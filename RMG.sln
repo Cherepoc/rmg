@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RMG.Core", "RMG.Core\RMG.Core.csproj", "{DFF8ADAC-8EFA-4F3A-A40B-B3F144841E5C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RMG.Tests", "RMG.Tests\RMG.Tests.csproj", "{0F7CA944-9C4F-498E-87A7-E6150CB65E84}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DFF8ADAC-8EFA-4F3A-A40B-B3F144841E5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFF8ADAC-8EFA-4F3A-A40B-B3F144841E5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFF8ADAC-8EFA-4F3A-A40B-B3F144841E5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFF8ADAC-8EFA-4F3A-A40B-B3F144841E5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F7CA944-9C4F-498E-87A7-E6150CB65E84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F7CA944-9C4F-498E-87A7-E6150CB65E84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F7CA944-9C4F-498E-87A7-E6150CB65E84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F7CA944-9C4F-498E-87A7-E6150CB65E84}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
