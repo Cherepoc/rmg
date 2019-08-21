@@ -25,7 +25,7 @@ namespace RMG.Core.Generation
             return Generate(context);
         }
 
-        public IReadOnlyList<TimedEvent<T>> Generate(GenerationContext context)
+        public IList<TimedEvent<T>> Generate(GenerationContext context)
         {
             if (Duration <= 0)
             {
@@ -43,7 +43,7 @@ namespace RMG.Core.Generation
             return result;
         }
 
-        private IReadOnlyList<TimedEvent<T>> GenerateInternal(
+        private IList<TimedEvent<T>> GenerateInternal(
             GenerationContext context,
             double normalizedPosition,
             double rankScale,

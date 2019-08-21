@@ -1,66 +1,30 @@
-using System;
 using RMG.Core.Music;
+using RMG.Core.Utils;
 
 namespace RMG.Core.Generation
 {
     public sealed class ScaleNoteOffsetGenerator : IGenerator
     {
-        public double RankMultiplier { get; set; }
+        public RankProbabilityFunction RankProbabilityFunction { get; set; }
 
         object IGenerator.Generate(GenerationContext context)
         {
             return Generate(context);
         }
 
-        public ScaleNoteOffset Generate(GenerationContext context)
+        public int[] Generate(GenerationContext context)
         {
-            var songContext = context.FindParent(c => c.Value is Song);
-            var song = songContext.Value as Song;
-            var scale = song.Scale;
-
-            var rankProbabilities = GetRankProbabilities(scale.RankedOffsets.Count);
-
-            var probability = context.Random.NextDouble();
-            var rank = 0;
-            var rankProbability = 0d;
-            for (; rank < rankProbabilities.Length; rank++)
+            var scaleOffset = new int[Scale.ScaleRankCount];
+            for (var rank = 0; rank < scaleOffset.Length; rank++)
             {
-                rankProbability = rankProbabilities[rank];
-                if (probability < rankProbability)
+                var rankProbability = RankProbabilityFunction.GetProbability(rank);
+                if (context.Random.TestProbability(rankProbability))
                 {
-                    break;
+                    scaleOffset[rank] = context.Random.Next(-12 + 1, 12);
                 }
-
-                probability -= rankProbability;
             }
 
-            var offsets = scale.RankedOffsets[rank];
-            var offset = (int) Math.Floor(probability / rankProbability * offsets.Count);
-            return new ScaleNoteOffset
-            {
-                Rank = rank,
-                Offset = offset
-            };
-        }
-
-        private double[] GetRankProbabilities(int count)
-        {
-            var rankProbabilities = new double[count];
-            var rankProbability = 1d;
-            var rankProbabilitySum = 0d;
-            for (var rank = 0; rank < rankProbabilities.Length; rank++)
-            {
-                rankProbabilities[rank] = rankProbability;
-                rankProbabilitySum += rankProbability;
-                rankProbability *= RankMultiplier;
-            }
-
-            for (var rank = 0; rank < rankProbabilities.Length; rank++)
-            {
-                rankProbabilities[rank] = rankProbabilities[rank] / rankProbabilitySum;
-            }
-
-            return rankProbabilities;
+            return scaleOffset;
         }
     }
 }

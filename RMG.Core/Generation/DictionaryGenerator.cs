@@ -13,7 +13,7 @@ namespace RMG.Core.Generation
             return Generate(context);
         }
 
-        public IReadOnlyDictionary<TKey, TValue> Generate(GenerationContext context)
+        public IDictionary<TKey, TValue> Generate(GenerationContext context)
         {
             var dictionary = new Dictionary<TKey, TValue>();
             var dictionaryContext = new GenerationContext(context, dictionary);

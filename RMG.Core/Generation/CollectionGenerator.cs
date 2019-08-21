@@ -14,7 +14,7 @@ namespace RMG.Core.Generation
             return Generate(context);
         }
 
-        public IReadOnlyList<T> Generate(GenerationContext context)
+        public IList<T> Generate(GenerationContext context)
         {
             var itemCountObject = ItemCountGenerator.Generate(context);
             var itemCount = Convert.ToInt32(itemCountObject);

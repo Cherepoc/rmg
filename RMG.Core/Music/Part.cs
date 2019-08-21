@@ -4,11 +4,12 @@ namespace RMG.Core.Music
 {
     public sealed class Part : IDuration
     {
-        public IReadOnlyDictionary<Track, IReadOnlyList<TimedEvent<Pattern>>> TrackPatterns { get; set; }
+        public IDictionary<Track, IList<TimedEvent<Pattern>>> TrackPatterns { get; set; }
 
-        public IReadOnlyList<TimedEvent<Part>> Parts { get; set; }
+        public IList<TimedEvent<Part>> Parts { get; set; }
 
         public NoteBasePattern NoteBasePattern { get; set; }
+        
         public double Duration { get; set; }
     }
 }

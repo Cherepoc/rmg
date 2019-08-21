@@ -15,7 +15,7 @@ namespace RMG.Core.Generation
             return Generate(context);
         }
 
-        public IReadOnlyList<TProperty> Generate(GenerationContext context)
+        public IList<TProperty> Generate(GenerationContext context)
         {
             var result = new List<TProperty>();
             var resultContext = new GenerationContext(context, result);
