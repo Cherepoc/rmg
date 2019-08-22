@@ -37,5 +37,10 @@ namespace RMG.Core.Generation
 
             return context;
         }
+        
+        public T FindParent<T>()
+        {
+            return (T) FindParent(context => context.Value is T).Value;
+        }
     }
 }

@@ -13,8 +13,8 @@ namespace RMG.Tests
     {
         private static readonly IntGenerator KeyEventGenerator = new IntGenerator
         {
-            Min = -12 + 1,
-            Max = 12
+            Min = -6 + 1,
+            Max = 6 + 1
         };
 
         private static readonly IntGenerator OctaveEventGenerator = new IntGenerator
@@ -43,8 +43,7 @@ namespace RMG.Tests
         {
             return new TimedEventGenerator<T>
             {
-                Duration = 160,
-                Offset = 32,
+                Offset = 0,
                 Scale = 64,
                 MaxRank = 3,
                 RankProbabilityFunction = new RankProbabilityFunction
@@ -59,12 +58,6 @@ namespace RMG.Tests
 
         private static readonly ObjectGenerator<NoteBasePattern> SongNoteBaseTimelineGenerator =
             new ObjectGenerator<NoteBasePattern>()
-                .WithPropertyGenerator(
-                    x => x.Duration,
-                    new ConstantGenerator<double>
-                    {
-                        Value = 160
-                    })
                 .WithPropertyGenerator(
                     x => x.KeyTimeline,
                     GenerateSongNoteBaseTimeEventGenerator<int>(KeyEventGenerator))
@@ -83,8 +76,7 @@ namespace RMG.Tests
         {
             return new TimedEventGenerator<T>
             {
-                Duration = 16,
-                Offset = 8,
+                Offset = 0,
                 Scale = 16,
                 MaxRank = 3,
                 RankProbabilityFunction = new RankProbabilityFunction
@@ -99,12 +91,6 @@ namespace RMG.Tests
 
         private static readonly ObjectGenerator<NoteBasePattern> PartNoteBaseTimelineGenerator =
             new ObjectGenerator<NoteBasePattern>()
-                .WithPropertyGenerator(
-                    x => x.Duration,
-                    new ConstantGenerator<double>
-                    {
-                        Value = 24
-                    })
                 .WithPropertyGenerator(
                     x => x.KeyTimeline,
                     GeneratePartNoteBaseTimeEventGenerator<int>(KeyEventGenerator))
@@ -123,8 +109,7 @@ namespace RMG.Tests
         {
             return new TimedEventGenerator<T>
             {
-                Duration = 4,
-                Offset = 2,
+                Offset = 0,
                 Scale = 4,
                 MaxRank = 3,
                 RankProbabilityFunction = new RankProbabilityFunction
@@ -140,17 +125,12 @@ namespace RMG.Tests
         private static readonly ObjectGenerator<NoteBasePattern> PatternNoteBaseTimelineGenerator =
             new ObjectGenerator<NoteBasePattern>()
                 .WithPropertyGenerator(
-                    x => x.Duration,
-                    new ConstantGenerator<double>
-                    {
-                        Value = 4
-                    })
-                .WithPropertyGenerator(
                     x => x.KeyTimeline,
-                    GeneratePatternNoteBaseTimeEventGenerator<int>(new ConstantGenerator<int>()
-                    {
-                        Value = 0
-                    }))
+                    GeneratePatternNoteBaseTimeEventGenerator<int>(
+                        new ConstantGenerator<int>()
+                        {
+                            Value = 0
+                        }))
                 .WithPropertyGenerator(
                     x => x.OctaveTimeline,
                     GeneratePatternNoteBaseTimeEventGenerator<int>(OctaveEventGenerator))
@@ -221,33 +201,16 @@ namespace RMG.Tests
                     x => x.Duration,
                     new RankedPositionGenerator
                     {
-                        RankMultiplier = 0.75,
-                        MaxRank = 5,
-                        Period = 80,
-                        Offset = 80,
-                        Min = 80,
-                        Max = 160
+                        RankMultiplier = 1 - 0.125,
+                        MaxRank = 6,
+                        Period = 240,
+                        Offset = 240,
+                        Min = 240,
+                        Max = 480
                     })
-                .WithPropertyGenerator(
-                    x => x.Key,
-                    new IntGenerator
-                    {
-                        Min = 0,
-                        Max = 12
-                    })
-                .WithPropertyGenerator(
-                    x => x.Octave,
-                    new IntGenerator
-                    {
-                        Min = -2,
-                        Max = 2 + 1
-                    })
-                .WithPropertyGenerator(
-                    x => x.Volume,
-                    new ConstantGenerator<double>
-                    {
-                        Value = 1
-                    })
+                .WithPropertyGenerator(x => x.Key, KeyEventGenerator)
+                .WithPropertyGenerator(x => x.Octave, OctaveEventGenerator)
+                .WithPropertyGenerator(x => x.Volume, new ConstantGenerator<double>(1))
                 .WithPropertyGenerator(
                     x => x.ScaleNoteOffset,
                     new ScaleNoteOffsetGenerator
@@ -259,15 +222,11 @@ namespace RMG.Tests
                             Multiplier = 0.5
                         }
                     })
-                .WithPropertyGenerator(
-                    x => x.NoteBasePattern,
-                    SongNoteBaseTimelineGenerator
-                )
+                .WithPropertyGenerator(x => x.NoteBasePattern, SongNoteBaseTimelineGenerator)
                 .WithPropertyGenerator(
                     x => x.Parts,
                     new TimedEventGenerator<Part>
                     {
-                        Duration = 160,
                         Offset = 0,
                         Scale = 16,
                         MaxRank = 2,
@@ -308,7 +267,6 @@ namespace RMG.Tests
                                     },
                                     ValueGenerator = new TimedEventGenerator<Pattern>
                                     {
-                                        Duration = 16,
                                         Offset = 0,
                                         Scale = 4,
                                         MaxRank = 2,
@@ -329,7 +287,6 @@ namespace RMG.Tests
                                                 x => x.Notes,
                                                 new TimedEventGenerator<Note>
                                                 {
-                                                    Duration = 4,
                                                     Offset = 0,
                                                     Scale = 1,
                                                     MaxRank = 4,

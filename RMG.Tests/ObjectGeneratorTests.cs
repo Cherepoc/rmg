@@ -34,6 +34,8 @@ namespace RMG.Tests
             public IList<int> Target { get; set; } = new List<int>();
             public IList<TimedEvent<double>> Timeline { get; set; }
             public double Duration { get; set; }
+            
+            public NoteBasePattern NoteBasePattern { get; set; }
         }
 
         [Fact]
@@ -72,7 +74,6 @@ namespace RMG.Tests
                         {
                             LinkedCollectionAccessor = x => new List<double>{x.Duration}
                         },
-                        Duration = 1,
                         Offset = 0,
                         Scale = 1,
                         MaxRank = 0,
@@ -89,6 +90,20 @@ namespace RMG.Tests
 
             var expectedTimeline = new List<TimedEvent<double>> {new TimedEvent<double>(0, 4)};
             Assert.Equal(expectedTimeline, generatedObject.Timeline);
+        }
+
+        [Fact]
+        public void TestChildDurationGeneration()
+        {
+            var generator = new ObjectGenerator<TestClass>()
+                .WithPropertyGenerator(
+                    x => x.NoteBasePattern,
+                    new ObjectGenerator<NoteBasePattern>())
+                .WithPropertyGenerator(x => x.Duration, new ConstantGenerator<double>(4));
+
+            var generatedObject = generator.Generate(GenerationContext);
+
+            Assert.Equal(4, generatedObject.NoteBasePattern.Duration);
         }
 
         [Fact]

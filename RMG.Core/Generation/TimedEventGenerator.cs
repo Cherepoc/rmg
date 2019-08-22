@@ -18,8 +18,6 @@ namespace RMG.Core.Generation
 
         public double Scale { get; set; } = 1;
 
-        public double Duration { get; set; } = 1;
-
         object IGenerator.Generate(GenerationContext context)
         {
             return Generate(context);
@@ -27,16 +25,25 @@ namespace RMG.Core.Generation
 
         public IList<TimedEvent<T>> Generate(GenerationContext context)
         {
-            if (Duration <= 0)
+            var parent = context.FindParent<IDuration>();
+            if (parent == null)
+            {
+                throw new ApplicationException(
+                    $"Cannot use {nameof(TimedEventGenerator<T>)} outside of {nameof(IDuration)}");
+            }
+
+            var duration = parent.Duration;
+
+            if (duration <= 0)
             {
                 return Array.Empty<TimedEvent<T>>();
             }
 
             var result = new List<TimedEvent<T>>();
-            var cycleCount = (int) Math.Ceiling(Duration / Scale);
+            var cycleCount = (int) Math.Ceiling(duration / Scale);
             for (var cycle = 0; cycle < cycleCount; cycle++)
             {
-                var events = GenerateInternal(context, 0, 1, 0, cycle);
+                var events = GenerateInternal(context, 0, 1, 0, duration, cycle);
                 result.AddRange(events.OrderBy(x => x.Position));
             }
 
@@ -48,6 +55,7 @@ namespace RMG.Core.Generation
             double normalizedPosition,
             double rankScale,
             int rank,
+            double duration,
             int cycle
         )
         {
@@ -73,16 +81,28 @@ namespace RMG.Core.Generation
                 var childRankScale = rankScale / 2;
 
                 var leftPosition = normalizedPosition - childRankScale;
-                if (TestPosition(leftPosition, cycle))
+                if (TestPosition(leftPosition, duration, cycle))
                 {
-                    var leftEvents = GenerateInternal(context, leftPosition, childRankScale, childRank, cycle);
+                    var leftEvents = GenerateInternal(
+                        context,
+                        leftPosition,
+                        childRankScale,
+                        childRank,
+                        duration,
+                        cycle);
                     result.AddRange(leftEvents);
                 }
 
                 var rightPosition = normalizedPosition + childRankScale;
-                if (TestPosition(rightPosition, cycle))
+                if (TestPosition(rightPosition, duration, cycle))
                 {
-                    var rightEvents = GenerateInternal(context, rightPosition, childRankScale, childRank, cycle);
+                    var rightEvents = GenerateInternal(
+                        context,
+                        rightPosition,
+                        childRankScale,
+                        childRank,
+                        duration,
+                        cycle);
                     result.AddRange(rightEvents);
                 }
             }
@@ -95,10 +115,10 @@ namespace RMG.Core.Generation
             return (normalizedPosition * Scale + Offset) % Scale + cycle * Scale;
         }
 
-        private bool TestPosition(double normalizedPosition, int cycle)
+        private bool TestPosition(double normalizedPosition, double duration, int cycle)
         {
             var position = ConvertPosition(normalizedPosition, cycle);
-            return position >= 0 && position < Duration;
+            return position >= 0 && position < duration;
         }
     }
 }

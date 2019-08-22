@@ -37,6 +37,12 @@ namespace RMG.Core.Generation
         public T Generate(GenerationContext context)
         {
             var obj = Activator.CreateInstance<T>();
+
+            if (obj is IDuration durationObj && context.Value is IDuration parentDuration)
+            {
+                durationObj.Duration = parentDuration.Duration;
+            }
+            
             var objectContext = new GenerationContext(context, obj);
             foreach (var propertyGenerator in GetPropertyGenerators())
             {
@@ -85,27 +91,45 @@ namespace RMG.Core.Generation
 
             private const string DurationPropertyName = nameof(IDuration.Duration);
 
+            private static readonly IReadOnlyList<Type> DurationDependants = new[]
+            {
+                typeof(IEnumerable<ITimedEvent>),
+                typeof(IDuration)
+            };
+
             public int Compare(PropertyGenerator x, PropertyGenerator y)
             {
-                if (x.DependsOn.Contains(y.Property))
-                    return 1;
-                if (y.DependsOn.Contains(x.Property))
-                    return -1;
+                var xDependsOnY = x.DependsOn.Contains(y.Property);
+                var yDependsOnX = y.DependsOn.Contains(x.Property);
+                if (xDependsOnY || yDependsOnX)
+                    return Compare(xDependsOnY, yDependsOnX);
+                
+                var declaringTypeHasDuration = typeof(IDuration).IsAssignableFrom(x.Property.DeclaringType);
                 
                 // can be timed events which should depend on IDuration.Duration
-                if (CheckTimelineDependsOnDuration(x, y))
-                    return 1;
-                if (CheckTimelineDependsOnDuration(y, x))
-                    return -1;
+                if (declaringTypeHasDuration)
+                {
+                    var xDependsOnYDuration = CheckDependsOnDuration(x, y);
+                    var yDependsOnXDuration = CheckDependsOnDuration(y, x);
+                    if (xDependsOnYDuration || yDependsOnXDuration)
+                        return Compare(xDependsOnYDuration, yDependsOnXDuration);
+                }
                 
                 return 0;
             }
 
-            private static bool CheckTimelineDependsOnDuration(PropertyGenerator x, PropertyGenerator y)
+            private static int Compare(bool firstDepends, bool secondDepends)
             {
-                var declaringType = x.Property.DeclaringType;
-                return typeof(IEnumerable<ITimedEvent>).IsAssignableFrom(x.Property.PropertyType)
-                       && typeof(IDuration).IsAssignableFrom(declaringType)
+                return firstDepends == secondDepends
+                    ? 0
+                    : firstDepends
+                        ? 1
+                        : -1;
+            }
+
+            private static bool CheckDependsOnDuration(PropertyGenerator x, PropertyGenerator y)
+            {
+                return DurationDependants.Any(type => type.IsAssignableFrom(x.Property.PropertyType))
                        && y.Property.Name == DurationPropertyName;
             }
         }
