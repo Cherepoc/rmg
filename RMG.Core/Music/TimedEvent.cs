@@ -4,6 +4,16 @@ namespace RMG.Core.Music
 {
     public sealed class TimedEvent<T> : ITimedEvent
     {
+        public TimedEvent()
+        {
+        }
+        
+        public TimedEvent(double position, T value)
+        {
+            Event = value;
+            Position = position;
+        }
+
         public T Event { get; set; }
         public double Position { get; set; }
 

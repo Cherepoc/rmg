@@ -4,7 +4,7 @@ using Xunit;
 
 namespace RMG.Tests
 {
-    public class RankedPositionGeneratorTests
+    public sealed class RankedPositionGeneratorTests
     {
         [Theory]
         [InlineData(0.5, 1, 0, 4, 0, 1)]

@@ -23,5 +23,9 @@ namespace RMG.Core.Music
         public double Volume { get; set; }
 
         public double Duration { get; set; }
+        
+        public IList<Part> PartTemplates { get; set; }
+        
+        public IList<Pattern> PatternTemplates { get; set; }
     }
 }
