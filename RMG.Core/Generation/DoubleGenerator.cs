@@ -11,6 +11,16 @@ namespace RMG.Core.Generation
             return Generate(context);
         }
 
+        public DoubleGenerator()
+        {
+        }
+
+        public DoubleGenerator(double min, double max)
+        {
+            Min = min;
+            Max = max;
+        }
+
         public double Generate(GenerationContext context)
         {
             return Min + context.Random.NextDouble() * (Max - Min);

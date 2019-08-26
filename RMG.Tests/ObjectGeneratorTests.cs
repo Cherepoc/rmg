@@ -19,13 +19,11 @@ namespace RMG.Tests
             };
         }
 
-        private static LinkedEntityCollectionGenerator<TestClass, int> CreateTargetGenerator()
+        private static LinkedEntityCollectionGenerator<int> CreateTargetGenerator()
         {
-            return new LinkedEntityCollectionGenerator<TestClass, int>
-            {
-                ItemCountGenerator = new ConstantGenerator<int>(4),
-                LinkedCollectionAccessor = x => x.Source
-            };
+            return new LinkedEntityCollectionGenerator<int>()
+                .LinkEntityCollection(targetLink => targetLink.FromParentProperty<TestClass>(x => x.Source))
+                .WithItemCountGenerator(new ConstantGenerator<int>(4));
         }
 
         private sealed class TestClass : IDuration
@@ -85,7 +83,7 @@ namespace RMG.Tests
                             LinkedCollectionAccessor = x => new List<double>{x.Duration}
                         },
                         Offset = 0,
-                        Scale = 1,
+                        Scale = 4,
                         MaxRank = 0,
                         RankProbabilityFunction = new RankProbabilityFunction
                         {
@@ -95,7 +93,7 @@ namespace RMG.Tests
                         }
                     }))
                 .WithProperty(
-                    x => x.Target,
+                    x => x.Duration,
                     property => property.WithValue(4));
 
             var generatedObject = generator.Generate(GenerationContext);
@@ -109,10 +107,10 @@ namespace RMG.Tests
         {
             var generator = new ObjectGenerator<TestClass>()
                 .WithProperty(
-                    x => x.Source,
+                    x => x.NoteBasePattern,
                     property => property.WithGenerator(new ObjectGenerator<NoteBasePattern>()))
                 .WithProperty(
-                    x => x.Target,
+                    x => x.Duration,
                     property => property.WithValue(4));
 
             var generatedObject = generator.Generate(GenerationContext);

@@ -271,15 +271,9 @@ namespace RMG.Tests
                                     trackPatternsProperty => trackPatternsProperty.WithGenerator(
                                         new DictionaryGenerator<Track, IList<TimedEvent<Pattern>>>
                                         {
-                                            KeyCollectionGenerator = new LinkedEntityCollectionGenerator<Song, Track>
-                                            {
-                                                ItemCountGenerator = new IntGenerator
-                                                {
-                                                    Min = 2,
-                                                    Max = 4 + 1
-                                                },
-                                                LinkedCollectionAccessor = x => x.Tracks
-                                            },
+                                            KeyCollectionGenerator = new LinkedEntityCollectionGenerator<Track>()
+                                                .LinkEntityCollection(tracksLink => tracksLink.FromParentProperty<Song>(x => x.Tracks))
+                                                .WithItemCountGenerator(new IntGenerator(2, 4+1)),
                                             ValueGenerator = new TimedEventGenerator<Pattern>
                                             {
                                                 Offset = 0,

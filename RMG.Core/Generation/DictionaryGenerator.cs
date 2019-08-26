@@ -17,10 +17,10 @@ namespace RMG.Core.Generation
         {
             var dictionary = new Dictionary<TKey, TValue>();
             var dictionaryContext = new GenerationContext(context, dictionary);
-            var keys = (IEnumerable<TKey>) KeyCollectionGenerator.Generate(dictionaryContext);
+            var keys = KeyCollectionGenerator.Generate<IEnumerable<TKey>>(dictionaryContext);
             foreach (var key in keys)
             {
-                var value = (TValue) ValueGenerator.Generate(dictionaryContext);
+                var value = ValueGenerator.Generate<TValue>(dictionaryContext);
                 dictionary.Add(key, value);
             }
 

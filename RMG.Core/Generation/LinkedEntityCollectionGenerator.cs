@@ -4,27 +4,22 @@ using System.Linq;
 
 namespace RMG.Core.Generation
 {
-    public sealed class LinkedEntityCollectionGenerator<TEntity, TProperty> : IGenerator
+    public sealed class LinkedEntityCollectionGenerator<T> : IGenerator
     {
-        public IGenerator ItemCountGenerator { get; set; }
-
-        public Func<TEntity, IEnumerable<TProperty>> LinkedCollectionAccessor { get; set; }
+        private ValueProvider<IEnumerable<T>> _linkedCollectionProvider;
+        private IGenerator _itemCountGenerator;
 
         object IGenerator.Generate(GenerationContext context)
         {
             return Generate(context);
         }
 
-        public IList<TProperty> Generate(GenerationContext context)
+        public IList<T> Generate(GenerationContext context)
         {
-            var result = new List<TProperty>();
-            var resultContext = new GenerationContext(context, result);
-            var itemCount = Convert.ToInt32(ItemCountGenerator.Generate(resultContext));
-            result.Capacity = itemCount;
+            var itemCount = _itemCountGenerator.Generate<int>(context);
+            var result = new List<T>(itemCount);
 
-            var entityContext = context.FindParent(x => x.Value is TEntity);
-            var entity = (TEntity) entityContext.Value;
-            var linkedCollection = LinkedCollectionAccessor(entity).ToList();
+            var linkedCollection = _linkedCollectionProvider.GetValue(context).ToList();
 
             var maxItemCount = Math.Min(itemCount, linkedCollection.Count);
             for (var index = 0; index < maxItemCount; index++)
@@ -35,6 +30,22 @@ namespace RMG.Core.Generation
             }
 
             return result;
+        }
+
+        public LinkedEntityCollectionGenerator<T> LinkEntityCollection(Action<ValueProviderBuilder<IEnumerable<T>>> valueProviderSetup)
+        {
+            var valueProviderBuilder = new ValueProviderBuilder<IEnumerable<T>>();
+            valueProviderSetup(valueProviderBuilder);
+            _linkedCollectionProvider = valueProviderBuilder.Build();
+
+            return this;
+        }
+
+        public LinkedEntityCollectionGenerator<T> WithItemCountGenerator(IGenerator generator)
+        {
+            _itemCountGenerator = generator;
+
+            return this;
         }
     }
 }
