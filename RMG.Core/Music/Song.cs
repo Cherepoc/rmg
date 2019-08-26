@@ -24,8 +24,8 @@ namespace RMG.Core.Music
 
         public double Duration { get; set; }
         
-        public IList<Part> PartTemplates { get; set; }
+        public IList<IList<Part>> RankedPartTemplates { get; set; }
         
-        public IList<Pattern> PatternTemplates { get; set; }
+        public IList<IList<Pattern>> RankedPatternTemplates { get; set; }
     }
 }

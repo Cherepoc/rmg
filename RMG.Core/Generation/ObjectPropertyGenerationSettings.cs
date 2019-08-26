@@ -1,13 +1,25 @@
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace RMG.Core.Generation
 {
     public sealed class ObjectPropertyGenerationSettings
     {
-        public string PropertyName { get; set; }
-        
-        public IGenerator Generator { get; set; }
-        
-        public IList<string> DependsOn { get; set; }
+        public ObjectPropertyGenerationSettings(
+            PropertyInfo property,
+            IGenerator generator,
+            IReadOnlyList<string> dependsOn
+        )
+        {
+            Property = property;
+            Generator = generator;
+            DependsOn = dependsOn;
+        }
+
+        public PropertyInfo Property { get; }
+
+        public IGenerator Generator { get; }
+
+        public IReadOnlyList<string> DependsOn { get; }
     }
 }

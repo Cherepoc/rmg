@@ -42,8 +42,14 @@ namespace RMG.Tests
         public void TestDependantOrder()
         {
             var generator = new ObjectGenerator<TestClass>()
-                .WithPropertyGenerator(x => x.Target, CreateTargetGenerator(), x => x.Source)
-                .WithPropertyGenerator(x => x.Source, CreateSourceGenerator());
+                .WithProperty(
+                    x => x.Target,
+                    property => property
+                        .WithGenerator(CreateTargetGenerator())
+                        .DependsOn(x => x.Source))
+                .WithProperty(
+                    x => x.Source,
+                    property => property.WithGenerator(CreateSourceGenerator()));
 
             var generatedObject = generator.Generate(GenerationContext);
 
@@ -54,8 +60,12 @@ namespace RMG.Tests
         public void TestRightOrder()
         {
             var generator = new ObjectGenerator<TestClass>()
-                .WithPropertyGenerator(x => x.Source, CreateSourceGenerator())
-                .WithPropertyGenerator(x => x.Target, CreateTargetGenerator());
+                    .WithProperty(
+                        x => x.Source,
+                        property => property.WithGenerator(CreateSourceGenerator()))
+                    .WithProperty(
+                        x => x.Target,
+                        property => property.WithGenerator(CreateTargetGenerator()));
 
             var generatedObject = generator.Generate(GenerationContext);
 
@@ -66,9 +76,9 @@ namespace RMG.Tests
         public void TestTimelineDependantOrder()
         {
             var generator = new ObjectGenerator<TestClass>()
-                .WithPropertyGenerator(
+                .WithProperty(
                     x => x.Timeline,
-                    new TimedEventGenerator<double>
+                    property => property.WithGenerator(new TimedEventGenerator<double>
                     {
                         EventGenerator = new LinkedEntityGenerator<TestClass, double>
                         {
@@ -83,8 +93,10 @@ namespace RMG.Tests
                             Max = 1,
                             Multiplier = 1
                         }
-                    })
-                .WithPropertyGenerator(x => x.Duration, new ConstantGenerator<double>(4));
+                    }))
+                .WithProperty(
+                    x => x.Target,
+                    property => property.WithValue(4));
 
             var generatedObject = generator.Generate(GenerationContext);
 
@@ -96,10 +108,12 @@ namespace RMG.Tests
         public void TestChildDurationGeneration()
         {
             var generator = new ObjectGenerator<TestClass>()
-                .WithPropertyGenerator(
-                    x => x.NoteBasePattern,
-                    new ObjectGenerator<NoteBasePattern>())
-                .WithPropertyGenerator(x => x.Duration, new ConstantGenerator<double>(4));
+                .WithProperty(
+                    x => x.Source,
+                    property => property.WithGenerator(new ObjectGenerator<NoteBasePattern>()))
+                .WithProperty(
+                    x => x.Target,
+                    property => property.WithValue(4));
 
             var generatedObject = generator.Generate(GenerationContext);
 
@@ -110,8 +124,12 @@ namespace RMG.Tests
         public void TestWrongOrder()
         {
             var generator = new ObjectGenerator<TestClass>()
-                .WithPropertyGenerator(x => x.Target, CreateTargetGenerator())
-                .WithPropertyGenerator(x => x.Source, CreateSourceGenerator());
+                .WithProperty(
+                    x => x.Target,
+                    property => property.WithGenerator(CreateTargetGenerator()))
+                .WithProperty(
+                    x => x.Source,
+                    property => property.WithGenerator(CreateSourceGenerator()));
 
             var generatedObject = generator.Generate(GenerationContext);
 

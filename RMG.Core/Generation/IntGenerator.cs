@@ -6,6 +6,16 @@ namespace RMG.Core.Generation
 
         public int Max { get; set; }
 
+        public IntGenerator()
+        {
+        }
+
+        public IntGenerator(int min, int max)
+        {
+            Min = min;
+            Max = max;
+        }
+
         object IGenerator.Generate(GenerationContext context)
         {
             return Generate(context);
