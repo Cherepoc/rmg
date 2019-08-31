@@ -343,12 +343,16 @@ namespace RMG.Tests
                                 property => property.WithGenerator(
                                     new DoublePowerGenerator
                                     {
-                                        ValueGenerator = new ConstantGenerator<double>(4),
+                                        ValueGenerator = new ConstantGenerator<double>(2),
                                         PowerGenerator = new DoubleAddGenerator
                                         {
-                                            ValueGenerator =
-                                                new GeneratedCollectionItemIndexGenerator<IList<Pattern>>(),
-                                            AdditiveGenerator = new ConstantGenerator<double>(1)
+                                            ValueGenerator = new IntGenerator(2, 4 + 1),
+                                            AdditiveGenerator = new DoubleMultiplierGenerator
+                                            {
+                                                LeftGenerator =
+                                                    new GeneratedCollectionItemIndexGenerator<IList<Pattern>>(),
+                                                RightGenerator = new ConstantGenerator<double>(2)
+                                            }
                                         }
                                     }))
                             .WithProperty(

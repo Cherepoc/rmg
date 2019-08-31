@@ -36,19 +36,8 @@ namespace RMG.Core.Generation
             while (totalDuration < duration)
             {
                 var newEvent = EventGenerator.RunGeneration<T>(timelineContext);
-                // check if item should be added
-                var newTotalDuration = totalDuration + newEvent.Duration;
-                if (totalDuration == 0
-                    || newTotalDuration <= duration
-                    || duration - totalDuration > newTotalDuration - duration)
-                {
-                    result.Add(new TimedEvent<T>(totalDuration, newEvent));
-                    totalDuration = newTotalDuration;
-                }
-                else
-                {
-                    break;
-                }
+                result.Add(new TimedEvent<T>(totalDuration, newEvent));
+                totalDuration += newEvent.Duration;
             }
 
             return result;
