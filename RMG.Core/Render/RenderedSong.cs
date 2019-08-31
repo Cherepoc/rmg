@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using RMG.Core.Music;
 
 namespace RMG.Core.Render
 {

@@ -15,8 +15,10 @@ namespace RMG.Core.Generation
         internal ObjectPropertyGenerationSettingsBuilder()
         {
         }
-        
-        public ObjectPropertyGenerationSettingsBuilder<TObject> DependsOn(params Expression<Func<TObject, object>>[] dependsOn)
+
+        public ObjectPropertyGenerationSettingsBuilder<TObject> DependsOn(
+            params Expression<Func<TObject, object>>[] dependsOn
+        )
         {
             foreach (var dependsOnProperty in dependsOn)
             {

@@ -14,18 +14,12 @@ namespace RMG.Core.Music
 
         public double Tempo { get; set; }
 
-        public int Key { get; set; }
+        public NoteBase NoteBase { get; set; }
 
-        public int[] ScaleNoteOffset { get; set; }
+        public IList<IList<Part>> RankedPartTemplates { get; set; }
 
-        public int Octave { get; set; }
-
-        public double Volume { get; set; }
+        public IList<IList<Pattern>> RankedPatternTemplates { get; set; }
 
         public double Duration { get; set; }
-        
-        public IList<IList<Part>> RankedPartTemplates { get; set; }
-        
-        public IList<IList<Pattern>> RankedPatternTemplates { get; set; }
     }
 }

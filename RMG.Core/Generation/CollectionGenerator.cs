@@ -13,14 +13,14 @@ namespace RMG.Core.Generation
             return Generate(context);
         }
 
-        public IList<T> Generate(GenerationContext context)
+        public IEnumerable<T> Generate(GenerationContext context)
         {
-            var itemCount = ItemCountGenerator.Generate<int>(context);
+            var itemCount = ItemCountGenerator.RunGeneration<int>(context);
             var result = new List<T>(itemCount);
             for (var index = 0; index < itemCount; index++)
             {
                 var collectionItemContext = new CollectionItemGenerationContext(context, result, index);
-                result.Add(ItemGenerator.Generate<T>(collectionItemContext));
+                result.Add(ItemGenerator.RunGeneration<T>(collectionItemContext));
             }
 
             return result;

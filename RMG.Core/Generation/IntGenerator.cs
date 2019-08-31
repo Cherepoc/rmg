@@ -2,10 +2,6 @@ namespace RMG.Core.Generation
 {
     public sealed class IntGenerator : IGenerator
     {
-        public int Min { get; set; }
-
-        public int Max { get; set; }
-
         public IntGenerator()
         {
         }
@@ -15,6 +11,10 @@ namespace RMG.Core.Generation
             Min = min;
             Max = max;
         }
+
+        public int Min { get; set; }
+
+        public int Max { get; set; }
 
         object IGenerator.Generate(GenerationContext context)
         {

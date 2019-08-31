@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using RMG.Core.Music;
 using RMG.Core.Utils;
@@ -43,21 +42,16 @@ namespace RMG.Core.Generation
             }
 
             var objectContext = new GenerationContext(context, obj);
-            foreach (var propertyGenerator in GetPropertyGenerators())
+            var propertyGenerators = ObjectPropertyGenerationSettingsSorter.Sort(_propertyGenerators.Values);
+            foreach (var propertyGenerator in propertyGenerators)
             {
-                var propertyValue = propertyGenerator.Generator.Generate(objectContext);
+                var propertyValue = propertyGenerator.Generator.RunGeneration(
+                    objectContext,
+                    propertyGenerator.Property.PropertyType);
                 propertyGenerator.Property.SetValue(obj, propertyValue);
             }
 
             return obj;
-        }
-
-        private IReadOnlyList<ObjectPropertyGenerationSettings> GetPropertyGenerators()
-        {
-            var propertyGenerators = _propertyGenerators.Values
-                .OrderBy(x => x, ObjectPropertyGenerationSettingsComparer.Instance)
-                .ToList();
-            return propertyGenerators;
         }
     }
 }

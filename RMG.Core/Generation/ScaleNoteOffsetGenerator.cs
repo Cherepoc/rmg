@@ -5,7 +5,7 @@ namespace RMG.Core.Generation
 {
     public sealed class ScaleNoteOffsetGenerator : IGenerator
     {
-        public RankProbabilityFunction RankProbabilityFunction { get; set; }
+        public GeometricProbabilityFunction GeometricProbabilityFunction { get; set; }
 
         object IGenerator.Generate(GenerationContext context)
         {
@@ -17,8 +17,9 @@ namespace RMG.Core.Generation
             var scaleOffset = new int[Scale.ScaleRankCount];
             for (var rank = 0; rank < scaleOffset.Length; rank++)
             {
-                var rankProbability = RankProbabilityFunction.GetProbability(rank);
-                if (context.Random.TestProbability(rankProbability))
+                var rankProbability = GeometricProbabilityFunction.GetProbability(rank);
+                var testProbability = context.Random.NextDouble();
+                if (ProbabilityTester.TestProbability(testProbability, rankProbability))
                 {
                     scaleOffset[rank] = context.Random.Next(-12 + 1, 12);
                 }

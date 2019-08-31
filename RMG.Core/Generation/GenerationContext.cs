@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace RMG.Core.Generation
 {
@@ -22,6 +23,8 @@ namespace RMG.Core.Generation
 
         public Random Random { get; }
 
+        internal Dictionary<IGenerator, object> Cache { get; } = new Dictionary<IGenerator, object>(0);
+
         public GenerationContext FindParent(Func<GenerationContext, bool> predicate)
         {
             var context = this;
@@ -37,8 +40,8 @@ namespace RMG.Core.Generation
 
             return context;
         }
-        
-        public T FindParent<T>()
+
+        public T FindParentValue<T>()
         {
             return (T) FindParent(context => context.Value is T).Value;
         }

@@ -10,12 +10,12 @@ namespace RMG.Core.Utils
         {
             return events.LastOrDefault(x => x.Position <= position);
         }
-        
+
         public static T GetEffectiveEvent<T>(this IEnumerable<TimedEvent<T>> events, double position)
         {
             return events.GetEffectiveEvent(position, default);
         }
-        
+
         public static T GetEffectiveEvent<T>(this IEnumerable<TimedEvent<T>> events, double position, T defaultValue)
         {
             var lastTimedEvent = events.LastOrDefault(x => x.Position <= position);

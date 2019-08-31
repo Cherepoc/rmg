@@ -9,7 +9,7 @@ namespace RMG.Core.Music
         public IList<TimedEvent<Part>> Parts { get; set; }
 
         public NoteBasePattern NoteBasePattern { get; set; }
-        
+
         public double Duration { get; set; }
     }
 }

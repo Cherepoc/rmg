@@ -17,19 +17,27 @@ namespace RMG.Tests
             Max = 6 + 1
         };
 
-        private static readonly IntGenerator OctaveEventGenerator = new IntGenerator
+        private static readonly IntPickerGenerator OctaveEventGenerator = new IntPickerGenerator
         {
-            Min = -2,
-            Max = 2 + 1
+            MinValueGenerator = new ConstantGenerator<int>(-2),
+            MaxValueGenerator = new ConstantGenerator<int>(2),
+            ProbabilityFunctionGenerator = new ConstantGenerator<GeometricProbabilityFunction>(
+                new GeometricProbabilityFunction
+                {
+                    MinProbability = 0,
+                    MaxProbability = 1,
+                    ProbabilityMultiplier = 0.5,
+                    Offset = 0
+                })
         };
 
         private static readonly ScaleNoteOffsetGenerator ScaleNoteOffsetEventGenerator = new ScaleNoteOffsetGenerator
         {
-            RankProbabilityFunction = new RankProbabilityFunction
+            GeometricProbabilityFunction = new GeometricProbabilityFunction
             {
-                Max = 0.5,
-                Min = 0.25,
-                Multiplier = 0.5
+                MaxProbability = 0.5,
+                MinProbability = 0,
+                ProbabilityMultiplier = 0.5
             }
         };
 
@@ -39,21 +47,61 @@ namespace RMG.Tests
             Max = 1
         };
 
-        private static TimedEventGenerator<T> GenerateSongNoteBaseTimeEventGenerator<T>(IGenerator eventGenerator)
+        private static ObjectGenerator<NoteBase> CreateSongNoteBaseGenerator()
+        {
+            return new ObjectGenerator<NoteBase>()
+                .WithProperty(x => x.Key, property => property.WithGenerator(KeyEventGenerator))
+                .WithProperty(x => x.Octave, property => property.WithGenerator(OctaveEventGenerator))
+                .WithProperty(x => x.ScaleOffset, property => property.WithGenerator(ScaleNoteOffsetEventGenerator))
+                .WithProperty(x => x.Volume, property => property.WithValue(1));
+        }
+
+        private static ObjectGenerator<NoteBase> CreateTrackNoteBaseGenerator()
+        {
+            return new ObjectGenerator<NoteBase>()
+                .WithProperty(x => x.Key, property => property.WithValue(0))
+                .WithProperty(x => x.Octave, property => property.WithGenerator(new IntGenerator(-2, 2 + 1)))
+                .WithProperty(x => x.ScaleOffset, property => property.WithValue(new int[Scale.ScaleRankCount]))
+                .WithProperty(x => x.Volume, property => property.WithGenerator(VolumeEventGenerator));
+        }
+
+        private static TimedEventGenerator<T> CreateTimelineGenerator<T>(
+            double offset,
+            double scale,
+            int maxRank,
+            double minRankProbability,
+            double maxRankProbability,
+            double rankProbabilityMultiplier,
+            IGenerator eventGenerator
+        )
         {
             return new TimedEventGenerator<T>
             {
-                Offset = 0,
-                Scale = 64,
-                MaxRank = 3,
-                RankProbabilityFunction = new RankProbabilityFunction
-                {
-                    Max = 1.0 / 8,
-                    Min = 1.0 / 32,
-                    Multiplier = 0.25
-                },
+                OffsetGenerator = new ConstantGenerator<double>(offset),
+                ScaleGenerator = new ConstantGenerator<double>(scale),
+                MaxRankGenerator = new ConstantGenerator<int>(maxRank),
+                RankProbabilityFunctionGenerator =
+                    new ConstantGenerator<GeometricProbabilityFunction>(
+                        new GeometricProbabilityFunction
+                        {
+                            MinProbability = minRankProbability,
+                            MaxProbability = maxRankProbability,
+                            ProbabilityMultiplier = rankProbabilityMultiplier
+                        }),
                 EventGenerator = eventGenerator
             };
+        }
+
+        private static TimedEventGenerator<T> GenerateSongNoteBaseTimeEventGenerator<T>(IGenerator eventGenerator)
+        {
+            return CreateTimelineGenerator<T>(
+                0,
+                64,
+                3,
+                1.0 / 8,
+                1.0 / 32,
+                0.25,
+                eventGenerator);
         }
 
         private static readonly ObjectGenerator<NoteBasePattern> SongNoteBaseTimelineGenerator =
@@ -75,19 +123,49 @@ namespace RMG.Tests
                     property => property
                         .WithGenerator(GenerateSongNoteBaseTimeEventGenerator<double>(VolumeEventGenerator)));
 
+        private static readonly ObjectGenerator<NoteBasePattern> EmptyNoteBaseTimelineGenerator =
+            new ObjectGenerator<NoteBasePattern>()
+                .WithProperty(
+                    x => x.KeyTimeline,
+                    property => property
+                        .WithValue(new List<TimedEvent<int>>()))
+                .WithProperty(
+                    x => x.OctaveTimeline,
+                    property => property
+                        .WithValue(new List<TimedEvent<int>>()))
+                .WithProperty(
+                    x => x.ScaleOffsetTimeline,
+                    property => property
+                        .WithValue(new List<TimedEvent<int[]>>()))
+                .WithProperty(
+                    x => x.VolumeTimeline,
+                    property => property
+                        .WithValue(new List<TimedEvent<double>>()));
+
         private static TimedEventGenerator<T> GeneratePartNoteBaseTimeEventGenerator<T>(IGenerator eventGenerator)
         {
             return new TimedEventGenerator<T>
             {
-                Offset = 0,
-                Scale = 16,
-                MaxRank = 3,
-                RankProbabilityFunction = new RankProbabilityFunction
+                OffsetGenerator = new ConstantGenerator<double>(0),
+                ScaleGenerator = new DoublePowerGenerator
                 {
-                    Max = 1.0 / 16,
-                    Min = 1.0 / 64,
-                    Multiplier = 0.25
+                    ValueGenerator = new ConstantGenerator<double>(4),
+                    PowerGenerator = new DoubleAddGenerator
+                    {
+                        ValueGenerator =
+                            new GeneratedCollectionItemIndexGenerator<IList<Part>>(),
+                        AdditiveGenerator = new ConstantGenerator<double>(3)
+                    }
                 },
+                MaxRankGenerator = new ConstantGenerator<int>(2),
+                RankProbabilityFunctionGenerator =
+                    new ConstantGenerator<GeometricProbabilityFunction>(
+                        new GeometricProbabilityFunction
+                        {
+                            MinProbability = 0,
+                            MaxProbability = 1.0 / 2,
+                            ProbabilityMultiplier = 1.0 / 2
+                        }),
                 EventGenerator = eventGenerator
             };
         }
@@ -113,19 +191,14 @@ namespace RMG.Tests
 
         private static TimedEventGenerator<T> GeneratePatternNoteBaseTimeEventGenerator<T>(IGenerator eventGenerator)
         {
-            return new TimedEventGenerator<T>
-            {
-                Offset = 0,
-                Scale = 4,
-                MaxRank = 3,
-                RankProbabilityFunction = new RankProbabilityFunction
-                {
-                    Max = 1.0 / 32,
-                    Min = 1.0 / 128,
-                    Multiplier = 0.25
-                },
-                EventGenerator = eventGenerator
-            };
+            return CreateTimelineGenerator<T>(
+                0,
+                4,
+                3,
+                0,
+                1.0 / 8,
+                0.25,
+                eventGenerator);
         }
 
         private static readonly ObjectGenerator<NoteBasePattern> PatternNoteBaseTimelineGenerator =
@@ -151,6 +224,301 @@ namespace RMG.Tests
                     x => x.VolumeTimeline,
                     property => property
                         .WithGenerator(GeneratePatternNoteBaseTimeEventGenerator<double>(VolumeEventGenerator)));
+
+        private static readonly IntGenerator TemplateCountGenerator = new IntGenerator(8, 16 + 1);
+
+        private static IGenerator CreateNoteGenerator()
+        {
+            return new TimedEventGenerator<Note>
+            {
+                OffsetGenerator = new RankedPositionGenerator
+                {
+                    Min = 0,
+                    Max = 4,
+                    MaxRank = 4,
+                    Offset = 2,
+                    Period = 4,
+                    RankMultiplier = 0.5
+                },
+                ScaleGenerator = new DoubleDivisionGenerator
+                {
+                    DividentGenerator = new RhythmPeriodGenerator
+                    {
+                        MaxNumberGenerator = new ConstantGenerator<int>(8),
+                        RankProbabilityFunctionGenerator = new ConstantGenerator<GeometricProbabilityFunction>
+                        {
+                            Value = new GeometricProbabilityFunction
+                            {
+                                MinProbability = 0,
+                                MaxProbability = 1,
+                                ProbabilityMultiplier = 0.75
+                            }
+                        }
+                    },
+                    DivisorGenerator = new DoublePowerGenerator
+                    {
+                        ValueGenerator = new ConstantGenerator<int>(2),
+                        PowerGenerator = new IntPickerGenerator
+                        {
+                            MinValueGenerator = new ConstantGenerator<int>(-1),
+                            MaxValueGenerator = new ConstantGenerator<int>(3),
+                            ProbabilityFunctionGenerator = new ConstantGenerator<GeometricProbabilityFunction>
+                            {
+                                Value = new GeometricProbabilityFunction
+                                {
+                                    MinProbability = 0,
+                                    MaxProbability = 1,
+                                    ProbabilityMultiplier = 0.75,
+                                    Offset = 0
+                                }
+                            }
+                        }
+                    }
+                },
+                MaxRankGenerator = new ConstantGenerator<int>(4),
+                RankProbabilityFunctionGenerator =
+                    new ConstantGenerator<GeometricProbabilityFunction>(
+                        new GeometricProbabilityFunction
+                        {
+                            MinProbability = 0,
+                            MaxProbability = 1,
+                            ProbabilityMultiplier = 0.25
+                        }),
+                EventGenerator = new ObjectGenerator<Note>()
+                    .WithProperty(
+                        x => x.Duration,
+                        property => property.WithGenerator(
+                            new RankedPositionGenerator
+                            {
+                                Min = 0,
+                                Max = 2,
+                                Offset = 1,
+                                Period = 2,
+                                MaxRank = 4,
+                                RankMultiplier = 0.5
+                            }))
+                    .WithProperty(
+                        x => x.Octave,
+                        property => property.WithValue(0))
+                    .WithProperty(
+                        x => x.Volume,
+                        property => property.WithGenerator(
+                            new RankedPositionGenerator
+                            {
+                                Min = 0.75,
+                                Max = 1,
+                                Offset = 0.5,
+                                Period = 1,
+                                MaxRank = 5,
+                                RankMultiplier = 0.75
+                            }))
+                    .WithProperty(
+                        x => x.ScaleOffset,
+                        property => property.WithGenerator(
+                            new ScaleNoteOffsetGenerator
+                            {
+                                GeometricProbabilityFunction =
+                                    new GeometricProbabilityFunction
+                                    {
+                                        MaxProbability = 0.5,
+                                        MinProbability = 0,
+                                        ProbabilityMultiplier = 1
+                                    }
+                            }))
+            };
+        }
+
+        private static IGenerator CreateRankedPatternTemplatesGenerator()
+        {
+            return new ReverseCollectionGenerator<IList<Pattern>>
+            {
+                CollectionGenerator = new CollectionGenerator<IList<Pattern>>
+                {
+                    ItemCountGenerator = new ConstantGenerator<int>(2),
+                    ItemGenerator = new CollectionGenerator<Pattern>
+                    {
+                        ItemGenerator = new ObjectGenerator<Pattern>()
+                            .WithProperty(
+                                x => x.Duration,
+                                property => property.WithGenerator(
+                                    new DoublePowerGenerator
+                                    {
+                                        ValueGenerator = new ConstantGenerator<double>(4),
+                                        PowerGenerator = new DoubleAddGenerator
+                                        {
+                                            ValueGenerator =
+                                                new GeneratedCollectionItemIndexGenerator<IList<Pattern>>(),
+                                            AdditiveGenerator = new ConstantGenerator<double>(1)
+                                        }
+                                    }))
+                            .WithProperty(
+                                x => x.NoteBasePattern,
+                                property => property.WithGenerator(EmptyNoteBaseTimelineGenerator))
+                            .WithProperty(
+                                x => x.Notes,
+                                notesProperty => notesProperty.WithGenerator(
+                                    new ConditionalGenerator
+                                    {
+                                        ConditionGenerator = new ConditionalEqualGenerator
+                                        {
+                                            FirstGenerator =
+                                                new GeneratedCollectionItemIndexGenerator<IList<Pattern>>(),
+                                            SecondGenerator = new ConstantGenerator<int>(0)
+                                        },
+                                        TrueGenerator = CreateNoteGenerator(),
+                                        FalseGenerator = new ConstantGenerator<IList<TimedEvent<Note>>>(null)
+                                    }))
+                            .WithProperty(
+                                x => x.Patterns,
+                                patternsProperty => patternsProperty.WithGenerator(
+                                    new ConditionalGenerator
+                                    {
+                                        ConditionGenerator = new ConditionalNotGenerator
+                                        {
+                                            ConditionGenerator = new ConditionalEqualGenerator
+                                            {
+                                                FirstGenerator =
+                                                    new GeneratedCollectionItemIndexGenerator<IList<Pattern>>(),
+                                                SecondGenerator = new ConstantGenerator<int>(0)
+                                            }
+                                        },
+                                        TrueGenerator = new SequentialTimelineGenerator<Pattern>
+                                        {
+                                            EventGenerator = new CollectionItemPickerGenerator<Pattern>
+                                            {
+                                                CollectionGenerator = new UniqueCollectionPickerGenerator<Pattern>
+                                                {
+                                                    CollectionGenerator =
+                                                        new CollectionItemGenerator<IList<Pattern>>
+                                                        {
+                                                            CollectionGenerator =
+                                                                new GeneratedCollectionGenerator<IList<Pattern>>(),
+                                                            IndexGenerator = new DoubleAddGenerator
+                                                            {
+                                                                ValueGenerator =
+                                                                    new GeneratedCollectionItemIndexGenerator<
+                                                                        IList<Pattern>
+                                                                    >(),
+                                                                AdditiveGenerator = new ConstantGenerator<int>(-1)
+                                                            }
+                                                        },
+                                                    ItemCountGenerator = new IntGenerator(1, 4 + 1)
+                                                }.Cache<Pattern, IList<Pattern>>()
+                                            }
+                                        },
+                                        FalseGenerator = new ConstantGenerator<IList<TimedEvent<Pattern>>>(null)
+                                    })),
+                        ItemCountGenerator = TemplateCountGenerator
+                    }
+                }
+            };
+        }
+
+        private static IGenerator CreateRankedPartTemplatesGenerator()
+        {
+            return new ReverseCollectionGenerator<IList<Part>>
+            {
+                CollectionGenerator = new CollectionGenerator<IList<Part>>
+                {
+                    ItemCountGenerator = new ConstantGenerator<int>(2),
+                    ItemGenerator = new CollectionGenerator<Part>
+                    {
+                        ItemGenerator = new ObjectGenerator<Part>()
+                            .WithProperty(
+                                x => x.Duration,
+                                property => property.WithGenerator(
+                                    new DoublePowerGenerator
+                                    {
+                                        ValueGenerator = new ConstantGenerator<double>(4),
+                                        PowerGenerator = new DoubleAddGenerator
+                                        {
+                                            ValueGenerator =
+                                                new GeneratedCollectionItemIndexGenerator<IList<Part>>(),
+                                            AdditiveGenerator = new ConstantGenerator<double>(3)
+                                        }
+                                    }))
+                            .WithProperty(
+                                x => x.NoteBasePattern,
+                                property => property.WithGenerator(PartNoteBaseTimelineGenerator))
+                            .WithProperty(
+                                x => x.TrackPatterns,
+                                trackPatternsProperty => trackPatternsProperty.WithGenerator(
+                                    new ConditionalGenerator
+                                    {
+                                        ConditionGenerator = new ConditionalEqualGenerator
+                                        {
+                                            FirstGenerator = new GeneratedCollectionItemIndexGenerator<IList<Part>>(),
+                                            SecondGenerator = new ConstantGenerator<int>(0)
+                                        },
+                                        TrueGenerator = new DictionaryGenerator<Track, IList<TimedEvent<Pattern>>>
+                                        {
+                                            KeyCollectionGenerator = new UniqueCollectionPickerGenerator<Track>
+                                            {
+                                                CollectionGenerator = new PropertyLinkGenerator<Song, IList<Track>>()
+                                                    .FromProperty(x => x.Tracks),
+                                                ItemCountGenerator = new IntGenerator(2, 4 + 1)
+                                            },
+                                            ValueGenerator = new SequentialTimelineGenerator<Pattern>
+                                            {
+                                                EventGenerator = new CollectionItemPickerGenerator<Pattern>
+                                                {
+                                                    CollectionGenerator = new UniqueCollectionPickerGenerator<Pattern>
+                                                    {
+                                                        CollectionGenerator =
+                                                            new CollectionItemGenerator<IList<Pattern>>
+                                                            {
+                                                                CollectionGenerator =
+                                                                    new PropertyLinkGenerator<Song,
+                                                                            IList<IList<Pattern>>>()
+                                                                        .FromProperty(x => x.RankedPatternTemplates),
+                                                                IndexGenerator = new ConstantGenerator<int>(0)
+                                                            },
+                                                        ItemCountGenerator = new IntGenerator(2, 8 + 1)
+                                                    }.Cache<Part, IList<Pattern>>()
+                                                }
+                                            }
+                                        },
+                                        FalseGenerator =
+                                            new ConstantGenerator<IDictionary<Track, IList<TimedEvent<Pattern>>>>(null)
+                                    }))
+                            .WithProperty(
+                                x => x.Parts,
+                                partsProperty => partsProperty.WithGenerator(
+                                    new ConditionalGenerator
+                                    {
+                                        ConditionGenerator = new ConditionalNotGenerator
+                                        {
+                                            ConditionGenerator = new ConditionalEqualGenerator
+                                            {
+                                                FirstGenerator =
+                                                    new GeneratedCollectionItemIndexGenerator<IList<Part>>(),
+                                                SecondGenerator = new ConstantGenerator<int>(0)
+                                            }
+                                        },
+                                        TrueGenerator = new SequentialTimelineGenerator<Part>
+                                        {
+                                            EventGenerator = new CollectionItemPickerGenerator<Part>
+                                            {
+                                                CollectionGenerator = new CollectionItemGenerator<IList<Part>>
+                                                {
+                                                    CollectionGenerator =
+                                                        new GeneratedCollectionGenerator<IList<Part>>(),
+                                                    IndexGenerator = new DoubleAddGenerator
+                                                    {
+                                                        ValueGenerator =
+                                                            new GeneratedCollectionItemIndexGenerator<IList<Part>>(),
+                                                        AdditiveGenerator = new ConstantGenerator<int>(-1)
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        FalseGenerator = new ConstantGenerator<IList<TimedEvent<Part>>>(null)
+                                    })),
+                        ItemCountGenerator = TemplateCountGenerator
+                    }
+                }
+            };
+        }
 
         [Fact]
         public void Test()
@@ -205,152 +573,110 @@ namespace RMG.Tests
                                                         x => x.Code,
                                                         codeProperty =>
                                                             codeProperty.WithGenerator(new IntGenerator(0, 128)))))
+                                    .WithProperty(
+                                        x => x.NoteBase,
+                                        property => property.WithGenerator(CreateTrackNoteBaseGenerator()))
+                                    .WithProperty(
+                                        x => x.MinOctave,
+                                        property => property.WithGenerator(
+                                            new DoubleAddGenerator
+                                            {
+                                                ValueGenerator = new IntPickerGenerator
+                                                {
+                                                    MinValueGenerator = new ConstantGenerator<int>(-2),
+                                                    MaxValueGenerator = new ConstantGenerator<int>(0),
+                                                    ProbabilityFunctionGenerator =
+                                                        new ConstantGenerator<GeometricProbabilityFunction>(
+                                                            new GeometricProbabilityFunction
+                                                            {
+                                                                MinProbability = 0,
+                                                                MaxProbability = 1,
+                                                                ProbabilityMultiplier = 0.5,
+                                                                Offset = 0
+                                                            })
+                                                },
+                                                AdditiveGenerator = new IntGenerator(-2, 2 + 1)
+                                            }))
+                                    .WithProperty(
+                                        x => x.MaxOctave,
+                                        property => property.WithGenerator(
+                                                new DoubleAddGenerator
+                                                {
+                                                    ValueGenerator = new DoubleAddGenerator
+                                                    {
+                                                        ValueGenerator = new DoubleMaxGenerator
+                                                        {
+                                                            Value1Generator = new DoubleSubtractionGenerator
+                                                            {
+                                                                SubtrahendGenerator = new ConstantGenerator<int>(2),
+                                                                MinuendGenerator =
+                                                                    new PropertyLinkGenerator<Track, int>()
+                                                                        .FromProperty(x => x.MinOctave)
+                                                            },
+                                                            Value2Generator = new ConstantGenerator<int>(2)
+                                                        },
+                                                        AdditiveGenerator = new IntPickerGenerator
+                                                        {
+                                                            MinValueGenerator = new ConstantGenerator<int>(0),
+                                                            MaxValueGenerator = new DoubleMaxGenerator
+                                                            {
+                                                                Value1Generator = new DoubleSubtractionGenerator
+                                                                {
+                                                                    SubtrahendGenerator = new ConstantGenerator<int>(4),
+                                                                    MinuendGenerator =
+                                                                        new PropertyLinkGenerator<Track, int>()
+                                                                            .FromProperty(x => x.MinOctave)
+                                                                },
+                                                                Value2Generator = new ConstantGenerator<int>(2)
+                                                            },
+                                                            ProbabilityFunctionGenerator =
+                                                                new ConstantGenerator<GeometricProbabilityFunction>(
+                                                                    new GeometricProbabilityFunction
+                                                                    {
+                                                                        MinProbability = 0,
+                                                                        MaxProbability = 1,
+                                                                        ProbabilityMultiplier = 0.5,
+                                                                        Offset = 0
+                                                                    })
+                                                        }
+                                                    },
+                                                    AdditiveGenerator =
+                                                        new PropertyLinkGenerator<Track, int>().FromProperty(
+                                                            x => x.MinOctave)
+                                                })
+                                            .DependsOn(x => x.MinOctave))
                             }))
                 .WithProperty(
                     x => x.Duration,
-                    property => property.WithGenerator(
-                        new RankedPositionGenerator
-                        {
-                            RankMultiplier = 1 - 0.125,
-                            MaxRank = 6,
-                            Period = 240,
-                            Offset = 240,
-                            Min = 240,
-                            Max = 480
-                        }))
-                .WithProperty(x => x.Key, property => property.WithGenerator(KeyEventGenerator))
-                .WithProperty(x => x.Octave, property => property.WithGenerator(OctaveEventGenerator))
-                .WithProperty(x => x.Volume, property => property.WithValue(1))
-                .WithProperty(
-                    x => x.ScaleNoteOffset,
-                    property => property.WithGenerator(
-                        new ScaleNoteOffsetGenerator
-                        {
-                            RankProbabilityFunction = new RankProbabilityFunction
-                            {
-                                Max = 0.5,
-                                Min = 0.25,
-                                Multiplier = 0.5
-                            }
-                        }))
+                    property => property.WithValue(256))
+                .WithProperty(x => x.NoteBase, property => property.WithGenerator(CreateSongNoteBaseGenerator()))
                 .WithProperty(
                     x => x.NoteBasePattern,
-                    property => property.WithGenerator(SongNoteBaseTimelineGenerator))
+                    property => property.WithGenerator(EmptyNoteBaseTimelineGenerator))
                 .WithProperty(
                     x => x.Parts,
                     partsProperty => partsProperty.WithGenerator(
-                        new TimedEventGenerator<Part>
-                        {
-                            Offset = 0,
-                            Scale = 16,
-                            MaxRank = 2,
-                            RankProbabilityFunction = new RankProbabilityFunction
+                            new SequentialTimelineGenerator<Part>
                             {
-                                Min = 0,
-                                Max = 1,
-                                Multiplier = 0.25
-                            },
-                            EventGenerator = new ObjectGenerator<Part>()
-                                .WithProperty(
-                                    x => x.Duration,
-                                    property => property.WithGenerator(
-                                        new RankedPositionGenerator
-                                        {
-                                            Min = 8,
-                                            Max = 24,
-                                            Offset = 8,
-                                            Period = 16,
-                                            MaxRank = 3,
-                                            RankMultiplier = 0.5
-                                        }))
-                                .WithProperty(
-                                    x => x.NoteBasePattern,
-                                    property => property.WithGenerator(PartNoteBaseTimelineGenerator))
-                                .WithProperty(
-                                    x => x.TrackPatterns,
-                                    trackPatternsProperty => trackPatternsProperty.WithGenerator(
-                                        new DictionaryGenerator<Track, IList<TimedEvent<Pattern>>>
-                                        {
-                                            KeyCollectionGenerator = new LinkedEntityCollectionGenerator<Track>()
-                                                .LinkEntityCollection(tracksLink => tracksLink.FromParentProperty<Song>(x => x.Tracks))
-                                                .WithItemCountGenerator(new IntGenerator(2, 4+1)),
-                                            ValueGenerator = new TimedEventGenerator<Pattern>
-                                            {
-                                                Offset = 0,
-                                                Scale = 4,
-                                                MaxRank = 2,
-                                                RankProbabilityFunction = new RankProbabilityFunction
-                                                {
-                                                    Min = 0,
-                                                    Max = 1,
-                                                    Multiplier = 0.25
-                                                },
-                                                EventGenerator = new ObjectGenerator<Pattern>()
-                                                    .WithProperty(
-                                                        x => x.Duration,
-                                                        property => property.WithValue(4))
-                                                    .WithProperty(
-                                                        x => x.NoteBasePattern,
-                                                        property => property.WithGenerator(PatternNoteBaseTimelineGenerator))
-                                                    .WithProperty(
-                                                        x => x.Notes,
-                                                        notesProperty => notesProperty.WithGenerator(
-                                                            new TimedEventGenerator<Note>
-                                                            {
-                                                                Offset = 0,
-                                                                Scale = 1,
-                                                                MaxRank = 4,
-                                                                RankProbabilityFunction = new RankProbabilityFunction
-                                                                {
-                                                                    Min = 0,
-                                                                    Max = 1,
-                                                                    Multiplier = 0.25
-                                                                },
-                                                                EventGenerator = new ObjectGenerator<Note>()
-                                                                    .WithProperty(
-                                                                        x => x.Duration,
-                                                                        property => property.WithGenerator(
-                                                                            new RankedPositionGenerator
-                                                                            {
-                                                                                Min = 0,
-                                                                                Max = 1,
-                                                                                Offset = 0,
-                                                                                Period = 1,
-                                                                                MaxRank = 4,
-                                                                                RankMultiplier = 0.5
-                                                                            }))
-                                                                    .WithProperty(
-                                                                        x => x.Octave,
-                                                                        property => property.WithValue(0))
-                                                                    .WithProperty(
-                                                                        x => x.Volume,
-                                                                        property => property.WithGenerator(
-                                                                            new RankedPositionGenerator
-                                                                            {
-                                                                                Min = 0.75,
-                                                                                Max = 1,
-                                                                                Offset = 0.5,
-                                                                                Period = 1,
-                                                                                MaxRank = 5,
-                                                                                RankMultiplier = 0.75
-                                                                            }))
-                                                                    .WithProperty(
-                                                                        x => x.ScaleOffset,
-                                                                        property => property.WithGenerator(
-                                                                            new ScaleNoteOffsetGenerator
-                                                                            {
-                                                                                RankProbabilityFunction =
-                                                                                    new RankProbabilityFunction
-                                                                                    {
-                                                                                        Max = 0.5,
-                                                                                        Min = 0.25,
-                                                                                        Multiplier = 0.5
-                                                                                    }
-                                                                            }))
-                                                            }))
-                                            }
-                                        }))
-                        }));
+                                EventGenerator = new CollectionItemPickerGenerator<Part>
+                                {
+                                    CollectionGenerator = new CollectionItemGenerator<IList<Part>>
+                                    {
+                                        CollectionGenerator = new PropertyLinkGenerator<Song, IList<IList<Part>>>()
+                                            .FromProperty(x => x.RankedPartTemplates),
+                                        IndexGenerator = new ConstantGenerator<int>(0)
+                                    }
+                                }
+                            })
+                        .DependsOn(x => x.RankedPartTemplates))
+                .WithProperty(
+                    x => x.RankedPatternTemplates,
+                    property => property.WithGenerator(CreateRankedPatternTemplatesGenerator()))
+                .WithProperty(
+                    x => x.RankedPartTemplates,
+                    property => property
+                        .WithGenerator(CreateRankedPartTemplatesGenerator())
+                        .DependsOn(x => x.RankedPatternTemplates));
 
             var song = songGenerator.Generate(new GenerationContext(new Random()));
 

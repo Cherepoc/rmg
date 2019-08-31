@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using RMG.Core.Music;
 using RMG.Core.Utils;
@@ -43,7 +42,8 @@ namespace RMG.Core.Render
 
             var offset = GetNoteOffset(flattenedSong, flattenedTrack, timedNote);
 
-            var volume = song.Volume
+            var volume = song.NoteBase.Volume
+                         * flattenedTrack.Track.NoteBase.Volume
                          * flattenedTrack.NoteBasePattern.VolumeTimeline.GetEffectiveEvent(timedNote.Position, 1)
                          * note.Volume;
 
@@ -63,30 +63,60 @@ namespace RMG.Core.Render
             var note = timedNote.Event;
             var song = flattenedSong.Song;
             var scale = song.Scale;
+            var track = flattenedTrack.Track;
 
             var baseScaleOffset = flattenedTrack.NoteBasePattern.ScaleOffsetTimeline.GetEffectiveEvent(
                 timedNote.Position,
                 new int[Scale.ScaleRankCount]);
 
             var scaleOffsetIndex = 0;
-            for (int i = 0; i < scale.RankedOffsetIndexes.Count; i++)
+            for (var i = 0; i < scale.RankedOffsetIndexes.Count; i++)
             {
                 var rankedScaleIndexes = scale.RankedOffsetIndexes[i];
-                var rankScaleOffsetIndex = MathUtils.Mod(
-                    song.ScaleNoteOffset[i] + baseScaleOffset[i] + note.ScaleOffset[i],
-                    rankedScaleIndexes.Count);
+                var offset = song.NoteBase.ScaleOffset[i]
+                             + track.NoteBase.ScaleOffset[i]
+                             + baseScaleOffset[i]
+                             + note.ScaleOffset[i];
+                var rankScaleOffsetIndex = MathUtils.Mod(offset, rankedScaleIndexes.Count);
                 scaleOffsetIndex += rankedScaleIndexes[rankScaleOffsetIndex];
             }
 
             var scaleOffset = scale.NoteOffsets[scaleOffsetIndex % scale.NoteOffsets.Count];
 
             var baseOctave = flattenedTrack.NoteBasePattern.OctaveTimeline.GetEffectiveEvent(timedNote.Position, 0);
-            var octaveOffset = (song.Octave + baseOctave + note.Octave) * 12;
+            var octaveOffset = (song.NoteBase.Octave + track.NoteBase.Octave + baseOctave + note.Octave) * 12;
 
-            var baseKey = song.Key
+            var baseKey = song.NoteBase.Key
+                          + track.NoteBase.Key
                           + flattenedTrack.NoteBasePattern.KeyTimeline.GetEffectiveEvent(timedNote.Position, 0);
 
-            return baseKey + octaveOffset + scaleOffset;
+            var noteOffset = baseKey + octaveOffset + scaleOffset;
+            return FixOctaveNoteOffset(noteOffset, track.MinOctave, track.MaxOctave);
+        }
+
+        private static int FixOctaveNoteOffset(int noteOffset, int minOctave, int maxOctave)
+        {
+            var minNoteOffset = minOctave * 12;
+            var maxNoteOffset = (maxOctave + 1) * 12;
+            var noteLength = maxNoteOffset - minNoteOffset;
+            var fixedNoteOffset = noteOffset;
+            while (true)
+            {
+                if (fixedNoteOffset < minNoteOffset)
+                {
+                    fixedNoteOffset += noteLength;
+                }
+                else if (fixedNoteOffset >= maxNoteOffset)
+                {
+                    fixedNoteOffset -= noteLength;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return fixedNoteOffset;
         }
     }
 }

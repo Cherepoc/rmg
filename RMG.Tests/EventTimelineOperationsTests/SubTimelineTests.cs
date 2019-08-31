@@ -15,7 +15,19 @@ namespace RMG.Tests.EventTimelineOperationsTests
                 Position = position
             };
         }
-        
+
+        [Fact]
+        public void TestEmpty()
+        {
+            var timeline = new List<TimedEvent<int>>();
+
+            var actual = EventTimelineOperations.SubTimeline(timeline, 1, 5);
+
+            var expected = new List<TimedEvent<int>>();
+
+            Assert.Equal(expected, actual);
+        }
+
         [Fact]
         public void TestIntervalInwards()
         {
@@ -24,9 +36,9 @@ namespace RMG.Tests.EventTimelineOperationsTests
                 CreateTimedEvent(1, 0),
                 CreateTimedEvent(2, 1),
                 CreateTimedEvent(3, 2),
-                CreateTimedEvent(4, 3),
+                CreateTimedEvent(4, 3)
             };
-            
+
             var actual = EventTimelineOperations.SubTimeline(timeline, 1, 2);
 
             var expected = new List<TimedEvent<int>>
@@ -34,10 +46,10 @@ namespace RMG.Tests.EventTimelineOperationsTests
                 CreateTimedEvent(2, 0),
                 CreateTimedEvent(3, 1)
             };
-            
+
             Assert.Equal(expected, actual);
         }
-        
+
         [Fact]
         public void TestIntervalOutwards()
         {
@@ -46,9 +58,9 @@ namespace RMG.Tests.EventTimelineOperationsTests
                 CreateTimedEvent(1, 2),
                 CreateTimedEvent(2, 3),
                 CreateTimedEvent(3, 4),
-                CreateTimedEvent(4, 5),
+                CreateTimedEvent(4, 5)
             };
-            
+
             var actual = EventTimelineOperations.SubTimeline(timeline, 1, 5);
 
             var expected = new List<TimedEvent<int>>
@@ -56,21 +68,9 @@ namespace RMG.Tests.EventTimelineOperationsTests
                 CreateTimedEvent(1, 1),
                 CreateTimedEvent(2, 2),
                 CreateTimedEvent(3, 3),
-                CreateTimedEvent(4, 4),
+                CreateTimedEvent(4, 4)
             };
-            
-            Assert.Equal(expected, actual);
-        }
-        
-        [Fact]
-        public void TestEmpty()
-        {
-            var timeline = new List<TimedEvent<int>>();
-            
-            var actual = EventTimelineOperations.SubTimeline(timeline, 1, 5);
 
-            var expected = new List<TimedEvent<int>>();
-            
             Assert.Equal(expected, actual);
         }
     }

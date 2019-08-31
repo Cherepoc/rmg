@@ -4,7 +4,6 @@ using System.Linq;
 using Commons.Music.Midi;
 using RMG.Core.Music;
 using RMG.Core.Render;
-using RMG.Core.Utils;
 
 namespace RMG.Core.Midi
 {
@@ -81,7 +80,9 @@ namespace RMG.Core.Midi
             {
                 var midiPosition = ConvertPosition(timedEvent.Position);
                 if (midiPosition > endOfTrackPosition)
+                {
                     midiPosition = endOfTrackPosition;
+                }
 
                 midiTrack.Messages.Add(new MidiMessage(midiPosition - previousEventMidiPosition, timedEvent.Event));
                 previousEventMidiPosition = midiPosition;
@@ -108,6 +109,7 @@ namespace RMG.Core.Midi
                     offset -= 12 * ((offset - 127) / 12 + 1);
                 }
             }
+
             return (byte) offset;
         }
 

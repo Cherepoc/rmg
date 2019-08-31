@@ -46,7 +46,7 @@ namespace RMG.Core.Render
                     new int[Scale.ScaleRankCount])
             };
         }
-        
+
         public static NoteBasePattern Merge(
             NoteBasePattern source,
             NoteBasePattern target
@@ -69,7 +69,10 @@ namespace RMG.Core.Render
                 KeyTimeline = EventTimelineOperations.SubTimeline(timeline.KeyTimeline, position, duration),
                 OctaveTimeline = EventTimelineOperations.SubTimeline(timeline.OctaveTimeline, position, duration),
                 VolumeTimeline = EventTimelineOperations.SubTimeline(timeline.VolumeTimeline, position, duration),
-                ScaleOffsetTimeline = EventTimelineOperations.SubTimeline(timeline.ScaleOffsetTimeline, position, duration)
+                ScaleOffsetTimeline = EventTimelineOperations.SubTimeline(
+                    timeline.ScaleOffsetTimeline,
+                    position,
+                    duration)
             };
         }
 
@@ -86,7 +89,7 @@ namespace RMG.Core.Render
         private static int[] MergeScaleNoteOffset(int[] a, int[] b)
         {
             var result = new int[Math.Max(a.Length, b.Length)];
-            for (int i = 0; i < result.Length; i++)
+            for (var i = 0; i < result.Length; i++)
             {
                 var aValue = i < a.Length ? a[i] : 0;
                 var bValue = i < b.Length ? b[i] : 0;

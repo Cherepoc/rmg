@@ -7,7 +7,11 @@ namespace RMG.Core.Render
 {
     public static class EventTimelineOperations
     {
-        public static IList<TimedEvent<T>> SubTimeline<T>(IList<TimedEvent<T>> timeline, double position, double duration)
+        public static IList<TimedEvent<T>> SubTimeline<T>(
+            IList<TimedEvent<T>> timeline,
+            double position,
+            double duration
+        )
         {
             var orderedTimeline = timeline
                 .OrderBy(x => x.Position)
@@ -17,25 +21,28 @@ namespace RMG.Core.Render
             if (effectiveTimedEventIndex >= 0)
             {
                 var effectiveTimedEvent = orderedTimeline[effectiveTimedEventIndex];
-                result.Add(new TimedEvent<T>
-                {
-                    Event = effectiveTimedEvent.Event,
-                    Position = 0
-                });
+                result.Add(
+                    new TimedEvent<T>
+                    {
+                        Event = effectiveTimedEvent.Event,
+                        Position = 0
+                    });
             }
 
             var endPosition = position + duration;
-            result.AddRange(timeline
-                .Where(x => x.Position > position && x.Position < endPosition)
-                .Select(x => new TimedEvent<T>
-                {
-                    Event = x.Event,
-                    Position = x.Position - position
-                }));
+            result.AddRange(
+                timeline
+                    .Where(x => x.Position > position && x.Position < endPosition)
+                    .Select(
+                        x => new TimedEvent<T>
+                        {
+                            Event = x.Event,
+                            Position = x.Position - position
+                        }));
 
             return result;
         }
-        
+
         public static IList<TimedEvent<T>> Merge<T>(
             IList<TimedEvent<T>> source,
             IList<TimedEvent<T>> target,
@@ -48,17 +55,19 @@ namespace RMG.Core.Render
             var orderedTarget = target
                 .OrderBy(x => x.Position)
                 .ToList();
-            
+
             source = source.Select(x => x.Copy()).ToList();
 
             if (target.Count == 0)
+            {
                 return source;
+            }
 
             var sourceIndex = GetLastElementIndexByPosition(source, position);
             var sourceTimedEvent = sourceIndex >= 0 ? source[sourceIndex] : null;
             var targetIndex = 0;
             var targetTimedEvent = orderedTarget[targetIndex];
-            double currentPosition = target[targetIndex].Position;
+            var currentPosition = target[targetIndex].Position;
             while (currentPosition < duration)
             {
                 var mergedTimedEvent = new TimedEvent<T>
@@ -127,11 +136,13 @@ namespace RMG.Core.Render
 
         private static int GetLastElementIndexByPosition<T>(IList<TimedEvent<T>> collection, double position)
         {
-            for (int index = 0; index < collection.Count; index++)
+            for (var index = 0; index < collection.Count; index++)
             {
                 var item = collection[index];
                 if (item.Position > position)
+                {
                     return index - 1;
+                }
             }
 
             return collection.Count - 1;

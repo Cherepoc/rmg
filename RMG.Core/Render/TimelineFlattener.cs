@@ -43,7 +43,7 @@ namespace RMG.Core.Render
                 part.NoteBasePattern,
                 position,
                 duration);
-            
+
             // parts can have other parts, but if there are track patterns - render them instead
             if (part.TrackPatterns != null && part.TrackPatterns.Count > 0)
             {
@@ -69,6 +69,57 @@ namespace RMG.Core.Render
                     position,
                     duration,
                     FlattenPartTimeline);
+            }
+        }
+
+        private static void FlattenPatternTimeline(
+            FlattenedTrackContext trackContext,
+            Pattern pattern,
+            NoteBasePattern noteBasePattern,
+            double position,
+            double duration
+        )
+        {
+            var patternNoteBasePattern = NoteBaseTimelineOperations.Merge(
+                noteBasePattern,
+                pattern.NoteBasePattern,
+                position,
+                duration);
+
+            trackContext.NoteBasePattern = NoteBaseTimelineOperations.Merge(
+                trackContext.NoteBasePattern,
+                NoteBaseTimelineOperations.SubTimeline(patternNoteBasePattern, position, duration),
+                position,
+                duration);
+
+            if (pattern.Notes != null && pattern.Notes.Count > 0)
+            {
+                foreach (var timedEvent in pattern.Notes.OrderBy(x => x.Position))
+                {
+                    if (timedEvent.Position >= duration)
+                    {
+                        return;
+                    }
+
+                    var notePosition = position + timedEvent.Position;
+
+                    trackContext.NoteTimeline.Add(
+                        new TimedEvent<Note>
+                        {
+                            Position = notePosition,
+                            Event = timedEvent.Event
+                        });
+                }
+            }
+            else if (pattern.Patterns != null && pattern.Patterns.Count > 0)
+            {
+                RenderDurationItem(
+                    trackContext,
+                    pattern.Patterns,
+                    patternNoteBasePattern,
+                    position,
+                    duration,
+                    FlattenPatternTimeline);
             }
         }
 
@@ -105,44 +156,6 @@ namespace RMG.Core.Render
                 }
 
                 renderFunc(context, timedItem.Event, noteBasePattern, position + timedItem.Position, itemDuration);
-            }
-        }
-
-        private static void FlattenPatternTimeline(
-            FlattenedTrackContext trackContext,
-            Pattern pattern,
-            NoteBasePattern noteBasePattern,
-            double position,
-            double duration
-        )
-        {
-            var patternNoteBasePattern = NoteBaseTimelineOperations.Merge(
-                noteBasePattern,
-                pattern.NoteBasePattern,
-                position,
-                duration);
-            
-            trackContext.NoteBasePattern = NoteBaseTimelineOperations.Merge(
-                trackContext.NoteBasePattern,
-                NoteBaseTimelineOperations.SubTimeline(patternNoteBasePattern, position, duration),
-                position,
-                duration);
-            
-            foreach (var timedEvent in pattern.Notes.OrderBy(x => x.Position))
-            {
-                if (timedEvent.Position >= duration)
-                {
-                    return;
-                }
-
-                var notePosition = position + timedEvent.Position;
-
-                trackContext.NoteTimeline.Add(
-                    new TimedEvent<Note>
-                    {
-                        Position = notePosition,
-                        Event = timedEvent.Event
-                    });
             }
         }
 

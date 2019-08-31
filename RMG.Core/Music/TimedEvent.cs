@@ -7,7 +7,7 @@ namespace RMG.Core.Music
         public TimedEvent()
         {
         }
-        
+
         public TimedEvent(double position, T value)
         {
             Event = value;

@@ -10,13 +10,13 @@ namespace RMG.Core.Generation
     {
         public IGenerator EventGenerator { get; set; }
 
-        public RankProbabilityFunction RankProbabilityFunction { get; set; }
+        public IGenerator RankProbabilityFunctionGenerator { get; set; }
 
-        public int MaxRank { get; set; } = 5;
+        public IGenerator MaxRankGenerator { get; set; }
 
-        public double Offset { get; set; } = 0;
+        public IGenerator OffsetGenerator { get; set; }
 
-        public double Scale { get; set; } = 1;
+        public IGenerator ScaleGenerator { get; set; }
 
         object IGenerator.Generate(GenerationContext context)
         {
@@ -25,7 +25,7 @@ namespace RMG.Core.Generation
 
         public IList<TimedEvent<T>> Generate(GenerationContext context)
         {
-            var parent = context.FindParent<IDuration>();
+            var parent = context.FindParentValue<IDuration>();
             if (parent == null)
             {
                 throw new ApplicationException(
@@ -39,11 +39,19 @@ namespace RMG.Core.Generation
                 return Array.Empty<TimedEvent<T>>();
             }
 
+            var timelineContext = new TimelineGenerationContext(
+                context,
+                RankProbabilityFunctionGenerator.RunGeneration<GeometricProbabilityFunction>(context),
+                MaxRankGenerator.RunGeneration<int>(context),
+                OffsetGenerator.RunGeneration<double>(context),
+                ScaleGenerator.RunGeneration<double>(context),
+                duration);
+
             var result = new List<TimedEvent<T>>();
-            var cycleCount = (int) Math.Ceiling(duration / Scale);
+            var cycleCount = (int) Math.Ceiling(duration / timelineContext.Scale);
             for (var cycle = 0; cycle < cycleCount; cycle++)
             {
-                var events = GenerateInternal(context, 0, 1, 0, duration, cycle);
+                var events = GenerateInternal(timelineContext, 0, 1, 0, cycle);
                 result.AddRange(events.OrderBy(x => x.Position));
             }
 
@@ -51,22 +59,23 @@ namespace RMG.Core.Generation
         }
 
         private IList<TimedEvent<T>> GenerateInternal(
-            GenerationContext context,
+            TimelineGenerationContext timelineContext,
             double normalizedPosition,
             double rankScale,
             int rank,
-            double duration,
             int cycle
         )
         {
-            var position = ConvertPosition(normalizedPosition, cycle);
-            var probabilityFunction = RankProbabilityFunction;
+            var position = ConvertPosition(timelineContext, normalizedPosition, cycle);
+            var probabilityFunction = timelineContext.GeometricProbabilityFunction;
             var result = new List<TimedEvent<T>>();
             var probability = probabilityFunction.GetProbability(rank);
-            if (context.Random.TestProbability(probability))
+            var testProbability = timelineContext.GenerationContext.Random.NextDouble();
+            if (ProbabilityTester.TestProbability(testProbability, probability))
             {
                 var generator = EventGenerator;
-                var obj = (T) generator.Generate(new RankedGenerationContext(context, result, rank));
+                var obj = (T) generator.Generate(
+                    new RankedGenerationContext(timelineContext.GenerationContext, result, rank));
                 result.Add(
                     new TimedEvent<T>
                     {
@@ -75,33 +84,31 @@ namespace RMG.Core.Generation
                     });
             }
 
-            if (rank < MaxRank)
+            if (rank < timelineContext.MaxRank)
             {
                 var childRank = rank + 1;
                 var childRankScale = rankScale / 2;
 
                 var leftPosition = normalizedPosition - childRankScale;
-                if (TestPosition(leftPosition, duration, cycle))
+                if (TestPosition(timelineContext, leftPosition, cycle))
                 {
                     var leftEvents = GenerateInternal(
-                        context,
+                        timelineContext,
                         leftPosition,
                         childRankScale,
                         childRank,
-                        duration,
                         cycle);
                     result.AddRange(leftEvents);
                 }
 
                 var rightPosition = normalizedPosition + childRankScale;
-                if (TestPosition(rightPosition, duration, cycle))
+                if (TestPosition(timelineContext, rightPosition, cycle))
                 {
                     var rightEvents = GenerateInternal(
-                        context,
+                        timelineContext,
                         rightPosition,
                         childRankScale,
                         childRank,
-                        duration,
                         cycle);
                     result.AddRange(rightEvents);
                 }
@@ -110,15 +117,56 @@ namespace RMG.Core.Generation
             return result;
         }
 
-        private double ConvertPosition(double normalizedPosition, int cycle)
+        private static double ConvertPosition(
+            TimelineGenerationContext timelineContext,
+            double normalizedPosition,
+            int cycle
+        )
         {
-            return (normalizedPosition * Scale + Offset) % Scale + cycle * Scale;
+            return (normalizedPosition * timelineContext.Scale + timelineContext.Offset) % timelineContext.Scale
+                   + cycle * timelineContext.Scale;
         }
 
-        private bool TestPosition(double normalizedPosition, double duration, int cycle)
+        private static bool TestPosition(
+            TimelineGenerationContext timelineContext,
+            double normalizedPosition,
+            int cycle
+        )
         {
-            var position = ConvertPosition(normalizedPosition, cycle);
-            return position >= 0 && position < duration;
+            var position = ConvertPosition(timelineContext, normalizedPosition, cycle);
+            return position >= 0 && position < timelineContext.Duration;
+        }
+
+        private sealed class TimelineGenerationContext
+        {
+            public TimelineGenerationContext(
+                GenerationContext generationContext,
+                GeometricProbabilityFunction geometricProbabilityFunction,
+                int maxRank,
+                double offset,
+                double scale,
+                double duration
+            )
+            {
+                GenerationContext = generationContext;
+                GeometricProbabilityFunction = geometricProbabilityFunction;
+                MaxRank = maxRank;
+                Offset = offset;
+                Scale = scale;
+                Duration = duration;
+            }
+
+            public GenerationContext GenerationContext { get; }
+
+            public GeometricProbabilityFunction GeometricProbabilityFunction { get; }
+
+            public int MaxRank { get; }
+
+            public double Offset { get; }
+
+            public double Scale { get; }
+
+            public double Duration { get; }
         }
     }
 }

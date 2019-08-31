@@ -4,4 +4,9 @@ namespace RMG.Core.Generation
     {
         object Generate(GenerationContext context);
     }
+
+    public interface IGenerator<out T>
+    {
+        T Generate(GenerationContext context);
+    }
 }
