@@ -1,6 +1,6 @@
 namespace RMG.Core.Generation
 {
-    public sealed class ConstantGenerator<T> : IGenerator
+    public sealed class ConstantGenerator<T> : GeneratorBase<T>
     {
         public ConstantGenerator()
         {
@@ -13,12 +13,7 @@ namespace RMG.Core.Generation
 
         public T Value { get; set; }
 
-        object IGenerator.Generate(GenerationContext context)
-        {
-            return Generate(context);
-        }
-
-        public T Generate(GenerationContext context)
+        public override T Generate(GenerationContext context)
         {
             return Value;
         }

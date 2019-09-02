@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
 using RMG.Core.Generation;
+using RMG.Core.Generation.ContextGenerators;
+using RMG.Core.Generation.ObjectGenerators;
+using RMG.Core.Generation.RandomGenerators;
 using RMG.Core.Music;
+using RMG.Core.ProbabilityCalculation;
 using Xunit;
 
 namespace RMG.Tests
@@ -15,9 +19,9 @@ namespace RMG.Tests
             return new IntGenerator(1, 2);
         }
 
-        private static PropertyLinkGenerator<TestClass, int> CreateTargetGenerator()
+        private static ContextEntityPropertyGenerator<TestClass, int> CreateTargetGenerator()
         {
-            return new PropertyLinkGenerator<TestClass, int>().FromProperty(x => x.Source);
+            return new ContextEntityPropertyGenerator<TestClass, int>().FromProperty(x => x.Source);
         }
 
         private sealed class TestClass : IDuration
@@ -87,7 +91,7 @@ namespace RMG.Tests
                 .WithProperty(
                     x => x.Timeline,
                     property => property.WithGenerator(
-                        new TimedEventGenerator<double>
+                        new RhythmTimelineGenerator<double>
                         {
                             EventGenerator = new LinkedEntityGenerator<TestClass, double>
                             {
@@ -95,8 +99,8 @@ namespace RMG.Tests
                             },
                             OffsetGenerator = new ConstantGenerator<double>(0),
                             ScaleGenerator = new ConstantGenerator<double>(4),
-                            MaxRankGenerator = new ConstantGenerator<int>(0),
-                            RankProbabilityFunctionGenerator = new ConstantGenerator<GeometricProbabilityFunction>(
+                            MaxPowerGenerator = new ConstantGenerator<int>(0),
+                            ProbabilityFunctionGenerator = new ConstantGenerator<GeometricProbabilityFunction>(
                                 new GeometricProbabilityFunction
                                 {
                                     MinProbability = 0,

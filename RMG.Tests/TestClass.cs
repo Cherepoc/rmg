@@ -3,8 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using Commons.Music.Midi;
 using RMG.Core.Generation;
+using RMG.Core.Generation.CollectionGenerators;
+using RMG.Core.Generation.ContextGenerators;
+using RMG.Core.Generation.LogicGenerators;
+using RMG.Core.Generation.MathGenerators;
+using RMG.Core.Generation.ObjectGenerators;
+using RMG.Core.Generation.RandomGenerators;
 using RMG.Core.Midi;
 using RMG.Core.Music;
+using RMG.Core.ProbabilityCalculation;
 using Xunit;
 
 namespace RMG.Tests
@@ -33,7 +40,7 @@ namespace RMG.Tests
 
         private static readonly ScaleNoteOffsetGenerator ScaleNoteOffsetEventGenerator = new ScaleNoteOffsetGenerator
         {
-            GeometricProbabilityFunction = new GeometricProbabilityFunction
+            ProbabilityFunctionGenerator = new GeometricProbabilityFunction
             {
                 MaxProbability = 0.5,
                 MinProbability = 0,
@@ -65,7 +72,7 @@ namespace RMG.Tests
                 .WithProperty(x => x.Volume, property => property.WithGenerator(VolumeEventGenerator));
         }
 
-        private static TimedEventGenerator<T> CreateTimelineGenerator<T>(
+        private static RhythmTimelineGenerator<T> CreateTimelineGenerator<T>(
             double offset,
             double scale,
             int maxRank,
@@ -75,12 +82,12 @@ namespace RMG.Tests
             IGenerator eventGenerator
         )
         {
-            return new TimedEventGenerator<T>
+            return new RhythmTimelineGenerator<T>
             {
                 OffsetGenerator = new ConstantGenerator<double>(offset),
                 ScaleGenerator = new ConstantGenerator<double>(scale),
                 MaxRankGenerator = new ConstantGenerator<int>(maxRank),
-                RankProbabilityFunctionGenerator =
+                ProbabilityFunctionGenerator =
                     new ConstantGenerator<GeometricProbabilityFunction>(
                         new GeometricProbabilityFunction
                         {
@@ -92,7 +99,7 @@ namespace RMG.Tests
             };
         }
 
-        private static TimedEventGenerator<T> GenerateSongNoteBaseTimeEventGenerator<T>(IGenerator eventGenerator)
+        private static RhythmTimelineGenerator<T> GenerateSongNoteBaseTimeEventGenerator<T>(IGenerator eventGenerator)
         {
             return CreateTimelineGenerator<T>(
                 0,
@@ -142,9 +149,9 @@ namespace RMG.Tests
                     property => property
                         .WithValue(new List<TimedEvent<double>>()));
 
-        private static TimedEventGenerator<T> GeneratePartNoteBaseTimeEventGenerator<T>(IGenerator eventGenerator)
+        private static RhythmTimelineGenerator<T> GeneratePartNoteBaseTimeEventGenerator<T>(IGenerator eventGenerator)
         {
-            return new TimedEventGenerator<T>
+            return new RhythmTimelineGenerator<T>
             {
                 OffsetGenerator = new ConstantGenerator<double>(0),
                 ScaleGenerator = new DoublePowerGenerator
@@ -153,12 +160,12 @@ namespace RMG.Tests
                     PowerGenerator = new DoubleAddGenerator
                     {
                         ValueGenerator =
-                            new GeneratedCollectionItemIndexGenerator<IList<Part>>(),
+                            new ContextCollectionItemIndexGenerator<IList<Part>>(),
                         AdditiveGenerator = new ConstantGenerator<double>(3)
                     }
                 },
                 MaxRankGenerator = new ConstantGenerator<int>(2),
-                RankProbabilityFunctionGenerator =
+                ProbabilityFunctionGenerator =
                     new ConstantGenerator<GeometricProbabilityFunction>(
                         new GeometricProbabilityFunction
                         {
@@ -189,7 +196,7 @@ namespace RMG.Tests
                     property => property
                         .WithGenerator(GeneratePartNoteBaseTimeEventGenerator<double>(VolumeEventGenerator)));
 
-        private static TimedEventGenerator<T> GeneratePatternNoteBaseTimeEventGenerator<T>(IGenerator eventGenerator)
+        private static RhythmTimelineGenerator<T> GeneratePatternNoteBaseTimeEventGenerator<T>(IGenerator eventGenerator)
         {
             return CreateTimelineGenerator<T>(
                 0,
@@ -229,9 +236,9 @@ namespace RMG.Tests
 
         private static IGenerator CreateNoteGenerator()
         {
-            return new TimedEventGenerator<Note>
+            return new RhythmTimelineGenerator<Note>
             {
-                OffsetGenerator = new RankedPositionGenerator
+                OffsetGenerator = new BinaryTreePickerGenerator
                 {
                     Min = 0,
                     Max = 4,
@@ -276,7 +283,7 @@ namespace RMG.Tests
                     }
                 },
                 MaxRankGenerator = new ConstantGenerator<int>(4),
-                RankProbabilityFunctionGenerator =
+                ProbabilityFunctionGenerator =
                     new ConstantGenerator<GeometricProbabilityFunction>(
                         new GeometricProbabilityFunction
                         {
@@ -288,7 +295,7 @@ namespace RMG.Tests
                     .WithProperty(
                         x => x.Duration,
                         property => property.WithGenerator(
-                            new RankedPositionGenerator
+                            new BinaryTreePickerGenerator
                             {
                                 Min = 0,
                                 Max = 2,
@@ -303,7 +310,7 @@ namespace RMG.Tests
                     .WithProperty(
                         x => x.Volume,
                         property => property.WithGenerator(
-                            new RankedPositionGenerator
+                            new BinaryTreePickerGenerator
                             {
                                 Min = 0.75,
                                 Max = 1,
@@ -317,7 +324,7 @@ namespace RMG.Tests
                         property => property.WithGenerator(
                             new ScaleNoteOffsetGenerator
                             {
-                                GeometricProbabilityFunction =
+                                ProbabilityFunctionGenerator =
                                     new GeometricProbabilityFunction
                                     {
                                         MaxProbability = 0.5,
@@ -350,7 +357,7 @@ namespace RMG.Tests
                                             AdditiveGenerator = new DoubleMultiplierGenerator
                                             {
                                                 LeftGenerator =
-                                                    new GeneratedCollectionItemIndexGenerator<IList<Pattern>>(),
+                                                    new ContextCollectionItemIndexGenerator<IList<Pattern>>(),
                                                 RightGenerator = new ConstantGenerator<double>(2)
                                             }
                                         }
@@ -361,12 +368,12 @@ namespace RMG.Tests
                             .WithProperty(
                                 x => x.Notes,
                                 notesProperty => notesProperty.WithGenerator(
-                                    new ConditionalGenerator
+                                    new BranchGenerator
                                     {
-                                        ConditionGenerator = new ConditionalEqualGenerator
+                                        ConditionGenerator = new EqualGenerator
                                         {
                                             FirstGenerator =
-                                                new GeneratedCollectionItemIndexGenerator<IList<Pattern>>(),
+                                                new ContextCollectionItemIndexGenerator<IList<Pattern>>(),
                                             SecondGenerator = new ConstantGenerator<int>(0)
                                         },
                                         TrueGenerator = CreateNoteGenerator(),
@@ -375,14 +382,14 @@ namespace RMG.Tests
                             .WithProperty(
                                 x => x.Patterns,
                                 patternsProperty => patternsProperty.WithGenerator(
-                                    new ConditionalGenerator
+                                    new BranchGenerator
                                     {
-                                        ConditionGenerator = new ConditionalNotGenerator
+                                        ConditionGenerator = new NotGenerator
                                         {
-                                            ConditionGenerator = new ConditionalEqualGenerator
+                                            ConditionGenerator = new EqualGenerator
                                             {
                                                 FirstGenerator =
-                                                    new GeneratedCollectionItemIndexGenerator<IList<Pattern>>(),
+                                                    new ContextCollectionItemIndexGenerator<IList<Pattern>>(),
                                                 SecondGenerator = new ConstantGenerator<int>(0)
                                             }
                                         },
@@ -393,14 +400,14 @@ namespace RMG.Tests
                                                 CollectionGenerator = new UniqueCollectionPickerGenerator<Pattern>
                                                 {
                                                     CollectionGenerator =
-                                                        new CollectionItemGenerator<IList<Pattern>>
+                                                        new CollectionItemAccessor<IList<Pattern>>
                                                         {
                                                             CollectionGenerator =
-                                                                new GeneratedCollectionGenerator<IList<Pattern>>(),
+                                                                new ContextCollectionGenerator<IList<Pattern>>(),
                                                             IndexGenerator = new DoubleAddGenerator
                                                             {
                                                                 ValueGenerator =
-                                                                    new GeneratedCollectionItemIndexGenerator<
+                                                                    new ContextCollectionItemIndexGenerator<
                                                                         IList<Pattern>
                                                                     >(),
                                                                 AdditiveGenerator = new ConstantGenerator<int>(-1)
@@ -437,7 +444,7 @@ namespace RMG.Tests
                                         PowerGenerator = new DoubleAddGenerator
                                         {
                                             ValueGenerator =
-                                                new GeneratedCollectionItemIndexGenerator<IList<Part>>(),
+                                                new ContextCollectionItemIndexGenerator<IList<Part>>(),
                                             AdditiveGenerator = new ConstantGenerator<double>(3)
                                         }
                                     }))
@@ -447,18 +454,18 @@ namespace RMG.Tests
                             .WithProperty(
                                 x => x.TrackPatterns,
                                 trackPatternsProperty => trackPatternsProperty.WithGenerator(
-                                    new ConditionalGenerator
+                                    new BranchGenerator
                                     {
-                                        ConditionGenerator = new ConditionalEqualGenerator
+                                        ConditionGenerator = new EqualGenerator
                                         {
-                                            FirstGenerator = new GeneratedCollectionItemIndexGenerator<IList<Part>>(),
+                                            FirstGenerator = new ContextCollectionItemIndexGenerator<IList<Part>>(),
                                             SecondGenerator = new ConstantGenerator<int>(0)
                                         },
                                         TrueGenerator = new DictionaryGenerator<Track, IList<TimedEvent<Pattern>>>
                                         {
                                             KeyCollectionGenerator = new UniqueCollectionPickerGenerator<Track>
                                             {
-                                                CollectionGenerator = new PropertyLinkGenerator<Song, IList<Track>>()
+                                                CollectionGenerator = new ContextEntityPropertyGenerator<Song, IList<Track>>()
                                                     .FromProperty(x => x.Tracks),
                                                 ItemCountGenerator = new IntGenerator(2, 4 + 1)
                                             },
@@ -469,10 +476,10 @@ namespace RMG.Tests
                                                     CollectionGenerator = new UniqueCollectionPickerGenerator<Pattern>
                                                     {
                                                         CollectionGenerator =
-                                                            new CollectionItemGenerator<IList<Pattern>>
+                                                            new CollectionItemAccessor<IList<Pattern>>
                                                             {
                                                                 CollectionGenerator =
-                                                                    new PropertyLinkGenerator<Song,
+                                                                    new ContextEntityPropertyGenerator<Song,
                                                                             IList<IList<Pattern>>>()
                                                                         .FromProperty(x => x.RankedPatternTemplates),
                                                                 IndexGenerator = new ConstantGenerator<int>(0)
@@ -488,14 +495,14 @@ namespace RMG.Tests
                             .WithProperty(
                                 x => x.Parts,
                                 partsProperty => partsProperty.WithGenerator(
-                                    new ConditionalGenerator
+                                    new BranchGenerator
                                     {
-                                        ConditionGenerator = new ConditionalNotGenerator
+                                        ConditionGenerator = new NotGenerator
                                         {
-                                            ConditionGenerator = new ConditionalEqualGenerator
+                                            ConditionGenerator = new EqualGenerator
                                             {
                                                 FirstGenerator =
-                                                    new GeneratedCollectionItemIndexGenerator<IList<Part>>(),
+                                                    new ContextCollectionItemIndexGenerator<IList<Part>>(),
                                                 SecondGenerator = new ConstantGenerator<int>(0)
                                             }
                                         },
@@ -503,14 +510,14 @@ namespace RMG.Tests
                                         {
                                             EventGenerator = new CollectionItemPickerGenerator<Part>
                                             {
-                                                CollectionGenerator = new CollectionItemGenerator<IList<Part>>
+                                                CollectionGenerator = new CollectionItemAccessor<IList<Part>>
                                                 {
                                                     CollectionGenerator =
-                                                        new GeneratedCollectionGenerator<IList<Part>>(),
+                                                        new ContextCollectionGenerator<IList<Part>>(),
                                                     IndexGenerator = new DoubleAddGenerator
                                                     {
                                                         ValueGenerator =
-                                                            new GeneratedCollectionItemIndexGenerator<IList<Part>>(),
+                                                            new ContextCollectionItemIndexGenerator<IList<Part>>(),
                                                         AdditiveGenerator = new ConstantGenerator<int>(-1)
                                                     }
                                                 }
@@ -547,7 +554,7 @@ namespace RMG.Tests
                 .WithProperty(
                     x => x.Tempo,
                     property => property.WithGenerator(
-                        new RankedPositionGenerator
+                        new BinaryTreePickerGenerator
                         {
                             MaxRank = 5,
                             RankMultiplier = 0.95,
@@ -614,7 +621,7 @@ namespace RMG.Tests
                                                             {
                                                                 SubtrahendGenerator = new ConstantGenerator<int>(2),
                                                                 MinuendGenerator =
-                                                                    new PropertyLinkGenerator<Track, int>()
+                                                                    new ContextEntityPropertyGenerator<Track, int>()
                                                                         .FromProperty(x => x.MinOctave)
                                                             },
                                                             Value2Generator = new ConstantGenerator<int>(2)
@@ -628,7 +635,7 @@ namespace RMG.Tests
                                                                 {
                                                                     SubtrahendGenerator = new ConstantGenerator<int>(4),
                                                                     MinuendGenerator =
-                                                                        new PropertyLinkGenerator<Track, int>()
+                                                                        new ContextEntityPropertyGenerator<Track, int>()
                                                                             .FromProperty(x => x.MinOctave)
                                                                 },
                                                                 Value2Generator = new ConstantGenerator<int>(2)
@@ -645,7 +652,7 @@ namespace RMG.Tests
                                                         }
                                                     },
                                                     AdditiveGenerator =
-                                                        new PropertyLinkGenerator<Track, int>().FromProperty(
+                                                        new ContextEntityPropertyGenerator<Track, int>().FromProperty(
                                                             x => x.MinOctave)
                                                 })
                                             .DependsOn(x => x.MinOctave))
@@ -664,9 +671,9 @@ namespace RMG.Tests
                             {
                                 EventGenerator = new CollectionItemPickerGenerator<Part>
                                 {
-                                    CollectionGenerator = new CollectionItemGenerator<IList<Part>>
+                                    CollectionGenerator = new CollectionItemAccessor<IList<Part>>
                                     {
-                                        CollectionGenerator = new PropertyLinkGenerator<Song, IList<IList<Part>>>()
+                                        CollectionGenerator = new ContextEntityPropertyGenerator<Song, IList<IList<Part>>>()
                                             .FromProperty(x => x.RankedPartTemplates),
                                         IndexGenerator = new ConstantGenerator<int>(0)
                                     }

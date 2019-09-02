@@ -1,5 +1,6 @@
 using System;
 using RMG.Core.Generation;
+using RMG.Core.Generation.RandomGenerators;
 using Xunit;
 
 namespace RMG.Tests
@@ -27,7 +28,7 @@ namespace RMG.Tests
             double max
         )
         {
-            var generator = new RankedPositionGenerator
+            var generator = new BinaryTreePickerGenerator
             {
                 RankMultiplier = rankMultiplier,
                 Period = scale,

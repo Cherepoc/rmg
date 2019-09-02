@@ -5,8 +5,8 @@ namespace RMG.Core.Generation
         object Generate(GenerationContext context);
     }
 
-    public interface IGenerator<out T>
+    public interface IGenerator<out T> : IGenerator
     {
-        T Generate(GenerationContext context);
+        new T Generate(GenerationContext context);
     }
 }
