@@ -2,13 +2,13 @@ using System.Collections.Generic;
 
 namespace RMG.Core.Generation.CollectionGenerators
 {
-    public sealed class DictionaryGenerator<TKey, TValue> : GeneratorBase<IDictionary<TKey, TValue>>
+    public sealed class DictionaryGenerator<TKey, TValue> : GeneratorBase<IReadOnlyDictionary<TKey, TValue>>
     {
         public IGenerator<IEnumerable<TKey>> KeyCollectionGenerator { get; set; }
 
         public IGenerator<TValue> ValueGenerator { get; set; }
 
-        public override IDictionary<TKey, TValue> Generate(GenerationContext context)
+        public override IReadOnlyDictionary<TKey, TValue> Generate(GenerationContext context)
         {
             var dictionary = new Dictionary<TKey, TValue>();
             var dictionaryContext = new GenerationContext(context, dictionary);

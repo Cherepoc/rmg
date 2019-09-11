@@ -6,8 +6,8 @@ namespace RMG.Core.Music
     {
         public const int ScaleRankCount = 3;
 
-        public IList<int> NoteOffsets { get; set; }
+        public IReadOnlyList<int> NoteOffsets { get; set; }
 
-        public IList<IList<int>> RankedOffsetIndexes { get; set; }
+        public IReadOnlyList<IReadOnlyList<int>> RankedOffsetIndexes { get; set; }
     }
 }

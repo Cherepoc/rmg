@@ -1,6 +1,6 @@
 namespace RMG.Core.Generation.ContextGenerators
 {
-    public sealed class ContextCacheGenerator<TEntity, TValue> : GeneratorBase<TValue>
+    public sealed class ContextCacheGenerator<TValue, TEntity> : GeneratorBase<TValue>
     {
         public IGenerator<TValue> ValueGenerator { get; set; }
 

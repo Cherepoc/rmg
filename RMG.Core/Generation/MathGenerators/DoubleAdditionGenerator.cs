@@ -1,10 +1,10 @@
 namespace RMG.Core.Generation.MathGenerators
 {
-    public class DoubleSubtractionGenerator : BinaryOperatorGeneratorBase<double>
+    public sealed class DoubleAdditionGenerator : BinaryOperatorGeneratorBase<double>
     {
         protected override double Calculate(double value1, double value2)
         {
-            return value1 - value2;
+            return value1 + value2;
         }
     }
 }

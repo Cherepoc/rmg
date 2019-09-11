@@ -6,4 +6,9 @@ namespace RMG.Core.Music
 
         object Event { get; }
     }
+    
+    public interface ITimedEvent<out T> : ITimedEvent
+    {
+        new T Event { get; }
+    }
 }

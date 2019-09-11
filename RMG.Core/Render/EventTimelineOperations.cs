@@ -7,8 +7,8 @@ namespace RMG.Core.Render
 {
     public static class EventTimelineOperations
     {
-        public static IList<TimedEvent<T>> SubTimeline<T>(
-            IList<TimedEvent<T>> timeline,
+        public static IReadOnlyList<TimedEvent<T>> SubTimeline<T>(
+            IReadOnlyList<TimedEvent<T>> timeline,
             double position,
             double duration
         )
@@ -43,9 +43,9 @@ namespace RMG.Core.Render
             return result;
         }
 
-        public static IList<TimedEvent<T>> Merge<T>(
-            IList<TimedEvent<T>> source,
-            IList<TimedEvent<T>> target,
+        public static IReadOnlyList<TimedEvent<T>> Merge<T>(
+            IReadOnlyList<TimedEvent<T>> source,
+            IReadOnlyList<TimedEvent<T>> target,
             double position,
             double duration,
             Func<T, T, T> mergeFunction,
@@ -56,15 +56,15 @@ namespace RMG.Core.Render
                 .OrderBy(x => x.Position)
                 .ToList();
 
-            source = source.Select(x => x.Copy()).ToList();
+            var newSource = source.Select(x => x.Copy()).ToList();
 
             if (target.Count == 0)
             {
-                return source;
+                return newSource;
             }
 
-            var sourceIndex = GetLastElementIndexByPosition(source, position);
-            var sourceTimedEvent = sourceIndex >= 0 ? source[sourceIndex] : null;
+            var sourceIndex = GetLastElementIndexByPosition(newSource, position);
+            var sourceTimedEvent = sourceIndex >= 0 ? newSource[sourceIndex] : null;
             var targetIndex = 0;
             var targetTimedEvent = orderedTarget[targetIndex];
             var currentPosition = target[targetIndex].Position;
@@ -79,15 +79,15 @@ namespace RMG.Core.Render
                 };
                 if (sourceTimedEvent != null && sourceTimedEvent.Position == mergedTimedEvent.Position)
                 {
-                    source[sourceIndex] = mergedTimedEvent;
+                    newSource[sourceIndex] = mergedTimedEvent;
                 }
                 else
                 {
-                    source.Insert(++sourceIndex, mergedTimedEvent);
+                    newSource.Insert(++sourceIndex, mergedTimedEvent);
                 }
 
                 var nextSourceIndex = sourceIndex + 1;
-                var nextSourceTimedItem = nextSourceIndex < source.Count ? source[nextSourceIndex] : null;
+                var nextSourceTimedItem = nextSourceIndex < newSource.Count ? newSource[nextSourceIndex] : null;
                 var nextTargetIndex = targetIndex + 1;
                 var nextTargetTimedItem = nextTargetIndex < orderedTarget.Count ? orderedTarget[nextTargetIndex] : null;
 
@@ -115,13 +115,13 @@ namespace RMG.Core.Render
             }
 
             var endPosition = position + duration;
-            var endEffectiveTimedEventIndex = GetLastElementIndexByPosition(source, endPosition);
-            if (endEffectiveTimedEventIndex >= 0 && source.Count > 0)
+            var endEffectiveTimedEventIndex = GetLastElementIndexByPosition(newSource, endPosition);
+            if (endEffectiveTimedEventIndex >= 0 && newSource.Count > 0)
             {
-                var endEffectiveTimedEvent = source[endEffectiveTimedEventIndex];
+                var endEffectiveTimedEvent = newSource[endEffectiveTimedEventIndex];
                 if (endEffectiveTimedEvent.Position < endPosition)
                 {
-                    source.Insert(
+                    newSource.Insert(
                         endEffectiveTimedEventIndex + 1,
                         new TimedEvent<T>
                         {
@@ -131,10 +131,10 @@ namespace RMG.Core.Render
                 }
             }
 
-            return source;
+            return newSource;
         }
 
-        private static int GetLastElementIndexByPosition<T>(IList<TimedEvent<T>> collection, double position)
+        private static int GetLastElementIndexByPosition<T>(IReadOnlyList<TimedEvent<T>> collection, double position)
         {
             for (var index = 0; index < collection.Count; index++)
             {

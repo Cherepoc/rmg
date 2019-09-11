@@ -6,9 +6,9 @@ namespace RMG.Core.Music
     {
         public Scale Scale { get; set; }
 
-        public IList<Track> Tracks { get; set; }
+        public IReadOnlyList<Track> Tracks { get; set; }
 
-        public IList<TimedEvent<Part>> Parts { get; set; }
+        public IReadOnlyList<TimedEvent<Part>> Parts { get; set; }
 
         public NoteBasePattern NoteBasePattern { get; set; }
 
@@ -16,9 +16,9 @@ namespace RMG.Core.Music
 
         public NoteBase NoteBase { get; set; }
 
-        public IList<IList<Part>> RankedPartTemplates { get; set; }
+        public IReadOnlyList<IReadOnlyList<Part>> RankedPartTemplates { get; set; }
 
-        public IList<IList<Pattern>> RankedPatternTemplates { get; set; }
+        public IReadOnlyList<IReadOnlyList<Pattern>> RankedPatternTemplates { get; set; }
 
         public double Duration { get; set; }
     }

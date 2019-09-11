@@ -1,6 +1,7 @@
 using System;
 using RMG.Core.Generation;
 using RMG.Core.Generation.RandomGenerators;
+using RMG.Core.ProbabilityCalculation;
 using Xunit;
 
 namespace RMG.Tests
@@ -21,21 +22,22 @@ namespace RMG.Tests
         [InlineData(0.5, 0.3, 0.2, 4, 0.1, 1.99)]
         public void ValuesInValidRange(
             double rankMultiplier,
-            double scale,
+            double period,
             double offset,
-            int maxRank,
-            double min,
-            double max
+            int maxPower,
+            double minValue,
+            double maxValue
         )
         {
             var generator = new BinaryTreePickerGenerator
             {
-                RankMultiplier = rankMultiplier,
-                Period = scale,
-                Offset = offset,
-                MaxRank = maxRank,
-                Min = min,
-                Max = max
+                OffsetGenerator = new ConstantGenerator<double>(offset),
+                PeriodGenerator = new ConstantGenerator<double>(period),
+                MaxPowerGenerator = new ConstantGenerator<int>(maxPower),
+                MinValueGenerator = new ConstantGenerator<double>(minValue),
+                MaxValueGenerator = new ConstantGenerator<double>(maxValue),
+                ProbabilityFunctionGenerator =
+                    new ConstantGenerator<IIntProbabilityFunction>(new GeometricProbabilityFunction(rankMultiplier))
             };
             var context = new GenerationContext(new Random(0));
 
@@ -47,7 +49,7 @@ namespace RMG.Tests
 
             foreach (var result in results)
             {
-                Assert.InRange(result, min, max);
+                Assert.InRange(result, minValue, maxValue);
             }
         }
     }

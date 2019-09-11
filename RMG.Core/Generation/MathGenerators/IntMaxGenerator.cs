@@ -3,9 +3,9 @@ using System.Linq;
 
 namespace RMG.Core.Generation.MathGenerators
 {
-    public class DoubleMaxGenerator : ReduceOperatorGeneratorBase<double>
+    public class IntMaxGenerator : ReduceOperatorGeneratorBase<int>
     {
-        protected override double Reduce(IEnumerable<double> collection)
+        protected override int Reduce(IEnumerable<int> collection)
         {
             return collection.Max();
         }

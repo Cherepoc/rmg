@@ -1,16 +1,10 @@
 namespace RMG.Core.Generation.MathGenerators
 {
-    public sealed class DoubleDivisionGenerator : GeneratorBase<double>
+    public sealed class DoubleDivisionGenerator : BinaryOperatorGeneratorBase<double>
     {
-        public IGenerator<double> DividentGenerator { get; set; }
-
-        public IGenerator<double> DivisorGenerator { get; set; }
-
-        public override double Generate(GenerationContext context)
+        protected override double Calculate(double value1, double value2)
         {
-            var divident = DividentGenerator.Generate(context);
-            var divisor = DivisorGenerator.Generate(context);
-            return divident / divisor;
+            return value1 / value2;
         }
     }
 }

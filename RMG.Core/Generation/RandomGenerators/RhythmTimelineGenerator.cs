@@ -11,13 +11,13 @@ namespace RMG.Core.Generation.RandomGenerators
     {
         public IGenerator<T> EventGenerator { get; set; }
 
-        public IGenerator<GeometricProbabilityFunction> ProbabilityFunctionGenerator { get; set; }
+        public IGenerator<IIntProbabilityFunction> ProbabilityFunctionGenerator { get; set; }
 
         public IGenerator<int> MaxPowerGenerator { get; set; }
 
         public IGenerator<double> OffsetGenerator { get; set; }
 
-        public IGenerator<double> ScaleGenerator { get; set; }
+        public IGenerator<double> PeriodGenerator { get; set; }
 
         public override IEnumerable<TimedEvent<T>> Generate(GenerationContext context)
         {
@@ -39,7 +39,7 @@ namespace RMG.Core.Generation.RandomGenerators
                 ProbabilityFunctionGenerator,
                 MaxPowerGenerator,
                 OffsetGenerator,
-                ScaleGenerator);
+                PeriodGenerator);
 
             var timelineContext = new TimelineGenerationContext(
                 context,
@@ -142,7 +142,7 @@ namespace RMG.Core.Generation.RandomGenerators
         {
             public TimelineGenerationContext(
                 GenerationContext generationContext,
-                GeometricProbabilityFunction geometricProbabilityFunction,
+                IIntProbabilityFunction geometricProbabilityFunction,
                 int maxRank,
                 double offset,
                 double scale,
@@ -159,7 +159,7 @@ namespace RMG.Core.Generation.RandomGenerators
 
             public GenerationContext GenerationContext { get; }
 
-            public GeometricProbabilityFunction GeometricProbabilityFunction { get; }
+            public IIntProbabilityFunction GeometricProbabilityFunction { get; }
 
             public int MaxRank { get; }
 

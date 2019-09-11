@@ -11,9 +11,9 @@ namespace RMG.Core.Generation.RandomGenerators
 
         public IGenerator<double> PeriodGenerator { get; set; }
 
-        public IGenerator<double> MinGenerator { get; set; }
+        public IGenerator<double> MinValueGenerator { get; set; }
 
-        public IGenerator<double> MaxGenerator { get; set; }
+        public IGenerator<double> MaxValueGenerator { get; set; }
 
         public IGenerator<int> MaxPowerGenerator { get; set; }
 
@@ -23,8 +23,8 @@ namespace RMG.Core.Generation.RandomGenerators
                 ProbabilityFunctionGenerator,
                 OffsetGenerator,
                 PeriodGenerator,
-                MinGenerator,
-                MaxGenerator,
+                MinValueGenerator,
+                MaxValueGenerator,
                 MaxPowerGenerator);
             
             var normalizedMin = (min - offset) / period;

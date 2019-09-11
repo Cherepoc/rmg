@@ -125,7 +125,7 @@ namespace RMG.Core.Render
 
         private static void RenderDurationItem<TEvent, TContext>(
             TContext context,
-            IList<TimedEvent<TEvent>> timeline,
+            IReadOnlyList<TimedEvent<TEvent>> timeline,
             NoteBasePattern noteBasePattern,
             double position,
             double duration,

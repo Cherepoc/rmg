@@ -4,14 +4,14 @@ namespace RMG.Core.Generation.LogicGenerators
     {
         public IGenerator<bool> ConditionGenerator { get; set; }
 
-        public IGenerator<T> TrueGenerator { get; set; }
+        public IGenerator<T> ThenGenerator { get; set; }
 
-        public IGenerator<T> FalseGenerator { get; set; }
+        public IGenerator<T> ElseGenerator { get; set; }
 
         public override T Generate(GenerationContext context)
         {
             var condition = ConditionGenerator.Generate(context);
-            var generator = condition ? TrueGenerator : FalseGenerator;
+            var generator = condition ? ThenGenerator : ElseGenerator;
             return generator.Generate(context);
         }
     }

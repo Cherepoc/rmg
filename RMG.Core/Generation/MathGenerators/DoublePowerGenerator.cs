@@ -2,17 +2,11 @@ using System;
 
 namespace RMG.Core.Generation.MathGenerators
 {
-    public sealed class DoublePowerGenerator : GeneratorBase<double>
+    public sealed class DoublePowerGenerator : BinaryOperatorGeneratorBase<double>
     {
-        public IGenerator<double> ValueGenerator { get; set; }
-
-        public IGenerator<double> PowerGenerator { get; set; }
-
-        public override double Generate(GenerationContext context)
+        protected override double Calculate(double value1, double value2)
         {
-            var value = ValueGenerator.Generate(context);
-            var power = PowerGenerator.Generate(context);
-            return Math.Pow(value, power);
+            return Math.Pow(value1, value2);
         }
     }
 }

@@ -9,7 +9,7 @@ namespace RMG.Core.Generation.RandomGenerators
     {
         public IGenerator<int> MaxNumberGenerator { get; set; }
 
-        public IGenerator<GeometricProbabilityFunction> RankProbabilityFunctionGenerator { get; set; }
+        public IGenerator<IIntProbabilityFunction> RankProbabilityFunctionGenerator { get; set; }
 
         public override double Generate(GenerationContext context)
         {

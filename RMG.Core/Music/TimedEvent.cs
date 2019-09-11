@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace RMG.Core.Music
 {
-    public sealed class TimedEvent<T> : ITimedEvent
+    public sealed class TimedEvent<T> : ITimedEvent<T>
     {
         public TimedEvent()
         {

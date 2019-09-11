@@ -14,21 +14,24 @@ namespace RMG.Tests
     {
         private static readonly GenerationContext GenerationContext = new GenerationContext(new Random(0));
 
-        private static IntGenerator CreateSourceGenerator()
+        private static IGenerator<int> CreateSourceGenerator()
         {
             return new IntGenerator(1, 2);
         }
 
-        private static ContextEntityPropertyGenerator<TestClass, int> CreateTargetGenerator()
+        private static IGenerator<int> CreateTargetGenerator()
         {
-            return new ContextEntityPropertyGenerator<TestClass, int>().FromProperty(x => x.Source);
+            return new EntityPropertyGenerator<TestClass, int>
+            {
+                EntityGenerator = new ContextEntityGenerator<TestClass>()
+            }.FromProperty(x => x.Source);
         }
 
         private sealed class TestClass : IDuration
         {
             public int Source { get; set; }
             public int Target { get; set; }
-            public IList<TimedEvent<double>> Timeline { get; set; }
+            public IReadOnlyList<TimedEvent<double>> Timeline { get; set; }
 
             public NoteBasePattern NoteBasePattern { get; set; }
             public double Duration { get; set; }
@@ -93,12 +96,12 @@ namespace RMG.Tests
                     property => property.WithGenerator(
                         new RhythmTimelineGenerator<double>
                         {
-                            EventGenerator = new LinkedEntityGenerator<TestClass, double>
+                            EventGenerator = new EntityPropertyGenerator<TestClass, double>
                             {
-                                LinkedCollectionAccessor = x => new List<double> {x.Duration}
-                            },
+                                EntityGenerator = new ContextEntityGenerator<TestClass>()
+                            }.FromProperty(x => x.Duration),
                             OffsetGenerator = new ConstantGenerator<double>(0),
-                            ScaleGenerator = new ConstantGenerator<double>(4),
+                            PeriodGenerator = new ConstantGenerator<double>(4),
                             MaxPowerGenerator = new ConstantGenerator<int>(0),
                             ProbabilityFunctionGenerator = new ConstantGenerator<GeometricProbabilityFunction>(
                                 new GeometricProbabilityFunction
@@ -107,7 +110,7 @@ namespace RMG.Tests
                                     MaxProbability = 1,
                                     ProbabilityMultiplier = 1
                                 })
-                        }))
+                        }.ToList()))
                 .WithProperty(
                     x => x.Duration,
                     property => property.WithValue(4));

@@ -3,9 +3,9 @@ using System.Linq;
 
 namespace RMG.Core.Generation.MathGenerators
 {
-    public sealed class DoubleMinGenerator : ReduceOperatorGeneratorBase<double>
+    public sealed class IntMinGenerator : ReduceOperatorGeneratorBase<int>
     {
-        protected override double Reduce(IEnumerable<double> collection)
+        protected override int Reduce(IEnumerable<int> collection)
         {
             return collection.Min();
         }

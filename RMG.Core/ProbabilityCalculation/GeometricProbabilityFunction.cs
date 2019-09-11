@@ -4,6 +4,22 @@ namespace RMG.Core.ProbabilityCalculation
 {
     public sealed class GeometricProbabilityFunction : IIntProbabilityFunction
     {
+        public GeometricProbabilityFunction()
+        {
+        }
+
+        public GeometricProbabilityFunction(double probabilityMultiplier)
+        {
+            ProbabilityMultiplier = probabilityMultiplier;
+        }
+
+        public GeometricProbabilityFunction(double minProbability, double maxProbability, double probabilityMultiplier)
+        {
+            MinProbability = minProbability;
+            MaxProbability = maxProbability;
+            ProbabilityMultiplier = probabilityMultiplier;
+        }
+
         public double MinProbability { get; set; } = 0;
 
         public double MaxProbability { get; set; } = 1;
