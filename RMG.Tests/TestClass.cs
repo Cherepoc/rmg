@@ -582,16 +582,88 @@ namespace RMG.Tests
                         .WithGenerator(CreateRankedPartTemplatesGenerator())
                         .DependsOn(x => x.RankedPatternTemplates));
 
-            var song = songGenerator.Generate(new GenerationContext(new Random()));
+            //var song = songGenerator.Generate(new GenerationContext(new Random()));
 
-            var midiMusic = MidiSongConverter.ConvertSong(song);
+            //var midiMusic = MidiSongConverter.ConvertSong(song);
             using (var stream = new FileStream(
-                "C:\\Users\\chech\\OneDrive\\Desktop\\songs\\song.mid",
+                "C:\\Projects\\RMG\\songs\\song1.mid",
                 FileMode.Create,
                 FileAccess.Write))
             {
                 var midiWriter = new SmfWriter(stream);
-                midiWriter.WriteMusic(midiMusic);
+                var track = new Track
+                {
+                    Instrument = new Instrument()
+                    {
+                        Code = 0
+                    },
+                    MinOctave = -2,
+                    MaxOctave = 2,
+                    NoteBase = new NoteBase()
+                    {
+                        Volume = 1,
+                        ScaleOffset = new int[] {0, 0, 0}
+                    }
+                };
+                midiWriter.WriteMusic(MidiSongConverter.ConvertSong(new Song
+                {
+                    Duration = 4,
+                    Scale = scaleGenerator.Generate(new GenerationContext(new Random())),
+                    Tempo = 120,
+                    Tracks = new Track[]
+                    {
+                        track
+                    },
+                    NoteBase = new NoteBase()
+                    {
+                        Volume = 1,
+                        ScaleOffset = new int[]{0, 0, 0}
+                    },
+                    Parts = new []
+                    {
+                        new TimedEvent<Part>(0, new Part
+                        {
+                            Duration = 4,
+                            NoteBasePattern = new NoteBasePattern
+                            {
+                                Duration = 0,
+                                KeyTimeline = new []{new TimedEvent<int>(0, 0)},
+                                OctaveTimeline = new []{new TimedEvent<int>(0, 0)},
+                                VolumeTimeline = new[]{new TimedEvent<double>(0, 1), },
+                                ScaleOffsetTimeline = new[]{new TimedEvent<int[]>(0, new int[]{0, 0, 0})}
+                            },
+                            TrackPatterns = new Dictionary<Track, IReadOnlyList<TimedEvent<Pattern>>>()
+                            {
+                                [track] = new[]{new TimedEvent<Pattern>(0, new Pattern()
+                                {
+                                    Duration = 4,
+                                    NoteBasePattern = new NoteBasePattern
+                                    {
+                                        Duration = 0,
+                                        KeyTimeline = new []{new TimedEvent<int>(0, 0)},
+                                        OctaveTimeline = new []{new TimedEvent<int>(0, 0)},
+                                        VolumeTimeline = new[]{new TimedEvent<double>(0, 1), },
+                                        ScaleOffsetTimeline = new[]{new TimedEvent<int[]>(0, new int[]{0, 0, 0})}
+                                    },
+                                    Notes = new[]{new TimedEvent<Note>(0, new Note
+                                    {
+                                         Duration = 4,
+                                         Octave = 0,
+                                         Volume = 1,
+                                         ScaleOffset = new int[]{0, 0, 0}
+                                    }), }
+                                }), }
+                            }
+                        }),
+                    },NoteBasePattern = new NoteBasePattern
+                    {
+                        Duration = 0,
+                        KeyTimeline = new []{new TimedEvent<int>(0, 0)},
+                        OctaveTimeline = new []{new TimedEvent<int>(0, 0)},
+                        VolumeTimeline = new[]{new TimedEvent<double>(0, 1), },
+                        ScaleOffsetTimeline = new[]{new TimedEvent<int[]>(0, new int[]{0, 0, 0})}
+                    }
+                }));
             }
         }
     }
