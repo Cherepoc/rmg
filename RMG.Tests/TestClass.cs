@@ -92,7 +92,7 @@ namespace RMG.Tests
                     {
                         Value1Generator =
                             new ContextCollectionItemIndexGenerator<IReadOnlyList<Part>>().ToDouble(),
-                        Value2Generator = new ConstantGenerator<double>(3)
+                        Value2Generator = new ConstantGenerator<double>(2)
                     }
                 },
                 MaxPowerGenerator = new ConstantGenerator<int>(2),
@@ -127,7 +127,7 @@ namespace RMG.Tests
                     property => property
                         .WithGenerator(GeneratePartNoteBaseTimeEventGenerator(VolumeEventGenerator)));
 
-        private static readonly IntGenerator TemplateCountGenerator = new IntGenerator(8, 16 + 1);
+        private static readonly IGenerator<int> TemplateCountGenerator = new ConstantGenerator<int>(16);
 
         private static IGenerator<IReadOnlyList<TimedEvent<Note>>> CreateNoteGenerator()
         {
@@ -204,7 +204,15 @@ namespace RMG.Tests
                             }))
                     .WithProperty(
                         x => x.Octave,
-                        property => property.WithValue(0))
+                        property => property.WithGenerator(new IntPickerGenerator
+                        {
+                            MinValueGenerator = new ConstantGenerator<int>(-1),
+                            MaxValueGenerator = new ConstantGenerator<int>(1),
+                            ProbabilityFunctionGenerator = new ConstantGenerator<IIntProbabilityFunction>(new GeometricProbabilityFunction
+                            {
+                                ProbabilityMultiplier = 1.0 / 8
+                            })
+                        }))
                     .WithProperty(
                         x => x.Volume,
                         property => property.WithGenerator(
@@ -226,7 +234,7 @@ namespace RMG.Tests
                             {
                                 ProbabilityFunctionGenerator =
                                     new ConstantGenerator<IIntProbabilityFunction>(
-                                        new GeometricProbabilityFunction(0, 0.5, 1))
+                                        new GeometricProbabilityFunction(0, 0.75, 0.5, 2))
                             }))
             }.ToList();
         }
@@ -552,7 +560,7 @@ namespace RMG.Tests
                             }.ToList()))
                 .WithProperty(
                     x => x.Duration,
-                    property => property.WithValue(256))
+                    property => property.WithValue(512))
                 .WithProperty(x => x.NoteBase, property => property.WithGenerator(CreateSongNoteBaseGenerator()))
                 .WithProperty(
                     x => x.NoteBasePattern,

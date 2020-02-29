@@ -20,17 +20,30 @@ namespace RMG.Core.ProbabilityCalculation
             ProbabilityMultiplier = probabilityMultiplier;
         }
 
-        public double MinProbability { get; set; } = 0;
+        public GeometricProbabilityFunction(
+            double minProbability,
+            double maxProbability,
+            double probabilityMultiplier,
+            int offset
+        )
+        {
+            MinProbability = minProbability;
+            MaxProbability = maxProbability;
+            ProbabilityMultiplier = probabilityMultiplier;
+            Offset = offset;
+        }
+
+        public double MinProbability { get; set; }
 
         public double MaxProbability { get; set; } = 1;
 
         public double ProbabilityMultiplier { get; set; } = 0.75;
 
-        public int Offset { get; set; } = 0;
+        public int Offset { get; set; }
 
         public double GetProbability(int value)
         {
-            return Math.Pow(ProbabilityMultiplier, Math.Abs(value + Offset))
+            return Math.Pow(ProbabilityMultiplier, Math.Abs(value - Offset))
                    * (MaxProbability - MinProbability)
                    + MinProbability;
         }
