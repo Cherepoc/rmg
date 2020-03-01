@@ -1,15 +1,9 @@
-import { AnyPattern, EntityPattern, Pattern } from './pattern';
-import { Note } from './note';
+import { Note } from '../music/note';
 import { createTypeGuard, TypeGuard } from '../core/type-check';
-import { DurationEntity } from './duration-entity';
-import { EntityTimeline } from './timed';
-
-export interface NoteBaseEntity extends DurationEntity {
-  noteBase: EntityTimeline<Note>
-}
+import { AnyPattern, Pattern, Patternize } from './pattern';
 
 export interface NoteBasePattern<T> extends Pattern<T> {
-  noteBase: EntityPattern<Note>;
+  noteBase: Patternize<Note>;
 }
 
 export type AnyNoteBasePattern<T> = Pattern<AnyNoteBasePattern<T>> | AnyPattern<T> | T;

@@ -3,13 +3,12 @@ import { Note } from './note';
 import { Track } from './track';
 import { Section } from './section';
 import { DurationEntity } from './duration-entity';
-import { AnyPattern } from './pattern';
-import { AnyNoteBasePattern } from './note-base-pattern';
+import { Timeline } from '../core/timeline';
 
 export interface Song extends DurationEntity {
   tracks: Track[];
-  scale: AnyPattern<Scale>;
-  noteBase: AnyPattern<Note>;
-  tempo: AnyPattern<number>;
-  section: AnyNoteBasePattern<Section>;
+  scale: Timeline<Scale>;
+  noteBase: Timeline<Note>;
+  tempo: Timeline<number>;
+  section: Timeline<Section>;
 }

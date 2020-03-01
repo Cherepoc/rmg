@@ -1,15 +1,14 @@
 import { Note } from './note';
-import { AnyPattern } from './pattern';
 import { Track } from './track';
-import { DurationEntity } from './duration-entity';
-import { AnyNoteBasePattern } from './note-base-pattern';
+import { NoteBaseEntity, NoteBaseTimeline } from './note-base';
+import { Timeline } from '../core/timeline';
 
-export interface Section extends DurationEntity {
-  noteBaseTimeline: AnyPattern<Note>;
+export interface Section extends NoteBaseEntity {
   trackTimeline: TrackNoteTimeline[];
 }
 
 export interface TrackNoteTimeline {
   track: Track;
-  timeline: AnyNoteBasePattern<Note>
+  timeline: Timeline<Note>;
+  noteBaseTimeline: NoteBaseTimeline;
 }

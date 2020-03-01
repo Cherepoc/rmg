@@ -1,5 +1,5 @@
-import { AnyPattern, isPattern, Pattern } from '../music/pattern';
-import { timed, Timeline } from '../music/timed';
+import { Timeline, timelineItem } from '../core/timeline';
+import { AnyPattern, isPattern, Pattern } from '../composition/pattern';
 
 export function flattenPattern<T>(patternValue: AnyPattern<T>, duration: number): Timeline<T> {
   if (isPattern(patternValue)) {
@@ -7,7 +7,7 @@ export function flattenPattern<T>(patternValue: AnyPattern<T>, duration: number)
     flattenPatternRecursive<T>(timeline, patternValue, 0, duration);
     return timeline;
   } else {
-    return [timed(0, patternValue)];
+    return [timelineItem(0, patternValue)];
   }
 }
 
@@ -24,7 +24,7 @@ function flattenPatternRecursive<T>(
       const patternDuration = Math.min(patternValue.duration, duration - patternItem.position);
       flattenPatternRecursive<T>(timeline, patternValue, patternPosition, patternDuration);
     } else {
-      timeline.push(timed<T>(patternPosition, patternValue));
+      timeline.push(timelineItem<T>(patternPosition, patternValue));
     }
   }
 }

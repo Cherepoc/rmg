@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ContentModelStore">
-    <e p="C:\Projects\RMG\rmg-js" t="IncludeFlat">
+    <e p="C:\Users\chech\AppData\local\JetBrains\Rider2020.1\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\chech\AppData\local\JetBrains\Rider2020.1\resharper-host\local\Transient\ReSharperHost\v201\SolutionCaches\_.19.00" t="ExcludeRecursive" />
+    <e p="D:\Projects\RMG\rmg-js" t="IncludeFlat">
       <e p="node_modules\@babel\parser" t="IncludeRecursive" />
       <e p="node_modules\@babel\types" t="IncludeRecursive" />
       <e p="node_modules\@bcoe\v8-coverage" t="IncludeRecursive" />
@@ -36,6 +38,7 @@
       <e p="node_modules\eslint-config-prettier" t="IncludeRecursive" />
       <e p="node_modules\eslint-plugin-prettier" t="IncludeRecursive" />
       <e p="node_modules\expect" t="IncludeRecursive" />
+      <e p="node_modules\fast-deep-equal" t="IncludeRecursive" />
       <e p="node_modules\fast-json-stable-stringify" t="IncludeRecursive" />
       <e p="node_modules\jest" t="IncludeRecursive" />
       <e p="node_modules\jest-changed-files" t="IncludeRecursive" />
@@ -101,8 +104,10 @@
       <e p="node_modules\typescript\lib\lib.es2019.object.d.ts" t="IncludeRecursive" />
       <e p="node_modules\typescript\lib\lib.es2019.string.d.ts" t="IncludeRecursive" />
       <e p="node_modules\typescript\lib\lib.es2019.symbol.d.ts" t="IncludeRecursive" />
+      <e p="node_modules\typescript\lib\lib.es2020.bigint.d.ts" t="IncludeRecursive" />
       <e p="node_modules\typescript\lib\lib.es2020.d.ts" t="IncludeRecursive" />
       <e p="node_modules\typescript\lib\lib.es2020.full.d.ts" t="IncludeRecursive" />
+      <e p="node_modules\typescript\lib\lib.es2020.promise.d.ts" t="IncludeRecursive" />
       <e p="node_modules\typescript\lib\lib.es2020.string.d.ts" t="IncludeRecursive" />
       <e p="node_modules\typescript\lib\lib.es2020.symbol.wellknown.d.ts" t="IncludeRecursive" />
       <e p="node_modules\typescript\lib\lib.es5.d.ts" t="IncludeRecursive" />
@@ -119,7 +124,5 @@
       <e p="node_modules\typescript\lib\lib.webworker.importscripts.d.ts" t="IncludeRecursive" />
       <e p="node_modules\v8-to-istanbul" t="IncludeRecursive" />
     </e>
-    <e p="C:\Users\chech\.Rider2019.3\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\chech\.Rider2019.3\system\resharper-host\local\Transient\ReSharperHost\v193\SolutionCaches\_.19.00" t="ExcludeRecursive" />
   </component>
 </project>

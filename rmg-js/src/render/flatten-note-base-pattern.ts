@@ -1,8 +1,7 @@
-import { AnyPattern, isPattern, Pattern } from '../music/pattern';
-import { timed, Timeline } from '../music/timed';
-import { AnyNoteBasePattern } from '../music/note-base-pattern';
 import { Note } from '../music/note';
-import { shiftPosition } from '../core/position-math';
+import { shiftPosition, Timeline } from '../core/timeline';
+import { AnyNoteBasePattern } from '../composition/note-base-pattern';
+import { AnyPattern, isPattern, Pattern } from '../composition/pattern';
 
 export interface FlatNoteBasePattern<T> {
   timeline: Timeline<T>;
