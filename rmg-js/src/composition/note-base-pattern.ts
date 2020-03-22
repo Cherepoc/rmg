@@ -1,12 +1,20 @@
 import { Note } from '../music/note';
-import { createTypeGuard, TypeGuard } from '../core/type-check';
-import { AnyPattern, Pattern, Patternize } from './pattern';
+import { AnyPattern, Pattern, Patternize, RecursivePattern } from './pattern';
+import { NoteBaseTimeline } from '../music/note-base';
+import { DurationEntity } from '../music/duration-entity';
+import { Timeline } from '../core/timeline';
 
 export interface NoteBasePattern<T> extends Pattern<T> {
-  noteBase: Patternize<Note>;
+  noteBaseTimeline: NoteBaseTimeline;
 }
 
-export type AnyNoteBasePattern<T> = Pattern<AnyNoteBasePattern<T>> | AnyPattern<T> | T;
+export interface RecursiveNoteBasePattern<T> extends DurationEntity {
+  timeline: AnyNoteBasePattern<T>;
+  noteBaseTimeline: AnyNoteBasePattern<Patternize<Note>>;
+}
 
-export const isNoteBasePattern: TypeGuard<NoteBasePattern<any>>
-  = createTypeGuard<NoteBasePattern<any>>('timeline', 'duration', 'noteBase');
+export type AnyNoteBasePattern<T> =
+  RecursiveNoteBasePattern<AnyNoteBasePattern<T>>
+  | RecursivePattern<AnyNoteBasePattern<T>>
+  | Timeline<AnyNoteBasePattern<T>>
+  | AnyPattern<T>;
