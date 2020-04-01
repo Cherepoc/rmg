@@ -9,12 +9,11 @@ export interface NoteBasePattern<T> extends Pattern<T> {
 }
 
 export interface RecursiveNoteBasePattern<T> extends DurationEntity {
-  timeline: AnyNoteBasePattern<T>;
-  noteBaseTimeline: AnyNoteBasePattern<Patternize<Note>>;
+  timeline: Timeline<AnyNoteBasePattern<T>>;
+  noteBaseTimeline: Timeline<AnyNoteBasePattern<Patternize<Note>>>;
 }
 
 export type AnyNoteBasePattern<T> =
   RecursiveNoteBasePattern<AnyNoteBasePattern<T>>
   | RecursivePattern<AnyNoteBasePattern<T>>
-  | Timeline<AnyNoteBasePattern<T>>
   | AnyPattern<T>;

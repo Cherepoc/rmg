@@ -17,15 +17,16 @@ export function shiftPosition<T>(timeline: Timeline<T>, position: number, durati
 }
 
 export function unionTimelines<T>(source: Timeline<T>, target: Timeline<T>, position: number, duration: number): Timeline<T> {
-  return [
-    ...shiftPosition(source, position, duration),
+  const shiftedPositions = shiftPosition(source, position, duration);
+  return sortTimeline([
+    ...shiftedPositions,
     ...target,
-  ].sort(x => x.position);
+  ]);
 }
 
 export function mergeTimelines<T>(source: Timeline<T>, target: Timeline<T>, position: number, duration: number, merger: TimelineMerger<T>): Timeline<T> {
   const shiftedSource = shiftPosition(source, position, duration);
-  const sortedTarget = [...target].sort(x => x.position);
+  const sortedTarget = sortTimeline([...target]);
   const positionEnd = position + duration;
   const positions = new Set<number>([
     ...getPositions(shiftedSource, position, positionEnd),

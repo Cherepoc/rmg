@@ -1,5 +1,5 @@
 import { Note } from '../music/note';
-import { Timeline, TimelineItem, timelineItem } from '../core/timeline';
+import { Timeline, timelineItem } from '../core/timeline';
 import { AnyNoteBasePattern, NoteBasePattern, RecursiveNoteBasePattern } from '../composition/note-base-pattern';
 import { Patternize, RecursivePattern } from '../composition/pattern';
 import { flattenPattern } from './flatten-pattern';
@@ -9,39 +9,19 @@ import { mapObject } from '../core/object-operations';
 import { sortTimeline, unionTimelines } from '../core/timeline-operations';
 import { createTypeGuard, TypeGuard } from '../core/type-check';
 
-export type TimelineMerger<T> = (source: Timeline<T>, target: Timeline<T>, position: number, duration: number) => Timeline<T>;
+export type AnyMergeFunction<T> = (source: Timeline<T>, target: Timeline<T>, position: number, duration: number) => Timeline<T>;
 
-export function flattenNoteBasePattern<T>(pattern: AnyNoteBasePattern<T>, duration: number, merger: TimelineMerger<T>): NoteBasePattern<T> {
+export function flattenNoteBasePattern<T>(pattern: AnyNoteBasePattern<T>, duration: number, merger: AnyMergeFunction<T>): NoteBasePattern<T> {
   if (isMaybeNoteBasePattern(pattern)) {
     const patternDuration = Math.min(pattern.duration, duration);
-    const flattenedTimeline = flattenNoteBasePattern<T>(pattern.timeline, patternDuration, merger);
+    const flattenedTimeline = flattenNoteBasePatternTimeline<T>(pattern.timeline, patternDuration, merger);
     let resultNoteBaseTimeline = flattenedTimeline.noteBaseTimeline;
     if (isNoteBasePattern(pattern)) {
-      const flattenedNoteBaseTimeline = flattenNoteBasePatternInner(pattern.noteBaseTimeline, patternDuration);
+      const flattenedNoteBaseTimeline = flattenNoteBasePatternInnerTimeline(pattern.noteBaseTimeline, patternDuration);
       resultNoteBaseTimeline = mergeNoteBaseTimelines(resultNoteBaseTimeline, flattenedNoteBaseTimeline, 0, duration);
     }
     return {
       timeline: flattenedTimeline.timeline,
-      noteBaseTimeline: resultNoteBaseTimeline,
-      duration: duration,
-    };
-  } else if (isTimeline(pattern)) {
-    let resultTimeline: Timeline<T> = [];
-    let resultNoteBaseTimeline = emptyNoteBaseTimeline();
-    for (let i = 0; i < pattern.length; i++) {
-      const timelineItem = pattern[i];
-      if (timelineItem.position >= duration) {
-        break;
-      }
-
-      const nextTimelineItem = pattern[i + 1];
-      const timelineItemDuration = Math.min(duration, nextTimelineItem?.position ?? duration) - timelineItem.position;
-      const flattenedTimelineItem = flattenNoteBasePattern<T>(timelineItem.value, timelineItemDuration, merger);
-      resultTimeline = merger(flattenedTimelineItem.timeline, resultTimeline, timelineItem.position, timelineItemDuration);
-      resultNoteBaseTimeline = mergeNoteBaseTimelines(flattenedTimelineItem.noteBaseTimeline, resultNoteBaseTimeline, timelineItem.position, timelineItemDuration);
-    }
-    return {
-      timeline: sortTimeline(resultTimeline),
       noteBaseTimeline: resultNoteBaseTimeline,
       duration: duration,
     };
@@ -54,32 +34,62 @@ export function flattenNoteBasePattern<T>(pattern: AnyNoteBasePattern<T>, durati
   }
 }
 
-function flattenNoteBasePatternInner(pattern: AnyNoteBasePattern<Patternize<Note>>, duration: number): NoteBaseTimeline {
+export function flattenNoteBasePatternTimeline<T>(timeline: Timeline<AnyNoteBasePattern<T>>, duration: number, merger: AnyMergeFunction<T>): NoteBasePattern<T> {
+  let result: NoteBasePattern<T> = {
+    timeline: [],
+    noteBaseTimeline: emptyNoteBaseTimeline(),
+    duration: duration,
+  }
+  for (let i = 0; i < timeline.length; i++) {
+    const timelineItem = timeline[i];
+    if (timelineItem.position >= duration) {
+      break;
+    }
+
+    const nextTimelineItem = timeline[i + 1];
+    const timelineItemDuration = Math.min(duration, nextTimelineItem?.position ?? duration) - timelineItem.position;
+    const flattenedTimelineItem = flattenNoteBasePattern<T>(timelineItem.value, timelineItemDuration, merger);
+    result = {
+      timeline: merger(flattenedTimelineItem.timeline, result.timeline, timelineItem.position, timelineItemDuration),
+      noteBaseTimeline: mergeNoteBaseTimelines(flattenedTimelineItem.noteBaseTimeline, result.noteBaseTimeline, timelineItem.position, timelineItemDuration),
+      duration: result.duration
+    }
+  }
+  return {
+    timeline: sortTimeline(result.timeline),
+    noteBaseTimeline: result.noteBaseTimeline,
+    duration: duration,
+  };
+}
+
+export function flattenNoteBasePatternInner(pattern: AnyNoteBasePattern<Patternize<Note>>, duration: number): NoteBaseTimeline {
   if (isMaybeNoteBasePattern(pattern)) {
     const patternDuration = Math.min(pattern.duration, duration);
-    let resultTimeline = flattenNoteBasePatternInner(pattern.timeline, patternDuration);
+    let resultTimeline = flattenNoteBasePatternInnerTimeline(pattern.timeline, patternDuration);
     if (isNoteBasePattern(pattern)) {
-      const flattenedNoteBaseTimeline = flattenNoteBasePatternInner(pattern.noteBaseTimeline, patternDuration);
+      const flattenedNoteBaseTimeline = flattenNoteBasePatternInnerTimeline(pattern.noteBaseTimeline, patternDuration);
       resultTimeline = mergeNoteBaseTimelines(resultTimeline, flattenedNoteBaseTimeline, 0, duration);
-    }
-    return resultTimeline;
-  } else if (isTimeline(pattern)) {
-    let resultTimeline = emptyNoteBaseTimeline();
-    for (let i = 0; i < pattern.length; i++) {
-      const timelineItem = pattern[i];
-      if (timelineItem.position >= duration) {
-        break;
-      }
-
-      const nextTimelineItem = pattern[i + 1];
-      const timelineItemDuration = Math.min(duration, nextTimelineItem?.position ?? duration) - timelineItem.position;
-      const flattenedTimelineItem = flattenNoteBasePatternInner(timelineItem.value, timelineItemDuration);
-      resultTimeline = mergeNoteBaseTimelines(flattenedTimelineItem, resultTimeline, timelineItem.position, timelineItemDuration);
     }
     return resultTimeline;
   } else {
     return mergeNoteBaseTimelines(flattenPatternizedNoteBase(pattern, duration), emptyNoteBaseTimeline(), 0, duration);
   }
+}
+
+export function flattenNoteBasePatternInnerTimeline(timeline: Timeline<AnyNoteBasePattern<Patternize<Note>>>, duration: number): NoteBaseTimeline {
+  let resultTimeline = emptyNoteBaseTimeline();
+  for (let i = 0; i < timeline.length; i++) {
+    const timelineItem = timeline[i];
+    if (timelineItem.position >= duration) {
+      break;
+    }
+
+    const nextTimelineItem = timeline[i + 1];
+    const timelineItemDuration = Math.min(duration, nextTimelineItem?.position ?? duration) - timelineItem.position;
+    const flattenedTimelineItem = flattenNoteBasePatternInner(timelineItem.value, timelineItemDuration);
+    resultTimeline = mergeNoteBaseTimelines(flattenedTimelineItem, resultTimeline, timelineItem.position, timelineItemDuration);
+  }
+  return resultTimeline;
 }
 
 const isNoteBasePattern: TypeGuard<RecursiveNoteBasePattern<any>>
@@ -91,9 +101,3 @@ const isMaybeNoteBasePattern: TypeGuard<RecursiveNoteBasePattern<any> | Recursiv
 function flattenPatternizedNoteBase(pattern: Patternize<Note>, duration: number): NoteBaseTimeline {
   return mapObject(pattern, (_, value) => flattenPattern(value, duration, unionTimelines));
 }
-
-const isTimeline: TypeGuard<Timeline<any>> = function(obj: any): obj is Timeline<any> {
-  return Array.isArray(obj) && obj.every(x => isTimelineItem(x));
-}
-
-const isTimelineItem: TypeGuard<TimelineItem<any>> = createTypeGuard<TimelineItem<any>>('position', 'value');

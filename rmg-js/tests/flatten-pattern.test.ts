@@ -24,6 +24,23 @@ describe('flatten pattern', function() {
     expect(timeline).toStrictEqual([timelineItem(0, 1)]);
   });
 
+  it('flattens array-type patterns', function() {
+    const timeline = flattenPattern(
+      {
+        duration: 1,
+        timeline: [
+          timelineItem(0, [1]),
+          timelineItem(0.5, []),
+        ],
+      }, 1,
+      merger,
+    );
+    expect(timeline).toStrictEqual([
+      timelineItem(0, [1]),
+      timelineItem(0.5, []),
+    ]);
+  });
+
   it('flattens recursive patterns and values', function() {
     const timeline = flattenPattern<number>(
       {
@@ -34,13 +51,16 @@ describe('flatten pattern', function() {
             duration: 2,
             timeline: [
               timelineItem(0, 2),
-              timelineItem(0.5, [
-                timelineItem(0, 1),
-                timelineItem(0.5, {
-                  timeline: 1,
-                  duration: 1,
-                }),
-              ]),
+              timelineItem(0.5, {
+                duration: 1,
+                timeline: [
+                  timelineItem(0, 1),
+                  timelineItem(0.5, {
+                    duration: 1,
+                    timeline: [timelineItem(0, 1)],
+                  }),
+                ]
+              }),
             ],
           }),
         ],

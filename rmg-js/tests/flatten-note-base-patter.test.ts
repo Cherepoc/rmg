@@ -1,10 +1,9 @@
 import { timelineItem } from '../src/core/timeline';
 import { AnyNoteBasePattern, NoteBasePattern } from '../src/composition/note-base-pattern';
 import { emptyNoteBaseTimeline } from '../src/music/note-base';
-import { Patternize } from '../src/composition/pattern';
-import { Note } from '../src/music/note';
 import { flattenNoteBasePattern } from '../src/render/flatten-note-base-pattern';
 import { unionTimelines } from '../src/core/timeline-operations';
+import { emptyNoteBase } from '../src/render/note-merge';
 
 type InputType = AnyNoteBasePattern<number>;
 type OutputType = NoteBasePattern<number>;
@@ -21,7 +20,7 @@ describe('Flatten note base pattern', () => {
     });
   });
 
-  it('unpacks flat pattern', function() {
+  it('unpacks flat pattern with note base timeline', function() {
     const timeline = flattenNoteBasePattern(<InputType>{
       timeline: [timelineItem(0, 1)],
       noteBaseTimeline: [timelineItem(0, {
@@ -30,6 +29,96 @@ describe('Flatten note base pattern', () => {
         volume: 1,
         octave: 1,
         key: 1,
+      })],
+      duration: 1,
+    }, 1, merger);
+    expect(timeline).toStrictEqual(<OutputType>{
+      timeline: [timelineItem(0, 1)],
+      noteBaseTimeline: {
+        key: [
+          timelineItem(0, 1),
+          timelineItem(1, 0),
+        ],
+        octave: [
+          timelineItem(0, 1),
+          timelineItem(1, 0),
+        ],
+        volume: [
+          timelineItem(0, 1),
+          timelineItem(1, 1),
+        ],
+        scaleOffset: [
+          timelineItem(0, [1]),
+          timelineItem(1, []),
+        ],
+        duration: [
+          timelineItem(0, 1),
+          timelineItem(1, 1),
+        ],
+      },
+      duration: 1,
+    });
+  });
+
+  it('unpacks inner note base pattern timeline', function() {
+    const timeline = flattenNoteBasePattern(<InputType>{
+      timeline: [timelineItem(0, 2)],
+      noteBaseTimeline: [timelineItem(0, {
+        timeline: [timelineItem(0, {
+          duration: 2,
+          scaleOffset: [2],
+          volume: 2,
+          octave: 2,
+          key: 2,
+        })],
+        noteBaseTimeline: [timelineItem(0, emptyNoteBase())],
+        duration: 1,
+      })],
+      duration: 1,
+    }, 1, merger);
+    expect(timeline).toStrictEqual(<OutputType>{
+      timeline: [
+        timelineItem(0, 2),
+      ],
+      noteBaseTimeline: {
+        key: [
+          timelineItem(0, 2),
+          timelineItem(1, 0),
+        ],
+        octave: [
+          timelineItem(0, 2),
+          timelineItem(1, 0),
+        ],
+        volume: [
+          timelineItem(0, 2),
+          timelineItem(1, 1),
+        ],
+        scaleOffset: [
+          timelineItem(0, [2]),
+          timelineItem(1, []),
+        ],
+        duration: [
+          timelineItem(0, 2),
+          timelineItem(1, 1),
+        ],
+      },
+      duration: 1,
+    });
+  });
+
+  it('unpacks flat pattern with recursive note base timeline', function() {
+    const timeline = flattenNoteBasePattern(<InputType>{
+      timeline: [timelineItem(0, 1)],
+      noteBaseTimeline: [timelineItem(0, {
+        timeline: [timelineItem(0, {
+          duration: 1,
+          scaleOffset: [1],
+          volume: 1,
+          octave: 1,
+          key: 1,
+        })],
+        noteBaseTimeline: emptyNoteBaseTimeline(),
+        duration: 1,
       })],
       duration: 1,
     }, 1, merger);
@@ -76,13 +165,13 @@ describe('Flatten note base pattern', () => {
   it('unpacks flat pattern with note base', function() {
     const timeline = flattenNoteBasePattern(<InputType>{
       timeline: [timelineItem(0, 1)],
-      noteBaseTimeline: <Patternize<Note>>{
+      noteBaseTimeline: [timelineItem(0, {
         duration: 1,
         scaleOffset: [1],
         volume: 1,
         octave: 1,
         key: 1,
-      },
+      })],
       duration: 1,
     }, 1, merger);
     expect(timeline).toStrictEqual(<OutputType>{
@@ -118,33 +207,33 @@ describe('Flatten note base pattern', () => {
       timeline: [
         timelineItem(0, 1),
         timelineItem(1, {
-          timeline: {
+          timeline: [timelineItem(0, {
             timeline: [
               timelineItem(0, 1),
               timelineItem(1, {
-                timeline: 1,
+                timeline: [timelineItem(0, 1)],
                 duration: 1,
               }),
             ],
             duration: 1,
-          },
-          noteBaseTimeline: {
+          })],
+          noteBaseTimeline: [timelineItem(0, {
             duration: 0.5,
             scaleOffset: [1],
             volume: 0.5,
             octave: 1,
             key: 1,
-          },
+          })],
           duration: 1,
         }),
       ],
-      noteBaseTimeline: {
+      noteBaseTimeline: [timelineItem(0, {
         duration: 0.5,
         scaleOffset: [1],
         volume: 0.5,
         octave: 1,
         key: 1,
-      },
+      })],
       duration: 2,
     }, 2, merger);
     expect(timeline).toStrictEqual(<OutputType>{

@@ -4,7 +4,7 @@ import { Timelinize } from '../core/timeline';
 import { createTypeGuard, TypeGuard } from '../core/type-check';
 
 export interface NoteBaseEntity extends DurationEntity {
-  noteBaseTimeline: NoteBaseTimeline
+  noteBaseTimeline: NoteBaseTimeline;
 }
 
 export type NoteBaseTimeline = Timelinize<Note>;
@@ -16,7 +16,7 @@ export function emptyNoteBaseTimeline(): NoteBaseTimeline {
     volume: [],
     duration: [],
     scaleOffset: []
-  }
+  };
 }
 
 export const isNote: TypeGuard<Note | NoteBaseTimeline>

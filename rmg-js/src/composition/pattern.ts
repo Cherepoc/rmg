@@ -7,13 +7,11 @@ export interface Pattern<T> extends DurationEntity {
 }
 
 export interface RecursivePattern<T> extends DurationEntity {
-  timeline: AnyPattern<T>
+  timeline: Timeline<AnyPattern<T>>
 }
 
-export type AnyPattern<T> = RecursivePattern<AnyPattern<T>> | Timeline<AnyPattern<T>> | T;
+export type AnyPattern<T> = RecursivePattern<AnyPattern<T>> | T;
 
 export type Patternize<T> = {
   [P in keyof T]: AnyPattern<T[P]>;
 }
-
-export type PatternizeTimeline<T> = {[K in keyof T]: T[K] extends Timeline<infer R> ? AnyPattern<R> : T[K]};
