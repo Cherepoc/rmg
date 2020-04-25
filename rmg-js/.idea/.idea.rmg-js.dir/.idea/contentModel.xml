@@ -13,6 +13,7 @@
       <e p="node_modules\@jest\source-map" t="IncludeRecursive" />
       <e p="node_modules\@jest\test-result" t="IncludeRecursive" />
       <e p="node_modules\@jest\test-sequencer" t="IncludeRecursive" />
+      <e p="node_modules\@jest\transform" t="IncludeRecursive" />
       <e p="node_modules\@jest\types" t="IncludeRecursive" />
       <e p="node_modules\@types" t="IncludeRecursive">
         <e p="babel__generator" t="IncludeRecursive" />
@@ -43,6 +44,7 @@
       <e p="node_modules\jest-cli" t="IncludeRecursive" />
       <e p="node_modules\jest-config" t="IncludeRecursive" />
       <e p="node_modules\jest-diff" t="IncludeRecursive" />
+      <e p="node_modules\jest-docblock" t="IncludeRecursive" />
       <e p="node_modules\jest-each" t="IncludeRecursive" />
       <e p="node_modules\jest-environment-jsdom" t="IncludeRecursive" />
       <e p="node_modules\jest-environment-node" t="IncludeRecursive" />
@@ -50,6 +52,7 @@
       <e p="node_modules\jest-haste-map" t="IncludeRecursive" />
       <e p="node_modules\jest-jasmine2" t="IncludeRecursive" />
       <e p="node_modules\jest-leak-detector" t="IncludeRecursive" />
+      <e p="node_modules\jest-matcher-utils" t="IncludeRecursive" />
       <e p="node_modules\jest-message-util" t="IncludeRecursive" />
       <e p="node_modules\jest-mock" t="IncludeRecursive" />
       <e p="node_modules\jest-regex-util" t="IncludeRecursive" />
@@ -61,7 +64,9 @@
       <e p="node_modules\jest-snapshot" t="IncludeRecursive" />
       <e p="node_modules\jest-util" t="IncludeRecursive" />
       <e p="node_modules\jest-validate" t="IncludeRecursive" />
+      <e p="node_modules\jest-watcher" t="IncludeRecursive" />
       <e p="node_modules\jest-worker" t="IncludeRecursive" />
+      <e p="node_modules\pirates" t="IncludeRecursive" />
       <e p="node_modules\pretty-format" t="IncludeRecursive" />
       <e p="node_modules\realpath-native" t="IncludeRecursive" />
       <e p="node_modules\source-map" t="IncludeRecursive" />
