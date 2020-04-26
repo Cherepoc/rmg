@@ -4,24 +4,7 @@ import { Note } from '../music/note';
 import { NoteBaseTimeline } from '../music/note-base';
 import { mergeTimelines, TimelineMerger } from '../core/timeline-operations';
 import { mapObject } from '../core/object-operations';
-
-const additiveMerger: TimelineMerger<number> = {
-  merge(t1: number, t2: number): number {
-    return t1 + t2;
-  },
-  default(): number {
-    return 0;
-  },
-};
-
-const multiplicativeMerger: TimelineMerger<number> = {
-  merge(t1: number, t2: number): number {
-    return t1 * t2;
-  },
-  default(): number {
-    return 1;
-  },
-};
+import { additiveMerger, multiplicativeMerger } from './timeline-merger';
 
 const scaleOffsetMerger: TimelineMerger<ScaleOffset> = {
   merge(t1: ScaleOffset, t2: ScaleOffset): ScaleOffset {

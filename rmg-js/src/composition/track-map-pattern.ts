@@ -1,4 +1,4 @@
-import { AnyNoteBasePattern, NoteBasePattern, RecursiveNoteBasePattern } from './note-base-pattern';
+import { AnyNoteBasePattern, NoteBasePattern } from './note-base-pattern';
 import { NoteBaseEntity } from '../music/note-base';
 
 export interface TrackMap<T> {
@@ -13,5 +13,4 @@ export interface PatternizedTrackMap<T> {
   [trackNumber: number]: AnyNoteBasePattern<T>;
 }
 
-export type RecursiveTrackMapPattern<T> = RecursiveNoteBasePattern<PatternizedTrackMap<T>>;
 export type AnyTrackMapPattern<T> = AnyNoteBasePattern<PatternizedTrackMap<T>>;
