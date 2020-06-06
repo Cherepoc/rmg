@@ -1,19 +1,19 @@
-import { TimelineMerger } from '../core/timeline-operations';
+import { TimelineMerger } from '../core/timeline-merge';
 
 export const additiveMerger: TimelineMerger<number> = {
-  merge(t1: number, t2: number): number {
+  merge (t1: number, t2: number): number {
     return t1 + t2;
   },
-  default(): number {
+  default (): number {
     return 0;
-  },
+  }
 };
 
 export const multiplicativeMerger: TimelineMerger<number> = {
-  merge(t1: number, t2: number): number {
+  merge (t1: number, t2: number): number {
     return t1 * t2;
   },
-  default(): number {
+  default (): number {
     return 1;
-  },
+  }
 };

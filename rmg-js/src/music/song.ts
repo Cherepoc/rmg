@@ -3,13 +3,13 @@ import { Note } from './note';
 import { Track } from './track';
 import { DurationEntity } from './duration-entity';
 import { Timeline } from '../core/timeline';
-import { NoteBaseTimeline } from './note-base';
-import { TrackMap } from '../composition/track-map-pattern';
+import { NoteBaseTimelineMap } from './note-base';
+import { TrackMap } from '../composition/track-note-base-pattern-map';
 
 export interface Song extends DurationEntity {
-  tracks: Track[];
-  scale: Timeline<Scale>;
-  noteBase: NoteBaseTimeline;
-  tempo: Timeline<number>;
-  notes: TrackMap<Note>;
+  tracks: Track[]
+  scale: Timeline<Scale>
+  noteBase: NoteBaseTimelineMap
+  tempo: Timeline<number>
+  notes: TrackMap<Note>
 }

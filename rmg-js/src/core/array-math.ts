@@ -1,10 +1,10 @@
-export function sumArrays(...arrays: number[][]): number[] {
+export function sumArrays (...arrays: number[][]): number[] {
   const n = arrays.reduce((max, xs) => Math.max(max, xs.length), 0);
   const result = Array.from({ length: n });
   return result.map((_, i) => arrays.map(xs => xs[i] || 0).reduce((sum, x) => sum + x, 0));
 }
 
-export function arraysEqual(...arrays: any[][]): boolean {
+export function arraysEqual (...arrays: any[][]): boolean {
   if (arrays.length === 0) {
     return true;
   }

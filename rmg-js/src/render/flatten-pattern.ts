@@ -1,21 +1,25 @@
-import { Timeline, timelineItem } from '../core/timeline';
-import { AnyPattern, RecursivePattern } from '../composition/pattern';
-import { createTypeGuard, TypeGuard } from '../core/type-check';
+import { Timeline } from '../core/timeline';
 import { sortTimeline } from '../core/timeline-operations';
+import { Pattern } from '../composition/pattern';
+import { TimelineCombineFunction } from '../core/timeline-combine';
 
-export type TimelineMerger<T> = (source: Timeline<T>, target: Timeline<T>, position: number, duration: number) => Timeline<T>;
+export function flattenPattern<T> (pattern: Pattern<T>, duration: number, combine: TimelineCombineFunction<T>): Timeline<T> {
+  let resultTimeline: Timeline<T> = [];
+  const patternDuration = Math.min(pattern.duration, duration);
 
-export function flattenPattern<T>(pattern: AnyPattern<T>, duration: number, merger: TimelineMerger<T>): Timeline<T> {
-  if (isPattern(pattern)) {
-    const patternDuration = Math.min(pattern.duration, duration);
-    return flattenPatternTimeline<T>(pattern.timeline, patternDuration, merger);
-  } else {
-    const mergeResult = merger([timelineItem(0, pattern)], [], 0, duration);
-    return mergeResult;
+  if (pattern.timeline) {
+    resultTimeline = combine(pattern.timeline, resultTimeline, 0, patternDuration);
   }
+
+  if (pattern.innerPatternTimeline) {
+    const flattenedTimeline = flattenPatternTimeline(pattern.innerPatternTimeline, patternDuration, combine);
+    resultTimeline = combine(flattenedTimeline, resultTimeline, 0, patternDuration);
+  }
+
+  return sortTimeline(resultTimeline);
 }
 
-function flattenPatternTimeline<T>(timeline: Timeline<AnyPattern<T>>, duration: number, merger: TimelineMerger<T>): Timeline<T> {
+export function flattenPatternTimeline<T> (timeline: Timeline<Pattern<T>>, duration: number, combine: TimelineCombineFunction<T>): Timeline<T> {
   let resultTimeline: Timeline<T> = [];
   for (let i = 0; i < timeline.length; i++) {
     const timelineItem = timeline[i];
@@ -25,10 +29,8 @@ function flattenPatternTimeline<T>(timeline: Timeline<AnyPattern<T>>, duration: 
 
     const nextTimelineItem = timeline[i + 1];
     const timelineItemDuration = Math.min(duration, nextTimelineItem?.position ?? duration) - timelineItem.position;
-    const flattenedTimelineItem = flattenPattern<T>(timelineItem.value, timelineItemDuration, merger);
-    resultTimeline = merger(flattenedTimelineItem, resultTimeline, timelineItem.position, timelineItemDuration);
+    const flattenedTimelineItem = flattenPattern<T>(timelineItem.value, timelineItemDuration, combine);
+    resultTimeline = combine(flattenedTimelineItem, resultTimeline, timelineItem.position, timelineItemDuration);
   }
   return sortTimeline(resultTimeline);
 }
-
-const isPattern: TypeGuard<RecursivePattern<any>> = createTypeGuard<RecursivePattern<any>>('duration', 'timeline');

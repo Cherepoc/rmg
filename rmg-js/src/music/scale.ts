@@ -1,4 +1,4 @@
 export interface Scale {
-  noteOffsets: number[];
-  rankedOffsetIndexes: number[][];
+  noteOffsets: number[]
+  rankedOffsetIndexes: number[][]
 }

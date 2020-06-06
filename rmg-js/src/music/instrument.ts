@@ -1,3 +1,3 @@
 export interface Instrument {
-  code: number;
+  code: number
 }

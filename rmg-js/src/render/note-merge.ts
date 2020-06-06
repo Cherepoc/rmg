@@ -1,18 +1,20 @@
 import { ScaleOffset } from '../music/simple-types';
 import { sumArrays } from '../core/array-math';
 import { Note } from '../music/note';
-import { NoteBaseTimeline } from '../music/note-base';
-import { mergeTimelines, TimelineMerger } from '../core/timeline-operations';
+import { NoteBaseTimelineMap } from '../music/note-base';
 import { mapObject } from '../core/object-operations';
 import { additiveMerger, multiplicativeMerger } from './timeline-merger';
+import { TimelineCombineFunctionMap } from '../core/timeline-combine';
+import { Timeline } from '../core/timeline';
+import { mergeTimelines, TimelineMerger } from '../core/timeline-merge';
 
 const scaleOffsetMerger: TimelineMerger<ScaleOffset> = {
-  merge(t1: ScaleOffset, t2: ScaleOffset): ScaleOffset {
+  merge (t1: ScaleOffset, t2: ScaleOffset): ScaleOffset {
     return sumArrays(t1, t2);
   },
-  default(): ScaleOffset {
+  default (): ScaleOffset {
     return [];
-  },
+  }
 };
 
 export const noteMergers: { readonly [P in keyof Note]: TimelineMerger<Note[P]> } = {
@@ -20,15 +22,22 @@ export const noteMergers: { readonly [P in keyof Note]: TimelineMerger<Note[P]> 
   octave: additiveMerger,
   scaleOffset: scaleOffsetMerger,
   volume: multiplicativeMerger,
-  duration: multiplicativeMerger,
+  duration: multiplicativeMerger
 };
+
+export const noteBaseCombineFunctionMap: TimelineCombineFunctionMap<Note> = mapObject(
+  noteMergers,
+  (_, merger: TimelineMerger<any>) =>
+    (source: Timeline<any>, target: Timeline<any>, position: number, duration: number) =>
+      mergeTimelines(source, target, position, duration, merger)
+);
 
 const emptyNote = mapObject(noteMergers, (_, merger: TimelineMerger<any>) => merger.default());
 
-export function mergeNoteBaseTimelines(source: NoteBaseTimeline, target: NoteBaseTimeline, position: number, duration: number): NoteBaseTimeline {
+export function mergeNoteBaseTimelines (source: NoteBaseTimelineMap, target: NoteBaseTimelineMap, position: number, duration: number): NoteBaseTimelineMap {
   return mapObject(noteMergers, (key, merger) => mergeTimelines<any>(source[key], target[key], position, duration, merger));
 }
 
-export function emptyNoteBase(): Note {
+export function emptyNoteBase (): Note {
   return { ...emptyNote };
 }

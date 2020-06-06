@@ -1,23 +1,26 @@
 import { Note } from './note';
-import { DurationEntity } from './duration-entity';
-import { Timelinize } from '../core/timeline';
-import { createTypeGuard, TypeGuard } from '../core/type-check';
+import { Timeline, TimelineMap } from '../core/timeline';
 
-export interface NoteBaseEntity extends DurationEntity {
-  noteBaseTimeline: NoteBaseTimeline;
+export interface NoteBaseTimeline<T> {
+  timeline: Timeline<T>
+  noteBaseTimeline: NoteBaseTimelineMap
 }
 
-export type NoteBaseTimeline = Timelinize<Note>;
+export type NoteBaseTimelineMap = TimelineMap<Note>;
 
-export function emptyNoteBaseTimeline(): NoteBaseTimeline {
+export function emptyNoteBaseTimeline<T>(): NoteBaseTimeline<T> {
+  return {
+    timeline: [],
+    noteBaseTimeline: emptyNoteBaseTimelineMap(),
+  };
+}
+
+export function emptyNoteBaseTimelineMap(): NoteBaseTimelineMap {
   return {
     key: [],
     octave: [],
     volume: [],
     duration: [],
-    scaleOffset: []
+    scaleOffset: [],
   };
 }
-
-export const isNote: TypeGuard<Note | NoteBaseTimeline>
-  = createTypeGuard<Note | NoteBaseTimeline>('duration', 'key', 'octave', 'scaleOffset', 'volume');

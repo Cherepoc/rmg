@@ -8,10 +8,10 @@ import {
   appendProgramChangeEvent,
   appendTempoEvent,
   appendTimeSignatureEvent,
-  appendTrack,
+  appendTrack
 } from './midi/midi';
 
-export async function generate(): Promise<void> {
+export async function generate (): Promise<void> {
   const stream: number[] = [];
   appendHeader(stream, 2);
 

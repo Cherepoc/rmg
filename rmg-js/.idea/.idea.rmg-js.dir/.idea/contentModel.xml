@@ -9,6 +9,7 @@
       <e p="node_modules\@jest\core" t="IncludeRecursive" />
       <e p="node_modules\@jest\environment" t="IncludeRecursive" />
       <e p="node_modules\@jest\fake-timers" t="IncludeRecursive" />
+      <e p="node_modules\@jest\globals" t="IncludeRecursive" />
       <e p="node_modules\@jest\reporters" t="IncludeRecursive" />
       <e p="node_modules\@jest\source-map" t="IncludeRecursive" />
       <e p="node_modules\@jest\test-result" t="IncludeRecursive" />
@@ -68,7 +69,6 @@
       <e p="node_modules\jest-worker" t="IncludeRecursive" />
       <e p="node_modules\pirates" t="IncludeRecursive" />
       <e p="node_modules\pretty-format" t="IncludeRecursive" />
-      <e p="node_modules\realpath-native" t="IncludeRecursive" />
       <e p="node_modules\source-map" t="IncludeRecursive" />
       <e p="node_modules\ts-jest" t="IncludeRecursive" />
       <e p="node_modules\typescript\lib\lib.d.ts" t="IncludeRecursive" />
@@ -121,6 +121,8 @@
       <e p="node_modules\typescript\lib\lib.esnext.d.ts" t="IncludeRecursive" />
       <e p="node_modules\typescript\lib\lib.esnext.full.d.ts" t="IncludeRecursive" />
       <e p="node_modules\typescript\lib\lib.esnext.intl.d.ts" t="IncludeRecursive" />
+      <e p="node_modules\typescript\lib\lib.esnext.promise.d.ts" t="IncludeRecursive" />
+      <e p="node_modules\typescript\lib\lib.esnext.string.d.ts" t="IncludeRecursive" />
       <e p="node_modules\typescript\lib\lib.esnext.symbol.d.ts" t="IncludeRecursive" />
       <e p="node_modules\typescript\lib\lib.scripthost.d.ts" t="IncludeRecursive" />
       <e p="node_modules\typescript\lib\lib.webworker.d.ts" t="IncludeRecursive" />

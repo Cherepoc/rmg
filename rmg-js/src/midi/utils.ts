@@ -1,4 +1,4 @@
-export function intToBytes(value: number, length: number = 0, bitsInByte: number = 8): number[] {
+export function intToBytes (value: number, length = 0, bitsInByte = 8): number[] {
   const result: number[] = [];
   let shiftedValue = Math.floor(value);
   const mask = 0xffffffff >>> (32 - bitsInByte);
