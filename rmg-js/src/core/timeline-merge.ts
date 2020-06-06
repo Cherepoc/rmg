@@ -2,6 +2,7 @@ import { Timeline, timelineItem, TimelineMap } from './timeline';
 import * as equal from 'fast-deep-equal';
 import { getPositions, shiftPosition, sortTimeline } from './timeline-operations';
 import { mapObject } from './object-operations';
+import { TimelineCombineFunction } from './timeline-combine';
 
 export interface TimelineMerger<T> {
   merge: (t1: T, t2: T) => T
@@ -62,6 +63,10 @@ export function mergeTimelines<T> (source: Timeline<T>, target: Timeline<T>, pos
   timeline.push(...sortedTarget.filter(x => x.position >= positionEnd));
 
   return timeline;
+}
+
+export function createCombineFromMerger<T>(merger: TimelineMerger<T>): TimelineCombineFunction<T> {
+  return (source: Timeline<T>, target: Timeline<T>, position: number, duration: number) => mergeTimelines(source, target, position, duration, merger);
 }
 
 export function mergeTimelineMaps<T> (source: TimelineMap<T>, target: TimelineMap<T>, position: number, duration: number, mergerMap: TimelineMergerMap<T>): TimelineMap<T> {

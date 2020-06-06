@@ -24,6 +24,7 @@
     "tsconfigRootDir": "."
   },
   "rules": {
-    "@typescript-eslint/semi": ["error"]
+    "semi": ["error", "always"],
+    "@typescript-eslint/semi": ["error", "always"]
   }
 }
