@@ -4,6 +4,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RMG.Core", "RMG.Core\RMG.Co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RMG.Tests", "RMG.Tests\RMG.Tests.csproj", "{0F7CA944-9C4F-498E-87A7-E6150CB65E84}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RMG.CoreF", "RMG.CoreF\RMG.CoreF.fsproj", "{3042DE29-F140-4ABC-B5CA-F9C310555B92}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RMG.TestsF", "RMG.TestsF\RMG.TestsF.fsproj", "{CBDC4F0F-2D96-4FF5-8CB4-3E62677F3948}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +22,13 @@ Global
 		{0F7CA944-9C4F-498E-87A7-E6150CB65E84}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F7CA944-9C4F-498E-87A7-E6150CB65E84}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F7CA944-9C4F-498E-87A7-E6150CB65E84}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3042DE29-F140-4ABC-B5CA-F9C310555B92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3042DE29-F140-4ABC-B5CA-F9C310555B92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3042DE29-F140-4ABC-B5CA-F9C310555B92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3042DE29-F140-4ABC-B5CA-F9C310555B92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBDC4F0F-2D96-4FF5-8CB4-3E62677F3948}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBDC4F0F-2D96-4FF5-8CB4-3E62677F3948}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBDC4F0F-2D96-4FF5-8CB4-3E62677F3948}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBDC4F0F-2D96-4FF5-8CB4-3E62677F3948}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

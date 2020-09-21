@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Operators.fs" />
+        <Compile Include="Timeline.fs" />
+        <Compile Include="NoteOffset.fs" />
+        <Compile Include="Song.fs" />
+        <Compile Include="Composition\Pattern.fs" />
+        <Compile Include="Composition\NoteOffsetPatternMap.fs" />
+        <Compile Include="Composition\NoteOffsetBasedPattern.fs" />
+    </ItemGroup>
+
+</Project>

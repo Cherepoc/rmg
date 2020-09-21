@@ -130,6 +130,20 @@
           <e p="TimedEventExtensions.cs" t="Include" />
         </e>
       </e>
+      <e p="RMG.CoreF" t="IncludeRecursive">
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Composition" t="Include">
+          <e p="NoteOffsetBasedPattern.fs" t="Include" />
+          <e p="NoteOffsetPatternMap.fs" t="Include" />
+          <e p="Pattern.fs" t="Include" />
+        </e>
+        <e p="NoteOffset.fs" t="Include" />
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="Operators.fs" t="Include" />
+        <e p="RMG.CoreF.fsproj" t="IncludeRecursive" />
+        <e p="Song.fs" t="Include" />
+        <e p="Timeline.fs" t="Include" />
+      </e>
       <e p="RMG.sln" t="IncludeFlat" />
       <e p="RMG.Tests" t="IncludeRecursive">
         <e p="bin" t="ExcludeRecursive" />
@@ -149,14 +163,48 @@
         <e p="RMG.Tests.csproj" t="IncludeRecursive" />
         <e p="TestClass.cs" t="Include" />
       </e>
+      <e p="RMG.TestsF" t="IncludeRecursive">
+        <e p="Assertions.fs" t="Include" />
+        <e p="bin" t="ExcludeRecursive" />
+        <e p="Composition" t="Include">
+          <e p="NoteOffsetBasedPattern" t="Include">
+            <e p="Flatten.fs" t="Include" />
+          </e>
+          <e p="NoteOffsetPatternMap" t="Include">
+            <e p="Flatten.fs" t="Include" />
+          </e>
+          <e p="Pattern" t="Include">
+            <e p="Flatten.fs" t="Include" />
+            <e p="FlattenAggregate.fs" t="Include" />
+            <e p="Map.fs" t="Include" />
+          </e>
+        </e>
+        <e p="Music" t="Include">
+          <e p="MergeNoteOffsetTimelineMaps.fs" t="Include" />
+        </e>
+        <e p="obj" t="ExcludeRecursive" />
+        <e p="RMG.TestsF.fsproj" t="IncludeRecursive" />
+        <e p="Timeline" t="Include">
+          <e p="Aggregate.fs" t="Include" />
+          <e p="Flatten.fs" t="Include" />
+          <e p="Merge.fs" t="Include" />
+          <e p="Trim.fs" t="Include" />
+          <e p="WithDuration.fs" t="Include" />
+        </e>
+      </e>
     </e>
     <e p="C:\Users\chech\.nuget\packages\microsoft.net.test.sdk\16.2.0\build\netcoreapp1.0" t="Include">
       <e p="Microsoft.NET.Test.Sdk.Program.cs" t="Include" />
     </e>
+    <e p="C:\Users\chech\.nuget\packages\microsoft.testplatform.testhost\16.7.1\build\netcoreapp2.1\x64\testhost.dll" t="Include" />
+    <e p="C:\Users\chech\.nuget\packages\microsoft.testplatform.testhost\16.7.1\build\netcoreapp2.1\x64\testhost.exe" t="Include" />
     <e p="C:\Users\chech\.nuget\packages\xunit.runner.visualstudio\2.4.1\build\netcoreapp1.0\xunit.runner.reporters.netcoreapp10.dll" t="Include" />
     <e p="C:\Users\chech\.nuget\packages\xunit.runner.visualstudio\2.4.1\build\netcoreapp1.0\xunit.runner.utility.netcoreapp10.dll" t="Include" />
     <e p="C:\Users\chech\.nuget\packages\xunit.runner.visualstudio\2.4.1\build\netcoreapp1.0\xunit.runner.visualstudio.dotnetcore.testadapter.dll" t="Include" />
-    <e p="C:\Users\chech\.Rider2019.3\system\extResources" t="IncludeRecursive" />
-    <e p="C:\Users\chech\.Rider2019.3\system\resharper-host\local\Transient\ReSharperHost\v193\SolutionCaches\_RMG.-1874311117.00" t="ExcludeRecursive" />
+    <e p="C:\Users\chech\.nuget\packages\xunit.runner.visualstudio\2.4.3\build\netcoreapp2.1\xunit.runner.reporters.netcoreapp10.dll" t="Include" />
+    <e p="C:\Users\chech\.nuget\packages\xunit.runner.visualstudio\2.4.3\build\netcoreapp2.1\xunit.runner.utility.netcoreapp10.dll" t="Include" />
+    <e p="C:\Users\chech\.nuget\packages\xunit.runner.visualstudio\2.4.3\build\netcoreapp2.1\xunit.runner.visualstudio.dotnetcore.testadapter.dll" t="Include" />
+    <e p="C:\Users\chech\AppData\local\JetBrains\Rider2020.2\extResources" t="IncludeRecursive" />
+    <e p="C:\Users\chech\AppData\local\JetBrains\Rider2020.2\resharper-host\local\Transient\Rider\v202\SolutionCaches\_RMG.-1874311117.00" t="ExcludeRecursive" />
   </component>
 </project>
