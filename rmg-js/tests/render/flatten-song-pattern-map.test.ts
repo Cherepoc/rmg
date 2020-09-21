@@ -1,5 +1,5 @@
-import { flattenSongPatternMap } from '../src/render/flatten-song-pattern-map';
-import { timelineItem } from '../src/core/timeline';
+import { flattenSongPatternMap } from '../../src/render/flatten-song-pattern-map';
+import { timelineItem } from '../../src/core/timeline';
 
 describe("Flatten patternized song", () => {
   it("works", () => {

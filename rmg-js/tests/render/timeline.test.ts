@@ -1,5 +1,5 @@
-import { Timeline, timelineItem } from '../src/core/timeline'
-import { mergeTimelines, TimelineMerger } from '../src/core/timeline-operations'
+import { mergeTimelines, TimelineMerger } from '../../src/core/timeline-merge';
+import { Timeline, timelineItem } from '../../src/core/timeline';
 
 describe('timeline merge', function () {
   const merger: TimelineMerger<number> = {

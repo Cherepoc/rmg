@@ -1,7 +1,7 @@
-import { flattenTrackNoteBasePatternMap } from '../src/render/flatten-track-note-base-pattern-map';
-import { unionTimelines } from '../src/core/timeline-operations';
-import { timelineItem } from '../src/core/timeline';
-import { TrackNoteBaseTimelineMap } from '../src/music/track-note-base-timeline-map';
+import { unionTimelines } from '../../src/core/timeline-operations';
+import { flattenTrackNoteBasePatternMap } from '../../src/render/flatten-track-note-base-pattern-map';
+import { timelineItem } from '../../src/core/timeline';
+import { TrackNoteBaseTimelineMap } from '../../src/music/track-note-base-timeline-map';
 
 const combine = unionTimelines;
 

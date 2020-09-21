@@ -1,8 +1,8 @@
-import { timelineItem } from '../src/core/timeline'
-import { TimelineCombineFunctionMap } from '../src/core/timeline-combine'
-import { mergeTimelines } from '../src/core/timeline-merge'
-import { additiveMerger, multiplicativeMerger } from '../src/render/timeline-merger'
-import { flattenPatternMapPattern } from '../src/render/flatten-pattern-map'
+import { TimelineCombineFunctionMap } from '../../src/core/timeline-combine';
+import { mergeTimelines } from '../../src/core/timeline-merge';
+import { additiveMerger, multiplicativeMerger } from '../../src/render/timeline-merger';
+import { flattenPatternMapPattern } from '../../src/render/flatten-pattern-map';
+import { timelineItem } from '../../src/core/timeline';
 
 interface TestMap {
   fieldAdd: number

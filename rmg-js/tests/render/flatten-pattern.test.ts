@@ -1,6 +1,6 @@
-import { flattenPattern } from '../src/render/flatten-pattern'
-import { timelineItem } from '../src/core/timeline'
-import { unionTimelines } from '../src/core/timeline-operations'
+import { unionTimelines } from '../../src/core/timeline-operations';
+import { flattenPattern } from '../../src/render/flatten-pattern';
+import { timelineItem } from '../../src/core/timeline';
 
 const merger = unionTimelines
 

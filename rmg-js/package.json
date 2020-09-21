@@ -1,7 +1,7 @@
 {
   "name": "rmg",
   "version": "0.0.1",
-  "description": "generates random music",
+  "description": "Generates random music",
   "main": "index.js",
   "scripts": {
     "test": "jest",
@@ -17,19 +17,19 @@
   "author": "Alexander Sharovatov",
   "license": "ISC",
   "devDependencies": {
-    "@types/jest": "25.2.3",
-    "@types/node": "12.12.44",
-    "@typescript-eslint/eslint-plugin": "3.1.0",
-    "@typescript-eslint/parser": "3.1.0",
-    "eslint": "7.2.0",
+    "@types/jest": "26.0.8",
+    "@types/node": "12.12.53",
+    "@typescript-eslint/eslint-plugin": "3.7.1",
+    "@typescript-eslint/parser": "3.7.1",
+    "eslint": "7.6.0",
     "eslint-config-prettier": "6.11.0",
-    "eslint-plugin-prettier": "3.1.3",
-    "jest": "26.0.1",
+    "eslint-plugin-prettier": "3.1.4",
+    "jest": "26.2.2",
     "prettier": "2.0.5",
-    "ts-jest": "26.1.0",
-    "typescript": "3.9.5"
+    "ts-jest": "26.1.4",
+    "typescript": "3.9.7"
   },
   "dependencies": {
-    "fast-deep-equal": "3.1.1"
+    "fast-deep-equal": "3.1.3"
   }
 }

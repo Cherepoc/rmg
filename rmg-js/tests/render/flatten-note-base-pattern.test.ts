@@ -1,7 +1,7 @@
-import { flattenNoteBasePattern } from '../src/render/flatten-note-base-pattern'
-import { unionTimelines } from '../src/core/timeline-operations'
-import { timelineItem } from '../src/core/timeline'
-import { NoteBaseTimeline } from '../src/music/note-base'
+import { unionTimelines } from '../../src/core/timeline-operations';
+import { flattenNoteBasePattern } from '../../src/render/flatten-note-base-pattern';
+import { timelineItem } from '../../src/core/timeline';
+import { NoteBaseTimeline } from '../../src/music/note-base';
 
 const combine = unionTimelines;
 

@@ -1,6 +1,6 @@
-import { emptyNoteBaseTimelineMap, NoteBaseTimelineMap } from '../src/music/note-base'
-import { timelineItem } from '../src/core/timeline'
-import { mergeNoteBaseTimelines } from '../src/render/note-merge'
+import { emptyNoteBaseTimelineMap, NoteBaseTimelineMap } from '../../src/music/note-base';
+import { timelineItem } from '../../src/core/timeline';
+import { mergeNoteBaseTimelines } from '../../src/render/note-merge';
 
 describe('Note timeline merge', () => {
   it('correctly merges', () => {
