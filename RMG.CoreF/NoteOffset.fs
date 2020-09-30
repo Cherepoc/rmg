@@ -1,11 +1,13 @@
 namespace RMG.CoreF
 
+open RMG.CoreF
+
 type KeyOffset = int
 type OctaveOffset = int
 type ScaleOffset = int
 type Volume = double
 
-type NoteOffset =
+type NoteOffsetOld =
     { Duration: Duration
       KeyOffset: KeyOffset
       OctaveOffset: OctaveOffset
@@ -30,65 +32,67 @@ type NoteOffsetBasedTimeline<'T> =
 type TrackNoteOffsetTimelineMap<'T> = Map<uint, NoteOffsetBasedTimeline<'T>>
 
 module NoteOffsetTimelineMap =
-    module Merger =
-        let duration: TimelineMerger<Duration> = Timeline.Merger.multiplicative
-        let keyOffset: TimelineMerger<KeyOffset> = Timeline.Merger.additive
-        let octaveOffset: TimelineMerger<OctaveOffset> = Timeline.Merger.additive
-        let scaleOffset: TimelineMerger<ScaleOffset> = Timeline.Merger.additive
-        let volume: TimelineMerger<Volume> = Timeline.Merger.multiplicative
+    module Blender =
+        let duration: TimelineBlender<Duration> = TimelineBlender.multiplicative
+        let keyOffset: TimelineBlender<KeyOffset> = TimelineBlender.additive
+        let octaveOffset: TimelineBlender<OctaveOffset> = TimelineBlender.additive
+        let scaleOffset: TimelineBlender<ScaleOffset> = TimelineBlender.additive
+        let volume: TimelineBlender<Volume> = TimelineBlender.multiplicative
 
     let empty: NoteOffsetTimelineMap =
-        { Duration = Seq.empty
-          KeyOffset = Seq.empty
-          OctaveOffset = Seq.empty
-          ScaleOffset = Seq.empty
-          Volume = Seq.empty }
+        { Duration = Timeline.empty
+          KeyOffset = Timeline.empty
+          OctaveOffset = Timeline.empty
+          ScaleOffset = Timeline.empty
+          Volume = Timeline.empty }
 
-    let merge (source: NoteOffsetTimelineMap, position: Position, duration: Duration)
-              (dest: NoteOffsetTimelineMap)
-              : NoteOffsetTimelineMap =
+    let blendInto (dest: NoteOffsetTimelineMap) (vector: Vector) (source: NoteOffsetTimelineMap): NoteOffsetTimelineMap =
         { Duration =
-              dest.Duration
-              |> Timeline.merge (source.Duration, position, duration, Merger.duration)
+              source.Duration
+              |> Timeline.blendInto dest.Duration vector Blender.duration
+              |> Timeline.fromSequence
           KeyOffset =
-              dest.KeyOffset
-              |> Timeline.merge (source.KeyOffset, position, duration, Merger.keyOffset)
+              source.KeyOffset
+              |> Timeline.blendInto dest.KeyOffset vector Blender.keyOffset
+              |> Timeline.fromSequence
           OctaveOffset =
-              dest.OctaveOffset
-              |> Timeline.merge (source.OctaveOffset, position, duration, Merger.octaveOffset)
+              source.OctaveOffset
+              |> Timeline.blendInto dest.OctaveOffset vector Blender.octaveOffset
+              |> Timeline.fromSequence
           ScaleOffset =
-              dest.ScaleOffset
-              |> Timeline.merge (source.ScaleOffset, position, duration, Merger.scaleOffset)
+              source.ScaleOffset
+              |> Timeline.blendInto dest.ScaleOffset vector Blender.scaleOffset
+              |> Timeline.fromSequence
           Volume =
-              dest.Volume
-              |> Timeline.merge (source.Volume, position, duration, Merger.volume) }
+              source.Volume
+              |> Timeline.blendInto dest.Volume vector Blender.volume
+              |> Timeline.fromSequence }
 
-    let flatten (duration: Duration) (timeline: Timeline<NoteOffsetTimelineMap>): NoteOffsetTimelineMap =
+    let flatten (duration: Duration) (timeline: TimelineLike<NoteOffsetTimelineMap>): NoteOffsetTimelineMap =
         timeline
-        |> Timeline.aggregate (duration, merge) empty
+        |> Timeline.aggregate duration blendInto empty
 
 module NoteOffsetBasedTimeline =
     let empty<'T> : NoteOffsetBasedTimeline<'T> =
-        { Timeline = Seq.empty
+        { Timeline = Timeline.empty
           NoteOffsetTimelineMap = NoteOffsetTimelineMap.empty }
 
-    let merge<'T when 'T: equality> (source: NoteOffsetBasedTimeline<'T>,
-                                     position: Position,
-                                     duration: Duration,
-                                     combineFunction: TimelineCombineFunction<'T>)
-                                    (dest: NoteOffsetBasedTimeline<'T>)
-                                    : NoteOffsetBasedTimeline<'T> =
+    let blendInto<'T when 'T: equality> (dest: NoteOffsetBasedTimeline<'T>)
+                                        (vector: Vector)
+                                        (combineInto: TimelineCombineFunction<'T>)
+                                        (source: NoteOffsetBasedTimeline<'T>)
+                                        : NoteOffsetBasedTimeline<'T> =
         { Timeline =
-              dest.Timeline
-              |> combineFunction (source.Timeline, position, duration)
+              source.Timeline
+              |> combineInto dest.Timeline vector
+              |> Timeline.fromSequence
           NoteOffsetTimelineMap =
-              dest.NoteOffsetTimelineMap
-              |> NoteOffsetTimelineMap.merge (source.NoteOffsetTimelineMap, position, duration) }
+              source.NoteOffsetTimelineMap
+              |> NoteOffsetTimelineMap.blendInto dest.NoteOffsetTimelineMap vector }
 
-    let flatten<'T when 'T: equality> (duration: Duration, combineFunction: TimelineCombineFunction<'T>)
-                                      (timeline: Timeline<NoteOffsetBasedTimeline<'T>>)
+    let flatten<'T when 'T: equality> (duration: Duration)
+                                      (combineInto: TimelineCombineFunction<'T>)
+                                      (timeline: TimelineLike<NoteOffsetBasedTimeline<'T>>)
                                       : NoteOffsetBasedTimeline<'T> =
         timeline
-        |> Timeline.aggregate
-            (duration, (fun (source, position, duration) -> merge (source, position, duration, combineFunction)))
-               empty
+        |> Timeline.aggregate duration (fun dest vector -> blendInto dest vector combineInto) empty

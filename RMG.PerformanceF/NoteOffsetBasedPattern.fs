@@ -1,27 +1,28 @@
-namespace RMG.TestsF.Composition.NoteOffsetBasedPattern
+namespace RMG.PerformanceF
+
+open BenchmarkDotNet.Diagnosers
+open BenchmarkDotNet.Attributes
+open BenchmarkDotNet.Configs
+open BenchmarkDotNet.Jobs
 
 open RMG.CoreF
 open RMG.CoreF.Composition
-open Xunit
-open RMG.TestsF.Assertions
 
-type Flatten() =
-    let combineInto = Timeline.insertInto
+type NoteOffsetBasedPatternPerfConfig() =
+    inherit ManualConfig()
 
-    [<Fact>]
-    let empty () =
-        let input = NoteOffsetBasedPattern.empty
-        let expected = NoteOffsetBasedTimeline.empty
+    do
+        base.AddJob Job.RyuJitX64 |> ignore
+        base.AddDiagnoser MemoryDiagnoser.Default
+        |> ignore
 
-        let result =
-            input
-            |> NoteOffsetBasedPattern.flatten 1.0 combineInto
+[<Config(typeof<NoteOffsetBasedPatternPerfConfig>)>]
+type NoteOffsetBasedPatternBenchmark() =
+    let mutable input: NoteOffsetBasedPattern<int> = NoteOffsetBasedPattern.empty
 
-        result |> should beEquivalentTo expected
-
-    [<Fact>]
-    let timeline () =
-        let input: NoteOffsetBasedPattern<int> =
+    [<GlobalSetup>]
+    member self.SetupData() =
+        input <-
             { Duration = 1.0
               PatternTimeline =
                   seq {
@@ -142,47 +143,7 @@ type Flatten() =
                   }
                   |> Timeline.fromSequence }
 
-        let expected: NoteOffsetBasedTimeline<int> =
-            { Timeline =
-                  seq {
-                      { Position = 0.0; Value = 1 }
-                      { Position = 0.5; Value = 1 }
-                  }
-                  |> Timeline.fromSequence
-              NoteOffsetTimelineMap =
-                  { Duration =
-                        seq {
-                            { Position = 0.5; Value = 2.0 }
-                            { Position = 1.0; Value = 1.0 }
-                        }
-                        |> Timeline.fromSequence
-                    KeyOffset =
-                        seq {
-                            { Position = 0.5; Value = 2 }
-                            { Position = 1.0; Value = 0 }
-                        }
-                        |> Timeline.fromSequence
-                    OctaveOffset =
-                        seq {
-                            { Position = 0.5; Value = 2 }
-                            { Position = 1.0; Value = 0 }
-                        }
-                        |> Timeline.fromSequence
-                    ScaleOffset =
-                        seq {
-                            { Position = 0.5; Value = 2 }
-                            { Position = 1.0; Value = 0 }
-                        }
-                        |> Timeline.fromSequence
-                    Volume =
-                        seq {
-                            { Position = 0.5; Value = 2.0 }
-                            { Position = 1.0; Value = 1.0 }
-                        }
-                        |> Timeline.fromSequence } }
-
-        let result =
-            input
-            |> NoteOffsetBasedPattern.flatten 1.0 combineInto
-
-        result |> should beEquivalentTo expected
+    [<Benchmark>]
+    member self.Flatten() =
+        input
+        |> NoteOffsetBasedPattern.flatten 1.0 Timeline.insertInto

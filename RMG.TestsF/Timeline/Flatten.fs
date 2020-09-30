@@ -5,13 +5,16 @@ open Xunit
 open RMG.TestsF.Assertions
 
 type Flatten() =
-    let combine = Timeline.union
+    let combineInto = Timeline.insertInto
 
     [<Fact>]
     let empty () =
         let input = Seq.empty
         let expected = Seq.empty
-        let result = input |> Timeline.flatten (1.0, combine)
+
+        let result =
+            input |> Timeline.flatten 1.0 combineInto
+
         result |> should beEquivalentTo expected
 
     [<Fact>]
@@ -20,7 +23,10 @@ type Flatten() =
             seq { { Position = 0.0; Value = Seq.empty } }
 
         let expected = Seq.empty
-        let result = input |> Timeline.flatten (1.0, combine)
+
+        let result =
+            input |> Timeline.flatten 1.0 combineInto
+
         result |> should beEquivalentTo expected
 
     [<Fact>]
@@ -32,7 +38,10 @@ type Flatten() =
             }
 
         let expected = seq { { Position = 0.0; Value = 1 } }
-        let result = input |> Timeline.flatten (1.0, combine)
+
+        let result =
+            input |> Timeline.flatten 1.0 combineInto
+
         result |> should beEquivalentTo expected
 
     [<Fact>]
@@ -41,12 +50,14 @@ type Flatten() =
             seq {
                 { Position = 0.0
                   Value = seq { { Position = 0.0; Value = 1 } } }
-                { Position = 0.5
-                  Value = Seq.empty }
+                { Position = 0.5; Value = Seq.empty }
             }
 
         let expected = seq { { Position = 0.0; Value = 1 } }
-        let result = input |> Timeline.flatten (1.0, combine)
+
+        let result =
+            input |> Timeline.flatten 1.0 combineInto
+
         result |> should beEquivalentTo expected
 
     [<Fact>]
@@ -59,11 +70,15 @@ type Flatten() =
                   Value = seq { { Position = 0.25; Value = 2 } } }
             }
 
-        let expected = seq {
-            { Position = 0.0; Value = 1 }
-            { Position = 0.75; Value = 2 }
-        }
-        let result = input |> Timeline.flatten (1.0, combine)
+        let expected =
+            seq {
+                { Position = 0.0; Value = 1 }
+                { Position = 0.75; Value = 2 }
+            }
+
+        let result =
+            input |> Timeline.flatten 1.0 combineInto
+
         result |> should beEquivalentTo expected
 
     [<Fact>]
@@ -71,32 +86,34 @@ type Flatten() =
         let input =
             seq {
                 { Position = 0.0
-                  Value = seq {
-                      { Position = 0.0; Value = 1 }
-                      { Position = 0.25; Value = 2 }
-                      { Position = 0.5; Value = 3 }
-                  } }
+                  Value =
+                      seq {
+                          { Position = 0.0; Value = 1 }
+                          { Position = 0.25; Value = 2 }
+                          { Position = 0.5; Value = 3 }
+                      } }
                 { Position = 0.5
-                  Value = seq {
-                      { Position = 0.0; Value = 4 }
-                      { Position = 0.5; Value = 5 }
-                  } }
+                  Value =
+                      seq {
+                          { Position = 0.0; Value = 4 }
+                          { Position = 0.5; Value = 5 }
+                      } }
                 { Position = 0.75
-                  Value = seq {
-                      { Position = 0.25; Value = 6 }
-                  } }
+                  Value = seq { { Position = 0.25; Value = 6 } } }
                 { Position = 1.0
-                  Value = seq {
-                      { Position = 0.0; Value = 7 }
-                  } }
+                  Value = seq { { Position = 0.0; Value = 7 } } }
             }
 
-        let expected = seq {
-            { Position = 0.0; Value = 1 }
-            { Position = 0.25; Value = 2 }
-            { Position = 0.5; Value = 4 }
-        }
-        let result = input |> Timeline.flatten (1.0, combine)
+        let expected =
+            seq {
+                { Position = 0.0; Value = 1 }
+                { Position = 0.25; Value = 2 }
+                { Position = 0.5; Value = 4 }
+            }
+
+        let result =
+            input |> Timeline.flatten 1.0 combineInto
+
         result |> should beEquivalentTo expected
 
     [<Fact>]
@@ -104,20 +121,26 @@ type Flatten() =
         let input =
             seq {
                 { Position = 0.5
-                  Value = seq {
-                      { Position = 0.0; Value = 1 }
-                      { Position = 0.5; Value = 2 }
-                  } }
+                  Value =
+                      seq {
+                          { Position = 0.0; Value = 1 }
+                          { Position = 0.5; Value = 2 }
+                      } }
                 { Position = 0.0
-                  Value = seq {
-                      { Position = 0.0; Value = 3 }
-                      { Position = 0.5; Value = 4 }
-                  } }
+                  Value =
+                      seq {
+                          { Position = 0.0; Value = 3 }
+                          { Position = 0.5; Value = 4 }
+                      } }
             }
 
-        let expected = seq {
-            { Position = 0.0; Value = 3 }
-            { Position = 0.5; Value = 1 }
-        }
-        let result = input |> Timeline.flatten (1.0, combine)
+        let expected =
+            seq {
+                { Position = 0.0; Value = 3 }
+                { Position = 0.5; Value = 1 }
+            }
+
+        let result =
+            input |> Timeline.flatten 1.0 combineInto
+
         result |> should beEquivalentTo expected

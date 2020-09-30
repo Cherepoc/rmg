@@ -6,8 +6,9 @@ open Xunit
 open RMG.TestsF.Assertions
 
 type FlattenAggregate() =
-    let combine (source: Timeline<int>, position: Position, duration: Duration): Timeline<int> -> Timeline<int> =
-        Timeline.merge (source, position, duration, Timeline.Merger.additive)
+    let combineInto (dest: TimelineLike<int>) (vector: Vector) (source: TimelineLike<int>): TimelineLike<int> =
+        source
+        |> Timeline.blendInto dest vector TimelineBlender.additive :> TimelineLike<int>
 
     [<Fact>]
     let empty () =
@@ -16,7 +17,7 @@ type FlattenAggregate() =
 
         let result =
             input
-            |> Pattern.flattenAggregate (1.0, combine) Seq.empty
+            |> Pattern.flattenAggregate 1.0 combineInto Seq.empty
 
         result |> should beEquivalentTo expected
 
@@ -31,17 +32,19 @@ type FlattenAggregate() =
                       { Position = 0.5
                         Value = seq { { Position = 0.0; Value = 2 } } }
                   }
-              PatternTimeline = Seq.empty }
+                  |> Timeline.fromSequence
+              PatternTimeline = Timeline.empty }
 
-        let expected = seq {
-            { Position = 0.0; Value = 1 }
-            { Position = 0.5; Value = 2 }
-            { Position = 1.0; Value = 0 }
-        }
+        let expected =
+            seq {
+                { Position = 0.0; Value = 1 }
+                { Position = 0.5; Value = 2 }
+                { Position = 1.0; Value = 0 }
+            }
 
         let result =
             input
-            |> Pattern.flattenAggregate (1.0, combine) Seq.empty
+            |> Pattern.flattenAggregate 1.0 combineInto Seq.empty
 
         result |> should beEquivalentTo expected
 
@@ -54,6 +57,7 @@ type FlattenAggregate() =
                       { Position = 0.0
                         Value = seq { { Position = 0.0; Value = 1 } } }
                   }
+                  |> Timeline.fromSequence
               PatternTimeline =
                   seq {
                       { Position = 0.5
@@ -64,17 +68,20 @@ type FlattenAggregate() =
                                       { Position = 0.0
                                         Value = seq { { Position = 0.0; Value = 2 } } }
                                   }
-                              PatternTimeline = Seq.empty } }
-                  } }
+                                  |> Timeline.fromSequence
+                              PatternTimeline = Timeline.empty } }
+                  }
+                  |> Timeline.fromSequence }
 
-        let expected = seq {
-            { Position = 0.0; Value = 1 }
-            { Position = 0.5; Value = 3 }
-            { Position = 1.0; Value = 0 }
-        }
+        let expected =
+            seq {
+                { Position = 0.0; Value = 1 }
+                { Position = 0.5; Value = 3 }
+                { Position = 1.0; Value = 0 }
+            }
 
         let result =
             input
-            |> Pattern.flattenAggregate (1.0, combine) Seq.empty
+            |> Pattern.flattenAggregate 1.0 combineInto Seq.empty
 
         result |> should beEquivalentTo expected

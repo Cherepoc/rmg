@@ -16,11 +16,12 @@ type NoteOffsetBasedPattern<'T> =
 module NoteOffsetBasedPattern =
     let empty<'T> : NoteOffsetBasedPattern<'T> =
         { Duration = 0.0
-          PatternTimeline = Seq.empty
-          NoteOffsetPatternMapPatternTimeline = Seq.empty
-          NoteOffsetBasedPatternTimeline = Seq.empty }
+          PatternTimeline = Timeline.empty
+          NoteOffsetPatternMapPatternTimeline = Timeline.empty
+          NoteOffsetBasedPatternTimeline = Timeline.empty }
 
-    let rec flatten<'T when 'T: equality> (duration: Duration, combineFunction: TimelineCombineFunction<'T>)
+    let rec flatten<'T when 'T: equality> (duration: Duration)
+                                          (combineInto: TimelineCombineFunction<'T>)
                                           (noteOffsetBasedPattern: NoteOffsetBasedPattern<'T>)
                                           : NoteOffsetBasedTimeline<'T> =
         let maxDuration =
@@ -28,31 +29,36 @@ module NoteOffsetBasedPattern =
 
         let flattenedPatterns =
             noteOffsetBasedPattern.PatternTimeline
-            |> Timeline.cutAfter maxDuration
-            |> Timeline.sort
-            |> Timeline.map (fun x -> x |> Pattern.flatten (x.Duration, combineFunction))
-            |> Timeline.flatten (maxDuration, combineFunction)
+            |> Timeline.withDuration maxDuration
+            |> Timeline.map (fun (pattern, duration) ->
+                pattern |> Pattern.flatten duration combineInto :> TimelineLike<'T>)
+            |> Timeline.flatten maxDuration combineInto
 
         let flattenedNoteOffsetPatternMapPatterns =
             noteOffsetBasedPattern.NoteOffsetPatternMapPatternTimeline
-            |> Timeline.cutAfter maxDuration
-            |> Timeline.sort
-            |> Timeline.map (fun x ->
-                x
-                |> Pattern.map (NoteOffsetPatternMap.flatten x.Duration)
-                |> Pattern.flattenAggregate (x.Duration, NoteOffsetTimelineMap.merge) NoteOffsetTimelineMap.empty)
+            |> Timeline.withDuration maxDuration
+            |> Timeline.map (fun (pattern, duration) ->
+                pattern
+                |> Pattern.map (NoteOffsetPatternMap.flatten duration)
+                |> Pattern.flattenAggregate duration NoteOffsetTimelineMap.blendInto NoteOffsetTimelineMap.empty)
             |> NoteOffsetTimelineMap.flatten maxDuration
 
         let noteOffsetBasedPatterns =
             noteOffsetBasedPattern.NoteOffsetBasedPatternTimeline
-            |> Timeline.cutAfter maxDuration
-            |> Timeline.sort
-            |> Timeline.map (fun x -> x |> flatten (x.Duration, combineFunction))
-            |> NoteOffsetBasedTimeline.flatten (maxDuration, combineFunction)
+            |> Timeline.withDuration maxDuration
+            |> Timeline.map (fun (pattern, duration) -> pattern |> flatten duration combineInto)
+            |> NoteOffsetBasedTimeline.flatten maxDuration combineInto
 
         { Timeline =
               flattenedPatterns
-              |> combineFunction (noteOffsetBasedPatterns.Timeline, 0.0, maxDuration)
+              |> combineInto
+                  noteOffsetBasedPatterns.Timeline
+                     { Position = 0.0
+                       Duration = maxDuration }
+              |> Timeline.fromSequence
           NoteOffsetTimelineMap =
               flattenedNoteOffsetPatternMapPatterns
-              |> NoteOffsetTimelineMap.merge (noteOffsetBasedPatterns.NoteOffsetTimelineMap, 0.0, maxDuration) }
+              |> NoteOffsetTimelineMap.blendInto
+                  noteOffsetBasedPatterns.NoteOffsetTimelineMap
+                     { Position = 0.0
+                       Duration = maxDuration } }

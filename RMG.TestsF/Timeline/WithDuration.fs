@@ -20,9 +20,24 @@ type WithDuration() =
         let input = seq { { Position = 0.0; Value = 1 } }
 
         let expected =
+            seq { { Position = 0.0; Value = (1, 1.0) } }
+
+        let result = input |> Timeline.withDuration 1.0
+
+        result |> should beEquivalentTo expected
+
+    [<Fact>]
+    let double () =
+        let input =
             seq {
-                { Position = 0.0
-                  Value = { Duration = 1.0; Value = 1 } }
+                { Position = 0.5; Value = 2 }
+                { Position = 0.0; Value = 1 }
+            }
+
+        let expected =
+            seq {
+                { Position = 0.0; Value = (1, 0.5) }
+                { Position = 0.5; Value = (2, 0.5) }
             }
 
         let result = input |> Timeline.withDuration 1.0
@@ -30,19 +45,19 @@ type WithDuration() =
         result |> should beEquivalentTo expected
 
     [<Fact>]
-    let multi () =
+    let triple () =
         let input =
             seq {
-                { Position = 0.0; Value = 1 }
                 { Position = 0.5; Value = 2 }
+                { Position = 0.0; Value = 1 }
+                { Position = 0.75; Value = 3 }
             }
 
         let expected =
             seq {
-                { Position = 0.0
-                  Value = { Duration = 0.5; Value = 1 } }
-                { Position = 0.5
-                  Value = { Duration = 0.5; Value = 2 } }
+                { Position = 0.0; Value = (1, 0.5) }
+                { Position = 0.5; Value = (2, 0.25) }
+                { Position = 0.75; Value = (3, 0.25) }
             }
 
         let result = input |> Timeline.withDuration 1.0
@@ -53,17 +68,15 @@ type WithDuration() =
     let cutoff () =
         let input =
             seq {
-                { Position = 0.0; Value = 1 }
                 { Position = 0.5; Value = 2 }
+                { Position = 0.0; Value = 1 }
                 { Position = 1.5; Value = 3 }
             }
 
         let expected =
             seq {
-                { Position = 0.0
-                  Value = { Duration = 0.5; Value = 1 } }
-                { Position = 0.5
-                  Value = { Duration = 0.5; Value = 2 } }
+                { Position = 0.0; Value = (1, 0.5) }
+                { Position = 0.5; Value = (2, 0.5) }
             }
 
         let result = input |> Timeline.withDuration 1.0

@@ -23,30 +23,35 @@ module NoteOffsetPatternMap =
         { Duration =
               patternMap.Duration
               |> Pattern.flatten
-                  (duration,
-                   NoteOffsetTimelineMap.Merger.duration
-                   |> Timeline.Merger.toCombineFunction)
+                  duration
+                     (NoteOffsetTimelineMap.Blender.duration
+                      |> TimelineBlender.toCombineFunction)
+              |> Timeline.fromSequence
           KeyOffset =
               patternMap.KeyOffset
               |> Pattern.flatten
-                  (duration,
-                   NoteOffsetTimelineMap.Merger.keyOffset
-                   |> Timeline.Merger.toCombineFunction)
+                  duration
+                     (NoteOffsetTimelineMap.Blender.keyOffset
+                      |> TimelineBlender.toCombineFunction)
+              |> Timeline.fromSequence
           OctaveOffset =
               patternMap.OctaveOffset
               |> Pattern.flatten
-                  (duration,
-                   NoteOffsetTimelineMap.Merger.octaveOffset
-                   |> Timeline.Merger.toCombineFunction)
+                  duration
+                     (NoteOffsetTimelineMap.Blender.octaveOffset
+                      |> TimelineBlender.toCombineFunction)
+              |> Timeline.fromSequence
           ScaleOffset =
               patternMap.ScaleOffset
               |> Pattern.flatten
-                  (duration,
-                   NoteOffsetTimelineMap.Merger.scaleOffset
-                   |> Timeline.Merger.toCombineFunction)
+                  duration
+                     (NoteOffsetTimelineMap.Blender.scaleOffset
+                      |> TimelineBlender.toCombineFunction)
+              |> Timeline.fromSequence
           Volume =
               patternMap.Volume
               |> Pattern.flatten
-                  (duration,
-                   NoteOffsetTimelineMap.Merger.volume
-                   |> Timeline.Merger.toCombineFunction) }
+                  duration
+                     (NoteOffsetTimelineMap.Blender.volume
+                      |> TimelineBlender.toCombineFunction)
+              |> Timeline.fromSequence }

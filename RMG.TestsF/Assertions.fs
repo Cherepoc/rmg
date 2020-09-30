@@ -3,7 +3,6 @@ namespace RMG.TestsF
 open FluentAssertions.Equivalency
 open FluentAssertions.Primitives
 open FluentAssertions
-open RMG.CoreF
 
 module Assertions =
     let optionConfiguration<'T> (options: EquivalencyAssertionOptions<'T>) =

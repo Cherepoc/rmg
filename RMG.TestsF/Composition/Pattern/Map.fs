@@ -19,27 +19,37 @@ type Map() =
     let recursive () =
         let input =
             { Duration = 1.0
-              Timeline = seq { { Position = 0.0; Value = 1 } }
+              Timeline =
+                  seq { { Position = 0.0; Value = 1 } }
+                  |> Timeline.fromSequence
               PatternTimeline =
                   seq {
                       { Position = 0.0
                         Value =
                             { Duration = 1.0
-                              Timeline = seq { { Position = 0.0; Value = 2 } }
-                              PatternTimeline = Seq.empty } }
-                  } }
+                              Timeline =
+                                  seq { { Position = 0.0; Value = 2 } }
+                                  |> Timeline.fromSequence
+                              PatternTimeline = Timeline.empty } }
+                  }
+                  |> Timeline.fromSequence }
 
         let expected =
             { Duration = 1.0
-              Timeline = seq { { Position = 0.0; Value = 2 } }
+              Timeline =
+                  seq { { Position = 0.0; Value = 2 } }
+                  |> Timeline.fromSequence
               PatternTimeline =
                   seq {
                       { Position = 0.0
                         Value =
                             { Duration = 1.0
-                              Timeline = seq { { Position = 0.0; Value = 4 } }
-                              PatternTimeline = Seq.empty } }
-                  } }
+                              Timeline =
+                                  seq { { Position = 0.0; Value = 4 } }
+                                  |> Timeline.fromSequence
+                              PatternTimeline = Timeline.empty } }
+                  }
+                  |> Timeline.fromSequence }
 
         let result = input |> Pattern.map map
         result |> should beEquivalentTo expected

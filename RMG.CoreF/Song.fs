@@ -1,5 +1,7 @@
 ﻿namespace RMG.CoreF
 
+open RMG.CoreF
+
 type Tempo = double
 
 type Instrument = { Code: byte }
@@ -14,7 +16,7 @@ type TimeSignature = { Numerator: uint; Denominator: uint }
 [<NoComparison>]
 type Track =
     { Instrument: Instrument
-      NoteOffset: NoteOffset
+      NoteOffset: NoteOffsetOld
       MinOctaveOffset: OctaveOffset
       MaxOctaveOffset: OctaveOffset }
 
@@ -25,4 +27,4 @@ type Song =
       ScaleTimeline: Timeline<Scale>
       NoteOffsetTimelineMap: NoteOffsetTimelineMap
       Tempo: Tempo
-      TrackNoteOffsetTimelineMap: TrackNoteOffsetTimelineMap<NoteOffset> }
+      TrackNoteOffsetTimelineMap: TrackNoteOffsetTimelineMap<NoteOffsetOld> }

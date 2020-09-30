@@ -13,30 +13,40 @@ type Pattern<'T> =
 module Pattern =
     let empty<'T> : Pattern<'T> =
         { Duration = 0.0
-          Timeline = Seq.empty
-          PatternTimeline = Seq.empty }
+          Timeline = Timeline.empty
+          PatternTimeline = Timeline.empty }
 
-    let rec map<'TSource, 'TDest> (mapFunction: 'TSource -> 'TDest) (pattern: Pattern<'TSource>) : Pattern<'TDest> =
+    let rec map<'TSource, 'TDest> (mapFunction: 'TSource -> 'TDest) (pattern: Pattern<'TSource>): Pattern<'TDest> =
         { Duration = pattern.Duration
-          Timeline = pattern.Timeline |> Timeline.map mapFunction
-          PatternTimeline = pattern.PatternTimeline |> Timeline.map (map mapFunction) }
+          Timeline =
+              pattern.Timeline
+              |> Timeline.map mapFunction
+              |> Timeline.fromSequence
+          PatternTimeline =
+              pattern.PatternTimeline
+              |> Timeline.map (map mapFunction)
+              |> Timeline.fromSequence }
 
-    let rec flatten<'T> (duration: Duration, combineFunction: TimelineCombineFunction<'T>)
+    let rec flatten<'T> (duration: Duration)
+                        (combineInto: TimelineCombineFunction<'T>)
                         (pattern: Pattern<'T>)
-                        : Timeline<'T> =
+                        : TimelineSequence<'T> =
         let maxDuration = Math.Min(duration, pattern.Duration)
 
         let flattenedPatterns =
             pattern.PatternTimeline
-            |> Timeline.cutAfter maxDuration
-            |> Timeline.sort
-            |> Timeline.map (fun x -> x |> flatten (x.Duration, combineFunction))
-            |> Timeline.flatten (maxDuration, combineFunction)
+            |> Timeline.withDuration maxDuration
+            |> Timeline.map (fun (pattern, duration) -> pattern |> flatten duration combineInto :> TimelineLike<'T>)
+            |> Timeline.flatten maxDuration combineInto
 
         pattern.Timeline
-        |> combineFunction (flattenedPatterns, 0.0, maxDuration)
+        |> combineInto
+            flattenedPatterns
+               { Position = 0.0
+                 Duration = maxDuration }
 
-    let rec flattenAggregate<'T> (duration: Duration, combineFunction: CombineFunction<'T>)
+    let rec flattenAggregate<'T> (duration: Duration)
+                                 (combineInto: CombineFunction<'T>)
                                  (initialValue: 'T)
                                  (pattern: Pattern<'T>)
                                  : 'T =
@@ -45,11 +55,14 @@ module Pattern =
         let flattenedPatterns =
             pattern.PatternTimeline
             |> Timeline.withDuration maxDuration
-            |> Timeline.map (fun x ->
-                x.Value
-                |> flattenAggregate (x.Duration, combineFunction) initialValue)
-            |> Timeline.aggregate (maxDuration, combineFunction) initialValue
+            |> Timeline.map (fun (pattern, duration) ->
+                pattern
+                |> flattenAggregate duration combineInto initialValue)
+            |> Timeline.aggregate maxDuration combineInto initialValue
 
         pattern.Timeline
-        |> Timeline.aggregate (maxDuration, combineFunction) initialValue
-        |> combineFunction (flattenedPatterns, 0.0, maxDuration)
+        |> Timeline.aggregate maxDuration combineInto initialValue
+        |> combineInto
+            flattenedPatterns
+               { Position = 0.0
+                 Duration = maxDuration }
