@@ -16,18 +16,12 @@
 
     <ItemGroup>
       <Compile Include="Assertions.fs" />
-      <Compile Include="Music\MergeNoteOffsetTimelineMaps.fs" />
-      <Compile Include="Composition\Pattern\Flatten.fs" />
-      <Compile Include="Composition\Pattern\Map.fs" />
-      <Compile Include="Composition\Pattern\FlattenAggregate.fs" />
-      <Compile Include="Composition\NoteOffsetBasedPattern\Flatten.fs" />
-      <Compile Include="Composition\NoteOffsetPatternMap\Flatten.fs" />
-      <Compile Include="Timeline\Main.fs" />
-      <Compile Include="Timeline\WithDuration.fs" />
-      <Compile Include="Timeline\Simplify.fs" />
-      <Compile Include="Timeline\Blend.fs" />
-      <Compile Include="Timeline\Aggregate.fs" />
-      <Compile Include="Timeline\Flatten.fs" />
+      <Compile Include="StateTimeline.fs" />
+      <Compile Include="EventPattern.fs" />
+      <Compile Include="StatePattern.fs" />
+      <Compile Include="NoteOffsetStatePatternMap.fs" />
+      <Compile Include="NoteOffsetStateBasedEventPattern.fs" />
+      <Compile Include="TrackNoteOffsetStateBasedEventTimelineMapTest.fs" />
     </ItemGroup>
 
     <ItemGroup>

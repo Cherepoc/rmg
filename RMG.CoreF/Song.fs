@@ -16,7 +16,7 @@ type TimeSignature = { Numerator: uint; Denominator: uint }
 [<NoComparison>]
 type Track =
     { Instrument: Instrument
-      NoteOffset: NoteOffsetOld
+      NoteOffset: NoteOffset
       MinOctaveOffset: OctaveOffset
       MaxOctaveOffset: OctaveOffset }
 
@@ -25,6 +25,6 @@ type Track =
 type Song =
     { Duration: Duration
       ScaleTimeline: Timeline<Scale>
-      NoteOffsetTimelineMap: NoteOffsetTimelineMap
+      NoteOffsetTimelineMap: NoteOffsetStateTimelineMap
       Tempo: Tempo
-      TrackNoteOffsetTimelineMap: TrackNoteOffsetTimelineMap<NoteOffsetOld> }
+      TrackNoteOffsetTimelineMap: TrackNoteOffsetStateBasedEventTimelineMap<NoteOffset> }

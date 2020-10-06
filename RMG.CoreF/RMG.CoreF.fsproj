@@ -6,12 +6,20 @@
 
     <ItemGroup>
         <Compile Include="Operators.fs" />
-        <Compile Include="Timeline.fs" />
+        <Compile Include="CoreTypes.fs" />
         <Compile Include="NoteOffset.fs" />
+        <Compile Include="Timeline\Timeline.fs" />
+        <Compile Include="Timeline\EventTimeline.fs" />
+        <Compile Include="Timeline\StateTimeline.fs" />
+        <Compile Include="Timeline\NoteOffsetStateTimelineMap.fs" />
+        <Compile Include="Timeline\NoteOffsetStateBasedEventTimeline.fs" />
+        <Compile Include="Timeline\TrackNoteOffsetStateBasedEventTimelineMap.fs" />
         <Compile Include="Song.fs" />
-        <Compile Include="Composition\Pattern.fs" />
-        <Compile Include="Composition\NoteOffsetPatternMap.fs" />
-        <Compile Include="Composition\NoteOffsetBasedPattern.fs" />
+        <Compile Include="Composition\EventPattern.fs" />
+        <Compile Include="Composition\StatePattern.fs" />
+        <Compile Include="Composition\NoteOffsetStatePatternMap.fs" />
+        <Compile Include="Composition\NoteOffsetStateBasedEventPattern.fs" />
+        <Compile Include="Composition\TrackNoteOffsetStateBasedEventPatternMap.fs" />
     </ItemGroup>
 
 </Project>

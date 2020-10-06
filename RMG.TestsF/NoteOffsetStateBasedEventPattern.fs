@@ -1,30 +1,36 @@
-namespace RMG.PerformanceF
-
-open BenchmarkDotNet.Diagnosers
-open BenchmarkDotNet.Attributes
-open BenchmarkDotNet.Configs
-open BenchmarkDotNet.Jobs
+namespace RMG.TestsF
 
 open RMG.CoreF
 open RMG.CoreF.Composition
+open Xunit
+open RMG.TestsF.Assertions
 
-type NoteOffsetBasedPatternPerfConfig() =
-    inherit ManualConfig()
+type NoteOffsetStateBasedEventPattern() =
+    [<Fact>]
+    let empty () =
+        let input =
+            { PatternTimelineInput = Seq.empty
+              NoteOffsetStatePatternMapPatternTimelineInput = Seq.empty
+              NoteOffsetBasedPatternTimelineInput = Seq.empty }
 
-    do
-        base.AddJob Job.RyuJitX64 |> ignore
-        base.AddDiagnoser MemoryDiagnoser.Default
-        |> ignore
+        let expected =
+            {| Timeline = Seq.empty
+               NoteOffsetStateTimelineMap =
+                   {| DurationTimeline = Seq.empty
+                      KeyOffsetTimeline = Seq.empty
+                      OctaveOffsetTimeline = Seq.empty
+                      ScaleOffsetTimeline = Seq.empty
+                      VolumeTimeline = Seq.empty |} |}
 
-[<Config(typeof<NoteOffsetBasedPatternPerfConfig>)>]
-type NoteOffsetBasedPatternBenchmark() =
-    let mutable input: NoteOffsetStateBasedEventPatternInput<int> =
-        { PatternTimelineInput = Seq.empty
-          NoteOffsetStatePatternMapPatternTimelineInput = Seq.empty
-          NoteOffsetBasedPatternTimelineInput = Seq.empty }
+        let result =
+            input
+            |> NoteOffsetStateBasedEventPattern.fromInput 1.0
 
-    [<GlobalSetup>]
-    member self.SetupData() =
+        result.FlatTimeline
+        |> should beEquivalentTo expected
+
+    [<Fact>]
+    let recursive () =
         let noteOffsetStatePatternMap =
             { NoteOffsetStatePatternMapInput.DurationPattern =
                   { StatePatternInput.TimelineInput = seq { { Position = 0.0; Value = 1.0 } }
@@ -72,7 +78,7 @@ type NoteOffsetBasedPatternBenchmark() =
               NoteOffsetBasedPatternTimelineInput = Seq.empty }
             |> NoteOffsetStateBasedEventPattern.fromInput 1.0
 
-        input <-
+        let result =
             { PatternTimelineInput =
                   seq {
                       { Position = 0.0
@@ -94,8 +100,38 @@ type NoteOffsetBasedPatternBenchmark() =
                             |> EventPattern.fromInput 1.0 }
                   }
               NoteOffsetBasedPatternTimelineInput = seq { { Position = 0.5; Value = innerPattern } } }
+            |> NoteOffsetStateBasedEventPattern.fromInput 1.0
 
-    [<Benchmark>]
-    member self.Flatten() =
-        input
-        |> NoteOffsetStateBasedEventPattern.fromInput 1.0
+        let expected =
+            {| Timeline =
+                   seq {
+                       { Position = 0.0; Value = 2 }
+                       { Position = 0.5; Value = 1 }
+                   }
+               NoteOffsetStateTimelineMap =
+                   {| DurationTimeline = Seq.empty
+                      KeyOffsetTimeline =
+                          seq {
+                              { Position = 0.0; Value = 1 }
+                              { Position = 0.5; Value = 2 }
+                              { Position = 1.0; Value = 1 }
+                              { Position = 1.5; Value = 0 }
+                          }
+                      OctaveOffsetTimeline =
+                          seq {
+                              { Position = 0.0; Value = 1 }
+                              { Position = 0.5; Value = 2 }
+                              { Position = 1.0; Value = 1 }
+                              { Position = 1.5; Value = 0 }
+                          }
+                      ScaleOffsetTimeline =
+                          seq {
+                              { Position = 0.0; Value = 1 }
+                              { Position = 0.5; Value = 2 }
+                              { Position = 1.0; Value = 1 }
+                              { Position = 1.5; Value = 0 }
+                          }
+                      VolumeTimeline = Seq.empty |} |}
+
+        result.FlatTimeline
+        |> should beEquivalentTo expected
