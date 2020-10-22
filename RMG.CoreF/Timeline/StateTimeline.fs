@@ -116,6 +116,15 @@ module StateTimeline =
 
         StateTimeline(result)
 
+    let effectiveValue<'T> (position: Position) (stateMerger: StateMerger<'T>) (timeline: StateTimeline<'T>): 'T =
+        let effectiveItem =
+            timeline.items
+            |> Array.tryFindBack (fun item -> item.Position <= position)
+
+        match effectiveItem with
+        | Some effectiveItem -> effectiveItem.Value
+        | _ -> stateMerger.DefaultValue
+
 module StateMerger =
     let additive: StateMerger<int> =
         { Merge = fun (v1, v2) -> v1 + v2

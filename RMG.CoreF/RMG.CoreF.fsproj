@@ -20,6 +20,9 @@
         <Compile Include="Composition\NoteOffsetStatePatternMap.fs" />
         <Compile Include="Composition\NoteOffsetStateBasedEventPattern.fs" />
         <Compile Include="Composition\TrackNoteOffsetStateBasedEventPatternMap.fs" />
+        <Compile Include="Composition\SongPatternMap.fs" />
+        <Compile Include="Rendering.fs" />
+        <Compile Include="Midi.fs" />
     </ItemGroup>
 
 </Project>

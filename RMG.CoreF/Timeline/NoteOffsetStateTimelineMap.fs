@@ -63,3 +63,20 @@ module NoteOffsetStateTimelineMap =
           OctaveOffsetTimeline = mergeStateTimeline (fun x -> x.OctaveOffsetTimeline) Merger.octaveOffset
           ScaleOffsetTimeline = mergeStateTimeline (fun x -> x.ScaleOffsetTimeline) Merger.scaleOffset
           VolumeTimeline = mergeStateTimeline (fun x -> x.VolumeTimeline) Merger.volume }
+
+    let effective (position: Position) (inputTimeline: NoteOffsetStateTimelineMap): NoteOffset =
+        { Duration =
+              inputTimeline.DurationTimeline
+              |> StateTimeline.effectiveValue position Merger.duration
+          KeyOffset =
+              inputTimeline.KeyOffsetTimeline
+              |> StateTimeline.effectiveValue position Merger.keyOffset
+          OctaveOffset =
+              inputTimeline.OctaveOffsetTimeline
+              |> StateTimeline.effectiveValue position Merger.octaveOffset
+          ScaleOffset =
+              inputTimeline.ScaleOffsetTimeline
+              |> StateTimeline.effectiveValue position Merger.scaleOffset
+          Volume =
+              inputTimeline.VolumeTimeline
+              |> StateTimeline.effectiveValue position Merger.volume }

@@ -34,3 +34,12 @@ module EventTimeline =
 
     let merge (inputTimeline: Timeline<EventTimeline<'T>>): EventTimeline<'T> =
         inputTimeline |> Timeline.merge |> fromSequence
+
+    let lastEffectiveValue<'T> (position: Position) (timeline: EventTimeline<'T>): ('T Option) =
+        let effectiveItem =
+            timeline.items
+            |> Array.tryFindBack (fun item -> item.Position <= position)
+
+        match effectiveItem with
+        | Some item -> Some item.Value
+        | None -> None

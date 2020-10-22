@@ -9,3 +9,6 @@ type Position = float
 type Duration = float
 
 type TrackNumber = int
+
+module Constants =
+    let notesInOctave = 12

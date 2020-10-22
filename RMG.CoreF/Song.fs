@@ -3,12 +3,13 @@
 open RMG.CoreF
 
 type Tempo = double
+type InstrumentCode = byte
 
-type Instrument = { Code: byte }
+type Instrument = { Code: InstrumentCode }
 
 [<NoEquality>]
 [<NoComparison>]
-type Scale = { KeyOffsets: seq<KeyOffset> }
+type Scale = { KeyOffsets: list<KeyOffset> }
 
 type TimeSignature = { Numerator: uint; Denominator: uint }
 
@@ -24,7 +25,17 @@ type Track =
 [<NoComparison>]
 type Song =
     { Duration: Duration
-      ScaleTimeline: Timeline<Scale>
+      Tracks: Map<TrackNumber, Track>
+      ScaleTimeline: EventTimeline<Scale>
+      TempoTimeline: StateTimeline<Tempo>
       NoteOffsetTimelineMap: NoteOffsetStateTimelineMap
-      Tempo: Tempo
-      TrackNoteOffsetTimelineMap: TrackNoteOffsetStateBasedEventTimelineMap<NoteOffset> }
+      TrackNoteOffsetTimelineMap: Map<TrackNumber, NoteOffsetStateBasedEventTimeline<NoteOffset>> }
+
+module Song =
+    let empty =
+        { Duration = 0.0
+          Tracks = Map.empty
+          ScaleTimeline = EventTimeline.empty
+          TempoTimeline = StateTimeline.empty
+          NoteOffsetTimelineMap = NoteOffsetStateTimelineMap.empty
+          TrackNoteOffsetTimelineMap = Map.empty }

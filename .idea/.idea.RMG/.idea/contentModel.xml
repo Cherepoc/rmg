@@ -136,13 +136,16 @@
           <e p="EventPattern.fs" t="Include" />
           <e p="NoteOffsetStateBasedEventPattern.fs" t="Include" />
           <e p="NoteOffsetStatePatternMap.fs" t="Include" />
+          <e p="SongPatternMap.fs" t="Include" />
           <e p="StatePattern.fs" t="Include" />
           <e p="TrackNoteOffsetStateBasedEventPatternMap.fs" t="Include" />
         </e>
         <e p="CoreTypes.fs" t="Include" />
+        <e p="Midi.fs" t="Include" />
         <e p="NoteOffset.fs" t="Include" />
         <e p="obj" t="ExcludeRecursive" />
         <e p="Operators.fs" t="Include" />
+        <e p="Rendering.fs" t="Include" />
         <e p="RMG.CoreF.fsproj" t="IncludeRecursive" />
         <e p="Song.fs" t="Include" />
         <e p="Timeline" t="Include">
