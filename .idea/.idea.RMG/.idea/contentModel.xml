@@ -97,7 +97,7 @@
           <e p="Track.cs" t="Include" />
         </e>
         <e p="obj" t="ExcludeRecursive">
-          <e p="Release" t="Include">
+          <e p="Debug" t="Include">
             <e p="netcoreapp3.1" t="Include">
               <e p="RMG.Core.AssemblyInfo.cs" t="Include" />
             </e>
@@ -172,7 +172,7 @@
           <e p="SubTimelineTests.cs" t="Include" />
         </e>
         <e p="obj" t="ExcludeRecursive">
-          <e p="Release" t="Include">
+          <e p="Debug" t="Include">
             <e p="netcoreapp3.1" t="Include">
               <e p="RMG.Tests.AssemblyInfo.cs" t="Include" />
             </e>
@@ -187,6 +187,8 @@
         <e p="Assertions.fs" t="Include" />
         <e p="bin" t="ExcludeRecursive" />
         <e p="EventPattern.fs" t="Include" />
+        <e p="intToBytes.fs" t="Include" />
+        <e p="Midi.fs" t="Include" />
         <e p="NoteOffsetStateBasedEventPattern.fs" t="Include" />
         <e p="NoteOffsetStatePatternMap.fs" t="Include" />
         <e p="obj" t="ExcludeRecursive" />

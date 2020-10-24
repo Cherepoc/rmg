@@ -87,6 +87,7 @@ module Rendering =
 
             let renderedNotes =
                 notes.Timeline
+                |> Seq.where (fun x -> x.Position < song.Duration)
                 |> Seq.map renderNote
                 |> EventTimeline.fromSequence
 

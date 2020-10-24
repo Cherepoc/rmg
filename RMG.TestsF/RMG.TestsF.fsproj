@@ -22,6 +22,8 @@
       <Compile Include="NoteOffsetStatePatternMap.fs" />
       <Compile Include="NoteOffsetStateBasedEventPattern.fs" />
       <Compile Include="TrackNoteOffsetStateBasedEventTimelineMapTest.fs" />
+      <Compile Include="intToBytes.fs" />
+      <Compile Include="Midi.fs" />
     </ItemGroup>
 
     <ItemGroup>

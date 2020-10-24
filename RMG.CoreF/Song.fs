@@ -11,7 +11,7 @@ type Instrument = { Code: InstrumentCode }
 [<NoComparison>]
 type Scale = { KeyOffsets: list<KeyOffset> }
 
-type TimeSignature = { Numerator: uint; Denominator: uint }
+type TimeSignature = { Numerator: uint8; Denominator: uint8 }
 
 [<NoEquality>]
 [<NoComparison>]
