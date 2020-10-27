@@ -17,13 +17,15 @@
     <ItemGroup>
       <Compile Include="Assertions.fs" />
       <Compile Include="StateTimeline.fs" />
-      <Compile Include="EventPattern.fs" />
-      <Compile Include="StatePattern.fs" />
-      <Compile Include="NoteOffsetStatePatternMap.fs" />
-      <Compile Include="NoteOffsetStateBasedEventPattern.fs" />
-      <Compile Include="TrackNoteOffsetStateBasedEventTimelineMapTest.fs" />
       <Compile Include="intToBytes.fs" />
       <Compile Include="Midi.fs" />
+      <Compile Include="Composition\EventPattern.fs" />
+      <Compile Include="Composition\StatePattern.fs" />
+      <Compile Include="Composition\NoteOffsetStatePatternMap.fs" />
+      <Compile Include="Composition\NoteOffsetStateBasedEventPattern.fs" />
+      <Compile Include="Composition\TrackNoteOffsetStateBasedEventTimelineMapTest.fs" />
+      <Compile Include="Probability\GeometricIntProbabilityFunction.fs" />
+      <Compile Include="Probability\PickItemWeighted.fs" />
     </ItemGroup>
 
     <ItemGroup>

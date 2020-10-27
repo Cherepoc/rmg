@@ -23,6 +23,8 @@
         <Compile Include="Composition\SongPatternMap.fs" />
         <Compile Include="Rendering.fs" />
         <Compile Include="Midi.fs" />
+        <Compile Include="Probability.fs" />
+        <Compile Include="Generate.fs" />
     </ItemGroup>
 
 </Project>
