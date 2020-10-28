@@ -19,7 +19,7 @@ type PickItemWeighted() =
 
         let result =
             items
-            |> pickItemWeighted probabilityFunction value
+            |> weightIndexPickItem probabilityFunction value
 
         result |> should beEquivalentTo expected
 
@@ -38,7 +38,7 @@ type PickItemWeighted() =
 
         let result =
             items
-            |> pickItemWeighted probabilityFunction value
+            |> weightIndexPickItem probabilityFunction value
 
         result |> should beEquivalentTo expected
 
@@ -60,6 +60,6 @@ type PickItemWeighted() =
 
         let result =
             items
-            |> pickItemWeighted probabilityFunction value
+            |> weightIndexPickItem probabilityFunction value
 
         result |> should beEquivalentTo expected

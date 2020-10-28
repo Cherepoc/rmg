@@ -200,6 +200,7 @@
         <e p="obj" t="ExcludeRecursive" />
         <e p="Probability" t="Include">
           <e p="GeometricIntProbabilityFunction.fs" t="Include" />
+          <e p="PickItemWeighted.fs" t="Include" />
         </e>
         <e p="RMG.TestsF.fsproj" t="IncludeRecursive" />
         <e p="StateTimeline.fs" t="Include" />

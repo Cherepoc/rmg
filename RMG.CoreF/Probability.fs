@@ -30,54 +30,27 @@ module Probability =
         else if value >= 1.0 then true
         else value < referenceValue
 
-    let pickWeightedWithRemainder<'T> (value: float) (items: seq<'T * float>) =
-        let itemArray = items |> Seq.toArray
-
-        let weightSum =
-            itemArray
-            |> Seq.map (fun (_, weight) -> weight)
-            |> Seq.sum
-
-        let (item, weight, minWeight) =
-            itemArray
-            |> Seq.indexed
-            |> Seq.map (fun (index, (item, weight)) ->
-                let minWeight =
-                    itemArray
-                    |> Seq.take index
-                    |> Seq.map (fun (_, weight) -> weight)
-                    |> Seq.sum
-
-                (item, weight / weightSum, minWeight / weightSum))
-            |> Seq.find (fun (_, weight, minWeight) -> value >= minWeight && value < minWeight + weight)
-
-        (item, (value - minWeight) / weight)
-
-    let pickItemWeighted<'T> (probabilityFunction: IntProbabilityFunction) (value: float) (items: seq<'T>): 'T =
-        let weightedItems =
-            items
-            |> Seq.indexed
-            |> Seq.map (fun (index, item) -> (item, probabilityFunction index))
-            |> Seq.toArray
+    let pickWeighted<'T> (value: float) (weightedItems: seq<'T * float>): 'T =
+        let weightedItemsArray = weightedItems |> Seq.toArray
 
         if value <= 0.0 then
-            let (item, _) = weightedItems |> Seq.head
+            let (item, _) = weightedItemsArray |> Seq.head
             item
         else if value >= 1.0 then
-            let (item, _) = weightedItems |> Seq.last
+            let (item, _) = weightedItemsArray |> Seq.last
             item
         else
             let weightSum =
-                weightedItems
+                weightedItemsArray
                 |> Seq.map (fun (_, weight) -> weight)
                 |> Seq.sum
 
             let (item, _, _) =
-                weightedItems
+                weightedItemsArray
                 |> Seq.indexed
                 |> Seq.map (fun (index, (item, weight)) ->
                     let minWeight =
-                        weightedItems
+                        weightedItemsArray
                         |> Seq.take index
                         |> Seq.map (fun (_, weight) -> weight)
                         |> Seq.sum
@@ -86,6 +59,17 @@ module Probability =
                 |> Seq.find (fun (_, minWeight, maxWeight) -> value >= minWeight && value < maxWeight)
 
             item
+
+    let pickRank (probabilityFunction: IntProbabilityFunction) (value: float) (ranks: seq<int>): int =
+        ranks
+        |> Seq.map (fun rank -> (rank, probabilityFunction rank))
+        |> pickWeighted value
+
+    let weightIndexPickItem<'T> (probabilityFunction: IntProbabilityFunction) (value: float) (items: seq<'T>): 'T =
+        items
+        |> Seq.indexed
+        |> Seq.map (fun (index, item) -> (item, probabilityFunction index))
+        |> pickWeighted value
 
     let pickItem<'T> (value: float) (items: seq<'T>): 'T =
         let itemArray = items |> Seq.toArray
