@@ -22,9 +22,10 @@
         <Compile Include="Composition\TrackNoteOffsetStateBasedEventPatternMap.fs" />
         <Compile Include="Composition\SongPatternMap.fs" />
         <Compile Include="Rendering.fs" />
-        <Compile Include="Midi.fs" />
         <Compile Include="Probability.fs" />
         <Compile Include="Generate.fs" />
+        <Compile Include="Midi.fs" />
+        <Compile Include="RandomMusicGenerator.fs" />
     </ItemGroup>
 
 </Project>

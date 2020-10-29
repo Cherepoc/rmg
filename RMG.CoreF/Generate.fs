@@ -1,6 +1,7 @@
 namespace RMG.CoreF
 
 open System
+open System.Collections.Generic
 open RMG.CoreF.Probability
 
 module Generate =
@@ -66,8 +67,8 @@ module Generate =
         * period
         + offset
 
-    let timeline<'T> (itemFunction: int -> 'T,
-                      probabilityFunction: IntProbabilityFunction,
+    let timeline<'T> (itemFunction: Context -> int -> 'T)
+                     (probabilityFunction: IntProbabilityFunction,
                       maxRank: int,
                       offset: float,
                       period: float,
@@ -92,7 +93,7 @@ module Generate =
             seq {
                 if probability |> test (context.GetProbability()) then
                     yield { Position = position
-                            Value = itemFunction rank }
+                            Value = itemFunction context rank }
 
                 if rank < maxRank then
                     let childRank = rank + 1
@@ -112,3 +113,55 @@ module Generate =
             for cycle = 0 to cycleCount do
                 yield! generate (0.0, 1.0, 0, cycle)
         }
+
+    let sequentialTimeline<'T> (itemFunction: Context -> 'T * Duration)
+                               (duration: Duration)
+                               (context: Context)
+                               : Timeline<'T> =
+        let mutable list = List.empty
+        let mutable durationSum = 0.0
+        while durationSum < duration do
+            let (item, itemDuration) = itemFunction context
+            list <-
+                list
+                |> List.append [ { Position = durationSum; Value = item } ]
+            durationSum <- durationSum + itemDuration
+        list |> Seq.ofList
+
+    let sequence<'T> (itemFunction: Context -> 'T) (count: int) (context: Context): seq<'T> =
+        seq {
+            for i = 1 to count do
+                yield itemFunction context
+        }
+
+    let rec subSequence<'T> (sequence: seq<'T>) (count: int) (context: Context): seq<'T> =
+        let array = sequence |> Seq.toArray
+        if count <= 0 || array.Length <= 0 then
+            Seq.empty
+        else
+            let index = (context.GetInt(0, array.Length))
+
+            let remainder =
+                seq {
+                    yield! array |> Seq.take index
+                    yield! array |> Seq.skip (index + 1)
+                }
+
+            seq {
+                yield array.[index]
+                yield! subSequence remainder (count - 1) context
+            }
+
+    let float (min: float, max: float) (context: Context): float =
+        (context.GetProbability()) * (max - min) + min
+
+    let int (min: int, max: int) (context: Context): int = (context.GetInt(min, max + 1))
+
+    let intByRank (probabilityFunction: IntProbabilityFunction, min: int, max: int) (context: Context): int =
+        seq { min .. max }
+        |> pickRank probabilityFunction (context.GetProbability())
+
+    let item<'T> (sequence: seq<'T>) (context: Context): 'T =
+        let array = sequence |> Seq.toArray
+        let index = (context.GetInt(0, array.Length))
+        array.[index]

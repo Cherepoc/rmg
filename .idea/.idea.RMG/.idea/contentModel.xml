@@ -147,6 +147,7 @@
         <e p="obj" t="ExcludeRecursive" />
         <e p="Operators.fs" t="Include" />
         <e p="Probability.fs" t="Include" />
+        <e p="RandomMusicGenerator.fs" t="Include" />
         <e p="Rendering.fs" t="Include" />
         <e p="RMG.CoreF.fsproj" t="IncludeRecursive" />
         <e p="Song.fs" t="Include" />
@@ -195,6 +196,7 @@
           <e p="StatePattern.fs" t="Include" />
           <e p="TrackNoteOffsetStateBasedEventTimelineMapTest.fs" t="Include" />
         </e>
+        <e p="GenerateSong.fs" t="Include" />
         <e p="intToBytes.fs" t="Include" />
         <e p="Midi.fs" t="Include" />
         <e p="obj" t="ExcludeRecursive" />

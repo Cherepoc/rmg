@@ -134,10 +134,11 @@ module Midi =
             writeTrack events
 
         let writeNoteTrack (track: RenderedTrack, index: byte) =
+            let fixedIndex = if index >= 10uy then index + 1uy else index
             let events =
                 seq {
                     yield { Delta = 0u
-                            Bytes = programChange (index, byte track.Code) }
+                            Bytes = programChange (fixedIndex, byte track.Code) }
                     yield! track.Items
                            |> Seq.collect (fun item ->
                                let noteOffPosition =
@@ -145,9 +146,9 @@ module Midi =
 
                                seq {
                                    { Delta = calculateAbsoluteDelta item.Position
-                                     Bytes = noteOn (index, byte item.Value.Offset, item.Value.Volume) }
+                                     Bytes = noteOn (fixedIndex, byte item.Value.Offset, item.Value.Volume) }
                                    { Delta = if noteOffPosition <= durationDelta then noteOffPosition else durationDelta
-                                     Bytes = noteOff (index, byte item.Value.Offset) }
+                                     Bytes = noteOff (fixedIndex, byte item.Value.Offset) }
                                })
                 }
 

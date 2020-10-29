@@ -26,6 +26,7 @@
       <Compile Include="Composition\TrackNoteOffsetStateBasedEventTimelineMapTest.fs" />
       <Compile Include="Probability\GeometricIntProbabilityFunction.fs" />
       <Compile Include="Probability\PickItemWeighted.fs" />
+      <Compile Include="GenerateSong.fs" />
     </ItemGroup>
 
     <ItemGroup>

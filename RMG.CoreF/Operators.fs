@@ -13,3 +13,6 @@ let inline nullCoalesceHelper< ^t, ^a, ^b, ^c when (^t or ^a) : (static member C
                                             ((^t or ^a) : (static member Coalesce : ^a * ^b -> ^c) (a, b))
 
 let inline (|??) a b = nullCoalesceHelper<NullCoalesce, _, _, _> a b
+
+/// Euclidean remainder, the proper modulo operation
+let inline (%!) a b = (a % b + b) % b

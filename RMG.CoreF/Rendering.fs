@@ -1,5 +1,7 @@
 namespace RMG.CoreF
 
+open RMG.CoreF.Operators
+
 module Rendering =
     type RenderedNote =
         { Offset: int
@@ -27,10 +29,10 @@ module Rendering =
                 |> NoteOffsetStateTimelineMap.merge
 
             let minTrackNoteOffset =
-                track.MinOctaveOffset * Constants.notesInOctave
+                (track.MinOctaveOffset + Constants.zeroOctaveOffset) * Constants.notesInOctave
 
             let maxTrackNoteOffset =
-                (track.MaxOctaveOffset + 1)
+                (track.MaxOctaveOffset + Constants.zeroOctaveOffset + 1)
                 * Constants.notesInOctave
 
             let trackNoteOffsetWidth = maxTrackNoteOffset - minTrackNoteOffset
@@ -49,10 +51,8 @@ module Rendering =
 
                 let scaleOffset =
                     match scale with
-                    | Some scale ->
-                        scale.KeyOffsets
-                        |> List.item (noteOffset.ScaleOffset % (scale.KeyOffsets |> List.length))
-                    | _ -> noteOffset.ScaleOffset % Constants.notesInOctave
+                    | Some scale -> scale.KeyOffsets.[noteOffset.ScaleOffset %! scale.KeyOffsets.Length]
+                    | _ -> noteOffset.ScaleOffset %! Constants.notesInOctave
 
                 let offset =
                     scaleOffset
