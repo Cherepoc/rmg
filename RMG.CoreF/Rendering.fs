@@ -104,6 +104,7 @@ module Rendering =
                            |> Map.toSeq
                            |> Seq.map (fun (trackNumber, _) -> trackNumber)
                 }
+                |> Seq.distinct
 
             trackNumbers
             |> Seq.choose (fun trackNumber ->
