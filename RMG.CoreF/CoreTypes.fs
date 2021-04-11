@@ -2,7 +2,7 @@ namespace RMG.CoreF
 
 type KeyOffset = int
 type OctaveOffset = int
-type ScaleOffset = int
+type ScaleOffset = float
 type Volume = float
 
 type Position = float

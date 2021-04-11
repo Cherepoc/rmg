@@ -16,6 +16,8 @@ module RandomMusicGenerator =
         let eighthProbabilityFunction =
             Probability.geometricIntProbabilityFunction (0.0, 1.0, 0.125, 0)
 
+        let scaleOffsetProbabilityFunction = Generate.normalFloat (0.0, 0.1)
+
         let context = Generate.Context()
         let duration = 512.0
         let templateCount = 16
@@ -47,7 +49,7 @@ module RandomMusicGenerator =
                       { Duration = context |> Generate.float (0.5, 2.0)
                         KeyOffset = 0
                         OctaveOffset = context |> Generate.int (-2, 2)
-                        ScaleOffset = 0
+                        ScaleOffset = 0.0
                         Volume = context |> Generate.float (0.75, 1.5) } }) trackCount
 
         let createPattern context =
@@ -81,8 +83,7 @@ module RandomMusicGenerator =
                           context
                           |> Generate.intByRank (eighthProbabilityFunction, -1, 1)
                       ScaleOffset =
-                          context
-                          |> Generate.intByRank (halfProbabilityFunction, -2, 2)
+                          float (context |> scaleOffsetProbabilityFunction)
                       KeyOffset = 0 }
 
             let notes =
@@ -183,9 +184,8 @@ module RandomMusicGenerator =
                         PatternTimelineInput = Seq.empty }
                   ScaleOffsetPatternInput =
                       { TimelineInput =
-                            generateIntNoteOffsetTimeline (fun context rank ->
-                                context
-                                |> Generate.intByRank (halfProbabilityFunction, -2, 2))
+                            generateFloatNoteOffsetTimeline (fun context rank ->
+                                context |> scaleOffsetProbabilityFunction)
                         PatternTimelineInput = Seq.empty }
                   VolumePatternInput =
                       { TimelineInput = Seq.empty
@@ -283,7 +283,7 @@ module RandomMusicGenerator =
                   Value =
                       { TimelineInput = seq { { Position = 0.0; Value = value } }
                         PatternTimelineInput = Seq.empty }
-                      |> StatePattern.fromInput duration StateMerger.multiplicative }
+                      |> StatePattern.fromInput duration StateMerger.multiplicativeFloat }
             }
 
         let toEventPatternTimeline value =

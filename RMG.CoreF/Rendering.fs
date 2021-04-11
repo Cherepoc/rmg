@@ -23,16 +23,20 @@ module Rendering =
                 seq {
                     { Position = 0.0
                       Value = song.NoteOffsetTimelineMap }
+
                     { Position = 0.0
                       Value = notes.NoteOffsetStateTimelineMap }
                 }
                 |> NoteOffsetStateTimelineMap.merge
 
             let minTrackNoteOffset =
-                (track.MinOctaveOffset + Constants.zeroOctaveOffset) * Constants.notesInOctave
+                (track.MinOctaveOffset + Constants.zeroOctaveOffset)
+                * Constants.notesInOctave
 
             let maxTrackNoteOffset =
-                (track.MaxOctaveOffset + Constants.zeroOctaveOffset + 1)
+                (track.MaxOctaveOffset
+                 + Constants.zeroOctaveOffset
+                 + 1)
                 * Constants.notesInOctave
 
             let trackNoteOffsetWidth = maxTrackNoteOffset - minTrackNoteOffset
@@ -49,10 +53,12 @@ module Rendering =
                     song.ScaleTimeline
                     |> EventTimeline.lastEffectiveValue item.Position
 
+                let noteOffsetModulo = noteOffset.ScaleOffset %! 1.0
+
                 let scaleOffset =
                     match scale with
-                    | Some scale -> scale.KeyOffsets.[noteOffset.ScaleOffset %! scale.KeyOffsets.Length]
-                    | _ -> noteOffset.ScaleOffset %! Constants.notesInOctave
+                    | Some scale -> scale.KeyOffsets.[int (floor (noteOffsetModulo * (float scale.KeyOffsets.Length)))]
+                    | _ -> int (floor (noteOffsetModulo * (float Constants.notesInOctave)))
 
                 let offset =
                     scaleOffset
@@ -97,12 +103,15 @@ module Rendering =
         let renderedTracks =
             let trackNumbers =
                 seq {
-                    yield! song.Tracks
-                           |> Map.toSeq
-                           |> Seq.map (fun (trackNumber, _) -> trackNumber)
-                    yield! song.TrackNoteOffsetTimelineMap
-                           |> Map.toSeq
-                           |> Seq.map (fun (trackNumber, _) -> trackNumber)
+                    yield!
+                        song.Tracks
+                        |> Map.toSeq
+                        |> Seq.map (fun (trackNumber, _) -> trackNumber)
+
+                    yield!
+                        song.TrackNoteOffsetTimelineMap
+                        |> Map.toSeq
+                        |> Seq.map (fun (trackNumber, _) -> trackNumber)
                 }
                 |> Seq.distinct
 

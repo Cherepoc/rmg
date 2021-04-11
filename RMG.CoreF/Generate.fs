@@ -1,7 +1,7 @@
 namespace RMG.CoreF
 
 open System
-open System.Collections.Generic
+open MathNet.Numerics.Distributions
 open RMG.CoreF.Probability
 
 module Generate =
@@ -165,3 +165,5 @@ module Generate =
         let array = sequence |> Seq.toArray
         let index = (context.GetInt(0, array.Length))
         array.[index]
+
+    let normalFloat (mean: float, stddev: float) (context: Context) : float = Normal.Sample(context.Random, mean, stddev)

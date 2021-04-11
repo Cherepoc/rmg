@@ -6,7 +6,7 @@ open Xunit
 open RMG.TestsF.Assertions
 
 type StatePattern() =
-    let stateMerger = StateMerger.additive
+    let stateMerger = StateMerger.additiveInt
 
     [<Fact>]
     let empty () =

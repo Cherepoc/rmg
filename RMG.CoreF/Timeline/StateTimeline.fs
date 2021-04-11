@@ -126,12 +126,17 @@ module StateTimeline =
         | _ -> stateMerger.DefaultValue
 
 module StateMerger =
-    let additive: StateMerger<int> =
+    let additiveInt: StateMerger<int> =
         { Merge = fun (v1, v2) -> v1 + v2
           CompareEqual = fun (v1, v2) -> v1 = v2
           DefaultValue = 0 }
 
-    let multiplicative: StateMerger<double> =
+    let additiveFloat: StateMerger<float> =
+        { Merge = fun (v1, v2) -> v1 + v2
+          CompareEqual = fun (v1, v2) -> v1 = v2
+          DefaultValue = 0.0 }
+
+    let multiplicativeFloat: StateMerger<float> =
         { Merge = fun (v1, v2) -> v1 * v2
           CompareEqual = fun (v1, v2) -> v1 = v2
           DefaultValue = 1.0 }

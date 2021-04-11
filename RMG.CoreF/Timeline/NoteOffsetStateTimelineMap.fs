@@ -20,11 +20,11 @@ type NoteOffsetStateTimelineMapInput =
 
 module NoteOffsetStateTimelineMap =
     module Merger =
-        let duration: StateMerger<Duration> = StateMerger.multiplicative
-        let keyOffset: StateMerger<KeyOffset> = StateMerger.additive
-        let octaveOffset: StateMerger<OctaveOffset> = StateMerger.additive
-        let scaleOffset: StateMerger<ScaleOffset> = StateMerger.additive
-        let volume: StateMerger<Volume> = StateMerger.multiplicative
+        let duration: StateMerger<Duration> = StateMerger.multiplicativeFloat
+        let keyOffset: StateMerger<KeyOffset> = StateMerger.additiveInt
+        let octaveOffset: StateMerger<OctaveOffset> = StateMerger.additiveInt
+        let scaleOffset: StateMerger<ScaleOffset> = StateMerger.additiveFloat
+        let volume: StateMerger<Volume> = StateMerger.multiplicativeFloat
 
     let empty: NoteOffsetStateTimelineMap =
         { DurationTimeline = StateTimeline.empty

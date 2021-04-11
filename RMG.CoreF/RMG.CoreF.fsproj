@@ -28,4 +28,9 @@
         <Compile Include="RandomMusicGenerator.fs" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
+      <PackageReference Include="MathNet.Numerics.FSharp" Version="4.15.0" />
+    </ItemGroup>
+
 </Project>

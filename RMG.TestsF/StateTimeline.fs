@@ -5,7 +5,7 @@ open Xunit
 open RMG.TestsF.Assertions
 
 type StateTimeline() =
-    let stateMerger = StateMerger.additive
+    let stateMerger = StateMerger.additiveInt
 
     [<Fact>]
     let fromEmptySource () =

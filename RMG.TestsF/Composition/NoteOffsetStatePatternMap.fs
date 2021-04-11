@@ -65,12 +65,12 @@ type NoteOffsetStatePatternMap() =
                         } }
                   |> StatePattern.fromInput 1.0 NoteOffsetStateTimelineMap.Merger.octaveOffset
               NoteOffsetStatePatternMapInput.ScaleOffsetPattern =
-                  { StatePatternInput.TimelineInput = seq { { Position = 0.0; Value = 1 } }
+                  { StatePatternInput.TimelineInput = seq { { Position = 0.0; Value = 1.0 } }
                     StatePatternInput.PatternTimelineInput =
                         seq {
                             { Position = 0.5
                               Value =
-                                  { StatePatternInput.TimelineInput = seq { { Position = 0.0; Value = 2 } }
+                                  { StatePatternInput.TimelineInput = seq { { Position = 0.0; Value = 2.0 } }
                                     StatePatternInput.PatternTimelineInput = Seq.empty }
                                   |> StatePattern.fromInput 1.0 NoteOffsetStateTimelineMap.Merger.scaleOffset }
                         } }

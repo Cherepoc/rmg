@@ -38,7 +38,7 @@ type SongPatternMap private (duration: Duration,
         let tempoTimeline =
             orderedTempoPatternTimeline
             |> Timeline.map (fun x -> x.FlatTimeline)
-            |> StateTimeline.merge StateMerger.multiplicative
+            |> StateTimeline.merge StateMerger.multiplicativeFloat
 
         let orderedScalePatternTimeline =
             scalePatternTimeline |> EventTimeline.fromSequence
