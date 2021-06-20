@@ -7,6 +7,7 @@ type Volume = float
 
 type Position = float
 type Duration = float
+type Tempo = float
 
 type TrackNumber = int
 

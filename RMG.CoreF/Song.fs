@@ -2,30 +2,19 @@
 
 open RMG.CoreF
 
-type Tempo = double
-type InstrumentCode = byte
-
-type Instrument = { Code: InstrumentCode }
-
 [<NoEquality>]
 [<NoComparison>]
 type Scale = { KeyOffsets: list<KeyOffset> }
 
-type TimeSignature = { Numerator: uint8; Denominator: uint8 }
-
-[<NoEquality>]
-[<NoComparison>]
-type Track =
-    { Instrument: Instrument
-      NoteOffset: NoteOffset
-      MinOctaveOffset: OctaveOffset
-      MaxOctaveOffset: OctaveOffset }
+type TimeSignature =
+    { Numerator: uint8
+      Denominator: uint8 }
 
 [<NoEquality>]
 [<NoComparison>]
 type Song =
     { Duration: Duration
-      Tracks: Map<TrackNumber, Track>
+      Tracks: Map<TrackNumber, InstrumentTrack>
       ScaleTimeline: EventTimeline<Scale>
       TempoTimeline: StateTimeline<Tempo>
       NoteOffsetTimelineMap: NoteOffsetStateTimelineMap

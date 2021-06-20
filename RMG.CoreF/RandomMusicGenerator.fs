@@ -28,9 +28,42 @@ module RandomMusicGenerator =
 
         let tempo = context |> Generate.float (0.75, 1.25)
 
-        let trackCount = context |> Generate.int (4, 8)
+        let percussionInstrumentTracks =
+            [
+                {
+                    Instrument = {ArticulationCodes = [35uy; 36uy]}
+                    NoteOffset =
+                      { Duration = 1.0
+                        KeyOffset = 0
+                        OctaveOffset = 0
+                        ScaleOffset = 0.0
+                        Volume = context |> Generate.float (0.75, 1.5) }
+                };
+                {
+                    Instrument = {ArticulationCodes = [37uy; 38uy; 39uy; 40uy]}
+                    NoteOffset =
+                      { Duration = 1.0
+                        KeyOffset = 0
+                        OctaveOffset = 0
+                        ScaleOffset = 0.0
+                        Volume = context |> Generate.float (0.75, 1.5) }
+                };
+                {
+                    Instrument = {ArticulationCodes = [42uy; 44uy; 46uy]}
+                    NoteOffset =
+                      { Duration = 1.0
+                        KeyOffset = 0
+                        OctaveOffset = 0
+                        ScaleOffset = 0.0
+                        Volume = context |> Generate.float (0.75, 1.5) }
+                }
+            ]
 
-        let tracks =
+        let percussionInstrumentTrackCount = percussionInstrumentTracks.Length
+
+        let pitchInstrumentTrackCount = context |> Generate.int (4, 8)
+
+        let pitchInstrumentTracks =
             context
             |> Generate.sequence (fun context ->
                 let minOctave =
@@ -50,7 +83,11 @@ module RandomMusicGenerator =
                         KeyOffset = 0
                         OctaveOffset = context |> Generate.int (-2, 2)
                         ScaleOffset = 0.0
-                        Volume = context |> Generate.float (0.75, 1.5) } }) trackCount
+                        Volume = context |> Generate.float (0.75, 1.5) } }) pitchInstrumentTrackCount
+            |> List.ofSeq
+
+        let pitchInstrumentTrackIndex i = i
+        let percussionInstrumentTrackIndex i = pitchInstrumentTrackCount + i
 
         let createPattern context =
             let duration: float =
@@ -90,15 +127,28 @@ module RandomMusicGenerator =
                 context
                 |> Generate.timeline noteGenerator (quarterProbabilityFunction, maxRank, offset, period, duration)
 
-            EventPattern<'T>(duration, notes, Seq.empty)
+            EventPattern(duration, notes, Seq.empty)
 
         let commonPatterns =
             context
             |> Generate.sequence createPattern templateCount
             |> Seq.toArray
 
-        let trackPatterns =
-            tracks
+        let pitchInstrumentTrackPatterns =
+            pitchInstrumentTracks
+            |> Seq.map (fun _ ->
+                seq {
+                    yield! context
+                           |> Generate.subSequence commonPatterns subTemplateCount
+                    yield! context
+                           |> Generate.sequence createPattern subTemplateCount
+                }
+                |> Seq.toArray)
+            |> Seq.indexed
+            |> Map.ofSeq
+
+        let percussionInstrumentTrackPatterns =
+            percussionInstrumentTracks
             |> Seq.map (fun _ ->
                 seq {
                     yield! context
@@ -136,8 +186,8 @@ module RandomMusicGenerator =
             |> Generate.sequence (createHigherPattern commonPatterns) templateCount
             |> Seq.toArray
 
-        let trackHigherPatterns =
-            tracks
+        let pitchInstrumentTrackHigherPatterns =
+            pitchInstrumentTracks
             |> Seq.indexed
             |> Seq.map (fun (index, _) ->
                 let patterns =
@@ -145,12 +195,49 @@ module RandomMusicGenerator =
                         yield! context
                                |> Generate.subSequence commonHigherPatterns subTemplateCount
                         yield! context
-                               |> Generate.sequence (createHigherPattern trackPatterns.[index]) subTemplateCount
+                               |> Generate.sequence (createHigherPattern pitchInstrumentTrackPatterns.[index]) subTemplateCount
                     }
                     |> Seq.toArray
 
                 (index, patterns))
             |> Map.ofSeq
+
+        let createPercussionPart context =
+            let duration = 2.0 ** float (context |> Generate.int (2, 4))
+            let partTrackCount = context |> Generate.int (1, 4)
+            let percussionTrackNumbers =
+                context
+                |> Generate.subSequence (seq { 0 .. percussionInstrumentTracks.Length - 1 }) percussionInstrumentTracks.Length
+            let trackTimelines =
+                percussionTrackNumbers
+                |> Seq.map (fun trackNumber ->
+                    let limitPatternCount = context |> Generate.int (1, 4)
+                    let limitedPatterns =
+                        context
+                        |> Generate.subSequence percussionInstrumentTrackPatterns.[trackNumber] limitPatternCount
+
+                    let innerPatterns =
+                        context
+                        |> Generate.sequentialTimeline (fun context ->
+                            let item = context |> Generate.item limitedPatterns
+                            let pattern =
+                                { PatternTimelineInput = [{ Position = 0.0; Value = item }]
+                                  NoteOffsetStatePatternMapPatternTimelineInput = Seq.empty
+                                  NoteOffsetBasedPatternTimelineInput = Seq.empty }
+                                |> NoteOffsetStateBasedEventPattern.fromInput item.Duration
+                            (pattern, item.Duration)) duration
+
+                    (percussionInstrumentTrackIndex trackNumber, innerPatterns))
+
+            { TrackPatternTimelineMapInput = trackTimelines
+              NoteOffsetStatePatternMapPatternTimelineInput = []
+              TrackNoteOffsetStateBasedEventPatternMapTimelineInput = Seq.empty }
+            |> TrackNoteOffsetStateBasedEventPatternMap.fromInput duration
+
+        let percussionParts =
+            context
+            |> Generate.sequence createPercussionPart templateCount
+            |> Seq.toArray
 
         let partNoteOffsetState (period, duration) =
             let generateFloatNoteOffsetTimeline (itemFunction: Generate.Context -> int -> float): Timeline<float> =
@@ -207,18 +294,18 @@ module RandomMusicGenerator =
 
             let partTrackCount = context |> Generate.int (1, 4)
 
-            let trackNumbers =
+            let pitchInstrumentTrackNumbers =
                 context
-                |> Generate.subSequence (seq { 0 .. trackCount - 1 }) partTrackCount
+                |> Generate.subSequence (seq { 0 .. pitchInstrumentTrackCount - 1 }) partTrackCount
 
-            let trackTimelines =
-                trackNumbers
-                |> Seq.map (fun trackNumber ->
+            let pitchInstrumentTrackTimelines =
+                pitchInstrumentTrackNumbers
+                |> Seq.map (fun pitchInstrumentTrackNumber ->
                     let limitPatternCount = context |> Generate.int (2, 8)
 
                     let limitedPatterns =
                         context
-                        |> Generate.subSequence trackHigherPatterns.[trackNumber] limitPatternCount
+                        |> Generate.subSequence pitchInstrumentTrackHigherPatterns.[pitchInstrumentTrackNumber] limitPatternCount
 
                     let innerPatterns =
                         context
@@ -226,17 +313,27 @@ module RandomMusicGenerator =
                             let item = context |> Generate.item limitedPatterns
                             (item, item.Duration)) duration
 
-                    (trackNumber, innerPatterns))
+                    (pitchInstrumentTrackIndex pitchInstrumentTrackNumber, innerPatterns))
+
+            let percussionPartTimeline =
+                let limitPartCount = context |> Generate.int (2, 8)
+                let limitedParts =
+                    context
+                    |> Generate.subSequence percussionParts limitPartCount
+                context
+                    |> Generate.sequentialTimeline (fun context ->
+                        let item = context |> Generate.item limitedParts
+                        (item, item.Duration)) duration
 
             let noteOffsetStatePattern = partNoteOffsetState (16.0, duration)
 
-            { TrackPatternTimelineMapInput = trackTimelines
+            { TrackPatternTimelineMapInput = pitchInstrumentTrackTimelines
               NoteOffsetStatePatternMapPatternTimelineInput =
                   seq {
                       { Position = 0.0
                         Value = noteOffsetStatePattern }
                   }
-              TrackNoteOffsetStateBasedEventPatternMapTimelineInput = Seq.empty }
+              TrackNoteOffsetStateBasedEventPatternMapTimelineInput = percussionPartTimeline }
             |> TrackNoteOffsetStateBasedEventPatternMap.fromInput duration
 
         let parts =
@@ -297,5 +394,10 @@ module RandomMusicGenerator =
 
         let tempoPatternTimeline = toStatePatternTimeline tempo
         let scalePatternTimeline = toEventPatternTimeline scale
+
+        let tracks = seq<InstrumentTrack> {
+            yield! pitchInstrumentTracks |> Seq.map PitchInstrumentTrack
+            yield! percussionInstrumentTracks |> Seq.map PercussionInstrumentTrack
+        }
 
         SongPatternMap(duration, tracks, songTimeline, tempoPatternTimeline, scalePatternTimeline)

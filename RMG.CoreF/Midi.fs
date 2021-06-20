@@ -5,6 +5,7 @@ open RMG.CoreF.Rendering
 
 module Midi =
     let private ticksPerQuarterNote = 96u
+    let private percussionChannel = 9uy
 
     type private MidiEvent = { Delta: uint32; Bytes: seq<byte> }
 
@@ -91,6 +92,11 @@ module Midi =
             yield! bytes |> Seq.skip (bytes.Length - 1)
         }
 
+    let pitchTrackChannel(trackIndex: byte): byte =
+        if trackIndex < percussionChannel
+            then byte trackIndex
+            else byte (trackIndex + 1uy)
+
     let writeSong (song: RenderedSong): array<byte> =
         let durationDelta = calculateAbsoluteDelta song.Duration
 
@@ -133,22 +139,21 @@ module Midi =
 
             writeTrack events
 
-        let writeNoteTrack (track: RenderedTrack, index: byte) =
-            let fixedIndex = if index >= 10uy then index + 1uy else index
+        let writeNoteTrack (items: EventTimeline<RenderedNote>, instrumentCode: InstrumentCode, index: byte) =
             let events =
                 seq {
                     yield { Delta = 0u
-                            Bytes = programChange (fixedIndex, byte track.Code) }
-                    yield! track.Items
+                            Bytes = programChange (index, byte instrumentCode) }
+                    yield! items
                            |> Seq.collect (fun item ->
                                let noteOffPosition =
                                    calculateAbsoluteDelta (item.Position + item.Value.Duration)
 
                                seq {
                                    { Delta = calculateAbsoluteDelta item.Position
-                                     Bytes = noteOn (fixedIndex, byte item.Value.Offset, item.Value.Volume) }
+                                     Bytes = noteOn (index, byte item.Value.Offset, item.Value.Volume) }
                                    { Delta = if noteOffPosition <= durationDelta then noteOffPosition else durationDelta
-                                     Bytes = noteOff (fixedIndex, byte item.Value.Offset) }
+                                     Bytes = noteOff (index, byte item.Value.Offset) }
                                })
                 }
 
@@ -165,11 +170,12 @@ module Midi =
             0x06uy
             0x00uy
             0x01uy
-            yield! intToBytes (uint32 (song.Tracks.Length + 1), Some 2, 8)
+            yield! intToBytes (uint32 (song.PitchInstrumentTracks.Length + 2), Some 2, 8)
             yield! intToBytes (ticksPerQuarterNote, Some 2, 8)
             yield! writeSystemTrack
-            yield! song.Tracks
+            yield! song.PitchInstrumentTracks
                    |> Seq.indexed
-                   |> Seq.collect (fun (index, track) -> writeNoteTrack (track, byte index))
+                   |> Seq.collect (fun (index, track) -> writeNoteTrack (track.Items, track.Code, pitchTrackChannel (byte index)))
+            yield! writeNoteTrack (song.PercussionTimeline, 0uy, percussionChannel)
         }
         |> Seq.toArray

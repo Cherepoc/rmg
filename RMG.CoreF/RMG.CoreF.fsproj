@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
@@ -14,6 +14,8 @@
         <Compile Include="Timeline\NoteOffsetStateTimelineMap.fs" />
         <Compile Include="Timeline\NoteOffsetStateBasedEventTimeline.fs" />
         <Compile Include="Timeline\TrackNoteOffsetStateBasedEventTimelineMap.fs" />
+        <Compile Include="Instrument.fs" />
+        <Compile Include="InstrumentTrack.fs" />
         <Compile Include="Song.fs" />
         <Compile Include="Composition\EventPattern.fs" />
         <Compile Include="Composition\StatePattern.fs" />

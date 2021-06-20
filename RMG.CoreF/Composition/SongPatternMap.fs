@@ -4,7 +4,7 @@ open RMG.CoreF
 
 [<Sealed>]
 type SongPatternMap private (duration: Duration,
-                             tracks: Map<TrackNumber, Track>,
+                             tracks: Map<TrackNumber, InstrumentTrack>,
                              trackNotePatternMapTimeline: EventTimeline<TrackNoteOffsetStateBasedEventPatternMap<NoteOffset>>,
                              tempoPatternTimeline: EventTimeline<StatePattern<Tempo>>,
                              scalePatternTimeline: EventTimeline<EventPattern<Scale>>,
@@ -17,7 +17,7 @@ type SongPatternMap private (duration: Duration,
     member this.FlatSong = flatSong
 
     new(duration: Duration,
-        tracks: seq<Track>,
+        tracks: seq<InstrumentTrack>,
         trackNotePatternMapTimeline: Timeline<TrackNoteOffsetStateBasedEventPatternMap<NoteOffset>>,
         tempoPatternTimeline: Timeline<StatePattern<Tempo>>,
         scalePatternTimeline: Timeline<EventPattern<Scale>>) =

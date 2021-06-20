@@ -13,7 +13,7 @@ type write() =
               Tempo =
                   seq { { Position = 0.0; Value = 1.0 } }
                   |> EventTimeline.fromSequence
-              Tracks =
+              PitchInstrumentTracks =
                   seq {
                       { Code = 0uy
                         Items =
@@ -31,7 +31,8 @@ type write() =
                             }
                             |> EventTimeline.fromSequence }
                   }
-                  |> Seq.toList }
+                  |> Seq.toList
+              PercussionTimeline = EventTimeline.empty }
         let bytes = Midi.writeSong renderedSong
 
         File.WriteAllBytes ("C:\\Projects\\RMG\\songs\\song1.mid", bytes)
