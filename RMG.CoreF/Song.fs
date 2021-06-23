@@ -17,14 +17,16 @@ type Song =
       Tracks: Map<TrackNumber, InstrumentTrack>
       ScaleTimeline: EventTimeline<Scale>
       TempoTimeline: StateTimeline<Tempo>
+      NoteOffset: NoteOffset
       NoteOffsetTimelineMap: NoteOffsetStateTimelineMap
-      TrackNoteOffsetTimelineMap: Map<TrackNumber, NoteOffsetStateBasedEventTimeline<NoteOffset>> }
+      TrackNoteOffsetTimelineMap: TrackEventTimelineMap<NoteOffset> }
 
 module Song =
-    let empty =
+    let empty : Song =
         { Duration = 0.0
           Tracks = Map.empty
           ScaleTimeline = EventTimeline.empty
           TempoTimeline = StateTimeline.empty
+          NoteOffset = NoteOffset.empty
           NoteOffsetTimelineMap = NoteOffsetStateTimelineMap.empty
           TrackNoteOffsetTimelineMap = Map.empty }

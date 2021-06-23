@@ -77,6 +77,6 @@ module NoteOffsetStateTimelineMap =
           ScaleOffset =
               inputTimeline.ScaleOffsetTimeline
               |> StateTimeline.effectiveValue position Merger.scaleOffset
-          Volume =
+          Velocity =
               inputTimeline.VolumeTimeline
               |> StateTimeline.effectiveValue position Merger.volume }

@@ -10,6 +10,7 @@
         <Compile Include="NoteOffset.fs" />
         <Compile Include="Timeline\Timeline.fs" />
         <Compile Include="Timeline\EventTimeline.fs" />
+        <Compile Include="Timeline\TrackEventTimelineMap.fs" />
         <Compile Include="Timeline\StateTimeline.fs" />
         <Compile Include="Timeline\NoteOffsetStateTimelineMap.fs" />
         <Compile Include="Timeline\NoteOffsetStateBasedEventTimeline.fs" />
@@ -22,6 +23,8 @@
         <Compile Include="Composition\NoteOffsetStatePatternMap.fs" />
         <Compile Include="Composition\NoteOffsetStateBasedEventPattern.fs" />
         <Compile Include="Composition\TrackNoteOffsetStateBasedEventPatternMap.fs" />
+        <Compile Include="Composition\CompositeEventPattern.fs" />
+        <Compile Include="Composition\CompositeTrackEventPattern.fs" />
         <Compile Include="Composition\SongPatternMap.fs" />
         <Compile Include="Rendering.fs" />
         <Compile Include="Probability.fs" />

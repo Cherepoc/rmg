@@ -5,12 +5,19 @@ type NoteOffset =
       KeyOffset: KeyOffset
       OctaveOffset: OctaveOffset
       ScaleOffset: ScaleOffset
-      Volume: Volume }
+      Velocity: Volume }
 
 module NoteOffset =
-    let merge (x: NoteOffset) (y: NoteOffset): NoteOffset =
+    let empty: NoteOffset =
+        { Duration = 1.0
+          KeyOffset = 0
+          OctaveOffset = 0
+          ScaleOffset = 0.0
+          Velocity = 1.0 }
+
+    let merge (x:NoteOffset, y: NoteOffset): NoteOffset =
         { Duration = x.Duration * y.Duration
           KeyOffset = x.KeyOffset + y.KeyOffset
           OctaveOffset = x.OctaveOffset + y.OctaveOffset
           ScaleOffset = x.ScaleOffset + y.ScaleOffset
-          Volume = x.Volume * y.Volume }
+          Velocity = x.Velocity * y.Velocity }
