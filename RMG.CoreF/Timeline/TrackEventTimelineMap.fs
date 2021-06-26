@@ -1,43 +1,75 @@
 namespace RMG.CoreF
 
-type TrackEventTimelineMap<'T> = Map<TrackNumber, EventTimeline<'T>>
-type TrackEventTimelineMapInput<'T> = seq<TrackNumber * Timeline<'T>>
+type SubTrackEventTimelineMap<'T> = Map<TrackNumber, EventTimeline<'T>>
+type TrackEventTimelineMap<'T> = Map<TrackNumber, SubTrackEventTimelineMap<'T>>
+
+type SubTrackEventTimelineMapInput<'T> = seq<TrackNumber * Timeline<'T>>
+type TrackEventTimelineMapInput<'T> = seq<TrackNumber * SubTrackEventTimelineMapInput<'T>>
 
 module TrackEventTimelineMap =
     let empty<'T> : TrackEventTimelineMap<'T> = Map.empty
 
     let fromSeq<'T> (input: TrackEventTimelineMapInput<'T>) : TrackEventTimelineMap<'T> =
+        let fromSeqSubTrack (input: SubTrackEventTimelineMapInput<'T>) : SubTrackEventTimelineMap<'T> =
+            input
+            |> Seq.groupBy fst
+            |> Seq.map
+                (fun (trackNumber, trackTimeline) ->
+                    let mergedTimeline =
+                        trackTimeline
+                        |> Seq.map
+                            (fun (_, timeline) ->
+                                timeline
+                                |> EventTimeline.fromSequence
+                                |> Timeline.itemFromSingle)
+                        |> EventTimeline.merge
+
+                    (trackNumber, mergedTimeline))
+            |> Map.ofSeq
+
         input
         |> Seq.groupBy fst
         |> Seq.map
             (fun (trackNumber, trackTimeline) ->
                 let mergedTimeline =
                     trackTimeline
-                    |> Seq.map
-                        (fun (_, timeline) ->
-                            timeline
-                            |> EventTimeline.fromSequence
-                            |> Timeline.itemFromSingle)
-                    |> EventTimeline.merge
+                    |> Seq.collect snd
+                    |> fromSeqSubTrack
 
                 (trackNumber, mergedTimeline))
         |> Map.ofSeq
 
+    let shift<'T> (position: Position) (timelineMap: TrackEventTimelineMap<'T>): TrackEventTimelineMap<'T> =
+        timelineMap
+        |> Map.map (fun _ subTrackTimelineMap ->
+                subTrackTimelineMap
+                |> Map.map (fun _ timeline ->
+                    timeline
+                    |> Timeline.shift position
+                    |> EventTimeline.fromSequence))
+
     let merge<'T> (inputTimeline: Timeline<TrackEventTimelineMap<'T>>) : TrackEventTimelineMap<'T> =
-        let array = inputTimeline |> Seq.toArray
+        let mergeSubTrack (inputTimeline: seq<SubTrackEventTimelineMap<'T>>): SubTrackEventTimelineMap<'T> =
+            inputTimeline
+            |> Seq.collect (fun x -> x |> Map.toSeq)
+            |> Seq.groupBy fst
+            |> Seq.map (fun (trackNumber, timelines) ->
+                let eventTimeline =
+                    timelines
+                    |> Seq.collect (fun (_, timeline) -> timeline)
+                    |> EventTimeline.fromSequence
+                (trackNumber, eventTimeline))
+            |> Map.ofSeq
 
-        array
-        |> Seq.collect (fun item -> item.Value |> Map.toSeq |> Seq.map fst)
-        |> Seq.distinct
-        |> Seq.map
-            (fun trackNumber ->
-                let mergedTimeline =
-                    array
-                    |> Seq.filter (fun item -> item.Value |> Map.containsKey trackNumber)
-                    |> Timeline.map (fun map -> map |> Map.find trackNumber)
-                    |> EventTimeline.merge
-
-                (trackNumber, mergedTimeline))
+        inputTimeline
+        |> Seq.collect (fun x -> x.Value |> shift x.Position |> Map.toSeq)
+        |> Seq.groupBy fst
+        |> Seq.map (fun (trackNumber, subTrackTimelines) ->
+            let subTrackTimeline =
+                subTrackTimelines
+                |> Seq.map snd
+                |> mergeSubTrack
+            (trackNumber, subTrackTimeline))
         |> Map.ofSeq
 
     let map<'TSource, 'TDest>
@@ -45,11 +77,12 @@ module TrackEventTimelineMap =
         (input: TrackEventTimelineMap<'TSource>)
         : TrackEventTimelineMap<'TDest> =
         input
-        |> Map.map
-            (fun _ trackTimeline ->
-                trackTimeline
+        |> Map.map (fun _ subTrackTimelineMap ->
+            subTrackTimelineMap
+            |> Map.map (fun _ timeline ->
+                timeline
                 |> Timeline.map func
-                |> EventTimeline.fromSequence)
+                |> EventTimeline.fromSequence))
 
     let mergeItem
         (item: 'T)
@@ -67,9 +100,17 @@ module TrackEventTimelineMap =
         |> Timeline.map
             (fun (timelineMap, compositeItem) ->
                 timelineMap
-                |> Map.map
-                    (fun _ timeline ->
-                        (timeline
-                         |> Timeline.mergeItem compositeItem timelineItemMerge
-                         |> EventTimeline.fromSequence)))
+                |> map (fun x -> timelineItemMerge(x,  compositeItem)))
         |> merge
+
+    let mergeCompositeInner
+        (timelineItemMerge: TimelineItemMerge<'T>)
+        (inputTimelineMap: TrackEventTimelineMap<#Timeline<'T> * 'T>)
+        : TrackEventTimelineMap<'T> =
+        inputTimelineMap
+        |> Map.map (fun _ subTrackTimelineMap ->
+            subTrackTimelineMap
+            |> Map.map (fun _ timeline ->
+                timeline
+                |> Timeline.mergeComposite timelineItemMerge
+                |> EventTimeline.fromSequence))

@@ -19,43 +19,30 @@ module RandomMusicGenerator =
         let scaleOffsetProbabilityFunction = Generate.normalFloat (0.0, 0.1)
 
         let context = Generate.Context()
-        let duration = 512.0
+        let duration = 256.0
         let templateCount = 16
         let subTemplateCount = templateCount / 2
 
-        let standardVelocity() = context |> Generate.float (0.8, 1.25)
-        let standardDuration() = context |> Generate.float (0.5, 2.0)
+        let standardVelocity() = context |> Generate.float (0.875, 1.125)
+        let standardDuration() = context |> Generate.float (0.8, 1.25)
         let standardOctaveOffset() = context |> Generate.intByRank (halfProbabilityFunction, -2, 2)
 
         let scale : Scale =
             { KeyOffsets = [ 0; 2; 3; 5; 7; 8; 10 ] }
 
-        let tempo = context |> Generate.float (0.75, 1.25)
+        let tempo = context |> Generate.float (0.25, 1.0)
 
-        let percussionInstrumentTracks =
-            [ { Instrument = { ArticulationCodes = [ 35uy; 36uy ] }
-                NoteOffset =
-                    { Duration = 1.0
-                      KeyOffset = 0
-                      OctaveOffset = 0
-                      ScaleOffset = 0.0
-                      Velocity = context |> Generate.float (0.75, 1.5) } }
-              { Instrument = { ArticulationCodes = [ 37uy; 38uy; 39uy; 40uy ] }
-                NoteOffset =
-                    { Duration = 1.0
-                      KeyOffset = 0
-                      OctaveOffset = 0
-                      ScaleOffset = 0.0
-                      Velocity = context |> Generate.float (0.75, 1.5) } }
-              { Instrument = { ArticulationCodes = [ 42uy; 44uy; 46uy ] }
-                NoteOffset =
-                    { Duration = 1.0
-                      KeyOffset = 0
-                      OctaveOffset = 0
-                      ScaleOffset = 0.0
-                      Velocity = context |> Generate.float (0.75, 1.5) } } ]
-
-        let percussionInstrumentTrackCount = percussionInstrumentTracks.Length
+        let percussionInstrumentTrack =
+            { Instruments = [
+                { ArticulationCodes = [ 35uy; 36uy ] }
+                { ArticulationCodes = [ 37uy; 38uy; 39uy; 40uy ] }
+                { ArticulationCodes = [ 42uy; 44uy; 46uy ] } ]
+              NoteOffset =
+                  { Duration = 1.0
+                    KeyOffset = 0
+                    OctaveOffset = 0
+                    ScaleOffset = 0.0
+                    Velocity = standardVelocity() } }
 
         let pitchInstrumentTrackCount = context |> Generate.int (4, 8)
 
@@ -84,8 +71,8 @@ module RandomMusicGenerator =
                 pitchInstrumentTrackCount
             |> List.ofSeq
 
-        let pitchInstrumentTrackIndex i = i
-        let percussionInstrumentTrackIndex i = pitchInstrumentTrackCount + i
+        let pitchInstrumentTrackIndex i = i + 1
+        let percussionInstrumentTrackIndex  = 0
 
         let generateNote context =
             { Duration =
@@ -152,7 +139,7 @@ module RandomMusicGenerator =
             |> Map.ofSeq
 
         let percussionInstrumentTrackPatterns =
-            percussionInstrumentTracks
+            percussionInstrumentTrack.Instruments
             |> Seq.map
                 (fun _ ->
                     seq {
@@ -180,7 +167,7 @@ module RandomMusicGenerator =
                   KeyOffset = 0
                   OctaveOffset = standardOctaveOffset()
                   ScaleOffset = context |> scaleOffsetProbabilityFunction
-                  Velocity = 1.0 }
+                  Velocity = standardVelocity() }
 
             let limitedPatterns =
                 context
@@ -234,8 +221,8 @@ module RandomMusicGenerator =
             let percussionTrackNumbers =
                 context
                 |> Generate.subSequence
-                    (seq { 0 .. percussionInstrumentTracks.Length - 1 })
-                    percussionInstrumentTracks.Length
+                    (seq { 0 .. percussionInstrumentTrack.Instruments.Length - 1 })
+                    percussionInstrumentTrack.Instruments.Length
 
             let generateNoteOffset () : NoteOffset =
                 { Duration = 1.0
@@ -270,9 +257,9 @@ module RandomMusicGenerator =
                                 duration
                             |> Timeline.map (fun x -> (x, generateNoteOffset ()))
 
-                        (percussionInstrumentTrackIndex trackNumber, innerPatterns))
+                        (trackNumber, innerPatterns))
 
-            { CompositeTrackPatternTimelineMap = trackTimelines
+            { CompositeTrackPatternTimelineMap = seq {(percussionInstrumentTrackIndex, trackTimelines)}
               CompositeTrackPatternMapTimeline = Seq.empty }
             |> CompositeTrackEventPattern.fromInput duration NoteOffset.merge
 
@@ -286,7 +273,7 @@ module RandomMusicGenerator =
                 //2.0 ** float (context |> Generate.int (4, 6))
                 16.0
 
-            let partTrackCount = context |> Generate.int (1, 4)
+            let partTrackCount = context |> Generate.intByRank (threeQuarterProbabilityFunction, 1, 3)
 
             let generateNoteOffset () : NoteOffset =
                 { Duration = standardDuration()
@@ -320,7 +307,7 @@ module RandomMusicGenerator =
                                 duration
                             |> Timeline.map (fun x -> (x, generateNoteOffset ()))
 
-                        (pitchInstrumentTrackIndex pitchInstrumentTrackNumber, innerPatterns))
+                        (pitchInstrumentTrackIndex pitchInstrumentTrackNumber, seq {(0, innerPatterns)}))
 
 
             let percussionPartTimeline =
@@ -415,13 +402,10 @@ module RandomMusicGenerator =
 
         let tracks =
             seq<InstrumentTrack> {
+                yield PercussionInstrumentTrack percussionInstrumentTrack
                 yield!
                     pitchInstrumentTracks
                     |> Seq.map PitchInstrumentTrack
-
-                yield!
-                    percussionInstrumentTracks
-                    |> Seq.map PercussionInstrumentTrack
             }
 
         let noteOffset : NoteOffset =

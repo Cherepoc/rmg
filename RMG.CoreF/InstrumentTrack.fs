@@ -13,7 +13,7 @@ type PitchInstrumentTrack =
 [<NoEquality>]
 [<NoComparison>]
 type PercussionInstrumentTrack =
-    { Instrument: PercussionInstrument
+    { Instruments: list<PercussionInstrument>
       NoteOffset: NoteOffset }
 
 [<NoEquality>]

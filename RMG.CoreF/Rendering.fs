@@ -1,25 +1,23 @@
 namespace RMG.CoreF
 
+open System
 open RMG.CoreF.Operators
 
 module Rendering =
     type RenderedNote =
         { Offset: int
-          Volume: Volume
+          Velocity: Volume
           Duration: Duration }
 
-    type RenderedTrack =
-        { Code: InstrumentCode
-          Items: EventTimeline<RenderedNote> }
+    type RenderedTrack = { Code: InstrumentCode; Items: EventTimeline<RenderedNote>; IsPercussionTrack: Boolean }
 
     type RenderedSong =
         { Duration: Duration
           Tempo: EventTimeline<Tempo>
-          PitchInstrumentTracks: list<RenderedTrack>
-          PercussionTimeline: EventTimeline<RenderedNote> }
+          Tracks: list<RenderedTrack> }
 
     let renderSong (song: Song) : RenderedSong =
-        let renderPitchInstrumentTrack (track: PitchInstrumentTrack, notes: EventTimeline<NoteOffset>) : RenderedTrack =
+        let renderPitchInstrumentTrack (track: PitchInstrumentTrack, notes: SubTrackEventTimelineMap<NoteOffset>) : RenderedTrack =
             let minTrackNoteOffset =
                 (track.MinOctaveOffset + Constants.zeroOctaveOffset)
                 * Constants.notesInOctave
@@ -78,48 +76,66 @@ module Rendering =
                 { Position = item.Position
                   Value =
                       { Offset = fixedOffset
-                        Volume = noteOffset.Velocity
+                        Velocity = noteOffset.Velocity
                         Duration = noteOffset.Duration } }
 
             let renderedNotes =
                 notes
+                |> Map.toSeq
+                |> Seq.collect snd
                 |> Seq.where (fun x -> x.Position < song.Duration)
                 |> Seq.map renderNote
                 |> EventTimeline.fromSequence
 
-            { Code = track.Instrument.Code
-              Items = renderedNotes }
+            { Code = track.Instrument.Code; Items = renderedNotes; IsPercussionTrack = false }
 
         let renderPercussionInstrumentTrack
             (
                 track: PercussionInstrumentTrack,
-                notes: EventTimeline<NoteOffset>
-            ) : EventTimeline<RenderedNote> =
-            let articulationCodes = track.Instrument.ArticulationCodes
+                timelineMap: SubTrackEventTimelineMap<NoteOffset>
+            ) : RenderedTrack =
+            let articulationCodeMap =
+                track.Instruments
+                |> Seq.map (fun x -> x.ArticulationCodes)
+                |> Seq.indexed
+                |> Map.ofSeq
 
-            let renderNote (item: TimelineItem<NoteOffset>) : TimelineItem<RenderedNote> =
-                let noteOffset = item.Value
+            let renderSubTrack (timeline: EventTimeline<NoteOffset>, articulationCodes: list<ArticulationCode>): Timeline<RenderedNote> =
+                let renderNote (item: TimelineItem<NoteOffset>) : TimelineItem<RenderedNote> =
+                    let noteOffset = item.Value
 
-                let noteOffsetModulo = noteOffset.ScaleOffset %! 1.0
+                    let noteOffsetModulo = noteOffset.ScaleOffset %! 1.0
 
-                let offsetIndex =
-                    floor (
-                        noteOffsetModulo
-                        * (float articulationCodes.Length)
-                    )
+                    let offsetIndex =
+                        floor (
+                            noteOffsetModulo
+                            * (float articulationCodes.Length)
+                        )
 
-                let offset = articulationCodes.[int offsetIndex]
+                    let offset = articulationCodes.[int offsetIndex]
 
-                { Position = item.Position
-                  Value =
-                      { Offset = int (offset)
-                        Volume = noteOffset.Velocity
-                        Duration = noteOffset.Duration } }
+                    { Position = item.Position
+                      Value =
+                          { Offset = int (offset)
+                            Velocity = noteOffset.Velocity
+                            Duration = noteOffset.Duration } }
 
-            notes
-            |> Seq.where (fun x -> x.Position < song.Duration)
-            |> Seq.map renderNote
-            |> EventTimeline.fromSequence
+                timeline
+                |> Seq.where (fun x -> x.Position < song.Duration)
+                |> Seq.map renderNote
+
+            let notes =
+                articulationCodeMap
+                |> Map.toSeq
+                |> Seq.map fst
+                |> Seq.collect (fun subTrackIndex ->
+                    let subTrackArticulationCodes = articulationCodeMap.[subTrackIndex]
+                    match timelineMap |> Map.tryFind subTrackIndex with
+                    | Some subTrackTimeline -> renderSubTrack (subTrackTimeline, subTrackArticulationCodes)
+                    | _ -> Seq.empty)
+                |> EventTimeline.fromSequence
+
+            {Code = 0uy; Items = notes; IsPercussionTrack = true}
 
         let trackNumbers =
             seq {
@@ -133,7 +149,7 @@ module Rendering =
             |> Seq.distinct
             |> List.ofSeq
 
-        let renderedPitchTracks =
+        let renderedTracks =
             trackNumbers
             |> Seq.choose
                 (fun trackNumber ->
@@ -146,56 +162,29 @@ module Rendering =
                     match (track, trackNoteOffsetTimelineMap) with
                     | Some (PitchInstrumentTrack track), Some trackNoteOffsetTimelineMap ->
                         Some(renderPitchInstrumentTrack (track, trackNoteOffsetTimelineMap))
+                    | Some (PercussionInstrumentTrack track), Some trackNoteOffsetTimelineMap ->
+                        Some(renderPercussionInstrumentTrack (track, trackNoteOffsetTimelineMap))
                     | _ -> None)
             |> Seq.toList
 
-        let renderedPercussionTimeline =
-            trackNumbers
-            |> Seq.map
-                (fun trackNumber ->
-                    let track = song.Tracks |> Map.tryFind trackNumber
-
-                    let trackNoteOffsetTimelineMap =
-                        song.TrackNoteOffsetTimelineMap
-                        |> Map.tryFind trackNumber
-
-                    match (track, trackNoteOffsetTimelineMap) with
-                    | Some (PercussionInstrumentTrack track), Some trackNoteOffsetTimelineMap ->
-                        renderPercussionInstrumentTrack (track, trackNoteOffsetTimelineMap)
-                        |> Timeline.itemFromSingle
-                    | _ -> EventTimeline.empty |> Timeline.itemFromSingle)
-            |> EventTimeline.merge
-
-        let maxVolume =
-            seq {
-                yield!
-                    renderedPitchTracks
-                    |> Seq.collect (fun track -> track.Items)
-
-                yield! renderedPercussionTimeline
-            }
-            |> Seq.map (fun noteItem -> noteItem.Value.Volume)
+        let maxVelocity =
+            renderedTracks
+            |> Seq.collect (fun x -> x.Items)
+            |> Seq.map (fun x -> x.Value.Velocity)
             |> Seq.max
 
-        let fixTrackVolume (timeline: Timeline<RenderedNote>) : EventTimeline<RenderedNote> =
+        let fixTrackVelocity (timeline: Timeline<RenderedNote>) : EventTimeline<RenderedNote> =
             timeline
             |> Timeline.map
                 (fun note ->
                     { note with
-                          Volume = note.Volume / maxVolume })
+                          Velocity = note.Velocity / maxVelocity })
             |> EventTimeline.fromSequence
 
-        let fixedVolumePitchTracks =
-            renderedPitchTracks
-            |> List.map
-                (fun track ->
-                    { track with
-                          Items = fixTrackVolume track.Items })
-
-        let fixedVolumePercussionTimeline =
-            fixTrackVolume renderedPercussionTimeline
+        let fixedVelocityTracks =
+            renderedTracks
+            |> List.map (fun renderedTrack -> {renderedTrack with Items = fixTrackVelocity renderedTrack.Items})
 
         { Duration = song.Duration
           Tempo = song.TempoTimeline |> EventTimeline.fromSequence
-          PitchInstrumentTracks = fixedVolumePitchTracks
-          PercussionTimeline = fixedVolumePercussionTimeline }
+          Tracks = fixedVelocityTracks }
