@@ -31,9 +31,14 @@ type CompositeTrackEventPattern<'T>
         let flatTimelineMap =
             seq {
                 yield
-                    orderedTrackPatternTimelineMap
-                    |> TrackEventTimelineMap.map (fun (pattern, item) -> (pattern.FlatTimeline, item))
-                    |> TrackEventTimelineMap.mergeCompositeInner timelineItemMerge
+                    compositeTrackPatternTimelineMap
+                    |> TrackEventTimelineMap.fromSeq
+                    |> Map.map
+                        (fun _ compositeTimeline ->
+                            compositeTimeline
+                            |> Timeline.map (fun (pattern, item) -> (pattern.FlatTimeline, item))
+                            |> Timeline.mergeComposite timelineItemMerge
+                            |> EventTimeline.fromSequence)
                     |> Timeline.itemFromSingle
 
                 yield

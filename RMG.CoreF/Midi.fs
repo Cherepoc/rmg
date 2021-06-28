@@ -151,29 +151,13 @@ module Midi =
 
                                seq {
                                    { Delta = calculateAbsoluteDelta item.Position
-                                     Bytes = noteOn (index, byte item.Value.Offset, item.Value.Velocity) }
+                                     Bytes = noteOn (index, byte item.Value.Offset, item.Value.Volume) }
                                    { Delta = if noteOffPosition <= durationDelta then noteOffPosition else durationDelta
                                      Bytes = noteOff (index, byte item.Value.Offset) }
                                })
                 }
 
             writeTrack events
-
-        let trackChannelMap =
-            seq {
-                yield!
-                    song.Tracks
-                    |> Seq.indexed
-                    |> Seq.filter (fun (index, track) -> not track.IsPercussionTrack)
-                    |> Seq.indexed
-                    |> Seq.map (fun (pitchIndex, (index, _)) -> (index, pitchTrackChannel (byte pitchIndex)))
-
-                yield!
-                    song.Tracks
-                    |> Seq.indexed
-                    |> Seq.filter (fun (index, track) -> track.IsPercussionTrack)
-                    |> Seq.map (fun (index, _) -> (index, percussionChannel)) }
-           |> Map.ofSeq
 
         seq {
             0x4Duy
@@ -186,13 +170,12 @@ module Midi =
             0x06uy
             0x00uy
             0x01uy
-            yield! intToBytes (uint32 (song.Tracks.Length + 1), Some 2, 8)
+            yield! intToBytes (uint32 (song.PitchInstrumentTracks.Length + 2), Some 2, 8)
             yield! intToBytes (ticksPerQuarterNote, Some 2, 8)
             yield! writeSystemTrack
-            yield!
-                song.Tracks
-                |> Seq.indexed
-                |> Seq.collect (fun (index, track) ->
-                    writeNoteTrack (track.Items, track.Code, trackChannelMap.[index]))
+            yield! song.PitchInstrumentTracks
+                   |> Seq.indexed
+                   |> Seq.collect (fun (index, track) -> writeNoteTrack (track.Items, track.Code, pitchTrackChannel (byte index)))
+            yield! writeNoteTrack (song.PercussionTimeline, 0uy, percussionChannel)
         }
         |> Seq.toArray
