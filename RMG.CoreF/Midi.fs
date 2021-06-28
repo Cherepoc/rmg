@@ -9,7 +9,7 @@ module Midi =
 
     type private MidiEvent = { Delta: uint32; Bytes: seq<byte> }
 
-    let rec intToBytes (value: uint32, length: int option, byteLength: int): seq<byte> =
+    let rec intToBytes (value: uint32, length: int option, byteLength: int) : seq<byte> =
         let mask = 0xffffffffu >>> (32 - byteLength)
         let shiftedValue = value >>> byteLength
 
@@ -24,25 +24,23 @@ module Midi =
             | None -> shiftedValue > 0u
 
         seq {
-            if shouldContinue
-            then yield! intToBytes (shiftedValue, nextLength, byteLength)
+            if shouldContinue then yield! intToBytes (shiftedValue, nextLength, byteLength)
 
             yield byte (value &&& mask)
         }
 
-    let private calculateAbsoluteDelta (value: Position): uint32 =
-        uint32 (round (value * (double ticksPerQuarterNote)))
+    let private calculateAbsoluteDelta (value: Position) : uint32 = uint32 (round (value * (double ticksPerQuarterNote)))
 
-    let private channelMidiEventHeader (channel: byte, eventType: byte): byte = (eventType <<< 4) ||| channel
+    let private channelMidiEventHeader (channel: byte, eventType: byte) : byte = (eventType <<< 4) ||| channel
 
-    let private noteOn (channel: byte, note: byte, volume: Volume): seq<byte> =
+    let private noteOn (channel: byte, note: byte, volume: Volume) : seq<byte> =
         seq {
             channelMidiEventHeader (channel, 0x09uy)
             note
             byte (volume * 127.0)
         }
 
-    let private noteOff (channel: byte, note: byte): seq<byte> =
+    let private noteOff (channel: byte, note: byte) : seq<byte> =
         seq {
             channelMidiEventHeader (channel, 0x08uy)
             note
@@ -82,22 +80,26 @@ module Midi =
         }
 
     let private variableLength (value: uint32) =
-        let bytes =
-            intToBytes (value, None, 7) |> Seq.toArray
+        let bytes = intToBytes (value, None, 7) |> Seq.toArray
 
         seq {
-            yield! bytes
-                   |> Seq.take (bytes.Length - 1)
-                   |> Seq.map (fun x -> x ||| 0x80uy)
+            yield! bytes |> Seq.take (bytes.Length - 1) |> Seq.map (fun x -> x ||| 0x80uy)
             yield! bytes |> Seq.skip (bytes.Length - 1)
         }
 
-    let pitchTrackChannel(trackIndex: byte): byte =
-        if trackIndex < percussionChannel
-            then byte trackIndex
-            else byte (trackIndex + 1uy)
+    let pitchTrackChannel (trackIndex: byte) : byte =
+        if trackIndex < percussionChannel then
+            byte trackIndex
+        else
+            byte (trackIndex + 1uy)
 
-    let writeSong (song: RenderedSong): array<byte> =
+    let trackChannel (trackIndex: byte, isPercussionTrack: bool) : byte =
+        match (trackIndex, isPercussionTrack) with
+        | trackIndex, false when trackIndex >= percussionChannel -> trackIndex + 1uy
+        | trackIndex, false when trackIndex < percussionChannel -> trackIndex
+        | _, _ -> percussionChannel
+
+    let writeSong (song: RenderedSong) : array<byte> =
         let durationDelta = calculateAbsoluteDelta song.Duration
 
         let writeTrack (events: seq<MidiEvent>) =
@@ -105,16 +107,16 @@ module Midi =
                 seq {
                     yield { Delta = 0u; Bytes = Seq.empty }
                     yield! events
-                    yield { Delta = durationDelta
-                            Bytes = endOfTrack }
+                    yield { Delta = durationDelta; Bytes = endOfTrack }
                 }
                 |> Seq.sortBy (fun item -> item.Delta)
                 |> Seq.pairwise
-                |> Seq.collect (fun (previousItem, item) ->
-                    seq {
-                        yield! variableLength (item.Delta - previousItem.Delta)
-                        yield! item.Bytes
-                    })
+                |> Seq.collect
+                    (fun (previousItem, item) ->
+                        seq {
+                            yield! variableLength (item.Delta - previousItem.Delta)
+                            yield! item.Bytes
+                        })
                 |> Seq.toArray
 
             seq {
@@ -129,12 +131,11 @@ module Midi =
         let writeSystemTrack =
             let events =
                 seq {
-                    { Delta = 0u
-                      Bytes = timeSignature (4uy, 4uy) }
-                    yield! song.Tempo
-                           |> Seq.map (fun item ->
-                               { Delta = calculateAbsoluteDelta item.Position
-                                 Bytes = tempo item.Value })
+                    { Delta = 0u; Bytes = timeSignature (4uy, 4uy) }
+
+                    yield!
+                        song.Tempo
+                        |> Seq.map (fun item -> { Delta = calculateAbsoluteDelta item.Position; Bytes = tempo item.Value })
                 }
 
             writeTrack events
@@ -142,19 +143,25 @@ module Midi =
         let writeNoteTrack (items: EventTimeline<RenderedNote>, instrumentCode: InstrumentCode, index: byte) =
             let events =
                 seq {
-                    yield { Delta = 0u
-                            Bytes = programChange (index, byte instrumentCode) }
-                    yield! items
-                           |> Seq.collect (fun item ->
-                               let noteOffPosition =
-                                   calculateAbsoluteDelta (item.Position + item.Value.Duration)
+                    yield { Delta = 0u; Bytes = programChange (index, byte instrumentCode) }
 
-                               seq {
-                                   { Delta = calculateAbsoluteDelta item.Position
-                                     Bytes = noteOn (index, byte item.Value.Offset, item.Value.Volume) }
-                                   { Delta = if noteOffPosition <= durationDelta then noteOffPosition else durationDelta
-                                     Bytes = noteOff (index, byte item.Value.Offset) }
-                               })
+                    yield!
+                        items
+                        |> Seq.collect
+                            (fun item ->
+                                let noteOffPosition = calculateAbsoluteDelta (item.Position + item.Value.Duration)
+
+                                seq {
+                                    {
+                                        Delta = calculateAbsoluteDelta item.Position
+                                        Bytes = noteOn (index, byte item.Value.Offset, item.Value.Velocity)
+                                    }
+
+                                    {
+                                        Delta = if noteOffPosition <= durationDelta then noteOffPosition else durationDelta
+                                        Bytes = noteOff (index, byte item.Value.Offset)
+                                    }
+                                })
                 }
 
             writeTrack events
@@ -170,12 +177,13 @@ module Midi =
             0x06uy
             0x00uy
             0x01uy
-            yield! intToBytes (uint32 (song.PitchInstrumentTracks.Length + 2), Some 2, 8)
+            yield! intToBytes (uint32 (song.Tracks.Length + 1), Some 2, 8)
             yield! intToBytes (ticksPerQuarterNote, Some 2, 8)
             yield! writeSystemTrack
-            yield! song.PitchInstrumentTracks
-                   |> Seq.indexed
-                   |> Seq.collect (fun (index, track) -> writeNoteTrack (track.Items, track.Code, pitchTrackChannel (byte index)))
-            yield! writeNoteTrack (song.PercussionTimeline, 0uy, percussionChannel)
+
+            yield!
+                song.Tracks
+                |> Seq.indexed
+                |> Seq.collect (fun (index, track) -> writeNoteTrack (track.Items, track.Code, trackChannel (byte index, track.IsPercussionTrack)))
         }
         |> Seq.toArray

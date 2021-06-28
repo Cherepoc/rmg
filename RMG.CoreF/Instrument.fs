@@ -6,7 +6,3 @@ type ArticulationCode = byte
 type PitchInstrument = { Code: InstrumentCode }
 
 type PercussionInstrument = { ArticulationCodes: list<ArticulationCode> }
-
-type Instrument =
-    | NoteInstrument
-    | PercussionInstrument
