@@ -8,25 +8,17 @@ open System.Text.Json
 type GenerateSong() =
     [<Fact>]
     let write () =
-        let generatedSong =
-            RandomMusicGenerator.generate ()
-
-        let renderedSong =
-            Rendering.renderSong generatedSong.FlatSong
+        let start = 5400
+        let count = 100
 
         let options = JsonSerializerOptions()
         options.WriteIndented <- true
 
-        File.WriteAllText(
-            "C:\\Projects\\RMG\\songs\\rendered-song.json",
-            JsonSerializer.Serialize(renderedSong, options)
-        )
+        for i = start to start + count - 1 do
+            let generatedSong = RandomMusicGenerator.generate ()
 
-        File.WriteAllText(
-            "C:\\Projects\\RMG\\songs\\generated-song.json",
-            JsonSerializer.Serialize(generatedSong, options)
-        )
+            let renderedSong = Rendering.renderSong generatedSong.FlatSong
 
-        let bytes = Midi.writeSong renderedSong
+            let bytes = Midi.writeSong renderedSong
 
-        File.WriteAllBytes("C:\\Projects\\RMG\\songs\\song.mid", bytes)
+            File.WriteAllBytes($"C:\\Projects\\RMG\\songs\\song_{i}.mid", bytes)

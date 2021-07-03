@@ -22,6 +22,10 @@ module RandomMusicGenerator =
         let songDuration = 256.0
         let templateCount = 16
         let subTemplateCount = templateCount / 2
+        let pitchInstrumentTrackCount = context |> Generate.int (4, 8)
+        let percussionInstrumentTrackCount = context |> Generate.int (4, 8)
+        let partPitchInstrumentTrackCount() = context |> Generate.int (1, 4)
+        let partPercussionInstrumentTrackCount() = context |> Generate.int (1, 4)
 
         let standardVelocity () = context |> Generate.float (0.875, 1.125)
         let standardDuration () = context |> Generate.float (0.8, 1.25)
@@ -31,44 +35,49 @@ module RandomMusicGenerator =
 
         let tempo = context |> Generate.float (0.5, 1.0)
 
-        let percussionInstrumentTracks =
+        let percussionInstruments : list<PercussionInstrument * float> =
             [
-                {
-                    Instrument = { ArticulationCodes = [ 35uy; 36uy ] }
-                    NoteOffset =
-                        {
-                            Duration = 1.0
-                            KeyOffset = 0
-                            OctaveOffset = 0
-                            ScaleOffset = 0.0
-                            Velocity = standardVelocity ()
-                        }
-                }
-                {
-                    Instrument = { ArticulationCodes = [ 37uy; 38uy; 39uy; 40uy ] }
-                    NoteOffset =
-                        {
-                            Duration = 1.0
-                            KeyOffset = 0
-                            OctaveOffset = 0
-                            ScaleOffset = 0.0
-                            Velocity = standardVelocity ()
-                        }
-                }
-                {
-                    Instrument = { ArticulationCodes = [ 42uy; 44uy; 46uy ] }
-                    NoteOffset =
-                        {
-                            Duration = 1.0
-                            KeyOffset = 0
-                            OctaveOffset = 0
-                            ScaleOffset = 0.0
-                            Velocity = standardVelocity ()
-                        }
-                }
+                ({ ArticulationCodes = [ 35uy; 36uy ] }, 1.0) // kick
+                ({ ArticulationCodes = [ 37uy; 38uy; 40uy ] }, 1.0) // snare
+                ({ ArticulationCodes = [ 42uy; 44uy; 46uy ] }, 1.0) // hi-hat
+                ({ ArticulationCodes = [ 41uy; 43uy; 45uy; 47uy; 48uy; 50uy ] }, 0.2) // tom
+                ({ ArticulationCodes = [ 51uy; 53uy; 59uy ] }, 0.2) // ride
+                ({ ArticulationCodes = [ 49uy; 52uy; 55uy; 57uy ] }, 0.2) // cymbal
+                ({ ArticulationCodes = [ 39uy ] }, 0.2) // clap
+                ({ ArticulationCodes = [ 54uy ] }, 0.1) // tambourine
+                ({ ArticulationCodes = [ 56uy ] }, 0.1) // cowbell
+                ({ ArticulationCodes = [ 58uy ] }, 0.1) // vibraslap
+                ({ ArticulationCodes = [ 60uy; 61uy ] }, 0.1) // bongo
+                ({ ArticulationCodes = [ 62uy; 63uy; 64uy ] }, 0.1) // conga
+                ({ ArticulationCodes = [ 65uy; 66uy ] }, 0.1) // timbale
+                ({ ArticulationCodes = [ 67uy; 68uy ] }, 0.1) // agogo
+                ({ ArticulationCodes = [ 69uy ] }, 0.1) // cabasa
+                ({ ArticulationCodes = [ 70uy ] }, 0.1) // maracas
+                ({ ArticulationCodes = [ 71uy; 72uy ] }, 0.1) // whistle
+                ({ ArticulationCodes = [ 73uy; 74uy ] }, 0.1) // guiro
+                ({ ArticulationCodes = [ 75uy ] }, 0.1) // claves
+                ({ ArticulationCodes = [ 76uy; 77uy ] }, 0.1) // wood block
+                ({ ArticulationCodes = [ 78uy; 79uy ] }, 0.1) // cuica
+                ({ ArticulationCodes = [ 80uy; 81uy ] }, 0.1) // triangle
             ]
 
-        let pitchInstrumentTrackCount = context |> Generate.int (4, 8)
+        let percussionInstrumentTracks =
+            context
+            |> Generate.subSequenceWeighted percussionInstruments percussionInstrumentTrackCount
+            |> Seq.map
+                (fun x ->
+                    {
+                        Instrument = x
+                        NoteOffset =
+                            {
+                                Duration = 1.0
+                                KeyOffset = 0
+                                OctaveOffset = 0
+                                ScaleOffset = 0.0
+                                Velocity = standardVelocity ()
+                            }
+                    })
+                |> List.ofSeq
 
         let pitchInstrumentTracks =
             context
@@ -230,10 +239,12 @@ module RandomMusicGenerator =
 
         let createPercussionPart context =
             let duration = higherPatternDuration
+            
+            let partTrackCount = partPercussionInstrumentTrackCount()
 
             let percussionTracks =
                 context
-                |> Generate.subSequence numberedPercussionInstrumentTracks numberedPercussionInstrumentTracks.Length
+                |> Generate.subSequence numberedPercussionInstrumentTracks partTrackCount
 
             let generateNoteOffset () : NoteOffset =
                 {
@@ -283,7 +294,7 @@ module RandomMusicGenerator =
         let createPart context =
             let duration = partDuration
 
-            let partTrackCount = context |> Generate.int (1, 4)
+            let partTrackCount = partPitchInstrumentTrackCount()
 
             let generateNoteOffset () : NoteOffset =
                 {

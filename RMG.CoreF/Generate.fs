@@ -40,11 +40,9 @@ module Generate =
             let rankPeriod = 0.5 ** double rank
             let rankOffset = rankPeriod * 0.5
 
-            let stepMin =
-                int (ceil ((normalizedMin - rankOffset) / rankPeriod))
+            let stepMin = int (ceil ((normalizedMin - rankOffset) / rankPeriod))
 
-            let stepMax =
-                int (floor ((normalizedMax - rankOffset) / rankPeriod))
+            let stepMax = int (floor ((normalizedMax - rankOffset) / rankPeriod))
 
             (rankPeriod, stepMin, stepMax)
 
@@ -60,37 +58,28 @@ module Generate =
         let stepCount = stepMax - stepMin + 1
         let stepIndex = context.GetInt(0, stepCount)
 
-        (rankPeriod * float (stepIndex + stepMin)
-         + rankPeriod * 0.5)
-        * period
-        + offset
+        (rankPeriod * float (stepIndex + stepMin) + rankPeriod * 0.5) * period + offset
 
     let timeline<'T>
         (itemFunction: Context -> int -> 'T)
         (probabilityFunction: IntProbabilityFunction, maxRank: int, offset: float, period: float, duration: float)
         (context: Context)
         : Timeline<'T> =
-        let convertPosition (normalizedPosition: float, cycle: int) =
-            (normalizedPosition * period + offset) % period
-            + float cycle * period
+        let convertPosition (normalizedPosition: float, cycle: int) = (normalizedPosition * period + offset) % period + float cycle * period
 
         let testPosition (normalizedPosition: float, cycle: int) =
-            let position =
-                convertPosition (normalizedPosition, cycle)
+            let position = convertPosition (normalizedPosition, cycle)
 
             position >= 0.0 && position < duration
 
         let rec generate (normalizedPosition: float, rankScale: float, rank: int, cycle: int) =
-            let position =
-                convertPosition (normalizedPosition, cycle)
+            let position = convertPosition (normalizedPosition, cycle)
 
             let probability = probabilityFunction rank
 
             seq {
                 if probability |> test (context.GetProbability()) then
-                    yield
-                        { Position = position
-                          Value = itemFunction context rank }
+                    yield { Position = position; Value = itemFunction context rank }
 
                 if rank < maxRank then
                     let childRank = rank + 1
@@ -121,9 +110,7 @@ module Generate =
         while durationSum < duration do
             let (item, itemDuration) = itemFunction context
 
-            list <-
-                list
-                |> List.append [ { Position = durationSum; Value = item } ]
+            list <- list |> List.append [ { Position = durationSum; Value = item } ]
 
             durationSum <- durationSum + itemDuration
 
@@ -154,25 +141,40 @@ module Generate =
                 yield! subSequence remainder (count - 1) context
             }
 
-    let float (min: float, max: float) (context: Context) : float =
-        (context.GetProbability()) * (max - min) + min
+    let rec subSequenceWeighted<'T> (sequence: seq<'T * float>) (count: int) (context: Context) : seq<'T> =
+        let array = sequence |> Seq.toArray
+
+        if count <= 0 || array.Length <= 0 then
+            Seq.empty
+        else
+            let weights = sequence |> Seq.map snd
+            let index = pickWeightedIndex (context.GetProbability()) weights
+
+            let remainder =
+                seq {
+                    yield! array |> Seq.take index
+                    yield! array |> Seq.skip (index + 1)
+                }
+
+            let item, _ = array.[index]
+
+            seq {
+                yield item
+                yield! subSequenceWeighted remainder (count - 1) context
+            }
+
+    let float (min: float, max: float) (context: Context) : float = (context.GetProbability()) * (max - min) + min
 
     let int (min: int, max: int) (context: Context) : int = (context.GetInt(min, max + 1))
 
     let intByRank (probabilityFunction: IntProbabilityFunction, min: int, max: int) (context: Context) : int =
-        seq { min .. max }
-        |> pickRank probabilityFunction (context.GetProbability())
+        seq { min .. max } |> pickRank probabilityFunction (context.GetProbability())
 
     let item<'T> (sequence: seq<'T>) (context: Context) : 'T =
         let array = sequence |> Seq.toArray
         let index = (context.GetInt(0, array.Length))
         array.[index]
 
-    let normalFloat (mean: float, stddev: float) (context: Context) : float =
-        Normal.Sample(context.Random, mean, stddev)
+    let normalFloat (mean: float, stddev: float) (context: Context) : float = Normal.Sample(context.Random, mean, stddev)
 
-    let test (value: float) (context: Context) : Boolean =
-        if Probability.test (context.GetProbability()) value then
-            true
-        else
-            false
+    let test (value: float) (context: Context) : Boolean = if test (context.GetProbability()) value then true else false

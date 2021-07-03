@@ -28,36 +28,39 @@ module Probability =
         else if value >= 1.0 then true
         else value < referenceValue
 
-    let pickWeighted<'T> (value: float) (weightedItems: seq<'T * float>) : 'T =
-        let weightedItemsArray = weightedItems |> Seq.toArray
+    let pickWeightedIndex (value: float) (weights: seq<float>) : int =
+        let weightsArray = weights |> Seq.toArray
 
         if value <= 0.0 then
-            let (item, _) = weightedItemsArray |> Seq.head
-            item
+            0
         else if value >= 1.0 then
-            let (item, _) = weightedItemsArray |> Seq.last
-            item
+            weightsArray.Length - 1
         else
             let weightSum =
-                weightedItemsArray
-                |> Seq.map (fun (_, weight) -> weight)
-                |> Seq.sum
+                weightsArray
+                |> Array.sum
 
-            let (item, _, _) =
-                weightedItemsArray
+            let index, _, _ =
+                weightsArray
                 |> Seq.indexed
                 |> Seq.map
-                    (fun (index, (item, weight)) ->
+                    (fun (index, weight) ->
                         let minWeight =
-                            weightedItemsArray
+                            weightsArray
                             |> Seq.take index
-                            |> Seq.map (fun (_, weight) -> weight)
                             |> Seq.sum
 
-                        (item, minWeight / weightSum, (minWeight + weight) / weightSum))
+                        (index, minWeight / weightSum, (minWeight + weight) / weightSum))
                 |> Seq.find (fun (_, minWeight, maxWeight) -> value >= minWeight && value < maxWeight)
 
-            item
+            index
+
+    let pickWeighted<'T> (value: float) (weightedItems: seq<'T * float>) : 'T =
+        let weightedItemsArray = weightedItems |> Seq.toArray
+        let weights = weightedItemsArray |> Seq.map snd
+        let index = pickWeightedIndex value weights
+        let value, _ = weightedItemsArray.[index]
+        value
 
     let pickRank (probabilityFunction: IntProbabilityFunction) (value: float) (ranks: seq<int>) : int =
         ranks
