@@ -86,7 +86,7 @@ module RandomMusicGenerator =
                     let minOctave = context |> Generate.intByRank (halfProbabilityFunction, -2, 0)
 
                     let maxOctave =
-                        minOctave + (context |> Generate.intByRank (halfProbabilityFunction, 2, 2 - minOctave))
+                        minOctave + (context |> Generate.intByRank (halfProbabilityFunction, 1, 1 - minOctave))
 
                     {
                         Instrument = { Code = byte (context |> Generate.int (0, 127)) }
@@ -239,7 +239,7 @@ module RandomMusicGenerator =
 
         let createPercussionPart context =
             let duration = higherPatternDuration
-            
+
             let partTrackCount = partPercussionInstrumentTrackCount()
 
             let percussionTracks =
