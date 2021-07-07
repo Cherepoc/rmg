@@ -83,10 +83,10 @@ module RandomMusicGenerator =
             context
             |> Generate.sequence
                 (fun context ->
-                    let minOctave = context |> Generate.intByRank (halfProbabilityFunction, -2, 0)
+                    let minOctave = context |> Generate.intByRank (halfProbabilityFunction, -3, -1)
 
                     let maxOctave =
-                        minOctave + (context |> Generate.intByRank (halfProbabilityFunction, 1, 1 - minOctave))
+                        minOctave + (context |> Generate.intByRank (halfProbabilityFunction, 1, 0 - minOctave))
 
                     {
                         Instrument = { Code = byte (context |> Generate.int (0, 127)) }
