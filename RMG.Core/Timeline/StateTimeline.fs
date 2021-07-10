@@ -30,7 +30,7 @@ type StateTimeline<'T> internal (items: array<TimelineItem<'T>>) =
 
     interface System.Collections.Generic.IReadOnlyList<TimelineItem<'T>> with
         member this.Item
-            with get (index) = this.items.[index]
+            with get index = this.items.[index]
 
     member this.Count = this.items.Length
 
@@ -40,18 +40,18 @@ module StateTimeline =
     let private trim<'T> (stateMerger: StateMerger<'T>) (inputTimeline: Timeline<'T>) : Timeline<'T> =
         let sorted =
             inputTimeline
-            |> Seq.skipWhile (fun x -> stateMerger.CompareEqual(x.Value, stateMerger.DefaultValue))
+            |> Seq.skipWhile (fun (_, value) -> stateMerger.CompareEqual(value, stateMerger.DefaultValue))
             |> Seq.toArray
 
         if sorted.Length <= 1 then
             sorted :> Timeline<'T>
         else
             seq {
-                yield sorted |> Array.head
+                sorted |> Array.head
 
-                for (previousItem, item) in sorted |> Seq.pairwise do
-                    if not (stateMerger.CompareEqual(item.Value, previousItem.Value)) then
-                        yield item
+                for (_, previousValue), (position, value) in sorted |> Seq.pairwise do
+                    if not (stateMerger.CompareEqual(value, previousValue)) then
+                        (position, value)
             }
 
     let inline private mergeAggregate<'T> (merger: StateMerger<'T>) (values: seq<'T>) : 'T =
@@ -62,66 +62,61 @@ module StateTimeline =
             seq {
                 yield!
                     inputTimeline
-                    |> Seq.filter (fun item -> item.Position < duration)
-                    |> Seq.groupBy (fun item -> item.Position)
-                    |> Seq.map
-                        (fun (position, items) ->
-                            {
-                                Position = position
-                                Value = items |> Seq.map (fun item -> item.Value) |> mergeAggregate stateMerger
-                            })
-                    |> Seq.sortBy (fun x -> x.Position)
+                    |> Timeline.trimDuration duration
+                    |> Timeline.groupByPosition
+                    |> Timeline.map (fun value -> value |> mergeAggregate stateMerger)
+                    |> Timeline.sort
 
-                yield { Position = duration; Value = stateMerger.DefaultValue }
+                yield (duration, stateMerger.DefaultValue)
             }
             |> trim stateMerger
             |> Seq.toArray
 
-        StateTimeline(trimmed)
+        StateTimeline trimmed
 
     let merge<'T> (stateMerger: StateMerger<'T>) (timelineInput: Timeline<StateTimeline<'T>>) : StateTimeline<'T> =
         let shiftedTimelines =
             timelineInput
-            |> Seq.map (fun timelineItem -> timelineItem.Value |> Timeline.shift timelineItem.Position |> Seq.toArray)
+            |> Seq.map (fun (position, timeline) -> timeline |> Timeline.shift position |> Seq.toArray)
             |> Seq.toArray
 
         let effective (effectivePosition: Position) (inputTimeline: array<TimelineItem<'T>>) : 'T =
             let effectiveItem =
                 inputTimeline
-                |> Array.tryFindBack (fun item -> item.Position <= effectivePosition)
+                |> Array.tryFindBack (fun (position, _) -> position <= effectivePosition)
 
             match effectiveItem with
-            | Some effectiveItem -> effectiveItem.Value
+            | Some (_, value) -> value
             | _ -> stateMerger.DefaultValue
 
         let result =
             seq {
                 for timeline in shiftedTimelines do
-                    for item in timeline do
-                        yield item.Position
+                    for position, _ in timeline do
+                        yield position
             }
             |> Seq.distinct
             |> Seq.sort
             |> Seq.map
                 (fun position ->
-                    {
-                        Position = position
-                        Value =
-                            shiftedTimelines
-                            |> Seq.map (fun timeline -> timeline |> effective position)
-                            |> mergeAggregate stateMerger
-                    })
+                    let value =
+                        shiftedTimelines
+                        |> Seq.map (fun timeline -> timeline |> effective position)
+                        |> mergeAggregate stateMerger
+
+                    (position, value))
             |> trim stateMerger
             |> Seq.toArray
 
-        StateTimeline(result)
+        StateTimeline result
 
     let effectiveValue<'T> (position: Position) (stateMerger: StateMerger<'T>) (timeline: StateTimeline<'T>) : 'T =
         let effectiveItem =
-            timeline.items |> Array.tryFindBack (fun item -> item.Position <= position)
+            timeline.items
+            |> Array.tryFindBack (fun (itemPosition, _) -> itemPosition <= position)
 
         match effectiveItem with
-        | Some effectiveItem -> effectiveItem.Value
+        | Some (_, value) -> value
         | _ -> stateMerger.DefaultValue
 
 module StateMerger =

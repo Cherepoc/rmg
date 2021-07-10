@@ -23,13 +23,13 @@ module TrackEventTimelineMap =
         let array = inputTimeline |> Seq.toArray
 
         array
-        |> Seq.collect (fun item -> item.Value |> Map.toSeq |> Seq.map fst)
+        |> Seq.collect (fun (_, timelineMap) -> timelineMap |> Map.toSeq |> Seq.map fst)
         |> Seq.distinct
         |> Seq.map
             (fun trackNumber ->
                 let mergedTimeline =
                     array
-                    |> Seq.filter (fun item -> item.Value |> Map.containsKey trackNumber)
+                    |> Seq.filter (fun (_, timelineMap) -> timelineMap |> Map.containsKey trackNumber)
                     |> Timeline.map (fun map -> map |> Map.find trackNumber)
                     |> EventTimeline.merge
 

@@ -26,14 +26,14 @@ type StatePattern() =
     let singleItemTimeline () =
         let input =
             {
-                StatePatternInput.TimelineInput = seq { { Position = 0.0; Value = 1 } }
+                StatePatternInput.TimelineInput = seq { (0.0, 1) }
                 StatePatternInput.PatternTimelineInput = Seq.empty
             }
 
         let expected =
             seq {
-                { Position = 0.0; Value = 1 }
-                { Position = 1.0; Value = 0 }
+                (0.0, 1)
+                (1.0, 0)
             }
 
         let result = input |> StatePattern.fromInput 1.0 stateMerger
@@ -47,22 +47,19 @@ type StatePattern() =
                 StatePatternInput.TimelineInput = Seq.empty
                 StatePatternInput.PatternTimelineInput =
                     seq {
-                        {
-                            Position = 0.0
-                            Value =
-                                {
-                                    StatePatternInput.TimelineInput = seq { { Position = 0.0; Value = 1 } }
-                                    StatePatternInput.PatternTimelineInput = Seq.empty
-                                }
-                                |> StatePattern.fromInput 1.0 stateMerger
-                        }
+                        (0.0,
+                         {
+                             StatePatternInput.TimelineInput = seq { (0.0, 1) }
+                             StatePatternInput.PatternTimelineInput = Seq.empty
+                         }
+                         |> StatePattern.fromInput 1.0 stateMerger)
                     }
             }
 
         let expected =
             seq {
-                { Position = 0.0; Value = 1 }
-                { Position = 1.0; Value = 0 }
+                (0.0, 1)
+                (1.0, 0)
             }
 
         let result = input |> StatePattern.fromInput 1.0 stateMerger
@@ -73,27 +70,24 @@ type StatePattern() =
     let mergesTimelines () =
         let input =
             {
-                StatePatternInput.TimelineInput = seq { { Position = 0.0; Value = 1 } }
+                StatePatternInput.TimelineInput = seq { (0.0, 1) }
                 StatePatternInput.PatternTimelineInput =
                     seq {
-                        {
-                            Position = 0.5
-                            Value =
-                                {
-                                    StatePatternInput.TimelineInput = seq { { Position = 0.0; Value = 2 } }
-                                    StatePatternInput.PatternTimelineInput = Seq.empty
-                                }
-                                |> StatePattern.fromInput 1.0 stateMerger
-                        }
+                        (0.5,
+                         {
+                             StatePatternInput.TimelineInput = seq { (0.0, 2) }
+                             StatePatternInput.PatternTimelineInput = Seq.empty
+                         }
+                         |> StatePattern.fromInput 1.0 stateMerger)
                     }
             }
 
         let expected =
             seq {
-                { Position = 0.0; Value = 1 }
-                { Position = 0.5; Value = 3 }
-                { Position = 1.0; Value = 2 }
-                { Position = 1.5; Value = 0 }
+                (0.0, 1)
+                (0.5, 3)
+                (1.0, 2)
+                (1.5, 0)
             }
 
         let result = input |> StatePattern.fromInput 1.0 stateMerger

@@ -11,7 +11,7 @@ type write() =
         let renderedSong =
             {
                 Duration = 10.0
-                Tempo = seq { { Position = 0.0; Value = 1.0 } } |> EventTimeline.fromSequence
+                Tempo = seq { (0.0, 1.0) } |> EventTimeline.fromSequence
                 Tracks =
                     seq {
                         {
@@ -19,15 +19,8 @@ type write() =
                             IsPercussionTrack = false
                             Items =
                                 seq {
-                                    {
-                                        Position = 1.0
-                                        Value = { Offset = 0x40; Velocity = 1.0; Duration = 4.0 }
-                                    }
-
-                                    {
-                                        Position = 5.0
-                                        Value = { Offset = 0x40; Velocity = 1.0; Duration = 1.0 }
-                                    }
+                                    (1.0, { Offset = 0x40; Velocity = 1.0; Duration = 4.0 })
+                                    (5.0, { Offset = 0x40; Velocity = 1.0; Duration = 1.0 })
                                 }
                                 |> EventTimeline.fromSequence
                         }

@@ -18,7 +18,7 @@ type StateTimeline() =
 
     [<Fact>]
     let fromDefaultElementSource () =
-        let input = seq { { Position = 0.0; Value = 0 } }
+        let input = seq { (0.0, 0) }
         let expected = Seq.empty
 
         let result = input |> StateTimeline.fromSequence 1.0 stateMerger
@@ -27,12 +27,12 @@ type StateTimeline() =
 
     [<Fact>]
     let fromSingleElementSource () =
-        let input = seq { { Position = 0.0; Value = 1 } }
+        let input = seq { (0.0, 1) }
 
         let expected =
             seq {
-                { Position = 0.0; Value = 1 }
-                { Position = 1.0; Value = 0 }
+                (0.0, 1)
+                (1.0, 0)
             }
 
         let result = input |> StateTimeline.fromSequence 1.0 stateMerger
@@ -43,15 +43,15 @@ type StateTimeline() =
     let fromMultiElementSource () =
         let input =
             seq {
-                { Position = 0.5; Value = 2 }
-                { Position = 0.0; Value = 1 }
+                (0.5, 2)
+                (0.0, 1)
             }
 
         let expected =
             seq {
-                { Position = 0.0; Value = 1 }
-                { Position = 0.5; Value = 2 }
-                { Position = 1.0; Value = 0 }
+                (0.0, 1)
+                (0.5, 2)
+                (1.0, 0)
             }
 
         let result = input |> StateTimeline.fromSequence 1.0 stateMerger
@@ -62,14 +62,14 @@ type StateTimeline() =
     let fromMultiElementEndsDefaultSource () =
         let input =
             seq {
-                { Position = 0.5; Value = 0 }
-                { Position = 0.0; Value = 1 }
+                (0.5, 0)
+                (0.0, 1)
             }
 
         let expected =
             seq {
-                { Position = 0.0; Value = 1 }
-                { Position = 0.5; Value = 0 }
+                (0.0, 1)
+                (0.5, 0)
             }
 
         let result = input |> StateTimeline.fromSequence 1.0 stateMerger
@@ -80,16 +80,16 @@ type StateTimeline() =
     let fromMultiElementSinglePositionSource () =
         let input =
             seq {
-                { Position = 0.5; Value = 3 }
-                { Position = 0.0; Value = 1 }
-                { Position = 0.5; Value = 2 }
+                (0.5, 3)
+                (0.0, 1)
+                (0.5, 2)
             }
 
         let expected =
             seq {
-                { Position = 0.0; Value = 1 }
-                { Position = 0.5; Value = 5 }
-                { Position = 1.0; Value = 0 }
+                (0.0, 1)
+                (0.5, 5)
+                (1.0, 0)
             }
 
         let result = input |> StateTimeline.fromSequence 1.0 stateMerger
@@ -100,16 +100,16 @@ type StateTimeline() =
     let fromSourceTrimsDuration () =
         let input =
             seq {
-                { Position = 1.0; Value = 3 }
-                { Position = 0.0; Value = 1 }
-                { Position = 0.5; Value = 2 }
+                (1.0, 3)
+                (0.0, 1)
+                (0.5, 2)
             }
 
         let expected =
             seq {
-                { Position = 0.0; Value = 1 }
-                { Position = 0.5; Value = 2 }
-                { Position = 1.0; Value = 0 }
+                (0.0, 1)
+                (0.5, 2)
+                (1.0, 0)
             }
 
         let result = input |> StateTimeline.fromSequence 1.0 stateMerger

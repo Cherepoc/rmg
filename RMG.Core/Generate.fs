@@ -82,7 +82,7 @@ module Generate =
 
             seq {
                 if probability |> test (context.GetProbability()) then
-                    yield { Position = position; Value = itemFunction context rank }
+                    yield (position, itemFunction context rank)
 
                 if rank < maxRank then
                     let childRank = rank + 1
@@ -113,7 +113,7 @@ module Generate =
         while durationSum < duration do
             let (item, itemDuration) = itemFunction context
 
-            list <- list |> List.append [ { Position = durationSum; Value = item } ]
+            list <- list |> List.append [ (durationSum, item) ]
 
             durationSum <- durationSum + itemDuration
 

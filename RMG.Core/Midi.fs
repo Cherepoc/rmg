@@ -137,10 +137,10 @@ module Midi =
                     yield!
                         song.Tempo
                         |> Seq.map
-                            (fun item ->
+                            (fun (position, value) ->
                                 {
-                                    Delta = calculateAbsoluteDelta item.Position
-                                    Bytes = tempo item.Value
+                                    Delta = calculateAbsoluteDelta position
+                                    Bytes = tempo value
                                 })
                 }
 
@@ -158,13 +158,13 @@ module Midi =
                     yield!
                         items
                         |> Seq.collect
-                            (fun item ->
-                                let noteOffPosition = calculateAbsoluteDelta (item.Position + item.Value.Duration)
+                            (fun (position, value) ->
+                                let noteOffPosition = calculateAbsoluteDelta (position + value.Duration)
 
                                 seq {
                                     {
-                                        Delta = calculateAbsoluteDelta item.Position
-                                        Bytes = noteOn (index, byte item.Value.Offset, item.Value.Velocity)
+                                        Delta = calculateAbsoluteDelta position
+                                        Bytes = noteOn (index, byte value.Offset, value.Velocity)
                                     }
 
                                     {
@@ -173,7 +173,7 @@ module Midi =
                                                 noteOffPosition
                                             else
                                                 durationDelta
-                                        Bytes = noteOff (index, byte item.Value.Offset)
+                                        Bytes = noteOff (index, byte value.Offset)
                                     }
                                 })
                 }

@@ -1,6 +1,6 @@
 namespace RMG.CoreF
 
-type TimelineItem<'T> = { Position: Position; Value: 'T }
+type TimelineItem<'T> = Position * 'T
 
 type Timeline<'T> = seq<TimelineItem<'T>>
 
@@ -8,16 +8,25 @@ type TimelineItemMerge<'T> = ('T * 'T) -> 'T
 
 module Timeline =
     let map<'TSource, 'TDest> (func: 'TSource -> 'TDest) (inputTimeline: Timeline<'TSource>) : Timeline<'TDest> =
-        inputTimeline
-        |> Seq.map (fun item -> { Position = item.Position; Value = func item.Value })
+        inputTimeline |> Seq.map (fun (position, value) -> (position, func value))
 
-    let shift (position: Position) (inputTimeline: Timeline<'T>) : Timeline<'T> =
-        inputTimeline |> Seq.map (fun x -> { x with Position = x.Position + position })
+    let shift (offset: Position) (inputTimeline: Timeline<'T>) : Timeline<'T> =
+        inputTimeline |> Seq.map (fun (position, value) -> (position + offset, value))
+
+    let trimDuration (duration: Duration) (inputTimeline: Timeline<'T>) : Timeline<'T> =
+        inputTimeline |> Seq.filter (fun (position, _) -> position < duration)
+
+    let groupByPosition (inputTimeline: Timeline<'T>) : Timeline<seq<'T>> =
+        inputTimeline
+        |> Seq.groupBy fst
+        |> Seq.map (fun (position, items) -> (position, items |> Seq.map snd))
+
+    let sort (inputTimeline: Timeline<'T>) : Timeline<'T> = inputTimeline |> Seq.sortBy fst
 
     let merge (inputTimeline: Timeline<#Timeline<'T>>) : Timeline<'T> =
         seq {
-            for timelineItem in inputTimeline do
-                yield! timelineItem.Value |> shift timelineItem.Position
+            for position, timeline in inputTimeline do
+                yield! timeline |> shift position
         }
 
     let mergeItem (item: 'T) (timelineItemMerge: TimelineItemMerge<'T>) (inputTimeline: Timeline<'T>) : Timeline<'T> =
@@ -28,6 +37,6 @@ module Timeline =
         |> map (fun (timeline, item) -> (timeline |> mergeItem item timelineItemMerge))
         |> merge
 
-    let itemFromSingle (item: 'T) : TimelineItem<'T> = { Position = 0.0; Value = item }
+    let itemFromSingle (value: 'T) : TimelineItem<'T> = (0.0, value)
 
-    let fromSingle (item: 'T) : Timeline<'T> = seq { yield { Position = 0.0; Value = item } }
+    let fromSingle (value: 'T) : Timeline<'T> = seq { itemFromSingle value }

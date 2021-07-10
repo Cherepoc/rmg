@@ -31,11 +31,9 @@ module Rendering =
 
             let trackNoteOffsetWidth = maxTrackNoteOffset - minTrackNoteOffset
 
-            let renderNote (item: TimelineItem<NoteOffset>) : TimelineItem<RenderedNote> =
-                let noteOffset = item.Value
-
+            let renderNote ((position, noteOffset): TimelineItem<NoteOffset>) : TimelineItem<RenderedNote> =
                 let scale =
-                    song.ScaleTimeline |> EventTimeline.lastEffectiveValue item.Position
+                    song.ScaleTimeline |> EventTimeline.lastEffectiveValue position
 
                 let noteOffsetModulo = noteOffset.ScaleOffset %! 1.0
 
@@ -63,19 +61,18 @@ module Rendering =
                         offset + period * trackNoteOffsetWidth
                     | _ -> offset
 
-                {
-                    Position = item.Position
-                    Value =
-                        {
-                            Offset = fixedOffset
-                            Velocity = noteOffset.Velocity
-                            Duration = noteOffset.Duration
-                        }
-                }
+                let renderedNote =
+                    {
+                        Offset = fixedOffset
+                        Velocity = noteOffset.Velocity
+                        Duration = noteOffset.Duration
+                    }
+
+                (position, renderedNote)
 
             let renderedNotes =
                 notes
-                |> Seq.where (fun x -> x.Position < song.Duration)
+                |> Timeline.trimDuration song.Duration
                 |> Seq.map renderNote
                 |> EventTimeline.fromSequence
 
@@ -88,27 +85,24 @@ module Rendering =
         let renderPercussionInstrumentTrack (track: PercussionInstrumentTrack, notes: EventTimeline<NoteOffset>) : EventTimeline<RenderedNote> =
             let articulationCodes = track.Instrument.ArticulationCodes
 
-            let renderNote (item: TimelineItem<NoteOffset>) : TimelineItem<RenderedNote> =
-                let noteOffset = item.Value
-
+            let renderNote ((position, noteOffset): TimelineItem<NoteOffset>) : TimelineItem<RenderedNote> =
                 let noteOffsetModulo = noteOffset.ScaleOffset %! 1.0
 
                 let offsetIndex = floor (noteOffsetModulo * (float articulationCodes.Length))
 
                 let offset = articulationCodes.[int offsetIndex]
 
-                {
-                    Position = item.Position
-                    Value =
-                        {
-                            Offset = int (offset)
-                            Velocity = noteOffset.Velocity
-                            Duration = noteOffset.Duration
-                        }
-                }
+                let renderedNote =
+                    {
+                        Offset = int (offset)
+                        Velocity = noteOffset.Velocity
+                        Duration = noteOffset.Duration
+                    }
+
+                (position, renderedNote)
 
             notes
-            |> Seq.where (fun x -> x.Position < song.Duration)
+            |> Timeline.trimDuration song.Duration
             |> Seq.map renderNote
             |> EventTimeline.fromSequence
 
@@ -164,7 +158,7 @@ module Rendering =
         let maxVolume =
             renderedTracks
             |> Seq.collect (fun x -> x.Items)
-            |> Seq.map (fun x -> x.Value.Velocity)
+            |> Seq.map (fun (_, value) -> value.Velocity)
             |> Seq.max
 
         let fixTrackVolume (timeline: Timeline<RenderedNote>) : EventTimeline<RenderedNote> =

@@ -24,11 +24,11 @@ type EventPattern() =
     let singleItemTimeline () =
         let input =
             {
-                TimelineInput = seq { { Position = 0.0; Value = 1 } }
+                TimelineInput = seq { (0.0, 1) }
                 PatternTimelineInput = Seq.empty
             }
 
-        let expected = seq { { Position = 0.0; Value = 1 } }
+        let expected = seq { (0.0, 1) }
 
         let result = input |> EventPattern.fromInput 1.0
 
@@ -40,20 +40,15 @@ type EventPattern() =
             {
                 TimelineInput = Seq.empty
                 PatternTimelineInput =
-                    seq {
-                        {
-                            Position = 0.0
-                            Value =
-                                {
-                                    TimelineInput = seq { { Position = 0.0; Value = 1 } }
-                                    PatternTimelineInput = Seq.empty
-                                }
-                                |> EventPattern.fromInput 1.0
-                        }
+                    {
+                        TimelineInput = seq { (0.0, 1) }
+                        PatternTimelineInput = Seq.empty
                     }
+                    |> EventPattern.fromInput 1.0
+                    |> Timeline.fromSingle
             }
 
-        let expected = seq { { Position = 0.0; Value = 1 } }
+        let expected = seq { (0.0, 1) }
 
         let result = input |> EventPattern.fromInput 1.0
 
@@ -63,25 +58,22 @@ type EventPattern() =
     let mergesTimelines () =
         let input =
             {
-                TimelineInput = seq { { Position = 0.0; Value = 1 } }
+                TimelineInput = seq { (0.0, 1) }
                 PatternTimelineInput =
                     seq {
-                        {
-                            Position = 0.5
-                            Value =
-                                {
-                                    TimelineInput = seq { { Position = 0.0; Value = 2 } }
-                                    PatternTimelineInput = Seq.empty
-                                }
-                                |> EventPattern.fromInput 1.0
-                        }
+                        (0.5,
+                         {
+                             TimelineInput = seq { (0.0, 2) }
+                             PatternTimelineInput = Seq.empty
+                         }
+                         |> EventPattern.fromInput 1.0)
                     }
             }
 
         let expected =
             seq {
-                { Position = 0.0; Value = 1 }
-                { Position = 0.5; Value = 2 }
+                (0.0, 1)
+                (0.5, 2)
             }
 
         let result = input |> EventPattern.fromInput 1.0

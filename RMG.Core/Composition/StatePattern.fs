@@ -25,7 +25,7 @@ type StatePattern<'T>
 
         let flatTimeline =
             seq {
-                yield { Position = 0.0; Value = orderedTimeline }
+                yield orderedTimeline |> Timeline.itemFromSingle
                 yield! orderedPatternTimeline |> Timeline.map (fun x -> x.FlatTimeline)
             }
             |> StateTimeline.merge stateMerger

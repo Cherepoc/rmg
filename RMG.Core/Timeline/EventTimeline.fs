@@ -21,7 +21,7 @@ type EventTimeline<'T> internal (items: array<TimelineItem<'T>>) =
 
     interface System.Collections.Generic.IReadOnlyList<TimelineItem<'T>> with
         member this.Item
-            with get (index) = this.items.[index]
+            with get index = this.items.[index]
 
     member this.Count = this.items.Length
 
@@ -29,14 +29,15 @@ module EventTimeline =
     let empty<'T> = EventTimeline<'T>(Array.empty)
 
     let fromSequence<'T> (inputTimeline: Timeline<'T>) : EventTimeline<'T> =
-        EventTimeline(inputTimeline |> Seq.sortBy (fun x -> x.Position) |> Seq.toArray)
+        EventTimeline(inputTimeline |> Timeline.sort |> Seq.toArray)
 
     let merge (inputTimeline: Timeline<EventTimeline<'T>>) : EventTimeline<'T> = inputTimeline |> Timeline.merge |> fromSequence
 
     let lastEffectiveValue<'T> (position: Position) (timeline: EventTimeline<'T>) : ('T Option) =
         let effectiveItem =
-            timeline.items |> Array.tryFindBack (fun item -> item.Position <= position)
+            timeline.items
+            |> Array.tryFindBack (fun (itemPosition, _) -> itemPosition <= position)
 
         match effectiveItem with
-        | Some item -> Some item.Value
+        | Some (_, value) -> Some value
         | None -> None
