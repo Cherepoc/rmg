@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="Operators.fs" />
+        <Compile Include="CoreTypes.fs" />
+        <Compile Include="NoteOffset.fs" />
+        <Compile Include="Timeline\Timeline.fs" />
+        <Compile Include="Timeline\EventTimeline.fs" />
+        <Compile Include="Timeline\TrackEventTimelineMap.fs" />
+        <Compile Include="Timeline\StateTimeline.fs" />
+        <Compile Include="Instrument.fs" />
+        <Compile Include="InstrumentTrack.fs" />
+        <Compile Include="Song.fs" />
+        <Compile Include="Composition\EventPattern.fs" />
+        <Compile Include="Composition\StatePattern.fs" />
+        <Compile Include="Composition\CompositeEventPattern.fs" />
+        <Compile Include="Composition\CompositeTrackEventPattern.fs" />
+        <Compile Include="Composition\SongPatternMap.fs" />
+        <Compile Include="Rendering.fs" />
+        <Compile Include="Probability.fs" />
+        <Compile Include="Generate.fs" />
+        <Compile Include="Midi.fs" />
+        <Compile Include="RandomMusicGenerator.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MathNet.Numerics" Version="4.15.0" />
+      <PackageReference Include="MathNet.Numerics.FSharp" Version="4.15.0" />
+    </ItemGroup>
+
+</Project>
