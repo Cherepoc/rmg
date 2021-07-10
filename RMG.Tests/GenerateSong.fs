@@ -19,6 +19,10 @@ type GenerateSong() =
 
             let renderedSong = Rendering.renderSong generatedSong.FlatSong
 
+            //File.WriteAllText($"C:\\Projects\\RMG\\songs\\rendered-song_{i}.json", JsonSerializer.Serialize(renderedSong, options))
+
+            //File.WriteAllText($"C:\\Projects\\RMG\\songs\\generated-song_{i}.json", JsonSerializer.Serialize(generatedSong, options))
+
             let bytes = Midi.writeSong renderedSong
 
             File.WriteAllBytes($"C:\\Projects\\RMG\\songs\\song_{i}.mid", bytes)

@@ -121,8 +121,8 @@ module Generate =
 
     let sequence<'T> (itemFunction: Context -> 'T) (count: int) (context: Context) : seq<'T> =
         seq {
-            for i = 1 to count do
-                yield itemFunction context
+            for _ = 1 to count do
+                itemFunction context
         }
 
     let rec subSequence<'T> (sequence: seq<'T>) (count: int) (context: Context) : seq<'T> =

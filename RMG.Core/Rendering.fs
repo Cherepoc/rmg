@@ -20,7 +20,24 @@ module Rendering =
             Tracks: list<RenderedTrack>
         }
 
+    let private chooseItemByOffset<'T> (offset: float) (items: 'T list) : 'T option =
+        match items with
+        | [] -> None
+        | items -> Some items.[Math.Floor(offset * (float items.Length)) |> int]
+
+    let private chooseItemsByOffsets<'T when 'T: equality and 'T: comparison> (offsets: float list) (items: 'T list) : 'T list =
+        offsets
+        |> List.choose (fun offset -> items |> chooseItemByOffset offset)
+        |> List.distinct
+        |> List.sort
+
     let renderSong (song: Song) : RenderedSong =
+        let chromaticScale : KeyOffset list = [ 0 .. Constants.notesInOctave - 1 ]
+
+        let breakOctaves (value: float) : int * float =
+            let octaves = Math.Floor value
+            (int octaves, value - octaves)
+
         let renderPitchInstrumentTrack (track: PitchInstrumentTrack, notes: EventTimeline<NoteOffset>) : RenderedTrack =
             let minTrackNoteOffset =
                 (track.MinOctaveOffset + Constants.zeroOctaveOffset) * Constants.notesInOctave
@@ -31,51 +48,57 @@ module Rendering =
 
             let trackNoteOffsetWidth = maxTrackNoteOffset - minTrackNoteOffset
 
-            let renderNote ((position, noteOffset): TimelineItem<NoteOffset>) : TimelineItem<RenderedNote> =
-                let scale =
-                    song.ScaleTimeline |> EventTimeline.lastEffectiveValue position
+            let fixOffset (offset: int) : int =
+                match offset with
+                | offset when offset >= maxTrackNoteOffset ->
+                    let period =
+                        int (ceil (double (offset - maxTrackNoteOffset) / double trackNoteOffsetWidth))
 
-                let octavesFromOffset = Math.Floor noteOffset.ScaleOffset |> int
+                    offset - period * trackNoteOffsetWidth
+                | offset when offset < minTrackNoteOffset ->
+                    let period =
+                        int (ceil (double (minTrackNoteOffset - offset) / double trackNoteOffsetWidth))
 
-                let noteOffsetModulo = noteOffset.ScaleOffset - float octavesFromOffset
+                    offset + period * trackNoteOffsetWidth
+                | _ -> offset
 
-                let scaleOffset =
-                    match scale with
-                    | Some scale -> scale.KeyOffsets.[int (floor (noteOffsetModulo * (float scale.KeyOffsets.Length)))]
-                    | _ -> int (floor (noteOffsetModulo * (float Constants.notesInOctave)))
+            let renderNote ((position, noteOffset): TimelineItem<NoteOffset>) : seq<TimelineItem<RenderedNote>> =
+                let scaleOffsets =
+                    song.ScaleTimeline
+                    |> EventTimeline.lastEffectiveValue position
+                    |> Option.map (fun x -> x.KeyOffsets)
+                    |> Option.defaultValue chromaticScale
 
-                let offset =
-                    scaleOffset
-                    + noteOffset.KeyOffset
-                    + ((noteOffset.OctaveOffset + octavesFromOffset) * Constants.notesInOctave)
+                let chordRootOctaves, chordRootRemainder = breakOctaves noteOffset.ChordRootOffset
 
-                let fixedOffset =
-                    match offset with
-                    | offset when offset >= maxTrackNoteOffset ->
-                        let period =
-                            int (ceil (double (offset - maxTrackNoteOffset) / double trackNoteOffsetWidth))
+                let chordRootOffset =
+                    scaleOffsets |> chooseItemByOffset chordRootRemainder |> Option.defaultValue 0
 
-                        offset - period * trackNoteOffsetWidth
-                    | offset when offset < minTrackNoteOffset ->
-                        let period =
-                            int (ceil (double (minTrackNoteOffset - offset) / double trackNoteOffsetWidth))
+                scaleOffsets
+                |> chooseItemsByOffsets noteOffset.ChordScaleOffsets
+                |> chooseItemsByOffsets noteOffset.ChordNoteOffsets
+                |> Seq.map
+                    (fun chordOffset ->
+                        let offset =
+                            chordOffset
+                            + chordRootOffset
+                            + noteOffset.KeyOffset
+                            + ((noteOffset.OctaveOffset + chordRootOctaves) * Constants.notesInOctave)
+                            |> fixOffset
 
-                        offset + period * trackNoteOffsetWidth
-                    | _ -> offset
+                        let renderedNote =
+                            {
+                                Offset = offset
+                                Velocity = noteOffset.Velocity
+                                Duration = noteOffset.Duration
+                            }
 
-                let renderedNote =
-                    {
-                        Offset = fixedOffset
-                        Velocity = noteOffset.Velocity
-                        Duration = noteOffset.Duration
-                    }
-
-                (position, renderedNote)
+                        (position, renderedNote))
 
             let renderedNotes =
                 notes
                 |> Timeline.trimDuration song.Duration
-                |> Seq.map renderNote
+                |> Seq.collect renderNote
                 |> EventTimeline.fromSequence
 
             {
@@ -87,25 +110,23 @@ module Rendering =
         let renderPercussionInstrumentTrack (track: PercussionInstrumentTrack, notes: EventTimeline<NoteOffset>) : EventTimeline<RenderedNote> =
             let articulationCodes = track.Instrument.ArticulationCodes
 
-            let renderNote ((position, noteOffset): TimelineItem<NoteOffset>) : TimelineItem<RenderedNote> =
-                let noteOffsetModulo = noteOffset.ScaleOffset %! 1.0
+            let renderNotes ((position, noteOffset): TimelineItem<NoteOffset>) : TimelineItem<RenderedNote> seq =
+                seq { articulationCodes |> chooseItemByOffset (noteOffset.ChordRootOffset %! 1.0) }
+                |> Seq.choose id
+                |> Seq.map
+                    (fun offset ->
+                        let renderedNote =
+                            {
+                                Offset = int offset
+                                Velocity = noteOffset.Velocity
+                                Duration = noteOffset.Duration
+                            }
 
-                let offsetIndex = floor (noteOffsetModulo * (float articulationCodes.Length))
-
-                let offset = articulationCodes.[int offsetIndex]
-
-                let renderedNote =
-                    {
-                        Offset = int (offset)
-                        Velocity = noteOffset.Velocity
-                        Duration = noteOffset.Duration
-                    }
-
-                (position, renderedNote)
+                        (position, renderedNote))
 
             notes
             |> Timeline.trimDuration song.Duration
-            |> Seq.map renderNote
+            |> Seq.collect renderNotes
             |> EventTimeline.fromSequence
 
         let trackNumbers =

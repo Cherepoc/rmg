@@ -4,19 +4,19 @@ open RMG.CoreF.Composition
 
 module RandomMusicGenerator =
     let generate () : SongPatternMap =
-        let halfProbabilityFunction =
-            Probability.geometricIntProbabilityFunction (0.0, 1.0, 0.5, 0)
+        let halfProbabilityFunction offset =
+            Probability.geometricIntProbabilityFunction (0.0, 1.0, 0.5, offset)
 
-        let threeQuarterProbabilityFunction =
-            Probability.geometricIntProbabilityFunction (0.0, 1.0, 0.75, 0)
+        let threeQuarterProbabilityFunction offset =
+            Probability.geometricIntProbabilityFunction (0.0, 1.0, 0.75, offset)
 
-        let quarterProbabilityFunction =
-            Probability.geometricIntProbabilityFunction (0.0, 1.0, 0.25, 0)
+        let quarterProbabilityFunction offset =
+            Probability.geometricIntProbabilityFunction (0.0, 1.0, 0.25, offset)
 
-        let eighthProbabilityFunction =
-            Probability.geometricIntProbabilityFunction (0.0, 1.0, 0.125, 0)
+        let eighthProbabilityFunction offset =
+            Probability.geometricIntProbabilityFunction (0.0, 1.0, 0.125, offset)
 
-        let scaleOffsetProbabilityFunction = Generate.normalFloat (0.0, 0.1)
+        let scaleOffsetProbabilityFunction offset = Generate.normalFloat (0.0, 0.1)
 
         let context = Generate.Context()
         let patternDuration = 1.0
@@ -33,9 +33,13 @@ module RandomMusicGenerator =
 
         let standardVelocity () = context |> Generate.float (0.875, 1.125)
         let standardDuration () = context |> Generate.float (0.8, 1.25)
+        let standardOffsets (min: int, max: int): float list =
+            context
+            |> Generate.sequence (fun context -> context |> Generate.float (0.0, 1.0)) (context |> Generate.intByRank (halfProbabilityFunction 0, 0, 1))
+            |> List.ofSeq
 
         let standardOctaveOffset () =
-            context |> Generate.intByRank (halfProbabilityFunction, -2, 2)
+            context |> Generate.intByRank (halfProbabilityFunction 0, -2, 2)
 
         let scale : Scale = { KeyOffsets = [ 0; 2; 3; 5; 7; 8; 10 ] }
 
@@ -82,7 +86,9 @@ module RandomMusicGenerator =
                                 Duration = 1.0
                                 KeyOffset = 0
                                 OctaveOffset = 0
-                                ScaleOffset = 0.0
+                                ChordRootOffset = 0.0
+                                ChordScaleOffsets = List.empty
+                                ChordNoteOffsets = List.empty
                                 Velocity = standardVelocity ()
                             }
                     })
@@ -93,11 +99,11 @@ module RandomMusicGenerator =
             |> Generate.sequence
                 (fun context ->
                     let minOctave =
-                        context |> Generate.intByRank (halfProbabilityFunction, -3, -1)
+                        context |> Generate.intByRank (halfProbabilityFunction 0, -3, -1)
 
                     let maxOctave =
                         minOctave
-                        + (context |> Generate.intByRank (halfProbabilityFunction, 1, 0 - minOctave))
+                        + (context |> Generate.intByRank (halfProbabilityFunction 0, 1, 0 - minOctave))
 
                     {
                         Instrument = { Code = byte (context |> Generate.int (0, 127)) }
@@ -108,7 +114,9 @@ module RandomMusicGenerator =
                                 Duration = standardDuration ()
                                 KeyOffset = 0
                                 OctaveOffset = standardOctaveOffset ()
-                                ScaleOffset = 0.0
+                                ChordRootOffset = 0.0
+                                ChordScaleOffsets = List.empty
+                                ChordNoteOffsets = standardOffsets (0, 2)
                                 Velocity = standardVelocity ()
                             }
                     })
@@ -144,13 +152,15 @@ module RandomMusicGenerator =
             {
                 Duration =
                     (context
-                     |> Generate.rhythmValue (halfProbabilityFunction, 1.0, 2.0, 0.25, 2.0, 4))
+                     |> Generate.rhythmValue (halfProbabilityFunction 0, 1.0, 2.0, 0.25, 2.0, 4))
                     / 4.0
                 Velocity =
                     context
-                    |> Generate.rhythmValue (threeQuarterProbabilityFunction, 0.5, 1.0, 0.75, 1.5, 5)
-                OctaveOffset = context |> Generate.intByRank (eighthProbabilityFunction, -1, 1)
-                ScaleOffset = float (context |> scaleOffsetProbabilityFunction)
+                    |> Generate.rhythmValue (threeQuarterProbabilityFunction 0, 0.5, 1.0, 0.75, 1.5, 5)
+                OctaveOffset = context |> Generate.intByRank (eighthProbabilityFunction 0, -1, 1)
+                ChordRootOffset = 0.0
+                ChordScaleOffsets = List.empty
+                ChordNoteOffsets = standardOffsets (1, 1)
                 KeyOffset = 0
             }
 
@@ -158,11 +168,13 @@ module RandomMusicGenerator =
             let duration : float = patternDuration
 
             let offset =
-                context |> Generate.rhythmValue (halfProbabilityFunction, 2.0, 4.0, 0.0, 4.0, 4)
+                context
+                |> Generate.rhythmValue (halfProbabilityFunction 0, 2.0, 4.0, 0.0, 4.0, 4)
 
             let period : float =
-                (context |> Generate.rhythmPeriod (quarterProbabilityFunction, 8))
-                / (2.0 ** float (context |> Generate.intByRank (quarterProbabilityFunction, -1, 2)))
+                (context |> Generate.rhythmPeriod (quarterProbabilityFunction 0, 8))
+                / (2.0
+                   ** float (context |> Generate.intByRank (quarterProbabilityFunction 0, -1, 2)))
 
             let maxRank = 4
 
@@ -170,7 +182,7 @@ module RandomMusicGenerator =
 
             let notes =
                 context
-                |> Generate.timeline noteGenerator (eighthProbabilityFunction, maxRank, offset, period, duration)
+                |> Generate.timeline noteGenerator (eighthProbabilityFunction 0, maxRank, offset, period, duration)
 
             CompositeEventPattern(duration, notes, Seq.empty, NoteOffset.merge)
 
@@ -217,7 +229,9 @@ module RandomMusicGenerator =
                     Duration = 1.0
                     KeyOffset = 0
                     OctaveOffset = standardOctaveOffset ()
-                    ScaleOffset = context |> scaleOffsetProbabilityFunction
+                    ChordRootOffset = 0.0
+                    ChordScaleOffsets = standardOffsets (0, 1)
+                    ChordNoteOffsets = standardOffsets (0, 1)
                     Velocity = standardVelocity ()
                 }
 
@@ -275,7 +289,9 @@ module RandomMusicGenerator =
                     Duration = 1.0
                     KeyOffset = 0
                     OctaveOffset = 0
-                    ScaleOffset = context |> scaleOffsetProbabilityFunction
+                    ChordRootOffset = context |> scaleOffsetProbabilityFunction 0
+                    ChordScaleOffsets = List.empty
+                    ChordNoteOffsets = List.empty
                     Velocity = 1.0
                 }
 
@@ -327,7 +343,9 @@ module RandomMusicGenerator =
                     Duration = standardDuration ()
                     KeyOffset = 0
                     OctaveOffset = standardOctaveOffset ()
-                    ScaleOffset = context |> scaleOffsetProbabilityFunction
+                    ChordRootOffset = context |> scaleOffsetProbabilityFunction 0
+                    ChordScaleOffsets = standardOffsets (2, 3)
+                    ChordNoteOffsets = standardOffsets (0, 1)
                     Velocity = standardVelocity ()
                 }
 
@@ -393,7 +411,9 @@ module RandomMusicGenerator =
                         else
                             0
                     OctaveOffset = standardOctaveOffset ()
-                    ScaleOffset = context |> scaleOffsetProbabilityFunction
+                    ChordRootOffset = context |> scaleOffsetProbabilityFunction 0
+                    ChordScaleOffsets = standardOffsets (0, 1)
+                    ChordNoteOffsets = standardOffsets (0, 1)
                     Velocity = standardVelocity ()
                 }
 
@@ -419,7 +439,9 @@ module RandomMusicGenerator =
                 Duration = standardDuration ()
                 KeyOffset = context |> Generate.int (-6, 6)
                 OctaveOffset = standardOctaveOffset ()
-                ScaleOffset = context |> scaleOffsetProbabilityFunction
+                ChordRootOffset = context |> scaleOffsetProbabilityFunction 0
+                ChordScaleOffsets = standardOffsets (0, 1)
+                ChordNoteOffsets = standardOffsets (0, 1)
                 Velocity = standardVelocity ()
             }
 
@@ -456,7 +478,9 @@ module RandomMusicGenerator =
                 Duration = context |> Generate.float (0.5, 2.0)
                 KeyOffset = context |> Generate.int (-6, 6)
                 OctaveOffset = 0
-                ScaleOffset = 0.0
+                ChordRootOffset = 0.0
+                ChordScaleOffsets = List.empty
+                ChordNoteOffsets = List.empty
                 Velocity = 1.0
             }
 
