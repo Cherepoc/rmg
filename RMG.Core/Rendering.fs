@@ -35,7 +35,9 @@ module Rendering =
                 let scale =
                     song.ScaleTimeline |> EventTimeline.lastEffectiveValue position
 
-                let noteOffsetModulo = noteOffset.ScaleOffset %! 1.0
+                let octavesFromOffset = Math.Floor noteOffset.ScaleOffset |> int
+
+                let noteOffsetModulo = noteOffset.ScaleOffset - float octavesFromOffset
 
                 let scaleOffset =
                     match scale with
@@ -45,7 +47,7 @@ module Rendering =
                 let offset =
                     scaleOffset
                     + noteOffset.KeyOffset
-                    + (noteOffset.OctaveOffset * Constants.notesInOctave)
+                    + ((noteOffset.OctaveOffset + octavesFromOffset) * Constants.notesInOctave)
 
                 let fixedOffset =
                     match offset with
