@@ -4,6 +4,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RMG.Core", "RMG.Core\RMG.Co
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RMG.Tests", "RMG.Tests\RMG.Tests.fsproj", "{CBDC4F0F-2D96-4FF5-8CB4-3E62677F3948}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "RMG", "RMG\RMG.fsproj", "{ABC129B0-A5E2-4C27-92B4-5B02F0FAE122}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{CBDC4F0F-2D96-4FF5-8CB4-3E62677F3948}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBDC4F0F-2D96-4FF5-8CB4-3E62677F3948}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBDC4F0F-2D96-4FF5-8CB4-3E62677F3948}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABC129B0-A5E2-4C27-92B4-5B02F0FAE122}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABC129B0-A5E2-4C27-92B4-5B02F0FAE122}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABC129B0-A5E2-4C27-92B4-5B02F0FAE122}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABC129B0-A5E2-4C27-92B4-5B02F0FAE122}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

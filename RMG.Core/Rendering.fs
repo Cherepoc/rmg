@@ -38,7 +38,21 @@ module Rendering =
             let octaves = Math.Floor value
             (int octaves, value - octaves)
 
-        let renderPitchInstrumentTrack (track: PitchInstrumentTrack, notes: EventTimeline<NoteOffset>) : RenderedTrack =
+        let sharedEventTimeline =
+            song.TrackEventStateTimelineMap
+            |> Map.tryFind None
+            |> Option.defaultValue EventStateTimeline.empty
+
+        let getEffectiveNote (noteEvents: Event list) (trackEvents: Event list) (position: Position) (trackEventTimeline: EventStateTimeline) : Event seq =
+            seq {
+                yield! noteEvents
+                yield! trackEventTimeline |> EventStateTimeline.effectiveState position
+                yield! sharedEventTimeline |> EventStateTimeline.effectiveState position
+                yield! trackEvents
+            }
+            |> Event.mergeAll
+
+        let renderPitchInstrumentTrack (track: PitchInstrumentTrack, eventTimeline: EventStateTimeline) : RenderedTrack =
             let minTrackNoteOffset =
                 (track.MinOctaveOffset + Constants.zeroOctaveOffset) * Constants.notesInOctave
 
@@ -62,42 +76,55 @@ module Rendering =
                     offset + period * trackNoteOffsetWidth
                 | _ -> offset
 
-            let renderNote ((position, noteOffset): TimelineItem<NoteOffset>) : seq<TimelineItem<RenderedNote>> =
-                let scaleOffsets =
-                    song.ScaleTimeline
-                    |> EventTimeline.lastEffectiveValue position
-                    |> Option.map (fun x -> x.KeyOffsets)
-                    |> Option.defaultValue chromaticScale
+            let renderNote ((position, events): Event list TimelineItem) : seq<TimelineItem<RenderedNote>> =
+                let effectiveEvents =
+                    getEffectiveNote events track.Events position eventTimeline |> Seq.cache
 
-                let chordRootOctaves, chordRootRemainder = breakOctaves noteOffset.ChordRootOffset
+                let noteDuration = effectiveEvents |> Event.duration.MergeToValues
+                let noteVelocity = effectiveEvents |> Event.velocity.MergeToValues
+                let noteKeyOffset = effectiveEvents |> Event.keyOffset.MergeToValues
+                let noteOctaveOffset = effectiveEvents |> Event.octaveOffset.MergeToValues
+                let noteChordRootOffset = effectiveEvents |> Event.chordRootOffset.MergeToValues
+                let noteChordScaleOffsets = effectiveEvents |> Event.chordScaleOffsets.MergeToValues
+                let noteChordNoteOffsets = effectiveEvents |> Event.chordNoteOffsets.MergeToValues
+                let noteScaleOffsets = effectiveEvents |> Event.scaleOffsets.MergeToValues
+
+                let scaleOffsets =
+                    if noteScaleOffsets |> List.isEmpty then
+                        chromaticScale
+                    else
+                        noteScaleOffsets
+
+                let chordRootOctaves, chordRootRemainder = breakOctaves noteChordRootOffset
 
                 let chordRootOffset =
                     scaleOffsets |> chooseItemByOffset chordRootRemainder |> Option.defaultValue 0
 
                 scaleOffsets
-                |> chooseItemsByOffsets noteOffset.ChordScaleOffsets
-                |> chooseItemsByOffsets noteOffset.ChordNoteOffsets
+                |> chooseItemsByOffsets noteChordScaleOffsets
+                |> chooseItemsByOffsets noteChordNoteOffsets
                 |> Seq.map
                     (fun chordOffset ->
                         let offset =
                             chordOffset
                             + chordRootOffset
-                            + noteOffset.KeyOffset
-                            + ((noteOffset.OctaveOffset + chordRootOctaves) * Constants.notesInOctave)
+                            + noteKeyOffset
+                            + ((noteOctaveOffset + chordRootOctaves) * Constants.notesInOctave)
                             |> fixOffset
 
                         let renderedNote =
                             {
                                 Offset = offset
-                                Velocity = noteOffset.Velocity
-                                Duration = noteOffset.Duration
+                                Velocity = noteVelocity
+                                Duration = noteDuration
                             }
 
                         (position, renderedNote))
 
             let renderedNotes =
-                notes
+                eventTimeline
                 |> Timeline.trimDuration song.Duration
+                |> Timeline.choose Event.Note.getValue
                 |> Seq.collect renderNote
                 |> EventTimeline.fromSequence
 
@@ -107,36 +134,38 @@ module Rendering =
                 Items = renderedNotes
             }
 
-        let renderPercussionInstrumentTrack (track: PercussionInstrumentTrack, notes: EventTimeline<NoteOffset>) : EventTimeline<RenderedNote> =
+        let renderPercussionInstrumentTrack (track: PercussionInstrumentTrack, eventTimeline: EventStateTimeline) : RenderedNote EventTimeline =
             let articulationCodes = track.Instrument.ArticulationCodes
 
-            let renderNotes ((position, noteOffset): TimelineItem<NoteOffset>) : TimelineItem<RenderedNote> seq =
-                seq { articulationCodes |> chooseItemByOffset (noteOffset.ChordRootOffset %! 1.0) }
+            let renderNotes ((position, events): Event list TimelineItem) : TimelineItem<RenderedNote> seq =
+                let effectiveEvents =
+                    getEffectiveNote events track.Events position eventTimeline |> Seq.cache
+
+                let noteDuration = effectiveEvents |> Event.duration.MergeToValues
+                let noteVelocity = effectiveEvents |> Event.velocity.MergeToValues
+                let noteArticulationOffset = effectiveEvents |> Event.articulationOffset.MergeToValues
+
+                seq { articulationCodes |> chooseItemByOffset (noteArticulationOffset %! 1.0) }
                 |> Seq.choose id
                 |> Seq.map
                     (fun offset ->
                         let renderedNote =
                             {
                                 Offset = int offset
-                                Velocity = noteOffset.Velocity
-                                Duration = noteOffset.Duration
+                                Velocity = noteVelocity
+                                Duration = noteDuration
                             }
 
                         (position, renderedNote))
 
-            notes
+            eventTimeline
             |> Timeline.trimDuration song.Duration
+            |> Timeline.choose Event.Note.getValue
             |> Seq.collect renderNotes
             |> EventTimeline.fromSequence
 
         let trackNumbers =
-            seq {
-                yield! song.Tracks |> Map.toSeq |> Seq.map fst
-
-                yield! song.TrackNoteOffsetTimelineMap |> Map.toSeq |> Seq.map fst
-            }
-            |> Seq.distinct
-            |> List.ofSeq
+            song.Tracks |> Map.toSeq |> Seq.map fst |> Seq.distinct |> List.ofSeq
 
         let renderedPitchTracks =
             trackNumbers
@@ -144,7 +173,8 @@ module Rendering =
                 (fun trackNumber ->
                     let track = song.Tracks |> Map.tryFind trackNumber
 
-                    let trackNoteOffsetTimelineMap = song.TrackNoteOffsetTimelineMap |> Map.tryFind trackNumber
+                    let trackNoteOffsetTimelineMap =
+                        song.TrackEventStateTimelineMap |> Map.tryFind (Some trackNumber)
 
                     match (track, trackNoteOffsetTimelineMap) with
                     | Some (PitchInstrumentTrack track), Some trackNoteOffsetTimelineMap -> Some(renderPitchInstrumentTrack (track, trackNoteOffsetTimelineMap))
@@ -161,7 +191,8 @@ module Rendering =
                         (fun trackNumber ->
                             let track = song.Tracks |> Map.tryFind trackNumber
 
-                            let trackNoteOffsetTimelineMap = song.TrackNoteOffsetTimelineMap |> Map.tryFind trackNumber
+                            let trackNoteOffsetTimelineMap =
+                                song.TrackEventStateTimelineMap |> Map.tryFind (Some trackNumber)
 
                             match (track, trackNoteOffsetTimelineMap) with
                             | Some (PercussionInstrumentTrack track), Some trackNoteOffsetTimelineMap ->
@@ -195,6 +226,9 @@ module Rendering =
 
         {
             Duration = song.Duration
-            Tempo = song.TempoTimeline |> EventTimeline.fromSequence
+            Tempo =
+                sharedEventTimeline
+                |> Timeline.choose Event.tempo.TryGetValue
+                |> EventTimeline.fromSequence
             Tracks = fixedVolumeTracks
         }

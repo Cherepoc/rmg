@@ -31,7 +31,7 @@ module EventTimeline =
     let fromSequence<'T> (inputTimeline: Timeline<'T>) : EventTimeline<'T> =
         EventTimeline(inputTimeline |> Timeline.sort |> Seq.toArray)
 
-    let merge (inputTimeline: Timeline<EventTimeline<'T>>) : EventTimeline<'T> = inputTimeline |> Timeline.merge |> fromSequence
+    let merge (inputTimeline: Timeline<EventTimeline<'T>>) : EventTimeline<'T> = inputTimeline |> Timeline.concat |> fromSequence
 
     let lastEffectiveValue<'T> (position: Position) (timeline: EventTimeline<'T>) : 'T Option =
         let effectiveItem =

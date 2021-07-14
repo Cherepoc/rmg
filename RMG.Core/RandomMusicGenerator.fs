@@ -3,7 +3,7 @@ namespace RMG.CoreF
 open RMG.CoreF.Composition
 
 module RandomMusicGenerator =
-    let generate () : SongPatternMap =
+    let generate () : EventStateSongPattern =
         let halfProbabilityFunction offset =
             Probability.geometricIntProbabilityFunction (0.0, 1.0, 0.5, offset)
 
@@ -16,7 +16,7 @@ module RandomMusicGenerator =
         let eighthProbabilityFunction offset =
             Probability.geometricIntProbabilityFunction (0.0, 1.0, 0.125, offset)
 
-        let scaleOffsetProbabilityFunction offset = Generate.normalFloat (0.0, 0.1)
+        let scaleOffsetProbabilityFunction = Generate.normalFloat (0.0, 0.1)
 
         let context = Generate.Context()
         let patternDuration = 1.0
@@ -33,7 +33,8 @@ module RandomMusicGenerator =
 
         let standardVelocity () = context |> Generate.float (0.875, 1.125)
         let standardDuration () = context |> Generate.float (0.8, 1.25)
-        let standardOffsets (min: int, max: int): float list =
+
+        let standardOffsets (min: int, max: int) : float list =
             context
             |> Generate.sequence (fun context -> context |> Generate.float (0.0, 1.0)) (context |> Generate.intByRank (halfProbabilityFunction 0, 0, 1))
             |> List.ofSeq
@@ -41,7 +42,7 @@ module RandomMusicGenerator =
         let standardOctaveOffset () =
             context |> Generate.intByRank (halfProbabilityFunction 0, -2, 2)
 
-        let scale : Scale = { KeyOffsets = [ 0; 2; 3; 5; 7; 8; 10 ] }
+        let scale : Scale = [ 0; 2; 3; 5; 7; 8; 10 ]
 
         let tempo = context |> Generate.float (0.5, 1.0)
 
@@ -81,16 +82,7 @@ module RandomMusicGenerator =
                 (fun x ->
                     {
                         Instrument = x
-                        NoteOffset =
-                            {
-                                Duration = 1.0
-                                KeyOffset = 0
-                                OctaveOffset = 0
-                                ChordRootOffset = 0.0
-                                ChordScaleOffsets = List.empty
-                                ChordNoteOffsets = List.empty
-                                Velocity = standardVelocity ()
-                            }
+                        Events = [ VelocityEvent(standardVelocity ()) ]
                     })
             |> List.ofSeq
 
@@ -109,16 +101,13 @@ module RandomMusicGenerator =
                         Instrument = { Code = byte (context |> Generate.int (0, 127)) }
                         MinOctaveOffset = minOctave
                         MaxOctaveOffset = maxOctave
-                        NoteOffset =
-                            {
-                                Duration = standardDuration ()
-                                KeyOffset = 0
-                                OctaveOffset = standardOctaveOffset ()
-                                ChordRootOffset = 0.0
-                                ChordScaleOffsets = List.empty
-                                ChordNoteOffsets = standardOffsets (0, 2)
-                                Velocity = standardVelocity ()
-                            }
+                        Events =
+                            [
+                                DurationEvent(standardDuration ())
+                                VelocityEvent(standardVelocity ())
+                                OctaveOffsetEvent(standardOctaveOffset ())
+                                ChordNoteOffsetsEvent(standardOffsets (0, 2))
+                            ]
                     })
                 pitchInstrumentTrackCount
             |> List.ofSeq
@@ -148,23 +137,23 @@ module RandomMusicGenerator =
                     | PercussionInstrumentTrack _ -> true
                     | _ -> false)
 
-        let generateNote context =
-            {
-                Duration =
+        let generateNote context : Event list =
+            [
+                DurationEvent(
                     (context
                      |> Generate.rhythmValue (halfProbabilityFunction 0, 1.0, 2.0, 0.25, 2.0, 4))
                     / 4.0
-                Velocity =
+                )
+                VelocityEvent(
                     context
                     |> Generate.rhythmValue (threeQuarterProbabilityFunction 0, 0.5, 1.0, 0.75, 1.5, 5)
-                OctaveOffset = context |> Generate.intByRank (eighthProbabilityFunction 0, -1, 1)
-                ChordRootOffset = 0.0
-                ChordScaleOffsets = List.empty
-                ChordNoteOffsets = standardOffsets (1, 1)
-                KeyOffset = 0
-            }
+                )
+                OctaveOffsetEvent(context |> Generate.intByRank (eighthProbabilityFunction 0, -1, 1))
+                ChordNoteOffsetsEvent(standardOffsets (1, 1))
+                ArticulationOffsetEvent(context |> scaleOffsetProbabilityFunction)
+            ]
 
-        let createPattern context =
+        let createPattern context : EventStatePattern =
             let duration : float = patternDuration
 
             let offset =
@@ -178,13 +167,13 @@ module RandomMusicGenerator =
 
             let maxRank = 4
 
-            let noteGenerator = fun context rank -> generateNote context
+            let noteGenerator = fun context rank -> NoteEvent(generateNote context)
 
             let notes =
                 context
                 |> Generate.timeline noteGenerator (eighthProbabilityFunction 0, maxRank, offset, period, duration)
 
-            CompositeEventPattern(duration, notes, Seq.empty, NoteOffset.merge)
+            EventStatePattern(duration, notes, Seq.empty)
 
         let commonPatterns =
             context |> Generate.sequence createPattern templateCount |> Seq.toArray
@@ -219,39 +208,32 @@ module RandomMusicGenerator =
                     (trackNumber, patterns))
             |> Map.ofSeq
 
-        let createHigherPattern (sourcePatterns: seq<CompositeEventPattern<NoteOffset>>) context =
+        let createHigherPattern (sourcePatterns: EventStatePattern seq) context : EventStatePattern =
             let duration = higherPatternDuration
 
             let limitPatternCount = context |> Generate.int (1, 4)
 
-            let generateNoteOffset () : NoteOffset =
-                {
-                    Duration = 1.0
-                    KeyOffset = 0
-                    OctaveOffset = standardOctaveOffset ()
-                    ChordRootOffset = 0.0
-                    ChordScaleOffsets = standardOffsets (0, 1)
-                    ChordNoteOffsets = standardOffsets (0, 1)
-                    Velocity = standardVelocity ()
-                }
-
             let limitedPatterns =
                 context |> Generate.subSequence sourcePatterns limitPatternCount
+
+            let noteOffset () =
+                [
+                    OctaveOffsetEvent(standardOctaveOffset ())
+                    ChordScaleOffsetsEvent(standardOffsets (0, 1))
+                    ChordNoteOffsetsEvent(standardOffsets (0, 1))
+                    VelocityEvent(standardVelocity ())
+                ]
 
             let innerPatterns =
                 context
                 |> Generate.sequentialTimeline
                     (fun context ->
                         let item = context |> Generate.item limitedPatterns
-                        (item, item.Duration))
+                        ((noteOffset (), item), item.Duration))
                     duration
-                |> Timeline.map (fun x -> (x, generateNoteOffset ()))
+                |> Array.ofSeq
 
-            {
-                CompositePatternTimelineInput = innerPatterns
-                TimelineInput = Seq.empty
-            }
-            |> CompositeEventPattern.fromInput duration NoteOffset.merge
+            EventStatePattern(duration, Seq.empty, innerPatterns)
 
         let commonHigherPatterns =
             context
@@ -275,7 +257,7 @@ module RandomMusicGenerator =
                     (trackNumber, patterns))
             |> Map.ofSeq
 
-        let createPercussionPart context =
+        let createPercussionPart context : TrackEventStatePattern =
             let duration = higherPatternDuration
 
             let partTrackCount = partPercussionInstrumentTrackCount ()
@@ -284,16 +266,10 @@ module RandomMusicGenerator =
                 context
                 |> Generate.subSequence numberedPercussionInstrumentTracks partTrackCount
 
-            let generateNoteOffset () : NoteOffset =
-                {
-                    Duration = 1.0
-                    KeyOffset = 0
-                    OctaveOffset = 0
-                    ChordRootOffset = context |> scaleOffsetProbabilityFunction 0
-                    ChordScaleOffsets = List.empty
-                    ChordNoteOffsets = List.empty
-                    Velocity = 1.0
-                }
+            let noteOffset () =
+                [
+                    ArticulationOffsetEvent(context |> scaleOffsetProbabilityFunction)
+                ]
 
             let trackTimelines =
                 percussionTracks
@@ -312,45 +288,36 @@ module RandomMusicGenerator =
                                     let item = context |> Generate.item limitedPatterns
 
                                     let pattern =
-                                        {
-                                            CompositePatternTimelineInput = (item, NoteOffset.empty) |> Timeline.fromSingle
-                                            TimelineInput = Seq.empty
-                                        }
-                                        |> CompositeEventPattern.fromInput item.Duration NoteOffset.merge
+                                        EventStatePattern(item.Duration, Seq.empty, (List.empty, item) |> Timeline.fromSingle)
 
-                                    (pattern, item.Duration))
+                                    ((noteOffset (), pattern), item.Duration))
                                 duration
-                            |> Timeline.map (fun x -> (x, generateNoteOffset ()))
 
-                        (trackNumber, innerPatterns))
+                        (Some trackNumber, innerPatterns))
 
-            {
-                CompositeTrackPatternTimelineMap = trackTimelines
-                CompositeTrackPatternMapTimeline = Seq.empty
-            }
-            |> CompositeTrackEventPattern.fromInput duration NoteOffset.merge
+            TrackEventStatePattern(duration, trackTimelines, Seq.empty)
 
         let percussionParts =
             context |> Generate.sequence createPercussionPart templateCount |> Seq.toArray
 
-        let createPart context =
+        let createPart context : TrackEventStatePattern =
             let duration = partDuration
 
             let partTrackCount = partPitchInstrumentTrackCount ()
 
-            let generateNoteOffset () : NoteOffset =
-                {
-                    Duration = standardDuration ()
-                    KeyOffset = 0
-                    OctaveOffset = standardOctaveOffset ()
-                    ChordRootOffset = context |> scaleOffsetProbabilityFunction 0
-                    ChordScaleOffsets = standardOffsets (2, 3)
-                    ChordNoteOffsets = standardOffsets (0, 1)
-                    Velocity = standardVelocity ()
-                }
-
             let pitchInstrumentTracks =
                 context |> Generate.subSequence numberedPitchInstrumentTracks partTrackCount
+
+            let noteOffset () =
+                [
+                    DurationEvent(standardDuration ())
+                    OctaveOffsetEvent(standardOctaveOffset ())
+                    ChordRootOffsetEvent(context |> scaleOffsetProbabilityFunction)
+                    ChordScaleOffsetsEvent(standardOffsets (0, 1))
+                    ChordNoteOffsetsEvent(standardOffsets (0, 1))
+                    VelocityEvent(standardVelocity ())
+                    ArticulationOffsetEvent(context |> scaleOffsetProbabilityFunction)
+                ]
 
             let pitchInstrumentTrackTimelines =
                 pitchInstrumentTracks
@@ -367,11 +334,10 @@ module RandomMusicGenerator =
                             |> Generate.sequentialTimeline
                                 (fun context ->
                                     let item = context |> Generate.item limitedPatterns
-                                    (item, item.Duration))
+                                    ((noteOffset (), item), item.Duration))
                                 duration
-                            |> Timeline.map (fun x -> (x, generateNoteOffset ()))
 
-                        (pitchInstrumentTrackNumber, innerPatterns))
+                        (Some pitchInstrumentTrackNumber, innerPatterns))
 
 
             let percussionPartTimeline =
@@ -384,38 +350,83 @@ module RandomMusicGenerator =
                 |> Generate.sequentialTimeline
                     (fun context ->
                         let item = context |> Generate.item limitedParts
-                        (item, item.Duration))
+                        ((List.empty, item), item.Duration))
                     duration
-                |> Timeline.map (fun x -> (x, generateNoteOffset ()))
 
-            {
-                CompositeTrackPatternTimelineMap = pitchInstrumentTrackTimelines
-                CompositeTrackPatternMapTimeline = percussionPartTimeline
-            }
-            |> CompositeTrackEventPattern.fromInput duration NoteOffset.merge
+            let state =
+                let noteOffset () =
+                    [
+                        DurationEvent(standardDuration ())
+
+                        //                        KeyOffsetEvent(
+//                            if context |> Generate.test 0.25 then
+//                                context |> Generate.int (-6, 6)
+//                            else
+//                                0
+//                        )
+
+                        OctaveOffsetEvent(standardOctaveOffset ())
+                        ChordRootOffsetEvent(context |> scaleOffsetProbabilityFunction)
+                        ChordScaleOffsetsEvent(standardOffsets (2, 3))
+                        ChordNoteOffsetsEvent(standardOffsets (0, 1))
+                        VelocityEvent(standardVelocity ())
+                        ArticulationOffsetEvent(context |> scaleOffsetProbabilityFunction)
+                    ]
+
+                //                let offset =
+//                    context
+//                    |> Generate.rhythmValue (halfProbabilityFunction 0, 8.0, 16.0, 0.0, 4.0, 4)
+
+                let period : float =
+                    (context |> Generate.rhythmPeriod (quarterProbabilityFunction 0, 8))
+                    / (2.0
+                       ** float (context |> Generate.intByRank (quarterProbabilityFunction 2, 1, 4)))
+
+                let maxRank = 4
+
+                let stateGenerator = fun _ _ -> noteOffset ()
+
+                let timeline =
+                    context
+                    |> Generate.timeline stateGenerator (eighthProbabilityFunction 0, maxRank, 0.0, period, duration)
+                    |> Timeline.collect (fun events -> events :> Event seq)
+
+                EventStatePattern(duration, timeline, Seq.empty)
+
+            let trackTimelines =
+                seq {
+                    yield (None, (List.empty, state) |> Timeline.fromSingle)
+                    yield! pitchInstrumentTrackTimelines
+                }
+
+            TrackEventStatePattern(duration, trackTimelines, percussionPartTimeline)
 
         let parts =
             context |> Generate.sequence createPart templateCount |> Seq.toArray
 
-        let createHigherPart context =
+        let createHigherPart context : TrackEventStatePattern =
             let duration = higherPartDuration
 
-            let limitPartCount = context |> Generate.int (1, 4)
+            let noteOffset () =
+                [
+                    DurationEvent(standardDuration ())
 
-            let generateNoteOffset () : NoteOffset =
-                {
-                    Duration = standardDuration ()
-                    KeyOffset =
-                        if context |> Generate.test 0.75 then
+                    KeyOffsetEvent(
+                        if context |> Generate.test 0.25 then
                             context |> Generate.int (-6, 6)
                         else
                             0
-                    OctaveOffset = standardOctaveOffset ()
-                    ChordRootOffset = context |> scaleOffsetProbabilityFunction 0
-                    ChordScaleOffsets = standardOffsets (0, 1)
-                    ChordNoteOffsets = standardOffsets (0, 1)
-                    Velocity = standardVelocity ()
-                }
+                    )
+
+                    OctaveOffsetEvent(standardOctaveOffset ())
+                    ChordRootOffsetEvent(context |> scaleOffsetProbabilityFunction)
+                    ChordScaleOffsetsEvent(standardOffsets (0, 1))
+                    ChordNoteOffsetsEvent(standardOffsets (0, 1))
+                    VelocityEvent(standardVelocity ())
+                    ArticulationOffsetEvent(context |> scaleOffsetProbabilityFunction)
+                ]
+
+            let limitPartCount = context |> Generate.int (1, 4)
 
             let limitedParts = context |> Generate.subSequence parts limitPartCount
 
@@ -424,64 +435,37 @@ module RandomMusicGenerator =
                 |> Generate.sequentialTimeline
                     (fun context ->
                         let item = context |> Generate.item limitedParts
-                        (item, item.Duration))
+                        ((noteOffset (), item), item.Duration))
                     duration
-                |> Timeline.map (fun x -> (x, generateNoteOffset ()))
 
-            {
-                CompositeTrackPatternTimelineMap = Seq.empty
-                CompositeTrackPatternMapTimeline = innerParts
-            }
-            |> CompositeTrackEventPattern.fromInput duration NoteOffset.merge
+            TrackEventStatePattern(duration, Seq.empty, innerParts)
 
-        let generateNoteOffset () : NoteOffset =
-            {
-                Duration = standardDuration ()
-                KeyOffset = context |> Generate.int (-6, 6)
-                OctaveOffset = standardOctaveOffset ()
-                ChordRootOffset = context |> scaleOffsetProbabilityFunction 0
-                ChordScaleOffsets = standardOffsets (0, 1)
-                ChordNoteOffsets = standardOffsets (0, 1)
-                Velocity = standardVelocity ()
-            }
+        let noteOffset () =
+            [
+                DurationEvent(standardDuration ())
+                KeyOffsetEvent(context |> Generate.int (-6, 6))
+                OctaveOffsetEvent(standardOctaveOffset ())
+                ChordRootOffsetEvent(context |> scaleOffsetProbabilityFunction)
+                ChordScaleOffsetsEvent(standardOffsets (0, 1))
+                ChordNoteOffsetsEvent(standardOffsets (0, 1))
+                VelocityEvent(standardVelocity ())
+                ArticulationOffsetEvent(context |> scaleOffsetProbabilityFunction)
+            ]
 
-        let songTimeline =
+        let songTimeline : TrackEventStatePattern WithEvents Timeline =
             context
             |> Generate.sequentialTimeline
                 (fun context ->
                     let item = createHigherPart context
-                    (item, item.Duration))
-                (songDuration)
-            |> Timeline.map (fun x -> (x, generateNoteOffset ()))
+                    ((noteOffset (), item), item.Duration))
+                songDuration
 
-        let toStatePatternTimeline value =
-            {
-                TimelineInput = value |> Timeline.fromSingle
-                PatternTimelineInput = Seq.empty
-            }
-            |> StatePattern.fromInput songDuration StateMerger.multiplicativeFloat
-            |> Timeline.fromSingle
+        let songNoteOffsets =
+            [
+                DurationEvent(context |> Generate.float (0.5, 2.0))
+                KeyOffsetEvent(context |> Generate.int (-6, 6))
+                ScaleOffsetsEvent(scale)
+                TempoEvent(tempo)
+            ]
 
-        let toEventPatternTimeline value =
-            {
-                EventPatternInput.TimelineInput = value |> Timeline.fromSingle
-                EventPatternInput.PatternTimelineInput = Seq.empty
-            }
-            |> EventPattern.fromInput songDuration
-            |> Timeline.fromSingle
-
-        let tempoPatternTimeline = toStatePatternTimeline tempo
-        let scalePatternTimeline = toEventPatternTimeline scale
-
-        let noteOffset : NoteOffset =
-            {
-                Duration = context |> Generate.float (0.5, 2.0)
-                KeyOffset = context |> Generate.int (-6, 6)
-                OctaveOffset = 0
-                ChordRootOffset = 0.0
-                ChordScaleOffsets = List.empty
-                ChordNoteOffsets = List.empty
-                Velocity = 1.0
-            }
-
-        SongPatternMap(songDuration, tracks, songTimeline, noteOffset, tempoPatternTimeline, scalePatternTimeline)
+        EventStateSongPattern(songDuration, tracks, songTimeline, songNoteOffsets)
