@@ -296,7 +296,7 @@ module RandomMusicGenerator =
                     DurationEvent(standardDuration ())
                     OctaveOffsetEvent(standardOctaveOffset ())
                     ChordRootOffsetEvent(standardArticulationOffset ())
-                    ChordScaleOffsetsEvent(standardOffsets (1, 3))
+                    ChordScaleOffsetsEvent(standardOffsets (0, 1))
                     ChordNoteOffsetsEvent(standardOffsets (0, 1))
                     VelocityEvent(standardVelocity ())
                     ArticulationOffsetEvent(standardArticulationOffset ())
@@ -337,17 +337,23 @@ module RandomMusicGenerator =
                     duration
 
             let state =
-                let period : float =
-                    (context |> Generate.rhythmPeriod (quarterProbabilityFunction 0, 8))
-                    / (4.0 ** float (context |> Generate.intByRank (halfProbabilityFunction 1, 1, 4)))
+                let generateState (eventGenerator: Generate.Context -> int -> Event) : Event Timeline =
+                    let period : float =
+                        (context |> Generate.rhythmPeriod (quarterProbabilityFunction 0, 8))
+                        / (4.0 ** float (context |> Generate.intByRank (halfProbabilityFunction 1, 1, 4)))
 
-                let maxRank = 4
+                    let maxRank = 4
 
-                let stateGenerator = fun _ _ -> ChordScaleOffsetsEvent(standardOffsets (1, 3))
+                    context
+                    |> Generate.timeline eventGenerator (eighthProbabilityFunction 0, maxRank, 0.0, period, duration)
 
                 let timeline =
-                    context
-                    |> Generate.timeline stateGenerator (eighthProbabilityFunction 0, maxRank, 0.0, period, duration)
+                    seq {
+                        yield! generateState (fun _ _ -> ChordScaleOffsetsEvent(standardOffsets (1, 3)))
+                        yield! generateState (fun _ _ -> ChordRootOffsetEvent(standardArticulationOffset ()))
+                        yield! generateState (fun _ _ -> ArticulationOffsetEvent(standardArticulationOffset ()))
+                    }
+                    |> Timeline.ofSeq
                     |> EventStateTimelineMap.ofEventTimeline duration
 
                 EventStatePattern.ofTimelines duration timeline Timeline.empty
