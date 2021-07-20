@@ -1,95 +1,60 @@
 namespace RMG.CoreF
 
+type EventState =
+    {
+        Duration: Duration
+        Velocity: Velocity
+        ArticulationOffset: ArticulationOffset
+        KeyOffset: KeyOffset
+        OctaveOffset: OctaveOffset
+        ChordRootOffset: ChordRootOffset
+        ChordScaleOffsets: ChordScaleOffsets
+        ChordNoteOffsets: ChordNoteOffsets
+        ScaleOffsets: ScaleOffsets
+        Tempo: Tempo
+    }
+
 type Event =
-    | NoteEvent of Event list
+    | NoteEvent of EventState
     | DurationEvent of Duration
     | VelocityEvent of Velocity
-    | ArticulationOffsetEvent of VariationOffset
+    | ArticulationOffsetEvent of ArticulationOffset
     | KeyOffsetEvent of KeyOffset
     | OctaveOffsetEvent of OctaveOffset
     | ChordRootOffsetEvent of ChordRootOffset
     | ChordScaleOffsetsEvent of ChordScaleOffsets
     | ChordNoteOffsetsEvent of ChordNoteOffsets
-    | ScaleOffsetsEvent of Scale
+    | ScaleOffsetsEvent of ScaleOffsets
     | TempoEvent of Tempo
 
-type WithEvents<'T> = Event list * 'T
+type WithEventState<'T> = (struct (EventState * 'T))
 
 type EventStateMerger<'T> =
     {
-        FromValue: 'T -> Event
-        Check: Event -> bool
-        TryGetValue: Event -> 'T option
-        TryMergeValues: 'T seq -> 'T option
-        TryMerge: Event seq -> Event option
-        MergeToValues: Event seq -> 'T
-        TryMergeToValues: Event seq -> 'T option
+        Name: string
+        GetValue: Event -> 'T
+        Merge: 'T -> 'T -> 'T
         DefaultValue: 'T
-        Default: Event
-    }
-
-type CommonEventStateMerger =
-    {
-        Check: Event -> bool
-        TryMerge: Event seq -> Event option
-        Default: Event
     }
 
 module Event =
-    type private EventStateMergerInput<'T> =
-        {
-            FromValue: 'T -> Event
-            TryGetValue: Event -> 'T option
-            Merger: 'T -> 'T -> 'T
-            DefaultValue: 'T
-        }
-
     let inline private mergeMul x y = x * y
     let inline private mergeAdd x y = x + y
     let inline private mergeAppendList x y = x |> List.append y
 
-    let private makeMergeValues<'T> (merger: 'T -> 'T -> 'T) : 'T seq -> 'T option =
-        fun values ->
-            if values |> Seq.isEmpty then
-                None
-            else
-                values |> (Seq.reduce merger) |> Some
-
-    let private createCommonMerger<'T> (merger: EventStateMerger<'T>) : CommonEventStateMerger =
-        {
-            Check = merger.Check
-            TryMerge =
-                fun events ->
-                    events
-                    |> Seq.choose merger.TryGetValue
-                    |> merger.TryMergeValues
-                    |> Option.map merger.FromValue
-            Default = merger.FromValue merger.DefaultValue
-        }
-
-    let private createEventStateMerger<'T> (input: EventStateMergerInput<'T>) : EventStateMerger<'T> =
-        let tryMergeValues = makeMergeValues input.Merger
-
-        {
-            FromValue = input.FromValue
-            TryGetValue = input.TryGetValue
-            Check = fun event -> input.TryGetValue event |> Option.isSome
-            TryMergeValues = tryMergeValues
-            TryMerge =
-                fun events ->
-                    events
-                    |> Seq.choose input.TryGetValue
-                    |> tryMergeValues
-                    |> Option.map input.FromValue
-            MergeToValues =
-                fun events ->
-                    events
-                    |> Seq.choose input.TryGetValue
-                    |> Seq.fold input.Merger input.DefaultValue
-            TryMergeToValues = fun events -> events |> Seq.choose input.TryGetValue |> tryMergeValues
-            DefaultValue = input.DefaultValue
-            Default = input.FromValue input.DefaultValue
-        }
+    let getEventName (event: Event) : string =
+        match event with
+        | NoteEvent _ -> nameof NoteEvent
+        | DurationEvent _ -> nameof DurationEvent
+        | VelocityEvent _ -> nameof VelocityEvent
+        | ArticulationOffsetEvent _ -> nameof ArticulationOffsetEvent
+        | KeyOffsetEvent _ -> nameof KeyOffsetEvent
+        | OctaveOffsetEvent _ -> nameof OctaveOffsetEvent
+        | ChordRootOffsetEvent _ -> nameof ChordRootOffsetEvent
+        | ChordScaleOffsetsEvent _ -> nameof ChordScaleOffsetsEvent
+        | ChordNoteOffsetsEvent _ -> nameof ChordNoteOffsetsEvent
+        | ScaleOffsetsEvent _ -> nameof ScaleOffsetsEvent
+        | TempoEvent _ -> nameof TempoEvent
 
     module Note =
         let check (event: Event) : bool =
@@ -97,164 +62,186 @@ module Event =
             | NoteEvent _ -> true
             | _ -> false
 
-        let getValue (event: Event) : Event list option =
+        let tryGetValue (event: Event) : EventState option =
             match event with
             | NoteEvent value -> Some value
             | _ -> None
 
+        let getValue (event: Event) : EventState =
+            match event with
+            | NoteEvent value -> value
+            | _ -> invalidArg (nameof event) "" |> raise
+
+    let invalidEventType (event: Event) (expectedType: string) =
+        invalidArg (nameof event) $"Invalid event type. Expected event of type {expectedType}, got {event}"
+
     let duration =
         {
-            FromValue = DurationEvent
-            TryGetValue =
+            Name = nameof DurationEvent
+            GetValue =
                 fun event ->
                     match event with
-                    | DurationEvent value -> Some value
-                    | _ -> None
-            Merger = mergeMul
+                    | DurationEvent value -> value
+                    | _ -> invalidEventType event (nameof DurationEvent)
+            Merge = mergeMul
             DefaultValue = 1.0
         }
-        |> createEventStateMerger
 
     let velocity =
         {
-            FromValue = VelocityEvent
-            TryGetValue =
+            Name = nameof VelocityEvent
+            GetValue =
                 fun event ->
                     match event with
-                    | VelocityEvent value -> Some value
-                    | _ -> None
-            Merger = mergeMul
+                    | VelocityEvent value -> value
+                    | _ -> invalidEventType event (nameof VelocityEvent)
+            Merge = mergeMul
             DefaultValue = 1.0
         }
-        |> createEventStateMerger
 
     let articulationOffset =
         {
-            FromValue = ArticulationOffsetEvent
-            TryGetValue =
+            Name = nameof ArticulationOffsetEvent
+            GetValue =
                 fun event ->
                     match event with
-                    | ArticulationOffsetEvent value -> Some value
-                    | _ -> None
-            Merger = mergeAdd
+                    | ArticulationOffsetEvent value -> value
+                    | _ -> invalidEventType event (nameof ArticulationOffsetEvent)
+            Merge = mergeAdd
             DefaultValue = 0.0
         }
-        |> createEventStateMerger
 
     let keyOffset =
         {
-            FromValue = KeyOffsetEvent
-            TryGetValue =
+            Name = nameof KeyOffsetEvent
+            GetValue =
                 fun event ->
                     match event with
-                    | KeyOffsetEvent value -> Some value
-                    | _ -> None
-            Merger = mergeAdd
+                    | KeyOffsetEvent value -> value
+                    | _ -> invalidEventType event (nameof KeyOffsetEvent)
+            Merge = mergeAdd
             DefaultValue = 0
         }
-        |> createEventStateMerger
 
     let octaveOffset =
         {
-            FromValue = OctaveOffsetEvent
-            TryGetValue =
+            Name = nameof OctaveOffsetEvent
+            GetValue =
                 fun event ->
                     match event with
-                    | OctaveOffsetEvent value -> Some value
-                    | _ -> None
-            Merger = mergeAdd
+                    | OctaveOffsetEvent value -> value
+                    | _ -> invalidEventType event (nameof OctaveOffsetEvent)
+            Merge = mergeAdd
             DefaultValue = 0
         }
-        |> createEventStateMerger
 
     let chordRootOffset =
         {
-            FromValue = ChordRootOffsetEvent
-            TryGetValue =
+            Name = nameof ChordRootOffsetEvent
+            GetValue =
                 fun event ->
                     match event with
-                    | ChordRootOffsetEvent value -> Some value
-                    | _ -> None
-            Merger = mergeAdd
+                    | ChordRootOffsetEvent value -> value
+                    | _ -> invalidEventType event (nameof ChordRootOffsetEvent)
+            Merge = mergeAdd
             DefaultValue = 0.0
         }
-        |> createEventStateMerger
 
     let chordScaleOffsets =
         {
-            FromValue = ChordScaleOffsetsEvent
-            TryGetValue =
+            Name = nameof ChordScaleOffsetsEvent
+            GetValue =
                 fun event ->
                     match event with
-                    | ChordScaleOffsetsEvent value -> Some value
-                    | _ -> None
-            Merger = mergeAppendList
+                    | ChordScaleOffsetsEvent value -> value
+                    | _ -> invalidEventType event (nameof ChordScaleOffsetsEvent)
+            Merge = mergeAppendList
             DefaultValue = List.empty
         }
-        |> createEventStateMerger
 
     let chordNoteOffsets =
         {
-            FromValue = ChordNoteOffsetsEvent
-            TryGetValue =
+            Name = nameof ChordNoteOffsetsEvent
+            GetValue =
                 fun event ->
                     match event with
-                    | ChordNoteOffsetsEvent value -> Some value
-                    | _ -> None
-            Merger = mergeAppendList
+                    | ChordNoteOffsetsEvent value -> value
+                    | _ -> invalidEventType event (nameof ChordNoteOffsetsEvent)
+            Merge = mergeAppendList
             DefaultValue = List.empty
         }
-        |> createEventStateMerger
 
     let scaleOffsets =
         {
-            FromValue = ScaleOffsetsEvent
-            TryGetValue =
+            Name = nameof ScaleOffsetsEvent
+            GetValue =
                 fun event ->
                     match event with
-                    | ScaleOffsetsEvent value -> Some value
-                    | _ -> None
-            Merger = mergeAppendList
+                    | ScaleOffsetsEvent value -> value
+                    | _ -> invalidEventType event (nameof ScaleOffsetsEvent)
+            Merge = mergeAppendList
             DefaultValue = List.empty
         }
-        |> createEventStateMerger
 
     let tempo =
         {
-            FromValue = TempoEvent
-            TryGetValue =
+            Name = nameof TempoEvent
+            GetValue =
                 fun event ->
                     match event with
-                    | TempoEvent value -> Some value
-                    | _ -> None
-            Merger = mergeMul
+                    | TempoEvent value -> value
+                    | _ -> invalidEventType event (nameof TempoEvent)
+            Merge = mergeMul
             DefaultValue = 1.0
         }
-        |> createEventStateMerger
 
-    let mergers : CommonEventStateMerger list =
-        [
-            createCommonMerger duration
-            createCommonMerger velocity
-            createCommonMerger articulationOffset
-            createCommonMerger keyOffset
-            createCommonMerger octaveOffset
-            createCommonMerger chordRootOffset
-            createCommonMerger chordNoteOffsets
-            createCommonMerger chordScaleOffsets
-            createCommonMerger scaleOffsets
-            createCommonMerger tempo
-        ]
+module EventState =
+    let empty : EventState =
+        {
+            Duration = Event.duration.DefaultValue
+            Velocity = Event.velocity.DefaultValue
+            ArticulationOffset = Event.articulationOffset.DefaultValue
+            KeyOffset = Event.keyOffset.DefaultValue
+            OctaveOffset = Event.octaveOffset.DefaultValue
+            ChordRootOffset = Event.chordRootOffset.DefaultValue
+            ChordScaleOffsets = Event.chordScaleOffsets.DefaultValue
+            ChordNoteOffsets = Event.chordNoteOffsets.DefaultValue
+            ScaleOffsets = Event.scaleOffsets.DefaultValue
+            Tempo = Event.tempo.DefaultValue
+        }
 
-    let isState (event: Event) : bool = Note.check event |> not
+    let merge (eventState1: EventState) (eventState2: EventState) : EventState =
+        {
+            Duration = Event.duration.Merge eventState1.Duration eventState2.Duration
+            Velocity = Event.velocity.Merge eventState1.Velocity eventState2.Velocity
+            ArticulationOffset = Event.articulationOffset.Merge eventState1.ArticulationOffset eventState2.ArticulationOffset
+            KeyOffset = Event.keyOffset.Merge eventState1.KeyOffset eventState2.KeyOffset
+            OctaveOffset = Event.octaveOffset.Merge eventState1.OctaveOffset eventState2.OctaveOffset
+            ChordRootOffset = Event.chordRootOffset.Merge eventState1.ChordRootOffset eventState2.ChordRootOffset
+            ChordScaleOffsets = Event.chordScaleOffsets.Merge eventState1.ChordScaleOffsets eventState2.ChordScaleOffsets
+            ChordNoteOffsets = Event.chordNoteOffsets.Merge eventState1.ChordNoteOffsets eventState2.ChordNoteOffsets
+            ScaleOffsets = Event.scaleOffsets.Merge eventState1.ScaleOffsets eventState2.ScaleOffsets
+            Tempo = Event.tempo.Merge eventState1.Tempo eventState2.Tempo
+        }
 
-    let mergeAll (events: Event seq) : Event seq =
-        events
-        |> Seq.groupBy isState
-        |> Seq.collect
-            (fun (isState, events) ->
-                if isState then
-                    let array = events |> Array.ofSeq
-                    mergers |> Seq.choose (fun merger -> array :> Event seq |> merger.TryMerge)
-                else
-                    events)
+    let private eventValuesFromMap<'T> (merger: EventStateMerger<'T>) (map: Map<string, Event seq>) : 'T =
+        map
+        |> Map.tryFind merger.Name
+        |> Option.map (fun events -> events |> Seq.map merger.GetValue |> Seq.reduce merger.Merge)
+        |> Option.defaultValue merger.DefaultValue
+
+    let ofSeq (items: Event seq) : EventState =
+        let itemMap = items |> Seq.groupBy Event.getEventName |> Map.ofSeq
+
+        {
+            Duration = itemMap |> eventValuesFromMap Event.duration
+            Velocity = itemMap |> eventValuesFromMap Event.velocity
+            ArticulationOffset = itemMap |> eventValuesFromMap Event.articulationOffset
+            KeyOffset = itemMap |> eventValuesFromMap Event.keyOffset
+            OctaveOffset = itemMap |> eventValuesFromMap Event.octaveOffset
+            ChordRootOffset = itemMap |> eventValuesFromMap Event.chordRootOffset
+            ChordScaleOffsets = itemMap |> eventValuesFromMap Event.chordScaleOffsets
+            ChordNoteOffsets = itemMap |> eventValuesFromMap Event.chordNoteOffsets
+            ScaleOffsets = itemMap |> eventValuesFromMap Event.scaleOffsets
+            Tempo = itemMap |> eventValuesFromMap Event.tempo
+        }

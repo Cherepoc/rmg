@@ -5,13 +5,14 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Tuples.fs" />
         <Compile Include="Operators.fs" />
         <Compile Include="CoreTypes.fs" />
-        <Compile Include="NoteOffset.fs" />
         <Compile Include="Event.fs" />
+        <Compile Include="Timeline\TimelineArray.fs" />
         <Compile Include="Timeline\Timeline.fs" />
-        <Compile Include="Timeline\EventTimeline.fs" />
-        <Compile Include="Timeline\EventStateTimeline.fs" />
+        <Compile Include="Timeline\StateTimeline.fs" />
+        <Compile Include="Timeline\EventStateTimelineMap.fs" />
         <Compile Include="Timeline\TrackEventStateTimelineMap.fs" />
         <Compile Include="Instrument.fs" />
         <Compile Include="InstrumentTrack.fs" />

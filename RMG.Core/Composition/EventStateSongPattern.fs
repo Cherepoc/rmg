@@ -8,52 +8,43 @@ type EventStateSongPattern
     (
         duration: Duration,
         tracks: Map<TrackNumber, InstrumentTrack>,
-        trackEventStatePatternTimeline: TrackEventStatePattern WithEvents EventTimeline,
-        noteOffsets: Event list,
+        trackEventStatePatternTimeline: TrackEventStatePattern WithEventState Timeline,
+        eventState: EventState,
         flatSong: Song
     ) =
     member this.Duration = duration
     member this.Track = tracks
     member this.TrackEventStatePatternTimeline = trackEventStatePatternTimeline
-    member this.NoteOffsets = noteOffsets
+    member this.EventState = eventState
     member this.FlatSong = flatSong
 
-    new(duration: Duration,
-        tracksInput: InstrumentTrack seq,
-        trackEventStatePatternTimelineInput: TrackEventStatePattern WithEvents Timeline,
-        noteOffsets: Event seq) =
-        let trackMap = tracksInput |> Seq.indexed |> Map.ofSeq
+    static member internal ofTimelineMapsUnsafe
+        (duration: Duration)
+        (tracks: Map<TrackNumber, InstrumentTrack>)
+        (trackEventStatePatternTimeline: TrackEventStatePattern WithEventState Timeline)
+        (eventState: EventState)
+        (flatSong: Song)
+        : EventStateSongPattern =
+        EventStateSongPattern(duration, tracks, trackEventStatePatternTimeline, eventState, flatSong)
 
-        let trackEventStatePatternTimeline =
-            trackEventStatePatternTimelineInput |> EventTimeline.fromSequence
-
-        let noteOffsets = noteOffsets |> List.ofSeq
-
+module EventStateSongPattern =
+    let ofTimelines
+        (duration: Duration)
+        (tracks: Map<TrackNumber, InstrumentTrack>)
+        (trackEventStatePatternTimeline: TrackEventStatePattern WithEventState Timeline)
+        (eventState: EventState)
+        : EventStateSongPattern =
         let trackNoteMap =
-            seq {
-                yield!
-                    trackEventStatePatternTimeline
-                    |> Timeline.collect
-                        (fun (noteOffsets, pattern) ->
-                            seq {
-                                pattern.FlatTimelineMap
-                                noteOffsets |> TrackEventStateTimelineMap.ofMultiple pattern.Duration
-                            })
-
-                yield!
-                    noteOffsets
-                    |> TrackEventStateTimelineMap.ofMultiple duration
-                    |> Timeline.fromSingle
-            }
-            |> TrackEventStateTimelineMap.concat
+            trackEventStatePatternTimeline
+            |> Timeline.map (fun struct (eventState, pattern) -> struct (eventState, pattern.FlatTimelineMap))
+            |> TrackEventStateTimelineMap.concatCombined duration
+            |> TrackEventStateTimelineMap.shiftState eventState
 
         let flatSong : Song =
             {
                 Duration = duration
-                Tracks = trackMap
+                Tracks = tracks
                 TrackEventStateTimelineMap = trackNoteMap
             }
 
-        EventStateSongPattern(duration, trackMap, trackEventStatePatternTimeline, noteOffsets, flatSong)
-
-    new() = EventStateSongPattern(0.0, Map.empty, EventTimeline.empty, List.empty, Song.empty)
+        EventStateSongPattern.ofTimelineMapsUnsafe duration tracks trackEventStatePatternTimeline eventState flatSong

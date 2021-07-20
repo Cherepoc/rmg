@@ -1,76 +1,52 @@
 namespace RMG.CoreF
 
-type TrackEventStateTimelineMap = Map<TrackNumber option, EventStateTimeline>
-type TrackEventStateTimelineMapInput = (TrackNumber option * Event Timeline) seq
+type TrackEventStateTimelineMap = Map<TrackNumber option, EventStateTimelineMap>
 
 module TrackEventStateTimelineMap =
-    let empty : TrackEventStateTimelineMap = Map.empty
-
-    let ofSeq (duration: Duration) (input: (TrackNumber option * Event Timeline) seq) : TrackEventStateTimelineMap =
+    let ofSeq (duration: Duration) (input: (TrackNumber option * EventStateTimelineMap) seq) : TrackEventStateTimelineMap =
         input
         |> Seq.groupBy fst
         |> Seq.map
             (fun (trackNumber, trackTimeline) ->
                 let mergedTimeline =
-                    trackTimeline
-                    |> Seq.map (fun (_, timeline) -> timeline |> EventStateTimeline.ofSeq duration |> Timeline.itemFromSingle)
-                    |> EventStateTimeline.concat
+                    trackTimeline |> Seq.map snd |> Timeline.ofMultiple |> EventStateTimelineMap.concat duration
 
                 (trackNumber, mergedTimeline))
         |> Map.ofSeq
 
-    let ofSeqSeparated (duration: Duration) (sharedTimeline: Event Timeline) (trackTimelines: (TrackNumber * Event Timeline) seq) : TrackEventStateTimelineMap =
+    let ofSeqSeparated
+        (duration: Duration)
+        (sharedTimeline: EventStateTimelineMap)
+        (trackTimelines: (TrackNumber * EventStateTimelineMap) seq)
+        : TrackEventStateTimelineMap =
         seq {
             yield (None, sharedTimeline)
 
-            yield!
-                trackTimelines
-                |> Seq.map (fun (trackNumber, timeline) -> (Some trackNumber, timeline))
+            yield! trackTimelines |> Seq.map (fun (trackNumber, timeline) -> (Some trackNumber, timeline))
         }
         |> ofSeq duration
 
     let ofMultiple (duration: Duration) (input: Event seq) : TrackEventStateTimelineMap =
-        seq { (None, input |> Timeline.fromMultiple |> EventStateTimeline.ofSeq duration) }
+        seq { (None, input |> EventStateTimelineMap.ofMultiple duration) } |> Map.ofSeq
+
+    let concat (duration: Duration) (inputTimeline: TrackEventStateTimelineMap Timeline) : TrackEventStateTimelineMap =
+        inputTimeline
+        |> Seq.collect (fun struct (_, value) -> value |> Map.toSeq |> Seq.map fst)
+        |> Seq.distinct
+        |> Seq.map
+            (fun trackNumber ->
+                let timeline =
+                    inputTimeline
+                    |> Timeline.choose (fun trackMap -> trackMap |> Map.tryFind trackNumber)
+                    |> EventStateTimelineMap.concat duration
+
+                (trackNumber, timeline))
         |> Map.ofSeq
 
-    let getDuration (input: TrackEventStateTimelineMap) : Duration =
-        if input |> Map.isEmpty then
-            0.0
-        else
-            input
-            |> Map.toSeq
-            |> Seq.map (fun (_, timeline) -> timeline.Duration)
-            |> Seq.max
+    let shiftState (state: EventState) (inputTimelineMap: TrackEventStateTimelineMap) : TrackEventStateTimelineMap =
+        inputTimelineMap |> Map.map (fun _ timeline -> timeline |> EventStateTimelineMap.shiftState state)
 
-    let concat (inputTimeline: TrackEventStateTimelineMap Timeline) : TrackEventStateTimelineMap =
-        let array = inputTimeline |> Array.ofSeq
-
-        if array |> Array.isEmpty then
-            empty
-        else
-            let duration =
-                array
-                |> Seq.collect
-                    (fun (position, timelineMap) ->
-                        timelineMap
-                        |> Map.toSeq
-                        |> Seq.map (fun (_, timeline) -> timeline.Duration + position))
-                |> Seq.max
-
-            array
-            |> Seq.collect
-                (fun (position, timelineMap) ->
-                    timelineMap
-                    |> Map.toSeq
-                    |> Seq.map (fun (trackNumber, timeline) -> (trackNumber, timeline |> Timeline.shift position)))
-            |> ofSeq duration
-
-    let concatCombined (inputTimeline: TrackEventStateTimelineMap WithEvents Timeline) : TrackEventStateTimelineMap =
+    let concatCombined (duration: Duration) (inputTimeline: TrackEventStateTimelineMap WithEventState Timeline) : TrackEventStateTimelineMap =
         inputTimeline
-        |> Timeline.collect
-            (fun (events, timelineMap) ->
-                seq {
-                    events |> ofMultiple (timelineMap |> getDuration)
-                    timelineMap
-                })
-        |> concat
+        |> Timeline.map (fun struct (eventState, timeline) -> timeline |> shiftState eventState)
+        |> concat duration

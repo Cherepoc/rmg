@@ -57,7 +57,7 @@ let reduceTimeInfo (func: float seq -> float) (input: GenerationInfo seq) : Gene
 [<EntryPoint>]
 let main argv =
     let start = -20
-    let count = 10
+    let count = 20
 
     //let options = JsonSerializerOptions()
     //options.WriteIndented <- true

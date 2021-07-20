@@ -137,7 +137,7 @@ module Midi =
                     yield!
                         song.Tempo
                         |> Seq.map
-                            (fun (position, value) ->
+                            (fun struct (position, value) ->
                                 {
                                     Delta = calculateAbsoluteDelta position
                                     Bytes = tempo value
@@ -146,7 +146,7 @@ module Midi =
 
             writeTrack events
 
-        let writeNoteTrack (items: EventTimeline<RenderedNote>, instrumentCode: InstrumentCode, index: byte) =
+        let writeNoteTrack (items: Timeline<RenderedNote>, instrumentCode: InstrumentCode, index: byte) =
             let events =
                 seq {
                     yield
@@ -158,7 +158,7 @@ module Midi =
                     yield!
                         items
                         |> Seq.collect
-                            (fun (position, value) ->
+                            (fun struct (position, value) ->
                                 let noteOffPosition = calculateAbsoluteDelta (position + value.Duration)
 
                                 seq {

@@ -7,9 +7,9 @@ type EventStatePattern
     private
     (
         duration: Duration,
-        timeline: EventStateTimeline,
-        patternTimeline: EventStatePattern WithEvents EventTimeline,
-        flatTimeline: EventStateTimeline
+        timeline: EventStateTimelineMap,
+        patternTimeline: EventStatePattern WithEventState Timeline,
+        flatTimeline: EventStateTimelineMap
     ) =
     member this.Duration = duration
     member this.Timeline = timeline
@@ -18,39 +18,22 @@ type EventStatePattern
 
     member this.FlatTimeline = flatTimeline
 
-    new(duration: Duration, timeline: Event Timeline, patternTimeline: EventStatePattern WithEvents Timeline) =
-        let orderedTimeline = timeline |> EventStateTimeline.ofSeq duration
-
-        let orderedPatternTimeline = patternTimeline |> EventTimeline.fromSequence
-
-        let flatTimeline =
-            seq {
-                yield orderedTimeline |> Timeline.itemFromSingle
-
-                yield!
-                    orderedPatternTimeline
-                    |> Timeline.collect
-                        (fun (events, pattern) ->
-                            seq {
-                                events |> Timeline.fromMultiple |> EventStateTimeline.ofSeq pattern.Duration
-                                pattern.FlatTimeline
-                            })
-            }
-            |> EventStateTimeline.concat
-
-        EventStatePattern(duration, orderedTimeline, orderedPatternTimeline, flatTimeline)
-
-    new() = EventStatePattern(0.0, EventStateTimeline.empty, EventTimeline.empty, EventStateTimeline.empty)
+    static member internal ofTimelinesUnsafe
+        (duration: Duration)
+        (timeline: EventStateTimelineMap)
+        (patternTimeline: EventStatePattern WithEventState Timeline)
+        (flatTimeline: EventStateTimelineMap)
+        : EventStatePattern =
+        EventStatePattern(duration, timeline, patternTimeline, flatTimeline)
 
 module EventStatePattern =
-    let empty<'T> = EventStatePattern()
+    let ofTimelines (duration: Duration) (timeline: EventStateTimelineMap) (patternTimeline: EventStatePattern WithEventState Timeline) : EventStatePattern =
+        let flatTimeline =
+            seq {
+                yield struct (EventState.empty, timeline) |> Timeline.itemOfSingle
+                yield! patternTimeline |> Timeline.map (fun struct (eventState, pattern) -> struct (eventState, pattern.FlatTimeline))
+            }
+            |> Timeline.ofSeq
+            |> EventStateTimelineMap.concatCombined duration
 
-    let concat (sourceTimeline: EventStatePattern Timeline) : EventStateTimeline =
-        sourceTimeline
-        |> Timeline.map (fun pattern -> pattern.FlatTimeline)
-        |> EventStateTimeline.concat
-
-    let concatCombined (sourceTimeline: EventStatePattern WithEvents Timeline) : EventStateTimeline =
-        sourceTimeline
-        |> Timeline.map (fun (events, pattern) -> (events, pattern.FlatTimeline))
-        |> EventStateTimeline.concatCombined
+        EventStatePattern.ofTimelinesUnsafe duration timeline patternTimeline flatTimeline

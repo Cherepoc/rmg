@@ -4,7 +4,6 @@ open Xunit
 open RMG.TestsF.Assertions
 open RMG.CoreF.Probability
 
-
 type GeometricIntProbabilityFunction() =
     [<Theory>]
     [<InlineData(-2, 0.25)>]

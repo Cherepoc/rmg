@@ -18,9 +18,13 @@
     <ItemGroup>
       <Compile Include="Assertions.fs" />
       <Compile Include="intToBytes.fs" />
-      <Compile Include="Midi.fs" />
       <Compile Include="Probability\GeometricIntProbabilityFunction.fs" />
       <Compile Include="Probability\PickItemWeighted.fs" />
+      <Compile Include="StateTimeline\OfSeq.fs" />
+      <Compile Include="StateTimeline\TryFindEffectiveIndex.fs" />
+      <Compile Include="StateTimeline\Concat.fs" />
+      <Compile Include="StateTimeline\ShiftValue.fs" />
+      <Compile Include="Timeline\TrimDuration.fs" />
     </ItemGroup>
 
     <ItemGroup>

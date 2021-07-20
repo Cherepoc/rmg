@@ -1,56 +1,76 @@
 namespace RMG.CoreF
 
-type TimelineItem<'T> = Position * 'T
+open RMG.CoreF.Tuples
 
-type Timeline<'T> = seq<TimelineItem<'T>>
+[<Sealed>]
+type Timeline<'T> private (items: 'T TimelineItem array) =
+    member internal this.Items = items
 
-type TimelineItemMerge<'T> = ('T * 'T) -> 'T
+    member this.Item
+        with get index = this.Items.[index]
+
+    static member internal ofArrayUnsafe(items: 'T TimelineItem array) : Timeline<'T> = Timeline items
+
+    interface System.Collections.Generic.IEnumerable<TimelineItem<'T>> with
+        member this.GetEnumerator() =
+            (this.Items :> System.Collections.Generic.IEnumerable<TimelineItem<'T>>)
+                .GetEnumerator()
+
+    interface System.Collections.IEnumerable with
+        member this.GetEnumerator() =
+            (this.Items :> System.Collections.IEnumerable)
+                .GetEnumerator()
+
+    interface System.Collections.Generic.IReadOnlyCollection<TimelineItem<'T>> with
+        member this.Count = this.Items.Length
+
+    interface System.Collections.Generic.IReadOnlyList<TimelineItem<'T>> with
+        member this.Item
+            with get index = this.Items.[index]
+
+    member this.Count = this.Items.Length
 
 module Timeline =
-    let toPositions<'T> (inputTimeline: 'T Timeline) : Position seq = inputTimeline |> Seq.map fst
+    let empty<'T> = Timeline<'T>.ofArrayUnsafe Array.empty
 
-    let map<'TSource, 'TDest> (func: 'TSource -> 'TDest) (inputTimeline: Timeline<'TSource>) : Timeline<'TDest> =
-        inputTimeline |> Seq.map (fun (position, value) -> (position, func value))
+    let ofSeq<'T> (items: 'T TimelineItem seq) = items |> Seq.sortBy structFst |> Array.ofSeq |> Timeline.ofArrayUnsafe
 
-    let collect<'TSource, 'TDest> (func: 'TSource -> 'TDest seq) (inputTimeline: Timeline<'TSource>) : Timeline<'TDest> =
-        inputTimeline
-        |> Seq.collect (fun (position, value) -> func value |> Seq.map (fun convertedValue -> (position, convertedValue)))
+//    let isEmpty<'T> (inputTimeline: 'T Timeline) : bool = inputTimeline.Items |> Array.isEmpty
 
-    let filter<'T> (func: 'T -> bool) (inputTimeline: 'T Timeline) : 'T Timeline = inputTimeline |> Seq.filter (fun (_, value) -> func value)
+//    let toPositions<'T> (inputTimeline: 'T Timeline) : Position array = inputTimeline.Items |> TimelineArray.toPositions
 
-    let choose<'TSource, 'TDest> (func: 'TSource -> 'TDest option) (inputTimeline: Timeline<'TSource>) : Timeline<'TDest> =
-        inputTimeline
-        |> Seq.choose (fun (position, value) -> func value |> Option.map (fun mappedValue -> (position, mappedValue)))
+    let map<'TSource, 'TDest> (func: 'TSource -> 'TDest) (inputTimeline: 'TSource Timeline) : 'TDest Timeline =
+        inputTimeline.Items |> TimelineArray.map func |> Timeline.ofArrayUnsafe
 
-    let shift (offset: Position) (inputTimeline: Timeline<'T>) : Timeline<'T> =
-        inputTimeline |> Seq.map (fun (position, value) -> (position + offset, value))
+//    let collect<'TSource, 'TDest> (func: 'TSource -> 'TDest seq) (inputTimeline: 'TSource Timeline) : 'TDest Timeline =
+//        inputTimeline.Items |> TimelineArray.collect func |> Timeline.ofArrayUnsafe
 
-    let trimDuration (duration: Duration) (inputTimeline: Timeline<'T>) : Timeline<'T> =
-        inputTimeline |> Seq.filter (fun (position, _) -> position < duration)
+//    let filter<'T> (func: 'T -> bool) (inputTimeline: 'T Timeline) : 'T Timeline = inputTimeline.Items |> TimelineArray.filter func |> Timeline.ofArrayUnsafe
 
-    let groupByPosition (inputTimeline: Timeline<'T>) : Timeline<seq<'T>> =
-        inputTimeline
-        |> Seq.groupBy fst
-        |> Seq.map (fun (position, items) -> (position, items |> Seq.map snd))
+    let choose<'TSource, 'TDest> (func: 'TSource -> 'TDest option) (inputTimeline: 'TSource Timeline) : Timeline<'TDest> =
+        inputTimeline.Items |> TimelineArray.choose func |> Timeline.ofArrayUnsafe
 
-    let sort (inputTimeline: Timeline<'T>) : Timeline<'T> = inputTimeline |> Seq.sortBy fst
+    let shift<'T> (offset: Position) (inputTimeline: 'T Timeline) : 'T Timeline = inputTimeline.Items |> TimelineArray.shift offset |> Timeline.ofArrayUnsafe
 
-    let concat (inputTimeline: Timeline<#Timeline<'T>>) : Timeline<'T> =
-        seq {
-            for position, timeline in inputTimeline do
-                yield! timeline |> shift position
-        }
+//    let tryFindEffectiveIndex<'T> (position: Position) (inputTimeline: 'T Timeline) : int option =
+//        inputTimeline.Items |> TimelineArray.tryFindEffectiveIndex position
+//
+//    let tryFindEffectiveValue<'T> (position: Position) (inputTimeline: 'T Timeline) : 'T option =
+//        inputTimeline.Items |> TimelineArray.tryFindEffectiveValue position
 
-    let mergeItem (item: 'T) (timelineItemMerge: TimelineItemMerge<'T>) (inputTimeline: Timeline<'T>) : Timeline<'T> =
-        inputTimeline |> map (fun x -> timelineItemMerge (x, item))
+    let trimDuration (duration: Duration) (inputTimeline: 'T Timeline) : 'T Timeline =
+        inputTimeline.Items |> TimelineArray.trimDuration duration |> Timeline.ofArrayUnsafe
 
-    let mergeComposite (timelineItemMerge: TimelineItemMerge<'T>) (inputTimeline: Timeline<#Timeline<'T> * 'T>) : Timeline<'T> =
-        inputTimeline
-        |> map (fun (timeline, item) -> (timeline |> mergeItem item timelineItemMerge))
-        |> concat
+    //let groupByPosition (inputTimeline: 'T Timeline) : 'T seq Timeline = inputTimeline.Items |> TimelineArray.groupByPosition |> Timeline.ofArrayUnsafe
 
-    let itemFromSingle (value: 'T) : TimelineItem<'T> = (0.0, value)
+    let concat (inputTimeline: 'T Timeline Timeline) : 'T Timeline =
+        inputTimeline.Items
+        |> Array.collect (fun struct (position, timeline) -> (timeline |> shift position).Items)
+        |> Array.sortBy structFst
+        |> Timeline.ofArrayUnsafe
 
-    let fromSingle (value: 'T) : Timeline<'T> = seq { itemFromSingle value }
+    let itemOfSingle (value: 'T) : 'T TimelineItem = (0.0, value)
 
-    let fromMultiple (values: 'T seq) = values |> Seq.map itemFromSingle
+    let ofSingle (value: 'T) : 'T Timeline = [| itemOfSingle value |] |> Timeline.ofArrayUnsafe
+
+    let ofMultiple (values: 'T seq) = values |> Seq.map itemOfSingle |> Array.ofSeq |> Timeline.ofArrayUnsafe

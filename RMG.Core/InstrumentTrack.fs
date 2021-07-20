@@ -5,12 +5,12 @@ open RMG.CoreF
 type PitchInstrumentTrack =
     {
         Instrument: PitchInstrument
-        Events: Event list
+        EventState: EventState
         MinOctaveOffset: OctaveOffset
         MaxOctaveOffset: OctaveOffset
     }
 
-type PercussionInstrumentTrack = { Instrument: PercussionInstrument; Events: Event list }
+type PercussionInstrumentTrack = { Instrument: PercussionInstrument; EventState: EventState }
 
 type InstrumentTrack =
     | PitchInstrumentTrack of PitchInstrumentTrack

@@ -1,14 +1,16 @@
 namespace RMG.CoreF
 
+open RMG.CoreF.Tuples
+
 module Probability =
     type IntProbabilityFunction = int -> float
 
-    let geometricIntProbabilityFunction (minProbability: float, maxProbability: float, probabilityMultiplier: float, offset: int) (value: int) : float =
+    let geometricIntProbabilityFunction struct (minProbability: float, maxProbability: float, probabilityMultiplier: float, offset: int) (value: int) : float =
         (probabilityMultiplier ** (abs (double (value - offset))))
         * (maxProbability - minProbability)
         + minProbability
 
-    let getWeights (probabilityFunction: IntProbabilityFunction, minValue: int, maxValue: int) : seq<float> =
+    let getWeights struct (probabilityFunction: IntProbabilityFunction, minValue: int, maxValue: int) : seq<float> =
         seq {
             for value = minValue to maxValue do
                 yield probabilityFunction value
@@ -17,7 +19,7 @@ module Probability =
     let withWeights<'T> (probabilityFunction: IntProbabilityFunction) (items: seq<'T>) =
         items
         |> Seq.indexed
-        |> Seq.map (fun (index, item) -> (item, probabilityFunction index))
+        |> Seq.map (fun (index, item) -> struct (item, probabilityFunction index))
 
     let test (value: float) (referenceValue: float) : bool =
         if value <= 0.0 then false
@@ -34,34 +36,34 @@ module Probability =
         else
             let weightSum = weightsArray |> Array.sum
 
-            let index, _, _ =
+            let struct (index, _, _) =
                 weightsArray
                 |> Seq.indexed
                 |> Seq.map
                     (fun (index, weight) ->
                         let minWeight = weightsArray |> Seq.take index |> Seq.sum
 
-                        (index, minWeight / weightSum, (minWeight + weight) / weightSum))
-                |> Seq.find (fun (_, minWeight, maxWeight) -> value >= minWeight && value < maxWeight)
+                        struct (index, minWeight / weightSum, (minWeight + weight) / weightSum))
+                |> Seq.find (fun struct (_, minWeight, maxWeight) -> value >= minWeight && value < maxWeight)
 
             index
 
-    let pickWeighted<'T> (value: float) (weightedItems: seq<'T * float>) : 'T =
+    let pickWeighted<'T> (value: float) (weightedItems: seq<struct('T * float)>) : 'T =
         let weightedItemsArray = weightedItems |> Seq.toArray
-        let weights = weightedItemsArray |> Seq.map snd
+        let weights = weightedItemsArray |> Seq.map structSnd
         let index = pickWeightedIndex value weights
-        let value, _ = weightedItemsArray.[index]
+        let struct (value, _) = weightedItemsArray.[index]
         value
 
     let pickRank (probabilityFunction: IntProbabilityFunction) (value: float) (ranks: seq<int>) : int =
         ranks
-        |> Seq.map (fun rank -> (rank, probabilityFunction rank))
+        |> Seq.map (fun rank -> struct (rank, probabilityFunction rank))
         |> pickWeighted value
 
     let weightIndexPickItem<'T> (probabilityFunction: IntProbabilityFunction) (value: float) (items: seq<'T>) : 'T =
         items
         |> Seq.indexed
-        |> Seq.map (fun (index, item) -> (item, probabilityFunction index))
+        |> Seq.map (fun (index, item) -> struct (item, probabilityFunction index))
         |> pickWeighted value
 
     let pickItem<'T> (value: float) (items: seq<'T>) : 'T =

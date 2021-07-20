@@ -3,6 +3,7 @@ namespace RMG.CoreF
 open System
 open MathNet.Numerics.Distributions
 open RMG.CoreF.Probability
+open RMG.CoreF.Tuples
 
 module Generate =
     [<Sealed>]
@@ -14,7 +15,7 @@ module Generate =
 
     let private primes = [ 2; 3; 5; 7; 11; 13 ]
 
-    let rhythmPeriod (probabilityFunction: IntProbabilityFunction, maxValue: int) (context: Context) : float =
+    let rhythmPeriod struct (probabilityFunction: IntProbabilityFunction, maxValue: int) (context: Context) : float =
         let selectedPrime =
             primes
             |> Seq.takeWhile (fun prime -> prime <= maxValue)
@@ -30,7 +31,7 @@ module Generate =
         |> pickItem (context.GetProbability())
 
     let rhythmValue
-        (probabilityFunction: IntProbabilityFunction, offset: float, period: float, min: float, max: float, maxRank: int)
+        struct (probabilityFunction: IntProbabilityFunction, offset: float, period: float, min: float, max: float, maxRank: int)
         (context: Context)
         : float
         =
@@ -45,17 +46,17 @@ module Generate =
 
             let stepMax = int (floor ((normalizedMax - rankOffset) / rankPeriod))
 
-            (rankPeriod, stepMin, stepMax)
+            struct (rankPeriod, stepMin, stepMax)
 
         let rank =
             seq { 0 .. maxRank }
             |> Seq.filter
                 (fun rank ->
-                    let (_, stepMin, stepMax) = calculateRank rank
+                    let struct (_, stepMin, stepMax) = calculateRank rank
                     stepMin <= stepMax)
             |> pickRank probabilityFunction (context.GetProbability())
 
-        let (rankPeriod, stepMin, stepMax) = calculateRank rank
+        let struct (rankPeriod, stepMin, stepMax) = calculateRank rank
         let stepCount = stepMax - stepMin + 1
         let stepIndex = context.GetInt(0, stepCount)
 
@@ -63,26 +64,26 @@ module Generate =
 
     let timeline<'T>
         (itemFunction: Context -> int -> 'T)
-        (probabilityFunction: IntProbabilityFunction, maxRank: int, offset: float, period: float, duration: float)
+        struct (probabilityFunction: IntProbabilityFunction, maxRank: int, offset: float, period: float, duration: float)
         (context: Context)
         : Timeline<'T>
         =
-        let convertPosition (normalizedPosition: float, cycle: int) =
+        let convertPosition struct (normalizedPosition: float, cycle: int) =
             (normalizedPosition * period + offset) % period + float cycle * period
 
-        let testPosition (normalizedPosition: float, cycle: int) =
+        let testPosition struct (normalizedPosition: float, cycle: int) =
             let position = convertPosition (normalizedPosition, cycle)
 
             position >= 0.0 && position < duration
 
-        let rec generate (normalizedPosition: float, rankScale: float, rank: int, cycle: int) =
-            let position = convertPosition (normalizedPosition, cycle)
+        let rec generate struct (normalizedPosition: float, rankScale: float, rank: int, cycle: int) : 'T TimelineItem seq =
+            let position = convertPosition struct (normalizedPosition, cycle)
 
             let probability = probabilityFunction rank
 
             seq {
                 if probability |> test (context.GetProbability()) then
-                    yield (position, itemFunction context rank)
+                    yield struct (position, itemFunction context rank)
 
                 if rank < maxRank then
                     let childRank = rank + 1
@@ -90,34 +91,35 @@ module Generate =
 
                     let leftPosition = normalizedPosition - childRankScale
 
-                    if testPosition (leftPosition, cycle) then
-                        yield! generate (leftPosition, childRankScale, childRank, cycle)
+                    if testPosition struct (leftPosition, cycle) then
+                        yield! generate struct (leftPosition, childRankScale, childRank, cycle)
 
                     let rightPosition = normalizedPosition + childRankScale
 
-                    if testPosition (rightPosition, cycle) then
-                        yield! generate (rightPosition, childRankScale, childRank, cycle)
+                    if testPosition struct (rightPosition, cycle) then
+                        yield! generate struct (rightPosition, childRankScale, childRank, cycle)
             }
 
         let cycleCount = int (ceil (duration / period))
 
         seq {
             for cycle = 0 to cycleCount do
-                yield! generate (0.0, 1.0, 0, cycle)
+                yield! generate struct (0.0, 1.0, 0, cycle)
         }
+        |> Timeline.ofSeq
 
-    let sequentialTimeline<'T> (itemFunction: Context -> 'T * Duration) (duration: Duration) (context: Context) : Timeline<'T> =
+    let sequentialTimeline<'T> (itemFunction: Context -> struct ('T * Duration)) (duration: Duration) (context: Context) : Timeline<'T> =
         let mutable list = List.empty
         let mutable durationSum = 0.0
 
         while durationSum < duration do
-            let (item, itemDuration) = itemFunction context
+            let struct (item, itemDuration) = itemFunction context
 
-            list <- list |> List.append [ (durationSum, item) ]
+            list <- list |> List.append [ struct (durationSum, item) ]
 
             durationSum <- durationSum + itemDuration
 
-        list |> Seq.ofList
+        list |> Timeline.ofSeq
 
     let sequence<'T> (itemFunction: Context -> 'T) (count: int) (context: Context) : seq<'T> =
         seq {
@@ -144,13 +146,13 @@ module Generate =
                 yield! subSequence remainder (count - 1) context
             }
 
-    let rec subSequenceWeighted<'T> (sequence: seq<'T * float>) (count: int) (context: Context) : seq<'T> =
+    let rec subSequenceWeighted<'T> (sequence: seq<struct ('T * float)>) (count: int) (context: Context) : seq<'T> =
         let array = sequence |> Seq.toArray
 
         if count <= 0 || array.Length <= 0 then
             Seq.empty
         else
-            let weights = sequence |> Seq.map snd
+            let weights = sequence |> Seq.map structSnd
             let index = pickWeightedIndex (context.GetProbability()) weights
 
             let remainder =
@@ -159,18 +161,18 @@ module Generate =
                     yield! array |> Seq.skip (index + 1)
                 }
 
-            let item, _ = array.[index]
+            let struct (item, _) = array.[index]
 
             seq {
                 yield item
                 yield! subSequenceWeighted remainder (count - 1) context
             }
 
-    let float (min: float, max: float) (context: Context) : float = (context.GetProbability()) * (max - min) + min
+    let float struct (min: float, max: float) (context: Context) : float = (context.GetProbability()) * (max - min) + min
 
-    let int (min: int, max: int) (context: Context) : int = (context.GetInt(min, max + 1))
+    let int struct (min: int, max: int) (context: Context) : int = (context.GetInt(min, max + 1))
 
-    let intByRank (probabilityFunction: IntProbabilityFunction, min: int, max: int) (context: Context) : int =
+    let intByRank struct (probabilityFunction: IntProbabilityFunction, min: int, max: int) (context: Context) : int =
         seq { min .. max } |> pickRank probabilityFunction (context.GetProbability())
 
     let item<'T> (sequence: seq<'T>) (context: Context) : 'T =

@@ -12,11 +12,3 @@ type Song =
         Tracks: Map<TrackNumber, InstrumentTrack>
         TrackEventStateTimelineMap: TrackEventStateTimelineMap
     }
-
-module Song =
-    let empty : Song =
-        {
-            Duration = 0.0
-            Tracks = Map.empty
-            TrackEventStateTimelineMap = TrackEventStateTimelineMap.empty
-        }
