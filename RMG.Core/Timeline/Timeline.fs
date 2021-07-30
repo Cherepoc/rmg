@@ -33,39 +33,36 @@ type Timeline<'T> private (items: 'T TimelineItem array) =
 module Timeline =
     let empty<'T> = Timeline<'T>.ofArrayUnsafe Array.empty
 
-    let ofSeq<'T> (items: 'T TimelineItem seq) = items |> Seq.sortBy structFst |> Array.ofSeq |> Timeline.ofArrayUnsafe
-
-//    let isEmpty<'T> (inputTimeline: 'T Timeline) : bool = inputTimeline.Items |> Array.isEmpty
-
-//    let toPositions<'T> (inputTimeline: 'T Timeline) : Position array = inputTimeline.Items |> TimelineArray.toPositions
+    let ofSeq<'T> (items: 'T TimelineItem seq) =
+        items |> Seq.sortBy structFst |> Array.ofSeq |> Timeline.ofArrayUnsafe
 
     let map<'TSource, 'TDest> (func: 'TSource -> 'TDest) (inputTimeline: 'TSource Timeline) : 'TDest Timeline =
         inputTimeline.Items |> TimelineArray.map func |> Timeline.ofArrayUnsafe
 
-//    let collect<'TSource, 'TDest> (func: 'TSource -> 'TDest seq) (inputTimeline: 'TSource Timeline) : 'TDest Timeline =
-//        inputTimeline.Items |> TimelineArray.collect func |> Timeline.ofArrayUnsafe
-
-//    let filter<'T> (func: 'T -> bool) (inputTimeline: 'T Timeline) : 'T Timeline = inputTimeline.Items |> TimelineArray.filter func |> Timeline.ofArrayUnsafe
+    let scalePosition<'T> (scaleValue: Position) (inputTimeline: 'T Timeline) : 'T Timeline =
+        inputTimeline.Items
+        |> TimelineArray.scalePosition scaleValue
+        |> Timeline.ofArrayUnsafe
 
     let choose<'TSource, 'TDest> (func: 'TSource -> 'TDest option) (inputTimeline: 'TSource Timeline) : Timeline<'TDest> =
         inputTimeline.Items |> TimelineArray.choose func |> Timeline.ofArrayUnsafe
 
-    let shift<'T> (offset: Position) (inputTimeline: 'T Timeline) : 'T Timeline = inputTimeline.Items |> TimelineArray.shift offset |> Timeline.ofArrayUnsafe
+    let shift<'T> (offset: Position) (inputTimeline: 'T Timeline) : 'T Timeline =
+        inputTimeline.Items |> TimelineArray.shift offset |> Timeline.ofArrayUnsafe
 
-//    let tryFindEffectiveIndex<'T> (position: Position) (inputTimeline: 'T Timeline) : int option =
-//        inputTimeline.Items |> TimelineArray.tryFindEffectiveIndex position
-//
-//    let tryFindEffectiveValue<'T> (position: Position) (inputTimeline: 'T Timeline) : 'T option =
-//        inputTimeline.Items |> TimelineArray.tryFindEffectiveValue position
+    let phaseShift<'T> (phase: Position) (period: Position) (inputTimeline: 'T Timeline) : 'T Timeline =
+        inputTimeline.Items
+        |> TimelineArray.phaseShift phase period
+        |> Timeline.ofArrayUnsafe
 
     let trimDuration (duration: Duration) (inputTimeline: 'T Timeline) : 'T Timeline =
-        inputTimeline.Items |> TimelineArray.trimDuration duration |> Timeline.ofArrayUnsafe
-
-    //let groupByPosition (inputTimeline: 'T Timeline) : 'T seq Timeline = inputTimeline.Items |> TimelineArray.groupByPosition |> Timeline.ofArrayUnsafe
+        inputTimeline.Items
+        |> TimelineArray.trimDuration duration
+        |> Timeline.ofArrayUnsafe
 
     let concat (inputTimeline: 'T Timeline Timeline) : 'T Timeline =
         inputTimeline.Items
-        |> Array.collect (fun struct (position, timeline) -> (timeline |> shift position).Items)
+        |> Array.collect (fun (struct (position, timeline)) -> (timeline |> shift position).Items)
         |> Array.sortBy structFst
         |> Timeline.ofArrayUnsafe
 
@@ -73,4 +70,5 @@ module Timeline =
 
     let ofSingle (value: 'T) : 'T Timeline = [| itemOfSingle value |] |> Timeline.ofArrayUnsafe
 
-    let ofMultiple (values: 'T seq) = values |> Seq.map itemOfSingle |> Array.ofSeq |> Timeline.ofArrayUnsafe
+    let ofMultiple (values: 'T seq) =
+        values |> Seq.map itemOfSingle |> Array.ofSeq |> Timeline.ofArrayUnsafe

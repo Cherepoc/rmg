@@ -31,16 +31,31 @@ type StateTimeline<'T when 'T: equality> private (items: 'T TimelineItem array) 
     member this.Count = this.Items.Length
 
 module StateTimeline =
-//    let shift<'T when 'T: equality> (offset: Position) (inputTimeline: 'T StateTimeline) : 'T StateTimeline =
+    //    let shift<'T when 'T: equality> (offset: Position) (inputTimeline: 'T StateTimeline) : 'T StateTimeline =
 //        inputTimeline.Items |> TimelineArray.shift offset |> StateTimeline.ofArrayUnsafe
 
-//    let toPositions<'T when 'T: equality> (inputTimeline: 'T StateTimeline) : Position array = inputTimeline.Items |> TimelineArray.toPositions
+    //    let toPositions<'T when 'T: equality> (inputTimeline: 'T StateTimeline) : Position array = inputTimeline.Items |> TimelineArray.toPositions
 
     let tryFindEffectiveIndex<'T when 'T: equality> (position: Position) (inputTimeline: 'T StateTimeline) : int option =
         inputTimeline.Items |> TimelineArray.tryFindEffectiveIndex position
 
     let tryFindEffectiveValue<'T when 'T: equality> (position: Position) (inputTimeline: 'T StateTimeline) : 'T option =
         inputTimeline.Items |> TimelineArray.tryFindEffectiveValue position
+
+    let empty<'T when 'T: equality> (duration: Duration) (defaultValue: 'T) : 'T StateTimeline =
+        [|
+            struct (0.0, defaultValue)
+            struct (duration, defaultValue)
+        |]
+        |> StateTimeline.ofArrayUnsafe
+
+    let isEmpty<'T when 'T: equality> (inputTimeline: 'T StateTimeline) : bool =
+        if inputTimeline.Count = 2 then
+            let struct (_, value1) = inputTimeline.[0]
+            let struct (_, value2) = inputTimeline.[1]
+            value1 = value2
+        else
+            false
 
     let private trimState<'T when 'T: equality> (inputTimeline: 'T TimelineItem array) : 'T TimelineItem array =
         match inputTimeline.Length with
@@ -87,36 +102,58 @@ module StateTimeline =
         =
         let shiftedTimelines =
             inputTimeline.Items
+            |> Array.filter (fun (struct (_, timeline)) -> isEmpty timeline |> not)
             |> Array.map
                 (fun (struct (position, timeline)) ->
                     timeline.Items
                     |> TimelineArray.shift position
                     |> TimelineArray.trimDuration duration)
+            |> Array.filter
+                (fun items ->
+                    match items.Length with
+                    | 0 -> false
+                    | length when length <= 2 -> items |> Array.exists (fun (struct (_, value)) -> not (value = defaultValue))
+                    | _ -> true)
 
-        shiftedTimelines
-        |> Seq.collect TimelineArray.toPositions
-        |> Seq.append (
-            seq {
-                0.0
-                duration
-            }
-        )
-        |> Seq.distinct
-        |> Seq.sort
-        |> Seq.map
-            (fun position ->
-                let value =
-                    if (position = duration) then
-                        defaultValue
-                    else
-                        shiftedTimelines
-                        |> Seq.choose (fun timeline -> timeline |> TimelineArray.tryFindEffectiveValue position)
-                        |> Seq.fold merger defaultValue
+        let positions =
+            shiftedTimelines
+            |> Seq.collect TimelineArray.toPositions
+            |> Seq.append (seq { 0.0 })
+            |> Seq.distinct
+            |> Seq.sort
 
-                struct (position, value))
-        |> Array.ofSeq
-        |> trimState
-        |> StateTimeline.ofArrayUnsafe
+        let timelineIndexes = Array.init shiftedTimelines.Length (fun _ -> -1)
+
+        let result : 'T TimelineItem array =
+            Array.zeroCreate ((shiftedTimelines |> Array.sumBy (fun x -> x.Length)) + 2)
+
+        let mutable resultIndex = 0
+
+        for position in positions do
+            let mutable mergedValue = defaultValue
+
+            for i = 0 to timelineIndexes.Length - 1 do
+                let mutable timelineIndex = timelineIndexes.[i]
+                let timeline = shiftedTimelines.[i]
+
+                if timeline.Length - 1 > timelineIndex then
+                    let struct (nextPosition, _) = timeline.[timelineIndex + 1]
+
+                    if nextPosition = position then
+                        timelineIndex <- timelineIndex + 1
+                        timelineIndexes.[i] <- timelineIndex
+
+                if timelineIndex >= 0 then
+                    let struct (_, value) = timeline.[timelineIndex]
+                    mergedValue <- merger mergedValue value
+
+            if resultIndex = 0 || not (mergedValue = defaultValue) then
+                result.[resultIndex] <- (position, mergedValue)
+                resultIndex <- resultIndex + 1
+
+        result.[resultIndex] <- (duration, defaultValue)
+
+        Array.sub result 0 (resultIndex + 1) |> StateTimeline.ofArrayUnsafe
 
     let shiftValue<'T when 'T: equality> (value: 'T) (defaultValue: 'T) (merger: 'T -> 'T -> 'T) (inputTimeline: 'T StateTimeline) : 'T StateTimeline =
         if value = defaultValue then

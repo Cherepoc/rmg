@@ -24,7 +24,9 @@
       <Compile Include="StateTimeline\TryFindEffectiveIndex.fs" />
       <Compile Include="StateTimeline\Concat.fs" />
       <Compile Include="StateTimeline\ShiftValue.fs" />
+      <Compile Include="Timeline\PhaseShift.fs" />
       <Compile Include="Timeline\TrimDuration.fs" />
+      <Compile Include="Generate\RankTimeline.fs" />
     </ItemGroup>
 
     <ItemGroup>
