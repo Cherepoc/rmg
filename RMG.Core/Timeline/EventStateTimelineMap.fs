@@ -16,17 +16,17 @@ type EventStateTimelineMap
         scaleOffsetsTimeline: ScaleOffsets StateTimeline,
         tempoTimeline: Tempo StateTimeline
     ) =
-    member this.noteTimeline = noteTimeline
-    member this.durationTimeline = durationTimeline
-    member this.velocityTimeline = velocityTimeline
-    member this.articulationOffsetTimeline = articulationOffsetTimeline
-    member this.keyOffsetTimeline = keyOffsetTimeline
-    member this.octaveOffsetTimeline = octaveOffsetTimeline
-    member this.chordRootOffsetTimeline = chordRootOffsetTimeline
-    member this.chordScaleOffsetsTimeline = chordScaleOffsetsTimeline
-    member this.chordNoteOffsetsTimeline = chordNoteOffsetsTimeline
-    member this.scaleOffsetsTimeline = scaleOffsetsTimeline
-    member this.tempoTimeline = tempoTimeline
+    member this.NoteTimeline = noteTimeline
+    member this.DurationTimeline = durationTimeline
+    member this.VelocityTimeline = velocityTimeline
+    member this.ArticulationOffsetTimeline = articulationOffsetTimeline
+    member this.KeyOffsetTimeline = keyOffsetTimeline
+    member this.OctaveOffsetTimeline = octaveOffsetTimeline
+    member this.ChordRootOffsetTimeline = chordRootOffsetTimeline
+    member this.ChordScaleOffsetsTimeline = chordScaleOffsetsTimeline
+    member this.ChordNoteOffsetsTimeline = chordNoteOffsetsTimeline
+    member this.ScaleOffsetsTimeline = scaleOffsetsTimeline
+    member this.TempoTimeline = tempoTimeline
 
     static member internal ofArraysUnsafe
         (
@@ -61,44 +61,48 @@ module EventStateTimelineMap =
         (duration: Duration)
         (merger: EventStateMerger<'T>)
         (groupedTimeline: Map<string, Event TimelineItem seq>)
-        : 'T StateTimeline =
+        : 'T StateTimeline
+        =
         groupedTimeline
         |> Map.tryFind merger.Name
         |> Option.defaultValue Seq.empty
-        |> Seq.map (fun struct (position, event) -> struct (position, merger.GetValue event))
+        |> Seq.map (fun (struct (position, event)) -> struct (position, merger.GetValue event))
         |> StateTimeline.ofSeq duration merger.Merge merger.DefaultValue
 
-    let ofEventTimeline (duration: Duration) (sourceTimeline: Event Timeline) : EventStateTimelineMap =
-        let groupedTimeline =
-            sourceTimeline
+    let ofTimelines (duration: Duration) (sourceNoteTimeline: EventState Timeline) (sourceStateTimeline: Event Timeline) : EventStateTimelineMap =
+        let groupedStateTimeline =
+            sourceStateTimeline
             |> Timeline.trimDuration duration
-            |> Seq.groupBy (fun struct (_, value) -> Event.getEventName value)
+            |> Seq.groupBy (fun (struct (_, value)) -> Event.getEventName value)
             |> Map.ofSeq
 
-        let noteTimeline =
-            groupedTimeline
-            |> Map.tryFind (nameof NoteEvent)
-            |> Option.defaultValue Seq.empty
-            |> Seq.map (fun struct (position, value) -> struct (position, Event.Note.getValue value))
-            |> Array.ofSeq
-            |> Timeline.ofArrayUnsafe
+        let noteTimeline = sourceNoteTimeline |> Timeline.trimDuration duration
 
-        let durationTimeline = groupedTimeline |> stateFromMap duration Event.duration
-        let velocityTimeline = groupedTimeline |> stateFromMap duration Event.velocity
+        let durationTimeline = groupedStateTimeline |> stateFromMap duration Event.duration
+        let velocityTimeline = groupedStateTimeline |> stateFromMap duration Event.velocity
 
-        let articulationOffsetTimeline = groupedTimeline |> stateFromMap duration Event.articulationOffset
+        let articulationOffsetTimeline =
+            groupedStateTimeline |> stateFromMap duration Event.articulationOffset
 
-        let keyOffsetTimeline = groupedTimeline |> stateFromMap duration Event.keyOffset
-        let octaveOffsetTimeline = groupedTimeline |> stateFromMap duration Event.octaveOffset
+        let keyOffsetTimeline =
+            groupedStateTimeline |> stateFromMap duration Event.keyOffset
 
-        let chordRootOffsetTimeline = groupedTimeline |> stateFromMap duration Event.chordRootOffset
+        let octaveOffsetTimeline =
+            groupedStateTimeline |> stateFromMap duration Event.octaveOffset
 
-        let chordScaleOffsetsTimeline = groupedTimeline |> stateFromMap duration Event.chordScaleOffsets
+        let chordRootOffsetTimeline =
+            groupedStateTimeline |> stateFromMap duration Event.chordRootOffset
 
-        let chordNoteOffsetsTimeline = groupedTimeline |> stateFromMap duration Event.chordNoteOffsets
+        let chordScaleOffsetsTimeline =
+            groupedStateTimeline |> stateFromMap duration Event.chordScaleOffsets
 
-        let scaleOffsetsTimeline = groupedTimeline |> stateFromMap duration Event.scaleOffsets
-        let tempoTimeline = groupedTimeline |> stateFromMap duration Event.tempo
+        let chordNoteOffsetsTimeline =
+            groupedStateTimeline |> stateFromMap duration Event.chordNoteOffsets
+
+        let scaleOffsetsTimeline =
+            groupedStateTimeline |> stateFromMap duration Event.scaleOffsets
+
+        let tempoTimeline = groupedStateTimeline |> stateFromMap duration Event.tempo
 
         EventStateTimelineMap.ofArraysUnsafe (
             noteTimeline,
@@ -114,61 +118,64 @@ module EventStateTimelineMap =
             tempoTimeline
         )
 
-    let empty (duration: Duration) : EventStateTimelineMap = ofEventTimeline duration Timeline.empty
+    let empty (duration: Duration) : EventStateTimelineMap = ofTimelines duration Timeline.empty Timeline.empty
 
     let private concatWithMerger<'T when 'T: equality>
         (duration: Duration)
         (func: EventStateTimelineMap -> 'T StateTimeline)
         (merger: EventStateMerger<'T>)
         (sourceTimeline: EventStateTimelineMap Timeline)
-        : 'T StateTimeline =
+        : 'T StateTimeline
+        =
         sourceTimeline
         |> Timeline.map func
         |> StateTimeline.concat duration merger.Merge merger.DefaultValue
 
     let concat (duration: Duration) (sourceTimeline: EventStateTimelineMap Timeline) : EventStateTimelineMap =
         let noteTimeline =
-            sourceTimeline |> Timeline.map (fun timelineMap -> timelineMap.noteTimeline) |> Timeline.concat
+            sourceTimeline
+            |> Timeline.map (fun timelineMap -> timelineMap.NoteTimeline)
+            |> Timeline.concat
 
         let durationTimeline =
             sourceTimeline
-            |> concatWithMerger duration (fun timelineMap -> timelineMap.durationTimeline) Event.duration
+            |> concatWithMerger duration (fun timelineMap -> timelineMap.DurationTimeline) Event.duration
 
         let velocityTimeline =
             sourceTimeline
-            |> concatWithMerger duration (fun timelineMap -> timelineMap.velocityTimeline) Event.velocity
+            |> concatWithMerger duration (fun timelineMap -> timelineMap.VelocityTimeline) Event.velocity
 
         let articulationOffsetTimeline =
             sourceTimeline
-            |> concatWithMerger duration (fun timelineMap -> timelineMap.articulationOffsetTimeline) Event.articulationOffset
+            |> concatWithMerger duration (fun timelineMap -> timelineMap.ArticulationOffsetTimeline) Event.articulationOffset
 
         let keyOffsetTimeline =
             sourceTimeline
-            |> concatWithMerger duration (fun timelineMap -> timelineMap.keyOffsetTimeline) Event.keyOffset
+            |> concatWithMerger duration (fun timelineMap -> timelineMap.KeyOffsetTimeline) Event.keyOffset
 
         let octaveOffsetTimeline =
             sourceTimeline
-            |> concatWithMerger duration (fun timelineMap -> timelineMap.octaveOffsetTimeline) Event.octaveOffset
+            |> concatWithMerger duration (fun timelineMap -> timelineMap.OctaveOffsetTimeline) Event.octaveOffset
 
         let chordRootOffsetTimeline =
             sourceTimeline
-            |> concatWithMerger duration (fun timelineMap -> timelineMap.chordRootOffsetTimeline) Event.chordRootOffset
+            |> concatWithMerger duration (fun timelineMap -> timelineMap.ChordRootOffsetTimeline) Event.chordRootOffset
 
         let chordScaleOffsetsTimeline =
             sourceTimeline
-            |> concatWithMerger duration (fun timelineMap -> timelineMap.chordScaleOffsetsTimeline) Event.chordScaleOffsets
+            |> concatWithMerger duration (fun timelineMap -> timelineMap.ChordScaleOffsetsTimeline) Event.chordScaleOffsets
 
         let chordNoteOffsetsTimeline =
             sourceTimeline
-            |> concatWithMerger duration (fun timelineMap -> timelineMap.chordNoteOffsetsTimeline) Event.chordNoteOffsets
+            |> concatWithMerger duration (fun timelineMap -> timelineMap.ChordNoteOffsetsTimeline) Event.chordNoteOffsets
 
         let scaleOffsetsTimeline =
             sourceTimeline
-            |> concatWithMerger duration (fun timelineMap -> timelineMap.scaleOffsetsTimeline) Event.scaleOffsets
+            |> concatWithMerger duration (fun timelineMap -> timelineMap.ScaleOffsetsTimeline) Event.scaleOffsets
 
         let tempoTimeline =
             sourceTimeline
-            |> concatWithMerger duration (fun timelineMap -> timelineMap.tempoTimeline) Event.tempo
+            |> concatWithMerger duration (fun timelineMap -> timelineMap.TempoTimeline) Event.tempo
 
         EventStateTimelineMap.ofArraysUnsafe (
             noteTimeline,
@@ -191,63 +198,76 @@ module EventStateTimelineMap =
 
     let effectiveState (position: Position) (sourceTimeline: EventStateTimelineMap) : EventState =
         {
-            Duration = sourceTimeline.durationTimeline |> effectiveValue position Event.duration
-            Velocity = sourceTimeline.velocityTimeline |> effectiveValue position Event.velocity
-            ArticulationOffset = sourceTimeline.articulationOffsetTimeline |> effectiveValue position Event.articulationOffset
-            KeyOffset = sourceTimeline.keyOffsetTimeline |> effectiveValue position Event.keyOffset
-            OctaveOffset = sourceTimeline.octaveOffsetTimeline |> effectiveValue position Event.octaveOffset
-            ChordRootOffset = sourceTimeline.chordRootOffsetTimeline |> effectiveValue position Event.chordRootOffset
-            ChordScaleOffsets = sourceTimeline.chordScaleOffsetsTimeline |> effectiveValue position Event.chordScaleOffsets
-            ChordNoteOffsets = sourceTimeline.chordNoteOffsetsTimeline |> effectiveValue position Event.chordNoteOffsets
-            ScaleOffsets = sourceTimeline.scaleOffsetsTimeline |> effectiveValue position Event.scaleOffsets
-            Tempo = sourceTimeline.tempoTimeline |> effectiveValue position Event.tempo
+            Duration = sourceTimeline.DurationTimeline |> effectiveValue position Event.duration
+            Velocity = sourceTimeline.VelocityTimeline |> effectiveValue position Event.velocity
+            ArticulationOffset =
+                sourceTimeline.ArticulationOffsetTimeline
+                |> effectiveValue position Event.articulationOffset
+            KeyOffset = sourceTimeline.KeyOffsetTimeline |> effectiveValue position Event.keyOffset
+            OctaveOffset =
+                sourceTimeline.OctaveOffsetTimeline
+                |> effectiveValue position Event.octaveOffset
+            ChordRootOffset =
+                sourceTimeline.ChordRootOffsetTimeline
+                |> effectiveValue position Event.chordRootOffset
+            ChordScaleOffsets =
+                sourceTimeline.ChordScaleOffsetsTimeline
+                |> effectiveValue position Event.chordScaleOffsets
+            ChordNoteOffsets =
+                sourceTimeline.ChordNoteOffsetsTimeline
+                |> effectiveValue position Event.chordNoteOffsets
+            ScaleOffsets =
+                sourceTimeline.ScaleOffsetsTimeline
+                |> effectiveValue position Event.scaleOffsets
+            Tempo = sourceTimeline.TempoTimeline |> effectiveValue position Event.tempo
         }
 
-    let ofMultiple (duration: Duration) (events: Event seq) : EventStateTimelineMap = events |> Timeline.ofMultiple |> ofEventTimeline duration
+    let ofMultipleState (duration: Duration) (events: Event seq) : EventStateTimelineMap =
+        ofTimelines duration Timeline.empty (events |> Timeline.ofMultiple)
 
     let shiftState (state: EventState) (inputTimelineMap: EventStateTimelineMap) : EventStateTimelineMap =
         let durationTimeline =
-            inputTimelineMap.durationTimeline
+            inputTimelineMap.DurationTimeline
             |> StateTimeline.shiftValue state.Duration Event.duration.DefaultValue Event.duration.Merge
 
         let velocityTimeline =
-            inputTimelineMap.velocityTimeline
+            inputTimelineMap.VelocityTimeline
             |> StateTimeline.shiftValue state.Velocity Event.velocity.DefaultValue Event.velocity.Merge
 
         let articulationOffsetTimeline =
-            inputTimelineMap.articulationOffsetTimeline
+            inputTimelineMap.ArticulationOffsetTimeline
             |> StateTimeline.shiftValue state.ArticulationOffset Event.articulationOffset.DefaultValue Event.articulationOffset.Merge
 
         let keyOffsetTimeline =
-            inputTimelineMap.keyOffsetTimeline
+            inputTimelineMap.KeyOffsetTimeline
             |> StateTimeline.shiftValue state.KeyOffset Event.keyOffset.DefaultValue Event.keyOffset.Merge
 
         let octaveOffsetTimeline =
-            inputTimelineMap.octaveOffsetTimeline
+            inputTimelineMap.OctaveOffsetTimeline
             |> StateTimeline.shiftValue state.OctaveOffset Event.octaveOffset.DefaultValue Event.octaveOffset.Merge
 
         let chordRootOffsetTimeline =
-            inputTimelineMap.chordRootOffsetTimeline
+            inputTimelineMap.ChordRootOffsetTimeline
             |> StateTimeline.shiftValue state.ChordRootOffset Event.chordRootOffset.DefaultValue Event.chordRootOffset.Merge
 
         let chordScaleOffsetsTimeline =
-            inputTimelineMap.chordScaleOffsetsTimeline
+            inputTimelineMap.ChordScaleOffsetsTimeline
             |> StateTimeline.shiftValue state.ChordScaleOffsets Event.chordScaleOffsets.DefaultValue Event.chordScaleOffsets.Merge
 
         let chordNoteOffsetsTimeline =
-            inputTimelineMap.chordNoteOffsetsTimeline
+            inputTimelineMap.ChordNoteOffsetsTimeline
             |> StateTimeline.shiftValue state.ChordNoteOffsets Event.chordNoteOffsets.DefaultValue Event.chordNoteOffsets.Merge
 
         let scaleOffsetsTimeline =
-            inputTimelineMap.scaleOffsetsTimeline
+            inputTimelineMap.ScaleOffsetsTimeline
             |> StateTimeline.shiftValue state.ScaleOffsets Event.scaleOffsets.DefaultValue Event.scaleOffsets.Merge
 
         let tempoTimeline =
-            inputTimelineMap.tempoTimeline
+            inputTimelineMap.TempoTimeline
             |> StateTimeline.shiftValue state.Tempo Event.tempo.DefaultValue Event.tempo.Merge
 
         EventStateTimelineMap.ofArraysUnsafe (
-            inputTimelineMap.noteTimeline,
+            inputTimelineMap.NoteTimeline,
             durationTimeline,
             velocityTimeline,
             articulationOffsetTimeline,
@@ -262,5 +282,5 @@ module EventStateTimelineMap =
 
     let concatCombined (duration: Duration) (sourceTimeline: EventStateTimelineMap WithEventState Timeline) : EventStateTimelineMap =
         sourceTimeline
-        |> Timeline.map (fun struct (eventState, timeline) -> timeline |> shiftState eventState)
+        |> Timeline.map (fun (struct (eventState, timeline)) -> timeline |> shiftState eventState)
         |> concat duration

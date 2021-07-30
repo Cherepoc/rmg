@@ -96,7 +96,8 @@ module internal TimelineArray =
         | 0, _ -> Array.empty
         | _, 0.0 -> inputTimeline
         | _, _ ->
-            let breakPosition = period - phase
+            let correctedPhase = phase % period
+            let breakPosition = period - correctedPhase
 
             let breakIndex = inputTimeline |> tryFindReverseEffectiveIndex breakPosition
 
@@ -119,7 +120,7 @@ module internal TimelineArray =
 
             for index = 0 to indexBeforeBreak do
                 let struct (position, value) = inputTimeline.[index]
-                result.[resultIndex] <- struct (position + phase, value)
+                result.[resultIndex] <- struct (position + correctedPhase, value)
                 resultIndex <- resultIndex + 1
 
             result

@@ -15,7 +15,6 @@ type EventState =
     }
 
 type Event =
-    | NoteEvent of EventState
     | DurationEvent of Duration
     | VelocityEvent of Velocity
     | ArticulationOffsetEvent of ArticulationOffset
@@ -44,7 +43,6 @@ module Event =
 
     let getEventName (event: Event) : string =
         match event with
-        | NoteEvent _ -> nameof NoteEvent
         | DurationEvent _ -> nameof DurationEvent
         | VelocityEvent _ -> nameof VelocityEvent
         | ArticulationOffsetEvent _ -> nameof ArticulationOffsetEvent
@@ -55,22 +53,6 @@ module Event =
         | ChordNoteOffsetsEvent _ -> nameof ChordNoteOffsetsEvent
         | ScaleOffsetsEvent _ -> nameof ScaleOffsetsEvent
         | TempoEvent _ -> nameof TempoEvent
-
-    module Note =
-        let check (event: Event) : bool =
-            match event with
-            | NoteEvent _ -> true
-            | _ -> false
-
-        let tryGetValue (event: Event) : EventState option =
-            match event with
-            | NoteEvent value -> Some value
-            | _ -> None
-
-        let getValue (event: Event) : EventState =
-            match event with
-            | NoteEvent value -> value
-            | _ -> invalidArg (nameof event) "" |> raise
 
     let invalidEventType (event: Event) (expectedType: string) =
         invalidArg (nameof event) $"Invalid event type. Expected event of type {expectedType}, got {event}"

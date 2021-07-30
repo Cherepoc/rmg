@@ -26,6 +26,16 @@ type RankTimeline() =
         result |> should beEquivalentTo expected
 
     [<Fact>]
+    let zeroRankBiggerPhase () =
+        let maxRank : int = 0
+        let phase : float = 1.5
+        let period : float = 1.0
+        let duration : float = 1.0
+        let expected : int TimelineItem array = [| struct (0.5, 0) |]
+        let result : int Timeline = Generate.rankTimeline maxRank phase period duration
+        result |> should beEquivalentTo expected
+
+    [<Fact>]
     let zeroRankOutOfRage () =
         let maxRank : int = 0
         let phase : float = 1.0
@@ -49,6 +59,16 @@ type RankTimeline() =
     let firstRank () =
         let maxRank : int = 1
         let phase : float = 0.0
+        let period : float = 1.0
+        let duration : float = 1.0
+        let expected : int TimelineItem array = [| struct (0.0, 0); struct (0.5, 1) |]
+        let result : int Timeline = Generate.rankTimeline maxRank phase period duration
+        result |> should beEquivalentTo expected
+
+    [<Fact>]
+    let firstRankBiggerPhase () =
+        let maxRank : int = 1
+        let phase : float = 4.0
         let period : float = 1.0
         let duration : float = 1.0
         let expected : int TimelineItem array = [| struct (0.0, 0); struct (0.5, 1) |]

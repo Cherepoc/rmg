@@ -46,7 +46,7 @@ module RandomMusicGenerator =
 
         let scale : ScaleOffsets = [ 0; 2; 3; 5; 7; 8; 10 ]
 
-        let tempo = context |> Generate.float (0.5, 1.5)
+        let tempo = context |> Generate.float (0.5, 1.0)
 
         let percussionInstruments : list<struct (PercussionInstrument * float)> =
             [
@@ -169,23 +169,23 @@ module RandomMusicGenerator =
 
             let offset =
                 context
-                |> Generate.rhythmValue (halfProbabilityFunction 0, 2.0, 4.0, 0.0, 4.0, 4)
+                |> Generate.rhythmValue (halfProbabilityFunction 0, 0.0, 1.0, 0.0, 1.0, 4)
 
             let period : float =
                 (context |> Generate.pickRhythmPeriod (quarterProbabilityFunction 0, 3))
-                / (2.0
-                   ** float (context |> Generate.intByRank (quarterProbabilityFunction 0, -1, 2)))
+                * (2.0
+                   ** float (context |> Generate.intByRank (quarterProbabilityFunction 0, -2, 1)))
 
             let maxRank = 4
 
-            let noteGenerator = fun context rank -> NoteEvent(generateNote context)
+            let noteGenerator = fun context rank -> generateNote context
 
             let notes =
                 context
                 |> Generate.timeline noteGenerator (eighthProbabilityFunction 0, maxRank, offset, period, duration)
-                |> EventStateTimelineMap.ofEventTimeline duration
+            let eventStateTimeline = EventStateTimelineMap.ofTimelines duration notes Timeline.empty
 
-            EventStatePattern.ofTimelines duration notes Timeline.empty
+            EventStatePattern.ofTimelines duration eventStateTimeline Timeline.empty
 
         let commonPatterns =
             context |> Generate.sequence createPattern templateCount |> Seq.toArray
@@ -380,16 +380,17 @@ module RandomMusicGenerator =
                     context
                     |> Generate.timeline eventGenerator (eighthProbabilityFunction 0, maxRank, 0.0, period, duration)
 
-                let timeline =
+                let stateTimeline =
                     seq {
                         yield! generateState (fun _ _ -> ChordScaleOffsetsEvent(standardOffsets (1, 3)))
                         yield! generateState (fun _ _ -> ChordRootOffsetEvent(standardArticulationOffset ()))
                         yield! generateState (fun _ _ -> ArticulationOffsetEvent(standardArticulationOffset ()))
                     }
                     |> Timeline.ofSeq
-                    |> EventStateTimelineMap.ofEventTimeline duration
+                let eventStateTimeline =
+                    EventStateTimelineMap.ofTimelines duration Timeline.empty stateTimeline
 
-                EventStatePattern.ofTimelines duration timeline Timeline.empty
+                EventStatePattern.ofTimelines duration eventStateTimeline Timeline.empty
 
             let trackTimelines =
                 seq {

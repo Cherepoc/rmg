@@ -27,7 +27,7 @@ module TrackEventStateTimelineMap =
         |> ofSeq duration
 
     let ofMultiple (duration: Duration) (input: Event seq) : TrackEventStateTimelineMap =
-        seq { (None, input |> EventStateTimelineMap.ofMultiple duration) } |> Map.ofSeq
+        seq { (None, input |> EventStateTimelineMap.ofMultipleState duration) } |> Map.ofSeq
 
     let concat (duration: Duration) (inputTimeline: TrackEventStateTimelineMap Timeline) : TrackEventStateTimelineMap =
         inputTimeline

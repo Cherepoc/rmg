@@ -102,7 +102,7 @@ module Rendering =
                         (position, renderedNote))
 
             let renderedNotes =
-                eventTimeline.noteTimeline
+                eventTimeline.NoteTimeline
                 |> Timeline.trimDuration song.Duration
                 |> Seq.collect renderNote
                 |> Timeline.ofSeq
@@ -132,7 +132,7 @@ module Rendering =
 
                         (position, renderedNote))
 
-            eventTimeline.noteTimeline
+            eventTimeline.NoteTimeline
             |> Timeline.trimDuration song.Duration
             |> Seq.collect renderNotes
             |> Timeline.ofSeq
@@ -193,6 +193,6 @@ module Rendering =
 
         {
             Duration = song.Duration
-            Tempo = sharedEventTimeline.tempoTimeline
+            Tempo = sharedEventTimeline.TempoTimeline
             Tracks = fixedVolumeTracks
         }
