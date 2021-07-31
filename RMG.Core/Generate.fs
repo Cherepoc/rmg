@@ -1,7 +1,6 @@
 namespace RMG.CoreF
 
 open System
-open MathNet.Numerics.Distributions
 open RMG.CoreF.Probability
 open RMG.CoreF.Tuples
 
@@ -20,8 +19,6 @@ module Generate =
         let array = sequence |> Seq.toArray
         let index = (context.GetInt(0, array.Length))
         array.[index]
-
-    let normalFloat (mean: float, stddev: float) (context: Context) : float = Normal.Sample(context.Random, mean, stddev)
 
     let test (value: float) (context: Context) : Boolean =
         if test (context.GetProbability()) value then
@@ -213,3 +210,17 @@ module Generate =
     let int struct (min: int, max: int) (context: Context) : int = (context.GetInt(min, max + 1))
 
     let float struct (min: float, max: float) (context: Context) : float = (context.GetProbability()) * (max - min) + min
+
+    let floatSpline (coef: float) (value: float) : float =
+        match (coef, value) with
+        | _, value when value > 1.0 || value < -1.0 -> invalidArg (nameof value) "Value should be between [-1;1]"
+        | coef, _ when coef < 0.0 -> invalidArg (nameof coef) "Coef should be greater then or equal to zero"
+        | _, _ ->
+            let circlePower = if coef <= 1.0 then 1.0 else (1.0 / coef)
+            let circleValue = (Math.Sqrt(1.0 - value ** 2.0) ** circlePower) - 1.0
+            let correctedCircleValue = if value > 0.0 then -circleValue else circleValue
+
+            if coef <= 1.0 then
+                coef * correctedCircleValue + (1.0 - coef) * value
+            else
+                correctedCircleValue
