@@ -646,35 +646,34 @@ module RandomMusicGenerator =
             let _, parts = songStyle.PartDefinitions |> List.last
             context |> Generate.subSequence parts 4
 
-        let generateTrackNumberSubSequence (count: int) (items: (TrackNumber * 'T) seq) : TrackNumber seq =
-            context |> Generate.subSequence items count |> Seq.map fst
-
         let generatePart () : TrackEventStatePattern =
             let pitchTrackCount = partPitchInstrumentTrackCount ()
 
-            let pitchTrackNumbers =
-                generateTrackNumberSubSequence pitchTrackCount numberedPitchInstrumentTracks
-
-            let pitchStyleNumbers =
-                generateTrackNumberSubSequence pitchTrackCount pitchInstrumentStyles
+            let pitchTrackNumberMap =
+                context
+                |> Generate.subSequence numberedPitchInstrumentTracks pitchTrackCount
+                |> Seq.map
+                    (fun (trackNumber, _) ->
+                        let styleNumber, _ = context |> Generate.item pitchInstrumentStyles
+                        (Some trackNumber, Some styleNumber))
 
             let percussionTrackCount = partPercussionInstrumentTrackCount ()
 
-            let percussionTrackNumbers =
-                generateTrackNumberSubSequence percussionTrackCount numberedPercussionInstrumentTracks
-
-            let percussionStyleNumbers =
-                generateTrackNumberSubSequence percussionTrackCount percussionInstrumentStyles
+            let percussionTrackNumberMap =
+                context
+                |> Generate.subSequence numberedPercussionInstrumentTracks percussionTrackCount
+                |> Seq.map
+                    (fun (trackNumber, _) ->
+                        let styleNumber, _ = context |> Generate.item percussionInstrumentStyles
+                        (Some trackNumber, Some styleNumber))
 
             let sharedStyleNumber = context |> Generate.item (sharedStyles |> Seq.map fst)
 
             let trackNumberMap =
                 seq {
-                    yield (Some sharedStyleNumber, None)
-
-                    yield!
-                        Seq.zip (pitchStyleNumbers |> Seq.append percussionStyleNumbers) (pitchTrackNumbers |> Seq.append percussionTrackNumbers)
-                        |> Seq.map (fun (t1, t2) -> (Some t1, Some t2))
+                    yield (None, Some sharedStyleNumber)
+                    yield! pitchTrackNumberMap
+                    yield! percussionTrackNumberMap
                 }
                 |> Map.ofSeq
 

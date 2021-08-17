@@ -63,7 +63,7 @@ module TrackEventStateTimelineMap =
         trackNumberMap
         |> Map.toSeq
         |> Seq.choose
-            (fun (fromTrack, toTrack) ->
+            (fun (toTrack, fromTrack) ->
                 inputTimelineMap
                 |> Map.tryFind fromTrack
                 |> Option.map (fun track -> (toTrack, track)))
