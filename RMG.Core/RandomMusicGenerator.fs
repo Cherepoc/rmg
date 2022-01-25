@@ -123,7 +123,7 @@ module RandomMusicGenerator =
 
         let songStyleDef: StyleDefinition =
             {
-                PatternDurationRankRange = 2, 4;
+                PatternDurationRankRange = 2, 3;
                 Identity =
                     seq {
                         yield!
@@ -602,7 +602,7 @@ module RandomMusicGenerator =
                         + (context |> Generate.intByRank (halfProbabilityFunction 0, 1, 0 - minOctave))
 
                     {
-                        Instrument = { Code = byte (context |> Generate.int (0, 127)) };
+                        Instrument = { Code = byte (context |> Generate.int (0, 120)) };
                         MinOctaveOffset = minOctave;
                         MaxOctaveOffset = maxOctave;
                         EventState =
