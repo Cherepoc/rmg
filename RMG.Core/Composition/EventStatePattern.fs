@@ -1,6 +1,6 @@
-namespace RMG.CoreF.Composition
+namespace RMG.Core.Composition
 
-open RMG.CoreF
+open RMG.Core
 
 [<Sealed>]
 type EventStatePattern

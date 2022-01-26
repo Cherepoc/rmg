@@ -1,4 +1,4 @@
-module RMG.CoreF.Operators
+module RMG.Core.Operators
 
 open System
 

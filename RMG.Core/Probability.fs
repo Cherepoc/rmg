@@ -1,7 +1,7 @@
-namespace RMG.CoreF
+namespace RMG.Core
 
 open System
-open RMG.CoreF.Tuples
+open RMG.Core.Tuples
 
 module Probability =
     type IntProbabilityFunction = int -> float

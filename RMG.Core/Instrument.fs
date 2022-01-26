@@ -1,4 +1,4 @@
-namespace RMG.CoreF
+namespace RMG.Core
 
 type InstrumentCode = byte
 type ArticulationCode = byte

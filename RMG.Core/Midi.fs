@@ -1,7 +1,7 @@
-namespace RMG.CoreF
+namespace RMG.Core
 
 open System
-open RMG.CoreF.Rendering
+open RMG.Core.Rendering
 
 module Midi =
     let private ticksPerQuarterNote = 96u

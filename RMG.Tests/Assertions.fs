@@ -1,4 +1,4 @@
-namespace RMG.TestsF
+namespace RMG.Tests
 
 open FluentAssertions.Equivalency
 open FluentAssertions.Primitives

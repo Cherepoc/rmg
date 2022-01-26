@@ -1,8 +1,8 @@
-namespace RMG.TestsF.Generate
+namespace RMG.Tests.Generate
 
 open Xunit
-open RMG.TestsF.Assertions
-open RMG.CoreF
+open RMG.Tests.Assertions
+open RMG.Core
 
 type RankTimeline() =
     [<Fact>]

@@ -1,6 +1,6 @@
-﻿namespace RMG.CoreF
+﻿namespace RMG.Core
 
-open RMG.CoreF
+open RMG.Core
 
 type TimeSignature = { Numerator: uint8; Denominator: uint8 }
 

@@ -1,6 +1,6 @@
-namespace RMG.CoreF
+namespace RMG.Core
 
-open RMG.CoreF.Tuples
+open RMG.Core.Tuples
 
 [<Sealed>]
 type StateTimeline<'T when 'T: equality> private (items: 'T TimelineItem array) =

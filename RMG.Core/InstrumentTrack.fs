@@ -1,6 +1,4 @@
-namespace RMG.CoreF
-
-open RMG.CoreF
+namespace RMG.Core
 
 type PitchInstrumentTrack =
     {

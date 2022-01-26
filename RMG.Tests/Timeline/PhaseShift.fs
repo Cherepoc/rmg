@@ -1,8 +1,8 @@
-namespace RMG.TestsF.Timeline
+namespace RMG.Tests.Timeline
 
 open Xunit
-open RMG.TestsF.Assertions
-open RMG.CoreF
+open RMG.Tests.Assertions
+open RMG.Core
 
 type PhaseShift() =
     [<Fact>]

@@ -1,8 +1,8 @@
-namespace RMG.TestsF
+namespace RMG.Tests
 
-open RMG.CoreF
+open RMG.Core
 open Xunit
-open RMG.TestsF.Assertions
+open RMG.Tests.Assertions
 
 type IntToBytes() =
     [<Fact>]

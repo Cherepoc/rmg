@@ -1,8 +1,8 @@
-namespace RMG.TestsF.StateTimeline
+namespace RMG.Tests.StateTimeline
 
 open Xunit
-open RMG.TestsF.Assertions
-open RMG.CoreF
+open RMG.Tests.Assertions
+open RMG.Core
 
 type ShiftValue() =
     let merger : int -> int -> int = fun a b -> a + b

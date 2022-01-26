@@ -1,8 +1,8 @@
-namespace RMG.TestsF.Probability
+namespace RMG.Tests.Probability
 
 open Xunit
-open RMG.TestsF.Assertions
-open RMG.CoreF.Probability
+open RMG.Tests.Assertions
+open RMG.Core.Probability
 
 type GeometricIntProbabilityFunction() =
     [<Theory>]

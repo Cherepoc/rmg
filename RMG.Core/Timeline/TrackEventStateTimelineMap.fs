@@ -1,4 +1,4 @@
-namespace RMG.CoreF
+namespace RMG.Core
 
 type TrackEventStateTimelineMap = Map<TrackNumber option, EventStateTimelineMap>
 

@@ -1,6 +1,6 @@
-namespace RMG.CoreF
+namespace RMG.Core
 
-open RMG.CoreF.Composition
+open RMG.Core.Composition
 
 type StyleDefinition =
     {

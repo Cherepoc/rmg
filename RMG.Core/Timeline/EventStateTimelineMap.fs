@@ -1,4 +1,4 @@
-namespace RMG.CoreF
+namespace RMG.Core
 
 [<Sealed>]
 type EventStateTimelineMap

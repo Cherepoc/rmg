@@ -1,7 +1,7 @@
-namespace RMG.CoreF
+namespace RMG.Core
 
 open System
-open RMG.CoreF.Operators
+open RMG.Core.Operators
 
 module Rendering =
     type RenderedNote = { Offset: int; Velocity: Volume; Duration: Duration }

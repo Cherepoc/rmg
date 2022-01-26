@@ -1,4 +1,4 @@
-namespace RMG.CoreF
+namespace RMG.Core
 
 type KeyOffset = int
 type OctaveOffset = int
