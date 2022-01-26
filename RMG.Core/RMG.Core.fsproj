@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
@@ -25,6 +25,7 @@
         <Compile Include="Generate.fs" />
         <Compile Include="Midi.fs" />
         <Compile Include="RandomMusicGenerator.fs" />
+        <Compile Include="Generation\TrackStyleDefinition.fs" />
     </ItemGroup>
 
 </Project>
