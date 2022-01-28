@@ -2,7 +2,8 @@
 
 open System
 open System.IO
-open RMG.CoreF
+open RMG.Core
+open RMG.Core.Generation
 
 type GenerationInfo =
     {

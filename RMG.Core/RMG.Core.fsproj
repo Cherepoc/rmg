@@ -24,8 +24,11 @@
         <Compile Include="Probability.fs" />
         <Compile Include="Generate.fs" />
         <Compile Include="Midi.fs" />
-        <Compile Include="RandomMusicGenerator.fs" />
         <Compile Include="Generation\TrackStyleDefinition.fs" />
+        <Compile Include="Generation\PatternGenerationDefinition.fs" />
+        <Compile Include="Generation\TrackStyleGeneration.fs" />
+        <Compile Include="Generation\InstrumentDefinition.fs" />
+        <Compile Include="Generation\RandomMusicGenerator.fs" />
     </ItemGroup>
 
 </Project>
