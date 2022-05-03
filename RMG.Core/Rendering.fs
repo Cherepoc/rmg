@@ -15,10 +15,24 @@ module Rendering =
 
     type RenderedSong = { Duration: Duration; Tempo: Tempo StateTimeline; Tracks: RenderedTrack list }
 
+    let private chooseIndexByOffset (length: int) (offset: float): int option =
+        if length <= 0 then None
+        else Some (Math.Floor(offset * (float length)) |> int)
+
+    let private breakOffsetsByLength (length: int) (offsets: float seq): option<int * int> =
+        if length <= 0 then None
+        else
+            let offset =
+                offsets
+                |> Seq.choose (chooseIndexByOffset length)
+                |> Seq.sum
+            let remainder = offset %! length
+            let cycles = (offset - remainder) / length
+            Some (cycles, remainder)
+
     let private chooseItemByOffset<'T> (offset: float) (items: 'T list) : 'T option =
-        match items with
-        | [] -> None
-        | items -> Some items.[Math.Floor(offset * (float items.Length)) |> int]
+        chooseIndexByOffset items.Length offset
+        |> Option.map (fun index -> items[index])
 
     let private chooseItemsByOffsets<'T when 'T: equality and 'T: comparison> (offsets: float list) (items: 'T list) : 'T list =
         offsets
@@ -28,10 +42,6 @@ module Rendering =
 
     let renderSong (song: Song) : RenderedSong =
         let chromaticScale : KeyOffset list = [ 0 .. Constants.notesInOctave - 1 ]
-
-        let breakOctaves (value: float) : int * float =
-            let octaves = Math.Floor value
-            (int octaves, value - octaves)
 
         let sharedEventTimeline =
             song.TrackEventStateTimelineMap
@@ -82,14 +92,17 @@ module Rendering =
                 |> chooseItemsByOffsets effectiveNote.ChordNoteOffsets
                 |> Seq.map
                     (fun chordNoteOffset ->
-                        let chordNoteOctaves, chordNoteRemainder = breakOctaves (effectiveNote.ChordRootOffset + chordNoteOffset)
+                        let octaveOffset, scaleNoteIndex =
+                            match [|effectiveNote.ChordRootOffset; chordNoteOffset|] |> breakOffsetsByLength scaleOffsets.Length with
+                            | Some (chordNoteOctaves, chordNoteRemainder) -> (chordNoteOctaves, chordNoteRemainder)
+                            | None -> (0, 0)
 
-                        let scaleOffset = scaleOffsets |> chooseItemByOffset chordNoteRemainder |> Option.defaultValue 0
+                        let scaleOffset = scaleOffsets[scaleNoteIndex]
 
                         let offset =
                             scaleOffset
                             + effectiveNote.KeyOffset
-                            + ((effectiveNote.OctaveOffset + chordNoteOctaves) * Constants.notesInOctave)
+                            + ((effectiveNote.OctaveOffset + octaveOffset) * Constants.notesInOctave)
                             |> fixOffset
 
                         let renderedNote =
