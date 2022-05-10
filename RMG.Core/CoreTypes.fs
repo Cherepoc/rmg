@@ -4,11 +4,11 @@ type KeyOffset = int
 type OctaveOffset = int
 type ArticulationOffset = float
 type ChordRootOffset = float
-type ChordScaleOffsets = float list
-type ChordNoteOffsets = float list
+type ChordScaleOffsets = float
+type ChordNoteOffsets = float
 type Volume = float
 type Velocity = float
-type ScaleOffsets = KeyOffset list
+type ScaleOffsets = KeyOffset
 
 type Position = float
 type Duration = float

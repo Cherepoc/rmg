@@ -38,7 +38,7 @@ module RandomMusicGenerator =
         let standardArticulationOffset () =
             Probability.floatSpline 1.0 (context |> Generate.float (-1.0, 1.0))
 
-        let scale: ScaleOffsets = [ 0; 2; 3; 5; 7; 8; 10 ]
+        let scale: ScaleOffsets list = [ 0; 2; 3; 5; 7; 8; 10 ]
 
         let tempo = context |> Generate.float (0.5, 1.0)
 
@@ -89,11 +89,10 @@ module RandomMusicGenerator =
                     let instrumentTrack =
                         { Instrument = { ArticulationCodes = articulationCodes }
                           EventState =
-                              seq {
-                                  VelocityEvent(standardVelocity ())
-                                  ArticulationOffsetEvent(standardArticulationOffset ())
-                              }
-                              |> EventState.ofSeq }
+                              { EventState.empty with
+                                  Velocity = [standardVelocity ()]
+                                  ArticulationOffset = [standardArticulationOffset ()]
+                              }}
 
                     (instrumentDefinition, instrumentTrack))
             |> List.ofSeq
@@ -111,17 +110,18 @@ module RandomMusicGenerator =
                         + (context
                            |> Generate.intByRank (halfProbabilityFunction 0, 1, 0 - minOctave))
 
-                    { Instrument = { Code = byte (context |> Generate.int (0, 120)) }
-                      MinOctaveOffset = minOctave
-                      MaxOctaveOffset = maxOctave
-                      EventState =
-                          seq {
-                              DurationEvent(standardDuration ())
-                              VelocityEvent(standardVelocity ())
-                              OctaveOffsetEvent(standardOctaveOffset ())
-                              ChordNoteOffsetsEvent(standardOffsets (0, 2))
-                          }
-                          |> EventState.ofSeq })
+                    {
+                        Instrument = { Code = byte (context |> Generate.int (0, 120)) }
+                        MinOctaveOffset = minOctave
+                        MaxOctaveOffset = maxOctave
+                        EventState =
+                        { EventState.empty with
+                            Duration = [standardDuration ()]
+                            Velocity = [standardVelocity ()]
+                            OctaveOffset = [standardOctaveOffset ()]
+                            ChordNoteOffsets = standardOffsets (0, 2)
+                        }
+                    })
                 pitchInstrumentTrackCount
             |> List.ofSeq
 
@@ -208,17 +208,16 @@ module RandomMusicGenerator =
                  |> Timeline.ofSingle)
 
         let noteOffset () =
-            seq {
-                DurationEvent(standardDuration ())
-                KeyOffsetEvent(context |> Generate.int (-6, 6))
-                OctaveOffsetEvent(standardOctaveOffset ())
-                ChordRootOffsetEvent(standardArticulationOffset ())
-                ChordScaleOffsetsEvent(standardOffsets (0, 1))
-                ChordNoteOffsetsEvent(standardOffsets (0, 1))
-                VelocityEvent(standardVelocity ())
-                ArticulationOffsetEvent(standardArticulationOffset ())
+            { EventState.empty with
+                Duration = [standardDuration ()]
+                KeyOffset = [context |> Generate.int (-6, 6)]
+                OctaveOffset = [standardOctaveOffset ()]
+                ChordRootOffset = [standardArticulationOffset ()]
+                ChordScaleOffsets = standardOffsets (0, 1)
+                ChordNoteOffsets = standardOffsets (0, 1)
+                Velocity = [standardVelocity ()]
+                ArticulationOffset = [standardArticulationOffset ()]
             }
-            |> EventState.ofSeq
 
         let songTimeline: TrackEventStatePattern WithEventState Timeline =
             context
@@ -229,13 +228,12 @@ module RandomMusicGenerator =
                 songDuration
 
         let songNoteOffsets =
-            seq {
-                DurationEvent(context |> Generate.float (0.5, 2.0))
-                KeyOffsetEvent(context |> Generate.int (-6, 6))
-                ScaleOffsetsEvent(scale)
-                TempoEvent(tempo)
+            { EventState.empty with
+                Duration = [context |> Generate.float (0.5, 2.0)]
+                KeyOffset = [context |> Generate.int (-6, 6)]
+                ScaleOffsets = scale
+                Tempo = [tempo]
             }
-            |> EventState.ofSeq
 
         let trackMap = tracks |> List.indexed |> Map.ofSeq
 

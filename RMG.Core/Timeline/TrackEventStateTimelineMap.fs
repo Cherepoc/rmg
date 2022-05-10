@@ -17,25 +17,6 @@ module TrackEventStateTimelineMap =
                 (trackNumber, mergedTimeline))
         |> Map.ofSeq
 
-    let ofSeqSeparated
-        (duration: Duration)
-        (sharedTimeline: EventStateTimelineMap)
-        (trackTimelines: (TrackNumber * EventStateTimelineMap) seq)
-        : TrackEventStateTimelineMap
-        =
-        seq {
-            yield (None, sharedTimeline)
-
-            yield!
-                trackTimelines
-                |> Seq.map (fun (trackNumber, timeline) -> (Some trackNumber, timeline))
-        }
-        |> ofSeq duration
-
-    let ofMultiple (duration: Duration) (input: Event seq) : TrackEventStateTimelineMap =
-        seq { (None, input |> EventStateTimelineMap.ofMultipleState duration) }
-        |> Map.ofSeq
-
     let concat (duration: Duration) (inputTimeline: TrackEventStateTimelineMap Timeline) : TrackEventStateTimelineMap =
         inputTimeline
         |> Seq.collect (fun struct (_, value) -> value |> Map.toSeq |> Seq.map fst)

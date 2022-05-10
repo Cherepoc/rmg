@@ -3,17 +3,17 @@ namespace RMG.Core
 open RMG.Core.Tuples
 
 [<Sealed>]
-type StateTimeline<'T when 'T: equality> private (items: 'T TimelineItem array) =
+type StateTimeline<'T when 'T: equality> private (items: 'T list TimelineItem array) =
     member internal this.Items = items
 
     member this.Item
         with get index = this.Items.[index]
 
-    static member internal ofArrayUnsafe(items: 'T TimelineItem array) : StateTimeline<'T> = StateTimeline items
+    static member internal ofArrayUnsafe(items: 'T list TimelineItem array) : StateTimeline<'T> = StateTimeline items
 
-    interface System.Collections.Generic.IEnumerable<TimelineItem<'T>> with
+    interface System.Collections.Generic.IEnumerable<TimelineItem<'T list>> with
         member this.GetEnumerator() =
-            (this.Items :> System.Collections.Generic.IEnumerable<TimelineItem<'T>>)
+            (this.Items :> System.Collections.Generic.IEnumerable<TimelineItem<'T list>>)
                 .GetEnumerator()
 
     interface System.Collections.IEnumerable with
@@ -21,45 +21,35 @@ type StateTimeline<'T when 'T: equality> private (items: 'T TimelineItem array) 
             (this.Items :> System.Collections.IEnumerable)
                 .GetEnumerator()
 
-    interface System.Collections.Generic.IReadOnlyCollection<TimelineItem<'T>> with
+    interface System.Collections.Generic.IReadOnlyCollection<TimelineItem<'T list>> with
         member this.Count = this.Items.Length
 
-    interface System.Collections.Generic.IReadOnlyList<TimelineItem<'T>> with
+    interface System.Collections.Generic.IReadOnlyList<TimelineItem<'T list>> with
         member this.Item
             with get index = this.Items.[index]
 
     member this.Count = this.Items.Length
 
 module StateTimeline =
-    //    let shift<'T when 'T: equality> (offset: Position) (inputTimeline: 'T StateTimeline) : 'T StateTimeline =
-//        inputTimeline.Items |> TimelineArray.shift offset |> StateTimeline.ofArrayUnsafe
-
-    //    let toPositions<'T when 'T: equality> (inputTimeline: 'T StateTimeline) : Position array = inputTimeline.Items |> TimelineArray.toPositions
-
     let tryFindEffectiveIndex<'T when 'T: equality> (position: Position) (inputTimeline: 'T StateTimeline) : int option =
         inputTimeline.Items |> TimelineArray.tryFindEffectiveIndex position
 
-    let tryFindEffectiveValue<'T when 'T: equality> (position: Position) (inputTimeline: 'T StateTimeline) : 'T option =
+    let tryFindEffectiveValue<'T when 'T: equality> (position: Position) (inputTimeline: 'T StateTimeline) : 'T list option =
         inputTimeline.Items |> TimelineArray.tryFindEffectiveValue position
 
-    let empty<'T when 'T: equality> (duration: Duration) (defaultValue: 'T) : 'T StateTimeline =
+    let empty<'T when 'T: equality> (duration: Duration) : 'T StateTimeline =
         [|
-            struct (0.0, defaultValue)
-            struct (duration, defaultValue)
+            struct (0.0, List.empty)
+            struct (duration, List.empty)
         |]
         |> StateTimeline.ofArrayUnsafe
 
     let isEmpty<'T when 'T: equality> (inputTimeline: 'T StateTimeline) : bool =
-        if inputTimeline.Count = 2 then
-            let struct (_, value1) = inputTimeline.[0]
-            let struct (_, value2) = inputTimeline.[1]
-            value1 = value2
-        else
-            false
+        inputTimeline.Count = 2 && (inputTimeline |> Seq.sumBy (fun struct (_, value) -> value.Length) = 0)
 
-    let private trimState<'T when 'T: equality> (inputTimeline: 'T TimelineItem array) : 'T TimelineItem array =
+    let private trimState<'T when 'T: equality> (inputTimeline: 'T list TimelineItem array) : 'T list TimelineItem array =
         match inputTimeline.Length with
-        | length when length < 3 -> inputTimeline
+        | length when length <= 2 -> inputTimeline
         | _ ->
             let mutable newIndex = 0
             let newItems = Array.zeroCreate inputTimeline.Length
@@ -76,27 +66,25 @@ module StateTimeline =
             newItems.[newIndex] <- inputTimeline.[inputTimeline.Length - 1]
             Array.sub newItems 0 (newIndex + 1)
 
-    let ofSeq<'T when 'T: equality> (duration: Duration) (merger: 'T -> 'T -> 'T) (defaultValue: 'T) (inputTimeline: 'T TimelineItem seq) : 'T StateTimeline =
+    let ofSeq<'T when 'T: equality> (duration: Duration) (inputTimeline: 'T list TimelineItem seq) : 'T StateTimeline =
         seq {
-            yield struct (0.0, defaultValue)
+            yield struct (0.0, List.empty)
 
             yield!
                 inputTimeline
                 |> Seq.filter (fun (struct (position, _)) -> position < duration)
                 |> Seq.sortBy structFst
 
-            yield (duration, defaultValue)
+            yield (duration, List.empty)
         }
         |> Seq.groupBy structFst
-        |> Seq.map (fun (position, items) -> struct (position, items |> Seq.map structSnd |> Seq.fold merger defaultValue))
+        |> Seq.map (fun (position, items) -> struct (position, items |> Seq.map structSnd |> List.concat))
         |> Array.ofSeq
         |> trimState
         |> StateTimeline.ofArrayUnsafe
 
     let concat<'T when 'T: equality>
         (duration: Duration)
-        (merger: 'T -> 'T -> 'T)
-        (defaultValue: 'T)
         (inputTimeline: 'T StateTimeline Timeline)
         : 'T StateTimeline
         =
@@ -112,7 +100,7 @@ module StateTimeline =
                 (fun items ->
                     match items.Length with
                     | 0 -> false
-                    | length when length <= 2 -> items |> Array.exists (fun (struct (_, value)) -> not (value = defaultValue))
+                    | length when length <= 2 -> items |> Array.exists (fun (struct (_, value)) -> not (List.isEmpty value))
                     | _ -> true)
 
         let positions =
@@ -124,13 +112,13 @@ module StateTimeline =
 
         let timelineIndexes = Array.init shiftedTimelines.Length (fun _ -> -1)
 
-        let result : 'T TimelineItem array =
+        let result : 'T list TimelineItem array =
             Array.zeroCreate ((shiftedTimelines |> Array.sumBy (fun x -> x.Length)) + 2)
 
         let mutable resultIndex = 0
 
         for position in positions do
-            let mutable mergedValue = defaultValue
+            let mutable mergedValue = List.empty
 
             for i = 0 to timelineIndexes.Length - 1 do
                 let mutable timelineIndex = timelineIndexes.[i]
@@ -145,27 +133,24 @@ module StateTimeline =
 
                 if timelineIndex >= 0 then
                     let struct (_, value) = timeline.[timelineIndex]
-                    mergedValue <- merger mergedValue value
+                    mergedValue <- List.append mergedValue value
 
-            if resultIndex = 0 || not (mergedValue = defaultValue) then
+            if resultIndex = 0 || not (List.isEmpty mergedValue) then
                 result.[resultIndex] <- (position, mergedValue)
                 resultIndex <- resultIndex + 1
 
-        result.[resultIndex] <- (duration, defaultValue)
+        result.[resultIndex] <- (duration, List.empty)
 
         Array.sub result 0 (resultIndex + 1) |> StateTimeline.ofArrayUnsafe
 
-    let shiftValue<'T when 'T: equality> (value: 'T) (defaultValue: 'T) (merger: 'T -> 'T -> 'T) (inputTimeline: 'T StateTimeline) : 'T StateTimeline =
-        if value = defaultValue then
-            inputTimeline
-        else
-            let lastIndex = inputTimeline.Items.Length - 1
+    let shiftValue<'T when 'T: equality> (value: 'T list) (inputTimeline: 'T StateTimeline) : 'T StateTimeline =
+        let lastIndex = inputTimeline.Items.Length - 1
 
-            inputTimeline.Items
-            |> Array.mapi
-                (fun index (struct (position, timelineValue)) ->
-                    if index = lastIndex then
-                        struct (position, timelineValue)
-                    else
-                        struct (position, merger timelineValue value))
-            |> StateTimeline.ofArrayUnsafe
+        inputTimeline.Items
+        |> Array.mapi
+            (fun index (struct (position, timelineValue)) ->
+                if index = lastIndex then
+                    struct (position, timelineValue)
+                else
+                    struct (position, List.append timelineValue value))
+        |> StateTimeline.ofArrayUnsafe

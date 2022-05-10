@@ -88,9 +88,21 @@ module InstrumentDefinition =
                 PatternGenerationDefinitions = kickPatternGenerationDefinitions;
                 Weight = 1.0
             };
-            // snare
+            // snare cross stick
             {
-                ArticulationCodes = [ 37uy; 38uy; 40uy ];
+                ArticulationCodes = [ 37uy ];
+                PatternGenerationDefinitions = snarePatternGenerationDefinitions;
+                Weight = 0.2
+            };
+            // acoustic snare
+            {
+                ArticulationCodes = [ 38uy ];
+                PatternGenerationDefinitions = snarePatternGenerationDefinitions;
+                Weight = 0.2
+            };
+            // electric snare
+            {
+                ArticulationCodes = [ 40uy ];
                 PatternGenerationDefinitions = snarePatternGenerationDefinitions;
                 Weight = 1.0
             };

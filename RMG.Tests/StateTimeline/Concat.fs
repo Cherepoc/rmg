@@ -5,24 +5,21 @@ open RMG.Tests.Assertions
 open RMG.Core
 
 type Concat() =
-    let merger : int -> int -> int = fun a b -> a + b
-    let defaultValue : int = 0
-
     [<Fact>]
     let empty () =
-        let input : int StateTimeline Timeline = Seq.empty |> Timeline.ofSeq
-        let expected : int TimelineItem array = [| struct (0.0, 0); struct (1.0, 0) |]
-        let result = input |> StateTimeline.concat 1.0 merger defaultValue
+        let input : int list StateTimeline Timeline = Seq.empty |> Timeline.ofSeq
+        let expected : int list TimelineItem array = [| struct (0.0, []); struct (1.0, []) |]
+        let result = input |> StateTimeline.concat 1.0
         result |> should beEquivalentTo expected
 
     [<Fact>]
     let singleEmpty () =
-        let input : int StateTimeline Timeline =
-            seq { struct (0.0, Seq.empty |> StateTimeline.ofSeq 1.0 merger defaultValue) }
+        let input : int list StateTimeline Timeline =
+            seq { struct (0.0, Seq.empty |> StateTimeline.ofSeq 1.0) }
             |> Timeline.ofSeq
 
-        let expected : int TimelineItem array = [| struct (0.0, 0); struct (1.0, 0) |]
-        let result = input |> StateTimeline.concat 1.0 merger defaultValue
+        let expected : int list TimelineItem array = [| struct (0.0, []); struct (1.0, []) |]
+        let result = input |> StateTimeline.concat 1.0
         result |> should beEquivalentTo expected
 
     [<Fact>]
@@ -31,16 +28,16 @@ type Concat() =
             seq {
                 struct (0.0,
                         seq {
-                            struct (0.0, 1)
-                            struct (1.0, 2)
-                            struct (2.0, 3)
+                            struct (0.0, [1])
+                            struct (1.0, [2])
+                            struct (2.0, [3])
                         }
-                        |> StateTimeline.ofSeq 3.0 merger defaultValue)
+                        |> StateTimeline.ofSeq 3.0)
             }
             |> Timeline.ofSeq
 
-        let expected : int TimelineItem array = [| struct (0.0, 1); struct (1.0, 2); struct (2.0, 0) |]
-        let result = input |> StateTimeline.concat 2.0 merger defaultValue
+        let expected : int list TimelineItem array = [| struct (0.0, [1]); struct (1.0, [2]); struct (2.0, []) |]
+        let result = input |> StateTimeline.concat 2.0
         result |> should beEquivalentTo expected
 
     [<Fact>]
@@ -49,31 +46,31 @@ type Concat() =
             seq {
                 struct (0.0,
                         seq {
-                            struct (0.0, 1)
-                            struct (1.0, 2)
-                            struct (2.0, 3)
+                            struct (0.0, [1])
+                            struct (1.0, [2])
+                            struct (2.0, [3])
                         }
-                        |> StateTimeline.ofSeq 3.0 merger defaultValue)
+                        |> StateTimeline.ofSeq 3.0)
 
                 struct (0.5,
                         seq {
-                            struct (0.0, 11)
-                            struct (1.0, 12)
-                            struct (2.0, 13)
+                            struct (0.0, [11])
+                            struct (1.0, [12])
+                            struct (2.0, [13])
                         }
-                        |> StateTimeline.ofSeq 3.0 merger defaultValue)
+                        |> StateTimeline.ofSeq 3.0)
             }
             |> Timeline.ofSeq
 
-        let expected : int TimelineItem array =
+        let expected : int list TimelineItem array =
             [|
-                struct (0.0, 1)
-                struct (0.5, 12)
-                struct (1.0, 13)
-                struct (1.5, 14)
-                struct (2.0, 15)
-                struct (2.5, 0)
+                struct (0.0, [1])
+                struct (0.5, [1; 11])
+                struct (1.0, [2; 11])
+                struct (1.5, [2; 12])
+                struct (2.0, [3; 12])
+                struct (2.5, [])
             |]
 
-        let result = input |> StateTimeline.concat 2.5 merger defaultValue
+        let result = input |> StateTimeline.concat 2.5
         result |> should beEquivalentTo expected

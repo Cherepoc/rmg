@@ -29,6 +29,9 @@ module Midi =
 
             yield byte (value &&& mask)
         }
+        
+    let private multiplyOffsets (offsets: float seq): float =
+        offsets |> Seq.fold (fun result offset -> result * offset) 1
 
     let private calculateAbsoluteDelta (value: Position) : uint32 = uint32 (round (value * (double ticksPerQuarterNote)))
 
@@ -140,7 +143,7 @@ module Midi =
                             (fun struct (position, value) ->
                                 {
                                     Delta = calculateAbsoluteDelta position
-                                    Bytes = tempo value
+                                    Bytes = tempo (multiplyOffsets value)
                                 })
                 }
 

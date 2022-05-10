@@ -5,8 +5,8 @@ open RMG.Tests.Assertions
 open RMG.Core
 
 type TryFindEffectiveIndex() =
-    let ofSeq (duration: Duration) (input: int TimelineItem seq): int StateTimeline =
-        input |> StateTimeline.ofSeq duration (fun a b -> a + b) 0
+    let ofSeq (duration: Duration) (input: int list TimelineItem seq): int StateTimeline =
+        input |> StateTimeline.ofSeq duration
 
     [<Fact>]
     let empty () =
@@ -19,9 +19,9 @@ type TryFindEffectiveIndex() =
     let exact () =
         let input : int StateTimeline =
             seq {
-                struct (0.0, 10)
-                struct (1.0, 11)
-                struct (2.0, 12)
+                struct (0.0, [10])
+                struct (1.0, [11])
+                struct (2.0, [12])
             }
             |> ofSeq 3.0
         let expected : int option = Some 1
@@ -32,9 +32,9 @@ type TryFindEffectiveIndex() =
     let between () =
         let input : int StateTimeline =
             seq {
-                struct (0.0, 10)
-                struct (1.0, 11)
-                struct (2.0, 12)
+                struct (0.0, [10])
+                struct (1.0, [11])
+                struct (2.0, [12])
             }
             |> ofSeq 3.0
         let expected : int option = Some 1
@@ -45,9 +45,9 @@ type TryFindEffectiveIndex() =
     let afterAll () =
         let input : int StateTimeline =
             seq {
-                struct (0.0, 10)
-                struct (1.0, 11)
-                struct (2.0, 12)
+                struct (0.0, [10])
+                struct (1.0, [11])
+                struct (2.0, [12])
             }
             |> ofSeq 3.0
         let expected : int option = Some 3
@@ -58,9 +58,9 @@ type TryFindEffectiveIndex() =
     let beforeAll () =
         let input : int StateTimeline =
             seq {
-                struct (0.0, 10)
-                struct (1.0, 11)
-                struct (2.0, 12)
+                struct (0.0, [10])
+                struct (1.0, [11])
+                struct (2.0, [12])
             }
             |> ofSeq 3.0
         let expected : int option = None

@@ -14,24 +14,42 @@ module Rendering =
         }
 
     type RenderedSong = { Duration: Duration; Tempo: Tempo StateTimeline; Tracks: RenderedTrack list }
+    
+    let private multiplyOffsets (offsets: float seq): float =
+        offsets |> Seq.fold (fun result offset -> result * offset) 1
 
-    let private chooseIndexByOffset (length: int) (offset: float): int option =
+    let private chooseIndexByOffset (length: int) (offset: float): int =
+        if length <= 0 then raise (ArgumentOutOfRangeException("{Length cannot be zero or negative"))
+        else (Math.Floor(offset * (float length)) |> int)
+        
+    let private chooseIndexByOffsets (length: int) (offsets: float seq): int =
+        if length <= 0 then raise (ArgumentOutOfRangeException("{Length cannot be zero or negative"))
+        else offsets |> Seq.sumBy (chooseIndexByOffset length)
+    
+    let private tryChooseIndexByOffset (length: int) (offset: float): int option =
         if length <= 0 then None
-        else Some (Math.Floor(offset * (float length)) |> int)
+        else Some (chooseIndexByOffset length offset)
+        
+    let private breakIndexByLength (length: int) (index: int): int * int =
+        if length <= 0 then raise (ArgumentOutOfRangeException("{Length cannot be zero or negative"))
+        else
+            let remainder = index %! length
+            let cycles = (index - remainder) / length
+            (cycles, remainder)
 
     let private breakOffsetsByLength (length: int) (offsets: float seq): option<int * int> =
         if length <= 0 then None
         else
             let offset =
                 offsets
-                |> Seq.choose (chooseIndexByOffset length)
+                |> Seq.choose (tryChooseIndexByOffset length)
                 |> Seq.sum
             let remainder = offset %! length
             let cycles = (offset - remainder) / length
             Some (cycles, remainder)
 
     let private chooseItemByOffset<'T> (offset: float) (items: 'T list) : 'T option =
-        chooseIndexByOffset items.Length offset
+        tryChooseIndexByOffset items.Length offset
         |> Option.map (fun index -> items[index])
 
     let private chooseItemsByOffsets<'T when 'T: equality and 'T: comparison> (offsets: float list) (items: 'T list) : 'T list =
@@ -83,36 +101,41 @@ module Rendering =
                 let effectiveNote = getEffectiveNote eventState track.EventState position eventTimeline
 
                 let scaleOffsets =
-                    if effectiveNote.ScaleOffsets |> List.isEmpty then
-                        chromaticScale
-                    else
-                        effectiveNote.ScaleOffsets
-
-                effectiveNote.ChordScaleOffsets
-                |> chooseItemsByOffsets effectiveNote.ChordNoteOffsets
-                |> Seq.map
-                    (fun chordNoteOffset ->
-                        let octaveOffset, scaleNoteIndex =
-                            match [|effectiveNote.ChordRootOffset; chordNoteOffset|] |> breakOffsetsByLength scaleOffsets.Length with
-                            | Some (chordNoteOctaves, chordNoteRemainder) -> (chordNoteOctaves, chordNoteRemainder)
-                            | None -> (0, 0)
-
-                        let scaleOffset = scaleOffsets[scaleNoteIndex]
-
-                        let offset =
-                            scaleOffset
-                            + effectiveNote.KeyOffset
-                            + ((effectiveNote.OctaveOffset + octaveOffset) * Constants.notesInOctave)
-                            |> fixOffset
-
-                        let renderedNote =
+                    match effectiveNote.ScaleOffsets with
+                    | [] -> chromaticScale
+                    | _ -> effectiveNote.ScaleOffsets |> List.distinct
+                    
+                let chordRootOffsetInScaleOffsetIndex = chooseIndexByOffsets scaleOffsets.Length effectiveNote.ChordRootOffset
+                
+                // chord offsets are chosen from effective scale offsets
+                let chordScaleOffsetsInScaleOffsetIndexes =
+                    match effectiveNote.ChordScaleOffsets with
+                    | [] -> scaleOffsets
+                    | _ ->
+                        effectiveNote.ChordScaleOffsets
+                            |> List.map (chooseIndexByOffset scaleOffsets.Length)
+                            |> List.distinct
+                
+                // note offsets are chosen from effective chord offsets
+                effectiveNote.ChordNoteOffsets
+                |> Seq.map (chooseIndexByOffset chordScaleOffsetsInScaleOffsetIndexes.Length)
+                |> Seq.distinct
+                |> Seq.map (fun chordNoteIndex ->
+                    let chordOctaves, chordNoteIndex = breakIndexByLength chordScaleOffsetsInScaleOffsetIndexes.Length chordNoteIndex
+                    let chordScaleIndex = chordRootOffsetInScaleOffsetIndex + chordScaleOffsetsInScaleOffsetIndexes[chordNoteIndex]
+                    let scaleOctaves, scaleNoteIndex = breakIndexByLength scaleOffsets.Length chordScaleIndex
+                    let scaleKeyOffset = scaleOffsets[scaleNoteIndex]
+                    let octaveOffset = List.append effectiveNote.OctaveOffset [chordOctaves; scaleOctaves] |> List.sum
+                    let keyOffset = List.append effectiveNote.KeyOffset [scaleKeyOffset] |> List.sum
+                    let offset = fixOffset (keyOffset + octaveOffset * Constants.notesInOctave)
+                    let renderedNote =
                             {
                                 Offset = offset
-                                Velocity = effectiveNote.Velocity
-                                Duration = effectiveNote.Duration
+                                Velocity = multiplyOffsets effectiveNote.Velocity
+                                Duration = multiplyOffsets effectiveNote.Duration
                             }
 
-                        (position, renderedNote))
+                    (position, renderedNote))
 
             let renderedNotes =
                 eventTimeline.NoteTimeline
@@ -131,19 +154,19 @@ module Rendering =
 
             let renderNotes ((position, eventState): EventState TimelineItem) : RenderedNote TimelineItem seq =
                 let effectiveNote = getEffectiveNote eventState track.EventState position eventTimeline
-
-                seq { articulationCodes |> chooseItemByOffset (effectiveNote.ArticulationOffset %! 1.0) }
-                |> Seq.choose id
-                |> Seq.map
-                    (fun offset ->
-                        let renderedNote =
-                            {
-                                Offset = int offset
-                                Velocity = effectiveNote.Velocity
-                                Duration = effectiveNote.Duration
-                            }
-
-                        (position, renderedNote))
+                
+                match effectiveNote.ArticulationOffset with
+                | [] -> Seq.empty
+                | _ ->
+                    let articulationIndex = chooseIndexByOffsets articulationCodes.Length effectiveNote.ArticulationOffset
+                    let _, fixedArticulationIndex = breakIndexByLength articulationCodes.Length articulationIndex
+                    let renderedNote =
+                        {
+                            Offset = int articulationCodes[fixedArticulationIndex]
+                            Velocity = multiplyOffsets effectiveNote.Velocity
+                            Duration = multiplyOffsets effectiveNote.Duration
+                        }
+                    Seq.singleton (position, renderedNote)
 
             eventTimeline.NoteTimeline
             |> Timeline.trimDuration song.Duration

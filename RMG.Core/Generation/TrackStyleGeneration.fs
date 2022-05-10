@@ -107,17 +107,13 @@ module TrackStyleGeneration =
                 }
 
         let generateNote context : EventState =
-            seq {
-                DurationEvent((context |> Generate.rhythmValue (halfProbabilityFunction 0, 1.0, 2.0, 0.25, 2.0, 4)) / 4.0)
-
-                VelocityEvent(context |> Generate.rhythmValue (threeQuarterProbabilityFunction 0, 0.5, 1.0, 0.75, 1.5, 5))
-
-                OctaveOffsetEvent(context |> Generate.intByRank (eighthProbabilityFunction 0, -1, 1))
-
-                ChordNoteOffsetsEvent(standardOffsets (1, 1))
-                ArticulationOffsetEvent(standardArticulationOffset ())
+            { EventState.empty with
+                Duration = [(context |> Generate.rhythmValue (halfProbabilityFunction 0, 1.0, 2.0, 0.25, 2.0, 4)) / 4.0]
+                Velocity = [context |> Generate.rhythmValue (threeQuarterProbabilityFunction 0, 0.5, 1.0, 0.75, 1.5, 5)]
+                OctaveOffset = [context |> Generate.intByRank (eighthProbabilityFunction 0, -1, 1)]
+                ChordNoteOffsets = standardOffsets (1, 1)
+                ArticulationOffset = [standardArticulationOffset ()]
             }
-            |> EventState.ofSeq
 
         let getDuration (style: PatternGenerationDefinition) : float = 4.0 ** (float style.DurationRank)
 
@@ -153,7 +149,11 @@ module TrackStyleGeneration =
                 Probability.rankTimeline maxRank phase period duration
                 |> Generate.fromRankTimeline context noteGenerator noteProbabilityFunction
 
-            let eventStateTimeline = EventStateTimelineMap.ofTimelines duration notes Timeline.empty
+            let eventStateTimeline =
+                { EventStateTimelineMap.emptyInput with
+                    NoteTimeline = notes
+                }
+                |> EventStateTimelineMap.fromInput duration
 
             EventStatePattern.ofTimelines duration eventStateTimeline Timeline.empty
 
@@ -166,13 +166,12 @@ module TrackStyleGeneration =
             let limitedPatterns = context |> Generate.subSequence sourcePatterns limitPatternCount
 
             let noteOffset () : EventState =
-                seq {
-                    OctaveOffsetEvent(standardOctaveOffset ())
-                    ChordScaleOffsetsEvent(standardOffsets (0, 1))
-                    ChordNoteOffsetsEvent(standardOffsets (0, 1))
-                    VelocityEvent(standardVelocity ())
+                { EventState.empty with
+                    Velocity = [standardVelocity ()]
+                    OctaveOffset = [standardOctaveOffset ()]
+                    ChordScaleOffsets = standardOffsets (0, 1)
+                    ChordNoteOffsets = standardOffsets (0, 1)
                 }
-                |> EventState.ofSeq
 
             let noteProbabilityOffset =
                 context |> Generate.intByRank (quarterProbabilityFunction style.ProbabilityPowerOffset, 1, 8)
@@ -217,7 +216,7 @@ module TrackStyleGeneration =
         let generateSharedPatternFromStyle (style: PatternGenerationDefinition) : EventStatePattern =
             let duration: float = getDuration style
 
-            let generateState (eventGenerator: Generate.Context -> int -> Event) : Event Timeline =
+            let generateState (eventGenerator: Generate.Context -> int -> 'T list) : 'T list Timeline =
                 let phase =
                     context
                     |> Generate.rhythmValue (halfProbabilityFunction style.PhaseRankOffset, 0.0, 1.0, 0.0, 1.0, 4)
@@ -235,16 +234,14 @@ module TrackStyleGeneration =
 
                 Probability.rankTimeline maxRank phase period duration
                 |> Generate.fromRankTimeline context eventGenerator (eighthProbabilityFunction 0)
-
-            let stateTimeline =
-                seq {
-                    yield! generateState (fun _ _ -> ChordScaleOffsetsEvent(standardOffsets (1, 3)))
-                    yield! generateState (fun _ _ -> ChordRootOffsetEvent(standardArticulationOffset ()))
-                    yield! generateState (fun _ _ -> ArticulationOffsetEvent(standardArticulationOffset ()))
+                
+            let eventStateTimeline =
+                { EventStateTimelineMap.emptyInput with
+                    ChordScaleOffsetsTimeline = generateState (fun _ _ -> standardOffsets (1, 3))
+                    ChordRootOffsetTimeline = generateState (fun _ _ -> [standardArticulationOffset ()])
+                    ArticulationOffsetTimeline = generateState (fun _ _ -> [standardArticulationOffset ()])
                 }
-                |> Timeline.ofSeq
-
-            let eventStateTimeline = EventStateTimelineMap.ofTimelines duration Timeline.empty stateTimeline
+                |> EventStateTimelineMap.fromInput duration
 
             EventStatePattern.ofTimelines duration eventStateTimeline Timeline.empty
 
@@ -257,16 +254,11 @@ module TrackStyleGeneration =
             let limitedPatterns = context |> Generate.subSequence sourcePatterns limitPatternCount
 
             let noteOffset () : EventState =
-                seq {
-                    //OctaveOffsetEvent(standardOctaveOffset ())
-                    //ChordScaleOffsetsEvent(standardOffsets (0, 1))
-                    //ChordNoteOffsetsEvent(standardOffsets (0, 1))
-                    //VelocityEvent(standardVelocity ())
-                    ChordScaleOffsetsEvent(standardOffsets (1, 3))
-                    ChordRootOffsetEvent(standardArticulationOffset ())
-                    ArticulationOffsetEvent(standardArticulationOffset ())
+                { EventState.empty with
+                    ChordScaleOffsets = standardOffsets (1, 3)
+                    ChordRootOffset = [standardArticulationOffset ()]
+                    ArticulationOffset = [standardArticulationOffset ()]
                 }
-                |> EventState.ofSeq
 
             let noteProbabilityOffset =
                 context |> Generate.intByRank (quarterProbabilityFunction style.ProbabilityPowerOffset, 1, 8)
@@ -312,16 +304,15 @@ module TrackStyleGeneration =
             let duration = getDuration style
 
             let noteOffset () =
-                seq {
-                    DurationEvent(standardDuration ())
-                    OctaveOffsetEvent(standardOctaveOffset ())
-                    ChordRootOffsetEvent(standardArticulationOffset ())
-                    ChordScaleOffsetsEvent(standardOffsets (0, 1))
-                    ChordNoteOffsetsEvent(standardOffsets (0, 1))
-                    VelocityEvent(standardVelocity ())
-                    ArticulationOffsetEvent(standardArticulationOffset ())
+                { EventState.empty with
+                    Duration = [standardDuration ()]
+                    OctaveOffset = [standardOctaveOffset ()]
+                    ChordRootOffset = [standardArticulationOffset ()]
+                    ChordScaleOffsets = standardOffsets (0, 1)
+                    ChordNoteOffsets = standardOffsets (0, 1)
+                    Velocity = [standardVelocity ()]
+                    ArticulationOffset = [standardArticulationOffset ()]
                 }
-                |> EventState.ofSeq
 
             let singleTrackTimelines: Map<TrackNumber option, EventStatePattern WithEventState Timeline> =
                 childStyles
@@ -353,19 +344,16 @@ module TrackStyleGeneration =
             let duration = getDuration style
 
             let noteOffset () =
-                seq {
-                    DurationEvent(standardDuration ())
-
-                    KeyOffsetEvent(if context |> Generate.test 0.25 then context |> Generate.int (-6, 6) else 0)
-
-                    OctaveOffsetEvent(standardOctaveOffset ())
-                    ChordRootOffsetEvent(standardArticulationOffset ())
-                    ChordScaleOffsetsEvent(standardOffsets (0, 1))
-                    ChordNoteOffsetsEvent(standardOffsets (0, 1))
-                    VelocityEvent(standardVelocity ())
-                    ArticulationOffsetEvent(standardArticulationOffset ())
+                { EventState.empty with
+                    Duration = [standardDuration ()]
+                    KeyOffset = [if context |> Generate.test 0.25 then context |> Generate.int (-6, 6) else 0]
+                    OctaveOffset = [standardOctaveOffset ()]
+                    ChordRootOffset = [standardArticulationOffset ()]
+                    ChordScaleOffsets = standardOffsets (0, 1)
+                    ChordNoteOffsets = standardOffsets (0, 1)
+                    Velocity = [standardVelocity ()]
+                    ArticulationOffset = [standardArticulationOffset ()]
                 }
-                |> EventState.ofSeq
 
             let limitPartCount = standardPartCount ()
 
