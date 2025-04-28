@@ -1,5 +1,7 @@
-*/obj/
-*/bin/
+*/obj/*
+*/bin/*
 *.user
 */node_modules/
 */lib/
+*/songs/*
+*/songs_old/*
