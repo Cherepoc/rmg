@@ -3,5 +3,5 @@
 *.user
 */node_modules/
 */lib/
-*/songs/*
-*/songs_old/*
+songs/
+songs_old/

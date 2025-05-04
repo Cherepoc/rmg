@@ -212,15 +212,6 @@ public static class Render
         return (int)Math.Floor(offset * length);
     }
 
-    private static (int index, int octave) ToIndexedPeriodRemainder(this double offset, int length)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);
-
-        return offset
-            .ToIndexOverLength(length)
-            .ToPeriodRemainder(length);
-    }
-
     private static int ToIndex(this ImmutableArray<double> offset, int length)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);
@@ -237,27 +228,6 @@ public static class Render
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);
 
         return offset.Sum(x => x.ToIndexOverLength(length));
-    }
-
-    private static (int index, int octave) ToIndexedPeriodRemainder(this ImmutableArray<double> offset, int length)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);
-
-        return offset
-            .Sum(x => x.ToIndexOverLength(length))
-            .ToPeriodRemainder(length);
-    }
-
-    private static (int index, int octave) AddIndexOctave(
-        this (int index, int octave) offset1,
-        (int index, int octave) offset2,
-        int length
-    )
-    {
-        var index = offset1.index + offset2.index;
-        var octave = offset1.octave + offset2.octave;
-        var (periodIndex, remainder) = index.ToPeriodRemainder(length);
-        return (periodIndex, octave + remainder);
     }
 
     private static (int periodIndex, int remainder) ToPeriodRemainder(this int offset, int periodLength)

@@ -69,6 +69,12 @@ public static class SongGenerator
                 .ToStateMap();
         };
 
+        var singleChordNoteStateMap = new IState[]
+            {
+                StateKinds.ChordNoteOffset.CreateState([0]),
+            }
+            .ToStateMap();
+
         var trackDefinitions = new Dictionary<int, IInstrumentTrack>
         {
             [1] = new PercussionInstrumentTrack(
@@ -85,7 +91,8 @@ public static class SongGenerator
             ),
             // chords instrument
             [4] = new PitchInstrumentTrack(
-                trackDefinitionStateMapGenerator(new IState[]
+                trackDefinitionStateMapGenerator(
+                    new IState[]
                     {
                         CompositionStateKinds.Control.ChordRootOffsetEnabled.CreateState(false),
                         CompositionStateKinds.Control.ChordNoteOffsetEnabled.CreateState(false),
@@ -98,12 +105,27 @@ public static class SongGenerator
                 maxOctaveOffsetGenerator()
             ),
             // melody instrument
-            // [5] = new PitchInstrumentTrack(
-            //     trackDefinitionStateMapGenerator(StateMap.Default),
-            //     pitchInstrumentCodeGenerator(),
-            //     minOctaveOffsetGenerator(),
-            //     maxOctaveOffsetGenerator()
-            // )
+            [5] = new PitchInstrumentTrack(
+                trackDefinitionStateMapGenerator(singleChordNoteStateMap),
+                pitchInstrumentCodeGenerator(),
+                minOctaveOffsetGenerator(),
+                maxOctaveOffsetGenerator()
+            ),
+            // bass instrument
+            [6] = new PitchInstrumentTrack(
+                trackDefinitionStateMapGenerator(
+                    new IState[]
+                        {
+                            CompositionStateKinds.Control.ChordRootOffsetEnabled.CreateState(false),
+                            CompositionStateKinds.Control.OutOfChordNoteOffsetEnabled.CreateState(false),
+                        }
+                        .ToStateMap()
+                        .MergeWith(singleChordNoteStateMap)
+                ),
+                pitchInstrumentCodeGenerator(),
+                -3,
+                -2
+            )
         };
 
         var rhythmPatternGenerator = (StateMap stateMap) =>
@@ -175,6 +197,11 @@ public static class SongGenerator
                 .SelectValueFromCollectionByIndex(CompositionStateKinds.ChordNoteInScaleOffsets)
                 .ToKind(StateKinds.ChordNoteInScaleOffsets);
 
+            var chordRootOffsetEnabled = stateMap.GetStateValue(CompositionStateKinds.Control.ChordRootOffsetEnabled);
+            var chordNoteOffsetEnabled = stateMap.GetStateValue(CompositionStateKinds.Control.ChordNoteOffsetEnabled);
+            var outOfChordNoteOffsetEnabled =
+                stateMap.GetStateValue(CompositionStateKinds.Control.OutOfChordNoteOffsetEnabled);
+
             var currentConsecutiveOffset = 0.0;
             return DyadicRankItemPattern<StateMap>.Create(
                 generationContext,
@@ -189,10 +216,13 @@ public static class SongGenerator
                         + chordNoteOffsetGenerator(innerContext) * notePatternRandomOffset;
                     currentConsecutiveOffset += notePatternConsecutiveOffset;
 
+                    var outOfChordOffsetState = StateKinds.OutOfChordNoteOffset
+                        .CreateState(outOfChordNoteOffsetEnabled ? [outOfChordOffset] : []);
+
                     return new IState[]
                         {
                             StateKinds.ArticulationOffset.CreateState([articulationOffset]),
-                            // StateKinds.OutOfChordNoteOffset.CreateState([outOfChordOffset]),
+                            outOfChordOffsetState,
                             StateKinds.Velocity.CreateState(velocityGenerator(innerContext)),
                             StateKinds.QuarterNoteDurationPower.CreateState(
                                 quarterNoteDurationPowerGenerator(innerContext)),
@@ -369,7 +399,7 @@ public static class SongGenerator
                     var innerPattern = noteHigherPatternGenerator(combinedStateMap);
                     var trackPattern = Enumerable.Repeat(innerPattern, 2)
                         .Unroll()
-                        .ToEventStateTimelineMap(StateTimelineMap.Empty);
+                        .ToEventStateTimelineMap(trackDefinition.StateMap.Except(CompositionStateKinds.GetAll()));
                     return new KeyValuePair<int, EventStateTimelineMap<StateMap>>(trackNumber, trackPattern);
                 });
 
