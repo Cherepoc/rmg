@@ -15,7 +15,6 @@ public static class StateKinds
     public static readonly StateKind<ImmutableArray<double>> ChordNoteInScaleOffsets = CreateCollection<double>("ChordNoteInScaleOffsets");
     public static readonly StateKind<ImmutableArray<double>> ChordRootNoteOffset = CreateCollection<double>("ChordRootOffset");
     public static readonly StateKind<ImmutableArray<double>> ChordNoteOffset = CreateCollection<double>("ChordNoteOffset");
-    public static readonly StateKind<ImmutableArray<double>> OutOfChordNoteOffset = CreateCollection<double>("OutOfChordNoteOffset");
     public static readonly StateKind<ImmutableArray<int>> ScaleOffsets = CreateCollection<int>("ScaleOffsets");
     public static readonly StateKind<double> Tempo = CreateMultiplicative<double>("Tempo");
 
@@ -35,7 +34,6 @@ public static class StateKinds
             ChordNoteInScaleOffsets,
             ChordRootNoteOffset,
             ChordNoteOffset,
-            OutOfChordNoteOffset,
             ScaleOffsets,
             Tempo
         ];

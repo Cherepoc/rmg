@@ -145,9 +145,8 @@ public static class Render
         // OutOfChordNoteOffset is an in-scale note that's going to be added to the chord notes
         // the only reason it exists along with the ChordRootNoteOffset is to be able to
         // generate it along with the root note but in a separate manner
-        var chordRootNoteIndex =
-            stateMap.GetStateValue(StateKinds.ChordRootNoteOffset).ToIndexOverLength(scaleOffsets.Length)
-            + stateMap.GetStateValue(StateKinds.OutOfChordNoteOffset).ToIndexOverLength(scaleOffsets.Length);
+        var chordRootNoteIndex = stateMap.GetStateValue(StateKinds.ChordRootNoteOffset)
+            .ToIndexOverLength(scaleOffsets.Length);
         
         // chord offsets are chosen from effective scale offsets
         var chordNoteInScaleIndexes = stateMap.GetStateValue(StateKinds.ChordNoteInScaleOffsets)

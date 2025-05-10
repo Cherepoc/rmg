@@ -43,8 +43,6 @@ public static class CompositionStateKinds
         public StateKind<bool> ChordRootOffsetEnabled { get; }
         
         public StateKind<bool> ChordNoteOffsetEnabled { get; }
-        
-        public StateKind<bool> OutOfChordNoteOffsetEnabled { get; }
 
         public StateKindControl(string prefix)
         {
@@ -52,13 +50,11 @@ public static class CompositionStateKinds
             
             ChordRootOffsetEnabled = StateKinds.CreateBoolPessimistic(prefix + "ChordRootOffsetEnabled");
             ChordNoteOffsetEnabled = StateKinds.CreateBoolPessimistic(prefix + "ChordNoteOffsetEnabled");
-            OutOfChordNoteOffsetEnabled = StateKinds.CreateBoolPessimistic(prefix + "OutOfChordNoteOffsetEnabled");
             
             _all =
             [
                 ChordRootOffsetEnabled,
                 ChordNoteOffsetEnabled,
-                OutOfChordNoteOffsetEnabled,
             ];
         }
         

@@ -96,7 +96,6 @@ public static class SongGenerator
                     {
                         CompositionStateKinds.Control.ChordRootOffsetEnabled.CreateState(false),
                         CompositionStateKinds.Control.ChordNoteOffsetEnabled.CreateState(false),
-                        CompositionStateKinds.Control.OutOfChordNoteOffsetEnabled.CreateState(false),
                     }
                     .ToStateMap()
                 ),
@@ -117,7 +116,6 @@ public static class SongGenerator
                     new IState[]
                         {
                             CompositionStateKinds.Control.ChordRootOffsetEnabled.CreateState(false),
-                            CompositionStateKinds.Control.OutOfChordNoteOffsetEnabled.CreateState(false),
                         }
                         .ToStateMap()
                         .MergeWith(singleChordNoteStateMap)
@@ -199,8 +197,6 @@ public static class SongGenerator
 
             var chordRootOffsetEnabled = stateMap.GetStateValue(CompositionStateKinds.Control.ChordRootOffsetEnabled);
             var chordNoteOffsetEnabled = stateMap.GetStateValue(CompositionStateKinds.Control.ChordNoteOffsetEnabled);
-            var outOfChordNoteOffsetEnabled =
-                stateMap.GetStateValue(CompositionStateKinds.Control.OutOfChordNoteOffsetEnabled);
 
             var currentConsecutiveOffset = 0.0;
             return DyadicRankItemPattern<StateMap>.Create(
@@ -211,18 +207,19 @@ public static class SongGenerator
                     var articulationOffset =
                         currentConsecutiveOffset
                         + articulationOffsetGenerator(innerContext) * notePatternRandomOffset;
-                    var outOfChordOffset =
+                    var chordRootNoteOffset =
                         currentConsecutiveOffset
                         + chordNoteOffsetGenerator(innerContext) * notePatternRandomOffset;
                     currentConsecutiveOffset += notePatternConsecutiveOffset;
 
-                    var outOfChordOffsetState = StateKinds.OutOfChordNoteOffset
-                        .CreateState(outOfChordNoteOffsetEnabled ? [outOfChordOffset] : []);
-
                     return new IState[]
                         {
                             StateKinds.ArticulationOffset.CreateState([articulationOffset]),
-                            outOfChordOffsetState,
+                            StateKinds.ChordRootNoteOffset.CreateState(
+                                chordRootOffsetEnabled
+                                    ? [chordRootNoteOffset]
+                                    : []
+                            ),
                             StateKinds.Velocity.CreateState(velocityGenerator(innerContext)),
                             StateKinds.QuarterNoteDurationPower.CreateState(
                                 quarterNoteDurationPowerGenerator(innerContext)),
