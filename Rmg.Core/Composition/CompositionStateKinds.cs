@@ -18,8 +18,6 @@ public static class CompositionStateKinds
     public static IncrementalStateKinds IncrementalChordRootNoteOffset { get; }
 
     public static IncrementalStateKinds IncrementalChordNoteOffset { get; }
-
-    public static StateKind<int> ChordNoteOffsetCount { get; }
     
     public static StateKindControl Control { get; }
     
@@ -34,7 +32,6 @@ public static class CompositionStateKinds
         IncrementalArticulationOffset = new IncrementalStateKinds(Prefix + StateKinds.ArticulationOffset.Name);
         IncrementalChordRootNoteOffset = new IncrementalStateKinds(Prefix + StateKinds.ChordRootNoteOffset.Name);
         IncrementalChordNoteOffset = new IncrementalStateKinds(Prefix + StateKinds.ChordNoteOffset.Name);
-        ChordNoteOffsetCount = StateKinds.CreateAdditive<int>(Prefix + StateKinds.ChordNoteOffset.Name + "Count");
         Control = new StateKindControl(Prefix);
 
         _all =
@@ -45,7 +42,6 @@ public static class CompositionStateKinds
             ..IncrementalChordRootNoteOffset.GetAll(),
             ..IncrementalChordNoteOffset.GetAll(),
             ..ChordNoteInScaleOffsets.GetAll(),
-            ChordNoteOffsetCount,
             ..Control.GetAll(),
         ];
     }
