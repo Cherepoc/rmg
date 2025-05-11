@@ -349,4 +349,9 @@ public static class Generators
                 : circleValue;
         };
     }
+
+    public static Func<IGenerationContext, double> AbsSplineValue(double c = 1)
+    {
+        return SplineValue(c).Then(Math.Abs);
+    }
 }

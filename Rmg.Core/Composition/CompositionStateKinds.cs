@@ -10,8 +10,16 @@ public static class CompositionStateKinds
     private static readonly ImmutableArray<IStateKind> _all;
         
     public static RhythmStateKinds Rhythm { get; }
+    
+    public static NumberFromCollectionStateKinds<int> ValueSeed { get; }
 
-    public static ValueStateKinds Value { get; }
+    public static IncrementalStateKinds IncrementalArticulationOffset { get; }
+
+    public static IncrementalStateKinds IncrementalChordRootNoteOffset { get; }
+
+    public static IncrementalStateKinds IncrementalChordNoteOffset { get; }
+
+    public static StateKind<int> ChordNoteOffsetCount { get; }
     
     public static StateKindControl Control { get; }
     
@@ -22,14 +30,22 @@ public static class CompositionStateKinds
     {
         
         Rhythm = new RhythmStateKinds(Prefix);
-        Value = new ValueStateKinds(Prefix);
+        ValueSeed = new NumberFromCollectionStateKinds<int>(Prefix + "ValueSeed");
+        IncrementalArticulationOffset = new IncrementalStateKinds(Prefix + StateKinds.ArticulationOffset.Name);
+        IncrementalChordRootNoteOffset = new IncrementalStateKinds(Prefix + StateKinds.ChordRootNoteOffset.Name);
+        IncrementalChordNoteOffset = new IncrementalStateKinds(Prefix + StateKinds.ChordNoteOffset.Name);
+        ChordNoteOffsetCount = StateKinds.CreateAdditive<int>(Prefix + StateKinds.ChordNoteOffset.Name + "Count");
         Control = new StateKindControl(Prefix);
 
         _all =
         [
             ..Rhythm.GetAll(),
-            ..Value.GetAll(),
+            ..ValueSeed.GetAll(),
+            ..IncrementalArticulationOffset.GetAll(),
+            ..IncrementalChordRootNoteOffset.GetAll(),
+            ..IncrementalChordNoteOffset.GetAll(),
             ..ChordNoteInScaleOffsets.GetAll(),
+            ChordNoteOffsetCount,
             ..Control.GetAll(),
         ];
     }
@@ -55,6 +71,35 @@ public static class CompositionStateKinds
             [
                 ChordRootOffsetEnabled,
                 ChordNoteOffsetEnabled,
+            ];
+        }
+        
+        public ImmutableArray<IStateKind> GetAll() => _all;
+    }
+
+    public sealed class IncrementalStateKinds
+    {
+        private readonly ImmutableArray<IStateKind> _all;
+
+        public StateKind<double> ConsecutiveOffset { get; }
+
+        public StateKind<double> RandomOffset { get; }
+
+        public StateKind<double> Multiplier { get; }
+
+        public IncrementalStateKinds(string prefix)
+        {
+            prefix += "Incremental";
+            
+            ConsecutiveOffset = StateKinds.CreateAdditive<double>(prefix + "ConsecutiveOffset");
+            RandomOffset = StateKinds.CreateAdditive<double>(prefix + "RandomOffset");
+            Multiplier = StateKinds.CreateMultiplicative<double>(prefix + "Multiplier");
+
+            _all =
+            [
+                ConsecutiveOffset,
+                RandomOffset,
+                Multiplier,
             ];
         }
         
@@ -99,35 +144,6 @@ public static class CompositionStateKinds
                 MaxRank,
                 Intensity,
                 ..Seed.GetAll(),
-            ];
-        }
-        
-        public ImmutableArray<IStateKind> GetAll() => _all;
-    }
-    
-    public sealed class ValueStateKinds
-    {
-        private readonly ImmutableArray<IStateKind> _all;
-
-        public StateKind<double> ConsecutiveOffset { get; }
-
-        public StateKind<double> RandomOffset { get; }
-
-        public NumberFromCollectionStateKinds<int> Seed { get; }
-
-        public ValueStateKinds(string prefix)
-        {
-            prefix += "Value";
-            
-            ConsecutiveOffset = StateKinds.CreateAdditive<double>(prefix + "ConsecutiveOffset");
-            RandomOffset = StateKinds.CreateAdditive<double>(prefix + "RandomOffset");
-            Seed = new NumberFromCollectionStateKinds<int>(prefix + "Seed");
-
-            _all =
-            [
-                ConsecutiveOffset,
-                RandomOffset,
-                ..Seed.GetAll()
             ];
         }
         
