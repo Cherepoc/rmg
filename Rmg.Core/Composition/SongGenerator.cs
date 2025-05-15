@@ -23,7 +23,7 @@ public static class SongGenerator
         var pitchInstrumentCodeGenerator = Generators.Int(0, 120).WithContext(generationContext);
         var minOctaveOffsetGenerator = Generators.Int(-2, 1).WithContext(generationContext);
         var maxOctaveOffsetGenerator = Generators.Int(0, 3).WithContext(generationContext);
-        
+
         var closeToZeroIncrementalOffsetMultiplierGenerator = Generators.AbsSplineValue();
         var closeToOneIncrementalOffsetMultiplierGenerator = Generators.AbsSplineValue().Then(x => 1 - x);
 
@@ -83,16 +83,29 @@ public static class SongGenerator
 
         var trackDefinitions = new Dictionary<int, IInstrumentTrack>
         {
+            // kick
             [1] = new PercussionInstrumentTrack(
                 trackDefinitionStateMapGenerator(StateMap.Default),
                 PercussionInstrumentDefinition.Definitions[0].ArticulationCodes
             ),
+            // snare
             [2] = new PercussionInstrumentTrack(
-                trackDefinitionStateMapGenerator(StateMap.Default),
+                trackDefinitionStateMapGenerator(new IState[]
+                    {
+                        CompositionStateKinds.Rhythm.Phase.Rank.CreateState(1)
+                    }
+                    .ToStateMap()
+                ),
                 PercussionInstrumentDefinition.Definitions[2].ArticulationCodes
             ),
+            // hi-hat
             [3] = new PercussionInstrumentTrack(
-                trackDefinitionStateMapGenerator(StateMap.Default),
+                trackDefinitionStateMapGenerator(new IState[]
+                    {
+                        CompositionStateKinds.Rhythm.Period.Power.CreateState(-1)
+                    }
+                    .ToStateMap()
+                ),
                 PercussionInstrumentDefinition.Definitions[4].ArticulationCodes
             ),
             // chords instrument
@@ -166,18 +179,16 @@ public static class SongGenerator
 
                 var periodPower = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Power)
                     .BounceInBounds(-2, 1);
-                var periodPrime = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.PrimeIndex)
+                var periodPrimeMultiplier = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.PrimeIndex)
                     .BounceInBounds(-RhythmPeriod.MaxPrimeIndex, RhythmPeriod.MaxPrimeIndex)
                     .ToRhythmPeriodValue();
+                var periodValue = Math.Pow(2, periodPower) * periodPrimeMultiplier;
 
                 var phaseRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.Rank)
                     .BounceInBounds(0, 2);
                 var phaseRankedOffset = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.RankedOffset)
                     .BounceInBounds(-1, 1);
-                var phaseValue =
-                    DyadicRankDistribution.GetHalfOffset(phaseRank, phaseRankedOffset);
-
-                var periodValue = Math.Pow(2, periodPower) * periodPrime;
+                var phaseValue = DyadicRankDistribution.GetHalfOffset(phaseRank, phaseRankedOffset) * periodValue;
 
                 return new IState[]
                     {
@@ -471,7 +482,7 @@ public static class SongGenerator
         var value = collection[index];
         return stateKindGroup.Value.CreateState(value);
     }
-    
+
     private static Func<IGenerationContext, ImmutableArray<double>> ToIncrementalGenerator(
         this StateMap stateMap,
         CompositionStateKinds.IncrementalStateKinds stateKindGroup,
@@ -481,7 +492,7 @@ public static class SongGenerator
         var multiplier = stateMap.GetStateValue(stateKindGroup.Multiplier);
         if (multiplier.IsEqualToByEpsilon(0))
             return _ => ImmutableArray<double>.Empty;
-        
+
         var consecutiveOffset = stateMap.GetStateValue(stateKindGroup.ConsecutiveOffset) * multiplier;
         var randomOffset = stateMap.GetStateValue(stateKindGroup.RandomOffset) * multiplier;
         var currentValue = 0.0;

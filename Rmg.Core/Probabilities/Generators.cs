@@ -25,11 +25,6 @@ public static class Generators
         };
     }
 
-    public static Func<IGenerationContext, int> Rank(Func<int, double> weightFunc, IEnumerable<int> items)
-    {
-        return WeightedValue(items.WeightUsing(weightFunc));
-    }
-
     public static Func<IGenerationContext, int> Rank(
         Func<int, double> weightFunc,
         int minRank,
@@ -38,8 +33,38 @@ public static class Generators
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(minRank, maxRank);
 
-        var ranks = Enumerable.Range(minRank, maxRank - minRank + 1);
-        return Rank(weightFunc, ranks);
+        if (minRank == maxRank)
+            return _ => minRank;
+
+        var absRanks = Enumerable
+            .Range(minRank, maxRank - minRank + 1)
+            .Select(Math.Abs)
+            .Distinct()
+            .Order()
+            .ToImmutableArray();
+        var rankedRanksBuilder = ImmutableArray.CreateBuilder<ImmutableArray<int>>(absRanks.Length);
+        foreach (var absRank in absRanks)
+        {
+            var hasPositiveRank = absRank >= minRank && absRank <= maxRank;
+            var hasNegativeRank = -absRank >= minRank && -absRank <= maxRank;
+            var rankedItemsBuilder = ImmutableArray.CreateBuilder<int>(hasPositiveRank && hasNegativeRank ? 2 : 1);
+            if (hasPositiveRank)
+                rankedItemsBuilder.Add(absRank);
+            if (hasNegativeRank)
+                rankedItemsBuilder.Add(-absRank);
+            rankedRanksBuilder.Add(rankedItemsBuilder.ToImmutable());
+        }
+        var rankedRanks = rankedRanksBuilder.ToImmutable();
+        var generateWeightedAbsRankIndex = WeightedIndex(absRanks.WeightUsing(weightFunc));
+        return context =>
+        {
+            var absRankIndex = generateWeightedAbsRankIndex(context);
+            var rankedItems = rankedRanks[absRankIndex];
+            if (rankedItems.Length == 1)
+                return rankedItems[0];
+            var itemIndex = context.GenerateInt(0, rankedItems.Length);
+            return rankedItems[itemIndex];
+        };
     }
 
     public static Func<IGenerationContext, T> ItemSelector<T>(IEnumerable<T> items)
