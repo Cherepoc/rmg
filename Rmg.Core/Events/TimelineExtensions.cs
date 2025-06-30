@@ -30,6 +30,15 @@ public static class TimelineExtensions
         return StateTimelineMap.Create(timeline.Duration, stateTimelines);
     }
 
+    public static TrackEventStateTimelineMap<T> ToTrackEventStateTimelineMap<T>(
+        this StateTimelineMap commonTimelineMap,
+        double duration
+    )
+        where T : notnull
+    {
+        return TrackEventStateTimelineMap<T>.Create(duration, [], commonTimelineMap);
+    }
+
     public static T Merge<T>(IEnumerable<T> items)
         where T : ITimelineLike<T>
     {
@@ -49,7 +58,7 @@ public static class TimelineExtensions
     {
         if (timeline.IsEmpty)
             return EventTimeline.Empty<StateMap>();
-        
+
         if (stateTimelineMap.IsEmpty || stateTimelineMap.StateTimelines.All(x => x.IsDefault))
             return timeline;
 
@@ -65,7 +74,7 @@ public static class TimelineExtensions
     {
         if (timeline.IsEmpty)
             return EventTimeline.Empty<StateMap>();
-        
+
         if (newStateMap.IsDefault)
             return timeline;
 
@@ -103,16 +112,16 @@ public static class TimelineExtensions
             shiftedTimelines.Add(shiftedTimeline);
             shiftPosition += timeline.Duration;
         }
-        
+
         return T.Merge(shiftedTimelines.ToImmutable());
     }
-    
+
     public static EventTimeline<T> ToEventTimeline<T>(this IEnumerable<TimelineItem<T>> items, double duration)
         where T : notnull
     {
         return EventTimeline<T>.Create(duration, items);
     }
-    
+
     public static StateTimelineMap ToStateTimelineMap(this IEnumerable<TimelineItem<StateMap>> items, double duration)
     {
         var eventTimeline = items.ToEventTimeline(duration);
