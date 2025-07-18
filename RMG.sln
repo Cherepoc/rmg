@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rmg.Tests", "Rmg.Tests\Rmg.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rmg", "Rmg\Rmg.csproj", "{599D46B9-55EC-4D90-81EC-D10A52021054}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rmg.MidiUtil", "Rmg.MidiUtil\Rmg.MidiUtil.csproj", "{1B83CF5F-498A-48EF-B158-E58C9FE0E721}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{599D46B9-55EC-4D90-81EC-D10A52021054}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{599D46B9-55EC-4D90-81EC-D10A52021054}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{599D46B9-55EC-4D90-81EC-D10A52021054}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B83CF5F-498A-48EF-B158-E58C9FE0E721}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B83CF5F-498A-48EF-B158-E58C9FE0E721}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B83CF5F-498A-48EF-B158-E58C9FE0E721}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B83CF5F-498A-48EF-B158-E58C9FE0E721}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
