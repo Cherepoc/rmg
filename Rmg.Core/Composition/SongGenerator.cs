@@ -44,41 +44,24 @@ public static class SongGenerator
         var chordRootNoteOffsetGenerator = Generators.SplineValue();
         var chordNoteOffsetGenerator = Generators.SplineValue();
 
-        var trackDefinitionStateMapGenerator = (StateMap stateMap) =>
-        {
-            return new IState[]
-                {
-                    CompositionStateKinds.Rhythm.Period.Power.CreateState(
-                        rhythmPatternPeriodPowerGenerator(generationContext)),
-                    CompositionStateKinds.Rhythm.Period.PrimeIndex.CreateState(
-                        rhythmPatternPeriodPrimeIndexGenerator(generationContext)),
-                    CompositionStateKinds.Rhythm.Phase.Rank.CreateState(
-                        rhythmPatternPhaseRankGenerator(generationContext)),
-                    CompositionStateKinds.Rhythm.Phase.RankedOffset.CreateState(
-                        rhythmPatternPhaseRankedOffsetGenerator(generationContext)),
-                    CompositionStateKinds.Rhythm.MaxRank.CreateState(rhythmPatternMaxRankGenerator(generationContext)),
-                    CompositionStateKinds.Rhythm.RankOffset.CreateState(
-                        rhythmPatternRankOffsetGenerator(generationContext)),
-                    CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset.CreateState(
-                        notePatternConsecutiveOffsetGenerator(generationContext)),
-                    CompositionStateKinds.IncrementalArticulationOffset.RandomOffset.CreateState(
-                        notePatternRandomOffsetGenerator(generationContext)),
-                    CompositionStateKinds.IncrementalChordRootNoteOffset.ConsecutiveOffset.CreateState(
-                        notePatternConsecutiveOffsetGenerator(generationContext)),
-                    CompositionStateKinds.IncrementalChordRootNoteOffset.RandomOffset.CreateState(
-                        notePatternRandomOffsetGenerator(generationContext)),
-                    CompositionStateKinds.IncrementalChordNoteOffset.ConsecutiveOffset.CreateState(
-                        notePatternConsecutiveOffsetGenerator(generationContext)),
-                    CompositionStateKinds.IncrementalChordNoteOffset.RandomOffset.CreateState(
-                        notePatternRandomOffsetGenerator(generationContext)),
-                    StateKinds.Velocity.CreateState(velocityGenerator(generationContext)),
-                    StateKinds.QuarterNoteDurationPower.CreateState(
-                        quarterNoteDurationPowerGenerator(generationContext)),
-                    StateKinds.NextNoteDurationFactor.CreateState(nextNoteDurationFactorGenerator(generationContext)),
-                }
-                .Concat(stateMap.States)
-                .ToStateMap();
-        };
+        var trackDefinitionStateMapGenerator = (StateMap stateMap) => new StateMapBuilder()
+            .Add(stateMap)
+            .Add(CompositionStateKinds.Rhythm.Period.Power, rhythmPatternPeriodPowerGenerator)
+            .Add(CompositionStateKinds.Rhythm.Period.PrimeIndex, rhythmPatternPeriodPrimeIndexGenerator)
+            .Add(CompositionStateKinds.Rhythm.Phase.Rank, rhythmPatternPhaseRankGenerator)
+            .Add(CompositionStateKinds.Rhythm.Phase.RankedOffset, rhythmPatternPhaseRankedOffsetGenerator)
+            .Add(CompositionStateKinds.Rhythm.MaxRank, rhythmPatternMaxRankGenerator)
+            .Add(CompositionStateKinds.Rhythm.RankOffset, rhythmPatternRankOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalArticulationOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordNoteOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordNoteOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(StateKinds.Velocity, velocityGenerator)
+            .Add(StateKinds.QuarterNoteDurationPower, quarterNoteDurationPowerGenerator)
+            .Add(StateKinds.NextNoteDurationFactor, nextNoteDurationFactorGenerator)
+            .ToStateMap(generationContext);
 
         var trackDefinitions = new Dictionary<int, IInstrumentTrack>
         {
@@ -89,33 +72,29 @@ public static class SongGenerator
             ),
             // snare
             [2] = new PercussionInstrumentTrack(
-                trackDefinitionStateMapGenerator(new IState[]
-                    {
-                        CompositionStateKinds.Rhythm.Phase.Rank.CreateState(1)
-                    }
-                    .ToStateMap()
+                trackDefinitionStateMapGenerator(
+                    new StateMapBuilder()
+                        .Add(CompositionStateKinds.Rhythm.Phase.Rank, 1)
+                        .ToStateMap(generationContext)
                 ),
                 PercussionInstrumentDefinition.Definitions[2].ArticulationCodes
             ),
             // hi-hat
             [3] = new PercussionInstrumentTrack(
-                trackDefinitionStateMapGenerator(new IState[]
-                    {
-                        CompositionStateKinds.Rhythm.Period.Power.CreateState(-1)
-                    }
-                    .ToStateMap()
+                trackDefinitionStateMapGenerator(
+                    new StateMapBuilder()
+                        .Add(CompositionStateKinds.Rhythm.Period.Power, -1)
+                        .ToStateMap(generationContext)
                 ),
                 PercussionInstrumentDefinition.Definitions[4].ArticulationCodes
             ),
             // chords instrument
             [4] = new PitchInstrumentTrack(
                 trackDefinitionStateMapGenerator(
-                    new IState[]
-                        {
-                            CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier.CreateState(0),
-                            CompositionStateKinds.IncrementalChordNoteOffset.Multiplier.CreateState(0),
-                        }
-                        .ToStateMap()
+                    new StateMapBuilder()
+                        .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, 0)
+                        .Add(CompositionStateKinds.IncrementalChordNoteOffset.Multiplier, 0)
+                        .ToStateMap(generationContext)
                 ),
                 pitchInstrumentCodeGenerator(),
                 minOctaveOffsetGenerator(),
@@ -131,14 +110,10 @@ public static class SongGenerator
             // bass instrument
             [6] = new PitchInstrumentTrack(
                 trackDefinitionStateMapGenerator(
-                    new IState[]
-                        {
-                            CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier
-                                .CreateState(closeToZeroIncrementalOffsetMultiplierGenerator(generationContext)),
-                            CompositionStateKinds.IncrementalChordNoteOffset.Multiplier
-                                .CreateState(closeToOneIncrementalOffsetMultiplierGenerator(generationContext)),
-                        }
-                        .ToStateMap()
+                    new StateMapBuilder()
+                        .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, closeToZeroIncrementalOffsetMultiplierGenerator)
+                        .Add(CompositionStateKinds.IncrementalChordNoteOffset.Multiplier, closeToOneIncrementalOffsetMultiplierGenerator)
+                        .ToStateMap(generationContext)
                 ),
                 pitchInstrumentCodeGenerator(),
                 -3,
@@ -172,39 +147,38 @@ public static class SongGenerator
         var cachedRhythmPatternGenerator = rhythmPatternGenerator
             .CacheGeneratedValues()
             .MapInput((StateMap stateMap) =>
-            {
-                var rankOffsetState = stateMap.GetState(CompositionStateKinds.Rhythm.RankOffset);
-                var seedValueState = stateMap.GetState(CompositionStateKinds.Rhythm.Seed.Value);
+                {
+                    var rankOffsetState = stateMap.GetState(CompositionStateKinds.Rhythm.RankOffset);
+                    var seedValueState = stateMap.GetState(CompositionStateKinds.Rhythm.Seed.Value);
 
-                var intensity = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Intensity)
-                    .BounceInBounds(0, 2);
-                var maxRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.MaxRank)
-                    .BounceInBounds(0, 2);
+                    var intensity = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Intensity)
+                        .BounceInBounds(0, 2);
+                    var maxRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.MaxRank)
+                        .BounceInBounds(0, 2);
 
-                var periodPower = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Power)
-                    .BounceInBounds(-2, 1);
-                var periodPrimeMultiplier = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.PrimeIndex)
-                    .BounceInBounds(-RhythmPeriod.MaxPrimeIndex, RhythmPeriod.MaxPrimeIndex)
-                    .ToRhythmPeriodValue();
-                var periodValue = Math.Pow(2, periodPower) * periodPrimeMultiplier;
+                    var periodPower = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Power)
+                        .BounceInBounds(-2, 1);
+                    var periodPrimeMultiplier = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.PrimeIndex)
+                        .BounceInBounds(-RhythmPeriod.MaxPrimeIndex, RhythmPeriod.MaxPrimeIndex)
+                        .ToRhythmPeriodValue();
+                    var periodValue = Math.Pow(2, periodPower) * periodPrimeMultiplier;
 
-                var phaseRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.Rank)
-                    .BounceInBounds(0, 2);
-                var phaseRankedOffset = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.RankedOffset)
-                    .BounceInBounds(-1, 1);
-                var phaseValue = DyadicRankDistribution.GetHalfOffset(phaseRank, phaseRankedOffset) * periodValue;
+                    var phaseRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.Rank)
+                        .BounceInBounds(0, 2);
+                    var phaseRankedOffset = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.RankedOffset)
+                        .BounceInBounds(-1, 1);
+                    var phaseValue = DyadicRankDistribution.GetHalfOffset(phaseRank, phaseRankedOffset) * periodValue;
 
-                return new IState[]
-                    {
-                        CompositionStateKinds.Rhythm.Period.Value.CreateState(periodValue),
-                        CompositionStateKinds.Rhythm.Phase.Value.CreateState(phaseValue),
-                        CompositionStateKinds.Rhythm.MaxRank.CreateState(maxRank),
-                        CompositionStateKinds.Rhythm.Intensity.CreateState(intensity),
-                        rankOffsetState.Map(x => x.BounceInBounds(0, maxRank)),
-                        seedValueState
-                    }
-                    .ToStateMap();
-            });
+                    return new StateMapBuilder()
+                        .Add(CompositionStateKinds.Rhythm.Period.Value, periodValue)
+                        .Add(CompositionStateKinds.Rhythm.Phase.Value, phaseValue)
+                        .Add(CompositionStateKinds.Rhythm.MaxRank, maxRank)
+                        .Add(CompositionStateKinds.Rhythm.Intensity, intensity)
+                        .Add(rankOffsetState.Map(x => x.BounceInBounds(0, maxRank)))
+                        .Add(seedValueState)
+                        .ToStateMap(generationContext);
+                }
+            );
 
         var notePatternGenerator = (StateMap stateMap) =>
         {
@@ -229,32 +203,43 @@ public static class SongGenerator
                 .SelectValueFromCollectionByIndex(CompositionStateKinds.ChordNoteInScaleOffsets)
                 .ToKind(StateKinds.ChordNoteInScaleOffsets);
 
+            var stateMapGenerator = new StateMapBuilder()
+                .Add(StateKinds.ArticulationOffset, incrementalArticulationOffsetGenerator)
+                .Add(StateKinds.ChordRootNoteOffset, incrementalChordRootNoteOffsetGenerator)
+                .Add(StateKinds.ChordNoteOffset, incrementalChordNoteOffsetGenerator)
+                .Add(StateKinds.Velocity, velocityGenerator)
+                .Add(StateKinds.QuarterNoteDurationPower, quarterNoteDurationPowerGenerator)
+                .Add(StateKinds.NextNoteDurationFactor, nextNoteDurationFactorGenerator)
+                .Add(StateKinds.ChordNoteOffset, incrementalChordNoteOffsetGenerator)
+                .Add(chordNoteInScaleOffsets)
+                .ToStateMapGenerator();
+
             return DyadicRankItemPattern<StateMap>.Create(
                 generationContext,
                 rhythmPattern,
-                innerContext => (int valueRank) =>
-                {
-                    var articulationOffset = incrementalArticulationOffsetGenerator(innerContext);
-                    var chordRootNoteOffset = incrementalChordRootNoteOffsetGenerator(innerContext);
-                    var chordNoteOffset = incrementalChordNoteOffsetGenerator(innerContext);
-
-                    return new IState[]
-                        {
-                            StateKinds.ArticulationOffset.CreateState(articulationOffset),
-                            StateKinds.ChordRootNoteOffset.CreateState(chordRootNoteOffset),
-                            StateKinds.ChordNoteOffset.CreateState(chordNoteOffset),
-                            StateKinds.Velocity.CreateState(velocityGenerator(innerContext)),
-                            StateKinds.QuarterNoteDurationPower.CreateState(
-                                quarterNoteDurationPowerGenerator(innerContext)),
-                            StateKinds.NextNoteDurationFactor.CreateState(
-                                nextNoteDurationFactorGenerator(innerContext)),
-                            chordNoteInScaleOffsets
-                        }
-                        .ToStateMap();
-                },
+                innerContext => (int valueRank) => stateMapGenerator(innerContext),
                 seed
             );
         };
+
+        var noteHigherPatternInnerStateMapGenerator = new StateMapBuilder()
+            .Add(CompositionStateKinds.Rhythm.Period.Power, rhythmPatternPeriodPowerGenerator)
+            .Add(CompositionStateKinds.Rhythm.Period.PrimeIndex, rhythmPatternPeriodPrimeIndexGenerator)
+            .Add(CompositionStateKinds.Rhythm.Phase.Rank, rhythmPatternPhaseRankGenerator)
+            .Add(CompositionStateKinds.Rhythm.Phase.RankedOffset, rhythmPatternPhaseRankedOffsetGenerator)
+            .Add(CompositionStateKinds.Rhythm.MaxRank, rhythmPatternMaxRankGenerator)
+            .Add(CompositionStateKinds.Rhythm.RankOffset, rhythmPatternRankOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalArticulationOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordNoteOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordNoteOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(StateKinds.Velocity, velocityGenerator)
+            .Add(StateKinds.QuarterNoteDurationPower, quarterNoteDurationPowerGenerator)
+            .Add(StateKinds.NextNoteDurationFactor, nextNoteDurationFactorGenerator)
+            .AddCollectionOfOne(StateKinds.ChordRootNoteOffset, chordRootOffsetGenerator)
+            .ToStateMapGenerator();
 
         var seedValueGenerator = Generators.Int();
         var noteHigherPatternGenerator = (ImmutableDictionary<int, StateMap> trackStateMaps) =>
@@ -274,44 +259,11 @@ public static class SongGenerator
 
                             var trackStateMap = trackStateMaps[trackNumber];
                             var trackGenerationContext = generationContext.CreateContext(seedValue);
-                            var innerStateMap = new IState[]
-                                {
-                                    CompositionStateKinds.Rhythm.Seed.Value.CreateState(seedValue),
-                                    CompositionStateKinds.ValueSeed.Value.CreateState(seedValue),
-                                    CompositionStateKinds.Rhythm.Period.Power.CreateState(
-                                        rhythmPatternPeriodPowerGenerator(trackGenerationContext)),
-                                    CompositionStateKinds.Rhythm.Period.PrimeIndex.CreateState(
-                                        rhythmPatternPeriodPrimeIndexGenerator(trackGenerationContext)),
-                                    CompositionStateKinds.Rhythm.Phase.Rank.CreateState(
-                                        rhythmPatternPhaseRankGenerator(trackGenerationContext)),
-                                    CompositionStateKinds.Rhythm.Phase.RankedOffset.CreateState(
-                                        rhythmPatternPhaseRankedOffsetGenerator(trackGenerationContext)),
-                                    CompositionStateKinds.Rhythm.MaxRank.CreateState(
-                                        rhythmPatternMaxRankGenerator(trackGenerationContext)),
-                                    CompositionStateKinds.Rhythm.RankOffset.CreateState(
-                                        rhythmPatternRankOffsetGenerator(trackGenerationContext)),
-                                    CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset.CreateState(
-                                        notePatternConsecutiveOffsetGenerator(trackGenerationContext)),
-                                    CompositionStateKinds.IncrementalArticulationOffset.RandomOffset.CreateState(
-                                        notePatternRandomOffsetGenerator(trackGenerationContext)),
-                                    CompositionStateKinds.IncrementalChordRootNoteOffset.ConsecutiveOffset.CreateState(
-                                        notePatternConsecutiveOffsetGenerator(trackGenerationContext)),
-                                    CompositionStateKinds.IncrementalChordRootNoteOffset.RandomOffset.CreateState(
-                                        notePatternRandomOffsetGenerator(trackGenerationContext)),
-                                    CompositionStateKinds.IncrementalChordNoteOffset.ConsecutiveOffset.CreateState(
-                                        notePatternConsecutiveOffsetGenerator(trackGenerationContext)),
-                                    CompositionStateKinds.IncrementalChordNoteOffset.RandomOffset.CreateState(
-                                        notePatternRandomOffsetGenerator(trackGenerationContext)),
-                                    StateKinds.Velocity.CreateState(velocityGenerator(trackGenerationContext)),
-                                    StateKinds.QuarterNoteDurationPower.CreateState(
-                                        quarterNoteDurationPowerGenerator(trackGenerationContext)),
-                                    StateKinds.NextNoteDurationFactor.CreateState(
-                                        nextNoteDurationFactorGenerator(trackGenerationContext)),
-                                    StateKinds.ChordRootNoteOffset.CreateState([
-                                        chordRootOffsetGenerator(trackGenerationContext)
-                                    ]),
-                                }
-                                .ToStateMap()
+                            var innerStateMap = new StateMapBuilder()
+                                .Add(noteHigherPatternInnerStateMapGenerator)
+                                .Add(CompositionStateKinds.Rhythm.Seed.Value, seedValue)
+                                .Add(CompositionStateKinds.ValueSeed.Value, seedValue)
+                                .ToStateMap(trackGenerationContext)
                                 .MergeWith(trackStateMap);
                             var notePattern = notePatternGenerator(innerStateMap);
                             var innerEventStateTimelineMap = notePattern.GeneratedTimeline
@@ -349,6 +301,13 @@ public static class SongGenerator
         var chordCollectionGenerator = Generators.Sequence(chordGenerator, 2);
         var chordIndexOffsetGenerator = Generators.Rank(HalfWeightRankGenerator, -2, 2);
 
+        var commonStateHigherPatternStateMapGenerator = new StateMapBuilder()
+            .Add(StateKinds.Velocity, velocityGenerator)
+            .Add(StateKinds.QuarterNoteDurationPower, quarterNoteDurationPowerGenerator)
+            .Add(StateKinds.NextNoteDurationFactor, nextNoteDurationFactorGenerator)
+            .AddCollectionOfOne(StateKinds.ChordRootNoteOffset, chordRootOffsetGenerator)
+            .Add(CompositionStateKinds.ChordNoteInScaleOffsets.Index, chordIndexOffsetGenerator)
+            .ToStateMapGenerator();
         var commonStateHigherPatternGenerator = () =>
         {
             var seeds = Generators.Sequence(seedValueGenerator, 4)(generationContext);
@@ -357,145 +316,82 @@ public static class SongGenerator
                 .Select((seedValue, index) =>
                 {
                     var innerGenerationContext = generationContext.CreateContext(seedValue);
-                    return new IState[]
-                        {
-                            StateKinds.Velocity.CreateState(velocityGenerator(innerGenerationContext)),
-                            StateKinds.QuarterNoteDurationPower.CreateState(
-                                quarterNoteDurationPowerGenerator(innerGenerationContext)),
-                            StateKinds.NextNoteDurationFactor.CreateState(
-                                nextNoteDurationFactorGenerator(innerGenerationContext)),
-                            StateKinds.ChordRootNoteOffset.CreateState([
-                                chordRootOffsetGenerator(innerGenerationContext)
-                            ]),
-                            CompositionStateKinds.ChordNoteInScaleOffsets.Index.CreateState(
-                                chordIndexOffsetGenerator(innerGenerationContext)),
-                        }
-                        .ToStateMap()
+                    return commonStateHigherPatternStateMapGenerator(innerGenerationContext)
                         .ToTimelineItem(index * 4);
                 })
                 .ToStateTimelineMap(16);
         };
 
-        var songStateMap = new IState[]
-            {
-                CompositionStateKinds.Rhythm.Period.Power.CreateState(
-                    rhythmPatternPeriodPowerGenerator(generationContext)),
-                CompositionStateKinds.Rhythm.Period.PrimeIndex.CreateState(
-                    rhythmPatternPeriodPrimeIndexGenerator(generationContext)),
-                CompositionStateKinds.Rhythm.Phase.Rank.CreateState(rhythmPatternPhaseRankGenerator(generationContext)),
-                CompositionStateKinds.Rhythm.Phase.RankedOffset.CreateState(
-                    rhythmPatternPhaseRankedOffsetGenerator(generationContext)),
-                CompositionStateKinds.Rhythm.MaxRank.CreateState(2),
-                CompositionStateKinds.Rhythm.RankOffset.CreateState(
-                    rhythmPatternRankOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset.CreateState(
-                    notePatternConsecutiveOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalArticulationOffset.RandomOffset.CreateState(
-                    notePatternRandomOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalChordRootNoteOffset.ConsecutiveOffset.CreateState(
-                    notePatternConsecutiveOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalChordRootNoteOffset.RandomOffset.CreateState(
-                    notePatternRandomOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalChordNoteOffset.ConsecutiveOffset.CreateState(
-                    notePatternConsecutiveOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalChordNoteOffset.RandomOffset.CreateState(
-                    notePatternRandomOffsetGenerator(generationContext)),
-                CompositionStateKinds.ChordNoteInScaleOffsets.Collection.CreateState(
-                    chordCollectionGenerator(generationContext)),
-                CompositionStateKinds.ChordNoteInScaleOffsets.Index.CreateState(
-                    chordIndexOffsetGenerator(generationContext)),
-            }
-            .ToStateMap();
+        var songStateMap = new StateMapBuilder()
+            .Add(CompositionStateKinds.Rhythm.Period.Power, rhythmPatternPeriodPowerGenerator)
+            .Add(CompositionStateKinds.Rhythm.Period.PrimeIndex, rhythmPatternPeriodPrimeIndexGenerator)
+            .Add(CompositionStateKinds.Rhythm.Phase.Rank, rhythmPatternPhaseRankGenerator)
+            .Add(CompositionStateKinds.Rhythm.Phase.RankedOffset, rhythmPatternPhaseRankedOffsetGenerator)
+            .Add(CompositionStateKinds.Rhythm.MaxRank, 2)
+            .Add(CompositionStateKinds.Rhythm.RankOffset, rhythmPatternRankOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalArticulationOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordNoteOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordNoteOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.ChordNoteInScaleOffsets.Collection, chordCollectionGenerator)
+            .Add(CompositionStateKinds.ChordNoteInScaleOffsets.Index, chordIndexOffsetGenerator)
+            .ToStateMap(generationContext);
 
-        // statemap applied to all the instruments in a section
-        var sectionStateMapGenerator = () => new IState[]
-            {
-                CompositionStateKinds.Rhythm.Period.Power.CreateState(
-                    rhythmPatternPeriodPowerGenerator(generationContext)),
-                CompositionStateKinds.Rhythm.Period.PrimeIndex.CreateState(
-                    rhythmPatternPeriodPrimeIndexGenerator(generationContext)),
-                CompositionStateKinds.Rhythm.Phase.Rank.CreateState(
-                    rhythmPatternPhaseRankGenerator(generationContext)),
-                CompositionStateKinds.Rhythm.Phase.RankedOffset.CreateState(
-                    rhythmPatternPhaseRankedOffsetGenerator(generationContext)),
-                CompositionStateKinds.Rhythm.MaxRank.CreateState(
-                    rhythmPatternMaxRankGenerator(generationContext)),
-                CompositionStateKinds.Rhythm.RankOffset.CreateState(
-                    rhythmPatternRankOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset.CreateState(
-                    notePatternConsecutiveOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalArticulationOffset.RandomOffset.CreateState(
-                    notePatternRandomOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalChordRootNoteOffset.ConsecutiveOffset.CreateState(
-                    notePatternConsecutiveOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalChordRootNoteOffset.RandomOffset.CreateState(
-                    notePatternRandomOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalChordNoteOffset.ConsecutiveOffset.CreateState(
-                    notePatternConsecutiveOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalChordNoteOffset.RandomOffset.CreateState(
-                    notePatternRandomOffsetGenerator(generationContext)),
-                CompositionStateKinds.ChordNoteInScaleOffsets.Collection.CreateState(
-                    chordCollectionGenerator(generationContext)),
-                CompositionStateKinds.ChordNoteInScaleOffsets.Index.CreateState(
-                    chordIndexOffsetGenerator(generationContext)),
-                StateKinds.Velocity.CreateState(velocityGenerator(generationContext)),
-                StateKinds.QuarterNoteDurationPower.CreateState(
-                    quarterNoteDurationPowerGenerator(generationContext)),
-                StateKinds.NextNoteDurationFactor.CreateState(nextNoteDurationFactorGenerator(generationContext)),
-                StateKinds.ChordRootNoteOffset.CreateState([chordRootOffsetGenerator(generationContext)]),
-            }
-            .ToStateMap();
+        var sectionStateMapGenerator = new StateMapBuilder()
+            .Add(CompositionStateKinds.Rhythm.Period.Power, rhythmPatternPeriodPowerGenerator)
+            .Add(CompositionStateKinds.Rhythm.Period.PrimeIndex, rhythmPatternPeriodPrimeIndexGenerator)
+            .Add(CompositionStateKinds.Rhythm.Phase.Rank, rhythmPatternPhaseRankGenerator)
+            .Add(CompositionStateKinds.Rhythm.Phase.RankedOffset, rhythmPatternPhaseRankedOffsetGenerator)
+            .Add(CompositionStateKinds.Rhythm.MaxRank, rhythmPatternMaxRankGenerator)
+            .Add(CompositionStateKinds.Rhythm.RankOffset, rhythmPatternRankOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalArticulationOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordNoteOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordNoteOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.ChordNoteInScaleOffsets.Collection, chordCollectionGenerator)
+            .Add(CompositionStateKinds.ChordNoteInScaleOffsets.Index, chordIndexOffsetGenerator)
+            .Add(StateKinds.Velocity, velocityGenerator)
+            .Add(StateKinds.QuarterNoteDurationPower, quarterNoteDurationPowerGenerator)
+            .Add(StateKinds.NextNoteDurationFactor, nextNoteDurationFactorGenerator)
+            .AddCollectionOfOne(StateKinds.ChordRootNoteOffset, chordRootNoteOffsetGenerator)
+            .ToStateMapGenerator();
 
-        // statemap applied to all the instruments in a group in a section (no chord root note state)
-        var trackGroupSectionStateMapGenerator = () => new IState[]
-            {
-                CompositionStateKinds.Rhythm.Period.Power.CreateState(
-                    rhythmPatternPeriodPowerGenerator(generationContext)),
-                CompositionStateKinds.Rhythm.Period.PrimeIndex.CreateState(
-                    rhythmPatternPeriodPrimeIndexGenerator(generationContext)),
-                CompositionStateKinds.Rhythm.Phase.Rank.CreateState(
-                    rhythmPatternPhaseRankGenerator(generationContext)),
-                CompositionStateKinds.Rhythm.Phase.RankedOffset.CreateState(
-                    rhythmPatternPhaseRankedOffsetGenerator(generationContext)),
-                CompositionStateKinds.Rhythm.MaxRank.CreateState(
-                    rhythmPatternMaxRankGenerator(generationContext)),
-                CompositionStateKinds.Rhythm.RankOffset.CreateState(
-                    rhythmPatternRankOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset.CreateState(
-                    notePatternConsecutiveOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalArticulationOffset.RandomOffset.CreateState(
-                    notePatternRandomOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalChordRootNoteOffset.ConsecutiveOffset.CreateState(
-                    notePatternConsecutiveOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalChordRootNoteOffset.RandomOffset.CreateState(
-                    notePatternRandomOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalChordNoteOffset.ConsecutiveOffset.CreateState(
-                    notePatternConsecutiveOffsetGenerator(generationContext)),
-                CompositionStateKinds.IncrementalChordNoteOffset.RandomOffset.CreateState(
-                    notePatternRandomOffsetGenerator(generationContext)),
-                CompositionStateKinds.ChordNoteInScaleOffsets.Collection.CreateState(
-                    chordCollectionGenerator(generationContext)),
-                CompositionStateKinds.ChordNoteInScaleOffsets.Index.CreateState(
-                    chordIndexOffsetGenerator(generationContext)),
-                StateKinds.Velocity.CreateState(velocityGenerator(generationContext)),
-                StateKinds.QuarterNoteDurationPower.CreateState(
-                    quarterNoteDurationPowerGenerator(generationContext)),
-                StateKinds.NextNoteDurationFactor.CreateState(nextNoteDurationFactorGenerator(generationContext)),
-            }
-            .ToStateMap();
+        var trackGroupSectionStateMapGenerator = new StateMapBuilder()
+            .Add(CompositionStateKinds.Rhythm.Period.Power, rhythmPatternPeriodPowerGenerator)
+            .Add(CompositionStateKinds.Rhythm.Period.PrimeIndex, rhythmPatternPeriodPrimeIndexGenerator)
+            .Add(CompositionStateKinds.Rhythm.Phase.Rank, rhythmPatternPhaseRankGenerator)
+            .Add(CompositionStateKinds.Rhythm.Phase.RankedOffset, rhythmPatternPhaseRankedOffsetGenerator)
+            .Add(CompositionStateKinds.Rhythm.MaxRank, rhythmPatternMaxRankGenerator)
+            .Add(CompositionStateKinds.Rhythm.RankOffset, rhythmPatternRankOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalArticulationOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordNoteOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordNoteOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.ChordNoteInScaleOffsets.Collection, chordCollectionGenerator)
+            .Add(CompositionStateKinds.ChordNoteInScaleOffsets.Index, chordIndexOffsetGenerator)
+            .Add(StateKinds.Velocity, velocityGenerator)
+            .Add(StateKinds.QuarterNoteDurationPower, quarterNoteDurationPowerGenerator)
+            .Add(StateKinds.NextNoteDurationFactor, nextNoteDurationFactorGenerator)
+            .ToStateMapGenerator();
 
         var nonGroupedTrackNumbers = trackDefinitions.Keys
             .Except(trackGroups.SelectMany(x => x.TrackNumbers))
             .ToImmutableSortedSet();
         var songSectionGenerator = (string sectionName) =>
         {
-            var sectionStateMap = sectionStateMapGenerator().MergeWith(songStateMap);
+            var sectionStateMap = sectionStateMapGenerator(generationContext).MergeWith(songStateMap);
 
             var trackTimelineMaps = new List<TrackEventStateTimelineMap<StateMap>>();
-            
+
             foreach (var group in trackGroups)
             {
-                var groupStateMap = trackGroupSectionStateMapGenerator()
+                var groupStateMap = trackGroupSectionStateMapGenerator(generationContext)
                     .MergeWith(group.StateMap)
                     .MergeWith(sectionStateMap);
                 var trackStateMaps = new Dictionary<int, StateMap>();
@@ -530,15 +426,13 @@ public static class SongGenerator
         };
         var cachedSongSectionGenerator = songSectionGenerator.CacheGeneratedValues();
 
-        var commonStateMap = new IState[]
-            {
-                StateKinds.ScaleOffsets.CreateState([0, 2, 3, 5, 7, 8, 10]),
-                StateKinds.KeyOffset.CreateState(generationContext.GenerateInt(0, 12)),
-                StateKinds.Tempo.CreateState(1),
-                StateKinds.QuarterNoteDurationPower.CreateState(quarterNoteDurationPowerGenerator(generationContext)),
-                StateKinds.NextNoteDurationFactor.CreateState(nextNoteDurationFactorGenerator(generationContext)),
-            }
-            .ToStateMap();
+        var commonStateMap = new StateMapBuilder()
+            .Add(StateKinds.ScaleOffsets, [0, 2, 3, 5, 7, 8, 10])
+            .Add(StateKinds.KeyOffset, Generators.Int(0, 12))
+            .Add(StateKinds.Tempo, 1)
+            .Add(StateKinds.QuarterNoteDurationPower, quarterNoteDurationPowerGenerator)
+            .Add(StateKinds.NextNoteDurationFactor, nextNoteDurationFactorGenerator)
+            .ToStateMap(generationContext);
 
         var songSectionCount = Generators.Int(6, 10)(generationContext);
         var songTrackNoteTimelineMap = SongSectionArchetypes.GenerateSongStructure(generationContext, songSectionCount)
