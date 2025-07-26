@@ -8,7 +8,160 @@ namespace Rmg.Core.Events;
 public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeline<T>>, IReadOnlyList<TimelineItem<T>>
     where T : notnull
 {
+    private readonly ImmutableArray<TimelineItem<T>> _items;
+
+    public StateTimeline(double duration, StateKind<T> stateKind, ImmutableArray<TimelineItem<T>> items)
+    {
+        Duration = duration;
+        StateKind = stateKind;
+        _items = items;
+        Positions = GeneratePositions(items, stateKind, duration);
+    }
+
+    public StateKind<T> StateKind { get; }
+
+    public IEnumerator<TimelineItem<T>> GetEnumerator()
+    {
+        return ((IEnumerable<TimelineItem<T>>)_items).GetEnumerator();
+    }
+
+    public int Count => _items.Length;
+
+    public TimelineItem<T> this[int index] => _items[index];
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return ((IEnumerable)_items).GetEnumerator();
+    }
+
+    public bool IsEmpty => Duration == 0;
+
+    public bool IsDefault => _items.Length == 0;
+
+    public ImmutableArray<double> Positions { get; }
+
+    IStateKind IStateTimeline.StateKind => StateKind;
+
+    object IStateTimeline.GetEffectiveValueAt(double position)
+    {
+        return GetEffectiveValueAt(position);
+    }
+
+    IState IStateTimeline.GetEffectiveStateAt(double position)
+    {
+        return GetEffectiveStateAt(position);
+    }
+
+    IStateTimeline IStateTimeline.Trim(double duration)
+    {
+        return Trim(duration);
+    }
+
+    IStateTimeline IStateTimeline.Shift(double offset)
+    {
+        return Shift(offset);
+    }
+
+    IStateTimeline IStateTimeline.Stretch(double factor)
+    {
+        return Stretch(factor);
+    }
+
+    IStateTimeline IStateTimeline.PhaseShift(double phase)
+    {
+        return PhaseShift(phase);
+    }
+
     public static StateTimeline<T> Empty { get; } = new(0, Events.StateKind.Empty<T>(), []);
+
+    public static StateTimeline<T> Merge(IEnumerable<StateTimeline<T>> timelines)
+    {
+        var timelineArray = timelines
+            .Where(x => !x.IsEmpty)
+            .ToArray();
+
+        if (timelineArray.Length == 0)
+            return Events.StateKind.Empty<T>().EmptyTimeline;
+
+        if (timelineArray.Length == 1)
+            return timelineArray[0];
+
+        var stateKind = timelineArray[0].StateKind;
+
+        if (timelineArray.Any(x => x.StateKind != stateKind))
+            throw new ArgumentException(
+                $"Expected all timelines to have event kind '{stateKind.Name}'.",
+                nameof(timelines)
+            );
+
+        var duration = timelineArray.Max(x => x.Duration);
+
+        var positions = timelineArray
+            .SelectMany(x => x.Positions)
+            .Where(x => x < duration)
+            .Distinct()
+            .Order()
+            .ToArray();
+
+        var items = new List<TimelineItem<T>>(positions.Length);
+        var previousValue = stateKind.DefaultValue;
+        foreach (var position in positions)
+        {
+            var values = timelineArray
+                .Select(x => x.GetEffectiveValueAt(position))
+                .ToArray();
+            var aggregatedValue = stateKind.AggregateValues(values);
+            if (stateKind.CheckValuesEqual(aggregatedValue, previousValue))
+                continue;
+
+            previousValue = aggregatedValue;
+            items.Add(new TimelineItem<T>(position, aggregatedValue));
+        }
+
+        if (items.Count == 0)
+            return stateKind.EmptyTimeline;
+
+        return new StateTimeline<T>(duration, stateKind, [..items]);
+    }
+
+    public double Duration { get; }
+
+    public StateTimeline<T> Trim(double duration)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(duration);
+
+        if (duration == 0 || IsEmpty)
+            return StateKind.EmptyTimeline;
+
+        // ReSharper disable once CompareOfFloatsByEqualityOperator
+        if (duration == Duration)
+            return this;
+
+        var newItems = _items.TrimState(StateKind, Duration, duration);
+        if (newItems.Length == 0)
+            return StateKind.EmptyTimeline;
+
+        return new StateTimeline<T>(duration, StateKind, newItems);
+    }
+
+    public StateTimeline<T> Shift(double offset)
+    {
+        var newDuration = Duration + offset;
+        if (newDuration < 0)
+            throw new ArgumentOutOfRangeException(nameof(offset), "Offset cannot be greater then the duration.");
+
+        if (offset == 0)
+            return this;
+
+        if (newDuration == 0 || IsEmpty)
+            return StateKind.EmptyTimeline;
+
+        var newItems = _items.ShiftState(StateKind, offset);
+        if (newItems.Length == 0)
+            return StateKind.EmptyTimeline;
+
+        return new StateTimeline<T>(newDuration, StateKind, newItems);
+    }
 
     public static StateTimeline<T> Create(double duration, StateKind<T> stateKind, IEnumerable<TimelineItem<T>> items)
     {
@@ -42,76 +195,6 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
         return new StateTimeline<T>(duration, stateKind, processedItemArray);
     }
 
-    public static StateTimeline<T> Merge(IEnumerable<StateTimeline<T>> timelines)
-    {
-        var timelineArray = timelines
-            .Where(x => !x.IsEmpty)
-            .ToArray();
-
-        if (timelineArray.Length == 0)
-            return Events.StateKind.Empty<T>().EmptyTimeline;
-
-        if (timelineArray.Length == 1)
-            return timelineArray[0];
-
-        var stateKind = timelineArray[0].StateKind;
-
-        if (timelineArray.Any(x => x.StateKind != stateKind))
-            throw new ArgumentException($"Expected all timelines to have event kind '{stateKind.Name}'.",
-                nameof(timelines));
-
-        var duration = timelineArray.Max(x => x.Duration);
-
-        var positions = timelineArray
-            .SelectMany(x => x.Positions)
-            .Where(x => x < duration)
-            .Distinct()
-            .Order()
-            .ToArray();
-
-        var items = new List<TimelineItem<T>>(positions.Length);
-        var previousValue = stateKind.DefaultValue;
-        foreach (var position in positions)
-        {
-            var values = timelineArray
-                .Select(x => x.GetEffectiveValueAt(position))
-                .ToArray();
-            var aggregatedValue = stateKind.AggregateValues(values);
-            if (stateKind.CheckValuesEqual(aggregatedValue, previousValue))
-                continue;
-
-            previousValue = aggregatedValue;
-            items.Add(new TimelineItem<T>(position, aggregatedValue));
-        }
-
-        if (items.Count == 0)
-            return stateKind.EmptyTimeline;
-
-        return new StateTimeline<T>(duration, stateKind, [..items]);
-    }
-
-    private readonly ImmutableArray<TimelineItem<T>> _items;
-
-    public StateTimeline(double duration, StateKind<T> stateKind, ImmutableArray<TimelineItem<T>> items)
-    {
-        Duration = duration;
-        StateKind = stateKind;
-        _items = items;
-        Positions = GeneratePositions(items, stateKind, duration);
-    }
-
-    public double Duration { get; }
-
-    public bool IsEmpty => Duration == 0;
-    
-    public bool IsDefault => _items.Length == 0;
-
-    public StateKind<T> StateKind { get; }
-
-    public ImmutableArray<double> Positions { get; }
-
-    IStateKind IStateTimeline.StateKind => StateKind;
-
     public T GetEffectiveValueAt(double position)
     {
         if (position >= Duration)
@@ -121,34 +204,10 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
         return index >= 0 ? this[index].Value : StateKind.DefaultValue;
     }
 
-    object IStateTimeline.GetEffectiveValueAt(double position) => GetEffectiveValueAt(position);
-
     public State<T> GetEffectiveStateAt(double position)
     {
         return new State<T>(StateKind, GetEffectiveValueAt(position));
     }
-
-    IState IStateTimeline.GetEffectiveStateAt(double position) => GetEffectiveStateAt(position);
-
-    public StateTimeline<T> Trim(double duration)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(duration);
-
-        if (duration == 0 || IsEmpty)
-            return StateKind.EmptyTimeline;
-
-        // ReSharper disable once CompareOfFloatsByEqualityOperator
-        if (duration == Duration)
-            return this;
-
-        var newItems = _items.TrimState(StateKind, Duration, duration);
-        if (newItems.Length == 0)
-            return StateKind.EmptyTimeline;
-
-        return new StateTimeline<T>(duration, StateKind, newItems);
-    }
-
-    IStateTimeline IStateTimeline.Trim(double duration) => Trim(duration);
 
     public StateTimeline<T> Merge(T value)
     {
@@ -159,28 +218,10 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
         return Merge([this, mergeTimeline]);
     }
 
-    public IStateTimeline Merge(object value) => Merge((T)value);
-
-    public StateTimeline<T> Shift(double offset)
+    public IStateTimeline Merge(object value)
     {
-        var newDuration = Duration + offset;
-        if (newDuration < 0)
-            throw new ArgumentOutOfRangeException(nameof(offset), "Offset cannot be greater then the duration.");
-
-        if (offset == 0)
-            return this;
-
-        if (newDuration == 0 || IsEmpty)
-            return StateKind.EmptyTimeline;
-
-        var newItems = _items.ShiftState(StateKind, offset);
-        if (newItems.Length == 0)
-            return StateKind.EmptyTimeline;
-
-        return new StateTimeline<T>(newDuration, StateKind, newItems);
+        return Merge((T)value);
     }
-
-    IStateTimeline IStateTimeline.Shift(double offset) => Shift(offset);
 
     public StateTimeline<T> Stretch(double factor)
     {
@@ -195,8 +236,6 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
 
         return new StateTimeline<T>(Duration * factor, StateKind, _items.Stretch(factor));
     }
-
-    IStateTimeline IStateTimeline.Stretch(double factor) => Stretch(factor);
 
     public StateTimeline<T> PhaseShift(double phase)
     {
@@ -213,17 +252,10 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
         return new StateTimeline<T>(Duration, StateKind, newItems);
     }
 
-    IStateTimeline IStateTimeline.PhaseShift(double phase) => PhaseShift(phase);
-
-    public IEnumerator<TimelineItem<T>> GetEnumerator() => ((IEnumerable<TimelineItem<T>>)_items).GetEnumerator();
-
-    public int Count => _items.Length;
-
-    public TimelineItem<T> this[int index] => _items[index];
-
-    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)_items).GetEnumerator();
-
-    public IEnumerable<TimelineItem<T>> AsEnumerable() => this;
+    public IEnumerable<TimelineItem<T>> AsEnumerable()
+    {
+        return this;
+    }
 
     private static bool CheckArrayNeedsPreprocessing(
         double duration,
@@ -335,7 +367,7 @@ public static class StateTimeline
 public interface IStateTimeline
 {
     bool IsEmpty { get; }
-    
+
     bool IsDefault { get; }
 
     IStateKind StateKind { get; }

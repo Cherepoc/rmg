@@ -5,10 +5,6 @@ namespace Rmg.Core.Songs;
 
 public sealed class PercussionInstrumentTrack : IInstrumentTrack
 {
-    public StateMap StateMap { get; }
-
-    public ImmutableArray<int> ArticulationCodes { get; }
-
     public PercussionInstrumentTrack(
         StateMap stateMap,
         ImmutableArray<int> articulationCodes
@@ -17,4 +13,7 @@ public sealed class PercussionInstrumentTrack : IInstrumentTrack
         StateMap = stateMap;
         ArticulationCodes = articulationCodes;
     }
+
+    public ImmutableArray<int> ArticulationCodes { get; }
+    public StateMap StateMap { get; }
 }

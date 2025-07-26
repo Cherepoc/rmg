@@ -33,7 +33,7 @@ public static class DyadicRankDistribution
         var result = new ImmutableArray<Item>[MaxRank + 1];
         result[0] = [new Item(0, 0)];
 
-        for (int rank = 1; rank < result.Length; rank++)
+        for (var rank = 1; rank < result.Length; rank++)
         {
             var itemCount = (int)Math.Pow(2, rank);
             var period = 2.0 / itemCount;
@@ -41,7 +41,7 @@ public static class DyadicRankDistribution
 
             var items = new Item[itemCount];
 
-            for (int i = 0; i < itemCount; i++)
+            for (var i = 0; i < itemCount; i++)
                 items[i] = new Item(phase + i * period, rank);
 
             result[rank] = [..items];
@@ -57,7 +57,7 @@ public static class DyadicRankDistribution
         var result = new ImmutableArray<Item>[exactRankedDistributions.Length];
         result[0] = exactRankedDistributions[0];
 
-        for (int rank = 1; rank < result.Length; rank++)
+        for (var rank = 1; rank < result.Length; rank++)
         {
             var previousItems = result[rank - 1];
             var newItems = exactRankedDistributions[rank];
@@ -74,14 +74,12 @@ public static class DyadicRankDistribution
         return [..result];
     }
 
-    private static ImmutableArray<ImmutableArray<Item>> BuildExactRankedHalfDistributions(
-        ImmutableArray<ImmutableArray<Item>> exactFullDistributions
-    )
+    private static ImmutableArray<ImmutableArray<Item>> BuildExactRankedHalfDistributions(ImmutableArray<ImmutableArray<Item>> exactFullDistributions)
     {
         var result = new ImmutableArray<Item>[exactFullDistributions.Length];
         result[0] = exactFullDistributions[0];
 
-        for (int rank = 1; rank < result.Length; rank++)
+        for (var rank = 1; rank < result.Length; rank++)
         {
             var fullDistribution = exactFullDistributions[rank];
             var halfLength = fullDistribution.Length / 2;
@@ -98,12 +96,12 @@ public static class DyadicRankDistribution
         var result = new ImmutableArray<Item>[exactFullDistributions.Length];
         result[0] = [new Item(1, 0)];
 
-        for (int rank = 1; rank < result.Length; rank++)
+        for (var rank = 1; rank < result.Length; rank++)
         {
             var fullDistribution = exactFullDistributions[rank];
 
             var items = new Item[fullDistribution.Length];
-            for (int i = 0; i < fullDistribution.Length; i++)
+            for (var i = 0; i < fullDistribution.Length; i++)
             {
                 var item = fullDistribution[i];
                 var position = item.Position < 0
@@ -111,7 +109,7 @@ public static class DyadicRankDistribution
                     : 1 / item.Position;
                 items[i] = item with { Position = position };
             }
-            
+
             Array.Sort(items);
 
             result[rank] = [..items];
@@ -173,7 +171,7 @@ public static class DyadicRankDistribution
         ValidateRank(rank);
         ArgumentOutOfRangeException.ThrowIfLessThan(rankedOffset, -1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(rankedOffset, 1);
-        
+
         var distribution = ExactRankedMultiplierDistributions[rank];
         if (rank == 0)
             return distribution[0].Position;
@@ -189,7 +187,7 @@ public static class DyadicRankDistribution
         ValidateRank(rank);
         ArgumentOutOfRangeException.ThrowIfLessThan(rankedOffset, -1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(rankedOffset, 1);
-        
+
         var distribution = ExactRankedHalfDistributions[rank];
         if (rank == 0)
             return distribution[0].Position;
@@ -225,7 +223,7 @@ public static class DyadicRankDistribution
             ? lesserPosition
             : greaterPosition;
     }
-    
+
     private static void ValidateRank(int rank)
     {
         if (rank is < 0 or > MaxRank)
@@ -263,7 +261,7 @@ public static class DyadicRankDistribution
         var minIndex = GetItemCeilingIndex(array, minPosition);
         if (minIndex == -1)
             return ImmutableArray<Item>.Empty;
-        
+
         var maxIndex = GetItemFloorIndex(array, maxPosition);
         if (minIndex > maxIndex)
             return ImmutableArray<Item>.Empty;
@@ -273,14 +271,17 @@ public static class DyadicRankDistribution
 
     public readonly record struct Item(double Position, int Rank) : IComparable<Item>, IComparable
     {
-        public int CompareTo(Item other) => Position.CompareTo(other.Position);
-
         public int CompareTo(object? obj)
         {
             if (obj is Item item)
                 return CompareTo(item);
 
             throw new ArgumentException($"Object must be of type {nameof(Item)}", nameof(obj));
+        }
+
+        public int CompareTo(Item other)
+        {
+            return Position.CompareTo(other.Position);
         }
     }
 }

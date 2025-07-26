@@ -2,9 +2,9 @@ namespace Rmg.Core.Probabilities;
 
 public sealed class InputMapGenerator<TArg, TMap, T>
 {
+    private readonly Func<TArg, T> _generateDelegate;
     private readonly Func<TMap, T> _innerGenerator;
     private readonly Func<TArg, TMap> _mapFunc;
-    private readonly Func<TArg, T> _generateDelegate;
 
     public InputMapGenerator(Func<TMap, T> innerGenerator, Func<TArg, TMap> mapFunc)
     {
@@ -19,8 +19,10 @@ public sealed class InputMapGenerator<TArg, TMap, T>
         return _innerGenerator(mappedInput);
     }
 
-    public static implicit operator Func<TArg, T>(InputMapGenerator<TArg, TMap, T> inputMapGenerator) =>
-        inputMapGenerator._generateDelegate;
+    public static implicit operator Func<TArg, T>(InputMapGenerator<TArg, TMap, T> inputMapGenerator)
+    {
+        return inputMapGenerator._generateDelegate;
+    }
 }
 
 public static class InputMapGeneratorExtensions

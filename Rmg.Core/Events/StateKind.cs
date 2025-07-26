@@ -1,5 +1,4 @@
 using System.Collections;
-using System.Collections.Immutable;
 using System.Diagnostics;
 
 namespace Rmg.Core.Events;
@@ -8,7 +7,84 @@ namespace Rmg.Core.Events;
 public sealed class StateKind<T> : IStateKind
     where T : notnull
 {
+    private readonly Func<IEnumerable<T>, T> _aggregateFunc;
+    private readonly IState _defaultStateObject;
+
+    private readonly object _defaultValueObject;
+    private readonly Func<T, T, bool> _equalityFunc;
+
+    public StateKind(string name, T defaultValue, Func<T, T, bool> equalityFunc, Func<IEnumerable<T>, T> aggregateFunc)
+    {
+        Name = name;
+        DefaultValue = defaultValue;
+        DefaultState = new State<T>(this, defaultValue);
+        _equalityFunc = equalityFunc;
+        _aggregateFunc = aggregateFunc;
+
+        _defaultValueObject = DefaultValue;
+        _defaultStateObject = DefaultState;
+    }
+
     public static StateKind<T> Empty { get; } = CreateEmpty();
+
+    public T DefaultValue { get; }
+
+    public State<T> DefaultState { get; }
+
+    public StateTimeline<T> EmptyTimeline => StateTimeline<T>.Empty;
+
+    public string Name { get; }
+
+    object IStateKind.DefaultValue => _defaultValueObject;
+
+    IState IStateKind.DefaultState => _defaultStateObject;
+
+    IStateTimeline IStateKind.EmptyTimeline => EmptyTimeline;
+
+    public object AggregateValues(IEnumerable values)
+    {
+        return AggregateValues(values.Cast<T>());
+    }
+
+    public bool CheckValuesEqual(object value1, object value2)
+    {
+        return _equalityFunc((T)value1, (T)value2);
+    }
+
+    public bool CheckValueIsDefault(object value)
+    {
+        return CheckValueIsDefault((T)value);
+    }
+
+    public IState AggregateValuesToState(IEnumerable values)
+    {
+        return AggregateValuesToState(values.Cast<T>());
+    }
+
+    public IState AggregateStates(IEnumerable<IState> states)
+    {
+        return AggregateValuesToState(states.Select(x => (T)x.Value));
+    }
+
+    IState IStateKind.CreateState(object value)
+    {
+        return CreateState((T)value);
+    }
+
+    public IStateTimeline MergeTimelines(IEnumerable<IStateTimeline> timelines)
+    {
+        return MergeTimelines(timelines.Cast<StateTimeline<T>>());
+    }
+
+    IStateTimeline IStateKind.CreateTimelineFromValue(double duration, object value)
+    {
+        return CreateTimelineFromValue(duration, (T)value);
+    }
+
+    IStateTimeline IStateKind.ExtractStateTimeline(EventTimeline<StateMap> eventTimeline)
+    {
+        return ExtractStateTimeline(eventTimeline);
+    }
 
     private static StateKind<T> CreateEmpty()
     {
@@ -32,75 +108,47 @@ public sealed class StateKind<T> : IStateKind
         );
     }
 
-    private readonly object _defaultValueObject;
-    private readonly IState _defaultStateObject;
-    private readonly Func<T, T, bool> _equalityFunc;
-    private readonly Func<IEnumerable<T>, T> _aggregateFunc;
-
-    public StateKind(string name, T defaultValue, Func<T, T, bool> equalityFunc, Func<IEnumerable<T>, T> aggregateFunc)
+    public T AggregateValues(IEnumerable<T> values)
     {
-        Name = name;
-        DefaultValue = defaultValue;
-        DefaultState = new State<T>(this, defaultValue);
-        _equalityFunc = equalityFunc;
-        _aggregateFunc = aggregateFunc;
-
-        _defaultValueObject = DefaultValue;
-        _defaultStateObject = DefaultState;
+        return _aggregateFunc(values);
     }
 
-    public string Name { get; }
+    public bool CheckValuesEqual(T value1, T value2)
+    {
+        return _equalityFunc(value1, value2);
+    }
 
-    public T DefaultValue { get; }
+    public bool CheckValueIsDefault(T value)
+    {
+        return CheckValuesEqual(value, DefaultValue);
+    }
 
-    object IStateKind.DefaultValue => _defaultValueObject;
+    public State<T> AggregateValuesToState(IEnumerable<T> values)
+    {
+        return new State<T>(this, AggregateValues(values));
+    }
 
-    public State<T> DefaultState { get; }
+    public State<T> AggregateStates(IEnumerable<State<T>> states)
+    {
+        return AggregateValuesToState(states.Select(x => x.Value));
+    }
 
-    IState IStateKind.DefaultState => _defaultStateObject;
-
-    public StateTimeline<T> EmptyTimeline => StateTimeline<T>.Empty;
-
-    IStateTimeline IStateKind.EmptyTimeline => EmptyTimeline;
-
-    public T AggregateValues(IEnumerable<T> values) => _aggregateFunc(values);
-
-    public object AggregateValues(IEnumerable values) => AggregateValues(values.Cast<T>());
-
-    public bool CheckValuesEqual(T value1, T value2) => _equalityFunc(value1, value2);
-
-    public bool CheckValuesEqual(object value1, object value2) => _equalityFunc((T)value1, (T)value2);
-
-    public bool CheckValueIsDefault(T value) => CheckValuesEqual(value, DefaultValue);
-
-    public bool CheckValueIsDefault(object value) => CheckValueIsDefault((T)value);
-
-    public State<T> AggregateValuesToState(IEnumerable<T> values) => new(this, AggregateValues(values));
-
-    public IState AggregateValuesToState(IEnumerable values) => AggregateValuesToState(values.Cast<T>());
-
-    public State<T> AggregateStates(IEnumerable<State<T>> states) => AggregateValuesToState(states.Select(x => x.Value));
-    
-    public IState AggregateStates(IEnumerable<IState> states) => AggregateValuesToState(states.Select(x => (T)x.Value));
-
-    public State<T> CreateState(T value) => new(this, value);
-
-    IState IStateKind.CreateState(object value) => CreateState((T)value);
+    public State<T> CreateState(T value)
+    {
+        return new State<T>(this, value);
+    }
 
     public StateTimeline<T> MergeTimelines(IEnumerable<StateTimeline<T>> timelines)
     {
         var timelinesArray = timelines.AsImmutableArray();
         if (timelinesArray.Length == 0 || timelinesArray.All(x => x.IsEmpty))
             return EmptyTimeline;
-        
+
         if (timelinesArray.Any(x => x.StateKind != this))
             throw new ArgumentException($"Timelines must have the state kind {Name}.", nameof(timelines));
-        
+
         return StateTimeline<T>.Merge(timelinesArray);
     }
-
-    public IStateTimeline MergeTimelines(IEnumerable<IStateTimeline> timelines) =>
-        MergeTimelines(timelines.Cast<StateTimeline<T>>());
 
     public StateTimeline<T> CreateTimelineFromValue(double duration, T value)
     {
@@ -110,9 +158,6 @@ public sealed class StateKind<T> : IStateKind
         return new StateTimeline<T>(duration, this, [new TimelineItem<T>(0, value)]);
     }
 
-    IStateTimeline IStateKind.CreateTimelineFromValue(double duration, object value) =>
-        CreateTimelineFromValue(duration, (T)value);
-    
     public StateTimeline<T> CreateStateTimelineFromEventTimeline(EventTimeline<T> eventTimeline)
     {
         if (eventTimeline.IsEmpty)
@@ -120,7 +165,7 @@ public sealed class StateKind<T> : IStateKind
 
         return StateTimeline.Create(eventTimeline.Duration, this, eventTimeline.ToImmutableArray());
     }
-    
+
     public StateTimeline<T> ExtractStateTimeline(EventTimeline<StateMap> eventTimeline)
     {
         if (eventTimeline.IsEmpty)
@@ -129,9 +174,6 @@ public sealed class StateKind<T> : IStateKind
         var items = eventTimeline.MapValues(x => x.GetStateValue(this));
         return StateTimeline.Create(eventTimeline.Duration, this, items.ToImmutableArray());
     }
-
-    IStateTimeline IStateKind.ExtractStateTimeline(EventTimeline<StateMap> eventTimeline) =>
-        ExtractStateTimeline(eventTimeline);
 }
 
 public static class StateKind

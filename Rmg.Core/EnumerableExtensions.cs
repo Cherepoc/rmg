@@ -13,9 +13,8 @@ public static class EnumerableExtensions
         };
     }
 
-    public static IReadOnlyDictionary<TKey, TValue> AsReadOnlyDictionary<TKey, TValue>(
-        this IEnumerable<KeyValuePair<TKey, TValue>> source
-    ) where TKey : notnull
+    public static IReadOnlyDictionary<TKey, TValue> AsReadOnlyDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> source)
+        where TKey : notnull
     {
         return source switch
         {

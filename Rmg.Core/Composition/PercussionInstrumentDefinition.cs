@@ -4,10 +4,6 @@ namespace Rmg.Core.Composition;
 
 public sealed class PercussionInstrumentDefinition
 {
-    public ImmutableArray<int> ArticulationCodes { get; }
-
-    public double Weight { get; }
-
     public PercussionInstrumentDefinition(ImmutableArray<int> articulationCodes, double weight)
     {
         if (articulationCodes.Length == 0)
@@ -16,6 +12,10 @@ public sealed class PercussionInstrumentDefinition
         ArticulationCodes = articulationCodes;
         Weight = weight;
     }
+
+    public ImmutableArray<int> ArticulationCodes { get; }
+
+    public double Weight { get; }
 
     public static ImmutableArray<PercussionInstrumentDefinition> Definitions { get; } =
     [
@@ -66,6 +66,6 @@ public sealed class PercussionInstrumentDefinition
         // cuica
         new([78, 79], 0.1),
         // triangle
-        new([80, 81], 0.1),
+        new([80, 81], 0.1)
     ];
 }

@@ -99,14 +99,17 @@ internal static class OrderedTimelineItemArrayExtensions
             breakIndex = items.GetIndexAtCeiling(breakOffset);
 
         var newItems = new TimelineItem<T>[items.Length - breakIndex];
-        for (int i = 0; i < newItems.Length; i++)
+        for (var i = 0; i < newItems.Length; i++)
             newItems[i] = items[i + breakIndex].Shift(offset);
 
         return [..newItems];
     }
 
-    public static ImmutableArray<TimelineItem<T>> ShiftState<T>(this ImmutableArray<TimelineItem<T>> items,
-        StateKind<T> stateKind, double offset)
+    public static ImmutableArray<TimelineItem<T>> ShiftState<T>(
+        this ImmutableArray<TimelineItem<T>> items,
+        StateKind<T> stateKind,
+        double offset
+    )
         where T : notnull
     {
         var breakOffset = -offset;
@@ -131,7 +134,7 @@ internal static class OrderedTimelineItemArrayExtensions
             return [];
 
         var newItems = new TimelineItem<T>[items.Length - breakIndex];
-        for (int i = 0; i < newItems.Length; i++)
+        for (var i = 0; i < newItems.Length; i++)
             newItems[i] = items[i + breakIndex].ShiftMinZero(offset);
 
         var firstItem = newItems[0];
@@ -154,14 +157,17 @@ internal static class OrderedTimelineItemArrayExtensions
             return items;
 
         var newItems = new TimelineItem<T>[items.Length];
-        for (int i = 0; i < items.Length; i++)
+        for (var i = 0; i < items.Length; i++)
             newItems[i] = items[i].Stretch(factor);
 
         return [..newItems];
     }
 
-    public static ImmutableArray<TimelineItem<T>> PhaseShift<T>(this ImmutableArray<TimelineItem<T>> items,
-        double phase, double duration)
+    public static ImmutableArray<TimelineItem<T>> PhaseShift<T>(
+        this ImmutableArray<TimelineItem<T>> items,
+        double phase,
+        double duration
+    )
         where T : notnull
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(duration);
@@ -181,11 +187,11 @@ internal static class OrderedTimelineItemArrayExtensions
         var newItems = new TimelineItem<T>[items.Length];
 
         var beforeBreakIndexOffset = items.Length - breakIndex;
-        for (int i = 0; i < breakIndex; i++)
+        for (var i = 0; i < breakIndex; i++)
             newItems[i + beforeBreakIndexOffset] = items[i].Shift(offset);
 
         var afterBreakPositionOffset = duration - offset;
-        for (int i = breakIndex; i < items.Length; i++)
+        for (var i = breakIndex; i < items.Length; i++)
             newItems[i - breakIndex] = items[i].Shift(-afterBreakPositionOffset);
 
         return [..newItems];
@@ -211,11 +217,9 @@ internal static class OrderedTimelineItemArrayExtensions
         var breakDuration = duration - offset;
         var breakIndex = items.GetIndexAtFloor(breakDuration);
         if (breakIndex == -1)
-        {
             return items
                 .ShiftState(stateKind, -breakDuration)
                 .TrimState(stateKind, duration - breakDuration, duration);
-        }
 
         var firstSplit = items.ShiftState(stateKind, -breakDuration);
         var secondSplit = items
@@ -231,7 +235,8 @@ internal static class OrderedTimelineItemArrayExtensions
         var newLength = firstSplit.Length + secondSplit.Length - skipSecondSplitFirstItemIndexDiff;
         var newItems = new TimelineItem<T>[newLength];
         firstSplit.CopyTo(newItems, 0);
-        secondSplit.CopyTo(skipSecondSplitFirstItemIndexDiff,
+        secondSplit.CopyTo(
+            skipSecondSplitFirstItemIndexDiff,
             newItems,
             firstSplit.Length,
             secondSplit.Length - skipSecondSplitFirstItemIndexDiff
@@ -284,8 +289,10 @@ internal static class OrderedTimelineItemArrayExtensions
 
         var newItems = ImmutableArray.CreateBuilder<TimelineItem<T>>(items.Length);
         foreach (var item in items)
+        {
             if (filterFunc(item.Value))
                 newItems.Add(item);
+        }
 
         return [..newItems];
     }

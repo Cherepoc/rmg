@@ -6,7 +6,7 @@ public static class GeneratorExtensions
     {
         return () => generator(context);
     }
-    
+
     public static Func<IGenerationContext, TDest> Then<TSource, TDest>(
         this Func<IGenerationContext, TSource> generator,
         Func<TSource, TDest> thenFunc

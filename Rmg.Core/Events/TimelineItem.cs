@@ -10,15 +10,15 @@ public readonly struct TimelineItem<T>
     public TimelineItem(double position, T value)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(position);
-        
+
         Position = position;
         Value = value;
     }
-    
+
     public double Position { get; }
-    
+
     public T Value { get; }
-    
+
     object ITimelineItem.Value => Value;
 
     public TimelineItem<T> Shift(double offset)
@@ -26,7 +26,7 @@ public readonly struct TimelineItem<T>
         var newPosition = Position + offset;
         if (newPosition < 0)
             throw new ArgumentOutOfRangeException(nameof(offset), offset, "Cannot shift to negative position");
-        
+
         return new TimelineItem<T>(newPosition, Value);
     }
 
@@ -35,11 +35,20 @@ public readonly struct TimelineItem<T>
         return new TimelineItem<T>(Math.Max(Position + offset, 0), Value);
     }
 
-    ITimelineItem ITimelineItem.Shift(double offset) => Shift(offset);
+    ITimelineItem ITimelineItem.Shift(double offset)
+    {
+        return Shift(offset);
+    }
 
-    public TimelineItem<T> Stretch(double factor) => new(Position * factor, Value);
-    
-    ITimelineItem ITimelineItem.Stretch(double factor) => Stretch(factor);
+    public TimelineItem<T> Stretch(double factor)
+    {
+        return new TimelineItem<T>(Position * factor, Value);
+    }
+
+    ITimelineItem ITimelineItem.Stretch(double factor)
+    {
+        return Stretch(factor);
+    }
 
     public TimelineItem<TDest> MapValue<TDest>(Func<T, TDest> map)
         where TDest : notnull
@@ -53,7 +62,10 @@ public readonly struct TimelineItem<T>
         return new TimelineItem<TDest>(Position, map(Position, Value));
     }
 
-    public int CompareTo(TimelineItem<T> other) => Position.CompareTo(other.Position);
+    public int CompareTo(TimelineItem<T> other)
+    {
+        return Position.CompareTo(other.Position);
+    }
 
     public int CompareTo(object? obj)
     {
@@ -76,7 +88,7 @@ public static class TimelineItem
 public interface ITimelineItem
 {
     double Position { get; }
-    
+
     object Value { get; }
 
     ITimelineItem Shift(double offset);

@@ -2,7 +2,7 @@
 using Rmg.Core.Composition;
 using Rmg.Core.Rendering;
 
-for (int i = 1; i <= 100; i++)
+for (var i = 1; i <= 100; i++)
 {
     var songPattern = SongGenerator.GenerateSong();
     var renderedSong = Render.RenderSong(songPattern);

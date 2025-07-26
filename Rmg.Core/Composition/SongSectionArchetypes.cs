@@ -5,26 +5,13 @@ namespace Rmg.Core.Composition;
 
 public static class SongSectionArchetypes
 {
-    public static class Names
-    {
-        // ReSharper disable MemberHidesStaticFromOuterClass
-        public const string Intro = "Intro";
-        public const string Verse = "Verse";
-        public const string PreChorus = "Pre-Chorus";
-        public const string Chorus = "Chorus";
-        public const string Bridge = "Bridge";
-
-        public const string Outro = "Outro";
-        // ReSharper restore MemberHidesStaticFromOuterClass
-    }
-
     public static SongSectionArchetype Intro { get; } = new(
         Names.Intro,
         1,
         0,
         [
             new Weighted<string>(1, Names.Verse),
-            new Weighted<string>(0.25, Names.Chorus),
+            new Weighted<string>(0.25, Names.Chorus)
         ]
     );
 
@@ -34,7 +21,7 @@ public static class SongSectionArchetypes
         0,
         [
             new Weighted<string>(1, Names.Chorus),
-            new Weighted<string>(0.25, Names.PreChorus),
+            new Weighted<string>(0.25, Names.PreChorus)
         ]
     );
 
@@ -43,7 +30,7 @@ public static class SongSectionArchetypes
         0,
         0,
         [
-            new Weighted<string>(1, Names.Chorus),
+            new Weighted<string>(1, Names.Chorus)
         ]
     );
 
@@ -53,7 +40,7 @@ public static class SongSectionArchetypes
         0,
         [
             new Weighted<string>(1, Names.Verse),
-            new Weighted<string>(0.25, Names.Bridge),
+            new Weighted<string>(0.25, Names.Bridge)
         ]
     );
 
@@ -63,7 +50,7 @@ public static class SongSectionArchetypes
         0,
         [
             new Weighted<string>(1, Names.Verse),
-            new Weighted<string>(0.25, Names.Chorus),
+            new Weighted<string>(0.25, Names.Chorus)
         ]
     );
 
@@ -81,7 +68,7 @@ public static class SongSectionArchetypes
         PreChorus,
         Chorus,
         Bridge,
-        Outro,
+        Outro
     ];
 
     private static readonly ImmutableDictionary<string, SongSectionArchetype> ArchetypesByNames =
@@ -115,18 +102,31 @@ public static class SongSectionArchetypes
             .Where(x => x.SongStartWeight > 0)
             .Select(x => new Weighted<string>(x.SongStartWeight, x.Name))
             .ToImmutableArray();
-        
-        for(;remainingSectionCount > 0; remainingSectionCount--)
+
+        for (; remainingSectionCount > 0; remainingSectionCount--)
         {
             var sectionName = Generators.WeightedValue(sectionWeights)(context);
             var sectionArchetype = GetByName(sectionName);
             songStructure.Add(sectionArchetype);
             sectionWeights = sectionArchetype.ResolvesToSectionsWeighted;
         }
-        
+
         if (hasOutro)
             songStructure.Add(Outro);
 
         return songStructure.ToImmutable();
+    }
+
+    public static class Names
+    {
+        // ReSharper disable MemberHidesStaticFromOuterClass
+        public const string Intro = "Intro";
+        public const string Verse = "Verse";
+        public const string PreChorus = "Pre-Chorus";
+        public const string Chorus = "Chorus";
+        public const string Bridge = "Bridge";
+
+        public const string Outro = "Outro";
+        // ReSharper restore MemberHidesStaticFromOuterClass
     }
 }

@@ -7,7 +7,7 @@ public static class RhythmPeriod
     private static readonly ImmutableArray<int> Primes = [3, 5, 7, 11, 13];
 
     private static readonly ImmutableArray<double> PrimePeriodValues = BuildPeriodValues();
-    
+
     public static int MaxPrimeIndex => Primes.Length;
 
     private static ImmutableArray<double> BuildPeriodValues()
@@ -15,7 +15,7 @@ public static class RhythmPeriod
         var result = new double[Primes.Length * 2 + 1];
         result[Primes.Length] = 1;
 
-        for (int i = 0; i < Primes.Length; i++)
+        for (var i = 0; i < Primes.Length; i++)
         {
             var prime = Primes[i];
             var nearestPower = Math.Round(Math.Log2(prime));
@@ -36,7 +36,7 @@ public static class RhythmPeriod
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(primeIndex, MaxPrimeIndex);
         ArgumentOutOfRangeException.ThrowIfLessThan(primeIndex, -MaxPrimeIndex);
-        
+
         return PrimePeriodValues[primeIndex + Primes.Length];
     }
 }

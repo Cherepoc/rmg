@@ -5,12 +5,6 @@ namespace Rmg.Core.Rendering;
 
 public sealed class RenderedSong
 {
-    public double Duration { get; }
-    
-    public StateTimeline<double> TempoTimeline { get; }
-
-    public ImmutableArray<RenderedTrack> Tracks { get; }
-
     public RenderedSong(
         double duration,
         StateTimeline<double> tempoTimeline,
@@ -25,4 +19,10 @@ public sealed class RenderedSong
         TempoTimeline = tempoTimeline;
         Tracks = tracks;
     }
+
+    public double Duration { get; }
+
+    public StateTimeline<double> TempoTimeline { get; }
+
+    public ImmutableArray<RenderedTrack> Tracks { get; }
 }

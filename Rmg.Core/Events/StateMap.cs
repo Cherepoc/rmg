@@ -4,8 +4,27 @@ namespace Rmg.Core.Events;
 
 public sealed class StateMap
 {
+    private readonly int _hashCode;
+    private readonly ImmutableDictionary<IStateKind, IState> _stateByKinds;
+
+    private readonly ImmutableArray<IState> _states;
+
+    private StateMap(ImmutableArray<IState> states)
+    {
+        _states = states;
+        _hashCode = CalculateHashCode(_states);
+        Kinds = [.._states.Select(x => x.Kind)];
+        _stateByKinds = _states.ToImmutableDictionary(x => x.Kind);
+    }
+
     public static StateMap Default { get; } = new(ImmutableArray<IState>.Empty);
-    
+
+    public bool IsDefault => _states.IsEmpty;
+
+    public ImmutableArray<IStateKind> Kinds { get; }
+
+    public ImmutableArray<IState> States => _states;
+
     public static StateMap FromStates(IEnumerable<IState> states)
     {
         var processedStates = states
@@ -16,31 +35,16 @@ public sealed class StateMap
             .ToImmutableArray();
         if (processedStates.IsEmpty)
             return Default;
-        
+
         return new StateMap(processedStates);
     }
-    
-    private readonly ImmutableArray<IState> _states;
-    private readonly ImmutableDictionary<IStateKind, IState> _stateByKinds;
 
-    private readonly int _hashCode;
-
-    private StateMap(ImmutableArray<IState> states)
-    {
-        _states = states;
-        _hashCode = CalculateHashCode(_states);
-        Kinds = [.._states.Select(x => x.Kind)];
-        _stateByKinds = _states.ToImmutableDictionary(x => x.Kind);
-    }
-    
-    public bool IsDefault => _states.IsEmpty;
-    
     public T GetStateValue<T>(StateKind<T> kind)
         where T : notnull
     {
         if (_stateByKinds.TryGetValue(kind, out var state))
             return (T)state.Value;
-        
+
         return kind.DefaultValue;
     }
 
@@ -50,20 +54,18 @@ public sealed class StateMap
         return _stateByKinds.TryGetValue(kind, out var state) ? (State<T>)state : kind.DefaultState;
     }
 
-    public IState GetState(IStateKind kind) =>
-        _stateByKinds.TryGetValue(kind, out var state) ? state : kind.DefaultState;
-    
-    public ImmutableArray<IStateKind> Kinds { get; }
-    
-    public ImmutableArray<IState> States => _states;
-    
+    public IState GetState(IStateKind kind)
+    {
+        return _stateByKinds.TryGetValue(kind, out var state) ? state : kind.DefaultState;
+    }
+
     public ImmutableArray<IStateTimeline> CreateTimelines(double duration)
     {
         return _states
             .Select(x => x.Kind.CreateTimelineFromValue(duration, x.Value))
             .ToImmutableArray();
     }
-    
+
     public StateTimelineMap ToStateTimelineMap(double duration)
     {
         var stateTimelines = _states.Select(x => x.Kind.CreateTimelineFromValue(duration, x.Value));
@@ -86,20 +88,20 @@ public sealed class StateMap
         return FromStates(_stateByKinds.SetItem(stateKind, stateKind.CreateState(value)).Values);
     }
 
-    public StateMap SetValue<T>(StateKind<T> stateKind, Func<T,T> valueMapFunc)
+    public StateMap SetValue<T>(StateKind<T> stateKind, Func<T, T> valueMapFunc)
         where T : notnull
     {
         var stateValue = GetStateValue(stateKind);
         var mappedValue = valueMapFunc(stateValue);
         return FromStates(_stateByKinds.SetItem(stateKind, stateKind.CreateState(mappedValue)).Values);
     }
-    
+
     public StateMap SwapStateKinds(IEnumerable<KeyValuePair<IStateKind, IStateKind>> stateKindPairs)
     {
         var stateKindDictionary = stateKindPairs.AsReadOnlyDictionary();
         if (stateKindDictionary.Count == 0)
             return this;
-        
+
         var newStates = new IState[_states.Length];
         for (var i = 0; i < _states.Length; i++)
         {
@@ -108,9 +110,10 @@ public sealed class StateMap
                 ? newStateKind.CreateState(state.Value)
                 : state;
         }
+
         return FromStates(newStates);
     }
-    
+
     public StateMap MergeWith(StateMap other)
     {
         if (other.IsDefault)

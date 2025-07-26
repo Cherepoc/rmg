@@ -4,16 +4,6 @@ namespace Rmg.Core.Probabilities;
 
 public sealed class DyadicRankThresholdPattern
 {
-    public int GenerationSeed { get; }
-
-    public double Intensity { get; }
-
-    public DyadicTimelineDescriptor Descriptor { get; }
-
-    public EventTimeline<ProbabilityThreshold<int>> ProbabilityThresholdTimeline { get; }
-
-    public EventTimeline<int> OutcomeRankTimeline { get; }
-
     private DyadicRankThresholdPattern(
         int generationSeed,
         double intensity,
@@ -29,10 +19,20 @@ public sealed class DyadicRankThresholdPattern
         OutcomeRankTimeline = outcomeRankTimeline;
     }
 
+    public int GenerationSeed { get; }
+
+    public double Intensity { get; }
+
+    public DyadicTimelineDescriptor Descriptor { get; }
+
+    public EventTimeline<ProbabilityThreshold<int>> ProbabilityThresholdTimeline { get; }
+
+    public EventTimeline<int> OutcomeRankTimeline { get; }
+
     public DyadicRankThresholdPattern WithIntensity(IGenerationContext generationContext, double intensity)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(intensity);
-        
+
         var outcomeRankTimeline = GenerateOutcomeRankTimeline(
             generationContext,
             GenerationSeed,

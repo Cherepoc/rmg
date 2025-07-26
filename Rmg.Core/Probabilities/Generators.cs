@@ -54,6 +54,7 @@ public static class Generators
                 rankedItemsBuilder.Add(-absRank);
             rankedRanksBuilder.Add(rankedItemsBuilder.ToImmutable());
         }
+
         var rankedRanks = rankedRanksBuilder.ToImmutable();
         var generateWeightedAbsRankIndex = WeightedIndex(absRanks.WeightUsing(weightFunc));
         return context =>
@@ -93,10 +94,10 @@ public static class Generators
     }
 
     /// <summary>
-    /// Creates a generator that returns a dyadic multiplier.
-    /// The multiplier is centered around 1.0, with a range depending on the maxRank.
-    /// with maxRank = 1, the multiplier can be from 0.5 to 2.0
-    /// with maxRank = 2, the multiplier can be from 0.25 to 4.0, etc.
+    ///     Creates a generator that returns a dyadic multiplier.
+    ///     The multiplier is centered around 1.0, with a range depending on the maxRank.
+    ///     with maxRank = 1, the multiplier can be from 0.5 to 2.0
+    ///     with maxRank = 2, the multiplier can be from 0.25 to 4.0, etc.
     /// </summary>
     public static Func<IGenerationContext, double> DyadicMultiplier(
         Func<int, double> weightFunc,
@@ -220,10 +221,7 @@ public static class Generators
         };
     }
 
-    public static Func<IGenerationContext, ImmutableArray<T>> Sequence<T>(
-        Func<IGenerationContext, T> itemGenerator,
-        int count
-    )
+    public static Func<IGenerationContext, ImmutableArray<T>> Sequence<T>(Func<IGenerationContext, T> itemGenerator, int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
 
@@ -237,6 +235,28 @@ public static class Generators
                 items[i] = itemGenerator(context);
 
             return [..items];
+        };
+    }
+
+    public static Func<IGenerationContext, EventTimeline<T>> SequentialTimeline<T>(
+        Func<IGenerationContext, T> itemGenerator,
+        double itemDuration,
+        int count
+    )
+        where T : notnull
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(count);
+
+        if (count == 0)
+            return _ => EventTimeline.Empty<T>();
+
+        return context =>
+        {
+            var items = new TimelineItem<T>[count];
+            for (var i = 0; i < count; i++)
+                items[i] = itemGenerator(context).ToTimelineItem(i * itemDuration);
+
+            return EventTimeline<T>.Create(count * itemDuration, items);
         };
     }
 

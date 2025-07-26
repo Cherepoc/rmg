@@ -123,7 +123,7 @@ public static class SongGenerator
 
         ImmutableArray<TrackGroup> trackGroups =
         [
-            new([1, 2, 3], trackDefinitionStateMapGenerator(StateMap.Default)),
+            new([1, 2, 3], trackDefinitionStateMapGenerator(StateMap.Default))
         ];
 
         var rhythmPatternGenerator = (StateMap stateMap) =>
@@ -180,44 +180,64 @@ public static class SongGenerator
                 }
             );
 
+        var notePatternChangingStateMapGenerator = (StateMap stateMap) => new StateMapBuilder()
+            .Add(CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalArticulationOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordNoteOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
+            .Add(CompositionStateKinds.IncrementalChordNoteOffset.RandomOffset, notePatternRandomOffsetGenerator)
+            .Add(
+                stateMap.Subset(
+                    [
+                        ..CompositionStateKinds.IncrementalArticulationOffset.GetAll(),
+                        ..CompositionStateKinds.IncrementalChordRootNoteOffset.GetAll(),
+                        ..CompositionStateKinds.IncrementalChordNoteOffset.GetAll()
+                    ]
+                )
+            )
+            .ToStateMapGenerator();
         var notePatternGenerator = (StateMap stateMap) =>
         {
             var rhythmPattern = cachedRhythmPatternGenerator(stateMap);
 
-            var incrementalArticulationOffsetGenerator = stateMap.ToIncrementalGenerator(
+            var seed = stateMap.GetStateValue(CompositionStateKinds.ValueSeed.Value);
+            var changingContext = generationContext.CreateContext(seed);
+            var changingStateTimelineMap = Generators.SequentialTimeline(notePatternChangingStateMapGenerator(stateMap), 1, 4)(changingContext)
+                .ToStateTimelineMap();
+
+            var incrementalArticulationOffsetGenerator = changingStateTimelineMap.ToIncrementalGenerator(
                 CompositionStateKinds.IncrementalArticulationOffset,
                 articulationOffsetGenerator
             );
-            var incrementalChordRootNoteOffsetGenerator = stateMap.ToIncrementalGenerator(
+            var incrementalChordRootNoteOffsetGenerator = changingStateTimelineMap.ToIncrementalGenerator(
                 CompositionStateKinds.IncrementalChordRootNoteOffset,
                 chordRootNoteOffsetGenerator
             );
-            var incrementalChordNoteOffsetGenerator = stateMap.ToIncrementalGenerator(
+            var incrementalChordNoteOffsetGenerator = changingStateTimelineMap.ToIncrementalGenerator(
                 CompositionStateKinds.IncrementalChordNoteOffset,
                 chordNoteOffsetGenerator
             );
-
-            var seed = stateMap.GetStateValue(CompositionStateKinds.ValueSeed.Value);
 
             var chordNoteInScaleOffsets = stateMap
                 .SelectValueFromCollectionByIndex(CompositionStateKinds.ChordNoteInScaleOffsets)
                 .ToKind(StateKinds.ChordNoteInScaleOffsets);
 
-            var stateMapGenerator = new StateMapBuilder()
-                .Add(StateKinds.ArticulationOffset, incrementalArticulationOffsetGenerator)
-                .Add(StateKinds.ChordRootNoteOffset, incrementalChordRootNoteOffsetGenerator)
-                .Add(StateKinds.ChordNoteOffset, incrementalChordNoteOffsetGenerator)
+            var stateMapGenerator = (IGenerationContext innerContext, double position) => new StateMapBuilder()
+                .Add(StateKinds.ArticulationOffset, incrementalArticulationOffsetGenerator(innerContext, position))
+                .Add(StateKinds.ChordRootNoteOffset, incrementalChordRootNoteOffsetGenerator(innerContext, position))
+                .Add(StateKinds.ChordNoteOffset, incrementalChordNoteOffsetGenerator(innerContext, position))
                 .Add(StateKinds.Velocity, velocityGenerator)
                 .Add(StateKinds.QuarterNoteDurationPower, quarterNoteDurationPowerGenerator)
                 .Add(StateKinds.NextNoteDurationFactor, nextNoteDurationFactorGenerator)
-                .Add(StateKinds.ChordNoteOffset, incrementalChordNoteOffsetGenerator)
+                .Add(StateKinds.ChordNoteOffset, incrementalChordNoteOffsetGenerator(innerContext, position))
                 .Add(chordNoteInScaleOffsets)
-                .ToStateMapGenerator();
+                .ToStateMap(innerContext);
 
             return DyadicRankItemPattern<StateMap>.Create(
                 generationContext,
                 rhythmPattern,
-                innerContext => (int valueRank) => stateMapGenerator(innerContext),
+                innerContext => (position, _) => stateMapGenerator(innerContext, position),
                 seed
             );
         };
@@ -250,31 +270,33 @@ public static class SongGenerator
             var trackSeedMapSelector = Generators.ItemSelector(trackSeedMaps);
             return Generators.Sequence(trackSeedMapSelector, 4)(generationContext)
                 .Select(trackSeedMap =>
-                {
-                    var trackNotePatters = trackSeedMap
-                        .Select(p =>
-                        {
-                            var trackNumber = p.Key;
-                            var seedValue = p.Value;
+                    {
+                        var trackNotePatters = trackSeedMap
+                            .Select(p =>
+                                {
+                                    var trackNumber = p.Key;
+                                    var seedValue = p.Value;
 
-                            var trackStateMap = trackStateMaps[trackNumber];
-                            var trackGenerationContext = generationContext.CreateContext(seedValue);
-                            var innerStateMap = new StateMapBuilder()
-                                .Add(noteHigherPatternInnerStateMapGenerator)
-                                .Add(CompositionStateKinds.Rhythm.Seed.Value, seedValue)
-                                .Add(CompositionStateKinds.ValueSeed.Value, seedValue)
-                                .ToStateMap(trackGenerationContext)
-                                .MergeWith(trackStateMap);
-                            var notePattern = notePatternGenerator(innerStateMap);
-                            var innerEventStateTimelineMap = notePattern.GeneratedTimeline
-                                .ToEventStateTimelineMap(innerStateMap.Subset(StateKinds.GetAll()));
-                            return new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
-                                trackNumber,
-                                innerEventStateTimelineMap
+                                    var trackStateMap = trackStateMaps[trackNumber];
+                                    var trackGenerationContext = generationContext.CreateContext(seedValue);
+                                    var innerStateMap = new StateMapBuilder()
+                                        .Add(noteHigherPatternInnerStateMapGenerator)
+                                        .Add(CompositionStateKinds.Rhythm.Seed.Value, seedValue)
+                                        .Add(CompositionStateKinds.ValueSeed.Value, seedValue)
+                                        .ToStateMap(trackGenerationContext)
+                                        .MergeWith(trackStateMap);
+                                    var notePattern = notePatternGenerator(innerStateMap);
+                                    var innerEventStateTimelineMap = notePattern.GeneratedTimeline
+                                        .ToEventStateTimelineMap(innerStateMap.Subset(StateKinds.GetAll()));
+                                    return new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
+                                        trackNumber,
+                                        innerEventStateTimelineMap
+                                    );
+                                }
                             );
-                        });
-                    return TrackEventStateTimelineMap.Create(4, trackNotePatters, StateTimelineMap.Empty);
-                })
+                        return TrackEventStateTimelineMap.Create(4, trackNotePatters, StateTimelineMap.Empty);
+                    }
+                )
                 .Unroll();
         };
 
@@ -289,7 +311,7 @@ public static class SongGenerator
             // we're going to move the probability towards linear the more notes we have
             var maxOffset = Math.Abs(Generators.SplineValue((6 - noteCount) / 6.0)(generationContext)) * 2;
             var noteOffsetRange = maxOffset / noteCount / 2;
-            for (int i = 0; i < noteCount; i++)
+            for (var i = 0; i < noteCount; i++)
             {
                 var offset = noteInChordOffsetGenerator(generationContext) * noteOffsetRange;
                 var chordNoteOffset = maxOffset * (i + 1) / noteCount + offset;
@@ -314,11 +336,12 @@ public static class SongGenerator
             var seedSelector = Generators.ItemSelector(seeds);
             return Generators.Sequence(seedSelector, 4)(generationContext)
                 .Select((seedValue, index) =>
-                {
-                    var innerGenerationContext = generationContext.CreateContext(seedValue);
-                    return commonStateHigherPatternStateMapGenerator(innerGenerationContext)
-                        .ToTimelineItem(index * 4);
-                })
+                    {
+                        var innerGenerationContext = generationContext.CreateContext(seedValue);
+                        return commonStateHigherPatternStateMapGenerator(innerGenerationContext)
+                            .ToTimelineItem(index * 4);
+                    }
+                )
                 .ToStateTimelineMap(16);
         };
 
@@ -440,8 +463,11 @@ public static class SongGenerator
             .Unroll()
             .MergeStateMap(commonStateMap);
 
-        return new Song(songTrackNoteTimelineMap.Duration, trackDefinitions.ToImmutableSortedDictionary(),
-            songTrackNoteTimelineMap);
+        return new Song(
+            songTrackNoteTimelineMap.Duration,
+            trackDefinitions.ToImmutableSortedDictionary(),
+            songTrackNoteTimelineMap
+        );
     }
 
     private static State<ImmutableArray<T>> SelectValueFromCollectionByIndex<T>(
@@ -456,21 +482,19 @@ public static class SongGenerator
         return stateKindGroup.Value.CreateState(value);
     }
 
-    private static Func<IGenerationContext, ImmutableArray<double>> ToIncrementalGenerator(
-        this StateMap stateMap,
+    private static Func<IGenerationContext, double, ImmutableArray<double>> ToIncrementalGenerator(
+        this StateTimelineMap stateTimelineMap,
         CompositionStateKinds.IncrementalStateKinds stateKindGroup,
         Func<IGenerationContext, double> randomValueGenerator
     )
     {
-        var multiplier = stateMap.GetStateValue(stateKindGroup.Multiplier);
-        if (multiplier.IsEqualToByEpsilon(0))
-            return _ => ImmutableArray<double>.Empty;
-
-        var consecutiveOffset = stateMap.GetStateValue(stateKindGroup.ConsecutiveOffset) * multiplier;
-        var randomOffset = stateMap.GetStateValue(stateKindGroup.RandomOffset) * multiplier;
         var currentValue = 0.0;
-        return innerContext =>
+        return (innerContext, position) =>
         {
+            var stateMap = stateTimelineMap.GetEffectiveStateMapAt(position);
+            var multiplier = stateMap.GetStateValue(stateKindGroup.Multiplier);
+            var consecutiveOffset = stateMap.GetStateValue(stateKindGroup.ConsecutiveOffset) * multiplier;
+            var randomOffset = stateMap.GetStateValue(stateKindGroup.RandomOffset) * multiplier;
             var randomValue = randomValueGenerator(innerContext);
             var value = currentValue + randomValue * randomOffset;
             currentValue += consecutiveOffset;

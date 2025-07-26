@@ -3,32 +3,33 @@ using System.Diagnostics;
 namespace Rmg.Core.Events;
 
 [DebuggerDisplay("[State {Kind.Name}: {Value}]")]
-public readonly struct State<T> : IState, IEquatable<State<T>> where T : notnull
+public readonly struct State<T> : IState, IEquatable<State<T>>
+    where T : notnull
 {
     public StateKind<T> Kind { get; }
-    
+
     public T Value { get; }
 
     private readonly object _objectValue;
 
     public bool IsDefault => Kind.CheckValueIsDefault(Value);
-    
+
     public State(StateKind<T> kind, T value)
     {
         Kind = kind;
         Value = value;
         _objectValue = Value;
     }
-    
+
     IStateKind IState.Kind => Kind;
 
     object IState.Value => _objectValue;
-    
+
     public State<T> Map(Func<T, T> mapFunc)
     {
         return new State<T>(Kind, mapFunc(Value));
     }
-    
+
     public State<T> ToKind(StateKind<T> kind)
     {
         return new State<T>(kind, Value);
@@ -82,9 +83,9 @@ public interface IState
 {
     public IStateKind Kind { get; }
 
-    public IState ToKind(IStateKind kind);
-
     public object Value { get; }
-    
+
     public bool IsDefault { get; }
+
+    public IState ToKind(IStateKind kind);
 }

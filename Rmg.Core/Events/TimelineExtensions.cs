@@ -64,7 +64,8 @@ public static class TimelineExtensions
 
         return timeline.MapValues((position, stateMap) => stateTimelineMap
             .GetEffectiveStateMapAt(position)
-            .MergeWith(stateMap));
+            .MergeWith(stateMap)
+        );
     }
 
     public static EventTimeline<StateMap> AbsorbStateMap(

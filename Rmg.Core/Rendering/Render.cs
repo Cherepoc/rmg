@@ -29,7 +29,7 @@ public static class Render
                 .MergeStateMap(track.StateMap)
                 .MergeStateTimelineMap(commonStateTimelineMap)
                 .ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
-            
+
             if (track is PitchInstrumentTrack pitchInstrumentTrack)
             {
                 var renderedTrack = RenderPitchInstrumentTrack(pitchInstrumentTrack, combinedEventStateTimelineMap);
@@ -72,7 +72,7 @@ public static class Render
                     maxVelocity = renderedNoteVelocity;
             }
         }
-        
+
         var velocityRange = maxVelocity - minVelocity;
 
         var result = ImmutableArray.CreateBuilder<RenderedTrack>(renderedTracks.Count);
@@ -87,6 +87,7 @@ public static class Render
             );
             result.Add(fixedVelocityTrack);
         }
+
         return result.ToImmutable();
     }
 
@@ -120,7 +121,7 @@ public static class Render
             var articulationOffset = stateMap.GetStateValue(StateKinds.ArticulationOffset);
             var noteVelocity = stateMap.GetStateValue(StateKinds.Velocity);
             var noteDuration = stateMap.GetStateValue(StateKinds.QuarterNoteDurationPower);
-            
+
             var articulationIndex = articulationOffset.ToIndex(track.ArticulationCodes.Length);
             var articulationCode = track.ArticulationCodes[articulationIndex];
             var renderedNote = new RenderedNote(articulationCode, noteVelocity, noteDuration);
@@ -147,7 +148,7 @@ public static class Render
         // generate it along with the root note but in a separate manner
         var chordRootNoteIndex = stateMap.GetStateValue(StateKinds.ChordRootNoteOffset)
             .ToIndexOverLength(scaleOffsets.Length);
-        
+
         // chord offsets are chosen from effective scale offsets
         var chordNoteInScaleIndexes = stateMap.GetStateValue(StateKinds.ChordNoteInScaleOffsets)
             .Select(x => x.ToIndexOverLength(scaleOffsets.Length))
@@ -155,10 +156,10 @@ public static class Render
             .Distinct()
             .Order()
             .ToImmutableArray();
-        
+
         // next we decide if we're going to choose a note from the chord
         var chordNoteOffset = stateMap.GetStateValue(StateKinds.ChordNoteOffset);
-        ImmutableArray<int> filteredChordNoteInScaleIndexes = chordNoteInScaleIndexes;
+        var filteredChordNoteInScaleIndexes = chordNoteInScaleIndexes;
         if (!chordNoteOffset.IsEmpty && !chordNoteInScaleIndexes.IsEmpty)
         {
             var (selectedOctave, selectedIndex) = chordNoteOffset
@@ -242,7 +243,7 @@ public static class Render
     {
         if (absoluteMinOctave is < 0 or > 10)
             throw new ArgumentOutOfRangeException(nameof(absoluteMinOctave), "Min octave must be between 0 and 10");
-        
+
         var absoluteMaxOctave = absoluteMinOctave + octaveCount - 1;
         if (octaveCount < 1 || absoluteMaxOctave > 10)
             throw new ArgumentOutOfRangeException(

@@ -3,10 +3,10 @@ namespace Rmg.Core.Probabilities;
 public sealed class CachedGenerator<TArg, T>
     where TArg : notnull
 {
-    private readonly Func<TArg, T> _innerGenerator;
     private readonly Dictionary<TArg, T> _dictionary = new();
     private readonly Func<TArg, T> _generateDelegate;
-    
+    private readonly Func<TArg, T> _innerGenerator;
+
     public CachedGenerator(Func<TArg, T> innerGenerator)
     {
         _innerGenerator = innerGenerator;
@@ -17,14 +17,16 @@ public sealed class CachedGenerator<TArg, T>
     {
         if (_dictionary.TryGetValue(input, out var cachedValue))
             return cachedValue;
-        
+
         var generatedValue = _innerGenerator(input);
         _dictionary[input] = generatedValue;
         return generatedValue;
     }
 
-    public static implicit operator Func<TArg, T>(CachedGenerator<TArg, T> generator) =>
-        generator._generateDelegate;
+    public static implicit operator Func<TArg, T>(CachedGenerator<TArg, T> generator)
+    {
+        return generator._generateDelegate;
+    }
 }
 
 public static class CachedGeneratorExtensions

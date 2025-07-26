@@ -5,34 +5,24 @@ namespace Rmg.Core.Events;
 public sealed class TrackEventStateTimelineMap<T> : ITimelineLike<TrackEventStateTimelineMap<T>>
     where T : notnull
 {
-    public static TrackEventStateTimelineMap<T> Empty { get; } =
-        new(0, ImmutableSortedDictionary<int, EventStateTimelineMap<T>>.Empty, StateTimelineMap.Empty);
-
-    public static TrackEventStateTimelineMap<T> Create(
+    private TrackEventStateTimelineMap(
         double duration,
-        IEnumerable<KeyValuePair<int, EventStateTimelineMap<T>>> timelines,
+        ImmutableSortedDictionary<int, EventStateTimelineMap<T>> timelineMap,
         StateTimelineMap commonStateTimelineMap
     )
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(duration, nameof(duration));
-
-        if (duration == 0)
-            return Empty;
-
-        var timelineDictionary = timelines
-            .Where(x => !x.Value.IsEmpty)
-            .GroupBy(x => x.Key, x => x.Value.Trim(duration))
-            .Select(x => new KeyValuePair<int, EventStateTimelineMap<T>>(x.Key, EventStateTimelineMap<T>.Merge(x)))
-            .Where(x => !x.Value.IsEmpty)
-            .ToImmutableSortedDictionary(x => x.Key, x => x.Value);
-        
-        var trimmedCommonStateTimelineMap = commonStateTimelineMap.Trim(duration);
-        
-        if (timelineDictionary.Count == 0 && trimmedCommonStateTimelineMap.IsEmpty)
-            return Empty;
-
-        return new TrackEventStateTimelineMap<T>(duration, timelineDictionary, trimmedCommonStateTimelineMap);
+        Duration = duration;
+        TrackTimelineMap = timelineMap;
+        CommonStateTimelineMap = commonStateTimelineMap;
+        IsEmpty = TrackTimelineMap.Count == 0 && CommonStateTimelineMap.IsEmpty;
     }
+
+    public ImmutableSortedDictionary<int, EventStateTimelineMap<T>> TrackTimelineMap { get; }
+
+    public StateTimelineMap CommonStateTimelineMap { get; }
+
+    public static TrackEventStateTimelineMap<T> Empty { get; } =
+        new(0, ImmutableSortedDictionary<int, EventStateTimelineMap<T>>.Empty, StateTimelineMap.Empty);
 
     public static TrackEventStateTimelineMap<T> Merge(IEnumerable<TrackEventStateTimelineMap<T>> timelines)
     {
@@ -56,29 +46,74 @@ public sealed class TrackEventStateTimelineMap<T> : ITimelineLike<TrackEventStat
         );
     }
 
-    private TrackEventStateTimelineMap(
-        double duration,
-        ImmutableSortedDictionary<int, EventStateTimelineMap<T>> timelineMap,
-        StateTimelineMap commonStateTimelineMap
-    )
-    {
-        Duration = duration;
-        TrackTimelineMap = timelineMap;
-        CommonStateTimelineMap = commonStateTimelineMap;
-        IsEmpty = TrackTimelineMap.Count == 0 && CommonStateTimelineMap.IsEmpty;
-    }
-
     public double Duration { get; }
 
     public bool IsEmpty { get; }
-    
-    public ImmutableSortedDictionary<int, EventStateTimelineMap<T>> TrackTimelineMap { get; }
-    
-    public StateTimelineMap CommonStateTimelineMap { get; }
 
-    public TrackEventStateTimelineMap<TDest> MapTrackTimelines<TDest>(
-        Func<EventStateTimelineMap<T>, EventStateTimelineMap<TDest>> map
+    public TrackEventStateTimelineMap<T> Shift(double offset)
+    {
+        if (offset == 0)
+            return this;
+
+        var newDuration = Duration + offset;
+        if (newDuration < 0)
+            throw new ArgumentOutOfRangeException(nameof(offset), offset, "The resulting duration cannot be negative.");
+
+        if (newDuration == 0 || IsEmpty)
+            return Empty;
+
+        var timelines = TrackTimelineMap
+            .Select(x => new KeyValuePair<int, EventStateTimelineMap<T>>(x.Key, x.Value.Shift(offset)));
+        var shiftedCommonStateTimelineMap = !CommonStateTimelineMap.IsEmpty
+            ? CommonStateTimelineMap.Shift(offset)
+            : CommonStateTimelineMap;
+        return Create(newDuration, timelines, shiftedCommonStateTimelineMap);
+    }
+
+    public TrackEventStateTimelineMap<T> Trim(double duration)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(duration, nameof(duration));
+
+        if (IsEmpty || duration == 0)
+            return Empty;
+
+        // ReSharper disable once CompareOfFloatsByEqualityOperator
+        if (duration == Duration)
+            return this;
+
+        var timelines = TrackTimelineMap
+            .Select(x => new KeyValuePair<int, EventStateTimelineMap<T>>(x.Key, x.Value.Trim(duration)));
+
+        return Create(duration, timelines, CommonStateTimelineMap.Trim(duration));
+    }
+
+    public static TrackEventStateTimelineMap<T> Create(
+        double duration,
+        IEnumerable<KeyValuePair<int, EventStateTimelineMap<T>>> timelines,
+        StateTimelineMap commonStateTimelineMap
     )
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(duration, nameof(duration));
+
+        if (duration == 0)
+            return Empty;
+
+        var timelineDictionary = timelines
+            .Where(x => !x.Value.IsEmpty)
+            .GroupBy(x => x.Key, x => x.Value.Trim(duration))
+            .Select(x => new KeyValuePair<int, EventStateTimelineMap<T>>(x.Key, EventStateTimelineMap<T>.Merge(x)))
+            .Where(x => !x.Value.IsEmpty)
+            .ToImmutableSortedDictionary(x => x.Key, x => x.Value);
+
+        var trimmedCommonStateTimelineMap = commonStateTimelineMap.Trim(duration);
+
+        if (timelineDictionary.Count == 0 && trimmedCommonStateTimelineMap.IsEmpty)
+            return Empty;
+
+        return new TrackEventStateTimelineMap<T>(duration, timelineDictionary, trimmedCommonStateTimelineMap);
+    }
+
+    public TrackEventStateTimelineMap<TDest> MapTrackTimelines<TDest>(Func<EventStateTimelineMap<T>, EventStateTimelineMap<TDest>> map)
         where TDest : notnull
     {
         if (IsEmpty)
@@ -103,52 +138,16 @@ public sealed class TrackEventStateTimelineMap<T> : ITimelineLike<TrackEventStat
             return this;
 
         var newTimelineMap = TrackTimelineMap.Select(x =>
-            new KeyValuePair<int, EventStateTimelineMap<T>>(trackMap.GetValueOrDefault(x.Key, x.Key), x.Value));
+            new KeyValuePair<int, EventStateTimelineMap<T>>(trackMap.GetValueOrDefault(x.Key, x.Key), x.Value)
+        );
         return Create(Duration, newTimelineMap, CommonStateTimelineMap);
-    }
-
-    public TrackEventStateTimelineMap<T> Shift(double offset)
-    {
-        if (offset == 0)
-            return this;
-
-        var newDuration = Duration + offset;
-        if (newDuration < 0)
-            throw new ArgumentOutOfRangeException(nameof(offset), offset, "The resulting duration cannot be negative.");
-        
-        if (newDuration == 0 || IsEmpty)
-            return Empty;
-
-        var timelines = TrackTimelineMap
-            .Select(x => new KeyValuePair<int, EventStateTimelineMap<T>>(x.Key, x.Value.Shift(offset)));
-        var shiftedCommonStateTimelineMap = !CommonStateTimelineMap.IsEmpty
-            ? CommonStateTimelineMap.Shift(offset)
-            : CommonStateTimelineMap;
-        return Create(newDuration, timelines, shiftedCommonStateTimelineMap);
-    }
-
-    public TrackEventStateTimelineMap<T> Trim(double duration)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(duration, nameof(duration));
-
-        if (IsEmpty || duration == 0)
-            return Empty;
-
-        // ReSharper disable once CompareOfFloatsByEqualityOperator
-        if (duration == Duration)
-            return this;
-        
-        var timelines = TrackTimelineMap
-            .Select(x => new KeyValuePair<int, EventStateTimelineMap<T>>(x.Key, x.Value.Trim(duration)));
-
-        return Create(duration, timelines, CommonStateTimelineMap.Trim(duration));
     }
 
     public TrackEventStateTimelineMap<T> MergeStateMap(StateMap stateMap)
     {
         if (stateMap.IsDefault)
             return this;
-        
+
         if (IsEmpty)
             return Empty;
 
@@ -168,7 +167,8 @@ public static class TrackEventStateTimelineMap
         double duration,
         IEnumerable<KeyValuePair<int, EventStateTimelineMap<T>>> timelines,
         StateTimelineMap commonStateTimelineMap
-    ) where T : notnull
+    )
+        where T : notnull
     {
         return TrackEventStateTimelineMap<T>.Create(duration, timelines, commonStateTimelineMap);
     }

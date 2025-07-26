@@ -5,14 +5,14 @@ namespace Rmg.Core;
 public static class MathExtensions
 {
     public const double Epsilon = 1e-3;
-    
+
     public static T Mod<T>(this T divident, T divisor)
         where T : INumber<T>
     {
         var remainder = divident % divisor;
         return remainder < T.Zero ? remainder + divisor : remainder;
     }
-    
+
     public static T TruncateMin<T>(this T value, T min)
         where T : INumber<T>
     {
@@ -35,13 +35,13 @@ public static class MathExtensions
     public static int BounceInBounds(this int value, int min, int max)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(min, max);
-        
+
         if (value >= min && value <= max)
             return value;
 
         if (min == max)
             return min;
-        
+
         var range = max - min + 1;
         var normalizedValue = value - min;
         var valueInPeriod = normalizedValue.Mod(range);
@@ -51,17 +51,17 @@ public static class MathExtensions
             ? max - valueInPeriod
             : min + valueInPeriod;
     }
-    
+
     public static double BounceInBounds(this double value, double min, double max)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(min, max);
-        
+
         if (value >= min && value <= max)
             return value;
 
         if (min.IsEqualToByEpsilon(max))
             return min;
-        
+
         var range = max - min;
         var normalizedValue = value - min;
         var valueInPeriod = normalizedValue.Mod(range);
@@ -71,12 +71,12 @@ public static class MathExtensions
             ? max - valueInPeriod
             : min + valueInPeriod;
     }
-    
+
     public static double Pow2(this double value)
     {
         return Math.Pow(2, value);
     }
-    
+
     public static double WeightedAverage(this double value, double weight, double otherValue)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(weight);

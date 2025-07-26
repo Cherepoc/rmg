@@ -4,10 +4,65 @@ namespace Rmg.Core.Events;
 
 public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
 {
+    private readonly ImmutableDictionary<IStateKind, IStateTimeline> _stateTimelineDictionary;
+
+    private StateTimelineMap(
+        double duration,
+        ImmutableDictionary<IStateKind, IStateTimeline> stateTimelineDictionary,
+        EventTimeline<StateMap> stateMapEventTimeline
+    )
+    {
+        Duration = duration;
+        _stateTimelineDictionary = stateTimelineDictionary;
+        StateMapEventTimeline = stateMapEventTimeline;
+
+        StateTimelines = [..stateTimelineDictionary.Values.OrderBy(x => x.StateKind.Name)];
+    }
+
+    public ImmutableArray<IStateTimeline> StateTimelines { get; }
+
+    public EventTimeline<StateMap> StateMapEventTimeline { get; }
+
     public static StateTimelineMap Empty { get; } =
         new(0, ImmutableDictionary<IStateKind, IStateTimeline>.Empty, EventTimeline<StateMap>.Empty);
 
-    private readonly ImmutableDictionary<IStateKind, IStateTimeline> _stateTimelineDictionary;
+    public static StateTimelineMap Merge(IEnumerable<StateTimelineMap> timelines)
+    {
+        var timelineArray = timelines.AsImmutableArray();
+        if (timelineArray.IsEmpty)
+            return Empty;
+
+        var duration = timelineArray.Max(x => x.Duration);
+        return Create(duration, timelineArray.SelectMany(x => x.StateTimelines));
+    }
+
+    public double Duration { get; }
+
+    public bool IsEmpty => StateTimelines.IsEmpty;
+
+    public StateTimelineMap Trim(double duration)
+    {
+        // ReSharper disable once CompareOfFloatsByEqualityOperator
+        if (Duration == duration)
+            return this;
+
+        if (duration == 0)
+            return Empty;
+
+        return Create(duration, StateTimelines);
+    }
+
+    public StateTimelineMap Shift(double offset)
+    {
+        if (offset == 0)
+            return this;
+
+        var newDuration = Duration + offset;
+        if (newDuration < 0)
+            throw new ArgumentOutOfRangeException(nameof(offset), "Offset cannot be greater then the duration.");
+
+        return Create(newDuration, StateTimelines.Select(x => x.Shift(offset)));
+    }
 
     public static StateTimelineMap Create(double duration, IEnumerable<IStateTimeline> stateTimelines)
     {
@@ -27,37 +82,6 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
         return new StateTimelineMap(duration, stateTimelineDictionary, stateMapEventTimeline);
     }
 
-    public static StateTimelineMap Merge(IEnumerable<StateTimelineMap> timelines)
-    {
-        var timelineArray = timelines.AsImmutableArray();
-        if (timelineArray.IsEmpty)
-            return Empty;
-        
-        var duration = timelineArray.Max(x => x.Duration);
-        return Create(duration, timelineArray.SelectMany(x => x.StateTimelines));
-    }
-
-    private StateTimelineMap(
-        double duration,
-        ImmutableDictionary<IStateKind, IStateTimeline> stateTimelineDictionary,
-        EventTimeline<StateMap> stateMapEventTimeline
-    )
-    {
-        Duration = duration;
-        _stateTimelineDictionary = stateTimelineDictionary;
-        StateMapEventTimeline = stateMapEventTimeline;
-
-        StateTimelines = [..stateTimelineDictionary.Values.OrderBy(x => x.StateKind.Name)];
-    }
-
-    public double Duration { get; }
-
-    public bool IsEmpty => StateTimelines.IsEmpty;
-
-    public ImmutableArray<IStateTimeline> StateTimelines { get; }
-
-    public EventTimeline<StateMap> StateMapEventTimeline { get; }
-
     public StateTimeline<T> GetStateTimeline<T>(StateKind<T> stateKind)
         where T : notnull
     {
@@ -65,50 +89,26 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
             ? (StateTimeline<T>)stateTimeline
             : stateKind.EmptyTimeline;
     }
-    
+
     public StateMap GetEffectiveStateMapAt(double position)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(position);
-        
+
         if (IsEmpty || position >= Duration || position < StateMapEventTimeline[0].Position)
             return StateMap.Default;
 
         var index = StateMapEventTimeline.ToImmutableArray().GetIndexAtFloor(position);
         return StateMapEventTimeline[index].Value;
     }
-    
-    public StateTimelineMap Trim(double duration)
-    {
-        // ReSharper disable once CompareOfFloatsByEqualityOperator
-        if (Duration == duration)
-            return this;
-        
-        if (duration == 0)
-            return Empty;
-        
-        return Create(duration, StateTimelines);
-    }
 
-    public StateTimelineMap Shift(double offset)
-    {
-        if (offset == 0)
-            return this;
-        
-        var newDuration = Duration + offset;
-        if (newDuration < 0)
-            throw new ArgumentOutOfRangeException(nameof(offset), "Offset cannot be greater then the duration.");
-
-        return Create(newDuration, StateTimelines.Select(x => x.Shift(offset)));
-    }
-    
     public StateTimelineMap MergeStateMap(StateMap stateMap)
     {
         if (IsEmpty)
             return Empty;
-        
+
         if (stateMap.IsDefault)
             return this;
-        
+
         var otherStateTimelineMap = stateMap.ToStateTimelineMap(Duration);
         return Merge([this, otherStateTimelineMap]);
     }

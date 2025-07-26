@@ -51,7 +51,10 @@ public static class Midi
         return result;
     }
 
-    private static uint AbsoluteDelta(double position) => (uint)Math.Round(position * TicksPerQuarterNote);
+    private static uint AbsoluteDelta(double position)
+    {
+        return (uint)Math.Round(position * TicksPerQuarterNote);
+    }
 
     private static byte ChannelMidiEventHeader(byte channel, byte eventType)
     {
@@ -87,7 +90,7 @@ public static class Midi
             numerator,
             (byte)Math.Log2(denominator),
             0x18,
-            0x08,
+            0x08
         ];
     }
 
@@ -109,7 +112,7 @@ public static class Midi
         [
             0xff,
             0x2f,
-            0x00,
+            0x00
         ];
     }
 
@@ -137,7 +140,8 @@ public static class Midi
 
     private static IEnumerable<MidiEvent> ToEvents(
         this TimelineItem<RenderedNote> renderedNoteTimelineItem,
-        byte channel, uint durationDelta
+        byte channel,
+        uint durationDelta
     )
     {
         var (position, renderedNote) = (renderedNoteTimelineItem.Position, renderedNoteTimelineItem.Value);
@@ -198,9 +202,7 @@ public static class Midi
         WriteTrack(events, durationDelta, stream);
     }
 
-    private static IEnumerable<(byte channel, RenderedTrack track)> ToIndexedTracks(
-        this ImmutableArray<RenderedTrack> tracks
-    )
+    private static IEnumerable<(byte channel, RenderedTrack track)> ToIndexedTracks(this ImmutableArray<RenderedTrack> tracks)
     {
         var percussionTracks = tracks
             .Where(x => x.IsPercussionInstrument)
@@ -266,5 +268,5 @@ public static class Midi
             foreach (var t in Data)
                 yield return t;
         }
-    };
+    }
 }

@@ -5,12 +5,6 @@ namespace Rmg.Core.Songs;
 
 public sealed class Song
 {
-    public double Duration { get; }
-
-    public ImmutableSortedDictionary<int, IInstrumentTrack> TrackDefinitions { get; }
-
-    public TrackEventStateTimelineMap<StateMap> TrackEventStateTimelineMap { get; }
-
     public Song(
         double duration,
         ImmutableSortedDictionary<int, IInstrumentTrack> trackDefinitions,
@@ -23,4 +17,10 @@ public sealed class Song
         TrackDefinitions = trackDefinitions;
         TrackEventStateTimelineMap = trackEventStateTimelineMap;
     }
+
+    public double Duration { get; }
+
+    public ImmutableSortedDictionary<int, IInstrumentTrack> TrackDefinitions { get; }
+
+    public TrackEventStateTimelineMap<StateMap> TrackEventStateTimelineMap { get; }
 }
