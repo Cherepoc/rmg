@@ -15,7 +15,7 @@ public static class SongGenerator
 
     public static Song GenerateSong()
     {
-        var generationContext = new GenerationContext();
+        var generationContext =  new GenerationContext();
 
         // track definitions
 
