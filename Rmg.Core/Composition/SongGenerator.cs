@@ -15,7 +15,15 @@ public static class SongGenerator
 
     public static Song GenerateSong()
     {
-        var generationContext =  new GenerationContext();
+        return GenerateSong(Random.Shared.Next());
+    }
+
+    /// <summary>
+    ///     Generates a song. The same seed always results in the same song.
+    /// </summary>
+    public static Song GenerateSong(int seed)
+    {
+        var generationContext = new GenerationContext(seed);
 
         // track definitions
 
