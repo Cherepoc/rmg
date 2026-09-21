@@ -2,9 +2,14 @@
 
 Random Music Generator: generates random, reproducible MIDI songs.
 
-Every song is built from a seed: a structure of sections (intro, verse, chorus, ...), three percussion
-tracks (kick, snare, hi-hat) and three pitched tracks (chords, melody, bass), each with its own rhythm
-and note patterns. The same seed always gives the same song.
+Every song is built from a seed: 4-8 parts, each a sequence of 1-4 sections ordered by a brush (alternation,
+ping-pong or random) over up to 3 distinct sections, which parts can share. Every section is played twice.
+Each section has a percussion kit and three pitched tracks (chords, melody, bass), each with its own rhythm
+and note patterns. A song has its own drums: one main snare (acoustic, electric, clap or sidestick, never mixed; a sidestick
+can also join an acoustic or electric snare), and up to four percussion instruments, or none. The kit of a
+section is picked from them by drum groups (kick, snare, timekeepers, toms, accents, percussion): kick and snare
+always play, plus one or two other groups with only some of their drums.
+The same seed always gives the same song.
 
 ## Requirements
 

@@ -1,71 +1,37 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
+using Rmg.Core.Events;
 
 namespace Rmg.Core.Composition;
 
+[DebuggerDisplay("PercussionInstrumentDefinition {Name}")]
 public sealed class PercussionInstrumentDefinition
 {
-    public PercussionInstrumentDefinition(ImmutableArray<int> articulationCodes, double weight)
+    public PercussionInstrumentDefinition(
+        string name,
+        ImmutableArray<int> articulationCodes,
+        double weight,
+        Func<StateMapBuilder, StateMapBuilder>? configureStateMap = null
+    )
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
         if (articulationCodes.Length == 0)
             throw new ArgumentException("Articulation codes cannot be empty.", nameof(articulationCodes));
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(weight);
 
+        Name = name;
         ArticulationCodes = articulationCodes;
         Weight = weight;
+        ConfigureStateMap = configureStateMap ?? (builder => builder);
     }
+
+    public string Name { get; }
 
     public ImmutableArray<int> ArticulationCodes { get; }
 
+    /// <summary>How likely the drum is to be chosen among the other drums of its group.</summary>
     public double Weight { get; }
 
-    public static ImmutableArray<PercussionInstrumentDefinition> Definitions { get; } =
-    [
-        // kick
-        new([35, 36], 1.0),
-        // snare cross stick
-        new([37], 0.2),
-        // acoustic snare
-        new([38], 0.2),
-        // electric snare
-        new([40], 1.0),
-        // hi-hat
-        new([42, 44, 46], 1.0),
-        // tom
-        new([41, 43, 45, 47, 48, 50], 0.2),
-        // ride
-        new([51, 53, 59], 0.2),
-        // cymbal
-        new([49, 52, 55, 57], 0.2),
-        // clap
-        new([39], 0.2),
-        // tambourine
-        new([54], 0.1),
-        // cowbell
-        new([56], 0.1),
-        // vibraslap
-        new([58], 0.1),
-        // bongo
-        new([60, 61], 0.1),
-        // conga
-        new([62, 63, 64], 0.1),
-        // timbale
-        new([65, 66], 0.1),
-        // agogo
-        new([67, 68], 0.1),
-        // cabasa
-        new([69], 0.1),
-        // maracas
-        new([70], 0.1),
-        // whistle
-        new([71, 72], 0.1),
-        // guiro
-        new([73, 74], 0.1),
-        // claves
-        new([75], 0.1),
-        // wood block
-        new([76, 77], 0.1),
-        // cuica
-        new([78, 79], 0.1),
-        // triangle
-        new([80, 81], 0.1)
-    ];
+    /// <summary>Adds drum-specific fixed state to a track state map, on top of the group state.</summary>
+    public Func<StateMapBuilder, StateMapBuilder> ConfigureStateMap { get; }
 }

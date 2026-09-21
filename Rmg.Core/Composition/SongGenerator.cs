@@ -73,29 +73,6 @@ public static class SongGenerator
 
         var trackDefinitions = new Dictionary<int, IInstrumentTrack>
         {
-            // kick
-            [1] = new PercussionInstrumentTrack(
-                trackDefinitionStateMapGenerator(StateMap.Default),
-                PercussionInstrumentDefinition.Definitions[0].ArticulationCodes
-            ),
-            // snare
-            [2] = new PercussionInstrumentTrack(
-                trackDefinitionStateMapGenerator(
-                    new StateMapBuilder()
-                        .Add(CompositionStateKinds.Rhythm.Phase.Rank, 1)
-                        .ToStateMap(generationContext)
-                ),
-                PercussionInstrumentDefinition.Definitions[2].ArticulationCodes
-            ),
-            // hi-hat
-            [3] = new PercussionInstrumentTrack(
-                trackDefinitionStateMapGenerator(
-                    new StateMapBuilder()
-                        .Add(CompositionStateKinds.Rhythm.Period.Power, -1)
-                        .ToStateMap(generationContext)
-                ),
-                PercussionInstrumentDefinition.Definitions[4].ArticulationCodes
-            ),
             // chords instrument
             [4] = new PitchInstrumentTrack(
                 trackDefinitionStateMapGenerator(
@@ -129,9 +106,28 @@ public static class SongGenerator
             )
         };
 
+        // the song has its own drums, and the drums picked by the section kit play in a section
+        var songDrums = DrumKitGenerator.SelectSongDrums(generationContext);
+        foreach (var drumGroup in DrumGroups.All)
+        {
+            foreach (var drum in drumGroup.Drums.Where(songDrums.Contains))
+            {
+                var drumStateMap = drum.ConfigureStateMap(drumGroup.ConfigureStateMap(new StateMapBuilder()))
+                    .ToStateMap(generationContext);
+                trackDefinitions[DrumGroups.GetTrackNumber(drum)] = new PercussionInstrumentTrack(
+                    trackDefinitionStateMapGenerator(drumStateMap),
+                    drum.ArticulationCodes
+                );
+            }
+        }
+
+        // the drums share the rhythm-related state
         ImmutableArray<TrackGroup> trackGroups =
         [
-            new([1, 2, 3], trackDefinitionStateMapGenerator(StateMap.Default))
+            new(
+                [..songDrums.Select(DrumGroups.GetTrackNumber)],
+                trackDefinitionStateMapGenerator(StateMap.Default)
+            )
         ];
 
         var rhythmPatternGenerator = (StateMap stateMap) =>
@@ -416,6 +412,9 @@ public static class SongGenerator
         var songSectionGenerator = (int sectionId) =>
         {
             var sectionStateMap = sectionStateMapGenerator(generationContext).MergeWith(songStateMap);
+            var activeDrumTrackNumbers = DrumKitGenerator.SelectActiveDrums(generationContext, songDrums)
+                .Select(DrumGroups.GetTrackNumber)
+                .ToImmutableHashSet();
 
             var trackTimelineMaps = new List<TrackEventStateTimelineMap<StateMap>>();
 
@@ -425,13 +424,16 @@ public static class SongGenerator
                     .MergeWith(group.StateMap)
                     .MergeWith(sectionStateMap);
                 var trackStateMaps = new Dictionary<int, StateMap>();
-                foreach (var trackNumber in group.TrackNumbers)
+                foreach (var trackNumber in group.TrackNumbers.Where(activeDrumTrackNumbers.Contains))
                 {
                     var trackDefinition = trackDefinitions[trackNumber];
                     var combinedStateMap = trackDefinitionStateMapGenerator(trackDefinition.StateMap)
                         .MergeWith(groupStateMap);
                     trackStateMaps[trackNumber] = combinedStateMap;
                 }
+
+                if (trackStateMaps.Count == 0)
+                    continue;
 
                 var innerPattern = noteHigherPatternGenerator(trackStateMaps.ToImmutableDictionary());
                 trackTimelineMaps.Add(innerPattern);
