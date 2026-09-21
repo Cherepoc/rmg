@@ -413,7 +413,7 @@ public static class SongGenerator
         var nonGroupedTrackNumbers = trackDefinitions.Keys
             .Except(trackGroups.SelectMany(x => x.TrackNumbers))
             .ToImmutableSortedSet();
-        var songSectionGenerator = (string sectionName) =>
+        var songSectionGenerator = (int sectionId) =>
         {
             var sectionStateMap = sectionStateMapGenerator(generationContext).MergeWith(songStateMap);
 
@@ -464,9 +464,9 @@ public static class SongGenerator
             .Add(StateKinds.NextNoteDurationFactor, nextNoteDurationFactorGenerator)
             .ToStateMap(generationContext);
 
-        var songSectionCount = Generators.Int(6, 10)(generationContext);
-        var songTrackNoteTimelineMap = SongSectionArchetypes.GenerateSongStructure(generationContext, songSectionCount)
-            .Select(x => cachedSongSectionGenerator(x.Name))
+        var songTrackNoteTimelineMap = SongStructureGenerator.Generate(generationContext)
+            .SelectMany(part => part.SectionIds)
+            .Select(x => cachedSongSectionGenerator(x))
             .Unroll()
             .MergeStateMap(commonStateMap);
 
