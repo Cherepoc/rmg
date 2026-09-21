@@ -230,7 +230,6 @@ public static class SongGenerator
                 .Add(StateKinds.Velocity, velocityGenerator)
                 .Add(StateKinds.QuarterNoteDurationPower, quarterNoteDurationPowerGenerator)
                 .Add(StateKinds.NextNoteDurationFactor, nextNoteDurationFactorGenerator)
-                .Add(StateKinds.ChordNoteOffset, incrementalChordNoteOffsetGenerator(innerContext, position))
                 .Add(chordNoteInScaleOffsets)
                 .ToStateMap(innerContext);
 
@@ -309,11 +308,11 @@ public static class SongGenerator
             var chordOffsetCollectionBuilder = ImmutableArray.CreateBuilder<double>(noteCount);
 
             // we're going to move the probability towards linear the more notes we have
-            var maxOffset = Math.Abs(Generators.SplineValue((6 - noteCount) / 6.0)(generationContext)) * 2;
+            var maxOffset = Math.Abs(Generators.SplineValue((6 - noteCount) / 6.0)(innerContext)) * 2;
             var noteOffsetRange = maxOffset / noteCount / 2;
             for (var i = 0; i < noteCount; i++)
             {
-                var offset = noteInChordOffsetGenerator(generationContext) * noteOffsetRange;
+                var offset = noteInChordOffsetGenerator(innerContext) * noteOffsetRange;
                 var chordNoteOffset = maxOffset * (i + 1) / noteCount + offset;
                 chordOffsetCollectionBuilder.Add(chordNoteOffset);
             }

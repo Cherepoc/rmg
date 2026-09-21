@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Immutable;
 using System.Diagnostics;
 
 namespace Rmg.Core.Events;
@@ -12,17 +13,28 @@ public sealed class StateKind<T> : IStateKind
 
     private readonly object _defaultValueObject;
     private readonly Func<T, T, bool> _equalityFunc;
+    private readonly Func<T, int> _hashFunc;
 
-    public StateKind(string name, T defaultValue, Func<T, T, bool> equalityFunc, Func<IEnumerable<T>, T> aggregateFunc)
+    public StateKind(
+        string name,
+        T defaultValue,
+        Func<T, T, bool> equalityFunc,
+        Func<IEnumerable<T>, T> aggregateFunc,
+        Func<T, int>? hashFunc = null
+    )
     {
         Name = name;
         DefaultValue = defaultValue;
         DefaultState = new State<T>(this, defaultValue);
         _equalityFunc = equalityFunc;
         _aggregateFunc = aggregateFunc;
+        _hashFunc = hashFunc ?? (value => EqualityComparer<T>.Default.GetHashCode(value));
 
         _defaultValueObject = DefaultValue;
         _defaultStateObject = DefaultState;
+
+        // each kind gets its own empty timeline so that it reports the kind's default value, not default(T)
+        EmptyTimeline = new StateTimeline<T>(0, this, []);
     }
 
     public static StateKind<T> Empty { get; } = CreateEmpty();
@@ -31,7 +43,7 @@ public sealed class StateKind<T> : IStateKind
 
     public State<T> DefaultState { get; }
 
-    public StateTimeline<T> EmptyTimeline => StateTimeline<T>.Empty;
+    public StateTimeline<T> EmptyTimeline { get; }
 
     public string Name { get; }
 
@@ -90,10 +102,11 @@ public sealed class StateKind<T> : IStateKind
     {
         var type = typeof(T);
         T defaultValue;
-        if (type.IsAssignableTo(typeof(IEnumerable<>)))
+        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ImmutableArray<>))
         {
-            var elementType = type.GetGenericArguments()[0];
-            defaultValue = (T)(object)Array.CreateInstance(elementType, 0);
+            // default(ImmutableArray<>) is an uninitialized array that throws on access
+            var emptyField = type.GetField(nameof(ImmutableArray<int>.Empty))!;
+            defaultValue = (T)emptyField.GetValue(null)!;
         }
         else
         {
@@ -116,6 +129,11 @@ public sealed class StateKind<T> : IStateKind
     public bool CheckValuesEqual(T value1, T value2)
     {
         return _equalityFunc(value1, value2);
+    }
+
+    public int GetValueHashCode(T value)
+    {
+        return _hashFunc(value);
     }
 
     public bool CheckValueIsDefault(T value)

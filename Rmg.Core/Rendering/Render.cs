@@ -74,12 +74,14 @@ public static class Render
         }
 
         var velocityRange = maxVelocity - minVelocity;
+        // with no velocity spread there is nothing to scale - use the middle of the target range
+        var hasVelocitySpread = velocityRange > 0;
 
         var result = ImmutableArray.CreateBuilder<RenderedTrack>(renderedTracks.Count);
         foreach (var renderedTrack in renderedTracks)
         {
             var fixedVelocityTimeline = renderedTrack.NoteTimeline
-                .MapValues(x => x with { Velocity = (x.Velocity - minVelocity) / velocityRange / 2 + 0.5 });
+                .MapValues(x => x with { Velocity = hasVelocitySpread ? (x.Velocity - minVelocity) / velocityRange / 2 + 0.5 : 0.75 });
             var fixedVelocityTrack = new RenderedTrack(
                 renderedTrack.IsPercussionInstrument,
                 renderedTrack.PitchInstrumentCode,
@@ -166,7 +168,7 @@ public static class Render
                 .ToIndexOverLength(chordNoteInScaleIndexes.Length)
                 .ToPeriodRemainder(chordNoteInScaleIndexes.Length);
             var chordNoteInScaleIndex = chordNoteInScaleIndexes[selectedIndex];
-            filteredChordNoteInScaleIndexes = [chordNoteInScaleIndex + selectedOctave * chordNoteInScaleIndexes.Length];
+            filteredChordNoteInScaleIndexes = [chordNoteInScaleIndex + selectedOctave * scaleOffsets.Length];
         }
 
         var noteOctaveOffset = stateMap.GetStateValue(StateKinds.OctaveOffset);

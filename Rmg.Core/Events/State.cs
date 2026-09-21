@@ -57,7 +57,7 @@ public readonly struct State<T> : IState, IEquatable<State<T>>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Kind, Value);
+        return HashCode.Combine(Kind, Kind.GetValueHashCode(Value));
     }
 
     public static bool operator ==(State<T> left, State<T> right)

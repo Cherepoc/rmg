@@ -72,7 +72,7 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
         return PhaseShift(phase);
     }
 
-    public static StateTimeline<T> Empty { get; } = new(0, Events.StateKind.Empty<T>(), []);
+    public static StateTimeline<T> Empty => Events.StateKind.Empty<T>().EmptyTimeline;
 
     public static StateTimeline<T> Merge(IEnumerable<StateTimeline<T>> timelines)
     {

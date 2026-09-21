@@ -125,7 +125,8 @@ public static class ProbabilityThreshold
         {
             var sourceIndex = i < index ? i : i + 1;
             var item = probabilityThresholds[sourceIndex];
-            result[i] = new ProbabilityThreshold<T>(item.Threshold * thresholdMultiplier, item.Value);
+            var threshold = i < index ? item.Threshold : item.Threshold - thresholdDiff;
+            result[i] = new ProbabilityThreshold<T>((threshold * thresholdMultiplier).RoundByEpsilon(1), item.Value);
         }
 
         return [..result];

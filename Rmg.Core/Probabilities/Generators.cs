@@ -144,7 +144,7 @@ public static class Generators
         ArgumentOutOfRangeException.ThrowIfGreaterThan(minValue, maxValue);
 
         if (maxRank == 0)
-            return _ => 1.0;
+            return _ => 0.0;
 
         var probabilityThresholds = Enumerable.Range(0, maxRank + 1)
             .WeightUsing(weightFunc)

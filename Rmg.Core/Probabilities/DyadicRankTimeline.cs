@@ -26,7 +26,7 @@ public sealed class DyadicRankTimeline
         ArgumentOutOfRangeException.ThrowIfNegative(duration);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(period);
         ArgumentOutOfRangeException.ThrowIfNegative(maxRank);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(maxRank, RankTimelines.Length);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(maxRank, RankTimelines.Length - 1);
 
         var templateTimeline = RankTimelines[maxRank]
             .Stretch(period)

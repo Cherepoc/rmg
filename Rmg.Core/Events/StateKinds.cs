@@ -27,6 +27,7 @@ public static class StateKinds
         [
             Velocity,
             QuarterNoteDurationPower,
+            NextNoteDurationFactor,
             ArticulationOffset,
             KeyOffset,
             OctaveOffset,
@@ -106,6 +107,14 @@ public static class StateKinds
                 if (isComparable)
                     preprocessedValues = preprocessedValues.Order();
                 return [..preprocessedValues];
+            },
+            values =>
+            {
+                var hashCode = new HashCode();
+                if (!values.IsDefault)
+                    foreach (var value in values)
+                        hashCode.Add(value);
+                return hashCode.ToHashCode();
             }
         );
     }

@@ -152,7 +152,7 @@ public static class DyadicRankDistribution
         ArgumentOutOfRangeException.ThrowIfNegative(maxValue);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(minValue, maxValue);
 
-        var distribution = ExactRankedMultiplierDistributions[rank];
+        var distribution = ExactRankedHalfDistributions[rank];
         return SliceItemsByPositions(distribution, minValue, maxValue);
     }
 
