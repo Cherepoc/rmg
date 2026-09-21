@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Rmg.Core/Rmg.Core.csproj" />
+  <Project Path="Rmg.Tests/Rmg.Tests.csproj" />
+  <Project Path="Rmg.WebApi/Rmg.WebApi.csproj" />
+  <Project Path="Rmg/Rmg.csproj" />
+</Solution>

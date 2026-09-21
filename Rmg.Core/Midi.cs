@@ -65,7 +65,7 @@ public static class Midi
     private static byte[] NoteOn(byte channel, byte note, double velocity)
     {
         var header = ChannelMidiEventHeader(channel, 0x09);
-        return [header, note, (byte)(Math.Floor(velocity * 127) + 1)];
+        return [header, note, (byte)Math.Min(127, Math.Floor(velocity * 127) + 1)];
     }
 
     private static byte[] NoteOff(byte channel, byte note)

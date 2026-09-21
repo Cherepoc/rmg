@@ -93,7 +93,7 @@ public static class StateKinds
 
     public static StateKind<ImmutableArray<T>> CreateCollection<T>(string name)
     {
-        var isComparable = typeof(T).IsAssignableFrom(typeof(IComparable<T>));
+        var isComparable = typeof(IComparable<T>).IsAssignableFrom(typeof(T));
         return new StateKind<ImmutableArray<T>>(
             name,
             [],
