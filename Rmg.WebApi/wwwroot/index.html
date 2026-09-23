@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RMG</title>
+    <link rel="stylesheet" href="app.css" />
+    <script type="importmap">
+        {
+            "imports": {
+                "spessasynth_lib": "https://cdn.jsdelivr.net/npm/spessasynth_lib@4.3.14/dist/index.js",
+                "spessasynth_core": "https://cdn.jsdelivr.net/npm/spessasynth_core@4.3.22/dist/index.js",
+                "stb-vorbis": "https://cdn.jsdelivr.net/npm/stb-vorbis@0.0.6/dist/index.js"
+            }
+        }
+    </script>
+    <script type="module" src="app.js"></script>
+</head>
+<body>
+<main>
+    <header>
+        <h1>RMG</h1>
+        <p>Random Music Generator. Every song is built from a seed, so the same seed always gives the same song.</p>
+    </header>
+
+    <section class="panel">
+        <h2>Soundfont</h2>
+        <p class="hint">
+            Playback needs a soundfont. Take one this server offers, or a <code>.sf2</code>, <code>.sf3</code> or
+            <code>.dls</code> file of your own &mdash; your own file is read in the browser and never uploaded.
+        </p>
+        <div class="row" id="library-row" hidden>
+            <label class="field">
+                <span>From the server</span>
+                <select id="library"></select>
+            </label>
+        </div>
+        <div class="row">
+            <label class="file-button">
+                <input type="file" id="soundfont" accept=".sf2,.sf3,.sfogg,.dls" />
+                <span>Choose a file</span>
+            </label>
+            <span class="file-name" id="soundfont-name">No soundfont loaded</span>
+        </div>
+        <label class="field toggle">
+            <input type="checkbox" id="keep" checked />
+            <span>Keep the soundfont in this browser, so it loads itself next time</span>
+        </label>
+    </section>
+
+    <section class="panel">
+        <h2>Song</h2>
+        <div class="row">
+            <button type="button" id="generate" class="primary">Generate Random</button>
+            <label class="field">
+                <span>Seed</span>
+                <input type="text" id="seed" readonly tabindex="-1" placeholder="none yet" />
+            </label>
+            <a id="download" class="secondary button" hidden download>Download .mid</a>
+            <button type="button" id="export-mp3" class="secondary" disabled>Export .mp3</button>
+        </div>
+        <label class="field toggle">
+            <input type="checkbox" id="show-seeded" />
+            <span>Generate from a seed</span>
+        </label>
+        <div class="row" id="seeded" hidden>
+            <label class="field">
+                <span>Seed</span>
+                <input type="text" id="seed-input" inputmode="numeric" placeholder="e.g. 12345" autocomplete="off" />
+            </label>
+            <button type="button" id="generate-seeded" class="secondary">Generate Seeded</button>
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>Player</h2>
+        <div class="row transport">
+            <button type="button" id="play" class="icon" disabled aria-label="Play">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+            </button>
+            <button type="button" id="stop" class="icon" disabled aria-label="Stop">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6z" /></svg>
+            </button>
+            <time id="elapsed">0:00</time>
+            <input type="range" id="seek" min="0" max="1" step="0.001" value="0" disabled aria-label="Seek" />
+            <time id="total">0:00</time>
+            <label class="field volume">
+                <span>Volume</span>
+                <input type="range" id="volume" min="0" max="2" step="0.01" value="1" />
+            </label>
+        </div>
+    </section>
+
+    <section class="panel" id="mixer-panel" hidden>
+        <h2>Mixer</h2>
+        <p class="hint">
+            These volumes are part of the song and are written into the file you download, unlike the
+            player&rsquo;s volume, which only says how loud it is here. A track switched off is left out of
+            the file altogether.
+        </p>
+        <div class="row">
+            <label class="field volume">
+                <span>Overall</span>
+                <input type="range" id="song-volume" min="0" max="1" step="0.01" value="1" />
+                <output id="song-volume-value">100%</output>
+            </label>
+            <button type="button" id="roll-instruments" class="secondary">Roll instruments</button>
+        </div>
+        <table class="mixer">
+            <thead>
+            <tr>
+                <th scope="col">Ch</th>
+                <th scope="col">On</th>
+                <th scope="col">Instrument</th>
+                <th scope="col">Volume</th>
+                <th scope="col">Mute</th>
+                <th scope="col">Solo</th>
+                <th scope="col">Voices</th>
+            </tr>
+            </thead>
+            <tbody id="mixer"></tbody>
+        </table>
+    </section>
+
+    <details class="panel" id="settings">
+        <summary>Settings</summary>
+        <p class="hint">
+            A roll takes an instrument at random from this range, which leaves out the sound effects
+            General MIDI ends with, as the generator does. Choosing one by hand is not bound by it, and
+            the drums are always rolled from their kits.
+        </p>
+        <div class="row">
+            <label class="field">
+                <span>Roll instruments from</span>
+                <select id="roll-first"></select>
+            </label>
+            <label class="field">
+                <span>to</span>
+                <select id="roll-last"></select>
+            </label>
+        </div>
+        <div class="row">
+            <label class="field">
+                <span>MP3 bitrate</span>
+                <select id="bitrate">
+                    <option value="128">128 kbps</option>
+                    <option value="192" selected>192 kbps</option>
+                    <option value="320">320 kbps</option>
+                </select>
+            </label>
+        </div>
+    </details>
+
+    <p id="status" role="status" aria-live="polite"></p>
+</main>
+</body>
+</html>

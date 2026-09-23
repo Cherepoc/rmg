@@ -1,5 +1,6 @@
 using Rmg;
 using Rmg.Core.Composition;
+using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Cli;
 
@@ -74,7 +75,7 @@ public sealed class SongBatchTest
             var exitCode = SongBatch.Run(options, SongGenerator.GenerateSong, output, error);
 
             var expectedNames = SongBatch.GenerateSongSeeds(99, 3)
-                .Select(SongBatch.GetFileName)
+                .Select(SongFile.GetName)
                 .ToArray();
             var actualNames = Directory.GetFiles(directory).Select(Path.GetFileName).ToArray();
             await Assert.That(exitCode).IsEqualTo(SongBatch.Success);
@@ -193,8 +194,8 @@ public sealed class SongBatchTest
 
             var expectedNames = new[]
             {
-                SongBatch.GetFileName(songSeeds[0]),
-                SongBatch.GetFileName(songSeeds[2]),
+                SongFile.GetName(songSeeds[0]),
+                SongFile.GetName(songSeeds[2]),
             };
             await Assert.That(exitCode).IsEqualTo(SongBatch.SongsFailed);
             await Assert.That(Directory.GetFiles(directory).Select(Path.GetFileName)).IsEquivalentTo(expectedNames);

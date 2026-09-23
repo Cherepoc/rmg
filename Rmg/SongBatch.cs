@@ -28,11 +28,6 @@ public static class SongBatch
         return seeds.MoveToImmutable();
     }
 
-    public static string GetFileName(int songSeed)
-    {
-        return $"song-{songSeed}.mid";
-    }
-
     /// <returns>Process exit code.</returns>
     public static int Run(CliOptions options, Func<int, Song> generateSong, TextWriter output, TextWriter error)
     {
@@ -54,7 +49,7 @@ public static class SongBatch
         {
             var index = i + 1;
             var songSeed = songSeeds[i];
-            var path = Path.Combine(options.OutputDirectory, GetFileName(songSeed));
+            var path = Path.Combine(options.OutputDirectory, SongFile.GetName(songSeed));
             try
             {
                 var renderedSong = Render.RenderSong(generateSong(songSeed));
