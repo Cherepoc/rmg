@@ -1,40 +1,26 @@
-using Rmg.Core;
-using Rmg.Core.Composition;
-using Rmg.Core.Rendering;
+using Microsoft.AspNetCore.StaticFiles;
+using Rmg.WebApi.Songs;
+using Rmg.WebApi.SoundFonts;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-// Configure Kestrel for Linux
-builder.WebHost.ConfigureKestrel(options =>
-    {
-        options.ListenAnyIP(5000);
-    }
-);
+// binds 0.0.0.0, so the page is reachable from other machines on the network
+builder.WebHost.ConfigureKestrel(options => { options.ListenAnyIP(5000); });
 
 var app = builder.Build();
 
+var soundFonts = SoundFontLibrary.Create(app.Environment.WebRootPath);
+app.Logger.LogInformation("Offering the soundfonts in {Directory}", soundFonts.Directory);
+
 app.UseDefaultFiles();
-app.UseStaticFiles();
 
-// API endpoints
-app.MapGet("/midi/generate", () =>
-{
-    try
-    {
-        var songPattern = SongGenerator.GenerateSong();
-        var renderedSong = Render.RenderSong(songPattern);
+// soundfonts have no registered media type, so static files would refuse to serve them unasked
+var contentTypes = new FileExtensionContentTypeProvider();
+foreach (var extension in SoundFontLibrary.Extensions) contentTypes.Mappings[extension] = "application/octet-stream";
 
-        var stream = new MemoryStream();
-        renderedSong.Write(stream);
-        stream.Seek(0, SeekOrigin.Begin);
+app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = contentTypes });
 
-        return Results.File(stream, "audio/midi", "generated_song.mid");
-    }
-    catch (Exception ex)
-    {
-        return Results.BadRequest(new { error = ex.Message });
-    }
-});
+app.MapSoundFonts(soundFonts);
+app.MapSongs();
 
 app.Run();

@@ -8,6 +8,10 @@ public static class Midi
 {
     private const uint TicksPerQuarterNote = 96;
     private const byte PercussionChannel = 9;
+    private const byte MainVolumeController = 7;
+
+    /// <summary>What a channel plays at when nothing says otherwise, which General MIDI puts at 100 of 127.</summary>
+    private const double DefaultChannelVolume = 100;
 
     internal static byte[] IntToBytesFixed(uint value, int length)
     {
@@ -78,6 +82,12 @@ public static class Midi
     {
         var header = ChannelMidiEventHeader(channel, 0x0C);
         return [header, program];
+    }
+
+    private static byte[] ControlChange(byte channel, byte controller, byte value)
+    {
+        var header = ChannelMidiEventHeader(channel, 0x0B);
+        return [header, controller, value];
     }
 
     private static byte[] TimeSignature(byte numerator, byte denominator)
@@ -189,37 +199,138 @@ public static class Midi
     }
 
     private static void WriteNoteTrack(
-        EventTimeline<RenderedNote> noteTimeline,
-        byte instrumentCode,
+        RenderedTrack track,
         byte channel,
         uint durationDelta,
         Stream stream
     )
     {
-        var events = noteTimeline
-            .SelectMany(x => x.ToEvents(channel, durationDelta))
-            .Prepend(new MidiEvent(0, ProgramChange(channel, instrumentCode)));
+        List<MidiEvent> settings = [new MidiEvent(0, ProgramChange(channel, (byte)track.PitchInstrumentCode))];
+
+        // a track at the volume it would play at anyway has nothing to say about its volume
+        if (track.Volume < 1)
+        {
+            var volume = (byte)Math.Round(track.Volume * DefaultChannelVolume);
+            settings.Add(new MidiEvent(0, ControlChange(channel, MainVolumeController, volume)));
+        }
+
+        var events = settings.Concat(track.NoteTimeline.SelectMany(x => x.ToEvents(channel, durationDelta)));
         WriteTrack(events, durationDelta, stream);
+    }
+
+    /// <summary>
+    ///     The channel every track is written to, in the order of <paramref name="tracks" />: the percussion
+    ///     track takes the channel General MIDI keeps for it, and the pitched ones the channels around it.
+    /// </summary>
+    private static ImmutableArray<byte> ToChannels(this ImmutableArray<RenderedTrack> tracks)
+    {
+        if (tracks.Count(x => x.IsPercussionInstrument) > 1)
+            throw new ArgumentException("Only one percussion track is allowed.");
+
+        var pitchTrackIndex = 0;
+        return
+        [
+            ..tracks.Select(track => track.IsPercussionInstrument
+                ? PercussionChannel
+                : PitchTrackChannel(pitchTrackIndex++))
+        ];
     }
 
     private static IEnumerable<(byte channel, RenderedTrack track)> ToIndexedTracks(this ImmutableArray<RenderedTrack> tracks)
     {
-        var percussionTracks = tracks
-            .Where(x => x.IsPercussionInstrument)
-            .ToArray();
-        if (percussionTracks.Length > 1)
-            throw new ArgumentException("Only one percussion track is allowed.");
+        return tracks.ToChannels()
+            .Zip(tracks)
+            .OrderBy(x => x.First);
+    }
 
-        var indexedTracks = tracks
-            .Where(x => !x.IsPercussionInstrument)
-            .Select((track, index) => (PitchTrackChannel(index), track));
+    /// <summary>
+    ///     The instrument every channel of the song plays, by channel. The instrument of the percussion
+    ///     channel is its drum kit, which is what a program change means on that channel.
+    /// </summary>
+    public static ImmutableSortedDictionary<byte, int> GetChannelInstruments(this RenderedSong song)
+    {
+        return song.Tracks
+            .ToIndexedTracks()
+            .ToImmutableSortedDictionary(x => x.channel, x => x.track.PitchInstrumentCode);
+    }
 
-        if (percussionTracks.Length == 1)
-            indexedTracks = indexedTracks
-                .Append((PercussionChannel, percussionTracks[0]))
-                .OrderBy(x => x.Item1);
+    /// <summary>
+    ///     The song with the instrument of every channel in <paramref name="instruments" /> replaced, which
+    ///     is the whole of what an instrument is to a written song: not a note of it changes.
+    /// </summary>
+    /// <exception cref="ArgumentException">A channel the song does not play.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">An instrument outside the 0-127 of General MIDI.</exception>
+    public static RenderedSong WithChannelInstruments(
+        this RenderedSong song,
+        IReadOnlyDictionary<byte, int> instruments
+    )
+    {
+        if (instruments.Count == 0) return song;
 
-        return indexedTracks;
+        var channels = song.Tracks.ThrowIfNotPlayed(instruments.Keys, nameof(instruments));
+        foreach (var instrument in instruments.Values)
+        {
+            ArgumentOutOfRangeException.ThrowIfNegative(instrument, nameof(instruments));
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(instrument, 127, nameof(instruments));
+        }
+
+        return song.WithTracks(song.Tracks.Select((track, index) =>
+            instruments.TryGetValue(channels[index], out var instrument)
+                ? new RenderedTrack(track.IsPercussionInstrument, instrument, track.NoteTimeline, track.Volume)
+                : track));
+    }
+
+    /// <summary>
+    ///     The song with the volume of every channel in <paramref name="volumes" /> replaced: a part of the
+    ///     volume it plays at unasked, where 1 is that volume and 0 is silence. The notes keep their own
+    ///     dynamics, since this is the volume the whole track plays under.
+    /// </summary>
+    /// <exception cref="ArgumentException">A channel the song does not play.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">A volume outside 0 to 1.</exception>
+    public static RenderedSong WithChannelVolumes(this RenderedSong song, IReadOnlyDictionary<byte, double> volumes)
+    {
+        if (volumes.Count == 0) return song;
+
+        var channels = song.Tracks.ThrowIfNotPlayed(volumes.Keys, nameof(volumes));
+
+        return song.WithTracks(song.Tracks.Select((track, index) =>
+            volumes.TryGetValue(channels[index], out var volume)
+                ? new RenderedTrack(track.IsPercussionInstrument, track.PitchInstrumentCode, track.NoteTimeline, volume)
+                : track));
+    }
+
+    /// <summary>
+    ///     The song without the given channels, which are not written at all: no notes, and nothing to say
+    ///     they were ever there. The pitched channels left behind close up, since they are handed out in
+    ///     the order the tracks are written.
+    /// </summary>
+    /// <exception cref="ArgumentException">A channel the song does not play.</exception>
+    public static RenderedSong WithoutChannels(this RenderedSong song, IReadOnlyCollection<byte> channels)
+    {
+        if (channels.Count == 0) return song;
+
+        var trackChannels = song.Tracks.ThrowIfNotPlayed(channels, nameof(channels));
+
+        return song.WithTracks(song.Tracks.Where((_, index) => !channels.Contains(trackChannels[index])));
+    }
+
+    /// <summary>The channels of the tracks, once every channel of <paramref name="asked" /> is known.</summary>
+    private static ImmutableArray<byte> ThrowIfNotPlayed(
+        this ImmutableArray<RenderedTrack> tracks,
+        IEnumerable<byte> asked,
+        string parameterName
+    )
+    {
+        var channels = tracks.ToChannels();
+        foreach (var channel in asked.Where(channel => !channels.Contains(channel)))
+            throw new ArgumentException($"The song does not play channel {channel}.", parameterName);
+
+        return channels;
+    }
+
+    private static RenderedSong WithTracks(this RenderedSong song, IEnumerable<RenderedTrack> tracks)
+    {
+        return new RenderedSong(song.Duration, song.TempoTimeline, [..tracks]);
     }
 
     public static void Write(this RenderedSong song, Stream stream)
@@ -246,11 +357,7 @@ public static class Midi
         WriteSystemTrack(song.TempoTimeline, songDurationDelta, stream);
 
         var indexedTracks = song.Tracks.ToIndexedTracks();
-        foreach (var (channel, track) in indexedTracks)
-        {
-            var instrumentCode = (byte)track.PitchInstrumentCode;
-            WriteNoteTrack(track.NoteTimeline, instrumentCode, channel, songDurationDelta, stream);
-        }
+        foreach (var (channel, track) in indexedTracks) WriteNoteTrack(track, channel, songDurationDelta, stream);
     }
 
     private readonly record struct MidiEvent(uint Delta, byte[] Data) : IComparable<MidiEvent>

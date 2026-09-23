@@ -1,0 +1,418 @@
+:root {
+    --bg: #f5f5f7;
+    --panel: #ffffff;
+    --text: #16161a;
+    --muted: #6b6b76;
+    --border: #dcdce3;
+    --accent: #4c5bd4;
+    --accent-text: #ffffff;
+    --meter: #4c5bd4;
+    --danger: #b3261e;
+    --radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #16161a;
+        --panel: #1e1e24;
+        --text: #ececf0;
+        --muted: #9a9aa6;
+        --border: #32323c;
+        --accent: #7d8bf0;
+        --accent-text: #16161a;
+        --meter: #7d8bf0;
+        --danger: #f2b8b5;
+    }
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* the display on .button and .meter would otherwise win over the user agent's [hidden] rule */
+[hidden] {
+    display: none !important;
+}
+
+body {
+    margin: 0;
+    padding: 32px 16px 64px;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+main {
+    max-width: 760px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 28px;
+    letter-spacing: 0.02em;
+}
+
+header p {
+    margin: 6px 0 0;
+    color: var(--muted);
+}
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+}
+
+.panel h2 {
+    margin: 0 0 12px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+}
+
+/* the settings are out of the way until they are asked for, so the summary carries the heading */
+details.panel > summary {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    cursor: pointer;
+}
+
+details.panel[open] > summary {
+    margin-bottom: 12px;
+}
+
+details.panel > summary:hover {
+    color: var(--text);
+}
+
+.hint {
+    margin: -4px 0 12px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.hint code {
+    font-size: 13px;
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* :not([hidden]) so a panel whose first row is not on show does not keep its gap */
+.row:not([hidden]) + .row {
+    margin-top: 12px;
+}
+
+button,
+.button {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--text);
+    padding: 9px 16px;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 15px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+button:hover:not(:disabled),
+.button:hover {
+    border-color: var(--accent);
+}
+
+button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text);
+    font-weight: 600;
+}
+
+button.icon {
+    padding: 9px;
+    line-height: 0;
+}
+
+button.icon svg {
+    width: 20px;
+    height: 20px;
+    fill: currentColor;
+}
+
+.file-button input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.file-button {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.file-button:hover,
+.file-button:focus-within {
+    border-color: var(--accent);
+}
+
+.file-name {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.field {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.field input[type="text"] {
+    width: 12ch;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* the seed of the song on show: a value to read and copy, not a field to fill in */
+.field input[readonly] {
+    border-color: transparent;
+    background: none;
+    padding-left: 0;
+    cursor: text;
+}
+
+.field select {
+    max-width: 320px;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.field select:hover {
+    border-color: var(--accent);
+}
+
+.toggle {
+    margin-top: 14px;
+    cursor: pointer;
+}
+
+.toggle input {
+    accent-color: var(--accent);
+    margin: 0;
+}
+
+#seeded {
+    margin-top: 12px;
+}
+
+.transport {
+    flex-wrap: nowrap;
+}
+
+.transport time {
+    font-variant-numeric: tabular-nums;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+input[type="range"] {
+    accent-color: var(--accent);
+}
+
+#seek {
+    flex: 1;
+    min-width: 80px;
+}
+
+.volume {
+    flex-shrink: 0;
+}
+
+.volume input {
+    width: 90px;
+}
+
+.mixer {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.mixer th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding-bottom: 8px;
+}
+
+.mixer td {
+    padding: 7px 10px 7px 0;
+    border-top: 1px solid var(--border);
+}
+
+.mixer td:first-child {
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    width: 3ch;
+}
+
+.instrument-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mixer .roll {
+    padding: 3px 8px;
+    font-size: 12px;
+}
+
+.mixer select {
+    width: 24ch;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.mixer select:hover {
+    border-color: var(--accent);
+}
+
+.mixer button {
+    padding: 3px 10px;
+    font-size: 13px;
+}
+
+.mixer input[type="checkbox"] {
+    accent-color: var(--accent);
+    margin: 0;
+    cursor: pointer;
+}
+
+/* a row switched off still reads, but says at a glance that it is out of the song */
+.mixer tr:has(input[type="checkbox"]:not(:checked)) {
+    opacity: 0.55;
+}
+
+.fader-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fader {
+    width: 90px;
+}
+
+.percent {
+    width: 4ch;
+    color: var(--muted);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+}
+
+#song-volume {
+    width: 160px;
+}
+
+.mixer button[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text);
+}
+
+.meter {
+    width: 100px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    overflow: hidden;
+}
+
+.meter span {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: var(--meter);
+    transition: width 80ms linear;
+}
+
+#status {
+    margin: 0;
+    min-height: 1.5em;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+#status.error {
+    color: var(--danger);
+}
+
+@media (max-width: 560px) {
+    .transport {
+        flex-wrap: wrap;
+    }
+
+    #seek {
+        order: 1;
+        flex-basis: 100%;
+    }
+
+    /* the instrument names are long, and the table has no room to spare on a phone */
+    .mixer select {
+        width: 16ch;
+    }
+
+    .fader {
+        width: 60px;
+    }
+}

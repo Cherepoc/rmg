@@ -14,6 +14,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Rmg.Core\Rmg.Core.csproj" />
       <ProjectReference Include="..\Rmg\Rmg.csproj" />
+      <ProjectReference Include="..\Rmg.WebApi\Rmg.WebApi.csproj" />
     </ItemGroup>
 
 </Project>
