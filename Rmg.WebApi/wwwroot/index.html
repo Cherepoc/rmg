@@ -24,31 +24,6 @@
     </header>
 
     <section class="panel">
-        <h2>Soundfont</h2>
-        <p class="hint">
-            Playback needs a soundfont. Take one this server offers, or a <code>.sf2</code>, <code>.sf3</code> or
-            <code>.dls</code> file of your own &mdash; your own file is read in the browser and never uploaded.
-        </p>
-        <div class="row" id="library-row" hidden>
-            <label class="field">
-                <span>From the server</span>
-                <select id="library"></select>
-            </label>
-        </div>
-        <div class="row">
-            <label class="file-button">
-                <input type="file" id="soundfont" accept=".sf2,.sf3,.sfogg,.dls" />
-                <span>Choose a file</span>
-            </label>
-            <span class="file-name" id="soundfont-name">No soundfont loaded</span>
-        </div>
-        <label class="field toggle">
-            <input type="checkbox" id="keep" checked />
-            <span>Keep the soundfont in this browser, so it loads itself next time</span>
-        </label>
-    </section>
-
-    <section class="panel">
         <h2>Song</h2>
         <div class="row">
             <button type="button" id="generate" class="primary">Generate Random</button>
@@ -58,6 +33,7 @@
             </label>
             <a id="download" class="secondary button" hidden download>Download .mid</a>
             <button type="button" id="export-mp3" class="secondary" disabled>Export .mp3</button>
+            <button type="button" id="share" class="secondary" disabled>Share</button>
         </div>
         <label class="field toggle">
             <input type="checkbox" id="show-seeded" />
@@ -69,6 +45,11 @@
                 <input type="text" id="seed-input" inputmode="numeric" placeholder="e.g. 12345" autocomplete="off" />
             </label>
             <button type="button" id="generate-seeded" class="secondary">Generate Seeded</button>
+        </div>
+        <div class="row history-row" id="history-row" role="group" aria-label="Songs so far" hidden>
+            <span class="history-label">So far</span>
+            <div class="history" id="history"></div>
+            <button type="button" id="clear-history" class="clear">Clear</button>
         </div>
     </section>
 
@@ -89,6 +70,10 @@
                 <input type="range" id="volume" min="0" max="2" step="0.01" value="1" />
             </label>
         </div>
+        <label class="field toggle">
+            <input type="checkbox" id="autoplay" checked />
+            <span>When a random song ends, generate another and play it. A song asked for by seed ends where it is.</span>
+        </label>
     </section>
 
     <section class="panel" id="mixer-panel" hidden>
@@ -122,6 +107,35 @@
         </table>
     </section>
 
+    <details class="panel" id="soundfont-panel">
+        <summary>Soundfont<span class="state" id="soundfont-name">Starting…</span></summary>
+        <p class="hint">
+            One this server offers is loaded for you. Take another, or a <code>.sf2</code>, <code>.sf3</code> or
+            <code>.dls</code> file of your own &mdash; your own file is read in the browser and never uploaded.
+        </p>
+        <div class="row" id="library-row" hidden>
+            <label class="field">
+                <span>From the server</span>
+                <select id="library"></select>
+            </label>
+            <a id="library-license" class="license" target="_blank" rel="noopener" hidden></a>
+        </div>
+        <div class="row">
+            <label class="file-button">
+                <input type="file" id="soundfont" accept=".sf2,.sf3,.sfogg,.dls" />
+                <span>Choose a file</span>
+            </label>
+        </div>
+        <p class="hint below">
+            Other soundfonts are worth a try:
+            <a href="https://midkar.com/SoundFonts/index.html" target="_blank" rel="noopener">Timbres of Heaven</a>
+        </p>
+        <label class="field toggle">
+            <input type="checkbox" id="keep" checked />
+            <span>Keep the soundfont in this browser, so it loads itself next time</span>
+        </label>
+    </details>
+
     <details class="panel" id="settings">
         <summary>Settings</summary>
         <p class="hint">
@@ -152,6 +166,30 @@
     </details>
 
     <p id="status" role="status" aria-live="polite"></p>
+
+    <footer>
+        <p>
+            RMG is <a href="https://opensource.org/license/mit" target="_blank" rel="noopener">MIT</a>.
+            Playback is <a href="https://github.com/spessasus/spessasynth_lib" target="_blank" rel="noopener">spessasynth</a>
+            (Apache-2.0) and <code>.mp3</code> export is
+            <a href="https://www.npmjs.com/package/@breezystack/lamejs" target="_blank" rel="noopener">lamejs</a>
+            (<a href="https://www.gnu.org/licenses/lgpl-3.0.html" target="_blank" rel="noopener">LGPL-3.0</a>),
+            both loaded unmodified from a CDN and neither linked against nor derived from.
+        </p>
+        <p>
+            Soundfonts carry their own licences and are none of this project&rsquo;s: the one to start with is
+            <a href="https://musescore.org/en/handbook/soundfonts-and-sfz-files" target="_blank" rel="noopener">MuseScore General</a>
+            by S. Christian Collins, after FluidR3 by Frank Wen, which is MIT so long as its acknowledgements
+            and copyright notices travel with it. Every soundfont this server offers links to its own notice above.
+        </p>
+        <p>
+            This page counts how long things took and how far people got, so the slow parts can be found.
+            It goes to this server and nowhere else, sets no cookie and stores nothing in your browser;
+            your address is turned into a number that changes every day and is never written down. The
+            soundfont you choose is counted by its size, never by its name. Turn on Global Privacy
+            Control or Do Not Track and none of it is sent at all.
+        </p>
+    </footer>
 </main>
 </body>
 </html>

@@ -83,16 +83,31 @@ class Player {
     }
 
     /**
-     *     Sets the instrument a channel plays. The lock is what makes the choice stick: the song sets its
-     *     own instruments whenever it starts over, and a locked channel ignores that.
+     *     Sets the instrument a channel plays. The lock is what makes a choice stick: the song sets its
+     *     own instruments whenever it starts over, and a locked channel ignores that. Putting back what
+     *     the song itself asked for wants no lock, so that the song may go on setting it.
      */
-    setChannelInstrument(channel, instrument) {
+    setChannelInstrument(channel, instrument, isLocked = true) {
         const midiChannel = this.#synth.midiChannels[channel];
         if (!midiChannel) return;
 
         midiChannel.setSystemParameter("presetLock", false);
         this.#synth.programChange(channel, instrument);
-        midiChannel.setSystemParameter("presetLock", true);
+
+        if (isLocked) midiChannel.setSystemParameter("presetLock", true);
+    }
+
+    /**
+     *     Says whether a channel plays a kit rather than an instrument. Loading a sound bank puts every
+     *     channel back to where it started, and a drum channel that has forgotten it is one plays the
+     *     whole kit as a piano.
+     */
+    setChannelDrums(channel, isDrum) {
+        const midiChannel = this.#synth.midiChannels[channel];
+        if (!midiChannel) return;
+
+        midiChannel.setSystemParameter("presetLock", false);
+        midiChannel.setDrums(isDrum);
     }
 
     /**

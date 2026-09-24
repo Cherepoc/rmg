@@ -6,3 +6,5 @@
 songs/
 songs_old/
 soundfonts/
+deploy.env
+state/

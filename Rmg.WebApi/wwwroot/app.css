@@ -95,14 +95,42 @@ details.panel > summary:hover {
     color: var(--text);
 }
 
+/* the soundfont panel carries its state in its summary, since shut is where it normally stays */
+details.panel > summary .state {
+    margin-left: 10px;
+    font-size: 14px;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--muted);
+}
+
+details.panel > summary .state.error {
+    color: var(--danger);
+}
+
 .hint {
     margin: -4px 0 12px;
     color: var(--muted);
     font-size: 14px;
 }
 
+/* a hint that follows what it is about, rather than introducing it */
+.hint.below {
+    margin: 12px 0 0;
+}
+
 .hint code {
     font-size: 13px;
+}
+
+.hint a {
+    color: inherit;
+    text-underline-offset: 2px;
+}
+
+.hint a:hover {
+    color: var(--text);
 }
 
 .row {
@@ -183,11 +211,6 @@ button.icon svg {
     border-color: var(--accent);
 }
 
-.file-name {
-    color: var(--muted);
-    font-size: 14px;
-}
-
 .field {
     display: inline-flex;
     align-items: center;
@@ -244,6 +267,56 @@ button.icon svg {
 
 #seeded {
     margin-top: 12px;
+}
+
+/* every song the page has had: a list to come back to, rather than a row of controls */
+.history-row {
+    align-items: flex-start;
+}
+
+.history-label {
+    padding-top: 5px;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+.history {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+
+    /* a long listen runs to a great many songs, and the rest of the page is worth more than all of them */
+    max-height: 104px;
+    overflow-y: auto;
+}
+
+.history button {
+    padding: 4px 10px;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+}
+
+/* the song on the page, which is where the list is being read from */
+.history button[aria-current="true"] {
+    border-color: var(--accent);
+    color: var(--text);
+}
+
+/* being rid of the list is not one of the songs on it, so it does not look like one */
+.history-row .clear {
+    padding: 4px 6px;
+    border-color: transparent;
+    background: none;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.history-row .clear:hover {
+    border-color: transparent;
+    color: var(--text);
 }
 
 .transport {
@@ -386,6 +459,18 @@ input[type="range"] {
     transition: width 80ms linear;
 }
 
+/* the licence sits beside the soundfont it belongs to, quietly, as a label rather than a button */
+.license {
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.license:hover {
+    color: var(--text);
+}
+
 #status {
     margin: 0;
     min-height: 1.5em;
@@ -395,6 +480,31 @@ input[type="range"] {
 
 #status.error {
     color: var(--danger);
+}
+
+footer {
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--muted);
+}
+
+footer p {
+    margin: 0 0 8px;
+}
+
+footer p:last-child {
+    margin-bottom: 0;
+}
+
+footer a {
+    color: inherit;
+    text-underline-offset: 2px;
+}
+
+footer a:hover {
+    color: var(--text);
 }
 
 @media (max-width: 560px) {
