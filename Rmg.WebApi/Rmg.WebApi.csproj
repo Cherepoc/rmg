@@ -12,4 +12,14 @@
       <ProjectReference Include="..\Rmg.Core\Rmg.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <!-- whatever is in the soundfont directory is the operator's, not the build's: it is theirs to put
+           on a server under its own licence, and a publish would otherwise carry tens of megabytes of it -->
+      <Content Remove="wwwroot\soundfonts\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
+    </ItemGroup>
+
 </Project>

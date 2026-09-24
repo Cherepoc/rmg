@@ -1,0 +1,293 @@
+/*
+    The dashboard borrows the app's panels and tokens, and adds the chart roles on top. The series
+    colours are the validated three-slot categorical set: they clear the lightness band, the chroma
+    floor, colourblind separation and the normal-vision floor on both surfaces. Aqua sits at 2.82:1
+    on the light panel, under the 3:1 bar, so every chart that uses it carries a legend, direct end
+    labels and a table view rather than leaning on the colour.
+*/
+.viz {
+    --surface: #ffffff;
+    --grid: #e7e7ee;
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+    --series-3: #1baf7a;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz {
+        --surface: #1e1e24;
+        --grid: #32323c;
+        --series-1: #3987e5;
+        --series-2: #d95926;
+        --series-3: #199e70;
+    }
+}
+
+:root[data-theme="dark"] .viz {
+    --surface: #1e1e24;
+    --grid: #32323c;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+}
+
+main.viz {
+    max-width: 980px;
+}
+
+.controls {
+    margin-bottom: -4px;
+}
+
+.taken {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+button.small {
+    padding: 5px 12px;
+    font-size: 13px;
+}
+
+/* --- figures ----------------------------------------------------------- */
+
+.headline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 28px;
+}
+
+/* the one number the page leads with, and the only one this size */
+.hero strong {
+    display: block;
+    font-size: 52px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+.hero span {
+    display: block;
+    margin-top: 6px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    flex: 1;
+}
+
+.tiles.wide .tile {
+    flex: 1 1 180px;
+}
+
+.tile {
+    flex: 0 1 140px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+}
+
+.tile .label {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.tile strong {
+    display: block;
+    margin-top: 6px;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.tile .sub {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* --- funnel ------------------------------------------------------------ */
+
+.funnel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.funnel-row {
+    display: grid;
+    grid-template-columns: 150px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.funnel-name {
+    color: var(--muted);
+}
+
+.funnel-track {
+    height: 20px;
+    background: var(--grid);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+/* 4px rounded data-end, square where it grows from the baseline */
+.funnel-bar {
+    height: 100%;
+    background: var(--series-1);
+    border-radius: 0 4px 4px 0;
+    min-width: 3px;
+    transition: width 120ms linear;
+}
+
+.funnel-value {
+    min-width: 6ch;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.funnel-share {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* --- charts ------------------------------------------------------------ */
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend i {
+    width: 14px;
+    height: 3px;
+    border-radius: 2px;
+    background: currentColor;
+}
+
+.chart {
+    position: relative;
+    margin: 0;
+}
+
+.chart svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.tooltip {
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    line-height: 1.5;
+    box-shadow: 0 6px 20px rgb(0 0 0 / 18%);
+    white-space: nowrap;
+}
+
+.tooltip b {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.tooltip i {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    background: currentColor;
+}
+
+/* --- tables ------------------------------------------------------------ */
+
+.grid {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.grid th {
+    text-align: left;
+    padding: 6px 10px 6px 0;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.grid td {
+    padding: 7px 10px 7px 0;
+    border-bottom: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+}
+
+.grid tr:last-child td {
+    border-bottom: 0;
+}
+
+/* the bar wants a column of its own, or it has nothing to be a proportion of */
+.grid td:has(> .bar) {
+    width: 42%;
+    padding-right: 0;
+}
+
+.grid .bar {
+    height: 12px;
+    background: var(--series-1);
+    border-radius: 0 3px 3px 0;
+    min-width: 2px;
+}
+
+.empty {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+@media (max-width: 620px) {
+    .funnel-row {
+        grid-template-columns: 110px 1fr auto;
+        gap: 8px;
+        font-size: 13px;
+    }
+
+    .hero strong {
+        font-size: 40px;
+    }
+}
