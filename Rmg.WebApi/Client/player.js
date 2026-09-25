@@ -1,6 +1,7 @@
 import { Sequencer, WorkletSynthesizer } from "spessasynth_lib";
 
-export const WORKLET_URL = "https://cdn.jsdelivr.net/npm/spessasynth_lib@4.3.14/dist/spessasynth_processor.min.js";
+// resolved through the import map, so the processor is always the one of the library the page loads
+export const WORKLET_URL = new URL("spessasynth_processor.min.js", import.meta.resolve("spessasynth_lib")).href;
 const SOUND_BANK_ID = "main";
 const MAIN_VOLUME = 7;
 
@@ -71,15 +72,6 @@ class Player {
 
     set masterGain(gain) {
         this.#synth.setSystemParameter("gain", gain);
-    }
-
-    /** The MIDI channels the loaded song actually uses, ascending. */
-    get songChannels() {
-        const channels = new Set();
-        for (const track of this.#sequencer.midiData?.tracks ?? [])
-            for (const channel of track.channels) channels.add(channel);
-
-        return [...channels].sort((a, b) => a - b);
     }
 
     /**

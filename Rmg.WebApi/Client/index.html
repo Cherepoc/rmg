@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="version" content="{{version}}" />
+    <title>RMG</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="{{assets}}/index.css" />
+    <script type="importmap">
+        {
+            "imports": {
+                "spessasynth_lib": "https://cdn.jsdelivr.net/npm/spessasynth_lib@4.3.14/dist/index.js",
+                "spessasynth_core": "https://cdn.jsdelivr.net/npm/spessasynth_core@4.3.22/dist/index.js",
+                "stb-vorbis": "https://cdn.jsdelivr.net/npm/stb-vorbis@0.0.6/dist/index.js"
+            }
+        }
+    </script>
+    <script type="module" src="{{assets}}/index.js"></script>
+</head>
+<body>
+<div class="layout">
+<header class="page-header">
+    <h1>RMG</h1>
+    <p>Random Music Generator. The same seed always gives the same song.</p>
+</header>
+
+<main>
+    <section class="panel song-panel" aria-labelledby="song-title">
+        <h2 id="song-title">Song</h2>
+        <div class="row song-row">
+            <button type="button" id="generate" class="primary">Generate Random</button>
+            <div class="seed-group">
+                <label class="field">
+                    <span>Seed</span>
+                    <input type="text" id="seed" readonly placeholder="none yet" />
+                </label>
+                <button type="button" id="share" class="secondary" disabled>Share</button>
+            </div>
+            <div class="downloads">
+                <a id="download" class="secondary button" aria-disabled="true" download>Download .mid</a>
+                <button type="button" id="export-mp3" class="secondary" disabled>Export .mp3</button>
+            </div>
+        </div>
+
+        <div class="row transport">
+            <button type="button" id="play" class="icon" disabled aria-label="Play">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
+            </button>
+            <button type="button" id="stop" class="icon" disabled aria-label="Stop">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6z" /></svg>
+            </button>
+            <time id="elapsed">0:00</time>
+            <input type="range" id="seek" min="0" max="1" step="0.001" value="0" disabled aria-label="Seek" />
+            <time id="total">0:00</time>
+            <label class="field volume">
+                <span>Volume</span>
+                <input type="range" id="volume" min="0" max="2" step="0.01" value="1" />
+                <output id="volume-value" class="percent">100%</output>
+            </label>
+        </div>
+
+        <label class="field toggle">
+            <input type="checkbox" id="autoplay" checked />
+            <span>Play a new random song when one ends (seeded songs just stop)</span>
+        </label>
+
+        <details class="seeded" id="seeded">
+            <summary>Play a specific seed</summary>
+            <div class="row">
+                <input type="text" id="seed-input" class="seed-input" inputmode="numeric" placeholder="e.g. 12345"
+                       autocomplete="off" aria-label="Seed to play" />
+                <button type="button" id="generate-seeded" class="secondary">Play seed</button>
+            </div>
+        </details>
+
+        <p id="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <aside class="side" aria-label="Songs so far">
+        <section class="panel history-panel">
+            <div class="history-head">
+                <h2>So far</h2>
+                <button type="button" id="clear-history" class="clear" disabled>Clear</button>
+            </div>
+            <div class="history" id="history"></div>
+        </section>
+    </aside>
+
+    <section class="panel" id="mixer-panel" hidden>
+        <h2>Mixer</h2>
+        <p class="hint">
+            These volumes are saved in the downloaded file; the player volume is not. Tracks switched off
+            are left out of the file.
+        </p>
+        <div class="row">
+            <label class="field volume">
+                <span>Overall</span>
+                <input type="range" id="song-volume" min="0" max="1" step="0.01" value="1" />
+                <output id="song-volume-value" class="percent">100%</output>
+            </label>
+            <button type="button" id="roll-instruments" class="small">Roll all instruments</button>
+        </div>
+        <div class="mixer-scroll">
+            <table class="mixer">
+                <thead>
+                <tr>
+                    <th scope="col">Ch</th>
+                    <th scope="col">On</th>
+                    <th scope="col">Instrument</th>
+                    <th scope="col">Volume</th>
+                    <th scope="col">Mute</th>
+                    <th scope="col">Solo</th>
+                    <th scope="col">Voices</th>
+                </tr>
+                </thead>
+                <tbody id="mixer"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <details class="panel" id="soundfont-panel">
+        <summary>
+            <h2>Soundfont</h2><span class="visually-hidden">: </span><span class="state" id="soundfont-name">Starting…</span>
+        </summary>
+        <p class="hint">
+            Pick one from the server or use your own <code>.sf2</code>, <code>.sf3</code> or <code>.dls</code>
+            file. Your file is never uploaded.
+        </p>
+        <div class="row" id="library-row" hidden>
+            <label class="field">
+                <span>From the server</span>
+                <select id="library"></select>
+            </label>
+            <a id="library-license" class="license" target="_blank" rel="noopener" hidden></a>
+        </div>
+        <div class="row">
+            <label class="file-button">
+                <input type="file" id="soundfont" accept=".sf2,.sf3,.sfogg,.dls" />
+                <span>Choose a file</span>
+            </label>
+        </div>
+        <p class="hint below">
+            Also worth a try:
+            <a href="https://midkar.com/SoundFonts/index.html" target="_blank" rel="noopener">Timbres of Heaven</a>
+        </p>
+        <label class="field toggle">
+            <input type="checkbox" id="keep" checked />
+            <span>Remember this soundfont next time</span>
+        </label>
+    </details>
+
+    <details class="panel" id="settings">
+        <summary><h2>Settings</h2></summary>
+        <p class="hint">
+            Random instruments are picked from this range. By default, it leaves out the General MIDI sound
+            effects. Instruments you pick by hand and drums are not affected.
+        </p>
+        <div class="row">
+            <label class="field">
+                <span>Roll instruments from</span>
+                <select id="roll-first"></select>
+            </label>
+            <label class="field">
+                <span>to</span>
+                <select id="roll-last"></select>
+            </label>
+        </div>
+        <div class="row">
+            <label class="field">
+                <span>MP3 bitrate</span>
+                <select id="bitrate">
+                    <option value="128">128 kbps</option>
+                    <option value="192" selected>192 kbps</option>
+                    <option value="320">320 kbps</option>
+                </select>
+            </label>
+        </div>
+    </details>
+</main>
+
+<footer>
+    <p>
+        RMG is <a href="https://opensource.org/license/mit" target="_blank" rel="noopener">MIT</a>.
+        <a href="https://github.com/spessasus/spessasynth_lib" target="_blank" rel="noopener">spessasynth</a> and
+        <a href="https://github.com/spessasus/stb-vorbis" target="_blank" rel="noopener">stb-vorbis</a> are Apache-2.0.
+        <a href="https://www.npmjs.com/package/@breezystack/lamejs" target="_blank" rel="noopener">lamejs</a> is
+        <a href="https://www.gnu.org/licenses/lgpl-3.0.html" target="_blank" rel="noopener">LGPL-3.0</a>.
+        <a href="https://musescore.org/en/handbook/soundfonts-and-sfz-files" target="_blank" rel="noopener">MuseScore General</a>
+        by S. Christian Collins is MIT. Other soundfonts have their own licences.
+    </p>
+    <p>
+        This page sends anonymous timings and usage steps to this server only. No cookies, and your
+        address is never saved. Global Privacy Control or Do Not Track turns it off.
+    </p>
+</footer>
+</div>
+</body>
+</html>

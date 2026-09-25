@@ -143,12 +143,17 @@ fi
 STAGE="$(mktemp -d)"
 trap 'rm -rf "$STAGE"' EXIT
 
-step "Publishing self-contained for $RUNTIME"
+# One executable with the runtime inside, so the VPS needs no .NET of its own. Beside it are only what
+# cannot go in: wwwroot, which is served from disk, and the native SQLite library, which a single file
+# would otherwise unpack to a temporary directory on every start, and the service may have none to use.
+# Compressed, it is half the size, for a moment's decompression on start.
+step "Publishing a single self-contained file for $RUNTIME"
 dotnet publish "$ROOT/Rmg.WebApi" \
     -c Release \
     -r "$RUNTIME" \
     --self-contained true \
-    -p:PublishSingleFile=false \
+    -p:PublishSingleFile=true \
+    -p:EnableCompressionInSingleFile=true \
     -p:DebugType=none \
     -o "$STAGE" \
     --nologo -v quiet \
@@ -239,20 +244,54 @@ else
 fi
 REMOTE
 
+# how long a superseded bundle folder stays on the server for pages that were open before the deploy
+readonly ASSETS_KEPT_DAYS=7
+
 step "Sending the app to $HOST:$TARGET"
+
+# A page opened before this deploy still points at the bundle folder it was served with, and fetches
+# the MP3 worker from it only when Export is pressed, so that folder has to outlive the deploy. The
+# one the live pages point at is marked as retired now, and the prune below counts from that.
+remote "$TARGET" <<'REMOTE'
+target="$1"
+if [[ -f $target/wwwroot/index.html ]]; then
+    live="$(grep -o 'assets/[0-9a-f]\{8\}' "$target/wwwroot/index.html" | head -1 || true)"
+    if [[ -n $live && -d $target/wwwroot/$live ]]; then touch "$target/wwwroot/$live"; fi
+fi
+REMOTE
+
+# the bundles first and without --delete, so the pages that follow never point at a folder not there yet
+rsync -az --human-readable \
+    --chmod=D755,F644 \
+    "$STAGE/wwwroot/assets/" "$HOST:$TARGET/wwwroot/assets/"
+
 # --delete so a file dropped from the build goes too, but never into soundfonts: what is there is
-# tens of megabytes the operator put there deliberately, and is not ours to remove
+# tens of megabytes the operator put there deliberately, and is not ours to remove. Nor into the
+# bundles, which the prune below looks after.
 rsync -az --delete --human-readable \
     --exclude "wwwroot/soundfonts/***" \
+    --exclude "wwwroot/assets/***" \
     --chmod=D755,F644 \
     "$STAGE/" "$HOST:$TARGET/"
 
-remote "$TARGET" "$SERVICE_USER" <<'REMOTE'
-target="$1"; account="$2"
+remote "$TARGET" "$SERVICE_USER" "$ASSETS_KEPT_DAYS" <<'REMOTE'
+target="$1"; account="$2"; kept_days="$3"
 mkdir -p "$target/wwwroot/soundfonts"
 chmod +x "$target/Rmg.WebApi"
-# the runtime ships shared objects and a few helper binaries that have to keep their bit
-find "$target" -name '*.so' -o -name 'createdump' -o -name 'apphost' | xargs -r chmod +x
+
+# bundle folders no page here points at any more, retired longer ago than a tab is likely to stay open
+live="$(grep -oh 'assets/[0-9a-f]\{8\}' "$target"/wwwroot/*.html | sort -u || true)"
+pruned=0
+for folder in "$target"/wwwroot/assets/*/; do
+    folder="${folder%/}"
+    [[ -d $folder ]] || continue
+    grep -qx "assets/${folder##*/}" <<< "$live" && continue
+    if [[ -n $(find "$folder" -maxdepth 0 -mtime +"$kept_days") ]]; then rm -rf "$folder"; pruned=$((pruned + 1)); fi
+done
+echo "    bundle: $(head -1 <<< "$live"), $pruned old one(s) pruned"
+
+# the native libraries beside it have to keep their bit too
+find "$target" -maxdepth 1 -name '*.so' -exec chmod +x {} +
 if id -u "$account" >/dev/null 2>&1; then
     sudo=""; [[ $EUID -eq 0 ]] || sudo="sudo"
     $sudo chgrp -R "$account" "$target"
@@ -393,6 +432,17 @@ $sudo systemctl start "$service"
 for _ in $(seq 1 20); do
     if curl -fsS --max-time 3 "http://127.0.0.1:$port/api/soundfonts" >/dev/null 2>&1; then
         echo "    up, and serving $(curl -fsS "http://127.0.0.1:$port/api/soundfonts" | grep -o '"file"' | wc -l) soundfont(s)"
+
+        # every file the pages point at, which is what a mismatch between the pages and the bundles breaks
+        for page in / /dashboard.html; do
+            for file in $(curl -fsS "http://127.0.0.1:$port$page" | grep -o 'assets/[0-9a-f]\{8\}/[a-z0-9.-]*' | sort -u); do
+                if ! curl -fsS -o /dev/null "http://127.0.0.1:$port/$file"; then
+                    echo "    $page points at $file, which is not served" >&2
+                    exit 1
+                fi
+            done
+        done
+        echo "    the pages and their bundles all answer"
         exit 0
     fi
     sleep 1

@@ -6,6 +6,8 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <InvariantGlobalization>true</InvariantGlobalization>
+        <!-- Caddy compresses on the way out, and UseStaticFiles would never serve a .br or .gz of its own -->
+        <CompressionEnabled>false</CompressionEnabled>
     </PropertyGroup>
 
     <ItemGroup>
@@ -21,5 +23,8 @@
     <ItemGroup>
       <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.12" />
     </ItemGroup>
+
+    <!-- the page's JS and CSS, bundled from Client/ into wwwroot on every build -->
+    <Import Project="Client.targets" />
 
 </Project>

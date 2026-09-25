@@ -1,4 +1,7 @@
 :root {
+    /* native controls, scrollbars and dropdown lists follow the theme too */
+    color-scheme: light dark;
+
     --bg: #f5f5f7;
     --panel: #ffffff;
     --text: #16161a;
@@ -34,6 +37,16 @@
     display: none !important;
 }
 
+/* read out, never shown */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
 body {
     margin: 0;
     padding: 32px 16px 64px;
@@ -48,6 +61,34 @@ main {
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+
+/*
+ * the player page, with a column kept free beside it for the songs so far. The heading has a row to
+ * itself, so the column starts level with the first panel rather than with the title
+ */
+.layout {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 220px;
+    grid-template-areas:
+        "header ."
+        "main ."
+        "footer .";
+    gap: 20px;
+}
+
+.layout > .page-header {
+    grid-area: header;
+}
+
+.layout > main {
+    position: relative;
+    grid-area: main;
+    min-width: 0;
+    max-width: none;
+    margin: 0;
 }
 
 header h1 {
@@ -85,6 +126,15 @@ details.panel > summary {
     letter-spacing: 0.08em;
     color: var(--muted);
     cursor: pointer;
+}
+
+/* a heading, so it can be found among the others, that looks like the summary it sits in */
+details.panel > summary h2 {
+    display: inline;
+    margin: 0;
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
 }
 
 details.panel[open] > summary {
@@ -167,9 +217,21 @@ button:hover:not(:disabled),
     border-color: var(--accent);
 }
 
-button:disabled {
+button:disabled,
+.button[aria-disabled="true"] {
     opacity: 0.45;
     cursor: default;
+}
+
+/* a link with nothing to hand over yet: shown like a disabled button, and just as unclickable */
+.button[aria-disabled="true"] {
+    pointer-events: none;
+}
+
+/* a button among small controls, where a full-size one would shout */
+button.small {
+    padding: 4px 10px;
+    font-size: 13px;
 }
 
 .primary {
@@ -177,6 +239,14 @@ button:disabled {
     border-color: var(--accent);
     color: var(--accent-text);
     font-weight: 600;
+}
+
+/* a filled button's border is already the accent, so under the pointer its fill moves toward the text colour */
+.primary:hover:not(:disabled),
+#play:hover:not(:disabled) {
+    --accent-hover: color-mix(in srgb, var(--accent) 82%, var(--text));
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
 }
 
 button.icon {
@@ -219,7 +289,8 @@ button.icon svg {
     color: var(--muted);
 }
 
-.field input[type="text"] {
+.field input[type="text"],
+.seed-input {
     width: 12ch;
     padding: 8px 10px;
     border: 1px solid var(--border);
@@ -231,11 +302,13 @@ button.icon svg {
     font-variant-numeric: tabular-nums;
 }
 
-/* the seed of the song on show: a value to read and copy, not a field to fill in */
+/* the seed of the song on show: a value to read and copy, not a field to fill in, as wide as the longest seed */
 .field input[readonly] {
+    width: 11.5ch;
     border-color: transparent;
     background: none;
     padding-left: 0;
+    padding-right: 0;
     cursor: text;
 }
 
@@ -265,58 +338,146 @@ button.icon svg {
     margin: 0;
 }
 
-#seeded {
-    margin-top: 12px;
+/* what the song panel does: roll one, see which it is and pass it on, and take it away as a file */
+.song-row {
+    row-gap: 10px;
 }
 
-/* every song the page has had: a list to come back to, rather than a row of controls */
-.history-row {
-    align-items: flex-start;
+.seed-group,
+.downloads {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.history-label {
-    padding-top: 5px;
+.downloads {
+    margin-left: auto;
+}
+
+/* the song panel is played from, so a row of controls has a little more room than elsewhere */
+.song-row + .transport {
+    margin-top: 16px;
+}
+
+/* asking for one seed in particular is the less common way in, so it waits behind a line of text */
+.seeded {
+    margin-top: 10px;
+}
+
+.seeded > summary {
+    width: fit-content;
     font-size: 14px;
     color: var(--muted);
+    cursor: pointer;
+}
+
+.seeded > summary:hover {
+    color: var(--text);
+}
+
+.seeded[open] > summary {
+    margin-bottom: 10px;
+}
+
+/*
+ * every song the page has had: a list to come back to, rather than a row of controls. It follows the
+ * song panel in the page, so a phone finds it there, and a wide screen lifts it into the free column,
+ * as tall as the main column exactly: the panel grows with the list up to that, and the list scrolls
+ */
+.side {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(100% + 20px);
+    width: 220px;
+}
+
+.history-panel {
+    display: flex;
+    flex-direction: column;
+    max-height: 100%;
+}
+
+.history-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
 }
 
 .history {
-    flex: 1;
-    min-width: 0;
+    min-height: 0;
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-
-    /* a long listen runs to a great many songs, and the rest of the page is worth more than all of them */
-    max-height: 104px;
+    flex-direction: column;
+    gap: 2px;
     overflow-y: auto;
+
+    /* room for the focus ring, so it is not clipped by the scrolling edge */
+    margin: 0 -4px;
+    padding: 4px;
 }
 
+.history:empty::before {
+    content: "Songs you hear show up here.";
+    font-size: 13px;
+    color: var(--muted);
+}
+
+/* a list of songs rather than a stack of fields: no boxes, only a highlight under the pointer */
 .history button {
-    padding: 4px 10px;
+    flex-shrink: 0;
+    padding: 5px 10px;
+    border-color: transparent;
+    background: none;
     font-size: 13px;
     font-variant-numeric: tabular-nums;
     color: var(--muted);
 }
 
-/* the song on the page, which is where the list is being read from */
-.history button[aria-current="true"] {
-    border-color: var(--accent);
+.history button:hover:not(:disabled) {
+    border-color: transparent;
+    background: var(--bg);
     color: var(--text);
 }
 
+/* the song on the page, which is where the list is being read from: filled and barred, never a mere outline, */
+/* which is what the keyboard's focus looks like */
+.history button[aria-current="true"],
+.history button[aria-current="true"]:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
+    box-shadow: inset 3px 0 0 var(--accent);
+    color: var(--text);
+    font-weight: 600;
+}
+
 /* being rid of the list is not one of the songs on it, so it does not look like one */
-.history-row .clear {
-    padding: 4px 6px;
+.history-panel .clear {
+    padding: 2px 6px;
     border-color: transparent;
     background: none;
     font-size: 13px;
     color: var(--muted);
 }
 
-.history-row .clear:hover {
+.history-panel .clear:hover:not(:disabled) {
     border-color: transparent;
     color: var(--text);
+}
+
+.history-panel .clear:disabled {
+    visibility: hidden;
+}
+
+/* the one control used more than any other once there is a song, so it carries the accent too */
+#play {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text);
+}
+
+/* the seed to ask for, which the summary above it already names */
+.seed-input {
+    width: 14ch;
 }
 
 .transport {
@@ -346,6 +507,17 @@ input[type="range"] {
     width: 90px;
 }
 
+/* the whole mix rolled at once, kept apart from the volume it shares a row with */
+#roll-instruments {
+    margin-left: auto;
+}
+
+/* the table cannot get narrower than its controls, so a phone scrolls it rather than the whole page */
+.mixer-scroll {
+    margin-top: 12px;
+    overflow-x: auto;
+}
+
 .mixer {
     width: 100%;
     border-collapse: collapse;
@@ -359,7 +531,8 @@ input[type="range"] {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    padding-bottom: 8px;
+    padding: 0 10px 8px 0;
+    white-space: nowrap;
 }
 
 .mixer td {
@@ -377,11 +550,6 @@ input[type="range"] {
     display: flex;
     align-items: center;
     gap: 8px;
-}
-
-.mixer .roll {
-    padding: 3px 8px;
-    font-size: 12px;
 }
 
 .mixer select {
@@ -443,11 +611,12 @@ input[type="range"] {
     color: var(--accent-text);
 }
 
+/* a quiet track, so a silent meter reads as nothing playing rather than as something missing */
 .meter {
     width: 100px;
     height: 6px;
     border-radius: 3px;
-    background: var(--border);
+    background: color-mix(in srgb, var(--border) 45%, transparent);
     overflow: hidden;
 }
 
@@ -472,7 +641,7 @@ input[type="range"] {
 }
 
 #status {
-    margin: 0;
+    margin: 12px 0 0;
     min-height: 1.5em;
     font-size: 14px;
     color: var(--muted);
@@ -483,6 +652,7 @@ input[type="range"] {
 }
 
 footer {
+    grid-area: footer;
     border-top: 1px solid var(--border);
     padding-top: 16px;
     font-size: 13px;
@@ -507,13 +677,110 @@ footer a:hover {
     color: var(--text);
 }
 
+/*
+ * no room for a second column: the list goes under the panels, above the footer, and with nothing
+ * beside it to be as tall as, it keeps a height of its own
+ */
+@media (max-width: 1040px) {
+    .layout {
+        max-width: 760px;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "header"
+            "main"
+            "side"
+            "footer";
+    }
+
+    /* no column to lift it into, so it stays where it is in the page: right under the song panel */
+    .side {
+        position: static;
+        width: auto;
+    }
+
+    /* full width to itself, so the songs sit side by side again rather than one to a line, each on a */
+    /* quiet fill of its own now that there is no column edge to line them up against */
+    .history {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+        max-height: 124px;
+    }
+
+    .history button {
+        background: var(--bg);
+    }
+}
+
 @media (max-width: 560px) {
+    /* a panel's padding is room a phone does not have to spare */
+    .panel {
+        padding: 14px;
+    }
+
+    /*
+     * the song panel in the order a phone uses it: roll a song, play it, then pass it on or take it
+     * away. The row that holds them on a wide screen steps aside, so they can be put in that order
+     */
+    .song-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .song-panel .song-row {
+        display: contents;
+    }
+
+    .song-panel h2,
+    .song-panel .song-row + .transport,
+    .song-panel .toggle,
+    .song-panel .seeded,
+    .song-panel #status {
+        margin: 0;
+    }
+
+    /* the full width of the panel, with its label in the middle of it */
+    #generate {
+        order: 1;
+        justify-content: center;
+    }
+
+    .song-panel .transport {
+        order: 2;
+    }
+
+    .seed-group {
+        order: 3;
+    }
+
+    .downloads {
+        order: 4;
+        margin-left: 0;
+    }
+
+    .song-panel .toggle {
+        order: 5;
+    }
+
+    .song-panel .seeded {
+        order: 6;
+    }
+
+    .song-panel #status {
+        order: 7;
+    }
+
+    #roll-instruments {
+        margin-left: 0;
+    }
+
+    /* the song and where it is stay on one line, between its two times, and the volume goes under them */
     .transport {
         flex-wrap: wrap;
     }
 
-    #seek {
-        order: 1;
+    .transport .volume {
         flex-basis: 100%;
     }
 
@@ -524,5 +791,27 @@ footer a:hover {
 
     .fader {
         width: 60px;
+    }
+}
+
+/*
+ * a finger needs more to aim at than a mouse does: the small controls grow to a size that can be hit,
+ * whatever the width of the screen they are on
+ */
+@media (pointer: coarse) {
+    .mixer button,
+    button.small {
+        min-height: 44px;
+        min-width: 44px;
+        justify-content: center;
+    }
+
+    .history button {
+        min-height: 44px;
+    }
+
+    .mixer input[type="checkbox"] {
+        width: 22px;
+        height: 22px;
     }
 }

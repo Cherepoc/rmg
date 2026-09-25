@@ -8,3 +8,6 @@ songs_old/
 soundfonts/
 deploy.env
 state/
+
+# built from Rmg.WebApi/Client on every build; the soundfonts in it are ignored above
+Rmg.WebApi/wwwroot/

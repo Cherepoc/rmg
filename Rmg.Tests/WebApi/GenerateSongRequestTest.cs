@@ -58,7 +58,7 @@ public sealed class GenerateSongRequestTest
         var result = request.TryGetChannelTracks(out _, out var error);
 
         await Assert.That(result).IsFalse();
-        await Assert.That(error).IsEqualTo($"{channel} is not a MIDI channel. Channels are counted from 1 to 16.");
+        await Assert.That(error).IsEqualTo($"{channel} is not a MIDI channel. Channels are 1 to 16.");
     }
 
     [Test]
@@ -85,7 +85,7 @@ public sealed class GenerateSongRequestTest
         var result = request.TryGetChannelTracks(out _, out var error);
 
         await Assert.That(result).IsFalse();
-        await Assert.That(error).IsEqualTo($"Channel 1 cannot play at a volume of {volume}. Volumes are 0 to 1.");
+        await Assert.That(error).IsEqualTo($"Channel 1 volume {volume} is not between 0 and 1.");
     }
 
     [Test]
@@ -96,7 +96,7 @@ public sealed class GenerateSongRequestTest
         var result = request.TryGetChannelTracks(out _, out var error);
 
         await Assert.That(result).IsFalse();
-        await Assert.That(error).IsEqualTo("The song cannot play at a volume of 2. Volumes are 0 to 1.");
+        await Assert.That(error).IsEqualTo("Song volume 2 is not between 0 and 1.");
     }
 
     [Test]
@@ -107,6 +107,6 @@ public sealed class GenerateSongRequestTest
         var result = request.TryGetChannelTracks(out _, out var error);
 
         await Assert.That(result).IsFalse();
-        await Assert.That(error).IsEqualTo("Channel 1 is asked for more than once.");
+        await Assert.That(error).IsEqualTo("Channel 1 appears more than once.");
     }
 }

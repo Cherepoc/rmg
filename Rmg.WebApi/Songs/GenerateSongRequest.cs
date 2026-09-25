@@ -34,14 +34,14 @@ public sealed record GenerateSongRequest(
     {
         channelTracks = [];
 
-        if (!TryReadVolume(Volume, "The song", out error)) return false;
+        if (!TryReadVolume(Volume, "Song", out error)) return false;
 
         foreach (var track in Tracks ?? [])
         {
             if (track.Channel is < FirstChannel or > LastChannel)
             {
                 error = $"{track.Channel} is not a MIDI channel. "
-                    + $"Channels are counted from {FirstChannel} to {LastChannel}.";
+                    + $"Channels are {FirstChannel} to {LastChannel}.";
                 return false;
             }
 
@@ -57,7 +57,7 @@ public sealed record GenerateSongRequest(
             // two ways to play one channel is a request that cannot be answered, not one to answer halfway
             if (!channelTracks.TryAdd((byte)(track.Channel - FirstChannel), track))
             {
-                error = $"Channel {track.Channel} is asked for more than once.";
+                error = $"Channel {track.Channel} appears more than once.";
                 return false;
             }
         }
@@ -70,7 +70,7 @@ public sealed record GenerateSongRequest(
         error = null;
         if (volume is null or >= 0 and <= 1) return true;
 
-        error = $"{what} cannot play at a volume of {volume}. Volumes are 0 to 1.";
+        error = $"{what} volume {volume} is not between 0 and 1.";
         return false;
     }
 }

@@ -46,6 +46,10 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     foreach (var proxy in settings!.KnownProxies) options.KnownProxies.Add(proxy);
 });
 
+// the JSON the API reads and writes is described at compile time, which a native build cannot do without
+builder.Services.ConfigureHttpJsonOptions(options =>
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonContext.Default));
+
 var app = builder.Build();
 
 // first, so that everything after it sees the request as the client made it, not as the proxy relayed it
@@ -81,7 +85,23 @@ if (settings.SoundFontDirectory is not null)
         RequestPath = $"/{SoundFontLibrary.DirectoryName}"
     });
 
-app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = contentTypes });
+// The bundles live in a folder named by a hash of what is in them, so what is at an address there never
+// changes: a browser keeps it for good and never asks again. The pages are what point at the current
+// folder, so a browser has to ask about those every time, which the ETag keeps cheap. A soundfont never
+// changes under the same name either, and is left to the usual caching.
+app.UseStaticFiles(new StaticFileOptions
+{
+    ContentTypeProvider = contentTypes,
+    OnPrepareResponse = context =>
+    {
+        var path = context.Context.Request.Path;
+        if (path.StartsWithSegments($"/{SoundFontLibrary.DirectoryName}")) return;
+
+        context.Context.Response.Headers.CacheControl = path.StartsWithSegments("/assets")
+            ? "public, max-age=31536000, immutable"
+            : "no-cache";
+    }
+});
 
 app.MapSoundFonts(soundFonts);
 app.MapSongs();

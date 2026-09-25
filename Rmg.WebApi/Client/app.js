@@ -5,9 +5,12 @@ import {
     LAST_INSTRUMENT_BEFORE_EFFECTS,
 } from "./instruments.js";
 import { encodeMp3, renderSong } from "./export.js";
+import { createMediaControls } from "./media-session.js";
 import { getPlayer } from "./player.js";
 import {
+    askToPersist,
     forget,
+    IS_SEED,
     isAutoplaying,
     isKeeping,
     keep,
@@ -31,11 +34,9 @@ const elements = {
     keep: document.getElementById("keep"),
     seed: document.getElementById("seed"),
     generate: document.getElementById("generate"),
-    showSeeded: document.getElementById("show-seeded"),
     seeded: document.getElementById("seeded"),
     seedInput: document.getElementById("seed-input"),
     generateSeeded: document.getElementById("generate-seeded"),
-    historyRow: document.getElementById("history-row"),
     history: document.getElementById("history"),
     clearHistory: document.getElementById("clear-history"),
     download: document.getElementById("download"),
@@ -48,6 +49,7 @@ const elements = {
     elapsed: document.getElementById("elapsed"),
     total: document.getElementById("total"),
     volume: document.getElementById("volume"),
+    volumeValue: document.getElementById("volume-value"),
     autoplay: document.getElementById("autoplay"),
     mixerPanel: document.getElementById("mixer-panel"),
     songVolume: document.getElementById("song-volume"),
@@ -71,11 +73,13 @@ const switchedOff = new Set();
 // the channels whose instrument was picked here, rather than the one the song was generated with
 const chosen = new Set();
 let songVolume = 1;
-let songChannels = [];
 
 // hasSoundFont and hasSong say that the bytes are here, not that the player has them: the page fetches
 // both the moment it opens, and the audio stack cannot exist until the page has been interacted with
 let hasSoundFont = false;
+
+// the soundfont in use, by name and as a Blob, which the browser may keep on disk rather than in memory;
+// an export or a later opt-in to keeping it reads it from here rather than fetching it again
 let source = null;
 let loading = Promise.resolve();
 let hasSong = false;
@@ -84,21 +88,36 @@ let pendingSong = null;
 let delivery = Promise.resolve();
 let startedListening = null;
 let isSeeking = false;
+let seekedFrom = null;
+let isExporting = false;
+let isGenerating = false;
 
 // whether the song on the page was rolled here rather than asked for by seed, which is the only kind
-// that leads to another when it ends, and whether one is on its way of its own accord
+// that leads to another when it ends, and which request to start a song once it arrives is the last one
 let isSongRandom = false;
-let isAdvancing = false;
+let playRequest = 0;
 let isListening = false;
 let downloadUrl = null;
 let exportUrl = null;
 let frame = null;
 let downloadTimer = null;
-let downloadRequest = 0;
+let downloadRefresh = null;
+let sayTimer = null;
+let statusTimer = null;
 
 function setStatus(message, isError = false) {
+    clearTimeout(statusTimer);
     elements.status.textContent = message;
     elements.status.classList.toggle("error", isError);
+}
+
+/**
+ *     Says something went as asked, then lets the line go quiet again. What is still going on, what went
+ *     wrong, and anything to be read and copied stay until something else is said.
+ */
+function announce(message) {
+    setStatus(message);
+    statusTimer = setTimeout(() => setStatus(""), 4000);
 }
 
 /** What the soundfont panel says while it is shut, which is all most visitors will ever see of it. */
@@ -119,7 +138,7 @@ function updateTransport() {
     elements.seek.disabled = !isReady;
 
     // an export is the song rendered through the soundfont, so it wants both of them as much as playing does
-    elements.exportMp3.disabled = !isReady;
+    elements.exportMp3.disabled = !isReady || isExporting;
 
     // sharing is only a seed, which the server has already answered with: no sound is needed to pass it on
     elements.share.disabled = !hasSong;
@@ -150,11 +169,18 @@ async function withPlayer(action, failureMessage) {
 }
 
 function listen(player) {
+    // the length is only known once the sequencer has taken the song, and a new song starts from the top
+    player.onSongChange(() => {
+        render(player, 0);
+        if (!player.paused) showMedia(player, 0);
+    });
     player.onSongEnded(() => {
         setPlayIcon(false);
         reportListening();
         render(player);
-        advance();
+
+        // one on its way keeps the controls playing across the gap, or a locked phone may let go of them
+        if (!advance()) mediaControls.paused(elements.seed.value, player.duration, player.duration);
     });
     player.masterGain = Number(elements.volume.value);
 }
@@ -164,29 +190,37 @@ function listen(player) {
  *     a video site goes on to the next. Only a song rolled here leads anywhere. One asked for by seed, or
  *     arrived at by a link, is the song that was asked for, and it ends where it ends.
  */
-async function advance() {
-    if (!elements.autoplay.checked || !isSongRandom) return;
+function advance() {
+    if (!elements.autoplay.checked || !isSongRandom || isGenerating) return false;
 
-    isAdvancing = true;
-    try {
-        const generated = await generate(null);
-
-        // the player has to have been handed the song before it can be started on it
-        await delivery;
-        if (!generated || !isAdvancing) return;
-
-        await withPlayer((player) => startPlaying(player, "auto"), "Playback failed");
-    } finally {
-        isAdvancing = false;
-    }
+    playNew(null, "auto");
+    return true;
 }
 
 /**
- *     Lets go of a song on its way of its own accord. Whatever was asked for by hand since is what should
- *     be playing, rather than the one the song before it asked for.
+ *     Gets a song and starts it the moment it has reached the player: asking for a song is asking to hear
+ *     it, whether by the button, by a seed, from the list, or by the song before it running out.
  */
-function stopAdvancing() {
-    isAdvancing = false;
+async function playNew(seed, origin) {
+    // one already on its way is the one that will play: a second ask would only cancel it for nothing
+    if (isGenerating) return;
+
+    const request = ++playRequest;
+    const generated = await generate(seed);
+
+    // the player has to have been handed the song before it can be started on it
+    await delivery;
+    if (!generated || request !== playRequest) return;
+
+    await withPlayer((player) => startPlaying(player, origin), "Playback failed");
+}
+
+/**
+ *     Lets go of a song on its way to being started. Whatever was pressed since, Stop or Pause or another
+ *     song, is the last word on what should be playing.
+ */
+function cancelPendingPlay() {
+    playRequest++;
 }
 
 // --- soundfont -------------------------------------------------------------
@@ -199,7 +233,7 @@ elements.soundFont.addEventListener("change", async () => {
 
     elements.library.value = "";
     showLicense(null);
-    await useSoundFont(file.name, () => file.arrayBuffer(), "file");
+    await useSoundFont(file.name, () => file, "file");
 });
 
 elements.library.addEventListener("change", async () => {
@@ -216,62 +250,78 @@ elements.keep.addEventListener("change", async () => {
 
     if (!elements.keep.checked) {
         await forget().catch(() => {});
-        setStatus("Soundfonts are no longer kept in this browser.");
+        announce("Soundfont forgotten.");
         return;
     }
+
+    // not waited for: whatever the browser says, the soundfont is saved the same way
+    askToPersist();
 
     if (source === null) {
-        setStatus("The next soundfont you load will be kept in this browser.");
+        announce("The next soundfont you load will be remembered.");
         return;
     }
 
-    setStatus(`Keeping ${source.name}…`);
-    try {
-        const problem = await store(source.name, await source.read());
-        setStatus(problem === null
-            ? `${source.name} is kept in this browser.`
-            : `${source.name} could not be kept: ${problem}.`);
-    } catch (error) {
-        setStatus(`${source.name} could not be kept: ${error.message}.`);
+    const saving = source;
+    setStatus(`Saving ${saving.name}…`);
+
+    const problem = await store(saving.name, saving.blob);
+    if (problem !== null) {
+        setStatus(`Could not save ${saving.name}: ${problem}.`, true);
+        return;
     }
+
+    saving.isStored = true;
+    announce(`${saving.name} will load next time.`);
 });
 
 /** Serialised, because two loads at once would race each other inside the sound bank manager. */
 function useSoundFont(name, read, origin, isStored = false) {
-    loading = loading.then(() => loadSoundFont(name, read, origin, isStored));
+    // caught here, so one load that throws cannot stop every load after it
+    loading = loading
+        .then(() => loadSoundFont(name, read, origin, isStored))
+        .catch((error) => setSoundFontState(`Could not load ${name}: ${error.message}`, true));
     return loading;
 }
 
 /**
- *     Takes the soundfont <paramref name="read" /> returns, rather than its bytes, because the
- *     worklet may take the buffer with it: holding a second copy of a few hundred megabytes just
- *     to serve a later opt-in is not worth it, so a re-read is asked for instead.
+ *     <paramref name="read" /> answers with the soundfont as a Blob or an ArrayBuffer. It is held as a
+ *     Blob, and the player is handed a copy of its bytes, since loading detaches the buffer it is given.
  */
 async function loadSoundFont(name, read, origin, isStored = false) {
     setSoundFontState(`Loading ${name}…`);
 
+    let blob;
     let soundFont;
     try {
-        soundFont = await read();
+        const data = await read();
+        blob = data instanceof Blob ? data : new Blob([data]);
+        soundFont = await blob.arrayBuffer();
     } catch (error) {
-        clearSoundFont();
-        setSoundFontState(`${name} could not be read`, true);
         setStatus(`Could not read ${name}: ${explain(error)}`, true);
+
+        // one already loaded is still the one playing, so it is what the page goes on showing
+        if (source === null) {
+            clearSoundFont();
+            setSoundFontState(`${name} could not be read`, true);
+        } else {
+            elements.soundFont.value = "";
+            selectInLibrary(source.name);
+            setSoundFontState(source.name);
+        }
 
         // the byte count tells the two failures apart: nothing arrived, or the connection gave out partway
         track("soundfont_failed", { detail: error.name || "unreadable", bytes: error.got ?? null });
         return;
     }
 
-    // stored before the player is handed it, since loading detaches the buffer
-    const problem = isKeeping() && !isStored ? await store(name, soundFont) : null;
-
-    source = { name, read };
+    // kept only once the player has taken it, so a file that will not load never replaces one that does
+    source = { name, blob, isStored };
     pendingSoundFont = soundFont;
     hasSoundFont = true;
     updateTransport();
 
-    setSoundFontState(problem === null ? name : `${name}, not kept: ${problem}`);
+    setSoundFontState(name);
 
     // the size and where it came from, never its name: a file of your own is yours, and its name can say
     // more about you than this has any business knowing
@@ -286,7 +336,10 @@ async function loadSoundFont(name, read, origin, isStored = false) {
  *     the soundfont are fetched the moment the page opens and wait here for the first gesture.
  */
 function deliver() {
-    delivery = delivery.then(deliverPending);
+    // caught here, so one delivery that throws cannot stop every delivery after it
+    delivery = delivery
+        .then(deliverPending)
+        .catch((error) => setStatus(`The player could not take the song: ${error.message}`, true));
     return delivery;
 }
 
@@ -295,41 +348,52 @@ async function deliverPending() {
 
     await firstGesture();
 
-    // taken before the await, since loading detaches the buffers and a second delivery must not resend them
+    // a player that would not start is no fault of the song or the soundfont: both wait for the next try
+    const player = await withPlayer((player) => player, "The player could not start");
+    if (player === null) return;
+
+    // taken only now, since loading detaches the buffers and a second delivery must not resend them
     const soundFont = pendingSoundFont;
+    const loaded = source;
     const song = pendingSong;
     pendingSoundFont = null;
     pendingSong = null;
 
-    const delivered = await withPlayer(async (player) => {
-        if (soundFont !== null) await player.loadSoundFont(soundFont);
+    if (soundFont !== null) {
+        try {
+            await player.loadSoundFont(soundFont);
+        } catch (error) {
+            setStatus(`Could not load ${loaded.name}: ${error.message}`, true);
 
+            // a kept one that would not load would only fail again on the next visit; any other kept one
+            // is still good, and stays
+            if (loaded.isStored) await forget().catch(() => {});
+            if (source === loaded) clearSoundFont();
+
+            // the song never reached the player, so it waits for the next soundfont
+            if (song !== null) pendingSong ??= song;
+            return;
+        }
+
+        // not waited for: saving hundreds of megabytes has no business holding up the first note
+        if (isKeeping() && !loaded.isStored) keepLoaded(loaded);
+    }
+
+    try {
         if (song !== null) {
             player.loadSong(song);
             applyMix(player);
         } else if (soundFont !== null) {
             // a soundfont swapped under a song already playing: the bank took every channel back to
             // where it started, and the song will not say what it plays again until it comes round
-            restoreMix(player);
+            applyMix(player, true);
         }
-
-        return true;
-    }, "The player could not start");
-
-    if (delivered === true) {
-        track("audio_ready", { ms: since() });
+    } catch (error) {
+        setStatus(`The player could not take the song: ${error.message}`, true);
         return;
     }
 
-    if (soundFont !== null) {
-        // whatever would not load is not worth keeping, and would only fail again on the next visit
-        await forget().catch(() => {});
-        clearSoundFont();
-        hasSoundFont = false;
-    }
-
-    if (song !== null) hasSong = false;
-    updateTransport();
+    track("audio_ready", { ms: since() });
 }
 
 /** How many times a soundfont is asked for before giving up on it. */
@@ -351,7 +415,13 @@ async function download(file, name) {
     for (let attempt = 1; attempt <= DOWNLOAD_ATTEMPTS; attempt++) {
         try {
             const response = await fetch(address, got > 0 ? { headers: { Range: `bytes=${got}-` } } : {});
-            if (!response.ok) throw new Error(await describeFailure(response));
+            if (!response.ok) {
+                const refusal = new Error(await describeFailure(response));
+
+                // a server that says no will say no again; only a failing server is worth asking twice
+                refusal.isFinal = response.status < 500;
+                throw refusal;
+            }
 
             // a server that took no notice of the range is starting over, so what was kept is not the start
             if (got > 0 && response.status !== 206) {
@@ -359,29 +429,25 @@ async function download(file, name) {
                 got = 0;
             }
 
+            // a missing length reads as 0, which would make whatever has arrived look like all of it
             const remaining = Number(response.headers.get("Content-Length"));
-            if (total === 0 && Number.isFinite(remaining)) total = got + remaining;
+            if (total === 0 && remaining > 0) total = got + remaining;
 
             // read as it arrives, so an interruption keeps what came before it
-            if (response.body === null || response.body === undefined) {
-                pieces.push(new Uint8Array(await response.arrayBuffer()));
-            } else {
-                const reader = response.body.getReader();
+            const reader = response.body.getReader();
+            for (;;) {
+                const { done, value } = await reader.read();
+                if (done) break;
 
-                for (;;) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-
-                    pieces.push(value);
-                    got += value.length;
-                    setSoundFontState(`Downloading ${name}… ${sofar(got, total)}`);
-                }
+                pieces.push(value);
+                got += value.length;
+                setSoundFontState(`Downloading ${name}… ${sofar(got, total)}`);
             }
 
-            return join(pieces);
+            return new Blob(pieces);
         } catch (error) {
             failure = error;
-            if (attempt === DOWNLOAD_ATTEMPTS) break;
+            if (attempt === DOWNLOAD_ATTEMPTS || error.isFinal) break;
 
             setSoundFontState(`Downloading ${name}… ${sofar(got, total)}, trying again`);
             await pause(400 * attempt);
@@ -397,20 +463,26 @@ function sofar(got, total) {
     return total > 0 ? formatPercent(got / total) : formatSize(got);
 }
 
-function join(pieces) {
-    const all = new Uint8Array(pieces.reduce((length, piece) => length + piece.length, 0));
-
-    let at = 0;
-    for (const piece of pieces) {
-        all.set(piece, at);
-        at += piece.length;
-    }
-
-    return all.buffer;
-}
-
 function pause(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Saves a soundfont the player has taken, and says so beside its name only if it could not. */
+async function keepLoaded(loaded) {
+    const problem = await store(loaded.name, loaded.blob);
+
+    // switched off while the save was still going: what was asked last is the last word
+    if (!isKeeping()) {
+        await forget().catch(() => {});
+        return;
+    }
+
+    if (problem === null) {
+        loaded.isStored = true;
+        return;
+    }
+
+    if (source === loaded) setSoundFontState(`${loaded.name}, not saved: ${problem}`);
 }
 
 async function store(name, soundFont) {
@@ -418,7 +490,7 @@ async function store(name, soundFont) {
         await keep(name, soundFont);
         return null;
     } catch (error) {
-        return error.name === "QuotaExceededError" ? "this browser has no room for it" : error.message;
+        return error.name === "QuotaExceededError" ? "not enough space" : error.message;
     }
 }
 
@@ -429,6 +501,8 @@ function clearSoundFont() {
     showLicense(null);
     source = null;
     pendingSoundFont = null;
+    hasSoundFont = false;
+    updateTransport();
 }
 
 /**
@@ -459,9 +533,13 @@ async function listLibrary() {
 
     if (soundFonts.length === 0) return null;
 
+    // what the dropdown shows when the soundfont is not one of these, which is not itself a choice:
+    // picking it would leave a soundfont playing under a dropdown that says there is none
     const choose = document.createElement("option");
     choose.value = "";
     choose.textContent = "Choose…";
+    choose.disabled = true;
+    choose.hidden = true;
 
     const options = soundFonts.map(describeSoundFont);
     elements.library.replaceChildren(choose, ...options);
@@ -503,37 +581,28 @@ function firstGesture() {
             return;
         }
 
+        // a touch only allows audio once the finger lifts, so pointerdown is too early on a phone: a player
+        // built then is never ready. A click comes after the lift, whatever did the clicking.
         const options = { once: true, capture: true };
         const done = () => {
-            document.removeEventListener("pointerdown", done, options);
+            document.removeEventListener("click", done, options);
             document.removeEventListener("keydown", done, options);
             resolve();
         };
 
-        document.addEventListener("pointerdown", done, options);
+        document.addEventListener("click", done, options);
         document.addEventListener("keydown", done, options);
     });
 }
 
-async function reread() {
-    const saved = await recall();
-    if (!saved) throw new Error("it is no longer kept in this browser");
-
-    return saved.soundFont;
-}
-
 // --- generating ------------------------------------------------------------
 
-elements.showSeeded.addEventListener("change", () => {
-    elements.seeded.hidden = !elements.showSeeded.checked;
-    if (elements.showSeeded.checked) elements.seedInput.focus();
+elements.seeded.addEventListener("toggle", () => {
+    if (elements.seeded.open) elements.seedInput.focus();
 });
 
 // no seed at all, so the server rolls one and reports it back in X-Song-Seed
-elements.generate.addEventListener("click", () => {
-    stopAdvancing();
-    generate(null);
-});
+elements.generate.addEventListener("click", () => playNew(null, "generate"));
 
 elements.generateSeeded.addEventListener("click", () => {
     const seed = readSeed(elements.seedInput.value.trim());
@@ -542,18 +611,20 @@ elements.generateSeeded.addEventListener("click", () => {
         return;
     }
 
-    stopAdvancing();
-    generate(seed);
+    playNew(seed, "seed");
 });
 
 elements.seedInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") elements.generateSeeded.click();
 });
 
-/** A seed is a 32-bit integer, and anything else is worth saying so before it is sent. */
+/**
+ *     A seed is a 32-bit integer, and anything else is worth saying so before it is sent. Written out in
+ *     digits, too: Number takes "0x10" and "1e3" as well, which are not what anybody means by a seed.
+ */
 function readSeed(text) {
     const seed = Number(text);
-    const isSeed = text !== "" && Number.isInteger(seed) && seed >= -(2 ** 31) && seed <= 2 ** 31 - 1;
+    const isSeed = IS_SEED.test(text) && seed >= -(2 ** 31) && seed <= 2 ** 31 - 1;
     return isSeed ? seed : null;
 }
 
@@ -561,42 +632,52 @@ function readSeed(text) {
  *     The seed asked for in the address, as <c>?seed=12345</c>: the seed itself, and whether one was
  *     asked for at all. A link carrying something that is not a seed is worth saying so about, rather
  *     than quietly playing a different song and letting whoever sent it wonder.
+ *
+ *     <c>wasRolled</c> tells a refresh from a link. The page writes the seed it is playing into the
+ *     address, so every refresh after the first arrives looking exactly like a seed somebody asked for;
+ *     what marks it as the page's own roll is the state left on the history entry, which a refresh
+ *     keeps and a link followed from anywhere else does not have.
  */
 function linkedSeed() {
     const asked = new URL(location.href).searchParams.get("seed");
-    if (asked === null) return { seed: null, wasAsked: false };
+    const wasRolled = history.state?.rolled === true;
 
-    return { seed: readSeed(asked.trim()), wasAsked: true };
+    if (asked === null) return { seed: null, wasAsked: false, wasRolled };
+
+    return { seed: readSeed(asked.trim()), wasAsked: true, wasRolled };
 }
 
 /**
  *     Keeps the address on the song being heard, so a refresh gives the same one back and the address
  *     bar is itself a shareable link. Replaced rather than pushed: every roll of the dice is not a place
  *     to go back to.
+ *
+ *     Whether the page rolled this one goes on the entry with it. The address cannot say so by itself:
+ *     a seed the page put there and a seed somebody sent read the same, and a refresh of a rolled song
+ *     is still a rolled song, so it should go on rolling when it ends.
  */
-function rememberSeed(songSeed) {
+function rememberSeed(songSeed, wasRolled) {
     try {
-        const address = new URL(location.href);
-        address.searchParams.set("seed", songSeed);
-        history.replaceState(null, "", address);
+        history.replaceState({ rolled: wasRolled }, "", songLink(songSeed));
     } catch {
         // an address that cannot be rewritten costs nothing here; the share button reads the seed itself
     }
 }
 
-/** The link to the song on the page, which is this address with the seed it is playing. */
-function songLink() {
+/** The link to a song, which is this address with its seed. */
+function songLink(songSeed) {
     const address = new URL(location.href);
-    address.searchParams.set("seed", elements.seed.value);
+    address.searchParams.set("seed", songSeed);
 
     return address.toString();
 }
 
-function requestSong(song) {
+function requestSong(song, signal = undefined) {
     return fetch(new URL("api/songs/generate", location.href), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(song),
+        signal,
     });
 }
 
@@ -613,8 +694,15 @@ function describeMix() {
     };
 }
 
-/** Answers whether a song arrived, which is what tells a roll of the next one that it has something to play. */
-async function generate(seed) {
+/**
+ *     Answers whether a song arrived, which is what tells a roll of the next one that it has something
+ *     to play. <paramref name="isRolled" /> says the song was the page's own to roll rather than one
+ *     asked for, which is what makes it lead to another when it ends; a seed refreshed back into the
+ *     address is still one the page rolled, so the caller is allowed to say so.
+ */
+async function generate(seed, isRolled = seed === null) {
+    if (isGenerating) return false;
+
     setGenerating(true);
     cancelDownloadRefresh();
     setStatus("Generating…");
@@ -627,26 +715,33 @@ async function generate(seed) {
             return false;
         }
 
+        const song = await response.arrayBuffer();
         const songSeed = response.headers.get("X-Song-Seed") ?? String(seed);
+
+        // only once the whole song is here: a body that fails halfway leaves the old song and its mix
         readSong(response.headers.get("X-Song-Instruments"));
 
         // built from what the server reported rather than from the loaded song, so the mix is on the
         // page as soon as there is a song at all, without waiting for the audio stack a click builds
         buildMixer([...instruments.keys()].sort((first, second) => first - second));
 
-        const song = await response.arrayBuffer();
+        // a song replaced while playing was listened to up to here, and the next one is from here
+        if (startedListening !== null) {
+            reportListening();
+            startedListening = performance.now();
+        }
 
         elements.seed.value = songSeed;
-        rememberSeed(songSeed);
+        rememberSeed(songSeed, isRolled);
         addToHistory(songSeed);
         // offered for download first, and as a copy, so it stays usable whatever the audio stack does
         offerDownload(song, songSeed);
-        setStatus(`Generated song ${songSeed}.`);
+        announce(`Generated song ${songSeed}.`);
         track("song_generated", { ms: since(), seed: Number(songSeed) });
 
         pendingSong = song;
         hasSong = true;
-        isSongRandom = seed === null;
+        isSongRandom = isRolled;
         updateTransport();
         deliver();
 
@@ -660,24 +755,14 @@ async function generate(seed) {
     }
 }
 
-/** Nothing is asked for while a song is on its way, the list of songs so far included. */
-function setGenerating(isGenerating) {
-    elements.generate.disabled = isGenerating;
-    elements.generateSeeded.disabled = isGenerating;
-
-    // a button disabled under the keyboard drops it, and the list is where the keyboard just was
-    const held = isGenerating && elements.history.contains(document.activeElement) ? document.activeElement : null;
-
-    for (const item of elements.history.children) item.disabled = isGenerating;
-
-    if (isGenerating) {
-        heldByKeyboard = held;
-        return;
-    }
-
-    // put the keyboard back only where it was taken from: anything pressed since is the last word
-    if (heldByKeyboard?.isConnected && document.activeElement === document.body) heldByKeyboard.focus();
-    heldByKeyboard = null;
+/**
+ *     The buttons up top are disabled while a song is on its way. The list is not, since a disabled
+ *     button drops the keyboard; generate simply ignores a press that arrives in the meantime.
+ */
+function setGenerating(isOn) {
+    isGenerating = isOn;
+    elements.generate.disabled = isOn;
+    elements.generateSeeded.disabled = isOn;
 }
 
 /**
@@ -688,8 +773,8 @@ function explain(error) {
     if (error.name !== "TypeError") return error.message;
 
     return error.got > 0
-        ? "the download stopped partway. Open the soundfont section and choose it again, or take a smaller one."
-        : "the download would not start. Open the soundfont section and try again.";
+        ? "the download stopped. Choose it again or pick a smaller one."
+        : "the download would not start. Try again.";
 }
 
 async function describeFailure(response) {
@@ -707,7 +792,7 @@ function offerDownload(song, songSeed) {
     downloadUrl = URL.createObjectURL(new Blob([song], { type: "audio/midi" }));
     elements.download.href = downloadUrl;
     elements.download.download = `song-${songSeed}.mid`;
-    elements.download.hidden = false;
+    elements.download.removeAttribute("aria-disabled");
 }
 
 // the download is a plain anchor, so the click is the only place it can be noticed
@@ -720,11 +805,6 @@ elements.download.addEventListener("click", () => {
 /** How many seeds the page keeps before the oldest is let go of. */
 const SONGS_KEPT = 50;
 
-const heardSeeds = [];
-
-/** The button the keyboard was on when the list was disabled, so it can be given back. */
-let heldByKeyboard = null;
-
 restoreHistory();
 
 /**
@@ -732,45 +812,47 @@ restoreHistory();
  *     with goes on top of what came before rather than starting the list over.
  */
 function restoreHistory() {
-    for (const songSeed of recallHistory().slice(0, SONGS_KEPT)) {
-        heardSeeds.push(songSeed);
-        elements.history.append(createHistoryItem(songSeed));
-    }
+    // a seed is on the list once, where it was last heard, which a list kept before that rule may not say
+    const seeds = [...new Set(recallHistory())].slice(0, SONGS_KEPT);
+    elements.history.append(...seeds.map(createHistoryItem));
+    elements.clearHistory.disabled = elements.history.children.length === 0;
+}
 
-    elements.historyRow.hidden = heardSeeds.length === 0;
+/** The seeds in the list, newest first: the buttons are the list, so it is read off them. */
+function historySeeds() {
+    return [...elements.history.children].map((item) => item.textContent);
 }
 
 /** The list is this browser's to be rid of, being the one thing here that says what anybody listened to. */
 elements.clearHistory.addEventListener("click", () => {
-    heardSeeds.length = 0;
     elements.history.replaceChildren();
-    elements.historyRow.hidden = true;
-    keepHistory(heardSeeds);
+    elements.clearHistory.disabled = true;
+    keepHistory([]);
 });
 
 /**
- *     Puts a seed down as one the page has had, however it came about: rolled, typed, followed from a
- *     link, or rolled by the song before it running out. A seed already down is not put down twice, so
- *     coming back to a song through the list leaves the list as it was.
- *
- *     The buttons are left where they are rather than written out again, so the one just pressed is
- *     still the one under the finger, and still the one the keyboard is on.
+ *     Puts a seed on top of the list, however it came about: rolled, typed, followed from a link, rolled
+ *     by the song before it running out, or pressed on the list itself. The list is the order songs were
+ *     heard in, so a seed heard again moves to the top, and wherever it was before is taken off.
  */
 function addToHistory(songSeed) {
-    if (!heardSeeds.includes(songSeed)) {
-        heardSeeds.unshift(songSeed);
-        elements.history.prepend(createHistoryItem(songSeed));
+    const earlier = [...elements.history.children].filter((item) => item.textContent === songSeed);
 
-        while (heardSeeds.length > SONGS_KEPT) {
-            heardSeeds.pop();
-            elements.history.lastElementChild?.remove();
-        }
+    // the keyboard follows a pressed seed to the top, rather than being dropped with the button it was on
+    const wasFocused = earlier.includes(document.activeElement);
+    for (const item of earlier) item.remove();
 
-        keepHistory(heardSeeds);
-    }
+    const item = createHistoryItem(songSeed);
+    elements.history.prepend(item);
+    while (elements.history.children.length > SONGS_KEPT) elements.history.lastElementChild.remove();
 
+    // the song on the page is the top of the list, so that is where the list is scrolled to
+    elements.history.scrollTop = 0;
+    if (wasFocused) item.focus({ preventScroll: true });
+
+    keepHistory(historySeeds());
     markCurrentSong(songSeed);
-    elements.historyRow.hidden = heardSeeds.length === 0;
+    elements.clearHistory.disabled = false;
 }
 
 /** Marks the song on the page, which is where the list is being read from. */
@@ -792,12 +874,10 @@ function createHistoryItem(songSeed) {
     button.textContent = songSeed;
     button.setAttribute("aria-label", `Song ${songSeed}`);
 
-    // one arriving while a song is on its way is as unaskable as the buttons above it
-    button.disabled = elements.generate.disabled;
-
     button.addEventListener("click", () => {
-        stopAdvancing();
-        generate(Number(songSeed));
+        if (isGenerating) return;
+
+        playNew(Number(songSeed), "history");
     });
 
     return button;
@@ -813,8 +893,8 @@ elements.share.addEventListener("click", share);
  *     song as it was generated rather than the mixer as it was left.
  */
 async function share() {
-    const link = songLink();
     const seed = elements.seed.value;
+    const link = songLink(seed);
 
     if (navigator.share !== undefined) {
         try {
@@ -829,7 +909,7 @@ async function share() {
 
     if (await copy(link)) {
         say("Copied");
-        setStatus(`Link to song ${seed} copied.`);
+        announce(`Link to song ${seed} copied.`);
         track("shared", { seed: Number(seed) || null, detail: "clipboard" });
         return;
     }
@@ -872,7 +952,10 @@ function copyTheOldWay(text) {
 /** Says so on the button itself, which is where the eye already is, and puts it back afterwards. */
 function say(word) {
     elements.share.textContent = word;
-    setTimeout(() => (elements.share.textContent = "Share"), 1600);
+
+    // a second press starts the wait over, rather than the first one cutting the second short
+    clearTimeout(sayTimer);
+    sayTimer = setTimeout(() => (elements.share.textContent = "Share"), 1600);
 }
 
 // --- exporting -------------------------------------------------------------
@@ -887,7 +970,11 @@ async function exportMp3() {
     const songSeed = elements.seed.value;
     const name = `song-${songSeed}.mp3`;
 
-    elements.exportMp3.disabled = true;
+    // taken now: a soundfont that fails to load while the song is fetched takes `source` with it
+    const exporting = source;
+
+    isExporting = true;
+    updateTransport();
     setStatus("Fetching the song…");
 
     try {
@@ -895,7 +982,7 @@ async function exportMp3() {
         if (!response.ok) throw new Error(await describeFailure(response));
 
         const song = await response.arrayBuffer();
-        const soundFont = await source.read();
+        const soundFont = await exporting.blob.arrayBuffer();
 
         const audio = await renderSong(song, soundFont, (progress) =>
             setStatus(`Rendering ${formatPercent(progress)}…`));
@@ -904,11 +991,12 @@ async function exportMp3() {
             setStatus(`Encoding ${formatPercent(progress)}…`));
 
         offerExport(mp3, name);
-        setStatus(`Exported ${name}, ${formatSize(mp3.size)}.`);
+        announce(`Exported ${name}, ${formatSize(mp3.size)}.`);
         track("export_mp3", { ms: since(), seed: Number(songSeed) || null, detail: `${elements.bitrate.value} kbps` });
     } catch (error) {
         setStatus(`Could not export ${name}: ${error.message}`, true);
     } finally {
+        isExporting = false;
         updateTransport();
     }
 }
@@ -931,32 +1019,67 @@ elements.autoplay.checked = isAutoplaying();
 
 elements.autoplay.addEventListener("change", () => setAutoplaying(elements.autoplay.checked));
 
-elements.play.addEventListener("click", async () => {
-    stopAdvancing();
+elements.play.addEventListener("click", () => playOrPause());
+
+/**
+ *     The play button, which toggles, and the lock screen's play and pause, which each only go one way:
+ *     <paramref name="wanted" /> is true to play, false to pause, and left out to toggle.
+ */
+async function playOrPause(wanted) {
+    cancelPendingPlay();
 
     // this click is very likely the gesture the fetched song and soundfont have been waiting for
     await deliver();
 
     await withPlayer(async (player) => {
         if (player.paused) {
-            await startPlaying(player);
+            if (wanted !== false) await startPlaying(player);
             return;
         }
+
+        if (wanted === true) return;
 
         stopTicking();
         player.pause();
         reportListening();
         setPlayIcon(false);
+        showMedia(player);
     }, "Playback failed");
-});
+}
 
 /** Starts the song, and everything that follows it while it plays. */
 async function startPlaying(player, origin = null) {
     await player.play();
     startTicking(player);
     setPlayIcon(true);
+    showMedia(player);
     startedListening = performance.now();
     track("play", { seed: Number(elements.seed.value) || null, detail: origin });
+}
+
+/**
+ *     The lock screen and media keys, which drive the page the way its own buttons do. Next is a new
+ *     random song, the way the song after this one would be.
+ */
+const mediaControls = createMediaControls({
+    play: () => playOrPause(true),
+    pause: () => playOrPause(false),
+    stop: () => elements.stop.click(),
+    next: () => playNew(null, "lockscreen"),
+    seek: (time, offset) => withPlayer((player) => {
+        const duration = player.duration;
+        const target = Math.min(Math.max(time ?? player.currentTime + offset, 0), duration);
+        player.currentTime = target;
+        render(player, target);
+        showMedia(player, target);
+    }, "Seeking failed"),
+});
+
+/** Tells the lock screen where the song is, and whether it is playing. */
+function showMedia(player, position = player.currentTime) {
+    const seed = elements.seed.value;
+    if (player.paused) mediaControls.paused(seed, position, player.duration);
+    else mediaControls.playing(seed, position, player.duration);
 }
 
 /**
@@ -973,7 +1096,7 @@ function reportListening() {
 }
 
 elements.stop.addEventListener("click", async () => {
-    stopAdvancing();
+    cancelPendingPlay();
     reportListening();
 
     await withPlayer((player) => {
@@ -981,23 +1104,50 @@ elements.stop.addEventListener("click", async () => {
         player.stop();
         setPlayIcon(false);
         render(player, 0);
+        mediaControls.paused(elements.seed.value, 0, player.duration);
     }, "Playback failed");
 });
 
-elements.seek.addEventListener("pointerdown", () => (isSeeking = true));
+// a Tab away from the bar is let go of on the next element, so leaving the bar ends the seek too
+elements.seek.addEventListener("pointerdown", () => {
+    isSeeking = true;
+    seekedFrom = { value: elements.seek.value, elapsed: elements.elapsed.textContent };
+});
 elements.seek.addEventListener("keydown", () => (isSeeking = true));
 elements.seek.addEventListener("keyup", () => (isSeeking = false));
+elements.seek.addEventListener("blur", () => (isSeeking = false));
 window.addEventListener("pointerup", () => (isSeeking = false));
 
+// a touch that turns into a scroll is cancelled rather than let go of, and no change follows it, so the
+// bar goes back to where the song is rather than staying where the finger happened to leave it
+elements.seek.addEventListener("pointercancel", () => {
+    isSeeking = false;
+    if (seekedFrom === null) return;
+
+    elements.seek.value = seekedFrom.value;
+    elements.elapsed.textContent = seekedFrom.elapsed;
+    seekedFrom = null;
+});
+
+// a seek replays the song up to the new place, so dragging only shows where it would go, and the
+// sequencer is moved once, when the bar is let go of
 elements.seek.addEventListener("input", async () => {
+    await withPlayer((player) => {
+        elements.elapsed.textContent = formatTime(Number(elements.seek.value) * player.duration);
+    }, "Seeking failed");
+});
+
+elements.seek.addEventListener("change", async () => {
     await withPlayer((player) => {
         const time = Number(elements.seek.value) * player.duration;
         player.currentTime = time;
         render(player, time);
+        showMedia(player, time);
     }, "Seeking failed");
 });
 
 elements.volume.addEventListener("input", async () => {
+    elements.volumeValue.textContent = formatPercent(Number(elements.volume.value));
     await withPlayer((player) => (player.masterGain = Number(elements.volume.value)), "Could not set the volume");
 });
 
@@ -1008,8 +1158,6 @@ function buildMixer(channels) {
     muted.clear();
     soloed.clear();
     elements.mixer.replaceChildren();
-
-    songChannels = channels;
 
     for (const channel of channels) {
         const number = document.createElement("td");
@@ -1123,7 +1271,7 @@ function rollInstrument(channel) {
 }
 
 elements.rollInstruments.addEventListener("click", () => {
-    for (const channel of songChannels) rollInstrument(channel);
+    for (const channel of instruments.keys()) rollInstrument(channel);
 });
 
 /**
@@ -1168,10 +1316,12 @@ function createVolume(channel) {
         volumes.set(channel, volume);
         shown.textContent = formatPercent(volume);
         scheduleDownloadRefresh();
-        track("mix_changed", { detail: "volume" });
 
         withPlayer((player) => player.setChannelVolume(channel, songVolume * volume), "Could not set the volume");
     });
+
+    // counted once it is let go of: a drag is one change, not one for every step it passed through
+    fader.addEventListener("change", () => track("mix_changed", { detail: "volume" }));
 
     const field = document.createElement("div");
     field.className = "fader-field";
@@ -1183,16 +1333,16 @@ function formatPercent(volume) {
     return `${Math.round(volume * 100)}%`;
 }
 
+/** The General MIDI instruments, grouped by family and numbered by counting through them in order. */
 function fillInstruments(select) {
-    select.append(...INSTRUMENT_FAMILIES.map(createFamily));
-}
+    let instrument = 0;
 
-function createFamily(family, familyIndex) {
-    const group = document.createElement("optgroup");
-    group.label = family.name;
-    group.append(...family.instruments.map((name, index) =>
-        createInstrumentOption(familyIndex * family.instruments.length + index, name)));
-    return group;
+    select.append(...INSTRUMENT_FAMILIES.map((family) => {
+        const group = document.createElement("optgroup");
+        group.label = family.name;
+        group.append(...family.instruments.map((name) => createInstrumentOption(instrument++, name)));
+        return group;
+    }));
 }
 
 function createInstrumentOption(instrument, name) {
@@ -1244,34 +1394,21 @@ function isSilenced(channel) {
 }
 
 /**
- *     Puts the mix on the page onto a player that has just been handed the song. Loading a song lets go of
- *     every lock the mixer set, and anything chosen before the first click had nowhere to go until now.
- *     Only what was actually changed here is applied: the song carries its own instruments and volumes,
- *     and locking a channel to what it already plays would stop the song setting it again on the way round.
+ *     Puts the mix on the page onto the player. Loading a song lets go of every lock the mixer set, and
+ *     anything chosen before the first click had nowhere to go until now. Only what was actually changed
+ *     here is applied: the song carries its own instruments and volumes, and locking a channel to what it
+ *     already plays would stop the song setting it again on the way round.
+ *
+ *     A new sound bank undoes more than that: it resets every channel to the first program, so what the
+ *     song itself asked for is as lost as what anybody picked, and the drum channel forgets it is one.
+ *     After a bank, every channel is told what it plays, but only a choice made here is locked, so a
+ *     channel the song owns is still the song's to set when it starts over.
  */
-function applyMix(player) {
-    for (const channel of songChannels) {
-        if (chosen.has(channel)) player.setChannelInstrument(channel, instruments.get(channel));
+function applyMix(player, isBankReset = false) {
+    for (const [channel, instrument] of instruments) {
+        if (isBankReset && channel === DRUM_CHANNEL) player.setChannelDrums(channel, true);
 
-        if (volumes.has(channel) || songVolume !== 1)
-            player.setChannelVolume(channel, songVolume * (volumes.get(channel) ?? 1));
-
-        player.setChannelMuted(channel, isSilenced(channel));
-    }
-}
-
-/**
- *     Puts the whole mix back, which a new sound bank has just undone. Every channel is told what it
- *     plays, not only the ones chosen here: loading a bank resets them all to the first program, and
- *     what the song itself asked for is as lost as what anybody picked. Only a choice made here is
- *     locked, so a channel the song owns is still the song's to set when it starts over.
- */
-function restoreMix(player) {
-    for (const channel of songChannels) {
-        if (channel === DRUM_CHANNEL) player.setChannelDrums(channel, true);
-
-        const instrument = instruments.get(channel);
-        if (instrument !== undefined) player.setChannelInstrument(channel, instrument, chosen.has(channel));
+        if (isBankReset || chosen.has(channel)) player.setChannelInstrument(channel, instrument, chosen.has(channel));
 
         if (volumes.has(channel) || songVolume !== 1)
             player.setChannelVolume(channel, songVolume * (volumes.get(channel) ?? 1));
@@ -1282,20 +1419,19 @@ function restoreMix(player) {
 
 function applyMuting() {
     withPlayer((player) => {
-        for (const channel of songChannels) player.setChannelMuted(channel, isSilenced(channel));
+        for (const channel of instruments.keys()) player.setChannelMuted(channel, isSilenced(channel));
     }, "Could not silence the channel");
 }
 
 elements.songVolume.addEventListener("input", async () => {
     songVolume = Number(elements.songVolume.value);
     showSongVolume();
+    scheduleDownloadRefresh();
 
     await withPlayer((player) => {
         for (const channel of instruments.keys())
             player.setChannelVolume(channel, songVolume * (volumes.get(channel) ?? 1));
     }, "Could not set the volume of the song");
-
-    scheduleDownloadRefresh();
 });
 
 function showSongVolume() {
@@ -1315,9 +1451,8 @@ function scheduleDownloadRefresh() {
 
 function cancelDownloadRefresh() {
     // a file already on its way is for a song, or a choice, that is no longer the one on the page
-    downloadRequest++;
-
-    if (downloadTimer === null) return;
+    downloadRefresh?.abort();
+    downloadRefresh = null;
 
     clearTimeout(downloadTimer);
     downloadTimer = null;
@@ -1329,17 +1464,18 @@ async function refreshDownload() {
     const songSeed = elements.seed.value;
     if (songSeed === "") return;
 
-    const request = ++downloadRequest;
+    const refresh = new AbortController();
+    downloadRefresh = refresh;
     try {
-        const response = await requestSong({ seed: Number(songSeed), ...describeMix() });
+        const response = await requestSong({ seed: Number(songSeed), ...describeMix() }, refresh.signal);
         if (!response.ok) throw new Error(await describeFailure(response));
 
-        const song = await response.arrayBuffer();
-        if (request !== downloadRequest) return; // a later choice has already asked for its own file
-
-        offerDownload(song, songSeed);
+        offerDownload(await response.arrayBuffer(), songSeed);
     } catch (error) {
-        setStatus(`The download does not carry the mix on this page: ${error.message}`, true);
+        // one let go of for a later choice is not a failure: that choice is asking for its own file
+        if (!refresh.signal.aborted) setStatus(`The download does not include your mix: ${error.message}`, true);
+    } finally {
+        if (downloadRefresh === refresh) downloadRefresh = null;
     }
 }
 
@@ -1351,10 +1487,13 @@ async function refreshDownload() {
  */
 function render(player, time = player.currentTime) {
     const duration = player.duration;
-    if (!isSeeking && duration > 0) elements.seek.value = String(time / duration);
-
-    elements.elapsed.textContent = formatTime(time);
     elements.total.textContent = formatTime(duration);
+
+    // the bar and the time under it are the seek's own while it lasts
+    if (!isSeeking) {
+        if (duration > 0) elements.seek.value = String(time / duration);
+        elements.elapsed.textContent = formatTime(time);
+    }
 
     for (const [channel, row] of rows) {
         const voices = player.paused ? 0 : player.getVoiceCount(channel);
@@ -1409,27 +1548,29 @@ async function start() {
     const linked = linkedSeed();
     track("page_open", { detail: linked.wasAsked ? "link" : "fresh" });
 
-    // said afterwards, since the generating itself has the status line until it is done with it
-    const generating = generate(linked.seed);
+    // said afterwards, since the generating itself has the status line until it is done with it, and
+    // only once a song has arrived: a failure has the status line to itself
+    const generating = generate(linked.seed, linked.seed === null || linked.wasRolled);
     if (linked.wasAsked && linked.seed === null)
-        generating.then(() => setStatus("That link did not carry a seed I could read, so here is another song.", true));
+        generating.then((isGenerated) => {
+            if (isGenerated) setStatus("That link has no valid seed, so here is a random song.", true);
+        });
 
-
-    // listed whatever is loaded, so the dropdown is ready for anyone who opens the panel
-    const offered = await listLibrary();
-    const kept = await recallKept();
+    // listed whatever is loaded, so the dropdown is ready for anyone who opens the panel, and asked for
+    // together, since neither needs the other
+    const [offered, kept] = await Promise.all([listLibrary(), recallKept()]);
 
     if (kept) {
         // the dropdown still points at it when what this browser kept is one the server offers too
         selectInLibrary(kept.name);
 
-        // read back out of the store rather than held, for the same reason useSoundFont takes a reader
-        await useSoundFont(kept.name, reread, "kept", true);
+        // a Blob out of IndexedDB is backed by the disk, so holding it costs no memory until it is read
+        await useSoundFont(kept.name, () => kept.soundFont, "kept", true);
         return;
     }
 
     if (offered === null) {
-        setSoundFontState("none — open this and choose one");
+        setSoundFontState("None — choose one");
         return;
     }
 

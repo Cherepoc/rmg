@@ -22,7 +22,7 @@ public static class SongEndpoints
         request ??= new GenerateSongRequest();
 
         if (!request.TryGetChannelTracks(out var channelTracks, out var error))
-            return Results.BadRequest(new { error });
+            return Results.BadRequest(new ErrorResponse(error!));
 
         var songSeed = request.Seed ?? Random.Shared.Next();
 
@@ -35,10 +35,9 @@ public static class SongEndpoints
             // asking for a channel this song does not play is the caller's mistake, not a failed generation
             var generatedInstruments = renderedSong.GetChannelInstruments();
             foreach (var channel in channelTracks.Keys.Where(channel => !generatedInstruments.ContainsKey(channel)))
-                return Results.BadRequest(new
-                {
-                    error = $"Song {songSeed} does not play channel {channel + GenerateSongRequest.FirstChannel}."
-                });
+                return Results.BadRequest(new ErrorResponse(
+                    $"Song {songSeed} does not play channel {channel + GenerateSongRequest.FirstChannel}."
+                ));
 
             renderedSong = renderedSong.WithChannelInstruments(Instruments(channelTracks));
 
@@ -55,7 +54,7 @@ public static class SongEndpoints
         }
         catch (Exception ex)
         {
-            return Results.Problem($"Generating the song with seed {songSeed} failed: {ex.Message}", statusCode: 500);
+            return Results.Problem($"Song {songSeed}: {ex.Message}", statusCode: 500);
         }
 
         // lets the page show and reuse the seed it actually got when it asked for a random one

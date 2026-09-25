@@ -1,0 +1,179 @@
+<Project>
+    <!--
+        The page's JS and CSS live in Client/ and are bundled and minified into wwwroot, which is build
+        output and nothing else, apart from the operator's soundfonts.
+
+        Every build's bundles go in a folder named by a hash of what is in them, wwwroot/assets/<hash>/,
+        so a change is a new address. The server tells browsers to keep those for good and to ask about the
+        HTML every time, which is what points them at the current folder. The names inside the folder stay
+        plain, so the page finds its worker beside it without being told where it went.
+
+        The spessasynth libraries and the MP3 encoder are not bundled: they stay on the CDN, through the
+        import map in the page and the full URL in the worker.
+    -->
+
+    <PropertyGroup>
+        <ClientDirectory>$(MSBuildThisFileDirectory)Client/</ClientDirectory>
+        <ClientIntermediate>$(MSBuildThisFileDirectory)$(BaseIntermediateOutputPath)client/</ClientIntermediate>
+        <ClientBundle>$(ClientIntermediate)bundle/</ClientBundle>
+        <ClientWebRoot>$(MSBuildThisFileDirectory)wwwroot/</ClientWebRoot>
+
+        <!-- the standalone binary from npm, pinned, and checked against the registry's own integrity -->
+        <EsbuildVersion>0.28.2</EsbuildVersion>
+        <EsbuildIntegrity>4xTZr1FUmSoQW4XIWmit3tzQrUTZM+N3P0XV8xROKYF50XfI7xeO90+1bZvNwxIufQ9hDQVRJH5YhgPVF8A/HQ==</EsbuildIntegrity>
+        <EsbuildDirectory>$(MSBuildThisFileDirectory)$(BaseIntermediateOutputPath)tools/esbuild-$(EsbuildVersion)/</EsbuildDirectory>
+
+        <!-- set EsbuildPath to an esbuild of your own on anything but linux-x64 -->
+        <EsbuildPath Condition="'$(EsbuildPath)' == ''">$(EsbuildDirectory)package/bin/esbuild</EsbuildPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <!--
+            What the render below writes is left out of the web root as the SDK lists it when the project is
+            read, and added by the render itself once it exists. Listed early, a folder this build replaces
+            would still be expected, and the build would fail looking for it.
+        -->
+        <Content Remove="wwwroot/assets/**;wwwroot/*.html;wwwroot/favicon.svg" />
+
+        <ClientSource Include="$(ClientDirectory)**/*" />
+
+        <!-- dotnet watch rebuilds when the page's sources change, not only the server's -->
+        <Watch Include="@(ClientSource)" />
+    </ItemGroup>
+
+    <Target Name="DownloadEsbuild" Condition="!Exists('$(EsbuildPath)')">
+        <Error Condition="!$([MSBuild]::IsOSPlatform('Linux')) Or '$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' != 'X64'"
+               Text="The pinned esbuild is for linux-x64. Install esbuild $(EsbuildVersion) and pass -p:EsbuildPath=/path/to/esbuild." />
+
+        <DownloadFile SourceUrl="https://registry.npmjs.org/@esbuild/linux-x64/-/linux-x64-$(EsbuildVersion).tgz"
+                      DestinationFolder="$(EsbuildDirectory)"
+                      DestinationFileName="esbuild.tgz" />
+
+        <GetFileHash Files="$(EsbuildDirectory)esbuild.tgz" Algorithm="SHA512" HashEncoding="base64">
+            <Output TaskParameter="Hash" PropertyName="_EsbuildHash" />
+        </GetFileHash>
+
+        <Delete Condition="'$(_EsbuildHash)' != '$(EsbuildIntegrity)'" Files="$(EsbuildDirectory)esbuild.tgz" />
+        <Error Condition="'$(_EsbuildHash)' != '$(EsbuildIntegrity)'"
+               Text="esbuild $(EsbuildVersion) did not match its pinned integrity, so it was thrown away." />
+
+        <Exec Command="tar -xzf esbuild.tgz" WorkingDirectory="$(EsbuildDirectory)" />
+    </Target>
+
+    <!-- only when a source has changed: the bundle in obj is what the render below works from -->
+    <Target Name="BundleClient"
+            DependsOnTargets="DownloadEsbuild"
+            Inputs="@(ClientSource);$(MSBuildThisFileFullPath)"
+            Outputs="$(ClientIntermediate)bundle.stamp">
+        <RemoveDir Directories="$(ClientBundle)" />
+
+        <Exec WorkingDirectory="$(ClientDirectory)"
+              Command="&quot;$(EsbuildPath)&quot; index=app.js index=app.css dashboard=dashboard.js dashboard=dashboard.css mp3-worker=mp3-worker.js --bundle --minify --sourcemap --format=esm --external:spessasynth_lib --external:spessasynth_core --external:stb-vorbis --external:https://* --outdir=&quot;$(ClientBundle)&quot; --log-level=warning" />
+
+        <Touch Files="$(ClientIntermediate)bundle.stamp" AlwaysCreate="true" />
+    </Target>
+
+    <!--
+        Every build, since it is cheap and the version stamp in the page should say what was built now,
+        not whenever the page's own sources last changed.
+    -->
+    <Target Name="RenderClient"
+            BeforeTargets="BeforeBuild"
+            DependsOnTargets="BundleClient"
+            Condition="'$(DesignTimeBuild)' != 'true'">
+        <Exec Command="git describe --always --dirty"
+              WorkingDirectory="$(MSBuildThisFileDirectory)"
+              ConsoleToMSBuild="true"
+              StandardOutputImportance="low"
+              IgnoreExitCode="true"
+              ContinueOnError="true">
+            <Output TaskParameter="ConsoleOutput" PropertyName="_ClientVersion" />
+        </Exec>
+
+        <RenderClientPages Bundle="$(ClientBundle)"
+                           Pages="$(ClientDirectory)index.html;$(ClientDirectory)dashboard.html"
+                           Copied="$(ClientDirectory)favicon.svg"
+                           WebRoot="$(ClientWebRoot)"
+                           Version="$(_ClientVersion)">
+            <Output TaskParameter="AssetsFolder" PropertyName="ClientAssetsFolder" />
+        </RenderClientPages>
+
+        <Message Importance="normal" Text="Client bundle: wwwroot/$(ClientAssetsFolder), version $(_ClientVersion)" />
+
+        <!--
+            The web root is listed when the project is read, before any of this exists, so what was just
+            written is added by hand, or a publish from a clean checkout would leave it behind.
+        -->
+        <ItemGroup>
+            <Content Include="$(ClientWebRoot)assets/**;$(ClientWebRoot)*.html;$(ClientWebRoot)favicon.svg"
+                     Exclude="@(Content)"
+                     CopyToPublishDirectory="PreserveNewest" />
+        </ItemGroup>
+    </Target>
+
+    <UsingTask TaskName="RenderClientPages"
+               TaskFactory="RoslynCodeTaskFactory"
+               AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
+        <ParameterGroup>
+            <Bundle ParameterType="System.String" Required="true" />
+            <Pages ParameterType="System.String[]" Required="true" />
+            <Copied ParameterType="System.String[]" Required="true" />
+            <WebRoot ParameterType="System.String" Required="true" />
+            <Version ParameterType="System.String" />
+            <AssetsFolder ParameterType="System.String" Output="true" />
+        </ParameterGroup>
+        <Task>
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Linq" />
+            <Using Namespace="System.Security.Cryptography" />
+            <Using Namespace="System.Text" />
+            <Code Type="Fragment" Language="cs"><![CDATA[
+                // one hash over every file's name and contents, in a fixed order, so the same bundle always
+                // lands in the same folder and anything different never does
+                var files = Directory.GetFiles(Bundle).OrderBy(Path.GetFileName, StringComparer.Ordinal).ToArray();
+                string hash;
+                using (var sha = SHA256.Create())
+                {
+                    foreach (var file in files)
+                    {
+                        var name = Encoding.UTF8.GetBytes(Path.GetFileName(file) + "\n");
+                        sha.TransformBlock(name, 0, name.Length, null, 0);
+                        var contents = File.ReadAllBytes(file);
+                        sha.TransformBlock(contents, 0, contents.Length, null, 0);
+                    }
+                    sha.TransformFinalBlock(new byte[0], 0, 0);
+                    hash = string.Concat(sha.Hash.Take(4).Select(b => b.ToString("x2")));
+                }
+
+                AssetsFolder = "assets/" + hash;
+                var assets = Path.Combine(WebRoot, "assets");
+                var target = Path.Combine(assets, hash);
+
+                // older folders are only ever wanted by a server that still has pages pointing at them, and
+                // deploy.sh keeps those there for itself; here they would only pile up
+                if (Directory.Exists(assets))
+                    foreach (var folder in Directory.GetDirectories(assets).Where(f => Path.GetFileName(f) != hash))
+                        Directory.Delete(folder, true);
+
+                if (!Directory.Exists(target))
+                {
+                    Directory.CreateDirectory(target);
+                    foreach (var file in files) File.Copy(file, Path.Combine(target, Path.GetFileName(file)));
+                }
+
+                var version = string.IsNullOrWhiteSpace(Version) ? "unknown" : Version.Trim();
+                foreach (var page in Pages)
+                {
+                    var html = File.ReadAllText(page).Replace("{{assets}}", AssetsFolder).Replace("{{version}}", version);
+                    var written = Path.Combine(WebRoot, Path.GetFileName(page));
+
+                    // left alone when nothing changed, so a build that changed nothing touches nothing
+                    if (!File.Exists(written) || File.ReadAllText(written) != html) File.WriteAllText(written, html);
+                }
+
+                foreach (var file in Copied)
+                    File.Copy(file, Path.Combine(WebRoot, Path.GetFileName(file)), true);
+            ]]></Code>
+        </Task>
+    </UsingTask>
+</Project>

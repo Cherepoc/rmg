@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Rmg.Core.Events;
 
@@ -98,6 +99,11 @@ public sealed class StateKind<T> : IStateKind
         return ExtractStateTimeline(eventTimeline);
     }
 
+    // The field is looked up by name, which a trimmed or native build cannot follow on its own, so it is kept
+    // by name here. Every ImmutableArray<> this reaches is one the program itself constructs, so its
+    // instantiation is always compiled in; only the field's metadata could otherwise go missing.
+    [DynamicDependency(nameof(ImmutableArray<int>.Empty), typeof(ImmutableArray<>))]
+    [UnconditionalSuppressMessage("Trimming", "IL2090", Justification = "ImmutableArray<>.Empty is kept by the DynamicDependency above.")]
     private static StateKind<T> CreateEmpty()
     {
         var type = typeof(T);
