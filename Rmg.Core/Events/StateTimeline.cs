@@ -34,8 +34,6 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
         return ((IEnumerable)_items).GetEnumerator();
     }
 
-    public bool IsEmpty => Duration == 0;
-
     public bool IsDefault => _items.Length == 0;
 
     public ImmutableArray<double> Positions { get; }
@@ -62,26 +60,14 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
         return Shift(offset);
     }
 
-    IStateTimeline IStateTimeline.Stretch(double factor)
-    {
-        return Stretch(factor);
-    }
-
-    IStateTimeline IStateTimeline.PhaseShift(double phase)
-    {
-        return PhaseShift(phase);
-    }
-
-    public static StateTimeline<T> Empty => Events.StateKind.Empty<T>().EmptyTimeline;
-
     public static StateTimeline<T> Merge(IEnumerable<StateTimeline<T>> timelines)
     {
         var timelineArray = timelines
-            .Where(x => !x.IsEmpty)
+            .Where(x => x.Duration > 0)
             .ToArray();
 
         if (timelineArray.Length == 0)
-            return Events.StateKind.Empty<T>().EmptyTimeline;
+            return Events.StateKind.None<T>().CreateDefaultTimeline(0);
 
         if (timelineArray.Length == 1)
             return timelineArray[0];
@@ -118,9 +104,6 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
             items.Add(new TimelineItem<T>(position, aggregatedValue));
         }
 
-        if (items.Count == 0)
-            return stateKind.EmptyTimeline;
-
         return new StateTimeline<T>(duration, stateKind, [..items]);
     }
 
@@ -130,18 +113,14 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
     {
         ArgumentOutOfRangeException.ThrowIfNegative(duration);
 
-        if (duration == 0 || IsEmpty)
-            return StateKind.EmptyTimeline;
+        if (duration == 0)
+            return StateKind.CreateDefaultTimeline(0);
 
         // ReSharper disable once CompareOfFloatsByEqualityOperator
         if (duration == Duration)
             return this;
 
-        var newItems = _items.TrimState(StateKind, Duration, duration);
-        if (newItems.Length == 0)
-            return StateKind.EmptyTimeline;
-
-        return new StateTimeline<T>(duration, StateKind, newItems);
+        return new StateTimeline<T>(duration, StateKind, _items.TrimState(StateKind, Duration, duration));
     }
 
     public StateTimeline<T> Shift(double offset)
@@ -153,14 +132,10 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
         if (offset == 0)
             return this;
 
-        if (newDuration == 0 || IsEmpty)
-            return StateKind.EmptyTimeline;
+        if (newDuration == 0)
+            return StateKind.CreateDefaultTimeline(0);
 
-        var newItems = _items.ShiftState(StateKind, offset);
-        if (newItems.Length == 0)
-            return StateKind.EmptyTimeline;
-
-        return new StateTimeline<T>(newDuration, StateKind, newItems);
+        return new StateTimeline<T>(newDuration, StateKind, _items.ShiftState(StateKind, offset));
     }
 
     public static StateTimeline<T> Create(double duration, StateKind<T> stateKind, IEnumerable<TimelineItem<T>> items)
@@ -168,7 +143,7 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
         ArgumentOutOfRangeException.ThrowIfNegative(duration);
 
         if (duration == 0)
-            return stateKind.EmptyTimeline;
+            return stateKind.CreateDefaultTimeline(0);
 
         var itemArray = items.AsImmutableArray();
 
@@ -207,49 +182,6 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
     public State<T> GetEffectiveStateAt(double position)
     {
         return new State<T>(StateKind, GetEffectiveValueAt(position));
-    }
-
-    public StateTimeline<T> Merge(T value)
-    {
-        if (Duration == 0 || StateKind.CheckValueIsDefault(value))
-            return this;
-
-        var mergeTimeline = new StateTimeline<T>(Duration, StateKind, [new TimelineItem<T>(0, value)]);
-        return Merge([this, mergeTimeline]);
-    }
-
-    public IStateTimeline Merge(object value)
-    {
-        return Merge((T)value);
-    }
-
-    public StateTimeline<T> Stretch(double factor)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(factor);
-
-        // ReSharper disable once CompareOfFloatsByEqualityOperator
-        if (factor == 1)
-            return this;
-
-        if (_items.Length == 0 || factor == 0)
-            return StateKind.EmptyTimeline;
-
-        return new StateTimeline<T>(Duration * factor, StateKind, _items.Stretch(factor));
-    }
-
-    public StateTimeline<T> PhaseShift(double phase)
-    {
-        if (_items.Length == 0)
-            return StateKind.EmptyTimeline;
-
-        if (phase.Mod(Duration) == 0)
-            return this;
-
-        var newItems = _items.PhaseShiftState(StateKind, phase, Duration);
-        if (newItems.Length == 0)
-            return StateKind.EmptyTimeline;
-
-        return new StateTimeline<T>(Duration, StateKind, newItems);
     }
 
     public IEnumerable<TimelineItem<T>> AsEnumerable()
@@ -347,14 +279,12 @@ public static class StateTimeline
     {
         var timelineArray = timelines.AsImmutableArray();
 
-        if (timelineArray.Length == 0 || timelineArray.All(x => x.IsEmpty))
-            return ImmutableArray<IStateTimeline>.Empty;
-
         return timelineArray
-            .Where(x => !x.IsEmpty)
+            .Where(x => x.Duration > 0)
             .GroupBy(x => x.StateKind)
             .Select(group => group.Key.MergeTimelines(group))
-            .Where(x => !x.IsEmpty)
+            // a timeline with only the default value adds nothing; the duration is kept by the owner of the timelines
+            .Where(x => !x.IsDefault)
             .ToImmutableArray();
     }
 
@@ -366,7 +296,7 @@ public static class StateTimeline
 
 public interface IStateTimeline
 {
-    bool IsEmpty { get; }
+    double Duration { get; }
 
     bool IsDefault { get; }
 
@@ -381,8 +311,4 @@ public interface IStateTimeline
     IStateTimeline Trim(double duration);
 
     IStateTimeline Shift(double offset);
-
-    IStateTimeline Stretch(double factor);
-
-    IStateTimeline PhaseShift(double phase);
 }

@@ -11,21 +11,21 @@ public sealed class StateTimelineMapTest
         StateTimelineMap.Create(duration, [StateTimeline.Create(duration, KeyOffset, items)]);
 
     [Test]
-    public async Task Empty_IsEmpty()
+    public async Task ZeroDuration_IsDefault()
     {
-        var result = StateTimelineMap.Empty;
+        var result = StateTimelineMap.Create(0);
 
-        await Assert.That(result.IsEmpty).IsTrue();
+        await Assert.That(result.IsDefault).IsTrue();
         await Assert.That(result.Duration).IsEqualTo(0);
         await Assert.That(result.StateTimelines.Length).IsEqualTo(0);
     }
 
     [Test]
-    public async Task Create_ZeroDuration_ResultsIn_Empty()
+    public async Task Create_ZeroDuration_ResultsIn_ZeroDuration()
     {
         var result = StateTimelineMap.Create(0, [StateTimeline.Create(1, KeyOffset, [new TimelineItem<int>(0, 1)])]);
 
-        await Assert.That(result).IsSameReferenceAs(StateTimelineMap.Empty);
+        await Assert.That(result).IsSameReferenceAs(StateTimelineMap.Create(0));
     }
 
     [Test]
@@ -35,17 +35,17 @@ public sealed class StateTimelineMapTest
     }
 
     [Test]
-    public async Task Create_NoTimelines_ResultsIn_Empty()
+    public async Task Create_NoTimelines_ResultsIn_Default()
     {
-        await Assert.That(StateTimelineMap.Create(2, []).IsEmpty).IsTrue();
+        await Assert.That(StateTimelineMap.Create(2, []).IsDefault).IsTrue();
     }
 
     [Test]
-    public async Task Create_OnlyEmptyTimelines_ResultsIn_Empty()
+    public async Task Create_OnlyZeroDurationTimelines_ResultsIn_Default()
     {
-        var result = StateTimelineMap.Create(2, [KeyOffset.EmptyTimeline]);
+        var result = StateTimelineMap.Create(2, [KeyOffset.CreateDefaultTimeline(0)]);
 
-        await Assert.That(result.IsEmpty).IsTrue();
+        await Assert.That(result.IsDefault).IsTrue();
     }
 
     [Test]
@@ -53,7 +53,7 @@ public sealed class StateTimelineMapTest
     {
         var result = KeyMap(2, new TimelineItem<int>(0, 1), new TimelineItem<int>(1, 2));
 
-        await Assert.That(result.IsEmpty).IsFalse();
+        await Assert.That(result.IsDefault).IsFalse();
         await Assert.That(result.Duration).IsEqualTo(2);
         await Assert.That(result.StateTimelines.Length).IsEqualTo(1);
         await Assert.That(result.GetStateTimeline(KeyOffset).AsEnumerable())
@@ -104,13 +104,14 @@ public sealed class StateTimelineMapTest
     }
 
     [Test]
-    public async Task GetStateTimeline_Missing_ResultsIn_EmptyTimeline()
+    public async Task GetStateTimeline_Missing_ResultsIn_DefaultTimelineOfMapDuration()
     {
         var input = KeyMap(2, new TimelineItem<int>(0, 1));
 
         var result = input.GetStateTimeline(Velocity);
 
-        await Assert.That(result.IsEmpty).IsTrue();
+        await Assert.That(result.IsDefault).IsTrue();
+        await Assert.That(result.Duration).IsEqualTo(2);
     }
 
     [Test]
@@ -122,9 +123,9 @@ public sealed class StateTimelineMapTest
     }
 
     [Test]
-    public async Task GetEffectiveStateMapAt_Empty_ResultsIn_Default()
+    public async Task GetEffectiveStateMapAt_ZeroDuration_ResultsIn_Default()
     {
-        await Assert.That(StateTimelineMap.Empty.GetEffectiveStateMapAt(0).IsDefault).IsTrue();
+        await Assert.That(StateTimelineMap.Create(0).GetEffectiveStateMapAt(0).IsDefault).IsTrue();
     }
 
     [Test]
@@ -203,17 +204,20 @@ public sealed class StateTimelineMapTest
     }
 
     [Test]
-    public async Task Trim_Zero_ResultsIn_Empty()
+    public async Task Trim_Zero_ResultsIn_ZeroDuration()
     {
         var input = KeyMap(2, new TimelineItem<int>(0, 1));
 
-        await Assert.That(input.Trim(0)).IsSameReferenceAs(StateTimelineMap.Empty);
+        await Assert.That(input.Trim(0)).IsSameReferenceAs(StateTimelineMap.Create(0));
     }
 
     [Test]
-    public async Task Trim_Empty_ResultsIn_Empty()
+    public async Task Trim_ZeroDurationMap_ResultsIn_Default()
     {
-        await Assert.That(StateTimelineMap.Empty.Trim(3).IsEmpty).IsTrue();
+        var result = StateTimelineMap.Create(0).Trim(3);
+
+        await Assert.That(result.IsDefault).IsTrue();
+        await Assert.That(result.Duration).IsEqualTo(3);
     }
 
     [Test]
@@ -283,11 +287,11 @@ public sealed class StateTimelineMapTest
     [Arguments(0)]
     [Arguments(1)]
     [Arguments(2)]
-    public async Task Merge_OnlyEmpty_ResultsIn_Empty(int count)
+    public async Task Merge_OnlyZeroDuration_ResultsIn_Default(int count)
     {
-        var input = Enumerable.Repeat(StateTimelineMap.Empty, count);
+        var input = Enumerable.Repeat(StateTimelineMap.Create(0), count);
 
-        await Assert.That(StateTimelineMap.Merge(input).IsEmpty).IsTrue();
+        await Assert.That(StateTimelineMap.Merge(input).IsDefault).IsTrue();
     }
 
     [Test]
@@ -318,11 +322,11 @@ public sealed class StateTimelineMapTest
     }
 
     [Test]
-    public async Task MergeStateMap_Empty_ResultsIn_Empty()
+    public async Task MergeStateMap_ZeroDuration_ResultsIn_Default()
     {
         var stateMap = StateMap.FromStates([KeyOffset.CreateState(1)]);
 
-        await Assert.That(StateTimelineMap.Empty.MergeStateMap(stateMap).IsEmpty).IsTrue();
+        await Assert.That(StateTimelineMap.Create(0).MergeStateMap(stateMap).IsDefault).IsTrue();
     }
 
     [Test]

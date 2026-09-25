@@ -24,4 +24,22 @@ public sealed class SplineValueGeneratorTest
 
         await Assert.That(result).IsEqualTo(expectedValue);
     }
+
+    [Test]
+    [Arguments(0.25, 0.5, 0)]
+    [Arguments(0.0625, 0.5, -0.1339745962155614)]
+    [Arguments(0.5625, 0.5, 0.1339745962155614)]
+    [Arguments(0.75, 1, 0.1339745962155614)]
+    public async Task SkewedSplineValue_RaisesDrawToSkewFirst(double generatedValue, double skew, double expectedValue)
+    {
+        // the draw raised to the skew is 0.5, 0.25 and 0.75, which the unskewed spline turns into 0 and -+0.134
+        var generationContext = new FakeGenerationContext
+        {
+            NextDouble = generatedValue
+        };
+
+        var result = Core.Probabilities.Generators.SplineValue(1, skew)(generationContext);
+
+        await Assert.That(result).IsEqualTo(expectedValue).Within(1e-12);
+    }
 }

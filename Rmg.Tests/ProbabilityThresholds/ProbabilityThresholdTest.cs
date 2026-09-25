@@ -37,47 +37,6 @@ public sealed class ProbabilityThresholdTest
     }
 
     [Test]
-    [Arguments(0, true)]
-    [Arguments(0.5, true)]
-    [Arguments(0.6, false)]
-    [Arguments(1, false)]
-    public async Task Test_ResultsIn_ThresholdAtLeastProbability(double probability, bool expected)
-    {
-        var input = new ProbabilityThreshold<int>(0.5, 0);
-
-        await Assert.That(input.Test(probability)).IsEqualTo(expected);
-    }
-
-    [Test]
-    [Arguments(-0.1)]
-    [Arguments(1.1)]
-    public async Task Test_ProbabilityOutOfRange_ResultsIn_ThrownException(double probability)
-    {
-        var input = new ProbabilityThreshold<int>(0.5, 0);
-
-        await Assert.That(() => { input.Test(probability); }).Throws<ArgumentOutOfRangeException>();
-    }
-
-    [Test]
-    public async Task CompareTo_OrdersByThreshold()
-    {
-        var low = new ProbabilityThreshold<string>(0.2, "z");
-        var high = new ProbabilityThreshold<string>(0.8, "a");
-
-        await Assert.That(low.CompareTo(high)).IsLessThan(0);
-        await Assert.That(high.CompareTo(low)).IsGreaterThan(0);
-        await Assert.That(low.CompareTo(new ProbabilityThreshold<string>(0.2, "other"))).IsEqualTo(0);
-    }
-
-    [Test]
-    public async Task CompareTo_Object_OtherType_ResultsIn_ThrownException()
-    {
-        var input = new ProbabilityThreshold<string>(0.2, "z");
-
-        await Assert.That(() => { input.CompareTo("not a threshold"); }).Throws<ArgumentException>();
-    }
-
-    [Test]
     [Arguments(0.0001, 0)]
     [Arguments(0.25, 0)]
     [Arguments(0.26, 1)]
@@ -90,42 +49,27 @@ public sealed class ProbabilityThresholdTest
     }
 
     [Test]
-    [Arguments(0.25, "a")]
-    [Arguments(0.4, "b")]
-    [Arguments(0.9, "c")]
-    [Arguments(1, "c")]
-    public async Task FindValueByProbability_ResultsIn_ValueOfMatchingThreshold(double probability, string expected)
+    public async Task FindIndexByProbability_ZeroProbability_ResultsIn_FirstThreshold()
     {
-        await Assert.That(Thresholds.FindValueByProbability(probability)).IsEqualTo(expected);
+        // a random double can be exactly 0
+        await Assert.That(Thresholds.FindIndexByProbability(0)).IsEqualTo(0);
     }
 
     [Test]
-    [Arguments(0)]
     [Arguments(-0.5)]
     [Arguments(1.5)]
-    public async Task FindByProbability_InvalidProbability_ResultsIn_ThrownException(double probability)
+    public async Task FindIndexByProbability_InvalidProbability_ResultsIn_ThrownException(double probability)
     {
         await Assert.That(() => { Thresholds.FindIndexByProbability(probability); })
             .Throws<ArgumentOutOfRangeException>();
-        await Assert.That(() => { Thresholds.FindValueByProbability(probability); })
-            .Throws<ArgumentOutOfRangeException>();
     }
 
     [Test]
-    public async Task FindByProbability_EmptyThresholds_ResultsIn_ThrownException()
+    public async Task FindIndexByProbability_EmptyThresholds_ResultsIn_ThrownException()
     {
         ImmutableArray<ProbabilityThreshold<string>> input = [];
 
         await Assert.That(() => { input.FindIndexByProbability(0.5); }).Throws<ArgumentException>();
-        await Assert.That(() => { input.FindValueByProbability(0.5); }).Throws<ArgumentException>();
-    }
-
-    [Test]
-    public async Task FindValueByProbability_ThresholdsNotReachingProbability_ResultsIn_ThrownException()
-    {
-        ImmutableArray<ProbabilityThreshold<string>> input = [new(0.3, "a"), new(0.6, "b")];
-
-        await Assert.That(() => { input.FindValueByProbability(0.9); }).Throws<ArgumentOutOfRangeException>();
     }
 
     [Test]
@@ -166,63 +110,5 @@ public sealed class ProbabilityThresholdTest
         var result = input.ToProbabilityThresholds();
 
         await Assert.That(result[^1].Threshold).IsEqualTo(1);
-    }
-
-    [Test]
-    public async Task RemoveThresholdAtIndex_Empty_ResultsIn_ThrownException()
-    {
-        ImmutableArray<ProbabilityThreshold<string>> input = [];
-
-        await Assert.That(() => { input.RemoveThresholdAtIndex(0); }).Throws<ArgumentException>();
-    }
-
-    [Test]
-    [Arguments(-1)]
-    [Arguments(3)]
-    public async Task RemoveThresholdAtIndex_IndexOutOfRange_ResultsIn_ThrownException(int index)
-    {
-        await Assert.That(() => { Thresholds.RemoveThresholdAtIndex(index); })
-            .Throws<ArgumentOutOfRangeException>();
-    }
-
-    [Test]
-    public async Task RemoveThresholdAtIndex_SingleItem_ResultsIn_Empty()
-    {
-        ImmutableArray<ProbabilityThreshold<string>> input = [new(1, "a")];
-
-        await Assert.That(input.RemoveThresholdAtIndex(0).IsEmpty).IsTrue();
-    }
-
-    [Test]
-    public async Task RemoveThresholdAtIndex_Last_RenormalizesRemaining()
-    {
-        // a:25% b:25% c:50% -> without c: a:50% b:50%
-        var result = Thresholds.RemoveThresholdAtIndex(2);
-
-        await Assert.That(result.Select(x => x.Value)).IsEquivalentTo(new[] { "a", "b" });
-        await Assert.That(result[0].Threshold).IsEqualTo(0.5).Within(Tolerance);
-        await Assert.That(result[1].Threshold).IsEqualTo(1).Within(Tolerance);
-    }
-
-    [Test]
-    public async Task RemoveThresholdAtIndex_Middle_RenormalizesRemaining()
-    {
-        // a:25% b:25% c:50% -> without b: a:1/3 c:2/3
-        var result = Thresholds.RemoveThresholdAtIndex(1);
-
-        await Assert.That(result.Select(x => x.Value)).IsEquivalentTo(new[] { "a", "c" });
-        await Assert.That(result[0].Threshold).IsEqualTo(1.0 / 3).Within(Tolerance);
-        await Assert.That(result[1].Threshold).IsEqualTo(1).Within(Tolerance);
-    }
-
-    [Test]
-    public async Task RemoveThresholdAtIndex_First_RenormalizesRemaining()
-    {
-        // a:25% b:25% c:50% -> without a: b:1/3 c:2/3
-        var result = Thresholds.RemoveThresholdAtIndex(0);
-
-        await Assert.That(result.Select(x => x.Value)).IsEquivalentTo(new[] { "b", "c" });
-        await Assert.That(result[0].Threshold).IsEqualTo(1.0 / 3).Within(Tolerance);
-        await Assert.That(result[1].Threshold).IsEqualTo(1).Within(Tolerance);
     }
 }

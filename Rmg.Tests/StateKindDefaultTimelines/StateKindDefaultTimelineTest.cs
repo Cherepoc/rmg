@@ -1,17 +1,17 @@
 using System.Collections.Immutable;
 using Rmg.Core.Events;
 
-namespace Rmg.Tests.StateKindEmptyTimelines;
+namespace Rmg.Tests.StateKindDefaultTimelines;
 
 /// <summary>
 /// A missing timeline must behave like a timeline of the kind's default value.
 /// </summary>
-public sealed class StateKindEmptyTimelineTest
+public sealed class StateKindDefaultTimelineTest
 {
     [Test]
-    public async Task MultiplicativeKind_EmptyTimeline_ResultsIn_KindDefault()
+    public async Task MultiplicativeKind_DefaultTimeline_ResultsIn_KindDefault()
     {
-        var result = StateKinds.Tempo.EmptyTimeline.GetEffectiveValueAt(0);
+        var result = StateKinds.Tempo.CreateDefaultTimeline(0).GetEffectiveValueAt(0);
 
         await Assert.That(result).IsEqualTo(1);
     }
@@ -19,7 +19,7 @@ public sealed class StateKindEmptyTimelineTest
     [Test]
     public async Task GetStateTimeline_MissingMultiplicativeKind_ResultsIn_KindDefault()
     {
-        var input = StateTimelineMap.Empty;
+        var input = StateTimelineMap.Create(0);
 
         var result = input.GetStateTimeline(StateKinds.Tempo);
 
@@ -27,7 +27,7 @@ public sealed class StateKindEmptyTimelineTest
     }
 
     [Test]
-    public async Task GetStateTimeline_MissingKindInNonEmptyMap_ResultsIn_KindDefault()
+    public async Task GetStateTimeline_MissingKindInMapWithState_ResultsIn_KindDefault()
     {
         var input = StateTimelineMap.Create(
             2,
@@ -41,9 +41,9 @@ public sealed class StateKindEmptyTimelineTest
     }
 
     [Test]
-    public async Task CollectionKind_EmptyTimeline_ResultsIn_InitializedEmptyCollection()
+    public async Task CollectionKind_DefaultTimeline_ResultsIn_InitializedEmptyCollection()
     {
-        var result = StateKinds.ScaleOffsets.EmptyTimeline.GetEffectiveValueAt(0);
+        var result = StateKinds.ScaleOffsets.CreateDefaultTimeline(0).GetEffectiveValueAt(0);
 
         await Assert.That(result.IsDefault).IsFalse();
         await Assert.That(result.Length).IsEqualTo(0);
@@ -52,15 +52,15 @@ public sealed class StateKindEmptyTimelineTest
     [Test]
     public async Task GetStateTimeline_MissingCollectionKind_ResultsIn_InitializedEmptyCollection()
     {
-        var result = StateTimelineMap.Empty.GetStateTimeline(StateKinds.ScaleOffsets).GetEffectiveValueAt(0);
+        var result = StateTimelineMap.Create(0).GetStateTimeline(StateKinds.ScaleOffsets).GetEffectiveValueAt(0);
 
         await Assert.That(result.IsDefault).IsFalse();
     }
 
     [Test]
-    public async Task EmptyKind_OfCollectionType_HasInitializedDefaultValue()
+    public async Task NoneKind_OfCollectionType_HasInitializedDefaultValue()
     {
-        var result = StateKind.Empty<ImmutableArray<int>>().DefaultValue;
+        var result = StateKind.None<ImmutableArray<int>>().DefaultValue;
 
         await Assert.That(result.IsDefault).IsFalse();
     }

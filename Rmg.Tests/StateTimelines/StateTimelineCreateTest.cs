@@ -7,7 +7,7 @@ public sealed class StateTimelineCreateTest
     private static readonly StateKind<int> StateKind = StateKinds.KeyOffset;
     
     [Test]
-    public async Task ZeroDuration_ResultsIn_Empty()
+    public async Task ZeroDuration_ResultsIn_ZeroDuration()
     {
         const double duration = 0;
         var items = new TimelineItem<int>[]
@@ -19,7 +19,6 @@ public sealed class StateTimelineCreateTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
@@ -29,7 +28,7 @@ public sealed class StateTimelineCreateTest
     [Arguments(0)]
     [Arguments(1)]
     [Arguments(2)]
-    public async Task DefaultItems_ResultsIn_Empty(int count)
+    public async Task DefaultItems_ResultsIn_Default(int count)
     {
         const double duration = 3;
         var items = new TimelineItem<int>[count];
@@ -40,14 +39,13 @@ public sealed class StateTimelineCreateTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
     }
     
     [Test]
-    public async Task BeforeFirstNonDefaultItemDuration_NonEmpty()
+    public async Task BeforeFirstNonDefaultItemDuration_ResultsIn_Default()
     {
         const double duration = 1;
         var items = new TimelineItem<int>[]
@@ -61,7 +59,6 @@ public sealed class StateTimelineCreateTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
@@ -98,7 +95,6 @@ public sealed class StateTimelineCreateTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -124,7 +120,6 @@ public sealed class StateTimelineCreateTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -152,7 +147,6 @@ public sealed class StateTimelineCreateTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -184,7 +178,6 @@ public sealed class StateTimelineCreateTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -216,7 +209,6 @@ public sealed class StateTimelineCreateTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));

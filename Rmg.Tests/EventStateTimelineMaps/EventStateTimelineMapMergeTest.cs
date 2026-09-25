@@ -13,17 +13,17 @@ public sealed class EventStateTimelineMapMergeTest
     [Arguments(0)]
     [Arguments(1)]
     [Arguments(2)]
-    public async Task Empty_ResultsIn_Empty(int count)
+    public async Task ZeroDurationTimeline_ResultsIn_ZeroDuration(int count)
     {
         var input = new EventStateTimelineMap<int>[count];
         for (var i = 0; i < count; i++)
-            input[i] = EventStateTimelineMap.Empty<int>();
+            input[i] = EventStateTimelineMap.Create<int>(0);
         
         var result = EventStateTimelineMap<int>.Merge(input);
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => !(x.EventTimeline.ToImmutableArray()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => !(x.StateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
@@ -68,7 +68,7 @@ public sealed class EventStateTimelineMapMergeTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.EventTimeline.ToImmutableArray(), assert => assert.IsEquivalentTo(eventItems))
             .And.Satisfies(x => x.StateTimelineMap.StateTimelines, assert => assert.IsEquivalentTo(stateTimelines.OrderBy(t => t.StateKind.Name)));
@@ -161,7 +161,7 @@ public sealed class EventStateTimelineMapMergeTest
         };
         var expectedStateItems3 = new TimelineItem<ImmutableArray<int>>[]
         {
-            new(0, [0, 1, 3]),
+            new(0, [0, 1, 1, 3]),
             new(1, [2]),
             new(2, []),
         };
@@ -174,7 +174,7 @@ public sealed class EventStateTimelineMapMergeTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.EventTimeline, assert => assert.IsEquivalentTo(expectedEventTimeline))
             .And.Satisfies(x => x.StateTimelineMap.StateTimelines, assert => assert.IsEquivalentTo(expectedStateTimelines.OrderBy(t => t.StateKind.Name)));

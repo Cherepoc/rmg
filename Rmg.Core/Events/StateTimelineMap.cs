@@ -23,14 +23,14 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
 
     public EventTimeline<StateMap> StateMapEventTimeline { get; }
 
-    public static StateTimelineMap Empty { get; } =
-        new(0, ImmutableDictionary<IStateKind, IStateTimeline>.Empty, EventTimeline<StateMap>.Empty);
+    private static readonly StateTimelineMap Zero =
+        new(0, ImmutableDictionary<IStateKind, IStateTimeline>.Empty, EventTimeline.Create<StateMap>(0));
 
     public static StateTimelineMap Merge(IEnumerable<StateTimelineMap> timelines)
     {
         var timelineArray = timelines.AsImmutableArray();
         if (timelineArray.IsEmpty)
-            return Empty;
+            return Zero;
 
         var duration = timelineArray.Max(x => x.Duration);
         return Create(duration, timelineArray.SelectMany(x => x.StateTimelines));
@@ -38,7 +38,8 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
 
     public double Duration { get; }
 
-    public bool IsEmpty => StateTimelines.IsEmpty;
+    /// <summary>Whether the map holds only default state, that is no state timelines at all.</summary>
+    public bool IsDefault => StateTimelines.IsEmpty;
 
     public StateTimelineMap Trim(double duration)
     {
@@ -47,7 +48,7 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
             return this;
 
         if (duration == 0)
-            return Empty;
+            return Zero;
 
         return Create(duration, StateTimelines);
     }
@@ -64,17 +65,27 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
         return Create(newDuration, StateTimelines.Select(x => x.Shift(offset)));
     }
 
+    /// <summary>A map of the given duration with only default state.</summary>
+    public static StateTimelineMap Create(double duration)
+    {
+        return Create(duration, []);
+    }
+
     public static StateTimelineMap Create(double duration, IEnumerable<IStateTimeline> stateTimelines)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(duration, nameof(duration));
 
         if (duration == 0)
-            return Empty;
+            return Zero;
 
         var mergedStateTimelines = StateTimeline.Merge(stateTimelines.Select(x => x.Trim(duration)));
 
         if (mergedStateTimelines.IsEmpty)
-            return Empty;
+            return new StateTimelineMap(
+                duration,
+                ImmutableDictionary<IStateKind, IStateTimeline>.Empty,
+                EventTimeline.Create<StateMap>(duration)
+            );
 
         var stateTimelineDictionary = mergedStateTimelines.ToImmutableDictionary(x => x.StateKind);
         var stateMapEventTimeline = StateTimelinesToStateMapEventTimeline(mergedStateTimelines, duration);
@@ -87,14 +98,14 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
     {
         return _stateTimelineDictionary.TryGetValue(stateKind, out var stateTimeline)
             ? (StateTimeline<T>)stateTimeline
-            : stateKind.EmptyTimeline;
+            : stateKind.CreateDefaultTimeline(Duration);
     }
 
     public StateMap GetEffectiveStateMapAt(double position)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(position);
 
-        if (IsEmpty || position >= Duration || position < StateMapEventTimeline[0].Position)
+        if (IsDefault || position >= Duration || position < StateMapEventTimeline[0].Position)
             return StateMap.Default;
 
         var index = StateMapEventTimeline.ToImmutableArray().GetIndexAtFloor(position);
@@ -103,8 +114,8 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
 
     public StateTimelineMap MergeStateMap(StateMap stateMap)
     {
-        if (IsEmpty)
-            return Empty;
+        if (Duration == 0)
+            return Zero;
 
         if (stateMap.IsDefault)
             return this;
@@ -119,7 +130,7 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
     )
     {
         if (mergedStateTimelines.IsEmpty)
-            return EventTimeline.Empty<StateMap>();
+            return EventTimeline.Create<StateMap>(duration);
 
         var positions = mergedStateTimelines
             .SelectMany(x => x.Positions)

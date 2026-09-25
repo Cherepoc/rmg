@@ -9,6 +9,21 @@ public static class Render
     private const int OctaveNoteCount = 12;
     private const int ZeroOctaveOffset = 5;
 
+    // drum sounds are mostly one-shots that play out whatever the note length, so every drum note is a sixteenth
+    private const double PercussionNoteDuration = 0.25;
+
+    // a note is held towards the next note of its track, but a gap longer than a bar is silence, such as a bar in
+    // which the track does not play, and the note is not held through it
+    private const double MaxNextNoteDuration = 4;
+
+    // the velocities of most notes of a song, between these percentiles, spread over the typical velocities, and the
+    // few quieter and louder ones over the ranges either side, so a handful of extreme notes cannot squeeze the rest
+    // into the middle
+    private static readonly (double From, double To) TypicalVelocityPercentiles = (0.05, 0.95);
+    private static readonly (double From, double To) QuietVelocities = (0.2, 0.3);
+    private static readonly (double From, double To) TypicalVelocities = (0.3, 0.9);
+    private static readonly (double From, double To) LoudVelocities = (0.9, 1);
+
     private static readonly ImmutableArray<int> ChromaticScaleOffsets = [..Enumerable.Range(0, OctaveNoteCount)];
 
     public static RenderedSong RenderSong(Song song)
@@ -22,7 +37,7 @@ public static class Render
         foreach (var (trackNumber, track) in song.TrackDefinitions)
         {
             var trackEventStateTimelineMap = trackEventStateTimelineMapDictionary.GetValueOrDefault(trackNumber);
-            if (trackEventStateTimelineMap == null || trackEventStateTimelineMap.EventTimeline.IsEmpty)
+            if (trackEventStateTimelineMap == null || trackEventStateTimelineMap.EventTimeline.Count == 0)
                 continue;
 
             var combinedEventStateTimelineMap = trackEventStateTimelineMap
@@ -44,7 +59,7 @@ public static class Render
         }
 
         var percussionEventTimeline = EventTimeline.Create(song.Duration, percussionTrackNotes.SelectMany(x => x));
-        if (!percussionEventTimeline.IsEmpty)
+        if (percussionEventTimeline.Count > 0)
         {
             var percussionTrack = new RenderedTrack(true, 0, percussionEventTimeline);
             renderedTracks.Add(percussionTrack);
@@ -59,38 +74,56 @@ public static class Render
 
     private static ImmutableArray<RenderedTrack> FixVolume(List<RenderedTrack> renderedTracks)
     {
-        var minVelocity = double.MaxValue;
-        var maxVelocity = double.MinValue;
-        foreach (var renderedTrack in renderedTracks)
+        var velocities = renderedTracks
+            .SelectMany(x => x.NoteTimeline)
+            .Select(x => x.Value.Velocity)
+            .Order()
+            .ToArray();
+        if (velocities.Length == 0)
+            return [..renderedTracks];
+
+        var minVelocity = velocities[0];
+        var typicalMinVelocity = GetPercentile(velocities, TypicalVelocityPercentiles.From);
+        var typicalMaxVelocity = GetPercentile(velocities, TypicalVelocityPercentiles.To);
+        var maxVelocity = velocities[^1];
+
+        double FixVelocity(double velocity)
         {
-            foreach (var renderedNoteTimelineItem in renderedTrack.NoteTimeline)
-            {
-                var renderedNoteVelocity = renderedNoteTimelineItem.Value.Velocity;
-                if (renderedNoteVelocity < minVelocity)
-                    minVelocity = renderedNoteVelocity;
-                if (renderedNoteVelocity > maxVelocity)
-                    maxVelocity = renderedNoteVelocity;
-            }
+            if (velocity < typicalMinVelocity)
+                return Scale(velocity, minVelocity, typicalMinVelocity, QuietVelocities);
+            if (velocity > typicalMaxVelocity)
+                return Scale(velocity, typicalMaxVelocity, maxVelocity, LoudVelocities);
+            return Scale(velocity, typicalMinVelocity, typicalMaxVelocity, TypicalVelocities);
         }
 
-        var velocityRange = maxVelocity - minVelocity;
-        // with no velocity spread there is nothing to scale - use the middle of the target range
-        var hasVelocitySpread = velocityRange > 0;
+        return
+        [
+            ..renderedTracks.Select(x => new RenderedTrack(
+                    x.IsPercussionInstrument,
+                    x.PitchInstrumentCode,
+                    x.NoteTimeline.MapValues(note => note with { Velocity = FixVelocity(note.Velocity) })
+                )
+            )
+        ];
+    }
 
-        var result = ImmutableArray.CreateBuilder<RenderedTrack>(renderedTracks.Count);
-        foreach (var renderedTrack in renderedTracks)
-        {
-            var fixedVelocityTimeline = renderedTrack.NoteTimeline
-                .MapValues(x => x with { Velocity = hasVelocitySpread ? (x.Velocity - minVelocity) / velocityRange / 2 + 0.5 : 0.75 });
-            var fixedVelocityTrack = new RenderedTrack(
-                renderedTrack.IsPercussionInstrument,
-                renderedTrack.PitchInstrumentCode,
-                fixedVelocityTimeline
-            );
-            result.Add(fixedVelocityTrack);
-        }
+    /// <summary>The value below which <paramref name="percentile" /> of the sorted values lie, between the two nearest.</summary>
+    private static double GetPercentile(double[] sortedValues, double percentile)
+    {
+        var index = percentile * (sortedValues.Length - 1);
+        var lowerIndex = (int)Math.Floor(index);
+        var upperIndex = Math.Min(lowerIndex + 1, sortedValues.Length - 1);
+        return sortedValues[lowerIndex] + (sortedValues[upperIndex] - sortedValues[lowerIndex]) * (index - lowerIndex);
+    }
 
-        return result.ToImmutable();
+    /// <summary>The value moved from between <paramref name="from" /> and <paramref name="to" /> into the range, in proportion.</summary>
+    private static double Scale(double value, double from, double to, (double From, double To) range)
+    {
+        // with nothing to scale by, the middle of the range
+        if (to <= from)
+            return (range.From + range.To) / 2;
+
+        return range.From + (value - from) / (to - from) * (range.To - range.From);
     }
 
     private static RenderedTrack RenderPitchInstrumentTrack(
@@ -122,11 +155,10 @@ public static class Render
             var stateMap = timelineItem.Value;
             var articulationOffset = stateMap.GetStateValue(StateKinds.ArticulationOffset);
             var noteVelocity = stateMap.GetStateValue(StateKinds.Velocity);
-            var noteDuration = stateMap.GetStateValue(StateKinds.QuarterNoteDurationPower);
 
             var articulationIndex = articulationOffset.ToIndex(track.ArticulationCodes.Length);
             var articulationCode = track.ArticulationCodes[articulationIndex];
-            var renderedNote = new RenderedNote(articulationCode, noteVelocity, noteDuration);
+            var renderedNote = new RenderedNote(articulationCode, noteVelocity, PercussionNoteDuration);
             yield return renderedNote.ToTimelineItem(timelineItem.Position);
         }
     }
@@ -138,38 +170,24 @@ public static class Render
     )
     {
         var position = timelineItemWithDuration.Position;
-        var nextNoteDuration = timelineItemWithDuration.Value.Duration;
+        var nextNoteDuration = Math.Min(timelineItemWithDuration.Value.Duration, MaxNextNoteDuration);
         var stateMap = timelineItemWithDuration.Value.Value;
 
         var scaleOffsets = stateMap.GetStateValue(StateKinds.ScaleOffsets);
         if (scaleOffsets.IsEmpty)
             scaleOffsets = ChromaticScaleOffsets;
 
-        // OutOfChordNoteOffset is an in-scale note that's going to be added to the chord notes
-        // the only reason it exists along with the ChordRootNoteOffset is to be able to
-        // generate it along with the root note but in a separate manner
+        // the chord root, in scale steps
         var chordRootNoteIndex = stateMap.GetStateValue(StateKinds.ChordRootNoteOffset)
             .ToIndexOverLength(scaleOffsets.Length);
 
-        // chord offsets are chosen from effective scale offsets
-        var chordNoteInScaleIndexes = stateMap.GetStateValue(StateKinds.ChordNoteInScaleOffsets)
-            .Select(x => x.ToIndexOverLength(scaleOffsets.Length))
-            .Prepend(0)
-            .Distinct()
-            .Order()
-            .ToImmutableArray();
-
-        // next we decide if we're going to choose a note from the chord
-        var chordNoteOffset = stateMap.GetStateValue(StateKinds.ChordNoteOffset);
-        var filteredChordNoteInScaleIndexes = chordNoteInScaleIndexes;
-        if (!chordNoteOffset.IsEmpty && !chordNoteInScaleIndexes.IsEmpty)
-        {
-            var (selectedOctave, selectedIndex) = chordNoteOffset
-                .ToIndexOverLength(chordNoteInScaleIndexes.Length)
-                .ToPeriodRemainder(chordNoteInScaleIndexes.Length);
-            var chordNoteInScaleIndex = chordNoteInScaleIndexes[selectedIndex];
-            filteredChordNoteInScaleIndexes = [chordNoteInScaleIndex + selectedOctave * scaleOffsets.Length];
-        }
+        // the chord notes, in scale steps above the root; a note without a chord plays its root alone
+        var chordPitchOffsets = stateMap.GetStateValue(StateKinds.ChordNotePitchOffsets);
+        var chordSteps = SnapChordToScale(
+            scaleOffsets,
+            chordRootNoteIndex,
+            chordPitchOffsets.IsEmpty ? [0] : chordPitchOffsets.Select(x => x * OctaveNoteCount)
+        );
 
         var noteOctaveOffset = stateMap.GetStateValue(StateKinds.OctaveOffset);
         var noteKeyOffset = stateMap.GetStateValue(StateKinds.KeyOffset);
@@ -181,19 +199,126 @@ public static class Render
             .BounceInBounds(0, 1);
         var duration = nextNoteDuration.WeightedAverage(nextNoteDurationFactor, quarterNoteDuration);
 
-        foreach (var chordNoteInScaleIndex in filteredChordNoteInScaleIndexes)
-        {
-            var (chordNoteOctaveOffset, scaleNoteIndex) = (chordRootNoteIndex + chordNoteInScaleIndex)
-                .ToPeriodRemainder(scaleOffsets.Length);
-            var scaleKeyOffset = scaleOffsets[scaleNoteIndex];
-            var octaveOffset = noteOctaveOffset + chordNoteOctaveOffset;
-            var keyOffset = noteKeyOffset + scaleKeyOffset;
-            var unfixedOffset = keyOffset + octaveOffset * OctaveNoteCount;
-            var offset = FixNoteOffset(absoluteMinOctave, octaveCount, unfixedOffset);
+        int ToNote(int stepAboveRoot) =>
+            noteKeyOffset + noteOctaveOffset * OctaveNoteCount + GetScalePitch(scaleOffsets, chordRootNoteIndex + stepAboveRoot);
 
-            var renderedNote = new RenderedNote(offset, noteVelocity, duration);
+        // a chord note offset picks one note of the chord, whatever its voicing, going round the chord's scale notes
+        // from the root up and an octave up or down for every lap around it; without one the whole chord plays
+        var chordNoteOffset = stateMap.GetStateValue(StateKinds.ChordNoteOffset);
+        ImmutableArray<int> notes;
+        if (!chordNoteOffset.IsEmpty)
+        {
+            var chordDegrees = chordSteps
+                .Select(x => x.Mod(scaleOffsets.Length))
+                .Distinct()
+                .Order()
+                .ToImmutableArray();
+            var (selectedOctave, selectedIndex) = chordNoteOffset
+                .ToIndexOverLength(chordDegrees.Length)
+                .ToPeriodRemainder(chordDegrees.Length);
+            var note = ToNote(chordDegrees[selectedIndex] + selectedOctave * scaleOffsets.Length);
+            notes = [FixNoteOffset(absoluteMinOctave, octaveCount, note)];
+        }
+        else
+        {
+            notes = FitChordIntoRange(absoluteMinOctave, octaveCount, [..chordSteps.Select(ToNote)]);
+        }
+
+        foreach (var note in notes)
+        {
+            var renderedNote = new RenderedNote(note, noteVelocity, duration);
             yield return renderedNote.ToTimelineItem(position);
         }
+    }
+
+    /// <summary>
+    ///     The chord's notes, in scale steps above its root, ascending. Every target, in semitones above the root's
+    ///     pitch, goes to the scale note nearest to it, the lowest target first and the lower note on a tie, so the
+    ///     same chord takes the scale's own shape in any scale. A target whose nearest note is already taken goes to the
+    ///     free one of that note's two neighbours that is nearer, and a target with neither left is dropped.
+    /// </summary>
+    internal static ImmutableArray<int> SnapChordToScale(
+        ImmutableArray<int> scaleOffsets,
+        int rootIndex,
+        IEnumerable<double> targets
+    )
+    {
+        if (scaleOffsets.IsEmpty)
+            throw new ArgumentException("Scale offsets cannot be empty.", nameof(scaleOffsets));
+
+        var rootPitch = GetScalePitch(scaleOffsets, rootIndex);
+        double Distance(int step, double target) =>
+            Math.Abs(GetScalePitch(scaleOffsets, rootIndex + step) - rootPitch - target);
+
+        var steps = new SortedSet<int>();
+        foreach (var target in targets.Order())
+        {
+            var nearest = FindNearestStep(scaleOffsets, rootIndex, rootPitch, target);
+            if (steps.Add(nearest))
+                continue;
+
+            var (closer, further) = Distance(nearest - 1, target) <= Distance(nearest + 1, target)
+                ? (nearest - 1, nearest + 1)
+                : (nearest + 1, nearest - 1);
+            if (!steps.Add(closer))
+                steps.Add(further);
+        }
+
+        return [..steps];
+    }
+
+    private static int FindNearestStep(ImmutableArray<int> scaleOffsets, int rootIndex, int rootPitch, double target)
+    {
+        // the scale's pitches rise with its steps, so the nearest step is within a scale's length of the step an even
+        // division of the octave would give
+        var length = scaleOffsets.Length;
+        var guess = (int)Math.Floor(target / OctaveNoteCount * length);
+        var nearest = guess - length;
+        var nearestDistance = double.MaxValue;
+        for (var step = guess - length; step <= guess + length; step++)
+        {
+            var distance = Math.Abs(GetScalePitch(scaleOffsets, rootIndex + step) - rootPitch - target);
+            if (distance < nearestDistance)
+            {
+                nearest = step;
+                nearestDistance = distance;
+            }
+        }
+
+        return nearest;
+    }
+
+    /// <summary>The pitch of a scale step, in semitones above the scale's first note in octave 0.</summary>
+    private static int GetScalePitch(ImmutableArray<int> scaleOffsets, int step)
+    {
+        var (octave, degree) = step.ToPeriodRemainder(scaleOffsets.Length);
+        return scaleOffsets[degree] + octave * OctaveNoteCount;
+    }
+
+    /// <summary>
+    ///     The chord moved into the track's range as a whole, by the octaves that bring its lowest note where
+    ///     <see cref="FixNoteOffset" /> would, so it keeps its voicing. A note still above the range comes down by
+    ///     octaves, and one that lands on another note of the chord is dropped.
+    /// </summary>
+    internal static ImmutableArray<int> FitChordIntoRange(int absoluteMinOctave, int octaveCount, ImmutableArray<int> notes)
+    {
+        if (notes.IsEmpty)
+            return [];
+
+        var lowestNote = notes.Min();
+        var shift = FixNoteOffset(absoluteMinOctave, octaveCount, lowestNote) - lowestNote;
+        var maxNote = (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1;
+
+        var result = new SortedSet<int>();
+        foreach (var note in notes.Order())
+        {
+            var fittedNote = note + shift;
+            while (fittedNote > maxNote)
+                fittedNote -= OctaveNoteCount;
+            result.Add(fittedNote);
+        }
+
+        return [..result];
     }
 
     private static int ToIndex(this double offset, int length)
@@ -211,7 +336,8 @@ public static class Render
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);
 
-        return (int)Math.Floor(offset * length);
+        // to the nearest step, halves away from zero, so that small offsets either way stay put
+        return (int)Math.Round(offset * length, MidpointRounding.AwayFromZero);
     }
 
     private static int ToIndex(this ImmutableArray<double> offset, int length)
@@ -225,6 +351,7 @@ public static class Render
             : 0;
     }
 
+    // each value is rounded before summing, so every layer shifts a pattern by a whole step - see README "How it works"
     private static int ToIndexOverLength(this ImmutableArray<double> offset, int length)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);

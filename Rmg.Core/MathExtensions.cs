@@ -13,12 +13,6 @@ public static class MathExtensions
         return remainder < T.Zero ? remainder + divisor : remainder;
     }
 
-    public static T TruncateMin<T>(this T value, T min)
-        where T : INumber<T>
-    {
-        return value < min ? min : value;
-    }
-
     public static double RoundByEpsilon(this double value, double reference)
     {
         return Math.Abs(value - reference) >= Epsilon

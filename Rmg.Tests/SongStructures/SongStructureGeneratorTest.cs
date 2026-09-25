@@ -24,6 +24,20 @@ public sealed class SongStructureGeneratorTest
     }
 
     [Test]
+    public async Task Sections_NeverRepeat_AcrossPartBoundaries()
+    {
+        for (var seed = 0; seed < 2000; seed++)
+        {
+            var sectionIds = SongStructureGenerator.Generate(new GenerationContext(seed))
+                .SelectMany(x => x.SectionIds)
+                .ToArray();
+
+            for (var i = 1; i < sectionIds.Length; i++)
+                await Assert.That(sectionIds[i]).IsNotEqualTo(sectionIds[i - 1]);
+        }
+    }
+
+    [Test]
     public async Task SectionIds_HaveNoGaps()
     {
         for (var seed = 0; seed < 200; seed++)

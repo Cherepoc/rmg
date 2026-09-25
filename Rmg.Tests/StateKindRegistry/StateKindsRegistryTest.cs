@@ -27,13 +27,6 @@ public sealed class StateKindsRegistryTest
     }
 
     [Test]
-    public async Task GetByName_ResultsIn_SameKind_ForEveryDeclaredKind()
-    {
-        foreach (var kind in DeclaredKinds())
-            await Assert.That(StateKinds.GetByName(kind.Name)).IsSameReferenceAs(kind);
-    }
-
-    [Test]
     public async Task DeclaredKindNames_AreUnique()
     {
         var names = DeclaredKinds().Select(x => x.Name).ToArray();

@@ -15,6 +15,7 @@ public sealed class StateKind<T> : IStateKind
     private readonly object _defaultValueObject;
     private readonly Func<T, T, bool> _equalityFunc;
     private readonly Func<T, int> _hashFunc;
+    private readonly StateTimeline<T> _zeroDurationTimeline;
 
     public StateKind(
         string name,
@@ -34,17 +35,19 @@ public sealed class StateKind<T> : IStateKind
         _defaultValueObject = DefaultValue;
         _defaultStateObject = DefaultState;
 
-        // each kind gets its own empty timeline so that it reports the kind's default value, not default(T)
-        EmptyTimeline = new StateTimeline<T>(0, this, []);
+        // each kind gets its own zero-duration timeline so that it reports the kind's default value, not default(T)
+        _zeroDurationTimeline = new StateTimeline<T>(0, this, []);
     }
 
-    public static StateKind<T> Empty { get; } = CreateEmpty();
+    /// <summary>
+    ///     A placeholder kind for a state timeline that has no kind of its own, such as the result of merging no
+    ///     timelines.
+    /// </summary>
+    public static StateKind<T> None { get; } = CreateNone();
 
     public T DefaultValue { get; }
 
     public State<T> DefaultState { get; }
-
-    public StateTimeline<T> EmptyTimeline { get; }
 
     public string Name { get; }
 
@@ -52,7 +55,10 @@ public sealed class StateKind<T> : IStateKind
 
     IState IStateKind.DefaultState => _defaultStateObject;
 
-    IStateTimeline IStateKind.EmptyTimeline => EmptyTimeline;
+    IStateTimeline IStateKind.CreateDefaultTimeline(double duration)
+    {
+        return CreateDefaultTimeline(duration);
+    }
 
     public object AggregateValues(IEnumerable values)
     {
@@ -104,7 +110,7 @@ public sealed class StateKind<T> : IStateKind
     // instantiation is always compiled in; only the field's metadata could otherwise go missing.
     [DynamicDependency(nameof(ImmutableArray<int>.Empty), typeof(ImmutableArray<>))]
     [UnconditionalSuppressMessage("Trimming", "IL2090", Justification = "ImmutableArray<>.Empty is kept by the DynamicDependency above.")]
-    private static StateKind<T> CreateEmpty()
+    private static StateKind<T> CreateNone()
     {
         var type = typeof(T);
         T defaultValue;
@@ -120,7 +126,7 @@ public sealed class StateKind<T> : IStateKind
         }
 
         return new StateKind<T>(
-            "Empty",
+            "None",
             defaultValue,
             (_, _) => throw new NotImplementedException(),
             _ => throw new NotImplementedException()
@@ -165,8 +171,8 @@ public sealed class StateKind<T> : IStateKind
     public StateTimeline<T> MergeTimelines(IEnumerable<StateTimeline<T>> timelines)
     {
         var timelinesArray = timelines.AsImmutableArray();
-        if (timelinesArray.Length == 0 || timelinesArray.All(x => x.IsEmpty))
-            return EmptyTimeline;
+        if (timelinesArray.All(x => x.Duration == 0))
+            return _zeroDurationTimeline;
 
         if (timelinesArray.Any(x => x.StateKind != this))
             throw new ArgumentException($"Timelines must have the state kind {Name}.", nameof(timelines));
@@ -177,24 +183,21 @@ public sealed class StateKind<T> : IStateKind
     public StateTimeline<T> CreateTimelineFromValue(double duration, T value)
     {
         if (duration <= 0 || CheckValueIsDefault(value))
-            return EmptyTimeline;
+            return CreateDefaultTimeline(duration);
 
         return new StateTimeline<T>(duration, this, [new TimelineItem<T>(0, value)]);
     }
 
-    public StateTimeline<T> CreateStateTimelineFromEventTimeline(EventTimeline<T> eventTimeline)
+    /// <summary>A timeline of the given duration that holds the kind's default value all along.</summary>
+    public StateTimeline<T> CreateDefaultTimeline(double duration)
     {
-        if (eventTimeline.IsEmpty)
-            return EmptyTimeline;
+        ArgumentOutOfRangeException.ThrowIfNegative(duration);
 
-        return StateTimeline.Create(eventTimeline.Duration, this, eventTimeline.ToImmutableArray());
+        return duration == 0 ? _zeroDurationTimeline : new StateTimeline<T>(duration, this, []);
     }
 
     public StateTimeline<T> ExtractStateTimeline(EventTimeline<StateMap> eventTimeline)
     {
-        if (eventTimeline.IsEmpty)
-            return EmptyTimeline;
-
         var items = eventTimeline.MapValues(x => x.GetStateValue(this));
         return StateTimeline.Create(eventTimeline.Duration, this, items.ToImmutableArray());
     }
@@ -202,10 +205,10 @@ public sealed class StateKind<T> : IStateKind
 
 public static class StateKind
 {
-    public static StateKind<T> Empty<T>()
+    public static StateKind<T> None<T>()
         where T : notnull
     {
-        return StateKind<T>.Empty;
+        return StateKind<T>.None;
     }
 }
 
@@ -217,7 +220,7 @@ public interface IStateKind
 
     IState DefaultState { get; }
 
-    IStateTimeline EmptyTimeline { get; }
+    IStateTimeline CreateDefaultTimeline(double duration);
 
     object AggregateValues(IEnumerable values);
 

@@ -8,7 +8,7 @@ public sealed class TrackEventStateTimelineMapCreateTest
     private static readonly StateKind<double> StateKind2 = StateKinds.QuarterNoteDurationPower;
     
     [Test]
-    public async Task ZeroDuration_ResultsIn_Empty()
+    public async Task ZeroDuration_ResultsIn_ZeroDuration()
     {
         var trackEventItems = new TimelineItem<int>[]
         {
@@ -47,7 +47,7 @@ public sealed class TrackEventStateTimelineMapCreateTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => !(x.TrackTimelineMap.AsEnumerable()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => !(x.CommonStateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
@@ -57,27 +57,27 @@ public sealed class TrackEventStateTimelineMapCreateTest
     [Arguments(0)]
     [Arguments(1)]
     [Arguments(2)]
-    public async Task EmptyTimelines_ResultsIn_Empty(int trackEventStateTimelineMapCount)
+    public async Task ZeroDurationTimelines_ResultsIn_Default(int trackEventStateTimelineMapCount)
     {
         var trackEventStateTimelineMaps = new Dictionary<int, EventStateTimelineMap<int>>();
         for (int i = 0; i < trackEventStateTimelineMapCount; i++)
-            trackEventStateTimelineMaps[i] = EventStateTimelineMap.Empty<int>();
+            trackEventStateTimelineMaps[i] = EventStateTimelineMap.Create<int>(0);
 
-        var commonStateTimelineMap = StateTimelineMap.Empty;
+        var commonStateTimelineMap = StateTimelineMap.Create(0);
         
         const double duration = 1;
         var result = TrackEventStateTimelineMap.Create(duration, trackEventStateTimelineMaps, commonStateTimelineMap);
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
-            .And.Satisfies(x => x.Duration, assert => assert.IsZero())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
+            .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => !(x.TrackTimelineMap.AsEnumerable()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => !(x.CommonStateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
     }
     
     [Test]
-    public async Task BeforeFirstItemsDuration_ResultsIn_Empty()
+    public async Task BeforeFirstItemsDuration_ResultsIn_Default()
     {
         var trackEventItems = new TimelineItem<int>[]
         {
@@ -116,8 +116,8 @@ public sealed class TrackEventStateTimelineMapCreateTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
-            .And.Satisfies(x => x.Duration, assert => assert.IsZero())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
+            .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => !(x.TrackTimelineMap.AsEnumerable()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => !(x.CommonStateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
     }
@@ -127,7 +127,7 @@ public sealed class TrackEventStateTimelineMapCreateTest
     {
         // ReSharper disable once CollectionNeverUpdated.Local
         var eventTimelineMap = new Dictionary<int, EventStateTimelineMap<int>>();
-        var commonStateTimelineMap = StateTimelineMap.Empty;
+        var commonStateTimelineMap = StateTimelineMap.Create(0);
         
         const double duration = -1;
 
@@ -138,7 +138,7 @@ public sealed class TrackEventStateTimelineMapCreateTest
     }
     
     [Test]
-    public async Task EmptyTrackTimelineMap_ResultsIn_CommonStateTimelinesOnly()
+    public async Task NoTracks_ResultsIn_CommonStateTimelinesOnly()
     {
         // ReSharper disable once CollectionNeverUpdated.Local
         var trackTimelineMap = new Dictionary<int, EventStateTimelineMap<int>>();
@@ -158,7 +158,7 @@ public sealed class TrackEventStateTimelineMapCreateTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => !(x.TrackTimelineMap.AsEnumerable()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => x.CommonStateTimelineMap.StateTimelines,
@@ -166,7 +166,7 @@ public sealed class TrackEventStateTimelineMapCreateTest
     }
     
     [Test]
-    public async Task EmptyCommonStateTimelines_ResultsIn_TrackTimelineMapOnly()
+    public async Task DefaultCommonState_ResultsIn_TrackTimelineMapOnly()
     {
         var trackEventItems = new TimelineItem<int>[]
         {
@@ -190,14 +190,14 @@ public sealed class TrackEventStateTimelineMapCreateTest
             [1] = trackEventStateTimelineMap
         };
         
-        var commonStateTimelineMap = StateTimelineMap.Empty;
+        var commonStateTimelineMap = StateTimelineMap.Create(0);
         
         const double duration = 1;
         var result = TrackEventStateTimelineMap.Create(duration, trackTimelineMap, commonStateTimelineMap);
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(), assert => assert.IsEquivalentTo(trackTimelineMap))
             .And.Satisfies(x => !(x.CommonStateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
@@ -254,7 +254,7 @@ public sealed class TrackEventStateTimelineMapCreateTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(),
                 assert => assert.IsEquivalentTo(expectedTrackTimelineMap))
@@ -318,7 +318,7 @@ public sealed class TrackEventStateTimelineMapCreateTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => !(x.TrackTimelineMap.AsEnumerable()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => x.CommonStateTimelineMap.StateTimelines,
@@ -388,7 +388,7 @@ public sealed class TrackEventStateTimelineMapCreateTest
             new(1, trackEventStateTimelineMap2),
         };
 
-        var commonStateTimelines = StateTimelineMap.Empty;
+        var commonStateTimelines = StateTimelineMap.Create(0);
         
         var result = TrackEventStateTimelineMap.Create(duration, trackTimelineMap, commonStateTimelines);
         
@@ -427,7 +427,7 @@ public sealed class TrackEventStateTimelineMapCreateTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(), assert => assert.IsEquivalentTo(expectedTimelineMap))
             .And.Satisfies(x => !(x.CommonStateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
@@ -496,13 +496,13 @@ public sealed class TrackEventStateTimelineMapCreateTest
             new(2, trackEventStateTimelineMap2),
         };
 
-        var commonStateTimelineMap = StateTimelineMap.Empty;
+        var commonStateTimelineMap = StateTimelineMap.Create(0);
 
         var result = TrackEventStateTimelineMap.Create(duration, trackTimelineMap, commonStateTimelineMap);
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(), assert => assert.IsEquivalentTo(trackTimelineMap))
             .And.Satisfies(x => !(x.CommonStateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());

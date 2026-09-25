@@ -5,7 +5,7 @@ namespace Rmg.Tests.EventTimelines;
 public sealed class EventTimelineCreateTest
 {
     [Test]
-    public async Task ZeroDuration_Empty()
+    public async Task ZeroDuration_ResultsIn_ZeroDuration()
     {
         const double duration = 0;
         var items = new TimelineItem<int>[]
@@ -17,14 +17,13 @@ public sealed class EventTimelineCreateTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
     }
     
     [Test]
-    public async Task ZeroItems_Empty()
+    public async Task ZeroItems_ResultsIn_NoEvents()
     {
         const double duration = 1;
         var items = Array.Empty<TimelineItem<int>>();
@@ -33,14 +32,13 @@ public sealed class EventTimelineCreateTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
-            .And.Satisfies(x => x.Duration, assert => assert.IsZero())
+            .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
     }
     
     [Test]
-    public async Task BeforeFirstItemDuration_Empty()
+    public async Task BeforeFirstItemDuration_ResultsIn_NoEvents()
     {
         const double duration = 1;
         var items = new TimelineItem<int>[]
@@ -52,8 +50,7 @@ public sealed class EventTimelineCreateTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
-            .And.Satisfies(x => x.Duration, assert => assert.IsZero())
+            .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
     }
@@ -89,7 +86,6 @@ public sealed class EventTimelineCreateTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -115,7 +111,6 @@ public sealed class EventTimelineCreateTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
