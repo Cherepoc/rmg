@@ -1,3 +1,6 @@
+/* the dashboard is built on the player's styles, and bundled with them into one file */
+@import "./app.css";
+
 /*
     The dashboard borrows the app's panels and tokens, and adds the chart roles on top. The series
     colours are the validated three-slot categorical set: they clear the lightness band, the chroma

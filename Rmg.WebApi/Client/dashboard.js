@@ -42,6 +42,9 @@ const SERIES = [
 
 let summary = null;
 
+// what the pointer over the day by day chart reads from, replaced on every draw
+let chart = null;
+
 // --- the token -------------------------------------------------------------
 
 function readToken() {
@@ -288,6 +291,8 @@ function drawDaily() {
     elements.daily.setAttribute("viewBox", `0 0 ${BOX.width} ${BOX.height}`);
 
     if (days.length === 0) {
+        chart = null;
+        hideDay();
         elements.dailyFigure.hidden = true;
         if (!elements.dailyPanel.querySelector(".empty"))
             elements.dailyPanel.append(empty("No days have been counted yet."));
@@ -376,51 +381,58 @@ function drawDaily() {
         return dot;
     });
 
-    hover(days, x, y, crosshair, dots, plotWidth);
+    chart = { days, x, y, crosshair, dots, plotWidth };
+    hideDay();
 }
 
-/** A crosshair and one tooltip for the whole day, rather than a hit target per dot. */
-function hover(days, x, y, crosshair, dots, plotWidth) {
-    const show = (event) => {
-        const box = elements.daily.getBoundingClientRect();
-        const atPixel = ((event.clientX - box.left) / box.width) * BOX.width;
-        const part = (atPixel - BOX.left) / plotWidth;
-        const index = Math.max(0, Math.min(days.length - 1, Math.round(part * (days.length - 1))));
-        const day = days[index];
+/**
+ *     A crosshair and one tooltip for the whole day, rather than a hit target per dot. Listened for once,
+ *     below, and read from whatever the last draw left in <c>chart</c>.
+ */
+function showDay(event) {
+    if (chart === null) return;
 
-        crosshair.setAttribute("x1", x(index));
-        crosshair.setAttribute("x2", x(index));
-        crosshair.setAttribute("opacity", 1);
+    const { days, x, y, crosshair, dots, plotWidth } = chart;
+    const box = elements.daily.getBoundingClientRect();
+    const atPixel = ((event.clientX - box.left) / box.width) * BOX.width;
+    const part = (atPixel - BOX.left) / plotWidth;
+    const index = Math.max(0, Math.min(days.length - 1, Math.round(part * (days.length - 1))));
+    const day = days[index];
 
-        dots.forEach((dot, slot) => {
-            dot.setAttribute("cx", x(index));
-            dot.setAttribute("cy", y(day[SERIES[slot].key]));
-            dot.setAttribute("opacity", 1);
-        });
+    crosshair.setAttribute("x1", x(index));
+    crosshair.setAttribute("x2", x(index));
+    crosshair.setAttribute("opacity", 1);
 
-        elements.dailyTooltip.innerHTML =
-            `<b>${day.day}</b>` +
-            SERIES.map((series) =>
-                `<span style="color: var(${series.role})"><i></i></span>` +
-                `<span style="color: var(--text)">${series.name} ${day[series.key].toLocaleString()}</span>`)
-                .join("<br />");
+    dots.forEach((dot, slot) => {
+        dot.setAttribute("cx", x(index));
+        dot.setAttribute("cy", y(day[SERIES[slot].key]));
+        dot.setAttribute("opacity", 1);
+    });
 
-        elements.dailyTooltip.hidden = false;
+    elements.dailyTooltip.innerHTML =
+        `<b>${day.day}</b>` +
+        SERIES.map((series) =>
+            `<span style="color: var(${series.role})"><i></i></span>` +
+            `<span style="color: var(--text)">${series.name} ${day[series.key].toLocaleString()}</span>`)
+            .join("<br />");
 
-        const left = (x(index) / BOX.width) * box.width;
-        elements.dailyTooltip.style.left = `${Math.min(box.width - 150, Math.max(0, left + 12))}px`;
-        elements.dailyTooltip.style.top = "8px";
-    };
+    elements.dailyTooltip.hidden = false;
 
-    const hide = () => {
-        crosshair.setAttribute("opacity", 0);
-        for (const dot of dots) dot.setAttribute("opacity", 0);
-        elements.dailyTooltip.hidden = true;
-    };
-
-    elements.daily.addEventListener("pointermove", show);
-    elements.daily.addEventListener("pointerleave", hide);
+    const left = (x(index) / BOX.width) * box.width;
+    elements.dailyTooltip.style.left = `${Math.min(box.width - 150, Math.max(0, left + 12))}px`;
+    elements.dailyTooltip.style.top = "8px";
 }
+
+function hideDay() {
+    elements.dailyTooltip.hidden = true;
+    if (chart === null) return;
+
+    chart.crosshair.setAttribute("opacity", 0);
+    for (const dot of chart.dots) dot.setAttribute("opacity", 0);
+}
+
+elements.daily.addEventListener("pointermove", showDay);
+elements.daily.addEventListener("pointerleave", hideDay);
 
 /** A step the axis can count in without fractions, so the ticks read 0 / 20 / 40, never 0 / 13 / 25. */
 function niceStep(highest, wanted = 4) {

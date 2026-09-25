@@ -66,7 +66,7 @@ export function encodeMp3(audio, bitrate, onProgress) {
 
         worker.addEventListener("error", (event) => {
             worker.terminate();
-            reject(new Error(event.message || "the encoder could not be started"));
+            reject(new Error(event.message || "the MP3 encoder did not start"));
         });
 
         worker.postMessage(

@@ -5,50 +5,34 @@ const SETTING = "rmg.keep-soundfont";
 const AUTOPLAY = "rmg.autoplay";
 const HISTORY = "rmg.history";
 
+export const isKeeping = () => readFlag(SETTING);
+export const setKeeping = (isOn) => writeFlag(SETTING, isOn);
+export const isAutoplaying = () => readFlag(AUTOPLAY);
+export const setAutoplaying = (isOn) => writeFlag(AUTOPLAY, isOn);
+
 /**
- *     Kept as the absence of an opt-out, so the default stays on for a first visit and for a
- *     browser that refuses local storage altogether.
+ *     A setting kept as the absence of an opt-out, so it stays on for a first visit and for a browser
+ *     that refuses local storage altogether.
  */
-export function isKeeping() {
+function readFlag(key) {
     try {
-        return localStorage.getItem(SETTING) !== "off";
+        return localStorage.getItem(key) !== "off";
     } catch {
         return true;
     }
 }
 
-export function setKeeping(isOn) {
+function writeFlag(key, isOn) {
     try {
-        if (isOn) localStorage.removeItem(SETTING);
-        else localStorage.setItem(SETTING, "off");
-    } catch {
-        // a browser that will not remember the setting will not remember the soundfont either
-    }
-}
-
-/**
- *     Kept the same way as the setting above, as the absence of an opt-out, so a song that runs out
- *     leads to another until somebody says otherwise.
- */
-export function isAutoplaying() {
-    try {
-        return localStorage.getItem(AUTOPLAY) !== "off";
-    } catch {
-        return true;
-    }
-}
-
-export function setAutoplaying(isOn) {
-    try {
-        if (isOn) localStorage.removeItem(AUTOPLAY);
-        else localStorage.setItem(AUTOPLAY, "off");
+        if (isOn) localStorage.removeItem(key);
+        else localStorage.setItem(key, "off");
     } catch {
         // a browser that will not remember the setting simply starts each visit with it on
     }
 }
 
 /** A seed as the page keeps it: the digits the server reported, and nothing that is not one. */
-const IS_SEED = /^-?\d{1,10}$/;
+export const IS_SEED = /^-?\d{1,10}$/;
 
 /**
  *     The songs this browser has had, newest first. They go to localStorage rather than to the database
@@ -84,7 +68,7 @@ function open() {
         request.onupgradeneeded = () => request.result.createObjectStore(STORE);
         request.onsuccess = () => resolve(request.result);
         request.onerror = () => reject(request.error);
-        request.onblocked = () => reject(new Error("another tab is holding the database open"));
+        request.onblocked = () => reject(new Error("close other RMG tabs and try again"));
     });
 }
 
@@ -96,21 +80,27 @@ async function withStore(mode, action) {
             const request = action(transaction.objectStore(STORE));
             transaction.oncomplete = () => resolve(request?.result ?? null);
             transaction.onerror = () => reject(transaction.error);
-            transaction.onabort = () => reject(transaction.error ?? new Error("the write was rolled back"));
+            transaction.onabort = () => reject(transaction.error ?? new Error("saving was cancelled"));
         });
     } finally {
         database.close();
     }
 }
 
-export async function keep(name, soundFont) {
-    // asking is enough: a browser that says no still stores, it just may evict under pressure
+/**
+ *     Asks for storage that is not cleared under pressure. Only ever when somebody has just ticked the
+ *     box: Firefox answers with a permission prompt, which a save nobody asked for has no business
+ *     raising. Asking is enough: a browser that says no still stores, it just may evict under pressure.
+ */
+export async function askToPersist() {
     try {
         await navigator.storage?.persist?.();
     } catch {
         // not worth reporting, the soundfont is stored either way
     }
+}
 
+export async function keep(name, soundFont) {
     await withStore("readwrite", (store) => store.put({ name, soundFont }, KEY));
 }
 
