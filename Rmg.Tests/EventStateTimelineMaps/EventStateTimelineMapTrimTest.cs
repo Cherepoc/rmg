@@ -8,7 +8,7 @@ public sealed class EventStateTimelineMapTrimTest
     private static readonly StateKind<double> StateKind2 = StateKinds.QuarterNoteDurationPower;
     
     [Test]
-    public async Task ZeroDuration_ResultsIn_Empty()
+    public async Task ZeroDuration_ResultsIn_ZeroDuration()
     {
         var eventItems = new TimelineItem<int>[]
         {
@@ -37,23 +37,23 @@ public sealed class EventStateTimelineMapTrimTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => !(x.EventTimeline.ToImmutableArray()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => !(x.StateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
     }
     
     [Test]
-    public async Task Empty_ResultsIn_Empty()
+    public async Task ZeroDurationTimeline_ResultsIn_Default()
     {
-        var input = EventStateTimelineMap.Empty<int>();
+        var input = EventStateTimelineMap.Create<int>(0);
 
         var result = input.Trim(1);
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
-            .And.Satisfies(x => x.Duration, assert => assert.IsZero())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
+            .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(1))
             .And.Satisfies(x => !(x.EventTimeline.ToImmutableArray()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => !(x.StateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
     }
@@ -61,7 +61,7 @@ public sealed class EventStateTimelineMapTrimTest
     [Test]
     public async Task NegativeDuration_ResultsIn_ThrownException()
     {
-        var input = EventStateTimelineMap.Empty<int>();
+        var input = EventStateTimelineMap.Create<int>(0);
 
         await Assert.That(() =>
         {
@@ -111,7 +111,7 @@ public sealed class EventStateTimelineMapTrimTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.EventTimeline.ToImmutableArray(),
                 assert => assert.IsEquivalentTo(expectedEventTimeline))

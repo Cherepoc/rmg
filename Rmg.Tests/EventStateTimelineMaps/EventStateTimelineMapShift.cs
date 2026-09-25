@@ -8,22 +8,22 @@ public sealed class EventStateTimelineMapShift
     private static readonly StateKind<double> StateKind2 = StateKinds.QuarterNoteDurationPower;
     
     [Test]
-    public async Task Empty_ResultsIn_Empty()
+    public async Task ZeroDurationTimeline_ResultsIn_Default()
     {
-        var input = EventStateTimelineMap.Empty<int>();
+        var input = EventStateTimelineMap.Create<int>(0);
         
         var result = input.Shift(1);
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
-            .And.Satisfies(x => x.Duration, assert => assert.IsZero())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
+            .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(1))
             .And.Satisfies(x => !(x.EventTimeline.ToImmutableArray()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => !(x.StateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
     }
     
     [Test]
-    public async Task OffsetToZeroDuration_ResultsIn_Empty()
+    public async Task OffsetToZeroDuration_ResultsIn_ZeroDuration()
     {
         var eventItems = new TimelineItem<int>[]
         {
@@ -52,7 +52,7 @@ public sealed class EventStateTimelineMapShift
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => !(x.EventTimeline.ToImmutableArray()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => !(x.StateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
@@ -61,7 +61,7 @@ public sealed class EventStateTimelineMapShift
     [Test]
     public async Task OffsetToNegativeDuration_ResultsIn_Exception()
     {
-        var input = EventStateTimelineMap.Empty<int>();
+        var input = EventStateTimelineMap.Create<int>(0);
         
         await Assert.That(() =>
         {
@@ -70,9 +70,9 @@ public sealed class EventStateTimelineMapShift
     }
     
     [Test]
-    public async Task EmptyEventTimeline_ResultsIn_ShiftedStateTimelines()
+    public async Task NoEvents_ResultsIn_ShiftedStateTimelines()
     {
-        var eventTimeline = EventTimeline.Empty<int>();
+        var eventTimeline = EventTimeline.Create<int>(0);
         
         var stateItems1 = new TimelineItem<int>[]
         {
@@ -101,7 +101,7 @@ public sealed class EventStateTimelineMapShift
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => !(x.EventTimeline.ToImmutableArray()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => x.StateTimelineMap.StateTimelines,
@@ -109,7 +109,7 @@ public sealed class EventStateTimelineMapShift
     }
     
     [Test]
-    public async Task EmptyStateTimelines_ResultsIn_ShiftedEventTimeline()
+    public async Task DefaultState_ResultsIn_ShiftedEventTimeline()
     {
         var eventItems = new TimelineItem<int>[]
         {
@@ -117,7 +117,7 @@ public sealed class EventStateTimelineMapShift
         };
         var eventTimeline = EventTimeline.Create(2, eventItems);
 
-        var stateTimelineMap = StateTimelineMap.Empty;
+        var stateTimelineMap = StateTimelineMap.Create(0);
         
         var input = EventStateTimelineMap.Create(2, eventTimeline, stateTimelineMap);
         
@@ -129,7 +129,7 @@ public sealed class EventStateTimelineMapShift
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.EventTimeline, assert => assert.IsEquivalentTo(expectedEventTimeline))
             .And.Satisfies(x => !(x.StateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
@@ -179,7 +179,7 @@ public sealed class EventStateTimelineMapShift
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.EventTimeline.ToImmutableArray(),
                 assert => assert.IsEquivalentTo(expectedEventTimeline))

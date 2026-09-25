@@ -148,23 +148,57 @@ public static class Midi
         }
     }
 
-    private static IEnumerable<MidiEvent> ToEvents(
-        this TimelineItem<RenderedNote> renderedNoteTimelineItem,
-        byte channel,
-        uint durationDelta
-    )
+    /// <summary>
+    ///     The notes as MIDI plays them. A key sounds once on a channel and a note-off ends whatever note of the key
+    ///     is playing, so a note ends where the next note of its key starts, rather than cutting that note short with
+    ///     its own note-off, and notes of a key that start on the same tick play as one.
+    /// </summary>
+    private static IEnumerable<MidiNote> ToMidiNotes(this EventTimeline<RenderedNote> noteTimeline, uint durationDelta)
     {
-        var (position, renderedNote) = (renderedNoteTimelineItem.Position, renderedNoteTimelineItem.Value);
+        return noteTimeline
+            .Select(x => new MidiNote(
+                AbsoluteDelta(x.Position),
+                Math.Min(AbsoluteDelta(x.Position + x.Value.Duration), durationDelta),
+                (byte)x.Value.Offset,
+                x.Value.Velocity
+            ))
+            .GroupBy(x => x.Key)
+            .SelectMany(TrimOverlaps)
+            // a note that ends where the next note of its key starts is written before it, so its note-off comes first
+            .OrderBy(x => x.OnDelta);
+    }
 
-        var noteOnDelta = AbsoluteDelta(position);
-        var noteOnBytes = NoteOn(channel, (byte)renderedNote.Offset, renderedNote.Velocity);
-        yield return new MidiEvent(noteOnDelta, noteOnBytes);
+    private static IEnumerable<MidiNote> TrimOverlaps(IEnumerable<MidiNote> keyNotes)
+    {
+        MidiNote? current = null;
+        foreach (var note in keyNotes)
+        {
+            if (current is { } playing)
+            {
+                if (note.OnDelta == playing.OnDelta)
+                {
+                    current = playing with
+                    {
+                        OffDelta = Math.Max(playing.OffDelta, note.OffDelta),
+                        Velocity = Math.Max(playing.Velocity, note.Velocity)
+                    };
+                    continue;
+                }
 
-        var noteOffDelta = AbsoluteDelta(position + renderedNote.Duration);
-        if (noteOffDelta > durationDelta)
-            noteOffDelta = durationDelta;
-        var noteOffBytes = NoteOff(channel, (byte)renderedNote.Offset);
-        yield return new MidiEvent(noteOffDelta, noteOffBytes);
+                yield return playing with { OffDelta = Math.Min(playing.OffDelta, note.OnDelta) };
+            }
+
+            current = note;
+        }
+
+        if (current is { } last)
+            yield return last;
+    }
+
+    private static IEnumerable<MidiEvent> ToEvents(this MidiNote note, byte channel)
+    {
+        yield return new MidiEvent(note.OnDelta, NoteOn(channel, note.Key, note.Velocity));
+        yield return new MidiEvent(note.OffDelta, NoteOff(channel, note.Key));
     }
 
     private static void WriteTrack(IEnumerable<MidiEvent> events, uint durationDelta, Stream stream)
@@ -190,7 +224,7 @@ public static class Midi
     private static void WriteSystemTrack(StateTimeline<double> tempoTimeline, uint durationDelta, Stream stream)
     {
         var events = tempoTimeline.Select(x => new MidiEvent(AbsoluteDelta(x.Position), Tempo(x.Value)));
-        if (tempoTimeline.IsEmpty || tempoTimeline[0].Position > 0)
+        if (tempoTimeline.Count == 0 || tempoTimeline[0].Position > 0)
             events = events.Prepend(new MidiEvent(0, Tempo(1)));
 
         events = events.Prepend(new MidiEvent(0, TimeSignature(4, 4)));
@@ -214,7 +248,7 @@ public static class Midi
             settings.Add(new MidiEvent(0, ControlChange(channel, MainVolumeController, volume)));
         }
 
-        var events = settings.Concat(track.NoteTimeline.SelectMany(x => x.ToEvents(channel, durationDelta)));
+        var events = settings.Concat(track.NoteTimeline.ToMidiNotes(durationDelta).SelectMany(x => x.ToEvents(channel)));
         WriteTrack(events, durationDelta, stream);
     }
 
@@ -359,6 +393,8 @@ public static class Midi
         var indexedTracks = song.Tracks.ToIndexedTracks();
         foreach (var (channel, track) in indexedTracks) WriteNoteTrack(track, channel, songDurationDelta, stream);
     }
+
+    private readonly record struct MidiNote(uint OnDelta, uint OffDelta, byte Key, double Velocity);
 
     private readonly record struct MidiEvent(uint Delta, byte[] Data) : IComparable<MidiEvent>
     {

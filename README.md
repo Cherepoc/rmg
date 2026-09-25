@@ -1,10 +1,12 @@
 # RMG
 
-Random Music Generator: generates random, reproducible MIDI songs. The same seed always gives the same song.
+Random Music Generator: generates random, reproducible MIDI songs. The same seed always gives the same song in the
+same version of RMG; a new version may turn a seed into a different song.
 
-A song has 4-8 parts, each a sequence of 1-4 sections chosen from up to 3 distinct sections (in
-alternation, ping-pong or random order). Every section is played twice and has a percussion kit and three
-pitched tracks (chords, melody, bass), each with its own rhythm and note patterns.
+A song has 4-8 parts, each a sequence of 1-4 sections chosen from up to 3 distinct sections (in alternation,
+ping-pong or random order), and no section follows itself, not even from one part to the next. Every section
+is played twice and has a percussion kit and three pitched tracks (chords, melody, bass), each with its own
+rhythm and note patterns. A song plays at its own tempo, from 90 to about 175 BPM, most often 120.
 
 Each song picks its own drums: one main snare (acoustic, electric, clap or sidestick; a sidestick can also
 join an acoustic or electric snare) and up to four other percussion instruments. Kick and snare always
@@ -103,7 +105,8 @@ https://your-server/?seed=42
 ```
 
 The address always follows the song that is playing. **Share** opens the phone's share sheet or copies the
-link. The link carries only the seed, not the mix.
+link. The link carries only the seed, not the mix. Seeds are not kept stable across versions, so after an update
+an old link, like the history, can play a different song.
 
 ### The mix
 
@@ -169,12 +172,36 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
 - **Timelines and state.** Music is modelled as immutable timelines of events (notes) and of *state*
   (velocity, tempo, scale, chord, octave, ...). State kinds define their own default and how values
   combine, so state from the song, a section, a track group and a track is merged with a single rule.
+  A timeline with nothing in it still keeps its duration: a bar in which nothing plays is still a bar.
+  "No content" and "no duration" are separate checks: `Count == 0` for events, `IsDefault` for state
+  and for the maps, and `Duration == 0` for length. Only zero-duration timelines are dropped when
+  timelines are put one after another.
 - **Rhythm.** Rhythm patterns are generated from dyadic ranks: positions in a period ranked by how
-  "strong" the beat is, and kept or dropped by a rank-weighted probability that scales with intensity.
+  "strong" the beat is, and kept or dropped by a rank-weighted probability.
 - **Generators.** Randomness is expressed as small composable generators that take a seeded
   context, which is what makes every song reproducible.
 - **Rendering.** `Render` turns the abstract song into concrete notes (pitch, velocity, duration),
   and `Midi` writes them as a standard MIDI file.
+- **Chords.** A chord is the heights of its notes above the chord root, as fractions of an octave in
+  pitch, so the same chord works in any scale: `Render` snaps every height to the nearest note of the
+  scale, lowest first, and a note already taken goes to a free neighbour or is dropped. A height can
+  sit between two qualities, such as a third between minor and major, and the scale decides, so a
+  triad is Cm, D° or Eb in C minor and C major in C major pentatonic. Shapes come from a table ranked
+  by weirdness, from triads (0) to clusters and polychords (5); a song draws where its chords gather,
+  how far and how evenly they stray and which way they lean, and a section moves that by up to a rank. A voicing
+  step then inverts or opens the shape, and `Render` moves the whole chord into the track's range.
+  The chord root, unlike the shape, is a fraction of the scale's note count, as it moves along the
+  scale.
+- **Offsets are rounded before they are summed.** Pitch offsets such as the chord root or the chord
+  note are collections of fractional values, one from each layer (section, bar, note, ...). `Render`
+  turns each value into a whole number of scale steps first and adds up the results, so it computes
+  `round(a * n) + round(b * n)` rather than `round((a + b) * n)`. This is deliberate: a layer then
+  shifts the tonality of everything beneath it by a whole number of steps, the same for every note of
+  the pattern. If the values were summed first, the same layer offset could move one note by a step
+  and leave the next one alone, depending on the note's own fraction. Each value goes to the nearest
+  step (halves away from zero), so every step covers the same range and an offset of less than half a
+  step either way leaves the note where it is. How often a track moves is set by scaling its offsets,
+  not by the rounding.
 
 ## Project layout
 

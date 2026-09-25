@@ -8,24 +8,18 @@ public static class DyadicRankDistribution
 
     private static readonly ImmutableArray<ImmutableArray<Item>> ExactRankedDistributions;
 
-    private static readonly ImmutableArray<ImmutableArray<Item>> CombinedRankedDistributions;
-
     private static readonly ImmutableArray<ImmutableArray<Item>> ExactRankedHalfDistributions;
 
     private static readonly ImmutableArray<ImmutableArray<Item>> CombinedRankedHalfDistributions;
 
     private static readonly ImmutableArray<ImmutableArray<Item>> ExactRankedMultiplierDistributions;
 
-    private static readonly ImmutableArray<ImmutableArray<Item>> CombinedRankedMultiplierDistributions;
-
     static DyadicRankDistribution()
     {
         ExactRankedDistributions = BuildExactRankedDistributions();
-        CombinedRankedDistributions = BuildCombinedRankedDistributions(ExactRankedDistributions);
         ExactRankedHalfDistributions = BuildExactRankedHalfDistributions(ExactRankedDistributions);
         CombinedRankedHalfDistributions = BuildCombinedRankedDistributions(ExactRankedHalfDistributions);
         ExactRankedMultiplierDistributions = BuildExactRankedMultiplierDistributions(ExactRankedDistributions);
-        CombinedRankedMultiplierDistributions = BuildCombinedRankedDistributions(ExactRankedMultiplierDistributions);
     }
 
     private static ImmutableArray<ImmutableArray<Item>> BuildExactRankedDistributions()
@@ -118,13 +112,6 @@ public static class DyadicRankDistribution
         return [..result];
     }
 
-    public static ImmutableArray<Item> GetCombinedDistributionByRank(int rank)
-    {
-        ValidateRank(rank);
-
-        return CombinedRankedDistributions[rank];
-    }
-
     public static ImmutableArray<Item> GetCombinedHalfDistributionByRank(int rank)
     {
         ValidateRank(rank);
@@ -144,44 +131,6 @@ public static class DyadicRankDistribution
         return SliceItemsByPositions(distribution, minValue, maxValue);
     }
 
-    public static ImmutableArray<Item> GetExactHalfDistributionSlice(int rank, double minValue, double maxValue)
-    {
-        ValidateRank(rank);
-
-        ArgumentOutOfRangeException.ThrowIfNegative(minValue);
-        ArgumentOutOfRangeException.ThrowIfNegative(maxValue);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(minValue, maxValue);
-
-        var distribution = ExactRankedHalfDistributions[rank];
-        return SliceItemsByPositions(distribution, minValue, maxValue);
-    }
-
-    public static double RoundNearestDyadicMultiplier(this double value, int maxRank)
-    {
-        return RoundNearestDyadicDistribution(CombinedRankedMultiplierDistributions, value, maxRank);
-    }
-
-    public static double RoundNearestHalfDyadicOffset(this double value, int maxRank)
-    {
-        return RoundNearestDyadicDistribution(CombinedRankedHalfDistributions, value, maxRank);
-    }
-
-    public static double GetMultiplier(int rank, double rankedOffset)
-    {
-        ValidateRank(rank);
-        ArgumentOutOfRangeException.ThrowIfLessThan(rankedOffset, -1);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(rankedOffset, 1);
-
-        var distribution = ExactRankedMultiplierDistributions[rank];
-        if (rank == 0)
-            return distribution[0].Position;
-
-        var index = (int)Math.Floor((rankedOffset + 1) * distribution.Length);
-        return index >= distribution.Length
-            ? distribution[^1].Position
-            : distribution[index].Position;
-    }
-
     public static double GetHalfOffset(int rank, double rankedOffset)
     {
         ValidateRank(rank);
@@ -192,36 +141,11 @@ public static class DyadicRankDistribution
         if (rank == 0)
             return distribution[0].Position;
 
-        var index = (int)Math.Floor((rankedOffset + 1) * distribution.Length);
+        // the offset's range of -1 to 1 is split evenly between the items
+        var index = (int)Math.Floor((rankedOffset + 1) / 2 * distribution.Length);
         return index >= distribution.Length
             ? distribution[^1].Position
             : distribution[index].Position;
-    }
-
-    private static double RoundNearestDyadicDistribution(
-        ImmutableArray<ImmutableArray<Item>> rankedDistributions,
-        double value,
-        int maxRank
-    )
-    {
-        ValidateRank(maxRank);
-
-        var distribution = rankedDistributions[maxRank];
-        var searchIndex = distribution.BinarySearch(new Item(value, 0));
-        if (searchIndex >= 0)
-            return value;
-
-        var greaterItemIndex = ~searchIndex;
-        if (greaterItemIndex == 0)
-            return distribution[0].Position;
-        if (greaterItemIndex == distribution.Length)
-            return distribution[^1].Position;
-
-        var greaterPosition = distribution[greaterItemIndex].Position;
-        var lesserPosition = distribution[greaterItemIndex - 1].Position;
-        return greaterPosition - value > value - lesserPosition
-            ? lesserPosition
-            : greaterPosition;
     }
 
     private static void ValidateRank(int rank)

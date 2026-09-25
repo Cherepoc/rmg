@@ -27,6 +27,7 @@ public static class SongStructureGenerator
         var partCount = PartCountGenerator(context);
         var parts = ImmutableArray.CreateBuilder<SongPart>(partCount);
         var sectionCount = 0;
+        int? previousSectionId = null;
 
         for (var i = 0; i < partCount; i++)
         {
@@ -40,8 +41,10 @@ public static class SongStructureGenerator
             var partSectionIds = new List<int>(distinctCount);
             for (var j = 0; j < distinctCount; j++)
             {
+                // a part of one section cannot start with the section the previous part ended with, which would then
+                // play twice in a row
                 var reusable = Enumerable.Range(0, sectionCount)
-                    .Where(x => !partSectionIds.Contains(x))
+                    .Where(x => !partSectionIds.Contains(x) && (distinctCount > 1 || x != previousSectionId))
                     .ToArray();
                 if (reusable.Length > 0 && context.TestProbability(ReuseSectionProbability))
                 {
@@ -55,10 +58,19 @@ public static class SongStructureGenerator
             }
 
             var brush = BrushGenerator(context);
-            var sectionIds = brush.Paint(distinctCount, length, context)
+            var sectionIndexes = brush.Paint(distinctCount, length, context);
+
+            // nor can a longer part: the sections of its first two slots trade places, which keeps the brush's law,
+            // since the brush never puts a section next to itself
+            if (partSectionIds[sectionIndexes[0]] == previousSectionId)
+                (partSectionIds[sectionIndexes[0]], partSectionIds[sectionIndexes[1]]) =
+                    (partSectionIds[sectionIndexes[1]], partSectionIds[sectionIndexes[0]]);
+
+            var sectionIds = sectionIndexes
                 .Select(x => partSectionIds[x])
                 .ToImmutableArray();
-            parts.Add(new SongPart(brush, sectionIds));
+            parts.Add(new SongPart(sectionIds));
+            previousSectionId = sectionIds[^1];
         }
 
         return parts.ToImmutable();

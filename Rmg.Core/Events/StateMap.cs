@@ -59,13 +59,6 @@ public sealed class StateMap
         return _stateByKinds.TryGetValue(kind, out var state) ? state : kind.DefaultState;
     }
 
-    public ImmutableArray<IStateTimeline> CreateTimelines(double duration)
-    {
-        return _states
-            .Select(x => x.Kind.CreateTimelineFromValue(duration, x.Value))
-            .ToImmutableArray();
-    }
-
     public StateTimelineMap ToStateTimelineMap(double duration)
     {
         var stateTimelines = _states.Select(x => x.Kind.CreateTimelineFromValue(duration, x.Value));
@@ -80,38 +73,6 @@ public sealed class StateMap
     public StateMap Except(IEnumerable<IStateKind> stateKinds)
     {
         return FromStates(_stateByKinds.RemoveRange(stateKinds).Values);
-    }
-
-    public StateMap SetValue<T>(StateKind<T> stateKind, T value)
-        where T : notnull
-    {
-        return FromStates(_stateByKinds.SetItem(stateKind, stateKind.CreateState(value)).Values);
-    }
-
-    public StateMap SetValue<T>(StateKind<T> stateKind, Func<T, T> valueMapFunc)
-        where T : notnull
-    {
-        var stateValue = GetStateValue(stateKind);
-        var mappedValue = valueMapFunc(stateValue);
-        return FromStates(_stateByKinds.SetItem(stateKind, stateKind.CreateState(mappedValue)).Values);
-    }
-
-    public StateMap SwapStateKinds(IEnumerable<KeyValuePair<IStateKind, IStateKind>> stateKindPairs)
-    {
-        var stateKindDictionary = stateKindPairs.AsReadOnlyDictionary();
-        if (stateKindDictionary.Count == 0)
-            return this;
-
-        var newStates = new IState[_states.Length];
-        for (var i = 0; i < _states.Length; i++)
-        {
-            var state = _states[i];
-            newStates[i] = stateKindDictionary.TryGetValue(state.Kind, out var newStateKind)
-                ? newStateKind.CreateState(state.Value)
-                : state;
-        }
-
-        return FromStates(newStates);
     }
 
     public StateMap MergeWith(StateMap other)

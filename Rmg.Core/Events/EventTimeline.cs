@@ -28,14 +28,24 @@ public sealed class EventTimeline<T> : ITimelineLike<EventTimeline<T>>, IReadOnl
         return ((IEnumerable)_items).GetEnumerator();
     }
 
-    public static EventTimeline<T> Empty { get; } = new(0, []);
+    private static readonly EventTimeline<T> Zero = new(0, []);
+
+    /// <summary>
+    ///     A timeline with no events that still takes its duration, such as a bar in which nothing plays.
+    /// </summary>
+    public static EventTimeline<T> Create(double duration)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(duration, nameof(duration));
+
+        return duration == 0 ? Zero : new EventTimeline<T>(duration, []);
+    }
 
     public static EventTimeline<T> Merge(IEnumerable<EventTimeline<T>> timelines)
     {
         var timelineArray = timelines.AsImmutableArray();
 
-        if (timelineArray.Length == 0 || timelineArray.All(x => x.Count == 0))
-            return Empty;
+        if (timelineArray.Length == 0)
+            return Zero;
 
         if (timelineArray.Length == 1)
             return timelineArray[0];
@@ -46,19 +56,17 @@ public sealed class EventTimeline<T> : ITimelineLike<EventTimeline<T>>, IReadOnl
             .ToImmutableArray();
 
         var duration = timelineArray.Max(x => x.Duration);
-        return new EventTimeline<T>(duration, items);
+        return duration == 0 ? Zero : new EventTimeline<T>(duration, items);
     }
 
     public double Duration { get; }
-
-    public bool IsEmpty => _items.Length == 0;
 
     public EventTimeline<T> Trim(double duration)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(duration);
 
-        if (IsEmpty || duration == 0)
-            return Empty;
+        if (duration == 0)
+            return Zero;
 
         // ReSharper disable once CompareOfFloatsByEqualityOperator
         if (duration == Duration)
@@ -67,8 +75,6 @@ public sealed class EventTimeline<T> : ITimelineLike<EventTimeline<T>>, IReadOnl
         var newItems = duration < Duration
             ? _items.Trim(duration)
             : _items;
-        if (newItems.Length == 0)
-            return Empty;
 
         return new EventTimeline<T>(duration, newItems);
     }
@@ -85,14 +91,10 @@ public sealed class EventTimeline<T> : ITimelineLike<EventTimeline<T>>, IReadOnl
         if (offset == 0)
             return this;
 
-        if (newDuration == 0 || IsEmpty)
-            return Empty;
+        if (newDuration == 0)
+            return Zero;
 
-        var newItems = _items.Shift(offset);
-        if (newItems.Length == 0)
-            return Empty;
-
-        return new EventTimeline<T>(newDuration, newItems);
+        return new EventTimeline<T>(newDuration, _items.Shift(offset));
     }
 
     public static EventTimeline<T> Create(double duration, IEnumerable<TimelineItem<T>> items)
@@ -100,11 +102,9 @@ public sealed class EventTimeline<T> : ITimelineLike<EventTimeline<T>>, IReadOnl
         ArgumentOutOfRangeException.ThrowIfNegative(duration, nameof(duration));
 
         if (duration == 0)
-            return Empty;
+            return Zero;
 
         var itemArray = items.AsImmutableArray();
-        if (itemArray.Length == 0)
-            return Empty;
 
         ImmutableArray<TimelineItem<T>> processedArray;
         if (!CheckArrayNeedsPreprocessing(duration, itemArray))
@@ -117,23 +117,9 @@ public sealed class EventTimeline<T> : ITimelineLike<EventTimeline<T>>, IReadOnl
                 .Where(x => x.Position >= 0 && x.Position < duration)
                 .OrderBy(x => x.Position)
                 .ToImmutableArray();
-            if (processedArray.Length == 0)
-                return Empty;
         }
 
         return new EventTimeline<T>(duration, processedArray);
-    }
-
-    public static EventTimeline<T> Unwrap(EventTimeline<EventTimeline<T>> timeline)
-    {
-        if (timeline.IsEmpty)
-            return Empty;
-
-        var timelines = timeline
-            .AsEnumerable()
-            .Where(x => !x.Value.IsEmpty)
-            .Select(x => x.Value.Shift(x.Position));
-        return Merge(timelines);
     }
 
     public EventTimeline<T> Stretch(double factor)
@@ -144,8 +130,8 @@ public sealed class EventTimeline<T> : ITimelineLike<EventTimeline<T>>, IReadOnl
         if (factor == 1)
             return this;
 
-        if (_items.Length == 0 || factor == 0)
-            return Empty;
+        if (factor == 0)
+            return Zero;
 
         return new EventTimeline<T>(Duration * factor, _items.Stretch(factor));
     }
@@ -153,8 +139,8 @@ public sealed class EventTimeline<T> : ITimelineLike<EventTimeline<T>>, IReadOnl
     public EventTimeline<TDest> MapValues<TDest>(Func<T, TDest> mapFunc)
         where TDest : notnull
     {
-        if (IsEmpty)
-            return EventTimeline<TDest>.Empty;
+        if (_items.Length == 0)
+            return EventTimeline<TDest>.Create(Duration);
 
         return new EventTimeline<TDest>(Duration, _items.MapValues(mapFunc));
     }
@@ -162,24 +148,24 @@ public sealed class EventTimeline<T> : ITimelineLike<EventTimeline<T>>, IReadOnl
     public EventTimeline<TDest> MapValues<TDest>(Func<double, T, TDest> mapFunc)
         where TDest : notnull
     {
-        if (IsEmpty)
-            return EventTimeline<TDest>.Empty;
+        if (_items.Length == 0)
+            return EventTimeline<TDest>.Create(Duration);
 
         return new EventTimeline<TDest>(Duration, _items.MapValues(mapFunc));
     }
 
     public EventTimeline<T> FilterValues(Func<T, bool> filterFunc)
     {
-        if (IsEmpty)
-            return Empty;
+        if (_items.Length == 0)
+            return this;
 
         return new EventTimeline<T>(Duration, _items.FilterValues(filterFunc));
     }
 
     public EventTimeline<T> PhaseShift(double phase)
     {
-        if (IsEmpty)
-            return Empty;
+        if (_items.Length == 0)
+            return this;
 
         if (phase.Mod(Duration) == 0)
             return this;
@@ -204,8 +190,8 @@ public sealed class EventTimeline<T> : ITimelineLike<EventTimeline<T>>, IReadOnl
 
     public EventTimeline<WithDuration<T>> WithDurations()
     {
-        if (IsEmpty)
-            return EventTimeline<WithDuration<T>>.Empty;
+        if (_items.Length == 0)
+            return EventTimeline<WithDuration<T>>.Create(Duration);
 
         var items = ImmutableArray.CreateBuilder<TimelineItem<WithDuration<T>>>(_items.Length);
 
@@ -220,11 +206,6 @@ public sealed class EventTimeline<T> : ITimelineLike<EventTimeline<T>>, IReadOnl
         }
 
         return EventTimeline.Create(Duration, items.ToImmutable());
-    }
-
-    public StateTimeline<T> ToStateTimeline(StateKind<T> stateKind)
-    {
-        return stateKind.CreateStateTimelineFromEventTimeline(this);
     }
 
     private static bool CheckArrayNeedsPreprocessing(double duration, ImmutableArray<TimelineItem<T>> array)
@@ -249,22 +230,10 @@ public static class EventTimeline
         return EventTimeline<T>.Create(duration, items);
     }
 
-    public static EventTimeline<T> ToEventTimeline<T>(this T value, double duration)
+    public static EventTimeline<T> Create<T>(double duration)
         where T : notnull
     {
-        return EventTimeline<T>.Create(duration, [value.ToTimelineItem(0)]);
-    }
-
-    public static EventTimeline<T> Empty<T>()
-        where T : notnull
-    {
-        return EventTimeline<T>.Empty;
-    }
-
-    public static EventTimeline<T> OfOne<T>(double duration, T value)
-        where T : notnull
-    {
-        return EventTimeline<T>.Create(duration, [new TimelineItem<T>(0, value)]);
+        return EventTimeline<T>.Create(duration);
     }
 
     public static EventTimeline<T> Merge<T>(IEnumerable<EventTimeline<T>> timelines)

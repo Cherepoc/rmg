@@ -8,7 +8,7 @@ public sealed class TrackEventStateTimelineMapTrimTest
     private static readonly StateKind<double> StateKind2 = StateKinds.QuarterNoteDurationPower;
 
     [Test]
-    public async Task ZeroDuration_ResultsIn_Empty()
+    public async Task ZeroDuration_ResultsIn_ZeroDuration()
     {
         const double inputDuration = 1;
         var trackEventItems = new TimelineItem<int>[]
@@ -49,23 +49,23 @@ public sealed class TrackEventStateTimelineMapTrimTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => !(x.TrackTimelineMap.AsEnumerable()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => !(x.CommonStateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
     }
 
     [Test]
-    public async Task Empty_ResultsIn_Empty()
+    public async Task ZeroDurationTimeline_ResultsIn_Default()
     {
-        var input = TrackEventStateTimelineMap.Empty<int>();
+        var input = TrackEventStateTimelineMap.Create<int>(0);
 
         var result = input.Trim(1);
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
-            .And.Satisfies(x => x.Duration, assert => assert.IsZero())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
+            .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(1))
             .And.Satisfies(x => !(x.TrackTimelineMap.AsEnumerable()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => !(x.CommonStateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
     }
@@ -73,7 +73,7 @@ public sealed class TrackEventStateTimelineMapTrimTest
     [Test]
     public async Task NegativeDuration_ResultsIn_ThrownException()
     {
-        var input = TrackEventStateTimelineMap.Empty<int>();
+        var input = TrackEventStateTimelineMap.Create<int>(0);
 
         await Assert.That(() =>
         {
@@ -174,7 +174,7 @@ public sealed class TrackEventStateTimelineMapTrimTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(),
                 assert => assert.IsEquivalentTo(expectedTrackTimelineMap))

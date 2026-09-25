@@ -8,22 +8,21 @@ public sealed class EventTimelineStretchTest
     [Arguments(0)]
     [Arguments(1)]
     [Arguments(2)]
-    public async Task Empty_Stretches_ToEmpty(double offset)
+    public async Task ZeroDurationTimeline_Stretches_ToZeroDuration(double offset)
     {
-        var input = EventTimeline.Empty<int>();
+        var input = EventTimeline.Create<int>(0);
         
         var result = input.Stretch(offset);
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
     }
     
     [Test]
-    public async Task ZeroFactorStretch_ToEmpty()
+    public async Task ZeroFactorStretch_ToZeroDuration()
     {
         const double duration = 1;
         var items = new TimelineItem<int>[]
@@ -38,7 +37,6 @@ public sealed class EventTimelineStretchTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
@@ -47,7 +45,7 @@ public sealed class EventTimelineStretchTest
     [Test]
     public async Task NegativeFactorStretch_ThrowsException()
     {
-        var input = EventTimeline.Empty<int>();
+        var input = EventTimeline.Create<int>(0);
         
         await Assert.That(() =>
         {
@@ -71,7 +69,6 @@ public sealed class EventTimelineStretchTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(items.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(items));
@@ -100,7 +97,6 @@ public sealed class EventTimelineStretchTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -129,7 +125,6 @@ public sealed class EventTimelineStretchTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));

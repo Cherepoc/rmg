@@ -160,107 +160,6 @@ public sealed class StateMapTest
     }
 
     [Test]
-    public async Task SetValue_NewKind_IsAdded()
-    {
-        var input = Map(KeyOffset.CreateState(1));
-
-        var result = input.SetValue(OctaveOffset, 2);
-
-        await Assert.That(result).IsEqualTo(Map(KeyOffset.CreateState(1), OctaveOffset.CreateState(2)));
-    }
-
-    [Test]
-    public async Task SetValue_ExistingKind_IsReplacedNotAggregated()
-    {
-        var input = Map(KeyOffset.CreateState(1));
-
-        var result = input.SetValue(KeyOffset, 5);
-
-        await Assert.That(result.GetStateValue(KeyOffset)).IsEqualTo(5);
-    }
-
-    [Test]
-    public async Task SetValue_DefaultValue_RemovesKind()
-    {
-        var input = Map(KeyOffset.CreateState(1));
-
-        var result = input.SetValue(KeyOffset, 0);
-
-        await Assert.That(result.IsDefault).IsTrue();
-    }
-
-    [Test]
-    public async Task SetValue_DoesNotMutateOriginal()
-    {
-        var input = Map(KeyOffset.CreateState(1));
-
-        input.SetValue(KeyOffset, 5);
-
-        await Assert.That(input.GetStateValue(KeyOffset)).IsEqualTo(1);
-    }
-
-    [Test]
-    public async Task SetValue_Func_MapsExistingValue()
-    {
-        var input = Map(KeyOffset.CreateState(2));
-
-        var result = input.SetValue(KeyOffset, x => x * 3);
-
-        await Assert.That(result.GetStateValue(KeyOffset)).IsEqualTo(6);
-    }
-
-    [Test]
-    public async Task SetValue_Func_MissingKind_ReceivesDefault()
-    {
-        var input = StateMap.Default;
-
-        var result = input.SetValue(Tempo, x => x * 2);
-
-        await Assert.That(result.GetStateValue(Tempo)).IsEqualTo(2);
-    }
-
-    [Test]
-    public async Task SwapStateKinds_EmptyPairs_ResultsIn_SameInstance()
-    {
-        var input = Map(KeyOffset.CreateState(1));
-
-        var result = input.SwapStateKinds([]);
-
-        await Assert.That(result).IsSameReferenceAs(input);
-    }
-
-    [Test]
-    public async Task SwapStateKinds_MovesValueToNewKind()
-    {
-        var input = Map(KeyOffset.CreateState(3), Tempo.CreateState(2));
-
-        var result = input.SwapStateKinds([new KeyValuePair<IStateKind, IStateKind>(KeyOffset, OctaveOffset)]);
-
-        await Assert.That(result).IsEqualTo(Map(OctaveOffset.CreateState(3), Tempo.CreateState(2)));
-    }
-
-    [Test]
-    public async Task SwapStateKinds_TargetAlreadyPresent_IsAggregated()
-    {
-        var input = Map(KeyOffset.CreateState(3), OctaveOffset.CreateState(4));
-
-        var result = input.SwapStateKinds([new KeyValuePair<IStateKind, IStateKind>(KeyOffset, OctaveOffset)]);
-
-        await Assert.That(result.GetStateValue(OctaveOffset)).IsEqualTo(7);
-        await Assert.That(result.GetStateValue(KeyOffset)).IsEqualTo(0);
-    }
-
-    [Test]
-    public async Task SwapStateKinds_UnrelatedPairs_ResultsIn_SameContent()
-    {
-        var input = Map(KeyOffset.CreateState(3));
-
-        var result = input.SwapStateKinds([new KeyValuePair<IStateKind, IStateKind>(OctaveOffset, KeyOffset)]);
-
-        await Assert.That(result).IsEqualTo(input);
-    }
-
-    [Test]
     public async Task MergeWith_OtherDefault_ResultsIn_This()
     {
         var input = Map(KeyOffset.CreateState(1));
@@ -298,14 +197,26 @@ public sealed class StateMapTest
     }
 
     [Test]
-    public async Task MergeWith_CollectionKinds_UnionsDistinctSorted()
+    public async Task MergeWith_CollectionKinds_ConcatenatesSortedKeepingDuplicates()
     {
         var input = Map(ScaleOffsets.CreateState([3, 1]));
         var other = Map(ScaleOffsets.CreateState([2, 3]));
 
         var result = input.MergeWith(other);
 
-        await Assert.That(result.GetStateValue(ScaleOffsets).AsEnumerable()).IsEquivalentTo(new[] { 1, 2, 3 });
+        await Assert.That(result.GetStateValue(ScaleOffsets).ToArray()).IsEquivalentTo([1, 2, 3, 3]);
+    }
+
+    [Test]
+    public async Task MergeWith_SameOffsetFromTwoLayers_KeepsBoth()
+    {
+        // each layer adds its own offset, and the offsets are summed when rendered
+        var input = Map(StateKinds.ChordRootNoteOffset.CreateState([0.25]));
+        var other = Map(StateKinds.ChordRootNoteOffset.CreateState([0.25]));
+
+        var result = input.MergeWith(other);
+
+        await Assert.That(result.GetStateValue(StateKinds.ChordRootNoteOffset).ToArray()).IsEquivalentTo([0.25, 0.25]);
     }
 
     [Test]
@@ -371,23 +282,6 @@ public sealed class StateMapTest
     }
 
     [Test]
-    public async Task CreateTimelines_OneTimelinePerNonDefaultState()
-    {
-        var input = Map(KeyOffset.CreateState(1), Tempo.CreateState(2));
-
-        var result = input.CreateTimelines(4);
-
-        await Assert.That(result.Length).IsEqualTo(2);
-        await Assert.That(result.All(x => !x.IsEmpty)).IsTrue();
-    }
-
-    [Test]
-    public async Task CreateTimelines_Default_ResultsIn_NoTimelines()
-    {
-        await Assert.That(StateMap.Default.CreateTimelines(4).Length).IsEqualTo(0);
-    }
-
-    [Test]
     public async Task ToStateTimelineMap_HasStateMapAtEveryPosition()
     {
         var input = Map(KeyOffset.CreateState(1), Tempo.CreateState(2));
@@ -400,8 +294,8 @@ public sealed class StateMapTest
     }
 
     [Test]
-    public async Task ToStateTimelineMap_Default_ResultsIn_Empty()
+    public async Task ToStateTimelineMap_Default_ResultsIn_Default()
     {
-        await Assert.That(StateMap.Default.ToStateTimelineMap(4).IsEmpty).IsTrue();
+        await Assert.That(StateMap.Default.ToStateTimelineMap(4).IsDefault).IsTrue();
     }
 }

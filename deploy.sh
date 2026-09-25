@@ -132,7 +132,7 @@ dotnet build "$ROOT/Rmg.slnx" -c Release --nologo -v quiet || die "the build fai
 
 if $run_tests; then
     step "Running tests"
-    # this suite runs on Microsoft.Testing.Platform, which the .NET 10 `dotnet test` no longer drives
+    # the suite runs on Microsoft.Testing.Platform, so it is a program of its own and runs as one, on the build above
     dotnet run --project "$ROOT/Rmg.Tests" -c Release --no-build || die "the tests failed. Nothing was deployed."
 else
     note "skipped, as asked"

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Events;
 
 namespace Rmg.Tests.StateTimelines;
@@ -10,17 +11,16 @@ public sealed class StateTimelineMergeTest
     [Arguments(0)]
     [Arguments(1)]
     [Arguments(2)]
-    public async Task Empty_ResultsIn_Empty(int count)
+    public async Task ZeroDurationTimelines_ResultsIn_ZeroDuration(int count)
     {
         var input = new StateTimeline<int>[count];
         for (var i = 0; i < count; i++)
-            input[i] = StateKind.EmptyTimeline;
+            input[i] = StateKind.CreateDefaultTimeline(0);
         
         var result = StateTimeline.Merge(input);
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
@@ -46,7 +46,6 @@ public sealed class StateTimelineMergeTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(items.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(items));
@@ -88,7 +87,6 @@ public sealed class StateTimelineMergeTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -129,7 +127,6 @@ public sealed class StateTimelineMergeTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -171,7 +168,6 @@ public sealed class StateTimelineMergeTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -212,7 +208,6 @@ public sealed class StateTimelineMergeTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -255,7 +250,6 @@ public sealed class StateTimelineMergeTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -296,7 +290,6 @@ public sealed class StateTimelineMergeTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -336,7 +329,6 @@ public sealed class StateTimelineMergeTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -380,14 +372,13 @@ public sealed class StateTimelineMergeTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
     }
     
     [Test]
-    public async Task MultipleSamePositionTimelines_WithAggregatedDefaultState_ResultsIn_Empty()
+    public async Task MultipleSamePositionTimelines_WithAggregatedDefaultState_ResultsIn_Default()
     {
         var items1 = new TimelineItem<int>[]
         {
@@ -414,9 +405,21 @@ public sealed class StateTimelineMergeTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
-            .And.Satisfies(x => x.Duration, assert => assert.IsZero())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
+            .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(4))
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
+    }
+
+    [Test]
+    public async Task CollectionTimelines_WithSameValue_KeepBothValues()
+    {
+        var kind = StateKinds.ChordRootNoteOffset;
+        var timeline1 = StateTimeline.Create(1, kind, [new TimelineItem<ImmutableArray<double>>(0, [0.25])]);
+        var timeline2 = StateTimeline.Create(1, kind, [new TimelineItem<ImmutableArray<double>>(0, [0.25])]);
+
+        var result = StateTimeline.Merge([timeline1, timeline2]);
+
+        await Assert.That(result.GetEffectiveValueAt(0).ToArray()).IsEquivalentTo([0.25, 0.25]);
     }
 }

@@ -12,7 +12,7 @@ public sealed class RenderedSong
     )
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(duration);
-        if (!tempoTimeline.IsEmpty && tempoTimeline.StateKind != StateKinds.Tempo)
+        if (!tempoTimeline.IsDefault && tempoTimeline.StateKind != StateKinds.Tempo)
             throw new ArgumentException("Tempo timeline must be of kind Tempo.", nameof(tempoTimeline));
 
         Duration = duration;

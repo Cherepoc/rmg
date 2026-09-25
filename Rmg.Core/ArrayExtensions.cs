@@ -19,11 +19,4 @@ public static class ArrayExtensions
             index = ~index;
         return index < array.Length ? index : -1;
     }
-
-    public static T GetValueAtModIndex<T>(this ImmutableArray<T> array, int index)
-    {
-        if (array.IsEmpty)
-            throw new ArgumentException("Array is empty", nameof(array));
-        return array[index.Mod(array.Length)];
-    }
 }

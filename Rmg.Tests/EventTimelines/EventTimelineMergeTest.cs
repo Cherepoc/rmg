@@ -8,17 +8,16 @@ public sealed class EventTimelineMergeTest
     [Arguments(0)]
     [Arguments(1)]
     [Arguments(2)]
-    public async Task Empty_MergesTo_Empty(int count)
+    public async Task ZeroDurationTimelines_MergeTo_ZeroDuration(int count)
     {
         var input = new EventTimeline<int>[count];
         for (var i = 0; i < count; i++)
-            input[i] = EventTimeline.Empty<int>();
+            input[i] = EventTimeline.Create<int>(0);
         
         var result = EventTimeline.Merge(input);
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
@@ -44,7 +43,6 @@ public sealed class EventTimelineMergeTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(items.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(items));
@@ -86,7 +84,6 @@ public sealed class EventTimelineMergeTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -128,7 +125,6 @@ public sealed class EventTimelineMergeTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));

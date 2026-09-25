@@ -13,17 +13,17 @@ public sealed class TrackEventStateTimelineMapMergeTest
     [Arguments(0)]
     [Arguments(1)]
     [Arguments(2)]
-    public async Task Empty_ResultsIn_Empty(int count)
+    public async Task ZeroDurationTimeline_ResultsIn_ZeroDuration(int count)
     {
         var input = new TrackEventStateTimelineMap<int>[count];
         for (var i = 0; i < count; i++)
-            input[i] = TrackEventStateTimelineMap.Empty<int>();
+            input[i] = TrackEventStateTimelineMap.Create<int>(0);
         
         var result = TrackEventStateTimelineMap.Merge(input);
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => !(x.TrackTimelineMap.AsEnumerable()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => !(x.CommonStateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
@@ -77,7 +77,7 @@ public sealed class TrackEventStateTimelineMapMergeTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(inputDuration))
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(),
                 assert => assert.IsEquivalentTo(trackTimelineMap))
@@ -376,7 +376,8 @@ public sealed class TrackEventStateTimelineMapMergeTest
         var expectedCommonStateItems3 = new TimelineItem<ImmutableArray<int>>[]
         {
             new(0, [1, 2, 3]),
-            new(1, [2, 3]),
+            new(1, [2, 2, 3, 3]),
+            new(2, [2, 3]),
             new(3, []),
         };
         var expectedCommonStateTimelines = new IStateTimeline[]
@@ -388,7 +389,7 @@ public sealed class TrackEventStateTimelineMapMergeTest
         
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(),
                 assert => assert.IsEquivalentTo(expectedTrackTimelineMap))

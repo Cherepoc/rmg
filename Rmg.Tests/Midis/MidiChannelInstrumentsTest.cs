@@ -18,7 +18,7 @@ public sealed class MidiChannelInstrumentsTest
 
     private static RenderedSong Song(params RenderedTrack[] tracks)
     {
-        return new RenderedSong(1, StateTimeline<double>.Empty, [..tracks]);
+        return new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), [..tracks]);
     }
 
     [Test]

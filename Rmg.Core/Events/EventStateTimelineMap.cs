@@ -8,22 +8,22 @@ public sealed class EventStateTimelineMap<T> : ITimelineLike<EventStateTimelineM
         Duration = duration;
         EventTimeline = eventTimeline;
         StateTimelineMap = stateTimelineMap;
-        IsEmpty = eventTimeline.IsEmpty && stateTimelineMap.IsEmpty;
+        IsDefault = eventTimeline.Count == 0 && stateTimelineMap.IsDefault;
     }
 
     public EventTimeline<T> EventTimeline { get; }
 
     public StateTimelineMap StateTimelineMap { get; }
 
-    public static EventStateTimelineMap<T> Empty { get; } =
-        new(0, Events.EventTimeline.Empty<T>(), StateTimelineMap.Empty);
+    private static readonly EventStateTimelineMap<T> Zero =
+        new(0, Events.EventTimeline.Create<T>(0), StateTimelineMap.Create(0));
 
     public static EventStateTimelineMap<T> Merge(IEnumerable<EventStateTimelineMap<T>> items)
     {
         var itemArray = items.AsImmutableArray();
 
-        if (itemArray.Length == 0 || itemArray.All(x => x.IsEmpty))
-            return Empty;
+        if (itemArray.Length == 0)
+            return Zero;
 
         if (itemArray.Length == 1)
             return itemArray[0];
@@ -40,7 +40,8 @@ public sealed class EventStateTimelineMap<T> : ITimelineLike<EventStateTimelineM
 
     public double Duration { get; }
 
-    public bool IsEmpty { get; }
+    /// <summary>Whether the map has no events and only default state.</summary>
+    public bool IsDefault { get; }
 
     public EventStateTimelineMap<T> Shift(double offset)
     {
@@ -51,18 +52,10 @@ public sealed class EventStateTimelineMap<T> : ITimelineLike<EventStateTimelineM
         if (newDuration < 0)
             throw new ArgumentOutOfRangeException(nameof(offset), offset, "Duration cannot be negative.");
 
-        if (newDuration == 0 || IsEmpty)
-            return Empty;
+        if (newDuration == 0)
+            return Zero;
 
-        var shiftedEventTimeline = !EventTimeline.IsEmpty
-            ? EventTimeline.Shift(offset)
-            : EventTimeline;
-
-        var shiftedStateTimelineMap = !StateTimelineMap.IsEmpty
-            ? StateTimelineMap.Shift(offset)
-            : StateTimelineMap;
-
-        return Create(newDuration, shiftedEventTimeline, shiftedStateTimelineMap);
+        return Create(newDuration, EventTimeline.Shift(offset), StateTimelineMap.Shift(offset));
     }
 
     public EventStateTimelineMap<T> Trim(double duration)
@@ -72,9 +65,6 @@ public sealed class EventStateTimelineMap<T> : ITimelineLike<EventStateTimelineM
         // ReSharper disable once CompareOfFloatsByEqualityOperator
         if (duration == Duration)
             return this;
-
-        if (IsEmpty)
-            return Empty;
 
         return Create(duration, EventTimeline.Trim(duration), StateTimelineMap.Trim(duration));
     }
@@ -88,13 +78,10 @@ public sealed class EventStateTimelineMap<T> : ITimelineLike<EventStateTimelineM
         ArgumentOutOfRangeException.ThrowIfNegative(duration, nameof(duration));
 
         if (duration == 0)
-            return Empty;
+            return Zero;
 
         var trimmedEventTimeline = eventTimeline.Trim(duration);
         var trimmedStateTimelineMap = stateTimelineMap.Trim(duration);
-
-        if (trimmedEventTimeline.IsEmpty && trimmedStateTimelineMap.IsEmpty)
-            return Empty;
 
         return new EventStateTimelineMap<T>(duration, trimmedEventTimeline, trimmedStateTimelineMap);
     }
@@ -104,17 +91,11 @@ public sealed class EventStateTimelineMap<T> : ITimelineLike<EventStateTimelineM
         return StateTimelineMap.GetEffectiveStateMapAt(position);
     }
 
-    public EventStateTimelineMap<TDest> MapEventTimeline<TDest>(Func<EventTimeline<T>, EventTimeline<TDest>> map)
-        where TDest : notnull
-    {
-        return EventStateTimelineMap<TDest>.Create(Duration, map(EventTimeline), StateTimelineMap);
-    }
-
     public EventTimeline<TDest> ToMappedEventTimeline<TDest>(Func<T, StateMap, TDest> map)
         where TDest : notnull
     {
-        if (IsEmpty || EventTimeline.IsEmpty)
-            return Events.EventTimeline.Empty<TDest>();
+        if (EventTimeline.Count == 0)
+            return Events.EventTimeline.Create<TDest>(Duration);
 
         var newEventItems = new TimelineItem<TDest>[EventTimeline.Count];
         for (var i = 0; i < EventTimeline.Count; i++)
@@ -130,9 +111,6 @@ public sealed class EventStateTimelineMap<T> : ITimelineLike<EventStateTimelineM
 
     public EventStateTimelineMap<T> MergeStateMap(StateMap stateMap)
     {
-        if (IsEmpty)
-            return Empty;
-
         if (stateMap.IsDefault)
             return this;
 
@@ -141,10 +119,7 @@ public sealed class EventStateTimelineMap<T> : ITimelineLike<EventStateTimelineM
 
     public EventStateTimelineMap<T> MergeStateTimelineMap(StateTimelineMap stateTimelineMap)
     {
-        if (IsEmpty)
-            return Empty;
-
-        if (stateTimelineMap.IsEmpty)
+        if (stateTimelineMap.IsDefault)
             return this;
 
         return Create(Duration, EventTimeline, StateTimelineMap.Merge([StateTimelineMap, stateTimelineMap]));
@@ -153,10 +128,11 @@ public sealed class EventStateTimelineMap<T> : ITimelineLike<EventStateTimelineM
 
 public static class EventStateTimelineMap
 {
-    public static EventStateTimelineMap<T> Empty<T>()
+    /// <summary>A map of the given duration with no events and only default state.</summary>
+    public static EventStateTimelineMap<T> Create<T>(double duration)
         where T : notnull
     {
-        return EventStateTimelineMap<T>.Empty;
+        return EventStateTimelineMap<T>.Create(duration, EventTimeline.Create<T>(duration), StateTimelineMap.Create(duration));
     }
 
     public static EventStateTimelineMap<T> Create<T>(
@@ -172,16 +148,7 @@ public static class EventStateTimelineMap
     public static EventStateTimelineMap<T> Create<T>(double duration, StateTimelineMap stateTimelineMap)
         where T : notnull
     {
-        return EventStateTimelineMap<T>.Create(duration, EventTimeline.Empty<T>(), stateTimelineMap);
-    }
-
-    public static EventStateTimelineMap<T> Unwrap<T>(this EventStateTimelineMap<EventStateTimelineMap<T>> timelineMap)
-        where T : notnull
-    {
-        var unwrappedEventTimeline = timelineMap.EventTimeline.Unwrap();
-        var stateTimelineMap =
-            StateTimelineMap.Merge([timelineMap.StateTimelineMap, unwrappedEventTimeline.StateTimelineMap]);
-        return Create(timelineMap.Duration, unwrappedEventTimeline.EventTimeline, stateTimelineMap);
+        return EventStateTimelineMap<T>.Create(duration, EventTimeline.Create<T>(duration), stateTimelineMap);
     }
 
     public static EventStateTimelineMap<T> ToEventStateTimelineMap<T>(

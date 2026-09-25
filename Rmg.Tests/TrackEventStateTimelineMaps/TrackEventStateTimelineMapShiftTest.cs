@@ -8,22 +8,22 @@ public sealed class TrackEventStateTimelineMapShiftTest
     private static readonly StateKind<double> StateKind2 = StateKinds.QuarterNoteDurationPower;
 
     [Test]
-    public async Task Empty_ResultsIn_Empty()
+    public async Task ZeroDurationTimeline_ResultsIn_Default()
     {
-        var input = TrackEventStateTimelineMap.Empty<int>();
+        var input = TrackEventStateTimelineMap.Create<int>(0);
         
         var result = input.Shift(1);
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
-            .And.Satisfies(x => x.Duration, assert => assert.IsZero())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
+            .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(1))
             .And.Satisfies(x => !(x.TrackTimelineMap.AsEnumerable()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => !(x.CommonStateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
     }
 
     [Test]
-    public async Task OffsetToZeroDuration_ResultsIn_Empty()
+    public async Task OffsetToZeroDuration_ResultsIn_ZeroDuration()
     {
         const double inputDuration = 1;
         var trackEventItems = new TimelineItem<int>[]
@@ -64,7 +64,7 @@ public sealed class TrackEventStateTimelineMapShiftTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => !(x.TrackTimelineMap.AsEnumerable()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => !(x.CommonStateTimelineMap.StateTimelines).Any(), assert => assert.IsTrue());
@@ -73,7 +73,7 @@ public sealed class TrackEventStateTimelineMapShiftTest
     [Test]
     public async Task OffsetToNegativeDuration_ResultsIn_Exception()
     {
-        var input = TrackEventStateTimelineMap.Empty<int>();
+        var input = TrackEventStateTimelineMap.Create<int>(0);
         
         await Assert.That(() =>
         {
@@ -82,14 +82,14 @@ public sealed class TrackEventStateTimelineMapShiftTest
     }
     
     [Test]
-    public async Task EmptyTrackTimelines_ResultsIn_ShiftedStateTimelines()
+    public async Task NoTrackEvents_ResultsIn_ShiftedStateTimelines()
     {
         const double inputDuration = 2;
         
         var trackTimelineMap = new Dictionary<int, EventStateTimelineMap<int>>
         {
-            [0] = EventStateTimelineMap.Empty<int>(),
-            [1] = EventStateTimelineMap.Empty<int>(),
+            [0] = EventStateTimelineMap.Create<int>(0),
+            [1] = EventStateTimelineMap.Create<int>(0),
         };
         
         var commonStateItems1 = new TimelineItem<int>[]
@@ -121,7 +121,7 @@ public sealed class TrackEventStateTimelineMapShiftTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => !(x.TrackTimelineMap.AsEnumerable()).Any(), assert => assert.IsTrue())
             .And.Satisfies(x => x.CommonStateTimelineMap.StateTimelines,
@@ -129,7 +129,7 @@ public sealed class TrackEventStateTimelineMapShiftTest
     }
 
     [Test]
-    public async Task EmptyStateTimelines_ResultsIn_ShiftedTrackTimelines()
+    public async Task DefaultState_ResultsIn_ShiftedTrackTimelines()
     {
         const double inputDuration = 2;
         
@@ -191,7 +191,7 @@ public sealed class TrackEventStateTimelineMapShiftTest
             new(2, trackEventStateTimelineMap2),
         };
 
-        var commonStateTimelineMap = StateTimelineMap.Empty;
+        var commonStateTimelineMap = StateTimelineMap.Create(0);
 
         var input = TrackEventStateTimelineMap.Create(inputDuration, trackTimelineMap, commonStateTimelineMap);
         
@@ -204,7 +204,7 @@ public sealed class TrackEventStateTimelineMapShiftTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(),
                 assert => assert.IsEquivalentTo(expectedTrackTimelineMap))
@@ -306,7 +306,7 @@ public sealed class TrackEventStateTimelineMapShiftTest
 
         await Assert.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(expectedDuration))
             .And.Satisfies(x => x.TrackTimelineMap.AsEnumerable(),
                 assert => assert.IsEquivalentTo(expectedTrackTimelineMap))

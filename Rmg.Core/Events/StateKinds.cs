@@ -1,4 +1,3 @@
-using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Numerics;
 
@@ -12,13 +11,12 @@ public static class StateKinds
     public static readonly StateKind<ImmutableArray<double>> ArticulationOffset = CreateCollection<double>("ArticulationOffset");
     public static readonly StateKind<int> KeyOffset = CreateAdditive<int>("KeyOffset");
     public static readonly StateKind<int> OctaveOffset = CreateAdditive<int>("OctaveOffset");
-    public static readonly StateKind<ImmutableArray<double>> ChordNoteInScaleOffsets = CreateCollection<double>("ChordNoteInScaleOffsets");
+    public static readonly StateKind<ImmutableArray<double>> ChordNotePitchOffsets = CreateCollection<double>("ChordNotePitchOffsets");
     public static readonly StateKind<ImmutableArray<double>> ChordRootNoteOffset = CreateCollection<double>("ChordRootOffset");
     public static readonly StateKind<ImmutableArray<double>> ChordNoteOffset = CreateCollection<double>("ChordNoteOffset");
     public static readonly StateKind<ImmutableArray<int>> ScaleOffsets = CreateCollection<int>("ScaleOffsets");
     public static readonly StateKind<double> Tempo = CreateMultiplicative<double>("Tempo");
 
-    private static readonly FrozenDictionary<string, IStateKind> Values;
     private static readonly ImmutableArray<IStateKind> AllValues;
 
     static StateKinds()
@@ -31,43 +29,17 @@ public static class StateKinds
             ArticulationOffset,
             KeyOffset,
             OctaveOffset,
-            ChordNoteInScaleOffsets,
+            ChordNotePitchOffsets,
             ChordRootNoteOffset,
             ChordNoteOffset,
             ScaleOffsets,
             Tempo
         ];
-        Values = AllValues.ToFrozenDictionary(x => x.Name);
-    }
-
-    public static IStateKind GetByName(string name)
-    {
-        return Values[name];
     }
 
     public static ImmutableArray<IStateKind> GetAll()
     {
         return AllValues;
-    }
-
-    public static StateKind<bool> CreateBoolPessimistic(string name)
-    {
-        return new StateKind<bool>(
-            name,
-            true,
-            (v1, v2) => v1 == v2,
-            values => values.Aggregate(true, (a, b) => a && b)
-        );
-    }
-
-    public static StateKind<bool> CreateBoolOptimistic(string name)
-    {
-        return new StateKind<bool>(
-            name,
-            false,
-            (v1, v2) => v1 == v2,
-            values => values.Aggregate(false, (a, b) => a || b)
-        );
     }
 
     public static StateKind<T> CreateAdditive<T>(string name)
@@ -101,9 +73,8 @@ public static class StateKinds
             (v1, v2) => v1.SequenceEqual(v2),
             values =>
             {
-                var preprocessedValues = values
-                    .SelectMany(x => x)
-                    .Distinct();
+                // duplicates are kept: each layer contributes its own values, such as offsets that are summed later
+                var preprocessedValues = values.SelectMany(x => x);
                 if (isComparable)
                     preprocessedValues = preprocessedValues.Order();
                 return [..preprocessedValues];

@@ -5,9 +5,9 @@ namespace Rmg.Tests.EventTimelines;
 public sealed class EventTimelineMapValuesTest
 {
     [Test]
-    public async Task Empty_Maps_ToEmpty()
+    public async Task ZeroDurationTimeline_Maps_ToZeroDuration()
     {
-        var input = EventTimeline.Empty<int>();
+        var input = EventTimeline.Create<int>(0);
         
         Func<int, double> mapFunc = x => x * 0.5;
         
@@ -15,14 +15,13 @@ public sealed class EventTimelineMapValuesTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
     }
     
     [Test]
-    public async Task NonEmpty_Maps_ToNewItems()
+    public async Task WithEvents_Maps_ToNewItems()
     {
         const double duration = 2;
         var items = new TimelineItem<int>[]
@@ -45,7 +44,6 @@ public sealed class EventTimelineMapValuesTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));

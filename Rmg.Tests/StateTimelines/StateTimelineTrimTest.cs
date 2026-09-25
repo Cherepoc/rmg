@@ -7,22 +7,22 @@ public sealed class StateTimelineTrimTest
     private static readonly StateKind<int> StateKind = StateKinds.KeyOffset;
     
     [Test]
-    public async Task Empty_ResultsIn_Empty()
+    public async Task ZeroDurationTimeline_ResultsIn_Default()
     {
-        var input = StateKind.EmptyTimeline;
+        var input = StateKind.CreateDefaultTimeline(0);
         
         var result = input.Trim(1);
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
-            .And.Satisfies(x => x.Duration, assert => assert.IsZero())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
+            .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(1))
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
     }
     
     [Test]
-    public async Task ZeroDuration_ResultsIn_Empty()
+    public async Task ZeroDuration_ResultsIn_ZeroDuration()
     {
         const double duration = 1;
         var items = new TimelineItem<int>[]
@@ -36,14 +36,13 @@ public sealed class StateTimelineTrimTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
             .And.Satisfies(x => x.Duration, assert => assert.IsZero())
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
     }
     
     [Test]
-    public async Task BeforeFirstItemDuration_ResultsIn_Empty()
+    public async Task BeforeFirstItemDuration_ResultsIn_Default()
     {
         const double duration = 2;
         var items = new TimelineItem<int>[]
@@ -57,8 +56,8 @@ public sealed class StateTimelineTrimTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsTrue())
-            .And.Satisfies(x => x.Duration, assert => assert.IsZero())
+            .And.Satisfies(x => x.IsDefault, assert => assert.IsTrue())
+            .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(1))
             .And.Satisfies(x => x.Count, assert => assert.IsZero())
             .And.Satisfies(x => !(x.AsEnumerable()).Any(), assert => assert.IsTrue());
     }
@@ -66,7 +65,7 @@ public sealed class StateTimelineTrimTest
     [Test]
     public async Task NegativeDuration_ResultsIn_ThrownException()
     {
-        var input = StateKind.EmptyTimeline;
+        var input = StateKind.CreateDefaultTimeline(0);
 
         await Assert.That(() =>
         {
@@ -89,7 +88,6 @@ public sealed class StateTimelineTrimTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(duration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(items.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(items));
@@ -117,7 +115,6 @@ public sealed class StateTimelineTrimTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(newDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));
@@ -140,7 +137,6 @@ public sealed class StateTimelineTrimTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(newDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(items.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(items));
@@ -168,7 +164,6 @@ public sealed class StateTimelineTrimTest
 
         await Check.That(result)
             .IsNotNull()
-            .And.Satisfies(x => x.IsEmpty, assert => assert.IsFalse())
             .And.Satisfies(x => x.Duration, assert => assert.IsEqualTo(newDuration))
             .And.Satisfies(x => x.Count, assert => assert.IsEqualTo(expectedItems.Length))
             .And.Satisfies(x => x.AsEnumerable(), assert => assert.IsEquivalentTo(expectedItems));

@@ -197,53 +197,6 @@ internal static class OrderedTimelineItemArrayExtensions
         return [..newItems];
     }
 
-    public static ImmutableArray<TimelineItem<T>> PhaseShiftState<T>(
-        this ImmutableArray<TimelineItem<T>> items,
-        StateKind<T> stateKind,
-        double phase,
-        double duration
-    )
-        where T : notnull
-    {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(duration);
-
-        if (items.Length == 0)
-            return [];
-
-        var offset = phase.Mod(duration);
-        if (offset == 0)
-            return items;
-
-        var breakDuration = duration - offset;
-        var breakIndex = items.GetIndexAtFloor(breakDuration);
-        if (breakIndex == -1)
-            return items
-                .ShiftState(stateKind, -breakDuration)
-                .TrimState(stateKind, duration - breakDuration, duration);
-
-        var firstSplit = items.ShiftState(stateKind, -breakDuration);
-        var secondSplit = items
-            .TrimState(stateKind, duration, breakDuration)
-            .ShiftState(stateKind, offset);
-
-        var firstSplitLastItemValue = firstSplit.Length > 0 ? firstSplit[^1].Value : stateKind.DefaultValue;
-        var secondSplitFirstItemValue = secondSplit.Length > 0 ? secondSplit[0].Value : stateKind.DefaultValue;
-        var skipSecondSplitFirstItem =
-            secondSplit.Length > 0
-            && stateKind.CheckValuesEqual(firstSplitLastItemValue, secondSplitFirstItemValue);
-        var skipSecondSplitFirstItemIndexDiff = skipSecondSplitFirstItem ? 1 : 0;
-        var newLength = firstSplit.Length + secondSplit.Length - skipSecondSplitFirstItemIndexDiff;
-        var newItems = new TimelineItem<T>[newLength];
-        firstSplit.CopyTo(newItems, 0);
-        secondSplit.CopyTo(
-            skipSecondSplitFirstItemIndexDiff,
-            newItems,
-            firstSplit.Length,
-            secondSplit.Length - skipSecondSplitFirstItemIndexDiff
-        );
-        return [..newItems];
-    }
-
     public static ImmutableArray<TimelineItem<TDest>> MapValues<TSource, TDest>(
         this ImmutableArray<TimelineItem<TSource>> items,
         Func<TSource, TDest> mapFunc
