@@ -242,6 +242,13 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   (strings, pads and organs smooth, pianos in between, guitars in blocks), a section moves it, and a
   4-bar pattern's first bar sometimes starts afresh in its own register. Chords whose layout is what
   they are, such as quartal stacks and clusters, only move by whole octaves.
+- **Bass leading.** The bass line (`BassLine`) moves by small steps: every note takes the octave nearest
+  the note before. Its first note in a bar lands on the chord's root most often, or on its third or
+  fifth for an inversion, and a note in the last beat before a bar line leads into the next root: by
+  the scale step next to it, a semitone below or above it, the next chord's fifth, or the root a
+  little early. How much the bass leads (`BassLeadingLayers`) comes from its instrument (upright and
+  fretless basses walk, synth basses sit on the roots), and a section moves it; each bar then draws
+  whether and how it leads.
 - **Instruments.** Each pitched track has a role (`InstrumentRoles`): the chords are played by pianos,
   organs, guitars, strings or pads, the melody by keys, mallets, guitars, strings, brass, reeds, pipes
   or leads, and the bass by basses, with a few unusual choices weighted low. The melody never plays

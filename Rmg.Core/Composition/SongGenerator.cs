@@ -43,6 +43,9 @@ public static class SongGenerator
         var chordsInstrument = InstrumentRoles.Chords.Pick(generationContext);
         var melodyInstrument = InstrumentRoles.Melody.Pick(generationContext, chordsInstrument.Program);
         var bassInstrument = InstrumentRoles.Bass.Pick(generationContext);
+
+        // how much the bass leads into the chords: its instrument sets where the song starts, a section moves it
+        var songBassLeading = bassInstrument.Leading + BassLeadingLayers.CreateGenerator(BassLeadingLayers.Song)(generationContext);
         var minOctaveOffsetGenerator = Generators.Int(-2, 1).WithContext(generationContext);
         var maxOctaveOffsetGenerator = Generators.Int(0, 3).WithContext(generationContext);
 
@@ -86,7 +89,7 @@ public static class SongGenerator
                         .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, 0)
                         .Add(CompositionStateKinds.IncrementalChordNoteOffset.Multiplier, 0)
                         // the chord instrument sets how smoothly the chords move, and the song moves it a little
-                        .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(x => chordsInstrument.VoiceLeading + x))
+                        .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(x => chordsInstrument.Leading + x))
                         .ToStateMap(generationContext),
                     VelocityLayers.Track,
                     RhythmLayers.Track
@@ -109,6 +112,8 @@ public static class SongGenerator
                     new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, closeToZeroIncrementalOffsetMultiplierGenerator)
                         .Add(CompositionStateKinds.IncrementalChordNoteOffset.Multiplier, closeToOneIncrementalOffsetMultiplierGenerator)
+                        // the bass plays the chord roots, so its line leads into the chords and lands on them
+                        .Add(StateKinds.FollowsChordRoots, 1)
                         .ToStateMap(generationContext),
                     VelocityLayers.Track,
                     RhythmLayers.Track
@@ -394,7 +399,7 @@ public static class SongGenerator
                 "Bar"
             ),
         ];
-        var commonStateHigherPatternGenerator = (ImmutableArray<int> progression, int home, HarmonicUnconventionality unconventionality) =>
+        var commonStateHigherPatternGenerator = (ImmutableArray<int> progression, int home, HarmonicUnconventionality unconventionality, double bassLeading) =>
         {
             // each state draws from its own random sequence, so tuning one does not change the others
             var seed = seedValueGenerator(generationContext);
@@ -444,6 +449,41 @@ public static class SongGenerator
                 )
                 .WithLayer("Bar");
 
+            // how the bass leads out of every bar into the next chord, and what it lands on in every bar's new chord
+            var approachGenerator = Generators.WeightedIndex(BassLeadingLayers.Approaches);
+            var approachTimeline = StateTimeline.Create(
+                    16,
+                    StateKinds.ChordApproach,
+                    Enumerable.Range(0, Progressions.BarCount)
+                        .Select(bar =>
+                            {
+                                var approach = generationContext.TestProbability(bassLeading * BassLeadingLayers.MaxApproachChance)
+                                    ? BassLeadingLayers.Approaches[approachGenerator(generationContext)].Value
+                                    : ChordApproach.None;
+                                return ((int)approach).ToTimelineItem(bar * 4.0);
+                            }
+                        )
+                        .ToArray()
+                )
+                .WithLayer("Bar");
+            var rootArrivalChance = BassLeadingLayers.MinRootArrivalChance + bassLeading * BassLeadingLayers.RootArrivalChanceRange;
+            ImmutableArray<Weighted<ChordArrival>> arrivals =
+            [
+                new(rootArrivalChance, ChordArrival.Root),
+                new(BassLeadingLayers.InversionArrivalChance, ChordArrival.Third),
+                new(BassLeadingLayers.InversionArrivalChance, ChordArrival.Fifth),
+                new(Math.Max(0, 1 - rootArrivalChance - 2 * BassLeadingLayers.InversionArrivalChance), ChordArrival.Free)
+            ];
+            var arrivalGenerator = Generators.WeightedIndex(arrivals);
+            var arrivalTimeline = StateTimeline.Create(
+                    16,
+                    StateKinds.ChordArrival,
+                    Enumerable.Range(0, Progressions.BarCount)
+                        .Select(bar => ((int)arrivals[arrivalGenerator(generationContext)].Value).ToTimelineItem(bar * 4.0))
+                        .ToArray()
+                )
+                .WithLayer("Bar");
+
             return StateTimelineMap.Create(
                 16,
                 [
@@ -453,7 +493,9 @@ public static class SongGenerator
                     progressionTimeline,
                     raisedStepTimeline,
                     roleChordTimeline,
-                    resetTimeline
+                    resetTimeline,
+                    approachTimeline,
+                    arrivalTimeline
                 ]
             );
         };
@@ -529,7 +571,12 @@ public static class SongGenerator
 
             // the section state reaches the notes through the track state maps, so the common timeline holds only
             // the state that changes by bar
-            var barStateTimelineMap = commonStateHigherPatternGenerator(progression, sectionHome, sectionUnconventionality);
+            var sectionBassLeading = Math.Clamp(
+                songBassLeading + BassLeadingLayers.CreateGenerator(BassLeadingLayers.Section)(generationContext),
+                0,
+                1
+            );
+            var barStateTimelineMap = commonStateHigherPatternGenerator(progression, sectionHome, sectionUnconventionality, sectionBassLeading);
 
             var trackTimelineMaps = new List<TrackEventStateTimelineMap<StateMap>>();
 
