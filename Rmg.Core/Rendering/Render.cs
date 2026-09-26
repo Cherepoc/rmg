@@ -30,7 +30,8 @@ public static class Render
     {
         var renderedTracks = new List<RenderedTrack>();
 
-        var commonStateTimelineMap = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
+        // Render reads only its own state; a track's definition also holds what its generation used
+        var commonStateTimelineMap = song.TrackEventStateTimelineMap.CommonStateTimelineMap.OfScope(StateScope.Render);
         var trackEventStateTimelineMapDictionary = song.TrackEventStateTimelineMap.TrackTimelineMap;
 
         var percussionTrackNotes = new List<IEnumerable<TimelineItem<RenderedNote>>>();
@@ -41,7 +42,7 @@ public static class Render
                 continue;
 
             var combinedEventStateTimelineMap = trackEventStateTimelineMap
-                .MergeStateMap(track.StateMap)
+                .MergeStateMap(track.StateMap.OfScope(StateScope.Render))
                 .MergeStateTimelineMap(commonStateTimelineMap)
                 .ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
 

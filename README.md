@@ -176,8 +176,29 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   "No content" and "no duration" are separate checks: `Count == 0` for events, `IsDefault` for state
   and for the maps, and `Duration == 0` for length. Only zero-duration timelines are dropped when
   timelines are put one after another.
+- **State kinds.** A kind's name is its identity: creating a second kind with a taken name throws.
+  Every kind has a scope. Composition state, such as the rhythm settings, is read only while the
+  song is generated; render state, such as velocity and the pitch offsets, is what the song keeps
+  and `Render` reads. Some kinds are shared, because every track must see the same value at the same
+  time: the key, the scale, the tempo and the chord shape. Only the layers all tracks share (the song,
+  a section, a bar) may set them. A builder made for a layer only some tracks see
+  (`new StateMapBuilder(layer, perTrack: true)`) checks every map it makes and throws if a shared
+  kind is in it.
+- **Pools.** Where a layer should pick one of several values rather than add to one, such as a chord
+  shape, the layers add entries to a pool and draws to an index into it. A pool lists its entries in
+  the order its layers are merged, and the index gathers around 0, so the first entries are the
+  likeliest: a section's pool starts with the song's entries and adds its own after them.
+- **Tracing.** To see why a value came out as it did, run the generation inside a `StateTrace`. It
+  records every track's state for each bar pattern and the pool and index behind each chord shape, and
+  `StateMap.Explain(kind)` lists what each layer contributed, such as the snare's +1 to its rhythm and
+  the song's and a section's steps. Without a trace, states keep no record and it costs nothing.
 - **Rhythm.** Rhythm patterns are generated from dyadic ranks: positions in a period ranked by how
-  "strong" the beat is, and kept or dropped by a rank-weighted probability.
+  "strong" the beat is, and kept or dropped by a rank-weighted probability. Every layer, from the song
+  to a bar, may move a track's rhythm settings a step, each with its own chance (`RhythmLayers`), so a
+  drum keeps the rhythm it is given in about half of the bars. A period can be a tuplet's, such as a
+  triplet's, which is not exact in binary, so rhythm positions are snapped to a grid of 1024 · 3 · 5 · 7
+  ticks per beat (`TimelineGrid`), on which the dyadic subdivisions and the triplets, quintuplets and
+  septuplets fall exactly; two ways to the same moment then give the same position.
 - **Generators.** Randomness is expressed as small composable generators that take a seeded
   context, which is what makes every song reproducible.
 - **Rendering.** `Render` turns the abstract song into concrete notes (pitch, velocity, duration),

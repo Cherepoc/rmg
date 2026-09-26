@@ -8,7 +8,21 @@ public sealed class StateTimelineMergeTest
     private static readonly StateKind<int> StateKind = StateKinds.KeyOffset;
     
     [Test]
-    [Arguments(0)]
+    public async Task NoTimelines_ResultsIn_ArgumentException()
+    {
+        await Assert.That(() => StateTimeline.Merge(Array.Empty<StateTimeline<int>>())).Throws<ArgumentException>();
+    }
+
+    [Test]
+    public async Task NoTimelines_MergedByTheirKind_ResultsIn_ZeroDuration()
+    {
+        var result = StateKind.MergeTimelines([]);
+
+        await Assert.That(result.Duration).IsZero();
+        await Assert.That(result.StateKind).IsSameReferenceAs(StateKind);
+    }
+
+    [Test]
     [Arguments(1)]
     [Arguments(2)]
     public async Task ZeroDurationTimelines_ResultsIn_ZeroDuration(int count)

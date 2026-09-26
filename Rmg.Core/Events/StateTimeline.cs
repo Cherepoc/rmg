@@ -5,13 +5,19 @@ using System.Diagnostics;
 namespace Rmg.Core.Events;
 
 [DebuggerDisplay("[StateTimeline[{_items.Length}] {StateKind.Name}]")]
-public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeline<T>>, IReadOnlyList<TimelineItem<T>>
+public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineItem<T>>
     where T : notnull
 {
     private readonly ImmutableArray<TimelineItem<T>> _items;
 
     public StateTimeline(double duration, StateKind<T> stateKind, ImmutableArray<TimelineItem<T>> items)
+        : this(duration, stateKind, items, null)
     {
+    }
+
+    private StateTimeline(double duration, StateKind<T> stateKind, ImmutableArray<TimelineItem<T>> items, string? layer)
+    {
+        Layer = layer;
         Duration = duration;
         StateKind = stateKind;
         _items = items;
@@ -19,6 +25,12 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
     }
 
     public StateKind<T> StateKind { get; }
+
+    /// <summary>
+    ///     The layer the timeline's values come from, such as the bar, which a <see cref="StateTrace" /> records for
+    ///     the states read from it. A trimmed or shifted timeline keeps it; a merge of several has none.
+    /// </summary>
+    public string? Layer { get; }
 
     public IEnumerator<TimelineItem<T>> GetEnumerator()
     {
@@ -60,14 +72,22 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
         return Shift(offset);
     }
 
+    /// <summary>
+    ///     Merges timelines of one kind. There must be at least one, which gives the kind; to merge any number of
+    ///     them, use <see cref="StateKind{T}.MergeTimelines(IEnumerable{StateTimeline{T}})" />.
+    /// </summary>
     public static StateTimeline<T> Merge(IEnumerable<StateTimeline<T>> timelines)
     {
-        var timelineArray = timelines
+        var allTimelines = timelines.ToArray();
+        if (allTimelines.Length == 0)
+            throw new ArgumentException("There must be at least one timeline, which gives the state kind.", nameof(timelines));
+
+        var timelineArray = allTimelines
             .Where(x => x.Duration > 0)
             .ToArray();
 
         if (timelineArray.Length == 0)
-            return Events.StateKind.None<T>().CreateDefaultTimeline(0);
+            return allTimelines[0].StateKind.CreateDefaultTimeline(0);
 
         if (timelineArray.Length == 1)
             return timelineArray[0];
@@ -120,7 +140,7 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
         if (duration == Duration)
             return this;
 
-        return new StateTimeline<T>(duration, StateKind, _items.TrimState(StateKind, Duration, duration));
+        return new StateTimeline<T>(duration, StateKind, _items.TrimState(StateKind, Duration, duration), Layer);
     }
 
     public StateTimeline<T> Shift(double offset)
@@ -135,7 +155,7 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
         if (newDuration == 0)
             return StateKind.CreateDefaultTimeline(0);
 
-        return new StateTimeline<T>(newDuration, StateKind, _items.ShiftState(StateKind, offset));
+        return new StateTimeline<T>(newDuration, StateKind, _items.ShiftState(StateKind, offset), Layer);
     }
 
     public static StateTimeline<T> Create(double duration, StateKind<T> stateKind, IEnumerable<TimelineItem<T>> items)
@@ -181,7 +201,16 @@ public sealed class StateTimeline<T> : IStateTimeline, ITimelineLike<StateTimeli
 
     public State<T> GetEffectiveStateAt(double position)
     {
-        return new State<T>(StateKind, GetEffectiveValueAt(position));
+        var value = GetEffectiveValueAt(position);
+        return Layer is not null && StateTrace.IsRunning
+            ? new State<T>(StateKind, value, [new StateContribution(Layer, value)])
+            : new State<T>(StateKind, value);
+    }
+
+    /// <summary>The timeline, its values recorded as coming from the given layer.</summary>
+    public StateTimeline<T> WithLayer(string layer)
+    {
+        return new StateTimeline<T>(Duration, StateKind, _items, layer);
     }
 
     public IEnumerable<TimelineItem<T>> AsEnumerable()

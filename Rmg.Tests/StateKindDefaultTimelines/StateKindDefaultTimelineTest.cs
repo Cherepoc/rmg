@@ -57,11 +57,4 @@ public sealed class StateKindDefaultTimelineTest
         await Assert.That(result.IsDefault).IsFalse();
     }
 
-    [Test]
-    public async Task NoneKind_OfCollectionType_HasInitializedDefaultValue()
-    {
-        var result = StateKind.None<ImmutableArray<int>>().DefaultValue;
-
-        await Assert.That(result.IsDefault).IsFalse();
-    }
 }

@@ -59,8 +59,8 @@ public static class SongGenerator
         var patternChordNoteOffsetGenerator = Generators.SplineValue();
 
         // the same state is drawn for a track for the whole song and again for each section, and for the drums as a group,
-        // each with the velocity weight and the rhythm layer of its level
-        var trackDefinitionStateMapGenerator = (StateMap stateMap, double velocityWeight, RhythmLayer rhythmLayer) => new StateMapBuilder()
+        // each with the velocity weight and the rhythm layer of its level; none of them may set what all tracks share
+        var trackDefinitionStateMapGenerator = (string layer, StateMap stateMap, double velocityWeight, RhythmLayer rhythmLayer) => new StateMapBuilder(layer, perTrack: true)
             .Add(stateMap)
             .AddRhythmLayer(rhythmLayer)
             .Add(CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
@@ -79,7 +79,8 @@ public static class SongGenerator
             // chords instrument
             [4] = new PitchInstrumentTrack(
                 trackDefinitionStateMapGenerator(
-                    new StateMapBuilder()
+                    "Track",
+                    new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, 0)
                         .Add(CompositionStateKinds.IncrementalChordNoteOffset.Multiplier, 0)
                         .ToStateMap(generationContext),
@@ -92,7 +93,7 @@ public static class SongGenerator
             ),
             // melody instrument
             [5] = new PitchInstrumentTrack(
-                trackDefinitionStateMapGenerator(StateMap.Default, VelocityLayers.Track, RhythmLayers.Track),
+                trackDefinitionStateMapGenerator("Track", StateMap.Default, VelocityLayers.Track, RhythmLayers.Track),
                 pitchInstrumentCodeGenerator(),
                 minOctaveOffsetGenerator(),
                 maxOctaveOffsetGenerator()
@@ -100,7 +101,8 @@ public static class SongGenerator
             // bass instrument
             [6] = new PitchInstrumentTrack(
                 trackDefinitionStateMapGenerator(
-                    new StateMapBuilder()
+                    "Track",
+                    new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, closeToZeroIncrementalOffsetMultiplierGenerator)
                         .Add(CompositionStateKinds.IncrementalChordNoteOffset.Multiplier, closeToOneIncrementalOffsetMultiplierGenerator)
                         .ToStateMap(generationContext),
@@ -119,10 +121,10 @@ public static class SongGenerator
         {
             foreach (var drum in drumGroup.Drums.Where(songDrums.Contains))
             {
-                var drumStateMap = drum.ConfigureStateMap(drumGroup.ConfigureStateMap(new StateMapBuilder()))
+                var drumStateMap = drum.ConfigureStateMap(drumGroup.ConfigureStateMap(new StateMapBuilder("Drum", perTrack: true)))
                     .ToStateMap(generationContext);
                 trackDefinitions[DrumGroups.GetTrackNumber(drum)] = new PercussionInstrumentTrack(
-                    trackDefinitionStateMapGenerator(drumStateMap, VelocityLayers.Track, RhythmLayers.Track),
+                    trackDefinitionStateMapGenerator("Track", drumStateMap, VelocityLayers.Track, RhythmLayers.Track),
                     drum.ArticulationCodes
                 );
             }
@@ -133,7 +135,7 @@ public static class SongGenerator
         [
             new(
                 [..songDrums.Select(DrumGroups.GetTrackNumber)],
-                trackDefinitionStateMapGenerator(StateMap.Default, VelocityLayers.DrumGroup, RhythmLayers.DrumGroup)
+                trackDefinitionStateMapGenerator("Drum group", StateMap.Default, VelocityLayers.DrumGroup, RhythmLayers.DrumGroup)
             )
         ];
 
@@ -176,7 +178,7 @@ public static class SongGenerator
                         .BounceInBounds(-1, 1);
                     var phaseValue = DyadicRankDistribution.GetHalfOffset(phaseRank, phaseRankedOffset) * periodValue;
 
-                    return new StateMapBuilder()
+                    return new StateMapBuilder("Resolved rhythm", perTrack: true)
                         .Add(CompositionStateKinds.Rhythm.Period.Value, periodValue)
                         .Add(CompositionStateKinds.Rhythm.Phase.Value, phaseValue)
                         .Add(CompositionStateKinds.Rhythm.MaxRank, maxRank)
@@ -186,7 +188,7 @@ public static class SongGenerator
                 }
             );
 
-        var notePatternChangingStateMapGenerator = (StateMap stateMap) => new StateMapBuilder()
+        var notePatternChangingStateMapGenerator = (StateMap stateMap) => new StateMapBuilder("Beat", perTrack: true)
             .Add(CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
             .Add(CompositionStateKinds.IncrementalArticulationOffset.RandomOffset, notePatternRandomOffsetGenerator)
             .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
@@ -204,7 +206,7 @@ public static class SongGenerator
             )
             .ToStateMapGenerator();
         // the bar state timeline covers the whole 4-bar pattern, and this pattern starts at patternStart in it
-        var notePatternGenerator = (StateMap stateMap, StateTimelineMap barStateTimelineMap, double patternStart) =>
+        var notePatternGenerator = (StateMap stateMap, StateTimelineMap barStateTimelineMap, double patternStart, int trackNumber, int sectionId, int barIndex) =>
         {
             var rhythmPattern = cachedRhythmPatternGenerator(stateMap);
 
@@ -227,16 +229,31 @@ public static class SongGenerator
             );
 
             // the chord shape can change within the pattern, so each note takes the shape at its position
-            var chordNoteInScaleOffsetsGenerator = (double position) => stateMap
-                .MergeWith(
+            var chordNoteInScaleOffsetsGenerator = (double position) =>
+            {
+                var chordStateMap = stateMap.MergeWith(
                     barStateTimelineMap
                         .GetEffectiveStateMapAt(patternStart + position)
                         .Subset([CompositionStateKinds.ChordNotePitchOffsets.Index])
-                )
-                .SelectValueFromCollectionByIndex(CompositionStateKinds.ChordNotePitchOffsets)
-                .ToKind(StateKinds.ChordNotePitchOffsets);
+                );
+                if (StateTrace.IsRunning)
+                    StateTrace.Record(
+                        "Chord",
+                        trackNumber,
+                        sectionId,
+                        barIndex,
+                        chordStateMap.Subset(
+                            [CompositionStateKinds.ChordNotePitchOffsets.Collection, CompositionStateKinds.ChordNotePitchOffsets.Index]
+                        ),
+                        position
+                    );
 
-            var stateMapGenerator = (IGenerationContext innerContext, double position, int rank) => new StateMapBuilder()
+                return chordStateMap
+                    .SelectValueFromCollectionByIndex(CompositionStateKinds.ChordNotePitchOffsets)
+                    .ToKind(StateKinds.ChordNotePitchOffsets);
+            };
+
+            var stateMapGenerator = (IGenerationContext innerContext, double position, int rank) => new StateMapBuilder("Note", perTrack: true)
                 .Add(StateKinds.ArticulationOffset, incrementalArticulationOffsetGenerator(innerContext, position))
                 .Add(StateKinds.ChordRootNoteOffset, incrementalChordRootNoteOffsetGenerator(innerContext, position))
                 .Add(StateKinds.ChordNoteOffset, incrementalChordNoteOffsetGenerator(innerContext, position))
@@ -254,7 +271,7 @@ public static class SongGenerator
             );
         };
 
-        var noteHigherPatternInnerStateMapGenerator = new StateMapBuilder()
+        var noteHigherPatternInnerStateMapGenerator = new StateMapBuilder("Bar pattern", perTrack: true)
             .AddRhythmLayer(RhythmLayers.BarPattern)
             .Add(CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
             .Add(CompositionStateKinds.IncrementalArticulationOffset.RandomOffset, notePatternRandomOffsetGenerator)
@@ -271,7 +288,7 @@ public static class SongGenerator
 
         var seedValueGenerator = Generators.Int();
         // the bar state is the chord progression: each bar of the pattern takes the state of the bar it plays in
-        var noteHigherPatternGenerator = (ImmutableDictionary<int, StateMap> trackStateMaps, StateTimelineMap barStateTimelineMap) =>
+        var noteHigherPatternGenerator = (int sectionId, ImmutableDictionary<int, StateMap> trackStateMaps, StateTimelineMap barStateTimelineMap) =>
         {
             var trackSeedMapGenerator = (IGenerationContext innerContext) =>
                 trackStateMaps.Keys.ToDictionary(x => x, _ => seedValueGenerator(innerContext));
@@ -289,7 +306,7 @@ public static class SongGenerator
                                     var trackStateMap = trackStateMaps[trackNumber];
                                     var patternSeeds = CreatePatternSeeds(seedValue);
                                     var trackGenerationContext = generationContext.CreateContext(patternSeeds.TrackState);
-                                    var innerStateMap = new StateMapBuilder()
+                                    var innerStateMap = new StateMapBuilder("Bar pattern", perTrack: true)
                                         .Add(noteHigherPatternInnerStateMapGenerator)
                                         .Add(CompositionStateKinds.Rhythm.Seed, patternSeeds.Rhythm)
                                         .Add(CompositionStateKinds.ValueSeed, seedValue)
@@ -303,9 +320,10 @@ public static class SongGenerator
                                                 trackGenerationContext
                                             )
                                         );
-                                    var notePattern = notePatternGenerator(innerStateMap, barStateTimelineMap, barIndex * 4);
+                                    StateTrace.Record("Bar pattern", trackNumber, sectionId, barIndex, innerStateMap);
+                                    var notePattern = notePatternGenerator(innerStateMap, barStateTimelineMap, barIndex * 4, trackNumber, sectionId, barIndex);
                                     var innerEventStateTimelineMap = notePattern.GeneratedTimeline
-                                        .ToEventStateTimelineMap(innerStateMap.Subset(StateKinds.GetAll()));
+                                        .ToEventStateTimelineMap(innerStateMap.OfScope(StateScope.Render));
                                     return new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
                                         trackNumber,
                                         innerEventStateTimelineMap
@@ -331,31 +349,36 @@ public static class SongGenerator
                 StateKinds.Velocity,
                 progressionSettings.NoteStateStep,
                 VelocityLayers.CreateGenerator(VelocityLayers.Bar),
-                progressionSettings.PoolSize
+                progressionSettings.PoolSize,
+                "Bar"
             ),
             StateTimelineGenerator.Create(
                 StateKinds.QuarterNoteDurationPower,
                 progressionSettings.NoteStateStep,
                 quarterNoteDurationPowerGenerator,
-                progressionSettings.PoolSize
+                progressionSettings.PoolSize,
+                "Bar"
             ),
             StateTimelineGenerator.Create(
                 StateKinds.NextNoteDurationFactor,
                 progressionSettings.NoteStateStep,
                 nextNoteDurationFactorGenerator,
-                progressionSettings.PoolSize
+                progressionSettings.PoolSize,
+                "Bar"
             ),
             StateTimelineGenerator.Create(
                 StateKinds.ChordRootNoteOffset,
                 progressionSettings.ChordRootStep,
                 chordRootOffsetGenerator.Then(x => ImmutableArray.Create(x)),
-                progressionSettings.PoolSize
+                progressionSettings.PoolSize,
+                "Bar"
             ),
             StateTimelineGenerator.Create(
                 CompositionStateKinds.ChordNotePitchOffsets.Index,
                 progressionSettings.ChordShapeStep,
                 chordIndexOffsetGenerator,
-                progressionSettings.PoolSize
+                progressionSettings.PoolSize,
+                "Bar"
             ),
         ];
         var commonStateHigherPatternGenerator = () =>
@@ -370,7 +393,7 @@ public static class SongGenerator
             );
         };
 
-        var songStateMap = new StateMapBuilder()
+        var songStateMap = new StateMapBuilder("Song")
             .AddRhythmLayer(RhythmLayers.Song)
             .Add(CompositionStateKinds.Rhythm.MaxRank, 2)
             .Add(CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
@@ -383,7 +406,7 @@ public static class SongGenerator
             .Add(CompositionStateKinds.ChordNotePitchOffsets.Index, chordIndexOffsetGenerator)
             .ToStateMap(generationContext);
 
-        var sectionStateMapGenerator = new StateMapBuilder()
+        var sectionStateMapGenerator = new StateMapBuilder("Section")
             .AddRhythmLayer(RhythmLayers.Section)
             .Add(CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
             .Add(CompositionStateKinds.IncrementalArticulationOffset.RandomOffset, notePatternRandomOffsetGenerator)
@@ -398,7 +421,7 @@ public static class SongGenerator
             .AddCollectionOfOne(StateKinds.ChordRootNoteOffset, chordRootNoteOffsetGenerator)
             .ToStateMapGenerator();
 
-        var trackGroupSectionStateMapGenerator = new StateMapBuilder()
+        var trackGroupSectionStateMapGenerator = new StateMapBuilder("Section drum group", perTrack: true)
             .AddRhythmLayer(RhythmLayers.SectionDrumGroup)
             .Add(CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset, notePatternConsecutiveOffsetGenerator)
             .Add(CompositionStateKinds.IncrementalArticulationOffset.RandomOffset, notePatternRandomOffsetGenerator)
@@ -417,9 +440,13 @@ public static class SongGenerator
         var songSectionGenerator = (int sectionId) =>
         {
             var sectionChords = chordCollectionGenerator(songChordWeirdness.GenerateSection(generationContext))(generationContext);
-            var sectionStateMap = sectionStateMapGenerator(generationContext)
-                .MergeWith(StateMap.FromStates([CompositionStateKinds.ChordNotePitchOffsets.Collection.CreateState(sectionChords)]))
-                .MergeWith(songStateMap);
+            var sectionStateMap = CreateSectionStateMap(
+                songStateMap,
+                sectionStateMapGenerator(generationContext),
+                new StateMapBuilder("Section")
+                    .Add(CompositionStateKinds.ChordNotePitchOffsets.Collection, sectionChords)
+                    .ToStateMap(generationContext)
+            );
             var activeDrumTrackNumbers = DrumKitGenerator.SelectActiveDrums(generationContext, songDrums)
                 .Select(DrumGroups.GetTrackNumber)
                 .ToImmutableHashSet();
@@ -439,7 +466,7 @@ public static class SongGenerator
                 foreach (var trackNumber in group.TrackNumbers.Where(activeDrumTrackNumbers.Contains))
                 {
                     var trackDefinition = trackDefinitions[trackNumber];
-                    var combinedStateMap = trackDefinitionStateMapGenerator(GetTrackGenerationStateMap(trackDefinition), VelocityLayers.SectionTrack, RhythmLayers.SectionTrack)
+                    var combinedStateMap = trackDefinitionStateMapGenerator("Section track", GetTrackGenerationStateMap(trackDefinition), VelocityLayers.SectionTrack, RhythmLayers.SectionTrack)
                         .MergeWith(groupStateMap);
                     trackStateMaps[trackNumber] = combinedStateMap;
                 }
@@ -447,28 +474,29 @@ public static class SongGenerator
                 if (trackStateMaps.Count == 0)
                     continue;
 
-                var innerPattern = noteHigherPatternGenerator(trackStateMaps.ToImmutableDictionary(), barStateTimelineMap);
+                var innerPattern = noteHigherPatternGenerator(sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap);
                 trackTimelineMaps.Add(innerPattern);
             }
 
             foreach (var trackNumber in nonGroupedTrackNumbers)
             {
                 var trackDefinition = trackDefinitions[trackNumber];
-                var combinedStateMap = trackDefinitionStateMapGenerator(GetTrackGenerationStateMap(trackDefinition), VelocityLayers.SectionTrack, RhythmLayers.SectionTrack)
+                var combinedStateMap = trackDefinitionStateMapGenerator("Section track", GetTrackGenerationStateMap(trackDefinition), VelocityLayers.SectionTrack, RhythmLayers.SectionTrack)
                     .MergeWith(sectionStateMap);
                 var trackStateMaps = new Dictionary<int, StateMap> { [trackNumber] = combinedStateMap };
-                var innerPattern = noteHigherPatternGenerator(trackStateMaps.ToImmutableDictionary(), barStateTimelineMap);
+                var innerPattern = noteHigherPatternGenerator(sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap);
                 trackTimelineMaps.Add(innerPattern);
             }
 
-            var commonStateTimeline = barStateTimelineMap.ToTrackEventStateTimelineMap<StateMap>(16);
+            // the song keeps what Render reads; the bar state for the generation, such as the chord shape's pick, stays here
+            var commonStateTimeline = barStateTimelineMap.OfScope(StateScope.Render).ToTrackEventStateTimelineMap<StateMap>(16);
             trackTimelineMaps.Add(commonStateTimeline);
             return TrackEventStateTimelineMap.Merge(trackTimelineMaps)
                 .Repeat(2);
         };
         var cachedSongSectionGenerator = songSectionGenerator.CacheGeneratedValues();
 
-        var commonStateMap = new StateMapBuilder()
+        var commonStateMap = new StateMapBuilder("Song")
             .Add(StateKinds.ScaleOffsets, [0, 2, 3, 5, 7, 8, 10])
             .Add(StateKinds.KeyOffset, Generators.Int(0, 12))
             .Add(StateKinds.Tempo, TempoGenerator)
@@ -502,6 +530,19 @@ public static class SongGenerator
             .Add(CompositionStateKinds.Rhythm.Phase.RankedOffset, Generators.SplineValue())
             .Add(CompositionStateKinds.Rhythm.MaxRank, layer.CreateDensityGenerator())
             .Add(CompositionStateKinds.Rhythm.RankOffset, layer.CreateDensityGenerator());
+    }
+
+    /// <summary>
+    ///     A section's state: the song's, then the section's own draws, then what the section adds to the song's
+    ///     pools. A pool lists its entries in the order its layers are merged, and an index around 0 picks the first
+    ///     ones most often, so the song's entries, such as its chord shapes, come first and are the likeliest, and the
+    ///     section's add variety.
+    /// </summary>
+    internal static StateMap CreateSectionStateMap(StateMap songStateMap, StateMap sectionDraws, StateMap sectionPoolEntries)
+    {
+        return songStateMap
+            .MergeWith(sectionDraws)
+            .MergeWith(sectionPoolEntries);
     }
 
     /// <summary>The seeds of the random sequences that make up one pattern of a track.</summary>
@@ -543,7 +584,7 @@ public static class SongGenerator
     /// </summary>
     internal static StateMap GetTrackGenerationStateMap(IInstrumentTrack trackDefinition)
     {
-        return trackDefinition.StateMap.Except(StateKinds.GetAll());
+        return trackDefinition.StateMap.OfScope(StateScope.Composition);
     }
 
     private static State<ImmutableArray<T>> SelectValueFromCollectionByIndex<T>(

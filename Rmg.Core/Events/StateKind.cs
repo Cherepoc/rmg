@@ -1,18 +1,25 @@
-using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Rmg.Core.Events;
+
+/// <summary>Which part of the program a state kind is for.</summary>
+public enum StateScope
+{
+    /// <summary>State that only the song's generation reads, such as the rhythm settings.</summary>
+    Composition,
+
+    /// <summary>State that <c>Render</c> turns into notes, such as the velocity and the pitch offsets.</summary>
+    Render
+}
 
 [DebuggerDisplay("State Kind {Name} ({typeof(T)})")]
 public sealed class StateKind<T> : IStateKind
     where T : notnull
 {
     private readonly Func<IEnumerable<T>, T> _aggregateFunc;
-    private readonly IState _defaultStateObject;
-
-    private readonly object _defaultValueObject;
+    private readonly Func<T, bool> _isAggregatedFunc;
     private readonly Func<T, T, bool> _equalityFunc;
     private readonly Func<T, int> _hashFunc;
     private readonly StateTimeline<T> _zeroDurationTimeline;
@@ -22,28 +29,27 @@ public sealed class StateKind<T> : IStateKind
         T defaultValue,
         Func<T, T, bool> equalityFunc,
         Func<IEnumerable<T>, T> aggregateFunc,
-        Func<T, int>? hashFunc = null
+        Func<T, int>? hashFunc = null,
+        Func<T, bool>? isAggregatedFunc = null,
+        StateScope scope = StateScope.Composition,
+        bool isShared = false
     )
     {
+        StateKindNames.Register(name);
+
         Name = name;
+        Scope = scope;
+        IsShared = isShared;
         DefaultValue = defaultValue;
         DefaultState = new State<T>(this, defaultValue);
         _equalityFunc = equalityFunc;
         _aggregateFunc = aggregateFunc;
         _hashFunc = hashFunc ?? (value => EqualityComparer<T>.Default.GetHashCode(value));
-
-        _defaultValueObject = DefaultValue;
-        _defaultStateObject = DefaultState;
+        _isAggregatedFunc = isAggregatedFunc ?? (_ => true);
 
         // each kind gets its own zero-duration timeline so that it reports the kind's default value, not default(T)
         _zeroDurationTimeline = new StateTimeline<T>(0, this, []);
     }
-
-    /// <summary>
-    ///     A placeholder kind for a state timeline that has no kind of its own, such as the result of merging no
-    ///     timelines.
-    /// </summary>
-    public static StateKind<T> None { get; } = CreateNone();
 
     public T DefaultValue { get; }
 
@@ -51,43 +57,25 @@ public sealed class StateKind<T> : IStateKind
 
     public string Name { get; }
 
-    object IStateKind.DefaultValue => _defaultValueObject;
+    public StateScope Scope { get; }
 
-    IState IStateKind.DefaultState => _defaultStateObject;
+    public bool IsShared { get; }
 
-    IStateTimeline IStateKind.CreateDefaultTimeline(double duration)
-    {
-        return CreateDefaultTimeline(duration);
-    }
-
-    public object AggregateValues(IEnumerable values)
-    {
-        return AggregateValues(values.Cast<T>());
-    }
-
-    public bool CheckValuesEqual(object value1, object value2)
-    {
-        return _equalityFunc((T)value1, (T)value2);
-    }
-
-    public bool CheckValueIsDefault(object value)
-    {
-        return CheckValueIsDefault((T)value);
-    }
-
-    public IState AggregateValuesToState(IEnumerable values)
-    {
-        return AggregateValuesToState(values.Cast<T>());
-    }
+    IState IStateKind.DefaultState => DefaultState;
 
     public IState AggregateStates(IEnumerable<IState> states)
     {
-        return AggregateValuesToState(states.Select(x => (T)x.Value));
+        return AggregateStates(states.ToArray().AsSpan());
     }
 
-    IState IStateKind.CreateState(object value)
+    IState IStateKind.AggregateStates(ReadOnlySpan<IState> states)
     {
-        return CreateState((T)value);
+        return AggregateStates(states);
+    }
+
+    bool IStateKind.CheckStateIsAggregated(IState state)
+    {
+        return _isAggregatedFunc(((State<T>)state).Value);
     }
 
     public IStateTimeline MergeTimelines(IEnumerable<IStateTimeline> timelines)
@@ -95,42 +83,14 @@ public sealed class StateKind<T> : IStateKind
         return MergeTimelines(timelines.Cast<StateTimeline<T>>());
     }
 
-    IStateTimeline IStateKind.CreateTimelineFromValue(double duration, object value)
+    IStateTimeline IStateKind.CreateTimelineFromState(double duration, IState state)
     {
-        return CreateTimelineFromValue(duration, (T)value);
+        return CreateTimelineFromValue(duration, ((State<T>)state).Value);
     }
 
     IStateTimeline IStateKind.ExtractStateTimeline(EventTimeline<StateMap> eventTimeline)
     {
         return ExtractStateTimeline(eventTimeline);
-    }
-
-    // The field is looked up by name, which a trimmed or native build cannot follow on its own, so it is kept
-    // by name here. Every ImmutableArray<> this reaches is one the program itself constructs, so its
-    // instantiation is always compiled in; only the field's metadata could otherwise go missing.
-    [DynamicDependency(nameof(ImmutableArray<int>.Empty), typeof(ImmutableArray<>))]
-    [UnconditionalSuppressMessage("Trimming", "IL2090", Justification = "ImmutableArray<>.Empty is kept by the DynamicDependency above.")]
-    private static StateKind<T> CreateNone()
-    {
-        var type = typeof(T);
-        T defaultValue;
-        if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ImmutableArray<>))
-        {
-            // default(ImmutableArray<>) is an uninitialized array that throws on access
-            var emptyField = type.GetField(nameof(ImmutableArray<int>.Empty))!;
-            defaultValue = (T)emptyField.GetValue(null)!;
-        }
-        else
-        {
-            defaultValue = default!;
-        }
-
-        return new StateKind<T>(
-            "None",
-            defaultValue,
-            (_, _) => throw new NotImplementedException(),
-            _ => throw new NotImplementedException()
-        );
     }
 
     public T AggregateValues(IEnumerable<T> values)
@@ -160,7 +120,7 @@ public sealed class StateKind<T> : IStateKind
 
     public State<T> AggregateStates(IEnumerable<State<T>> states)
     {
-        return AggregateValuesToState(states.Select(x => x.Value));
+        return AggregateStates(states.Cast<IState>().ToArray().AsSpan());
     }
 
     public State<T> CreateState(T value)
@@ -201,14 +161,39 @@ public sealed class StateKind<T> : IStateKind
         var items = eventTimeline.MapValues(x => x.GetStateValue(this));
         return StateTimeline.Create(eventTimeline.Duration, this, items.ToImmutableArray());
     }
+
+    /// <summary>
+    ///     The states aggregated in their order. While a <see cref="StateTrace" /> runs, the result also keeps what
+    ///     every one of them was made of.
+    /// </summary>
+    private State<T> AggregateStates(ReadOnlySpan<IState> states)
+    {
+        var values = new T[states.Length];
+        for (var i = 0; i < states.Length; i++)
+            values[i] = ((State<T>)states[i]).Value;
+        var value = AggregateValues(values);
+
+        if (!StateTrace.IsRunning)
+            return new State<T>(this, value);
+
+        var contributions = ImmutableArray.CreateBuilder<StateContribution>();
+        foreach (var state in states)
+            contributions.AddRange(state.Contributions.IsEmpty ? [StateContribution.Unlabeled(state.Value)] : state.Contributions);
+        return new State<T>(this, value, contributions.ToImmutable());
+    }
 }
 
-public static class StateKind
+/// <summary>
+///     The names of all state kinds, of whatever value type. A kind's name is its identity, so no two kinds share one.
+/// </summary>
+internal static class StateKindNames
 {
-    public static StateKind<T> None<T>()
-        where T : notnull
+    private static readonly ConcurrentDictionary<string, bool> Names = new();
+
+    public static void Register(string name)
     {
-        return StateKind<T>.None;
+        if (!Names.TryAdd(name, true))
+            throw new ArgumentException($"A state kind named '{name}' already exists.", nameof(name));
     }
 }
 
@@ -216,27 +201,30 @@ public interface IStateKind
 {
     string Name { get; }
 
-    object DefaultValue { get; }
+    StateScope Scope { get; }
+
+    /// <summary>
+    ///     Whether every track must see the same value of the kind at the same time, such as the scale, so that only
+    ///     the layers the tracks share may set it.
+    /// </summary>
+    bool IsShared { get; }
 
     IState DefaultState { get; }
 
-    IStateTimeline CreateDefaultTimeline(double duration);
-
-    object AggregateValues(IEnumerable values);
-
-    bool CheckValuesEqual(object value1, object value2);
-
-    bool CheckValueIsDefault(object value);
-
-    IState AggregateValuesToState(IEnumerable values);
-
     IState AggregateStates(IEnumerable<IState> values);
 
-    IState CreateState(object value);
+    /// <summary>The states aggregated in their order; every one must be of this kind.</summary>
+    IState AggregateStates(ReadOnlySpan<IState> states);
+
+    /// <summary>
+    ///     Whether the state is as aggregating it alone would leave it, such as a collection that is already in order,
+    ///     so that it can be kept as it is.
+    /// </summary>
+    bool CheckStateIsAggregated(IState state);
 
     IStateTimeline MergeTimelines(IEnumerable<IStateTimeline> timelines);
 
-    IStateTimeline CreateTimelineFromValue(double duration, object value);
+    IStateTimeline CreateTimelineFromState(double duration, IState state);
 
     IStateTimeline ExtractStateTimeline(EventTimeline<StateMap> eventTimeline);
 }

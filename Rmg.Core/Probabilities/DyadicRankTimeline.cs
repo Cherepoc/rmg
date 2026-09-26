@@ -37,6 +37,12 @@ public sealed class DyadicRankTimeline
         for (var i = 0; i < itemCount; i++)
             timelinesToMerge[i] = templateTimeline.Shift(i * period);
 
-        return EventTimeline.Merge(timelinesToMerge).Trim(duration);
+        // the positions are multiples of a period that can be a tuplet's, so they are snapped to the grid; one that
+        // snaps to the end is the next pattern's first beat, which that pattern plays
+        var merged = EventTimeline.Merge(timelinesToMerge).Trim(duration);
+        return EventTimeline.Create(
+            duration,
+            merged.Select(x => new TimelineItem<int>(TimelineGrid.Snap(x.Position), x.Value))
+        );
     }
 }
