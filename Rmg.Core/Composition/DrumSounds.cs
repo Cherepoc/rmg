@@ -5,6 +5,7 @@ namespace Rmg.Core.Composition;
 /// <summary>The General MIDI sounds of the drums that the fills name, by their note numbers.</summary>
 public static class DrumSounds
 {
+    public const int PedalHiHat = 44;
     public const int OpenHiHat = 46;
 
     public const int LowFloorTom = 41;

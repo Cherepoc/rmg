@@ -19,12 +19,58 @@ public enum EndingKind
     Stop
 }
 
+/// <summary>How a song starts before its first section.</summary>
+public enum IntroKind
+{
+    /// <summary>The whole band starts together.</summary>
+    Cold,
+
+    /// <summary>Bars of the first section's drums alone before it, the band coming in with a fill and a landing.</summary>
+    DrumsFirst,
+
+    /// <summary>A bar of the pedal hi-hat on the beats before the first section.</summary>
+    CountIn,
+
+    /// <summary>The first phrase with the chords alone, now and then with the bass, the band coming in after it.</summary>
+    ChordsFirst,
+
+    /// <summary>The first phrase building up: the chords, then the bass, then the drums, and the melody after it.</summary>
+    Build
+}
+
 /// <summary>
-///     How a song starts and ends around its sections. It ends on the home chord of its last section, whose home is the
+///     How a song starts and ends around its sections. It starts with the whole band, with the drums or the chords
+///     alone, with a count-in, or building up. It ends on the home chord of its last section, whose home is the
 ///     song's tonic, most of the time; the more its rhythm strays, the likelier an open or a stopped ending.
 /// </summary>
 public static class FormLayers
 {
+    public static ImmutableArray<Weighted<IntroKind>> Intros { get; } =
+    [
+        new(0.3, IntroKind.Cold),
+        new(0.25, IntroKind.DrumsFirst),
+        new(0.1, IntroKind.CountIn),
+        new(0.2, IntroKind.ChordsFirst),
+        new(0.15, IntroKind.Build)
+    ];
+
+    /// <summary>How many bars the drums play alone before the first section.</summary>
+    public static ImmutableArray<Weighted<int>> DrumsFirstBars { get; } = [new(0.3, 1), new(0.5, 2), new(0.2, 4)];
+
+    /// <summary>The chance that a count-in clicks only the last two beats, rather than all four.</summary>
+    public const double HalfCountInChance = 0.3;
+
+    /// <summary>How loud a count-in's clicks are, over the hi-hat's state.</summary>
+    public const double CountInVelocity = -0.3;
+
+    /// <summary>The chance that the bass joins the chords in an intro of the chords first.</summary>
+    public const double ChordsFirstBassChance = 0.5;
+
+    /// <summary>When each track comes in, in bars into the first phrase, as an intro builds up; the melody after the phrase.</summary>
+    public const int BuildBassBar = 1;
+
+    public const int BuildDrumsBar = 2;
+
     public static ImmutableArray<Weighted<EndingKind>> Endings { get; } =
     [
         new(0.35, EndingKind.Button),

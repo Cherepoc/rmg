@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text.RegularExpressions;
 using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
@@ -84,17 +86,25 @@ public sealed class FillTest
     [Test]
     public async Task EveryLine_RecordsItsFillDecision()
     {
-        using var trace = StateTrace.Start();
-        var song = SongGenerator.GenerateSong(3);
+        for (var seed = 0; seed < 10; seed++)
+        {
+            using var trace = StateTrace.Start();
+            var song = SongGenerator.GenerateSong(seed);
+            string Form(string point) => trace.Entries.Single(x => x.Point == point).Phrase!;
+            double Number(string text, string pattern) => double.Parse(Regex.Match(text, pattern).Groups[1].Value, CultureInfo.InvariantCulture);
 
-        var decisions = trace.Entries.Where(x => x.Point == "Fill decision").ToArray();
+            var decisions = trace.Entries.Where(x => x.Point == "Fill decision").ToArray();
 
-        // a line between every two sections, one in the middle of every section, and one before the ending, if the song
-        // has bars of its own there
-        var sections = (int)(song.Duration / SectionDuration);
-        var hasEnding = !trace.Entries.Single(x => x.Point == "Song form").Phrase!.Contains("Open ending");
-        await Assert.That(decisions.Length).IsEqualTo(sections - 1 + sections + (hasEnding ? 1 : 0));
-        await Assert.That(decisions.All(x => x.Track == FillGenerator.DrumsTrace && x.Bar == 3)).IsTrue();
+            // a line between every two sections, one in the middle of every section, one after the intro's bars, if it
+            // has any, and one before the ending's
+            var origin = Number(Form("Song intro"), @", ([\d.]+) beats");
+            var ending = Form("Song ending");
+            var end = ending.StartsWith("Open") ? song.Duration : Number(ending, @"at beat ([\d.]+)");
+            var sections = (int)Math.Round((end - origin) / SectionDuration);
+            var expected = sections - 1 + sections + (origin > 0 ? 1 : 0) + (ending.StartsWith("Open") ? 0 : 1);
+            await Assert.That(decisions.Length).IsEqualTo(expected).Because($"seed {seed}");
+            await Assert.That(decisions.All(x => x.Track == FillGenerator.DrumsTrace && x.Bar == 3)).IsTrue();
+        }
     }
 
     [Test]
@@ -134,11 +144,13 @@ public sealed class FillTest
         int changes = 0, crashes = 0, kicks = 0, downbeats = 0, otherCrashes = 0;
         for (var seed = 0; seed < 40; seed++)
         {
-            var song = SongGenerator.GenerateSong(seed);
+            var (song, origin) = TestSongs.Generate(seed);
             var drums = Render.RenderSong(song).Tracks.Single(x => x.IsPercussionInstrument).NoteTimeline;
-            for (var bar = 1.0; bar * 4 < song.Duration; bar++)
+            // the bars of the sections, after the first, up to the ending's, which lands every time
+            for (var bar = 1.0; origin + bar * 4 < song.Duration - 8; bar++)
             {
-                var hits = drums.Where(x => x.Position.IsEqualToByEpsilon(bar * 4)).Select(x => x.Value.Offset).ToArray();
+                var position = origin + bar * 4;
+                var hits = drums.Where(x => x.Position.IsEqualToByEpsilon(position)).Select(x => x.Value.Offset).ToArray();
                 if ((bar * 4 % SectionDuration).IsEqualToByEpsilon(0))
                 {
                     changes++;

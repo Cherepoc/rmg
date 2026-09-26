@@ -74,14 +74,15 @@ public sealed class CadenceRaisedStepTest
         var raising = 0;
         for (var seed = 0; seed < 60; seed++)
         {
-            var common = SongGenerator.GenerateSong(seed).TrackEventStateTimelineMap.CommonStateTimelineMap;
+            var (song, origin) = TestSongs.Generate(seed);
+            var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
 
             foreach (var item in common.GetStateTimeline(StateKinds.RaisedScaleSteps).Where(x => !x.Value.IsEmpty))
             {
                 raising++;
                 // the last bar of a 4-bar pattern; whether it raises depends on the section's home, not the song's
                 // scale: even harmonic minor has a minor fifth seen from its fourth step
-                await Assert.That(item.Position % 16).IsEqualTo(12).Because($"seed {seed}");
+                await Assert.That((item.Position - origin) % 16).IsEqualTo(12).Because($"seed {seed}");
             }
         }
 

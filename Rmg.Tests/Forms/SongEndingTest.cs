@@ -25,7 +25,7 @@ public sealed class SongEndingTest
     {
         using var trace = StateTrace.Start();
         var song = SongGenerator.GenerateSong(seed);
-        var description = trace.Entries.Single(x => x.Point == "Song form").Phrase!;
+        var description = trace.Entries.Single(x => x.Point == "Song ending").Phrase!;
         var ending = new Ending(
             Enum.Parse<EndingKind>(description.Split(' ')[0]),
             Number(description, @"at beat ([\d.]+)"),

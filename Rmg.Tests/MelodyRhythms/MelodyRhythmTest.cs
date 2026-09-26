@@ -80,13 +80,16 @@ public sealed class MelodyRhythmTest
         await Assert.That(values.All(x => x is >= 0 and <= 1)).IsTrue();
     }
 
-    private static TimelineItem<RenderedNote>[] RenderMelody(int seed)
+    private static TimelineItem<RenderedNote>[] RenderMelody(int seed) => RenderMelodyFrom(seed).Melody;
+
+    /// <summary>The melody, and where the song's first section starts.</summary>
+    private static (TimelineItem<RenderedNote>[] Melody, double Origin) RenderMelodyFrom(int seed)
     {
-        var song = SongGenerator.GenerateSong(seed);
+        var (song, origin) = TestSongs.Generate(seed);
         var program = ((PitchInstrumentTrack)song.TrackDefinitions[MelodyTrackNumber]).InstrumentCode;
-        return Render.RenderSong(song)
+        return (Render.RenderSong(song)
             .Tracks.First(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == program)
-            .NoteTimeline.ToArray();
+            .NoteTimeline.ToArray(), origin);
     }
 
     [Test]
@@ -106,10 +109,10 @@ public sealed class MelodyRhythmTest
         int phrases = 0, held = 0, rested = 0;
         for (var seed = 0; seed < 30; seed++)
         {
-            var melody = RenderMelody(seed);
+            var (melody, origin) = RenderMelodyFrom(seed);
             var duration = melody[^1].Position + 4;
-            // a phrase is a section's 4-bar pattern, so its last bar ends on every 16th beat
-            for (var end = 16.0; end < duration; end += 16)
+            // a phrase is a section's 4-bar pattern, so its last bar ends on every 16th beat of the sections
+            for (var end = origin + 16; end < duration; end += 16)
             {
                 var last = melody.Where(x => x.Position < end && x.Position >= end - 4).ToArray();
                 if (last.Length == 0)

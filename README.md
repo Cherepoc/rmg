@@ -312,7 +312,11 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   (`FillEdits`); a drum names its sound outright (`StateKinds.ArticulationIndex`), and a drum out of a
   section's groove still has the section's drum state, so a fill's notes are as loud as the section.
 - **Form.** `SongFormGenerator` puts the song together around its sections and tells the fills where
-  the lines are. The song's last section has the tonic as its home, so its cadence leads home, and
+  the lines are. A song starts (`FormLayers`) with the whole band (30%), with a bar, two or four of
+  the first section's drums alone (25%), with a count-in on the pedal hi-hat (10%), with the chords
+  alone for the first phrase, now and then with the bass (20%), or building up through it: the
+  chords, then the bass, then the drums, and the melody after it (15%). Where the band or the melody
+  comes in, the drums play a fill and land on a crash and a kick. The song's last section has the tonic as its home, so its cadence leads home, and
   the song ends there (`FormLayers`): on a button (everyone hits the home chord on a last downbeat,
   short), ringing out (the chord held a bar or two, the bar before slowing down half the time), a stop
   (the band silent a beat or two, then the hit), or open, on the cadence, unresolved. The more the
