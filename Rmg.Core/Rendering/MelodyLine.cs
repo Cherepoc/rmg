@@ -1,5 +1,7 @@
 using Rmg.Core;
 
+using Rmg.Core.Composition;
+
 namespace Rmg.Core.Rendering;
 
 /// <summary>
@@ -26,8 +28,6 @@ internal sealed class MelodyLine
     /// <summary>A move this big or bigger is a leap, which the next note fills in by stepping back.</summary>
     internal const int LeapSize = 7;
 
-    // chords change at bar lines, every 4 beats
-    private const double BarDuration = 4;
 
     /// <summary>The weakest beat, by its rank in the rhythm, that still takes a note of the chord.</summary>
     internal const int StrongestWeakRank = 1;
@@ -89,7 +89,7 @@ internal sealed class MelodyLine
         bool isFinal = false
     )
     {
-        var bar = (int)Math.Floor(position / BarDuration);
+        var bar = (int)Math.Floor(position / Meter.BarDuration);
         if (bar != _previousBar)
         {
             _barNoteIndex = 0;

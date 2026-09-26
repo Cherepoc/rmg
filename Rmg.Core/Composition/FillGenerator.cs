@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
+using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
@@ -21,7 +22,6 @@ internal sealed class FillGenerator
     // the song's tempo is a multiple of this
     private const double BaseTempo = 120;
 
-    private const double BarDuration = 4;
 
     private static readonly Func<IGenerationContext, int> SeedGenerator = Generators.Int();
 
@@ -66,11 +66,11 @@ internal sealed class FillGenerator
 
     /// <param name="song">The song's sections and its intro and ending, put one after another.</param>
     /// <param name="lines">Every line the drums mark, in the song's order.</param>
-    /// <param name="origin">Where the song's first section starts.</param>
+    /// <param name="map">Where the song's parts are; none for a song that starts with its first section.</param>
     public TrackEventStateTimelineMap<StateMap> Generate(
         TrackEventStateTimelineMap<StateMap> song,
         IReadOnlyList<FillLine> lines,
-        double origin = 0
+        SongMap? map = null
     )
     {
         // a fast song's runs play 8ths, which 16ths would blur
@@ -78,9 +78,9 @@ internal sealed class FillGenerator
         var grid = tempo <= FillLayers.MaxSixteenthTempo ? 0.25 : 0.5;
 
         var drummer = Drummer.Generate(_context, _songRhythm);
-        var edits = new TimelineEdits(_context, origin);
+        var edits = new TimelineEdits(_context, map);
         foreach (var line in lines)
-            MarkLine(song, edits, line, grid, drummer, origin);
+            MarkLine(song, edits, line, grid, drummer, map?.Origin ?? 0);
 
         return edits.ApplyTo(song);
     }
@@ -100,9 +100,9 @@ internal sealed class FillGenerator
             if (i > 0)
                 lines.Add(new FillLine(start, sections[i - 1], sections[i].SectionId, FillTable.Section, LandingRule.Section));
 
-            for (var line = start + BarStateGenerator.PatternDuration;
+            for (var line = start + Meter.PatternDuration;
                  line < start + sections[i].Duration;
-                 line += BarStateGenerator.PatternDuration)
+                 line += Meter.PatternDuration)
                 lines.Add(new FillLine(line, sections[i], sections[i].SectionId, FillTable.Phrase, LandingRule.Phrase));
 
             start += sections[i].Duration;
@@ -218,7 +218,7 @@ internal sealed class FillGenerator
         if (!StateTrace.IsRunning)
             return;
 
-        var bar = (int)Math.Floor(line / BarDuration) - 1;
+        var bar = (int)Math.Floor(line / Meter.BarDuration) - 1;
         var description = $"{play.Kind}, {span} beats, landing {landing}"
                           + (play.Tuplet != 1 ? $", in {play.Tuplet}s" : "")
                           + (play.OddVoice is { } oddVoice ? $", on {oddVoice}" : "")
@@ -229,7 +229,7 @@ internal sealed class FillGenerator
             sectionId,
             bar.Mod(Progressions.BarCount),
             StateMap.Default,
-            play.Kind == FillKind.None ? 0 : Math.Max(0, BarDuration - span),
+            play.Kind == FillKind.None ? 0 : Math.Max(0, Meter.BarDuration - span),
             description
         );
     }
@@ -271,7 +271,7 @@ internal sealed class FillGenerator
             span = coarse;
         // an odd span starts a note of the coarser grid earlier, or later where it is a bar long
         if (play.Twists.HasFlag(FillTwist.OddSpan))
-            span = span < BarDuration ? span + coarse : span - coarse;
+            span = span < Meter.BarDuration ? span + coarse : span - coarse;
         var from = line - span;
         var name = play.Kind.ToString();
 

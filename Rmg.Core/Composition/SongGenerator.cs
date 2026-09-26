@@ -71,13 +71,18 @@ public static class SongGenerator
         var sectionIds = SongStructureGenerator.Generate(Stream(SongStream.Structure))
             .SelectMany(part => part.SectionIds)
             .ToArray();
-        // every section is generated once, where it first plays; the one the song ends with leads home to the tonic
-        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(id, id == sectionIds[^1])))
+        // how the song starts and ends around its sections, decided before them: the one the song ends with leads home
+        // to the tonic, where the ending lands
+        var formGenerator = new SongFormGenerator(Stream(SongStream.Form), rhythmicUnconventionality);
+        var plan = formGenerator.Plan(sectionIds);
+
+        // every section is generated once, where it first plays
+        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(id, id == plan.TonicHomeSectionId)))
             .CacheGeneratedValues();
         var sections = sectionIds.Select(generateSection).ToArray();
 
-        // how the song starts and ends around its sections, and the lines the drums mark
-        var form = new SongFormGenerator(Stream(SongStream.Form), rhythmicUnconventionality).Generate(sectionIds, sections);
+        // the song put together as planned, and the lines the drums mark
+        var form = formGenerator.Assemble(plan, sectionIds, sections);
         var songTrackNoteTimelineMap = form.Edits.ApplyTo(form.Blocks.Unroll());
         songTrackNoteTimelineMap = TrackEventStateTimelineMap.Merge(
                 [
@@ -89,9 +94,9 @@ public static class SongGenerator
 
         // the drums mark the lines, now that the song is put together
         songTrackNoteTimelineMap = new FillGenerator(Stream(SongStream.Fills), tracks, rhythmicUnconventionality)
-            .Generate(songTrackNoteTimelineMap, form.Lines, form.Origin);
+            .Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
 
-        return new Song(songTrackNoteTimelineMap.Duration, tracks.Definitions, songTrackNoteTimelineMap);
+        return new Song(songTrackNoteTimelineMap.Duration, tracks.Definitions, songTrackNoteTimelineMap, form.Map);
     }
 
     /// <summary>The random sequence a stage of the song of the given seed draws from.</summary>

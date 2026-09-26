@@ -8,7 +8,7 @@ namespace Rmg.Tests.Forms;
 
 public sealed class SongIntroTest
 {
-    private const double Phrase = BarStateGenerator.PatternDuration;
+    private const double Phrase = Meter.PatternDuration;
 
     // the longest fill before the line where the drums come in, an odd span of a bar less a note
     private const double LongestFill = 4.5;

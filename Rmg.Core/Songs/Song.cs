@@ -8,7 +8,8 @@ public sealed class Song
     public Song(
         double duration,
         ImmutableSortedDictionary<int, IInstrumentTrack> trackDefinitions,
-        TrackEventStateTimelineMap<StateMap> trackEventStateTimelineMap
+        TrackEventStateTimelineMap<StateMap> trackEventStateTimelineMap,
+        SongMap? map = null
     )
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(duration);
@@ -16,7 +17,11 @@ public sealed class Song
         Duration = duration;
         TrackDefinitions = trackDefinitions;
         TrackEventStateTimelineMap = trackEventStateTimelineMap;
+        Map = map;
     }
+
+    /// <summary>Where the song's intro, sections and ending are, for a generated song.</summary>
+    public SongMap? Map { get; }
 
     public double Duration { get; }
 

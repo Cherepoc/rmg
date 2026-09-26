@@ -10,7 +10,7 @@ namespace Rmg.Tests.Fills;
 
 public sealed class FillTest
 {
-    private const double SectionDuration = 2 * BarStateGenerator.PatternDuration;
+    private const double SectionDuration = 2 * Meter.PatternDuration;
 
     private static readonly int[] Crashes = [49, 57];
 

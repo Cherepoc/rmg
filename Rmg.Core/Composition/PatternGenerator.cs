@@ -12,7 +12,6 @@ namespace Rmg.Core.Composition;
 /// </summary>
 internal sealed class PatternGenerator
 {
-    private const double BarDuration = 4;
 
     private static readonly Func<IGenerationContext, int> SeedGenerator = Generators.Int();
 
@@ -86,7 +85,7 @@ internal sealed class PatternGenerator
                             )
                         )
                     );
-                    return TrackEventStateTimelineMap.Create(BarDuration, trackNotePatterns, StateTimelineMap.Create(BarDuration));
+                    return TrackEventStateTimelineMap.Create(Meter.BarDuration, trackNotePatterns, StateTimelineMap.Create(Meter.BarDuration));
                 }
             )
             .Unroll();
@@ -122,12 +121,12 @@ internal sealed class PatternGenerator
             .MergeWith(CreatePatternChordNoteOffset(_trackDefinitions[trackNumber], trackStateMap, trackGenerationContext));
         StateTrace.Record("Bar pattern", trackNumber, sectionId, barIndex, stateMap, phrase: scheme);
 
-        var notes = GenerateNotes(stateMap, barStateTimelineMap, barIndex * BarDuration, trackNumber, sectionId, barIndex)
+        var notes = GenerateNotes(stateMap, barStateTimelineMap, barIndex * Meter.BarDuration, trackNumber, sectionId, barIndex)
             .GeneratedTimeline;
         if (trackNumber == SongTracks.MelodyTrack)
             notes = EndPhrase(
                 notes,
-                barStateTimelineMap.GetEffectiveStateMapAt(barIndex * BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd)
+                barStateTimelineMap.GetEffectiveStateMapAt(barIndex * Meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd)
             );
         feels.Add(new BarFeel(trackNumber, barIndex, ResolvePrimeIndex(stateMap).ToTuplet(), notes.Count));
         return notes.ToEventStateTimelineMap(stateMap.OfScope(StateScope.Render));
@@ -151,7 +150,7 @@ internal sealed class PatternGenerator
         if (end <= 0)
             return notes;
 
-        var holdEnd = BarDuration - MelodyLayers.PhraseEndRest;
+        var holdEnd = Meter.BarDuration - MelodyLayers.PhraseEndRest;
         var kept = notes.Where(x => x.Position < end).ToList();
         if (kept.Count == 0 && notes.Count > 0 && notes[0].Position < holdEnd)
             kept.Add(notes[0]);
@@ -292,8 +291,8 @@ internal sealed class PatternGenerator
     /// <summary>The rhythm of a bar pattern, by its resolved settings: its period, phase, ranks and seed.</summary>
     private DyadicRankThresholdPattern GenerateRhythmPattern(StateMap stateMap)
     {
-        var period = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Value) * BarDuration;
-        var phase = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.Value) * BarDuration;
+        var period = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Value) * Meter.BarDuration;
+        var phase = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.Value) * Meter.BarDuration;
         var maxRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.MaxRank);
         var seed = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Seed);
         var rankOffset = stateMap.GetStateValue(CompositionStateKinds.Rhythm.RankOffset);
@@ -304,7 +303,7 @@ internal sealed class PatternGenerator
             _context,
             seed,
             WeightUtil.CreateGeometricRankWeightFunc(rankOffset, 0, 1.0, fullness),
-            new DyadicTimelineDescriptor(BarDuration, period, phase, maxRank),
+            new DyadicTimelineDescriptor(Meter.BarDuration, period, phase, maxRank),
             variation
         );
     }

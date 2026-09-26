@@ -1,5 +1,6 @@
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
+using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
@@ -7,12 +8,11 @@ namespace Rmg.Core.Composition;
 ///     Changes to a song's notes, gathered, and made at once: the spans they clear and the hits they add, as the fills
 ///     and the song's form make them.
 /// </summary>
-/// <param name="origin">Where the song's first section starts, from which the trace counts the bars of the sections' patterns.</param>
-internal sealed class TimelineEdits(IGenerationContext context, double origin = 0)
+/// <param name="map">Where the song's parts are, from which the trace counts the bars of the sections' patterns; none for a
+///     song that starts with its first section.</param>
+internal sealed class TimelineEdits(IGenerationContext context, SongMap? map = null)
 {
     private const double Epsilon = 1e-6;
-    private const double BarDuration = 4;
-    private const int PatternBarCount = Progressions.BarCount;
 
     private readonly Dictionary<int, List<(double From, double To)>> _cleared = [];
     private readonly Dictionary<int, List<TimelineItem<StateMap>>> _hits = [];
@@ -43,8 +43,9 @@ internal sealed class TimelineEdits(IGenerationContext context, double origin = 
             builder.Add(StateKinds.ArticulationIndex, articulation);
         var stateMap = builder.ToStateMap(context);
         // sections are made of whole 4-bar patterns, so the bar of the pattern and the beat in it follow from the song's
-        var bar = (int)Math.Floor((position - origin) / BarDuration);
-        StateTrace.Record("Fill", track, sectionId, bar.Mod(PatternBarCount), stateMap, position - origin - bar * BarDuration, fill);
+        var fromOrigin = position - (map?.Origin ?? 0);
+        var bar = (int)Math.Floor(fromOrigin / Meter.BarDuration);
+        StateTrace.Record("Fill", track, sectionId, bar.Mod(Meter.PatternBarCount), stateMap, fromOrigin - bar * Meter.BarDuration, fill);
 
         Clear(track, position, position + Epsilon);
         if (!_hits.TryGetValue(track, out var hits))

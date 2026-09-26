@@ -24,8 +24,6 @@ internal sealed class BassLine
 {
     private const int OctaveNoteCount = 12;
 
-    // chords change at bar lines, every 4 beats
-    private const double BarDuration = 4;
 
     private readonly Func<int, int> _placeAsDrawn;
     private readonly int _minNote;
@@ -59,7 +57,7 @@ internal sealed class BassLine
     )
     {
         // the bar, not the root, tells a new chord, since a bass line's own walk can move its root within one
-        var bar = (int)Math.Floor(position / BarDuration);
+        var bar = (int)Math.Floor(position / Meter.BarDuration);
         var isArrival = bar != _previousBar;
 
         int note;
@@ -90,7 +88,7 @@ internal sealed class BassLine
     /// <summary>Whether the note is in the last beat before the next bar line, and the next note is past it.</summary>
     internal static bool IsInLastBeatBeforeChange(double position, double nextPosition)
     {
-        var change = (Math.Floor(position / BarDuration) + 1) * BarDuration;
+        var change = (Math.Floor(position / Meter.BarDuration) + 1) * Meter.BarDuration;
         return position >= change - 1 && nextPosition >= change;
     }
 

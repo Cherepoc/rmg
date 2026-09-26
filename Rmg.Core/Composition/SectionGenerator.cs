@@ -48,8 +48,8 @@ internal sealed class SectionGenerator
     }
 
     /// <summary>The section: its 4-bar pattern played twice, with what the fills need to know of its rhythm.</summary>
-    /// <param name="endsSong">Whether the song ends with the section, which then has the song's tonic as its home.</param>
-    public GeneratedSection Generate(int sectionId, bool endsSong = false)
+    /// <param name="hasTonicHome">Whether the section has the song's tonic as its home, as the song's form has the last.</param>
+    public GeneratedSection Generate(int sectionId, bool hasTonicHome = false)
     {
         // every section draws from its own sequence, so a change to one leaves the others as they are
         var context = _context.CreateContext(Seeds.Derive(_seed, sectionId));
@@ -60,7 +60,7 @@ internal sealed class SectionGenerator
         // the section's chords move around its home, which every track's root starts from
         var home = Progressions.GenerateHome(context, _songScale);
         // the song's last section leads home to its tonic, where the song ends
-        if (endsSong)
+        if (hasTonicHome)
             home = 0;
         var progression = Progressions.Generate(context, _songScale, home, unconventionality.ProgressionStrictness);
 
@@ -102,7 +102,7 @@ internal sealed class SectionGenerator
 
         // the song keeps what Render reads; the bar state for the generation, such as the chord pool's pick, stays here
         trackTimelineMaps.Add(
-            barStateTimelineMap.OfScope(StateScope.Render).ToTrackEventStateTimelineMap<StateMap>(BarStateGenerator.PatternDuration)
+            barStateTimelineMap.OfScope(StateScope.Render).ToTrackEventStateTimelineMap<StateMap>(Meter.PatternDuration)
         );
         return new GeneratedSection(
             TrackEventStateTimelineMap.Merge(trackTimelineMaps).Repeat(2),
@@ -157,15 +157,15 @@ internal sealed class SectionGenerator
             // later, such as in a fill, plays as loud as the section
             var idleStateMap = groupStateMap.OfScope(StateScope.Render);
             yield return new GeneratedBars(TrackEventStateTimelineMap.Create(
-                BarStateGenerator.PatternDuration,
+                Meter.PatternDuration,
                 group.TrackNumbers
                     .Where(x => !trackStateMaps.ContainsKey(x))
                     .Select(x => new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
                             x,
-                            EventTimeline.Create<StateMap>(BarStateGenerator.PatternDuration).ToEventStateTimelineMap(idleStateMap)
+                            EventTimeline.Create<StateMap>(Meter.PatternDuration).ToEventStateTimelineMap(idleStateMap)
                         )
                     ),
-                StateTimelineMap.Create(BarStateGenerator.PatternDuration)
+                StateTimelineMap.Create(Meter.PatternDuration)
             ), []);
 
             if (trackStateMaps.Count == 0)

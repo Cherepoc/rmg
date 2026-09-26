@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
+using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
@@ -8,13 +9,12 @@ namespace Rmg.Core.Composition;
 ///     The form of a song around its sections: how it starts and how it ends. It sees the sections before they are put
 ///     one after another, so it can put bars before and after them, and it tells the fills where the lines are that
 ///     they mark. An intro puts the first section's drums or a count-in before it, or leaves tracks out of its first
-///     phrase, to come in after it. The ending plays the home bar of the last section, whose home is the song's tonic: every track's first
-///     note of it, moved to the downbeat and held, the bass on the root and the melody's last note on it too.
+///     phrase, to come in after it. The ending plays the home bar of the last section, whose home is the song's tonic:
+///     every track's first note of it, moved to the downbeat and held, the bass on the root and the melody's last note on
+///     it too. It decides the form before the sections are generated, and puts the song together after.
 /// </summary>
 internal sealed class SongFormGenerator
 {
-    private const double BarDuration = 4;
-
     private readonly IGenerationContext _context;
     private readonly RhythmicUnconventionality _songRhythm;
 
@@ -24,38 +24,86 @@ internal sealed class SongFormGenerator
         _songRhythm = songRhythm;
     }
 
+    /// <summary>
+    ///     What the song's form will be, decided before its sections: its intro and ending, and how they play. The song's
+    ///     last section then leads home to the tonic, where the ending lands.
+    /// </summary>
     /// <param name="sectionIds">The sections in the song's order.</param>
-    /// <param name="sections">Every section in the song's order, as generated.</param>
-    public SongForm Generate(IReadOnlyList<int> sectionIds, IReadOnlyList<GeneratedSection> sections)
+    public FormPlan Plan(IReadOnlyList<int> sectionIds)
     {
-        ImmutableArray<FillSection> fillSections =
-        [
-            ..sectionIds.Zip(sections, (id, section) => new FillSection(id, section.Timeline.Duration, section.Rhythm, section.DrumTuplet))
-        ];
         var intro = Pick(FormLayers.Intros);
         var ending = Pick(FormLayers.WeighEndings(_songRhythm.ChanceScale));
+        var drumsFirstBars = intro == IntroKind.DrumsFirst ? Pick(FormLayers.DrumsFirstBars) : 0;
+        var halfCountIn = intro == IntroKind.CountIn && _context.TestProbability(FormLayers.HalfCountInChance);
+        var withBass = intro == IntroKind.ChordsFirst && _context.TestProbability(FormLayers.ChordsFirstBassChance);
 
-        var blocks = ImmutableArray.CreateBuilder<TrackEventStateTimelineMap<StateMap>>();
-        var first = sections[0];
-        var introBlock = intro switch
+        double held = 0, stop = 0;
+        var slowsDown = false;
+        if (ending != EndingKind.Open)
         {
-            IntroKind.DrumsFirst => CreateDrumsFirst(first, Pick(FormLayers.DrumsFirstBars) * BarDuration),
-            IntroKind.CountIn => CreateCountIn(first, _context.TestProbability(FormLayers.HalfCountInChance)),
+            held = ending == EndingKind.RingOut ? Pick(FormLayers.RingOutLengths) : FormLayers.ButtonLength;
+            if (ending == EndingKind.Stop)
+                stop = Pick(FormLayers.StopLengths);
+            slowsDown = ending == EndingKind.RingOut && _context.TestProbability(FormLayers.RitardandoChance);
+        }
+
+        return new FormPlan(intro, drumsFirstBars, halfCountIn, withBass, ending, held, stop, slowsDown, sectionIds[^1]);
+    }
+
+    /// <summary>
+    ///     The song put together as planned: the intro's bars, the sections and the ending's bars one after another,
+    ///     where each is, what the form changes once they are, the tempo, and the lines the fills mark.
+    /// </summary>
+    /// <param name="sectionIds">The sections in the song's order.</param>
+    /// <param name="sections">Every section in the song's order, as generated.</param>
+    public SongAssembly Assemble(FormPlan plan, IReadOnlyList<int> sectionIds, IReadOnlyList<GeneratedSection> sections)
+    {
+        var first = sections[0];
+        var introBlock = plan.Intro switch
+        {
+            IntroKind.DrumsFirst => CreateDrumsFirst(first, plan.DrumsFirstBars * Meter.BarDuration),
+            IntroKind.CountIn => CreateCountIn(first, plan.HalfCountIn),
             _ => null
         };
+
+        // the first section starts after the intro's bars, and the ending after the last
+        var origin = introBlock?.Duration ?? 0;
+        var spans = ImmutableArray.CreateBuilder<SectionSpan>();
+        var start = origin;
+        foreach (var (id, section) in sectionIds.Zip(sections))
+        {
+            spans.Add(new SectionSpan(id, start, section.Timeline.Duration));
+            start += section.Timeline.Duration;
+        }
+
+        var end = start;
+        var endingDuration = plan.Ending switch
+        {
+            EndingKind.Open => 0,
+            EndingKind.RingOut => plan.Held,
+            _ => Math.Max(plan.Held, Meter.BarDuration)
+        };
+        var map = new SongMap(
+            new IntroSpan(plan.Intro, origin, plan.WithBass),
+            spans.ToImmutable(),
+            new EndingSpan(plan.Ending, end, endingDuration, plan.Held, plan.Stop, plan.SlowsDown)
+        );
+
+        var blocks = ImmutableArray.CreateBuilder<TrackEventStateTimelineMap<StateMap>>();
         if (introBlock is not null)
             blocks.Add(introBlock);
         blocks.AddRange(sections.Select(x => x.Timeline));
 
-        // the first section starts after the intro's bars
-        var origin = introBlock?.Duration ?? 0;
-        var edits = new TimelineEdits(_context, origin);
+        ImmutableArray<FillSection> fillSections =
+        [
+            ..map.Sections.Zip(sections, (span, section) => new FillSection(span.SectionId, span.Duration, section.Rhythm, section.DrumTuplet))
+        ];
+        var edits = new TimelineEdits(_context, map);
         var lines = FillGenerator.GetSectionLines(fillSections, origin).ToBuilder();
-        var end = origin + sections.Sum(x => x.Timeline.Duration);
         var tempo = StateTimelineMap.Create(end);
-        var introDescription = $"{intro} intro, {origin} beats";
+        var introDescription = $"{plan.Intro} intro, {origin} beats";
 
-        switch (intro)
+        switch (plan.Intro)
         {
             case IntroKind.DrumsFirst:
                 // the band comes in on a fill and a landing
@@ -67,18 +115,17 @@ internal sealed class SongFormGenerator
             case IntroKind.ChordsFirst or IntroKind.Build:
             {
                 // the first phrase leaves tracks out, which come in at its end, the drums with a fill and a landing
-                var phraseEnd = origin + BarStateGenerator.PatternDuration;
-                var withBass = intro == IntroKind.ChordsFirst && _context.TestProbability(FormLayers.ChordsFirstBassChance);
+                var phraseEnd = origin + Meter.PatternDuration;
                 foreach (var track in first.Timeline.TrackTimelineMap.Keys)
                 {
-                    var entry = GetIntroEntry(intro, track, withBass);
+                    var entry = GetIntroEntry(plan.Intro, track, plan.WithBass);
                     if (entry > 0)
                         edits.Clear(track, origin, origin + entry);
                 }
 
                 var phraseLine = lines.Select((x, i) => (x, i)).First(x => x.x.Position.IsEqualToByEpsilon(phraseEnd)).i;
                 lines[phraseLine] = new FillLine(phraseEnd, fillSections[0], sectionIds[0], FillTable.Section, LandingRule.Forced);
-                if (withBass)
+                if (plan.WithBass)
                     introDescription += ", with the bass";
                 break;
             }
@@ -86,22 +133,16 @@ internal sealed class SongFormGenerator
 
         StateTrace.Record("Song intro", FillGenerator.DrumsTrace, sectionIds[0], 0, StateMap.Default, 0, introDescription);
 
-        var description = $"{ending} ending";
-        if (ending != EndingKind.Open)
+        var description = $"{plan.Ending} ending";
+        if (plan.Ending != EndingKind.Open)
         {
-            var (length, duration) = ending switch
-            {
-                EndingKind.RingOut => (Pick(FormLayers.RingOutLengths), 0.0),
-                _ => (FormLayers.ButtonLength, BarDuration)
-            };
-            blocks.Add(CreateEnding(sections[^1], sections.Take(sections.Count - 1), length, Math.Max(length, duration)));
+            blocks.Add(CreateEnding(sections[^1], sections.Take(sections.Count - 1), plan.Held, endingDuration));
 
-            if (ending == EndingKind.Stop)
+            if (plan.Ending == EndingKind.Stop)
             {
                 // the band stops before the line, and the drums land on it with the rest
-                var stopLength = Pick(FormLayers.StopLengths);
-                var stop = end - stopLength;
-                description += $", stopping {stopLength} beats before it";
+                var stop = end - plan.Stop;
+                description += $", stopping {plan.Stop} beats before it";
                 foreach (var track in sections[^1].Timeline.TrackTimelineMap.Keys)
                 {
                     edits.Cut(track, stop);
@@ -109,18 +150,20 @@ internal sealed class SongFormGenerator
                 }
             }
 
-            lines.Add(new FillLine(end, fillSections[^1], sectionIds[^1], ending == EndingKind.Stop ? FillTable.None : FillTable.Section, LandingRule.Forced));
+            lines.Add(
+                new FillLine(end, fillSections[^1], sectionIds[^1], plan.Ending == EndingKind.Stop ? FillTable.None : FillTable.Section, LandingRule.Forced)
+            );
 
-            description += $", at beat {end}, held {length} beats";
-            if (ending == EndingKind.RingOut && _context.TestProbability(FormLayers.RitardandoChance))
+            description += $", at beat {end}, held {plan.Held} beats";
+            if (plan.SlowsDown)
             {
-                tempo = CreateRitardando(end, end + length);
+                tempo = CreateRitardando(end, end + plan.Held);
                 description += ", slowing down";
             }
         }
 
         StateTrace.Record("Song ending", FillGenerator.DrumsTrace, sectionIds[^1], 0, StateMap.Default, 0, description);
-        return new SongForm(blocks.ToImmutable(), lines.ToImmutable(), origin, edits, tempo);
+        return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, tempo);
     }
 
     /// <summary>
@@ -129,7 +172,7 @@ internal sealed class SongFormGenerator
     /// </summary>
     internal static double GetIntroEntry(IntroKind intro, int track, bool withBass)
     {
-        var phrase = BarStateGenerator.PatternDuration;
+        var phrase = Meter.PatternDuration;
         if (track == SongTracks.ChordsTrack)
             return 0;
         if (intro == IntroKind.ChordsFirst)
@@ -137,8 +180,8 @@ internal sealed class SongFormGenerator
 
         return track switch
         {
-            SongTracks.BassTrack => FormLayers.BuildBassBar * BarDuration,
-            >= DrumGroups.FirstTrackNumber => FormLayers.BuildDrumsBar * BarDuration,
+            SongTracks.BassTrack => FormLayers.BuildBassBar * Meter.BarDuration,
+            >= DrumGroups.FirstTrackNumber => FormLayers.BuildDrumsBar * Meter.BarDuration,
             _ => phrase
         };
     }
@@ -157,7 +200,7 @@ internal sealed class SongFormGenerator
     /// <summary>A bar of the pedal hi-hat on the beats, or on the last two, over the first section's drum state.</summary>
     private static TrackEventStateTimelineMap<StateMap> CreateCountIn(GeneratedSection first, bool isHalf)
     {
-        var bar = first.Timeline.Trim(BarDuration);
+        var bar = first.Timeline.Trim(Meter.BarDuration);
         var hiHat = DrumGroups.GetTrackNumber(DrumDefinitions.HiHat);
         var click = StateMap.FromStates(
             [
@@ -171,13 +214,13 @@ internal sealed class SongFormGenerator
                     x.Key,
                     x.Value.WithEvents(
                         EventTimeline.Create(
-                            BarDuration,
+                            Meter.BarDuration,
                             x.Key == hiHat ? Enumerable.Range(isHalf ? 2 : 0, isHalf ? 2 : 4).Select(beat => click.ToTimelineItem(beat)) : []
                         )
                     )
                 )
             );
-        return TrackEventStateTimelineMap.Create(BarDuration, tracks, bar.CommonStateTimelineMap);
+        return TrackEventStateTimelineMap.Create(Meter.BarDuration, tracks, bar.CommonStateTimelineMap);
     }
 
     private T Pick<T>(ImmutableArray<Weighted<T>> weights)
@@ -201,7 +244,7 @@ internal sealed class SongFormGenerator
         double duration
     )
     {
-        var homeBar = lastSection.Timeline.Trim(BarDuration);
+        var homeBar = lastSection.Timeline.Trim(Meter.BarDuration);
         var final = StateMap.FromStates([StateKinds.HeldDuration.CreateState(length), StateKinds.MelodyFinal.CreateState(1)]);
         // every track plays the home bar's chord, whichever note it takes its own state from
         IStateKind[] shapeKinds = [StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed];
@@ -229,7 +272,7 @@ internal sealed class SongFormGenerator
                         );
                 return new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
                     x.Key,
-                    EventStateTimelineMap.Create(BarDuration, EventTimeline.Create(BarDuration, notes), x.Value.StateTimelineMap)
+                    EventStateTimelineMap.Create(Meter.BarDuration, EventTimeline.Create(Meter.BarDuration, notes), x.Value.StateTimelineMap)
                 );
             }
         );
@@ -239,7 +282,7 @@ internal sealed class SongFormGenerator
             .MergeStateMap(StateMap.FromStates([StateKinds.ChordArrival.CreateState((int)ChordArrival.Root)]));
         return TrackEventStateTimelineMap.Merge(
             [
-                TrackEventStateTimelineMap.Create(BarDuration, tracks, commonStateTimelineMap),
+                TrackEventStateTimelineMap.Create(Meter.BarDuration, tracks, commonStateTimelineMap),
                 TrackEventStateTimelineMap.Create<StateMap>(duration)
             ]
         );
@@ -259,15 +302,35 @@ internal sealed class SongFormGenerator
     }
 }
 
-/// <summary>A song's form: its blocks to put one after another, the lines the fills mark, and the changes it makes.</summary>
+/// <summary>What a song's form will be, decided before its sections.</summary>
+/// <param name="DrumsFirstBars">How many bars the drums play alone, for an intro of the drums first.</param>
+/// <param name="HalfCountIn">Whether a count-in clicks only the last two beats.</param>
+/// <param name="WithBass">Whether the bass joins the chords, for an intro of the chords first.</param>
+/// <param name="Held">How long the final chord is held, in beats; 0 for an open ending.</param>
+/// <param name="Stop">How long the band is silent before a stopped ending's chord, in beats.</param>
+/// <param name="SlowsDown">Whether the bar before a ringing ending slows down.</param>
+/// <param name="TonicHomeSectionId">The section whose home is the song's tonic, the last, which leads home to the ending.</param>
+internal sealed record FormPlan(
+    IntroKind Intro,
+    int DrumsFirstBars,
+    bool HalfCountIn,
+    bool WithBass,
+    EndingKind Ending,
+    double Held,
+    double Stop,
+    bool SlowsDown,
+    int TonicHomeSectionId
+);
+
+/// <summary>A song put together: where its parts are, its blocks to put one after another, and what the form adds.</summary>
 /// <param name="Blocks">The intro, if it has bars of its own, the sections, and the ending, if it has bars of its own.</param>
-/// <param name="Origin">Where the first section starts, after the intro's bars.</param>
+/// <param name="Lines">The lines the fills mark, in the song's order.</param>
 /// <param name="Edits">What the form changes once the blocks are put one after another, such as the bars an intro leaves out.</param>
 /// <param name="Tempo">How the tempo changes over the song, such as the slowing before an ending, over the song's own.</param>
-internal sealed record SongForm(
+internal sealed record SongAssembly(
+    SongMap Map,
     ImmutableArray<TrackEventStateTimelineMap<StateMap>> Blocks,
     ImmutableArray<FillLine> Lines,
-    double Origin,
     TimelineEdits Edits,
     StateTimelineMap Tempo
 );
