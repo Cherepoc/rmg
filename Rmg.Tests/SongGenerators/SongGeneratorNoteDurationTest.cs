@@ -12,13 +12,16 @@ public sealed class SongGeneratorNoteDurationTest
     private const double BarDuration = 4;
 
     [Test]
-    public async Task PitchedNotes_LastNoLongerThanABar()
+    public async Task PitchedNotes_LastNoLongerThanABar_ButTheFinalChord()
     {
+        // the final chord of an ending that rings out is held for as long as the ending, up to two bars
         var maxDuration = Enumerable.Range(0, 20)
             .Select(seed => Render.RenderSong(SongGenerator.GenerateSong(seed)))
-            .SelectMany(x => x.Tracks)
-            .Where(x => !x.IsPercussionInstrument)
-            .SelectMany(x => x.NoteTimeline)
+            .SelectMany(song => song.Tracks
+                .Where(x => !x.IsPercussionInstrument)
+                .SelectMany(x => x.NoteTimeline)
+                .Where(x => x.Position + x.Value.Duration < song.Duration - 1e-9)
+            )
             .Max(x => x.Value.Duration);
 
         await Assert.That(maxDuration).IsLessThanOrEqualTo(BarDuration);

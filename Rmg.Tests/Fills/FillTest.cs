@@ -89,9 +89,11 @@ public sealed class FillTest
 
         var decisions = trace.Entries.Where(x => x.Point == "Fill decision").ToArray();
 
-        // a line between every two sections, and one in the middle of every section
+        // a line between every two sections, one in the middle of every section, and one before the ending, if the song
+        // has bars of its own there
         var sections = (int)(song.Duration / SectionDuration);
-        await Assert.That(decisions.Length).IsEqualTo(sections - 1 + sections);
+        var hasEnding = !trace.Entries.Single(x => x.Point == "Song form").Phrase!.Contains("Open ending");
+        await Assert.That(decisions.Length).IsEqualTo(sections - 1 + sections + (hasEnding ? 1 : 0));
         await Assert.That(decisions.All(x => x.Track == FillGenerator.DrumsTrace && x.Bar == 3)).IsTrue();
     }
 

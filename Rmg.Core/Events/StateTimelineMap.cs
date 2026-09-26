@@ -95,6 +95,13 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
         return Create(Duration, StateTimelines.Where(x => x.StateKind.Scope == scope));
     }
 
+    /// <summary>The map without the timelines of the given kinds.</summary>
+    public StateTimelineMap Except(IEnumerable<IStateKind> stateKinds)
+    {
+        var excluded = stateKinds.ToHashSet();
+        return Create(Duration, StateTimelines.Where(x => !excluded.Contains(x.StateKind)));
+    }
+
     public StateTimeline<T> GetStateTimeline<T>(StateKind<T> stateKind)
         where T : notnull
     {

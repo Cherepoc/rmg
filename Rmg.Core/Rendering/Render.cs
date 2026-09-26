@@ -254,7 +254,8 @@ public static class Render
                     heldDuration > 0 ? 0 : stateMap.GetStateValue(StateKinds.BeatRank),
                     stateMap.GetStateValue(StateKinds.MelodyStep),
                     stateMap.GetStateValue(StateKinds.MelodyRegister),
-                    stateMap.GetStateValue(StateKinds.MelodyMotif)
+                    stateMap.GetStateValue(StateKinds.MelodyMotif),
+                    stateMap.GetStateValue(StateKinds.MelodyFinal) > 0
                 );
             else if (stateMap.GetStateValue(StateKinds.FollowsChordRoots) > 0)
                 note = bassLine.Place(

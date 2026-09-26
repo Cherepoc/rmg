@@ -47,6 +47,17 @@ public sealed class MelodyLineTest
     }
 
     [Test]
+    public async Task FinalNote_LandsOnTheChordsRoot_NearestTheNoteBefore()
+    {
+        var line = StartedOnE();
+
+        // over G, whose root is G4 (67) or G3 (55) in the range
+        var final = line.Place(ChordOn(4), [7, 11, 2], 4, Weak, 2, 0, isFinal: true);
+
+        await Assert.That(final).IsEqualTo(67);
+    }
+
+    [Test]
     public async Task NextBar_GoesOnTheWayTheMelodyWent()
     {
         var line = new MelodyLine(MinNote, MaxNote);

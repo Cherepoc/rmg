@@ -11,7 +11,8 @@ namespace Rmg.Core.Rendering;
 ///     track's, and its first note is the chord's note nearest where the phrase aims.
 ///     A bar pattern that comes back is a motif: its bar starts by the rules, and its other notes take the shape it had
 ///     the first time, in scale steps from its first note, so that over another chord it sounds as a sequence of it. A
-///     note of the shape on a strong beat that misses the chord moves to a note of the chord close by.
+///     note of the shape on a strong beat that misses the chord moves to a note of the chord close by. Its last note, at
+///     the song's end, lands on the chord's root.
 /// </summary>
 internal sealed class MelodyLine
 {
@@ -76,6 +77,7 @@ internal sealed class MelodyLine
     /// </param>
     /// <param name="register">How far above or below the middle of the range the phrase aims here, in semitones.</param>
     /// <param name="motif">The bar pattern the note belongs to; 0 for none.</param>
+    /// <param name="isFinal">Whether it is the melody's last note, which lands on the chord's root nearest the note before.</param>
     public int Place(
         ChordContext chord,
         IReadOnlyCollection<int> chordToneClasses,
@@ -83,7 +85,8 @@ internal sealed class MelodyLine
         int beatRank,
         int step,
         double register,
-        int motif = 0
+        int motif = 0,
+        bool isFinal = false
     )
     {
         var bar = (int)Math.Floor(position / BarDuration);
@@ -96,9 +99,10 @@ internal sealed class MelodyLine
         }
 
         _previousBar = bar;
-        var note = _replaying is { } replaying && _barNoteIndex > 0 && _barNoteIndex < replaying.Count
-            ? PlaceFromMotif(chord, chordToneClasses, beatRank, replaying[_barNoteIndex])
-            : PlaceByRule(chord, chordToneClasses, beatRank, step, register);
+        var note = isFinal ? PlaceFinal(chord)
+            : _replaying is { } replaying && _barNoteIndex > 0 && _barNoteIndex < replaying.Count
+                ? PlaceFromMotif(chord, chordToneClasses, beatRank, replaying[_barNoteIndex])
+                : PlaceByRule(chord, chordToneClasses, beatRank, step, register);
 
         var noteStep = GetScaleStep(chord, note);
         if (_barNoteIndex == 0)
@@ -128,6 +132,14 @@ internal sealed class MelodyLine
         }
 
         return note >= _low && note <= _high ? note : GetNearest(GetScaleNotes(chord), note);
+    }
+
+    /// <summary>The melody's last note: the chord's root in the range, the one nearest the note before.</summary>
+    private int PlaceFinal(ChordContext chord)
+    {
+        var rootClass = chord.Root.Mod(OctaveNoteCount);
+        var roots = Enumerable.Range(_low, _high - _low + 1).Where(x => x.Mod(OctaveNoteCount) == rootClass).ToArray();
+        return GetNearest(roots, _previous ?? _middle);
     }
 
     /// <summary>The scale step of a note, counted from the chord's root: the step whose note is nearest it.</summary>

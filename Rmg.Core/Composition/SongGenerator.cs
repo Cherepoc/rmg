@@ -62,19 +62,25 @@ public static class SongGenerator
             scale,
             songStateMap
         );
-        var generateSection = ((Func<int, GeneratedSection>)sectionGenerator.Generate).CacheGeneratedValues();
-
         var commonStateMap = CreateCommonStateMap(context, scale);
 
         var sectionIds = SongStructureGenerator.Generate(context)
             .SelectMany(part => part.SectionIds)
             .ToArray();
+        // every section is generated once, where it first plays; the one the song ends with leads home to the tonic
+        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(id, id == sectionIds[^1])))
+            .CacheGeneratedValues();
         var sections = sectionIds.Select(generateSection).ToArray();
 
         // how the song starts and ends around its sections, and the lines the drums mark
-        var form = new SongFormGenerator(context).Generate(sectionIds, sections);
-        var songTrackNoteTimelineMap = form.Edits
-            .ApplyTo(form.Blocks.Unroll())
+        var form = new SongFormGenerator(context, rhythmicUnconventionality).Generate(sectionIds, sections);
+        var songTrackNoteTimelineMap = form.Edits.ApplyTo(form.Blocks.Unroll());
+        songTrackNoteTimelineMap = TrackEventStateTimelineMap.Merge(
+                [
+                    songTrackNoteTimelineMap,
+                    TrackEventStateTimelineMap.Create<StateMap>(songTrackNoteTimelineMap.Duration, [], form.Tempo)
+                ]
+            )
             .MergeStateMap(commonStateMap);
 
         // the drums mark the lines, now that the song is put together

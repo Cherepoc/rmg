@@ -16,6 +16,7 @@ internal sealed class TimelineEdits(IGenerationContext context, double origin = 
 
     private readonly Dictionary<int, List<(double From, double To)>> _cleared = [];
     private readonly Dictionary<int, List<TimelineItem<StateMap>>> _hits = [];
+    private readonly Dictionary<int, List<double>> _cuts = [];
 
     /// <summary>Takes a track's notes out from one position up to another; the fills' own hits stay.</summary>
     public void Clear(int track, double from, double to)
@@ -23,6 +24,14 @@ internal sealed class TimelineEdits(IGenerationContext context, double origin = 
         if (!_cleared.TryGetValue(track, out var spans))
             _cleared[track] = spans = [];
         spans.Add((from, to));
+    }
+
+    /// <summary>Makes a track's last note before a position end there, as the band stops.</summary>
+    public void Cut(int track, double position)
+    {
+        if (!_cuts.TryGetValue(track, out var cuts))
+            _cuts[track] = cuts = [];
+        cuts.Add(position);
     }
 
     /// <summary>A hit of a track, in place of any it or a fill has there.</summary>
@@ -47,13 +56,36 @@ internal sealed class TimelineEdits(IGenerationContext context, double origin = 
     public TrackEventStateTimelineMap<StateMap> ApplyTo(TrackEventStateTimelineMap<StateMap> song)
     {
         var maps = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>();
-        foreach (var track in _cleared.Keys.Union(_hits.Keys))
+        foreach (var track in _cleared.Keys.Union(_hits.Keys).Union(_cuts.Keys))
             maps[track] = timeline =>
             {
+                foreach (var cut in _cuts.GetValueOrDefault(track) ?? [])
+                    timeline = CutBefore(timeline, cut);
                 foreach (var (from, to) in _cleared.GetValueOrDefault(track) ?? [])
                     timeline = timeline.RemoveSpan(from, to);
                 return EventTimeline.Merge([timeline, EventTimeline.Create(timeline.Duration, _hits.GetValueOrDefault(track) ?? [])]);
             };
         return song.MapTrackEvents(maps);
+    }
+
+    /// <summary>The timeline with its last note before the position held until there, unless it ends sooner already.</summary>
+    private static EventTimeline<StateMap> CutBefore(EventTimeline<StateMap> timeline, double position)
+    {
+        var index = -1;
+        for (var i = 0; i < timeline.Count && timeline[i].Position < position; i++)
+            index = i;
+        if (index < 0)
+            return timeline;
+
+        var note = timeline[index];
+        var held = note.Value.GetStateValue(StateKinds.HeldDuration);
+        var length = position - note.Position;
+        if (held > 0 && held <= length)
+            return timeline;
+
+        var cutNote = note.Value
+            .MergeWith(StateMap.FromStates([StateKinds.HeldDuration.CreateState(length - held)]))
+            .ToTimelineItem(note.Position);
+        return EventTimeline.Create(timeline.Duration, timeline.Select((x, i) => i == index ? cutNote : x));
     }
 }

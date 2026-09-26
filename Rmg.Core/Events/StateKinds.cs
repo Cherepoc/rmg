@@ -36,6 +36,8 @@ public static class StateKinds
     public static readonly StateKind<int> MelodyStep = CreateAdditive<int>("MelodyStep", StateScope.Render);
     // which bar pattern a melody note belongs to, so that a pattern that comes back plays its remembered shape
     public static readonly StateKind<int> MelodyMotif = CreateAdditive<int>("MelodyMotif", StateScope.Render);
+    // 1 for a melody's last note, which lands on the chord's root
+    public static readonly StateKind<int> MelodyFinal = CreateAdditive<int>("MelodyFinal", StateScope.Render);
     // how far above or below the middle of its range the melody aims in a bar, in semitones, for the phrase's shape
     public static readonly StateKind<double> MelodyRegister = CreateAdditive<double>("MelodyRegister", StateScope.Render);
     // which of a drum's sounds a note plays, counted from 1, such as a fill's high tom or a landing's crash, over the

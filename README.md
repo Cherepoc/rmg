@@ -311,6 +311,14 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   fills sound like one player's. The fills take notes out of a span and add their own
   (`FillEdits`); a drum names its sound outright (`StateKinds.ArticulationIndex`), and a drum out of a
   section's groove still has the section's drum state, so a fill's notes are as loud as the section.
+- **Form.** `SongFormGenerator` puts the song together around its sections and tells the fills where
+  the lines are. The song's last section has the tonic as its home, so its cadence leads home, and
+  the song ends there (`FormLayers`): on a button (everyone hits the home chord on a last downbeat,
+  short), ringing out (the chord held a bar or two, the bar before slowing down half the time), a stop
+  (the band silent a beat or two, then the hit), or open, on the cadence, unresolved. The more the
+  song's rhythm strays, the likelier a stop or an open ending. The final chord is the last section's
+  home bar: every track's first note of it, moved to the downbeat and held, all on the bar's chord, the
+  bass on the root and the melody's last note on it too; the drums land on it with a crash and a kick.
 - **Instruments.** Each pitched track has a role (`InstrumentRoles`): the chords are played by pianos,
   organs, guitars, strings or pads, the melody by keys, mallets, guitars, strings, brass, reeds, pipes
   or leads, and the bass by basses, with a few unusual choices weighted low. The melody never plays

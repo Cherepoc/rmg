@@ -44,7 +44,8 @@ internal sealed class SectionGenerator
     }
 
     /// <summary>The section: its 4-bar pattern played twice, with what the fills need to know of its rhythm.</summary>
-    public GeneratedSection Generate(int sectionId)
+    /// <param name="endsSong">Whether the song ends with the section, which then has the song's tonic as its home.</param>
+    public GeneratedSection Generate(int sectionId, bool endsSong = false)
     {
         var unconventionality = _songUnconventionality.GenerateSection(_context);
         var rhythm = _songRhythmicUnconventionality.GenerateSection(_context);
@@ -52,6 +53,9 @@ internal sealed class SectionGenerator
 
         // the section's chords move around its home, which every track's root starts from
         var home = Progressions.GenerateHome(_context, _songScale);
+        // the song's last section leads home to its tonic, where the song ends
+        if (endsSong)
+            home = 0;
         var progression = Progressions.Generate(_context, _songScale, home, unconventionality.ProgressionStrictness);
 
         var sectionStateMap = CreateSectionStateMap(

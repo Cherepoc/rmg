@@ -14,6 +14,12 @@ Heights between two qualities, such as the third, could move a little from chord
 notes than seven picks sometimes one quality and sometimes the other. Worth it once scales of other sizes than seven
 exist; in a 7-note scale it changes nothing.
 
+## Form
+
+- **Fade-outs:** an ending that fades over the last section needs channel volume automation, since `Render` spreads the
+  notes' velocities over the whole song, so a fade in them would be undone.
+- **Intros of their own material,** such as a riff the song does not play otherwise.
+
 ## Rhythm engine
 
 A bar pattern's rhythm comes from the dyadic engine (`DyadicRankThresholdPattern`): a cycle (the period) is halved
