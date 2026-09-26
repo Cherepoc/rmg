@@ -18,12 +18,15 @@ public sealed class DrumGroup
         int maxActiveDrums,
         bool isAlwaysOn = false,
         Func<StateMapBuilder, StateMapBuilder>? configureStateMap = null,
-        SongDrumRule? songRule = null
+        SongDrumRule? songRule = null,
+        double grooveChance = 1
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(selectionWeight);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxActiveDrums);
+        ArgumentOutOfRangeException.ThrowIfNegative(grooveChance);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(grooveChance, 1);
         if (drums.IsDefaultOrEmpty)
             throw new ArgumentException("Drums cannot be empty.", nameof(drums));
 
@@ -34,6 +37,7 @@ public sealed class DrumGroup
         IsAlwaysOn = isAlwaysOn;
         ConfigureStateMap = configureStateMap ?? (builder => builder);
         SongRule = songRule ?? SongDrumRule.AllDrums;
+        GrooveChance = grooveChance;
     }
 
     public string Name { get; }
@@ -53,4 +57,11 @@ public sealed class DrumGroup
 
     /// <summary>Decides which of the drums are available in a song.</summary>
     public SongDrumRule SongRule { get; }
+
+    /// <summary>
+    ///     The chance that an optional group is among those a section picks its groove from. A group that mostly plays
+    ///     elsewhere, such as the toms in fills, has a low one, so that it grooves in few sections however few other
+    ///     groups the song has.
+    /// </summary>
+    public double GrooveChance { get; }
 }

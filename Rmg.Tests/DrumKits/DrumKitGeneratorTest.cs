@@ -47,6 +47,18 @@ public sealed class DrumKitGeneratorTest
     }
 
     [Test]
+    public async Task TomsAndCymbal_GrooveInFewSections()
+    {
+        var kits = Seeds.Select(SelectSectionDrums).ToArray();
+        double ShareWith(DrumGroup group) => kits.Count(kit => kit.Any(group.Drums.Contains)) / (double)kits.Length;
+
+        // they play mostly in fills and landings, and the timekeepers take their place
+        await Assert.That(ShareWith(DrumGroups.Toms)).IsBetween(0.05, 0.25);
+        await Assert.That(ShareWith(DrumGroups.Accents)).IsBetween(0.02, 0.15);
+        await Assert.That(ShareWith(DrumGroups.Timekeepers)).IsGreaterThan(0.6);
+    }
+
+    [Test]
     public async Task ActiveDrums_AreDistinct_AndRespectGroupLimit()
     {
         foreach (var seed in Seeds)

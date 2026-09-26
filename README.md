@@ -10,7 +10,9 @@ rhythm and note patterns. A song plays at its own tempo, from 90 to about 175 BP
 
 Each song picks its own drums: one main snare (acoustic, electric, clap or sidestick; a sidestick can also
 join an acoustic or electric snare) and up to four other percussion instruments. Kick and snare always
-play in a section, plus one or two other drum groups (timekeepers, toms, accents, percussion).
+play in a section, plus one or two other drum groups (timekeepers, toms, accents, percussion). The toms
+and the crash are kept for fills and landings: a section grooves on them only now and then, the crash
+then only on the downbeats.
 
 ## Requirements
 

@@ -38,6 +38,7 @@ public static class DrumKitGenerator
         // a song can have no drums in a group at all
         var optionalGroups = DrumGroups.All
             .Where(x => !x.IsAlwaysOn && x.Drums.Any(songDrums.Contains))
+            .Where(x => x.GrooveChance >= 1 || context.TestProbability(x.GrooveChance))
             .ToImmutableArray();
 
         var maxOptionalGroupCount = Math.Min(MaxGroupsPerSection - alwaysOnGroups.Length, optionalGroups.Length);

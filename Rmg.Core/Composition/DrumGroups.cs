@@ -6,6 +6,12 @@ public static class DrumGroups
 {
     public const int FirstTrackNumber = 100;
 
+    /// <summary>The chance that a section may groove on the toms, which play mostly in fills.</summary>
+    private const double TomsGrooveChance = 0.25;
+
+    /// <summary>The chance that a section may groove on the cymbal, which marks mostly where a section lands.</summary>
+    private const double AccentsGrooveChance = 0.12;
+
     /// <summary>Chance of a song having a sidestick along with an acoustic or an electric snare.</summary>
     private const double CrossStickWithSnareProbability = 0.15;
 
@@ -65,18 +71,24 @@ public static class DrumGroups
         1
     );
 
+    // the toms play mostly in fills; now and then a section grooves on them, as on a floor tom or in a tribal beat
     public static DrumGroup Toms { get; } = new(
         nameof(Toms),
         [DrumDefinitions.Tom],
         0.5,
-        1
+        1,
+        grooveChance: TomsGrooveChance
     );
 
+    // a crash marks where a section lands, so it rarely plays in a groove, and then only on the downbeats, as a crash
+    // ride in a loud section
     public static DrumGroup Accents { get; } = new(
         nameof(Accents),
         [DrumDefinitions.Cymbal],
         0.4,
-        1
+        1,
+        configureStateMap: builder => builder.Add(CompositionStateKinds.Rhythm.MaxRank, -2),
+        grooveChance: AccentsGrooveChance
     );
 
     // a song has its own few percussion instruments, or none
