@@ -32,6 +32,25 @@ public static class RhythmPeriod
         return [..result];
     }
 
+    /// <summary>
+    ///     The tuplet a period's notes fall on: the prime, where the period divides the beat by it, such as 4/3 for
+    ///     triplets; 1 where they stay on the straight grid, as a straight period does, or one the prime lengthens, such as
+    ///     3/4 for dotted 8ths, whose notes group in threes but fall on 16ths.
+    /// </summary>
+    public static int ToTuplet(this int primeIndex)
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(primeIndex, MaxPrimeIndex);
+        ArgumentOutOfRangeException.ThrowIfLessThan(primeIndex, -MaxPrimeIndex);
+
+        if (primeIndex == 0)
+            return 1;
+
+        // the prime divides the period where the period times the prime is a power of two
+        var prime = Primes[Math.Abs(primeIndex) - 1];
+        var power = Math.Log2(primeIndex.ToRhythmPeriodValue() * prime);
+        return Math.Abs(power - Math.Round(power)) < 1e-9 ? prime : 1;
+    }
+
     public static double ToRhythmPeriodValue(this int primeIndex)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(primeIndex, MaxPrimeIndex);

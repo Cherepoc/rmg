@@ -60,11 +60,8 @@ internal sealed class FillGenerator
     }
 
     /// <param name="song">The sections put one after another.</param>
-    /// <param name="sections">Every section in the song's order, by its id, and how long it is.</param>
-    public TrackEventStateTimelineMap<StateMap> Generate(
-        TrackEventStateTimelineMap<StateMap> song,
-        IReadOnlyList<(int SectionId, double Duration)> sections
-    )
+    /// <param name="sections">Every section in the song's order.</param>
+    public TrackEventStateTimelineMap<StateMap> Generate(TrackEventStateTimelineMap<StateMap> song, IReadOnlyList<FillSection> sections)
     {
         // a fast song's runs play 8ths, which 16ths would blur
         var tempo = BaseTempo * song.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(StateKinds.Tempo);
@@ -75,12 +72,12 @@ internal sealed class FillGenerator
         var start = 0.0;
         for (var i = 0; i < sections.Count; i++)
         {
-            var (sectionId, duration) = sections[i];
+            var (sectionId, duration, _, drumTuplet) = sections[i];
             if (i > 0)
             {
-                // the fill before the line belongs to the section it ends
+                // the fill before the line belongs to the section it ends, and plays in its feel
                 var previousSectionId = sections[i - 1].SectionId;
-                var fill = PickFill(FillLayers.SectionFills, drummer, song, start);
+                var fill = PickFill(FillLayers.SectionFills, drummer, sections[i - 1].DrumTuplet);
                 var span = Fill(edits, fill, start, grid, drummer, previousSectionId);
                 var landing = IsForcingLanding(fill) ? FillLanding.CrashAndKick : Pick(FillLayers.SectionLandings);
                 Land(song, edits, start, sectionId, landing);
@@ -90,7 +87,7 @@ internal sealed class FillGenerator
             // the line in the middle of the section, between its 4-bar pattern and the pattern's repeat
             for (var line = start + BarStateGenerator.PatternDuration; line < start + duration; line += BarStateGenerator.PatternDuration)
             {
-                var fill = PickFill(FillLayers.PhraseFills, drummer, song, line);
+                var fill = PickFill(FillLayers.PhraseFills, drummer, drumTuplet);
                 var span = Fill(edits, fill, line, grid, drummer, sectionId);
                 var landing = IsForcingLanding(fill)
                               || fill != FillKind.None && _context.TestProbability(FillLayers.PhraseLandingChance)
@@ -148,30 +145,14 @@ internal sealed class FillGenerator
         return weights[Generators.WeightedIndex(weights)(_context)].Value;
     }
 
-    /// <summary>The fill before a line; a bar in a tuplet feel takes only a fill that does not play straight notes.</summary>
-    private FillKind PickFill(
-        ImmutableArray<Weighted<FillKind>> weights,
-        Drummer drummer,
-        TrackEventStateTimelineMap<StateMap> song,
-        double line
-    )
+    /// <summary>The fill before a line; drums in a tuplet feel take only a fill that does not play straight notes.</summary>
+    /// <param name="drumTuplet">The tuplet the drums play before the line, 1 for straight.</param>
+    private FillKind PickFill(ImmutableArray<Weighted<FillKind>> weights, Drummer drummer, int drumTuplet)
     {
         weights = drummer.Weigh(weights);
-        if (IsInTupletFeel(song, line - BarDuration, line))
+        if (drumTuplet != 1)
             weights = [..weights.Where(x => FillLayers.TupletFills.Contains(x.Value))];
         return Pick(weights);
-    }
-
-    private bool IsInTupletFeel(TrackEventStateTimelineMap<StateMap> song, double from, double to)
-    {
-        var positions = _drumTracks
-            .Where(song.TrackTimelineMap.ContainsKey)
-            .SelectMany(x => song.TrackTimelineMap[x].EventTimeline)
-            .Where(x => x.Position >= from && x.Position < to)
-            .Select(x => x.Position * 4)
-            .ToArray();
-        return positions.Length > 0
-               && positions.Count(x => !x.IsEqualToByEpsilon(Math.Round(x))) >= FillLayers.TupletFeelShare * positions.Length;
     }
 
     /// <summary>
@@ -360,6 +341,10 @@ internal sealed class FillGenerator
                && timeline.EventTimeline.Any(x => x.Position.IsEqualToByEpsilon(position));
     }
 }
+
+/// <summary>A section as the fills see it: where it is, how far its rhythm strays, and the drums' feel before its lines.</summary>
+/// <param name="DrumTuplet">The tuplet the drums play in the last bar of the section's 4-bar pattern, 1 for straight.</param>
+internal sealed record FillSection(int SectionId, double Duration, RhythmicUnconventionality Rhythm, int DrumTuplet);
 
 /// <summary>The changes the fills make to the drums, gathered, and made at once: the spans they clear and the hits they add.</summary>
 internal sealed class FillEdits(IGenerationContext context)

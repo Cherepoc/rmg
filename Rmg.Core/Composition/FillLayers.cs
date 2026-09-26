@@ -160,7 +160,7 @@ public static class FillLayers
     /// </summary>
     public static ImmutableHashSet<FillKind> TupletFills { get; } = [FillKind.None, FillKind.Break, FillKind.StopTime, FillKind.Lift];
 
-    /// <summary>The share of the drums' hits in the bar before a line off the 16th grid from which the bar is in a tuplet feel.</summary>
+    /// <summary>The share of the drums' notes in a bar that a tuplet needs to set the bar's feel.</summary>
     public const double TupletFeelShare = 0.25;
 
     /// <summary>What the drums land on at a section change, and how likely each is.</summary>

@@ -292,8 +292,10 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   hit together, then silence) or a lift on an open hi-hat; the line in the middle of a section gets
   one now and then, mostly a pickup or a lift. A fill spans from half a beat to a bar before the line,
   and its hands leave the groove there while the kick plays on, or the drums stop. Its voices are
-  dyadic patterns like the grooves', so chance leaves a note out now and then. A bar in a tuplet feel
-  takes only fills that play no straight notes, and a fast song's runs play 8ths. The next section
+  dyadic patterns like the grooves', so chance leaves a note out now and then. A section tells the
+  fills how far its rhythm strays and its drums' feel before its lines: the tuplet at least a quarter
+  of their notes in the pattern's last bar fall on, such as triplets, but not a dotted period, whose
+  notes stay on the 16ths. A line in a tuplet feel takes only fills that play no straight notes, and a fast song's runs play 8ths. The next section
   lands on a crash and a kick most of the time (65%), a kick alone (20%), or runs straight on; after a
   break or stop-time always on both. Every fill is data (`FillSpec`): its spans, what it does with the
   groove, the hits it starts with, and its voices, each a walk of named sounds (`DrumSounds`), such as

@@ -43,7 +43,7 @@ internal sealed class PatternGenerator
     /// </summary>
     /// <param name="trackStateMaps">Every track's state in the section.</param>
     /// <param name="barStateTimelineMap">The state that changes by bar, such as the chord, along the 4-bar pattern.</param>
-    public TrackEventStateTimelineMap<StateMap> GenerateBars(
+    public GeneratedBars GenerateBars(
         int sectionId,
         ImmutableDictionary<int, StateMap> trackStateMaps,
         StateTimelineMap barStateTimelineMap,
@@ -63,7 +63,8 @@ internal sealed class PatternGenerator
         var trackSeedMapGenerator = (IGenerationContext innerContext) =>
             trackStateMaps.Keys.ToDictionary(x => x, _ => SeedGenerator(innerContext));
         var trackSeedMaps = Generators.Sequence(trackSeedMapGenerator, scheme.PatternCount)(_context);
-        return scheme.Letters
+        var feels = new List<BarFeel>();
+        var timeline = scheme.Letters
             .Select((letter, barIndex) =>
                 {
                     var trackNotePatterns = trackSeedMaps[letter].Select(x =>
@@ -78,7 +79,8 @@ internal sealed class PatternGenerator
                                 barIndex,
                                 barPatternLayerGenerator,
                                 scheme.IsVaried[barIndex],
-                                scheme.ToString()
+                                scheme.ToString(),
+                                feels
                             )
                         )
                     );
@@ -86,6 +88,7 @@ internal sealed class PatternGenerator
                 }
             )
             .Unroll();
+        return new GeneratedBars(timeline, [..feels]);
     }
 
     /// <summary>A track's bar: its bar pattern's state over the track's, and the notes of its rhythm.</summary>
@@ -98,7 +101,8 @@ internal sealed class PatternGenerator
         int barIndex,
         Func<IGenerationContext, StateMap> barPatternLayerGenerator,
         bool isVaried,
-        string scheme
+        string scheme,
+        List<BarFeel> feels
     )
     {
         var patternSeeds = CreatePatternSeeds(seed);
@@ -123,7 +127,15 @@ internal sealed class PatternGenerator
                 notes,
                 barStateTimelineMap.GetEffectiveStateMapAt(barIndex * BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd)
             );
+        feels.Add(new BarFeel(trackNumber, barIndex, ResolvePrimeIndex(stateMap).ToTuplet(), notes.Count));
         return notes.ToEventStateTimelineMap(stateMap.OfScope(StateScope.Render));
+    }
+
+    /// <summary>The index of the prime a bar pattern's period is divided by, folded into its range.</summary>
+    private static int ResolvePrimeIndex(StateMap stateMap)
+    {
+        return stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.PrimeIndex)
+            .BounceInBounds(-RhythmPeriod.MaxPrimeIndex, RhythmPeriod.MaxPrimeIndex);
     }
 
     /// <summary>
@@ -309,9 +321,7 @@ internal sealed class PatternGenerator
 
         var periodPower = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Power)
             .BounceInBounds(-2, 1);
-        var periodPrimeMultiplier = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.PrimeIndex)
-            .BounceInBounds(-RhythmPeriod.MaxPrimeIndex, RhythmPeriod.MaxPrimeIndex)
-            .ToRhythmPeriodValue();
+        var periodPrimeMultiplier = ResolvePrimeIndex(stateMap).ToRhythmPeriodValue();
         var periodValue = Math.Pow(2, periodPower) * periodPrimeMultiplier;
 
         var phaseRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.Rank)
@@ -367,6 +377,13 @@ internal sealed class PatternGenerator
         return StateMap.FromStates([StateKinds.ChordNoteOffset.CreateState([PatternChordNoteOffset(context) * multiplier])]);
     }
 }
+
+/// <summary>The bars of the tracks' patterns in a section, and the feel every track's bar plays in.</summary>
+internal sealed record GeneratedBars(TrackEventStateTimelineMap<StateMap> Timeline, ImmutableArray<BarFeel> Feels);
+
+/// <summary>The feel of a track's bar: the tuplet its notes fall on, 1 for straight, and how many notes it has.</summary>
+/// <param name="Bar">The bar of the section's 4-bar pattern.</param>
+internal readonly record struct BarFeel(int Track, int Bar, int Tuplet, int NoteCount);
 
 /// <param name="TrackState">The state a track draws for the pattern, such as its rhythm and offsets.</param>
 /// <param name="Rhythm">Which beats of the rhythm play.</param>

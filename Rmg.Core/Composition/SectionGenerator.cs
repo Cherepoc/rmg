@@ -43,8 +43,8 @@ internal sealed class SectionGenerator
         _patternGenerator = new PatternGenerator(context, tracks.Definitions);
     }
 
-    /// <summary>The section: its 4-bar pattern played twice.</summary>
-    public TrackEventStateTimelineMap<StateMap> Generate(int sectionId)
+    /// <summary>The section: its 4-bar pattern played twice, with what the fills need to know of its rhythm.</summary>
+    public GeneratedSection Generate(int sectionId)
     {
         var unconventionality = _songUnconventionality.GenerateSection(_context);
         var rhythm = _songRhythmicUnconventionality.GenerateSection(_context);
@@ -85,19 +85,42 @@ internal sealed class SectionGenerator
         var scheme = PhraseSchemes.Pick(_context, rhythm);
         var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(_context));
 
+        var drums = GenerateDrums(sectionId, sectionStateMap, activeDrumTrackNumbers, barStateTimelineMap, sectionRhythm).ToArray();
         var trackTimelineMaps = new List<TrackEventStateTimelineMap<StateMap>>();
-        trackTimelineMaps.AddRange(GenerateDrums(sectionId, sectionStateMap, activeDrumTrackNumbers, barStateTimelineMap, sectionRhythm));
-        trackTimelineMaps.AddRange(GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, sectionRhythm));
+        trackTimelineMaps.AddRange(drums.Select(x => x.Timeline));
+        trackTimelineMaps.AddRange(GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, sectionRhythm).Select(x => x.Timeline));
 
         // the song keeps what Render reads; the bar state for the generation, such as the chord pool's pick, stays here
         trackTimelineMaps.Add(
             barStateTimelineMap.OfScope(StateScope.Render).ToTrackEventStateTimelineMap<StateMap>(BarStateGenerator.PatternDuration)
         );
-        return TrackEventStateTimelineMap.Merge(trackTimelineMaps).Repeat(2);
+        return new GeneratedSection(
+            TrackEventStateTimelineMap.Merge(trackTimelineMaps).Repeat(2),
+            rhythm,
+            GetDrumTuplet(drums.SelectMany(x => x.Feels))
+        );
+    }
+
+    /// <summary>
+    ///     The tuplet the drums play in the pattern's last bar, before both of the section's lines: the one most of their
+    ///     tuplet notes there fall on, if it has enough of all their notes to set the feel; 1 for straight.
+    /// </summary>
+    internal static int GetDrumTuplet(IEnumerable<BarFeel> feels)
+    {
+        var lastBar = feels.Where(x => x.Bar == Progressions.BarCount - 1).ToArray();
+        var noteCount = lastBar.Sum(x => x.NoteCount);
+        var tuplet = lastBar
+            .Where(x => x.Tuplet != 1)
+            .GroupBy(x => x.Tuplet)
+            .Select(x => (Tuplet: x.Key, NoteCount: x.Sum(y => y.NoteCount)))
+            .OrderByDescending(x => x.NoteCount)
+            .ThenBy(x => x.Tuplet)
+            .FirstOrDefault();
+        return noteCount > 0 && tuplet.NoteCount >= FillLayers.TupletFeelShare * noteCount ? tuplet.Tuplet : 1;
     }
 
     /// <summary>The drums the section plays, which make their patterns together, over the drums' shared state.</summary>
-    private IEnumerable<TrackEventStateTimelineMap<StateMap>> GenerateDrums(
+    private IEnumerable<GeneratedBars> GenerateDrums(
         int sectionId,
         StateMap sectionStateMap,
         ImmutableHashSet<int> activeDrumTrackNumbers,
@@ -122,7 +145,7 @@ internal sealed class SectionGenerator
             // a drum out of the groove still has the state the drums share, with no notes, so that a note added
             // later, such as in a fill, plays as loud as the section
             var idleStateMap = groupStateMap.OfScope(StateScope.Render);
-            yield return TrackEventStateTimelineMap.Create(
+            yield return new GeneratedBars(TrackEventStateTimelineMap.Create(
                 BarStateGenerator.PatternDuration,
                 group.TrackNumbers
                     .Where(x => !trackStateMaps.ContainsKey(x))
@@ -132,7 +155,7 @@ internal sealed class SectionGenerator
                         )
                     ),
                 StateTimelineMap.Create(BarStateGenerator.PatternDuration)
-            );
+            ), []);
 
             if (trackStateMaps.Count == 0)
                 continue;
@@ -142,7 +165,7 @@ internal sealed class SectionGenerator
     }
 
     /// <summary>The pitched tracks, each making its patterns on its own, over the section's state.</summary>
-    private IEnumerable<TrackEventStateTimelineMap<StateMap>> GeneratePitchedTracks(
+    private IEnumerable<GeneratedBars> GeneratePitchedTracks(
         int sectionId,
         StateMap sectionStateMap,
         StateTimelineMap barStateTimelineMap,
@@ -197,4 +220,9 @@ internal sealed class SectionGenerator
 ///     A section's rhythm: how far it strays from convention, the scheme its 4-bar pattern follows, and how busy its
 ///     melody is.
 /// </summary>
+/// <summary>A section's tracks, and what the fills need to know of its rhythm.</summary>
+/// <param name="Rhythm">How far the section's rhythm strays from convention.</param>
+/// <param name="DrumTuplet">The tuplet the drums play in the pattern's last bar, 1 for straight.</param>
+internal sealed record GeneratedSection(TrackEventStateTimelineMap<StateMap> Timeline, RhythmicUnconventionality Rhythm, int DrumTuplet);
+
 internal sealed record SectionRhythm(RhythmicUnconventionality Unconventionality, PhraseScheme Scheme, MelodyBusyness MelodyBusyness);
