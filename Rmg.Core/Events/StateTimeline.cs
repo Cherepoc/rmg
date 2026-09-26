@@ -10,14 +10,25 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
 {
     private readonly ImmutableArray<TimelineItem<T>> _items;
 
+    // while a trace runs, the timelines this one was made from, so that a state read from it tells its layers apart;
+    // empty otherwise
+    private readonly ImmutableArray<StateTimeline<T>> _sources;
+
     public StateTimeline(double duration, StateKind<T> stateKind, ImmutableArray<TimelineItem<T>> items)
-        : this(duration, stateKind, items, null)
+        : this(duration, stateKind, items, null, [])
     {
     }
 
-    private StateTimeline(double duration, StateKind<T> stateKind, ImmutableArray<TimelineItem<T>> items, string? layer)
+    private StateTimeline(
+        double duration,
+        StateKind<T> stateKind,
+        ImmutableArray<TimelineItem<T>> items,
+        string? layer,
+        ImmutableArray<StateTimeline<T>> sources
+    )
     {
         Layer = layer;
+        _sources = sources;
         Duration = duration;
         StateKind = stateKind;
         _items = items;
@@ -28,7 +39,9 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
 
     /// <summary>
     ///     The layer the timeline's values come from, such as the bar, which a <see cref="StateTrace" /> records for
-    ///     the states read from it. A trimmed or shifted timeline keeps it; a merge of several has none.
+    ///     the states read from it. A trimmed or shifted timeline keeps it, and so does a merge of timelines that all
+    ///     have it. A merge of timelines of different layers has none, but while a trace runs it keeps the timelines
+    ///     it was merged from, and a state read from it is made of what they hold there.
     /// </summary>
     public string? Layer { get; }
 
@@ -124,7 +137,13 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
             items.Add(new TimelineItem<T>(position, aggregatedValue));
         }
 
-        return new StateTimeline<T>(duration, stateKind, [..items]);
+        // timelines of one layer, such as the sections' parts of it put one after another, stay that layer's; while a
+        // trace runs, timelines of different layers are kept for the parts of the merged values
+        var layer = timelineArray[0].Layer;
+        if (timelineArray.All(x => x.Layer == layer) && layer is not null)
+            return new StateTimeline<T>(duration, stateKind, [..items], layer, []);
+
+        return new StateTimeline<T>(duration, stateKind, [..items], null, StateTrace.IsRunning ? [..timelineArray] : []);
     }
 
     public double Duration { get; }
@@ -140,7 +159,13 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
         if (duration == Duration)
             return this;
 
-        return new StateTimeline<T>(duration, StateKind, _items.TrimState(StateKind, Duration, duration), Layer);
+        return new StateTimeline<T>(
+            duration,
+            StateKind,
+            _items.TrimState(StateKind, Duration, duration),
+            Layer,
+            [.._sources.Select(x => x.Trim(duration))]
+        );
     }
 
     public StateTimeline<T> Shift(double offset)
@@ -155,7 +180,13 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
         if (newDuration == 0)
             return StateKind.CreateDefaultTimeline(0);
 
-        return new StateTimeline<T>(newDuration, StateKind, _items.ShiftState(StateKind, offset), Layer);
+        return new StateTimeline<T>(
+            newDuration,
+            StateKind,
+            _items.ShiftState(StateKind, offset),
+            Layer,
+            [.._sources.Select(x => x.Shift(offset))]
+        );
     }
 
     public static StateTimeline<T> Create(double duration, StateKind<T> stateKind, IEnumerable<TimelineItem<T>> items)
@@ -202,15 +233,34 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
     public State<T> GetEffectiveStateAt(double position)
     {
         var value = GetEffectiveValueAt(position);
-        return Layer is not null && StateTrace.IsRunning
-            ? new State<T>(StateKind, value, [new StateContribution(Layer, value)])
-            : new State<T>(StateKind, value);
+        if (!StateTrace.IsRunning)
+            return new State<T>(StateKind, value);
+
+        if (Layer is not null)
+            return new State<T>(StateKind, value, [new StateContribution(Layer, value)]);
+
+        // the parts of a merged value: what each timeline it was merged from holds here, those at their default
+        // adding nothing
+        var contributions = _sources
+            .Select(x => x.GetEffectiveStateAt(position))
+            .Where(x => !x.IsDefault)
+            .SelectMany(x => x.Contributions.IsEmpty ? [StateContribution.Unlabeled(x.Value)] : x.Contributions);
+        return new State<T>(StateKind, value, [..contributions]);
+    }
+
+    /// <summary>
+    ///     The timeline, its values recorded as made of the given timelines, while a trace runs; such as one whose
+    ///     value is several layers' parts.
+    /// </summary>
+    internal StateTimeline<T> WithSources(ImmutableArray<StateTimeline<T>> sources)
+    {
+        return new StateTimeline<T>(Duration, StateKind, _items, null, sources);
     }
 
     /// <summary>The timeline, its values recorded as coming from the given layer.</summary>
     public StateTimeline<T> WithLayer(string layer)
     {
-        return new StateTimeline<T>(Duration, StateKind, _items, layer);
+        return new StateTimeline<T>(Duration, StateKind, _items, layer, []);
     }
 
     public IEnumerable<TimelineItem<T>> AsEnumerable()

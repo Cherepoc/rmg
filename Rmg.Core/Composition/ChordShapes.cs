@@ -9,13 +9,15 @@ namespace Rmg.Core.Composition;
 ///     height to the nearest note of the scale, so a height can sit between two qualities and leave the choice to the
 ///     scale, as the third does between a minor and a major third.
 /// </summary>
-/// <param name="Rank">How weird the chord is, from 0 for a triad to <see cref="ChordShapes.MaxRank" />.</param>
-/// <param name="Weight">How likely the chord is among the others of its rank.</param>
+/// <param name="Unconventionality">
+///     How far the chord strays from convention, from 0 for a triad to <see cref="ChordShapes.MaxUnconventionality" />.
+/// </param>
+/// <param name="Weight">How likely the chord is among the others of its unconventionality.</param>
 /// <param name="IsVoicingFixed">Whether the chord's layout is what it is, so that it is never revoiced.</param>
 [DebuggerDisplay("ChordShape {Name}")]
 public sealed record ChordShape(
     string Name,
-    int Rank,
+    int Unconventionality,
     double Weight,
     ImmutableArray<double> Targets,
     bool IsVoicingFixed = false
@@ -23,7 +25,7 @@ public sealed record ChordShape(
 
 public static class ChordShapes
 {
-    public const int MaxRank = 5;
+    public const int MaxUnconventionality = 5;
 
     // heights that leave the quality to the scale: steps of the octave divided evenly into seven, which fall between
     // the two qualities a 7-note scale can give, such as a minor and a major third
@@ -69,22 +71,48 @@ public static class ChordShapes
         new("Tritone stack", 5, 0.5, [0, 6, 11, 17])
     ];
 
-    private static readonly ImmutableArray<ImmutableArray<ChordShape>> ShapesByRank =
+    private static readonly ImmutableArray<ImmutableArray<ChordShape>> ShapesByUnconventionality =
     [
-        ..Enumerable.Range(0, MaxRank + 1).Select(rank => All.Where(x => x.Rank == rank).ToImmutableArray())
+        ..Enumerable.Range(0, MaxUnconventionality + 1).Select(level => All.Where(x => x.Unconventionality == level).ToImmutableArray())
     ];
 
     private static readonly ImmutableArray<Func<IGenerationContext, int>> ShapeIndexGenerators =
     [
-        ..ShapesByRank.Select(shapes => Generators.WeightedIndex([..shapes.Select(x => new Weighted<ChordShape>(x.Weight, x))]))
+        ..ShapesByUnconventionality.Select(shapes => Generators.WeightedIndex([..shapes.Select(x => new Weighted<ChordShape>(x.Weight, x))]))
     ];
 
-    /// <summary>A shape of the rank, the heavier ones being more likely.</summary>
-    public static ChordShape Pick(IGenerationContext context, int rank)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(rank);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(rank, MaxRank);
+    /// <summary>
+    ///     The shapes that end a phrase with pull towards home, and how likely each is: the seventh most, which on the
+    ///     fifth is the dominant seventh, then the suspended ones, which resolve by a step, and the plain triad.
+    /// </summary>
+    private static readonly ImmutableArray<Weighted<ChordShape>> CadenceShapes =
+    [
+        new(1, Named("Seventh")),
+        new(0.6, Named("Seven-sus4")),
+        new(0.5, Named("Sus4")),
+        new(0.5, Named("Triad")),
+        new(0.3, Named("Ninth"))
+    ];
 
-        return ShapesByRank[rank][ShapeIndexGenerators[rank](context)];
+    private static readonly Func<IGenerationContext, int> CadenceShapeIndexGenerator = Generators.WeightedIndex(CadenceShapes);
+
+    /// <summary>A shape of the unconventionality, the heavier ones being more likely.</summary>
+    public static ChordShape Pick(IGenerationContext context, int unconventionality)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(unconventionality);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(unconventionality, MaxUnconventionality);
+
+        return ShapesByUnconventionality[unconventionality][ShapeIndexGenerators[unconventionality](context)];
+    }
+
+    /// <summary>A shape that ends a phrase with pull towards home, the heavier ones being more likely.</summary>
+    public static ChordShape PickCadence(IGenerationContext context)
+    {
+        return CadenceShapes[CadenceShapeIndexGenerator(context)].Value;
+    }
+
+    private static ChordShape Named(string name)
+    {
+        return All.Single(x => x.Name == name);
     }
 }

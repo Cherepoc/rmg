@@ -20,6 +20,10 @@ public static class CompositionStateKinds
     public static IncrementalStateKinds IncrementalChordNoteOffset { get; } =
         new(Prefix + StateKinds.ChordNoteOffset.Name);
 
+    // the chord shape of a bar with a role in the phrase, such as the home chord, in place of the pool's pick
+    public static StateKind<ImmutableArray<double>> RoleChord { get; } =
+        StateKinds.CreateCollection<double>(Prefix + "RoleChord", isShared: true);
+
     // every track plays the same chord shape, so the pool and the pick are the same for all of them
     public static CollectionFromCollectionStateKinds<double> ChordNotePitchOffsets { get; } =
         new(Prefix + "ChordPitchOffsets", isShared: true);

@@ -6,11 +6,11 @@ namespace Rmg.Tests.Chords;
 public sealed class ChordShapesTest
 {
     [Test]
-    public async Task EveryRank_HasShapes()
+    public async Task EveryUnconventionality_HasShapes()
     {
-        var ranks = ChordShapes.All.Select(x => x.Rank).Distinct().Order().ToArray();
+        var levels = ChordShapes.All.Select(x => x.Unconventionality).Distinct().Order().ToArray();
 
-        await Assert.That(ranks).IsEquivalentTo(Enumerable.Range(0, ChordShapes.MaxRank + 1).ToArray());
+        await Assert.That(levels).IsEquivalentTo(Enumerable.Range(0, ChordShapes.MaxUnconventionality + 1).ToArray());
     }
 
     [Test]
@@ -27,12 +27,12 @@ public sealed class ChordShapesTest
     }
 
     [Test]
-    public async Task Pick_ResultsIn_ShapesOfTheRank_TheHeavierMoreOften()
+    public async Task Pick_ResultsIn_ShapesOfTheUnconventionality_TheHeavierMoreOften()
     {
         var context = new GenerationContext(0);
         var picks = Enumerable.Range(0, 10000).Select(_ => ChordShapes.Pick(context, 1)).ToArray();
 
-        await Assert.That(picks.All(x => x.Rank == 1)).IsTrue();
+        await Assert.That(picks.All(x => x.Unconventionality == 1)).IsTrue();
         // the seventh weighs 1 and the sixth 0.5
         await Assert.That(picks.Count(x => x.Name == "Seventh")).IsGreaterThan(picks.Count(x => x.Name == "Sixth") * 3 / 2);
     }
