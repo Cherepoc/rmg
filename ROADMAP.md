@@ -2,11 +2,43 @@
 
 Planned work that has been decided but not built yet.
 
+## Next
+
+In this order, each measured before it is planned:
+
+1. **Listen and tune.** Fills (their level against the groove, the length of tom runs and rolls, whether twists sound
+   interesting or broken), intros (whether the band's entry after a chords-first or build-up intro feels earned) and
+   endings (whether the ritardando plays in the browser, whether a final chord taken from a weak note is too quiet) have
+   been tuned by measurement only.
+2. **Section dynamics.** One energy value per section, drawn around the song's, that drives what is drawn apart today:
+   the section's velocity, the drums' fullness and which groups play (ride and crash when loud, cross-stick when
+   quiet), the melody's busyness and the chords' rhythm, and fills that build into a loud section and break before a
+   quiet one. Verse, pre-chorus and chorus then differ by design. Measure first how far sections differ now.
+3. **Sections changing mode,** such as a chorus in the relative major or a darker bridge: the section's scale becomes
+   its own state; scales, homes and cadences already work per scale.
+4. Smaller: melody motifs remembered per cycle (see *Rhythm engine*), fade-out endings (see *Form*), and moving the
+   melody's final note and a stop's cuts from render flags to edits of the notes after `Realizer`, one at a time.
+
+## Architecture
+
+Left from the review, each small and best done when the code is next touched:
+
+- **Track roles:** a role on a track's definition in place of checking track numbers (`SongTracks.MelodyTrack`,
+  `>= DrumGroups.FirstTrackNumber`) in the generators, and the melody's pattern code (phrase ends, steps, motifs) out
+  of `PatternGenerator` into a class of its own.
+- **Split `FillGenerator`** into the decisions and a player of fill specs, once fills grow again.
+- **Visibility:** the tables (`FillLayers`, `FormLayers`, `Drummer`, `MelodyBusyness` and more) are public though
+  nothing outside needs them.
+- `TrackEventStateTimelineMap.MergeStateTimelineMap` in place of merging a map of no tracks to add common state; one
+  `Pick` over weights in `Generators` in place of the copies; `StateMap.With(kind, value)` for setting finished state.
+- **Memory:** every `RealizedNote` keeps the state it was decided from, which a song now holds on to (about 2 MB a
+  song, 8 MB with a trace). Recompute it on demand instead, should memory matter.
+
 ## Chords
 
 Chord shapes are pitch fractions snapped to the scale, picked from a table ordered by unconventionality, laid out by a
 voicing step and led from chord to chord (see `ChordShapes`, `HarmonicUnconventionality`, `ChordVoicing`,
-`Render.SnapChordToScale` and `VoiceLeader`). Still to do:
+`Realizer.SnapChordToScale` and `VoiceLeader`). Still to do:
 
 ### Jitter on in-between heights
 
@@ -41,9 +73,9 @@ rhythm (its busyness, riffs, and phrase ends with a held note and a rest), and f
 - **Segments in any pattern:** bars that mix feels, such as three straight beats and a quintuplet beat; fills get them
   first.
 - Choosing whole patterns by measured features (syncopation, evenness) as a family, should a target prove out of reach
-  of the dyadic engine; euclidean patterns that fit no cycle; a library of idioms such as clave and bossa;
-  energy-aware fills that build into loud sections and break before quiet ones; and drums generated together, the
-  snare avoiding the kick and the hi-hat filling the gaps.
+  of the dyadic engine; euclidean patterns that fit no cycle; a library of idioms such as clave and bossa; and drums
+  generated together, the snare avoiding the kick and the hi-hat filling the gaps. Energy-aware fills come with section
+  dynamics (see *Next*).
 
 A cycle that does not fit the bar and is cut off at the bar line, such as 3+3+2, stays as it is: an off-kilter feel,
 not a fault.
