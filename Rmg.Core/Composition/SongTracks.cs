@@ -76,7 +76,19 @@ internal sealed class SongTracks
                 maxOctaveOffsetGenerator()
             ),
             [MelodyTrack] = new PitchInstrumentTrack(
-                LayerStates.CreateTrackLayer(context, "Track", StateMap.Default, VelocityLayers.Track, RhythmLayers.Track),
+                LayerStates.CreateTrackLayer(
+                    context,
+                    "Track",
+                    new StateMapBuilder("Track role", perTrack: true)
+                        // the melody keeps to the chords: its root does not walk away from theirs
+                        .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, 0)
+                        // the melody instrument sets how stepwise the melody is, and the song moves it a little
+                        .Add(CompositionStateKinds.MelodyStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Song).Then(x => melodyInstrument.Leading + x))
+                        .Add(StateKinds.MelodyLine, 1)
+                        .ToStateMap(context),
+                    VelocityLayers.Track,
+                    RhythmLayers.Track
+                ),
                 melodyInstrument.Program,
                 minOctaveOffsetGenerator(),
                 maxOctaveOffsetGenerator()

@@ -137,14 +137,28 @@ internal sealed class PatternGenerator
             ChordNoteOffset
         );
 
-        var noteStateMapGenerator = (IGenerationContext innerContext, double position, int rank) => new StateMapBuilder("Note", perTrack: true)
-            .Add(StateKinds.ArticulationOffset, articulationOffsetGenerator(innerContext, position))
-            .Add(StateKinds.ChordRootNoteOffset, chordRootNoteOffsetGenerator(innerContext, position))
-            .Add(StateKinds.ChordNoteOffset, chordNoteOffsetGenerator(innerContext, position))
-            .Add(StateKinds.Velocity, BeatAccent.CreateVelocityGenerator(rank, rhythmPattern.MaxRank).Then(x => x * VelocityLayers.Note))
-            .AddNoteDurationLayer()
-            .Add(GetChord(stateMap, barStateTimelineMap, patternStart, position, trackNumber, sectionId, barIndex))
-            .ToStateMap(innerContext);
+        var isMelody = trackNumber == SongTracks.MelodyTrack;
+        // the bar pattern's seed names its motif
+        var motif = stateMap.GetStateValue(CompositionStateKinds.ValueSeed);
+        var stepwiseness = stateMap.GetStateValue(CompositionStateKinds.MelodyStepwiseness);
+        var noteStateMapGenerator = (IGenerationContext innerContext, double position, int rank) =>
+        {
+            var builder = new StateMapBuilder("Note", perTrack: true)
+                .Add(StateKinds.ArticulationOffset, articulationOffsetGenerator(innerContext, position))
+                .Add(StateKinds.ChordRootNoteOffset, chordRootNoteOffsetGenerator(innerContext, position))
+                .Add(StateKinds.ChordNoteOffset, chordNoteOffsetGenerator(innerContext, position))
+                .Add(StateKinds.Velocity, BeatAccent.CreateVelocityGenerator(rank, rhythmPattern.MaxRank).Then(x => x * VelocityLayers.Note))
+                .AddNoteDurationLayer()
+                .Add(StateKinds.BeatRank, rank)
+                .Add(GetChord(stateMap, barStateTimelineMap, patternStart, position, trackNumber, sectionId, barIndex));
+            // a melody note draws where it means to go from the bar pattern's own sequence, so the bar's shape comes
+            // back with the bar
+            if (isMelody)
+                builder
+                    .Add(StateKinds.MelodyStep, context => MelodyLayers.GenerateStep(context, stepwiseness))
+                    .Add(StateKinds.MelodyMotif, motif);
+            return builder.ToStateMap(innerContext);
+        };
 
         return DyadicRankItemPattern<StateMap>.Create(
             _context,

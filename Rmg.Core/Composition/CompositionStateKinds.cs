@@ -20,6 +20,9 @@ public static class CompositionStateKinds
     public static IncrementalStateKinds IncrementalChordNoteOffset { get; } =
         new(Prefix + StateKinds.ChordNoteOffset.Name);
 
+    // how much a melody moves by step rather than by leap, from 0 to 1
+    public static StateKind<double> MelodyStepwiseness { get; } = StateKinds.CreateAdditive<double>(Prefix + "MelodyStepwiseness");
+
     // the chord of a bar with a role in the phrase, such as the home chord, in place of the pool's pick; empty or one
     public static StateKind<ImmutableArray<Chord>> RoleChord { get; } =
         StateKinds.CreateCollection<Chord>(Prefix + "RoleChord", isShared: true);

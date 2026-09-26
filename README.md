@@ -255,6 +255,14 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   little early. How much the bass leads (`BassLeadingLayers`) comes from its instrument (upright and
   fretless basses walk, synth basses sit on the roots), and a section moves it; each bar then draws
   whether and how it leads.
+- **Melody.** The melody line (`MelodyLine`) is placed note by note by rule. A note on a strong beat
+  takes a note of the chord, the nearest one the way the melody goes, and a note on a weak beat moves
+  along the scale between them; a note means to go on the way the melody goes or to turn back, and now
+  and then to leap, less the more stepwise the melody (`MelodyLayers`, set by the melody instrument
+  and moved by the section). After a leap it steps back, and it turns towards where its phrase aims,
+  a shape drawn per section: up and back down, falling, rising, or a wave. It keeps to a singable 15
+  semitones in the middle of its range. A bar pattern that comes back is a motif: it plays the shape it
+  had the first time, moved along the scale, so that over another chord it sounds as a sequence.
 - **Instruments.** Each pitched track has a role (`InstrumentRoles`): the chords are played by pianos,
   organs, guitars, strings or pads, the melody by keys, mallets, guitars, strings, brass, reeds, pipes
   or leads, and the bass by basses, with a few unusual choices weighted low. The melody never plays

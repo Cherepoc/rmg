@@ -27,6 +27,17 @@ public static class StateKinds
     // plays (a ChordArrival)
     public static readonly StateKind<int> ChordApproach = CreateAdditive<int>("ChordApproach", StateScope.Render);
     public static readonly StateKind<int> ChordArrival = CreateAdditive<int>("ChordArrival", StateScope.Render);
+    // 1 for a track that plays the melody, whose notes follow the chords and the phrase by rule
+    public static readonly StateKind<int> MelodyLine = CreateAdditive<int>("MelodyLine", StateScope.Render);
+    // how strong a note's beat is, 0 the strongest, from its rhythm pattern
+    public static readonly StateKind<int> BeatRank = CreateAdditive<int>("BeatRank", StateScope.Render);
+    // where a melody note means to go, from the way the melody goes: 1 a step on, -1 a step back, 2 and -2 a leap, 0
+    // the same note
+    public static readonly StateKind<int> MelodyStep = CreateAdditive<int>("MelodyStep", StateScope.Render);
+    // which bar pattern a melody note belongs to, so that a pattern that comes back plays its remembered shape
+    public static readonly StateKind<int> MelodyMotif = CreateAdditive<int>("MelodyMotif", StateScope.Render);
+    // how far above or below the middle of its range the melody aims in a bar, in semitones, for the phrase's shape
+    public static readonly StateKind<double> MelodyRegister = CreateAdditive<double>("MelodyRegister", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordRootNoteOffset = CreateCollection<double>("ChordRootOffset", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordNoteOffset = CreateCollection<double>("ChordNoteOffset", StateScope.Render);
     public static readonly StateKind<ImmutableArray<int>> ScaleOffsets = CreateCollection<int>("ScaleOffsets", StateScope.Render, isShared: true);

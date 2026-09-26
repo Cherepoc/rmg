@@ -12,7 +12,8 @@ namespace Rmg.Core.Composition;
 ///     <see cref="StateKinds.VoiceLeading" />): strings, pads and organs hold their notes and move them little, pianos
 ///     are in between, and guitars move their chord shapes up and down the neck. For a bass it is how much it leads
 ///     into the next chord (see <see cref="BassLeadingLayers" />): upright and fretless basses walk, synth basses sit on
-///     the roots.
+///     the roots. For a melody instrument it is how stepwise its melody is (see <see cref="MelodyLayers" />): winds
+///     and strings sing by step, mallets leap.
 /// </param>
 public sealed record RoleInstrument(int Program, string Name, double Weight, double Leading = VoiceLeadingLayers.Piano);
 
@@ -92,37 +93,37 @@ public static class InstrumentRoles
     public static InstrumentRole Melody { get; } = new(
         nameof(Melody),
         [
-            new(0, "Acoustic Grand Piano", 0.6),
-            new(4, "Electric Piano 1", 0.5),
-            new(8, "Celesta", 0.2),
-            new(9, "Glockenspiel", 0.2),
-            new(11, "Vibraphone", 0.5),
-            new(12, "Marimba", 0.4),
-            new(13, "Xylophone", 0.15),
-            new(22, "Harmonica", 0.2),
-            new(24, "Acoustic Guitar (nylon)", 0.5),
-            new(26, "Electric Guitar (jazz)", 0.4),
-            new(27, "Electric Guitar (clean)", 0.5),
-            new(40, "Violin", 0.6),
-            new(42, "Cello", 0.3),
-            new(56, "Trumpet", 0.5),
-            new(59, "Muted Trumpet", 0.3),
-            new(60, "French Horn", 0.2),
-            new(64, "Soprano Sax", 0.3),
-            new(65, "Alto Sax", 0.5),
-            new(66, "Tenor Sax", 0.4),
-            new(68, "Oboe", 0.3),
-            new(71, "Clarinet", 0.5),
-            new(73, "Flute", 0.7),
-            new(75, "Pan Flute", 0.3),
-            new(79, "Ocarina", 0.15),
-            new(80, "Lead 1 (square)", 0.4),
-            new(81, "Lead 2 (sawtooth)", 0.4),
-            new(84, "Lead 5 (charang)", 0.15),
-            new(104, "Sitar", 0.1),
-            new(105, "Banjo", 0.1),
-            new(108, "Kalimba", 0.2),
-            new(110, "Fiddle", 0.1)
+            new(0, "Acoustic Grand Piano", 0.6, MelodyLayers.Mixed),
+            new(4, "Electric Piano 1", 0.5, MelodyLayers.Mixed),
+            new(8, "Celesta", 0.2, MelodyLayers.Leaping),
+            new(9, "Glockenspiel", 0.2, MelodyLayers.Leaping),
+            new(11, "Vibraphone", 0.5, MelodyLayers.Leaping),
+            new(12, "Marimba", 0.4, MelodyLayers.Leaping),
+            new(13, "Xylophone", 0.15, MelodyLayers.Leaping),
+            new(22, "Harmonica", 0.2, MelodyLayers.Stepwise),
+            new(24, "Acoustic Guitar (nylon)", 0.5, MelodyLayers.Mixed),
+            new(26, "Electric Guitar (jazz)", 0.4, MelodyLayers.Mixed),
+            new(27, "Electric Guitar (clean)", 0.5, MelodyLayers.Mixed),
+            new(40, "Violin", 0.6, MelodyLayers.Stepwise),
+            new(42, "Cello", 0.3, MelodyLayers.Stepwise),
+            new(56, "Trumpet", 0.5, MelodyLayers.Stepwise),
+            new(59, "Muted Trumpet", 0.3, MelodyLayers.Stepwise),
+            new(60, "French Horn", 0.2, MelodyLayers.Stepwise),
+            new(64, "Soprano Sax", 0.3, MelodyLayers.Stepwise),
+            new(65, "Alto Sax", 0.5, MelodyLayers.Stepwise),
+            new(66, "Tenor Sax", 0.4, MelodyLayers.Stepwise),
+            new(68, "Oboe", 0.3, MelodyLayers.Stepwise),
+            new(71, "Clarinet", 0.5, MelodyLayers.Stepwise),
+            new(73, "Flute", 0.7, MelodyLayers.Stepwise),
+            new(75, "Pan Flute", 0.3, MelodyLayers.Stepwise),
+            new(79, "Ocarina", 0.15, MelodyLayers.Stepwise),
+            new(80, "Lead 1 (square)", 0.4, MelodyLayers.Mixed),
+            new(81, "Lead 2 (sawtooth)", 0.4, MelodyLayers.Mixed),
+            new(84, "Lead 5 (charang)", 0.15, MelodyLayers.Mixed),
+            new(104, "Sitar", 0.1, MelodyLayers.Mixed),
+            new(105, "Banjo", 0.1, MelodyLayers.Mixed),
+            new(108, "Kalimba", 0.2, MelodyLayers.Leaping),
+            new(110, "Fiddle", 0.1, MelodyLayers.Stepwise)
         ]
     );
 

@@ -113,7 +113,8 @@ internal sealed class BarStateGenerator
                 raisedStepTimeline,
                 roleChordTimeline,
                 GenerateResets(),
-                ..GenerateBassLeading(bassLeading)
+                ..GenerateBassLeading(bassLeading),
+                GenerateMelodyContour()
             ]
         );
     }
@@ -137,6 +138,18 @@ internal sealed class BarStateGenerator
                         }
                     )
                     .ToArray()
+            )
+            .WithLayer("Bar");
+    }
+
+    /// <summary>The shape the section's melody phrases take: the register the melody aims at in each bar.</summary>
+    private StateTimeline<double> GenerateMelodyContour()
+    {
+        var contour = MelodyLayers.Contours[Generators.WeightedIndex(MelodyLayers.Contours)(_context)].Value;
+        return StateTimeline.Create(
+                PatternDuration,
+                StateKinds.MelodyRegister,
+                contour.Select((register, bar) => register.ToTimelineItem(bar * BarDuration)).ToArray()
             )
             .WithLayer("Bar");
     }

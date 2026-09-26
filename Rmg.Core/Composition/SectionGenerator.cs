@@ -126,14 +126,14 @@ internal sealed class SectionGenerator
     {
         foreach (var trackNumber in _tracks.NonGroupedTrackNumbers)
         {
+            // a section's chords move more smoothly or more in blocks than the song's, and its melody more or less by step
+            var sectionTrackLayer = new StateMapBuilder("Section track", perTrack: true)
+                .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Section));
+            if (trackNumber == SongTracks.MelodyTrack)
+                sectionTrackLayer.Add(CompositionStateKinds.MelodyStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Section));
             var trackStateMap = CreateSectionTrackLayer(trackNumber)
                 .MergeWith(sectionStateMap)
-                // a section's chords move more smoothly or more in blocks than the song's
-                .MergeWith(
-                    new StateMapBuilder("Section track", perTrack: true)
-                        .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Section))
-                        .ToStateMap(_context)
-                );
+                .MergeWith(sectionTrackLayer.ToStateMap(_context));
             var trackStateMaps = new Dictionary<int, StateMap> { [trackNumber] = trackStateMap };
             yield return _patternGenerator.GenerateBars(sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap);
         }

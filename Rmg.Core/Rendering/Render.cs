@@ -148,12 +148,17 @@ public static class Render
             (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1,
             note => FixNoteOffset(absoluteMinOctave, octaveCount, note)
         );
+        // and a melody's, each by rule from the one before, the chord and the scale
+        var melodyLine = new MelodyLine(
+            absoluteMinOctave * OctaveNoteCount,
+            (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1
+        );
         var items = eventStateTimelineMap.WithDurations().ToArray();
         var renderedNotes = ImmutableArray.CreateBuilder<TimelineItem<RenderedNote>>();
         for (var i = 0; i < items.Length; i++)
         {
             TimelineItem<WithDuration<StateMap>>? next = i + 1 < items.Length ? items[i + 1] : null;
-            renderedNotes.AddRange(RenderPitchNotes(items[i], next, absoluteMinOctave, octaveCount, voiceLeader, bassLine));
+            renderedNotes.AddRange(RenderPitchNotes(items[i], next, absoluteMinOctave, octaveCount, voiceLeader, bassLine, melodyLine));
         }
         var renderedNoteTimeline = EventTimeline.Create(eventStateTimelineMap.Duration, renderedNotes.ToImmutable());
         return new RenderedTrack(false, track.InstrumentCode, renderedNoteTimeline);
@@ -186,7 +191,8 @@ public static class Render
         int absoluteMinOctave,
         int octaveCount,
         VoiceLeader voiceLeader,
-        BassLine bassLine
+        BassLine bassLine,
+        MelodyLine melodyLine
     )
     {
         var position = timelineItemWithDuration.Position;
@@ -228,7 +234,17 @@ public static class Render
                 .ToIndexOverLength(chordDegrees.Length)
                 .ToPeriodRemainder(chordDegrees.Length);
             var note = ToNote(chordDegrees[selectedIndex] + selectedOctave * scaleOffsets.Length);
-            if (stateMap.GetStateValue(StateKinds.FollowsChordRoots) > 0)
+            if (stateMap.GetStateValue(StateKinds.MelodyLine) > 0)
+                note = melodyLine.Place(
+                    chord,
+                    chordSteps.Select(x => ToNote(x).Mod(OctaveNoteCount)).ToHashSet(),
+                    position,
+                    stateMap.GetStateValue(StateKinds.BeatRank),
+                    stateMap.GetStateValue(StateKinds.MelodyStep),
+                    stateMap.GetStateValue(StateKinds.MelodyRegister),
+                    stateMap.GetStateValue(StateKinds.MelodyMotif)
+                );
+            else if (stateMap.GetStateValue(StateKinds.FollowsChordRoots) > 0)
                 note = bassLine.Place(
                     note,
                     chord,
