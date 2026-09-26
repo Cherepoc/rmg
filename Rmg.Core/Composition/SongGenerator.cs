@@ -66,11 +66,19 @@ public static class SongGenerator
 
         var commonStateMap = CreateCommonStateMap(context, scale);
 
-        var songTrackNoteTimelineMap = SongStructureGenerator.Generate(context)
+        var sectionIds = SongStructureGenerator.Generate(context)
             .SelectMany(part => part.SectionIds)
-            .Select(generateSection)
+            .ToArray();
+        var sections = sectionIds.Select(generateSection).ToArray();
+        var songTrackNoteTimelineMap = sections
             .Unroll()
             .MergeStateMap(commonStateMap);
+
+        // the drums mark the lines between the sections, now that they are put one after another
+        songTrackNoteTimelineMap = new FillGenerator(context, tracks).Generate(
+            songTrackNoteTimelineMap,
+            [..sectionIds.Zip(sections, (id, section) => (id, section.Duration))]
+        );
 
         return new Song(songTrackNoteTimelineMap.Duration, tracks.Definitions, songTrackNoteTimelineMap);
     }

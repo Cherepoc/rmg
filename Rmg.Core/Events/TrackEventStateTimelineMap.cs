@@ -108,6 +108,25 @@ public sealed class TrackEventStateTimelineMap<T> : ITimelineLike<TrackEventStat
         return new TrackEventStateTimelineMap<T>(duration, timelineDictionary, trimmedCommonStateTimelineMap);
     }
 
+    /// <summary>
+    ///     The map with the events of the given tracks changed, and all state kept. A track the map does not have yet
+    ///     starts with no events and default state.
+    /// </summary>
+    public TrackEventStateTimelineMap<T> MapTrackEvents(IReadOnlyDictionary<int, Func<EventTimeline<T>, EventTimeline<T>>> maps)
+    {
+        if (maps.Count == 0)
+            return this;
+
+        var timelineMap = TrackTimelineMap.ToBuilder();
+        foreach (var (trackNumber, map) in maps)
+        {
+            var timeline = TrackTimelineMap.GetValueOrDefault(trackNumber) ?? EventStateTimelineMap.Create<T>(Duration);
+            timelineMap[trackNumber] = timeline.WithEvents(map(timeline.EventTimeline));
+        }
+
+        return new TrackEventStateTimelineMap<T>(Duration, timelineMap.ToImmutable(), CommonStateTimelineMap);
+    }
+
     public TrackEventStateTimelineMap<T> MergeStateMap(StateMap stateMap)
     {
         if (stateMap.IsDefault)

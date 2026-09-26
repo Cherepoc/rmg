@@ -175,8 +175,9 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   seeded random sequence, so their order is part of what a seed makes: the tracks and their
   instruments (`SongTracks`), the song's harmony and state, the structure of parts and sections, and
   every section (`SectionGenerator`), which makes its harmony, its bar state (`BarStateGenerator`) and
-  its tracks' patterns (`PatternGenerator`). The state every layer draws a part of is drawn in one
-  place (`LayerStates`).
+  its tracks' patterns (`PatternGenerator`), and last the fills (`FillGenerator`), which see the
+  sections one after another and mark the lines between them. The state every layer draws a part of is
+  drawn in one place (`LayerStates`).
 - **Timelines and state.** Music is modelled as immutable timelines of events (notes) and of *state*
   (velocity, tempo, scale, chord, octave, ...). State kinds define their own default and how values
   combine, so state from the song, a section, a track group and a track is merged with a single rule.
@@ -285,6 +286,11 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   note ends by the next. Most phrases end in their last bar (`MelodyLayers.PhraseEnds`): the notes
   from beat 2, 3 or 4 on are left out, and the last one is held on a note of the chord until a beat
   before the next phrase, the one place where a note's length is set over the gap to the next.
+- **Fills.** The drums mark the lines between sections (`FillGenerator`, `FillLayers`): a section
+  change lands on a crash and a kick most of the time (65%), a kick alone (20%), or runs straight on.
+  The fills take notes out of a span and add their own (`FillEdits`); a drum names its sound outright
+  (`StateKinds.ArticulationIndex`), and a drum out of a section's groove still has the section's
+  drum state, so a fill's notes are as loud as the section.
 - **Instruments.** Each pitched track has a role (`InstrumentRoles`): the chords are played by pianos,
   organs, guitars, strings or pads, the melody by keys, mallets, guitars, strings, brass, reeds, pipes
   or leads, and the bass by basses, with a few unusual choices weighted low. The melody never plays

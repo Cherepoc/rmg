@@ -178,7 +178,11 @@ public static class Render
             var articulationOffset = stateMap.GetStateValue(StateKinds.ArticulationOffset);
             var noteVelocity = stateMap.GetStateValue(StateKinds.Velocity);
 
-            var articulationIndex = articulationOffset.ToIndex(track.ArticulationCodes.Length);
+            // a note may name its sound, as a fill does; otherwise the walk of the articulation picks it
+            var fixedIndex = stateMap.GetStateValue(StateKinds.ArticulationIndex);
+            var articulationIndex = fixedIndex > 0
+                ? Math.Min(fixedIndex, track.ArticulationCodes.Length) - 1
+                : articulationOffset.ToIndex(track.ArticulationCodes.Length);
             var articulationCode = track.ArticulationCodes[articulationIndex];
             var renderedNote = new RenderedNote(articulationCode, noteVelocity, PercussionNoteDuration);
             yield return renderedNote.ToTimelineItem(timelineItem.Position);

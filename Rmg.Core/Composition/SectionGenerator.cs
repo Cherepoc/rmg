@@ -119,6 +119,21 @@ internal sealed class SectionGenerator
             foreach (var trackNumber in group.TrackNumbers.Where(activeDrumTrackNumbers.Contains))
                 trackStateMaps[trackNumber] = CreateSectionTrackLayer(trackNumber, sectionRhythm).MergeWith(groupStateMap);
 
+            // a drum out of the groove still has the state the drums share, with no notes, so that a note added
+            // later, such as in a fill, plays as loud as the section
+            var idleStateMap = groupStateMap.OfScope(StateScope.Render);
+            yield return TrackEventStateTimelineMap.Create(
+                BarStateGenerator.PatternDuration,
+                group.TrackNumbers
+                    .Where(x => !trackStateMaps.ContainsKey(x))
+                    .Select(x => new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
+                            x,
+                            EventTimeline.Create<StateMap>(BarStateGenerator.PatternDuration).ToEventStateTimelineMap(idleStateMap)
+                        )
+                    ),
+                StateTimelineMap.Create(BarStateGenerator.PatternDuration)
+            );
+
             if (trackStateMaps.Count == 0)
                 continue;
 

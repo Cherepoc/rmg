@@ -154,6 +154,15 @@ public sealed class EventTimeline<T> : ITimelineLike<EventTimeline<T>>, IReadOnl
         return new EventTimeline<TDest>(Duration, _items.MapValues(mapFunc));
     }
 
+    /// <summary>The timeline without the events from <paramref name="from" /> up to <paramref name="to" />.</summary>
+    public EventTimeline<T> RemoveSpan(double from, double to)
+    {
+        if (to <= from || _items.All(x => x.Position < from || x.Position >= to))
+            return this;
+
+        return new EventTimeline<T>(Duration, [.._items.Where(x => x.Position < from || x.Position >= to)]);
+    }
+
     public EventTimeline<T> FilterValues(Func<T, bool> filterFunc)
     {
         if (_items.Length == 0)

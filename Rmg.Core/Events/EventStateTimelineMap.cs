@@ -109,6 +109,12 @@ public sealed class EventStateTimelineMap<T> : ITimelineLike<EventStateTimelineM
         return Events.EventTimeline.Create(Duration, newEventItems);
     }
 
+    /// <summary>The map with its events replaced, and its state kept.</summary>
+    public EventStateTimelineMap<T> WithEvents(EventTimeline<T> eventTimeline)
+    {
+        return Create(Duration, eventTimeline, StateTimelineMap);
+    }
+
     public EventStateTimelineMap<T> MergeStateMap(StateMap stateMap)
     {
         if (stateMap.IsDefault)

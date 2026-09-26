@@ -38,6 +38,9 @@ public static class StateKinds
     public static readonly StateKind<int> MelodyMotif = CreateAdditive<int>("MelodyMotif", StateScope.Render);
     // how far above or below the middle of its range the melody aims in a bar, in semitones, for the phrase's shape
     public static readonly StateKind<double> MelodyRegister = CreateAdditive<double>("MelodyRegister", StateScope.Render);
+    // which of a drum's sounds a note plays, counted from 1, such as a fill's high tom or a landing's crash, over the
+    // walk of its articulation; 0 for the walk's
+    public static readonly StateKind<int> ArticulationIndex = CreateAdditive<int>("ArticulationIndex", StateScope.Render);
     // a note's length set outright, in beats, over the gap to the next note, such as a phrase's last note; 0 for none
     public static readonly StateKind<double> HeldDuration = CreateAdditive<double>("HeldDuration", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordRootNoteOffset = CreateCollection<double>("ChordRootOffset", StateScope.Render);
