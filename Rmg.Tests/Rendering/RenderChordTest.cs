@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core.Composition;
 using Rmg.Core.Rendering;
 
 namespace Rmg.Tests.Rendering;
@@ -24,7 +25,7 @@ public sealed class RenderChordTest
     public async Task Triad_InNaturalMinor_IsEveryOtherScaleStep_OnEveryDegree(int rootIndex)
     {
         // Cm, D°, Eb, Fm, Gm, Ab, Bb: the scale's own triads
-        var result = Render.SnapChordToScale(NaturalMinor, rootIndex, Triad);
+        var result = Realizer.SnapChordToScale(NaturalMinor, rootIndex, Triad);
 
         await Assert.That(result).IsEquivalentTo([0, 2, 4]);
     }
@@ -33,7 +34,7 @@ public sealed class RenderChordTest
     public async Task Triad_InMajorPentatonic_IsAMajorTriad()
     {
         // C, E, G, where rounding the scale's note count would give C, D, G
-        var result = Render.SnapChordToScale(MajorPentatonic, 0, Triad);
+        var result = Realizer.SnapChordToScale(MajorPentatonic, 0, Triad);
 
         await Assert.That(result).IsEquivalentTo([0, 2, 3]);
     }
@@ -42,7 +43,7 @@ public sealed class RenderChordTest
     public async Task Triad_InOctatonic_IsDiminished()
     {
         // C, Eb, Gb: a fifth is as far from Gb as from Ab, and the lower note wins a tie
-        var result = Render.SnapChordToScale(WholeHalfOctatonic, 0, Triad);
+        var result = Realizer.SnapChordToScale(WholeHalfOctatonic, 0, Triad);
 
         await Assert.That(result).IsEquivalentTo([0, 2, 4]);
     }
@@ -50,7 +51,7 @@ public sealed class RenderChordTest
     [Test]
     public async Task Triad_InChromaticScale_IsMinor()
     {
-        var result = Render.SnapChordToScale(Chromatic, 0, Triad);
+        var result = Realizer.SnapChordToScale(Chromatic, 0, Triad);
 
         await Assert.That(result).IsEquivalentTo([0, 3, 7]);
     }
@@ -59,7 +60,7 @@ public sealed class RenderChordTest
     public async Task NotesAboveAnOctave_LandInTheOctavesAbove()
     {
         // a ninth and a note below the root, as voicings give
-        var result = Render.SnapChordToScale(NaturalMinor, 0, [-5, 0, 14]);
+        var result = Realizer.SnapChordToScale(NaturalMinor, 0, [-5, 0, 14]);
 
         await Assert.That(result).IsEquivalentTo([-3, 0, 8]);
     }
@@ -68,7 +69,7 @@ public sealed class RenderChordTest
     public async Task Cluster_InMajorPentatonic_TakesFreeNeighbours_AndDropsTheRest()
     {
         // C, Db, D, Eb in a scale of C, D, E, G, A: C, then D and E for the two next, and nothing left for the last
-        var result = Render.SnapChordToScale(MajorPentatonic, 0, [0, 1, 2, 3]);
+        var result = Realizer.SnapChordToScale(MajorPentatonic, 0, [0, 1, 2, 3]);
 
         await Assert.That(result).IsEquivalentTo([0, 1, 2]);
     }
@@ -77,7 +78,7 @@ public sealed class RenderChordTest
     public async Task ChordFittingTheRange_KeepsItsVoicing()
     {
         // octaves 5 and 6; the chord comes up an octave, as its lowest note would
-        var result = Render.FitChordIntoRange(5, 2, [50, 55, 62]);
+        var result = Realizer.FitChordIntoRange(5, 2, [50, 55, 62]);
 
         await Assert.That(result).IsEquivalentTo([62, 67, 74]);
     }
@@ -86,7 +87,7 @@ public sealed class RenderChordTest
     public async Task ChordWiderThanTheRange_FoldsItsTopNotesDown()
     {
         // A, C, E in a single octave from C: C and E come down under A
-        var result = Render.FitChordIntoRange(5, 1, [69, 72, 76]);
+        var result = Realizer.FitChordIntoRange(5, 1, [69, 72, 76]);
 
         await Assert.That(result).IsEquivalentTo([60, 64, 69]);
     }
@@ -94,7 +95,7 @@ public sealed class RenderChordTest
     [Test]
     public async Task NoteFoldingOntoAnother_IsDropped()
     {
-        var result = Render.FitChordIntoRange(5, 1, [60, 72]);
+        var result = Realizer.FitChordIntoRange(5, 1, [60, 72]);
 
         await Assert.That(result).IsEquivalentTo([60]);
     }

@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace Rmg.Core.Rendering;
+namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     Places the chords of a track one after another, each in the layout that follows best from the chord before.

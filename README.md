@@ -225,21 +225,27 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   septuplets fall exactly; two ways to the same moment then give the same position.
 - **Generators.** Randomness is expressed as small composable generators that take a seeded
   context, which is what makes every song reproducible.
-- **Rendering.** `Render` turns the abstract song into concrete notes (pitch, velocity, duration),
-  and `Midi` writes them as a standard MIDI file.
+- **Notes and rendering.** The last stage of the generation, `Realizer`, decides the song's notes
+  from its state, over the whole song in order, since a track's line goes on across its sections:
+  every note's pitches, loudness and length, and every drum hit's sound (`Song.Notes`, a
+  `RealizedNote` per note, with the state it was decided from). A stage that comes after it can
+  change the notes themselves; the state still explains how they came about, but does not show
+  the change. `Render` then plays the notes: a chord's pitches together, the drums on one channel,
+  and the song's velocities spread over the MIDI range, which it needs all the notes for; `Midi`
+  writes them as a standard MIDI file.
 - **Scales.** A song is in one scale from start to end, in a random key. The scale is drawn from a
   weighted table of 7-note scales (`Scales`): natural minor and major are the most common (30% each),
   dorian and mixolydian occasional (12% each), and harmonic minor, phrygian and lydian rare (5–6%).
   Chord roots move by scale steps and chord heights sit between the qualities a 7-note scale gives,
   so scales of other sizes, such as pentatonic, are not in the table.
 - **Chords.** A chord is the heights of its notes above the chord root, as fractions of an octave in
-  pitch, so the same chord works in any scale: `Render` snaps every height to the nearest note of the
+  pitch, so the same chord works in any scale: `Realizer` snaps every height to the nearest note of the
   scale, lowest first, and a note already taken goes to a free neighbour or is dropped. A height can
   sit between two qualities, such as a third between minor and major, and the scale decides, so a
   triad is Cm, D° or Eb in C minor and C major in C major pentatonic. Shapes come from a table ranked
   by unconventionality, from triads (0) to clusters and polychords (5); a song draws where its chords gather,
   how far and how evenly they stray and which way they lean, and a section moves that by up to a rank. A voicing
-  step then inverts or opens the shape, and `Render` moves the whole chord into the track's range.
+  step then inverts or opens the shape, and `Realizer` moves the whole chord into the track's range.
   The chord root, unlike the shape, is a fraction of the scale's note count, as it moves along the
   scale.
 - **Progressions.** Every section has a home, the tonic most often (60%) and otherwise the relative
@@ -257,7 +263,7 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   colour, and the cadence bar a chord with pull, a seventh most often, then a suspended chord, a triad
   or a ninth; a strange song keeps its strangeness at the cadence. The bars between pick from the
   section's pool of chord shapes.
-- **Voice leading.** `Render` places a track's chords one after another (`VoiceLeader`): each takes
+- **Voice leading.** `Realizer` places a track's chords one after another (`VoiceLeader`): each takes
   the layout, among its inversions in every octave of the track's range, that follows best from the
   chord before, with a pull towards the middle of the range so that the chords do not drift. How it
   follows is the track's smoothness (`StateKinds.VoiceLeading`), from 1, where every note moves as
@@ -332,7 +338,7 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   or leads, and the bass by basses, with a few unusual choices weighted low. The melody never plays
   the chords' instrument. Drums and sound effects are never picked.
 - **Offsets are rounded before they are summed.** Pitch offsets such as the chord root or the chord
-  note are collections of fractional values, one from each layer (section, bar, note, ...). `Render`
+  note are collections of fractional values, one from each layer (section, bar, note, ...). `Realizer`
   turns each value into a whole number of scale steps first and adds up the results, so it computes
   `round(a * n) + round(b * n)` rather than `round((a + b) * n)`. This is deliberate: a layer then
   shifts the tonality of everything beneath it by a whole number of steps, the same for every note of

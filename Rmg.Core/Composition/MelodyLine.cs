@@ -1,8 +1,6 @@
 using Rmg.Core;
 
-using Rmg.Core.Composition;
-
-namespace Rmg.Core.Rendering;
+namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     Places the notes of a melody one after another, each by rule from the note before, the chord and the scale.

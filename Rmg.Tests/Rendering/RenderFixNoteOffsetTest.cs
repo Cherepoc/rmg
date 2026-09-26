@@ -1,3 +1,4 @@
+using Rmg.Core.Composition;
 using Rmg.Core.Rendering;
 
 namespace Rmg.Tests.Rendering;
@@ -11,7 +12,7 @@ public sealed class RenderFixNoteOffsetTest
     [Arguments(77)]
     public async Task Count1ReturnsMinOctaveOffset(int noteOffset)
     {
-        var result = Render.FixNoteOffset(5, 1, noteOffset);
+        var result = Realizer.FixNoteOffset(5, 1, noteOffset);
         const int expectedOffset = 65;
         await Assert.That(result).IsEqualTo(expectedOffset);
     }
@@ -24,7 +25,7 @@ public sealed class RenderFixNoteOffsetTest
     [Arguments(113)]
     public async Task Count2FirstPeriod(int noteOffset)
     {
-        var result = Render.FixNoteOffset(5, 2, noteOffset);
+        var result = Realizer.FixNoteOffset(5, 2, noteOffset);
         const int expectedOffset = 65;
         await Assert.That(result).IsEqualTo(expectedOffset);
     }
@@ -37,7 +38,7 @@ public sealed class RenderFixNoteOffsetTest
     [Arguments(113)]
     public async Task Count2SecondPeriod(int noteOffset)
     {
-        var result = Render.FixNoteOffset(4, 2, noteOffset);
+        var result = Realizer.FixNoteOffset(4, 2, noteOffset);
         const int expectedOffset = 65;
         await Assert.That(result).IsEqualTo(expectedOffset);
     }
@@ -49,7 +50,7 @@ public sealed class RenderFixNoteOffsetTest
     [Arguments(125)]
     public async Task Count3FirstPeriod(int noteOffset)
     {
-        var result = Render.FixNoteOffset(5, 3, noteOffset);
+        var result = Realizer.FixNoteOffset(5, 3, noteOffset);
         const int expectedOffset = 65;
         await Assert.That(result).IsEqualTo(expectedOffset);
     }
@@ -61,7 +62,7 @@ public sealed class RenderFixNoteOffsetTest
     [Arguments(101)]
     public async Task Count3SecondPeriod(int noteOffset)
     {
-        var result = Render.FixNoteOffset(4, 3, noteOffset);
+        var result = Realizer.FixNoteOffset(4, 3, noteOffset);
         const int expectedOffset = 65;
         await Assert.That(result).IsEqualTo(expectedOffset);
     }
@@ -73,7 +74,7 @@ public sealed class RenderFixNoteOffsetTest
     [Arguments(137)]
     public async Task Count3ThirdPeriod(int noteOffset)
     {
-        var result = Render.FixNoteOffset(3, 3, noteOffset);
+        var result = Realizer.FixNoteOffset(3, 3, noteOffset);
         const int expectedOffset = 65;
         await Assert.That(result).IsEqualTo(expectedOffset);
     }

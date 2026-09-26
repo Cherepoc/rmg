@@ -53,9 +53,9 @@ public sealed class CadenceRaisedStepTest
     {
         ImmutableArray<int> minor = [0, 2, 3, 5, 7, 8, 10];
 
-        await Assert.That(Render.RaiseScaleSteps(minor, [6]).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 8, 11]);
-        await Assert.That(Render.RaiseScaleSteps(minor, [5, 6]).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 9, 11]);
-        await Assert.That(Render.RaiseScaleSteps(minor, [])).IsEqualTo(minor);
+        await Assert.That(Realizer.RaiseScaleSteps(minor, [6]).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 8, 11]);
+        await Assert.That(Realizer.RaiseScaleSteps(minor, [5, 6]).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 9, 11]);
+        await Assert.That(Realizer.RaiseScaleSteps(minor, [])).IsEqualTo(minor);
     }
 
     [Test]
@@ -65,7 +65,7 @@ public sealed class CadenceRaisedStepTest
     {
         ImmutableArray<int> minor = [0, 2, 3, 5, 7, 8, 10];
 
-        await Assert.That(() => Render.RaiseScaleSteps(minor, [..steps])).Throws<ArgumentException>();
+        await Assert.That(() => Realizer.RaiseScaleSteps(minor, [..steps])).Throws<ArgumentException>();
     }
 
     [Test]

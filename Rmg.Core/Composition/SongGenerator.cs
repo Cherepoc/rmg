@@ -96,7 +96,10 @@ public static class SongGenerator
         songTrackNoteTimelineMap = new FillGenerator(Stream(SongStream.Fills), tracks, rhythmicUnconventionality)
             .Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
 
-        return new Song(songTrackNoteTimelineMap.Duration, tracks.Definitions, songTrackNoteTimelineMap, form.Map);
+        // and last the notes, decided from the state of the whole song, in its order
+        var notes = Realizer.Realize(tracks.Definitions, songTrackNoteTimelineMap);
+
+        return new Song(songTrackNoteTimelineMap.Duration, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes);
     }
 
     /// <summary>The random sequence a stage of the song of the given seed draws from.</summary>

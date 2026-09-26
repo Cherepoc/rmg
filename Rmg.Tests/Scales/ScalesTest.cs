@@ -94,7 +94,7 @@ public sealed class ScalesTest
             if (isChromaticApproach)
                 continue;
 
-            var scale = Rmg.Core.Rendering.Render.RaiseScaleSteps(offsets, raisedSteps.GetEffectiveValueAt(note.Position));
+            var scale = Rmg.Core.Composition.Realizer.RaiseScaleSteps(offsets, raisedSteps.GetEffectiveValueAt(note.Position));
             var pitchClasses = scale.Select(x => (x + key) % 12).ToHashSet();
             await Assert.That(pitchClasses).Contains(note.Value.Offset % 12).Because($"position {note.Position}");
         }

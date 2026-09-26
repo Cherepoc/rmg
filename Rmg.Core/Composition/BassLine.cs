@@ -1,6 +1,5 @@
-using Rmg.Core.Composition;
 
-namespace Rmg.Core.Rendering;
+namespace Rmg.Core.Composition;
 
 /// <summary>The chord a note is played over: the pitch of any step of the scale, counted from the chord's root.</summary>
 internal sealed class ChordContext(Func<int, int> getPitch)
