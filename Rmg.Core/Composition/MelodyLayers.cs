@@ -32,7 +32,7 @@ public static class MelodyLayers
     public const double RepeatChance = 0.2;
 
     /// <summary>The chance of a moving note going on the way the melody goes, rather than turning back.</summary>
-    public const double ContinueChance = 0.75;
+    public const double ContinueChance = 0.85;
 
     /// <summary>How much less often the melody's cycles are drawn afresh than the other tracks', so it plays riffs.</summary>
     public const double RhythmVariation = -0.2;

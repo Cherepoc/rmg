@@ -41,8 +41,6 @@ finest grid. Taking events out in a span is a new timeline operation, kept to th
 
 ### Left for later
 
-- **The melody's direction:** about 58% of its moves turn back, where a sung line turns less often. It did not change
-  when the melody got busier, so it comes from `MelodyLine`'s rules, not from sparse notes; worth tuning there.
 - **Motifs within a bar:** a melody's repeated cycle repeats its rhythm, but its pitches follow the rules afresh; a
   motif could be remembered per cycle as well as per bar.
 

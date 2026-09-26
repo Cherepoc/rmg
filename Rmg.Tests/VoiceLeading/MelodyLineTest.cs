@@ -10,7 +10,7 @@ namespace Rmg.Tests.VoiceLeading;
 
 public sealed class MelodyLineTest
 {
-    // C3 to B5; the melody keeps to 15 semitones in the middle, from about C4 to D#5
+    // C3 to B5; the melody keeps to 17 semitones in the middle, from A3 to D5
     private const int MinNote = 48;
     private const int MaxNote = 83;
 
@@ -44,6 +44,20 @@ public sealed class MelodyLineTest
 
         await Assert.That(CTones).Contains(note % 12);
         await Assert.That(Math.Abs(note - 65)).IsLessThanOrEqualTo(2);
+    }
+
+    [Test]
+    public async Task NextBar_GoesOnTheWayTheMelodyWent()
+    {
+        var line = new MelodyLine(MinNote, MaxNote);
+        var first = line.Place(C, CTones, 0, Strong, 0, 0);
+        // turning back from the start, the melody goes down
+        var down = line.Place(C, CTones, 3, Weak, -1, 0);
+
+        var next = line.Place(C, CTones, 4, Weak, 1, 0);
+
+        await Assert.That(down).IsLessThan(first);
+        await Assert.That(next).IsLessThan(down);
     }
 
     [Test]

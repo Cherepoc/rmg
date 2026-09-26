@@ -273,7 +273,7 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   along the scale between them; a note means to go on the way the melody goes or to turn back, and now
   and then to leap, less the more stepwise the melody (`MelodyLayers`, set by the melody instrument
   and moved by the section). After a leap it steps back, and it turns towards where its phrase aims,
-  a shape drawn per section: up and back down, falling, rising, or a wave. It keeps to a singable 15
+  a shape drawn per section: up and back down, falling, rising, or a wave. It keeps to a singable 17
   semitones in the middle of its range. A bar pattern that comes back is a motif: it plays the shape it
   had the first time, moved along the scale, so that over another chord it sounds as a sequence.
 - **The melody's rhythm.** A song draws how busy its melody is (`MelodyBusyness`), from a sparse, held

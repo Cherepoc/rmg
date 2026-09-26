@@ -15,8 +15,9 @@ namespace Rmg.Core.Rendering;
 /// </summary>
 internal sealed class MelodyLine
 {
-    /// <summary>How wide the melody's range is, in semitones: about what a voice sings comfortably.</summary>
-    internal const int RangeWidth = 15;
+    /// <summary>How wide the melody's range is, in semitones: an octave and a fourth, a little more than a voice sings comfortably, so that a line
+    ///     that runs on turns at the phrase's aim more often than at the range's edge.</summary>
+    internal const int RangeWidth = 17;
 
     /// <summary>How far from where its phrase aims the melody goes before it turns back towards it.</summary>
     internal const int RegisterPull = 7;
@@ -42,8 +43,8 @@ internal sealed class MelodyLine
     private int? _previous;
     private int _previousMove;
 
-    // the way the melody goes, up (1) or down (-1): its last move's, which the next note goes on in or turns from;
-    // every bar starts it up, so that a bar that comes back traces the same shape
+    // the way the melody goes, up (1) or down (-1): its last move's, which the next note goes on in or turns from, across
+    // bar lines too; a bar that comes back takes its shape from the motif, not from the way the melody went
     private int _heading = 1;
     private int? _previousBar;
 
@@ -88,7 +89,6 @@ internal sealed class MelodyLine
         var bar = (int)Math.Floor(position / BarDuration);
         if (bar != _previousBar)
         {
-            _heading = 1;
             _barNoteIndex = 0;
             // a motif heard before plays its shape again, and one heard for the first time is remembered
             _replaying = motif != 0 && _motifs.TryGetValue(motif, out var shape) ? shape : null;
