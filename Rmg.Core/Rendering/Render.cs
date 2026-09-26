@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Songs;
 
@@ -141,9 +142,19 @@ public static class Render
             (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1,
             notes => FitChordIntoRange(absoluteMinOctave, octaveCount, notes)
         );
+        // and a bass line's notes, each following from the one before and leading into the next chord
+        var bassLine = new BassLine(
+            absoluteMinOctave * OctaveNoteCount,
+            (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1,
+            note => FixNoteOffset(absoluteMinOctave, octaveCount, note)
+        );
+        var items = eventStateTimelineMap.WithDurations().ToArray();
         var renderedNotes = ImmutableArray.CreateBuilder<TimelineItem<RenderedNote>>();
-        foreach (var item in eventStateTimelineMap.WithDurations())
-            renderedNotes.AddRange(RenderPitchNotes(item, absoluteMinOctave, octaveCount, voiceLeader));
+        for (var i = 0; i < items.Length; i++)
+        {
+            TimelineItem<WithDuration<StateMap>>? next = i + 1 < items.Length ? items[i + 1] : null;
+            renderedNotes.AddRange(RenderPitchNotes(items[i], next, absoluteMinOctave, octaveCount, voiceLeader, bassLine));
+        }
         var renderedNoteTimeline = EventTimeline.Create(eventStateTimelineMap.Duration, renderedNotes.ToImmutable());
         return new RenderedTrack(false, track.InstrumentCode, renderedNoteTimeline);
     }
@@ -171,23 +182,18 @@ public static class Render
 
     private static IEnumerable<TimelineItem<RenderedNote>> RenderPitchNotes(
         TimelineItem<WithDuration<StateMap>> timelineItemWithDuration,
+        TimelineItem<WithDuration<StateMap>>? nextItem,
         int absoluteMinOctave,
         int octaveCount,
-        VoiceLeader voiceLeader
+        VoiceLeader voiceLeader,
+        BassLine bassLine
     )
     {
         var position = timelineItemWithDuration.Position;
         var nextNoteDuration = Math.Min(timelineItemWithDuration.Value.Duration, MaxNextNoteDuration);
         var stateMap = timelineItemWithDuration.Value.Value;
 
-        var scaleOffsets = stateMap.GetStateValue(StateKinds.ScaleOffsets);
-        if (scaleOffsets.IsEmpty)
-            scaleOffsets = ChromaticScaleOffsets;
-        scaleOffsets = RaiseScaleSteps(scaleOffsets, stateMap.GetStateValue(StateKinds.RaisedScaleSteps));
-
-        // the chord root, in scale steps
-        var chordRootNoteIndex = stateMap.GetStateValue(StateKinds.ChordRootNoteOffset)
-            .ToIndexOverLength(scaleOffsets.Length);
+        var (scaleOffsets, chordRootNoteIndex, chord) = GetChord(stateMap);
 
         // the chord notes, in scale steps above the root; a note without a chord plays its root alone
         var chordPitchOffsets = stateMap.GetStateValue(StateKinds.ChordNotePitchOffsets);
@@ -197,8 +203,6 @@ public static class Render
             chordPitchOffsets.IsEmpty ? [0] : chordPitchOffsets.Select(x => x * OctaveNoteCount)
         );
 
-        var noteOctaveOffset = stateMap.GetStateValue(StateKinds.OctaveOffset);
-        var noteKeyOffset = stateMap.GetStateValue(StateKinds.KeyOffset);
         var noteVelocity = stateMap.GetStateValue(StateKinds.Velocity);
         var quarterNoteDuration = stateMap.GetStateValue(StateKinds.QuarterNoteDurationPower)
             .BounceInBounds(-2, 2)
@@ -207,8 +211,7 @@ public static class Render
             .BounceInBounds(0, 1);
         var duration = nextNoteDuration.WeightedAverage(nextNoteDurationFactor, quarterNoteDuration);
 
-        int ToNote(int stepAboveRoot) =>
-            noteKeyOffset + noteOctaveOffset * OctaveNoteCount + GetScalePitch(scaleOffsets, chordRootNoteIndex + stepAboveRoot);
+        int ToNote(int stepAboveRoot) => chord.GetPitch(stepAboveRoot);
 
         // a chord note offset picks one note of the chord, whatever its voicing, going round the chord's scale notes
         // from the root up and an octave up or down for every lap around it; without one the whole chord plays
@@ -225,7 +228,19 @@ public static class Render
                 .ToIndexOverLength(chordDegrees.Length)
                 .ToPeriodRemainder(chordDegrees.Length);
             var note = ToNote(chordDegrees[selectedIndex] + selectedOctave * scaleOffsets.Length);
-            notes = [FixNoteOffset(absoluteMinOctave, octaveCount, note)];
+            if (stateMap.GetStateValue(StateKinds.FollowsChordRoots) > 0)
+                note = bassLine.Place(
+                    note,
+                    chord,
+                    position,
+                    nextItem is { } next ? GetChord(next.Value.Value).Chord : null,
+                    nextItem?.Position,
+                    (ChordArrival)stateMap.GetStateValue(StateKinds.ChordArrival),
+                    (ChordApproach)stateMap.GetStateValue(StateKinds.ChordApproach)
+                );
+            else
+                note = FixNoteOffset(absoluteMinOctave, octaveCount, note);
+            notes = [note];
         }
         else
         {
@@ -243,6 +258,23 @@ public static class Render
             var renderedNote = new RenderedNote(note, noteVelocity, duration);
             yield return renderedNote.ToTimelineItem(position);
         }
+    }
+
+    /// <summary>
+    ///     The chord a note is played over: the scale, with the steps the note's bar raises, the chord root's step in
+    ///     it, and the pitch of every step counted from the root, in the key and the octave.
+    /// </summary>
+    private static (ImmutableArray<int> ScaleOffsets, int RootIndex, ChordContext Chord) GetChord(StateMap stateMap)
+    {
+        var scaleOffsets = stateMap.GetStateValue(StateKinds.ScaleOffsets);
+        if (scaleOffsets.IsEmpty)
+            scaleOffsets = ChromaticScaleOffsets;
+        scaleOffsets = RaiseScaleSteps(scaleOffsets, stateMap.GetStateValue(StateKinds.RaisedScaleSteps));
+
+        // the chord root, in scale steps
+        var rootIndex = stateMap.GetStateValue(StateKinds.ChordRootNoteOffset).ToIndexOverLength(scaleOffsets.Length);
+        var basePitch = stateMap.GetStateValue(StateKinds.KeyOffset) + stateMap.GetStateValue(StateKinds.OctaveOffset) * OctaveNoteCount;
+        return (scaleOffsets, rootIndex, new ChordContext(step => basePitch + GetScalePitch(scaleOffsets, rootIndex + step)));
     }
 
     /// <summary>

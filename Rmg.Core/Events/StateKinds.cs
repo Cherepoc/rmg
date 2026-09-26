@@ -21,6 +21,12 @@ public static class StateKinds
     // a bar whose first chord plays as drawn, in its own register, and not led from the chord before; each such bar
     // has its own number, so that bars in a row are told apart
     public static readonly StateKind<int> ChordVoicingReset = CreateAdditive<int>("ChordVoicingReset", StateScope.Render);
+    // 1 for a track that plays the chord roots, the bass, whose line leads into the chords and lands on them
+    public static readonly StateKind<int> FollowsChordRoots = CreateAdditive<int>("FollowsChordRoots", StateScope.Render);
+    // how a bar's last bass note leads into the next chord (a ChordApproach), and what its first note of a new chord
+    // plays (a ChordArrival)
+    public static readonly StateKind<int> ChordApproach = CreateAdditive<int>("ChordApproach", StateScope.Render);
+    public static readonly StateKind<int> ChordArrival = CreateAdditive<int>("ChordArrival", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordRootNoteOffset = CreateCollection<double>("ChordRootOffset", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordNoteOffset = CreateCollection<double>("ChordNoteOffset", StateScope.Render);
     public static readonly StateKind<ImmutableArray<int>> ScaleOffsets = CreateCollection<int>("ScaleOffsets", StateScope.Render, isShared: true);

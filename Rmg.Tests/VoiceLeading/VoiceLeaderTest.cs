@@ -169,8 +169,8 @@ public sealed class VoiceLeaderTest
                 .ToArray();
             var songSmoothness = definition.StateMap.GetStateValue(StateKinds.VoiceLeading);
 
-            if (!byInstrument.TryGetValue(instrument.VoiceLeading, out var list))
-                byInstrument[instrument.VoiceLeading] = list = [];
+            if (!byInstrument.TryGetValue(instrument.Leading, out var list))
+                byInstrument[instrument.Leading] = list = [];
             list.Add(songSmoothness);
             if (smoothness.Length > 1)
                 songsVaryingBySection++;

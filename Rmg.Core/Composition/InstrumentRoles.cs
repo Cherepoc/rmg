@@ -7,12 +7,14 @@ namespace Rmg.Core.Composition;
 
 /// <summary>A General MIDI instrument a role can be played with, and how likely it is among the role's others.</summary>
 /// <param name="Program">The General MIDI program, from 0.</param>
-/// <param name="VoiceLeading">
-///     How smoothly the instrument's chords usually move (see <see cref="StateKinds.VoiceLeading" />): strings, pads
-///     and organs hold their notes and move them little, pianos are in between, and guitars move their chord shapes
-///     up and down the neck.
+/// <param name="Leading">
+///     How the instrument moves from chord to chord. For a chord instrument it is how smoothly its chords move (see
+///     <see cref="StateKinds.VoiceLeading" />): strings, pads and organs hold their notes and move them little, pianos
+///     are in between, and guitars move their chord shapes up and down the neck. For a bass it is how much it leads
+///     into the next chord (see <see cref="BassLeadingLayers" />): upright and fretless basses walk, synth basses sit on
+///     the roots.
 /// </param>
-public sealed record RoleInstrument(int Program, string Name, double Weight, double VoiceLeading = VoiceLeadingLayers.Piano);
+public sealed record RoleInstrument(int Program, string Name, double Weight, double Leading = VoiceLeadingLayers.Piano);
 
 /// <summary>
 ///     What a pitched track does in the song, and the instruments that suit it: ones that sustain chords, ones that
@@ -127,17 +129,17 @@ public static class InstrumentRoles
     public static InstrumentRole Bass { get; } = new(
         nameof(Bass),
         [
-            new(32, "Acoustic Bass", 0.8),
-            new(33, "Electric Bass (finger)", 1),
-            new(34, "Electric Bass (pick)", 0.6),
-            new(35, "Fretless Bass", 0.5),
-            new(36, "Slap Bass 1", 0.2),
-            new(37, "Slap Bass 2", 0.15),
-            new(38, "Synth Bass 1", 0.5),
-            new(39, "Synth Bass 2", 0.4),
-            new(43, "Contrabass", 0.3),
-            new(58, "Tuba", 0.1),
-            new(70, "Bassoon", 0.1)
+            new(32, "Acoustic Bass", 0.8, BassLeadingLayers.Walking),
+            new(33, "Electric Bass (finger)", 1, BassLeadingLayers.Moderate),
+            new(34, "Electric Bass (pick)", 0.6, BassLeadingLayers.Moderate),
+            new(35, "Fretless Bass", 0.5, BassLeadingLayers.Walking),
+            new(36, "Slap Bass 1", 0.2, BassLeadingLayers.Moderate),
+            new(37, "Slap Bass 2", 0.15, BassLeadingLayers.Moderate),
+            new(38, "Synth Bass 1", 0.5, BassLeadingLayers.Plain),
+            new(39, "Synth Bass 2", 0.4, BassLeadingLayers.Plain),
+            new(43, "Contrabass", 0.3, BassLeadingLayers.Walking),
+            new(58, "Tuba", 0.1, BassLeadingLayers.Moderate),
+            new(70, "Bassoon", 0.1, BassLeadingLayers.Moderate)
         ]
     );
 }

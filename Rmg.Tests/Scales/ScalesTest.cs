@@ -2,6 +2,7 @@ using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Rendering;
+using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Scales;
 
@@ -76,15 +77,23 @@ public sealed class ScalesTest
         var offsets = common.GetStateTimeline(StateKinds.ScaleOffsets)[0].Value;
         var key = common.GetStateTimeline(StateKinds.KeyOffset).GetEffectiveValueAt(0);
         var raisedSteps = common.GetStateTimeline(StateKinds.RaisedScaleSteps);
+        var approaches = common.GetStateTimeline(StateKinds.ChordApproach);
+        var bassProgram = ((PitchInstrumentTrack)song.TrackDefinitions[6]).InstrumentCode;
 
-        var notes = Render.RenderSong(song).Tracks
-            .Where(x => !x.IsPercussionInstrument)
-            .SelectMany(x => x.NoteTimeline)
-            .ToArray();
+        var tracks = Render.RenderSong(song).Tracks.Where(x => !x.IsPercussionInstrument).ToArray();
 
-        await Assert.That(notes.Length).IsGreaterThan(0);
-        foreach (var note in notes)
+        await Assert.That(tracks.Sum(x => x.NoteTimeline.Count)).IsGreaterThan(0);
+        foreach (var track in tracks)
+        foreach (var note in track.NoteTimeline)
         {
+            // a bass note leading into the next chord by a semitone leaves the scale on purpose
+            var approach = (ChordApproach)approaches.GetEffectiveValueAt(note.Position);
+            var isChromaticApproach = track.PitchInstrumentCode == bassProgram
+                && note.Position % 4 >= 3
+                && approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove;
+            if (isChromaticApproach)
+                continue;
+
             var scale = Rmg.Core.Rendering.Render.RaiseScaleSteps(offsets, raisedSteps.GetEffectiveValueAt(note.Position));
             var pitchClasses = scale.Select(x => (x + key) % 12).ToHashSet();
             await Assert.That(pitchClasses).Contains(note.Value.Offset % 12).Because($"position {note.Position}");
