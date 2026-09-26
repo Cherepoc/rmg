@@ -85,7 +85,16 @@ public sealed class StateKind<T> : IStateKind
 
     IStateTimeline IStateKind.CreateTimelineFromState(double duration, IState state)
     {
-        return CreateTimelineFromValue(duration, ((State<T>)state).Value);
+        // a timeline holds values, not states, so a state's parts go with it: the layer of a value that is one part,
+        // or a timeline of every part, which keeps a layer that took part twice visible as twice
+        var timeline = CreateTimelineFromValue(duration, ((State<T>)state).Value);
+        var contributions = state.Contributions;
+        return contributions.Length switch
+        {
+            0 => timeline,
+            1 => timeline.WithLayer(contributions[0].Layer),
+            _ => timeline.WithSources([..contributions.Select(x => CreateTimelineFromValue(duration, (T)x.Value).WithLayer(x.Layer))])
+        };
     }
 
     IStateTimeline IStateKind.ExtractStateTimeline(EventTimeline<StateMap> eventTimeline)

@@ -4,8 +4,8 @@ Planned work that has been decided but not built yet.
 
 ## Chords
 
-Chord shapes are pitch fractions snapped to the scale, picked from a table ranked by weirdness and laid out by a
-voicing step (see `ChordShapes`, `ChordWeirdness`, `ChordVoicing` and `Render.SnapChordToScale`). Still to do:
+Chord shapes are pitch fractions snapped to the scale, picked from a table ordered by unconventionality and laid out by a
+voicing step (see `ChordShapes`, `HarmonicUnconventionality`, `ChordVoicing` and `Render.SnapChordToScale`). Still to do:
 
 ### Voice leading
 
@@ -22,13 +22,8 @@ it needs the actual pitches of the previous chord:
 It only concerns tracks that play whole chords; melody and bass pick single chord notes. Rendering then keeps the
 previous chord of a track, where it now renders every note on its own.
 
-### Home chord
-
-A progression has no chord it resolves to: a section's chords are a pool the bars pick from. With a home chord, the
-chord a progression comes back to would stay near rank 0 while the others may be weirder, for tension and release.
-
 ### Jitter on in-between heights
 
 Heights between two qualities, such as the third, could move a little from chord to chord, so that a scale with more
-notes than seven picks sometimes one quality and sometimes the other. Worth it once scales other than natural minor
+notes than seven picks sometimes one quality and sometimes the other. Worth it once scales of other sizes than seven
 exist; in a 7-note scale it changes nothing.

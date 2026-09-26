@@ -11,12 +11,14 @@ namespace Rmg.Tests.SongGenerators;
 public sealed class SongGeneratorStateLayerTest
 {
     [Test]
-    public async Task Notes_GetEachChordRootOffsetOnce()
+    public async Task Notes_GetEachLayersChordRootOffsetOnce()
     {
-        // the chord root offsets are a collection, so every layer's random offset stays visible: an offset that
-        // shows up twice on a note is one layer's value applied twice
+        // a trace names the layer of every offset, so a layer whose offset shows up twice on a note is one applied
+        // twice; the offsets themselves can be equal, such as a section's home and a bar's root of the same step
+        var layersSeen = new HashSet<string>();
         for (var seed = 0; seed < 30; seed++)
         {
+            using var trace = StateTrace.Start();
             var song = SongGenerator.GenerateSong(seed);
             var commonStateTimelineMap = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
 
@@ -30,13 +32,17 @@ public sealed class SongGeneratorStateLayerTest
 
                 foreach (var note in notes)
                 {
-                    var offsets = note.Value.GetStateValue(StateKinds.ChordRootNoteOffset);
-                    await Assert.That(offsets.Distinct().Count())
-                        .IsEqualTo(offsets.Length)
-                        .Because($"seed {seed}, track {trackNumber}, position {note.Position}");
+                    var layers = note.Value.Explain(StateKinds.ChordRootNoteOffset).Select(x => x.Layer).ToArray();
+                    layersSeen.UnionWith(layers);
+                    await Assert.That(layers.Distinct().Count())
+                        .IsEqualTo(layers.Length)
+                        .Because($"seed {seed}, track {trackNumber}, position {note.Position}: {string.Join(", ", layers)}");
                 }
             }
         }
+
+        // the section's home, the progression's root and the notes' own walk all reach the notes
+        await Assert.That(layersSeen.IsSupersetOf(["Section", "Progression", "Note"])).IsTrue().Because(string.Join(", ", layersSeen));
     }
 
     [Test]

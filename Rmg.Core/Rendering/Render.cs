@@ -177,6 +177,7 @@ public static class Render
         var scaleOffsets = stateMap.GetStateValue(StateKinds.ScaleOffsets);
         if (scaleOffsets.IsEmpty)
             scaleOffsets = ChromaticScaleOffsets;
+        scaleOffsets = RaiseScaleSteps(scaleOffsets, stateMap.GetStateValue(StateKinds.RaisedScaleSteps));
 
         // the chord root, in scale steps
         var chordRootNoteIndex = stateMap.GetStateValue(StateKinds.ChordRootNoteOffset)
@@ -230,6 +231,29 @@ public static class Render
             var renderedNote = new RenderedNote(note, noteVelocity, duration);
             yield return renderedNote.ToTimelineItem(position);
         }
+    }
+
+    /// <summary>
+    ///     The scale with every listed step raised a semitone, as many times as it is listed. The scale must stay in
+    ///     order within the octave: a step cannot be raised onto the next one.
+    /// </summary>
+    internal static ImmutableArray<int> RaiseScaleSteps(ImmutableArray<int> scaleOffsets, ImmutableArray<int> raisedSteps)
+    {
+        if (raisedSteps.IsEmpty)
+            return scaleOffsets;
+
+        var offsets = scaleOffsets.ToArray();
+        foreach (var step in raisedSteps)
+            offsets[step.Mod(offsets.Length)]++;
+
+        for (var i = 0; i < offsets.Length; i++)
+            if (offsets[i] >= OctaveNoteCount || i > 0 && offsets[i] <= offsets[i - 1])
+                throw new ArgumentException(
+                    $"Raising steps {string.Join(", ", raisedSteps)} of the scale {string.Join(", ", scaleOffsets)} puts it out of order.",
+                    nameof(raisedSteps)
+                );
+
+        return [..offsets];
     }
 
     /// <summary>

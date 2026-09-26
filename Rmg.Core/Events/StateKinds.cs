@@ -16,6 +16,8 @@ public static class StateKinds
     public static readonly StateKind<ImmutableArray<double>> ChordRootNoteOffset = CreateCollection<double>("ChordRootOffset", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordNoteOffset = CreateCollection<double>("ChordNoteOffset", StateScope.Render);
     public static readonly StateKind<ImmutableArray<int>> ScaleOffsets = CreateCollection<int>("ScaleOffsets", StateScope.Render, isShared: true);
+    // scale steps raised a semitone each time they are listed, such as the seventh on a cadence
+    public static readonly StateKind<ImmutableArray<int>> RaisedScaleSteps = CreateCollection<int>("RaisedScaleSteps", StateScope.Render, isShared: true);
     public static readonly StateKind<double> Tempo = CreateMultiplicative<double>("Tempo", StateScope.Render, isShared: true);
 
     public static StateKind<T> CreateAdditive<T>(

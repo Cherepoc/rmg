@@ -203,16 +203,40 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   context, which is what makes every song reproducible.
 - **Rendering.** `Render` turns the abstract song into concrete notes (pitch, velocity, duration),
   and `Midi` writes them as a standard MIDI file.
+- **Scales.** A song is in one scale from start to end, in a random key. The scale is drawn from a
+  weighted table of 7-note scales (`Scales`): natural minor and major are the most common (30% each),
+  dorian and mixolydian occasional (12% each), and harmonic minor, phrygian and lydian rare (5–6%).
+  Chord roots move by scale steps and chord heights sit between the qualities a 7-note scale gives,
+  so scales of other sizes, such as pentatonic, are not in the table.
 - **Chords.** A chord is the heights of its notes above the chord root, as fractions of an octave in
   pitch, so the same chord works in any scale: `Render` snaps every height to the nearest note of the
   scale, lowest first, and a note already taken goes to a free neighbour or is dropped. A height can
   sit between two qualities, such as a third between minor and major, and the scale decides, so a
   triad is Cm, D° or Eb in C minor and C major in C major pentatonic. Shapes come from a table ranked
-  by weirdness, from triads (0) to clusters and polychords (5); a song draws where its chords gather,
+  by unconventionality, from triads (0) to clusters and polychords (5); a song draws where its chords gather,
   how far and how evenly they stray and which way they lean, and a section moves that by up to a rank. A voicing
   step then inverts or opens the shape, and `Render` moves the whole chord into the track's range.
   The chord root, unlike the shape, is a fraction of the scale's note count, as it moves along the
   scale.
+- **Progressions.** Every section has a home, the tonic most often (60%) and otherwise the relative
+  key, IV or V, and a 4-bar progression of chord roots around it (`Progressions`): bar 1 is the home
+  chord, bar 2 moves away, bar 3 prepares the cadence (ii or IV) and bar 4 is the cadence, which
+  resolves to bar 1 as the pattern repeats. A root is drawn by how strongly the previous one leads to
+  it, falling a fifth the most, and by how well it suits its bar. The cadence chords follow from the
+  chords the scale builds around the home, so they suit the mode: V where it is major, ♭VII in
+  mixolydian or natural minor, ♭II in phrygian, IV or ♭VII in dorian. Roots stay within 3 steps of the
+  home, so the bass keeps to one register. The more unconventional a section's harmony, the looser it
+  keeps to these rules, until every root is as likely. Where the chord on the fifth is minor and the
+  seventh step sits a whole step below the home, as in natural minor, dorian and mixolydian, a
+  cadence on the fifth raises that seventh for the bar (`StateKinds.RaisedScaleSteps`), so the chord
+  turns major and leads home as in harmonic minor. The home bar plays a plain chord, a triad or a mild
+  colour, and the cadence bar a chord with pull, a seventh most often, then a suspended chord, a triad
+  or a ninth; a strange song keeps its strangeness at the cadence. The bars between pick from the
+  section's pool of chord shapes.
+- **Instruments.** Each pitched track has a role (`InstrumentRoles`): the chords are played by pianos,
+  organs, guitars, strings or pads, the melody by keys, mallets, guitars, strings, brass, reeds, pipes
+  or leads, and the bass by basses, with a few unusual choices weighted low. The melody never plays
+  the chords' instrument. Drums and sound effects are never picked.
 - **Offsets are rounded before they are summed.** Pitch offsets such as the chord root or the chord
   note are collections of fractional values, one from each layer (section, bar, note, ...). `Render`
   turns each value into a whole number of scale steps first and adds up the results, so it computes
