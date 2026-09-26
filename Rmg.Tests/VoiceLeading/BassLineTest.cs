@@ -111,7 +111,7 @@ public sealed class BassLineTest
         var leaps = new List<int>();
         for (var seed = 0; seed < 20; seed++)
         {
-            var song = SongGenerator.GenerateSong(seed);
+            var song = TestCorpus.Get(seed).Song;
             var program = ((PitchInstrumentTrack)song.TrackDefinitions[6]).InstrumentCode;
             var notes = Render.RenderSong(song).Tracks.First(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == program)
                 .NoteTimeline.ToArray();
@@ -129,7 +129,7 @@ public sealed class BassLineTest
         var byLeading = new Dictionary<double, List<double>>();
         for (var seed = 0; seed < 80; seed++)
         {
-            var song = SongGenerator.GenerateSong(seed);
+            var song = TestCorpus.Get(seed).Song;
             var program = ((PitchInstrumentTrack)song.TrackDefinitions[6]).InstrumentCode;
             var instrument = Rmg.Core.Composition.InstrumentRoles.Bass.Instruments.Single(x => x.Program == program);
             var approaches = song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordApproach);

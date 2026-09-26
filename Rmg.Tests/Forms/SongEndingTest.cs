@@ -1,5 +1,3 @@
-using System.Globalization;
-using System.Text.RegularExpressions;
 using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
@@ -14,49 +12,19 @@ public sealed class SongEndingTest
     private const int MelodyTrack = 5;
     private const int BassTrack = 6;
 
-    private sealed record Ending(EndingKind Kind, double Line, double Held, double Stop, bool SlowsDown);
+    private static readonly IReadOnlyList<CorpusSong> Songs = TestCorpus.Range(40).ToArray();
 
-    private sealed record EndedSong(Song Song, RenderedSong Rendered, Ending Ending);
+    private static EndingSpan Ending(CorpusSong song) => song.Map.Ending;
 
-    private static double Number(string description, string pattern) =>
-        Regex.Match(description, pattern) is { Success: true } match ? double.Parse(match.Groups[1].Value, CultureInfo.InvariantCulture) : 0;
-
-    private static EndedSong Generate(int seed)
-    {
-        using var trace = StateTrace.Start();
-        var song = SongGenerator.GenerateSong(seed);
-        var description = trace.Entries.Single(x => x.Point == "Song ending").Phrase!;
-        var ending = new Ending(
-            Enum.Parse<EndingKind>(description.Split(' ')[0]),
-            Number(description, @"at beat ([\d.]+)"),
-            Number(description, @"held ([\d.]+)"),
-            Number(description, @"stopping ([\d.]+)"),
-            description.Contains("slowing down")
-        );
-        return new EndedSong(song, Render.RenderSong(song), ending);
-    }
-
-    private static readonly IReadOnlyList<EndedSong> Songs = Enumerable.Range(0, 40).Select(Generate).ToArray();
-
-    private static TimelineItem<RenderedNote>[] Notes(EndedSong song, int track)
-    {
-        var program = ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
-        return song.Rendered.Tracks
-            .Where(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == program)
-            .SelectMany(x => x.NoteTimeline)
-            .OrderBy(x => x.Position)
-            .ToArray();
-    }
-
-    private static int Tonic(EndedSong song) =>
+    private static int Tonic(CorpusSong song) =>
         song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(StateKinds.KeyOffset).Mod(12);
 
     [Test]
     public async Task ClosedEndings_LandOnTheTonic()
     {
-        var closed = Songs.Where(x => x.Ending.Kind != EndingKind.Open).ToArray();
-        var bassOnTonic = closed.Count(x => Notes(x, BassTrack)[^1].Value.Offset.Mod(12) == Tonic(x));
-        var melodyOnTonic = closed.Count(x => Notes(x, MelodyTrack)[^1].Value.Offset.Mod(12) == Tonic(x));
+        var closed = Songs.Where(x => Ending(x).Kind != EndingKind.Open).ToArray();
+        var bassOnTonic = closed.Count(x => x.Notes(BassTrack)[^1].Value.Offset.Mod(12) == Tonic(x));
+        var melodyOnTonic = closed.Count(x => x.Notes(MelodyTrack)[^1].Value.Offset.Mod(12) == Tonic(x));
 
         await Assert.That(closed.Length).IsGreaterThan(20);
         await Assert.That(bassOnTonic).IsEqualTo(closed.Length);
@@ -66,26 +34,26 @@ public sealed class SongEndingTest
     [Test]
     public async Task TheFinalChord_PlaysOnTheLine_AndIsHeld()
     {
-        foreach (var song in Songs.Where(x => x.Ending.Kind != EndingKind.Open))
+        foreach (var song in Songs.Where(x => Ending(x).Kind != EndingKind.Open))
         {
-            var bass = Notes(song, BassTrack)[^1];
+            var bass = song.Notes(BassTrack)[^1];
 
-            await Assert.That(bass.Position).IsEqualTo(song.Ending.Line);
-            await Assert.That(bass.Value.Duration).IsEqualTo(song.Ending.Held);
-            await Assert.That(song.Song.Duration).IsEqualTo(song.Ending.Line + Math.Max(song.Ending.Held, 4));
+            await Assert.That(bass.Position).IsEqualTo(Ending(song).Start);
+            await Assert.That(bass.Value.Duration).IsEqualTo(Ending(song).Held);
+            await Assert.That(song.Song.Duration).IsEqualTo(Ending(song).Start + Ending(song).Duration);
         }
     }
 
     [Test]
     public async Task Stops_SilenceTheBand_BeforeTheFinalChord()
     {
-        var stops = Songs.Where(x => x.Ending.Kind == EndingKind.Stop).ToArray();
+        var stops = Songs.Where(x => Ending(x).Kind == EndingKind.Stop).ToArray();
         foreach (var song in stops)
         {
-            var from = song.Ending.Line - song.Ending.Stop;
+            var from = Ending(song).Start - Ending(song).Stop;
             var sounding = song.Rendered.Tracks
                 .SelectMany(x => x.NoteTimeline)
-                .Where(x => x.Position < song.Ending.Line && x.Position + (x.Value.Duration > 0.25 ? x.Value.Duration : 0) > from + 1e-9)
+                .Where(x => x.Position < Ending(song).Start && x.Position + (x.Value.Duration > 0.25 ? x.Value.Duration : 0) > from + 1e-9)
                 .ToArray();
 
             await Assert.That(sounding).IsEmpty();
@@ -97,14 +65,14 @@ public sealed class SongEndingTest
     [Test]
     public async Task Ritardandos_SlowTheBarBeforeTheEnding()
     {
-        var slowing = Songs.Where(x => x.Ending.SlowsDown).ToArray();
+        var slowing = Songs.Where(x => Ending(x).SlowsDown).ToArray();
         foreach (var song in slowing)
         {
             var tempo = song.Rendered.TempoTimeline;
-            var before = tempo.GetEffectiveValueAt(song.Ending.Line - 5);
+            var before = tempo.GetEffectiveValueAt(Ending(song).Start - 5);
 
-            await Assert.That(tempo.GetEffectiveValueAt(song.Ending.Line - 1)).IsLessThan(before);
-            await Assert.That(tempo.GetEffectiveValueAt(song.Ending.Line)).IsEqualTo(before * FormLayers.Ritardando[^1]).Within(1e-9);
+            await Assert.That(tempo.GetEffectiveValueAt(Ending(song).Start - 1)).IsLessThan(before);
+            await Assert.That(tempo.GetEffectiveValueAt(Ending(song).Start)).IsEqualTo(before * FormLayers.Ritardando[^1]).Within(1e-9);
         }
 
         await Assert.That(slowing.Length).IsGreaterThan(0);

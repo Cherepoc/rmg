@@ -16,7 +16,7 @@ public sealed class SongGeneratorNoteDurationTest
     {
         // the final chord of an ending that rings out is held for as long as the ending, up to two bars
         var maxDuration = Enumerable.Range(0, 20)
-            .Select(seed => Render.RenderSong(SongGenerator.GenerateSong(seed)))
+            .Select(seed => TestCorpus.Get(seed).Rendered)
             .SelectMany(song => song.Tracks
                 .Where(x => !x.IsPercussionInstrument)
                 .SelectMany(x => x.NoteTimeline)

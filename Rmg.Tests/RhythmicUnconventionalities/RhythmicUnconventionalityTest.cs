@@ -52,7 +52,7 @@ public sealed class RhythmicUnconventionalityTest
         for (var seed = 0; seed < 80; seed++)
         {
             var value = RhythmicUnconventionality.Generate(SongGenerator.CreateStream(seed, SongStream.Rhythm)).Value;
-            var hits = SongGenerator.GenerateSong(seed).TrackEventStateTimelineMap.TrackTimelineMap
+            var hits = TestCorpus.Get(seed).Song.TrackEventStateTimelineMap.TrackTimelineMap
                 .Where(x => x.Key >= DrumGroups.FirstTrackNumber)
                 .SelectMany(x => x.Value.EventTimeline.Select(e => e.Position))
                 .ToArray();

@@ -313,8 +313,10 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   fills sound like one player's. The fills take notes out of a span and add their own
   (`FillEdits`); a drum names its sound outright (`StateKinds.ArticulationIndex`), and a drum out of a
   section's groove still has the section's drum state, so a fill's notes are as loud as the section.
-- **Form.** `SongFormGenerator` puts the song together around its sections and tells the fills where
-  the lines are. A song starts (`FormLayers`) with the whole band (30%), with a bar, two or four of
+- **Form.** `SongFormGenerator` plans the song's form before its sections are generated, then puts the
+  song together around them, and tells the fills where the lines are; `Song.Map` records where the
+  intro, every section and the ending are. The meter, bars of four beats and 4-bar patterns, is in
+  one place (`Meter`). A song starts (`FormLayers`) with the whole band (30%), with a bar, two or four of
   the first section's drums alone (25%), with a count-in on the pedal hi-hat (10%), with the chords
   alone for the first phrase, now and then with the bass (20%), or building up through it: the
   chords, then the bass, then the drums, and the melody after it (15%). Where the band or the melody
@@ -362,6 +364,10 @@ from the CDN as before.
 ```
 dotnet run --project Rmg.Tests
 ```
+
+Tests that look at whole songs share them: `TestCorpus` generates each seed once, with its rendering and
+the trace of its generation, and every test that asks for it gets the same song. A song's `Map` says
+where its intro, sections and ending are, so tests read positions from it rather than assume them.
 
 ## Settings
 

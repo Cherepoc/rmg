@@ -51,7 +51,7 @@ public sealed class ScalesTest
         var scales = new HashSet<string>();
         for (var seed = 0; seed < 30; seed++)
         {
-            var timeline = SongGenerator.GenerateSong(seed).TrackEventStateTimelineMap.CommonStateTimelineMap
+            var timeline = TestCorpus.Get(seed).Song.TrackEventStateTimelineMap.CommonStateTimelineMap
                 .GetStateTimeline(StateKinds.ScaleOffsets);
 
             // one value from the start, never changed
@@ -72,7 +72,7 @@ public sealed class ScalesTest
     [Arguments(3)]
     public async Task EveryPitchedNote_IsInTheSongsScaleAndKey_WithTheStepsRaisedWhereTheyAre(int seed)
     {
-        var song = SongGenerator.GenerateSong(seed);
+        var song = TestCorpus.Get(seed).Song;
         var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
         var offsets = common.GetStateTimeline(StateKinds.ScaleOffsets)[0].Value;
         var key = common.GetStateTimeline(StateKinds.KeyOffset).GetEffectiveValueAt(0);

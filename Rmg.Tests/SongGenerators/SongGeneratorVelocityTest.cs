@@ -14,7 +14,7 @@ public sealed class SongGeneratorVelocityTest
         var offGrid = new List<double>();
         foreach (var seed in Enumerable.Range(0, 30))
         {
-            foreach (var track in Render.RenderSong(SongGenerator.GenerateSong(seed)).Tracks)
+            foreach (var track in TestCorpus.Get(seed).Rendered.Tracks)
             {
                 foreach (var note in track.NoteTimeline)
                 {

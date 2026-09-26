@@ -14,7 +14,7 @@ public sealed class SongGeneratorDrumsTest
 
         for (var seed = 0; seed < 60; seed++)
         {
-            var song = Render.RenderSong(SongGenerator.GenerateSong(seed));
+            var song = TestCorpus.Get(seed).Rendered;
             var codes = song.Tracks
                 .Where(x => x.IsPercussionInstrument)
                 .SelectMany(x => x.NoteTimeline)

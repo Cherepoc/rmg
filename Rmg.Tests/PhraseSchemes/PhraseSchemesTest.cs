@@ -68,10 +68,7 @@ public sealed class PhraseSchemesTest
     [Test]
     public async Task Songs_BarsFollowTheirSectionsScheme_EveryTrackTheSame()
     {
-        using var trace = StateTrace.Start();
-        SongGenerator.GenerateSong(1);
-
-        foreach (var section in trace.Entries.Where(x => x.Point == "Bar pattern").GroupBy(x => x.Section))
+        foreach (var section in TestCorpus.Get(1).Trace.Where(x => x.Point == "Bar pattern").GroupBy(x => x.Section))
         {
             var phrases = section.Select(x => x.Phrase).Distinct().ToArray();
             await Assert.That(phrases.Length).IsEqualTo(1).Because("every track follows the section's scheme");

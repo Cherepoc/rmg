@@ -19,7 +19,7 @@ public sealed class SongGeneratorChordProgressionTest
         var changes = 0;
         for (var seed = 0; seed < 10; seed++)
         {
-            var song = SongGenerator.GenerateSong(seed);
+            var song = TestCorpus.Get(seed).Song;
             changes += GetPitchedNotes(song)
                 .GroupBy(x => (x.TrackNumber, Section: Math.Floor(x.Position / SectionDuration)))
                 .Count(x => x.Select(note => note.Shape).Distinct().Count() > 1);
@@ -33,7 +33,7 @@ public sealed class SongGeneratorChordProgressionTest
     {
         for (var seed = 0; seed < 10; seed++)
         {
-            var song = SongGenerator.GenerateSong(seed);
+            var song = TestCorpus.Get(seed).Song;
             foreach (var notesAtPosition in GetPitchedNotes(song).GroupBy(x => x.Position))
             {
                 await Assert.That(notesAtPosition.Select(x => x.Shape).Distinct().Count())
@@ -51,7 +51,7 @@ public sealed class SongGeneratorChordProgressionTest
         const int chordTrackNumber = 4;
         for (var seed = 0; seed < 10; seed++)
         {
-            var (song, origin) = TestSongs.Generate(seed);
+            var (song, origin) = TestCorpus.Get(seed);
             var commonStateTimelineMap = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
             var notes = song.TrackEventStateTimelineMap.TrackTimelineMap[chordTrackNumber]
                 .MergeStateMap(song.TrackDefinitions[chordTrackNumber].StateMap)
@@ -87,7 +87,7 @@ public sealed class SongGeneratorChordProgressionTest
     {
         for (var seed = 0; seed < 10; seed++)
         {
-            var song = SongGenerator.GenerateSong(seed);
+            var song = TestCorpus.Get(seed).Song;
             foreach (var bar in GetPitchedNotes(song).GroupBy(x => (x.TrackNumber, Bar: Math.Floor(x.Position / 4))))
             {
                 await Assert.That(bar.Select(x => x.Shape).Distinct().Count())

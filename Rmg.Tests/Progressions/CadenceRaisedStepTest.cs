@@ -74,7 +74,7 @@ public sealed class CadenceRaisedStepTest
         var raising = 0;
         for (var seed = 0; seed < 60; seed++)
         {
-            var (song, origin) = TestSongs.Generate(seed);
+            var (song, origin) = TestCorpus.Get(seed);
             var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
 
             foreach (var item in common.GetStateTimeline(StateKinds.RaisedScaleSteps).Where(x => !x.Value.IsEmpty))

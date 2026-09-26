@@ -2,7 +2,6 @@ using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Rendering;
-using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Forms;
 
@@ -13,32 +12,13 @@ public sealed class SongIntroTest
     // the longest fill before the line where the drums come in, an odd span of a bar less a note
     private const double LongestFill = 4.5;
 
-    private sealed record IntroSong(Song Song, RenderedSong Rendered, IntroKind Intro, double Origin, bool WithBass);
+    private static readonly IReadOnlyList<CorpusSong> Songs = TestCorpus.Range(60).ToArray();
 
-    private static IntroSong Generate(int seed)
-    {
-        using var trace = StateTrace.Start();
-        var song = SongGenerator.GenerateSong(seed);
-        var intro = trace.Entries.Single(x => x.Point == "Song intro").Phrase!;
-        var origin = double.Parse(intro.Split(", ")[1].Split(' ')[0], System.Globalization.CultureInfo.InvariantCulture);
-        return new IntroSong(song, Render.RenderSong(song), Enum.Parse<IntroKind>(intro.Split(' ')[0]), origin, intro.Contains("with the bass"));
-    }
+    private static TimelineItem<RenderedNote>[] Notes(CorpusSong song, int track) => song.Notes(track);
 
-    private static readonly IReadOnlyList<IntroSong> Songs = Enumerable.Range(0, 60).Select(Generate).ToArray();
+    private static TimelineItem<RenderedNote>[] Drums(CorpusSong song) => song.Drums;
 
-    private static TimelineItem<RenderedNote>[] Notes(IntroSong song, int track)
-    {
-        var program = ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
-        return song.Rendered.Tracks
-            .Where(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == program)
-            .SelectMany(x => x.NoteTimeline)
-            .ToArray();
-    }
-
-    private static TimelineItem<RenderedNote>[] Drums(IntroSong song) =>
-        song.Rendered.Tracks.Where(x => x.IsPercussionInstrument).SelectMany(x => x.NoteTimeline).ToArray();
-
-    private static IntroSong[] Of(IntroKind intro) => Songs.Where(x => x.Intro == intro).ToArray();
+    private static CorpusSong[] Of(IntroKind intro) => Songs.Where(x => x.Map.Intro.Kind == intro).ToArray();
 
     [Test]
     [Arguments(IntroKind.ChordsFirst, SongTracks.ChordsTrack, false, 0.0)]
@@ -58,7 +38,7 @@ public sealed class SongIntroTest
     [Test]
     public async Task TheMelody_ComesInAfterTheFirstPhrase_WhereTheIntroLeavesItOut()
     {
-        var songs = Songs.Where(x => x.Intro is IntroKind.ChordsFirst or IntroKind.Build).ToArray();
+        var songs = Songs.Where(x => x.Map.Intro.Kind is IntroKind.ChordsFirst or IntroKind.Build).ToArray();
         foreach (var song in songs)
             await Assert.That(Notes(song, SongTracks.MelodyTrack).Min(x => x.Position)).IsGreaterThanOrEqualTo(song.Origin + Phrase);
 
@@ -72,7 +52,7 @@ public sealed class SongIntroTest
         foreach (var song in songs)
         {
             await Assert.That(Drums(song).Min(x => x.Position)).IsGreaterThanOrEqualTo(Phrase - LongestFill);
-            if (!song.WithBass)
+            if (!song.Map.Intro.WithBass)
                 await Assert.That(Notes(song, SongTracks.BassTrack).Min(x => x.Position)).IsGreaterThanOrEqualTo(Phrase);
         }
 

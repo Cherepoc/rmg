@@ -85,7 +85,7 @@ public sealed class MelodyRhythmTest
     /// <summary>The melody, and where the song's first section starts.</summary>
     private static (TimelineItem<RenderedNote>[] Melody, double Origin) RenderMelodyFrom(int seed)
     {
-        var (song, origin) = TestSongs.Generate(seed);
+        var (song, origin) = TestCorpus.Get(seed);
         var program = ((PitchInstrumentTrack)song.TrackDefinitions[MelodyTrackNumber]).InstrumentCode;
         return (Render.RenderSong(song)
             .Tracks.First(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == program)

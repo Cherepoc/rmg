@@ -60,7 +60,7 @@ public sealed class InstrumentRolesTest
     {
         for (var seed = 0; seed < 50; seed++)
         {
-            var tracks = SongGenerator.GenerateSong(seed).TrackDefinitions;
+            var tracks = TestCorpus.Get(seed).Song.TrackDefinitions;
             int Program(int track) => ((PitchInstrumentTrack)tracks[track]).InstrumentCode;
 
             await Assert.That(Rmg.Core.Composition.InstrumentRoles.Chords.Instruments.Any(x => x.Program == Program(4))).IsTrue();

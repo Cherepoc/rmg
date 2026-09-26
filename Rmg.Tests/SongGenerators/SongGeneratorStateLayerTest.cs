@@ -18,8 +18,9 @@ public sealed class SongGeneratorStateLayerTest
         var layersSeen = new HashSet<string>();
         for (var seed = 0; seed < 30; seed++)
         {
+            var song = TestCorpus.Get(seed).Song;
+            // the merges below keep the layers only while a trace runs, as the song's generation did
             using var trace = StateTrace.Start();
-            var song = SongGenerator.GenerateSong(seed);
             var commonStateTimelineMap = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
 
             foreach (var (trackNumber, trackTimelineMap) in song.TrackEventStateTimelineMap.TrackTimelineMap)

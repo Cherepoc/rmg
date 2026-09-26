@@ -219,7 +219,7 @@ public sealed class MelodyLineTest
         int onBeat = 0, onBeatChordNotes = 0;
         for (var seed = 0; seed < 20; seed++)
         {
-            var song = SongGenerator.GenerateSong(seed);
+            var song = TestCorpus.Get(seed).Song;
             var rendered = Render.RenderSong(song);
             RenderedTrack TrackOf(int number) =>
                 rendered.Tracks.First(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == ((PitchInstrumentTrack)song.TrackDefinitions[number]).InstrumentCode);

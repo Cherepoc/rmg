@@ -7,7 +7,7 @@ public sealed class SongGeneratorTempoTest
 {
     private static double GetTempo(int seed)
     {
-        var tempoTimeline = Render.RenderSong(SongGenerator.GenerateSong(seed)).TempoTimeline;
+        var tempoTimeline = TestCorpus.Get(seed).Rendered.TempoTimeline;
         return tempoTimeline.GetEffectiveValueAt(0);
     }
 

@@ -131,7 +131,7 @@ public sealed class VoiceLeaderTest
         int changes = 0, jumps = 0;
         for (var seed = 0; seed < 20; seed++)
         {
-            var song = SongGenerator.GenerateSong(seed);
+            var song = TestCorpus.Get(seed).Song;
             var instrument = ((PitchInstrumentTrack)song.TrackDefinitions[4]).InstrumentCode;
             var chords = Render.RenderSong(song).Tracks
                 .First(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == instrument)
@@ -158,7 +158,7 @@ public sealed class VoiceLeaderTest
         var songsVaryingBySection = 0;
         for (var seed = 0; seed < 60; seed++)
         {
-            var song = SongGenerator.GenerateSong(seed);
+            var song = TestCorpus.Get(seed).Song;
             var definition = (PitchInstrumentTrack)song.TrackDefinitions[4];
             var instrument = Rmg.Core.Composition.InstrumentRoles.Chords.Instruments.Single(x => x.Program == definition.InstrumentCode);
             // a section's smoothness is the track's state along the section, not a note's own

@@ -32,7 +32,7 @@ public sealed class SongMapTest
     {
         for (var seed = 0; seed < 20; seed++)
         {
-            var song = SongGenerator.GenerateSong(seed);
+            var song = TestCorpus.Get(seed).Song;
             var map = song.Map!;
             ImmutableArray<SectionSpan> sections = map.Sections;
 

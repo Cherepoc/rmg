@@ -12,7 +12,7 @@ public sealed class SongGeneratorTimekeepingTest
         var hiHat = DrumGroups.GetTrackNumber(DrumDefinitions.HiHat);
         for (var seed = 0; seed < 40; seed++)
         {
-            var map = SongGenerator.GenerateSong(seed).TrackEventStateTimelineMap.TrackTimelineMap;
+            var map = TestCorpus.Get(seed).Song.TrackEventStateTimelineMap.TrackTimelineMap;
             if (!map.TryGetValue(hiHat, out var track))
                 continue;
 

@@ -22,7 +22,7 @@ public sealed class SongGeneratorChordNoteTest
     {
         for (var seed = 0; seed < 10; seed++)
         {
-            foreach (var (position, state) in GetNotes(SongGenerator.GenerateSong(seed), ChordTrackNumber))
+            foreach (var (position, state) in GetNotes(TestCorpus.Get(seed).Song, ChordTrackNumber))
             {
                 await Assert.That(state.GetStateValue(StateKinds.ChordNoteOffset).IsEmpty)
                     .IsTrue()
@@ -38,7 +38,7 @@ public sealed class SongGeneratorChordNoteTest
     {
         for (var seed = 0; seed < 10; seed++)
         {
-            var notes = GetNotes(SongGenerator.GenerateSong(seed), trackNumber);
+            var notes = GetNotes(TestCorpus.Get(seed).Song, trackNumber);
             foreach (var pattern in notes.GroupBy(x => Math.Floor(x.Position / PatternDuration)))
             {
                 var offsets = pattern.Select(x => x.State.GetStateValue(StateKinds.ChordNoteOffset)).ToList();

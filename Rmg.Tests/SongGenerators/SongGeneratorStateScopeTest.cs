@@ -11,7 +11,7 @@ public sealed class SongGeneratorStateScopeTest
     [Arguments(2)]
     public async Task SongState_IsRenderStateOnly(int seed)
     {
-        var map = SongGenerator.GenerateSong(seed).TrackEventStateTimelineMap;
+        var map = TestCorpus.Get(seed).Song.TrackEventStateTimelineMap;
 
         var kinds = map.CommonStateTimelineMap.StateTimelines
             .Concat(map.TrackTimelineMap.Values.SelectMany(x => x.StateTimelineMap.StateTimelines))

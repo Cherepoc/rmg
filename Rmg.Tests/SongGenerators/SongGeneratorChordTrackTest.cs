@@ -15,7 +15,7 @@ public sealed class SongGeneratorChordTrackTest
         // every shape has two notes or more, and snapping and fitting into the range never merges them
         for (var seed = 0; seed < 50; seed++)
         {
-            var song = SongGenerator.GenerateSong(seed);
+            var song = TestCorpus.Get(seed).Song;
             var chordTrackSong = new Song(
                 song.Duration,
                 song.TrackDefinitions.Where(x => x.Key == ChordTrackNumber).ToImmutableSortedDictionary(),
