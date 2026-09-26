@@ -88,6 +88,8 @@ internal sealed class SongTracks
                         // the melody instrument sets how stepwise the melody is, and the song moves it a little
                         .Add(CompositionStateKinds.MelodyStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Song).Then(x => melodyInstrument.Leading + x))
                         .Add(StateKinds.MelodyLine, 1)
+                        // a melody repeats its cycles more than the other tracks, as riffs
+                        .Add(CompositionStateKinds.Rhythm.Variation, MelodyLayers.RhythmVariation)
                         .ToStateMap(context),
                     VelocityLayers.Track,
                     trackRhythmLayer

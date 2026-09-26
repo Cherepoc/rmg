@@ -14,6 +14,7 @@ internal sealed class SectionGenerator
     private readonly SongTracks _tracks;
     private readonly HarmonicUnconventionality _songUnconventionality;
     private readonly RhythmicUnconventionality _songRhythmicUnconventionality;
+    private readonly MelodyBusyness _songMelodyBusyness;
     private readonly Scale _songScale;
     private readonly StateMap _songStateMap;
     private readonly BarStateGenerator _barStateGenerator;
@@ -26,6 +27,7 @@ internal sealed class SectionGenerator
         SongTracks tracks,
         HarmonicUnconventionality songUnconventionality,
         RhythmicUnconventionality songRhythmicUnconventionality,
+        MelodyBusyness songMelodyBusyness,
         Scale songScale,
         StateMap songStateMap
     )
@@ -34,6 +36,7 @@ internal sealed class SectionGenerator
         _tracks = tracks;
         _songUnconventionality = songUnconventionality;
         _songRhythmicUnconventionality = songRhythmicUnconventionality;
+        _songMelodyBusyness = songMelodyBusyness;
         _songScale = songScale;
         _songStateMap = songStateMap;
         _barStateGenerator = new BarStateGenerator(context, settings, songScale);
@@ -80,7 +83,7 @@ internal sealed class SectionGenerator
 
         // every track follows the section's phrase scheme, so they repeat their bars in the same places
         var scheme = PhraseSchemes.Pick(_context, rhythm);
-        var sectionRhythm = new SectionRhythm(rhythm, scheme);
+        var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(_context));
 
         var trackTimelineMaps = new List<TrackEventStateTimelineMap<StateMap>>();
         trackTimelineMaps.AddRange(GenerateDrums(sectionId, sectionStateMap, activeDrumTrackNumbers, barStateTimelineMap, sectionRhythm));
@@ -133,11 +136,14 @@ internal sealed class SectionGenerator
     {
         foreach (var trackNumber in _tracks.NonGroupedTrackNumbers)
         {
-            // a section's chords move more smoothly or more in blocks than the song's, and its melody more or less by step
+            // a section's chords move more smoothly or more in blocks than the song's, and its melody more or less by step,
+            // and is as busy as the section has it
             var sectionTrackLayer = new StateMapBuilder("Section track", perTrack: true)
                 .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Section));
             if (trackNumber == SongTracks.MelodyTrack)
-                sectionTrackLayer.Add(CompositionStateKinds.MelodyStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Section));
+                sectionRhythm.MelodyBusyness.AddTo(
+                    sectionTrackLayer.Add(CompositionStateKinds.MelodyStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Section))
+                );
             var trackStateMap = CreateSectionTrackLayer(trackNumber, sectionRhythm)
                 .MergeWith(sectionStateMap)
                 .MergeWith(sectionTrackLayer.ToStateMap(_context));
@@ -172,5 +178,8 @@ internal sealed class SectionGenerator
     }
 }
 
-/// <summary>A section's rhythm: how far it strays from convention, and the scheme its 4-bar pattern follows.</summary>
-internal sealed record SectionRhythm(RhythmicUnconventionality Unconventionality, PhraseScheme Scheme);
+/// <summary>
+///     A section's rhythm: how far it strays from convention, the scheme its 4-bar pattern follows, and how busy its
+///     melody is.
+/// </summary>
+internal sealed record SectionRhythm(RhythmicUnconventionality Unconventionality, PhraseScheme Scheme, MelodyBusyness MelodyBusyness);

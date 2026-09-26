@@ -216,6 +216,13 @@ public static class Render
         var nextNoteDurationFactor = stateMap.GetStateValue(StateKinds.NextNoteDurationFactor)
             .BounceInBounds(0, 1);
         var duration = nextNoteDuration.WeightedAverage(nextNoteDurationFactor, quarterNoteDuration);
+        // a melody sings one note at a time, so a note ends by the next, unless it is held, as a phrase's last note is
+        var heldDuration = stateMap.GetStateValue(StateKinds.HeldDuration);
+        var isMelody = stateMap.GetStateValue(StateKinds.MelodyLine) > 0;
+        if (heldDuration > 0)
+            duration = heldDuration;
+        else if (isMelody)
+            duration = Math.Min(duration, nextNoteDuration);
 
         int ToNote(int stepAboveRoot) => chord.GetPitch(stepAboveRoot);
 
@@ -234,12 +241,13 @@ public static class Render
                 .ToIndexOverLength(chordDegrees.Length)
                 .ToPeriodRemainder(chordDegrees.Length);
             var note = ToNote(chordDegrees[selectedIndex] + selectedOctave * scaleOffsets.Length);
-            if (stateMap.GetStateValue(StateKinds.MelodyLine) > 0)
+            // a held note ends a phrase, so it lands on the chord as a strong beat does
+            if (isMelody)
                 note = melodyLine.Place(
                     chord,
                     chordSteps.Select(x => ToNote(x).Mod(OctaveNoteCount)).ToHashSet(),
                     position,
-                    stateMap.GetStateValue(StateKinds.BeatRank),
+                    heldDuration > 0 ? 0 : stateMap.GetStateValue(StateKinds.BeatRank),
                     stateMap.GetStateValue(StateKinds.MelodyStep),
                     stateMap.GetStateValue(StateKinds.MelodyRegister),
                     stateMap.GetStateValue(StateKinds.MelodyMotif)

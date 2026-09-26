@@ -34,6 +34,25 @@ public static class MelodyLayers
     /// <summary>The chance of a moving note going on the way the melody goes, rather than turning back.</summary>
     public const double ContinueChance = 0.75;
 
+    /// <summary>How much less often the melody's cycles are drawn afresh than the other tracks', so it plays riffs.</summary>
+    public const double RhythmVariation = -0.2;
+
+    /// <summary>
+    ///     Where a phrase ends in its last bar, as the beat before which its last note starts, and how likely each is;
+    ///     0 for a phrase that runs on into the next. The last note is held until <see cref="PhraseEndRest" /> before
+    ///     the bar line, so the earlier it starts the longer it is.
+    /// </summary>
+    public static ImmutableArray<Weighted<int>> PhraseEnds { get; } =
+    [
+        new(0.2, 0),
+        new(0.4, 1),
+        new(0.3, 2),
+        new(0.1, 3)
+    ];
+
+    /// <summary>How long the melody rests before its next phrase, in beats.</summary>
+    public const double PhraseEndRest = 1;
+
     /// <summary>
     ///     The shapes a phrase takes, as the register it aims at in each of its four bars, in semitones above or below
     ///     the middle of the melody's range, and how likely each is.

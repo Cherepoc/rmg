@@ -116,8 +116,39 @@ internal sealed class PatternGenerator
             .MergeWith(CreatePatternChordNoteOffset(_trackDefinitions[trackNumber], trackStateMap, trackGenerationContext));
         StateTrace.Record("Bar pattern", trackNumber, sectionId, barIndex, stateMap, phrase: scheme);
 
-        var notePattern = GenerateNotes(stateMap, barStateTimelineMap, barIndex * BarDuration, trackNumber, sectionId, barIndex);
-        return notePattern.GeneratedTimeline.ToEventStateTimelineMap(stateMap.OfScope(StateScope.Render));
+        var notes = GenerateNotes(stateMap, barStateTimelineMap, barIndex * BarDuration, trackNumber, sectionId, barIndex)
+            .GeneratedTimeline;
+        if (trackNumber == SongTracks.MelodyTrack)
+            notes = EndPhrase(
+                notes,
+                barStateTimelineMap.GetEffectiveStateMapAt(barIndex * BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd)
+            );
+        return notes.ToEventStateTimelineMap(stateMap.OfScope(StateScope.Render));
+    }
+
+    /// <summary>
+    ///     A melody's bar with its phrase ended: its notes from the given beat on are left out, and the last one left is
+    ///     held until the rest before the next phrase. A bar with no note before the beat keeps its first, if it starts
+    ///     before the rest. A phrase end of 0 leaves the bar as it is.
+    /// </summary>
+    /// <param name="end">The beat, from 1, before which the phrase's last note starts; 0 for none.</param>
+    internal static EventTimeline<StateMap> EndPhrase(EventTimeline<StateMap> notes, int end)
+    {
+        if (end <= 0)
+            return notes;
+
+        var holdEnd = BarDuration - MelodyLayers.PhraseEndRest;
+        var kept = notes.Where(x => x.Position < end).ToList();
+        if (kept.Count == 0 && notes.Count > 0 && notes[0].Position < holdEnd)
+            kept.Add(notes[0]);
+        if (kept.Count == 0)
+            return notes;
+
+        var last = kept[^1];
+        kept[^1] = last.Value
+            .MergeWith(StateMap.FromStates([StateKinds.HeldDuration.CreateState(holdEnd - last.Position)]))
+            .ToTimelineItem(last.Position);
+        return EventTimeline.Create(notes.Duration, kept);
     }
 
     /// <summary>

@@ -21,12 +21,8 @@ again and again down to a top rank, and each position is kept by chance by its r
 melodies and repetition need is a small extension of it rather than a new engine, which keeps its settings and all
 the tuning built on them, such as the snare's backbeat and the shares of speed and tuplets. Each step is off by
 default, so it can first be shown to leave the recorded songs unchanged, and then tuned by measurement. Built so far:
-fullness and repeated cycles (rolls, riffs and pulses), phrase schemes, and rhythmic unconventionality.
-
-### 3. The melody's rhythm
-
-Denser than today's 2.5 notes a bar, with riffs and repeated cycles, rests between phrases, and a long last note at a
-phrase's end, the one place where a note's length overrides the gap to the next.
+fullness and repeated cycles (rolls, riffs and pulses), phrase schemes, rhythmic unconventionality, and the melody's
+rhythm (its busyness, riffs, and phrase ends with a held note and a rest).
 
 ### 4. Fills
 
@@ -44,6 +40,11 @@ and phrase ends now and then a pickup. A song-level drummer sets how busy and in
 finest grid. Taking events out in a span is a new timeline operation, kept to this stage.
 
 ### Left for later
+
+- **The melody's direction:** about 58% of its moves turn back, where a sung line turns less often. It did not change
+  when the melody got busier, so it comes from `MelodyLine`'s rules, not from sparse notes; worth tuning there.
+- **Motifs within a bar:** a melody's repeated cycle repeats its rhythm, but its pitches follow the rules afresh; a
+  motif could be remembered per cycle as well as per bar.
 
 - **Long cycles:** a bar pattern is one bar long, so a slower cycle, such as the kick's slowed to two bars, plays its
   first half and starts again at every bar line. Patterns as long as their cycle would let slow figures run whole, such

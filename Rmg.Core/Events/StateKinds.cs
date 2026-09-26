@@ -38,6 +38,8 @@ public static class StateKinds
     public static readonly StateKind<int> MelodyMotif = CreateAdditive<int>("MelodyMotif", StateScope.Render);
     // how far above or below the middle of its range the melody aims in a bar, in semitones, for the phrase's shape
     public static readonly StateKind<double> MelodyRegister = CreateAdditive<double>("MelodyRegister", StateScope.Render);
+    // a note's length set outright, in beats, over the gap to the next note, such as a phrase's last note; 0 for none
+    public static readonly StateKind<double> HeldDuration = CreateAdditive<double>("HeldDuration", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordRootNoteOffset = CreateCollection<double>("ChordRootOffset", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordNoteOffset = CreateCollection<double>("ChordNoteOffset", StateScope.Render);
     public static readonly StateKind<ImmutableArray<int>> ScaleOffsets = CreateCollection<int>("ScaleOffsets", StateScope.Render, isShared: true);

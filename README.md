@@ -276,6 +276,13 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   a shape drawn per section: up and back down, falling, rising, or a wave. It keeps to a singable 15
   semitones in the middle of its range. A bar pattern that comes back is a motif: it plays the shape it
   had the first time, moved along the scale, so that over another chord it sounds as a sequence.
+- **The melody's rhythm.** A song draws how busy its melody is (`MelodyBusyness`), from a sparse, held
+  line of a note or two a bar to riffs in 8ths, and a section moves it: the busier, the fuller its
+  pattern and the likelier it plays twice as fast, about 2 to 7 notes a bar across songs and 4 on
+  average. Its cycles repeat more than the other tracks', as riffs. It sings one note at a time, so a
+  note ends by the next. Most phrases end in their last bar (`MelodyLayers.PhraseEnds`): the notes
+  from beat 2, 3 or 4 on are left out, and the last one is held on a note of the chord until a beat
+  before the next phrase, the one place where a note's length is set over the gap to the next.
 - **Instruments.** Each pitched track has a role (`InstrumentRoles`): the chords are played by pianos,
   organs, guitars, strings or pads, the melody by keys, mallets, guitars, strings, brass, reeds, pipes
   or leads, and the bass by basses, with a few unusual choices weighted low. The melody never plays

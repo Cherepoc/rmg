@@ -23,6 +23,10 @@ public static class CompositionStateKinds
     // how much a melody moves by step rather than by leap, from 0 to 1
     public static StateKind<double> MelodyStepwiseness { get; } = StateKinds.CreateAdditive<double>(Prefix + "MelodyStepwiseness");
 
+    // where the melody's phrase ends in its last bar: 0 for no end, or the beat, from 1 to 3, before which its last note
+    // starts; it holds that note, and rests until the next phrase
+    public static StateKind<int> MelodyPhraseEnd { get; } = StateKinds.CreateAdditive<int>(Prefix + "MelodyPhraseEnd");
+
     // the chord of a bar with a role in the phrase, such as the home chord, in place of the pool's pick; empty or one
     public static StateKind<ImmutableArray<Chord>> RoleChord { get; } =
         StateKinds.CreateCollection<Chord>(Prefix + "RoleChord", isShared: true);

@@ -7,7 +7,8 @@ namespace Rmg.Core.Composition;
 /// <summary>
 ///     The state of a section that changes from bar to bar along its 4-bar pattern, the same for every track: the
 ///     progression's roots, the raised seventh of the cadence, the home and cadence chords, the pick from the chord
-///     pool, the bar's loudness and note lengths, and how the chords and the bass move into the next bar.
+///     pool, the bar's loudness and note lengths, how the chords and the bass move into the next bar, and the shape of
+///     the melody's phrase and where it ends.
 /// </summary>
 internal sealed class BarStateGenerator
 {
@@ -114,7 +115,8 @@ internal sealed class BarStateGenerator
                 roleChordTimeline,
                 GenerateResets(),
                 ..GenerateBassLeading(bassLeading),
-                GenerateMelodyContour()
+                GenerateMelodyContour(),
+                GenerateMelodyPhraseEnd()
             ]
         );
     }
@@ -150,6 +152,18 @@ internal sealed class BarStateGenerator
                 PatternDuration,
                 StateKinds.MelodyRegister,
                 contour.Select((register, bar) => register.ToTimelineItem(bar * BarDuration)).ToArray()
+            )
+            .WithLayer("Bar");
+    }
+
+    /// <summary>Where the melody's phrase ends in the pattern's last bar, if it does.</summary>
+    private StateTimeline<int> GenerateMelodyPhraseEnd()
+    {
+        var end = MelodyLayers.PhraseEnds[Generators.WeightedIndex(MelodyLayers.PhraseEnds)(_context)].Value;
+        return StateTimeline.Create(
+                PatternDuration,
+                CompositionStateKinds.MelodyPhraseEnd,
+                [end.ToTimelineItem(CadenceBarPosition)]
             )
             .WithLayer("Bar");
     }

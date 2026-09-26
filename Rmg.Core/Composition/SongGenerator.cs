@@ -49,6 +49,8 @@ public static class SongGenerator
         var unconventionality = HarmonicUnconventionality.Generate(context);
         var scale = Scales.Pick(context);
         var songStateMap = CreateSongStateMap(context, unconventionality, rhythmicUnconventionality);
+        // how busy the melody is, which a section moves
+        var melodyBusyness = MelodyBusyness.Generate(context);
 
         var sectionGenerator = new SectionGenerator(
             context,
@@ -56,6 +58,7 @@ public static class SongGenerator
             tracks,
             unconventionality,
             rhythmicUnconventionality,
+            melodyBusyness,
             scale,
             songStateMap
         );
