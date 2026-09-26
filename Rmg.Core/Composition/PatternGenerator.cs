@@ -13,7 +13,6 @@ namespace Rmg.Core.Composition;
 internal sealed class PatternGenerator
 {
     private const double BarDuration = 4;
-    private const int BarPatternPoolSize = 4;
 
     private static readonly Func<IGenerationContext, int> SeedGenerator = Generators.Int();
 
@@ -28,16 +27,6 @@ internal sealed class PatternGenerator
     // the rhythm of a bar pattern, by its resolved settings, which many bar patterns share
     private readonly Func<StateMap, DyadicRankThresholdPattern> _rhythmPatternGenerator;
 
-    // a bar pattern's own layer, drawn for every track and bar
-    private readonly Func<IGenerationContext, StateMap> _barPatternLayerGenerator = new StateMapBuilder("Bar pattern", perTrack: true)
-        .AddRhythmLayer(RhythmLayers.BarPattern)
-        .AddNoteWalkLayer()
-        .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.BarPattern))
-        .AddNoteDurationLayer()
-        // no chord root offset here: every track plays the progression's chord, and a track leaves it only by moving
-        // its root from note to note
-        .ToStateMapGenerator();
-
     public PatternGenerator(IGenerationContext context, ImmutableSortedDictionary<int, IInstrumentTrack> trackDefinitions)
     {
         _context = context;
@@ -48,28 +37,49 @@ internal sealed class PatternGenerator
     }
 
     /// <summary>
-    ///     The four bars of the tracks' pattern in a section. Four sets of seeds are drawn, one seed per track, and
-    ///     every bar takes one of them, so the tracks change their patterns together and bars come back.
+    ///     The four bars of the tracks' pattern in a section, as the section's phrase scheme has them: a set of seeds is
+    ///     drawn for every letter of the scheme, one seed per track, and every bar takes its letter's, so the tracks
+    ///     change their patterns together and bars come back where the scheme repeats them.
     /// </summary>
     /// <param name="trackStateMaps">Every track's state in the section.</param>
     /// <param name="barStateTimelineMap">The state that changes by bar, such as the chord, along the 4-bar pattern.</param>
     public TrackEventStateTimelineMap<StateMap> GenerateBars(
         int sectionId,
         ImmutableDictionary<int, StateMap> trackStateMaps,
-        StateTimelineMap barStateTimelineMap
+        StateTimelineMap barStateTimelineMap,
+        SectionRhythm sectionRhythm
     )
     {
+        // a bar pattern's own layer, drawn for every track and bar; no chord root offset here: every track plays the
+        // progression's chord, and a track leaves it only by moving its root from note to note
+        var barPatternLayerGenerator = new StateMapBuilder("Bar pattern", perTrack: true)
+            .AddRhythmLayer(sectionRhythm.Unconventionality.Scale(RhythmLayers.BarPattern))
+            .AddNoteWalkLayer()
+            .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.BarPattern))
+            .AddNoteDurationLayer()
+            .ToStateMapGenerator();
+
+        var scheme = sectionRhythm.Scheme;
         var trackSeedMapGenerator = (IGenerationContext innerContext) =>
             trackStateMaps.Keys.ToDictionary(x => x, _ => SeedGenerator(innerContext));
-        var trackSeedMaps = Generators.Sequence(trackSeedMapGenerator, BarPatternPoolSize)(_context);
-        var trackSeedMapSelector = Generators.ItemSelector(trackSeedMaps);
-        return Generators.Sequence(trackSeedMapSelector, Progressions.BarCount)(_context)
-            .Select((trackSeedMap, barIndex) =>
+        var trackSeedMaps = Generators.Sequence(trackSeedMapGenerator, scheme.PatternCount)(_context);
+        return scheme.Letters
+            .Select((letter, barIndex) =>
                 {
-                    var trackNotePatterns = trackSeedMap.Select(x =>
+                    var trackNotePatterns = trackSeedMaps[letter].Select(x =>
                         new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
                             x.Key,
-                            GenerateBar(x.Key, x.Value, trackStateMaps[x.Key], barStateTimelineMap, sectionId, barIndex)
+                            GenerateBar(
+                                x.Key,
+                                x.Value,
+                                trackStateMaps[x.Key],
+                                barStateTimelineMap,
+                                sectionId,
+                                barIndex,
+                                barPatternLayerGenerator,
+                                scheme.IsVaried[barIndex],
+                                scheme.ToString()
+                            )
                         )
                     );
                     return TrackEventStateTimelineMap.Create(BarDuration, trackNotePatterns, StateTimelineMap.Create(BarDuration));
@@ -85,19 +95,26 @@ internal sealed class PatternGenerator
         StateMap trackStateMap,
         StateTimelineMap barStateTimelineMap,
         int sectionId,
-        int barIndex
+        int barIndex,
+        Func<IGenerationContext, StateMap> barPatternLayerGenerator,
+        bool isVaried,
+        string scheme
     )
     {
         var patternSeeds = CreatePatternSeeds(seed);
         var trackGenerationContext = _context.CreateContext(patternSeeds.TrackState);
-        var stateMap = new StateMapBuilder("Bar pattern", perTrack: true)
-            .Add(_barPatternLayerGenerator)
+        var builder = new StateMapBuilder("Bar pattern", perTrack: true)
+            .Add(barPatternLayerGenerator)
             .Add(CompositionStateKinds.Rhythm.Seed, patternSeeds.Rhythm)
-            .Add(CompositionStateKinds.ValueSeed, seed)
+            .Add(CompositionStateKinds.ValueSeed, seed);
+        // a varied repeat plays its bar pattern with its cycles drawn afresh more often: it starts as the first did
+        if (isVaried)
+            builder.Add(CompositionStateKinds.Rhythm.Variation, PhraseSchemes.VariedRepeatVariation);
+        var stateMap = builder
             .ToStateMap(trackGenerationContext)
             .MergeWith(trackStateMap)
             .MergeWith(CreatePatternChordNoteOffset(_trackDefinitions[trackNumber], trackStateMap, trackGenerationContext));
-        StateTrace.Record("Bar pattern", trackNumber, sectionId, barIndex, stateMap);
+        StateTrace.Record("Bar pattern", trackNumber, sectionId, barIndex, stateMap, phrase: scheme);
 
         var notePattern = GenerateNotes(stateMap, barStateTimelineMap, barIndex * BarDuration, trackNumber, sectionId, barIndex);
         return notePattern.GeneratedTimeline.ToEventStateTimelineMap(stateMap.OfScope(StateScope.Render));

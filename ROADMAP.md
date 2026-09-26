@@ -20,16 +20,8 @@ A bar pattern's rhythm comes from the dyadic engine (`DyadicRankThresholdPattern
 again and again down to a top rank, and each position is kept by chance by its rank. Most of what fills, busier
 melodies and repetition need is a small extension of it rather than a new engine, which keeps its settings and all
 the tuning built on them, such as the snare's backbeat and the shares of speed and tuplets. Each step is off by
-default, so it can first be shown to leave the recorded songs unchanged, and then tuned by measurement. The first,
-fullness and repeated cycles (rolls, riffs and pulses), is built.
-
-### 2. Phrase schemes and rhythmic unconventionality
-
-- **Phrase schemes:** a section's four bars follow a scheme, such as AAAA, AABA, AAAB, ABAB or ABAC, instead of random
-  picks from its pool of bar patterns; a repeat can be varied (A′), its rhythm with a hit added or dropped, so the
-  melody's motif memory plays the same shape a little changed.
-- **Rhythmic unconventionality:** a song's and a section's, apart from the harmonic one, which widens the rhythm
-  layers: more cross-rhythms and 5- and 7-divisions, displaced accents, looser density.
+default, so it can first be shown to leave the recorded songs unchanged, and then tuned by measurement. Built so far:
+fullness and repeated cycles (rolls, riffs and pulses), phrase schemes, and rhythmic unconventionality.
 
 ### 3. The melody's rhythm
 

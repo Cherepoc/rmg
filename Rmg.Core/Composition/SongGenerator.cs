@@ -41,14 +41,24 @@ public static class SongGenerator
         // the stages draw from one random sequence, so their order is part of what a seed makes
         var context = new GenerationContext(seed);
 
-        var tracks = SongTracks.Create(context);
+        // how far the rhythm strays from convention, which every rhythm layer from the tracks' own on is scaled by
+        var rhythmicUnconventionality = RhythmicUnconventionality.Generate(context);
+        var tracks = SongTracks.Create(context, rhythmicUnconventionality);
 
         // the song's chords gather around its unconventionality, and a section's around its own shift of it
         var unconventionality = HarmonicUnconventionality.Generate(context);
         var scale = Scales.Pick(context);
-        var songStateMap = CreateSongStateMap(context, unconventionality);
+        var songStateMap = CreateSongStateMap(context, unconventionality, rhythmicUnconventionality);
 
-        var sectionGenerator = new SectionGenerator(context, progressionSettings, tracks, unconventionality, scale, songStateMap);
+        var sectionGenerator = new SectionGenerator(
+            context,
+            progressionSettings,
+            tracks,
+            unconventionality,
+            rhythmicUnconventionality,
+            scale,
+            songStateMap
+        );
         var generateSection = ((Func<int, TrackEventStateTimelineMap<StateMap>>)sectionGenerator.Generate).CacheGeneratedValues();
 
         var commonStateMap = CreateCommonStateMap(context, scale);
@@ -66,10 +76,14 @@ public static class SongGenerator
     ///     The song's layer of the generation state, which every section starts from: its rhythm, its note walk, and
     ///     the first entries of the chord pool, which the song's chords make the likeliest.
     /// </summary>
-    private static StateMap CreateSongStateMap(IGenerationContext context, HarmonicUnconventionality unconventionality)
+    private static StateMap CreateSongStateMap(
+        IGenerationContext context,
+        HarmonicUnconventionality unconventionality,
+        RhythmicUnconventionality rhythmicUnconventionality
+    )
     {
         return new StateMapBuilder("Song")
-            .AddRhythmLayer(RhythmLayers.Song)
+            .AddRhythmLayer(rhythmicUnconventionality.Scale(RhythmLayers.Song))
             .Add(CompositionStateKinds.Rhythm.MaxRank, 2)
             .Add(CompositionStateKinds.Rhythm.Fullness, RhythmSettings.Fullness)
             .Add(CompositionStateKinds.Rhythm.Variation, RhythmSettings.Variation)

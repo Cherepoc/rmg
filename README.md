@@ -205,7 +205,16 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   positions play, up to all of them, which on a fast cycle is a roll, and its variation how often a cycle
   draws afresh what it plays rather than repeating the cycle before, down to a fixed riff; a cycle of one
   rank repeated is a steady pulse. The hi-hat and the ride keep time full and steady, and the kick and the
-  snare mostly keep their figures. A period can be a tuplet's, such as a
+  snare mostly keep their figures.
+- **Phrase schemes.** A section's four bars follow a scheme (`PhraseSchemes`) that every track shares:
+  AABA and AAAB most often, then ABAB, AAAA, AABB and ABAC, and rarely four different bars. Bars of the
+  same letter play the same bar pattern, and a repeat is now and then varied: it starts as the first did
+  and then changes.
+- **Rhythmic unconventionality.** How far a song's rhythm strays from convention
+  (`RhythmicUnconventionality`), apart from its harmony, scales the chances with which the rhythm layers
+  move their settings, from a quarter for plain grooves to four times for wild ones, full of tuplets,
+  syncopation and displaced accents; it also brings more new bars into the phrase schemes. A section
+  moves the song's a little. A period can be a tuplet's, such as a
   triplet's, which is not exact in binary, so rhythm positions are snapped to a grid of 1024 · 3 · 5 · 7
   ticks per beat (`TimelineGrid`), on which the dyadic subdivisions and the triplets, quintuplets and
   septuplets fall exactly; two ways to the same moment then give the same position.

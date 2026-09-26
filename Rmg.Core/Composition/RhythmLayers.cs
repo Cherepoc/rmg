@@ -24,8 +24,34 @@ namespace Rmg.Core.Composition;
 /// </param>
 /// <param name="Fullness">How far the layer moves a pattern's fullness either way, a value drawn around 0.</param>
 /// <param name="Variation">How far the layer moves how often a pattern's cycles are drawn afresh, either way.</param>
-public sealed record RhythmLayer(double Groove, double Density, double Tuplet, double Fullness = 0, double Variation = 0)
+/// <param name="SpeedScale">What the chance of a speed change is multiplied by, so that scaling the groove leaves it.</param>
+public sealed record RhythmLayer(
+    double Groove,
+    double Density,
+    double Tuplet,
+    double Fullness = 0,
+    double Variation = 0,
+    double SpeedScale = 1
+)
 {
+    /// <summary>
+    ///     The layer with its chances and spreads multiplied, each kept to a chance, except how often its speed changes,
+    ///     which the tuning of the snare's backbeat and the hi-hat's speed rest on.
+    /// </summary>
+    public RhythmLayer Scale(double scale)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(scale);
+
+        return new RhythmLayer(
+            Math.Min(1, Groove * scale),
+            Math.Min(1, Density * scale),
+            Math.Min(1, Tuplet * scale),
+            Fullness * scale,
+            Variation * scale,
+            Groove == 0 ? SpeedScale : SpeedScale * Groove / Math.Min(1, Groove * scale)
+        );
+    }
+
     public Func<IGenerationContext, double> CreateFullnessGenerator()
     {
         return Generators.SplineValue().Then(x => x * Fullness);
@@ -45,7 +71,7 @@ public sealed record RhythmLayer(double Groove, double Density, double Tuplet, d
 
     public Func<IGenerationContext, int> CreateSpeedGenerator()
     {
-        return CreateStepGenerator(Groove * SpeedShare);
+        return CreateStepGenerator(Math.Min(1, Groove * SpeedShare * SpeedScale));
     }
 
     public Func<IGenerationContext, int> CreateTupletGenerator()

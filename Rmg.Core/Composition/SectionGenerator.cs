@@ -13,31 +13,19 @@ internal sealed class SectionGenerator
     private readonly IGenerationContext _context;
     private readonly SongTracks _tracks;
     private readonly HarmonicUnconventionality _songUnconventionality;
+    private readonly RhythmicUnconventionality _songRhythmicUnconventionality;
     private readonly Scale _songScale;
     private readonly StateMap _songStateMap;
     private readonly BarStateGenerator _barStateGenerator;
     private readonly PatternGenerator _patternGenerator;
 
-    private readonly Func<IGenerationContext, StateMap> _sectionLayerGenerator = new StateMapBuilder("Section")
-        .AddRhythmLayer(RhythmLayers.Section)
-        .AddNoteWalkLayer()
-        .Add(CompositionStateKinds.ChordPool.Index, LayerStates.ChordPoolIndex)
-        .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.Section))
-        .AddNoteDurationLayer()
-        .ToStateMapGenerator();
-
-    private readonly Func<IGenerationContext, StateMap> _drumGroupLayerGenerator = new StateMapBuilder("Section drum group", perTrack: true)
-        .AddRhythmLayer(RhythmLayers.SectionDrumGroup)
-        .AddNoteWalkLayer()
-        .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.SectionDrumGroup))
-        .AddNoteDurationLayer()
-        .ToStateMapGenerator();
 
     public SectionGenerator(
         IGenerationContext context,
         ProgressionSettings settings,
         SongTracks tracks,
         HarmonicUnconventionality songUnconventionality,
+        RhythmicUnconventionality songRhythmicUnconventionality,
         Scale songScale,
         StateMap songStateMap
     )
@@ -45,6 +33,7 @@ internal sealed class SectionGenerator
         _context = context;
         _tracks = tracks;
         _songUnconventionality = songUnconventionality;
+        _songRhythmicUnconventionality = songRhythmicUnconventionality;
         _songScale = songScale;
         _songStateMap = songStateMap;
         _barStateGenerator = new BarStateGenerator(context, settings, songScale);
@@ -55,6 +44,7 @@ internal sealed class SectionGenerator
     public TrackEventStateTimelineMap<StateMap> Generate(int sectionId)
     {
         var unconventionality = _songUnconventionality.GenerateSection(_context);
+        var rhythm = _songRhythmicUnconventionality.GenerateSection(_context);
         var chords = LayerStates.CreateChordPool(unconventionality)(_context);
 
         // the section's chords move around its home, which every track's root starts from
@@ -63,7 +53,13 @@ internal sealed class SectionGenerator
 
         var sectionStateMap = CreateSectionStateMap(
             _songStateMap,
-            _sectionLayerGenerator(_context),
+            new StateMapBuilder("Section")
+                .AddRhythmLayer(rhythm.Scale(RhythmLayers.Section))
+                .AddNoteWalkLayer()
+                .Add(CompositionStateKinds.ChordPool.Index, LayerStates.ChordPoolIndex)
+                .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.Section))
+                .AddNoteDurationLayer()
+                .ToStateMap(_context),
             new StateMapBuilder("Section")
                 .Add(CompositionStateKinds.ChordPool.Collection, chords)
                 .Add(StateKinds.ChordRootNoteOffset, [Progressions.ToRootOffset(home)])
@@ -82,9 +78,13 @@ internal sealed class SectionGenerator
         );
         var barStateTimelineMap = _barStateGenerator.Generate(progression, home, unconventionality, bassLeading);
 
+        // every track follows the section's phrase scheme, so they repeat their bars in the same places
+        var scheme = PhraseSchemes.Pick(_context, rhythm);
+        var sectionRhythm = new SectionRhythm(rhythm, scheme);
+
         var trackTimelineMaps = new List<TrackEventStateTimelineMap<StateMap>>();
-        trackTimelineMaps.AddRange(GenerateDrums(sectionId, sectionStateMap, activeDrumTrackNumbers, barStateTimelineMap));
-        trackTimelineMaps.AddRange(GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap));
+        trackTimelineMaps.AddRange(GenerateDrums(sectionId, sectionStateMap, activeDrumTrackNumbers, barStateTimelineMap, sectionRhythm));
+        trackTimelineMaps.AddRange(GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, sectionRhythm));
 
         // the song keeps what Render reads; the bar state for the generation, such as the chord pool's pick, stays here
         trackTimelineMaps.Add(
@@ -98,22 +98,28 @@ internal sealed class SectionGenerator
         int sectionId,
         StateMap sectionStateMap,
         ImmutableHashSet<int> activeDrumTrackNumbers,
-        StateTimelineMap barStateTimelineMap
+        StateTimelineMap barStateTimelineMap,
+        SectionRhythm sectionRhythm
     )
     {
         foreach (var group in _tracks.Groups)
         {
-            var groupStateMap = _drumGroupLayerGenerator(_context)
+            var groupStateMap = new StateMapBuilder("Section drum group", perTrack: true)
+                .AddRhythmLayer(sectionRhythm.Unconventionality.Scale(RhythmLayers.SectionDrumGroup))
+                .AddNoteWalkLayer()
+                .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.SectionDrumGroup))
+                .AddNoteDurationLayer()
+                .ToStateMap(_context)
                 .MergeWith(group.StateMap)
                 .MergeWith(sectionStateMap);
             var trackStateMaps = new Dictionary<int, StateMap>();
             foreach (var trackNumber in group.TrackNumbers.Where(activeDrumTrackNumbers.Contains))
-                trackStateMaps[trackNumber] = CreateSectionTrackLayer(trackNumber).MergeWith(groupStateMap);
+                trackStateMaps[trackNumber] = CreateSectionTrackLayer(trackNumber, sectionRhythm).MergeWith(groupStateMap);
 
             if (trackStateMaps.Count == 0)
                 continue;
 
-            yield return _patternGenerator.GenerateBars(sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap);
+            yield return _patternGenerator.GenerateBars(sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap, sectionRhythm);
         }
     }
 
@@ -121,7 +127,8 @@ internal sealed class SectionGenerator
     private IEnumerable<TrackEventStateTimelineMap<StateMap>> GeneratePitchedTracks(
         int sectionId,
         StateMap sectionStateMap,
-        StateTimelineMap barStateTimelineMap
+        StateTimelineMap barStateTimelineMap,
+        SectionRhythm sectionRhythm
     )
     {
         foreach (var trackNumber in _tracks.NonGroupedTrackNumbers)
@@ -131,23 +138,23 @@ internal sealed class SectionGenerator
                 .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Section));
             if (trackNumber == SongTracks.MelodyTrack)
                 sectionTrackLayer.Add(CompositionStateKinds.MelodyStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Section));
-            var trackStateMap = CreateSectionTrackLayer(trackNumber)
+            var trackStateMap = CreateSectionTrackLayer(trackNumber, sectionRhythm)
                 .MergeWith(sectionStateMap)
                 .MergeWith(sectionTrackLayer.ToStateMap(_context));
             var trackStateMaps = new Dictionary<int, StateMap> { [trackNumber] = trackStateMap };
-            yield return _patternGenerator.GenerateBars(sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap);
+            yield return _patternGenerator.GenerateBars(sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap, sectionRhythm);
         }
     }
 
     /// <summary>A track's own layer in the section, over the state its definition brings.</summary>
-    private StateMap CreateSectionTrackLayer(int trackNumber)
+    private StateMap CreateSectionTrackLayer(int trackNumber, SectionRhythm sectionRhythm)
     {
         return LayerStates.CreateTrackLayer(
             _context,
             "Section track",
             SongTracks.GetGenerationStateMap(_tracks.Definitions[trackNumber]),
             VelocityLayers.SectionTrack,
-            RhythmLayers.SectionTrack
+            sectionRhythm.Unconventionality.Scale(RhythmLayers.SectionTrack)
         );
     }
 
@@ -164,3 +171,6 @@ internal sealed class SectionGenerator
             .MergeWith(sectionPoolEntries);
     }
 }
+
+/// <summary>A section's rhythm: how far it strays from convention, and the scheme its 4-bar pattern follows.</summary>
+internal sealed record SectionRhythm(RhythmicUnconventionality Unconventionality, PhraseScheme Scheme);

@@ -16,7 +16,16 @@ public sealed record StateContribution(string Layer, object Value)
 /// <param name="Point">What was decided there, such as a track's rhythm for a bar or the chord shape of a note.</param>
 /// <param name="Bar">The bar of the section's 4-bar pattern.</param>
 /// <param name="Position">Where in the bar, in beats; 0 for what holds for the whole bar.</param>
-public sealed record StateTraceEntry(string Point, int Track, int Section, int Bar, double Position, StateMap StateMap);
+/// <param name="Phrase">The phrase scheme of the section's 4-bar pattern, such as AABA, where it is known.</param>
+public sealed record StateTraceEntry(
+    string Point,
+    int Track,
+    int Section,
+    int Bar,
+    double Position,
+    StateMap StateMap,
+    string? Phrase = null
+);
 
 /// <summary>
 ///     Records what every layer contributed to the state of the song being generated in this flow of execution (the
@@ -74,9 +83,17 @@ public sealed class StateTrace : IDisposable
         return trace;
     }
 
-    internal static void Record(string point, int track, int section, int bar, StateMap stateMap, double position = 0)
+    internal static void Record(
+        string point,
+        int track,
+        int section,
+        int bar,
+        StateMap stateMap,
+        double position = 0,
+        string? phrase = null
+    )
     {
         if (IsRunning)
-            Current.Value!._entries.Add(new StateTraceEntry(point, track, section, bar, position, stateMap));
+            Current.Value!._entries.Add(new StateTraceEntry(point, track, section, bar, position, stateMap, phrase));
     }
 }

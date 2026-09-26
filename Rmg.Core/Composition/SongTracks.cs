@@ -43,8 +43,11 @@ internal sealed class SongTracks
     /// <summary>How much the bass leads into the chords in the song, before a section moves it.</summary>
     public double BassLeading { get; }
 
-    public static SongTracks Create(IGenerationContext context)
+    /// <param name="rhythmicUnconventionality">How far the song's rhythm strays, which its tracks' layers are scaled by.</param>
+    public static SongTracks Create(IGenerationContext context, RhythmicUnconventionality rhythmicUnconventionality)
     {
+        var trackRhythmLayer = rhythmicUnconventionality.Scale(RhythmLayers.Track);
+
         // the melody plays something other than the chords, so the two can be told apart
         var chordsInstrument = InstrumentRoles.Chords.Pick(context);
         var melodyInstrument = InstrumentRoles.Melody.Pick(context, chordsInstrument.Program);
@@ -69,7 +72,7 @@ internal sealed class SongTracks
                         .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(x => chordsInstrument.Leading + x))
                         .ToStateMap(context),
                     VelocityLayers.Track,
-                    RhythmLayers.Track
+                    trackRhythmLayer
                 ),
                 chordsInstrument.Program,
                 minOctaveOffsetGenerator(),
@@ -87,7 +90,7 @@ internal sealed class SongTracks
                         .Add(StateKinds.MelodyLine, 1)
                         .ToStateMap(context),
                     VelocityLayers.Track,
-                    RhythmLayers.Track
+                    trackRhythmLayer
                 ),
                 melodyInstrument.Program,
                 minOctaveOffsetGenerator(),
@@ -105,7 +108,7 @@ internal sealed class SongTracks
                         .Add(StateKinds.FollowsChordRoots, 1)
                         .ToStateMap(context),
                     VelocityLayers.Track,
-                    RhythmLayers.Track
+                    trackRhythmLayer
                 ),
                 bassInstrument.Program,
                 -3,
@@ -122,7 +125,7 @@ internal sealed class SongTracks
                 var drumStateMap = drum.ConfigureStateMap(drumGroup.ConfigureStateMap(new StateMapBuilder("Drum", perTrack: true)))
                     .ToStateMap(context);
                 definitions[DrumGroups.GetTrackNumber(drum)] = new PercussionInstrumentTrack(
-                    LayerStates.CreateTrackLayer(context, "Track", drumStateMap, VelocityLayers.Track, RhythmLayers.Track),
+                    LayerStates.CreateTrackLayer(context, "Track", drumStateMap, VelocityLayers.Track, trackRhythmLayer),
                     drum.ArticulationCodes
                 );
             }
@@ -133,7 +136,13 @@ internal sealed class SongTracks
         [
             new(
                 [..songDrums.Select(DrumGroups.GetTrackNumber)],
-                LayerStates.CreateTrackLayer(context, "Drum group", StateMap.Default, VelocityLayers.DrumGroup, RhythmLayers.DrumGroup)
+                LayerStates.CreateTrackLayer(
+                    context,
+                    "Drum group",
+                    StateMap.Default,
+                    VelocityLayers.DrumGroup,
+                    rhythmicUnconventionality.Scale(RhythmLayers.DrumGroup)
+                )
             )
         ];
 
