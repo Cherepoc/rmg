@@ -70,16 +70,16 @@ public static class SongGenerator
             .SelectMany(part => part.SectionIds)
             .ToArray();
         var sections = sectionIds.Select(generateSection).ToArray();
-        var songTrackNoteTimelineMap = sections
-            .Select(x => x.Timeline)
-            .Unroll()
+
+        // how the song starts and ends around its sections, and the lines the drums mark
+        var form = new SongFormGenerator(context).Generate(sectionIds, sections);
+        var songTrackNoteTimelineMap = form.Edits
+            .ApplyTo(form.Blocks.Unroll())
             .MergeStateMap(commonStateMap);
 
-        // the drums mark the lines between the sections, now that they are put one after another
-        songTrackNoteTimelineMap = new FillGenerator(context, tracks, rhythmicUnconventionality).Generate(
-            songTrackNoteTimelineMap,
-            [..sectionIds.Zip(sections, (id, section) => new FillSection(id, section.Timeline.Duration, section.Rhythm, section.DrumTuplet))]
-        );
+        // the drums mark the lines, now that the song is put together
+        songTrackNoteTimelineMap = new FillGenerator(context, tracks, rhythmicUnconventionality)
+            .Generate(songTrackNoteTimelineMap, form.Lines, form.Origin);
 
         return new Song(songTrackNoteTimelineMap.Duration, tracks.Definitions, songTrackNoteTimelineMap);
     }

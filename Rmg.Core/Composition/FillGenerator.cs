@@ -64,68 +64,92 @@ internal sealed class FillGenerator
         _roles = roles.ToImmutableDictionary();
     }
 
-    /// <param name="song">The sections put one after another.</param>
-    /// <param name="sections">Every section in the song's order.</param>
-    public TrackEventStateTimelineMap<StateMap> Generate(TrackEventStateTimelineMap<StateMap> song, IReadOnlyList<FillSection> sections)
+    /// <param name="song">The song's sections and its intro and ending, put one after another.</param>
+    /// <param name="lines">Every line the drums mark, in the song's order.</param>
+    /// <param name="origin">Where the song's first section starts.</param>
+    public TrackEventStateTimelineMap<StateMap> Generate(
+        TrackEventStateTimelineMap<StateMap> song,
+        IReadOnlyList<FillLine> lines,
+        double origin = 0
+    )
     {
         // a fast song's runs play 8ths, which 16ths would blur
         var tempo = BaseTempo * song.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(StateKinds.Tempo);
         var grid = tempo <= FillLayers.MaxSixteenthTempo ? 0.25 : 0.5;
 
         var drummer = Drummer.Generate(_context, _songRhythm);
-        var edits = new FillEdits(_context);
-        var start = 0.0;
-        for (var i = 0; i < sections.Count; i++)
-        {
-            // the fill before a line belongs to the section it ends
-            if (i > 0)
-                MarkLine(song, edits, start, sections[i - 1], sections[i].SectionId, true, grid, drummer);
-
-            // the line in the middle of the section, between its 4-bar pattern and the pattern's repeat
-            for (var line = start + BarStateGenerator.PatternDuration;
-                 line < start + sections[i].Duration;
-                 line += BarStateGenerator.PatternDuration)
-                MarkLine(song, edits, line, sections[i], sections[i].SectionId, false, grid, drummer);
-
-            start += sections[i].Duration;
-        }
+        var edits = new TimelineEdits(_context, origin);
+        foreach (var line in lines)
+            MarkLine(song, edits, line, grid, drummer, origin);
 
         return edits.ApplyTo(song);
     }
 
+    /// <summary>
+    ///     The lines between a song's sections and in the middle of each, as the fills mark them where the song has no
+    ///     intro or ending of its own: a section change before every section but the first, and a phrase line between
+    ///     every section's 4-bar pattern and its repeat.
+    /// </summary>
+    /// <param name="start">Where the first section starts.</param>
+    public static ImmutableArray<FillLine> GetSectionLines(IReadOnlyList<FillSection> sections, double start = 0)
+    {
+        var lines = ImmutableArray.CreateBuilder<FillLine>();
+        for (var i = 0; i < sections.Count; i++)
+        {
+            // the fill before a line belongs to the section it ends
+            if (i > 0)
+                lines.Add(new FillLine(start, sections[i - 1], sections[i].SectionId, FillTable.Section, LandingRule.Section));
+
+            for (var line = start + BarStateGenerator.PatternDuration;
+                 line < start + sections[i].Duration;
+                 line += BarStateGenerator.PatternDuration)
+                lines.Add(new FillLine(line, sections[i], sections[i].SectionId, FillTable.Phrase, LandingRule.Phrase));
+
+            start += sections[i].Duration;
+        }
+
+        return lines.ToImmutable();
+    }
+
     /// <summary>The fill before a line, in the feel and with the twists of the section it ends, and the landing after it.</summary>
-    /// <param name="ending">The section the line ends, or the one it is in.</param>
-    /// <param name="landingSectionId">The section that starts at the line.</param>
     private void MarkLine(
         TrackEventStateTimelineMap<StateMap> song,
-        FillEdits edits,
-        double line,
-        FillSection ending,
-        int landingSectionId,
-        bool isSectionChange,
+        TimelineEdits edits,
+        FillLine line,
         double grid,
-        Drummer drummer
+        Drummer drummer,
+        double origin
     )
     {
+        var ending = line.Ending;
         var chanceScale = ending.Rhythm.ChanceScale;
-        var fill = Pick(drummer.Weigh(isSectionChange ? FillLayers.SectionFills : FillLayers.PhraseFills, chanceScale));
+        var fill = line.Fills switch
+        {
+            FillTable.Section => Pick(drummer.Weigh(FillLayers.SectionFills, chanceScale)),
+            FillTable.Phrase => Pick(drummer.Weigh(FillLayers.PhraseFills, chanceScale)),
+            _ => FillKind.None
+        };
         var play = DrawPlay(fill, drummer, chanceScale, ending.DrumTuplet);
-        var span = Fill(edits, play, line, grid, drummer, ending.SectionId);
+        var span = Fill(edits, play, line.Position, grid, drummer, ending.SectionId);
 
-        FillLanding landing;
-        if (isSectionChange)
-            landing = IsForcingLanding(fill) ? FillLanding.CrashAndKick : Pick(FillLayers.SectionLandings);
-        else
-            landing = IsForcingLanding(fill) || fill != FillKind.None && _context.TestProbability(FillLayers.PhraseLandingChance)
+        var landing = line.Landing switch
+        {
+            LandingRule.Forced => FillLanding.CrashAndKick,
+            LandingRule.Section => IsForcingLanding(fill) ? FillLanding.CrashAndKick : Pick(FillLayers.SectionLandings),
+            _ => IsForcingLanding(fill) || fill != FillKind.None && _context.TestProbability(FillLayers.PhraseLandingChance)
                 ? FillLanding.CrashAndKick
-                : FillLanding.None;
-        if (play.Twists.HasFlag(FillTwist.NoLanding))
+                : FillLanding.None
+        };
+        // a line the song's form marks, such as where the band comes in, always lands
+        if (play.Twists.HasFlag(FillTwist.NoLanding) && line.Landing != LandingRule.Forced)
             landing = FillLanding.None;
 
         // a pushed landing comes a note of the coarser grid early, an 8th, or a tuplet's note
-        var landingPosition = play.Twists.HasFlag(FillTwist.EarlyLanding) ? line - GetGrids(play.Tuplet, grid).Coarse : line;
-        Land(song, edits, landingPosition, landingSectionId, landing);
-        RecordDecision(ending.SectionId, line, play, span, landing);
+        var landingPosition = play.Twists.HasFlag(FillTwist.EarlyLanding)
+            ? line.Position - GetGrids(play.Tuplet, grid).Coarse
+            : line.Position;
+        Land(song, edits, landingPosition, line.LandingSectionId, landing);
+        RecordDecision(ending.SectionId, line.Position - origin, play, span, landing);
     }
 
     /// <summary>
@@ -177,7 +201,7 @@ internal sealed class FillGenerator
         Drummer drummer
     )
     {
-        var edits = new FillEdits(_context);
+        var edits = new TimelineEdits(_context);
         Fill(edits, play, line, grid, drummer, 0);
         return edits.ApplyTo(song);
     }
@@ -188,6 +212,7 @@ internal sealed class FillGenerator
     }
 
     /// <summary>What was decided at a line, recorded in the last bar before it, where its fill is.</summary>
+    /// <param name="line">Where the line is, from the start of the song's first section.</param>
     private static void RecordDecision(int sectionId, double line, FillPlay play, double span, FillLanding landing)
     {
         if (!StateTrace.IsRunning)
@@ -202,7 +227,7 @@ internal sealed class FillGenerator
             "Fill decision",
             DrumsTrace,
             sectionId,
-            bar % Progressions.BarCount,
+            bar.Mod(Progressions.BarCount),
             StateMap.Default,
             play.Kind == FillKind.None ? 0 : Math.Max(0, BarDuration - span),
             description
@@ -233,7 +258,7 @@ internal sealed class FillGenerator
     ///     its hits at the span's start, then its voices.
     /// </summary>
     /// <returns>How long the fill is, in beats; 0 for none.</returns>
-    private double Fill(FillEdits edits, FillPlay play, double line, double grid, Drummer drummer, int sectionId)
+    private double Fill(TimelineEdits edits, FillPlay play, double line, double grid, Drummer drummer, int sectionId)
     {
         if (play.Kind == FillKind.None)
             return 0;
@@ -290,7 +315,7 @@ internal sealed class FillGenerator
     ///     second, where the span and the grids allow, and one that slows down the other way round.
     /// </summary>
     private void PlayVoice(
-        FillEdits edits,
+        TimelineEdits edits,
         FillVoice voice,
         FillPlay play,
         double from,
@@ -356,7 +381,7 @@ internal sealed class FillGenerator
     ///     power of two, such as the six of a sextuplet beat, the span holds as many cycles as their odd factor.
     /// </summary>
     private void PlaySegment(
-        FillEdits edits,
+        TimelineEdits edits,
         double from,
         double to,
         double noteLength,
@@ -464,7 +489,7 @@ internal sealed class FillGenerator
     }
 
     /// <summary>The hits the drums land on at a line: a crash, and a kick if the groove has none there.</summary>
-    private void Land(TrackEventStateTimelineMap<StateMap> song, FillEdits edits, double position, int sectionId, FillLanding landing)
+    private void Land(TrackEventStateTimelineMap<StateMap> song, TimelineEdits edits, double position, int sectionId, FillLanding landing)
     {
         if (landing == FillLanding.None)
             return;
@@ -493,57 +518,26 @@ internal sealed record FillPlay(FillKind Kind, FillTwist Twists, int Tuplet, Odd
     public static FillPlay Plain(FillKind kind) => new(kind, FillTwist.None, 1, null);
 }
 
+/// <summary>The fills a line takes: none, those before a section change, or those in the middle of a section.</summary>
+internal enum FillTable
+{
+    None,
+    Section,
+    Phrase
+}
+
+/// <summary>How the drums land after a line: as after a section change, as after a phrase line, or always.</summary>
+internal enum LandingRule
+{
+    Section,
+    Phrase,
+    Forced
+}
+
+/// <summary>A line the drums mark: where it is, the section it ends, the one that starts there, and its fills and landing.</summary>
+/// <param name="Ending">The section the line ends, whose rhythm and feel its fill plays in.</param>
+internal sealed record FillLine(double Position, FillSection Ending, int LandingSectionId, FillTable Fills, LandingRule Landing);
+
 /// <summary>A section as the fills see it: where it is, how far its rhythm strays, and the drums' feel before its lines.</summary>
 /// <param name="DrumTuplet">The tuplet the drums play in the last bar of the section's 4-bar pattern, 1 for straight.</param>
 internal sealed record FillSection(int SectionId, double Duration, RhythmicUnconventionality Rhythm, int DrumTuplet);
-
-/// <summary>The changes the fills make to the drums, gathered, and made at once: the spans they clear and the hits they add.</summary>
-internal sealed class FillEdits(IGenerationContext context)
-{
-    private const double Epsilon = 1e-6;
-    private const double BarDuration = 4;
-    private const int PatternBarCount = Progressions.BarCount;
-
-    private readonly Dictionary<int, List<(double From, double To)>> _cleared = [];
-    private readonly Dictionary<int, List<TimelineItem<StateMap>>> _hits = [];
-
-    /// <summary>Takes a track's notes out from one position up to another; the fills' own hits stay.</summary>
-    public void Clear(int track, double from, double to)
-    {
-        if (!_cleared.TryGetValue(track, out var spans))
-            _cleared[track] = spans = [];
-        spans.Add((from, to));
-    }
-
-    /// <summary>A hit of a track, in place of any it or a fill has there.</summary>
-    /// <param name="articulation">The drum's sound, counted from 1; 0 for the groove's.</param>
-    public void Hit(int track, double position, double velocity, int articulation, int sectionId, string fill)
-    {
-        var builder = new StateMapBuilder("Fill", perTrack: true).Add(StateKinds.Velocity, velocity);
-        if (articulation > 0)
-            builder.Add(StateKinds.ArticulationIndex, articulation);
-        var stateMap = builder.ToStateMap(context);
-        // sections are made of whole 4-bar patterns, so the bar of the pattern and the beat in it follow from the song's
-        var bar = (int)Math.Floor(position / BarDuration);
-        StateTrace.Record("Fill", track, sectionId, bar % PatternBarCount, stateMap, position - bar * BarDuration, fill);
-
-        Clear(track, position, position + Epsilon);
-        if (!_hits.TryGetValue(track, out var hits))
-            _hits[track] = hits = [];
-        hits.RemoveAll(x => x.Position.IsEqualToByEpsilon(position));
-        hits.Add(stateMap.ToTimelineItem(position));
-    }
-
-    public TrackEventStateTimelineMap<StateMap> ApplyTo(TrackEventStateTimelineMap<StateMap> song)
-    {
-        var maps = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>();
-        foreach (var track in _cleared.Keys.Union(_hits.Keys))
-            maps[track] = timeline =>
-            {
-                foreach (var (from, to) in _cleared.GetValueOrDefault(track) ?? [])
-                    timeline = timeline.RemoveSpan(from, to);
-                return EventTimeline.Merge([timeline, EventTimeline.Create(timeline.Duration, _hits.GetValueOrDefault(track) ?? [])]);
-            };
-        return song.MapTrackEvents(maps);
-    }
-}
