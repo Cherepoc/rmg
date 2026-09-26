@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Rmg.Core.Events;
+using Rmg.Core.Probabilities;
 
 namespace Rmg.Tests.StateMapBuilders;
 
@@ -164,5 +165,39 @@ public sealed class StateMapBuilderTest
         await Assert.That(result.GetStateValue(KeyOffset)).IsEqualTo(2);
         await Assert.That(result.GetStateValue(OctaveOffset)).IsEqualTo(0);
         await Assert.That(result.GetStateValue(Tempo)).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task PerTrackBuilder_SettingASharedKind_ResultsIn_InvalidOperation()
+    {
+        var builder = new StateMapBuilder("Bar pattern", perTrack: true)
+            .Add(StateKinds.Velocity, 0.5)
+            .Add(StateKinds.ScaleOffsets, [0, 2, 4]);
+
+        var exception = Assert.Throws<InvalidOperationException>(() => builder.ToStateMap(new GenerationContext(0)));
+
+        await Assert.That(exception.Message).Contains("Bar pattern");
+        await Assert.That(exception.Message).Contains(StateKinds.ScaleOffsets.Name);
+        await Assert.That(() => builder.ToStateMapGenerator()(new GenerationContext(0))).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task PerTrackBuilder_AddingAMapWithASharedKind_ResultsIn_InvalidOperation()
+    {
+        // the check covers the maps added too, not only the states made here
+        var shared = StateMap.FromStates([StateKinds.KeyOffset.CreateState(3)]);
+        var builder = new StateMapBuilder("Track", perTrack: true).Add(shared);
+
+        await Assert.That(() => builder.ToStateMap(new GenerationContext(0))).Throws<InvalidOperationException>();
+    }
+
+    [Test]
+    public async Task SharedLayerBuilder_MaySetASharedKind()
+    {
+        var result = new StateMapBuilder("Song")
+            .Add(StateKinds.ScaleOffsets, [0, 2, 4])
+            .ToStateMap(new GenerationContext(0));
+
+        await Assert.That(result.GetStateValue(StateKinds.ScaleOffsets).Length).IsEqualTo(3);
     }
 }

@@ -22,12 +22,14 @@ public sealed class StateTimelineGenerator<T> : IStateTimelineGenerator
         StateKind<T> stateKind,
         double stepDuration,
         Func<IGenerationContext, T> valueGenerator,
-        int poolSize
+        int poolSize,
+        string? layer
     )
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(stepDuration);
         ArgumentOutOfRangeException.ThrowIfNegative(poolSize);
 
+        Layer = layer;
         StateKind = stateKind;
         StepDuration = stepDuration;
         PoolSize = poolSize;
@@ -40,6 +42,9 @@ public sealed class StateTimelineGenerator<T> : IStateTimelineGenerator
 
     /// <summary>How many values the steps pick from; 0 draws a fresh value for every step.</summary>
     public int PoolSize { get; }
+
+    /// <summary>The layer the values belong to, such as the bar, which a <see cref="StateTrace" /> records.</summary>
+    public string? Layer { get; }
 
     IStateTimeline IStateTimelineGenerator.Generate(IGenerationContext context, double duration)
     {
@@ -59,7 +64,8 @@ public sealed class StateTimelineGenerator<T> : IStateTimelineGenerator
         for (var i = 0; i < stepCount; i++)
             items[i] = valueGenerator(context).ToTimelineItem(i * StepDuration);
 
-        return StateTimeline.Create(duration, StateKind, items);
+        var timeline = StateTimeline.Create(duration, StateKind, items);
+        return Layer is null ? timeline : timeline.WithLayer(Layer);
     }
 }
 
@@ -69,10 +75,11 @@ public static class StateTimelineGenerator
         StateKind<T> stateKind,
         double stepDuration,
         Func<IGenerationContext, T> valueGenerator,
-        int poolSize = 0
+        int poolSize = 0,
+        string? layer = null
     )
         where T : notnull
     {
-        return new StateTimelineGenerator<T>(stateKind, stepDuration, valueGenerator, poolSize);
+        return new StateTimelineGenerator<T>(stateKind, stepDuration, valueGenerator, poolSize, layer);
     }
 }

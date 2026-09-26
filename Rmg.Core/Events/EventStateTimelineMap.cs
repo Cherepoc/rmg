@@ -145,21 +145,6 @@ public static class EventStateTimelineMap
         return EventStateTimelineMap<T>.Create(duration, eventTimeline, stateTimelineMap);
     }
 
-    public static EventStateTimelineMap<T> Create<T>(double duration, StateTimelineMap stateTimelineMap)
-        where T : notnull
-    {
-        return EventStateTimelineMap<T>.Create(duration, EventTimeline.Create<T>(duration), stateTimelineMap);
-    }
-
-    public static EventStateTimelineMap<T> ToEventStateTimelineMap<T>(
-        this EventTimeline<T> timeline,
-        StateTimelineMap stateTimelineMap
-    )
-        where T : notnull
-    {
-        return EventStateTimelineMap<T>.Create(timeline.Duration, timeline, stateTimelineMap);
-    }
-
     public static EventStateTimelineMap<T> ToEventStateTimelineMap<T>(this EventTimeline<T> timeline, StateMap stateMap)
         where T : notnull
     {

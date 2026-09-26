@@ -10,6 +10,12 @@ public sealed class StateMapTest
     private static readonly StateKind<double> Tempo = StateKinds.Tempo;
     private static readonly StateKind<ImmutableArray<int>> ScaleOffsets = StateKinds.ScaleOffsets;
 
+    // kinds of these tests alone; a kind's name is its identity, so each is created once
+    private static readonly StateKind<int> LowerCaseKind = StateKinds.CreateAdditive<int>("StateMapTest.apple");
+    private static readonly StateKind<int> UpperCaseKind = StateKinds.CreateAdditive<int>("StateMapTest.Banana");
+    private static readonly StateKind<ImmutableArray<ImmutableArray<int>>> Pool =
+        StateKinds.CreateCollection<ImmutableArray<int>>("StateMapTest.Pool");
+
     private static StateMap Map(params IState[] states) => StateMap.FromStates(states);
 
     [Test]
@@ -297,5 +303,124 @@ public sealed class StateMapTest
     public async Task ToStateTimelineMap_Default_ResultsIn_Default()
     {
         await Assert.That(StateMap.Default.ToStateTimelineMap(4).IsDefault).IsTrue();
+    }
+
+    [Test]
+    public async Task FromStates_SingleUnorderedCollection_IsOrdered()
+    {
+        var result = Map(ScaleOffsets.CreateState([7, 0, 3]));
+
+        await Assert.That(result.GetStateValue(ScaleOffsets)).IsEquivalentTo(new[] { 0, 3, 7 });
+        await Assert.That(result.GetStateValue(ScaleOffsets)[0]).IsEqualTo(0);
+    }
+
+    [Test]
+    public async Task FromStates_StatesAreOrderedByKindName_Ordinally()
+    {
+        var result = Map(LowerCaseKind.CreateState(1), UpperCaseKind.CreateState(1));
+
+        // "StateMapTest.B..." before "StateMapTest.a...": ordinal order puts upper case first, whatever the culture
+        await Assert.That(result.Kinds[0]).IsSameReferenceAs(UpperCaseKind);
+        await Assert.That(result.Kinds[1]).IsSameReferenceAs(LowerCaseKind);
+    }
+
+    [Test]
+    public async Task FromStates_ManyStates_AreAggregatedInTheOrderTheyComeIn()
+    {
+        // more states than the insertion sort handles, and collection values keep the order of their states
+        var pool = Pool;
+        var states = Enumerable.Range(0, 100)
+            .Select(i => i % 2 == 0 ? (IState)KeyOffset.CreateState(1) : pool.CreateState([ImmutableArray.Create(i)]))
+            .ToArray();
+
+        var result = StateMap.FromStates(states);
+
+        await Assert.That(result.GetStateValue(KeyOffset)).IsEqualTo(50);
+        await Assert.That(result.GetStateValue(pool).Select(x => x[0])).IsEquivalentTo(
+            Enumerable.Range(0, 100).Where(i => i % 2 == 1)
+        );
+        await Assert.That(result.GetStateValue(pool)[0][0]).IsEqualTo(1);
+        await Assert.That(result.GetStateValue(pool)[^1][0]).IsEqualTo(99);
+    }
+
+    [Test]
+    public async Task MergeWith_IsTheSameAsFromStatesOfBoth()
+    {
+        // random maps over a few kinds of every aggregation, merged both ways
+        var pool = Pool;
+        var random = new Random(1);
+        IState RandomState() => random.Next(4) switch
+        {
+            0 => KeyOffset.CreateState(random.Next(-2, 3)),
+            1 => Tempo.CreateState(random.Next(1, 3) / 2.0),
+            2 => ScaleOffsets.CreateState([random.Next(12), random.Next(12)]),
+            _ => pool.CreateState([ImmutableArray.Create(random.Next(10))])
+        };
+
+        for (var i = 0; i < 200; i++)
+        {
+            var first = StateMap.FromStates(Enumerable.Range(0, random.Next(5)).Select(_ => RandomState()).ToArray());
+            var second = StateMap.FromStates(Enumerable.Range(0, random.Next(5)).Select(_ => RandomState()).ToArray());
+
+            var expected = StateMap.FromStates([..first.States, ..second.States]);
+
+            await Assert.That(first.MergeWith(second)).IsEqualTo(expected);
+            await Assert.That(StateMap.Aggregate([first, second])).IsEqualTo(expected);
+        }
+    }
+
+    [Test]
+    public async Task Aggregate_ManyMaps_IsTheSameAsFromStatesOfAll()
+    {
+        var maps = new[]
+        {
+            Map(KeyOffset.CreateState(1), Tempo.CreateState(2)),
+            Map(KeyOffset.CreateState(2)),
+            Map(Tempo.CreateState(3), OctaveOffset.CreateState(1))
+        };
+
+        var result = StateMap.Aggregate(maps);
+
+        await Assert.That(result).IsEqualTo(StateMap.FromStates(maps.SelectMany(x => x.States)));
+        await Assert.That(result.GetStateValue(KeyOffset)).IsEqualTo(3);
+        await Assert.That(result.GetStateValue(Tempo)).IsEqualTo(6);
+    }
+
+    [Test]
+    public async Task EqualMaps_HaveEqualHashCodes()
+    {
+        var first = Map(KeyOffset.CreateState(1), ScaleOffsets.CreateState([0, 2]));
+        var second = Map(ScaleOffsets.CreateState([2, 0]), KeyOffset.CreateState(1));
+
+        await Assert.That(first).IsEqualTo(second);
+        await Assert.That(first.GetHashCode()).IsEqualTo(second.GetHashCode());
+    }
+
+    [Test]
+    public async Task OfScope_KeepsOnlyTheScopesKinds()
+    {
+        var input = Map(KeyOffset.CreateState(1), LowerCaseKind.CreateState(2));
+
+        await Assert.That(input.OfScope(StateScope.Render)).IsEqualTo(Map(KeyOffset.CreateState(1)));
+        await Assert.That(input.OfScope(StateScope.Composition)).IsEqualTo(Map(LowerCaseKind.CreateState(2)));
+    }
+
+    [Test]
+    public async Task ThrowIfShared_WithSharedKind_NamesTheLayerAndKind()
+    {
+        var input = Map(OctaveOffset.CreateState(1), ScaleOffsets.CreateState([0, 2]));
+
+        var exception = Assert.Throws<InvalidOperationException>(() => input.ThrowIfShared("bar pattern"));
+
+        await Assert.That(exception.Message).Contains("bar pattern");
+        await Assert.That(exception.Message).Contains(ScaleOffsets.Name);
+    }
+
+    [Test]
+    public async Task ThrowIfShared_WithoutSharedKinds_ResultsIn_TheMap()
+    {
+        var input = Map(OctaveOffset.CreateState(1), LowerCaseKind.CreateState(2));
+
+        await Assert.That(input.ThrowIfShared("bar pattern")).IsSameReferenceAs(input);
     }
 }

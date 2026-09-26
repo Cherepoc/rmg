@@ -6,25 +6,25 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
 {
     private readonly ImmutableDictionary<IStateKind, IStateTimeline> _stateTimelineDictionary;
 
-    private StateTimelineMap(
-        double duration,
-        ImmutableDictionary<IStateKind, IStateTimeline> stateTimelineDictionary,
-        EventTimeline<StateMap> stateMapEventTimeline
-    )
+    // the state at every change, built when a state is first looked up: most maps are only merged, shifted or trimmed
+    // into others and never looked up
+    private EventTimeline<StateMap>? _stateMapEventTimeline;
+
+    private StateTimelineMap(double duration, ImmutableDictionary<IStateKind, IStateTimeline> stateTimelineDictionary)
     {
         Duration = duration;
         _stateTimelineDictionary = stateTimelineDictionary;
-        StateMapEventTimeline = stateMapEventTimeline;
 
-        StateTimelines = [..stateTimelineDictionary.Values.OrderBy(x => x.StateKind.Name)];
+        StateTimelines = [..stateTimelineDictionary.Values.OrderBy(x => x.StateKind.Name, StringComparer.Ordinal)];
     }
 
     public ImmutableArray<IStateTimeline> StateTimelines { get; }
 
-    public EventTimeline<StateMap> StateMapEventTimeline { get; }
+    // a single reference write, so another thread sees either nothing or a whole timeline, both equal
+    public EventTimeline<StateMap> StateMapEventTimeline =>
+        _stateMapEventTimeline ??= StateTimelinesToStateMapEventTimeline(StateTimelines, Duration);
 
-    private static readonly StateTimelineMap Zero =
-        new(0, ImmutableDictionary<IStateKind, IStateTimeline>.Empty, EventTimeline.Create<StateMap>(0));
+    private static readonly StateTimelineMap Zero = new(0, ImmutableDictionary<IStateKind, IStateTimeline>.Empty);
 
     public static StateTimelineMap Merge(IEnumerable<StateTimelineMap> timelines)
     {
@@ -81,16 +81,18 @@ public sealed class StateTimelineMap : ITimelineLike<StateTimelineMap>
         var mergedStateTimelines = StateTimeline.Merge(stateTimelines.Select(x => x.Trim(duration)));
 
         if (mergedStateTimelines.IsEmpty)
-            return new StateTimelineMap(
-                duration,
-                ImmutableDictionary<IStateKind, IStateTimeline>.Empty,
-                EventTimeline.Create<StateMap>(duration)
-            );
+            return new StateTimelineMap(duration, ImmutableDictionary<IStateKind, IStateTimeline>.Empty);
 
-        var stateTimelineDictionary = mergedStateTimelines.ToImmutableDictionary(x => x.StateKind);
-        var stateMapEventTimeline = StateTimelinesToStateMapEventTimeline(mergedStateTimelines, duration);
+        return new StateTimelineMap(duration, mergedStateTimelines.ToImmutableDictionary(x => x.StateKind));
+    }
 
-        return new StateTimelineMap(duration, stateTimelineDictionary, stateMapEventTimeline);
+    /// <summary>The timelines of the scope, such as those that <c>Render</c> reads.</summary>
+    public StateTimelineMap OfScope(StateScope scope)
+    {
+        if (StateTimelines.All(x => x.StateKind.Scope == scope))
+            return this;
+
+        return Create(Duration, StateTimelines.Where(x => x.StateKind.Scope == scope));
     }
 
     public StateTimeline<T> GetStateTimeline<T>(StateKind<T> stateKind)

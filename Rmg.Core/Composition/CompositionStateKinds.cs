@@ -20,8 +20,9 @@ public static class CompositionStateKinds
     public static IncrementalStateKinds IncrementalChordNoteOffset { get; } =
         new(Prefix + StateKinds.ChordNoteOffset.Name);
 
+    // every track plays the same chord shape, so the pool and the pick are the same for all of them
     public static CollectionFromCollectionStateKinds<double> ChordNotePitchOffsets { get; } =
-        new(Prefix + "ChordPitchOffsets");
+        new(Prefix + "ChordPitchOffsets", isShared: true);
 
     public sealed class IncrementalStateKinds
     {
@@ -113,11 +114,13 @@ public static class CompositionStateKinds
 
     public sealed class CollectionFromCollectionStateKinds<T>
     {
-        public CollectionFromCollectionStateKinds(string prefix)
+        /// <param name="isShared">Whether the pool and the pick must be the same for every track.</param>
+        public CollectionFromCollectionStateKinds(string prefix, bool isShared = false)
         {
+            // the value picked is a note's own, made from the shared pool at the note's position
             Value = StateKinds.CreateCollection<T>(prefix + "Value");
-            Index = StateKinds.CreateAdditive<int>(prefix + "Index");
-            Collection = StateKinds.CreateCollection<ImmutableArray<T>>(prefix + "Collection");
+            Index = StateKinds.CreateAdditive<int>(prefix + "Index", isShared: isShared);
+            Collection = StateKinds.CreateCollection<ImmutableArray<T>>(prefix + "Collection", isShared: isShared);
         }
 
         public StateKind<ImmutableArray<T>> Value { get; }
