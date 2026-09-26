@@ -17,7 +17,7 @@ public sealed class SongGeneratorPatternSeedsTest
     [Arguments(int.MinValue)]
     public async Task CreatePatternSeeds_GivesEachSequenceItsOwnSeed(int seed)
     {
-        var result = SongGenerator.CreatePatternSeeds(seed);
+        var result = PatternGenerator.CreatePatternSeeds(seed);
 
         int[] seeds = [result.TrackState, result.Rhythm, result.StateChanges, result.NoteValues];
         await Assert.That(seeds.Distinct().Count()).IsEqualTo(4);
@@ -26,14 +26,14 @@ public sealed class SongGeneratorPatternSeedsTest
     [Test]
     public async Task CreatePatternSeeds_SameSeed_ResultsInSameSeeds()
     {
-        await Assert.That(SongGenerator.CreatePatternSeeds(42)).IsEqualTo(SongGenerator.CreatePatternSeeds(42));
+        await Assert.That(PatternGenerator.CreatePatternSeeds(42)).IsEqualTo(PatternGenerator.CreatePatternSeeds(42));
     }
 
     [Test]
     public async Task CreatePatternSeeds_DifferentSeeds_ResultInDifferentSeeds()
     {
-        var result1 = SongGenerator.CreatePatternSeeds(1);
-        var result2 = SongGenerator.CreatePatternSeeds(2);
+        var result1 = PatternGenerator.CreatePatternSeeds(1);
+        var result2 = PatternGenerator.CreatePatternSeeds(2);
 
         await Assert.That(result1.Rhythm).IsNotEqualTo(result2.Rhythm);
         await Assert.That(result1.NoteValues).IsNotEqualTo(result2.NoteValues);

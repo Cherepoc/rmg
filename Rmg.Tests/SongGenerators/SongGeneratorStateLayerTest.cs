@@ -59,7 +59,7 @@ public sealed class SongGeneratorStateLayerTest
             1
         );
 
-        var result = SongGenerator.GetTrackGenerationStateMap(trackDefinition);
+        var result = SongTracks.GetGenerationStateMap(trackDefinition);
 
         await Assert.That(result.GetStateValue(StateKinds.Velocity)).IsEqualTo(0);
         await Assert.That(result.GetStateValue(CompositionStateKinds.Rhythm.Period.Power)).IsEqualTo(-1);

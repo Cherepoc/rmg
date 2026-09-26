@@ -19,7 +19,7 @@ public sealed class SongGeneratorSectionPoolTest
         var song = PoolOf(0.1, 0.2).MergeWith(StateMap.FromStates([Index.CreateState(1)]));
         var section = PoolOf(0.3, 0.4);
 
-        var result = SongGenerator.CreateSectionStateMap(song, StateMap.FromStates([Index.CreateState(-1)]), section);
+        var result = SectionGenerator.CreateSectionStateMap(song, StateMap.FromStates([Index.CreateState(-1)]), section);
 
         await Assert.That(result.GetStateValue(Pool).Select(x => x.Heights[1])).IsEquivalentTo([0.1, 0.2, 0.3, 0.4]);
         await Assert.That(result.GetStateValue(Pool)[0].Heights[1]).IsEqualTo(0.1);

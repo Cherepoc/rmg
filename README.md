@@ -169,6 +169,12 @@ whose name it starts: `MuseScore_General_License.md` covers `MuseScore_General.s
 seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
 ```
 
+- **Generation stages.** `SongGenerator` runs the stages in turn, all drawing from the song's one
+  seeded random sequence, so their order is part of what a seed makes: the tracks and their
+  instruments (`SongTracks`), the song's harmony and state, the structure of parts and sections, and
+  every section (`SectionGenerator`), which makes its harmony, its bar state (`BarStateGenerator`) and
+  its tracks' patterns (`PatternGenerator`). The state every layer draws a part of is drawn in one
+  place (`LayerStates`).
 - **Timelines and state.** Music is modelled as immutable timelines of events (notes) and of *state*
   (velocity, tempo, scale, chord, octave, ...). State kinds define their own default and how values
   combine, so state from the song, a section, a track group and a track is merged with a single rule.
