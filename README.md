@@ -233,6 +233,15 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   colour, and the cadence bar a chord with pull, a seventh most often, then a suspended chord, a triad
   or a ninth; a strange song keeps its strangeness at the cadence. The bars between pick from the
   section's pool of chord shapes.
+- **Voice leading.** `Render` places a track's chords one after another (`VoiceLeader`): each takes
+  the layout, among its inversions in every octave of the track's range, that follows best from the
+  chord before, with a pull towards the middle of the range so that the chords do not drift. How it
+  follows is the track's smoothness (`StateKinds.VoiceLeading`), from 1, where every note moves as
+  little as it can and shared notes are held, to 0, where the chord keeps the previous one's shape and
+  slides with the root, as guitar chords do. The chord instrument sets the song's smoothness
+  (strings, pads and organs smooth, pianos in between, guitars in blocks), a section moves it, and a
+  4-bar pattern's first bar sometimes starts afresh in its own register. Chords whose layout is what
+  they are, such as quartal stacks and clusters, only move by whole octaves.
 - **Instruments.** Each pitched track has a role (`InstrumentRoles`): the chords are played by pianos,
   organs, guitars, strings or pads, the melody by keys, mallets, guitars, strings, brass, reeds, pipes
   or leads, and the bass by basses, with a few unusual choices weighted low. The melody never plays

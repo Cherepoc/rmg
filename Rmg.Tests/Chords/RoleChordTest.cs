@@ -12,12 +12,12 @@ public sealed class RoleChordTest
     private static readonly string[] CadenceShapeNames = ["Seventh", "Seven-sus4", "Sus4", "Triad", "Ninth"];
 
     /// <summary>The shape a chord is laid out from: voicings move notes by octaves, so the pitch classes tell.</summary>
-    private static ChordShape ShapeOf(ImmutableArray<double> chord)
+    private static ChordShape ShapeOf(Chord chord)
     {
         static string Classes(IEnumerable<double> semitones) =>
             string.Join(",", semitones.Select(x => Math.Round(((x % 12) + 12) % 12, 3)).Distinct().Order());
 
-        var classes = Classes(chord.Select(x => x * 12));
+        var classes = Classes(chord.Heights.Select(x => x * 12));
         return ChordShapes.All.First(x => Classes(x.Targets) == classes);
     }
 

@@ -13,6 +13,14 @@ public static class StateKinds
     public static readonly StateKind<int> KeyOffset = CreateAdditive<int>("KeyOffset", StateScope.Render, isShared: true);
     public static readonly StateKind<int> OctaveOffset = CreateAdditive<int>("OctaveOffset", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordNotePitchOffsets = CreateCollection<double>("ChordNotePitchOffsets", StateScope.Render);
+    // 1 for a chord whose layout is what it is, which Render moves only by whole octaves
+    public static readonly StateKind<int> ChordVoicingFixed = CreateAdditive<int>("ChordVoicingFixed", StateScope.Render);
+    // how smoothly a track's chords move, from 0, the chord's shape sliding with the root, to 1, every note moving as
+    // little as it can
+    public static readonly StateKind<double> VoiceLeading = CreateAdditive<double>("VoiceLeading", StateScope.Render);
+    // a bar whose first chord plays as drawn, in its own register, and not led from the chord before; each such bar
+    // has its own number, so that bars in a row are told apart
+    public static readonly StateKind<int> ChordVoicingReset = CreateAdditive<int>("ChordVoicingReset", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordRootNoteOffset = CreateCollection<double>("ChordRootOffset", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordNoteOffset = CreateCollection<double>("ChordNoteOffset", StateScope.Render);
     public static readonly StateKind<ImmutableArray<int>> ScaleOffsets = CreateCollection<int>("ScaleOffsets", StateScope.Render, isShared: true);

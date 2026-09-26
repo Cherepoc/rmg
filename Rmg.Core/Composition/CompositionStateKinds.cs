@@ -20,13 +20,12 @@ public static class CompositionStateKinds
     public static IncrementalStateKinds IncrementalChordNoteOffset { get; } =
         new(Prefix + StateKinds.ChordNoteOffset.Name);
 
-    // the chord shape of a bar with a role in the phrase, such as the home chord, in place of the pool's pick
-    public static StateKind<ImmutableArray<double>> RoleChord { get; } =
-        StateKinds.CreateCollection<double>(Prefix + "RoleChord", isShared: true);
+    // the chord of a bar with a role in the phrase, such as the home chord, in place of the pool's pick; empty or one
+    public static StateKind<ImmutableArray<Chord>> RoleChord { get; } =
+        StateKinds.CreateCollection<Chord>(Prefix + "RoleChord", isShared: true);
 
-    // every track plays the same chord shape, so the pool and the pick are the same for all of them
-    public static CollectionFromCollectionStateKinds<double> ChordNotePitchOffsets { get; } =
-        new(Prefix + "ChordPitchOffsets", isShared: true);
+    // every track plays the same chord, so the pool and the pick are the same for all of them
+    public static PoolStateKinds<Chord> ChordPool { get; } = new(Prefix + "ChordPool", isShared: true);
 
     public sealed class IncrementalStateKinds
     {
@@ -116,21 +115,31 @@ public static class CompositionStateKinds
         public StateKind<double> RankedOffset { get; }
     }
 
-    public sealed class CollectionFromCollectionStateKinds<T>
+    /// <summary>
+    ///     A pool the layers add entries to, in the order they are merged, and an index into it the layers add draws
+    ///     to; the index is folded into the pool's length to pick an entry.
+    /// </summary>
+    public sealed class PoolStateKinds<T>
     {
         /// <param name="isShared">Whether the pool and the pick must be the same for every track.</param>
-        public CollectionFromCollectionStateKinds(string prefix, bool isShared = false)
+        public PoolStateKinds(string prefix, bool isShared = false)
         {
-            // the value picked is a note's own, made from the shared pool at the note's position
-            Value = StateKinds.CreateCollection<T>(prefix + "Value");
             Index = StateKinds.CreateAdditive<int>(prefix + "Index", isShared: isShared);
-            Collection = StateKinds.CreateCollection<ImmutableArray<T>>(prefix + "Collection", isShared: isShared);
+            Collection = StateKinds.CreateCollection<T>(prefix + "Collection", isShared: isShared);
         }
-
-        public StateKind<ImmutableArray<T>> Value { get; }
 
         public StateKind<int> Index { get; }
 
-        public StateKind<ImmutableArray<ImmutableArray<T>>> Collection { get; }
+        public StateKind<ImmutableArray<T>> Collection { get; }
+
+        /// <summary>The entry the map's index picks from its pool.</summary>
+        public T Pick(StateMap stateMap)
+        {
+            var collection = stateMap.GetStateValue(Collection);
+            if (collection.IsEmpty)
+                throw new InvalidOperationException($"The pool {Collection.Name} is empty.");
+
+            return collection[stateMap.GetStateValue(Index).BounceInBounds(0, collection.Length - 1)];
+        }
     }
 }

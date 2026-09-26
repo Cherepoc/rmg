@@ -1,12 +1,18 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
+using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
 
 /// <summary>A General MIDI instrument a role can be played with, and how likely it is among the role's others.</summary>
 /// <param name="Program">The General MIDI program, from 0.</param>
-public sealed record RoleInstrument(int Program, string Name, double Weight);
+/// <param name="VoiceLeading">
+///     How smoothly the instrument's chords usually move (see <see cref="StateKinds.VoiceLeading" />): strings, pads
+///     and organs hold their notes and move them little, pianos are in between, and guitars move their chord shapes
+///     up and down the neck.
+/// </param>
+public sealed record RoleInstrument(int Program, string Name, double Weight, double VoiceLeading = VoiceLeadingLayers.Piano);
 
 /// <summary>
 ///     What a pitched track does in the song, and the instruments that suit it: ones that sustain chords, ones that
@@ -56,28 +62,28 @@ public static class InstrumentRoles
             new(5, "Electric Piano 2", 0.6),
             new(6, "Harpsichord", 0.2),
             new(11, "Vibraphone", 0.3),
-            new(16, "Drawbar Organ", 0.6),
-            new(17, "Percussive Organ", 0.4),
-            new(18, "Rock Organ", 0.3),
-            new(19, "Church Organ", 0.15),
-            new(21, "Accordion", 0.15),
-            new(24, "Acoustic Guitar (nylon)", 0.6),
-            new(25, "Acoustic Guitar (steel)", 0.7),
-            new(26, "Electric Guitar (jazz)", 0.5),
-            new(27, "Electric Guitar (clean)", 0.6),
-            new(29, "Overdriven Guitar", 0.2),
-            new(30, "Distortion Guitar", 0.2),
+            new(16, "Drawbar Organ", 0.6, VoiceLeadingLayers.Sustained),
+            new(17, "Percussive Organ", 0.4, VoiceLeadingLayers.Sustained),
+            new(18, "Rock Organ", 0.3, VoiceLeadingLayers.Sustained),
+            new(19, "Church Organ", 0.15, VoiceLeadingLayers.Sustained),
+            new(21, "Accordion", 0.15, VoiceLeadingLayers.Sustained),
+            new(24, "Acoustic Guitar (nylon)", 0.6, VoiceLeadingLayers.Guitar),
+            new(25, "Acoustic Guitar (steel)", 0.7, VoiceLeadingLayers.Guitar),
+            new(26, "Electric Guitar (jazz)", 0.5, VoiceLeadingLayers.Guitar),
+            new(27, "Electric Guitar (clean)", 0.6, VoiceLeadingLayers.Guitar),
+            new(29, "Overdriven Guitar", 0.2, VoiceLeadingLayers.Guitar),
+            new(30, "Distortion Guitar", 0.2, VoiceLeadingLayers.Guitar),
             new(46, "Orchestral Harp", 0.2),
-            new(48, "String Ensemble 1", 0.8),
-            new(49, "String Ensemble 2", 0.4),
-            new(50, "Synth Strings 1", 0.5),
-            new(52, "Choir Aahs", 0.2),
-            new(88, "Pad 1 (new age)", 0.4),
-            new(89, "Pad 2 (warm)", 0.6),
-            new(90, "Pad 3 (polysynth)", 0.5),
-            new(91, "Pad 4 (choir)", 0.2),
-            new(94, "Pad 7 (halo)", 0.3),
-            new(95, "Pad 8 (sweep)", 0.2)
+            new(48, "String Ensemble 1", 0.8, VoiceLeadingLayers.Sustained),
+            new(49, "String Ensemble 2", 0.4, VoiceLeadingLayers.Sustained),
+            new(50, "Synth Strings 1", 0.5, VoiceLeadingLayers.Sustained),
+            new(52, "Choir Aahs", 0.2, VoiceLeadingLayers.Sustained),
+            new(88, "Pad 1 (new age)", 0.4, VoiceLeadingLayers.Sustained),
+            new(89, "Pad 2 (warm)", 0.6, VoiceLeadingLayers.Sustained),
+            new(90, "Pad 3 (polysynth)", 0.5, VoiceLeadingLayers.Sustained),
+            new(91, "Pad 4 (choir)", 0.2, VoiceLeadingLayers.Sustained),
+            new(94, "Pad 7 (halo)", 0.3, VoiceLeadingLayers.Sustained),
+            new(95, "Pad 8 (sweep)", 0.2, VoiceLeadingLayers.Sustained)
         ]
     );
 
