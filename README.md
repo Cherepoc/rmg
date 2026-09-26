@@ -286,11 +286,18 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   note ends by the next. Most phrases end in their last bar (`MelodyLayers.PhraseEnds`): the notes
   from beat 2, 3 or 4 on are left out, and the last one is held on a note of the chord until a beat
   before the next phrase, the one place where a note's length is set over the gap to the next.
-- **Fills.** The drums mark the lines between sections (`FillGenerator`, `FillLayers`): a section
-  change lands on a crash and a kick most of the time (65%), a kick alone (20%), or runs straight on.
-  The fills take notes out of a span and add their own (`FillEdits`); a drum names its sound outright
-  (`StateKinds.ArticulationIndex`), and a drum out of a section's groove still has the section's
-  drum state, so a fill's notes are as loud as the section.
+- **Fills.** The drums mark the lines between sections (`FillGenerator`, `FillLayers`). Before a
+  section change a drummer plays a fill most of the time: a pickup of a few hits, a run down the toms, a
+  snare roll that speeds up and swells, a run from the snare around the toms, a break, stop-time (one
+  hit together, then silence) or a lift on an open hi-hat; the line in the middle of a section gets
+  one now and then, mostly a pickup or a lift. A fill spans from half a beat to a bar before the line,
+  and its hands leave the groove there while the kick plays on, or the drums stop. Its voices are
+  dyadic patterns like the grooves', so chance leaves a note out now and then. A bar in a tuplet feel
+  takes only fills that play no straight notes, and a fast song's runs play 8ths. The next section
+  lands on a crash and a kick most of the time (65%), a kick alone (20%), or runs straight on; after a
+  break or stop-time always on both. The fills take notes out of a span and add their own
+  (`FillEdits`); a drum names its sound outright (`StateKinds.ArticulationIndex`), and a drum out of a
+  section's groove still has the section's drum state, so a fill's notes are as loud as the section.
 - **Instruments.** Each pitched track has a role (`InstrumentRoles`): the chords are played by pianos,
   organs, guitars, strings or pads, the melody by keys, mallets, guitars, strings, brass, reeds, pipes
   or leads, and the bass by basses, with a few unusual choices weighted low. The melody never plays
