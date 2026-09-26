@@ -71,6 +71,8 @@ public static class SongGenerator
         return new StateMapBuilder("Song")
             .AddRhythmLayer(RhythmLayers.Song)
             .Add(CompositionStateKinds.Rhythm.MaxRank, 2)
+            .Add(CompositionStateKinds.Rhythm.Fullness, RhythmSettings.Fullness)
+            .Add(CompositionStateKinds.Rhythm.Variation, RhythmSettings.Variation)
             .AddNoteWalkLayer()
             .Add(CompositionStateKinds.ChordPool.Collection, LayerStates.CreateChordPool(unconventionality))
             .Add(CompositionStateKinds.ChordPool.Index, LayerStates.ChordPoolIndex)

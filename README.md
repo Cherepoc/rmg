@@ -201,7 +201,11 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
 - **Rhythm.** Rhythm patterns are generated from dyadic ranks: positions in a period ranked by how
   "strong" the beat is, and kept or dropped by a rank-weighted probability. Every layer, from the song
   to a bar, may move a track's rhythm settings a step, each with its own chance (`RhythmLayers`), so a
-  drum keeps the rhythm it is given in about half of the bars. A period can be a tuplet's, such as a
+  drum keeps the rhythm it is given in about half of the bars. A pattern's fullness sets how many of its
+  positions play, up to all of them, which on a fast cycle is a roll, and its variation how often a cycle
+  draws afresh what it plays rather than repeating the cycle before, down to a fixed riff; a cycle of one
+  rank repeated is a steady pulse. The hi-hat and the ride keep time full and steady, and the kick and the
+  snare mostly keep their figures. A period can be a tuplet's, such as a
   triplet's, which is not exact in binary, so rhythm positions are snapped to a grid of 1024 · 3 · 5 · 7
   ticks per beat (`TimelineGrid`), on which the dyadic subdivisions and the triplets, quintuplets and
   septuplets fall exactly; two ways to the same moment then give the same position.

@@ -13,3 +13,55 @@ voicing step and led from chord to chord (see `ChordShapes`, `HarmonicUnconventi
 Heights between two qualities, such as the third, could move a little from chord to chord, so that a scale with more
 notes than seven picks sometimes one quality and sometimes the other. Worth it once scales of other sizes than seven
 exist; in a 7-note scale it changes nothing.
+
+## Rhythm engine
+
+A bar pattern's rhythm comes from the dyadic engine (`DyadicRankThresholdPattern`): a cycle (the period) is halved
+again and again down to a top rank, and each position is kept by chance by its rank. Most of what fills, busier
+melodies and repetition need is a small extension of it rather than a new engine, which keeps its settings and all
+the tuning built on them, such as the snare's backbeat and the shares of speed and tuplets. Each step is off by
+default, so it can first be shown to leave the recorded songs unchanged, and then tuned by measurement. The first,
+fullness and repeated cycles (rolls, riffs and pulses), is built.
+
+### 2. Phrase schemes and rhythmic unconventionality
+
+- **Phrase schemes:** a section's four bars follow a scheme, such as AAAA, AABA, AAAB, ABAB or ABAC, instead of random
+  picks from its pool of bar patterns; a repeat can be varied (A′), its rhythm with a hit added or dropped, so the
+  melody's motif memory plays the same shape a little changed.
+- **Rhythmic unconventionality:** a song's and a section's, apart from the harmonic one, which widens the rhythm
+  layers: more cross-rhythms and 5- and 7-divisions, displaced accents, looser density.
+
+### 3. The melody's rhythm
+
+Denser than today's 2.5 notes a bar, with riffs and repeated cycles, rests between phrases, and a long last note at a
+phrase's end, the one place where a note's length overrides the gap to the next.
+
+### 4. Fills
+
+A new stage after the sections are put one after another, the only one that knows the boundaries. A fill is an
+archetype with parameters, and its voices are dyadic patterns like any other, not exact figures: a tom run is a fast,
+full cycle whose articulation walks down the toms, a snare roll a fast, full cycle with a velocity ramp, and a pickup a
+sparse one. A note that chance leaves out is welcome, as a drummer would leave it out; nothing needs to be strict.
+A voice can be two short patterns one after the other, such as 8ths then 16ths, for a fill that speeds up.
+
+The archetypes: none, pickup (a few sparse hits), tom run, snare roll or build, around the kit, break (the drums, or
+rarely the band, silent), stop-time (a unison hit, then silence), and a cymbal or open hi-hat swell. Each has a span
+before the line, a treatment of the groove there (kept, thinned to kick and snare, dropped, or stopped), and a landing
+on the downbeat (crash and kick, kick only, a choke, or nothing). Section changes get fills more often than repeats,
+and phrase ends now and then a pickup. A song-level drummer sets how busy and in what vocabulary; the tempo caps the
+finest grid. Taking events out in a span is a new timeline operation, kept to this stage.
+
+### Left for later
+
+- **Long cycles:** a bar pattern is one bar long, so a slower cycle, such as the kick's slowed to two bars, plays its
+  first half and starts again at every bar line. Patterns as long as their cycle would let slow figures run whole, such
+  as a crash every two bars or a kick figure answered in the second bar. Worth it if slow figures sound wrong.
+- **Segments in any pattern:** bars that mix feels, such as three straight beats and a quintuplet beat; fills get them
+  first.
+- Choosing whole patterns by measured features (syncopation, evenness) as a family, should a target prove out of
+  reach of the dyadic engine; euclidean patterns that fit no cycle; a library of idioms such as clave and bossa; fills
+  in the section's tuplet feel; energy-aware fills that build into loud sections and break before quiet ones; and drums
+  generated together, the snare avoiding the kick and the hi-hat filling the gaps.
+
+A cycle that does not fit the bar and is cut off at the bar line, such as 3+3+2, stays as it is: an off-kilter feel,
+not a fault.

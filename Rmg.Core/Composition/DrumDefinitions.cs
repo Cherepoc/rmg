@@ -6,7 +6,13 @@ namespace Rmg.Core.Composition;
 /// </summary>
 public static class DrumDefinitions
 {
-    public static PercussionInstrumentDefinition Kick { get; } = new("Kick", [35, 36], 1.0);
+    // the kick repeats its figure, the base of the groove
+    public static PercussionInstrumentDefinition Kick { get; } = new(
+        "Kick",
+        [35, 36],
+        1.0,
+        builder => builder.Add(CompositionStateKinds.Rhythm.Variation, -0.4)
+    );
 
     public static PercussionInstrumentDefinition CrossStick { get; } = new("Snare Cross Stick", [37], 0.2);
 
@@ -16,15 +22,25 @@ public static class DrumDefinitions
 
     public static PercussionInstrumentDefinition Clap { get; } = new("Clap", [39], 0.3);
 
-    // hi-hat plays faster than the other timekeepers
+    // hi-hat plays faster than the other timekeepers, and like the ride keeps time: full and steady
     public static PercussionInstrumentDefinition HiHat { get; } = new(
         "Hi-Hat",
         [42, 44, 46],
         1.0,
-        builder => builder.Add(CompositionStateKinds.Rhythm.Period.Power, -1)
+        builder => builder
+            .Add(CompositionStateKinds.Rhythm.Period.Power, -1)
+            .Add(CompositionStateKinds.Rhythm.Fullness, 0.35)
+            .Add(CompositionStateKinds.Rhythm.Variation, -0.5)
     );
 
-    public static PercussionInstrumentDefinition Ride { get; } = new("Ride", [51, 53, 59], 0.5);
+    public static PercussionInstrumentDefinition Ride { get; } = new(
+        "Ride",
+        [51, 53, 59],
+        0.5,
+        builder => builder
+            .Add(CompositionStateKinds.Rhythm.Fullness, 0.35)
+            .Add(CompositionStateKinds.Rhythm.Variation, -0.5)
+    );
 
     public static PercussionInstrumentDefinition Tambourine { get; } = new("Tambourine", [54], 0.2);
 

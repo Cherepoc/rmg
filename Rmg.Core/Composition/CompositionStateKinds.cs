@@ -73,6 +73,8 @@ public static class CompositionStateKinds
             MaxRank = StateKinds.CreateAdditive<int>(prefix + "MaxRank");
             Seed = StateKinds.CreateAdditive<int>(prefix + "SeedValue");
             RankOffset = StateKinds.CreateAdditive<int>(prefix + "RankOffset");
+            Fullness = StateKinds.CreateAdditive<double>(prefix + "Fullness");
+            Variation = StateKinds.CreateAdditive<double>(prefix + "Variation");
         }
 
         public PeriodStateKinds Period { get; }
@@ -84,6 +86,18 @@ public static class CompositionStateKinds
         public StateKind<int> Seed { get; }
 
         public StateKind<int> RankOffset { get; }
+
+        /// <summary>
+        ///     How much of a position's chance of being kept is left for every rank it is from the rank offset: near 1
+        ///     every position is kept, as in a roll, and lower the pattern thins out.
+        /// </summary>
+        public StateKind<double> Fullness { get; }
+
+        /// <summary>
+        ///     The chance of a cycle drawing afresh what it keeps: 1 draws every cycle afresh, and 0 repeats the first,
+        ///     as a riff.
+        /// </summary>
+        public StateKind<double> Variation { get; }
     }
 
     public sealed class PeriodStateKinds

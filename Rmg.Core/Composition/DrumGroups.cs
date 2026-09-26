@@ -36,7 +36,9 @@ public static class DrumGroups
         builder => builder
             .Add(CompositionStateKinds.Rhythm.Period.Power, -1)
             .Add(CompositionStateKinds.Rhythm.Phase.Rank, 1)
-            .Add(CompositionStateKinds.Rhythm.MaxRank, -2),
+            .Add(CompositionStateKinds.Rhythm.MaxRank, -2)
+            // and keeps its figure, bar after bar
+            .Add(CompositionStateKinds.Rhythm.Variation, -0.3),
         new SongDrumRule(
             [
                 SongDrumRule.OneOf(

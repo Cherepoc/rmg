@@ -31,7 +31,8 @@ internal static class LayerStates
     /// <summary>
     ///     A layer's steps of the rhythm settings. The period and the phase make the groove, the speed changing more
     ///     often and the tuplet period by a chance of its own, and the max rank and the rank offset how busy it is; the
-    ///     phase's offset among the beats of its rank is drawn around 0 in every layer.
+    ///     phase's offset among the beats of its rank, and how full the pattern is and how often its cycles change,
+    ///     are drawn around 0 in every layer.
     /// </summary>
     public static StateMapBuilder AddRhythmLayer(this StateMapBuilder builder, RhythmLayer layer)
     {
@@ -41,7 +42,9 @@ internal static class LayerStates
             .Add(CompositionStateKinds.Rhythm.Phase.Rank, layer.CreateGrooveGenerator())
             .Add(CompositionStateKinds.Rhythm.Phase.RankedOffset, Generators.SplineValue())
             .Add(CompositionStateKinds.Rhythm.MaxRank, layer.CreateDensityGenerator())
-            .Add(CompositionStateKinds.Rhythm.RankOffset, layer.CreateDensityGenerator());
+            .Add(CompositionStateKinds.Rhythm.RankOffset, layer.CreateDensityGenerator())
+            .Add(CompositionStateKinds.Rhythm.Fullness, layer.CreateFullnessGenerator())
+            .Add(CompositionStateKinds.Rhythm.Variation, layer.CreateVariationGenerator());
     }
 
     /// <summary>A layer's part of the note-to-note walk of the articulation, the chord root and the chord note.</summary>

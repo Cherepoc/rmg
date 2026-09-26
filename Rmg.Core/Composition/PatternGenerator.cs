@@ -235,12 +235,15 @@ internal sealed class PatternGenerator
         var maxRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.MaxRank);
         var seed = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Seed);
         var rankOffset = stateMap.GetStateValue(CompositionStateKinds.Rhythm.RankOffset);
+        var fullness = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Fullness);
+        var variation = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Variation);
 
         return DyadicRankThresholdPattern.Create(
             _context,
             seed,
-            WeightUtil.CreateGeometricRankWeightFunc(rankOffset, 0, 1.0, 0.5),
-            new DyadicTimelineDescriptor(BarDuration, period, phase, maxRank)
+            WeightUtil.CreateGeometricRankWeightFunc(rankOffset, 0, 1.0, fullness),
+            new DyadicTimelineDescriptor(BarDuration, period, phase, maxRank),
+            variation
         );
     }
 
@@ -269,7 +272,13 @@ internal sealed class PatternGenerator
             .BounceInBounds(-1, 1);
         var phaseValue = DyadicRankDistribution.GetHalfOffset(phaseRank, phaseRankedOffset) * periodValue;
 
+        // fullness and variation keep to their ranges; the song sets where they start
+        var fullness = Math.Clamp(stateMap.GetStateValue(CompositionStateKinds.Rhythm.Fullness), RhythmSettings.MinFullness, 1);
+        var variation = Math.Clamp(stateMap.GetStateValue(CompositionStateKinds.Rhythm.Variation), 0, 1);
+
         return new StateMapBuilder("Resolved rhythm", perTrack: true)
+            .Add(CompositionStateKinds.Rhythm.Fullness, fullness)
+            .Add(CompositionStateKinds.Rhythm.Variation, variation)
             .Add(CompositionStateKinds.Rhythm.Period.Value, periodValue)
             .Add(CompositionStateKinds.Rhythm.Phase.Value, phaseValue)
             .Add(CompositionStateKinds.Rhythm.MaxRank, maxRank)

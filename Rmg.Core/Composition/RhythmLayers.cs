@@ -22,8 +22,20 @@ namespace Rmg.Core.Composition;
 ///     The chance to move the settings that make how busy the rhythm is: how many subdivisions it has and which of
 ///     them play. They change freely, most of all from bar to bar.
 /// </param>
-public sealed record RhythmLayer(double Groove, double Density, double Tuplet)
+/// <param name="Fullness">How far the layer moves a pattern's fullness either way, a value drawn around 0.</param>
+/// <param name="Variation">How far the layer moves how often a pattern's cycles are drawn afresh, either way.</param>
+public sealed record RhythmLayer(double Groove, double Density, double Tuplet, double Fullness = 0, double Variation = 0)
 {
+    public Func<IGenerationContext, double> CreateFullnessGenerator()
+    {
+        return Generators.SplineValue().Then(x => x * Fullness);
+    }
+
+    public Func<IGenerationContext, double> CreateVariationGenerator()
+    {
+        return Generators.SplineValue().Then(x => x * Variation);
+    }
+
     public const double SpeedShare = 3.25;
 
     public Func<IGenerationContext, int> CreateGrooveGenerator()
@@ -69,22 +81,22 @@ public sealed record RhythmLayer(double Groove, double Density, double Tuplet)
 /// </summary>
 public static class RhythmLayers
 {
-    public static RhythmLayer Song { get; } = new(0.075, 0.1, 0.025);
+    public static RhythmLayer Song { get; } = new(0.075, 0.1, 0.025, 0.1, 0.2);
 
-    public static RhythmLayer Section { get; } = new(0.05, 0.1, 0.07);
+    public static RhythmLayer Section { get; } = new(0.05, 0.1, 0.07, 0.1, 0.2);
 
     /// <summary>A track's own rhythm for the whole song.</summary>
-    public static RhythmLayer Track { get; } = new(0.025, 0.05, 0.008);
+    public static RhythmLayer Track { get; } = new(0.025, 0.05, 0.008, 0.05, 0.1);
 
     /// <summary>How a track's rhythm differs in a section from the song.</summary>
-    public static RhythmLayer SectionTrack { get; } = new(0.025, 0.05, 0.035);
+    public static RhythmLayer SectionTrack { get; } = new(0.025, 0.05, 0.035, 0.05, 0.1);
 
     /// <summary>The rhythm the drums share for the whole song.</summary>
-    public static RhythmLayer DrumGroup { get; } = new(0.025, 0.05, 0.008);
+    public static RhythmLayer DrumGroup { get; } = new(0.025, 0.05, 0.008, 0.05, 0.1);
 
     /// <summary>How the drums' shared rhythm differs in a section.</summary>
-    public static RhythmLayer SectionDrumGroup { get; } = new(0.025, 0.05, 0.035);
+    public static RhythmLayer SectionDrumGroup { get; } = new(0.025, 0.05, 0.035, 0.05, 0.1);
 
     /// <summary>A track's bar pattern, where a busier or sparser bar sounds like a variation, not a new groove.</summary>
-    public static RhythmLayer BarPattern { get; } = new(0.025, 0.15, 0.05);
+    public static RhythmLayer BarPattern { get; } = new(0.025, 0.15, 0.05, 0.05, 0.1);
 }
