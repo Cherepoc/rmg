@@ -17,6 +17,8 @@ public sealed class FillArchetypeTest
 
     private static IEnumerable<int> Seeds => Enumerable.Range(0, 12);
 
+    private static readonly Drummer Middle = new(0.5, FillKind.None);
+
     private sealed record Setup(FillGenerator Generator, TrackEventStateTimelineMap<StateMap> Song, int Snare);
 
     /// <summary>A groove of kick on the beats, snare on the backbeats and hi-hat in 8ths, for three bars.</summary>
@@ -51,13 +53,24 @@ public sealed class FillArchetypeTest
     private static int Articulation(TimelineItem<StateMap> item) => item.Value.GetStateValue(StateKinds.ArticulationIndex);
 
     [Test]
-    public async Task TomDown_RunsFromTheHighTomToTheFloorTom()
+    public async Task EveryFill_HasASpec()
     {
-        var toms = Enumerable.Range(0, 8).Select(x => FillGenerator.TomDown(x, 8)).ToArray();
+        var kinds = Enum.GetValues<FillKind>().Where(x => x != FillKind.None).ToHashSet();
 
-        await Assert.That(toms[0]).IsEqualTo(FillLayers.TomCount);
-        await Assert.That(toms[^1]).IsGreaterThanOrEqualTo(1);
-        await Assert.That(toms.Zip(toms.Skip(1)).All(x => x.Second <= x.First)).IsTrue();
+        await Assert.That(FillLayers.Specs.Keys.ToHashSet().SetEquals(kinds)).IsTrue();
+        await Assert.That(FillLayers.Specs.Values.All(x => x.Spans.Length > 0)).IsTrue();
+    }
+
+    [Test]
+    public async Task NamedSounds_AreTheDrumsOwn()
+    {
+        var toms = DrumSounds.TomsHighToLow.Select(DrumDefinitions.Tom.GetArticulationIndex).ToArray();
+
+        // the toms' sounds are listed from the low floor tom up, so the run down them counts down
+        await Assert.That(toms).IsEquivalentTo(Enumerable.Range(1, toms.Length).Reverse().ToArray());
+        await Assert.That(DrumDefinitions.HiHat.ArticulationCodes).Contains(DrumSounds.OpenHiHat);
+        await Assert.That(FillLayers.Crashes.All(x => DrumDefinitions.Cymbal.ArticulationCodes.Contains(x.Value))).IsTrue();
+        await Assert.That(() => DrumDefinitions.Tom.GetArticulationIndex(DrumSounds.OpenHiHat)).Throws<ArgumentException>();
     }
 
     [Test]
@@ -66,7 +79,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var (generator, song, snare) = Create(seed);
-            var filled = generator.ApplyFill(song, FillKind.TomRun, Line, Grid);
+            var filled = generator.ApplyFill(song, FillKind.TomRun, Line, Grid, Middle);
             var toms = Events(filled, Tom, 0, 12);
             var from = toms[0].Position;
 
@@ -86,7 +99,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var (generator, song, snare) = Create(seed);
-            var roll = Events(generator.ApplyFill(song, FillKind.SnareRoll, Line, Grid), snare, 4, Line)
+            var roll = Events(generator.ApplyFill(song, FillKind.SnareRoll, Line, Grid, Middle), snare, 4, Line)
                 .Where(x => x.Value.GetStateValue(StateKinds.Velocity) != 0)
                 .ToArray();
             var velocities = roll.Select(x => x.Value.GetStateValue(StateKinds.Velocity)).ToArray();
@@ -102,7 +115,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var (generator, song, snare) = Create(seed);
-            var filled = generator.ApplyFill(song, FillKind.Break, Line, Grid);
+            var filled = generator.ApplyFill(song, FillKind.Break, Line, Grid, Middle);
             var silent = new[] { Kick, snare, HiHat }.Select(x => Events(filled, x, Line - 1, Line).Length).Sum();
 
             await Assert.That(silent).IsEqualTo(0);
@@ -117,7 +130,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var (generator, song, snare) = Create(seed);
-            var filled = generator.ApplyFill(song, FillKind.StopTime, Line, Grid);
+            var filled = generator.ApplyFill(song, FillKind.StopTime, Line, Grid, Middle);
             // the crash is the fill's own, where the drums stop
             var from = Events(filled, Cymbal, 0, 12).Single().Position;
             var hits = new[] { Kick, snare, HiHat, Cymbal }.SelectMany(x => Events(filled, x, from, Line).Select(e => (x, e.Position))).ToArray();
@@ -131,9 +144,9 @@ public sealed class FillArchetypeTest
     public async Task Lift_OpensTheHiHat_OnTheLastOffBeat()
     {
         var (generator, song, _) = Create(1);
-        var hiHat = Events(generator.ApplyFill(song, FillKind.Lift, Line, Grid), HiHat, Line - 0.5, Line).Single();
+        var hiHat = Events(generator.ApplyFill(song, FillKind.Lift, Line, Grid, Middle), HiHat, Line - 0.5, Line).Single();
 
-        await Assert.That(Articulation(hiHat)).IsEqualTo(FillLayers.OpenHiHat);
+        await Assert.That(Articulation(hiHat)).IsEqualTo(DrumDefinitions.HiHat.GetArticulationIndex(DrumSounds.OpenHiHat));
     }
 
     [Test]
@@ -142,7 +155,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var (generator, song, _) = Create(seed);
-            var filled = generator.ApplyFill(song, FillKind.Pickup, Line, Grid);
+            var filled = generator.ApplyFill(song, FillKind.Pickup, Line, Grid, Middle);
 
             await Assert.That(Events(filled, HiHat, 0, 12).Length).IsEqualTo(Events(song, HiHat, 0, 12).Length);
             await Assert.That(Events(filled, Kick, 0, 12).Length).IsEqualTo(Events(song, Kick, 0, 12).Length);

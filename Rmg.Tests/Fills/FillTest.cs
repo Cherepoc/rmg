@@ -82,6 +82,20 @@ public sealed class FillTest
     }
 
     [Test]
+    public async Task EveryLine_RecordsItsFillDecision()
+    {
+        using var trace = StateTrace.Start();
+        var song = SongGenerator.GenerateSong(3);
+
+        var decisions = trace.Entries.Where(x => x.Point == "Fill decision").ToArray();
+
+        // a line between every two sections, and one in the middle of every section
+        var sections = (int)(song.Duration / SectionDuration);
+        await Assert.That(decisions.Length).IsEqualTo(sections - 1 + sections);
+        await Assert.That(decisions.All(x => x.Track == FillGenerator.DrumsTrace && x.Bar == 3)).IsTrue();
+    }
+
+    [Test]
     public async Task SectionChanges_MostlyLandOnACrashAndAKick()
     {
         int changes = 0, crashes = 0, kicks = 0, downbeats = 0, otherCrashes = 0;

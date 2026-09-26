@@ -25,7 +25,7 @@ public sealed class DrummerTest
     [Test]
     public async Task WeighSpans_FavoursLongerFills_TheBusierTheDrummer()
     {
-        var spans = FillLayers.Spans[FillKind.TomRun];
+        var spans = FillLayers.Specs[FillKind.TomRun].Spans;
         double Ratio(double busyness)
         {
             var weighed = new Drummer(busyness, FillKind.None).WeighSpans(spans);

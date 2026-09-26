@@ -295,7 +295,9 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   dyadic patterns like the grooves', so chance leaves a note out now and then. A bar in a tuplet feel
   takes only fills that play no straight notes, and a fast song's runs play 8ths. The next section
   lands on a crash and a kick most of the time (65%), a kick alone (20%), or runs straight on; after a
-  break or stop-time always on both. A song's drummer (`Drummer`) sets how busy the fills are, how
+  break or stop-time always on both. Every fill is data (`FillSpec`): its spans, what it does with the
+  groove, the hits it starts with, and its voices, each a walk of named sounds (`DrumSounds`), such as
+  down the toms. A song's drummer (`Drummer`) sets how busy the fills are, how
   often, how long and how full, and has a favourite fill it plays three times as often, so a song's
   fills sound like one player's. The fills take notes out of a span and add their own
   (`FillEdits`); a drum names its sound outright (`StateKinds.ArticulationIndex`), and a drum out of a

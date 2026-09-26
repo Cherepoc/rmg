@@ -8,11 +8,15 @@ namespace Rmg.Core.Composition;
 ///     The drums at the lines between the sections of a song, once they are put one after another: the only stage that
 ///     knows where a section ends and the next begins. Before a line a drummer plays a fill, or lets the groove run on,
 ///     and after it lands the next section on its downbeat; a section change is marked most, and the line in the middle
-///     of a section now and then, each as the song's drummer plays them. Its draws come after all the others, so a song
-///     is the same outside the lines it marks.
+///     of a section now and then, each as the song's drummer plays them. A fill is played from its spec
+///     (<see cref="FillLayers.Specs" />). Its draws come after all the others, so a song is the same outside the lines it
+///     marks.
 /// </summary>
 internal sealed class FillGenerator
 {
+    /// <summary>The track of a trace entry that records a decision for all the drums, such as a line's fill.</summary>
+    public const int DrumsTrace = -1;
+
     // the song's tempo is a multiple of this
     private const double BaseTempo = 120;
 
@@ -31,29 +35,28 @@ internal sealed class FillGenerator
 
     private readonly IGenerationContext _context;
     private readonly ImmutableArray<int> _drumTracks;
-    private readonly int? _kickTrack;
-    private readonly int? _snareTrack;
-    private readonly int? _tomTrack;
-    private readonly int? _hiHatTrack;
-    private readonly int? _cymbalTrack;
 
-    // the song's drummer, drawn when the fills are, after all else
-    private Drummer _drummer = new(0.5, FillKind.None);
+    // the drum the song has for every role a fill plays
+    private readonly ImmutableDictionary<DrumRole, (int Track, PercussionInstrumentDefinition Drum)> _roles;
 
     public FillGenerator(IGenerationContext context, SongTracks tracks)
     {
         _context = context;
         _drumTracks = [..tracks.SongDrums.Select(DrumGroups.GetTrackNumber)];
-        _kickTrack = GetTrack(tracks, DrumDefinitions.Kick);
-        _snareTrack = Snares.Select(x => GetTrack(tracks, x)).FirstOrDefault(x => x is not null);
-        _tomTrack = GetTrack(tracks, DrumDefinitions.Tom);
-        _hiHatTrack = GetTrack(tracks, DrumDefinitions.HiHat);
-        _cymbalTrack = GetTrack(tracks, DrumDefinitions.Cymbal);
-    }
 
-    private static int? GetTrack(SongTracks tracks, PercussionInstrumentDefinition drum)
-    {
-        return tracks.SongDrums.Contains(drum) ? DrumGroups.GetTrackNumber(drum) : null;
+        var roles = new Dictionary<DrumRole, (int, PercussionInstrumentDefinition)>();
+        void AddRole(DrumRole role, PercussionInstrumentDefinition? drum)
+        {
+            if (drum is not null && tracks.SongDrums.Contains(drum))
+                roles[role] = (DrumGroups.GetTrackNumber(drum), drum);
+        }
+
+        AddRole(DrumRole.Kick, DrumDefinitions.Kick);
+        AddRole(DrumRole.Snare, Snares.FirstOrDefault(tracks.SongDrums.Contains));
+        AddRole(DrumRole.Toms, DrumDefinitions.Tom);
+        AddRole(DrumRole.HiHat, DrumDefinitions.HiHat);
+        AddRole(DrumRole.Cymbal, DrumDefinitions.Cymbal);
+        _roles = roles.ToImmutableDictionary();
     }
 
     /// <param name="song">The sections put one after another.</param>
@@ -67,7 +70,7 @@ internal sealed class FillGenerator
         var tempo = BaseTempo * song.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(StateKinds.Tempo);
         var grid = tempo <= FillLayers.MaxSixteenthTempo ? 0.25 : 0.5;
 
-        _drummer = Drummer.Generate(_context);
+        var drummer = Drummer.Generate(_context);
         var edits = new FillEdits(_context);
         var start = 0.0;
         for (var i = 0; i < sections.Count; i++)
@@ -76,22 +79,25 @@ internal sealed class FillGenerator
             if (i > 0)
             {
                 // the fill before the line belongs to the section it ends
-                var fill = PickFill(FillLayers.SectionFills, song, start);
-                Fill(edits, fill, start, grid, sections[i - 1].SectionId);
-                var landing = fill is FillKind.Break or FillKind.StopTime ? FillLanding.CrashAndKick : Pick(FillLayers.SectionLandings);
+                var previousSectionId = sections[i - 1].SectionId;
+                var fill = PickFill(FillLayers.SectionFills, drummer, song, start);
+                var span = Fill(edits, fill, start, grid, drummer, previousSectionId);
+                var landing = IsForcingLanding(fill) ? FillLanding.CrashAndKick : Pick(FillLayers.SectionLandings);
                 Land(song, edits, start, sectionId, landing);
+                RecordDecision(previousSectionId, start, fill, span, landing);
             }
 
             // the line in the middle of the section, between its 4-bar pattern and the pattern's repeat
             for (var line = start + BarStateGenerator.PatternDuration; line < start + duration; line += BarStateGenerator.PatternDuration)
             {
-                var fill = PickFill(FillLayers.PhraseFills, song, line);
-                Fill(edits, fill, line, grid, sectionId);
-                var landing = fill is FillKind.Break or FillKind.StopTime
+                var fill = PickFill(FillLayers.PhraseFills, drummer, song, line);
+                var span = Fill(edits, fill, line, grid, drummer, sectionId);
+                var landing = IsForcingLanding(fill)
                               || fill != FillKind.None && _context.TestProbability(FillLayers.PhraseLandingChance)
                     ? FillLanding.CrashAndKick
                     : FillLanding.None;
                 Land(song, edits, line, sectionId, landing);
+                RecordDecision(sectionId, line, fill, span, landing);
             }
 
             start += duration;
@@ -100,12 +106,41 @@ internal sealed class FillGenerator
         return edits.ApplyTo(song);
     }
 
-    /// <summary>The song with one fill before the given line, and no landing, as a drummer in the middle plays it.</summary>
-    internal TrackEventStateTimelineMap<StateMap> ApplyFill(TrackEventStateTimelineMap<StateMap> song, FillKind fill, double line, double grid)
+    /// <summary>The song with one fill before the given line, as the given drummer plays it, and no landing.</summary>
+    internal TrackEventStateTimelineMap<StateMap> ApplyFill(
+        TrackEventStateTimelineMap<StateMap> song,
+        FillKind fill,
+        double line,
+        double grid,
+        Drummer drummer
+    )
     {
         var edits = new FillEdits(_context);
-        Fill(edits, fill, line, grid, 0);
+        Fill(edits, fill, line, grid, drummer, 0);
         return edits.ApplyTo(song);
+    }
+
+    private static bool IsForcingLanding(FillKind fill)
+    {
+        return fill != FillKind.None && FillLayers.Specs[fill].ForcesLanding;
+    }
+
+    /// <summary>What was decided at a line, recorded in the last bar before it, where its fill is.</summary>
+    private static void RecordDecision(int sectionId, double line, FillKind fill, double span, FillLanding landing)
+    {
+        if (!StateTrace.IsRunning)
+            return;
+
+        var bar = (int)Math.Floor(line / BarDuration) - 1;
+        StateTrace.Record(
+            "Fill decision",
+            DrumsTrace,
+            sectionId,
+            bar % Progressions.BarCount,
+            StateMap.Default,
+            fill == FillKind.None ? 0 : BarDuration - Math.Min(span, BarDuration),
+            $"{fill}, {span} beats, landing {landing}"
+        );
     }
 
     private T Pick<T>(ImmutableArray<Weighted<T>> weights)
@@ -114,9 +149,14 @@ internal sealed class FillGenerator
     }
 
     /// <summary>The fill before a line; a bar in a tuplet feel takes only a fill that does not play straight notes.</summary>
-    private FillKind PickFill(ImmutableArray<Weighted<FillKind>> weights, TrackEventStateTimelineMap<StateMap> song, double line)
+    private FillKind PickFill(
+        ImmutableArray<Weighted<FillKind>> weights,
+        Drummer drummer,
+        TrackEventStateTimelineMap<StateMap> song,
+        double line
+    )
     {
-        weights = _drummer.Weigh(weights);
+        weights = drummer.Weigh(weights);
         if (IsInTupletFeel(song, line - BarDuration, line))
             weights = [..weights.Where(x => FillLayers.TupletFills.Contains(x.Value))];
         return Pick(weights);
@@ -134,120 +174,110 @@ internal sealed class FillGenerator
                && positions.Count(x => !x.IsEqualToByEpsilon(Math.Round(x))) >= FillLayers.TupletFeelShare * positions.Length;
     }
 
-    /// <summary>A fill before the line: the groove in its span kept, thinned to the kick, or cleared, and its voices.</summary>
-    private void Fill(FillEdits edits, FillKind fill, double line, double grid, int sectionId)
+    /// <summary>
+    ///     A fill before the line, played from its spec: the groove in its span kept, left to the kick, or stopped, then
+    ///     its hits at the span's start, then its voices.
+    /// </summary>
+    /// <returns>How long the fill is, in beats; 0 for none.</returns>
+    private double Fill(FillEdits edits, FillKind fill, double line, double grid, Drummer drummer, int sectionId)
     {
         if (fill == FillKind.None)
-            return;
+            return 0;
 
-        var span = Pick(_drummer.WeighSpans(FillLayers.Spans[fill]));
+        var spec = FillLayers.Specs[fill];
+        var span = Pick(drummer.WeighSpans(spec.Spans));
         var from = line - span;
         var name = fill.ToString();
-        var run = (FillLayers.RunStartVelocity, FillLayers.RunEndVelocity);
-        switch (fill)
+
+        if (spec.Groove != GrooveTreatment.Keep)
+            foreach (var track in _drumTracks.Where(x => spec.Groove == GrooveTreatment.Stop || x != Track(DrumRole.Kick)))
+                edits.Clear(track, from, line);
+
+        foreach (var hit in spec.Hits)
+            if (hit.Choices.FirstOrDefault(x => _roles.ContainsKey(x.Role)) is { } choice)
+            {
+                var (track, articulation) = Resolve(choice);
+                edits.Hit(track, from, hit.Velocity, articulation, sectionId, name);
+            }
+
+        foreach (var voice in spec.Voices)
+            PlayVoice(edits, voice, from, line, grid, drummer, sectionId, name);
+
+        return span;
+    }
+
+    private int? Track(DrumRole role)
+    {
+        return _roles.TryGetValue(role, out var drum) ? drum.Track : null;
+    }
+
+    /// <summary>A sound's track and its number on the drum; the choice among several sounds is drawn.</summary>
+    private (int Track, int Articulation) Resolve(FillSound sound)
+    {
+        var (track, drum) = _roles[sound.Role];
+        var code = sound.Codes.Length switch
         {
-            case FillKind.Pickup:
-                var tomsPlay = _tomTrack is not null && _context.TestProbability(FillLayers.PickupTomChance);
-                // weaker beats are kept less, so a pickup is a few hits, mostly on the beats
-                Voice(
-                    edits,
-                    from,
-                    line,
-                    grid,
-                    rank => Math.Pow(FillLayers.PickupFullness, rank),
-                    (k, n) => tomsPlay ? (_tomTrack, TomDown(k, n)) : (_snareTrack, 0),
-                    run,
-                    sectionId,
-                    name
-                );
-                break;
-            case FillKind.TomRun:
-                ClearGroove(edits, from, line, keepKick: true);
-                Voice(edits, from, line, grid, Run, (k, n) => (_tomTrack, TomDown(k, n)), run, sectionId, name);
-                break;
-            case FillKind.SnareRoll:
-                ClearGroove(edits, from, line, keepKick: true);
-                // it speeds up, 8ths then 16ths for its second half, where it is long enough and the tempo allows
-                var middle = span >= 1 && grid < 0.5 ? from + span / 2 : from;
-                var midVelocity = (FillLayers.RollStartVelocity + FillLayers.RollEndVelocity) / 2;
-                Voice(edits, from, middle, 0.5, Run, (_, _) => (_snareTrack, 0), (FillLayers.RollStartVelocity, midVelocity), sectionId, name);
-                Voice(
-                    edits,
-                    middle,
-                    line,
-                    grid,
-                    Run,
-                    (_, _) => (_snareTrack, 0),
-                    (middle > from ? midVelocity : FillLayers.RollStartVelocity, FillLayers.RollEndVelocity),
-                    sectionId,
-                    name
-                );
-                break;
-            case FillKind.AroundTheKit:
-                ClearGroove(edits, from, line, keepKick: true);
-                Voice(
-                    edits,
-                    from,
-                    line,
-                    grid,
-                    Run,
-                    (k, n) =>
-                    {
-                        var snareCount = (int)Math.Ceiling(n * FillLayers.AroundTheKitSnareShare);
-                        return k < snareCount || _tomTrack is null ? (_snareTrack, 0) : (_tomTrack, TomDown(k - snareCount, n - snareCount));
-                    },
-                    run,
-                    sectionId,
-                    name
-                );
-                break;
-            case FillKind.Break:
-                ClearGroove(edits, from, line, keepKick: false);
-                break;
-            case FillKind.StopTime:
-                ClearGroove(edits, from, line, keepKick: false);
-                foreach (var track in new[] { _kickTrack, _snareTrack })
-                    if (track is { } hit)
-                        edits.Hit(hit, from, FillLayers.LandingVelocity, 0, sectionId, name);
-                if (_cymbalTrack is { } cymbal)
-                    edits.Hit(cymbal, from, FillLayers.LandingVelocity, Pick(FillLayers.Crashes), sectionId, name);
-                break;
-            case FillKind.Lift:
-                if (_hiHatTrack is { } hiHat)
-                    edits.Hit(hiHat, from, FillLayers.RunEndVelocity, FillLayers.OpenHiHat, sectionId, name);
-                else if (_cymbalTrack is { } liftCymbal)
-                    edits.Hit(liftCymbal, from, FillLayers.RunEndVelocity, Pick(FillLayers.Crashes), sectionId, name);
-                break;
+            0 => 0,
+            1 => sound.Codes[0].Value,
+            _ => Pick(sound.Codes)
+        };
+        return (track, code == 0 ? 0 : drum.GetArticulationIndex(code));
+    }
+
+    /// <summary>A voice over the span; one that speeds up plays 8ths for the first half, where the span and the tempo allow.</summary>
+    private void PlayVoice(FillEdits edits, FillVoice voice, double from, double line, double grid, Drummer drummer, int sectionId, string name)
+    {
+        var walk = voice.Alternative is { } alternative
+                   && _roles.ContainsKey(GetRole(alternative))
+                   && _context.TestProbability(voice.AlternativeChance)
+            ? alternative
+            : voice.Walk;
+        Func<int, double> keepChance = voice.Keep switch
+        {
+            FillKeep.Run => rank => rank == 0 ? 1 : drummer.RunFullness,
+            _ => rank => Math.Pow(FillLayers.PickupFullness, rank)
+        };
+
+        if (!voice.SpeedsUp)
+        {
+            PlaySegment(edits, from, line, grid, keepChance, walk, (voice.StartVelocity, voice.EndVelocity), sectionId, name);
+            return;
         }
+
+        var span = line - from;
+        var middle = span >= 1 && grid < 0.5 ? from + span / 2 : from;
+        var midVelocity = (voice.StartVelocity + voice.EndVelocity) / 2;
+        PlaySegment(edits, from, middle, 0.5, keepChance, walk, (voice.StartVelocity, midVelocity), sectionId, name);
+        PlaySegment(
+            edits,
+            middle,
+            line,
+            grid,
+            keepChance,
+            walk,
+            (middle > from ? midVelocity : voice.StartVelocity, voice.EndVelocity),
+            sectionId,
+            name
+        );
     }
 
-    // a run keeps its first note, and nearly all the others, as many as the drummer does
-    private double Run(int rank) => rank == 0 ? 1 : _drummer.RunFullness;
-
-    /// <summary>The tom of a run's note, from the high tom down to the floor tom over the run.</summary>
-    internal static int TomDown(int index, int count)
+    /// <summary>The drum a walk needs, besides the snare that some walks start on.</summary>
+    private static DrumRole GetRole(FillWalk walk)
     {
-        return FillLayers.TomCount - index * FillLayers.TomCount / Math.Max(1, count);
-    }
-
-    /// <summary>Takes the drums' notes out of a span, all of them or all but the kick's.</summary>
-    private void ClearGroove(FillEdits edits, double from, double to, bool keepKick)
-    {
-        foreach (var track in _drumTracks.Where(x => !keepKick || x != _kickTrack))
-            edits.Clear(track, from, to);
+        return walk == FillWalk.Snare ? DrumRole.Snare : DrumRole.Toms;
     }
 
     /// <summary>
-    ///     A voice of a fill: a dyadic pattern over its span, on the given grid, whose every note plays the sound it is
-    ///     given by its place among the notes, louder or quieter along the span.
+    ///     A part of a voice: a dyadic pattern over its span, on the given grid, whose every note plays the sound of the
+    ///     walk at its place among the notes, louder or quieter along the span.
     /// </summary>
-    private void Voice(
+    private void PlaySegment(
         FillEdits edits,
         double from,
         double to,
         double grid,
         Func<int, double> keepChance,
-        Func<int, int, (int? Track, int Articulation)> sound,
+        FillWalk walk,
         (double From, double To) velocity,
         int sectionId,
         string name
@@ -267,13 +297,44 @@ internal sealed class FillGenerator
             .OutcomeRankTimeline;
         for (var k = 0; k < hits.Count; k++)
         {
-            var (track, articulation) = sound(k, hits.Count);
-            if (track is not { } hitTrack)
+            if (GetWalkSound(walk, k, hits.Count) is not var (track, articulation))
                 continue;
 
             var loudness = velocity.From + (velocity.To - velocity.From) * hits[k].Position / span;
-            edits.Hit(hitTrack, from + hits[k].Position, loudness, articulation, sectionId, name);
+            edits.Hit(track, from + hits[k].Position, loudness, articulation, sectionId, name);
         }
+    }
+
+    /// <summary>The sound of a walk's note by its place among the notes; none if the song lacks its drum.</summary>
+    private (int Track, int Articulation)? GetWalkSound(FillWalk walk, int index, int count)
+    {
+        switch (walk)
+        {
+            case FillWalk.TomsDown:
+                return GetTomDown(index, count);
+            case FillWalk.SnareThenTomsDown:
+                var snareCount = (int)Math.Ceiling(count * FillLayers.AroundTheKitSnareShare);
+                return index < snareCount || !_roles.ContainsKey(DrumRole.Toms)
+                    ? GetGrooveSound(DrumRole.Snare)
+                    : GetTomDown(index - snareCount, count - snareCount);
+            default:
+                return GetGrooveSound(DrumRole.Snare);
+        }
+    }
+
+    private (int Track, int Articulation)? GetGrooveSound(DrumRole role)
+    {
+        return _roles.TryGetValue(role, out var drum) ? (drum.Track, 0) : null;
+    }
+
+    /// <summary>The tom of a run's note, from the high tom down to the floor tom over the run.</summary>
+    private (int Track, int Articulation)? GetTomDown(int index, int count)
+    {
+        if (!_roles.TryGetValue(DrumRole.Toms, out var toms))
+            return null;
+
+        var tom = DrumSounds.TomsHighToLow[index * DrumSounds.TomsHighToLow.Length / Math.Max(1, count)];
+        return (toms.Track, toms.Drum.GetArticulationIndex(tom));
     }
 
     /// <summary>The hits the drums land on at a line: a crash, and a kick if the groove has none there.</summary>
@@ -282,11 +343,14 @@ internal sealed class FillGenerator
         if (landing == FillLanding.None)
             return;
 
-        if (landing == FillLanding.CrashAndKick && _cymbalTrack is { } cymbal)
-            edits.Hit(cymbal, position, FillLayers.LandingVelocity, Pick(FillLayers.Crashes), sectionId, "Landing");
+        if (landing == FillLanding.CrashAndKick && _roles.ContainsKey(DrumRole.Cymbal))
+        {
+            var (cymbal, crash) = Resolve(FillLayers.Crash);
+            edits.Hit(cymbal, position, FillLayers.LandingVelocity, crash, sectionId, "Landing");
+        }
 
         // the kick plays its own sound, as the groove's walk has it there
-        if (_kickTrack is { } kick && !HasHitAt(song, kick, position))
+        if (Track(DrumRole.Kick) is { } kick && !HasHitAt(song, kick, position))
             edits.Hit(kick, position, FillLayers.LandingVelocity, 0, sectionId, "Landing");
     }
 

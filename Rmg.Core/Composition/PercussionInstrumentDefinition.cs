@@ -29,6 +29,15 @@ public sealed class PercussionInstrumentDefinition
 
     public ImmutableArray<int> ArticulationCodes { get; }
 
+    /// <summary>The number of one of the drum's sounds, counted from 1, as a note names it outright.</summary>
+    public int GetArticulationIndex(int code)
+    {
+        var index = ArticulationCodes.IndexOf(code);
+        if (index < 0)
+            throw new ArgumentException($"The drum {Name} has no sound {code}.", nameof(code));
+        return index + 1;
+    }
+
     /// <summary>How likely the drum is to be chosen among the other drums of its group.</summary>
     public double Weight { get; }
 
