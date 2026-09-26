@@ -22,13 +22,7 @@ melodies and repetition need is a small extension of it rather than a new engine
 the tuning built on them, such as the snare's backbeat and the shares of speed and tuplets. Each step is off by
 default, so it can first be shown to leave the recorded songs unchanged, and then tuned by measurement. Built so far:
 fullness and repeated cycles (rolls, riffs and pulses), phrase schemes, rhythmic unconventionality, the melody's
-rhythm (its busyness, riffs, and phrase ends with a held note and a rest), and fills with landings.
-
-### 4. Fills: the drummer
-
-Fills and landings are built (`FillGenerator`); still to do is a song-level drummer, how busy and in what
-vocabulary: how often it fills, how long and how full its fills are, and a favourite fill that it plays more
-than the others, so that a song's fills sound like one drummer's. Then tuning by measurement.
+rhythm (its busyness, riffs, and phrase ends with a held note and a rest), and fills with landings and a drummer.
 
 ### Left for later
 

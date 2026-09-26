@@ -8,7 +8,8 @@ namespace Rmg.Core.Composition;
 ///     The drums at the lines between the sections of a song, once they are put one after another: the only stage that
 ///     knows where a section ends and the next begins. Before a line a drummer plays a fill, or lets the groove run on,
 ///     and after it lands the next section on its downbeat; a section change is marked most, and the line in the middle
-///     of a section now and then. Its draws come after all the others, so a song is the same outside the lines it marks.
+///     of a section now and then, each as the song's drummer plays them. Its draws come after all the others, so a song
+///     is the same outside the lines it marks.
 /// </summary>
 internal sealed class FillGenerator
 {
@@ -35,6 +36,9 @@ internal sealed class FillGenerator
     private readonly int? _tomTrack;
     private readonly int? _hiHatTrack;
     private readonly int? _cymbalTrack;
+
+    // the song's drummer, drawn when the fills are, after all else
+    private Drummer _drummer = new(0.5, FillKind.None);
 
     public FillGenerator(IGenerationContext context, SongTracks tracks)
     {
@@ -63,6 +67,7 @@ internal sealed class FillGenerator
         var tempo = BaseTempo * song.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(StateKinds.Tempo);
         var grid = tempo <= FillLayers.MaxSixteenthTempo ? 0.25 : 0.5;
 
+        _drummer = Drummer.Generate(_context);
         var edits = new FillEdits(_context);
         var start = 0.0;
         for (var i = 0; i < sections.Count; i++)
@@ -95,7 +100,7 @@ internal sealed class FillGenerator
         return edits.ApplyTo(song);
     }
 
-    /// <summary>The song with one fill before the given line, and no landing.</summary>
+    /// <summary>The song with one fill before the given line, and no landing, as a drummer in the middle plays it.</summary>
     internal TrackEventStateTimelineMap<StateMap> ApplyFill(TrackEventStateTimelineMap<StateMap> song, FillKind fill, double line, double grid)
     {
         var edits = new FillEdits(_context);
@@ -111,6 +116,7 @@ internal sealed class FillGenerator
     /// <summary>The fill before a line; a bar in a tuplet feel takes only a fill that does not play straight notes.</summary>
     private FillKind PickFill(ImmutableArray<Weighted<FillKind>> weights, TrackEventStateTimelineMap<StateMap> song, double line)
     {
+        weights = _drummer.Weigh(weights);
         if (IsInTupletFeel(song, line - BarDuration, line))
             weights = [..weights.Where(x => FillLayers.TupletFills.Contains(x.Value))];
         return Pick(weights);
@@ -134,7 +140,7 @@ internal sealed class FillGenerator
         if (fill == FillKind.None)
             return;
 
-        var span = Pick(FillLayers.Spans[fill]);
+        var span = Pick(_drummer.WeighSpans(FillLayers.Spans[fill]));
         var from = line - span;
         var name = fill.ToString();
         var run = (FillLayers.RunStartVelocity, FillLayers.RunEndVelocity);
@@ -215,8 +221,8 @@ internal sealed class FillGenerator
         }
     }
 
-    // a run keeps its first note, and nearly all the others
-    private static double Run(int rank) => rank == 0 ? 1 : FillLayers.RunFullness;
+    // a run keeps its first note, and nearly all the others, as many as the drummer does
+    private double Run(int rank) => rank == 0 ? 1 : _drummer.RunFullness;
 
     /// <summary>The tom of a run's note, from the high tom down to the floor tom over the run.</summary>
     internal static int TomDown(int index, int count)
