@@ -42,7 +42,7 @@ public sealed class FillArchetypeTest
             ],
             StateTimelineMap.Create(12)
         );
-        return new Setup(new FillGenerator(context, tracks), song, snare);
+        return new Setup(new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5)), song, snare);
     }
 
     private static TimelineItem<StateMap>[] Events(TrackEventStateTimelineMap<StateMap> song, int track, double from, double to) =>
@@ -79,7 +79,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var (generator, song, snare) = Create(seed);
-            var filled = generator.ApplyFill(song, FillKind.TomRun, Line, Grid, Middle);
+            var filled = generator.ApplyFill(song, FillPlay.Plain(FillKind.TomRun), Line, Grid, Middle);
             var toms = Events(filled, Tom, 0, 12);
             var from = toms[0].Position;
 
@@ -99,7 +99,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var (generator, song, snare) = Create(seed);
-            var roll = Events(generator.ApplyFill(song, FillKind.SnareRoll, Line, Grid, Middle), snare, 4, Line)
+            var roll = Events(generator.ApplyFill(song, FillPlay.Plain(FillKind.SnareRoll), Line, Grid, Middle), snare, 4, Line)
                 .Where(x => x.Value.GetStateValue(StateKinds.Velocity) != 0)
                 .ToArray();
             var velocities = roll.Select(x => x.Value.GetStateValue(StateKinds.Velocity)).ToArray();
@@ -115,7 +115,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var (generator, song, snare) = Create(seed);
-            var filled = generator.ApplyFill(song, FillKind.Break, Line, Grid, Middle);
+            var filled = generator.ApplyFill(song, FillPlay.Plain(FillKind.Break), Line, Grid, Middle);
             var silent = new[] { Kick, snare, HiHat }.Select(x => Events(filled, x, Line - 1, Line).Length).Sum();
 
             await Assert.That(silent).IsEqualTo(0);
@@ -130,7 +130,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var (generator, song, snare) = Create(seed);
-            var filled = generator.ApplyFill(song, FillKind.StopTime, Line, Grid, Middle);
+            var filled = generator.ApplyFill(song, FillPlay.Plain(FillKind.StopTime), Line, Grid, Middle);
             // the crash is the fill's own, where the drums stop
             var from = Events(filled, Cymbal, 0, 12).Single().Position;
             var hits = new[] { Kick, snare, HiHat, Cymbal }.SelectMany(x => Events(filled, x, from, Line).Select(e => (x, e.Position))).ToArray();
@@ -144,7 +144,7 @@ public sealed class FillArchetypeTest
     public async Task Lift_OpensTheHiHat_OnTheLastOffBeat()
     {
         var (generator, song, _) = Create(1);
-        var hiHat = Events(generator.ApplyFill(song, FillKind.Lift, Line, Grid, Middle), HiHat, Line - 0.5, Line).Single();
+        var hiHat = Events(generator.ApplyFill(song, FillPlay.Plain(FillKind.Lift), Line, Grid, Middle), HiHat, Line - 0.5, Line).Single();
 
         await Assert.That(Articulation(hiHat)).IsEqualTo(DrumDefinitions.HiHat.GetArticulationIndex(DrumSounds.OpenHiHat));
     }
@@ -155,10 +155,114 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var (generator, song, _) = Create(seed);
-            var filled = generator.ApplyFill(song, FillKind.Pickup, Line, Grid, Middle);
+            var filled = generator.ApplyFill(song, FillPlay.Plain(FillKind.Pickup), Line, Grid, Middle);
 
             await Assert.That(Events(filled, HiHat, 0, 12).Length).IsEqualTo(Events(song, HiHat, 0, 12).Length);
             await Assert.That(Events(filled, Kick, 0, 12).Length).IsEqualTo(Events(song, Kick, 0, 12).Length);
+        }
+    }
+
+    private static FillPlay Twisted(FillKind kind, FillTwist twists, int tuplet = 1, OddVoice? oddVoice = null) =>
+        new(kind, twists, tuplet, oddVoice);
+
+    private static int[] Toms(TrackEventStateTimelineMap<StateMap> song) => Events(song, Tom, 0, 12).Select(Articulation).ToArray();
+
+    [Test]
+    public async Task Tuplet_PlaysTheRunOnTheTuplet()
+    {
+        foreach (var seed in Seeds)
+        {
+            var (generator, song, _) = Create(seed);
+            var toms = Events(generator.ApplyFill(song, Twisted(FillKind.TomRun, FillTwist.Tuplet, 3), Line, Grid, Middle), Tom, 0, 12);
+
+            await Assert.That(toms.All(x => Math.Abs(x.Position * 6 - Math.Round(x.Position * 6)) < 1e-6)).IsTrue();
+            await Assert.That(toms.Any(x => Math.Abs(x.Position * 4 - Math.Round(x.Position * 4)) > 1e-6)).IsTrue();
+        }
+    }
+
+    [Test]
+    public async Task Upward_RunsUpTheToms_AndZigzag_TakesTheHighAndLowInTurn()
+    {
+        foreach (var seed in Seeds)
+        {
+            var (generator, song, _) = Create(seed);
+            var up = Toms(generator.ApplyFill(song, Twisted(FillKind.TomRun, FillTwist.Upward), Line, Grid, Middle));
+            var zigzag = Events(generator.ApplyFill(song, Twisted(FillKind.TomRun, FillTwist.Zigzag), Line, Grid, Middle), Tom, 0, 12);
+
+            await Assert.That(up.Zip(up.Skip(1)).All(x => x.Second >= x.First)).IsTrue();
+            // the high toms are the last three of the six, and the run's notes take them and the low ones in turn
+            await Assert.That(zigzag.Length).IsGreaterThan(1);
+            await Assert.That(zigzag.Select((x, i) => (Articulation(x) > 3) == (i % 2 == 0)).All(x => x)).IsTrue();
+        }
+    }
+
+    [Test]
+    public async Task SlowDown_PlaysTheFinerNotesFirst()
+    {
+        foreach (var seed in Seeds)
+        {
+            var (generator, song, snare) = Create(seed);
+            var roll = Events(generator.ApplyFill(song, Twisted(FillKind.SnareRoll, FillTwist.SlowDown), Line, Grid, Middle), snare, 4, Line)
+                .Where(x => x.Value.GetStateValue(StateKinds.Velocity) != 0)
+                .ToArray();
+            var middle = (roll[0].Position + Line) / 2;
+
+            // the second half keeps to 8ths
+            await Assert.That(roll.Where(x => x.Position >= middle).All(x => Math.Abs(x.Position * 2 - Math.Round(x.Position * 2)) < 1e-6)).IsTrue();
+        }
+    }
+
+    [Test]
+    public async Task OddVoice_PlaysTheRunOnTheKick()
+    {
+        foreach (var seed in Seeds)
+        {
+            var (generator, song, _) = Create(seed);
+            var filled = generator.ApplyFill(song, Twisted(FillKind.TomRun, FillTwist.OddVoice, oddVoice: OddVoice.Kick), Line, Grid, Middle);
+
+            await Assert.That(Events(filled, Tom, 0, 12)).IsEmpty();
+            await Assert.That(Events(filled, Kick, 4, Line).Length).IsGreaterThan(Events(song, Kick, 4, Line).Length);
+        }
+    }
+
+    [Test]
+    public async Task Fading_FadesTheRoll()
+    {
+        foreach (var seed in Seeds)
+        {
+            var (generator, song, snare) = Create(seed);
+            var velocities = Events(generator.ApplyFill(song, Twisted(FillKind.SnareRoll, FillTwist.Fading), Line, Grid, Middle), snare, 4, Line)
+                .Select(x => x.Value.GetStateValue(StateKinds.Velocity))
+                .Where(x => x != 0)
+                .ToArray();
+
+            await Assert.That(velocities.Zip(velocities.Skip(1)).All(x => x.Second <= x.First)).IsTrue();
+        }
+    }
+
+    [Test]
+    public async Task Gappy_LeavesMoreNotesOut()
+    {
+        int plain = 0, gappy = 0;
+        foreach (var seed in Seeds)
+        {
+            var (generator, song, _) = Create(seed);
+            plain += Events(generator.ApplyFill(song, FillPlay.Plain(FillKind.TomRun), Line, Grid, Middle), Tom, 0, 12).Length;
+            gappy += Events(generator.ApplyFill(song, Twisted(FillKind.TomRun, FillTwist.Gappy), Line, Grid, Middle), Tom, 0, 12).Length;
+        }
+
+        await Assert.That(gappy).IsLessThan(plain);
+    }
+
+    [Test]
+    public async Task OddSpan_StartsTheFillOffTheBeat()
+    {
+        foreach (var seed in Seeds)
+        {
+            var (generator, song, _) = Create(seed);
+            var first = Events(generator.ApplyFill(song, Twisted(FillKind.TomRun, FillTwist.OddSpan), Line, Grid, Middle), Tom, 0, 12)[0];
+
+            await Assert.That(first.Position % 1).IsEqualTo(0.5).Within(1e-9);
         }
     }
 }

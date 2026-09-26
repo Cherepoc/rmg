@@ -295,7 +295,14 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   dyadic patterns like the grooves', so chance leaves a note out now and then. A section tells the
   fills how far its rhythm strays and its drums' feel before its lines: the tuplet at least a quarter
   of their notes in the pattern's last bar fall on, such as triplets, but not a dotted period, whose
-  notes stay on the 16ths. A line in a tuplet feel takes only fills that play no straight notes, and a fast song's runs play 8ths. The next section
+  notes stay on the 16ths. A fill in a tuplet feel plays its runs in that tuplet, and a fast song's
+  runs play 8ths. The more a section's rhythm strays, the likelier its adventurous fills (around the
+  kit, breaks, stop-time) and its twists (`FillTwist`), each by its own chance, several at once: a
+  tuplet, a fill starting off the beat, a roll that slows down, toms running up or zigzagging, an odd
+  voice (the kick, the song's percussion, crashes, or snare and floor tom together), a gappy run, a
+  fade, and a landing pushed an 8th early or left out. About one fill in eight takes a twist in the
+  middle, one in fourteen in a plain song and one in three and a half in a wild one; a wild song's
+  drummer may have a signature twist it plays five times as often. The next section
   lands on a crash and a kick most of the time (65%), a kick alone (20%), or runs straight on; after a
   break or stop-time always on both. Every fill is data (`FillSpec`): its spans, what it does with the
   groove, the hits it starts with, and its voices, each a walk of named sounds (`DrumSounds`), such as

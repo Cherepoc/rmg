@@ -96,6 +96,37 @@ public sealed class FillTest
     }
 
     [Test]
+    public async Task EarlyLandings_ComeBeforeTheLine()
+    {
+        var early = 0;
+        for (var seed = 0; seed < 200 && early < 5; seed++)
+        {
+            using var trace = StateTrace.Start();
+            SongGenerator.GenerateSong(seed);
+
+            var landings = new List<StateTraceEntry>();
+            foreach (var entry in trace.Entries)
+            {
+                if (entry.Point == "Fill" && entry.Phrase == "Landing")
+                    landings.Add(entry);
+                if (entry.Point != "Fill decision")
+                    continue;
+
+                if (entry.Phrase!.Contains("EarlyLanding") && entry.Phrase.Contains("landing CrashAndKick") && !entry.Phrase.Contains("NoLanding"))
+                {
+                    early++;
+                    // in the last bar before the line, where the fill is
+                    await Assert.That(landings.All(x => x.Bar == entry.Bar && x.Position > 3)).IsTrue();
+                }
+
+                landings.Clear();
+            }
+        }
+
+        await Assert.That(early).IsGreaterThan(0);
+    }
+
+    [Test]
     public async Task SectionChanges_MostlyLandOnACrashAndAKick()
     {
         int changes = 0, crashes = 0, kicks = 0, downbeats = 0, otherCrashes = 0;

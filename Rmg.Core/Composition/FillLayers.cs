@@ -49,7 +49,61 @@ public enum DrumRole
 
     Toms,
     HiHat,
-    Cymbal
+    Cymbal,
+
+    /// <summary>The song's own percussion, such as a cowbell or congas, if it has any.</summary>
+    Percussion
+}
+
+/// <summary>
+///     A change a fill may take from convention, any fill and several at once; the stranger a section's rhythm, the
+///     likelier each is. One that does not concern a fill, such as the toms' way for a snare roll, leaves it as it is.
+/// </summary>
+[Flags]
+public enum FillTwist
+{
+    None = 0,
+
+    /// <summary>The voices play a tuplet, such as triplets or quintuplets.</summary>
+    Tuplet = 1,
+
+    /// <summary>The fill starts off the beat, half a beat earlier or later.</summary>
+    OddSpan = 2,
+
+    /// <summary>The voices slow down, the finest grid then the coarser one.</summary>
+    SlowDown = 4,
+
+    /// <summary>The toms run up, from the floor tom to the high tom.</summary>
+    Upward = 8,
+
+    /// <summary>The toms zigzag, high and low in turn.</summary>
+    Zigzag = 16,
+
+    /// <summary>The voices play an odd sound: the kick, the song's percussion, crashes, or the snare and the floor tom together.</summary>
+    OddVoice = 32,
+
+    /// <summary>The voices leave many of their notes out, so the fill stutters.</summary>
+    Gappy = 64,
+
+    /// <summary>The voices fade out rather than swell.</summary>
+    Fading = 128,
+
+    /// <summary>The next section lands early, pushed an 8th ahead of the line.</summary>
+    EarlyLanding = 256,
+
+    /// <summary>The next section lands on nothing, even after a break.</summary>
+    NoLanding = 512
+}
+
+/// <summary>The odd sounds a voice may play instead of its own.</summary>
+public enum OddVoice
+{
+    Kick,
+    Percussion,
+    Crashes,
+
+    /// <summary>The snare and the floor tom together.</summary>
+    Unison
 }
 
 /// <summary>What a fill does with the groove in its span.</summary>
@@ -155,10 +209,46 @@ public static class FillLayers
     ];
 
     /// <summary>
-    ///     The fills a section in a tuplet feel may play, since a run in straight 16ths would fight it: none, a break,
-    ///     stop-time or a lift, each as likely relative to the others as it is otherwise.
+    ///     The fills that stray from convention, whose weights are multiplied by how far a section's rhythm strays (its
+    ///     chance scale), as the adventurous phrase schemes are.
     /// </summary>
-    public static ImmutableHashSet<FillKind> TupletFills { get; } = [FillKind.None, FillKind.Break, FillKind.StopTime, FillKind.Lift];
+    public static ImmutableHashSet<FillKind> AdventurousFills { get; } = [FillKind.AroundTheKit, FillKind.Break, FillKind.StopTime];
+
+    /// <summary>
+    ///     How likely each twist is, in a section of conventionality in the middle; its chance is multiplied by the
+    ///     section's chance scale, from a quarter in a plain one to four times in a wild one. About one fill in eight
+    ///     takes a twist in the middle.
+    /// </summary>
+    public static ImmutableArray<Weighted<FillTwist>> Twists { get; } =
+    [
+        new(0.02, FillTwist.Tuplet),
+        new(0.015, FillTwist.OddSpan),
+        new(0.01, FillTwist.SlowDown),
+        new(0.015, FillTwist.Upward),
+        new(0.01, FillTwist.Zigzag),
+        new(0.02, FillTwist.OddVoice),
+        new(0.015, FillTwist.Gappy),
+        new(0.01, FillTwist.Fading),
+        new(0.01, FillTwist.EarlyLanding),
+        new(0.005, FillTwist.NoLanding)
+    ];
+
+    /// <summary>The tuplets a fill's twist may play, where the section plays none of its own.</summary>
+    public static ImmutableArray<Weighted<int>> TwistTuplets { get; } = [new(0.75, 3), new(0.25, 5)];
+
+    /// <summary>The odd sounds of a voice's twist; one the song lacks the drum for is left out.</summary>
+    public static ImmutableArray<Weighted<OddVoice>> OddVoices { get; } =
+    [
+        new(0.3, OddVoice.Kick),
+        new(0.3, OddVoice.Percussion),
+        new(0.2, OddVoice.Crashes),
+        new(0.2, OddVoice.Unison)
+    ];
+
+    /// <summary>How likely a gappy run keeps each note after its first, and a gappy pickup a note of the next rank.</summary>
+    public const double GappyFullness = 0.45;
+
+    public const double GappySparseFullness = 0.3;
 
     /// <summary>The share of the drums' notes in a bar that a tuplet needs to set the bar's feel.</summary>
     public const double TupletFeelShare = 0.25;

@@ -76,7 +76,7 @@ public static class SongGenerator
             .MergeStateMap(commonStateMap);
 
         // the drums mark the lines between the sections, now that they are put one after another
-        songTrackNoteTimelineMap = new FillGenerator(context, tracks).Generate(
+        songTrackNoteTimelineMap = new FillGenerator(context, tracks, rhythmicUnconventionality).Generate(
             songTrackNoteTimelineMap,
             [..sectionIds.Zip(sections, (id, section) => new FillSection(id, section.Timeline.Duration, section.Rhythm, section.DrumTuplet))]
         );

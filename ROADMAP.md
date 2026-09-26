@@ -34,10 +34,10 @@ rhythm (its busyness, riffs, and phrase ends with a held note and a rest), and f
   as a crash every two bars or a kick figure answered in the second bar. Worth it if slow figures sound wrong.
 - **Segments in any pattern:** bars that mix feels, such as three straight beats and a quintuplet beat; fills get them
   first.
-- Choosing whole patterns by measured features (syncopation, evenness) as a family, should a target prove out of
-  reach of the dyadic engine; euclidean patterns that fit no cycle; a library of idioms such as clave and bossa; fills
-  in the section's tuplet feel; energy-aware fills that build into loud sections and break before quiet ones; and drums
-  generated together, the snare avoiding the kick and the hi-hat filling the gaps.
+- Choosing whole patterns by measured features (syncopation, evenness) as a family, should a target prove out of reach
+  of the dyadic engine; euclidean patterns that fit no cycle; a library of idioms such as clave and bossa;
+  energy-aware fills that build into loud sections and break before quiet ones; and drums generated together, the
+  snare avoiding the kick and the hi-hat filling the gaps.
 
 A cycle that does not fit the bar and is cut off at the bar line, such as 3+3+2, stays as it is: an off-kilter feel,
 not a fault.
