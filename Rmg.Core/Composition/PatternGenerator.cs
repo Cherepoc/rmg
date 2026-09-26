@@ -43,7 +43,9 @@ internal sealed class PatternGenerator
     /// </summary>
     /// <param name="trackStateMaps">Every track's state in the section.</param>
     /// <param name="barStateTimelineMap">The state that changes by bar, such as the chord, along the 4-bar pattern.</param>
+    /// <param name="context">The section's random sequence.</param>
     public GeneratedBars GenerateBars(
+        IGenerationContext context,
         int sectionId,
         ImmutableDictionary<int, StateMap> trackStateMaps,
         StateTimelineMap barStateTimelineMap,
@@ -62,7 +64,7 @@ internal sealed class PatternGenerator
         var scheme = sectionRhythm.Scheme;
         var trackSeedMapGenerator = (IGenerationContext innerContext) =>
             trackStateMaps.Keys.ToDictionary(x => x, _ => SeedGenerator(innerContext));
-        var trackSeedMaps = Generators.Sequence(trackSeedMapGenerator, scheme.PatternCount)(_context);
+        var trackSeedMaps = Generators.Sequence(trackSeedMapGenerator, scheme.PatternCount)(context);
         var feels = new List<BarFeel>();
         var timeline = scheme.Letters
             .Select((letter, barIndex) =>

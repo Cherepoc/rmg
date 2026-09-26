@@ -171,13 +171,15 @@ whose name it starts: `MuseScore_General_License.md` covers `MuseScore_General.s
 seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
 ```
 
-- **Generation stages.** `SongGenerator` runs the stages in turn, all drawing from the song's one
-  seeded random sequence, so their order is part of what a seed makes: the tracks and their
-  instruments (`SongTracks`), the song's harmony and state, the structure of parts and sections, and
-  every section (`SectionGenerator`), which makes its harmony, its bar state (`BarStateGenerator`) and
-  its tracks' patterns (`PatternGenerator`), and last the fills (`FillGenerator`), which see the
-  sections one after another and mark the lines between them. The state every layer draws a part of is
-  drawn in one place (`LayerStates`).
+- **Generation stages.** `SongGenerator` runs the stages in turn: the tracks and their instruments
+  (`SongTracks`), the song's harmony and state, the structure of parts and sections, every section
+  (`SectionGenerator`), which makes its harmony, its bar state (`BarStateGenerator`) and its tracks'
+  patterns (`PatternGenerator`), the form (`SongFormGenerator`), which puts the intro, the sections
+  and the ending one after another, and last the fills (`FillGenerator`), which mark the lines between
+  them. Each stage draws from its own random sequence, derived from the song's seed by the stage
+  (`SongStream`), and each section from its own, derived by its id, so a change to what one stage or
+  section draws leaves what the others draw as it was. The state every layer draws a part of is drawn
+  in one place (`LayerStates`).
 - **Timelines and state.** Music is modelled as immutable timelines of events (notes) and of *state*
   (velocity, tempo, scale, chord, octave, ...). State kinds define their own default and how values
   combine, so state from the song, a section, a track group and a track is merged with a single rule.

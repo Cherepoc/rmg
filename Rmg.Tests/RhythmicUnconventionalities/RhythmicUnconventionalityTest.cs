@@ -51,7 +51,7 @@ public sealed class RhythmicUnconventionalityTest
         var shares = new List<(double Value, double Tuplets)>();
         for (var seed = 0; seed < 80; seed++)
         {
-            var value = RhythmicUnconventionality.Generate(new GenerationContext(seed)).Value;
+            var value = RhythmicUnconventionality.Generate(SongGenerator.CreateStream(seed, SongStream.Rhythm)).Value;
             var hits = SongGenerator.GenerateSong(seed).TrackEventStateTimelineMap.TrackTimelineMap
                 .Where(x => x.Key >= DrumGroups.FirstTrackNumber)
                 .SelectMany(x => x.Value.EventTimeline.Select(e => e.Position))

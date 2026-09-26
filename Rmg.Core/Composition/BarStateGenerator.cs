@@ -18,16 +18,14 @@ internal sealed class BarStateGenerator
 
     private static readonly Func<IGenerationContext, int> SeedGenerator = Generators.Int();
 
-    private readonly IGenerationContext _context;
     private readonly Scale _scale;
 
     // the state that changes along the pattern besides the progression; every state has its own timeline, so each can
     // change at its own pace
     private readonly ImmutableArray<IStateTimelineGenerator> _timelineGenerators;
 
-    public BarStateGenerator(IGenerationContext context, ProgressionSettings settings, Scale scale)
+    public BarStateGenerator(ProgressionSettings settings, Scale scale)
     {
-        _context = context;
         _scale = scale;
         _timelineGenerators =
         [
@@ -65,7 +63,9 @@ internal sealed class BarStateGenerator
     /// <param name="progression">The roots of the bars, in steps above the home.</param>
     /// <param name="home">The step of the section's home above the song's tonic.</param>
     /// <param name="bassLeading">How much the section's bass leads into the chords, from 0 to 1.</param>
+    /// <param name="context">The section's random sequence.</param>
     public StateTimelineMap Generate(
+        IGenerationContext context,
         ImmutableArray<int> progression,
         int home,
         HarmonicUnconventionality unconventionality,
@@ -73,7 +73,7 @@ internal sealed class BarStateGenerator
     )
     {
         // each state draws from its own random sequence, so tuning one does not change the others
-        var seed = SeedGenerator(_context);
+        var seed = SeedGenerator(context);
         var progressionTimeline = StateTimeline.Create(
                 PatternDuration,
                 StateKinds.ChordRootNoteOffset,
@@ -97,9 +97,9 @@ internal sealed class BarStateGenerator
                 PatternDuration,
                 CompositionStateKinds.RoleChord,
                 [
-                    ImmutableArray.Create(unconventionality.GenerateHomeChord(_context)).ToTimelineItem(0.0),
+                    ImmutableArray.Create(unconventionality.GenerateHomeChord(context)).ToTimelineItem(0.0),
                     ImmutableArray<Chord>.Empty.ToTimelineItem(BarDuration),
-                    ImmutableArray.Create(unconventionality.GenerateCadenceChord(_context)).ToTimelineItem(CadenceBarPosition)
+                    ImmutableArray.Create(unconventionality.GenerateCadenceChord(context)).ToTimelineItem(CadenceBarPosition)
                 ]
             )
             .WithLayer("Progression");
@@ -108,15 +108,15 @@ internal sealed class BarStateGenerator
             PatternDuration,
             [
                 .._timelineGenerators.Select((generator, index) =>
-                    generator.Generate(_context.CreateContext(Seeds.Derive(seed, index)), PatternDuration)
+                    generator.Generate(context.CreateContext(Seeds.Derive(seed, index)), PatternDuration)
                 ),
                 progressionTimeline,
                 raisedStepTimeline,
                 roleChordTimeline,
-                GenerateResets(),
-                ..GenerateBassLeading(bassLeading),
-                GenerateMelodyContour(),
-                GenerateMelodyPhraseEnd()
+                GenerateResets(context),
+                ..GenerateBassLeading(context, bassLeading),
+                GenerateMelodyContour(context),
+                GenerateMelodyPhraseEnd(context)
             ]
         );
     }
@@ -127,7 +127,7 @@ internal sealed class BarStateGenerator
     ///     The bars whose first chord starts afresh in its own register, now and then, most often the pattern's first;
     ///     each has its own number, so that bars in a row are told apart.
     /// </summary>
-    private StateTimeline<int> GenerateResets()
+    private StateTimeline<int> GenerateResets(IGenerationContext context)
     {
         return StateTimeline.Create(
                 PatternDuration,
@@ -136,7 +136,7 @@ internal sealed class BarStateGenerator
                     .Select(bar =>
                         {
                             var chance = bar == 0 ? VoiceLeadingLayers.ResetAtPatternStart : VoiceLeadingLayers.ResetElsewhere;
-                            return (_context.TestProbability(chance) ? bar + 1 : 0).ToTimelineItem(bar * BarDuration);
+                            return (context.TestProbability(chance) ? bar + 1 : 0).ToTimelineItem(bar * BarDuration);
                         }
                     )
                     .ToArray()
@@ -145,9 +145,9 @@ internal sealed class BarStateGenerator
     }
 
     /// <summary>The shape the section's melody phrases take: the register the melody aims at in each bar.</summary>
-    private StateTimeline<double> GenerateMelodyContour()
+    private StateTimeline<double> GenerateMelodyContour(IGenerationContext context)
     {
-        var contour = MelodyLayers.Contours[Generators.WeightedIndex(MelodyLayers.Contours)(_context)].Value;
+        var contour = MelodyLayers.Contours[Generators.WeightedIndex(MelodyLayers.Contours)(context)].Value;
         return StateTimeline.Create(
                 PatternDuration,
                 StateKinds.MelodyRegister,
@@ -157,9 +157,9 @@ internal sealed class BarStateGenerator
     }
 
     /// <summary>Where the melody's phrase ends in the pattern's last bar, if it does.</summary>
-    private StateTimeline<int> GenerateMelodyPhraseEnd()
+    private StateTimeline<int> GenerateMelodyPhraseEnd(IGenerationContext context)
     {
-        var end = MelodyLayers.PhraseEnds[Generators.WeightedIndex(MelodyLayers.PhraseEnds)(_context)].Value;
+        var end = MelodyLayers.PhraseEnds[Generators.WeightedIndex(MelodyLayers.PhraseEnds)(context)].Value;
         return StateTimeline.Create(
                 PatternDuration,
                 CompositionStateKinds.MelodyPhraseEnd,
@@ -169,7 +169,7 @@ internal sealed class BarStateGenerator
     }
 
     /// <summary>How the bass leads out of every bar into the next chord, and what it lands on in every bar's new chord.</summary>
-    private IEnumerable<IStateTimeline> GenerateBassLeading(double bassLeading)
+    private IEnumerable<IStateTimeline> GenerateBassLeading(IGenerationContext context, double bassLeading)
     {
         var approachGenerator = Generators.WeightedIndex(BassLeadingLayers.Approaches);
         var approaches = StateTimeline.Create(
@@ -178,8 +178,8 @@ internal sealed class BarStateGenerator
                 Enumerable.Range(0, Progressions.BarCount)
                     .Select(bar =>
                         {
-                            var approach = _context.TestProbability(bassLeading * BassLeadingLayers.MaxApproachChance)
-                                ? BassLeadingLayers.Approaches[approachGenerator(_context)].Value
+                            var approach = context.TestProbability(bassLeading * BassLeadingLayers.MaxApproachChance)
+                                ? BassLeadingLayers.Approaches[approachGenerator(context)].Value
                                 : ChordApproach.None;
                             return ((int)approach).ToTimelineItem(bar * BarDuration);
                         }
@@ -201,7 +201,7 @@ internal sealed class BarStateGenerator
                 PatternDuration,
                 StateKinds.ChordArrival,
                 Enumerable.Range(0, Progressions.BarCount)
-                    .Select(bar => ((int)arrivalWeights[arrivalGenerator(_context)].Value).ToTimelineItem(bar * BarDuration))
+                    .Select(bar => ((int)arrivalWeights[arrivalGenerator(context)].Value).ToTimelineItem(bar * BarDuration))
                     .ToArray()
             )
             .WithLayer("Bar");

@@ -11,6 +11,7 @@ namespace Rmg.Core.Composition;
 internal sealed class SectionGenerator
 {
     private readonly IGenerationContext _context;
+    private readonly int _seed;
     private readonly SongTracks _tracks;
     private readonly HarmonicUnconventionality _songUnconventionality;
     private readonly RhythmicUnconventionality _songRhythmicUnconventionality;
@@ -21,8 +22,10 @@ internal sealed class SectionGenerator
     private readonly PatternGenerator _patternGenerator;
 
 
+    /// <param name="seed">The seed of the sections' random sequences, from which every section derives its own by its id.</param>
     public SectionGenerator(
         IGenerationContext context,
+        int seed,
         ProgressionSettings settings,
         SongTracks tracks,
         HarmonicUnconventionality songUnconventionality,
@@ -33,13 +36,14 @@ internal sealed class SectionGenerator
     )
     {
         _context = context;
+        _seed = seed;
         _tracks = tracks;
         _songUnconventionality = songUnconventionality;
         _songRhythmicUnconventionality = songRhythmicUnconventionality;
         _songMelodyBusyness = songMelodyBusyness;
         _songScale = songScale;
         _songStateMap = songStateMap;
-        _barStateGenerator = new BarStateGenerator(context, settings, songScale);
+        _barStateGenerator = new BarStateGenerator(settings, songScale);
         _patternGenerator = new PatternGenerator(context, tracks.Definitions);
     }
 
@@ -47,16 +51,18 @@ internal sealed class SectionGenerator
     /// <param name="endsSong">Whether the song ends with the section, which then has the song's tonic as its home.</param>
     public GeneratedSection Generate(int sectionId, bool endsSong = false)
     {
-        var unconventionality = _songUnconventionality.GenerateSection(_context);
-        var rhythm = _songRhythmicUnconventionality.GenerateSection(_context);
-        var chords = LayerStates.CreateChordPool(unconventionality)(_context);
+        // every section draws from its own sequence, so a change to one leaves the others as they are
+        var context = _context.CreateContext(Seeds.Derive(_seed, sectionId));
+        var unconventionality = _songUnconventionality.GenerateSection(context);
+        var rhythm = _songRhythmicUnconventionality.GenerateSection(context);
+        var chords = LayerStates.CreateChordPool(unconventionality)(context);
 
         // the section's chords move around its home, which every track's root starts from
-        var home = Progressions.GenerateHome(_context, _songScale);
+        var home = Progressions.GenerateHome(context, _songScale);
         // the song's last section leads home to its tonic, where the song ends
         if (endsSong)
             home = 0;
-        var progression = Progressions.Generate(_context, _songScale, home, unconventionality.ProgressionStrictness);
+        var progression = Progressions.Generate(context, _songScale, home, unconventionality.ProgressionStrictness);
 
         var sectionStateMap = CreateSectionStateMap(
             _songStateMap,
@@ -66,33 +72,33 @@ internal sealed class SectionGenerator
                 .Add(CompositionStateKinds.ChordPool.Index, LayerStates.ChordPoolIndex)
                 .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.Section))
                 .AddNoteDurationLayer()
-                .ToStateMap(_context),
+                .ToStateMap(context),
             new StateMapBuilder("Section")
                 .Add(CompositionStateKinds.ChordPool.Collection, chords)
                 .Add(StateKinds.ChordRootNoteOffset, [Progressions.ToRootOffset(home)])
-                .ToStateMap(_context)
+                .ToStateMap(context)
         );
-        var activeDrumTrackNumbers = DrumKitGenerator.SelectActiveDrums(_context, _tracks.SongDrums)
+        var activeDrumTrackNumbers = DrumKitGenerator.SelectActiveDrums(context, _tracks.SongDrums)
             .Select(DrumGroups.GetTrackNumber)
             .ToImmutableHashSet();
 
         // the section state reaches the notes through the track state maps, so the bar state holds only the state
         // that changes by bar
         var bassLeading = Math.Clamp(
-            _tracks.BassLeading + BassLeadingLayers.CreateGenerator(BassLeadingLayers.Section)(_context),
+            _tracks.BassLeading + BassLeadingLayers.CreateGenerator(BassLeadingLayers.Section)(context),
             0,
             1
         );
-        var barStateTimelineMap = _barStateGenerator.Generate(progression, home, unconventionality, bassLeading);
+        var barStateTimelineMap = _barStateGenerator.Generate(context, progression, home, unconventionality, bassLeading);
 
         // every track follows the section's phrase scheme, so they repeat their bars in the same places
-        var scheme = PhraseSchemes.Pick(_context, rhythm);
-        var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(_context));
+        var scheme = PhraseSchemes.Pick(context, rhythm);
+        var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context));
 
-        var drums = GenerateDrums(sectionId, sectionStateMap, activeDrumTrackNumbers, barStateTimelineMap, sectionRhythm).ToArray();
+        var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, barStateTimelineMap, sectionRhythm).ToArray();
         var trackTimelineMaps = new List<TrackEventStateTimelineMap<StateMap>>();
         trackTimelineMaps.AddRange(drums.Select(x => x.Timeline));
-        trackTimelineMaps.AddRange(GeneratePitchedTracks(sectionId, sectionStateMap, barStateTimelineMap, sectionRhythm).Select(x => x.Timeline));
+        trackTimelineMaps.AddRange(GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, sectionRhythm).Select(x => x.Timeline));
 
         // the song keeps what Render reads; the bar state for the generation, such as the chord pool's pick, stays here
         trackTimelineMaps.Add(
@@ -125,6 +131,7 @@ internal sealed class SectionGenerator
 
     /// <summary>The drums the section plays, which make their patterns together, over the drums' shared state.</summary>
     private IEnumerable<GeneratedBars> GenerateDrums(
+        IGenerationContext context,
         int sectionId,
         StateMap sectionStateMap,
         ImmutableHashSet<int> activeDrumTrackNumbers,
@@ -139,12 +146,12 @@ internal sealed class SectionGenerator
                 .AddNoteWalkLayer()
                 .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.SectionDrumGroup))
                 .AddNoteDurationLayer()
-                .ToStateMap(_context)
+                .ToStateMap(context)
                 .MergeWith(group.StateMap)
                 .MergeWith(sectionStateMap);
             var trackStateMaps = new Dictionary<int, StateMap>();
             foreach (var trackNumber in group.TrackNumbers.Where(activeDrumTrackNumbers.Contains))
-                trackStateMaps[trackNumber] = CreateSectionTrackLayer(trackNumber, sectionRhythm).MergeWith(groupStateMap);
+                trackStateMaps[trackNumber] = CreateSectionTrackLayer(context, trackNumber, sectionRhythm).MergeWith(groupStateMap);
 
             // a drum out of the groove still has the state the drums share, with no notes, so that a note added
             // later, such as in a fill, plays as loud as the section
@@ -164,12 +171,13 @@ internal sealed class SectionGenerator
             if (trackStateMaps.Count == 0)
                 continue;
 
-            yield return _patternGenerator.GenerateBars(sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap, sectionRhythm);
+            yield return _patternGenerator.GenerateBars(context, sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap, sectionRhythm);
         }
     }
 
     /// <summary>The pitched tracks, each making its patterns on its own, over the section's state.</summary>
     private IEnumerable<GeneratedBars> GeneratePitchedTracks(
+        IGenerationContext context,
         int sectionId,
         StateMap sectionStateMap,
         StateTimelineMap barStateTimelineMap,
@@ -186,19 +194,19 @@ internal sealed class SectionGenerator
                 sectionRhythm.MelodyBusyness.AddTo(
                     sectionTrackLayer.Add(CompositionStateKinds.MelodyStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Section))
                 );
-            var trackStateMap = CreateSectionTrackLayer(trackNumber, sectionRhythm)
+            var trackStateMap = CreateSectionTrackLayer(context, trackNumber, sectionRhythm)
                 .MergeWith(sectionStateMap)
-                .MergeWith(sectionTrackLayer.ToStateMap(_context));
+                .MergeWith(sectionTrackLayer.ToStateMap(context));
             var trackStateMaps = new Dictionary<int, StateMap> { [trackNumber] = trackStateMap };
-            yield return _patternGenerator.GenerateBars(sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap, sectionRhythm);
+            yield return _patternGenerator.GenerateBars(context, sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap, sectionRhythm);
         }
     }
 
     /// <summary>A track's own layer in the section, over the state its definition brings.</summary>
-    private StateMap CreateSectionTrackLayer(int trackNumber, SectionRhythm sectionRhythm)
+    private StateMap CreateSectionTrackLayer(IGenerationContext context, int trackNumber, SectionRhythm sectionRhythm)
     {
         return LayerStates.CreateTrackLayer(
-            _context,
+            context,
             "Section track",
             SongTracks.GetGenerationStateMap(_tracks.Definitions[trackNumber]),
             VelocityLayers.SectionTrack,

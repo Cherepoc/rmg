@@ -38,22 +38,26 @@ public static class SongGenerator
 
     internal static Song GenerateSong(int seed, ProgressionSettings progressionSettings)
     {
-        // the stages draw from one random sequence, so their order is part of what a seed makes
-        var context = new GenerationContext(seed);
+        // every stage draws from its own random sequence, derived from the seed by the stage, so a change to what one
+        // stage draws leaves what the others draw as it was
+        var root = new GenerationContext(seed);
+        IGenerationContext Stream(SongStream stream) => CreateStream(seed, stream);
 
         // how far the rhythm strays from convention, which every rhythm layer from the tracks' own on is scaled by
-        var rhythmicUnconventionality = RhythmicUnconventionality.Generate(context);
-        var tracks = SongTracks.Create(context, rhythmicUnconventionality);
+        var rhythmicUnconventionality = RhythmicUnconventionality.Generate(Stream(SongStream.Rhythm));
+        var tracks = SongTracks.Create(Stream(SongStream.Tracks), rhythmicUnconventionality);
 
         // the song's chords gather around its unconventionality, and a section's around its own shift of it
-        var unconventionality = HarmonicUnconventionality.Generate(context);
-        var scale = Scales.Pick(context);
-        var songStateMap = CreateSongStateMap(context, unconventionality, rhythmicUnconventionality);
+        var harmonyContext = Stream(SongStream.Harmony);
+        var unconventionality = HarmonicUnconventionality.Generate(harmonyContext);
+        var scale = Scales.Pick(harmonyContext);
+        var songStateMap = CreateSongStateMap(Stream(SongStream.SongState), unconventionality, rhythmicUnconventionality);
         // how busy the melody is, which a section moves
-        var melodyBusyness = MelodyBusyness.Generate(context);
+        var melodyBusyness = MelodyBusyness.Generate(Stream(SongStream.Melody));
 
         var sectionGenerator = new SectionGenerator(
-            context,
+            root,
+            Seeds.Derive(seed, (int)SongStream.Sections),
             progressionSettings,
             tracks,
             unconventionality,
@@ -62,9 +66,9 @@ public static class SongGenerator
             scale,
             songStateMap
         );
-        var commonStateMap = CreateCommonStateMap(context, scale);
+        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), scale);
 
-        var sectionIds = SongStructureGenerator.Generate(context)
+        var sectionIds = SongStructureGenerator.Generate(Stream(SongStream.Structure))
             .SelectMany(part => part.SectionIds)
             .ToArray();
         // every section is generated once, where it first plays; the one the song ends with leads home to the tonic
@@ -73,7 +77,7 @@ public static class SongGenerator
         var sections = sectionIds.Select(generateSection).ToArray();
 
         // how the song starts and ends around its sections, and the lines the drums mark
-        var form = new SongFormGenerator(context, rhythmicUnconventionality).Generate(sectionIds, sections);
+        var form = new SongFormGenerator(Stream(SongStream.Form), rhythmicUnconventionality).Generate(sectionIds, sections);
         var songTrackNoteTimelineMap = form.Edits.ApplyTo(form.Blocks.Unroll());
         songTrackNoteTimelineMap = TrackEventStateTimelineMap.Merge(
                 [
@@ -84,10 +88,16 @@ public static class SongGenerator
             .MergeStateMap(commonStateMap);
 
         // the drums mark the lines, now that the song is put together
-        songTrackNoteTimelineMap = new FillGenerator(context, tracks, rhythmicUnconventionality)
+        songTrackNoteTimelineMap = new FillGenerator(Stream(SongStream.Fills), tracks, rhythmicUnconventionality)
             .Generate(songTrackNoteTimelineMap, form.Lines, form.Origin);
 
         return new Song(songTrackNoteTimelineMap.Duration, tracks.Definitions, songTrackNoteTimelineMap);
+    }
+
+    /// <summary>The random sequence a stage of the song of the given seed draws from.</summary>
+    internal static IGenerationContext CreateStream(int seed, SongStream stream)
+    {
+        return new GenerationContext(Seeds.Derive(seed, (int)stream));
     }
 
     /// <summary>
@@ -130,4 +140,22 @@ public static class SongGenerator
 internal sealed record ProgressionSettings(double ChordShapeStep, double NoteStateStep, int PoolSize)
 {
     public static ProgressionSettings Default { get; } = new(4, 4, 4);
+}
+
+/// <summary>
+///     The random sequences of a song's stages, each derived from the song's seed by its number, which must stay as it
+///     is: a new stage takes a new number.
+/// </summary>
+internal enum SongStream
+{
+    Rhythm = 1,
+    Tracks = 2,
+    Harmony = 3,
+    SongState = 4,
+    Melody = 5,
+    Common = 6,
+    Structure = 7,
+    Sections = 8,
+    Form = 9,
+    Fills = 10
 }
