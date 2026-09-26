@@ -135,11 +135,16 @@ public static class Render
         var absoluteMinOctave = track.MinOctaveOffset + ZeroOctaveOffset;
         var octaveCount = track.MaxOctaveOffset - track.MinOctaveOffset + 1;
 
-        var renderedNotes = eventStateTimelineMap
-            .WithDurations()
-            .SelectMany(x => RenderPitchNotes(x, absoluteMinOctave, octaveCount))
-            .ToImmutableArray();
-        var renderedNoteTimeline = EventTimeline.Create(eventStateTimelineMap.Duration, renderedNotes);
+        // the chords are placed in order, each following from the one before
+        var voiceLeader = new VoiceLeader(
+            absoluteMinOctave * OctaveNoteCount,
+            (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1,
+            notes => FitChordIntoRange(absoluteMinOctave, octaveCount, notes)
+        );
+        var renderedNotes = ImmutableArray.CreateBuilder<TimelineItem<RenderedNote>>();
+        foreach (var item in eventStateTimelineMap.WithDurations())
+            renderedNotes.AddRange(RenderPitchNotes(item, absoluteMinOctave, octaveCount, voiceLeader));
+        var renderedNoteTimeline = EventTimeline.Create(eventStateTimelineMap.Duration, renderedNotes.ToImmutable());
         return new RenderedTrack(false, track.InstrumentCode, renderedNoteTimeline);
     }
 
@@ -167,7 +172,8 @@ public static class Render
     private static IEnumerable<TimelineItem<RenderedNote>> RenderPitchNotes(
         TimelineItem<WithDuration<StateMap>> timelineItemWithDuration,
         int absoluteMinOctave,
-        int octaveCount
+        int octaveCount,
+        VoiceLeader voiceLeader
     )
     {
         var position = timelineItemWithDuration.Position;
@@ -223,7 +229,13 @@ public static class Render
         }
         else
         {
-            notes = FitChordIntoRange(absoluteMinOctave, octaveCount, [..chordSteps.Select(ToNote)]);
+            notes = voiceLeader.Place(
+                [..chordSteps.Select(ToNote)],
+                ToNote(0),
+                stateMap.GetStateValue(StateKinds.ChordVoicingFixed) > 0,
+                stateMap.GetStateValue(StateKinds.VoiceLeading),
+                stateMap.GetStateValue(StateKinds.ChordVoicingReset)
+            );
         }
 
         foreach (var note in notes)

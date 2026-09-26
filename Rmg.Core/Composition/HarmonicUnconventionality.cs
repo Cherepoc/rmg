@@ -53,7 +53,7 @@ public sealed record HarmonicUnconventionality(double Anchor, double Spread, dou
     ///     A chord: a shape of the unconventionality drawn, laid out by a voicing, as the heights of its notes above the root in
     ///     fractions of an octave, which <c>Render</c> snaps to the scale.
     /// </summary>
-    public ImmutableArray<double> GenerateChord(IGenerationContext context)
+    public Chord GenerateChord(IGenerationContext context)
     {
         return Voice(context, ChordShapes.Pick(context, GenerateChordUnconventionality(context)));
     }
@@ -63,7 +63,7 @@ public sealed record HarmonicUnconventionality(double Anchor, double Spread, dou
     ///     <see cref="HomeChordMaxUnconventionality" />, a triad or a mild colour such as a seventh, an added ninth or a
     ///     suspended chord, however strange the song.
     /// </summary>
-    public ImmutableArray<double> GenerateHomeChord(IGenerationContext context)
+    public Chord GenerateHomeChord(IGenerationContext context)
     {
         var level = Math.Min(GenerateChordUnconventionality(context), HomeChordMaxUnconventionality);
         return Voice(context, ChordShapes.Pick(context, level));
@@ -74,7 +74,7 @@ public sealed record HarmonicUnconventionality(double Anchor, double Spread, dou
     ///     seventh, unless the chord drawn is more unconventional than <see cref="CadenceShapeMaxUnconventionality" />,
     ///     so that a strange song keeps its strangeness there.
     /// </summary>
-    public ImmutableArray<double> GenerateCadenceChord(IGenerationContext context)
+    public Chord GenerateCadenceChord(IGenerationContext context)
     {
         var level = GenerateChordUnconventionality(context);
         var shape = level <= CadenceShapeMaxUnconventionality ? ChordShapes.PickCadence(context) : ChordShapes.Pick(context, level);
@@ -87,9 +87,9 @@ public sealed record HarmonicUnconventionality(double Anchor, double Spread, dou
     /// <summary>The most unconventional chord drawn for a cadence that plays a cadence shape instead.</summary>
     public const int CadenceShapeMaxUnconventionality = 2;
 
-    private static ImmutableArray<double> Voice(IGenerationContext context, ChordShape shape)
+    private static Chord Voice(IGenerationContext context, ChordShape shape)
     {
-        return [..ChordVoicing.Apply(context, shape).Select(x => x / 12)];
+        return new Chord([..ChordVoicing.Apply(context, shape).Select(x => x / 12)], shape.IsVoicingFixed);
     }
 
     /// <summary>

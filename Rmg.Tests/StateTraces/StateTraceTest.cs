@@ -37,7 +37,7 @@ public sealed class StateTraceTest
         using var trace = StateTrace.Start();
         SongGenerator.GenerateSong(1);
 
-        var index = CompositionStateKinds.ChordNotePitchOffsets.Index;
+        var index = CompositionStateKinds.ChordPool.Index;
         var chordEntries = trace.Entries.Where(x => x.Point == "Chord").ToArray();
         var layers = new HashSet<string>();
 
@@ -49,7 +49,7 @@ public sealed class StateTraceTest
 
             // the pick adds up from the shared layers alone, and the pool it picks from is there
             await Assert.That(contributions.Sum(x => (int)x.Value)).IsEqualTo(entry.StateMap.GetStateValue(index));
-            await Assert.That(entry.StateMap.GetStateValue(CompositionStateKinds.ChordNotePitchOffsets.Collection).Length).IsGreaterThan(0);
+            await Assert.That(entry.StateMap.GetStateValue(CompositionStateKinds.ChordPool.Collection).Length).IsGreaterThan(0);
         }
 
         // the bar's part is named now, and no track's layer takes part
@@ -67,7 +67,10 @@ public sealed class StateTraceTest
         var snareEntries = trace.Entries.Where(x => x.Point == "Bar pattern" && SnareTracks.Contains(x.Track)).ToArray();
 
         await Assert.That(snareEntries.Length).IsGreaterThan(0);
-        foreach (var entry in snareEntries)
+        // a value the layers add up to 0 is the default, which a map does not keep, nor its parts
+        var explained = snareEntries.Where(x => x.StateMap.GetStateValue(kind) != 0).ToArray();
+        await Assert.That(explained.Length).IsGreaterThan(0);
+        foreach (var entry in explained)
         {
             var contributions = entry.StateMap.Explain(kind);
 
