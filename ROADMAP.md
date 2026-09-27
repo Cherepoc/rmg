@@ -81,6 +81,11 @@ to:
 - **Idioms the draws no longer tie together:** a lift is now a half-beat run on any sounds, rarely the open hi-hat,
   and a landing takes any cymbal sound, the china and the splash as often as the crashes. The drummer's signature
   twist went with the twists.
+- **Sounds by convention:** a run or a landing draws among a drum's sounds evenly, so half the cymbal landings are the
+  china or the splash, accents that mark a downbeat less than a crash, where a plain song would crash. Each sound could
+  carry how conventional it is, as data on its drum like the toms' order of pitch: the crashes 1, the china and the
+  splash less, their weights multiplied by the section's chance scale, so plain sections crash and wild ones reach for
+  the others.
 - **Fill values as state,** built with section dynamics, which needs the same plumbing for its energy: the chances of
   starting off the beat, fading and landing early as multiplicative state kinds (a base, the section's chance scale, a
   signature's ×5, capped at 1 when read), layered in `FillGenerator` from the fills' own random stream, so that songs
