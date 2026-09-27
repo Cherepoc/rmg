@@ -77,8 +77,7 @@ internal sealed class FillSounds
         ImmutableArray<Weighted<FillSpeed>> speeds =
             [..FillLayers.Speeds.Select(x => x.Value == FillSpeed.SlowsDown ? x with { Weight = x.Weight * chanceScale } : x)];
         var speed = Pick(context, speeds);
-        var rankLimitLift = context.TestProbability(Math.Min(1, FillLayers.RankLimitLiftChance * chanceScale)) ? 1 : 0;
-        return new FillRun(order, path, width, speed, rankLimitLift);
+        return new FillRun(order, path, width, speed);
     }
 
     /// <summary>Where in its order each of a run's notes starts its window, as its walk goes.</summary>
@@ -122,18 +121,29 @@ internal sealed class FillSounds
     }
 
     /// <summary>
-    ///     The sounds of a run's note: the window of its order from the note's place, each if its role plays the note's
-    ///     rank; a drum plays one sound at a time, the first of the window's.
+    ///     The sounds of a run's note: the window of its order from the note's place, each where its drum plays the
+    ///     note; a drum plays one sound at a time, the first of the window's.
     /// </summary>
-    public static IEnumerable<RunSound> GetNoteSounds(FillRun run, int place, int rank)
+    /// <param name="plays">Whether a drum plays the note, by its track.</param>
+    public static IEnumerable<RunSound> GetNoteSounds(FillRun run, int place, Func<int, bool> plays)
     {
         var tracks = new HashSet<int>();
         for (var j = 0; j < run.Width; j++)
         {
             var sound = run.Sounds[(place + j) % run.Sounds.Length];
-            if ((!FillLayers.RankLimits.TryGetValue(sound.Role, out var limit) || rank <= limit + run.RankLimitLift) && tracks.Add(sound.Track))
+            if (plays(sound.Track) && tracks.Add(sound.Track))
                 yield return sound;
         }
+    }
+
+    /// <summary>The sounds the drums land on at a line: a sound of each role the song has, by the role's chance.</summary>
+    public ImmutableArray<RunSound> DrawLanding(IGenerationContext context, IReadOnlyDictionary<DrumRole, double> chances)
+    {
+        var sounds = ImmutableArray.CreateBuilder<RunSound>();
+        foreach (var (role, candidates) in _sounds)
+            if (chances.TryGetValue(role, out var chance) && context.TestProbability(Math.Min(1, chance)))
+                sounds.Add(candidates[context.GenerateInt(0, candidates.Length)]);
+        return sounds.ToImmutable();
     }
 
     private static T Pick<T>(IGenerationContext context, ImmutableArray<Weighted<T>> weights)
@@ -160,16 +170,16 @@ internal sealed record RunSound(DrumRole Role, int Track, int Articulation, int 
     public override string ToString() => $"{Drum} {Code}";
 }
 
-/// <summary>A run as drawn: its sounds in order, how it walks them, how many each note plays, and whether it changes speed.</summary>
-/// <param name="RankLimitLift">How many ranks finer than their limit its sounds may play.</param>
-internal sealed record FillRun(
-    ImmutableArray<RunSound> Sounds,
-    FillPath Path,
-    int Width,
-    FillSpeed Speed = FillSpeed.Steady,
-    int RankLimitLift = 0
-)
+/// <summary>
+///     A run as drawn: its sounds in order, none for a run that rests, how it walks them, how many each note plays, and
+///     whether it changes speed.
+/// </summary>
+internal sealed record FillRun(ImmutableArray<RunSound> Sounds, FillPath Path, int Width, FillSpeed Speed = FillSpeed.Steady)
 {
+    public static FillRun Rest { get; } = new([], FillPath.OneWay, 1);
+
     public override string ToString() =>
-        $"on {string.Join(" ", Sounds)}, {Path}{(Width > 1 ? $", {Width} at once" : "")}{(Speed != FillSpeed.Steady ? $", {Speed}" : "")}";
+        Sounds.IsEmpty
+            ? "resting"
+            : $"on {string.Join(" ", Sounds)}, {Path}{(Width > 1 ? $", {Width} at once" : "")}{(Speed != FillSpeed.Steady ? $", {Speed}" : "")}";
 }

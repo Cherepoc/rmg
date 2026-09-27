@@ -10,7 +10,7 @@ public sealed class FillTest
 {
     private const double SectionDuration = 2 * Meter.PatternDuration;
 
-    private static readonly int[] Crashes = [49, 57];
+    private static readonly int[] Crashes = [..DrumDefinitions.Cymbal.ArticulationCodes];
 
     private static StateMap Velocity(double velocity) => StateMap.FromStates([StateKinds.Velocity.CreateState(velocity)]);
 
@@ -113,7 +113,7 @@ public sealed class FillTest
                 if (entry.Point != "Fill decision")
                     continue;
 
-                if (entry.Phrase!.Contains("EarlyLanding") && entry.Phrase.Contains("landing CrashAndKick") && !entry.Phrase.Contains("NoLanding"))
+                if (entry.Phrase!.Contains(" early") && landings.Count > 0)
                 {
                     early++;
                     // in the last bar before the line, where the fill is

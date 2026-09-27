@@ -66,6 +66,22 @@ A run is two ranks finer than the snare's groove, and the snare's backbeat is sp
 three runs in ten play quarters or slower, half play 8ths or 16ths. Should slow runs sound weak, a run's finest rank
 could aim at the finest the tempo allows, a step or two less, keeping only the groove's cycle and phase.
 
+### Left from the fill review
+
+Every fill is a run now, and a landing a note of a few sounds; what is still fixed, best done with the work it belongs
+to:
+
+- **A line's weight:** the section's and the phrase's tables of spans and landings could be one value that scales the
+  chance of no fill, the fullness, the span and the landing: the energy of *Section dynamics*.
+- **Loudness:** a run's swell, its accents and a landing's hit are constants, where the groove's loudness is layers; a
+  fill's velocity layer would make them cumulative with the section's, which section dynamics will want.
+- **Speed changes** are a rank more for one half of the span, a case of ranks changing along it (see *Segments in any
+  pattern*).
+- **Walks:** one way, turn, loop and random could be one walk with a few values, should they grow.
+- **Idioms the draws no longer tie together:** a lift is now a half-beat run on any sounds, rarely the open hi-hat,
+  and a landing takes any cymbal sound, the china and the splash as often as the crashes. The drummer's signature
+  twist went with the twists.
+
 ### A drum's sounds together
 
 A drum is one track, whose note plays one sound, so a run's window plays one sound of a drum at a time: never two

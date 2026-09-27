@@ -85,7 +85,7 @@ public sealed class SongIntroTest
             // the groove may start on a later beat, but plays in the intro's first bar
             await Assert.That(Drums(song).Min(x => x.Position)).IsLessThan(4);
             // the band comes in on a crash, pushed an 8th early now and then
-            await Assert.That(Drums(song).Any(x => x.Position >= song.Origin - 0.5 && x.Position <= song.Origin && x.Value.Offset is 49 or 57))
+            await Assert.That(Drums(song).Any(x => x.Position >= song.Origin - 0.5 && x.Position <= song.Origin && DrumDefinitions.Cymbal.ArticulationCodes.Contains(x.Value.Offset)))
                 .IsTrue();
         }
 

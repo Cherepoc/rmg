@@ -30,15 +30,15 @@ public sealed class FillFeelTest
         var context = new GenerationContext(1);
         var tracks = SongTracks.Create(context, new RhythmicUnconventionality(0.5));
         var song = TrackEventStateTimelineMap.Create<StateMap>(8 * 32);
-        var sections = Enumerable.Range(0, 8).Select(x => new FillSection(x, 32, new RhythmicUnconventionality(0.5), Rhythm(3))).ToArray();
+        var sections = Enumerable.Range(0, 8).Select(x => new FillSection(x, 32, new RhythmicUnconventionality(0.5), FillGrooves.FromSource(Rhythm(3)))).ToArray();
         using var trace = StateTrace.Start();
 
-        new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5)).Generate(song, FillGenerator.GetSectionLines(sections));
+        new FillGenerator(context, tracks).Generate(song, FillGenerator.GetSectionLines(sections));
 
         var decisions = trace.Entries.Where(x => x.Point == "Fill decision").Select(x => x.Phrase!).ToArray();
         var hits = trace.Entries.Where(x => x.Point == "Fill" && x.Phrase != "Landing").ToArray();
         await Assert.That(decisions.Length).IsEqualTo(15);
-        await Assert.That(decisions.Where(x => !x.StartsWith("None")).All(x => x.Contains("in 3s"))).IsTrue();
+        await Assert.That(decisions.Where(x => !x.StartsWith("0 beats")).All(x => x.Contains("in 3s"))).IsTrue();
         // triplet 8ths and sextuplets, a sixth of a beat apart at the finest
         await Assert.That(hits.Length).IsGreaterThan(0);
         await Assert.That(hits.All(x => Math.Abs(x.Position * 6 - Math.Round(x.Position * 6)) < 1e-6)).IsTrue();

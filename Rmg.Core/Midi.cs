@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Rendering;
 
@@ -106,7 +107,8 @@ public static class Midi
 
     private static byte[] Tempo(double tempo)
     {
-        var tempoValue = (uint)(0.5 * 1_000_000.0 / tempo);
+        // microseconds a beat
+        var tempoValue = (uint)(60 / Meter.BaseTempo * 1_000_000.0 / tempo);
         return
         [
             0xff,

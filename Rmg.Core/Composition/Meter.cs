@@ -14,4 +14,7 @@ public static class Meter
 
     /// <summary>How long a section's pattern is, in beats.</summary>
     public const double PatternDuration = PatternBarCount * BarDuration;
+
+    /// <summary>The tempo, in beats a minute, that a song's tempo state is a multiple of.</summary>
+    public const double BaseTempo = 120;
 }

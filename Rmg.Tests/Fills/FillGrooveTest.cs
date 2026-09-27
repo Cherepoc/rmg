@@ -42,12 +42,13 @@ public sealed class FillGrooveTest
             var notes = song.Song.Notes!;
             for (var i = 0; i < lines.Length; i++)
             {
+                // the fills that play: a span, and a run that does not rest
                 var parts = decisions[i].Phrase!.Split(", ");
-                var kind = parts[0];
-                if (!FillLayers.Specs.TryGetValue(Enum.Parse<FillKind>(kind), out var spec) || !spec.Runs)
+                var span = double.Parse(parts[0].Split(' ')[0]);
+                if (span <= 0 || parts.Contains("resting"))
                     continue;
 
-                var span = double.Parse(parts[1].Split(' ')[0]);
+                var kind = parts[2];
                 var from = lines[i] - span;
                 (int Track, double Position, double Velocity)[] Hands(double a, double b) =>
                 [

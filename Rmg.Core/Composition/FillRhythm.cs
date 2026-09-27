@@ -58,6 +58,13 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit)
         return new FillRhythm(rhythm, Math.Max(0, (int)Math.Floor(Math.Log2(rhythm.Period / minNote) + 1e-9)));
     }
 
+    /// <summary>Whether the fill's finest notes have one at a position, in the bar that ends at the line.</summary>
+    public bool Has(double position, double line)
+    {
+        var steps = (position - (line - Meter.BarDuration) - Phase) / Fine;
+        return Math.Abs(steps - Math.Round(steps)) < 1e-6;
+    }
+
     /// <summary>A rank a step finer or coarser than the fill's, folded into range as the fill's own is.</summary>
     public int Step(int step)
     {

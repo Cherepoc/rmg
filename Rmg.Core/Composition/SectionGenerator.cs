@@ -107,24 +107,27 @@ internal sealed class SectionGenerator
         return new GeneratedSection(
             TrackEventStateTimelineMap.Merge(trackTimelineMaps).Repeat(2),
             rhythm,
-            GetGroove(drums.SelectMany(x => x.Feels))
+            GetGrooves(drums.SelectMany(x => x.Feels))
         );
     }
 
     /// <summary>
-    ///     The rhythm the fills play from: the snare's in the pattern's last bar, before both of the section's lines, or
-    ///     where the section plays no snare, that of the drum with the most notes there.
+    ///     The rhythm the fills play from, in the pattern's last bar, before both of the section's lines: every drum's
+    ///     state, which sets the notes of a run the drum plays, and the snare's, which the run's rhythm is, or where the
+    ///     section plays no snare, that of the drum with the most notes there.
     /// </summary>
-    internal static StateMap GetGroove(IEnumerable<BarFeel> feels)
+    internal static FillGrooves GetGrooves(IEnumerable<BarFeel> feels)
     {
         var snares = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
-        return feels
-            .Where(x => x.Bar == Progressions.BarCount - 1)
+        var lastBar = feels.Where(x => x.Bar == Progressions.BarCount - 1).ToArray();
+        var source = lastBar
+            .Where(x => x.NoteCount > 0)
             .OrderByDescending(x => snares.Contains(x.Track))
             .ThenByDescending(x => x.NoteCount)
             .ThenBy(x => x.Track)
             .Select(x => x.Rhythm)
             .FirstOrDefault() ?? ResolvedRhythm.DefaultState;
+        return new FillGrooves(source, lastBar.ToImmutableDictionary(x => x.Track, x => x.Rhythm));
     }
 
     /// <summary>The drums the section plays, which make their patterns together, over the drums' shared state.</summary>
@@ -152,19 +155,26 @@ internal sealed class SectionGenerator
                 trackStateMaps[trackNumber] = CreateSectionTrackLayer(context, trackNumber, sectionRhythm).MergeWith(groupStateMap);
 
             // a drum out of the groove still has the state the drums share, with no notes, so that a note added
-            // later, such as in a fill, plays as loud as the section
+            // later, such as in a fill, plays as loud as the section, and its own rhythm's state, which a fill plays it by
             var idleStateMap = groupStateMap.OfScope(StateScope.Render);
+            var idleTrackNumbers = group.TrackNumbers.Where(x => !trackStateMaps.ContainsKey(x)).ToArray();
             yield return new GeneratedBars(TrackEventStateTimelineMap.Create(
                 Meter.PatternDuration,
-                group.TrackNumbers
-                    .Where(x => !trackStateMaps.ContainsKey(x))
-                    .Select(x => new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
-                            x,
-                            EventTimeline.Create<StateMap>(Meter.PatternDuration).ToEventStateTimelineMap(idleStateMap)
-                        )
-                    ),
+                idleTrackNumbers.Select(x => new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
+                        x,
+                        EventTimeline.Create<StateMap>(Meter.PatternDuration).ToEventStateTimelineMap(idleStateMap)
+                    )
+                ),
                 StateTimelineMap.Create(Meter.PatternDuration)
-            ), []);
+            ), [
+                ..idleTrackNumbers.Select(x => new BarFeel(
+                        x,
+                        Progressions.BarCount - 1,
+                        SongTracks.GetGenerationStateMap(_tracks.Definitions[x]).MergeWith(groupStateMap),
+                        0
+                    )
+                )
+            ]);
 
             if (trackStateMaps.Count == 0)
                 continue;
@@ -232,11 +242,11 @@ internal sealed class SectionGenerator
 /// </summary>
 /// <summary>A section's tracks, and what the fills need to know of its rhythm.</summary>
 /// <param name="Rhythm">How far the section's rhythm strays from convention.</param>
-/// <param name="Groove">The state of the rhythm the fills play from.</param>
+/// <param name="Groove">The states of the rhythm the fills play from.</param>
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
     RhythmicUnconventionality Rhythm,
-    StateMap Groove
+    FillGrooves Groove
 );
 
 internal sealed record SectionRhythm(RhythmicUnconventionality Unconventionality, PhraseScheme Scheme, MelodyBusyness MelodyBusyness);

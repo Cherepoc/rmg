@@ -93,7 +93,7 @@ public static class SongGenerator
             .MergeStateMap(commonStateMap);
 
         // the drums mark the lines, now that the song is put together
-        songTrackNoteTimelineMap = new FillGenerator(Stream(SongStream.Fills), tracks, rhythmicUnconventionality)
+        songTrackNoteTimelineMap = new FillGenerator(Stream(SongStream.Fills), tracks)
             .Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
 
         // and last the notes, decided from the state of the whole song, in its order
