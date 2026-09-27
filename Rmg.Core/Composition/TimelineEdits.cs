@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
@@ -67,6 +68,32 @@ internal sealed class TimelineEdits(IGenerationContext context, SongMap? map = n
                 return EventTimeline.Merge([timeline, EventTimeline.Create(timeline.Duration, _hits.GetValueOrDefault(track) ?? [])]);
             };
         return song.MapTrackEvents(maps);
+    }
+
+    /// <summary>
+    ///     The notes once they are decided, with every note that would sound past a cut ending there, such as a chord
+    ///     that outlasts the notes after it: before the notes are decided, only the last note's length is known to reach
+    ///     the cut, which it is held to.
+    /// </summary>
+    public ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> CutNotes(ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> notes)
+    {
+        foreach (var (track, cuts) in _cuts)
+        {
+            if (!notes.TryGetValue(track, out var timeline))
+                continue;
+
+            foreach (var cut in cuts)
+                timeline = EventTimeline.Create(
+                    timeline.Duration,
+                    timeline.Select(x => x.Position < cut - Epsilon && x.Position + x.Value.Duration > cut + Epsilon
+                        ? (x.Value with { Duration = cut - x.Position }).ToTimelineItem(x.Position)
+                        : x
+                    )
+                );
+            notes = notes.SetItem(track, timeline);
+        }
+
+        return notes;
     }
 
     /// <summary>The timeline with its last note before the position held until there, unless it ends sooner already.</summary>

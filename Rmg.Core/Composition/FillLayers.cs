@@ -96,6 +96,12 @@ public static class FillLayers
         new(0.02, 4)
     ];
 
+    /// <summary>
+    ///     How a span leans, for the energy of the section a line leads into: none quiet, the longer the louder, a beat
+    ///     in the middle.
+    /// </summary>
+    public static double GetSpanLoudness(double span) => span <= 0 ? -1 : Math.Clamp(Math.Log2(span) / 2, -1, 1);
+
     /// <summary>What a fill does with the groove, and how likely each is; stopping's weight is multiplied by the chance scale.</summary>
     public static ImmutableArray<Weighted<GrooveTreatment>> Treatments { get; } =
     [
@@ -103,6 +109,14 @@ public static class FillLayers
         new(0.1, GrooveTreatment.Stop),
         new(0.12, GrooveTreatment.Keep)
     ];
+
+    /// <summary>How a treatment leans, for the energy of the section a line leads into: stopping, a stop or a break, quiet.</summary>
+    public static ImmutableDictionary<GrooveTreatment, double> TreatmentLoudness { get; } = new Dictionary<GrooveTreatment, double>
+    {
+        [GrooveTreatment.Played] = 0,
+        [GrooveTreatment.Keep] = 0,
+        [GrooveTreatment.Stop] = -1
+    }.ToImmutableDictionary();
 
     /// <summary>
     ///     How much fuller or sparser a fill is for what it does with the groove: one over the groove plays a few hits,

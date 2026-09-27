@@ -2,7 +2,8 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     The drums. A weight is how likely the drum is to be chosen among the other drums it competes with, both
-///     when choosing the drums of a song and the drums of a section.
+///     when choosing the drums of a song and the drums of a section; a loudness leans a section's choice by its energy:
+///     the crash and the ride loud, the tambourine a little, the shakers a little quiet and the cross-stick quiet.
 /// </summary>
 public static class DrumDefinitions
 {
@@ -14,7 +15,7 @@ public static class DrumDefinitions
         builder => builder.Add(CompositionStateKinds.Rhythm.Variation, -0.4)
     );
 
-    public static PercussionInstrumentDefinition CrossStick { get; } = new("Snare Cross Stick", [37], 0.2);
+    public static PercussionInstrumentDefinition CrossStick { get; } = new("Snare Cross Stick", [37], 0.2, loudness: -1);
 
     public static PercussionInstrumentDefinition AcousticSnare { get; } = new("Acoustic Snare", [38], 1.0);
 
@@ -39,18 +40,19 @@ public static class DrumDefinitions
         0.5,
         builder => builder
             .Add(CompositionStateKinds.Rhythm.Fullness, 0.35)
-            .Add(CompositionStateKinds.Rhythm.Variation, -0.5)
+            .Add(CompositionStateKinds.Rhythm.Variation, -0.5),
+        1
     );
 
-    public static PercussionInstrumentDefinition Tambourine { get; } = new("Tambourine", [54], 0.2);
+    public static PercussionInstrumentDefinition Tambourine { get; } = new("Tambourine", [54], 0.2, loudness: 0.5);
 
-    public static PercussionInstrumentDefinition Cabasa { get; } = new("Cabasa", [69], 0.15);
+    public static PercussionInstrumentDefinition Cabasa { get; } = new("Cabasa", [69], 0.15, loudness: -0.5);
 
-    public static PercussionInstrumentDefinition Maracas { get; } = new("Maracas", [70], 0.15);
+    public static PercussionInstrumentDefinition Maracas { get; } = new("Maracas", [70], 0.15, loudness: -0.5);
 
     public static PercussionInstrumentDefinition Tom { get; } = new("Tom", [41, 43, 45, 47, 48, 50], 1.0);
 
-    public static PercussionInstrumentDefinition Cymbal { get; } = new("Cymbal", [49, 52, 55, 57], 1.0);
+    public static PercussionInstrumentDefinition Cymbal { get; } = new("Cymbal", [49, 52, 55, 57], 1.0, loudness: 1);
 
     public static PercussionInstrumentDefinition Vibraslap { get; } = new("Vibraslap", [58], 0.15);
 

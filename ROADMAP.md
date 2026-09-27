@@ -11,46 +11,28 @@ In this order, each measured before it is planned:
    toms, about one run in five), intros (whether the band's entry after a chords-first or build-up intro feels earned)
    and endings (whether the ritardando plays in the browser, whether a final chord taken from a weak note is too quiet)
    have been tuned by measurement only.
-2. **Section dynamics,** as planned in *Section dynamics*.
-3. **Sections changing mode,** such as a chorus in the relative major or a darker bridge: the section's scale becomes
+2. **Sections changing mode,** such as a chorus in the relative major or a darker bridge: the section's scale becomes
    its own state; scales, homes and cadences already work per scale.
-4. Smaller: melody motifs remembered per cycle (see *Rhythm engine*), fade-out endings (see *Form*), and moving the
-   melody's final note and a stop's cuts from render flags to edits of the notes after `Realizer`, one at a time.
+3. Smaller: melody motifs remembered per cycle (see *Rhythm engine*), fade-out endings (see *Form*), and moving the
+   melody's final note and a stop's hold from render flags to edits of the notes after `Realizer`, one at a time, as a
+   stop's cut of the notes that would sound into it already is (`TimelineEdits.CutNotes`).
 
 ## Section dynamics
 
-Measured over 200 corpus songs, against the sections of each song, leaving out the last bar of each pattern: sections
-already differ, the spread between them 2 to 4 times the bar-to-bar spread within one for loudness (of the loud
-notes), the drums' notes and how many drums play, and the bass's, chords' and melody's notes; but each is drawn on its
-own: loudness correlates with none of the others (-0.06 to 0.06), the densities with each other only weakly (0.2 to
-0.3), through the section's shared rhythm layer. A song has a median of 7 distinct sections, without roles, and a
-fill looks only at the section it ends.
+Every section has an energy (`SectionEnergy`), an additive state of the song's and three steps (how often the section
+recurs, where it plays on average, and its own). Its pull, the energy times the section's coupling, tilts the draws
+(`Tilt`): the section's loudness, the drums' fullness and density in the drum group's and each drum's section layer,
+which drums play (each drum's `Loudness`), and the fills by the energy they lead into. With no tilt the songs are the
+same as without it.
 
-Decided: one **energy** per section that makes some outcomes likelier, never decides them.
+Measured over 200 corpus songs, at `HighOdds` 32, in plain sections and wild ones: energy correlates with loudness 0.51
+and 0.27, with how many drums play 0.46 and 0.32, but with the drums' notes only 0.22 and 0.19; loudness, the drums'
+notes and how many drums play correlate with each other 0.2 to 0.4, where the plan aimed at 0.4 to 0.6. Fills into a
+louder section average 2.5 beats and almost always land, into a quieter one 0.85 beats, none in half of them. Left:
 
-- **Energy** is an additive state kind in the section's state, where everything after reads it, the fills too:
-  the song's, a step for how often the section recurs (the more, the more chorus-like), one for where it plays on
-  average in the song (an arc rising towards the later parts), and a random step of the section's own. A section is
-  made once and plays the same wherever it recurs, so the arc goes by its average place.
-- **The pull** of a section is its energy times its coupling, 1 - 0.8 times its rhythmic unconventionality: a plain
-  section follows its energy closely, a wild one only a little, so a loud and sparse section happens there by chance.
-- **How it tilts a draw,** with the knobs the draws already have: a spline value's skew (`Generators.SplineValue`), so
-  a loud section is likelier loud; a step's -1 or +1, tilted away from even, its chance of stepping kept; a choice's
-  weights, each multiplied by how its option leans.
-- **What it drives first:**
-  - the section's loudness: its velocity draw's skew, in place of an even draw, its spread kept;
-  - the drums' fullness and density: the section rhythm layer's fullness spread and its steps;
-  - which drum groups play: each drum leans loud or quiet as data on it, such as the crash and the ride loud and the
-    cross-stick quiet, which weighs the section's choice of drums (`DrumKitGenerator.SelectActiveDrums`);
-  - the fills, by the energy of the section a line leads into, less the one it ends: into a louder one, longer and
-    fuller fills and likelier landings, into a quieter one likelier stops and breaks. This is the line's weight left
-    from the fill review.
-- **Measured after:** loudness, the drums' notes and how many drums play correlating around 0.4 to 0.6 in plain
-  sections and less in wild ones; the spreads between sections about where they are; a fill's span and fullness rising
-  with the energy it leads into.
-
-Later, each measured first:
-
+- **The drums' notes** follow the energy weakly: the section layers' density and fullness move little, so even with
+  energy near deciding (odds of 100,000) the drums' notes correlate with it only 0.48. The section's shared rhythm
+  layer, or the drums' speed, would move them more, the first also moving the pitched tracks.
 - **The melody's busyness and the chords' rhythm,** by the same pull.
 - **Energy by appearance,** so that the last chorus plays louder than the first: the parts that change would be edits
   of the song as it is put together, as the fills are.
@@ -66,6 +48,9 @@ Left from the review, each small and best done when the code is next touched:
   nothing outside needs them.
 - `TrackEventStateTimelineMap.MergeStateTimelineMap` in place of merging a map of no tracks to add common state; one
   `Pick` over weights in `Generators` in place of the copies; `StateMap.With(kind, value)` for setting finished state.
+- **Chance scales as tilts:** the choices the chance scale multiplies (stopping, the random walk, a group's run chance
+  to the power of its unconventionality, the drummer's spans) are each a weight times a scale to the power of how the
+  option leans, which `Tilt.Weigh` is; they could move to it when next touched.
 - **Memory:** every `RealizedNote` keeps the state it was decided from, which a song now holds on to (about 2 MB a
   song, 8 MB with a trace). Recompute it on demand instead, should memory matter.
 
@@ -106,8 +91,6 @@ could aim at the finest the tempo allows, a step or two less, keeping only the g
 Every fill is a run now, and a landing a note of a few sounds; what is still fixed, best done with the work it belongs
 to:
 
-- **A line's weight:** the section's and the phrase's tables of spans and landings could be one value that scales the
-  chance of no fill, the fullness, the span and the landing: the energy of *Section dynamics*.
 - **Loudness:** a run's swell, its accents and a landing's hit are constants, where the groove's loudness is layers; a
   fill's velocity layer would make them cumulative with the section's, which section dynamics will want.
 - **Speed changes** are a rank more for one half of the span, a case of ranks changing along it (see *Segments in any
@@ -120,7 +103,7 @@ to:
   carry how conventional it is, as data on its drum like the toms' order of pitch: the crashes 1, the china and the
   splash less, their weights multiplied by the section's chance scale, so plain sections crash and wild ones reach for
   the others.
-- **The drummer's walks and busyness as state,** with section dynamics: the fills' rarer choices and each drum
+- **The drummer's walks and busyness as state:** the fills' rarer choices and each drum
   group's chance of a run are layered state now, and a signature a song layer over them; the favourite walk, a choice
   among four, would need a pool like the chord pool's, and busyness, which weighs the spans and moves the fullness,
   would become a fullness and a span length that the section's energy adds to.
@@ -158,8 +141,7 @@ rhythm (its busyness, riffs, and phrase ends with a held note and a rest), and f
   first.
 - Choosing whole patterns by measured features (syncopation, evenness) as a family, should a target prove out of reach
   of the dyadic engine; euclidean patterns that fit no cycle; a library of idioms such as clave and bossa; and drums
-  generated together, the snare avoiding the kick and the hi-hat filling the gaps. Energy-aware fills come with section
-  dynamics (see *Next*).
+  generated together, the snare avoiding the kick and the hi-hat filling the gaps.
 
 A cycle that does not fit the bar and is cut off at the bar line, such as 3+3+2, stays as it is: an off-kilter feel,
 not a fault.

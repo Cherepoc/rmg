@@ -14,11 +14,17 @@ public sealed record RhythmicUnconventionality(double Value)
     /// <summary>How far a section moves the song's value, either way.</summary>
     public const double SectionShift = 0.15;
 
+    /// <summary>How little a section of the wildest rhythm follows its energy.</summary>
+    public const double MaxDecoupling = 0.8;
+
     // around 0 with a flat peak, from -2 to 2, so that songs spread over the whole range and more of them near the middle
     private static readonly Func<IGenerationContext, double> SpreadGenerator = Generators.SplineValue(0);
 
     /// <summary>What the rhythm layers' chances are multiplied by: from 1/4 at 0 through 1 at 0.5 to 4 at 1.</summary>
     public double ChanceScale => Math.Pow(16, Value - 0.5);
+
+    /// <summary>How much of what a section's energy leans it to the rhythm follows: all at 0, a fifth at 1.</summary>
+    public double Coupling => 1 - MaxDecoupling * Value;
 
     public static RhythmicUnconventionality Generate(IGenerationContext context)
     {

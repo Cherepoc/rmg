@@ -34,9 +34,9 @@ public static class VelocityLayers
     /// <summary>The loudness of a note, tipped by how strong its beat is.</summary>
     public const double Note = 1;
 
-    /// <summary>A layer's random velocity, scaled by its weight.</summary>
-    public static Func<IGenerationContext, double> CreateGenerator(double weight)
+    /// <summary>A layer's random velocity, scaled by its weight, leaning louder or quieter by the tilt, such as a section's energy.</summary>
+    public static Func<IGenerationContext, double> CreateGenerator(double weight, Tilt tilt = default)
     {
-        return Generators.SplineValue().Then(x => x * weight);
+        return tilt.SplineValue().Then(x => x * weight);
     }
 }

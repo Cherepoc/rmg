@@ -25,6 +25,10 @@ namespace Rmg.Core.Composition;
 /// <param name="Fullness">How far the layer moves a pattern's fullness either way, a value drawn around 0.</param>
 /// <param name="Variation">How far the layer moves how often a pattern's cycles are drawn afresh, either way.</param>
 /// <param name="SpeedScale">What the chance of a speed change is multiplied by, so that scaling the groove leaves it.</param>
+/// <remarks>
+///     A layer can be tilted (<see cref="Tilted" />), as a section by its energy, so that its fullness and density lean
+///     fuller and busier or sparser, how often they move kept.
+/// </remarks>
 public sealed record RhythmLayer(
     double Groove,
     double Density,
@@ -42,19 +46,29 @@ public sealed record RhythmLayer(
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(scale);
 
-        return new RhythmLayer(
-            Math.Min(1, Groove * scale),
-            Math.Min(1, Density * scale),
-            Math.Min(1, Tuplet * scale),
-            Fullness * scale,
-            Variation * scale,
-            Groove == 0 ? SpeedScale : SpeedScale * Groove / Math.Min(1, Groove * scale)
-        );
+        return this with
+        {
+            Groove = Math.Min(1, Groove * scale),
+            Density = Math.Min(1, Density * scale),
+            Tuplet = Math.Min(1, Tuplet * scale),
+            Fullness = Fullness * scale,
+            Variation = Variation * scale,
+            SpeedScale = Groove == 0 ? SpeedScale : SpeedScale * Groove / Math.Min(1, Groove * scale)
+        };
+    }
+
+    /// <summary>How the layer's fullness and density lean: fuller and busier on the high side.</summary>
+    public Tilt Tilt { get; init; } = Tilt.None;
+
+    /// <summary>The layer with its fullness and density leaning by the tilt.</summary>
+    public RhythmLayer Tilted(Tilt tilt)
+    {
+        return this with { Tilt = tilt };
     }
 
     public Func<IGenerationContext, double> CreateFullnessGenerator()
     {
-        return Generators.SplineValue().Then(x => x * Fullness);
+        return Tilt.SplineValue().Then(x => x * Fullness);
     }
 
     public Func<IGenerationContext, double> CreateVariationGenerator()
@@ -81,22 +95,13 @@ public sealed record RhythmLayer(
 
     public Func<IGenerationContext, int> CreateDensityGenerator()
     {
-        return CreateStepGenerator(Density);
+        return Tilt.Step(Density);
     }
 
     /// <summary>A step of -1 or 1 with the chance given, each as likely, and 0 otherwise.</summary>
     internal static Func<IGenerationContext, int> CreateStepGenerator(double chance)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(chance);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(chance, 1);
-
-        return context =>
-        {
-            if (!context.TestProbability(chance))
-                return 0;
-
-            return context.GenerateInt(0, 2) == 0 ? -1 : 1;
-        };
+        return Tilt.None.Step(chance);
     }
 }
 

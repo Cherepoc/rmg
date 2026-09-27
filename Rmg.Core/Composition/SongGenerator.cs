@@ -55,6 +55,15 @@ public static class SongGenerator
         // how busy the melody is, which a section moves
         var melodyBusyness = MelodyBusyness.Generate(Stream(SongStream.Melody));
 
+        var sectionIds = SongStructureGenerator.Generate(Stream(SongStream.Structure))
+            .SelectMany(part => part.SectionIds)
+            .ToArray();
+
+        // how loud and busy each section is meant to be, from the song's and where and how often the section plays
+        var dynamicsContext = Stream(SongStream.Dynamics);
+        songStateMap = songStateMap.MergeWith(SectionEnergy.GenerateSong(dynamicsContext));
+        var sectionEnergies = SectionEnergy.GenerateSections(dynamicsContext, sectionIds);
+
         var sectionGenerator = new SectionGenerator(
             root,
             Seeds.Derive(seed, (int)SongStream.Sections),
@@ -64,13 +73,10 @@ public static class SongGenerator
             rhythmicUnconventionality,
             melodyBusyness,
             scale,
-            songStateMap
+            songStateMap,
+            sectionEnergies
         );
         var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), scale);
-
-        var sectionIds = SongStructureGenerator.Generate(Stream(SongStream.Structure))
-            .SelectMany(part => part.SectionIds)
-            .ToArray();
         // how the song starts and ends around its sections, decided before them: the one the song ends with leads home
         // to the tonic, where the ending lands
         var formGenerator = new SongFormGenerator(Stream(SongStream.Form), rhythmicUnconventionality);
@@ -96,8 +102,8 @@ public static class SongGenerator
         songTrackNoteTimelineMap = new FillGenerator(Stream(SongStream.Fills), tracks, rhythmicUnconventionality)
             .Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
 
-        // and last the notes, decided from the state of the whole song, in its order
-        var notes = Realizer.Realize(tracks.Definitions, songTrackNoteTimelineMap);
+        // and last the notes, decided from the state of the whole song, in its order, none sounding into a stop
+        var notes = form.Edits.CutNotes(Realizer.Realize(tracks.Definitions, songTrackNoteTimelineMap));
 
         return new Song(songTrackNoteTimelineMap.Duration, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes);
     }
@@ -165,5 +171,6 @@ internal enum SongStream
     Structure = 7,
     Sections = 8,
     Form = 9,
-    Fills = 10
+    Fills = 10,
+    Dynamics = 11
 }

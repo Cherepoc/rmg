@@ -109,4 +109,43 @@ public sealed class DrumKitGeneratorTest
         await Assert.That(numbers.Distinct().Count()).IsEqualTo(numbers.Length);
         await Assert.That(numbers.Min()).IsGreaterThanOrEqualTo(DrumGroups.FirstTrackNumber);
     }
+
+    [Test]
+    public async Task ASectionOfMoreEnergy_PlaysMoreGroups_AndTheLoudDrumsMoreOften()
+    {
+        (double Groups, double Loud, double Quiet) Measure(Tilt tilt)
+        {
+            var kits = Seeds.Select(seed =>
+                {
+                    var context = new GenerationContext(seed);
+                    var songDrums = DrumKitGenerator.SelectSongDrums(context);
+                    return DrumKitGenerator.SelectActiveDrums(context, songDrums, tilt);
+                }
+            ).ToArray();
+            return (
+                kits.Average(x => x.Select(GroupOf).Distinct().Count()),
+                kits.Average(x => x.Count(d => d.Loudness > 0)),
+                kits.Average(x => x.Count(d => d.Loudness < 0))
+            );
+        }
+
+        var even = Measure(Tilt.None);
+        var loud = Measure(Tilt.Of(8, 1));
+        var quiet = Measure(Tilt.Of(8, -1));
+
+        await Assert.That(loud.Groups).IsGreaterThan(even.Groups);
+        await Assert.That(quiet.Groups).IsLessThan(even.Groups);
+        await Assert.That(loud.Loud).IsGreaterThan(even.Loud);
+        await Assert.That(quiet.Quiet).IsGreaterThan(even.Quiet);
+    }
+
+    [Test]
+    public async Task AGroupsLoudness_IsItsDrumsInTheSong_TheLikelierCountingMore()
+    {
+        var timekeepers = DrumGroups.Timekeepers;
+
+        await Assert.That(DrumKitGenerator.GetLoudness(DrumGroups.Accents, [DrumDefinitions.Cymbal])).IsEqualTo(1);
+        await Assert.That(DrumKitGenerator.GetLoudness(timekeepers, [DrumDefinitions.HiHat, DrumDefinitions.Ride])).IsEqualTo(0.5 / 1.5).Within(1e-9);
+        await Assert.That(DrumKitGenerator.GetLoudness(timekeepers, [])).IsEqualTo(0);
+    }
 }

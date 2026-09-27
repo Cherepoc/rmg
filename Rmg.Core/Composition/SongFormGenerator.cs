@@ -96,7 +96,7 @@ internal sealed class SongFormGenerator
 
         ImmutableArray<FillSection> fillSections =
         [
-            ..map.Sections.Zip(sections, (span, section) => new FillSection(span.SectionId, span.Duration, section.Rhythm, section.Groove))
+            ..map.Sections.Zip(sections, (span, section) => new FillSection(span.SectionId, span.Duration, section.Rhythm, section.Groove, section.Energy))
         ];
         var edits = new TimelineEdits(_context, map);
         var lines = FillGenerator.GetSectionLines(fillSections, origin).ToBuilder();
@@ -107,10 +107,10 @@ internal sealed class SongFormGenerator
         {
             case IntroKind.DrumsFirst:
                 // the band comes in on a fill and a landing
-                lines.Insert(0, new FillLine(origin, fillSections[0], sectionIds[0], FillTable.Section, LandingRule.Forced));
+                lines.Insert(0, new FillLine(origin, fillSections[0], fillSections[0], FillTable.Section, LandingRule.Forced));
                 break;
             case IntroKind.CountIn:
-                lines.Insert(0, new FillLine(origin, fillSections[0], sectionIds[0], FillTable.None, LandingRule.Section));
+                lines.Insert(0, new FillLine(origin, fillSections[0], fillSections[0], FillTable.None, LandingRule.Section));
                 break;
             case IntroKind.ChordsFirst or IntroKind.Build:
             {
@@ -124,7 +124,7 @@ internal sealed class SongFormGenerator
                 }
 
                 var phraseLine = lines.Select((x, i) => (x, i)).First(x => x.x.Position.IsEqualToByEpsilon(phraseEnd)).i;
-                lines[phraseLine] = new FillLine(phraseEnd, fillSections[0], sectionIds[0], FillTable.Section, LandingRule.Forced);
+                lines[phraseLine] = new FillLine(phraseEnd, fillSections[0], fillSections[0], FillTable.Section, LandingRule.Forced);
                 if (plan.WithBass)
                     introDescription += ", with the bass";
                 break;
@@ -151,7 +151,7 @@ internal sealed class SongFormGenerator
             }
 
             lines.Add(
-                new FillLine(end, fillSections[^1], sectionIds[^1], plan.Ending == EndingKind.Stop ? FillTable.None : FillTable.Section, LandingRule.Forced)
+                new FillLine(end, fillSections[^1], fillSections[^1], plan.Ending == EndingKind.Stop ? FillTable.None : FillTable.Section, LandingRule.Forced)
             );
 
             description += $", at beat {end}, held {plan.Held} beats";

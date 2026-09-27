@@ -10,6 +10,9 @@ namespace Rmg.Core.Composition;
 /// </summary>
 internal sealed class SectionGenerator
 {
+    /// <summary>The track of a trace entry that records a decision for the whole section, such as its energy.</summary>
+    public const int SectionTrace = -2;
+
     private readonly IGenerationContext _context;
     private readonly int _seed;
     private readonly SongTracks _tracks;
@@ -18,6 +21,7 @@ internal sealed class SectionGenerator
     private readonly MelodyBusyness _songMelodyBusyness;
     private readonly Scale _songScale;
     private readonly StateMap _songStateMap;
+    private readonly ImmutableDictionary<int, StateMap> _sectionEnergies;
     private readonly BarStateGenerator _barStateGenerator;
     private readonly PatternGenerator _patternGenerator;
 
@@ -32,7 +36,8 @@ internal sealed class SectionGenerator
         RhythmicUnconventionality songRhythmicUnconventionality,
         MelodyBusyness songMelodyBusyness,
         Scale songScale,
-        StateMap songStateMap
+        StateMap songStateMap,
+        ImmutableDictionary<int, StateMap>? sectionEnergies = null
     )
     {
         _context = context;
@@ -43,6 +48,7 @@ internal sealed class SectionGenerator
         _songMelodyBusyness = songMelodyBusyness;
         _songScale = songScale;
         _songStateMap = songStateMap;
+        _sectionEnergies = sectionEnergies ?? ImmutableDictionary<int, StateMap>.Empty;
         _barStateGenerator = new BarStateGenerator(settings, songScale);
         _patternGenerator = new PatternGenerator(context, tracks.Definitions);
     }
@@ -57,6 +63,20 @@ internal sealed class SectionGenerator
         var rhythm = _songRhythmicUnconventionality.GenerateSection(context);
         var chords = LayerStates.CreateChordPool(unconventionality)(context);
 
+        // how loud and busy the section is meant to be, which leans its draws as far as its rhythm follows it
+        var songStateMap = _songStateMap.MergeWith(_sectionEnergies.GetValueOrDefault(sectionId, StateMap.Default));
+        var energy = songStateMap.GetStateValue(CompositionStateKinds.Energy);
+        var tilt = SectionEnergy.Tilt(energy, rhythm);
+        StateTrace.Record(
+            "Section energy",
+            SectionTrace,
+            sectionId,
+            0,
+            songStateMap.Subset([CompositionStateKinds.Energy]),
+            0,
+            $"pull {energy * rhythm.Coupling:R}"
+        );
+
         // the section's chords move around its home, which every track's root starts from
         var home = Progressions.GenerateHome(context, _songScale);
         // the song's last section leads home to its tonic, where the song ends
@@ -65,12 +85,12 @@ internal sealed class SectionGenerator
         var progression = Progressions.Generate(context, _songScale, home, unconventionality.ProgressionStrictness);
 
         var sectionStateMap = CreateSectionStateMap(
-            _songStateMap,
+            songStateMap,
             new StateMapBuilder("Section")
                 .AddRhythmLayer(rhythm.Scale(RhythmLayers.Section))
                 .AddNoteWalkLayer()
                 .Add(CompositionStateKinds.ChordPool.Index, LayerStates.ChordPoolIndex)
-                .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.Section))
+                .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.Section, tilt))
                 .AddNoteDurationLayer()
                 .ToStateMap(context),
             new StateMapBuilder("Section")
@@ -78,7 +98,7 @@ internal sealed class SectionGenerator
                 .Add(StateKinds.ChordRootNoteOffset, [Progressions.ToRootOffset(home)])
                 .ToStateMap(context)
         );
-        var activeDrumTrackNumbers = DrumKitGenerator.SelectActiveDrums(context, _tracks.SongDrums)
+        var activeDrumTrackNumbers = DrumKitGenerator.SelectActiveDrums(context, _tracks.SongDrums, tilt)
             .Select(DrumGroups.GetTrackNumber)
             .ToImmutableHashSet();
 
@@ -93,7 +113,7 @@ internal sealed class SectionGenerator
 
         // every track follows the section's phrase scheme, so they repeat their bars in the same places
         var scheme = PhraseSchemes.Pick(context, rhythm);
-        var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context));
+        var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context), tilt);
 
         var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, barStateTimelineMap, sectionRhythm).ToArray();
         var trackTimelineMaps = new List<TrackEventStateTimelineMap<StateMap>>();
@@ -107,7 +127,8 @@ internal sealed class SectionGenerator
         return new GeneratedSection(
             TrackEventStateTimelineMap.Merge(trackTimelineMaps).Repeat(2),
             rhythm,
-            GetGrooves(drums.SelectMany(x => x.Feels))
+            GetGrooves(drums.SelectMany(x => x.Feels)),
+            energy
         );
     }
 
@@ -143,7 +164,7 @@ internal sealed class SectionGenerator
         foreach (var group in _tracks.Groups)
         {
             var groupStateMap = new StateMapBuilder("Section drum group", perTrack: true)
-                .AddRhythmLayer(sectionRhythm.Unconventionality.Scale(RhythmLayers.SectionDrumGroup))
+                .AddRhythmLayer(sectionRhythm.Unconventionality.Scale(RhythmLayers.SectionDrumGroup).Tilted(sectionRhythm.Energy))
                 .AddNoteWalkLayer()
                 .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.SectionDrumGroup))
                 .AddNoteDurationLayer()
@@ -152,7 +173,7 @@ internal sealed class SectionGenerator
                 .MergeWith(sectionStateMap);
             var trackStateMaps = new Dictionary<int, StateMap>();
             foreach (var trackNumber in group.TrackNumbers.Where(activeDrumTrackNumbers.Contains))
-                trackStateMaps[trackNumber] = CreateSectionTrackLayer(context, trackNumber, sectionRhythm).MergeWith(groupStateMap);
+                trackStateMaps[trackNumber] = CreateSectionTrackLayer(context, trackNumber, sectionRhythm, sectionRhythm.Energy).MergeWith(groupStateMap);
 
             // a drum out of the groove still has the state the drums share, with no notes, so that a note added
             // later, such as in a fill, plays as loud as the section, and its own rhythm's state, which a fill plays it by
@@ -210,15 +231,18 @@ internal sealed class SectionGenerator
         }
     }
 
-    /// <summary>A track's own layer in the section, over the state its definition brings.</summary>
-    private StateMap CreateSectionTrackLayer(IGenerationContext context, int trackNumber, SectionRhythm sectionRhythm)
+    /// <summary>
+    ///     A track's own layer in the section, over the state its definition brings, its fullness and density leaning by
+    ///     the tilt given, such as a drum's by the section's energy.
+    /// </summary>
+    private StateMap CreateSectionTrackLayer(IGenerationContext context, int trackNumber, SectionRhythm sectionRhythm, Tilt tilt = default)
     {
         return LayerStates.CreateTrackLayer(
             context,
             "Section track",
             SongTracks.GetGenerationStateMap(_tracks.Definitions[trackNumber]),
             VelocityLayers.SectionTrack,
-            sectionRhythm.Unconventionality.Scale(RhythmLayers.SectionTrack)
+            sectionRhythm.Unconventionality.Scale(RhythmLayers.SectionTrack).Tilted(tilt)
         );
     }
 
@@ -236,17 +260,24 @@ internal sealed class SectionGenerator
     }
 }
 
-/// <summary>
-///     A section's rhythm: how far it strays from convention, the scheme its 4-bar pattern follows, and how busy its
-///     melody is.
-/// </summary>
-/// <summary>A section's tracks, and what the fills need to know of its rhythm.</summary>
+/// <summary>A section's tracks, and what the fills need to know of its rhythm and energy.</summary>
 /// <param name="Rhythm">How far the section's rhythm strays from convention.</param>
 /// <param name="Groove">The states of the rhythm the fills play from.</param>
+/// <param name="Energy">How loud and busy the section is meant to be (<see cref="SectionEnergy" />).</param>
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
     RhythmicUnconventionality Rhythm,
-    FillGrooves Groove
+    FillGrooves Groove,
+    double Energy = 0
 );
 
-internal sealed record SectionRhythm(RhythmicUnconventionality Unconventionality, PhraseScheme Scheme, MelodyBusyness MelodyBusyness);
+/// <summary>
+///     A section's rhythm: how far it strays from convention, the scheme its 4-bar pattern follows, how busy its
+///     melody is, and how its energy leans its draws.
+/// </summary>
+internal sealed record SectionRhythm(
+    RhythmicUnconventionality Unconventionality,
+    PhraseScheme Scheme,
+    MelodyBusyness MelodyBusyness,
+    Tilt Energy = default
+);

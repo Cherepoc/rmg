@@ -159,6 +159,7 @@ public sealed class FillTest
 
         await Assert.That(crashes / (double)changes).IsBetween(0.5, 0.8);
         await Assert.That(kicks / (double)changes).IsGreaterThan(0.9);
-        await Assert.That(otherCrashes / (double)downbeats).IsLessThan(0.1);
+        // a section of more energy grooves on the crash more often, on its downbeats
+        await Assert.That(otherCrashes / (double)downbeats).IsLessThan(0.15);
     }
 }
