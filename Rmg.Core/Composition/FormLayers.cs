@@ -79,13 +79,13 @@ public static class FormLayers
         new(0.15, EndingKind.Stop)
     ];
 
-    /// <summary>The endings whose weights are multiplied by how far the song's rhythm strays (its chance scale).</summary>
+    /// <summary>The endings that lean unconventional, likelier the further the song's rhythm strays.</summary>
     public static ImmutableHashSet<EndingKind> AdventurousEndings { get; } = [EndingKind.Open, EndingKind.Stop];
 
-    /// <summary>The endings' weights in a song whose rhythm strays as far as the given chance scale.</summary>
-    public static ImmutableArray<Weighted<EndingKind>> WeighEndings(double chanceScale)
+    /// <summary>The endings' weights in a song whose rhythm leans as the tilt given.</summary>
+    public static ImmutableArray<Weighted<EndingKind>> WeighEndings(Tilt tilt)
     {
-        return [..Endings.Select(x => AdventurousEndings.Contains(x.Value) ? x with { Weight = x.Weight * chanceScale } : x)];
+        return tilt.Weigh(Endings, x => AdventurousEndings.Contains(x) ? 1 : 0);
     }
 
     /// <summary>How long a button's hit is, in beats, in the bar it has.</summary>

@@ -98,7 +98,7 @@ public sealed class SongEndingTest
     {
         double Share(double chanceScale)
         {
-            var weights = FormLayers.WeighEndings(chanceScale);
+            var weights = FormLayers.WeighEndings(Tilt.Of(chanceScale, 1));
             return weights.Where(x => FormLayers.AdventurousEndings.Contains(x.Value)).Sum(x => x.Weight) / weights.Sum(x => x.Weight);
         }
 

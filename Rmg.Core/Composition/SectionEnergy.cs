@@ -73,12 +73,13 @@ public static class SectionEnergy
     }
 
     /// <summary>
-    ///     How a section's energy leans its draws: its pull, the energy times how far the section's rhythm follows it,
-    ///     as the odds of the high side, <see cref="HighOdds" /> to the power of the pull.
+    ///     How a section's energy leans its draws: its pull, the energy times how far the draws follow it, their
+    ///     coupling, such as the section's rhythm's for its loudness and drums and its harmony's for its scale, as the
+    ///     odds of the high side, <see cref="HighOdds" /> to the power of the pull.
     /// </summary>
-    public static Tilt Tilt(double energy, RhythmicUnconventionality rhythm)
+    public static Tilt Tilt(double energy, double coupling)
     {
-        return Probabilities.Tilt.Of(HighOdds, energy * rhythm.Coupling);
+        return Probabilities.Tilt.Of(HighOdds, energy * coupling);
     }
 }
 

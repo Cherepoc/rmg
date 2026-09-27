@@ -52,7 +52,7 @@ public static class PhraseSchemes
     {
         ImmutableArray<Weighted<string>> weights =
         [
-            ..All.Select(x => new Weighted<string>(x.IsAdventurous ? x.Weight * unconventionality.ChanceScale : x.Weight, x.Scheme))
+            ..All.Select(x => new Weighted<string>(unconventionality.Tilt.Weigh(x.Weight, x.IsAdventurous ? 1 : 0), x.Scheme))
         ];
         var scheme = weights[Generators.WeightedIndex(weights)(context)].Value;
 

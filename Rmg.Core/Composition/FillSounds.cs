@@ -47,12 +47,13 @@ internal sealed class FillSounds
 
     /// <summary>A run's sounds, their order, its walk and window, and whether it changes speed.</summary>
     /// <param name="roleChance">The chance a run plays a role's drums, as their state has it in the section.</param>
-    public FillRun Draw(IGenerationContext context, Drummer drummer, double chanceScale, Func<DrumRole, int, double> roleChance)
+    /// <param name="tilt">How the section's rhythm leans the run's rarer choices.</param>
+    public FillRun Draw(IGenerationContext context, Drummer drummer, Tilt tilt, Func<DrumRole, int, double> roleChance)
     {
         var sounds = new List<RunSound>();
         foreach (var (role, candidates) in _sounds)
         {
-            if (!context.TestProbability(Math.Min(1, roleChance(role, candidates[0].Track))))
+            if (!context.TestProbability(roleChance(role, candidates[0].Track)))
                 continue;
 
             var count = Math.Min(Pick(context, FillLayers.SoundCounts), candidates.Length);
@@ -65,19 +66,16 @@ internal sealed class FillSounds
 
         var order = Shuffle(context, sounds);
         // the toms keep their order of pitch, as their note numbers have it, down or up
-        if (context.TestProbability(Math.Min(1, FillLayers.PitchOrderChance / chanceScale)))
+        if (context.TestProbability(tilt.Chance(FillLayers.PitchOrderChance, FillLayers.PitchOrderLean)))
         {
             var isDown = context.TestProbability(0.5);
             var toms = new Queue<RunSound>(order.Where(x => x.Role == DrumRole.Toms).OrderBy(x => isDown ? -x.Code : x.Code));
             order = [..order.Select(x => x.Role == DrumRole.Toms ? toms.Dequeue() : x)];
         }
 
-        ImmutableArray<Weighted<int>> widths = [..FillLayers.Widths.Select(x => x.Value > 1 ? x with { Weight = x.Weight * chanceScale } : x)];
-        var width = Math.Min(Pick(context, widths), Math.Max(1, order.Length));
-        var path = Pick(context, drummer.WeighPaths(FillLayers.Paths, chanceScale));
-        ImmutableArray<Weighted<FillSpeed>> speeds =
-            [..FillLayers.Speeds.Select(x => x.Value == FillSpeed.SlowsDown ? x with { Weight = x.Weight * chanceScale } : x)];
-        var speed = Pick(context, speeds);
+        var width = Math.Min(Pick(context, tilt.Weigh(FillLayers.Widths, x => x > 1 ? 1 : 0)), Math.Max(1, order.Length));
+        var path = Pick(context, drummer.WeighPaths(FillLayers.Paths, tilt));
+        var speed = Pick(context, tilt.Weigh(FillLayers.Speeds, x => x == FillSpeed.SlowsDown ? 1 : 0));
         return new FillRun(order, path, width, speed);
     }
 

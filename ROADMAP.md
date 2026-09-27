@@ -84,28 +84,31 @@ has a chord note offset and wiring left to silent defaults, are fixed, and a tra
 value (`StateTraceEntry.Value`, such as a `FillDecision`), at a point named in `TracePoints`, which the tests read in
 place of its words. The item that placed the chords and the bass at generation, as the melody is, was wrong: they
 already repeat all their pitch classes where a section plays again, and `Realizer` only chooses their register from
-what came before, as it now does the melody's (see *Melody at generation*).
+what came before, as it now does the melody's (see *Melody at generation*). The rhythm's unconventionality leans its
+choices as a `Tilt` (`RhythmicUnconventionality.Tilt`), every option by how unconventional it is, as the energy leans
+by how loud: a weight times the odds, a chance by its odds, so that none is capped at certain; the toms' order of pitch
+leans conventional twice as much (`FillLayers.PitchOrderLean`), which keeps it in 97% of the plainest sections' runs.
+A section's scale leans by its energy as far as its harmony follows it (`HarmonicUnconventionality.Coupling`).
 
-1. **One lean:** the choices the chance scale multiplies (stopping, the random walk, a wider note, slowing down, the
-   pitch order, a group's run chance to the power of its unconventionality, the drummer's spans) are each a weight
-   times a scale to the power of how the option leans, which `Tilt.Weigh` is; and a section's mode leans by its
-   energy through its rhythm's coupling, where its harmony's unconventionality should say how far it follows it.
-2. **A line's weight:** the fills' section and phrase tables (spans, landings, fullness) could be one value that
+1. **A line's weight:** the fills' section and phrase tables (spans, landings, fullness) could be one value that
    scales the chance of no fill, the span, the fullness and the landing, of which the energy it leads into is a part;
    a phrase line in the middle of a section, whose energy does not change, has no lean now.
-3. **Track roles:** a role on a track's definition in place of checking track numbers (`SongTracks.MelodyTrack`,
+2. **Track roles:** a role on a track's definition in place of checking track numbers (`SongTracks.MelodyTrack`,
    `ChordsTrack`, `BassTrack`, `DrumGroups.FirstTrackNumber`, 13 checks in `PatternGenerator`, `SectionGenerator` and
    `SongFormGenerator`); and `SectionGenerator.Generate`, which draws the section's energy, scale, harmony, drums, bar
    state and tracks, places its melody and keeps its notes' render state, split, with its flags (`hasTonicHome`,
    `keepsSongScale`) a plan of the section in their place.
-4. **Tables:** 139 tuning constants and 30 weighted tables in `Composition`; some are convention (a drum's weight),
+3. **Tables:** 139 tuning constants and 30 weighted tables in `Composition`; some are convention (a drum's weight),
    some shapes chosen by hand (the melody's four contours, its phrase ends, the fills' spans, treatments, speeds and
    widths, the leans of drums, spans and treatments) that a rule could derive or a draw could make.
-5. **A stop's cut in one place:** its last note held to the stop before `Realizer` (`TimelineEdits.CutBefore`) and the
+4. **A stop's cut in one place:** its last note held to the stop before `Realizer` (`TimelineEdits.CutBefore`) and the
    notes that would sound into it cut after (`CutNotes`) could both be edits after it.
 
 Smaller, when the code is next touched:
 
+- **Chances multiplied:** the rhythm layers' chances (`RhythmLayer.Scale`) and the fills' rarer chances, layered
+  state (`FillLayers.Chances`), are still multiplied by the chance scale and capped at 1; tuned so, they could lean by
+  their odds as the choices do, should the capping show.
 - **Offsets as lists:** the chord root, the chord note and the articulation are collections that their readers sum,
   and the scale a collection that two layers would silently merge into fourteen notes; additive kinds, and a kind that
   may be set once, would say what they are.

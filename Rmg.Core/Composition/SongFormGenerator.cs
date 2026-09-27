@@ -32,7 +32,7 @@ internal sealed class SongFormGenerator
     public FormPlan Plan(IReadOnlyList<int> sectionIds)
     {
         var intro = Pick(FormLayers.Intros);
-        var ending = Pick(FormLayers.WeighEndings(_songRhythm.ChanceScale));
+        var ending = Pick(FormLayers.WeighEndings(_songRhythm.Tilt));
         var drumsFirstBars = intro == IntroKind.DrumsFirst ? Pick(FormLayers.DrumsFirstBars) : 0;
         var halfCountIn = intro == IntroKind.CountIn && _context.TestProbability(FormLayers.HalfCountInChance);
         var withBass = intro == IntroKind.ChordsFirst && _context.TestProbability(FormLayers.ChordsFirstBassChance);

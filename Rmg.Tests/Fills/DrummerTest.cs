@@ -39,7 +39,7 @@ public sealed class DrummerTest
     public async Task WeighPaths_FavoursTheFavourite_AndTheRandomWalkInWildSections()
     {
         double WeightOfPath(IEnumerable<Weighted<FillPath>> paths, FillPath path) => paths.Single(x => x.Value == path).Weight;
-        var paths = new Drummer(0.5, FillPath.Loop).WeighPaths(FillLayers.Paths, 4);
+        var paths = new Drummer(0.5, FillPath.Loop).WeighPaths(FillLayers.Paths, Tilt.Of(4, 1));
 
         await Assert.That(WeightOfPath(paths, FillPath.Loop)).IsEqualTo(WeightOfPath(FillLayers.Paths, FillPath.Loop) * Drummer.FavouriteWeight).Within(1e-9);
         await Assert.That(WeightOfPath(paths, FillPath.Random)).IsEqualTo(WeightOfPath(FillLayers.Paths, FillPath.Random) * 4).Within(1e-9);
@@ -65,7 +65,7 @@ public sealed class DrummerTest
         }
 
         await Assert.That(Share(0.5)).IsEqualTo(FillLayers.SignatureChance).Within(0.02);
-        await Assert.That(Share(1)).IsEqualTo(FillLayers.SignatureChance * 4).Within(0.03);
+        await Assert.That(Share(1)).IsEqualTo(Tilt.Of(4, 1).Chance(FillLayers.SignatureChance, 1)).Within(0.03);
         await Assert.That(Share(0)).IsLessThan(Share(0.5));
     }
 
@@ -91,12 +91,12 @@ public sealed class DrummerTest
         StateMap Drum(PercussionInstrumentDefinition drum) =>
             DrumGroups.All.Single(x => x.Drums.Contains(drum)).ConfigureStateMap(new StateMapBuilder("Test")).ToStateMap(new GenerationContext(1));
 
-        // the snare as likely in any section, the kick four times as likely in a wild one
-        await Assert.That(FillGenerator.GetRunChance(Drum(DrumDefinitions.AcousticSnare), 4)).IsEqualTo(FillGenerator.GetRunChance(Drum(DrumDefinitions.AcousticSnare), 1));
-        await Assert.That(FillGenerator.GetRunChance(Drum(DrumDefinitions.Kick), 4))
-            .IsEqualTo(FillGenerator.GetRunChance(Drum(DrumDefinitions.Kick), 1) * 4).Within(1e-9);
-        await Assert.That(FillGenerator.GetRunChance(Drum(DrumDefinitions.Tom), 1))
-            .IsGreaterThan(FillGenerator.GetRunChance(Drum(DrumDefinitions.Cymbal), 1));
+        // the snare as likely in any section, the kick at four times the odds in a wild one
+        await Assert.That(FillGenerator.GetRunChance(Drum(DrumDefinitions.AcousticSnare), Tilt.Of(4, 1))).IsEqualTo(FillGenerator.GetRunChance(Drum(DrumDefinitions.AcousticSnare), Tilt.Of(1, 1)));
+        await Assert.That(FillGenerator.GetRunChance(Drum(DrumDefinitions.Kick), Tilt.Of(4, 1)))
+            .IsEqualTo(Tilt.Of(4, 1).Chance(FillGenerator.GetRunChance(Drum(DrumDefinitions.Kick), Tilt.Of(1, 1)), 1)).Within(1e-9);
+        await Assert.That(FillGenerator.GetRunChance(Drum(DrumDefinitions.Tom), Tilt.Of(1, 1)))
+            .IsGreaterThan(FillGenerator.GetRunChance(Drum(DrumDefinitions.Cymbal), Tilt.Of(1, 1)));
     }
 
     [Test]

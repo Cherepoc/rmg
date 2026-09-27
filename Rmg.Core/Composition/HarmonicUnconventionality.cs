@@ -43,6 +43,13 @@ public sealed record HarmonicUnconventionality(double Anchor, double Spread, dou
         );
     }
 
+    /// <summary>
+    ///     How much of what a section's energy leans it to the harmony follows, as the rhythm's
+    ///     (<see cref="RhythmicUnconventionality.Coupling" />): all at an anchor of 0, a fifth at the most unconventional.
+    /// </summary>
+    public double Coupling =>
+        1 - RhythmicUnconventionality.MaxDecoupling * Math.Clamp(Anchor / ChordShapes.MaxUnconventionality, 0, 1);
+
     /// <summary>A section's unconventionality: the song's, with the anchor moved by up to 1 either way.</summary>
     public HarmonicUnconventionality GenerateSection(IGenerationContext context)
     {

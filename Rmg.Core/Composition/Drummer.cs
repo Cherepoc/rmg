@@ -32,7 +32,7 @@ public sealed record Drummer(double Busyness, FillPath Favourite, StateMap? Laye
         var favourite = FillLayers.Paths[Generators.WeightedIndex(FillLayers.Paths)(context)].Value;
         // and any of the rarer choices the signature, the likelier ones more often
         var builder = new StateMapBuilder("Drummer", perTrack: true);
-        if (context.TestProbability(Math.Min(1, FillLayers.SignatureChance * rhythm.ChanceScale)))
+        if (context.TestProbability(rhythm.Tilt.Chance(FillLayers.SignatureChance, 1)))
         {
             ImmutableArray<Weighted<StateKind<double>>> kinds = [..FillLayers.Chances.Select(x => new Weighted<StateKind<double>>(x.Chance, x.Kind))];
             builder.Add(kinds[Generators.WeightedIndex(kinds)(context)].Value, FillLayers.SignatureWeight);
@@ -58,17 +58,13 @@ public sealed record Drummer(double Busyness, FillPath Favourite, StateMap? Laye
         ];
     }
 
-    /// <summary>The walks' weights as this drummer takes them: the favourite more likely, and the random walk by the chance scale.</summary>
-    public ImmutableArray<Weighted<FillPath>> WeighPaths(ImmutableArray<Weighted<FillPath>> paths, double chanceScale = 1)
+    /// <summary>The walks' weights as this drummer takes them: the favourite more likely, and the random walk leaning by the tilt.</summary>
+    public ImmutableArray<Weighted<FillPath>> WeighPaths(ImmutableArray<Weighted<FillPath>> paths, Tilt tilt = default)
     {
-        return
-        [
-            ..paths.Select(x => x with
-                {
-                    Weight = x.Weight * (x.Value == Favourite ? FavouriteWeight : 1) * (x.Value == FillPath.Random ? chanceScale : 1)
-                }
-            )
-        ];
+        return tilt.Weigh(
+            paths.Select(x => x.Value == Favourite ? x with { Weight = x.Weight * FavouriteWeight } : x),
+            x => x == FillPath.Random ? 1 : 0
+        );
     }
 
     /// <summary>How much fuller or sparser than the line's the drummer's runs are.</summary>

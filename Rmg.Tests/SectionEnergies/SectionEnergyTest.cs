@@ -48,8 +48,8 @@ public sealed class SectionEnergyTest
     [Test]
     public async Task APlainSection_FollowsItsEnergy_MoreThanAWildOne()
     {
-        var plain = SectionEnergy.Tilt(0.5, new RhythmicUnconventionality(0));
-        var wild = SectionEnergy.Tilt(0.5, new RhythmicUnconventionality(1));
+        var plain = SectionEnergy.Tilt(0.5, new RhythmicUnconventionality(0).Coupling);
+        var wild = SectionEnergy.Tilt(0.5, new RhythmicUnconventionality(1).Coupling);
 
         await Assert.That(plain.Odds).IsEqualTo(Math.Pow(SectionEnergy.HighOdds, 0.5)).Within(1e-9);
         await Assert.That(wild.Odds).IsGreaterThan(1);

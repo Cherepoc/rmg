@@ -21,7 +21,13 @@ public sealed record RhythmicUnconventionality(double Value)
     private static readonly Func<IGenerationContext, double> SpreadGenerator = Generators.SplineValue(0);
 
     /// <summary>What the rhythm layers' chances are multiplied by: from 1/4 at 0 through 1 at 0.5 to 4 at 1.</summary>
-    public double ChanceScale => Math.Pow(16, Value - 0.5);
+    public double ChanceScale => Tilt.Odds;
+
+    /// <summary>
+    ///     How the unconventionality leans a choice: an option's weight, or a chance's odds, times the chance scale to
+    ///     the power of how unconventional the option is, such as 1 for stopping the groove and -1 for toms in order.
+    /// </summary>
+    public Tilt Tilt => Tilt.Of(16, Value - 0.5);
 
     /// <summary>How much of what a section's energy leans it to the rhythm follows: all at 0, a fifth at 1.</summary>
     public double Coupling => 1 - MaxDecoupling * Value;

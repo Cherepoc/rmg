@@ -119,7 +119,7 @@ internal sealed class FillGenerator
         var ending = line.Ending;
         var chances = GetChances(drummer, ending.Rhythm);
         var lift = line.Next.Energy - ending.Energy;
-        var tilt = SectionEnergy.Tilt(lift, ending.Rhythm);
+        var tilt = SectionEnergy.Tilt(lift, ending.Rhythm.Coupling);
         var play = DrawPlay(drummer, ending.Rhythm, line.Fills, ending.Groove, chances, tilt);
         var rhythm = FillRhythm.Of(ending.Groove.Source, play.Layer, minNote);
         var span = Fill(edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId);
@@ -168,9 +168,8 @@ internal sealed class FillGenerator
         if (span <= 0)
             return FillPlay.None;
 
-        var chanceScale = rhythm.ChanceScale;
-        ImmutableArray<Weighted<GrooveTreatment>> treatments =
-            [..FillLayers.Treatments.Select(x => x.Value == GrooveTreatment.Stop ? x with { Weight = x.Weight * chanceScale } : x)];
+        // stopping is the unconventional treatment, and the quiet one
+        var treatments = rhythm.Tilt.Weigh(FillLayers.Treatments, x => x == GrooveTreatment.Stop ? 1 : 0);
         var treatment = Pick(tilt.Weigh(treatments, x => FillLayers.TreatmentLoudness[x]));
         var fullness = (table == FillTable.Phrase ? FillLayers.PhraseFullness : FillLayers.SectionFullness)
                        + FillLayers.TreatmentFullness[treatment];
@@ -178,7 +177,7 @@ internal sealed class FillGenerator
         // where the drums stop, they rest half the time: a break
         var run = treatment == GrooveTreatment.Stop && _context.TestProbability(tilt.Chance(FillLayers.StopRestChance, -1))
             ? FillRun.Rest
-            : _sounds.Draw(_context, drummer, chanceScale, (_, track) => GetRunChance(grooves.Of(track), chanceScale));
+            : _sounds.Draw(_context, drummer, rhythm.Tilt, (_, track) => GetRunChance(grooves.Of(track), rhythm.Tilt));
         var spanShift = _context.TestProbability(Math.Min(1, chances.GetStateValue(CompositionStateKinds.Fill.OffBeatChance)))
             ? _context.TestProbability(0.5) ? 1 : -1
             : 0;
@@ -231,17 +230,19 @@ internal sealed class FillGenerator
         return _chances.MergeWith(drummer.Layer ?? StateMap.Default).MergeWith(section.ToStateMap(_context));
     }
 
-    /// <summary>The chance a run plays a drum, as its group's state has it: its run chance, times the chance scale to the power of how unconventional it is.</summary>
-    internal static double GetRunChance(StateMap drum, double chanceScale)
+    /// <summary>The chance a run plays a drum, as its group's state has it: its run chance, leaning by how unconventional it is.</summary>
+    internal static double GetRunChance(StateMap drum, Tilt tilt)
     {
-        return drum.GetStateValue(CompositionStateKinds.Fill.RunChance)
-               * Math.Pow(chanceScale, drum.GetStateValue(CompositionStateKinds.Fill.Unconventionality));
+        return tilt.Chance(
+            Math.Clamp(drum.GetStateValue(CompositionStateKinds.Fill.RunChance), 0, 1),
+            drum.GetStateValue(CompositionStateKinds.Fill.Unconventionality)
+        );
     }
 
     /// <summary>A run as drawn over the song's own drum states, for the tests to play.</summary>
-    internal FillRun DrawRun(Drummer drummer, double chanceScale = 1)
+    internal FillRun DrawRun(Drummer drummer, Tilt tilt = default)
     {
-        return _sounds.Draw(_context, drummer, chanceScale, (_, track) => GetRunChance(_songDrums.Of(track), chanceScale));
+        return _sounds.Draw(_context, drummer, tilt, (_, track) => GetRunChance(_songDrums.Of(track), tilt));
     }
 
     /// <summary>What was decided at a line, recorded in the last bar before it, where its fill is.</summary>

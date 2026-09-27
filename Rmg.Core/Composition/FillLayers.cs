@@ -158,9 +158,13 @@ public static class FillLayers
 
     /// <summary>
     ///     The chance, in a section of conventionality in the middle, that a run takes its toms in their order of pitch,
-    ///     down or up; it is divided by the section's chance scale. Otherwise every sound's place is drawn.
+    ///     down or up, which leans conventional twice as much as the rarer choices lean unconventional
+    ///     (<see cref="PitchOrderLean" />): 97% in the plainest section, 13% in the wildest. Otherwise every sound's place
+    ///     is drawn.
     /// </summary>
     public const double PitchOrderChance = 0.7;
+
+    public const double PitchOrderLean = -2;
 
     /// <summary>How a run walks its sounds, and how likely each is; the random walk's weight is multiplied by the chance scale.</summary>
     public static ImmutableArray<Weighted<FillPath>> Paths { get; } =

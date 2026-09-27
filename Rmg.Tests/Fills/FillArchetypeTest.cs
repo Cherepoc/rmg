@@ -266,8 +266,8 @@ public sealed class FillArchetypeTest
     public async Task DrawnRuns_MostlyPlayTheSnareAndTheToms_InTheirOrder_WhereTheRhythmIsPlain()
     {
         var setup = Create(1);
-        var plain = Enumerable.Range(0, 2_000).Select(_ => setup.Generator.DrawRun(Middle, 0.25)).ToArray();
-        var wild = Enumerable.Range(0, 2_000).Select(_ => setup.Generator.DrawRun(Middle, 4)).ToArray();
+        var plain = Enumerable.Range(0, 2_000).Select(_ => setup.Generator.DrawRun(Middle, Tilt.Of(0.25, 1))).ToArray();
+        var wild = Enumerable.Range(0, 2_000).Select(_ => setup.Generator.DrawRun(Middle, Tilt.Of(4, 1))).ToArray();
         double Conventional(FillRun[] runs) =>
             runs.Count(x => x.Sounds.All(s => s.Role is DrumRole.Snare or DrumRole.Toms)) / (double)runs.Length;
         double InOrder(FillRun[] runs)
