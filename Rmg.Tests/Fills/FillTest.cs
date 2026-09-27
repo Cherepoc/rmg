@@ -87,7 +87,7 @@ public sealed class FillTest
         for (var seed = 0; seed < 10; seed++)
         {
             var song = TestCorpus.Get(seed);
-            var decisions = song.Trace.Where(x => x.Point == "Fill decision").ToArray();
+            var decisions = song.Trace.Where(x => x.Point == TracePoints.FillDecision).ToArray();
 
             // a line between every two sections, one in the middle of every section, one after the intro's bars, if it
             // has any, and one before the ending's
@@ -108,12 +108,12 @@ public sealed class FillTest
             var landings = new List<StateTraceEntry>();
             foreach (var entry in TestCorpus.Get(seed).Trace)
             {
-                if (entry.Point == "Fill" && entry.Phrase == "Landing")
+                if (entry.Point == TracePoints.Fill && entry.Phrase == "Landing")
                     landings.Add(entry);
-                if (entry.Point != "Fill decision")
+                if (entry.Point != TracePoints.FillDecision)
                     continue;
 
-                if (entry.Phrase!.Contains(" early") && landings.Count > 0)
+                if (((FillDecision)entry.Value!).IsEarly && landings.Count > 0)
                 {
                     early++;
                     // in the last bar before the line, where the fill is

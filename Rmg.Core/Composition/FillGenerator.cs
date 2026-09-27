@@ -272,13 +272,14 @@ internal sealed class FillGenerator
                               : "")
                           + (lift != 0 ? $", into energy {(lift > 0 ? "+" : "")}{lift:F2}" : "");
         StateTrace.Record(
-            "Fill decision",
+            TracePoints.FillDecision,
             DrumsTrace,
             sectionId,
             bar.Mod(Progressions.BarCount),
             StateMap.Default,
             span > 0 ? Math.Max(0, Meter.BarDuration - span) : 0,
-            description
+            description,
+            new FillDecision(span, play.Treatment, play.Run == FillRun.Rest, rhythm.Tuplet, rhythm.Rhythm.Fullness, landing, isEarly, lift)
         );
     }
 
@@ -419,6 +420,25 @@ internal sealed record FillPlay(
 {
     public static FillPlay None { get; } = new(0, GrooveTreatment.Keep, FillRun.Rest, FillRhythm.PlainLayer);
 }
+
+/// <summary>What was decided at a line, as a trace records it.</summary>
+/// <param name="Span">How long the fill is, in beats; 0 for none.</param>
+/// <param name="Rests">Whether the run rests, playing nothing, as a break does.</param>
+/// <param name="Tuplet">The tuplet the fill plays in; 1 for straight.</param>
+/// <param name="Fullness">How full the fill's rhythm is.</param>
+/// <param name="Landing">The sounds the drums land on after the line.</param>
+/// <param name="IsEarly">Whether the landing is pushed early.</param>
+/// <param name="Lift">How much more energy the section the line leads into has than the one it ends.</param>
+internal sealed record FillDecision(
+    double Span,
+    GrooveTreatment Treatment,
+    bool Rests,
+    int Tuplet,
+    double Fullness,
+    ImmutableArray<RunSound> Landing,
+    bool IsEarly,
+    double Lift
+);
 
 /// <summary>The fills a line takes: none, those before a section change, or those in the middle of a section.</summary>
 internal enum FillTable

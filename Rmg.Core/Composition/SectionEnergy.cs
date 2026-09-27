@@ -81,3 +81,6 @@ public static class SectionEnergy
         return Probabilities.Tilt.Of(HighOdds, energy * rhythm.Coupling);
     }
 }
+
+/// <summary>A section's energy as a trace records it: its sum, and its pull, the part of it its rhythm follows.</summary>
+public sealed record SectionEnergyTrace(double Energy, double Pull);

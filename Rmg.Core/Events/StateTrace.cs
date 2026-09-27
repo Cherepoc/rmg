@@ -16,7 +16,10 @@ public sealed record StateContribution(string Layer, object Value)
 /// <param name="Point">What was decided there, such as a track's rhythm for a bar or the chord shape of a note.</param>
 /// <param name="Bar">The bar of the section's 4-bar pattern.</param>
 /// <param name="Position">Where in the bar, in beats; 0 for what holds for the whole bar.</param>
-/// <param name="Phrase">The phrase scheme of the section's 4-bar pattern, such as AABA, where it is known.</param>
+/// <param name="Phrase">
+///     The phrase scheme of the section's 4-bar pattern, such as AABA, where it is known, or what was decided, in words.
+/// </param>
+/// <param name="Value">What was decided, as a value to read, such as a fill's span; none where the state says it.</param>
 public sealed record StateTraceEntry(
     string Point,
     int Track,
@@ -24,7 +27,8 @@ public sealed record StateTraceEntry(
     int Bar,
     double Position,
     StateMap StateMap,
-    string? Phrase = null
+    string? Phrase = null,
+    object? Value = null
 );
 
 /// <summary>
@@ -90,10 +94,11 @@ public sealed class StateTrace : IDisposable
         int bar,
         StateMap stateMap,
         double position = 0,
-        string? phrase = null
+        string? phrase = null,
+        object? value = null
     )
     {
         if (IsRunning)
-            Current.Value!._entries.Add(new StateTraceEntry(point, track, section, bar, position, stateMap, phrase));
+            Current.Value!._entries.Add(new StateTraceEntry(point, track, section, bar, position, stateMap, phrase, value));
     }
 }

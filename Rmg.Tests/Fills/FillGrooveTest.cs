@@ -32,7 +32,7 @@ public sealed class FillGrooveTest
             // a line at every pattern from the first section on, the first after the intro only if it has one, and the
             // last before the ending only if it has one
             var map = song.Map;
-            var decisions = song.Trace.Where(x => x.Point == "Fill decision").ToArray();
+            var decisions = song.Trace.Where(x => x.Point == TracePoints.FillDecision).ToArray();
             var first = map.Intro.Duration > 0 ? 0 : 1;
             var last = (int)Math.Round((map.Sections[^1].End - song.Origin) / Meter.PatternDuration) - (map.Ending.Kind == EndingKind.Open ? 1 : 0);
             var lines = Enumerable.Range(first, last - first + 1).Select(x => song.Origin + x * Meter.PatternDuration).ToArray();
@@ -43,12 +43,12 @@ public sealed class FillGrooveTest
             for (var i = 0; i < lines.Length; i++)
             {
                 // the fills that play: a span, and a run that does not rest
-                var parts = decisions[i].Phrase!.Split(", ");
-                var span = double.Parse(parts[0].Split(' ')[0]);
-                if (span <= 0 || parts.Contains("resting"))
+                var decision = (FillDecision)decisions[i].Value!;
+                var span = decision.Span;
+                if (span <= 0 || decision.Rests)
                     continue;
 
-                var kind = parts[2];
+                var kind = decision.Treatment.ToString();
                 var from = lines[i] - span;
                 (int Track, double Position, double Velocity)[] Hands(double a, double b) =>
                 [
@@ -77,7 +77,7 @@ public sealed class FillGrooveTest
                     )
                 );
                 measured.Add(new Measured(
-                    parts.Any(x => x.StartsWith("in ")) ? $"{kind} in a tuplet" : kind,
+                    decision.Tuplet != 1 ? $"{kind} in a tuplet" : kind,
                     Grid(fill.Select(x => x.Position)),
                     grooveGrid,
                     isOff,

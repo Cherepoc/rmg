@@ -131,7 +131,7 @@ internal sealed class SongFormGenerator
             }
         }
 
-        StateTrace.Record("Song intro", FillGenerator.DrumsTrace, sectionIds[0], 0, StateMap.Default, 0, introDescription);
+        StateTrace.Record(TracePoints.SongIntro, FillGenerator.DrumsTrace, sectionIds[0], 0, StateMap.Default, 0, introDescription);
 
         var description = $"{plan.Ending} ending";
         if (plan.Ending != EndingKind.Open)
@@ -162,7 +162,7 @@ internal sealed class SongFormGenerator
             }
         }
 
-        StateTrace.Record("Song ending", FillGenerator.DrumsTrace, sectionIds[^1], 0, StateMap.Default, 0, description);
+        StateTrace.Record(TracePoints.SongEnding, FillGenerator.DrumsTrace, sectionIds[^1], 0, StateMap.Default, 0, description);
         return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, tempo);
     }
 

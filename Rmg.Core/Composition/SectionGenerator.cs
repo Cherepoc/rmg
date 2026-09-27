@@ -76,13 +76,14 @@ internal sealed class SectionGenerator
         var energy = songStateMap.GetStateValue(CompositionStateKinds.Energy);
         var tilt = SectionEnergy.Tilt(energy, rhythm);
         StateTrace.Record(
-            "Section energy",
+            TracePoints.SectionEnergy,
             SectionTrace,
             sectionId,
             0,
             songStateMap.Subset([CompositionStateKinds.Energy]),
             0,
-            $"pull {energy * rhythm.Coupling:R}"
+            $"energy {energy:F2}, pull {energy * rhythm.Coupling:F2}",
+            new SectionEnergyTrace(energy, energy * rhythm.Coupling)
         );
 
         // the section plays in the song's scale, or now and then in another on its tonic, leaning brighter the more
@@ -90,7 +91,7 @@ internal sealed class SectionGenerator
         var scale = keepsSongScale
             ? _songScale
             : Scales.PickSection(_context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), ScaleStream)), _songScale, unconventionality, tilt);
-        StateTrace.Record("Section scale", SectionTrace, sectionId, 0, StateMap.Default, 0, scale.Name);
+        StateTrace.Record(TracePoints.SectionScale, SectionTrace, sectionId, 0, StateMap.Default, 0, scale.Name, scale);
 
         // the section's chords move around its home, which every track's root starts from
         var home = Progressions.GenerateHome(context, scale);

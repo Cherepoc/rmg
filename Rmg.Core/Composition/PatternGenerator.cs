@@ -119,7 +119,7 @@ internal sealed class PatternGenerator
             .ToStateMap(trackGenerationContext)
             .MergeWith(trackStateMap)
             .MergeWith(CreatePatternChordNoteOffset(_trackDefinitions[trackNumber], trackStateMap, trackGenerationContext));
-        StateTrace.Record("Bar pattern", trackNumber, sectionId, barIndex, stateMap, phrase: scheme);
+        StateTrace.Record(TracePoints.BarPattern, trackNumber, sectionId, barIndex, stateMap, phrase: scheme);
 
         var notes = GenerateNotes(stateMap, barStateTimelineMap, barIndex * Meter.BarDuration, trackNumber, sectionId, barIndex)
             .GeneratedTimeline;
@@ -212,7 +212,7 @@ internal sealed class PatternGenerator
         // progression
         if (StateTrace.IsRunning)
             StateTrace.Record(
-                "Chord",
+                TracePoints.Chord,
                 trackNumber,
                 sectionId,
                 barIndex,

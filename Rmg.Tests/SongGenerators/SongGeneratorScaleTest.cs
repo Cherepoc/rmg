@@ -10,7 +10,7 @@ public sealed class SongGeneratorScaleTest
 
     /// <summary>Every section's scale, by its id, as the trace recorded it.</summary>
     private static Dictionary<int, Scale> SectionScales(CorpusSong song) =>
-        song.Trace.Where(x => x.Point == "Section scale").ToDictionary(x => x.Section, x => Core.Composition.Scales.All.Single(s => s.Name == x.Phrase));
+        song.Trace.Where(x => x.Point == TracePoints.SectionScale).ToDictionary(x => x.Section, x => (Scale)x.Value!);
 
     [Test]
     public async Task EveryPitchedNote_PlaysInOneScaleOfSevenNotes()
@@ -48,7 +48,7 @@ public sealed class SongGeneratorScaleTest
         foreach (var song in TestCorpus.Range(SongCount))
         {
             var scales = SectionScales(song);
-            var energies = song.Trace.Where(x => x.Point == "Section energy")
+            var energies = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy)
                 .ToDictionary(x => x.Section, x => x.StateMap.GetStateValue(CompositionStateKinds.Energy));
             var first = song.Map.Sections[0].SectionId;
             foreach (var (id, scale) in scales.Where(x => x.Key != first))

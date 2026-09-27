@@ -1,5 +1,3 @@
-using System.Globalization;
-using System.Text.RegularExpressions;
 using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Songs;
@@ -61,25 +59,18 @@ public sealed class SectionDynamicsTest
     internal static IEnumerable<SectionChange> ReadSectionChanges(CorpusSong song)
     {
         // the lines at section changes are those whose sections differ, which are the only ones to lead into energy
-        foreach (var entry in song.Trace.Where(x => x.Point == "Fill decision" && x.Phrase!.Contains("into energy")))
-        {
-            var description = entry.Phrase!;
-            yield return new SectionChange(
-                Number(description, @"into energy \+?(-?\d+(?:[.,]\d+)?(?:E[+-]?\d+)?)"),
-                Number(description, @"^(-?\d+(?:[.,]\d+)?(?:E[+-]?\d+)?) beats"),
-                Regex.IsMatch(description, "fullness") ? Number(description, @"fullness (-?\d+(?:[.,]\d+)?(?:E[+-]?\d+)?)") : null,
-                description.Contains(nameof(GrooveTreatment.Stop)),
-                !description.Contains("landing on nothing")
+        return song.Trace
+            .Select(x => x.Value)
+            .OfType<FillDecision>()
+            .Where(x => x.Lift != 0)
+            .Select(x => new SectionChange(
+                    x.Lift,
+                    x.Span,
+                    x.Span > 0 ? x.Fullness : null,
+                    x.Span > 0 && x.Treatment == GrooveTreatment.Stop,
+                    !x.Landing.IsEmpty
+                )
             );
-        }
-    }
-
-    private static double Number(string text, string pattern)
-    {
-        var match = Regex.Match(text, pattern);
-        if (!match.Success)
-            throw new FormatException($"No {pattern} in '{text}'.");
-        return double.Parse(match.Groups[1].Value, CultureInfo.CurrentCulture);
     }
 
     /// <summary>A section's measures over its bars, as it last plays in the song, with its energy and how far its rhythm strays.</summary>
@@ -91,13 +82,12 @@ public sealed class SectionDynamicsTest
     internal static SectionMeasures[] MeasureSections(CorpusSong song)
     {
         var notes = song.Song.Notes!;
-        var energies = song.Trace.Where(x => x.Point == "Section energy")
+        var energies = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy)
             .ToDictionary(
                 x => x.Section,
                 x =>
                 {
-                    var energy = x.StateMap.GetStateValue(CompositionStateKinds.Energy);
-                    var pull = Number(x.Phrase!, @"pull (-?\d+(?:[.,]\d+)?(?:E[+-]?\d+)?)");
+                    var (energy, pull) = (SectionEnergyTrace)x.Value!;
                     return (Energy: energy, Unconventionality: energy == 0 ? 0.5 : (1 - pull / energy) / RhythmicUnconventionality.MaxDecoupling);
                 }
             );

@@ -67,7 +67,7 @@ public sealed class RoleChordTest
     [Test]
     public async Task Songs_PlayRoleChordsInTheHomeAndCadenceBars_AndPoolChordsBetween()
     {
-        var chordEntries = TestCorpus.Range(10).SelectMany(x => x.Trace).Where(x => x.Point == "Chord").ToArray();
+        var chordEntries = TestCorpus.Range(10).SelectMany(x => x.Trace).Where(x => x.Point == TracePoints.Chord).ToArray();
 
         await Assert.That(chordEntries.Length).IsGreaterThan(0);
         foreach (var entry in chordEntries)

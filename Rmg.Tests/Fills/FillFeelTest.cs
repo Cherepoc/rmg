@@ -35,10 +35,10 @@ public sealed class FillFeelTest
 
         new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5)).Generate(song, FillGenerator.GetSectionLines(sections));
 
-        var decisions = trace.Entries.Where(x => x.Point == "Fill decision").Select(x => x.Phrase!).ToArray();
-        var hits = trace.Entries.Where(x => x.Point == "Fill" && x.Phrase != "Landing").ToArray();
+        var decisions = trace.Entries.Where(x => x.Point == TracePoints.FillDecision).Select(x => (FillDecision)x.Value!).ToArray();
+        var hits = trace.Entries.Where(x => x.Point == TracePoints.Fill && x.Phrase != "Landing").ToArray();
         await Assert.That(decisions.Length).IsEqualTo(15);
-        await Assert.That(decisions.Where(x => !x.StartsWith("0 beats")).All(x => x.Contains("in 3s"))).IsTrue();
+        await Assert.That(decisions.Where(x => x.Span > 0).All(x => x.Tuplet == 3)).IsTrue();
         // triplet 8ths and sextuplets, a sixth of a beat apart at the finest
         await Assert.That(hits.Length).IsGreaterThan(0);
         await Assert.That(hits.All(x => Math.Abs(x.Position * 6 - Math.Round(x.Position * 6)) < 1e-6)).IsTrue();

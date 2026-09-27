@@ -38,7 +38,7 @@ public sealed class StateTraceTest
         SongGenerator.GenerateSong(1);
 
         var index = CompositionStateKinds.ChordPool.Index;
-        var chordEntries = trace.Entries.Where(x => x.Point == "Chord").ToArray();
+        var chordEntries = trace.Entries.Where(x => x.Point == TracePoints.Chord).ToArray();
         var layers = new HashSet<string>();
 
         await Assert.That(chordEntries.Length).IsGreaterThan(0);
@@ -64,7 +64,7 @@ public sealed class StateTraceTest
         SongGenerator.GenerateSong(1);
 
         var kind = CompositionStateKinds.Rhythm.Phase.Rank;
-        var snareEntries = trace.Entries.Where(x => x.Point == "Bar pattern" && SnareTracks.Contains(x.Track)).ToArray();
+        var snareEntries = trace.Entries.Where(x => x.Point == TracePoints.BarPattern && SnareTracks.Contains(x.Track)).ToArray();
 
         await Assert.That(snareEntries.Length).IsGreaterThan(0);
         // a value the layers add up to 0 is the default, which a map does not keep, nor its parts
@@ -88,7 +88,7 @@ public sealed class StateTraceTest
         SongGenerator.GenerateSong(1);
 
         var layers = trace.Entries
-            .Where(x => x.Point == "Bar pattern" && SnareTracks.Contains(x.Track))
+            .Where(x => x.Point == TracePoints.BarPattern && SnareTracks.Contains(x.Track))
             .SelectMany(x => x.StateMap.Explain(CompositionStateKinds.Rhythm.Phase.RankedOffset))
             .Select(x => x.Layer)
             .ToHashSet();

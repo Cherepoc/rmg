@@ -147,7 +147,7 @@ public sealed class ProgressionsTest
     [Test]
     public async Task SongChords_AreTheSectionsHomeAndTheProgressionsRoot()
     {
-        var chordEntries = TestCorpus.Get(1).Trace.Where(x => x.Point == "Chord").ToArray();
+        var chordEntries = TestCorpus.Get(1).Trace.Where(x => x.Point == TracePoints.Chord).ToArray();
 
         await Assert.That(chordEntries.Length).IsGreaterThan(0);
         foreach (var entry in chordEntries)

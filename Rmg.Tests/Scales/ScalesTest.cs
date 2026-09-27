@@ -53,7 +53,7 @@ public sealed class ScalesTest
         {
             var song = TestCorpus.Get(seed);
             var timeline = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.ScaleOffsets);
-            var traced = song.Trace.Where(x => x.Point == "Section scale").ToDictionary(x => x.Section, x => x.Phrase);
+            var traced = song.Trace.Where(x => x.Point == TracePoints.SectionScale).ToDictionary(x => x.Section, x => ((Scale)x.Value!).Name);
 
             // every section plays the scale it drew, one of the table's, from its start
             foreach (var span in song.Map.Sections)
@@ -63,7 +63,7 @@ public sealed class ScalesTest
                 await Assert.That(scale!.Name).IsEqualTo(traced[span.SectionId]);
             }
 
-            scales.Add(traced[song.Map.Sections[0].SectionId]!);
+            scales.Add(traced[song.Map.Sections[0].SectionId]);
         }
 
         // 30 songs reach well beyond minor and major
