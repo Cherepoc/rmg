@@ -109,7 +109,7 @@ public sealed class SongEndingTest
                 StateMap.FromStates([StateKinds.ChordArrival.CreateState((int)ChordArrival.Third)]).ToStateTimelineMap(32)
             ),
             new RhythmicUnconventionality(0.5),
-            ResolvedRhythm.Default
+            ResolvedRhythm.DefaultState
         );
 
         var ending = SongFormGenerator.CreateEnding(section, [], 8, 8);

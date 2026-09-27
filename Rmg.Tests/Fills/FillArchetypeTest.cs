@@ -56,15 +56,41 @@ public sealed class FillArchetypeTest
     private static RunSound[] SoundsOf(FillGenerator generator, DrumRole role) =>
         generator.Sounds.Sounds.TryGetValue(role, out var sounds) ? [..sounds.OrderBy(x => x.Code)] : [];
 
-    private static FillRun Run(IEnumerable<RunSound> sounds, FillPath path = FillPath.OneWay, int width = 1, double fullness = 0.9) =>
-        new([..sounds], path, width, fullness, false);
+    /// <summary>The state of a groove's rhythm: its cycle's power of two of a bar, its phase's rank, its finest rank, and more.</summary>
+    internal static StateMap Groove(int periodPower, int phaseRank, int maxRank, int primeIndex = 0, double fullness = 0.7) =>
+        StateMap.FromStates(
+            [
+                CompositionStateKinds.Rhythm.Period.Power.CreateState(periodPower),
+                CompositionStateKinds.Rhythm.Period.PrimeIndex.CreateState(primeIndex),
+                CompositionStateKinds.Rhythm.Phase.Rank.CreateState(phaseRank),
+                CompositionStateKinds.Rhythm.MaxRank.CreateState(maxRank),
+                CompositionStateKinds.Rhythm.Fullness.CreateState(fullness),
+                CompositionStateKinds.Rhythm.Variation.CreateState(0.5)
+            ]
+        );
 
-    private static FillPlay Play(FillRun run, FillTwist twists = FillTwist.None, int tuplet = 1) => new(FillKind.Run, twists, tuplet, run);
+    /// <summary>A groove of a beat's cycle down to 8ths, which a plain fill's layer makes full, and 16ths.</summary>
+    private static readonly StateMap Beat = Groove(-2, 0, 1);
 
-    private static TrackEventStateTimelineMap<StateMap> ApplyRun(Setup setup, FillRun run, FillTwist twists = FillTwist.None, int tuplet = 1) =>
-        setup.Generator.ApplyFill(setup.Song, Play(run, twists, tuplet), Line, ResolvedRhythm.Default, MinNote, Middle);
+    /// <summary>A backbeat: a cycle of two beats, its strongest note on the second, down to quarters.</summary>
+    private static readonly StateMap Backbeat = Groove(-1, 1, 1);
 
-    private static FillRun SnareRun(Setup setup) => Run([SoundsOf(setup.Generator, DrumRole.Snare).First(x => x.Track == setup.Snare)]);
+    /// <summary>A fill's layer of the given ranks finer.</summary>
+    private static StateMap Layer(int ranks) => StateMap.FromStates([CompositionStateKinds.Rhythm.MaxRank.CreateState(ranks)]);
+
+    private static int TripletIndex { get; } =
+        Enumerable.Range(-RhythmPeriod.MaxPrimeIndex, 2 * RhythmPeriod.MaxPrimeIndex + 1).First(x => x.ToTuplet() == 3);
+
+    private static FillRun Run(IEnumerable<RunSound> sounds, FillPath path = FillPath.OneWay, int width = 1, FillSpeed speed = FillSpeed.Steady) =>
+        new([..sounds], path, width, speed);
+
+    private static FillPlay Play(FillRun run, FillTwist twists = FillTwist.None) => new(FillKind.Run, twists, run, FillRhythm.PlainLayer);
+
+    private static TrackEventStateTimelineMap<StateMap> ApplyRun(Setup setup, FillRun run, FillTwist twists = FillTwist.None, StateMap? groove = null) =>
+        setup.Generator.ApplyFill(setup.Song, Play(run, twists), Line, groove ?? Beat, MinNote, Middle);
+
+    private static FillRun SnareRun(Setup setup, FillSpeed speed = FillSpeed.Steady) =>
+        Run([SoundsOf(setup.Generator, DrumRole.Snare).First(x => x.Track == setup.Snare)], speed: speed);
 
     /// <summary>The velocities of a track's fill notes before the line.</summary>
     private static double[] Velocities(TrackEventStateTimelineMap<StateMap> song, int track) =>
@@ -141,34 +167,52 @@ public sealed class FillArchetypeTest
     }
 
     [Test]
-    public async Task Run_PlaysTheGroovesCycle_ARankFiner()
+    public async Task Run_PlaysTheGroovesCycle_Finer()
     {
-        // a backbeat: a cycle of two beats, its strongest note on the second, down to quarters
-        var backbeat = new ResolvedRhythm(0.5, 0.25, 1, 0, 0.5, 0.5);
         foreach (var seed in Seeds)
         {
             var setup = Create(seed);
-            var run = Run([SoundsOf(setup.Generator, DrumRole.Toms)[0]], fullness: 0.95);
-            var filled = setup.Generator.ApplyFill(setup.Song, Play(run), Line, backbeat, MinNote, Middle);
-            var toms = Events(filled, Tom, 0, 12);
+            var toms = Events(ApplyRun(setup, Run([SoundsOf(setup.Generator, DrumRole.Toms)[0]]), groove: Backbeat), Tom, 0, 12);
 
-            // 8ths, a rank finer than the backbeat's quarters
-            await Assert.That(toms.All(x => Math.Abs(x.Position * 2 - Math.Round(x.Position * 2)) < 1e-6)).IsTrue();
+            // 16ths, two ranks finer than the backbeat's quarters, on its cycle
+            await Assert.That(toms).IsNotEmpty();
+            await Assert.That(toms.All(x => Math.Abs(x.Position * 4 - Math.Round(x.Position * 4)) < 1e-6)).IsTrue();
         }
     }
 
     [Test]
     public async Task FillRhythm_KeepsThePhase_AndTheTempoLimitsTheFinestNotes()
     {
-        var backbeat = new ResolvedRhythm(0.5, 0.25, 1, 0, 0.5, 0.5);
-        var rhythm = FillRhythm.Of(backbeat, 2, 1, 0.2);
-        var notes = rhythm.Play(new GenerationContext(1), 1, _ => 1, Line, 4, Line, rhythm.MaxRank);
+        var rhythm = FillRhythm.Of(Backbeat, Layer(2), 0.2);
+        var notes = rhythm.Play(new GenerationContext(1), 1, Line, 4, Line, rhythm.MaxRank);
 
-        // 16ths, and at a limit of 8ths, 8ths
+        // 16ths, and at a limit of 16ths a rank finer folds back into 32nds' place, and at 8ths into 8ths
         await Assert.That(rhythm.Fine).IsEqualTo(0.25);
-        await Assert.That(FillRhythm.Of(backbeat, 2, 1, 0.5).Fine).IsEqualTo(0.5);
+        await Assert.That(FillRhythm.Of(Backbeat, Layer(2), 0.1).Fine).IsEqualTo(0.25);
+        await Assert.That(FillRhythm.Of(Backbeat, Layer(2), 0.5).Fine).IsEqualTo(0.5);
         // the strongest notes on the backbeats
         await Assert.That(notes.Where(x => x.Rank == 0).Select(x => x.Position).ToArray()).IsEquivalentTo([5.0, 7.0]);
+    }
+
+    [Test]
+    public async Task FillRhythm_OverAGrooveAtItsFinest_FoldsBackSparser()
+    {
+        // a beat's cycle down to 16ths, at a limit of 16ths: a rank finer stays at 16ths, two fold back into 8ths
+        var sixteenths = Groove(-2, 0, 2);
+        await Assert.That(FillRhythm.Of(sixteenths, Layer(1), 0.25).MaxRank).IsEqualTo(2);
+        await Assert.That(FillRhythm.Of(sixteenths, Layer(2), 0.25).MaxRank).IsEqualTo(1);
+        // and a slower tempo lets it go finer
+        await Assert.That(FillRhythm.Of(sixteenths, Layer(1), 0.1).MaxRank).IsEqualTo(3);
+    }
+
+    [Test]
+    public async Task ASparseFill_OverAShortSpan_MayKeepNothing()
+    {
+        // a half-bar cycle, its strongest note on the downbeat, and little kept of the weaker ones
+        var sparse = FillRhythm.Of(Groove(-1, 0, 2, fullness: 0.05), StateMap.Default, 0.2);
+        var empty = Enumerable.Range(0, 200).Count(x => sparse.Play(new GenerationContext(x), x, Line, Line - 1, Line, sparse.MaxRank).IsEmpty);
+
+        await Assert.That(empty).IsGreaterThan(100);
     }
 
     [Test]
@@ -248,7 +292,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var (generator, song, snare) = Create(seed);
-            var filled = generator.ApplyFill(song, FillPlay.Plain(FillKind.Break), Line, ResolvedRhythm.Default, MinNote, Middle);
+            var filled = generator.ApplyFill(song, FillPlay.Plain(FillKind.Break), Line, Beat, MinNote, Middle);
             var silent = new[] { Kick, snare, HiHat }.Select(x => Events(filled, x, Line - 1, Line).Length).Sum();
 
             await Assert.That(silent).IsEqualTo(0);
@@ -263,7 +307,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var (generator, song, snare) = Create(seed);
-            var filled = generator.ApplyFill(song, FillPlay.Plain(FillKind.StopTime), Line, ResolvedRhythm.Default, MinNote, Middle);
+            var filled = generator.ApplyFill(song, FillPlay.Plain(FillKind.StopTime), Line, Beat, MinNote, Middle);
             // the crash is the fill's own, where the drums stop
             var from = Events(filled, Cymbal, 0, 12).Single().Position;
             var hits = new[] { Kick, snare, HiHat, Cymbal }.SelectMany(x => Events(filled, x, from, Line).Select(e => (x, e.Position))).ToArray();
@@ -277,19 +321,20 @@ public sealed class FillArchetypeTest
     public async Task Lift_OpensTheHiHat_OnTheLastOffBeat()
     {
         var (generator, song, _) = Create(1);
-        var hiHat = Events(generator.ApplyFill(song, FillPlay.Plain(FillKind.Lift), Line, ResolvedRhythm.Default, MinNote, Middle), HiHat, Line - 0.5, Line)
+        var hiHat = Events(generator.ApplyFill(song, FillPlay.Plain(FillKind.Lift), Line, Beat, MinNote, Middle), HiHat, Line - 0.5, Line)
             .Single();
 
         await Assert.That(Articulation(hiHat)).IsEqualTo(DrumDefinitions.HiHat.GetArticulationIndex(DrumSounds.OpenHiHat));
     }
 
     [Test]
-    public async Task Tuplet_PlaysTheRunOnTheTuplet()
+    public async Task ATupletGroove_PlaysTheRunOnTheTuplet()
     {
+        var triplets = Groove(-2, 0, 2, TripletIndex);
         var toms = Seeds.SelectMany(seed =>
             {
                 var setup = Create(seed);
-                return Events(ApplyRun(setup, Run(SoundsOf(setup.Generator, DrumRole.Toms)), FillTwist.Tuplet, 3), Tom, 0, 12);
+                return Events(ApplyRun(setup, Run(SoundsOf(setup.Generator, DrumRole.Toms)), groove: triplets), Tom, 0, 12);
             }
         ).ToArray();
 
@@ -298,12 +343,12 @@ public sealed class FillArchetypeTest
     }
 
     [Test]
-    public async Task SlowDown_PlaysTheFinerNotesFirst()
+    public async Task SlowingDown_PlaysTheFinerNotesFirst()
     {
         foreach (var seed in Seeds)
         {
             var setup = Create(seed);
-            var roll = Events(ApplyRun(setup, SnareRun(setup), FillTwist.SlowDown), setup.Snare, 4, Line)
+            var roll = Events(ApplyRun(setup, SnareRun(setup, FillSpeed.SlowsDown)), setup.Snare, 4, Line)
                 .Where(x => x.Value.GetStateValue(StateKinds.Velocity) != 0)
                 .ToArray();
             var middle = (roll[0].Position + Line) / 2;

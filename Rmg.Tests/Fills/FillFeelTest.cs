@@ -21,11 +21,8 @@ public sealed class FillFeelTest
         await Assert.That(IndexOf(5.0 / 4).ToTuplet()).IsEqualTo(1);
     }
 
-    private static ResolvedRhythm Rhythm(int tuplet)
-    {
-        var index = Enumerable.Range(-RhythmPeriod.MaxPrimeIndex, 2 * RhythmPeriod.MaxPrimeIndex + 1).First(x => x.ToTuplet() == tuplet);
-        return ResolvedRhythm.Default with { PrimeIndex = index, PeriodValue = ResolvedRhythm.Default.PeriodValue * index.ToRhythmPeriodValue() };
-    }
+    private static StateMap Rhythm(int tuplet) =>
+        FillArchetypeTest.Groove(-2, 0, 2, Enumerable.Range(-RhythmPeriod.MaxPrimeIndex, 2 * RhythmPeriod.MaxPrimeIndex + 1).First(x => x.ToTuplet() == tuplet));
 
     [Test]
     public async Task TupletSections_PlayTheirFillsInTheirTuplet()

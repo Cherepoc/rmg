@@ -77,23 +77,29 @@ public enum FillTwist
 {
     None = 0,
 
-    /// <summary>The run plays a tuplet, such as triplets or quintuplets, where the groove plays none.</summary>
-    Tuplet = 1,
-
     /// <summary>The fill starts off the beat, a note near an 8th earlier or later.</summary>
-    OddSpan = 2,
-
-    /// <summary>The run slows down, the finest notes then a rank coarser.</summary>
-    SlowDown = 4,
+    OddSpan = 1,
 
     /// <summary>The run fades out rather than swells.</summary>
-    Fading = 8,
+    Fading = 2,
 
     /// <summary>The next section lands early, pushed a note near an 8th ahead of the line.</summary>
-    EarlyLanding = 16,
+    EarlyLanding = 4,
 
     /// <summary>The next section lands on nothing, even after a break.</summary>
-    NoLanding = 32
+    NoLanding = 8
+}
+
+/// <summary>Whether a run keeps its speed, or changes it by a rank halfway.</summary>
+public enum FillSpeed
+{
+    Steady,
+
+    /// <summary>A rank coarser for the first half.</summary>
+    SpeedsUp,
+
+    /// <summary>A rank coarser for the second half.</summary>
+    SlowsDown
 }
 
 /// <summary>What a fill does with the groove in its span.</summary>
@@ -169,22 +175,14 @@ public static class FillLayers
     /// </summary>
     public static ImmutableArray<Weighted<FillTwist>> Twists { get; } =
     [
-        new(0.02, FillTwist.Tuplet),
         new(0.015, FillTwist.OddSpan),
-        new(0.01, FillTwist.SlowDown),
         new(0.01, FillTwist.Fading),
         new(0.01, FillTwist.EarlyLanding),
         new(0.005, FillTwist.NoLanding)
     ];
 
-    /// <summary>The tuplets a fill's twist may play, where the groove plays none of its own.</summary>
-    public static ImmutableArray<Weighted<int>> TwistTuplets { get; } = [new(0.75, 3), new(0.25, 5)];
-
     /// <summary>The shortest note a fill plays, in seconds: a sextuplet at 125 beats a minute, a 32nd at 94.</summary>
     public const double MinNoteSeconds = 0.08;
-
-    /// <summary>How many ranks finer than the groove a run plays, and how likely each is.</summary>
-    public static ImmutableArray<Weighted<int>> ExtraRanks { get; } = [new(0.3, 0), new(0.5, 1), new(0.2, 2)];
 
     /// <summary>
     ///     The chance a run plays a role's drums: mostly the snare and the toms; the others' chances are multiplied by
@@ -243,21 +241,26 @@ public static class FillLayers
     public const double RankLimitLiftChance = 0.1;
 
     /// <summary>
-    ///     How likely a run keeps a note, less for every rank it is weaker: at a section change mostly full, at a
-    ///     phrase line mostly sparse, a few hits; each is spread around, and the drummer moves it.
+    ///     How many ranks finer than the groove a fill plays: the snare's backbeat plays its cycle's strongest notes
+    ///     alone, so two ranks make 8ths of it, and a groove already fine folds back into range.
     /// </summary>
-    public const double SectionRunFullness = 0.8;
+    public const int FinerRanks = 2;
 
-    public const double PhraseRunFullness = 0.55;
-    public const double RunFullnessSpread = 0.2;
+    /// <summary>
+    ///     How much fuller than the groove a fill is: at a section change much fuller, at a phrase line about as sparse,
+    ///     a few hits; the fill's layer spreads it, and the drummer moves it.
+    /// </summary>
+    public const double SectionFullness = 0.3;
 
-    /// <summary>The fewest and the most a run keeps of a note a rank weaker.</summary>
-    public const double MinRunFullness = 0.3;
+    public const double PhraseFullness = 0.05;
 
-    public const double MaxRunFullness = 0.95;
-
-    /// <summary>The chance a run speeds up, a rank coarser for its first half.</summary>
-    public const double SpeedUpChance = 0.3;
+    /// <summary>Whether a run changes speed halfway, and how likely each is; slowing down's weight is multiplied by the chance scale.</summary>
+    public static ImmutableArray<Weighted<FillSpeed>> Speeds { get; } =
+    [
+        new(0.7, FillSpeed.Steady),
+        new(0.27, FillSpeed.SpeedsUp),
+        new(0.03, FillSpeed.SlowsDown)
+    ];
 
     /// <summary>What the drums land on at a section change, and how likely each is.</summary>
     public static ImmutableArray<Weighted<FillLanding>> SectionLandings { get; } =

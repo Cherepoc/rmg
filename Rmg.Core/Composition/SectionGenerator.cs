@@ -115,7 +115,7 @@ internal sealed class SectionGenerator
     ///     The rhythm the fills play from: the snare's in the pattern's last bar, before both of the section's lines, or
     ///     where the section plays no snare, that of the drum with the most notes there.
     /// </summary>
-    internal static ResolvedRhythm GetGroove(IEnumerable<BarFeel> feels)
+    internal static StateMap GetGroove(IEnumerable<BarFeel> feels)
     {
         var snares = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
         return feels
@@ -123,8 +123,8 @@ internal sealed class SectionGenerator
             .OrderByDescending(x => snares.Contains(x.Track))
             .ThenByDescending(x => x.NoteCount)
             .ThenBy(x => x.Track)
-            .Select(x => (ResolvedRhythm?)x.Rhythm)
-            .FirstOrDefault() ?? ResolvedRhythm.Default;
+            .Select(x => x.Rhythm)
+            .FirstOrDefault() ?? ResolvedRhythm.DefaultState;
     }
 
     /// <summary>The drums the section plays, which make their patterns together, over the drums' shared state.</summary>
@@ -232,11 +232,11 @@ internal sealed class SectionGenerator
 /// </summary>
 /// <summary>A section's tracks, and what the fills need to know of its rhythm.</summary>
 /// <param name="Rhythm">How far the section's rhythm strays from convention.</param>
-/// <param name="Groove">The rhythm the fills play from.</param>
+/// <param name="Groove">The state of the rhythm the fills play from.</param>
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
     RhythmicUnconventionality Rhythm,
-    ResolvedRhythm Groove
+    StateMap Groove
 );
 
 internal sealed record SectionRhythm(RhythmicUnconventionality Unconventionality, PhraseScheme Scheme, MelodyBusyness MelodyBusyness);

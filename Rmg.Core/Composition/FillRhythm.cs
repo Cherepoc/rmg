@@ -1,22 +1,46 @@
 using System.Collections.Immutable;
+using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     The rhythm a fill plays: the groove's, the snare's in the bar before the line, with its cycle and phase, so that
-///     the fill falls on the groove's grid and its strongest notes where the groove's accents are, only finer by a rank
-///     or two, as the fill draws, and no finer than the fastest note the song's tempo allows.
+///     The rhythm a fill plays: the groove's state, the snare's in the bar before the line, with the fill's layer added
+///     and resolved as a bar pattern's is, so that the fill keeps the groove's cycle and phase, falls on its grid, and
+///     its strongest notes fall where the groove's accents are. The layer makes it finer and fuller; its
+///     steps fold back into range as a bar pattern's do, so a fill over a groove at its finest turns sparser, and one
+///     that steps its rank offset puts its weight on weaker notes. The finest rank is as fine as the shortest note the
+///     song's tempo allows, where a bar pattern stops at <see cref="ResolvedRhythm.MaxRankLimit" />.
 /// </summary>
-/// <param name="Period">The cycle, in beats.</param>
-/// <param name="Phase">Where the cycle's strongest note falls in it, in beats.</param>
-/// <param name="MaxRank">How many times the cycle is halved, down to the fill's finest notes.</param>
-internal sealed record FillRhythm(double Period, double Phase, int MaxRank)
+/// <param name="Rhythm">The resolved settings.</param>
+/// <param name="RankLimit">The finest rank the tempo allows, which a change of speed folds into.</param>
+internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit)
 {
+    /// <summary>The layer of a plain fill: finer, fuller by a section change's share, its cycles repeating.</summary>
+    public static StateMap PlainLayer { get; } = StateMap.FromStates(
+        [
+            CompositionStateKinds.Rhythm.MaxRank.CreateState(FillLayers.FinerRanks),
+            CompositionStateKinds.Rhythm.Fullness.CreateState(FillLayers.SectionFullness),
+            CompositionStateKinds.Rhythm.Variation.CreateState(-1)
+        ]
+    );
+
+    /// <summary>The cycle, in beats.</summary>
+    public double Period => Rhythm.Period;
+
+    /// <summary>Where the cycle's strongest note falls in it, in beats.</summary>
+    public double Phase => Rhythm.Phase;
+
+    /// <summary>How many times the cycle is halved, down to the fill's finest notes.</summary>
+    public int MaxRank => Rhythm.MaxRank;
+
+    /// <summary>The tuplet the fill's notes fall on, 1 for straight.</summary>
+    public int Tuplet => Rhythm.PrimeIndex.ToTuplet();
+
     /// <summary>The fill's finest notes, in beats.</summary>
     public double Fine => Period / Math.Pow(2, MaxRank);
 
-    /// <summary>The notes a rank coarser, which a fill that speeds up starts on; the finest where there are none.</summary>
+    /// <summary>The notes a rank coarser, where the halves of a fill that changes speed meet; the finest where there are none.</summary>
     public double Coarse => MaxRank > 0 ? 2 * Fine : Fine;
 
     /// <summary>
@@ -25,68 +49,49 @@ internal sealed record FillRhythm(double Period, double Phase, int MaxRank)
     /// </summary>
     public double Push => Period / Math.Pow(2, Math.Max(0, Math.Round(Math.Log2(Period / 0.5))));
 
-    /// <summary>The rank of a note of the fill's finest notes, by where it falls in the cycle.</summary>
-    public int RankAt(double position, double line, int maxRank)
+    /// <param name="groove">The state of the groove's rhythm.</param>
+    /// <param name="layer">The fill's layer over it.</param>
+    /// <param name="minNote">The shortest note the fill may play, in beats.</param>
+    public static FillRhythm Of(StateMap groove, StateMap layer, double minNote)
     {
-        var offset = position - (line - Meter.BarDuration) - Phase;
-        for (var rank = 0; rank < maxRank; rank++)
-        {
-            var steps = offset / (Period / Math.Pow(2, rank));
-            if (Math.Abs(steps - Math.Round(steps)) < 1e-6)
-                return rank;
-        }
-
-        return maxRank;
+        var rhythm = ResolvedRhythm.Of(groove.MergeWith(layer), minNote);
+        return new FillRhythm(rhythm, Math.Max(0, (int)Math.Floor(Math.Log2(rhythm.Period / minNote) + 1e-9)));
     }
 
-    /// <param name="groove">The groove's rhythm.</param>
-    /// <param name="extraRanks">How many ranks finer than the groove the fill plays.</param>
-    /// <param name="tuplet">The tuplet the fill plays, 1 for straight; a groove of its own keeps its own.</param>
-    /// <param name="minNote">The shortest note the fill may play, in beats.</param>
-    public static FillRhythm Of(ResolvedRhythm groove, int extraRanks, int tuplet, double minNote)
+    /// <summary>A rank a step finer or coarser than the fill's, folded into range as the fill's own is.</summary>
+    public int Step(int step)
     {
-        var period = groove.Period;
-        // a straight groove plays the tuplet by dividing its cycle by it, to the nearest power of two
-        if (groove.PrimeIndex.ToTuplet() == 1 && tuplet != 1)
-            period *= Math.Pow(2, Math.Round(Math.Log2(tuplet))) / tuplet;
-        var maxRank = Math.Max(0, (int)Math.Floor(Math.Log2(period / minNote) + 1e-9));
-        return new FillRhythm(period, groove.Phase, Math.Min(groove.MaxRank + extraRanks, maxRank));
+        return (MaxRank + step).BounceInBounds(0, RankLimit);
     }
 
     /// <summary>
     ///     The notes of the fill from one position up to another, each with its rank: the fill's dyadic pattern over the
-    ///     bar that ends at the line, whose cycles repeat, and which keeps a note of each rank by its chance.
-    ///     Where the fill's first note is its own, it always plays, on the finest notes, so that a run starts on a hit.
+    ///     bar that ends at the line, which keeps a note by its rank's distance from the rank offset, as a bar pattern
+    ///     does. A sparse fill over a short span may keep none, and leave its drums silent there.
     /// </summary>
-    /// <param name="maxRank">The rank of the finest notes, at most the fill's.</param>
+    /// <param name="maxRank">The rank of the finest notes.</param>
     public ImmutableArray<(double Position, int Rank, int MaxRank)> Play(
         IGenerationContext context,
         int seed,
-        Func<int, double> keepChance,
         double line,
         double from,
         double to,
-        int maxRank,
-        bool startsOnAHit = false
+        int maxRank
     )
     {
         var barStart = line - Meter.BarDuration;
         var pattern = DyadicRankThresholdPattern.Create(
             context,
             seed,
-            keepChance,
+            WeightUtil.CreateGeometricRankWeightFunc(Math.Min(Rhythm.RankOffset, maxRank), 0, 1, Rhythm.Fullness),
             new DyadicTimelineDescriptor(Meter.BarDuration, Period, Phase, maxRank),
-            0
+            Rhythm.Variation
         );
-        var notes = pattern.OutcomeRankTimeline
-            .Where(x => barStart + x.Position >= from - 1e-9 && barStart + x.Position < to - 1e-9)
-            .Select(x => (barStart + x.Position, x.Value, pattern.MaxRank))
-            .ToList();
-        // the first note on the finest notes, which a span that falls off them has none of
-        var note = Period / Math.Pow(2, maxRank);
-        var first = barStart + Phase + Math.Ceiling((from - barStart - Phase) / note - 1e-9) * note;
-        if (startsOnAHit && first < to - 1e-9 && (notes.Count == 0 || notes[0].Item1 > first + 1e-9))
-            notes.Insert(0, (first, RankAt(first, line, maxRank), maxRank));
-        return [..notes];
+        return
+        [
+            ..pattern.OutcomeRankTimeline
+                .Where(x => barStart + x.Position >= from - 1e-9 && barStart + x.Position < to - 1e-9)
+                .Select(x => (barStart + x.Position, x.Value, pattern.MaxRank))
+        ];
     }
 }

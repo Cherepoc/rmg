@@ -117,9 +117,9 @@ public sealed class FillGrooveTest
     {
         var fills = Fills.Value.Where(x => !double.IsNaN(x.FillGrid) && !double.IsNaN(x.GrooveGrid)).ToArray();
 
-        // a rank or two finer than the snare, which the groove's other drums often are already
-        await Assert.That(fills.Count(x => x.FillGrid <= x.GrooveGrid / 4 + 1e-6)).IsLessThan(fills.Length / 20);
-        await Assert.That(fills.Count(x => x.FillGrid < x.GrooveGrid * 0.99)).IsLessThan(fills.Length / 3);
+        // finer than the snare's backbeat, which the groove's other drums often are already, or sparser where it folds;
+        // before the fills played the groove's rhythm, a third were
+        await Assert.That(fills.Count(x => x.FillGrid <= x.GrooveGrid / 4 + 1e-6)).IsLessThan(fills.Length / 8);
     }
 
     [Test]

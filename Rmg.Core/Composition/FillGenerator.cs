@@ -133,8 +133,8 @@ internal sealed class FillGenerator
             FillTable.Phrase => Pick(drummer.Weigh(FillLayers.PhraseFills, chanceScale)),
             _ => FillKind.None
         };
-        var play = DrawPlay(fill, drummer, chanceScale, ending.Groove.PrimeIndex.ToTuplet(), line.Fills);
-        var rhythm = FillRhythm.Of(ending.Groove, play.ExtraRanks, play.Tuplet, minNote);
+        var play = DrawPlay(fill, drummer, ending.Rhythm, line.Fills);
+        var rhythm = FillRhythm.Of(ending.Groove, play.Layer, minNote);
         var span = Fill(edits, play, line.Position, rhythm, drummer, ending.SectionId);
 
         var landing = line.Landing switch
@@ -154,36 +154,45 @@ internal sealed class FillGenerator
             ? line.Position - rhythm.Push
             : line.Position;
         Land(song, edits, landingPosition, line.LandingSectionId, landing);
-        RecordDecision(ending.SectionId, line.Position - origin, play, span, landing);
+        RecordDecision(ending.SectionId, line.Position - origin, play, rhythm, span, landing);
     }
 
     /// <summary>
-    ///     How a fill is played: how much finer than the groove, its twists, each by its chance, its tuplet, the groove's
-    ///     own if it plays one, else one of the tuplet twist's, and for a run, its sounds and how it walks them.
+    ///     How a fill is played: its twists, each by its chance, its layer over the groove's rhythm, and for a run, its
+    ///     sounds and how it walks them.
     /// </summary>
-    private FillPlay DrawPlay(FillKind fill, Drummer drummer, double chanceScale, int grooveTuplet, FillTable table)
+    private FillPlay DrawPlay(FillKind fill, Drummer drummer, RhythmicUnconventionality rhythm, FillTable table)
     {
         if (fill == FillKind.None)
             return FillPlay.Plain(fill);
 
-        var extraRanks = Pick(FillLayers.ExtraRanks);
+        var chanceScale = rhythm.ChanceScale;
         var twists = FillTwist.None;
         foreach (var twist in FillLayers.Twists)
             if (_context.TestProbability(drummer.GetTwistChance(twist, chanceScale)))
                 twists |= twist.Value;
 
-        var tuplet = grooveTuplet != 1 ? grooveTuplet
-            : twists.HasFlag(FillTwist.Tuplet) ? Pick(FillLayers.TwistTuplets)
-            : 1;
-        var run = FillLayers.Specs[fill].Runs
-            ? _sounds.Draw(
-                _context,
-                drummer,
-                chanceScale,
-                table == FillTable.Phrase ? FillLayers.PhraseRunFullness : FillLayers.SectionRunFullness
-            )
-            : null;
-        return new FillPlay(fill, twists, tuplet, run, extraRanks);
+        var layer = CreateLayer(drummer, rhythm, table == FillTable.Phrase ? FillLayers.PhraseFullness : FillLayers.SectionFullness);
+        var run = FillLayers.Specs[fill].Runs ? _sounds.Draw(_context, drummer, chanceScale) : null;
+        return new FillPlay(fill, twists, run, layer);
+    }
+
+    /// <summary>
+    ///     A fill's layer over the groove's rhythm: finer, a step more or less, fuller by the line's share and as
+    ///     the drummer plays, its cycles repeating, and the steps of the fill's rhythm layer, as strange as the section.
+    /// </summary>
+    private StateMap CreateLayer(Drummer drummer, RhythmicUnconventionality rhythm, double fullness)
+    {
+        var layer = rhythm.Scale(RhythmLayers.Fill);
+        var density = layer.CreateDensityGenerator();
+        var spread = layer.CreateFullnessGenerator();
+        return new StateMapBuilder("Fill", perTrack: true)
+            .Add(CompositionStateKinds.Rhythm.MaxRank, context => FillLayers.FinerRanks + density(context))
+            .Add(CompositionStateKinds.Rhythm.RankOffset, density)
+            .Add(CompositionStateKinds.Rhythm.Period.PrimeIndex, layer.CreateTupletGenerator())
+            .Add(CompositionStateKinds.Rhythm.Fullness, context => fullness + drummer.FullnessOffset + spread(context))
+            .Add(CompositionStateKinds.Rhythm.Variation, -1.0)
+            .ToStateMap(_context);
     }
 
     /// <summary>The song with one fill before the given line, played as given, and no landing.</summary>
@@ -191,20 +200,20 @@ internal sealed class FillGenerator
         TrackEventStateTimelineMap<StateMap> song,
         FillPlay play,
         double line,
-        ResolvedRhythm groove,
+        StateMap groove,
         double minNote,
         Drummer drummer
     )
     {
         var edits = new TimelineEdits(_context);
-        Fill(edits, play, line, FillRhythm.Of(groove, play.ExtraRanks, play.Tuplet, minNote), drummer, 0);
+        Fill(edits, play, line, FillRhythm.Of(groove, play.Layer, minNote), drummer, 0);
         return edits.ApplyTo(song);
     }
 
     /// <summary>A run as drawn for a line before a section change, for the tests to play.</summary>
     internal FillRun DrawRun(Drummer drummer, double chanceScale = 1)
     {
-        return _sounds.Draw(_context, drummer, chanceScale, FillLayers.SectionRunFullness);
+        return _sounds.Draw(_context, drummer, chanceScale);
     }
 
     /// <summary>Every sound a run may play, by role.</summary>
@@ -217,15 +226,17 @@ internal sealed class FillGenerator
 
     /// <summary>What was decided at a line, recorded in the last bar before it, where its fill is.</summary>
     /// <param name="line">Where the line is, from the start of the song's first section.</param>
-    private static void RecordDecision(int sectionId, double line, FillPlay play, double span, FillLanding landing)
+    private static void RecordDecision(int sectionId, double line, FillPlay play, FillRhythm rhythm, double span, FillLanding landing)
     {
         if (!StateTrace.IsRunning)
             return;
 
         var bar = (int)Math.Floor(line / Meter.BarDuration) - 1;
         var description = $"{play.Kind}, {span} beats, landing {landing}"
-                          + (play.Tuplet != 1 ? $", in {play.Tuplet}s" : "")
-                          + (play.Run is { } run ? $", {run}" : "")
+                          + (rhythm.Tuplet != 1 ? $", in {rhythm.Tuplet}s" : "")
+                          + (play.Run is { } run
+                              ? $", {rhythm.MaxRank} ranks of {rhythm.Period} beats, fullness {rhythm.Rhythm.Fullness:F2}, {run}"
+                              : "")
                           + (play.Twists != FillTwist.None ? $", twists {play.Twists}" : "");
         StateTrace.Record(
             "Fill decision",
@@ -256,7 +267,7 @@ internal sealed class FillGenerator
         var spec = FillLayers.Specs[play.Kind];
         var span = Pick(drummer.WeighSpans(spec.Spans));
         // a fill shorter than a beat is a note of the fill's rhythm, so that in a tuplet it falls on the tuplet
-        if (play.Tuplet != 1 && span < 1)
+        if (rhythm.Tuplet != 1 && span < 1)
             span = rhythm.Push;
         // an odd span starts a note of the fill's rhythm near an 8th earlier, or later where it is a bar long
         if (play.Twists.HasFlag(FillTwist.OddSpan))
@@ -320,25 +331,25 @@ internal sealed class FillGenerator
         string name
     )
     {
-        var fullness = run.Fullness;
-        Func<int, double> keepChance = rank => Math.Pow(fullness, rank);
         var (startVelocity, endVelocity) = twists.HasFlag(FillTwist.Fading)
             ? (FillLayers.RunEndVelocity, FillLayers.RunStartVelocity)
             : (FillLayers.RunStartVelocity, FillLayers.RunEndVelocity);
 
-        var slowsDown = twists.HasFlag(FillTwist.SlowDown);
         var seed = SeedGenerator(_context);
         var notes = new List<(double Position, int Rank, int MaxRank)>();
-        if ((run.SpeedsUp || slowsDown) && rhythm.MaxRank > 0)
+        if (run.Speed != FillSpeed.Steady)
         {
-            // the halves meet on a note of the coarser notes, so that a tuplet's notes stay on it
-            var middle = from + Math.Round((line - from) / 2 / rhythm.Coarse) * rhythm.Coarse;
-            var (first, second) = slowsDown ? (rhythm.MaxRank, rhythm.MaxRank - 1) : (rhythm.MaxRank - 1, rhythm.MaxRank);
-            notes.AddRange(rhythm.Play(_context, seed, keepChance, line, from, middle, first, true));
-            notes.AddRange(rhythm.Play(_context, seed + 1, keepChance, line, middle, line, second));
+            // a rank coarser for one half, folded into range; the halves meet on a note of the coarser, so that a
+            // tuplet's notes stay on it
+            var coarser = rhythm.Step(-1);
+            var (first, second) = run.Speed == FillSpeed.SpeedsUp ? (coarser, rhythm.MaxRank) : (rhythm.MaxRank, coarser);
+            var note = rhythm.Period / Math.Pow(2, Math.Min(first, second));
+            var middle = from + Math.Round((line - from) / 2 / note) * note;
+            notes.AddRange(rhythm.Play(_context, seed, line, from, middle, first));
+            notes.AddRange(rhythm.Play(_context, seed + 1, line, middle, line, second));
         }
         else
-            notes.AddRange(rhythm.Play(_context, seed, keepChance, line, from, line, rhythm.MaxRank, true));
+            notes.AddRange(rhythm.Play(_context, seed, line, from, line, rhythm.MaxRank));
 
         var places = FillSounds.Walk(_context, run.Path, run.Sounds.Length, notes.Count);
         var span = line - from;
@@ -376,11 +387,10 @@ internal sealed class FillGenerator
     }
 }
 
-/// <summary>How a fill is played: its kind, its twists, the tuplet it plays, 1 for straight, and its run, if it has one.</summary>
-/// <param name="ExtraRanks">How many ranks finer than the groove the fill plays.</param>
-internal sealed record FillPlay(FillKind Kind, FillTwist Twists, int Tuplet, FillRun? Run, int ExtraRanks = 1)
+/// <summary>How a fill is played: its kind, its twists, its run, if it has one, and its layer over the groove's rhythm.</summary>
+internal sealed record FillPlay(FillKind Kind, FillTwist Twists, FillRun? Run, StateMap Layer)
 {
-    public static FillPlay Plain(FillKind kind) => new(kind, FillTwist.None, 1, null);
+    public static FillPlay Plain(FillKind kind) => new(kind, FillTwist.None, null, FillRhythm.PlainLayer);
 }
 
 /// <summary>The fills a line takes: none, those before a section change, or those in the middle of a section.</summary>
@@ -404,5 +414,8 @@ internal enum LandingRule
 internal sealed record FillLine(double Position, FillSection Ending, int LandingSectionId, FillTable Fills, LandingRule Landing);
 
 /// <summary>A section as the fills see it: where it is, how far its rhythm strays, and the drums' feel before its lines.</summary>
-/// <param name="Groove">The rhythm the fills play from, the snare's in the last bar of the section's 4-bar pattern.</param>
-internal sealed record FillSection(int SectionId, double Duration, RhythmicUnconventionality Rhythm, ResolvedRhythm Groove);
+/// <param name="Groove">
+///     The state of the rhythm the fills play from, the snare's in the last bar of the section's 4-bar pattern, which
+///     a fill adds its layer to.
+/// </param>
+internal sealed record FillSection(int SectionId, double Duration, RhythmicUnconventionality Rhythm, StateMap Groove);

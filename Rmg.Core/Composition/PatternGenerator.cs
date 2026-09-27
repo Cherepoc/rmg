@@ -128,7 +128,7 @@ internal sealed class PatternGenerator
                 notes,
                 barStateTimelineMap.GetEffectiveStateMapAt(barIndex * Meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd)
             );
-        feels.Add(new BarFeel(trackNumber, barIndex, ResolvedRhythm.Of(stateMap), notes.Count));
+        feels.Add(new BarFeel(trackNumber, barIndex, stateMap, notes.Count));
         return notes.ToEventStateTimelineMap(stateMap.OfScope(StateScope.Render));
     }
 
@@ -355,18 +355,36 @@ internal sealed class PatternGenerator
 /// <summary>The bars of the tracks' patterns in a section, and the feel every track's bar plays in.</summary>
 internal sealed record GeneratedBars(TrackEventStateTimelineMap<StateMap> Timeline, ImmutableArray<BarFeel> Feels);
 
-/// <summary>The feel of a track's bar: the rhythm it plays, and how many notes it has.</summary>
+/// <summary>The feel of a track's bar: the state its rhythm is resolved from, and how many notes it has.</summary>
 /// <param name="Bar">The bar of the section's 4-bar pattern.</param>
-internal readonly record struct BarFeel(int Track, int Bar, ResolvedRhythm Rhythm, int NoteCount);
+internal readonly record struct BarFeel(int Track, int Bar, StateMap Rhythm, int NoteCount);
 
 /// <summary>
 ///     A bar pattern's rhythm settings, which its layers added up, folded into their ranges; its period and phase in
 ///     bars.
 /// </summary>
-internal readonly record struct ResolvedRhythm(double PeriodValue, double PhaseValue, int MaxRank, int PrimeIndex, double Fullness, double Variation)
+internal readonly record struct ResolvedRhythm(
+    double PeriodValue,
+    double PhaseValue,
+    int MaxRank,
+    int PrimeIndex,
+    double Fullness,
+    double Variation,
+    int RankOffset = 0
+)
 {
+    /// <summary>The finest rank a bar pattern plays down to.</summary>
+    public const int MaxRankLimit = 2;
+
     /// <summary>A straight rhythm of a beat, down to 16ths, for a section whose drums play nothing.</summary>
-    public static ResolvedRhythm Default { get; } = new(0.25, 0, 2, 0, RhythmSettings.Fullness, RhythmSettings.Variation);
+    public static StateMap DefaultState { get; } = StateMap.FromStates(
+        [
+            CompositionStateKinds.Rhythm.Period.Power.CreateState(-2),
+            CompositionStateKinds.Rhythm.MaxRank.CreateState(MaxRankLimit),
+            CompositionStateKinds.Rhythm.Fullness.CreateState(RhythmSettings.Fullness),
+            CompositionStateKinds.Rhythm.Variation.CreateState(RhythmSettings.Variation)
+        ]
+    );
 
     /// <summary>The period in beats.</summary>
     public double Period => PeriodValue * Meter.BarDuration;
@@ -374,16 +392,23 @@ internal readonly record struct ResolvedRhythm(double PeriodValue, double PhaseV
     /// <summary>The phase in beats.</summary>
     public double Phase => PhaseValue * Meter.BarDuration;
 
-    public static ResolvedRhythm Of(StateMap stateMap)
+    /// <param name="minNote">
+    ///     The shortest note, in beats, which sets the finest rank the rhythm folds into, as a fill's does; none for a
+    ///     bar pattern's, which folds into <see cref="MaxRankLimit" />.
+    /// </param>
+    public static ResolvedRhythm Of(StateMap stateMap, double? minNote = null)
     {
-        var maxRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.MaxRank)
-            .BounceInBounds(0, 2);
-
         var periodPower = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Power)
             .BounceInBounds(-2, 1);
         var primeIndex = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.PrimeIndex)
             .BounceInBounds(-RhythmPeriod.MaxPrimeIndex, RhythmPeriod.MaxPrimeIndex);
         var periodValue = Math.Pow(2, periodPower) * primeIndex.ToRhythmPeriodValue();
+
+        var maxRankLimit = minNote is { } note
+            ? Math.Max(0, (int)Math.Floor(Math.Log2(periodValue * Meter.BarDuration / note) + 1e-9))
+            : MaxRankLimit;
+        var maxRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.MaxRank)
+            .BounceInBounds(0, maxRankLimit);
 
         var phaseRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.Rank)
             .BounceInBounds(0, 2);
@@ -394,7 +419,8 @@ internal readonly record struct ResolvedRhythm(double PeriodValue, double PhaseV
         // fullness and variation keep to their ranges; the song sets where they start
         var fullness = Math.Clamp(stateMap.GetStateValue(CompositionStateKinds.Rhythm.Fullness), RhythmSettings.MinFullness, 1);
         var variation = Math.Clamp(stateMap.GetStateValue(CompositionStateKinds.Rhythm.Variation), 0, 1);
-        return new ResolvedRhythm(periodValue, phaseValue, maxRank, primeIndex, fullness, variation);
+        var rankOffset = stateMap.GetStateValue(CompositionStateKinds.Rhythm.RankOffset).BounceInBounds(0, maxRank);
+        return new ResolvedRhythm(periodValue, phaseValue, maxRank, primeIndex, fullness, variation, rankOffset);
     }
 }
 

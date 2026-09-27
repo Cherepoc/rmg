@@ -123,6 +123,13 @@ public static class RhythmLayers
     /// <summary>How the drums' shared rhythm differs in a section.</summary>
     public static RhythmLayer SectionDrumGroup { get; } = new(0.025, 0.05, 0.035, 0.05, 0.1);
 
+    /// <summary>
+    ///     A fill's layer over the groove, over and above the ranks finer it plays: a rank more or less, its weight moved
+    ///     to weaker notes, a tuplet or a dotted feel now and then, and its fullness spread. Its cycle and phase stay the
+    ///     groove's.
+    /// </summary>
+    public static RhythmLayer Fill { get; } = new(0, 0.5, 0.02, 0.2, 0);
+
     /// <summary>A track's bar pattern, where a busier or sparser bar sounds like a variation, not a new groove.</summary>
     public static RhythmLayer BarPattern { get; } = new(0.025, 0.15, 0.05, 0.05, 0.1);
 }

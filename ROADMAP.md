@@ -60,6 +60,12 @@ A run plays the snare's feel only, so where the hi-hat or the percussion plays a
 stays straight: wild songs play about 1.8 times the tuplet notes of plain ones, down from 2.1. Reading the tuplet the
 drums play most, as the fills once did, would bring it back, should wild songs sound too straight.
 
+### How fast runs are
+
+A run is two ranks finer than the snare's groove, and the snare's backbeat is sparse, so over 200 corpus songs about
+three runs in ten play quarters or slower, half play 8ths or 16ths. Should slow runs sound weak, a run's finest rank
+could aim at the finest the tempo allows, a step or two less, keeping only the groove's cycle and phase.
+
 ### A drum's sounds together
 
 A drum is one track, whose note plays one sound, so a run's window plays one sound of a drum at a time: never two
