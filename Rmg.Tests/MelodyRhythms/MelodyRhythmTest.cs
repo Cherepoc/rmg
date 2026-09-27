@@ -149,4 +149,24 @@ public sealed class MelodyRhythmTest
         await Assert.That(notesPerBar.Min()).IsLessThan(2.5);
         await Assert.That(notesPerBar.Max()).IsGreaterThan(5);
     }
+
+    [Test]
+    public async Task APhrasesContour_RisesToItsPeak_AndFallsFromIt()
+    {
+        var context = new Rmg.Core.Probabilities.GenerationContext(1);
+        var peaks = new List<int>();
+        for (var i = 0; i < 2_000; i++)
+        {
+            var contour = MelodyLayers.GenerateContour(context);
+            var peak = contour.IndexOf(contour.Max());
+            peaks.Add(peak);
+
+            await Assert.That(contour[peak]).IsEqualTo(MelodyLayers.PeakRegister);
+            for (var bar = 1; bar < contour.Length; bar++)
+                await Assert.That(bar <= peak ? contour[bar] > contour[bar - 1] : contour[bar] < contour[bar - 1]).IsTrue();
+        }
+
+        // an arch most often, peaking in the third bar
+        await Assert.That(peaks.GroupBy(x => x).MaxBy(x => x.Count())!.Key).IsEqualTo(2);
+    }
 }

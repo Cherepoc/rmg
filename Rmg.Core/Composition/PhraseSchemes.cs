@@ -33,26 +33,35 @@ public static class PhraseSchemes
     ///     The schemes and how likely each is: repeats, which give a phrase its identity, most of all, and a phrase of
     ///     four different bars rarely.
     /// </summary>
-    public static ImmutableArray<(string Scheme, double Weight, bool IsAdventurous)> All { get; } =
+    public static ImmutableArray<(string Scheme, double Weight)> All { get; } =
     [
-        ("AAAA", 0.15, false),
-        ("AABA", 0.2, false),
-        ("AAAB", 0.2, false),
-        ("ABAB", 0.15, false),
-        ("AABB", 0.1, false),
-        ("ABAC", 0.1, true),
-        ("ABCD", 0.05, true)
+        ("AAAA", 0.15),
+        ("AABA", 0.2),
+        ("AAAB", 0.2),
+        ("ABAB", 0.15),
+        ("AABB", 0.1),
+        ("ABAC", 0.1),
+        ("ABCD", 0.05)
     ];
 
     /// <summary>
-    ///     A scheme, the adventurous ones, which bring more new bars, more likely the more unconventional the rhythm,
-    ///     and some of its repeats varied.
+    ///     How unconventional a scheme is, by how many different bars it brings: -0.5 for one bar four times, 0 for two,
+    ///     and 1 for four different bars.
+    /// </summary>
+    public static double GetUnconventionality(string scheme)
+    {
+        return (scheme.Distinct().Count() - 2) / 2.0;
+    }
+
+    /// <summary>
+    ///     A scheme, those that bring more new bars the more likely the more unconventional the rhythm, and some of its
+    ///     repeats varied.
     /// </summary>
     public static PhraseScheme Pick(IGenerationContext context, RhythmicUnconventionality unconventionality)
     {
         ImmutableArray<Weighted<string>> weights =
         [
-            ..All.Select(x => new Weighted<string>(unconventionality.Tilt.Weigh(x.Weight, x.IsAdventurous ? 1 : 0), x.Scheme))
+            ..All.Select(x => new Weighted<string>(unconventionality.Tilt.Weigh(x.Weight, GetUnconventionality(x.Scheme)), x.Scheme))
         ];
         var scheme = weights[Generators.WeightedIndex(weights)(context)].Value;
 

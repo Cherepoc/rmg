@@ -24,8 +24,19 @@ public sealed class PhraseSchemesTest
         var counts = DrawSchemes(0.5);
         var weightSum = Rmg.Core.Composition.PhraseSchemes.All.Sum(x => x.Weight);
 
-        foreach (var (scheme, weight, _) in Rmg.Core.Composition.PhraseSchemes.All)
+        foreach (var (scheme, weight) in Rmg.Core.Composition.PhraseSchemes.All)
             await Assert.That(counts.GetValueOrDefault(scheme) / (double)DrawCount).IsEqualTo(weight / weightSum).Within(0.01).Because(scheme);
+    }
+
+    [Test]
+    [Arguments("AAAA", -0.5)]
+    [Arguments("AABA", 0.0)]
+    [Arguments("ABAB", 0.0)]
+    [Arguments("ABAC", 0.5)]
+    [Arguments("ABCD", 1.0)]
+    public async Task ASchemesUnconventionality_IsHowManyDifferentBarsItBrings(string scheme, double unconventionality)
+    {
+        await Assert.That(Rmg.Core.Composition.PhraseSchemes.GetUnconventionality(scheme)).IsEqualTo(unconventionality);
     }
 
     [Test]

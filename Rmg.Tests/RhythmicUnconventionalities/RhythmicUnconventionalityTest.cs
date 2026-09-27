@@ -49,7 +49,8 @@ public sealed class RhythmicUnconventionalityTest
     public async Task WildSongs_PlayMoreTuplets_ThanPlainOnes()
     {
         var shares = new List<(double Value, double Tuplets)>();
-        for (var seed = 0; seed < 80; seed++)
+        // over enough songs that the quarters compared are not left to chance: over 80, the ratio swings from 1.4 to 1.7
+        for (var seed = 0; seed < 200; seed++)
         {
             var value = RhythmicUnconventionality.Generate(SongGenerator.CreateStream(seed, SongStream.Rhythm)).Value;
             var hits = TestCorpus.Get(seed).Song.TrackEventStateTimelineMap.TrackTimelineMap

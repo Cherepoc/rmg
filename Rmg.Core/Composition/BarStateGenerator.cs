@@ -145,7 +145,7 @@ internal sealed class BarStateGenerator
     /// <summary>The shape the section's melody phrases take: the register the melody aims at in each bar.</summary>
     private StateTimeline<double> GenerateMelodyContour(IGenerationContext context)
     {
-        var contour = MelodyLayers.Contours[Generators.WeightedIndex(MelodyLayers.Contours)(context)].Value;
+        var contour = MelodyLayers.GenerateContour(context);
         return StateTimeline.Create(
                 Meter.PatternDuration,
                 CompositionStateKinds.MelodyRegister,

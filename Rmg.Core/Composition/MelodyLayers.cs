@@ -54,18 +54,33 @@ public static class MelodyLayers
     public const double PhraseEndRest = 1;
 
     /// <summary>
-    ///     The shapes a phrase takes, as the register it aims at in each of its four bars, in semitones above or below
-    ///     the middle of the melody's range, and how likely each is.
+    ///     The bar a phrase peaks in, and how likely each is: most often its third, an arch that rises and comes back
+    ///     down, then its first, a phrase that falls from its start, then its last, one that rises to its end.
     /// </summary>
-    public static ImmutableArray<Weighted<ImmutableArray<double>>> Contours { get; } =
-    [
-        // up and back down
-        new(0.4, [-2, 3, 5, 0]),
-        new(0.25, [5, 2, -1, -4]),
-        new(0.15, [-4, -1, 2, 5]),
-        // up and down and up
-        new(0.2, [0, 4, -2, 2])
-    ];
+    public static ImmutableArray<Weighted<int>> PeakBars { get; } = [new(0.25, 0), new(0.1, 1), new(0.45, 2), new(0.2, 3)];
+
+    /// <summary>The register a phrase aims at in the bar it peaks in, in semitones above the middle of the melody's range.</summary>
+    public const double PeakRegister = 5;
+
+    /// <summary>How far below its peak a phrase aims for every bar away from it, in semitones, and how far that spreads either way.</summary>
+    public const double Slope = 3;
+
+    public const double SlopeSpread = 1;
+
+    private static readonly Func<IGenerationContext, int> PeakBarGenerator = Generators.WeightedIndex(PeakBars);
+
+    private static readonly Func<IGenerationContext, double> SlopeGenerator = Generators.SplineValue().Then(x => Slope + x * SlopeSpread);
+
+    /// <summary>
+    ///     The shape a phrase takes, as the register it aims at in each of its four bars: its peak in the bar drawn, and
+    ///     lower by the slope drawn for every bar away from it, so that it rises to its peak and falls from it.
+    /// </summary>
+    public static ImmutableArray<double> GenerateContour(IGenerationContext context)
+    {
+        var peak = PeakBars[PeakBarGenerator(context)].Value;
+        var slope = SlopeGenerator(context);
+        return [..Enumerable.Range(0, Progressions.BarCount).Select(bar => PeakRegister - slope * Math.Abs(bar - peak))];
+    }
 
     /// <summary>A layer's shift of the stepwiseness, up to the given size either way.</summary>
     public static Func<IGenerationContext, double> CreateGenerator(double size)
