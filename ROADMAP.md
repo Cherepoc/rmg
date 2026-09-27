@@ -81,6 +81,14 @@ to:
 - **Idioms the draws no longer tie together:** a lift is now a half-beat run on any sounds, rarely the open hi-hat,
   and a landing takes any cymbal sound, the china and the splash as often as the crashes. The drummer's signature
   twist went with the twists.
+- **Fill values as state,** built with section dynamics, which needs the same plumbing for its energy: the chances of
+  starting off the beat, fading and landing early as multiplicative state kinds (a base, the section's chance scale, a
+  signature's ×5, capped at 1 when read), layered in `FillGenerator` from the fills' own random stream, so that songs
+  stay the same outside the lines: a base layer, the drummer's song layer, which brings the signature back as a
+  raised value, and the section's. A run's chance of a role's drums would follow as each group's own state, per role
+  so that a song of four percussion drums plays them no more than one, with how unconventional a group is, 0 for the
+  snare and the toms, as the power of the chance scale that multiplies it, in place of `RoleChances` and
+  `ConventionalRoles`.
 
 ### A drum's sounds together
 
