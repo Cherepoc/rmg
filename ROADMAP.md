@@ -6,18 +6,18 @@ Planned work that has been decided but not built yet.
 
 In this order, each measured before it is planned:
 
-1. **Fills from the groove** (see *Fills*): the runs are rebuilt on the section's groove, as measured and decided there.
-2. **Listen and tune.** The new fills (their level against the groove, the length of runs, whether twists sound
-   interesting or broken), intros (whether the band's entry after a chords-first or build-up intro feels earned) and
-   endings (whether the ritardando plays in the browser, whether a final chord taken from a weak note is too quiet) have
-   been tuned by measurement only.
-3. **Section dynamics.** One energy value per section, drawn around the song's, that drives what is drawn apart today:
+1. **Listen and tune.** The runs, rebuilt on the groove (whether they sound part of it now, whether the drums they
+   draw, their walks and windows sound interesting or broken, how often they play drums other than the snare and the
+   toms, about one run in five), intros (whether the band's entry after a chords-first or build-up intro feels earned)
+   and endings (whether the ritardando plays in the browser, whether a final chord taken from a weak note is too quiet)
+   have been tuned by measurement only.
+2. **Section dynamics.** One energy value per section, drawn around the song's, that drives what is drawn apart today:
    the section's velocity, the drums' fullness and which groups play (ride and crash when loud, cross-stick when
    quiet), the melody's busyness and the chords' rhythm, and fills that build into a loud section and break before a
    quiet one. Verse, pre-chorus and chorus then differ by design. Measure first how far sections differ now.
-4. **Sections changing mode,** such as a chorus in the relative major or a darker bridge: the section's scale becomes
+3. **Sections changing mode,** such as a chorus in the relative major or a darker bridge: the section's scale becomes
    its own state; scales, homes and cadences already work per scale.
-5. Smaller: melody motifs remembered per cycle (see *Rhythm engine*), fade-out endings (see *Form*), and moving the
+4. Smaller: melody motifs remembered per cycle (see *Rhythm engine*), fade-out endings (see *Form*), and moving the
    melody's final note and a stop's cuts from render flags to edits of the notes after `Realizer`, one at a time.
 
 ## Architecture
@@ -27,7 +27,6 @@ Left from the review, each small and best done when the code is next touched:
 - **Track roles:** a role on a track's definition in place of checking track numbers (`SongTracks.MelodyTrack`,
   `>= DrumGroups.FirstTrackNumber`) in the generators, and the melody's pattern code (phrase ends, steps, motifs) out
   of `PatternGenerator` into a class of its own.
-- **Split `FillGenerator`** into the decisions and a player of fill specs, once fills grow again.
 - **Visibility:** the tables (`FillLayers`, `FormLayers`, `Drummer`, `MelodyBusyness` and more) are public though
   nothing outside needs them.
 - `TrackEventStateTimelineMap.MergeStateTimelineMap` in place of merging a map of no tracks to add common state; one
@@ -49,42 +48,22 @@ exist; in a 7-note scale it changes nothing.
 
 ## Fills
 
-### From the groove
-
-The runs sound detached from the groove they end. Measured over 300 corpus songs, against the drums but the kick in
-the bar before each fill:
-
-- **Grid:** the runs play on the fixed grid (16ths, 8ths above 150 BPM) while the groove's hands play 8ths or coarser
-  in 70% of bars, so three runs in four play finer than the groove, and one in three at least four times finer.
-- **Feel:** one run in five falls off the groove's grid, straight over a triplet, dotted or quintuplet groove (one in
-  three around the kit), since a fill takes a tuplet only where it fills a quarter of the last bar's drum notes.
-- **Loudness:** tom runs and runs around the kit average 0.37 against the groove's 0.21, louder in about 80% of fills;
-  snare rolls average 0.14, quieter than the groove.
-
-Decided:
-
-- **One run** in place of the tom run, the snare roll, the run around the kit and the pickup; the fills are then the
-  run, the break, stop time and the lift.
-- **The rhythm is the groove's:** the snare track's state at the line plus a fill layer, which raises the max rank and
-  the fullness and sets the variation to 0, so the run keeps the section's cycle, phase and tuplet, and its accents
-  fall by rank where the groove's do. A pickup is a small layer; a speed-up adds a rank for the second half; the
-  150 BPM limit on 16ths becomes a limit on the max rank. Only the snare's state is read, not the hi-hat's.
-- **Each instrument's limits** are layers of its own over that, such as the cymbals kept to coarse notes; the
-  section's conventionality loosens them. The drummer's busyness moves the fullness.
-- **The sounds:** a weighted set of the song's drums, mostly the snare and the toms, in a random order that a
-  conventional section pulls toward the toms' pitch order, walked one way, turning, looping, or at random, mostly to a
-  neighbour. Each note plays the sounds in a window of the walk, whose width is drawn, mostly 1, with no limit.
-  The snare's single sound makes a set of the snare alone a roll.
-- **Twists:** upward, zigzag, odd voice and gappy go, as walks, sets, windows and layers; tuplet (where the groove has
-  none), slow-down (the max rank down), odd span, fading, early landing and no landing stay.
-
-This is when to split `FillGenerator` (see *Architecture*).
-
 ### Snare and cross-stick
 
 A section whose snare group plays the cross-stick gives the run the cross-stick's state, which works as a rhythm, but
 the run then plays a cross-stick or a clap as its snare. Better handling later: the song's main snare's sound over the
 section's rhythm, or both where the song has both.
+
+### Tuplets of the other drums
+
+A run plays the snare's feel only, so where the hi-hat or the percussion plays a tuplet and the snare does not, the run
+stays straight: wild songs play about 1.8 times the tuplet notes of plain ones, down from 2.1. Reading the tuplet the
+drums play most, as the fills once did, would bring it back, should wild songs sound too straight.
+
+### A drum's sounds together
+
+A drum is one track, whose note plays one sound, so a run's window plays one sound of a drum at a time: never two
+toms together. Notes of several sounds on one track would allow it.
 
 ## Form
 
