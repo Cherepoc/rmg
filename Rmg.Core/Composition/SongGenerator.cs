@@ -82,11 +82,15 @@ public static class SongGenerator
         );
         // how the song starts and ends around its sections, decided before them: the one the song ends with leads home
         // to the tonic, where the ending lands
-        var formGenerator = new SongFormGenerator(Stream(SongStream.Form), rhythmicUnconventionality);
+        var formGenerator = new SongFormGenerator(
+            Stream(SongStream.Form),
+            rhythmicUnconventionality,
+            tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role)
+        );
         var plan = formGenerator.Plan(sectionIds);
 
         // every section is generated once, where it first plays
-        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(id, id == plan.TonicHomeSectionId, id == sectionIds[0])))
+        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0]))))
             .CacheGeneratedValues();
         var sections = sectionIds.Select(generateSection).ToArray();
 

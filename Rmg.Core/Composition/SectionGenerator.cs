@@ -61,48 +61,25 @@ internal sealed class SectionGenerator
     }
 
     /// <summary>The section: its 4-bar pattern played twice, with what the fills need to know of its rhythm.</summary>
-    /// <param name="hasTonicHome">Whether the section has the song's tonic as its home, as the song's form has the last.</param>
-    /// <param name="keepsSongScale">Whether the section plays in the song's scale, as the song's first does, which sets the key.</param>
-    public GeneratedSection Generate(int sectionId, bool hasTonicHome = false, bool keepsSongScale = false)
+    /// <param name="plan">The section's place in the song's form, which some of its draws keep to.</param>
+    public GeneratedSection Generate(SectionPlan plan)
     {
         // every section draws from its own sequence, so a change to one leaves the others as they are
+        var sectionId = plan.Id;
         var context = _context.CreateContext(Seeds.Derive(_seed, sectionId));
         var unconventionality = _songUnconventionality.GenerateSection(context);
         var rhythm = _songRhythmicUnconventionality.GenerateSection(context);
         var chords = LayerStates.CreateChordPool(unconventionality)(context);
 
-        // how loud and busy the section is meant to be, which leans its draws as far as its rhythm follows it
-        var songStateMap = _songStateMap.MergeWith(_sectionEnergies[sectionId]);
-        var energy = songStateMap.GetStateValue(CompositionStateKinds.Energy);
+        var (songStateMap, energy) = GetEnergy(sectionId, rhythm);
         var tilt = SectionEnergy.Tilt(energy, rhythm.Coupling);
-        StateTrace.Record(
-            TracePoints.SectionEnergy,
-            SectionTrace,
-            sectionId,
-            0,
-            songStateMap.Subset([CompositionStateKinds.Energy]),
-            0,
-            $"energy {energy:F2}, pull {energy * rhythm.Coupling:F2}",
-            new SectionEnergyTrace(energy, energy * rhythm.Coupling)
-        );
-
-        // the section plays in the song's scale, or now and then in another on its tonic, leaning brighter the more
-        // energy it has, as far as its harmony follows it; drawn from a sequence of its own, so that the section's
-        // other draws stay as they are
-        var scale = keepsSongScale
-            ? _songScale
-            : Scales.PickSection(
-                _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), ScaleStream)),
-                _songScale,
-                unconventionality,
-                SectionEnergy.Tilt(energy, unconventionality.Coupling)
-            );
+        var scale = plan.KeepsSongScale ? _songScale : PickScale(sectionId, unconventionality, energy);
         StateTrace.Record(TracePoints.SectionScale, SectionTrace, sectionId, 0, StateMap.Default, 0, scale.Name, scale);
 
-        // the section's chords move around its home, which every track's root starts from
+        // the section's chords move around its home, which every track's root starts from; the song's last section
+        // leads home to its tonic, where the song ends
         var home = Progressions.GenerateHome(context, scale);
-        // the song's last section leads home to its tonic, where the song ends
-        if (hasTonicHome)
+        if (plan.HasTonicHome)
             home = 0;
         var progression = Progressions.Generate(context, scale, home, unconventionality.ProgressionStrictness);
 
@@ -138,27 +115,68 @@ internal sealed class SectionGenerator
         var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context), tilt);
 
         var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, barStateTimelineMap, sectionRhythm).ToArray();
-        var trackTimelineMaps = new List<TrackEventStateTimelineMap<StateMap>>();
-        trackTimelineMaps.AddRange(drums.Select(x => x.Timeline));
-        trackTimelineMaps.AddRange(GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, sectionRhythm).Select(x => x.Timeline));
-
-        // the song keeps what Render reads; the bar state for the generation, such as the chord pool's pick, stays here
-        trackTimelineMaps.Add(
-            barStateTimelineMap.OfScope(StateScope.Render).ToTrackEventStateTimelineMap<StateMap>(Meter.PatternDuration)
+        var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, sectionRhythm);
+        return new GeneratedSection(
+            KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Timeline)], barStateTimelineMap).Repeat(2),
+            rhythm,
+            GetGrooves(drums.SelectMany(x => x.Feels)),
+            energy
         );
-        // and of the notes, too, what Render reads, now that the melody is placed
-        var timeline = TrackEventStateTimelineMap.Merge(trackTimelineMaps);
-        timeline = timeline.MapTrackEvents(
+    }
+
+    /// <summary>
+    ///     How loud and busy the section is meant to be: the song's state with the section's layers of the energy, and
+    ///     their sum, which leans the section's draws as far as its rhythm follows it.
+    /// </summary>
+    private (StateMap SongStateMap, double Energy) GetEnergy(int sectionId, RhythmicUnconventionality rhythm)
+    {
+        var songStateMap = _songStateMap.MergeWith(_sectionEnergies[sectionId]);
+        var energy = songStateMap.GetStateValue(CompositionStateKinds.Energy);
+        StateTrace.Record(
+            TracePoints.SectionEnergy,
+            SectionTrace,
+            sectionId,
+            0,
+            songStateMap.Subset([CompositionStateKinds.Energy]),
+            0,
+            $"energy {energy:F2}, pull {energy * rhythm.Coupling:F2}",
+            new SectionEnergyTrace(energy, energy * rhythm.Coupling)
+        );
+        return (songStateMap, energy);
+    }
+
+    /// <summary>
+    ///     The section's scale: the song's, or now and then another on its tonic, leaning brighter the more energy the
+    ///     section has, as far as its harmony follows it; drawn from a sequence of its own, so that the section's other
+    ///     draws stay as they are.
+    /// </summary>
+    private Scale PickScale(int sectionId, HarmonicUnconventionality harmony, double energy)
+    {
+        return Scales.PickSection(
+            _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), ScaleStream)),
+            _songScale,
+            harmony,
+            SectionEnergy.Tilt(energy, harmony.Coupling)
+        );
+    }
+
+    /// <summary>
+    ///     The section's tracks as the song keeps them: what Render reads of their notes, now that the melody is placed,
+    ///     and of the bar state, whose state for the generation, such as the chord pool's pick, stays here.
+    /// </summary>
+    private static TrackEventStateTimelineMap<StateMap> KeepRenderState(
+        IEnumerable<TrackEventStateTimelineMap<StateMap>> tracks,
+        StateTimelineMap barStateTimelineMap
+    )
+    {
+        var timeline = TrackEventStateTimelineMap.Merge(
+            [..tracks, barStateTimelineMap.OfScope(StateScope.Render).ToTrackEventStateTimelineMap<StateMap>(Meter.PatternDuration)]
+        );
+        return timeline.MapTrackEvents(
             timeline.TrackTimelineMap.Keys.ToDictionary(
                 x => x,
                 _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes => notes.MapValues(x => x.OfScope(StateScope.Render)))
             )
-        );
-        return new GeneratedSection(
-            timeline.Repeat(2),
-            rhythm,
-            GetGrooves(drums.SelectMany(x => x.Feels)),
-            energy
         );
     }
 
@@ -249,7 +267,7 @@ internal sealed class SectionGenerator
             // and is as busy as the section has it
             var sectionTrackLayer = new StateMapBuilder("Section track", perTrack: true)
                 .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Section));
-            if (trackNumber == SongTracks.MelodyTrack)
+            if (_tracks.Definitions[trackNumber].Role == TrackRole.Melody)
                 sectionRhythm.MelodyBusyness.AddTo(
                     sectionTrackLayer.Add(CompositionStateKinds.MelodyStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Section))
                 );
@@ -259,7 +277,7 @@ internal sealed class SectionGenerator
             var trackStateMaps = new Dictionary<int, StateMap> { [trackNumber] = trackStateMap };
             var bars = _patternGenerator.GenerateBars(context, sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap, sectionRhythm);
             // the melody's notes are placed once its bars are made, in their order
-            if (trackNumber == SongTracks.MelodyTrack)
+            if (_tracks.Definitions[trackNumber].Role == TrackRole.Melody)
                 bars = bars with
                 {
                     Timeline = MelodyPattern.Place(bars.Timeline, trackNumber, (PitchInstrumentTrack)_tracks.Definitions[trackNumber], barStateTimelineMap, _key)
@@ -296,6 +314,11 @@ internal sealed class SectionGenerator
             .MergeWith(sectionPoolEntries);
     }
 }
+
+/// <summary>A section's place in the song's form, which some of its draws keep to.</summary>
+/// <param name="HasTonicHome">Whether its home is the song's tonic, as the song's last section's is, where the song ends.</param>
+/// <param name="KeepsSongScale">Whether it plays in the song's scale, as the song's first does, which sets the key.</param>
+internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScale);
 
 /// <summary>A section's tracks, and what the fills need to know of its rhythm and energy.</summary>
 /// <param name="Rhythm">How far the section's rhythm strays from convention.</param>

@@ -76,7 +76,8 @@ internal sealed class SongTracks
                 ),
                 chordsInstrument.Program,
                 minOctaveOffsetGenerator(),
-                maxOctaveOffsetGenerator()
+                maxOctaveOffsetGenerator(),
+                TrackRole.Chords
             ),
             [MelodyTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
@@ -96,7 +97,8 @@ internal sealed class SongTracks
                 ),
                 melodyInstrument.Program,
                 minOctaveOffsetGenerator(),
-                maxOctaveOffsetGenerator()
+                maxOctaveOffsetGenerator(),
+                TrackRole.Melody
             ),
             [BassTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
@@ -114,7 +116,8 @@ internal sealed class SongTracks
                 ),
                 bassInstrument.Program,
                 -3,
-                -2
+                -2,
+                TrackRole.Bass
             )
         };
 

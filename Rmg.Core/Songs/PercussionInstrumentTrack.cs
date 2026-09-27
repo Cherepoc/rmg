@@ -16,4 +16,6 @@ public sealed class PercussionInstrumentTrack : IInstrumentTrack
 
     public ImmutableArray<int> ArticulationCodes { get; }
     public StateMap StateMap { get; }
+
+    public TrackRole Role => TrackRole.Drum;
 }

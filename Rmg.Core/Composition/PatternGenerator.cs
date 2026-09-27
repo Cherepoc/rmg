@@ -123,7 +123,7 @@ internal sealed class PatternGenerator
 
         var notes = GenerateNotes(stateMap, barStateTimelineMap, barIndex * Meter.BarDuration, trackNumber, sectionId, barIndex)
             .GeneratedTimeline;
-        if (trackNumber == SongTracks.MelodyTrack)
+        if (_trackDefinitions[trackNumber].Role == TrackRole.Melody)
             notes = MelodyPattern.EndPhrase(
                 notes,
                 barStateTimelineMap.GetEffectiveStateMapAt(barIndex * Meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd)
@@ -166,7 +166,7 @@ internal sealed class PatternGenerator
             ChordNoteOffset
         );
 
-        var melody = trackNumber == SongTracks.MelodyTrack ? new MelodyPattern(stateMap) : null;
+        var melody = _trackDefinitions[trackNumber].Role == TrackRole.Melody ? new MelodyPattern(stateMap) : null;
         // a note's values, which a note of a repeated cycle takes from the note it repeats
         var noteValuesGenerator = (IGenerationContext innerContext, double position, KeptBeat beat) =>
         {

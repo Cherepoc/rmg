@@ -128,7 +128,13 @@ public sealed class SongEndingTest
             0
         );
 
-        var ending = SongFormGenerator.CreateEnding(section, [], 8, 8);
+        var ending = SongFormGenerator.CreateEnding(
+            section,
+            [],
+            8,
+            8,
+            new Dictionary<int, TrackRole> { [MelodyTrack] = TrackRole.Melody, [BassTrack] = TrackRole.Bass, [drum] = TrackRole.Drum }
+        );
         var melody = ending.TrackTimelineMap[MelodyTrack].EventTimeline.Single();
 
         await Assert.That(ending.Duration).IsEqualTo(8);

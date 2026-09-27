@@ -8,9 +8,14 @@ public sealed class PitchInstrumentTrack : IInstrumentTrack
         StateMap stateMap,
         int instrumentCode,
         int minOctaveOffset,
-        int maxOctaveOffset
+        int maxOctaveOffset,
+        TrackRole role
     )
     {
+        if (role == TrackRole.Drum)
+            throw new ArgumentException("A pitched track does not play a drum.", nameof(role));
+
+        Role = role;
         StateMap = stateMap;
         InstrumentCode = instrumentCode;
         MinOctaveOffset = minOctaveOffset;
@@ -23,4 +28,6 @@ public sealed class PitchInstrumentTrack : IInstrumentTrack
 
     public int MaxOctaveOffset { get; }
     public StateMap StateMap { get; }
+
+    public TrackRole Role { get; }
 }

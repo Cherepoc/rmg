@@ -18,10 +18,14 @@ internal sealed class SongFormGenerator
     private readonly IGenerationContext _context;
     private readonly RhythmicUnconventionality _songRhythm;
 
-    public SongFormGenerator(IGenerationContext context, RhythmicUnconventionality songRhythm)
+    // what every track plays, by its number, so that the form can bring in or leave out the drums or the bass
+    private readonly IReadOnlyDictionary<int, TrackRole> _roles;
+
+    public SongFormGenerator(IGenerationContext context, RhythmicUnconventionality songRhythm, IReadOnlyDictionary<int, TrackRole> roles)
     {
         _context = context;
         _songRhythm = songRhythm;
+        _roles = roles;
     }
 
     /// <summary>
@@ -61,8 +65,8 @@ internal sealed class SongFormGenerator
         var first = sections[0];
         var introBlock = plan.Intro switch
         {
-            IntroKind.DrumsFirst => CreateDrumsFirst(first, plan.DrumsFirstBars * Meter.BarDuration),
-            IntroKind.CountIn => CreateCountIn(first, plan.HalfCountIn),
+            IntroKind.DrumsFirst => CreateDrumsFirst(first, plan.DrumsFirstBars * Meter.BarDuration, _roles),
+            IntroKind.CountIn => CreateCountIn(first, plan.HalfCountIn, _roles),
             _ => null
         };
 
@@ -118,7 +122,7 @@ internal sealed class SongFormGenerator
                 var phraseEnd = origin + Meter.PatternDuration;
                 foreach (var track in first.Timeline.TrackTimelineMap.Keys)
                 {
-                    var entry = GetIntroEntry(plan.Intro, track, plan.WithBass);
+                    var entry = GetIntroEntry(plan.Intro, _roles[track], plan.WithBass);
                     if (entry > 0)
                         edits.Clear(track, origin, origin + entry);
                 }
@@ -136,7 +140,7 @@ internal sealed class SongFormGenerator
         var description = $"{plan.Ending} ending";
         if (plan.Ending != EndingKind.Open)
         {
-            blocks.Add(CreateEnding(sections[^1], sections.Take(sections.Count - 1), plan.Held, endingDuration));
+            blocks.Add(CreateEnding(sections[^1], sections.Take(sections.Count - 1), plan.Held, endingDuration, _roles));
 
             if (plan.Ending == EndingKind.Stop)
             {
@@ -170,35 +174,43 @@ internal sealed class SongFormGenerator
     ///     When a track comes in, in beats into the first phrase, as an intro leaves it out: the chords from the start, and
     ///     in a build the bass and the drums bar by bar; the others after the phrase; 0 for from the start.
     /// </summary>
-    internal static double GetIntroEntry(IntroKind intro, int track, bool withBass)
+    internal static double GetIntroEntry(IntroKind intro, TrackRole role, bool withBass)
     {
         var phrase = Meter.PatternDuration;
-        if (track == SongTracks.ChordsTrack)
+        if (role == TrackRole.Chords)
             return 0;
         if (intro == IntroKind.ChordsFirst)
-            return track == SongTracks.BassTrack && withBass ? 0 : phrase;
+            return role == TrackRole.Bass && withBass ? 0 : phrase;
 
-        return track switch
+        return role switch
         {
-            SongTracks.BassTrack => FormLayers.BuildBassBar * Meter.BarDuration,
-            >= DrumGroups.FirstTrackNumber => FormLayers.BuildDrumsBar * Meter.BarDuration,
+            TrackRole.Bass => FormLayers.BuildBassBar * Meter.BarDuration,
+            TrackRole.Drum => FormLayers.BuildDrumsBar * Meter.BarDuration,
             _ => phrase
         };
     }
 
     /// <summary>The first section's drums alone, notes and state, for the intro's bars.</summary>
-    private static TrackEventStateTimelineMap<StateMap> CreateDrumsFirst(GeneratedSection first, double duration)
+    private static TrackEventStateTimelineMap<StateMap> CreateDrumsFirst(
+        GeneratedSection first,
+        double duration,
+        IReadOnlyDictionary<int, TrackRole> roles
+    )
     {
         var bars = first.Timeline.Trim(duration);
         return TrackEventStateTimelineMap.Create(
             duration,
-            bars.TrackTimelineMap.Where(x => x.Key >= DrumGroups.FirstTrackNumber),
+            bars.TrackTimelineMap.Where(x => roles[x.Key] == TrackRole.Drum),
             bars.CommonStateTimelineMap
         );
     }
 
     /// <summary>A bar of the pedal hi-hat on the beats, or on the last two, over the first section's drum state.</summary>
-    private static TrackEventStateTimelineMap<StateMap> CreateCountIn(GeneratedSection first, bool isHalf)
+    private static TrackEventStateTimelineMap<StateMap> CreateCountIn(
+        GeneratedSection first,
+        bool isHalf,
+        IReadOnlyDictionary<int, TrackRole> roles
+    )
     {
         var bar = first.Timeline.Trim(Meter.BarDuration);
         var hiHat = DrumGroups.GetTrackNumber(DrumDefinitions.HiHat);
@@ -209,7 +221,7 @@ internal sealed class SongFormGenerator
             ]
         );
         var tracks = bar.TrackTimelineMap
-            .Where(x => x.Key >= DrumGroups.FirstTrackNumber)
+            .Where(x => roles[x.Key] == TrackRole.Drum)
             .Select(x => new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
                     x.Key,
                     x.Value.WithEvents(
@@ -255,7 +267,8 @@ internal sealed class SongFormGenerator
         GeneratedSection lastSection,
         IEnumerable<GeneratedSection> earlierSections,
         double length,
-        double duration
+        double duration,
+        IReadOnlyDictionary<int, TrackRole> roles
     )
     {
         var homeBar = lastSection.Timeline.Trim(Meter.BarDuration);
@@ -263,7 +276,7 @@ internal sealed class SongFormGenerator
         // every track plays the home bar's chord, whichever note it takes its own state from
         IStateKind[] shapeKinds = [StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed];
         var homeShape = homeBar.TrackTimelineMap
-            .Where(x => x.Key < DrumGroups.FirstTrackNumber && x.Value.EventTimeline.Count > 0)
+            .Where(x => roles[x.Key] != TrackRole.Drum && x.Value.EventTimeline.Count > 0)
             .Select(x => x.Value.EventTimeline[0].Value.Subset(shapeKinds))
             .FirstOrDefault();
         var tracks = homeBar.TrackTimelineMap.Select(x =>
@@ -275,7 +288,7 @@ internal sealed class SongFormGenerator
                             section.Timeline.TrackTimelineMap.TryGetValue(x.Key, out var timeline) ? timeline.EventTimeline.Reverse() : []
                         )
                     );
-                var notes = x.Key >= DrumGroups.FirstTrackNumber
+                var notes = roles[x.Key] == TrackRole.Drum
                     ? []
                     : template.Take(1)
                         // on the home chord itself, without the note's own step of the walk of the root

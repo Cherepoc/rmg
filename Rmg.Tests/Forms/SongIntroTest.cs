@@ -1,3 +1,4 @@
+using Rmg.Core.Songs;
 using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
@@ -21,18 +22,18 @@ public sealed class SongIntroTest
     private static CorpusSong[] Of(IntroKind intro) => Songs.Where(x => x.Map.Intro.Kind == intro).ToArray();
 
     [Test]
-    [Arguments(IntroKind.ChordsFirst, SongTracks.ChordsTrack, false, 0.0)]
-    [Arguments(IntroKind.ChordsFirst, SongTracks.BassTrack, false, Phrase)]
-    [Arguments(IntroKind.ChordsFirst, SongTracks.BassTrack, true, 0.0)]
-    [Arguments(IntroKind.ChordsFirst, SongTracks.MelodyTrack, true, Phrase)]
-    [Arguments(IntroKind.ChordsFirst, DrumGroups.FirstTrackNumber, true, Phrase)]
-    [Arguments(IntroKind.Build, SongTracks.ChordsTrack, false, 0.0)]
-    [Arguments(IntroKind.Build, SongTracks.BassTrack, false, 4.0)]
-    [Arguments(IntroKind.Build, DrumGroups.FirstTrackNumber, false, 8.0)]
-    [Arguments(IntroKind.Build, SongTracks.MelodyTrack, false, Phrase)]
-    public async Task IntroEntries_ComeInTheirOrder(IntroKind intro, int track, bool withBass, double entry)
+    [Arguments(IntroKind.ChordsFirst, TrackRole.Chords, false, 0.0)]
+    [Arguments(IntroKind.ChordsFirst, TrackRole.Bass, false, Phrase)]
+    [Arguments(IntroKind.ChordsFirst, TrackRole.Bass, true, 0.0)]
+    [Arguments(IntroKind.ChordsFirst, TrackRole.Melody, true, Phrase)]
+    [Arguments(IntroKind.ChordsFirst, TrackRole.Drum, true, Phrase)]
+    [Arguments(IntroKind.Build, TrackRole.Chords, false, 0.0)]
+    [Arguments(IntroKind.Build, TrackRole.Bass, false, 4.0)]
+    [Arguments(IntroKind.Build, TrackRole.Drum, false, 8.0)]
+    [Arguments(IntroKind.Build, TrackRole.Melody, false, Phrase)]
+    public async Task IntroEntries_ComeInTheirOrder(IntroKind intro, TrackRole role, bool withBass, double entry)
     {
-        await Assert.That(SongFormGenerator.GetIntroEntry(intro, track, withBass)).IsEqualTo(entry);
+        await Assert.That(SongFormGenerator.GetIntroEntry(intro, role, withBass)).IsEqualTo(entry);
     }
 
     [Test]
