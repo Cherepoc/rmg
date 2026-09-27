@@ -11,14 +11,49 @@ In this order, each measured before it is planned:
    toms, about one run in five), intros (whether the band's entry after a chords-first or build-up intro feels earned)
    and endings (whether the ritardando plays in the browser, whether a final chord taken from a weak note is too quiet)
    have been tuned by measurement only.
-2. **Section dynamics.** One energy value per section, drawn around the song's, that drives what is drawn apart today:
-   the section's velocity, the drums' fullness and which groups play (ride and crash when loud, cross-stick when
-   quiet), the melody's busyness and the chords' rhythm, and fills that build into a loud section and break before a
-   quiet one. Verse, pre-chorus and chorus then differ by design. Measure first how far sections differ now.
+2. **Section dynamics,** as planned in *Section dynamics*.
 3. **Sections changing mode,** such as a chorus in the relative major or a darker bridge: the section's scale becomes
    its own state; scales, homes and cadences already work per scale.
 4. Smaller: melody motifs remembered per cycle (see *Rhythm engine*), fade-out endings (see *Form*), and moving the
    melody's final note and a stop's cuts from render flags to edits of the notes after `Realizer`, one at a time.
+
+## Section dynamics
+
+Measured over 200 corpus songs, against the sections of each song, leaving out the last bar of each pattern: sections
+already differ, the spread between them 2 to 4 times the bar-to-bar spread within one for loudness (of the loud
+notes), the drums' notes and how many drums play, and the bass's, chords' and melody's notes; but each is drawn on its
+own: loudness correlates with none of the others (-0.06 to 0.06), the densities with each other only weakly (0.2 to
+0.3), through the section's shared rhythm layer. A song has a median of 7 distinct sections, without roles, and a
+fill looks only at the section it ends.
+
+Decided: one **energy** per section that makes some outcomes likelier, never decides them.
+
+- **Energy** is an additive state kind in the section's state, where everything after reads it, the fills too:
+  the song's, a step for how often the section recurs (the more, the more chorus-like), one for where it plays on
+  average in the song (an arc rising towards the later parts), and a random step of the section's own. A section is
+  made once and plays the same wherever it recurs, so the arc goes by its average place.
+- **The pull** of a section is its energy times its coupling, 1 - 0.8 times its rhythmic unconventionality: a plain
+  section follows its energy closely, a wild one only a little, so a loud and sparse section happens there by chance.
+- **How it tilts a draw,** with the knobs the draws already have: a spline value's skew (`Generators.SplineValue`), so
+  a loud section is likelier loud; a step's -1 or +1, tilted away from even, its chance of stepping kept; a choice's
+  weights, each multiplied by how its option leans.
+- **What it drives first:**
+  - the section's loudness: its velocity draw's skew, in place of an even draw, its spread kept;
+  - the drums' fullness and density: the section rhythm layer's fullness spread and its steps;
+  - which drum groups play: each drum leans loud or quiet as data on it, such as the crash and the ride loud and the
+    cross-stick quiet, which weighs the section's choice of drums (`DrumKitGenerator.SelectActiveDrums`);
+  - the fills, by the energy of the section a line leads into, less the one it ends: into a louder one, longer and
+    fuller fills and likelier landings, into a quieter one likelier stops and breaks. This is the line's weight left
+    from the fill review.
+- **Measured after:** loudness, the drums' notes and how many drums play correlating around 0.4 to 0.6 in plain
+  sections and less in wild ones; the spreads between sections about where they are; a fill's span and fullness rising
+  with the energy it leads into.
+
+Later, each measured first:
+
+- **The melody's busyness and the chords' rhythm,** by the same pull.
+- **Energy by appearance,** so that the last chorus plays louder than the first: the parts that change would be edits
+  of the song as it is put together, as the fills are.
 
 ## Architecture
 
