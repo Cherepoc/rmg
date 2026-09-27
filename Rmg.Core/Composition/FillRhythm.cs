@@ -20,7 +20,7 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit)
     public static StateMap PlainLayer { get; } = StateMap.FromStates(
         [
             CompositionStateKinds.Rhythm.MaxRank.CreateState(FillLayers.FinerRanks),
-            CompositionStateKinds.Rhythm.Fullness.CreateState(FillLayers.SectionFullness),
+            CompositionStateKinds.Rhythm.Fullness.CreateState(FillLayers.Fullness),
             CompositionStateKinds.Rhythm.Variation.CreateState(-1)
         ]
     );

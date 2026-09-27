@@ -76,8 +76,16 @@ public enum GrooveTreatment
 /// </summary>
 public static class FillLayers
 {
-    /// <summary>How long a fill before a section change is, in beats before the line, and how likely each is; 0 is none.</summary>
-    public static ImmutableArray<Weighted<double>> SectionSpans { get; } =
+    /// <summary>
+    ///     How much a line weighs, as a pull of the odds <see cref="SectionEnergy.HighOdds" /> give, which leans its fill
+    ///     and landing (see <see cref="Spans" />, <see cref="Landings" /> and <see cref="Fullness" />): a section change
+    ///     0, and the energy it leads into on top; the line in the middle of a section this, the odds of its longer fills
+    ///     about a seventh, so that the groove mostly runs on there.
+    /// </summary>
+    public const double PhraseWeight = -0.55;
+
+    /// <summary>How long a fill is, in beats before a line of no weight, and how likely each is; 0 is none.</summary>
+    public static ImmutableArray<Weighted<double>> Spans { get; } =
     [
         new(0.2, 0),
         new(0.07, 0.5),
@@ -86,19 +94,8 @@ public static class FillLayers
         new(0.22, 4)
     ];
 
-    /// <summary>How long a fill before the line in the middle of a section is, where the groove mostly runs on.</summary>
-    public static ImmutableArray<Weighted<double>> PhraseSpans { get; } =
-    [
-        new(0.7, 0),
-        new(0.1, 0.5),
-        new(0.12, 1),
-        new(0.06, 2),
-        new(0.02, 4)
-    ];
-
     /// <summary>
-    ///     How a span leans, for the energy of the section a line leads into: none quiet, the longer the louder, a beat
-    ///     in the middle.
+    ///     How a span leans, for the line's weight: none light, the longer the heavier, a beat in the middle.
     /// </summary>
     public static double GetSpanLoudness(double span) => span <= 0 ? -1 : Math.Clamp(Math.Log2(span) / 2, -1, 1);
 
@@ -191,12 +188,16 @@ public static class FillLayers
     public const int FinerRanks = 2;
 
     /// <summary>
-    ///     How much fuller than the groove a fill is: at a section change much fuller, at a phrase line about as sparse,
-    ///     a few hits; the fill's layer spreads it, and the drummer moves it.
+    ///     How much fuller than the groove a fill is before a line of no weight, much fuller; the fill's layer spreads it,
+    ///     and the drummer moves it.
     /// </summary>
-    public const double SectionFullness = 0.3;
+    public const double Fullness = 0.3;
 
-    public const double PhraseFullness = 0.05;
+    /// <summary>
+    ///     How much fuller a fill is for every step of its line's weight, so that at a phrase line it is about as sparse
+    ///     as the groove, a few hits.
+    /// </summary>
+    public const double FullnessPerWeight = 0.45;
 
     /// <summary>Whether a run changes speed halfway, and how likely each is; slowing down's weight is multiplied by the chance scale.</summary>
     public static ImmutableArray<Weighted<FillSpeed>> Speeds { get; } =
@@ -206,19 +207,18 @@ public static class FillLayers
         new(0.03, FillSpeed.SlowsDown)
     ];
 
-    /// <summary>The chance the drums land on a role's sound after a section change: mostly a kick, often with a crash.</summary>
-    public static ImmutableDictionary<DrumRole, double> SectionLandings { get; } = new Dictionary<DrumRole, double>
+    /// <summary>
+    ///     The chance the drums land on a role's sound after a line of no weight, mostly a kick, often with a crash; a
+    ///     landing leans on the line's weight twice as much as a span (<see cref="LandingLean" />), so that after a
+    ///     phrase line it comes now and then.
+    /// </summary>
+    public static ImmutableDictionary<DrumRole, double> Landings { get; } = new Dictionary<DrumRole, double>
     {
         [DrumRole.Kick] = 0.85,
         [DrumRole.Cymbal] = 0.65
     }.ToImmutableDictionary();
 
-    /// <summary>The chance the drums land on a role's sound after a phrase line, now and then.</summary>
-    public static ImmutableDictionary<DrumRole, double> PhraseLandings { get; } = new Dictionary<DrumRole, double>
-    {
-        [DrumRole.Kick] = 0.05,
-        [DrumRole.Cymbal] = 0.05
-    }.ToImmutableDictionary();
+    public const double LandingLean = 2;
 
     /// <summary>The chance the drums land on each of a line's landing sounds after they stopped, as they come back.</summary>
     public const double StopLandingChance = 0.97;

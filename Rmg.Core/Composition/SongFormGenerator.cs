@@ -107,10 +107,10 @@ internal sealed class SongFormGenerator
         {
             case IntroKind.DrumsFirst:
                 // the band comes in on a fill and a landing
-                lines.Insert(0, new FillLine(origin, fillSections[0], fillSections[0], FillTable.Section, LandingRule.Forced));
+                lines.Insert(0, new FillLine(origin, fillSections[0], fillSections[0], 0, IsLandingForced: true));
                 break;
             case IntroKind.CountIn:
-                lines.Insert(0, new FillLine(origin, fillSections[0], fillSections[0], FillTable.None, LandingRule.Section));
+                lines.Insert(0, new FillLine(origin, fillSections[0], fillSections[0], 0, HasFill: false));
                 break;
             case IntroKind.ChordsFirst or IntroKind.Build:
             {
@@ -124,7 +124,7 @@ internal sealed class SongFormGenerator
                 }
 
                 var phraseLine = lines.Select((x, i) => (x, i)).First(x => x.x.Position.IsEqualToByEpsilon(phraseEnd)).i;
-                lines[phraseLine] = new FillLine(phraseEnd, fillSections[0], fillSections[0], FillTable.Section, LandingRule.Forced);
+                lines[phraseLine] = new FillLine(phraseEnd, fillSections[0], fillSections[0], 0, IsLandingForced: true);
                 if (plan.WithBass)
                     introDescription += ", with the bass";
                 break;
@@ -151,7 +151,7 @@ internal sealed class SongFormGenerator
             }
 
             lines.Add(
-                new FillLine(end, fillSections[^1], fillSections[^1], plan.Ending == EndingKind.Stop ? FillTable.None : FillTable.Section, LandingRule.Forced)
+                new FillLine(end, fillSections[^1], fillSections[^1], 0, plan.Ending != EndingKind.Stop, IsLandingForced: true)
             );
 
             description += $", at beat {end}, held {plan.Held} beats";

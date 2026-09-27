@@ -14,16 +14,16 @@ public sealed class DrummerTest
     [Arguments(1.0, 0.5)]
     public async Task WeighSpans_MakesNoFillRarer_TheBusierTheDrummer(double busyness, double factor)
     {
-        var spans = new Drummer(busyness, FillPath.Loop).WeighSpans(FillLayers.SectionSpans);
+        var spans = new Drummer(busyness, FillPath.Loop).WeighSpans(FillLayers.Spans);
 
-        await Assert.That(WeightOf(spans, 0)).IsEqualTo(WeightOf(FillLayers.SectionSpans, 0) * factor).Within(1e-9);
-        await Assert.That(WeightOf(spans, 1)).IsEqualTo(WeightOf(FillLayers.SectionSpans, 1)).Within(1e-9);
+        await Assert.That(WeightOf(spans, 0)).IsEqualTo(WeightOf(FillLayers.Spans, 0) * factor).Within(1e-9);
+        await Assert.That(WeightOf(spans, 1)).IsEqualTo(WeightOf(FillLayers.Spans, 1)).Within(1e-9);
     }
 
     [Test]
     public async Task WeighSpans_FavoursLongerFills_TheBusierTheDrummer()
     {
-        var spans = FillLayers.SectionSpans;
+        var spans = FillLayers.Spans;
         double Ratio(double busyness)
         {
             var weighed = new Drummer(busyness, FillPath.OneWay).WeighSpans(spans);

@@ -89,19 +89,23 @@ choices as a `Tilt` (`RhythmicUnconventionality.Tilt`), every option by how unco
 by how loud: a weight times the odds, a chance by its odds, so that none is capped at certain; the toms' order of pitch
 leans conventional twice as much (`FillLayers.PitchOrderLean`), which keeps it in 97% of the plainest sections' runs.
 A section's scale leans by its energy as far as its harmony follows it (`HarmonicUnconventionality.Coupling`).
+Every line the drums mark weighs (`FillLine.Weight`): a section change nothing, a phrase line less
+(`FillLayers.PhraseWeight`), and the energy it leads into on top; the weight leans one table of spans and one of
+landings, and moves the fill's fullness, where a section's and a phrase's tables were, and the energy's direction alone
+leans whether a fill stops the groove. Over 100 corpus songs phrase lines fill as their table had them (70% none) and
+land a little more often (a kick 15% against 10%); at a section change the fills follow its energy more, a fill's
+fullness correlating 0.6 with it against 0.24, and the drums landing into a quieter section 54% of the time against
+78%, which listening should judge.
 
-1. **A line's weight:** the fills' section and phrase tables (spans, landings, fullness) could be one value that
-   scales the chance of no fill, the span, the fullness and the landing, of which the energy it leads into is a part;
-   a phrase line in the middle of a section, whose energy does not change, has no lean now.
-2. **Track roles:** a role on a track's definition in place of checking track numbers (`SongTracks.MelodyTrack`,
+1. **Track roles:** a role on a track's definition in place of checking track numbers (`SongTracks.MelodyTrack`,
    `ChordsTrack`, `BassTrack`, `DrumGroups.FirstTrackNumber`, 13 checks in `PatternGenerator`, `SectionGenerator` and
    `SongFormGenerator`); and `SectionGenerator.Generate`, which draws the section's energy, scale, harmony, drums, bar
    state and tracks, places its melody and keeps its notes' render state, split, with its flags (`hasTonicHome`,
    `keepsSongScale`) a plan of the section in their place.
-3. **Tables:** 139 tuning constants and 30 weighted tables in `Composition`; some are convention (a drum's weight),
+2. **Tables:** 139 tuning constants and 30 weighted tables in `Composition`; some are convention (a drum's weight),
    some shapes chosen by hand (the melody's four contours, its phrase ends, the fills' spans, treatments, speeds and
    widths, the leans of drums, spans and treatments) that a rule could derive or a draw could make.
-4. **A stop's cut in one place:** its last note held to the stop before `Realizer` (`TimelineEdits.CutBefore`) and the
+3. **A stop's cut in one place:** its last note held to the stop before `Realizer` (`TimelineEdits.CutBefore`) and the
    notes that would sound into it cut after (`CutNotes`) could both be edits after it.
 
 Smaller, when the code is next touched:

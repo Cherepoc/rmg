@@ -88,12 +88,12 @@ internal sealed class FillGenerator
         {
             // the fill before a line belongs to the section it ends
             if (i > 0)
-                lines.Add(new FillLine(start, sections[i - 1], sections[i], FillTable.Section, LandingRule.Section));
+                lines.Add(new FillLine(start, sections[i - 1], sections[i], 0));
 
             for (var line = start + Meter.PatternDuration;
                  line < start + sections[i].Duration;
                  line += Meter.PatternDuration)
-                lines.Add(new FillLine(line, sections[i], sections[i], FillTable.Phrase, LandingRule.Phrase));
+                lines.Add(new FillLine(line, sections[i], sections[i], FillLayers.PhraseWeight));
 
             start += sections[i].Duration;
         }
@@ -118,24 +118,24 @@ internal sealed class FillGenerator
     {
         var ending = line.Ending;
         var chances = GetChances(drummer, ending.Rhythm);
+        // how much the line weighs: its own weight, and the energy it leads into, as far as the section's rhythm follows it
         var lift = line.Next.Energy - ending.Energy;
-        var tilt = SectionEnergy.Tilt(lift, ending.Rhythm.Coupling);
-        var play = DrawPlay(drummer, ending.Rhythm, line.Fills, ending.Groove, chances, tilt);
+        var weight = line.Weight + lift * ending.Rhythm.Coupling;
+        var tilt = Tilt.Of(SectionEnergy.HighOdds, weight);
+        // and which way the energy goes, which makes stopping the groove likelier into a quieter section
+        var direction = SectionEnergy.Tilt(lift, ending.Rhythm.Coupling);
+        var play = line.HasFill ? DrawPlay(drummer, ending.Rhythm, ending.Groove, chances, tilt, direction, weight) : FillPlay.None;
         var rhythm = FillRhythm.Of(ending.Groove.Source, play.Layer, minNote);
         var span = Fill(edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId);
 
         // the drums land after they stopped, as they come back, and always where the song's form marks the line,
         // such as where the band comes in
-        IReadOnlyDictionary<DrumRole, double> landings = line.Landing switch
-        {
-            LandingRule.Forced => FillLayers.SectionLandings.ToImmutableDictionary(x => x.Key, _ => 1.0),
-            _ when span > 0 && play.Treatment == GrooveTreatment.Stop
-                => FillLayers.SectionLandings.ToImmutableDictionary(x => x.Key, _ => FillLayers.StopLandingChance),
-            LandingRule.Section => FillLayers.SectionLandings,
-            _ => FillLayers.PhraseLandings
-        };
-        if (line.Landing != LandingRule.Forced)
-            landings = landings.ToImmutableDictionary(x => x.Key, x => tilt.Chance(x.Value, 1));
+        var landings = FillLayers.Landings.ToImmutableDictionary(
+            x => x.Key,
+            x => line.IsLandingForced ? 1
+                : span > 0 && play.Treatment == GrooveTreatment.Stop ? FillLayers.StopLandingChance
+                : tilt.Chance(x.Value, FillLayers.LandingLean)
+        );
         var landing = _sounds.DrawLanding(_context, landings);
         // a pushed landing comes a note of the fill's rhythm near an 8th early
         var isEarly = _context.TestProbability(Math.Min(1, chances.GetStateValue(CompositionStateKinds.Fill.EarlyLandingChance)));
@@ -149,33 +149,30 @@ internal sealed class FillGenerator
     ///     the groove's rhythm, its run, and whether it starts off the beat or fades.
     /// </summary>
     /// <param name="chances">The chances of the fills' rarer choices at the line.</param>
-    /// <param name="tilt">How the line's energy leans the fill: longer and fuller on the high side, stopping on the low.</param>
+    /// <param name="tilt">How the line's weight leans the fill: longer on the heavy side.</param>
+    /// <param name="direction">How the energy the line leads into leans it: stopping into a quieter section.</param>
+    /// <param name="weight">How much the line weighs, which makes the fill fuller or sparser.</param>
     private FillPlay DrawPlay(
         Drummer drummer,
         RhythmicUnconventionality rhythm,
-        FillTable table,
         FillGrooves grooves,
         StateMap chances,
-        Tilt tilt
+        Tilt tilt,
+        Tilt direction,
+        double weight
     )
     {
-        var span = table switch
-        {
-            FillTable.Section => Pick(tilt.Weigh(drummer.WeighSpans(FillLayers.SectionSpans), FillLayers.GetSpanLoudness)),
-            FillTable.Phrase => Pick(tilt.Weigh(drummer.WeighSpans(FillLayers.PhraseSpans), FillLayers.GetSpanLoudness)),
-            _ => 0
-        };
+        var span = Pick(tilt.Weigh(drummer.WeighSpans(FillLayers.Spans), FillLayers.GetSpanLoudness));
         if (span <= 0)
             return FillPlay.None;
 
         // stopping is the unconventional treatment, and the quiet one
         var treatments = rhythm.Tilt.Weigh(FillLayers.Treatments, x => x == GrooveTreatment.Stop ? 1 : 0);
-        var treatment = Pick(tilt.Weigh(treatments, x => FillLayers.TreatmentLoudness[x]));
-        var fullness = (table == FillTable.Phrase ? FillLayers.PhraseFullness : FillLayers.SectionFullness)
-                       + FillLayers.TreatmentFullness[treatment];
-        var layer = CreateLayer(drummer, rhythm, fullness, tilt);
+        var treatment = Pick(direction.Weigh(treatments, x => FillLayers.TreatmentLoudness[x]));
+        var fullness = FillLayers.Fullness + FillLayers.FullnessPerWeight * weight + FillLayers.TreatmentFullness[treatment];
+        var layer = CreateLayer(drummer, rhythm, fullness);
         // where the drums stop, they rest half the time: a break
-        var run = treatment == GrooveTreatment.Stop && _context.TestProbability(tilt.Chance(FillLayers.StopRestChance, -1))
+        var run = treatment == GrooveTreatment.Stop && _context.TestProbability(direction.Chance(FillLayers.StopRestChance, -1))
             ? FillRun.Rest
             : _sounds.Draw(_context, drummer, rhythm.Tilt, (_, track) => GetRunChance(grooves.Of(track), rhythm.Tilt));
         var spanShift = _context.TestProbability(Math.Min(1, chances.GetStateValue(CompositionStateKinds.Fill.OffBeatChance)))
@@ -188,13 +185,13 @@ internal sealed class FillGenerator
     /// <summary>
     ///     A fill's layer over the groove's rhythm: finer, a step more or less, fuller by the line's and the treatment's
     ///     share and as the drummer plays, its cycles repeating, and the steps of the fill's rhythm layer, as strange as
-    ///     the section, its fullness leaning by the line's energy; how fine it plays stays near the groove's.
+    ///     the section; how fine it plays stays near the groove's.
     /// </summary>
-    private StateMap CreateLayer(Drummer drummer, RhythmicUnconventionality rhythm, double fullness, Tilt tilt = default)
+    private StateMap CreateLayer(Drummer drummer, RhythmicUnconventionality rhythm, double fullness)
     {
         var layer = rhythm.Scale(RhythmLayers.Fill);
         var density = layer.CreateDensityGenerator();
-        var spread = layer.Tilted(tilt).CreateFullnessGenerator();
+        var spread = layer.CreateFullnessGenerator();
         return new StateMapBuilder("Fill", perTrack: true)
             .Add(CompositionStateKinds.Rhythm.MaxRank, context => FillLayers.FinerRanks + density(context))
             .Add(CompositionStateKinds.Rhythm.RankOffset, density)
@@ -441,26 +438,20 @@ internal sealed record FillDecision(
     double Lift
 );
 
-/// <summary>The fills a line takes: none, those before a section change, or those in the middle of a section.</summary>
-internal enum FillTable
-{
-    None,
-    Section,
-    Phrase
-}
-
-/// <summary>How the drums land after a line: as after a section change, as after a phrase line, or always.</summary>
-internal enum LandingRule
-{
-    Section,
-    Phrase,
-    Forced
-}
-
-/// <summary>A line the drums mark: where it is, the section it ends, the one that starts there, and its fills and landing.</summary>
+/// <summary>A line the drums mark: where it is, the section it ends, the one that starts there, and how it weighs.</summary>
 /// <param name="Ending">The section the line ends, whose rhythm and feel its fill plays in.</param>
 /// <param name="Next">The section that starts at the line, which the drums land in.</param>
-internal sealed record FillLine(double Position, FillSection Ending, FillSection Next, FillTable Fills, LandingRule Landing);
+/// <param name="Weight">How much the line weighs before the energy it leads into (<see cref="FillLayers.PhraseWeight" />).</param>
+/// <param name="HasFill">Whether a fill may play before it; none where the song's form has the drums wait.</param>
+/// <param name="IsLandingForced">Whether the drums always land on it, as where the band comes in.</param>
+internal sealed record FillLine(
+    double Position,
+    FillSection Ending,
+    FillSection Next,
+    double Weight,
+    bool HasFill = true,
+    bool IsLandingForced = false
+);
 
 /// <summary>
 ///     A section as the fills see it: where it is, how far its rhythm strays, the drums' feel before its lines, and its
