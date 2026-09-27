@@ -107,8 +107,25 @@ internal sealed class SectionGenerator
         return new GeneratedSection(
             TrackEventStateTimelineMap.Merge(trackTimelineMaps).Repeat(2),
             rhythm,
-            GetDrumTuplet(drums.SelectMany(x => x.Feels))
+            GetDrumTuplet(drums.SelectMany(x => x.Feels)),
+            GetGroove(drums.SelectMany(x => x.Feels))
         );
+    }
+
+    /// <summary>
+    ///     The rhythm the fills play from: the snare's in the pattern's last bar, before both of the section's lines, or
+    ///     where the section plays no snare, that of the drum with the most notes there.
+    /// </summary>
+    internal static ResolvedRhythm GetGroove(IEnumerable<BarFeel> feels)
+    {
+        var snares = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
+        return feels
+            .Where(x => x.Bar == Progressions.BarCount - 1)
+            .OrderByDescending(x => snares.Contains(x.Track))
+            .ThenByDescending(x => x.NoteCount)
+            .ThenBy(x => x.Track)
+            .Select(x => (ResolvedRhythm?)x.Rhythm)
+            .FirstOrDefault() ?? ResolvedRhythm.Default;
     }
 
     /// <summary>
@@ -235,6 +252,12 @@ internal sealed class SectionGenerator
 /// <summary>A section's tracks, and what the fills need to know of its rhythm.</summary>
 /// <param name="Rhythm">How far the section's rhythm strays from convention.</param>
 /// <param name="DrumTuplet">The tuplet the drums play in the pattern's last bar, 1 for straight.</param>
-internal sealed record GeneratedSection(TrackEventStateTimelineMap<StateMap> Timeline, RhythmicUnconventionality Rhythm, int DrumTuplet);
+/// <param name="Groove">The rhythm the fills play from.</param>
+internal sealed record GeneratedSection(
+    TrackEventStateTimelineMap<StateMap> Timeline,
+    RhythmicUnconventionality Rhythm,
+    int DrumTuplet,
+    ResolvedRhythm Groove
+);
 
 internal sealed record SectionRhythm(RhythmicUnconventionality Unconventionality, PhraseScheme Scheme, MelodyBusyness MelodyBusyness);

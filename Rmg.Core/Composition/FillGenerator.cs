@@ -540,4 +540,5 @@ internal sealed record FillLine(double Position, FillSection Ending, int Landing
 
 /// <summary>A section as the fills see it: where it is, how far its rhythm strays, and the drums' feel before its lines.</summary>
 /// <param name="DrumTuplet">The tuplet the drums play in the last bar of the section's 4-bar pattern, 1 for straight.</param>
-internal sealed record FillSection(int SectionId, double Duration, RhythmicUnconventionality Rhythm, int DrumTuplet);
+/// <param name="Groove">The rhythm the fills play from, the snare's in the last bar of the section's 4-bar pattern.</param>
+internal sealed record FillSection(int SectionId, double Duration, RhythmicUnconventionality Rhythm, int DrumTuplet, ResolvedRhythm Groove);

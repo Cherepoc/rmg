@@ -96,7 +96,7 @@ internal sealed class SongFormGenerator
 
         ImmutableArray<FillSection> fillSections =
         [
-            ..map.Sections.Zip(sections, (span, section) => new FillSection(span.SectionId, span.Duration, section.Rhythm, section.DrumTuplet))
+            ..map.Sections.Zip(sections, (span, section) => new FillSection(span.SectionId, span.Duration, section.Rhythm, section.DrumTuplet, section.Groove))
         ];
         var edits = new TimelineEdits(_context, map);
         var lines = FillGenerator.GetSectionLines(fillSections, origin).ToBuilder();

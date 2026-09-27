@@ -128,15 +128,8 @@ internal sealed class PatternGenerator
                 notes,
                 barStateTimelineMap.GetEffectiveStateMapAt(barIndex * Meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd)
             );
-        feels.Add(new BarFeel(trackNumber, barIndex, ResolvePrimeIndex(stateMap).ToTuplet(), notes.Count));
+        feels.Add(new BarFeel(trackNumber, barIndex, ResolvedRhythm.Of(stateMap), notes.Count));
         return notes.ToEventStateTimelineMap(stateMap.OfScope(StateScope.Render));
-    }
-
-    /// <summary>The index of the prime a bar pattern's period is divided by, folded into its range.</summary>
-    private static int ResolvePrimeIndex(StateMap stateMap)
-    {
-        return stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.PrimeIndex)
-            .BounceInBounds(-RhythmPeriod.MaxPrimeIndex, RhythmPeriod.MaxPrimeIndex);
     }
 
     /// <summary>
@@ -314,35 +307,15 @@ internal sealed class PatternGenerator
     /// </summary>
     private StateMap ResolveRhythm(StateMap stateMap)
     {
-        var rankOffsetState = stateMap.GetState(CompositionStateKinds.Rhythm.RankOffset);
-        var seedValueState = stateMap.GetState(CompositionStateKinds.Rhythm.Seed);
-
-        var maxRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.MaxRank)
-            .BounceInBounds(0, 2);
-
-        var periodPower = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Power)
-            .BounceInBounds(-2, 1);
-        var periodPrimeMultiplier = ResolvePrimeIndex(stateMap).ToRhythmPeriodValue();
-        var periodValue = Math.Pow(2, periodPower) * periodPrimeMultiplier;
-
-        var phaseRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.Rank)
-            .BounceInBounds(0, 2);
-        var phaseRankedOffset = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.RankedOffset)
-            .BounceInBounds(-1, 1);
-        var phaseValue = DyadicRankDistribution.GetHalfOffset(phaseRank, phaseRankedOffset) * periodValue;
-
-        // fullness and variation keep to their ranges; the song sets where they start
-        var fullness = Math.Clamp(stateMap.GetStateValue(CompositionStateKinds.Rhythm.Fullness), RhythmSettings.MinFullness, 1);
-        var variation = Math.Clamp(stateMap.GetStateValue(CompositionStateKinds.Rhythm.Variation), 0, 1);
-
+        var rhythm = ResolvedRhythm.Of(stateMap);
         return new StateMapBuilder("Resolved rhythm", perTrack: true)
-            .Add(CompositionStateKinds.Rhythm.Fullness, fullness)
-            .Add(CompositionStateKinds.Rhythm.Variation, variation)
-            .Add(CompositionStateKinds.Rhythm.Period.Value, periodValue)
-            .Add(CompositionStateKinds.Rhythm.Phase.Value, phaseValue)
-            .Add(CompositionStateKinds.Rhythm.MaxRank, maxRank)
-            .Add(rankOffsetState.Map(x => x.BounceInBounds(0, maxRank)))
-            .Add(seedValueState)
+            .Add(CompositionStateKinds.Rhythm.Fullness, rhythm.Fullness)
+            .Add(CompositionStateKinds.Rhythm.Variation, rhythm.Variation)
+            .Add(CompositionStateKinds.Rhythm.Period.Value, rhythm.PeriodValue)
+            .Add(CompositionStateKinds.Rhythm.Phase.Value, rhythm.PhaseValue)
+            .Add(CompositionStateKinds.Rhythm.MaxRank, rhythm.MaxRank)
+            .Add(stateMap.GetState(CompositionStateKinds.Rhythm.RankOffset).Map(x => x.BounceInBounds(0, rhythm.MaxRank)))
+            .Add(stateMap.GetState(CompositionStateKinds.Rhythm.Seed))
             .ToStateMap(_context);
     }
 
@@ -382,9 +355,52 @@ internal sealed class PatternGenerator
 /// <summary>The bars of the tracks' patterns in a section, and the feel every track's bar plays in.</summary>
 internal sealed record GeneratedBars(TrackEventStateTimelineMap<StateMap> Timeline, ImmutableArray<BarFeel> Feels);
 
-/// <summary>The feel of a track's bar: the tuplet its notes fall on, 1 for straight, and how many notes it has.</summary>
+/// <summary>The feel of a track's bar: the rhythm it plays, and how many notes it has.</summary>
 /// <param name="Bar">The bar of the section's 4-bar pattern.</param>
-internal readonly record struct BarFeel(int Track, int Bar, int Tuplet, int NoteCount);
+internal readonly record struct BarFeel(int Track, int Bar, ResolvedRhythm Rhythm, int NoteCount)
+{
+    /// <summary>The tuplet the bar's notes fall on, 1 for straight.</summary>
+    public int Tuplet => Rhythm.PrimeIndex.ToTuplet();
+}
+
+/// <summary>
+///     A bar pattern's rhythm settings, which its layers added up, folded into their ranges; its period and phase in
+///     bars.
+/// </summary>
+internal readonly record struct ResolvedRhythm(double PeriodValue, double PhaseValue, int MaxRank, int PrimeIndex, double Fullness, double Variation)
+{
+    /// <summary>A straight rhythm of a beat, down to 16ths, for a section whose drums play nothing.</summary>
+    public static ResolvedRhythm Default { get; } = new(0.25, 0, 2, 0, RhythmSettings.Fullness, RhythmSettings.Variation);
+
+    /// <summary>The period in beats.</summary>
+    public double Period => PeriodValue * Meter.BarDuration;
+
+    /// <summary>The phase in beats.</summary>
+    public double Phase => PhaseValue * Meter.BarDuration;
+
+    public static ResolvedRhythm Of(StateMap stateMap)
+    {
+        var maxRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.MaxRank)
+            .BounceInBounds(0, 2);
+
+        var periodPower = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Power)
+            .BounceInBounds(-2, 1);
+        var primeIndex = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.PrimeIndex)
+            .BounceInBounds(-RhythmPeriod.MaxPrimeIndex, RhythmPeriod.MaxPrimeIndex);
+        var periodValue = Math.Pow(2, periodPower) * primeIndex.ToRhythmPeriodValue();
+
+        var phaseRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.Rank)
+            .BounceInBounds(0, 2);
+        var phaseRankedOffset = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.RankedOffset)
+            .BounceInBounds(-1, 1);
+        var phaseValue = DyadicRankDistribution.GetHalfOffset(phaseRank, phaseRankedOffset) * periodValue;
+
+        // fullness and variation keep to their ranges; the song sets where they start
+        var fullness = Math.Clamp(stateMap.GetStateValue(CompositionStateKinds.Rhythm.Fullness), RhythmSettings.MinFullness, 1);
+        var variation = Math.Clamp(stateMap.GetStateValue(CompositionStateKinds.Rhythm.Variation), 0, 1);
+        return new ResolvedRhythm(periodValue, phaseValue, maxRank, primeIndex, fullness, variation);
+    }
+}
 
 /// <param name="TrackState">The state a track draws for the pattern, such as its rhythm and offsets.</param>
 /// <param name="Rhythm">Which beats of the rhythm play.</param>
