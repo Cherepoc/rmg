@@ -13,7 +13,8 @@ In this order, each measured before it is planned:
    have been tuned by measurement only, as have the sections' energy and modes (see *Section dynamics* and *Section
    modes*) and the melody's echoes (see *Rhythm engine*), which play a bar that comes back, and so a section's second
    phrase and a section that recurs, much as it was.
-2. Smaller: fade-out endings (see *Form*), and moving the melody's final note and a stop's hold from render flags to
+2. **The melody at generation,** as planned in *Melody at generation*.
+3. Smaller: fade-out endings (see *Form*), and moving the melody's final note and a stop's hold from render flags to
    edits of the notes after `Realizer`, one at a time, as a stop's cut of the notes that would sound into it already is
    (`TimelineEdits.CutNotes`).
 
@@ -51,6 +52,26 @@ major or minor; those that turn brighter have an energy of 0.33 on average, thos
 - **Listen** to the changes: whether a section in the parallel mode sounds like a new colour or a mistake, and whether
   the cadence into it prepares it.
 - **Key changes,** such as a last chorus a step up: a section's key as its own state, as its scale is now.
+
+## Melody at generation
+
+The melody is the one track whose notes are decided in `Realizer`, one after another over the song, from the note
+before and render flags (`BeatRank`, `MelodyStep`, `MelodyRegister`, `Echo`, `MelodyFinal`, read only there); the
+echoes patch the repetition that this loses with a memory of their own. Decided: the melody is placed at generation,
+where the other tracks' notes are decided.
+
+- The key reaches the section generator (drawn in its own stream, so nothing else changes).
+- `MelodyLine` moves into `MelodyPattern`: one line per section places its notes in order over the section's bars, as
+  part of each note's values, with the note's chord worked out as `Realizer` does (`Realizer.GetChord`); a note keeps
+  its scale step above its chord's root as its state. A bar pattern that comes back in the section plays its notes
+  again, by its seed; a varied repeat is placed afresh; a repeated cycle plays its steps again by the rhythm engine; a
+  section that recurs is the same by construction.
+- `Realizer` plays the given step; its melody memory, the echo key and the render flags go.
+- The final note becomes an edit as the song is put together (`CreateEnding`): the chord's root in the octave nearest
+  the note it is made from.
+- Measured against the echoes: leaps, the mean move, chord notes on the beat, the same note over the same root, and
+  leaps where a section starts, whose line starts afresh on the chord note nearest its phrase's aim; the other tracks
+  unchanged.
 
 ## Architecture
 
@@ -146,6 +167,13 @@ echoes: a melody note of a bar that comes back, or of a cycle that repeats the o
 as the scale step from its chord's root (`MelodyPattern.GetEcho`, `MelodyLine`). Over 100 corpus songs, 5% of the
 melody's notes are in a repeated cycle and 84% in a bar that comes back; over the same root as before, 77% play the
 same note, up from 40%, the others moving to the chord on a strong beat.
+A beat of a repeated cycle also plays the values its beat had in the cycle it repeats, for every track: its accent,
+its walks (such as the hi-hat's open or closed sound and an arpeggio's chord note), its lengths and the melody's step;
+only what depends on its position, the chord there, is its own (`DyadicRankItemPattern`). Over 100 corpus songs about
+half the hi-hat's notes are in a repeated cycle, 35 to 40% of the snares', a quarter of the kick's and the ride's, and
+10 to 13% of the chords' and the bass's. Variety comes from cycles drawn afresh, which draw their values afresh too, and
+from the bar and section layers; should repeated figures sound mechanical, a small fresh loudness draw could be added
+over the replayed accent.
 
 ### Left for later
 

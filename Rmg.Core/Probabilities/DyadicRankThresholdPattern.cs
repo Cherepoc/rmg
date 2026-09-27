@@ -58,7 +58,7 @@ public sealed class DyadicRankThresholdPattern
             }
 
             if (decision.IsKept)
-                kept.Add(new TimelineItem<KeptBeat>(slot.Position, new KeptBeat(slot.Rank, slot.Slot, decision.Cycle)));
+                kept.Add(new TimelineItem<KeptBeat>(slot.Position, new KeptBeat(slot.Rank, slot.Slot, decision.Cycle, cycle)));
         }
 
         return new DyadicRankThresholdPattern(descriptor.MaxRank, EventTimeline.Create(descriptor.Duration, kept));
@@ -72,4 +72,9 @@ public sealed class DyadicRankThresholdPattern
 ///     The cycle whose draw the beat plays: its own where the cycle was drawn afresh, or the last one drawn where it
 ///     repeats it, so that the beats of a repeated cycle are those of the cycle it repeats.
 /// </param>
-public readonly record struct KeptBeat(int Rank, int Slot, int Source);
+/// <param name="Cycle">The cycle the beat is in.</param>
+public readonly record struct KeptBeat(int Rank, int Slot, int Source, int Cycle)
+{
+    /// <summary>Whether the beat repeats one of an earlier cycle, which it plays as that one played.</summary>
+    public bool IsRepeated => Source < Cycle;
+}

@@ -167,7 +167,8 @@ internal sealed class PatternGenerator
         );
 
         var melody = trackNumber == SongTracks.MelodyTrack ? new MelodyPattern(stateMap) : null;
-        var noteStateMapGenerator = (IGenerationContext innerContext, double position, KeptBeat beat) =>
+        // a note's values, which a note of a repeated cycle takes from the note it repeats
+        var noteValuesGenerator = (IGenerationContext innerContext, double position, KeptBeat beat) =>
         {
             var rank = beat.Rank;
             var builder = new StateMapBuilder("Note", perTrack: true)
@@ -176,17 +177,18 @@ internal sealed class PatternGenerator
                 .Add(StateKinds.ChordNoteOffset, chordNoteOffsetGenerator(innerContext, position))
                 .Add(StateKinds.Velocity, BeatAccent.CreateVelocityGenerator(rank, rhythmPattern.MaxRank).Then(x => x * VelocityLayers.Note))
                 .AddNoteDurationLayer()
-                .Add(StateKinds.BeatRank, rank)
-                .Add(GetChord(stateMap, barStateTimelineMap, patternStart, position, trackNumber, sectionId, barIndex));
+                .Add(StateKinds.BeatRank, rank);
             melody?.AddNoteState(builder, beat);
             return builder.ToStateMap(innerContext);
         };
 
+        // and the chord at its own position
         return DyadicRankItemPattern<StateMap>.Create(
             _context,
             rhythmPattern,
-            innerContext => (position, beat) => noteStateMapGenerator(innerContext, position, beat),
-            patternSeeds.NoteValues
+            innerContext => (position, beat) => noteValuesGenerator(innerContext, position, beat),
+            patternSeeds.NoteValues,
+            (position, _, values) => values.MergeWith(GetChord(stateMap, barStateTimelineMap, patternStart, position, trackNumber, sectionId, barIndex))
         );
     }
 
