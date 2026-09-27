@@ -17,7 +17,7 @@ public sealed class FillArchetypeTest
 
     private static IEnumerable<int> Seeds => Enumerable.Range(0, 12);
 
-    private static readonly Drummer Middle = new(0.5, FillKind.None);
+    private static readonly Drummer Middle = new(0.5, FillPath.OneWay);
 
     private sealed record Setup(FillGenerator Generator, TrackEventStateTimelineMap<StateMap> Song, int Snare);
 
@@ -52,6 +52,28 @@ public sealed class FillArchetypeTest
 
     private static int Articulation(TimelineItem<StateMap> item) => item.Value.GetStateValue(StateKinds.ArticulationIndex);
 
+    /// <summary>The song's sounds of a role, in the order of their note numbers.</summary>
+    private static RunSound[] SoundsOf(FillGenerator generator, DrumRole role) =>
+        generator.Sounds.Sounds.TryGetValue(role, out var sounds) ? [..sounds.OrderBy(x => x.Code)] : [];
+
+    private static FillRun Run(IEnumerable<RunSound> sounds, FillPath path = FillPath.OneWay, int width = 1, double fullness = 0.9) =>
+        new([..sounds], path, width, fullness, false);
+
+    private static FillPlay Play(FillRun run, FillTwist twists = FillTwist.None, int tuplet = 1) => new(FillKind.Run, twists, tuplet, run);
+
+    private static TrackEventStateTimelineMap<StateMap> ApplyRun(Setup setup, FillRun run, FillTwist twists = FillTwist.None, int tuplet = 1) =>
+        setup.Generator.ApplyFill(setup.Song, Play(run, twists, tuplet), Line, ResolvedRhythm.Default, MinNote, Middle);
+
+    private static FillRun SnareRun(Setup setup) => Run([SoundsOf(setup.Generator, DrumRole.Snare).First(x => x.Track == setup.Snare)]);
+
+    /// <summary>The velocities of a track's fill notes before the line.</summary>
+    private static double[] Velocities(TrackEventStateTimelineMap<StateMap> song, int track) =>
+        Events(song, track, 4, Line).Select(x => x.Value.GetStateValue(StateKinds.Velocity)).Where(x => x != 0).ToArray();
+
+    /// <summary>How much louder the second half of a fill's notes is than the first; each note is accented by its rank.</summary>
+    private static double Swell(double[] velocities) =>
+        velocities[(velocities.Length / 2)..].Average() - velocities[..(velocities.Length / 2)].Average();
+
     [Test]
     public async Task EveryFill_HasASpec()
     {
@@ -64,56 +86,161 @@ public sealed class FillArchetypeTest
     [Test]
     public async Task NamedSounds_AreTheDrumsOwn()
     {
-        var toms = DrumSounds.TomsHighToLow.Select(DrumDefinitions.Tom.GetArticulationIndex).ToArray();
-
-        // the toms' sounds are listed from the low floor tom up, so the run down them counts down
-        await Assert.That(toms).IsEquivalentTo(Enumerable.Range(1, toms.Length).Reverse().ToArray());
+        // the toms' note numbers rise with their pitch, which a run's order of pitch goes by
+        await Assert.That(DrumDefinitions.Tom.ArticulationCodes.Order().ToArray()).IsEquivalentTo(DrumSounds.TomsHighToLow.Reverse().ToArray());
         await Assert.That(DrumDefinitions.HiHat.ArticulationCodes).Contains(DrumSounds.OpenHiHat);
         await Assert.That(FillLayers.Crashes.All(x => DrumDefinitions.Cymbal.ArticulationCodes.Contains(x.Value))).IsTrue();
         await Assert.That(() => DrumDefinitions.Tom.GetArticulationIndex(DrumSounds.OpenHiHat)).Throws<ArgumentException>();
     }
 
     [Test]
-    public async Task TomRun_RunsDownTheToms_OverTheKick()
+    public async Task Sounds_AreEverySoundOfTheSongsDrums()
+    {
+        var (generator, _, _) = Create(1);
+        var toms = SoundsOf(generator, DrumRole.Toms);
+
+        await Assert.That(toms.Select(x => x.Code).ToArray()).IsEquivalentTo(DrumDefinitions.Tom.ArticulationCodes.Order().ToArray());
+        await Assert.That(toms.All(x => x.Track == Tom)).IsTrue();
+        await Assert.That(SoundsOf(generator, DrumRole.Snare)).IsNotEmpty();
+    }
+
+    [Test]
+    public async Task Run_DownTheToms_ClearsThem_AndTheGroovePlaysOn()
     {
         foreach (var seed in Seeds)
         {
-            var (generator, song, snare) = Create(seed);
-            var filled = generator.ApplyFill(song, FillPlay.Plain(FillKind.TomRun), Line, ResolvedRhythm.Default, MinNote, Middle);
+            var setup = Create(seed);
+            var filled = ApplyRun(setup, Run(SoundsOf(setup.Generator, DrumRole.Toms).Reverse()));
             var toms = Events(filled, Tom, 0, 12);
-            var from = toms[0].Position;
 
             await Assert.That(toms.All(x => x.Position is >= 4 and < Line)).IsTrue();
+            // down the toms, whose sounds count up with their pitch
             await Assert.That(toms.Select(Articulation).Zip(toms.Skip(1).Select(Articulation)).All(x => x.Second <= x.First)).IsTrue();
-            // the hands leave the groove for the toms, the foot keeps the kick
-            await Assert.That(Events(filled, HiHat, from, Line)).IsEmpty();
-            await Assert.That(Events(filled, snare, from, Line)).IsEmpty();
-            await Assert.That(Events(filled, Kick, from, Line).Length).IsEqualTo(Events(song, Kick, from, Line).Length);
-            await Assert.That(Events(filled, HiHat, Line, 12).Length).IsEqualTo(Events(song, HiHat, Line, 12).Length);
+            // the drums the run does not play keep the groove
+            foreach (var track in new[] { Kick, setup.Snare, HiHat })
+                await Assert.That(Events(filled, track, 0, 12).Length).IsEqualTo(Events(setup.Song, track, 0, 12).Length);
         }
     }
 
     [Test]
-    public async Task SnareRoll_SwellsIntoTheLine()
+    public async Task Run_OnTheSnareAlone_IsARollThatSwells_InPlaceOfTheSnaresGroove()
     {
         var rolls = Seeds.Select(seed =>
             {
-                var (generator, song, snare) = Create(seed);
-                return Velocities(generator.ApplyFill(song, FillPlay.Plain(FillKind.SnareRoll), Line, ResolvedRhythm.Default, MinNote, Middle), snare);
+                var setup = Create(seed);
+                var filled = ApplyRun(setup, SnareRun(setup));
+                var roll = Velocities(filled, setup.Snare);
+                // the snare's own notes are left out where the roll plays
+                var first = Events(filled, setup.Snare, 4, Line).First(x => x.Value.GetStateValue(StateKinds.Velocity) != 0).Position;
+                return (Velocities: roll, IsTheRollAlone: Events(filled, setup.Snare, first, Line).Length == Velocities(filled, setup.Snare).Length);
             }
         ).ToArray();
 
-        await Assert.That(rolls.All(x => x.Length > 1)).IsTrue();
-        await Assert.That(rolls.Average(Swell)).IsGreaterThan(0.2);
+        await Assert.That(rolls.All(x => x.Velocities.Length > 1 && x.IsTheRollAlone)).IsTrue();
+        await Assert.That(rolls.Average(x => Swell(x.Velocities))).IsGreaterThan(0.2);
     }
 
-    /// <summary>The velocities of a track's fill notes before the line.</summary>
-    private static double[] Velocities(TrackEventStateTimelineMap<StateMap> song, int track) =>
-        Events(song, track, 4, Line).Select(x => x.Value.GetStateValue(StateKinds.Velocity)).Where(x => x != 0).ToArray();
+    [Test]
+    public async Task Run_PlaysTheGroovesCycle_ARankFiner()
+    {
+        // a backbeat: a cycle of two beats, its strongest note on the second, down to quarters
+        var backbeat = new ResolvedRhythm(0.5, 0.25, 1, 0, 0.5, 0.5);
+        foreach (var seed in Seeds)
+        {
+            var setup = Create(seed);
+            var run = Run([SoundsOf(setup.Generator, DrumRole.Toms)[0]], fullness: 0.95);
+            var filled = setup.Generator.ApplyFill(setup.Song, Play(run), Line, backbeat, MinNote, Middle);
+            var toms = Events(filled, Tom, 0, 12);
 
-    /// <summary>How much louder the second half of a fill's notes is than the first; each note is accented by its rank.</summary>
-    private static double Swell(double[] velocities) =>
-        velocities[(velocities.Length / 2)..].Average() - velocities[..(velocities.Length / 2)].Average();
+            // 8ths, a rank finer than the backbeat's quarters
+            await Assert.That(toms.All(x => Math.Abs(x.Position * 2 - Math.Round(x.Position * 2)) < 1e-6)).IsTrue();
+        }
+    }
+
+    [Test]
+    public async Task FillRhythm_KeepsThePhase_AndTheTempoLimitsTheFinestNotes()
+    {
+        var backbeat = new ResolvedRhythm(0.5, 0.25, 1, 0, 0.5, 0.5);
+        var rhythm = FillRhythm.Of(backbeat, 2, 1, 0.2);
+        var notes = rhythm.Play(new GenerationContext(1), 1, _ => 1, Line, 4, Line, rhythm.MaxRank);
+
+        // 16ths, and at a limit of 8ths, 8ths
+        await Assert.That(rhythm.Fine).IsEqualTo(0.25);
+        await Assert.That(FillRhythm.Of(backbeat, 2, 1, 0.5).Fine).IsEqualTo(0.5);
+        // the strongest notes on the backbeats
+        await Assert.That(notes.Where(x => x.Rank == 0).Select(x => x.Position).ToArray()).IsEquivalentTo([5.0, 7.0]);
+    }
+
+    [Test]
+    public async Task Walks_GoOneWay_Turn_Loop_OrStepAtRandom()
+    {
+        var context = new GenerationContext(1);
+
+        await Assert.That(FillSounds.Walk(context, FillPath.OneWay, 3, 6)).IsEquivalentTo([0, 0, 1, 1, 2, 2]);
+        await Assert.That(FillSounds.Walk(context, FillPath.Turn, 3, 5)).IsEquivalentTo([0, 1, 2, 1, 0]);
+        await Assert.That(FillSounds.Walk(context, FillPath.Loop, 3, 7)).IsEquivalentTo([0, 1, 2, 0, 1, 2, 0]);
+        await Assert.That(FillSounds.Walk(context, FillPath.Random, 1, 4)).IsEquivalentTo([0, 0, 0, 0]);
+
+        var random = FillSounds.Walk(context, FillPath.Random, 6, 2_000);
+        var steps = random.Zip(random.Skip(1), (a, b) => Math.Abs(b - a)).ToArray();
+        await Assert.That(random.All(x => x is >= 0 and < 6)).IsTrue();
+        await Assert.That(steps.Count(x => x == 1) / (double)steps.Length).IsGreaterThan(FillLayers.NeighbourStepChance * 0.9);
+    }
+
+    [Test]
+    public async Task AWiderWindow_PlaysSeveralSoundsTogether()
+    {
+        foreach (var seed in Seeds)
+        {
+            var setup = Create(seed);
+            var tom = SoundsOf(setup.Generator, DrumRole.Toms)[0];
+            var snare = SoundsOf(setup.Generator, DrumRole.Snare).First(x => x.Track == setup.Snare);
+            var filled = ApplyRun(setup, Run([tom, snare], FillPath.Loop, 2));
+            var toms = Events(filled, Tom, 0, 12).Select(x => x.Position).ToArray();
+
+            // the snare with a tom, a drum a sound at a time
+            await Assert.That(toms).IsNotEmpty();
+            await Assert.That(toms.All(x => Events(filled, setup.Snare, x, x + 1e-6).Length == 1)).IsTrue();
+        }
+    }
+
+    [Test]
+    public async Task ACymbal_PlaysOnlyTheStrongNotes()
+    {
+        foreach (var seed in Seeds)
+        {
+            var setup = Create(seed);
+            var crash = SoundsOf(setup.Generator, DrumRole.Cymbal).First(x => x.Code == DrumSounds.CrashCymbal1);
+            var filled = ApplyRun(setup, Run([crash, SoundsOf(setup.Generator, DrumRole.Toms)[0]], FillPath.Loop, 2));
+
+            // a cycle of a beat down to 16ths, of which the crash keeps to the 8ths
+            await Assert.That(Events(filled, Cymbal, 0, 12).All(x => Math.Abs(x.Position * 2 - Math.Round(x.Position * 2)) < 1e-6)).IsTrue();
+            await Assert.That(Events(filled, Tom, 0, 12).Length).IsGreaterThan(Events(filled, Cymbal, 0, 12).Length);
+        }
+    }
+
+    [Test]
+    public async Task DrawnRuns_MostlyPlayTheSnareAndTheToms_InTheirOrder_WhereTheRhythmIsPlain()
+    {
+        var setup = Create(1);
+        var plain = Enumerable.Range(0, 2_000).Select(_ => setup.Generator.DrawRun(Middle, 0.25)).ToArray();
+        var wild = Enumerable.Range(0, 2_000).Select(_ => setup.Generator.DrawRun(Middle, 4)).ToArray();
+        double Conventional(FillRun[] runs) =>
+            runs.Count(x => x.Sounds.All(s => FillLayers.ConventionalRoles.Contains(s.Role))) / (double)runs.Length;
+        double InOrder(FillRun[] runs)
+        {
+            var codes = runs.Select(x => x.Sounds.Where(s => s.Role == DrumRole.Toms).Select(s => s.Code).ToArray()).Where(x => x.Length > 2).ToArray();
+            return codes.Count(x => x.Zip(x.Skip(1)).All(p => p.Second < p.First) || x.Zip(x.Skip(1)).All(p => p.Second > p.First)) / (double)codes.Length;
+        }
+
+        await Assert.That(plain.All(x => x.Sounds.Length > 0)).IsTrue();
+        await Assert.That(Conventional(plain)).IsGreaterThan(0.9);
+        await Assert.That(Conventional(wild)).IsLessThan(Conventional(plain) - 0.2);
+        await Assert.That(InOrder(plain)).IsGreaterThan(0.95);
+        await Assert.That(InOrder(wild)).IsLessThan(InOrder(plain) - 0.3);
+        // a roll on the snare alone, now and then
+        await Assert.That(plain.Count(x => x.Sounds is [{ Role: DrumRole.Snare }]) / (double)plain.Length).IsGreaterThan(0.1);
+    }
 
     [Test]
     public async Task Break_SilencesTheDrums_UntilTheLine()
@@ -150,36 +277,19 @@ public sealed class FillArchetypeTest
     public async Task Lift_OpensTheHiHat_OnTheLastOffBeat()
     {
         var (generator, song, _) = Create(1);
-        var hiHat = Events(generator.ApplyFill(song, FillPlay.Plain(FillKind.Lift), Line, ResolvedRhythm.Default, MinNote, Middle), HiHat, Line - 0.5, Line).Single();
+        var hiHat = Events(generator.ApplyFill(song, FillPlay.Plain(FillKind.Lift), Line, ResolvedRhythm.Default, MinNote, Middle), HiHat, Line - 0.5, Line)
+            .Single();
 
         await Assert.That(Articulation(hiHat)).IsEqualTo(DrumDefinitions.HiHat.GetArticulationIndex(DrumSounds.OpenHiHat));
     }
-
-    [Test]
-    public async Task Pickup_PlaysOverTheGroove()
-    {
-        foreach (var seed in Seeds)
-        {
-            var (generator, song, _) = Create(seed);
-            var filled = generator.ApplyFill(song, FillPlay.Plain(FillKind.Pickup), Line, ResolvedRhythm.Default, MinNote, Middle);
-
-            await Assert.That(Events(filled, HiHat, 0, 12).Length).IsEqualTo(Events(song, HiHat, 0, 12).Length);
-            await Assert.That(Events(filled, Kick, 0, 12).Length).IsEqualTo(Events(song, Kick, 0, 12).Length);
-        }
-    }
-
-    private static FillPlay Twisted(FillKind kind, FillTwist twists, int tuplet = 1, OddVoice? oddVoice = null) =>
-        new(kind, twists, tuplet, oddVoice);
-
-    private static int[] Toms(TrackEventStateTimelineMap<StateMap> song) => Events(song, Tom, 0, 12).Select(Articulation).ToArray();
 
     [Test]
     public async Task Tuplet_PlaysTheRunOnTheTuplet()
     {
         var toms = Seeds.SelectMany(seed =>
             {
-                var (generator, song, _) = Create(seed);
-                return Events(generator.ApplyFill(song, Twisted(FillKind.TomRun, FillTwist.Tuplet, 3), Line, ResolvedRhythm.Default, MinNote, Middle), Tom, 0, 12);
+                var setup = Create(seed);
+                return Events(ApplyRun(setup, Run(SoundsOf(setup.Generator, DrumRole.Toms)), FillTwist.Tuplet, 3), Tom, 0, 12);
             }
         ).ToArray();
 
@@ -188,28 +298,12 @@ public sealed class FillArchetypeTest
     }
 
     [Test]
-    public async Task Upward_RunsUpTheToms_AndZigzag_TakesTheHighAndLowInTurn()
-    {
-        foreach (var seed in Seeds)
-        {
-            var (generator, song, _) = Create(seed);
-            var up = Toms(generator.ApplyFill(song, Twisted(FillKind.TomRun, FillTwist.Upward), Line, ResolvedRhythm.Default, MinNote, Middle));
-            var zigzag = Events(generator.ApplyFill(song, Twisted(FillKind.TomRun, FillTwist.Zigzag), Line, ResolvedRhythm.Default, MinNote, Middle), Tom, 0, 12);
-
-            await Assert.That(up.Zip(up.Skip(1)).All(x => x.Second >= x.First)).IsTrue();
-            // the high toms are the last three of the six, and the run's notes take them and the low ones in turn
-            await Assert.That(zigzag.Length).IsGreaterThan(1);
-            await Assert.That(zigzag.Select((x, i) => (Articulation(x) > 3) == (i % 2 == 0)).All(x => x)).IsTrue();
-        }
-    }
-
-    [Test]
     public async Task SlowDown_PlaysTheFinerNotesFirst()
     {
         foreach (var seed in Seeds)
         {
-            var (generator, song, snare) = Create(seed);
-            var roll = Events(generator.ApplyFill(song, Twisted(FillKind.SnareRoll, FillTwist.SlowDown), Line, ResolvedRhythm.Default, MinNote, Middle), snare, 4, Line)
+            var setup = Create(seed);
+            var roll = Events(ApplyRun(setup, SnareRun(setup), FillTwist.SlowDown), setup.Snare, 4, Line)
                 .Where(x => x.Value.GetStateValue(StateKinds.Velocity) != 0)
                 .ToArray();
             var middle = (roll[0].Position + Line) / 2;
@@ -220,25 +314,12 @@ public sealed class FillArchetypeTest
     }
 
     [Test]
-    public async Task OddVoice_PlaysTheRunOnTheKick()
-    {
-        foreach (var seed in Seeds)
-        {
-            var (generator, song, _) = Create(seed);
-            var filled = generator.ApplyFill(song, Twisted(FillKind.TomRun, FillTwist.OddVoice, oddVoice: OddVoice.Kick), Line, ResolvedRhythm.Default, MinNote, Middle);
-
-            await Assert.That(Events(filled, Tom, 0, 12)).IsEmpty();
-            await Assert.That(Events(filled, Kick, 4, Line).Length).IsGreaterThan(Events(song, Kick, 4, Line).Length);
-        }
-    }
-
-    [Test]
     public async Task Fading_FadesTheRoll()
     {
         var rolls = Seeds.Select(seed =>
             {
-                var (generator, song, snare) = Create(seed);
-                return Velocities(generator.ApplyFill(song, Twisted(FillKind.SnareRoll, FillTwist.Fading), Line, ResolvedRhythm.Default, MinNote, Middle), snare);
+                var setup = Create(seed);
+                return Velocities(ApplyRun(setup, SnareRun(setup), FillTwist.Fading), setup.Snare);
             }
         ).ToArray();
 
@@ -246,26 +327,12 @@ public sealed class FillArchetypeTest
     }
 
     [Test]
-    public async Task Gappy_LeavesMoreNotesOut()
-    {
-        int plain = 0, gappy = 0;
-        foreach (var seed in Seeds)
-        {
-            var (generator, song, _) = Create(seed);
-            plain += Events(generator.ApplyFill(song, FillPlay.Plain(FillKind.TomRun), Line, ResolvedRhythm.Default, MinNote, Middle), Tom, 0, 12).Length;
-            gappy += Events(generator.ApplyFill(song, Twisted(FillKind.TomRun, FillTwist.Gappy), Line, ResolvedRhythm.Default, MinNote, Middle), Tom, 0, 12).Length;
-        }
-
-        await Assert.That(gappy).IsLessThan(plain);
-    }
-
-    [Test]
     public async Task OddSpan_StartsTheFillOffTheBeat()
     {
         foreach (var seed in Seeds)
         {
-            var (generator, song, _) = Create(seed);
-            var first = Events(generator.ApplyFill(song, Twisted(FillKind.TomRun, FillTwist.OddSpan), Line, ResolvedRhythm.Default, MinNote, Middle), Tom, 0, 12)[0];
+            var setup = Create(seed);
+            var first = Events(ApplyRun(setup, Run(SoundsOf(setup.Generator, DrumRole.Toms)), FillTwist.OddSpan), Tom, 0, 12)[0];
 
             await Assert.That(first.Position % 1).IsEqualTo(0.5).Within(1e-9);
         }

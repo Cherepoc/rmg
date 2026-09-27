@@ -17,17 +17,11 @@ public enum FillKind
     /// <summary>The groove runs straight on.</summary>
     None,
 
-    /// <summary>A few sparse hits of the snare or the toms over the groove, into the line.</summary>
-    Pickup,
-
-    /// <summary>A fast, full run down the toms, from the high tom to the floor tom, over the kick.</summary>
-    TomRun,
-
-    /// <summary>A snare roll that speeds up and swells, 8ths then 16ths, over the kick.</summary>
-    SnareRoll,
-
-    /// <summary>A fast run from the snare down the toms, over the kick.</summary>
-    AroundTheKit,
+    /// <summary>
+    ///     A run in the groove's rhythm over a few of the song's drums, mostly the snare and the toms, walking from one
+    ///     to the next: a roll where it plays the snare alone, a few hits where it is sparse.
+    /// </summary>
+    Run,
 
     /// <summary>The drums stop, and come back at the line.</summary>
     Break,
@@ -39,7 +33,7 @@ public enum FillKind
     Lift
 }
 
-/// <summary>The drums a fill plays, by what they do in the kit; a song has one of each, or none.</summary>
+/// <summary>The drums a fill plays, by what they do in the kit.</summary>
 public enum DrumRole
 {
     Kick,
@@ -48,62 +42,58 @@ public enum DrumRole
     Snare,
 
     Toms,
+
+    /// <summary>The drums that keep time, such as the hi-hat or the ride.</summary>
     HiHat,
+
     Cymbal,
 
     /// <summary>The song's own percussion, such as a cowbell or congas, if it has any.</summary>
     Percussion
 }
 
+/// <summary>How a run walks the order of its sounds from note to note.</summary>
+public enum FillPath
+{
+    /// <summary>From the first sound to the last, a share of the notes on each.</summary>
+    OneWay,
+
+    /// <summary>To the last sound and back.</summary>
+    Turn,
+
+    /// <summary>Through the sounds again and again, a note on each.</summary>
+    Loop,
+
+    /// <summary>At random, mostly to a neighbour.</summary>
+    Random
+}
+
 /// <summary>
 ///     A change a fill may take from convention, any fill and several at once; the stranger a section's rhythm, the
-///     likelier each is. One that does not concern a fill, such as the toms' way for a snare roll, leaves it as it is.
+///     likelier each is. One that does not concern a fill, such as a slow-down for a break, leaves it as it is.
 /// </summary>
 [Flags]
 public enum FillTwist
 {
     None = 0,
 
-    /// <summary>The voices play a tuplet, such as triplets or quintuplets.</summary>
+    /// <summary>The run plays a tuplet, such as triplets or quintuplets, where the groove plays none.</summary>
     Tuplet = 1,
 
-    /// <summary>The fill starts off the beat, half a beat earlier or later.</summary>
+    /// <summary>The fill starts off the beat, a note near an 8th earlier or later.</summary>
     OddSpan = 2,
 
-    /// <summary>The voices slow down, the finest grid then the coarser one.</summary>
+    /// <summary>The run slows down, the finest notes then a rank coarser.</summary>
     SlowDown = 4,
 
-    /// <summary>The toms run up, from the floor tom to the high tom.</summary>
-    Upward = 8,
+    /// <summary>The run fades out rather than swells.</summary>
+    Fading = 8,
 
-    /// <summary>The toms zigzag, high and low in turn.</summary>
-    Zigzag = 16,
-
-    /// <summary>The voices play an odd sound: the kick, the song's percussion, crashes, or the snare and the floor tom together.</summary>
-    OddVoice = 32,
-
-    /// <summary>The voices leave many of their notes out, so the fill stutters.</summary>
-    Gappy = 64,
-
-    /// <summary>The voices fade out rather than swell.</summary>
-    Fading = 128,
-
-    /// <summary>The next section lands early, pushed an 8th ahead of the line.</summary>
-    EarlyLanding = 256,
+    /// <summary>The next section lands early, pushed a note near an 8th ahead of the line.</summary>
+    EarlyLanding = 16,
 
     /// <summary>The next section lands on nothing, even after a break.</summary>
-    NoLanding = 512
-}
-
-/// <summary>The odd sounds a voice may play instead of its own.</summary>
-public enum OddVoice
-{
-    Kick,
-    Percussion,
-    Crashes,
-
-    /// <summary>The snare and the floor tom together.</summary>
-    Unison
+    NoLanding = 32
 }
 
 /// <summary>What a fill does with the groove in its span.</summary>
@@ -112,33 +102,11 @@ public enum GrooveTreatment
     /// <summary>The groove plays on under the fill.</summary>
     Keep,
 
-    /// <summary>The hands leave the groove for the fill, and the kick plays on.</summary>
-    KeepKick,
+    /// <summary>The drums the fill plays leave the groove for it, and the others play on.</summary>
+    Played,
 
     /// <summary>The drums stop.</summary>
     Stop
-}
-
-/// <summary>The sounds a voice's notes play, one after another.</summary>
-public enum FillWalk
-{
-    Snare,
-
-    /// <summary>From the high tom down to the floor tom.</summary>
-    TomsDown,
-
-    /// <summary>The snare for the first notes, then the toms down.</summary>
-    SnareThenTomsDown
-}
-
-/// <summary>How likely a voice keeps each of its notes.</summary>
-public enum FillKeep
-{
-    /// <summary>Its first note, and nearly all the others, as many as the drummer does.</summary>
-    Run,
-
-    /// <summary>Less for every rank a note is weaker, so a few hits, mostly on the beats.</summary>
-    Sparse
 }
 
 /// <summary>A drum's sound: the groove's, when it names none, one sound, or a choice among several.</summary>
@@ -152,35 +120,21 @@ public sealed record FillSound(DrumRole Role, ImmutableArray<Weighted<int>> Code
 /// <summary>A hit at the start of a fill: the first of its sounds whose drum the song has.</summary>
 public sealed record FillHit(ImmutableArray<FillSound> Choices, double Velocity);
 
-/// <summary>
-///     A voice of a fill: a dyadic pattern over the fill's span, whose notes play the sounds of its walk, louder or
-///     quieter along it. One that speeds up plays 8ths for the first half and the song's finest grid for the second.
-///     Another walk may take its place by a chance, if its drum is in the song.
-/// </summary>
-public sealed record FillVoice(
-    FillWalk Walk,
-    FillKeep Keep,
-    double StartVelocity,
-    double EndVelocity,
-    bool SpeedsUp = false,
-    FillWalk? Alternative = null,
-    double AlternativeChance = 0
-);
-
-/// <summary>A fill: how long it may be, what it does with the groove, the hits it starts with and its voices.</summary>
+/// <summary>A fill: how long it may be, what it does with the groove, the hits it starts with, and whether it runs.</summary>
+/// <param name="Runs">Whether it plays a run over its span.</param>
 /// <param name="ForcesLanding">Whether the next section always lands on a crash and a kick after it.</param>
 public sealed record FillSpec(
     ImmutableArray<Weighted<double>> Spans,
     GrooveTreatment Groove,
     ImmutableArray<FillHit> Hits,
-    ImmutableArray<FillVoice> Voices,
+    bool Runs = false,
     bool ForcesLanding = false
 );
 
 /// <summary>
 ///     How the drums mark the lines between sections and phrases: the fill before a line, and what they land on after
-///     it. A section change is marked most, a phrase line inside a section now and then. A fill's voices are dyadic
-///     patterns like any other, so chance leaves notes out of them, as a drummer would.
+///     it. A section change is marked most, a phrase line inside a section now and then. A run's rhythm is the
+///     groove's (see <see cref="FillRhythm" />), so chance leaves notes out of it, as a drummer would.
 /// </summary>
 public static class FillLayers
 {
@@ -188,10 +142,7 @@ public static class FillLayers
     public static ImmutableArray<Weighted<FillKind>> SectionFills { get; } =
     [
         new(0.2, FillKind.None),
-        new(0.15, FillKind.Pickup),
-        new(0.25, FillKind.TomRun),
-        new(0.15, FillKind.SnareRoll),
-        new(0.1, FillKind.AroundTheKit),
+        new(0.65, FillKind.Run),
         new(0.08, FillKind.Break),
         new(0.05, FillKind.StopTime),
         new(0.07, FillKind.Lift)
@@ -201,9 +152,7 @@ public static class FillLayers
     public static ImmutableArray<Weighted<FillKind>> PhraseFills { get; } =
     [
         new(0.7, FillKind.None),
-        new(0.2, FillKind.Pickup),
-        new(0.05, FillKind.TomRun),
-        new(0.03, FillKind.SnareRoll),
+        new(0.28, FillKind.Run),
         new(0.02, FillKind.Break),
         new(0.1, FillKind.Lift)
     ];
@@ -212,43 +161,103 @@ public static class FillLayers
     ///     The fills that stray from convention, whose weights are multiplied by how far a section's rhythm strays (its
     ///     chance scale), as the adventurous phrase schemes are.
     /// </summary>
-    public static ImmutableHashSet<FillKind> AdventurousFills { get; } = [FillKind.AroundTheKit, FillKind.Break, FillKind.StopTime];
+    public static ImmutableHashSet<FillKind> AdventurousFills { get; } = [FillKind.Break, FillKind.StopTime];
 
     /// <summary>
     ///     How likely each twist is, in a section of conventionality in the middle; its chance is multiplied by the
-    ///     section's chance scale, from a quarter in a plain one to four times in a wild one. About one fill in eight
-    ///     takes a twist in the middle.
+    ///     section's chance scale, from a quarter in a plain one to four times in a wild one.
     /// </summary>
     public static ImmutableArray<Weighted<FillTwist>> Twists { get; } =
     [
         new(0.02, FillTwist.Tuplet),
         new(0.015, FillTwist.OddSpan),
         new(0.01, FillTwist.SlowDown),
-        new(0.015, FillTwist.Upward),
-        new(0.01, FillTwist.Zigzag),
-        new(0.02, FillTwist.OddVoice),
-        new(0.015, FillTwist.Gappy),
         new(0.01, FillTwist.Fading),
         new(0.01, FillTwist.EarlyLanding),
         new(0.005, FillTwist.NoLanding)
     ];
 
-    /// <summary>The tuplets a fill's twist may play, where the section plays none of its own.</summary>
+    /// <summary>The tuplets a fill's twist may play, where the groove plays none of its own.</summary>
     public static ImmutableArray<Weighted<int>> TwistTuplets { get; } = [new(0.75, 3), new(0.25, 5)];
 
-    /// <summary>The odd sounds of a voice's twist; one the song lacks the drum for is left out.</summary>
-    public static ImmutableArray<Weighted<OddVoice>> OddVoices { get; } =
+    /// <summary>The shortest note a fill plays, in seconds: a sextuplet at 125 beats a minute, a 32nd at 94.</summary>
+    public const double MinNoteSeconds = 0.08;
+
+    /// <summary>How many ranks finer than the groove a run plays, and how likely each is.</summary>
+    public static ImmutableArray<Weighted<int>> ExtraRanks { get; } = [new(0.3, 0), new(0.5, 1), new(0.2, 2)];
+
+    /// <summary>
+    ///     The chance a run plays a role's drums: mostly the snare and the toms; the others' chances are multiplied by
+    ///     the section's chance scale. A run that draws none plays the snare, or the first of the song's drums.
+    /// </summary>
+    public static ImmutableDictionary<DrumRole, double> RoleChances { get; } = new Dictionary<DrumRole, double>
+    {
+        [DrumRole.Snare] = 0.5,
+        [DrumRole.Toms] = 0.65,
+        [DrumRole.Kick] = 0.04,
+        [DrumRole.HiHat] = 0.05,
+        [DrumRole.Cymbal] = 0.04,
+        [DrumRole.Percussion] = 0.08
+    }.ToImmutableDictionary();
+
+    /// <summary>The roles a run plays by convention, whose chances the chance scale leaves.</summary>
+    public static ImmutableHashSet<DrumRole> ConventionalRoles { get; } = [DrumRole.Snare, DrumRole.Toms];
+
+    /// <summary>How many of a role's sounds a run plays, such as how many toms, and how likely each is; at most its all.</summary>
+    public static ImmutableArray<Weighted<int>> SoundCounts { get; } = [new(0.2, 1), new(0.3, 2), new(0.3, 3), new(0.2, 4)];
+
+    /// <summary>
+    ///     The chance, in a section of conventionality in the middle, that a run takes its toms in their order of pitch,
+    ///     down or up; it is divided by the section's chance scale. Otherwise every sound's place is drawn.
+    /// </summary>
+    public const double PitchOrderChance = 0.7;
+
+    /// <summary>How a run walks its sounds, and how likely each is; the random walk's weight is multiplied by the chance scale.</summary>
+    public static ImmutableArray<Weighted<FillPath>> Paths { get; } =
     [
-        new(0.3, OddVoice.Kick),
-        new(0.3, OddVoice.Percussion),
-        new(0.2, OddVoice.Crashes),
-        new(0.2, OddVoice.Unison)
+        new(0.55, FillPath.OneWay),
+        new(0.15, FillPath.Turn),
+        new(0.2, FillPath.Loop),
+        new(0.1, FillPath.Random)
     ];
 
-    /// <summary>How likely a gappy run keeps each note after its first, and a gappy pickup a note of the next rank.</summary>
-    public const double GappyFullness = 0.45;
+    /// <summary>The chance a random walk steps to a neighbour rather than to any sound.</summary>
+    public const double NeighbourStepChance = 0.8;
 
-    public const double GappySparseFullness = 0.3;
+    /// <summary>
+    ///     How many sounds of the walk each note plays together, and how likely each is; the weights of more than one
+    ///     are multiplied by the chance scale.
+    /// </summary>
+    public static ImmutableArray<Weighted<int>> Widths { get; } = [new(0.85, 1), new(0.12, 2), new(0.03, 3)];
+
+    /// <summary>
+    ///     The finest rank a role's sounds play in a run, such as a crash on the strongest notes only; a role not named
+    ///     plays any. A wild section lifts the limit by a rank now and then.
+    /// </summary>
+    public static ImmutableDictionary<DrumRole, int> RankLimits { get; } = new Dictionary<DrumRole, int>
+    {
+        [DrumRole.Cymbal] = 1
+    }.ToImmutableDictionary();
+
+    /// <summary>The chance a rank limit is a rank finer, in a section of conventionality in the middle, times its chance scale.</summary>
+    public const double RankLimitLiftChance = 0.1;
+
+    /// <summary>
+    ///     How likely a run keeps a note, less for every rank it is weaker: at a section change mostly full, at a
+    ///     phrase line mostly sparse, a few hits; each is spread around, and the drummer moves it.
+    /// </summary>
+    public const double SectionRunFullness = 0.8;
+
+    public const double PhraseRunFullness = 0.55;
+    public const double RunFullnessSpread = 0.2;
+
+    /// <summary>The fewest and the most a run keeps of a note a rank weaker.</summary>
+    public const double MinRunFullness = 0.3;
+
+    public const double MaxRunFullness = 0.95;
+
+    /// <summary>The chance a run speeds up, a rank coarser for its first half.</summary>
+    public const double SpeedUpChance = 0.3;
 
     /// <summary>What the drums land on at a section change, and how likely each is.</summary>
     public static ImmutableArray<Weighted<FillLanding>> SectionLandings { get; } =
@@ -273,65 +282,22 @@ public static class FillLayers
     /// <summary>How loud a landing's hit is over the drum's state there, as a note's accent.</summary>
     public const double LandingVelocity = 0.8;
 
-    /// <summary>How loud a run starts and ends, and a roll, which swells more.</summary>
-    public const double RunStartVelocity = -0.1;
+    /// <summary>How loud a run starts and ends, around the groove's loudness.</summary>
+    public const double RunStartVelocity = -0.15;
 
-    public const double RunEndVelocity = 0.4;
+    public const double RunEndVelocity = 0.5;
+
+    /// <summary>How much a run's note is accented by its rank, as a groove's note is, which the swell is added to.</summary>
+    public const double AccentWeight = 0.5;
+
     /// <summary>How loud a lift's hit is.</summary>
     public const double LiftVelocity = 0.6;
-
-    public const double RollStartVelocity = -0.2;
-    public const double RollEndVelocity = 0.6;
-
-    /// <summary>How likely a run keeps each of its notes: nearly all, as chance leaves one out now and then.</summary>
-    public const double RunFullness = 0.85;
-
-    /// <summary>How likely a pickup keeps a note, less for every rank it is weaker.</summary>
-    public const double PickupFullness = 0.5;
-
-    /// <summary>The chance that a pickup plays the toms rather than the snare.</summary>
-    public const double PickupTomChance = 0.3;
-
-    /// <summary>The share of the notes of a run around the kit that the snare plays, before the toms.</summary>
-    public const double AroundTheKitSnareShare = 0.25;
-
-    /// <summary>The shortest note a fill plays, in seconds: a sextuplet at 125 beats a minute, a 32nd at 94.</summary>
-    public const double MinNoteSeconds = 0.08;
-
-    /// <summary>How many ranks finer than the groove a fill plays, and how likely each is.</summary>
-    public static ImmutableArray<Weighted<int>> ExtraRanks { get; } = [new(0.3, 0), new(0.5, 1), new(0.2, 2)];
-
-    /// <summary>How much a fill's note is accented by its rank, as a groove's note is, which the swell is added to.</summary>
-    public const double AccentWeight = 0.5;
 
     /// <summary>Every fill but none: how long it may be, in beats before the line, and what it plays.</summary>
     public static ImmutableDictionary<FillKind, FillSpec> Specs { get; } = new Dictionary<FillKind, FillSpec>
     {
-        [FillKind.Pickup] = new(
-            [new(0.7, 1), new(0.3, 2)],
-            GrooveTreatment.Keep,
-            [],
-            [new FillVoice(FillWalk.Snare, FillKeep.Sparse, RunStartVelocity, RunEndVelocity, Alternative: FillWalk.TomsDown, AlternativeChance: PickupTomChance)]
-        ),
-        [FillKind.TomRun] = new(
-            [new(0.4, 1), new(0.45, 2), new(0.15, 4)],
-            GrooveTreatment.KeepKick,
-            [],
-            [new FillVoice(FillWalk.TomsDown, FillKeep.Run, RunStartVelocity, RunEndVelocity)]
-        ),
-        [FillKind.SnareRoll] = new(
-            [new(0.3, 1), new(0.4, 2), new(0.3, 4)],
-            GrooveTreatment.KeepKick,
-            [],
-            [new FillVoice(FillWalk.Snare, FillKeep.Run, RollStartVelocity, RollEndVelocity, SpeedsUp: true)]
-        ),
-        [FillKind.AroundTheKit] = new(
-            [new(0.6, 2), new(0.4, 4)],
-            GrooveTreatment.KeepKick,
-            [],
-            [new FillVoice(FillWalk.SnareThenTomsDown, FillKeep.Run, RunStartVelocity, RunEndVelocity)]
-        ),
-        [FillKind.Break] = new([new(0.3, 1), new(0.4, 2), new(0.3, 4)], GrooveTreatment.Stop, [], [], ForcesLanding: true),
+        [FillKind.Run] = new([new(0.35, 1), new(0.4, 2), new(0.25, 4)], GrooveTreatment.Played, [], Runs: true),
+        [FillKind.Break] = new([new(0.3, 1), new(0.4, 2), new(0.3, 4)], GrooveTreatment.Stop, [], ForcesLanding: true),
         [FillKind.StopTime] = new(
             [new(0.5, 2), new(0.5, 4)],
             GrooveTreatment.Stop,
@@ -340,14 +306,12 @@ public static class FillLayers
                 new FillHit([FillSound.Groove(DrumRole.Snare)], LandingVelocity),
                 new FillHit([Crash], LandingVelocity)
             ],
-            [],
             ForcesLanding: true
         ),
         [FillKind.Lift] = new(
             [new(1, 0.5)],
             GrooveTreatment.Keep,
-            [new FillHit([FillSound.Of(DrumRole.HiHat, DrumSounds.OpenHiHat), Crash], LiftVelocity)],
-            []
+            [new FillHit([FillSound.Of(DrumRole.HiHat, DrumSounds.OpenHiHat), Crash], LiftVelocity)]
         )
     }.ToImmutableDictionary();
 }

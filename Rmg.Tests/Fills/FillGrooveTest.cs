@@ -44,7 +44,7 @@ public sealed class FillGrooveTest
             {
                 var parts = decisions[i].Phrase!.Split(", ");
                 var kind = parts[0];
-                if (!FillLayers.Specs.TryGetValue(Enum.Parse<FillKind>(kind), out var spec) || spec.Voices.IsEmpty)
+                if (!FillLayers.Specs.TryGetValue(Enum.Parse<FillKind>(kind), out var spec) || !spec.Runs)
                     continue;
 
                 var span = double.Parse(parts[1].Split(' ')[0]);
@@ -76,7 +76,7 @@ public sealed class FillGrooveTest
                     )
                 );
                 measured.Add(new Measured(
-                    kind,
+                    parts.Any(x => x.StartsWith("in ")) ? $"{kind} in a tuplet" : kind,
                     Grid(fill.Select(x => x.Position)),
                     grooveGrid,
                     isOff,
@@ -123,11 +123,12 @@ public sealed class FillGrooveTest
     }
 
     [Test]
-    public async Task Fills_FallOnTheGroovesGrid()
+    public async Task StraightFills_FallOnTheGroovesGrid()
     {
-        var fills = Fills.Value;
+        // a fill in a tuplet leaves it on purpose, where the twist plays one over a straight groove
+        var fills = Fills.Value.Where(x => !x.Kind.EndsWith("in a tuplet")).ToArray();
 
-        // off it where a twist plays a tuplet, or the snare's feel is not the other drums'
+        // off it where the snare's feel is not the other drums'
         await Assert.That(fills.Count(x => x.IsOffTheGroove)).IsLessThan(fills.Length / 8);
     }
 

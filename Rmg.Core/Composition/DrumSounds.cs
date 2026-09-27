@@ -18,6 +18,6 @@ public static class DrumSounds
     public const int CrashCymbal1 = 49;
     public const int CrashCymbal2 = 57;
 
-    /// <summary>The toms from the highest down, as a run down them plays them.</summary>
+    /// <summary>The toms from the highest down: their note numbers fall with their pitch, which a run's order of pitch goes by.</summary>
     public static ImmutableArray<int> TomsHighToLow { get; } = [HighTom, HighMidTom, LowMidTom, LowTom, HighFloorTom, LowFloorTom];
 }

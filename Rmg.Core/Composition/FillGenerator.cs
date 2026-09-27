@@ -38,8 +38,11 @@ internal sealed class FillGenerator
     private readonly RhythmicUnconventionality _songRhythm;
     private readonly ImmutableArray<int> _drumTracks;
 
-    // the drum the song has for every role a fill plays
+    // the drum the song has for every role a fill's hits play
     private readonly ImmutableDictionary<DrumRole, (int Track, PercussionInstrumentDefinition Drum)> _roles;
+
+    // every sound of the song's drums a run may play
+    private readonly FillSounds _sounds;
 
     /// <param name="songRhythm">How far the song's rhythm strays, which its drummer plays to.</param>
     public FillGenerator(IGenerationContext context, SongTracks tracks, RhythmicUnconventionality songRhythm)
@@ -62,6 +65,7 @@ internal sealed class FillGenerator
         AddRole(DrumRole.Cymbal, DrumDefinitions.Cymbal);
         AddRole(DrumRole.Percussion, DrumGroups.Percussion.Drums.FirstOrDefault(tracks.SongDrums.Contains));
         _roles = roles.ToImmutableDictionary();
+        _sounds = new FillSounds(tracks.SongDrums);
     }
 
     /// <param name="song">The song's sections and its intro and ending, put one after another.</param>
@@ -73,7 +77,7 @@ internal sealed class FillGenerator
         SongMap? map = null
     )
     {
-        // a fast song's runs play 8ths, which 16ths would blur
+        // a fast song's runs play coarser notes, which finer ones would blur
         var tempo = BaseTempo * song.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(StateKinds.Tempo);
         var minNote = FillLayers.MinNoteSeconds * tempo / 60;
 
@@ -129,7 +133,7 @@ internal sealed class FillGenerator
             FillTable.Phrase => Pick(drummer.Weigh(FillLayers.PhraseFills, chanceScale)),
             _ => FillKind.None
         };
-        var play = DrawPlay(fill, drummer, chanceScale, ending.Groove.PrimeIndex.ToTuplet());
+        var play = DrawPlay(fill, drummer, chanceScale, ending.Groove.PrimeIndex.ToTuplet(), line.Fills);
         var rhythm = FillRhythm.Of(ending.Groove, play.ExtraRanks, play.Tuplet, minNote);
         var span = Fill(edits, play, line.Position, rhythm, drummer, ending.SectionId);
 
@@ -154,10 +158,10 @@ internal sealed class FillGenerator
     }
 
     /// <summary>
-    ///     How a fill is played: how much finer than the groove, its twists, each by its chance, and its tuplet, the
-    ///     groove's own if it plays one, else one of the tuplet twist's.
+    ///     How a fill is played: how much finer than the groove, its twists, each by its chance, its tuplet, the groove's
+    ///     own if it plays one, else one of the tuplet twist's, and for a run, its sounds and how it walks them.
     /// </summary>
-    private FillPlay DrawPlay(FillKind fill, Drummer drummer, double chanceScale, int grooveTuplet)
+    private FillPlay DrawPlay(FillKind fill, Drummer drummer, double chanceScale, int grooveTuplet, FillTable table)
     {
         if (fill == FillKind.None)
             return FillPlay.Plain(fill);
@@ -171,27 +175,15 @@ internal sealed class FillGenerator
         var tuplet = grooveTuplet != 1 ? grooveTuplet
             : twists.HasFlag(FillTwist.Tuplet) ? Pick(FillLayers.TwistTuplets)
             : 1;
-
-        OddVoice? oddVoice = null;
-        if (twists.HasFlag(FillTwist.OddVoice))
-        {
-            ImmutableArray<Weighted<OddVoice>> voices = [..FillLayers.OddVoices.Where(x => CanPlay(x.Value))];
-            if (voices.Length > 0)
-                oddVoice = Pick(voices);
-        }
-
-        return new FillPlay(fill, twists, tuplet, oddVoice, extraRanks);
-    }
-
-    private bool CanPlay(OddVoice voice)
-    {
-        return voice switch
-        {
-            OddVoice.Kick => _roles.ContainsKey(DrumRole.Kick),
-            OddVoice.Percussion => _roles.ContainsKey(DrumRole.Percussion),
-            OddVoice.Crashes => _roles.ContainsKey(DrumRole.Cymbal),
-            _ => _roles.ContainsKey(DrumRole.Snare) && _roles.ContainsKey(DrumRole.Toms)
-        };
+        var run = FillLayers.Specs[fill].Runs
+            ? _sounds.Draw(
+                _context,
+                drummer,
+                chanceScale,
+                table == FillTable.Phrase ? FillLayers.PhraseRunFullness : FillLayers.SectionRunFullness
+            )
+            : null;
+        return new FillPlay(fill, twists, tuplet, run, extraRanks);
     }
 
     /// <summary>The song with one fill before the given line, played as given, and no landing.</summary>
@@ -209,6 +201,15 @@ internal sealed class FillGenerator
         return edits.ApplyTo(song);
     }
 
+    /// <summary>A run as drawn for a line before a section change, for the tests to play.</summary>
+    internal FillRun DrawRun(Drummer drummer, double chanceScale = 1)
+    {
+        return _sounds.Draw(_context, drummer, chanceScale, FillLayers.SectionRunFullness);
+    }
+
+    /// <summary>Every sound a run may play, by role.</summary>
+    internal FillSounds Sounds => _sounds;
+
     private static bool IsForcingLanding(FillKind fill)
     {
         return fill != FillKind.None && FillLayers.Specs[fill].ForcesLanding;
@@ -224,7 +225,7 @@ internal sealed class FillGenerator
         var bar = (int)Math.Floor(line / Meter.BarDuration) - 1;
         var description = $"{play.Kind}, {span} beats, landing {landing}"
                           + (play.Tuplet != 1 ? $", in {play.Tuplet}s" : "")
-                          + (play.OddVoice is { } oddVoice ? $", on {oddVoice}" : "")
+                          + (play.Run is { } run ? $", {run}" : "")
                           + (play.Twists != FillTwist.None ? $", twists {play.Twists}" : "");
         StateTrace.Record(
             "Fill decision",
@@ -243,8 +244,8 @@ internal sealed class FillGenerator
     }
 
     /// <summary>
-    ///     A fill before the line, played from its spec: the groove in its span kept, left to the kick, or stopped, then
-    ///     its hits at the span's start, then its voices.
+    ///     A fill before the line, played from its spec: the groove in its span kept, left by the drums the fill plays,
+    ///     or stopped, then its hits at the span's start, then its run.
     /// </summary>
     /// <returns>How long the fill is, in beats; 0 for none.</returns>
     private double Fill(TimelineEdits edits, FillPlay play, double line, FillRhythm rhythm, Drummer drummer, int sectionId)
@@ -263,9 +264,14 @@ internal sealed class FillGenerator
         var from = line - span;
         var name = play.Kind.ToString();
 
-        if (spec.Groove != GrooveTreatment.Keep)
-            foreach (var track in _drumTracks.Where(x => spec.Groove == GrooveTreatment.Stop || x != Track(DrumRole.Kick)))
-                edits.Clear(track, from, line);
+        var cleared = spec.Groove switch
+        {
+            GrooveTreatment.Stop => _drumTracks,
+            GrooveTreatment.Played => play.Run?.Sounds.Select(x => x.Track).Distinct() ?? [],
+            _ => []
+        };
+        foreach (var track in cleared)
+            edits.Clear(track, from, line);
 
         foreach (var hit in spec.Hits)
             if (hit.Choices.FirstOrDefault(x => _roles.ContainsKey(x.Role)) is { } choice)
@@ -274,8 +280,8 @@ internal sealed class FillGenerator
                 edits.Hit(track, from, hit.Velocity, articulation, sectionId, name);
             }
 
-        foreach (var voice in spec.Voices)
-            PlayVoice(edits, voice, play, from, line, rhythm, drummer, sectionId, name);
+        if (play.Run is { } run)
+            PlayRun(edits, run, play.Twists, from, line, rhythm, sectionId, name);
         return span;
     }
 
@@ -298,134 +304,52 @@ internal sealed class FillGenerator
     }
 
     /// <summary>
-    ///     A voice over the span, in the fill's rhythm, each note accented by its rank as the groove's are, and louder or
-    ///     quieter along the span. One that speeds up plays a rank coarser for the first half and the finest for the
-    ///     second, where the span allows, and one that slows down the other way round; the walk runs over all its notes.
+    ///     A run over the span, in the fill's rhythm, starting on a hit, each note accented by its rank as the groove's
+    ///     are, and louder or quieter along the span. One that speeds up plays a rank coarser for the first half and the
+    ///     finest for the second, where the span allows, and one that slows down the other way round. Its walk runs over
+    ///     all its notes.
     /// </summary>
-    private void PlayVoice(
+    private void PlayRun(
         TimelineEdits edits,
-        FillVoice voice,
-        FillPlay play,
+        FillRun run,
+        FillTwist twists,
         double from,
         double line,
         FillRhythm rhythm,
-        Drummer drummer,
         int sectionId,
         string name
     )
     {
-        var walk = voice.Alternative is { } alternative
-                   && _roles.ContainsKey(GetRole(alternative))
-                   && _context.TestProbability(voice.AlternativeChance)
-            ? alternative
-            : voice.Walk;
-        var isGappy = play.Twists.HasFlag(FillTwist.Gappy);
-        Func<int, double> keepChance = voice.Keep switch
-        {
-            FillKeep.Run => rank => rank == 0 ? 1 : isGappy ? FillLayers.GappyFullness : drummer.RunFullness,
-            _ => rank => Math.Pow(isGappy ? FillLayers.GappySparseFullness : FillLayers.PickupFullness, rank)
-        };
-        var (startVelocity, endVelocity) = play.Twists.HasFlag(FillTwist.Fading)
-            ? (voice.EndVelocity, voice.StartVelocity)
-            : (voice.StartVelocity, voice.EndVelocity);
+        var fullness = run.Fullness;
+        Func<int, double> keepChance = rank => Math.Pow(fullness, rank);
+        var (startVelocity, endVelocity) = twists.HasFlag(FillTwist.Fading)
+            ? (FillLayers.RunEndVelocity, FillLayers.RunStartVelocity)
+            : (FillLayers.RunStartVelocity, FillLayers.RunEndVelocity);
 
-        var slowsDown = play.Twists.HasFlag(FillTwist.SlowDown);
+        var slowsDown = twists.HasFlag(FillTwist.SlowDown);
         var seed = SeedGenerator(_context);
-        var startsOnAHit = voice.Keep == FillKeep.Run;
         var notes = new List<(double Position, int Rank, int MaxRank)>();
-        if ((voice.SpeedsUp || slowsDown) && rhythm.MaxRank > 0)
+        if ((run.SpeedsUp || slowsDown) && rhythm.MaxRank > 0)
         {
             // the halves meet on a note of the coarser notes, so that a tuplet's notes stay on it
             var middle = from + Math.Round((line - from) / 2 / rhythm.Coarse) * rhythm.Coarse;
             var (first, second) = slowsDown ? (rhythm.MaxRank, rhythm.MaxRank - 1) : (rhythm.MaxRank - 1, rhythm.MaxRank);
-            notes.AddRange(rhythm.Play(_context, seed, keepChance, line, from, middle, first, startsOnAHit));
+            notes.AddRange(rhythm.Play(_context, seed, keepChance, line, from, middle, first, true));
             notes.AddRange(rhythm.Play(_context, seed + 1, keepChance, line, middle, line, second));
         }
         else
-            notes.AddRange(rhythm.Play(_context, seed, keepChance, line, from, line, rhythm.MaxRank, startsOnAHit));
+            notes.AddRange(rhythm.Play(_context, seed, keepChance, line, from, line, rhythm.MaxRank, true));
 
+        var places = FillSounds.Walk(_context, run.Path, run.Sounds.Length, notes.Count);
         var span = line - from;
         for (var k = 0; k < notes.Count; k++)
         {
             var (position, rank, maxRank) = notes[k];
             var loudness = startVelocity + (endVelocity - startVelocity) * (position - from) / span
                            + FillLayers.AccentWeight * BeatAccent.CreateVelocityGenerator(rank, maxRank)(_context);
-            foreach (var (track, articulation) in GetWalkSounds(walk, play, k, notes.Count))
-                edits.Hit(track, position, loudness, articulation, sectionId, name);
+            foreach (var sound in FillSounds.GetNoteSounds(run, places[k], rank))
+                edits.Hit(sound.Track, position, loudness, sound.Articulation, sectionId, name);
         }
-    }
-
-    /// <summary>The drum a walk needs, besides the snare that some walks start on.</summary>
-    private static DrumRole GetRole(FillWalk walk)
-    {
-        return walk == FillWalk.Snare ? DrumRole.Snare : DrumRole.Toms;
-    }
-
-    /// <summary>The sounds of a walk's note by its place among the notes; none if the song lacks their drums.</summary>
-    private IEnumerable<(int Track, int Articulation)> GetWalkSounds(FillWalk walk, FillPlay play, int index, int count)
-    {
-        (int Track, int Articulation)? sound;
-        switch (play.OddVoice)
-        {
-            case OddVoice.Kick:
-                sound = GetGrooveSound(DrumRole.Kick);
-                break;
-            case OddVoice.Percussion:
-                sound = GetGrooveSound(DrumRole.Percussion);
-                break;
-            case OddVoice.Crashes:
-                sound = _roles.TryGetValue(DrumRole.Cymbal, out var cymbal)
-                    ? (cymbal.Track, cymbal.Drum.GetArticulationIndex(DrumSounds.CrashCymbal1))
-                    : null;
-                break;
-            case OddVoice.Unison:
-                if (GetGrooveSound(DrumRole.Snare) is { } snare)
-                    yield return snare;
-                sound = _roles.TryGetValue(DrumRole.Toms, out var toms)
-                    ? (toms.Track, toms.Drum.GetArticulationIndex(DrumSounds.LowFloorTom))
-                    : null;
-                break;
-            default:
-                sound = walk switch
-                {
-                    FillWalk.TomsDown => GetTom(index, count, play.Twists),
-                    FillWalk.SnareThenTomsDown => index < (int)Math.Ceiling(count * FillLayers.AroundTheKitSnareShare)
-                                                 || !_roles.ContainsKey(DrumRole.Toms)
-                        ? GetGrooveSound(DrumRole.Snare)
-                        : GetTom(
-                            index - (int)Math.Ceiling(count * FillLayers.AroundTheKitSnareShare),
-                            count - (int)Math.Ceiling(count * FillLayers.AroundTheKitSnareShare),
-                            play.Twists
-                        ),
-                    _ => GetGrooveSound(DrumRole.Snare)
-                };
-                break;
-        }
-
-        if (sound is { } played)
-            yield return played;
-    }
-
-    private (int Track, int Articulation)? GetGrooveSound(DrumRole role)
-    {
-        return _roles.TryGetValue(role, out var drum) ? (drum.Track, 0) : null;
-    }
-
-    /// <summary>
-    ///     The tom of a run's note: from the high tom down to the floor tom over the run, or up, or zigzagging, the high
-    ///     toms and the low ones in turn, both coming down.
-    /// </summary>
-    private (int Track, int Articulation)? GetTom(int index, int count, FillTwist twists)
-    {
-        if (!_roles.TryGetValue(DrumRole.Toms, out var toms))
-            return null;
-
-        var tomCount = DrumSounds.TomsHighToLow.Length;
-        var step = index * tomCount / Math.Max(1, count);
-        var tomIndex = twists.HasFlag(FillTwist.Zigzag) ? step / 2 + (index % 2 == 0 ? 0 : tomCount / 2)
-            : twists.HasFlag(FillTwist.Upward) ? tomCount - 1 - step
-            : step;
-        return (toms.Track, toms.Drum.GetArticulationIndex(DrumSounds.TomsHighToLow[tomIndex]));
     }
 
     /// <summary>The hits the drums land on at a line: a crash, and a kick if the groove has none there.</summary>
@@ -452,9 +376,9 @@ internal sealed class FillGenerator
     }
 }
 
-/// <summary>How a fill is played: its kind, its twists, the tuplet it plays, 1 for straight, and its odd sound, if any.</summary>
+/// <summary>How a fill is played: its kind, its twists, the tuplet it plays, 1 for straight, and its run, if it has one.</summary>
 /// <param name="ExtraRanks">How many ranks finer than the groove the fill plays.</param>
-internal sealed record FillPlay(FillKind Kind, FillTwist Twists, int Tuplet, OddVoice? OddVoice, int ExtraRanks = 1)
+internal sealed record FillPlay(FillKind Kind, FillTwist Twists, int Tuplet, FillRun? Run, int ExtraRanks = 1)
 {
     public static FillPlay Plain(FillKind kind) => new(kind, FillTwist.None, 1, null);
 }
