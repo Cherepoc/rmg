@@ -107,7 +107,6 @@ internal sealed class SectionGenerator
         return new GeneratedSection(
             TrackEventStateTimelineMap.Merge(trackTimelineMaps).Repeat(2),
             rhythm,
-            GetDrumTuplet(drums.SelectMany(x => x.Feels)),
             GetGroove(drums.SelectMany(x => x.Feels))
         );
     }
@@ -126,24 +125,6 @@ internal sealed class SectionGenerator
             .ThenBy(x => x.Track)
             .Select(x => (ResolvedRhythm?)x.Rhythm)
             .FirstOrDefault() ?? ResolvedRhythm.Default;
-    }
-
-    /// <summary>
-    ///     The tuplet the drums play in the pattern's last bar, before both of the section's lines: the one most of their
-    ///     tuplet notes there fall on, if it has enough of all their notes to set the feel; 1 for straight.
-    /// </summary>
-    internal static int GetDrumTuplet(IEnumerable<BarFeel> feels)
-    {
-        var lastBar = feels.Where(x => x.Bar == Progressions.BarCount - 1).ToArray();
-        var noteCount = lastBar.Sum(x => x.NoteCount);
-        var tuplet = lastBar
-            .Where(x => x.Tuplet != 1)
-            .GroupBy(x => x.Tuplet)
-            .Select(x => (Tuplet: x.Key, NoteCount: x.Sum(y => y.NoteCount)))
-            .OrderByDescending(x => x.NoteCount)
-            .ThenBy(x => x.Tuplet)
-            .FirstOrDefault();
-        return noteCount > 0 && tuplet.NoteCount >= FillLayers.TupletFeelShare * noteCount ? tuplet.Tuplet : 1;
     }
 
     /// <summary>The drums the section plays, which make their patterns together, over the drums' shared state.</summary>
@@ -251,12 +232,10 @@ internal sealed class SectionGenerator
 /// </summary>
 /// <summary>A section's tracks, and what the fills need to know of its rhythm.</summary>
 /// <param name="Rhythm">How far the section's rhythm strays from convention.</param>
-/// <param name="DrumTuplet">The tuplet the drums play in the pattern's last bar, 1 for straight.</param>
 /// <param name="Groove">The rhythm the fills play from.</param>
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
     RhythmicUnconventionality Rhythm,
-    int DrumTuplet,
     ResolvedRhythm Groove
 );
 

@@ -57,11 +57,13 @@ public sealed class RhythmicUnconventionalityTest
                 .SelectMany(x => x.Value.EventTimeline.Select(e => e.Position))
                 .ToArray();
             if (hits.Length > 0)
-                shares.Add((value, hits.Count(x => Math.Abs(x * 4 - Math.Round(x * 4)) > 1e-6) / (double)hits.Length));
+                // a tuplet's note is off every dyadic grid, where a fill's 32nds are on one
+                shares.Add((value, hits.Count(x => Math.Abs(x * 16 - Math.Round(x * 16)) > 1e-6) / (double)hits.Length));
         }
 
         var ordered = shares.OrderBy(x => x.Value).ToArray();
         var quarter = ordered.Length / 4;
-        await Assert.That(ordered[^quarter..].Average(x => x.Tuplets)).IsGreaterThan(ordered[..quarter].Average(x => x.Tuplets) * 2);
+        // the fills play the snare's feel, so a tuplet the other drums play leaves them straight
+        await Assert.That(ordered[^quarter..].Average(x => x.Tuplets)).IsGreaterThan(ordered[..quarter].Average(x => x.Tuplets) * 1.5);
     }
 }

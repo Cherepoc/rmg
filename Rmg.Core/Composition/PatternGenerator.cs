@@ -357,11 +357,7 @@ internal sealed record GeneratedBars(TrackEventStateTimelineMap<StateMap> Timeli
 
 /// <summary>The feel of a track's bar: the rhythm it plays, and how many notes it has.</summary>
 /// <param name="Bar">The bar of the section's 4-bar pattern.</param>
-internal readonly record struct BarFeel(int Track, int Bar, ResolvedRhythm Rhythm, int NoteCount)
-{
-    /// <summary>The tuplet the bar's notes fall on, 1 for straight.</summary>
-    public int Tuplet => Rhythm.PrimeIndex.ToTuplet();
-}
+internal readonly record struct BarFeel(int Track, int Bar, ResolvedRhythm Rhythm, int NoteCount);
 
 /// <summary>
 ///     A bar pattern's rhythm settings, which its layers added up, folded into their ranges; its period and phase in

@@ -109,7 +109,6 @@ public sealed class SongEndingTest
                 StateMap.FromStates([StateKinds.ChordArrival.CreateState((int)ChordArrival.Third)]).ToStateTimelineMap(32)
             ),
             new RhythmicUnconventionality(0.5),
-            1,
             ResolvedRhythm.Default
         );
 

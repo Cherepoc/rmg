@@ -250,9 +250,6 @@ public static class FillLayers
 
     public const double GappySparseFullness = 0.3;
 
-    /// <summary>The share of the drums' notes in a bar that a tuplet needs to set the bar's feel.</summary>
-    public const double TupletFeelShare = 0.25;
-
     /// <summary>What the drums land on at a section change, and how likely each is.</summary>
     public static ImmutableArray<Weighted<FillLanding>> SectionLandings { get; } =
     [
@@ -277,11 +274,14 @@ public static class FillLayers
     public const double LandingVelocity = 0.8;
 
     /// <summary>How loud a run starts and ends, and a roll, which swells more.</summary>
-    public const double RunStartVelocity = 0.2;
+    public const double RunStartVelocity = -0.1;
 
-    public const double RunEndVelocity = 0.6;
-    public const double RollStartVelocity = -0.4;
-    public const double RollEndVelocity = 0.8;
+    public const double RunEndVelocity = 0.4;
+    /// <summary>How loud a lift's hit is.</summary>
+    public const double LiftVelocity = 0.6;
+
+    public const double RollStartVelocity = -0.2;
+    public const double RollEndVelocity = 0.6;
 
     /// <summary>How likely a run keeps each of its notes: nearly all, as chance leaves one out now and then.</summary>
     public const double RunFullness = 0.85;
@@ -295,8 +295,14 @@ public static class FillLayers
     /// <summary>The share of the notes of a run around the kit that the snare plays, before the toms.</summary>
     public const double AroundTheKitSnareShare = 0.25;
 
-    /// <summary>The fastest tempo, in beats a minute, at which a run plays 16ths; a faster one plays 8ths.</summary>
-    public const double MaxSixteenthTempo = 150;
+    /// <summary>The shortest note a fill plays, in seconds: a sextuplet at 125 beats a minute, a 32nd at 94.</summary>
+    public const double MinNoteSeconds = 0.08;
+
+    /// <summary>How many ranks finer than the groove a fill plays, and how likely each is.</summary>
+    public static ImmutableArray<Weighted<int>> ExtraRanks { get; } = [new(0.3, 0), new(0.5, 1), new(0.2, 2)];
+
+    /// <summary>How much a fill's note is accented by its rank, as a groove's note is, which the swell is added to.</summary>
+    public const double AccentWeight = 0.5;
 
     /// <summary>Every fill but none: how long it may be, in beats before the line, and what it plays.</summary>
     public static ImmutableDictionary<FillKind, FillSpec> Specs { get; } = new Dictionary<FillKind, FillSpec>
@@ -340,7 +346,7 @@ public static class FillLayers
         [FillKind.Lift] = new(
             [new(1, 0.5)],
             GrooveTreatment.Keep,
-            [new FillHit([FillSound.Of(DrumRole.HiHat, DrumSounds.OpenHiHat), Crash], RunEndVelocity)],
+            [new FillHit([FillSound.Of(DrumRole.HiHat, DrumSounds.OpenHiHat), Crash], LiftVelocity)],
             []
         )
     }.ToImmutableDictionary();

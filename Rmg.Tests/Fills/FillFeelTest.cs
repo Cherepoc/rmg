@@ -21,23 +21,10 @@ public sealed class FillFeelTest
         await Assert.That(IndexOf(5.0 / 4).ToTuplet()).IsEqualTo(1);
     }
 
-    private static ResolvedRhythm Rhythm(int tuplet) => ResolvedRhythm.Default with
+    private static ResolvedRhythm Rhythm(int tuplet)
     {
-        PrimeIndex = Enumerable.Range(-RhythmPeriod.MaxPrimeIndex, 2 * RhythmPeriod.MaxPrimeIndex + 1).First(x => x.ToTuplet() == tuplet)
-    };
-
-    private static BarFeel Feel(int track, int bar, int tuplet, int noteCount) => new(track, bar, Rhythm(tuplet), noteCount);
-
-    [Test]
-    public async Task DrumTuplet_IsTheTupletWithAQuarterOfTheLastBarsNotes()
-    {
-        const int lastBar = 3;
-
-        await Assert.That(SectionGenerator.GetDrumTuplet([Feel(1, lastBar, 1, 6), Feel(2, lastBar, 3, 2)])).IsEqualTo(3);
-        await Assert.That(SectionGenerator.GetDrumTuplet([Feel(1, lastBar, 1, 7), Feel(2, lastBar, 3, 2)])).IsEqualTo(1);
-        // only the last bar counts
-        await Assert.That(SectionGenerator.GetDrumTuplet([Feel(1, 0, 3, 8), Feel(2, lastBar, 1, 2)])).IsEqualTo(1);
-        await Assert.That(SectionGenerator.GetDrumTuplet([])).IsEqualTo(1);
+        var index = Enumerable.Range(-RhythmPeriod.MaxPrimeIndex, 2 * RhythmPeriod.MaxPrimeIndex + 1).First(x => x.ToTuplet() == tuplet);
+        return ResolvedRhythm.Default with { PrimeIndex = index, PeriodValue = ResolvedRhythm.Default.PeriodValue * index.ToRhythmPeriodValue() };
     }
 
     [Test]
@@ -46,7 +33,7 @@ public sealed class FillFeelTest
         var context = new GenerationContext(1);
         var tracks = SongTracks.Create(context, new RhythmicUnconventionality(0.5));
         var song = TrackEventStateTimelineMap.Create<StateMap>(8 * 32);
-        var sections = Enumerable.Range(0, 8).Select(x => new FillSection(x, 32, new RhythmicUnconventionality(0.5), 3, Rhythm(3))).ToArray();
+        var sections = Enumerable.Range(0, 8).Select(x => new FillSection(x, 32, new RhythmicUnconventionality(0.5), Rhythm(3))).ToArray();
         using var trace = StateTrace.Start();
 
         new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5)).Generate(song, FillGenerator.GetSectionLines(sections));

@@ -75,12 +75,12 @@ internal sealed class FillGenerator
     {
         // a fast song's runs play 8ths, which 16ths would blur
         var tempo = BaseTempo * song.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(StateKinds.Tempo);
-        var grid = tempo <= FillLayers.MaxSixteenthTempo ? 0.25 : 0.5;
+        var minNote = FillLayers.MinNoteSeconds * tempo / 60;
 
         var drummer = Drummer.Generate(_context, _songRhythm);
         var edits = new TimelineEdits(_context, map);
         foreach (var line in lines)
-            MarkLine(song, edits, line, grid, drummer, map?.Origin ?? 0);
+            MarkLine(song, edits, line, minNote, drummer, map?.Origin ?? 0);
 
         return edits.ApplyTo(song);
     }
@@ -116,7 +116,7 @@ internal sealed class FillGenerator
         TrackEventStateTimelineMap<StateMap> song,
         TimelineEdits edits,
         FillLine line,
-        double grid,
+        double minNote,
         Drummer drummer,
         double origin
     )
@@ -129,8 +129,9 @@ internal sealed class FillGenerator
             FillTable.Phrase => Pick(drummer.Weigh(FillLayers.PhraseFills, chanceScale)),
             _ => FillKind.None
         };
-        var play = DrawPlay(fill, drummer, chanceScale, ending.DrumTuplet);
-        var span = Fill(edits, play, line.Position, grid, drummer, ending.SectionId);
+        var play = DrawPlay(fill, drummer, chanceScale, ending.Groove.PrimeIndex.ToTuplet());
+        var rhythm = FillRhythm.Of(ending.Groove, play.ExtraRanks, play.Tuplet, minNote);
+        var span = Fill(edits, play, line.Position, rhythm, drummer, ending.SectionId);
 
         var landing = line.Landing switch
         {
@@ -144,29 +145,30 @@ internal sealed class FillGenerator
         if (play.Twists.HasFlag(FillTwist.NoLanding) && line.Landing != LandingRule.Forced)
             landing = FillLanding.None;
 
-        // a pushed landing comes a note of the coarser grid early, an 8th, or a tuplet's note
+        // a pushed landing comes a note of the fill's rhythm near an 8th early
         var landingPosition = play.Twists.HasFlag(FillTwist.EarlyLanding)
-            ? line.Position - GetGrids(play.Tuplet, grid).Coarse
+            ? line.Position - rhythm.Push
             : line.Position;
         Land(song, edits, landingPosition, line.LandingSectionId, landing);
         RecordDecision(ending.SectionId, line.Position - origin, play, span, landing);
     }
 
     /// <summary>
-    ///     How a fill is played: its twists, each by its chance, and its tuplet, the section's own if its drums play one,
-    ///     else one of the tuplet twist's.
+    ///     How a fill is played: how much finer than the groove, its twists, each by its chance, and its tuplet, the
+    ///     groove's own if it plays one, else one of the tuplet twist's.
     /// </summary>
-    private FillPlay DrawPlay(FillKind fill, Drummer drummer, double chanceScale, int drumTuplet)
+    private FillPlay DrawPlay(FillKind fill, Drummer drummer, double chanceScale, int grooveTuplet)
     {
         if (fill == FillKind.None)
             return FillPlay.Plain(fill);
 
+        var extraRanks = Pick(FillLayers.ExtraRanks);
         var twists = FillTwist.None;
         foreach (var twist in FillLayers.Twists)
             if (_context.TestProbability(drummer.GetTwistChance(twist, chanceScale)))
                 twists |= twist.Value;
 
-        var tuplet = drumTuplet != 1 ? drumTuplet
+        var tuplet = grooveTuplet != 1 ? grooveTuplet
             : twists.HasFlag(FillTwist.Tuplet) ? Pick(FillLayers.TwistTuplets)
             : 1;
 
@@ -178,7 +180,7 @@ internal sealed class FillGenerator
                 oddVoice = Pick(voices);
         }
 
-        return new FillPlay(fill, twists, tuplet, oddVoice);
+        return new FillPlay(fill, twists, tuplet, oddVoice, extraRanks);
     }
 
     private bool CanPlay(OddVoice voice)
@@ -197,12 +199,13 @@ internal sealed class FillGenerator
         TrackEventStateTimelineMap<StateMap> song,
         FillPlay play,
         double line,
-        double grid,
+        ResolvedRhythm groove,
+        double minNote,
         Drummer drummer
     )
     {
         var edits = new TimelineEdits(_context);
-        Fill(edits, play, line, grid, drummer, 0);
+        Fill(edits, play, line, FillRhythm.Of(groove, play.ExtraRanks, play.Tuplet, minNote), drummer, 0);
         return edits.ApplyTo(song);
     }
 
@@ -240,38 +243,23 @@ internal sealed class FillGenerator
     }
 
     /// <summary>
-    ///     The grids a fill's voices play on: the coarser one a roll starts on, 8ths, and the finest, the song's; in a
-    ///     tuplet, triplet 8ths and sextuplets where the song plays 16ths, or the tuplet's notes of the beat.
-    /// </summary>
-    internal static (double Coarse, double Fine) GetGrids(int tuplet, double grid)
-    {
-        return tuplet switch
-        {
-            1 => (0.5, grid),
-            3 => (1.0 / 3, grid < 0.5 ? 1.0 / 6 : 1.0 / 3),
-            _ => (1.0 / tuplet, 1.0 / tuplet)
-        };
-    }
-
-    /// <summary>
     ///     A fill before the line, played from its spec: the groove in its span kept, left to the kick, or stopped, then
     ///     its hits at the span's start, then its voices.
     /// </summary>
     /// <returns>How long the fill is, in beats; 0 for none.</returns>
-    private double Fill(TimelineEdits edits, FillPlay play, double line, double grid, Drummer drummer, int sectionId)
+    private double Fill(TimelineEdits edits, FillPlay play, double line, FillRhythm rhythm, Drummer drummer, int sectionId)
     {
         if (play.Kind == FillKind.None)
             return 0;
 
         var spec = FillLayers.Specs[play.Kind];
         var span = Pick(drummer.WeighSpans(spec.Spans));
-        var (coarse, fine) = GetGrids(play.Tuplet, grid);
-        // a fill shorter than a beat is a note of the coarser grid, so that in a tuplet it falls on the tuplet
+        // a fill shorter than a beat is a note of the fill's rhythm, so that in a tuplet it falls on the tuplet
         if (play.Tuplet != 1 && span < 1)
-            span = coarse;
-        // an odd span starts a note of the coarser grid earlier, or later where it is a bar long
+            span = rhythm.Push;
+        // an odd span starts a note of the fill's rhythm near an 8th earlier, or later where it is a bar long
         if (play.Twists.HasFlag(FillTwist.OddSpan))
-            span = span < Meter.BarDuration ? span + coarse : span - coarse;
+            span = span < Meter.BarDuration ? span + rhythm.Push : span - rhythm.Push;
         var from = line - span;
         var name = play.Kind.ToString();
 
@@ -287,8 +275,7 @@ internal sealed class FillGenerator
             }
 
         foreach (var voice in spec.Voices)
-            PlayVoice(edits, voice, play, from, line, coarse, fine, drummer, sectionId, name);
-
+            PlayVoice(edits, voice, play, from, line, rhythm, drummer, sectionId, name);
         return span;
     }
 
@@ -311,8 +298,9 @@ internal sealed class FillGenerator
     }
 
     /// <summary>
-    ///     A voice over the span. One that speeds up plays the coarser grid for the first half and the finest for the
-    ///     second, where the span and the grids allow, and one that slows down the other way round.
+    ///     A voice over the span, in the fill's rhythm, each note accented by its rank as the groove's are, and louder or
+    ///     quieter along the span. One that speeds up plays a rank coarser for the first half and the finest for the
+    ///     second, where the span allows, and one that slows down the other way round; the walk runs over all its notes.
     /// </summary>
     private void PlayVoice(
         TimelineEdits edits,
@@ -320,8 +308,7 @@ internal sealed class FillGenerator
         FillPlay play,
         double from,
         double line,
-        double coarse,
-        double fine,
+        FillRhythm rhythm,
         Drummer drummer,
         int sectionId,
         string name
@@ -343,82 +330,35 @@ internal sealed class FillGenerator
             : (voice.StartVelocity, voice.EndVelocity);
 
         var slowsDown = play.Twists.HasFlag(FillTwist.SlowDown);
-        if (!voice.SpeedsUp && !slowsDown)
+        var seed = SeedGenerator(_context);
+        var startsOnAHit = voice.Keep == FillKeep.Run;
+        var notes = new List<(double Position, int Rank, int MaxRank)>();
+        if ((voice.SpeedsUp || slowsDown) && rhythm.MaxRank > 0)
         {
-            PlaySegment(edits, from, line, fine, keepChance, walk, play, (startVelocity, endVelocity), sectionId, name);
-            return;
+            // the halves meet on a note of the coarser notes, so that a tuplet's notes stay on it
+            var middle = from + Math.Round((line - from) / 2 / rhythm.Coarse) * rhythm.Coarse;
+            var (first, second) = slowsDown ? (rhythm.MaxRank, rhythm.MaxRank - 1) : (rhythm.MaxRank - 1, rhythm.MaxRank);
+            notes.AddRange(rhythm.Play(_context, seed, keepChance, line, from, middle, first, startsOnAHit));
+            notes.AddRange(rhythm.Play(_context, seed + 1, keepChance, line, middle, line, second));
         }
+        else
+            notes.AddRange(rhythm.Play(_context, seed, keepChance, line, from, line, rhythm.MaxRank, startsOnAHit));
 
         var span = line - from;
-        var (first, second) = slowsDown ? (fine, coarse) : (coarse, fine);
-        // the halves meet on a note of the coarser grid, so that a tuplet's notes stay on it
-        var middle = span >= 1 && fine < coarse ? from + Math.Round(span / 2 / coarse) * coarse : from;
-        var midVelocity = (startVelocity + endVelocity) / 2;
-        PlaySegment(edits, from, middle, first, keepChance, walk, play, (startVelocity, midVelocity), sectionId, name);
-        PlaySegment(
-            edits,
-            middle,
-            line,
-            middle > from ? second : fine,
-            keepChance,
-            walk,
-            play,
-            (middle > from ? midVelocity : startVelocity, endVelocity),
-            sectionId,
-            name
-        );
+        for (var k = 0; k < notes.Count; k++)
+        {
+            var (position, rank, maxRank) = notes[k];
+            var loudness = startVelocity + (endVelocity - startVelocity) * (position - from) / span
+                           + FillLayers.AccentWeight * BeatAccent.CreateVelocityGenerator(rank, maxRank)(_context);
+            foreach (var (track, articulation) in GetWalkSounds(walk, play, k, notes.Count))
+                edits.Hit(track, position, loudness, articulation, sectionId, name);
+        }
     }
 
     /// <summary>The drum a walk needs, besides the snare that some walks start on.</summary>
     private static DrumRole GetRole(FillWalk walk)
     {
         return walk == FillWalk.Snare ? DrumRole.Snare : DrumRole.Toms;
-    }
-
-    /// <summary>
-    ///     A part of a voice: a dyadic pattern over its span, on notes of the given length, whose every note plays the
-    ///     sounds of the walk at its place among the notes, louder or quieter along the span. Where the notes are not a
-    ///     power of two, such as the six of a sextuplet beat, the span holds as many cycles as their odd factor.
-    /// </summary>
-    private void PlaySegment(
-        TimelineEdits edits,
-        double from,
-        double to,
-        double noteLength,
-        Func<int, double> keepChance,
-        FillWalk walk,
-        FillPlay play,
-        (double From, double To) velocity,
-        int sectionId,
-        string name
-    )
-    {
-        var span = to - from;
-        var noteCount = (int)Math.Round(span / noteLength);
-        if (noteCount < 1)
-            return;
-
-        var cycles = noteCount;
-        var maxRank = 0;
-        while (cycles % 2 == 0)
-        {
-            cycles /= 2;
-            maxRank++;
-        }
-
-        var hits = DyadicRankThresholdPattern.Create(
-                _context,
-                SeedGenerator(_context),
-                keepChance,
-                new DyadicTimelineDescriptor(span, span / cycles, 0, maxRank)
-            )
-            .OutcomeRankTimeline;
-        for (var k = 0; k < hits.Count; k++)
-        {
-            var loudness = velocity.From + (velocity.To - velocity.From) * hits[k].Position / span;
-            foreach (var (track, articulation) in GetWalkSounds(walk, play, k, hits.Count))
-                edits.Hit(track, from + hits[k].Position, loudness, articulation, sectionId, name);
-        }
     }
 
     /// <summary>The sounds of a walk's note by its place among the notes; none if the song lacks their drums.</summary>
@@ -513,7 +453,8 @@ internal sealed class FillGenerator
 }
 
 /// <summary>How a fill is played: its kind, its twists, the tuplet it plays, 1 for straight, and its odd sound, if any.</summary>
-internal sealed record FillPlay(FillKind Kind, FillTwist Twists, int Tuplet, OddVoice? OddVoice)
+/// <param name="ExtraRanks">How many ranks finer than the groove the fill plays.</param>
+internal sealed record FillPlay(FillKind Kind, FillTwist Twists, int Tuplet, OddVoice? OddVoice, int ExtraRanks = 1)
 {
     public static FillPlay Plain(FillKind kind) => new(kind, FillTwist.None, 1, null);
 }
@@ -539,6 +480,5 @@ internal enum LandingRule
 internal sealed record FillLine(double Position, FillSection Ending, int LandingSectionId, FillTable Fills, LandingRule Landing);
 
 /// <summary>A section as the fills see it: where it is, how far its rhythm strays, and the drums' feel before its lines.</summary>
-/// <param name="DrumTuplet">The tuplet the drums play in the last bar of the section's 4-bar pattern, 1 for straight.</param>
 /// <param name="Groove">The rhythm the fills play from, the snare's in the last bar of the section's 4-bar pattern.</param>
-internal sealed record FillSection(int SectionId, double Duration, RhythmicUnconventionality Rhythm, int DrumTuplet, ResolvedRhythm Groove);
+internal sealed record FillSection(int SectionId, double Duration, RhythmicUnconventionality Rhythm, ResolvedRhythm Groove);
