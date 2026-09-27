@@ -241,7 +241,7 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   `Realizer`, plays them, over the whole song in order: every note's pitches, loudness and length, and
   every drum hit's sound (`Song.Notes`, a `RealizedNote` per note, with the state it was decided from),
   in the register that follows from the notes before, since a track's line goes on across its sections:
-  a chord's voicing, the bass's octave and each melody phrase's octave. A stage that comes after it can
+  a chord's voicing, the bass's octave and the octave each bar of the melody starts in. A stage that comes after it can
   change the notes themselves; the state still explains how they came about, but does not show
   the change. `Render` then plays the notes: a chord's pitches together, the drums on one channel,
   and the song's velocities spread over the MIDI range, which it needs all the notes for; `Midi`
@@ -306,7 +306,8 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   its range. A bar pattern that comes back, or a cycle that repeats the one before, plays its notes
   again as the scale steps they had from the chord's root, so that over another chord they sound as a
   sequence. Every note keeps its scale step (`StateKinds.ScaleStep`), so a section plays its melody the
-  same wherever it plays, each phrase in the octave nearest the note before it.
+  same wherever it plays, every bar moved by an octave at most to start nearest the note before it. The
+  song's last note is the chord's root, its octave chosen as a bar's is.
 - **The melody's rhythm.** A song draws how busy its melody is (`MelodyBusyness`), from a sparse, held
   line of a note or two a bar to riffs in 8ths, and a section moves it: the busier, the fuller its
   pattern and the likelier it plays twice as fast, about 2 to 7 notes a bar across songs and 4 on

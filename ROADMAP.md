@@ -57,19 +57,20 @@ line places its notes in order over them, by the rules of `MelodyLine`, over the
 (`MelodyPattern.Place`), and every note keeps its scale step above its chord's root (`StateKinds.ScaleStep`), which
 `Realizer` plays. The section then plays it the same wherever it plays: its second phrase and a section that recurs are
 the same notes, where before, placed as the song played, a bar that came back played the same note over the same root
-40% of the time. The melody's render flags are generation state now, and the final note lands on the root as an edit of
-its step (`SongFormGenerator.LandOnRoot`).
+40% of the time. The melody's render flags are generation state now.
 
 As the chords' voicing and the bass's octave are, the melody's register is chosen in `Realizer` from what came before:
-a phrase, the notes placed for a section's 4-bar pattern, is moved by whole octaves to start nearest the note before,
-within the track's range (`PhraseRegister`, `StateKinds.PhraseStart`), so what plays again plays the same notes, in
-the octave its phrase starts in.
+every bar is moved by an octave at most, down, none or up, to start nearest the note before, within the track's range
+(`MelodyRegister`, `StateKinds.RegisterStart`), so what plays again plays the same notes, the octave aside, and the
+melody stays within an octave of where it was placed. The song's last note is the chord's root in the register of the
+note it is made from, an edit as the song is put together (`SongFormGenerator.LandOnRoot`), and its octave is chosen as
+a bar's is.
 
-Measured over 100 corpus songs, against the melody placed as the song played: chord notes on the beat 87.5%, up from
-81%; within phrases the melody moves about as before (2.9% leaps against 2.2%), but where a phrase starts again, at a
-section's start or its second phrase, 27% of the moves are leaps, against 3% before, 83% of them after a rest, as a new
-phrase starts after a breath; 38% before the phrase's octave was chosen, which a range of an octave or two often has
-no room for. Left:
+Measured over 200 corpus songs, against the melody placed as the song played: chord notes on the beat 87%, up from 81%;
+leaps 3.4% of the moves, against 2.2%, where a phrase starts again 14% (88% of them after a rest, as a new phrase
+starts after a breath) and into a section 14%, against 3% before; the song's last note leaps from the note before 18%
+of the time, as before. The octave chosen per phrase left 24% of the leaps where a phrase starts again, and chosen per
+bar anywhere in the track's range let the melody drift, spanning up to 64 semitones in a song against 41. Left:
 
 - **Listen** to where phrases start again. Two rules tried to close a phrase onto its start and were dropped: aiming
   the last bar back moved little, and landing the last note near the start only moved the leap one note earlier.

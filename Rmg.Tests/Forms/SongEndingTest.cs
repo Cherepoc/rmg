@@ -36,13 +36,15 @@ public sealed class SongEndingTest
     [Arguments(-2, 0)]
     [Arguments(11, 14)]
     [Arguments(-4, -7)]
-    public async Task AMelodysLastNote_LandsOnTheRoot_InTheOctaveNearestIt(int step, int root)
+    public async Task AMelodysLastNote_LandsOnTheRoot_InItsRegister_ItsOctaveChosenFromTheNoteBefore(int step, int root)
     {
         var note = StateMap.FromStates([StateKinds.ScaleStep.CreateState(step), StateKinds.Velocity.CreateState(0.5)]).ToTimelineItem(0);
         var plain = StateMap.FromStates([StateKinds.Velocity.CreateState(0.5)]).ToTimelineItem(0);
 
-        await Assert.That(SongFormGenerator.LandOnRoot(note).Value.GetStateValue(StateKinds.ScaleStep)).IsEqualTo(root);
-        await Assert.That(SongFormGenerator.LandOnRoot(note).Value.GetStateValue(StateKinds.Velocity)).IsEqualTo(0.5);
+        var landed = SongFormGenerator.LandOnRoot(note).Value;
+        await Assert.That(landed.GetStateValue(StateKinds.ScaleStep)).IsEqualTo(root);
+        await Assert.That(landed.GetStateValue(StateKinds.RegisterStart)).IsEqualTo(1);
+        await Assert.That(landed.GetStateValue(StateKinds.Velocity)).IsEqualTo(0.5);
         await Assert.That(SongFormGenerator.LandOnRoot(plain)).IsEqualTo(plain);
     }
 

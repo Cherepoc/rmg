@@ -58,10 +58,7 @@ internal sealed class MelodyLine
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(minNote, maxNote);
 
-        // the singable range in the middle of the track's, or all of the track's if it is narrower
-        var middle = (minNote + maxNote) / 2.0;
-        _low = Math.Max(minNote, (int)Math.Round(middle - RangeWidth / 2.0));
-        _high = Math.Min(maxNote, _low + RangeWidth);
+        (_low, _high) = GetSingableRange(minNote, maxNote);
         _middle = (_low + _high) / 2.0;
     }
 
@@ -125,6 +122,14 @@ internal sealed class MelodyLine
             note = GetNearest(GetChordTones(chordToneClasses), note);
 
         return note >= _low && note <= _high ? note : GetNearest(GetScaleNotes(chord), note);
+    }
+
+    /// <summary>The singable range in the middle of a track's, or all of the track's if it is narrower.</summary>
+    internal static (int Low, int High) GetSingableRange(int minNote, int maxNote)
+    {
+        var middle = (minNote + maxNote) / 2.0;
+        var low = Math.Max(minNote, (int)Math.Round(middle - RangeWidth / 2.0));
+        return (low, Math.Min(maxNote, low + RangeWidth));
     }
 
     /// <summary>The scale step of a note, counted from the chord's root: the step whose note is nearest it.</summary>

@@ -130,9 +130,9 @@ public sealed class MelodyRepetitionTest
     }
 
     [Test]
-    public async Task WhatComesBack_PlaysTheSameNotes_InTheOctaveItsPhraseStartsIn()
+    public async Task WhatComesBack_PlaysTheSameNotes_InTheOctaveItsBarStartsIn()
     {
-        // a section's melody is placed once, so what plays again is the same, moved by the octave its phrase starts in;
+        // a section's melody is placed once, so what plays again is the same, moved by the octave its bar starts in;
         // before, when the melody was placed as the song played, bars that came back played the same note over the same
         // root 40% of the time
         var m = Measure(TestCorpus.Range(20));

@@ -241,17 +241,9 @@ internal sealed class SongFormGenerator
     }
 
     /// <summary>
-    ///     The ending's bars: the home bar of the song's last section, every pitched track's first note of it moved to
-    ///     the downbeat and held, or its first of the section if it rests in that bar, or its last before the section if
-    ///     it rests in all of it, the melody's as its last note; the
-    ///     drums' state with no notes, for the fills to land on; and the bass on the chord's root.
-    /// </summary>
-    /// <param name="length">How long the chord is held, in beats.</param>
-    /// <param name="duration">How long the ending is, in beats.</param>
-    /// <param name="earlierSections">The sections before the last, in the song's order.</param>
-    /// <summary>
-    ///     A note whose scale step is set, as the melody's is, moved to the chord's root in the octave nearest it, where a
-    ///     melody ends.
+    ///     A note whose scale step is set, as the melody's is, moved to the chord's root, where a melody ends: the root
+    ///     in the register of the note it is made from, which <c>Realizer</c> moves by an octave to be nearest the note
+    ///     before, as it does where a bar starts.
     /// </summary>
     internal static TimelineItem<StateMap> LandOnRoot(TimelineItem<StateMap> note)
     {
@@ -259,10 +251,21 @@ internal sealed class SongFormGenerator
             return note;
 
         var root = (int)Math.Round(note.Value.GetStateValue(StateKinds.ScaleStep) / (double)Scales.StepCount) * Scales.StepCount;
-        return note.Value.Except([StateKinds.ScaleStep]).MergeWith(StateMap.FromStates([StateKinds.ScaleStep.CreateState(root)]))
+        return note.Value.Except([StateKinds.ScaleStep, StateKinds.RegisterStart])
+            .MergeWith(StateMap.FromStates([StateKinds.ScaleStep.CreateState(root), StateKinds.RegisterStart.CreateState(1)]))
             .ToTimelineItem(note.Position);
     }
 
+    /// <summary>
+    ///     The ending's bars: the home bar of the song's last section, every pitched track's first note of it moved to
+    ///     the downbeat and held, or its first of the section if it rests in that bar, or its last before the section if
+    ///     it rests in all of it, the melody's as its last note, on the root; the drums' state with no notes, for the
+    ///     fills to land on; and the bass on the chord's root.
+    /// </summary>
+    /// <param name="length">How long the chord is held, in beats.</param>
+    /// <param name="duration">How long the ending is, in beats.</param>
+    /// <param name="earlierSections">The sections before the last, in the song's order.</param>
+    /// <param name="roles">What every track plays, by its number.</param>
     internal static TrackEventStateTimelineMap<StateMap> CreateEnding(
         GeneratedSection lastSection,
         IEnumerable<GeneratedSection> earlierSections,
