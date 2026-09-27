@@ -209,33 +209,50 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   drum keeps the rhythm it is given in about half of the bars. A pattern's fullness sets how many of its
   positions play, up to all of them, which on a fast cycle is a roll, and its variation how often a cycle
   draws afresh what it plays rather than repeating the cycle before, down to a fixed riff; a cycle of one
-  rank repeated is a steady pulse. The hi-hat and the ride keep time full and steady, and the kick and the
-  snare mostly keep their figures.
+  rank repeated is a steady pulse. A cycle that repeats the one before plays its notes as they were, not
+  only where they were: their accents, their walks (such as the hi-hat's open or closed sound or an
+  arpeggio's notes) and their lengths; only the chord is each note's own (`DyadicRankItemPattern`). The
+  hi-hat and the ride keep time full and steady, and the kick and the snare mostly keep their figures.
 - **Phrase schemes.** A section's four bars follow a scheme (`PhraseSchemes`) that every track shares:
-  AABA and AAAB most often, then ABAB, AAAA, AABB and ABAC, and rarely four different bars. Bars of the
+  AABA and AAAB most often, then ABAB, AAAA, AABB and ABAC, and rarely four different bars; the more
+  different bars a scheme brings, the likelier it is the more unconventional the rhythm. Bars of the
   same letter play the same bar pattern, and a repeat is now and then varied: it starts as the first did
   and then changes.
 - **Rhythmic unconventionality.** How far a song's rhythm strays from convention
   (`RhythmicUnconventionality`), apart from its harmony, scales the chances with which the rhythm layers
   move their settings, from a quarter for plain grooves to four times for wild ones, full of tuplets,
-  syncopation and displaced accents; it also brings more new bars into the phrase schemes. A section
-  moves the song's a little. A period can be a tuplet's, such as a
-  triplet's, which is not exact in binary, so rhythm positions are snapped to a grid of 1024 · 3 · 5 · 7
-  ticks per beat (`TimelineGrid`), on which the dyadic subdivisions and the triplets, quintuplets and
-  septuplets fall exactly; two ways to the same moment then give the same position.
+  syncopation and displaced accents. It leans the song's rarer choices too (`Tilt`), each by how
+  unconventional it is, through its weight or its odds: phrase schemes of more new bars, open and stopped
+  endings, fills that stop the groove, walk at random, play wider or slow down, toms out of their order
+  of pitch, and a drummer's signature. A section moves the song's a little. A period can be a tuplet's,
+  such as a triplet's, which is not exact in binary, so rhythm positions are snapped to a grid of
+  1024 · 3 · 5 · 7 ticks per beat (`TimelineGrid`), on which the dyadic subdivisions and the triplets,
+  quintuplets and septuplets fall exactly; two ways to the same moment then give the same position.
+- **Section energy.** Every section has an energy (`SectionEnergy`), how loud and busy it is meant to be:
+  the song's, more the more often the section recurs, more the later it plays on average, and a step of
+  its own. It leans the section's draws and never decides them, as far as its rhythm is conventional, so
+  that a wild section is loud and sparse as often as not: its loudness, the drums' fullness and how busy
+  they play, which drums play (each drum leans loud or quiet, the crash and the ride loud, the
+  cross-stick quiet), how bright its scale is, as far as its harmony is conventional, and the fills that
+  lead into it.
 - **Generators.** Randomness is expressed as small composable generators that take a seeded
   context, which is what makes every song reproducible.
-- **Notes and rendering.** The last stage of the generation, `Realizer`, decides the song's notes
-  from its state, over the whole song in order, since a track's line goes on across its sections:
-  every note's pitches, loudness and length, and every drum hit's sound (`Song.Notes`, a
-  `RealizedNote` per note, with the state it was decided from). A stage that comes after it can
+- **Notes and rendering.** The state decides the notes, and the last stage of the generation,
+  `Realizer`, plays them, over the whole song in order: every note's pitches, loudness and length, and
+  every drum hit's sound (`Song.Notes`, a `RealizedNote` per note, with the state it was decided from),
+  in the register that follows from the notes before, since a track's line goes on across its sections:
+  a chord's voicing, the bass's octave and each melody phrase's octave. A stage that comes after it can
   change the notes themselves; the state still explains how they came about, but does not show
   the change. `Render` then plays the notes: a chord's pitches together, the drums on one channel,
   and the song's velocities spread over the MIDI range, which it needs all the notes for; `Midi`
   writes them as a standard MIDI file.
-- **Scales.** A song is in one scale from start to end, in a random key. The scale is drawn from a
-  weighted table of 7-note scales (`Scales`): natural minor and major are the most common (30% each),
-  dorian and mixolydian occasional (12% each), and harmonic minor, phrygian and lydian rare (5–6%).
+- **Scales.** A song has a scale, in a random key. The scale is drawn from a weighted table of 7-note
+  scales (`Scales`): natural minor and major are the most common (30% each), dorian and mixolydian
+  occasional (12% each), and harmonic minor, phrygian and lydian rare (5–6%). A section plays in the
+  song's scale, or now and then (about one in seven) in another on the same tonic: a close one most
+  often, such as dorian for natural minor or mixolydian for major, now and then the parallel major or
+  minor, leaning brighter the more energy the section has. The song's first section keeps its scale,
+  which sets the key.
   Chord roots move by scale steps and chord heights sit between the qualities a 7-note scale gives,
   so scales of other sizes, such as pentatonic, are not in the table.
 - **Chords.** A chord is the heights of its notes above the chord root, as fractions of an octave in
@@ -279,14 +296,17 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   little early. How much the bass leads (`BassLeadingLayers`) comes from its instrument (upright and
   fretless basses walk, synth basses sit on the roots), and a section moves it; each bar then draws
   whether and how it leads.
-- **Melody.** The melody line (`MelodyLine`) is placed note by note by rule. A note on a strong beat
-  takes a note of the chord, the nearest one the way the melody goes, and a note on a weak beat moves
-  along the scale between them; a note means to go on the way the melody goes or to turn back, and now
-  and then to leap, less the more stepwise the melody (`MelodyLayers`, set by the melody instrument
-  and moved by the section). After a leap it steps back, and it turns towards where its phrase aims,
-  a shape drawn per section: up and back down, falling, rising, or a wave. It keeps to a singable 17
-  semitones in the middle of its range. A bar pattern that comes back is a motif: it plays the shape it
-  had the first time, moved along the scale, so that over another chord it sounds as a sequence.
+- **Melody.** A section's melody is placed once its bars are made (`MelodyPattern`), note by note by
+  rule (`MelodyLine`). A note on a strong beat takes a note of the chord, the nearest one the way the
+  melody goes, and a note on a weak beat moves along the scale between them; a note means to go on the
+  way the melody goes or to turn back, and now and then to leap, less the more stepwise the melody
+  (`MelodyLayers`, set by the melody instrument and moved by the section). After a leap it steps back,
+  and it turns towards where its phrase aims, a shape drawn per section: it rises to a peak in a bar
+  drawn, most often the third, and falls from it. It keeps to a singable 17 semitones in the middle of
+  its range. A bar pattern that comes back, or a cycle that repeats the one before, plays its notes
+  again as the scale steps they had from the chord's root, so that over another chord they sound as a
+  sequence. Every note keeps its scale step (`StateKinds.ScaleStep`), so a section plays its melody the
+  same wherever it plays, each phrase in the octave nearest the note before it.
 - **The melody's rhythm.** A song draws how busy its melody is (`MelodyBusyness`), from a sparse, held
   line of a note or two a bar to riffs in 8ths, and a section moves it: the busier, the fuller its
   pattern and the likelier it plays twice as fast, about 2 to 7 notes a bar across songs and 4 on
@@ -294,30 +314,23 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   note ends by the next. Most phrases end in their last bar (`MelodyLayers.PhraseEnds`): the notes
   from beat 2, 3 or 4 on are left out, and the last one is held on a note of the chord until a beat
   before the next phrase, the one place where a note's length is set over the gap to the next.
-- **Fills.** The drums mark the lines between sections (`FillGenerator`, `FillLayers`). Before a
-  section change a drummer plays a fill most of the time: a pickup of a few hits, a run down the toms, a
-  snare roll that speeds up and swells, a run from the snare around the toms, a break, stop-time (one
-  hit together, then silence) or a lift on an open hi-hat; the line in the middle of a section gets
-  one now and then, mostly a pickup or a lift. A fill spans from half a beat to a bar before the line,
-  and its hands leave the groove there while the kick plays on, or the drums stop. Its voices are
-  dyadic patterns like the grooves', so chance leaves a note out now and then. A section tells the
-  fills how far its rhythm strays and its drums' feel before its lines: the tuplet at least a quarter
-  of their notes in the pattern's last bar fall on, such as triplets, but not a dotted period, whose
-  notes stay on the 16ths. A fill in a tuplet feel plays its runs in that tuplet, and a fast song's
-  runs play 8ths. The more a section's rhythm strays, the likelier its adventurous fills (around the
-  kit, breaks, stop-time) and its twists (`FillTwist`), each by its own chance, several at once: a
-  tuplet, a fill starting off the beat, a roll that slows down, toms running up or zigzagging, an odd
-  voice (the kick, the song's percussion, crashes, or snare and floor tom together), a gappy run, a
-  fade, and a landing pushed an 8th early or left out. About one fill in eight takes a twist in the
-  middle, one in fourteen in a plain song and one in three and a half in a wild one; a wild song's
-  drummer may have a signature twist it plays five times as often. The next section
-  lands on a crash and a kick most of the time (65%), a kick alone (20%), or runs straight on; after a
-  break or stop-time always on both. Every fill is data (`FillSpec`): its spans, what it does with the
-  groove, the hits it starts with, and its voices, each a walk of named sounds (`DrumSounds`), such as
-  down the toms. A song's drummer (`Drummer`) sets how busy the fills are, how
-  often, how long and how full, and has a favourite fill it plays three times as often, so a song's
-  fills sound like one player's. The fills take notes out of a span and add their own
-  (`FillEdits`); a drum names its sound outright (`StateKinds.ArticulationIndex`), and a drum out of a
+- **Fills.** The drums mark the line before every section and the line in the middle of each
+  (`FillGenerator`, `FillLayers`). Every fill is a run in the groove's rhythm, a rank or two finer, with a
+  layer of its own over it (`FillRhythm`), coarser in a fast song: its span, from half a beat to a bar
+  before the line, or none for the groove running on; what it does with the groove, its drums leaving it
+  for the run, playing over it, a few hits or a lift, or stopping, a break or stop-time; and the sounds it
+  walks (`FillSounds`), some of each drum role's, such as the toms in their order of pitch, walked one way,
+  turning, looping or at random, each drum playing where its own rhythm has a note. Every line weighs
+  (`FillLine.Weight`): a section change more than the line in the middle of a section, where the groove
+  mostly runs on, and more still into a section of more energy; the weight leans the span, how full the
+  fill is and whether the drums land, and a section of less energy makes stopping likelier. The next
+  section lands on a kick, often with a crash, after a section change, now and then after a phrase line,
+  and after the drums stopped almost always. The more a section's rhythm strays, the likelier the rarer
+  choices: stopping, a tuplet, a random walk, wider notes, a run that slows down, a fill off the beat, a
+  fade or a landing pushed early. A song's drummer (`Drummer`) sets how busy its fills are, and has a
+  favourite walk and now and then a signature, one of the rarer choices it makes more often, so a song's
+  fills sound like one player's. The fills are edits of the song once it is put together
+  (`TimelineEdits`); a drum names its sound outright (`StateKinds.ArticulationIndex`), and a drum out of a
   section's groove still has the section's drum state, so a fill's notes are as loud as the section.
 - **Form.** `SongFormGenerator` plans the song's form before its sections are generated, then puts the
   song together around them, and tells the fills where the lines are; `Song.Map` records where the
@@ -373,7 +386,16 @@ dotnet run --project Rmg.Tests
 
 Tests that look at whole songs share them: `TestCorpus` generates each seed once, with its rendering and
 the trace of its generation, and every test that asks for it gets the same song. A song's `Map` says
-where its intro, sections and ending are, so tests read positions from it rather than assume them.
+where its intro, sections and ending are, so tests read positions from it rather than assume them, and
+the trace carries what was decided as values (`StateTraceEntry.Value`, at points named in `TracePoints`),
+which tests read rather than the trace's words. Explicit tests report what the corpus measures, such as
+how sections differ (`SectionDynamicsTest`), how the melody repeats (`MelodyRepetitionTest`) or how the
+fills mark the lines (`FillLineTest`), and `CorpusFingerprintTest` fingerprints the corpus's notes, to show
+that a change leaves the songs as they were:
+
+```
+dotnet run --project Rmg.Tests -- --treenode-filter "/*/*/CorpusFingerprintTest/*" --output Detailed
+```
 
 ## Settings
 
