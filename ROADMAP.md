@@ -79,21 +79,16 @@ to:
   pattern*).
 - **Walks:** one way, turn, loop and random could be one walk with a few values, should they grow.
 - **Idioms the draws no longer tie together:** a lift is now a half-beat run on any sounds, rarely the open hi-hat,
-  and a landing takes any cymbal sound, the china and the splash as often as the crashes. The drummer's signature
-  twist went with the twists.
+  and a landing takes any cymbal sound, the china and the splash as often as the crashes.
 - **Sounds by convention:** a run or a landing draws among a drum's sounds evenly, so half the cymbal landings are the
   china or the splash, accents that mark a downbeat less than a crash, where a plain song would crash. Each sound could
   carry how conventional it is, as data on its drum like the toms' order of pitch: the crashes 1, the china and the
   splash less, their weights multiplied by the section's chance scale, so plain sections crash and wild ones reach for
   the others.
-- **Fill values as state,** built with section dynamics, which needs the same plumbing for its energy: the chances of
-  starting off the beat, fading and landing early as multiplicative state kinds (a base, the section's chance scale, a
-  signature's ×5, capped at 1 when read), layered in `FillGenerator` from the fills' own random stream, so that songs
-  stay the same outside the lines: a base layer, the drummer's song layer, which brings the signature back as a
-  raised value, and the section's. A run's chance of a role's drums would follow as each group's own state, per role
-  so that a song of four percussion drums plays them no more than one, with how unconventional a group is, 0 for the
-  snare and the toms, as the power of the chance scale that multiplies it, in place of `RoleChances` and
-  `ConventionalRoles`.
+- **The drummer's walks and busyness as state,** with section dynamics: the fills' rarer choices and each drum
+  group's chance of a run are layered state now, and a signature a song layer over them; the favourite walk, a choice
+  among four, would need a pool like the chord pool's, and busyness, which weighs the spans and moves the fullness,
+  would become a fullness and a span length that the section's energy adds to.
 
 ### A drum's sounds together
 

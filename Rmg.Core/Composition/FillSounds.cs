@@ -4,11 +4,12 @@ using Rmg.Core.Probabilities;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     The sounds a run plays: a few of the song's drums, drawn role by role, mostly the snare and the toms, in an order
-///     that a run walks from note to note, each note playing a window of it. Every sound of every drum of the song may
-///     play, and the stranger a section's rhythm, the likelier the unconventional ones, the random walks and the wide
-///     windows, and the less the toms keep to their order of pitch. A drum plays one sound at a time, so a window
-///     plays its sounds of different drums together.
+///     The sounds a run plays: a few of the song's drums, drawn role by role by the chance their group's state gives them
+///     (see <see cref="DrumGroups" />), mostly the snare and the toms, in an order that a run walks from note to note,
+///     each note playing a window of it. Every sound of every drum of the song may play, and the stranger a section's
+///     rhythm, the likelier the unconventional ones, the random walks and the wide windows, and the less the toms keep
+///     to their order of pitch. A drum plays one sound at a time, so a window plays its sounds of different drums
+///     together.
 /// </summary>
 internal sealed class FillSounds
 {
@@ -45,13 +46,13 @@ internal sealed class FillSounds
     public ImmutableSortedDictionary<DrumRole, ImmutableArray<RunSound>> Sounds => _sounds;
 
     /// <summary>A run's sounds, their order, its walk and window, and whether it changes speed.</summary>
-    public FillRun Draw(IGenerationContext context, Drummer drummer, double chanceScale)
+    /// <param name="roleChance">The chance a run plays a role's drums, as their state has it in the section.</param>
+    public FillRun Draw(IGenerationContext context, Drummer drummer, double chanceScale, Func<DrumRole, int, double> roleChance)
     {
         var sounds = new List<RunSound>();
         foreach (var (role, candidates) in _sounds)
         {
-            var chance = FillLayers.RoleChances[role] * (FillLayers.ConventionalRoles.Contains(role) ? 1 : chanceScale);
-            if (!context.TestProbability(Math.Min(1, chance)))
+            if (!context.TestProbability(Math.Min(1, roleChance(role, candidates[0].Track))))
                 continue;
 
             var count = Math.Min(Pick(context, FillLayers.SoundCounts), candidates.Length);

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core.Events;
 
 namespace Rmg.Core.Composition;
 
@@ -15,12 +16,24 @@ public static class DrumGroups
     /// <summary>Chance of a song having a sidestick along with an acoustic or an electric snare.</summary>
     private const double CrossStickWithSnareProbability = 0.15;
 
+    /// <summary>
+    ///     A group's part in a fill's run: its chance of joining one, and how unconventional that is, the power of the
+    ///     section's chance scale the chance is multiplied by.
+    /// </summary>
+    private static StateMapBuilder InRuns(this StateMapBuilder builder, double chance, double unconventionality = 1)
+    {
+        return builder
+            .Add(CompositionStateKinds.Fill.RunChance, chance)
+            .Add(CompositionStateKinds.Fill.Unconventionality, unconventionality);
+    }
+
     public static DrumGroup Kick { get; } = new(
         nameof(Kick),
         [DrumDefinitions.Kick],
         1.0,
         1,
-        true
+        true,
+        builder => builder.InRuns(0.04)
     );
 
     // a song has one main snare, that is either an acoustic or an electric snare, a clap or a sidestick.
@@ -44,7 +57,9 @@ public static class DrumGroups
             .Add(CompositionStateKinds.Rhythm.Phase.Rank, 1)
             .Add(CompositionStateKinds.Rhythm.MaxRank, -2)
             // and keeps its figure, bar after bar
-            .Add(CompositionStateKinds.Rhythm.Variation, -0.3),
+            .Add(CompositionStateKinds.Rhythm.Variation, -0.3)
+            // and plays in most runs, as a roll or with the toms
+            .InRuns(0.5, 0),
         new SongDrumRule(
             [
                 SongDrumRule.OneOf(
@@ -68,7 +83,8 @@ public static class DrumGroups
             DrumDefinitions.Maracas
         ],
         1.0,
-        1
+        1,
+        configureStateMap: builder => builder.InRuns(0.05)
     );
 
     // the toms play mostly in fills; now and then a section grooves on them, as on a floor tom or in a tribal beat
@@ -77,6 +93,7 @@ public static class DrumGroups
         [DrumDefinitions.Tom],
         0.5,
         1,
+        configureStateMap: builder => builder.InRuns(0.65, 0),
         grooveChance: TomsGrooveChance
     );
 
@@ -87,7 +104,7 @@ public static class DrumGroups
         [DrumDefinitions.Cymbal],
         0.4,
         1,
-        configureStateMap: builder => builder.Add(CompositionStateKinds.Rhythm.MaxRank, -2),
+        configureStateMap: builder => builder.Add(CompositionStateKinds.Rhythm.MaxRank, -2).InRuns(0.04),
         grooveChance: AccentsGrooveChance
     );
 
@@ -113,6 +130,7 @@ public static class DrumGroups
         PercussionDrums,
         0.4,
         2,
+        configureStateMap: builder => builder.InRuns(0.08),
         songRule: new SongDrumRule([SongDrumRule.Pool(0, 4, [..PercussionDrums])])
     );
 

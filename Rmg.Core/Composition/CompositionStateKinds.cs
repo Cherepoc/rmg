@@ -9,6 +9,8 @@ public static class CompositionStateKinds
 
     public static RhythmStateKinds Rhythm { get; } = new(Prefix);
 
+    public static FillStateKinds Fill { get; } = new(Prefix);
+
     public static StateKind<int> ValueSeed { get; } = StateKinds.CreateAdditive<int>(Prefix + "ValueSeedValue");
 
     public static IncrementalStateKinds IncrementalArticulationOffset { get; } =
@@ -64,6 +66,42 @@ public static class CompositionStateKinds
         {
             return _all;
         }
+    }
+
+    /// <summary>
+    ///     What the fills are drawn by: the chances of their rarer choices, which the layers multiply, such as the
+    ///     section's chance scale and a drummer's signature, and each drum group's chance of joining a run.
+    /// </summary>
+    public sealed class FillStateKinds
+    {
+        public FillStateKinds(string prefix)
+        {
+            prefix += "Fill";
+
+            OffBeatChance = StateKinds.CreateMultiplicative<double>(prefix + "OffBeatChance");
+            FadeChance = StateKinds.CreateMultiplicative<double>(prefix + "FadeChance");
+            EarlyLandingChance = StateKinds.CreateMultiplicative<double>(prefix + "EarlyLandingChance");
+            RunChance = StateKinds.CreateAdditive<double>(prefix + "RunChance");
+            Unconventionality = StateKinds.CreateAdditive<double>(prefix + "Unconventionality");
+        }
+
+        /// <summary>The chance a fill starts a note near an 8th off the beat, earlier or later.</summary>
+        public StateKind<double> OffBeatChance { get; }
+
+        /// <summary>The chance a run fades rather than swells.</summary>
+        public StateKind<double> FadeChance { get; }
+
+        /// <summary>The chance a landing is pushed a note near an 8th early.</summary>
+        public StateKind<double> EarlyLandingChance { get; }
+
+        /// <summary>A drum group's chance of joining a run, before the section's chance scale.</summary>
+        public StateKind<double> RunChance { get; }
+
+        /// <summary>
+        ///     How unconventional a drum group is in a run, the power of the section's chance scale that its run chance
+        ///     is multiplied by: 0 for the snare and the toms, which a plain section plays as often as a wild one.
+        /// </summary>
+        public StateKind<double> Unconventionality { get; }
     }
 
     public sealed class RhythmStateKinds

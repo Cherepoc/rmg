@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
@@ -8,9 +9,11 @@ namespace Rmg.Core.Composition;
 ///     a line gets a fill, how long the fills are and how full their runs: at 0 a drummer who mostly lets the groove run
 ///     on and plays short, sparse runs, at 1 one who fills most lines with long, full runs. A song's is spread widely
 ///     around the middle. The drummer also has a favourite way of walking a run's drums, which it takes more often
-///     than the others.
+///     than the others, and the more a song's rhythm strays, the likelier a signature: one of the fills' rarer choices,
+///     such as starting off the beat, that it makes more often, as a layer of the song over the fills' chances.
 /// </summary>
-public sealed record Drummer(double Busyness, FillPath Favourite)
+/// <param name="Layer">The drummer's layer over the fills' chances, such as its signature's.</param>
+public sealed record Drummer(double Busyness, FillPath Favourite, StateMap? Layer = null)
 {
     /// <summary>How much more likely the favourite walk is than it would be.</summary>
     public const double FavouriteWeight = 3;
@@ -21,12 +24,21 @@ public sealed record Drummer(double Busyness, FillPath Favourite)
     // around 0 with a flat peak, from -2 to 2, so that songs spread over the whole range and more of them near the middle
     private static readonly Func<IGenerationContext, double> SpreadGenerator = Generators.SplineValue(0);
 
-    public static Drummer Generate(IGenerationContext context)
+    /// <param name="rhythm">How far the song's rhythm strays, which makes a signature likelier.</param>
+    public static Drummer Generate(IGenerationContext context, RhythmicUnconventionality rhythm)
     {
         var busyness = Math.Clamp(0.5 + SpreadGenerator(context) / 4, 0, 1);
         // any walk can be the favourite, the likelier ones more often
         var favourite = FillLayers.Paths[Generators.WeightedIndex(FillLayers.Paths)(context)].Value;
-        return new Drummer(busyness, favourite);
+        // and any of the rarer choices the signature, the likelier ones more often
+        var builder = new StateMapBuilder("Drummer", perTrack: true);
+        if (context.TestProbability(Math.Min(1, FillLayers.SignatureChance * rhythm.ChanceScale)))
+        {
+            ImmutableArray<Weighted<StateKind<double>>> kinds = [..FillLayers.Chances.Select(x => new Weighted<StateKind<double>>(x.Chance, x.Kind))];
+            builder.Add(kinds[Generators.WeightedIndex(kinds)(context)].Value, FillLayers.SignatureWeight);
+        }
+
+        return new Drummer(busyness, favourite, builder.ToStateMap(context));
     }
 
     /// <summary>

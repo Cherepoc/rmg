@@ -1,4 +1,5 @@
 using Rmg.Core.Composition;
+using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 
 namespace Rmg.Tests.Fills;
@@ -54,10 +55,55 @@ public sealed class DrummerTest
     }
 
     [Test]
+    public async Task WildSongs_HaveASignatureMoreOften()
+    {
+        double Share(double value)
+        {
+            var context = new GenerationContext(1);
+            return Enumerable.Range(0, 4_000)
+                .Count(_ => !Drummer.Generate(context, new RhythmicUnconventionality(value)).Layer!.IsDefault) / 4_000.0;
+        }
+
+        await Assert.That(Share(0.5)).IsEqualTo(FillLayers.SignatureChance).Within(0.02);
+        await Assert.That(Share(1)).IsEqualTo(FillLayers.SignatureChance * 4).Within(0.03);
+        await Assert.That(Share(0)).IsLessThan(Share(0.5));
+    }
+
+    [Test]
+    public async Task Chances_AreTheBase_TimesTheSignature_AndTheSectionsChanceScale()
+    {
+        var context = new GenerationContext(1);
+        var generator = new FillGenerator(context, SongTracks.Create(context, new RhythmicUnconventionality(0.5)), new RhythmicUnconventionality(0.5));
+        var fade = CompositionStateKinds.Fill.FadeChance;
+        var signature = new Drummer(0.5, FillPath.OneWay, StateMap.FromStates([fade.CreateState(FillLayers.SignatureWeight)]));
+        var baseChance = FillLayers.Chances.Single(x => x.Kind == fade).Chance;
+        var wild = new RhythmicUnconventionality(1);
+
+        await Assert.That(generator.GetChances(new Drummer(0.5, FillPath.OneWay), new RhythmicUnconventionality(0.5)).GetStateValue(fade))
+            .IsEqualTo(baseChance).Within(1e-9);
+        await Assert.That(generator.GetChances(signature, wild).GetStateValue(fade))
+            .IsEqualTo(baseChance * FillLayers.SignatureWeight * wild.ChanceScale).Within(1e-9);
+    }
+
+    [Test]
+    public async Task RunChances_AreTheGroups_TheUnconventionalOnesScaledByTheSection()
+    {
+        StateMap Drum(PercussionInstrumentDefinition drum) =>
+            DrumGroups.All.Single(x => x.Drums.Contains(drum)).ConfigureStateMap(new StateMapBuilder("Test")).ToStateMap(new GenerationContext(1));
+
+        // the snare as likely in any section, the kick four times as likely in a wild one
+        await Assert.That(FillGenerator.GetRunChance(Drum(DrumDefinitions.AcousticSnare), 4)).IsEqualTo(FillGenerator.GetRunChance(Drum(DrumDefinitions.AcousticSnare), 1));
+        await Assert.That(FillGenerator.GetRunChance(Drum(DrumDefinitions.Kick), 4))
+            .IsEqualTo(FillGenerator.GetRunChance(Drum(DrumDefinitions.Kick), 1) * 4).Within(1e-9);
+        await Assert.That(FillGenerator.GetRunChance(Drum(DrumDefinitions.Tom), 1))
+            .IsGreaterThan(FillGenerator.GetRunChance(Drum(DrumDefinitions.Cymbal), 1));
+    }
+
+    [Test]
     public async Task Drummers_SpreadAroundTheMiddle_AndFavourAWalk()
     {
         var context = new GenerationContext(1);
-        var drummers = Enumerable.Range(0, 5_000).Select(_ => Drummer.Generate(context)).ToArray();
+        var drummers = Enumerable.Range(0, 5_000).Select(_ => Drummer.Generate(context, new RhythmicUnconventionality(0.5))).ToArray();
         var busyness = drummers.Select(x => x.Busyness).Order().ToArray();
 
         await Assert.That(busyness[busyness.Length / 2]).IsEqualTo(0.5).Within(0.03);

@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
@@ -118,33 +119,25 @@ public static class FillLayers
     public const double StopRestChance = 0.5;
 
     /// <summary>
-    ///     The chance, in a section of conventionality in the middle, that a fill starts a note near an 8th off the beat,
-    ///     earlier or later, times the chance scale.
+    ///     The chances of a fill's rarer choices, in a section of conventionality in the middle: that it starts off the
+    ///     beat, that a run fades, and that its landing comes early. The section's chance scale and a drummer's
+    ///     signature multiply them.
     /// </summary>
-    public const double SpanShiftChance = 0.015;
+    public static ImmutableArray<(StateKind<double> Kind, double Chance)> Chances { get; } =
+    [
+        (CompositionStateKinds.Fill.OffBeatChance, 0.015),
+        (CompositionStateKinds.Fill.FadeChance, 0.01),
+        (CompositionStateKinds.Fill.EarlyLandingChance, 0.01)
+    ];
 
-    /// <summary>The chance, in a section of conventionality in the middle, that a run fades rather than swells, times the chance scale.</summary>
-    public const double FadeChance = 0.01;
+    /// <summary>The chance a drummer has a signature, in a song of conventionality in the middle, times its chance scale.</summary>
+    public const double SignatureChance = 0.1;
+
+    /// <summary>How much more likely a drummer's signature choice is than it would be.</summary>
+    public const double SignatureWeight = 5;
 
     /// <summary>The shortest note a fill plays, in seconds: a sextuplet at 125 beats a minute, a 32nd at 94.</summary>
     public const double MinNoteSeconds = 0.08;
-
-    /// <summary>
-    ///     The chance a run plays a role's drums: mostly the snare and the toms; the others' chances are multiplied by
-    ///     the section's chance scale. A run that draws none plays the snare, or the first of the song's drums.
-    /// </summary>
-    public static ImmutableDictionary<DrumRole, double> RoleChances { get; } = new Dictionary<DrumRole, double>
-    {
-        [DrumRole.Snare] = 0.5,
-        [DrumRole.Toms] = 0.65,
-        [DrumRole.Kick] = 0.04,
-        [DrumRole.HiHat] = 0.05,
-        [DrumRole.Cymbal] = 0.04,
-        [DrumRole.Percussion] = 0.08
-    }.ToImmutableDictionary();
-
-    /// <summary>The roles a run plays by convention, whose chances the chance scale leaves.</summary>
-    public static ImmutableHashSet<DrumRole> ConventionalRoles { get; } = [DrumRole.Snare, DrumRole.Toms];
 
     /// <summary>How many of a role's sounds a run plays, such as how many toms, and how likely each is; at most its all.</summary>
     public static ImmutableArray<Weighted<int>> SoundCounts { get; } = [new(0.2, 1), new(0.3, 2), new(0.3, 3), new(0.2, 4)];
@@ -211,9 +204,6 @@ public static class FillLayers
 
     /// <summary>The chance the drums land on each of a line's landing sounds after they stopped, as they come back.</summary>
     public const double StopLandingChance = 0.97;
-
-    /// <summary>The chance, in a section of conventionality in the middle, that a landing is pushed a note near an 8th early, times the chance scale.</summary>
-    public const double EarlyLandingChance = 0.01;
 
     /// <summary>How loud a landing's hit is over the drum's state there, as a note's accent.</summary>
     public const double LandingVelocity = 0.8;

@@ -43,7 +43,7 @@ public sealed class FillArchetypeTest
             ],
             StateTimelineMap.Create(12)
         );
-        return new Setup(new FillGenerator(context, tracks), song, snare);
+        return new Setup(new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5)), song, snare);
     }
 
     private static TimelineItem<StateMap>[] Events(TrackEventStateTimelineMap<StateMap> song, int track, double from, double to) =>
@@ -269,7 +269,7 @@ public sealed class FillArchetypeTest
         var plain = Enumerable.Range(0, 2_000).Select(_ => setup.Generator.DrawRun(Middle, 0.25)).ToArray();
         var wild = Enumerable.Range(0, 2_000).Select(_ => setup.Generator.DrawRun(Middle, 4)).ToArray();
         double Conventional(FillRun[] runs) =>
-            runs.Count(x => x.Sounds.All(s => FillLayers.ConventionalRoles.Contains(s.Role))) / (double)runs.Length;
+            runs.Count(x => x.Sounds.All(s => s.Role is DrumRole.Snare or DrumRole.Toms)) / (double)runs.Length;
         double InOrder(FillRun[] runs)
         {
             var codes = runs.Select(x => x.Sounds.Where(s => s.Role == DrumRole.Toms).Select(s => s.Code).ToArray()).Where(x => x.Length > 2).ToArray();
