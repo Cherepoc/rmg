@@ -42,8 +42,8 @@ internal sealed class SectionGenerator
         MelodyBusyness songMelodyBusyness,
         Scale songScale,
         StateMap songStateMap,
-        ImmutableDictionary<int, StateMap>? sectionEnergies = null,
-        int key = 0
+        ImmutableDictionary<int, StateMap> sectionEnergies,
+        int key
     )
     {
         _context = context;
@@ -54,7 +54,7 @@ internal sealed class SectionGenerator
         _songMelodyBusyness = songMelodyBusyness;
         _songScale = songScale;
         _songStateMap = songStateMap;
-        _sectionEnergies = sectionEnergies ?? ImmutableDictionary<int, StateMap>.Empty;
+        _sectionEnergies = sectionEnergies;
         _key = key;
         _barStateGenerator = new BarStateGenerator(settings);
         _patternGenerator = new PatternGenerator(context, tracks.Definitions);
@@ -72,7 +72,7 @@ internal sealed class SectionGenerator
         var chords = LayerStates.CreateChordPool(unconventionality)(context);
 
         // how loud and busy the section is meant to be, which leans its draws as far as its rhythm follows it
-        var songStateMap = _songStateMap.MergeWith(_sectionEnergies.GetValueOrDefault(sectionId, StateMap.Default));
+        var songStateMap = _songStateMap.MergeWith(_sectionEnergies[sectionId]);
         var energy = songStateMap.GetStateValue(CompositionStateKinds.Energy);
         var tilt = SectionEnergy.Tilt(energy, rhythm);
         StateTrace.Record(
@@ -298,7 +298,7 @@ internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
     RhythmicUnconventionality Rhythm,
     FillGrooves Groove,
-    double Energy = 0
+    double Energy
 );
 
 /// <summary>
@@ -309,5 +309,5 @@ internal sealed record SectionRhythm(
     RhythmicUnconventionality Unconventionality,
     PhraseScheme Scheme,
     MelodyBusyness MelodyBusyness,
-    Tilt Energy = default
+    Tilt Energy
 );

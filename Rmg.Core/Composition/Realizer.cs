@@ -187,7 +187,10 @@ internal static class Realizer
         // from the root up and an octave up or down for every lap around it; without one the whole chord plays
         var chordNoteOffset = stateMap.GetStateValue(StateKinds.ChordNoteOffset);
         ImmutableArray<int> notes;
-        if (!chordNoteOffset.IsEmpty)
+        // a melody's note was placed where it was made, as its scale step above the chord's root
+        if (isMelody)
+            notes = [ToNote(stateMap.GetStateValue(StateKinds.ScaleStep))];
+        else if (!chordNoteOffset.IsEmpty)
         {
             var chordDegrees = chordSteps
                 .Select(x => x.Mod(scaleOffsets.Length))
@@ -198,10 +201,7 @@ internal static class Realizer
                 .ToIndexOverLength(chordDegrees.Length)
                 .ToPeriodRemainder(chordDegrees.Length);
             var note = ToNote(chordDegrees[selectedIndex] + selectedOctave * scaleOffsets.Length);
-            // a melody's note was placed where it was made, as its scale step above the chord's root
-            if (isMelody)
-                note = ToNote(stateMap.GetStateValue(StateKinds.ScaleStep));
-            else if (stateMap.GetStateValue(StateKinds.FollowsChordRoots) > 0)
+            if (stateMap.GetStateValue(StateKinds.FollowsChordRoots) > 0)
                 note = bassLine.Place(
                     note,
                     chord,

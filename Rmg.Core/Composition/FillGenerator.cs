@@ -452,7 +452,7 @@ internal sealed record FillSection(
     double Duration,
     RhythmicUnconventionality Rhythm,
     FillGrooves Groove,
-    double Energy = 0
+    double Energy
 );
 
 /// <summary>

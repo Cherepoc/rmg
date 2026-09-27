@@ -73,17 +73,44 @@ phrase starts after a breath. Left:
 
 ## Architecture
 
-Left from the review, each small and best done when the code is next touched:
+From the review of September 2026, in this order; the two small errors it found, the melody read only where a note
+has a chord note offset and wiring left to silent defaults, are fixed.
 
-- **Track roles:** a role on a track's definition in place of checking track numbers (`SongTracks.MelodyTrack`,
-  `>= DrumGroups.FirstTrackNumber`) in the generators.
+1. **Structured trace values:** tests read decisions from the trace's descriptions with patterns ("pull …", "into
+   energy …", a fill's span and fullness), which broke on a culture's decimal comma; a trace entry could carry its
+   values as state or typed fields, read as such.
+2. **One placement:** the melody is placed at generation, the chords (`VoiceLeader`) and the bass (`BassLine`) in
+   `Realizer` from their notes before, so a section that plays again repeats its melody but only 88% of its bass notes
+   and 75% of its chords. The bass could be placed at generation as the melody is; the chords need a decision, as
+   their voicing leads across the sections: placed per section, with the octave chosen where a section starts.
+3. **One lean:** the choices the chance scale multiplies (stopping, the random walk, a wider note, slowing down, the
+   pitch order, a group's run chance to the power of its unconventionality, the drummer's spans) are each a weight
+   times a scale to the power of how the option leans, which `Tilt.Weigh` is; and a section's mode leans by its
+   energy through its rhythm's coupling, where its harmony's unconventionality should say how far it follows it.
+4. **A line's weight:** the fills' section and phrase tables (spans, landings, fullness) could be one value that
+   scales the chance of no fill, the span, the fullness and the landing, of which the energy it leads into is a part;
+   a phrase line in the middle of a section, whose energy does not change, has no lean now.
+5. **Track roles:** a role on a track's definition in place of checking track numbers (`SongTracks.MelodyTrack`,
+   `ChordsTrack`, `BassTrack`, `DrumGroups.FirstTrackNumber`, 13 checks in `PatternGenerator`, `SectionGenerator` and
+   `SongFormGenerator`); and `SectionGenerator.Generate`, which draws the section's energy, scale, harmony, drums, bar
+   state and tracks, places its melody and keeps its notes' render state, split, with its flags (`hasTonicHome`,
+   `keepsSongScale`) a plan of the section in their place.
+6. **Tables:** 139 tuning constants and 30 weighted tables in `Composition`; some are convention (a drum's weight),
+   some shapes chosen by hand (the melody's four contours, its phrase ends, the fills' spans, treatments, speeds and
+   widths, the leans of drums, spans and treatments) that a rule could derive or a draw could make.
+7. **A stop's cut in one place:** its last note held to the stop before `Realizer` (`TimelineEdits.CutBefore`) and the
+   notes that would sound into it cut after (`CutNotes`) could both be edits after it.
+
+Smaller, when the code is next touched:
+
+- **Offsets as lists:** the chord root, the chord note and the articulation are collections that their readers sum,
+  and the scale a collection that two layers would silently merge into fourteen notes; additive kinds, and a kind that
+  may be set once, would say what they are.
+- **Echo keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 - **Visibility:** the tables (`FillLayers`, `FormLayers`, `Drummer`, `MelodyBusyness` and more) are public though
   nothing outside needs them.
 - `TrackEventStateTimelineMap.MergeStateTimelineMap` in place of merging a map of no tracks to add common state; one
   `Pick` over weights in `Generators` in place of the copies; `StateMap.With(kind, value)` for setting finished state.
-- **Chance scales as tilts:** the choices the chance scale multiplies (stopping, the random walk, a group's run chance
-  to the power of its unconventionality, the drummer's spans) are each a weight times a scale to the power of how the
-  option leans, which `Tilt.Weigh` is; they could move to it when next touched.
 - **Memory:** every `RealizedNote` keeps the state it was decided from, which a song now holds on to (about 2 MB a
   song, 8 MB with a trace). Recompute it on demand instead, should memory matter.
 
