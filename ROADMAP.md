@@ -10,10 +10,9 @@ In this order, each measured before it is planned:
    draw, their walks and windows sound interesting or broken, how often they play drums other than the snare and the
    toms, about one run in five), intros (whether the band's entry after a chords-first or build-up intro feels earned)
    and endings (whether the ritardando plays in the browser, whether a final chord taken from a weak note is too quiet)
-   have been tuned by measurement only.
-2. **Sections changing mode,** such as a chorus in the relative major or a darker bridge: the section's scale becomes
-   its own state; scales, homes and cadences already work per scale.
-3. Smaller: melody motifs remembered per cycle (see *Rhythm engine*), fade-out endings (see *Form*), and moving the
+   have been tuned by measurement only, as have the sections' energy and modes (see *Section dynamics* and *Section
+   modes*).
+2. Smaller: melody motifs remembered per cycle (see *Rhythm engine*), fade-out endings (see *Form*), and moving the
    melody's final note and a stop's hold from render flags to edits of the notes after `Realizer`, one at a time, as a
    stop's cut of the notes that would sound into it already is (`TimelineEdits.CutNotes`).
 
@@ -36,6 +35,21 @@ louder section average 2.5 beats and almost always land, into a quieter one 0.85
 - **The melody's busyness and the chords' rhythm,** by the same pull.
 - **Energy by appearance,** so that the last chorus plays louder than the first: the parts that change would be edits
   of the song as it is put together, as the fills are.
+
+## Section modes
+
+A section on the relative key already plays: a home on the relative step (a fifth of the sections) builds its chords
+on the same notes. A section may also play in another scale on the song's tonic, a parallel mode
+(`Scales.PickSection`): `ScaleOffsets` is each section's state, which its home, progression and cadence draw in, and the
+intro and the ending take from the first and the last section. The first section keeps the song's scale, which sets the
+key; another changes one time in ten, more the less conventional its harmony, to a scale weighed by its weight and how
+few notes it changes, leaning brighter (by the sum of its offsets) the more energy the section has. Over 100 corpus
+songs, 15% of the sections after the first change, three in four to a scale one note away, a tenth to the parallel
+major or minor; those that turn brighter have an energy of 0.33 on average, those that turn darker -0.17. Left:
+
+- **Listen** to the changes: whether a section in the parallel mode sounds like a new colour or a mistake, and whether
+  the cadence into it prepares it.
+- **Key changes,** such as a last chorus a step up: a section's key as its own state, as its scale is now.
 
 ## Architecture
 

@@ -76,14 +76,14 @@ public static class SongGenerator
             songStateMap,
             sectionEnergies
         );
-        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), scale);
+        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common));
         // how the song starts and ends around its sections, decided before them: the one the song ends with leads home
         // to the tonic, where the ending lands
         var formGenerator = new SongFormGenerator(Stream(SongStream.Form), rhythmicUnconventionality);
         var plan = formGenerator.Plan(sectionIds);
 
         // every section is generated once, where it first plays
-        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(id, id == plan.TonicHomeSectionId)))
+        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(id, id == plan.TonicHomeSectionId, id == sectionIds[0])))
             .CacheGeneratedValues();
         var sections = sectionIds.Select(generateSection).ToArray();
 
@@ -135,11 +135,13 @@ public static class SongGenerator
             .ToStateMap(context);
     }
 
-    /// <summary>The song's state that Render reads, the same for every track: its scale, key and tempo.</summary>
-    private static StateMap CreateCommonStateMap(IGenerationContext context, Scale scale)
+    /// <summary>
+    ///     The song's state that Render reads, the same for every track: its key and tempo. Its scale is each section's,
+    ///     most often the song's.
+    /// </summary>
+    private static StateMap CreateCommonStateMap(IGenerationContext context)
     {
         return new StateMapBuilder("Song")
-            .Add(StateKinds.ScaleOffsets, scale.Offsets)
             .Add(StateKinds.KeyOffset, Generators.Int(0, 12))
             .Add(StateKinds.Tempo, TempoGenerator)
             .AddNoteDurationLayer()

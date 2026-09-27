@@ -13,6 +13,9 @@ internal sealed class SectionGenerator
     /// <summary>The track of a trace entry that records a decision for the whole section, such as its energy.</summary>
     public const int SectionTrace = -2;
 
+    // the stream a section draws its scale from, apart from its own
+    private const int ScaleStream = 1;
+
     private readonly IGenerationContext _context;
     private readonly int _seed;
     private readonly SongTracks _tracks;
@@ -49,13 +52,14 @@ internal sealed class SectionGenerator
         _songScale = songScale;
         _songStateMap = songStateMap;
         _sectionEnergies = sectionEnergies ?? ImmutableDictionary<int, StateMap>.Empty;
-        _barStateGenerator = new BarStateGenerator(settings, songScale);
+        _barStateGenerator = new BarStateGenerator(settings);
         _patternGenerator = new PatternGenerator(context, tracks.Definitions);
     }
 
     /// <summary>The section: its 4-bar pattern played twice, with what the fills need to know of its rhythm.</summary>
     /// <param name="hasTonicHome">Whether the section has the song's tonic as its home, as the song's form has the last.</param>
-    public GeneratedSection Generate(int sectionId, bool hasTonicHome = false)
+    /// <param name="keepsSongScale">Whether the section plays in the song's scale, as the song's first does, which sets the key.</param>
+    public GeneratedSection Generate(int sectionId, bool hasTonicHome = false, bool keepsSongScale = false)
     {
         // every section draws from its own sequence, so a change to one leaves the others as they are
         var context = _context.CreateContext(Seeds.Derive(_seed, sectionId));
@@ -77,12 +81,19 @@ internal sealed class SectionGenerator
             $"pull {energy * rhythm.Coupling:R}"
         );
 
+        // the section plays in the song's scale, or now and then in another on its tonic, leaning brighter the more
+        // energy it has; drawn from a sequence of its own, so that the section's other draws stay as they are
+        var scale = keepsSongScale
+            ? _songScale
+            : Scales.PickSection(_context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), ScaleStream)), _songScale, unconventionality, tilt);
+        StateTrace.Record("Section scale", SectionTrace, sectionId, 0, StateMap.Default, 0, scale.Name);
+
         // the section's chords move around its home, which every track's root starts from
-        var home = Progressions.GenerateHome(context, _songScale);
+        var home = Progressions.GenerateHome(context, scale);
         // the song's last section leads home to its tonic, where the song ends
         if (hasTonicHome)
             home = 0;
-        var progression = Progressions.Generate(context, _songScale, home, unconventionality.ProgressionStrictness);
+        var progression = Progressions.Generate(context, scale, home, unconventionality.ProgressionStrictness);
 
         var sectionStateMap = CreateSectionStateMap(
             songStateMap,
@@ -109,7 +120,7 @@ internal sealed class SectionGenerator
             0,
             1
         );
-        var barStateTimelineMap = _barStateGenerator.Generate(context, progression, home, unconventionality, bassLeading);
+        var barStateTimelineMap = _barStateGenerator.Generate(context, scale, progression, home, unconventionality, bassLeading);
 
         // every track follows the section's phrase scheme, so they repeat their bars in the same places
         var scheme = PhraseSchemes.Pick(context, rhythm);

@@ -46,20 +46,24 @@ public sealed class ScalesTest
     }
 
     [Test]
-    public async Task Songs_AreInScalesOfTheTable_TheSameAllSongLong()
+    public async Task Sections_AreInScalesOfTheTable_TheSongsFirstInTheSongsScale()
     {
         var scales = new HashSet<string>();
         for (var seed = 0; seed < 30; seed++)
         {
-            var timeline = TestCorpus.Get(seed).Song.TrackEventStateTimelineMap.CommonStateTimelineMap
-                .GetStateTimeline(StateKinds.ScaleOffsets);
+            var song = TestCorpus.Get(seed);
+            var timeline = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.ScaleOffsets);
+            var traced = song.Trace.Where(x => x.Point == "Section scale").ToDictionary(x => x.Section, x => x.Phrase);
 
-            // one value from the start, never changed
-            await Assert.That(timeline.Count).IsEqualTo(1);
-            var offsets = timeline[0].Value;
-            var scale = AllScales.SingleOrDefault(x => x.Offsets.SequenceEqual(offsets));
-            await Assert.That(scale).IsNotNull();
-            scales.Add(scale!.Name);
+            // every section plays the scale it drew, one of the table's, from its start
+            foreach (var span in song.Map.Sections)
+            {
+                var scale = AllScales.SingleOrDefault(x => x.Offsets.SequenceEqual(timeline.GetEffectiveValueAt(span.Start)));
+                await Assert.That(scale).IsNotNull();
+                await Assert.That(scale!.Name).IsEqualTo(traced[span.SectionId]);
+            }
+
+            scales.Add(traced[song.Map.Sections[0].SectionId]!);
         }
 
         // 30 songs reach well beyond minor and major
@@ -67,14 +71,36 @@ public sealed class ScalesTest
     }
 
     [Test]
+    public async Task ASectionsScale_IsTheSongs_UnlessItChanges_ToACloseOneMostOften()
+    {
+        var context = new GenerationContext(1);
+        var plain = new HarmonicUnconventionality(0, 1, 1, 1);
+        var picks = Enumerable.Range(0, 20_000).Select(_ => Rmg.Core.Composition.Scales.PickSection(context, Rmg.Core.Composition.Scales.NaturalMinor, plain)).ToArray();
+        var changed = picks.Where(x => x != Rmg.Core.Composition.Scales.NaturalMinor).ToArray();
+
+        await Assert.That(changed.Length / (double)picks.Length).IsEqualTo(Rmg.Core.Composition.Scales.SectionChangeChance).Within(0.01);
+        await Assert.That(changed.Count(x => x.Distance(Rmg.Core.Composition.Scales.NaturalMinor) == 1)).IsGreaterThan(changed.Length * 3 / 4);
+    }
+
+    [Test]
+    public async Task Brightness_OrdersTheModes_AndDistance_CountsTheNotesThatDiffer()
+    {
+        string[] order = [..AllScales.Where(x => x != Rmg.Core.Composition.Scales.HarmonicMinor).OrderByDescending(x => x.Brightness).Select(x => x.Name)];
+
+        await Assert.That(order.SequenceEqual(["Lydian", "Major", "Mixolydian", "Dorian", "Natural minor", "Phrygian"])).IsTrue();
+        await Assert.That(Rmg.Core.Composition.Scales.Major.Distance(Rmg.Core.Composition.Scales.NaturalMinor)).IsEqualTo(3);
+        await Assert.That(Rmg.Core.Composition.Scales.HarmonicMinor.Distance(Rmg.Core.Composition.Scales.NaturalMinor)).IsEqualTo(1);
+    }
+
+    [Test]
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]
-    public async Task EveryPitchedNote_IsInTheSongsScaleAndKey_WithTheStepsRaisedWhereTheyAre(int seed)
+    public async Task EveryPitchedNote_IsInItsSectionsScaleAndTheKey_WithTheStepsRaisedWhereTheyAre(int seed)
     {
         var song = TestCorpus.Get(seed).Song;
         var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
-        var offsets = common.GetStateTimeline(StateKinds.ScaleOffsets)[0].Value;
+        var offsets = common.GetStateTimeline(StateKinds.ScaleOffsets);
         var key = common.GetStateTimeline(StateKinds.KeyOffset).GetEffectiveValueAt(0);
         var raisedSteps = common.GetStateTimeline(StateKinds.RaisedScaleSteps);
         var approaches = common.GetStateTimeline(StateKinds.ChordApproach);
@@ -94,7 +120,10 @@ public sealed class ScalesTest
             if (isChromaticApproach)
                 continue;
 
-            var scale = Rmg.Core.Composition.Realizer.RaiseScaleSteps(offsets, raisedSteps.GetEffectiveValueAt(note.Position));
+            var scale = Rmg.Core.Composition.Realizer.RaiseScaleSteps(
+                offsets.GetEffectiveValueAt(note.Position),
+                raisedSteps.GetEffectiveValueAt(note.Position)
+            );
             var pitchClasses = scale.Select(x => (x + key) % 12).ToHashSet();
             await Assert.That(pitchClasses).Contains(note.Value.Offset % 12).Because($"position {note.Position}");
         }

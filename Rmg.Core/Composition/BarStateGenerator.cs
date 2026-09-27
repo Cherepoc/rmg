@@ -5,8 +5,8 @@ using Rmg.Core.Probabilities;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     The state of a section that changes from bar to bar along its 4-bar pattern, the same for every track: the
-///     progression's roots, the raised seventh of the cadence, the home and cadence chords, the pick from the chord
+///     The state of a section that changes from bar to bar along its 4-bar pattern, the same for every track: its
+///     scale, which holds for all of it, the progression's roots, the raised seventh of the cadence, the home and cadence chords, the pick from the chord
 ///     pool, the bar's loudness and note lengths, how the chords and the bass move into the next bar, and the shape of
 ///     the melody's phrase and where it ends.
 /// </summary>
@@ -16,15 +16,12 @@ internal sealed class BarStateGenerator
 
     private static readonly Func<IGenerationContext, int> SeedGenerator = Generators.Int();
 
-    private readonly Scale _scale;
-
     // the state that changes along the pattern besides the progression; every state has its own timeline, so each can
     // change at its own pace
     private readonly ImmutableArray<IStateTimelineGenerator> _timelineGenerators;
 
-    public BarStateGenerator(ProgressionSettings settings, Scale scale)
+    public BarStateGenerator(ProgressionSettings settings)
     {
-        _scale = scale;
         _timelineGenerators =
         [
             StateTimelineGenerator.Create(
@@ -58,12 +55,14 @@ internal sealed class BarStateGenerator
         ];
     }
 
+    /// <param name="scale">The section's scale, which every bar plays in.</param>
     /// <param name="progression">The roots of the bars, in steps above the home.</param>
     /// <param name="home">The step of the section's home above the song's tonic.</param>
     /// <param name="bassLeading">How much the section's bass leads into the chords, from 0 to 1.</param>
     /// <param name="context">The section's random sequence.</param>
     public StateTimelineMap Generate(
         IGenerationContext context,
+        Scale scale,
         ImmutableArray<int> progression,
         int home,
         HarmonicUnconventionality unconventionality,
@@ -82,7 +81,7 @@ internal sealed class BarStateGenerator
             .WithLayer("Progression");
 
         // the cadence bar may raise the seventh, for a major chord on the fifth; the bars before keep the scale
-        var raisedStep = Progressions.GetCadenceRaisedStep(_scale.Offsets, home, progression[^1]);
+        var raisedStep = Progressions.GetCadenceRaisedStep(scale.Offsets, home, progression[^1]);
         var raisedStepTimeline = StateTimeline.Create(
                 Meter.PatternDuration,
                 StateKinds.RaisedScaleSteps,
@@ -108,6 +107,7 @@ internal sealed class BarStateGenerator
                 .._timelineGenerators.Select((generator, index) =>
                     generator.Generate(context.CreateContext(Seeds.Derive(seed, index)), Meter.PatternDuration)
                 ),
+                StateTimeline.Create(Meter.PatternDuration, StateKinds.ScaleOffsets, [scale.Offsets.ToTimelineItem(0.0)]).WithLayer("Section"),
                 progressionTimeline,
                 raisedStepTimeline,
                 roleChordTimeline,
