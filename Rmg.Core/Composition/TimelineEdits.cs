@@ -27,7 +27,7 @@ internal sealed class TimelineEdits(IGenerationContext context, SongMap? map = n
         spans.Add((from, to));
     }
 
-    /// <summary>Makes a track's last note before a position end there, as the band stops.</summary>
+    /// <summary>Makes a track's notes end by a position, its last one before it held until there, as the band stops.</summary>
     public void Cut(int track, double position)
     {
         if (!_cuts.TryGetValue(track, out var cuts))
@@ -58,11 +58,9 @@ internal sealed class TimelineEdits(IGenerationContext context, SongMap? map = n
     public TrackEventStateTimelineMap<StateMap> ApplyTo(TrackEventStateTimelineMap<StateMap> song)
     {
         var maps = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>();
-        foreach (var track in _cleared.Keys.Union(_hits.Keys).Union(_cuts.Keys))
+        foreach (var track in _cleared.Keys.Union(_hits.Keys))
             maps[track] = timeline =>
             {
-                foreach (var cut in _cuts.GetValueOrDefault(track) ?? [])
-                    timeline = CutBefore(timeline, cut);
                 foreach (var (from, to) in _cleared.GetValueOrDefault(track) ?? [])
                     timeline = timeline.RemoveSpan(from, to);
                 return EventTimeline.Merge([timeline, EventTimeline.Create(timeline.Duration, _hits.GetValueOrDefault(track) ?? [])]);
@@ -71,11 +69,15 @@ internal sealed class TimelineEdits(IGenerationContext context, SongMap? map = n
     }
 
     /// <summary>
-    ///     The notes once they are decided, with every note that would sound past a cut ending there, such as a chord
-    ///     that outlasts the notes after it: before the notes are decided, only the last note's length is known to reach
-    ///     the cut, which it is held to.
+    ///     The notes once they are decided, as the band stops at every cut: a pitched track's last note before it held
+    ///     until there, unless it ends sooner as a phrase's last note is held, and every note that would sound past it,
+    ///     such as a chord that outlasts the notes after it, ending there. A drum's hit keeps its length.
     /// </summary>
-    public ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> CutNotes(ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> notes)
+    /// <param name="roles">What every track plays, by its number.</param>
+    public ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> CutNotes(
+        ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> notes,
+        IReadOnlyDictionary<int, TrackRole> roles
+    )
     {
         foreach (var (track, cuts) in _cuts)
         {
@@ -83,37 +85,32 @@ internal sealed class TimelineEdits(IGenerationContext context, SongMap? map = n
                 continue;
 
             foreach (var cut in cuts)
-                timeline = EventTimeline.Create(
-                    timeline.Duration,
-                    timeline.Select(x => x.Position < cut - Epsilon && x.Position + x.Value.Duration > cut + Epsilon
-                        ? (x.Value with { Duration = cut - x.Position }).ToTimelineItem(x.Position)
-                        : x
-                    )
-                );
+            {
+                // the last note before the cut, which a pitched track holds until there
+                var last = -1;
+                if (roles[track] != TrackRole.Drum)
+                    for (var i = 0; i < timeline.Count && timeline[i].Position < cut - Epsilon; i++)
+                        last = i;
+
+                timeline = EventTimeline.Create(timeline.Duration, timeline.Select((x, i) => EndBy(x, cut, i == last)));
+            }
+
             notes = notes.SetItem(track, timeline);
         }
 
         return notes;
     }
 
-    /// <summary>The timeline with its last note before the position held until there, unless it ends sooner already.</summary>
-    private static EventTimeline<StateMap> CutBefore(EventTimeline<StateMap> timeline, double position)
+    /// <summary>
+    ///     A note ending by a cut: held until there if it is the last before it and not held for less already, and cut
+    ///     there if it would sound past it.
+    /// </summary>
+    private static TimelineItem<RealizedNote> EndBy(TimelineItem<RealizedNote> note, double cut, bool isLast)
     {
-        var index = -1;
-        for (var i = 0; i < timeline.Count && timeline[i].Position < position; i++)
-            index = i;
-        if (index < 0)
-            return timeline;
-
-        var note = timeline[index];
-        var held = note.Value.GetStateValue(StateKinds.HeldDuration);
-        var length = position - note.Position;
-        if (held > 0 && held <= length)
-            return timeline;
-
-        var cutNote = note.Value
-            .MergeWith(StateMap.FromStates([StateKinds.HeldDuration.CreateState(length - held)]))
-            .ToTimelineItem(note.Position);
-        return EventTimeline.Create(timeline.Duration, timeline.Select((x, i) => i == index ? cutNote : x));
+        var length = cut - note.Position;
+        var held = note.Value.State.GetStateValue(StateKinds.HeldDuration);
+        var isHeld = isLast && (held <= 0 || held > length);
+        var soundsPast = note.Position < cut - Epsilon && note.Position + note.Value.Duration > cut + Epsilon;
+        return isHeld || soundsPast ? (note.Value with { Duration = length }).ToTimelineItem(note.Position) : note;
     }
 }

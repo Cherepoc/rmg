@@ -110,7 +110,10 @@ public static class SongGenerator
             .Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
 
         // and last the notes, decided from the state of the whole song, in its order, none sounding into a stop
-        var notes = form.Edits.CutNotes(Realizer.Realize(tracks.Definitions, songTrackNoteTimelineMap));
+        var notes = form.Edits.CutNotes(
+            Realizer.Realize(tracks.Definitions, songTrackNoteTimelineMap),
+            tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role)
+        );
 
         return new Song(songTrackNoteTimelineMap.Duration, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes);
     }
