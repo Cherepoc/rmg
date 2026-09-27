@@ -174,11 +174,10 @@ internal static class Realizer
                 note = melodyLine.Place(
                     chord,
                     chordSteps.Select(x => ToNote(x).Mod(OctaveNoteCount)).ToHashSet(),
-                    position,
                     heldDuration > 0 ? 0 : stateMap.GetStateValue(StateKinds.BeatRank),
                     stateMap.GetStateValue(StateKinds.MelodyStep),
                     stateMap.GetStateValue(StateKinds.MelodyRegister),
-                    stateMap.GetStateValue(StateKinds.MelodyMotif),
+                    stateMap.GetStateValue(StateKinds.Echo),
                     stateMap.GetStateValue(StateKinds.MelodyFinal) > 0
                 );
             else if (stateMap.GetStateValue(StateKinds.FollowsChordRoots) > 0)

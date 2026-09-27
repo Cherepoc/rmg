@@ -124,37 +124,12 @@ internal sealed class PatternGenerator
         var notes = GenerateNotes(stateMap, barStateTimelineMap, barIndex * Meter.BarDuration, trackNumber, sectionId, barIndex)
             .GeneratedTimeline;
         if (trackNumber == SongTracks.MelodyTrack)
-            notes = EndPhrase(
+            notes = MelodyPattern.EndPhrase(
                 notes,
                 barStateTimelineMap.GetEffectiveStateMapAt(barIndex * Meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd)
             );
         feels.Add(new BarFeel(trackNumber, barIndex, stateMap, notes.Count));
         return notes.ToEventStateTimelineMap(stateMap.OfScope(StateScope.Render));
-    }
-
-    /// <summary>
-    ///     A melody's bar with its phrase ended: its notes from the given beat on are left out, and the last one left is
-    ///     held until the rest before the next phrase. A bar with no note before the beat keeps its first, if it starts
-    ///     before the rest. A phrase end of 0 leaves the bar as it is.
-    /// </summary>
-    /// <param name="end">The beat, from 1, before which the phrase's last note starts; 0 for none.</param>
-    internal static EventTimeline<StateMap> EndPhrase(EventTimeline<StateMap> notes, int end)
-    {
-        if (end <= 0)
-            return notes;
-
-        var holdEnd = Meter.BarDuration - MelodyLayers.PhraseEndRest;
-        var kept = notes.Where(x => x.Position < end).ToList();
-        if (kept.Count == 0 && notes.Count > 0 && notes[0].Position < holdEnd)
-            kept.Add(notes[0]);
-        if (kept.Count == 0)
-            return notes;
-
-        var last = kept[^1];
-        kept[^1] = last.Value
-            .MergeWith(StateMap.FromStates([StateKinds.HeldDuration.CreateState(holdEnd - last.Position)]))
-            .ToTimelineItem(last.Position);
-        return EventTimeline.Create(notes.Duration, kept);
     }
 
     /// <summary>
@@ -191,12 +166,10 @@ internal sealed class PatternGenerator
             ChordNoteOffset
         );
 
-        var isMelody = trackNumber == SongTracks.MelodyTrack;
-        // the bar pattern's seed names its motif
-        var motif = stateMap.GetStateValue(CompositionStateKinds.ValueSeed);
-        var stepwiseness = stateMap.GetStateValue(CompositionStateKinds.MelodyStepwiseness);
-        var noteStateMapGenerator = (IGenerationContext innerContext, double position, int rank) =>
+        var melody = trackNumber == SongTracks.MelodyTrack ? new MelodyPattern(stateMap) : null;
+        var noteStateMapGenerator = (IGenerationContext innerContext, double position, KeptBeat beat) =>
         {
+            var rank = beat.Rank;
             var builder = new StateMapBuilder("Note", perTrack: true)
                 .Add(StateKinds.ArticulationOffset, articulationOffsetGenerator(innerContext, position))
                 .Add(StateKinds.ChordRootNoteOffset, chordRootNoteOffsetGenerator(innerContext, position))
@@ -205,19 +178,14 @@ internal sealed class PatternGenerator
                 .AddNoteDurationLayer()
                 .Add(StateKinds.BeatRank, rank)
                 .Add(GetChord(stateMap, barStateTimelineMap, patternStart, position, trackNumber, sectionId, barIndex));
-            // a melody note draws where it means to go from the bar pattern's own sequence, so the bar's shape comes
-            // back with the bar
-            if (isMelody)
-                builder
-                    .Add(StateKinds.MelodyStep, context => MelodyLayers.GenerateStep(context, stepwiseness))
-                    .Add(StateKinds.MelodyMotif, motif);
+            melody?.AddNoteState(builder, beat);
             return builder.ToStateMap(innerContext);
         };
 
         return DyadicRankItemPattern<StateMap>.Create(
             _context,
             rhythmPattern,
-            innerContext => (position, rank) => noteStateMapGenerator(innerContext, position, rank),
+            innerContext => (position, beat) => noteStateMapGenerator(innerContext, position, beat),
             patternSeeds.NoteValues
         );
     }

@@ -15,13 +15,13 @@ public sealed class DyadicRankItemPattern<T>
     public static DyadicRankItemPattern<T> Create(
         IGenerationContext context,
         DyadicRankThresholdPattern rhythmPattern,
-        Func<IGenerationContext, Func<double, int, T>> rankedItemGeneratorFunc,
+        Func<IGenerationContext, Func<double, KeptBeat, T>> rankedItemGeneratorFunc,
         int generationSeed
     )
     {
         var seededContext = context.CreateContext(generationSeed);
         var rankedItemGenerator = rankedItemGeneratorFunc(seededContext);
-        var itemTimeline = rhythmPattern.OutcomeRankTimeline
+        var itemTimeline = rhythmPattern.OutcomeTimeline
             .MapValues(rankedItemGenerator);
         return new DyadicRankItemPattern<T>(itemTimeline);
     }

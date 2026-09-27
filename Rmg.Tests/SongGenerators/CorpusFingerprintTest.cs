@@ -8,15 +8,17 @@ public sealed class CorpusFingerprintTest
 {
     [Test]
     [Explicit]
-    public async Task Report()
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task Report(bool withoutMelody)
     {
         var text = new StringBuilder();
         foreach (var song in TestCorpus.Range(200))
-        foreach (var (track, notes) in song.Song.Notes!)
+        foreach (var (track, notes) in song.Song.Notes!.Where(x => !withoutMelody || x.Key != Rmg.Core.Composition.SongTracks.MelodyTrack))
         foreach (var note in notes)
             text.Append($"{track} {note.Position:R} {note.Value.Velocity:R} {note.Value.Duration:R} {string.Join(",", note.Value.Pitches)};");
 
-        Console.WriteLine($"Corpus fingerprint: {Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(text.ToString())))[..16]}");
+        Console.WriteLine($"Corpus fingerprint{(withoutMelody ? " without the melody" : "")}: {Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(text.ToString())))[..16]}");
         await Task.CompletedTask;
     }
 }

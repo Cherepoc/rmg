@@ -34,8 +34,9 @@ public static class StateKinds
     // where a melody note means to go, from the way the melody goes: 1 a step on, -1 a step back, 2 and -2 a leap, 0
     // the same note
     public static readonly StateKind<int> MelodyStep = CreateAdditive<int>("MelodyStep", StateScope.Render);
-    // which bar pattern a melody note belongs to, so that a pattern that comes back plays its remembered shape
-    public static readonly StateKind<int> MelodyMotif = CreateAdditive<int>("MelodyMotif", StateScope.Render);
+    // which note a note plays again: the key of its beat in its bar pattern's rhythm, the same for a beat of a bar that
+    // comes back and for a beat of a cycle that repeats the one before; 0 for none
+    public static readonly StateKind<int> Echo = CreateAdditive<int>("Echo", StateScope.Render);
     // 1 for a melody's last note, which lands on the chord's root
     public static readonly StateKind<int> MelodyFinal = CreateAdditive<int>("MelodyFinal", StateScope.Render);
     // how far above or below the middle of its range the melody aims in a bar, in semitones, for the phrase's shape

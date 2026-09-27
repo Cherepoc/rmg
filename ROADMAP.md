@@ -11,10 +11,11 @@ In this order, each measured before it is planned:
    toms, about one run in five), intros (whether the band's entry after a chords-first or build-up intro feels earned)
    and endings (whether the ritardando plays in the browser, whether a final chord taken from a weak note is too quiet)
    have been tuned by measurement only, as have the sections' energy and modes (see *Section dynamics* and *Section
-   modes*).
-2. Smaller: melody motifs remembered per cycle (see *Rhythm engine*), fade-out endings (see *Form*), and moving the
-   melody's final note and a stop's hold from render flags to edits of the notes after `Realizer`, one at a time, as a
-   stop's cut of the notes that would sound into it already is (`TimelineEdits.CutNotes`).
+   modes*) and the melody's echoes (see *Rhythm engine*), which play a bar that comes back, and so a section's second
+   phrase and a section that recurs, much as it was.
+2. Smaller: fade-out endings (see *Form*), and moving the melody's final note and a stop's hold from render flags to
+   edits of the notes after `Realizer`, one at a time, as a stop's cut of the notes that would sound into it already is
+   (`TimelineEdits.CutNotes`).
 
 ## Section dynamics
 
@@ -56,8 +57,7 @@ major or minor; those that turn brighter have an energy of 0.33 on average, thos
 Left from the review, each small and best done when the code is next touched:
 
 - **Track roles:** a role on a track's definition in place of checking track numbers (`SongTracks.MelodyTrack`,
-  `>= DrumGroups.FirstTrackNumber`) in the generators, and the melody's pattern code (phrase ends, steps, motifs) out
-  of `PatternGenerator` into a class of its own.
+  `>= DrumGroups.FirstTrackNumber`) in the generators.
 - **Visibility:** the tables (`FillLayers`, `FormLayers`, `Drummer`, `MelodyBusyness` and more) are public though
   nothing outside needs them.
 - `TrackEventStateTimelineMap.MergeStateTimelineMap` in place of merging a map of no tracks to add common state; one
@@ -141,12 +141,16 @@ melodies and repetition need is a small extension of it rather than a new engine
 the tuning built on them, such as the snare's backbeat and the shares of speed and tuplets. Each step is off by
 default, so it can first be shown to leave the recorded songs unchanged, and then tuned by measurement. Built so far:
 fullness and repeated cycles (rolls, riffs and pulses), phrase schemes, rhythmic unconventionality, the melody's
-rhythm (its busyness, riffs, and phrase ends with a held note and a rest), and fills with landings and a drummer.
+rhythm (its busyness, riffs, and phrase ends with a held note and a rest), fills with landings and a drummer, and
+echoes: a melody note of a bar that comes back, or of a cycle that repeats the one before, plays the note it had again,
+as the scale step from its chord's root (`MelodyPattern.GetEcho`, `MelodyLine`). Over 100 corpus songs, 5% of the
+melody's notes are in a repeated cycle and 84% in a bar that comes back; over the same root as before, 77% play the
+same note, up from 40%, the others moving to the chord on a strong beat.
 
 ### Left for later
 
-- **Motifs within a bar:** a melody's repeated cycle repeats its rhythm, but its pitches follow the rules afresh; a
-  motif could be remembered per cycle as well as per bar.
+- **Echoes in the bass:** the bass could play its notes again by the same key, where its approaches into the next
+  chord allow.
 
 - **Long cycles:** a bar pattern is one bar long, so a slower cycle, such as the kick's slowed to two bars, plays its
   first half and starts again at every bar line. Patterns as long as their cycle would let slow figures run whole, such

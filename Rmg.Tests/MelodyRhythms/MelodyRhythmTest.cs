@@ -21,7 +21,7 @@ public sealed class MelodyRhythmTest
     [Test]
     public async Task EndPhrase_LeavesOutTheNotesFromTheEnd_AndHoldsTheLastUntilTheRest()
     {
-        var ended = PatternGenerator.EndPhrase(CreateBar(0, 1, 1.5, 2, 3), 2);
+        var ended = MelodyPattern.EndPhrase(CreateBar(0, 1, 1.5, 2, 3), 2);
 
         await Assert.That(ended.Select(x => x.Position).ToArray()).IsEquivalentTo([0.0, 1.0, 1.5]);
         await Assert.That(ended[2].Value.GetStateValue(StateKinds.HeldDuration)).IsEqualTo(4 - MelodyLayers.PhraseEndRest - 1.5);
@@ -33,7 +33,7 @@ public sealed class MelodyRhythmTest
     [Test]
     public async Task EndPhrase_WithNoNoteBeforeTheEnd_HoldsTheFirst()
     {
-        var ended = PatternGenerator.EndPhrase(CreateBar(1.5, 2.5), 1);
+        var ended = MelodyPattern.EndPhrase(CreateBar(1.5, 2.5), 1);
 
         await Assert.That(ended.Select(x => x.Position).ToArray()).IsEquivalentTo([1.5]);
         await Assert.That(ended[0].Value.GetStateValue(StateKinds.HeldDuration)).IsEqualTo(4 - MelodyLayers.PhraseEndRest - 1.5);
@@ -45,8 +45,8 @@ public sealed class MelodyRhythmTest
         var bar = CreateBar(0, 2);
         var late = CreateBar(3, 3.5);
 
-        await Assert.That(PatternGenerator.EndPhrase(bar, 0)).IsSameReferenceAs(bar);
-        await Assert.That(PatternGenerator.EndPhrase(late, 1)).IsSameReferenceAs(late);
+        await Assert.That(MelodyPattern.EndPhrase(bar, 0)).IsSameReferenceAs(bar);
+        await Assert.That(MelodyPattern.EndPhrase(late, 1)).IsSameReferenceAs(late);
     }
 
     [Test]

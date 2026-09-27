@@ -9,10 +9,11 @@ namespace Rmg.Core.Composition;
 ///     notes. After a leap the melody steps back the other way, as a melody fills the gap it left, and when it strays
 ///     too far from where its phrase aims, it turns back towards it. It keeps to a singable range in the middle of the
 ///     track's, and its first note is the chord's note nearest where the phrase aims.
-///     A bar pattern that comes back is a motif: its bar starts by the rules, and its other notes take the shape it had
-///     the first time, in scale steps from its first note, so that over another chord it sounds as a sequence of it. A
-///     note of the shape on a strong beat that misses the chord moves to a note of the chord close by. Its last note, at
-///     the song's end, lands on the chord's root.
+///     A note that echoes one heard before, as the notes of a bar pattern that comes back or of a cycle that repeats the
+///     one before do, plays it again: the scale step it had from its chord's root, from the root of its own, in the
+///     octave nearest the note before where a run of echoes starts or its chord changes and in the run's octave
+///     otherwise, so that over the same chords it repeats and over others it sounds as a sequence. An echo on a strong
+///     beat that misses the chord moves to the chord's note nearest it. Its last note, at the song's end, lands on the chord's root.
 /// </summary>
 internal sealed class MelodyLine
 {
@@ -30,10 +31,9 @@ internal sealed class MelodyLine
     /// <summary>The weakest beat, by its rank in the rhythm, that still takes a note of the chord.</summary>
     internal const int StrongestWeakRank = 1;
 
-    /// <summary>How far a motif's note on a strong beat moves to a note of the chord, at most.</summary>
-    internal const int MotifChordToneReach = 2;
-
     private const int OctaveNoteCount = 12;
+
+    private const int ScaleStepCount = 7;
 
     private readonly int _low;
     private readonly int _high;
@@ -43,16 +43,14 @@ internal sealed class MelodyLine
     private int _previousMove;
 
     // the way the melody goes, up (1) or down (-1): its last move's, which the next note goes on in or turns from, across
-    // bar lines too; a bar that comes back takes its shape from the motif, not from the way the melody went
+    // bar lines too; an echo takes its step from the note it echoes, not from the way the melody went
     private int _heading = 1;
-    private int? _previousBar;
 
-    // every motif's shape, as the scale steps of its notes from its first, in the order they play
-    private readonly Dictionary<int, List<int>> _motifs = [];
-    private List<int>? _recording;
-    private List<int>? _replaying;
-    private int _barNoteIndex;
-    private int _barFirstStep;
+    // every note that may be echoed, as the scale step it had from its chord's root, by its key
+    private readonly Dictionary<int, int> _heard = [];
+
+    // the run of echoes playing: the root of its chord, and the octave it plays in, in scale steps from where it was heard
+    private (int Root, int Octave)? _echoRun;
 
     /// <param name="minNote">The lowest note of the track's range.</param>
     /// <param name="maxNote">The highest note of the track's range.</param>
@@ -74,39 +72,39 @@ internal sealed class MelodyLine
     ///     staying.
     /// </param>
     /// <param name="register">How far above or below the middle of the range the phrase aims here, in semitones.</param>
-    /// <param name="motif">The bar pattern the note belongs to; 0 for none.</param>
+    /// <param name="echo">The key of the note it plays again, if that was heard, or is remembered by; 0 for none.</param>
     /// <param name="isFinal">Whether it is the melody's last note, which lands on the chord's root nearest the note before.</param>
     public int Place(
         ChordContext chord,
         IReadOnlyCollection<int> chordToneClasses,
-        double position,
         int beatRank,
         int step,
         double register,
-        int motif = 0,
+        int echo = 0,
         bool isFinal = false
     )
     {
-        var bar = (int)Math.Floor(position / Meter.BarDuration);
-        if (bar != _previousBar)
+        int note;
+        if (isFinal)
         {
-            _barNoteIndex = 0;
-            // a motif heard before plays its shape again, and one heard for the first time is remembered
-            _replaying = motif != 0 && _motifs.TryGetValue(motif, out var shape) ? shape : null;
-            _recording = motif != 0 && _replaying is null ? _motifs[motif] = [] : null;
+            _echoRun = null;
+            note = PlaceFinal(chord);
+        }
+        else if (echo != 0 && _heard.TryGetValue(echo, out var heard))
+        {
+            if (_echoRun?.Root != chord.Root)
+                _echoRun = (chord.Root, GetNearestOctave(chord, heard) - heard);
+            note = PlaceEcho(chord, chordToneClasses, beatRank, heard + _echoRun.Value.Octave);
+        }
+        else
+        {
+            _echoRun = null;
+            note = PlaceByRule(chord, chordToneClasses, beatRank, step, register);
         }
 
-        _previousBar = bar;
-        var note = isFinal ? PlaceFinal(chord)
-            : _replaying is { } replaying && _barNoteIndex > 0 && _barNoteIndex < replaying.Count
-                ? PlaceFromMotif(chord, chordToneClasses, beatRank, replaying[_barNoteIndex])
-                : PlaceByRule(chord, chordToneClasses, beatRank, step, register);
-
-        var noteStep = GetScaleStep(chord, note);
-        if (_barNoteIndex == 0)
-            _barFirstStep = noteStep;
-        _recording?.Add(noteStep - _barFirstStep);
-        _barNoteIndex++;
+        // the first time a note is heard it is remembered, as the step from its chord's root it has
+        if (echo != 0)
+            _heard.TryAdd(echo, GetScaleStep(chord, note));
 
         _previousMove = _previous is { } before ? note - before : 0;
         if (_previousMove != 0)
@@ -115,19 +113,23 @@ internal sealed class MelodyLine
         return note;
     }
 
-    /// <summary>
-    ///     A note of a motif heard before: the scale step it had from the bar's first note, and on a strong beat the
-    ///     note of the chord close by if it misses the chord; by the rules if that leaves the range.
-    /// </summary>
-    private int PlaceFromMotif(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int stepsFromFirst)
+    /// <summary>The scale step, an octave's steps from the one given, whose note is nearest the note before.</summary>
+    private int GetNearestOctave(ChordContext chord, int step)
     {
-        var note = chord.GetPitch(_barFirstStep + stepsFromFirst);
+        var target = _previous ?? _middle;
+        return Enumerable.Range(-3, 7).Select(x => step + x * ScaleStepCount).MinBy(x => Math.Abs(chord.GetPitch(x) - target));
+    }
+
+    /// <summary>
+    ///     An echo: the note of the scale step, from the chord's root, and on a strong beat, which takes a note of the
+    ///     chord as it would by the rules, the note of the chord nearest it if it misses the chord; the nearest in the
+    ///     range if it leaves it.
+    /// </summary>
+    private int PlaceEcho(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int step)
+    {
+        var note = chord.GetPitch(step);
         if (beatRank <= StrongestWeakRank && chordToneClasses.Count > 0 && !chordToneClasses.Contains(note.Mod(OctaveNoteCount)))
-        {
-            var nearest = GetNearest(GetChordTones(chordToneClasses), note);
-            if (Math.Abs(nearest - note) <= MotifChordToneReach)
-                note = nearest;
-        }
+            note = GetNearest(GetChordTones(chordToneClasses), note);
 
         return note >= _low && note <= _high ? note : GetNearest(GetScaleNotes(chord), note);
     }
@@ -145,7 +147,7 @@ internal sealed class MelodyLine
     {
         // a scale step is between one and a few semitones, so the step is near the note's distance in sevenths of
         // an octave
-        var guess = (int)Math.Round((note - chord.Root) * 7.0 / OctaveNoteCount);
+        var guess = (int)Math.Round((note - chord.Root) * (double)ScaleStepCount / OctaveNoteCount);
         return Enumerable.Range(guess - 4, 9).MinBy(x => Math.Abs(chord.GetPitch(x) - note));
     }
 
