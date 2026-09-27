@@ -11,12 +11,11 @@ In this order, each measured before it is planned:
    toms, about one run in five), intros (whether the band's entry after a chords-first or build-up intro feels earned)
    and endings (whether the ritardando plays in the browser, whether a final chord taken from a weak note is too quiet)
    have been tuned by measurement only, as have the sections' energy and modes (see *Section dynamics* and *Section
-   modes*) and the melody's echoes (see *Rhythm engine*), which play a bar that comes back, and so a section's second
-   phrase and a section that recurs, much as it was.
-2. **The melody at generation,** as planned in *Melody at generation*.
-3. Smaller: fade-out endings (see *Form*), and moving the melody's final note and a stop's hold from render flags to
-   edits of the notes after `Realizer`, one at a time, as a stop's cut of the notes that would sound into it already is
-   (`TimelineEdits.CutNotes`).
+   modes*) and the melody placed at generation (see *Melody at generation*), which plays a section's second phrase and
+   a section that recurs as it was, and leaps where a phrase starts again.
+2. Smaller: fade-out endings (see *Form*), and moving a stop's hold from a render flag to an edit of the notes after
+   `Realizer`, as a stop's cut of the notes that would sound into it already is (`TimelineEdits.CutNotes`), and the
+   melody's final note an edit as the song is put together (`SongFormGenerator.LandOnRoot`).
 
 ## Section dynamics
 
@@ -55,23 +54,22 @@ major or minor; those that turn brighter have an energy of 0.33 on average, thos
 
 ## Melody at generation
 
-The melody is the one track whose notes are decided in `Realizer`, one after another over the song, from the note
-before and render flags (`BeatRank`, `MelodyStep`, `MelodyRegister`, `Echo`, `MelodyFinal`, read only there); the
-echoes patch the repetition that this loses with a memory of their own. Decided: the melody is placed at generation,
-where the other tracks' notes are decided.
+The melody is placed where the other tracks' notes are decided, not in `Realizer`: once a section's bars are made, one
+line places its notes in order over them, by the rules of `MelodyLine`, over the chords `Realizer` would work out
+(`MelodyPattern.Place`), and every note keeps its scale step above its chord's root (`StateKinds.ScaleStep`), which
+`Realizer` plays. The section then plays it the same wherever it plays: its second phrase and a section that recurs are
+the same notes, where before, placed as the song played, a bar that came back played the same note over the same root
+40% of the time. The melody's render flags are generation state now, and the final note lands on the root as an edit of
+its step (`SongFormGenerator.LandOnRoot`).
 
-- The key reaches the section generator (drawn in its own stream, so nothing else changes).
-- `MelodyLine` moves into `MelodyPattern`: one line per section places its notes in order over the section's bars, as
-  part of each note's values, with the note's chord worked out as `Realizer` does (`Realizer.GetChord`); a note keeps
-  its scale step above its chord's root as its state. A bar pattern that comes back in the section plays its notes
-  again, by its seed; a varied repeat is placed afresh; a repeated cycle plays its steps again by the rhythm engine; a
-  section that recurs is the same by construction.
-- `Realizer` plays the given step; its melody memory, the echo key and the render flags go.
-- The final note becomes an edit as the song is put together (`CreateEnding`): the chord's root in the octave nearest
-  the note it is made from.
-- Measured against the echoes: leaps, the mean move, chord notes on the beat, the same note over the same root, and
-  leaps where a section starts, whose line starts afresh on the chord note nearest its phrase's aim; the other tracks
-  unchanged.
+Measured over 100 corpus songs, against the melody placed as the song played: chord notes on the beat 87.5%, up from
+81%; within phrases the melody moves about as before (2.9% leaps against 2.2%), but where a phrase starts again, at a
+section's start or its second phrase, 38% of the moves are leaps, against 3% before, 82% of them after a rest, as a new
+phrase starts after a breath. Left:
+
+- **Listen** to where phrases start again. Two rules tried to close a phrase onto its start and were dropped: aiming
+  the last bar back moved little, and landing the last note near the start only moved the leap one note earlier.
+- **The bass** could be placed at generation the same way, and its notes played again in a repeated cycle.
 
 ## Architecture
 
@@ -163,10 +161,8 @@ the tuning built on them, such as the snare's backbeat and the shares of speed a
 default, so it can first be shown to leave the recorded songs unchanged, and then tuned by measurement. Built so far:
 fullness and repeated cycles (rolls, riffs and pulses), phrase schemes, rhythmic unconventionality, the melody's
 rhythm (its busyness, riffs, and phrase ends with a held note and a rest), fills with landings and a drummer, and
-echoes: a melody note of a bar that comes back, or of a cycle that repeats the one before, plays the note it had again,
-as the scale step from its chord's root (`MelodyPattern.GetEcho`, `MelodyLine`). Over 100 corpus songs, 5% of the
-melody's notes are in a repeated cycle and 84% in a bar that comes back; over the same root as before, 77% play the
-same note, up from 40%, the others moving to the chord on a strong beat.
+echoes: within a section's melody, a note of a bar pattern that comes back, or of a cycle that repeats the one before,
+plays the note it had again, as the scale step from its chord's root (`MelodyPattern.GetEcho`, `MelodyLine`).
 A beat of a repeated cycle also plays the values its beat had in the cycle it repeats, for every track: its accent,
 its walks (such as the hi-hat's open or closed sound and an arpeggio's chord note), its lengths and the melody's step;
 only what depends on its position, the chord there, is its own (`DyadicRankItemPattern`). Over 100 corpus songs about
@@ -176,9 +172,6 @@ from the bar and section layers; should repeated figures sound mechanical, a sma
 over the replayed accent.
 
 ### Left for later
-
-- **Echoes in the bass:** the bass could play its notes again by the same key, where its approaches into the next
-  chord allow.
 
 - **Long cycles:** a bar pattern is one bar long, so a slower cycle, such as the kick's slowed to two bars, plays its
   first half and starts again at every bar line. Patterns as long as their cycle would let slow figures run whole, such

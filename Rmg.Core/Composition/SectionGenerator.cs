@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
+using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
@@ -25,6 +26,7 @@ internal sealed class SectionGenerator
     private readonly Scale _songScale;
     private readonly StateMap _songStateMap;
     private readonly ImmutableDictionary<int, StateMap> _sectionEnergies;
+    private readonly int _key;
     private readonly BarStateGenerator _barStateGenerator;
     private readonly PatternGenerator _patternGenerator;
 
@@ -40,7 +42,8 @@ internal sealed class SectionGenerator
         MelodyBusyness songMelodyBusyness,
         Scale songScale,
         StateMap songStateMap,
-        ImmutableDictionary<int, StateMap>? sectionEnergies = null
+        ImmutableDictionary<int, StateMap>? sectionEnergies = null,
+        int key = 0
     )
     {
         _context = context;
@@ -52,6 +55,7 @@ internal sealed class SectionGenerator
         _songScale = songScale;
         _songStateMap = songStateMap;
         _sectionEnergies = sectionEnergies ?? ImmutableDictionary<int, StateMap>.Empty;
+        _key = key;
         _barStateGenerator = new BarStateGenerator(settings);
         _patternGenerator = new PatternGenerator(context, tracks.Definitions);
     }
@@ -135,8 +139,16 @@ internal sealed class SectionGenerator
         trackTimelineMaps.Add(
             barStateTimelineMap.OfScope(StateScope.Render).ToTrackEventStateTimelineMap<StateMap>(Meter.PatternDuration)
         );
+        // and of the notes, too, what Render reads, now that the melody is placed
+        var timeline = TrackEventStateTimelineMap.Merge(trackTimelineMaps);
+        timeline = timeline.MapTrackEvents(
+            timeline.TrackTimelineMap.Keys.ToDictionary(
+                x => x,
+                _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes => notes.MapValues(x => x.OfScope(StateScope.Render)))
+            )
+        );
         return new GeneratedSection(
-            TrackEventStateTimelineMap.Merge(trackTimelineMaps).Repeat(2),
+            timeline.Repeat(2),
             rhythm,
             GetGrooves(drums.SelectMany(x => x.Feels)),
             energy
@@ -238,7 +250,14 @@ internal sealed class SectionGenerator
                 .MergeWith(sectionStateMap)
                 .MergeWith(sectionTrackLayer.ToStateMap(context));
             var trackStateMaps = new Dictionary<int, StateMap> { [trackNumber] = trackStateMap };
-            yield return _patternGenerator.GenerateBars(context, sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap, sectionRhythm);
+            var bars = _patternGenerator.GenerateBars(context, sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap, sectionRhythm);
+            // the melody's notes are placed once its bars are made, in their order
+            if (trackNumber == SongTracks.MelodyTrack)
+                bars = bars with
+                {
+                    Timeline = MelodyPattern.Place(bars.Timeline, trackNumber, (PitchInstrumentTrack)_tracks.Definitions[trackNumber], barStateTimelineMap, _key)
+                };
+            yield return bars;
         }
     }
 

@@ -25,6 +25,20 @@ public static class CompositionStateKinds
     // how much a melody moves by step rather than by leap, from 0 to 1
     public static StateKind<double> MelodyStepwiseness { get; } = StateKinds.CreateAdditive<double>(Prefix + "MelodyStepwiseness");
 
+    // how strong a note's beat is, 0 the strongest, from its rhythm pattern
+    public static StateKind<int> BeatRank { get; } = StateKinds.CreateAdditive<int>(Prefix + "BeatRank");
+
+    // where a melody note means to go, from the way the melody goes: 1 a step on, -1 a step back, 2 and -2 a leap, 0
+    // the same note
+    public static StateKind<int> MelodyStep { get; } = StateKinds.CreateAdditive<int>(Prefix + "MelodyStep");
+
+    // which note a melody note plays again: the key of its beat in its bar pattern's rhythm, the same for a beat of a
+    // bar that comes back and for a beat of a cycle that repeats the one before; 0 for none
+    public static StateKind<int> Echo { get; } = StateKinds.CreateAdditive<int>(Prefix + "Echo");
+
+    // how far above or below the middle of its range the melody aims in a bar, in semitones, for the phrase's shape
+    public static StateKind<double> MelodyRegister { get; } = StateKinds.CreateAdditive<double>(Prefix + "MelodyRegister");
+
     // where the melody's phrase ends in its last bar: 0 for no end, or the beat, from 1 to 3, before which its last note
     // starts; it holds that note, and rests until the next phrase
     public static StateKind<int> MelodyPhraseEnd { get; } = StateKinds.CreateAdditive<int>(Prefix + "MelodyPhraseEnd");

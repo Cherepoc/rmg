@@ -237,6 +237,20 @@ internal sealed class SongFormGenerator
     /// <param name="length">How long the chord is held, in beats.</param>
     /// <param name="duration">How long the ending is, in beats.</param>
     /// <param name="earlierSections">The sections before the last, in the song's order.</param>
+    /// <summary>
+    ///     A note whose scale step is set, as the melody's is, moved to the chord's root in the octave nearest it, where a
+    ///     melody ends.
+    /// </summary>
+    internal static TimelineItem<StateMap> LandOnRoot(TimelineItem<StateMap> note)
+    {
+        if (!note.Value.Kinds.Contains(StateKinds.ScaleStep))
+            return note;
+
+        var root = (int)Math.Round(note.Value.GetStateValue(StateKinds.ScaleStep) / (double)Scales.StepCount) * Scales.StepCount;
+        return note.Value.Except([StateKinds.ScaleStep]).MergeWith(StateMap.FromStates([StateKinds.ScaleStep.CreateState(root)]))
+            .ToTimelineItem(note.Position);
+    }
+
     internal static TrackEventStateTimelineMap<StateMap> CreateEnding(
         GeneratedSection lastSection,
         IEnumerable<GeneratedSection> earlierSections,
@@ -245,7 +259,7 @@ internal sealed class SongFormGenerator
     )
     {
         var homeBar = lastSection.Timeline.Trim(Meter.BarDuration);
-        var final = StateMap.FromStates([StateKinds.HeldDuration.CreateState(length), StateKinds.MelodyFinal.CreateState(1)]);
+        var final = StateMap.FromStates([StateKinds.HeldDuration.CreateState(length)]);
         // every track plays the home bar's chord, whichever note it takes its own state from
         IStateKind[] shapeKinds = [StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed];
         var homeShape = homeBar.TrackTimelineMap
@@ -269,7 +283,8 @@ internal sealed class SongFormGenerator
                             .Except([StateKinds.ChordRootNoteOffset])
                             .MergeWith(final)
                             .ToTimelineItem(0)
-                        );
+                        )
+                        .Select(LandOnRoot);
                 return new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
                     x.Key,
                     EventStateTimelineMap.Create(Meter.BarDuration, EventTimeline.Create(Meter.BarDuration, notes), x.Value.StateTimelineMap)

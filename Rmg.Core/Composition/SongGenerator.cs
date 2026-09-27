@@ -64,6 +64,9 @@ public static class SongGenerator
         songStateMap = songStateMap.MergeWith(SectionEnergy.GenerateSong(dynamicsContext));
         var sectionEnergies = SectionEnergy.GenerateSections(dynamicsContext, sectionIds);
 
+        // the song's key, which the sections place their melodies in
+        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common));
+
         var sectionGenerator = new SectionGenerator(
             root,
             Seeds.Derive(seed, (int)SongStream.Sections),
@@ -74,9 +77,9 @@ public static class SongGenerator
             melodyBusyness,
             scale,
             songStateMap,
-            sectionEnergies
+            sectionEnergies,
+            commonStateMap.GetStateValue(StateKinds.KeyOffset)
         );
-        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common));
         // how the song starts and ends around its sections, decided before them: the one the song ends with leads home
         // to the tonic, where the ending lands
         var formGenerator = new SongFormGenerator(Stream(SongStream.Form), rhythmicUnconventionality);

@@ -6,8 +6,9 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     Decides the song's notes from its state, the last stage of its generation: every note's chord, pitches and
-///     length, in the song's order, each track's from its notes before, as its chords are led, its bass line leads into
-///     the next chord, and its melody moves by rule; and every drum hit's sound. It sees the whole song, because a
+///     length, in the song's order, each track's from its notes before, as its chords are led and its bass line leads
+///     into the next chord, and its melody's notes as they were placed where they were made; and every drum hit's
+///     sound. It sees the whole song, because a
 ///     track's line goes on across its sections, and a section that comes back plays on from where the song is.
 /// </summary>
 internal static class Realizer
@@ -39,10 +40,7 @@ internal static class Realizer
             if (trackEventStateTimelineMap == null || trackEventStateTimelineMap.EventTimeline.Count == 0)
                 continue;
 
-            var notes = trackEventStateTimelineMap
-                .MergeStateMap(track.StateMap.OfScope(StateScope.Render))
-                .MergeStateTimelineMap(commonStateTimelineMap)
-                .ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
+            var notes = GetNoteStates(trackEventStateTimelineMap, track, commonStateTimelineMap);
             tracks[trackNumber] = track switch
             {
                 PitchInstrumentTrack pitchInstrumentTrack => RealizePitchTrack(pitchInstrumentTrack, notes),
@@ -54,7 +52,44 @@ internal static class Realizer
         return tracks.ToImmutable();
     }
 
-    /// <summary>A pitched track's notes, each placed from the one before, as its chords, bass line or melody lead.</summary>
+    /// <summary>Every note's state, as a note reads it: its own, over its track's, its definition's and the common state.</summary>
+    internal static EventTimeline<StateMap> GetNoteStates(
+        EventStateTimelineMap<StateMap> track,
+        IInstrumentTrack definition,
+        StateTimelineMap commonStateTimelineMap
+    )
+    {
+        return track
+            .MergeStateMap(definition.StateMap.OfScope(StateScope.Render))
+            .MergeStateTimelineMap(commonStateTimelineMap)
+            .ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
+    }
+
+    /// <summary>The lowest and the highest note of a pitched track's range.</summary>
+    internal static (int Low, int High) GetRange(PitchInstrumentTrack track)
+    {
+        var absoluteMinOctave = track.MinOctaveOffset + ZeroOctaveOffset;
+        var octaveCount = track.MaxOctaveOffset - track.MinOctaveOffset + 1;
+        return (absoluteMinOctave * OctaveNoteCount, (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1);
+    }
+
+    /// <summary>
+    ///     The chord a note plays over, and its notes, in scale steps above its root, and as pitch classes; a note
+    ///     without a chord plays its root alone.
+    /// </summary>
+    internal static (ChordContext Chord, ImmutableArray<int> Steps, IReadOnlySet<int> Classes) GetChordNotes(StateMap stateMap)
+    {
+        var (scaleOffsets, chordRootNoteIndex, chord) = GetChord(stateMap);
+        var chordPitchOffsets = stateMap.GetStateValue(StateKinds.ChordNotePitchOffsets);
+        var chordSteps = SnapChordToScale(
+            scaleOffsets,
+            chordRootNoteIndex,
+            chordPitchOffsets.IsEmpty ? [0] : chordPitchOffsets.Select(x => x * OctaveNoteCount)
+        );
+        return (chord, chordSteps, chordSteps.Select(x => chord.GetPitch(x).Mod(OctaveNoteCount)).ToHashSet());
+    }
+
+    /// <summary>A pitched track's notes, each placed from the one before, as its chords or bass line lead.</summary>
     private static EventTimeline<RealizedNote> RealizePitchTrack(PitchInstrumentTrack track, EventTimeline<StateMap> eventStateTimelineMap)
     {
         var absoluteMinOctave = track.MinOctaveOffset + ZeroOctaveOffset;
@@ -72,17 +107,12 @@ internal static class Realizer
             (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1,
             note => FixNoteOffset(absoluteMinOctave, octaveCount, note)
         );
-        // and a melody's, each by rule from the one before, the chord and the scale
-        var melodyLine = new MelodyLine(
-            absoluteMinOctave * OctaveNoteCount,
-            (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1
-        );
         var items = eventStateTimelineMap.WithDurations().ToArray();
         var notes = new TimelineItem<RealizedNote>[items.Length];
         for (var i = 0; i < items.Length; i++)
         {
             TimelineItem<WithDuration<StateMap>>? next = i + 1 < items.Length ? items[i + 1] : null;
-            notes[i] = RealizeNote(items[i], next, absoluteMinOctave, octaveCount, voiceLeader, bassLine, melodyLine);
+            notes[i] = RealizeNote(items[i], next, absoluteMinOctave, octaveCount, voiceLeader, bassLine);
         }
 
         return EventTimeline.Create(eventStateTimelineMap.Duration, notes);
@@ -119,8 +149,7 @@ internal static class Realizer
         int absoluteMinOctave,
         int octaveCount,
         VoiceLeader voiceLeader,
-        BassLine bassLine,
-        MelodyLine melodyLine
+        BassLine bassLine
     )
     {
         var position = timelineItemWithDuration.Position;
@@ -169,17 +198,9 @@ internal static class Realizer
                 .ToIndexOverLength(chordDegrees.Length)
                 .ToPeriodRemainder(chordDegrees.Length);
             var note = ToNote(chordDegrees[selectedIndex] + selectedOctave * scaleOffsets.Length);
-            // a held note ends a phrase, so it lands on the chord as a strong beat does
+            // a melody's note was placed where it was made, as its scale step above the chord's root
             if (isMelody)
-                note = melodyLine.Place(
-                    chord,
-                    chordSteps.Select(x => ToNote(x).Mod(OctaveNoteCount)).ToHashSet(),
-                    heldDuration > 0 ? 0 : stateMap.GetStateValue(StateKinds.BeatRank),
-                    stateMap.GetStateValue(StateKinds.MelodyStep),
-                    stateMap.GetStateValue(StateKinds.MelodyRegister),
-                    stateMap.GetStateValue(StateKinds.Echo),
-                    stateMap.GetStateValue(StateKinds.MelodyFinal) > 0
-                );
+                note = ToNote(stateMap.GetStateValue(StateKinds.ScaleStep));
             else if (stateMap.GetStateValue(StateKinds.FollowsChordRoots) > 0)
                 note = bassLine.Place(
                     note,

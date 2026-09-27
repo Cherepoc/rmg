@@ -148,7 +148,7 @@ internal sealed class BarStateGenerator
         var contour = MelodyLayers.Contours[Generators.WeightedIndex(MelodyLayers.Contours)(context)].Value;
         return StateTimeline.Create(
                 Meter.PatternDuration,
-                StateKinds.MelodyRegister,
+                CompositionStateKinds.MelodyRegister,
                 contour.Select((register, bar) => register.ToTimelineItem(bar * Meter.BarDuration)).ToArray()
             )
             .WithLayer("Bar");

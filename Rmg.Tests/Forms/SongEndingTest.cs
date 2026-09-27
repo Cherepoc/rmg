@@ -32,6 +32,21 @@ public sealed class SongEndingTest
     }
 
     [Test]
+    [Arguments(9, 7)]
+    [Arguments(-2, 0)]
+    [Arguments(11, 14)]
+    [Arguments(-4, -7)]
+    public async Task AMelodysLastNote_LandsOnTheRoot_InTheOctaveNearestIt(int step, int root)
+    {
+        var note = StateMap.FromStates([StateKinds.ScaleStep.CreateState(step), StateKinds.Velocity.CreateState(0.5)]).ToTimelineItem(0);
+        var plain = StateMap.FromStates([StateKinds.Velocity.CreateState(0.5)]).ToTimelineItem(0);
+
+        await Assert.That(SongFormGenerator.LandOnRoot(note).Value.GetStateValue(StateKinds.ScaleStep)).IsEqualTo(root);
+        await Assert.That(SongFormGenerator.LandOnRoot(note).Value.GetStateValue(StateKinds.Velocity)).IsEqualTo(0.5);
+        await Assert.That(SongFormGenerator.LandOnRoot(plain)).IsEqualTo(plain);
+    }
+
+    [Test]
     public async Task TheFinalChord_PlaysOnTheLine_AndIsHeld()
     {
         foreach (var song in Songs.Where(x => Ending(x).Kind != EndingKind.Open))
@@ -118,7 +133,6 @@ public sealed class SongEndingTest
         await Assert.That(ending.Duration).IsEqualTo(8);
         await Assert.That(melody.Position).IsEqualTo(0);
         await Assert.That(melody.Value.GetStateValue(StateKinds.HeldDuration)).IsEqualTo(8);
-        await Assert.That(melody.Value.GetStateValue(StateKinds.MelodyFinal)).IsEqualTo(1);
         await Assert.That(ending.TrackTimelineMap[drum].EventTimeline).IsEmpty();
         // the bass rests in the home bar, and plays its first note of the section
         await Assert.That(ending.TrackTimelineMap[BassTrack].EventTimeline.Single().Position).IsEqualTo(0);

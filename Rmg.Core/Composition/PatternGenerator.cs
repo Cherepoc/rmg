@@ -177,7 +177,7 @@ internal sealed class PatternGenerator
                 .Add(StateKinds.ChordNoteOffset, chordNoteOffsetGenerator(innerContext, position))
                 .Add(StateKinds.Velocity, BeatAccent.CreateVelocityGenerator(rank, rhythmPattern.MaxRank).Then(x => x * VelocityLayers.Note))
                 .AddNoteDurationLayer()
-                .Add(StateKinds.BeatRank, rank);
+                .Add(CompositionStateKinds.BeatRank, rank);
             melody?.AddNoteState(builder, beat);
             return builder.ToStateMap(innerContext);
         };

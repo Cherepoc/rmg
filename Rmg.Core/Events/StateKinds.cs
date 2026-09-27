@@ -29,18 +29,8 @@ public static class StateKinds
     public static readonly StateKind<int> ChordArrival = CreateAdditive<int>("ChordArrival", StateScope.Render);
     // 1 for a track that plays the melody, whose notes follow the chords and the phrase by rule
     public static readonly StateKind<int> MelodyLine = CreateAdditive<int>("MelodyLine", StateScope.Render);
-    // how strong a note's beat is, 0 the strongest, from its rhythm pattern
-    public static readonly StateKind<int> BeatRank = CreateAdditive<int>("BeatRank", StateScope.Render);
-    // where a melody note means to go, from the way the melody goes: 1 a step on, -1 a step back, 2 and -2 a leap, 0
-    // the same note
-    public static readonly StateKind<int> MelodyStep = CreateAdditive<int>("MelodyStep", StateScope.Render);
-    // which note a note plays again: the key of its beat in its bar pattern's rhythm, the same for a beat of a bar that
-    // comes back and for a beat of a cycle that repeats the one before; 0 for none
-    public static readonly StateKind<int> Echo = CreateAdditive<int>("Echo", StateScope.Render);
-    // 1 for a melody's last note, which lands on the chord's root
-    public static readonly StateKind<int> MelodyFinal = CreateAdditive<int>("MelodyFinal", StateScope.Render);
-    // how far above or below the middle of its range the melody aims in a bar, in semitones, for the phrase's shape
-    public static readonly StateKind<double> MelodyRegister = CreateAdditive<double>("MelodyRegister", StateScope.Render);
+    // a note's scale step above its chord's root, set outright, as the melody's notes are placed where they are made
+    public static readonly StateKind<int> ScaleStep = CreateAdditive<int>("ScaleStep", StateScope.Render);
     // which of a drum's sounds a note plays, counted from 1, such as a fill's high tom or a landing's crash, over the
     // walk of its articulation; 0 for the walk's
     public static readonly StateKind<int> ArticulationIndex = CreateAdditive<int>("ArticulationIndex", StateScope.Render);

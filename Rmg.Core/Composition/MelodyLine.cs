@@ -13,7 +13,7 @@ namespace Rmg.Core.Composition;
 ///     one before do, plays it again: the scale step it had from its chord's root, from the root of its own, in the
 ///     octave nearest the note before where a run of echoes starts or its chord changes and in the run's octave
 ///     otherwise, so that over the same chords it repeats and over others it sounds as a sequence. An echo on a strong
-///     beat that misses the chord moves to the chord's note nearest it. Its last note, at the song's end, lands on the chord's root.
+///     beat that misses the chord moves to the chord's note nearest it.
 /// </summary>
 internal sealed class MelodyLine
 {
@@ -73,24 +73,17 @@ internal sealed class MelodyLine
     /// </param>
     /// <param name="register">How far above or below the middle of the range the phrase aims here, in semitones.</param>
     /// <param name="echo">The key of the note it plays again, if that was heard, or is remembered by; 0 for none.</param>
-    /// <param name="isFinal">Whether it is the melody's last note, which lands on the chord's root nearest the note before.</param>
     public int Place(
         ChordContext chord,
         IReadOnlyCollection<int> chordToneClasses,
         int beatRank,
         int step,
         double register,
-        int echo = 0,
-        bool isFinal = false
+        int echo = 0
     )
     {
         int note;
-        if (isFinal)
-        {
-            _echoRun = null;
-            note = PlaceFinal(chord);
-        }
-        else if (echo != 0 && _heard.TryGetValue(echo, out var heard))
+        if (echo != 0 && _heard.TryGetValue(echo, out var heard))
         {
             if (_echoRun?.Root != chord.Root)
                 _echoRun = (chord.Root, GetNearestOctave(chord, heard) - heard);
@@ -134,16 +127,8 @@ internal sealed class MelodyLine
         return note >= _low && note <= _high ? note : GetNearest(GetScaleNotes(chord), note);
     }
 
-    /// <summary>The melody's last note: the chord's root in the range, the one nearest the note before.</summary>
-    private int PlaceFinal(ChordContext chord)
-    {
-        var rootClass = chord.Root.Mod(OctaveNoteCount);
-        var roots = Enumerable.Range(_low, _high - _low + 1).Where(x => x.Mod(OctaveNoteCount) == rootClass).ToArray();
-        return GetNearest(roots, _previous ?? _middle);
-    }
-
     /// <summary>The scale step of a note, counted from the chord's root: the step whose note is nearest it.</summary>
-    private static int GetScaleStep(ChordContext chord, int note)
+    internal static int GetScaleStep(ChordContext chord, int note)
     {
         // a scale step is between one and a few semitones, so the step is near the note's distance in sevenths of
         // an octave

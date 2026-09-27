@@ -1,0 +1,144 @@
+using Rmg.Core;
+using Rmg.Core.Composition;
+using Rmg.Core.Events;
+
+namespace Rmg.Tests.MelodyRhythms;
+
+/// <summary>
+///     How the melody plays again what comes back: a section's second 4-bar pattern against its first, which has the
+///     same state, and a section that recurs against where it first played; and how the melody moves, within its
+///     phrases and where a phrase starts again, which it does mostly after a rest.
+/// </summary>
+public sealed class MelodyRepetitionTest
+{
+    private const int SongCount = 100;
+
+    /// <param name="Pairs">Notes at the same place in a pattern that comes back, both played.</param>
+    /// <param name="Same">Of those, the ones that play the same note.</param>
+    /// <param name="SectionStartLeaps">Moves into a section's first note that are leaps.</param>
+    /// <param name="Joins">Moves into the first note of a 4-bar pattern, where a phrase starts again.</param>
+    /// <param name="JoinLeaps">Of those, the leaps.</param>
+    /// <param name="RestedJoinLeaps">Of those, the ones after a rest of half a beat or more.</param>
+    internal sealed record Measures(
+        int Notes,
+        int Pairs,
+        int Same,
+        double MeanMove,
+        double LeapShare,
+        double OnBeatChordNotes,
+        int SectionStarts,
+        int SectionStartLeaps,
+        int Joins,
+        int JoinLeaps,
+        int RestedJoinLeaps
+    );
+
+    internal static Measures Measure(IEnumerable<CorpusSong> songs)
+    {
+        int notes = 0, pairs = 0, same = 0, leaps = 0, moves = 0, onBeat = 0, onBeatChord = 0, starts = 0, startLeaps = 0;
+        int joins = 0, joinLeaps = 0, restedJoinLeaps = 0;
+        double moveSum = 0;
+        foreach (var song in songs)
+        {
+            var melody = song.Song.Notes![SongTracks.MelodyTrack].ToArray();
+            var chords = song.Song.Notes[SongTracks.ChordsTrack].GroupBy(x => x.Position)
+                .Select(x => (Position: x.Key, Classes: x.SelectMany(n => n.Value.Pitches).Select(p => p.Mod(12)).ToHashSet()))
+                .ToArray();
+            notes += melody.Length;
+            var patternStarts = song.Map.Sections.SelectMany(x => new[] { x.Start, x.Start + Meter.PatternDuration }).ToArray();
+            for (var i = 1; i < melody.Length; i++)
+            {
+                var move = Math.Abs(melody[i].Value.Pitches[0] - melody[i - 1].Value.Pitches[0]);
+                var isLeap = move >= MelodyLine.LeapSize;
+                moves++;
+                moveSum += move;
+                leaps += isLeap ? 1 : 0;
+                if (!patternStarts.Any(x => melody[i - 1].Position < x && melody[i].Position >= x))
+                    continue;
+                joins++;
+                joinLeaps += isLeap ? 1 : 0;
+                var rest = melody[i].Position - (melody[i - 1].Position + melody[i - 1].Value.Duration);
+                restedJoinLeaps += isLeap && rest >= 0.5 ? 1 : 0;
+            }
+
+            foreach (var note in melody.Where(x => Math.Abs(x.Position - Math.Round(x.Position)) < 1e-9))
+            {
+                var chord = chords.LastOrDefault(x => x.Position <= note.Position);
+                if (chord.Classes is null)
+                    continue;
+                onBeat++;
+                onBeatChord += chord.Classes.Contains(note.Value.Pitches[0].Mod(12)) ? 1 : 0;
+            }
+
+            // what comes back: every section's second pattern against its first, and a section against its first place
+            var pitches = melody.ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0]);
+            var spans = song.Map.Sections;
+            var comparisons = spans.Select(x => (From: x.Start, To: x.Start + Meter.PatternDuration, Length: Meter.PatternDuration))
+                .Concat(spans.Select((x, i) => (Span: x, First: spans.First(s => s.SectionId == x.SectionId)))
+                    .Where(x => x.First != x.Span)
+                    .Select(x => (From: x.First.Start, To: x.Span.Start, Length: x.Span.Duration)));
+            foreach (var (from, to, length) in comparisons)
+            foreach (var note in melody.Where(x => x.Position >= from && x.Position < from + length))
+            {
+                if (!pitches.TryGetValue(Math.Round(note.Position - from + to, 6), out var again))
+                    continue;
+                pairs++;
+                same += again == note.Value.Pitches[0] ? 1 : 0;
+            }
+
+            foreach (var span in spans.Skip(1))
+            {
+                var index = Array.FindIndex(melody, x => x.Position >= span.Start);
+                if (index <= 0 || melody[index].Position >= span.End)
+                    continue;
+                starts++;
+                startLeaps += Math.Abs(melody[index].Value.Pitches[0] - melody[index - 1].Value.Pitches[0]) >= MelodyLine.LeapSize ? 1 : 0;
+            }
+        }
+
+        return new Measures(
+            notes,
+            pairs,
+            same,
+            moveSum / moves,
+            leaps / (double)moves,
+            onBeatChord / (double)onBeat,
+            starts,
+            startLeaps,
+            joins,
+            joinLeaps,
+            restedJoinLeaps
+        );
+    }
+
+    [Test]
+    [Explicit]
+    public async Task Report()
+    {
+        var m = Measure(TestCorpus.Range(SongCount));
+        Console.WriteLine($"{m.Notes} melody notes; of {m.Pairs} that come back, the same note {m.Same / (double)m.Pairs:P0}; " +
+                          $"mean move {m.MeanMove:F2} semitones, leaps {m.LeapShare:P1}, chord notes on the beat {m.OnBeatChordNotes:P1}; " +
+                          $"leaps into a section {m.SectionStartLeaps / (double)m.SectionStarts:P1} of {m.SectionStarts}; " +
+                          $"leaps where a phrase starts again {m.JoinLeaps / (double)m.Joins:P1} of {m.Joins}, " +
+                          $"after a rest {m.RestedJoinLeaps / (double)m.JoinLeaps:P0}");
+        await Task.CompletedTask;
+    }
+
+    [Test]
+    public async Task WhatComesBack_PlaysTheSameNotes()
+    {
+        // a section's melody is placed once, so what plays again is the same; before, when the melody was placed as the
+        // song played, bars that came back played the same note over the same root 40% of the time
+        var m = Measure(TestCorpus.Range(20));
+
+        await Assert.That(m.Same).IsEqualTo(m.Pairs);
+    }
+
+    [Test]
+    public async Task APhraseThatStartsAgain_LeapsMostlyAfterARest()
+    {
+        var m = Measure(TestCorpus.Range(20));
+
+        await Assert.That(m.RestedJoinLeaps / (double)m.JoinLeaps).IsGreaterThan(0.7);
+    }
+}

@@ -25,6 +25,9 @@ public sealed record Scale(string Name, ImmutableArray<int> Offsets, double Weig
 /// </summary>
 public static class Scales
 {
+    /// <summary>How many notes every scale has.</summary>
+    public const int StepCount = 7;
+
     public static Scale NaturalMinor { get; } = new("Natural minor", [0, 2, 3, 5, 7, 8, 10], 0.3);
 
     public static Scale Major { get; } = new("Major", [0, 2, 4, 5, 7, 9, 11], 0.3);
