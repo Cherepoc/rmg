@@ -31,6 +31,8 @@ public static class StateKinds
     public static readonly StateKind<int> MelodyLine = CreateAdditive<int>("MelodyLine", StateScope.Render);
     // a note's scale step above its chord's root, set outright, as the melody's notes are placed where they are made
     public static readonly StateKind<int> ScaleStep = CreateAdditive<int>("ScaleStep", StateScope.Render);
+    // 1 for the first note of a phrase placed where it was made, whose octave is chosen afresh from the note before
+    public static readonly StateKind<int> PhraseStart = CreateAdditive<int>("PhraseStart", StateScope.Render);
     // which of a drum's sounds a note plays, counted from 1, such as a fill's high tom or a landing's crash, over the
     // walk of its articulation; 0 for the walk's
     public static readonly StateKind<int> ArticulationIndex = CreateAdditive<int>("ArticulationIndex", StateScope.Render);

@@ -62,10 +62,16 @@ the same notes, where before, placed as the song played, a bar that came back pl
 40% of the time. The melody's render flags are generation state now, and the final note lands on the root as an edit of
 its step (`SongFormGenerator.LandOnRoot`).
 
+As the chords' voicing and the bass's octave are, the melody's register is chosen in `Realizer` from what came before:
+a phrase, the notes placed for a section's 4-bar pattern, is moved by whole octaves to start nearest the note before,
+within the track's range (`PhraseRegister`, `StateKinds.PhraseStart`), so what plays again plays the same notes, in
+the octave its phrase starts in.
+
 Measured over 100 corpus songs, against the melody placed as the song played: chord notes on the beat 87.5%, up from
 81%; within phrases the melody moves about as before (2.9% leaps against 2.2%), but where a phrase starts again, at a
-section's start or its second phrase, 38% of the moves are leaps, against 3% before, 82% of them after a rest, as a new
-phrase starts after a breath. Left:
+section's start or its second phrase, 27% of the moves are leaps, against 3% before, 83% of them after a rest, as a new
+phrase starts after a breath; 38% before the phrase's octave was chosen, which a range of an octave or two often has
+no room for. Left:
 
 - **Listen** to where phrases start again. Two rules tried to close a phrase onto its start and were dropped: aiming
   the last bar back moved little, and landing the last note near the start only moved the leap one note earlier.
@@ -76,28 +82,26 @@ phrase starts after a breath. Left:
 From the review of September 2026, in this order; the two small errors it found, the melody read only where a note
 has a chord note offset and wiring left to silent defaults, are fixed, and a trace entry carries what was decided as a
 value (`StateTraceEntry.Value`, such as a `FillDecision`), at a point named in `TracePoints`, which the tests read in
-place of its words.
+place of its words. The item that placed the chords and the bass at generation, as the melody is, was wrong: they
+already repeat all their pitch classes where a section plays again, and `Realizer` only chooses their register from
+what came before, as it now does the melody's (see *Melody at generation*).
 
-1. **One placement:** the melody is placed at generation, the chords (`VoiceLeader`) and the bass (`BassLine`) in
-   `Realizer` from their notes before, so a section that plays again repeats its melody but only 88% of its bass notes
-   and 75% of its chords. The bass could be placed at generation as the melody is; the chords need a decision, as
-   their voicing leads across the sections: placed per section, with the octave chosen where a section starts.
-2. **One lean:** the choices the chance scale multiplies (stopping, the random walk, a wider note, slowing down, the
+1. **One lean:** the choices the chance scale multiplies (stopping, the random walk, a wider note, slowing down, the
    pitch order, a group's run chance to the power of its unconventionality, the drummer's spans) are each a weight
    times a scale to the power of how the option leans, which `Tilt.Weigh` is; and a section's mode leans by its
    energy through its rhythm's coupling, where its harmony's unconventionality should say how far it follows it.
-3. **A line's weight:** the fills' section and phrase tables (spans, landings, fullness) could be one value that
+2. **A line's weight:** the fills' section and phrase tables (spans, landings, fullness) could be one value that
    scales the chance of no fill, the span, the fullness and the landing, of which the energy it leads into is a part;
    a phrase line in the middle of a section, whose energy does not change, has no lean now.
-4. **Track roles:** a role on a track's definition in place of checking track numbers (`SongTracks.MelodyTrack`,
+3. **Track roles:** a role on a track's definition in place of checking track numbers (`SongTracks.MelodyTrack`,
    `ChordsTrack`, `BassTrack`, `DrumGroups.FirstTrackNumber`, 13 checks in `PatternGenerator`, `SectionGenerator` and
    `SongFormGenerator`); and `SectionGenerator.Generate`, which draws the section's energy, scale, harmony, drums, bar
    state and tracks, places its melody and keeps its notes' render state, split, with its flags (`hasTonicHome`,
    `keepsSongScale`) a plan of the section in their place.
-5. **Tables:** 139 tuning constants and 30 weighted tables in `Composition`; some are convention (a drum's weight),
+4. **Tables:** 139 tuning constants and 30 weighted tables in `Composition`; some are convention (a drum's weight),
    some shapes chosen by hand (the melody's four contours, its phrase ends, the fills' spans, treatments, speeds and
    widths, the leans of drums, spans and treatments) that a rule could derive or a draw could make.
-6. **A stop's cut in one place:** its last note held to the stop before `Realizer` (`TimelineEdits.CutBefore`) and the
+5. **A stop's cut in one place:** its last note held to the stop before `Realizer` (`TimelineEdits.CutBefore`) and the
    notes that would sound into it cut after (`CutNotes`) could both be edits after it.
 
 Smaller, when the code is next touched:

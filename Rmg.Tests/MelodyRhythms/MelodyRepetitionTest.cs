@@ -15,6 +15,7 @@ public sealed class MelodyRepetitionTest
 
     /// <param name="Pairs">Notes at the same place in a pattern that comes back, both played.</param>
     /// <param name="Same">Of those, the ones that play the same note.</param>
+    /// <param name="SameClass">Of those, the ones that play the same note in some octave.</param>
     /// <param name="SectionStartLeaps">Moves into a section's first note that are leaps.</param>
     /// <param name="Joins">Moves into the first note of a 4-bar pattern, where a phrase starts again.</param>
     /// <param name="JoinLeaps">Of those, the leaps.</param>
@@ -23,6 +24,7 @@ public sealed class MelodyRepetitionTest
         int Notes,
         int Pairs,
         int Same,
+        int SameClass,
         double MeanMove,
         double LeapShare,
         double OnBeatChordNotes,
@@ -35,7 +37,7 @@ public sealed class MelodyRepetitionTest
 
     internal static Measures Measure(IEnumerable<CorpusSong> songs)
     {
-        int notes = 0, pairs = 0, same = 0, leaps = 0, moves = 0, onBeat = 0, onBeatChord = 0, starts = 0, startLeaps = 0;
+        int notes = 0, pairs = 0, same = 0, sameClass = 0, leaps = 0, moves = 0, onBeat = 0, onBeatChord = 0, starts = 0, startLeaps = 0;
         int joins = 0, joinLeaps = 0, restedJoinLeaps = 0;
         double moveSum = 0;
         foreach (var song in songs)
@@ -84,6 +86,7 @@ public sealed class MelodyRepetitionTest
                     continue;
                 pairs++;
                 same += again == note.Value.Pitches[0] ? 1 : 0;
+                sameClass += (again - note.Value.Pitches[0]).Mod(12) == 0 ? 1 : 0;
             }
 
             foreach (var span in spans.Skip(1))
@@ -100,6 +103,7 @@ public sealed class MelodyRepetitionTest
             notes,
             pairs,
             same,
+            sameClass,
             moveSum / moves,
             leaps / (double)moves,
             onBeatChord / (double)onBeat,
@@ -116,7 +120,8 @@ public sealed class MelodyRepetitionTest
     public async Task Report()
     {
         var m = Measure(TestCorpus.Range(SongCount));
-        Console.WriteLine($"{m.Notes} melody notes; of {m.Pairs} that come back, the same note {m.Same / (double)m.Pairs:P0}; " +
+        Console.WriteLine($"{m.Notes} melody notes; of {m.Pairs} that come back, the same note {m.Same / (double)m.Pairs:P0}, " +
+                          $"in some octave {m.SameClass / (double)m.Pairs:P0}; " +
                           $"mean move {m.MeanMove:F2} semitones, leaps {m.LeapShare:P1}, chord notes on the beat {m.OnBeatChordNotes:P1}; " +
                           $"leaps into a section {m.SectionStartLeaps / (double)m.SectionStarts:P1} of {m.SectionStarts}; " +
                           $"leaps where a phrase starts again {m.JoinLeaps / (double)m.Joins:P1} of {m.Joins}, " +
@@ -125,13 +130,14 @@ public sealed class MelodyRepetitionTest
     }
 
     [Test]
-    public async Task WhatComesBack_PlaysTheSameNotes()
+    public async Task WhatComesBack_PlaysTheSameNotes_InTheOctaveItsPhraseStartsIn()
     {
-        // a section's melody is placed once, so what plays again is the same; before, when the melody was placed as the
-        // song played, bars that came back played the same note over the same root 40% of the time
+        // a section's melody is placed once, so what plays again is the same, moved by the octave its phrase starts in;
+        // before, when the melody was placed as the song played, bars that came back played the same note over the same
+        // root 40% of the time
         var m = Measure(TestCorpus.Range(20));
 
-        await Assert.That(m.Same).IsEqualTo(m.Pairs);
+        await Assert.That(m.SameClass).IsEqualTo(m.Pairs);
     }
 
     [Test]

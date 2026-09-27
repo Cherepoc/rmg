@@ -6,9 +6,10 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     Decides the song's notes from its state, the last stage of its generation: every note's chord, pitches and
-///     length, in the song's order, each track's from its notes before, as its chords are led and its bass line leads
-///     into the next chord, and its melody's notes as they were placed where they were made; and every drum hit's
-///     sound. It sees the whole song, because a
+///     length, in the song's order: the notes the state decides, in the register that follows from the notes before, as
+///     the chords are led, the bass line takes the octave nearest its note before and leads into the next chord, and
+///     the melody's phrases, placed where they were made, start in the octave nearest the note before; and every drum
+///     hit's sound. It sees the whole song, because a
 ///     track's line goes on across its sections, and a section that comes back plays on from where the song is.
 /// </summary>
 internal static class Realizer
@@ -101,6 +102,8 @@ internal static class Realizer
             (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1,
             notes => FitChordIntoRange(absoluteMinOctave, octaveCount, notes)
         );
+        // and a melody's phrases, each moved by octaves to start nearest the note before
+        var phraseRegister = new PhraseRegister(absoluteMinOctave * OctaveNoteCount, (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1);
         // and a bass line's notes, each following from the one before and leading into the next chord
         var bassLine = new BassLine(
             absoluteMinOctave * OctaveNoteCount,
@@ -112,7 +115,7 @@ internal static class Realizer
         for (var i = 0; i < items.Length; i++)
         {
             TimelineItem<WithDuration<StateMap>>? next = i + 1 < items.Length ? items[i + 1] : null;
-            notes[i] = RealizeNote(items[i], next, absoluteMinOctave, octaveCount, voiceLeader, bassLine);
+            notes[i] = RealizeNote(items[i], next, absoluteMinOctave, octaveCount, voiceLeader, bassLine, phraseRegister);
         }
 
         return EventTimeline.Create(eventStateTimelineMap.Duration, notes);
@@ -149,7 +152,8 @@ internal static class Realizer
         int absoluteMinOctave,
         int octaveCount,
         VoiceLeader voiceLeader,
-        BassLine bassLine
+        BassLine bassLine,
+        PhraseRegister phraseRegister
     )
     {
         var position = timelineItemWithDuration.Position;
@@ -189,7 +193,7 @@ internal static class Realizer
         ImmutableArray<int> notes;
         // a melody's note was placed where it was made, as its scale step above the chord's root
         if (isMelody)
-            notes = [ToNote(stateMap.GetStateValue(StateKinds.ScaleStep))];
+            notes = [phraseRegister.Place(ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)), stateMap.GetStateValue(StateKinds.PhraseStart) > 0)];
         else if (!chordNoteOffset.IsEmpty)
         {
             var chordDegrees = chordSteps
@@ -425,5 +429,31 @@ internal static class Realizer
         var noteOctave = (noteOffset - octaveNote) / OctaveNoteCount;
         var fixedOctaveOffset = noteOctave.BounceInBounds(absoluteMinOctave, absoluteMaxOctave);
         return fixedOctaveOffset * OctaveNoteCount + octaveNote;
+    }
+}
+
+/// <summary>
+///     The register of a melody's phrases: a phrase is placed where it is made, in an octave of its own, and plays moved
+///     by whole octaves so that it starts nearest the note before, within the track's range, and keeps its shape.
+/// </summary>
+internal sealed class PhraseRegister(int minNote, int maxNote)
+{
+    private const int OctaveNoteCount = 12;
+
+    private int? _previous;
+    private int _shift;
+
+    /// <param name="isPhraseStart">Whether the note starts a phrase, whose octave is chosen afresh.</param>
+    public int Place(int note, bool isPhraseStart)
+    {
+        if (isPhraseStart && _previous is { } previous)
+            _shift = new[] { -OctaveNoteCount, 0, OctaveNoteCount }
+                .Where(x => note + x >= minNote && note + x <= maxNote)
+                .DefaultIfEmpty(0)
+                .MinBy(x => Math.Abs(note + x - previous));
+
+        var placed = note + _shift;
+        _previous = placed;
+        return placed;
     }
 }
