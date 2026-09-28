@@ -13,8 +13,8 @@ In this order, each measured before it is planned:
    endings, the section modes and the chords' level.
 2. **The melody** (see *Melody at generation*): it plays where it was placed, so a phrase that plays again is heard
    as the same notes, and its shape follows its contour weakly.
-3. **The drums** (see *Drums*): roles as data; listen to the strokes and accents, the drums coming and going by bar,
-   the percussion's grooves and the sections of percussion only.
+3. **The drums** (see *Drums*): listen to the roles and the doubling, the strokes and accents, the drums coming and
+   going by bar, the percussion's grooves and the sections of percussion only.
 4. Smaller: fade-out endings (see *Form*).
 
 ## Section dynamics
@@ -166,13 +166,30 @@ Smaller, when the code is next touched:
 
 ## Drums
 
-A section chooses its drums (`DrumKitGenerator.SelectActiveDrums`): the kick and the snare, and one or two optional
-groups (the timekeepers, the toms, the accents, the percussion), one drum of each, two of the percussion. The
-timekeepers weigh three times the others, still optional. The triangle, the cuica and the whistle are left out of the
-song's percussion, as they grate in a groove, until genres call for them. The vibraslap is an accent, as a crash is:
-a fifth of the songs have it beside the cymbal, and a landing weighs its sounds by their drum's weight, shared among
-its sounds, so that it lands in about one cymbal landing in eleven where the song has it and all but never grooves
-(no section of 200 corpus songs, against 264 as a percussion drum).
+A drum plays a role in the groove (`DrumRole`): it grounds it (as the kick does), plays the backbeat (the snare), keeps
+time (the hi-hat) or colours it (the toms, a crash ride, more percussion); the fills keep their own roles
+(`FillDrumRole`), finer, by the sounds a run plays. A drum's affinity for every role is data on it, its main role the
+heaviest: the kick and the snare steep, the percussion spread over several roles, the shakers keeping time. The song
+draws a drum's role and a section may draw it again (`DrumRoles`), the lowest layer's winning, both leaning to the roles
+not its main one the less conventional the rhythm; the role sets the drum's fixed rhythm (grounding repeats its figure,
+the backbeat is a half-bar cycle shifted by half, time plays faster, full and steady), a section's other role as the
+difference from the song's. Over 200 corpus songs the kick always grounds, the snares keep time in 2 to 4% of their
+sections (a train beat, to listen to), the clap colours in 11%, the tambourine plays the backbeat in 28%, the conga
+grounds in 53% and keeps time in 35%, the claves play the backbeat in 56%.
+
+A section's kit is chosen by the roles (`DrumKitGenerator.SelectKit`): a lead for the ground and one for the backbeat,
+and one to keep time 90% of the time, the more energy the likelier, each among the drums whose main role it is, by
+weight, the loud ones likelier the more energy, one lead a role in place of the groups' rule that their drums do not
+play together; what a lead plays is its role in the section, so that a wild section's snare may keep time in the
+backbeat's place. Then the colour, none to two groups of it (the toms, the accents, the percussion), more the more
+energy; and now and then, 19% of the sections, 8% of the quieter half and 29% of the louder, a drum doubles a lead of
+its role (`PercussionInstrumentDefinition.Doubling`): the clap or the tambourine on the backbeat, a shaker or the
+tambourine over the hi-hat or the ride, playing the lead's rhythm and its bar patterns on the lead's strong beats. A song
+has an acoustic or an electric snare, and in 30% of the songs a clap, which mostly doubles it and now and then leads the
+backbeat. The groups keep only the song's drums, the colour and the fills' roles. The triangle, the cuica and the
+whistle are left out of the song's percussion, as they grate in a groove, until genres call for them. The vibraslap is
+an accent, as a crash is: a fifth of the songs have it beside the cymbal, and it lands in about one cymbal landing in
+eleven where the song has it and all but never grooves.
 
 A drum's sounds are data (`DrumSound`): a weight, which runs and landings pick them by, so that the cymbal lands on a
 crash four times in five where it landed on the china and the splash half the time, and a sound joins a run by its
@@ -182,65 +199,30 @@ pitches, or strikes one steadily, its stroke (`DrumStrokes`), a state the lowest
 (`StateKinds.CreateLowestLayerWins`, by the depth every value carries): the song picks one, a section may change it and
 a bar of a later letter may change the section's, a change the likelier the heavier the new stroke, the less
 conventional the rhythm and the more its loudness goes the energy's way. The cross-stick is a stroke of the snare, no
-longer a drum: 14% of the snare's sections play it, 21% of the quieter half and 8% of the louder, and 77 of 160 songs
+longer a drum: 14% of the snare's sections play it, 20% of the quieter half and 7% of the louder, and 86 of 194 songs
 switch to it and back. A note may play an accent over its stroke, at a note's depth (`DrumAccents`), leaned to the
-beats it favours and by energy, and replayed in a repeated cycle: the hi-hat plays 87% closed, 5% its pedal and 8% open,
+beats it favours and by energy, and replayed in a repeated cycle: the hi-hat plays 85% closed, 6% its pedal and 9% open,
 two thirds of those off the beat, where the three were about even; the ride's bell is 6% of its notes, nine in ten on
 the beat, where it was 28%.
 
 Drums by bar (`DrumPresence`): the section's first bar pattern, the phrase scheme's A, plays its drums as the section
-does, and the bars of another letter vary them: a drum that holds a role in the groove (the kick, the snare, the
-timekeepers, and every drum of a section of percussion only) never sits out, as the hi-hat sitting out sounded as a
-dropout, but may change its stroke there; a drum that colours the groove sits out 30% of the time, from about 10% in
-the plainest sections to 60% in the wildest, less the more energy the section has, each drawn from a stream of its
-own. Bars of the same letter play the same drums.
+does, and the bars of another letter vary them: a lead never sits out, as the hi-hat sitting out sounded as a dropout,
+but may change its stroke there; a drum that colours the groove or doubles a lead sits out 30% of the time, from about
+10% in the plainest sections to 60% in the wildest, less the more energy the section has, each drawn from a stream of
+its own. Bars of the same letter play the same drums.
 
-The percussion stands in for the drum kit by its register and takes the fixed rhythm of the drum it stands for
-(`DrumDefinitions.GroundsTheGroove`, `PlaysTheBackbeat`, `KeepsTime`): the conga and the timbale ground the groove as
-the kick does, the claves and the wood block play the backbeat as the snare does, and the cowbell, the agogo, the bongos
-and the guiro keep time as the hi-hat does.
+Sections of percussion only (`PercussionSections`): a section plays its percussion without the drum kit, its leads
+among the percussion and up to three drums in all, by a chance of the song's lean, spread evenly, and its own, leaned to
+unconventional and quiet sections, where the song has two or more percussion drums. Into such a section the drums land
+on the percussion, a run there plays the percussion alone, and a run in a drum kit section does now and then
+(`FillLayers.PercussionRunChance`). The count-in clicks on the first of a few dry sounds the song has
+(`FormLayers.CountInSounds`), the hi-hat's pedal first.
 
-Sections of percussion only (`PercussionSections`): a section plays up to three of the song's percussion drums without
-the drum kit, by a chance of the song's lean, spread evenly, and its own, leaned to unconventional and quiet sections,
-where the song has two or more percussion drums; its kit is still drawn, and dropped, so that its other draws stay as
-they are. Into such a section the drums land on the percussion, a run there plays the percussion alone, and a run in a
-drum kit section does now and then (`FillLayers.PercussionRunChance`). The count-in clicks on the first of a few dry
-sounds the song has (`FormLayers.CountInSounds`), the hi-hat's pedal first, where it was silent in a song with no
-hi-hat.
-
-Measured over 200 corpus songs (`DrumUseReportTest`), against before these changes: the timekeepers groove in 79% of
-the sections, against 76%, the percussion in 40%, and a section grooves on 3.2 drums, as before; a bar plays 3.7 drums,
-against 3.9, and the drums change from the bar before in 29% of the bars, against 23%. Where the percussion played as any drum, about 2.8 notes a
-bar, half of them on 1 and 3, the time keepers now play 5 to 6.5 notes a bar spread as the hi-hat's, and the claves and
-the wood block repeat their bar 60% of the time as the snare does. 6.7% of the sections play percussion only, in 38
-songs, 10 of them in half their sections or more; their energy averages 0.00, against 0.14.
-
-Planned, **roles as data**. A drum plays a role in the groove (`DrumRole`): it grounds it (as the kick does), plays
-the backbeat (the snare), keeps time (the hi-hat) or colours it (the toms, a crash ride, more percussion); the fills keep
-their own roles (`FillDrumRole`), finer, by the sounds a run plays. The role sets the drum's fixed rhythm state
-(`GroundsTheGroove`, `PlaysTheBackbeat`, `KeepsTime`), where its definition sets it now. In this order, each measured:
-
-1. **Roles as state, no change:** every drum's affinity for every role as data, its role now at 1 and the others at
-   0; the song draws a drum's role by them and a section may draw it again, the lowest layer's winning, both leaned by
-   conventionality; the role's rhythm state is added from the role. The corpus fingerprint stays as it is.
-2. **Affinities spread:** the kick and the snare steep, the conga, the cowbell and the claves spread over several
-   roles, the ride keeping time or colouring. Measure the roles in plain and wild sections, how often the kick or the
-   snare leaves its role (rarely, and only in wild sections), and where each drum's notes fall.
-3. **The kit by roles,** in place of `SelectActiveDrums`: a section fills the ground and the backbeat almost always,
-   time mostly, and colour with none to two drums by energy, and each role's lead is drawn among the song's drums by
-   weight times affinity, leaned by loudness and energy, one lead a role in place of the groups' rule that their drums
-   do not play together; a section of percussion only draws its leads from the percussion. The groups keep only the
-   song's drums and the fills' roles. Retune to today: the timekeepers in 79% of the sections, the percussion in 40%, 3.2
-   drums a section and 3.7 a bar, 6.7% of the sections percussion only.
-4. **Doubling:** a role held by two drums, the second playing the lead's rhythm on its strong ranks with a sound of its
-   own, leaned by energy: the clap or the tambourine on the backbeat, a shaker over the hi-hat. The clap leaves the
-   main snares, the song having an acoustic or an electric snare and maybe a clap, which mostly doubles the backbeat
-   and in a few unconventional songs leads it.
-5. **Drums by bar on roles:** the leads of the ground, the backbeat and time never sit out a bar but may change their
-   stroke, colour comes and goes, and a doubler sits out with its lead.
-
-Risks: the kick or the snare in a role not theirs may sound broken rather than bold, hence steep affinities, and
-listen to the wild end; the colour count by energy shifts the balance of the toms, the crash ride and the percussion.
+Measured over 200 corpus songs (`DrumUseReportTest`): the timekeepers groove in 78% of the sections, the percussion in
+41%, the toms in 13%, the accents in 6%; a section grooves on 3.35 drums, a bar plays 3.95, the doublers among them,
+and the drums change from the bar before in 31% of the bars. 6% of the sections play percussion only, in 37 songs, 7 of
+them in half their sections or more; their energy averages -0.03, against 0.14. Listen to the wild end, where the kick
+or the snare in a role not theirs may sound broken rather than bold.
 
 Later:
 
