@@ -28,8 +28,14 @@ internal sealed class MelodyPattern
     /// </summary>
     public StateMapBuilder AddNoteState(StateMapBuilder builder, KeptBeat beat)
     {
+        var stepwiseness = _stepwiseness;
         return builder
-            .Add(CompositionStateKinds.MelodyStep, context => MelodyLayers.GenerateStep(context, _stepwiseness))
+            .Add(context =>
+                {
+                    var (step, turn) = MelodyLayers.GenerateStep(context, stepwiseness);
+                    return StateMap.FromStates([CompositionStateKinds.MelodyStep.CreateState(step), CompositionStateKinds.MelodyTurn.CreateState(turn)]);
+                }
+            )
             .Add(CompositionStateKinds.Echo, GetEcho(_motif, beat));
     }
 
@@ -68,6 +74,7 @@ internal sealed class MelodyPattern
                     classes,
                     state.Value.GetStateValue(StateKinds.HeldDuration) > 0 ? 0 : state.Value.GetStateValue(CompositionStateKinds.BeatRank),
                     state.Value.GetStateValue(CompositionStateKinds.MelodyStep),
+                    state.Value.GetStateValue(CompositionStateKinds.MelodyTurn),
                     state.Value.GetStateValue(CompositionStateKinds.MelodyRegister),
                     state.Value.GetStateValue(CompositionStateKinds.Echo)
                 );

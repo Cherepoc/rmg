@@ -109,7 +109,9 @@ internal sealed class SectionGenerator
             0,
             1
         );
-        var barStateTimelineMap = _barStateGenerator.Generate(context, scale, progression, home, unconventionality, bassLeading);
+        var barStateTimelineMap = _barStateGenerator.Generate(context, scale, progression, home, unconventionality, bassLeading, rhythm.Tilt);
+        var contour = barStateTimelineMap.GetStateTimeline(CompositionStateKinds.MelodyRegister).Select(x => x.Value).ToImmutableArray();
+        StateTrace.Record(TracePoints.MelodyContour, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", contour), contour);
 
         // every track follows the section's phrase scheme, so they repeat their bars in the same places
         var scheme = PhraseSchemes.Pick(context, rhythm);

@@ -67,19 +67,30 @@ public static class MelodyLayers
 
     public const double SlopeSpread = 1;
 
+    /// <summary>
+    ///     How many bars a phrase's shape takes before it starts again, and how likely each is: mostly the whole phrase,
+    ///     and now and then half of it, a wave that rises and falls twice; the shorter leans unconventional.
+    /// </summary>
+    public static ImmutableArray<Weighted<int>> Periods { get; } = [new(0.8, Progressions.BarCount), new(0.2, Progressions.BarCount / 2)];
+
     private static readonly Func<IGenerationContext, int> PeakBarGenerator = Generators.WeightedIndex(PeakBars);
 
     private static readonly Func<IGenerationContext, double> SlopeGenerator = Generators.SplineValue().Then(x => Slope + x * SlopeSpread);
 
     /// <summary>
     ///     The shape a phrase takes, as the register it aims at in each of its four bars: its peak in the bar drawn, and
-    ///     lower by the slope drawn for every bar away from it, so that it rises to its peak and falls from it.
+    ///     lower by the slope drawn for every bar away from it, so that it rises to its peak and falls from it; the shape
+    ///     starts again every period, drawn from its own sequence, so that a period of half the phrase makes a wave.
     /// </summary>
-    public static ImmutableArray<double> GenerateContour(IGenerationContext context)
+    /// <param name="periodContext">The sequence the period is drawn from.</param>
+    /// <param name="tilt">How unconventional the section is, which leans the shorter period.</param>
+    public static ImmutableArray<double> GenerateContour(IGenerationContext context, IGenerationContext periodContext, Tilt tilt)
     {
         var peak = PeakBars[PeakBarGenerator(context)].Value;
         var slope = SlopeGenerator(context);
-        return [..Enumerable.Range(0, Progressions.BarCount).Select(bar => PeakRegister - slope * Math.Abs(bar - peak))];
+        var periods = tilt.Weigh(Periods, x => x < Progressions.BarCount ? 1 : 0);
+        var period = periods[Generators.WeightedIndex(periods)(periodContext)].Value;
+        return [..Enumerable.Range(0, Progressions.BarCount).Select(bar => PeakRegister - slope * Math.Abs(bar % period - peak % period))];
     }
 
     /// <summary>A layer's shift of the stepwiseness, up to the given size either way.</summary>
@@ -89,16 +100,34 @@ public static class MelodyLayers
     }
 
     /// <summary>
-    ///     Where a note means to go, from the way the melody goes: on (positive) more often than back (negative), so
-    ///     that it runs up or down a while before it turns, and a leap (2) the less likely the more stepwise it is.
+    ///     How much likelier a note is to go on towards where its phrase aims, and to turn back rather than go on away from
+    ///     it, as the odds at <see cref="MelodyLine.RegisterPull" /> semitones from it, less the nearer it is.
     /// </summary>
-    public static int GenerateStep(IGenerationContext context, double stepwiseness)
+    public const double AimOdds = 1;
+
+    /// <summary>
+    ///     Where a note means to go: staying (0), a step (1), or a leap (2), the less likely the more stepwise the melody
+    ///     is; and its draw of whether it goes on the way the melody goes or turns back, from 0 to 1, which goes on below
+    ///     <see cref="ContinueChance" /> as the aim leans it (<see cref="GetContinueChance" />), so that it runs up or
+    ///     down a while before it turns.
+    /// </summary>
+    public static (int Step, double Turn) GenerateStep(IGenerationContext context, double stepwiseness)
     {
         if (context.TestProbability(RepeatChance))
-            return 0;
+            return (0, 0);
 
-        var direction = context.TestProbability(ContinueChance) ? 1 : -1;
+        var turn = context.GenerateDouble();
         var leapChance = (1 - Math.Clamp(stepwiseness, 0, 1)) * MaxLeapChance;
-        return context.TestProbability(leapChance) ? 2 * direction : direction;
+        return (context.TestProbability(leapChance) ? 2 : 1, turn);
+    }
+
+    /// <summary>
+    ///     The chance a note goes on the way the melody goes, leaning to go on towards where its phrase aims and to turn
+    ///     back from going on away from it, the more the further it is, up to <see cref="MelodyLine.RegisterPull" />.
+    /// </summary>
+    /// <param name="towardsAim">How far going on moves towards the aim, in semitones; negative away from it.</param>
+    public static double GetContinueChance(double towardsAim)
+    {
+        return Tilt.Of(AimOdds, 1).Chance(ContinueChance, Math.Clamp(towardsAim / MelodyLine.RegisterPull, -1, 1));
     }
 }

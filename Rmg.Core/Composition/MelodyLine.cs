@@ -6,8 +6,9 @@ namespace Rmg.Core.Composition;
 ///     Places the notes of a melody one after another, each by rule from the note before, the chord and the scale.
 ///     A note means to go on the way the melody goes or to turn back, so the melody runs a while before it turns. A
 ///     note on a strong beat takes a note of the chord, the nearest one the way it goes, or the one after for a leap; a note on a weak beat moves along the scale, a step or, for a leap, a third, passing between the chord's
-///     notes. After a leap the melody steps back the other way, as a melody fills the gap it left, and when it strays
-///     too far from where its phrase aims, it turns back towards it. It keeps to a singable range in the middle of the
+///     notes. After a leap the melody steps back the other way, as a melody fills the gap it left; it leans towards
+///     where its phrase aims, going on towards it and turning back from it the likelier the further it is, and when it
+///     strays too far, it turns back towards it. It keeps to a singable range in the middle of the
 ///     track's, and its first note is the chord's note nearest where the phrase aims.
 ///     A note that echoes one heard before, as the notes of a bar pattern that comes back or of a cycle that repeats the
 ///     one before do, plays it again: the scale step it had from its chord's root, from the root of its own, in the
@@ -64,9 +65,10 @@ internal sealed class MelodyLine
 
     /// <param name="chordToneClasses">The pitch classes of the chord's notes.</param>
     /// <param name="beatRank">How strong the note's beat is, 0 the strongest.</param>
-    /// <param name="step">
-    ///     Where the note means to go, from the way the melody goes: 1 on, -1 back, 2 and -2 the same with a leap, 0
-    ///     staying.
+    /// <param name="step">How far the note means to go: 1 a step, 2 a leap, 0 staying.</param>
+    /// <param name="turn">
+    ///     The note's draw of whether it goes on the way the melody goes or turns back, from 0 to 1, which goes on
+    ///     below the chance the aim leans (<see cref="MelodyLayers.GetContinueChance" />).
     /// </param>
     /// <param name="register">How far above or below the middle of the range the phrase aims here, in semitones.</param>
     /// <param name="echo">The key of the note it plays again, if that was heard, or is remembered by; 0 for none.</param>
@@ -75,6 +77,7 @@ internal sealed class MelodyLine
         IReadOnlyCollection<int> chordToneClasses,
         int beatRank,
         int step,
+        double turn,
         double register,
         int echo = 0
     )
@@ -89,7 +92,7 @@ internal sealed class MelodyLine
         else
         {
             _echoRun = null;
-            note = PlaceByRule(chord, chordToneClasses, beatRank, step, register);
+            note = PlaceByRule(chord, chordToneClasses, beatRank, step, turn, register);
         }
 
         // the first time a note is heard it is remembered, as the step from its chord's root it has
@@ -141,7 +144,7 @@ internal sealed class MelodyLine
         return Enumerable.Range(guess - 4, 9).MinBy(x => Math.Abs(chord.GetPitch(x) - note));
     }
 
-    private int PlaceByRule(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int step, double register)
+    private int PlaceByRule(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int step, double turn, double register)
     {
         var aim = _middle + register;
         var isStrong = beatRank <= StrongestWeakRank && chordToneClasses.Count > 0;
@@ -153,8 +156,10 @@ internal sealed class MelodyLine
         }
         else
         {
-            var direction = Math.Sign(step) * _heading;
-            var isLeap = Math.Abs(step) >= 2;
+            // on the way the melody goes, or back, leaning towards the aim
+            var goesOn = turn < MelodyLayers.GetContinueChance((aim - previous) * _heading);
+            var direction = step == 0 ? 0 : goesOn ? _heading : -_heading;
+            var isLeap = step >= 2;
             if (Math.Abs(_previousMove) >= LeapSize)
             {
                 // a leap is followed by a step back

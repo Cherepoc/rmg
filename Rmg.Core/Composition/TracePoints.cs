@@ -9,6 +9,9 @@ public static class TracePoints
     /// <summary>A section's scale (<see cref="Scale" />).</summary>
     public const string SectionScale = "Section scale";
 
+    /// <summary>The register a section's melody aims at in each bar of its pattern (an <c>ImmutableArray</c> of doubles).</summary>
+    public const string MelodyContour = "Melody contour";
+
     /// <summary>A bar pattern's state, with its phrase scheme.</summary>
     public const string BarPattern = "Bar pattern";
 

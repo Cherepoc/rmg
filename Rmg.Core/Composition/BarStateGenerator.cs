@@ -16,6 +16,9 @@ internal sealed class BarStateGenerator
 
     private static readonly Func<IGenerationContext, int> SeedGenerator = Generators.Int();
 
+    // the stream of the melody contour's period, apart from the timeline generators'
+    private const int ContourPeriodStream = 100;
+
     // the state that changes along the pattern besides the progression; every state has its own timeline, so each can
     // change at its own pace
     private readonly ImmutableArray<IStateTimelineGenerator> _timelineGenerators;
@@ -60,13 +63,15 @@ internal sealed class BarStateGenerator
     /// <param name="home">The step of the section's home above the song's tonic.</param>
     /// <param name="bassLeading">How much the section's bass leads into the chords, from 0 to 1.</param>
     /// <param name="context">The section's random sequence.</param>
+    /// <param name="rhythmTilt">How unconventional the section's rhythm is, which leans the melody's contour.</param>
     public StateTimelineMap Generate(
         IGenerationContext context,
         Scale scale,
         ImmutableArray<int> progression,
         int home,
         HarmonicUnconventionality unconventionality,
-        double bassLeading
+        double bassLeading,
+        Tilt rhythmTilt
     )
     {
         // each state draws from its own random sequence, so tuning one does not change the others
@@ -113,7 +118,7 @@ internal sealed class BarStateGenerator
                 roleChordTimeline,
                 GenerateResets(context),
                 ..GenerateBassLeading(context, bassLeading),
-                GenerateMelodyContour(context),
+                GenerateMelodyContour(context, context.CreateContext(Seeds.Derive(seed, ContourPeriodStream)), rhythmTilt),
                 GenerateMelodyPhraseEnd(context)
             ]
         );
@@ -143,9 +148,9 @@ internal sealed class BarStateGenerator
     }
 
     /// <summary>The shape the section's melody phrases take: the register the melody aims at in each bar.</summary>
-    private StateTimeline<double> GenerateMelodyContour(IGenerationContext context)
+    private StateTimeline<double> GenerateMelodyContour(IGenerationContext context, IGenerationContext periodContext, Tilt tilt)
     {
-        var contour = MelodyLayers.GenerateContour(context);
+        var contour = MelodyLayers.GenerateContour(context, periodContext, tilt);
         return StateTimeline.Create(
                 Meter.PatternDuration,
                 CompositionStateKinds.MelodyRegister,

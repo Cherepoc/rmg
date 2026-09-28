@@ -28,9 +28,12 @@ public static class CompositionStateKinds
     // how strong a note's beat is, 0 the strongest, from its rhythm pattern
     public static StateKind<int> BeatRank { get; } = StateKinds.CreateAdditive<int>(Prefix + "BeatRank");
 
-    // where a melody note means to go, from the way the melody goes: 1 a step on, -1 a step back, 2 and -2 a leap, 0
-    // the same note
+    // how far a melody note means to go: 1 a step, 2 a leap, 0 the same note
     public static StateKind<int> MelodyStep { get; } = StateKinds.CreateAdditive<int>(Prefix + "MelodyStep");
+
+    // a melody note's draw, from 0 to 1, of whether it goes on the way the melody goes or turns back, which the aim of
+    // its phrase leans (MelodyLayers.GetContinueChance)
+    public static StateKind<double> MelodyTurn { get; } = StateKinds.CreateAdditive<double>(Prefix + "MelodyTurn");
 
     // which note a melody note plays again: the key of its beat in its bar pattern's rhythm, the same for a beat of a
     // bar that comes back and for a beat of a cycle that repeats the one before; 0 for none

@@ -72,6 +72,12 @@ starts after a breath) and into a section 14%, against 3% before; the song's las
 of the time, as before. The octave chosen per phrase left 24% of the leaps where a phrase starts again, and chosen per
 bar anywhere in the track's range let the melody drift, spanning up to 64 semitones in a song against 41. Left:
 
+- **The contour barely shapes the melody:** within a 4-bar pattern a bar's mean pitch follows the register it aims at
+  only 0.14 (`MelodyContourTest`, over 100 corpus songs), 0.15 semitones for one, as the line turns towards the aim
+  only past `MelodyLine.RegisterPull` and otherwise goes on or turns back by its draw alone. A phrase's shape may now
+  start again every half phrase, a wave (`MelodyLayers.Periods`, 19% of the patterns, the more the less conventional
+  the section's rhythm), and a note's draw of going on or turning back (`CompositionStateKinds.MelodyTurn`) leans
+  towards the aim (`MelodyLayers.AimOdds`), off at 1 so far: tune it by the following, and listen.
 - **Listen** to where phrases start again. Two rules tried to close a phrase onto its start and were dropped: aiming
   the last bar back moved little, and landing the last note near the start only moved the leap one note earlier.
 - **The bass** could be placed at generation the same way, and its notes played again in a repeated cycle.

@@ -1,3 +1,4 @@
+using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
@@ -155,18 +156,41 @@ public sealed class MelodyRhythmTest
     {
         var context = new Rmg.Core.Probabilities.GenerationContext(1);
         var peaks = new List<int>();
+        var waves = 0;
         for (var i = 0; i < 2_000; i++)
         {
-            var contour = MelodyLayers.GenerateContour(context);
+            var contour = MelodyLayers.GenerateContour(context, context, Rmg.Core.Probabilities.Tilt.None);
+            await Assert.That(contour.Max()).IsEqualTo(MelodyLayers.PeakRegister);
+
+            // a wave: the shape of half the phrase, twice, its peak and its low bar taking turns
+            if (contour[0].IsEqualToByEpsilon(contour[2]) && contour[1].IsEqualToByEpsilon(contour[3]))
+            {
+                waves++;
+                await Assert.That(contour[0]).IsNotEqualTo(contour[1]);
+                continue;
+            }
+
             var peak = contour.IndexOf(contour.Max());
             peaks.Add(peak);
-
-            await Assert.That(contour[peak]).IsEqualTo(MelodyLayers.PeakRegister);
             for (var bar = 1; bar < contour.Length; bar++)
                 await Assert.That(bar <= peak ? contour[bar] > contour[bar - 1] : contour[bar] < contour[bar - 1]).IsTrue();
         }
 
-        // an arch most often, peaking in the third bar
+        // an arch most often, peaking in the third bar, and now and then a wave
         await Assert.That(peaks.GroupBy(x => x).MaxBy(x => x.Count())!.Key).IsEqualTo(2);
+        await Assert.That(waves / 2_000.0).IsBetween(0.15, 0.25);
+    }
+
+    [Test]
+    public async Task APlainSection_WavesLessOften_AndAWildOneMore()
+    {
+        var context = new Rmg.Core.Probabilities.GenerationContext(1);
+
+        double WaveShare(double unconventionality) => Enumerable.Range(0, 2_000)
+            .Select(_ => MelodyLayers.GenerateContour(context, context, new RhythmicUnconventionality(unconventionality).Tilt))
+            .Count(x => x[0].IsEqualToByEpsilon(x[2]) && x[1].IsEqualToByEpsilon(x[3])) / 2_000.0;
+
+        await Assert.That(WaveShare(0)).IsLessThan(0.1);
+        await Assert.That(WaveShare(1)).IsGreaterThan(0.4);
     }
 }
