@@ -44,7 +44,8 @@ internal sealed class MelodyPattern
     ///     order over the section's bars, over the chord it plays as <c>Realizer</c> works it out, kept as its scale
     ///     step above the chord's root, so that the section plays it the same wherever it plays. A note that ends a
     ///     phrase lands on the chord as one on a strong beat does. The line starts afresh in every section, on the note
-    ///     nearest where its phrase aims, and plays where it was placed.
+    ///     nearest where its phrase aims; the first note of every bar starts its register, whose octave
+    ///     <c>Realizer</c> chooses from the note before wherever it plays.
     /// </summary>
     /// <param name="barStates">The section's state that changes by bar, such as its chords and its phrases' registers.</param>
     /// <param name="key">The song's key.</param>
@@ -64,7 +65,7 @@ internal sealed class MelodyPattern
             definition,
             barStates
         );
-        var placed = track.EventTimeline.Zip(states).Select(x =>
+        var placed = track.EventTimeline.Zip(states).Select((x, index) =>
             {
                 var (note, state) = x;
                 var (chord, _, classes) = Realizer.GetChordNotes(state.Value);
@@ -80,7 +81,11 @@ internal sealed class MelodyPattern
                 var step = MelodyLine.GetScaleStep(chord, pitch);
                 if (chord.GetPitch(step) != pitch)
                     throw new InvalidOperationException($"The melody's note {pitch} is not on a step of its chord's scale.");
-                return note.Value.MergeWith(StateMap.FromStates([StateKinds.ScaleStep.CreateState(step)])).ToTimelineItem(note.Position);
+                var isBarStart = index == 0 || (int)Math.Floor(note.Position / Meter.BarDuration) != (int)Math.Floor(track.EventTimeline[index - 1].Position / Meter.BarDuration);
+                var placedState = StateMap.FromStates(
+                    isBarStart ? [StateKinds.ScaleStep.CreateState(step), StateKinds.RegisterStart.CreateState(1)] : [StateKinds.ScaleStep.CreateState(step)]
+                );
+                return note.Value.MergeWith(placedState).ToTimelineItem(note.Position);
             }
         );
         var timeline = EventTimeline.Create(track.EventTimeline.Duration, placed);

@@ -102,6 +102,8 @@ internal static class Realizer
             (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1,
             notes => FitChordIntoRange(absoluteMinOctave, octaveCount, notes)
         );
+        // and a melody's notes, moved by octaves to start every bar nearest the note before
+        var melodyRegister = new MelodyRegister(absoluteMinOctave * OctaveNoteCount, (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1);
         // and a bass line's notes, each following from the one before and leading into the next chord
         var bassLine = new BassLine(
             absoluteMinOctave * OctaveNoteCount,
@@ -113,7 +115,7 @@ internal static class Realizer
         for (var i = 0; i < items.Length; i++)
         {
             TimelineItem<WithDuration<StateMap>>? next = i + 1 < items.Length ? items[i + 1] : null;
-            notes[i] = RealizeNote(items[i], next, absoluteMinOctave, octaveCount, voiceLeader, bassLine);
+            notes[i] = RealizeNote(items[i], next, absoluteMinOctave, octaveCount, voiceLeader, bassLine, melodyRegister);
         }
 
         return EventTimeline.Create(eventStateTimelineMap.Duration, notes);
@@ -150,7 +152,8 @@ internal static class Realizer
         int absoluteMinOctave,
         int octaveCount,
         VoiceLeader voiceLeader,
-        BassLine bassLine
+        BassLine bassLine,
+        MelodyRegister melodyRegister
     )
     {
         var position = timelineItemWithDuration.Position;
@@ -188,9 +191,9 @@ internal static class Realizer
         // from the root up and an octave up or down for every lap around it; without one the whole chord plays
         var chordNoteOffset = stateMap.GetStateValue(StateKinds.ChordNoteOffset);
         ImmutableArray<int> notes;
-        // a melody's note was placed where it was made, as its scale step above the chord's root, and plays there
+        // a melody's note was placed where it was made, as its scale step above the chord's root
         if (isMelody)
-            notes = [ToNote(stateMap.GetStateValue(StateKinds.ScaleStep))];
+            notes = [melodyRegister.Place(ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)), stateMap.GetStateValue(StateKinds.RegisterStart) > 0)];
         else if (!chordNoteOffset.IsEmpty)
         {
             var chordDegrees = chordSteps
@@ -426,5 +429,46 @@ internal static class Realizer
         var noteOctave = (noteOffset - octaveNote) / OctaveNoteCount;
         var fixedOctaveOffset = noteOctave.BounceInBounds(absoluteMinOctave, absoluteMaxOctave);
         return fixedOctaveOffset * OctaveNoteCount + octaveNote;
+    }
+}
+
+/// <summary>
+///     The register of a melody: its notes are placed where they are made, in their register, and play moved by an
+///     octave at most, chosen afresh where a bar starts or the song lands, so that the note starts nearest the note
+///     before, within the track's range, and the notes after it keep their shape; the melody moves no further from
+///     where it was placed.
+/// </summary>
+internal sealed class MelodyRegister
+{
+    private const int OctaveNoteCount = 12;
+
+    private readonly int _low;
+    private readonly int _high;
+
+    private int? _previous;
+    private int _shift;
+
+    /// <param name="minNote">The lowest note of the track's range.</param>
+    /// <param name="maxNote">The highest note of the track's range.</param>
+    public MelodyRegister(int minNote, int maxNote)
+    {
+        (_low, _high) = (minNote, maxNote);
+    }
+
+    /// <param name="isStart">Whether the note's octave is chosen afresh, nearest the note before.</param>
+    public int Place(int note, bool isStart)
+    {
+        if (isStart && _previous is { } previous)
+        {
+            // an octave down, none or up, in the track's range, the one nearest the note before
+            _shift = new[] { -OctaveNoteCount, 0, OctaveNoteCount }
+                .Where(x => note + x >= _low && note + x <= _high)
+                .DefaultIfEmpty(0)
+                .MinBy(x => Math.Abs(note + x - previous));
+        }
+
+        var placed = note + _shift;
+        _previous = placed;
+        return placed;
     }
 }

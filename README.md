@@ -241,7 +241,7 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   `Realizer`, plays them, over the whole song in order: every note's pitches, loudness and length, and
   every drum hit's sound (`Song.Notes`, a `RealizedNote` per note, with the state it was decided from),
   in the register that follows from the notes before, since a track's line goes on across its sections:
-  a chord's voicing and the bass's octave; the melody plays where it was placed. A stage that comes after it can
+  a chord's voicing, the bass's octave and the octave each bar of the melody starts in. A stage that comes after it can
   change the notes themselves; the state still explains how they came about, but does not show
   the change. `Render` then plays the notes: a chord's pitches together, the drums on one channel,
   and every note's velocity on a fixed scale, the same for every song, so that a quiet section or an evenly
