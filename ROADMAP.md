@@ -79,9 +79,9 @@ where a phrase starts again 37% of the time (84% after a rest) against 14%, into
 its last note 35% against 13%. Left:
 
 - **Mutation further:** a section's answer is its question mutated a decision at a time (see *Question and answer*);
-  the same can vary a bar of a later letter within the phrase (A′, whose rhythm alone varies now), mutate the rhythm
-  of the answer as well as its melody, and, as an edit after assembly, a section as it recurs, each appearance from
-  the one before by an amount that grows, so that a song drifts from how it began.
+  the same can vary a bar of a later letter within the phrase (A′, whose rhythm alone varies now, and hardly for the
+  melody), and, as an edit after assembly, a section as it recurs, each appearance from the one before by an amount
+  that grows, so that a song drifts from how it began.
 - **Question and answer** (built): a section plays its 4-bar pattern twice, and its melody as a question and its
   answer (`MelodyPattern.Answer`): placed as one line over the 8 bars, so that the answer goes on from the question,
   its first half the question's and its second half mutated a decision at a time, a note there drawing afresh whether
@@ -93,7 +93,11 @@ its last note 35% against 13%. Left:
   answer's first half plays the question's notes 98 to 100% of the time and its second half 68 to 72%; a phrase starts
   again with a leap 36% of the time (38% when it played the same), and a note leaps 6.3% of the time (4.7%), as what
   plays again over the same root now plays in its octave; chord notes on the beat 87%, and a bar follows the aim of
-  its contour 0.38.
+  its contour 0.38. Its rhythm answers too, each a decision of the answer's own sequence: a changing bar draws its
+  rhythm afresh by the same chance times `MelodyLayers.AnswerRhythm`, the same settings on another rhythm, and the
+  answer's phrase ends afresh by the same chance, other than the question's; the answer's third bar keeps 90% of the
+  question's onsets and its last 80%, the same notes on 61% and 51% of them, where drawing the cycles afresh, as a
+  varied repeat does, changed a melody's bar of mostly one cycle hardly at all.
 - **The contour shapes the melody weakly:** within a 4-bar pattern a bar's mean pitch follows the register it aims at
   0.30 (`MelodyContourTest`, over 100 corpus songs), as the line turns towards the aim only past
   `MelodyLine.RegisterPull` and otherwise goes on or turns back by its draw alone. A phrase's shape may start again
