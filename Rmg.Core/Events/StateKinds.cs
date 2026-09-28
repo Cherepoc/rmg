@@ -86,6 +86,38 @@ public static class StateKinds
         return true;
     }
 
+    /// <summary>
+    ///     A kind that the lowest layer that sets it decides, such as a note's over its bar pattern's, its section's and its
+    ///     song's: every value carries the depth of the layer that set it (<see cref="StateDepths" />), and the deepest
+    ///     wins, whatever order the layers merge in. Two layers of the same depth that set different values are an error.
+    /// </summary>
+    public static StateKind<LayerValue<T>> CreateLowestLayerWins<T>(
+        string name,
+        StateScope scope = StateScope.Composition,
+        bool isShared = false
+    )
+        where T : notnull
+    {
+        return new StateKind<LayerValue<T>>(
+            name,
+            LayerValue<T>.Unset,
+            (v1, v2) => v1.Equals(v2),
+            values =>
+            {
+                var set = values.Where(x => x.IsSet).ToArray();
+                if (set.Length == 0)
+                    return LayerValue<T>.Unset;
+
+                var deepest = set.MaxBy(x => x.Depth);
+                if (set.Any(x => x.Depth == deepest.Depth && !x.Equals(deepest)))
+                    throw new InvalidOperationException($"{name} is set to different values by two layers of depth {deepest.Depth}.");
+                return deepest;
+            },
+            scope: scope,
+            isShared: isShared
+        );
+    }
+
     public static StateKind<ImmutableArray<T>> CreateCollection<T>(
         string name,
         StateScope scope = StateScope.Composition,
@@ -119,4 +151,22 @@ public static class StateKinds
             isShared
         );
     }
+}
+
+/// <summary>The depths of the layers, from the song's down to a note's, by which a kind the lowest layer sets goes.</summary>
+public static class StateDepths
+{
+    public const int Song = 0;
+    public const int Section = 1;
+    public const int BarPattern = 2;
+    public const int Note = 3;
+}
+
+/// <summary>A value as a layer sets it, with the layer's depth (<see cref="StateDepths" />); unset below 0.</summary>
+public readonly record struct LayerValue<T>(int Depth, T Value)
+    where T : notnull
+{
+    public static LayerValue<T> Unset { get; } = new(-1, default!);
+
+    public bool IsSet => Depth >= 0;
 }
