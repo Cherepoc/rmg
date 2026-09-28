@@ -208,15 +208,23 @@ public static class FillLayers
     ];
 
     /// <summary>
-    ///     The chance the drums land on a role's sound after a line of no weight, mostly a kick, often with a crash; a
-    ///     landing leans on the line's weight twice as much as a span (<see cref="LandingLean" />), so that after a
-    ///     phrase line it comes now and then.
+    ///     The chance the drums land on a role's sound after a line of no weight, mostly a kick, often with a crash, and
+    ///     into a section of percussion only on the percussion, as on the kick; a landing leans on the line's weight twice
+    ///     as much as a span (<see cref="LandingLean" />), so that after a phrase line it comes now and then.
     /// </summary>
     public static ImmutableDictionary<DrumRole, double> Landings { get; } = new Dictionary<DrumRole, double>
     {
         [DrumRole.Kick] = 0.85,
-        [DrumRole.Cymbal] = 0.65
+        [DrumRole.Cymbal] = 0.65,
+        [DrumRole.Percussion] = 0.85
     }.ToImmutableDictionary();
+
+    /// <summary>
+    ///     The chance a run in a section of the drum kit plays the song's percussion alone, in a song that has any, with
+    ///     no lean; the less conventional the section's rhythm, the likelier. A run in a section of percussion only plays
+    ///     nothing else.
+    /// </summary>
+    public const double PercussionRunChance = 0.05;
 
     public const double LandingLean = 2;
 

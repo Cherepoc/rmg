@@ -100,7 +100,7 @@ internal sealed class SongFormGenerator
 
         ImmutableArray<FillSection> fillSections =
         [
-            ..map.Sections.Zip(sections, (span, section) => new FillSection(span.SectionId, span.Duration, section.Rhythm, section.Groove, section.Energy))
+            ..map.Sections.Zip(sections, (span, section) => new FillSection(span.SectionId, span.Duration, section.Rhythm, section.Groove, section.Energy, section.IsPercussionOnly))
         ];
         var edits = new TimelineEdits(_context, map);
         var lines = FillGenerator.GetSectionLines(fillSections, origin).ToBuilder();
@@ -205,7 +205,10 @@ internal sealed class SongFormGenerator
         );
     }
 
-    /// <summary>A bar of the pedal hi-hat on the beats, or on the last two, over the first section's drum state.</summary>
+    /// <summary>
+    ///     A bar of clicks on the beats, or on the last two, over the first section's drum state: on the hi-hat's pedal,
+    ///     or where the song has no hi-hat, on another dry sound it has (<see cref="FormLayers.CountInSounds" />).
+    /// </summary>
     private static TrackEventStateTimelineMap<StateMap> CreateCountIn(
         GeneratedSection first,
         bool isHalf,
@@ -213,11 +216,12 @@ internal sealed class SongFormGenerator
     )
     {
         var bar = first.Timeline.Trim(Meter.BarDuration);
-        var hiHat = DrumGroups.GetTrackNumber(DrumDefinitions.HiHat);
+        var (drum, sound) = FormLayers.CountInSounds.First(x => bar.TrackTimelineMap.ContainsKey(DrumGroups.GetTrackNumber(x.Drum)));
+        var clickTrack = DrumGroups.GetTrackNumber(drum);
         var click = StateMap.FromStates(
             [
                 StateKinds.Velocity.CreateState(FormLayers.CountInVelocity),
-                StateKinds.ArticulationIndex.CreateState(DrumDefinitions.HiHat.GetArticulationIndex(DrumSounds.PedalHiHat))
+                StateKinds.ArticulationIndex.CreateState(drum.GetArticulationIndex(sound))
             ]
         );
         var tracks = bar.TrackTimelineMap
@@ -227,7 +231,7 @@ internal sealed class SongFormGenerator
                     x.Value.WithEvents(
                         EventTimeline.Create(
                             Meter.BarDuration,
-                            x.Key == hiHat ? Enumerable.Range(isHalf ? 2 : 0, isHalf ? 2 : 4).Select(beat => click.ToTimelineItem(beat)) : []
+                            x.Key == clickTrack ? Enumerable.Range(isHalf ? 2 : 0, isHalf ? 2 : 4).Select(beat => click.ToTimelineItem(beat)) : []
                         )
                     )
                 )

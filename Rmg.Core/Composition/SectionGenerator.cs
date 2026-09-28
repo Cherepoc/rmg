@@ -14,9 +14,11 @@ internal sealed class SectionGenerator
     /// <summary>The track of a trace entry that records a decision for the whole section, such as its energy.</summary>
     public const int SectionTrace = -2;
 
-    // the streams a section draws its scale and which bars its drums sit out from, apart from its own
+    // the streams a section draws its scale, which bars its drums sit out and whether it plays percussion only from,
+    // apart from its own
     private const int ScaleStream = 1;
     private const int DrumPresenceStream = 2;
+    private const int PercussionStream = 3;
 
     private readonly IGenerationContext _context;
     private readonly int _seed;
@@ -27,12 +29,14 @@ internal sealed class SectionGenerator
     private readonly Scale _songScale;
     private readonly StateMap _songStateMap;
     private readonly ImmutableDictionary<int, StateMap> _sectionEnergies;
+    private readonly Tilt _songPercussion;
     private readonly int _key;
     private readonly BarStateGenerator _barStateGenerator;
     private readonly PatternGenerator _patternGenerator;
 
 
     /// <param name="seed">The seed of the sections' random sequences, from which every section derives its own by its id.</param>
+    /// <param name="songPercussion">How far the song leans to sections of percussion only (<see cref="PercussionSections" />).</param>
     public SectionGenerator(
         IGenerationContext context,
         int seed,
@@ -44,6 +48,7 @@ internal sealed class SectionGenerator
         Scale songScale,
         StateMap songStateMap,
         ImmutableDictionary<int, StateMap> sectionEnergies,
+        Tilt songPercussion,
         int key
     )
     {
@@ -56,6 +61,7 @@ internal sealed class SectionGenerator
         _songScale = songScale;
         _songStateMap = songStateMap;
         _sectionEnergies = sectionEnergies;
+        _songPercussion = songPercussion;
         _key = key;
         _barStateGenerator = new BarStateGenerator(settings);
         _patternGenerator = new PatternGenerator(context, tracks.Definitions);
@@ -99,7 +105,14 @@ internal sealed class SectionGenerator
                 .Add(StateKinds.ChordRootNoteOffset, [Progressions.ToRootOffset(home)])
                 .ToStateMap(context)
         );
-        var activeDrumTrackNumbers = DrumKitGenerator.SelectActiveDrums(context, _tracks.SongDrums, tilt)
+        // the drums: the kit's and the percussion's, or, now and then, the percussion's alone, which draws its drums from
+        // a sequence of its own, the section's drawing the kit's still, so that its other draws stay as they are
+        var kit = DrumKitGenerator.SelectActiveDrums(context, _tracks.SongDrums, tilt);
+        var percussionContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), PercussionStream));
+        var songPercussion = _tracks.SongDrums.Count(DrumGroups.Percussion.Drums.Contains);
+        var isPercussionOnly = PercussionSections.Draw(percussionContext, _songPercussion, rhythm.Tilt, tilt, songPercussion);
+        StateTrace.Record(TracePoints.PercussionOnly, SectionTrace, sectionId, 0, StateMap.Default, 0, isPercussionOnly ? "percussion only" : "drum kit", isPercussionOnly);
+        var activeDrumTrackNumbers = (isPercussionOnly ? DrumKitGenerator.SelectPercussion(percussionContext, _tracks.SongDrums, tilt) : kit)
             .Select(DrumGroups.GetTrackNumber)
             .ToImmutableHashSet();
 
@@ -133,7 +146,8 @@ internal sealed class SectionGenerator
             KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Timeline)], barStateTimelineMap).Repeat(2),
             rhythm,
             GetGrooves(drums.SelectMany(x => x.Feels)),
-            energy
+            energy,
+            isPercussionOnly
         );
     }
 
@@ -338,11 +352,13 @@ internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScal
 /// <param name="Rhythm">How far the section's rhythm strays from convention.</param>
 /// <param name="Groove">The states of the rhythm the fills play from.</param>
 /// <param name="Energy">How loud and busy the section is meant to be (<see cref="SectionEnergy" />).</param>
+/// <param name="IsPercussionOnly">Whether the section plays its percussion without the drum kit.</param>
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
     RhythmicUnconventionality Rhythm,
     FillGrooves Groove,
-    double Energy
+    double Energy,
+    bool IsPercussionOnly
 );
 
 /// <summary>

@@ -21,6 +21,9 @@ public sealed class SongIntroTest
 
     private static CorpusSong[] Of(IntroKind intro) => Songs.Where(x => x.Map.Intro.Kind == intro).ToArray();
 
+    private static bool PercussionOnly(CorpusSong song, int sectionId) =>
+        song.Trace.Any(x => x.Point == TracePoints.PercussionOnly && x.Section == sectionId && (bool)x.Value!);
+
     [Test]
     [Arguments(IntroKind.ChordsFirst, TrackRole.Chords, false, 0.0)]
     [Arguments(IntroKind.ChordsFirst, TrackRole.Bass, false, Phrase)]
@@ -85,8 +88,11 @@ public sealed class SongIntroTest
             await Assert.That(pitched.Min(x => x.Position)).IsGreaterThanOrEqualTo(song.Origin);
             // the groove may start on a later beat, but plays in the intro's first bar
             await Assert.That(Drums(song).Min(x => x.Position)).IsLessThan(4);
-            // the band comes in on a crash, pushed an 8th early now and then
-            await Assert.That(Drums(song).Any(x => x.Position >= song.Origin - 0.5 && x.Position <= song.Origin && DrumDefinitions.Cymbal.ArticulationCodes.Contains(x.Value.Offset)))
+            // the band comes in on a crash, pushed an 8th early now and then, or on the percussion into a section of it
+            var landsOn = PercussionOnly(song, song.Map.Sections[0].SectionId)
+                ? DrumGroups.Percussion.Drums.SelectMany(x => x.ArticulationCodes)
+                : DrumDefinitions.Cymbal.ArticulationCodes;
+            await Assert.That(Drums(song).Any(x => x.Position >= song.Origin - 0.5 && x.Position <= song.Origin && landsOn.Contains(x.Value.Offset)))
                 .IsTrue();
         }
 
@@ -94,16 +100,17 @@ public sealed class SongIntroTest
     }
 
     [Test]
-    public async Task CountIn_ClicksThePedalHiHat_OnTheBeats()
+    public async Task CountIn_ClicksThePedalHiHat_OrADrySoundTheSongHas_OnTheBeats()
     {
         var songs = Of(IntroKind.CountIn);
         foreach (var song in songs)
         {
             var clicks = Drums(song).Where(x => x.Position < song.Origin).ToArray();
+            var sound = FormLayers.CountInSounds.First(x => song.Song.TrackDefinitions.ContainsKey(DrumGroups.GetTrackNumber(x.Drum))).Sound;
 
             await Assert.That(song.Origin).IsEqualTo(4);
             await Assert.That(clicks.Length is 2 or 4).IsTrue();
-            await Assert.That(clicks.All(x => x.Value.Offset == DrumSounds.PedalHiHat && x.Position % 1 == 0)).IsTrue();
+            await Assert.That(clicks.All(x => x.Value.Offset == sound && x.Position % 1 == 0)).IsTrue();
         }
 
         await Assert.That(songs.Length).IsGreaterThan(0);

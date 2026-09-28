@@ -133,13 +133,18 @@ public sealed class FillTest
         int changes = 0, crashes = 0, kicks = 0, downbeats = 0, otherCrashes = 0;
         for (var seed = 0; seed < 40; seed++)
         {
-            var (song, origin) = TestCorpus.Get(seed);
+            var corpusSong = TestCorpus.Get(seed);
+            var (song, origin) = corpusSong;
             var drums = Render.RenderSong(song).Tracks.Single(x => x.IsPercussionInstrument).NoteTimeline;
+            // the sections of percussion only land on the percussion
+            var percussionOnly = corpusSong.Trace.Where(x => x.Point == TracePoints.PercussionOnly).ToDictionary(x => x.Section, x => (bool)x.Value!);
             // the bars of the sections, after the first, up to the ending's, which lands every time
             for (var bar = 1.0; origin + bar * 4 < song.Duration - 8; bar++)
             {
                 var position = origin + bar * 4;
                 var hits = drums.Where(x => x.Position.IsEqualToByEpsilon(position)).Select(x => x.Value.Offset).ToArray();
+                if (corpusSong.Map.Sections.Any(x => x.Start.IsEqualToByEpsilon(position) && percussionOnly[x.SectionId]))
+                    continue;
                 if ((bar * 4 % SectionDuration).IsEqualToByEpsilon(0))
                 {
                     changes++;

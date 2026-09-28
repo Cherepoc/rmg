@@ -43,6 +43,18 @@ public sealed class DrumUseReportTest
         var changes = perBar.Sum(x => x.Zip(x.Skip(1)).Count(p => !p.First.SetEquals(p.Second)));
         Console.WriteLine($"Drums playing in a bar: {bars.Average(x => x.Count):F2}; the drums change from the bar before in {changes / (double)perBar.Sum(x => x.Length - 1):P0} of the bars");
 
+        // sections of percussion only: how many, in how many songs, and how loud they are meant to be
+        var percussionOnly = songs.SelectMany(song =>
+        {
+            var energies = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
+            var only = song.Trace.Where(x => x.Point == TracePoints.PercussionOnly).ToDictionary(x => x.Section, x => (bool)x.Value!);
+            return song.Map.Sections.Select(span => (song.Seed, Only: only[span.SectionId], Energy: energies[span.SectionId]));
+        }).ToArray();
+        var bySong = percussionOnly.GroupBy(x => x.Seed).Select(x => x.Count(y => y.Only) / (double)x.Count()).ToArray();
+        Console.WriteLine($"Percussion only: {percussionOnly.Count(x => x.Only) / (double)percussionOnly.Length:P1} of the sections, in {bySong.Count(x => x > 0)} songs, " +
+                          $"{bySong.Count(x => x >= 0.5)} of them half or more; energy {percussionOnly.Where(x => x.Only).DefaultIfEmpty().Average(x => x.Energy):F2} " +
+                          $"against {percussionOnly.Where(x => !x.Only).Average(x => x.Energy):F2}");
+
         // where a drum plays within its bars, where it grooves, and how often a bar repeats the one before
         Console.WriteLine("Where a drum grooves: notes a bar; on 1 and 3, on 2 and 4, on the 8ths between, finer; bars as the one before");
         foreach (var drum in DrumGroups.AllDrums)

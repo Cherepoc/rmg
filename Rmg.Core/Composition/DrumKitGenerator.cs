@@ -78,6 +78,26 @@ public static class DrumKitGenerator
         ];
     }
 
+    /// <summary>
+    ///     The drums a section of percussion only plays: up to <see cref="PercussionSections.MaxActiveDrums" /> of the
+    ///     song's percussion, the loud ones likelier in a section of more energy.
+    /// </summary>
+    public static ImmutableArray<PercussionInstrumentDefinition> SelectPercussion(
+        IGenerationContext context,
+        ImmutableArray<PercussionInstrumentDefinition> songDrums,
+        Tilt tilt
+    )
+    {
+        return
+        [
+            ..PickWeighted(
+                context,
+                DrumGroups.Percussion.Drums.Where(songDrums.Contains).Select(x => new Weighted<PercussionInstrumentDefinition>(tilt.Weigh(x.Weight, x.Loudness), x)),
+                PercussionSections.MaxActiveDrums
+            )
+        ];
+    }
+
     /// <summary>How loud a group leans in a song: its drums' loudness there, the likelier drums counting more.</summary>
     internal static double GetLoudness(DrumGroup group, ImmutableArray<PercussionInstrumentDefinition> songDrums)
     {

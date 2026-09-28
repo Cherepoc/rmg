@@ -124,13 +124,13 @@ internal sealed class FillGenerator
         var tilt = Tilt.Of(SectionEnergy.HighOdds, weight);
         // and which way the energy goes, which makes stopping the groove likelier into a quieter section
         var direction = SectionEnergy.Tilt(lift, ending.Rhythm.Coupling);
-        var play = line.HasFill ? DrawPlay(drummer, ending.Rhythm, ending.Groove, chances, tilt, direction, weight) : FillPlay.None;
+        var play = line.HasFill ? DrawPlay(drummer, ending, chances, tilt, direction, weight) : FillPlay.None;
         var rhythm = FillRhythm.Of(ending.Groove.Source, play.Layer, minNote);
         var span = Fill(edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId);
 
         // the drums land after they stopped, as they come back, and always where the song's form marks the line,
-        // such as where the band comes in
-        var landings = FillLayers.Landings.ToImmutableDictionary(
+        // such as where the band comes in; on the drum kit, or on the percussion into a section of percussion only
+        var landings = FillLayers.Landings.Where(x => x.Key == DrumRole.Percussion == line.Next.IsPercussionOnly).ToImmutableDictionary(
             x => x.Key,
             x => line.IsLandingForced ? 1
                 : span > 0 && play.Treatment == GrooveTreatment.Stop ? FillLayers.StopLandingChance
@@ -154,14 +154,14 @@ internal sealed class FillGenerator
     /// <param name="weight">How much the line weighs, which makes the fill fuller or sparser.</param>
     private FillPlay DrawPlay(
         Drummer drummer,
-        RhythmicUnconventionality rhythm,
-        FillGrooves grooves,
+        FillSection section,
         StateMap chances,
         Tilt tilt,
         Tilt direction,
         double weight
     )
     {
+        var (rhythm, grooves) = (section.Rhythm, section.Groove);
         var span = Pick(tilt.Weigh(drummer.WeighSpans(FillLayers.Spans), FillLayers.GetSpanLoudness));
         if (span <= 0)
             return FillPlay.None;
@@ -172,9 +172,17 @@ internal sealed class FillGenerator
         var fullness = FillLayers.Fullness + FillLayers.FullnessPerWeight * weight + FillLayers.TreatmentFullness[treatment];
         var layer = CreateLayer(drummer, rhythm, fullness);
         // where the drums stop, they rest half the time: a break
+        // a run plays the percussion alone in a section of percussion only, and now and then in one of the drum kit
+        var isPercussion = section.IsPercussionOnly ||
+                           (_sounds.Sounds.ContainsKey(DrumRole.Percussion) && _context.TestProbability(rhythm.Tilt.Chance(FillLayers.PercussionRunChance, 1)));
         var run = treatment == GrooveTreatment.Stop && _context.TestProbability(direction.Chance(FillLayers.StopRestChance, -1))
             ? FillRun.Rest
-            : _sounds.Draw(_context, drummer, rhythm.Tilt, (_, track) => GetRunChance(grooves.Of(track), rhythm.Tilt));
+            : _sounds.Draw(
+                _context,
+                drummer,
+                rhythm.Tilt,
+                (role, track) => !isPercussion ? GetRunChance(grooves.Of(track), rhythm.Tilt) : role == DrumRole.Percussion ? 1 : 0
+            );
         var spanShift = _context.TestProbability(Math.Min(1, chances.GetStateValue(CompositionStateKinds.Fill.OffBeatChance)))
             ? _context.TestProbability(0.5) ? 1 : -1
             : 0;
@@ -459,12 +467,14 @@ internal sealed record FillLine(
 /// </summary>
 /// <param name="Groove">The states of the rhythm the fills play from, in the last bar of the section's 4-bar pattern.</param>
 /// <param name="Energy">How loud and busy the section is meant to be (<see cref="SectionEnergy" />).</param>
+/// <param name="IsPercussionOnly">Whether the section plays its percussion without the drum kit.</param>
 internal sealed record FillSection(
     int SectionId,
     double Duration,
     RhythmicUnconventionality Rhythm,
     FillGrooves Groove,
-    double Energy
+    double Energy,
+    bool IsPercussionOnly
 );
 
 /// <summary>

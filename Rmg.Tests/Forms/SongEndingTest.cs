@@ -126,7 +126,8 @@ public sealed class SongEndingTest
             ),
             new RhythmicUnconventionality(0.5),
             FillGrooves.FromSource(ResolvedRhythm.DefaultState),
-            0
+            0,
+            false
         );
 
         var ending = SongFormGenerator.CreateEnding(

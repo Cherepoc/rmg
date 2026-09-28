@@ -78,6 +78,7 @@ public static class SongGenerator
             scale,
             songStateMap,
             sectionEnergies,
+            PercussionSections.GenerateSong(Stream(SongStream.Percussion)),
             commonStateMap.GetStateValue(StateKinds.KeyOffset)
         );
         // how the song starts and ends around its sections, decided before them: the one the song ends with leads home
@@ -184,5 +185,6 @@ internal enum SongStream
     Sections = 8,
     Form = 9,
     Fills = 10,
-    Dynamics = 11
+    Dynamics = 11,
+    Percussion = 12
 }

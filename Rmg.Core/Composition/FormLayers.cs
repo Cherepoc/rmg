@@ -60,8 +60,24 @@ public static class FormLayers
     /// <summary>The chance that a count-in clicks only the last two beats, rather than all four.</summary>
     public const double HalfCountInChance = 0.3;
 
-    /// <summary>How loud a count-in's clicks are, over the hi-hat's state.</summary>
+    /// <summary>How loud a count-in's clicks are, over the state of the drum it clicks on.</summary>
     public const double CountInVelocity = -0.3;
+
+    /// <summary>
+    ///     The sounds a count-in clicks on, the first of them the song has: the hi-hat's pedal, as a drummer counts in, or
+    ///     a dry sound of the percussion, or the snare's, which every song has.
+    /// </summary>
+    public static ImmutableArray<(PercussionInstrumentDefinition Drum, int Sound)> CountInSounds { get; } =
+    [
+        (DrumDefinitions.HiHat, DrumSounds.PedalHiHat),
+        (DrumDefinitions.Claves, 75),
+        (DrumDefinitions.WoodBlock, 76),
+        (DrumDefinitions.Cowbell, 56),
+        (DrumDefinitions.CrossStick, 37),
+        (DrumDefinitions.AcousticSnare, 38),
+        (DrumDefinitions.ElectricSnare, 40),
+        (DrumDefinitions.Clap, 39)
+    ];
 
     /// <summary>The chance that the bass joins the chords in an intro of the chords first.</summary>
     public const double ChordsFirstBassChance = 0.5;
