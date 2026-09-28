@@ -77,7 +77,7 @@ public sealed class VelocityReportTest
     [Test]
     public async Task TheBassAndTheChordsPlayEvenly_AChordAsLoudAsANote_AndTheMelodyOnTop()
     {
-        var m = Measure(TestCorpus.Range(20));
+        var m = Measure(TestCorpus.Range(100));
         var (bass, chords, melody, drums) = (m["Bass"], m["Chords"], m["Melody"], m["Drum"]);
 
         // a bass and chords accent their beats less than a melody or the drums

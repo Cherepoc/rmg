@@ -108,6 +108,24 @@ public sealed class DrumUseReportTest
                           $"the louder {snareSections.Where(x => x.Energy >= median).Count(x => x.CrossStick) / (double)snareSections.Count(x => x.Energy >= median):P0}; " +
                           $"songs that switch {snareSections.GroupBy(x => x.Seed).Count(x => x.Any(y => y.CrossStick) && x.Any(y => !y.CrossStick))} of {snareSections.Select(x => x.Seed).Distinct().Count()}");
 
+        // the drums that double a lead: which on which, in the quieter and the louder half of the sections
+        var doubled = songs.SelectMany(song =>
+        {
+            var energies = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
+            return song.Trace.Where(x => x.Point == TracePoints.Doubles)
+                .Select(x => (Energy: energies[x.Section], Doubles: (System.Collections.Immutable.ImmutableDictionary<int, Doubling>)x.Value!));
+        }).ToArray();
+        var middle = doubled.Select(x => x.Energy).Order().ElementAt(doubled.Length / 2);
+        Console.WriteLine($"Doubling in {doubled.Count(x => !x.Doubles.IsEmpty) / (double)doubled.Length:P0} of the sections, " +
+                          $"the quieter half {doubled.Where(x => x.Energy < middle).Count(x => !x.Doubles.IsEmpty) / (double)doubled.Count(x => x.Energy < middle):P0}, " +
+                          $"the louder {doubled.Where(x => x.Energy >= middle).Count(x => !x.Doubles.IsEmpty) / (double)doubled.Count(x => x.Energy >= middle):P0}: " +
+                          string.Join(", ", doubled.SelectMany(x => x.Doubles).GroupBy(x => $"{DrumGroups.GetDrum(x.Key).Name} on {DrumGroups.GetDrum(x.Value.Lead).Name}")
+                              .OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}")));
+        var clapLeads = all.Count(x => Grooves(x.s, x.span, DrumDefinitions.Clap) &&
+                                       !x.s.Trace.Any(e => e.Point == TracePoints.Doubles && e.Section == x.span.SectionId &&
+                                                           ((System.Collections.Immutable.ImmutableDictionary<int, Doubling>)e.Value!).ContainsKey(DrumGroups.GetTrackNumber(DrumDefinitions.Clap))));
+        Console.WriteLine($"The clap leads the backbeat in {clapLeads} sections");
+
         // sections of percussion only: how many, in how many songs, and how loud they are meant to be
         var percussionOnly = songs.SelectMany(song =>
         {

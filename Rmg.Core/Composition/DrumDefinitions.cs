@@ -27,7 +27,7 @@ public static class DrumDefinitions
 
     public static PercussionInstrumentDefinition ElectricSnare { get; } = new("Electric Snare", [new DrumSound(40), CrossStick], 0.7, roles: Plays(DrumRole.Backbeat, (DrumRole.Time, 0.01)));
 
-    public static PercussionInstrumentDefinition Clap { get; } = new("Clap", [39], 0.3, roles: Plays(DrumRole.Backbeat, (DrumRole.Colour, 0.1)));
+    public static PercussionInstrumentDefinition Clap { get; } = new("Clap", [39], 0.1, roles: Plays(DrumRole.Backbeat, (DrumRole.Colour, 0.1)), doubling: 1);
 
     public static PercussionInstrumentDefinition HiHat { get; } = new(
         "Hi-Hat",
@@ -49,11 +49,18 @@ public static class DrumDefinitions
         roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.15))
     );
 
-    public static PercussionInstrumentDefinition Tambourine { get; } = new("Tambourine", [54], 0.2, loudness: 0.5, roles: Plays(DrumRole.Time, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.2)));
+    public static PercussionInstrumentDefinition Tambourine { get; } = new(
+        "Tambourine",
+        [54],
+        0.2,
+        loudness: 0.5,
+        roles: Plays(DrumRole.Time, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.2)),
+        doubling: 1
+    );
 
-    public static PercussionInstrumentDefinition Cabasa { get; } = new("Cabasa", [69], 0.15, loudness: -0.5, roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.2)));
+    public static PercussionInstrumentDefinition Cabasa { get; } = new("Cabasa", [69], 0.15, loudness: -0.5, roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.2)), doubling: 0.6);
 
-    public static PercussionInstrumentDefinition Maracas { get; } = new("Maracas", [70], 0.15, loudness: -0.5, roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.2)));
+    public static PercussionInstrumentDefinition Maracas { get; } = new("Maracas", [70], 0.15, loudness: -0.5, roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.2)), doubling: 0.6);
 
     public static PercussionInstrumentDefinition Tom { get; } = new("Tom", [41, 43, 45, 47, 48, 50], 1.0, walks: true, roles: Plays(DrumRole.Colour, (DrumRole.Ground, 0.1)));
 

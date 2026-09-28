@@ -144,7 +144,15 @@ public static class CompositionStateKinds
             RankOffset = StateKinds.CreateAdditive<int>(prefix + "RankOffset");
             Fullness = StateKinds.CreateAdditive<double>(prefix + "Fullness");
             Variation = StateKinds.CreateAdditive<double>(prefix + "Variation");
+            All =
+            [
+                Period.Value, Period.Power, Period.PrimeIndex, Phase.Value, Phase.Rank, Phase.RankedOffset, MaxRank, Seed, RankOffset,
+                Fullness, Variation
+            ];
         }
+
+        /// <summary>Every kind of the rhythm's state, such as a drum that doubles another takes from it.</summary>
+        public ImmutableArray<IStateKind> All { get; }
 
         public PeriodStateKinds Period { get; }
 

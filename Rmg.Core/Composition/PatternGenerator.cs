@@ -49,6 +49,7 @@ internal sealed class PatternGenerator
         int sectionId,
         ImmutableDictionary<int, StateMap> trackStateMaps,
         BarDrums barDrums,
+        ImmutableDictionary<int, Doubling> doubles,
         StateTimelineMap barStateTimelineMap,
         SectionRhythm sectionRhythm
     )
@@ -70,12 +71,14 @@ internal sealed class PatternGenerator
         var timeline = scheme.Letters
             .Select((letter, barIndex) =>
                 {
-                    var trackNotePatterns = trackSeedMaps[letter].Select(x =>
+                    // a drum that doubles a lead plays its lead's bar patterns
+                    var seeds = trackSeedMaps[letter];
+                    var trackNotePatterns = seeds.Select(x =>
                         new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
                             x.Key,
                             GenerateBar(
                                 x.Key,
-                                x.Value,
+                                doubles.TryGetValue(x.Key, out var doubling) ? seeds[doubling.Lead] : x.Value,
                                 trackStateMaps[x.Key],
                                 barStateTimelineMap,
                                 sectionId,
@@ -86,6 +89,7 @@ internal sealed class PatternGenerator
                                 barDrums.Strokes.TryGetValue((x.Key, letter), out var stroke) ? stroke : null,
                                 scheme.ToString(),
                                 sectionRhythm.Energy,
+                                doubles.TryGetValue(x.Key, out var doubled) ? doubled.MaxRank : null,
                                 feels
                             )
                         )
@@ -111,6 +115,7 @@ internal sealed class PatternGenerator
         int? stroke,
         string scheme,
         Tilt energy,
+        int? doublingRank,
         List<BarFeel> feels
     )
     {
@@ -135,6 +140,9 @@ internal sealed class PatternGenerator
         var notes = isResting
             ? EventTimeline.Create<StateMap>(Meter.BarDuration)
             : GenerateNotes(stateMap, barStateTimelineMap, barIndex * Meter.BarDuration, trackNumber, sectionId, barIndex, energy).GeneratedTimeline;
+        // a drum that doubles a lead plays its strong beats
+        if (doublingRank is { } maxRank)
+            notes = EventTimeline.Create(notes.Duration, notes.Where(x => x.Value.GetStateValue(CompositionStateKinds.BeatRank) <= maxRank));
         if (_trackDefinitions[trackNumber].Role == TrackRole.Melody)
             notes = MelodyPattern.EndPhrase(
                 notes,
@@ -449,3 +457,6 @@ internal static class IncrementalGenerators
         };
     }
 }
+
+/// <summary>A drum that doubles a lead: the lead's track, and the weakest rank of its beats it plays.</summary>
+public sealed record Doubling(int Lead, int MaxRank);

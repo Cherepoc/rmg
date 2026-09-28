@@ -14,7 +14,7 @@ public sealed class SongDrumSelectionTest
     }
 
     private static PercussionInstrumentDefinition[] MainSnares =>
-        [DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare, DrumDefinitions.Clap];
+        [DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare];
 
     [Test]
     public async Task EveryGroup_ExceptPercussion_HasAtLeastOneDrumInSong()
@@ -29,10 +29,12 @@ public sealed class SongDrumSelectionTest
     }
 
     [Test]
-    public async Task Song_HasOneMainSnare_ThatIsSnareElectricSnareOrClap()
+    public async Task Song_HasOneSnare_AcousticOrElectric_AndSometimesAClap()
     {
         foreach (var seed in Seeds)
             await Assert.That(MainSnares.Count(SongDrums(seed).Contains)).IsEqualTo(1);
+        var withClap = Seeds.Count(seed => SongDrums(seed).Contains(DrumDefinitions.Clap)) / (double)Seeds.Count();
+        await Assert.That(withClap).IsBetween(0.2, 0.4);
     }
 
     [Test]
@@ -92,7 +94,7 @@ public sealed class SongDrumSelectionTest
     {
         var seen = Enumerable.Range(0, 5000).SelectMany(seed => SongDrums(seed)).ToHashSet();
 
-        foreach (var drum in MainSnares.Concat(DrumGroups.Percussion.Drums))
+        foreach (var drum in MainSnares.Append(DrumDefinitions.Clap).Concat(DrumGroups.Percussion.Drums))
             await Assert.That(seen.Contains(drum)).IsTrue();
     }
 
@@ -106,7 +108,7 @@ public sealed class SongDrumSelectionTest
 
             for (var i = 0; i < 5; i++)
             {
-                var sectionDrums = DrumKitGenerator.SelectKit(context, songDrums, default, false);
+                var sectionDrums = DrumKitGenerator.SelectKit(context, songDrums, x => x.MainRole, default, false).Drums;
 
                 await Assert.That(sectionDrums.All(songDrums.Contains)).IsTrue();
             }
@@ -121,7 +123,7 @@ public sealed class SongDrumSelectionTest
             var context = new GenerationContext(seed);
             var songDrums = DrumKitGenerator.SelectSongDrums(context);
             var usedMainSnares = Enumerable.Range(0, 20)
-                .SelectMany(_ => DrumKitGenerator.SelectKit(context, songDrums, default, false))
+                .SelectMany(_ => DrumKitGenerator.SelectKit(context, songDrums, x => x.MainRole, default, false).Drums)
                 .Where(MainSnares.Contains)
                 .Distinct();
 

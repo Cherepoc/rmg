@@ -88,10 +88,11 @@ public sealed class SongIntroTest
             await Assert.That(pitched.Min(x => x.Position)).IsGreaterThanOrEqualTo(song.Origin);
             // the groove may start on a later beat, but plays in the intro's first bar
             await Assert.That(Drums(song).Min(x => x.Position)).IsLessThan(4);
-            // the band comes in on a crash, pushed an 8th early now and then, or on the percussion into a section of it
+            // the band comes in on a crash, or now and then the vibraslap, pushed an 8th early now and then, or on the
+            // percussion into a section of it
             var landsOn = PercussionOnly(song, song.Map.Sections[0].SectionId)
                 ? DrumGroups.Percussion.Drums.SelectMany(x => x.ArticulationCodes)
-                : DrumDefinitions.Cymbal.ArticulationCodes;
+                : DrumGroups.Accents.Drums.SelectMany(x => x.ArticulationCodes);
             await Assert.That(Drums(song).Any(x => x.Position >= song.Origin - 0.5 && x.Position <= song.Origin && landsOn.Contains(x.Value.Offset)))
                 .IsTrue();
         }

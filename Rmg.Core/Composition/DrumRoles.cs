@@ -73,6 +73,18 @@ public static class DrumRoles
         [DrumRole.Colour] = new(0, 0, 0, 0, 0)
     }.ToImmutableDictionary();
 
+    /// <summary>
+    ///     The weakest rank of the lead's beats a drum that doubles it plays: the backbeat's main hits, and time's beats
+    ///     and 8ths, as a clap doubles the backbeat and a shaker the hi-hat's pulse.
+    /// </summary>
+    public static ImmutableDictionary<DrumRole, int> DoublingRanks { get; } = new Dictionary<DrumRole, int>
+    {
+        [DrumRole.Ground] = 0,
+        [DrumRole.Backbeat] = 0,
+        [DrumRole.Time] = 1,
+        [DrumRole.Colour] = 0
+    }.ToImmutableDictionary();
+
     /// <summary>A layer's role of a drum, at its depth, with no part.</summary>
     public static StateMap At(int depth, DrumRole role)
     {

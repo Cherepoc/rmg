@@ -8,7 +8,7 @@ public sealed class DrumKitGeneratorTest
 {
     private static IEnumerable<int> Seeds => Enumerable.Range(0, 500);
 
-    private static (ImmutableArray<PercussionInstrumentDefinition> Song, ImmutableArray<PercussionInstrumentDefinition> Kit) Select(
+    private static (ImmutableArray<PercussionInstrumentDefinition> Song, ImmutableArray<PercussionInstrumentDefinition> Kit, SectionKit Section) Select(
         int seed,
         Tilt tilt = default,
         bool isPercussionOnly = false
@@ -16,7 +16,8 @@ public sealed class DrumKitGeneratorTest
     {
         var context = new GenerationContext(seed);
         var songDrums = DrumKitGenerator.SelectSongDrums(context);
-        return (songDrums, DrumKitGenerator.SelectKit(context, songDrums, tilt, isPercussionOnly));
+        var kit = DrumKitGenerator.SelectKit(context, songDrums, x => x.MainRole, tilt, isPercussionOnly);
+        return (songDrums, kit.Drums, kit);
     }
 
     private static DrumGroup GroupOf(PercussionInstrumentDefinition drum) => DrumGroups.All.Single(x => x.Drums.Contains(drum));
@@ -27,7 +28,9 @@ public sealed class DrumKitGeneratorTest
         var withTime = 0;
         foreach (var seed in Seeds)
         {
-            var (_, kit) = Select(seed);
+            var (_, drums, section) = Select(seed);
+            // its leads, not the drums that double them
+            var kit = drums.Except(section.Doubles.Keys).ToArray();
 
             await Assert.That(kit.Count(x => x.MainRole == DrumRole.Ground && GroupOf(x) != DrumGroups.Percussion)).IsEqualTo(1);
             await Assert.That(kit.Count(x => x.MainRole == DrumRole.Backbeat && GroupOf(x) != DrumGroups.Percussion)).IsEqualTo(1);
@@ -53,7 +56,7 @@ public sealed class DrumKitGeneratorTest
     {
         foreach (var seed in Seeds)
         {
-            var (song, kit) = Select(seed);
+            var (song, kit, _) = Select(seed);
 
             await Assert.That(kit.All(song.Contains)).IsTrue();
             await Assert.That(kit.Distinct().Count()).IsEqualTo(kit.Length);
@@ -68,7 +71,7 @@ public sealed class DrumKitGeneratorTest
     {
         foreach (var seed in Seeds)
         {
-            var (song, kit) = Select(seed, isPercussionOnly: true);
+            var (song, kit, _) = Select(seed, isPercussionOnly: true);
             var percussion = song.Where(DrumGroups.Percussion.Drums.Contains).ToArray();
 
             await Assert.That(kit.All(DrumGroups.Percussion.Drums.Contains)).IsTrue();

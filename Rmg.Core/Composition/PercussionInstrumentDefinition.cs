@@ -16,7 +16,8 @@ public sealed class PercussionInstrumentDefinition
         Func<StateMapBuilder, StateMapBuilder>? configureStateMap = null,
         double loudness = 0,
         bool walks = false,
-        ImmutableArray<Weighted<DrumRole>> roles = default
+        ImmutableArray<Weighted<DrumRole>> roles = default,
+        double doubling = 0
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -34,7 +35,14 @@ public sealed class PercussionInstrumentDefinition
         Loudness = loudness;
         Walks = walks;
         Roles = roles.IsDefaultOrEmpty ? [new Weighted<DrumRole>(1, DrumRole.Colour)] : roles;
+        Doubling = doubling;
     }
+
+    /// <summary>
+    ///     How likely the drum is to double the lead of its role in a section, such as the clap on the snare's backbeat,
+    ///     among the drums that may (<see cref="DrumKitGenerator.SelectKit" />); 0 for never.
+    /// </summary>
+    public double Doubling { get; }
 
     /// <summary>
     ///     The drum's affinity for every role in the groove (<see cref="DrumRoles" />), its main role the heaviest; a drum

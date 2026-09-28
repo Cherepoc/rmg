@@ -13,6 +13,9 @@ public static class DrumGroups
     /// <summary>The chance that a section may groove on the cymbal, which marks mostly where a section lands.</summary>
     private const double AccentsGrooveChance = 0.12;
 
+    /// <summary>The chance of a song having a clap beside its snare.</summary>
+    private const double ClapChance = 0.3;
+
     /// <summary>The chance of a song having the vibraslap, which it plays as a landing, with the cymbal.</summary>
     private const double VibraslapChance = 0.2;
 
@@ -38,8 +41,8 @@ public static class DrumGroups
         holdsARole: true
     );
 
-    // a song has one main snare, an acoustic or an electric snare, whose strokes are its head and its cross-stick, or a
-    // clap
+    // a song has one snare, an acoustic or an electric one, whose strokes are its head and its cross-stick, and maybe a
+    // clap, which mostly doubles its backbeat and now and then leads it
     public static DrumGroup Snare { get; } = new(
         nameof(Snare),
         [
@@ -52,7 +55,9 @@ public static class DrumGroups
         true,
         // in most runs, as a roll or with the toms
         builder => builder.InRuns(0.5, 0),
-        new SongDrumRule([SongDrumRule.OneOf(DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare, DrumDefinitions.Clap)]),
+        new SongDrumRule(
+            [SongDrumRule.OneOf(DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare), SongDrumRule.Optional(DrumDefinitions.Clap, ClapChance)]
+        ),
         holdsARole: true
     );
 

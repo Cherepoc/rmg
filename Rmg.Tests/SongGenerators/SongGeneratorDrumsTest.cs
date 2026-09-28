@@ -6,10 +6,10 @@ namespace Rmg.Tests.SongGenerators;
 public sealed class SongGeneratorDrumsTest
 {
     [Test]
-    public async Task RenderedDrums_NeverMixMainSnares_AndPlayTheCrossStickOnlyWithASnare()
+    public async Task RenderedDrums_NeverMixTheSnares()
     {
-        // the cross-stick is a stroke of either snare, so a main snare is told by its own sound
-        var mainSnareCodes = new[] { DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare, DrumDefinitions.Clap }
+        // the cross-stick is a stroke of either snare, so a snare is told by its own sound
+        var mainSnareCodes = new[] { DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare }
             .Select(x => x.ArticulationCodes.Except([37]).ToHashSet())
             .ToArray();
 
@@ -24,7 +24,6 @@ public sealed class SongGeneratorDrumsTest
 
             var usedMainSnareCount = mainSnareCodes.Count(x => codes.Overlaps(x));
             await Assert.That(usedMainSnareCount).IsLessThanOrEqualTo(1);
-            await Assert.That(codes.Contains(DrumDefinitions.Clap.ArticulationCodes[0]) && codes.Contains(37)).IsFalse();
         }
     }
 }

@@ -33,32 +33,39 @@ public static class DrumKitGenerator
     ///     groups of them (the toms, the accents, the percussion), more the more energy. What a drum plays there is its
     ///     role in the section, which a wild one may draw away from its main one, such as the snare keeping time. A section
     ///     of percussion only plays its percussion's leads and more of it, up to
-    ///     <see cref="PercussionSections.MaxActiveDrums" />.
+    ///     <see cref="PercussionSections.MaxActiveDrums" />. Last, now and then a drum doubles a lead, such as the clap on
+    ///     the snare's backbeat or a shaker over the hi-hat: one whose role in the section is the lead's and that doubles
+    ///     (<see cref="PercussionInstrumentDefinition.Doubling" />), the likelier the more energy the section has.
     /// </summary>
+    /// <param name="role">A drum's role in the section, which a drum that doubles takes on.</param>
     /// <param name="tilt">The section's pull of its energy.</param>
-    public static ImmutableArray<PercussionInstrumentDefinition> SelectKit(
+    public static SectionKit SelectKit(
         IGenerationContext context,
         ImmutableArray<PercussionInstrumentDefinition> songDrums,
+        Func<PercussionInstrumentDefinition, DrumRole> role,
         Tilt tilt,
         bool isPercussionOnly
     )
     {
         var family = songDrums.Where(x => DrumGroups.All.Single(g => g.Drums.Contains(x)) == DrumGroups.Percussion == isPercussionOnly).ToArray();
         var kit = new List<PercussionInstrumentDefinition>();
+        var leads = new List<PercussionInstrumentDefinition>();
         foreach (var lead in LeadRoles)
         {
             var candidates = family.Where(x => x.MainRole == lead).ToArray();
             if (candidates.Length == 0 || !context.TestProbability(tilt.Chance(lead == DrumRole.Time ? TimeChance : 1, 1)))
                 continue;
 
-            kit.AddRange(PickWeighted(context, candidates.Select(x => new Weighted<PercussionInstrumentDefinition>(tilt.Weigh(x.Weight, x.Loudness), x)), 1));
+            var picked = PickWeighted(context, candidates.Select(x => new Weighted<PercussionInstrumentDefinition>(tilt.Weigh(x.Weight, x.Loudness), x)), 1);
+            kit.AddRange(picked);
+            leads.AddRange(picked);
         }
 
         if (isPercussionOnly)
         {
             var more = family.Except(kit).Select(x => new Weighted<PercussionInstrumentDefinition>(tilt.Weigh(x.Weight, x.Loudness), x));
             kit.AddRange(PickWeighted(context, more, PercussionSections.MaxActiveDrums - kit.Count));
-            return [..kit];
+            return new SectionKit([..kit], ImmutableDictionary<PercussionInstrumentDefinition, PercussionInstrumentDefinition>.Empty);
         }
 
         // the colour: the groups that hold no role, those of a lower chance of grooving now and then
@@ -83,8 +90,22 @@ public static class DrumKitGenerator
                 )
             );
 
-        return [..kit];
+        var doubles = ImmutableDictionary.CreateBuilder<PercussionInstrumentDefinition, PercussionInstrumentDefinition>();
+        // a lead that doubles itself, such as a shaker keeping time, is not doubled
+        foreach (var lead in leads.Where(x => x.Doubling <= 0))
+        {
+            var candidates = family.Where(x => x.Doubling > 0 && role(x) == lead.MainRole && !kit.Contains(x) && !doubles.ContainsKey(x)).ToArray();
+            if (candidates.Length == 0 || !context.TestProbability(tilt.Chance(DoublingChance, 1)))
+                continue;
+
+            doubles[PickWeighted(context, candidates.Select(x => new Weighted<PercussionInstrumentDefinition>(x.Doubling, x)), 1)[0]] = lead;
+        }
+
+        return new SectionKit([..kit, ..doubles.Keys], doubles.ToImmutable());
     }
+
+    /// <summary>The chance a section has a drum double a lead that one may double, with no lean; the more energy, the likelier.</summary>
+    public const double DoublingChance = 0.15;
 
     /// <summary>The roles a section has a lead for, the ground and the backbeat always, time by <see cref="TimeChance" />.</summary>
     public static ImmutableArray<DrumRole> LeadRoles { get; } = [DrumRole.Ground, DrumRole.Backbeat, DrumRole.Time];
@@ -121,3 +142,9 @@ public static class DrumKitGenerator
         return result;
     }
 }
+
+/// <summary>The drums a section plays, and those of them that double a lead, by the lead they double.</summary>
+public sealed record SectionKit(
+    ImmutableArray<PercussionInstrumentDefinition> Drums,
+    ImmutableDictionary<PercussionInstrumentDefinition, PercussionInstrumentDefinition> Doubles
+);
