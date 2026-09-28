@@ -11,8 +11,8 @@ In this order, each measured before it is planned:
    toms, about one run in five), intros (whether the band's entry after a chords-first or build-up intro feels earned)
    have been tuned by measurement only, as has the sections' energy (see *Section dynamics*). Heard and kept: the
    endings, the section modes and the chords' level.
-2. **The melody** (see *Melody at generation*): it plays where it was placed, so a phrase that plays again is heard
-   as the same notes, and its shape follows its contour weakly.
+2. **The melody** (see *Melody at generation*): listen to the question and its answer; then mutation further, a bar
+   of a later letter within the phrase and a section as it recurs.
 3. **The drums** (see *Drums*): listen to the setups and the percussion songs, the roles and the doubling, the strokes
    and accents, the drums coming and going by bar.
 4. Smaller: fade-out endings (see *Form*).
@@ -78,9 +78,22 @@ note 100% of the time, against 72%, and the melody spans 15.6 semitones on avera
 where a phrase starts again 37% of the time (84% after a rest) against 14%, into a section 35% against 15%, and into
 its last note 35% against 13%. Left:
 
-- **Variety in repetition, on purpose:** a phrase that plays again is the same notes; the octave chosen per bar
-  varied it only as a side effect. A varied repeat as its own decision at generation: a phrase or a bar that plays
-  again moved or changed, leaned by conventionality.
+- **Mutation further:** a section's answer is its question mutated a decision at a time (see *Question and answer*);
+  the same can vary a bar of a later letter within the phrase (A′, whose rhythm alone varies now), mutate the rhythm
+  of the answer as well as its melody, and, as an edit after assembly, a section as it recurs, each appearance from
+  the one before by an amount that grows, so that a song drifts from how it began.
+- **Question and answer** (built): a section plays its 4-bar pattern twice, and its melody as a question and its
+  answer (`MelodyPattern.Answer`): placed as one line over the 8 bars, so that the answer goes on from the question,
+  its first half the question's and its second half mutated a decision at a time, a note there drawing afresh whether
+  it goes on or turns back and playing no note heard before, by a chance of the section's (`MelodyLayers.AnswerAmount`,
+  0.5, the likelier the less conventional), from a sequence keyed by the note it echoes, so that notes that echo the
+  same one mutate alike and no other draw moves; the other tracks play their pattern twice as before. An echo plays as
+  it was heard over the same root, and as a sequence nearest the note before over another, where it moved to the note
+  before over any root and, the melody placed on, fell out of its range to be clamped. Over 100 corpus songs the
+  answer's first half plays the question's notes 98 to 100% of the time and its second half 68 to 72%; a phrase starts
+  again with a leap 36% of the time (38% when it played the same), and a note leaps 6.3% of the time (4.7%), as what
+  plays again over the same root now plays in its octave; chord notes on the beat 87%, and a bar follows the aim of
+  its contour 0.38.
 - **The contour shapes the melody weakly:** within a 4-bar pattern a bar's mean pitch follows the register it aims at
   0.30 (`MelodyContourTest`, over 100 corpus songs), as the line turns towards the aim only past
   `MelodyLine.RegisterPull` and otherwise goes on or turns back by its draw alone. A phrase's shape may start again
