@@ -77,7 +77,13 @@ bar anywhere in the track's range let the melody drift, spanning up to 64 semito
   only past `MelodyLine.RegisterPull` and otherwise goes on or turns back by its draw alone. A phrase's shape may now
   start again every half phrase, a wave (`MelodyLayers.Periods`, 19% of the patterns, the more the less conventional
   the section's rhythm), and a note's draw of going on or turning back (`CompositionStateKinds.MelodyTurn`) leans
-  towards the aim (`MelodyLayers.AimOdds`), off at 1 so far: tune it by the following, and listen.
+  towards the aim (`MelodyLayers.AimOdds`), off at 1: even at odds of 32 the following is only 0.20. What masks the
+  contour is the octave chosen per bar (without it 0.37) and the echoes (without them 0.36; without both 0.60).
+  Choosing the octave per phrase instead follows at 0.30 but leaps where a phrase starts again 25% of the time, against
+  14%, and into a section 27% against 15%, as the placed line jumps more than an octave between phrases (a section's
+  line starts afresh at its aim, and a pattern's end wraps to its start); two octaves either way at a phrase start
+  leap as often and drift to a span of 65 semitones. By ear the melodies sound fine, so the octave stays per bar; the
+  wave and the lean wait for a reason.
 - **Listen** to where phrases start again. Two rules tried to close a phrase onto its start and were dropped: aiming
   the last bar back moved little, and landing the last note near the start only moved the leap one note earlier.
 - **The bass** could be placed at generation the same way, and its notes played again in a repeated cycle.
@@ -86,7 +92,8 @@ bar anywhere in the track's range let the melody drift, spanning up to 64 semito
 
 A note's velocity is the sum of its layers, which `Render` plays on a fixed scale (`Render.ToMidiVelocity`), where it
 spread every song's over the MIDI range, which stretched whatever variety was left: a track's level by its role
-(`VelocityLayers.GetLevel`), where it was drawn at random, the melody about 3 dB over the others; a section's, leaned by
+(`VelocityLayers.GetLevel`), where it was drawn at random, the melody about 3 dB over the others and, by ear, the
+chords 1 to 2 dB over the bass and the drums (-8.6 dB against -9.9 and -9.1, the melody -6.8); a section's, leaned by
 its energy; a bar's and a bar pattern's; and a note's, its beat's accent, fixed, and a variation, both as far as the
 track's dynamics have them (`CompositionStateKinds.NoteDynamics`, bass 0.4, chords 0.5, melody 0.8, drums 1, times
 a section's chance scale to the power of 1/4). A chord's notes play at n^-1/4 for n notes. Measured over 100 corpus
@@ -95,8 +102,8 @@ chords, against 23, 16 for the melody and the drums; a chord sounds as loud as a
 the melody 2 to 4 dB over the others, where every track was as loud; a note at the same place from bar to bar within a
 section varies by 3 to 5, and the sections' loudness follows their energy 0.59 in plain sections, against 0.51. Left:
 
-- **Listen** to the balance and to how even the bass and the chords play; the levels, dynamics and chord softening
-  are tuned by measurement only.
+- **Listen** to how even the bass and the chords play; the dynamics and chord softening are tuned by measurement
+  only, the levels by ear too (the chords raised from under the others).
 - **The bar layers** (a bar's and a bar pattern's loudness, drawn) add little, 3 to 5 from bar to bar; they could go,
   should bars sound to jump.
 

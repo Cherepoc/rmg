@@ -18,15 +18,19 @@ public sealed class MelodyContourTest
     /// <param name="Correlation">Of a bar's mean pitch with its aim, both from their pattern's mean.</param>
     /// <param name="Slope">How many semitones the bar's mean pitch moves for one of its aim.</param>
     /// <param name="Waves">Patterns whose aim turns more than once, such as up, down and up.</param>
-    internal sealed record Measures(int Bars, double Correlation, double Slope, int Patterns, int Waves);
+    /// <param name="MeanSpan">How far apart a song's lowest and highest melody notes are, on average, in semitones.</param>
+    /// <param name="MaxSpan">The same in the song where they are furthest apart.</param>
+    internal sealed record Measures(int Bars, double Correlation, double Slope, int Patterns, int Waves, double MeanSpan, int MaxSpan);
 
     internal static Measures Measure(IEnumerable<CorpusSong> songs)
     {
         var pairs = new List<(double Aim, double Pitch)>();
         int patterns = 0, waves = 0;
+        var spans = new List<int>();
         foreach (var song in songs)
         {
             var melody = song.Song.Notes![SongTracks.MelodyTrack];
+            spans.Add(melody.Max(x => x.Value.Pitches[0]) - melody.Min(x => x.Value.Pitches[0]));
             var contours = song.Trace.Where(x => x.Point == TracePoints.MelodyContour).ToDictionary(x => x.Section, x => (ImmutableArray<double>)x.Value!);
             foreach (var span in song.Map.Sections)
             for (var start = span.Start; start < span.End - 1e-9; start += Meter.PatternDuration)
@@ -56,7 +60,7 @@ public sealed class MelodyContourTest
         var covariance = pairs.Sum(x => x.Aim * x.Pitch);
         var aimVariance = pairs.Sum(x => x.Aim * x.Aim);
         var pitchVariance = pairs.Sum(x => x.Pitch * x.Pitch);
-        return new Measures(pairs.Count, covariance / Math.Sqrt(aimVariance * pitchVariance), covariance / aimVariance, patterns, waves);
+        return new Measures(pairs.Count, covariance / Math.Sqrt(aimVariance * pitchVariance), covariance / aimVariance, patterns, waves, spans.Average(), spans.Max());
     }
 
     private static int CountTurns(double[] values)
@@ -71,7 +75,8 @@ public sealed class MelodyContourTest
     {
         var m = Measure(TestCorpus.Range(SongCount));
         Console.WriteLine($"{m.Bars} bars: a bar's mean pitch follows its aim {m.Correlation:F2} (correlation), " +
-                          $"{m.Slope:F2} semitones for one; waves {m.Waves / (double)m.Patterns:P0} of {m.Patterns} patterns");
+                          $"{m.Slope:F2} semitones for one; waves {m.Waves / (double)m.Patterns:P0} of {m.Patterns} patterns; " +
+                          $"a song's melody spans {m.MeanSpan:F1} semitones on average, {m.MaxSpan} at most");
         await Task.CompletedTask;
     }
 }
