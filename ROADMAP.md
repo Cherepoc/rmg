@@ -11,8 +11,8 @@ In this order, each measured before it is planned:
    toms, about one run in five), intros (whether the band's entry after a chords-first or build-up intro feels earned)
    have been tuned by measurement only, as has the sections' energy (see *Section dynamics*). Heard and kept: the
    endings, the section modes and the chords' level.
-2. **The melody** (see *Melody at generation*): its shape follows its contour weakly, and its repetition is heard
-   through the octave chosen per bar, without which every phrase plays the same notes.
+2. **The melody** (see *Melody at generation*): it plays where it was placed, so a phrase that plays again is heard
+   as the same notes, and its shape follows its contour weakly.
 3. Smaller: fade-out endings (see *Form*).
 
 ## Section dynamics
@@ -59,12 +59,10 @@ line places its notes in order over them, by the rules of `MelodyLine`, over the
 the same notes, where before, placed as the song played, a bar that came back played the same note over the same root
 40% of the time. The melody's render flags are generation state now.
 
-As the chords' voicing and the bass's octave are, the melody's register is chosen in `Realizer` from what came before:
-every bar is moved by an octave at most, down, none or up, to start nearest the note before, within the track's range
-(`MelodyRegister`, `StateKinds.RegisterStart`), so what plays again plays the same notes, the octave aside, and the
-melody stays within an octave of where it was placed. The song's last note is the chord's root in the register of the
-note it is made from, an edit as the song is put together (`SongFormGenerator.LandOnRoot`), and its octave is chosen as
-a bar's is.
+The melody plays where it was placed. `Realizer` used to choose every bar's octave from the note before, which varied
+a phrase that played again by its octave, as a side effect; it no longer does, and what plays again plays the very same
+notes. The song's last note is the chord's root in the register of the note it is made from, an edit as the song is
+put together (`SongFormGenerator.LandOnRoot`).
 
 Measured over 200 corpus songs, against the melody placed as the song played: chord notes on the beat 87%, up from 81%;
 leaps 3.4% of the moves, against 2.2%, where a phrase starts again 14% (88% of them after a rest, as a new phrase
@@ -72,31 +70,28 @@ starts after a breath) and into a section 14%, against 3% before; the song's las
 of the time, as before. The octave chosen per phrase left 24% of the leaps where a phrase starts again, and chosen per
 bar anywhere in the track's range let the melody drift, spanning up to 64 semitones in a song against 41.
 
-Played where it was placed, with no octave chosen (over 100 corpus songs), what plays again is the same note 100% of
-the time, against 72%, and the melody spans 15.6 semitones on average, against 30.8; but by ear every phrase then
-sounds the same, where the octave chosen per bar varies a phrase that plays again, and it leaps where a phrase starts
-again 37% of the time against 14%, and into its last note 35% against 13%. So the octave choice stays: it is heard
-as variety. Left:
+Played where it was placed, against the octave chosen per bar (over 100 corpus songs), what plays again is the same
+note 100% of the time, against 72%, and the melody spans 15.6 semitones on average and 20 at most, against 30.8 and
+41; it follows its contour 0.30, against 0.14; but by ear every phrase that plays again sounds the same, and it leaps
+where a phrase starts again 37% of the time (84% after a rest) against 14%, into a section 35% against 15%, and into
+its last note 35% against 13%. Left:
 
-- **Variety in repetition, on purpose:** the octave chosen per bar is what varies a phrase that plays again, as a
-  side effect of leading from the note before. Should the melody sound too repetitive or too random, a varied repeat
-  could be its own decision at generation (a phrase or a bar that plays again moved or changed, leaned by
-  conventionality), and the octave choice kept to leading only.
-- **The contour barely shapes the melody:** within a 4-bar pattern a bar's mean pitch follows the register it aims at
-  only 0.14 (`MelodyContourTest`, over 100 corpus songs), 0.15 semitones for one, as the line turns towards the aim
-  only past `MelodyLine.RegisterPull` and otherwise goes on or turns back by its draw alone. A phrase's shape may now
-  start again every half phrase, a wave (`MelodyLayers.Periods`, 19% of the patterns, the more the less conventional
-  the section's rhythm), and a note's draw of going on or turning back (`CompositionStateKinds.MelodyTurn`) leans
-  towards the aim (`MelodyLayers.AimOdds`), off at 1: even at odds of 32 the following is only 0.20. What masks the
-  contour is the octave chosen per bar (without it 0.37) and the echoes (without them 0.36; without both 0.60), which
-  replay a note's step whatever the aim; an echo run's octave or transposition chosen towards the aim would let a
-  repeated bar follow the arch as a sequence. Choosing the octave per phrase instead follows at 0.30 but leaps where a
-  phrase starts again 25% of the time, against 14%, and into a section 27% against 15%, as the placed line jumps more
-  than an octave between phrases (a section's line starts afresh at its aim, and a pattern's end wraps to its start);
-  two octaves either way at a phrase start leap as often and drift to a span of 65 semitones. The wave and the lean
-  wait for this work.
-- **Listen** to where phrases start again. Two rules tried to close a phrase onto its start and were dropped: aiming
-  the last bar back moved little, and landing the last note near the start only moved the leap one note earlier.
+- **Variety in repetition, on purpose:** a phrase that plays again is the same notes; the octave chosen per bar
+  varied it only as a side effect. A varied repeat as its own decision at generation: a phrase or a bar that plays
+  again moved or changed, leaned by conventionality.
+- **The contour shapes the melody weakly:** within a 4-bar pattern a bar's mean pitch follows the register it aims at
+  0.30 (`MelodyContourTest`, over 100 corpus songs), as the line turns towards the aim only past
+  `MelodyLine.RegisterPull` and otherwise goes on or turns back by its draw alone. A phrase's shape may start again
+  every half phrase, a wave (`MelodyLayers.Periods`, 19% of the patterns, the more the less conventional the section's
+  rhythm), and a note's draw of going on or turning back (`CompositionStateKinds.MelodyTurn`) can lean towards the aim
+  (`MelodyLayers.AimOdds`), off at 1; with the octave still chosen per bar, odds of 32 moved the following only from
+  0.14 to 0.20, so retune it now. The echoes mask the rest (without them 0.60), as they replay a note's step whatever
+  the aim: an echo run's octave or transposition chosen towards the aim would let a repeated bar follow the arch as a
+  sequence. The wave and the lean wait for this work.
+- **Where it leaps:** a phrase or a section starts afresh at its aim, and a pattern's end wraps to its start, so the
+  melody leaps there about a third of the time, mostly after a rest; whether that sounds like a new phrase or a break
+  is to be heard. Two rules tried to close a phrase onto its start and were dropped: aiming the last bar back moved
+  little, and landing the last note near the start only moved the leap one note earlier.
 - **The bass** could be placed at generation the same way, and its notes played again in a repeated cycle.
 
 ## Velocity
