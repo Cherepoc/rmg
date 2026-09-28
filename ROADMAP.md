@@ -78,9 +78,14 @@ note 100% of the time, against 72%, and the melody spans 15.6 semitones on avera
 where a phrase starts again 37% of the time (84% after a rest) against 14%, into a section 35% against 15%, and into
 its last note 35% against 13%. Left:
 
-- **Varied repeats (A′) lean by conventionality** (planned): a repeated bar is varied by a flat chance of 0.25 and a
-  fixed strength (`PhraseSchemes.VariedRepeatChance`, `VariedRepeatVariation`) where the answer leans; both could lean
-  through the section's rhythm tilt, in `PhraseSchemes.Pick`, as the scheme's choice already does. A′ needs no
+- **Varied repeats (A′) and conventionality** (open, pending listening): a repeated bar is varied by a flat chance of
+  0.25 and a fixed strength (`PhraseSchemes.VariedRepeatChance`, `VariedRepeatVariation`), where the answer's amount
+  leans. Leaning A′ too was not built: which way convention runs is unclear (a varied repeat is as conventional in
+  songwriting as a literal loop is in electronic music, and what is unconventional here is rhythmic strangeness, not
+  development); the scheme's choice already leans to more distinct bars in wild sections, so a lean of A′ the same way
+  would push wild sections to no repetition and plain ones to loops; and its strength is what makes a varied repeat
+  start as the first did, not a choice to lean. Should listening find plain sections too varied or wild ones too
+  literal, lean its chance alone, gently. The answer's lean (more mutation the wilder) awaits the same listening. A′ needs no
   mutation of its melody: its cycles drawn afresh bring fresh beats, placed by the rules, so its second half keeps 30%
   of its first play's steps against 47% for a plain repeat (65% and 61% in the first half), over 100 corpus songs
   measured by the scale step above the chord's root, as a repeat over another chord plays a sequence; plain repeats
