@@ -137,6 +137,7 @@ internal sealed class SectionGenerator
             tilt,
             isPercussionOnly
         );
+        StateTrace.Record(TracePoints.Kit, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", kit.Drums.Select(x => x.Name)), kit);
         var activeDrumTrackNumbers = kit.Drums.Select(DrumGroups.GetTrackNumber).ToImmutableHashSet();
         // a drum that doubles a lead plays its lead's beats up to the rank its role doubles
         var doubles = kit.Doubles.ToImmutableDictionary(
@@ -171,7 +172,7 @@ internal sealed class SectionGenerator
             _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumPresenceStream)),
             activeDrumTrackNumbers,
             scheme,
-            isPercussionOnly,
+            kit.Leads.Select(DrumGroups.GetTrackNumber).ToHashSet(),
             track => sectionStrokes.TryGetValue(track, out var stroke) ? stroke : SongStroke(track),
             rhythm.Tilt,
             tilt

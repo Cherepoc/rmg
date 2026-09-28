@@ -43,9 +43,8 @@ public sealed class DrumGroup
     }
 
     /// <summary>
-    ///     Whether the group's drum holds a role in the groove that a bar must keep, as the kick grounds it, the snare
-    ///     plays the backbeat and the timekeepers keep time: it never sits out a bar, but may change its stroke there
-    ///     (<see cref="DrumPresence" />); the other groups colour the groove, and come and go.
+    ///     Whether the group's drums lead the roles of a section's groove, as the kick, the snare and the timekeepers do,
+    ///     rather than colour it, as the toms, the accents and the percussion do (<see cref="DrumKitGenerator.SelectKit" />).
     /// </summary>
     public bool HoldsARole { get; }
 

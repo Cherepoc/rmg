@@ -65,7 +65,7 @@ public static class DrumKitGenerator
         {
             var more = family.Except(kit).Select(x => new Weighted<PercussionInstrumentDefinition>(tilt.Weigh(x.Weight, x.Loudness), x));
             kit.AddRange(PickWeighted(context, more, PercussionSections.MaxActiveDrums - kit.Count));
-            return new SectionKit([..kit], ImmutableDictionary<PercussionInstrumentDefinition, PercussionInstrumentDefinition>.Empty);
+            return new SectionKit([..kit], [..leads], ImmutableDictionary<PercussionInstrumentDefinition, PercussionInstrumentDefinition>.Empty);
         }
 
         // the colour: the groups that hold no role, those of a lower chance of grooving now and then
@@ -101,7 +101,7 @@ public static class DrumKitGenerator
             doubles[PickWeighted(context, candidates.Select(x => new Weighted<PercussionInstrumentDefinition>(x.Doubling, x)), 1)[0]] = lead;
         }
 
-        return new SectionKit([..kit, ..doubles.Keys], doubles.ToImmutable());
+        return new SectionKit([..kit, ..doubles.Keys], [..leads], doubles.ToImmutable());
     }
 
     /// <summary>The chance a section has a drum double a lead that one may double, with no lean; the more energy, the likelier.</summary>
@@ -143,8 +143,12 @@ public static class DrumKitGenerator
     }
 }
 
-/// <summary>The drums a section plays, and those of them that double a lead, by the lead they double.</summary>
+/// <summary>
+///     The drums a section plays; those of them that lead a role, the ground, the backbeat or time; and those that double
+///     a lead, by the lead they double.
+/// </summary>
 public sealed record SectionKit(
     ImmutableArray<PercussionInstrumentDefinition> Drums,
+    ImmutableArray<PercussionInstrumentDefinition> Leads,
     ImmutableDictionary<PercussionInstrumentDefinition, PercussionInstrumentDefinition> Doubles
 );

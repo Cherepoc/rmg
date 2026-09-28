@@ -8,26 +8,27 @@ namespace Rmg.Tests.DrumKits;
 public sealed class DrumPresenceTest
 {
     [Test]
-    public async Task OnlyDrumsThatColourTheGroove_SitOut_AndDrumsWithARole_ChangeTheirStroke_NeverInTheFirstBarPattern()
+    public async Task OnlyDrumsThatLeadNoRole_SitOut_AndTheLeads_ChangeTheirStroke_NeverInTheFirstBarPattern()
     {
         int resting = 0, strokes = 0;
         foreach (var song in TestCorpus.Range(40))
         {
-            var percussionOnly = song.Trace.Where(x => x.Point == TracePoints.PercussionOnly).ToDictionary(x => x.Section, x => (bool)x.Value!);
+            var leads = song.Trace.Where(x => x.Point == TracePoints.Kit)
+                .ToDictionary(x => x.Section, x => ((SectionKit)x.Value!).Leads.Select(DrumGroups.GetTrackNumber).ToHashSet());
             foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.DrumPresence))
             {
                 var bars = (BarDrums)entry.Value!;
                 foreach (var (track, letter) in bars.Resting)
                 {
                     resting++;
-                    await Assert.That(DrumGroups.GetGroup(track).HoldsARole || percussionOnly[entry.Section]).IsFalse();
+                    await Assert.That(leads[entry.Section].Contains(track)).IsFalse();
                     await Assert.That(letter).IsGreaterThan(0);
                 }
 
                 foreach (var ((track, letter), _) in bars.Strokes)
                 {
                     strokes++;
-                    await Assert.That(DrumGroups.GetDrum(track).HasStrokes).IsTrue();
+                    await Assert.That(DrumGroups.GetDrum(track).HasStrokes && leads[entry.Section].Contains(track)).IsTrue();
                     await Assert.That(letter).IsGreaterThan(0);
                 }
             }
@@ -98,7 +99,7 @@ public sealed class DrumPresenceTest
         {
             var context = new GenerationContext(1);
             return Enumerable.Range(0, 2_000)
-                .Average(_ => DrumPresence.Draw(context, tracks, scheme, false, _ => 0, new RhythmicUnconventionality(unconventionality).Tilt, Tilt.None).Resting.Count / 2.0);
+                .Average(_ => DrumPresence.Draw(context, tracks, scheme, new HashSet<int>(), _ => 0, new RhythmicUnconventionality(unconventionality).Tilt, Tilt.None).Resting.Count / 2.0);
         }
 
         await Assert.That(Share(0)).IsLessThan(0.15);
