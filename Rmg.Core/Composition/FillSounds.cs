@@ -25,29 +25,30 @@ internal sealed class FillSounds
 
     private readonly ImmutableSortedDictionary<DrumRole, ImmutableArray<RunSound>> _sounds;
 
-    // every role's sounds as a landing weighs them: by their drum's weight, shared among its sounds
-    private readonly ImmutableSortedDictionary<DrumRole, ImmutableArray<Weighted<RunSound>>> _landingSounds;
+    // every role's sounds as a run or a landing weighs them: by their drum's weight, shared among its sounds by theirs
+    private readonly ImmutableSortedDictionary<DrumRole, ImmutableArray<Weighted<RunSound>>> _weightedSounds;
 
     public FillSounds(IEnumerable<PercussionInstrumentDefinition> songDrums)
     {
         var sounds = new SortedDictionary<DrumRole, List<RunSound>>();
-        var landingSounds = new SortedDictionary<DrumRole, List<Weighted<RunSound>>>();
+        var weightedSounds = new SortedDictionary<DrumRole, List<Weighted<RunSound>>>();
         foreach (var drum in songDrums)
         {
             var role = GroupRoles.Single(x => x.Key.Drums.Contains(drum)).Value;
             if (!sounds.TryGetValue(role, out var list))
                 sounds[role] = list = [];
-            var drumSounds = drum.ArticulationCodes
-                .Select(code => new RunSound(role, DrumGroups.GetTrackNumber(drum), drum.GetArticulationIndex(code), code, drum.Name))
+            var drumSounds = drum.Sounds
+                .Select(x => new RunSound(role, DrumGroups.GetTrackNumber(drum), drum.GetArticulationIndex(x.Code), x.Code, drum.Name))
                 .ToArray();
             list.AddRange(drumSounds);
-            if (!landingSounds.TryGetValue(role, out var weighted))
-                landingSounds[role] = weighted = [];
-            weighted.AddRange(drumSounds.Select(x => new Weighted<RunSound>(drum.Weight / drumSounds.Length, x)));
+            if (!weightedSounds.TryGetValue(role, out var weighted))
+                weightedSounds[role] = weighted = [];
+            var soundWeight = drum.Sounds.Sum(x => x.Weight);
+            weighted.AddRange(drumSounds.Zip(drum.Sounds, (x, sound) => new Weighted<RunSound>(drum.Weight * sound.Weight / soundWeight, x)));
         }
 
         _sounds = sounds.ToImmutableSortedDictionary(x => x.Key, x => x.Value.ToImmutableArray());
-        _landingSounds = landingSounds.ToImmutableSortedDictionary(x => x.Key, x => x.Value.ToImmutableArray());
+        _weightedSounds = weightedSounds.ToImmutableSortedDictionary(x => x.Key, x => x.Value.ToImmutableArray());
     }
 
     /// <summary>Every sound a run may play, by role.</summary>
@@ -59,13 +60,14 @@ internal sealed class FillSounds
     public FillRun Draw(IGenerationContext context, Drummer drummer, Tilt tilt, Func<DrumRole, int, double> roleChance)
     {
         var sounds = new List<RunSound>();
-        foreach (var (role, candidates) in _sounds)
+        foreach (var (role, candidates) in _weightedSounds)
         {
-            if (!context.TestProbability(roleChance(role, candidates[0].Track)))
+            if (!context.TestProbability(roleChance(role, candidates[0].Value.Track)))
                 continue;
 
+            // the heavier sounds likelier, such as the crash over the china
             var count = Math.Min(Pick(context, FillLayers.SoundCounts), candidates.Length);
-            sounds.AddRange(Shuffle(context, candidates).Take(count));
+            sounds.AddRange(DrumKitGenerator.PickWeighted(context, candidates, count));
         }
 
         // a run that draws no drum plays the snare, or the song's first drum
@@ -144,13 +146,13 @@ internal sealed class FillSounds
     }
 
     /// <summary>
-    ///     The sounds the drums land on at a line: a sound of each role the song has, by the role's chance, the sounds
-    ///     of the heavier drums likelier, such as the cymbal's over the vibraslap.
+    ///     The sounds the drums land on at a line: a sound of each role the song has, by the role's chance, the heavier
+    ///     drums' and sounds likelier, such as the cymbal's over the vibraslap and the crash over the china.
     /// </summary>
     public ImmutableArray<RunSound> DrawLanding(IGenerationContext context, IReadOnlyDictionary<DrumRole, double> chances)
     {
         var sounds = ImmutableArray.CreateBuilder<RunSound>();
-        foreach (var (role, candidates) in _landingSounds)
+        foreach (var (role, candidates) in _weightedSounds)
             if (chances.TryGetValue(role, out var chance) && context.TestProbability(Math.Min(1, chance)))
                 sounds.Add(candidates[Generators.WeightedIndex(candidates)(context)].Value);
         return sounds.ToImmutable();

@@ -38,8 +38,13 @@ public sealed class RealizedNoteTest
             await Assert.That(notes[SongTracks.MelodyTrack].All(x => x.Value.Pitches.Length == 1)).IsTrue();
             await Assert.That(notes[SongTracks.BassTrack].All(x => x.Value.Pitches.Length == 1)).IsTrue();
             await Assert.That(notes[SongTracks.ChordsTrack].Any(x => x.Value.Pitches.Length > 1)).IsTrue();
-            // every note keeps the state it was decided from
-            await Assert.That(notes.Values.SelectMany(x => x).All(x => x.Value.State.GetStateValue(StateKinds.Velocity) == x.Value.Velocity))
+            // every note keeps the state it was decided from, and a drum's plays as loud as its sound is over the drum
+            double SoundLoudness(int track, int pitch) => corpusSong.Song.TrackDefinitions[track] is PercussionInstrumentTrack drum
+                ? VelocityLayers.SoundLevel * drum.Sounds.Single(x => x.Code == pitch).Loudness
+                : 0;
+            await Assert.That(notes.All(track => track.Value.All(x =>
+                    (x.Value.State.GetStateValue(StateKinds.Velocity) + SoundLoudness(track.Key, x.Value.Pitches[0])).IsEqualToByEpsilon(x.Value.Velocity)
+                )))
                 .IsTrue();
         }
     }

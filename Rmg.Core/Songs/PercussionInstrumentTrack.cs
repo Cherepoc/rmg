@@ -7,12 +7,15 @@ public sealed class PercussionInstrumentTrack : IInstrumentTrack
 {
     public PercussionInstrumentTrack(
         StateMap stateMap,
-        ImmutableArray<int> articulationCodes
+        ImmutableArray<DrumSound> sounds
     )
     {
         StateMap = stateMap;
-        ArticulationCodes = articulationCodes;
+        Sounds = sounds;
+        ArticulationCodes = [..sounds.Select(x => x.Code)];
     }
+
+    public ImmutableArray<DrumSound> Sounds { get; }
 
     public ImmutableArray<int> ArticulationCodes { get; }
     public StateMap StateMap { get; }

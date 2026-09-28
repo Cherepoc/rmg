@@ -134,7 +134,7 @@ internal sealed class SongTracks
                     .ToStateMap(context);
                 definitions[DrumGroups.GetTrackNumber(drum)] = new PercussionInstrumentTrack(
                     LayerStates.CreateTrackLayer(context, "Track", drumStateMap, _ => VelocityLayers.GetLevel(drum), trackRhythmLayer),
-                    drum.ArticulationCodes
+                    drum.Sounds
                 );
             }
         }

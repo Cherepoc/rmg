@@ -48,6 +48,19 @@ public sealed class DrumUseReportTest
         Console.WriteLine("Landings: " + string.Join(", ", landings.GroupBy(x => x.Drum).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count() / (double)landings.Length:P1}")));
         Console.WriteLine("Cymbal landings: " + string.Join(", ", landings.Where(x => x.Drum == DrumDefinitions.Cymbal.Name).GroupBy(x => x.Code).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count()}")));
 
+        // every drum of more than one sound: how its notes share them, in the groove and in the fills, which name theirs
+        foreach (var drum in DrumGroups.AllDrums.Where(x => x.Sounds.Length > 1))
+        {
+            var notes = songs.SelectMany(x => x.Song.Notes!.TryGetValue(DrumGroups.GetTrackNumber(drum), out var n) ? n.ToArray() : []).ToArray();
+            string Shares(IEnumerable<Rmg.Core.Events.TimelineItem<RealizedNote>> of)
+            {
+                var all = of.ToArray();
+                return string.Join(" ", drum.ArticulationCodes.Select(code => $"{code} {all.Count(x => x.Value.Pitches[0] == code) / (double)Math.Max(1, all.Length):P0}"));
+            }
+            bool IsFill(Rmg.Core.Events.TimelineItem<RealizedNote> note) => note.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.ArticulationIndex) > 0;
+            Console.WriteLine($"Sounds of {drum.Name,-16} groove: {Shares(notes.Where(x => !IsFill(x)))}; fills: {Shares(notes.Where(IsFill))}");
+        }
+
         // sections of percussion only: how many, in how many songs, and how loud they are meant to be
         var percussionOnly = songs.SelectMany(song =>
         {

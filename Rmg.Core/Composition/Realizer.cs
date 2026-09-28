@@ -138,8 +138,10 @@ internal static class Realizer
             var articulationIndex = fixedIndex > 0
                 ? Math.Min(fixedIndex, track.ArticulationCodes.Length) - 1
                 : articulationOffset.ToIndex(track.ArticulationCodes.Length);
-            var articulationCode = track.ArticulationCodes[articulationIndex];
-            return new RealizedNote([articulationCode], noteVelocity, PercussionNoteDuration, stateMap).ToTimelineItem(timelineItem.Position);
+            // and plays as loud as its sound is over the drum
+            var sound = track.Sounds[articulationIndex];
+            var velocity = noteVelocity + VelocityLayers.SoundLevel * sound.Loudness;
+            return new RealizedNote([sound.Code], velocity, PercussionNoteDuration, stateMap).ToTimelineItem(timelineItem.Position);
         }
     }
 

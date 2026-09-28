@@ -1,4 +1,5 @@
 using Rmg.Core.Events;
+using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
@@ -51,11 +52,18 @@ public static class DrumDefinitions
 
     public static PercussionInstrumentDefinition Clap { get; } = new("Clap", [39], 0.3);
 
-    public static PercussionInstrumentDefinition HiHat { get; } = new("Hi-Hat", [42, 44, 46], 1.0, builder => builder.KeepsTime());
+    public static PercussionInstrumentDefinition HiHat { get; } = new(
+        "Hi-Hat",
+        // closed, pedal, open: the pedal quieter and the open louder, both played less than the closed in runs
+        [new DrumSound(42), new DrumSound(44, 0.3, -0.5), new DrumSound(46, 0.5, 0.5)],
+        1.0,
+        builder => builder.KeepsTime()
+    );
 
     public static PercussionInstrumentDefinition Ride { get; } = new(
         "Ride",
-        [51, 53, 59],
+        // the ride, its bell, louder, and the second ride
+        [new DrumSound(51), new DrumSound(53, 0.4, 0.5), new DrumSound(59, 0.6)],
         0.5,
         builder => builder
             .Add(CompositionStateKinds.Rhythm.Fullness, 0.35)
@@ -71,7 +79,13 @@ public static class DrumDefinitions
 
     public static PercussionInstrumentDefinition Tom { get; } = new("Tom", [41, 43, 45, 47, 48, 50], 1.0);
 
-    public static PercussionInstrumentDefinition Cymbal { get; } = new("Cymbal", [49, 52, 55, 57], 1.0, loudness: 1);
+    public static PercussionInstrumentDefinition Cymbal { get; } = new(
+        "Cymbal",
+        // the crashes, and the china and the splash, which mark a downbeat less, the splash quieter
+        [new DrumSound(49), new DrumSound(52, 0.25, 0.3), new DrumSound(55, 0.25, -0.5), new DrumSound(57)],
+        1.0,
+        loudness: 1
+    );
 
     public static PercussionInstrumentDefinition Vibraslap { get; } = new("Vibraslap", [58], 0.1);
 

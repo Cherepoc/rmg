@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Rmg.Core.Events;
+using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
@@ -9,27 +10,30 @@ public sealed class PercussionInstrumentDefinition
 {
     public PercussionInstrumentDefinition(
         string name,
-        ImmutableArray<int> articulationCodes,
+        ImmutableArray<DrumSound> sounds,
         double weight,
         Func<StateMapBuilder, StateMapBuilder>? configureStateMap = null,
         double loudness = 0
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
-        if (articulationCodes.Length == 0)
-            throw new ArgumentException("Articulation codes cannot be empty.", nameof(articulationCodes));
+        if (sounds.Length == 0)
+            throw new ArgumentException("A drum has at least one sound.", nameof(sounds));
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(weight);
         ArgumentOutOfRangeException.ThrowIfLessThan(loudness, -1);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(loudness, 1);
 
         Name = name;
-        ArticulationCodes = articulationCodes;
+        Sounds = sounds;
+        ArticulationCodes = [..sounds.Select(x => x.Code)];
         Weight = weight;
         ConfigureStateMap = configureStateMap ?? (builder => builder);
         Loudness = loudness;
     }
 
     public string Name { get; }
+
+    public ImmutableArray<DrumSound> Sounds { get; }
 
     public ImmutableArray<int> ArticulationCodes { get; }
 
