@@ -13,7 +13,7 @@ public sealed class StateTraceTest
 
     private static readonly string[] Layers =
     [
-        "Song", "Section", "Track", "Track role", "Section track", "Drum", "Drum group", "Section drum group",
+        "Song", "Section", "Track", "Track role", "Section track", "Drum", "Drum role", "Drum group", "Section drum group",
         "Bar pattern", "Beat", "Note", "Bar", StateContribution.UnlabeledLayer
     ];
 
@@ -74,8 +74,8 @@ public sealed class StateTraceTest
         {
             var contributions = entry.StateMap.Explain(kind);
 
-            // the snare's own +1 is there, every layer is a known one, and the parts add up to the value
-            await Assert.That(contributions).Contains(new StateContribution("Drum", 1));
+            // the backbeat's +1 is there, from the snare's role, every layer is a known one, and the parts add up to the value
+            await Assert.That(contributions).Contains(new StateContribution(DrumRoles.Layer, 1));
             await Assert.That(contributions.All(x => Layers.Contains(x.Layer))).IsTrue();
             await Assert.That(contributions.Sum(x => (int)x.Value)).IsEqualTo(entry.StateMap.GetStateValue(kind));
         }

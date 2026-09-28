@@ -31,8 +31,8 @@ public sealed class FillLineTest
         var spans = fills.GroupBy(x => x.Span).OrderBy(x => x.Key).Select(x => $"{x.Key}: {x.Count() / (double)fills.Count:P0}");
         var played = fills.Where(x => x.Span > 0).ToArray();
         return $"{fills.Count} lines; spans {string.Join(", ", spans)}; " +
-               $"kick landing {fills.Count(x => x.Landing.Any(s => s.Role == DrumRole.Kick)) / (double)fills.Count:P0}, " +
-               $"cymbal {fills.Count(x => x.Landing.Any(s => s.Role == DrumRole.Cymbal)) / (double)fills.Count:P0}; " +
+               $"kick landing {fills.Count(x => x.Landing.Any(s => s.Role == FillDrumRole.Kick)) / (double)fills.Count:P0}, " +
+               $"cymbal {fills.Count(x => x.Landing.Any(s => s.Role == FillDrumRole.Cymbal)) / (double)fills.Count:P0}; " +
                $"fullness {(played.Length > 0 ? played.Average(x => x.Fullness) : 0):F2}";
     }
 
@@ -43,7 +43,7 @@ public sealed class FillLineTest
         FillDecision[] Of(bool isPhrase) => [..lines.Where(x => x.IsPhrase == isPhrase).Select(x => x.Decision)];
         var (phrase, section) = (Of(true), Of(false));
         double None(FillDecision[] fills) => fills.Count(x => x.Span <= 0) / (double)fills.Length;
-        double Kick(FillDecision[] fills) => fills.Count(x => x.Landing.Any(s => s.Role == DrumRole.Kick)) / (double)fills.Length;
+        double Kick(FillDecision[] fills) => fills.Count(x => x.Landing.Any(s => s.Role == FillDrumRole.Kick)) / (double)fills.Length;
         double Fullness(FillDecision[] fills) => fills.Where(x => x.Span > 0).Average(x => x.Fullness);
 
         // the groove mostly runs on at a phrase line, as it did in a table of its own: 70% none, landing now and then

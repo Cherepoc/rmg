@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Rmg.Core.Events;
+using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
@@ -14,7 +15,8 @@ public sealed class PercussionInstrumentDefinition
         double weight,
         Func<StateMapBuilder, StateMapBuilder>? configureStateMap = null,
         double loudness = 0,
-        bool walks = false
+        bool walks = false,
+        ImmutableArray<Weighted<DrumRole>> roles = default
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -31,7 +33,14 @@ public sealed class PercussionInstrumentDefinition
         ConfigureStateMap = configureStateMap ?? (builder => builder);
         Loudness = loudness;
         Walks = walks;
+        Roles = roles.IsDefaultOrEmpty ? [new Weighted<DrumRole>(1, DrumRole.Colour)] : roles;
     }
+
+    /// <summary>
+    ///     The drum's affinity for every role in the groove (<see cref="DrumRoles" />), its main role the heaviest; a drum
+    ///     with none given colours it.
+    /// </summary>
+    public ImmutableArray<Weighted<DrumRole>> Roles { get; }
 
     /// <summary>
     ///     Whether the drum walks its sounds from note to note, as the toms and the congas walk their pitches; a drum

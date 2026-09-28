@@ -130,7 +130,7 @@ internal sealed class FillGenerator
 
         // the drums land after they stopped, as they come back, and always where the song's form marks the line,
         // such as where the band comes in; on the drum kit, or on the percussion into a section of percussion only
-        var landings = FillLayers.Landings.Where(x => x.Key == DrumRole.Percussion == line.Next.IsPercussionOnly).ToImmutableDictionary(
+        var landings = FillLayers.Landings.Where(x => x.Key == FillDrumRole.Percussion == line.Next.IsPercussionOnly).ToImmutableDictionary(
             x => x.Key,
             x => line.IsLandingForced ? 1
                 : span > 0 && play.Treatment == GrooveTreatment.Stop ? FillLayers.StopLandingChance
@@ -174,14 +174,14 @@ internal sealed class FillGenerator
         // where the drums stop, they rest half the time: a break
         // a run plays the percussion alone in a section of percussion only, and now and then in one of the drum kit
         var isPercussion = section.IsPercussionOnly ||
-                           (_sounds.Sounds.ContainsKey(DrumRole.Percussion) && _context.TestProbability(rhythm.Tilt.Chance(FillLayers.PercussionRunChance, 1)));
+                           (_sounds.Sounds.ContainsKey(FillDrumRole.Percussion) && _context.TestProbability(rhythm.Tilt.Chance(FillLayers.PercussionRunChance, 1)));
         var run = treatment == GrooveTreatment.Stop && _context.TestProbability(direction.Chance(FillLayers.StopRestChance, -1))
             ? FillRun.Rest
             : _sounds.Draw(
                 _context,
                 drummer,
                 rhythm.Tilt,
-                (role, track) => !isPercussion ? GetRunChance(grooves.Of(track), rhythm.Tilt) : role == DrumRole.Percussion ? 1 : 0
+                (role, track) => !isPercussion ? GetRunChance(grooves.Of(track), rhythm.Tilt) : role == FillDrumRole.Percussion ? 1 : 0
             );
         var spanShift = _context.TestProbability(Math.Min(1, chances.GetStateValue(CompositionStateKinds.Fill.OffBeatChance)))
             ? _context.TestProbability(0.5) ? 1 : -1

@@ -26,7 +26,7 @@ public sealed class FillArchetypeTest
     private static Setup Create(int seed)
     {
         var context = new GenerationContext(seed);
-        var tracks = SongTracks.Create(context, new RhythmicUnconventionality(0.5), context);
+        var tracks = SongTracks.Create(context, new RhythmicUnconventionality(0.5), context, context);
         // the fills play the snare itself, when the song has a sidestick too
         var snare = new[] { DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare, DrumDefinitions.Clap }
             .Where(tracks.SongDrums.Contains)
@@ -54,7 +54,7 @@ public sealed class FillArchetypeTest
     private static int Articulation(TimelineItem<StateMap> item) => item.Value.GetStateValue(StateKinds.ArticulationIndex);
 
     /// <summary>The song's sounds of a role, in the order of their note numbers.</summary>
-    private static RunSound[] SoundsOf(FillGenerator generator, DrumRole role) =>
+    private static RunSound[] SoundsOf(FillGenerator generator, FillDrumRole role) =>
         generator.Sounds.Sounds.TryGetValue(role, out var sounds) ? [..sounds.OrderBy(x => x.Code)] : [];
 
     /// <summary>The state of a groove's rhythm: its cycle's power of two of a bar, its phase's rank, its finest rank, and more.</summary>
@@ -95,7 +95,7 @@ public sealed class FillArchetypeTest
         Apply(setup, Play(run), FillGrooves.FromSource(groove ?? Beat));
 
     private static FillRun SnareRun(Setup setup, FillSpeed speed = FillSpeed.Steady) =>
-        Run([SoundsOf(setup.Generator, DrumRole.Snare).First(x => x.Track == setup.Snare)], speed: speed);
+        Run([SoundsOf(setup.Generator, FillDrumRole.Snare).First(x => x.Track == setup.Snare)], speed: speed);
 
     /// <summary>The velocities of a track's fill notes before the line.</summary>
     private static double[] Velocities(TrackEventStateTimelineMap<StateMap> song, int track) =>
@@ -119,11 +119,11 @@ public sealed class FillArchetypeTest
     public async Task Sounds_AreEverySoundOfTheSongsDrums()
     {
         var (generator, _, _) = Create(1);
-        var toms = SoundsOf(generator, DrumRole.Toms);
+        var toms = SoundsOf(generator, FillDrumRole.Toms);
 
         await Assert.That(toms.Select(x => x.Code).ToArray()).IsEquivalentTo(DrumDefinitions.Tom.ArticulationCodes.Order().ToArray());
         await Assert.That(toms.All(x => x.Track == Tom)).IsTrue();
-        await Assert.That(SoundsOf(generator, DrumRole.Snare)).IsNotEmpty();
+        await Assert.That(SoundsOf(generator, FillDrumRole.Snare)).IsNotEmpty();
     }
 
     [Test]
@@ -132,7 +132,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var setup = Create(seed);
-            var filled = ApplyRun(setup, Run(SoundsOf(setup.Generator, DrumRole.Toms).Reverse()));
+            var filled = ApplyRun(setup, Run(SoundsOf(setup.Generator, FillDrumRole.Toms).Reverse()));
             var toms = Events(filled, Tom, 0, 12);
 
             await Assert.That(toms.All(x => x.Position is >= 4 and < Line)).IsTrue();
@@ -168,7 +168,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var setup = Create(seed);
-            var toms = Events(ApplyRun(setup, Run([SoundsOf(setup.Generator, DrumRole.Toms)[0]]), Backbeat), Tom, 0, 12);
+            var toms = Events(ApplyRun(setup, Run([SoundsOf(setup.Generator, FillDrumRole.Toms)[0]]), Backbeat), Tom, 0, 12);
 
             // 16ths, two ranks finer than the backbeat's quarters, on its cycle
             await Assert.That(toms).IsNotEmpty();
@@ -233,8 +233,8 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var setup = Create(seed);
-            var tom = SoundsOf(setup.Generator, DrumRole.Toms)[0];
-            var snare = SoundsOf(setup.Generator, DrumRole.Snare).First(x => x.Track == setup.Snare);
+            var tom = SoundsOf(setup.Generator, FillDrumRole.Toms)[0];
+            var snare = SoundsOf(setup.Generator, FillDrumRole.Snare).First(x => x.Track == setup.Snare);
             var filled = ApplyRun(setup, Run([tom, snare], FillPath.Loop, 2));
             var toms = Events(filled, Tom, 0, 12).Select(x => x.Position).ToArray();
 
@@ -250,10 +250,10 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var setup = Create(seed);
-            var crash = SoundsOf(setup.Generator, DrumRole.Cymbal).First(x => x.Code == DrumSounds.CrashCymbal1);
+            var crash = SoundsOf(setup.Generator, FillDrumRole.Cymbal).First(x => x.Code == DrumSounds.CrashCymbal1);
             // the cymbal's own rhythm: a bar's cycle, its strongest note alone, as the accents' groove has it
             var grooves = new FillGrooves(Beat, ImmutableDictionary<int, StateMap>.Empty.Add(Cymbal, Groove(0, 0, 0)));
-            var filled = Apply(setup, Play(Run([crash, SoundsOf(setup.Generator, DrumRole.Toms)[0]], FillPath.Loop, 2)), grooves);
+            var filled = Apply(setup, Play(Run([crash, SoundsOf(setup.Generator, FillDrumRole.Toms)[0]], FillPath.Loop, 2)), grooves);
 
             // a run in 16ths, of which the crash keeps to the beats: its own cycle two ranks finer
             await Assert.That(Events(filled, Cymbal, 0, 12)).IsNotEmpty();
@@ -269,10 +269,10 @@ public sealed class FillArchetypeTest
         var plain = Enumerable.Range(0, 2_000).Select(_ => setup.Generator.DrawRun(Middle, Tilt.Of(0.25, 1))).ToArray();
         var wild = Enumerable.Range(0, 2_000).Select(_ => setup.Generator.DrawRun(Middle, Tilt.Of(4, 1))).ToArray();
         double Conventional(FillRun[] runs) =>
-            runs.Count(x => x.Sounds.All(s => s.Role is DrumRole.Snare or DrumRole.Toms)) / (double)runs.Length;
+            runs.Count(x => x.Sounds.All(s => s.Role is FillDrumRole.Snare or FillDrumRole.Toms)) / (double)runs.Length;
         double InOrder(FillRun[] runs)
         {
-            var codes = runs.Select(x => x.Sounds.Where(s => s.Role == DrumRole.Toms).Select(s => s.Code).ToArray()).Where(x => x.Length > 2).ToArray();
+            var codes = runs.Select(x => x.Sounds.Where(s => s.Role == FillDrumRole.Toms).Select(s => s.Code).ToArray()).Where(x => x.Length > 2).ToArray();
             return codes.Count(x => x.Zip(x.Skip(1)).All(p => p.Second < p.First) || x.Zip(x.Skip(1)).All(p => p.Second > p.First)) / (double)codes.Length;
         }
 
@@ -282,7 +282,7 @@ public sealed class FillArchetypeTest
         await Assert.That(InOrder(plain)).IsGreaterThan(0.95);
         await Assert.That(InOrder(wild)).IsLessThan(InOrder(plain) - 0.3);
         // a roll on the snare alone, now and then
-        await Assert.That(plain.Count(x => x.Sounds is [{ Role: DrumRole.Snare }]) / (double)plain.Length).IsGreaterThan(0.1);
+        await Assert.That(plain.Count(x => x.Sounds is [{ Role: FillDrumRole.Snare }]) / (double)plain.Length).IsGreaterThan(0.1);
     }
 
     [Test]
@@ -310,8 +310,8 @@ public sealed class FillArchetypeTest
         {
             var setup = Create(seed);
             var (generator, song, snare) = setup;
-            var crash = SoundsOf(generator, DrumRole.Cymbal).First(x => x.Code == DrumSounds.CrashCymbal1);
-            var sounds = new[] { SoundsOf(generator, DrumRole.Kick)[0], SoundsOf(generator, DrumRole.Snare).First(x => x.Track == snare), crash };
+            var crash = SoundsOf(generator, FillDrumRole.Cymbal).First(x => x.Code == DrumSounds.CrashCymbal1);
+            var sounds = new[] { SoundsOf(generator, FillDrumRole.Kick)[0], SoundsOf(generator, FillDrumRole.Snare).First(x => x.Track == snare), crash };
             var filled = Apply(setup, new FillPlay(4, GrooveTreatment.Stop, Run(sounds, width: 3), StateMap.Default), FillGrooves.FromSource(bar));
             // the crash is the fill's own, where the drums stop
             var from = Events(filled, Cymbal, 0, 12).Single().Position;
@@ -326,7 +326,7 @@ public sealed class FillArchetypeTest
     public async Task AHalfBeatOverTheGroove_OnTheOpenHiHat_IsALift()
     {
         var setup = Create(1);
-        var open = SoundsOf(setup.Generator, DrumRole.HiHat).First(x => x.Code == DrumSounds.OpenHiHat);
+        var open = SoundsOf(setup.Generator, FillDrumRole.HiHat).First(x => x.Code == DrumSounds.OpenHiHat);
         var filled = Apply(setup, new FillPlay(0.5, GrooveTreatment.Keep, Run([open]), FillRhythm.PlainLayer));
         var hiHat = Events(filled, HiHat, Line - 0.5, Line);
 
@@ -344,7 +344,7 @@ public sealed class FillArchetypeTest
         var toms = Seeds.SelectMany(seed =>
             {
                 var setup = Create(seed);
-                return Events(ApplyRun(setup, Run(SoundsOf(setup.Generator, DrumRole.Toms)), triplets), Tom, 0, 12);
+                return Events(ApplyRun(setup, Run(SoundsOf(setup.Generator, FillDrumRole.Toms)), triplets), Tom, 0, 12);
             }
         ).ToArray();
 
@@ -387,7 +387,7 @@ public sealed class FillArchetypeTest
         foreach (var seed in Seeds)
         {
             var setup = Create(seed);
-            var first = Events(Apply(setup, Play(Run(SoundsOf(setup.Generator, DrumRole.Toms)), 2) with { SpanShift = 1 }), Tom, 0, 12)[0];
+            var first = Events(Apply(setup, Play(Run(SoundsOf(setup.Generator, FillDrumRole.Toms)), 2) with { SpanShift = 1 }), Tom, 0, 12)[0];
 
             await Assert.That(first.Position % 1).IsEqualTo(0.5).Within(1e-9);
         }

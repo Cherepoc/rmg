@@ -4,8 +4,11 @@ using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
 
-/// <summary>The drums a fill plays, by what they do in the kit.</summary>
-public enum DrumRole
+/// <summary>
+///     A drum's role in a fill, by the sounds a run or a landing plays, finer than its role in the groove
+///     (<see cref="DrumRole" />): the toms and the cymbal both colour a groove, but a run plays them apart.
+/// </summary>
+public enum FillDrumRole
 {
     Kick,
 
@@ -212,11 +215,11 @@ public static class FillLayers
     ///     into a section of percussion only on the percussion, as on the kick; a landing leans on the line's weight twice
     ///     as much as a span (<see cref="LandingLean" />), so that after a phrase line it comes now and then.
     /// </summary>
-    public static ImmutableDictionary<DrumRole, double> Landings { get; } = new Dictionary<DrumRole, double>
+    public static ImmutableDictionary<FillDrumRole, double> Landings { get; } = new Dictionary<FillDrumRole, double>
     {
-        [DrumRole.Kick] = 0.85,
-        [DrumRole.Cymbal] = 0.65,
-        [DrumRole.Percussion] = 0.85
+        [FillDrumRole.Kick] = 0.85,
+        [FillDrumRole.Cymbal] = 0.65,
+        [FillDrumRole.Percussion] = 0.85
     }.ToImmutableDictionary();
 
     /// <summary>

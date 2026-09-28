@@ -20,6 +20,7 @@ internal sealed class SectionGenerator
     private const int DrumPresenceStream = 2;
     private const int PercussionStream = 3;
     private const int DrumStrokeStream = 4;
+    private const int DrumRoleStream = 5;
 
     private readonly IGenerationContext _context;
     private readonly int _seed;
@@ -132,7 +133,21 @@ internal sealed class SectionGenerator
         var scheme = PhraseSchemes.Pick(context, rhythm);
         var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context), tilt);
 
-        // the strokes the section changes from the song's, and how its drums play its bars, each from a sequence of its own
+        // the roles the section draws again for the song's drums, as their parts in its grooves and its fills, the strokes
+        // it changes from the song's, and how its drums play its bars, each from a sequence of its own
+        var roleContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumRoleStream));
+        var sectionRoles = _tracks.SongDrums.Select(DrumGroups.GetTrackNumber).Order()
+            .ToImmutableDictionary(x => x, x => DrumRoles.DrawSection(roleContext, DrumGroups.GetDrum(x), SongRole(x), rhythm.Tilt));
+        StateTrace.Record(
+            TracePoints.DrumRoles,
+            SectionTrace,
+            sectionId,
+            0,
+            StateMap.Default,
+            0,
+            string.Join(", ", sectionRoles.Where(x => !x.Value.IsDefault).Select(x => $"{x.Key} {(DrumRole)x.Value.GetStateValue(CompositionStateKinds.DrumRole).Value}")),
+            sectionRoles.Where(x => !x.Value.IsDefault).ToImmutableDictionary(x => x.Key, x => (DrumRole)x.Value.GetStateValue(CompositionStateKinds.DrumRole).Value)
+        );
         var strokeContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumStrokeStream));
         var sectionStrokes = ImmutableDictionary.CreateBuilder<int, int>();
         foreach (var track in activeDrumTrackNumbers.Order().Where(x => DrumGroups.GetDrum(x).HasStrokes))
@@ -150,7 +165,7 @@ internal sealed class SectionGenerator
         );
         StateTrace.Record(TracePoints.DrumPresence, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{string.Join(", ", barDrums.Resting)}; {string.Join(", ", barDrums.Strokes)}", barDrums);
 
-        var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm).ToArray();
+        var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, sectionRoles, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm).ToArray();
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, sectionRhythm);
         return new GeneratedSection(
             KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Timeline)], barStateTimelineMap).Repeat(2),
@@ -180,6 +195,12 @@ internal sealed class SectionGenerator
             new SectionEnergyTrace(energy, energy * rhythm.Coupling)
         );
         return (songStateMap, energy);
+    }
+
+    /// <summary>The role a drum plays in the song, before a section draws it again.</summary>
+    private DrumRole SongRole(int track)
+    {
+        return (DrumRole)_tracks.Definitions[track].StateMap.GetStateValue(CompositionStateKinds.DrumRole).Value;
     }
 
     /// <summary>The stroke a drum that has strokes plays in the song, before a section changes it.</summary>
@@ -248,6 +269,7 @@ internal sealed class SectionGenerator
         int sectionId,
         StateMap sectionStateMap,
         ImmutableHashSet<int> activeDrumTrackNumbers,
+        ImmutableDictionary<int, StateMap> sectionRoles,
         ImmutableDictionary<int, int> sectionStrokes,
         BarDrums barDrums,
         StateTimelineMap barStateTimelineMap,
@@ -268,6 +290,7 @@ internal sealed class SectionGenerator
             foreach (var trackNumber in group.TrackNumbers.Where(activeDrumTrackNumbers.Contains))
                 trackStateMaps[trackNumber] = CreateSectionTrackLayer(context, trackNumber, sectionRhythm, sectionRhythm.Energy)
                     .MergeWith(groupStateMap)
+                    .MergeWith(sectionRoles[trackNumber])
                     .MergeWith(sectionStrokes.TryGetValue(trackNumber, out var stroke) ? DrumStrokes.At(StateDepths.Section, stroke) : StateMap.Default);
 
             // a drum out of the groove still has the state the drums share, with no notes, so that a note added
@@ -286,7 +309,7 @@ internal sealed class SectionGenerator
                 ..idleTrackNumbers.Select(x => new BarFeel(
                         x,
                         Progressions.BarCount - 1,
-                        SongTracks.GetGenerationStateMap(_tracks.Definitions[x]).MergeWith(groupStateMap),
+                        SongTracks.GetGenerationStateMap(_tracks.Definitions[x]).MergeWith(groupStateMap).MergeWith(sectionRoles[x]),
                         0
                     )
                 )

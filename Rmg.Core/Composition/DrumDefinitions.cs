@@ -1,4 +1,6 @@
+using System.Collections.Immutable;
 using Rmg.Core.Events;
+using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
@@ -6,52 +8,23 @@ namespace Rmg.Core.Composition;
 /// <summary>
 ///     The drums. A weight is how likely the drum is to be chosen among the other drums it competes with, both
 ///     when choosing the drums of a song and the drums of a section; a loudness leans a section's choice by its energy:
-///     the crash and the ride loud, the tambourine a little, the shakers a little quiet and the cross-stick quiet.
+///     the crash and the ride loud, the tambourine a little, the shakers a little quiet. A drum's roles in the groove
+///     (<see cref="DrumRoles" />) set its fixed rhythm.
 /// </summary>
 public static class DrumDefinitions
 {
-    /// <summary>The kick's part in a groove: it repeats its figure, the base of the groove.</summary>
-    public static StateMapBuilder GroundsTheGroove(this StateMapBuilder builder)
-    {
-        return builder.Add(CompositionStateKinds.Rhythm.Variation, -0.4);
-    }
+    private static ImmutableArray<Weighted<DrumRole>> Plays(DrumRole role) => [new(1, role)];
 
-    /// <summary>
-    ///     The hi-hat's part in a groove: it plays faster than the other drums, and like the ride keeps time, full and
-    ///     steady.
-    /// </summary>
-    public static StateMapBuilder KeepsTime(this StateMapBuilder builder)
-    {
-        return builder
-            .Add(CompositionStateKinds.Rhythm.Period.Power, -1)
-            .Add(CompositionStateKinds.Rhythm.Fullness, 0.35)
-            .Add(CompositionStateKinds.Rhythm.Variation, -0.5);
-    }
-
-    /// <summary>
-    ///     The snare's part in a groove, the backbeat: a cycle of half a bar, shifted by half of it, puts the main hits
-    ///     on beats 2 and 4, and with no weaker hits of its own it plays nothing else unless the rhythm layers add ghost
-    ///     notes; and it keeps its figure, bar after bar.
-    /// </summary>
-    public static StateMapBuilder PlaysTheBackbeat(this StateMapBuilder builder)
-    {
-        return builder
-            .Add(CompositionStateKinds.Rhythm.Period.Power, -1)
-            .Add(CompositionStateKinds.Rhythm.Phase.Rank, 1)
-            .Add(CompositionStateKinds.Rhythm.MaxRank, -2)
-            .Add(CompositionStateKinds.Rhythm.Variation, -0.3);
-    }
-
-    public static PercussionInstrumentDefinition Kick { get; } = new("Kick", [35, 36], 1.0, builder => builder.GroundsTheGroove());
+    public static PercussionInstrumentDefinition Kick { get; } = new("Kick", [35, 36], 1.0, roles: Plays(DrumRole.Ground));
 
     // the cross-stick is a stroke of the snare: quieter, and seldom in a run
     private static DrumSound CrossStick { get; } = new(37, 0.1, -1, 0.25);
 
-    public static PercussionInstrumentDefinition AcousticSnare { get; } = new("Acoustic Snare", [new DrumSound(38), CrossStick], 1.0);
+    public static PercussionInstrumentDefinition AcousticSnare { get; } = new("Acoustic Snare", [new DrumSound(38), CrossStick], 1.0, roles: Plays(DrumRole.Backbeat));
 
-    public static PercussionInstrumentDefinition ElectricSnare { get; } = new("Electric Snare", [new DrumSound(40), CrossStick], 0.7);
+    public static PercussionInstrumentDefinition ElectricSnare { get; } = new("Electric Snare", [new DrumSound(40), CrossStick], 0.7, roles: Plays(DrumRole.Backbeat));
 
-    public static PercussionInstrumentDefinition Clap { get; } = new("Clap", [39], 0.3);
+    public static PercussionInstrumentDefinition Clap { get; } = new("Clap", [39], 0.3, roles: Plays(DrumRole.Backbeat));
 
     public static PercussionInstrumentDefinition HiHat { get; } = new(
         "Hi-Hat",
@@ -59,7 +32,7 @@ public static class DrumDefinitions
         // rarely as the stroke, a loud wash, and now and then as an accent off the beat
         [new DrumSound(42), new DrumSound(44, 0.3, -0.5, 0.15), new DrumSound(46, 0.5, 0.5, 0.05, DrumAccents.OpenHiHat, 1)],
         1.0,
-        builder => builder.KeepsTime()
+        roles: Plays(DrumRole.Time)
     );
 
     public static PercussionInstrumentDefinition Ride { get; } = new(
@@ -67,10 +40,10 @@ public static class DrumDefinitions
         // the ride, its bell, louder, now and then as an accent on the beat, and the second ride
         [new DrumSound(51), new DrumSound(53, 0.4, 0.5, 0.05, DrumAccents.RideBell, -1), new DrumSound(59, 0.6, 0, 0.4)],
         0.5,
-        builder => builder
-            .Add(CompositionStateKinds.Rhythm.Fullness, 0.35)
-            .Add(CompositionStateKinds.Rhythm.Variation, -0.5),
-        1
+        // it keeps time a step slower than the hi-hat
+        builder => builder.Add(CompositionStateKinds.Rhythm.Period.Power, 1),
+        1,
+        roles: Plays(DrumRole.Time)
     );
 
     public static PercussionInstrumentDefinition Tambourine { get; } = new("Tambourine", [54], 0.2, loudness: 0.5);
@@ -91,24 +64,24 @@ public static class DrumDefinitions
 
     public static PercussionInstrumentDefinition Vibraslap { get; } = new("Vibraslap", [58], 0.1);
 
-    // the percussion stands in for the drum kit by its register, and plays its part in a groove: the low drums ground
+    // the percussion stands in for the drum kit by its register, and plays its role in a groove: the low drums ground
     // it as the kick does, the dry high ones play the backbeat as the snare does, and the bells, the bongos and the
     // guiro keep time as the hi-hat does
-    public static PercussionInstrumentDefinition Bongo { get; } = new("Bongo", [60, 61], 0.15, builder => builder.KeepsTime(), walks: true);
+    public static PercussionInstrumentDefinition Bongo { get; } = new("Bongo", [60, 61], 0.15, walks: true, roles: Plays(DrumRole.Time));
 
-    public static PercussionInstrumentDefinition Conga { get; } = new("Conga", [62, 63, 64], 0.15, builder => builder.GroundsTheGroove(), walks: true);
+    public static PercussionInstrumentDefinition Conga { get; } = new("Conga", [62, 63, 64], 0.15, walks: true, roles: Plays(DrumRole.Ground));
 
-    public static PercussionInstrumentDefinition Timbale { get; } = new("Timbale", [65, 66], 0.1, builder => builder.GroundsTheGroove(), walks: true);
+    public static PercussionInstrumentDefinition Timbale { get; } = new("Timbale", [65, 66], 0.1, walks: true, roles: Plays(DrumRole.Ground));
 
-    public static PercussionInstrumentDefinition Agogo { get; } = new("Agogo", [67, 68], 0.1, builder => builder.KeepsTime(), walks: true);
+    public static PercussionInstrumentDefinition Agogo { get; } = new("Agogo", [67, 68], 0.1, walks: true, roles: Plays(DrumRole.Time));
 
-    public static PercussionInstrumentDefinition Cowbell { get; } = new("Cowbell", [56], 0.1, builder => builder.KeepsTime());
+    public static PercussionInstrumentDefinition Cowbell { get; } = new("Cowbell", [56], 0.1, roles: Plays(DrumRole.Time));
 
-    public static PercussionInstrumentDefinition Claves { get; } = new("Claves", [75], 0.1, builder => builder.PlaysTheBackbeat());
+    public static PercussionInstrumentDefinition Claves { get; } = new("Claves", [75], 0.1, roles: Plays(DrumRole.Backbeat));
 
-    public static PercussionInstrumentDefinition WoodBlock { get; } = new("Wood Block", [76, 77], 0.1, builder => builder.PlaysTheBackbeat(), walks: true);
+    public static PercussionInstrumentDefinition WoodBlock { get; } = new("Wood Block", [76, 77], 0.1, walks: true, roles: Plays(DrumRole.Backbeat));
 
-    public static PercussionInstrumentDefinition Guiro { get; } = new("Guiro", [73, 74], 0.1, builder => builder.KeepsTime(), walks: true);
+    public static PercussionInstrumentDefinition Guiro { get; } = new("Guiro", [73, 74], 0.1, walks: true, roles: Plays(DrumRole.Time));
 
     public static PercussionInstrumentDefinition Triangle { get; } = new("Triangle", [80, 81], 0.1);
 

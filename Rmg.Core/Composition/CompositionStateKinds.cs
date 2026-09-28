@@ -54,6 +54,9 @@ public static class CompositionStateKinds
     // beats alike, more for a melody; a section's conventionality moves it
     public static StateKind<double> NoteDynamics { get; } = StateKinds.CreateMultiplicative<double>(Prefix + "NoteDynamics");
 
+    // a drum's role in the groove (a DrumRole), set by the lowest layer, such as a section's over its song's
+    public static StateKind<LayerValue<int>> DrumRole { get; } = StateKinds.CreateLowestLayerWins<int>(Prefix + "DrumRole");
+
     // how loud and busy a section is meant to be, around 0: it leans the section's draws, never decides them
     public static StateKind<double> Energy { get; } = StateKinds.CreateAdditive<double>(Prefix + "Energy", isShared: true);
 

@@ -13,25 +13,25 @@ namespace Rmg.Core.Composition;
 /// </summary>
 internal sealed class FillSounds
 {
-    private static readonly ImmutableDictionary<DrumGroup, DrumRole> GroupRoles = new Dictionary<DrumGroup, DrumRole>
+    private static readonly ImmutableDictionary<DrumGroup, FillDrumRole> GroupRoles = new Dictionary<DrumGroup, FillDrumRole>
     {
-        [DrumGroups.Kick] = DrumRole.Kick,
-        [DrumGroups.Snare] = DrumRole.Snare,
-        [DrumGroups.Toms] = DrumRole.Toms,
-        [DrumGroups.Timekeepers] = DrumRole.HiHat,
-        [DrumGroups.Accents] = DrumRole.Cymbal,
-        [DrumGroups.Percussion] = DrumRole.Percussion
+        [DrumGroups.Kick] = FillDrumRole.Kick,
+        [DrumGroups.Snare] = FillDrumRole.Snare,
+        [DrumGroups.Toms] = FillDrumRole.Toms,
+        [DrumGroups.Timekeepers] = FillDrumRole.HiHat,
+        [DrumGroups.Accents] = FillDrumRole.Cymbal,
+        [DrumGroups.Percussion] = FillDrumRole.Percussion
     }.ToImmutableDictionary();
 
-    private readonly ImmutableSortedDictionary<DrumRole, ImmutableArray<RunSound>> _sounds;
+    private readonly ImmutableSortedDictionary<FillDrumRole, ImmutableArray<RunSound>> _sounds;
 
     // every role's sounds as a run or a landing weighs them: by their drum's weight, shared among its sounds by theirs
-    private readonly ImmutableSortedDictionary<DrumRole, ImmutableArray<Weighted<RunSound>>> _weightedSounds;
+    private readonly ImmutableSortedDictionary<FillDrumRole, ImmutableArray<Weighted<RunSound>>> _weightedSounds;
 
     public FillSounds(IEnumerable<PercussionInstrumentDefinition> songDrums)
     {
-        var sounds = new SortedDictionary<DrumRole, List<RunSound>>();
-        var weightedSounds = new SortedDictionary<DrumRole, List<Weighted<RunSound>>>();
+        var sounds = new SortedDictionary<FillDrumRole, List<RunSound>>();
+        var weightedSounds = new SortedDictionary<FillDrumRole, List<Weighted<RunSound>>>();
         foreach (var drum in songDrums)
         {
             var role = GroupRoles.Single(x => x.Key.Drums.Contains(drum)).Value;
@@ -52,12 +52,12 @@ internal sealed class FillSounds
     }
 
     /// <summary>Every sound a run may play, by role.</summary>
-    public ImmutableSortedDictionary<DrumRole, ImmutableArray<RunSound>> Sounds => _sounds;
+    public ImmutableSortedDictionary<FillDrumRole, ImmutableArray<RunSound>> Sounds => _sounds;
 
     /// <summary>A run's sounds, their order, its walk and window, and whether it changes speed.</summary>
     /// <param name="roleChance">The chance a run plays a role's drums, as their state has it in the section.</param>
     /// <param name="tilt">How the section's rhythm leans the run's rarer choices.</param>
-    public FillRun Draw(IGenerationContext context, Drummer drummer, Tilt tilt, Func<DrumRole, int, double> roleChance)
+    public FillRun Draw(IGenerationContext context, Drummer drummer, Tilt tilt, Func<FillDrumRole, int, double> roleChance)
     {
         var sounds = new List<RunSound>();
         foreach (var (role, candidates) in _weightedSounds)
@@ -76,15 +76,15 @@ internal sealed class FillSounds
 
         // a run that draws no drum plays the snare, or the song's first drum
         if (sounds.Count == 0 && _sounds.Count > 0)
-            sounds.Add((_sounds.TryGetValue(DrumRole.Snare, out var snares) ? snares : _sounds.Values.First())[0]);
+            sounds.Add((_sounds.TryGetValue(FillDrumRole.Snare, out var snares) ? snares : _sounds.Values.First())[0]);
 
         var order = Shuffle(context, sounds);
         // the toms keep their order of pitch, as their note numbers have it, down or up
         if (context.TestProbability(tilt.Chance(FillLayers.PitchOrderChance, FillLayers.PitchOrderLean)))
         {
             var isDown = context.TestProbability(0.5);
-            var toms = new Queue<RunSound>(order.Where(x => x.Role == DrumRole.Toms).OrderBy(x => isDown ? -x.Code : x.Code));
-            order = [..order.Select(x => x.Role == DrumRole.Toms ? toms.Dequeue() : x)];
+            var toms = new Queue<RunSound>(order.Where(x => x.Role == FillDrumRole.Toms).OrderBy(x => isDown ? -x.Code : x.Code));
+            order = [..order.Select(x => x.Role == FillDrumRole.Toms ? toms.Dequeue() : x)];
         }
 
         var width = Math.Min(Pick(context, tilt.Weigh(FillLayers.Widths, x => x > 1 ? 1 : 0)), Math.Max(1, order.Length));
@@ -153,7 +153,7 @@ internal sealed class FillSounds
     ///     The sounds the drums land on at a line: a sound of each role the song has, by the role's chance, the heavier
     ///     drums' and sounds likelier, such as the cymbal's over the vibraslap and the crash over the china.
     /// </summary>
-    public ImmutableArray<RunSound> DrawLanding(IGenerationContext context, IReadOnlyDictionary<DrumRole, double> chances)
+    public ImmutableArray<RunSound> DrawLanding(IGenerationContext context, IReadOnlyDictionary<FillDrumRole, double> chances)
     {
         var sounds = ImmutableArray.CreateBuilder<RunSound>();
         foreach (var (role, candidates) in _weightedSounds)
@@ -181,7 +181,7 @@ internal sealed class FillSounds
 }
 
 /// <summary>A sound a run plays: its drum's role, track, the sound's number on the drum, counted from 1, and its note number.</summary>
-internal sealed record RunSound(DrumRole Role, int Track, int Articulation, int Code, string Drum)
+internal sealed record RunSound(FillDrumRole Role, int Track, int Articulation, int Code, string Drum)
 {
     public override string ToString() => $"{Drum} {Code}";
 }

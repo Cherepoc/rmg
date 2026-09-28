@@ -50,8 +50,8 @@ public static class DrumGroups
         1.0,
         1,
         true,
-        // the backbeat, and in most runs, as a roll or with the toms
-        builder => builder.PlaysTheBackbeat().InRuns(0.5, 0),
+        // in most runs, as a roll or with the toms
+        builder => builder.InRuns(0.5, 0),
         new SongDrumRule([SongDrumRule.OneOf(DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare, DrumDefinitions.Clap)]),
         holdsARole: true
     );

@@ -45,7 +45,13 @@ internal sealed class SongTracks
 
     /// <param name="rhythmicUnconventionality">How far the song's rhythm strays, which its tracks' layers are scaled by.</param>
     /// <param name="strokeContext">The sequence the drums' strokes in the song are drawn from (<see cref="DrumStrokes" />).</param>
-    public static SongTracks Create(IGenerationContext context, RhythmicUnconventionality rhythmicUnconventionality, IGenerationContext strokeContext)
+    /// <param name="roleContext">The sequence the drums' roles in the song are drawn from (<see cref="DrumRoles" />).</param>
+    public static SongTracks Create(
+        IGenerationContext context,
+        RhythmicUnconventionality rhythmicUnconventionality,
+        IGenerationContext strokeContext,
+        IGenerationContext roleContext
+    )
     {
         var trackRhythmLayer = rhythmicUnconventionality.Scale(RhythmLayers.Track);
 
@@ -135,7 +141,9 @@ internal sealed class SongTracks
                 var builder = drum.ConfigureStateMap(drumGroup.ConfigureStateMap(new StateMapBuilder("Drum", perTrack: true)));
                 if (!drum.Walks)
                     builder.Add(CompositionStateKinds.IncrementalArticulationOffset.Multiplier, 0.0);
-                var drumStateMap = builder.ToStateMap(context).MergeWith(DrumStrokes.GenerateSong(strokeContext, drum));
+                var drumStateMap = builder.ToStateMap(context)
+                    .MergeWith(DrumStrokes.GenerateSong(strokeContext, drum))
+                    .MergeWith(DrumRoles.GenerateSong(roleContext, drum, rhythmicUnconventionality.Tilt));
                 definitions[DrumGroups.GetTrackNumber(drum)] = new PercussionInstrumentTrack(
                     LayerStates.CreateTrackLayer(context, "Track", drumStateMap, _ => VelocityLayers.GetLevel(drum), trackRhythmLayer),
                     drum.Sounds
