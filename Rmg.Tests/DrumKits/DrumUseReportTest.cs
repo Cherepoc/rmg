@@ -61,6 +61,24 @@ public sealed class DrumUseReportTest
             Console.WriteLine($"Sounds of {drum.Name,-16} groove: {Shares(notes.Where(x => !IsFill(x)))}; fills: {Shares(notes.Where(IsFill))}");
         }
 
+        // the roles the drums play where they groove: the section's, or the song's where it keeps it
+        Console.WriteLine("Roles where a drum grooves: ground, backbeat, time, colour");
+        foreach (var drum in DrumGroups.AllDrums)
+        {
+            var track = DrumGroups.GetTrackNumber(drum);
+            var roles = all.Where(x => Grooves(x.s, x.span, drum)).Select(x =>
+            {
+                var section = x.s.Trace.First(e => e.Point == TracePoints.DrumRoles && e.Section == x.span.SectionId);
+                var changed = (System.Collections.Immutable.ImmutableDictionary<int, DrumRole>)section.Value!;
+                return changed.TryGetValue(track, out var role)
+                    ? role
+                    : (DrumRole)x.s.Song.TrackDefinitions[track].StateMap.GetStateValue(CompositionStateKinds.DrumRole).Value;
+            }).ToArray();
+            if (roles.Length == 0)
+                continue;
+            Console.WriteLine($"{drum.Name,-18} {string.Join(" ", Enum.GetValues<DrumRole>().Select(r => $"{roles.Count(x => x == r) / (double)roles.Length,4:P0}"))} of {roles.Length}");
+        }
+
         // where the accents fall: the share of the open hi-hat's and the ride bell's groove notes on the beats
         foreach (var (drum, code) in new[] { (DrumDefinitions.HiHat, 46), (DrumDefinitions.Ride, 53) })
         {
