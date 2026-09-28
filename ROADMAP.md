@@ -224,6 +224,24 @@ and the drums change from the bar before in 31% of the bars. 6% of the sections 
 them in half their sections or more; their energy averages -0.03, against 0.14. Listen to the wild end, where the kick
 or the snare in a role not theirs may sound broken rather than bold.
 
+Planned, **a song's drum setup**: most songs play the drum kit alone, some the kit with one or two percussion drums,
+and a few percussion alone, a draw of the song's leaned by its conventionality, where every song now has a kit and
+most some percussion (0 to 4 drums, evenly). In this order, each measured:
+
+1. **Strokes and accents for the hand drums:** the conga, the bongos, the agogo, the timbales, the wood block and the
+   guiro strike a steady tone and accent the beats with their others, where they walk their sounds from note to note,
+   which wanders; the repeated cycles bring the figures back.
+2. **A drum's family as data:** the drum kit, the percussion, or both, as the hand percussion (the tambourine, the
+   shakers, the clap) is, in place of the groups telling it.
+3. **The setup:** the drum kit (most), the kit and one or two percussion drums (some), which may switch to sections of
+   percussion only and back, and percussion alone (a few), whose every section is percussion only, with more drums:
+   one for each role by its main role, and more beside, the hand percussion among them.
+4. **Percussion songs play as a band:** a lead for every role in every section, figures that repeat more (a song layer
+   of less variation), and a count-in on a dry sound, or on the percussion's first.
+
+Measure the drum parts of percussion songs against those of kit songs: notes a bar, bars that repeat the one before,
+the ground on the downbeat and something on 2 and 4 in most bars, and listen, as they may sound thin or aimless.
+
 Later:
 
 - **The clap's ghost notes,** the weak ranks of the backbeat, only after listening, as a clap there may sound busy.
