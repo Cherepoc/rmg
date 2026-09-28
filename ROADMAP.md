@@ -13,8 +13,8 @@ In this order, each measured before it is planned:
    endings, the section modes and the chords' level.
 2. **The melody** (see *Melody at generation*): it plays where it was placed, so a phrase that plays again is heard
    as the same notes, and its shape follows its contour weakly.
-3. **The drums** (see *Drums*): grooves for the percussion, and sections of percussion only; listen to the drums
-   coming and going by bar.
+3. **The drums** (see *Drums*): sections of percussion only; listen to the drums coming and going by bar and to the
+   percussion's grooves.
 4. Smaller: fade-out endings (see *Form*).
 
 ## Section dynamics
@@ -168,20 +168,25 @@ Smaller, when the code is next touched:
 
 A section chooses its drums (`DrumKitGenerator.SelectActiveDrums`): the kick and the snare, and one or two optional
 groups (the timekeepers, the toms, the accents, the percussion), one drum of each, two of the percussion. Over 200
-corpus songs the timekeepers groove in 85% of the sections (76% before their weight was raised to 3), the percussion in
-34% (40%), and a section grooves on 3.2 drums (`DrumUseReportTest`). The triangle, the cuica and the whistle are left out of the song's percussion, as they grate in a
+corpus songs the timekeepers groove in 81% of the sections (76% before their weight was raised to 3, 85% before the
+drums by bar thinned some sections), the percussion in 36% (40%), and a section grooves on 3.2 drums
+(`DrumUseReportTest`). The triangle, the cuica and the whistle are left out of the song's percussion, as they grate in a
 groove, until genres call for them.
 
 Drums by bar (`DrumPresence`): the section's first bar pattern, the phrase scheme's A, plays all its drums, and an
 optional drum sits out the bars of another letter 30% of the time, from about 10% in the plainest sections to 60% in the
 wildest, less the more energy the section has, drawn from a stream of its own; the kick and the snare always play.
 Bars of the same letter play the same drums. The drums a bar plays change from the bar before in 39% of the bars,
-against 23% (fills, crashes and sparse drums), and a bar plays 3.7 drums against 3.9. Planned, in this order:
+against 23% (fills, crashes and sparse drums), and a bar plays 3.7 drums against 3.9.
 
-1. **Grooves for the percussion:** a percussion drum's fixed rhythm by its register, the low ones grounding the
-   downbeats as the kick does, the high ones an offbeat or backbeat figure, as the kick's and the snare's fixed state
-   anchor a drum kit's groove.
-2. **Sections of percussion only:** a section may play its percussion without the drum kit, a chance as layered state of
+The percussion stands in for the drum kit by its register and takes the fixed rhythm of the drum it stands for
+(`DrumDefinitions.GroundsTheGroove`, `PlaysTheBackbeat`, `KeepsTime`): the conga and the timbale ground the groove as
+the kick does, the claves and the wood block play the backbeat as the snare does, and the cowbell, the agogo, the bongos
+and the guiro keep time as the hi-hat does. Where they played as any drum, about 2.8 notes a bar, half of them on 1 and
+3, the time keepers now play 5 to 6.5 notes a bar spread as the hi-hat's, and the claves and the wood block repeat their
+bar 60% of the time as the snare does. Planned:
+
+1. **Sections of percussion only:** a section may play its percussion without the drum kit, a chance as layered state of
    the song's and the section's, leaned by energy and conventionality, so that a song switches to percussion and back
    at section lines, and one that leans far enough plays percussion throughout. What it touches: the kick and the snare
    are always on only in a drum kit section; the percussion plays more drums in its own section, and only where the

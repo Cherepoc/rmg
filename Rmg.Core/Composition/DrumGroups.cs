@@ -50,16 +50,8 @@ public static class DrumGroups
         1.0,
         1,
         true,
-        // backbeat: a cycle of half a bar, shifted by half of it, puts the main hits on beats 2 and 4, and with no
-        // weaker hits of its own the snare plays nothing else unless the rhythm layers add ghost notes
-        builder => builder
-            .Add(CompositionStateKinds.Rhythm.Period.Power, -1)
-            .Add(CompositionStateKinds.Rhythm.Phase.Rank, 1)
-            .Add(CompositionStateKinds.Rhythm.MaxRank, -2)
-            // and keeps its figure, bar after bar
-            .Add(CompositionStateKinds.Rhythm.Variation, -0.3)
-            // and plays in most runs, as a roll or with the toms
-            .InRuns(0.5, 0),
+        // the backbeat, and in most runs, as a roll or with the toms
+        builder => builder.PlaysTheBackbeat().InRuns(0.5, 0),
         new SongDrumRule(
             [
                 SongDrumRule.OneOf(

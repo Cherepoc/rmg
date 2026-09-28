@@ -42,6 +42,26 @@ public sealed class DrumUseReportTest
         var bars = perBar.SelectMany(x => x).ToArray();
         var changes = perBar.Sum(x => x.Zip(x.Skip(1)).Count(p => !p.First.SetEquals(p.Second)));
         Console.WriteLine($"Drums playing in a bar: {bars.Average(x => x.Count):F2}; the drums change from the bar before in {changes / (double)perBar.Sum(x => x.Length - 1):P0} of the bars");
+
+        // where a drum plays within its bars, where it grooves, and how often a bar repeats the one before
+        Console.WriteLine("Where a drum grooves: notes a bar; on 1 and 3, on 2 and 4, on the 8ths between, finer; bars as the one before");
+        foreach (var drum in DrumGroups.AllDrums)
+        {
+            var track = DrumGroups.GetTrackNumber(drum);
+            var grooveBars = all.Where(x => Grooves(x.s, x.span, drum))
+                .SelectMany(x => Enumerable.Range(0, (int)(x.span.Duration / Meter.BarDuration)).Select(bar =>
+                    x.s.Song.Notes![track].Where(n => n.Position >= x.span.Start + bar * Meter.BarDuration && n.Position < x.span.Start + (bar + 1) * Meter.BarDuration)
+                        .Select(n => Math.Round(n.Position - x.span.Start - bar * Meter.BarDuration, 3)).ToArray()).ToArray())
+                .ToArray();
+            var places = grooveBars.SelectMany(x => x).ToArray();
+            if (places.Length == 0)
+                continue;
+            double Share(Func<double, bool> at) => places.Count(at) / (double)places.Length;
+            var repeats = grooveBars.Zip(grooveBars.Skip(1)).Count(x => x.First.Length > 0 && x.First.SequenceEqual(x.Second)) / (double)Math.Max(1, grooveBars.Length - 1);
+            Console.WriteLine($"{drum.Name,-18} {places.Length / (double)grooveBars.Length,5:F1} a bar; {Share(x => x is 0 or 2),4:P0} {Share(x => x is 1 or 3),4:P0} " +
+                              $"{Share(x => x is 0.5 or 1.5 or 2.5 or 3.5),4:P0} {Share(x => x % 0.5 != 0),4:P0}; repeats {repeats:P0}");
+        }
+
         await Task.CompletedTask;
     }
 }
