@@ -73,7 +73,7 @@ public static class DrumDefinitions
 
     public static PercussionInstrumentDefinition Cymbal { get; } = new("Cymbal", [49, 52, 55, 57], 1.0, loudness: 1);
 
-    public static PercussionInstrumentDefinition Vibraslap { get; } = new("Vibraslap", [58], 0.15);
+    public static PercussionInstrumentDefinition Vibraslap { get; } = new("Vibraslap", [58], 0.1);
 
     // the percussion stands in for the drum kit by its register, and plays its part in a groove: the low drums ground
     // it as the kick does, the dry high ones play the backbeat as the snare does, and the bells, the bongos and the

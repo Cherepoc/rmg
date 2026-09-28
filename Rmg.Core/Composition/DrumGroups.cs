@@ -13,6 +13,9 @@ public static class DrumGroups
     /// <summary>The chance that a section may groove on the cymbal, which marks mostly where a section lands.</summary>
     private const double AccentsGrooveChance = 0.12;
 
+    /// <summary>The chance of a song having the vibraslap, which it plays as a landing, with the cymbal.</summary>
+    private const double VibraslapChance = 0.2;
+
     /// <summary>Chance of a song having a sidestick along with an acoustic or an electric snare.</summary>
     private const double CrossStickWithSnareProbability = 0.15;
 
@@ -92,13 +95,15 @@ public static class DrumGroups
     );
 
     // a crash marks where a section lands, so it rarely plays in a groove, and then only on the downbeats, as a crash
-    // ride in a loud section
+    // ride in a loud section; some songs have a vibraslap, which lands now and then in the cymbal's place, as light as
+    // it is, and all but never grooves
     public static DrumGroup Accents { get; } = new(
         nameof(Accents),
-        [DrumDefinitions.Cymbal],
+        [DrumDefinitions.Cymbal, DrumDefinitions.Vibraslap],
         0.4,
         1,
         configureStateMap: builder => builder.Add(CompositionStateKinds.Rhythm.MaxRank, -2).InRuns(0.04),
+        songRule: new SongDrumRule([SongDrumRule.Always(DrumDefinitions.Cymbal), SongDrumRule.Optional(DrumDefinitions.Vibraslap, VibraslapChance)]),
         grooveChance: AccentsGrooveChance
     );
 
@@ -113,8 +118,7 @@ public static class DrumGroups
         DrumDefinitions.Cowbell,
         DrumDefinitions.Claves,
         DrumDefinitions.WoodBlock,
-        DrumDefinitions.Guiro,
-        DrumDefinitions.Vibraslap
+        DrumDefinitions.Guiro
     ];
 
     public static DrumGroup Percussion { get; } = new(

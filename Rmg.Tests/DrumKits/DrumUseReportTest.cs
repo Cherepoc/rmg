@@ -43,6 +43,11 @@ public sealed class DrumUseReportTest
         var changes = perBar.Sum(x => x.Zip(x.Skip(1)).Count(p => !p.First.SetEquals(p.Second)));
         Console.WriteLine($"Drums playing in a bar: {bars.Average(x => x.Count):F2}; the drums change from the bar before in {changes / (double)perBar.Sum(x => x.Length - 1):P0} of the bars");
 
+        // the sounds the drums land on, by drum, and the cymbal's by sound
+        var landings = songs.SelectMany(x => x.Trace.Where(e => e.Point == TracePoints.FillDecision).SelectMany(e => ((FillDecision)e.Value!).Landing)).ToArray();
+        Console.WriteLine("Landings: " + string.Join(", ", landings.GroupBy(x => x.Drum).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count() / (double)landings.Length:P1}")));
+        Console.WriteLine("Cymbal landings: " + string.Join(", ", landings.Where(x => x.Drum == DrumDefinitions.Cymbal.Name).GroupBy(x => x.Code).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count()}")));
+
         // sections of percussion only: how many, in how many songs, and how loud they are meant to be
         var percussionOnly = songs.SelectMany(song =>
         {

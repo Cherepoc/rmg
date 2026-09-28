@@ -169,7 +169,10 @@ Smaller, when the code is next touched:
 A section chooses its drums (`DrumKitGenerator.SelectActiveDrums`): the kick and the snare, and one or two optional
 groups (the timekeepers, the toms, the accents, the percussion), one drum of each, two of the percussion. The
 timekeepers weigh three times the others, still optional. The triangle, the cuica and the whistle are left out of the
-song's percussion, as they grate in a groove, until genres call for them.
+song's percussion, as they grate in a groove, until genres call for them. The vibraslap is an accent, as a crash is:
+a fifth of the songs have it beside the cymbal, and a landing weighs its sounds by their drum's weight, shared among
+its sounds, so that it lands in about one cymbal landing in eleven where the song has it and all but never grooves
+(no section of 200 corpus songs, against 264 as a percussion drum).
 
 Drums by bar (`DrumPresence`): the section's first bar pattern, the phrase scheme's A, plays all its drums, and an
 optional drum sits out the bars of another letter 30% of the time, from about 10% in the plainest sections to 60% in the
@@ -205,10 +208,6 @@ Later:
 - **Shakers over the hi-hat:** layering them rather than replacing it, which needs care in how their figures fit.
 - **Drums by appearance:** a section's later appearance changing its drums, as an edit after assembly (see *Energy by
   appearance*).
-- **The vibraslap as a landing:** it plays as a landing more than a groove, so it could move to the accents, as an
-  optional drum of the song, with a landing's sounds weighed by their drum's weight and leaned by conventionality
-  (see *Sounds by convention*), which would also make the china and the splash rarer landings in plain sections.
-
 ## Chords
 
 Chord shapes are pitch fractions snapped to the scale, picked from a table ordered by unconventionality, laid out by a
@@ -253,11 +252,11 @@ to:
 - **Walks:** one way, turn, loop and random could be one walk with a few values, should they grow.
 - **Idioms the draws no longer tie together:** a lift is now a half-beat run on any sounds, rarely the open hi-hat,
   and a landing takes any cymbal sound, the china and the splash as often as the crashes.
-- **Sounds by convention:** a run or a landing draws among a drum's sounds evenly, so half the cymbal landings are the
-  china or the splash, accents that mark a downbeat less than a crash, where a plain song would crash. Each sound could
-  carry how conventional it is, as data on its drum like the toms' order of pitch: the crashes 1, the china and the
-  splash less, their weights multiplied by the section's chance scale, so plain sections crash and wild ones reach for
-  the others.
+- **Sounds by convention:** a run draws among a drum's sounds evenly, and a landing weighs them by their drum's weight
+  shared among its sounds, so the vibraslap lands rarely, but still half the cymbal landings are the china or the
+  splash, accents that mark a downbeat less than a crash, where a plain song would crash. Each sound could carry how
+  conventional it is, as data on its drum like the toms' order of pitch: the crashes 1, the china and the splash less,
+  their weights multiplied by the section's chance scale, so plain sections crash and wild ones reach for the others.
 - **The drummer's walks and busyness as state:** the fills' rarer choices and each drum
   group's chance of a run are layered state now, and a signature a song layer over them; the favourite walk, a choice
   among four, would need a pool like the chord pool's, and busyness, which weighs the spans and moves the fullness,
