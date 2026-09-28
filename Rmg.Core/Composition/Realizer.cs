@@ -133,10 +133,12 @@ internal static class Realizer
             var articulationOffset = stateMap.GetStateValue(StateKinds.ArticulationOffset);
             var noteVelocity = stateMap.GetStateValue(StateKinds.Velocity);
 
-            // a note may name its sound, as a fill does; otherwise the walk of the articulation picks it
             var fixedIndex = stateMap.GetStateValue(StateKinds.ArticulationIndex);
-            var articulationIndex = fixedIndex > 0
-                ? Math.Min(fixedIndex, track.ArticulationCodes.Length) - 1
+            // a note may name its sound, as a fill does; a drum that strikes plays its stroke; otherwise the walk of the
+            // articulation picks it
+            var stroke = stateMap.GetStateValue(StateKinds.DrumStroke);
+            var articulationIndex = fixedIndex > 0 ? Math.Min(fixedIndex, track.ArticulationCodes.Length) - 1
+                : stroke.IsSet ? stroke.Value
                 : articulationOffset.ToIndex(track.ArticulationCodes.Length);
             // and plays as loud as its sound is over the drum
             var sound = track.Sounds[articulationIndex];

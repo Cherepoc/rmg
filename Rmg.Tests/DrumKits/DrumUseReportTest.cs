@@ -61,6 +61,24 @@ public sealed class DrumUseReportTest
             Console.WriteLine($"Sounds of {drum.Name,-16} groove: {Shares(notes.Where(x => !IsFill(x)))}; fills: {Shares(notes.Where(IsFill))}");
         }
 
+        // the snare's stroke by section: on its cross-stick mostly, by the section's energy, and how many songs switch
+        var snareSections = songs.SelectMany(song =>
+        {
+            var energies = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
+            var snares = new[] { DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare }.Select(DrumGroups.GetTrackNumber).Where(song.Song.Notes!.ContainsKey).ToArray();
+            return song.Map.Sections.Select(span =>
+            {
+                var notes = snares.SelectMany(t => song.Song.Notes![t]).Where(x => x.Position >= span.Start && x.Position < span.End &&
+                    x.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.ArticulationIndex) == 0).ToArray();
+                return (song.Seed, Energy: energies[span.SectionId], Notes: notes.Length, CrossStick: notes.Count(x => x.Value.Pitches[0] == 37) > notes.Length / 2);
+            }).Where(x => x.Notes > 8);
+        }).ToArray();
+        var median = snareSections.Select(x => x.Energy).Order().ElementAt(snareSections.Length / 2);
+        Console.WriteLine($"Snare sections on the cross-stick: {snareSections.Count(x => x.CrossStick) / (double)snareSections.Length:P0}, " +
+                          $"the quieter half {snareSections.Where(x => x.Energy < median).Count(x => x.CrossStick) / (double)snareSections.Count(x => x.Energy < median):P0}, " +
+                          $"the louder {snareSections.Where(x => x.Energy >= median).Count(x => x.CrossStick) / (double)snareSections.Count(x => x.Energy >= median):P0}; " +
+                          $"songs that switch {snareSections.GroupBy(x => x.Seed).Count(x => x.Any(y => y.CrossStick) && x.Any(y => !y.CrossStick))} of {snareSections.Select(x => x.Seed).Distinct().Count()}");
+
         // sections of percussion only: how many, in how many songs, and how loud they are meant to be
         var percussionOnly = songs.SelectMany(song =>
         {

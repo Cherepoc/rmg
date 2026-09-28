@@ -73,9 +73,8 @@ public static class FormLayers
         (DrumDefinitions.Claves, 75),
         (DrumDefinitions.WoodBlock, 76),
         (DrumDefinitions.Cowbell, 56),
-        (DrumDefinitions.CrossStick, 37),
-        (DrumDefinitions.AcousticSnare, 38),
-        (DrumDefinitions.ElectricSnare, 40),
+        (DrumDefinitions.AcousticSnare, 37),
+        (DrumDefinitions.ElectricSnare, 37),
         (DrumDefinitions.Clap, 39)
     ];
 

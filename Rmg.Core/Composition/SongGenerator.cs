@@ -45,7 +45,7 @@ public static class SongGenerator
 
         // how far the rhythm strays from convention, which every rhythm layer from the tracks' own on is scaled by
         var rhythmicUnconventionality = RhythmicUnconventionality.Generate(Stream(SongStream.Rhythm));
-        var tracks = SongTracks.Create(Stream(SongStream.Tracks), rhythmicUnconventionality);
+        var tracks = SongTracks.Create(Stream(SongStream.Tracks), rhythmicUnconventionality, Stream(SongStream.DrumStrokes));
 
         // the song's chords gather around its unconventionality, and a section's around its own shift of it
         var harmonyContext = Stream(SongStream.Harmony);
@@ -186,5 +186,6 @@ internal enum SongStream
     Form = 9,
     Fills = 10,
     Dynamics = 11,
-    Percussion = 12
+    Percussion = 12,
+    DrumStrokes = 13
 }

@@ -19,7 +19,8 @@ public sealed class DrumGroup
         bool isAlwaysOn = false,
         Func<StateMapBuilder, StateMapBuilder>? configureStateMap = null,
         SongDrumRule? songRule = null,
-        double grooveChance = 1
+        double grooveChance = 1,
+        bool holdsARole = false
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -38,7 +39,15 @@ public sealed class DrumGroup
         ConfigureStateMap = configureStateMap ?? (builder => builder);
         SongRule = songRule ?? SongDrumRule.AllDrums;
         GrooveChance = grooveChance;
+        HoldsARole = holdsARole;
     }
+
+    /// <summary>
+    ///     Whether the group's drum holds a role in the groove that a bar must keep, as the kick grounds it, the snare
+    ///     plays the backbeat and the timekeepers keep time: it never sits out a bar, but may change its stroke there
+    ///     (<see cref="DrumPresence" />); the other groups colour the groove, and come and go.
+    /// </summary>
+    public bool HoldsARole { get; }
 
     public string Name { get; }
 

@@ -41,14 +41,14 @@ internal sealed class PatternGenerator
     ///     change their patterns together and bars come back where the scheme repeats them.
     /// </summary>
     /// <param name="trackStateMaps">Every track's state in the section.</param>
-    /// <param name="restingBars">The bars a track sits out, by its number and the letter of the bars: it keeps its state there, with no notes.</param>
+    /// <param name="barDrums">How the drums play the bars of a letter: the bars a track sits out, keeping its state there with no notes, and the strokes it changes to.</param>
     /// <param name="barStateTimelineMap">The state that changes by bar, such as the chord, along the 4-bar pattern.</param>
     /// <param name="context">The section's random sequence.</param>
     public GeneratedBars GenerateBars(
         IGenerationContext context,
         int sectionId,
         ImmutableDictionary<int, StateMap> trackStateMaps,
-        ImmutableHashSet<(int Track, int Letter)> restingBars,
+        BarDrums barDrums,
         StateTimelineMap barStateTimelineMap,
         SectionRhythm sectionRhythm
     )
@@ -82,7 +82,8 @@ internal sealed class PatternGenerator
                                 barIndex,
                                 barPatternLayerGenerator,
                                 scheme.IsVaried[barIndex],
-                                restingBars.Contains((x.Key, letter)),
+                                barDrums.Resting.Contains((x.Key, letter)),
+                                barDrums.Strokes.TryGetValue((x.Key, letter), out var stroke) ? stroke : null,
                                 scheme.ToString(),
                                 feels
                             )
@@ -106,6 +107,7 @@ internal sealed class PatternGenerator
         Func<IGenerationContext, StateMap> barPatternLayerGenerator,
         bool isVaried,
         bool isResting,
+        int? stroke,
         string scheme,
         List<BarFeel> feels
     )
@@ -119,6 +121,9 @@ internal sealed class PatternGenerator
         // a varied repeat plays its bar pattern with its cycles drawn afresh more often: it starts as the first did
         if (isVaried)
             builder.Add(CompositionStateKinds.Rhythm.Variation, PhraseSchemes.VariedRepeatVariation);
+        // a drum's stroke, where the bar changes it from its section's
+        if (stroke is { } barStroke)
+            builder.Add(DrumStrokes.At(StateDepths.BarPattern, barStroke));
         var stateMap = builder
             .ToStateMap(trackGenerationContext)
             .MergeWith(trackStateMap)

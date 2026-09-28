@@ -8,19 +8,61 @@ namespace Rmg.Tests.DrumKits;
 public sealed class DrumPresenceTest
 {
     [Test]
-    public async Task OnlyOptionalDrums_SitOut_AndNeverInTheFirstBarPattern()
+    public async Task OnlyDrumsThatColourTheGroove_SitOut_AndDrumsWithARole_ChangeTheirStroke_NeverInTheFirstBarPattern()
     {
-        var restingCount = 0;
+        int resting = 0, strokes = 0;
         foreach (var song in TestCorpus.Range(40))
-        foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.DrumPresence))
-        foreach (var (track, letter) in (ImmutableHashSet<(int Track, int Letter)>)entry.Value!)
         {
-            restingCount++;
-            await Assert.That(DrumGroups.GetGroup(track).IsAlwaysOn).IsFalse();
-            await Assert.That(letter).IsGreaterThan(0);
+            var percussionOnly = song.Trace.Where(x => x.Point == TracePoints.PercussionOnly).ToDictionary(x => x.Section, x => (bool)x.Value!);
+            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.DrumPresence))
+            {
+                var bars = (BarDrums)entry.Value!;
+                foreach (var (track, letter) in bars.Resting)
+                {
+                    resting++;
+                    await Assert.That(DrumGroups.GetGroup(track).HoldsARole || percussionOnly[entry.Section]).IsFalse();
+                    await Assert.That(letter).IsGreaterThan(0);
+                }
+
+                foreach (var ((track, letter), _) in bars.Strokes)
+                {
+                    strokes++;
+                    await Assert.That(DrumGroups.GetDrum(track).HasStrokes).IsTrue();
+                    await Assert.That(letter).IsGreaterThan(0);
+                }
+            }
         }
 
-        await Assert.That(restingCount).IsGreaterThan(0);
+        await Assert.That(resting).IsGreaterThan(0);
+        await Assert.That(strokes).IsGreaterThan(0);
+    }
+
+    [Test]
+    public async Task AChangedStroke_PlaysInTheBarsOfItsLetter()
+    {
+        var checkedNotes = 0;
+        foreach (var song in TestCorpus.Range(40))
+        {
+            var schemes = song.Trace.Where(x => x.Point == TracePoints.BarPattern).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => x.First().Phrase!.Replace("′", ""));
+            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.DrumPresence))
+            foreach (var ((track, letter), stroke) in ((BarDrums)entry.Value!).Strokes)
+            foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section))
+            {
+                var code = DrumGroups.GetDrum(track).Sounds[stroke].Code;
+                foreach (var bar in schemes[entry.Section].Select((x, bar) => (x, bar)).Where(x => x.x - 'A' == letter).Select(x => x.bar))
+                {
+                    var start = span.Start + bar * Meter.BarDuration;
+                    // but a fill's notes, which name their sounds
+                    var notes = song.Song.Notes![track]
+                        .Where(x => x.Position >= start && x.Position < start + Meter.BarDuration && x.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.ArticulationIndex) == 0)
+                        .ToArray();
+                    checkedNotes += notes.Length;
+                    await Assert.That(notes.All(x => x.Value.Pitches[0] == code)).IsTrue();
+                }
+            }
+        }
+
+        await Assert.That(checkedNotes).IsGreaterThan(0);
     }
 
     [Test]
@@ -30,7 +72,7 @@ public sealed class DrumPresenceTest
         {
             var schemes = song.Trace.Where(x => x.Point == TracePoints.BarPattern).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => x.First().Phrase!.Replace("′", ""));
             foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.DrumPresence))
-            foreach (var (track, letter) in (ImmutableHashSet<(int Track, int Letter)>)entry.Value!)
+            foreach (var (track, letter) in ((BarDrums)entry.Value!).Resting)
             foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section))
             {
                 // the bars of its letter, but the last of a pattern, where a fill may play it
@@ -48,13 +90,13 @@ public sealed class DrumPresenceTest
     public async Task APlainSection_KeepsItsDrums_MoreThanAWildOne()
     {
         var scheme = new PhraseScheme([0, 1, 0, 1], [false, false, false, false]);
-        int[] tracks = [DrumGroups.GetTrackNumber(DrumDefinitions.HiHat), DrumGroups.GetTrackNumber(DrumDefinitions.Conga)];
+        int[] tracks = [DrumGroups.GetTrackNumber(DrumDefinitions.Tom), DrumGroups.GetTrackNumber(DrumDefinitions.Conga)];
 
         double Share(double unconventionality)
         {
             var context = new GenerationContext(1);
             return Enumerable.Range(0, 2_000)
-                .Average(_ => DrumPresence.Draw(context, tracks, scheme, new RhythmicUnconventionality(unconventionality).Tilt, Tilt.None).Count / 2.0);
+                .Average(_ => DrumPresence.Draw(context, tracks, scheme, false, _ => 0, new RhythmicUnconventionality(unconventionality).Tilt, Tilt.None).Resting.Count / 2.0);
         }
 
         await Assert.That(Share(0)).IsLessThan(0.15);

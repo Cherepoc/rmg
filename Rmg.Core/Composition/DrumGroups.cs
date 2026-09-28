@@ -16,8 +16,6 @@ public static class DrumGroups
     /// <summary>The chance of a song having the vibraslap, which it plays as a landing, with the cymbal.</summary>
     private const double VibraslapChance = 0.2;
 
-    /// <summary>Chance of a song having a sidestick along with an acoustic or an electric snare.</summary>
-    private const double CrossStickWithSnareProbability = 0.15;
 
     /// <summary>
     ///     A group's part in a fill's run: its chance of joining one, and how unconventional that is, the power of the
@@ -36,16 +34,15 @@ public static class DrumGroups
         1.0,
         1,
         true,
-        builder => builder.InRuns(0.04)
+        builder => builder.InRuns(0.04),
+        holdsARole: true
     );
 
-    // a song has one main snare, that is either an acoustic or an electric snare, a clap or a sidestick.
-    // acoustic and electric snares can also be joined by a sidestick, but clap can't. the drums of the group
-    // never play together in a section, so a section has either a snare or a sidestick
+    // a song has one main snare, an acoustic or an electric snare, whose strokes are its head and its cross-stick, or a
+    // clap
     public static DrumGroup Snare { get; } = new(
         nameof(Snare),
         [
-            DrumDefinitions.CrossStick,
             DrumDefinitions.AcousticSnare,
             DrumDefinitions.ElectricSnare,
             DrumDefinitions.Clap
@@ -55,17 +52,8 @@ public static class DrumGroups
         true,
         // the backbeat, and in most runs, as a roll or with the toms
         builder => builder.PlaysTheBackbeat().InRuns(0.5, 0),
-        new SongDrumRule(
-            [
-                SongDrumRule.OneOf(
-                    DrumDefinitions.AcousticSnare,
-                    DrumDefinitions.ElectricSnare,
-                    DrumDefinitions.Clap,
-                    DrumDefinitions.CrossStick
-                ),
-                SongDrumRule.Optional(DrumDefinitions.CrossStick, CrossStickWithSnareProbability, DrumDefinitions.Clap)
-            ]
-        )
+        new SongDrumRule([SongDrumRule.OneOf(DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare, DrumDefinitions.Clap)]),
+        holdsARole: true
     );
 
     // the timekeepers are optional, but most sections keep time on them: over 200 corpus songs they groove in 85% of
@@ -81,7 +69,8 @@ public static class DrumGroups
         ],
         3.0,
         1,
-        configureStateMap: builder => builder.InRuns(0.05)
+        configureStateMap: builder => builder.InRuns(0.05),
+        holdsARole: true
     );
 
     // the toms play mostly in fills; now and then a section grooves on them, as on a floor tom or in a tribal beat
@@ -151,6 +140,12 @@ public static class DrumGroups
     public static int GetTrackNumber(PercussionInstrumentDefinition drum)
     {
         return TrackNumbers[drum];
+    }
+
+    /// <summary>The drum on the given track.</summary>
+    public static PercussionInstrumentDefinition GetDrum(int trackNumber)
+    {
+        return TrackNumbers.Single(x => x.Value == trackNumber).Key;
     }
 
     /// <summary>The group of the drum on the given track.</summary>

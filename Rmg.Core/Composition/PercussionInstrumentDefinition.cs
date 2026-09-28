@@ -13,7 +13,8 @@ public sealed class PercussionInstrumentDefinition
         ImmutableArray<DrumSound> sounds,
         double weight,
         Func<StateMapBuilder, StateMapBuilder>? configureStateMap = null,
-        double loudness = 0
+        double loudness = 0,
+        bool walks = false
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -29,7 +30,17 @@ public sealed class PercussionInstrumentDefinition
         Weight = weight;
         ConfigureStateMap = configureStateMap ?? (builder => builder);
         Loudness = loudness;
+        Walks = walks;
     }
+
+    /// <summary>
+    ///     Whether the drum walks its sounds from note to note, as the toms and the congas walk their pitches; a drum
+    ///     that does not strikes one sound steadily, its stroke (<see cref="DrumStrokes" />), such as the snare's head.
+    /// </summary>
+    public bool Walks { get; }
+
+    /// <summary>Whether the groove chooses among the drum's sounds as its stroke: a drum that strikes, of more than one.</summary>
+    public bool HasStrokes => !Walks && Sounds.Count(x => x.Stroke > 0) > 1;
 
     public string Name { get; }
 

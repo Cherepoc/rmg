@@ -65,9 +65,13 @@ internal sealed class FillSounds
             if (!context.TestProbability(roleChance(role, candidates[0].Value.Track)))
                 continue;
 
-            // the heavier sounds likelier, such as the crash over the china
+            // the heavier sounds likelier, such as the crash over the china, and a sound after the first joins by its
+            // weight against the heaviest, so that the toms all join and the snare's cross-stick seldom
             var count = Math.Min(Pick(context, FillLayers.SoundCounts), candidates.Length);
-            sounds.AddRange(DrumKitGenerator.PickWeighted(context, candidates, count));
+            var heaviest = candidates.Max(x => x.Weight);
+            var picked = DrumKitGenerator.PickWeighted(context, candidates, count);
+            var weights = candidates.ToDictionary(x => x.Value, x => x.Weight);
+            sounds.AddRange(picked.Where((x, i) => i == 0 || context.TestProbability(weights[x] / heaviest)));
         }
 
         // a run that draws no drum plays the snare, or the song's first drum

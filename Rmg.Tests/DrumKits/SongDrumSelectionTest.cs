@@ -29,30 +29,19 @@ public sealed class SongDrumSelectionTest
     }
 
     [Test]
-    public async Task Song_HasOneMainSnare_ThatIsSnareClapOrCrossStick()
+    public async Task Song_HasOneMainSnare_ThatIsSnareElectricSnareOrClap()
     {
         foreach (var seed in Seeds)
-        {
-            var songDrums = SongDrums(seed);
-            var mainSnareCount = MainSnares.Count(songDrums.Contains);
-
-            await Assert.That(mainSnareCount).IsLessThanOrEqualTo(1);
-            // without any of them the sidestick is the only snare
-            if (mainSnareCount == 0)
-                await Assert.That(songDrums.Contains(DrumDefinitions.CrossStick)).IsTrue();
-        }
+            await Assert.That(MainSnares.Count(SongDrums(seed).Contains)).IsEqualTo(1);
     }
 
     [Test]
-    public async Task Song_NeverHasCrossStickWithClap()
+    public async Task TheSnares_CrossStick_IsAStrokeOfTheirs_AndNotTheClaps()
     {
-        foreach (var seed in Seeds)
-        {
-            var songDrums = SongDrums(seed);
-
-            await Assert.That(songDrums.Contains(DrumDefinitions.Clap) && songDrums.Contains(DrumDefinitions.CrossStick))
-                .IsFalse();
-        }
+        await Assert.That(DrumDefinitions.AcousticSnare.HasStrokes && DrumDefinitions.ElectricSnare.HasStrokes).IsTrue();
+        await Assert.That(DrumDefinitions.AcousticSnare.ArticulationCodes).Contains(37);
+        await Assert.That(DrumDefinitions.ElectricSnare.ArticulationCodes).Contains(37);
+        await Assert.That(DrumDefinitions.Clap.ArticulationCodes).DoesNotContain(37);
     }
 
     [Test]
@@ -99,24 +88,11 @@ public sealed class SongDrumSelectionTest
     }
 
     [Test]
-    public async Task CrossStick_IsInMinorityOfSongs_AlonePairedWithSnareAndAbsent()
-    {
-        var withCrossStick = Seeds.Where(seed => SongDrums(seed).Contains(DrumDefinitions.CrossStick)).ToArray();
-        var alone = withCrossStick.Count(seed => !MainSnares.Any(SongDrums(seed).Contains));
-        var withSnare = withCrossStick.Length - alone;
-
-        await Assert.That(alone).IsGreaterThan(0);
-        await Assert.That(withSnare).IsGreaterThan(0);
-        // less than a third of the songs
-        await Assert.That(withCrossStick.Length).IsLessThan(Seeds.Count() / 3);
-    }
-
-    [Test]
-    public async Task EveryMainSnare_CrossStick_AndEveryPercussion_CanBeInSong()
+    public async Task EveryMainSnare_AndEveryPercussion_CanBeInSong()
     {
         var seen = Enumerable.Range(0, 5000).SelectMany(seed => SongDrums(seed)).ToHashSet();
 
-        foreach (var drum in MainSnares.Append(DrumDefinitions.CrossStick).Concat(DrumGroups.Percussion.Drums))
+        foreach (var drum in MainSnares.Concat(DrumGroups.Percussion.Drums))
             await Assert.That(seen.Contains(drum)).IsTrue();
     }
 

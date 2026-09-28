@@ -44,18 +44,20 @@ public static class DrumDefinitions
 
     public static PercussionInstrumentDefinition Kick { get; } = new("Kick", [35, 36], 1.0, builder => builder.GroundsTheGroove());
 
-    public static PercussionInstrumentDefinition CrossStick { get; } = new("Snare Cross Stick", [37], 0.2, loudness: -1);
+    // the cross-stick is a stroke of the snare: quieter, and seldom in a run
+    private static DrumSound CrossStick { get; } = new(37, 0.1, -1, 0.25);
 
-    public static PercussionInstrumentDefinition AcousticSnare { get; } = new("Acoustic Snare", [38], 1.0);
+    public static PercussionInstrumentDefinition AcousticSnare { get; } = new("Acoustic Snare", [new DrumSound(38), CrossStick], 1.0);
 
-    public static PercussionInstrumentDefinition ElectricSnare { get; } = new("Electric Snare", [40], 0.7);
+    public static PercussionInstrumentDefinition ElectricSnare { get; } = new("Electric Snare", [new DrumSound(40), CrossStick], 0.7);
 
     public static PercussionInstrumentDefinition Clap { get; } = new("Clap", [39], 0.3);
 
     public static PercussionInstrumentDefinition HiHat { get; } = new(
         "Hi-Hat",
-        // closed, pedal, open: the pedal quieter and the open louder, both played less than the closed in runs
-        [new DrumSound(42), new DrumSound(44, 0.3, -0.5), new DrumSound(46, 0.5, 0.5)],
+        // closed, pedal, open: the pedal quieter and the open louder, both played less than the closed, the open
+        // rarely as the stroke, a loud wash
+        [new DrumSound(42), new DrumSound(44, 0.3, -0.5, 0.15), new DrumSound(46, 0.5, 0.5, 0.05)],
         1.0,
         builder => builder.KeepsTime()
     );
@@ -63,7 +65,7 @@ public static class DrumDefinitions
     public static PercussionInstrumentDefinition Ride { get; } = new(
         "Ride",
         // the ride, its bell, louder, and the second ride
-        [new DrumSound(51), new DrumSound(53, 0.4, 0.5), new DrumSound(59, 0.6)],
+        [new DrumSound(51), new DrumSound(53, 0.4, 0.5, 0.05), new DrumSound(59, 0.6, 0, 0.4)],
         0.5,
         builder => builder
             .Add(CompositionStateKinds.Rhythm.Fullness, 0.35)
@@ -77,12 +79,12 @@ public static class DrumDefinitions
 
     public static PercussionInstrumentDefinition Maracas { get; } = new("Maracas", [70], 0.15, loudness: -0.5);
 
-    public static PercussionInstrumentDefinition Tom { get; } = new("Tom", [41, 43, 45, 47, 48, 50], 1.0);
+    public static PercussionInstrumentDefinition Tom { get; } = new("Tom", [41, 43, 45, 47, 48, 50], 1.0, walks: true);
 
     public static PercussionInstrumentDefinition Cymbal { get; } = new(
         "Cymbal",
         // the crashes, and the china and the splash, which mark a downbeat less, the splash quieter
-        [new DrumSound(49), new DrumSound(52, 0.25, 0.3), new DrumSound(55, 0.25, -0.5), new DrumSound(57)],
+        [new DrumSound(49), new DrumSound(52, 0.25, 0.3, 0.2), new DrumSound(55, 0.25, -0.5, 0.05), new DrumSound(57, 1, 0, 0.8)],
         1.0,
         loudness: 1
     );
@@ -92,21 +94,21 @@ public static class DrumDefinitions
     // the percussion stands in for the drum kit by its register, and plays its part in a groove: the low drums ground
     // it as the kick does, the dry high ones play the backbeat as the snare does, and the bells, the bongos and the
     // guiro keep time as the hi-hat does
-    public static PercussionInstrumentDefinition Bongo { get; } = new("Bongo", [60, 61], 0.15, builder => builder.KeepsTime());
+    public static PercussionInstrumentDefinition Bongo { get; } = new("Bongo", [60, 61], 0.15, builder => builder.KeepsTime(), walks: true);
 
-    public static PercussionInstrumentDefinition Conga { get; } = new("Conga", [62, 63, 64], 0.15, builder => builder.GroundsTheGroove());
+    public static PercussionInstrumentDefinition Conga { get; } = new("Conga", [62, 63, 64], 0.15, builder => builder.GroundsTheGroove(), walks: true);
 
-    public static PercussionInstrumentDefinition Timbale { get; } = new("Timbale", [65, 66], 0.1, builder => builder.GroundsTheGroove());
+    public static PercussionInstrumentDefinition Timbale { get; } = new("Timbale", [65, 66], 0.1, builder => builder.GroundsTheGroove(), walks: true);
 
-    public static PercussionInstrumentDefinition Agogo { get; } = new("Agogo", [67, 68], 0.1, builder => builder.KeepsTime());
+    public static PercussionInstrumentDefinition Agogo { get; } = new("Agogo", [67, 68], 0.1, builder => builder.KeepsTime(), walks: true);
 
     public static PercussionInstrumentDefinition Cowbell { get; } = new("Cowbell", [56], 0.1, builder => builder.KeepsTime());
 
     public static PercussionInstrumentDefinition Claves { get; } = new("Claves", [75], 0.1, builder => builder.PlaysTheBackbeat());
 
-    public static PercussionInstrumentDefinition WoodBlock { get; } = new("Wood Block", [76, 77], 0.1, builder => builder.PlaysTheBackbeat());
+    public static PercussionInstrumentDefinition WoodBlock { get; } = new("Wood Block", [76, 77], 0.1, builder => builder.PlaysTheBackbeat(), walks: true);
 
-    public static PercussionInstrumentDefinition Guiro { get; } = new("Guiro", [73, 74], 0.1, builder => builder.KeepsTime());
+    public static PercussionInstrumentDefinition Guiro { get; } = new("Guiro", [73, 74], 0.1, builder => builder.KeepsTime(), walks: true);
 
     public static PercussionInstrumentDefinition Triangle { get; } = new("Triangle", [80, 81], 0.1);
 

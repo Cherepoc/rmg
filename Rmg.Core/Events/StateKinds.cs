@@ -34,6 +34,9 @@ public static class StateKinds
     // which of a drum's sounds a note plays, counted from 1, such as a fill's high tom or a landing's crash, over the
     // walk of its articulation; 0 for the walk's
     public static readonly StateKind<int> ArticulationIndex = CreateAdditive<int>("ArticulationIndex", StateScope.Render);
+    // the sound a drum that strikes plays steadily, as its index among the drum's sounds, set by the lowest layer, such
+    // as a bar's over its section's and its song's
+    public static readonly StateKind<LayerValue<int>> DrumStroke = CreateLowestLayerWins<int>("DrumStroke", StateScope.Render);
     // a note's length set outright, in beats, over the gap to the next note, such as a phrase's last note; 0 for none
     public static readonly StateKind<double> HeldDuration = CreateAdditive<double>("HeldDuration", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordRootNoteOffset = CreateCollection<double>("ChordRootOffset", StateScope.Render);

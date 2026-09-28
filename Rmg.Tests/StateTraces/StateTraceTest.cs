@@ -7,7 +7,7 @@ public sealed class StateTraceTest
 {
     private static readonly HashSet<int> SnareTracks =
     [
-        ..new[] { DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare, DrumDefinitions.Clap, DrumDefinitions.CrossStick }
+        ..new[] { DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare, DrumDefinitions.Clap }
             .Select(DrumGroups.GetTrackNumber)
     ];
 
