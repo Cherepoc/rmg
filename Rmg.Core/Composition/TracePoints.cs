@@ -12,6 +12,9 @@ public static class TracePoints
     /// <summary>The register a section's melody aims at in each bar of its pattern (an <c>ImmutableArray</c> of doubles).</summary>
     public const string MelodyContour = "Melody contour";
 
+    /// <summary>The bars a section's optional drums sit out (an <c>ImmutableHashSet</c> of their tracks and letters).</summary>
+    public const string DrumPresence = "Drum presence";
+
     /// <summary>A bar pattern's state, with its phrase scheme.</summary>
     public const string BarPattern = "Bar pattern";
 

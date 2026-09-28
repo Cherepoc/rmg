@@ -14,8 +14,9 @@ internal sealed class SectionGenerator
     /// <summary>The track of a trace entry that records a decision for the whole section, such as its energy.</summary>
     public const int SectionTrace = -2;
 
-    // the stream a section draws its scale from, apart from its own
+    // the streams a section draws its scale and which bars its drums sit out from, apart from its own
     private const int ScaleStream = 1;
+    private const int DrumPresenceStream = 2;
 
     private readonly IGenerationContext _context;
     private readonly int _seed;
@@ -117,7 +118,16 @@ internal sealed class SectionGenerator
         var scheme = PhraseSchemes.Pick(context, rhythm);
         var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context), tilt);
 
-        var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, barStateTimelineMap, sectionRhythm).ToArray();
+        var restingBars = DrumPresence.Draw(
+            _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumPresenceStream)),
+            activeDrumTrackNumbers,
+            scheme,
+            rhythm.Tilt,
+            tilt
+        );
+        StateTrace.Record(TracePoints.DrumPresence, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", restingBars), restingBars);
+
+        var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, restingBars, barStateTimelineMap, sectionRhythm).ToArray();
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, sectionRhythm);
         return new GeneratedSection(
             KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Timeline)], barStateTimelineMap).Repeat(2),
@@ -208,6 +218,7 @@ internal sealed class SectionGenerator
         int sectionId,
         StateMap sectionStateMap,
         ImmutableHashSet<int> activeDrumTrackNumbers,
+        ImmutableHashSet<(int Track, int Letter)> restingBars,
         StateTimelineMap barStateTimelineMap,
         SectionRhythm sectionRhythm
     )
@@ -251,7 +262,7 @@ internal sealed class SectionGenerator
             if (trackStateMaps.Count == 0)
                 continue;
 
-            yield return _patternGenerator.GenerateBars(context, sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap, sectionRhythm);
+            yield return _patternGenerator.GenerateBars(context, sectionId, trackStateMaps.ToImmutableDictionary(), restingBars, barStateTimelineMap, sectionRhythm);
         }
     }
 
@@ -278,7 +289,7 @@ internal sealed class SectionGenerator
                 .MergeWith(sectionStateMap)
                 .MergeWith(sectionTrackLayer.ToStateMap(context));
             var trackStateMaps = new Dictionary<int, StateMap> { [trackNumber] = trackStateMap };
-            var bars = _patternGenerator.GenerateBars(context, sectionId, trackStateMaps.ToImmutableDictionary(), barStateTimelineMap, sectionRhythm);
+            var bars = _patternGenerator.GenerateBars(context, sectionId, trackStateMaps.ToImmutableDictionary(), [], barStateTimelineMap, sectionRhythm);
             // the melody's notes are placed once its bars are made, in their order
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Melody)
                 bars = bars with

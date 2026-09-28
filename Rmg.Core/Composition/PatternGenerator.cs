@@ -41,12 +41,14 @@ internal sealed class PatternGenerator
     ///     change their patterns together and bars come back where the scheme repeats them.
     /// </summary>
     /// <param name="trackStateMaps">Every track's state in the section.</param>
+    /// <param name="restingBars">The bars a track sits out, by its number and the letter of the bars: it keeps its state there, with no notes.</param>
     /// <param name="barStateTimelineMap">The state that changes by bar, such as the chord, along the 4-bar pattern.</param>
     /// <param name="context">The section's random sequence.</param>
     public GeneratedBars GenerateBars(
         IGenerationContext context,
         int sectionId,
         ImmutableDictionary<int, StateMap> trackStateMaps,
+        ImmutableHashSet<(int Track, int Letter)> restingBars,
         StateTimelineMap barStateTimelineMap,
         SectionRhythm sectionRhythm
     )
@@ -80,6 +82,7 @@ internal sealed class PatternGenerator
                                 barIndex,
                                 barPatternLayerGenerator,
                                 scheme.IsVaried[barIndex],
+                                restingBars.Contains((x.Key, letter)),
                                 scheme.ToString(),
                                 feels
                             )
@@ -102,6 +105,7 @@ internal sealed class PatternGenerator
         int barIndex,
         Func<IGenerationContext, StateMap> barPatternLayerGenerator,
         bool isVaried,
+        bool isResting,
         string scheme,
         List<BarFeel> feels
     )
@@ -121,8 +125,9 @@ internal sealed class PatternGenerator
             .MergeWith(CreatePatternChordNoteOffset(_trackDefinitions[trackNumber], trackStateMap, trackGenerationContext));
         StateTrace.Record(TracePoints.BarPattern, trackNumber, sectionId, barIndex, stateMap, phrase: scheme);
 
-        var notes = GenerateNotes(stateMap, barStateTimelineMap, barIndex * Meter.BarDuration, trackNumber, sectionId, barIndex)
-            .GeneratedTimeline;
+        var notes = isResting
+            ? EventTimeline.Create<StateMap>(Meter.BarDuration)
+            : GenerateNotes(stateMap, barStateTimelineMap, barIndex * Meter.BarDuration, trackNumber, sectionId, barIndex).GeneratedTimeline;
         if (_trackDefinitions[trackNumber].Role == TrackRole.Melody)
             notes = MelodyPattern.EndPhrase(
                 notes,

@@ -13,8 +13,8 @@ In this order, each measured before it is planned:
    endings, the section modes and the chords' level.
 2. **The melody** (see *Melody at generation*): it plays where it was placed, so a phrase that plays again is heard
    as the same notes, and its shape follows its contour weakly.
-3. **The drums** (see *Drums*): drums coming and going by bar, grooves for the percussion, and
-   sections of percussion only.
+3. **The drums** (see *Drums*): grooves for the percussion, and sections of percussion only; listen to the drums
+   coming and going by bar.
 4. Smaller: fade-out endings (see *Form*).
 
 ## Section dynamics
@@ -170,15 +170,18 @@ A section chooses its drums (`DrumKitGenerator.SelectActiveDrums`): the kick and
 groups (the timekeepers, the toms, the accents, the percussion), one drum of each, two of the percussion. Over 200
 corpus songs the timekeepers groove in 85% of the sections (76% before their weight was raised to 3), the percussion in
 34% (40%), and a section grooves on 3.2 drums (`DrumUseReportTest`). The triangle, the cuica and the whistle are left out of the song's percussion, as they grate in a
-groove, until genres call for them. Planned, in this order:
+groove, until genres call for them.
 
-1. **Drums by bar:** the section chooses its drums, and every bar pattern (a letter of the phrase scheme) plays some of
-   them, so that bars of the same letter play the same drums and a contrasting bar may drop one; the kick and the snare
-   always play. A drum's presence leans by the section's conventionality and energy, drawn from a stream of its own.
-2. **Grooves for the percussion:** a percussion drum's fixed rhythm by its register, the low ones grounding the
+Drums by bar (`DrumPresence`): the section's first bar pattern, the phrase scheme's A, plays all its drums, and an
+optional drum sits out the bars of another letter 30% of the time, from about 10% in the plainest sections to 60% in the
+wildest, less the more energy the section has, drawn from a stream of its own; the kick and the snare always play.
+Bars of the same letter play the same drums. The drums a bar plays change from the bar before in 39% of the bars,
+against 23% (fills, crashes and sparse drums), and a bar plays 3.7 drums against 3.9. Planned, in this order:
+
+1. **Grooves for the percussion:** a percussion drum's fixed rhythm by its register, the low ones grounding the
    downbeats as the kick does, the high ones an offbeat or backbeat figure, as the kick's and the snare's fixed state
    anchor a drum kit's groove.
-3. **Sections of percussion only:** a section may play its percussion without the drum kit, a chance as layered state of
+2. **Sections of percussion only:** a section may play its percussion without the drum kit, a chance as layered state of
    the song's and the section's, leaned by energy and conventionality, so that a song switches to percussion and back
    at section lines, and one that leans far enough plays percussion throughout. What it touches: the kick and the snare
    are always on only in a drum kit section; the percussion plays more drums in its own section, and only where the

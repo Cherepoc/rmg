@@ -156,4 +156,11 @@ public static class DrumGroups
     {
         return TrackNumbers[drum];
     }
+
+    /// <summary>The group of the drum on the given track.</summary>
+    public static DrumGroup GetGroup(int trackNumber)
+    {
+        var drum = TrackNumbers.Single(x => x.Value == trackNumber).Key;
+        return All.Single(x => x.Drums.Contains(drum));
+    }
 }
