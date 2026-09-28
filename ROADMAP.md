@@ -342,5 +342,17 @@ over the replayed accent.
   of the dyadic engine; euclidean patterns that fit no cycle; a library of idioms such as clave and bossa; and drums
   generated together, the snare avoiding the kick and the hi-hat filling the gaps.
 
-A cycle that does not fit the bar and is cut off at the bar line, such as 3+3+2, stays as it is: an off-kilter feel,
-not a fault.
+A grouped cycle, a number of 16ths that is no power of two, such as the dotted 8th's three (`ResolvedRhythm.IsGrouped`),
+starts again every smallest power-of-two span that holds two of it (`RestartOf`), so that a dotted 8th plays 3+3+2 every
+half bar, as a tresillo, and subdivides only as far as its halves stay on the 16ths (`GridRankLimit`), a dotted 8th's not
+at all. Halved as any cycle is and cut off at the bar, it streamed dotted 32nds that crowded their last note onto the next
+bar's first, a 64th apart, heard as a rush at every bar line (seed 162711917 at 1:15). Over 200 corpus songs the groove's
+notes off the 16th and triplet grids fell from 18,910 to 6,147 (the quintuplets and septuplets), its gaps under a 32nd
+from 286 to 3, and 666 bars play a tresillo twice; a grouped cycle plays fewer notes, 3% of the groove's in all. Left:
+
+- **Timekeepers in grouped cycles:** a hi-hat keeping time in dotted 8ths plays only the tresillo, sparse for time;
+  the tuplet draw of a drum that keeps time could lean to straight cycles in plain sections, as convention has it.
+- **Splitting a grouped cycle by its number** (a dotted 8th into three 16ths, one strong and two weak), where the
+  engine only halves: the 3-against-4 cross-rhythm as a full 16th stream, should the tresillo alone sound thin.
+- **Cross-rhythms across the phrase,** a grouped cycle running on across the bars, need patterns longer than a bar
+  (see *Long cycles*), as the unconventional reading of what the tresillo is the plain one.
