@@ -50,6 +50,15 @@ public static class MelodyLayers
         new(0.1, 3)
     ];
 
+    /// <summary>
+    ///     How much of the answer's every bar, the section's second 4 bars, is mutated from the question's, by the answer
+    ///     amount: its first half as the question, the classic answer's start, and its second half changed.
+    /// </summary>
+    public static ImmutableArray<double> AnswerBars { get; } = [0, 0, 1, 1];
+
+    /// <summary>The chance a note of the answer's changing bars is mutated, with no lean; the less conventional the rhythm, the likelier.</summary>
+    public const double AnswerAmount = 0.5;
+
     /// <summary>How long the melody rests before its next phrase, in beats.</summary>
     public const double PhraseEndRest = 1;
 

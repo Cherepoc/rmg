@@ -11,9 +11,10 @@ namespace Rmg.Core.Composition;
 ///     strays too far, it turns back towards it. It keeps to a singable range in the middle of the
 ///     track's, and its first note is the chord's note nearest where the phrase aims.
 ///     A note that echoes one heard before, as the notes of a bar pattern that comes back or of a cycle that repeats the
-///     one before do, plays it again: the scale step it had from its chord's root, from the root of its own, in the
-///     octave nearest the note before where a run of echoes starts or its chord changes and in the run's octave
-///     otherwise, so that over the same chords it repeats and over others it sounds as a sequence. An echo on a strong
+///     one before do, plays it again: the scale step it had from its chord's root, from the root of its own, where a run
+///     of echoes starts or its chord changes as it was heard over the same root, and in the octave nearest the note
+///     before over another, and in the run's octave otherwise, so that over the same chords it repeats and over others it
+///     sounds as a sequence. An echo on a strong
 ///     beat that misses the chord moves to the chord's note nearest it.
 /// </summary>
 internal sealed class MelodyLine
@@ -48,7 +49,7 @@ internal sealed class MelodyLine
     private int _heading = 1;
 
     // every note that may be echoed, as the scale step it had from its chord's root, by its key
-    private readonly Dictionary<int, int> _heard = [];
+    private readonly Dictionary<int, (int Step, int Root)> _heard = [];
 
     // the run of echoes playing: the root of its chord, and the octave it plays in, in scale steps from where it was heard
     private (int Root, int Octave)? _echoRun;
@@ -85,9 +86,10 @@ internal sealed class MelodyLine
         int note;
         if (echo != 0 && _heard.TryGetValue(echo, out var heard))
         {
+            // over the root it was heard over, as it was; over another, a sequence nearest the note before
             if (_echoRun?.Root != chord.Root)
-                _echoRun = (chord.Root, GetNearestOctave(chord, heard) - heard);
-            note = PlaceEcho(chord, chordToneClasses, beatRank, heard + _echoRun.Value.Octave);
+                _echoRun = (chord.Root, chord.Root == heard.Root ? 0 : GetNearestOctave(chord, heard.Step) - heard.Step);
+            note = PlaceEcho(chord, chordToneClasses, beatRank, heard.Step + _echoRun.Value.Octave);
         }
         else
         {
@@ -97,7 +99,7 @@ internal sealed class MelodyLine
 
         // the first time a note is heard it is remembered, as the step from its chord's root it has
         if (echo != 0)
-            _heard.TryAdd(echo, GetScaleStep(chord, note));
+            _heard.TryAdd(echo, (GetScaleStep(chord, note), chord.Root));
 
         _previousMove = _previous is { } before ? note - before : 0;
         if (_previousMove != 0)

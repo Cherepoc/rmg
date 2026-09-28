@@ -22,6 +22,7 @@ internal sealed class SectionGenerator
     private const int DrumStrokeStream = 4;
     private const int DrumRoleStream = 5;
     private const int KitStream = 6;
+    private const int MelodyAnswerStream = 7;
 
     private readonly IGenerationContext _context;
     private readonly int _seed;
@@ -183,9 +184,18 @@ internal sealed class SectionGenerator
         StateTrace.Record(TracePoints.DrumPresence, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{string.Join(", ", barDrums.Resting)}; {string.Join(", ", barDrums.Strokes)}", barDrums);
 
         var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, sectionRoles, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm).ToArray();
-        var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, sectionRhythm);
+        var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, sectionRhythm).ToArray();
+        // the section's pattern played twice, its melody as a question and its answer
+        var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap).Repeat(2);
+        foreach (var (track, answered) in pitched.Where(x => x.Answered is not null).Select(x => (x.Track, x.Answered!)))
+            timeline = timeline.MapTrackEvents(
+                new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>
+                {
+                    [track] = _ => answered.TrackTimelineMap[track].EventTimeline.MapValues(x => x.OfScope(StateScope.Render))
+                }
+            );
         return new GeneratedSection(
-            KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Timeline)], barStateTimelineMap).Repeat(2),
+            timeline,
             rhythm,
             GetGrooves(drums.SelectMany(x => x.Feels)),
             energy,
@@ -359,7 +369,7 @@ internal sealed class SectionGenerator
     }
 
     /// <summary>The pitched tracks, each making its patterns on its own, over the section's state.</summary>
-    private IEnumerable<GeneratedBars> GeneratePitchedTracks(
+    private IEnumerable<(int Track, GeneratedBars Bars, TrackEventStateTimelineMap<StateMap>? Answered)> GeneratePitchedTracks(
         IGenerationContext context,
         int sectionId,
         StateMap sectionStateMap,
@@ -382,13 +392,24 @@ internal sealed class SectionGenerator
                 .MergeWith(sectionTrackLayer.ToStateMap(context));
             var trackStateMaps = new Dictionary<int, StateMap> { [trackNumber] = trackStateMap };
             var bars = _patternGenerator.GenerateBars(context, sectionId, trackStateMaps.ToImmutableDictionary(), BarDrums.None, ImmutableDictionary<int, Doubling>.Empty, barStateTimelineMap, sectionRhythm);
-            // the melody's notes are placed once its bars are made, in their order
-            if (_tracks.Definitions[trackNumber].Role == TrackRole.Melody)
-                bars = bars with
-                {
-                    Timeline = MelodyPattern.Place(bars.Timeline, trackNumber, (PitchInstrumentTrack)_tracks.Definitions[trackNumber], barStateTimelineMap, _key)
-                };
-            yield return bars;
+            // the melody's notes are placed once its bars are made, in their order, over the question and its answer
+            if (_tracks.Definitions[trackNumber].Role != TrackRole.Melody)
+            {
+                yield return (trackNumber, bars, null);
+                continue;
+            }
+
+            var answerContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), MelodyAnswerStream));
+            var amount = sectionRhythm.Unconventionality.Tilt.Chance(MelodyLayers.AnswerAmount, 1);
+            var answered = MelodyPattern.Place(
+                MelodyPattern.Answer(bars.Timeline, trackNumber, answerContext.GenerateInt(), amount),
+                trackNumber,
+                (PitchInstrumentTrack)_tracks.Definitions[trackNumber],
+                barStateTimelineMap.Repeat(2),
+                _key
+            );
+            StateTrace.Record(TracePoints.MelodyAnswer, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{amount:F2}", amount);
+            yield return (trackNumber, bars with { Timeline = answered.Trim(Meter.PatternDuration) }, answered);
         }
     }
 

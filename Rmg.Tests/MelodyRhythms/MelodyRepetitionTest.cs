@@ -130,14 +130,40 @@ public sealed class MelodyRepetitionTest
     }
 
     [Test]
-    public async Task WhatComesBack_PlaysTheSameNotes_InTheOctaveItsBarStartsIn()
+    public async Task ASectionThatRecurs_PlaysTheSameNotes_AndItsAnswer_StartsAsItsQuestion_AndChangesAfter()
     {
-        // a section's melody is placed once, so what plays again is the same, moved by the octave its bar starts in;
-        // before, when the melody was placed as the song played, bars that came back played the same note over the same
-        // root 40% of the time
-        var m = Measure(TestCorpus.Range(20));
+        int recurring = 0, recurringSame = 0;
+        int[] answer = new int[2], answerSame = new int[2];
+        foreach (var song in TestCorpus.Range(20))
+        {
+            var melody = song.Song.Notes![SongTracks.MelodyTrack].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0]);
+            var firsts = song.Map.Sections.GroupBy(x => x.SectionId).ToDictionary(x => x.Key, x => x.First());
+            foreach (var span in song.Map.Sections)
+            {
+                var first = firsts[span.SectionId];
+                foreach (var (position, pitch) in melody.Where(x => x.Key >= first.Start && x.Key < first.End))
+                {
+                    var offset = position - first.Start;
+                    if (span != first && melody.TryGetValue(Math.Round(span.Start + offset, 6), out var again))
+                    {
+                        recurring++;
+                        recurringSame += again == pitch ? 1 : 0;
+                    }
 
-        await Assert.That(m.SameClass).IsEqualTo(m.Pairs);
+                    // the question's bars against the answer's, its first half and its second
+                    if (span == first && offset < Meter.PatternDuration && melody.TryGetValue(Math.Round(position + Meter.PatternDuration, 6), out var answered))
+                    {
+                        var half = offset < Meter.PatternDuration / 2 ? 0 : 1;
+                        answer[half]++;
+                        answerSame[half] += answered == pitch ? 1 : 0;
+                    }
+                }
+            }
+        }
+
+        await Assert.That(recurringSame / (double)recurring).IsGreaterThan(0.97);
+        await Assert.That(answerSame[0] / (double)answer[0]).IsGreaterThan(0.95);
+        await Assert.That(answerSame[1] / (double)answer[1]).IsBetween(0.5, 0.9);
     }
 
     [Test]

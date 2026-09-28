@@ -88,6 +88,43 @@ internal sealed class MelodyPattern
     }
 
     /// <summary>
+    ///     A section's melody as a question and its answer: its 4 bars, and the same again with the answer's later bars
+    ///     mutated, a decision at a time (<see cref="MelodyLayers.AnswerBars" />): a note mutated there draws afresh
+    ///     whether it goes on or turns back, and plays no note heard before, so that it is placed by the rules where it
+    ///     echoed the question. Whether a note is mutated, and how, is drawn from a sequence of the note's own, by the
+    ///     key of the note it echoes, so that notes that echo the same one mutate alike and no other draw moves.
+    /// </summary>
+    /// <param name="bars">The section's bars, a 4-bar pattern.</param>
+    /// <param name="seed">The seed of the answer's mutations.</param>
+    /// <param name="amount">The chance a note of the answer's later bars is mutated.</param>
+    public static TrackEventStateTimelineMap<StateMap> Answer(TrackEventStateTimelineMap<StateMap> bars, int trackNumber, int seed, double amount)
+    {
+        var answered = bars.Repeat(2);
+        var track = answered.TrackTimelineMap[trackNumber].EventTimeline;
+        var mutated = track.Select(note =>
+            {
+                var bar = (int)Math.Floor(note.Position / Meter.BarDuration) - Progressions.BarCount;
+                var echo = note.Value.GetStateValue(CompositionStateKinds.Echo);
+                if (bar < 0 || MelodyLayers.AnswerBars[bar] <= 0)
+                    return note;
+
+                var context = new GenerationContext(Seeds.Derive(seed, echo));
+                if (!context.TestProbability(amount * MelodyLayers.AnswerBars[bar]))
+                    return note;
+
+                var turn = context.GenerateDouble();
+                var key = Seeds.Derive(echo, seed);
+                return note.Value
+                    .Except([CompositionStateKinds.MelodyTurn, CompositionStateKinds.Echo])
+                    .MergeWith(StateMap.FromStates([CompositionStateKinds.MelodyTurn.CreateState(turn), CompositionStateKinds.Echo.CreateState(key == 0 ? 1 : key)]))
+                    .ToTimelineItem(note.Position);
+            }
+        );
+        var timeline = EventTimeline.Create(track.Duration, mutated);
+        return answered.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [trackNumber] = _ => timeline });
+    }
+
+    /// <summary>
     ///     The key of the note a beat plays again: its bar pattern's, its cycle's draw and its place in the cycle, so
     ///     that a bar pattern that comes back, and a cycle that repeats the one before, play their beats' notes again.
     /// </summary>
