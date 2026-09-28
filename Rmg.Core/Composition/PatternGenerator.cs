@@ -85,6 +85,7 @@ internal sealed class PatternGenerator
                                 barDrums.Resting.Contains((x.Key, letter)),
                                 barDrums.Strokes.TryGetValue((x.Key, letter), out var stroke) ? stroke : null,
                                 scheme.ToString(),
+                                sectionRhythm.Energy,
                                 feels
                             )
                         )
@@ -109,6 +110,7 @@ internal sealed class PatternGenerator
         bool isResting,
         int? stroke,
         string scheme,
+        Tilt energy,
         List<BarFeel> feels
     )
     {
@@ -132,7 +134,7 @@ internal sealed class PatternGenerator
 
         var notes = isResting
             ? EventTimeline.Create<StateMap>(Meter.BarDuration)
-            : GenerateNotes(stateMap, barStateTimelineMap, barIndex * Meter.BarDuration, trackNumber, sectionId, barIndex).GeneratedTimeline;
+            : GenerateNotes(stateMap, barStateTimelineMap, barIndex * Meter.BarDuration, trackNumber, sectionId, barIndex, energy).GeneratedTimeline;
         if (_trackDefinitions[trackNumber].Role == TrackRole.Melody)
             notes = MelodyPattern.EndPhrase(
                 notes,
@@ -153,7 +155,8 @@ internal sealed class PatternGenerator
         double patternStart,
         int trackNumber,
         int sectionId,
-        int barIndex
+        int barIndex,
+        Tilt energy
     )
     {
         var rhythmPattern = _rhythmPatternGenerator(stateMap);
@@ -177,6 +180,8 @@ internal sealed class PatternGenerator
         );
 
         var melody = _trackDefinitions[trackNumber].Role == TrackRole.Melody ? new MelodyPattern(stateMap) : null;
+        // a drum that strikes may accent a note with another of its sounds
+        var accentSounds = _trackDefinitions[trackNumber] is PercussionInstrumentTrack drum && drum.Sounds.Any(x => x.Accent > 0) ? drum.Sounds : [];
         var dynamics = stateMap.GetStateValue(CompositionStateKinds.NoteDynamics);
         // a note's values, which a note of a repeated cycle takes from the note it repeats
         var noteValuesGenerator = (IGenerationContext innerContext, double position, KeptBeat beat) =>
@@ -190,6 +195,8 @@ internal sealed class PatternGenerator
                 .AddNoteDurationLayer()
                 .Add(CompositionStateKinds.BeatRank, rank);
             melody?.AddNoteState(builder, beat);
+            if (!accentSounds.IsEmpty)
+                builder.Add(context => DrumAccents.Draw(context, accentSounds, rank, energy));
             return builder.ToStateMap(innerContext);
         };
 

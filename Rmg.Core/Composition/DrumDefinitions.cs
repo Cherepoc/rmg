@@ -56,16 +56,16 @@ public static class DrumDefinitions
     public static PercussionInstrumentDefinition HiHat { get; } = new(
         "Hi-Hat",
         // closed, pedal, open: the pedal quieter and the open louder, both played less than the closed, the open
-        // rarely as the stroke, a loud wash
-        [new DrumSound(42), new DrumSound(44, 0.3, -0.5, 0.15), new DrumSound(46, 0.5, 0.5, 0.05)],
+        // rarely as the stroke, a loud wash, and now and then as an accent off the beat
+        [new DrumSound(42), new DrumSound(44, 0.3, -0.5, 0.15), new DrumSound(46, 0.5, 0.5, 0.05, DrumAccents.OpenHiHat, 1)],
         1.0,
         builder => builder.KeepsTime()
     );
 
     public static PercussionInstrumentDefinition Ride { get; } = new(
         "Ride",
-        // the ride, its bell, louder, and the second ride
-        [new DrumSound(51), new DrumSound(53, 0.4, 0.5, 0.05), new DrumSound(59, 0.6, 0, 0.4)],
+        // the ride, its bell, louder, now and then as an accent on the beat, and the second ride
+        [new DrumSound(51), new DrumSound(53, 0.4, 0.5, 0.05, DrumAccents.RideBell, -1), new DrumSound(59, 0.6, 0, 0.4)],
         0.5,
         builder => builder
             .Add(CompositionStateKinds.Rhythm.Fullness, 0.35)

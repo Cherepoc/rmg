@@ -52,9 +52,11 @@ public sealed class DrumPresenceTest
                 foreach (var bar in schemes[entry.Section].Select((x, bar) => (x, bar)).Where(x => x.x - 'A' == letter).Select(x => x.bar))
                 {
                     var start = span.Start + bar * Meter.BarDuration;
-                    // but a fill's notes, which name their sounds
+                    // but a fill's notes, which name their sounds, and an accent's, a note's own stroke
                     var notes = song.Song.Notes![track]
-                        .Where(x => x.Position >= start && x.Position < start + Meter.BarDuration && x.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.ArticulationIndex) == 0)
+                        .Where(x => x.Position >= start && x.Position < start + Meter.BarDuration &&
+                                    x.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.ArticulationIndex) == 0 &&
+                                    x.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.DrumStroke).Depth < Rmg.Core.Events.StateDepths.Note)
                         .ToArray();
                     checkedNotes += notes.Length;
                     await Assert.That(notes.All(x => x.Value.Pitches[0] == code)).IsTrue();

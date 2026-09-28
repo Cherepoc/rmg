@@ -61,6 +61,17 @@ public sealed class DrumUseReportTest
             Console.WriteLine($"Sounds of {drum.Name,-16} groove: {Shares(notes.Where(x => !IsFill(x)))}; fills: {Shares(notes.Where(IsFill))}");
         }
 
+        // where the accents fall: the share of the open hi-hat's and the ride bell's groove notes on the beats
+        foreach (var (drum, code) in new[] { (DrumDefinitions.HiHat, 46), (DrumDefinitions.Ride, 53) })
+        {
+            var accents = songs.SelectMany(song => song.Song.Notes!.TryGetValue(DrumGroups.GetTrackNumber(drum), out var n)
+                    ? n.Where(x => x.Value.Pitches[0] == code && x.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.ArticulationIndex) == 0)
+                        .Select(x => song.Map.BeatInBar(x.Position)).ToArray()
+                    : [])
+                .ToArray();
+            Console.WriteLine($"{drum.Name} {code} in the groove: {accents.Length} notes, {accents.Count(x => Math.Abs(x - Math.Round(x)) < 1e-6) / (double)Math.Max(1, accents.Length):P0} on the beats");
+        }
+
         // the snare's stroke by section: on its cross-stick mostly, by the section's energy, and how many songs switch
         var snareSections = songs.SelectMany(song =>
         {
