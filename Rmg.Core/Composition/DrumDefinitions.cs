@@ -77,22 +77,58 @@ public static class DrumDefinitions
 
     // the percussion stands in for the drum kit by its register, and plays its role in a groove: the low drums ground
     // it as the kick does, the dry high ones play the backbeat as the snare does, and the bells, the bongos and the
-    // guiro keep time as the hi-hat does
-    public static PercussionInstrumentDefinition Bongo { get; } = new("Bongo", [60, 61], 0.15, walks: true, roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.3), (DrumRole.Backbeat, 0.1)));
+    // guiro keep time as the hi-hat does. A hand drum strikes a steady tone and accents the strong beats with its other,
+    // as a player does, where a walk from tone to tone would wander
+    public static PercussionInstrumentDefinition Bongo { get; } = new(
+        "Bongo",
+        [new DrumSound(60), OtherTone(61)],
+        0.15,
+        roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.3), (DrumRole.Backbeat, 0.1))
+    );
 
-    public static PercussionInstrumentDefinition Conga { get; } = new("Conga", [62, 63, 64], 0.15, walks: true, roles: Plays(DrumRole.Ground, (DrumRole.Time, 0.4), (DrumRole.Colour, 0.3)));
+    // the open tone, the muted one now and then off the beat, and the low one on the strong beats
+    public static PercussionInstrumentDefinition Conga { get; } = new(
+        "Conga",
+        [new DrumSound(62, 1, -0.3, 0.1, DrumAccents.MutedConga, 1), new DrumSound(63), OtherTone(64)],
+        0.15,
+        roles: Plays(DrumRole.Ground, (DrumRole.Time, 0.4), (DrumRole.Colour, 0.3))
+    );
 
-    public static PercussionInstrumentDefinition Timbale { get; } = new("Timbale", [65, 66], 0.1, walks: true, roles: Plays(DrumRole.Ground, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.4)));
+    public static PercussionInstrumentDefinition Timbale { get; } = new(
+        "Timbale",
+        [new DrumSound(65), OtherTone(66)],
+        0.1,
+        roles: Plays(DrumRole.Ground, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.4))
+    );
 
-    public static PercussionInstrumentDefinition Agogo { get; } = new("Agogo", [67, 68], 0.1, walks: true, roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.4)));
+    public static PercussionInstrumentDefinition Agogo { get; } = new(
+        "Agogo",
+        [new DrumSound(67), OtherTone(68)],
+        0.1,
+        roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.4))
+    );
 
     public static PercussionInstrumentDefinition Cowbell { get; } = new("Cowbell", [56], 0.1, roles: Plays(DrumRole.Time, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.3)));
 
     public static PercussionInstrumentDefinition Claves { get; } = new("Claves", [75], 0.1, roles: Plays(DrumRole.Backbeat, (DrumRole.Time, 0.3), (DrumRole.Colour, 0.3)));
 
-    public static PercussionInstrumentDefinition WoodBlock { get; } = new("Wood Block", [76, 77], 0.1, walks: true, roles: Plays(DrumRole.Backbeat, (DrumRole.Time, 0.3), (DrumRole.Colour, 0.3)));
+    public static PercussionInstrumentDefinition WoodBlock { get; } = new(
+        "Wood Block",
+        [new DrumSound(76), OtherTone(77)],
+        0.1,
+        roles: Plays(DrumRole.Backbeat, (DrumRole.Time, 0.3), (DrumRole.Colour, 0.3))
+    );
 
-    public static PercussionInstrumentDefinition Guiro { get; } = new("Guiro", [73, 74], 0.1, walks: true, roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.3)));
+    // the short scrape, and the long one on the strong beats
+    public static PercussionInstrumentDefinition Guiro { get; } = new(
+        "Guiro",
+        [new DrumSound(73), OtherTone(74)],
+        0.1,
+        roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.3))
+    );
+
+    // a hand drum's other tone: now and then its stroke, and an accent on the strong beats
+    private static DrumSound OtherTone(int code) => new(code, 1, 0.2, 0.1, DrumAccents.HandDrum, -1);
 
     public static PercussionInstrumentDefinition Triangle { get; } = new("Triangle", [80, 81], 0.1);
 

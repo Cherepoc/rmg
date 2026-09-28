@@ -19,6 +19,12 @@ public static class DrumAccents
     /// <summary>The chance of the ride's bell on a note, with no lean.</summary>
     public const double RideBell = 0.03;
 
+    /// <summary>The chance of a hand drum's other tone on a note, such as the conga's low one, with no lean.</summary>
+    public const double HandDrum = 0.06;
+
+    /// <summary>The chance of the conga's muted tone on a note, with no lean.</summary>
+    public const double MutedConga = 0.04;
+
     /// <summary>The odds by which an accent leans to the beats it favours, and away from the others.</summary>
     public const double BeatOdds = 4;
 
