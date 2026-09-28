@@ -78,10 +78,19 @@ note 100% of the time, against 72%, and the melody spans 15.6 semitones on avera
 where a phrase starts again 37% of the time (84% after a rest) against 14%, into a section 35% against 15%, and into
 its last note 35% against 13%. Left:
 
-- **Mutation further:** a section's answer is its question mutated a decision at a time (see *Question and answer*);
-  the same can vary a bar of a later letter within the phrase (A′, whose rhythm alone varies now, and hardly for the
-  melody), and, as an edit after assembly, a section as it recurs, each appearance from the one before by an amount
-  that grows, so that a song drifts from how it began.
+- **Varied repeats (A′) lean by conventionality** (planned): a repeated bar is varied by a flat chance of 0.25 and a
+  fixed strength (`PhraseSchemes.VariedRepeatChance`, `VariedRepeatVariation`) where the answer leans; both could lean
+  through the section's rhythm tilt, in `PhraseSchemes.Pick`, as the scheme's choice already does. A′ needs no
+  mutation of its melody: its cycles drawn afresh bring fresh beats, placed by the rules, so its second half keeps 30%
+  of its first play's steps against 47% for a plain repeat (65% and 61% in the first half), over 100 corpus songs
+  measured by the scale step above the chord's root, as a repeat over another chord plays a sequence; plain repeats
+  are recognisable as they are. Gathering the answer's and A′'s values in one class was dropped: they are two
+  mechanisms of two domains, the phrase scheme's and the melody's, that share only their lean.
+- **A section as it recurs** (later): each appearance mutated from the one before by an amount that grows, so that a
+  song drifts from how it began, generated per appearance, not edited, so that the rules place what is mutated. It
+  would key its decisions as the answer does, by the key a note echoes by (`CompositionStateKinds.Echo`), which names a
+  note of a figure (its bar pattern, its cycle's draw and its slot) rather than a note in time; renamed then to what it
+  is (a motif key) and computed for the other tracks it mutates, not before.
 - **Question and answer** (built): a section plays its 4-bar pattern twice, and its melody as a question and its
   answer (`MelodyPattern.Answer`): placed as one line over the 8 bars, so that the answer goes on from the question,
   its first half the question's and its second half mutated a decision at a time, a note there drawing afresh whether
