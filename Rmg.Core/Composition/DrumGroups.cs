@@ -108,7 +108,8 @@ public static class DrumGroups
         grooveChance: AccentsGrooveChance
     );
 
-    // a song has its own few percussion instruments, or none
+    // a song has its own few percussion instruments, or none; the triangle, the cuica and the whistle are left out, as
+    // they grate in a groove of any length, until a genre calls for them
     private static readonly ImmutableArray<PercussionInstrumentDefinition> PercussionDrums =
     [
         DrumDefinitions.Bongo,
@@ -119,9 +120,6 @@ public static class DrumGroups
         DrumDefinitions.Claves,
         DrumDefinitions.WoodBlock,
         DrumDefinitions.Guiro,
-        DrumDefinitions.Triangle,
-        DrumDefinitions.Cuica,
-        DrumDefinitions.Whistle,
         DrumDefinitions.Vibraslap
     ];
 
