@@ -17,7 +17,8 @@ public sealed class PercussionInstrumentDefinition
         double loudness = 0,
         bool walks = false,
         ImmutableArray<Weighted<DrumRole>> roles = default,
-        double doubling = 0
+        double doubling = 0,
+        DrumFamily family = DrumFamily.Kit
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -36,7 +37,11 @@ public sealed class PercussionInstrumentDefinition
         Walks = walks;
         Roles = roles.IsDefaultOrEmpty ? [new Weighted<DrumRole>(1, DrumRole.Colour)] : roles;
         Doubling = doubling;
+        Family = family;
     }
+
+    /// <summary>The families the drum plays in, the drum kit, the percussion or both.</summary>
+    public DrumFamily Family { get; }
 
     /// <summary>
     ///     How likely the drum is to double the lead of its role in a section, such as the clap on the snare's backbeat,

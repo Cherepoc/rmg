@@ -6,7 +6,7 @@ namespace Rmg.Tests.DrumKits;
 
 public sealed class PercussionSectionsTest
 {
-    private static bool IsPercussion(int track) => DrumGroups.GetGroup(track) == DrumGroups.Percussion;
+    private static bool IsPercussion(int track) => DrumGroups.GetDrum(track).Family.HasFlag(DrumFamily.Percussion);
 
     [Test]
     public async Task ASectionOfPercussionOnly_PlaysNoDrumKit_ButALandingPushedIntoTheNext()

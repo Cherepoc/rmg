@@ -13,6 +13,9 @@ namespace Rmg.Core.Composition;
 /// </summary>
 public static class DrumDefinitions
 {
+    // the hand percussion, which plays in the drum kit and in the percussion alike
+    private const DrumFamily HandPercussion = DrumFamily.Kit | DrumFamily.Percussion;
+
     // a drum's affinities for the roles, its main one first at 1 and the others as rare as a drummer plays them so, which
     // a wild section reaches for more
     private static ImmutableArray<Weighted<DrumRole>> Plays(DrumRole main, params (DrumRole Role, double Affinity)[] others) =>
@@ -27,7 +30,7 @@ public static class DrumDefinitions
 
     public static PercussionInstrumentDefinition ElectricSnare { get; } = new("Electric Snare", [new DrumSound(40), CrossStick], 0.7, roles: Plays(DrumRole.Backbeat, (DrumRole.Time, 0.01)));
 
-    public static PercussionInstrumentDefinition Clap { get; } = new("Clap", [39], 0.1, roles: Plays(DrumRole.Backbeat, (DrumRole.Colour, 0.1)), doubling: 1);
+    public static PercussionInstrumentDefinition Clap { get; } = new("Clap", [39], 0.1, roles: Plays(DrumRole.Backbeat, (DrumRole.Colour, 0.1)), doubling: 1, family: HandPercussion);
 
     public static PercussionInstrumentDefinition HiHat { get; } = new(
         "Hi-Hat",
@@ -55,12 +58,13 @@ public static class DrumDefinitions
         0.2,
         loudness: 0.5,
         roles: Plays(DrumRole.Time, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.2)),
-        doubling: 1
+        doubling: 1,
+        family: HandPercussion
     );
 
-    public static PercussionInstrumentDefinition Cabasa { get; } = new("Cabasa", [69], 0.15, loudness: -0.5, roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.2)), doubling: 0.6);
+    public static PercussionInstrumentDefinition Cabasa { get; } = new("Cabasa", [69], 0.15, loudness: -0.5, roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.2)), doubling: 0.6, family: HandPercussion);
 
-    public static PercussionInstrumentDefinition Maracas { get; } = new("Maracas", [70], 0.15, loudness: -0.5, roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.2)), doubling: 0.6);
+    public static PercussionInstrumentDefinition Maracas { get; } = new("Maracas", [70], 0.15, loudness: -0.5, roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.2)), doubling: 0.6, family: HandPercussion);
 
     public static PercussionInstrumentDefinition Tom { get; } = new("Tom", [41, 43, 45, 47, 48, 50], 1.0, walks: true, roles: Plays(DrumRole.Colour, (DrumRole.Ground, 0.1)));
 
@@ -83,7 +87,8 @@ public static class DrumDefinitions
         "Bongo",
         [new DrumSound(60), OtherTone(61)],
         0.15,
-        roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.3), (DrumRole.Backbeat, 0.1))
+        roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.3), (DrumRole.Backbeat, 0.1)),
+        family: DrumFamily.Percussion
     );
 
     // the open tone, the muted one now and then off the beat, and the low one on the strong beats
@@ -91,32 +96,36 @@ public static class DrumDefinitions
         "Conga",
         [new DrumSound(62, 1, -0.3, 0.1, DrumAccents.MutedConga, 1), new DrumSound(63), OtherTone(64)],
         0.15,
-        roles: Plays(DrumRole.Ground, (DrumRole.Time, 0.4), (DrumRole.Colour, 0.3))
+        roles: Plays(DrumRole.Ground, (DrumRole.Time, 0.4), (DrumRole.Colour, 0.3)),
+        family: DrumFamily.Percussion
     );
 
     public static PercussionInstrumentDefinition Timbale { get; } = new(
         "Timbale",
         [new DrumSound(65), OtherTone(66)],
         0.1,
-        roles: Plays(DrumRole.Ground, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.4))
+        roles: Plays(DrumRole.Ground, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.4)),
+        family: DrumFamily.Percussion
     );
 
     public static PercussionInstrumentDefinition Agogo { get; } = new(
         "Agogo",
         [new DrumSound(67), OtherTone(68)],
         0.1,
-        roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.4))
+        roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.4)),
+        family: DrumFamily.Percussion
     );
 
-    public static PercussionInstrumentDefinition Cowbell { get; } = new("Cowbell", [56], 0.1, roles: Plays(DrumRole.Time, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.3)));
+    public static PercussionInstrumentDefinition Cowbell { get; } = new("Cowbell", [56], 0.1, roles: Plays(DrumRole.Time, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.3)), family: DrumFamily.Percussion);
 
-    public static PercussionInstrumentDefinition Claves { get; } = new("Claves", [75], 0.1, roles: Plays(DrumRole.Backbeat, (DrumRole.Time, 0.3), (DrumRole.Colour, 0.3)));
+    public static PercussionInstrumentDefinition Claves { get; } = new("Claves", [75], 0.1, roles: Plays(DrumRole.Backbeat, (DrumRole.Time, 0.3), (DrumRole.Colour, 0.3)), family: DrumFamily.Percussion);
 
     public static PercussionInstrumentDefinition WoodBlock { get; } = new(
         "Wood Block",
         [new DrumSound(76), OtherTone(77)],
         0.1,
-        roles: Plays(DrumRole.Backbeat, (DrumRole.Time, 0.3), (DrumRole.Colour, 0.3))
+        roles: Plays(DrumRole.Backbeat, (DrumRole.Time, 0.3), (DrumRole.Colour, 0.3)),
+        family: DrumFamily.Percussion
     );
 
     // the short scrape, and the long one on the strong beats
@@ -124,7 +133,8 @@ public static class DrumDefinitions
         "Guiro",
         [new DrumSound(73), OtherTone(74)],
         0.1,
-        roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.3))
+        roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.3)),
+        family: DrumFamily.Percussion
     );
 
     // a hand drum's other tone: now and then its stroke, and an accent on the strong beats

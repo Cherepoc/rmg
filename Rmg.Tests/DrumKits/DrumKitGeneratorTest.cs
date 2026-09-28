@@ -67,14 +67,14 @@ public sealed class DrumKitGeneratorTest
     }
 
     [Test]
-    public async Task ASectionOfPercussionOnly_PlaysOnlyPercussion_ItsLeadsAmongIt()
+    public async Task ASectionOfPercussionOnly_PlaysOnlyPercussion_HandPercussionAmongIt_AndItsLeads()
     {
         foreach (var seed in Seeds)
         {
             var (song, kit, _) = Select(seed, isPercussionOnly: true);
-            var percussion = song.Where(DrumGroups.Percussion.Drums.Contains).ToArray();
+            var percussion = song.Where(x => x.Family.HasFlag(DrumFamily.Percussion)).ToArray();
 
-            await Assert.That(kit.All(DrumGroups.Percussion.Drums.Contains)).IsTrue();
+            await Assert.That(kit.All(x => x.Family.HasFlag(DrumFamily.Percussion))).IsTrue();
             await Assert.That(kit.Length).IsEqualTo(Math.Min(percussion.Length, PercussionSections.MaxActiveDrums));
         }
     }

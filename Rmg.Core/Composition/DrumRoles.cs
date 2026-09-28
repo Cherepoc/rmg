@@ -4,6 +4,17 @@ using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
 
+/// <summary>
+///     The families a drum plays in: the drum kit, the percussion, or both, as the hand percussion, the tambourine, the
+///     shakers and the clap, does; a section of percussion only plays the percussion's.
+/// </summary>
+[Flags]
+public enum DrumFamily
+{
+    Kit = 1,
+    Percussion = 2
+}
+
 /// <summary>A drum's role in the groove, which sets its fixed rhythm (<see cref="DrumRoles" />).</summary>
 public enum DrumRole
 {

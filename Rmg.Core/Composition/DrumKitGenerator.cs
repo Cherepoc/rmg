@@ -47,7 +47,7 @@ public static class DrumKitGenerator
         bool isPercussionOnly
     )
     {
-        var family = songDrums.Where(x => DrumGroups.All.Single(g => g.Drums.Contains(x)) == DrumGroups.Percussion == isPercussionOnly).ToArray();
+        var family = songDrums.Where(x => x.Family.HasFlag(isPercussionOnly ? DrumFamily.Percussion : DrumFamily.Kit)).ToArray();
         var kit = new List<PercussionInstrumentDefinition>();
         var leads = new List<PercussionInstrumentDefinition>();
         foreach (var lead in LeadRoles)
