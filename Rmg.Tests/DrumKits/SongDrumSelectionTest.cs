@@ -106,7 +106,7 @@ public sealed class SongDrumSelectionTest
 
             for (var i = 0; i < 5; i++)
             {
-                var sectionDrums = DrumKitGenerator.SelectActiveDrums(context, songDrums);
+                var sectionDrums = DrumKitGenerator.SelectKit(context, songDrums, default, false);
 
                 await Assert.That(sectionDrums.All(songDrums.Contains)).IsTrue();
             }
@@ -121,7 +121,7 @@ public sealed class SongDrumSelectionTest
             var context = new GenerationContext(seed);
             var songDrums = DrumKitGenerator.SelectSongDrums(context);
             var usedMainSnares = Enumerable.Range(0, 20)
-                .SelectMany(_ => DrumKitGenerator.SelectActiveDrums(context, songDrums))
+                .SelectMany(_ => DrumKitGenerator.SelectKit(context, songDrums, default, false))
                 .Where(MainSnares.Contains)
                 .Distinct();
 

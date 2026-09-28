@@ -56,8 +56,7 @@ public static class DrumGroups
         holdsARole: true
     );
 
-    // the timekeepers are optional, but most sections keep time on them: over 200 corpus songs they groove in 85% of
-    // the sections, against 76% at the weight of the other groups
+    // the timekeepers, of which a section mostly has one keep time (DrumKitGenerator.TimeChance)
     public static DrumGroup Timekeepers { get; } = new(
         nameof(Timekeepers),
         [

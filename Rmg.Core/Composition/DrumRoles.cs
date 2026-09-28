@@ -103,8 +103,7 @@ public static class DrumRoles
 
     private static DrumRole Pick(IGenerationContext context, PercussionInstrumentDefinition drum, Tilt rhythm)
     {
-        var main = drum.Roles.MaxBy(x => x.Weight).Value;
-        var weights = rhythm.Weigh(drum.Roles.Where(x => x.Weight > 0), x => x == main ? 0 : 1);
+        var weights = rhythm.Weigh(drum.Roles.Where(x => x.Weight > 0), x => x == drum.MainRole ? 0 : 1);
         return weights[Generators.WeightedIndex(weights)(context)].Value;
     }
 }

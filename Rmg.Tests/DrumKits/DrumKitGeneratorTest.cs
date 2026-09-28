@@ -8,86 +8,97 @@ public sealed class DrumKitGeneratorTest
 {
     private static IEnumerable<int> Seeds => Enumerable.Range(0, 500);
 
-    private static ImmutableArray<PercussionInstrumentDefinition> SelectSectionDrums(int seed)
+    private static (ImmutableArray<PercussionInstrumentDefinition> Song, ImmutableArray<PercussionInstrumentDefinition> Kit) Select(
+        int seed,
+        Tilt tilt = default,
+        bool isPercussionOnly = false
+    )
     {
         var context = new GenerationContext(seed);
         var songDrums = DrumKitGenerator.SelectSongDrums(context);
-        return DrumKitGenerator.SelectActiveDrums(context, songDrums);
+        return (songDrums, DrumKitGenerator.SelectKit(context, songDrums, tilt, isPercussionOnly));
     }
 
-    private static DrumGroup GroupOf(PercussionInstrumentDefinition drum)
-    {
-        return DrumGroups.All.Single(x => x.Drums.Contains(drum));
-    }
+    private static DrumGroup GroupOf(PercussionInstrumentDefinition drum) => DrumGroups.All.Single(x => x.Drums.Contains(drum));
 
     [Test]
-    public async Task AlwaysOnGroups_AreAlwaysActive()
+    public async Task ADrumKitSection_HasAGroundAndABackbeat_AndMostlyTime()
     {
+        var withTime = 0;
         foreach (var seed in Seeds)
         {
-            var kit = SelectSectionDrums(seed);
-            var activeGroups = kit.Select(GroupOf).ToHashSet();
+            var (_, kit) = Select(seed);
 
-            foreach (var group in DrumGroups.All.Where(x => x.IsAlwaysOn))
-                await Assert.That(activeGroups.Contains(group)).IsTrue();
+            await Assert.That(kit.Count(x => x.MainRole == DrumRole.Ground && GroupOf(x) != DrumGroups.Percussion)).IsEqualTo(1);
+            await Assert.That(kit.Count(x => x.MainRole == DrumRole.Backbeat && GroupOf(x) != DrumGroups.Percussion)).IsEqualTo(1);
+            withTime += kit.Any(x => x.MainRole == DrumRole.Time && GroupOf(x) == DrumGroups.Timekeepers) ? 1 : 0;
         }
+
+        await Assert.That(withTime / (double)Seeds.Count()).IsEqualTo(DrumKitGenerator.TimeChance).Within(0.05);
     }
 
     [Test]
-    public async Task ActiveGroupCount_NeverExceedsLimit_AndIncludesOptionalGroup()
+    public async Task TomsAndCymbal_ColourFewSections()
     {
-        var alwaysOnCount = DrumGroups.All.Count(x => x.IsAlwaysOn);
-        foreach (var seed in Seeds)
-        {
-            var kit = SelectSectionDrums(seed);
-            var groupCount = kit.Select(GroupOf).Distinct().Count();
-
-            await Assert.That(groupCount).IsBetween(alwaysOnCount + 1, DrumKitGenerator.MaxGroupsPerSection);
-        }
-    }
-
-    [Test]
-    public async Task TomsAndCymbal_GrooveInFewSections()
-    {
-        var kits = Seeds.Select(SelectSectionDrums).ToArray();
+        var kits = Seeds.Select(x => Select(x).Kit).ToArray();
         double ShareWith(DrumGroup group) => kits.Count(kit => kit.Any(group.Drums.Contains)) / (double)kits.Length;
 
-        // they play mostly in fills and landings, and the timekeepers take their place
-        await Assert.That(ShareWith(DrumGroups.Toms)).IsBetween(0.05, 0.25);
-        await Assert.That(ShareWith(DrumGroups.Accents)).IsBetween(0.02, 0.15);
-        await Assert.That(ShareWith(DrumGroups.Timekeepers)).IsGreaterThan(0.6);
+        // they play mostly in fills and landings
+        await Assert.That(ShareWith(DrumGroups.Toms)).IsBetween(0.03, 0.25);
+        await Assert.That(ShareWith(DrumGroups.Accents)).IsBetween(0.01, 0.15);
     }
 
     [Test]
-    public async Task ActiveDrums_AreDistinct_AndRespectGroupLimit()
+    public async Task AKit_IsTheSongsDrums_Distinct_AndFarFewer()
     {
         foreach (var seed in Seeds)
         {
-            var kit = SelectSectionDrums(seed);
+            var (song, kit) = Select(seed);
 
+            await Assert.That(kit.All(song.Contains)).IsTrue();
             await Assert.That(kit.Distinct().Count()).IsEqualTo(kit.Length);
-            foreach (var groupKit in kit.GroupBy(GroupOf))
-                await Assert.That(groupKit.Count()).IsBetween(1, groupKit.Key.MaxActiveDrums);
+            await Assert.That(kit.Length).IsLessThan(DrumGroups.AllDrums.Length / 2);
+            foreach (var colour in kit.GroupBy(GroupOf).Where(x => !x.Key.HoldsARole))
+                await Assert.That(colour.Count()).IsLessThanOrEqualTo(colour.Key.MaxActiveDrums);
         }
     }
 
     [Test]
-    public async Task ActiveDrums_AreFarFewerThanAllDrums()
+    public async Task ASectionOfPercussionOnly_PlaysOnlyPercussion_ItsLeadsAmongIt()
     {
         foreach (var seed in Seeds)
         {
-            var kit = SelectSectionDrums(seed);
+            var (song, kit) = Select(seed, isPercussionOnly: true);
+            var percussion = song.Where(DrumGroups.Percussion.Drums.Contains).ToArray();
 
-            await Assert.That(kit.Length).IsLessThan(DrumGroups.AllDrums.Length / 2);
+            await Assert.That(kit.All(DrumGroups.Percussion.Drums.Contains)).IsTrue();
+            await Assert.That(kit.Length).IsEqualTo(Math.Min(percussion.Length, PercussionSections.MaxActiveDrums));
         }
+    }
+
+    [Test]
+    public async Task ASectionOfMoreEnergy_PlaysMoreColour_AndTheLoudDrumsMoreOften()
+    {
+        (double Drums, double Loud, double Quiet) Measure(Tilt tilt)
+        {
+            var kits = Seeds.Select(seed => Select(seed, tilt).Kit).ToArray();
+            return (kits.Average(x => x.Length), kits.Average(x => x.Count(d => d.Loudness > 0)), kits.Average(x => x.Count(d => d.Loudness < 0)));
+        }
+
+        var even = Measure(Tilt.None);
+        var loud = Measure(Tilt.Of(8, 1));
+        var quiet = Measure(Tilt.Of(8, -1));
+
+        await Assert.That(loud.Drums).IsGreaterThan(even.Drums);
+        await Assert.That(quiet.Drums).IsLessThan(even.Drums);
+        await Assert.That(loud.Loud).IsGreaterThan(even.Loud);
+        await Assert.That(quiet.Quiet).IsGreaterThan(even.Quiet);
     }
 
     [Test]
     public async Task EveryDrum_CanBeSelected_AcrossSeeds()
     {
-        var seen = Enumerable.Range(0, 30000)
-            .SelectMany(seed => SelectSectionDrums(seed))
-            .ToHashSet();
+        var seen = Enumerable.Range(0, 30000).SelectMany(seed => Select(seed, isPercussionOnly: seed % 5 == 0).Kit).ToHashSet();
 
         await Assert.That(seen.Count).IsEqualTo(DrumGroups.AllDrums.Length);
     }
@@ -95,10 +106,7 @@ public sealed class DrumKitGeneratorTest
     [Test]
     public async Task SameSeed_ResultsIn_SameKit()
     {
-        var first = SelectSectionDrums(3);
-        var second = SelectSectionDrums(3);
-
-        await Assert.That(first.AsEnumerable()).IsEquivalentTo(second.AsEnumerable());
+        await Assert.That(Select(3).Kit.AsEnumerable()).IsEquivalentTo(Select(3).Kit.AsEnumerable());
     }
 
     [Test]
@@ -108,35 +116,6 @@ public sealed class DrumKitGeneratorTest
 
         await Assert.That(numbers.Distinct().Count()).IsEqualTo(numbers.Length);
         await Assert.That(numbers.Min()).IsGreaterThanOrEqualTo(DrumGroups.FirstTrackNumber);
-    }
-
-    [Test]
-    public async Task ASectionOfMoreEnergy_PlaysMoreGroups_AndTheLoudDrumsMoreOften()
-    {
-        (double Groups, double Loud, double Quiet) Measure(Tilt tilt)
-        {
-            var kits = Seeds.Select(seed =>
-                {
-                    var context = new GenerationContext(seed);
-                    var songDrums = DrumKitGenerator.SelectSongDrums(context);
-                    return DrumKitGenerator.SelectActiveDrums(context, songDrums, tilt);
-                }
-            ).ToArray();
-            return (
-                kits.Average(x => x.Select(GroupOf).Distinct().Count()),
-                kits.Average(x => x.Count(d => d.Loudness > 0)),
-                kits.Average(x => x.Count(d => d.Loudness < 0))
-            );
-        }
-
-        var even = Measure(Tilt.None);
-        var loud = Measure(Tilt.Of(8, 1));
-        var quiet = Measure(Tilt.Of(8, -1));
-
-        await Assert.That(loud.Groups).IsGreaterThan(even.Groups);
-        await Assert.That(quiet.Groups).IsLessThan(even.Groups);
-        await Assert.That(loud.Loud).IsGreaterThan(even.Loud);
-        await Assert.That(quiet.Quiet).IsGreaterThan(even.Quiet);
     }
 
     [Test]

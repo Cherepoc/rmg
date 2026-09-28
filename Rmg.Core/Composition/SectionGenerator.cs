@@ -21,6 +21,7 @@ internal sealed class SectionGenerator
     private const int PercussionStream = 3;
     private const int DrumStrokeStream = 4;
     private const int DrumRoleStream = 5;
+    private const int KitStream = 6;
 
     private readonly IGenerationContext _context;
     private readonly int _seed;
@@ -107,14 +108,34 @@ internal sealed class SectionGenerator
                 .Add(StateKinds.ChordRootNoteOffset, [Progressions.ToRootOffset(home)])
                 .ToStateMap(context)
         );
-        // the drums: the kit's and the percussion's, or, now and then, the percussion's alone, which draws its drums from
-        // a sequence of its own, the section's drawing the kit's still, so that its other draws stay as they are
-        var kit = DrumKitGenerator.SelectActiveDrums(context, _tracks.SongDrums, tilt);
+        // the roles the section draws again for the song's drums, as their parts in its grooves and its fills, from a
+        // sequence of its own
+        var roleContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumRoleStream));
+        var sectionRoles = _tracks.SongDrums.Select(DrumGroups.GetTrackNumber).Order()
+            .ToImmutableDictionary(x => x, x => DrumRoles.DrawSection(roleContext, DrumGroups.GetDrum(x), SongRole(x), rhythm.Tilt));
+        StateTrace.Record(
+            TracePoints.DrumRoles,
+            SectionTrace,
+            sectionId,
+            0,
+            StateMap.Default,
+            0,
+            string.Join(", ", sectionRoles.Where(x => !x.Value.IsDefault).Select(x => $"{x.Key} {(DrumRole)x.Value.GetStateValue(CompositionStateKinds.DrumRole).Value}")),
+            sectionRoles.Where(x => !x.Value.IsDefault).ToImmutableDictionary(x => x.Key, x => (DrumRole)x.Value.GetStateValue(CompositionStateKinds.DrumRole).Value)
+        );
+
+        // the drums: the kit's or, now and then, the percussion's alone, by the roles they play, each from a sequence of
+        // its own
         var percussionContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), PercussionStream));
         var songPercussion = _tracks.SongDrums.Count(DrumGroups.Percussion.Drums.Contains);
         var isPercussionOnly = PercussionSections.Draw(percussionContext, _songPercussion, rhythm.Tilt, tilt, songPercussion);
         StateTrace.Record(TracePoints.PercussionOnly, SectionTrace, sectionId, 0, StateMap.Default, 0, isPercussionOnly ? "percussion only" : "drum kit", isPercussionOnly);
-        var activeDrumTrackNumbers = (isPercussionOnly ? DrumKitGenerator.SelectPercussion(percussionContext, _tracks.SongDrums, tilt) : kit)
+        var activeDrumTrackNumbers = DrumKitGenerator.SelectKit(
+                _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), KitStream)),
+                _tracks.SongDrums,
+                tilt,
+                isPercussionOnly
+            )
             .Select(DrumGroups.GetTrackNumber)
             .ToImmutableHashSet();
 
@@ -133,22 +154,8 @@ internal sealed class SectionGenerator
         var scheme = PhraseSchemes.Pick(context, rhythm);
         var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context), tilt);
 
-        // the roles the section draws again for the song's drums, as their parts in its grooves and its fills, the strokes
-        // it changes from the song's, and how its drums play its bars, each from a sequence of its own
-        var roleContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumRoleStream));
-        var sectionRoles = _tracks.SongDrums.Select(DrumGroups.GetTrackNumber).Order()
-            .ToImmutableDictionary(x => x, x => DrumRoles.DrawSection(roleContext, DrumGroups.GetDrum(x), SongRole(x), rhythm.Tilt));
-        StateTrace.Record(
-            TracePoints.DrumRoles,
-            SectionTrace,
-            sectionId,
-            0,
-            StateMap.Default,
-            0,
-            string.Join(", ", sectionRoles.Where(x => !x.Value.IsDefault).Select(x => $"{x.Key} {(DrumRole)x.Value.GetStateValue(CompositionStateKinds.DrumRole).Value}")),
-            sectionRoles.Where(x => !x.Value.IsDefault).ToImmutableDictionary(x => x.Key, x => (DrumRole)x.Value.GetStateValue(CompositionStateKinds.DrumRole).Value)
-        );
-        var strokeContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumStrokeStream));
+        // the strokes the section changes from the song's, and how its drums play its bars, each from a sequence of its own
+        var strokeContext =_context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumStrokeStream));
         var sectionStrokes = ImmutableDictionary.CreateBuilder<int, int>();
         foreach (var track in activeDrumTrackNumbers.Order().Where(x => DrumGroups.GetDrum(x).HasStrokes))
             if (DrumStrokes.DrawChange(strokeContext, DrumGroups.GetDrum(track), SongStroke(track), DrumStrokes.SectionChangeChance, rhythm.Tilt, tilt) is { } change)

@@ -42,6 +42,9 @@ public sealed class PercussionInstrumentDefinition
     /// </summary>
     public ImmutableArray<Weighted<DrumRole>> Roles { get; }
 
+    /// <summary>The drum's heaviest role, which it fills in a section's kit (<see cref="DrumKitGenerator.SelectKit" />).</summary>
+    public DrumRole MainRole => Roles.MaxBy(x => x.Weight).Value;
+
     /// <summary>
     ///     Whether the drum walks its sounds from note to note, as the toms and the congas walk their pitches; a drum
     ///     that does not strikes one sound steadily, its stroke (<see cref="DrumStrokes" />), such as the snare's head.
