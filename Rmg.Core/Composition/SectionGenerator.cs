@@ -90,6 +90,7 @@ internal sealed class SectionGenerator
                 .AddNoteWalkLayer()
                 .Add(CompositionStateKinds.ChordPool.Index, LayerStates.ChordPoolIndex)
                 .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.Section, tilt))
+                .Add(CompositionStateKinds.NoteDynamics, Math.Pow(rhythm.ChanceScale, VelocityLayers.DynamicsLean))
                 .AddNoteDurationLayer()
                 .ToStateMap(context),
             new StateMapBuilder("Section")
@@ -296,7 +297,7 @@ internal sealed class SectionGenerator
             context,
             "Section track",
             SongTracks.GetGenerationStateMap(_tracks.Definitions[trackNumber]),
-            VelocityLayers.SectionTrack,
+            VelocityLayers.CreateGenerator(VelocityLayers.SectionTrack),
             sectionRhythm.Unconventionality.Scale(RhythmLayers.SectionTrack).Tilted(tilt)
         );
     }

@@ -167,6 +167,7 @@ internal sealed class PatternGenerator
         );
 
         var melody = _trackDefinitions[trackNumber].Role == TrackRole.Melody ? new MelodyPattern(stateMap) : null;
+        var dynamics = stateMap.GetStateValue(CompositionStateKinds.NoteDynamics);
         // a note's values, which a note of a repeated cycle takes from the note it repeats
         var noteValuesGenerator = (IGenerationContext innerContext, double position, KeptBeat beat) =>
         {
@@ -175,7 +176,7 @@ internal sealed class PatternGenerator
                 .Add(StateKinds.ArticulationOffset, articulationOffsetGenerator(innerContext, position))
                 .Add(StateKinds.ChordRootNoteOffset, chordRootNoteOffsetGenerator(innerContext, position))
                 .Add(StateKinds.ChordNoteOffset, chordNoteOffsetGenerator(innerContext, position))
-                .Add(StateKinds.Velocity, BeatAccent.CreateVelocityGenerator(rank, rhythmPattern.MaxRank).Then(x => x * VelocityLayers.Note))
+                .Add(StateKinds.Velocity, BeatAccent.CreateVelocityGenerator(rank, rhythmPattern.MaxRank, dynamics).Then(x => x * VelocityLayers.Note))
                 .AddNoteDurationLayer()
                 .Add(CompositionStateKinds.BeatRank, rank);
             melody?.AddNoteState(builder, beat);

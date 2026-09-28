@@ -244,7 +244,13 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   a chord's voicing, the bass's octave and the octave each bar of the melody starts in. A stage that comes after it can
   change the notes themselves; the state still explains how they came about, but does not show
   the change. `Render` then plays the notes: a chord's pitches together, the drums on one channel,
-  and the song's velocities spread over the MIDI range, which it needs all the notes for; `Midi`
+  and every note's velocity on a fixed scale, the same for every song, so that a quiet section or an evenly
+  played bass sounds so; a chord's notes play softer, at n^-1/4 for n notes, so that together they sound
+  about as loud as one note. A note's velocity is the sum of its layers (`VelocityLayers`): its track's
+  level by its role, the melody on top of the mix and the chords a little under it; its section's, leaned
+  by the section's energy; and its beat's accent with a variation around it, as far as the track's
+  dynamics have them (`BeatAccent`): a bass and chords play evenly, a melody moves more, and a plain
+  section plays more evenly than a wild one. `Midi`
   writes them as a standard MIDI file.
 - **Scales.** A song has a scale, in a random key. The scale is drawn from a weighted table of 7-note
   scales (`Scales`): natural minor and major are the most common (30% each), dorian and mixolydian

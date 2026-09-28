@@ -47,6 +47,10 @@ public static class CompositionStateKinds
     public static StateKind<ImmutableArray<Chord>> RoleChord { get; } =
         StateKinds.CreateCollection<Chord>(Prefix + "RoleChord", isShared: true);
 
+    // how far a track's notes move from its level, by their beats' accents and at random: less for a bass that hits its
+    // beats alike, more for a melody; a section's conventionality moves it
+    public static StateKind<double> NoteDynamics { get; } = StateKinds.CreateMultiplicative<double>(Prefix + "NoteDynamics");
+
     // how loud and busy a section is meant to be, around 0: it leans the section's draws, never decides them
     public static StateKind<double> Energy { get; } = StateKinds.CreateAdditive<double>(Prefix + "Energy", isShared: true);
 

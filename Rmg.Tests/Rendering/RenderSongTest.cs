@@ -38,61 +38,39 @@ public sealed class RenderSongTest
     }
 
     [Test]
-    public async Task SingleNote_HasVelocityInMidiRange()
+    public async Task ANoteAtTheCentre_PlaysAtTheMiddleVelocity()
     {
-        var song = CreateSong(1, PitchTrack(), StateMap.Default.ToTimelineItem(0));
+        var stateMap = StateMap.FromStates([StateKinds.Velocity.CreateState(Render.VelocityCentre)]);
+        var song = CreateSong(1, PitchTrack(), stateMap.ToTimelineItem(0));
 
         var result = Render.RenderSong(song);
 
-        // with no spread to scale by, the middle of the typical velocities
-        await Assert.That(result.Tracks[0].NoteTimeline[0].Value.Velocity).IsEqualTo(0.6);
+        await Assert.That(result.Tracks[0].NoteTimeline[0].Value.Velocity).IsEqualTo(0.6).Within(1e-9);
     }
 
     [Test]
-    public async Task NotesWithEqualVelocity_HaveVelocityInMidiRange()
+    public async Task ANotesVelocity_IsTheSame_WhateverTheOtherNotesOfTheSong()
     {
-        var stateMap = StateMap.FromStates([StateKinds.Velocity.CreateState(0.7)]);
-        var song = CreateSong(2, PitchTrack(), stateMap.ToTimelineItem(0), stateMap.ToTimelineItem(1));
+        // on a fixed scale, so that an evenly played song stays even, and a quiet one quiet
+        StateMap Velocity(double velocity) => StateMap.FromStates([StateKinds.Velocity.CreateState(velocity)]);
+        var alone = Render.RenderSong(CreateSong(1, PitchTrack(), Velocity(0.5).ToTimelineItem(0)));
+        var withOthers = Render.RenderSong(CreateSong(3, PitchTrack(), Velocity(0.5).ToTimelineItem(0), Velocity(-2).ToTimelineItem(1), Velocity(3).ToTimelineItem(2)));
 
-        var result = Render.RenderSong(song);
-
-        foreach (var note in result.Tracks[0].NoteTimeline)
-        {
-            await Assert.That(note.Value.Velocity).IsEqualTo(0.6);
-        }
+        await Assert.That(withOthers.Tracks[0].NoteTimeline[0].Value.Velocity).IsEqualTo(alone.Tracks[0].NoteTimeline[0].Value.Velocity);
     }
 
     [Test]
-    public async Task NotesWithDifferentVelocity_AreScaledToFullRange()
+    [Arguments(-10.0)]
+    [Arguments(-1.0)]
+    [Arguments(0.0)]
+    [Arguments(1.0)]
+    [Arguments(10.0)]
+    public async Task Velocities_RiseWithTheSum_AndStayBetweenTheQuietestAndTheLoudest(double sum)
     {
-        var quiet = StateMap.FromStates([StateKinds.Velocity.CreateState(1)]);
-        var loud = StateMap.FromStates([StateKinds.Velocity.CreateState(3)]);
-        var song = CreateSong(2, PitchTrack(), quiet.ToTimelineItem(0), loud.ToTimelineItem(1));
+        var velocity = Render.ToMidiVelocity(sum);
 
-        var result = Render.RenderSong(song);
-
-        var velocities = result.Tracks[0].NoteTimeline.Select(x => x.Value.Velocity).ToArray();
-        await Assert.That(velocities[0]).IsEqualTo(0.2);
-        await Assert.That(velocities[1]).IsEqualTo(1);
-    }
-
-    [Test]
-    [Arguments(0, 0.2)]
-    [Arguments(1, 0.3)]
-    [Arguments(10, 0.6)]
-    [Arguments(19, 0.9)]
-    [Arguments(20, 1)]
-    public async Task Velocities_FromFifthToNinetyFifthPercentile_AreSpreadFrom03To09(int velocity, double expected)
-    {
-        // velocities 0 to 20, whose 5th percentile is 1 and 95th is 19
-        var notes = Enumerable.Range(0, 21)
-            .Select(x => StateMap.FromStates([StateKinds.Velocity.CreateState(x)]).ToTimelineItem(x))
-            .ToArray();
-        var song = CreateSong(21, PitchTrack(), notes);
-
-        var result = Render.RenderSong(song);
-
-        await Assert.That(result.Tracks[0].NoteTimeline[velocity].Value.Velocity).IsEqualTo(expected).Within(1e-9);
+        await Assert.That(velocity).IsBetween(0.2, 1);
+        await Assert.That(Render.ToMidiVelocity(sum + 0.1)).IsGreaterThan(velocity);
     }
 
     [Test]

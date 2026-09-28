@@ -3,61 +3,43 @@ using Rmg.Core.Probabilities;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     How loud a note is likely to be by how strong its beat is. A beat's rank in its rhythm pattern goes from 0, the
-///     strongest, to the pattern's max rank, the weakest. The velocity of a note on a strong beat is tipped towards
-///     loud and spread wide, and on the weakest beats it is even and kept close to the middle.
+///     How loud a note is by how strong its beat is: an accent fixed by the beat's rank in its rhythm pattern, from 0,
+///     the strongest, to the pattern's max rank, the weakest, and a variation drawn around it; both as far as the
+///     track's dynamics have them (<see cref="CompositionStateKinds.NoteDynamics" />), so that a bass hits its beats
+///     alike and a melody moves more.
 /// </summary>
 public static class BeatAccent
 {
-    /// <summary>The skew of the strongest beat, which makes it louder than the middle 94% of the time.</summary>
-    private const double StrongestSkew = 0.25;
+    /// <summary>How much louder the strongest beat of a pattern is than its weakest, before the track's dynamics.</summary>
+    public const double StrongestAccent = 0.6;
 
-    /// <summary>How much of what is left of the skew each weaker rank keeps: the steps towards 1 halve.</summary>
-    private const double SkewStepRatio = 0.5;
+    /// <summary>How much of what is left of the way to the weakest beat each weaker rank keeps: the steps halve.</summary>
+    private const double StepRatio = 0.5;
 
-    private const double StrongestSpread = 0.5;
-
-    private const double WeakestSpread = 2;
+    private static readonly Func<IGenerationContext, double> Variation = Generators.SplineValue();
 
     /// <summary>
-    ///     The skew of the velocity of a beat: <see cref="StrongestSkew" /> at rank 0 and 1 at the max rank, with every
-    ///     step towards 1 half the one before, so 0.25, 0.75, 1 over three ranks. A pattern of a single rank has
-    ///     nothing to set apart and is not skewed.
+    ///     The accent of a beat: <see cref="StrongestAccent" /> at rank 0 and none at the max rank, falling faster than
+    ///     the ranks, every step towards the weakest half the one before, so 0.6, 0.07, 0 over three ranks. A pattern
+    ///     of a single rank has nothing to set apart.
     /// </summary>
-    public static double GetVelocitySkew(int rank, int maxRank)
-    {
-        Validate(rank, maxRank);
-
-        if (maxRank == 0)
-            return 1;
-
-        var share = (1 - Math.Pow(SkewStepRatio, rank)) / (1 - Math.Pow(SkewStepRatio, maxRank));
-        return StrongestSkew + (1 - StrongestSkew) * share;
-    }
-
-    /// <summary>
-    ///     The spread (the spline's c) of the velocity of a beat: from <see cref="StrongestSpread" /> at rank 0 to
-    ///     <see cref="WeakestSpread" /> at the max rank, the rank being the power, so 0.5, 1, 2 over three ranks. A
-    ///     pattern of a single rank keeps the usual spread of 1.
-    /// </summary>
-    public static double GetVelocitySpread(int rank, int maxRank)
-    {
-        Validate(rank, maxRank);
-
-        if (maxRank == 0)
-            return 1;
-
-        return StrongestSpread * Math.Pow(WeakestSpread / StrongestSpread, (double)rank / maxRank);
-    }
-
-    public static Func<IGenerationContext, double> CreateVelocityGenerator(int rank, int maxRank)
-    {
-        return Generators.SplineValue(GetVelocitySpread(rank, maxRank), GetVelocitySkew(rank, maxRank));
-    }
-
-    private static void Validate(int rank, int maxRank)
+    public static double GetAccent(int rank, int maxRank)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(rank);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(rank, maxRank);
+
+        if (maxRank == 0)
+            return 0;
+
+        var share = (1 - Math.Pow(StepRatio, rank)) / (1 - Math.Pow(StepRatio, maxRank));
+        return StrongestAccent * Math.Pow(1 - share, 2);
+    }
+
+    /// <summary>A note's velocity by its beat: its accent and a variation drawn around it, times the dynamics.</summary>
+    /// <param name="dynamics">How far the track's notes move from its level, 1 as tuned.</param>
+    public static Func<IGenerationContext, double> CreateVelocityGenerator(int rank, int maxRank, double dynamics = 1)
+    {
+        var accent = GetAccent(rank, maxRank);
+        return context => dynamics * (accent + Variation(context));
     }
 }

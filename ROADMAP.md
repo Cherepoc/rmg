@@ -76,6 +76,24 @@ bar anywhere in the track's range let the melody drift, spanning up to 64 semito
   the last bar back moved little, and landing the last note near the start only moved the leap one note earlier.
 - **The bass** could be placed at generation the same way, and its notes played again in a repeated cycle.
 
+## Velocity
+
+A note's velocity is the sum of its layers, which `Render` plays on a fixed scale (`Render.ToMidiVelocity`), where it
+spread every song's over the MIDI range, which stretched whatever variety was left: a track's level by its role
+(`VelocityLayers.GetLevel`), where it was drawn at random, the melody about 3 dB over the others; a section's, leaned by
+its energy; a bar's and a bar pattern's; and a note's, its beat's accent, fixed, and a variation, both as far as the
+track's dynamics have them (`CompositionStateKinds.NoteDynamics`, bass 0.4, chords 0.5, melody 0.8, drums 1, times
+a section's chance scale to the power of 1/4). A chord's notes play at n^-1/4 for n notes. Measured over 100 corpus
+songs, against the velocities before: the accent of a bar's downbeat over an 8th off the beat 9 for the bass and the
+chords, against 23, 16 for the melody and the drums; a chord sounds as loud as a note, where it was 5 dB louder, and
+the melody 2 to 4 dB over the others, where every track was as loud; a note at the same place from bar to bar within a
+section varies by 3 to 5, and the sections' loudness follows their energy 0.59 in plain sections, against 0.51. Left:
+
+- **Listen** to the balance and to how even the bass and the chords play; the levels, dynamics and chord softening
+  are tuned by measurement only.
+- **The bar layers** (a bar's and a bar pattern's loudness, drawn) add little, 3 to 5 from bar to bar; they could go,
+  should bars sound to jump.
+
 ## Architecture
 
 From the review of September 2026; the two small errors it found, the melody read only where a note

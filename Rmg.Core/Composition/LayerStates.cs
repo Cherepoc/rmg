@@ -71,11 +71,12 @@ internal static class LayerStates
     ///     A layer that only some tracks see: a track's own for the song or a section, or the drums'. It adds its
     ///     rhythm, walk, velocity and duration to the given state, and may not set what every track shares.
     /// </summary>
+    /// <param name="velocity">The layer's velocity, such as a track's level or a section's draw.</param>
     public static StateMap CreateTrackLayer(
         IGenerationContext context,
         string layer,
         StateMap stateMap,
-        double velocityWeight,
+        Func<IGenerationContext, double> velocity,
         RhythmLayer rhythmLayer
     )
     {
@@ -83,7 +84,7 @@ internal static class LayerStates
             .Add(stateMap)
             .AddRhythmLayer(rhythmLayer)
             .AddNoteWalkLayer()
-            .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(velocityWeight))
+            .Add(StateKinds.Velocity, velocity)
             .AddNoteDurationLayer()
             .ToStateMap(context);
     }

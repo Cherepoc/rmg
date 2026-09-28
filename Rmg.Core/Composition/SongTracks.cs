@@ -65,13 +65,14 @@ internal sealed class SongTracks
                     context,
                     "Track",
                     new StateMapBuilder("Track role", perTrack: true)
+                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Chords))
                         // the chords play whole: their root and their notes do not walk
                         .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, 0)
                         .Add(CompositionStateKinds.IncrementalChordNoteOffset.Multiplier, 0)
                         // the chord instrument sets how smoothly the chords move, and the song moves it a little
                         .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(x => chordsInstrument.Leading + x))
                         .ToStateMap(context),
-                    VelocityLayers.Track,
+                    _ => VelocityLayers.GetLevel(TrackRole.Chords),
                     trackRhythmLayer
                 ),
                 chordsInstrument.Program,
@@ -84,6 +85,7 @@ internal sealed class SongTracks
                     context,
                     "Track",
                     new StateMapBuilder("Track role", perTrack: true)
+                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Melody))
                         // the melody keeps to the chords: its root does not walk away from theirs
                         .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, 0)
                         // the melody instrument sets how stepwise the melody is, and the song moves it a little
@@ -92,7 +94,7 @@ internal sealed class SongTracks
                         // a melody repeats its cycles more than the other tracks, as riffs
                         .Add(CompositionStateKinds.Rhythm.Variation, MelodyLayers.RhythmVariation)
                         .ToStateMap(context),
-                    VelocityLayers.Track,
+                    _ => VelocityLayers.GetLevel(TrackRole.Melody),
                     trackRhythmLayer
                 ),
                 melodyInstrument.Program,
@@ -105,13 +107,14 @@ internal sealed class SongTracks
                     context,
                     "Track",
                     new StateMapBuilder("Track role", perTrack: true)
+                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Bass))
                         // the bass keeps close to the root and walks through the chord's notes
                         .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, Generators.AbsSplineValue())
                         .Add(CompositionStateKinds.IncrementalChordNoteOffset.Multiplier, Generators.AbsSplineValue().Then(x => 1 - x))
                         // the bass plays the chord roots, so its line leads into the chords and lands on them
                         .Add(StateKinds.FollowsChordRoots, 1)
                         .ToStateMap(context),
-                    VelocityLayers.Track,
+                    _ => VelocityLayers.GetLevel(TrackRole.Bass),
                     trackRhythmLayer
                 ),
                 bassInstrument.Program,
@@ -130,7 +133,7 @@ internal sealed class SongTracks
                 var drumStateMap = drum.ConfigureStateMap(drumGroup.ConfigureStateMap(new StateMapBuilder("Drum", perTrack: true)))
                     .ToStateMap(context);
                 definitions[DrumGroups.GetTrackNumber(drum)] = new PercussionInstrumentTrack(
-                    LayerStates.CreateTrackLayer(context, "Track", drumStateMap, VelocityLayers.Track, trackRhythmLayer),
+                    LayerStates.CreateTrackLayer(context, "Track", drumStateMap, _ => VelocityLayers.GetLevel(drum), trackRhythmLayer),
                     drum.ArticulationCodes
                 );
             }
@@ -145,7 +148,7 @@ internal sealed class SongTracks
                     context,
                     "Drum group",
                     StateMap.Default,
-                    VelocityLayers.DrumGroup,
+                    _ => VelocityLayers.GetLevel(TrackRole.Drum),
                     rhythmicUnconventionality.Scale(RhythmLayers.DrumGroup)
                 )
             )
