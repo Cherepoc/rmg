@@ -242,8 +242,7 @@ internal sealed class SongFormGenerator
 
     /// <summary>
     ///     A note whose scale step is set, as the melody's is, moved to the chord's root, where a melody ends: the root
-    ///     in the register of the note it is made from, which <c>Realizer</c> moves by an octave to be nearest the note
-    ///     before, as it does where a bar starts.
+    ///     in the register of the note it is made from.
     /// </summary>
     internal static TimelineItem<StateMap> LandOnRoot(TimelineItem<StateMap> note)
     {
@@ -251,8 +250,8 @@ internal sealed class SongFormGenerator
             return note;
 
         var root = (int)Math.Round(note.Value.GetStateValue(StateKinds.ScaleStep) / (double)Scales.StepCount) * Scales.StepCount;
-        return note.Value.Except([StateKinds.ScaleStep, StateKinds.RegisterStart])
-            .MergeWith(StateMap.FromStates([StateKinds.ScaleStep.CreateState(root), StateKinds.RegisterStart.CreateState(1)]))
+        return note.Value.Except([StateKinds.ScaleStep])
+            .MergeWith(StateMap.FromStates([StateKinds.ScaleStep.CreateState(root)]))
             .ToTimelineItem(note.Position);
     }
 
