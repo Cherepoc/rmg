@@ -1,4 +1,5 @@
 using Rmg.Core.Composition;
+using Rmg.Core.Songs;
 
 namespace Rmg.Tests.DrumKits;
 
@@ -23,6 +24,14 @@ public sealed class DrumUseReportTest
             var notes = songs.Sum(s => s.Song.Notes!.TryGetValue(track, out var n) ? n.Count : 0);
             Console.WriteLine($"{drum.Name,-18} songs {inSongs,3}, grooving sections {inSections,4} of {sections}, notes {notes}");
         }
+
+        // by section: which groups groove there, and how many drums
+        bool Grooves(CorpusSong song, SectionSpan span, PercussionInstrumentDefinition drum) =>
+            song.Song.Notes!.TryGetValue(DrumGroups.GetTrackNumber(drum), out var n) && n.Count(x => x.Position >= span.Start && x.Position < span.End) > 8;
+        var all = songs.SelectMany(s => s.Map.Sections.Select(span => (s, span))).ToArray();
+        foreach (var group in DrumGroups.All)
+            Console.WriteLine($"{group.Name,-12} grooves in {all.Count(x => group.Drums.Any(d => Grooves(x.s, x.span, d))) / (double)all.Length:P0} of the sections");
+        Console.WriteLine($"Drums grooving in a section: {all.Average(x => DrumGroups.AllDrums.Count(d => Grooves(x.s, x.span, d))):F2}");
         await Task.CompletedTask;
     }
 }

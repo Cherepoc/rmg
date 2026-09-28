@@ -13,7 +13,9 @@ In this order, each measured before it is planned:
    endings, the section modes and the chords' level.
 2. **The melody** (see *Melody at generation*): it plays where it was placed, so a phrase that plays again is heard
    as the same notes, and its shape follows its contour weakly.
-3. Smaller: fade-out endings (see *Form*).
+3. **The drums** (see *Drums*): drums coming and going by bar, grooves for the percussion, and
+   sections of percussion only.
+4. Smaller: fade-out endings (see *Form*).
 
 ## Section dynamics
 
@@ -161,6 +163,38 @@ Smaller, when the code is next touched:
   `Pick` over weights in `Generators` in place of the copies; `StateMap.With(kind, value)` for setting finished state.
 - **Memory:** every `RealizedNote` keeps the state it was decided from, which a song now holds on to (about 2 MB a
   song, 8 MB with a trace). Recompute it on demand instead, should memory matter.
+
+## Drums
+
+A section chooses its drums (`DrumKitGenerator.SelectActiveDrums`): the kick and the snare, and one or two optional
+groups (the timekeepers, the toms, the accents, the percussion), one drum of each, two of the percussion. Over 200
+corpus songs the timekeepers groove in 85% of the sections (76% before their weight was raised to 3), the percussion in
+34% (40%), and a section grooves on 3.2 drums (`DrumUseReportTest`). The triangle, the cuica and the whistle are left out of the song's percussion, as they grate in a
+groove, until genres call for them. Planned, in this order:
+
+1. **Drums by bar:** the section chooses its drums, and every bar pattern (a letter of the phrase scheme) plays some of
+   them, so that bars of the same letter play the same drums and a contrasting bar may drop one; the kick and the snare
+   always play. A drum's presence leans by the section's conventionality and energy, drawn from a stream of its own.
+2. **Grooves for the percussion:** a percussion drum's fixed rhythm by its register, the low ones grounding the
+   downbeats as the kick does, the high ones an offbeat or backbeat figure, as the kick's and the snare's fixed state
+   anchor a drum kit's groove.
+3. **Sections of percussion only:** a section may play its percussion without the drum kit, a chance as layered state of
+   the song's and the section's, leaned by energy and conventionality, so that a song switches to percussion and back
+   at section lines, and one that leans far enough plays percussion throughout. What it touches: the kick and the snare
+   are always on only in a drum kit section; the percussion plays more drums in its own section, and only where the
+   song has two or more; the landings take the roles of the section they lead into; a run draws its family (the drum
+   kit, the percussion or both) from what its section has, which also makes deliberate percussion fills in a drum kit
+   song; and the count-in clicks on a drum the song has, which fixes today's silent count-in in songs without a
+   hi-hat.
+
+Later:
+
+- **Doubling the snare:** the tambourine or the clap playing the snare's rhythm, its strong ranks (the backbeat), as
+  the same rhythm state with a sound of its own; the clap's ghost notes, the weak ranks, only after listening, as a
+  clap there may sound busy. The tambourine would leave the timekeepers, where it replaces the hi-hat.
+- **Shakers over the hi-hat:** layering them rather than replacing it, which needs care in how their figures fit.
+- **Drums by appearance:** a section's later appearance changing its drums, as an edit after assembly (see *Energy by
+  appearance*).
 
 ## Chords
 

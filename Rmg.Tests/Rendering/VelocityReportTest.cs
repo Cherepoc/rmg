@@ -83,9 +83,10 @@ public sealed class VelocityReportTest
         // a bass and chords accent their beats less than a melody or the drums
         await Assert.That(bass.Accent).IsLessThan(melody.Accent * 0.75);
         await Assert.That(chords.Accent).IsLessThan(melody.Accent * 0.75);
-        // a chord of several notes sounds about as loud as a single note, and the melody leads the mix
+        // a chord of several notes sounds about as loud as a single note, and the melody leads the mix, less over the
+        // chords since they were raised by ear, by about 1.7 dB over 100 songs
         await Assert.That(Math.Abs(chords.Loudness - bass.Loudness)).IsLessThan(2);
-        await Assert.That(melody.Loudness).IsGreaterThan(Math.Max(Math.Max(bass.Loudness, chords.Loudness), drums.Loudness) + 1.5);
+        await Assert.That(melody.Loudness).IsGreaterThan(Math.Max(Math.Max(bass.Loudness, chords.Loudness), drums.Loudness) + 1);
     }
 
     [Test]
