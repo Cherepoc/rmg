@@ -350,8 +350,13 @@ bar's first, a 64th apart, heard as a rush at every bar line (seed 162711917 at 
 notes off the 16th and triplet grids fell from 18,910 to 6,147 (the quintuplets and septuplets), its gaps under a 32nd
 from 286 to 3, and 666 bars play a tresillo twice; a grouped cycle plays fewer notes, 3% of the groove's in all. Left:
 
-- **Timekeepers in grouped cycles:** a hi-hat keeping time in dotted 8ths plays only the tresillo, sparse for time;
-  the tuplet draw of a drum that keeps time could lean to straight cycles in plain sections, as convention has it.
+- **Timekeepers in grouped cycles, not leaned:** a drum keeping time plays a grouped cycle in 6.9% of the plainest
+  sections' bar patterns, 9% of the middle and 23% of the wildest, as the other drums do, leaned already by the
+  chances every rhythm layer scales; heard as a clean tresillo since the fix. Straightening it after the layers' sum
+  would undo a decision rather than lean one, per bar pattern where a feel is the section's, and the tresillo keeping
+  time is conventional in reggaeton, dancehall or afrobeats, so its convention is the genres' to say. Should it be
+  wanted, first the rhythm layers' chances as leans (see *Chances multiplied*), then a role's lean on its drum's own
+  layers, per section, tied to genre.
 - **Splitting a grouped cycle by its number** (a dotted 8th into three 16ths, one strong and two weak), where the
   engine only halves: the 3-against-4 cross-rhythm as a full 16th stream, should the tresillo alone sound thin.
 - **Cross-rhythms across the phrase,** a grouped cycle running on across the bars, need patterns longer than a bar
