@@ -15,7 +15,7 @@ public sealed class DrumKitGeneratorTest
     )
     {
         var context = new GenerationContext(seed);
-        var songDrums = DrumKitGenerator.SelectSongDrums(context);
+        var songDrums = DrumSetups.SelectSongDrums(context, DrumSetup.KitAndPercussion);
         var kit = DrumKitGenerator.SelectKit(context, songDrums, x => x.MainRole, tilt, isPercussionOnly);
         return (songDrums, kit.Drums, kit);
     }

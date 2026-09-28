@@ -12,6 +12,9 @@ public static class TracePoints
     /// <summary>The register a section's melody aims at in each bar of its pattern (an <c>ImmutableArray</c> of doubles).</summary>
     public const string MelodyContour = "Melody contour";
 
+    /// <summary>What a song's drums are (a <see cref="DrumSetup" />).</summary>
+    public const string DrumSetup = "Drum setup";
+
     /// <summary>The drums a section plays, its leads and the drums that double them (a <see cref="SectionKit" />).</summary>
     public const string Kit = "Kit";
 

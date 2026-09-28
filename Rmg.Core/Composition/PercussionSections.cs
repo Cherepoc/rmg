@@ -12,24 +12,24 @@ namespace Rmg.Core.Composition;
 public static class PercussionSections
 {
     /// <summary>The chance a section plays percussion only, with no lean.</summary>
-    public const double Chance = 0.005;
+    public const double Chance = 0.06;
 
     /// <summary>How far the song's lean spreads either way, as the log of the odds it multiplies the chance's by.</summary>
-    public const double SongSpread = 7;
+    public const double SongSpread = 2;
 
     /// <summary>How few percussion drums a song has for its sections to play them alone.</summary>
     public const int MinDrums = 2;
 
     /// <summary>How many of the song's percussion drums a section of percussion only plays at most.</summary>
-    public const int MaxActiveDrums = 3;
+    public const int MaxActiveDrums = 4;
 
     /// <summary>
-    ///     How far the song leans to sections of percussion only, spread evenly either way, so that some songs lean far
-    ///     enough to play percussion in most of their sections.
+    ///     How far the song leans to sections of percussion only, around none; a song of percussion alone is a setup of
+    ///     its own (<see cref="DrumSetups" />).
     /// </summary>
     public static Tilt GenerateSong(IGenerationContext context)
     {
-        return new Tilt((context.GenerateDouble() * 2 - 1) * SongSpread);
+        return new Tilt(Generators.SplineValue()(context) * SongSpread);
     }
 
     /// <summary>Whether a section plays percussion only; drawn only where the song has enough percussion.</summary>

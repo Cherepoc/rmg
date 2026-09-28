@@ -126,6 +126,29 @@ public sealed class DrumUseReportTest
                                                            ((System.Collections.Immutable.ImmutableDictionary<int, Doubling>)e.Value!).ContainsKey(DrumGroups.GetTrackNumber(DrumDefinitions.Clap))));
         Console.WriteLine($"The clap leads the backbeat in {clapLeads} sections");
 
+        // the songs by their drum setup, and the drum parts of the percussion songs against those of the kit songs:
+        // notes a bar, bars that repeat the one before, and bars with a note on the downbeat and on both 2 and 4
+        var setups = songs.ToDictionary(x => x.Seed, x => (DrumSetup)x.Trace.First(e => e.Point == TracePoints.DrumSetup).Value!);
+        Console.WriteLine("Setups: " + string.Join(", ", Enum.GetValues<DrumSetup>().Select(x => $"{x} {setups.Values.Count(s => s == x)}")));
+        foreach (var setup in new[] { DrumSetup.Kit, DrumSetup.Percussion })
+        {
+            var setupBars = songs.Where(x => setups[x.Seed] == setup).SelectMany(song =>
+            {
+                var drums = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.Drum)
+                    .SelectMany(x => x.Value.Where(n => n.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.ArticulationIndex) == 0)
+                        .Select(n => (Track: x.Key, n.Position))).ToArray();
+                return song.Map.Sections.SelectMany(span => Enumerable.Range(0, (int)(span.Duration / Meter.BarDuration)).Select(bar =>
+                    drums.Where(n => n.Position >= span.Start + bar * Meter.BarDuration && n.Position < span.Start + (bar + 1) * Meter.BarDuration)
+                        .Select(n => (n.Track, Place: Math.Round(n.Position - span.Start - bar * Meter.BarDuration, 3))).OrderBy(n => n.Track).ThenBy(n => n.Place).ToArray()));
+            }).ToArray();
+            if (setupBars.Length == 0)
+                continue;
+            var repeats = setupBars.Zip(setupBars.Skip(1)).Count(x => x.First.Length > 0 && x.First.SequenceEqual(x.Second)) / (double)(setupBars.Length - 1);
+            Console.WriteLine($"{setup} songs' drums: {setupBars.Average(x => x.Length):F1} notes a bar, {repeats:P0} of the bars as the one before, " +
+                              $"the downbeat in {setupBars.Count(x => x.Any(n => n.Place == 0)) / (double)setupBars.Length:P0}, " +
+                              $"2 and 4 in {setupBars.Count(x => x.Any(n => n.Place == 1) && x.Any(n => n.Place == 3)) / (double)setupBars.Length:P0}");
+        }
+
         // sections of percussion only: how many, in how many songs, and how loud they are meant to be
         var percussionOnly = songs.SelectMany(song =>
         {

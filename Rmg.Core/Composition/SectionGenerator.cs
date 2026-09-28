@@ -128,7 +128,10 @@ internal sealed class SectionGenerator
         // its own
         var percussionContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), PercussionStream));
         var songPercussion = _tracks.SongDrums.Count(DrumGroups.Percussion.Drums.Contains);
-        var isPercussionOnly = PercussionSections.Draw(percussionContext, _songPercussion, rhythm.Tilt, tilt, songPercussion);
+        // a percussion song's every section, and now and then a section of a song of the kit and percussion
+        var isPercussionOnly = _tracks.DrumSetup == DrumSetup.Percussion ||
+                               (_tracks.DrumSetup == DrumSetup.KitAndPercussion &&
+                                PercussionSections.Draw(percussionContext, _songPercussion, rhythm.Tilt, tilt, songPercussion));
         StateTrace.Record(TracePoints.PercussionOnly, SectionTrace, sectionId, 0, StateMap.Default, 0, isPercussionOnly ? "percussion only" : "drum kit", isPercussionOnly);
         var kit = DrumKitGenerator.SelectKit(
             _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), KitStream)),

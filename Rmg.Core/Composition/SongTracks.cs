@@ -19,17 +19,22 @@ internal sealed class SongTracks
         ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
         ImmutableArray<PercussionInstrumentDefinition> songDrums,
         ImmutableArray<TrackGroup> groups,
-        double bassLeading
+        double bassLeading,
+        DrumSetup drumSetup
     )
     {
         Definitions = definitions;
         SongDrums = songDrums;
+        DrumSetup = drumSetup;
         Groups = groups;
         BassLeading = bassLeading;
         NonGroupedTrackNumbers = [..definitions.Keys.Except(groups.SelectMany(x => x.TrackNumbers))];
     }
 
     public ImmutableSortedDictionary<int, IInstrumentTrack> Definitions { get; }
+
+    /// <summary>What the song's drums are: the drum kit, the kit with some percussion, or percussion alone.</summary>
+    public DrumSetup DrumSetup { get; }
 
     /// <summary>The drums the song has; a section plays some of them.</summary>
     public ImmutableArray<PercussionInstrumentDefinition> SongDrums { get; }
@@ -46,11 +51,13 @@ internal sealed class SongTracks
     /// <param name="rhythmicUnconventionality">How far the song's rhythm strays, which its tracks' layers are scaled by.</param>
     /// <param name="strokeContext">The sequence the drums' strokes in the song are drawn from (<see cref="DrumStrokes" />).</param>
     /// <param name="roleContext">The sequence the drums' roles in the song are drawn from (<see cref="DrumRoles" />).</param>
+    /// <param name="drumSetup">What the song's drums are (<see cref="DrumSetups" />).</param>
     public static SongTracks Create(
         IGenerationContext context,
         RhythmicUnconventionality rhythmicUnconventionality,
         IGenerationContext strokeContext,
-        IGenerationContext roleContext
+        IGenerationContext roleContext,
+        DrumSetup drumSetup
     )
     {
         var trackRhythmLayer = rhythmicUnconventionality.Scale(RhythmLayers.Track);
@@ -132,7 +139,7 @@ internal sealed class SongTracks
         };
 
         // the song has its own drums, and the drums picked by the section kit play in a section
-        var songDrums = DrumKitGenerator.SelectSongDrums(context);
+        var songDrums = DrumSetups.SelectSongDrums(context, drumSetup);
         foreach (var drumGroup in DrumGroups.All)
         {
             foreach (var drum in drumGroup.Drums.Where(songDrums.Contains))
@@ -141,6 +148,9 @@ internal sealed class SongTracks
                 var builder = drum.ConfigureStateMap(drumGroup.ConfigureStateMap(new StateMapBuilder("Drum", perTrack: true)));
                 if (!drum.Walks)
                     builder.Add(CompositionStateKinds.IncrementalArticulationOffset.Multiplier, 0.0);
+                // a percussion song's figures repeat more, as an ensemble's do
+                if (drumSetup == DrumSetup.Percussion)
+                    builder.Add(CompositionStateKinds.Rhythm.Variation, DrumSetups.PercussionVariation);
                 var drumStateMap = builder.ToStateMap(context)
                     .MergeWith(DrumStrokes.GenerateSong(strokeContext, drum))
                     .MergeWith(DrumRoles.GenerateSong(roleContext, drum, rhythmicUnconventionality.Tilt));
@@ -166,7 +176,7 @@ internal sealed class SongTracks
             )
         ];
 
-        return new SongTracks(definitions.ToImmutableSortedDictionary(), songDrums, groups, bassLeading);
+        return new SongTracks(definitions.ToImmutableSortedDictionary(), songDrums, groups, bassLeading, drumSetup);
     }
 
     /// <summary>

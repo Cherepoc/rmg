@@ -137,8 +137,9 @@ internal sealed class FillGenerator
                 : tilt.Chance(x.Value, FillLayers.LandingLean)
         );
         var landing = _sounds.DrawLanding(_context, landings);
-        // a pushed landing comes a note of the fill's rhythm near an 8th early
-        var isEarly = _context.TestProbability(Math.Min(1, chances.GetStateValue(CompositionStateKinds.Fill.EarlyLandingChance)));
+        // a pushed landing comes a note of the fill's rhythm near an 8th early, after a fill, not where the band stops
+        // or counts in and lands on the line together
+        var isEarly = _context.TestProbability(Math.Min(1, chances.GetStateValue(CompositionStateKinds.Fill.EarlyLandingChance))) && line.HasFill;
         var landingPosition = isEarly ? line.Position - rhythm.Push : line.Position;
         Land(song, edits, landingPosition, line.Next.SectionId, landing);
         RecordDecision(ending.SectionId, line.Position - origin, play, rhythm, span, landing, isEarly, lift);

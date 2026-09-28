@@ -9,22 +9,6 @@ namespace Rmg.Core.Composition;
 /// </summary>
 public static class DrumKitGenerator
 {
-    /// <summary>Chooses the drums that are available in a song.</summary>
-    public static ImmutableArray<PercussionInstrumentDefinition> SelectSongDrums(IGenerationContext context)
-    {
-        var songDrums = DrumGroups.All
-            .Select(group => (group, drums: group.SongRule.Select(context, group.Drums)))
-            .ToImmutableArray();
-
-        foreach (var (group, drums) in songDrums)
-        {
-            if (group.IsAlwaysOn && drums.IsEmpty)
-                throw new InvalidOperationException($"An always-on drum group '{group.Name}' has no drums in the song.");
-        }
-
-        return [..songDrums.SelectMany(x => x.drums)];
-    }
-
     /// <summary>
     ///     The drums a section plays, out of the song's: a lead for the ground, one for the backbeat, and mostly one to
     ///     keep time, each drawn among the drums whose main role it is (<see cref="PercussionInstrumentDefinition.MainRole" />)

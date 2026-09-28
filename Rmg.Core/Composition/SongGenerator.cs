@@ -49,8 +49,10 @@ public static class SongGenerator
             Stream(SongStream.Tracks),
             rhythmicUnconventionality,
             Stream(SongStream.DrumStrokes),
-            Stream(SongStream.DrumRoles)
+            Stream(SongStream.DrumRoles),
+            DrumSetups.Pick(Stream(SongStream.DrumSetup), rhythmicUnconventionality.Tilt)
         );
+        StateTrace.Record(TracePoints.DrumSetup, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, tracks.DrumSetup.ToString(), tracks.DrumSetup);
 
         // the song's chords gather around its unconventionality, and a section's around its own shift of it
         var harmonyContext = Stream(SongStream.Harmony);
@@ -193,5 +195,6 @@ internal enum SongStream
     Dynamics = 11,
     Percussion = 12,
     DrumStrokes = 13,
-    DrumRoles = 14
+    DrumRoles = 14,
+    DrumSetup = 15
 }

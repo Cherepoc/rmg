@@ -119,8 +119,8 @@ public static class DrumGroups
         PercussionDrums,
         0.4,
         2,
-        configureStateMap: builder => builder.InRuns(0.08),
-        songRule: new SongDrumRule([SongDrumRule.Pool(0, 4, [..PercussionDrums])])
+        // a song's percussion comes of its drum setup (DrumSetups)
+        configureStateMap: builder => builder.InRuns(0.08)
     );
 
     public static ImmutableArray<DrumGroup> All { get; } =

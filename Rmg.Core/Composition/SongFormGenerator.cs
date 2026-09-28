@@ -216,7 +216,13 @@ internal sealed class SongFormGenerator
     )
     {
         var bar = first.Timeline.Trim(Meter.BarDuration);
-        var (drum, sound) = FormLayers.CountInSounds.First(x => bar.TrackTimelineMap.ContainsKey(DrumGroups.GetTrackNumber(x.Drum)));
+        // or on the first sound of the song's first drum, such as a percussion song's with none of them
+        var (drum, sound) = FormLayers.CountInSounds.FirstOrDefault(x => bar.TrackTimelineMap.ContainsKey(DrumGroups.GetTrackNumber(x.Drum)));
+        if (drum is null)
+        {
+            drum = DrumGroups.GetDrum(bar.TrackTimelineMap.Keys.Where(x => roles[x] == TrackRole.Drum).Min());
+            sound = drum.Sounds[0].Code;
+        }
         var clickTrack = DrumGroups.GetTrackNumber(drum);
         var click = StateMap.FromStates(
             [

@@ -8,9 +8,9 @@ public sealed class SongDrumSelectionTest
 {
     private static IEnumerable<int> Seeds => Enumerable.Range(0, 1000);
 
-    private static ImmutableArray<PercussionInstrumentDefinition> SongDrums(int seed)
+    private static ImmutableArray<PercussionInstrumentDefinition> SongDrums(int seed, DrumSetup setup = DrumSetup.KitAndPercussion)
     {
-        return DrumKitGenerator.SelectSongDrums(new GenerationContext(seed));
+        return DrumSetups.SelectSongDrums(new GenerationContext(seed), setup);
     }
 
     private static PercussionInstrumentDefinition[] MainSnares =>
@@ -71,13 +71,39 @@ public sealed class SongDrumSelectionTest
     }
 
     [Test]
-    public async Task Song_PercussionPool_HasUpToFourDrums_AndSometimesNone()
+    public async Task AKitSong_HasNoPercussion_AndOneOfTheKitAndPercussion_OneToThree()
     {
-        var counts = Seeds.Select(seed => DrumGroups.Percussion.Drums.Count(SongDrums(seed).Contains)).ToArray();
+        int Count(int seed, DrumSetup setup) => DrumGroups.Percussion.Drums.Count(SongDrums(seed, setup).Contains);
 
-        await Assert.That(counts.Max()).IsEqualTo(4);
-        await Assert.That(counts.Contains(0)).IsTrue();
-        await Assert.That(counts.Contains(1)).IsTrue();
+        await Assert.That(Seeds.All(seed => Count(seed, DrumSetup.Kit) == 0)).IsTrue();
+        var counts = Seeds.Select(seed => Count(seed, DrumSetup.KitAndPercussion)).ToArray();
+        await Assert.That(counts.Min()).IsEqualTo(1);
+        await Assert.That(counts.Max()).IsEqualTo(3);
+    }
+
+    [Test]
+    public async Task APercussionSong_HasNoDrumKit_ADrumForEveryRole_AndMore()
+    {
+        foreach (var seed in Seeds)
+        {
+            var drums = SongDrums(seed, DrumSetup.Percussion);
+
+            await Assert.That(drums.All(x => x.Family.HasFlag(DrumFamily.Percussion))).IsTrue();
+            foreach (var role in DrumKitGenerator.LeadRoles)
+                await Assert.That(drums.Count(x => x.MainRole == role)).IsGreaterThanOrEqualTo(1);
+            await Assert.That(drums.Length).IsBetween(4, 6);
+        }
+    }
+
+    [Test]
+    public async Task MostSongs_PlayTheKitAlone_AFew_PercussionAlone_TheMoreTheWilder()
+    {
+        double Share(DrumSetup setup, double unconventionality) => Seeds.Count(seed =>
+            DrumSetups.Pick(new GenerationContext(seed), new RhythmicUnconventionality(unconventionality).Tilt) == setup) / (double)Seeds.Count();
+
+        await Assert.That(Share(DrumSetup.Kit, 0.5)).IsBetween(0.55, 0.7);
+        await Assert.That(Share(DrumSetup.Percussion, 0.5)).IsBetween(0.02, 0.09);
+        await Assert.That(Share(DrumSetup.Percussion, 1)).IsGreaterThan(Share(DrumSetup.Percussion, 0) * 3);
     }
 
     [Test]
@@ -104,7 +130,7 @@ public sealed class SongDrumSelectionTest
         foreach (var seed in Seeds)
         {
             var context = new GenerationContext(seed);
-            var songDrums = DrumKitGenerator.SelectSongDrums(context);
+            var songDrums = DrumSetups.SelectSongDrums(context, DrumSetup.KitAndPercussion);
 
             for (var i = 0; i < 5; i++)
             {
@@ -121,7 +147,7 @@ public sealed class SongDrumSelectionTest
         foreach (var seed in Seeds)
         {
             var context = new GenerationContext(seed);
-            var songDrums = DrumKitGenerator.SelectSongDrums(context);
+            var songDrums = DrumSetups.SelectSongDrums(context, DrumSetup.KitAndPercussion);
             var usedMainSnares = Enumerable.Range(0, 20)
                 .SelectMany(_ => DrumKitGenerator.SelectKit(context, songDrums, x => x.MainRole, default, false).Drums)
                 .Where(MainSnares.Contains)
