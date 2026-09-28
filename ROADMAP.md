@@ -13,8 +13,8 @@ In this order, each measured before it is planned:
    endings, the section modes and the chords' level.
 2. **The melody** (see *Melody at generation*): it plays where it was placed, so a phrase that plays again is heard
    as the same notes, and its shape follows its contour weakly.
-3. **The drums** (see *Drums*): listen to the drums coming and going by bar, the percussion's grooves and the
-   sections of percussion only.
+3. **The drums** (see *Drums*): roles as data; listen to the strokes and accents, the drums coming and going by bar,
+   the percussion's grooves and the sections of percussion only.
 4. Smaller: fade-out endings (see *Form*).
 
 ## Section dynamics
@@ -215,22 +215,42 @@ bar, half of them on 1 and 3, the time keepers now play 5 to 6.5 notes a bar spr
 the wood block repeat their bar 60% of the time as the snare does. 6.7% of the sections play percussion only, in 38
 songs, 10 of them in half their sections or more; their energy averages 0.00, against 0.14.
 
+Planned, **roles as data**. A drum plays a role in the groove (`DrumRole`): it grounds it (as the kick does), plays
+the backbeat (the snare), keeps time (the hi-hat) or colours it (the toms, a crash ride, more percussion); the fills keep
+their own roles (`FillDrumRole`), finer, by the sounds a run plays. The role sets the drum's fixed rhythm state
+(`GroundsTheGroove`, `PlaysTheBackbeat`, `KeepsTime`), where its definition sets it now. In this order, each measured:
+
+1. **Roles as state, no change:** every drum's affinity for every role as data, its role now at 1 and the others at
+   0; the song draws a drum's role by them and a section may draw it again, the lowest layer's winning, both leaned by
+   conventionality; the role's rhythm state is added from the role. The corpus fingerprint stays as it is.
+2. **Affinities spread:** the kick and the snare steep, the conga, the cowbell and the claves spread over several
+   roles, the ride keeping time or colouring. Measure the roles in plain and wild sections, how often the kick or the
+   snare leaves its role (rarely, and only in wild sections), and where each drum's notes fall.
+3. **The kit by roles,** in place of `SelectActiveDrums`: a section fills the ground and the backbeat almost always,
+   time mostly, and colour with none to two drums by energy, and each role's lead is drawn among the song's drums by
+   weight times affinity, leaned by loudness and energy, one lead a role in place of the groups' rule that their drums
+   do not play together; a section of percussion only draws its leads from the percussion. The groups keep only the
+   song's drums and the fills' roles. Retune to today: the timekeepers in 79% of the sections, the percussion in 40%, 3.2
+   drums a section and 3.7 a bar, 6.7% of the sections percussion only.
+4. **Doubling:** a role held by two drums, the second playing the lead's rhythm on its strong ranks with a sound of its
+   own, leaned by energy: the clap or the tambourine on the backbeat, a shaker over the hi-hat. The clap leaves the
+   main snares, the song having an acoustic or an electric snare and maybe a clap, which mostly doubles the backbeat
+   and in a few unconventional songs leads it.
+5. **Drums by bar on roles:** the leads of the ground, the backbeat and time never sit out a bar but may change their
+   stroke, colour comes and goes, and a doubler sits out with its lead.
+
+Risks: the kick or the snare in a role not theirs may sound broken rather than bold, hence steep affinities, and
+listen to the wild end; the colour count by energy shifts the balance of the toms, the crash ride and the percussion.
+
 Later:
 
-- **Doubling the snare:** the tambourine or the clap playing the snare's rhythm, its strong ranks (the backbeat), as
-  the same rhythm state with a sound of its own; the clap's ghost notes, the weak ranks, only after listening, as a
-  clap there may sound busy. The tambourine would leave the timekeepers, where it replaces the hi-hat.
-- **Shakers over the hi-hat:** layering them rather than replacing it, which needs care in how their figures fit.
+- **The clap's ghost notes,** the weak ranks of the backbeat, only after listening, as a clap there may sound busy.
+- **Shakers over the hi-hat with figures of their own,** where doubling plays the lead's rhythm.
 - **Drums by appearance:** a section's later appearance changing its drums, as an edit after assembly (see *Energy by
   appearance*).
-- **Roles as data:** each drum's affinity for every role (grounding, the backbeat, keeping time, colouring), drawn per
-  section and leaned by conventionality, so that in a wild section any drum may take any role; a section's kit chosen
-  by the roles it fills, which would cover a section of percussion only by construction, and doubling as a role held
-  by two drums, the clap's place: doubling the backbeat, or holding it in a few unconventional songs. Undecided: a
-  drum's role drawn per section or per song, and whether the kit is chosen by roles or the groups stay with roles drawn
-  after them.
 - **Strokes before a lift:** the snare going from its cross-stick to its head in the last phrase before a louder
   section, an edit after assembly.
+
 ## Chords
 
 Chord shapes are pitch fractions snapped to the scale, picked from a table ordered by unconventionality, laid out by a
