@@ -154,8 +154,8 @@ Smaller, when the code is next touched:
   state (`FillLayers.Chances`), are still multiplied by the chance scale and capped at 1; tuned so, they could lean by
   their odds as the choices do, should the capping show.
 - **Offsets as lists:** the chord root, the chord note and the articulation are collections that their readers sum,
-  and the scale a collection that two layers would silently merge into fourteen notes; additive kinds, and a kind that
-  may be set once, would say what they are.
+  and the scale a collection that two layers would silently merge into fourteen notes; additive kinds, and a kind the
+  lowest layer sets, as the drums' strokes now are (`StateKinds.CreateLowestLayerWins`), would say what they are.
 - **Echo keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 - **Visibility:** the tables (`FillLayers`, `FormLayers`, `Drummer`, `MelodyBusyness` and more) are public though
   nothing outside needs them.
@@ -174,10 +174,26 @@ a fifth of the songs have it beside the cymbal, and a landing weighs its sounds 
 its sounds, so that it lands in about one cymbal landing in eleven where the song has it and all but never grooves
 (no section of 200 corpus songs, against 264 as a percussion drum).
 
-Drums by bar (`DrumPresence`): the section's first bar pattern, the phrase scheme's A, plays all its drums, and an
-optional drum sits out the bars of another letter 30% of the time, from about 10% in the plainest sections to 60% in the
-wildest, less the more energy the section has, drawn from a stream of its own; the kick and the snare always play.
-Bars of the same letter play the same drums.
+A drum's sounds are data (`DrumSound`): a weight, which runs and landings pick them by, so that the cymbal lands on a
+crash four times in five where it landed on the china and the splash half the time, and a sound joins a run by its
+weight against the heaviest; a loudness, which adds to its velocity (`VelocityLayers.SoundLevel`) and leans it by
+energy; a stroke weight; and an accent. A drum walks its sounds from note to note, as the toms and the congas do their
+pitches, or strikes one steadily, its stroke (`DrumStrokes`), a state the lowest layer that sets it decides
+(`StateKinds.CreateLowestLayerWins`, by the depth every value carries): the song picks one, a section may change it and
+a bar of a later letter may change the section's, a change the likelier the heavier the new stroke, the less
+conventional the rhythm and the more its loudness goes the energy's way. The cross-stick is a stroke of the snare, no
+longer a drum: 14% of the snare's sections play it, 21% of the quieter half and 8% of the louder, and 77 of 160 songs
+switch to it and back. A note may play an accent over its stroke, at a note's depth (`DrumAccents`), leaned to the
+beats it favours and by energy, and replayed in a repeated cycle: the hi-hat plays 87% closed, 5% its pedal and 8% open,
+two thirds of those off the beat, where the three were about even; the ride's bell is 6% of its notes, nine in ten on
+the beat, where it was 28%.
+
+Drums by bar (`DrumPresence`): the section's first bar pattern, the phrase scheme's A, plays its drums as the section
+does, and the bars of another letter vary them: a drum that holds a role in the groove (the kick, the snare, the
+timekeepers, and every drum of a section of percussion only) never sits out, as the hi-hat sitting out sounded as a
+dropout, but may change its stroke there; a drum that colours the groove sits out 30% of the time, from about 10% in
+the plainest sections to 60% in the wildest, less the more energy the section has, each drawn from a stream of its
+own. Bars of the same letter play the same drums.
 
 The percussion stands in for the drum kit by its register and takes the fixed rhythm of the drum it stands for
 (`DrumDefinitions.GroundsTheGroove`, `PlaysTheBackbeat`, `KeepsTime`): the conga and the timbale ground the groove as
@@ -192,10 +208,9 @@ drum kit section does now and then (`FillLayers.PercussionRunChance`). The count
 sounds the song has (`FormLayers.CountInSounds`), the hi-hat's pedal first, where it was silent in a song with no
 hi-hat.
 
-Measured over 200 corpus songs (`DrumUseReportTest`), against before these changes: the timekeepers groove in 76% of
-the sections, as before, their greater weight making up for the bars they now sit out (85% with the weight alone), the
-percussion in 40%, and a section grooves on 3.1 drums, against 3.2; a bar plays 3.6 drums, against 3.9, and the drums
-change from the bar before in 38% of the bars, against 23%. Where the percussion played as any drum, about 2.8 notes a
+Measured over 200 corpus songs (`DrumUseReportTest`), against before these changes: the timekeepers groove in 79% of
+the sections, against 76%, the percussion in 40%, and a section grooves on 3.2 drums, as before; a bar plays 3.7 drums,
+against 3.9, and the drums change from the bar before in 29% of the bars, against 23%. Where the percussion played as any drum, about 2.8 notes a
 bar, half of them on 1 and 3, the time keepers now play 5 to 6.5 notes a bar spread as the hi-hat's, and the claves and
 the wood block repeat their bar 60% of the time as the snare does. 6.7% of the sections play percussion only, in 38
 songs, 10 of them in half their sections or more; their energy averages 0.00, against 0.14.
@@ -208,6 +223,14 @@ Later:
 - **Shakers over the hi-hat:** layering them rather than replacing it, which needs care in how their figures fit.
 - **Drums by appearance:** a section's later appearance changing its drums, as an edit after assembly (see *Energy by
   appearance*).
+- **Roles as data:** each drum's affinity for every role (grounding, the backbeat, keeping time, colouring), drawn per
+  section and leaned by conventionality, so that in a wild section any drum may take any role; a section's kit chosen
+  by the roles it fills, which would cover a section of percussion only by construction, and doubling as a role held
+  by two drums, the clap's place: doubling the backbeat, or holding it in a few unconventional songs. Undecided: a
+  drum's role drawn per section or per song, and whether the kit is chosen by roles or the groups stay with roles drawn
+  after them.
+- **Strokes before a lift:** the snare going from its cross-stick to its head in the last phrase before a louder
+  section, an edit after assembly.
 ## Chords
 
 Chord shapes are pitch fractions snapped to the scale, picked from a table ordered by unconventionality, laid out by a
@@ -221,12 +244,6 @@ notes than seven picks sometimes one quality and sometimes the other. Worth it o
 exist; in a 7-note scale it changes nothing.
 
 ## Fills
-
-### Snare and cross-stick
-
-A section whose snare group plays the cross-stick gives the run the cross-stick's state, which works as a rhythm, but
-the run then plays a cross-stick or a clap as its snare. Better handling later: the song's main snare's sound over the
-section's rhythm, or both where the song has both.
 
 ### Tuplets of the other drums
 
@@ -252,11 +269,9 @@ to:
 - **Walks:** one way, turn, loop and random could be one walk with a few values, should they grow.
 - **Idioms the draws no longer tie together:** a lift is now a half-beat run on any sounds, rarely the open hi-hat,
   and a landing takes any cymbal sound, the china and the splash as often as the crashes.
-- **Sounds by convention:** a run draws among a drum's sounds evenly, and a landing weighs them by their drum's weight
-  shared among its sounds, so the vibraslap lands rarely, but still half the cymbal landings are the china or the
-  splash, accents that mark a downbeat less than a crash, where a plain song would crash. Each sound could carry how
-  conventional it is, as data on its drum like the toms' order of pitch: the crashes 1, the china and the splash less,
-  their weights multiplied by the section's chance scale, so plain sections crash and wild ones reach for the others.
+- **Sounds by convention:** runs and landings weigh a drum's sounds by their weights (see *Drums*), the same in a plain
+  section as in a wild one; the weights could lean by the section's conventionality, so plain sections crash and wild
+  ones reach for the china and the splash.
 - **The drummer's walks and busyness as state:** the fills' rarer choices and each drum
   group's chance of a run are layered state now, and a signature a song layer over them; the favourite walk, a choice
   among four, would need a pool like the chord pool's, and busyness, which weighs the spans and moves the fullness,
