@@ -56,6 +56,12 @@ public static class MelodyLayers
     /// </summary>
     public static ImmutableArray<double> AnswerBars { get; } = [0, 0, 1, 1];
 
+    /// <summary>
+    ///     How likely an answer's changing bar is to draw its rhythm afresh, for an amount of 1: half the time at the
+    ///     answer's amount with no lean.
+    /// </summary>
+    public const double AnswerRhythm = 1;
+
     /// <summary>The chance a note of the answer's changing bars is mutated, with no lean; the less conventional the rhythm, the likelier.</summary>
     public const double AnswerAmount = 0.5;
 

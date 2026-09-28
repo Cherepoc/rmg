@@ -87,7 +87,8 @@ public sealed class PhraseSchemesTest
 
             foreach (var track in section.GroupBy(x => x.Track))
             {
-                var seeds = track.OrderBy(x => x.Bar).Select(x => x.StateMap.GetStateValue(CompositionStateKinds.ValueSeed)).ToArray();
+                // a melody's answer plays the same bar patterns again, recorded at their places
+                var seeds = track.GroupBy(x => x.Bar).OrderBy(x => x.Key).Select(x => x.First().StateMap.GetStateValue(CompositionStateKinds.ValueSeed)).ToArray();
                 for (var a = 0; a < 4; a++)
                 for (var b = 0; b < 4; b++)
                     await Assert.That(seeds[a] == seeds[b]).IsEqualTo(letters[a] == letters[b]).Because($"{letters}, bars {a} and {b}");

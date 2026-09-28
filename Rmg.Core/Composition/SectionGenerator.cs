@@ -364,7 +364,7 @@ internal sealed class SectionGenerator
             if (trackStateMaps.Count == 0)
                 continue;
 
-            yield return _patternGenerator.GenerateBars(context, sectionId, DoubleLeads(trackStateMaps, doubles), barDrums, doubles, barStateTimelineMap, sectionRhythm);
+            yield return _patternGenerator.GenerateBars(context, sectionId, DoubleLeads(trackStateMaps, doubles), barDrums, doubles, barStateTimelineMap, sectionRhythm, null);
         }
     }
 
@@ -391,18 +391,24 @@ internal sealed class SectionGenerator
                 .MergeWith(sectionStateMap)
                 .MergeWith(sectionTrackLayer.ToStateMap(context));
             var trackStateMaps = new Dictionary<int, StateMap> { [trackNumber] = trackStateMap };
-            var bars = _patternGenerator.GenerateBars(context, sectionId, trackStateMaps.ToImmutableDictionary(), BarDrums.None, ImmutableDictionary<int, Doubling>.Empty, barStateTimelineMap, sectionRhythm);
-            // the melody's notes are placed once its bars are made, in their order, over the question and its answer
-            if (_tracks.Definitions[trackNumber].Role != TrackRole.Melody)
+            // the melody answers its question: the answer's later bars draw their rhythm afresh now and then, and its notes
+            // there are mutated, by the section's amount, each decision from the answer's own sequence
+            var isMelody = _tracks.Definitions[trackNumber].Role == TrackRole.Melody;
+            var amount = sectionRhythm.Unconventionality.Tilt.Chance(MelodyLayers.AnswerAmount, 1);
+            var answerContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), MelodyAnswerStream));
+            var answerSeed = answerContext.GenerateInt();
+            var questionEnd = barStateTimelineMap.GetEffectiveStateMapAt(Meter.PatternDuration - Meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
+            var answer = isMelody ? MelodyPattern.DrawAnswer(answerContext, amount, questionEnd) : null;
+            var bars = _patternGenerator.GenerateBars(context, sectionId, trackStateMaps.ToImmutableDictionary(), BarDrums.None, ImmutableDictionary<int, Doubling>.Empty, barStateTimelineMap, sectionRhythm, answer);
+            if (!isMelody)
             {
                 yield return (trackNumber, bars, null);
                 continue;
             }
 
-            var answerContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), MelodyAnswerStream));
-            var amount = sectionRhythm.Unconventionality.Tilt.Chance(MelodyLayers.AnswerAmount, 1);
+            // the melody's notes are placed once its bars are made, in their order, over the question and its answer
             var answered = MelodyPattern.Place(
-                MelodyPattern.Answer(bars.Timeline, trackNumber, answerContext.GenerateInt(), amount),
+                MelodyPattern.Answer(bars.Timeline, trackNumber, answerSeed, amount),
                 trackNumber,
                 (PitchInstrumentTrack)_tracks.Definitions[trackNumber],
                 barStateTimelineMap.Repeat(2),

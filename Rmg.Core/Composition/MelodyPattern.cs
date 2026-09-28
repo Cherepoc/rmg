@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
@@ -88,19 +89,19 @@ internal sealed class MelodyPattern
     }
 
     /// <summary>
-    ///     A section's melody as a question and its answer: its 4 bars, and the same again with the answer's later bars
-    ///     mutated, a decision at a time (<see cref="MelodyLayers.AnswerBars" />): a note mutated there draws afresh
+    ///     A section's melody as a question and its answer: its 4 bars, and the answer's, of the same bar patterns, whose
+    ///     later bars' rhythm is varied (<see cref="PatternGenerator.GenerateBars" />) and whose notes there are mutated, a
+    ///     decision at a time (<see cref="MelodyLayers.AnswerBars" />): a note mutated there draws afresh
     ///     whether it goes on or turns back, and plays no note heard before, so that it is placed by the rules where it
     ///     echoed the question. Whether a note is mutated, and how, is drawn from a sequence of the note's own, by the
     ///     key of the note it echoes, so that notes that echo the same one mutate alike and no other draw moves.
     /// </summary>
-    /// <param name="bars">The section's bars, a 4-bar pattern.</param>
+    /// <param name="bars">The section's bars, its 4-bar pattern's question and answer.</param>
     /// <param name="seed">The seed of the answer's mutations.</param>
     /// <param name="amount">The chance a note of the answer's later bars is mutated.</param>
     public static TrackEventStateTimelineMap<StateMap> Answer(TrackEventStateTimelineMap<StateMap> bars, int trackNumber, int seed, double amount)
     {
-        var answered = bars.Repeat(2);
-        var track = answered.TrackTimelineMap[trackNumber].EventTimeline;
+        var track = bars.TrackTimelineMap[trackNumber].EventTimeline;
         var mutated = track.Select(note =>
             {
                 var bar = (int)Math.Floor(note.Position / Meter.BarDuration) - Progressions.BarCount;
@@ -121,7 +122,22 @@ internal sealed class MelodyPattern
             }
         );
         var timeline = EventTimeline.Create(track.Duration, mutated);
-        return answered.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [trackNumber] = _ => timeline });
+        return bars.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [trackNumber] = _ => timeline });
+    }
+
+    /// <summary>
+    ///     How a melody's answer plays, where it differs from its question: whether every bar draws its rhythm afresh, and
+    ///     where the phrase ends in its last bar, as <see cref="CompositionStateKinds.MelodyPhraseEnd" /> has it; none for
+    ///     where the question's does. Drawn from the answer's own sequence, by the section's amount: the rhythm now and then
+    ///     in its later bars, and the end afresh, other than the question's.
+    /// </summary>
+    public static MelodyAnswer DrawAnswer(IGenerationContext context, double amount, int questionEnd)
+    {
+        ImmutableArray<bool> rhythm = [..MelodyLayers.AnswerBars.Select(x => context.TestProbability(x * amount * MelodyLayers.AnswerRhythm))];
+        var endsAfresh = context.TestProbability(amount);
+        ImmutableArray<Weighted<int>> ends = [..MelodyLayers.PhraseEnds.Where(x => x.Value != questionEnd)];
+        var end = ends[Generators.WeightedIndex(ends)(context)].Value;
+        return new MelodyAnswer(rhythm, endsAfresh ? end : null);
     }
 
     /// <summary>
@@ -159,3 +175,8 @@ internal sealed class MelodyPattern
         return EventTimeline.Create(notes.Duration, kept);
     }
 }
+
+/// <summary>How a melody's answer differs from its question (<see cref="MelodyPattern.DrawAnswer" />).</summary>
+/// <param name="RedrawsRhythm">Whether every bar of the answer draws its rhythm afresh.</param>
+/// <param name="PhraseEnd">Where the answer's phrase ends in its last bar; none for where the question's does.</param>
+public sealed record MelodyAnswer(ImmutableArray<bool> RedrawsRhythm, int? PhraseEnd);

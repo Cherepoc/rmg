@@ -13,6 +13,9 @@ namespace Rmg.Core.Composition;
 internal sealed class PatternGenerator
 {
 
+    // the key an answer's bar derives its fresh rhythm's seed from its bar pattern's by
+    private const int AnswerRhythmKey = 1;
+
     private static readonly Func<IGenerationContext, int> SeedGenerator = Generators.Int();
 
     private static readonly Func<IGenerationContext, double> ArticulationOffset = Generators.SplineValue();
@@ -43,6 +46,11 @@ internal sealed class PatternGenerator
     /// <param name="trackStateMaps">Every track's state in the section.</param>
     /// <param name="barDrums">How the drums play the bars of a letter: the bars a track sits out, keeping its state there with no notes, and the strokes it changes to.</param>
     /// <param name="barStateTimelineMap">The state that changes by bar, such as the chord, along the 4-bar pattern.</param>
+    /// <param name="answer">
+    ///     For a track that answers its 4-bar pattern, as the melody does, how its answer plays: the pattern's bars again,
+    ///     of the same bar patterns, a bar as the question's did or, drawing its rhythm afresh, of the same settings on
+    ///     another rhythm, and the phrase ending where the answer has it; none for no answer.
+    /// </param>
     /// <param name="context">The section's random sequence.</param>
     public GeneratedBars GenerateBars(
         IGenerationContext context,
@@ -51,7 +59,8 @@ internal sealed class PatternGenerator
         BarDrums barDrums,
         ImmutableDictionary<int, Doubling> doubles,
         StateTimelineMap barStateTimelineMap,
-        SectionRhythm sectionRhythm
+        SectionRhythm sectionRhythm,
+        MelodyAnswer? answer
     )
     {
         // a bar pattern's own layer, drawn for every track and bar; no chord root offset here: every track plays the
@@ -68,9 +77,15 @@ internal sealed class PatternGenerator
             trackStateMaps.Keys.ToDictionary(x => x, _ => SeedGenerator(innerContext));
         var trackSeedMaps = Generators.Sequence(trackSeedMapGenerator, scheme.PatternCount)(context);
         var feels = new List<BarFeel>();
-        var timeline = scheme.Letters
+        // the question's letters, and the answer's, the same again
+        var letters = answer is null ? scheme.Letters : [..scheme.Letters, ..scheme.Letters];
+        var timeline = letters
             .Select((letter, barIndex) =>
                 {
+                    var patternBar = barIndex % scheme.Letters.Length;
+                    var inAnswer = barIndex >= scheme.Letters.Length;
+                    var redrawsRhythm = inAnswer && answer!.RedrawsRhythm[patternBar];
+                    var phraseEnd = inAnswer ? answer!.PhraseEnd : null;
                     // a drum that doubles a lead plays its lead's bar patterns
                     var seeds = trackSeedMaps[letter];
                     var trackNotePatterns = seeds.Select(x =>
@@ -84,7 +99,9 @@ internal sealed class PatternGenerator
                                 sectionId,
                                 barIndex,
                                 barPatternLayerGenerator,
-                                scheme.IsVaried[barIndex],
+                                scheme.IsVaried[patternBar],
+                                redrawsRhythm,
+                                phraseEnd,
                                 barDrums.Resting.Contains((x.Key, letter)),
                                 barDrums.Strokes.TryGetValue((x.Key, letter), out var stroke) ? stroke : null,
                                 scheme.ToString(),
@@ -111,6 +128,8 @@ internal sealed class PatternGenerator
         int barIndex,
         Func<IGenerationContext, StateMap> barPatternLayerGenerator,
         bool isVaried,
+        bool redrawsRhythm,
+        int? phraseEnd,
         bool isResting,
         int? stroke,
         string scheme,
@@ -121,9 +140,10 @@ internal sealed class PatternGenerator
     {
         var patternSeeds = CreatePatternSeeds(seed);
         var trackGenerationContext = _context.CreateContext(patternSeeds.TrackState);
+        // an answer's bar that draws its rhythm afresh plays its bar pattern's settings on another rhythm
         var builder = new StateMapBuilder("Bar pattern", perTrack: true)
             .Add(barPatternLayerGenerator)
-            .Add(CompositionStateKinds.Rhythm.Seed, patternSeeds.Rhythm)
+            .Add(CompositionStateKinds.Rhythm.Seed, redrawsRhythm ? Seeds.Derive(patternSeeds.Rhythm, AnswerRhythmKey) : patternSeeds.Rhythm)
             .Add(CompositionStateKinds.ValueSeed, seed);
         // a varied repeat plays its bar pattern with its cycles drawn afresh more often: it starts as the first did
         if (isVaried)
@@ -135,19 +155,21 @@ internal sealed class PatternGenerator
             .ToStateMap(trackGenerationContext)
             .MergeWith(trackStateMap)
             .MergeWith(CreatePatternChordNoteOffset(_trackDefinitions[trackNumber], trackStateMap, trackGenerationContext));
-        StateTrace.Record(TracePoints.BarPattern, trackNumber, sectionId, barIndex, stateMap, phrase: scheme);
+        // an answer's bar is recorded at its place in the 4-bar pattern, as its question's is
+        StateTrace.Record(TracePoints.BarPattern, trackNumber, sectionId, barIndex % Progressions.BarCount, stateMap, phrase: scheme);
 
+        // the bar's place in the 4-bar pattern, whose state an answer's bar plays over as its question's does
+        var patternBar = barIndex % Progressions.BarCount;
         var notes = isResting
             ? EventTimeline.Create<StateMap>(Meter.BarDuration)
-            : GenerateNotes(stateMap, barStateTimelineMap, barIndex * Meter.BarDuration, trackNumber, sectionId, barIndex, energy).GeneratedTimeline;
+            : GenerateNotes(stateMap, barStateTimelineMap, patternBar * Meter.BarDuration, trackNumber, sectionId, patternBar, energy).GeneratedTimeline;
         // a drum that doubles a lead plays its strong beats
         if (doublingRank is { } maxRank)
             notes = EventTimeline.Create(notes.Duration, notes.Where(x => x.Value.GetStateValue(CompositionStateKinds.BeatRank) <= maxRank));
+        // a melody's phrase ends where its bar has it, or where its answer does
+        var barEnd = barStateTimelineMap.GetEffectiveStateMapAt(patternBar * Meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
         if (_trackDefinitions[trackNumber].Role == TrackRole.Melody)
-            notes = MelodyPattern.EndPhrase(
-                notes,
-                barStateTimelineMap.GetEffectiveStateMapAt(barIndex * Meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd)
-            );
+            notes = MelodyPattern.EndPhrase(notes, patternBar == Progressions.BarCount - 1 && phraseEnd is { } answerEnd ? answerEnd : barEnd);
         feels.Add(new BarFeel(trackNumber, barIndex, stateMap, notes.Count));
         return notes.ToEventStateTimelineMap(stateMap.OfScope(StateScope.Render));
     }
