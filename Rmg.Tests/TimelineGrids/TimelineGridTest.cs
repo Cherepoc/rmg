@@ -40,7 +40,7 @@ public sealed class TimelineGridTest
         {
             var period = Math.Pow(2, power) * primeIndex.ToRhythmPeriodValue();
             var phase = DyadicRankDistribution.GetHalfOffset(phaseRank, 0.5) * period;
-            positions.AddRange(DyadicRankTimeline.Generate(4, phase * 4, period * 4, 2).Select(x => x.Position));
+            positions.AddRange(DyadicRankTimeline.Generate(4, phase * 4, period * 4, 2, 4).Select(x => x.Position));
         }
 
         var sorted = positions.Distinct().Order().ToArray();

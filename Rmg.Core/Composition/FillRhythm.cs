@@ -55,7 +55,9 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit)
     public static FillRhythm Of(StateMap groove, StateMap layer, double minNote)
     {
         var rhythm = ResolvedRhythm.Of(groove.MergeWith(layer), minNote);
-        return new FillRhythm(rhythm, Math.Max(0, (int)Math.Floor(Math.Log2(rhythm.Period / minNote) + 1e-9)));
+        // no finer than the tempo allows, nor, for a grouped cycle, than the grid
+        var noteLimit = Math.Max(0, (int)Math.Floor(Math.Log2(rhythm.Period / minNote) + 1e-9));
+        return new FillRhythm(rhythm, ResolvedRhythm.IsGrouped(rhythm.Period) ? Math.Min(noteLimit, ResolvedRhythm.GridRankLimit(rhythm.Period)) : noteLimit);
     }
 
     /// <summary>Whether the fill's finest notes have one at a position, in the bar that ends at the line.</summary>
@@ -91,7 +93,7 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit)
             context,
             seed,
             WeightUtil.CreateGeometricRankWeightFunc(Math.Min(Rhythm.RankOffset, maxRank), 0, 1, Rhythm.Fullness),
-            new DyadicTimelineDescriptor(Meter.BarDuration, Period, Phase, maxRank),
+            new DyadicTimelineDescriptor(Meter.BarDuration, Period, Phase, maxRank, ResolvedRhythm.RestartOf(Period)),
             Rhythm.Variation
         );
         return

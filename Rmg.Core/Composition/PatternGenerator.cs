@@ -314,7 +314,7 @@ internal sealed class PatternGenerator
             _context,
             seed,
             WeightUtil.CreateGeometricRankWeightFunc(rankOffset, 0, 1.0, fullness),
-            new DyadicTimelineDescriptor(Meter.BarDuration, period, phase, maxRank),
+            new DyadicTimelineDescriptor(Meter.BarDuration, period, phase, maxRank, ResolvedRhythm.RestartOf(period)),
             variation
         );
     }
@@ -394,6 +394,50 @@ internal readonly record struct ResolvedRhythm(
     /// <summary>The finest rank a bar pattern plays down to.</summary>
     public const int MaxRankLimit = 2;
 
+    /// <summary>The grid a bar pattern's notes fall on, in beats: 16ths, or a tuplet's where the period divides the beat by one.</summary>
+    public const double Grid = 0.25;
+
+    /// <summary>
+    ///     Whether a cycle groups the grid's steps by a number that is no power of two, such as the dotted 8th's three
+    ///     16ths: its notes fall on the grid, but its halves would not, and it fits the bar only by being cut off.
+    /// </summary>
+    /// <param name="period">The cycle, in beats.</param>
+    public static bool IsGrouped(double period)
+    {
+        var steps = period / Grid;
+        var whole = Math.Round(steps);
+        return Math.Abs(steps - whole) < 1e-9 && whole > 0 && Math.Abs(Math.Log2(whole) - Math.Round(Math.Log2(whole))) > 1e-9;
+    }
+
+    /// <summary>
+    ///     How often a cycle starts again, in beats: a grouped one every smallest power-of-two span that holds two of it,
+    ///     so that a dotted 8th's plays 3+3+2 every half bar, as a tresillo does, where cut off at the bar it would crowd
+    ///     its last note onto the next bar's first; any other the bar.
+    /// </summary>
+    /// <param name="period">The cycle, in beats.</param>
+    public static double RestartOf(double period)
+    {
+        return IsGrouped(period) ? Math.Min(Meter.BarDuration, Math.Pow(2, Math.Ceiling(Math.Log2(2 * period) - 1e-9))) : Meter.BarDuration;
+    }
+
+    /// <summary>
+    ///     The finest rank a cycle plays on the grid: a grouped one only as far as its halves are whole steps of it, as a
+    ///     dotted 8th's are none, where they would fall between the 16ths; any other down to <see cref="MaxRankLimit" />.
+    /// </summary>
+    /// <param name="period">The cycle, in beats.</param>
+    public static int GridRankLimit(double period)
+    {
+        if (!IsGrouped(period))
+            return MaxRankLimit;
+
+        var rank = 0;
+        while (rank < MaxRankLimit && IsWhole(period / Math.Pow(2, rank + 1) / Grid))
+            rank++;
+        return rank;
+
+        static bool IsWhole(double steps) => Math.Abs(steps - Math.Round(steps)) < 1e-9;
+    }
+
     /// <summary>A straight rhythm of a beat, down to 16ths, for a section whose drums play nothing.</summary>
     public static StateMap DefaultState { get; } = StateMap.FromStates(
         [
@@ -422,9 +466,12 @@ internal readonly record struct ResolvedRhythm(
             .BounceInBounds(-RhythmPeriod.MaxPrimeIndex, RhythmPeriod.MaxPrimeIndex);
         var periodValue = Math.Pow(2, periodPower) * primeIndex.ToRhythmPeriodValue();
 
+        // a bar pattern's to its limit, and a fill's as fine as its shortest note; a grouped cycle's no finer than the grid
         var maxRankLimit = minNote is { } note
             ? Math.Max(0, (int)Math.Floor(Math.Log2(periodValue * Meter.BarDuration / note) + 1e-9))
             : MaxRankLimit;
+        if (IsGrouped(periodValue * Meter.BarDuration))
+            maxRankLimit = Math.Min(maxRankLimit, GridRankLimit(periodValue * Meter.BarDuration));
         var maxRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.MaxRank)
             .BounceInBounds(0, maxRankLimit);
 

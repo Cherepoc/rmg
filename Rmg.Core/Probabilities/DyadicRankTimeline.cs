@@ -21,22 +21,25 @@ public sealed class DyadicRankTimeline
         return [..result];
     }
 
-    public static EventTimeline<int> Generate(double duration, double phase, double period, int maxRank)
+    public static EventTimeline<int> Generate(double duration, double phase, double period, int maxRank, double restart)
     {
         return EventTimeline.Create(
             duration,
-            GenerateSlots(duration, phase, period, maxRank).Select(x => new TimelineItem<int>(x.Position, x.Rank))
+            GenerateSlots(duration, phase, period, maxRank, restart).Select(x => new TimelineItem<int>(x.Position, x.Rank))
         );
     }
 
     /// <summary>
     ///     The positions of the cycles in the duration, in order, each with its rank, the cycle it is in and its slot
-    ///     in the cycle, which is the same slot in every cycle.
+    ///     in the cycle, which is the same slot in every cycle. The cycles start again every restart, where the last of
+    ///     them is cut off, as they are at the duration's end.
     /// </summary>
-    public static ImmutableArray<DyadicRankSlot> GenerateSlots(double duration, double phase, double period, int maxRank)
+    /// <param name="restart">How often the cycles start again, such as every half bar; the duration for never.</param>
+    public static ImmutableArray<DyadicRankSlot> GenerateSlots(double duration, double phase, double period, int maxRank, double restart)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(duration);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(period);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(restart);
         ArgumentOutOfRangeException.ThrowIfNegative(maxRank);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(maxRank, RankTimelines.Length - 1);
 
@@ -44,13 +47,19 @@ public sealed class DyadicRankTimeline
             .Stretch(period)
             .PhaseShift(phase);
 
-        var cycleCount = (int)Math.Ceiling(duration / period);
+        var cycleCount = (int)Math.Ceiling(Math.Min(restart, duration) / period);
         var slots = new List<DyadicRankSlot>();
-        for (var cycle = 0; cycle < cycleCount; cycle++)
+        var cycle = 0;
+        for (var start = 0.0; start < duration - 1e-9; start += restart)
         {
-            var shifted = templateTimeline.Shift(cycle * period);
-            for (var slot = 0; slot < shifted.Count; slot++)
-                slots.Add(new DyadicRankSlot(shifted[slot].Position, shifted[slot].Value, cycle, slot));
+            var end = Math.Min(start + restart, duration);
+            for (var inSpan = 0; inSpan < cycleCount; inSpan++, cycle++)
+            {
+                var shifted = templateTimeline.Shift(start + inSpan * period);
+                for (var slot = 0; slot < shifted.Count; slot++)
+                    if (shifted[slot].Position < end)
+                        slots.Add(new DyadicRankSlot(shifted[slot].Position, shifted[slot].Value, cycle, slot));
+            }
         }
 
         // the positions are multiples of a period that can be a tuplet's, so they are snapped to the grid; one that
@@ -59,7 +68,6 @@ public sealed class DyadicRankTimeline
         [
             ..slots
                 .OrderBy(x => x.Position)
-                .Where(x => x.Position < duration)
                 .Select(x => x with { Position = TimelineGrid.Snap(x.Position) })
                 .Where(x => x.Position >= 0 && x.Position < duration)
         ];
