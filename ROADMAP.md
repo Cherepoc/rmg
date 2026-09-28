@@ -13,8 +13,8 @@ In this order, each measured before it is planned:
    endings, the section modes and the chords' level.
 2. **The melody** (see *Melody at generation*): it plays where it was placed, so a phrase that plays again is heard
    as the same notes, and its shape follows its contour weakly.
-3. **The drums** (see *Drums*): listen to the roles and the doubling, the strokes and accents, the drums coming and
-   going by bar, the percussion's grooves and the sections of percussion only.
+3. **The drums** (see *Drums*): listen to the setups and the percussion songs, the roles and the doubling, the strokes
+   and accents, the drums coming and going by bar.
 4. Smaller: fade-out endings (see *Form*).
 
 ## Section dynamics
@@ -194,8 +194,9 @@ eleven where the song has it and all but never grooves.
 A drum's sounds are data (`DrumSound`): a weight, which runs and landings pick them by, so that the cymbal lands on a
 crash four times in five where it landed on the china and the splash half the time, and a sound joins a run by its
 weight against the heaviest; a loudness, which adds to its velocity (`VelocityLayers.SoundLevel`) and leans it by
-energy; a stroke weight; and an accent. A drum walks its sounds from note to note, as the toms and the congas do their
-pitches, or strikes one steadily, its stroke (`DrumStrokes`), a state the lowest layer that sets it decides
+energy; a stroke weight; and an accent. A drum walks its sounds from note to note, as the toms do their pitches, or
+strikes one steadily, its stroke (`DrumStrokes`), as the hand drums do too, accenting the strong beats with
+their other tone where they walked from tone to tone, a state the lowest layer that sets it decides
 (`StateKinds.CreateLowestLayerWins`, by the depth every value carries): the song picks one, a section may change it and
 a bar of a later letter may change the section's, a change the likelier the heavier the new stroke, the less
 conventional the rhythm and the more its loudness goes the energy's way. The cross-stick is a stroke of the snare, no
@@ -211,36 +212,22 @@ but may change its stroke there; a drum that colours the groove or doubles a lea
 10% in the plainest sections to 60% in the wildest, less the more energy the section has, each drawn from a stream of
 its own. Bars of the same letter play the same drums.
 
-Sections of percussion only (`PercussionSections`): a section plays its percussion without the drum kit, its leads
-among the percussion and up to three drums in all, by a chance of the song's lean, spread evenly, and its own, leaned to
-unconventional and quiet sections, where the song has two or more percussion drums. Into such a section the drums land
-on the percussion, a run there plays the percussion alone, and a run in a drum kit section does now and then
-(`FillLayers.PercussionRunChance`). The count-in clicks on the first of a few dry sounds the song has
-(`FormLayers.CountInSounds`), the hi-hat's pedal first.
+A song's drum setup (`DrumSetups`), drawn once and leaned to percussion the less conventional the song: most play the
+drum kit alone (119 of 200 corpus songs); some the kit with one to three percussion drums (74), which colour it and may
+switch to sections of percussion only and back (`PercussionSections`, by a chance of the song's lean around none and
+the section's, leaned to unconventional and quiet sections, where the song has two or more); and a few percussion alone
+(7), a drum for every role by its main role and one to three more, the hand percussion among them (a drum's family,
+`DrumFamily`, the kit, the percussion or both), every section percussion only with up to four drums, and figures that
+repeat more. Into a section of percussion only the drums land on the percussion, a run there plays the percussion
+alone, and a run in a drum kit section does now and then (`FillLayers.PercussionRunChance`). The count-in clicks on the
+first of a few dry sounds the song has (`FormLayers.CountInSounds`), the hi-hat's pedal first, or on its first drum.
 
-Measured over 200 corpus songs (`DrumUseReportTest`): the timekeepers groove in 78% of the sections, the percussion in
-41%, the toms in 13%, the accents in 6%; a section grooves on 3.35 drums, a bar plays 3.95, the doublers among them,
-and the drums change from the bar before in 31% of the bars. 6% of the sections play percussion only, in 37 songs, 7 of
-them in half their sections or more; their energy averages -0.03, against 0.14. Listen to the wild end, where the kick
-or the snare in a role not theirs may sound broken rather than bold.
-
-Planned, **a song's drum setup**: most songs play the drum kit alone, some the kit with one or two percussion drums,
-and a few percussion alone, a draw of the song's leaned by its conventionality, where every song now has a kit and
-most some percussion (0 to 4 drums, evenly). In this order, each measured:
-
-1. **Strokes and accents for the hand drums:** the conga, the bongos, the agogo, the timbales, the wood block and the
-   guiro strike a steady tone and accent the beats with their others, where they walk their sounds from note to note,
-   which wanders; the repeated cycles bring the figures back.
-2. **A drum's family as data:** the drum kit, the percussion, or both, as the hand percussion (the tambourine, the
-   shakers, the clap) is, in place of the groups telling it.
-3. **The setup:** the drum kit (most), the kit and one or two percussion drums (some), which may switch to sections of
-   percussion only and back, and percussion alone (a few), whose every section is percussion only, with more drums:
-   one for each role by its main role, and more beside, the hand percussion among them.
-4. **Percussion songs play as a band:** a lead for every role in every section, figures that repeat more (a song layer
-   of less variation), and a count-in on a dry sound, or on the percussion's first.
-
-Measure the drum parts of percussion songs against those of kit songs: notes a bar, bars that repeat the one before,
-the ground on the downbeat and something on 2 and 4 in most bars, and listen, as they may sound thin or aimless.
+Measured over 200 corpus songs (`DrumUseReportTest`): the timekeepers groove in 83% of the sections, the percussion in
+18% (41% when every song had some), the toms in 13%, the accents in 6%; the drums change from the bar before in 28% of
+the bars. 4.9% of the sections play percussion only, in 21 songs, the 7 percussion songs among them. A percussion
+song's drums play as a kit song's: 13.6 notes a bar against 10.7, 30% of the bars as the one before against 35%, the
+downbeat in 99% against 96%, both 2 and 4 in 60% against 63%. Listen to the percussion songs, and to the wild end,
+where the kick or the snare in a role not theirs may sound broken rather than bold.
 
 Later:
 
