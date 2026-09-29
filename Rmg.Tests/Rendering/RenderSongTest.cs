@@ -23,6 +23,9 @@ public sealed class RenderSongTest
     private static PitchInstrumentTrack PitchTrack(int minOctaveOffset = 0, int maxOctaveOffset = 4) =>
         new(StateMap.Default, 0, minOctaveOffset, maxOctaveOffset, TrackRole.Chords);
 
+    // the bass plays one note of the chord, which its chord note offset picks
+    private static PitchInstrumentTrack BassTrack() => new(StateMap.Default, 0, 0, 4, TrackRole.Bass);
+
     [Test]
     [Arguments(-1.5)]
     [Arguments(0)]
@@ -87,7 +90,7 @@ public sealed class RenderSongTest
                 StateKinds.OctaveOffset.CreateState(7),
             ]
         );
-        var song = CreateSong(1, PitchTrack(), stateMap.ToTimelineItem(0));
+        var song = CreateSong(1, BassTrack(), stateMap.ToTimelineItem(0));
 
         var result = Render.RenderSong(song);
 
@@ -108,7 +111,7 @@ public sealed class RenderSongTest
                 StateKinds.OctaveOffset.CreateState(7),
             ]
         );
-        var song = CreateSong(1, PitchTrack(), stateMap.ToTimelineItem(0));
+        var song = CreateSong(1, BassTrack(), stateMap.ToTimelineItem(0));
 
         var result = Render.RenderSong(song);
 

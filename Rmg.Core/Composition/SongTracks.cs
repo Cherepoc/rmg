@@ -80,7 +80,7 @@ internal sealed class SongTracks
                     "Track",
                     new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Chords))
-                        // the chords play whole: their root and their notes do not walk
+                        // the chords play whole, as their role has them: their root and their notes do not walk
                         .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, 0)
                         .Add(CompositionStateKinds.IncrementalChordNoteOffset.Multiplier, 0)
                         // the chord instrument sets how smoothly the chords move, and the song moves it a little
@@ -104,7 +104,6 @@ internal sealed class SongTracks
                         .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, 0)
                         // the melody instrument sets how stepwise the melody is, and the song moves it a little
                         .Add(CompositionStateKinds.MelodyStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Song).Then(x => melodyInstrument.Leading + x))
-                        .Add(StateKinds.MelodyLine, 1)
                         // a melody repeats its cycles more than the other tracks, as riffs
                         .Add(CompositionStateKinds.Rhythm.Variation, MelodyLayers.RhythmVariation)
                         .ToStateMap(context),
@@ -125,8 +124,6 @@ internal sealed class SongTracks
                         // the bass keeps close to the root and walks through the chord's notes
                         .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, Generators.AbsSplineValue())
                         .Add(CompositionStateKinds.IncrementalChordNoteOffset.Multiplier, Generators.AbsSplineValue().Then(x => 1 - x))
-                        // the bass plays the chord roots, so its line leads into the chords and lands on them
-                        .Add(StateKinds.FollowsChordRoots, 1)
                         .ToStateMap(context),
                     _ => VelocityLayers.GetLevel(TrackRole.Bass),
                     trackRhythmLayer

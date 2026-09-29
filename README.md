@@ -366,7 +366,8 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   and leave the next one alone, depending on the note's own fraction. Each value goes to the nearest
   step (halves away from zero), so every step covers the same range and an offset of less than half a
   step either way leaves the note where it is. How often a track moves is set by scaling its offsets,
-  not by the rounding.
+  not by the rounding. How a track plays its chord is its role's: the chords play it whole, the melody
+  the note placed for it, and the bass the chord's note its chord note offset picks.
 
 ## Project layout
 

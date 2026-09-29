@@ -10,7 +10,7 @@ public static class StateKinds
     public static readonly StateKind<double> QuarterNoteDurationPower = CreateAdditive<double>("QuarterNoteDurationPower", StateScope.Render);
     public static readonly StateKind<double> NextNoteDurationFactor = CreateAdditive<double>("NextNoteDurationFactor", StateScope.Render);
     // which of a drum's sounds its walk picks, as every layer's step of it, a fraction of the sounds the drum has, which
-    // Render rounds to whole sounds each, the drum's count known only there, and adds
+    // Render rounds to whole sounds each and adds, so that a layer moves every note under it alike (README)
     public static readonly StateKind<ImmutableArray<double>> ArticulationOffset = CreateCollection<double>("ArticulationOffset", StateScope.Render);
     public static readonly StateKind<int> KeyOffset = CreateAdditive<int>("KeyOffset", StateScope.Render, isShared: true);
     public static readonly StateKind<int> OctaveOffset = CreateAdditive<int>("OctaveOffset", StateScope.Render);
@@ -26,14 +26,10 @@ public static class StateKinds
     // a bar whose first chord plays as drawn, in its own register, and not led from the chord before; each such bar
     // has its own number, so that bars in a row are told apart
     public static readonly StateKind<int> ChordVoicingReset = CreateAdditive<int>("ChordVoicingReset", StateScope.Render);
-    // 1 for a track that plays the chord roots, the bass, whose line leads into the chords and lands on them
-    public static readonly StateKind<int> FollowsChordRoots = CreateAdditive<int>("FollowsChordRoots", StateScope.Render);
     // how a bar's last bass note leads into the next chord (a ChordApproach), and what its first note of a new chord
     // plays (a ChordArrival)
     public static readonly StateKind<int> ChordApproach = CreateAdditive<int>("ChordApproach", StateScope.Render);
     public static readonly StateKind<int> ChordArrival = CreateAdditive<int>("ChordArrival", StateScope.Render);
-    // 1 for a track that plays the melody, whose notes follow the chords and the phrase by rule
-    public static readonly StateKind<int> MelodyLine = CreateAdditive<int>("MelodyLine", StateScope.Render);
     // a note's scale step above its chord's root, set outright, as the melody's notes are placed where they are made
     public static readonly StateKind<int> ScaleStep = CreateAdditive<int>("ScaleStep", StateScope.Render);
     // which of a drum's sounds a note plays, counted from 1, such as a fill's high tom or a landing's crash, over the
@@ -44,10 +40,10 @@ public static class StateKinds
     public static readonly StateKind<LayerValue<int>> DrumStroke = CreateLowestLayerWins<int>("DrumStroke", StateScope.Render);
     // a note's length set outright, in beats, over the gap to the next note, such as a phrase's last note; 0 for none
     public static readonly StateKind<double> HeldDuration = CreateAdditive<double>("HeldDuration", StateScope.Render);
-    // the chord's root, and which of its notes a note plays, as every layer's step of them, such as the progression's
-    // and the walk's: fractions of the scale's steps and of the chord's notes, which Render rounds to whole steps each,
-    // the lengths known only there, and adds; a sum of the fractions rounded once would land elsewhere, and no chord
-    // note offset, an empty list, plays the whole chord
+    // the chord's root, and which of its notes the bass plays, as every layer's step of them, such as the progression's
+    // and the walk's: fractions of the scale's steps and of the chord's notes, which Render rounds to whole steps each
+    // and adds, so that a layer moves every note under it alike, where a sum rounded once would move one note and not
+    // the next (README); none is a step of 0. How a track plays its chord is its role's, not an offset's
     public static readonly StateKind<ImmutableArray<double>> ChordRootNoteOffset = CreateCollection<double>("ChordRootOffset", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordNoteOffset = CreateCollection<double>("ChordNoteOffset", StateScope.Render);
     // the scale, as its notes' semitones above its root: one value, set by one layer, a section's, whose kind would join

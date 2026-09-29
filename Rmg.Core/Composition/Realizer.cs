@@ -113,7 +113,7 @@ internal static class Realizer
         for (var i = 0; i < items.Length; i++)
         {
             TimelineItem<WithDuration<StateMap>>? next = i + 1 < items.Length ? items[i + 1] : null;
-            notes[i] = RealizeNote(items[i], next, absoluteMinOctave, octaveCount, voiceLeader, bassLine);
+            notes[i] = RealizeNote(items[i], next, voiceLeader, bassLine, track.Role);
         }
 
         return EventTimeline.Create(eventStateTimelineMap.Duration, notes);
@@ -151,10 +151,9 @@ internal static class Realizer
     private static TimelineItem<RealizedNote> RealizeNote(
         TimelineItem<WithDuration<StateMap>> timelineItemWithDuration,
         TimelineItem<WithDuration<StateMap>>? nextItem,
-        int absoluteMinOctave,
-        int octaveCount,
         VoiceLeader voiceLeader,
-        BassLine bassLine
+        BassLine bassLine,
+        TrackRole role
     )
     {
         var position = timelineItemWithDuration.Position;
@@ -180,58 +179,53 @@ internal static class Realizer
         var duration = nextNoteDuration.WeightedAverage(nextNoteDurationFactor, quarterNoteDuration);
         // a melody sings one note at a time, so a note ends by the next, unless it is held, as a phrase's last note is
         var heldDuration = stateMap.GetStateValue(StateKinds.HeldDuration);
-        var isMelody = stateMap.GetStateValue(StateKinds.MelodyLine) > 0;
         if (heldDuration > 0)
             duration = heldDuration;
-        else if (isMelody)
+        else if (role == TrackRole.Melody)
             duration = Math.Min(duration, nextNoteDuration);
 
         int ToNote(int stepAboveRoot) => chord.GetPitch(stepAboveRoot);
 
-        // a chord note offset picks one note of the chord, whatever its voicing, going round the chord's scale notes
-        // from the root up and an octave up or down for every lap around it; without one the whole chord plays
-        var chordNoteOffset = stateMap.GetStateValue(StateKinds.ChordNoteOffset);
-        ImmutableArray<int> notes;
-        // a melody's note was placed where it was made, as its scale step above the chord's root, and plays there
-        if (isMelody)
-            notes = [ToNote(stateMap.GetStateValue(StateKinds.ScaleStep))];
-        else if (!chordNoteOffset.IsEmpty)
+        // how a track plays its chord is its role's: the melody the note placed where it was made, as its scale step
+        // above the chord's root; the bass a line of the chord's notes; the chords the whole chord, led from the one before
+        ImmutableArray<int> notes = role switch
+        {
+            TrackRole.Melody => [ToNote(stateMap.GetStateValue(StateKinds.ScaleStep))],
+            TrackRole.Bass => [PlaceBassNote()],
+            TrackRole.Chords => voiceLeader.Place(
+                [..chordSteps.Select(ToNote)],
+                ToNote(0),
+                stateMap.GetStateValue(StateKinds.ChordVoicingFixed) > 0,
+                stateMap.GetStateValue(StateKinds.VoiceLeading),
+                stateMap.GetStateValue(StateKinds.ChordVoicingReset)
+            ),
+            _ => throw new ArgumentOutOfRangeException(nameof(role), role, "A pitched track plays the chords, the melody or the bass.")
+        };
+
+        return new RealizedNote(notes, noteVelocity, duration, stateMap).ToTimelineItem(position);
+
+        // the bass's note: the chord's note its chord note offset picks, going round the chord's scale notes from the
+        // root up and an octave up or down for every lap around it, the root for none, as its line places it
+        int PlaceBassNote()
         {
             var chordDegrees = chordSteps
                 .Select(x => x.Mod(scaleOffsets.Length))
                 .Distinct()
                 .Order()
                 .ToImmutableArray();
-            var (selectedOctave, selectedIndex) = chordNoteOffset
+            var (selectedOctave, selectedIndex) = stateMap.GetStateValue(StateKinds.ChordNoteOffset)
                 .ToIndexOverLength(chordDegrees.Length)
                 .ToPeriodRemainder(chordDegrees.Length);
-            var note = ToNote(chordDegrees[selectedIndex] + selectedOctave * scaleOffsets.Length);
-            if (stateMap.GetStateValue(StateKinds.FollowsChordRoots) > 0)
-                note = bassLine.Place(
-                    note,
-                    chord,
-                    position,
-                    nextItem is { } next ? GetChord(next.Value.Value).Chord : null,
-                    nextItem?.Position,
-                    (ChordArrival)stateMap.GetStateValue(StateKinds.ChordArrival),
-                    (ChordApproach)stateMap.GetStateValue(StateKinds.ChordApproach)
-                );
-            else
-                note = FixNoteOffset(absoluteMinOctave, octaveCount, note);
-            notes = [note];
-        }
-        else
-        {
-            notes = voiceLeader.Place(
-                [..chordSteps.Select(ToNote)],
-                ToNote(0),
-                stateMap.GetStateValue(StateKinds.ChordVoicingFixed) > 0,
-                stateMap.GetStateValue(StateKinds.VoiceLeading),
-                stateMap.GetStateValue(StateKinds.ChordVoicingReset)
+            return bassLine.Place(
+                ToNote(chordDegrees[selectedIndex] + selectedOctave * scaleOffsets.Length),
+                chord,
+                position,
+                nextItem is { } next ? GetChord(next.Value.Value).Chord : null,
+                nextItem?.Position,
+                (ChordArrival)stateMap.GetStateValue(StateKinds.ChordArrival),
+                (ChordApproach)stateMap.GetStateValue(StateKinds.ChordApproach)
             );
         }
-
-        return new RealizedNote(notes, noteVelocity, duration, stateMap).ToTimelineItem(position);
     }
 
     /// <summary>

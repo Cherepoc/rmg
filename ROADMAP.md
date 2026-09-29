@@ -208,14 +208,21 @@ amount), the drums play the same notes a bar, off the 8ths and off the 16ths as 
 plainest sections (13.4% and 3.0% against 13.5% and 3.1%) to the wildest (31.4% and 18.1% against 30.3% and 18.0%),
 where a lean of 1 left the wildest's tuplets at 16.4% and one of 1.25 made the plain ones plainer (10.8% off the 8ths). The
 offsets that are lists stay lists: every layer's chord root, chord note and articulation offset is a fraction of a
-length known only in `Render`, rounded to whole steps each and added, which an additive number rounded once would
-change, and an empty chord note offset plays the whole chord. The scale and a chord's shape are single values that are
+length, rounded to whole steps each and added, so that a layer moves every note under it alike, which an additive
+number rounded once would not. How a track plays its chord is its role's (`Realizer`), where an empty chord note
+offset used to play the whole chord and two render states flagged the melody and the bass. The scale and a chord's shape are single values that are
 lists, set by one layer each, whose kind would join two layers' into one; a test holds them to one
 (`SingleValuedListsTest`), where a kind of its own for a value one layer sets would add a mechanism for a mistake not
 made, and forbid the override a kind the lowest layer sets allows, should a section's scale ever override a song's.
 
 Smaller, when the code is next touched:
 
+- **The bass at generation,** as the melody is (see *Melody at generation*): one rule set, in one place, for where
+  it lands, how it leads and how it walks the chord's notes, in place of a walk of the chord root and of the chord
+  note, drawn as fractions, that `BassLine` in `Realizer` then overrides at a change of chord. The root offset would
+  then carry the harmony alone, whose roots are scale steps written as sevenths to be rounded back, and could be whole
+  steps; the chord and the scale are known where the notes are made now, so the fractions are a remnant of `Realizer`
+  deciding them. Worth it once the bass's lines want more say than their leading and landing give them.
 - **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 - **Memory:** every `RealizedNote` keeps the state it was decided from, which a song now holds on to (about 2 MB a
   song, 8 MB with a trace). Recompute it on demand instead, should memory matter.
