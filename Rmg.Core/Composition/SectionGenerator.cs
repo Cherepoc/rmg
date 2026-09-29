@@ -101,7 +101,8 @@ internal sealed class SectionGenerator
         var home = Progressions.GenerateHome(context, scale);
         if (plan.HasTonicHome)
             home = 0;
-        var progression = Progressions.Generate(context, scale, home, unconventionality.ProgressionStrictness);
+        var harmonicRhythm = HarmonicRhythm.OneABar;
+        var progression = Progressions.Generate(context, scale, home, unconventionality.ProgressionStrictness, harmonicRhythm.Count);
 
         var sectionStateMap = CreateSectionStateMap(
             songStateMap,
@@ -187,7 +188,7 @@ internal sealed class SectionGenerator
             0,
             1
         );
-        var barStateTimelineMap = _barStateGenerator.Generate(context, scale, progression, home, unconventionality, bassLeading, rhythm.Tilt);
+        var barStateTimelineMap = _barStateGenerator.Generate(context, scale, progression, harmonicRhythm, home, unconventionality, bassLeading, rhythm.Tilt);
         var contour = barStateTimelineMap.GetStateTimeline(CompositionStateKinds.LineRegister).Select(x => x.Value).ToImmutableArray();
         StateTrace.Record(TracePoints.MelodyContour, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", contour), contour);
 
@@ -214,7 +215,7 @@ internal sealed class SectionGenerator
         StateTrace.Record(TracePoints.DrumPresence, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{string.Join(", ", barDrums.Resting)}; {string.Join(", ", barDrums.Strokes)}", barDrums);
 
         var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads.ToImmutable(), sectionRoles, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm).ToArray();
-        var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, sectionRhythm).ToArray();
+        var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm).ToArray();
         // the section's pattern played twice, its melody as a question and its answer
         var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap).Repeat(2);
         ImmutableArray<SectionLine> lines = [..pitched.Select(x => x.Line).OfType<SectionLine>()];
@@ -402,6 +403,7 @@ internal sealed class SectionGenerator
         int sectionId,
         StateMap sectionStateMap,
         StateTimelineMap barStateTimelineMap,
+        HarmonicRhythm harmonicRhythm,
         SectionRhythm sectionRhythm
     )
     {
@@ -444,11 +446,11 @@ internal sealed class SectionGenerator
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Bass)
             {
                 // the bass's line, placed with the song's, its pattern played twice as the section does, leading and
-                // landing as its bars have it
-                ChordApproach Approach(int bar) =>
-                    (ChordApproach)barStateTimelineMap.GetEffectiveStateMapAt(bar * Meter.BarDuration).GetStateValue(StateKinds.ChordApproach);
-                ChordArrival Landing(int bar) =>
-                    (ChordArrival)barStateTimelineMap.GetEffectiveStateMapAt(bar * Meter.BarDuration).GetStateValue(StateKinds.ChordArrival);
+                // landing as its chords have it
+                ChordApproach Approach(double change) =>
+                    (ChordApproach)barStateTimelineMap.GetEffectiveStateMapAt(change).GetStateValue(StateKinds.ChordApproach);
+                ChordArrival Landing(double change) =>
+                    (ChordArrival)barStateTimelineMap.GetEffectiveStateMapAt(change).GetStateValue(StateKinds.ChordArrival);
                 var bass = new SectionLine(
                     trackNumber,
                     BassLeadingLayers.Line,
@@ -459,8 +461,9 @@ internal sealed class SectionGenerator
                         return BuildBars(rhythmKeys).Timeline.Repeat(2);
                     },
                     sectionRhythm.Scheme.Letters,
-                    [..Enumerable.Range(0, Progressions.BarCount).Select(Approach)],
-                    [..Enumerable.Range(0, Progressions.BarCount).Select(Landing)],
+                    harmonicRhythm,
+                    [..harmonicRhythm.Changes.Select(Approach)],
+                    [..harmonicRhythm.Changes.Select(Landing)],
                     BassLeadingLayers.Line.RegisterFreedom,
                     StreamSeed(sectionId, SectionStream.BassImprovisation)
                 );
@@ -498,8 +501,9 @@ internal sealed class SectionGenerator
                     return LinePattern.Answer(BuildBars(rhythmKeys).Timeline, trackNumber, MelodyLayers.Line, answerSeed, amount);
                 },
                 sectionRhythm.Scheme.Letters,
-                LinePattern.DrawApproaches(leadingContext, leading),
-                [..Enumerable.Repeat(ChordArrival.Free, Progressions.BarCount)],
+                harmonicRhythm,
+                LinePattern.DrawApproaches(leadingContext, leading, harmonicRhythm.Count),
+                [..Enumerable.Repeat(ChordArrival.Free, harmonicRhythm.Count)],
                 freedom,
                 StreamSeed(sectionId, SectionStream.MelodyImprovisation)
             );

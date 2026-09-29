@@ -87,7 +87,9 @@ public sealed class BassLeadInTest
                         .ToEventStateTimelineMap(StateMap.Default)
                 )
             ],
+            // the chords change on the bar line, whether the chord is another or the same
             StateMap.FromStates([StateKinds.ScaleOffsets.CreateState([0, 2, 4, 5, 7, 9, 11])]).ToStateTimelineMap(8)
+                .MergeWith(StateTimelineMap.Create(8, [StateTimeline.Create(8, StateKinds.ChordChange, [1.ToTimelineItem(0.0), 2.ToTimelineItem(4.0)])]))
         );
 
         var placed = LinePattern.Place(song, 0, bass, BassLeadingLayers.Line);

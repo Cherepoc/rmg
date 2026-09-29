@@ -62,7 +62,8 @@ internal sealed class BarStateGenerator
     }
 
     /// <param name="scale">The section's scale, which every bar plays in.</param>
-    /// <param name="progression">The roots of the bars, in steps above the home.</param>
+    /// <param name="progression">The roots of the chords, in steps above the home.</param>
+    /// <param name="harmonicRhythm">Where the chords change.</param>
     /// <param name="home">The step of the section's home above the song's tonic.</param>
     /// <param name="bassLeading">How much the section's bass leads into the chords, from 0 to 1.</param>
     /// <param name="context">The section's random sequence.</param>
@@ -71,6 +72,7 @@ internal sealed class BarStateGenerator
         IGenerationContext context,
         Scale scale,
         ImmutableArray<int> progression,
+        HarmonicRhythm harmonicRhythm,
         int home,
         HarmonicUnconventionality unconventionality,
         double bassLeading,
@@ -79,31 +81,37 @@ internal sealed class BarStateGenerator
     {
         // each state draws from its own random sequence, so tuning one does not change the others
         var seed = SeedGenerator(context);
+        var changes = harmonicRhythm.Changes;
+        var cadencePosition = changes[^1];
         var progressionTimeline = StateTimeline.Create(
                 Meter.PatternDuration,
                 StateKinds.ChordRoot,
-                progression.Select((root, bar) => root.ToTimelineItem(bar * Meter.BarDuration))
+                progression.Select((root, chord) => root.ToTimelineItem(changes[chord]))
+            )
+            .WithLayer("Progression");
+        var changeTimeline = StateTimeline.Create(
+                Meter.PatternDuration,
+                StateKinds.ChordChange,
+                changes.Select((position, chord) => (chord + 1).ToTimelineItem(position))
             )
             .WithLayer("Progression");
 
-        // the cadence bar may raise the seventh, for a major chord on the fifth; the bars before keep the scale
+        // the cadence chord may raise the seventh, for a major chord on the fifth; the chords before keep the scale
         var raisedStep = Progressions.GetCadenceRaisedStep(scale.Offsets, home, progression[^1]);
         var raisedStepTimeline = StateTimeline.Create(
                 Meter.PatternDuration,
                 StateKinds.RaisedScaleSteps,
-                raisedStep is { } step ? [ImmutableArray.Create(step).ToTimelineItem(CadenceBarPosition)] : []
+                raisedStep is { } step ? [ImmutableArray.Create(step).ToTimelineItem(cadencePosition)] : []
             )
             .WithLayer("Progression");
 
-        // the home bar plays a plain chord and the cadence bar one with pull; the bars between pick from the pool
+        // the home chord plays a plain chord and the cadence one with pull; the chords between pick from the pool
+        var homeChord = ImmutableArray.Create(unconventionality.GenerateHomeChord(context)).ToTimelineItem(0.0);
+        var cadenceChord = ImmutableArray.Create(unconventionality.GenerateCadenceChord(context)).ToTimelineItem(cadencePosition);
         var roleChordTimeline = StateTimeline.Create(
                 Meter.PatternDuration,
                 CompositionStateKinds.RoleChord,
-                [
-                    ImmutableArray.Create(unconventionality.GenerateHomeChord(context)).ToTimelineItem(0.0),
-                    ImmutableArray<Chord>.Empty.ToTimelineItem(Meter.BarDuration),
-                    ImmutableArray.Create(unconventionality.GenerateCadenceChord(context)).ToTimelineItem(CadenceBarPosition)
-                ]
+                changes.Length > 2 ? [homeChord, ImmutableArray<Chord>.Empty.ToTimelineItem(changes[1]), cadenceChord] : [homeChord, cadenceChord]
             )
             .WithLayer("Progression");
 
@@ -115,17 +123,18 @@ internal sealed class BarStateGenerator
                 ),
                 StateTimeline.Create(Meter.PatternDuration, StateKinds.ScaleOffsets, [scale.Offsets.ToTimelineItem(0.0)]).WithLayer("Section"),
                 progressionTimeline,
+                changeTimeline,
                 raisedStepTimeline,
                 roleChordTimeline,
                 GenerateResets(context),
-                ..GenerateBassLeading(context.CreateContext(Seeds.Derive(seed, BassLeadingStream)), bassLeading, rhythmTilt),
+                ..GenerateBassLeading(context.CreateContext(Seeds.Derive(seed, BassLeadingStream)), changes, bassLeading, rhythmTilt),
                 GenerateMelodyContour(context, context.CreateContext(Seeds.Derive(seed, ContourPeriodStream)), rhythmTilt),
                 GenerateMelodyPhraseEnd(context)
             ]
         );
     }
 
-    private static double CadenceBarPosition => (Progressions.BarCount - 1) * Meter.BarDuration;
+    private static double LastBarPosition => (Progressions.BarCount - 1) * Meter.BarDuration;
 
     /// <summary>
     ///     The bars whose first chord starts afresh in its own register, now and then, most often the pattern's first;
@@ -167,29 +176,29 @@ internal sealed class BarStateGenerator
         return StateTimeline.Create(
                 Meter.PatternDuration,
                 CompositionStateKinds.MelodyPhraseEnd,
-                [end.ToTimelineItem(CadenceBarPosition)]
+                [end.ToTimelineItem(LastBarPosition)]
             )
             .WithLayer("Bar");
     }
 
     /// <summary>
-    ///     How the bass leads out of every bar into the next chord, by how much it leads, and what it lands on in every bar's
-    ///     new chord, the less conventional the section the less often the root.
+    ///     How the bass leads out of every chord into the next, by how much it leads, and what it lands on in every new
+    ///     chord, the less conventional the section the less often the root.
     /// </summary>
-    private IEnumerable<IStateTimeline> GenerateBassLeading(IGenerationContext context, double bassLeading, Tilt rhythmTilt)
+    private IEnumerable<IStateTimeline> GenerateBassLeading(IGenerationContext context, ImmutableArray<double> changes, double bassLeading, Tilt rhythmTilt)
     {
         var approachGenerator = Generators.WeightedIndex(BassLeadingLayers.Approaches);
         var approaches = StateTimeline.Create(
                 Meter.PatternDuration,
                 StateKinds.ChordApproach,
-                Enumerable.Range(0, Progressions.BarCount)
-                    .Select(bar =>
+                changes
+                    .Select(position =>
                         {
-                            // the way is drawn whether the bar leads or not, so that the draws are as many whatever the chance
+                            // the way is drawn whether the chord leads or not, so that the draws are as many whatever the chance
                             var leads = context.TestProbability(bassLeading * BassLeadingLayers.MaxApproachChance);
                             var way = BassLeadingLayers.Approaches[approachGenerator(context)].Value;
                             var approach = leads ? way : ChordApproach.None;
-                            return ((int)approach).ToTimelineItem(bar * Meter.BarDuration);
+                            return ((int)approach).ToTimelineItem(position);
                         }
                     )
                     .ToArray()
@@ -201,8 +210,8 @@ internal sealed class BarStateGenerator
         var arrivals = StateTimeline.Create(
                 Meter.PatternDuration,
                 StateKinds.ChordArrival,
-                Enumerable.Range(0, Progressions.BarCount)
-                    .Select(bar => ((int)arrivalWeights[arrivalGenerator(context)].Value).ToTimelineItem(bar * Meter.BarDuration))
+                changes
+                    .Select(position => ((int)arrivalWeights[arrivalGenerator(context)].Value).ToTimelineItem(position))
                     .ToArray()
             )
             .WithLayer("Bar");

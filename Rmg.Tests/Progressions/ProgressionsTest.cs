@@ -12,7 +12,7 @@ public sealed class ProgressionsTest
     private static ImmutableArray<int>[] GeneratePhrases(Scale scale, int home, double strictness)
     {
         var context = new GenerationContext(1);
-        return [..Enumerable.Range(0, PhraseCount).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, scale, home, strictness))];
+        return [..Enumerable.Range(0, PhraseCount).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, scale, home, strictness, 4))];
     }
 
     private static int Mod7(int x) => ((x % 7) + 7) % 7;

@@ -300,7 +300,7 @@ internal sealed class PatternGenerator
     }
 
     /// <summary>
-    ///     A bass bar's notes with one in its last beat, where the bar leads into the next chord
+    ///     A bass bar's notes with one in its last beat, where its last chord leads into the next
     ///     (<see cref="StateKinds.ChordApproach" />) and none starts there: the note sounding there played again, over
     ///     the chord at its place and on the rhythm's weakest beat, as lightly as a note there, so that the approach has
     ///     a note to play on; marked as a pickup, which stays only where the chord does change, as the song put together
@@ -318,7 +318,8 @@ internal sealed class PatternGenerator
         var patternBar = barIndex % Progressions.BarCount;
         var start = patternBar * Meter.BarDuration;
         const double pickup = Meter.BarDuration - 1;
-        if (barStateTimelineMap.GetEffectiveStateMapAt(start).GetStateValue(StateKinds.ChordApproach) == 0
+        // the chord sounding in the bar's last beat is the one that leads into the next
+        if (barStateTimelineMap.GetEffectiveStateMapAt(start + pickup).GetStateValue(StateKinds.ChordApproach) == 0
             || notes.Count == 0
             || notes[^1].Position >= pickup - 1e-9)
             return notes;

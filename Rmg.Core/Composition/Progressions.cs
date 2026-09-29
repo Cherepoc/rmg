@@ -4,11 +4,12 @@ using Rmg.Core.Probabilities;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     The chord progression of a section: the root of every bar of its 4-bar pattern, in scale steps from the
-///     section's home. Bar 1 is the home chord, bar 2 moves away, bar 3 prepares the cadence and bar 4 is the cadence,
-///     which resolves to bar 1 when the pattern plays again. Each bar's root is drawn by how strongly the previous root
-///     leads to it, falling a fifth the most, and by how well it suits its bar. Roots stay within 3 steps of home, so
-///     the progression keeps to one register.
+///     The chord progression of a section: the root of every chord of its 4-bar pattern, in scale steps from the
+///     section's home. The first chord is the home chord, the last the cadence, which resolves to the first when the
+///     pattern plays again, the one before it prepares the cadence, and the others move away; four chords, a chord a
+///     bar, are home, away, preparation and cadence, two are home and cadence. Each chord's root is drawn by how
+///     strongly the previous root leads to it, falling a fifth the most, and by how well it suits its place. Roots stay
+///     within 3 steps of home, so the progression keeps to one register.
 /// </summary>
 internal static class Progressions
 {
@@ -56,37 +57,38 @@ internal static class Progressions
     }
 
     /// <summary>
-    ///     The roots of the bars, in steps above the section's home, from -3 to 3.
+    ///     The roots of the chords, in steps above the section's home, from -3 to 3.
     /// </summary>
+    /// <param name="count">How many chords the pattern has, at least two.</param>
     /// <param name="home">The step of the section's home above the song's tonic, which sets the chords around it.</param>
     /// <param name="strictness">
     ///     How closely the progression keeps to its rules, from 1, which follows them, to 0, which picks every root
     ///     as likely as any other.
     /// </param>
-    public static ImmutableArray<int> Generate(IGenerationContext context, Scale scale, int home, double strictness)
+    public static ImmutableArray<int> Generate(IGenerationContext context, Scale scale, int home, double strictness, int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(strictness);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(strictness, 1);
+        ArgumentOutOfRangeException.ThrowIfLessThan(count, 2);
 
         var cadenceWeights = GetCadenceWeights(scale.Offsets, home);
-        var roots = new int[BarCount];
-        for (var bar = 1; bar < BarCount; bar++)
+        var roots = new int[count];
+        for (var chord = 1; chord < count; chord++)
         {
-            var previous = roots[bar - 1];
+            var previous = roots[chord - 1];
+            var isCadence = chord == count - 1;
+            var isPreparation = chord == count - 2;
             var weights = new Weighted<int>[StepCount];
             for (var step = 0; step < StepCount; step++)
             {
-                var roleWeight = bar switch
-                {
-                    2 => PreCadenceSteps.Contains(step) ? 1 : OutOfRoleWeight,
-                    3 => cadenceWeights[step] > 0 ? cadenceWeights[step] : OutOfRoleWeight,
-                    _ => 1
-                };
+                var roleWeight = isCadence ? cadenceWeights[step] > 0 ? cadenceWeights[step] : OutOfRoleWeight
+                    : isPreparation ? PreCadenceSteps.Contains(step) ? 1 : OutOfRoleWeight
+                    : 1;
                 var motionWeight = MotionWeights[Mod(step - previous)];
                 weights[step] = new Weighted<int>(Math.Pow(motionWeight * roleWeight, strictness), step);
             }
 
-            roots[bar] = Normalize(context.Pick([..weights]));
+            roots[chord] = Normalize(context.Pick([..weights]));
         }
 
         return [..roots];

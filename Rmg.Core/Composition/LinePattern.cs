@@ -55,10 +55,10 @@ internal sealed class LinePattern
     /// <summary>
     ///     A line placed over the song put together: every note by the rules of <see cref="Line" />, in the song's order,
     ///     over the chord it plays as <c>Realizer</c> works it out, the next section's too, kept as its scale step above
-    ///     its chord's root; a bar's first note landing where its bar asks (<see cref="CompositionStateKinds.LineLanding" />),
+    ///     its chord's root; a chord's first note landing where its chord asks (<see cref="CompositionStateKinds.LineLanding" />),
     ///     a phrase starting afresh at its aim or going on from the note before as its first note says (<see cref="CompositionStateKinds.LinePhraseStart" />),
-    ///     and the last note before a change of chord on a bar line, its next one of the new chord's, leading into it as
-    ///     its bar has it (<see cref="CompositionStateKinds.LineApproach" />), a pickup added for it kept only there
+    ///     and the last note before a change of chord, its next one of the new chord's, leading into it as its chord has
+    ///     it (<see cref="CompositionStateKinds.LineApproach" />), a pickup added for it kept only there
     ///     (<see cref="CompositionStateKinds.LinePickup" />). One line for the whole song, so that it goes
     ///     on from section to section, and a note echoes one heard anywhere before it; the notes the song's form cleared,
     ///     such as an intro's, are not there to place.
@@ -74,21 +74,25 @@ internal sealed class LinePattern
         var line = new Line(profile, low, high);
         var track = song.TrackTimelineMap[trackNumber];
         var allNotes = LinePlacement.GetNotes(track, definition, song.CommonStateTimelineMap);
-        int Bar(LineNote note) => (int)Math.Floor(note.Position / Meter.BarDuration);
-        // a pickup stays where the line leads into a new chord: the next note on the bar line, over another chord
+        // where the song's chords change, as its sections have them, and the change a note plays after, -1 before the first
+        var changes = song.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+        int Chord(LineNote note) => Array.FindLastIndex(changes, x => x <= note.Position + 1e-9);
+        bool IsOnChange(LineNote note, int chord) => chord >= 0 && Math.Abs(note.Position - changes[chord]) < 1e-9;
+        // a pickup stays where the line leads into a new chord: the next note on the next change, over another chord
         ImmutableArray<LineNote> lineNotes =
         [
             ..allNotes.Where((x, i) =>
                 x.State.GetStateValue(CompositionStateKinds.LinePickup) == 0
                 || i + 1 < allNotes.Length
-                && Math.Abs(allNotes[i + 1].Position - (Bar(x) + 1) * Meter.BarDuration) < 1e-9
+                && Chord(x) + 1 < changes.Length
+                && IsOnChange(allNotes[i + 1], Chord(x) + 1)
                 && !allNotes[i + 1].Classes.SetEquals(x.Classes)
             )
         ];
         var notes = lineNotes
             .Select((x, i) =>
                 {
-                    var isFirstInBar = i == 0 || Bar(lineNotes[i - 1]) != Bar(x);
+                    var isFirstOfChord = i == 0 || Chord(lineNotes[i - 1]) != Chord(x);
                     var rank = x.State.GetStateValue(StateKinds.HeldDuration) > 0 ? 0 : x.State.GetStateValue(CompositionStateKinds.BeatRank);
                     var pitch = line.Place(
                         x.Chord,
@@ -98,7 +102,7 @@ internal sealed class LinePattern
                         x.State.GetStateValue(CompositionStateKinds.LineTurn),
                         x.State.GetStateValue(CompositionStateKinds.LineRegister),
                         x.State.GetStateValue(CompositionStateKinds.NoteKey),
-                        isFirstInBar ? (ChordArrival)x.State.GetStateValue(CompositionStateKinds.LineLanding) : ChordArrival.Free,
+                        isFirstOfChord ? (ChordArrival)x.State.GetStateValue(CompositionStateKinds.LineLanding) : ChordArrival.Free,
                         (PhraseStart)x.State.GetStateValue(CompositionStateKinds.LinePhraseStart)
                     );
                     return (Note: x, Rank: rank, Pitch: pitch);
@@ -108,14 +112,14 @@ internal sealed class LinePattern
 
         for (var i = 0; i + 1 < notes.Length; i++)
         {
-            // a change of chord on a bar line, its first note one of the new chord's, led into as the bar before has it,
-            // but from a held note, a phrase's cadence, which rests where it is
+            // a change of chord, its first note one of the new chord's, led into as the chord before has it, but from a
+            // held note, a phrase's cadence, which rests where it is
             var (last, next) = (notes[i], notes[i + 1]);
-            var bar = next.Note.Position / Meter.BarDuration;
-            var isBarLine = Math.Abs(bar - Math.Round(bar)) < 1e-9 && Bar(last.Note) < Bar(next.Note);
+            var nextChord = Chord(next.Note);
+            var isChange = IsOnChange(next.Note, nextChord) && Chord(last.Note) < nextChord;
             var approach = (ChordApproach)last.Note.State.GetStateValue(CompositionStateKinds.LineApproach);
             var isHeld = last.Note.State.GetStateValue(StateKinds.HeldDuration) > 0;
-            if (!isBarLine || isHeld || approach == ChordApproach.None || last.Note.Classes.SetEquals(next.Note.Classes) || !next.Note.Classes.Contains(next.Pitch.Mod(12)))
+            if (!isChange || isHeld || approach == ChordApproach.None || last.Note.Classes.SetEquals(next.Note.Classes) || !next.Note.Classes.Contains(next.Pitch.Mod(12)))
                 continue;
 
             notes[i] = last with { Pitch = line.Approach(approach, last.Note.Chord, last.Note.Classes, last.Rank, last.Pitch, next.Note.Chord, next.Pitch) };
@@ -130,9 +134,9 @@ internal sealed class LinePattern
     ///     step, by the section's chance of leading into a chord change (<see cref="MelodyLayers.Leading" />), or not at
     ///     all; into the next phrase too, where the phrase runs on into it rather than ending on a held note.
     /// </summary>
-    public static ImmutableArray<ChordApproach> DrawApproaches(IGenerationContext context, double leading)
+    public static ImmutableArray<ChordApproach> DrawApproaches(IGenerationContext context, double leading, int chordCount)
     {
-        return [..Enumerable.Range(0, Progressions.BarCount).Select(_ => context.TestProbability(leading) ? ChordApproach.ScaleStep : ChordApproach.None)];
+        return [..Enumerable.Range(0, chordCount).Select(_ => context.TestProbability(leading) ? ChordApproach.ScaleStep : ChordApproach.None)];
     }
 
     /// <summary>
@@ -254,8 +258,9 @@ internal sealed class LinePattern
 /// <param name="Bars">The section's 8 bars, the answer's mutated.</param>
 /// <param name="BuildBars">The section's 8 bars built afresh, the answer's mutated, every bar drawing its rhythm afresh by its key, 0 for none.</param>
 /// <param name="Letters">Every bar's letter in the section's phrase scheme.</param>
-/// <param name="Approaches">How each bar of the 4-bar pattern leads into the next (<see cref="LinePattern.DrawApproaches" />).</param>
-/// <param name="Landings">What the first note of each bar of the 4-bar pattern lands on.</param>
+/// <param name="HarmonicRhythm">Where the section's chords change.</param>
+/// <param name="Approaches">How each chord of the 4-bar pattern leads into the next (<see cref="LinePattern.DrawApproaches" />).</param>
+/// <param name="Landings">What the first note of each chord of the 4-bar pattern lands on.</param>
 /// <param name="RegisterFreedom">The chance a phrase of the line starts afresh at where it aims, rather than going on from the note before.</param>
 /// <param name="Seed">The seed of its appearances' draws.</param>
 internal sealed record SectionLine(
@@ -264,6 +269,7 @@ internal sealed record SectionLine(
     TrackEventStateTimelineMap<StateMap> Bars,
     Func<ImmutableArray<int>, TrackEventStateTimelineMap<StateMap>> BuildBars,
     ImmutableArray<int> Letters,
+    HarmonicRhythm HarmonicRhythm,
     ImmutableArray<ChordApproach> Approaches,
     ImmutableArray<ChordArrival> Landings,
     double RegisterFreedom,
@@ -280,7 +286,7 @@ internal sealed record SectionLine(
     ///     from the first, not from the one before, so that the section keeps its tune: the bars of a letter draw their
     ///     rhythm afresh, alike, where a phrase varies (<see cref="MelodyLayers.AnswerBars" />), by the amount times
     ///     <see cref="MelodyLayers.ImprovisedRhythm" />, and its notes are mutated by the amount. Every note carries how its
-    ///     bar leads out and lands, and a phrase's first note whether it starts afresh, drawn for every appearance.
+    ///     chord leads out and lands, and a phrase's first note whether it starts afresh, drawn for every appearance.
     /// </summary>
     public TrackEventStateTimelineMap<StateMap> Appear(int appearance, double amount)
     {
@@ -316,11 +322,11 @@ internal sealed record SectionLine(
             .ToArray();
         var marked = track.Select(note =>
             {
-                var bar = (int)Math.Floor(note.Position / Meter.BarDuration).Mod(Progressions.BarCount);
+                var chord = HarmonicRhythm.IndexAt(note.Position);
                 var phrase = (int)Math.Floor(note.Position / Meter.PatternDuration);
                 var value = note.Value
-                    .With(CompositionStateKinds.LineApproach, (int)Approaches[bar])
-                    .With(CompositionStateKinds.LineLanding, (int)Landings[bar]);
+                    .With(CompositionStateKinds.LineApproach, (int)Approaches[chord])
+                    .With(CompositionStateKinds.LineLanding, (int)Landings[chord]);
                 var start = resets[phrase] ? PhraseStart.Afresh : PhraseStart.GoesOn;
                 return (firsts[phrase] == note.Position ? value.With(CompositionStateKinds.LinePhraseStart, (int)start) : value)
                     .ToTimelineItem(note.Position);
