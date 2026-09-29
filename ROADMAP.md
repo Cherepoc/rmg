@@ -240,9 +240,10 @@ Smaller, when the code is next touched:
   against 21.4; leads 14, 42 and 65% of its changes by its instrument, as before, a tension resolving by step 8, 17 and
   23% against 6, 17 and 26%; lands on the root 77 to 92% of the time, as before; a recurring section plays its first
   appearance's pitches 82% of the time against 90%. Its octave nearest the note before is its line's rule: placing
-  every note in its chord's register instead leapt a fifth or more 35% of the time and an octave 18%. Left: the bass's
-  pickup (`PatternGenerator.LeadIn`) still decided as its bars are made, where a section's last bar compares with its
-  own first, not the next section's; the melody's echoes keeping their heard octave or the one nearest by its freedom,
+  every note in its chord's register instead leapt a fifth or more 35% of the time and an octave 18%. The bass's pickup
+  is added where a bar asks to lead, as the bars are made, over the chord at its place, and kept only where the song
+  put together has a new chord after it, the next section's too (`LinePickup`, `LinePattern.Place`). Left: the melody's
+  echoes keeping their heard octave or the one nearest by its freedom,
   where only a line of no freedom keeps nearest; the melody leading into its phrase's first bar, now that it knows the
   next section's chord; the harmony's roots, which no line walks now, as whole scale steps, where they are sevenths of
   the scale rounded back.

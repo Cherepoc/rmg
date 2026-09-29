@@ -53,6 +53,10 @@ internal static class CompositionStateKinds
     // before, as the line's freedom to change register draws it (MelodyLayers.RegisterFreedom)
     public static StateKind<int> LineReset { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineReset", StateScope.Render);
 
+    // 1 for a note added in a bar's last beat for the line to lead into the next chord on, as the bass's pickup, which
+    // stays only where the line does lead into a new chord (LinePattern.Place)
+    public static StateKind<int> LinePickup { get; } = StateKinds.CreateAdditive<int>(Prefix + "LinePickup", StateScope.Render);
+
     // where the melody's phrase ends in its last bar: 0 for no end, or the beat, from 1 to 3, before which its last note
     // starts; it holds that note, and rests until the next phrase
     public static StateKind<int> MelodyPhraseEnd { get; } = StateKinds.CreateAdditive<int>(Prefix + "MelodyPhraseEnd");

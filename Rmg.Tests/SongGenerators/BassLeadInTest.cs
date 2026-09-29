@@ -47,13 +47,13 @@ public sealed class BassLeadInTest
         await Assert.That(pickup.GetStateValue(StateKinds.ChordNotePitchOffsets).SequenceEqual(Seventh.Heights)).IsTrue();
         await Assert.That(pickup.GetStateValue(CompositionStateKinds.BeatRank)).IsEqualTo(MaxRank);
         await Assert.That(pickup.GetStateValue(StateKinds.Velocity)).IsEqualTo(1 - BeatAccent.GetAccent(0, MaxRank)).Within(1e-9);
+        await Assert.That(pickup.GetStateValue(CompositionStateKinds.LinePickup)).IsEqualTo(1);
     }
 
     [Test]
     [Arguments(ChordApproach.None, 3.0, 0.0)]
-    [Arguments(ChordApproach.ScaleStep, 0.0, 0.0)]
     [Arguments(ChordApproach.ScaleStep, 3.0, 3.5)]
-    public async Task ABarThatDoesNotLead_OrLeadsIntoTheSameChord_OrHasANoteInItsLastBeat_IsLeftAsItIs(ChordApproach approach, double nextRoot, double lastNote)
+    public async Task ABarThatDoesNotLead_OrHasANoteInItsLastBeat_IsLeftAsItIs(ChordApproach approach, double nextRoot, double lastNote)
     {
         var barStates = BarStates(approach, [(0, Triad, 0), (4, Triad, nextRoot)]);
         var notes = Notes(lastNote == 0 ? [0.0] : [0.0, lastNote]);
@@ -61,5 +61,37 @@ public sealed class BassLeadInTest
         var led = PatternGenerator.LeadIn(notes, TrackState, barStates, 0, MaxRank);
 
         await Assert.That(led.Select(x => x.Position)).IsEquivalentTo(notes.Select(x => x.Position));
+    }
+
+    [Test]
+    [Arguments(3, 3)]
+    [Arguments(0, 2)]
+    public async Task APickup_StaysWhereTheBassLeadsIntoANewChord_AsTheSongPutTogetherKnows(int nextRoot, int expectedNotes)
+    {
+        // C, a pickup in the last beat, and the next bar's note over F, or over C again, where no chord changes
+        StateMap Note(int root, int pickup) => StateMap.FromStates(
+            [
+                StateKinds.ChordNotePitchOffsets.CreateState(Triad.Heights),
+                StateKinds.ChordRootNoteOffset.CreateState([root / 7.0]),
+                CompositionStateKinds.LinePickup.CreateState(pickup),
+                CompositionStateKinds.LineApproach.CreateState(pickup > 0 ? (int)ChordApproach.HalfStepBelow : 0)
+            ]
+        );
+        var bass = new Rmg.Core.Songs.PitchInstrumentTrack(StateMap.Default, 0, -3, -2, Rmg.Core.Songs.TrackRole.Bass);
+        var song = TrackEventStateTimelineMap.Create(
+            8,
+            [
+                new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
+                    0,
+                    EventTimeline.Create(8, [Note(0, 0).ToTimelineItem(0), Note(0, 1).ToTimelineItem(3), Note(nextRoot, 0).ToTimelineItem(4)])
+                        .ToEventStateTimelineMap(StateMap.Default)
+                )
+            ],
+            StateMap.FromStates([StateKinds.ScaleOffsets.CreateState([0, 2, 4, 5, 7, 9, 11])]).ToStateTimelineMap(8)
+        );
+
+        var placed = LinePattern.Place(song, 0, bass, BassLeadingLayers.Line);
+
+        await Assert.That(placed.TrackTimelineMap[0].EventTimeline.Count).IsEqualTo(expectedNotes);
     }
 }

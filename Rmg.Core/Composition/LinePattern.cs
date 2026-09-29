@@ -58,7 +58,8 @@ internal sealed class LinePattern
     ///     its chord's root; a bar's first note landing where its bar asks (<see cref="CompositionStateKinds.LineLanding" />),
     ///     a phrase starting afresh at its aim where its first note says so (<see cref="CompositionStateKinds.LineReset" />),
     ///     and the last note before a change of chord on a bar line, its next one of the new chord's, leading into it as
-    ///     its bar has it (<see cref="CompositionStateKinds.LineApproach" />). One line for the whole song, so that it goes
+    ///     its bar has it (<see cref="CompositionStateKinds.LineApproach" />), a pickup added for it kept only there
+    ///     (<see cref="CompositionStateKinds.LinePickup" />). One line for the whole song, so that it goes
     ///     on from section to section, and a note echoes one heard anywhere before it; the notes the song's form cleared,
     ///     such as an intro's, are not there to place.
     /// </summary>
@@ -72,8 +73,18 @@ internal sealed class LinePattern
         var (low, high) = Realizer.GetRange(definition);
         var line = new Line(profile, low, high);
         var track = song.TrackTimelineMap[trackNumber];
-        var lineNotes = LinePlacement.GetNotes(track, definition, song.CommonStateTimelineMap);
+        var allNotes = LinePlacement.GetNotes(track, definition, song.CommonStateTimelineMap);
         int Bar(LineNote note) => (int)Math.Floor(note.Position / Meter.BarDuration);
+        // a pickup stays where the line leads into a new chord: the next note on the bar line, over another chord
+        ImmutableArray<LineNote> lineNotes =
+        [
+            ..allNotes.Where((x, i) =>
+                x.State.GetStateValue(CompositionStateKinds.LinePickup) == 0
+                || i + 1 < allNotes.Length
+                && Math.Abs(allNotes[i + 1].Position - (Bar(x) + 1) * Meter.BarDuration) < 1e-9
+                && !allNotes[i + 1].Classes.SetEquals(x.Classes)
+            )
+        ];
         var notes = lineNotes
             .Select((x, i) =>
                 {

@@ -202,7 +202,7 @@ internal sealed class PatternGenerator
         // a drum that doubles a lead plays its strong beats
         if (doublingRank is { } maxRank)
             notes = EventTimeline.Create(notes.Duration, notes.Where(x => x.Value.GetStateValue(CompositionStateKinds.BeatRank) <= maxRank));
-        // a bass bar that leads into a change of chord plays a note in its last beat, for its approach to play on
+        // a bass bar that leads into the next chord plays a note in its last beat, for its approach to play on
         if (_trackDefinitions[trackNumber].Role == TrackRole.Bass)
             notes = LeadIn(notes, stateMap, barStateTimelineMap, barIndex, _rhythmPatternGenerator(stateMap).MaxRank);
         // a melody's phrase ends where its bar has it, or where its answer does
@@ -286,10 +286,11 @@ internal sealed class PatternGenerator
     }
 
     /// <summary>
-    ///     A bass bar's notes with one in its last beat, where the bar leads into a change of chord
+    ///     A bass bar's notes with one in its last beat, where the bar leads into the next chord
     ///     (<see cref="StateKinds.ChordApproach" />) and none starts there: the note sounding there played again, over
     ///     the chord at its place and on the rhythm's weakest beat, as lightly as a note there, so that the approach has
-    ///     a note to play on.
+    ///     a note to play on; marked as a pickup, which stays only where the chord does change, as the song put together
+    ///     knows, the next section's chord too (<see cref="LinePattern.Place" />).
     /// </summary>
     /// <param name="maxRank">The weakest rank of the bar's rhythm.</param>
     internal static EventTimeline<StateMap> LeadIn(
@@ -301,20 +302,14 @@ internal sealed class PatternGenerator
     )
     {
         var patternBar = barIndex % Progressions.BarCount;
-        var (start, next) = (patternBar * Meter.BarDuration, (patternBar + 1) % Progressions.BarCount * Meter.BarDuration);
+        var start = patternBar * Meter.BarDuration;
         const double pickup = Meter.BarDuration - 1;
         if (barStateTimelineMap.GetEffectiveStateMapAt(start).GetStateValue(StateKinds.ChordApproach) == 0
             || notes.Count == 0
             || notes[^1].Position >= pickup - 1e-9)
             return notes;
 
-        var (barStateMap, nextBarStateMap) = (barStateTimelineMap.GetEffectiveStateMapAt(start + pickup), barStateTimelineMap.GetEffectiveStateMapAt(next));
-        var (chord, nextChord) = (PickChord(stateMap, barStateMap), PickChord(stateMap, nextBarStateMap));
-        var isChange = !chord.GetStateValue(StateKinds.ChordNotePitchOffsets).SequenceEqual(nextChord.GetStateValue(StateKinds.ChordNotePitchOffsets))
-            || !barStateMap.GetStateValue(StateKinds.ChordRootNoteOffset).SequenceEqual(nextBarStateMap.GetStateValue(StateKinds.ChordRootNoteOffset));
-        if (!isChange)
-            return notes;
-
+        var chord = PickChord(stateMap, barStateTimelineMap.GetEffectiveStateMapAt(start + pickup));
         var sounding = notes[^1].Value;
         var rank = sounding.GetStateValue(CompositionStateKinds.BeatRank);
         var velocity = sounding.GetStateValue(StateKinds.Velocity)
@@ -323,7 +318,8 @@ internal sealed class PatternGenerator
             .Except([StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed])
             .MergeWith(chord)
             .With(StateKinds.Velocity, velocity)
-            .With(CompositionStateKinds.BeatRank, maxRank);
+            .With(CompositionStateKinds.BeatRank, maxRank)
+            .With(CompositionStateKinds.LinePickup, 1);
         return EventTimeline.Create(notes.Duration, [..notes, note.ToTimelineItem(pickup)]);
     }
 
