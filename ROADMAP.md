@@ -11,14 +11,14 @@ measured before and after by a report test, by the measure its entry names.
 
 **Now** (P0), in this order:
 
-1. **The meter as state,** every song still in four (see *Meter*).
-2. **A section's streams** (see *Architecture*), before the arrangement adds its draws.
-3. **Harmonic rhythm** (see *Chords*).
+1. **A section's streams** (see *Architecture*), before the arrangement adds its draws.
+2. **Harmonic rhythm** (see *Chords*).
+3. **A section's length** (see *Form*).
 
 **Next** (P1), in this order:
 
-4. **Sections with a role,** as the form (see *Form*).
-5. **A section's length** (see *Form*).
+4. **The meter:** a cycle split in three, then the meter as state, then other meters (see *Meter*).
+5. **Sections with a role,** as the form (see *Form*).
 6. **The energy in the pitched tracks** (see *Section dynamics*).
 7. **The arrangement, and energy by appearance** (see *Appearances*).
 8. **Pitched fills and the lift** (see *Fills*).
@@ -27,7 +27,7 @@ Alongside, continuously and never as a gate: **listening** through the checklist
 
 **Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs
 rated enough; occasional chords and a pentatonic melody (see *Instruments*, *Scales*); half time and double time (see *Groove*);
-the melody's contour (see *Melody*); styles (see *Styles*); other meters (see *Meter*); the song's memory (see
+the melody's contour (see *Melody*); styles (see *Styles*); the song's memory (see
 *Architecture*), once the arrangement doubles the tracks.
 
 **When the need shows** (P3): harmonised doubling and articulations, after styles; solos; long cycles, then
@@ -95,16 +95,26 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
 ## Meter
 
 Every bar is four beats (`Meter.BarDuration`, read in about 50 places), a section's pattern four bars
-(`Progressions.BarCount`, about 20), and the rhythm engine halves from the bar. Until the meter is state, new work
-sizes what it adds in beats, chord changes or patterns, not in bars, and adds no reader of either constant.
+(`Progressions.BarCount`, about 20), and the rhythm engine halves from the bar: a rhythm's period is a fraction of the
+bar, halved again and again (`DyadicRankDistribution`). Until the meter is state, new work sizes what it adds in beats,
+chord changes or patterns, not in bars, and adds no reader of either constant.
 
-- **The meter as state** (P0): a song's, a section's or a bar's, of any number of beats or 16ths, the bar grouped as a
-  grouped cycle is (3+3+2, `ResolvedRhythm.IsGrouped`), in place of the fixed four beats: the engine halving from a
-  bar's groups, and the progression's chords, the phrase scheme's bars, the contour, the fills' spans and lines, the
-  intro's windows and the count-in taking the bar's length. A refactor: every song still in four, the corpus
-  unchanged (`CorpusFingerprintTest`), every reader of the two constants reading the state.
-- **Other meters** (P2, with listening): 3/4, 7/8 or 13/16 drawn, leaned conventional towards four; the first use a bar
-  of two beats now and then before a section. Measured by: the meters drawn by conventionality; the drums' notes a
+Planned in September 2026 as a refactor first, the meter as state with every song still in four, and put off: a bar
+of three beats halved gives dotted quarters, not beats, and 6/8's dotted quarters halve into two where they split into
+three 8ths, so no other meter plays right until the engine splits a cycle in three; the state's shape waits for that,
+and threading a value that is always four through a hundred readers would change nothing heard. In this order:
+
+- **A cycle split in three:** a cycle of three units, such as a dotted 8th's three 16ths or a dotted quarter's three
+  8ths, splits into three, its first strong and the other two weak, where the engine only halves (`ResolvedRhythm`,
+  `GridRankLimit`: a dotted 8th's does not subdivide at all now). It is heard already, as a tresillo's cycles filled
+  out into a 3-against-4 stream, and it is what a bar of three
+  beats or a group of three 8ths needs. Measured by: the grouped cycles' notes, and the grid report's gaps.
+- **The meter as state:** a song's, a section's or a bar's, a bar as its groups of beats or 16ths, such as 4, 3,
+  2+2+3 or 3+3+3+2+2, the engine halving or splitting from a bar's groups, a rhythm's period in beats rather than as a
+  fraction of the bar, and the progression's chords, the phrase scheme's bars, the contour, the fills' spans and lines,
+  the intro's windows and the count-in taking the bar's length. First with every song in four, the corpus unchanged.
+- **Other meters** (with listening): 3/4, 6/8, 7/8 or 13/16 drawn, leaned conventional towards four; the first use a
+  bar of two beats now and then before a section. Measured by: the meters drawn by conventionality; the drums' notes a
   bar, the downbeat and the backbeat as in four, per beat; the grid report's gaps under a 32nd.
 - **Overlapping polyrhythms** (P3, after *Long cycles*, needed someday): a figure of a length of its own, such as a
   riff of 23 16ths, running on against the bar, as the kick and the guitar do against the hi-hat and the snare in
@@ -290,8 +300,6 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
 - **A drum's sounds together:** a drum is one track, whose note plays one sound, so a run never plays two toms
   together; notes of several sounds on one track would allow it.
 - **The vibraslap's pickup,** the last beat before a landing.
-- **Splitting a grouped cycle by its number** (a dotted 8th into three 16ths, one strong and two weak): the
-  3-against-4 cross-rhythm as a full 16th stream, should the tresillo alone sound thin.
 - **Patterns by measured features** (syncopation, evenness) as a family, should a target prove out of reach of the
   dyadic engine; euclidean patterns that fit no cycle; a library of idioms such as clave and bossa, which styles may
   take up; and drums generated together, the snare avoiding the kick and the hi-hat filling the gaps.
