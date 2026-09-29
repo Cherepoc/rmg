@@ -8,21 +8,28 @@ public sealed class RenderedTrack
         bool isPercussionInstrument,
         int pitchInstrumentCode,
         EventTimeline<RenderedNote> noteTimeline,
+        double pan,
         double volume = 1
     )
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(pan, -1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(pan, 1);
         ArgumentOutOfRangeException.ThrowIfNegative(volume);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(volume, 1);
 
         IsPercussionInstrument = isPercussionInstrument;
         PitchInstrumentCode = pitchInstrumentCode;
         NoteTimeline = noteTimeline;
+        Pan = pan;
         Volume = volume;
     }
 
     public bool IsPercussionInstrument { get; }
     public int PitchInstrumentCode { get; }
     public EventTimeline<RenderedNote> NoteTimeline { get; }
+
+    /// <summary>Where the track sits from left to right, from -1, left, through 0, the middle, to 1, right.</summary>
+    public double Pan { get; }
 
     /// <summary>
     ///     How loud the track plays, as a part of the volume it plays at unasked. 1 asks for nothing and

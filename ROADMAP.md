@@ -11,24 +11,22 @@ measured before and after by a report test, by the measure its entry names.
 
 **Now** (P0), in this order:
 
-1. **Panning** (see *Instruments*) and **swing** (see *Groove*): cheap, and heard in every song.
-2. **The meter as state,** every song still in four (see *Meter*).
-3. **A section's streams** (see *Architecture*), before the arrangement adds its draws.
-4. **Harmonic rhythm** (see *Chords*).
+1. **The meter as state,** every song still in four (see *Meter*).
+2. **A section's streams** (see *Architecture*), before the arrangement adds its draws.
+3. **Harmonic rhythm** (see *Chords*).
 
 **Next** (P1), in this order:
 
-5. **Sections with a role,** as the form (see *Form*).
-6. **A section's length** (see *Form*).
-7. **The energy in the pitched tracks** (see *Section dynamics*).
-8. **The arrangement, and energy by appearance** (see *Appearances*).
-9. **Pitched fills and the lift** (see *Fills*).
+4. **Sections with a role,** as the form (see *Form*).
+5. **A section's length** (see *Form*).
+6. **The energy in the pitched tracks** (see *Section dynamics*).
+7. **The arrangement, and energy by appearance** (see *Appearances*).
+8. **Pitched fills and the lift** (see *Fills*).
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
 **Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs
-rated enough;
-occasional chords and a pentatonic melody (see *Instruments*, *Scales*); half time and double time (see *Groove*);
+rated enough; occasional chords and a pentatonic melody (see *Instruments*, *Scales*); half time and double time (see *Groove*);
 the melody's contour (see *Melody*); styles (see *Styles*); other meters (see *Meter*); the song's memory (see
 *Architecture*), once the arrangement doubles the tracks.
 
@@ -89,6 +87,9 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
   step or two less, keeping only the groove's cycle and phase.
 - **Repeated cycles** replay their beats' accents: mechanical? Then a small fresh loudness draw over the replayed
   accent.
+- **Swing and panning,** set by measurement only: is a triplet's swing too heavy at 16ths, and do the tuplets and
+  grouped cycles of wild songs, swung with the rest, sound played or broken? Are the chords (a half to all of 0.6 to a
+  side) too far out, or the melody (up to 0.15) too near the middle?
 - **The fade-outs:** a ritardando into the fade, the drums fading first, or a tag after it, if asked for.
 
 ## Meter
@@ -193,11 +194,9 @@ The fills are the drums', and every track lands with them where a section lands.
 ## Instruments
 
 Three pitched tracks, the chords, the melody and the bass, each on one instrument for the whole song; every section
-plays all three.
+plays all three. Each sits where its role spreads it (`Panning`): the bass in the middle, the melody near it and the
+chords out to the other side; a new role takes a spread of its own.
 
-- **Panning** (P0): no track is panned; the file sends no pan (CC 10), which the web player's synth plays. A place per
-  track drawn by its role, the bass and the kick in the middle, the chords and a pad spread, the drums as a kit
-  stands. Measured by: the places drawn by role, and the page's mixer left as it is.
 - **Occasional chords** (P2): how many notes a track sounds at once is its role's (`Realizer`). As a note's state, a
   note, two or the chord, leaned by the beat's accent, the energy and the landings, the melody would play a double stop
   on an accent, a guitar a power chord where a section lands, the bass a chord now and then. Measured by: the notes
@@ -220,11 +219,11 @@ plays all three.
 
 ## Groove
 
-- **Swing** (P0): every note lands on the grid, tuplets aside. A song's swing, drawn and leaned conventional towards
-  none, would delay the notes off the 8ths (or the 16ths, by the song's) by a fraction of the way to the next, a state
-  that generation decides and `Render` plays, every track alike, the drums perhaps more than the chords; the notes of a
-  tuplet or a grouped cycle as they are. Measured by: the songs that swing and how much, by conventionality and tempo;
-  no two notes of a track crossing.
+A song swings by a chance of 0.2, leaned by its rhythm's unconventionality (`Groove`): its 16ths where they are long
+enough to be heard swung (0.14 s, 105 BPM and slower), its 8ths otherwise, from 30% of a triplet's swing to all of
+it, `Render` moving every note by one continuous stretch of each pair, so that no note crosses another. Over 300
+corpus songs, 16% of the plainest swing, 17% of the middle and 37% of the wildest (`GrooveTest.Report`).
+
 - **Half time and double time** (P2): a section whose drums play at half or twice the song's tempo, the backbeat on 3
   or on every beat, over the same chords, drawn by the energy, half time the quieter and double time the louder.
   Measured by: the energy of the sections that change, and the drums' notes a bar in them.

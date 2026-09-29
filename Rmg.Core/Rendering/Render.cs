@@ -16,12 +16,14 @@ public static class Render
 
     /// <summary>
     ///     The song as MIDI plays it: its notes, as its generation decided them, or decided here for a song that comes
-    ///     without them; a chord's pitches as notes together, the drums on the percussion channel, and the velocities
-    ///     on a fixed scale.
+    ///     without them; a chord's pitches as notes together, the drums on the percussion channel, the velocities
+    ///     on a fixed scale, and every note swung as the song swings.
     /// </summary>
     public static RenderedSong RenderSong(Song song)
     {
         var notes = song.Notes ?? Realizer.Realize(song.TrackDefinitions, song.TrackEventStateTimelineMap);
+        var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap.OfScope(StateScope.Render);
+        var swing = GetSwing(song);
         var renderedTracks = new List<RenderedTrack>();
         var percussionTrackNotes = new List<IEnumerable<TimelineItem<RenderedNote>>>();
         foreach (var (trackNumber, trackNotes) in notes)
@@ -29,12 +31,15 @@ public static class Render
             var renderedNotes = trackNotes.SelectMany(note =>
                 {
                     var velocity = GetMidiVelocity(note.Value);
-                    return note.Value.Pitches.Select(pitch => new RenderedNote(pitch, velocity, note.Value.Duration).ToTimelineItem(note.Position));
+                    // swung, its end as its start, so that it still reaches the note it reached
+                    var position = swing.Apply(note.Position);
+                    var duration = swing.Apply(note.Position + note.Value.Duration) - position;
+                    return note.Value.Pitches.Select(pitch => new RenderedNote(pitch, velocity, duration).ToTimelineItem(position));
                 }
             );
             if (song.TrackDefinitions[trackNumber] is PitchInstrumentTrack pitchInstrumentTrack)
                 renderedTracks.Add(
-                    new RenderedTrack(false, pitchInstrumentTrack.InstrumentCode, EventTimeline.Create(trackNotes.Duration, renderedNotes))
+                    new RenderedTrack(false, pitchInstrumentTrack.InstrumentCode, EventTimeline.Create(trackNotes.Duration, renderedNotes), pitchInstrumentTrack.Pan)
                 );
             else
                 percussionTrackNotes.Add(renderedNotes);
@@ -43,13 +48,22 @@ public static class Render
         var percussionEventTimeline = EventTimeline.Create(song.Duration, percussionTrackNotes.SelectMany(x => x));
         if (percussionEventTimeline.Count > 0)
         {
-            var percussionTrack = new RenderedTrack(true, 0, percussionEventTimeline);
+            // the drums share their channel, where the soundfont places each drum as a kit stands
+            var percussionTrack = new RenderedTrack(true, 0, percussionEventTimeline, 0);
             renderedTracks.Add(percussionTrack);
         }
 
-        var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap.OfScope(StateScope.Render);
-
         return new RenderedSong(song.Duration, common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..renderedTracks]);
+    }
+
+    /// <summary>How the song swings, which moves where its every note plays.</summary>
+    internal static Swing GetSwing(Song song)
+    {
+        var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
+        return new Swing(
+            common.GetStateTimeline(StateKinds.SwingDelay).GetEffectiveValueAt(0),
+            common.GetStateTimeline(StateKinds.SwingPeriod).GetEffectiveValueAt(0)
+        );
     }
 
     /// <summary>

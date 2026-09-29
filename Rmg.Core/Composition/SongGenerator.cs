@@ -45,8 +45,10 @@ public static class SongGenerator
 
         // how far the rhythm strays from convention, which every rhythm layer from the tracks' own on is scaled by
         var rhythmicUnconventionality = RhythmicUnconventionality.Generate(Stream(SongStream.Rhythm));
+        StateTrace.Record(TracePoints.SongRhythm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{rhythmicUnconventionality.Value:F2}", rhythmicUnconventionality);
         var tracks = SongTracks.Create(
             Stream(SongStream.Tracks),
+            Stream(SongStream.Panning),
             rhythmicUnconventionality,
             Stream(SongStream.DrumStrokes),
             Stream(SongStream.DrumRoles),
@@ -73,6 +75,10 @@ public static class SongGenerator
 
         // the song's key, which the sections place their melodies in
         var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common));
+        // how the song swings, which its tempo sets the notes of
+        var grooveContext = Stream(SongStream.Groove);
+        var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), rhythmicUnconventionality.Tilt);
+        StateTrace.Record(TracePoints.Swing, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{swing.Delay:F3} of {swing.Period}", swing);
 
         var sectionGenerator = new SectionGenerator(
             root,
@@ -117,7 +123,8 @@ public static class SongGenerator
         // the song put together as planned, and the lines the drums mark
         var form = formGenerator.Assemble(plan, played, sections);
         var songTrackNoteTimelineMap = form.Edits.ApplyTo(form.Blocks.Unroll());
-        songTrackNoteTimelineMap = songTrackNoteTimelineMap.MergeStateTimelineMap(form.SongState).MergeStateMap(commonStateMap);
+        songTrackNoteTimelineMap = songTrackNoteTimelineMap.MergeStateTimelineMap(form.SongState).MergeStateMap(commonStateMap)
+            .MergeStateMap(Groove.ToStateMap(swing, grooveContext));
 
         // the drums mark the lines, now that the song is put together
         songTrackNoteTimelineMap = new FillGenerator(Stream(SongStream.Fills), tracks, rhythmicUnconventionality)
@@ -211,5 +218,7 @@ internal enum SongStream
     DrumRoles = 14,
     DrumSetup = 15,
     MelodyImprovisation = 16,
-    Intro = 17
+    Intro = 17,
+    Groove = 18,
+    Panning = 19
 }

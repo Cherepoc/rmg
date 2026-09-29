@@ -56,6 +56,11 @@ public static class StateKinds
     // channel's expression
     public static readonly StateKind<double> Fade = CreateMultiplicative<double>("Fade", StateScope.Render, isShared: true);
 
+    // how late the second of every pair of swung notes plays, in beats, 0 for none, and how long a pair is, in beats:
+    // 1 for swung 8ths, 1/2 for swung 16ths; Render moves every note by it (Groove)
+    public static readonly StateKind<double> SwingDelay = CreateAdditive<double>("SwingDelay", StateScope.Render, isShared: true);
+    public static readonly StateKind<double> SwingPeriod = CreateMultiplicative<double>("SwingPeriod", StateScope.Render, isShared: true);
+
     public static StateKind<T> CreateAdditive<T>(
         string name,
         StateScope scope = StateScope.Composition,

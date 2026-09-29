@@ -11,6 +11,7 @@ public static class Midi
     private const byte PercussionChannel = 9;
     private const byte MainVolumeController = 7;
     private const byte ExpressionController = 11;
+    private const byte PanController = 10;
     private const double MaxControllerValue = 127;
 
     /// <summary>What a channel plays at when nothing says otherwise, which General MIDI puts at 100 of 127.</summary>
@@ -267,6 +268,13 @@ public static class Midi
             settings.Add(new MidiEvent(0, ControlChange(channel, MainVolumeController, volume)));
         }
 
+        // nor does one in the middle about its place
+        if (track.Pan != 0)
+        {
+            var pan = (byte)Math.Round(64 + track.Pan * 63);
+            settings.Add(new MidiEvent(0, ControlChange(channel, PanController, pan)));
+        }
+
         // a fade plays as the channel's expression, under the volume the listener sets
         var fade = fadeTimeline.Select(x => new MidiEvent(AbsoluteDelta(x.Position), ControlChange(channel, ExpressionController, (byte)Math.Round(x.Value * MaxControllerValue))));
         var events = settings.Concat(fade).Concat(track.NoteTimeline.ToMidiNotes(durationDelta).SelectMany(x => x.ToEvents(channel)));
@@ -331,7 +339,7 @@ public static class Midi
 
         return song.WithTracks(song.Tracks.Select((track, index) =>
             instruments.TryGetValue(channels[index], out var instrument)
-                ? new RenderedTrack(track.IsPercussionInstrument, instrument, track.NoteTimeline, track.Volume)
+                ? new RenderedTrack(track.IsPercussionInstrument, instrument, track.NoteTimeline, track.Pan, track.Volume)
                 : track));
     }
 
@@ -350,7 +358,7 @@ public static class Midi
 
         return song.WithTracks(song.Tracks.Select((track, index) =>
             volumes.TryGetValue(channels[index], out var volume)
-                ? new RenderedTrack(track.IsPercussionInstrument, track.PitchInstrumentCode, track.NoteTimeline, volume)
+                ? new RenderedTrack(track.IsPercussionInstrument, track.PitchInstrumentCode, track.NoteTimeline, track.Pan, volume)
                 : track));
     }
 

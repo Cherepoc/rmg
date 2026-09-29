@@ -77,7 +77,7 @@ public sealed class BassLeadInTest
                 CompositionStateKinds.LineApproach.CreateState(pickup > 0 ? (int)ChordApproach.HalfStepBelow : 0)
             ]
         );
-        var bass = new Rmg.Core.Songs.PitchInstrumentTrack(StateMap.Default, 0, -3, -2, Rmg.Core.Songs.TrackRole.Bass);
+        var bass = new Rmg.Core.Songs.PitchInstrumentTrack(StateMap.Default, 0, -3, -2, Rmg.Core.Songs.TrackRole.Bass, 0);
         var song = TrackEventStateTimelineMap.Create(
             8,
             [

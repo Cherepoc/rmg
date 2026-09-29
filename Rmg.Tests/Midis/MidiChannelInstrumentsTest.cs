@@ -13,7 +13,7 @@ public sealed class MidiChannelInstrumentsTest
         [
             new RenderedNote(64, 1, 1).ToTimelineItem(0),
         ];
-        return new RenderedTrack(isPercussionInstrument, instrument, EventTimeline.Create(1, renderedNotes));
+        return new RenderedTrack(isPercussionInstrument, instrument, EventTimeline.Create(1, renderedNotes), 0);
     }
 
     private static RenderedSong Song(params RenderedTrack[] tracks)

@@ -15,7 +15,7 @@ public sealed class MidiWriteTest
             new RenderedNote(64, 1, 1).ToTimelineItem(0),
         ];
         var noteTimeline = EventTimeline.Create(1, renderedNotes);
-        var track = new RenderedTrack(false, 1, noteTimeline);
+        var track = new RenderedTrack(false, 1, noteTimeline, 0);
         
         ImmutableArray<RenderedTrack> tracks = [
             track
@@ -47,7 +47,7 @@ public sealed class MidiWriteTest
 
     private static byte[] WriteOneBeatSong(params TimelineItem<RenderedNote>[] renderedNotes)
     {
-        var track = new RenderedTrack(false, 1, EventTimeline.Create(1, renderedNotes));
+        var track = new RenderedTrack(false, 1, EventTimeline.Create(1, renderedNotes), 0);
         var renderedSong = new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), [track]);
 
         var memoryStream = new MemoryStream();
@@ -59,7 +59,7 @@ public sealed class MidiWriteTest
     public async Task AFade_PlaysAsTheChannelsExpression()
     {
         var fade = StateTimeline.Create(1, StateKinds.Fade, [0.75.ToTimelineItem(0), 0.5.ToTimelineItem(0.5)]);
-        var track = new RenderedTrack(false, 1, EventTimeline.Create(1, [new RenderedNote(64, 1, 1).ToTimelineItem(0)]));
+        var track = new RenderedTrack(false, 1, EventTimeline.Create(1, [new RenderedNote(64, 1, 1).ToTimelineItem(0)]), 0);
         var memoryStream = new MemoryStream();
         new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), fade, [track]).Write(memoryStream, null);
 

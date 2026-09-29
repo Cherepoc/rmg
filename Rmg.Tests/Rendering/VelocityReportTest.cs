@@ -61,6 +61,8 @@ public sealed class VelocityReportTest
     private static (double Position, double Velocity, int Count)[] Rendered(CorpusSong song, int track)
     {
         var notes = song.Song.Notes![track];
+        // a note plays where the song's swing moves it
+        var swing = Rmg.Core.Rendering.Render.GetSwing(song.Song);
         var rendered = song.Rendered.Tracks
             .Where(x => song.Song.TrackDefinitions[track] is PitchInstrumentTrack pitched
                 ? !x.IsPercussionInstrument && x.PitchInstrumentCode == pitched.InstrumentCode
@@ -70,7 +72,7 @@ public sealed class VelocityReportTest
             .ToDictionary(x => x.Key, x => x.First().Value.Velocity * 127);
         return
         [
-            ..notes.Select(n => (n.Position, rendered.GetValueOrDefault((Math.Round(n.Position, 6), n.Value.Pitches[0])), n.Value.Pitches.Length))
+            ..notes.Select(n => (n.Position, rendered.GetValueOrDefault((Math.Round(swing.Apply(n.Position), 6), n.Value.Pitches[0])), n.Value.Pitches.Length))
         ];
     }
 

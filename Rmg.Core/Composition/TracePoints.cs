@@ -12,6 +12,15 @@ internal static class TracePoints
     /// <summary>The register a section's melody aims at in each bar of its pattern (an <c>ImmutableArray</c> of doubles).</summary>
     public const string MelodyContour = "Melody contour";
 
+    /// <summary>How far a song's rhythm strays from convention (a <see cref="RhythmicUnconventionality" />).</summary>
+    public const string SongRhythm = "Song rhythm";
+
+    /// <summary>How a song swings (a <see cref="Swing" />).</summary>
+    public const string Swing = "Swing";
+
+    /// <summary>Where a song's pitched tracks sit from left to right (an <c>ImmutableDictionary</c> of tracks and pans).</summary>
+    public const string Panning = "Panning";
+
     /// <summary>What a song's drums are (a <see cref="DrumSetup" />).</summary>
     public const string DrumSetup = "Drum setup";
 

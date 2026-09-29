@@ -52,8 +52,10 @@ internal sealed class SongTracks
     /// <param name="strokeContext">The sequence the drums' strokes in the song are drawn from (<see cref="DrumStrokes" />).</param>
     /// <param name="roleContext">The sequence the drums' roles in the song are drawn from (<see cref="DrumRoles" />).</param>
     /// <param name="drumSetup">What the song's drums are (<see cref="DrumSetups" />).</param>
+    /// <param name="panningContext">The sequence the pitched tracks' places from left to right are drawn from (<see cref="Panning" />).</param>
     public static SongTracks Create(
         IGenerationContext context,
+        IGenerationContext panningContext,
         RhythmicUnconventionality rhythmicUnconventionality,
         IGenerationContext strokeContext,
         IGenerationContext roleContext,
@@ -72,6 +74,12 @@ internal sealed class SongTracks
         var minOctaveOffsetGenerator = Generators.Int(-2, 1).WithContext(context);
         var maxOctaveOffsetGenerator = Generators.Int(0, 3).WithContext(context);
 
+        var pans = Panning.Draw(
+            panningContext,
+            new Dictionary<int, TrackRole> { [ChordsTrack] = TrackRole.Chords, [MelodyTrack] = TrackRole.Melody, [BassTrack] = TrackRole.Bass }
+        );
+        StateTrace.Record(TracePoints.Panning, ChordsTrack, 0, 0, StateMap.Default, 0, string.Join(", ", pans.Select(x => $"{x.Key} {x.Value:F2}")), pans);
+
         var definitions = new Dictionary<int, IInstrumentTrack>
         {
             [ChordsTrack] = new PitchInstrumentTrack(
@@ -89,7 +97,8 @@ internal sealed class SongTracks
                 chordsInstrument.Program,
                 minOctaveOffsetGenerator(),
                 maxOctaveOffsetGenerator(),
-                TrackRole.Chords
+                TrackRole.Chords,
+                pans[ChordsTrack]
             ),
             [MelodyTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
@@ -108,7 +117,8 @@ internal sealed class SongTracks
                 melodyInstrument.Program,
                 minOctaveOffsetGenerator(),
                 maxOctaveOffsetGenerator(),
-                TrackRole.Melody
+                TrackRole.Melody,
+                pans[MelodyTrack]
             ),
             [BassTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
@@ -124,7 +134,8 @@ internal sealed class SongTracks
                 bassInstrument.Program,
                 -3,
                 -2,
-                TrackRole.Bass
+                TrackRole.Bass,
+                pans[BassTrack]
             )
         };
 

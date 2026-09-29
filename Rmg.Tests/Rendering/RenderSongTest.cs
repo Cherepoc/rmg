@@ -21,7 +21,7 @@ public sealed class RenderSongTest
     }
 
     private static PitchInstrumentTrack PitchTrack(int minOctaveOffset = 0, int maxOctaveOffset = 4) =>
-        new(StateMap.Default, 0, minOctaveOffset, maxOctaveOffset, TrackRole.Chords);
+        new(StateMap.Default, 0, minOctaveOffset, maxOctaveOffset, TrackRole.Chords, 0);
 
     [Test]
     [Arguments(-1.5)]

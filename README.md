@@ -6,7 +6,8 @@ same version of RMG; a new version may turn a seed into a different song.
 A song has 4-8 parts, each a sequence of 1-4 sections chosen from up to 3 distinct sections (in alternation,
 ping-pong or random order), and no section follows itself, not even from one part to the next. Every section
 is played twice and has a percussion kit and three pitched tracks (chords, melody, bass), each with its own
-rhythm and note patterns. A song plays at its own tempo, from 90 to about 175 BPM, most often 120.
+rhythm and note patterns. A song plays at its own tempo, from 90 to about 175 BPM, most often 120, and about one in five swings. The bass plays
+in the middle of the stereo field, the melody near it and the chords to one side.
 
 Each song picks its own drums: one main snare (acoustic, electric, clap or sidestick; a sidestick can also
 join an acoustic or electric snare) and up to four other percussion instruments. Kick and snare always

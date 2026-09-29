@@ -58,7 +58,8 @@ public sealed class SongGeneratorStateLayerTest
             0,
             0,
             1,
-            TrackRole.Chords
+            TrackRole.Chords,
+            0
         );
 
         var result = SongTracks.GetGenerationStateMap(trackDefinition);
