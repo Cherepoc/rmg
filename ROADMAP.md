@@ -49,8 +49,8 @@ major or minor; those that turn brighter have an energy of 0.33 on average, thos
 
 ## Melody at generation
 
-The melody is placed where the other tracks' notes are decided, not in `Realizer`: once a section's bars are made, one
-line places its notes in order over them, by the rules of `Line`, over the chords `Realizer` would work out
+The melody is placed before `Realizer`, where the other tracks' notes are decided: once the song is put together (it
+was once a section's bars were made, see below), one line places its notes in order, by the rules of `Line`, over the chords `Realizer` would work out
 (`LinePattern.Place`), and every note keeps its scale step above its chord's root (`StateKinds.ScaleStep`), which
 `Realizer` plays. The section then plays it the same wherever it plays: its second phrase and a section that recurs are
 the same notes, where before, placed as the song played, a bar that came back played the same note over the same root
@@ -230,16 +230,26 @@ Smaller, when the code is next touched:
   line is one line of a kind (`Line`, `LinePattern`, `SectionLine`), what sets it apart held as data
   (`LineProfile`, `MelodyLayers.Line`: its range, how it moves, what its strong beats take), the melody note for note
   as it was, its per-note state line state (`LineStep`, `LineTurn`, `LineStepwiseness`, `LineRegister`) and a section
-  its lines (`GeneratedSection.Lines`); `Line` lands a bar's first note as the bar asks (root, third or fifth nearest
+  its lines (`GeneratedSection.Lines`); every line placed last, the melody the first: a section brings every
+  appearance's bars unplaced (`SectionLine.Appear`), each note carrying how its bar leads and lands
+  (`LineApproach`, `LineLanding`) and a phrase's first note whether it starts afresh (`LineReset`), drawn per
+  appearance by the section's freedom to change register (`LineRegisterFreedom`: the line's 0.25, a song's and a
+  section's spread of 0.25 either way), the line's state kept by the song (render scope); after the fills, one line
+  places the melody over the whole song (`LinePattern.Place`), its notes echoing any heard before, and the song's last
+  note lands on the root nearest the note before (`SongFormGenerator.LandOnRoot`), where it was moved to the root in
+  its register. Over 100 corpus songs, against the melody placed per section: it leaps into a section 21% of the time
+  against 33%, where a phrase starts again 31% against 35%, into its last note 11% against 31%; a recurring section
+  plays its first appearance's notes 96% of the time in songs that do not improvise, against 100%; chord notes on the
+  beat 88%; but it follows its phrase's contour 0.23 against 0.35, as the contour came mostly from every section
+  starting at its aim: a freedom of 1 brings it back to 0.31 at 31% leaps into a section, and leaning towards the aim
+  as it moves (`LineProfile.AimOdds` 16, was 1, off) adds 0.06 without a leap; the echoes, which replay a note's step
+  wherever the aim is, hold it down. Listening decides the freedom. `Line` lands a bar's first note as the bar asks (root, third or fifth nearest
   the note before, or free) and leads into the next chord by an approach kind (`ChordApproach`: the melody's bend to a
   scale step, a half step below or above the next root, its fifth or the root early, each aimed at where the next note
   was placed, so that no approach leaps an octave), taken per bar of the pattern (`LinePattern.Place`), the melody's
-  never into its phrase's first bar as data, the melody as it was. Next, in steps: every line placed last, once the song is put
-  together, over its whole chords, so that it leads into the next section's chord and goes on from section to section,
-  the melody first, measured and heard; how freely a line changes register a setting of its own (`LineRegisterFreedom`,
-  by the instrument, the song and the section: at a phrase's or a section's start a line resets to its aim or goes on,
-  and an echo over another root keeps the octave nearest the note before or its heard one), low by default, as octave
-  changes should be rare, and leading into a chord never one; then the bass as a second profile (a stepwise line low
+  never into its phrase's first bar as data, the melody as it was. Left: an echo over another root keeping the octave nearest the note
+  before or its heard one by the same freedom; the melody leading into its phrase's first bar, now that it knows the
+  next section's chord; then the bass as a second profile (a stepwise line low
   in its range, every beat a chord note, landing and leading as its bars ask, its register never reset, its pickup
   placed there too), its walks of the chord root and the chord note, `BassLine` and `BassPattern` retired, tuned
   against the bass reports; last, the harmony's roots as whole scale steps. Its octave nearest

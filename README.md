@@ -304,8 +304,10 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   little early. How much the bass leads (`BassLeadingLayers`) comes from its instrument (upright and
   fretless basses walk, synth basses sit on the roots), and a section moves it; each bar then draws
   whether and how it leads.
-- **Melody.** A section's melody is placed once its bars are made (`LinePattern`), note by note by
-  rule (`Line`). A note on a strong beat takes a note of the chord, the nearest one the way the
+- **Melody.** The melody is placed once the song is put together (`LinePattern`), over the whole
+  song, note by note by rule (`Line`), so that it goes on from section to section; a section's bars,
+  and every appearance's variation of them, are made before, and a phrase starts afresh at its aim
+  now and then, as freely as the song and the section change register. A note on a strong beat takes a note of the chord, the nearest one the way the
   melody goes, and a note on a weak beat moves along the scale between them; a note means to go on the
   way the melody goes or to turn back, and now and then to leap, less the more stepwise the melody
   (`MelodyLayers`, set by the melody instrument and moved by the section). After a leap it steps back,

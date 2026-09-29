@@ -25,23 +25,33 @@ internal static class CompositionStateKinds
     // how much a line, such as the melody, moves by step rather than by leap, from 0 to 1
     public static StateKind<double> LineStepwiseness { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineStepwiseness");
 
-    // how strong a note's beat is, 0 the strongest, from its rhythm pattern
-    public static StateKind<int> BeatRank { get; } = StateKinds.CreateAdditive<int>(Prefix + "BeatRank");
+    // how strong a note's beat is, 0 the strongest, from its rhythm pattern; kept by the song, as the render state is,
+    // for placing its lines once it is put together, as the line state below is
+    public static StateKind<int> BeatRank { get; } = StateKinds.CreateAdditive<int>(Prefix + "BeatRank", StateScope.Render);
 
     // how far a line's note means to go: 1 a step, 2 a leap, 0 the same note
-    public static StateKind<int> LineStep { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineStep");
+    public static StateKind<int> LineStep { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineStep", StateScope.Render);
 
     // a line's note's draw, from 0 to 1, of whether it goes on the way the line goes or turns back, which the aim of
     // its phrase leans (LineProfile.GetContinueChance)
-    public static StateKind<double> LineTurn { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineTurn");
+    public static StateKind<double> LineTurn { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineTurn", StateScope.Render);
 
     // which note of a figure a line's note is: the key of its beat in its bar pattern's rhythm, the same for a beat of a
     // bar that comes back and for a beat of a cycle that repeats the one before, so that the note plays again, and is
     // mutated alike, wherever the figure does; 0 for none
-    public static StateKind<int> NoteKey { get; } = StateKinds.CreateAdditive<int>(Prefix + "NoteKey");
+    public static StateKind<int> NoteKey { get; } = StateKinds.CreateAdditive<int>(Prefix + "NoteKey", StateScope.Render);
 
     // how far above or below the middle of its range a line aims in a bar, in semitones, for the phrase's shape
-    public static StateKind<double> LineRegister { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineRegister");
+    public static StateKind<double> LineRegister { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineRegister", StateScope.Render);
+
+    // how a line's note's bar leads out into the next chord (a ChordApproach), and what its first note lands on (a
+    // ChordArrival), the line's own, where bar state would be every track's
+    public static StateKind<int> LineApproach { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineApproach", StateScope.Render);
+    public static StateKind<int> LineLanding { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineLanding", StateScope.Render);
+
+    // 1 for a line's note that starts its phrase afresh, at where the phrase aims, rather than going on from the note
+    // before, as the line's freedom to change register draws it (MelodyLayers.RegisterFreedom)
+    public static StateKind<int> LineReset { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineReset", StateScope.Render);
 
     // where the melody's phrase ends in its last bar: 0 for no end, or the beat, from 1 to 3, before which its last note
     // starts; it holds that note, and rests until the next phrase

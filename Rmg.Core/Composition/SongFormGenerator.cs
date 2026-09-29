@@ -281,16 +281,15 @@ internal sealed class SongFormGenerator
     }
 
     /// <summary>
-    ///     A note whose scale step is set, as the melody's is, moved to the chord's root, where a melody ends: the root
-    ///     in the register of the note it is made from.
+    ///     A line's note that ends the song, asked to land on its chord's root, which the line places nearest the note
+    ///     before (<see cref="LinePattern.Place" />), going on from it rather than starting a phrase afresh.
     /// </summary>
     internal static TimelineItem<StateMap> LandOnRoot(TimelineItem<StateMap> note)
     {
-        if (!note.Value.Kinds.Contains(StateKinds.ScaleStep))
-            return note;
-
-        var root = (int)Math.Round(note.Value.GetStateValue(StateKinds.ScaleStep) / (double)Scales.StepCount) * Scales.StepCount;
-        return note.Value.With(StateKinds.ScaleStep, root).ToTimelineItem(note.Position);
+        return note.Value
+            .With(CompositionStateKinds.LineLanding, (int)ChordArrival.Root)
+            .With(CompositionStateKinds.LineReset, 0)
+            .ToTimelineItem(note.Position);
     }
 
     /// <summary>

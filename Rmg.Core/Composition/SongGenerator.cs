@@ -117,7 +117,10 @@ public static class SongGenerator
         songTrackNoteTimelineMap = new FillGenerator(Stream(SongStream.Fills), tracks, rhythmicUnconventionality)
             .Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
 
-        // the bass placed over the whole song, as its line goes on from section to section and leads into the next
+        // the lines placed over the whole song, as they go on from section to section and lead into the next: the melody,
+        // and the bass
+        var melodyTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Melody);
+        songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, melodyTrack.Key, (PitchInstrumentTrack)melodyTrack.Value, MelodyLayers.Line);
         var bassTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Bass);
         songTrackNoteTimelineMap = BassPattern.Place(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value);
 

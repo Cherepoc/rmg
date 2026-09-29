@@ -56,19 +56,14 @@ public sealed class SongEndingTest
     }
 
     [Test]
-    [Arguments(9, 7)]
-    [Arguments(-2, 0)]
-    [Arguments(11, 14)]
-    [Arguments(-4, -7)]
-    public async Task AMelodysLastNote_LandsOnTheRoot_InItsRegister(int step, int root)
+    public async Task ALinesLastNote_AsksToLandOnTheRoot_GoingOnFromTheNoteBefore()
     {
-        var note = StateMap.FromStates([StateKinds.ScaleStep.CreateState(step), StateKinds.Velocity.CreateState(0.5)]).ToTimelineItem(0);
-        var plain = StateMap.FromStates([StateKinds.Velocity.CreateState(0.5)]).ToTimelineItem(0);
+        var note = StateMap.FromStates([CompositionStateKinds.LineReset.CreateState(1), StateKinds.Velocity.CreateState(0.5)]).ToTimelineItem(0);
 
         var landed = SongFormGenerator.LandOnRoot(note).Value;
-        await Assert.That(landed.GetStateValue(StateKinds.ScaleStep)).IsEqualTo(root);
+        await Assert.That(landed.GetStateValue(CompositionStateKinds.LineLanding)).IsEqualTo((int)ChordArrival.Root);
+        await Assert.That(landed.GetStateValue(CompositionStateKinds.LineReset)).IsEqualTo(0);
         await Assert.That(landed.GetStateValue(StateKinds.Velocity)).IsEqualTo(0.5);
-        await Assert.That(SongFormGenerator.LandOnRoot(plain)).IsEqualTo(plain);
     }
 
     [Test]

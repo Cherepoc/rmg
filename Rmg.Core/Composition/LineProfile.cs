@@ -17,6 +17,10 @@ namespace Rmg.Core.Composition;
 /// <param name="RepeatChance">The chance of a note meaning to stay on the note before.</param>
 /// <param name="MaxLeapChance">The chance of a note meaning to leap, at no stepwiseness; less the more stepwise the line is.</param>
 /// <param name="ContinueChance">The chance of a moving note going on the way the line goes, rather than turning back.</param>
+/// <param name="RegisterFreedom">
+///     The chance, before a song and a section spread it, that a phrase of the line starts afresh at where it aims, as a
+///     new phrase that changes register, rather than going on from the note before.
+/// </param>
 /// <param name="AimOdds">
 ///     How much likelier a note is to go on towards where its phrase aims, and to turn back rather than go on away from
 ///     it, as the odds at <see cref="RegisterPull" /> semitones from it, less the nearer it is.
@@ -29,7 +33,8 @@ internal sealed record LineProfile(
     double RepeatChance,
     double MaxLeapChance,
     double ContinueChance,
-    double AimOdds
+    double AimOdds,
+    double RegisterFreedom
 )
 {
     /// <summary>

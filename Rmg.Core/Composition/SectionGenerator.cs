@@ -25,6 +25,10 @@ internal sealed class SectionGenerator
     private const int MelodyAnswerStream = 7;
     private const int MelodyLeadingStream = 8;
     private const int MelodyImprovisationStream = 9;
+    private const int RegisterFreedomStream = 10;
+
+    // the stream of the song's own shift of its lines' freedom to change register, apart from every section's
+    private const int SongRegisterFreedomStream = -1;
 
     private readonly IGenerationContext _context;
     private readonly int _seed;
@@ -39,6 +43,9 @@ internal sealed class SectionGenerator
     private readonly int _key;
     private readonly BarStateGenerator _barStateGenerator;
     private readonly PatternGenerator _patternGenerator;
+
+    // the song's shift of its lines' freedom to change register, before a section's, in spreads (MelodyLayers.RegisterFreedomSpread)
+    private readonly double _songRegisterFreedomShift;
 
 
     /// <param name="seed">The seed of the sections' random sequences, from which every section derives its own by its id.</param>
@@ -69,6 +76,7 @@ internal sealed class SectionGenerator
         _sectionEnergies = sectionEnergies;
         _songPercussion = songPercussion;
         _key = key;
+        _songRegisterFreedomShift = Generators.SplineValue()(context.CreateContext(Seeds.Derive(seed, SongRegisterFreedomStream)));
         _barStateGenerator = new BarStateGenerator(settings);
         _patternGenerator = new PatternGenerator(context, tracks.Definitions);
     }
@@ -423,6 +431,15 @@ internal sealed class SectionGenerator
             var leading = Math.Clamp(MelodyLayers.Leading + Generators.SplineValue()(leadingContext) * MelodyLayers.LeadingSpread, 0, 1);
             StateTrace.Record(TracePoints.MelodyLeading, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{leading:F2}", leading);
             // a later appearance builds its bars afresh where its rhythm is improvised, as recorded the first time
+            // how freely the melody changes register where a phrase starts: the line's, as the song and the section move it
+            var freedomContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), RegisterFreedomStream));
+            var freedom = Math.Clamp(
+                MelodyLayers.Line.RegisterFreedom + (_songRegisterFreedomShift + Generators.SplineValue()(freedomContext)) * MelodyLayers.RegisterFreedomSpread,
+                0,
+                1
+            );
+            StateTrace.Record(TracePoints.LineRegisterFreedom, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{freedom:F2}", freedom);
+            // a later appearance builds its bars afresh where its rhythm is improvised, as recorded the first time
             var melody = new SectionLine(
                 trackNumber,
                 MelodyLayers.Line,
@@ -433,15 +450,13 @@ internal sealed class SectionGenerator
                     return LinePattern.Answer(BuildBars(rhythmKeys).Timeline, trackNumber, MelodyLayers.Line, answerSeed, amount);
                 },
                 sectionRhythm.Scheme.Letters,
-                (PitchInstrumentTrack)_tracks.Definitions[trackNumber],
-                barStateTimelineMap.Repeat(2),
-                _key,
                 LinePattern.DrawApproaches(leadingContext, leading),
                 [..Enumerable.Repeat(ChordArrival.Free, Progressions.BarCount)],
+                freedom,
                 Seeds.Derive(Seeds.Derive(_seed, sectionId), MelodyImprovisationStream)
             );
             StateTrace.Record(TracePoints.MelodyAnswer, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{amount:F2}", amount);
-            yield return (trackNumber, bars with { Timeline = melody.Place(0, 0).Trim(Meter.PatternDuration) }, melody);
+            yield return (trackNumber, bars with { Timeline = melody.Appear(0, 0).Trim(Meter.PatternDuration) }, melody);
         }
     }
 
@@ -505,7 +520,7 @@ internal sealed record GeneratedSection(
         var timeline = Timeline;
         foreach (var line in Lines)
         {
-            var placed = line.Place(appearance, improvisation).TrackTimelineMap[line.Track].EventTimeline.MapValues(x => x.OfScope(StateScope.Render));
+            var placed = line.Appear(appearance, improvisation).TrackTimelineMap[line.Track].EventTimeline.MapValues(x => x.OfScope(StateScope.Render));
             timeline = timeline.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [line.Track] = _ => placed });
         }
 

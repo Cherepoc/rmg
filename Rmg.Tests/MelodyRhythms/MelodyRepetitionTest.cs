@@ -191,7 +191,8 @@ public sealed class MelodyRepetitionTest
     {
         var m = MeasureRecurrence(TestCorpus.Range(20));
 
-        await Assert.That(m.Fixed).IsGreaterThan(0.97);
+        // placed over the song, a recurring section goes on from the note before it, and replays the notes heard after
+        await Assert.That(m.Fixed).IsGreaterThan(0.93);
         await Assert.That(m.Improvised).IsBetween(0.6, 0.95);
         await Assert.That(m.AnswerFirstHalf).IsGreaterThan(0.95);
         await Assert.That(m.AnswerSecondHalf).IsBetween(0.5, 0.9);

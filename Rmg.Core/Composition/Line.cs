@@ -68,6 +68,7 @@ internal sealed class Line
     ///     What the note lands on, as the first note of a bar that asks for it, such as a bass's on the chord's root: the
     ///     nearest such note of the chord in the range to the note before; free for none, the note placed as it would be.
     /// </param>
+    /// <param name="reset">Whether the note starts its phrase afresh, as a first note does, at where the phrase aims.</param>
     public int Place(
         ChordContext chord,
         IReadOnlyCollection<int> chordToneClasses,
@@ -76,9 +77,13 @@ internal sealed class Line
         double turn,
         double register,
         int echo = 0,
-        ChordArrival landing = ChordArrival.Free
+        ChordArrival landing = ChordArrival.Free,
+        bool reset = false
     )
     {
+        if (reset)
+            (_previous, _previousMove, _echoRun) = (null, 0, null);
+
         int note;
         if (landing != ChordArrival.Free)
         {

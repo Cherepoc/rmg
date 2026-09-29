@@ -42,6 +42,9 @@ internal static class TracePoints
     /// <summary>How much a song improvises its melody as its sections recur (a <c>double</c>, <see cref="Composition.MelodyLayers.Improvisation" />).</summary>
     public const string MelodyImprovisation = "Melody improvisation";
 
+    /// <summary>How freely a section's melody changes register where a phrase starts (a <c>double</c>, <see cref="Composition.SectionLine.RegisterFreedom" />).</summary>
+    public const string LineRegisterFreedom = "Line register freedom";
+
     /// <summary>A bar pattern's state, with its phrase scheme.</summary>
     public const string BarPattern = "Bar pattern";
 
