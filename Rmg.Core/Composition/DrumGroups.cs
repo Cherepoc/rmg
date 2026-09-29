@@ -19,6 +19,13 @@ internal static class DrumGroups
     /// <summary>The chance of a song having the vibraslap, which it plays as a landing, with the cymbal.</summary>
     private const double VibraslapChance = 0.2;
 
+    /// <summary>The chance of a song having each of the calls, which it plays bound to a lead or as a landing.</summary>
+    private const double TriangleChance = 0.1;
+
+    private const double CuicaChance = 0.05;
+
+    private const double WhistleChance = 0.05;
+
 
     /// <summary>
     ///     A group's part in a fill's run: its chance of joining one, and how unconventional that is, the power of the
@@ -100,8 +107,7 @@ internal static class DrumGroups
         grooveChance: AccentsGrooveChance
     );
 
-    // a song has its own few percussion instruments, or none; the triangle, the cuica and the whistle are left out, as
-    // they grate in a groove of any length, until a genre calls for them
+    // a song has its own few percussion instruments, or none; the calls are a group of their own
     private static readonly ImmutableArray<PercussionInstrumentDefinition> PercussionDrums =
     [
         DrumDefinitions.Bongo,
@@ -123,6 +129,26 @@ internal static class DrumGroups
         configureStateMap: builder => builder.InRuns(0.08)
     );
 
+    // the calls, which grate in a groove of any length: some songs have one, which lands now and then with the others,
+    // a whistle's call or a cuica's squeak, joins a fill's run now and then, or is bound to a lead (DrumBinding), as a
+    // triangle on the timekeeper's beats; its group all but never grooves, and then on the downbeats alone, and leads no
+    // role
+    public static DrumGroup Calls { get; } = new(
+        nameof(Calls),
+        [DrumDefinitions.Triangle, DrumDefinitions.Cuica, DrumDefinitions.Whistle],
+        0.2,
+        1,
+        configureStateMap: builder => builder.Add(CompositionStateKinds.Rhythm.MaxRank, -2).InRuns(0.15),
+        songRule: new SongDrumRule(
+            [
+                SongDrumRule.Optional(DrumDefinitions.Triangle, TriangleChance),
+                SongDrumRule.Optional(DrumDefinitions.Cuica, CuicaChance),
+                SongDrumRule.Optional(DrumDefinitions.Whistle, WhistleChance)
+            ]
+        ),
+        grooveChance: AccentsGrooveChance / 4
+    );
+
     public static ImmutableArray<DrumGroup> All { get; } =
     [
         Kick,
@@ -130,7 +156,8 @@ internal static class DrumGroups
         Timekeepers,
         Toms,
         Accents,
-        Percussion
+        Percussion,
+        Calls
     ];
 
     public static ImmutableArray<PercussionInstrumentDefinition> AllDrums { get; } =
@@ -140,6 +167,15 @@ internal static class DrumGroups
         AllDrums
             .Select((drum, index) => (drum, index))
             .ToImmutableDictionary(x => x.drum, x => FirstTrackNumber + x.index);
+
+    private static readonly ImmutableDictionary<PercussionInstrumentDefinition, DrumGroup> Groups =
+        All.SelectMany(group => group.Drums.Select(drum => (drum, group))).ToImmutableDictionary(x => x.drum, x => x.group);
+
+    /// <summary>The group a drum is in.</summary>
+    public static DrumGroup GroupOf(PercussionInstrumentDefinition drum)
+    {
+        return Groups[drum];
+    }
 
     public static int GetTrackNumber(PercussionInstrumentDefinition drum)
     {

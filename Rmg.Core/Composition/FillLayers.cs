@@ -23,7 +23,10 @@ public enum FillDrumRole
     Cymbal,
 
     /// <summary>The song's own percussion, such as a cowbell or congas, if it has any.</summary>
-    Percussion
+    Percussion,
+
+    /// <summary>The song's call, a triangle, a cuica or a whistle, if it has one, now and then in a run or a landing.</summary>
+    Calls
 }
 
 /// <summary>How a run walks the order of its sounds from note to note.</summary>
@@ -219,7 +222,8 @@ internal static class FillLayers
     {
         [FillDrumRole.Kick] = 0.85,
         [FillDrumRole.Cymbal] = 0.65,
-        [FillDrumRole.Percussion] = 0.85
+        [FillDrumRole.Percussion] = 0.85,
+        [FillDrumRole.Calls] = 0.2
     }.ToImmutableDictionary();
 
     /// <summary>

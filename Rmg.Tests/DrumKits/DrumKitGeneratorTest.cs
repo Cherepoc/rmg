@@ -56,12 +56,13 @@ public sealed class DrumKitGeneratorTest
     {
         foreach (var seed in Seeds)
         {
-            var (song, kit, _) = Select(seed);
+            var (song, kit, section) = Select(seed);
 
             await Assert.That(kit.All(song.Contains)).IsTrue();
             await Assert.That(kit.Distinct().Count()).IsEqualTo(kit.Length);
             await Assert.That(kit.Length).IsLessThan(DrumGroups.AllDrums.Length / 2);
-            foreach (var colour in kit.GroupBy(GroupOf).Where(x => !x.Key.HoldsARole))
+            // a drum bound to a lead plays with it, not as its group's colour
+            foreach (var colour in kit.Except(section.Doubles.Keys).GroupBy(GroupOf).Where(x => !x.Key.HoldsARole))
                 await Assert.That(colour.Count()).IsLessThanOrEqualTo(colour.Key.MaxActiveDrums);
         }
     }

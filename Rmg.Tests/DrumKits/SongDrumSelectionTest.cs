@@ -17,14 +17,29 @@ public sealed class SongDrumSelectionTest
         [DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare];
 
     [Test]
-    public async Task EveryGroup_ExceptPercussion_HasAtLeastOneDrumInSong()
+    public async Task EveryGroup_ButThePercussionAndTheCalls_HasAtLeastOneDrumInSong()
     {
         foreach (var seed in Seeds)
         {
             var songDrums = SongDrums(seed);
 
-            foreach (var group in DrumGroups.All.Where(x => x != DrumGroups.Percussion))
+            foreach (var group in DrumGroups.All.Where(x => x != DrumGroups.Percussion && x != DrumGroups.Calls))
                 await Assert.That(group.Drums.Any(songDrums.Contains)).IsTrue();
+        }
+    }
+
+    [Test]
+    public async Task TheCalls_AreInAFewSongs_AndNeverLeadARole()
+    {
+        var withCalls = Seeds.Count(seed => DrumGroups.Calls.Drums.Any(SongDrums(seed).Contains)) / (double)Seeds.Count();
+        await Assert.That(withCalls).IsBetween(0.1, 0.3);
+
+        foreach (var seed in Seeds)
+        {
+            var context = new GenerationContext(seed);
+            var kit = DrumKitGenerator.SelectKit(context, SongDrums(seed), x => x.MainRole, default, false);
+
+            await Assert.That(kit.Leads.Any(DrumGroups.Calls.Drums.Contains)).IsFalse();
         }
     }
 

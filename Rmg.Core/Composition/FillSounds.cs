@@ -20,7 +20,8 @@ internal sealed class FillSounds
         [DrumGroups.Toms] = FillDrumRole.Toms,
         [DrumGroups.Timekeepers] = FillDrumRole.HiHat,
         [DrumGroups.Accents] = FillDrumRole.Cymbal,
-        [DrumGroups.Percussion] = FillDrumRole.Percussion
+        [DrumGroups.Percussion] = FillDrumRole.Percussion,
+        [DrumGroups.Calls] = FillDrumRole.Calls
     }.ToImmutableDictionary();
 
     private readonly ImmutableSortedDictionary<FillDrumRole, ImmutableArray<RunSound>> _sounds;

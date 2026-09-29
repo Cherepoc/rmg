@@ -19,7 +19,8 @@ public sealed class PercussionInstrumentDefinition
         ImmutableArray<Weighted<DrumRole>> roles = default,
         double doubling = 0,
         DrumFamily family = DrumFamily.Kit,
-        ImmutableArray<Weighted<DrumBinding>> bindings = default
+        ImmutableArray<Weighted<DrumBinding>> bindings = default,
+        double doublingOdds = 1
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -42,7 +43,15 @@ public sealed class PercussionInstrumentDefinition
         if (doubling > 0 && bindings.IsDefaultOrEmpty)
             throw new ArgumentException("A drum that may double a lead says how it is bound to it.", nameof(bindings));
         Bindings = bindings.IsDefault ? [] : bindings;
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(doublingOdds);
+        DoublingOdds = doublingOdds;
     }
+
+    /// <summary>
+    ///     How much likelier a section is to have a drum double a lead, where this drum may: the odds times this, as a call
+    ///     that a song has is eager to be heard; 1 for as likely as any.
+    /// </summary>
+    public double DoublingOdds { get; }
 
     /// <summary>
     ///     How likely each way the drum is bound to a lead it doubles is (<see cref="DrumBinding" />), before a section

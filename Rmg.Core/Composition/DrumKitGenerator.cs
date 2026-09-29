@@ -36,7 +36,8 @@ internal static class DrumKitGenerator
         var leads = new List<PercussionInstrumentDefinition>();
         foreach (var lead in LeadRoles)
         {
-            var candidates = family.Where(x => x.MainRole == lead).ToArray();
+            // a lead of a group that grooves, not of one that all but never does, such as the calls
+            var candidates = family.Where(x => x.MainRole == lead && DrumGroups.GroupOf(x).GrooveChance >= 1).ToArray();
             if (candidates.Length == 0 || !context.TestProbability(tilt.Chance(lead == DrumRole.Time ? TimeChance : 1, 1)))
                 continue;
 
@@ -78,8 +79,10 @@ internal static class DrumKitGenerator
         // a lead that doubles itself, such as a shaker keeping time, is not doubled
         foreach (var lead in leads.Where(x => x.Doubling <= 0))
         {
-            var candidates = family.Where(x => x.Doubling > 0 && role(x) == lead.MainRole && !kit.Contains(x) && !doubles.ContainsKey(x)).ToArray();
-            if (candidates.Length == 0 || !context.TestProbability(tilt.Chance(DoublingChance, 1)))
+            // any of the song's drums that doubles, the percussion too, which binds to the kit's lead of its role
+            var candidates = songDrums.Where(x => x.Doubling > 0 && role(x) == lead.MainRole && !kit.Contains(x) && !doubles.ContainsKey(x)).ToArray();
+            // the likelier the more eager the most eager of them is
+            if (candidates.Length == 0 || !context.TestProbability(new Tilt(tilt.LogOdds + Math.Log(candidates.Max(x => x.DoublingOdds))).Chance(DoublingChance, 1)))
                 continue;
 
             doubles[PickWeighted(context, candidates.Select(x => new Weighted<PercussionInstrumentDefinition>(x.Doubling, x)), 1)[0]] = lead;

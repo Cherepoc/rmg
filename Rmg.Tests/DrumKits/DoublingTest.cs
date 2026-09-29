@@ -16,8 +16,13 @@ public sealed class DoublingTest
         foreach (var (track, doubling) in ((ImmutableDictionary<int, Doubling>)entry.Value!).Where(x => x.Value.Binding != DrumBinding.Figure))
         foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section))
         {
-            // the groove's notes, but in the last bar of a pattern, where a fill may take the lead's notes into its run
-            bool InFillBar(double position) => (position - span.Start) % Meter.PatternDuration >= Meter.PatternDuration - Meter.BarDuration;
+            // the groove's notes, but in the last bar of a pattern, where a fill may take the lead's notes into its run, and
+            // at a pattern's first beat, where a call may land with the band, pushed an 8th early now and then
+            bool InFillBar(double position)
+            {
+                var inPattern = (position - span.Start) % Meter.PatternDuration;
+                return inPattern >= Meter.PatternDuration - Meter.BarDuration || inPattern < 0.5;
+            }
             // a drum the song never plays has no notes
             double[] Groove(int t) => [..song.Song.Notes!.GetValueOrDefault(t, EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0))
                 .Where(x => x.Position >= span.Start && x.Position < span.End && !InFillBar(x.Position))

@@ -93,6 +93,8 @@ internal static class DrumDefinitions
         [new DrumSound(60), OtherTone(61)],
         0.15,
         roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.3), (DrumRole.Backbeat, 0.1)),
+        doubling: 0.5,
+        bindings: Binds(0.1, 0.2, 0.7),
         family: DrumFamily.Percussion
     );
 
@@ -102,6 +104,8 @@ internal static class DrumDefinitions
         [new DrumSound(62, 1, -0.3, 0.1, DrumAccents.MutedConga, 1), new DrumSound(63), OtherTone(64)],
         0.15,
         roles: Plays(DrumRole.Ground, (DrumRole.Time, 0.4), (DrumRole.Colour, 0.3)),
+        doubling: 0.5,
+        bindings: Binds(0.1, 0.2, 0.7),
         family: DrumFamily.Percussion
     );
 
@@ -110,6 +114,8 @@ internal static class DrumDefinitions
         [new DrumSound(65), OtherTone(66)],
         0.1,
         roles: Plays(DrumRole.Ground, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.4)),
+        doubling: 0.4,
+        bindings: Binds(0.1, 0.3, 0.6),
         family: DrumFamily.Percussion
     );
 
@@ -118,18 +124,22 @@ internal static class DrumDefinitions
         [new DrumSound(67), OtherTone(68)],
         0.1,
         roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.4)),
+        doubling: 0.4,
+        bindings: Binds(0.1, 0.2, 0.7),
         family: DrumFamily.Percussion
     );
 
-    public static PercussionInstrumentDefinition Cowbell { get; } = new("Cowbell", [56], 0.1, roles: Plays(DrumRole.Time, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.3)), family: DrumFamily.Percussion);
+    public static PercussionInstrumentDefinition Cowbell { get; } = new("Cowbell", [56], 0.1, roles: Plays(DrumRole.Time, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.3)), doubling: 0.6, bindings: Binds(0.3, 0.5, 0.2), family: DrumFamily.Percussion);
 
-    public static PercussionInstrumentDefinition Claves { get; } = new("Claves", [75], 0.1, roles: Plays(DrumRole.Backbeat, (DrumRole.Time, 0.3), (DrumRole.Colour, 0.3)), family: DrumFamily.Percussion);
+    public static PercussionInstrumentDefinition Claves { get; } = new("Claves", [75], 0.1, roles: Plays(DrumRole.Backbeat, (DrumRole.Time, 0.3), (DrumRole.Colour, 0.3)), doubling: 0.4, bindings: Binds(0.1, 0.2, 0.7), family: DrumFamily.Percussion);
 
     public static PercussionInstrumentDefinition WoodBlock { get; } = new(
         "Wood Block",
         [new DrumSound(76), OtherTone(77)],
         0.1,
         roles: Plays(DrumRole.Backbeat, (DrumRole.Time, 0.3), (DrumRole.Colour, 0.3)),
+        doubling: 0.4,
+        bindings: Binds(0.3, 0.4, 0.3),
         family: DrumFamily.Percussion
     );
 
@@ -139,15 +149,36 @@ internal static class DrumDefinitions
         [new DrumSound(73), OtherTone(74)],
         0.1,
         roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.3)),
+        doubling: 0.5,
+        bindings: Binds(0.2, 0.3, 0.5),
         family: DrumFamily.Percussion
     );
 
     // a hand drum's other tone: now and then its stroke, and an accent on the strong beats
     private static DrumSound OtherTone(int code) => new(code, 1, 0.2, 0.1, DrumAccents.HandDrum, -1);
 
-    public static PercussionInstrumentDefinition Triangle { get; } = new("Triangle", [80, 81], 0.1);
+    // the calls grate in a groove of any length, so they play only bound to a lead, a share of its strongest beats, or
+    // as a landing (DrumGroups.Calls): the triangle on the timekeeper's beats, the cuica a squeak on the backbeat now and
+    // then, the whistle only where a section lands
+    public static PercussionInstrumentDefinition Triangle { get; } = new(
+        "Triangle",
+        [80, 81],
+        0.1,
+        roles: Plays(DrumRole.Time, (DrumRole.Colour, 0.2)),
+        doubling: 3,
+        bindings: Binds(0.3, 0.6, 0.1),
+        doublingOdds: 12
+    );
 
-    public static PercussionInstrumentDefinition Cuica { get; } = new("Cuica", [78, 79], 0.05);
+    public static PercussionInstrumentDefinition Cuica { get; } = new(
+        "Cuica",
+        [78, 79],
+        0.05,
+        roles: Plays(DrumRole.Backbeat, (DrumRole.Colour, 0.2)),
+        doubling: 2,
+        bindings: Binds(0.1, 0.8, 0.1),
+        doublingOdds: 8
+    );
 
     public static PercussionInstrumentDefinition Whistle { get; } = new("Whistle", [71, 72], 0.05);
 }

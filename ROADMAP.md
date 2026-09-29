@@ -342,7 +342,25 @@ Later:
   clap's ghost notes, soft hits around the backbeat, which a figure on the snare's feel may come near, as the velocity
   accent quietens its weaker ranks, only should listening miss them; a drum bound to the lead of any role it has an
   affinity for, not only its main one's, as a clap on the kick's beats, a stomp-clap; the doubling chance (0.15),
-  should bound drums be too rare to hear.
+  should bound drums be too rare to hear. The percussion binds too, any of the song's drums that doubles, not only the
+  section's family's, to the kit's lead of its role: the cowbell and the wood block leaning to double and accent, the
+  claves, the agogo, the guiro, the bongos, the congas and the timbales to a figure; over 100 corpus songs, rarely, as
+  few songs have percussion (a conga on the kick 6 times, the rest once or twice). A section of percussion only binds
+  none, its drums already up to four. Percussion that colours a kit's groove plays in another tuplet than the lead of
+  its main role in 14% of its bars, another grouping in 7% (`PercussionFeelReportTest`, 536 bars): colour percussion
+  taking its lead's feel, as a bound drum does, waits for listening to hear it drift.
+- **The calls** (built): the triangle, the cuica and the whistle, which grate in a groove of any length, are back in a
+  group of their own (`DrumGroups.Calls`), optional in a song (0.1, 0.05 and 0.05), which all but never grooves, and
+  then on the downbeats alone, leads no role (a lead comes of a group that grooves), and lands in the cymbal's place
+  with the band where a section lands, and joins a fill's run, as a fill role of their own (`FillDrumRole.Calls`,
+  landing by 0.2 before the line's weight leans it, in runs by 0.15); the triangle and the cuica are bound to a lead,
+  mostly accenting it, the triangle the timekeeper's beats, the cuica the backbeat, a section likelier to double a lead
+  where one of them may (`PercussionInstrumentDefinition.DoublingOdds`, the odds 12 and 8 times, where any other
+  drum's are as they were). Over 200 corpus songs, in the songs that have one: the whistle sounds at 35% of their
+  section changes, the triangle and the cuica about half, with their bound downbeats; the triangle is bound in 14% of
+  their sections, the cuica in 19%, which the lead of their role, a doubler of its own or another drum doubling it
+  keep from more. The vibraslap stays a landing; a pickup of it, the last beat before a landing, is
+  the one other place it would fit.
 - **Drums by appearance:** a section's later appearance changing its drums, as an edit after assembly (see *Energy by
   appearance*).
 - **Strokes before a lift:** the snare going from its cross-stick to its head in the last phrase before a louder
