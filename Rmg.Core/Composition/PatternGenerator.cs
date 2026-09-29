@@ -515,16 +515,27 @@ internal readonly record struct ResolvedRhythm(
         return IsGrouped(period) ? Math.Min(Meter.BarDuration, Math.Pow(2, Math.Ceiling(Math.Log2(2 * period) - 1e-9))) : Meter.BarDuration;
     }
 
-    /// <summary>How many parts a cycle splits into first, before every part halves (<see cref="DyadicTimelineDescriptor.Split" />).</summary>
+    /// <summary>
+    ///     How many parts a cycle splits into first, before every part halves (<see cref="DyadicTimelineDescriptor.Split" />):
+    ///     a grouped one by the odd number it groups the grid's steps by, a dotted 8th into its three 16ths and a dotted
+    ///     quarter into its three 8ths, its first strong and the others weak, as a group of three is felt; any other in two.
+    /// </summary>
     /// <param name="period">The cycle, in beats.</param>
     public static int SplitOf(double period)
     {
-        return 2;
+        if (!IsGrouped(period))
+            return 2;
+
+        var steps = (int)Math.Round(period / Grid);
+        while (steps % 2 == 0)
+            steps /= 2;
+        return steps;
     }
 
     /// <summary>
-    ///     The finest rank a cycle plays on the grid: a grouped one only as far as its halves are whole steps of it, as a
-    ///     dotted 8th's are none, where they would fall between the 16ths; any other down to <see cref="MaxRankLimit" />.
+    ///     The finest rank a cycle plays on the grid: a grouped one its split into parts (<see cref="SplitOf" />), and then
+    ///     as far as the parts halve into whole steps of it, as a dotted 8th's 16ths do not and a dotted quarter's 8ths do
+    ///     once; any other down to <see cref="MaxRankLimit" />.
     /// </summary>
     /// <param name="period">The cycle, in beats.</param>
     public static int GridRankLimit(double period)
@@ -532,12 +543,15 @@ internal readonly record struct ResolvedRhythm(
         if (!IsGrouped(period))
             return MaxRankLimit;
 
-        var rank = 0;
-        while (rank < MaxRankLimit && IsWhole(period / Math.Pow(2, rank + 1) / Grid))
+        var part = (int)Math.Round(period / Grid) / SplitOf(period);
+        var rank = 1;
+        while (rank < MaxRankLimit && part % 2 == 0)
+        {
+            part /= 2;
             rank++;
-        return rank;
+        }
 
-        static bool IsWhole(double steps) => Math.Abs(steps - Math.Round(steps)) < 1e-9;
+        return rank;
     }
 
     /// <summary>A straight rhythm of a beat, down to 16ths, for a section whose drums play nothing.</summary>

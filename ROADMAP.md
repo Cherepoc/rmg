@@ -13,7 +13,7 @@ measured before and after by a report test, by the measure its entry names.
 
 **Next** (P1), in this order:
 
-1. **The meter:** a cycle split in three, then the meter as state, then other meters (see *Meter*).
+1. **The meter:** the meter as state, then other meters (see *Meter*); a cycle split in three is built.
 2. **Sections with a role,** as the form (see *Form*).
 3. **The energy in the pitched tracks** (see *Section dynamics*).
 4. **The arrangement, and energy by appearance** (see *Appearances*).
@@ -102,11 +102,14 @@ of three beats halved gives dotted quarters, not beats, and 6/8's dotted quarter
 three 8ths, so no other meter plays right until the engine splits a cycle in three; the state's shape waits for that,
 and threading a value that is always four through a hundred readers would change nothing heard. In this order:
 
-- **A cycle split in three:** a cycle of three units, such as a dotted 8th's three 16ths or a dotted quarter's three
-  8ths, splits into three, its first strong and the other two weak, where the engine only halves (`ResolvedRhythm`,
-  `GridRankLimit`: a dotted 8th's does not subdivide at all now). It is heard already, as a tresillo's cycles filled
-  out into a 3-against-4 stream, and it is what a bar of three
-  beats or a group of three 8ths needs. Measured by: the grouped cycles' notes, and the grid report's gaps.
+- **A cycle split in three** (built): a grouped cycle splits first into the odd number it groups the grid's steps by
+  (`ResolvedRhythm.SplitOf`), a dotted 8th into its three 16ths and a dotted quarter into its three 8ths, its first
+  strong and the others weak, and then halves as far as the grid, where it did not subdivide at all or halved into
+  dotted 8ths; every other cycle splits in two, as the template it is made from always did (`DyadicRankTimeline`). Over
+  200 corpus songs the drums play 8% more notes, the wildest sections 13.4 a bar against 11.5 and the plainest 13.1
+  against 12.5, so that grouped cycles no longer leave the wild sections sparser; the notes off both the 16ths and the
+  triplets 3.0% against 2.7%, those under a 32nd after the one before 3, as before (`GridReportTest`,
+  `RhythmBusynessReportTest`).
 - **The meter as state:** a song's, a section's or a bar's, a bar as its groups of beats or 16ths, such as 4, 3,
   2+2+3 or 3+3+3+2+2, the engine halving or splitting from a bar's groups, a rhythm's period in beats rather than as a
   fraction of the bar, and the progression's chords, the phrase scheme's bars, the contour, the fills' spans and lines,
