@@ -11,7 +11,7 @@ public sealed class RealizedNoteTest
     private static byte[] Midi(Song song)
     {
         using var stream = new MemoryStream();
-        Render.RenderSong(song).Write(stream);
+        Render.RenderSong(song).Write(stream, null);
         return stream.ToArray();
     }
 

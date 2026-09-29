@@ -154,7 +154,7 @@ public sealed class MidiChannelInstrumentsTest
         var song = Song(Track(false, 1)).WithChannelInstruments(new Dictionary<byte, int> { [0] = 0x40 });
 
         var memoryStream = new MemoryStream();
-        song.Write(memoryStream);
+        song.Write(memoryStream, null);
         var result = memoryStream.ToArray();
 
         byte[] expected =
@@ -174,7 +174,7 @@ public sealed class MidiChannelInstrumentsTest
         var song = Song(Track(false, 1)).WithChannelVolumes(new Dictionary<byte, double> { [0] = 0.5 });
 
         var memoryStream = new MemoryStream();
-        song.Write(memoryStream);
+        song.Write(memoryStream, null);
         var result = memoryStream.ToArray();
 
         byte[] expected =
@@ -195,7 +195,7 @@ public sealed class MidiChannelInstrumentsTest
         var song = Song(Track(false, 1)).WithChannelVolumes(new Dictionary<byte, double> { [0] = 1 });
 
         var memoryStream = new MemoryStream();
-        song.Write(memoryStream);
+        song.Write(memoryStream, null);
 
         // the song plays at that volume unasked, so nothing about it is worth a byte
         await Assert.That(memoryStream.ToArray().Contains((byte)0xB0)).IsFalse();

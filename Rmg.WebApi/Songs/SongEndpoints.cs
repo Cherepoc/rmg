@@ -3,6 +3,7 @@ using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
+using Rmg.Core.Versions;
 
 namespace Rmg.WebApi.Songs;
 
@@ -11,6 +12,9 @@ public static class SongEndpoints
     public static void MapSongs(this IEndpointRouteBuilder routes)
     {
         routes.MapPost("/api/songs/generate", GenerateSong);
+
+        // what the page shows as RMG's version
+        routes.MapGet("/api/version", () => Results.Ok(new VersionResponse(SongsVersion.Number, SongsVersion.Commit)));
     }
 
     /// <summary>
@@ -49,7 +53,7 @@ public static class SongEndpoints
                 .WithoutChannels(SwitchedOff(channelTracks));
 
             stream = new MemoryStream();
-            renderedSong.Write(stream);
+            renderedSong.Write(stream, SongsVersion.Label(songSeed));
             stream.Seek(0, SeekOrigin.Begin);
         }
         catch (Exception ex)
@@ -59,6 +63,9 @@ public static class SongEndpoints
 
         // lets the page show and reuse the seed it actually got when it asked for a random one
         context.Response.Headers["X-Song-Seed"] = songSeed.ToString();
+
+        // and which songs' version it is, which the page reports with what it tells of the song
+        context.Response.Headers["X-Song-Version"] = SongsVersion.Number;
 
         // and show what every channel plays before a note of it is heard
         context.Response.Headers["X-Song-Instruments"] = Describe(channelInstruments);
@@ -103,3 +110,6 @@ public static class SongEndpoints
         );
     }
 }
+
+/// <summary>RMG's version: the songs' number, which goes up when the songs change, and the commit it is built from.</summary>
+public sealed record VersionResponse(string Version, string? Commit);

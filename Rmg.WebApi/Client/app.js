@@ -59,6 +59,7 @@ const elements = {
     rollLast: document.getElementById("roll-last"),
     mixer: document.getElementById("mixer"),
     status: document.getElementById("status"),
+    version: document.getElementById("version"),
 };
 
 const muted = new Set();
@@ -87,6 +88,9 @@ let pendingSoundFont = null;
 let pendingSong = null;
 let delivery = Promise.resolve();
 let startedListening = null;
+// the songs' version the song on the page was made by, which every event about the song carries: the same seed
+// is another song in another version, and a page open across a deploy still plays the song it got
+let songVersion = null;
 let isSeeking = false;
 let seekedFrom = null;
 let isExporting = false;
@@ -732,12 +736,13 @@ async function generate(seed, isRolled = seed === null) {
         }
 
         elements.seed.value = songSeed;
+        songVersion = response.headers.get("X-Song-Version");
         rememberSeed(songSeed, isRolled);
         addToHistory(songSeed);
         // offered for download first, and as a copy, so it stays usable whatever the audio stack does
         offerDownload(song, songSeed);
         announce(`Generated song ${songSeed}.`);
-        track("song_generated", { ms: since(), seed: Number(songSeed) });
+        track("song_generated", { ms: since(), seed: Number(songSeed), version: songVersion });
 
         pendingSong = song;
         hasSong = true;
@@ -797,7 +802,7 @@ function offerDownload(song, songSeed) {
 
 // the download is a plain anchor, so the click is the only place it can be noticed
 elements.download.addEventListener("click", () => {
-    track("download_mid", { seed: Number(elements.seed.value) || null });
+    track("download_mid", { seed: Number(elements.seed.value) || null, version: songVersion });
 });
 
 // --- the songs so far ------------------------------------------------------
@@ -899,7 +904,7 @@ async function share() {
     if (navigator.share !== undefined) {
         try {
             await navigator.share({ title: `RMG song ${seed}`, url: link });
-            track("shared", { seed: Number(seed) || null, detail: "sheet" });
+            track("shared", { seed: Number(seed) || null, detail: "sheet", version: songVersion });
             return;
         } catch (error) {
             // thinking better of it halfway through a share sheet is not a failure worth reporting
@@ -910,7 +915,7 @@ async function share() {
     if (await copy(link)) {
         say("Copied");
         announce(`Link to song ${seed} copied.`);
-        track("shared", { seed: Number(seed) || null, detail: "clipboard" });
+        track("shared", { seed: Number(seed) || null, detail: "clipboard", version: songVersion });
         return;
     }
 
@@ -992,7 +997,7 @@ async function exportMp3() {
 
         offerExport(mp3, name);
         announce(`Exported ${name}, ${formatSize(mp3.size)}.`);
-        track("export_mp3", { ms: since(), seed: Number(songSeed) || null, detail: `${elements.bitrate.value} kbps` });
+        track("export_mp3", { ms: since(), seed: Number(songSeed) || null, detail: `${elements.bitrate.value} kbps`, version: songVersion });
     } catch (error) {
         setStatus(`Could not export ${name}: ${error.message}`, true);
     } finally {
@@ -1054,7 +1059,7 @@ async function startPlaying(player, origin = null) {
     setPlayIcon(true);
     showMedia(player);
     startedListening = performance.now();
-    track("play", { seed: Number(elements.seed.value) || null, detail: origin });
+    track("play", { seed: Number(elements.seed.value) || null, detail: origin, version: songVersion });
 }
 
 /**
@@ -1092,7 +1097,7 @@ function reportListening() {
     const seconds = (performance.now() - startedListening) / 1000;
     startedListening = null;
 
-    if (seconds >= 1) track("listened", { seconds, seed: Number(elements.seed.value) || null });
+    if (seconds >= 1) track("listened", { seconds, seed: Number(elements.seed.value) || null, version: songVersion });
 }
 
 elements.stop.addEventListener("click", async () => {
@@ -1547,6 +1552,7 @@ start();
 async function start() {
     const linked = linkedSeed();
     track("page_open", { detail: linked.wasAsked ? "link" : "fresh" });
+    showVersion();
 
     // said afterwards, since the generating itself has the status line until it is done with it, and
     // only once a song has arrived: a failure has the status line to itself
@@ -1584,4 +1590,21 @@ function selectInLibrary(name) {
 
     elements.library.value = option?.value ?? "";
     showLicense(option ?? null);
+}
+
+/**
+ *     RMG's version in the footer: the songs' number, which goes up when the songs change, and the commit. Best
+ *     effort, as nothing else on the page depends on it.
+ */
+async function showVersion() {
+    try {
+        const response = await fetch(new URL("api/version", location.href));
+        if (!response.ok) return;
+
+        const { version, commit } = await response.json();
+        elements.version.textContent = commit ? `RMG ${version} (${commit.slice(0, 7)})` : `RMG ${version}`;
+        elements.version.hidden = false;
+    } catch {
+        // a footer without its version is a footer all the same
+    }
 }

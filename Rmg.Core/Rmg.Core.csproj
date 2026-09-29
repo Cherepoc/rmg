@@ -8,4 +8,20 @@
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
+    <!-- the songs' version, which the deploy bumps in VERSION when the songs' fingerprint changes (SongsVersion) -->
+    <PropertyGroup>
+        <SongsVersionFile>$(MSBuildThisFileDirectory)..\VERSION</SongsVersionFile>
+        <SongsVersionText Condition="Exists('$(SongsVersionFile)')">$([System.IO.File]::ReadAllText('$(SongsVersionFile)'))</SongsVersionText>
+        <SongsVersion>$([System.Text.RegularExpressions.Regex]::Match('$(SongsVersionText)', '(?m)(?&lt;=^version )\S+'))</SongsVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <AssemblyMetadata Include="SongsVersion" Value="$(SongsVersion)" />
+        <UpToDateCheckInput Include="$(SongsVersionFile)" />
+    </ItemGroup>
+
+    <Target Name="RequireSongsVersion" BeforeTargets="BeforeBuild" Condition="'$(SongsVersion)' == ''">
+        <Error Text="No songs' version: $(SongsVersionFile) needs a line 'version 0.5.000'." />
+    </Target>
+
 </Project>

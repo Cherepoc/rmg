@@ -120,6 +120,18 @@ public static class Midi
         ];
     }
 
+    private static byte[] Text(string text)
+    {
+        var bytes = System.Text.Encoding.UTF8.GetBytes(text);
+        return
+        [
+            0xff,
+            0x01,
+            ..IntToBytesVariable((uint)bytes.Length),
+            ..bytes
+        ];
+    }
+
     private static byte[] EndOfTrack()
     {
         return
@@ -225,13 +237,15 @@ public static class Midi
         stream.Write(allEvents, 0, allEvents.Length);
     }
 
-    private static void WriteSystemTrack(StateTimeline<double> tempoTimeline, uint durationDelta, Stream stream)
+    private static void WriteSystemTrack(StateTimeline<double> tempoTimeline, string? label, uint durationDelta, Stream stream)
     {
         var events = tempoTimeline.Select(x => new MidiEvent(AbsoluteDelta(x.Position), Tempo(x.Value)));
         if (tempoTimeline.Count == 0 || tempoTimeline[0].Position > 0)
             events = events.Prepend(new MidiEvent(0, Tempo(1)));
 
         events = events.Prepend(new MidiEvent(0, TimeSignature(4, 4)));
+        if (label is not null)
+            events = events.Prepend(new MidiEvent(0, Text(label)));
 
         WriteTrack(events, durationDelta, stream);
     }
@@ -374,7 +388,11 @@ public static class Midi
         return new RenderedSong(song.Duration, song.TempoTimeline, song.FadeTimeline, [..tracks]);
     }
 
-    public static void Write(this RenderedSong song, Stream stream)
+    /// <param name="label">
+    ///     What the file says it is, as a text event at its start, such as RMG's version and the song's seed; null
+    ///     for none, as the songs' fingerprint writes them, so that the label never changes what it measures.
+    /// </param>
+    public static void Write(this RenderedSong song, Stream stream, string? label)
     {
         var songDurationDelta = AbsoluteDelta(song.Duration);
 
@@ -395,7 +413,7 @@ public static class Midi
         var ticksPerQuarterNoteBytes = IntToBytesFixed(TicksPerQuarterNote, 2);
         stream.Write(ticksPerQuarterNoteBytes, 0, ticksPerQuarterNoteBytes.Length);
 
-        WriteSystemTrack(song.TempoTimeline, songDurationDelta, stream);
+        WriteSystemTrack(song.TempoTimeline, label, songDurationDelta, stream);
 
         var indexedTracks = song.Tracks.ToIndexedTracks();
         foreach (var (channel, track) in indexedTracks) WriteNoteTrack(track, channel, song.FadeTimeline, songDurationDelta, stream);

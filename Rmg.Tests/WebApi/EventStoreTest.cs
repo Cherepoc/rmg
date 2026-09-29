@@ -20,10 +20,10 @@ public sealed class EventStoreTest : IDisposable
     }
 
     private bool Write(string name, string visitor = "someone", DateTimeOffset? at = null,
-        long? ms = null, double? seconds = null, long? seed = null, string? detail = null)
+        long? ms = null, double? seconds = null, long? seed = null, string? detail = null, string? version = null)
     {
         var when = at ?? Now;
-        return _store.Write(new StoredEvent(when, EventStore.Day(when), visitor, name, ms, null, seconds, seed, detail));
+        return _store.Write(new StoredEvent(when, EventStore.Day(when), visitor, name, ms, null, seconds, seed, detail, version));
     }
 
     [Test]
@@ -188,8 +188,8 @@ public sealed class EventStoreTest : IDisposable
         try
         {
             var store = EventStore.Create(directory, 7);
-            store.Write(new StoredEvent(Now.AddDays(-8), EventStore.Day(Now.AddDays(-8)), "old", EventNames.PageOpen, null, null, null, null, null));
-            store.Write(new StoredEvent(Now.AddDays(-6), EventStore.Day(Now.AddDays(-6)), "recent", EventNames.PageOpen, null, null, null, null, null));
+            store.Write(new StoredEvent(Now.AddDays(-8), EventStore.Day(Now.AddDays(-8)), "old", EventNames.PageOpen, null, null, null, null, null, null));
+            store.Write(new StoredEvent(Now.AddDays(-6), EventStore.Day(Now.AddDays(-6)), "recent", EventNames.PageOpen, null, null, null, null, null, null));
 
             await Assert.That(store.RetentionDays).IsEqualTo(7);
             await Assert.That(store.Prune(Now)).IsEqualTo(1);
@@ -214,5 +214,76 @@ public sealed class EventStoreTest : IDisposable
 
         await Assert.That(EventNames.IsKnown("something_else")).IsFalse();
         await Assert.That(EventNames.IsKnown(null)).IsFalse();
+    }
+
+    [Test]
+    public async Task ListeningIsSummedByVersion_AVisitorsSongOnce()
+    {
+        Write(EventNames.SongGenerated, seed: 1, version: "0.5.000");
+        Write(EventNames.Played, seed: 1, version: "0.5.000");
+        Write(EventNames.Listened, seconds: 20, seed: 1, version: "0.5.000");
+        Write(EventNames.Listened, seconds: 15, seed: 1, version: "0.5.000");
+        Write(EventNames.Listened, seconds: 10, seed: 2, version: "0.5.000");
+        Write(EventNames.Listened, seconds: 40, seed: 1, version: "0.5.001", visitor: "somebody else");
+        Write(EventNames.Played, seed: 3);
+
+        var versions = _store.Summarise(Now, 30).Versions;
+
+        await Assert.That(versions.Select(x => x.Version)).IsEquivalentTo(new[] { "0.5.001", "0.5.000" });
+        var first = versions.Single(x => x.Version == "0.5.000");
+        await Assert.That(first.Songs).IsEqualTo(1);
+        await Assert.That(first.Plays).IsEqualTo(1);
+        await Assert.That(first.Listens).IsEqualTo(2);
+        await Assert.That(first.ListensPast30s).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task VersionsAreOrderedByTheirNumbers()
+    {
+        Write(EventNames.Played, version: "0.5.999");
+        Write(EventNames.Played, version: "0.5.1000");
+        Write(EventNames.Played, version: "0.6.000");
+
+        var versions = _store.Summarise(Now, 30).Versions.Select(x => x.Version).ToArray();
+
+        await Assert.That(versions).IsEquivalentTo(new[] { "0.6.000", "0.5.1000", "0.5.999" });
+    }
+
+    [Test]
+    public async Task AFileFromBeforeTheVersion_GetsItsColumn_AndKeepsItsEvents()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        Directory.CreateDirectory(directory);
+
+        try
+        {
+            using (var connection = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={Path.Combine(directory, EventStore.FileName)}"))
+            {
+                connection.Open();
+                using var command = connection.CreateCommand();
+                command.CommandText = """
+                    CREATE TABLE events (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL, day TEXT NOT NULL, visitor TEXT NOT NULL,
+                        name TEXT NOT NULL, ms INTEGER NULL, bytes INTEGER NULL, seconds REAL NULL, seed INTEGER NULL,
+                        detail TEXT NULL
+                    );
+                    INSERT INTO events (at, day, visitor, name) VALUES ('2026-09-24T12:00:00Z', '2026-09-24', 'old', 'page_open');
+                    """;
+                command.ExecuteNonQuery();
+            }
+
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+            var store = EventStore.Create(directory);
+            store.Write(new StoredEvent(Now, EventStore.Day(Now), "new", EventNames.Played, null, null, null, 1, null, "0.5.000"));
+
+            var summary = store.Summarise(Now, 30);
+            await Assert.That(summary.Events).IsEqualTo(2);
+            await Assert.That(summary.Versions.Single().Version).IsEqualTo("0.5.000");
+        }
+        finally
+        {
+            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
+            Directory.Delete(directory, true);
+        }
     }
 }

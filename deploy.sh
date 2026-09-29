@@ -116,7 +116,7 @@ die() { printf '\n%sdeploy: %s%s\n' "$RED" "$1" "$PLAIN" >&2; exit 1; }
 
 [[ -n "$HOST" ]] || die "no host. Pass --host user@host, or set RMG_HOST in deploy.env."
 
-for tool in dotnet rsync ssh; do
+for tool in dotnet rsync ssh git; do
     command -v "$tool" >/dev/null || die "$tool is not installed."
 done
 
@@ -127,8 +127,35 @@ note "ok"
 
 # --- build and test --------------------------------------------------------
 
+# The songs' version names the songs a seed is heard as, and the commit the code; code that no commit holds would
+# make both a lie, so there is nothing to deploy but what is committed.
+step "Checking the working tree"
+[[ -z $(git -C "$ROOT" status --porcelain) ]] \
+    || die "the working tree has changes that are not committed. Commit them first; only committed code is deployed."
+note "clean, at $(git -C "$ROOT" rev-parse --short HEAD)"
+
 step "Building"
 dotnet build "$ROOT/Rmg.slnx" -c Release --nologo -v quiet || die "the build failed."
+
+# The songs' version goes up when the songs change: the fingerprint of the corpus's songs against the one VERSION
+# was last bumped for. A bump is a commit of its own, and the build is done again to stamp the new number.
+step "Checking the songs' version"
+readonly VERSION_FILE="$ROOT/VERSION"
+version="$(sed -n 's/^version //p' "$VERSION_FILE")"
+recorded="$(sed -n 's/^fingerprint //p' "$VERSION_FILE")"
+[[ $version =~ ^([0-9]+)\.([0-9]+)\.([0-9]{3,})$ ]] || die "VERSION has no line 'version 0.5.000', but '$version'."
+fingerprint="$(dotnet "$ROOT/Rmg/bin/Release/net10.0/Rmg.dll" --fingerprint)" || die "the songs' fingerprint failed."
+
+if [[ $fingerprint == "$recorded" ]]; then
+    note "the songs are as they were: $version"
+else
+    bumped="$(printf '%d.%d.%03d' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "$((10#${BASH_REMATCH[3]} + 1))")"
+    sed -i -e "s/^version .*/version $bumped/" -e "s/^fingerprint .*/fingerprint $fingerprint/" "$VERSION_FILE"
+    git -C "$ROOT" commit -q -m "Songs $bumped" -- VERSION || die "could not commit the songs' version $bumped."
+    note "the songs changed: $version is now $bumped, committed"
+
+    dotnet build "$ROOT/Rmg.slnx" -c Release --nologo -v quiet || die "the build of $bumped failed."
+fi
 
 if $run_tests; then
     step "Running tests"

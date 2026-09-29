@@ -37,13 +37,18 @@ public static class EventNames
 /// <param name="Seconds">How long something was listened to.</param>
 /// <param name="Seed">The song it was about, which is the only thing here that identifies anything.</param>
 /// <param name="Detail">One short word of context: where a soundfont came from, which control was moved.</param>
+/// <param name="Version">
+///     The songs' version the song was made by (<c>X-Song-Version</c>), which a seed needs to name a song: the same
+///     seed is another song in another version.
+/// </param>
 public sealed record EventRequest(
     string? Name,
     long? Ms = null,
     long? Bytes = null,
     double? Seconds = null,
     long? Seed = null,
-    string? Detail = null
+    string? Detail = null,
+    string? Version = null
 );
 
 /// <summary>An event as it is kept: the request, with the day and the visitor it came from.</summary>
@@ -56,5 +61,6 @@ public sealed record StoredEvent(
     long? Bytes,
     double? Seconds,
     long? Seed,
-    string? Detail
+    string? Detail,
+    string? Version
 );

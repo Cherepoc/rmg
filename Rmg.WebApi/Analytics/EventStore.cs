@@ -86,6 +86,20 @@ public sealed class EventStore
             """;
 
         command.ExecuteNonQuery();
+
+        // the songs' version came later than the table, so a file from before it has the column added
+        using var columns = connection.CreateCommand();
+        columns.CommandText = "SELECT COUNT(*) FROM pragma_table_info('events') WHERE name = 'version'";
+        if (Convert.ToInt64(columns.ExecuteScalar()) == 0)
+        {
+            using var adding = connection.CreateCommand();
+            adding.CommandText = "ALTER TABLE events ADD COLUMN version TEXT NULL";
+            adding.ExecuteNonQuery();
+        }
+
+        using var indexing = connection.CreateCommand();
+        indexing.CommandText = "CREATE INDEX IF NOT EXISTS events_version_name ON events (version, name)";
+        indexing.ExecuteNonQuery();
     }
 
     /// <summary>
@@ -109,8 +123,8 @@ public sealed class EventStore
 
             using var writing = connection.CreateCommand();
             writing.CommandText = """
-                INSERT INTO events (at, day, visitor, name, ms, bytes, seconds, seed, detail)
-                VALUES ($at, $day, $visitor, $name, $ms, $bytes, $seconds, $seed, $detail)
+                INSERT INTO events (at, day, visitor, name, ms, bytes, seconds, seed, detail, version)
+                VALUES ($at, $day, $visitor, $name, $ms, $bytes, $seconds, $seed, $detail, $version)
                 """;
 
             writing.Parameters.AddWithValue("$at", stored.At.UtcDateTime.ToString("O"));
@@ -122,6 +136,7 @@ public sealed class EventStore
             writing.Parameters.AddWithValue("$seconds", (object?)stored.Seconds ?? DBNull.Value);
             writing.Parameters.AddWithValue("$seed", (object?)stored.Seed ?? DBNull.Value);
             writing.Parameters.AddWithValue("$detail", (object?)stored.Detail ?? DBNull.Value);
+            writing.Parameters.AddWithValue("$version", (object?)stored.Version ?? DBNull.Value);
 
             writing.ExecuteNonQuery();
             return true;

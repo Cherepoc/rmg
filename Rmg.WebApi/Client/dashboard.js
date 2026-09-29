@@ -30,6 +30,8 @@ const elements = {
     dailyTableToggle: document.getElementById("daily-table-toggle"),
     seedsPanel: document.getElementById("seeds-panel"),
     seeds: document.getElementById("seeds"),
+    versionsPanel: document.getElementById("versions-panel"),
+    versions: document.getElementById("versions"),
     failuresPanel: document.getElementById("failures-panel"),
     failures: document.getElementById("failures"),
 };
@@ -94,7 +96,7 @@ function setStatus(message, isError = false) {
 
 function showPanels(isShown) {
     for (const panel of [elements.headline, elements.timings, elements.funnelPanel,
-        elements.dailyPanel, elements.seedsPanel, elements.failuresPanel])
+        elements.dailyPanel, elements.seedsPanel, elements.versionsPanel, elements.failuresPanel])
         panel.hidden = !isShown;
 
     elements.controls.hidden = !isShown;
@@ -202,6 +204,7 @@ function draw() {
     drawDaily();
     drawDailyTable();
     drawSeeds();
+    drawVersions();
     drawFailures();
 }
 
@@ -520,6 +523,26 @@ function drawSeeds() {
 
             return [String(seed.seed), seconds(seed.seconds), String(seed.plays), bar];
         })
+    ));
+}
+
+function drawVersions() {
+    if (summary.versions.length === 0) {
+        elements.versions.replaceChildren(empty("No event has named its version yet."));
+        return;
+    }
+
+    elements.versions.replaceChildren(table(
+        ["Version", "Since", "Songs", "Plays", "Listens", "Past 30s", "Median"],
+        summary.versions.map((version) => [
+            version.version,
+            version.firstDay,
+            String(version.songs),
+            String(version.plays),
+            String(version.listens),
+            percent(version.listensPast30s, version.listens),
+            seconds(version.medianSeconds),
+        ])
     ));
 }
 

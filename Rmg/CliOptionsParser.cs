@@ -2,18 +2,33 @@ using System.Globalization;
 
 namespace Rmg;
 
-public sealed record CliParseResult(CliOptions? Options, string? Error, bool ShowHelp)
+/// <summary>What the command line asks for other than songs.</summary>
+public enum CliCommand
 {
-    public static CliParseResult Help { get; } = new(null, null, true);
+    Generate,
+    Help,
+
+    /// <summary>RMG's songs' version and commit.</summary>
+    Version,
+
+    /// <summary>The songs' fingerprint, which the deploy compares with the file VERSION.</summary>
+    Fingerprint
+}
+
+public sealed record CliParseResult(CliOptions? Options, string? Error, CliCommand Command)
+{
+    public static CliParseResult Help { get; } = new(null, null, CliCommand.Help);
+
+    public bool ShowHelp => Command == CliCommand.Help;
 
     public static CliParseResult Success(CliOptions options)
     {
-        return new CliParseResult(options, null, false);
+        return new CliParseResult(options, null, CliCommand.Generate);
     }
 
     public static CliParseResult Failure(string error)
     {
-        return new CliParseResult(null, error, false);
+        return new CliParseResult(null, error, CliCommand.Generate);
     }
 }
 
@@ -30,6 +45,9 @@ public static class CliOptionsParser
           -n, --count <n>      Number of songs to generate, at least 1 (default: 1)
           -s, --seed <n>       Seed of the randomizer that provides a seed for every song
                                (default: random, printed so the run can be repeated)
+          --version            Print RMG's songs' version and commit
+          --fingerprint        Print the fingerprint of the songs of the corpus's seeds, which changes
+                               when the songs do
           -h, --help           Show this help
         """;
 
@@ -46,6 +64,10 @@ public static class CliOptionsParser
             var arg = args[i];
             if (arg is "-h" or "--help" or "-?")
                 return CliParseResult.Help;
+            if (arg == "--version")
+                return new CliParseResult(null, null, CliCommand.Version);
+            if (arg == "--fingerprint")
+                return new CliParseResult(null, null, CliCommand.Fingerprint);
 
             var name = arg;
             string? inlineValue = null;

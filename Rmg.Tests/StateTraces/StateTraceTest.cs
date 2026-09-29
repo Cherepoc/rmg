@@ -140,8 +140,8 @@ public sealed class StateTraceTest
 
         using var plainStream = new MemoryStream();
         using var tracedStream = new MemoryStream();
-        Rmg.Core.Midi.Write(plain, plainStream);
-        Rmg.Core.Midi.Write(traced, tracedStream);
+        Rmg.Core.Midi.Write(plain, plainStream, null);
+        Rmg.Core.Midi.Write(traced, tracedStream, null);
 
         await Assert.That(tracedStream.ToArray().SequenceEqual(plainStream.ToArray())).IsTrue();
     }

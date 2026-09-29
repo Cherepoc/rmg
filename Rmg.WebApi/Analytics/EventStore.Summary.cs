@@ -24,6 +24,7 @@ public static class EventStoreSummary
             Funnel(connection, since),
             Daily(connection, since),
             Seeds(connection, since),
+            Versions(connection, since),
             Failures(connection, since),
             Count(connection, "SELECT COUNT(*) FROM events WHERE day >= $since", since)
         );
@@ -132,6 +133,77 @@ public static class EventStoreSummary
 
         return seeds;
     }
+
+    /// <summary>How many of the latest songs' versions the dashboard shows.</summary>
+    private const int VersionsShown = 10;
+
+    /// <summary>
+    ///     How each songs' version was listened to, so that a change to the songs shows in how they are heard. A
+    ///     listen is a visitor's song, its stretches of playing added up, so pausing does not count it twice.
+    /// </summary>
+    private static List<VersionListening> Versions(SqliteConnection connection, string since)
+    {
+        using var counting = connection.CreateCommand();
+        counting.CommandText = $"""
+            SELECT version,
+                   MIN(day),
+                   COUNT(CASE WHEN name = '{EventNames.SongGenerated}' THEN 1 END),
+                   COUNT(CASE WHEN name = '{EventNames.Played}' THEN 1 END)
+            FROM events
+            WHERE version IS NOT NULL AND day >= $since
+            GROUP BY version
+            """;
+        counting.Parameters.AddWithValue("$since", since);
+
+        var counts = new List<(string Version, string FirstDay, int Songs, int Plays)>();
+        using (var reader = counting.ExecuteReader())
+            while (reader.Read())
+                counts.Add((reader.GetString(0), reader.GetString(1), reader.GetInt32(2), reader.GetInt32(3)));
+
+        using var listening = connection.CreateCommand();
+        listening.CommandText = $"""
+            SELECT version, SUM(seconds)
+            FROM events
+            WHERE name = '{EventNames.Listened}' AND version IS NOT NULL AND seed IS NOT NULL AND day >= $since
+            GROUP BY version, visitor, seed
+            """;
+        listening.Parameters.AddWithValue("$since", since);
+
+        var listens = new Dictionary<string, List<double>>();
+        using (var reader = listening.ExecuteReader())
+            while (reader.Read())
+            {
+                var version = reader.GetString(0);
+                if (!listens.TryGetValue(version, out var seconds)) listens[version] = seconds = [];
+                seconds.Add(reader.GetDouble(1));
+            }
+
+        return counts
+            .OrderByDescending(x => x.Version, VersionOrder)
+            .Take(VersionsShown)
+            .Select(x =>
+            {
+                var seconds = listens.GetValueOrDefault(x.Version, []).Order().ToList();
+                return new VersionListening(
+                    x.Version,
+                    x.FirstDay,
+                    x.Songs,
+                    x.Plays,
+                    seconds.Count,
+                    seconds.Count(s => s >= 30),
+                    seconds.Count == 0 ? null : Math.Round(At(seconds, 0.5), 1)
+                );
+            })
+            .ToList();
+    }
+
+    /// <summary>Versions by their numbers, so that 0.5.1000 comes after 0.5.999, where text would put it before.</summary>
+    private static readonly Comparer<string> VersionOrder = Comparer<string>.Create((first, second) =>
+    {
+        var firstParts = first.Split('.').Select(long.Parse).ToArray();
+        var secondParts = second.Split('.').Select(long.Parse).ToArray();
+        return firstParts.Zip(secondParts, (x, y) => x.CompareTo(y)).FirstOrDefault(x => x != 0);
+    });
 
     private static List<Failure> Failures(SqliteConnection connection, string since)
     {

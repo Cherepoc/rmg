@@ -3,6 +3,7 @@ using Rmg.Core;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
+using Rmg.Core.Versions;
 
 namespace Rmg;
 
@@ -56,7 +57,7 @@ public static class SongBatch
 
                 // written in one go so a failing song never leaves a partial file behind
                 using var stream = new MemoryStream();
-                renderedSong.Write(stream);
+                renderedSong.Write(stream, SongsVersion.Label(songSeed));
                 File.WriteAllBytes(path, stream.ToArray());
 
                 output.WriteLine($"[{index}/{options.Count}] seed {songSeed} saved to {path}");

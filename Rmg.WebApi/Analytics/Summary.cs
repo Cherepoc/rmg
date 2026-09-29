@@ -17,6 +17,23 @@ public sealed record DayCount(string Day, int Visitors, int Songs, int Plays);
 /// <param name="Seconds">How long it was listened to, over every visitor who played it.</param>
 public sealed record SeedListening(long Seed, double Seconds, int Plays);
 
+/// <param name="Version">The songs' version, which a seed needs to name a song.</param>
+/// <param name="FirstDay">The first day an event of it arrived, as yyyy-MM-dd.</param>
+/// <param name="Songs">Songs generated.</param>
+/// <param name="Plays">Presses of play.</param>
+/// <param name="Listens">Songs listened to, a visitor's song once however often it was paused.</param>
+/// <param name="ListensPast30s">Of those, the ones listened to for 30 seconds or more in all.</param>
+/// <param name="MedianSeconds">How long a song was listened to in all, in the middle of them.</param>
+public sealed record VersionListening(
+    string Version,
+    string FirstDay,
+    int Songs,
+    int Plays,
+    int Listens,
+    int ListensPast30s,
+    double? MedianSeconds
+);
+
 /// <param name="Name">What failed.</param>
 /// <param name="Detail">Why, as far as the page could say.</param>
 public sealed record Failure(string Name, string Detail, int Count);
@@ -28,6 +45,7 @@ public sealed record Failure(string Name, string Detail, int Count);
 /// <param name="Funnel">How far down the page visitors got.</param>
 /// <param name="Daily">The same, day by day.</param>
 /// <param name="Seeds">Which songs held attention.</param>
+/// <param name="Versions">How each songs' version was listened to, the latest first.</param>
 /// <param name="Failures">What went wrong, and how often.</param>
 public sealed record AnalyticsSummary(
     int Days,
@@ -39,6 +57,7 @@ public sealed record AnalyticsSummary(
     IReadOnlyList<FunnelStep> Funnel,
     IReadOnlyList<DayCount> Daily,
     IReadOnlyList<SeedListening> Seeds,
+    IReadOnlyList<VersionListening> Versions,
     IReadOnlyList<Failure> Failures,
     int Events
 );

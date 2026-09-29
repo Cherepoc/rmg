@@ -23,7 +23,7 @@ public sealed class MidiWriteTest
         var renderedSong = new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), tracks);
         
         var memoryStream = new MemoryStream();
-        renderedSong.Write(memoryStream);
+        renderedSong.Write(memoryStream, null);
         var result = memoryStream.ToArray();
 
         byte[] expected =
@@ -51,7 +51,7 @@ public sealed class MidiWriteTest
         var renderedSong = new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), [track]);
 
         var memoryStream = new MemoryStream();
-        renderedSong.Write(memoryStream);
+        renderedSong.Write(memoryStream, null);
         return memoryStream.ToArray();
     }
 
@@ -61,7 +61,7 @@ public sealed class MidiWriteTest
         var fade = StateTimeline.Create(1, StateKinds.Fade, [0.75.ToTimelineItem(0), 0.5.ToTimelineItem(0.5)]);
         var track = new RenderedTrack(false, 1, EventTimeline.Create(1, [new RenderedNote(64, 1, 1).ToTimelineItem(0)]));
         var memoryStream = new MemoryStream();
-        new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), fade, [track]).Write(memoryStream);
+        new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), fade, [track]).Write(memoryStream, null);
 
         byte[] expected =
         [

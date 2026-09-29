@@ -9,7 +9,7 @@ public sealed class SongGeneratorSeedTest
     private static byte[] GenerateMidi(int seed)
     {
         using var stream = new MemoryStream();
-        Render.RenderSong(SongGenerator.GenerateSong(seed)).Write(stream);
+        Render.RenderSong(SongGenerator.GenerateSong(seed)).Write(stream, null);
         return stream.ToArray();
     }
 
