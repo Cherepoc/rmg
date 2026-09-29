@@ -209,8 +209,8 @@ internal static class Realizer
             scaleOffsets = ChromaticScaleOffsets;
         scaleOffsets = RaiseScaleSteps(scaleOffsets, stateMap.GetStateValue(StateKinds.RaisedScaleSteps));
 
-        // the chord root, in scale steps
-        var rootIndex = stateMap.GetStateValue(StateKinds.ChordRootNoteOffset).ToIndexOverLength(scaleOffsets.Length);
+        // the chord root, in scale steps: the harmony's, and a walk's steps from it
+        var rootIndex = stateMap.GetStateValue(StateKinds.ChordRoot) + stateMap.GetStateValue(StateKinds.ChordRootNoteOffset).ToIndexOverLength(scaleOffsets.Length);
         var basePitch = stateMap.GetStateValue(StateKinds.KeyOffset) + stateMap.GetStateValue(StateKinds.OctaveOffset) * OctaveNoteCount;
         return (scaleOffsets, rootIndex, new ChordContext(step => basePitch + GetScalePitch(scaleOffsets, rootIndex + step)));
     }

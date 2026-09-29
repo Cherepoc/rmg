@@ -60,19 +60,12 @@ public sealed class SongGeneratorChordProgressionTest
 
             foreach (var section in notes.GroupBy(x => Math.Floor((x.Position - origin) / SectionDuration)))
             {
-                var sectionOffsets = new HashSet<double>();
+                var sectionOffsets = new HashSet<int>();
                 foreach (var note in section)
                 {
-                    var offsets = note.Value.GetStateValue(StateKinds.ChordRootNoteOffset).ToList();
-                    var barOffsets = commonStateTimelineMap.GetEffectiveStateMapAt(note.Position)
-                        .GetStateValue(StateKinds.ChordRootNoteOffset);
-                    foreach (var barOffset in barOffsets)
-                        offsets.Remove(barOffset);
-
-                    await Assert.That(offsets.Count)
-                        .IsEqualTo(1)
-                        .Because($"seed {seed}, position {note.Position}: only the section's offset is left");
-                    sectionOffsets.Add(offsets[0]);
+                    // the note's root less the bar's, the progression's, leaves the section's home
+                    var barRoot = commonStateTimelineMap.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.ChordRoot);
+                    sectionOffsets.Add(note.Value.GetStateValue(StateKinds.ChordRoot) - barRoot);
                 }
 
                 await Assert.That(sectionOffsets.Count)

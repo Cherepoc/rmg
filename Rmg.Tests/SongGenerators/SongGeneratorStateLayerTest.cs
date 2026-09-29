@@ -11,7 +11,7 @@ namespace Rmg.Tests.SongGenerators;
 public sealed class SongGeneratorStateLayerTest
 {
     [Test]
-    public async Task Notes_GetEachLayersChordRootOffsetOnce()
+    public async Task Notes_GetEachLayersChordRootOnce()
     {
         // a trace names the layer of every offset, so a layer whose offset shows up twice on a note is one applied
         // twice; the offsets themselves can be equal, such as a section's home and a bar's root of the same step
@@ -33,7 +33,7 @@ public sealed class SongGeneratorStateLayerTest
 
                 foreach (var note in notes)
                 {
-                    var layers = note.Value.Explain(StateKinds.ChordRootNoteOffset).Select(x => x.Layer).ToArray();
+                    var layers = note.Value.Explain(StateKinds.ChordRoot).Select(x => x.Layer).ToArray();
                     layersSeen.UnionWith(layers);
                     await Assert.That(layers.Distinct().Count())
                         .IsEqualTo(layers.Length)
@@ -42,8 +42,8 @@ public sealed class SongGeneratorStateLayerTest
             }
         }
 
-        // the section's home, the progression's root and the notes' own walk all reach the notes
-        await Assert.That(layersSeen.IsSupersetOf(["Section", "Progression", "Note"])).IsTrue().Because(string.Join(", ", layersSeen));
+        // the section's home and the progression's root both reach the notes
+        await Assert.That(layersSeen.IsSupersetOf(["Section", "Progression"])).IsTrue().Because(string.Join(", ", layersSeen));
     }
 
     [Test]

@@ -48,6 +48,8 @@ public static class StateKinds
     // and adds, so that a layer moves every note under it alike, where a sum rounded once would move one note and not
     // the next (README); none is a step of 0. How a track plays its chord is its role's, not an offset's
     public static readonly StateKind<ImmutableArray<double>> ChordRootNoteOffset = CreateCollection<double>("ChordRootOffset", StateScope.Render);
+    // the chord's root, in scale steps above the key's tonic: the section's home and the progression's step from it
+    public static readonly StateKind<int> ChordRoot = CreateAdditive<int>("ChordRoot", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordNoteOffset = CreateCollection<double>("ChordNoteOffset", StateScope.Render);
     // the scale, as its notes' semitones above its root: one value, set by one layer, a section's, whose kind would join
     // two layers' scales into one of fourteen notes (SingleValuedListsTest)

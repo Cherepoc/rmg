@@ -81,10 +81,8 @@ internal sealed class BarStateGenerator
         var seed = SeedGenerator(context);
         var progressionTimeline = StateTimeline.Create(
                 Meter.PatternDuration,
-                StateKinds.ChordRootNoteOffset,
-                progression.Select((root, bar) =>
-                    ImmutableArray.Create(Progressions.ToRootOffset(root)).ToTimelineItem(bar * Meter.BarDuration)
-                )
+                StateKinds.ChordRoot,
+                progression.Select((root, bar) => root.ToTimelineItem(bar * Meter.BarDuration))
             )
             .WithLayer("Progression");
 

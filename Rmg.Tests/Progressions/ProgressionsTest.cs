@@ -150,10 +150,15 @@ public sealed class ProgressionsTest
         var chordEntries = TestCorpus.Get(1).Trace.Where(x => x.Point == TracePoints.Chord).ToArray();
 
         await Assert.That(chordEntries.Length).IsGreaterThan(0);
+        // a root of 0, the tonic, is left out as the default, so a chord may show one layer or none
+        var seen = new HashSet<string>();
         foreach (var entry in chordEntries)
         {
-            var layers = entry.StateMap.Explain(StateKinds.ChordRootNoteOffset).Select(x => x.Layer).Order().ToArray();
-            await Assert.That(layers).IsEquivalentTo(new[] { "Progression", "Section" });
+            var layers = entry.StateMap.Explain(StateKinds.ChordRoot).Select(x => x.Layer).ToArray();
+            await Assert.That(layers.All(x => x is "Progression" or "Section")).IsTrue();
+            seen.UnionWith(layers);
         }
+
+        await Assert.That(seen).IsEquivalentTo(new[] { "Progression", "Section" });
     }
 }

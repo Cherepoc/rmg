@@ -347,9 +347,9 @@ internal sealed class PatternGenerator
                 sectionId,
                 barIndex,
                 stateMap
-                    .Subset([CompositionStateKinds.ChordPool.Collection, CompositionStateKinds.ChordPool.Index, StateKinds.ChordRootNoteOffset])
+                    .Subset([CompositionStateKinds.ChordPool.Collection, CompositionStateKinds.ChordPool.Index, StateKinds.ChordRoot])
                     .MergeWith(
-                        barStateMap.Subset([CompositionStateKinds.ChordPool.Index, StateKinds.ChordRootNoteOffset, CompositionStateKinds.RoleChord])
+                        barStateMap.Subset([CompositionStateKinds.ChordPool.Index, StateKinds.ChordRoot, CompositionStateKinds.RoleChord])
                     ),
                 position
             );

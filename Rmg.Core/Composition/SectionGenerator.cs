@@ -117,7 +117,7 @@ internal sealed class SectionGenerator
                 .ToStateMap(context),
             new StateMapBuilder("Section")
                 .Add(CompositionStateKinds.ChordPool.Collection, chords)
-                .Add(StateKinds.ChordRootNoteOffset, [Progressions.ToRootOffset(home)])
+                .Add(StateKinds.ChordRoot, home)
                 .ToStateMap(context)
         );
         // the roles the section draws again for the song's drums, as their parts in its grooves and its fills, from a

@@ -147,12 +147,6 @@ internal static class Progressions
         return GetQuality([..raised], home + 4) == TriadQuality.Major ? seventh : null;
     }
 
-    /// <summary>The value a chord root offset takes to move the root by the steps, as a fraction of the scale.</summary>
-    public static double ToRootOffset(int steps)
-    {
-        return steps / (double)StepCount;
-    }
-
     private enum TriadQuality
     {
         Major,
