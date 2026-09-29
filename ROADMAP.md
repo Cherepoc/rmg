@@ -10,7 +10,7 @@ In this order, each measured before it is planned:
    kept: the endings, the section modes, the chords' level, the drums, the fills and their runs, the fades, and the
    intros of entries.
 2. **The melody** (see *Melody at generation*): listen to the question and its answer and to the improvised
-   appearances; then a bar of a later letter within the phrase, and a last chorus varied more than the second.
+   appearances; then a bar of a later letter within the phrase.
 
 ## Section dynamics
 
@@ -102,8 +102,12 @@ its last note 35% against 13%. Left:
   of their own (`PatternGenerator.BuildBars` from the seeds `DrawSeeds` drew, not drawn again; the trace paused while
   it is built again, `StateTrace.Pause`). A rhythm drawn afresh of the same settings keeps most of its onsets, so the
   improvised rhythm stays gentle: a later appearance keeps 100% of the onsets of a phrase's first half and 92% of its
-  second (95% at a factor of 1), the same note on 86% and 72% of them, and 80% of its notes as a whole. A last chorus
-  varied more than the second (an amount that grows by appearance) waits for listening.
+  second (95% at a factor of 1), the same note on 86% and 72% of them, and 80% of its notes as a whole. The later in
+  the song, the more it improvises: an appearance's amount is the song's, its odds times
+  `MelodyLayers.ImprovisationGrowth` (3) to the power of how far into the song it falls, so that the last chorus, and a
+  fade's, varies most; over 100 corpus songs, in songs that improvise, a recurring section plays its first
+  appearance's notes 71% of the time in the song's first half, 61% in its second, 59% as its last section, against
+  75%, 75% and 64% (a growth of 2 gave 72, 68 and 66%, of 4 69, 59 and 57%).
 - **An endless song** (later, low priority): a mode in which a song goes on with sections generated afresh as it
   plays, with no ending, a streaming form rather than a planned one. The sections generated per appearance are a step
   towards it; the form's plan, its intro and ending, and the song's single pass are not.

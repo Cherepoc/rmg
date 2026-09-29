@@ -106,7 +106,13 @@ public static class SongGenerator
         StateTrace.Record(TracePoints.MelodyImprovisation, SongTracks.MelodyTrack, 0, 0, StateMap.Default, 0, $"{improvisation:F2}", improvisation);
         // a song that fades out plays its last section once more, over which it fades
         int[] played = plan.Ending == EndingKind.Fade ? [..sectionIds, sectionIds[^1]] : sectionIds;
-        var sections = played.Select((id, index) => generateSection(id).Appear(played.Take(index).Count(x => x == id), improvisation)).ToArray();
+        // the later in the song, the more
+        var sections = played.Select((id, index) => generateSection(id).Appear(
+                    played.Take(index).Count(x => x == id),
+                    Tilt.Of(MelodyLayers.ImprovisationGrowth, index / (double)Math.Max(1, played.Length - 1)).Chance(improvisation, 1)
+                )
+            )
+            .ToArray();
 
         // the song put together as planned, and the lines the drums mark
         var form = formGenerator.Assemble(plan, played, sections);

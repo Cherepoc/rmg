@@ -224,4 +224,42 @@ public sealed class MelodyRepetitionTest
 
         await Assert.That(m.RestedJoinLeaps / (double)m.JoinLeaps).IsGreaterThan(0.7);
     }
+
+    /// <summary>
+    ///     In songs that improvise, how many of a recurring section's notes play its first appearance's, by where the
+    ///     appearance falls in the song: in its first half, in its second, and the song's last section.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task ImprovisationByPlaceReport()
+    {
+        int[] notes = new int[3], same = new int[3];
+        foreach (var song in TestCorpus.Range(100))
+        {
+            if ((double)song.Trace.Single(x => x.Point == TracePoints.MelodyImprovisation).Value! <= 0)
+                continue;
+
+            var melody = song.Song.Notes![SongTracks.MelodyTrack].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0]);
+            var sections = song.Map.Sections;
+            var firsts = sections.GroupBy(x => x.SectionId).ToDictionary(x => x.Key, x => x.First());
+            for (var i = 0; i < sections.Length; i++)
+            {
+                var (span, first) = (sections[i], firsts[sections[i].SectionId]);
+                if (span == first)
+                    continue;
+
+                var place = i == sections.Length - 1 ? 2 : span.Start < song.Map.Duration / 2 ? 0 : 1;
+                foreach (var (position, pitch) in melody.Where(x => x.Key >= first.Start && x.Key < first.End))
+                    if (melody.TryGetValue(Math.Round(span.Start + position - first.Start, 6), out var again))
+                    {
+                        notes[place]++;
+                        same[place] += again == pitch ? 1 : 0;
+                    }
+            }
+        }
+
+        Console.WriteLine($"in songs that improvise, a recurring section plays its first appearance's notes {same[0] / (double)notes[0]:P0} in the song's first half, " +
+                          $"{same[1] / (double)notes[1]:P0} in its second, {same[2] / (double)notes[2]:P0} as its last section");
+        await Task.CompletedTask;
+    }
 }

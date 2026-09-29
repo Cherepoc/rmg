@@ -93,6 +93,13 @@ internal static class MelodyLayers
     public const double Improvisation = 0.3;
 
     /// <summary>
+    ///     How much more a song improvises by its end: the odds of its improvisation times this to the power of how far
+    ///     into the song an appearance falls, from 0 at its start to 1 at its end, so that the last chorus, and a fade's,
+    ///     varies most, as a singer ad-libs more as a song goes on; a song that does not improvise stays as it is.
+    /// </summary>
+    public const double ImprovisationGrowth = 3;
+
+    /// <summary>
     ///     How likely a bar of a section's later appearance is to draw its melody's rhythm afresh, over the song's
     ///     improvisation and where a phrase varies (<see cref="AnswerBars" />).
     /// </summary>
