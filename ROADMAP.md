@@ -291,9 +291,13 @@ Later:
   `Plain` 0.15 (was 0.3), 14% (was 10%), so that they sit on the roots; a tension resolving by step 27%, 16% and 6%
   (was 12%, 6% and 4%). The pickup always falls on the beat; the 8th before the bar line, leaned by convention, waits
   for listening.
-- **The root arrival** leans on the leading amount too (`MinRootArrivalChance` + leading × `RootArrivalChanceRange`),
-  so a bass that leads less lands on the root less often, the wrong way for synth basses that sit on the roots: at
-  `Plain` 0.15 they land on it 61% of the time, against 67% at 0.3. The arrival wants a lean of its own, or none.
+- **Landing on the new chord** (built): what the bass plays on a new chord's first note is drawn from one list for
+  every bass (`BassLeadingLayers.Arrivals`: the root 0.8, the third and the fifth 0.05 each, the figure's own note
+  0.1), all but the root leaning unconventional by the section's rhythm, in place of a root chance that rose with the
+  leading amount, so that synth basses, which lead least, landed on the root least. Over 100 corpus songs
+  (`BassArrivalReportTest`, plain and wild sections told apart by the melody's answer amount) the bass plays the new
+  root on 85 to 87% of a synth bass's changes (was 72 to 75%), 91% of an electric one's in plain sections and 84% in
+  wild ones (was 83 and 88%), and 90 and 81% of a walking one's (was 89 and 90%).
 
 ## Chords
 

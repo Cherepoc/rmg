@@ -86,3 +86,57 @@ public sealed class BassLeadingReportTest
         await Task.CompletedTask;
     }
 }
+
+/// <summary>
+///     How the bass lands on its chord changes, by how much its instrument leads and whether the section is plain or wild
+///     (by its melody's answer amount, which rises with the section's unconventionality): how often the landing is drawn
+///     as the root (<see cref="StateKinds.ChordArrival" />), and how often the note played is the new chord's root, of
+///     all landings and of those left free, which play their figure's note.
+/// </summary>
+public sealed class BassArrivalReportTest
+{
+    private const int SongCount = 100;
+
+    [Test]
+    [Explicit]
+    public async Task Report()
+    {
+        var counts = new Dictionary<(double Leading, bool IsWild), (int Changes, int RootDrawn, int OnRoot, int Free, int FreeOnRoot)>();
+        foreach (var song in TestCorpus.Range(SongCount))
+        {
+            var program = ((PitchInstrumentTrack)song.Song.TrackDefinitions[SongTracks.BassTrack]).InstrumentCode;
+            var leading = Core.Composition.InstrumentRoles.Bass.Instruments.Single(x => x.Program == program).Leading;
+            var amounts = song.Trace.Where(x => x.Point == TracePoints.MelodyAnswer).ToDictionary(x => x.Section, x => (double)x.Value!);
+            var bass = song.Song.Notes![SongTracks.BassTrack].ToArray();
+            for (var i = 0; i + 1 < bass.Length; i++)
+            {
+                var (last, next) = (bass[i], bass[i + 1]);
+                var change = (Math.Floor(last.Position / Meter.BarDuration) + 1) * Meter.BarDuration;
+                if (Math.Abs(next.Position - change) > 1e-9 || song.Map.SectionAt(next.Position) is not { } section)
+                    continue;
+
+                var (_, _, lastClasses) = Realizer.GetChordNotes(last.Value.State);
+                var (nextChord, _, nextClasses) = Realizer.GetChordNotes(next.Value.State);
+                if (lastClasses.SetEquals(nextClasses))
+                    continue;
+
+                var key = (leading, amounts[section.SectionId] > MelodyLayers.AnswerAmount);
+                var arrival = (ChordArrival)next.Value.State.GetStateValue(StateKinds.ChordArrival);
+                var isOnRoot = next.Value.Pitches[0].Mod(12) == nextChord.Root.Mod(12);
+                var c = counts.GetValueOrDefault(key);
+                counts[key] = (
+                    c.Changes + 1,
+                    c.RootDrawn + (arrival == ChordArrival.Root ? 1 : 0),
+                    c.OnRoot + (isOnRoot ? 1 : 0),
+                    c.Free + (arrival == ChordArrival.Free ? 1 : 0),
+                    c.FreeOnRoot + (arrival == ChordArrival.Free && isOnRoot ? 1 : 0)
+                );
+            }
+        }
+
+        foreach (var ((leading, isWild), c) in counts.OrderBy(x => x.Key.Leading).ThenBy(x => x.Key.IsWild))
+            Console.WriteLine($"leading {leading:F2} {(isWild ? "wild " : "plain")}, {c.Changes} changes: root drawn {c.RootDrawn / (double)c.Changes:P0}, " +
+                              $"on the root {c.OnRoot / (double)c.Changes:P0}; free {c.Free / (double)c.Changes:P0}, of which on the root {c.FreeOnRoot / (double)Math.Max(1, c.Free):P0}");
+        await Task.CompletedTask;
+    }
+}

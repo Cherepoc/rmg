@@ -120,7 +120,7 @@ internal sealed class BarStateGenerator
                 raisedStepTimeline,
                 roleChordTimeline,
                 GenerateResets(context),
-                ..GenerateBassLeading(context.CreateContext(Seeds.Derive(seed, BassLeadingStream)), bassLeading),
+                ..GenerateBassLeading(context.CreateContext(Seeds.Derive(seed, BassLeadingStream)), bassLeading, rhythmTilt),
                 GenerateMelodyContour(context, context.CreateContext(Seeds.Derive(seed, ContourPeriodStream)), rhythmTilt),
                 GenerateMelodyPhraseEnd(context)
             ]
@@ -174,8 +174,11 @@ internal sealed class BarStateGenerator
             .WithLayer("Bar");
     }
 
-    /// <summary>How the bass leads out of every bar into the next chord, and what it lands on in every bar's new chord.</summary>
-    private IEnumerable<IStateTimeline> GenerateBassLeading(IGenerationContext context, double bassLeading)
+    /// <summary>
+    ///     How the bass leads out of every bar into the next chord, by how much it leads, and what it lands on in every bar's
+    ///     new chord, the less conventional the section the less often the root.
+    /// </summary>
+    private IEnumerable<IStateTimeline> GenerateBassLeading(IGenerationContext context, double bassLeading, Tilt rhythmTilt)
     {
         var approachGenerator = Generators.WeightedIndex(BassLeadingLayers.Approaches);
         var approaches = StateTimeline.Create(
@@ -195,14 +198,7 @@ internal sealed class BarStateGenerator
             )
             .WithLayer("Bar");
 
-        var rootArrivalChance = BassLeadingLayers.MinRootArrivalChance + bassLeading * BassLeadingLayers.RootArrivalChanceRange;
-        ImmutableArray<Weighted<ChordArrival>> arrivalWeights =
-        [
-            new(rootArrivalChance, ChordArrival.Root),
-            new(BassLeadingLayers.InversionArrivalChance, ChordArrival.Third),
-            new(BassLeadingLayers.InversionArrivalChance, ChordArrival.Fifth),
-            new(Math.Max(0, 1 - rootArrivalChance - 2 * BassLeadingLayers.InversionArrivalChance), ChordArrival.Free)
-        ];
+        var arrivalWeights = rhythmTilt.Weigh(BassLeadingLayers.Arrivals, x => x == ChordArrival.Root ? 0 : 1);
         var arrivalGenerator = Generators.WeightedIndex(arrivalWeights);
         var arrivals = StateTimeline.Create(
                 Meter.PatternDuration,

@@ -5,9 +5,9 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     How much the bass leads into the next chord, drawn by layer: the bass instrument sets where the song starts,
-///     and a section moves it. The amount sets, bar by bar, how often the bass lands on the new chord's root and how
-///     often its last note before a change leads into it (see <c>StateKinds.ChordArrival</c> and
-///     <c>StateKinds.ChordApproach</c>).
+///     and a section moves it. The amount sets, bar by bar, how often its last note before a change leads into it (see
+///     <c>StateKinds.ChordApproach</c>); what it lands on in the new chord leans by the section's conventionality alone
+///     (<see cref="Arrivals" />, <c>StateKinds.ChordArrival</c>).
 /// </summary>
 public static class BassLeadingLayers
 {
@@ -30,15 +30,16 @@ public static class BassLeadingLayers
     public const double MaxApproachChance = 0.8;
 
     /// <summary>
-    ///     The chance of the bass landing on a new chord's root: this at the least leading, and
-    ///     <see cref="RootArrivalChanceRange" /> more at the most.
+    ///     What the bass lands on in a new chord, and how likely each is, whatever the bass: mostly the root, now and then
+    ///     an inversion or the note its figure plays; all but the root lean unconventional.
     /// </summary>
-    public const double MinRootArrivalChance = 0.55;
-
-    public const double RootArrivalChanceRange = 0.4;
-
-    /// <summary>The chance of the bass landing on the new chord's third, and as much on its fifth, as an inversion.</summary>
-    public const double InversionArrivalChance = 0.05;
+    public static ImmutableArray<Weighted<ChordArrival>> Arrivals { get; } =
+    [
+        new(0.8, ChordArrival.Root),
+        new(0.05, ChordArrival.Third),
+        new(0.05, ChordArrival.Fifth),
+        new(0.1, ChordArrival.Free)
+    ];
 
     /// <summary>How a bar leads into the next, and how likely each way is when it does.</summary>
     public static ImmutableArray<Weighted<ChordApproach>> Approaches { get; } =
