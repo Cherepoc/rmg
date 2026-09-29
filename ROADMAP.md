@@ -13,11 +13,12 @@ measured before and after by a report test, by the measure its entry names.
 
 **Next** (P1), in this order:
 
-1. **The meter:** the meter as state, then other meters (see *Meter*); a cycle split in three is built.
-2. **Sections with a role,** as the form (see *Form*).
-3. **The energy in the pitched tracks** (see *Section dynamics*).
-4. **The arrangement, and energy by appearance** (see *Appearances*).
-5. **Pitched fills and the lift** (see *Fills*).
+1. **Sections with a role,** as the form (see *Form*).
+2. **The energy in the pitched tracks** (see *Section dynamics*).
+3. **The arrangement, and energy by appearance** (see *Appearances*).
+4. **Pitched fills and the lift** (see *Fills*).
+5. **The meter:** the meter as state, then other meters (see *Meter*), once what a period means in another meter is
+   decided by ear; a cycle split in three is built.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -110,10 +111,16 @@ and threading a value that is always four through a hundred readers would change
   against 12.5, so that grouped cycles no longer leave the wild sections sparser; the notes off both the 16ths and the
   triplets 3.0% against 2.7%, those under a 32nd after the one before 3, as before (`GridReportTest`,
   `RhythmBusynessReportTest`).
-- **The meter as state:** a song's, a section's or a bar's, a bar as its groups of beats or 16ths, such as 4, 3,
-  2+2+3 or 3+3+3+2+2, the engine halving or splitting from a bar's groups, a rhythm's period in beats rather than as a
-  fraction of the bar, and the progression's chords, the phrase scheme's bars, the contour, the fills' spans and lines,
-  the intro's windows and the count-in taking the bar's length. First with every song in four, the corpus unchanged.
+- **The meter as state** (put off again, a decision for listening): a song's, a section's or a bar's, a bar as its
+  groups of beats or 16ths, such as 4, 3, 2+2+3 or 3+3+3+2+2, the engine splitting a bar's groups as it now splits a
+  grouped cycle, and the progression's chords, the phrase scheme's bars, the contour, the fills' spans and lines, the
+  intro's windows, the count-in and the MIDI file's time signature (`Midi`, 4/4 now) taking the bar's length. What
+  holds it back is what a rhythm's period means in another meter, which decides how every other meter sounds: a
+  fraction of the bar, as now, halves a 3/4 bar into dotted quarters and its quarters off the grid; a length in beats
+  fits 3/4 but misses 6/8, whose unit is the dotted quarter; a level of the meter's hierarchy (the bar, its groups, their
+  beats, their halves) fits every meter, but 3/4 has no half-bar level, so the same settings play a level busier in it
+  than in four. The last is the likeliest, with the settings' levels shifted where a meter has fewer; it wants hearing
+  before the state takes its shape, and the refactor alone, every song still in four, changes nothing heard.
 - **Other meters** (with listening): 3/4, 6/8, 7/8 or 13/16 drawn, leaned conventional towards four; the first use a
   bar of two beats now and then before a section. Measured by: the meters drawn by conventionality; the drums' notes a
   bar, the downbeat and the backbeat as in four, per beat; the grid report's gaps under a 32nd.
