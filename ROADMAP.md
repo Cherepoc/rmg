@@ -1,86 +1,271 @@
 # Roadmap
 
-Planned work that has been decided but not built yet, and the decisions that keep it so.
+Planned work, in order, the questions listening is to settle, and the decisions that keep what is built so.
 
 ## Next
 
-In this order, each measured before it is planned:
+In this order, each measured before it is planned. Every section is a 4-bar pattern played twice, a chord a bar, in
+four beats, so the songs are alike in their form more than in anything the drums do: the song's shape comes before
+the drums' details, which are paused.
 
-1. **Listen and tune.** The sections' energy has been tuned by measurement only (see *Section dynamics*). Heard and
-   kept: the endings, the section modes, the chords' level, the drums, the fills and their runs, the fades, and the
-   intros of entries.
-2. **The melody** (see *Melody*): listen to the question and its answer and to the improvised appearances; then a bar
-   of a later letter within the phrase.
-
-Then, by what is heard for its cost: the song's shape before the drums' details, which are paused. Every section is
-a 4-bar pattern played twice, a chord a bar, so the songs are alike in their form more than in anything the drums do.
-
-3. **The energy in the pitched tracks, and by appearance** (see *Section dynamics*).
-4. **Harmonic rhythm** (see *Chords*).
-5. **Panning** (see *Instruments*).
+1. **A version and ratings** (see *Listening data*), so that listening is measured as the corpus is.
+2. **Listen** through the checklist (see *Listening*), with the ratings where they help.
+3. **Panning** (see *Instruments*), small, and heard in every song.
+4. **The meter as state** (see *Meter*), before the work that sizes things by the bar.
+5. **Harmonic rhythm** (see *Chords*).
 6. **A section's length** (see *Form*).
-7. **Pitched roles and the arrangement** (see *Instruments*).
-8. **Harmonised doubling** (see *Instruments*).
-9. **Occasional chords** (see *Instruments*).
-10. **Swing** (see *Groove*).
-11. **Articulations** (see *Instruments*).
-12. **Sections with a role** (see *Form*).
-13. **Solos** (see *Instruments*).
-14. **A short bar at a section change** (see *Meter*).
-15. **Bars of any length and polyrhythms** (see *Meter*), needed someday, low priority.
+7. **Sections with a role** (see *Form*), which the energy then comes from.
+8. **The energy in the pitched tracks** (see *Section dynamics*).
+9. **Appearances and the arrangement** (see *Appearances*): what plays, and how, each time a section plays.
+10. **Pitched fills and the lift** (see *Fills*).
+11. **Harmonised doubling** (see *Instruments*).
+12. **Occasional chords** (see *Instruments*).
+13. **Swing** (see *Groove*).
+14. **Half time and double time** (see *Groove*).
+15. **Articulations** (see *Instruments*).
+16. **Styles** (see *Styles*).
+17. **Solos** (see *Instruments*).
+18. **Scales of other sizes** (see *Scales*).
+19. **Long cycles, then overlapping polyrhythms** (see *Rhythm engine*, *Meter*).
 
-Alongside, whenever the web page is touched: **ratings** (see *Listening data*), so that listening is measured as the
-corpus is.
+Every item states what it will be measured by; a new report test measures it before and after.
+
+## Listening data
+
+The corpus is measured against targets the plan set itself, and listening is one seed at a time. The web page records
+how long each seed is listened to (`Analytics`, `SeedListening`), but not by which generator: a seed is another song in
+another version.
+
+- **A version:** RMG's version, the commit it is built from, stamped at build (by `deploy.sh`, into the assembly),
+  shown on the page, written into the MIDI file's text, and stored with every analytics event that carries a seed, so
+  that a seed listened to or rated is known by the version it was heard in. It labels the data; the seeds stay free
+  to change from version to version.
+- **Ratings:** a rating on the page (liked or not, or 1 to 5), an analytics event of its own, stored with the seed and
+  the version, and a report that holds the ratings, and the time listened, of a version's seeds against the trace's
+  values (`StateTraceEntry.Value`): which endings, modes, drum setups or energies are liked or skipped.
+  Measured by: ratings per version, enough to tell two versions apart.
+- **Targets from outside,** later: a few measures (the notes a bar by role, the intervals, the syncopation, the chord
+  changes a bar) of a corpus of real MIDI songs to tune towards.
+
+## Listening
+
+What listening is to settle, each a question and what it decides. A report test picks the corpus seeds to hear for
+each from the trace; the seeds named here are ones already found.
+
+- **The sections' energy,** tuned by measurement only (see *Section dynamics*): do quieter sections sound as sections,
+  and louder ones lift? The fills land into a quieter section 54% of the time: too often?
+- **The melody's question and answer, and the improvised appearances:** then a bar of a later letter within the
+  phrase.
+- **Varied repeats (A′):** a repeated bar is varied by a flat chance of 0.25 and a fixed strength
+  (`PhraseSchemes.VariedRepeatChance`, `VariedRepeatVariation`). Should plain sections sound too varied or wild ones
+  too literal, lean its chance alone, gently: which way convention runs is unclear (a varied repeat is as conventional
+  in songwriting as a literal loop is in electronic music), and the scheme's choice already leans to more distinct
+  bars in wild sections, so leaning A′ the same way would push wild sections to no repetition and plain ones to loops.
+  The answer's lean (more mutation the wilder) the same.
+- **Where the melody leaps:** a phrase or a section starts afresh at its aim, and a pattern's end wraps to its start,
+  so the melody leaps there about a third of the time, mostly after a rest: a new phrase, or a break? Two rules tried
+  to close a phrase onto its start and were dropped: aiming the last bar back moved little, and landing the last note
+  near the start only moved the leap one note earlier.
+- **The gaps before chord changes:** half the changes have no melody note in their last beat, a rest or a held note.
+  Empty? Then the pitched fills (see *Fills*) and a counter-melody (see *Appearances*) move there.
+- **The section modes:** does the cadence into a change prepare it? The parallel major or minor and the harmonic minor
+  sound clearly (corpus seeds 196, 10, 36 and 171), the one-note modes more faintly.
+- **The velocity:** how even the bass and the chords play, tuned by measurement only; the bar layers (a bar's and a
+  bar pattern's loudness) add 3 to 5 from bar to bar, and go should bars sound to jump.
+- **The drums:** the percussion songs; the wild end, where the kick or the snare in a role not theirs may sound broken
+  rather than bold (the snares keep time in 2 to 4% of their sections, a train beat); bound drums, too rare to hear at
+  a doubling chance of 0.15?; the clap's ghost notes, soft hits around the backbeat, built only if missed.
+- **The bass's pickup** always falls on the beat: the 8th before the bar line, leaned by convention, if it sounds
+  square.
+- **The fills:** wild songs play about 1.8 times the tuplet notes of plain ones, as a run plays the snare's feel only:
+  too straight? Then read the tuplet the drums play most. Three runs in ten play quarters or slower, as a run is two
+  ranks finer than the snare's sparse groove: weak? Then aim a run's finest rank at the finest the tempo allows, a
+  step or two less, keeping only the groove's cycle and phase.
+- **Repeated cycles** replay their beats' accents: mechanical? Then a small fresh loudness draw over the replayed
+  accent.
+- **The fade-outs:** a ritardando into the fade, the drums fading first, or a tag after it, if asked for.
+
+## Meter
+
+Every bar is four beats (`Meter.BarDuration`, read in about 50 places), a section's pattern four bars
+(`Progressions.BarCount`, about 20), and the rhythm engine halves from the bar. Until the meter is state, new work
+sizes what it adds in beats, chord changes or patterns, not in bars, and adds no reader of either constant.
+
+- **The meter as state:** a song's, a section's or a bar's, of any number of beats or 16ths, odd ones too, such as
+  3/4, 7/8 or 13/16, the bar grouped as a grouped cycle is (3+3+2, `ResolvedRhythm.IsGrouped`), in place of the fixed
+  four beats: the engine halving from a bar's groups, and the progression's chords, the phrase scheme's bars, the
+  contour, the fills' spans and lines, the intro's windows and the count-in taking the bar's length. First with every
+  song in four, the corpus unchanged, then other meters drawn, leaned conventional towards four. Its first use: a
+  bar of two beats now and then before a section. Measured by: the meters drawn by conventionality; the drums' notes a
+  bar, the downbeat and the backbeat as in four, per beat; the grid report's gaps under a 32nd.
+- **Overlapping polyrhythms** (after *Long cycles*): a figure of a length of its own, such as a riff of 23 16ths,
+  running on against the bar, as the kick and the guitar do against the hi-hat and the snare in Meshuggah, meeting the
+  bar again at a phrase's end; it covers cross-rhythms, a grouped cycle running on across the bars.
+
+## Chords
+
+- **Harmonic rhythm:** a chord a bar, always (`Progressions`). A section's harmonic rhythm as its state, a chord for
+  half, one or two of its bars' lengths, drawn and leaned by convention and energy, over the same pattern. No cost to
+  the rhythm engine, but everything that is per bar and means per chord becomes per change: the lines' approaches and
+  landings (`LinePattern`, `SectionGenerator`'s per-bar arrays), the bass's pickup (`PatternGenerator.LeadIn`), the
+  cadence's place and the progression's roles (home, away, pre-cadence, cadence) spread over more or fewer chords.
+  Measured by: the chord changes a bar by conventionality and energy; the bass and the melody leading into their
+  changes as often as now (`BassLeadingReportTest`); chord notes on the beat.
+
+## Scales
+
+Every scale has seven notes, and the progressions' rules are in its steps (`Progressions`, `StepCount`).
+
+- **Scales of other sizes:** the pentatonic and the blues scale for the melody, over chords of a 7-note scale, as the
+  conventional way to a melody that cannot clash; later whole scales of other sizes, where the progressions' rules
+  would need their steps as fractions of the octave. Then **jitter on in-between heights:** heights between two
+  qualities, such as the third, move a little from chord to chord, so that a scale of more than seven notes picks
+  sometimes one quality and sometimes the other. Measured by: chord notes on the beat, and notes off the chord's scale.
 
 ## Section dynamics
 
 A section's energy (`SectionEnergy`) leans its loudness, its drums' fullness and density, which drums play, and the
 fills into it. Over 200 corpus songs, in plain sections and wild ones, it correlates with loudness 0.51 and 0.27, with
-how many drums play 0.46 and 0.32, but with the drums' notes only 0.22 and 0.19. Left:
+how many drums play 0.46 and 0.32, but with the drums' notes only 0.22 and 0.19.
 
-- **The drums' notes** follow the energy weakly: the section layers' density and fullness move little, so even with
-  energy near deciding (odds of 100,000) the drums' notes correlate with it only 0.48. The section's shared rhythm
-  layer, or the drums' speed, would move them more, the first also moving the pitched tracks.
-- **The melody's busyness and the chords' rhythm,** by the same pull.
-- **Energy by appearance,** so that the last chorus plays louder than the first: a section already appears afresh
-  every time it plays (`GeneratedSection.Appear`), which may be a simpler place for it than an edit after assembly.
+- **The energy in the pitched tracks:** the melody's busyness, the chords' rhythm and the melody's register by the
+  same pull. The drums' notes follow it weakly: the section layers' density and fullness move little, so even with
+  energy near deciding (odds of 100,000) they correlate only 0.48; the section's shared rhythm layer, or the drums'
+  speed, would move them more, the first also moving the pitched tracks. Measured by: the energy against the melody's
+  and the chords' notes a bar and the melody's mean pitch, towards the 0.4 to 0.6 the loudness and the drums reach.
 
-## Section modes
+## Appearances
 
-A section may play in a parallel mode (`Scales.PickSection`). Left:
+A section is made once and played again, only its melody improvised afresh as it recurs (`GeneratedSection.Appear`).
+What changes from one appearance to the next is one mechanism, and the arrangement is its main means, so these are
+planned together:
 
-- **Listen** whether the cadence into a change prepares it; the parallel major or minor and the harmonic minor sound
-  clearly (corpus seeds 196, 10, 36 and 171), the one-note modes more faintly.
-- **Key changes,** such as a last chorus a step up: a section's key as its own state, as its scale is now.
+- **Pitched roles and the arrangement:** more pitched roles, such as a pad, a second chord instrument or a
+  counter-melody (a third `LineProfile`), and a section's parts chosen as its drum kit is (`DrumKitGenerator.SelectKit`):
+  roles, the ones that lead and the ones that colour, which play leaned by the section's energy, so that a section
+  builds by what plays, not only by how loud. The one mechanism for the drums and the pitched tracks, where it can be.
+  More tracks and program changes need the web page's mixer to show them. Measured by: the parts that play against the
+  energy, towards the drums' 0.46.
+- **Energy by appearance:** an appearance's own step of the energy, rising the later it plays, so that the last chorus
+  plays bigger than the first, drawn in `Appear`: more parts (an appearance may add a pad or a counter-melody), louder,
+  the drums changed (their kit's colour, a drum's stroke). Measured by: the energy and the parts of a section's last
+  appearance against its first.
+- **Strokes before a lift** fold into *The lift* (see *Fills*).
+
+## Fills
+
+The fills are the drums', and every track lands with them where a section lands.
+
+- **Pitched fills:** at a line the drums mark, a pitched track fills too, by the same lines and weights (`FillLine`)
+  and the same rhythm as a run: the melody or a counter-line running up or down the scale or the chord into the next
+  section's first note, the bass walking up to its root, the chords playing a stab or a push on the last 8th. A run's
+  notes are a line's (`Line`), aimed at where the next section starts. Also where the melody has a gap before a
+  chord change within a phrase, should it sound empty. Measured by: pitched fills by the line's weight, and leaps into
+  a section, which a run aimed at the next note should lower.
+- **The lift:** into a louder section, the last phrase before it builds across the band, as an edit after assembly:
+  the snare from its cross-stick to its head, the hi-hat opening, the chords' rhythm doubling, a part entering early,
+  the loudness rising. Measured by: the loudness and the notes a bar over the last phrase before a louder section
+  against the phrase before it.
+- **Loudness:** a run's swell, its accents and a landing's hit are constants, where the groove's loudness is layers; a
+  fill's velocity layer would make them cumulative with the section's.
+- **Speed changes** are a rank more for one half of the span, a case of ranks changing along it (see *Segments in any
+  pattern*).
+- **Sounds by convention:** runs and landings weigh a drum's sounds the same in a plain section as in a wild one; the
+  weights could lean by conventionality, so plain sections crash and wild ones reach for the china and the splash;
+  the idioms the draws no longer tie together, a lift on the open hi-hat, come back the same way.
+- **The drummer as state:** the favourite walk (one way, turn, loop and random, which could be one walk with a few
+  values) would need a pool like the chord pool's, and busyness, which weighs the spans and moves the fullness, would
+  become a fullness and a span length that the section's energy adds to.
+- **A drum's sounds together:** a drum is one track, whose note plays one sound, so a run never plays two toms
+  together. Notes of several sounds on one track would allow it.
+- **The vibraslap's pickup,** the last beat before a landing, the one other place it would fit.
+
+## Form
+
+- **A section's length:** every section plays its pattern twice, its melody a question and its answer. Played once,
+  twice or four times, drawn per section and leaned by convention towards twice, with now and then a tag of half a
+  pattern before a section changes. Once plays the question with the answer's end, so it cadences; four times the
+  question and the answer twice, the second pair as an improvised appearance. The fills' phrase lines, the drums by bar
+  (`DrumPresence`) and the energy's recurrence count plays, not sections. Measured by: the lengths drawn; leaps into
+  a section and the answer's notes as now.
+- **Sections with a role:** the form draws a section's role, an intro, a verse, a pre-chorus, a chorus, a bridge,
+  by where and how often it plays, which leans its energy, its harmony (a bridge away from home), its length and its
+  arrangement, where now the energy is inferred from how often and where a section plays (`SectionEnergy`). Before
+  the pitched tracks and the arrangement lean on the energy, so that they are tuned once. Measured by: the energy by
+  role, and the chorus the loudest section of its song.
+- **Key changes,** such as a last chorus a step up: a section's key as its own state, as its scale is now
+  (`Scales.PickSection`).
+- **Intros of their own material,** such as a riff the song does not play otherwise.
+- **An endless song** (low priority): sections generated afresh as it plays, with no ending. The sections generated
+  per appearance are a step towards it; the form's plan, its intro and ending, and the song's single pass are not.
+
+## Instruments
+
+Three pitched tracks, the chords, the melody and the bass, each on one instrument for the whole song; every section
+plays all three.
+
+- **Panning:** no track is panned; the file sends no pan (CC 10), which the web player's synth plays. A place per
+  track drawn by its role, the bass and the kick in the middle, the chords and a pad spread, the drums as a kit
+  stands.
+- **Harmonised doubling** (after the arrangement, which brings tracks of their own): a line doubled a diatonic third
+  or sixth above, as twin guitars play a riff, on a track of its own panned against it: a line's notes are scale steps
+  above the chord's root (`LinePlacement`), so the double is two steps up. Per section, leaned by energy. Plain
+  doubling, the same part twice, waits for timing by role (see *Groove*): two copies with the same notes and timing
+  only play louder. Measured by: the sections doubled by energy, and the double's notes off the chord on the beat.
+- **Occasional chords:** how many notes a track sounds at once is its role's (`Realizer`). As a note's state, a note,
+  two or the chord, leaned by the beat's accent, the energy and the landings, the melody would play a double stop on
+  an accent, a guitar a power chord where a section lands, the bass a chord now and then. Measured by: the notes
+  sounding at once by role, on accents and off.
+- **Articulations:** a finger, pick or slap bass, a muted guitar or its harmonics are General MIDI programs of their
+  own. An instrument's articulations as data, picked as a drum's stroke is (`DrumStrokes`: the song's, changed by a
+  section and by a bar of a later letter, the lowest layer winning), a program change where it changes; the playing
+  should follow, such as octaves popped in slap and short notes muted, or it is only another sound.
+- **Solos** (after sections with a role): an appearance of a section in which the melody rests and a solo line
+  improvises over its chords, more (`LinePattern.Mutate`), busier and over a wider range, the other parts thinned; a
+  bass solo by the bass's profile loosened. Special solo instruments by a pool of their own. The form decides which
+  appearance is a solo, by the section's role.
+
+## Groove
+
+- **Swing:** every note lands on the grid, tuplets aside. A song's swing, drawn and leaned conventional towards none,
+  would delay the notes off the 8ths (or the 16ths, by the song's) by a fraction of the way to the next, a state that
+  generation decides and `Render` plays, every track alike, the drums perhaps more than the chords. Measured by: the
+  swing drawn by conventionality and tempo, and no two notes of a track crossing.
+- **Timing by role,** later: the backbeat a little late, the hi-hat on top, should swing alone sound stiff; plain
+  doubling needs it.
+- **Half time and double time:** a section whose drums play at half or twice the song's tempo, the backbeat on 3 or
+  on every beat, over the same chords, drawn by the energy, half time the quieter and double time the louder. Measured
+  by: the energy of the sections that change, and the drums' notes a bar in them.
+
+## Styles
+
+Genre is the answer deferred more than once: the tresillo keeping time is conventional in reggaeton, dancehall or
+afrobeats; twin guitars, slap bass and the calls belong to some styles and not others. A style is a named bundle of
+leans on the draws the generator already has (`Tilt` by style: the drums' roles and figures, the instruments' pools,
+the scales, the swing, the harmonic rhythm, the meters), drawn per song, never a separate generator and never deciding
+a draw. Leaning towards none of them is what the songs are now. Measured by: per style, the measures its leans move
+against the unstyled songs.
+
+## Rhythm engine
+
+- **Long cycles:** a bar pattern is one bar long, so a slower cycle, such as the kick's slowed to two bars, plays its
+  first half and starts again at every bar line. Patterns as long as their cycle would let slow figures run whole,
+  such as a crash every two bars or a kick figure answered in the second bar. Overlapping polyrhythms and a chord of
+  two bars need them.
+- **Segments in any pattern:** bars that mix feels, such as three straight beats and a quintuplet beat; fills get them
+  first.
+- **Splitting a grouped cycle by its number** (a dotted 8th into three 16ths, one strong and two weak), where the
+  engine only halves: the 3-against-4 cross-rhythm as a full 16th stream, should the tresillo alone sound thin.
+- Choosing whole patterns by measured features (syncopation, evenness) as a family, should a target prove out of reach
+  of the dyadic engine; euclidean patterns that fit no cycle; a library of idioms such as clave and bossa; and drums
+  generated together, the snare avoiding the kick and the hi-hat filling the gaps.
 
 ## Melody
 
-- **Varied repeats (A′) and conventionality** (pending listening): a repeated bar is varied by a flat chance of 0.25
-  and a fixed strength (`PhraseSchemes.VariedRepeatChance`, `VariedRepeatVariation`). Leaning A′ was not built: which
-  way convention runs is unclear (a varied repeat is as conventional in songwriting as a literal loop is in electronic
-  music), and the scheme's choice already leans to more distinct bars in wild sections, so leaning A′ the same way
-  would push wild sections to no repetition and plain ones to loops. Should listening find plain sections too varied
-  or wild ones too literal, lean its chance alone, gently. The answer's lean (more mutation the wilder) awaits the same
-  listening.
 - **The contour shapes the melody weakly:** a bar's mean pitch follows the register it aims at about 0.2
   (`MelodyContourTest`). The echoes mask it (0.60 without them), as they replay a note's step whatever the aim: an
   echo run's octave or transposition chosen towards the aim would let a repeated bar follow the arch as a sequence.
   The wave (`MelodyLayers.Periods`) and the lean towards the aim (`MelodyLayers.AimOdds`) wait for this, then retune.
-- **Gaps before chord changes:** half the changes have no melody note in their last beat, a rest or a held note, where
-  a pitched fill at a phrase line, or a counter-melody, would move, should the gaps sound empty.
-- **Where it leaps:** a phrase or a section starts afresh at its aim, and a pattern's end wraps to its start, so the
-  melody leaps there about a third of the time, mostly after a rest; whether that sounds like a new phrase or a break
-  is to be heard. Two rules tried to close a phrase onto its start and were dropped: aiming the last bar back moved
-  little, and landing the last note near the start only moved the leap one note earlier.
-- **An endless song** (later, low priority): a mode in which a song goes on with sections generated afresh as it
-  plays, with no ending. The sections generated per appearance are a step towards it; the form's plan, its intro and
-  ending, and the song's single pass are not.
-
-## Velocity
-
-- **Listen** to how even the bass and the chords play; the dynamics and chord softening are tuned by measurement only.
-- **The bar layers** (a bar's and a bar pattern's loudness) add little, 3 to 5 from bar to bar; they could go, should
-  bars sound to jump.
 
 ## Architecture
 
@@ -90,7 +275,7 @@ A section may play in a parallel mode (`Scales.PickSection`). Left:
 - **Memory:** every `RealizedNote` keeps the state it was decided from, which a song holds on to (about 2 MB a song,
   8 MB with a trace). Recompute it on demand instead, should memory matter.
 
-Decided, and kept:
+## Decided, and kept
 
 - **The tables** that are how often musicians do a thing (the fills' spans and treatments, the landings, the intros
   and endings, the progressions' homes and root motions, the cadences, the scales, the bass's approaches and arrivals,
@@ -101,145 +286,8 @@ Decided, and kept:
   a kind of their own would add a mechanism for a mistake not made, and forbid a section's scale overriding a song's.
 - **The chords and the bass are not placed at generation** as the melody is: they already repeat their pitch classes
   where a section plays again, and `Realizer` only chooses their register.
-
-## Drums
-
-- **Listen** to the percussion songs, and to the wild end, where the kick or the snare in a role not theirs may sound
-  broken rather than bold (the snares keep time in 2 to 4% of their sections, a train beat).
-- **The clap's ghost notes,** soft hits around the backbeat, which a figure on the snare's feel may come near, only
-  should listening miss them; and the doubling chance (0.15), should bound drums be too rare to hear.
-- **The vibraslap's pickup,** the last beat before a landing, the one other place it would fit.
-- **Drums by appearance:** a section's later appearance changing its drums (see *Energy by appearance*).
-- **Strokes before a lift:** the snare going from its cross-stick to its head in the last phrase before a louder
-  section, an edit after assembly.
-
-Decided: the kit's leads among themselves, the snare and the hi-hat, keep their own feels, over the drums' shared
-layers; only the drums that do not lead follow a lead's (`FeelLeads`).
-
-## Instruments
-
-Three pitched tracks play, the chords, the melody and the bass, each on one instrument for the whole song and every
-section, all of them in every section.
-
-- **Panning:** no track is panned; the file sends no pan (CC 10), which the web player's synth plays. A place per
-  track drawn by its role, the bass and the kick in the middle, the chords and a pad spread, the drums as a kit
-  stands.
-- **Pitched roles and the arrangement:** more pitched roles, such as a pad, a second chord instrument or a
-  counter-melody (a third `LineProfile`), and a section's parts chosen as its drum kit is (`DrumKitGenerator.SelectKit`):
-  roles, the ones that lead and the ones that colour, which play leaned by the section's energy, so that a section
-  builds by what plays, not only by how loud. The one mechanism for the drums and the pitched tracks, where it can be.
-- **Harmonised doubling:** a line doubled a diatonic third or sixth above, as twin guitars play a riff, on a track of
-  its own panned against it: a line's notes are scale steps above the chord's root (`LinePlacement`), so the double is
-  two steps up. Per section, leaned by energy. Plain doubling, the same part twice, waits for timing by role (see
-  *Groove*): two copies with the same notes and timing only play louder.
-- **Occasional chords:** how many notes a track sounds at once is its role's (`Realizer`). As a note's state, a note,
-  two or the chord, leaned by the beat's accent, the energy and the landings, the melody would play a double stop on
-  an accent, a guitar a power chord where a section lands, the bass a chord now and then.
-- **Articulations:** a finger, pick or slap bass, a muted guitar or its harmonics are General MIDI programs of their
-  own. An instrument's articulations as data, picked as a drum's stroke is (`DrumStrokes`: the song's, changed by a
-  section and by a bar of a later letter, the lowest layer winning), a program change where it changes; the playing
-  should follow, such as octaves popped in slap and short notes muted, or it is only another sound.
-- **Solos:** an appearance of a section in which the melody rests and a solo line improvises over its chords, more
-  (`LinePattern.Mutate`), busier and over a wider range, the other parts thinned; a bass solo by the bass's profile
-  loosened. Special solo instruments by a pool of their own. Needs the arrangement and sections with a role: the form
-  decides which appearance is a solo.
-
-## Groove
-
-- **Swing:** every note lands on the grid, tuplets aside. A song's swing, drawn and leaned conventional towards none,
-  would delay the notes off the 8ths (or the 16ths, by the song's) by a fraction of the way to the next, a state that
-  generation decides and `Render` plays, every track alike, the drums perhaps more than the chords.
-- **Timing by role,** later: the backbeat a little late, the hi-hat on top, should swing alone sound stiff.
-
-## Listening data
-
-The corpus is measured against targets the plan set itself, and listening is one seed at a time. The web page already
-records how long each seed is listened to (`Analytics`, `SeedListening`); a rating on the page, stored with the seed
-and the version, would give a mark to hold the trace's values against (`StateTraceEntry.Value`), such as which
-endings, modes or drum setups are skipped. Later, should targets from outside be wanted: a few measures (the notes a
-bar by role, the intervals, the syncopation) of a corpus of real MIDI songs to tune towards.
-
-## Bass
-
-- **The pickup** always falls on the beat; the 8th before the bar line, leaned by convention, waits for listening.
-
-## Chords
-
-- **Harmonic rhythm:** a chord a bar, always (`Progressions`). A section's harmonic rhythm as its state, a chord for
-  half a bar, a bar or two bars, drawn and leaned by convention and energy, over the same 4-bar pattern, would change
-  how every section moves at no cost to the rhythm engine; the cadence's place and the lines' leading follow the
-  changes, not the bars.
-- **Jitter on in-between heights:** heights between two qualities, such as the third, could move a little from chord
-  to chord, so that a scale with more notes than seven picks sometimes one quality and sometimes the other. Worth it
-  once scales of other sizes than seven exist; in a 7-note scale it changes nothing.
-
-## Fills
-
-- **Tuplets of the other drums:** a run plays the snare's feel only, so where the hi-hat or the percussion plays a
-  tuplet and the snare does not, the run stays straight: wild songs play about 1.8 times the tuplet notes of plain
-  ones, down from 2.1. Reading the tuplet the drums play most would bring it back, should wild songs sound too
-  straight.
-- **How fast runs are:** a run is two ranks finer than the snare's groove, and the snare's backbeat is sparse, so
-  about three runs in ten play quarters or slower. Should slow runs sound weak, a run's finest rank could aim at the
-  finest the tempo allows, a step or two less, keeping only the groove's cycle and phase.
-- **Loudness:** a run's swell, its accents and a landing's hit are constants, where the groove's loudness is layers; a
-  fill's velocity layer would make them cumulative with the section's.
-- **Speed changes** are a rank more for one half of the span, a case of ranks changing along it (see *Segments in any
-  pattern*).
-- **Walks:** one way, turn, loop and random could be one walk with a few values, should they grow.
-- **Idioms the draws no longer tie together:** a lift is a half-beat run on any sounds, rarely the open hi-hat, and a
-  landing takes any cymbal sound.
-- **Sounds by convention:** runs and landings weigh a drum's sounds the same in a plain section as in a wild one; the
-  weights could lean by the section's conventionality, so plain sections crash and wild ones reach for the china and
-  the splash.
-- **The drummer's walks and busyness as state:** the favourite walk, a choice among four, would need a pool like the
-  chord pool's, and busyness, which weighs the spans and moves the fullness, would become a fullness and a span length
-  that the section's energy adds to.
-- **A drum's sounds together:** a drum is one track, whose note plays one sound, so a run never plays two toms
-  together. Notes of several sounds on one track would allow it.
-
-## Form
-
-- **A section's length:** every section plays its 4-bar pattern twice. Played once, twice or four times, drawn per
-  section and leaned by convention towards twice, with now and then a tag of 2 bars before a section changes, it would
-  vary the form with no change to the pattern.
-- **Sections with a role** (later, once the above are in): the form draws a section's role, a verse, a chorus, a
-  bridge, which leans its energy and its harmony, where now the energy is inferred from how often and where a section
-  plays (`SectionEnergy`).
-- **Fade-outs,** should listening ask: a ritardando into the fade, the drums fading first, or a tag after it.
-- **Intros of their own material,** such as a riff the song does not play otherwise.
-
-## Meter
-
-Every bar is four beats (`Meter.BarDuration`, read in about 50 places), and the rhythm engine halves from the bar.
-
-- **A short bar at a section change:** a bar of two beats before a section, now and then, as an edit after assembly.
-- **Bars of any length** (needed someday, low priority): a meter as state, a song's, a section's or a bar's, of any
-  number of beats or 16ths, odd ones too, such as 7/8 or 13/16, the bar grouped as a grouped cycle is (3+3+2), in
-  place of the fixed four beats: the engine halving from a bar's groups, the progression's chords, the phrase
-  scheme's bars and the fills' spans taking the bar's length.
-- **Overlapping polyrhythms** (with bars of any length): a figure of a length of its own, such as a riff of 23 16ths,
-  running on against the bar, as the kick and the guitar do against the hi-hat and the snare in Meshuggah, meeting the
-  bar again at a phrase's end. Needs patterns longer than a bar (see *Long cycles*) and the lengths no power of two;
-  it covers *Cross-rhythms across the phrase*.
-
-## Rhythm engine
-
-- **Mechanical repeats:** a repeated cycle replays its beats' values, accents included; should repeated figures sound
-  mechanical, a small fresh loudness draw could be added over the replayed accent.
-- **Long cycles:** a bar pattern is one bar long, so a slower cycle, such as the kick's slowed to two bars, plays its
-  first half and starts again at every bar line. Patterns as long as their cycle would let slow figures run whole,
-  such as a crash every two bars or a kick figure answered in the second bar. Worth it if slow figures sound wrong.
-- **Segments in any pattern:** bars that mix feels, such as three straight beats and a quintuplet beat; fills get them
-  first.
-- **Splitting a grouped cycle by its number** (a dotted 8th into three 16ths, one strong and two weak), where the
-  engine only halves: the 3-against-4 cross-rhythm as a full 16th stream, should the tresillo alone sound thin.
-- **Cross-rhythms across the phrase,** a grouped cycle running on across the bars, need *Long cycles*.
-- Choosing whole patterns by measured features (syncopation, evenness) as a family, should a target prove out of reach
-  of the dyadic engine; euclidean patterns that fit no cycle; a library of idioms such as clave and bossa; and drums
-  generated together, the snare avoiding the kick and the hi-hat filling the gaps.
-
-Decided: a drum keeping time plays grouped cycles (a tresillo) unleaned, 7% of the plainest sections' bar patterns to
-23% of the wildest, as the other drums do; the tresillo keeping time is conventional in reggaeton, dancehall or
-afrobeats, so its convention is the genres' to say. Should it be wanted, a role's lean on its drum's own layers, per
-section, tied to genre.
+- **The kit's leads among themselves,** the snare and the hi-hat, keep their own feels over the drums' shared layers;
+  only the drums that do not lead follow a lead's (`FeelLeads`).
+- **A drum keeping time plays grouped cycles (a tresillo) unleaned,** 7% of the plainest sections' bar patterns to 23%
+  of the wildest, as the other drums do: its convention is a style's to say (see *Styles*).
+- **Seeds are not stable across versions;** the version labels what was heard (see *Listening data*).
