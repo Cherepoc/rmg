@@ -223,7 +223,15 @@ internal sealed class SectionGenerator
         var plays = SectionLength.Draw(Stream(sectionId, SectionStream.Length), rhythm.Tilt, plan.Role);
         StateTrace.Record(TracePoints.SectionLength, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{plays}", plays);
         var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap).Repeat(plays);
-        ImmutableArray<SectionLine> lines = [..pitched.Select(x => x.Line).OfType<SectionLine>()];
+        // the parts the section leaves out, from a sequence of its own, the likelier the less energy it has
+        var resting = Arrangement.DrawRests(Stream(sectionId, SectionStream.Arrangement), tilt, plan.Role);
+        StateTrace.Record(TracePoints.Arrangement, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", resting.Order()), resting);
+        var silent = timeline.TrackTimelineMap.Keys.Where(x => resting.Contains(_tracks.Definitions[x].Role)).ToHashSet();
+        timeline = timeline.MapTrackEvents(silent.ToDictionary(
+            x => x,
+            _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes => EventTimeline.Create<StateMap>(notes.Duration))
+        ));
+        ImmutableArray<SectionLine> lines = [..pitched.Select(x => x.Line).OfType<SectionLine>().Where(x => !silent.Contains(x.Track))];
         var section = new GeneratedSection(
             timeline,
             rhythm,
@@ -233,7 +241,8 @@ internal sealed class SectionGenerator
             sectionRoles.Keys.ToImmutableDictionary(x => x, x => SectionRole(sectionRoles, x)),
             lines,
             plays,
-            doubles.ToImmutableDictionary(x => x.Key, x => x.Value.Lead)
+            doubles.ToImmutableDictionary(x => x.Key, x => x.Value.Lead),
+            !resting.Contains(TrackRole.Drum)
         );
         return section.Appear(0, 0);
     }
@@ -565,6 +574,7 @@ internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScal
 /// <param name="Lines">The section's lines, such as its melody, before they are placed, placed afresh every time it plays.</param>
 /// <param name="Plays">How many times the section plays its 4-bar pattern: once, twice or four times (<see cref="SectionLength" />).</param>
 /// <param name="Bindings">The drums bound to a lead, by their tracks, and their leads' tracks (<see cref="Doubling" />).</param>
+/// <param name="HasDrums">Whether the drums play in the section, rather than rest for a breakdown (<see cref="Arrangement" />).</param>
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
     RhythmicUnconventionality Rhythm,
@@ -574,7 +584,8 @@ internal sealed record GeneratedSection(
     ImmutableDictionary<int, DrumRole> DrumRoles,
     ImmutableArray<SectionLine> Lines,
     int Plays,
-    ImmutableDictionary<int, int> Bindings
+    ImmutableDictionary<int, int> Bindings,
+    bool HasDrums
 )
 {
     /// <summary>
@@ -634,5 +645,6 @@ internal enum SectionStream
     DrumBindings = 12,
     DrumFeels = 13,
     HarmonicRhythm = 14,
-    Length = 15
+    Length = 15,
+    Arrangement = 16
 }

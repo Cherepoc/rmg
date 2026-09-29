@@ -33,9 +33,7 @@ public sealed class FillGrooveTest
             // last before the ending only if it has one
             var map = song.Map;
             var decisions = song.Trace.Where(x => x.Point == TracePoints.FillDecision).ToArray();
-            var first = map.Intro.Duration > 0 ? 0 : 1;
-            var last = (int)Math.Round((map.Sections[^1].End - song.Origin) / Meter.PatternDuration) - (FormLayers.HasFinalChord(map.Ending.Kind) ? 0 : 1);
-            var lines = Enumerable.Range(first, last - first + 1).Select(x => song.Origin + x * Meter.PatternDuration).ToArray();
+            var lines = song.FillLines();
             if (lines.Length != decisions.Length)
                 throw new InvalidOperationException($"seed {song.Seed}: {lines.Length} lines, {decisions.Length} fill decisions");
 

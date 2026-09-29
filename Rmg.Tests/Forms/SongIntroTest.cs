@@ -71,10 +71,10 @@ public sealed class SongIntroTest
     [Test]
     public async Task AnIntroOfItsOwnBars_EndsWithTheBandLanding()
     {
-        var songs = Entries.Where(x => x.Map.Intro.Window.IsBefore).ToArray();
+        var songs = Entries.Where(x => x.Map.Intro.Window.IsBefore && x.HasDrums(x.Map.Sections[0].SectionId)).ToArray();
         foreach (var song in songs)
         {
-            // the band comes in on a crash, or now and then the vibraslap, pushed an 8th early now and then, or on the
+            // the band comes in on a crash, where the first section's drums play, or now and then the vibraslap, pushed an 8th early now and then, or on the
             // percussion into a section of it
             var landsOn = PercussionOnly(song, song.Map.Sections[0].SectionId)
                 ? DrumGroups.Percussion.Drums.SelectMany(x => x.ArticulationCodes)

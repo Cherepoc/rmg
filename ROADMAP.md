@@ -89,6 +89,8 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
   of a chord every two bars static? Does the silence where a clipped note leaves a change unstruck sound like a gap?
 - **The forms:** do the songs of a form sound like verses and choruses, the chorus lifting? A song is shorter, 80 bars
   of sections at the median against 116: too short?
+- **The rests:** do the breakdowns and the sections without a melody sound like an arrangement, or like parts gone
+  missing? Is a drumless section before a chorus a lift, as the fill out of it means it to be?
 - **The fade-outs:** a ritardando into the fade, the drums fading first, or a tag after it, if asked for.
 
 ## Meter
@@ -194,6 +196,15 @@ how many drums play 0.46 and 0.32, but with the drums' notes only 0.22 and 0.19.
 A section is made once and played again, only its melody improvised afresh as it recurs (`GeneratedSection.Appear`).
 What changes from one appearance to the next is one mechanism, and the arrangement is its main means, so these are
 planned together (P1):
+
+- **The parts that rest** (built): a section leaves out now and then its drums, for a breakdown, its bass, its chords or
+  its melody, for a section of the band alone, each the likelier the less energy it has, the melody all but never in a
+  verse, a pre-chorus or a chorus (`Arrangement`, 0.08, 0.05, 0.05 and 0.1, odds of 8 against a tune's roles resting);
+  where both the bass and the chords would rest, the chords play. No line leads into a section whose drums rest, nor
+  marks its phrases, and the fill out of it is the drums coming back. Over 200 corpus songs, the drums rest in 10% of
+  the sections, 15% of the quieter half and 4% of the louder, 18% of the bridges and 1% of the choruses; the melody in
+  10%, 26% of the bridges; the bass 7%, the chords 6% (`ArrangementReportTest`); within a song the energy follows the
+  bass's notes 0.16 and the melody's 0.38 (`SectionDynamicsTest`).
 
 - **Pitched roles and the arrangement:** more pitched roles, such as a pad, a second chord instrument or a
   counter-melody (a third `LineProfile`), and a section's parts chosen as its drum kit is (`DrumKitGenerator.SelectKit`):

@@ -8,7 +8,9 @@ chorus, with a pre-chorus now and then, a section for every role; the others, mo
 their rhythm, have 4-8 parts, each a sequence of 1-4 sections chosen from up to 3 distinct sections (in
 alternation, ping-pong or random order). No section follows itself. Every section
 plays its 4-bar pattern once, twice or four times, changes its chords every half bar, bar or two bars, and has a percussion kit and three pitched tracks (chords, melody, bass), each with its own
-rhythm and note patterns. A song plays at its own tempo, from 90 to about 175 BPM, most often 120, and about one in five swings. The bass plays
+rhythm and note patterns. A song plays at its own tempo, from 90 to about 175 BPM, most often 120, and about one in five swings. Now and then a
+section leaves out a part, the drums for a breakdown or the melody for a section of the band alone, the
+likelier the quieter it is. The bass plays
 in the middle of the stereo field, the melody near it and the chords to one side.
 
 Each song picks its own drums: one main snare (acoustic, electric, clap or sidestick; a sidestick can also

@@ -89,12 +89,7 @@ public sealed class FillTest
             var song = TestCorpus.Get(seed);
             var decisions = song.Trace.Where(x => x.Point == TracePoints.FillDecision).ToArray();
 
-            // a line between every two sections, one between every two plays of a section's pattern, one after the
-            // intro's bars, if it has any, and one before the ending's
-            var map = song.Map;
-            var sections = map.Sections.Length;
-            var phraseLines = map.Sections.Sum(x => (int)Math.Round((x.End - x.Start) / Meter.PatternDuration) - 1);
-            var expected = sections - 1 + phraseLines + (map.Intro.Duration > 0 ? 1 : 0) + (map.Ending.Kind == EndingKind.Open ? 0 : 1);
+            var expected = song.FillLines().Length;
             await Assert.That(decisions.Length).IsEqualTo(expected).Because($"seed {seed}");
             await Assert.That(decisions.All(x => x.Track == FillGenerator.DrumsTrace && x.Bar == 3)).IsTrue();
         }

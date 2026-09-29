@@ -9,6 +9,9 @@ internal static class TracePoints
     /// <summary>How often a section's chords change (a <see cref="HarmonicRhythm" />).</summary>
     public const string HarmonicRhythm = "Harmonic rhythm";
 
+    /// <summary>The parts a section leaves out (an <c>ImmutableHashSet</c> of <see cref="Songs.TrackRole" />s).</summary>
+    public const string Arrangement = "Arrangement";
+
     /// <summary>How many times a section plays its 4-bar pattern (an <c>int</c>).</summary>
     public const string SectionLength = "Section length";
 

@@ -152,7 +152,8 @@ public sealed class SongEndingTest
             ImmutableDictionary<int, DrumRole>.Empty,
             [],
             2,
-            ImmutableDictionary<int, int>.Empty
+            ImmutableDictionary<int, int>.Empty,
+            true
         );
 
         var ending = SongFormGenerator.CreateEnding(

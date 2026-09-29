@@ -112,7 +112,7 @@ internal sealed class SongFormGenerator
 
         ImmutableArray<FillSection> fillSections =
         [
-            ..map.Sections.Zip(sections, (span, section) => new FillSection(span.SectionId, span.Duration, section.Rhythm, section.Groove, section.Energy, section.IsPercussionOnly))
+            ..map.Sections.Zip(sections, (span, section) => new FillSection(span.SectionId, span.Duration, section.Rhythm, section.Groove, section.Energy, section.IsPercussionOnly, section.HasDrums))
         ];
         var edits = new TimelineEdits(_context, map);
         var lines = FillGenerator.GetSectionLines(fillSections, origin).ToBuilder();
@@ -121,7 +121,8 @@ internal sealed class SongFormGenerator
 
         switch (plan.Intro)
         {
-            case IntroKind.CountIn:
+            // the drums land where the first section starts, but in a first section whose drums rest
+            case IntroKind.CountIn when fillSections[0].HasDrums:
                 lines.Insert(0, new FillLine(origin, fillSections[0], fillSections[0], 0, HasFill: false));
                 break;
             case IntroKind.Entries:
@@ -134,12 +135,16 @@ internal sealed class SongFormGenerator
                 foreach (var track in entry.Tracks)
                     edits.Clear(track, windowStart, windowStart + entry.Entry);
 
-                if (plan.Window.IsBefore)
-                    lines.Insert(0, new FillLine(windowEnd, fillSections[0], fillSections[0], 0, IsLandingForced: true));
-                else
+                // where the first section's drums play, the line the window ends on, or a new one where no line is there,
+                // as where the section changes into one whose drums rest; in one whose drums rest, the parts simply come in
+                if (fillSections[0].HasDrums)
                 {
-                    var windowLine = lines.Select((x, i) => (x, i)).First(x => x.x.Position.IsEqualToByEpsilon(windowEnd)).i;
-                    lines[windowLine] = new FillLine(windowEnd, fillSections[0], fillSections[0], 0, IsLandingForced: true);
+                    var landing = new FillLine(windowEnd, fillSections[0], fillSections[0], 0, IsLandingForced: true);
+                    var windowLine = lines.Select((x, i) => (x, i)).FirstOrDefault(x => x.x.Position.IsEqualToByEpsilon(windowEnd), (null!, -1)).i;
+                    if (windowLine >= 0)
+                        lines[windowLine] = landing;
+                    else
+                        lines.Insert(lines.Count(x => x.Position < windowEnd), landing);
                 }
 
                 introDescription += $", {plan.Window.Bars} bars {(plan.Window.IsBefore ? "before the first section" : "into it")}: " +

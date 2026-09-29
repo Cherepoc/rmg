@@ -11,18 +11,17 @@ public sealed class FillLineTest
     /// <summary>A line's fill, and whether it is the line in the middle of a section.</summary>
     internal sealed record Line(bool IsPhrase, FillDecision Decision);
 
-    /// <summary>Every section's lines, the change into it and the one in its middle, with what their fills played.</summary>
+    /// <summary>Every section's lines, the change into it and those in its middle, with what their fills played.</summary>
     internal static IEnumerable<Line> ReadLines(CorpusSong song)
     {
-        // the decisions come in the song's order: the intro's line, if any, then every section's, then the ending's
+        // the decisions come in the song's order, a line each, the intro's and the ending's among them, which are left out
         var decisions = song.Trace.Where(x => x.Point == TracePoints.FillDecision).Select(x => (FillDecision)x.Value!).ToArray();
-        var index = song.Map.Intro.Duration > 0 ? 1 : 0;
-        for (var i = 0; i < song.Map.Sections.Length; i++)
+        var sections = song.Map.Sections;
+        foreach (var (position, decision) in song.FillLines().Zip(decisions))
         {
-            if (i > 0)
-                yield return new Line(false, decisions[index++]);
-            for (var line = Meter.PatternDuration; line < song.Map.Sections[i].Duration; line += Meter.PatternDuration)
-                yield return new Line(true, decisions[index++]);
+            if (position <= sections[0].Start + 1e-9 || position >= sections[^1].End - 1e-9)
+                continue;
+            yield return new Line(!sections.Any(x => Math.Abs(x.Start - position) < 1e-9), decision);
         }
     }
 

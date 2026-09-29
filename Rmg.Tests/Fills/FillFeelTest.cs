@@ -30,7 +30,7 @@ public sealed class FillFeelTest
         var context = new GenerationContext(1);
         var tracks = SongTracks.Create(context, context, new RhythmicUnconventionality(0.5), context, context, DrumSetup.KitAndPercussion);
         var song = TrackEventStateTimelineMap.Create<StateMap>(8 * 32);
-        var sections = Enumerable.Range(0, 8).Select(x => new FillSection(x, 32, new RhythmicUnconventionality(0.5), FillGrooves.FromSource(Rhythm(3)), 0, false)).ToArray();
+        var sections = Enumerable.Range(0, 8).Select(x => new FillSection(x, 32, new RhythmicUnconventionality(0.5), FillGrooves.FromSource(Rhythm(3)), 0, false, true)).ToArray();
         using var trace = StateTrace.Start();
 
         new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5)).Generate(song, FillGenerator.GetSectionLines(sections));

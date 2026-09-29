@@ -15,7 +15,7 @@ public sealed class PercussionSectionsTest
         foreach (var song in TestCorpus.Range(100))
         {
             var only = song.Trace.Where(x => x.Point == TracePoints.PercussionOnly).ToDictionary(x => x.Section, x => (bool)x.Value!);
-            foreach (var span in song.Map.Sections.Where(x => only[x.SectionId]))
+            foreach (var span in song.Map.Sections.Where(x => only[x.SectionId] && song.HasDrums(x.SectionId)))
             {
                 sections++;
                 var kitNotes = song.Song.Notes!

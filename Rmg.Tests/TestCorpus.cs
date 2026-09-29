@@ -55,6 +55,30 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     /// <summary>Where the song's chords change, as its sections have them.</summary>
     public double[] ChordChanges => [..Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)];
 
+    /// <summary>Whether a section's drums play, rather than rest for a breakdown (<see cref="Arrangement" />).</summary>
+    public bool HasDrums(int sectionId) =>
+        !((ImmutableHashSet<TrackRole>)Trace.First(x => x.Point == TracePoints.Arrangement && x.Section == sectionId).Value!).Contains(TrackRole.Drum);
+
+    /// <summary>
+    ///     Where the drums mark a line, as the song puts them: at every pattern from the first section on, the first after
+    ///     the intro only if it has one, and the last before the ending only if it has one; but for a line into a section
+    ///     whose drums rest, or in one, where an intro's window into the first section ends on its own line.
+    /// </summary>
+    public double[] FillLines()
+    {
+        var first = Map.Intro.Duration > 0 ? 0 : 1;
+        var last = (int)Math.Round((Map.Sections[^1].End - Origin) / Meter.PatternDuration) - (FormLayers.HasFinalChord(Map.Ending.Kind) ? 0 : 1);
+        var windowEnd = Map.Intro.Kind == IntroKind.Entries && !Map.Intro.Window.IsBefore ? Origin + Map.Intro.Window.Bars * Meter.BarDuration : double.NaN;
+        return
+        [
+            ..Enumerable.Range(first, last - first + 1)
+                .Select(x => Origin + x * Meter.PatternDuration)
+                .Where(x => x >= Map.Sections[^1].End - 1e-9
+                            || HasDrums(Map.Sections.Last(s => s.Start <= x + 1e-9).SectionId)
+                            || Math.Abs(x - windowEnd) < 1e-9 && HasDrums(Map.Sections[0].SectionId))
+        ];
+    }
+
     /// <summary>Where the first section starts, after any bars of an intro.</summary>
     public double Origin => Map.Origin;
 

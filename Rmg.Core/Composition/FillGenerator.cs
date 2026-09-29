@@ -86,12 +86,13 @@ internal sealed class FillGenerator
         var lines = ImmutableArray.CreateBuilder<FillLine>();
         for (var i = 0; i < sections.Count; i++)
         {
-            // the fill before a line belongs to the section it ends
-            if (i > 0)
+            // the fill before a line belongs to the section it ends, one out of a breakdown the drums coming back; no line
+            // leads into a section whose drums rest, nor marks its phrases
+            if (i > 0 && sections[i].HasDrums)
                 lines.Add(new FillLine(start, sections[i - 1], sections[i], 0));
 
             for (var line = start + Meter.PatternDuration;
-                 line < start + sections[i].Duration;
+                 sections[i].HasDrums && line < start + sections[i].Duration;
                  line += Meter.PatternDuration)
                 lines.Add(new FillLine(line, sections[i], sections[i], FillLayers.PhraseWeight));
 
@@ -480,7 +481,8 @@ internal sealed record FillSection(
     RhythmicUnconventionality Rhythm,
     FillGrooves Groove,
     double Energy,
-    bool IsPercussionOnly
+    bool IsPercussionOnly,
+    bool HasDrums
 );
 
 /// <summary>
