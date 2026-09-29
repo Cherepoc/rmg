@@ -140,3 +140,45 @@ public sealed class BassArrivalReportTest
         await Task.CompletedTask;
     }
 }
+
+/// <summary>
+///     How the bass line moves: its mean move from note to note, how many of its moves leap a fifth or more and an
+///     octave or more, how far a song's bass spans, and how much of a recurring section's bass plays the pitches of its
+///     first appearance.
+/// </summary>
+public sealed class BassLineReportTest
+{
+    private const int SongCount = 100;
+
+    [Test]
+    [Explicit]
+    public async Task Report()
+    {
+        var moves = new List<int>();
+        var spans = new List<int>();
+        int recurring = 0, recurringSame = 0;
+        foreach (var song in TestCorpus.Range(SongCount))
+        {
+            var bass = song.Song.Notes![SongTracks.BassTrack].ToArray();
+            moves.AddRange(bass.Zip(bass.Skip(1), (a, b) => Math.Abs(b.Value.Pitches[0] - a.Value.Pitches[0])));
+            spans.Add(bass.Max(x => x.Value.Pitches[0]) - bass.Min(x => x.Value.Pitches[0]));
+            var pitches = bass.ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0]);
+            var firsts = song.Map.Sections.GroupBy(x => x.SectionId).ToDictionary(x => x.Key, x => x.First());
+            foreach (var span in song.Map.Sections.Where(x => x != firsts[x.SectionId]))
+            {
+                var first = firsts[span.SectionId];
+                foreach (var (position, pitch) in pitches.Where(x => x.Key >= first.Start && x.Key < first.End))
+                    if (pitches.TryGetValue(Math.Round(span.Start + position - first.Start, 6), out var again))
+                    {
+                        recurring++;
+                        recurringSame += again == pitch ? 1 : 0;
+                    }
+            }
+        }
+
+        Console.WriteLine($"bass: mean move {moves.Average():F2} semitones, a fifth or more {moves.Count(x => x >= 7) / (double)moves.Count:P1}, " +
+                          $"an octave or more {moves.Count(x => x >= 12) / (double)moves.Count:P1}; a song's bass spans {spans.Average():F1} semitones, {spans.Max()} at most; " +
+                          $"a recurring section plays its first appearance's pitches {recurringSame / (double)recurring:P1}");
+        await Task.CompletedTask;
+    }
+}

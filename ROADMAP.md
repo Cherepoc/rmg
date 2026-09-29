@@ -226,7 +226,13 @@ Smaller, when the code is next touched:
   a melody note does (a chord note up, down or the root, a scale step between on a weak beat, a note key so that a
   riff repeats), in place of the walks of the chord root and the chord note drawn as fractions; the root offset then
   carries the harmony alone, whose roots are scale steps written as sevenths to be rounded back, and could be whole
-  steps. Worth it once the bass's lines want more say than their leading and landing give them.
+  steps. Worth it once the bass's lines want more say than their leading and landing give them. Its octave nearest
+  the note before is its line's rule, not a choice on top of it, as the melody's octave per bar was: its draws give
+  pitch classes, the chord note's walk going round the chord across octaves, and without the rule every note in the
+  register its chord gives it leapt a fifth or more 35% of the time and an octave 18%, against 6% and 0.1%, over 100
+  corpus songs (`BassLineReportTest`), where a recurring section played its first appearance's pitches 99% of the
+  time against 90%; kept. Exact repeats would come of starting the line afresh at a section's first note, or of the
+  second stage's moves.
 - **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 - **Memory:** every `RealizedNote` keeps the state it was decided from, which a song now holds on to (about 2 MB a
   song, 8 MB with a trace). Recompute it on demand instead, should memory matter.
