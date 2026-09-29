@@ -13,8 +13,8 @@ public static class EventStoreSummary
         var since = EventStore.Day(now.AddDays(-(days - 1)));
 
         using var connection = store.OpenForReading();
-        var ratings = Ratings(connection, since);
-        var ratedVersion = ratings.Select(x => x.Version).Distinct().OrderByDescending(x => x, VersionOrder).FirstOrDefault();
+        var ratings = Ratings(connection);
+        var ratedVersion = ratings.Where(x => x.Likes + x.Dislikes > 0).Select(x => x.Version).Distinct().OrderByDescending(x => x, VersionOrder).FirstOrDefault();
 
         return new AnalyticsSummary(
             days,
@@ -145,7 +145,7 @@ public static class EventStoreSummary
     ///     How each songs' version was listened to, so that a change to the songs shows in how they are heard. A
     ///     listen is a visitor's song, its stretches of playing added up, so pausing does not count it twice.
     /// </summary>
-    private static List<VersionListening> Versions(SqliteConnection connection, string since, List<Rating> ratings)
+    private static List<VersionListening> Versions(SqliteConnection connection, string since, List<SongRating> ratings)
     {
         using var counting = connection.CreateCommand();
         counting.CommandText = $"""
@@ -196,51 +196,70 @@ public static class EventStoreSummary
                     seconds.Count,
                     seconds.Count(s => s >= 30),
                     seconds.Count == 0 ? null : Math.Round(At(seconds, 0.5), 1),
-                    ratings.Count(r => r.Version == x.Version && r.IsLike),
-                    ratings.Count(r => r.Version == x.Version && !r.IsLike)
+                    ratings.Where(r => r.Version == x.Version).Sum(r => r.Likes),
+                    ratings.Where(r => r.Version == x.Version).Sum(r => r.Dislikes)
                 );
             })
             .ToList();
     }
 
-    /// <summary>A visitor's latest rating of a song, where it is a like or a dislike rather than taken back.</summary>
-    private sealed record Rating(string Version, long Seed, bool IsLike);
+    /// <summary>A song's likes and dislikes in a version.</summary>
+    private sealed record SongRating(string Version, long Seed, int Likes, int Dislikes);
 
     /// <summary>How many rated songs the dashboard shows.</summary>
     private const int RatedSeedsShown = 20;
 
-    /// <summary>Every visitor's latest rating of every song, in the window, the ones taken back left out.</summary>
-    private static List<Rating> Ratings(SqliteConnection connection, string since)
+    /// <summary>
+    ///     Every song's likes and dislikes, from every rating kept, not only the window's: a rating is a change, such as
+    ///     "up>down", from what the browser had to what it has, so a song's likes are the changes to a like less the
+    ///     changes from one, whoever and whenever they came from. A visitor is a hash of a day, so it could not tell
+    ///     that a dislike today takes back yesterday's like; the change can. A change whose rating before it is no
+    ///     longer kept would take more than there is, so a count stops at none.
+    /// </summary>
+    private static List<SongRating> Ratings(SqliteConnection connection)
     {
         using var command = connection.CreateCommand();
         command.CommandText = $"""
             SELECT version, seed, detail
-            FROM events AS rating
-            WHERE name = '{EventNames.Rated}' AND version IS NOT NULL AND seed IS NOT NULL AND day >= $since
-              AND id = (SELECT MAX(id) FROM events
-                        WHERE name = '{EventNames.Rated}' AND version = rating.version AND seed = rating.seed
-                          AND visitor = rating.visitor AND day >= $since)
+            FROM events
+            WHERE name = '{EventNames.Rated}' AND version IS NOT NULL AND seed IS NOT NULL AND detail IS NOT NULL
             """;
-        command.Parameters.AddWithValue("$since", since);
 
-        var ratings = new List<Rating>();
-        using var reader = command.ExecuteReader();
-        while (reader.Read())
-        {
-            var detail = reader.IsDBNull(2) ? null : reader.GetString(2);
-            if (detail is "up" or "down") ratings.Add(new Rating(reader.GetString(0), reader.GetInt64(1), detail == "up"));
-        }
+        var counts = new Dictionary<(string Version, long Seed), (int Likes, int Dislikes)>();
+        using (var reader = command.ExecuteReader())
+            while (reader.Read())
+            {
+                if (!TryReadChange(reader.GetString(2), out var from, out var to)) continue;
 
-        return ratings;
+                var key = (reader.GetString(0), reader.GetInt64(1));
+                var (likes, dislikes) = counts.GetValueOrDefault(key);
+                counts[key] = (likes + Count(to, "up") - Count(from, "up"), dislikes + Count(to, "down") - Count(from, "down"));
+            }
+
+        return counts
+            .Select(x => new SongRating(x.Key.Version, x.Key.Seed, Math.Max(0, x.Value.Likes), Math.Max(0, x.Value.Dislikes)))
+            .ToList();
+
+        static int Count(string rating, string counted) => rating == counted ? 1 : 0;
+    }
+
+    /// <summary>A rating's change, "from>to", each "up", "down" or "none", and never the same; anything else is not one.</summary>
+    private static bool TryReadChange(string detail, out string from, out string to)
+    {
+        string[] ratings = ["up", "down", "none"];
+        var parts = detail.Split('>');
+        from = parts[0];
+        to = parts.Length == 2 ? parts[1] : "";
+
+        return parts.Length == 2 && ratings.Contains(from) && ratings.Contains(to) && from != to;
     }
 
     /// <summary>The songs of a version rated, the most liked first and the most disliked last.</summary>
-    private static List<RatedSeed> RatedSeeds(List<Rating> ratings, string? version)
+    private static List<RatedSeed> RatedSeeds(List<SongRating> ratings, string? version)
     {
         var rated = ratings
-            .Where(x => x.Version == version)
-            .GroupBy(x => x.Seed)
-            .Select(x => new RatedSeed(x.Key, x.Count(r => r.IsLike), x.Count(r => !r.IsLike)))
+            .Where(x => x.Version == version && x.Likes + x.Dislikes > 0)
+            .Select(x => new RatedSeed(x.Seed, x.Likes, x.Dislikes))
             .OrderByDescending(x => x.Likes - x.Dislikes)
             .ThenByDescending(x => x.Likes)
             .ThenBy(x => x.Seed)

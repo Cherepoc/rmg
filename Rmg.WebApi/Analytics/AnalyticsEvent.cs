@@ -19,7 +19,10 @@ public static class EventNames
     public const string ExportedMp3 = "export_mp3";
     public const string Shared = "shared";
 
-    /// <summary>A song liked or not: its detail "up", "down", or "none" for a rating taken back.</summary>
+    /// <summary>
+    ///     A song's rating changed, its detail the change, "from>to", each "up", "down" or "none": a like is "none>up", a
+    ///     like turned into a dislike "up>down" and taken back "down>none".
+    /// </summary>
     public const string Rated = "rated";
 
     private static readonly HashSet<string> Known =

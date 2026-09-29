@@ -24,8 +24,8 @@ public sealed record SeedListening(long Seed, double Seconds, int Plays);
 /// <param name="Listens">Songs listened to, a visitor's song once however often it was paused.</param>
 /// <param name="ListensPast30s">Of those, the ones listened to for 30 seconds or more in all.</param>
 /// <param name="MedianSeconds">How long a song was listened to in all, in the middle of them.</param>
-/// <param name="Likes">Songs liked, a visitor's latest rating of a song counted once.</param>
-/// <param name="Dislikes">Songs disliked, likewise.</param>
+/// <param name="Likes">Likes of its songs, as they stand now, from every rating kept.</param>
+/// <param name="Dislikes">Dislikes of its songs, likewise.</param>
 public sealed record VersionListening(
     string Version,
     string FirstDay,
@@ -39,8 +39,8 @@ public sealed record VersionListening(
 );
 
 /// <param name="Seed">The song, in <see cref="AnalyticsSummary.RatedVersion" />.</param>
-/// <param name="Likes">Visitors whose latest rating of it is a like.</param>
-/// <param name="Dislikes">Visitors whose latest rating of it is a dislike.</param>
+/// <param name="Likes">Its likes as they stand now: the changes to a like less the changes from one.</param>
+/// <param name="Dislikes">Its dislikes, likewise.</param>
 public sealed record RatedSeed(long Seed, int Likes, int Dislikes);
 
 /// <param name="Name">What failed.</param>

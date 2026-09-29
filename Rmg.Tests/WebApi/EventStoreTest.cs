@@ -289,21 +289,63 @@ public sealed class EventStoreTest : IDisposable
     }
 
     [Test]
-    public async Task AVisitorsLatestRatingOfASong_IsTheOneCounted()
+    public async Task ARatingChanged_CountsAsItStandsNow_WhoeverAndWheneverChangedIt()
     {
-        Write(EventNames.Rated, seed: 1, detail: "up", version: "0.5.000");
-        Write(EventNames.Rated, seed: 1, detail: "down", version: "0.5.000");
-        Write(EventNames.Rated, seed: 1, detail: "up", version: "0.5.000", visitor: "somebody else");
-        Write(EventNames.Rated, seed: 2, detail: "up", version: "0.5.000");
-        Write(EventNames.Rated, seed: 2, detail: "none", version: "0.5.000");
-        Write(EventNames.Rated, seed: 3, detail: "up", version: "0.4.999");
+        // liked yesterday, as a visitor of yesterday's hash, and turned into a dislike today, as another
+        Write(EventNames.Rated, seed: 1, detail: "none>up", version: "0.5.000", visitor: "yesterday", at: Now.AddDays(-1));
+        Write(EventNames.Rated, seed: 1, detail: "up>down", version: "0.5.000", visitor: "today");
+        // liked, and taken back the day after
+        Write(EventNames.Rated, seed: 2, detail: "none>up", version: "0.5.000", visitor: "yesterday", at: Now.AddDays(-1));
+        Write(EventNames.Rated, seed: 2, detail: "up>none", version: "0.5.000", visitor: "today");
+        // liked by two
+        Write(EventNames.Rated, seed: 3, detail: "none>up", version: "0.5.000");
+        Write(EventNames.Rated, seed: 3, detail: "none>up", version: "0.5.000", visitor: "somebody else");
 
         var summary = _store.Summarise(Now, 30);
         var version = summary.Versions.Single(x => x.Version == "0.5.000");
 
-        await Assert.That(version.Likes).IsEqualTo(1);
+        await Assert.That(version.Likes).IsEqualTo(2);
         await Assert.That(version.Dislikes).IsEqualTo(1);
         await Assert.That(summary.RatedVersion).IsEqualTo("0.5.000");
-        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed(1, 1, 1) });
+        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed(3, 2, 0), new RatedSeed(1, 0, 1) });
+    }
+
+    [Test]
+    public async Task ARatingBeforeTheWindow_StillCounts()
+    {
+        Write(EventNames.Played, version: "0.5.000");
+        Write(EventNames.Rated, seed: 1, detail: "none>up", version: "0.5.000", at: Now.AddDays(-20));
+
+        var version = _store.Summarise(Now, 7).Versions.Single();
+
+        await Assert.That(version.Likes).IsEqualTo(1);
+    }
+
+    [Test]
+    [Arguments("up")]
+    [Arguments("up>up")]
+    [Arguments("up>sideways")]
+    [Arguments("none>up>down")]
+    public async Task AnythingButAChangeOfRating_IsNotCounted(string detail)
+    {
+        Write(EventNames.Played, version: "0.5.000");
+        Write(EventNames.Rated, seed: 1, detail: detail, version: "0.5.000");
+
+        var summary = _store.Summarise(Now, 30);
+
+        await Assert.That(summary.Versions.Single().Likes).IsEqualTo(0);
+        await Assert.That(summary.Rated).IsEmpty();
+        await Assert.That(summary.RatedVersion).IsNull();
+    }
+
+    [Test]
+    public async Task AChangeFromARatingNoLongerKept_TakesNoMoreThanThereIs()
+    {
+        Write(EventNames.Rated, seed: 1, detail: "up>down", version: "0.5.000");
+
+        var rated = _store.Summarise(Now, 30).Rated.Single();
+
+        await Assert.That(rated.Likes).IsEqualTo(0);
+        await Assert.That(rated.Dislikes).IsEqualTo(1);
     }
 }

@@ -1544,8 +1544,8 @@ window.addEventListener("pagehide", reportListening);
 
 /**
  *     The song rated, liked or not, which is what tells one version of the songs from another better than how long
- *     they were listened to. Pressing the pressed one takes the rating back; the latest a visitor gives is the one
- *     counted. Sent whether the page counts or not, since pressing it is saying so on purpose.
+ *     they were listened to. Pressing the pressed one takes the rating back. Sent as the change from the rating this
+ *     browser had, whether the page counts or not, since pressing it is saying so on purpose.
  */
 function rate(rating) {
     const seed = elements.seed.value;
@@ -1555,7 +1555,8 @@ function rate(rating) {
     const next = current === rating ? null : rating;
     keepRating(songVersion, seed, next);
     showRating(next);
-    tell("rated", { seed: Number(seed), detail: next ?? "none", version: songVersion });
+    // the change, rather than the rating, since the server has no one to tell today's rating from yesterday's by
+    tell("rated", { seed: Number(seed), detail: `${current ?? "none"}>${next ?? "none"}`, version: songVersion });
     announce(next === null ? "Rating taken back." : next === "up" ? "Liked." : "Disliked.");
 }
 
