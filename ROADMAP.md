@@ -11,23 +11,23 @@ measured before and after by a report test, by the measure its entry names.
 
 **Now** (P0), in this order:
 
-1. **A version** (see *Listening data*).
-2. **Panning** (see *Instruments*) and **swing** (see *Groove*): cheap, and heard in every song.
-3. **The meter as state,** every song still in four (see *Meter*).
-4. **A section's streams** (see *Architecture*), before the arrangement adds its draws.
-5. **Harmonic rhythm** (see *Chords*).
+1. **Panning** (see *Instruments*) and **swing** (see *Groove*): cheap, and heard in every song.
+2. **The meter as state,** every song still in four (see *Meter*).
+3. **A section's streams** (see *Architecture*), before the arrangement adds its draws.
+4. **Harmonic rhythm** (see *Chords*).
 
 **Next** (P1), in this order:
 
-6. **Sections with a role,** as the form (see *Form*).
-7. **A section's length** (see *Form*).
-8. **The energy in the pitched tracks** (see *Section dynamics*).
-9. **The arrangement, and energy by appearance** (see *Appearances*).
-10. **Pitched fills and the lift** (see *Fills*).
+5. **Sections with a role,** as the form (see *Form*).
+6. **A section's length** (see *Form*).
+7. **The energy in the pitched tracks** (see *Section dynamics*).
+8. **The arrangement, and energy by appearance** (see *Appearances*).
+9. **Pitched fills and the lift** (see *Fills*).
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
-**Later** (P2), roughly in this order: ratings (see *Listening data*), should the page have listeners enough;
+**Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs
+rated enough;
 occasional chords and a pentatonic melody (see *Instruments*, *Scales*); half time and double time (see *Groove*);
 the melody's contour (see *Melody*); styles (see *Styles*); other meters (see *Meter*); the song's memory (see
 *Architecture*), once the arrangement doubles the tracks.
@@ -40,21 +40,16 @@ fills' loudness and sounds by convention; note keys.
 
 ## Listening data
 
-The corpus is measured against targets the plan set itself, and listening is one seed at a time. The web page records
-how long each seed is listened to (`Analytics`, `SeedListening`), but not by which generator: a seed is another song in
-another version.
+A song's version (`VERSION`, `SongsVersion`: a number such as 0.5.001, which `deploy.sh` bumps and commits when the
+songs' fingerprint changes) is stored with every analytics event about a song, and the page rates songs, liked or
+not; the dashboard shows the listening and the ratings by version, and the songs of the latest one rated.
 
-- **A version** (P0): two values stamped at build by `deploy.sh`, shown on the page, written into the MIDI file's text
-  and stored with every analytics event that carries a seed. The commit, to find the code; and the songs' version, the
-  corpus's fingerprint (`CorpusFingerprintTest`, of the MIDI files rather than the notes, so that the tempo and the
-  fades count, over fewer songs should 200 slow the deploy), which changes only when the songs do, where the commit
-  changes 30 to 40 times a day, mostly leaving them as they were. Listening and ratings are compared by the songs'
-  version. It labels the data; the seeds stay free to change from version to version.
-- **Ratings** (P2, should the page have listeners enough: the dashboard says how many): a rating on the page (liked or
-  not, or 1 to 5), an analytics event of its own, stored with the seed and the version, and a report that holds the
-  ratings, and the time listened, of a version's seeds against the trace's values (`StateTraceEntry.Value`): which
-  endings, modes, drum setups or energies are liked or skipped. With one listener, it is the checklist with a button.
-  Measured by: ratings per version, enough to tell two versions apart.
+- **The ratings report** (P2, once the dashboard shows a few hundred songs rated in one version): an export of a
+  version's ratings and time listened (seed, rating, seconds), behind the dashboard's token, and an explicit report
+  test that reads it, keeps the seeds of the build's own version, generates them again with the trace and holds the
+  ratings against its values (`StateTraceEntry.Value`): which endings, intros, drum setups, modes, tempos, energies or
+  improvisations are liked or skipped, with their counts, so that a small sample shows itself. Measured by: ratings
+  per version, enough to tell two versions apart.
 - **Targets from outside** (P3): a few measures (the notes a bar by role, the intervals, the syncopation, the chord
   changes a bar) of a corpus of real MIDI songs to tune towards.
 

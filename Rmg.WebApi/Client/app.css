@@ -354,6 +354,22 @@ button.icon svg {
     margin-left: auto;
 }
 
+/* the song rated, which a pressed button shows as the accent, as the mixer's switches do */
+.rating {
+    display: flex;
+    gap: 4px;
+}
+
+.rating[hidden] {
+    display: none;
+}
+
+.rating button[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-text);
+}
+
 /* the song panel is played from, so a row of controls has a little more room than elsewhere */
 .song-row + .transport {
     margin-top: 16px;
@@ -782,6 +798,12 @@ footer a:hover {
 
     .transport .volume {
         flex-basis: 100%;
+    }
+
+    /* where the song can be rated, the rating and the volume share that second line */
+    .transport:has(.rating:not([hidden])) .volume {
+        flex-basis: auto;
+        margin-left: auto;
     }
 
     /* the instrument names are long, and the table has no room to spare on a phone */

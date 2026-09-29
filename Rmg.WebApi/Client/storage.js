@@ -4,6 +4,10 @@ const KEY = "current";
 const SETTING = "rmg.keep-soundfont";
 const AUTOPLAY = "rmg.autoplay";
 const HISTORY = "rmg.history";
+const RATINGS = "rmg.ratings";
+
+/** How many ratings the browser keeps, the oldest let go of first. */
+const RATINGS_KEPT = 500;
 
 export const isKeeping = () => readFlag(SETTING);
 export const setKeeping = (isOn) => writeFlag(SETTING, isOn);
@@ -55,6 +59,39 @@ export function keepHistory(seeds) {
         else localStorage.setItem(HISTORY, JSON.stringify(seeds));
     } catch {
         // a browser that will not remember the list simply shows what this visit has had
+    }
+}
+
+/**
+ *     How this browser rated a song, "up", "down" or null, by the songs' version and the seed, since the same seed
+ *     is another song in another version.
+ */
+export function recallRating(version, seed) {
+    const rating = readRatings()[`${version}:${seed}`];
+    return rating === "up" || rating === "down" ? rating : null;
+}
+
+export function keepRating(version, seed, rating) {
+    try {
+        const ratings = readRatings();
+        const key = `${version}:${seed}`;
+        delete ratings[key];
+        if (rating !== null) ratings[key] = rating;
+
+        // insertion order is age order, so the oldest go first
+        const kept = Object.entries(ratings).slice(-RATINGS_KEPT);
+        localStorage.setItem(RATINGS, JSON.stringify(Object.fromEntries(kept)));
+    } catch {
+        // a browser that will not remember a rating still sends it
+    }
+}
+
+function readRatings() {
+    try {
+        const kept = JSON.parse(localStorage.getItem(RATINGS) ?? "{}");
+        return kept !== null && typeof kept === "object" && !Array.isArray(kept) ? kept : {};
+    } catch {
+        return {};
     }
 }
 

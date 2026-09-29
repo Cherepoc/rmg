@@ -207,7 +207,8 @@ public sealed class EventStoreTest : IDisposable
         [
             EventNames.PageOpen, EventNames.SongGenerated, EventNames.SongFailed, EventNames.SoundFontReady,
             EventNames.SoundFontFailed, EventNames.AudioReady, EventNames.Played, EventNames.Listened,
-            EventNames.MixChanged, EventNames.DownloadedMidi, EventNames.ExportedMp3, EventNames.Shared
+            EventNames.MixChanged, EventNames.DownloadedMidi, EventNames.ExportedMp3, EventNames.Shared,
+            EventNames.Rated
         ];
 
         foreach (var name in sent) await Assert.That(EventNames.IsKnown(name)).IsTrue();
@@ -285,5 +286,24 @@ public sealed class EventStoreTest : IDisposable
             Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
             Directory.Delete(directory, true);
         }
+    }
+
+    [Test]
+    public async Task AVisitorsLatestRatingOfASong_IsTheOneCounted()
+    {
+        Write(EventNames.Rated, seed: 1, detail: "up", version: "0.5.000");
+        Write(EventNames.Rated, seed: 1, detail: "down", version: "0.5.000");
+        Write(EventNames.Rated, seed: 1, detail: "up", version: "0.5.000", visitor: "somebody else");
+        Write(EventNames.Rated, seed: 2, detail: "up", version: "0.5.000");
+        Write(EventNames.Rated, seed: 2, detail: "none", version: "0.5.000");
+        Write(EventNames.Rated, seed: 3, detail: "up", version: "0.4.999");
+
+        var summary = _store.Summarise(Now, 30);
+        var version = summary.Versions.Single(x => x.Version == "0.5.000");
+
+        await Assert.That(version.Likes).IsEqualTo(1);
+        await Assert.That(version.Dislikes).IsEqualTo(1);
+        await Assert.That(summary.RatedVersion).IsEqualTo("0.5.000");
+        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed(1, 1, 1) });
     }
 }

@@ -25,6 +25,9 @@ const isRefused = (() => {
     }
 })();
 
+/** Whether what the page tells the server arrives at all, which a control that only tells it has to know. */
+export const isCounting = () => !isRefused;
+
 const opened = performance.now();
 
 /** How long the page has been open, in whole milliseconds, which is what every `ms` here means. */

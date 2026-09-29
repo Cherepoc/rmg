@@ -13,6 +13,8 @@ public static class EventStoreSummary
         var since = EventStore.Day(now.AddDays(-(days - 1)));
 
         using var connection = store.OpenForReading();
+        var ratings = Ratings(connection, since);
+        var ratedVersion = ratings.Select(x => x.Version).Distinct().OrderByDescending(x => x, VersionOrder).FirstOrDefault();
 
         return new AnalyticsSummary(
             days,
@@ -24,7 +26,9 @@ public static class EventStoreSummary
             Funnel(connection, since),
             Daily(connection, since),
             Seeds(connection, since),
-            Versions(connection, since),
+            Versions(connection, since, ratings),
+            ratedVersion,
+            RatedSeeds(ratings, ratedVersion),
             Failures(connection, since),
             Count(connection, "SELECT COUNT(*) FROM events WHERE day >= $since", since)
         );
@@ -141,7 +145,7 @@ public static class EventStoreSummary
     ///     How each songs' version was listened to, so that a change to the songs shows in how they are heard. A
     ///     listen is a visitor's song, its stretches of playing added up, so pausing does not count it twice.
     /// </summary>
-    private static List<VersionListening> Versions(SqliteConnection connection, string since)
+    private static List<VersionListening> Versions(SqliteConnection connection, string since, List<Rating> ratings)
     {
         using var counting = connection.CreateCommand();
         counting.CommandText = $"""
@@ -191,10 +195,61 @@ public static class EventStoreSummary
                     x.Plays,
                     seconds.Count,
                     seconds.Count(s => s >= 30),
-                    seconds.Count == 0 ? null : Math.Round(At(seconds, 0.5), 1)
+                    seconds.Count == 0 ? null : Math.Round(At(seconds, 0.5), 1),
+                    ratings.Count(r => r.Version == x.Version && r.IsLike),
+                    ratings.Count(r => r.Version == x.Version && !r.IsLike)
                 );
             })
             .ToList();
+    }
+
+    /// <summary>A visitor's latest rating of a song, where it is a like or a dislike rather than taken back.</summary>
+    private sealed record Rating(string Version, long Seed, bool IsLike);
+
+    /// <summary>How many rated songs the dashboard shows.</summary>
+    private const int RatedSeedsShown = 20;
+
+    /// <summary>Every visitor's latest rating of every song, in the window, the ones taken back left out.</summary>
+    private static List<Rating> Ratings(SqliteConnection connection, string since)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = $"""
+            SELECT version, seed, detail
+            FROM events AS rating
+            WHERE name = '{EventNames.Rated}' AND version IS NOT NULL AND seed IS NOT NULL AND day >= $since
+              AND id = (SELECT MAX(id) FROM events
+                        WHERE name = '{EventNames.Rated}' AND version = rating.version AND seed = rating.seed
+                          AND visitor = rating.visitor AND day >= $since)
+            """;
+        command.Parameters.AddWithValue("$since", since);
+
+        var ratings = new List<Rating>();
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            var detail = reader.IsDBNull(2) ? null : reader.GetString(2);
+            if (detail is "up" or "down") ratings.Add(new Rating(reader.GetString(0), reader.GetInt64(1), detail == "up"));
+        }
+
+        return ratings;
+    }
+
+    /// <summary>The songs of a version rated, the most liked first and the most disliked last.</summary>
+    private static List<RatedSeed> RatedSeeds(List<Rating> ratings, string? version)
+    {
+        var rated = ratings
+            .Where(x => x.Version == version)
+            .GroupBy(x => x.Seed)
+            .Select(x => new RatedSeed(x.Key, x.Count(r => r.IsLike), x.Count(r => !r.IsLike)))
+            .OrderByDescending(x => x.Likes - x.Dislikes)
+            .ThenByDescending(x => x.Likes)
+            .ThenBy(x => x.Seed)
+            .ToList();
+
+        // the ends are what is worth hearing again, so a long list keeps both of them and drops its middle
+        return rated.Count <= RatedSeedsShown
+            ? rated
+            : [..rated.Take(RatedSeedsShown / 2), ..rated.TakeLast(RatedSeedsShown / 2)];
     }
 
     /// <summary>Versions by their numbers, so that 0.5.1000 comes after 0.5.999, where text would put it before.</summary>

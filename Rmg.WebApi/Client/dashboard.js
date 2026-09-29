@@ -32,6 +32,9 @@ const elements = {
     seeds: document.getElementById("seeds"),
     versionsPanel: document.getElementById("versions-panel"),
     versions: document.getElementById("versions"),
+    ratedPanel: document.getElementById("rated-panel"),
+    ratedHint: document.getElementById("rated-hint"),
+    rated: document.getElementById("rated"),
     failuresPanel: document.getElementById("failures-panel"),
     failures: document.getElementById("failures"),
 };
@@ -96,7 +99,7 @@ function setStatus(message, isError = false) {
 
 function showPanels(isShown) {
     for (const panel of [elements.headline, elements.timings, elements.funnelPanel,
-        elements.dailyPanel, elements.seedsPanel, elements.versionsPanel, elements.failuresPanel])
+        elements.dailyPanel, elements.seedsPanel, elements.versionsPanel, elements.ratedPanel, elements.failuresPanel])
         panel.hidden = !isShown;
 
     elements.controls.hidden = !isShown;
@@ -205,6 +208,7 @@ function draw() {
     drawDailyTable();
     drawSeeds();
     drawVersions();
+    drawRated();
     drawFailures();
 }
 
@@ -533,7 +537,7 @@ function drawVersions() {
     }
 
     elements.versions.replaceChildren(table(
-        ["Version", "Since", "Songs", "Plays", "Listens", "Past 30s", "Median"],
+        ["Version", "Since", "Songs", "Plays", "Listens", "Past 30s", "Median", "Liked", "Disliked"],
         summary.versions.map((version) => [
             version.version,
             version.firstDay,
@@ -542,7 +546,23 @@ function drawVersions() {
             String(version.listens),
             percent(version.listensPast30s, version.listens),
             seconds(version.medianSeconds),
+            String(version.likes),
+            String(version.dislikes),
         ])
+    ));
+}
+
+function drawRated() {
+    if (summary.rated.length === 0) {
+        elements.ratedHint.textContent = "The songs of the latest version rated, the most liked first.";
+        elements.rated.replaceChildren(empty("No song has been rated yet."));
+        return;
+    }
+
+    elements.ratedHint.textContent = `The songs of ${summary.ratedVersion} rated, the most liked first. A seed is this song only in this version.`;
+    elements.rated.replaceChildren(table(
+        ["Seed", "Liked", "Disliked"],
+        summary.rated.map((seed) => [String(seed.seed), String(seed.likes), String(seed.dislikes)])
     ));
 }
 

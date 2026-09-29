@@ -40,6 +40,9 @@ dotnet run --project Rmg -- [options]
   -n, --count <n>      Number of songs to generate, at least 1 (default: 1)
   -s, --seed <n>       Seed of the randomizer that provides a seed for every song
                        (default: random, printed so the run can be repeated)
+  --version            Print RMG's songs' version and commit
+  --fingerprint        Print the fingerprint of the songs of the corpus's seeds, which changes
+                       when the songs do
   -h, --help           Show this help
 ```
 
@@ -48,6 +51,15 @@ files, and a larger `--count` only adds songs to the end. Files are named `song-
 
 Exit codes: `0` success, `1` at least one song failed (its seed is printed and the rest still run),
 `2` invalid arguments or output directory.
+
+## Versions
+
+The songs' version, such as `0.5.001`, is in `VERSION`. `deploy.sh` compares the songs' fingerprint
+(`--fingerprint`) with the one recorded there and, when the songs have changed, bumps the last number and
+commits the file; raise the first two by hand for a change worth naming. The version is written into every
+MIDI file, with the commit and the seed, shown on the page, and stored with the page's analytics, so that a
+seed listened to or rated is known by the songs it was heard as. The deploy refuses a working tree with
+changes that are not committed.
 
 ## Web service
 

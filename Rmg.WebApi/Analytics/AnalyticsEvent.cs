@@ -19,10 +19,13 @@ public static class EventNames
     public const string ExportedMp3 = "export_mp3";
     public const string Shared = "shared";
 
+    /// <summary>A song liked or not: its detail "up", "down", or "none" for a rating taken back.</summary>
+    public const string Rated = "rated";
+
     private static readonly HashSet<string> Known =
     [
         PageOpen, SongGenerated, SongFailed, SoundFontReady, SoundFontFailed, AudioReady,
-        Played, Listened, MixChanged, DownloadedMidi, ExportedMp3, Shared
+        Played, Listened, MixChanged, DownloadedMidi, ExportedMp3, Shared, Rated
     ];
 
     public static bool IsKnown(string? name)

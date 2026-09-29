@@ -15,12 +15,14 @@ import {
     isKeeping,
     keep,
     keepHistory,
+    keepRating,
     recall,
     recallHistory,
+    recallRating,
     setAutoplaying,
     setKeeping,
 } from "./storage.js";
-import { since, track } from "./tally.js";
+import { isCounting, since, track } from "./tally.js";
 
 const PLAY_ICON = "M8 5v14l11-7z";
 const PAUSE_ICON = "M7 5h3.5v14H7zM13.5 5H17v14h-3.5z";
@@ -60,6 +62,9 @@ const elements = {
     mixer: document.getElementById("mixer"),
     status: document.getElementById("status"),
     version: document.getElementById("version"),
+    rating: document.getElementById("rating"),
+    like: document.getElementById("like"),
+    dislike: document.getElementById("dislike"),
 };
 
 const muted = new Set();
@@ -146,6 +151,10 @@ function updateTransport() {
 
     // sharing is only a seed, which the server has already answered with: no sound is needed to pass it on
     elements.share.disabled = !hasSong;
+
+    // nor is rating it, though it is mostly done while it plays
+    elements.like.disabled = !hasSong || songVersion === null;
+    elements.dislike.disabled = !hasSong || songVersion === null;
 }
 
 function setPlayIcon(isPlaying) {
@@ -737,6 +746,7 @@ async function generate(seed, isRolled = seed === null) {
 
         elements.seed.value = songSeed;
         songVersion = response.headers.get("X-Song-Version");
+        showRating(recallRating(songVersion, songSeed));
         rememberSeed(songSeed, isRolled);
         addToHistory(songSeed);
         // offered for download first, and as a copy, so it stays usable whatever the audio stack does
@@ -1532,6 +1542,32 @@ function stopTicking() {
 
 // closing the tab is the commonest way listening ends, and the last event is the one worth having
 window.addEventListener("pagehide", reportListening);
+
+/**
+ *     The song rated, liked or not, which is what tells one version of the songs from another better than how long
+ *     they were listened to. Pressing the pressed one takes the rating back; the latest a visitor gives is the one
+ *     counted. Only where the page counts at all, or the buttons would say they did something they did not.
+ */
+function rate(rating) {
+    const seed = elements.seed.value;
+    if (!IS_SEED.test(seed) || songVersion === null) return;
+
+    const current = recallRating(songVersion, seed);
+    const next = current === rating ? null : rating;
+    keepRating(songVersion, seed, next);
+    showRating(next);
+    track("rated", { seed: Number(seed), detail: next ?? "none", version: songVersion });
+    announce(next === null ? "Rating taken back." : next === "up" ? "Liked." : "Disliked.");
+}
+
+function showRating(rating) {
+    elements.like.setAttribute("aria-pressed", String(rating === "up"));
+    elements.dislike.setAttribute("aria-pressed", String(rating === "down"));
+}
+
+elements.rating.hidden = !isCounting();
+elements.like.addEventListener("click", () => rate("up"));
+elements.dislike.addEventListener("click", () => rate("down"));
 
 // --- wiring ----------------------------------------------------------------
 

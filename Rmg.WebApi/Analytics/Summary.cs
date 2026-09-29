@@ -24,6 +24,8 @@ public sealed record SeedListening(long Seed, double Seconds, int Plays);
 /// <param name="Listens">Songs listened to, a visitor's song once however often it was paused.</param>
 /// <param name="ListensPast30s">Of those, the ones listened to for 30 seconds or more in all.</param>
 /// <param name="MedianSeconds">How long a song was listened to in all, in the middle of them.</param>
+/// <param name="Likes">Songs liked, a visitor's latest rating of a song counted once.</param>
+/// <param name="Dislikes">Songs disliked, likewise.</param>
 public sealed record VersionListening(
     string Version,
     string FirstDay,
@@ -31,8 +33,15 @@ public sealed record VersionListening(
     int Plays,
     int Listens,
     int ListensPast30s,
-    double? MedianSeconds
+    double? MedianSeconds,
+    int Likes,
+    int Dislikes
 );
+
+/// <param name="Seed">The song, in <see cref="AnalyticsSummary.RatedVersion" />.</param>
+/// <param name="Likes">Visitors whose latest rating of it is a like.</param>
+/// <param name="Dislikes">Visitors whose latest rating of it is a dislike.</param>
+public sealed record RatedSeed(long Seed, int Likes, int Dislikes);
 
 /// <param name="Name">What failed.</param>
 /// <param name="Detail">Why, as far as the page could say.</param>
@@ -46,6 +55,8 @@ public sealed record Failure(string Name, string Detail, int Count);
 /// <param name="Daily">The same, day by day.</param>
 /// <param name="Seeds">Which songs held attention.</param>
 /// <param name="Versions">How each songs' version was listened to, the latest first.</param>
+/// <param name="RatedVersion">The latest songs' version any song was rated in, which <paramref name="Rated" /> is of.</param>
+/// <param name="Rated">The songs of it rated, the most liked first and the most disliked last.</param>
 /// <param name="Failures">What went wrong, and how often.</param>
 public sealed record AnalyticsSummary(
     int Days,
@@ -58,6 +69,8 @@ public sealed record AnalyticsSummary(
     IReadOnlyList<DayCount> Daily,
     IReadOnlyList<SeedListening> Seeds,
     IReadOnlyList<VersionListening> Versions,
+    string? RatedVersion,
+    IReadOnlyList<RatedSeed> Rated,
     IReadOnlyList<Failure> Failures,
     int Events
 );
