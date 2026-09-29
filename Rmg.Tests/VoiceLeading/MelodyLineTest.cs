@@ -251,4 +251,20 @@ public sealed class MelodyLineTest
         await Assert.That(moves.Count(x => x > 7) / (double)moves.Count).IsLessThan(0.05);
         await Assert.That(onBeatChordNotes / (double)onBeat).IsGreaterThan(0.8);
     }
+
+    [Test]
+    public async Task ALastNote_BendsToAStepFromTheNext_ByAThirdAtMost_OntoItsChordOnAStrongBeat()
+    {
+        var line = new MelodyLine(MinNote, MaxNote);
+
+        // a step from the next already: kept
+        await Assert.That(line.Approach(C, CTones, Weak, 67, 69)).IsEqualTo(67);
+        // B leads into G through A on a weak beat; on a strong beat only a note of its own chord may, and none is near
+        await Assert.That(line.Approach(C, CTones, Weak, 71, 67)).IsEqualTo(69);
+        await Assert.That(line.Approach(C, CTones, Strong, 71, 67)).IsEqualTo(71);
+        // G leads into D through E, a note of its chord, on a strong beat
+        await Assert.That(line.Approach(C, CTones, Strong, 67, 62)).IsEqualTo(64);
+        // too far to bend without a leap: kept
+        await Assert.That(line.Approach(C, CTones, Weak, 72, 62)).IsEqualTo(72);
+    }
 }

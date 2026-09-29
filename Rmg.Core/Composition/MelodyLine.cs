@@ -137,6 +137,27 @@ internal sealed class MelodyLine
         return (low, Math.Min(maxNote, low + RangeWidth));
     }
 
+    /// <summary>
+    ///     The note that leads into the next by a step, where a chord changes: the note as it is, if it is a step (one or
+    ///     two semitones) from the next already; or the note nearest it that is, a step from it at most, so that it bends
+    ///     rather than jumps, a note of its scale on a weak beat and of its chord on a strong one, where it would sound
+    ///     against its own chord; or the note as it is, where no note is.
+    /// </summary>
+    /// <param name="chordToneClasses">The pitch classes of the note's own chord's notes.</param>
+    /// <param name="beatRank">How strong the note's beat is, 0 the strongest.</param>
+    public int Approach(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int note, int next)
+    {
+        static bool IsStep(int a, int b) => Math.Abs(a - b) is 1 or 2;
+        if (IsStep(note, next))
+            return note;
+
+        var isStrong = beatRank <= StrongestWeakRank && chordToneClasses.Count > 0;
+        var candidates = (isStrong ? GetChordTones(chordToneClasses) : GetScaleNotes(chord))
+            .Where(x => IsStep(x, next) && Math.Abs(x - note) <= 4)
+            .ToArray();
+        return candidates.Length == 0 ? note : GetNearest(candidates, note);
+    }
+
     /// <summary>The scale step of a note, counted from the chord's root: the step whose note is nearest it.</summary>
     internal static int GetScaleStep(ChordContext chord, int note)
     {

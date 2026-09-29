@@ -33,6 +33,9 @@ public static class TracePoints
     /// <summary>How a section's drums play the bars of its later letters (a <see cref="BarDrums" />).</summary>
     public const string DrumPresence = "Drum presence";
 
+    /// <summary>A section's chance of its melody leading into a chord change within a phrase (a <c>double</c>).</summary>
+    public const string MelodyLeading = "Melody leading";
+
     /// <summary>The chance a note of a section's melody's answer is mutated from the question's (a <c>double</c>).</summary>
     public const string MelodyAnswer = "Melody answer";
 

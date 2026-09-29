@@ -23,6 +23,7 @@ internal sealed class SectionGenerator
     private const int DrumRoleStream = 5;
     private const int KitStream = 6;
     private const int MelodyAnswerStream = 7;
+    private const int MelodyLeadingStream = 8;
 
     private readonly IGenerationContext _context;
     private readonly int _seed;
@@ -406,13 +407,19 @@ internal sealed class SectionGenerator
                 continue;
             }
 
-            // the melody's notes are placed once its bars are made, in their order, over the question and its answer
+            // the melody's notes are placed once its bars are made, in their order, over the question and its answer,
+            // leading into the chord changes within a phrase as often as the section has it
+            var leadingContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), MelodyLeadingStream));
+            var leading = Math.Clamp(MelodyLayers.Leading + Generators.SplineValue()(leadingContext) * MelodyLayers.LeadingSpread, 0, 1);
+            StateTrace.Record(TracePoints.MelodyLeading, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{leading:F2}", leading);
             var answered = MelodyPattern.Place(
                 MelodyPattern.Answer(bars.Timeline, trackNumber, answerSeed, amount),
                 trackNumber,
                 (PitchInstrumentTrack)_tracks.Definitions[trackNumber],
                 barStateTimelineMap.Repeat(2),
-                _key
+                _key,
+                leading,
+                leadingContext
             );
             StateTrace.Record(TracePoints.MelodyAnswer, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{amount:F2}", amount);
             yield return (trackNumber, bars with { Timeline = answered.Trim(Meter.PatternDuration) }, answered);

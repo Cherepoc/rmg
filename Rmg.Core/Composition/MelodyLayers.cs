@@ -65,6 +65,16 @@ public static class MelodyLayers
     /// <summary>The chance a note of the answer's changing bars is mutated, with no lean; the less conventional the rhythm, the likelier.</summary>
     public const double AnswerAmount = 0.5;
 
+    /// <summary>
+    ///     The chance the melody leads into a chord change within a phrase, its last note before the change a step from
+    ///     the note it changes to, with no spread; a section's is this spread by <see cref="LeadingSpread" /> either way,
+    ///     so that some sections hardly lead, as a riff, and some lead most changes.
+    /// </summary>
+    public const double Leading = 0.5;
+
+    /// <summary>How far a section's chance of leading spreads from <see cref="Leading" />, either way.</summary>
+    public const double LeadingSpread = 0.5;
+
     /// <summary>How long the melody rests before its next phrase, in beats.</summary>
     public const double PhraseEndRest = 1;
 

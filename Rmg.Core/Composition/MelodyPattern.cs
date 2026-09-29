@@ -49,12 +49,16 @@ internal sealed class MelodyPattern
     /// </summary>
     /// <param name="barStates">The section's state that changes by bar, such as its chords and its phrases' registers.</param>
     /// <param name="key">The song's key.</param>
+    /// <param name="leading">The section's chance of leading into a chord change within a phrase (<see cref="MelodyLayers.Leading" />).</param>
+    /// <param name="leadingContext">The sequence whether a bar of the 4-bar pattern leads into the next is drawn from.</param>
     public static TrackEventStateTimelineMap<StateMap> Place(
         TrackEventStateTimelineMap<StateMap> bars,
         int trackNumber,
         PitchInstrumentTrack definition,
         StateTimelineMap barStates,
-        int key
+        int key,
+        double leading,
+        IGenerationContext leadingContext
     )
     {
         var (low, high) = Realizer.GetRange(definition);
@@ -65,23 +69,46 @@ internal sealed class MelodyPattern
             definition,
             barStates
         );
-        var placed = track.EventTimeline.Zip(states).Select(x =>
+        var notes = track.EventTimeline.Zip(states).Select(x =>
+                {
+                    var (note, state) = x;
+                    var (chord, _, classes) = Realizer.GetChordNotes(state.Value);
+                    var rank = state.Value.GetStateValue(StateKinds.HeldDuration) > 0 ? 0 : state.Value.GetStateValue(CompositionStateKinds.BeatRank);
+                    var pitch = line.Place(
+                        chord,
+                        classes,
+                        rank,
+                        state.Value.GetStateValue(CompositionStateKinds.MelodyStep),
+                        state.Value.GetStateValue(CompositionStateKinds.MelodyTurn),
+                        state.Value.GetStateValue(CompositionStateKinds.MelodyRegister),
+                        state.Value.GetStateValue(CompositionStateKinds.Echo)
+                    );
+                    return (Note: note, Chord: chord, Classes: classes, Rank: rank, Pitch: pitch);
+                }
+            )
+            .ToArray();
+
+        // a bar of the 4-bar pattern leads into the next or not, the same in the question and in its answer
+        bool[] leads = [..Enumerable.Range(0, Progressions.BarCount).Select(_ => leadingContext.TestProbability(leading))];
+        for (var i = 0; i + 1 < notes.Length; i++)
+        {
+            // a change of chord on a bar line within a phrase, its first note one of the new chord's
+            var (last, next) = (notes[i], notes[i + 1]);
+            var bar = next.Note.Position / Meter.BarDuration;
+            var isBarLine = Math.Abs(bar - Math.Round(bar)) < 1e-9;
+            var patternBar = (int)Math.Round(bar).Mod(Progressions.BarCount);
+            if (!isBarLine || patternBar == 0 || !leads[patternBar - 1] || last.Classes.SetEquals(next.Classes) || !next.Classes.Contains(next.Pitch.Mod(12)))
+                continue;
+
+            notes[i] = last with { Pitch = line.Approach(last.Chord, last.Classes, last.Rank, last.Pitch, next.Pitch) };
+        }
+
+        var placed = notes.Select(x =>
             {
-                var (note, state) = x;
-                var (chord, _, classes) = Realizer.GetChordNotes(state.Value);
-                var pitch = line.Place(
-                    chord,
-                    classes,
-                    state.Value.GetStateValue(StateKinds.HeldDuration) > 0 ? 0 : state.Value.GetStateValue(CompositionStateKinds.BeatRank),
-                    state.Value.GetStateValue(CompositionStateKinds.MelodyStep),
-                    state.Value.GetStateValue(CompositionStateKinds.MelodyTurn),
-                    state.Value.GetStateValue(CompositionStateKinds.MelodyRegister),
-                    state.Value.GetStateValue(CompositionStateKinds.Echo)
-                );
-                var step = MelodyLine.GetScaleStep(chord, pitch);
-                if (chord.GetPitch(step) != pitch)
-                    throw new InvalidOperationException($"The melody's note {pitch} is not on a step of its chord's scale.");
-                return note.Value.MergeWith(StateMap.FromStates([StateKinds.ScaleStep.CreateState(step)])).ToTimelineItem(note.Position);
+                var step = MelodyLine.GetScaleStep(x.Chord, x.Pitch);
+                if (x.Chord.GetPitch(step) != x.Pitch)
+                    throw new InvalidOperationException($"The melody's note {x.Pitch} is not on a step of its chord's scale.");
+                return x.Note.Value.MergeWith(StateMap.FromStates([StateKinds.ScaleStep.CreateState(step)])).ToTimelineItem(x.Note.Position);
             }
         );
         var timeline = EventTimeline.Create(track.EventTimeline.Duration, placed);
