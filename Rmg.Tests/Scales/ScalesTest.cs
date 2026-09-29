@@ -104,6 +104,8 @@ public sealed class ScalesTest
         var key = common.GetStateTimeline(StateKinds.KeyOffset).GetEffectiveValueAt(0);
         var raisedSteps = common.GetStateTimeline(StateKinds.RaisedScaleSteps);
         var approaches = common.GetStateTimeline(StateKinds.ChordApproach);
+        // a bass note leads into a change of chord in the beat before it
+        var changes = TestCorpus.Get(seed).ChordChanges;
         var bassProgram = ((PitchInstrumentTrack)song.TrackDefinitions[6]).InstrumentCode;
 
         var tracks = Render.RenderSong(song).Tracks.Where(x => !x.IsPercussionInstrument).ToArray();
@@ -115,7 +117,7 @@ public sealed class ScalesTest
             // a bass note leading into the next chord by a semitone leaves the scale on purpose
             var approach = (ChordApproach)approaches.GetEffectiveValueAt(note.Position);
             var isChromaticApproach = track.PitchInstrumentCode == bassProgram
-                && note.Position % 4 >= 3
+                && changes.Any(x => x > note.Position && x <= note.Position + 1)
                 && approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove;
             if (isChromaticApproach)
                 continue;

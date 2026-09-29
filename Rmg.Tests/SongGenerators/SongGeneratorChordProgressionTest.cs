@@ -76,12 +76,14 @@ public sealed class SongGeneratorChordProgressionTest
     }
 
     [Test]
-    public async Task DefaultSteps_ChangeTheShapeOnlyAtBarLines()
+    public async Task DefaultSteps_ChangeTheShapeOnlyAtBarLinesAndChordChanges()
     {
         for (var seed = 0; seed < 10; seed++)
         {
-            var song = TestCorpus.Get(seed).Song;
-            foreach (var bar in GetPitchedNotes(song).GroupBy(x => (x.TrackNumber, Bar: Math.Floor(x.Position / 4))))
+            var corpusSong = TestCorpus.Get(seed);
+            var changes = corpusSong.ChordChanges;
+            int Chord(double position) => Array.FindLastIndex(changes, x => x <= position + 1e-9);
+            foreach (var bar in GetPitchedNotes(corpusSong.Song).GroupBy(x => (x.TrackNumber, Bar: Math.Floor(x.Position / 4), Chord: Chord(x.Position))))
             {
                 await Assert.That(bar.Select(x => x.Shape).Distinct().Count())
                     .IsEqualTo(1)

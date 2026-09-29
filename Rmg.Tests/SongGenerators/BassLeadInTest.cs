@@ -22,7 +22,13 @@ public sealed class BassLeadInTest
             [
                 StateTimeline.Create(Meter.PatternDuration, StateKinds.ChordApproach, [((int)approach).ToTimelineItem(0.0)]),
                 StateTimeline.Create(Meter.PatternDuration, CompositionStateKinds.RoleChord, chords.Select(x => ImmutableArray.Create(x.Chord).ToTimelineItem(x.Position))),
-                StateTimeline.Create(Meter.PatternDuration, StateKinds.ChordRoot, chords.Select(x => ((int)x.Root).ToTimelineItem(x.Position)))
+                StateTimeline.Create(Meter.PatternDuration, StateKinds.ChordRoot, chords.Select(x => ((int)x.Root).ToTimelineItem(x.Position))),
+                // the progression's chords change where the root does
+                StateTimeline.Create(
+                    Meter.PatternDuration,
+                    StateKinds.ChordChange,
+                    chords.Where((x, i) => i == 0 || x.Root != chords[i - 1].Root).Select((x, i) => (i + 1).ToTimelineItem(x.Position))
+                )
             ]
         );
     }

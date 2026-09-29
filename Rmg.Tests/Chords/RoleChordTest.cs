@@ -65,15 +65,23 @@ public sealed class RoleChordTest
     }
 
     [Test]
-    public async Task Songs_PlayRoleChordsInTheHomeAndCadenceBars_AndPoolChordsBetween()
+    public async Task Songs_PlayRoleChordsInTheHomeAndCadenceChords_AndPoolChordsBetween()
     {
-        var chordEntries = TestCorpus.Range(10).SelectMany(x => x.Trace).Where(x => x.Point == TracePoints.Chord).ToArray();
-
-        await Assert.That(chordEntries.Length).IsGreaterThan(0);
-        foreach (var entry in chordEntries)
+        var entries = 0;
+        foreach (var song in TestCorpus.Range(10))
         {
-            var hasRoleChord = !entry.StateMap.GetStateValue(CompositionStateKinds.RoleChord).IsEmpty;
-            await Assert.That(hasRoleChord).IsEqualTo(entry.Bar is 0 or 3).Because($"bar {entry.Bar}");
+            var rhythms = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).ToDictionary(x => x.Section, x => (HarmonicRhythm)x.Value!);
+            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Chord))
+            {
+                entries++;
+                // the note's place in the pattern: its bar's start and its place in the bar
+                var rhythm = rhythms[entry.Section];
+                var chord = rhythm.IndexAt(entry.Bar % Rmg.Core.Composition.Progressions.BarCount * Meter.BarDuration + entry.Position);
+                var hasRoleChord = !entry.StateMap.GetStateValue(CompositionStateKinds.RoleChord).IsEmpty;
+                await Assert.That(hasRoleChord).IsEqualTo(chord == 0 || chord == rhythm.Count - 1).Because($"bar {entry.Bar}, chord {chord} of {rhythm.Count}");
+            }
         }
+
+        await Assert.That(entries).IsGreaterThan(0);
     }
 }

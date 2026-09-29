@@ -33,13 +33,16 @@ public sealed class BassLeadingReportTest
             var leading = Core.Composition.InstrumentRoles.Bass.Instruments.Single(x => x.Program == program).Leading;
             var m = byLeading.GetValueOrDefault(leading, new Measures(0, 0, 0, 0, 0, 0, 0, 0));
             var bass = song.Song.Notes![SongTracks.BassTrack].ToArray();
-            // the rendered velocities, by position
-            var velocities = song.Notes(SongTracks.BassTrack).GroupBy(x => x.Position).ToDictionary(x => x.Key, x => x.Max(y => y.Value.Velocity));
+            // the rendered velocities, by position, where the song's swing moved them
+            var velocities = song.Notes(SongTracks.BassTrack).GroupBy(x => Math.Round(x.Position, 6)).ToDictionary(x => x.Key, x => x.Max(y => y.Value.Velocity));
+            double Velocity(double position) => velocities[Math.Round(song.Swing.Apply(position), 6)];
+            var changes = song.ChordChanges;
             for (var i = 0; i + 1 < bass.Length; i++)
             {
                 var (last, next) = (bass[i], bass[i + 1]);
-                var change = (Math.Floor(last.Position / Meter.BarDuration) + 1) * Meter.BarDuration;
-                if (Math.Abs(next.Position - change) > 1e-9)
+                // the next note on the next change of chord
+                var change = changes.FirstOrDefault(x => x > last.Position + 1e-9, double.NaN);
+                if (!(Math.Abs(next.Position - change) < 1e-9))
                     continue;
 
                 var (_, _, lastClasses) = Realizer.GetChordNotes(last.Value.State);
@@ -61,7 +64,7 @@ public sealed class BassLeadingReportTest
                     m.ByStep + (isStep ? 1 : 0),
                     m.Resolving + (isStep && isOnChord && !lastClasses.Contains(lastPitch.Mod(12)) ? 1 : 0),
                     m.OffChord + (isOnChord ? 0 : 1),
-                    m.LastBeatLoudness + (isLastBeat ? velocities[last.Position] / velocities[barFirst.Position] : 0)
+                    m.LastBeatLoudness + (isLastBeat ? Velocity(last.Position) / Velocity(barFirst.Position) : 0)
                 );
             }
 

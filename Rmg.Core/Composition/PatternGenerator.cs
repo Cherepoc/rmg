@@ -300,11 +300,11 @@ internal sealed class PatternGenerator
     }
 
     /// <summary>
-    ///     A bass bar's notes with one in its last beat, where its last chord leads into the next
-    ///     (<see cref="StateKinds.ChordApproach" />) and none starts there: the note sounding there played again, over
-    ///     the chord at its place and on the rhythm's weakest beat, as lightly as a note there, so that the approach has
-    ///     a note to play on; marked as a pickup, which stays only where the chord does change, as the song put together
-    ///     knows, the next section's chord too (<see cref="LinePattern.Place" />).
+    ///     A bass bar's notes with one in the beat before every change of chord in it or at its end, where the chord
+    ///     before leads into the next (<see cref="StateKinds.ChordApproach" />) and none starts there: the note sounding
+    ///     there played again, over the chord at its place and on the rhythm's weakest beat, as lightly as a note there,
+    ///     so that the approach has a note to play on; marked as a pickup, which stays only where the chord does change,
+    ///     as the song put together knows, the next section's chord too (<see cref="LinePattern.Place" />).
     /// </summary>
     /// <param name="maxRank">The weakest rank of the bar's rhythm.</param>
     internal static EventTimeline<StateMap> LeadIn(
@@ -317,25 +317,41 @@ internal sealed class PatternGenerator
     {
         var patternBar = barIndex % Progressions.BarCount;
         var start = patternBar * Meter.BarDuration;
-        const double pickup = Meter.BarDuration - 1;
-        // the chord sounding in the bar's last beat is the one that leads into the next
-        if (barStateTimelineMap.GetEffectiveStateMapAt(start + pickup).GetStateValue(StateKinds.ChordApproach) == 0
-            || notes.Count == 0
-            || notes[^1].Position >= pickup - 1e-9)
-            return notes;
+        var end = start + Meter.BarDuration;
+        // the changes of chord in the bar, and at its end where the next bar starts a chord or the pattern starts again
+        var patternChanges = barStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+        var changes = patternChanges
+            .Where(x => x > start + 1e-9 && x < end - 1e-9)
+            .Append(end)
+            .Where(x => x >= Meter.PatternDuration - 1e-9 || patternChanges.Any(c => Math.Abs(c - x) < 1e-9))
+            .Select(x => x - start);
 
-        var chord = PickChord(stateMap, barStateTimelineMap.GetEffectiveStateMapAt(start + pickup));
-        var sounding = notes[^1].Value;
-        var rank = sounding.GetStateValue(CompositionStateKinds.BeatRank);
-        var velocity = sounding.GetStateValue(StateKinds.Velocity)
-            + VelocityLayers.Note * BeatAccent.GetShift(rank, maxRank, maxRank, stateMap.GetStateValue(CompositionStateKinds.NoteDynamics));
-        var note = sounding
-            .Except([StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed])
-            .MergeWith(chord)
-            .With(StateKinds.Velocity, velocity)
-            .With(CompositionStateKinds.BeatRank, maxRank)
-            .With(CompositionStateKinds.LinePickup, 1);
-        return EventTimeline.Create(notes.Duration, [..notes, note.ToTimelineItem(pickup)]);
+        var led = notes.ToList();
+        foreach (var change in changes)
+        {
+            var pickup = change - 1;
+            var before = led.Where(x => x.Position < pickup - 1e-9).ToArray();
+            if (barStateTimelineMap.GetEffectiveStateMapAt(start + pickup).GetStateValue(StateKinds.ChordApproach) == 0
+                || before.Length == 0
+                || led.Any(x => x.Position >= pickup - 1e-9 && x.Position < change - 1e-9))
+                continue;
+
+            var chord = PickChord(stateMap, barStateTimelineMap.GetEffectiveStateMapAt(start + pickup));
+            var sounding = before[^1].Value;
+            var rank = sounding.GetStateValue(CompositionStateKinds.BeatRank);
+            var velocity = sounding.GetStateValue(StateKinds.Velocity)
+                + VelocityLayers.Note * BeatAccent.GetShift(rank, maxRank, maxRank, stateMap.GetStateValue(CompositionStateKinds.NoteDynamics));
+            var note = sounding
+                .Except([StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed])
+                .MergeWith(chord)
+                .With(StateKinds.Velocity, velocity)
+                .With(CompositionStateKinds.BeatRank, maxRank)
+                .With(CompositionStateKinds.LinePickup, 1);
+            led.Add(note.ToTimelineItem(pickup));
+            led.Sort((x, y) => x.Position.CompareTo(y.Position));
+        }
+
+        return led.Count == notes.Count ? notes : EventTimeline.Create(notes.Duration, led);
     }
 
     /// <summary>

@@ -6,6 +6,9 @@ internal static class TracePoints
     /// <summary>A section's energy, with its pull (<see cref="SectionEnergyTrace" />).</summary>
     public const string SectionEnergy = "Section energy";
 
+    /// <summary>How often a section's chords change (a <see cref="HarmonicRhythm" />).</summary>
+    public const string HarmonicRhythm = "Harmonic rhythm";
+
     /// <summary>A section's scale (<see cref="Scale" />).</summary>
     public const string SectionScale = "Section scale";
 

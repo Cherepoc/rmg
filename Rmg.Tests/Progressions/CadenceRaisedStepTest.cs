@@ -69,20 +69,25 @@ public sealed class CadenceRaisedStepTest
     }
 
     [Test]
-    public async Task Songs_RaiseSteps_OnlyInTheCadenceBar()
+    public async Task Songs_RaiseSteps_OnlyInTheCadenceChord()
     {
         var raising = 0;
         for (var seed = 0; seed < 60; seed++)
         {
-            var (song, origin) = TestCorpus.Get(seed);
+            var corpusSong = TestCorpus.Get(seed);
+            var (song, origin) = corpusSong;
             var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
+            var changes = corpusSong.ChordChanges;
 
             foreach (var item in common.GetStateTimeline(StateKinds.RaisedScaleSteps).Where(x => !x.Value.IsEmpty))
             {
                 raising++;
-                // the last bar of a 4-bar pattern; whether it raises depends on the section's home, not the song's
-                // scale: even harmonic minor has a minor fifth seen from its fourth step
-                await Assert.That((item.Position - origin) % 16).IsEqualTo(12).Because($"seed {seed}");
+                // the last chord of a 4-bar pattern, where the chords change and the next change starts a pattern;
+                // whether it raises depends on the section's home, not the song's scale: even harmonic minor has a minor
+                // fifth seen from its fourth step
+                await Assert.That(changes).Contains(item.Position).Because($"seed {seed}");
+                var next = changes.FirstOrDefault(x => x > item.Position, song.Map!.Sections.Max(x => x.End));
+                await Assert.That((next - origin) % 16).IsEqualTo(0).Because($"seed {seed}");
             }
         }
 

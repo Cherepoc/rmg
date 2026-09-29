@@ -101,7 +101,9 @@ internal sealed class SectionGenerator
         var home = Progressions.GenerateHome(context, scale);
         if (plan.HasTonicHome)
             home = 0;
-        var harmonicRhythm = HarmonicRhythm.OneABar;
+        // how often its chords change, from a sequence of its own, faster the more energy it has
+        var harmonicRhythm = HarmonicRhythm.Draw(Stream(sectionId, SectionStream.HarmonicRhythm), tilt);
+        StateTrace.Record(TracePoints.HarmonicRhythm, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{harmonicRhythm.Span}", harmonicRhythm);
         var progression = Progressions.Generate(context, scale, home, unconventionality.ProgressionStrictness, harmonicRhythm.Count);
 
         var sectionStateMap = CreateSectionStateMap(
@@ -609,5 +611,6 @@ internal enum SectionStream
     RegisterFreedom = 10,
     BassImprovisation = 11,
     DrumBindings = 12,
-    DrumFeels = 13
+    DrumFeels = 13,
+    HarmonicRhythm = 14
 }

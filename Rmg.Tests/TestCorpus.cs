@@ -49,6 +49,12 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
         origin = Origin;
     }
 
+    /// <summary>How the song swings, which moves where a note decided at a place is rendered.</summary>
+    public Swing Swing => Render.GetSwing(Song);
+
+    /// <summary>Where the song's chords change, as its sections have them.</summary>
+    public double[] ChordChanges => [..Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)];
+
     /// <summary>Where the first section starts, after any bars of an intro.</summary>
     public double Origin => Map.Origin;
 

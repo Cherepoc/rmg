@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
 
@@ -11,6 +12,25 @@ internal sealed record HarmonicRhythm(double Span)
 {
     /// <summary>A chord a bar.</summary>
     public static HarmonicRhythm OneABar { get; } = new(Meter.BarDuration);
+
+    /// <summary>
+    ///     The spans a section's chords may last, in beats, and how often: a chord a bar the most, one every two bars,
+    ///     as a loop of two chords plays, now and then, and two a bar rarely; each leans by how fast it is, from -1, the
+    ///     slowest, to 1, the fastest, so that a section with more energy changes its chords faster.
+    /// </summary>
+    public static ImmutableArray<(Weighted<double> Span, double Lean)> Spans { get; } =
+    [
+        (new Weighted<double>(0.25, 2 * Meter.BarDuration), -1),
+        (new Weighted<double>(0.6, Meter.BarDuration), 0),
+        (new Weighted<double>(0.15, Meter.BarDuration / 2), 1)
+    ];
+
+    /// <summary>A section's harmonic rhythm, leaned by its energy's pull.</summary>
+    public static HarmonicRhythm Draw(IGenerationContext context, Tilt energy)
+    {
+        var leans = Spans.ToDictionary(x => x.Span.Value, x => x.Lean);
+        return new HarmonicRhythm(context.Pick(energy.Weigh(Spans.Select(x => x.Span), span => leans[span])));
+    }
 
     /// <summary>How many chords the pattern has.</summary>
     public int Count => (int)Math.Round(Meter.PatternDuration / Span);
