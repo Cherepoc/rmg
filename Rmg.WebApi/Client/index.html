@@ -54,7 +54,7 @@
             <time id="elapsed">0:00</time>
             <input type="range" id="seek" min="0" max="1" step="0.001" value="0" disabled aria-label="Seek" />
             <time id="total">0:00</time>
-            <div class="rating" id="rating" role="group" aria-label="Rate this song" hidden>
+            <div class="rating" role="group" aria-label="Rate this song">
                 <button type="button" id="like" class="icon" aria-pressed="false" aria-label="I like this song" disabled>
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 21h4V9H2v12zm20-11a2 2 0 0 0-2-2h-6.3l1-4.6v-.3c0-.4-.2-.8-.4-1.1L13.2 1 6.6 7.6C6.2 8 6 8.5 6 9v10a2 2 0 0 0 2 2h9c.8 0 1.5-.5 1.8-1.2l3-7.1c.1-.2.2-.5.2-.7v-2z" /></svg>
                 </button>
@@ -201,7 +201,8 @@
     </p>
     <p>
         This page sends anonymous timings and usage steps to this server only. No cookies, and your
-        address is never saved. Global Privacy Control or Do Not Track turns it off.
+        address is never saved. Global Privacy Control or Do Not Track turns it off, all but a rating
+        you give a song, which is sent because you pressed it.
     </p>
 </footer>
 </div>

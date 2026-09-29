@@ -25,9 +25,6 @@ const isRefused = (() => {
     }
 })();
 
-/** Whether what the page tells the server arrives at all, which a control that only tells it has to know. */
-export const isCounting = () => !isRefused;
-
 const opened = performance.now();
 
 /** How long the page has been open, in whole milliseconds, which is what every `ms` here means. */
@@ -38,6 +35,19 @@ export function since() {
 export function track(name, measurements = {}) {
     if (isRefused) return;
 
+    send(name, measurements);
+}
+
+/**
+ *     What somebody chose to tell the server by pressing a button that does nothing else, such as rating a song.
+ *     It is sent whatever they have asked of the counting: an opt-out is about being watched, and this is saying
+ *     something on purpose.
+ */
+export function tell(name, measurements = {}) {
+    send(name, measurements);
+}
+
+function send(name, measurements) {
     try {
         const body = JSON.stringify({ name, ...measurements });
 

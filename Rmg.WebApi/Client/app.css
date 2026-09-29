@@ -360,10 +360,6 @@ button.icon svg {
     gap: 4px;
 }
 
-.rating[hidden] {
-    display: none;
-}
-
 .rating button[aria-pressed="true"] {
     background: var(--accent);
     border-color: var(--accent);
@@ -791,20 +787,16 @@ footer a:hover {
         margin-left: 0;
     }
 
-    /* the song and where it is stay on one line, between its two times, and the volume goes under them */
+    /* the song and where it is stay on one line, between its two times, and the rating and the volume go under them */
     .transport {
         flex-wrap: wrap;
     }
 
+    /* the rating and the volume share the second line */
     .transport .volume {
-        flex-basis: 100%;
-    }
-
-    /* where the song can be rated, the rating and the volume share that second line */
-    .transport:has(.rating:not([hidden])) .volume {
-        flex-basis: auto;
         margin-left: auto;
     }
+
 
     /* the instrument names are long, and the table has no room to spare on a phone */
     .mixer select {

@@ -22,7 +22,7 @@ import {
     setAutoplaying,
     setKeeping,
 } from "./storage.js";
-import { isCounting, since, track } from "./tally.js";
+import { since, tell, track } from "./tally.js";
 
 const PLAY_ICON = "M8 5v14l11-7z";
 const PAUSE_ICON = "M7 5h3.5v14H7zM13.5 5H17v14h-3.5z";
@@ -62,7 +62,6 @@ const elements = {
     mixer: document.getElementById("mixer"),
     status: document.getElementById("status"),
     version: document.getElementById("version"),
-    rating: document.getElementById("rating"),
     like: document.getElementById("like"),
     dislike: document.getElementById("dislike"),
 };
@@ -1546,7 +1545,7 @@ window.addEventListener("pagehide", reportListening);
 /**
  *     The song rated, liked or not, which is what tells one version of the songs from another better than how long
  *     they were listened to. Pressing the pressed one takes the rating back; the latest a visitor gives is the one
- *     counted. Only where the page counts at all, or the buttons would say they did something they did not.
+ *     counted. Sent whether the page counts or not, since pressing it is saying so on purpose.
  */
 function rate(rating) {
     const seed = elements.seed.value;
@@ -1556,7 +1555,7 @@ function rate(rating) {
     const next = current === rating ? null : rating;
     keepRating(songVersion, seed, next);
     showRating(next);
-    track("rated", { seed: Number(seed), detail: next ?? "none", version: songVersion });
+    tell("rated", { seed: Number(seed), detail: next ?? "none", version: songVersion });
     announce(next === null ? "Rating taken back." : next === "up" ? "Liked." : "Disliked.");
 }
 
@@ -1565,7 +1564,6 @@ function showRating(rating) {
     elements.dislike.setAttribute("aria-pressed", String(rating === "down"));
 }
 
-elements.rating.hidden = !isCounting();
 elements.like.addEventListener("click", () => rate("up"));
 elements.dislike.addEventListener("click", () => rate("down"));
 
