@@ -12,6 +12,15 @@ In this order, each measured before it is planned:
 2. **The melody** (see *Melody*): listen to the question and its answer and to the improvised appearances; then a bar
    of a later letter within the phrase.
 
+Then, by what is heard for its cost: the song's shape before the drums' details, which are paused. Every section is
+a 4-bar pattern played twice, a chord a bar, so the songs are alike in their form more than in anything the drums do.
+
+3. **The energy in the pitched tracks, and by appearance** (see *Section dynamics*).
+4. **Harmonic rhythm** (see *Chords*).
+5. **A section's length** (see *Form*).
+6. **Swing** (see *Groove*).
+7. **Ratings** (see *Listening data*), so that listening is measured as the corpus is.
+
 ## Section dynamics
 
 A section's energy (`SectionEnergy`) leans its loudness, its drums' fullness and density, which drums play, and the
@@ -64,6 +73,8 @@ A section may play in a parallel mode (`Scales.PickSection`). Left:
 
 ## Architecture
 
+- **A section's streams:** `SectionGenerator.Generate` derives thirteen numbered streams by hand, each as
+  `Seeds.Derive(Seeds.Derive(_seed, sectionId), …)`; an enum of them, as `SongStream` is, and one method to derive one.
 - **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 - **Memory:** every `RealizedNote` keeps the state it was decided from, which a song holds on to (about 2 MB a song,
   8 MB with a trace). Recompute it on demand instead, should memory matter.
@@ -94,12 +105,31 @@ Decided, and kept:
 Decided: the kit's leads among themselves, the snare and the hi-hat, keep their own feels, over the drums' shared
 layers; only the drums that do not lead follow a lead's (`FeelLeads`).
 
+## Groove
+
+- **Swing:** every note lands on the grid, tuplets aside. A song's swing, drawn and leaned conventional towards none,
+  would delay the notes off the 8ths (or the 16ths, by the song's) by a fraction of the way to the next, a state that
+  generation decides and `Render` plays, every track alike, the drums perhaps more than the chords.
+- **Timing by role,** later: the backbeat a little late, the hi-hat on top, should swing alone sound stiff.
+
+## Listening data
+
+The corpus is measured against targets the plan set itself, and listening is one seed at a time. The web page already
+records how long each seed is listened to (`Analytics`, `SeedListening`); a rating on the page, stored with the seed
+and the version, would give a mark to hold the trace's values against (`StateTraceEntry.Value`), such as which
+endings, modes or drum setups are skipped. Later, should targets from outside be wanted: a few measures (the notes a
+bar by role, the intervals, the syncopation) of a corpus of real MIDI songs to tune towards.
+
 ## Bass
 
 - **The pickup** always falls on the beat; the 8th before the bar line, leaned by convention, waits for listening.
 
 ## Chords
 
+- **Harmonic rhythm:** a chord a bar, always (`Progressions`). A section's harmonic rhythm as its state, a chord for
+  half a bar, a bar or two bars, drawn and leaned by convention and energy, over the same 4-bar pattern, would change
+  how every section moves at no cost to the rhythm engine; the cadence's place and the lines' leading follow the
+  changes, not the bars.
 - **Jitter on in-between heights:** heights between two qualities, such as the third, could move a little from chord
   to chord, so that a scale with more notes than seven picks sometimes one quality and sometimes the other. Worth it
   once scales of other sizes than seven exist; in a 7-note scale it changes nothing.
@@ -131,6 +161,12 @@ layers; only the drums that do not lead follow a lead's (`FeelLeads`).
 
 ## Form
 
+- **A section's length:** every section plays its 4-bar pattern twice. Played once, twice or four times, drawn per
+  section and leaned by convention towards twice, with now and then a tag of 2 bars before a section changes, it would
+  vary the form with no change to the pattern.
+- **Sections with a role** (later, once the above are in): the form draws a section's role, a verse, a chorus, a
+  bridge, which leans its energy and its harmony, where now the energy is inferred from how often and where a section
+  plays (`SectionEnergy`).
 - **Fade-outs,** should listening ask: a ritardando into the fade, the drums fading first, or a tag after it.
 - **Intros of their own material,** such as a riff the song does not play otherwise.
 
