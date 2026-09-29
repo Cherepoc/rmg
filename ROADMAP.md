@@ -360,9 +360,13 @@ Later:
   section's family's, to the kit's lead of its role: the cowbell and the wood block leaning to double and accent, the
   claves, the agogo, the guiro, the bongos, the congas and the timbales to a figure; over 100 corpus songs, rarely, as
   few songs have percussion (a conga on the kick 6 times, the rest once or twice). A section of percussion only binds
-  none, its drums already up to four. Percussion that colours a kit's groove plays in another tuplet than the lead of
-  its main role in 14% of its bars, another grouping in 7% (`PercussionFeelReportTest`, 536 bars): colour percussion
-  taking its lead's feel, as a bound drum does, waits for listening to hear it drift.
+  none, its drums already up to four. A drum that does not lead plays on its lead's feel (`FeelLeads`), its
+  tuplet, all its layers' steps of it in place of its own, bar by bar: one bound to a lead always, one that colours the
+  section, a percussion drum or a ride by the hi-hat, on the lead of its main role's by a chance (`FeelChance`, 0.85),
+  crossing it the less conventional the section, for the whole section, not a bar here and there. Over 100 corpus
+  songs, the drums that colour a section follow their lead's feel in 87% of them; another tuplet than the lead's went
+  from 18% of their bars to 2%, and from 12% to none for a drum bound by a figure (`PercussionFeelReportTest`). The
+  kit's leads among themselves, the snare and the hi-hat, keep their own feels, over the drums' shared layers.
 - **The calls** (built): the triangle, the cuica and the whistle, which grate in a groove of any length, are back in a
   group of their own (`DrumGroups.Calls`), optional in a song (0.1, 0.05 and 0.05), which all but never grooves, and
   then on the downbeats alone, leads no role (a lead comes of a group that grooves), and lands in the cymbal's place

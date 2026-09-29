@@ -21,6 +21,12 @@ internal static class TracePoints
     /// <summary>The drums a section has double a lead (an <c>ImmutableDictionary</c> of drum tracks and their <see cref="Doubling" />s).</summary>
     public const string Doubles = "Doubles";
 
+    /// <summary>
+    ///     The drums a section has play on the feel of a lead, bound to it or colouring its role (an
+    ///     <c>ImmutableDictionary</c> of drum tracks and their leads' tracks).
+    /// </summary>
+    public const string FeelLeads = "FeelLeads";
+
     /// <summary>The roles a section draws again for the song's drums (an <c>ImmutableDictionary</c> of drum tracks and <see cref="DrumRole" />s).</summary>
     public const string DrumRoles = "Drum roles";
 

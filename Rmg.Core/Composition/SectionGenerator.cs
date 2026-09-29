@@ -28,6 +28,7 @@ internal sealed class SectionGenerator
     private const int RegisterFreedomStream = 10;
     private const int BassImprovisationStream = 11;
     private const int DrumBindingStream = 12;
+    private const int DrumFeelStream = 13;
 
     // the stream of the song's own shift of its lines' freedom to change register, apart from every section's
     private const int SongRegisterFreedomStream = -1;
@@ -168,6 +169,20 @@ internal sealed class SectionGenerator
             )
         );
         StateTrace.Record(TracePoints.Doubles, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", kit.Doubles.Select(x => $"{x.Key.Name} on {x.Value.Name}")), doubles);
+        // a drum that does not lead plays on its lead's feel: one bound to it always, one that colours the section on the
+        // lead of its main role's by a chance, drawn from a sequence of its own, crossing it the less conventional the section
+        var feelContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumFeelStream));
+        var feelLeads = ImmutableDictionary.CreateBuilder<int, int>();
+        foreach (var drum in kit.Drums.Except(kit.Leads).OrderBy(DrumGroups.GetTrackNumber))
+        {
+            var track = DrumGroups.GetTrackNumber(drum);
+            if (doubles.TryGetValue(track, out var doubling))
+                feelLeads[track] = doubling.Lead;
+            else if (kit.Leads.FirstOrDefault(x => x.MainRole == drum.MainRole) is { } lead && feelContext.TestProbability(rhythm.Tilt.Chance(DrumKitGenerator.FeelChance, -1)))
+                feelLeads[track] = DrumGroups.GetTrackNumber(lead);
+        }
+
+        StateTrace.Record(TracePoints.FeelLeads, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", feelLeads.Select(x => $"{DrumGroups.GetDrum(x.Key).Name} on {DrumGroups.GetDrum(x.Value).Name}")), feelLeads.ToImmutable());
 
         // the section state reaches the notes through the track state maps, so the bar state holds only the state
         // that changes by bar
@@ -202,7 +217,7 @@ internal sealed class SectionGenerator
         );
         StateTrace.Record(TracePoints.DrumPresence, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{string.Join(", ", barDrums.Resting)}; {string.Join(", ", barDrums.Strokes)}", barDrums);
 
-        var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, sectionRoles, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm).ToArray();
+        var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads.ToImmutable(), sectionRoles, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm).ToArray();
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, sectionRhythm).ToArray();
         // the section's pattern played twice, its melody as a question and its answer
         var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap).Repeat(2);
@@ -331,6 +346,7 @@ internal sealed class SectionGenerator
         StateMap sectionStateMap,
         ImmutableHashSet<int> activeDrumTrackNumbers,
         ImmutableDictionary<int, Doubling> doubles,
+        ImmutableDictionary<int, int> feelLeads,
         ImmutableDictionary<int, StateMap> sectionRoles,
         ImmutableDictionary<int, int> sectionStrokes,
         BarDrums barDrums,
@@ -380,7 +396,7 @@ internal sealed class SectionGenerator
             if (trackStateMaps.Count == 0)
                 continue;
 
-            yield return _patternGenerator.GenerateBars(context, sectionId, DoubleLeads(trackStateMaps, doubles), barDrums, doubles, barStateTimelineMap, sectionRhythm, null);
+            yield return _patternGenerator.GenerateBars(context, sectionId, DoubleLeads(trackStateMaps, doubles), barDrums, doubles, feelLeads, barStateTimelineMap, sectionRhythm, null);
         }
     }
 
@@ -422,6 +438,7 @@ internal sealed class SectionGenerator
                 trackStateMaps.ToImmutableDictionary(),
                 BarDrums.None,
                 ImmutableDictionary<int, Doubling>.Empty,
+                ImmutableDictionary<int, int>.Empty,
                 barStateTimelineMap,
                 sectionRhythm,
                 answer,

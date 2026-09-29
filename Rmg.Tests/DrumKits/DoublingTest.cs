@@ -44,4 +44,36 @@ public sealed class DoublingTest
         await Assert.That(accentNotes).IsGreaterThan(0);
         await Assert.That((double)accentNotes).IsLessThan(accentedLeadNotes * DrumKitGenerator.AccentShare);
     }
+
+    [Test]
+    public async Task ADrumOnItsLeadsFeel_PlaysItsTuplet_EveryBar_TheBoundAlways_MostColouringOnes()
+    {
+        int bars = 0, colours = 0, following = 0;
+        foreach (var song in TestCorpus.Range(100))
+        {
+            var patterns = song.Trace.Where(x => x.Point == TracePoints.BarPattern)
+                .GroupBy(x => (x.Section, x.Track, x.Bar))
+                .ToDictionary(x => x.Key, x => ResolvedRhythm.Of(x.First().StateMap));
+            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.FeelLeads))
+            {
+                var feelLeads = (ImmutableDictionary<int, int>)entry.Value!;
+                var kit = (SectionKit)song.Trace.Single(x => x.Point == TracePoints.Kit && x.Section == entry.Section).Value!;
+                foreach (var drum in kit.Doubles.Keys)
+                    await Assert.That(feelLeads[DrumGroups.GetTrackNumber(drum)]).IsEqualTo(DrumGroups.GetTrackNumber(kit.Doubles[drum]));
+                var colouring = kit.Drums.Where(x => !kit.Leads.Contains(x) && !kit.Doubles.ContainsKey(x) && kit.Leads.Any(l => l.MainRole == x.MainRole)).ToArray();
+                colours += colouring.Length;
+                following += colouring.Count(x => feelLeads.ContainsKey(DrumGroups.GetTrackNumber(x)));
+
+                foreach (var (track, lead) in feelLeads)
+                for (var bar = 0; bar < Rmg.Core.Composition.Progressions.BarCount; bar++)
+                {
+                    bars++;
+                    await Assert.That(patterns[(entry.Section, track, bar)].PrimeIndex).IsEqualTo(patterns[(entry.Section, lead, bar)].PrimeIndex);
+                }
+            }
+        }
+
+        await Assert.That(bars).IsGreaterThan(0);
+        await Assert.That(following / (double)colours).IsBetween(0.7, 0.95);
+    }
 }

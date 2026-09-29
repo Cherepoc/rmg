@@ -55,13 +55,14 @@ internal sealed class PatternGenerator
         ImmutableDictionary<int, StateMap> trackStateMaps,
         BarDrums barDrums,
         ImmutableDictionary<int, Doubling> doubles,
+        ImmutableDictionary<int, int> feelLeads,
         StateTimelineMap barStateTimelineMap,
         SectionRhythm sectionRhythm,
         MelodyAnswer? answer
     )
     {
         var seeds = DrawSeeds(context, trackStateMaps.Keys, sectionRhythm.Scheme);
-        return BuildBars(seeds, sectionId, trackStateMaps, barDrums, doubles, barStateTimelineMap, sectionRhythm, answer, []);
+        return BuildBars(seeds, sectionId, trackStateMaps, barDrums, doubles, feelLeads, barStateTimelineMap, sectionRhythm, answer, []);
     }
 
     /// <summary>The seeds of the tracks' bar patterns, a set for every letter of the scheme, one seed per track.</summary>
@@ -77,12 +78,14 @@ internal sealed class PatternGenerator
     ///     key drawing its rhythm afresh by it, as an answer's does by its own.
     /// </summary>
     /// <param name="rhythmKeys">Every bar's key to draw its rhythm afresh by, 0 for none; none for no bar.</param>
+    /// <param name="feelLeads">The tracks that play on another's feel, its tuplet, and the tracks whose feel they play on.</param>
     public GeneratedBars BuildBars(
         ImmutableArray<ImmutableDictionary<int, int>> trackSeedMaps,
         int sectionId,
         ImmutableDictionary<int, StateMap> trackStateMaps,
         BarDrums barDrums,
         ImmutableDictionary<int, Doubling> doubles,
+        ImmutableDictionary<int, int> feelLeads,
         StateTimelineMap barStateTimelineMap,
         SectionRhythm sectionRhythm,
         MelodyAnswer? answer,
@@ -111,12 +114,12 @@ internal sealed class PatternGenerator
                     var rhythmKey = rhythmKeys.IsDefaultOrEmpty ? 0 : rhythmKeys[barIndex];
                     var phraseEnd = inAnswer ? answer!.PhraseEnd : null;
                     // a drum that doubles or accents a lead plays its lead's bar patterns, and one that plays a figure of its
-                    // own on the lead's feel its own
+                    // own on the lead's feel its own; a track that plays on another's feel makes its bar after that one's
                     var seeds = trackSeedMaps[letter];
-                    var trackNotePatterns = seeds.Select(x =>
-                        new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
-                            x.Key,
-                            GenerateBar(
+                    var barFeels = new List<BarFeel>();
+                    var bars = new Dictionary<int, EventStateTimelineMap<StateMap>>();
+                    foreach (var x in seeds.OrderBy(x => feelLeads.ContainsKey(x.Key)))
+                        bars[x.Key] = GenerateBar(
                                 x.Key,
                                 doubles.TryGetValue(x.Key, out var doubling) && doubling.Binding != DrumBinding.Figure ? seeds[doubling.Lead] : x.Value,
                                 trackStateMaps[x.Key],
@@ -133,10 +136,11 @@ internal sealed class PatternGenerator
                                 scheme.ToString(),
                                 sectionRhythm.Energy,
                                 doubles.GetValueOrDefault(x.Key),
-                                feels
-                            )
-                        )
-                    );
+                                feelLeads.TryGetValue(x.Key, out var feelLead) ? barFeels.Single(feel => feel.Track == feelLead).Rhythm : null,
+                                barFeels
+                            );
+                    feels.AddRange(seeds.Select(x => barFeels.Single(feel => feel.Track == x.Key)));
+                    var trackNotePatterns = seeds.Select(x => new KeyValuePair<int, EventStateTimelineMap<StateMap>>(x.Key, bars[x.Key]));
                     return TrackEventStateTimelineMap.Create(Meter.BarDuration, trackNotePatterns, StateTimelineMap.Create(Meter.BarDuration));
                 }
             )
@@ -150,6 +154,9 @@ internal sealed class PatternGenerator
         var key = Seeds.Derive(Seeds.Derive(seed, trackNumber), (int)Math.Round(position * AccentPlacesPerBeat));
         return new GenerationContext(key).TestProbability(share);
     }
+
+    // the state that makes a track's feel, the tuplet its cycles play in, which its grouping follows
+    private static readonly IStateKind FeelKind = CompositionStateKinds.Rhythm.Period.PrimeIndex;
 
     // how finely the places of a bar are told apart, where a drum accents its lead: a 48th of a beat, which holds the
     // 16ths, their triplets and the 32nds
@@ -180,6 +187,7 @@ internal sealed class PatternGenerator
         string scheme,
         Tilt energy,
         Doubling? doubling,
+        StateMap? leadFeel,
         List<BarFeel> feels
     )
     {
@@ -199,6 +207,9 @@ internal sealed class PatternGenerator
         var stateMap = builder
             .ToStateMap(trackGenerationContext)
             .MergeWith(trackStateMap);
+        // a track on another's feel plays its tuplet, all its layers' steps of it in place of its own
+        if (leadFeel is not null)
+            stateMap = stateMap.Except([FeelKind]).MergeWith(leadFeel.Subset([FeelKind]));
         // an answer's bar is recorded at its place in the 4-bar pattern, as its question's is
         StateTrace.Record(TracePoints.BarPattern, trackNumber, sectionId, barIndex % Progressions.BarCount, stateMap, phrase: scheme);
 

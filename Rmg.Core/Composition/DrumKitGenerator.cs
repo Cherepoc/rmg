@@ -103,6 +103,12 @@ internal static class DrumKitGenerator
     /// <summary>The share of its lead's beats a drum that accents the lead plays (<see cref="DrumBinding.Accent" />).</summary>
     public const double AccentShare = 0.5;
 
+    /// <summary>
+    ///     The chance a drum that colours a section plays on the feel of the lead of its main role, with no lean; the less
+    ///     conventional the section, the likelier it crosses it, a tuplet against the lead's for the whole section.
+    /// </summary>
+    public const double FeelChance = 0.85;
+
     /// <summary>The roles a section has a lead for, the ground and the backbeat always, time by <see cref="TimeChance" />.</summary>
     public static ImmutableArray<DrumRole> LeadRoles { get; } = [DrumRole.Ground, DrumRole.Backbeat, DrumRole.Time];
 
