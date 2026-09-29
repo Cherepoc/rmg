@@ -26,6 +26,7 @@ internal sealed class SectionGenerator
     private const int MelodyLeadingStream = 8;
     private const int MelodyImprovisationStream = 9;
     private const int RegisterFreedomStream = 10;
+    private const int BassImprovisationStream = 11;
 
     // the stream of the song's own shift of its lines' freedom to change register, apart from every section's
     private const int SongRegisterFreedomStream = -1;
@@ -44,7 +45,7 @@ internal sealed class SectionGenerator
     private readonly BarStateGenerator _barStateGenerator;
     private readonly PatternGenerator _patternGenerator;
 
-    // the song's shift of its lines' freedom to change register, before a section's, in spreads (MelodyLayers.RegisterFreedomSpread)
+    // the song's shift of its lines' freedom to change register, before a section's, in spreads (LineProfile.RegisterFreedomSpread)
     private readonly double _songRegisterFreedomShift;
 
 
@@ -419,6 +420,33 @@ internal sealed class SectionGenerator
                 rhythmKeys
             );
             var bars = BuildBars([]);
+            if (_tracks.Definitions[trackNumber].Role == TrackRole.Bass)
+            {
+                // the bass's line, placed with the song's, its pattern played twice as the section does, leading and
+                // landing as its bars have it
+                ChordApproach Approach(int bar) =>
+                    (ChordApproach)barStateTimelineMap.GetEffectiveStateMapAt(bar * Meter.BarDuration).GetStateValue(StateKinds.ChordApproach);
+                ChordArrival Landing(int bar) =>
+                    (ChordArrival)barStateTimelineMap.GetEffectiveStateMapAt(bar * Meter.BarDuration).GetStateValue(StateKinds.ChordArrival);
+                var bass = new SectionLine(
+                    trackNumber,
+                    BassLeadingLayers.Line,
+                    bars.Timeline.Repeat(2),
+                    rhythmKeys =>
+                    {
+                        using var pause = StateTrace.Pause();
+                        return BuildBars(rhythmKeys).Timeline.Repeat(2);
+                    },
+                    sectionRhythm.Scheme.Letters,
+                    [..Enumerable.Range(0, Progressions.BarCount).Select(Approach)],
+                    [..Enumerable.Range(0, Progressions.BarCount).Select(Landing)],
+                    BassLeadingLayers.Line.RegisterFreedom,
+                    Seeds.Derive(Seeds.Derive(_seed, sectionId), BassImprovisationStream)
+                );
+                yield return (trackNumber, bars with { Timeline = bass.Appear(0, 0).Trim(Meter.PatternDuration) }, bass);
+                continue;
+            }
+
             if (!isMelody)
             {
                 yield return (trackNumber, bars, null);
@@ -434,7 +462,7 @@ internal sealed class SectionGenerator
             // how freely the melody changes register where a phrase starts: the line's, as the song and the section move it
             var freedomContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), RegisterFreedomStream));
             var freedom = Math.Clamp(
-                MelodyLayers.Line.RegisterFreedom + (_songRegisterFreedomShift + Generators.SplineValue()(freedomContext)) * MelodyLayers.RegisterFreedomSpread,
+                MelodyLayers.Line.RegisterFreedom + (_songRegisterFreedomShift + Generators.SplineValue()(freedomContext)) * MelodyLayers.Line.RegisterFreedomSpread,
                 0,
                 1
             );

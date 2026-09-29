@@ -35,11 +35,11 @@ internal static class MelodyLayers
         MaxLeapChance: 0.4,
         ContinueChance: 0.85,
         AimOdds: 16,
-        RegisterFreedom: 0.25
+        RegisterFreedom: 0.25,
+        RegisterFreedomSpread: 0.25,
+        ContourShare: 1,
+        ImprovisationShare: 1
     );
-
-    /// <summary>How far a song, and a section of it, moves a line's freedom to change register, either way.</summary>
-    public const double RegisterFreedomSpread = 0.25;
 
     /// <summary>How much less often the melody's cycles are drawn afresh than the other tracks', so it plays riffs.</summary>
     public const double RhythmVariation = -0.2;

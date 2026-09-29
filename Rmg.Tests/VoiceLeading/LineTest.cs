@@ -294,4 +294,25 @@ public sealed class LineTest
 
         await Assert.That(line.Place(ChordOn(4), [7, 11, 2], Strong, 1, 0, 4, landing: landing)).IsEqualTo(expected);
     }
+
+    [Test]
+    public async Task ALineThatKeepsItsRegister_ReplaysAnEcho_NearestTheNoteBefore_WhereTheMelodyReplaysItAsHeard()
+    {
+        // an echo heard as G4 over C, replayed over C after the line has come down to A3
+        int Replay(LineProfile profile)
+        {
+            var line = new Line(profile, MinNote, MaxNote);
+            line.Place(C, CTones, Strong, 1, 0, 4, echo: 7);
+            // down from it over D minor, F4, D4, A3
+            Place(line, ChordOn(1), [2, 5, 9], Strong, -1, -10);
+            Place(line, ChordOn(1), [2, 5, 9], Strong, 1, -10);
+            Place(line, ChordOn(1), [2, 5, 9], Strong, 1, -10);
+            return line.Place(C, CTones, Strong, 1, 0, 0, echo: 7);
+        }
+
+        var keeping = MelodyLayers.Line with { RegisterFreedom = 0, RegisterFreedomSpread = 0 };
+        await Assert.That(Replay(MelodyLayers.Line)).IsEqualTo(67);
+        // near A3, where the melody replays G4: G3, below the range, kept at its lowest note, A3
+        await Assert.That(Replay(keeping)).IsEqualTo(57);
+    }
 }

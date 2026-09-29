@@ -96,13 +96,14 @@ internal sealed class Line
                 _ => throw new ArgumentOutOfRangeException(nameof(landing), landing, null)
             };
             var pitchClass = chord.GetPitch(landingStep).Mod(OctaveNoteCount);
-            note = GetNearest(Enumerable.Range(_low, _high - _low + 1).Where(x => x.Mod(OctaveNoteCount) == pitchClass).ToArray(), _previous ?? _middle + register);
+            note = GetNearest(Enumerable.Range(_low, _high - _low + 1).Where(x => x.Mod(OctaveNoteCount) == pitchClass).ToArray(), _previous ?? _middle + register * _profile.ContourShare);
         }
         else if (echo != 0 && _heard.TryGetValue(echo, out var heard))
         {
-            // over the root it was heard over, as it was; over another, a sequence nearest the note before
+            // over the root it was heard over, as it was, but for a line that never changes register; over another, a
+            // sequence nearest the note before
             if (_echoRun?.Root != chord.Root)
-                _echoRun = (chord.Root, chord.Root == heard.Root ? 0 : GetNearestOctave(chord, heard.Step) - heard.Step);
+                _echoRun = (chord.Root, chord.Root == heard.Root && !KeepsRegister ? 0 : GetNearestOctave(chord, heard.Step) - heard.Step);
             note = PlaceEcho(chord, chordToneClasses, beatRank, heard.Step + _echoRun.Value.Octave);
         }
         else
@@ -121,6 +122,10 @@ internal sealed class Line
         _previous = note;
         return note;
     }
+
+    // a line that never starts a phrase afresh in another register, whatever the song or the section, which replays an
+    // echo nearest the note before rather than in the octave it was heard in
+    private bool KeepsRegister => _profile is { RegisterFreedom: 0, RegisterFreedomSpread: 0 };
 
     /// <summary>The scale step, an octave's steps from the one given, whose note is nearest the note before.</summary>
     private int GetNearestOctave(ChordContext chord, int step)
@@ -173,7 +178,7 @@ internal sealed class Line
     )
     {
         var root = NearestOfClass(nextChord.Root, next);
-        return approach switch
+        var approached = approach switch
         {
             ChordApproach.None => note,
             ChordApproach.ScaleStep => ApproachByStep(chord, chordToneClasses, beatRank, note, next),
@@ -183,6 +188,12 @@ internal sealed class Line
             ChordApproach.Anticipation => root,
             _ => throw new ArgumentOutOfRangeException(nameof(approach), approach, null)
         };
+        // an approach past the range's edge moves an octave into it, as close to the edge as it can
+        while (approached < _low)
+            approached += OctaveNoteCount;
+        while (approached > _high)
+            approached -= OctaveNoteCount;
+        return approached;
     }
 
     /// <summary>The note of the given one's pitch class nearest the other, the lower on a tie.</summary>
@@ -207,7 +218,7 @@ internal sealed class Line
 
     private int PlaceByRule(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int step, double turn, double register)
     {
-        var aim = _middle + register;
+        var aim = _middle + register * _profile.ContourShare;
         var isStrong = beatRank <= _profile.StrongestWeakRank && chordToneClasses.Count > 0;
 
         int note;

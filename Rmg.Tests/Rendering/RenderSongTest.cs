@@ -23,15 +23,6 @@ public sealed class RenderSongTest
     private static PitchInstrumentTrack PitchTrack(int minOctaveOffset = 0, int maxOctaveOffset = 4) =>
         new(StateMap.Default, 0, minOctaveOffset, maxOctaveOffset, TrackRole.Chords);
 
-    // the bass plays one note of the chord, which its chord note offset picks where its line is placed
-    private static PitchInstrumentTrack BassTrack() => new(StateMap.Default, 0, 0, 4, TrackRole.Bass);
-
-    private static Song PlaceBass(Song song)
-    {
-        var track = (PitchInstrumentTrack)song.TrackDefinitions[0];
-        return new Song(song.Duration, song.TrackDefinitions, Rmg.Core.Composition.BassPattern.Place(song.TrackEventStateTimelineMap, 0, track));
-    }
-
     [Test]
     [Arguments(-1.5)]
     [Arguments(0)]
@@ -80,49 +71,6 @@ public sealed class RenderSongTest
 
         await Assert.That(velocity).IsBetween(0.2, 1);
         await Assert.That(Render.ToMidiVelocity(sum + 0.1)).IsGreaterThan(velocity);
-    }
-
-    [Test]
-    public async Task ChordNoteFromNextChordOctave_IsOneScaleOctaveAboveChordNote()
-    {
-        // 7-note scale, a triad of C, E and G, which are scale steps 0, 2 and 4.
-        // Chord note offset 1.4 selects the 5th chord note (index 4 of the repeating chord): chord note #2 one octave up.
-        // One octave up in the scale is 7 scale steps, not the 3 notes of the chord.
-        var stateMap = StateMap.FromStates(
-            [
-                StateKinds.ScaleOffsets.CreateState([0, 2, 4, 5, 7, 9, 11]),
-                StateKinds.ChordNotePitchOffsets.CreateState([0, 4 / 12.0, 7 / 12.0]),
-                StateKinds.ChordNoteOffset.CreateState([1.4]),
-                StateKinds.OctaveOffset.CreateState(7),
-            ]
-        );
-        var song = PlaceBass(CreateSong(1, BassTrack(), stateMap.ToTimelineItem(0)));
-
-        var result = Render.RenderSong(song);
-
-        // scale step 2 + 7 = step 9 -> scale offset 4 (E), one octave above the base octave 7 -> octave 8
-        var notes = result.Tracks[0].NoteTimeline;
-        await Assert.That(notes.Count).IsEqualTo(1);
-        await Assert.That(notes[0].Value.Offset).IsEqualTo(8 * 12 + 4);
-    }
-
-    [Test]
-    public async Task ChordNoteFromBaseChordOctave_IsChordNoteInScale()
-    {
-        var stateMap = StateMap.FromStates(
-            [
-                StateKinds.ScaleOffsets.CreateState([0, 2, 4, 5, 7, 9, 11]),
-                StateKinds.ChordNotePitchOffsets.CreateState([0, 4 / 12.0, 7 / 12.0]),
-                StateKinds.ChordNoteOffset.CreateState([0.4]),
-                StateKinds.OctaveOffset.CreateState(7),
-            ]
-        );
-        var song = PlaceBass(CreateSong(1, BassTrack(), stateMap.ToTimelineItem(0)));
-
-        var result = Render.RenderSong(song);
-
-        // chord note offset 0.4 -> index round(0.4 * 3) = 1 -> scale step 2 -> scale offset 4 in octave 7
-        await Assert.That(result.Tracks[0].NoteTimeline[0].Value.Offset).IsEqualTo(7 * 12 + 4);
     }
 
     [Test]

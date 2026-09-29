@@ -343,13 +343,9 @@ internal sealed class SongFormGenerator
                 );
             }
         );
-        // the bass lands on the root, whatever the bar's own arrival
-        var commonStateTimelineMap = homeBar.CommonStateTimelineMap
-            .Except([StateKinds.ChordArrival])
-            .MergeStateMap(StateMap.FromStates([StateKinds.ChordArrival.CreateState((int)ChordArrival.Root)]));
         return TrackEventStateTimelineMap.Merge(
             [
-                TrackEventStateTimelineMap.Create(Meter.BarDuration, tracks, commonStateTimelineMap),
+                TrackEventStateTimelineMap.Create(Meter.BarDuration, tracks, homeBar.CommonStateTimelineMap),
                 TrackEventStateTimelineMap.Create<StateMap>(duration)
             ]
         );

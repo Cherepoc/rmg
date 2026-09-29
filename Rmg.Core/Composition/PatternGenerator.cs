@@ -248,7 +248,13 @@ internal sealed class PatternGenerator
             ChordNoteOffset
         );
 
-        var melody = _trackDefinitions[trackNumber].Role == TrackRole.Melody ? new LinePattern(stateMap, MelodyLayers.Line) : null;
+        // a line's notes draw where they mean to go, by its profile
+        var line = _trackDefinitions[trackNumber].Role switch
+        {
+            TrackRole.Melody => new LinePattern(stateMap, MelodyLayers.Line),
+            TrackRole.Bass => new LinePattern(stateMap, BassLeadingLayers.Line),
+            _ => null
+        };
         // a drum that strikes may accent a note with another of its sounds
         var accentSounds = _trackDefinitions[trackNumber] is PercussionInstrumentTrack drum && drum.Sounds.Any(x => x.Accent > 0) ? drum.Sounds : [];
         var dynamics = stateMap.GetStateValue(CompositionStateKinds.NoteDynamics);
@@ -263,7 +269,7 @@ internal sealed class PatternGenerator
                 .Add(StateKinds.Velocity, BeatAccent.CreateVelocityGenerator(rank, rhythmPattern.MaxRank, dynamics).Then(x => x * VelocityLayers.Note))
                 .AddNoteDurationLayer()
                 .Add(CompositionStateKinds.BeatRank, rank);
-            melody?.AddNoteState(builder, beat);
+            line?.AddNoteState(builder, beat);
             if (!accentSounds.IsEmpty)
                 builder.Add(context => DrumAccents.Draw(context, accentSounds, rank, energy));
             return builder.ToStateMap(innerContext);

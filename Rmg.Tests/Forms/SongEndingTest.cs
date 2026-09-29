@@ -165,8 +165,10 @@ public sealed class SongEndingTest
         await Assert.That(melody.Value.GetStateValue(StateKinds.HeldDuration)).IsEqualTo(8);
         await Assert.That(ending.TrackTimelineMap[drum].EventTimeline).IsEmpty();
         // the bass rests in the home bar, and plays its first note of the section
-        await Assert.That(ending.TrackTimelineMap[BassTrack].EventTimeline.Single().Position).IsEqualTo(0);
-        await Assert.That(ending.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(StateKinds.ChordArrival))
-            .IsEqualTo((int)ChordArrival.Root);
+        var bass = ending.TrackTimelineMap[BassTrack].EventTimeline.Single();
+        await Assert.That(bass.Position).IsEqualTo(0);
+        // every line lands on the root, whatever the bar's own arrival
+        await Assert.That(bass.Value.GetStateValue(CompositionStateKinds.LineLanding)).IsEqualTo((int)ChordArrival.Root);
+        await Assert.That(melody.Value.GetStateValue(CompositionStateKinds.LineLanding)).IsEqualTo((int)ChordArrival.Root);
     }
 }

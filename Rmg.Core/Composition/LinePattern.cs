@@ -277,6 +277,8 @@ internal sealed record SectionLine(
     {
         var bars = Bars;
         var seed = Seeds.Derive(Seed, appearance);
+        // the line's share of the song's improvisation
+        amount *= Profile.ImprovisationShare;
         if (appearance > 0 && amount > 0)
         {
             var context = new GenerationContext(Seeds.Derive(seed, RhythmStream));

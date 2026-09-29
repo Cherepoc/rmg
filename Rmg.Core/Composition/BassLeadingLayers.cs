@@ -51,6 +51,29 @@ internal static class BassLeadingLayers
         new(0.1, ChordApproach.Anticipation)
     ];
 
+    /// <summary>
+    ///     How the bass moves, as a line (<see cref="LineProfile" />): by step through the chord's notes, every note one of
+    ///     them, over the whole of its range, which it keeps to rather than to a phrase's shape; it never starts a phrase
+    ///     afresh in another register, and varies less than the melody as its sections recur.
+    /// </summary>
+    public static LineProfile Line { get; } = new(
+        RangeWidth: 23,
+        RegisterPull: 7,
+        LeapSize: 7,
+        StrongestWeakRank: 1,
+        RepeatChance: 0.2,
+        MaxLeapChance: 0.4,
+        ContinueChance: 0.85,
+        AimOdds: 16,
+        RegisterFreedom: 0,
+        RegisterFreedomSpread: 0,
+        ContourShare: 0,
+        ImprovisationShare: 0.5
+    );
+
+    /// <summary>How much the bass moves by step rather than by leap, from 0 to 1 (<see cref="CompositionStateKinds.LineStepwiseness" />).</summary>
+    public const double Stepwiseness = 0.8;
+
     /// <summary>A layer's shift of the amount, up to the given size either way.</summary>
     public static Func<IGenerationContext, double> CreateGenerator(double size)
     {

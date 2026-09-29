@@ -21,6 +21,9 @@ namespace Rmg.Core.Composition;
 ///     The chance, before a song and a section spread it, that a phrase of the line starts afresh at where it aims, as a
 ///     new phrase that changes register, rather than going on from the note before.
 /// </param>
+/// <param name="RegisterFreedomSpread">How far a song, and a section of it, moves the line's freedom to change register, either way.</param>
+/// <param name="ContourShare">How much the shape the phrases take moves where the line aims: 1 all of it, 0 none, a line that keeps to the middle of its range.</param>
+/// <param name="ImprovisationShare">How much of the song's improvisation the line takes as its sections recur.</param>
 /// <param name="AimOdds">
 ///     How much likelier a note is to go on towards where its phrase aims, and to turn back rather than go on away from
 ///     it, as the odds at <see cref="RegisterPull" /> semitones from it, less the nearer it is.
@@ -34,7 +37,10 @@ internal sealed record LineProfile(
     double MaxLeapChance,
     double ContinueChance,
     double AimOdds,
-    double RegisterFreedom
+    double RegisterFreedom,
+    double RegisterFreedomSpread,
+    double ContourShare,
+    double ImprovisationShare
 )
 {
     /// <summary>

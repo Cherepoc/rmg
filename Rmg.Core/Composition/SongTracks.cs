@@ -121,9 +121,11 @@ internal sealed class SongTracks
                     "Track",
                     new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Bass))
-                        // the bass keeps close to the root and walks through the chord's notes
-                        .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, Generators.AbsSplineValue())
+                        // the bass is a line over the chords, its root theirs: the walks it once took are drawn as they
+                        // were, so that no other track's draws move, and its root walks no more
+                        .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, Generators.AbsSplineValue().Then(_ => 0.0))
                         .Add(CompositionStateKinds.IncrementalChordNoteOffset.Multiplier, Generators.AbsSplineValue().Then(x => 1 - x))
+                        .Add(CompositionStateKinds.LineStepwiseness, BassLeadingLayers.Stepwiseness)
                         .ToStateMap(context),
                     _ => VelocityLayers.GetLevel(TrackRole.Bass),
                     trackRhythmLayer
