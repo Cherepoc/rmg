@@ -11,17 +11,16 @@ measured before and after by a report test, by the measure its entry names.
 
 **Now** (P0), in this order:
 
-1. **A section's streams** (see *Architecture*), before the arrangement adds its draws.
-2. **Harmonic rhythm** (see *Chords*).
-3. **A section's length** (see *Form*).
+1. **Harmonic rhythm** (see *Chords*).
+2. **A section's length** (see *Form*).
 
 **Next** (P1), in this order:
 
-4. **The meter:** a cycle split in three, then the meter as state, then other meters (see *Meter*).
-5. **Sections with a role,** as the form (see *Form*).
-6. **The energy in the pitched tracks** (see *Section dynamics*).
-7. **The arrangement, and energy by appearance** (see *Appearances*).
-8. **Pitched fills and the lift** (see *Fills*).
+3. **The meter:** a cycle split in three, then the meter as state, then other meters (see *Meter*).
+4. **Sections with a role,** as the form (see *Form*).
+5. **The energy in the pitched tracks** (see *Section dynamics*).
+6. **The arrangement, and energy by appearance** (see *Appearances*).
+7. **Pitched fills and the lift** (see *Fills*).
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -281,9 +280,6 @@ the rest as they were.
 
 ## Architecture
 
-- **A section's streams** (P0, before the arrangement adds its draws): `SectionGenerator.Generate` derives thirteen
-  numbered streams by hand, each as `Seeds.Derive(Seeds.Derive(_seed, sectionId), …)`; an enum of them, as
-  `SongStream` is, and one method to derive one. The corpus unchanged.
 - **Memory** (P3, P2 once the arrangement doubles the tracks): every `RealizedNote` keeps the state it was decided
   from, which a song holds on to (about 2 MB a song, 8 MB with a trace). Recompute it on demand instead; watch the
   generation time too.

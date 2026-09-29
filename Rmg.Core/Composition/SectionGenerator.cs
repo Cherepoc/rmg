@@ -14,22 +14,6 @@ internal sealed class SectionGenerator
     /// <summary>The track of a trace entry that records a decision for the whole section, such as its energy.</summary>
     public const int SectionTrace = -2;
 
-    // the streams a section draws its scale, which bars its drums sit out and whether it plays percussion only from,
-    // apart from its own
-    private const int ScaleStream = 1;
-    private const int DrumPresenceStream = 2;
-    private const int PercussionStream = 3;
-    private const int DrumStrokeStream = 4;
-    private const int DrumRoleStream = 5;
-    private const int KitStream = 6;
-    private const int MelodyAnswerStream = 7;
-    private const int MelodyLeadingStream = 8;
-    private const int MelodyImprovisationStream = 9;
-    private const int RegisterFreedomStream = 10;
-    private const int BassImprovisationStream = 11;
-    private const int DrumBindingStream = 12;
-    private const int DrumFeelStream = 13;
-
     // the stream of the song's own shift of its lines' freedom to change register, apart from every section's
     private const int SongRegisterFreedomStream = -1;
 
@@ -84,6 +68,18 @@ internal sealed class SectionGenerator
         _patternGenerator = new PatternGenerator(context, tracks.Definitions);
     }
 
+    /// <summary>The random sequence a decision of a section draws from, apart from its own and every other decision's.</summary>
+    private IGenerationContext Stream(int sectionId, SectionStream stream)
+    {
+        return _context.CreateContext(StreamSeed(sectionId, stream));
+    }
+
+    /// <summary>The seed of <see cref="Stream" />, for a decision that derives its own sequences from it.</summary>
+    private int StreamSeed(int sectionId, SectionStream stream)
+    {
+        return Seeds.Derive(Seeds.Derive(_seed, sectionId), (int)stream);
+    }
+
     /// <summary>The section: its 4-bar pattern played twice, with what the fills need to know of its rhythm.</summary>
     /// <param name="plan">The section's place in the song's form, which some of its draws keep to.</param>
     public GeneratedSection Generate(SectionPlan plan)
@@ -124,7 +120,7 @@ internal sealed class SectionGenerator
         );
         // the roles the section draws again for the song's drums, as their parts in its grooves and its fills, from a
         // sequence of its own
-        var roleContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumRoleStream));
+        var roleContext = Stream(sectionId, SectionStream.DrumRoles);
         var sectionRoles = _tracks.SongDrums.Select(DrumGroups.GetTrackNumber).Order()
             .ToImmutableDictionary(x => x, x => DrumRoles.DrawSection(roleContext, DrumGroups.GetDrum(x), SongRole(x), rhythm.Tilt));
         StateTrace.Record(
@@ -140,7 +136,7 @@ internal sealed class SectionGenerator
 
         // the drums: the kit's or, now and then, the percussion's alone, by the roles they play, each from a sequence of
         // its own
-        var percussionContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), PercussionStream));
+        var percussionContext = Stream(sectionId, SectionStream.Percussion);
         var songPercussion = _tracks.SongDrums.Count(DrumGroups.Percussion.Drums.Contains);
         // a percussion song's every section, and now and then a section of a song of the kit and percussion
         var isPercussionOnly = _tracks.DrumSetup == DrumSetup.Percussion ||
@@ -148,7 +144,7 @@ internal sealed class SectionGenerator
                                 PercussionSections.Draw(percussionContext, _songPercussion, rhythm.Tilt, tilt, songPercussion));
         StateTrace.Record(TracePoints.PercussionOnly, SectionTrace, sectionId, 0, StateMap.Default, 0, isPercussionOnly ? "percussion only" : "drum kit", isPercussionOnly);
         var kit = DrumKitGenerator.SelectKit(
-            _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), KitStream)),
+            Stream(sectionId, SectionStream.Kit),
             _tracks.SongDrums,
             tilt,
             isPercussionOnly
@@ -158,7 +154,7 @@ internal sealed class SectionGenerator
         // a drum that doubles a lead plays its lead's beats up to the rank its role doubles, all of them, a share, or a
         // figure of its own on the lead's feel, as it is bound to it, drawn from a sequence of its own, leaning to its own
         // figure the less conventional the section
-        var bindingContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumBindingStream));
+        var bindingContext = Stream(sectionId, SectionStream.DrumBindings);
         var doubles = kit.Doubles.OrderBy(x => DrumGroups.GetTrackNumber(x.Key)).ToImmutableDictionary(
             x => DrumGroups.GetTrackNumber(x.Key),
             x => new Doubling(
@@ -171,7 +167,7 @@ internal sealed class SectionGenerator
         StateTrace.Record(TracePoints.Doubles, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", kit.Doubles.Select(x => $"{x.Key.Name} on {x.Value.Name}")), doubles);
         // a drum that does not lead plays on its lead's feel: one bound to it always, one that colours the section on the
         // lead of its main role's by a chance, drawn from a sequence of its own, crossing it the less conventional the section
-        var feelContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumFeelStream));
+        var feelContext = Stream(sectionId, SectionStream.DrumFeels);
         var feelLeads = ImmutableDictionary.CreateBuilder<int, int>();
         foreach (var drum in kit.Drums.Except(kit.Leads).OrderBy(DrumGroups.GetTrackNumber))
         {
@@ -200,14 +196,14 @@ internal sealed class SectionGenerator
         var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context), tilt);
 
         // the strokes the section changes from the song's, and how its drums play its bars, each from a sequence of its own
-        var strokeContext =_context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumStrokeStream));
+        var strokeContext =Stream(sectionId, SectionStream.DrumStrokes);
         var sectionStrokes = ImmutableDictionary.CreateBuilder<int, int>();
         foreach (var track in activeDrumTrackNumbers.Order().Where(x => DrumGroups.GetDrum(x).HasStrokes))
             if (DrumStrokes.DrawChange(strokeContext, DrumGroups.GetDrum(track), SongStroke(track), DrumStrokes.SectionChangeChance, rhythm.Tilt, tilt) is { } change)
                 sectionStrokes[track] = change;
         StateTrace.Record(TracePoints.DrumStrokes, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", sectionStrokes), sectionStrokes.ToImmutable());
         var barDrums = DrumPresence.Draw(
-            _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumPresenceStream)),
+            Stream(sectionId, SectionStream.DrumPresence),
             activeDrumTrackNumbers,
             scheme,
             kit.Leads.Select(DrumGroups.GetTrackNumber).ToHashSet(),
@@ -293,7 +289,7 @@ internal sealed class SectionGenerator
     private Scale PickScale(int sectionId, HarmonicUnconventionality harmony, double energy)
     {
         return Scales.PickSection(
-            _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), ScaleStream)),
+            Stream(sectionId, SectionStream.Scale),
             _songScale,
             harmony,
             SectionEnergy.Tilt(energy, harmony.Coupling)
@@ -427,7 +423,7 @@ internal sealed class SectionGenerator
             // there are mutated, by the section's amount, each decision from the answer's own sequence
             var isMelody = _tracks.Definitions[trackNumber].Role == TrackRole.Melody;
             var amount = sectionRhythm.Unconventionality.Tilt.Chance(MelodyLayers.AnswerAmount, 1);
-            var answerContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), MelodyAnswerStream));
+            var answerContext = Stream(sectionId, SectionStream.MelodyAnswer);
             var answerSeed = answerContext.GenerateInt();
             var questionEnd = barStateTimelineMap.GetEffectiveStateMapAt(Meter.PatternDuration - Meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
             var answer = isMelody ? LinePattern.DrawAnswer(answerContext, amount, questionEnd) : null;
@@ -466,7 +462,7 @@ internal sealed class SectionGenerator
                     [..Enumerable.Range(0, Progressions.BarCount).Select(Approach)],
                     [..Enumerable.Range(0, Progressions.BarCount).Select(Landing)],
                     BassLeadingLayers.Line.RegisterFreedom,
-                    Seeds.Derive(Seeds.Derive(_seed, sectionId), BassImprovisationStream)
+                    StreamSeed(sectionId, SectionStream.BassImprovisation)
                 );
                 yield return (trackNumber, bars with { Timeline = bass.Appear(0, 0).Trim(Meter.PatternDuration) }, bass);
                 continue;
@@ -480,12 +476,11 @@ internal sealed class SectionGenerator
 
             // the melody's notes are placed once its bars are made, in their order, over the question and its answer,
             // leading into the chord changes within a phrase as often as the section has it
-            var leadingContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), MelodyLeadingStream));
+            var leadingContext = Stream(sectionId, SectionStream.MelodyLeading);
             var leading = Math.Clamp(MelodyLayers.Leading + Generators.SplineValue()(leadingContext) * MelodyLayers.LeadingSpread, 0, 1);
             StateTrace.Record(TracePoints.MelodyLeading, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{leading:F2}", leading);
-            // a later appearance builds its bars afresh where its rhythm is improvised, as recorded the first time
             // how freely the melody changes register where a phrase starts: the line's, as the song and the section move it
-            var freedomContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), RegisterFreedomStream));
+            var freedomContext = Stream(sectionId, SectionStream.RegisterFreedom);
             var freedom = Math.Clamp(
                 MelodyLayers.Line.RegisterFreedom + (_songRegisterFreedomShift + Generators.SplineValue()(freedomContext)) * MelodyLayers.Line.RegisterFreedomSpread,
                 0,
@@ -506,7 +501,7 @@ internal sealed class SectionGenerator
                 LinePattern.DrawApproaches(leadingContext, leading),
                 [..Enumerable.Repeat(ChordArrival.Free, Progressions.BarCount)],
                 freedom,
-                Seeds.Derive(Seeds.Derive(_seed, sectionId), MelodyImprovisationStream)
+                StreamSeed(sectionId, SectionStream.MelodyImprovisation)
             );
             StateTrace.Record(TracePoints.MelodyAnswer, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{amount:F2}", amount);
             yield return (trackNumber, bars with { Timeline = melody.Appear(0, 0).Trim(Meter.PatternDuration) }, melody);
@@ -591,3 +586,24 @@ internal sealed record SectionRhythm(
     MelodyBusyness MelodyBusyness,
     Tilt Energy
 );
+
+/// <summary>
+///     The random sequences of a section's decisions apart from its own, each derived from the section's seed by its
+///     number, which must stay as it is: a new decision takes a new number.
+/// </summary>
+internal enum SectionStream
+{
+    Scale = 1,
+    DrumPresence = 2,
+    Percussion = 3,
+    DrumStrokes = 4,
+    DrumRoles = 5,
+    Kit = 6,
+    MelodyAnswer = 7,
+    MelodyLeading = 8,
+    MelodyImprovisation = 9,
+    RegisterFreedom = 10,
+    BassImprovisation = 11,
+    DrumBindings = 12,
+    DrumFeels = 13
+}
