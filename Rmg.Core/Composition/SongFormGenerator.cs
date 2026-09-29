@@ -288,7 +288,7 @@ internal sealed class SongFormGenerator
     {
         return note.Value
             .With(CompositionStateKinds.LineLanding, (int)ChordArrival.Root)
-            .With(CompositionStateKinds.LineReset, 0)
+            .With(CompositionStateKinds.LinePhraseStart, (int)PhraseStart.None)
             .ToTimelineItem(note.Position);
     }
 

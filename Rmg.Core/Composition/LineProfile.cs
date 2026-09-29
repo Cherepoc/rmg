@@ -28,6 +28,22 @@ namespace Rmg.Core.Composition;
 ///     How much likelier a note is to go on towards where its phrase aims, and to turn back rather than go on away from
 ///     it, as the odds at <see cref="RegisterPull" /> semitones from it, less the nearer it is.
 /// </param>
+/// <summary>How a line's note starts its phrase, as its freedom to change register draws it.</summary>
+public enum PhraseStart
+{
+    /// <summary>A note within its phrase, which the phrase started before it.</summary>
+    None = 0,
+
+    /// <summary>
+    ///     Afresh, at where the phrase aims, a new register, its echoes replayed where they were heard, as a phrase that
+    ///     restates does.
+    /// </summary>
+    Afresh = 1,
+
+    /// <summary>Going on from the note before, its echoes replayed nearest it, as a phrase that continues does.</summary>
+    GoesOn = 2
+}
+
 internal sealed record LineProfile(
     int RangeWidth,
     int RegisterPull,

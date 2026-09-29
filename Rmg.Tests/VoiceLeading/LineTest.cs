@@ -296,23 +296,20 @@ public sealed class LineTest
     }
 
     [Test]
-    public async Task ALineThatKeepsItsRegister_ReplaysAnEcho_NearestTheNoteBefore_WhereTheMelodyReplaysItAsHeard()
+    [Arguments(PhraseStart.GoesOn, 60)]
+    [Arguments(PhraseStart.None, 60)]
+    [Arguments(PhraseStart.Afresh, 72)]
+    public async Task AnEcho_IsReplayedNearTheNoteBefore_InAPhraseThatGoesOn_WhereItWouldLeap_AndAsHeard_InOneThatStartsAfresh(PhraseStart start, int expected)
     {
-        // an echo heard as G4 over C, replayed over C after the line has come down to A3
-        int Replay(LineProfile profile)
-        {
-            var line = new Line(profile, MinNote, MaxNote);
-            line.Place(C, CTones, Strong, 1, 0, 4, echo: 7);
-            // down from it over D minor, F4, D4, A3
-            Place(line, ChordOn(1), [2, 5, 9], Strong, -1, -10);
-            Place(line, ChordOn(1), [2, 5, 9], Strong, 1, -10);
-            Place(line, ChordOn(1), [2, 5, 9], Strong, 1, -10);
-            return line.Place(C, CTones, Strong, 1, 0, 0, echo: 7);
-        }
+        // an echo heard as C5 over C, in a phrase that goes on, replayed over C after the line has come down to D4: C5
+        // would leap a seventh, so the C nearest D4 in the range, C4, plays it
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
+        line.Place(C, CTones, Strong, 1, 0, 6, echo: 7, phraseStart: PhraseStart.GoesOn);
+        // down from it over D minor, A4, F4, D4
+        Place(line, ChordOn(1), [2, 5, 9], Strong, -1, -10);
+        Place(line, ChordOn(1), [2, 5, 9], Strong, 1, -10);
+        Place(line, ChordOn(1), [2, 5, 9], Strong, 1, -10);
 
-        var keeping = MelodyLayers.Line with { RegisterFreedom = 0, RegisterFreedomSpread = 0 };
-        await Assert.That(Replay(MelodyLayers.Line)).IsEqualTo(67);
-        // near A3, where the melody replays G4: G3, below the range, kept at its lowest note, A3
-        await Assert.That(Replay(keeping)).IsEqualTo(57);
+        await Assert.That(line.Place(C, CTones, Strong, 1, 0, 0, echo: 7, phraseStart: start)).IsEqualTo(expected);
     }
 }

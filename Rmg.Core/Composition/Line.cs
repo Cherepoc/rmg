@@ -43,6 +43,10 @@ internal sealed class Line
     // the run of echoes playing: the root of its chord, and the octave it plays in, in scale steps from where it was heard
     private (int Root, int Octave)? _echoRun;
 
+    // whether the phrase playing goes on from the note before, and so replays its echoes nearest it rather than where
+    // they were heard
+    private bool _echoesNear;
+
     /// <param name="profile">How the line moves, and what its strong beats take.</param>
     /// <param name="minNote">The lowest note of the track's range.</param>
     /// <param name="maxNote">The highest note of the track's range.</param>
@@ -68,7 +72,10 @@ internal sealed class Line
     ///     What the note lands on, as the first note of a bar that asks for it, such as a bass's on the chord's root: the
     ///     nearest such note of the chord in the range to the note before; free for none, the note placed as it would be.
     /// </param>
-    /// <param name="reset">Whether the note starts its phrase afresh, as a first note does, at where the phrase aims.</param>
+    /// <param name="phraseStart">
+    ///     How the note starts its phrase: afresh, as a first note does, at where the phrase aims, its echoes replayed where
+    ///     they were heard; going on from the note before, its echoes replayed nearest it; none within a phrase.
+    /// </param>
     public int Place(
         ChordContext chord,
         IReadOnlyCollection<int> chordToneClasses,
@@ -78,11 +85,13 @@ internal sealed class Line
         double register,
         int echo = 0,
         ChordArrival landing = ChordArrival.Free,
-        bool reset = false
+        PhraseStart phraseStart = PhraseStart.None
     )
     {
-        if (reset)
+        if (phraseStart == PhraseStart.Afresh)
             (_previous, _previousMove, _echoRun) = (null, 0, null);
+        if (phraseStart != PhraseStart.None)
+            (_echoesNear, _echoRun) = (phraseStart == PhraseStart.GoesOn, null);
 
         int note;
         if (landing != ChordArrival.Free)
@@ -100,10 +109,13 @@ internal sealed class Line
         }
         else if (echo != 0 && _heard.TryGetValue(echo, out var heard))
         {
-            // over the root it was heard over, as it was, but for a line that never changes register; over another, a
-            // sequence nearest the note before
+            // over the root it was heard over, as it was, but in a phrase that goes on, where that would leap from the
+            // note before; over another root, nearest the note before, as a sequence
             if (_echoRun?.Root != chord.Root)
-                _echoRun = (chord.Root, chord.Root == heard.Root && !KeepsRegister ? 0 : GetNearestOctave(chord, heard.Step) - heard.Step);
+            {
+                var asHeard = chord.Root == heard.Root && !(_echoesNear && _previous is { } last && Math.Abs(chord.GetPitch(heard.Step) - last) >= _profile.LeapSize);
+                _echoRun = (chord.Root, asHeard ? 0 : GetNearestOctave(chord, heard.Step) - heard.Step);
+            }
             note = PlaceEcho(chord, chordToneClasses, beatRank, heard.Step + _echoRun.Value.Octave);
         }
         else
@@ -123,15 +135,13 @@ internal sealed class Line
         return note;
     }
 
-    // a line that never starts a phrase afresh in another register, whatever the song or the section, which replays an
-    // echo nearest the note before rather than in the octave it was heard in
-    private bool KeepsRegister => _profile is { RegisterFreedom: 0, RegisterFreedomSpread: 0 };
-
     /// <summary>The scale step, an octave's steps from the one given, whose note is nearest the note before.</summary>
     private int GetNearestOctave(ChordContext chord, int step)
     {
         var target = _previous ?? _middle;
-        return Enumerable.Range(-3, 7).Select(x => step + x * ScaleStepCount).MinBy(x => Math.Abs(chord.GetPitch(x) - target));
+        var steps = Enumerable.Range(-3, 7).Select(x => step + x * ScaleStepCount).ToArray();
+        var inRange = steps.Where(x => chord.GetPitch(x) >= _low && chord.GetPitch(x) <= _high).ToArray();
+        return (inRange.Length > 0 ? inRange : steps).MinBy(x => Math.Abs(chord.GetPitch(x) - target));
     }
 
     /// <summary>

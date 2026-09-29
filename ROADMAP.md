@@ -246,10 +246,17 @@ Smaller, when the code is next touched:
   appearance's pitches 82% of the time against 90%. Its octave nearest the note before is its line's rule: placing
   every note in its chord's register instead leapt a fifth or more 35% of the time and an octave 18%. The bass's pickup
   is added where a bar asks to lead, as the bars are made, over the chord at its place, and kept only where the song
-  put together has a new chord after it, the next section's too (`LinePickup`, `LinePattern.Place`). Left: the melody's
-  echoes keeping their heard octave or the one nearest by its freedom,
-  where only a line of no freedom keeps nearest; the melody leading into its phrase's first bar, now that it knows the
-  next section's chord.
+  put together has a new chord after it, the next section's too (`LinePickup`, `LinePattern.Place`). A phrase's
+  start decides its echoes too (`PhraseStart`, `LinePhraseStart`): a phrase that starts afresh replays an echo over the
+  root it was heard over where it was heard, and one that goes on replays it so too, unless that would leap from the
+  note before, where it takes the octave nearest it; an echo's octave nearest the note before is within the range, so
+  that a replayed tune moves by octaves rather than bending at the range's edge. Over 100 corpus songs, against echoes
+  always where they were heard: the melody leaps where a phrase starts again 16% of the time against 31%, into a
+  section 12% against 18%; a recurring section plays its first appearance's notes in some octave 95% of the time, the
+  same notes 91% against 96%, and the answer's first half the question's in some octave 94%, the same notes 85%
+  against 99%; chord notes on the beat 89% against 88%; its contour 0.18 against 0.21. Nearest the note before
+  whatever the range, the same notes fell to 71%, a replayed figure bent at the range's edge into other notes. Left:
+  the melody leading into its phrase's first bar, now that it knows the next section's chord.
 - **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 - **Memory:** every `RealizedNote` keeps the state it was decided from, which a song now holds on to (about 2 MB a
   song, 8 MB with a trace). Recompute it on demand instead, should memory matter.

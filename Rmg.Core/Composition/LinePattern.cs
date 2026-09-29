@@ -56,7 +56,7 @@ internal sealed class LinePattern
     ///     A line placed over the song put together: every note by the rules of <see cref="Line" />, in the song's order,
     ///     over the chord it plays as <c>Realizer</c> works it out, the next section's too, kept as its scale step above
     ///     its chord's root; a bar's first note landing where its bar asks (<see cref="CompositionStateKinds.LineLanding" />),
-    ///     a phrase starting afresh at its aim where its first note says so (<see cref="CompositionStateKinds.LineReset" />),
+    ///     a phrase starting afresh at its aim or going on from the note before as its first note says (<see cref="CompositionStateKinds.LinePhraseStart" />),
     ///     and the last note before a change of chord on a bar line, its next one of the new chord's, leading into it as
     ///     its bar has it (<see cref="CompositionStateKinds.LineApproach" />), a pickup added for it kept only there
     ///     (<see cref="CompositionStateKinds.LinePickup" />). One line for the whole song, so that it goes
@@ -99,7 +99,7 @@ internal sealed class LinePattern
                         x.State.GetStateValue(CompositionStateKinds.LineRegister),
                         x.State.GetStateValue(CompositionStateKinds.NoteKey),
                         isFirstInBar ? (ChordArrival)x.State.GetStateValue(CompositionStateKinds.LineLanding) : ChordArrival.Free,
-                        x.State.GetStateValue(CompositionStateKinds.LineReset) > 0
+                        (PhraseStart)x.State.GetStateValue(CompositionStateKinds.LinePhraseStart)
                     );
                     return (Note: x, Rank: rank, Pitch: pitch);
                 }
@@ -323,7 +323,8 @@ internal sealed record SectionLine(
                 var value = note.Value
                     .With(CompositionStateKinds.LineApproach, (int)Approaches[bar])
                     .With(CompositionStateKinds.LineLanding, (int)Landings[bar]);
-                return (resets[phrase] && firsts[phrase] == note.Position ? value.With(CompositionStateKinds.LineReset, 1) : value)
+                var start = resets[phrase] ? PhraseStart.Afresh : PhraseStart.GoesOn;
+                return (firsts[phrase] == note.Position ? value.With(CompositionStateKinds.LinePhraseStart, (int)start) : value)
                     .ToTimelineItem(note.Position);
             }
         );
