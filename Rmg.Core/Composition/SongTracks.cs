@@ -80,9 +80,6 @@ internal sealed class SongTracks
                     "Track",
                     new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Chords))
-                        // the chords play whole, as their role has them: their root and their notes do not walk
-                        .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, 0)
-                        .Add(CompositionStateKinds.IncrementalChordNoteOffset.Multiplier, 0)
                         // the chord instrument sets how smoothly the chords move, and the song moves it a little
                         .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(x => chordsInstrument.Leading + x))
                         .ToStateMap(context),
@@ -100,8 +97,6 @@ internal sealed class SongTracks
                     "Track",
                     new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Melody))
-                        // the melody keeps to the chords: its root does not walk away from theirs
-                        .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, 0)
                         // the melody instrument sets how stepwise the melody is, and the song moves it a little
                         .Add(CompositionStateKinds.LineStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Song).Then(x => melodyInstrument.Leading + x))
                         // a melody repeats its cycles more than the other tracks, as riffs
@@ -121,10 +116,6 @@ internal sealed class SongTracks
                     "Track",
                     new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Bass))
-                        // the bass is a line over the chords, its root theirs: the walks it once took are drawn as they
-                        // were, so that no other track's draws move, and its root walks no more
-                        .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, Generators.AbsSplineValue().Then(_ => 0.0))
-                        .Add(CompositionStateKinds.IncrementalChordNoteOffset.Multiplier, Generators.AbsSplineValue().Then(x => 1 - x))
                         .Add(CompositionStateKinds.LineStepwiseness, BassLeadingLayers.Stepwiseness)
                         .ToStateMap(context),
                     _ => VelocityLayers.GetLevel(TrackRole.Bass),

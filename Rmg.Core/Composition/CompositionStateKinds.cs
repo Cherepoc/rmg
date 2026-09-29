@@ -16,12 +16,6 @@ internal static class CompositionStateKinds
     public static IncrementalStateKinds IncrementalArticulationOffset { get; } =
         new(Prefix + StateKinds.ArticulationOffset.Name);
 
-    public static IncrementalStateKinds IncrementalChordRootNoteOffset { get; } =
-        new(Prefix + StateKinds.ChordRootNoteOffset.Name);
-
-    public static IncrementalStateKinds IncrementalChordNoteOffset { get; } =
-        new(Prefix + StateKinds.ChordNoteOffset.Name);
-
     // how much a line, such as the melody, moves by step rather than by leap, from 0 to 1
     public static StateKind<double> LineStepwiseness { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineStepwiseness");
 

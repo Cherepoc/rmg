@@ -330,9 +330,8 @@ internal sealed class SongFormGenerator
                 var notes = roles[x.Key] == TrackRole.Drum
                     ? []
                     : template.Take(1)
-                        // on the home chord itself, without the note's own step of the walk of the root
+                        // on the home chord itself
                         .Select(note => (homeShape is null ? note.Value : note.Value.Except(shapeKinds).MergeWith(homeShape))
-                            .Except([StateKinds.ChordRootNoteOffset])
                             .MergeWith(final)
                             .ToTimelineItem(0)
                         )

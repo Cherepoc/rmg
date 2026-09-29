@@ -22,7 +22,7 @@ public sealed class BassLeadInTest
             [
                 StateTimeline.Create(Meter.PatternDuration, StateKinds.ChordApproach, [((int)approach).ToTimelineItem(0.0)]),
                 StateTimeline.Create(Meter.PatternDuration, CompositionStateKinds.RoleChord, chords.Select(x => ImmutableArray.Create(x.Chord).ToTimelineItem(x.Position))),
-                StateTimeline.Create(Meter.PatternDuration, StateKinds.ChordRootNoteOffset, chords.Select(x => ImmutableArray.Create(x.Root).ToTimelineItem(x.Position)))
+                StateTimeline.Create(Meter.PatternDuration, StateKinds.ChordRoot, chords.Select(x => ((int)x.Root).ToTimelineItem(x.Position)))
             ]
         );
     }
@@ -72,7 +72,7 @@ public sealed class BassLeadInTest
         StateMap Note(int root, int pickup) => StateMap.FromStates(
             [
                 StateKinds.ChordNotePitchOffsets.CreateState(Triad.Heights),
-                StateKinds.ChordRootNoteOffset.CreateState([root / 7.0]),
+                StateKinds.ChordRoot.CreateState(root),
                 CompositionStateKinds.LinePickup.CreateState(pickup),
                 CompositionStateKinds.LineApproach.CreateState(pickup > 0 ? (int)ChordApproach.HalfStepBelow : 0)
             ]

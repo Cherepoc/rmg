@@ -74,20 +74,18 @@ public sealed class RenderSongTest
     }
 
     [Test]
-    // a small offset either way is less than half a step, so the note stays on the root
-    [Arguments(-0.05, 7 * 12 + 0)]
-    [Arguments(0.05, 7 * 12 + 0)]
-    // more than half a step up or down moves the note a whole step
-    [Arguments(0.1, 7 * 12 + 2)]
-    [Arguments(-0.1, 6 * 12 + 11)]
-    public async Task ChordRootOffset_RoundsToNearestScaleStep(double chordRootOffset, int expectedNote)
+    [Arguments(0, 7 * 12 + 0)]
+    [Arguments(1, 7 * 12 + 2)]
+    [Arguments(-1, 6 * 12 + 11)]
+    [Arguments(7, 8 * 12 + 0)]
+    public async Task ChordRoot_IsWholeScaleSteps_AboveTheTonic(int chordRoot, int expectedNote)
     {
-        // 7-note scale: one scale step is 1/7 of the offset
+        // a chord of the root alone, over a 7-note scale
         var stateMap = StateMap.FromStates(
             [
                 StateKinds.ScaleOffsets.CreateState([0, 2, 4, 5, 7, 9, 11]),
-                StateKinds.ChordRootNoteOffset.CreateState([chordRootOffset]),
-                StateKinds.ChordNoteOffset.CreateState([0]),
+                StateKinds.ChordRoot.CreateState(chordRoot),
+                StateKinds.ChordNotePitchOffsets.CreateState([0.0]),
                 StateKinds.OctaveOffset.CreateState(7),
             ]
         );

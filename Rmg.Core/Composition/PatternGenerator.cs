@@ -19,9 +19,6 @@ internal sealed class PatternGenerator
     private static readonly Func<IGenerationContext, int> SeedGenerator = Generators.Int();
 
     private static readonly Func<IGenerationContext, double> ArticulationOffset = Generators.SplineValue();
-    private static readonly Func<IGenerationContext, double> ChordRootNoteOffset = Generators.SplineValue();
-    private static readonly Func<IGenerationContext, double> ChordNoteOffset = Generators.SplineValue();
-    private static readonly Func<IGenerationContext, double> PatternChordNoteOffset = Generators.SplineValue();
 
     private readonly IGenerationContext _context;
     private readonly ImmutableSortedDictionary<int, IInstrumentTrack> _trackDefinitions;
@@ -189,8 +186,7 @@ internal sealed class PatternGenerator
             builder.Add(DrumStrokes.At(StateDepths.BarPattern, barStroke));
         var stateMap = builder
             .ToStateMap(trackGenerationContext)
-            .MergeWith(trackStateMap)
-            .MergeWith(CreatePatternChordNoteOffset(_trackDefinitions[trackNumber], trackStateMap, trackGenerationContext));
+            .MergeWith(trackStateMap);
         // an answer's bar is recorded at its place in the 4-bar pattern, as its question's is
         StateTrace.Record(TracePoints.BarPattern, trackNumber, sectionId, barIndex % Progressions.BarCount, stateMap, phrase: scheme);
 
@@ -239,14 +235,6 @@ internal sealed class PatternGenerator
             CompositionStateKinds.IncrementalArticulationOffset,
             ArticulationOffset
         );
-        var chordRootNoteOffsetGenerator = changingStateTimelineMap.ToIncrementalGenerator(
-            CompositionStateKinds.IncrementalChordRootNoteOffset,
-            ChordRootNoteOffset
-        );
-        var chordNoteOffsetGenerator = changingStateTimelineMap.ToIncrementalGenerator(
-            CompositionStateKinds.IncrementalChordNoteOffset,
-            ChordNoteOffset
-        );
 
         // a line's notes draw where they mean to go, by its profile
         var line = _trackDefinitions[trackNumber].Role switch
@@ -264,8 +252,6 @@ internal sealed class PatternGenerator
             var rank = beat.Rank;
             var builder = new StateMapBuilder("Note", perTrack: true)
                 .Add(StateKinds.ArticulationOffset, articulationOffsetGenerator(innerContext, position))
-                .Add(StateKinds.ChordRootNoteOffset, chordRootNoteOffsetGenerator(innerContext, position))
-                .Add(StateKinds.ChordNoteOffset, chordNoteOffsetGenerator(innerContext, position))
                 .Add(StateKinds.Velocity, BeatAccent.CreateVelocityGenerator(rank, rhythmPattern.MaxRank, dynamics).Then(x => x * VelocityLayers.Note))
                 .AddNoteDurationLayer()
                 .Add(CompositionStateKinds.BeatRank, rank);
@@ -378,11 +364,7 @@ internal sealed class PatternGenerator
             .AddNoteWalkLayer()
             .Add(
                 stateMap.Subset(
-                    [
-                        ..CompositionStateKinds.IncrementalArticulationOffset.GetAll(),
-                        ..CompositionStateKinds.IncrementalChordRootNoteOffset.GetAll(),
-                        ..CompositionStateKinds.IncrementalChordNoteOffset.GetAll()
-                    ]
+                    [..CompositionStateKinds.IncrementalArticulationOffset.GetAll()]
                 )
             )
             .ToStateMapGenerator();
@@ -435,27 +417,6 @@ internal sealed class PatternGenerator
             Seeds.Derive(seed, 2),
             Seeds.Derive(seed, 3)
         );
-    }
-
-    /// <summary>
-    ///     Where in the chord a pitched track's bar pattern starts: the note-to-note walk of the pattern goes on from
-    ///     there. It is scaled like that walk, so a track that plays whole chords (a zero multiplier) gets nothing and
-    ///     keeps playing whole chords.
-    /// </summary>
-    private static StateMap CreatePatternChordNoteOffset(
-        IInstrumentTrack trackDefinition,
-        StateMap trackStateMap,
-        IGenerationContext context
-    )
-    {
-        if (trackDefinition is not PitchInstrumentTrack)
-            return StateMap.Default;
-
-        var multiplier = trackStateMap.GetStateValue(CompositionStateKinds.IncrementalChordNoteOffset.Multiplier);
-        if (multiplier.IsEqualToByEpsilon(0))
-            return StateMap.Default;
-
-        return StateMap.FromStates([StateKinds.ChordNoteOffset.CreateState([PatternChordNoteOffset(context) * multiplier])]);
     }
 }
 

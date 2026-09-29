@@ -47,16 +47,12 @@ internal static class LayerStates
             .Add(CompositionStateKinds.Rhythm.Variation, layer.CreateVariationGenerator());
     }
 
-    /// <summary>A layer's part of the note-to-note walk of the articulation, the chord root and the chord note.</summary>
+    /// <summary>A layer's part of the note-to-note walk of a drum's articulation.</summary>
     public static StateMapBuilder AddNoteWalkLayer(this StateMapBuilder builder)
     {
         return builder
             .Add(CompositionStateKinds.IncrementalArticulationOffset.ConsecutiveOffset, WalkConsecutiveOffset)
-            .Add(CompositionStateKinds.IncrementalArticulationOffset.RandomOffset, WalkRandomOffset)
-            .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.ConsecutiveOffset, WalkConsecutiveOffset)
-            .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.RandomOffset, WalkRandomOffset)
-            .Add(CompositionStateKinds.IncrementalChordNoteOffset.ConsecutiveOffset, WalkConsecutiveOffset)
-            .Add(CompositionStateKinds.IncrementalChordNoteOffset.RandomOffset, WalkRandomOffset);
+            .Add(CompositionStateKinds.IncrementalArticulationOffset.RandomOffset, WalkRandomOffset);
     }
 
     /// <summary>A layer's part of the note durations.</summary>

@@ -428,7 +428,7 @@ public sealed class StateTimelineMergeTest
     [Test]
     public async Task CollectionTimelines_WithSameValue_KeepBothValues()
     {
-        var kind = StateKinds.ChordRootNoteOffset;
+        var kind = StateKinds.ArticulationOffset;
         var timeline1 = StateTimeline.Create(1, kind, [new TimelineItem<ImmutableArray<double>>(0, [0.25])]);
         var timeline2 = StateTimeline.Create(1, kind, [new TimelineItem<ImmutableArray<double>>(0, [0.25])]);
 

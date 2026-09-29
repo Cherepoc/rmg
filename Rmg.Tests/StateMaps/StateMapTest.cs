@@ -217,12 +217,12 @@ public sealed class StateMapTest
     public async Task MergeWith_SameOffsetFromTwoLayers_KeepsBoth()
     {
         // each layer adds its own offset, and the offsets are summed when rendered
-        var input = Map(StateKinds.ChordRootNoteOffset.CreateState([0.25]));
-        var other = Map(StateKinds.ChordRootNoteOffset.CreateState([0.25]));
+        var input = Map(StateKinds.ArticulationOffset.CreateState([0.25]));
+        var other = Map(StateKinds.ArticulationOffset.CreateState([0.25]));
 
         var result = input.MergeWith(other);
 
-        await Assert.That(result.GetStateValue(StateKinds.ChordRootNoteOffset).ToArray()).IsEquivalentTo([0.25, 0.25]);
+        await Assert.That(result.GetStateValue(StateKinds.ArticulationOffset).ToArray()).IsEquivalentTo([0.25, 0.25]);
     }
 
     [Test]

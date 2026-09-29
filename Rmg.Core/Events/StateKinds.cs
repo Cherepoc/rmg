@@ -43,14 +43,8 @@ public static class StateKinds
     public static readonly StateKind<LayerValue<int>> DrumStroke = CreateLowestLayerWins<int>("DrumStroke", StateScope.Render);
     // a note's length set outright, in beats, over the gap to the next note, such as a phrase's last note; 0 for none
     public static readonly StateKind<double> HeldDuration = CreateAdditive<double>("HeldDuration", StateScope.Render);
-    // the chord's root, and which of its notes the bass plays, as every layer's step of them, such as the progression's
-    // and the walk's: fractions of the scale's steps and of the chord's notes, which Render rounds to whole steps each
-    // and adds, so that a layer moves every note under it alike, where a sum rounded once would move one note and not
-    // the next (README); none is a step of 0. How a track plays its chord is its role's, not an offset's
-    public static readonly StateKind<ImmutableArray<double>> ChordRootNoteOffset = CreateCollection<double>("ChordRootOffset", StateScope.Render);
     // the chord's root, in scale steps above the key's tonic: the section's home and the progression's step from it
     public static readonly StateKind<int> ChordRoot = CreateAdditive<int>("ChordRoot", StateScope.Render);
-    public static readonly StateKind<ImmutableArray<double>> ChordNoteOffset = CreateCollection<double>("ChordNoteOffset", StateScope.Render);
     // the scale, as its notes' semitones above its root: one value, set by one layer, a section's, whose kind would join
     // two layers' scales into one of fourteen notes (SingleValuedListsTest)
     public static readonly StateKind<ImmutableArray<int>> ScaleOffsets = CreateCollection<int>("ScaleOffsets", StateScope.Render, isShared: true);

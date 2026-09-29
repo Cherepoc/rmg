@@ -206,9 +206,13 @@ lean of their own (`RhythmLayers.ChanceLean`, 1.1), tuned so that a section is a
 unconventionality: over 300 corpus songs (`RhythmBusynessReportTest`, the sections told apart by their melody's answer
 amount), the drums play the same notes a bar, off the 8ths and off the 16ths as they did, within a point, from the
 plainest sections (13.4% and 3.0% against 13.5% and 3.1%) to the wildest (31.4% and 18.1% against 30.3% and 18.0%),
-where a lean of 1 left the wildest's tuplets at 16.4% and one of 1.25 made the plain ones plainer (10.8% off the 8ths). The
-offsets that are lists stay lists: every layer's chord root, chord note and articulation offset is a fraction of a
-length, rounded to whole steps each and added, so that a layer moves every note under it alike, which an additive
+where a lean of 1 left the wildest's tuplets at 16.4% and one of 1.25 made the plain ones plainer (10.8% off the 8ths). A
+chord's root is whole scale steps (`StateKinds.ChordRoot`), the section's home and the progression's, where it was a
+list of sevenths of the scale rounded back, and the chord root's and the chord note's walks, which no line reads since
+the bass became one, are gone, their draws with them, which reshuffled the corpus: over 300 corpus songs its bands
+moved either way, no more than their spread between runs (the wild sections' notes off the 16ths 13.5% against 10.1%,
+the wildest's 15.7% against 18.1%). The drums' articulation offset stays a list: every layer's fraction of a drum's
+sounds rounded to whole sounds each and added, so that a layer moves every note under it alike, which an additive
 number rounded once would not. How a track plays its chord is its role's (`Realizer`), where an empty chord note
 offset used to play the whole chord and two render states flagged the melody and the bass. The scale and a chord's shape are single values that are
 lists, set by one layer each, whose kind would join two layers' into one; a test holds them to one
@@ -233,8 +237,8 @@ Smaller, when the code is next touched:
   contour 0.23 against 0.35, which a freedom of 1 brings back to 0.31 at 31% leaps into a section; the echoes hold it
   down. The bass: every note on a strong beat a note of the chord, a weak one moving along the scale, its range all of
   its track's, no contour, a freedom of 0, so that it never starts afresh and replays an echo nearest the note before,
-  half the song's improvisation, its leading and landing as its bars draw them (`ChordApproach`, `ChordArrival`); its
-  walks of the chord root and the chord note, `BassLine` and `BassPattern` retired. Against the bass before, over 100
+  half the song's improvisation, its leading and landing as its bars draw them (`ChordApproach`, `ChordArrival`);
+  `BassLine` and `BassPattern` retired. Against the bass before, over 100
   corpus songs (`BassLineReportTest`, `BassLeadingReportTest`, `BassArrivalReportTest`): it moves 2.7 semitones on
   average against 2.9, a fifth or more 6.4% of the time against 6.2%, an octave or more 0.3% against 0.1%, spans 21.9
   against 21.4; leads 14, 42 and 65% of its changes by its instrument, as before, a tension resolving by step 8, 17 and
@@ -245,8 +249,7 @@ Smaller, when the code is next touched:
   put together has a new chord after it, the next section's too (`LinePickup`, `LinePattern.Place`). Left: the melody's
   echoes keeping their heard octave or the one nearest by its freedom,
   where only a line of no freedom keeps nearest; the melody leading into its phrase's first bar, now that it knows the
-  next section's chord; the harmony's roots, which no line walks now, as whole scale steps, where they are sevenths of
-  the scale rounded back.
+  next section's chord.
 - **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 - **Memory:** every `RealizedNote` keeps the state it was decided from, which a song now holds on to (about 2 MB a
   song, 8 MB with a trace). Recompute it on demand instead, should memory matter.

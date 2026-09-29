@@ -363,17 +363,18 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   organs, guitars, strings or pads, the melody by keys, mallets, guitars, strings, brass, reeds, pipes
   or leads, and the bass by basses, with a few unusual choices weighted low. The melody never plays
   the chords' instrument. Drums and sound effects are never picked.
-- **Offsets are rounded before they are summed.** Pitch offsets such as the chord root or the chord
-  note are collections of fractional values, one from each layer (section, bar, note, ...). `Realizer`
-  turns each value into a whole number of scale steps first and adds up the results, so it computes
-  `round(a * n) + round(b * n)` rather than `round((a + b) * n)`. This is deliberate: a layer then
-  shifts the tonality of everything beneath it by a whole number of steps, the same for every note of
-  the pattern. If the values were summed first, the same layer offset could move one note by a step
-  and leave the next one alone, depending on the note's own fraction. Each value goes to the nearest
-  step (halves away from zero), so every step covers the same range and an offset of less than half a
-  step either way leaves the note where it is. How often a track moves is set by scaling its offsets,
-  not by the rounding. How a track plays its chord is its role's: the chords play it whole, the melody
-  the note placed for it, and the bass the chord's note its chord note offset picks.
+- **Chords and lines.** A chord's root is whole scale steps above the key's tonic, the section's home
+  and the progression's step from it (`StateKinds.ChordRoot`). How a track plays its chord is its
+  role's: the chords play it whole, and the melody and the bass the notes their lines placed.
+- **Offsets are rounded before they are summed.** A drum's articulation offset, which walks from note
+  to note through its sounds, is a collection of fractional values, one from each layer (section, bar,
+  note, ...). `Realizer` turns each value into a whole number of sounds first and adds up the results,
+  so it computes `round(a * n) + round(b * n)` rather than `round((a + b) * n)`. This is deliberate: a
+  layer then shifts everything beneath it by a whole step, the same for every note of the pattern. If
+  the values were summed first, the same layer offset could move one note by a step and leave the next
+  one alone, depending on the note's own fraction. Each value goes to the nearest step (halves away
+  from zero), so every step covers the same range and an offset of less than half a step either way
+  leaves the note where it is.
 
 ## Project layout
 

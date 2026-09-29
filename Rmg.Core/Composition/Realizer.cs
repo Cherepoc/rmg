@@ -209,8 +209,8 @@ internal static class Realizer
             scaleOffsets = ChromaticScaleOffsets;
         scaleOffsets = RaiseScaleSteps(scaleOffsets, stateMap.GetStateValue(StateKinds.RaisedScaleSteps));
 
-        // the chord root, in scale steps: the harmony's, and a walk's steps from it
-        var rootIndex = stateMap.GetStateValue(StateKinds.ChordRoot) + stateMap.GetStateValue(StateKinds.ChordRootNoteOffset).ToIndexOverLength(scaleOffsets.Length);
+        // the chord root, in scale steps
+        var rootIndex = stateMap.GetStateValue(StateKinds.ChordRoot);
         var basePitch = stateMap.GetStateValue(StateKinds.KeyOffset) + stateMap.GetStateValue(StateKinds.OctaveOffset) * OctaveNoteCount;
         return (scaleOffsets, rootIndex, new ChordContext(step => basePitch + GetScalePitch(scaleOffsets, rootIndex + step)));
     }
@@ -347,6 +347,7 @@ internal static class Realizer
         return (int)Math.Round(offset * length, MidpointRounding.AwayFromZero);
     }
 
+    // each value is rounded before summing, so every layer shifts a pattern by a whole step - see README "How it works"
     private static int ToIndex(this ImmutableArray<double> offset, int length)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);
@@ -358,15 +359,7 @@ internal static class Realizer
             : 0;
     }
 
-    // each value is rounded before summing, so every layer shifts a pattern by a whole step - see README "How it works"
-    internal static int ToIndexOverLength(this ImmutableArray<double> offset, int length)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);
-
-        return offset.Sum(x => x.ToIndexOverLength(length));
-    }
-
-    internal static (int periodIndex, int remainder) ToPeriodRemainder(this int offset, int periodLength)
+    private static (int periodIndex, int remainder) ToPeriodRemainder(this int offset, int periodLength)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(periodLength);
 
