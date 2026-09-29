@@ -25,7 +25,8 @@ internal sealed class MelodyPattern
 
     /// <summary>
     ///     A note's state: where it means to go, drawn from the bar pattern's own sequence, so the bar's shape comes back
-    ///     with the bar, and which note of its figure it is (<see cref="GetNoteKey" />).
+    ///     with the bar, how stepwise its bar is, for a mutation to draw it again, and which note of its figure it is
+    ///     (<see cref="GetNoteKey" />).
     /// </summary>
     public StateMapBuilder AddNoteState(StateMapBuilder builder, KeptBeat beat)
     {
@@ -34,7 +35,13 @@ internal sealed class MelodyPattern
             .Add(context =>
                 {
                     var (step, turn) = MelodyLayers.GenerateStep(context, stepwiseness);
-                    return StateMap.FromStates([CompositionStateKinds.MelodyStep.CreateState(step), CompositionStateKinds.MelodyTurn.CreateState(turn)]);
+                    return StateMap.FromStates(
+                        [
+                            CompositionStateKinds.MelodyStep.CreateState(step),
+                            CompositionStateKinds.MelodyTurn.CreateState(turn),
+                            CompositionStateKinds.MelodyStepwiseness.CreateState(stepwiseness)
+                        ]
+                    );
                 }
             )
             .Add(CompositionStateKinds.NoteKey, GetNoteKey(_motif, beat));
@@ -49,16 +56,14 @@ internal sealed class MelodyPattern
     /// </summary>
     /// <param name="barStates">The section's state that changes by bar, such as its chords and its phrases' registers.</param>
     /// <param name="key">The song's key.</param>
-    /// <param name="leading">The section's chance of leading into a chord change within a phrase (<see cref="MelodyLayers.Leading" />).</param>
-    /// <param name="leadingContext">The sequence whether a bar of the 4-bar pattern leads into the next is drawn from.</param>
+    /// <param name="leads">Whether each bar of the 4-bar pattern leads into the next (<see cref="DrawLeads" />).</param>
     public static TrackEventStateTimelineMap<StateMap> Place(
         TrackEventStateTimelineMap<StateMap> bars,
         int trackNumber,
         PitchInstrumentTrack definition,
         StateTimelineMap barStates,
         int key,
-        double leading,
-        IGenerationContext leadingContext
+        ImmutableArray<bool> leads
     )
     {
         var (low, high) = Realizer.GetRange(definition);
@@ -88,8 +93,6 @@ internal sealed class MelodyPattern
             )
             .ToArray();
 
-        // a bar of the 4-bar pattern leads into the next or not, the same in the question and in its answer
-        bool[] leads = [..Enumerable.Range(0, Progressions.BarCount).Select(_ => leadingContext.TestProbability(leading))];
         for (var i = 0; i + 1 < notes.Length; i++)
         {
             // a change of chord on a bar line within a phrase, its first note one of the new chord's
@@ -116,35 +119,68 @@ internal sealed class MelodyPattern
     }
 
     /// <summary>
+    ///     Whether each bar of the 4-bar pattern leads into the next, by the section's chance of leading into a chord
+    ///     change within a phrase (<see cref="MelodyLayers.Leading" />), the same in the question and in its answer.
+    /// </summary>
+    public static ImmutableArray<bool> DrawLeads(IGenerationContext context, double leading)
+    {
+        return [..Enumerable.Range(0, Progressions.BarCount).Select(_ => context.TestProbability(leading))];
+    }
+
+    /// <summary>
     ///     A section's melody as a question and its answer: its 4 bars, and the answer's, of the same bar patterns, whose
-    ///     later bars' rhythm is varied (<see cref="PatternGenerator.GenerateBars" />) and whose notes there are mutated, a
-    ///     decision at a time (<see cref="MelodyLayers.AnswerBars" />): a note mutated there draws afresh
-    ///     whether it goes on or turns back, and plays no note heard before, so that it is placed by the rules where it
-    ///     echoed the question. Whether a note is mutated, and how, is drawn from a sequence of the note's own, by the
-    ///     note's key (<see cref="CompositionStateKinds.NoteKey" />), so that the notes of a figure that comes back mutate alike and no other draw moves.
+    ///     later bars' rhythm is varied (<see cref="PatternGenerator.GenerateBars" />) and whose notes there are mutated
+    ///     (<see cref="Mutate" />, <see cref="MelodyLayers.AnswerBars" />), so that they are placed by the rules where
+    ///     they echoed the question.
     /// </summary>
     /// <param name="bars">The section's bars, its 4-bar pattern's question and answer.</param>
     /// <param name="seed">The seed of the answer's mutations.</param>
     /// <param name="amount">The chance a note of the answer's later bars is mutated.</param>
     public static TrackEventStateTimelineMap<StateMap> Answer(TrackEventStateTimelineMap<StateMap> bars, int trackNumber, int seed, double amount)
     {
+        return Mutate(
+            bars,
+            trackNumber,
+            seed,
+            bar => bar < Progressions.BarCount ? 0 : amount * MelodyLayers.AnswerBars[bar - Progressions.BarCount]
+        );
+    }
+
+    /// <summary>
+    ///     A melody's notes mutated, a decision at a time: a mutated note draws afresh where it means to go, as it was
+    ///     drawn (<see cref="MelodyLayers.GenerateStep" />), and plays no note heard before, so that it is placed by the rules. Whether a note is mutated, and how, is
+    ///     drawn from a sequence of the note's own, by its key (<see cref="CompositionStateKinds.NoteKey" />), so that the
+    ///     notes of a figure that comes back mutate alike, and take a key of their own, so that they come back alike.
+    /// </summary>
+    /// <param name="seed">The seed of the mutations.</param>
+    /// <param name="chance">The chance a note is mutated, by the bar it is in.</param>
+    public static TrackEventStateTimelineMap<StateMap> Mutate(TrackEventStateTimelineMap<StateMap> bars, int trackNumber, int seed, Func<int, double> chance)
+    {
         var track = bars.TrackTimelineMap[trackNumber].EventTimeline;
         var mutated = track.Select(note =>
             {
-                var bar = (int)Math.Floor(note.Position / Meter.BarDuration) - Progressions.BarCount;
+                var noteChance = chance((int)Math.Floor(note.Position / Meter.BarDuration));
                 var noteKey = note.Value.GetStateValue(CompositionStateKinds.NoteKey);
-                if (bar < 0 || MelodyLayers.AnswerBars[bar] <= 0)
+                if (noteChance <= 0)
                     return note;
 
                 var context = new GenerationContext(Seeds.Derive(seed, noteKey));
-                if (!context.TestProbability(amount * MelodyLayers.AnswerBars[bar]))
+                if (!context.TestProbability(noteChance))
                     return note;
 
-                var turn = context.GenerateDouble();
+                var (step, turn) = MelodyLayers.GenerateStep(context, note.Value.GetStateValue(CompositionStateKinds.MelodyStepwiseness));
                 var key = Seeds.Derive(noteKey, seed);
                 return note.Value
-                    .Except([CompositionStateKinds.MelodyTurn, CompositionStateKinds.NoteKey])
-                    .MergeWith(StateMap.FromStates([CompositionStateKinds.MelodyTurn.CreateState(turn), CompositionStateKinds.NoteKey.CreateState(key == 0 ? 1 : key)]))
+                    .Except([CompositionStateKinds.MelodyStep, CompositionStateKinds.MelodyTurn, CompositionStateKinds.NoteKey])
+                    .MergeWith(
+                        StateMap.FromStates(
+                            [
+                                CompositionStateKinds.MelodyStep.CreateState(step),
+                                CompositionStateKinds.MelodyTurn.CreateState(turn),
+                                CompositionStateKinds.NoteKey.CreateState(key == 0 ? 1 : key)
+                            ]
+                        )
+                    )
                     .ToTimelineItem(note.Position);
             }
         );
@@ -200,6 +236,35 @@ internal sealed class MelodyPattern
             .MergeWith(StateMap.FromStates([StateKinds.HeldDuration.CreateState(holdEnd - last.Position)]))
             .ToTimelineItem(last.Position);
         return EventTimeline.Create(notes.Duration, kept);
+    }
+}
+
+/// <summary>
+///     A section's melody before it is placed: its bars, the question and its answer, and what places them, so that
+///     every time the section plays its melody can be placed afresh.
+/// </summary>
+/// <param name="Bars">The section's 8 bars, the answer's mutated.</param>
+/// <param name="Leads">Whether each bar of the 4-bar pattern leads into the next (<see cref="MelodyPattern.DrawLeads" />).</param>
+/// <param name="Seed">The seed of the mutations of its later appearances.</param>
+internal sealed record SectionMelody(
+    int Track,
+    TrackEventStateTimelineMap<StateMap> Bars,
+    PitchInstrumentTrack Definition,
+    StateTimelineMap BarStates,
+    int Key,
+    ImmutableArray<bool> Leads,
+    int Seed
+)
+{
+    /// <summary>
+    ///     The melody placed as the section plays it the given time, from 0: the first time as it was made, and every
+    ///     later time with its notes mutated by the amount given (<see cref="MelodyLayers.Improvisation" />), each
+    ///     appearance from the first, not from the one before, so that the section keeps its tune.
+    /// </summary>
+    public TrackEventStateTimelineMap<StateMap> Place(int appearance, double amount)
+    {
+        var bars = appearance == 0 || amount <= 0 ? Bars : MelodyPattern.Mutate(Bars, Track, Seeds.Derive(Seed, appearance), _ => amount);
+        return MelodyPattern.Place(bars, Track, Definition, BarStates, Key, Leads);
     }
 }
 

@@ -100,7 +100,10 @@ public static class SongGenerator
         // every section is generated once, where it first plays
         var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0]))))
             .CacheGeneratedValues();
-        var sections = sectionIds.Select(generateSection).ToArray();
+        // and its melody placed afresh every time it plays, varied from the first as far as the song improvises
+        var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), rhythmicUnconventionality.Tilt);
+        StateTrace.Record(TracePoints.MelodyImprovisation, SongTracks.MelodyTrack, 0, 0, StateMap.Default, 0, $"{improvisation:F2}", improvisation);
+        var sections = sectionIds.Select((id, index) => generateSection(id).Appear(sectionIds.Take(index).Count(x => x == id), improvisation)).ToArray();
 
         // the song put together as planned, and the lines the drums mark
         var form = formGenerator.Assemble(plan, sectionIds, sections);
@@ -196,5 +199,6 @@ internal enum SongStream
     Percussion = 12,
     DrumStrokes = 13,
     DrumRoles = 14,
-    DrumSetup = 15
+    DrumSetup = 15,
+    MelodyImprovisation = 16
 }

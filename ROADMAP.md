@@ -91,20 +91,33 @@ its last note 35% against 13%. Left:
   measured by the scale step above the chord's root, as a repeat over another chord plays a sequence; plain repeats
   are recognisable as they are. Gathering the answer's and A′'s values in one class was dropped: they are two
   mechanisms of two domains, the phrase scheme's and the melody's, that share only their lean.
-- **A section as it recurs** (later): each appearance mutated from the one before by an amount that grows, so that a
-  song drifts from how it began, generated per appearance, not edited, so that the rules place what is mutated. It
-  would key its decisions as the answer does, by the key a note echoes by (`CompositionStateKinds.Echo`), which names a
-  note of a figure (its bar pattern, its cycle's draw and its slot) rather than a note in time; renamed then to what it
-  is (a motif key) and computed for the other tracks it mutates, not before.
+- **A section as it recurs** (built): a song improvises its melody as its sections recur, by an amount of its own
+  (`MelodyLayers.Improvisation`, drawn per song from `SongStream.MelodyImprovisation`, none in about half the songs,
+  which play their sections' melodies as first heard, as riffs do, and up to 0.6 in the others, the more the less
+  conventional the song's rhythm): a section's melody is kept unplaced (`SectionMelody`) and placed afresh every time
+  the section plays (`GeneratedSection.Appear`), its notes mutated from the first appearance, not from the one before,
+  so that a chorus keeps its tune as a singer varies it, by the answer's mechanism (`MelodyPattern.Mutate`), keyed by
+  the note key (`CompositionStateKinds.NoteKey`), so that a figure that comes back varies alike. A mutated note draws
+  where it means to go afresh, its step and its turn, as it was drawn; a turn alone changed a recurring section's
+  notes 7% of the time, where the rules placed it where it was. Over 100 corpus songs a recurring section plays its
+  first appearance's notes 100% of the time in songs that do not improvise and 82% in songs that do; leaps, chord notes
+  on the beat and the contour as before. Left: the rhythm stays as first heard, as the pattern generator draws it from
+  the section's sequence; a later appearance drawing its melody's rhythm afresh from one of its own would let the
+  improvisation move in time too. A last chorus varied more than the second (an amount that grows by appearance) waits
+  for listening.
+- **An endless song** (later, low priority): a mode in which a song goes on with sections generated afresh as it
+  plays, with no ending, a streaming form rather than a planned one. The sections generated per appearance are a step
+  towards it; the form's plan, its intro and ending, and the song's single pass are not.
 - **Question and answer** (built): a section plays its 4-bar pattern twice, and its melody as a question and its
   answer (`MelodyPattern.Answer`): placed as one line over the 8 bars, so that the answer goes on from the question,
-  its first half the question's and its second half mutated a decision at a time, a note there drawing afresh whether
-  it goes on or turns back and playing no note heard before, by a chance of the section's (`MelodyLayers.AnswerAmount`,
-  0.5, the likelier the less conventional), from a sequence keyed by the note it echoes, so that notes that echo the
+  its first half the question's and its second half mutated a decision at a time, a note there drawing afresh where
+  it means to go and playing no note heard before, by a chance of the section's (`MelodyLayers.AnswerAmount`,
+  0.5, the likelier the less conventional, times 0.8 in the answer's changing bars, `MelodyLayers.AnswerBars`, since
+  a mutated note draws its step afresh as well as its turn), from a sequence keyed by the note it echoes, so that notes that echo the
   same one mutate alike and no other draw moves; the other tracks play their pattern twice as before. An echo plays as
   it was heard over the same root, and as a sequence nearest the note before over another, where it moved to the note
   before over any root and, the melody placed on, fell out of its range to be clamped. Over 100 corpus songs the
-  answer's first half plays the question's notes 98 to 100% of the time and its second half 68 to 72%; a phrase starts
+  answer's first half plays the question's notes 98 to 100% of the time and its second half 68 to 72% (66% now); a phrase starts
   again with a leap 36% of the time (38% when it played the same), and a note leaps 6.3% of the time (4.7%), as what
   plays again over the same root now plays in its octave; chord notes on the beat 87%, and a bar follows the aim of
   its contour 0.38. Its rhythm answers too, each a decision of the answer's own sequence: a changing bar draws its

@@ -54,13 +54,13 @@ public static class MelodyLayers
     ///     How much of the answer's every bar, the section's second 4 bars, is mutated from the question's, by the answer
     ///     amount: its first half as the question, the classic answer's start, and its second half changed.
     /// </summary>
-    public static ImmutableArray<double> AnswerBars { get; } = [0, 0, 1, 1];
+    public static ImmutableArray<double> AnswerBars { get; } = [0, 0, 0.8, 0.8];
 
     /// <summary>
-    ///     How likely an answer's changing bar is to draw its rhythm afresh, for an amount of 1: half the time at the
-    ///     answer's amount with no lean.
+    ///     How likely an answer's changing bar is to draw its rhythm afresh, over the bar's share of the answer
+    ///     (<see cref="AnswerBars" />) and the answer's amount: half the time at the amount with no lean.
     /// </summary>
-    public const double AnswerRhythm = 1;
+    public const double AnswerRhythm = 1.25;
 
     /// <summary>The chance a note of the answer's changing bars is mutated, with no lean; the less conventional the rhythm, the likelier.</summary>
     public const double AnswerAmount = 0.5;
@@ -74,6 +74,21 @@ public static class MelodyLayers
 
     /// <summary>How far a section's chance of leading spreads from <see cref="Leading" />, either way.</summary>
     public const double LeadingSpread = 0.5;
+
+    /// <summary>
+    ///     How much a song improvises its melody as its sections recur: the chance a note of a section's later appearance
+    ///     is mutated from its first, as a singer varies a tune each time, drawn per song as a value around 0 of up to
+    ///     twice this either way, spread evenly rather than gathered near 0, and none below 0, so that about half the
+    ///     songs play their sections' melodies as first heard, as riffs do; the less conventional the song's rhythm, the
+    ///     more it leans up.
+    /// </summary>
+    public const double Improvisation = 0.3;
+
+    /// <summary>A song's improvisation (<see cref="Improvisation" />).</summary>
+    public static double GenerateImprovisation(IGenerationContext context, Tilt tilt)
+    {
+        return Math.Clamp(tilt.SplineValue(0)(context) * Improvisation, 0, 1);
+    }
 
     /// <summary>How long the melody rests before its next phrase, in beats.</summary>
     public const double PhraseEndRest = 1;

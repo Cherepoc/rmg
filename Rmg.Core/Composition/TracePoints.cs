@@ -39,6 +39,9 @@ public static class TracePoints
     /// <summary>The chance a note of a section's melody's answer is mutated from the question's (a <c>double</c>).</summary>
     public const string MelodyAnswer = "Melody answer";
 
+    /// <summary>How much a song improvises its melody as its sections recur (a <c>double</c>, <see cref="Composition.MelodyLayers.Improvisation" />).</summary>
+    public const string MelodyImprovisation = "Melody improvisation";
+
     /// <summary>A bar pattern's state, with its phrase scheme.</summary>
     public const string BarPattern = "Bar pattern";
 

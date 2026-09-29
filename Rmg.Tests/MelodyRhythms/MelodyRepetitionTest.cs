@@ -129,13 +129,18 @@ public sealed class MelodyRepetitionTest
         await Task.CompletedTask;
     }
 
-    [Test]
-    public async Task ASectionThatRecurs_PlaysTheSameNotes_AndItsAnswer_StartsAsItsQuestion_AndChangesAfter()
+    /// <summary>
+    ///     How much of a recurring section's melody plays the notes of its first appearance, in songs that improvise and
+    ///     in songs that do not (<see cref="MelodyLayers.Improvisation" />), and how much of its answer the question's,
+    ///     its first half and its second.
+    /// </summary>
+    internal static (double Fixed, double Improvised, double AnswerFirstHalf, double AnswerSecondHalf) MeasureRecurrence(IEnumerable<CorpusSong> songs)
     {
-        int recurring = 0, recurringSame = 0;
+        int[] recurring = new int[2], recurringSame = new int[2];
         int[] answer = new int[2], answerSame = new int[2];
-        foreach (var song in TestCorpus.Range(20))
+        foreach (var song in songs)
         {
+            var improvises = (double)song.Trace.Single(x => x.Point == TracePoints.MelodyImprovisation).Value! > 0 ? 1 : 0;
             var melody = song.Song.Notes![SongTracks.MelodyTrack].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0]);
             var firsts = song.Map.Sections.GroupBy(x => x.SectionId).ToDictionary(x => x.Key, x => x.First());
             foreach (var span in song.Map.Sections)
@@ -146,8 +151,8 @@ public sealed class MelodyRepetitionTest
                     var offset = position - first.Start;
                     if (span != first && melody.TryGetValue(Math.Round(span.Start + offset, 6), out var again))
                     {
-                        recurring++;
-                        recurringSame += again == pitch ? 1 : 0;
+                        recurring[improvises]++;
+                        recurringSame[improvises] += again == pitch ? 1 : 0;
                     }
 
                     // the question's bars against the answer's, its first half and its second
@@ -161,9 +166,28 @@ public sealed class MelodyRepetitionTest
             }
         }
 
-        await Assert.That(recurringSame / (double)recurring).IsGreaterThan(0.97);
-        await Assert.That(answerSame[0] / (double)answer[0]).IsGreaterThan(0.95);
-        await Assert.That(answerSame[1] / (double)answer[1]).IsBetween(0.5, 0.9);
+        return (recurringSame[0] / (double)recurring[0], recurringSame[1] / (double)recurring[1], answerSame[0] / (double)answer[0], answerSame[1] / (double)answer[1]);
+    }
+
+    [Test]
+    public async Task ASectionThatRecurs_PlaysTheSameNotes_UnlessTheSongImprovises_AndItsAnswer_StartsAsItsQuestion_AndChangesAfter()
+    {
+        var m = MeasureRecurrence(TestCorpus.Range(20));
+
+        await Assert.That(m.Fixed).IsGreaterThan(0.97);
+        await Assert.That(m.Improvised).IsBetween(0.6, 0.95);
+        await Assert.That(m.AnswerFirstHalf).IsGreaterThan(0.95);
+        await Assert.That(m.AnswerSecondHalf).IsBetween(0.5, 0.9);
+    }
+
+    [Test]
+    [Explicit]
+    public async Task RecurrenceReport()
+    {
+        var m = MeasureRecurrence(TestCorpus.Range(100));
+        Console.WriteLine($"a recurring section plays its first appearance's notes {m.Fixed:P0} in songs that do not improvise, {m.Improvised:P0} in songs that do; " +
+                          $"its answer the question's {m.AnswerFirstHalf:P0} in its first half, {m.AnswerSecondHalf:P0} in its second");
+        await Task.CompletedTask;
     }
 
     [Test]
