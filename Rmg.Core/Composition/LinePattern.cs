@@ -108,12 +108,14 @@ internal sealed class LinePattern
 
         for (var i = 0; i + 1 < notes.Length; i++)
         {
-            // a change of chord on a bar line, its first note one of the new chord's, led into as the bar before has it
+            // a change of chord on a bar line, its first note one of the new chord's, led into as the bar before has it,
+            // but from a held note, a phrase's cadence, which rests where it is
             var (last, next) = (notes[i], notes[i + 1]);
             var bar = next.Note.Position / Meter.BarDuration;
             var isBarLine = Math.Abs(bar - Math.Round(bar)) < 1e-9 && Bar(last.Note) < Bar(next.Note);
             var approach = (ChordApproach)last.Note.State.GetStateValue(CompositionStateKinds.LineApproach);
-            if (!isBarLine || approach == ChordApproach.None || last.Note.Classes.SetEquals(next.Note.Classes) || !next.Note.Classes.Contains(next.Pitch.Mod(12)))
+            var isHeld = last.Note.State.GetStateValue(StateKinds.HeldDuration) > 0;
+            if (!isBarLine || isHeld || approach == ChordApproach.None || last.Note.Classes.SetEquals(next.Note.Classes) || !next.Note.Classes.Contains(next.Pitch.Mod(12)))
                 continue;
 
             notes[i] = last with { Pitch = line.Approach(approach, last.Note.Chord, last.Note.Classes, last.Rank, last.Pitch, next.Note.Chord, next.Pitch) };
@@ -125,16 +127,12 @@ internal sealed class LinePattern
 
     /// <summary>
     ///     How each bar of the 4-bar pattern leads into the next, the same in the question and in its answer: by a scale
-    ///     step, by the section's chance of leading into a chord change within a phrase (<see cref="MelodyLayers.Leading" />),
-    ///     or not at all; never into the phrase's first bar, which its last bar's held note ends as a cadence.
+    ///     step, by the section's chance of leading into a chord change (<see cref="MelodyLayers.Leading" />), or not at
+    ///     all; into the next phrase too, where the phrase runs on into it rather than ending on a held note.
     /// </summary>
     public static ImmutableArray<ChordApproach> DrawApproaches(IGenerationContext context, double leading)
     {
-        return
-        [
-            ..Enumerable.Range(0, Progressions.BarCount)
-                .Select(bar => context.TestProbability(leading) && bar < Progressions.BarCount - 1 ? ChordApproach.ScaleStep : ChordApproach.None)
-        ];
+        return [..Enumerable.Range(0, Progressions.BarCount).Select(_ => context.TestProbability(leading) ? ChordApproach.ScaleStep : ChordApproach.None)];
     }
 
     /// <summary>

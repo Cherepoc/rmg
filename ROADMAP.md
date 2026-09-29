@@ -255,8 +255,10 @@ Smaller, when the code is next touched:
   section 12% against 18%; a recurring section plays its first appearance's notes in some octave 95% of the time, the
   same notes 91% against 96%, and the answer's first half the question's in some octave 94%, the same notes 85%
   against 99%; chord notes on the beat 89% against 88%; its contour 0.18 against 0.21. Nearest the note before
-  whatever the range, the same notes fell to 71%, a replayed figure bent at the range's edge into other notes. Left:
-  the melody leading into its phrase's first bar, now that it knows the next section's chord.
+  whatever the range, the same notes fell to 71%, a replayed figure bent at the range's edge into other notes. The melody
+  leads into its phrase's first bar as into any other, the next section's too, where the phrase runs on into it: a held
+  note, a phrase's cadence, never bends (`LinePattern.Place`), where the melody once never led into a phrase's first bar
+  at all; few notes change, too few to move the measures above.
 - **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 - **Memory:** every `RealizedNote` keeps the state it was decided from, which a song now holds on to (about 2 MB a
   song, 8 MB with a trace). Recompute it on demand instead, should memory matter.

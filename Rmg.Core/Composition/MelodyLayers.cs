@@ -74,7 +74,7 @@ internal static class MelodyLayers
     public const double AnswerAmount = 0.5;
 
     /// <summary>
-    ///     The chance the melody leads into a chord change within a phrase, its last note before the change a step from
+    ///     The chance the melody leads into a chord change, its last note before the change a step from
     ///     the note it changes to, with no spread; a section's is this spread by <see cref="LeadingSpread" /> either way,
     ///     so that some sections hardly lead, as a riff, and some lead most changes.
     /// </summary>
