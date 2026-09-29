@@ -13,7 +13,7 @@ namespace Rmg.Core.Composition;
 ///     (<see cref="RhythmicUnconventionality.Coupling" />), so that in a wild one a loud and sparse section is as likely
 ///     as not.
 /// </summary>
-public static class SectionEnergy
+internal static class SectionEnergy
 {
     /// <summary>How far the song's energy spreads either way, which moves all its sections alike.</summary>
     public const double Song = 0.25;

@@ -152,6 +152,13 @@ public sealed class StateMap
         return Filter(x => !kinds.Contains(x.Kind));
     }
 
+    /// <summary>The map with the kind's state set to the value, in place of any it had.</summary>
+    public StateMap With<T>(StateKind<T> kind, T value)
+        where T : notnull
+    {
+        return Except([kind]).MergeWith(FromStates([kind.CreateState(value)]));
+    }
+
     /// <summary>
     ///     The states of both maps, those of a kind in both aggregated, this map's first. The same as
     ///     <see cref="FromStates" /> of both maps' states, in one pass over the two ordered maps.

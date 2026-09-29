@@ -7,7 +7,7 @@ namespace Rmg.Core.Composition;
 ///     Lays out a chord shape by moving some of its notes by octaves, which keeps the chord and changes how it is spread.
 ///     A shape whose layout is what it is keeps it.
 /// </summary>
-public static class ChordVoicing
+internal static class ChordVoicing
 {
     private static readonly ImmutableArray<Voicing> Voicings =
     [
@@ -29,7 +29,7 @@ public static class ChordVoicing
             return shape.Targets;
 
         var voicings = Voicings.Where(x => shape.Targets.Length >= x.MinNoteCount).ToImmutableArray();
-        var voicing = voicings[Generators.WeightedIndex([..voicings.Select(x => new Weighted<Voicing>(x.Weight, x))])(context)];
+        var voicing = context.Pick([..voicings.Select(x => new Weighted<Voicing>(x.Weight, x))]);
         return [..voicing.Apply(shape.Targets).Order()];
     }
 

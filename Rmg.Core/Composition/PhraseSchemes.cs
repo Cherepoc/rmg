@@ -21,7 +21,7 @@ public sealed record PhraseScheme(ImmutableArray<int> Letters, ImmutableArray<bo
     }
 }
 
-public static class PhraseSchemes
+internal static class PhraseSchemes
 {
     /// <summary>The chance of a repeat being varied.</summary>
     public const double VariedRepeatChance = 0.25;
@@ -63,7 +63,7 @@ public static class PhraseSchemes
         [
             ..All.Select(x => new Weighted<string>(unconventionality.Tilt.Weigh(x.Weight, GetUnconventionality(x.Scheme)), x.Scheme))
         ];
-        var scheme = weights[Generators.WeightedIndex(weights)(context)].Value;
+        var scheme = context.Pick(weights);
 
         var letters = scheme.Select(x => x - 'A').ToImmutableArray();
         var isVaried = letters

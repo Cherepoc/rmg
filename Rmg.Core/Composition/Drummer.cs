@@ -13,7 +13,7 @@ namespace Rmg.Core.Composition;
 ///     such as starting off the beat, that it makes more often, as a layer of the song over the fills' chances.
 /// </summary>
 /// <param name="Layer">The drummer's layer over the fills' chances, such as its signature's.</param>
-public sealed record Drummer(double Busyness, FillPath Favourite, StateMap? Layer = null)
+internal sealed record Drummer(double Busyness, FillPath Favourite, StateMap? Layer = null)
 {
     /// <summary>How much more likely the favourite walk is than it would be.</summary>
     public const double FavouriteWeight = 3;
@@ -29,13 +29,13 @@ public sealed record Drummer(double Busyness, FillPath Favourite, StateMap? Laye
     {
         var busyness = Math.Clamp(0.5 + SpreadGenerator(context) / 4, 0, 1);
         // any walk can be the favourite, the likelier ones more often
-        var favourite = FillLayers.Paths[Generators.WeightedIndex(FillLayers.Paths)(context)].Value;
+        var favourite = context.Pick(FillLayers.Paths);
         // and any of the rarer choices the signature, the likelier ones more often
         var builder = new StateMapBuilder("Drummer", perTrack: true);
         if (context.TestProbability(rhythm.Tilt.Chance(FillLayers.SignatureChance, 1)))
         {
             ImmutableArray<Weighted<StateKind<double>>> kinds = [..FillLayers.Chances.Select(x => new Weighted<StateKind<double>>(x.Chance, x.Kind))];
-            builder.Add(kinds[Generators.WeightedIndex(kinds)(context)].Value, FillLayers.SignatureWeight);
+            builder.Add(context.Pick(kinds), FillLayers.SignatureWeight);
         }
 
         return new Drummer(busyness, favourite, builder.ToStateMap(context));

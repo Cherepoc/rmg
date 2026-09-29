@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 namespace Rmg.Core.Composition;
 
 /// <summary>The General MIDI sounds of the drums that the fills name, by their note numbers.</summary>
-public static class DrumSounds
+internal static class DrumSounds
 {
     public const int PedalHiHat = 44;
     public const int OpenHiHat = 46;

@@ -11,7 +11,7 @@ namespace Rmg.Core.Composition;
 ///     the note's beat is, and by the section's energy, as far as the sound is louder than its drum; a note of a
 ///     repeated cycle plays the accent of the note it repeats, so that an accent in a figure comes back with it.
 /// </summary>
-public static class DrumAccents
+internal static class DrumAccents
 {
     /// <summary>The chance of an open hi-hat on a note, with no lean.</summary>
     public const double OpenHiHat = 0.025;

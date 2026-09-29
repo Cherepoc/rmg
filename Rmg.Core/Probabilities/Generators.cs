@@ -5,6 +5,12 @@ namespace Rmg.Core.Probabilities;
 
 public static class Generators
 {
+    /// <summary>One of the options, drawn as likely as its weight has it.</summary>
+    public static T Pick<T>(this IGenerationContext context, ImmutableArray<Weighted<T>> options)
+    {
+        return options[WeightedIndex(options)(context)].Value;
+    }
+
     public static Func<IGenerationContext, int> WeightedIndex<T>(ImmutableArray<Weighted<T>> items)
     {
         var probabilityThresholds = items.ToProbabilityThresholds();

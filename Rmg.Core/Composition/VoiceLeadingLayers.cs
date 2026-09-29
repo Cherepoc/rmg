@@ -7,7 +7,7 @@ namespace Rmg.Core.Composition;
 ///     the chord instrument sets where the song starts, a section moves it, and now and then a bar starts afresh in
 ///     its own register.
 /// </summary>
-public static class VoiceLeadingLayers
+internal static class VoiceLeadingLayers
 {
     /// <summary>Strings, pads, organs and choirs, which hold their notes and move them little.</summary>
     public const double Sustained = 0.8;

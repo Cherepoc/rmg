@@ -3,7 +3,7 @@ using Rmg.Core.Events;
 
 namespace Rmg.Core.Composition;
 
-public static class CompositionStateKinds
+internal static class CompositionStateKinds
 {
     private const string Prefix = "Composition";
 

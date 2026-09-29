@@ -1,7 +1,7 @@
 namespace Rmg.Core.Composition;
 
 /// <summary>The points of a song's generation that a <see cref="Events.StateTrace" /> records, by name.</summary>
-public static class TracePoints
+internal static class TracePoints
 {
     /// <summary>A section's energy, with its pull (<see cref="SectionEnergyTrace" />).</summary>
     public const string SectionEnergy = "Section energy";

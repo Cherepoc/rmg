@@ -163,13 +163,13 @@ internal sealed class FillGenerator
     )
     {
         var (rhythm, grooves) = (section.Rhythm, section.Groove);
-        var span = Pick(tilt.Weigh(drummer.WeighSpans(FillLayers.Spans), FillLayers.GetSpanLoudness));
+        var span = _context.Pick(tilt.Weigh(drummer.WeighSpans(FillLayers.Spans), FillLayers.GetSpanLoudness));
         if (span <= 0)
             return FillPlay.None;
 
         // stopping is the unconventional treatment, and the quiet one
         var treatments = rhythm.Tilt.Weigh(FillLayers.Treatments, x => x == GrooveTreatment.Stop ? 1 : 0);
-        var treatment = Pick(direction.Weigh(treatments, x => FillLayers.TreatmentLoudness[x]));
+        var treatment = _context.Pick(direction.Weigh(treatments, x => FillLayers.TreatmentLoudness[x]));
         var fullness = FillLayers.Fullness + FillLayers.FullnessPerWeight * weight + FillLayers.TreatmentFullness[treatment];
         var layer = CreateLayer(drummer, rhythm, fullness);
         // where the drums stop, they rest half the time: a break
@@ -288,11 +288,6 @@ internal sealed class FillGenerator
             description,
             new FillDecision(span, play.Treatment, play.Run == FillRun.Rest, rhythm.Tuplet, rhythm.Rhythm.Fullness, landing, isEarly, lift)
         );
-    }
-
-    private T Pick<T>(ImmutableArray<Weighted<T>> weights)
-    {
-        return weights[Generators.WeightedIndex(weights)(_context)].Value;
     }
 
     /// <summary>

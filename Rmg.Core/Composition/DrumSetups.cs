@@ -18,7 +18,7 @@ public enum DrumSetup
 ///     role and more beside, the hand percussion among them, so that it plays as a band does. The less conventional the
 ///     song's rhythm, the likelier the percussion.
 /// </summary>
-public static class DrumSetups
+internal static class DrumSetups
 {
     /// <summary>How likely every setup is, with no lean, and how it leans to the unconventional.</summary>
     public static ImmutableArray<(DrumSetup Setup, double Weight, double Lean)> All { get; } =
@@ -41,7 +41,7 @@ public static class DrumSetups
     public static DrumSetup Pick(IGenerationContext context, Tilt rhythm)
     {
         ImmutableArray<Weighted<DrumSetup>> weights = [..All.Select(x => new Weighted<DrumSetup>(rhythm.Weigh(x.Weight, x.Lean), x.Setup))];
-        return weights[Generators.WeightedIndex(weights)(context)].Value;
+        return context.Pick(weights);
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public static class DrumSetups
             var drums = new List<PercussionInstrumentDefinition>();
             foreach (var role in DrumKitGenerator.LeadRoles)
                 drums.AddRange(DrumKitGenerator.PickWeighted(context, family.Where(x => x.MainRole == role).Except(drums).Select(Weighed), 1));
-            var more = MorePercussion[Generators.WeightedIndex(MorePercussion)(context)].Value;
+            var more = context.Pick(MorePercussion);
             drums.AddRange(DrumKitGenerator.PickWeighted(context, family.Except(drums).Select(Weighed), more));
             return [..DrumGroups.AllDrums.Where(drums.Contains)];
         }
@@ -72,7 +72,7 @@ public static class DrumSetups
         if (setup == DrumSetup.Kit)
             return [..DrumGroups.AllDrums.Where(kit.Contains)];
 
-        var count = PercussionCounts[Generators.WeightedIndex(PercussionCounts)(context)].Value;
+        var count = context.Pick(PercussionCounts);
         var percussion = DrumKitGenerator.PickWeighted(context, DrumGroups.Percussion.Drums.Select(Weighed), count);
         return [..DrumGroups.AllDrums.Where(x => kit.Contains(x) || percussion.Contains(x))];
     }

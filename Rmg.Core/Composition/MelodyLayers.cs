@@ -8,7 +8,7 @@ namespace Rmg.Core.Composition;
 ///     moves it, and a section draws the shape its phrases take. Every note then draws where it means to go, from its
 ///     bar pattern's seed, so that a bar that comes back comes back with its shape.
 /// </summary>
-public static class MelodyLayers
+internal static class MelodyLayers
 {
     /// <summary>Winds, strings and leads that sing, which move by step.</summary>
     public const double Stepwise = 0.8;
@@ -136,7 +136,7 @@ public static class MelodyLayers
         var peak = PeakBars[PeakBarGenerator(context)].Value;
         var slope = SlopeGenerator(context);
         var periods = tilt.Weigh(Periods, x => x < Progressions.BarCount ? 1 : 0);
-        var period = periods[Generators.WeightedIndex(periods)(periodContext)].Value;
+        var period = periodContext.Pick(periods);
         return [..Enumerable.Range(0, Progressions.BarCount).Select(bar => PeakRegister - slope * Math.Abs(bar % period - peak % period))];
     }
 

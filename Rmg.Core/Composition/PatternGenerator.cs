@@ -314,9 +314,10 @@ internal sealed class PatternGenerator
         var velocity = sounding.GetStateValue(StateKinds.Velocity)
             + VelocityLayers.Note * BeatAccent.GetShift(rank, maxRank, maxRank, stateMap.GetStateValue(CompositionStateKinds.NoteDynamics));
         var note = sounding
-            .Except([StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed, StateKinds.Velocity, CompositionStateKinds.BeatRank])
+            .Except([StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed])
             .MergeWith(chord)
-            .MergeWith(StateMap.FromStates([StateKinds.Velocity.CreateState(velocity), CompositionStateKinds.BeatRank.CreateState(maxRank)]));
+            .With(StateKinds.Velocity, velocity)
+            .With(CompositionStateKinds.BeatRank, maxRank);
         return EventTimeline.Create(notes.Duration, [..notes, note.ToTimelineItem(pickup)]);
     }
 

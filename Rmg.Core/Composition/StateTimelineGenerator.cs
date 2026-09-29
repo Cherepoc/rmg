@@ -69,7 +69,7 @@ public sealed class StateTimelineGenerator<T> : IStateTimelineGenerator
     }
 }
 
-public static class StateTimelineGenerator
+internal static class StateTimelineGenerator
 {
     public static StateTimelineGenerator<T> Create<T>(
         StateKind<T> stateKind,

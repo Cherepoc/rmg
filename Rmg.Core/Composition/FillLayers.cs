@@ -77,7 +77,7 @@ public enum GrooveTreatment
 ///     a note of a few sounds on the line. A section change is marked most, a phrase line inside a section now and then;
 ///     the stranger a section's rhythm, the likelier the unconventional choices.
 /// </summary>
-public static class FillLayers
+internal static class FillLayers
 {
     /// <summary>
     ///     How much a line weighs, as a pull of the odds <see cref="SectionEnergy.HighOdds" /> give, which leans its fill

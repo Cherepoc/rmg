@@ -9,7 +9,7 @@ namespace Rmg.Core.Composition;
 ///     <c>StateKinds.ChordApproach</c>); what it lands on in the new chord leans by the section's conventionality alone
 ///     (<see cref="Arrivals" />, <c>StateKinds.ChordArrival</c>).
 /// </summary>
-public static class BassLeadingLayers
+internal static class BassLeadingLayers
 {
     /// <summary>Upright, acoustic and fretless basses, which walk into their chords.</summary>
     public const double Walking = 0.8;

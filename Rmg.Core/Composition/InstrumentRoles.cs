@@ -45,7 +45,7 @@ public sealed class InstrumentRole
         if (candidates.IsEmpty)
             throw new InvalidOperationException($"Every instrument of the {Name} role is excluded.");
 
-        return candidates[Generators.WeightedIndex([..candidates.Select(x => new Weighted<RoleInstrument>(x.Weight, x))])(context)];
+        return context.Pick([..candidates.Select(x => new Weighted<RoleInstrument>(x.Weight, x))]);
     }
 }
 
@@ -53,7 +53,7 @@ public sealed class InstrumentRole
 ///     The roles of the pitched tracks. The common instruments of a role weigh the most, and ones with more character
 ///     less, so most songs sound familiar and some unusual; none is a sound effect or a drum.
 /// </summary>
-public static class InstrumentRoles
+internal static class InstrumentRoles
 {
     public static InstrumentRole Chords { get; } = new(
         nameof(Chords),

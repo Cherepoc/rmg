@@ -23,7 +23,7 @@ public sealed record Scale(string Name, ImmutableArray<int> Offsets, double Weig
 ///     The scales a song can be in. They all have seven notes, since the chord root moves by scale steps and chord
 ///     heights are placed between the qualities a 7-note scale gives; scales of other sizes need more than that.
 /// </summary>
-public static class Scales
+internal static class Scales
 {
     /// <summary>How many notes every scale has.</summary>
     public const int StepCount = 7;
@@ -79,6 +79,6 @@ public static class Scales
             All.Where(x => x != song).Select(x => new Weighted<Scale>(x.Weight * Math.Pow(Closeness, x.Distance(song) - 1), x)),
             x => Math.Sign(x.Brightness - song.Brightness)
         );
-        return options[Generators.WeightedIndex(options)(context)].Value;
+        return context.Pick(options);
     }
 }

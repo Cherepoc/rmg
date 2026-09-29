@@ -1,7 +1,7 @@
 namespace Rmg.Core.Composition;
 
 /// <summary>Where the rhythm settings that are not steps start, before the layers move them.</summary>
-public static class RhythmSettings
+internal static class RhythmSettings
 {
     /// <summary>The fullness a song starts from: every rank from the rank offset halves a position's chance.</summary>
     public const double Fullness = 0.5;

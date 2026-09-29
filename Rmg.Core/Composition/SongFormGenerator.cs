@@ -45,18 +45,18 @@ internal sealed class SongFormGenerator
     /// <param name="sectionIds">The sections in the song's order.</param>
     public FormPlan Plan(IReadOnlyList<int> sectionIds)
     {
-        var intro = Pick(FormLayers.Intros);
-        var ending = Pick(FormLayers.WeighEndings(_songRhythm.Tilt));
-        var window = intro == IntroKind.Entries ? Pick(_introContext, FormLayers.IntroWindows) : default;
+        var intro = _context.Pick(FormLayers.Intros);
+        var ending = _context.Pick(FormLayers.WeighEndings(_songRhythm.Tilt));
+        var window = intro == IntroKind.Entries ? _introContext.Pick(FormLayers.IntroWindows) : default;
         var halfCountIn = intro == IntroKind.CountIn && _context.TestProbability(FormLayers.HalfCountInChance);
 
         double held = 0, stop = 0;
         var slowsDown = false;
         if (FormLayers.HasFinalChord(ending))
         {
-            held = ending == EndingKind.RingOut ? Pick(FormLayers.RingOutLengths) : FormLayers.ButtonLength;
+            held = ending == EndingKind.RingOut ? _context.Pick(FormLayers.RingOutLengths) : FormLayers.ButtonLength;
             if (ending == EndingKind.Stop)
-                stop = Pick(FormLayers.StopLengths);
+                stop = _context.Pick(FormLayers.StopLengths);
             slowsDown = ending == EndingKind.RingOut && _context.TestProbability(FormLayers.RitardandoChance);
         }
 
@@ -280,13 +280,6 @@ internal sealed class SongFormGenerator
         return TrackEventStateTimelineMap.Create(Meter.BarDuration, tracks, bar.CommonStateTimelineMap);
     }
 
-    private T Pick<T>(ImmutableArray<Weighted<T>> weights) => Pick(_context, weights);
-
-    private static T Pick<T>(IGenerationContext context, ImmutableArray<Weighted<T>> weights)
-    {
-        return weights[Generators.WeightedIndex(weights)(context)].Value;
-    }
-
     /// <summary>
     ///     A note whose scale step is set, as the melody's is, moved to the chord's root, where a melody ends: the root
     ///     in the register of the note it is made from.
@@ -297,9 +290,7 @@ internal sealed class SongFormGenerator
             return note;
 
         var root = (int)Math.Round(note.Value.GetStateValue(StateKinds.ScaleStep) / (double)Scales.StepCount) * Scales.StepCount;
-        return note.Value.Except([StateKinds.ScaleStep])
-            .MergeWith(StateMap.FromStates([StateKinds.ScaleStep.CreateState(root)]))
-            .ToTimelineItem(note.Position);
+        return note.Value.With(StateKinds.ScaleStep, root).ToTimelineItem(note.Position);
     }
 
     /// <summary>

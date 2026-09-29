@@ -8,7 +8,7 @@ namespace Rmg.Core.Composition;
 ///     track's dynamics have them (<see cref="CompositionStateKinds.NoteDynamics" />), so that a bass hits its beats
 ///     alike and a melody moves more.
 /// </summary>
-public static class BeatAccent
+internal static class BeatAccent
 {
     /// <summary>How much louder the strongest beat of a pattern is than its weakest, before the track's dynamics.</summary>
     public const double StrongestAccent = 0.6;

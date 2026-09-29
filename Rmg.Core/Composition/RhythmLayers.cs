@@ -110,7 +110,7 @@ public sealed record RhythmLayer(
 ///     groove the tracks are given: the snare keeps its backbeat in most bars, with a busier or shifted bar now and then.
 ///     Tuplets play in about a fifth of a drum's bars, mostly as a section or a bar rather than a whole song.
 /// </summary>
-public static class RhythmLayers
+internal static class RhythmLayers
 {
     public static RhythmLayer Song { get; } = new(0.075, 0.1, 0.025, 0.1, 0.2);
 

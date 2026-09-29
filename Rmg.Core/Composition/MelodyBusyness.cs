@@ -10,7 +10,7 @@ namespace Rmg.Core.Composition;
 ///     shorter cycles. A song's is spread widely around the middle, and a section moves it, so that a verse can be
 ///     sparser than a chorus.
 /// </summary>
-public sealed record MelodyBusyness(double Value)
+internal sealed record MelodyBusyness(double Value)
 {
     /// <summary>How far a section moves the song's value, either way.</summary>
     public const double SectionShift = 0.2;

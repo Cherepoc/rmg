@@ -134,6 +134,15 @@ public sealed class TrackEventStateTimelineMap<T> : ITimelineLike<TrackEventStat
 
         return Create(Duration, TrackTimelineMap, CommonStateTimelineMap.MergeStateMap(stateMap));
     }
+
+    /// <summary>The map with the state given along it merged into its common state, after its own, as <see cref="Merge" /> does.</summary>
+    public TrackEventStateTimelineMap<T> MergeStateTimelineMap(StateTimelineMap stateTimelineMap)
+    {
+        if (stateTimelineMap.IsDefault)
+            return this;
+
+        return Create(Duration, TrackTimelineMap, StateTimelineMap.Merge([CommonStateTimelineMap.Trim(Duration), stateTimelineMap.Trim(Duration)]));
+    }
 }
 
 public static class TrackEventStateTimelineMap

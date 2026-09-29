@@ -9,7 +9,7 @@ namespace Rmg.Core.Composition;
 ///     by how unconventional its rhythm is and, the other way, by its energy, as the percussion alone is the quieter
 ///     groove. Only a song with two or more percussion drums has such sections, so that the percussion can groove.
 /// </summary>
-public static class PercussionSections
+internal static class PercussionSections
 {
     /// <summary>The chance a section plays percussion only, with no lean.</summary>
     public const double Chance = 0.06;

@@ -13,7 +13,7 @@ namespace Rmg.Core.Composition;
 ///     loudness goes the energy's way, so that the strokes keep to their weights over a song, and a quiet verse plays the
 ///     cross-stick now and then and a chorus the snare.
 /// </summary>
-public static class DrumStrokes
+internal static class DrumStrokes
 {
     /// <summary>The chance a section changes a drum's stroke from the song's, with no lean.</summary>
     public const double SectionChangeChance = 0.3;
@@ -63,6 +63,6 @@ public static class DrumStrokes
                 .Select((x, i) => new Weighted<int>(i == except ? 0 : energy.Weigh(x.Stroke, x.Loudness), i))
                 .Where(x => x.Weight > 0)
         ];
-        return weights[Generators.WeightedIndex(weights)(context)].Value;
+        return context.Pick(weights);
     }
 }

@@ -23,7 +23,7 @@ public sealed record ChordShape(
     bool IsVoicingFixed = false
 );
 
-public static class ChordShapes
+internal static class ChordShapes
 {
     public const int MaxUnconventionality = 5;
 

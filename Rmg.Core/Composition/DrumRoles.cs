@@ -39,7 +39,7 @@ public enum DrumRole
 ///     the drum's fixed rhythm, its part: the song's role in the drum's definition, and a section's other role as the
 ///     difference from the song's, as every part's state adds up.
 /// </summary>
-public static class DrumRoles
+internal static class DrumRoles
 {
     /// <summary>The layer of a role's part, as a trace tells it.</summary>
     public const string Layer = "Drum role";
@@ -127,6 +127,6 @@ public static class DrumRoles
     private static DrumRole Pick(IGenerationContext context, PercussionInstrumentDefinition drum, Tilt rhythm)
     {
         var weights = rhythm.Weigh(drum.Roles.Where(x => x.Weight > 0), x => x == drum.MainRole ? 0 : 1);
-        return weights[Generators.WeightedIndex(weights)(context)].Value;
+        return context.Pick(weights);
     }
 }

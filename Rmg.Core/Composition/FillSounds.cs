@@ -67,7 +67,7 @@ internal sealed class FillSounds
 
             // the heavier sounds likelier, such as the crash over the china, and a sound after the first joins by its
             // weight against the heaviest, so that the toms all join and the snare's cross-stick seldom
-            var count = Math.Min(Pick(context, FillLayers.SoundCounts), candidates.Length);
+            var count = Math.Min(context.Pick(FillLayers.SoundCounts), candidates.Length);
             var heaviest = candidates.Max(x => x.Weight);
             var picked = DrumKitGenerator.PickWeighted(context, candidates, count);
             var weights = candidates.ToDictionary(x => x.Value, x => x.Weight);
@@ -87,9 +87,9 @@ internal sealed class FillSounds
             order = [..order.Select(x => x.Role == FillDrumRole.Toms ? toms.Dequeue() : x)];
         }
 
-        var width = Math.Min(Pick(context, tilt.Weigh(FillLayers.Widths, x => x > 1 ? 1 : 0)), Math.Max(1, order.Length));
-        var path = Pick(context, drummer.WeighPaths(FillLayers.Paths, tilt));
-        var speed = Pick(context, tilt.Weigh(FillLayers.Speeds, x => x == FillSpeed.SlowsDown ? 1 : 0));
+        var width = Math.Min(context.Pick(tilt.Weigh(FillLayers.Widths, x => x > 1 ? 1 : 0)), Math.Max(1, order.Length));
+        var path = context.Pick(drummer.WeighPaths(FillLayers.Paths, tilt));
+        var speed = context.Pick(tilt.Weigh(FillLayers.Speeds, x => x == FillSpeed.SlowsDown ? 1 : 0));
         return new FillRun(order, path, width, speed);
     }
 
@@ -158,13 +158,8 @@ internal sealed class FillSounds
         var sounds = ImmutableArray.CreateBuilder<RunSound>();
         foreach (var (role, candidates) in _weightedSounds)
             if (chances.TryGetValue(role, out var chance) && context.TestProbability(Math.Min(1, chance)))
-                sounds.Add(candidates[Generators.WeightedIndex(candidates)(context)].Value);
+                sounds.Add(context.Pick(candidates));
         return sounds.ToImmutable();
-    }
-
-    private static T Pick<T>(IGenerationContext context, ImmutableArray<Weighted<T>> weights)
-    {
-        return weights[Generators.WeightedIndex(weights)(context)].Value;
     }
 
     private static ImmutableArray<T> Shuffle<T>(IGenerationContext context, IEnumerable<T> items)

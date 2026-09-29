@@ -59,7 +59,7 @@ public readonly record struct IntroWindow(int Bars, bool IsBefore);
 ///     coming in part by part. It ends on the home chord of its last section, whose home is the song's tonic, most of
 ///     the time, or fades out; the more its rhythm strays, the likelier an open or a stopped ending.
 /// </summary>
-public static class FormLayers
+internal static class FormLayers
 {
     public static ImmutableArray<Weighted<IntroKind>> Intros { get; } =
     [

@@ -111,13 +111,7 @@ public static class SongGenerator
         // the song put together as planned, and the lines the drums mark
         var form = formGenerator.Assemble(plan, played, sections);
         var songTrackNoteTimelineMap = form.Edits.ApplyTo(form.Blocks.Unroll());
-        songTrackNoteTimelineMap = TrackEventStateTimelineMap.Merge(
-                [
-                    songTrackNoteTimelineMap,
-                    TrackEventStateTimelineMap.Create<StateMap>(songTrackNoteTimelineMap.Duration, [], form.SongState)
-                ]
-            )
-            .MergeStateMap(commonStateMap);
+        songTrackNoteTimelineMap = songTrackNoteTimelineMap.MergeStateTimelineMap(form.SongState).MergeStateMap(commonStateMap);
 
         // the drums mark the lines, now that the song is put together
         songTrackNoteTimelineMap = new FillGenerator(Stream(SongStream.Fills), tracks, rhythmicUnconventionality)

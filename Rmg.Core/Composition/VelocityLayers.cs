@@ -9,7 +9,7 @@ namespace Rmg.Core.Composition;
 ///     section's loudness, drawn and leaned by its energy; a track's in a section, a bar's and a bar pattern's, drawn;
 ///     and a note's, its beat's accent and a variation, as far as the track's dynamics have them.
 /// </summary>
-public static class VelocityLayers
+internal static class VelocityLayers
 {
     /// <summary>
     ///     A track's level by its role: the melody on top, as a melody leads the mix; the chords a little over the bass

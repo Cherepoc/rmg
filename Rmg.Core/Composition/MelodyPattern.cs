@@ -111,7 +111,7 @@ internal sealed class MelodyPattern
                 var step = MelodyLine.GetScaleStep(x.Chord, x.Pitch);
                 if (x.Chord.GetPitch(step) != x.Pitch)
                     throw new InvalidOperationException($"The melody's note {x.Pitch} is not on a step of its chord's scale.");
-                return x.Note.Value.MergeWith(StateMap.FromStates([StateKinds.ScaleStep.CreateState(step)])).ToTimelineItem(x.Note.Position);
+                return x.Note.Value.With(StateKinds.ScaleStep, step).ToTimelineItem(x.Note.Position);
             }
         );
         var timeline = EventTimeline.Create(track.EventTimeline.Duration, placed);
@@ -171,16 +171,9 @@ internal sealed class MelodyPattern
                 var (step, turn) = MelodyLayers.GenerateStep(context, note.Value.GetStateValue(CompositionStateKinds.MelodyStepwiseness));
                 var key = Seeds.Derive(noteKey, seed);
                 return note.Value
-                    .Except([CompositionStateKinds.MelodyStep, CompositionStateKinds.MelodyTurn, CompositionStateKinds.NoteKey])
-                    .MergeWith(
-                        StateMap.FromStates(
-                            [
-                                CompositionStateKinds.MelodyStep.CreateState(step),
-                                CompositionStateKinds.MelodyTurn.CreateState(turn),
-                                CompositionStateKinds.NoteKey.CreateState(key == 0 ? 1 : key)
-                            ]
-                        )
-                    )
+                    .With(CompositionStateKinds.MelodyStep, step)
+                    .With(CompositionStateKinds.MelodyTurn, turn)
+                    .With(CompositionStateKinds.NoteKey, key == 0 ? 1 : key)
                     .ToTimelineItem(note.Position);
             }
         );
@@ -199,7 +192,7 @@ internal sealed class MelodyPattern
         ImmutableArray<bool> rhythm = [..MelodyLayers.AnswerBars.Select(x => context.TestProbability(x * amount * MelodyLayers.AnswerRhythm))];
         var endsAfresh = context.TestProbability(amount);
         ImmutableArray<Weighted<int>> ends = [..MelodyLayers.PhraseEnds.Where(x => x.Value != questionEnd)];
-        var end = ends[Generators.WeightedIndex(ends)(context)].Value;
+        var end = context.Pick(ends);
         return new MelodyAnswer(rhythm, endsAfresh ? end : null);
     }
 
@@ -233,7 +226,7 @@ internal sealed class MelodyPattern
 
         var last = kept[^1];
         kept[^1] = last.Value
-            .MergeWith(StateMap.FromStates([StateKinds.HeldDuration.CreateState(holdEnd - last.Position)]))
+            .With(StateKinds.HeldDuration, holdEnd - last.Position)
             .ToTimelineItem(last.Position);
         return EventTimeline.Create(notes.Duration, kept);
     }

@@ -11,7 +11,7 @@ namespace Rmg.Core.Composition;
 ///     the crash and the ride loud, the tambourine a little, the shakers a little quiet. A drum's roles in the groove
 ///     (<see cref="DrumRoles" />) set its fixed rhythm.
 /// </summary>
-public static class DrumDefinitions
+internal static class DrumDefinitions
 {
     // the hand percussion, which plays in the drum kit and in the percussion alike
     private const DrumFamily HandPercussion = DrumFamily.Kit | DrumFamily.Percussion;

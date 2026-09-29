@@ -165,7 +165,7 @@ internal sealed class BarStateGenerator
     /// <summary>Where the melody's phrase ends in the pattern's last bar, if it does.</summary>
     private StateTimeline<int> GenerateMelodyPhraseEnd(IGenerationContext context)
     {
-        var end = MelodyLayers.PhraseEnds[Generators.WeightedIndex(MelodyLayers.PhraseEnds)(context)].Value;
+        var end = context.Pick(MelodyLayers.PhraseEnds);
         return StateTimeline.Create(
                 Meter.PatternDuration,
                 CompositionStateKinds.MelodyPhraseEnd,

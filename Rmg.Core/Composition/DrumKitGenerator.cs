@@ -7,7 +7,7 @@ namespace Rmg.Core.Composition;
 ///     Chooses the drums of a song and the drums that play in a section. Playing all the drums at once would only
 ///     be noise, so a section gets a lead for each role in the groove and a few drums that colour it.
 /// </summary>
-public static class DrumKitGenerator
+internal static class DrumKitGenerator
 {
     /// <summary>
     ///     The drums a section plays, out of the song's: a lead for the ground, one for the backbeat, and mostly one to
@@ -62,7 +62,7 @@ public static class DrumKitGenerator
         [
             ..Enumerable.Range(0, maxCount + 1).Select(x => new Weighted<int>(tilt.Weigh(ColourCountWeights[x], maxCount > 0 ? 2.0 * x / maxCount - 1 : 0), x))
         ];
-        var count = counts[Generators.WeightedIndex(counts)(context)].Value;
+        var count = context.Pick(counts);
         var groups = PickWeighted(context, colourGroups.Select(x => new Weighted<DrumGroup>(tilt.Weigh(x.SelectionWeight, GetLoudness(x, songDrums)), x)), count)
             .OrderBy(x => DrumGroups.All.IndexOf(x));
         foreach (var group in groups)

@@ -211,10 +211,6 @@ Smaller, when the code is next touched:
   and the scale a collection that two layers would silently merge into fourteen notes; additive kinds, and a kind the
   lowest layer sets, as the drums' strokes now are (`StateKinds.CreateLowestLayerWins`), would say what they are.
 - **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
-- **Visibility:** the tables (`FillLayers`, `FormLayers`, `Drummer`, `MelodyBusyness` and more) are public though
-  nothing outside needs them.
-- `TrackEventStateTimelineMap.MergeStateTimelineMap` in place of merging a map of no tracks to add common state; one
-  `Pick` over weights in `Generators` in place of the copies; `StateMap.With(kind, value)` for setting finished state.
 - **Memory:** every `RealizedNote` keeps the state it was decided from, which a song now holds on to (about 2 MB a
   song, 8 MB with a trace). Recompute it on demand instead, should memory matter.
 

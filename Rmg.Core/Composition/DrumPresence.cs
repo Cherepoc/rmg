@@ -12,7 +12,7 @@ namespace Rmg.Core.Composition;
 ///     snare going to its cross-stick. A drum that colours the groove or doubles a lead may sit out such a bar, the
 ///     likelier the less conventional the section's rhythm and the less likely the more energy it has.
 /// </summary>
-public static class DrumPresence
+internal static class DrumPresence
 {
     /// <summary>The chance a drum that leads no role sits out the bars of a letter other than the first, with no lean.</summary>
     public const double SitOutChance = 0.3;

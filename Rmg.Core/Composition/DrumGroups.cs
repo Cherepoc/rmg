@@ -3,7 +3,7 @@ using Rmg.Core.Events;
 
 namespace Rmg.Core.Composition;
 
-public static class DrumGroups
+internal static class DrumGroups
 {
     public const int FirstTrackNumber = 100;
 

@@ -10,7 +10,7 @@ namespace Rmg.Core.Composition;
 ///     leads to it, falling a fifth the most, and by how well it suits its bar. Roots stay within 3 steps of home, so
 ///     the progression keeps to one register.
 /// </summary>
-public static class Progressions
+internal static class Progressions
 {
     public const int BarCount = 4;
 
@@ -52,7 +52,7 @@ public static class Progressions
             new(0.1, Normalize(3)),
             new(0.1, Normalize(4))
         ];
-        return homes[Generators.WeightedIndex(homes)(context)].Value;
+        return context.Pick(homes);
     }
 
     /// <summary>
@@ -86,7 +86,7 @@ public static class Progressions
                 weights[step] = new Weighted<int>(Math.Pow(motionWeight * roleWeight, strictness), step);
             }
 
-            roots[bar] = Normalize(weights[Generators.WeightedIndex([..weights])(context)].Value);
+            roots[bar] = Normalize(context.Pick([..weights]));
         }
 
         return [..roots];

@@ -3,7 +3,7 @@ using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
 
-public static class SongStructureGenerator
+internal static class SongStructureGenerator
 {
     public const int MinPartCount = 4;
     public const int MaxPartCount = 8;
