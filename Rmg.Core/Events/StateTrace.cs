@@ -54,6 +54,9 @@ public sealed class StateTrace : IDisposable
 
     private bool _isDisposed;
 
+    // how many pauses hold the trace here, which records nothing while one does
+    private int _pauseCount;
+
     private readonly List<StateTraceEntry> _entries = [];
 
     private StateTrace()
@@ -62,7 +65,31 @@ public sealed class StateTrace : IDisposable
 
     public IReadOnlyList<StateTraceEntry> Entries => _entries;
 
-    internal static bool IsRunning => Volatile.Read(ref _runningCount) > 0 && Current.Value is { _isDisposed: false };
+    internal static bool IsRunning => Volatile.Read(ref _runningCount) > 0 && Current.Value is { _isDisposed: false, _pauseCount: 0 };
+
+    /// <summary>
+    ///     Stops recording in this flow of execution until the pause is disposed, for work done again that was recorded
+    ///     the first time, such as a section's melody built afresh for a later appearance.
+    /// </summary>
+    internal static IDisposable Pause()
+    {
+        var trace = Current.Value is { _isDisposed: false } current ? current : null;
+        if (trace is not null)
+            trace._pauseCount++;
+        return new Paused(trace);
+    }
+
+    private sealed class Paused(StateTrace? trace) : IDisposable
+    {
+        private StateTrace? _trace = trace;
+
+        public void Dispose()
+        {
+            if (_trace is not null)
+                _trace._pauseCount--;
+            _trace = null;
+        }
+    }
 
     public void Dispose()
     {

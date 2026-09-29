@@ -101,10 +101,14 @@ its last note 35% against 13%. Left:
   where it means to go afresh, its step and its turn, as it was drawn; a turn alone changed a recurring section's
   notes 7% of the time, where the rules placed it where it was. Over 100 corpus songs a recurring section plays its
   first appearance's notes 100% of the time in songs that do not improvise and 82% in songs that do; leaps, chord notes
-  on the beat and the contour as before. Left: the rhythm stays as first heard, as the pattern generator draws it from
-  the section's sequence; a later appearance drawing its melody's rhythm afresh from one of its own would let the
-  improvisation move in time too. A last chorus varied more than the second (an amount that grows by appearance) waits
-  for listening.
+  on the beat and the contour as before. Its rhythm improvises too, where a phrase varies (`MelodyLayers.AnswerBars`,
+  its second half): the bars of a letter draw their rhythm afresh, alike, by the amount times
+  `MelodyLayers.ImprovisedRhythm` (2), a draw per letter from the appearance's own sequence, as the answer's do by a key
+  of their own (`PatternGenerator.BuildBars` from the seeds `DrawSeeds` drew, not drawn again; the trace paused while
+  it is built again, `StateTrace.Pause`). A rhythm drawn afresh of the same settings keeps most of its onsets, so the
+  improvised rhythm stays gentle: a later appearance keeps 100% of the onsets of a phrase's first half and 92% of its
+  second (95% at a factor of 1), the same note on 86% and 72% of them, and 80% of its notes as a whole. A last chorus
+  varied more than the second (an amount that grows by appearance) waits for listening.
 - **An endless song** (later, low priority): a mode in which a song goes on with sections generated afresh as it
   plays, with no ending, a streaming form rather than a planned one. The sections generated per appearance are a step
   towards it; the form's plan, its intro and ending, and the song's single pass are not.

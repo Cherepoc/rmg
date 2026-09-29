@@ -244,11 +244,15 @@ internal sealed class MelodyPattern
 ///     every time the section plays its melody can be placed afresh.
 /// </summary>
 /// <param name="Bars">The section's 8 bars, the answer's mutated.</param>
+/// <param name="BuildBars">The section's 8 bars built afresh, the answer's mutated, every bar drawing its rhythm afresh by its key, 0 for none.</param>
+/// <param name="Letters">Every bar's letter in the section's phrase scheme.</param>
 /// <param name="Leads">Whether each bar of the 4-bar pattern leads into the next (<see cref="MelodyPattern.DrawLeads" />).</param>
 /// <param name="Seed">The seed of the mutations of its later appearances.</param>
 internal sealed record SectionMelody(
     int Track,
     TrackEventStateTimelineMap<StateMap> Bars,
+    Func<ImmutableArray<int>, TrackEventStateTimelineMap<StateMap>> BuildBars,
+    ImmutableArray<int> Letters,
     PitchInstrumentTrack Definition,
     StateTimelineMap BarStates,
     int Key,
@@ -256,14 +260,39 @@ internal sealed record SectionMelody(
     int Seed
 )
 {
+    // the stream of an appearance's rhythm, apart from its notes'
+    private const int RhythmStream = 1;
+
     /// <summary>
     ///     The melody placed as the section plays it the given time, from 0: the first time as it was made, and every
-    ///     later time with its notes mutated by the amount given (<see cref="MelodyLayers.Improvisation" />), each
-    ///     appearance from the first, not from the one before, so that the section keeps its tune.
+    ///     later time improvised by the amount given (<see cref="MelodyLayers.Improvisation" />), each appearance from
+    ///     the first, not from the one before, so that the section keeps its tune: the bars of a letter draw their rhythm
+    ///     afresh, alike, where a phrase varies (<see cref="MelodyLayers.AnswerBars" />), by the amount times
+    ///     <see cref="MelodyLayers.ImprovisedRhythm" />, and its notes are mutated by the amount.
     /// </summary>
     public TrackEventStateTimelineMap<StateMap> Place(int appearance, double amount)
     {
-        var bars = appearance == 0 || amount <= 0 ? Bars : MelodyPattern.Mutate(Bars, Track, Seeds.Derive(Seed, appearance), _ => amount);
+        var bars = Bars;
+        if (appearance > 0 && amount > 0)
+        {
+            var seed = Seeds.Derive(Seed, appearance);
+            var context = new GenerationContext(Seeds.Derive(seed, RhythmStream));
+            // a draw per letter, which its bars redraw their rhythm below, the likelier where a phrase varies
+            var draws = Enumerable.Range(0, Letters.Max() + 1).Select(_ => context.GenerateDouble()).ToArray();
+            ImmutableArray<int> rhythmKeys =
+            [
+                ..Enumerable.Range(0, 2 * Letters.Length).Select(bar =>
+                    {
+                        var chance = amount * MelodyLayers.ImprovisedRhythm * MelodyLayers.AnswerBars[bar % Letters.Length];
+                        return draws[Letters[bar % Letters.Length]] < chance ? appearance : 0;
+                    }
+                )
+            ];
+            if (rhythmKeys.Any(x => x != 0))
+                bars = BuildBars(rhythmKeys);
+            bars = MelodyPattern.Mutate(bars, Track, seed, _ => amount);
+        }
+
         return MelodyPattern.Place(bars, Track, Definition, BarStates, Key, Leads);
     }
 }

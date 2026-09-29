@@ -397,7 +397,19 @@ internal sealed class SectionGenerator
             var answerSeed = answerContext.GenerateInt();
             var questionEnd = barStateTimelineMap.GetEffectiveStateMapAt(Meter.PatternDuration - Meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
             var answer = isMelody ? MelodyPattern.DrawAnswer(answerContext, amount, questionEnd) : null;
-            var bars = _patternGenerator.GenerateBars(context, sectionId, trackStateMaps.ToImmutableDictionary(), BarDrums.None, ImmutableDictionary<int, Doubling>.Empty, barStateTimelineMap, sectionRhythm, answer);
+            var seeds = PatternGenerator.DrawSeeds(context, trackStateMaps.Keys, sectionRhythm.Scheme);
+            GeneratedBars BuildBars(ImmutableArray<int> rhythmKeys) => _patternGenerator.BuildBars(
+                seeds,
+                sectionId,
+                trackStateMaps.ToImmutableDictionary(),
+                BarDrums.None,
+                ImmutableDictionary<int, Doubling>.Empty,
+                barStateTimelineMap,
+                sectionRhythm,
+                answer,
+                rhythmKeys
+            );
+            var bars = BuildBars([]);
             if (!isMelody)
             {
                 yield return (trackNumber, bars, null);
@@ -409,9 +421,16 @@ internal sealed class SectionGenerator
             var leadingContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), MelodyLeadingStream));
             var leading = Math.Clamp(MelodyLayers.Leading + Generators.SplineValue()(leadingContext) * MelodyLayers.LeadingSpread, 0, 1);
             StateTrace.Record(TracePoints.MelodyLeading, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{leading:F2}", leading);
+            // a later appearance builds its bars afresh where its rhythm is improvised, as recorded the first time
             var melody = new SectionMelody(
                 trackNumber,
                 MelodyPattern.Answer(bars.Timeline, trackNumber, answerSeed, amount),
+                rhythmKeys =>
+                {
+                    using var pause = StateTrace.Pause();
+                    return MelodyPattern.Answer(BuildBars(rhythmKeys).Timeline, trackNumber, answerSeed, amount);
+                },
+                sectionRhythm.Scheme.Letters,
                 (PitchInstrumentTrack)_tracks.Definitions[trackNumber],
                 barStateTimelineMap.Repeat(2),
                 _key,

@@ -134,9 +134,11 @@ public sealed class MelodyRepetitionTest
     ///     in songs that do not (<see cref="MelodyLayers.Improvisation" />), and how much of its answer the question's,
     ///     its first half and its second.
     /// </summary>
-    internal static (double Fixed, double Improvised, double AnswerFirstHalf, double AnswerSecondHalf) MeasureRecurrence(IEnumerable<CorpusSong> songs)
+    internal static (double Fixed, double Improvised, double AnswerFirstHalf, double AnswerSecondHalf, double[] OnsetsKept, double[] ImprovisedByHalf) MeasureRecurrence(IEnumerable<CorpusSong> songs)
     {
         int[] recurring = new int[2], recurringSame = new int[2];
+        // in songs that improvise, by the half of the phrase: the first appearance's onsets, those a later one keeps, and of those the same note
+        int[] onsets = new int[2], onsetsKept = new int[2], halfSame = new int[2];
         int[] answer = new int[2], answerSame = new int[2];
         foreach (var song in songs)
         {
@@ -149,10 +151,18 @@ public sealed class MelodyRepetitionTest
                 foreach (var (position, pitch) in melody.Where(x => x.Key >= first.Start && x.Key < first.End))
                 {
                     var offset = position - first.Start;
+                    var phraseHalf = offset % Meter.PatternDuration < Meter.PatternDuration / 2 ? 0 : 1;
+                    if (span != first && improvises == 1)
+                        onsets[phraseHalf]++;
                     if (span != first && melody.TryGetValue(Math.Round(span.Start + offset, 6), out var again))
                     {
                         recurring[improvises]++;
                         recurringSame[improvises] += again == pitch ? 1 : 0;
+                        if (improvises == 1)
+                        {
+                            onsetsKept[phraseHalf]++;
+                            halfSame[phraseHalf] += again == pitch ? 1 : 0;
+                        }
                     }
 
                     // the question's bars against the answer's, its first half and its second
@@ -166,7 +176,14 @@ public sealed class MelodyRepetitionTest
             }
         }
 
-        return (recurringSame[0] / (double)recurring[0], recurringSame[1] / (double)recurring[1], answerSame[0] / (double)answer[0], answerSame[1] / (double)answer[1]);
+        return (
+            recurringSame[0] / (double)recurring[0],
+            recurringSame[1] / (double)recurring[1],
+            answerSame[0] / (double)answer[0],
+            answerSame[1] / (double)answer[1],
+            [..onsetsKept.Zip(onsets, (kept, all) => kept / (double)all)],
+            [..halfSame.Zip(onsetsKept, (same, kept) => same / (double)kept)]
+        );
     }
 
     [Test]
@@ -186,7 +203,9 @@ public sealed class MelodyRepetitionTest
     {
         var m = MeasureRecurrence(TestCorpus.Range(100));
         Console.WriteLine($"a recurring section plays its first appearance's notes {m.Fixed:P0} in songs that do not improvise, {m.Improvised:P0} in songs that do; " +
-                          $"its answer the question's {m.AnswerFirstHalf:P0} in its first half, {m.AnswerSecondHalf:P0} in its second");
+                          $"its answer the question's {m.AnswerFirstHalf:P0} in its first half, {m.AnswerSecondHalf:P0} in its second; " +
+                          $"in songs that improvise, a later appearance keeps {m.OnsetsKept[0]:P0} of the onsets of a phrase's first half and {m.OnsetsKept[1]:P0} of its second, " +
+                          $"the same note on {m.ImprovisedByHalf[0]:P0} and {m.ImprovisedByHalf[1]:P0} of them");
         await Task.CompletedTask;
     }
 

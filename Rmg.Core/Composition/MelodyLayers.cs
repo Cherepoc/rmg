@@ -52,7 +52,8 @@ public static class MelodyLayers
 
     /// <summary>
     ///     How much of the answer's every bar, the section's second 4 bars, is mutated from the question's, by the answer
-    ///     amount: its first half as the question, the classic answer's start, and its second half changed.
+    ///     amount: its first half as the question, the classic answer's start, and its second half changed; where a
+    ///     phrase varies, as an improvised appearance's rhythm does too.
     /// </summary>
     public static ImmutableArray<double> AnswerBars { get; } = [0, 0, 0.8, 0.8];
 
@@ -83,6 +84,12 @@ public static class MelodyLayers
     ///     more it leans up.
     /// </summary>
     public const double Improvisation = 0.3;
+
+    /// <summary>
+    ///     How likely a bar of a section's later appearance is to draw its melody's rhythm afresh, over the song's
+    ///     improvisation and where a phrase varies (<see cref="AnswerBars" />).
+    /// </summary>
+    public const double ImprovisedRhythm = 2;
 
     /// <summary>A song's improvisation (<see cref="Improvisation" />).</summary>
     public static double GenerateImprovisation(IGenerationContext context, Tilt tilt)
