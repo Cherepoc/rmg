@@ -139,7 +139,7 @@ internal sealed class FillGenerator
         var landing = _sounds.DrawLanding(_context, landings);
         // a pushed landing comes a note of the fill's rhythm near an 8th early, after a fill, not where the band stops
         // or counts in and lands on the line together
-        var isEarly = _context.TestProbability(Math.Min(1, chances.GetStateValue(CompositionStateKinds.Fill.EarlyLandingChance))) && line.HasFill;
+        var isEarly = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.EarlyLandingChance)) && line.HasFill;
         var landingPosition = isEarly ? line.Position - rhythm.Push : line.Position;
         Land(song, edits, landingPosition, line.Next.SectionId, landing);
         RecordDecision(ending.SectionId, line.Position - origin, play, rhythm, span, landing, isEarly, lift);
@@ -184,10 +184,10 @@ internal sealed class FillGenerator
                 rhythm.Tilt,
                 (role, track) => !isPercussion ? GetRunChance(grooves.Of(track), rhythm.Tilt) : role == FillDrumRole.Percussion ? 1 : 0
             );
-        var spanShift = _context.TestProbability(Math.Min(1, chances.GetStateValue(CompositionStateKinds.Fill.OffBeatChance)))
+        var spanShift = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.OffBeatChance))
             ? _context.TestProbability(0.5) ? 1 : -1
             : 0;
-        var fades = _context.TestProbability(Math.Min(1, chances.GetStateValue(CompositionStateKinds.Fill.FadeChance)));
+        var fades = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.FadeChance));
         return new FillPlay(span, treatment, run, layer, spanShift, fades);
     }
 
@@ -198,7 +198,7 @@ internal sealed class FillGenerator
     /// </summary>
     private StateMap CreateLayer(Drummer drummer, RhythmicUnconventionality rhythm, double fullness)
     {
-        var layer = rhythm.Scale(RhythmLayers.Fill);
+        var layer = rhythm.Lean(RhythmLayers.Fill);
         var density = layer.CreateDensityGenerator();
         var spread = layer.CreateFullnessGenerator();
         return new StateMapBuilder("Fill", perTrack: true)
@@ -234,6 +234,16 @@ internal sealed class FillGenerator
         foreach (var (kind, _) in FillLayers.Chances)
             section.Add(kind, rhythm.ChanceScale);
         return _chances.MergeWith(drummer.Layer ?? StateMap.Default).MergeWith(section.ToStateMap(_context));
+    }
+
+    /// <summary>
+    ///     A rarer choice's chance at a line (<see cref="GetChances" />): its base chance, its odds times what the layers
+    ///     over it multiply it by, as a chance leans.
+    /// </summary>
+    internal static double GetChance(StateMap chances, StateKind<double> kind)
+    {
+        var chance = FillLayers.Chances.Single(x => x.Kind == kind).Chance;
+        return new Tilt(Math.Log(chances.GetStateValue(kind) / chance)).Chance(chance, 1);
     }
 
     /// <summary>The chance a run plays a drum, as its group's state has it: its run chance, leaning by how unconventional it is.</summary>

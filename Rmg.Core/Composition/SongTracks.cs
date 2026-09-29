@@ -60,7 +60,7 @@ internal sealed class SongTracks
         DrumSetup drumSetup
     )
     {
-        var trackRhythmLayer = rhythmicUnconventionality.Scale(RhythmLayers.Track);
+        var trackRhythmLayer = rhythmicUnconventionality.Lean(RhythmLayers.Track);
 
         // the melody plays something other than the chords, so the two can be told apart
         var chordsInstrument = InstrumentRoles.Chords.Pick(context);
@@ -171,7 +171,7 @@ internal sealed class SongTracks
                     "Drum group",
                     StateMap.Default,
                     _ => VelocityLayers.GetLevel(TrackRole.Drum),
-                    rhythmicUnconventionality.Scale(RhythmLayers.DrumGroup)
+                    rhythmicUnconventionality.Lean(RhythmLayers.DrumGroup)
                 )
             )
         ];

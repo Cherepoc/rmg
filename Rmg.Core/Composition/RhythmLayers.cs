@@ -24,7 +24,7 @@ namespace Rmg.Core.Composition;
 /// </param>
 /// <param name="Fullness">How far the layer moves a pattern's fullness either way, a value drawn around 0.</param>
 /// <param name="Variation">How far the layer moves how often a pattern's cycles are drawn afresh, either way.</param>
-/// <param name="SpeedScale">What the chance of a speed change is multiplied by, so that scaling the groove leaves it.</param>
+/// <param name="SpeedScale">What the chance of a speed change is multiplied by, so that leaning the groove leaves it.</param>
 /// <remarks>
 ///     A layer can be tilted (<see cref="Tilted" />), as a section by its energy, so that its fullness and density lean
 ///     fuller and busier or sparser, how often they move kept.
@@ -39,21 +39,21 @@ public sealed record RhythmLayer(
 )
 {
     /// <summary>
-    ///     The layer with its chances and spreads multiplied, each kept to a chance, except how often its speed changes,
-    ///     which the tuning of the snare's backbeat and the hi-hat's speed rest on.
+    ///     The layer leaned by the tilt: its chances by its odds to the power of the lean, as a chance leans, and its
+    ///     spreads times the odds; how often its speed changes stays, which the tuning of the snare's backbeat and the
+    ///     hi-hat's speed rest on.
     /// </summary>
-    public RhythmLayer Scale(double scale)
+    public RhythmLayer Lean(Tilt tilt, double lean)
     {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(scale);
-
+        var groove = tilt.Chance(Groove, lean);
         return this with
         {
-            Groove = Math.Min(1, Groove * scale),
-            Density = Math.Min(1, Density * scale),
-            Tuplet = Math.Min(1, Tuplet * scale),
-            Fullness = Fullness * scale,
-            Variation = Variation * scale,
-            SpeedScale = Groove == 0 ? SpeedScale : SpeedScale * Groove / Math.Min(1, Groove * scale)
+            Groove = groove,
+            Density = tilt.Chance(Density, lean),
+            Tuplet = tilt.Chance(Tuplet, lean),
+            Fullness = Fullness * tilt.Odds,
+            Variation = Variation * tilt.Odds,
+            SpeedScale = Groove == 0 ? SpeedScale : SpeedScale * Groove / groove
         };
     }
 
@@ -112,6 +112,13 @@ public sealed record RhythmLayer(
 /// </summary>
 internal static class RhythmLayers
 {
+    /// <summary>
+    ///     How strongly the layers' chances lean by how far the rhythm strays from convention: their odds times the
+    ///     tilt's to this power, so that a wild section's chances reach as far as they were tuned to when they were
+    ///     multiplied, where odds alone would flatten the larger ones.
+    /// </summary>
+    public const double ChanceLean = 1.1;
+
     public static RhythmLayer Song { get; } = new(0.075, 0.1, 0.025, 0.1, 0.2);
 
     public static RhythmLayer Section { get; } = new(0.05, 0.1, 0.07, 0.1, 0.2);

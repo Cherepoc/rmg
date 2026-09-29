@@ -95,7 +95,7 @@ internal sealed class PatternGenerator
         // a bar pattern's own layer, drawn for every track and bar; no chord root offset here: every track plays the
         // progression's chord, and a track leaves it only by moving its root from note to note
         var barPatternLayerGenerator = new StateMapBuilder("Bar pattern", perTrack: true)
-            .AddRhythmLayer(sectionRhythm.Unconventionality.Scale(RhythmLayers.BarPattern))
+            .AddRhythmLayer(sectionRhythm.Unconventionality.Lean(RhythmLayers.BarPattern))
             .AddNoteWalkLayer()
             .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.BarPattern))
             .AddNoteDurationLayer()

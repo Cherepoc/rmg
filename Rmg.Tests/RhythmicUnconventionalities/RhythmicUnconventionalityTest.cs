@@ -15,20 +15,22 @@ public sealed class RhythmicUnconventionalityTest
     }
 
     [Test]
-    [Arguments(0.25)]
-    [Arguments(2.0)]
-    [Arguments(4.0)]
-    public async Task Scale_MultipliesTheChances_ButLeavesTheSpeedAndKeepsToChances(double scale)
+    [Arguments(0.0)]
+    [Arguments(0.8)]
+    [Arguments(1.0)]
+    public async Task Lean_LeansTheChancesByTheirOdds_ButLeavesTheSpeed(double value)
     {
         var layer = RhythmLayers.Section;
+        var tilt = new RhythmicUnconventionality(value).Tilt;
 
-        var scaled = layer.Scale(scale);
+        var leaned = layer.Lean(tilt, RhythmLayers.ChanceLean);
 
-        await Assert.That(scaled.Tuplet).IsEqualTo(Math.Min(1, layer.Tuplet * scale)).Within(1e-9);
-        await Assert.That(scaled.Density).IsEqualTo(Math.Min(1, layer.Density * scale)).Within(1e-9);
-        await Assert.That(scaled.Groove).IsLessThanOrEqualTo(1);
-        // the chance of a speed change is the groove's times its share, which the scale leaves as it was
-        await Assert.That(scaled.Groove * RhythmLayer.SpeedShare * scaled.SpeedScale)
+        double Odds(double chance) => chance / (1 - chance);
+        await Assert.That(Odds(leaned.Tuplet)).IsEqualTo(Odds(layer.Tuplet) * Math.Pow(tilt.Odds, RhythmLayers.ChanceLean)).Within(1e-9);
+        await Assert.That(Odds(leaned.Density)).IsEqualTo(Odds(layer.Density) * Math.Pow(tilt.Odds, RhythmLayers.ChanceLean)).Within(1e-9);
+        await Assert.That(leaned.Groove).IsLessThan(1);
+        // the chance of a speed change is the groove's times its share, which the lean leaves as it was
+        await Assert.That(leaned.Groove * RhythmLayer.SpeedShare * leaned.SpeedScale)
             .IsEqualTo(layer.Groove * RhythmLayer.SpeedShare)
             .Within(1e-9);
     }

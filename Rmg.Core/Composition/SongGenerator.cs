@@ -143,7 +143,7 @@ public static class SongGenerator
     )
     {
         return new StateMapBuilder("Song")
-            .AddRhythmLayer(rhythmicUnconventionality.Scale(RhythmLayers.Song))
+            .AddRhythmLayer(rhythmicUnconventionality.Lean(RhythmLayers.Song))
             .Add(CompositionStateKinds.Rhythm.MaxRank, 2)
             .Add(CompositionStateKinds.Rhythm.Fullness, RhythmSettings.Fullness)
             .Add(CompositionStateKinds.Rhythm.Variation, RhythmSettings.Variation)

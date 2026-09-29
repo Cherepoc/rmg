@@ -135,7 +135,7 @@ internal static class FillLayers
     /// <summary>
     ///     The chances of a fill's rarer choices, in a section of conventionality in the middle: that it starts off the
     ///     beat, that a run fades, and that its landing comes early. The section's chance scale and a drummer's
-    ///     signature multiply them.
+    ///     signature multiply their odds (<see cref="FillGenerator.GetChance" />).
     /// </summary>
     public static ImmutableArray<(StateKind<double> Kind, double Chance)> Chances { get; } =
     [

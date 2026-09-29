@@ -200,13 +200,16 @@ unconventionality is how many different bars it brings (`PhraseSchemes.GetUnconv
 rises to a peak in a bar drawn and falls from it by a slope drawn (`MelodyLayers.GenerateContour`), which covers the
 arch, the fall and the rise the table had, and loses its wave; the melody leaps less where a phrase starts again (24%
 against 28%) and into a section (25% against 31%). The review's items are done; the tuning constants are left to
-listening.
+listening. The rhythm layers' chances and the fills' rarer ones, which were multiplied by the chance scale and capped at
+1, lean by their odds as every other chance does (`RhythmLayer.Lean`, `FillGenerator.GetChance`), the layers' by a
+lean of their own (`RhythmLayers.ChanceLean`, 1.1), tuned so that a section is as busy as before at every
+unconventionality: over 300 corpus songs (`RhythmBusynessReportTest`, the sections told apart by their melody's answer
+amount), the drums play the same notes a bar, off the 8ths and off the 16ths as they did, within a point, from the
+plainest sections (13.4% and 3.0% against 13.5% and 3.1%) to the wildest (31.4% and 18.1% against 30.3% and 18.0%),
+where a lean of 1 left the wildest's tuplets at 16.4% and one of 1.25 made the plain ones plainer (10.8% off the 8ths).
 
 Smaller, when the code is next touched:
 
-- **Chances multiplied:** the rhythm layers' chances (`RhythmLayer.Scale`) and the fills' rarer chances, layered
-  state (`FillLayers.Chances`), are still multiplied by the chance scale and capped at 1; tuned so, they could lean by
-  their odds as the choices do, should the capping show.
 - **Offsets as lists:** the chord root, the chord note and the articulation are collections that their readers sum,
   and the scale a collection that two layers would silently merge into fourteen notes; additive kinds, and a kind the
   lowest layer sets, as the drums' strokes now are (`StateKinds.CreateLowestLayerWins`), would say what they are.

@@ -99,7 +99,7 @@ internal sealed class SectionGenerator
         var sectionStateMap = CreateSectionStateMap(
             songStateMap,
             new StateMapBuilder("Section")
-                .AddRhythmLayer(rhythm.Scale(RhythmLayers.Section))
+                .AddRhythmLayer(rhythm.Lean(RhythmLayers.Section))
                 .AddNoteWalkLayer()
                 .Add(CompositionStateKinds.ChordPool.Index, LayerStates.ChordPoolIndex)
                 .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.Section, tilt))
@@ -324,7 +324,7 @@ internal sealed class SectionGenerator
         foreach (var group in _tracks.Groups)
         {
             var groupStateMap = new StateMapBuilder("Section drum group", perTrack: true)
-                .AddRhythmLayer(sectionRhythm.Unconventionality.Scale(RhythmLayers.SectionDrumGroup).Tilted(sectionRhythm.Energy))
+                .AddRhythmLayer(sectionRhythm.Unconventionality.Lean(RhythmLayers.SectionDrumGroup).Tilted(sectionRhythm.Energy))
                 .AddNoteWalkLayer()
                 .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.SectionDrumGroup))
                 .AddNoteDurationLayer()
@@ -454,7 +454,7 @@ internal sealed class SectionGenerator
             "Section track",
             SongTracks.GetGenerationStateMap(_tracks.Definitions[trackNumber]),
             VelocityLayers.CreateGenerator(VelocityLayers.SectionTrack),
-            sectionRhythm.Unconventionality.Scale(RhythmLayers.SectionTrack).Tilted(tilt)
+            sectionRhythm.Unconventionality.Lean(RhythmLayers.SectionTrack).Tilted(tilt)
         );
     }
 
