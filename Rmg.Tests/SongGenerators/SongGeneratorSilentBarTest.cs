@@ -25,7 +25,7 @@ public sealed class SongGeneratorSilentBarTest
             context,
             1,
             _ => 1e-4,
-            new DyadicTimelineDescriptor(BarDuration, 1, 0, 2, BarDuration)
+            new DyadicTimelineDescriptor(BarDuration, 1, 0, 2, BarDuration, 2)
         );
         var notePattern = DyadicRankItemPattern<StateMap>.Create(
             context,

@@ -27,7 +27,7 @@ public sealed class GroupedCycleTest
         // a 1.5-beat cycle's halves fall on dotted 8ths, but not their halves
         await Assert.That(ResolvedRhythm.GridRankLimit(1.5)).IsEqualTo(1);
 
-        var positions = DyadicRankTimeline.Generate(4, 0, 0.75, 0, ResolvedRhythm.RestartOf(0.75)).Select(x => x.Position).ToArray();
+        var positions = DyadicRankTimeline.Generate(4, 0, 0.75, 0, ResolvedRhythm.RestartOf(0.75), ResolvedRhythm.SplitOf(0.75)).Select(x => x.Position).ToArray();
         await Assert.That(positions).IsEquivalentTo([0, 0.75, 1.5, 2, 2.75, 3.5]);
     }
 }

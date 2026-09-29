@@ -103,7 +103,7 @@ public sealed class PhraseSchemesTest
         for (var seed = 0; seed < 30; seed++)
         {
             var weights = WeightUtil.CreateGeometricRankWeightFunc(1, 0, 1.0, 0.5);
-            var descriptor = new DyadicTimelineDescriptor(4, 1, 0, 2, 4);
+            var descriptor = new DyadicTimelineDescriptor(4, 1, 0, 2, 4, 2);
             var first = DyadicRankThresholdPattern.Create(new GenerationContext(0), seed, weights, descriptor, 0.3);
             var varied = DyadicRankThresholdPattern.Create(new GenerationContext(0), seed, weights, descriptor, 0.8);
 

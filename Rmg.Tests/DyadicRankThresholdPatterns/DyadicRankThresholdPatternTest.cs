@@ -21,7 +21,7 @@ public sealed class DyadicRankThresholdPatternTest
             new GenerationContext(0),
             1,
             Weights(0, 1),
-            new DyadicTimelineDescriptor(BarDuration, 1, 0, 2, BarDuration)
+            new DyadicTimelineDescriptor(BarDuration, 1, 0, 2, BarDuration, 2)
         );
 
         await Assert.That(Positions(pattern)).IsEquivalentTo(Enumerable.Range(0, 16).Select(x => x * 0.25).ToArray());
@@ -36,7 +36,7 @@ public sealed class DyadicRankThresholdPatternTest
                 new GenerationContext(0),
                 seed,
                 Weights(1, 0.5),
-                new DyadicTimelineDescriptor(BarDuration, 1, 0, 2, BarDuration),
+                new DyadicTimelineDescriptor(BarDuration, 1, 0, 2, BarDuration, 2),
                 variation: 0
             );
 
@@ -59,7 +59,7 @@ public sealed class DyadicRankThresholdPatternTest
                     new GenerationContext(0),
                     seed,
                     Weights(0, 0.5),
-                    new DyadicTimelineDescriptor(BarDuration, 0.5, 0, 0, BarDuration),
+                    new DyadicTimelineDescriptor(BarDuration, 0.5, 0, 0, BarDuration, 2),
                     variation: 0
                 )
             ))
@@ -75,10 +75,10 @@ public sealed class DyadicRankThresholdPatternTest
         // what the pattern did before cycles could repeat: every position kept or not by its own draw, in order
         for (var seed = 0; seed < 30; seed++)
         {
-            var descriptor = new DyadicTimelineDescriptor(BarDuration, 4 / 3.0, 0.25, 2, BarDuration);
+            var descriptor = new DyadicTimelineDescriptor(BarDuration, 4 / 3.0, 0.25, 2, BarDuration, 2);
             var weights = Weights(1, 0.5);
             var context = new GenerationContext(0).CreateContext(seed);
-            var expected = DyadicRankTimeline.Generate(BarDuration, descriptor.Phase, descriptor.Period, descriptor.MaxRank, descriptor.Restart)
+            var expected = DyadicRankTimeline.Generate(BarDuration, descriptor.Phase, descriptor.Period, descriptor.MaxRank, descriptor.Restart, descriptor.Split)
                 .FilterValues(x => context.TestProbability(weights(x)))
                 .Select(x => x.Position)
                 .ToArray();
@@ -99,7 +99,7 @@ public sealed class DyadicRankThresholdPatternTest
                 new GenerationContext(0),
                 seed,
                 Weights(1, 0.5),
-                new DyadicTimelineDescriptor(BarDuration, 1, 0, 2, BarDuration),
+                new DyadicTimelineDescriptor(BarDuration, 1, 0, 2, BarDuration, 2),
                 variation: 0.5
             );
             var first = Positions(pattern).Where(x => x < 1).ToArray();
@@ -116,7 +116,7 @@ public sealed class DyadicRankThresholdPatternTest
     [Test]
     public async Task Slots_NameTheSamePlaceInEveryCycle()
     {
-        var slots = DyadicRankTimeline.GenerateSlots(BarDuration, 0, 2, 1, BarDuration);
+        var slots = DyadicRankTimeline.GenerateSlots(BarDuration, 0, 2, 1, BarDuration, 2);
 
         await Assert.That(slots.Select(x => x.Position).ToArray()).IsEquivalentTo([0.0, 1, 2, 3]);
         await Assert.That(slots.Select(x => x.Cycle).ToArray()).IsEquivalentTo([0, 0, 1, 1]);

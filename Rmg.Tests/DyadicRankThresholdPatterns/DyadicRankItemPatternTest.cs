@@ -9,7 +9,7 @@ public sealed class DyadicRankItemPatternTest
         5,
         _ => 0.6,
         // a cycle of a beat, four times in the bar, down to 16ths
-        new DyadicTimelineDescriptor(4, 1, 0, 2, 4),
+        new DyadicTimelineDescriptor(4, 1, 0, 2, 4, 2),
         variation
     );
 

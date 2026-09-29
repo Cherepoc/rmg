@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using Rmg.Core.Events;
 
@@ -5,27 +6,32 @@ namespace Rmg.Core.Probabilities;
 
 public sealed class DyadicRankTimeline
 {
-    private static readonly ImmutableArray<EventTimeline<int>> RankTimelines = BuildRankTimelines();
+    // the templates of a cycle's positions in [0, 1), by how it splits first and its weakest rank
+    private static readonly ConcurrentDictionary<(int Split, int MaxRank), EventTimeline<int>> RankTimelines = new();
 
-    private static ImmutableArray<EventTimeline<int>> BuildRankTimelines()
+    /// <summary>
+    ///     A cycle's positions, each with its rank: its start the strongest, then the parts it splits into first, then
+    ///     every part halved again and again, each halving a rank weaker. Split in two, it is the dyadic cycle: its middle,
+    ///     then its quarters, then its 8ths.
+    /// </summary>
+    private static EventTimeline<int> BuildRankTimeline(int split, int maxRank)
     {
-        var result = new EventTimeline<int>[DyadicRankDistribution.MaxRank + 1];
+        var items = new List<TimelineItem<int>> { new(0, 0) };
+        if (maxRank >= 1)
+            items.AddRange(Enumerable.Range(1, split - 1).Select(x => new TimelineItem<int>(x / (double)split, 1)));
 
-        for (var i = 0; i < result.Length; i++)
-        {
-            var dyadicDistributionItems = DyadicRankDistribution.GetCombinedHalfDistributionByRank(i);
-            var timelineItems = dyadicDistributionItems.Select(x => new TimelineItem<int>(x.Position, x.Rank));
-            result[i] = EventTimeline.Create(1, timelineItems);
-        }
+        var parts = split;
+        for (var rank = 2; rank <= maxRank; rank++, parts *= 2)
+            items.AddRange(Enumerable.Range(0, parts).Select(x => new TimelineItem<int>((x + 0.5) / parts, rank)));
 
-        return [..result];
+        return EventTimeline.Create(1, items.OrderBy(x => x.Position));
     }
 
-    public static EventTimeline<int> Generate(double duration, double phase, double period, int maxRank, double restart)
+    public static EventTimeline<int> Generate(double duration, double phase, double period, int maxRank, double restart, int split)
     {
         return EventTimeline.Create(
             duration,
-            GenerateSlots(duration, phase, period, maxRank, restart).Select(x => new TimelineItem<int>(x.Position, x.Rank))
+            GenerateSlots(duration, phase, period, maxRank, restart, split).Select(x => new TimelineItem<int>(x.Position, x.Rank))
         );
     }
 
@@ -35,15 +41,17 @@ public sealed class DyadicRankTimeline
     ///     them is cut off, as they are at the duration's end.
     /// </summary>
     /// <param name="restart">How often the cycles start again, such as every half bar; the duration for never.</param>
-    public static ImmutableArray<DyadicRankSlot> GenerateSlots(double duration, double phase, double period, int maxRank, double restart)
+    /// <param name="split">How many parts a cycle splits into first, before every part halves.</param>
+    public static ImmutableArray<DyadicRankSlot> GenerateSlots(double duration, double phase, double period, int maxRank, double restart, int split)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(duration);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(period);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(restart);
         ArgumentOutOfRangeException.ThrowIfNegative(maxRank);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(maxRank, RankTimelines.Length - 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(maxRank, DyadicRankDistribution.MaxRank);
+        ArgumentOutOfRangeException.ThrowIfLessThan(split, 2);
 
-        var templateTimeline = RankTimelines[maxRank]
+        var templateTimeline = RankTimelines.GetOrAdd((split, maxRank), x => BuildRankTimeline(x.Split, x.MaxRank))
             .Stretch(period)
             .PhaseShift(phase);
 

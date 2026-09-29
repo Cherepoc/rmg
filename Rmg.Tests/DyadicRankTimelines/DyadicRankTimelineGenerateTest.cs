@@ -7,7 +7,7 @@ public sealed class DyadicRankTimelineGenerateTest
     [Test]
     public async Task MaxAllowedRank_ResultsIn_Timeline()
     {
-        var result = DyadicRankTimeline.Generate(1, 0, 1, DyadicRankDistribution.MaxRank, 1);
+        var result = DyadicRankTimeline.Generate(1, 0, 1, DyadicRankDistribution.MaxRank, 1, 2);
 
         await Assert.That(result.Count).IsEqualTo((int)Math.Pow(2, DyadicRankDistribution.MaxRank));
     }
@@ -15,14 +15,14 @@ public sealed class DyadicRankTimelineGenerateTest
     [Test]
     public async Task RankAboveMax_ResultsIn_ArgumentOutOfRange()
     {
-        await Assert.That(() => { DyadicRankTimeline.Generate(1, 0, 1, DyadicRankDistribution.MaxRank + 1, 1); })
+        await Assert.That(() => { DyadicRankTimeline.Generate(1, 0, 1, DyadicRankDistribution.MaxRank + 1, 1, 2); })
             .Throws<ArgumentOutOfRangeException>();
     }
 
     [Test]
     public async Task NegativeRank_ResultsIn_ArgumentOutOfRange()
     {
-        await Assert.That(() => { DyadicRankTimeline.Generate(1, 0, 1, -1, 1); })
+        await Assert.That(() => { DyadicRankTimeline.Generate(1, 0, 1, -1, 1, 2); })
             .Throws<ArgumentOutOfRangeException>();
     }
 
@@ -34,7 +34,7 @@ public sealed class DyadicRankTimelineGenerateTest
     [Test]
     public async Task HalfBarCycle_ShiftedByHalf_WithMainHitsOnly_PlaysBeats2And4()
     {
-        var result = DyadicRankTimeline.Generate(BarDuration, BackbeatPhase, HalfBarPeriod, 0, BarDuration);
+        var result = DyadicRankTimeline.Generate(BarDuration, BackbeatPhase, HalfBarPeriod, 0, BarDuration, 2);
 
         await Assert.That(result.Select(x => x.Position)).IsEquivalentTo([1.0, 3.0]);
         await Assert.That(result.All(x => x.Value == 0)).IsTrue();
@@ -43,7 +43,7 @@ public sealed class DyadicRankTimelineGenerateTest
     [Test]
     public async Task HalfBarCycle_ShiftedByHalf_WithWeakerHits_KeepsBeats2And4Strongest()
     {
-        var result = DyadicRankTimeline.Generate(BarDuration, BackbeatPhase, HalfBarPeriod, 1, BarDuration);
+        var result = DyadicRankTimeline.Generate(BarDuration, BackbeatPhase, HalfBarPeriod, 1, BarDuration, 2);
 
         await Assert.That(result.Where(x => x.Value == 0).Select(x => x.Position)).IsEquivalentTo([1.0, 3.0]);
         await Assert.That(result.Where(x => x.Value == 1).Select(x => x.Position)).IsEquivalentTo([0.0, 2.0]);

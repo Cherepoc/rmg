@@ -430,7 +430,7 @@ internal sealed class PatternGenerator
             _context,
             seed,
             WeightUtil.CreateGeometricRankWeightFunc(rankOffset, 0, 1.0, fullness),
-            new DyadicTimelineDescriptor(Meter.BarDuration, period, phase, maxRank, ResolvedRhythm.RestartOf(period)),
+            new DyadicTimelineDescriptor(Meter.BarDuration, period, phase, maxRank, ResolvedRhythm.RestartOf(period), ResolvedRhythm.SplitOf(period)),
             variation
         );
     }
@@ -513,6 +513,13 @@ internal readonly record struct ResolvedRhythm(
     public static double RestartOf(double period)
     {
         return IsGrouped(period) ? Math.Min(Meter.BarDuration, Math.Pow(2, Math.Ceiling(Math.Log2(2 * period) - 1e-9))) : Meter.BarDuration;
+    }
+
+    /// <summary>How many parts a cycle splits into first, before every part halves (<see cref="DyadicTimelineDescriptor.Split" />).</summary>
+    /// <param name="period">The cycle, in beats.</param>
+    public static int SplitOf(double period)
+    {
+        return 2;
     }
 
     /// <summary>

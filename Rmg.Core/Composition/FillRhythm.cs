@@ -93,7 +93,7 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit)
             context,
             seed,
             WeightUtil.CreateGeometricRankWeightFunc(Math.Min(Rhythm.RankOffset, maxRank), 0, 1, Rhythm.Fullness),
-            new DyadicTimelineDescriptor(Meter.BarDuration, Period, Phase, maxRank, ResolvedRhythm.RestartOf(Period)),
+            new DyadicTimelineDescriptor(Meter.BarDuration, Period, Phase, maxRank, ResolvedRhythm.RestartOf(Period), ResolvedRhythm.SplitOf(Period)),
             Rhythm.Variation
         );
         return
