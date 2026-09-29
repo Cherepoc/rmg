@@ -98,7 +98,7 @@ internal sealed class SectionGenerator
 
         // the section's chords move around its home, which every track's root starts from; the song's last section
         // leads home to its tonic, where the song ends
-        var home = Progressions.GenerateHome(context, scale);
+        var home = Progressions.GenerateHome(context, scale, plan.Role);
         if (plan.HasTonicHome)
             home = 0;
         // how often its chords change, from a sequence of its own, faster the more energy it has
@@ -220,7 +220,7 @@ internal sealed class SectionGenerator
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
-        var plays = SectionLength.Draw(Stream(sectionId, SectionStream.Length), rhythm.Tilt);
+        var plays = SectionLength.Draw(Stream(sectionId, SectionStream.Length), rhythm.Tilt, plan.Role);
         StateTrace.Record(TracePoints.SectionLength, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{plays}", plays);
         var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap).Repeat(plays);
         ImmutableArray<SectionLine> lines = [..pitched.Select(x => x.Line).OfType<SectionLine>()];
@@ -232,7 +232,8 @@ internal sealed class SectionGenerator
             isPercussionOnly,
             sectionRoles.Keys.ToImmutableDictionary(x => x, x => SectionRole(sectionRoles, x)),
             lines,
-            plays
+            plays,
+            doubles.ToImmutableDictionary(x => x.Key, x => x.Value.Lead)
         );
         return section.Appear(0, 0);
     }
@@ -550,7 +551,8 @@ internal sealed class SectionGenerator
 /// <summary>A section's place in the song's form, which some of its draws keep to.</summary>
 /// <param name="HasTonicHome">Whether its home is the song's tonic, as the song's last section's is, where the song ends.</param>
 /// <param name="KeepsSongScale">Whether it plays in the song's scale, as the song's first does, which sets the key.</param>
-internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScale);
+/// <param name="Role">What it does in the song's form, which leans its length and its home.</param>
+internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScale, SectionRole Role);
 
 /// <summary>A section's tracks, and what the fills need to know of its rhythm and energy.</summary>
 /// <param name="Rhythm">How far the section's rhythm strays from convention.</param>
@@ -560,6 +562,7 @@ internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScal
 /// <param name="DrumRoles">The role every one of the song's drums plays in the section.</param>
 /// <param name="Lines">The section's lines, such as its melody, before they are placed, placed afresh every time it plays.</param>
 /// <param name="Plays">How many times the section plays its 4-bar pattern: once, twice or four times (<see cref="SectionLength" />).</param>
+/// <param name="Bindings">The drums bound to a lead, by their tracks, and their leads' tracks (<see cref="Doubling" />).</param>
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
     RhythmicUnconventionality Rhythm,
@@ -568,7 +571,8 @@ internal sealed record GeneratedSection(
     bool IsPercussionOnly,
     ImmutableDictionary<int, DrumRole> DrumRoles,
     ImmutableArray<SectionLine> Lines,
-    int Plays
+    int Plays,
+    ImmutableDictionary<int, int> Bindings
 )
 {
     /// <summary>

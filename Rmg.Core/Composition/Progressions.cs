@@ -43,7 +43,8 @@ internal static class Progressions
     ///     The step of a section's home above the song's tonic, from -3 to 3: the tonic itself most often, the relative
     ///     key (the third degree of a minor scale, the sixth of a major one) sometimes, and IV or V now and then.
     /// </summary>
-    public static int GenerateHome(IGenerationContext context, Scale scale)
+    /// <param name="role">What the section does in the song's form: a bridge leans away from the tonic, to another key.</param>
+    public static int GenerateHome(IGenerationContext context, Scale scale, SectionRole role)
     {
         var relativeStep = GetQuality(scale.Offsets, 0) == TriadQuality.Minor ? 2 : 5;
         ImmutableArray<Weighted<int>> homes =
@@ -53,8 +54,12 @@ internal static class Progressions
             new(0.1, Normalize(3)),
             new(0.1, Normalize(4))
         ];
-        return context.Pick(homes);
+        var away = Tilt.Of(BridgeAwayOdds, role == SectionRole.Bridge ? 1 : 0);
+        return context.Pick(away.Weigh(homes, home => home == 0 ? 0 : 1));
     }
+
+    /// <summary>How far a bridge leans its home away from the tonic, as the odds of any other home over the tonic.</summary>
+    public const double BridgeAwayOdds = 4;
 
     /// <summary>
     ///     The roots of the chords, in steps above the section's home, from -3 to 3.

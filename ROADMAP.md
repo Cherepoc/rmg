@@ -13,11 +13,10 @@ measured before and after by a report test, by the measure its entry names.
 
 **Next** (P1), in this order:
 
-1. **Sections with a role,** as the form (see *Form*).
-2. **The energy in the pitched tracks** (see *Section dynamics*).
-3. **The arrangement, and energy by appearance** (see *Appearances*).
-4. **Pitched fills and the lift** (see *Fills*).
-5. **The meter:** the meter as state, then other meters (see *Meter*), once what a period means in another meter is
+1. **The energy in the pitched tracks** (see *Section dynamics*).
+2. **The arrangement, and energy by appearance** (see *Appearances*).
+3. **Pitched fills and the lift** (see *Fills*).
+4. **The meter:** the meter as state, then other meters (see *Meter*), once what a period means in another meter is
    decided by ear; a cycle split in three is built.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
@@ -89,6 +88,8 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
   side) too far out, or the melody (up to 0.15) too near the middle?
 - **Harmonic rhythm,** set by measurement only: do sections of a chord every half bar sound busy or rushed, and those
   of a chord every two bars static? Does the silence where a clipped note leaves a change unstruck sound like a gap?
+- **The forms:** do the songs of a form sound like verses and choruses, the chorus lifting? A song is shorter, 80 bars
+  of sections at the median against 116: too short?
 - **The fade-outs:** a ritardando into the fade, the drums fading first, or a tag after it, if asked for.
 
 ## Meter
@@ -151,13 +152,18 @@ and 62% of its changes by its instrument, off the new chord 1 to 3%, the melody'
 
 ## Form
 
-- **Sections with a role, as the form** (P1): the form is drawn from roles, not labelled after: a plan of roles (an
-  intro, verses, pre-choruses, choruses, a bridge) and their order, drawn from a few conventional forms and leaned
-  away from them by the song's conventionality, in place of `SongStructureGenerator`'s random parts and brushes, which
-  remain its unconventional end. A section's role leans its energy, its harmony (a bridge away from home), its length
-  and its arrangement, where now the energy is inferred from how often and where a section plays (`SectionEnergy`).
-  Before the pitched tracks and the arrangement lean on the energy, so that they are tuned once. Measured by: the
-  energy by role; the chorus the loudest section of its song; the forms drawn by conventionality.
+- **Sections with a role, as the form** (built): a song takes one of the forms songs are written in by a chance of
+  0.7, less the less conventional its rhythm (`SongForms`: V C V C B C, V P C V P C B C, V C V C B V C, V C V C,
+  C V C V B C, V P C V P C), a section for every role, or else a form of its own as before (`SongStructureGenerator`),
+  whose sections have no role. A role leans its section's length (`SectionLength.GetRolePlays`, odds of 8: a verse and a
+  chorus to sixteen bars, a pre-chorus to four, a bridge to eight) and a bridge's home away from the tonic (odds of 4);
+  the energy comes from how often and where a section plays, as before, which puts the chorus, recurring most, on top. A
+  drum bound to a lead comes in with it in an intro of entries. Over 200 corpus songs, 134 take a form, the chorus the
+  loudest section in 127 of them; the energy of a chorus 0.50 on average, a verse -0.17, a pre-chorus -0.12, a bridge
+  -0.24; half the verses and choruses play sixteen bars; a song's sections take 80 bars at the median, 48 to 152 from
+  10% to 90%, against 116 before (`SongFormReportTest`). Left: the role leaning the arrangement and the solos (see
+  *Appearances*, *Instruments*); an intro and an outro as roles of their own, should the form's intros and endings not
+  do; a form with a last chorus played twice over, as a section may not follow itself.
 - **A section's length** (built): a section plays its pattern once, twice or four times (`SectionLength`, 0.2, 0.65
   and 0.15), other than twice the likelier the less conventional its rhythm; once plays its lines' question alone, four
   times the question and the answer twice, the second time as a further appearance, improvised as far as the song

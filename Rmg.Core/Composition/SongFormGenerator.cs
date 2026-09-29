@@ -234,9 +234,14 @@ internal sealed class SongFormGenerator
         ];
     }
 
-    /// <summary>The part of the band a track plays: its role, and a drum's role in the section.</summary>
+    /// <summary>
+    ///     The part of the band a track plays: its role, and a drum's role in the section, a drum bound to a lead its
+    ///     lead's, as it plays on the lead's beats and comes in with it.
+    /// </summary>
     private IntroPart GetPart(int track, GeneratedSection section)
     {
+        if (section.Bindings.TryGetValue(track, out var lead))
+            track = lead;
         var role = _roles[track];
         return role == TrackRole.Drum ? new IntroPart(role, section.DrumRoles[track]) : new IntroPart(role);
     }

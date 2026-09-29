@@ -36,7 +36,8 @@ public sealed class DoublingTest
                 accentedLeadNotes += lead.Count;
             }
 
-            await Assert.That(doubler.All(lead.Contains)).IsTrue();
+            await Assert.That(doubler.All(lead.Contains)).IsTrue()
+                .Because($"seed {song.Seed}, section {entry.Section} at {span.Start}, {DrumGroups.GetDrum(track).Name} on {DrumGroups.GetDrum(doubling.Lead).Name}: {string.Join(", ", doubler.Where(x => !lead.Contains(x)).Take(5))}");
         }
 
         await Assert.That(checkedNotes).IsGreaterThan(0);

@@ -123,7 +123,7 @@ public sealed class ProgressionsTest
         var scale = Rmg.Core.Composition.Scales.All.Single(x => x.Name == scaleName);
         var context = new GenerationContext(1);
         var homes = Enumerable.Range(0, PhraseCount)
-            .Select(_ => Rmg.Core.Composition.Progressions.GenerateHome(context, scale))
+            .Select(_ => Rmg.Core.Composition.Progressions.GenerateHome(context, scale, Rmg.Core.Composition.SectionRole.Free))
             .CountBy(x => x)
             .ToDictionary();
 
@@ -147,7 +147,7 @@ public sealed class ProgressionsTest
     [Test]
     public async Task SongChords_AreTheSectionsHomeAndTheProgressionsRoot()
     {
-        var chordEntries = TestCorpus.Get(1).Trace.Where(x => x.Point == TracePoints.Chord).ToArray();
+        var chordEntries = TestCorpus.Range(5).SelectMany(x => x.Trace).Where(x => x.Point == TracePoints.Chord).ToArray();
 
         await Assert.That(chordEntries.Length).IsGreaterThan(0);
         // a root of 0, the tonic, is left out as the default, so a chord may show one layer or none

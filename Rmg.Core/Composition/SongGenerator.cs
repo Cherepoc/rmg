@@ -64,9 +64,10 @@ public static class SongGenerator
         // how busy the melody is, which a section moves
         var melodyBusyness = MelodyBusyness.Generate(Stream(SongStream.Melody));
 
-        var sectionIds = SongStructureGenerator.Generate(Stream(SongStream.Structure))
-            .SelectMany(part => part.SectionIds)
-            .ToArray();
+        // the song's form: one of the forms songs are written in, its sections playing their roles, or one of its own
+        var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), rhythmicUnconventionality.Tilt);
+        StateTrace.Record(TracePoints.SongForm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(" ", structure.SectionIds.Select(x => structure.Roles[x])), structure);
+        var sectionIds = structure.SectionIds.ToArray();
 
         // how loud and busy each section is meant to be, from the song's and where and how often the section plays
         var dynamicsContext = Stream(SongStream.Dynamics);
@@ -105,7 +106,7 @@ public static class SongGenerator
         var plan = formGenerator.Plan(sectionIds);
 
         // every section is generated once, where it first plays
-        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0]))))
+        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0], structure.Roles[id]))))
             .CacheGeneratedValues();
         // and its melody placed afresh every time it plays, varied from the first as far as the song improvises
         var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), rhythmicUnconventionality.Tilt);
@@ -222,5 +223,6 @@ internal enum SongStream
     MelodyImprovisation = 16,
     Intro = 17,
     Groove = 18,
-    Panning = 19
+    Panning = 19,
+    SongForm = 20
 }

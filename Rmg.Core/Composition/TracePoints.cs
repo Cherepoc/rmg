@@ -21,6 +21,9 @@ internal static class TracePoints
     /// <summary>How far a song's rhythm strays from convention (a <see cref="RhythmicUnconventionality" />).</summary>
     public const string SongRhythm = "Song rhythm";
 
+    /// <summary>A song's sections in its order and their roles (a <see cref="SongStructure" />).</summary>
+    public const string SongForm = "Song form";
+
     /// <summary>How a song swings (a <see cref="Swing" />).</summary>
     public const string Swing = "Swing";
 

@@ -3,8 +3,10 @@
 Random Music Generator: generates random, reproducible MIDI songs. The same seed always gives the same song in the
 same version of RMG; a new version may turn a seed into a different song.
 
-A song has 4-8 parts, each a sequence of 1-4 sections chosen from up to 3 distinct sections (in alternation,
-ping-pong or random order), and no section follows itself, not even from one part to the next. Every section
+Most songs take one of the forms songs are written in, such as verse, chorus, verse, chorus, bridge,
+chorus, with a pre-chorus now and then, a section for every role; the others, more the less conventional
+their rhythm, have 4-8 parts, each a sequence of 1-4 sections chosen from up to 3 distinct sections (in
+alternation, ping-pong or random order). No section follows itself. Every section
 plays its 4-bar pattern once, twice or four times, changes its chords every half bar, bar or two bars, and has a percussion kit and three pitched tracks (chords, melody, bass), each with its own
 rhythm and note patterns. A song plays at its own tempo, from 90 to about 175 BPM, most often 120, and about one in five swings. The bass plays
 in the middle of the stereo field, the melody near it and the chords to one side.
