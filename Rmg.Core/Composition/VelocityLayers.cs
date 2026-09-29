@@ -12,13 +12,14 @@ namespace Rmg.Core.Composition;
 internal static class VelocityLayers
 {
     /// <summary>
-    ///     A track's level by its role: the melody on top, as a melody leads the mix; the chords a little over the bass
-    ///     and the drums, their stacked notes already softened (<c>Render</c>), which by measure alone sounded too quiet;
-    ///     the bass and the drums as they are.
+    ///     A track's level by its role: the melody and the bass on top, as they lead the mix, the bass a little quieter
+    ///     for its even beats; the chords a little over the drums, their stacked notes already softened (<c>Render</c>),
+    ///     which by measure alone sounded too quiet; the drums as they are.
     /// </summary>
     public static double GetLevel(TrackRole role) => role switch
     {
         TrackRole.Melody => 0.25,
+        TrackRole.Bass => 0.25,
         TrackRole.Chords => 0.1,
         _ => 0
     };
@@ -32,8 +33,12 @@ internal static class VelocityLayers
     /// <summary>A drum's level: the drums', and its own by how loud it leans.</summary>
     public static double GetLevel(PercussionInstrumentDefinition drum) => DrumLevel * drum.Loudness;
 
-    /// <summary>The loudness of a section, shared by all its tracks.</summary>
-    public const double Section = 0.5;
+    /// <summary>
+    ///     The loudness of a section, shared by all its tracks, drawn either way and leaned by its energy: narrow, so that
+    ///     a quiet section, whether its energy or its draw makes it so, is still heard, and its energy sounds in how few
+    ///     and how sparse its drums are more than in how loud.
+    /// </summary>
+    public const double Section = 0.15;
 
     /// <summary>How much louder or quieter a track is in a section than it is in the song.</summary>
     public const double SectionTrack = 0.25;

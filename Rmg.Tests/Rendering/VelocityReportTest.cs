@@ -75,7 +75,7 @@ public sealed class VelocityReportTest
     }
 
     [Test]
-    public async Task TheBassAndTheChordsPlayEvenly_AChordAsLoudAsANote_AndTheMelodyOnTop()
+    public async Task TheBassAndTheChordsPlayEvenly_AChordAsLoudAsANote_AndTheMelodyAndTheBassOnTop()
     {
         var m = Measure(TestCorpus.Range(100));
         var (bass, chords, melody, drums) = (m["Bass"], m["Chords"], m["Melody"], m["Drum"]);
@@ -83,10 +83,10 @@ public sealed class VelocityReportTest
         // a bass and chords accent their beats less than a melody or the drums
         await Assert.That(bass.Accent).IsLessThan(melody.Accent * 0.75);
         await Assert.That(chords.Accent).IsLessThan(melody.Accent * 0.75);
-        // a chord of several notes sounds about as loud as a single note, and the melody leads the mix, less over the
-        // chords since they were raised by ear, by about 1.7 dB over 100 songs
-        await Assert.That(Math.Abs(chords.Loudness - bass.Loudness)).IsLessThan(2);
-        await Assert.That(melody.Loudness).IsGreaterThan(Math.Max(Math.Max(bass.Loudness, chords.Loudness), drums.Loudness) + 1);
+        // the melody and the bass lead the mix, about as loud, the bass a little quieter for its even beats, and the
+        // chords, a chord of several notes about as loud as a single note, and the drums under them
+        await Assert.That(Math.Abs(melody.Loudness - bass.Loudness)).IsLessThan(1);
+        await Assert.That(Math.Min(melody.Loudness, bass.Loudness)).IsGreaterThan(Math.Max(chords.Loudness, drums.Loudness));
     }
 
     [Test]

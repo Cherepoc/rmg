@@ -162,7 +162,13 @@ a section's chance scale to the power of 1/4). A chord's notes play at n^-1/4 fo
 songs, against the velocities before: the accent of a bar's downbeat over an 8th off the beat 9 for the bass and the
 chords, against 23, 16 for the melody and the drums; a chord sounds as loud as a note, where it was 5 dB louder, and
 the melody 2 to 4 dB over the others, where every track was as loud; a note at the same place from bar to bar within a
-section varies by 3 to 5, and the sections' loudness follows their energy 0.59 in plain sections, against 0.51. Left:
+section varies by 3 to 5, and the sections' loudness follows their energy 0.59 in plain sections, against 0.51. By ear
+since: the bass as loud as the melody, its level the melody's (0.25), -7.3 dB against -6.8, over the chords (-8.4) and
+the drums (-9.4); and a section's loudness narrower (`VelocityLayers.Section`, 0.15, was 0.5), a quiet section, of its
+energy or of its draw, still heard, its energy sounding in its drums more than in its level: over 100 corpus songs
+(`SectionLoudnessReportTest`) a song's loudest section is 4.1 dB over its quietest at the median, 5.8 at 90% and 8.0 at
+most, against 7.2, 10.2 and 11.2, and 1% of the sections more than 6 dB under their song's loudest, against 11%; the
+track's, the drum group's and the bars' layers make the rest. Left:
 
 - **Listen** to how even the bass and the chords play; the dynamics and chord softening are tuned by measurement
   only, the levels by ear too (the chords raised from under the others).
