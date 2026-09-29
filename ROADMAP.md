@@ -17,9 +17,20 @@ a 4-bar pattern played twice, a chord a bar, so the songs are alike in their for
 
 3. **The energy in the pitched tracks, and by appearance** (see *Section dynamics*).
 4. **Harmonic rhythm** (see *Chords*).
-5. **A section's length** (see *Form*).
-6. **Swing** (see *Groove*).
-7. **Ratings** (see *Listening data*), so that listening is measured as the corpus is.
+5. **Panning** (see *Instruments*).
+6. **A section's length** (see *Form*).
+7. **Pitched roles and the arrangement** (see *Instruments*).
+8. **Harmonised doubling** (see *Instruments*).
+9. **Occasional chords** (see *Instruments*).
+10. **Swing** (see *Groove*).
+11. **Articulations** (see *Instruments*).
+12. **Sections with a role** (see *Form*).
+13. **Solos** (see *Instruments*).
+14. **A short bar at a section change** (see *Meter*).
+15. **Bars of any length and polyrhythms** (see *Meter*), needed someday, low priority.
+
+Alongside, whenever the web page is touched: **ratings** (see *Listening data*), so that listening is measured as the
+corpus is.
 
 ## Section dynamics
 
@@ -105,6 +116,34 @@ Decided, and kept:
 Decided: the kit's leads among themselves, the snare and the hi-hat, keep their own feels, over the drums' shared
 layers; only the drums that do not lead follow a lead's (`FeelLeads`).
 
+## Instruments
+
+Three pitched tracks play, the chords, the melody and the bass, each on one instrument for the whole song and every
+section, all of them in every section.
+
+- **Panning:** no track is panned; the file sends no pan (CC 10), which the web player's synth plays. A place per
+  track drawn by its role, the bass and the kick in the middle, the chords and a pad spread, the drums as a kit
+  stands.
+- **Pitched roles and the arrangement:** more pitched roles, such as a pad, a second chord instrument or a
+  counter-melody (a third `LineProfile`), and a section's parts chosen as its drum kit is (`DrumKitGenerator.SelectKit`):
+  roles, the ones that lead and the ones that colour, which play leaned by the section's energy, so that a section
+  builds by what plays, not only by how loud. The one mechanism for the drums and the pitched tracks, where it can be.
+- **Harmonised doubling:** a line doubled a diatonic third or sixth above, as twin guitars play a riff, on a track of
+  its own panned against it: a line's notes are scale steps above the chord's root (`LinePlacement`), so the double is
+  two steps up. Per section, leaned by energy. Plain doubling, the same part twice, waits for timing by role (see
+  *Groove*): two copies with the same notes and timing only play louder.
+- **Occasional chords:** how many notes a track sounds at once is its role's (`Realizer`). As a note's state, a note,
+  two or the chord, leaned by the beat's accent, the energy and the landings, the melody would play a double stop on
+  an accent, a guitar a power chord where a section lands, the bass a chord now and then.
+- **Articulations:** a finger, pick or slap bass, a muted guitar or its harmonics are General MIDI programs of their
+  own. An instrument's articulations as data, picked as a drum's stroke is (`DrumStrokes`: the song's, changed by a
+  section and by a bar of a later letter, the lowest layer winning), a program change where it changes; the playing
+  should follow, such as octaves popped in slap and short notes muted, or it is only another sound.
+- **Solos:** an appearance of a section in which the melody rests and a solo line improvises over its chords, more
+  (`LinePattern.Mutate`), busier and over a wider range, the other parts thinned; a bass solo by the bass's profile
+  loosened. Special solo instruments by a pool of their own. Needs the arrangement and sections with a role: the form
+  decides which appearance is a solo.
+
 ## Groove
 
 - **Swing:** every note lands on the grid, tuplets aside. A song's swing, drawn and leaned conventional towards none,
@@ -169,6 +208,20 @@ bar by role, the intervals, the syncopation) of a corpus of real MIDI songs to t
   plays (`SectionEnergy`).
 - **Fade-outs,** should listening ask: a ritardando into the fade, the drums fading first, or a tag after it.
 - **Intros of their own material,** such as a riff the song does not play otherwise.
+
+## Meter
+
+Every bar is four beats (`Meter.BarDuration`, read in about 50 places), and the rhythm engine halves from the bar.
+
+- **A short bar at a section change:** a bar of two beats before a section, now and then, as an edit after assembly.
+- **Bars of any length** (needed someday, low priority): a meter as state, a song's, a section's or a bar's, of any
+  number of beats or 16ths, odd ones too, such as 7/8 or 13/16, the bar grouped as a grouped cycle is (3+3+2), in
+  place of the fixed four beats: the engine halving from a bar's groups, the progression's chords, the phrase
+  scheme's bars and the fills' spans taking the bar's length.
+- **Overlapping polyrhythms** (with bars of any length): a figure of a length of its own, such as a riff of 23 16ths,
+  running on against the bar, as the kick and the guitar do against the hi-hat and the snare in Meshuggah, meeting the
+  bar again at a phrase's end. Needs patterns longer than a bar (see *Long cycles*) and the lengths no power of two;
+  it covers *Cross-rhythms across the phrase*.
 
 ## Rhythm engine
 
