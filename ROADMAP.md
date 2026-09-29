@@ -121,6 +121,18 @@ its last note 35% against 13%. Left:
   0.14 to 0.20, so retune it now. The echoes mask the rest (without them 0.60), as they replay a note's step whatever
   the aim: an echo run's octave or transposition chosen towards the aim would let a repeated bar follow the arch as a
   sequence. The wave and the lean wait for this work.
+- **Leading into chord changes** (built): the melody's last note before a chord change within a phrase bends, by a
+  third at most and so never a leap, to a step from the note the next bar starts on, a note of its scale on a weak
+  beat and of its chord on a strong one, where the section leads: a chance of its own (`MelodyLayers.Leading`, 0.5,
+  spread 0.5 either way, so that some sections hardly lead, as a riff, and some lead most changes), drawn per bar of
+  the 4-bar pattern, so that the answer's first half leads as the question does, and not at a phrase's end, whose
+  held note is its cadence (`MelodyLine.Approach`, `MelodyPattern.Place`). An echo keeps its figure but for that note,
+  as a riff turns into its next chord. Over 200 corpus songs the melody crosses a chord change by a step onto the new
+  chord 42% of the time, against 31%, by a skip or leap 44% against 50%; within a phrase 50%, and 61% in the sections
+  that lead most; leaps, chord notes on the beat and the contour as before. Left: the bass leads as seldom (a tension
+  resolving by step 8 to 10% of its changes), by its own layers; half the changes have no melody note in their last
+  beat, a rest or a held note, where a pitched fill at a phrase line, or a counter-melody, would move, should the gaps
+  sound empty.
 - **Where it leaps:** a phrase or a section starts afresh at its aim, and a pattern's end wraps to its start, so the
   melody leaps there about a third of the time, mostly after a rest; whether that sounds like a new phrase or a break
   is to be heard. Two rules tried to close a phrase onto its start and were dropped: aiming the last bar back moved
