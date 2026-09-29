@@ -198,7 +198,7 @@ Smaller, when the code is next touched:
 - **Offsets as lists:** the chord root, the chord note and the articulation are collections that their readers sum,
   and the scale a collection that two layers would silently merge into fourteen notes; additive kinds, and a kind the
   lowest layer sets, as the drums' strokes now are (`StateKinds.CreateLowestLayerWins`), would say what they are.
-- **Echo keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
+- **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 - **Visibility:** the tables (`FillLayers`, `FormLayers`, `Drummer`, `MelodyBusyness` and more) are public though
   nothing outside needs them.
 - `TrackEventStateTimelineMap.MergeStateTimelineMap` in place of merging a map of no tracks to add common state; one
@@ -366,7 +366,7 @@ default, so it can first be shown to leave the recorded songs unchanged, and the
 fullness and repeated cycles (rolls, riffs and pulses), phrase schemes, rhythmic unconventionality, the melody's
 rhythm (its busyness, riffs, and phrase ends with a held note and a rest), fills with landings and a drummer, and
 echoes: within a section's melody, a note of a bar pattern that comes back, or of a cycle that repeats the one before,
-plays the note it had again, as the scale step from its chord's root (`MelodyPattern.GetEcho`, `MelodyLine`).
+plays the note it had again, as the scale step from its chord's root (`MelodyPattern.GetNoteKey`, `MelodyLine`).
 A beat of a repeated cycle also plays the values its beat had in the cycle it repeats, for every track: its accent,
 its walks (such as the hi-hat's open or closed sound and an arpeggio's chord note), its lengths and the melody's step;
 only what depends on its position, the chord there, is its own (`DyadicRankItemPattern`). Over 100 corpus songs about

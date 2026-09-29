@@ -25,7 +25,7 @@ internal sealed class MelodyPattern
 
     /// <summary>
     ///     A note's state: where it means to go, drawn from the bar pattern's own sequence, so the bar's shape comes back
-    ///     with the bar, and the note it plays again (<see cref="GetEcho" />).
+    ///     with the bar, and which note of its figure it is (<see cref="GetNoteKey" />).
     /// </summary>
     public StateMapBuilder AddNoteState(StateMapBuilder builder, KeptBeat beat)
     {
@@ -37,7 +37,7 @@ internal sealed class MelodyPattern
                     return StateMap.FromStates([CompositionStateKinds.MelodyStep.CreateState(step), CompositionStateKinds.MelodyTurn.CreateState(turn)]);
                 }
             )
-            .Add(CompositionStateKinds.Echo, GetEcho(_motif, beat));
+            .Add(CompositionStateKinds.NoteKey, GetNoteKey(_motif, beat));
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ internal sealed class MelodyPattern
                         state.Value.GetStateValue(CompositionStateKinds.MelodyStep),
                         state.Value.GetStateValue(CompositionStateKinds.MelodyTurn),
                         state.Value.GetStateValue(CompositionStateKinds.MelodyRegister),
-                        state.Value.GetStateValue(CompositionStateKinds.Echo)
+                        state.Value.GetStateValue(CompositionStateKinds.NoteKey)
                     );
                     return (Note: note, Chord: chord, Classes: classes, Rank: rank, Pitch: pitch);
                 }
@@ -121,7 +121,7 @@ internal sealed class MelodyPattern
     ///     decision at a time (<see cref="MelodyLayers.AnswerBars" />): a note mutated there draws afresh
     ///     whether it goes on or turns back, and plays no note heard before, so that it is placed by the rules where it
     ///     echoed the question. Whether a note is mutated, and how, is drawn from a sequence of the note's own, by the
-    ///     key of the note it echoes, so that notes that echo the same one mutate alike and no other draw moves.
+    ///     note's key (<see cref="CompositionStateKinds.NoteKey" />), so that the notes of a figure that comes back mutate alike and no other draw moves.
     /// </summary>
     /// <param name="bars">The section's bars, its 4-bar pattern's question and answer.</param>
     /// <param name="seed">The seed of the answer's mutations.</param>
@@ -132,19 +132,19 @@ internal sealed class MelodyPattern
         var mutated = track.Select(note =>
             {
                 var bar = (int)Math.Floor(note.Position / Meter.BarDuration) - Progressions.BarCount;
-                var echo = note.Value.GetStateValue(CompositionStateKinds.Echo);
+                var noteKey = note.Value.GetStateValue(CompositionStateKinds.NoteKey);
                 if (bar < 0 || MelodyLayers.AnswerBars[bar] <= 0)
                     return note;
 
-                var context = new GenerationContext(Seeds.Derive(seed, echo));
+                var context = new GenerationContext(Seeds.Derive(seed, noteKey));
                 if (!context.TestProbability(amount * MelodyLayers.AnswerBars[bar]))
                     return note;
 
                 var turn = context.GenerateDouble();
-                var key = Seeds.Derive(echo, seed);
+                var key = Seeds.Derive(noteKey, seed);
                 return note.Value
-                    .Except([CompositionStateKinds.MelodyTurn, CompositionStateKinds.Echo])
-                    .MergeWith(StateMap.FromStates([CompositionStateKinds.MelodyTurn.CreateState(turn), CompositionStateKinds.Echo.CreateState(key == 0 ? 1 : key)]))
+                    .Except([CompositionStateKinds.MelodyTurn, CompositionStateKinds.NoteKey])
+                    .MergeWith(StateMap.FromStates([CompositionStateKinds.MelodyTurn.CreateState(turn), CompositionStateKinds.NoteKey.CreateState(key == 0 ? 1 : key)]))
                     .ToTimelineItem(note.Position);
             }
         );
@@ -168,10 +168,10 @@ internal sealed class MelodyPattern
     }
 
     /// <summary>
-    ///     The key of the note a beat plays again: its bar pattern's, its cycle's draw and its place in the cycle, so
+    ///     The key of a beat's note in its figure: its bar pattern's, its cycle's draw and its place in the cycle, so
     ///     that a bar pattern that comes back, and a cycle that repeats the one before, play their beats' notes again.
     /// </summary>
-    internal static int GetEcho(int barPattern, KeptBeat beat)
+    internal static int GetNoteKey(int barPattern, KeptBeat beat)
     {
         var key = Seeds.Derive(Seeds.Derive(barPattern, beat.Source), beat.Slot);
         return key == 0 ? 1 : key;

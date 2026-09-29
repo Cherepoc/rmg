@@ -35,9 +35,10 @@ public static class CompositionStateKinds
     // its phrase leans (MelodyLayers.GetContinueChance)
     public static StateKind<double> MelodyTurn { get; } = StateKinds.CreateAdditive<double>(Prefix + "MelodyTurn");
 
-    // which note a melody note plays again: the key of its beat in its bar pattern's rhythm, the same for a beat of a
-    // bar that comes back and for a beat of a cycle that repeats the one before; 0 for none
-    public static StateKind<int> Echo { get; } = StateKinds.CreateAdditive<int>(Prefix + "Echo");
+    // which note of a figure a melody note is: the key of its beat in its bar pattern's rhythm, the same for a beat of a
+    // bar that comes back and for a beat of a cycle that repeats the one before, so that the note plays again, and is
+    // mutated alike, wherever the figure does; 0 for none
+    public static StateKind<int> NoteKey { get; } = StateKinds.CreateAdditive<int>(Prefix + "NoteKey");
 
     // how far above or below the middle of its range the melody aims in a bar, in semitones, for the phrase's shape
     public static StateKind<double> MelodyRegister { get; } = StateKinds.CreateAdditive<double>(Prefix + "MelodyRegister");
