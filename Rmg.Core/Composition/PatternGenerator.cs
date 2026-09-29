@@ -63,6 +63,35 @@ internal sealed class PatternGenerator
         MelodyAnswer? answer
     )
     {
+        var seeds = DrawSeeds(context, trackStateMaps.Keys, sectionRhythm.Scheme);
+        return BuildBars(seeds, sectionId, trackStateMaps, barDrums, doubles, barStateTimelineMap, sectionRhythm, answer, []);
+    }
+
+    /// <summary>The seeds of the tracks' bar patterns, a set for every letter of the scheme, one seed per track.</summary>
+    public static ImmutableArray<ImmutableDictionary<int, int>> DrawSeeds(IGenerationContext context, IEnumerable<int> trackNumbers, PhraseScheme scheme)
+    {
+        var tracks = trackNumbers.ToArray();
+        var trackSeedMapGenerator = (IGenerationContext innerContext) => tracks.ToImmutableDictionary(x => x, _ => SeedGenerator(innerContext));
+        return Generators.Sequence(trackSeedMapGenerator, scheme.PatternCount)(context);
+    }
+
+    /// <summary>
+    ///     The bars of <see cref="GenerateBars" />, of the seeds given (<see cref="DrawSeeds" />), a bar with a rhythm
+    ///     key drawing its rhythm afresh by it, as an answer's does by its own.
+    /// </summary>
+    /// <param name="rhythmKeys">Every bar's key to draw its rhythm afresh by, 0 for none; none for no bar.</param>
+    public GeneratedBars BuildBars(
+        ImmutableArray<ImmutableDictionary<int, int>> trackSeedMaps,
+        int sectionId,
+        ImmutableDictionary<int, StateMap> trackStateMaps,
+        BarDrums barDrums,
+        ImmutableDictionary<int, Doubling> doubles,
+        StateTimelineMap barStateTimelineMap,
+        SectionRhythm sectionRhythm,
+        MelodyAnswer? answer,
+        ImmutableArray<int> rhythmKeys
+    )
+    {
         // a bar pattern's own layer, drawn for every track and bar; no chord root offset here: every track plays the
         // progression's chord, and a track leaves it only by moving its root from note to note
         var barPatternLayerGenerator = new StateMapBuilder("Bar pattern", perTrack: true)
@@ -73,9 +102,6 @@ internal sealed class PatternGenerator
             .ToStateMapGenerator();
 
         var scheme = sectionRhythm.Scheme;
-        var trackSeedMapGenerator = (IGenerationContext innerContext) =>
-            trackStateMaps.Keys.ToDictionary(x => x, _ => SeedGenerator(innerContext));
-        var trackSeedMaps = Generators.Sequence(trackSeedMapGenerator, scheme.PatternCount)(context);
         var feels = new List<BarFeel>();
         // the question's letters, and the answer's, the same again
         var letters = answer is null ? scheme.Letters : [..scheme.Letters, ..scheme.Letters];
@@ -85,6 +111,7 @@ internal sealed class PatternGenerator
                     var patternBar = barIndex % scheme.Letters.Length;
                     var inAnswer = barIndex >= scheme.Letters.Length;
                     var redrawsRhythm = inAnswer && answer!.RedrawsRhythm[patternBar];
+                    var rhythmKey = rhythmKeys.IsDefaultOrEmpty ? 0 : rhythmKeys[barIndex];
                     var phraseEnd = inAnswer ? answer!.PhraseEnd : null;
                     // a drum that doubles a lead plays its lead's bar patterns
                     var seeds = trackSeedMaps[letter];
@@ -101,6 +128,7 @@ internal sealed class PatternGenerator
                                 barPatternLayerGenerator,
                                 scheme.IsVaried[patternBar],
                                 redrawsRhythm,
+                                rhythmKey,
                                 phraseEnd,
                                 barDrums.Resting.Contains((x.Key, letter)),
                                 barDrums.Strokes.TryGetValue((x.Key, letter), out var stroke) ? stroke : null,
@@ -118,6 +146,13 @@ internal sealed class PatternGenerator
         return new GeneratedBars(timeline, [..feels]);
     }
 
+    /// <summary>The seed of a bar's rhythm: its bar pattern's, drawn afresh for an answer, and again by its own key.</summary>
+    private static int GetRhythmSeed(int seed, bool redrawsRhythm, int rhythmKey)
+    {
+        var answered = redrawsRhythm ? Seeds.Derive(seed, AnswerRhythmKey) : seed;
+        return rhythmKey == 0 ? answered : Seeds.Derive(answered, rhythmKey);
+    }
+
     /// <summary>A track's bar: its bar pattern's state over the track's, and the notes of its rhythm.</summary>
     private EventStateTimelineMap<StateMap> GenerateBar(
         int trackNumber,
@@ -129,6 +164,7 @@ internal sealed class PatternGenerator
         Func<IGenerationContext, StateMap> barPatternLayerGenerator,
         bool isVaried,
         bool redrawsRhythm,
+        int rhythmKey,
         int? phraseEnd,
         bool isResting,
         int? stroke,
@@ -143,7 +179,7 @@ internal sealed class PatternGenerator
         // an answer's bar that draws its rhythm afresh plays its bar pattern's settings on another rhythm
         var builder = new StateMapBuilder("Bar pattern", perTrack: true)
             .Add(barPatternLayerGenerator)
-            .Add(CompositionStateKinds.Rhythm.Seed, redrawsRhythm ? Seeds.Derive(patternSeeds.Rhythm, AnswerRhythmKey) : patternSeeds.Rhythm)
+            .Add(CompositionStateKinds.Rhythm.Seed, GetRhythmSeed(patternSeeds.Rhythm, redrawsRhythm, rhythmKey))
             .Add(CompositionStateKinds.ValueSeed, seed);
         // a varied repeat plays its bar pattern with its cycles drawn afresh more often: it starts as the first did
         if (isVaried)
