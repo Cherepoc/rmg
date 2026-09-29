@@ -26,8 +26,8 @@ namespace Rmg.Core.Composition;
 /// <param name="Variation">How far the layer moves how often a pattern's cycles are drawn afresh, either way.</param>
 /// <param name="SpeedScale">What the chance of a speed change is multiplied by, so that leaning the groove leaves it.</param>
 /// <remarks>
-///     A layer can be tilted (<see cref="Tilted" />), as a section by its energy, so that its fullness and density lean
-///     fuller and busier or sparser, how often they move kept.
+///     A layer can be tilted (<see cref="Tilted" />), as a section by its energy, so that its fullness, density and speed
+///     lean fuller, busier and faster or sparser and slower, how often they move kept.
 /// </remarks>
 public sealed record RhythmLayer(
     double Groove,
@@ -57,7 +57,7 @@ public sealed record RhythmLayer(
         };
     }
 
-    /// <summary>How the layer's fullness and density lean: fuller and busier on the high side.</summary>
+    /// <summary>How the layer's fullness, density and speed lean: fuller, busier and faster on the high side.</summary>
     public Tilt Tilt { get; init; } = Tilt.None;
 
     /// <summary>The layer with its fullness and density leaning by the tilt.</summary>
@@ -83,9 +83,10 @@ public sealed record RhythmLayer(
         return CreateStepGenerator(Groove);
     }
 
+    /// <summary>A step of the period's power, faster on the tilt's high side, as its period shortens: -1 is twice as fast.</summary>
     public Func<IGenerationContext, int> CreateSpeedGenerator()
     {
-        return CreateStepGenerator(Math.Min(1, Groove * SpeedShare * SpeedScale));
+        return new Tilt(-Tilt.LogOdds).Step(Math.Min(1, Groove * SpeedShare * SpeedScale));
     }
 
     public Func<IGenerationContext, int> CreateTupletGenerator()

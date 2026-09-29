@@ -35,16 +35,18 @@ internal sealed record MelodyBusyness(double Value)
         return new MelodyBusyness(Math.Clamp(0.5 + SpreadGenerator(context) / 4, 0, 1));
     }
 
-    public MelodyBusyness GenerateSection(IGenerationContext context)
+    /// <param name="energy">How the section's energy leans it: busier the more energy it has.</param>
+    public MelodyBusyness GenerateSection(IGenerationContext context, Tilt energy)
     {
-        return new MelodyBusyness(Math.Clamp(Value + Generators.SplineValue()(context) * SectionShift, 0, 1));
+        return new MelodyBusyness(Math.Clamp(Value + energy.SplineValue()(context) * SectionShift, 0, 1));
     }
 
-    /// <summary>The steps of the melody's rhythm settings in a section.</summary>
-    public StateMapBuilder AddTo(StateMapBuilder builder)
+    /// <summary>The steps of the melody's rhythm settings in a section, twice as fast the likelier the more energy it has.</summary>
+    public StateMapBuilder AddTo(StateMapBuilder builder, Tilt energy)
     {
+        var speedUp = energy.Chance(MinSpeedUpChance + Value * (1 - MinSpeedUpChance), 1);
         return builder
             .Add(CompositionStateKinds.Rhythm.Fullness, Fullness + (Value - 0.5) * 2 * FullnessRange)
-            .Add(CompositionStateKinds.Rhythm.Period.Power, context => context.TestProbability(MinSpeedUpChance + Value * (1 - MinSpeedUpChance)) ? -1 : 0);
+            .Add(CompositionStateKinds.Rhythm.Period.Power, context => context.TestProbability(speedUp) ? -1 : 0);
     }
 }

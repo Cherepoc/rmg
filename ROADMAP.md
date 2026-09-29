@@ -13,10 +13,9 @@ measured before and after by a report test, by the measure its entry names.
 
 **Next** (P1), in this order:
 
-1. **The energy in the pitched tracks** (see *Section dynamics*).
-2. **The arrangement, and energy by appearance** (see *Appearances*).
-3. **Pitched fills and the lift** (see *Fills*).
-4. **The meter:** the meter as state, then other meters (see *Meter*), once what a period means in another meter is
+1. **The arrangement, and energy by appearance** (see *Appearances*).
+2. **Pitched fills and the lift** (see *Fills*).
+3. **The meter:** the meter as state, then other meters (see *Meter*), once what a period means in another meter is
    decided by ear; a cycle split in three is built.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
@@ -180,12 +179,15 @@ A section's energy (`SectionEnergy`) leans its loudness, its drums' fullness and
 fills into it. Over 200 corpus songs, in plain sections and wild ones, it correlates with loudness 0.51 and 0.27, with
 how many drums play 0.46 and 0.32, but with the drums' notes only 0.22 and 0.19.
 
-- **The energy in the pitched tracks** (P1): the melody's busyness, the chords' rhythm and the melody's register by
-  the same pull. The drums' notes follow it weakly: the section layers' density and fullness move little, so even
-  with energy near deciding (odds of 100,000) they correlate only 0.48; the section's shared rhythm layer, or the
-  drums' speed, would move them more, the first also moving the pitched tracks. Measured by: the energy against the
-  melody's and the chords' notes a bar and the melody's mean pitch, towards the 0.4 to 0.6 the loudness and the drums
-  reach.
+- **The energy in the pitched tracks** (built): the pitched tracks' section layer leans by the energy as the drums'
+  does, and a tilted layer leans its speed too, faster the more energy (`RhythmLayer.CreateSpeedGenerator`), as its
+  fullness and density lean; the melody's busyness and its chance to play twice as fast lean by it
+  (`MelodyBusyness`). Within a song, over 200 corpus songs (`SectionDynamicsTest`, `PitchedEnergyReportTest`), the
+  energy now follows the melody's notes 0.30 (was -0.03), the drums' 0.41 (was 0.27), the bass's 0.11 and the chords'
+  0.10 (were 0.07 and -0.05); the drums play 14.2 notes a bar in the plainest sections against 12.6, a faster
+  rhythm adding more notes than a slower one takes away. Left: **the melody's register,** which a shift of the
+  contour by the energy did not move (0.03 at eight semitones), as the line follows its aim only weakly; it waits for
+  the contour (see *Melody*); **the chords and the bass,** which follow weakly, should choruses not sound fuller.
 
 ## Appearances
 

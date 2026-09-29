@@ -196,7 +196,7 @@ internal sealed class SectionGenerator
 
         // every track follows the section's phrase scheme, so they repeat their bars in the same places
         var scheme = PhraseSchemes.Pick(context, rhythm);
-        var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context), tilt);
+        var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context, tilt), tilt);
 
         // the strokes the section changes from the song's, and how its drums play its bars, each from a sequence of its own
         var strokeContext =Stream(sectionId, SectionStream.DrumStrokes);
@@ -422,9 +422,11 @@ internal sealed class SectionGenerator
                 .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Section));
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Melody)
                 sectionRhythm.MelodyBusyness.AddTo(
-                    sectionTrackLayer.Add(CompositionStateKinds.LineStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Section))
+                    sectionTrackLayer.Add(CompositionStateKinds.LineStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Section)),
+                    sectionRhythm.Energy
                 );
-            var trackStateMap = CreateSectionTrackLayer(context, trackNumber, sectionRhythm)
+            // fuller and busier the more energy the section has, as its drums are
+            var trackStateMap = CreateSectionTrackLayer(context, trackNumber, sectionRhythm, sectionRhythm.Energy)
                 .MergeWith(sectionStateMap)
                 .MergeWith(sectionTrackLayer.ToStateMap(context));
             var trackStateMaps = new Dictionary<int, StateMap> { [trackNumber] = trackStateMap };

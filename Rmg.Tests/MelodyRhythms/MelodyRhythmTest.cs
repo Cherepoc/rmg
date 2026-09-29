@@ -59,7 +59,7 @@ public sealed class MelodyRhythmTest
         var busyness = new MelodyBusyness(value);
         var context = new GenerationContext(1);
         var stateMaps = Enumerable.Range(0, 4_000)
-            .Select(_ => busyness.AddTo(new StateMapBuilder("Test")).ToStateMap(context))
+            .Select(_ => busyness.AddTo(new StateMapBuilder("Test"), Tilt.None).ToStateMap(context))
             .ToArray();
 
         var fullness = stateMaps[0].GetStateValue(CompositionStateKinds.Rhythm.Fullness);
