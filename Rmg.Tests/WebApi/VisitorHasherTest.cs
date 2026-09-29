@@ -84,7 +84,9 @@ public sealed class VisitorHasherTest : IDisposable
     {
         var hash = VisitorHasher.Create(_directory).Hash("2026-09-24", "203.0.113.7", "Firefox");
 
+        // hex digits alone, which a random salt may make any of, so no part of the address can show but by chance
         await Assert.That(hash.Length).IsEqualTo(16);
-        await Assert.That(hash).DoesNotContain("203");
+        await Assert.That(hash.All(Uri.IsHexDigit)).IsTrue();
+        await Assert.That(hash).DoesNotContain("203.0.113.7");
     }
 }
