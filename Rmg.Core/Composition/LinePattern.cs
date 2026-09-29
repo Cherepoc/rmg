@@ -24,7 +24,7 @@ internal sealed class LinePattern
     public LinePattern(StateMap barPattern, LineProfile profile)
     {
         _profile = profile;
-        _stepwiseness = barPattern.GetStateValue(CompositionStateKinds.MelodyStepwiseness);
+        _stepwiseness = barPattern.GetStateValue(CompositionStateKinds.LineStepwiseness);
         _motif = barPattern.GetStateValue(CompositionStateKinds.ValueSeed);
     }
 
@@ -42,9 +42,9 @@ internal sealed class LinePattern
                     var (step, turn) = profile.GenerateStep(context, stepwiseness);
                     return StateMap.FromStates(
                         [
-                            CompositionStateKinds.MelodyStep.CreateState(step),
-                            CompositionStateKinds.MelodyTurn.CreateState(turn),
-                            CompositionStateKinds.MelodyStepwiseness.CreateState(stepwiseness)
+                            CompositionStateKinds.LineStep.CreateState(step),
+                            CompositionStateKinds.LineTurn.CreateState(turn),
+                            CompositionStateKinds.LineStepwiseness.CreateState(stepwiseness)
                         ]
                     );
                 }
@@ -87,9 +87,9 @@ internal sealed class LinePattern
                         x.Chord,
                         x.Classes,
                         rank,
-                        x.State.GetStateValue(CompositionStateKinds.MelodyStep),
-                        x.State.GetStateValue(CompositionStateKinds.MelodyTurn),
-                        x.State.GetStateValue(CompositionStateKinds.MelodyRegister),
+                        x.State.GetStateValue(CompositionStateKinds.LineStep),
+                        x.State.GetStateValue(CompositionStateKinds.LineTurn),
+                        x.State.GetStateValue(CompositionStateKinds.LineRegister),
                         x.State.GetStateValue(CompositionStateKinds.NoteKey)
                     );
                     return (Note: x, Rank: rank, Pitch: pitch);
@@ -174,11 +174,11 @@ internal sealed class LinePattern
                 if (!context.TestProbability(noteChance))
                     return note;
 
-                var (step, turn) = profile.GenerateStep(context, note.Value.GetStateValue(CompositionStateKinds.MelodyStepwiseness));
+                var (step, turn) = profile.GenerateStep(context, note.Value.GetStateValue(CompositionStateKinds.LineStepwiseness));
                 var key = Seeds.Derive(noteKey, seed);
                 return note.Value
-                    .With(CompositionStateKinds.MelodyStep, step)
-                    .With(CompositionStateKinds.MelodyTurn, turn)
+                    .With(CompositionStateKinds.LineStep, step)
+                    .With(CompositionStateKinds.LineTurn, turn)
                     .With(CompositionStateKinds.NoteKey, key == 0 ? 1 : key)
                     .ToTimelineItem(note.Position);
             }

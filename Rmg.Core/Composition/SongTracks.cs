@@ -103,7 +103,7 @@ internal sealed class SongTracks
                         // the melody keeps to the chords: its root does not walk away from theirs
                         .Add(CompositionStateKinds.IncrementalChordRootNoteOffset.Multiplier, 0)
                         // the melody instrument sets how stepwise the melody is, and the song moves it a little
-                        .Add(CompositionStateKinds.MelodyStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Song).Then(x => melodyInstrument.Leading + x))
+                        .Add(CompositionStateKinds.LineStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Song).Then(x => melodyInstrument.Leading + x))
                         // a melody repeats its cycles more than the other tracks, as riffs
                         .Add(CompositionStateKinds.Rhythm.Variation, MelodyLayers.RhythmVariation)
                         .ToStateMap(context),

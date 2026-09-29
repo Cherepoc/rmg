@@ -160,7 +160,7 @@ internal sealed class SectionGenerator
             1
         );
         var barStateTimelineMap = _barStateGenerator.Generate(context, scale, progression, home, unconventionality, bassLeading, rhythm.Tilt);
-        var contour = barStateTimelineMap.GetStateTimeline(CompositionStateKinds.MelodyRegister).Select(x => x.Value).ToImmutableArray();
+        var contour = barStateTimelineMap.GetStateTimeline(CompositionStateKinds.LineRegister).Select(x => x.Value).ToImmutableArray();
         StateTrace.Record(TracePoints.MelodyContour, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", contour), contour);
 
         // every track follows the section's phrase scheme, so they repeat their bars in the same places
@@ -189,7 +189,7 @@ internal sealed class SectionGenerator
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, sectionRhythm).ToArray();
         // the section's pattern played twice, its melody as a question and its answer
         var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap).Repeat(2);
-        var melody = pitched.Select(x => x.Melody).SingleOrDefault(x => x is not null);
+        ImmutableArray<SectionLine> lines = [..pitched.Select(x => x.Line).OfType<SectionLine>()];
         var section = new GeneratedSection(
             timeline,
             rhythm,
@@ -197,7 +197,7 @@ internal sealed class SectionGenerator
             energy,
             isPercussionOnly,
             sectionRoles.Keys.ToImmutableDictionary(x => x, x => SectionRole(sectionRoles, x)),
-            melody
+            lines
         );
         return section.Appear(0, 0);
     }
@@ -368,7 +368,7 @@ internal sealed class SectionGenerator
     }
 
     /// <summary>The pitched tracks, each making its patterns on its own, over the section's state.</summary>
-    private IEnumerable<(int Track, GeneratedBars Bars, SectionLine? Melody)> GeneratePitchedTracks(
+    private IEnumerable<(int Track, GeneratedBars Bars, SectionLine? Line)> GeneratePitchedTracks(
         IGenerationContext context,
         int sectionId,
         StateMap sectionStateMap,
@@ -384,7 +384,7 @@ internal sealed class SectionGenerator
                 .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Section));
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Melody)
                 sectionRhythm.MelodyBusyness.AddTo(
-                    sectionTrackLayer.Add(CompositionStateKinds.MelodyStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Section))
+                    sectionTrackLayer.Add(CompositionStateKinds.LineStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Section))
                 );
             var trackStateMap = CreateSectionTrackLayer(context, trackNumber, sectionRhythm)
                 .MergeWith(sectionStateMap)
@@ -484,7 +484,7 @@ internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScal
 /// <param name="Energy">How loud and busy the section is meant to be (<see cref="SectionEnergy" />).</param>
 /// <param name="IsPercussionOnly">Whether the section plays its percussion without the drum kit.</param>
 /// <param name="DrumRoles">The role every one of the song's drums plays in the section.</param>
-/// <param name="Melody">The section's melody before it is placed, placed afresh every time it plays; none for no melody.</param>
+/// <param name="Lines">The section's lines, such as its melody, before they are placed, placed afresh every time it plays.</param>
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
     RhythmicUnconventionality Rhythm,
@@ -492,23 +492,23 @@ internal sealed record GeneratedSection(
     double Energy,
     bool IsPercussionOnly,
     ImmutableDictionary<int, DrumRole> DrumRoles,
-    SectionLine? Melody
+    ImmutableArray<SectionLine> Lines
 )
 {
     /// <summary>
-    ///     The section as it plays the given time, from 0: its melody placed for that time, mutated from the first by
+    ///     The section as it plays the given time, from 0: its lines placed for that time, mutated from the first by
     ///     the song's improvisation (<see cref="SectionLine.Place" />), and every other track as it was made.
     /// </summary>
     public GeneratedSection Appear(int appearance, double improvisation)
     {
-        if (Melody is not { } melody)
-            return this;
-
-        var placed = melody.Place(appearance, improvisation).TrackTimelineMap[melody.Track].EventTimeline.MapValues(x => x.OfScope(StateScope.Render));
-        return this with
+        var timeline = Timeline;
+        foreach (var line in Lines)
         {
-            Timeline = Timeline.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [melody.Track] = _ => placed })
-        };
+            var placed = line.Place(appearance, improvisation).TrackTimelineMap[line.Track].EventTimeline.MapValues(x => x.OfScope(StateScope.Render));
+            timeline = timeline.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [line.Track] = _ => placed });
+        }
+
+        return this with { Timeline = timeline };
     }
 }
 

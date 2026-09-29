@@ -22,26 +22,26 @@ internal static class CompositionStateKinds
     public static IncrementalStateKinds IncrementalChordNoteOffset { get; } =
         new(Prefix + StateKinds.ChordNoteOffset.Name);
 
-    // how much a melody moves by step rather than by leap, from 0 to 1
-    public static StateKind<double> MelodyStepwiseness { get; } = StateKinds.CreateAdditive<double>(Prefix + "MelodyStepwiseness");
+    // how much a line, such as the melody, moves by step rather than by leap, from 0 to 1
+    public static StateKind<double> LineStepwiseness { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineStepwiseness");
 
     // how strong a note's beat is, 0 the strongest, from its rhythm pattern
     public static StateKind<int> BeatRank { get; } = StateKinds.CreateAdditive<int>(Prefix + "BeatRank");
 
-    // how far a melody note means to go: 1 a step, 2 a leap, 0 the same note
-    public static StateKind<int> MelodyStep { get; } = StateKinds.CreateAdditive<int>(Prefix + "MelodyStep");
+    // how far a line's note means to go: 1 a step, 2 a leap, 0 the same note
+    public static StateKind<int> LineStep { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineStep");
 
-    // a melody note's draw, from 0 to 1, of whether it goes on the way the melody goes or turns back, which the aim of
-    // its phrase leans (MelodyLayers.GetContinueChance)
-    public static StateKind<double> MelodyTurn { get; } = StateKinds.CreateAdditive<double>(Prefix + "MelodyTurn");
+    // a line's note's draw, from 0 to 1, of whether it goes on the way the line goes or turns back, which the aim of
+    // its phrase leans (LineProfile.GetContinueChance)
+    public static StateKind<double> LineTurn { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineTurn");
 
-    // which note of a figure a melody note is: the key of its beat in its bar pattern's rhythm, the same for a beat of a
+    // which note of a figure a line's note is: the key of its beat in its bar pattern's rhythm, the same for a beat of a
     // bar that comes back and for a beat of a cycle that repeats the one before, so that the note plays again, and is
     // mutated alike, wherever the figure does; 0 for none
     public static StateKind<int> NoteKey { get; } = StateKinds.CreateAdditive<int>(Prefix + "NoteKey");
 
-    // how far above or below the middle of its range the melody aims in a bar, in semitones, for the phrase's shape
-    public static StateKind<double> MelodyRegister { get; } = StateKinds.CreateAdditive<double>(Prefix + "MelodyRegister");
+    // how far above or below the middle of its range a line aims in a bar, in semitones, for the phrase's shape
+    public static StateKind<double> LineRegister { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineRegister");
 
     // where the melody's phrase ends in its last bar: 0 for no end, or the beat, from 1 to 3, before which its last note
     // starts; it holds that note, and rests until the next phrase

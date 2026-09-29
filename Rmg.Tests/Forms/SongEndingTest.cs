@@ -153,7 +153,7 @@ public sealed class SongEndingTest
             0,
             false,
             ImmutableDictionary<int, DrumRole>.Empty,
-            null
+            []
         );
 
         var ending = SongFormGenerator.CreateEnding(

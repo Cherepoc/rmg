@@ -128,7 +128,7 @@ its last note 35% against 13%. Left:
   0.30 (`MelodyContourTest`, over 100 corpus songs), as the line turns towards the aim only past
   `LineProfile.RegisterPull` and otherwise goes on or turns back by its draw alone. A phrase's shape may start again
   every half phrase, a wave (`MelodyLayers.Periods`, 19% of the patterns, the more the less conventional the section's
-  rhythm), and a note's draw of going on or turning back (`CompositionStateKinds.MelodyTurn`) can lean towards the aim
+  rhythm), and a note's draw of going on or turning back (`CompositionStateKinds.LineTurn`) can lean towards the aim
   (`MelodyLayers.AimOdds`), off at 1; with the octave still chosen per bar, odds of 32 moved the following only from
   0.14 to 0.20, so retune it now. The echoes mask the rest (without them 0.60), as they replay a note's step whatever
   the aim: an echo run's octave or transposition chosen towards the aim would let a repeated bar follow the arch as a
@@ -229,9 +229,17 @@ Smaller, when the code is next touched:
   steps. Worth it once the bass's lines want more say than their leading and landing give them. Begun: the melody's
   line is one line of a kind (`Line`, `LinePattern`, `SectionLine`), what sets it apart held as data
   (`LineProfile`, `MelodyLayers.Line`: its range, how it moves, what its strong beats take), the melody note for note
-  as it was; next, the bass as a second profile: a stepwise walk low in its range, landing on a new chord as the bar
-  asks and leading into the next by its approaches, its walks of the chord root and the chord note retired, placed per
-  section as the melody is, and tuned against the bass reports. Its octave nearest
+  as it was, its per-note state line state (`LineStep`, `LineTurn`, `LineStepwiseness`, `LineRegister`) and a section
+  its lines (`GeneratedSection.Lines`). Next, in steps: `Line` landing on a new chord as a bar asks and leading into
+  the next by an approach kind (`ChordApproach`), the melody as it was; every line placed last, once the song is put
+  together, over its whole chords, so that it leads into the next section's chord and goes on from section to section,
+  the melody first, measured and heard; how freely a line changes register a setting of its own (`LineRegisterFreedom`,
+  by the instrument, the song and the section: at a phrase's or a section's start a line resets to its aim or goes on,
+  and an echo over another root keeps the octave nearest the note before or its heard one), low by default, as octave
+  changes should be rare, and leading into a chord never one; then the bass as a second profile (a stepwise line low
+  in its range, every beat a chord note, landing and leading as its bars ask, its register never reset, its pickup
+  placed there too), its walks of the chord root and the chord note, `BassLine` and `BassPattern` retired, tuned
+  against the bass reports; last, the harmony's roots as whole scale steps. Its octave nearest
   the note before is its line's rule, not a choice on top of it, as the melody's octave per bar was: its draws give
   pitch classes, the chord note's walk going round the chord across octaves, and without the rule every note in the
   register its chord gives it leapt a fifth or more 35% of the time and an octave 18%, against 6% and 0.1%, over 100
