@@ -206,13 +206,16 @@ lean of their own (`RhythmLayers.ChanceLean`, 1.1), tuned so that a section is a
 unconventionality: over 300 corpus songs (`RhythmBusynessReportTest`, the sections told apart by their melody's answer
 amount), the drums play the same notes a bar, off the 8ths and off the 16ths as they did, within a point, from the
 plainest sections (13.4% and 3.0% against 13.5% and 3.1%) to the wildest (31.4% and 18.1% against 30.3% and 18.0%),
-where a lean of 1 left the wildest's tuplets at 16.4% and one of 1.25 made the plain ones plainer (10.8% off the 8ths).
+where a lean of 1 left the wildest's tuplets at 16.4% and one of 1.25 made the plain ones plainer (10.8% off the 8ths). The
+offsets that are lists stay lists: every layer's chord root, chord note and articulation offset is a fraction of a
+length known only in `Render`, rounded to whole steps each and added, which an additive number rounded once would
+change, and an empty chord note offset plays the whole chord. The scale and a chord's shape are single values that are
+lists, set by one layer each, whose kind would join two layers' into one; a test holds them to one
+(`SingleValuedListsTest`), where a kind of its own for a value one layer sets would add a mechanism for a mistake not
+made, and forbid the override a kind the lowest layer sets allows, should a section's scale ever override a song's.
 
 Smaller, when the code is next touched:
 
-- **Offsets as lists:** the chord root, the chord note and the articulation are collections that their readers sum,
-  and the scale a collection that two layers would silently merge into fourteen notes; additive kinds, and a kind the
-  lowest layer sets, as the drums' strokes now are (`StateKinds.CreateLowestLayerWins`), would say what they are.
 - **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 - **Memory:** every `RealizedNote` keeps the state it was decided from, which a song now holds on to (about 2 MB a
   song, 8 MB with a trace). Recompute it on demand instead, should memory matter.

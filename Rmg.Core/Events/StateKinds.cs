@@ -9,9 +9,14 @@ public static class StateKinds
     public static readonly StateKind<double> Velocity = CreateAdditive<double>("Velocity", StateScope.Render);
     public static readonly StateKind<double> QuarterNoteDurationPower = CreateAdditive<double>("QuarterNoteDurationPower", StateScope.Render);
     public static readonly StateKind<double> NextNoteDurationFactor = CreateAdditive<double>("NextNoteDurationFactor", StateScope.Render);
+    // which of a drum's sounds its walk picks, as every layer's step of it, a fraction of the sounds the drum has, which
+    // Render rounds to whole sounds each, the drum's count known only there, and adds
     public static readonly StateKind<ImmutableArray<double>> ArticulationOffset = CreateCollection<double>("ArticulationOffset", StateScope.Render);
     public static readonly StateKind<int> KeyOffset = CreateAdditive<int>("KeyOffset", StateScope.Render, isShared: true);
     public static readonly StateKind<int> OctaveOffset = CreateAdditive<int>("OctaveOffset", StateScope.Render);
+    // a chord's shape, the heights of its notes above its root: one value, set by one layer, whose kind would join two
+    // layers' shapes into one (SingleValuedListsTest); a layer that replaces it, as an ending's home chord does, takes
+    // the note's out first, and should one ever lean on a deeper layer's, it would be a kind the lowest layer sets
     public static readonly StateKind<ImmutableArray<double>> ChordNotePitchOffsets = CreateCollection<double>("ChordNotePitchOffsets", StateScope.Render);
     // 1 for a chord whose layout is what it is, which Render moves only by whole octaves
     public static readonly StateKind<int> ChordVoicingFixed = CreateAdditive<int>("ChordVoicingFixed", StateScope.Render);
@@ -39,8 +44,14 @@ public static class StateKinds
     public static readonly StateKind<LayerValue<int>> DrumStroke = CreateLowestLayerWins<int>("DrumStroke", StateScope.Render);
     // a note's length set outright, in beats, over the gap to the next note, such as a phrase's last note; 0 for none
     public static readonly StateKind<double> HeldDuration = CreateAdditive<double>("HeldDuration", StateScope.Render);
+    // the chord's root, and which of its notes a note plays, as every layer's step of them, such as the progression's
+    // and the walk's: fractions of the scale's steps and of the chord's notes, which Render rounds to whole steps each,
+    // the lengths known only there, and adds; a sum of the fractions rounded once would land elsewhere, and no chord
+    // note offset, an empty list, plays the whole chord
     public static readonly StateKind<ImmutableArray<double>> ChordRootNoteOffset = CreateCollection<double>("ChordRootOffset", StateScope.Render);
     public static readonly StateKind<ImmutableArray<double>> ChordNoteOffset = CreateCollection<double>("ChordNoteOffset", StateScope.Render);
+    // the scale, as its notes' semitones above its root: one value, set by one layer, a section's, whose kind would join
+    // two layers' scales into one of fourteen notes (SingleValuedListsTest)
     public static readonly StateKind<ImmutableArray<int>> ScaleOffsets = CreateCollection<int>("ScaleOffsets", StateScope.Render, isShared: true);
     // scale steps raised a semitone each time they are listed, such as the seventh on a cadence
     public static readonly StateKind<ImmutableArray<int>> RaisedScaleSteps = CreateCollection<int>("RaisedScaleSteps", StateScope.Render, isShared: true);
