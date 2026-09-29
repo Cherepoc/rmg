@@ -61,7 +61,8 @@ internal sealed class LinePattern
     /// </summary>
     /// <param name="barStates">The section's state that changes by bar, such as its chords and its phrases' registers.</param>
     /// <param name="key">The song's key.</param>
-    /// <param name="leads">Whether each bar of the 4-bar pattern leads into the next (<see cref="DrawLeads" />).</param>
+    /// <param name="approaches">How each bar of the 4-bar pattern leads into the next where the chord changes (<see cref="DrawApproaches" />).</param>
+    /// <param name="landings">What the first note of each bar of the 4-bar pattern lands on; free for the line's own rule.</param>
     public static TrackEventStateTimelineMap<StateMap> Place(
         TrackEventStateTimelineMap<StateMap> bars,
         int trackNumber,
@@ -69,19 +70,24 @@ internal sealed class LinePattern
         LineProfile profile,
         StateTimelineMap barStates,
         int key,
-        ImmutableArray<bool> leads
+        ImmutableArray<ChordApproach> approaches,
+        ImmutableArray<ChordArrival> landings
     )
     {
         var (low, high) = Realizer.GetRange(definition);
         var line = new Line(profile, low, high);
         var track = bars.TrackTimelineMap[trackNumber];
-        var notes = LinePlacement.GetNotes(
-                track.MergeStateMap(StateMap.FromStates([StateKinds.KeyOffset.CreateState(key)])),
-                definition,
-                barStates
-            )
-            .Select(x =>
+        var lineNotes = LinePlacement.GetNotes(
+            track.MergeStateMap(StateMap.FromStates([StateKinds.KeyOffset.CreateState(key)])),
+            definition,
+            barStates
+        );
+        int Bar(LineNote note) => (int)Math.Floor(note.Position / Meter.BarDuration);
+        var notes = lineNotes
+            .Select((x, i) =>
                 {
+                    // the first note of a bar lands where its bar asks
+                    var landing = i == 0 || Bar(lineNotes[i - 1]) != Bar(x) ? landings[Bar(x).Mod(Progressions.BarCount)] : ChordArrival.Free;
                     var rank = x.State.GetStateValue(StateKinds.HeldDuration) > 0 ? 0 : x.State.GetStateValue(CompositionStateKinds.BeatRank);
                     var pitch = line.Place(
                         x.Chord,
@@ -90,7 +96,8 @@ internal sealed class LinePattern
                         x.State.GetStateValue(CompositionStateKinds.LineStep),
                         x.State.GetStateValue(CompositionStateKinds.LineTurn),
                         x.State.GetStateValue(CompositionStateKinds.LineRegister),
-                        x.State.GetStateValue(CompositionStateKinds.NoteKey)
+                        x.State.GetStateValue(CompositionStateKinds.NoteKey),
+                        landing
                     );
                     return (Note: x, Rank: rank, Pitch: pitch);
                 }
@@ -99,31 +106,37 @@ internal sealed class LinePattern
 
         for (var i = 0; i + 1 < notes.Length; i++)
         {
-            // a change of chord on a bar line within a phrase, its first note one of the new chord's
+            // a change of chord on a bar line, its first note one of the new chord's, led into as the bar before has it
             var (last, next) = (notes[i], notes[i + 1]);
             var bar = next.Note.Position / Meter.BarDuration;
             var isBarLine = Math.Abs(bar - Math.Round(bar)) < 1e-9;
-            var patternBar = (int)Math.Round(bar).Mod(Progressions.BarCount);
-            if (!isBarLine || patternBar == 0 || !leads[patternBar - 1] || last.Note.Classes.SetEquals(next.Note.Classes) || !next.Note.Classes.Contains(next.Pitch.Mod(12)))
+            var approach = approaches[((int)Math.Round(bar) - 1).Mod(Progressions.BarCount)];
+            if (!isBarLine || approach == ChordApproach.None || last.Note.Classes.SetEquals(next.Note.Classes) || !next.Note.Classes.Contains(next.Pitch.Mod(12)))
                 continue;
 
-            notes[i] = last with { Pitch = line.Approach(last.Note.Chord, last.Note.Classes, last.Rank, last.Pitch, next.Pitch) };
+            notes[i] = last with { Pitch = line.Approach(approach, last.Note.Chord, last.Note.Classes, last.Rank, last.Pitch, next.Note.Chord, next.Pitch) };
         }
 
+        // a line that leads in only by the scale plays the steps of its chords' scales
         var placed = LinePlacement.Store(track.EventTimeline.Duration, notes.Select(x => (x.Note, x.Pitch)));
-        if (placed.Any(x => x.Value.GetStateValue(StateKinds.Alteration) != 0))
-            throw new InvalidOperationException("The melody's notes are on the steps of their chords' scales.");
+        if (approaches.All(x => x is ChordApproach.None or ChordApproach.ScaleStep) && placed.Any(x => x.Value.GetStateValue(StateKinds.Alteration) != 0))
+            throw new InvalidOperationException("A line that leads in by the scale places its notes on its chords' scales.");
 
         return bars.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [trackNumber] = _ => placed });
     }
 
     /// <summary>
-    ///     Whether each bar of the 4-bar pattern leads into the next, by the section's chance of leading into a chord
-    ///     change within a phrase (<see cref="MelodyLayers.Leading" />), the same in the question and in its answer.
+    ///     How each bar of the 4-bar pattern leads into the next, the same in the question and in its answer: by a scale
+    ///     step, by the section's chance of leading into a chord change within a phrase (<see cref="MelodyLayers.Leading" />),
+    ///     or not at all; never into the phrase's first bar, which its last bar's held note ends as a cadence.
     /// </summary>
-    public static ImmutableArray<bool> DrawLeads(IGenerationContext context, double leading)
+    public static ImmutableArray<ChordApproach> DrawApproaches(IGenerationContext context, double leading)
     {
-        return [..Enumerable.Range(0, Progressions.BarCount).Select(_ => context.TestProbability(leading))];
+        return
+        [
+            ..Enumerable.Range(0, Progressions.BarCount)
+                .Select(bar => context.TestProbability(leading) && bar < Progressions.BarCount - 1 ? ChordApproach.ScaleStep : ChordApproach.None)
+        ];
     }
 
     /// <summary>
@@ -245,7 +258,8 @@ internal sealed class LinePattern
 /// <param name="Bars">The section's 8 bars, the answer's mutated.</param>
 /// <param name="BuildBars">The section's 8 bars built afresh, the answer's mutated, every bar drawing its rhythm afresh by its key, 0 for none.</param>
 /// <param name="Letters">Every bar's letter in the section's phrase scheme.</param>
-/// <param name="Leads">Whether each bar of the 4-bar pattern leads into the next (<see cref="LinePattern.DrawLeads" />).</param>
+/// <param name="Approaches">How each bar of the 4-bar pattern leads into the next (<see cref="LinePattern.DrawApproaches" />).</param>
+/// <param name="Landings">What the first note of each bar of the 4-bar pattern lands on.</param>
 /// <param name="Seed">The seed of the mutations of its later appearances.</param>
 internal sealed record SectionLine(
     int Track,
@@ -256,7 +270,8 @@ internal sealed record SectionLine(
     PitchInstrumentTrack Definition,
     StateTimelineMap BarStates,
     int Key,
-    ImmutableArray<bool> Leads,
+    ImmutableArray<ChordApproach> Approaches,
+    ImmutableArray<ChordArrival> Landings,
     int Seed
 )
 {
@@ -293,7 +308,7 @@ internal sealed record SectionLine(
             bars = LinePattern.Mutate(bars, Track, Profile, seed, _ => amount);
         }
 
-        return LinePattern.Place(bars, Track, Definition, Profile, BarStates, Key, Leads);
+        return LinePattern.Place(bars, Track, Definition, Profile, BarStates, Key, Approaches, Landings);
     }
 }
 

@@ -258,13 +258,40 @@ public sealed class LineTest
         var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
 
         // a step from the next already: kept
-        await Assert.That(line.Approach(C, CTones, Weak, 67, 69)).IsEqualTo(67);
+        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Weak, 67, C, 69)).IsEqualTo(67);
         // B leads into G through A on a weak beat; on a strong beat only a note of its own chord may, and none is near
-        await Assert.That(line.Approach(C, CTones, Weak, 71, 67)).IsEqualTo(69);
-        await Assert.That(line.Approach(C, CTones, Strong, 71, 67)).IsEqualTo(71);
+        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Weak, 71, C, 67)).IsEqualTo(69);
+        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Strong, 71, C, 67)).IsEqualTo(71);
         // G leads into D through E, a note of its chord, on a strong beat
-        await Assert.That(line.Approach(C, CTones, Strong, 67, 62)).IsEqualTo(64);
+        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Strong, 67, C, 62)).IsEqualTo(64);
         // too far to bend without a leap: kept
-        await Assert.That(line.Approach(C, CTones, Weak, 72, 62)).IsEqualTo(72);
+        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Weak, 72, C, 62)).IsEqualTo(72);
+    }
+
+    [Test]
+    [Arguments(ChordApproach.HalfStepBelow, 66)]
+    [Arguments(ChordApproach.HalfStepAbove, 68)]
+    [Arguments(ChordApproach.Fifth, 62)]
+    [Arguments(ChordApproach.Anticipation, 67)]
+    [Arguments(ChordApproach.None, 72)]
+    public async Task AnApproach_LeadsIntoTheNextRoot_NearestWhereTheNextNoteIs(ChordApproach approach, int expected)
+    {
+        // C5 before G4, over G: the root nearest the next note is G4, and its fifth nearest G4 is D4
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
+
+        await Assert.That(line.Approach(approach, C, CTones, Weak, 72, ChordOn(4), 67)).IsEqualTo(expected);
+    }
+
+    [Test]
+    [Arguments(ChordArrival.Root, 67)]
+    [Arguments(ChordArrival.Third, 71)]
+    [Arguments(ChordArrival.Fifth, 62)]
+    public async Task AFirstNoteThatLands_TakesTheNoteOfTheChordItAsks_NearestTheNoteBefore(ChordArrival landing, int expected)
+    {
+        // after G4, the first note, nearest where its phrase aims, over G: G4, B4 and D4 are the nearest in the range
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
+        Place(line, C, CTones, Strong, 0, 4);
+
+        await Assert.That(line.Place(ChordOn(4), [7, 11, 2], Strong, 1, 0, 4, landing: landing)).IsEqualTo(expected);
     }
 }

@@ -230,8 +230,11 @@ Smaller, when the code is next touched:
   line is one line of a kind (`Line`, `LinePattern`, `SectionLine`), what sets it apart held as data
   (`LineProfile`, `MelodyLayers.Line`: its range, how it moves, what its strong beats take), the melody note for note
   as it was, its per-note state line state (`LineStep`, `LineTurn`, `LineStepwiseness`, `LineRegister`) and a section
-  its lines (`GeneratedSection.Lines`). Next, in steps: `Line` landing on a new chord as a bar asks and leading into
-  the next by an approach kind (`ChordApproach`), the melody as it was; every line placed last, once the song is put
+  its lines (`GeneratedSection.Lines`); `Line` lands a bar's first note as the bar asks (root, third or fifth nearest
+  the note before, or free) and leads into the next chord by an approach kind (`ChordApproach`: the melody's bend to a
+  scale step, a half step below or above the next root, its fifth or the root early, each aimed at where the next note
+  was placed, so that no approach leaps an octave), taken per bar of the pattern (`LinePattern.Place`), the melody's
+  never into its phrase's first bar as data, the melody as it was. Next, in steps: every line placed last, once the song is put
   together, over its whole chords, so that it leads into the next section's chord and goes on from section to section,
   the melody first, measured and heard; how freely a line changes register a setting of its own (`LineRegisterFreedom`,
   by the instrument, the song and the section: at a phrase's or a section's start a line resets to its aim or goes on,

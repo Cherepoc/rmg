@@ -436,7 +436,8 @@ internal sealed class SectionGenerator
                 (PitchInstrumentTrack)_tracks.Definitions[trackNumber],
                 barStateTimelineMap.Repeat(2),
                 _key,
-                LinePattern.DrawLeads(leadingContext, leading),
+                LinePattern.DrawApproaches(leadingContext, leading),
+                [..Enumerable.Repeat(ChordArrival.Free, Progressions.BarCount)],
                 Seeds.Derive(Seeds.Derive(_seed, sectionId), MelodyImprovisationStream)
             );
             StateTrace.Record(TracePoints.MelodyAnswer, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{amount:F2}", amount);

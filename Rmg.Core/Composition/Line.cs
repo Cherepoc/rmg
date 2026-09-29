@@ -64,6 +64,10 @@ internal sealed class Line
     /// </param>
     /// <param name="register">How far above or below the middle of the range the phrase aims here, in semitones.</param>
     /// <param name="echo">The key of the note it plays again, if that was heard, or is remembered by; 0 for none.</param>
+    /// <param name="landing">
+    ///     What the note lands on, as the first note of a bar that asks for it, such as a bass's on the chord's root: the
+    ///     nearest such note of the chord in the range to the note before; free for none, the note placed as it would be.
+    /// </param>
     public int Place(
         ChordContext chord,
         IReadOnlyCollection<int> chordToneClasses,
@@ -71,11 +75,25 @@ internal sealed class Line
         int step,
         double turn,
         double register,
-        int echo = 0
+        int echo = 0,
+        ChordArrival landing = ChordArrival.Free
     )
     {
         int note;
-        if (echo != 0 && _heard.TryGetValue(echo, out var heard))
+        if (landing != ChordArrival.Free)
+        {
+            _echoRun = null;
+            var landingStep = landing switch
+            {
+                ChordArrival.Root => 0,
+                ChordArrival.Third => 2,
+                ChordArrival.Fifth => 4,
+                _ => throw new ArgumentOutOfRangeException(nameof(landing), landing, null)
+            };
+            var pitchClass = chord.GetPitch(landingStep).Mod(OctaveNoteCount);
+            note = GetNearest(Enumerable.Range(_low, _high - _low + 1).Where(x => x.Mod(OctaveNoteCount) == pitchClass).ToArray(), _previous ?? _middle + register);
+        }
+        else if (echo != 0 && _heard.TryGetValue(echo, out var heard))
         {
             // over the root it was heard over, as it was; over another, a sequence nearest the note before
             if (_echoRun?.Root != chord.Root)
@@ -129,14 +147,47 @@ internal sealed class Line
     }
 
     /// <summary>
-    ///     The note that leads into the next by a step, where a chord changes: the note as it is, if it is a step (one or
-    ///     two semitones) from the next already; or the note nearest it that is, a step from it at most, so that it bends
+    ///     The note that leads into the next, where a chord changes, as the approach has it, aimed at where the next note
+    ///     was placed, so that it never leaps an octave: by a scale step, the note as it is, if it is a step (one or two
+    ///     semitones) from the next already, or the note nearest it that is, a step from it at most, so that it bends
     ///     rather than jumps, a note of its scale on a weak beat and of its chord on a strong one, where it would sound
-    ///     against its own chord; or the note as it is, where no note is.
+    ///     against its own chord, or the note as it is, where no note is; a semitone below or above the next chord's root
+    ///     nearest the next note, its fifth nearest that root, or the root itself, a little early.
     /// </summary>
     /// <param name="chordToneClasses">The pitch classes of the note's own chord's notes.</param>
     /// <param name="beatRank">How strong the note's beat is, 0 the strongest.</param>
-    public int Approach(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int note, int next)
+    /// <param name="nextChord">The chord of the next note.</param>
+    public int Approach(
+        ChordApproach approach,
+        ChordContext chord,
+        IReadOnlyCollection<int> chordToneClasses,
+        int beatRank,
+        int note,
+        ChordContext nextChord,
+        int next
+    )
+    {
+        var root = NearestOfClass(nextChord.Root, next);
+        return approach switch
+        {
+            ChordApproach.None => note,
+            ChordApproach.ScaleStep => ApproachByStep(chord, chordToneClasses, beatRank, note, next),
+            ChordApproach.HalfStepBelow => root - 1,
+            ChordApproach.HalfStepAbove => root + 1,
+            ChordApproach.Fifth => NearestOfClass(nextChord.GetPitch(4), root),
+            ChordApproach.Anticipation => root,
+            _ => throw new ArgumentOutOfRangeException(nameof(approach), approach, null)
+        };
+    }
+
+    /// <summary>The note of the given one's pitch class nearest the other, the lower on a tie.</summary>
+    private static int NearestOfClass(int note, double other)
+    {
+        var below = (int)Math.Floor(other) - ((int)Math.Floor(other) - note).Mod(OctaveNoteCount);
+        return other - below <= below + OctaveNoteCount - other ? below : below + OctaveNoteCount;
+    }
+
+    private int ApproachByStep(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int note, int next)
     {
         static bool IsStep(int a, int b) => Math.Abs(a - b) is 1 or 2;
         if (IsStep(note, next))
