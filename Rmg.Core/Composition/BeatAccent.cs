@@ -35,6 +35,12 @@ public static class BeatAccent
         return StrongestAccent * Math.Pow(1 - share, 2);
     }
 
+    /// <summary>How far a note's velocity moves when its beat takes another rank, its variation kept.</summary>
+    public static double GetShift(int rank, int newRank, int maxRank, double dynamics = 1)
+    {
+        return dynamics * (GetAccent(newRank, maxRank) - GetAccent(rank, maxRank));
+    }
+
     /// <summary>A note's velocity by its beat: its accent and a variation drawn around it, times the dynamics.</summary>
     /// <param name="dynamics">How far the track's notes move from its level, 1 as tuned.</param>
     public static Func<IGenerationContext, double> CreateVelocityGenerator(int rank, int maxRank, double dynamics = 1)

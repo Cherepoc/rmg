@@ -19,6 +19,9 @@ internal sealed class BarStateGenerator
     // the stream of the melody contour's period, apart from the timeline generators'
     private const int ContourPeriodStream = 100;
 
+    // how the bass leads into its chords
+    private const int BassLeadingStream = 101;
+
     // the state that changes along the pattern besides the progression; every state has its own timeline, so each can
     // change at its own pace
     private readonly ImmutableArray<IStateTimelineGenerator> _timelineGenerators;
@@ -117,7 +120,7 @@ internal sealed class BarStateGenerator
                 raisedStepTimeline,
                 roleChordTimeline,
                 GenerateResets(context),
-                ..GenerateBassLeading(context, bassLeading),
+                ..GenerateBassLeading(context.CreateContext(Seeds.Derive(seed, BassLeadingStream)), bassLeading),
                 GenerateMelodyContour(context, context.CreateContext(Seeds.Derive(seed, ContourPeriodStream)), rhythmTilt),
                 GenerateMelodyPhraseEnd(context)
             ]
@@ -181,9 +184,10 @@ internal sealed class BarStateGenerator
                 Enumerable.Range(0, Progressions.BarCount)
                     .Select(bar =>
                         {
-                            var approach = context.TestProbability(bassLeading * BassLeadingLayers.MaxApproachChance)
-                                ? BassLeadingLayers.Approaches[approachGenerator(context)].Value
-                                : ChordApproach.None;
+                            // the way is drawn whether the bar leads or not, so that the draws are as many whatever the chance
+                            var leads = context.TestProbability(bassLeading * BassLeadingLayers.MaxApproachChance);
+                            var way = BassLeadingLayers.Approaches[approachGenerator(context)].Value;
+                            var approach = leads ? way : ChordApproach.None;
                             return ((int)approach).ToTimelineItem(bar * Meter.BarDuration);
                         }
                     )

@@ -129,9 +129,8 @@ its last note 35% against 13%. Left:
   held note is its cadence (`MelodyLine.Approach`, `MelodyPattern.Place`). An echo keeps its figure but for that note,
   as a riff turns into its next chord. Over 200 corpus songs the melody crosses a chord change by a step onto the new
   chord 42% of the time, against 31%, by a skip or leap 44% against 50%; within a phrase 50%, and 61% in the sections
-  that lead most; leaps, chord notes on the beat and the contour as before. Left: the bass leads as seldom (a tension
-  resolving by step 8 to 10% of its changes), by its own layers; half the changes have no melody note in their last
-  beat, a rest or a held note, where a pitched fill at a phrase line, or a counter-melody, would move, should the gaps
+  that lead most; leaps, chord notes on the beat and the contour as before. The bass now leads too (see *Bass*). Left:
+  half the changes have no melody note in their last beat, a rest or a held note, where a pitched fill at a phrase line, or a counter-melody, would move, should the gaps
   sound empty.
 - **Where it leaps:** a phrase or a section starts afresh at its aim, and a pattern's end wraps to its start, so the
   melody leaps there about a third of the time, mostly after a rest; whether that sounds like a new phrase or a break
@@ -280,6 +279,21 @@ Later:
   appearance*).
 - **Strokes before a lift:** the snare going from its cross-stick to its head in the last phrase before a louder
   section, an edit after assembly.
+
+## Bass
+
+- **Leading into chord changes** (built): a bar that leads (`StateKinds.ChordApproach`, drawn per bar of the 4-bar
+  pattern by the bass's leading, from a stream of its own with as many draws whatever the chance) plays a note in its
+  last beat where it has none before a change of chord: the note sounding there again, over the chord at its place and
+  as lightly as the rhythm's weakest beat (`PatternGenerator.LeadIn`), for `BassLine` to play the approach on. Before,
+  a bar that led had a note to lead on a third of the time. Over 100 corpus songs (`BassLeadingReportTest`) the bass
+  leads 64% of its changes with a walking bass (was 27%), 42% with an electric one (was 13%), and synth basses, at
+  `Plain` 0.15 (was 0.3), 14% (was 10%), so that they sit on the roots; a tension resolving by step 27%, 16% and 6%
+  (was 12%, 6% and 4%). The pickup always falls on the beat; the 8th before the bar line, leaned by convention, waits
+  for listening.
+- **The root arrival** leans on the leading amount too (`MinRootArrivalChance` + leading × `RootArrivalChanceRange`),
+  so a bass that leads less lands on the root less often, the wrong way for synth basses that sit on the roots: at
+  `Plain` 0.15 they land on it 61% of the time, against 67% at 0.3. The arrival wants a lean of its own, or none.
 
 ## Chords
 

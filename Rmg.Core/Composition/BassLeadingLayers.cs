@@ -18,7 +18,7 @@ public static class BassLeadingLayers
     public const double Moderate = 0.55;
 
     /// <summary>Synth basses, which mostly sit on the roots.</summary>
-    public const double Plain = 0.3;
+    public const double Plain = 0.15;
 
     /// <summary>How far the song moves away from its bass's amount, either way.</summary>
     public const double Song = 0.15;
