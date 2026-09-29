@@ -33,6 +33,8 @@ internal static class Realizer
     {
         // a note reads only the state Render would; a track's definition also holds what its generation used
         var commonStateTimelineMap = song.CommonStateTimelineMap.OfScope(StateScope.Render);
+        // where the chords change, which a note that plays the chord ends by
+        var changes = commonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToImmutableArray();
         var tracks = ImmutableSortedDictionary.CreateBuilder<int, EventTimeline<RealizedNote>>();
         foreach (var (trackNumber, track) in trackDefinitions)
         {
@@ -43,7 +45,7 @@ internal static class Realizer
             var notes = GetNoteStates(trackEventStateTimelineMap, track, commonStateTimelineMap);
             tracks[trackNumber] = track switch
             {
-                PitchInstrumentTrack pitchInstrumentTrack => RealizePitchTrack(pitchInstrumentTrack, notes),
+                PitchInstrumentTrack pitchInstrumentTrack => RealizePitchTrack(pitchInstrumentTrack, notes, changes),
                 PercussionInstrumentTrack percussionInstrumentTrack => RealizePercussionTrack(percussionInstrumentTrack, notes),
                 _ => throw new ArgumentException($"Track {trackNumber} is of no kind that plays.", nameof(trackDefinitions))
             };
@@ -96,7 +98,8 @@ internal static class Realizer
     }
 
     /// <summary>A pitched track's notes: its chords each placed from the one before, and a line's as it was placed.</summary>
-    private static EventTimeline<RealizedNote> RealizePitchTrack(PitchInstrumentTrack track, EventTimeline<StateMap> eventStateTimelineMap)
+    /// <param name="changes">Where the song's chords change, in order.</param>
+    private static EventTimeline<RealizedNote> RealizePitchTrack(PitchInstrumentTrack track, EventTimeline<StateMap> eventStateTimelineMap, ImmutableArray<double> changes)
     {
         var absoluteMinOctave = track.MinOctaveOffset + ZeroOctaveOffset;
         var octaveCount = track.MaxOctaveOffset - track.MinOctaveOffset + 1;
@@ -110,7 +113,7 @@ internal static class Realizer
         var items = eventStateTimelineMap.WithDurations().ToArray();
         var notes = new TimelineItem<RealizedNote>[items.Length];
         for (var i = 0; i < items.Length; i++)
-            notes[i] = RealizeNote(items[i], voiceLeader, track.Role);
+            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, changes);
 
         return EventTimeline.Create(eventStateTimelineMap.Duration, notes);
     }
@@ -143,11 +146,22 @@ internal static class Realizer
         }
     }
 
-    /// <summary>A pitched note: its chord, its length, and its pitches, as the track's line places them.</summary>
+    /// <summary>How long from a position until the chords next change, or for ever where they do not.</summary>
+    private static double UntilChange(ImmutableArray<double> changes, double position)
+    {
+        foreach (var change in changes)
+            if (change > position + 1e-9)
+                return change - position;
+
+        return double.PositiveInfinity;
+    }
+
+        /// <summary>A pitched note: its chord, its length, and its pitches, as the track's line places them.</summary>
     private static TimelineItem<RealizedNote> RealizeNote(
         TimelineItem<WithDuration<StateMap>> timelineItemWithDuration,
         VoiceLeader voiceLeader,
-        TrackRole role
+        TrackRole role,
+        ImmutableArray<double> changes
     )
     {
         var position = timelineItemWithDuration.Position;
@@ -177,6 +191,10 @@ internal static class Realizer
             duration = heldDuration;
         else if (role == TrackRole.Melody)
             duration = Math.Min(duration, nextNoteDuration);
+        else
+            // a note that plays the chord, the chords' or the bass's, ends where the chord changes, rather than sound the
+            // old chord over the new; a melody's may, as a suspension does
+            duration = Math.Min(duration, UntilChange(changes, position));
 
         int ToNote(int stepAboveRoot) => chord.GetPitch(stepAboveRoot);
 

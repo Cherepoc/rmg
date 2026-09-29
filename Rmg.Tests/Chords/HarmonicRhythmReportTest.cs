@@ -17,6 +17,7 @@ public sealed class HarmonicRhythmReportTest
             await Assert.That(spans.All(x => x is 2 or 4 or 8)).IsTrue();
 
             var changes = song.ChordChanges;
+
             var gaps = changes.Zip(changes.Skip(1), (a, b) => b - a).ToArray();
             await Assert.That(gaps.All(x => x > 0)).IsTrue();
         }
@@ -28,6 +29,7 @@ public sealed class HarmonicRhythmReportTest
     {
         var sections = new List<(double Span, double Energy)>();
         var notes = new Dictionary<int, (int All, int Crossing)>();
+        var struckChanges = new Dictionary<int, (int All, int Struck)>();
         foreach (var song in TestCorpus.Range(200))
         {
             var energies = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy)
@@ -36,6 +38,14 @@ public sealed class HarmonicRhythmReportTest
                 .Select(x => (((HarmonicRhythm)x.Value!).Span, energies[x.Section])));
 
             var changes = song.ChordChanges;
+            foreach (var track in new[] { SongTracks.ChordsTrack, SongTracks.BassTrack })
+            {
+                var onsets = song.Song.Notes![track].Select(x => Math.Round(x.Position, 6)).ToHashSet();
+                // the changes the track plays through, from its first note to its last
+                var played = changes.Where(x => x > song.Song.Notes[track][0].Position && x < song.Song.Notes[track][^1].Position).ToArray();
+                var (all, struck) = struckChanges.GetValueOrDefault(track);
+                struckChanges[track] = (all + played.Length, struck + played.Count(x => onsets.Contains(Math.Round(x, 6))));
+            }
             foreach (var track in new[] { SongTracks.ChordsTrack, SongTracks.BassTrack, SongTracks.MelodyTrack })
             foreach (var note in song.Song.Notes![track])
             {
@@ -47,6 +57,8 @@ public sealed class HarmonicRhythmReportTest
 
         foreach (var span in sections.GroupBy(x => x.Span).OrderBy(x => x.Key))
             Console.WriteLine($"span {span.Key}: {span.Count()} sections ({span.Count() / (double)sections.Count:P0}), energy {span.Average(x => x.Energy):F2} on average");
+        foreach (var (track, (all, struck)) in struckChanges)
+            Console.WriteLine($"track {track} strikes {struck / (double)all:P1} of {all} changes of chord it plays through");
         foreach (var (track, (all, crossing)) in notes)
             Console.WriteLine($"track {track}'s notes sounding across a change: {crossing / (double)all:P1} of {all}");
         await Task.CompletedTask;
