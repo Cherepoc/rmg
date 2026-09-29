@@ -18,15 +18,14 @@ internal static class DrumKitGenerator
     ///     role in the section, which a wild one may draw away from its main one, such as the snare keeping time. A section
     ///     of percussion only plays its percussion's leads and more of it, up to
     ///     <see cref="PercussionSections.MaxActiveDrums" />. Last, now and then a drum doubles a lead, such as the clap on
-    ///     the snare's backbeat or a shaker over the hi-hat: one whose role in the section is the lead's and that doubles
-    ///     (<see cref="PercussionInstrumentDefinition.Doubling" />), the likelier the more energy the section has.
+    ///     the snare's backbeat or a shaker over the hi-hat: one that doubles (<see cref="PercussionInstrumentDefinition.Doubling" />)
+    ///     and has an affinity for the lead's role, the likelier the more it has, as a clap now and then on the kick, and a
+    ///     section doubles the likelier the more energy it has and the more eager the drum (<see cref="PercussionInstrumentDefinition.DoublingOdds" />).
     /// </summary>
-    /// <param name="role">A drum's role in the section, which a drum that doubles takes on.</param>
     /// <param name="tilt">The section's pull of its energy.</param>
     public static SectionKit SelectKit(
         IGenerationContext context,
         ImmutableArray<PercussionInstrumentDefinition> songDrums,
-        Func<PercussionInstrumentDefinition, DrumRole> role,
         Tilt tilt,
         bool isPercussionOnly
     )
@@ -79,13 +78,20 @@ internal static class DrumKitGenerator
         // a lead that doubles itself, such as a shaker keeping time, is not doubled
         foreach (var lead in leads.Where(x => x.Doubling <= 0))
         {
-            // any of the song's drums that doubles, the percussion too, which binds to the kit's lead of its role
-            var candidates = songDrums.Where(x => x.Doubling > 0 && role(x) == lead.MainRole && !kit.Contains(x) && !doubles.ContainsKey(x)).ToArray();
-            // the likelier the more eager the most eager of them is
-            if (candidates.Length == 0 || !context.TestProbability(new Tilt(tilt.LogOdds + Math.Log(candidates.Max(x => x.DoublingOdds))).Chance(DoublingChance, 1)))
+            // any of the song's drums that doubles and has an affinity for the lead's role, the percussion too, likelier
+            // the more it has, so that a clap mostly doubles the snare and now and then the kick
+            var candidates = songDrums
+                .Where(x => x.Doubling > 0 && x.AffinityFor(lead.MainRole) > 0 && !kit.Contains(x) && !doubles.ContainsKey(x))
+                .ToArray();
+            // the likelier the more eager, and the more at home in the lead's role, the likeliest of them is, so that a
+            // lead that only drums of another main role may double, as the kick, is seldom doubled
+            if (candidates.Length == 0)
+                continue;
+            var eagerness = candidates.Max(x => x.DoublingOdds * x.AffinityFor(lead.MainRole));
+            if (!context.TestProbability(new Tilt(tilt.LogOdds + Math.Log(eagerness)).Chance(DoublingChance, 1)))
                 continue;
 
-            doubles[PickWeighted(context, candidates.Select(x => new Weighted<PercussionInstrumentDefinition>(x.Doubling, x)), 1)[0]] = lead;
+            doubles[PickWeighted(context, candidates.Select(x => new Weighted<PercussionInstrumentDefinition>(x.Doubling * x.AffinityFor(lead.MainRole), x)), 1)[0]] = lead;
         }
 
         return new SectionKit([..kit, ..doubles.Keys], [..leads], doubles.ToImmutable());

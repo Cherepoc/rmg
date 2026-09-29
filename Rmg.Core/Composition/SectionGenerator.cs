@@ -149,7 +149,6 @@ internal sealed class SectionGenerator
         var kit = DrumKitGenerator.SelectKit(
             _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), KitStream)),
             _tracks.SongDrums,
-            drum => SectionRole(sectionRoles, DrumGroups.GetTrackNumber(drum)),
             tilt,
             isPercussionOnly
         );

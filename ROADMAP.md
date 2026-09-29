@@ -350,9 +350,13 @@ Later:
   tambourine 0.3, 0.5 and 0.2, the cabasa and the maracas 0.3, 0.1 and 0.6. Over 100 corpus songs, 19% of the sections
   have a drum bound to a lead (29% of the louder half): doubling 127 times, accenting 88, a figure 102. Left: the
   clap's ghost notes, soft hits around the backbeat, which a figure on the snare's feel may come near, as the velocity
-  accent quietens its weaker ranks, only should listening miss them; a drum bound to the lead of any role it has an
-  affinity for, not only its main one's, as a clap on the kick's beats, a stomp-clap; the doubling chance (0.15),
-  should bound drums be too rare to hear. The percussion binds too, any of the song's drums that doubles, not only the
+  accent quietens its weaker ranks, only should listening miss them; the doubling chance (0.15), should bound drums be
+  too rare to hear. A drum binds to the lead of any role it has an affinity for (`AffinityFor`), not only its main
+  one's, picked by its doubling times that affinity, and a lead is doubled the likelier the more eager and at home in
+  its role its likeliest candidate is, so a kick, which only drums of another main role double, seldom is: the clap
+  on the kick 0.2, a stomp-clap, the tambourine on the snare 0.3 and on the kick 0.1. Over 100 corpus songs, 27% of the
+  sections have a drum bound to a lead, a quarter of the bindings to a role not the drum's main one (the tambourine on
+  the snares 62, on the kick 28, the clap on the kick 17). The percussion binds too, any of the song's drums that doubles, not only the
   section's family's, to the kit's lead of its role: the cowbell and the wood block leaning to double and accent, the
   claves, the agogo, the guiro, the bongos, the congas and the timbales to a figure; over 100 corpus songs, rarely, as
   few songs have percussion (a conga on the kick 6 times, the rest once or twice). A section of percussion only binds

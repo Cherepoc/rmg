@@ -77,6 +77,9 @@ public sealed class PercussionInstrumentDefinition
     /// <summary>The drum's heaviest role, which it fills in a section's kit (<see cref="DrumKitGenerator.SelectKit" />).</summary>
     public DrumRole MainRole => Roles.MaxBy(x => x.Weight).Value;
 
+    /// <summary>The drum's affinity for a role, 0 for none (<see cref="Roles" />).</summary>
+    public double AffinityFor(DrumRole role) => Roles.Where(x => x.Value == role).Sum(x => x.Weight);
+
     /// <summary>
     ///     Whether the drum walks its sounds from note to note, as the toms and the congas walk their pitches; a drum
     ///     that does not strikes one sound steadily, its stroke (<see cref="DrumStrokes" />), such as the snare's head.

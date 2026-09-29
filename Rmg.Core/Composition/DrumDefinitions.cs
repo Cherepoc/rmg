@@ -17,13 +17,13 @@ internal static class DrumDefinitions
     private const DrumFamily HandPercussion = DrumFamily.Kit | DrumFamily.Percussion;
 
     // a drum's affinities for the roles, its main one first at 1 and the others as rare as a drummer plays them so, which
-    // a wild section reaches for more
+    // a wild section reaches for more, and by which a drum that doubles binds to the lead of a role
+    private static ImmutableArray<Weighted<DrumRole>> Plays(DrumRole main, params (DrumRole Role, double Affinity)[] others) =>
+        [new(1, main), ..others.Select(x => new Weighted<DrumRole>(x.Affinity, x.Role))];
+
     // how likely a drum that doubles a lead is to double it, to accent it, or to play a figure of its own on its feel
     private static ImmutableArray<Weighted<DrumBinding>> Binds(double doubles, double accents, double figures) =>
         [new(doubles, DrumBinding.Double), new(accents, DrumBinding.Accent), new(figures, DrumBinding.Figure)];
-
-    private static ImmutableArray<Weighted<DrumRole>> Plays(DrumRole main, params (DrumRole Role, double Affinity)[] others) =>
-        [new(1, main), ..others.Select(x => new Weighted<DrumRole>(x.Affinity, x.Role))];
 
     public static PercussionInstrumentDefinition Kick { get; } = new("Kick", [35, 36], 1.0, roles: Plays(DrumRole.Ground, (DrumRole.Time, 0.01)));
 
@@ -34,7 +34,7 @@ internal static class DrumDefinitions
 
     public static PercussionInstrumentDefinition ElectricSnare { get; } = new("Electric Snare", [new DrumSound(40), CrossStick], 0.7, roles: Plays(DrumRole.Backbeat, (DrumRole.Time, 0.01)));
 
-    public static PercussionInstrumentDefinition Clap { get; } = new("Clap", [39], 0.1, roles: Plays(DrumRole.Backbeat, (DrumRole.Colour, 0.1)), doubling: 1, family: HandPercussion, bindings: Binds(0.5, 0.3, 0.2));
+    public static PercussionInstrumentDefinition Clap { get; } = new("Clap", [39], 0.1, roles: Plays(DrumRole.Backbeat, (DrumRole.Ground, 0.2), (DrumRole.Colour, 0.1)), doubling: 1, family: HandPercussion, bindings: Binds(0.5, 0.3, 0.2));
 
     public static PercussionInstrumentDefinition HiHat { get; } = new(
         "Hi-Hat",
@@ -61,7 +61,7 @@ internal static class DrumDefinitions
         [54],
         0.2,
         loudness: 0.5,
-        roles: Plays(DrumRole.Time, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.2)),
+        roles: Plays(DrumRole.Time, (DrumRole.Backbeat, 0.3), (DrumRole.Colour, 0.2), (DrumRole.Ground, 0.1)),
         doubling: 1,
         family: HandPercussion,
         bindings: Binds(0.3, 0.5, 0.2)
