@@ -208,7 +208,7 @@ internal sealed class PatternGenerator
         // a melody's phrase ends where its bar has it, or where its answer does
         var barEnd = barStateTimelineMap.GetEffectiveStateMapAt(patternBar * Meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
         if (_trackDefinitions[trackNumber].Role == TrackRole.Melody)
-            notes = MelodyPattern.EndPhrase(notes, patternBar == Progressions.BarCount - 1 && phraseEnd is { } answerEnd ? answerEnd : barEnd);
+            notes = LinePattern.EndPhrase(notes, patternBar == Progressions.BarCount - 1 && phraseEnd is { } answerEnd ? answerEnd : barEnd);
         feels.Add(new BarFeel(trackNumber, barIndex, stateMap, notes.Count));
         return notes.ToEventStateTimelineMap(stateMap.OfScope(StateScope.Render));
     }
@@ -248,7 +248,7 @@ internal sealed class PatternGenerator
             ChordNoteOffset
         );
 
-        var melody = _trackDefinitions[trackNumber].Role == TrackRole.Melody ? new MelodyPattern(stateMap) : null;
+        var melody = _trackDefinitions[trackNumber].Role == TrackRole.Melody ? new LinePattern(stateMap, MelodyLayers.Line) : null;
         // a drum that strikes may accent a note with another of its sounds
         var accentSounds = _trackDefinitions[trackNumber] is PercussionInstrumentTrack drum && drum.Sounds.Any(x => x.Accent > 0) ? drum.Sounds : [];
         var dynamics = stateMap.GetStateValue(CompositionStateKinds.NoteDynamics);

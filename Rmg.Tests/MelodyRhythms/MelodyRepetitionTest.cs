@@ -51,7 +51,7 @@ public sealed class MelodyRepetitionTest
             for (var i = 1; i < melody.Length; i++)
             {
                 var move = Math.Abs(melody[i].Value.Pitches[0] - melody[i - 1].Value.Pitches[0]);
-                var isLeap = move >= MelodyLine.LeapSize;
+                var isLeap = move >= MelodyLayers.Line.LeapSize;
                 moves++;
                 moveSum += move;
                 leaps += isLeap ? 1 : 0;
@@ -95,7 +95,7 @@ public sealed class MelodyRepetitionTest
                 if (index <= 0 || melody[index].Position >= span.End)
                     continue;
                 starts++;
-                startLeaps += Math.Abs(melody[index].Value.Pitches[0] - melody[index - 1].Value.Pitches[0]) >= MelodyLine.LeapSize ? 1 : 0;
+                startLeaps += Math.Abs(melody[index].Value.Pitches[0] - melody[index - 1].Value.Pitches[0]) >= MelodyLayers.Line.LeapSize ? 1 : 0;
             }
         }
 

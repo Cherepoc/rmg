@@ -3,7 +3,8 @@ using Rmg.Core;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     Places the notes of a melody one after another, each by rule from the note before, the chord and the scale.
+///     Places the notes of a line, such as the melody, one after another, each by rule from the note before, the chord
+///     and the scale, as far as its profile has it (<see cref="LineProfile" />).
 ///     A note means to go on the way the melody goes or to turn back, so the melody runs a while before it turns. A
 ///     note on a strong beat takes a note of the chord, the nearest one the way it goes, or the one after for a leap; a note on a weak beat moves along the scale, a step or, for a leap, a third, passing between the chord's
 ///     notes. After a leap the melody steps back the other way, as a melody fills the gap it left; it leans towards
@@ -17,21 +18,9 @@ namespace Rmg.Core.Composition;
 ///     sounds as a sequence. An echo on a strong
 ///     beat that misses the chord moves to the chord's note nearest it.
 /// </summary>
-internal sealed class MelodyLine
+internal sealed class Line
 {
-    /// <summary>How wide the melody's range is, in semitones: an octave and a fourth, a little more than a voice sings comfortably, so that a line
-    ///     that runs on turns at the phrase's aim more often than at the range's edge.</summary>
-    internal const int RangeWidth = 17;
-
-    /// <summary>How far from where its phrase aims the melody goes before it turns back towards it.</summary>
-    internal const int RegisterPull = 7;
-
-    /// <summary>A move this big or bigger is a leap, which the next note fills in by stepping back.</summary>
-    internal const int LeapSize = 7;
-
-
-    /// <summary>The weakest beat, by its rank in the rhythm, that still takes a note of the chord.</summary>
-    internal const int StrongestWeakRank = 1;
+    private readonly LineProfile _profile;
 
     private const int OctaveNoteCount = 12;
 
@@ -54,13 +43,15 @@ internal sealed class MelodyLine
     // the run of echoes playing: the root of its chord, and the octave it plays in, in scale steps from where it was heard
     private (int Root, int Octave)? _echoRun;
 
+    /// <param name="profile">How the line moves, and what its strong beats take.</param>
     /// <param name="minNote">The lowest note of the track's range.</param>
     /// <param name="maxNote">The highest note of the track's range.</param>
-    public MelodyLine(int minNote, int maxNote)
+    public Line(LineProfile profile, int minNote, int maxNote)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(minNote, maxNote);
 
-        (_low, _high) = GetSingableRange(minNote, maxNote);
+        _profile = profile;
+        (_low, _high) = GetSingableRange(minNote, maxNote, profile.RangeWidth);
         _middle = (_low + _high) / 2.0;
     }
 
@@ -69,7 +60,7 @@ internal sealed class MelodyLine
     /// <param name="step">How far the note means to go: 1 a step, 2 a leap, 0 staying.</param>
     /// <param name="turn">
     ///     The note's draw of whether it goes on the way the melody goes or turns back, from 0 to 1, which goes on
-    ///     below the chance the aim leans (<see cref="MelodyLayers.GetContinueChance" />).
+    ///     below the chance the aim leans (<see cref="LineProfile.GetContinueChance" />).
     /// </param>
     /// <param name="register">How far above or below the middle of the range the phrase aims here, in semitones.</param>
     /// <param name="echo">The key of the note it plays again, if that was heard, or is remembered by; 0 for none.</param>
@@ -123,18 +114,18 @@ internal sealed class MelodyLine
     private int PlaceEcho(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int step)
     {
         var note = chord.GetPitch(step);
-        if (beatRank <= StrongestWeakRank && chordToneClasses.Count > 0 && !chordToneClasses.Contains(note.Mod(OctaveNoteCount)))
+        if (beatRank <= _profile.StrongestWeakRank && chordToneClasses.Count > 0 && !chordToneClasses.Contains(note.Mod(OctaveNoteCount)))
             note = GetNearest(GetChordTones(chordToneClasses), note);
 
         return note >= _low && note <= _high ? note : GetNearest(GetScaleNotes(chord), note);
     }
 
     /// <summary>The singable range in the middle of a track's, or all of the track's if it is narrower.</summary>
-    internal static (int Low, int High) GetSingableRange(int minNote, int maxNote)
+    internal static (int Low, int High) GetSingableRange(int minNote, int maxNote, int rangeWidth)
     {
         var middle = (minNote + maxNote) / 2.0;
-        var low = Math.Max(minNote, (int)Math.Round(middle - RangeWidth / 2.0));
-        return (low, Math.Min(maxNote, low + RangeWidth));
+        var low = Math.Max(minNote, (int)Math.Round(middle - rangeWidth / 2.0));
+        return (low, Math.Min(maxNote, low + rangeWidth));
     }
 
     /// <summary>
@@ -151,7 +142,7 @@ internal sealed class MelodyLine
         if (IsStep(note, next))
             return note;
 
-        var isStrong = beatRank <= StrongestWeakRank && chordToneClasses.Count > 0;
+        var isStrong = beatRank <= _profile.StrongestWeakRank && chordToneClasses.Count > 0;
         var candidates = (isStrong ? GetChordTones(chordToneClasses) : GetScaleNotes(chord))
             .Where(x => IsStep(x, next) && Math.Abs(x - note) <= 4)
             .ToArray();
@@ -161,7 +152,7 @@ internal sealed class MelodyLine
     private int PlaceByRule(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int step, double turn, double register)
     {
         var aim = _middle + register;
-        var isStrong = beatRank <= StrongestWeakRank && chordToneClasses.Count > 0;
+        var isStrong = beatRank <= _profile.StrongestWeakRank && chordToneClasses.Count > 0;
 
         int note;
         if (_previous is not { } previous)
@@ -171,16 +162,16 @@ internal sealed class MelodyLine
         else
         {
             // on the way the melody goes, or back, leaning towards the aim
-            var goesOn = turn < MelodyLayers.GetContinueChance((aim - previous) * _heading);
+            var goesOn = turn < _profile.GetContinueChance((aim - previous) * _heading);
             var direction = step == 0 ? 0 : goesOn ? _heading : -_heading;
             var isLeap = step >= 2;
-            if (Math.Abs(_previousMove) >= LeapSize)
+            if (Math.Abs(_previousMove) >= _profile.LeapSize)
             {
                 // a leap is followed by a step back
                 direction = -Math.Sign(_previousMove);
                 isLeap = false;
             }
-            else if (Math.Abs(previous - aim) > RegisterPull)
+            else if (Math.Abs(previous - aim) > _profile.RegisterPull)
             {
                 direction = Math.Sign(aim - previous);
             }

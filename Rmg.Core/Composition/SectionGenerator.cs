@@ -368,7 +368,7 @@ internal sealed class SectionGenerator
     }
 
     /// <summary>The pitched tracks, each making its patterns on its own, over the section's state.</summary>
-    private IEnumerable<(int Track, GeneratedBars Bars, SectionMelody? Melody)> GeneratePitchedTracks(
+    private IEnumerable<(int Track, GeneratedBars Bars, SectionLine? Melody)> GeneratePitchedTracks(
         IGenerationContext context,
         int sectionId,
         StateMap sectionStateMap,
@@ -397,7 +397,7 @@ internal sealed class SectionGenerator
             var answerContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), MelodyAnswerStream));
             var answerSeed = answerContext.GenerateInt();
             var questionEnd = barStateTimelineMap.GetEffectiveStateMapAt(Meter.PatternDuration - Meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
-            var answer = isMelody ? MelodyPattern.DrawAnswer(answerContext, amount, questionEnd) : null;
+            var answer = isMelody ? LinePattern.DrawAnswer(answerContext, amount, questionEnd) : null;
             var seeds = PatternGenerator.DrawSeeds(context, trackStateMaps.Keys, sectionRhythm.Scheme);
             GeneratedBars BuildBars(ImmutableArray<int> rhythmKeys) => _patternGenerator.BuildBars(
                 seeds,
@@ -423,19 +423,20 @@ internal sealed class SectionGenerator
             var leading = Math.Clamp(MelodyLayers.Leading + Generators.SplineValue()(leadingContext) * MelodyLayers.LeadingSpread, 0, 1);
             StateTrace.Record(TracePoints.MelodyLeading, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{leading:F2}", leading);
             // a later appearance builds its bars afresh where its rhythm is improvised, as recorded the first time
-            var melody = new SectionMelody(
+            var melody = new SectionLine(
                 trackNumber,
-                MelodyPattern.Answer(bars.Timeline, trackNumber, answerSeed, amount),
+                MelodyLayers.Line,
+                LinePattern.Answer(bars.Timeline, trackNumber, MelodyLayers.Line, answerSeed, amount),
                 rhythmKeys =>
                 {
                     using var pause = StateTrace.Pause();
-                    return MelodyPattern.Answer(BuildBars(rhythmKeys).Timeline, trackNumber, answerSeed, amount);
+                    return LinePattern.Answer(BuildBars(rhythmKeys).Timeline, trackNumber, MelodyLayers.Line, answerSeed, amount);
                 },
                 sectionRhythm.Scheme.Letters,
                 (PitchInstrumentTrack)_tracks.Definitions[trackNumber],
                 barStateTimelineMap.Repeat(2),
                 _key,
-                MelodyPattern.DrawLeads(leadingContext, leading),
+                LinePattern.DrawLeads(leadingContext, leading),
                 Seeds.Derive(Seeds.Derive(_seed, sectionId), MelodyImprovisationStream)
             );
             StateTrace.Record(TracePoints.MelodyAnswer, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{amount:F2}", amount);
@@ -491,12 +492,12 @@ internal sealed record GeneratedSection(
     double Energy,
     bool IsPercussionOnly,
     ImmutableDictionary<int, DrumRole> DrumRoles,
-    SectionMelody? Melody
+    SectionLine? Melody
 )
 {
     /// <summary>
     ///     The section as it plays the given time, from 0: its melody placed for that time, mutated from the first by
-    ///     the song's improvisation (<see cref="SectionMelody.Place" />), and every other track as it was made.
+    ///     the song's improvisation (<see cref="SectionLine.Place" />), and every other track as it was made.
     /// </summary>
     public GeneratedSection Appear(int appearance, double improvisation)
     {

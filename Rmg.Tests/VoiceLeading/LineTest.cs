@@ -8,7 +8,7 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Tests.VoiceLeading;
 
-public sealed class MelodyLineTest
+public sealed class LineTest
 {
     // C3 to B5; the melody keeps to 17 semitones in the middle, from A3 to D5
     private const int MinNote = 48;
@@ -29,13 +29,13 @@ public sealed class MelodyLineTest
     ///     A note placed where it means to go, as the steps were written: 1 a step on, -1 a step back, 2 and -2 the
     ///     same with a leap, 0 staying; a note that goes on draws 0, and one that turns back 1, whatever the aim leans.
     /// </summary>
-    private static int Place(MelodyLine line, ChordContext chord, IReadOnlyCollection<int> tones, int rank, int step, double register, int echo = 0) =>
+    private static int Place(Line line, ChordContext chord, IReadOnlyCollection<int> tones, int rank, int step, double register, int echo = 0) =>
         line.Place(chord, tones, rank, Math.Abs(step), step < 0 ? 1 : 0, register, echo);
 
     /// <summary>A melody line that has played E4, having moved up to it, and so goes on up.</summary>
-    private static MelodyLine StartedOnE()
+    private static Line StartedOnE()
     {
-        var line = new MelodyLine(MinNote, MaxNote);
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
         Place(line, C, CTones, Strong, 0, 0);
         Place(line, C, CTones, Weak, 1, 0);
         return line;
@@ -44,7 +44,7 @@ public sealed class MelodyLineTest
     [Test]
     public async Task FirstNote_IsTheChordsNoteNearestWhereThePhraseAims()
     {
-        var line = new MelodyLine(MinNote, MaxNote);
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
 
         // the middle of the range is about G4 (67), so aiming 2 below is about F4, nearest E4 or G4
         var note = Place(line, C, CTones, Strong, 0, -2);
@@ -56,7 +56,7 @@ public sealed class MelodyLineTest
     [Test]
     public async Task NextBar_GoesOnTheWayTheMelodyWent()
     {
-        var line = new MelodyLine(MinNote, MaxNote);
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
         var first = Place(line, C, CTones, Strong, 0, 0);
         // turning back from the start, the melody goes down
         var down = Place(line, C, CTones, Weak, -1, 0);
@@ -70,7 +70,7 @@ public sealed class MelodyLineTest
     [Test]
     public async Task StrongBeat_TakesTheNextChordNoteTheWayItGoes()
     {
-        var line = new MelodyLine(MinNote, MaxNote);
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
         var first = Place(line, C, CTones, Strong, 0, 0);
 
         var on = Place(line, C, CTones, Strong, 1, 0);
@@ -83,7 +83,7 @@ public sealed class MelodyLineTest
     [Test]
     public async Task Leap_OnAStrongBeat_SkipsAChordNote()
     {
-        var line = new MelodyLine(MinNote, MaxNote);
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
         var first = Place(line, C, CTones, Strong, 0, 0);
 
         var leap = Place(line, C, CTones, Strong, 2, 0);
@@ -96,7 +96,7 @@ public sealed class MelodyLineTest
     [Test]
     public async Task WeakBeat_StepsAlongTheScale()
     {
-        var line = new MelodyLine(MinNote, MaxNote);
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
         var first = Place(line, C, CTones, Strong, 0, 0);
 
         var step = Place(line, C, CTones, Weak, 1, 0);
@@ -119,7 +119,7 @@ public sealed class MelodyLineTest
     [Test]
     public async Task AfterALeap_TheMelodyStepsBack()
     {
-        var line = new MelodyLine(MinNote, MaxNote);
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
         Place(line, C, CTones, Strong, 0, -5);
         var leap = Place(line, C, CTones, Strong, 2, -5);
 
@@ -133,7 +133,7 @@ public sealed class MelodyLineTest
     [Test]
     public async Task FarFromWhereThePhraseAims_TheMelodyTurnsTowardsIt()
     {
-        var line = new MelodyLine(MinNote, MaxNote);
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
         var low = Place(line, C, CTones, Strong, 0, -7);
 
         // the phrase now aims 7 above the middle, 14 above the melody: it goes up whatever the note meant
@@ -145,17 +145,17 @@ public sealed class MelodyLineTest
     [Test]
     public async Task Melody_StaysInItsRange()
     {
-        var line = new MelodyLine(MinNote, MaxNote);
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
         var notes = Enumerable.Range(0, 200).Select(i => Place(line, C, CTones, i % 2 == 0 ? Strong : Weak, 2, 0)).ToArray();
 
-        await Assert.That(notes.Max() - notes.Min()).IsLessThanOrEqualTo(MelodyLine.RangeWidth);
+        await Assert.That(notes.Max() - notes.Min()).IsLessThanOrEqualTo(MelodyLayers.Line.RangeWidth);
     }
 
     [Test]
     public async Task EchoesOverAnotherChord_PlayTheirShapeAsASequence_FromANoteOfTheChord()
     {
         // low in the range, so that the shape has room to rise; it ends on a weak beat, which keeps its note
-        var line = new MelodyLine(MinNote, MaxNote);
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
         const double register = -6;
         // bar 0 over C: the notes are heard, rising along the scale
         var first = new[] { (Strong, 0, 1), (Weak, 1, 2), (Weak, 1, 3), (Weak, 1, 4) }
@@ -177,7 +177,7 @@ public sealed class MelodyLineTest
     [Test]
     public async Task EchoesOverTheSameChord_RepeatTheNotes_AsARiff()
     {
-        var line = new MelodyLine(MinNote, MaxNote);
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
         var first = new[] { (Strong, 0, 1), (Weak, 2, 2), (Weak, -1, 3) }
             .Select(x => Place(line, C, CTones, x.Item1, x.Item2, 0, x.Item3)).ToArray();
         var again = new[] { (Strong, 1, 1), (Weak, 1, 2), (Weak, 1, 3) }
@@ -189,7 +189,7 @@ public sealed class MelodyLineTest
     [Test]
     public async Task AnEchoOnAStrongBeatThatMissesTheChord_MovesToTheChordCloseBy()
     {
-        var line = new MelodyLine(MinNote, MaxNote);
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
         foreach (var (rank, step, echo) in new[] { (Strong, 0, 1), (Weak, 1, 2), (Strong, 1, 3) })
             Place(line, C, CTones, rank, step, -6, echo);
         var d = ChordOn(1);
@@ -207,16 +207,16 @@ public sealed class MelodyLineTest
     {
         const int drawCount = 50_000;
         var context = new GenerationContext(1);
-        var stepwise = Enumerable.Range(0, drawCount).Select(_ => MelodyLayers.GenerateStep(context, 1)).ToArray();
-        var leaping = Enumerable.Range(0, drawCount).Select(_ => MelodyLayers.GenerateStep(context, 0)).ToArray();
+        var stepwise = Enumerable.Range(0, drawCount).Select(_ => MelodyLayers.Line.GenerateStep(context, 1)).ToArray();
+        var leaping = Enumerable.Range(0, drawCount).Select(_ => MelodyLayers.Line.GenerateStep(context, 0)).ToArray();
 
-        await Assert.That(stepwise.Count(x => x.Step == 0) / (double)drawCount).IsEqualTo(MelodyLayers.RepeatChance).Within(0.01);
+        await Assert.That(stepwise.Count(x => x.Step == 0) / (double)drawCount).IsEqualTo(MelodyLayers.Line.RepeatChance).Within(0.01);
         var moving = stepwise.Where(x => x.Step != 0).ToArray();
-        await Assert.That(moving.Count(x => x.Turn < MelodyLayers.GetContinueChance(0)) / (double)moving.Length)
-            .IsEqualTo(MelodyLayers.ContinueChance).Within(0.01);
+        await Assert.That(moving.Count(x => x.Turn < MelodyLayers.Line.GetContinueChance(0)) / (double)moving.Length)
+            .IsEqualTo(MelodyLayers.Line.ContinueChance).Within(0.01);
         await Assert.That(stepwise.Count(x => x.Step == 2)).IsEqualTo(0);
         await Assert.That(leaping.Count(x => x.Step == 2) / (double)drawCount)
-            .IsEqualTo((1 - MelodyLayers.RepeatChance) * MelodyLayers.MaxLeapChance).Within(0.01);
+            .IsEqualTo((1 - MelodyLayers.Line.RepeatChance) * MelodyLayers.Line.MaxLeapChance).Within(0.01);
     }
 
     [Test]
@@ -255,7 +255,7 @@ public sealed class MelodyLineTest
     [Test]
     public async Task ALastNote_BendsToAStepFromTheNext_ByAThirdAtMost_OntoItsChordOnAStrongBeat()
     {
-        var line = new MelodyLine(MinNote, MaxNote);
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
 
         // a step from the next already: kept
         await Assert.That(line.Approach(C, CTones, Weak, 67, 69)).IsEqualTo(67);

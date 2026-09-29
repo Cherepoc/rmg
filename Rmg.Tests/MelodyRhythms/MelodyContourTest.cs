@@ -34,7 +34,7 @@ public sealed class MelodyContourTest
             var melody = song.Song.Notes![SongTracks.MelodyTrack];
             spans.Add(melody.Max(x => x.Value.Pitches[0]) - melody.Min(x => x.Value.Pitches[0]));
             songCount++;
-            finalLeaps += Math.Abs(melody[^1].Value.Pitches[0] - melody[^2].Value.Pitches[0]) >= MelodyLine.LeapSize ? 1 : 0;
+            finalLeaps += Math.Abs(melody[^1].Value.Pitches[0] - melody[^2].Value.Pitches[0]) >= MelodyLayers.Line.LeapSize ? 1 : 0;
             var contours = song.Trace.Where(x => x.Point == TracePoints.MelodyContour).ToDictionary(x => x.Section, x => (ImmutableArray<double>)x.Value!);
             foreach (var span in song.Map.Sections)
             for (var start = span.Start; start < span.End - 1e-9; start += Meter.PatternDuration)

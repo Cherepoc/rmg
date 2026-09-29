@@ -50,8 +50,8 @@ major or minor; those that turn brighter have an energy of 0.33 on average, thos
 ## Melody at generation
 
 The melody is placed where the other tracks' notes are decided, not in `Realizer`: once a section's bars are made, one
-line places its notes in order over them, by the rules of `MelodyLine`, over the chords `Realizer` would work out
-(`MelodyPattern.Place`), and every note keeps its scale step above its chord's root (`StateKinds.ScaleStep`), which
+line places its notes in order over them, by the rules of `Line`, over the chords `Realizer` would work out
+(`LinePattern.Place`), and every note keeps its scale step above its chord's root (`StateKinds.ScaleStep`), which
 `Realizer` plays. The section then plays it the same wherever it plays: its second phrase and a section that recurs are
 the same notes, where before, placed as the song played, a bar that came back played the same note over the same root
 40% of the time. The melody's render flags are generation state now.
@@ -89,9 +89,9 @@ its last note 35% against 13%. Left:
 - **A section as it recurs** (built): a song improvises its melody as its sections recur, by an amount of its own
   (`MelodyLayers.Improvisation`, drawn per song from `SongStream.MelodyImprovisation`, none in about half the songs,
   which play their sections' melodies as first heard, as riffs do, and up to 0.6 in the others, the more the less
-  conventional the song's rhythm): a section's melody is kept unplaced (`SectionMelody`) and placed afresh every time
+  conventional the song's rhythm): a section's melody is kept unplaced (`SectionLine`) and placed afresh every time
   the section plays (`GeneratedSection.Appear`), its notes mutated from the first appearance, not from the one before,
-  so that a chorus keeps its tune as a singer varies it, by the answer's mechanism (`MelodyPattern.Mutate`), keyed by
+  so that a chorus keeps its tune as a singer varies it, by the answer's mechanism (`LinePattern.Mutate`), keyed by
   the note key (`CompositionStateKinds.NoteKey`), so that a figure that comes back varies alike. A mutated note draws
   where it means to go afresh, its step and its turn, as it was drawn; a turn alone changed a recurring section's
   notes 7% of the time, where the rules placed it where it was. Over 100 corpus songs a recurring section plays its
@@ -108,7 +108,7 @@ its last note 35% against 13%. Left:
   plays, with no ending, a streaming form rather than a planned one. The sections generated per appearance are a step
   towards it; the form's plan, its intro and ending, and the song's single pass are not.
 - **Question and answer** (built): a section plays its 4-bar pattern twice, and its melody as a question and its
-  answer (`MelodyPattern.Answer`): placed as one line over the 8 bars, so that the answer goes on from the question,
+  answer (`LinePattern.Answer`): placed as one line over the 8 bars, so that the answer goes on from the question,
   its first half the question's and its second half mutated a decision at a time, a note there drawing afresh where
   it means to go and playing no note heard before, by a chance of the section's (`MelodyLayers.AnswerAmount`,
   0.5, the likelier the less conventional, times 0.8 in the answer's changing bars, `MelodyLayers.AnswerBars`, since
@@ -126,7 +126,7 @@ its last note 35% against 13%. Left:
   varied repeat does, changed a melody's bar of mostly one cycle hardly at all.
 - **The contour shapes the melody weakly:** within a 4-bar pattern a bar's mean pitch follows the register it aims at
   0.30 (`MelodyContourTest`, over 100 corpus songs), as the line turns towards the aim only past
-  `MelodyLine.RegisterPull` and otherwise goes on or turns back by its draw alone. A phrase's shape may start again
+  `LineProfile.RegisterPull` and otherwise goes on or turns back by its draw alone. A phrase's shape may start again
   every half phrase, a wave (`MelodyLayers.Periods`, 19% of the patterns, the more the less conventional the section's
   rhythm), and a note's draw of going on or turning back (`CompositionStateKinds.MelodyTurn`) can lean towards the aim
   (`MelodyLayers.AimOdds`), off at 1; with the octave still chosen per bar, odds of 32 moved the following only from
@@ -138,7 +138,7 @@ its last note 35% against 13%. Left:
   beat and of its chord on a strong one, where the section leads: a chance of its own (`MelodyLayers.Leading`, 0.5,
   spread 0.5 either way, so that some sections hardly lead, as a riff, and some lead most changes), drawn per bar of
   the 4-bar pattern, so that the answer's first half leads as the question does, and not at a phrase's end, whose
-  held note is its cadence (`MelodyLine.Approach`, `MelodyPattern.Place`). An echo keeps its figure but for that note,
+  held note is its cadence (`Line.Approach`, `LinePattern.Place`). An echo keeps its figure but for that note,
   as a riff turns into its next chord. Over 200 corpus songs the melody crosses a chord change by a step onto the new
   chord 42% of the time, against 31%, by a skip or leap 44% against 50%; within a phrase 50%, and 61% in the sections
   that lead most; leaps, chord notes on the beat and the contour as before. The bass now leads too (see *Bass*). Left:
@@ -226,7 +226,12 @@ Smaller, when the code is next touched:
   a melody note does (a chord note up, down or the root, a scale step between on a weak beat, a note key so that a
   riff repeats), in place of the walks of the chord root and the chord note drawn as fractions; the root offset then
   carries the harmony alone, whose roots are scale steps written as sevenths to be rounded back, and could be whole
-  steps. Worth it once the bass's lines want more say than their leading and landing give them. Its octave nearest
+  steps. Worth it once the bass's lines want more say than their leading and landing give them. Begun: the melody's
+  line is one line of a kind (`Line`, `LinePattern`, `SectionLine`), what sets it apart held as data
+  (`LineProfile`, `MelodyLayers.Line`: its range, how it moves, what its strong beats take), the melody note for note
+  as it was; next, the bass as a second profile: a stepwise walk low in its range, landing on a new chord as the bar
+  asks and leading into the next by its approaches, its walks of the chord root and the chord note retired, placed per
+  section as the melody is, and tuned against the bass reports. Its octave nearest
   the note before is its line's rule, not a choice on top of it, as the melody's octave per bar was: its draws give
   pitch classes, the chord note's walk going round the chord across octaves, and without the rule every note in the
   register its chord gives it leapt a fifth or more 35% of the time and an octave 18%, against 6% and 0.1%, over 100
@@ -415,7 +420,7 @@ default, so it can first be shown to leave the recorded songs unchanged, and the
 fullness and repeated cycles (rolls, riffs and pulses), phrase schemes, rhythmic unconventionality, the melody's
 rhythm (its busyness, riffs, and phrase ends with a held note and a rest), fills with landings and a drummer, and
 echoes: within a section's melody, a note of a bar pattern that comes back, or of a cycle that repeats the one before,
-plays the note it had again, as the scale step from its chord's root (`MelodyPattern.GetNoteKey`, `MelodyLine`).
+plays the note it had again, as the scale step from its chord's root (`LinePattern.GetNoteKey`, `Line`).
 A beat of a repeated cycle also plays the values its beat had in the cycle it repeats, for every track: its accent,
 its walks (such as the hi-hat's open or closed sound and an arpeggio's chord note), its lengths and the melody's step;
 only what depends on its position, the chord there, is its own (`DyadicRankItemPattern`). Over 100 corpus songs about

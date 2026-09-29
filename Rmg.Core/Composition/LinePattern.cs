@@ -6,19 +6,24 @@ using Rmg.Core.Songs;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     The melody's part of a section: the state its bar patterns' notes carry for <see cref="MelodyLine" /> to place
+///     The melody's part of a section: the state its bar patterns' notes carry for <see cref="Line" /> to place
 ///     them by, the end of its phrases, and the notes placed once its bars are made.
 /// </summary>
-internal sealed class MelodyPattern
+internal sealed class LinePattern
 {
     private readonly double _stepwiseness;
+
+    // how the line moves, which its notes' steps are drawn by
+    private readonly LineProfile _profile;
 
     // the bar pattern's seed, which names its notes for the echoes
     private readonly int _motif;
 
     /// <param name="barPattern">The bar pattern's state, over the melody track's.</param>
-    public MelodyPattern(StateMap barPattern)
+    /// <param name="profile">How the line moves (<see cref="LineProfile" />).</param>
+    public LinePattern(StateMap barPattern, LineProfile profile)
     {
+        _profile = profile;
         _stepwiseness = barPattern.GetStateValue(CompositionStateKinds.MelodyStepwiseness);
         _motif = barPattern.GetStateValue(CompositionStateKinds.ValueSeed);
     }
@@ -30,11 +35,11 @@ internal sealed class MelodyPattern
     /// </summary>
     public StateMapBuilder AddNoteState(StateMapBuilder builder, KeptBeat beat)
     {
-        var stepwiseness = _stepwiseness;
+        var (stepwiseness, profile) = (_stepwiseness, _profile);
         return builder
             .Add(context =>
                 {
-                    var (step, turn) = MelodyLayers.GenerateStep(context, stepwiseness);
+                    var (step, turn) = profile.GenerateStep(context, stepwiseness);
                     return StateMap.FromStates(
                         [
                             CompositionStateKinds.MelodyStep.CreateState(step),
@@ -48,7 +53,7 @@ internal sealed class MelodyPattern
     }
 
     /// <summary>
-    ///     A section's melody placed, once its bars are made: every note by the rules of <see cref="MelodyLine" />, in
+    ///     A section's melody placed, once its bars are made: every note by the rules of <see cref="Line" />, in
     ///     order over the section's bars, over the chord it plays as <c>Realizer</c> works it out, kept as its scale
     ///     step above the chord's root, so that the section plays it the same wherever it plays. A note that ends a
     ///     phrase lands on the chord as one on a strong beat does. The line starts afresh in every section, on the note
@@ -61,13 +66,14 @@ internal sealed class MelodyPattern
         TrackEventStateTimelineMap<StateMap> bars,
         int trackNumber,
         PitchInstrumentTrack definition,
+        LineProfile profile,
         StateTimelineMap barStates,
         int key,
         ImmutableArray<bool> leads
     )
     {
         var (low, high) = Realizer.GetRange(definition);
-        var line = new MelodyLine(low, high);
+        var line = new Line(profile, low, high);
         var track = bars.TrackTimelineMap[trackNumber];
         var notes = LinePlacement.GetNotes(
                 track.MergeStateMap(StateMap.FromStates([StateKinds.KeyOffset.CreateState(key)])),
@@ -129,11 +135,12 @@ internal sealed class MelodyPattern
     /// <param name="bars">The section's bars, its 4-bar pattern's question and answer.</param>
     /// <param name="seed">The seed of the answer's mutations.</param>
     /// <param name="amount">The chance a note of the answer's later bars is mutated.</param>
-    public static TrackEventStateTimelineMap<StateMap> Answer(TrackEventStateTimelineMap<StateMap> bars, int trackNumber, int seed, double amount)
+    public static TrackEventStateTimelineMap<StateMap> Answer(TrackEventStateTimelineMap<StateMap> bars, int trackNumber, LineProfile profile, int seed, double amount)
     {
         return Mutate(
             bars,
             trackNumber,
+            profile,
             seed,
             bar => bar < Progressions.BarCount ? 0 : amount * MelodyLayers.AnswerBars[bar - Progressions.BarCount]
         );
@@ -141,13 +148,19 @@ internal sealed class MelodyPattern
 
     /// <summary>
     ///     A melody's notes mutated, a decision at a time: a mutated note draws afresh where it means to go, as it was
-    ///     drawn (<see cref="MelodyLayers.GenerateStep" />), and plays no note heard before, so that it is placed by the rules. Whether a note is mutated, and how, is
+    ///     drawn (<see cref="LineProfile.GenerateStep" />), and plays no note heard before, so that it is placed by the rules. Whether a note is mutated, and how, is
     ///     drawn from a sequence of the note's own, by its key (<see cref="CompositionStateKinds.NoteKey" />), so that the
     ///     notes of a figure that comes back mutate alike, and take a key of their own, so that they come back alike.
     /// </summary>
     /// <param name="seed">The seed of the mutations.</param>
     /// <param name="chance">The chance a note is mutated, by the bar it is in.</param>
-    public static TrackEventStateTimelineMap<StateMap> Mutate(TrackEventStateTimelineMap<StateMap> bars, int trackNumber, int seed, Func<int, double> chance)
+    public static TrackEventStateTimelineMap<StateMap> Mutate(
+        TrackEventStateTimelineMap<StateMap> bars,
+        int trackNumber,
+        LineProfile profile,
+        int seed,
+        Func<int, double> chance
+    )
     {
         var track = bars.TrackTimelineMap[trackNumber].EventTimeline;
         var mutated = track.Select(note =>
@@ -161,7 +174,7 @@ internal sealed class MelodyPattern
                 if (!context.TestProbability(noteChance))
                     return note;
 
-                var (step, turn) = MelodyLayers.GenerateStep(context, note.Value.GetStateValue(CompositionStateKinds.MelodyStepwiseness));
+                var (step, turn) = profile.GenerateStep(context, note.Value.GetStateValue(CompositionStateKinds.MelodyStepwiseness));
                 var key = Seeds.Derive(noteKey, seed);
                 return note.Value
                     .With(CompositionStateKinds.MelodyStep, step)
@@ -232,10 +245,11 @@ internal sealed class MelodyPattern
 /// <param name="Bars">The section's 8 bars, the answer's mutated.</param>
 /// <param name="BuildBars">The section's 8 bars built afresh, the answer's mutated, every bar drawing its rhythm afresh by its key, 0 for none.</param>
 /// <param name="Letters">Every bar's letter in the section's phrase scheme.</param>
-/// <param name="Leads">Whether each bar of the 4-bar pattern leads into the next (<see cref="MelodyPattern.DrawLeads" />).</param>
+/// <param name="Leads">Whether each bar of the 4-bar pattern leads into the next (<see cref="LinePattern.DrawLeads" />).</param>
 /// <param name="Seed">The seed of the mutations of its later appearances.</param>
-internal sealed record SectionMelody(
+internal sealed record SectionLine(
     int Track,
+    LineProfile Profile,
     TrackEventStateTimelineMap<StateMap> Bars,
     Func<ImmutableArray<int>, TrackEventStateTimelineMap<StateMap>> BuildBars,
     ImmutableArray<int> Letters,
@@ -276,14 +290,14 @@ internal sealed record SectionMelody(
             ];
             if (rhythmKeys.Any(x => x != 0))
                 bars = BuildBars(rhythmKeys);
-            bars = MelodyPattern.Mutate(bars, Track, seed, _ => amount);
+            bars = LinePattern.Mutate(bars, Track, Profile, seed, _ => amount);
         }
 
-        return MelodyPattern.Place(bars, Track, Definition, BarStates, Key, Leads);
+        return LinePattern.Place(bars, Track, Definition, Profile, BarStates, Key, Leads);
     }
 }
 
-/// <summary>How a melody's answer differs from its question (<see cref="MelodyPattern.DrawAnswer" />).</summary>
+/// <summary>How a melody's answer differs from its question (<see cref="LinePattern.DrawAnswer" />).</summary>
 /// <param name="RedrawsRhythm">Whether every bar of the answer draws its rhythm afresh.</param>
 /// <param name="PhraseEnd">Where the answer's phrase ends in its last bar; none for where the question's does.</param>
 public sealed record MelodyAnswer(ImmutableArray<bool> RedrawsRhythm, int? PhraseEnd);

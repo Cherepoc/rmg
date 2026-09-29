@@ -25,14 +25,17 @@ internal static class MelodyLayers
     /// <summary>How far a section moves away from the song's stepwiseness, either way.</summary>
     public const double Section = 0.3;
 
-    /// <summary>The chance of a note meaning to leap, at no stepwiseness; less the more stepwise the melody is.</summary>
-    public const double MaxLeapChance = 0.4;
-
-    /// <summary>The chance of a note meaning to stay on the note before.</summary>
-    public const double RepeatChance = 0.2;
-
-    /// <summary>The chance of a moving note going on the way the melody goes, rather than turning back.</summary>
-    public const double ContinueChance = 0.85;
+    /// <summary>How the melody moves, and what its strong beats take, as a line (<see cref="LineProfile" />).</summary>
+    public static LineProfile Line { get; } = new(
+        RangeWidth: 17,
+        RegisterPull: 7,
+        LeapSize: 7,
+        StrongestWeakRank: 1,
+        RepeatChance: 0.2,
+        MaxLeapChance: 0.4,
+        ContinueChance: 0.85,
+        AimOdds: 1
+    );
 
     /// <summary>How much less often the melody's cycles are drawn afresh than the other tracks', so it plays riffs.</summary>
     public const double RhythmVariation = -0.2;
@@ -144,37 +147,5 @@ internal static class MelodyLayers
     public static Func<IGenerationContext, double> CreateGenerator(double size)
     {
         return Generators.SplineValue().Then(x => x * size);
-    }
-
-    /// <summary>
-    ///     How much likelier a note is to go on towards where its phrase aims, and to turn back rather than go on away from
-    ///     it, as the odds at <see cref="MelodyLine.RegisterPull" /> semitones from it, less the nearer it is.
-    /// </summary>
-    public const double AimOdds = 1;
-
-    /// <summary>
-    ///     Where a note means to go: staying (0), a step (1), or a leap (2), the less likely the more stepwise the melody
-    ///     is; and its draw of whether it goes on the way the melody goes or turns back, from 0 to 1, which goes on below
-    ///     <see cref="ContinueChance" /> as the aim leans it (<see cref="GetContinueChance" />), so that it runs up or
-    ///     down a while before it turns.
-    /// </summary>
-    public static (int Step, double Turn) GenerateStep(IGenerationContext context, double stepwiseness)
-    {
-        if (context.TestProbability(RepeatChance))
-            return (0, 0);
-
-        var turn = context.GenerateDouble();
-        var leapChance = (1 - Math.Clamp(stepwiseness, 0, 1)) * MaxLeapChance;
-        return (context.TestProbability(leapChance) ? 2 : 1, turn);
-    }
-
-    /// <summary>
-    ///     The chance a note goes on the way the melody goes, leaning to go on towards where its phrase aims and to turn
-    ///     back from going on away from it, the more the further it is, up to <see cref="MelodyLine.RegisterPull" />.
-    /// </summary>
-    /// <param name="towardsAim">How far going on moves towards the aim, in semitones; negative away from it.</param>
-    public static double GetContinueChance(double towardsAim)
-    {
-        return Tilt.Of(AimOdds, 1).Chance(ContinueChance, Math.Clamp(towardsAim / MelodyLine.RegisterPull, -1, 1));
     }
 }
