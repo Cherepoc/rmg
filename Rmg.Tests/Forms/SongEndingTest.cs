@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
@@ -151,6 +152,7 @@ public sealed class SongEndingTest
             FillGrooves.FromSource(ResolvedRhythm.DefaultState),
             0,
             false,
+            ImmutableDictionary<int, DrumRole>.Empty,
             null
         );
 

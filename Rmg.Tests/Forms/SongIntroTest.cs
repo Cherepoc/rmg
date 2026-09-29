@@ -24,80 +24,81 @@ public sealed class SongIntroTest
     private static bool PercussionOnly(CorpusSong song, int sectionId) =>
         song.Trace.Any(x => x.Point == TracePoints.PercussionOnly && x.Section == sectionId && (bool)x.Value!);
 
-    [Test]
-    [Arguments(IntroKind.ChordsFirst, TrackRole.Chords, false, 0.0)]
-    [Arguments(IntroKind.ChordsFirst, TrackRole.Bass, false, Phrase)]
-    [Arguments(IntroKind.ChordsFirst, TrackRole.Bass, true, 0.0)]
-    [Arguments(IntroKind.ChordsFirst, TrackRole.Melody, true, Phrase)]
-    [Arguments(IntroKind.ChordsFirst, TrackRole.Drum, true, Phrase)]
-    [Arguments(IntroKind.Build, TrackRole.Chords, false, 0.0)]
-    [Arguments(IntroKind.Build, TrackRole.Bass, false, 4.0)]
-    [Arguments(IntroKind.Build, TrackRole.Drum, false, 8.0)]
-    [Arguments(IntroKind.Build, TrackRole.Melody, false, Phrase)]
-    public async Task IntroEntries_ComeInTheirOrder(IntroKind intro, TrackRole role, bool withBass, double entry)
-    {
-        await Assert.That(SongFormGenerator.GetIntroEntry(intro, role, withBass)).IsEqualTo(entry);
-    }
+    private static CorpusSong[] Entries => Of(IntroKind.Entries);
+
+    // where an intro's window starts: at the song's start for bars of its own, or at the first section's
+    private static double WindowStart(CorpusSong song) => song.Map.Intro.Window.IsBefore ? 0 : song.Origin;
 
     [Test]
-    public async Task TheMelody_ComesInAfterTheFirstPhrase_WhereTheIntroLeavesItOut()
+    public async Task AnIntrosParts_ComeInFromItsStart_InTheirOrder_AndSomeAtItsEnd()
     {
-        var songs = Songs.Where(x => x.Map.Intro.Kind is IntroKind.ChordsFirst or IntroKind.Build).ToArray();
-        foreach (var song in songs)
-            await Assert.That(Notes(song, SongTracks.MelodyTrack).Min(x => x.Position)).IsGreaterThanOrEqualTo(song.Origin + Phrase);
-
-        await Assert.That(songs.Length).IsGreaterThan(0);
-    }
-
-    [Test]
-    public async Task ChordsFirst_LeavesTheDrumsOut_ButForTheirFillIn()
-    {
-        var songs = Of(IntroKind.ChordsFirst);
-        foreach (var song in songs)
+        foreach (var song in Entries)
         {
-            await Assert.That(Drums(song).Min(x => x.Position)).IsGreaterThanOrEqualTo(Phrase - LongestFill);
-            if (!song.Map.Intro.WithBass)
-                await Assert.That(Notes(song, SongTracks.BassTrack).Min(x => x.Position)).IsGreaterThanOrEqualTo(Phrase);
+            var intro = song.Map.Intro;
+            var entries = intro.Entries.Select(x => x.Entry).ToArray();
+            var window = intro.Window.Bars * Meter.BarDuration;
+
+            await Assert.That(entries[0]).IsEqualTo(0);
+            await Assert.That(entries.Zip(entries.Skip(1)).All(x => x.First <= x.Second)).IsTrue();
+            await Assert.That(entries[^1]).IsEqualTo(window);
+            await Assert.That(entries.All(x => x % Meter.BarDuration == 0 && x <= window)).IsTrue();
+            await Assert.That(intro.Duration).IsEqualTo(intro.Window.IsBefore ? window : 0);
         }
 
-        await Assert.That(songs.Length).IsGreaterThan(0);
+        await Assert.That(Entries.Length).IsGreaterThan(20);
     }
 
     [Test]
-    public async Task Build_BringsTheBassAndTheDrumsInBarByBar()
+    public async Task EveryPart_IsLeftOutUntilItComesIn_ButForTheDrumsFillIntoTheLanding()
     {
-        var songs = Of(IntroKind.Build);
-        foreach (var song in songs)
+        foreach (var song in Entries)
         {
-            await Assert.That(Notes(song, SongTracks.BassTrack).Min(x => x.Position)).IsGreaterThanOrEqualTo(4);
-            await Assert.That(Drums(song).Min(x => x.Position)).IsGreaterThanOrEqualTo(8);
+            var window = song.Map.Intro.Window.Bars * Meter.BarDuration;
+            foreach (var entry in song.Map.Intro.Entries)
+            foreach (var track in entry.Tracks)
+            {
+                if (!song.Song.Notes!.TryGetValue(track, out var notes) || notes.Count == 0)
+                    continue;
+
+                // a fill leads the drums in where the band lands
+                var from = WindowStart(song) + entry.Entry - (entry.Part.Role == TrackRole.Drum && entry.Entry == window ? LongestFill : 0);
+                await Assert.That(notes.Min(x => x.Position)).IsGreaterThanOrEqualTo(from - 1e-9)
+                    .Because($"seed {song.Seed}, {entry.Part} at {entry.Entry}");
+            }
         }
-
-        await Assert.That(songs.Length).IsGreaterThan(0);
     }
 
     [Test]
-    public async Task DrumsFirst_PlayAlone_ThenTheBandLands()
+    public async Task AnIntroOfItsOwnBars_EndsWithTheBandLanding()
     {
-        var songs = Of(IntroKind.DrumsFirst);
+        var songs = Entries.Where(x => x.Map.Intro.Window.IsBefore).ToArray();
         foreach (var song in songs)
         {
-            var pitched = new[] { SongTracks.ChordsTrack, SongTracks.MelodyTrack, SongTracks.BassTrack }.SelectMany(x => Notes(song, x));
-
-            await Assert.That(song.Origin).IsGreaterThan(0);
-            await Assert.That(pitched.Min(x => x.Position)).IsGreaterThanOrEqualTo(song.Origin);
-            // the groove may start on a later beat, but plays in the intro's first bar
-            await Assert.That(Drums(song).Min(x => x.Position)).IsLessThan(4);
             // the band comes in on a crash, or now and then the vibraslap, pushed an 8th early now and then, or on the
             // percussion into a section of it
             var landsOn = PercussionOnly(song, song.Map.Sections[0].SectionId)
                 ? DrumGroups.Percussion.Drums.SelectMany(x => x.ArticulationCodes)
                 : DrumGroups.Accents.Drums.SelectMany(x => x.ArticulationCodes);
             await Assert.That(Drums(song).Any(x => x.Position >= song.Origin - 0.5 && x.Position <= song.Origin && landsOn.Contains(x.Value.Offset)))
-                .IsTrue();
+                .IsTrue()
+                .Because($"seed {song.Seed}");
         }
 
-        await Assert.That(songs.Length).IsGreaterThan(0);
+        await Assert.That(songs.Length).IsGreaterThan(5);
+    }
+
+    [Test]
+    [Explicit]
+    public async Task Report()
+    {
+        var songs = TestCorpus.Range(200).Where(x => x.Map.Intro.Kind == IntroKind.Entries).ToArray();
+        var firsts = songs.GroupBy(x => x.Map.Intro.Entries[0].Part.ToString()).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}");
+        var melodyEarly = songs.Count(x => x.Map.Intro.Entries.Any(y => y.Part.Role == TrackRole.Melody && y.Entry < x.Map.Intro.Window.Bars * Meter.BarDuration));
+        var inWindow = songs.Select(x => x.Map.Intro.Entries.Count(y => y.Entry < x.Map.Intro.Window.Bars * Meter.BarDuration) / (double)x.Map.Intro.Entries.Length).Average();
+        var windows = songs.GroupBy(x => x.Map.Intro.Window).OrderBy(x => x.Key.Bars).Select(x => $"{x.Key.Bars}{(x.Key.IsBefore ? " before" : " in")} {x.Count()}");
+        Console.WriteLine($"{songs.Length} intros of entries; windows {string.Join(", ", windows)}; first in {string.Join(", ", firsts)}; " +
+                          $"the melody in the window {melodyEarly}; {inWindow:P0} of the parts come in in it");
+        await Task.CompletedTask;
     }
 
     [Test]

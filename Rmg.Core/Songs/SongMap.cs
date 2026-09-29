@@ -35,8 +35,14 @@ public sealed record SongMap(IntroSpan Intro, ImmutableArray<SectionSpan> Sectio
 }
 
 /// <summary>How a song starts: its intro's kind, and how long it plays before the first section, 0 for none.</summary>
-/// <param name="WithBass">Whether the bass joins the chords in an intro of the chords first.</param>
-public sealed record IntroSpan(IntroKind Kind, double Duration, bool WithBass = false);
+/// <param name="Window">Where the band comes in part by part, for an intro of entries.</param>
+/// <param name="Entries">When every part comes in, for an intro of entries, in the order drawn; none otherwise.</param>
+public sealed record IntroSpan(IntroKind Kind, double Duration, IntroWindow Window = default, ImmutableArray<IntroEntry> Entries = default);
+
+/// <summary>A part of the band coming in, in an intro of entries.</summary>
+/// <param name="Tracks">The part's tracks.</param>
+/// <param name="Entry">When it comes in, in beats from the start of the intro's window.</param>
+public sealed record IntroEntry(IntroPart Part, ImmutableArray<int> Tracks, double Entry);
 
 /// <summary>A section where the song plays it.</summary>
 public sealed record SectionSpan(int SectionId, double Start, double Duration)

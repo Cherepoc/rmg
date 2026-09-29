@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Rmg.Core.Probabilities;
+using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
@@ -28,37 +29,69 @@ public enum IntroKind
     /// <summary>The whole band starts together.</summary>
     Cold,
 
-    /// <summary>Bars of the first section's drums alone before it, the band coming in with a fill and a landing.</summary>
-    DrumsFirst,
-
     /// <summary>A bar of the pedal hi-hat on the beats before the first section.</summary>
     CountIn,
 
-    /// <summary>The first phrase with the chords alone, now and then with the bass, the band coming in after it.</summary>
-    ChordsFirst,
-
-    /// <summary>The first phrase building up: the chords, then the bass, then the drums, and the melody after it.</summary>
-    Build
+    /// <summary>
+    ///     The band coming in part by part, in an order drawn, over bars of the first section's before it or over its
+    ///     first phrase, and the parts left coming in together at its end, with a fill and a landing.
+    /// </summary>
+    Entries
 }
 
 /// <summary>
-///     How a song starts and ends around its sections. It starts with the whole band, with the drums or the chords
-///     alone, with a count-in, or building up. It ends on the home chord of its last section, whose home is the
-///     song's tonic, most of the time; the more its rhythm strays, the likelier an open or a stopped ending.
+///     A part of the band that comes in as one in an intro: a pitched track by its role, or the drums of a role in the
+///     first section.
+/// </summary>
+/// <param name="DrumRole">The drums' role, for the drums; none for a pitched track.</param>
+public readonly record struct IntroPart(TrackRole Role, DrumRole? DrumRole = null)
+{
+    public override string ToString() => DrumRole?.ToString() ?? Role.ToString();
+}
+
+/// <summary>Where an intro's parts come in: over bars of their own before the first section, or over its first phrase.</summary>
+/// <param name="Bars">How many bars the parts come in over.</param>
+/// <param name="IsBefore">Whether they are bars of their own before the first section, rather than its first phrase.</param>
+public readonly record struct IntroWindow(int Bars, bool IsBefore);
+
+/// <summary>
+///     How a song starts and ends around its sections. It starts with the whole band, with a count-in, or with the band
+///     coming in part by part. It ends on the home chord of its last section, whose home is the song's tonic, most of
+///     the time, or fades out; the more its rhythm strays, the likelier an open or a stopped ending.
 /// </summary>
 public static class FormLayers
 {
     public static ImmutableArray<Weighted<IntroKind>> Intros { get; } =
     [
         new(0.3, IntroKind.Cold),
-        new(0.25, IntroKind.DrumsFirst),
         new(0.1, IntroKind.CountIn),
-        new(0.2, IntroKind.ChordsFirst),
-        new(0.15, IntroKind.Build)
+        new(0.6, IntroKind.Entries)
     ];
 
-    /// <summary>How many bars the drums play alone before the first section.</summary>
-    public static ImmutableArray<Weighted<int>> DrumsFirstBars { get; } = [new(0.3, 1), new(0.5, 2), new(0.2, 4)];
+    /// <summary>Where an intro's parts come in: bars of their own before the first section, or its first phrase.</summary>
+    public static ImmutableArray<Weighted<IntroWindow>> IntroWindows { get; } =
+    [
+        new(0.12, new IntroWindow(1, true)),
+        new(0.2, new IntroWindow(2, true)),
+        new(0.1, new IntroWindow(4, true)),
+        new(0.58, new IntroWindow(Progressions.BarCount, false))
+    ];
+
+    /// <summary>
+    ///     How likely each part is to come in next, of those left: most often one that keeps the time or the chords, and
+    ///     the melody hardly ever before the band, as it is sung over it; those with a lean of 1 lean unconventional,
+    ///     likelier the further the song's rhythm strays.
+    /// </summary>
+    public static ImmutableArray<(IntroPart Part, double Weight, double Lean)> IntroParts { get; } =
+    [
+        (new IntroPart(TrackRole.Drum, DrumRole.Time), 2, 0),
+        (new IntroPart(TrackRole.Chords), 2, 0),
+        (new IntroPart(TrackRole.Drum, DrumRole.Ground), 1.5, 0),
+        (new IntroPart(TrackRole.Bass), 1, 0),
+        (new IntroPart(TrackRole.Drum, DrumRole.Backbeat), 0.7, 1),
+        (new IntroPart(TrackRole.Drum, DrumRole.Colour), 0.5, 1),
+        (new IntroPart(TrackRole.Melody), 0.05, 1)
+    ];
 
     /// <summary>The chance that a count-in clicks only the last two beats, rather than all four.</summary>
     public const double HalfCountInChance = 0.3;
@@ -80,14 +113,6 @@ public static class FormLayers
         (DrumDefinitions.ElectricSnare, 37),
         (DrumDefinitions.Clap, 39)
     ];
-
-    /// <summary>The chance that the bass joins the chords in an intro of the chords first.</summary>
-    public const double ChordsFirstBassChance = 0.5;
-
-    /// <summary>When each track comes in, in bars into the first phrase, as an intro builds up; the melody after the phrase.</summary>
-    public const int BuildBassBar = 1;
-
-    public const int BuildDrumsBar = 2;
 
     public static ImmutableArray<Weighted<EndingKind>> Endings { get; } =
     [

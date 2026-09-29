@@ -6,16 +6,11 @@ Planned work that has been decided but not built yet.
 
 In this order, each measured before it is planned:
 
-1. **Listen and tune.** The runs, rebuilt on the groove (whether they sound part of it now, whether the drums they
-   draw, their walks and windows sound interesting or broken, how often they play drums other than the snare and the
-   toms, about one run in five), intros (whether the band's entry after a chords-first or build-up intro feels earned)
-   have been tuned by measurement only, as has the sections' energy (see *Section dynamics*). Heard and kept: the
-   endings, the section modes and the chords' level.
-2. **The melody** (see *Melody at generation*): listen to the question and its answer; then mutation further, a bar
-   of a later letter within the phrase and a section as it recurs.
-3. **The drums** (see *Drums*): listen to the setups and the percussion songs, the roles and the doubling, the strokes
-   and accents, the drums coming and going by bar.
-4. **Fade-outs** (built, see *Form*): listen to how the fade sounds in the web player.
+1. **Listen and tune.** The sections' energy has been tuned by measurement only (see *Section dynamics*). Heard and
+   kept: the endings, the section modes, the chords' level, the drums, the fills and their runs, the fades, and the
+   intros of entries.
+2. **The melody** (see *Melody at generation*): listen to the question and its answer and to the improvised
+   appearances; then a bar of a later letter within the phrase, and a last chorus varied more than the second.
 
 ## Section dynamics
 
@@ -377,6 +372,18 @@ toms together. Notes of several sounds on one track would allow it.
   would not do: they change how hard a note is struck, not how loud the band is, and leave held notes as they are. A
   fade of one section's pass is 12 to 16 seconds. Later, should listening ask: a ritardando into it, the drums fading
   first, or a tag after it.
+- **Intros of entries** (built): in place of the drums first, the chords first and the build-up, each with its order
+  set by hand, the band comes in part by part in an order drawn (`IntroKind.Entries`, `SongFormGenerator.DrawEntries`):
+  the chords, the bass and the melody, and the drums by their role in the first section, so that the hi-hat and the
+  kick can come in before the snare, each next part drawn by its weight, leaned by the song's rhythm
+  (`FormLayers.IntroParts`: the time and the chords most often, the backbeat, the colour and the melody, 0.05, leaning
+  unconventional), over a window (`FormLayers.IntroWindows`: 1, 2 or 4 bars of the first section's before it, or its
+  first phrase), a drawn number of them, at least one and one fewer than all, spread evenly from its start, and the
+  rest together at its end with a fill and a landing, so that the window never plays the whole band, which made a
+  4-bar intro of the drums alone sound like a section of 12 bars. Drawn from a stream of its own (`SongStream.Intro`).
+  Over 200 corpus songs, 120 intros of entries: the first part in is the chords 38 times, the time 27, the ground 25,
+  the bass 18, the backbeat 11, the colour once; 53% of the parts come in inside the window; the melody 7 times (6%),
+  which in bars of the intro's own plays the first section's opening before it starts again.
 - **Intros of their own material,** such as a riff the song does not play otherwise.
 
 ## Rhythm engine

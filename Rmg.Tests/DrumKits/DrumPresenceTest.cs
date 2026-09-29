@@ -78,12 +78,16 @@ public sealed class DrumPresenceTest
             foreach (var (track, letter) in ((BarDrums)entry.Value!).Resting)
             foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section))
             {
+                // a drum the song never plays has no notes to count
+                if (!song.Song.Notes!.TryGetValue(track, out var notes))
+                    continue;
+
                 // the bars of its letter, but the last of a pattern, where a fill may play it
                 var bars = schemes[entry.Section].Select((x, bar) => (x, bar)).Where(x => x.x - 'A' == letter && x.bar < Meter.PatternBarCount - 1).Select(x => x.bar);
                 foreach (var bar in bars)
                 {
                     var start = span.Start + bar * Meter.BarDuration;
-                    await Assert.That(song.Song.Notes![track].Count(x => x.Position >= start && x.Position < start + Meter.BarDuration)).IsEqualTo(0);
+                    await Assert.That(notes.Count(x => x.Position >= start && x.Position < start + Meter.BarDuration)).IsEqualTo(0);
                 }
             }
         }

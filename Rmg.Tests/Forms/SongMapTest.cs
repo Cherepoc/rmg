@@ -7,7 +7,7 @@ namespace Rmg.Tests.Forms;
 public sealed class SongMapTest
 {
     private static readonly SongMap Map = new(
-        new IntroSpan(IntroKind.DrumsFirst, 8),
+        new IntroSpan(IntroKind.Entries, 8, new IntroWindow(2, true)),
         [new SectionSpan(0, 8, 32), new SectionSpan(1, 40, 32)],
         new EndingSpan(EndingKind.Button, 72, 4, 1)
     );
@@ -40,10 +40,10 @@ public sealed class SongMapTest
             await Assert.That(sections[0].Start).IsEqualTo(map.Intro.Duration);
             await Assert.That(sections.Zip(sections.Skip(1)).All(x => x.First.End == x.Second.Start)).IsTrue();
             await Assert.That(map.Ending.Start).IsEqualTo(sections[^1].End);
-            // an intro has bars of its own when the drums or a count-in play before the first section
-            var hasBars = map.Intro.Kind is IntroKind.DrumsFirst or IntroKind.CountIn;
+            // an intro has bars of its own for a count-in, or where its parts come in before the first section
+            var hasBars = map.Intro.Kind == IntroKind.CountIn || map.Intro.Kind == IntroKind.Entries && map.Intro.Window.IsBefore;
             await Assert.That(map.Intro.Duration > 0).IsEqualTo(hasBars);
-            await Assert.That(map.Ending.Duration > 0).IsEqualTo(map.Ending.Kind != EndingKind.Open);
+            await Assert.That(map.Ending.Duration > 0).IsEqualTo(FormLayers.HasFinalChord(map.Ending.Kind));
         }
     }
 }

@@ -196,6 +196,7 @@ internal sealed class SectionGenerator
             GetGrooves(drums.SelectMany(x => x.Feels)),
             energy,
             isPercussionOnly,
+            sectionRoles.Keys.ToImmutableDictionary(x => x, x => SectionRole(sectionRoles, x)),
             melody
         );
         return section.Appear(0, 0);
@@ -481,12 +482,15 @@ internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScal
 /// <param name="Groove">The states of the rhythm the fills play from.</param>
 /// <param name="Energy">How loud and busy the section is meant to be (<see cref="SectionEnergy" />).</param>
 /// <param name="IsPercussionOnly">Whether the section plays its percussion without the drum kit.</param>
+/// <param name="DrumRoles">The role every one of the song's drums plays in the section.</param>
+/// <param name="Melody">The section's melody before it is placed, placed afresh every time it plays; none for no melody.</param>
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
     RhythmicUnconventionality Rhythm,
     FillGrooves Groove,
     double Energy,
     bool IsPercussionOnly,
+    ImmutableDictionary<int, DrumRole> DrumRoles,
     SectionMelody? Melody
 )
 {

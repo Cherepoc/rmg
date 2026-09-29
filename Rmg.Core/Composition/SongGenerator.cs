@@ -92,6 +92,7 @@ public static class SongGenerator
         // to the tonic, where the ending lands
         var formGenerator = new SongFormGenerator(
             Stream(SongStream.Form),
+            Stream(SongStream.Intro),
             rhythmicUnconventionality,
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role)
         );
@@ -202,5 +203,6 @@ internal enum SongStream
     DrumStrokes = 13,
     DrumRoles = 14,
     DrumSetup = 15,
-    MelodyImprovisation = 16
+    MelodyImprovisation = 16,
+    Intro = 17
 }

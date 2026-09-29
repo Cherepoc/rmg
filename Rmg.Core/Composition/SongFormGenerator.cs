@@ -16,14 +16,24 @@ namespace Rmg.Core.Composition;
 internal sealed class SongFormGenerator
 {
     private readonly IGenerationContext _context;
+
+    // the sequence an intro's entries are drawn from, apart from the rest of the form
+    private readonly IGenerationContext _introContext;
+
     private readonly RhythmicUnconventionality _songRhythm;
 
     // what every track plays, by its number, so that the form can bring in or leave out the drums or the bass
     private readonly IReadOnlyDictionary<int, TrackRole> _roles;
 
-    public SongFormGenerator(IGenerationContext context, RhythmicUnconventionality songRhythm, IReadOnlyDictionary<int, TrackRole> roles)
+    public SongFormGenerator(
+        IGenerationContext context,
+        IGenerationContext introContext,
+        RhythmicUnconventionality songRhythm,
+        IReadOnlyDictionary<int, TrackRole> roles
+    )
     {
         _context = context;
+        _introContext = introContext;
         _songRhythm = songRhythm;
         _roles = roles;
     }
@@ -37,9 +47,8 @@ internal sealed class SongFormGenerator
     {
         var intro = Pick(FormLayers.Intros);
         var ending = Pick(FormLayers.WeighEndings(_songRhythm.Tilt));
-        var drumsFirstBars = intro == IntroKind.DrumsFirst ? Pick(FormLayers.DrumsFirstBars) : 0;
+        var window = intro == IntroKind.Entries ? Pick(_introContext, FormLayers.IntroWindows) : default;
         var halfCountIn = intro == IntroKind.CountIn && _context.TestProbability(FormLayers.HalfCountInChance);
-        var withBass = intro == IntroKind.ChordsFirst && _context.TestProbability(FormLayers.ChordsFirstBassChance);
 
         double held = 0, stop = 0;
         var slowsDown = false;
@@ -51,7 +60,7 @@ internal sealed class SongFormGenerator
             slowsDown = ending == EndingKind.RingOut && _context.TestProbability(FormLayers.RitardandoChance);
         }
 
-        return new FormPlan(intro, drumsFirstBars, halfCountIn, withBass, ending, held, stop, slowsDown, sectionIds[^1]);
+        return new FormPlan(intro, window, halfCountIn, ending, held, stop, slowsDown, sectionIds[^1]);
     }
 
     /// <summary>
@@ -63,12 +72,15 @@ internal sealed class SongFormGenerator
     public SongAssembly Assemble(FormPlan plan, IReadOnlyList<int> sectionIds, IReadOnlyList<GeneratedSection> sections)
     {
         var first = sections[0];
+        // an intro of entries before the first section plays its first bars, the parts cleared until they come in
+        var windowDuration = plan.Window.Bars * Meter.BarDuration;
         var introBlock = plan.Intro switch
         {
-            IntroKind.DrumsFirst => CreateDrumsFirst(first, plan.DrumsFirstBars * Meter.BarDuration, _roles),
+            IntroKind.Entries when plan.Window.IsBefore => first.Timeline.Trim(windowDuration),
             IntroKind.CountIn => CreateCountIn(first, plan.HalfCountIn, _roles),
             _ => null
         };
+        ImmutableArray<IntroEntry> entries = plan.Intro == IntroKind.Entries ? DrawEntries(first, plan.Window) : [];
 
         // the first section starts after the intro's bars, and the ending after the last
         var origin = introBlock?.Duration ?? 0;
@@ -88,7 +100,7 @@ internal sealed class SongFormGenerator
             _ => Math.Max(plan.Held, Meter.BarDuration)
         };
         var map = new SongMap(
-            new IntroSpan(plan.Intro, origin, plan.WithBass),
+            new IntroSpan(plan.Intro, origin, plan.Window, entries),
             spans.ToImmutable(),
             new EndingSpan(plan.Ending, end, endingDuration, plan.Held, plan.Stop, plan.SlowsDown)
         );
@@ -109,28 +121,29 @@ internal sealed class SongFormGenerator
 
         switch (plan.Intro)
         {
-            case IntroKind.DrumsFirst:
-                // the band comes in on a fill and a landing
-                lines.Insert(0, new FillLine(origin, fillSections[0], fillSections[0], 0, IsLandingForced: true));
-                break;
             case IntroKind.CountIn:
                 lines.Insert(0, new FillLine(origin, fillSections[0], fillSections[0], 0, HasFill: false));
                 break;
-            case IntroKind.ChordsFirst or IntroKind.Build:
+            case IntroKind.Entries:
             {
-                // the first phrase leaves tracks out, which come in at its end, the drums with a fill and a landing
-                var phraseEnd = origin + Meter.PatternDuration;
-                foreach (var track in first.Timeline.TrackTimelineMap.Keys)
+                // every part left out of its window until it comes in, and the parts left come in at its end, the
+                // drums with a fill and a landing
+                var windowStart = plan.Window.IsBefore ? 0 : origin;
+                var windowEnd = windowStart + windowDuration;
+                foreach (var entry in entries.Where(x => x.Entry > 0))
+                foreach (var track in entry.Tracks)
+                    edits.Clear(track, windowStart, windowStart + entry.Entry);
+
+                if (plan.Window.IsBefore)
+                    lines.Insert(0, new FillLine(windowEnd, fillSections[0], fillSections[0], 0, IsLandingForced: true));
+                else
                 {
-                    var entry = GetIntroEntry(plan.Intro, _roles[track], plan.WithBass);
-                    if (entry > 0)
-                        edits.Clear(track, origin, origin + entry);
+                    var windowLine = lines.Select((x, i) => (x, i)).First(x => x.x.Position.IsEqualToByEpsilon(windowEnd)).i;
+                    lines[windowLine] = new FillLine(windowEnd, fillSections[0], fillSections[0], 0, IsLandingForced: true);
                 }
 
-                var phraseLine = lines.Select((x, i) => (x, i)).First(x => x.x.Position.IsEqualToByEpsilon(phraseEnd)).i;
-                lines[phraseLine] = new FillLine(phraseEnd, fillSections[0], fillSections[0], 0, IsLandingForced: true);
-                if (plan.WithBass)
-                    introDescription += ", with the bass";
+                introDescription += $", {plan.Window.Bars} bars {(plan.Window.IsBefore ? "before the first section" : "into it")}: " +
+                                    string.Join(", ", entries.Select(x => $"{x.Part} at {x.Entry}"));
                 break;
             }
         }
@@ -179,38 +192,52 @@ internal sealed class SongFormGenerator
     }
 
     /// <summary>
-    ///     When a track comes in, in beats into the first phrase, as an intro leaves it out: the chords from the start, and
-    ///     in a build the bass and the drums bar by bar; the others after the phrase; 0 for from the start.
+    ///     When the parts of the band come in, over an intro's window: those that play in it, in an order drawn part by
+    ///     part, each likelier as <see cref="FormLayers.IntroParts" /> weighs it, leaned by the song's rhythm; a drawn
+    ///     number of them, at least one and one fewer than all, come in over the window, spread evenly from its start,
+    ///     and the rest together at its end, so that the window never plays the whole band.
     /// </summary>
-    internal static double GetIntroEntry(IntroKind intro, TrackRole role, bool withBass)
+    internal ImmutableArray<IntroEntry> DrawEntries(GeneratedSection first, IntroWindow window)
     {
-        var phrase = Meter.PatternDuration;
-        if (role == TrackRole.Chords)
-            return 0;
-        if (intro == IntroKind.ChordsFirst)
-            return role == TrackRole.Bass && withBass ? 0 : phrase;
+        var windowDuration = window.Bars * Meter.BarDuration;
+        var parts = first.Timeline.TrackTimelineMap
+            .Where(x => x.Value.EventTimeline.Any(note => note.Position < windowDuration))
+            .GroupBy(x => GetPart(x.Key, first))
+            .ToDictionary(x => x.Key, x => x.Select(y => y.Key).Order().ToImmutableArray());
+        var listed = FormLayers.IntroParts.ToDictionary(x => x.Part);
+        foreach (var part in parts.Keys.Where(x => !listed.ContainsKey(x)))
+            throw new InvalidOperationException($"The intro has no weight for the part {part}.");
 
-        return role switch
+        var options = _songRhythm.Tilt.Weigh(
+                FormLayers.IntroParts.Where(x => parts.ContainsKey(x.Part)).Select(x => new Weighted<IntroPart>(x.Weight, x.Part)),
+                x => listed[x].Lean
+            )
+            .ToList();
+        var order = new List<IntroPart>();
+        while (options.Count > 0)
         {
-            TrackRole.Bass => FormLayers.BuildBassBar * Meter.BarDuration,
-            TrackRole.Drum => FormLayers.BuildDrumsBar * Meter.BarDuration,
-            _ => phrase
-        };
+            var index = Generators.WeightedIndex([..options])(_introContext);
+            order.Add(options[index].Value);
+            options.RemoveAt(index);
+        }
+
+        var inWindow = order.Count <= 1 ? order.Count : Generators.Int(1, order.Count)(_introContext);
+        return
+        [
+            ..order.Select((part, i) => new IntroEntry(
+                    part,
+                    parts[part],
+                    i < inWindow ? Math.Floor(i * window.Bars / (double)inWindow) * Meter.BarDuration : windowDuration
+                )
+            )
+        ];
     }
 
-    /// <summary>The first section's drums alone, notes and state, for the intro's bars.</summary>
-    private static TrackEventStateTimelineMap<StateMap> CreateDrumsFirst(
-        GeneratedSection first,
-        double duration,
-        IReadOnlyDictionary<int, TrackRole> roles
-    )
+    /// <summary>The part of the band a track plays: its role, and a drum's role in the section.</summary>
+    private IntroPart GetPart(int track, GeneratedSection section)
     {
-        var bars = first.Timeline.Trim(duration);
-        return TrackEventStateTimelineMap.Create(
-            duration,
-            bars.TrackTimelineMap.Where(x => roles[x.Key] == TrackRole.Drum),
-            bars.CommonStateTimelineMap
-        );
+        var role = _roles[track];
+        return role == TrackRole.Drum ? new IntroPart(role, section.DrumRoles[track]) : new IntroPart(role);
     }
 
     /// <summary>
@@ -253,9 +280,11 @@ internal sealed class SongFormGenerator
         return TrackEventStateTimelineMap.Create(Meter.BarDuration, tracks, bar.CommonStateTimelineMap);
     }
 
-    private T Pick<T>(ImmutableArray<Weighted<T>> weights)
+    private T Pick<T>(ImmutableArray<Weighted<T>> weights) => Pick(_context, weights);
+
+    private static T Pick<T>(IGenerationContext context, ImmutableArray<Weighted<T>> weights)
     {
-        return weights[Generators.WeightedIndex(weights)(_context)].Value;
+        return weights[Generators.WeightedIndex(weights)(context)].Value;
     }
 
     /// <summary>
@@ -364,18 +393,16 @@ internal sealed class SongFormGenerator
 }
 
 /// <summary>What a song's form will be, decided before its sections.</summary>
-/// <param name="DrumsFirstBars">How many bars the drums play alone, for an intro of the drums first.</param>
+/// <param name="Window">Where the band comes in part by part, for an intro of entries.</param>
 /// <param name="HalfCountIn">Whether a count-in clicks only the last two beats.</param>
-/// <param name="WithBass">Whether the bass joins the chords, for an intro of the chords first.</param>
 /// <param name="Held">How long the final chord is held, in beats; 0 for an ending with none, open or fading.</param>
 /// <param name="Stop">How long the band is silent before a stopped ending's chord, in beats.</param>
 /// <param name="SlowsDown">Whether the bar before a ringing ending slows down.</param>
 /// <param name="TonicHomeSectionId">The section whose home is the song's tonic, the last, which leads home to the ending.</param>
 internal sealed record FormPlan(
     IntroKind Intro,
-    int DrumsFirstBars,
+    IntroWindow Window,
     bool HalfCountIn,
-    bool WithBass,
     EndingKind Ending,
     double Held,
     double Stop,
