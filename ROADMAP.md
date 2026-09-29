@@ -330,8 +330,19 @@ where the kick or the snare in a role not theirs may sound broken rather than bo
 
 Later:
 
-- **The clap's ghost notes,** the weak ranks of the backbeat, only after listening, as a clap there may sound busy.
-- **Shakers over the hi-hat with figures of their own,** where doubling plays the lead's rhythm.
+- **Drums bound to a lead** (built): a drum that doubles a lead (`Doubling`) takes its feel, its rhythm's settings,
+  and is bound to it one of three ways (`DrumBinding`), drawn per section from a sequence of its own, by weights on the
+  drum (`PercussionInstrumentDefinition.Bindings`), a figure of its own the likelier the less conventional the section:
+  it doubles the lead's notes up to the rank its role doubles, as before; accents them, playing a share of them
+  (`DrumKitGenerator.AccentShare`, half), the same ones wherever its bar pattern plays, by a draw keyed by the drum and
+  the beat's place, as a tambourine on the snare's 4; or plays a figure of its own on the lead's feel, its own seed, up
+  to the same rank, as a shaker against the hi-hat. The clap doubles 0.5, accents 0.3 and plays a figure 0.2, the
+  tambourine 0.3, 0.5 and 0.2, the cabasa and the maracas 0.3, 0.1 and 0.6. Over 100 corpus songs, 19% of the sections
+  have a drum bound to a lead (29% of the louder half): doubling 127 times, accenting 88, a figure 102. Left: the
+  clap's ghost notes, soft hits around the backbeat, which a figure on the snare's feel may come near, as the velocity
+  accent quietens its weaker ranks, only should listening miss them; a drum bound to the lead of any role it has an
+  affinity for, not only its main one's, as a clap on the kick's beats, a stomp-clap; the doubling chance (0.15),
+  should bound drums be too rare to hear.
 - **Drums by appearance:** a section's later appearance changing its drums, as an edit after assembly (see *Energy by
   appearance*).
 - **Strokes before a lift:** the snare going from its cross-stick to its head in the last phrase before a louder

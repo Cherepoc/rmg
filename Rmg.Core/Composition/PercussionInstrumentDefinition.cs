@@ -18,7 +18,8 @@ public sealed class PercussionInstrumentDefinition
         bool walks = false,
         ImmutableArray<Weighted<DrumRole>> roles = default,
         double doubling = 0,
-        DrumFamily family = DrumFamily.Kit
+        DrumFamily family = DrumFamily.Kit,
+        ImmutableArray<Weighted<DrumBinding>> bindings = default
     )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
@@ -38,7 +39,16 @@ public sealed class PercussionInstrumentDefinition
         Roles = roles.IsDefaultOrEmpty ? [new Weighted<DrumRole>(1, DrumRole.Colour)] : roles;
         Doubling = doubling;
         Family = family;
+        if (doubling > 0 && bindings.IsDefaultOrEmpty)
+            throw new ArgumentException("A drum that may double a lead says how it is bound to it.", nameof(bindings));
+        Bindings = bindings.IsDefault ? [] : bindings;
     }
+
+    /// <summary>
+    ///     How likely each way the drum is bound to a lead it doubles is (<see cref="DrumBinding" />), before a section
+    ///     leans it; none for a drum that never doubles.
+    /// </summary>
+    public ImmutableArray<Weighted<DrumBinding>> Bindings { get; }
 
     /// <summary>The families the drum plays in, the drum kit, the percussion or both.</summary>
     public DrumFamily Family { get; }
@@ -93,4 +103,20 @@ public sealed class PercussionInstrumentDefinition
 
     /// <summary>Adds drum-specific fixed state to a track state map, on top of the group state.</summary>
     public Func<StateMapBuilder, StateMapBuilder> ConfigureStateMap { get; }
+}
+
+/// <summary>
+///     How a drum that doubles a lead is bound to it: it always takes the lead's feel, its rhythm's settings, and takes
+///     all of its figure, some of it, or none, a figure of its own on that feel.
+/// </summary>
+public enum DrumBinding
+{
+    /// <summary>The lead's notes up to the rank its role doubles, as a clap on the snare's backbeat.</summary>
+    Double,
+
+    /// <summary>A share of those notes, the same ones wherever its bar pattern plays, as a tambourine on the snare's 4.</summary>
+    Accent,
+
+    /// <summary>A figure of its own on the lead's feel, up to the same rank, as a shaker against the hi-hat.</summary>
+    Figure
 }

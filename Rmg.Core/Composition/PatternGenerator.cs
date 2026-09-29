@@ -110,14 +110,15 @@ internal sealed class PatternGenerator
                     var redrawsRhythm = inAnswer && answer!.RedrawsRhythm[patternBar];
                     var rhythmKey = rhythmKeys.IsDefaultOrEmpty ? 0 : rhythmKeys[barIndex];
                     var phraseEnd = inAnswer ? answer!.PhraseEnd : null;
-                    // a drum that doubles a lead plays its lead's bar patterns
+                    // a drum that doubles or accents a lead plays its lead's bar patterns, and one that plays a figure of its
+                    // own on the lead's feel its own
                     var seeds = trackSeedMaps[letter];
                     var trackNotePatterns = seeds.Select(x =>
                         new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
                             x.Key,
                             GenerateBar(
                                 x.Key,
-                                doubles.TryGetValue(x.Key, out var doubling) ? seeds[doubling.Lead] : x.Value,
+                                doubles.TryGetValue(x.Key, out var doubling) && doubling.Binding != DrumBinding.Figure ? seeds[doubling.Lead] : x.Value,
                                 trackStateMaps[x.Key],
                                 barStateTimelineMap,
                                 sectionId,
@@ -131,7 +132,7 @@ internal sealed class PatternGenerator
                                 barDrums.Strokes.TryGetValue((x.Key, letter), out var stroke) ? stroke : null,
                                 scheme.ToString(),
                                 sectionRhythm.Energy,
-                                doubles.TryGetValue(x.Key, out var doubled) ? doubled.MaxRank : null,
+                                doubles.GetValueOrDefault(x.Key),
                                 feels
                             )
                         )
@@ -142,6 +143,17 @@ internal sealed class PatternGenerator
             .Unroll();
         return new GeneratedBars(timeline, [..feels]);
     }
+
+    /// <summary>Whether a drum that accents its lead plays the lead's beat at the place given, as the bar pattern's seed has it.</summary>
+    private static bool IsAccented(int seed, int trackNumber, double position, double share)
+    {
+        var key = Seeds.Derive(Seeds.Derive(seed, trackNumber), (int)Math.Round(position * AccentPlacesPerBeat));
+        return new GenerationContext(key).TestProbability(share);
+    }
+
+    // how finely the places of a bar are told apart, where a drum accents its lead: a 48th of a beat, which holds the
+    // 16ths, their triplets and the 32nds
+    private const int AccentPlacesPerBeat = 48;
 
     /// <summary>The seed of a bar's rhythm: its bar pattern's, drawn afresh for an answer, and again by its own key.</summary>
     private static int GetRhythmSeed(int seed, bool redrawsRhythm, int rhythmKey)
@@ -167,7 +179,7 @@ internal sealed class PatternGenerator
         int? stroke,
         string scheme,
         Tilt energy,
-        int? doublingRank,
+        Doubling? doubling,
         List<BarFeel> feels
     )
     {
@@ -195,9 +207,14 @@ internal sealed class PatternGenerator
         var notes = isResting
             ? EventTimeline.Create<StateMap>(Meter.BarDuration)
             : GenerateNotes(stateMap, barStateTimelineMap, patternBar * Meter.BarDuration, trackNumber, sectionId, patternBar, energy).GeneratedTimeline;
-        // a drum that doubles a lead plays its strong beats
-        if (doublingRank is { } maxRank)
-            notes = EventTimeline.Create(notes.Duration, notes.Where(x => x.Value.GetStateValue(CompositionStateKinds.BeatRank) <= maxRank));
+        // a drum bound to a lead plays its strong beats, and one that accents it a share of them, the same ones wherever
+        // its bar pattern plays, by a draw keyed by the drum and the beat's place
+        if (doubling is not null)
+            notes = EventTimeline.Create(
+                notes.Duration,
+                notes.Where(x => x.Value.GetStateValue(CompositionStateKinds.BeatRank) <= doubling.MaxRank
+                                 && (doubling.Binding != DrumBinding.Accent || IsAccented(seed, trackNumber, x.Position, doubling.Share)))
+            );
         // a bass bar that leads into the next chord plays a note in its last beat, for its approach to play on
         if (_trackDefinitions[trackNumber].Role == TrackRole.Bass)
             notes = LeadIn(notes, stateMap, barStateTimelineMap, barIndex, _rhythmPatternGenerator(stateMap).MaxRank);
@@ -577,5 +594,8 @@ internal static class IncrementalGenerators
     }
 }
 
-/// <summary>A drum that doubles a lead: the lead's track, and the weakest rank of its beats it plays.</summary>
-public sealed record Doubling(int Lead, int MaxRank);
+/// <summary>
+///     A drum that doubles a lead: the lead's track, the weakest rank of its beats it plays, how it is bound to the lead,
+///     and the share of those beats it plays, for a drum that accents it.
+/// </summary>
+public sealed record Doubling(int Lead, int MaxRank, DrumBinding Binding, double Share);

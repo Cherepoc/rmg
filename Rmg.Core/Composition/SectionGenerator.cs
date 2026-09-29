@@ -27,6 +27,7 @@ internal sealed class SectionGenerator
     private const int MelodyImprovisationStream = 9;
     private const int RegisterFreedomStream = 10;
     private const int BassImprovisationStream = 11;
+    private const int DrumBindingStream = 12;
 
     // the stream of the song's own shift of its lines' freedom to change register, apart from every section's
     private const int SongRegisterFreedomStream = -1;
@@ -154,10 +155,18 @@ internal sealed class SectionGenerator
         );
         StateTrace.Record(TracePoints.Kit, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", kit.Drums.Select(x => x.Name)), kit);
         var activeDrumTrackNumbers = kit.Drums.Select(DrumGroups.GetTrackNumber).ToImmutableHashSet();
-        // a drum that doubles a lead plays its lead's beats up to the rank its role doubles
-        var doubles = kit.Doubles.ToImmutableDictionary(
+        // a drum that doubles a lead plays its lead's beats up to the rank its role doubles, all of them, a share, or a
+        // figure of its own on the lead's feel, as it is bound to it, drawn from a sequence of its own, leaning to its own
+        // figure the less conventional the section
+        var bindingContext = _context.CreateContext(Seeds.Derive(Seeds.Derive(_seed, sectionId), DrumBindingStream));
+        var doubles = kit.Doubles.OrderBy(x => DrumGroups.GetTrackNumber(x.Key)).ToImmutableDictionary(
             x => DrumGroups.GetTrackNumber(x.Key),
-            x => new Doubling(DrumGroups.GetTrackNumber(x.Value), DrumRoles.DoublingRanks[x.Value.MainRole])
+            x => new Doubling(
+                DrumGroups.GetTrackNumber(x.Value),
+                DrumRoles.DoublingRanks[x.Value.MainRole],
+                bindingContext.Pick(rhythm.Tilt.Weigh(x.Key.Bindings, binding => binding == DrumBinding.Figure ? 1 : 0)),
+                DrumKitGenerator.AccentShare
+            )
         );
         StateTrace.Record(TracePoints.Doubles, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", kit.Doubles.Select(x => $"{x.Key.Name} on {x.Value.Name}")), doubles);
 

@@ -121,6 +121,8 @@ public sealed class DrumUseReportTest
                           $"the louder {doubled.Where(x => x.Energy >= middle).Count(x => !x.Doubles.IsEmpty) / (double)doubled.Count(x => x.Energy >= middle):P0}: " +
                           string.Join(", ", doubled.SelectMany(x => x.Doubles).GroupBy(x => $"{DrumGroups.GetDrum(x.Key).Name} on {DrumGroups.GetDrum(x.Value.Lead).Name}")
                               .OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}")));
+        Console.WriteLine("Bound to their leads: " + string.Join(", ", doubled.SelectMany(x => x.Doubles).GroupBy(x => x.Value.Binding)
+            .OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count()}")));
         var clapLeads = all.Count(x => Grooves(x.s, x.span, DrumDefinitions.Clap) &&
                                        !x.s.Trace.Any(e => e.Point == TracePoints.Doubles && e.Section == x.span.SectionId &&
                                                            ((System.Collections.Immutable.ImmutableDictionary<int, Doubling>)e.Value!).ContainsKey(DrumGroups.GetTrackNumber(DrumDefinitions.Clap))));
