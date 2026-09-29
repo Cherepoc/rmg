@@ -117,6 +117,10 @@ public static class SongGenerator
         songTrackNoteTimelineMap = new FillGenerator(Stream(SongStream.Fills), tracks, rhythmicUnconventionality)
             .Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
 
+        // the bass placed over the whole song, as its line goes on from section to section and leads into the next
+        var bassTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Bass);
+        songTrackNoteTimelineMap = BassPattern.Place(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value);
+
         // and last the notes, decided from the state of the whole song, in its order, none sounding into a stop
         var notes = form.Edits.CutNotes(
             Realizer.Realize(tracks.Definitions, songTrackNoteTimelineMap),

@@ -69,26 +69,24 @@ internal sealed class MelodyPattern
         var (low, high) = Realizer.GetRange(definition);
         var line = new MelodyLine(low, high);
         var track = bars.TrackTimelineMap[trackNumber];
-        var states = Realizer.GetNoteStates(
-            track.MergeStateMap(StateMap.FromStates([StateKinds.KeyOffset.CreateState(key)])),
-            definition,
-            barStates
-        );
-        var notes = track.EventTimeline.Zip(states).Select(x =>
+        var notes = LinePlacement.GetNotes(
+                track.MergeStateMap(StateMap.FromStates([StateKinds.KeyOffset.CreateState(key)])),
+                definition,
+                barStates
+            )
+            .Select(x =>
                 {
-                    var (note, state) = x;
-                    var (chord, _, classes) = Realizer.GetChordNotes(state.Value);
-                    var rank = state.Value.GetStateValue(StateKinds.HeldDuration) > 0 ? 0 : state.Value.GetStateValue(CompositionStateKinds.BeatRank);
+                    var rank = x.State.GetStateValue(StateKinds.HeldDuration) > 0 ? 0 : x.State.GetStateValue(CompositionStateKinds.BeatRank);
                     var pitch = line.Place(
-                        chord,
-                        classes,
+                        x.Chord,
+                        x.Classes,
                         rank,
-                        state.Value.GetStateValue(CompositionStateKinds.MelodyStep),
-                        state.Value.GetStateValue(CompositionStateKinds.MelodyTurn),
-                        state.Value.GetStateValue(CompositionStateKinds.MelodyRegister),
-                        state.Value.GetStateValue(CompositionStateKinds.NoteKey)
+                        x.State.GetStateValue(CompositionStateKinds.MelodyStep),
+                        x.State.GetStateValue(CompositionStateKinds.MelodyTurn),
+                        x.State.GetStateValue(CompositionStateKinds.MelodyRegister),
+                        x.State.GetStateValue(CompositionStateKinds.NoteKey)
                     );
-                    return (Note: note, Chord: chord, Classes: classes, Rank: rank, Pitch: pitch);
+                    return (Note: x, Rank: rank, Pitch: pitch);
                 }
             )
             .ToArray();
@@ -100,22 +98,17 @@ internal sealed class MelodyPattern
             var bar = next.Note.Position / Meter.BarDuration;
             var isBarLine = Math.Abs(bar - Math.Round(bar)) < 1e-9;
             var patternBar = (int)Math.Round(bar).Mod(Progressions.BarCount);
-            if (!isBarLine || patternBar == 0 || !leads[patternBar - 1] || last.Classes.SetEquals(next.Classes) || !next.Classes.Contains(next.Pitch.Mod(12)))
+            if (!isBarLine || patternBar == 0 || !leads[patternBar - 1] || last.Note.Classes.SetEquals(next.Note.Classes) || !next.Note.Classes.Contains(next.Pitch.Mod(12)))
                 continue;
 
-            notes[i] = last with { Pitch = line.Approach(last.Chord, last.Classes, last.Rank, last.Pitch, next.Pitch) };
+            notes[i] = last with { Pitch = line.Approach(last.Note.Chord, last.Note.Classes, last.Rank, last.Pitch, next.Pitch) };
         }
 
-        var placed = notes.Select(x =>
-            {
-                var step = MelodyLine.GetScaleStep(x.Chord, x.Pitch);
-                if (x.Chord.GetPitch(step) != x.Pitch)
-                    throw new InvalidOperationException($"The melody's note {x.Pitch} is not on a step of its chord's scale.");
-                return x.Note.Value.With(StateKinds.ScaleStep, step).ToTimelineItem(x.Note.Position);
-            }
-        );
-        var timeline = EventTimeline.Create(track.EventTimeline.Duration, placed);
-        return bars.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [trackNumber] = _ => timeline });
+        var placed = LinePlacement.Store(track.EventTimeline.Duration, notes.Select(x => (x.Note, x.Pitch)));
+        if (placed.Any(x => x.Value.GetStateValue(StateKinds.Alteration) != 0))
+            throw new InvalidOperationException("The melody's notes are on the steps of their chords' scales.");
+
+        return bars.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [trackNumber] = _ => placed });
     }
 
     /// <summary>

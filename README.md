@@ -296,7 +296,9 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   4-bar pattern's first bar sometimes starts afresh in its own register. Chords whose layout is what
   they are, such as quartal stacks and clusters, only move by whole octaves.
 - **Bass leading.** The bass line (`BassLine`) moves by small steps: every note takes the octave nearest
-  the note before. Its first note in a bar lands on the chord's root most often, or on its third or
+  the note before. It is placed once the song is put together (`BassPattern`), over the whole song, so
+  that it goes on from section to section, as the melody is placed once a section's bars are made, both
+  kept as scale steps above their chords' roots, and a semitone off them for a chromatic approach. Its first note in a bar lands on the chord's root most often, or on its third or
   fifth for an inversion, and a note in the last beat before a bar line leads into the next root: by
   the scale step next to it, a semitone below or above it, the next chord's fifth, or the root a
   little early. How much the bass leads (`BassLeadingLayers`) comes from its instrument (upright and

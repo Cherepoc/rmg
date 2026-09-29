@@ -217,12 +217,16 @@ made, and forbid the override a kind the lowest layer sets allows, should a sect
 
 Smaller, when the code is next touched:
 
-- **The bass at generation,** as the melody is (see *Melody at generation*): one rule set, in one place, for where
-  it lands, how it leads and how it walks the chord's notes, in place of a walk of the chord root and of the chord
-  note, drawn as fractions, that `BassLine` in `Realizer` then overrides at a change of chord. The root offset would
-  then carry the harmony alone, whose roots are scale steps written as sevenths to be rounded back, and could be whole
-  steps; the chord and the scale are known where the notes are made now, so the fractions are a remnant of `Realizer`
-  deciding them. Worth it once the bass's lines want more say than their leading and landing give them.
+- **The bass before `Realizer`** (built, its first stage): the bass is placed as the melody is, by one pipeline
+  (`LinePlacement`: a track's notes in order over their chords, and each placed note kept as its scale step above its
+  chord's root, and its `Alteration` a semitone off it for a chromatic approach), by `BassLine`'s rules as they were,
+  over the song put together (`BassPattern`), an edit after assembly, so that its line goes on from section to section
+  and leads into the next section's chord; `Realizer` plays both lines as placed, and chooses only the chords'
+  register. The corpus is the same, note for note. Left, its second stage: each bass note drawing where it goes, as
+  a melody note does (a chord note up, down or the root, a scale step between on a weak beat, a note key so that a
+  riff repeats), in place of the walks of the chord root and the chord note drawn as fractions; the root offset then
+  carries the harmony alone, whose roots are scale steps written as sevenths to be rounded back, and could be whole
+  steps. Worth it once the bass's lines want more say than their leading and landing give them.
 - **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 - **Memory:** every `RealizedNote` keeps the state it was decided from, which a song now holds on to (about 2 MB a
   song, 8 MB with a trace). Recompute it on demand instead, should memory matter.

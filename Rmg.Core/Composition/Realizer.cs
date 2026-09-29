@@ -6,11 +6,10 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     Decides the song's notes from its state, the last stage of its generation: every note's chord, pitches and
-///     length, in the song's order: the notes the state decides, in the register that follows from the notes before, as
-///     the chords are led, the bass line takes the octave nearest its note before and leads into the next chord, and
-///     the melody's bars, placed where they were made, start in the octave nearest the note before; and every drum hit's
-///     sound. It sees the whole song, because a
-///     track's line goes on across its sections, and a section that comes back plays on from where the song is.
+///     length, in the song's order: the chords in the register that follows from the chord before, as they are led, and
+///     the lines, the melody's and the bass's, as they were placed before it (<see cref="LinePlacement" />); and every
+///     drum hit's sound. It sees the whole song, because the chords are led across its sections, and a section that
+///     comes back plays on from where the song is.
 /// </summary>
 internal static class Realizer
 {
@@ -66,6 +65,12 @@ internal static class Realizer
             .ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
     }
 
+    /// <summary>A note moved by octaves into a pitched track's range (<see cref="FixNoteOffset" />).</summary>
+    internal static int FitNote(PitchInstrumentTrack track, int note)
+    {
+        return FixNoteOffset(track.MinOctaveOffset + ZeroOctaveOffset, track.MaxOctaveOffset - track.MinOctaveOffset + 1, note);
+    }
+
     /// <summary>The lowest and the highest note of a pitched track's range.</summary>
     internal static (int Low, int High) GetRange(PitchInstrumentTrack track)
     {
@@ -90,7 +95,7 @@ internal static class Realizer
         return (chord, chordSteps, chordSteps.Select(x => chord.GetPitch(x).Mod(OctaveNoteCount)).ToHashSet());
     }
 
-    /// <summary>A pitched track's notes, each placed from the one before, as its chords or bass line lead.</summary>
+    /// <summary>A pitched track's notes: its chords each placed from the one before, and a line's as it was placed.</summary>
     private static EventTimeline<RealizedNote> RealizePitchTrack(PitchInstrumentTrack track, EventTimeline<StateMap> eventStateTimelineMap)
     {
         var absoluteMinOctave = track.MinOctaveOffset + ZeroOctaveOffset;
@@ -102,19 +107,10 @@ internal static class Realizer
             (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1,
             notes => FitChordIntoRange(absoluteMinOctave, octaveCount, notes)
         );
-        // and a bass line's notes, each following from the one before and leading into the next chord
-        var bassLine = new BassLine(
-            absoluteMinOctave * OctaveNoteCount,
-            (absoluteMinOctave + octaveCount) * OctaveNoteCount - 1,
-            note => FixNoteOffset(absoluteMinOctave, octaveCount, note)
-        );
         var items = eventStateTimelineMap.WithDurations().ToArray();
         var notes = new TimelineItem<RealizedNote>[items.Length];
         for (var i = 0; i < items.Length; i++)
-        {
-            TimelineItem<WithDuration<StateMap>>? next = i + 1 < items.Length ? items[i + 1] : null;
-            notes[i] = RealizeNote(items[i], next, voiceLeader, bassLine, track.Role);
-        }
+            notes[i] = RealizeNote(items[i], voiceLeader, track.Role);
 
         return EventTimeline.Create(eventStateTimelineMap.Duration, notes);
     }
@@ -150,9 +146,7 @@ internal static class Realizer
     /// <summary>A pitched note: its chord, its length, and its pitches, as the track's line places them.</summary>
     private static TimelineItem<RealizedNote> RealizeNote(
         TimelineItem<WithDuration<StateMap>> timelineItemWithDuration,
-        TimelineItem<WithDuration<StateMap>>? nextItem,
         VoiceLeader voiceLeader,
-        BassLine bassLine,
         TrackRole role
     )
     {
@@ -186,12 +180,11 @@ internal static class Realizer
 
         int ToNote(int stepAboveRoot) => chord.GetPitch(stepAboveRoot);
 
-        // how a track plays its chord is its role's: the melody the note placed where it was made, as its scale step
-        // above the chord's root; the bass a line of the chord's notes; the chords the whole chord, led from the one before
+        // how a track plays its chord is its role's: a line, the melody's or the bass's, the note placed for it before,
+        // as its scale step above the chord's root and its alteration; the chords the whole chord, led from the one before
         ImmutableArray<int> notes = role switch
         {
-            TrackRole.Melody => [ToNote(stateMap.GetStateValue(StateKinds.ScaleStep))],
-            TrackRole.Bass => [PlaceBassNote()],
+            TrackRole.Melody or TrackRole.Bass => [ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)) + stateMap.GetStateValue(StateKinds.Alteration)],
             TrackRole.Chords => voiceLeader.Place(
                 [..chordSteps.Select(ToNote)],
                 ToNote(0),
@@ -203,29 +196,6 @@ internal static class Realizer
         };
 
         return new RealizedNote(notes, noteVelocity, duration, stateMap).ToTimelineItem(position);
-
-        // the bass's note: the chord's note its chord note offset picks, going round the chord's scale notes from the
-        // root up and an octave up or down for every lap around it, the root for none, as its line places it
-        int PlaceBassNote()
-        {
-            var chordDegrees = chordSteps
-                .Select(x => x.Mod(scaleOffsets.Length))
-                .Distinct()
-                .Order()
-                .ToImmutableArray();
-            var (selectedOctave, selectedIndex) = stateMap.GetStateValue(StateKinds.ChordNoteOffset)
-                .ToIndexOverLength(chordDegrees.Length)
-                .ToPeriodRemainder(chordDegrees.Length);
-            return bassLine.Place(
-                ToNote(chordDegrees[selectedIndex] + selectedOctave * scaleOffsets.Length),
-                chord,
-                position,
-                nextItem is { } next ? GetChord(next.Value.Value).Chord : null,
-                nextItem?.Position,
-                (ChordArrival)stateMap.GetStateValue(StateKinds.ChordArrival),
-                (ChordApproach)stateMap.GetStateValue(StateKinds.ChordApproach)
-            );
-        }
     }
 
     /// <summary>
@@ -389,14 +359,14 @@ internal static class Realizer
     }
 
     // each value is rounded before summing, so every layer shifts a pattern by a whole step - see README "How it works"
-    private static int ToIndexOverLength(this ImmutableArray<double> offset, int length)
+    internal static int ToIndexOverLength(this ImmutableArray<double> offset, int length)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(length);
 
         return offset.Sum(x => x.ToIndexOverLength(length));
     }
 
-    private static (int periodIndex, int remainder) ToPeriodRemainder(this int offset, int periodLength)
+    internal static (int periodIndex, int remainder) ToPeriodRemainder(this int offset, int periodLength)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(periodLength);
 

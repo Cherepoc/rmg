@@ -10,7 +10,7 @@
 # Architecture
 
 - **State decides, `Realizer` realizes.** Generation decides the notes as layered state (song, section, track, bar,
-  note); `Realizer` only chooses their register from what came before (a chord's voicing, the bass's octave) and
+  note); `Realizer` only chooses their register from what came before (a chord's voicing) and
   leads into what follows. A decision that needs the song put together, such as a fill,
   the form or a stop, is an edit after assembly, not a render flag.
 - **Lean, don't decide.** Bias a choice with `Tilt`: an option's weight times the odds to the power of its lean, a

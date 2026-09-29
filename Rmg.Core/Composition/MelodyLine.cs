@@ -99,7 +99,7 @@ internal sealed class MelodyLine
 
         // the first time a note is heard it is remembered, as the step from its chord's root it has
         if (echo != 0)
-            _heard.TryAdd(echo, (GetScaleStep(chord, note), chord.Root));
+            _heard.TryAdd(echo, (LinePlacement.GetScaleStep(chord, note), chord.Root));
 
         _previousMove = _previous is { } before ? note - before : 0;
         if (_previousMove != 0)
@@ -156,15 +156,6 @@ internal sealed class MelodyLine
             .Where(x => IsStep(x, next) && Math.Abs(x - note) <= 4)
             .ToArray();
         return candidates.Length == 0 ? note : GetNearest(candidates, note);
-    }
-
-    /// <summary>The scale step of a note, counted from the chord's root: the step whose note is nearest it.</summary>
-    internal static int GetScaleStep(ChordContext chord, int note)
-    {
-        // a scale step is between one and a few semitones, so the step is near the note's distance in sevenths of
-        // an octave
-        var guess = (int)Math.Round((note - chord.Root) * (double)ScaleStepCount / OctaveNoteCount);
-        return Enumerable.Range(guess - 4, 9).MinBy(x => Math.Abs(chord.GetPitch(x) - note));
     }
 
     private int PlaceByRule(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int step, double turn, double register)

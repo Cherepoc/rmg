@@ -30,8 +30,11 @@ public static class StateKinds
     // plays (a ChordArrival)
     public static readonly StateKind<int> ChordApproach = CreateAdditive<int>("ChordApproach", StateScope.Render);
     public static readonly StateKind<int> ChordArrival = CreateAdditive<int>("ChordArrival", StateScope.Render);
-    // a note's scale step above its chord's root, set outright, as the melody's notes are placed where they are made
+    // a note's scale step above its chord's root, set outright, as a line's notes are placed before Realizer
     public static readonly StateKind<int> ScaleStep = CreateAdditive<int>("ScaleStep", StateScope.Render);
+    // the semitones a placed note is raised or lowered from its scale step, as a bass's note that leads a half step into
+    // the next root is; 0 for the step's own note
+    public static readonly StateKind<int> Alteration = CreateAdditive<int>("Alteration", StateScope.Render);
     // which of a drum's sounds a note plays, counted from 1, such as a fill's high tom or a landing's crash, over the
     // walk of its articulation; 0 for the walk's
     public static readonly StateKind<int> ArticulationIndex = CreateAdditive<int>("ArticulationIndex", StateScope.Render);
