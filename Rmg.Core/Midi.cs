@@ -10,6 +10,8 @@ public static class Midi
     private const uint TicksPerQuarterNote = 96;
     private const byte PercussionChannel = 9;
     private const byte MainVolumeController = 7;
+    private const byte ExpressionController = 11;
+    private const double MaxControllerValue = 127;
 
     /// <summary>What a channel plays at when nothing says otherwise, which General MIDI puts at 100 of 127.</summary>
     private const double DefaultChannelVolume = 100;
@@ -237,6 +239,7 @@ public static class Midi
     private static void WriteNoteTrack(
         RenderedTrack track,
         byte channel,
+        StateTimeline<double> fadeTimeline,
         uint durationDelta,
         Stream stream
     )
@@ -250,7 +253,9 @@ public static class Midi
             settings.Add(new MidiEvent(0, ControlChange(channel, MainVolumeController, volume)));
         }
 
-        var events = settings.Concat(track.NoteTimeline.ToMidiNotes(durationDelta).SelectMany(x => x.ToEvents(channel)));
+        // a fade plays as the channel's expression, under the volume the listener sets
+        var fade = fadeTimeline.Select(x => new MidiEvent(AbsoluteDelta(x.Position), ControlChange(channel, ExpressionController, (byte)Math.Round(x.Value * MaxControllerValue))));
+        var events = settings.Concat(fade).Concat(track.NoteTimeline.ToMidiNotes(durationDelta).SelectMany(x => x.ToEvents(channel)));
         WriteTrack(events, durationDelta, stream);
     }
 
@@ -366,7 +371,7 @@ public static class Midi
 
     private static RenderedSong WithTracks(this RenderedSong song, IEnumerable<RenderedTrack> tracks)
     {
-        return new RenderedSong(song.Duration, song.TempoTimeline, [..tracks]);
+        return new RenderedSong(song.Duration, song.TempoTimeline, song.FadeTimeline, [..tracks]);
     }
 
     public static void Write(this RenderedSong song, Stream stream)
@@ -393,7 +398,7 @@ public static class Midi
         WriteSystemTrack(song.TempoTimeline, songDurationDelta, stream);
 
         var indexedTracks = song.Tracks.ToIndexedTracks();
-        foreach (var (channel, track) in indexedTracks) WriteNoteTrack(track, channel, songDurationDelta, stream);
+        foreach (var (channel, track) in indexedTracks) WriteNoteTrack(track, channel, song.FadeTimeline, songDurationDelta, stream);
     }
 
     private readonly record struct MidiNote(uint OnDelta, uint OffDelta, byte Key, double Velocity);

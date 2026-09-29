@@ -46,6 +46,10 @@ public static class StateKinds
     public static readonly StateKind<ImmutableArray<int>> RaisedScaleSteps = CreateCollection<int>("RaisedScaleSteps", StateScope.Render, isShared: true);
     public static readonly StateKind<double> Tempo = CreateMultiplicative<double>("Tempo", StateScope.Render, isShared: true);
 
+    // how far the whole band is faded in, from 1, as loud as it plays, to 0, silent, which the song's MIDI plays as every
+    // channel's expression
+    public static readonly StateKind<double> Fade = CreateMultiplicative<double>("Fade", StateScope.Render, isShared: true);
+
     public static StateKind<T> CreateAdditive<T>(
         string name,
         StateScope scope = StateScope.Composition,

@@ -22,13 +22,36 @@ public sealed class SongEndingTest
     [Test]
     public async Task ClosedEndings_LandOnTheTonic()
     {
-        var closed = Songs.Where(x => Ending(x).Kind != EndingKind.Open).ToArray();
+        var closed = Songs.Where(x => FormLayers.HasFinalChord(Ending(x).Kind)).ToArray();
         var bassOnTonic = closed.Count(x => x.Notes(BassTrack)[^1].Value.Offset.Mod(12) == Tonic(x));
         var melodyOnTonic = closed.Count(x => x.Notes(MelodyTrack)[^1].Value.Offset.Mod(12) == Tonic(x));
 
         await Assert.That(closed.Length).IsGreaterThan(20);
         await Assert.That(bassOnTonic).IsEqualTo(closed.Length);
         await Assert.That(melodyOnTonic).IsEqualTo(closed.Length);
+    }
+
+    [Test]
+    public async Task AFadingSong_PlaysItsLastSectionOnceMore_AndFadesOutOverIt()
+    {
+        var fading = TestCorpus.Range(100).Where(x => Ending(x).Kind == EndingKind.Fade).ToArray();
+
+        await Assert.That(fading.Length).IsGreaterThan(5);
+        foreach (var song in fading)
+        {
+            var sections = song.Map.Sections;
+            var fade = song.Rendered.FadeTimeline;
+            await Assert.That(sections[^1].SectionId).IsEqualTo(sections[^2].SectionId);
+            await Assert.That(Ending(song).Duration).IsEqualTo(0);
+            await Assert.That(song.Map.Duration).IsEqualTo(sections[^1].End).Within(1e-9);
+            // its first step down a step into the last section, as a step of 1, as loud as the band plays, is none
+            await Assert.That(fade[0].Position).IsEqualTo(sections[^1].Start + FormLayers.FadeStep).Within(1e-9);
+            await Assert.That(fade[0].Value).IsLessThan(1);
+            await Assert.That(fade.Zip(fade.Skip(1)).All(x => x.Second.Value < x.First.Value)).IsTrue();
+            await Assert.That(fade[^1].Value).IsLessThan(0.01);
+        }
+
+        await Assert.That(Songs.Where(x => Ending(x).Kind != EndingKind.Fade).All(x => x.Rendered.FadeTimeline.Count == 0)).IsTrue();
     }
 
     [Test]
@@ -50,7 +73,7 @@ public sealed class SongEndingTest
     [Test]
     public async Task TheFinalChord_PlaysOnTheLine_AndIsHeld()
     {
-        foreach (var song in Songs.Where(x => Ending(x).Kind != EndingKind.Open))
+        foreach (var song in Songs.Where(x => FormLayers.HasFinalChord(Ending(x).Kind)))
         {
             var bass = song.Notes(BassTrack)[^1];
 

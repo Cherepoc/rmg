@@ -43,7 +43,7 @@ internal sealed class SongFormGenerator
 
         double held = 0, stop = 0;
         var slowsDown = false;
-        if (ending != EndingKind.Open)
+        if (FormLayers.HasFinalChord(ending))
         {
             held = ending == EndingKind.RingOut ? Pick(FormLayers.RingOutLengths) : FormLayers.ButtonLength;
             if (ending == EndingKind.Stop)
@@ -83,7 +83,7 @@ internal sealed class SongFormGenerator
         var end = start;
         var endingDuration = plan.Ending switch
         {
-            EndingKind.Open => 0,
+            _ when !FormLayers.HasFinalChord(plan.Ending) => 0,
             EndingKind.RingOut => plan.Held,
             _ => Math.Max(plan.Held, Meter.BarDuration)
         };
@@ -104,7 +104,7 @@ internal sealed class SongFormGenerator
         ];
         var edits = new TimelineEdits(_context, map);
         var lines = FillGenerator.GetSectionLines(fillSections, origin).ToBuilder();
-        var tempo = StateTimelineMap.Create(end);
+        var songState = StateTimelineMap.Create(end);
         var introDescription = $"{plan.Intro} intro, {origin} beats";
 
         switch (plan.Intro)
@@ -138,7 +138,7 @@ internal sealed class SongFormGenerator
         StateTrace.Record(TracePoints.SongIntro, FillGenerator.DrumsTrace, sectionIds[0], 0, StateMap.Default, 0, introDescription);
 
         var description = $"{plan.Ending} ending";
-        if (plan.Ending != EndingKind.Open)
+        if (FormLayers.HasFinalChord(plan.Ending))
         {
             blocks.Add(CreateEnding(sections[^1], sections.Take(sections.Count - 1), plan.Held, endingDuration, _roles));
 
@@ -161,13 +161,21 @@ internal sealed class SongFormGenerator
             description += $", at beat {end}, held {plan.Held} beats";
             if (plan.SlowsDown)
             {
-                tempo = CreateRitardando(end, end + plan.Held);
+                songState = CreateRitardando(end, end + plan.Held);
                 description += ", slowing down";
             }
         }
 
+        // a fading song plays its last section once more, as the song plans it, and fades out over it
+        if (plan.Ending == EndingKind.Fade)
+        {
+            var fadeStart = spans[^1].Start;
+            songState = CreateFade(fadeStart, end);
+            description += $", fading from beat {fadeStart} to {end}";
+        }
+
         StateTrace.Record(TracePoints.SongEnding, FillGenerator.DrumsTrace, sectionIds[^1], 0, StateMap.Default, 0, description);
-        return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, tempo);
+        return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, songState);
     }
 
     /// <summary>
@@ -328,6 +336,19 @@ internal sealed class SongFormGenerator
         );
     }
 
+    /// <summary>The band fading out from the start given to the end, a step every <see cref="FormLayers.FadeStep" />, to silence.</summary>
+    private static StateTimelineMap CreateFade(double start, double end)
+    {
+        var count = (int)Math.Round((end - start) / FormLayers.FadeStep);
+        IStateTimeline fade = StateTimeline.Create(
+                end,
+                StateKinds.Fade,
+                Enumerable.Range(0, count).Select(i => (1 - i / (double)count).ToTimelineItem(start + i * FormLayers.FadeStep))
+            )
+            .WithLayer("Ending");
+        return new[] { fade }.ToStateTimelineMap(end);
+    }
+
     /// <summary>The tempo slowing over the bar before the ending, beat by beat, and staying slow to the end.</summary>
     private static StateTimelineMap CreateRitardando(double line, double end)
     {
@@ -346,7 +367,7 @@ internal sealed class SongFormGenerator
 /// <param name="DrumsFirstBars">How many bars the drums play alone, for an intro of the drums first.</param>
 /// <param name="HalfCountIn">Whether a count-in clicks only the last two beats.</param>
 /// <param name="WithBass">Whether the bass joins the chords, for an intro of the chords first.</param>
-/// <param name="Held">How long the final chord is held, in beats; 0 for an open ending.</param>
+/// <param name="Held">How long the final chord is held, in beats; 0 for an ending with none, open or fading.</param>
 /// <param name="Stop">How long the band is silent before a stopped ending's chord, in beats.</param>
 /// <param name="SlowsDown">Whether the bar before a ringing ending slows down.</param>
 /// <param name="TonicHomeSectionId">The section whose home is the song's tonic, the last, which leads home to the ending.</param>
@@ -366,11 +387,11 @@ internal sealed record FormPlan(
 /// <param name="Blocks">The intro, if it has bars of its own, the sections, and the ending, if it has bars of its own.</param>
 /// <param name="Lines">The lines the fills mark, in the song's order.</param>
 /// <param name="Edits">What the form changes once the blocks are put one after another, such as the bars an intro leaves out.</param>
-/// <param name="Tempo">How the tempo changes over the song, such as the slowing before an ending, over the song's own.</param>
+/// <param name="SongState">How the song's state changes over it, over its own, such as the tempo slowing before an ending, or the band fading out.</param>
 internal sealed record SongAssembly(
     SongMap Map,
     ImmutableArray<TrackEventStateTimelineMap<StateMap>> Blocks,
     ImmutableArray<FillLine> Lines,
     TimelineEdits Edits,
-    StateTimelineMap Tempo
+    StateTimelineMap SongState
 );

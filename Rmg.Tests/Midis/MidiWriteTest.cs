@@ -20,7 +20,7 @@ public sealed class MidiWriteTest
         ImmutableArray<RenderedTrack> tracks = [
             track
         ];
-        var renderedSong = new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), tracks);
+        var renderedSong = new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), tracks);
         
         var memoryStream = new MemoryStream();
         renderedSong.Write(memoryStream);
@@ -48,11 +48,30 @@ public sealed class MidiWriteTest
     private static byte[] WriteOneBeatSong(params TimelineItem<RenderedNote>[] renderedNotes)
     {
         var track = new RenderedTrack(false, 1, EventTimeline.Create(1, renderedNotes));
-        var renderedSong = new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), [track]);
+        var renderedSong = new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), [track]);
 
         var memoryStream = new MemoryStream();
         renderedSong.Write(memoryStream);
         return memoryStream.ToArray();
+    }
+
+    [Test]
+    public async Task AFade_PlaysAsTheChannelsExpression()
+    {
+        var fade = StateTimeline.Create(1, StateKinds.Fade, [0.75.ToTimelineItem(0), 0.5.ToTimelineItem(0.5)]);
+        var track = new RenderedTrack(false, 1, EventTimeline.Create(1, [new RenderedNote(64, 1, 1).ToTimelineItem(0)]));
+        var memoryStream = new MemoryStream();
+        new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), fade, [track]).Write(memoryStream);
+
+        byte[] expected =
+        [
+            ..OneBeatSongStart,
+            0x4D, 0x54, 0x72, 0x6B, 0x00, 0x00, 0x00, 0x17, 0x00, 0xC0, 0x01,
+            0x00, 0xB0, 0x0B, 0x5F, 0x00, 0x90, 0x40, 0x7F, 0x30, 0xB0, 0x0B, 0x40,
+            0x30, 0x80, 0x40, 0x40, 0x00, 0xFF, 0x2F, 0x00,
+        ];
+
+        await Assert.That(memoryStream.ToArray()).IsEquivalentTo(expected);
     }
 
     [Test]

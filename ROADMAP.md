@@ -15,7 +15,7 @@ In this order, each measured before it is planned:
    of a later letter within the phrase and a section as it recurs.
 3. **The drums** (see *Drums*): listen to the setups and the percussion songs, the roles and the doubling, the strokes
    and accents, the drums coming and going by bar.
-4. Smaller: fade-out endings (see *Form*).
+4. **Fade-outs** (built, see *Form*): listen to how the fade sounds in the web player.
 
 ## Section dynamics
 
@@ -369,8 +369,14 @@ toms together. Notes of several sounds on one track would allow it.
 
 ## Form
 
-- **Fade-outs:** an ending that fades over the last section needs channel volume automation, since `Render` spreads the
-  notes' velocities over the whole song, so a fade in them would be undone.
+- **Fade-outs** (built): an ending (`EndingKind.Fade`, weight 0.15, leaning conventional, 9.5% of 200 corpus songs)
+  that plays the last section once more, another appearance of it, improvised as far as the song improvises, with no
+  final chord, and fades the band out over it: the form puts a song-wide render state on it (`StateKinds.Fade`, from
+  1 down a step every `FormLayers.FadeStep`, a quarter beat), which `Render` carries as the song's fade and `Midi`
+  writes as every channel's expression (CC 11), under the channel volume the web player locks for its mixer. Velocities
+  would not do: they change how hard a note is struck, not how loud the band is, and leave held notes as they are. A
+  fade of one section's pass is 12 to 16 seconds. Later, should listening ask: a ritardando into it, the drums fading
+  first, or a tag after it.
 - **Intros of their own material,** such as a riff the song does not play otherwise.
 
 ## Rhythm engine

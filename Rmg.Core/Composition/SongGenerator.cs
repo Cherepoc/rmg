@@ -103,15 +103,17 @@ public static class SongGenerator
         // and its melody placed afresh every time it plays, varied from the first as far as the song improvises
         var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), rhythmicUnconventionality.Tilt);
         StateTrace.Record(TracePoints.MelodyImprovisation, SongTracks.MelodyTrack, 0, 0, StateMap.Default, 0, $"{improvisation:F2}", improvisation);
-        var sections = sectionIds.Select((id, index) => generateSection(id).Appear(sectionIds.Take(index).Count(x => x == id), improvisation)).ToArray();
+        // a song that fades out plays its last section once more, over which it fades
+        int[] played = plan.Ending == EndingKind.Fade ? [..sectionIds, sectionIds[^1]] : sectionIds;
+        var sections = played.Select((id, index) => generateSection(id).Appear(played.Take(index).Count(x => x == id), improvisation)).ToArray();
 
         // the song put together as planned, and the lines the drums mark
-        var form = formGenerator.Assemble(plan, sectionIds, sections);
+        var form = formGenerator.Assemble(plan, played, sections);
         var songTrackNoteTimelineMap = form.Edits.ApplyTo(form.Blocks.Unroll());
         songTrackNoteTimelineMap = TrackEventStateTimelineMap.Merge(
                 [
                     songTrackNoteTimelineMap,
-                    TrackEventStateTimelineMap.Create<StateMap>(songTrackNoteTimelineMap.Duration, [], form.Tempo)
+                    TrackEventStateTimelineMap.Create<StateMap>(songTrackNoteTimelineMap.Duration, [], form.SongState)
                 ]
             )
             .MergeStateMap(commonStateMap);

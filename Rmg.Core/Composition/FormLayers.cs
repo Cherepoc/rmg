@@ -16,7 +16,10 @@ public enum EndingKind
     RingOut,
 
     /// <summary>The whole band stops a beat or two before the line, then hits the home chord together.</summary>
-    Stop
+    Stop,
+
+    /// <summary>The last section plays once more, as it would again, and the band fades out over it.</summary>
+    Fade
 }
 
 /// <summary>How a song starts before its first section.</summary>
@@ -88,11 +91,18 @@ public static class FormLayers
 
     public static ImmutableArray<Weighted<EndingKind>> Endings { get; } =
     [
-        new(0.35, EndingKind.Button),
-        new(0.4, EndingKind.RingOut),
-        new(0.1, EndingKind.Open),
-        new(0.15, EndingKind.Stop)
+        new(0.3, EndingKind.Button),
+        new(0.34, EndingKind.RingOut),
+        new(0.08, EndingKind.Open),
+        new(0.13, EndingKind.Stop),
+        new(0.15, EndingKind.Fade)
     ];
+
+    /// <summary>Whether an ending lands on a final chord, which it holds, after the last section.</summary>
+    public static bool HasFinalChord(EndingKind ending) => ending is EndingKind.Button or EndingKind.RingOut or EndingKind.Stop;
+
+    /// <summary>How often a fade steps down, in beats.</summary>
+    public const double FadeStep = 0.25;
 
     /// <summary>The endings that lean unconventional, likelier the further the song's rhythm strays.</summary>
     public static ImmutableHashSet<EndingKind> AdventurousEndings { get; } = [EndingKind.Open, EndingKind.Stop];

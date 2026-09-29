@@ -47,9 +47,9 @@ public static class Render
             renderedTracks.Add(percussionTrack);
         }
 
-        var tempoTimeline = song.TrackEventStateTimelineMap.CommonStateTimelineMap.OfScope(StateScope.Render).GetStateTimeline(StateKinds.Tempo);
+        var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap.OfScope(StateScope.Render);
 
-        return new RenderedSong(song.Duration, tempoTimeline, [..renderedTracks]);
+        return new RenderedSong(song.Duration, common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..renderedTracks]);
     }
 
     /// <summary>
