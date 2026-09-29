@@ -89,11 +89,12 @@ public sealed class FillTest
             var song = TestCorpus.Get(seed);
             var decisions = song.Trace.Where(x => x.Point == TracePoints.FillDecision).ToArray();
 
-            // a line between every two sections, one in the middle of every section, one after the intro's bars, if it
-            // has any, and one before the ending's
+            // a line between every two sections, one between every two plays of a section's pattern, one after the
+            // intro's bars, if it has any, and one before the ending's
             var map = song.Map;
             var sections = map.Sections.Length;
-            var expected = sections - 1 + sections + (map.Intro.Duration > 0 ? 1 : 0) + (map.Ending.Kind == EndingKind.Open ? 0 : 1);
+            var phraseLines = map.Sections.Sum(x => (int)Math.Round((x.End - x.Start) / Meter.PatternDuration) - 1);
+            var expected = sections - 1 + phraseLines + (map.Intro.Duration > 0 ? 1 : 0) + (map.Ending.Kind == EndingKind.Open ? 0 : 1);
             await Assert.That(decisions.Length).IsEqualTo(expected).Because($"seed {seed}");
             await Assert.That(decisions.All(x => x.Track == FillGenerator.DrumsTrace && x.Bar == 3)).IsTrue();
         }
@@ -145,7 +146,7 @@ public sealed class FillTest
                 var hits = drums.Where(x => x.Position.IsEqualToByEpsilon(position)).Select(x => x.Value.Offset).ToArray();
                 if (corpusSong.Map.Sections.Any(x => x.Start.IsEqualToByEpsilon(position) && percussionOnly[x.SectionId]))
                     continue;
-                if ((bar * 4 % SectionDuration).IsEqualToByEpsilon(0))
+                if (corpusSong.Map.Sections.Any(x => x.Start.IsEqualToByEpsilon(position)))
                 {
                     changes++;
                     if (hits.Any(Crashes.Contains))

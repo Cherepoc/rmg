@@ -167,8 +167,10 @@ public sealed class MelodyRepetitionTest
                         }
                     }
 
-                    // the question's bars against the answer's, its first half and its second
-                    if (span == first && offset < Meter.PatternDuration && melody.TryGetValue(Math.Round(position + Meter.PatternDuration, 6), out var answered))
+                    // the question's bars against the answer's, its first half and its second, where the section plays its
+                    // pattern again
+                    if (span == first && offset < Meter.PatternDuration && position + Meter.PatternDuration < first.End
+                        && melody.TryGetValue(Math.Round(position + Meter.PatternDuration, 6), out var answered))
                     {
                         var half = offset < Meter.PatternDuration / 2 ? 0 : 1;
                         answer[half]++;
@@ -194,7 +196,7 @@ public sealed class MelodyRepetitionTest
     [Test]
     public async Task ASectionThatRecurs_PlaysTheSameNotes_UnlessTheSongImprovises_AndItsAnswer_StartsAsItsQuestion_AndChangesAfter()
     {
-        var m = MeasureRecurrence(TestCorpus.Range(20));
+        var m = MeasureRecurrence(TestCorpus.Range(60));
 
         // placed over the song, a recurring section and an answer that go on from the note before replay the tune heard,
         // an octave off where it would leap from it

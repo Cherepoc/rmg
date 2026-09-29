@@ -110,8 +110,10 @@ public static class SongGenerator
         // and its melody placed afresh every time it plays, varied from the first as far as the song improvises
         var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), rhythmicUnconventionality.Tilt);
         StateTrace.Record(TracePoints.MelodyImprovisation, SongTracks.MelodyTrack, 0, 0, StateMap.Default, 0, $"{improvisation:F2}", improvisation);
-        // a song that fades out plays its last section once more, over which it fades
-        int[] played = plan.Ending == EndingKind.Fade ? [..sectionIds, sectionIds[^1]] : sectionIds;
+        // a song that fades out plays its last section once more, over which it fades, twice where it plays its pattern
+        // only once, so that the fade takes eight bars at least
+        var fading = plan.Ending != EndingKind.Fade ? 0 : generateSection(sectionIds[^1]).Plays == 1 ? 2 : 1;
+        int[] played = [..sectionIds, ..Enumerable.Repeat(sectionIds[^1], fading)];
         // the later in the song, the more
         var sections = played.Select((id, index) => generateSection(id).Appear(
                     played.Take(index).Count(x => x == id),

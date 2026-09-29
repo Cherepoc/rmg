@@ -5,7 +5,7 @@ same version of RMG; a new version may turn a seed into a different song.
 
 A song has 4-8 parts, each a sequence of 1-4 sections chosen from up to 3 distinct sections (in alternation,
 ping-pong or random order), and no section follows itself, not even from one part to the next. Every section
-is played twice and has a percussion kit and three pitched tracks (chords, melody, bass), each with its own
+plays its 4-bar pattern once, twice or four times, changes its chords every half bar, bar or two bars, and has a percussion kit and three pitched tracks (chords, melody, bass), each with its own
 rhythm and note patterns. A song plays at its own tempo, from 90 to about 175 BPM, most often 120, and about one in five swings. The bass plays
 in the middle of the stereo field, the melody near it and the chords to one side.
 
@@ -285,9 +285,10 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
   The chord root, unlike the shape, is a fraction of the scale's note count, as it moves along the
   scale.
 - **Progressions.** Every section has a home, the tonic most often (60%) and otherwise the relative
-  key, IV or V, and a 4-bar progression of chord roots around it (`Progressions`): bar 1 is the home
-  chord, bar 2 moves away, bar 3 prepares the cadence (ii or IV) and bar 4 is the cadence, which
-  resolves to bar 1 as the pattern repeats. A root is drawn by how strongly the previous one leads to
+  key, IV or V, and a progression of chord roots around it over its 4-bar pattern (`Progressions`), two, four or
+  eight chords as the section's harmonic rhythm has it: the first is the home chord, the last the
+  cadence, which resolves to the first as the pattern repeats, the one before it prepares the cadence
+  (ii or IV), and the others move away. A root is drawn by how strongly the previous one leads to
   it, falling a fifth the most, and by how well it suits its bar. The cadence chords follow from the
   chords the scale builds around the home, so they suit the mode: V where it is major, ♭VII in
   mixolydian or natural minor, ♭II in phrygian, IV or ♭VII in dorian. Roots stay within 3 steps of the

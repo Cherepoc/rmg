@@ -218,8 +218,11 @@ internal sealed class SectionGenerator
 
         var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads.ToImmutable(), sectionRoles, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm).ToArray();
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm).ToArray();
-        // the section's pattern played twice, its melody as a question and its answer
-        var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap).Repeat(2);
+        // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
+        // of its own, the less conventional the section the likelier it plays other than twice
+        var plays = SectionLength.Draw(Stream(sectionId, SectionStream.Length), rhythm.Tilt);
+        StateTrace.Record(TracePoints.SectionLength, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{plays}", plays);
+        var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap).Repeat(plays);
         ImmutableArray<SectionLine> lines = [..pitched.Select(x => x.Line).OfType<SectionLine>()];
         var section = new GeneratedSection(
             timeline,
@@ -228,7 +231,8 @@ internal sealed class SectionGenerator
             energy,
             isPercussionOnly,
             sectionRoles.Keys.ToImmutableDictionary(x => x, x => SectionRole(sectionRoles, x)),
-            lines
+            lines,
+            plays
         );
         return section.Appear(0, 0);
     }
@@ -555,6 +559,7 @@ internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScal
 /// <param name="IsPercussionOnly">Whether the section plays its percussion without the drum kit.</param>
 /// <param name="DrumRoles">The role every one of the song's drums plays in the section.</param>
 /// <param name="Lines">The section's lines, such as its melody, before they are placed, placed afresh every time it plays.</param>
+/// <param name="Plays">How many times the section plays its 4-bar pattern: once, twice or four times (<see cref="SectionLength" />).</param>
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
     RhythmicUnconventionality Rhythm,
@@ -562,19 +567,29 @@ internal sealed record GeneratedSection(
     double Energy,
     bool IsPercussionOnly,
     ImmutableDictionary<int, DrumRole> DrumRoles,
-    ImmutableArray<SectionLine> Lines
+    ImmutableArray<SectionLine> Lines,
+    int Plays
 )
 {
     /// <summary>
     ///     The section as it plays the given time, from 0: its lines placed for that time, mutated from the first by
-    ///     the song's improvisation (<see cref="SectionLine.Place" />), and every other track as it was made.
+    ///     the song's improvisation (<see cref="SectionLine.Place" />), and every other track as it was made. A section
+    ///     played once plays its lines' question alone; one played four times plays the question and the answer twice,
+    ///     the second time as a further appearance, improvised as far as the song improvises.
     /// </summary>
     public GeneratedSection Appear(int appearance, double improvisation)
     {
         var timeline = Timeline;
         foreach (var line in Lines)
         {
-            var placed = line.Appear(appearance, improvisation).TrackTimelineMap[line.Track].EventTimeline.MapValues(x => x.OfScope(StateScope.Render));
+            var bars = Plays switch
+            {
+                1 => line.Appear(appearance, improvisation).Trim(Meter.PatternDuration),
+                2 => line.Appear(appearance, improvisation),
+                4 => new[] { line.Appear(2 * appearance, improvisation), line.Appear(2 * appearance + 1, improvisation) }.Unroll(),
+                _ => throw new InvalidOperationException($"A section plays its pattern once, twice or four times, not {Plays} times.")
+            };
+            var placed = bars.TrackTimelineMap[line.Track].EventTimeline.MapValues(x => x.OfScope(StateScope.Render));
             timeline = timeline.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [line.Track] = _ => placed });
         }
 
@@ -612,5 +627,6 @@ internal enum SectionStream
     BassImprovisation = 11,
     DrumBindings = 12,
     DrumFeels = 13,
-    HarmonicRhythm = 14
+    HarmonicRhythm = 14,
+    Length = 15
 }

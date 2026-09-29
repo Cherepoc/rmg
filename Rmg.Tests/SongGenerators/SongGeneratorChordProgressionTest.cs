@@ -51,14 +51,15 @@ public sealed class SongGeneratorChordProgressionTest
         const int chordTrackNumber = 4;
         for (var seed = 0; seed < 10; seed++)
         {
-            var (song, origin) = TestCorpus.Get(seed);
+            var corpusSong = TestCorpus.Get(seed);
+            var song = corpusSong.Song;
             var commonStateTimelineMap = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
             var notes = song.TrackEventStateTimelineMap.TrackTimelineMap[chordTrackNumber]
                 .MergeStateMap(song.TrackDefinitions[chordTrackNumber].StateMap)
                 .MergeStateTimelineMap(commonStateTimelineMap)
                 .ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
 
-            foreach (var section in notes.GroupBy(x => Math.Floor((x.Position - origin) / SectionDuration)))
+            foreach (var section in notes.GroupBy(x => corpusSong.Map.Sections.LastOrDefault(s => s.Start <= x.Position + 1e-9)?.Start))
             {
                 var sectionOffsets = new HashSet<int>();
                 foreach (var note in section)

@@ -179,10 +179,11 @@ internal sealed class SongFormGenerator
             }
         }
 
-        // a fading song plays its last section once more, as the song plans it, and fades out over it
+        // a fading song plays its last section once more, as the song plans it, and fades out over it, over eight bars
+        // at least, a section of one play's pattern played twice
         if (plan.Ending == EndingKind.Fade)
         {
-            var fadeStart = spans[^1].Start;
+            var fadeStart = Math.Min(spans[^1].Start, end - 2 * Meter.PatternDuration);
             songState = CreateFade(fadeStart, end);
             description += $", fading from beat {fadeStart} to {end}";
         }
