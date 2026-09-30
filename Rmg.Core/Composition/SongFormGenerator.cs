@@ -112,7 +112,7 @@ internal sealed class SongFormGenerator
         var endingDuration = plan.Ending switch
         {
             _ when !FormLayers.HasFinalChord(plan.Ending) => 0,
-            EndingKind.RingOut => plan.Held,
+            // a bar of the last section's meter at least, as the final chord's block is
             _ => Math.Max(plan.Held, last.BarDuration)
         };
         var map = new SongMap(

@@ -13,7 +13,7 @@ public sealed class RealizedNoteTest
     {
         using var stream = new MemoryStream();
         var rendered = Render.RenderSong(song);
-        new RenderedSong(rendered.Duration, rendered.Meter, rendered.TempoTimeline, rendered.FadeTimeline,
+        new RenderedSong(rendered.Duration, rendered.Meters, rendered.TempoTimeline, rendered.FadeTimeline,
             [..rendered.Tracks.Select(x => new RenderedTrack(x.IsPercussionInstrument, x.Role, x.PitchInstrumentCode, x.NoteTimeline, x.Pan, x.Volume))]).Write(stream, null);
         return stream.ToArray();
     }

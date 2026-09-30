@@ -256,15 +256,16 @@ public static class Midi
         stream.Write(allEvents, 0, allEvents.Length);
     }
 
-    private static void WriteSystemTrack(StateTimeline<double> tempoTimeline, Meter meter, string? label, uint durationDelta, Stream stream)
+    private static void WriteSystemTrack(StateTimeline<double> tempoTimeline, ImmutableArray<(double Position, Meter Meter)> meters, string? label, uint durationDelta, Stream stream)
     {
         var events = tempoTimeline.Select(x => new MidiEvent(AbsoluteDelta(x.Position), Tempo(x.Value)));
         if (tempoTimeline.Count == 0 || tempoTimeline[0].Position > 0)
             events = events.Prepend(new MidiEvent(0, Tempo(1)));
 
-        var (numerator, denominator) = meter.TimeSignature;
-        // a click on every pulse of the meter, six clocks a 16th
-        events = events.Prepend(new MidiEvent(0, TimeSignature((byte)numerator, (byte)denominator, (byte)(meter.PulseSixteenths * 6))));
+        // every meter where it starts, a click on every pulse of it, six clocks a 16th
+        events = meters
+            .Select(x => new MidiEvent(AbsoluteDelta(x.Position), TimeSignature((byte)x.Meter.TimeSignature.Numerator, (byte)x.Meter.TimeSignature.Denominator, (byte)(x.Meter.PulseSixteenths * 6))))
+            .Concat(events);
         if (label is not null)
             events = events.Prepend(new MidiEvent(0, Text(label)));
 
@@ -378,7 +379,7 @@ public static class Midi
         var ticksPerQuarterNoteBytes = IntToBytesFixed(TicksPerQuarterNote, 2);
         stream.Write(ticksPerQuarterNoteBytes, 0, ticksPerQuarterNoteBytes.Length);
 
-        WriteSystemTrack(song.TempoTimeline, song.Meter, label, songDurationDelta, stream);
+        WriteSystemTrack(song.TempoTimeline, song.Meters, label, songDurationDelta, stream);
 
         var indexedTracks = song.Tracks.ToIndexedTracks();
         foreach (var (channel, track) in indexedTracks) WriteNoteTrack(track, channel, song.FadeTimeline, songDurationDelta, stream);

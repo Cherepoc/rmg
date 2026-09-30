@@ -8,20 +8,22 @@ public sealed class RenderedSong
 {
     public RenderedSong(
         double duration,
-        Meter meter,
+        ImmutableArray<(double Position, Meter Meter)> meters,
         StateTimeline<double> tempoTimeline,
         StateTimeline<double> fadeTimeline,
         ImmutableArray<RenderedTrack> tracks
     )
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(duration);
+        if (meters.IsDefaultOrEmpty || meters[0].Position != 0)
+            throw new ArgumentException("A song's meters start with the one it starts in.", nameof(meters));
         if (!tempoTimeline.IsDefault && tempoTimeline.StateKind != StateKinds.Tempo)
             throw new ArgumentException("Tempo timeline must be of kind Tempo.", nameof(tempoTimeline));
         if (!fadeTimeline.IsDefault && fadeTimeline.StateKind != StateKinds.Fade)
             throw new ArgumentException("Fade timeline must be of kind Fade.", nameof(fadeTimeline));
 
         Duration = duration;
-        Meter = meter;
+        Meters = meters;
         TempoTimeline = tempoTimeline;
         FadeTimeline = fadeTimeline;
         Tracks = tracks;
@@ -29,8 +31,11 @@ public sealed class RenderedSong
 
     public double Duration { get; }
 
-    /// <summary>The meter the song's bars are in, which its MIDI file writes as its time signature.</summary>
-    public Meter Meter { get; }
+    /// <summary>The meter the song starts in.</summary>
+    public Meter Meter => Meters[0].Meter;
+
+    /// <summary>The meter the song's bars are in from where it starts and every change, which its MIDI file writes as its time signatures.</summary>
+    public ImmutableArray<(double Position, Meter Meter)> Meters { get; }
 
     public StateTimeline<double> TempoTimeline { get; }
 

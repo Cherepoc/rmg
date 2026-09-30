@@ -128,16 +128,19 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     /// </summary>
     public double[] FillLines()
     {
-        var first = Map.Intro.Duration > 0 ? 0 : 1;
-        var last = (int)Math.Round((Map.Sections[^1].End - Origin) / Map.Meter.PatternDuration) - (FormLayers.HasFinalChord(Map.Ending.Kind) ? 0 : 1);
+        // every pattern's start in its section's meter, the song's first only after an intro, and the ending's line where
+        // it has a final chord
+        var patterns = Map.Sections
+            .SelectMany(span => Enumerable.Range(0, (int)Math.Round(span.Duration / span.Meter.PatternDuration)).Select(p => span.Start + p * span.Meter.PatternDuration))
+            .Where(x => Map.Intro.Duration > 0 || x > Origin + 1e-9)
+            .Concat(FormLayers.HasFinalChord(Map.Ending.Kind) ? [Map.Sections[^1].End] : []);
         var windowEnd = Map.Intro.Kind == IntroKind.Entries && !Map.Intro.Window.IsBefore ? Origin + Map.Intro.Window.Bars * Map.Meter.BarDuration : double.NaN;
         // and every bar of a drum solo
         var soloBars = Solos.Where(x => x.Value.IsDrumSolo).Select(x => Map.Sections[x.Key])
-            .SelectMany(span => Enumerable.Range(1, (int)Math.Round(span.Duration / Map.Meter.BarDuration) - 1).Select(bar => span.Start + bar * Map.Meter.BarDuration));
+            .SelectMany(span => Enumerable.Range(1, (int)Math.Round(span.Duration / span.Meter.BarDuration) - 1).Select(bar => span.Start + bar * span.Meter.BarDuration));
         return
         [
-            ..Enumerable.Range(first, last - first + 1)
-                .Select(x => Origin + x * Map.Meter.PatternDuration)
+            ..patterns
                 .Where(x => x >= Map.Sections[^1].End - 1e-9
                             || HasDrums(Map.Sections.Last(s => s.Start <= x + 1e-9))
                             || Math.Abs(x - windowEnd) < 1e-9 && HasDrums(Map.Sections[0]))

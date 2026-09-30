@@ -49,7 +49,12 @@ public sealed record Meter(ImmutableArray<int> Groups)
     public static Meter Draw(IGenerationContext context, double unconventionality, int? given)
     {
         var drawn = context.Pick(ByConvention.Weigh(Options, unconventionality));
-        var meter = given is { } option ? Options[option].Meter : drawn;
+        return InAnOrder(context, given is { } option ? Options[option].Meter : drawn);
+    }
+
+    /// <summary>The meter with its groups in an order drawn among theirs.</summary>
+    public static Meter InAnOrder(IGenerationContext context, Meter meter)
+    {
         var orders = Orders(meter.Groups).ToArray();
         return new Meter(orders[(int)(context.GenerateDouble() * orders.Length)]);
     }

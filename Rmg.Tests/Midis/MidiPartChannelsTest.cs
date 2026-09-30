@@ -20,7 +20,7 @@ public sealed class MidiPartChannelsTest
 
     private static RenderedSong Song(params RenderedTrack[] tracks)
     {
-        return new RenderedSong(1, Meter.FourFour, StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), [..tracks]);
+        return new RenderedSong(1, [(0, Meter.FourFour)], StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), [..tracks]);
     }
 
     [Test]

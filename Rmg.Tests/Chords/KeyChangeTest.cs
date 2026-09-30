@@ -12,7 +12,7 @@ public sealed class KeyChangeTest
 
     // every pattern's start in the song's sections, the song's own first left out
     private static double[] PatternStarts(CorpusSong song) => song.Map.Sections
-        .SelectMany(x => Enumerable.Range(0, (int)Math.Round((x.End - x.Start) / song.Map.Meter.PatternDuration)).Select(p => x.Start + p * song.Map.Meter.PatternDuration))
+        .SelectMany(x => Enumerable.Range(0, (int)Math.Round((x.End - x.Start) / x.Meter.PatternDuration)).Select(p => x.Start + p * x.Meter.PatternDuration))
         .Skip(1)
         .ToArray();
 

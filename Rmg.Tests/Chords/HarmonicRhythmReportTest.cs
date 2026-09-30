@@ -16,10 +16,9 @@ public sealed class HarmonicRhythmReportTest
             var bars = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).Select(x => ((HarmonicRhythm)x.Value!).Bars).ToArray();
             await Assert.That(bars.All(x => x is 0.5 or 1 or 2)).IsTrue();
 
-            // every change on the start of a group of the meter
+            // every change on the start of a group of its section's meter
             var changes = song.ChordChanges;
-            var meter = song.Map.Meter;
-            await Assert.That(changes.All(x => Math.Abs(meter.NearestGroupStart(x - song.Origin) - (x - song.Origin)) < 1e-9)).IsTrue().Because($"seed {song.Seed}");
+            await Assert.That(changes.All(x => Math.Abs(song.Map.MeterAt(x).NearestGroupStart(song.Map.BeatInBar(x)) - song.Map.BeatInBar(x)) < 1e-9)).IsTrue().Because($"seed {song.Seed}");
 
             var gaps = changes.Zip(changes.Skip(1), (a, b) => b - a).ToArray();
             await Assert.That(gaps.All(x => x > 0)).IsTrue();

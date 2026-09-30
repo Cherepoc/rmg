@@ -104,7 +104,9 @@ public sealed class SongGeneratorChordProgressionTest
             var notes = GetPitchedNotes(song).Where(x => x.Shape != "").ToList();
 
             // the shape still only changes at half-bar lines
-            foreach (var halfBar in notes.GroupBy(x => (x.TrackNumber, HalfBar: Math.Floor(x.Position / (bar / 2)))))
+            // counted in the bars of the note's section
+            double HalfBarOf(double position) => song.Map.SectionAt(position) is { } span ? span.Start * 1000 + Math.Floor((position - span.Start) / (span.Meter.BarDuration / 2)) : Math.Floor(position / (bar / 2));
+            foreach (var halfBar in notes.GroupBy(x => (x.TrackNumber, HalfBar: HalfBarOf(x.Position))))
             {
                 await Assert.That(halfBar.Select(x => x.Shape).Distinct().Count())
                     .IsEqualTo(1)

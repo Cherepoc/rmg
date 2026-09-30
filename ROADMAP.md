@@ -186,11 +186,14 @@ dotted 8th (`MeterReportTest`; `MeterSeedsReportTest` names seeds to hear).
 
 - **To listen to:** whether 6/8 drags, its tempo counted in quarters so that 120 pulses at 80 (to draw the tempo by
   the pulse if so), and whether 13/16 is too busy.
-- **A bar of two beats before a section, and a section's meter of its own** (P3, planned and put off): both make
-  the meter a thing of a place in the song rather than of the song, the song map's bars no longer all alike, and
-  every reader of the song's meter (the fills, the edits, the bass's fills, the realizer, the trace's bars, the
-  tests' bar arithmetic) asking it at a position; the MIDI file a time signature at every change. Rare in the
-  music it plays, against a cost across the song's assembly; to take up when the song map holds its bars.
+- **A section's own meter** (built): a section but the first may be in a meter of its own every time it plays, by the
+  feel facet (`SectionMeter`, 0.02 at the middle), a chorus or a bridge leaning to it, another of the song's options
+  as the facet weighs them, its groups in an order of their own. The song map's sections carry their meter and every
+  reader asks a position's (`SongMap.MeterAt`, `PatternBarAt`, `BeatInBar`): the fills, the edits, the bass's walks,
+  the realizer, the form's lifts and ending, the key changes, solos and switches; the MIDI file signs every change
+  (`RenderedSong.Meters`). Over 1024 songs, in the middle fifth 4% of the choruses and bridges and 2% of the others, in
+  the wildest 65% and 42%, 3/4, 6/8 and 4/4 most often (`SectionMeterTest`). Left: a bar of two beats before a
+  section, which would make the bars of a section unlike each other; swing, which the song's meter decides.
 - **Overlapping polyrhythms** (P3, after *Long cycles*, needed someday): a figure of a length of its own, such as a
   riff of 23 16ths, running on against the bar, as the kick and the guitar do against the hi-hat and the snare in
   Meshuggah, meeting the bar again at a phrase's end; it covers cross-rhythms, a grouped cycle running on across the

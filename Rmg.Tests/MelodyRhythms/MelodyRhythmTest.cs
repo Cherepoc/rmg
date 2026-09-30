@@ -111,10 +111,10 @@ public sealed class MelodyRhythmTest
         for (var seed = 0; seed < 256; seed++)
         {
             var (melody, origin) = RenderMelodyFrom(seed);
-            var meter = TestCorpus.Get(seed).Map.Meter;
-            var duration = melody[^1].Position + meter.BarDuration;
-            // a phrase is a section's 4-bar pattern, so its last bar ends at every pattern's end from the sections' start
-            for (var end = origin + meter.PatternDuration; end < duration; end += meter.PatternDuration)
+            var map = TestCorpus.Get(seed).Map;
+            // a phrase is a section's 4-bar pattern, so its last bar ends at every pattern's end in its section's meter
+            var ends = map.Sections.SelectMany(x => Enumerable.Range(1, (int)Math.Round(x.Duration / x.Meter.PatternDuration)).Select(p => (End: x.Start + p * x.Meter.PatternDuration, x.Meter)));
+            foreach (var (end, meter) in ends)
             {
                 var last = melody.Where(x => x.Position < end && x.Position >= end - meter.BarDuration).ToArray();
                 if (last.Length == 0)

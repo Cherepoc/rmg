@@ -87,7 +87,8 @@ public sealed class CadenceRaisedStepTest
                 // fifth seen from its fourth step
                 await Assert.That(changes).Contains(item.Position).Because($"seed {seed}");
                 var next = changes.FirstOrDefault(x => x > item.Position, song.Map!.Sections.Max(x => x.End));
-                await Assert.That((next - origin) % song.Map.Meter.PatternDuration).IsEqualTo(0).Because($"seed {seed}");
+                var section = song.Map.SectionAt(item.Position)!;
+                await Assert.That((next - section.Start) % section.Meter.PatternDuration).IsEqualTo(0).Because($"seed {seed}");
             }
         }
 

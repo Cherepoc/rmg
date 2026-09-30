@@ -68,14 +68,16 @@ internal sealed class FillGenerator
         SongMap? map = null
     )
     {
-        // a fast song's runs play coarser notes, which finer ones would blur
-        var tempo = Meter.BaseTempo * song.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(StateKinds.Tempo);
-        var minNote = FillLayers.MinNoteSeconds * tempo / 60;
+        // a fast section's runs play coarser notes, which finer ones would blur, at the tempo the section the fill ends
+        // starts at, before any slowing into the ending
+        var tempo = song.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
+        double MinNote(double line) =>
+            FillLayers.MinNoteSeconds * Meter.BaseTempo * tempo.GetEffectiveValueAt(map?.SectionAt(line - 1e-9)?.Start ?? 0) / 60;
 
         var drummer = Drummer.Generate(_context, _songRhythm.Value);
         var edits = new TimelineEdits(_context, _meter, map);
         foreach (var line in lines)
-            MarkLine(song, edits, line, minNote, drummer, map);
+            MarkLine(song, edits, line, MinNote(line.Position), drummer, map);
 
         return edits.ApplyTo(song);
     }

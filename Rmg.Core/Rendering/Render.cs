@@ -106,7 +106,12 @@ public static class Render
                 Expression = x.Track.Expression,
                 Echoes = x.Track.Echoes
             });
-        return new RenderedSong(song.Duration, song.Meter, common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..mixed]);
+        // the meter the song starts in, and every section's that is another than the one before
+        var meters = new List<(double Position, Meter Meter)> { (0, song.Meter) };
+        foreach (var section in song.Map?.Sections ?? [])
+            if (!section.Meter.Equals(meters[^1].Meter))
+                meters.Add((section.Start, section.Meter));
+        return new RenderedSong(song.Duration, [..meters], common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..mixed]);
     }
 
     /// <summary>Where a track's instrument changes, a note playing another than the one before it, swung as the note is.</summary>

@@ -155,9 +155,18 @@ public static class SongGenerator
             meter
         );
         var plan = formGenerator.Plan(sectionIds);
+        // a section in a meter of its own now and then, a chorus the likelier, each drawing from a stream of its own
+        var sectionMeters = SectionMeter.Generate(
+            id => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SectionMeter), id)),
+            meter,
+            songUnconventionality[Facet.Feel],
+            sectionIds,
+            structure.Roles
+        );
+        StateTrace.Record(TracePoints.SectionMeter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", sectionMeters.Select(x => $"{x.Key} {x.Value}")), sectionMeters);
 
         // every section is generated once, where it first plays
-        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0], structure.Roles[id], meter))))
+        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0], structure.Roles[id], sectionMeters[id]))))
             .CacheGeneratedValues();
         // and its melody placed afresh every time it plays, varied from the first as far as the song improvises
         var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), songUnconventionality[Facet.Melody]);
@@ -400,5 +409,6 @@ internal enum SongStream
     PartSound = 35,
     SectionKey = 36,
     RhythmPart = 37,
-    SectionTempo = 38
+    SectionTempo = 38,
+    SectionMeter = 39
 }
