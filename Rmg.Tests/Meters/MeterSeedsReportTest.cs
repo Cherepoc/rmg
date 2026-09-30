@@ -13,7 +13,7 @@ public sealed class MeterSeedsReportTest
         static Meter Of(int seed) => Meter.Draw(
             SongGenerator.CreateStream(seed, SongStream.Meter),
             Unconventionality.Generate(
-                RhythmicUnconventionality.Generate(SongGenerator.CreateStream(seed, SongStream.Rhythm)).Value,
+                Unconventionality.DrawBase(SongGenerator.CreateStream(seed, SongStream.Rhythm)),
                 facet => SongGenerator.CreateStream(seed, SongStream.Unconventionality, facet)
             )[Facet.Feel]
         );

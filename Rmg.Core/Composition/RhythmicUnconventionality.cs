@@ -15,9 +15,6 @@ public sealed record RhythmicUnconventionality(double Value)
     /// <summary>How little a section of the wildest rhythm follows its energy.</summary>
     public const double MaxDecoupling = 0.8;
 
-    // around 0 with a flat peak, from -2 to 2, so that songs spread over the whole range and more of them near the middle
-    private static readonly Func<IGenerationContext, double> SpreadGenerator = Generators.SplineValue(0);
-
     /// <summary>What the odds of an unconventional choice are multiplied by: from 1/4 at 0 through 1 at 0.5 to 4 at 1.</summary>
     public double ChanceScale => Tilt.Odds;
 
@@ -29,11 +26,6 @@ public sealed record RhythmicUnconventionality(double Value)
 
     /// <summary>How much of what a section's energy leans it to the rhythm follows: all at 0, a fifth at 1.</summary>
     public double Coupling => 1 - MaxDecoupling * Value;
-
-    public static RhythmicUnconventionality Generate(IGenerationContext context)
-    {
-        return new RhythmicUnconventionality(Math.Clamp(0.5 + SpreadGenerator(context) / 4, 0, 1));
-    }
 
     /// <summary>
     ///     A chance's ends, as it leaned by the unconventionality through <see cref="Tilt" />: an unconventional thing

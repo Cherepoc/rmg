@@ -108,7 +108,7 @@ public sealed class MelodyRhythmTest
     public async Task Phrases_MostlyEndWithAHeldNote_AndARest()
     {
         int phrases = 0, held = 0, rested = 0;
-        for (var seed = 0; seed < 32; seed++)
+        for (var seed = 0; seed < 256; seed++)
         {
             var (melody, origin) = RenderMelodyFrom(seed);
             var meter = TestCorpus.Get(seed).Map.Meter;

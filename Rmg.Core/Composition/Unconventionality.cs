@@ -34,21 +34,32 @@ public enum Facet
 /// <summary>
 ///     How far a song or a section strays from convention, from 0, the plainest, to 1, the wildest: a base, and a value
 ///     for every facet drawn around it, each from a sequence of its own, so that a song may be plain in one way and wild
-///     in another. The facets stray the less the nearer the base is to an end, and not at all there, so that a base of 0
-///     makes every facet 0 and one of 1 every facet 1. A section moves every facet a little, and not at all at an end.
+///     in another. Every value strays in log-odds, the less the nearer it is to an end and not at all there, so that a
+///     base of 0 makes every facet 0 and one of 1 every facet 1; a section moves every facet a little the same way.
 /// </summary>
 /// <param name="Base">The song's value, which the facets are drawn around.</param>
 /// <param name="Facets">Every facet's value.</param>
 public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, double> Facets)
 {
     /// <summary>
-    ///     How far a facet strays from the base, either way, with the base in the middle, so that a middling song's facets
-    ///     stray from it by up to about 0.27 nine times in ten, and chords and groove go together about as closely as 0.67.
+    ///     How far a generated song's base strays from the middle, in log-odds, as far as the widest draw goes: its values
+    ///     gather about the middle and thin out towards the ends, which only a supplied base reaches, near one in about one
+    ///     song in eighty.
     /// </summary>
-    public const double FacetSpread = 0.6;
+    public const double BaseSpread = 1.2;
 
-    /// <summary>How far a section moves a facet, either way, with the facet in the middle.</summary>
-    public const double SectionShift = 0.15;
+    /// <summary>
+    ///     How far a facet strays from the base, either way, in log-odds: freely about the middle, and less and less
+    ///     towards an end the nearer the base is to it, and not at all at an end; so that a generated song's chords and
+    ///     groove go together about as closely as 0.75, a facet is near an end in about one song in sixteen, and a song as
+    ///     a whole, its facets' mean, in about one in a hundred.
+    /// </summary>
+    public const double FacetSpread = 2;
+
+    /// <summary>How far a section moves a facet, either way, in log-odds: about 0.15 about the middle.</summary>
+    public const double SectionShift = 0.6;
+
+    private static readonly Func<IGenerationContext, double> BaseGenerator = Generators.SplineValue(0);
 
     private static readonly Func<IGenerationContext, double> ShiftGenerator = Generators.SplineValue();
 
@@ -75,13 +86,25 @@ public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, d
     }
 
     /// <summary>
-    ///     A value around the one given, by up to the spread either way where it is 0.5 and the less the nearer it is to an
-    ///     end, where it stays.
+    ///     A generated song's base, drawn in log-odds about the middle (<see cref="BaseSpread" />), in place of a supplied
+    ///     one, which is used as given.
+    /// </summary>
+    public static double DrawBase(IGenerationContext context)
+    {
+        return Logistic(BaseGenerator(context) * BaseSpread);
+    }
+
+    /// <summary>
+    ///     A value around the one given, moved by up to the spread either way in log-odds, so that it moves the less the
+    ///     nearer it is to an end, towards which it thins out, and not at all at one.
     /// </summary>
     private static double Around(double value, double spread, IGenerationContext context)
     {
-        return Math.Clamp(value + spread * 4 * value * (1 - value) * ShiftGenerator(context), 0, 1);
+        var shift = ShiftGenerator(context) * spread;
+        return value is 0 or 1 ? value : Logistic(Math.Log(value / (1 - value)) + shift);
     }
+
+    private static double Logistic(double logOdds) => 1 / (1 + Math.Exp(-logOdds));
 }
 
 /// <summary>What a test sets in place of the song's own draws; none for the song as its seed makes it.</summary>

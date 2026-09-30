@@ -28,15 +28,15 @@ public sealed class RhythmicUnconventionalityTest
     }
 
     [Test]
-    public async Task Songs_SpreadOverTheRange_AroundTheMiddle()
+    public async Task GeneratedSongs_GatherAboutTheMiddle_AndSeldomNearAnEnd()
     {
         var context = new GenerationContext(1);
-        var values = Enumerable.Range(0, 20_000).Select(_ => RhythmicUnconventionality.Generate(context).Value).Order().ToArray();
+        var values = Enumerable.Range(0, 20_000).Select(_ => Unconventionality.DrawBase(context)).Order().ToArray();
 
         await Assert.That(values[values.Length / 2]).IsEqualTo(0.5).Within(0.03);
-        await Assert.That(values[values.Length / 4]).IsLessThan(0.35);
-        await Assert.That(values[values.Length * 3 / 4]).IsGreaterThan(0.65);
-        await Assert.That(values.All(x => x is >= 0 and <= 1)).IsTrue();
+        await Assert.That(values[values.Length / 4]).IsLessThan(0.4);
+        await Assert.That(values[values.Length * 3 / 4]).IsGreaterThan(0.6);
+        await Assert.That(values.Count(x => x is < 0.1 or > 0.9) / (double)values.Length).IsLessThan(0.02);
     }
 
     [Test]
@@ -46,7 +46,7 @@ public sealed class RhythmicUnconventionalityTest
         // over enough songs that the quarters compared are not left to chance: over 80, the ratio swings from 1.4 to 1.7
         for (var seed = 0; seed < 256; seed++)
         {
-            var value = RhythmicUnconventionality.Generate(SongGenerator.CreateStream(seed, SongStream.Rhythm)).Value;
+            var value = ((Unconventionality)TestCorpus.Get(seed).Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!)[Facet.Feel];
             var hits = TestCorpus.Get(seed).Song.TrackEventStateTimelineMap.TrackTimelineMap
                 .Where(x => x.Key >= DrumGroups.FirstTrackNumber)
                 .SelectMany(x => x.Value.EventTimeline.Select(e => e.Position))

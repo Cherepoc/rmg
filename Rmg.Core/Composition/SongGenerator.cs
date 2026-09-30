@@ -48,7 +48,7 @@ public static class SongGenerator
 
         // how far the song strays from convention, and every facet of it, drawn around the song's; the rhythm strays as
         // the groove does, which every rhythm layer from the tracks' own on is scaled by
-        var unconventionalityBase = overrides.Base ?? RhythmicUnconventionality.Generate(Stream(SongStream.Rhythm)).Value;
+        var unconventionalityBase = overrides.Base ?? Unconventionality.DrawBase(Stream(SongStream.Rhythm));
         var songUnconventionality = Unconventionality.Generate(unconventionalityBase, facet => CreateStream(seed, SongStream.Unconventionality, facet));
         if (overrides.Facets is { } facets)
             songUnconventionality = songUnconventionality with { Facets = songUnconventionality.Facets.SetItems(facets) };
