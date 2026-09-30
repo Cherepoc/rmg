@@ -13,7 +13,7 @@ measured before and after by a report test, by the measure its entry names.
 
 **Next** (P1), in this order:
 
-1. **The meter:** as its hierarchy, in five steps (see *Meter*); a cycle split in three is built.
+1. **The meter:** as its hierarchy (see *Meter*); the meter a value and the engine and the grooves from its tree are built, 3/4 and 6/8 next.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -114,24 +114,21 @@ and threading a value that is always four through a hundred readers would change
   4/4 as two halves of two beats, 3/4 as three beats, 6/8 as two groups of three 8ths, 15/16 as 4+4+4+3 or
   3+3+3+3+3, a tree from the bar down to its 16ths, every node splitting by the odd number of its steps first, as a
   grouped cycle now does, and in two after. In this order, each measured:
-  1. **The meter as a value** (`Meter` a record, a song's), which every reader of the bar's length and the pattern's
-     reads, and the MIDI file's time signature; every song in four, the corpus unchanged.
-  2. **The engine from the tree:** a cycle's template the node's, from its start down, and a rhythm's period a level of
-     the tree, the level whose nodes are nearest the length the period has in four, the coarser where two are as near,
-     so that the same settings play as busy in every meter; a cycle restarting at every node of its level, as a grouped
-     one restarts now, a phase a place in the node, and a tuplet only on a node of a power of two of steps. In four the
-     tree is the dyadic template, so the corpus unchanged.
-  3. **The grooves from the tree,** where the drums' roles now set 4/4's periods and phases by hand: the backbeat the
-     weak nodes of the level nearest a beat and a half apart (4/4's 2 and 4, 3/4's 2 and 3, 6/8's 4), the ground the
-     bar's and its groups' starts, the time the level nearest an 8th; measured against 4/4 as it plays, the corpus
-     changing only as far as the derived grooves differ from the hand-set ones.
-  4. **3/4 and 6/8,** drawn per song by a small chance, leaned away from convention; the harmonic rhythm counted in bars,
+  1. **The meter as a value** (built): `Meter` a record, a song's, which every reader of the bar's length and the
+     pattern's reads, and the MIDI file's time signature; every song in four, the corpus unchanged.
+  2. **The engine and the grooves from the tree** (built): a straight period counted in the meter's pulse (`Tactus`,
+     the level nearest a beat), a period of the reference bar the bar, a longer one two bars, a shorter one the level
+     nearest as many pulses; every node a cycle of its own descendants, a rank the depth a start first appears at, and
+     half a cycle late its other parts struck first. So the drums' roles keep 4/4's periods and phases and the tree
+     reads them: the backbeat on 2 and 4, on 2 and 3 in 3/4, on the fourth 8th in 6/8 and on the groups after the
+     first in 15/16, the ground on the bar's and its groups' starts (`MeterTreeTest`). Tuplets and grouped periods run
+     on from the bar's start as before. In four every cycle is as it was, the corpus unchanged.
+  3. **3/4 and 6/8,** drawn per song by a small chance, leaned away from convention; the harmonic rhythm counted in bars,
      the fills' spans and the bass's pickup in the meter's groups, the count-in by groups, swing only where a meter's
      groups are even. Listened to before going on.
-  5. **Odd meters,** 5/4, 7/8, 15/16 and the like, groupings drawn among the usual ones, rarely, and the bar of two
+  4. **Odd meters,** 5/4, 7/8, 15/16 and the like, groupings drawn among the usual ones, rarely, and the bar of two
      beats before a section; then a section's meter of its own.
-  What it costs: the first three change nothing heard and touch about a hundred readers; the grooves are where the
-  musical risk is, as 4/4's conventions are set by hand today; the tempo is in quarter notes, so 6/8 at 120 pulses at
+  What it costs: the tempo is in quarter notes, so 6/8 at 120 pulses at
   80, which may want the tempo drawn by the meter's pulse.
 - **Other meters** (with listening): 3/4, 6/8, 7/8 or 13/16 drawn, leaned conventional towards four; the first use a
   bar of two beats now and then before a section. Measured by: the meters drawn by conventionality; the drums' notes a
