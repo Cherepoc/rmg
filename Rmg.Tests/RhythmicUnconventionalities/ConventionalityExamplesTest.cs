@@ -5,7 +5,7 @@ using Rmg.Core.Events;
 namespace Rmg.Tests.RhythmicUnconventionalities;
 
 /// <summary>
-///     Songs at both ends of the unconventionality, their base supplied as 0 and as 1, written to songs/conventionality to
+///     Songs at both ends of the unconventionality, their base supplied as 0 and as 1, and fairly wild between, written to songs/conventionality to
 ///     listen to, each described: its meter, tempo, scales, feels, form, drums, key change, intro, ending and chords.
 /// </summary>
 public sealed class ConventionalityExamplesTest
@@ -16,7 +16,7 @@ public sealed class ConventionalityExamplesTest
     {
         var directory = Path.Combine(Directory.GetCurrentDirectory(), "..", "..", "..", "..", "songs", "conventionality");
         Directory.CreateDirectory(directory);
-        foreach (var (name, @base) in new[] { ("plainest", 0.0), ("wildest", 1.0) })
+        foreach (var (name, @base) in new[] { ("plainest", 0.0), ("fairly-wild", 96 / 127.0), ("wildest", 1.0) })
         foreach (var seed in new[] { 1, 2, 3 })
         {
             var song = TestCorpus.Get(seed, new SongOverrides(Base: @base));
