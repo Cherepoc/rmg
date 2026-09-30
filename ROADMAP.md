@@ -341,6 +341,12 @@ the rest as they were.
 
 - **Memory** (P4, measured in September 2026 with five pitched tracks): every `RealizedNote` keeps the state it was
   decided from, which a song holds on to: 1.7 MB a song, generated in 86 ms, so nothing to do.
+- **The tests' speed** (measured in September 2026): a song is made in 119 ms alone; the corpus makes its songs in
+  parallel (`TestCorpus.Range`, `Measure`, `InParallel`), traced for their entries but not explained (`StateTrace`'s
+  `explains`), with server GC and no tiered PGO, so that 200 songs take 3.3 s and the full run 15 s, against 142 s and
+  169 s; a report's own measuring is negligible beside the songs'. A corpus song holds about 5 MB, the full run 1.6 GB
+  at most. Should a report want thousands of songs, its seeds past the shared corpus would be made, measured and let
+  go rather than cached.
 - **Note keys** (P3) are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 
 ## Parked
