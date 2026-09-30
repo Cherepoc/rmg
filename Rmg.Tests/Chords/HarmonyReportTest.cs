@@ -14,10 +14,10 @@ public sealed class HarmonyReportTest
 {
     private const int SongCount = 256;
 
-    private sealed record SectionChords(int Band, ImmutableArray<(string Place, int Level)> Chords);
+    private sealed record SectionChords(int Band, ImmutableArray<(string Place, int Level, bool? IsClose)> Chords);
 
     private sealed record SongHarmony(int Band, string Scale, int Sections, int OtherScales, int Pentatonic, int KeyChanges, ImmutableArray<SectionChords> SectionChords,
-        ImmutableArray<(int Band, ImmutableArray<int> Roots)> Progressions);
+        ImmutableArray<(int Band, ImmutableArray<int> Roots)> Progressions, ImmutableArray<(int Band, bool IsReset)> ChordBars);
 
     // a place on the unconventionality's scale, in fifths: a section's chords facet for its chords, and the song's scale
     // facet for its scales, its key change and its pentatonic melodies
@@ -37,6 +37,15 @@ public sealed class HarmonyReportTest
         {
             var levels = band.SelectMany(x => x.Chords).Where(x => x.Place == place).Select(x => x.Level).ToArray();
             Console.WriteLine($"  {place,-8} {band.Key}/5, {levels.Length,5} chords: {string.Join(" ", Enumerable.Range(0, ChordShapes.MaxUnconventionality + 1).Select(l => $"{l}:{levels.Count(x => x == l) / (double)Math.Max(1, levels.Length):P0}"))}");
+        }
+
+        Console.WriteLine("chords' voicings and register by the section's chords facet, in fifths:");
+        foreach (var band in songs.SelectMany(x => x.SectionChords).GroupBy(x => x.Band).OrderBy(x => x.Key))
+        {
+            var voiced = band.SelectMany(x => x.Chords).Where(x => x.IsClose is not null).ToArray();
+            var bars = songs.SelectMany(x => x.ChordBars).Where(x => x.Band == band.Key).ToArray();
+            Console.WriteLine($"  {band.Key}/5, {voiced.Length,5} chords: close {voiced.Count(x => x.IsClose == true) / (double)Math.Max(1, voiced.Length):P0}; " +
+                              $"{bars.Length} bars, afresh {bars.Count(x => x.IsReset) / (double)Math.Max(1, bars.Length):P1}");
         }
 
         Console.WriteLine("progressions' roots, in steps above the home, by the section's progression facet, in fifths:");
@@ -84,7 +93,9 @@ public sealed class HarmonyReportTest
                         var role = entry.StateMap.GetStateValue(CompositionStateKinds.RoleChord);
                         var chord = role.IsEmpty ? CompositionStateKinds.ChordPool.Pick(entry.StateMap) : role[0];
                         var place = x.Key == 0 ? "home" : x.Key == rhythm.Count - 1 ? "cadence" : "between";
-                        return (place, chord.Shape.Unconventionality);
+                        // laid out as its shape is, rather than inverted or spread by octaves, for a shape a voicing may lay out
+                        var isClose = chord.IsVoicingFixed ? (bool?)null : chord.Heights.SequenceEqual(chord.Shape.Targets.Order().Select(h => h / 12));
+                        return (place, chord.Shape.Unconventionality, isClose);
                     });
                 return new SectionChords(ChordsBand(sectionHarmony[section.Key]), [..played]);
             });
@@ -94,6 +105,12 @@ public sealed class HarmonyReportTest
             .Select(x => (Math.Clamp((int)(facets[x.Section][Facet.Progression] * 5), 0, 4), (ImmutableArray<int>)x.Value!));
 
         var songFacets = (Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!;
-        return new SongHarmony(Band(songFacets[Facet.Scale]), scale.Name, scales.Length, scales.Count(x => x != scale), pentatonic, keyChanges, [..chords], [..progressions]);
+        // the chords' bars that start afresh in a register of their own, rather than led from the chord before
+        var bars = song.Song.Notes![SongTracks.ChordsTrack]
+            .Where(x => song.Map.SectionAt(x.Position) is not null)
+            .GroupBy(x => (int)Math.Floor(x.Position / song.Map.Meter.BarDuration + 1e-9))
+            .Select(x => (Band: ChordsBand(sectionHarmony[song.Map.SectionAt(x.First().Position)!.SectionId]), IsReset: x.First().Value.State.GetStateValue(StateKinds.ChordVoicingReset) > 0));
+
+        return new SongHarmony(Band(songFacets[Facet.Scale]), scale.Name, scales.Length, scales.Count(x => x != scale), pentatonic, keyChanges, [..chords], [..progressions], [..bars]);
     }
 }

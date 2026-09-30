@@ -35,8 +35,8 @@ public sealed record HarmonicUnconventionality(double Chords)
         return Voice(context, ChordShapes.PickCadence(context, Chords));
     }
 
-    private static Chord Voice(IGenerationContext context, ChordShape shape)
+    private Chord Voice(IGenerationContext context, ChordShape shape)
     {
-        return new Chord([..ChordVoicing.Apply(context, shape).Select(x => x / 12)], shape.IsVoicingFixed, shape);
+        return new Chord([..ChordVoicing.Apply(context, shape, Chords).Select(x => x / 12)], shape.IsVoicingFixed, shape);
     }
 }

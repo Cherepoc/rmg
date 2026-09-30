@@ -24,11 +24,14 @@ internal static class VoiceLeadingLayers
     /// <summary>How far a section moves away from the song's smoothness, either way.</summary>
     public const double Section = 0.4;
 
-    /// <summary>The chance of a 4-bar pattern starting afresh, which marks a new section by a new register.</summary>
-    public const double ResetAtPatternStart = 0.25;
+    /// <summary>
+    ///     The chance of a 4-bar pattern starting afresh, which marks a new section by a new register, by the chords
+    ///     facet: never at the plain end and every time at the wild.
+    /// </summary>
+    public static ByConvention ResetAtPatternStart { get; } = new(0, 0.25, 1);
 
-    /// <summary>The chance of any other bar starting afresh, a deliberate break.</summary>
-    public const double ResetElsewhere = 0.03;
+    /// <summary>The chance of any other bar starting afresh, a deliberate break, by the chords facet as well.</summary>
+    public static ByConvention ResetElsewhere { get; } = new(0, 0.03, 1);
 
     /// <summary>A layer's shift of the smoothness, up to the given size either way.</summary>
     public static Func<IGenerationContext, double> CreateGenerator(double size)

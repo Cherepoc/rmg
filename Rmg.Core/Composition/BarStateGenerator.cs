@@ -130,7 +130,7 @@ internal sealed class BarStateGenerator
                 changeTimeline,
                 raisedStepTimeline,
                 roleChordTimeline,
-                GenerateResets(context),
+                GenerateResets(context, facets[Facet.Chords]),
                 ..GenerateBassLeading(context.CreateContext(Seeds.Derive(seed, BassLeadingStream)), changes, bassLeading, facets[Facet.Chords]),
                 GenerateMelodyContour(context, context.CreateContext(Seeds.Derive(seed, ContourPeriodStream)), facets[Facet.Melody]),
                 GenerateMelodyPhraseEnd(context)
@@ -141,10 +141,11 @@ internal sealed class BarStateGenerator
     private double LastBarPosition => (Progressions.BarCount - 1) * _meter.BarDuration;
 
     /// <summary>
-    ///     The bars whose first chord starts afresh in its own register, now and then, most often the pattern's first;
-    ///     each has its own number, so that bars in a row are told apart.
+    ///     The bars whose first chord starts afresh in its own register, by the chords facet: never in the plainest
+    ///     songs, whose chords are all led from the one before; now and then at the middle, most often the pattern's
+    ///     first; every bar at the wild end. Each has its own number, so that bars in a row are told apart.
     /// </summary>
-    private StateTimeline<int> GenerateResets(IGenerationContext context)
+    private StateTimeline<int> GenerateResets(IGenerationContext context, double unconventionality)
     {
         return StateTimeline.Create(
                 _meter.PatternDuration,
@@ -153,7 +154,7 @@ internal sealed class BarStateGenerator
                     .Select(bar =>
                         {
                             var chance = bar == 0 ? VoiceLeadingLayers.ResetAtPatternStart : VoiceLeadingLayers.ResetElsewhere;
-                            return (context.TestProbability(chance) ? bar + 1 : 0).ToTimelineItem(bar * _meter.BarDuration);
+                            return (context.TestProbability(chance.At(unconventionality)) ? bar + 1 : 0).ToTimelineItem(bar * _meter.BarDuration);
                         }
                     )
                     .ToArray()
