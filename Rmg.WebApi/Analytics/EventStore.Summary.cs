@@ -29,6 +29,7 @@ public static class EventStoreSummary
             Versions(connection, since, ratings),
             ratedVersion,
             RatedSeeds(ratings, ratedVersion),
+            RatedFifths(ratings, ratedVersion),
             Failures(connection, since),
             Count(connection, "SELECT COUNT(*) FROM events WHERE day >= $since", since)
         );
@@ -203,8 +204,11 @@ public static class EventStoreSummary
             .ToList();
     }
 
-    /// <summary>A song's likes and dislikes in a version.</summary>
-    private sealed record SongRating(string Version, long Seed, int Likes, int Dislikes);
+    /// <summary>
+    ///     A song's likes and dislikes in a version: its seed, and the unconventionality it was asked for with, which
+    ///     names it too, or none for one drawn; and how plain or wild it is, drawn or given, where its ratings say.
+    /// </summary>
+    private sealed record SongRating(string Version, long Seed, int? Given, int? Unconventionality, int Likes, int Dislikes);
 
     /// <summary>How many rated songs the dashboard shows.</summary>
     private const int RatedSeedsShown = 20;
@@ -220,24 +224,28 @@ public static class EventStoreSummary
     {
         using var command = connection.CreateCommand();
         command.CommandText = $"""
-            SELECT version, seed, detail
+            SELECT version, seed, detail, unconventionality, given
             FROM events
             WHERE name = '{EventNames.Rated}' AND version IS NOT NULL AND seed IS NOT NULL AND detail IS NOT NULL
+            ORDER BY id
             """;
 
-        var counts = new Dictionary<(string Version, long Seed), (int Likes, int Dislikes)>();
+        var counts = new Dictionary<(string Version, long Seed, int? Given), (int? Unconventionality, int Likes, int Dislikes)>();
         using (var reader = command.ExecuteReader())
             while (reader.Read())
             {
                 if (!TryReadChange(reader.GetString(2), out var from, out var to)) continue;
 
-                var key = (reader.GetString(0), reader.GetInt64(1));
-                var (likes, dislikes) = counts.GetValueOrDefault(key);
-                counts[key] = (likes + Count(to, "up") - Count(from, "up"), dislikes + Count(to, "down") - Count(from, "down"));
+                // a rating from before the settings were kept has no unconventionality, and is of a drawn song
+                int? unconventionality = reader.IsDBNull(3) ? null : reader.GetInt32(3);
+                var given = !reader.IsDBNull(4) && reader.GetBoolean(4) ? unconventionality : null;
+                var key = (reader.GetString(0), reader.GetInt64(1), given);
+                var (known, likes, dislikes) = counts.GetValueOrDefault(key);
+                counts[key] = (unconventionality ?? known, likes + Count(to, "up") - Count(from, "up"), dislikes + Count(to, "down") - Count(from, "down"));
             }
 
         return counts
-            .Select(x => new SongRating(x.Key.Version, x.Key.Seed, Math.Max(0, x.Value.Likes), Math.Max(0, x.Value.Dislikes)))
+            .Select(x => new SongRating(x.Key.Version, x.Key.Seed, x.Key.Given, x.Value.Unconventionality, Math.Max(0, x.Value.Likes), Math.Max(0, x.Value.Dislikes)))
             .ToList();
 
         static int Count(string rating, string counted) => rating == counted ? 1 : 0;
@@ -259,16 +267,33 @@ public static class EventStoreSummary
     {
         var rated = ratings
             .Where(x => x.Version == version && x.Likes + x.Dislikes > 0)
-            .Select(x => new RatedSeed(x.Seed, x.Likes, x.Dislikes))
+            .Select(x => new RatedSeed(x.Seed, x.Given, x.Likes, x.Dislikes))
             .OrderByDescending(x => x.Likes - x.Dislikes)
             .ThenByDescending(x => x.Likes)
             .ThenBy(x => x.Seed)
+            .ThenBy(x => x.Given)
             .ToList();
 
         // the ends are what is worth hearing again, so a long list keeps both of them and drops its middle
         return rated.Count <= RatedSeedsShown
             ? rated
             : [..rated.Take(RatedSeedsShown / 2), ..rated.TakeLast(RatedSeedsShown / 2)];
+    }
+
+    /// <summary>
+    ///     How a version's songs were liked by how plain or wild they are, in fifths of the unconventionality, those asked
+    ///     for with one apart from those that drew their own, since a song asked for at an end is far from what songs
+    ///     draw. A song whose ratings do not say how plain or wild it is is left out.
+    /// </summary>
+    private static List<RatedFifth> RatedFifths(List<SongRating> ratings, string? version)
+    {
+        return ratings
+            .Where(x => x.Version == version && x.Unconventionality is not null && x.Likes + x.Dislikes > 0)
+            .GroupBy(x => (IsGiven: x.Given is not null, Fifth: Math.Min(4, x.Unconventionality!.Value * 5 / 127)))
+            .Select(x => new RatedFifth(x.Key.IsGiven, x.Key.Fifth, x.Count(), x.Sum(r => r.Likes), x.Sum(r => r.Dislikes)))
+            .OrderBy(x => x.IsGiven)
+            .ThenBy(x => x.Fifth)
+            .ToList();
     }
 
     /// <summary>Versions by their numbers, so that 0.5.1000 comes after 0.5.999, where text would put it before.</summary>

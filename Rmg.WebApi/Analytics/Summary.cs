@@ -39,9 +39,17 @@ public sealed record VersionListening(
 );
 
 /// <param name="Seed">The song, in <see cref="AnalyticsSummary.RatedVersion" />.</param>
+/// <param name="Given">The unconventionality it was asked for with, from 0 to 127, which names it too; none for one drawn.</param>
 /// <param name="Likes">Its likes as they stand now: the changes to a like less the changes from one.</param>
 /// <param name="Dislikes">Its dislikes, likewise.</param>
-public sealed record RatedSeed(long Seed, int Likes, int Dislikes);
+public sealed record RatedSeed(long Seed, int? Given, int Likes, int Dislikes);
+
+/// <param name="IsGiven">Whether the songs were asked for at their unconventionality, or drew it.</param>
+/// <param name="Fifth">Which fifth of the unconventionality, from 0 for the plainest to 4 for the wildest.</param>
+/// <param name="Songs">How many songs of it were rated.</param>
+/// <param name="Likes">Their likes as they stand now.</param>
+/// <param name="Dislikes">Their dislikes.</param>
+public sealed record RatedFifth(bool IsGiven, int Fifth, int Songs, int Likes, int Dislikes);
 
 /// <param name="Name">What failed.</param>
 /// <param name="Detail">Why, as far as the page could say.</param>
@@ -57,6 +65,7 @@ public sealed record Failure(string Name, string Detail, int Count);
 /// <param name="Versions">How each songs' version was listened to, the latest first.</param>
 /// <param name="RatedVersion">The latest songs' version any song was rated in, which <paramref name="Rated" /> is of.</param>
 /// <param name="Rated">The songs of it rated, the most liked first and the most disliked last.</param>
+/// <param name="RatedFifths">Its songs' ratings by how plain or wild they are, given apart from drawn.</param>
 /// <param name="Failures">What went wrong, and how often.</param>
 public sealed record AnalyticsSummary(
     int Days,
@@ -71,6 +80,7 @@ public sealed record AnalyticsSummary(
     IReadOnlyList<VersionListening> Versions,
     string? RatedVersion,
     IReadOnlyList<RatedSeed> Rated,
+    IReadOnlyList<RatedFifth> RatedFifths,
     IReadOnlyList<Failure> Failures,
     int Events
 );

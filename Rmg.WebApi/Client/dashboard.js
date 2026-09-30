@@ -35,6 +35,8 @@ const elements = {
     ratedPanel: document.getElementById("rated-panel"),
     ratedHint: document.getElementById("rated-hint"),
     rated: document.getElementById("rated"),
+    fifthsPanel: document.getElementById("fifths-panel"),
+    fifths: document.getElementById("fifths"),
     failuresPanel: document.getElementById("failures-panel"),
     failures: document.getElementById("failures"),
 };
@@ -99,7 +101,7 @@ function setStatus(message, isError = false) {
 
 function showPanels(isShown) {
     for (const panel of [elements.headline, elements.timings, elements.funnelPanel,
-        elements.dailyPanel, elements.seedsPanel, elements.versionsPanel, elements.ratedPanel, elements.failuresPanel])
+        elements.dailyPanel, elements.seedsPanel, elements.versionsPanel, elements.ratedPanel, elements.fifthsPanel, elements.failuresPanel])
         panel.hidden = !isShown;
 
     elements.controls.hidden = !isShown;
@@ -209,6 +211,7 @@ function draw() {
     drawSeeds();
     drawVersions();
     drawRated();
+    drawFifths();
     drawFailures();
 }
 
@@ -561,8 +564,30 @@ function drawRated() {
 
     elements.ratedHint.textContent = `The songs of ${summary.ratedVersion} rated, the most liked first. A seed is this song only in this version.`;
     elements.rated.replaceChildren(table(
-        ["Seed", "Liked", "Disliked"],
-        summary.rated.map((seed) => [String(seed.seed), String(seed.likes), String(seed.dislikes)])
+        ["Seed", "Asked for at", "Liked", "Disliked"],
+        summary.rated.map((seed) => [String(seed.seed), seed.given === null ? "drawn" : `${seed.given} of 127`, String(seed.likes), String(seed.dislikes)])
+    ));
+}
+
+const FIFTHS = ["Plainest", "Plain", "Middle", "Wild", "Wildest"];
+
+/** Ratings by fifths of how plain or wild the songs are, with how many songs each is of, as a share of few is little. */
+function drawFifths() {
+    if (summary.ratedFifths.length === 0) {
+        elements.fifths.replaceChildren(empty("No song has been rated with its settings yet."));
+        return;
+    }
+
+    elements.fifths.replaceChildren(table(
+        ["Songs", "Fifth", "Rated", "Liked", "Disliked", "Share liked"],
+        summary.ratedFifths.map((fifth) => [
+            fifth.isGiven ? "asked for" : "drawn",
+            `${FIFTHS[fifth.fifth]} (${fifth.fifth * 20}–${fifth.fifth * 20 + 20}%)`,
+            String(fifth.songs),
+            String(fifth.likes),
+            String(fifth.dislikes),
+            percent(fifth.likes, fifth.likes + fifth.dislikes),
+        ])
     ));
 }
 
