@@ -189,7 +189,7 @@ internal static class Realizer
         var heldDuration = stateMap.GetStateValue(StateKinds.HeldDuration);
         if (heldDuration > 0)
             duration = heldDuration;
-        else if (role == TrackRole.Melody)
+        else if (role is TrackRole.Melody or TrackRole.CounterMelody)
             duration = Math.Min(duration, nextNoteDuration);
         else
             // a note that plays the chord, the chords' or the bass's, ends where the chord changes, rather than sound the
@@ -202,7 +202,7 @@ internal static class Realizer
         // as its scale step above the chord's root and its alteration; the chords the whole chord, led from the one before
         ImmutableArray<int> notes = role switch
         {
-            TrackRole.Melody or TrackRole.Bass => [ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)) + stateMap.GetStateValue(StateKinds.Alteration)],
+            TrackRole.Melody or TrackRole.Bass or TrackRole.CounterMelody => [ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)) + stateMap.GetStateValue(StateKinds.Alteration)],
             TrackRole.Chords or TrackRole.Pad => voiceLeader.Place(
                 [..chordSteps.Select(ToNote)],
                 ToNote(0),

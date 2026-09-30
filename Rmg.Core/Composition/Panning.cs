@@ -21,6 +21,7 @@ internal static class Panning
             TrackRole.Melody => 0.15,
             TrackRole.Chords => 0.6,
             TrackRole.Pad => 0.5,
+            TrackRole.CounterMelody => 0.4,
             _ => throw new ArgumentOutOfRangeException(nameof(role), role, "A drum is not panned on its own.")
         };
     }

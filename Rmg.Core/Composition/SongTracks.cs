@@ -15,6 +15,7 @@ internal sealed class SongTracks
     public const int MelodyTrack = 5;
     public const int BassTrack = 6;
     public const int PadTrack = 7;
+    public const int CounterMelodyTrack = 8;
 
     private SongTracks(
         ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
@@ -55,10 +56,12 @@ internal sealed class SongTracks
     /// <param name="drumSetup">What the song's drums are (<see cref="DrumSetups" />).</param>
     /// <param name="panningContext">The sequence the pitched tracks' places from left to right are drawn from (<see cref="Panning" />).</param>
     /// <param name="padContext">The sequence the pad's instrument and state are drawn from.</param>
+    /// <param name="counterContext">The sequence the counter-melody's instrument and state are drawn from.</param>
     public static SongTracks Create(
         IGenerationContext context,
         IGenerationContext panningContext,
         IGenerationContext padContext,
+        IGenerationContext counterContext,
         RhythmicUnconventionality rhythmicUnconventionality,
         IGenerationContext strokeContext,
         IGenerationContext roleContext,
@@ -81,16 +84,38 @@ internal sealed class SongTracks
             panningContext,
             new Dictionary<int, TrackRole>
             {
-                [ChordsTrack] = TrackRole.Chords, [MelodyTrack] = TrackRole.Melody, [BassTrack] = TrackRole.Bass, [PadTrack] = TrackRole.Pad
+                [ChordsTrack] = TrackRole.Chords, [MelodyTrack] = TrackRole.Melody, [BassTrack] = TrackRole.Bass, [PadTrack] = TrackRole.Pad,
+                [CounterMelodyTrack] = TrackRole.CounterMelody
             }
         );
         StateTrace.Record(TracePoints.Panning, ChordsTrack, 0, 0, StateMap.Default, 0, string.Join(", ", pans.Select(x => $"{x.Key} {x.Value:F2}")), pans);
 
         // the pad holds chords in a sound of its own, apart from the chords', which it plays under
         var padInstrument = InstrumentRoles.Pad.Pick(padContext, chordsInstrument.Program);
+        // and the counter-melody a line in a sound of its own, apart from the melody's and the chords'
+        var counterInstrument = InstrumentRoles.CounterMelody.Pick(counterContext, melodyInstrument.Program, chordsInstrument.Program);
 
         var definitions = new Dictionary<int, IInstrumentTrack>
         {
+            [CounterMelodyTrack] = new PitchInstrumentTrack(
+                LayerStates.CreateTrackLayer(
+                    counterContext,
+                    "Track",
+                    new StateMapBuilder("Track role", perTrack: true)
+                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.CounterMelody))
+                        .Add(CompositionStateKinds.LineStepwiseness, CounterLayers.Stepwiseness)
+                        .Add(CompositionStateKinds.Rhythm.Period.Power, CounterLayers.SlowerBy)
+                        .Add(CompositionStateKinds.Rhythm.Fullness, CounterLayers.Fullness)
+                        .ToStateMap(counterContext),
+                    _ => VelocityLayers.GetLevel(TrackRole.CounterMelody),
+                    trackRhythmLayer
+                ),
+                counterInstrument.Program,
+                -1,
+                0,
+                TrackRole.CounterMelody,
+                pans[CounterMelodyTrack]
+            ),
             [PadTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
                     padContext,

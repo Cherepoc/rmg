@@ -495,6 +495,30 @@ internal sealed class SectionGenerator
                 continue;
             }
 
+            if (_tracks.Definitions[trackNumber].Role == TrackRole.CounterMelody)
+            {
+                // the counter-melody's line, placed with the song's, its pattern played twice as the section does, leading
+                // into the chord changes by step now and then, from a sequence of its own
+                var counter = new SectionLine(
+                    trackNumber,
+                    CounterLayers.Line,
+                    bars.Timeline.Repeat(2),
+                    rhythmKeys =>
+                    {
+                        using var pause = StateTrace.Pause();
+                        return BuildBars(rhythmKeys).Timeline.Repeat(2);
+                    },
+                    sectionRhythm.Scheme.Letters,
+                    harmonicRhythm,
+                    LinePattern.DrawApproaches(Stream(sectionId, SectionStream.CounterLeading), CounterLayers.Leading, harmonicRhythm.Count),
+                    [..Enumerable.Repeat(ChordArrival.Free, harmonicRhythm.Count)],
+                    CounterLayers.Line.RegisterFreedom,
+                    StreamSeed(sectionId, SectionStream.CounterImprovisation)
+                );
+                yield return (trackNumber, bars with { Timeline = counter.Appear(0, 0).Trim(Meter.PatternDuration) }, counter);
+                continue;
+            }
+
             if (!isMelody)
             {
                 yield return (trackNumber, bars, null);
@@ -708,5 +732,7 @@ internal enum SectionStream
     DrumFeels = 13,
     HarmonicRhythm = 14,
     Length = 15,
-    Arrangement = 16
+    Arrangement = 16,
+    CounterLeading = 17,
+    CounterImprovisation = 18
 }

@@ -50,6 +50,7 @@ public static class SongGenerator
             Stream(SongStream.Tracks),
             Stream(SongStream.Panning),
             Stream(SongStream.Pad),
+            Stream(SongStream.CounterMelody),
             rhythmicUnconventionality,
             Stream(SongStream.DrumStrokes),
             Stream(SongStream.DrumRoles),
@@ -157,6 +158,8 @@ public static class SongGenerator
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, melodyTrack.Key, (PitchInstrumentTrack)melodyTrack.Value, MelodyLayers.Line);
         var bassTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Bass);
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, BassLeadingLayers.Line);
+        var counterTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.CounterMelody);
+        songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, counterTrack.Key, (PitchInstrumentTrack)counterTrack.Value, CounterLayers.Line);
 
         // and last the notes, decided from the state of the whole song, in its order, none sounding into a stop
         var notes = form.Edits.CutNotes(
@@ -244,5 +247,6 @@ internal enum SongStream
     Panning = 19,
     SongForm = 20,
     Pad = 21,
-    KeyChange = 22
+    KeyChange = 22,
+    CounterMelody = 23
 }

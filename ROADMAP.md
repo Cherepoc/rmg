@@ -13,9 +13,8 @@ measured before and after by a report test, by the measure its entry names.
 
 **Next** (P1), in this order:
 
-1. **The arrangement, and energy by appearance** (see *Appearances*).
-2. **Pitched fills and the lift** (see *Fills*).
-3. **The meter:** the meter as state, then other meters (see *Meter*), once what a period means in another meter is
+1. **Pitched fills and the lift** (see *Fills*).
+2. **The meter:** the meter as state, then other meters (see *Meter*), once what a period means in another meter is
    decided by ear; a cycle split in three is built.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
@@ -213,13 +212,17 @@ planned together (P1):
   entries as a part of its own. Over 200 corpus songs it plays in 45% of the sections, 63% of the louder half and 28%
   of the quieter, 70% of the choruses and 22% of the bridges, at -12.2 dB against the chords' -8.5
   (`ArrangementReportTest`, `VelocityReportTest`).
-- **Pitched roles and the arrangement:** more pitched roles, such as a second chord instrument or a
-  counter-melody (a third `LineProfile`), and a section's parts chosen as its drum kit is (`DrumKitGenerator.SelectKit`):
-  roles, the ones that lead and the ones that colour, which play leaned by the section's energy and role, so that a
-  section builds by what plays, not only by how loud; a breakdown, the drums out or only a pad and the melody, its
-  quiet end. The one mechanism for the drums and the pitched tracks, where it can be. More tracks and program changes
-  need the web page's mixer to show them. Measured by: the parts that play against the energy, towards the drums' 0.46;
-  the breakdowns by role.
+- **A counter-melody** (built): a fifth pitched track (`TrackRole.CounterMelody`, `InstrumentRoles.CounterMelody`:
+  strings, horns, reeds, a clean guitar, an organ, apart from the melody's and the chords' sounds), a line by the
+  melody's rules (`CounterLayers.Line`: stepwise, no phrase shape, going on through the song), half as fast and sparser,
+  in the register below the melody, placed over the song with the melody and the bass, resting in a section by a chance
+  of 0.75, less the more energy. Over 100 corpus songs it plays in 46% of the sections as they play, with 29% as many
+  notes as the melody, 8.2 semitones below it on average, a semitone or a major seventh from the melody note over it
+  3.7% of the time. A stop now holds a part's last note only where it still sounds in the bar before, not a note of a
+  part that rested since.
+- **Pitched roles and the arrangement:** left: a second chord instrument, and a section's parts chosen as its drum kit
+  is (`DrumKitGenerator.SelectKit`), leading and colouring roles, where now each part rests on its own
+  (`Arrangement`); the page's mixer shows every track the file has.
 - **Energy by appearance** (built for the parts): every appearance of a section has an energy of its own, the
   section's and the arc's step for how much later or earlier it plays than the section does on average
   (`SectionEnergy.AppearanceStep`), which a later appearance draws its parts again by, from a sequence of its own, a part

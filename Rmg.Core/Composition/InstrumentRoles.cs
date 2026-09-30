@@ -111,6 +111,25 @@ internal static class InstrumentRoles
         ]
     );
 
+    /// <summary>The instruments that play a line under the melody: strings, horns, reeds, a clean guitar, an organ.</summary>
+    public static InstrumentRole CounterMelody { get; } = new(
+        nameof(CounterMelody),
+        [
+            new(40, "Violin", 0.6),
+            new(41, "Viola", 0.5),
+            new(42, "Cello", 0.8),
+            new(48, "String Ensemble 1", 0.8),
+            new(60, "French Horn", 0.6),
+            new(57, "Trombone", 0.3),
+            new(71, "Clarinet", 0.4),
+            new(73, "Flute", 0.5),
+            new(68, "Oboe", 0.3),
+            new(27, "Electric Guitar (clean)", 0.4),
+            new(18, "Rock Organ", 0.2),
+            new(81, "Lead 2 (sawtooth)", 0.2)
+        ]
+    );
+
     public static InstrumentRole Melody { get; } = new(
         nameof(Melody),
         [

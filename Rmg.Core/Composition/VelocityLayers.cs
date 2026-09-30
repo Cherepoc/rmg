@@ -22,6 +22,7 @@ internal static class VelocityLayers
         TrackRole.Bass => 0.25,
         TrackRole.Chords => 0.1,
         TrackRole.Pad => -0.1,
+        TrackRole.CounterMelody => 0.05,
         _ => 0
     };
 
@@ -66,6 +67,7 @@ internal static class VelocityLayers
         TrackRole.Chords => 0.5,
         TrackRole.Melody => 0.8,
         TrackRole.Pad => 0.2,
+        TrackRole.CounterMelody => 0.6,
         _ => 1
     };
 

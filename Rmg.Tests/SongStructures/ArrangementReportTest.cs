@@ -38,7 +38,7 @@ public sealed class ArrangementReportTest
                 .Select(x => (energy[x.Section], structure.Roles[x.Section], (ImmutableHashSet<TrackRole>)x.Value!)));
         }
 
-        foreach (var part in new[] { TrackRole.Drum, TrackRole.Bass, TrackRole.Chords, TrackRole.Melody, TrackRole.Pad })
+        foreach (var part in new[] { TrackRole.Drum, TrackRole.Bass, TrackRole.Chords, TrackRole.Melody, TrackRole.Pad, TrackRole.CounterMelody })
         {
             string Share(IEnumerable<(double Energy, SectionRole Role, ImmutableHashSet<TrackRole> Resting)> band)
             {
@@ -55,7 +55,7 @@ public sealed class ArrangementReportTest
         foreach (var song in TestCorpus.Range(200))
         foreach (var group in song.Map.Sections.GroupBy(x => x.SectionId).Where(x => x.Count() > 1))
         {
-            var (f, l) = (5 - song.Resting(group.First()).Count, 5 - song.Resting(group.Last()).Count);
+            var (f, l) = (6 - song.Resting(group.First()).Count, 6 - song.Resting(group.Last()).Count);
             (first, last, recurring, grown) = (first + f, last + l, recurring + 1, grown + (l > f ? 1 : 0));
         }
 

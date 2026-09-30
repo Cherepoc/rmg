@@ -86,11 +86,14 @@ internal sealed class TimelineEdits(IGenerationContext context, SongMap? map = n
 
             foreach (var cut in cuts)
             {
-                // the last note before the cut, which a pitched track holds until there
+                // the last note before the cut, which a pitched track holds until there where it still sounds in the bar
+                // before it, not a note of a part that rested since
                 var last = -1;
                 if (roles[track] != TrackRole.Drum)
                     for (var i = 0; i < timeline.Count && timeline[i].Position < cut - Epsilon; i++)
                         last = i;
+                if (last >= 0 && timeline[last].Position + timeline[last].Value.Duration < cut - Meter.BarDuration - Epsilon)
+                    last = -1;
 
                 timeline = EventTimeline.Create(timeline.Duration, timeline.Select((x, i) => EndBy(x, cut, i == last)));
             }
