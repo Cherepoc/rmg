@@ -11,17 +11,21 @@ import {
     askToPersist,
     forget,
     IS_SEED,
+    IS_SONG,
     isAutoplaying,
     isKeeping,
     keep,
     keepHistory,
     keepRating,
+    keepUnconventionality,
     recall,
     recallHistory,
     recallRating,
+    recallUnconventionality,
     setAutoplaying,
     setKeeping,
 } from "./storage.js";
+import { CHANNEL_COUNT, formatSettings, LAST_STEP, parseSettings, toStep } from "./settings.js";
 import { since, tell, track } from "./tally.js";
 
 const PLAY_ICON = "M8 5v14l11-7z";
@@ -53,6 +57,9 @@ const elements = {
     volume: document.getElementById("volume"),
     volumeValue: document.getElementById("volume-value"),
     autoplay: document.getElementById("autoplay"),
+    giveUnconventionality: document.getElementById("give-unconventionality"),
+    unconventionality: document.getElementById("unconventionality"),
+    unconventionalityValue: document.getElementById("unconventionality-value"),
     mixerPanel: document.getElementById("mixer-panel"),
     songVolume: document.getElementById("song-volume"),
     songVolumeValue: document.getElementById("song-volume-value"),
@@ -95,6 +102,10 @@ let startedListening = null;
 // the songs' version the song on the page was made by, which every event about the song carries: the same seed
 // is another song in another version, and a page open across a deploy still plays the song it got
 let songVersion = null;
+// how plain or wild the song on the page is, as a step from 0 to 127, and that step again where it was asked for
+// rather than drawn, which names the song as much as its seed does; null for a drawn one
+let songUnconventionality = null;
+let songGiven = null;
 let isSeeking = false;
 let seekedFrom = null;
 let isExporting = false;
@@ -213,12 +224,12 @@ function advance() {
  *     Gets a song and starts it the moment it has reached the player: asking for a song is asking to hear
  *     it, whether by the button, by a seed, from the list, or by the song before it running out.
  */
-async function playNew(seed, origin) {
+async function playNew(seed, origin, given = askedUnconventionality()) {
     // one already on its way is the one that will play: a second ask would only cancel it for nothing
     if (isGenerating) return;
 
     const request = ++playRequest;
-    const generated = await generate(seed);
+    const generated = await generate(seed, given);
 
     // the player has to have been handed the song before it can be started on it
     await delivery;
@@ -649,14 +660,20 @@ function readSeed(text) {
  *     address, so every refresh after the first arrives looking exactly like a seed somebody asked for;
  *     what marks it as the page's own roll is the state left on the history entry, which a refresh
  *     keeps and a link followed from anywhere else does not have.
+ *
+ *     A link carries the song's settings too, as <c>&settings=</c>: the unconventionality it was asked for with,
+ *     which names the song, and the mix it was heard with, which is put back.
  */
 function linkedSeed() {
-    const asked = new URL(location.href).searchParams.get("seed");
+    const parameters = new URL(location.href).searchParams;
+    const asked = parameters.get("seed");
     const wasRolled = history.state?.rolled === true;
 
-    if (asked === null) return { seed: null, wasAsked: false, wasRolled };
+    if (asked === null) return { seed: null, wasAsked: false, wasRolled, settings: null, isSettingsBad: false };
 
-    return { seed: readSeed(asked.trim()), wasAsked: true, wasRolled };
+    const settings = parseSettings(parameters.get("settings")?.trim() ?? null);
+    const isSettingsBad = settings === null && parameters.get("settings") !== null;
+    return { seed: readSeed(asked.trim()), wasAsked: true, wasRolled, settings, isSettingsBad };
 }
 
 /**
@@ -668,20 +685,70 @@ function linkedSeed() {
  *     a seed the page put there and a seed somebody sent read the same, and a refresh of a rolled song
  *     is still a rolled song, so it should go on rolling when it ends.
  */
-function rememberSeed(songSeed, wasRolled) {
+function rememberSong(wasRolled = history.state?.rolled === true) {
     try {
-        history.replaceState({ rolled: wasRolled }, "", songLink(songSeed));
+        history.replaceState({ rolled: wasRolled }, "", songLink());
     } catch {
         // an address that cannot be rewritten costs nothing here; the share button reads the seed itself
     }
 }
 
-/** The link to a song, which is this address with its seed. */
-function songLink(songSeed) {
+/** The link to the song on the page, which is this address with its seed and its settings, the mix as it is now. */
+function songLink() {
     const address = new URL(location.href);
-    address.searchParams.set("seed", songSeed);
+    address.searchParams.set("seed", elements.seed.value);
+    address.searchParams.set("settings", currentSettings());
 
     return address.toString();
+}
+
+/**
+ *     What the song on the page is heard with (settings.js): its unconventionality, drawn or given, and the mix the
+ *     file is written with. A channel the song does not play is written as off, at nothing.
+ */
+function currentSettings() {
+    const channels = [];
+    for (let channel = 0; channel < CHANNEL_COUNT; channel++)
+        channels.push(instruments.has(channel)
+            ? { instrument: instruments.get(channel), isEnabled: !switchedOff.has(channel), volume: toStep(volumes.get(channel) ?? 1) }
+            : { instrument: 0, isEnabled: false, volume: 0 });
+
+    return formatSettings({
+        unconventionality: songUnconventionality,
+        isGiven: songGiven !== null,
+        songVolume: toStep(songVolume),
+        channels,
+    });
+}
+
+/** What every event about the song on the page carries: which song it is, and what it was heard with. */
+function aboutSong(measurements = {}) {
+    return {
+        seed: IS_SEED.test(elements.seed.value) ? Number(elements.seed.value) : null,
+        version: songVersion,
+        settings: songUnconventionality === null ? null : currentSettings(),
+        ...measurements,
+    };
+}
+
+/** A song as the page names it (IS_SONG): its seed, and its unconventionality's step where that was given. */
+function songName(seed, given) {
+    return given === null ? String(seed) : `${seed}u${given}`;
+}
+
+function readSongName(name) {
+    const [seed, given] = name.split("u");
+    return { seed: Number(seed), given: given === undefined ? null : Number(given) };
+}
+
+/** The song on the page, as the page names it. */
+function currentSong() {
+    return songName(elements.seed.value, songGiven);
+}
+
+/** The song on the page as the server is asked for it, with the mix on the page. */
+function describeSong() {
+    return { seed: Number(elements.seed.value), unconventionality: songGiven ?? undefined, ...describeMix() };
 }
 
 function requestSong(song, signal = undefined) {
@@ -711,8 +778,11 @@ function describeMix() {
  *     to play. <paramref name="isRolled" /> says the song was the page's own to roll rather than one
  *     asked for, which is what makes it lead to another when it ends; a seed refreshed back into the
  *     address is still one the page rolled, so the caller is allowed to say so.
+ *
+ *     <paramref name="given" /> is the unconventionality to ask for, as a step from 0 to 127, or null for the song to
+ *     draw its own; <paramref name="settings" /> a linked song's settings, whose mix is put back once it arrives.
  */
-async function generate(seed, isRolled = seed === null) {
+async function generate(seed, given, isRolled = seed === null, settings = null) {
     if (isGenerating) return false;
 
     setGenerating(true);
@@ -720,7 +790,7 @@ async function generate(seed, isRolled = seed === null) {
     setStatus("Generating…");
 
     try {
-        const response = await requestSong({ seed });
+        const response = await requestSong({ seed, unconventionality: given ?? undefined });
         if (!response.ok) {
             setStatus(`Could not generate a song: ${await describeFailure(response)}`, true);
             track("song_failed", { detail: `http ${response.status}` });
@@ -730,28 +800,34 @@ async function generate(seed, isRolled = seed === null) {
         const song = await response.arrayBuffer();
         const songSeed = response.headers.get("X-Song-Seed") ?? String(seed);
 
-        // only once the whole song is here: a body that fails halfway leaves the old song and its mix
-        readSong(response.headers.get("X-Song-Instruments"));
-
-        // built from what the server reported rather than from the loaded song, so the mix is on the
-        // page as soon as there is a song at all, without waiting for the audio stack a click builds
-        buildMixer([...instruments.keys()].sort((first, second) => first - second));
-
-        // a song replaced while playing was listened to up to here, and the next one is from here
+        // a song replaced while playing was listened to up to here, with its own mix, and the next one is from here
         if (startedListening !== null) {
             reportListening();
             startedListening = performance.now();
         }
 
+        // only once the whole song is here: a body that fails halfway leaves the old song and its mix
+        readSong(response.headers.get("X-Song-Instruments"));
+        if (settings !== null) putBack(settings);
+
+        // built from what the server reported rather than from the loaded song, so the mix is on the
+        // page as soon as there is a song at all, without waiting for the audio stack a click builds
+        buildMixer([...instruments.keys()].sort((first, second) => first - second));
+
         elements.seed.value = songSeed;
         songVersion = response.headers.get("X-Song-Version");
-        showRating(recallRating(songVersion, songSeed));
-        rememberSeed(songSeed, isRolled);
-        addToHistory(songSeed);
+        songGiven = given;
+        songUnconventionality = readUnconventionality(response.headers.get("X-Song-Unconventionality")) ?? given;
+        showUnconventionality();
+        showRating(recallRating(songVersion, currentSong()));
+        rememberSong(isRolled);
+        addToHistory(currentSong());
         // offered for download first, and as a copy, so it stays usable whatever the audio stack does
         offerDownload(song, songSeed);
+        // a mix put back from a link is heard at once, and the file offered is fetched again with it
+        if (settings !== null) scheduleDownloadRefresh();
         announce(`Generated song ${songSeed}.`);
-        track("song_generated", { ms: since(), seed: Number(songSeed), version: songVersion });
+        track("song_generated", aboutSong({ ms: since() }));
 
         pendingSong = song;
         hasSong = true;
@@ -768,6 +844,76 @@ async function generate(seed, isRolled = seed === null) {
         setGenerating(false);
     }
 }
+
+/** "64 drawn" or "64 given": the song's unconventionality as a step, or null for anything else. */
+function readUnconventionality(header) {
+    const step = Number((header ?? "").split(" ")[0]);
+    return header && Number.isInteger(step) && step >= 0 && step <= LAST_STEP ? step : null;
+}
+
+/** A file of the song on the page, named as the server names it: by its seed, and by a given unconventionality. */
+function fileName(songSeed) {
+    return songGiven === null ? `song-${songSeed}` : `song-${songSeed}-u${songGiven}`;
+}
+
+/**
+ *     Puts a linked song's mix back on the page, over the one it arrived with, for the channels it plays. Only what
+ *     differs from the song is set, as though it had been changed here.
+ */
+function putBack(settings) {
+    songVolume = settings.songVolume / LAST_STEP;
+    elements.songVolume.value = String(settings.songVolume);
+    showSongVolume();
+
+    for (const channel of instruments.keys()) {
+        const linked = settings.channels[channel];
+        if (linked.instrument !== instruments.get(channel)) {
+            instruments.set(channel, linked.instrument);
+            chosen.add(channel);
+        }
+        if (linked.volume !== LAST_STEP) volumes.set(channel, linked.volume / LAST_STEP);
+        if (!linked.isEnabled) switchedOff.add(channel);
+    }
+}
+
+// --- how plain or wild -----------------------------------------------------
+
+/**
+ *     The unconventionality new songs are asked for with, as a step from 0 to 127, or null for each to draw its own.
+ *     A song from the list or a link is asked for as it was, whatever this says.
+ */
+function askedUnconventionality() {
+    return elements.giveUnconventionality.checked ? Number(elements.unconventionality.value) : null;
+}
+
+/**
+ *     The slider says what the next song is asked for with, and, while songs draw their own, how plain or wild the one
+ *     on the page drew, which is where it starts from once it is asked for.
+ */
+function showUnconventionality() {
+    const isGiven = elements.giveUnconventionality.checked;
+    elements.unconventionality.disabled = !isGiven;
+    if (!isGiven && songUnconventionality !== null) elements.unconventionality.value = String(songUnconventionality);
+    elements.unconventionalityValue.textContent = formatPercent(Number(elements.unconventionality.value) / LAST_STEP);
+}
+
+{
+    const kept = recallUnconventionality();
+    elements.giveUnconventionality.checked = kept !== null;
+    if (kept !== null) elements.unconventionality.value = String(kept);
+    showUnconventionality();
+}
+
+elements.giveUnconventionality.addEventListener("change", () => {
+    keepUnconventionality(askedUnconventionality());
+    showUnconventionality();
+    track("mix_changed", { detail: "unconventionality" });
+});
+
+elements.unconventionality.addEventListener("input", () => {
+    keepUnconventionality(askedUnconventionality());
+    showUnconventionality();
+});
 
 /**
  *     The buttons up top are disabled while a song is on its way. The list is not, since a disabled
@@ -805,13 +951,13 @@ function offerDownload(song, songSeed) {
 
     downloadUrl = URL.createObjectURL(new Blob([song], { type: "audio/midi" }));
     elements.download.href = downloadUrl;
-    elements.download.download = `song-${songSeed}.mid`;
+    elements.download.download = `${fileName(songSeed)}.mid`;
     elements.download.removeAttribute("aria-disabled");
 }
 
 // the download is a plain anchor, so the click is the only place it can be noticed
 elements.download.addEventListener("click", () => {
-    track("download_mid", { seed: Number(elements.seed.value) || null, version: songVersion });
+    track("download_mid", aboutSong());
 });
 
 // --- the songs so far ------------------------------------------------------
@@ -826,15 +972,15 @@ restoreHistory();
  *     with goes on top of what came before rather than starting the list over.
  */
 function restoreHistory() {
-    // a seed is on the list once, where it was last heard, which a list kept before that rule may not say
-    const seeds = [...new Set(recallHistory())].slice(0, SONGS_KEPT);
-    elements.history.append(...seeds.map(createHistoryItem));
+    // a song is on the list once, where it was last heard, which a list kept before that rule may not say
+    const songs = [...new Set(recallHistory())].slice(0, SONGS_KEPT);
+    elements.history.append(...songs.map(createHistoryItem));
     elements.clearHistory.disabled = elements.history.children.length === 0;
 }
 
-/** The seeds in the list, newest first: the buttons are the list, so it is read off them. */
-function historySeeds() {
-    return [...elements.history.children].map((item) => item.textContent);
+/** The songs in the list, newest first, as the page names them: the buttons are the list, so it is read off them. */
+function historySongs() {
+    return [...elements.history.children].map((item) => item.dataset.song);
 }
 
 /** The list is this browser's to be rid of, being the one thing here that says what anybody listened to. */
@@ -849,14 +995,14 @@ elements.clearHistory.addEventListener("click", () => {
  *     by the song before it running out, or pressed on the list itself. The list is the order songs were
  *     heard in, so a seed heard again moves to the top, and wherever it was before is taken off.
  */
-function addToHistory(songSeed) {
-    const earlier = [...elements.history.children].filter((item) => item.textContent === songSeed);
+function addToHistory(name) {
+    const earlier = [...elements.history.children].filter((item) => item.dataset.song === name);
 
     // the keyboard follows a pressed seed to the top, rather than being dropped with the button it was on
     const wasFocused = earlier.includes(document.activeElement);
     for (const item of earlier) item.remove();
 
-    const item = createHistoryItem(songSeed);
+    const item = createHistoryItem(name);
     elements.history.prepend(item);
     while (elements.history.children.length > SONGS_KEPT) elements.history.lastElementChild.remove();
 
@@ -864,15 +1010,15 @@ function addToHistory(songSeed) {
     elements.history.scrollTop = 0;
     if (wasFocused) item.focus({ preventScroll: true });
 
-    keepHistory(historySeeds());
-    markCurrentSong(songSeed);
+    keepHistory(historySongs());
+    markCurrentSong(name);
     elements.clearHistory.disabled = false;
 }
 
 /** Marks the song on the page, which is where the list is being read from. */
-function markCurrentSong(songSeed) {
+function markCurrentSong(name) {
     for (const item of elements.history.children) {
-        if (item.textContent === songSeed) item.setAttribute("aria-current", "true");
+        if (item.dataset.song === name) item.setAttribute("aria-current", "true");
         else item.removeAttribute("aria-current");
     }
 }
@@ -880,18 +1026,20 @@ function markCurrentSong(songSeed) {
 /**
  *     One song to come back to. It is asked for by its seed like any other, so what comes back is the
  *     song as it was generated rather than the mixer as it was left, and it is the song that was asked
- *     for: it leads to no other when it ends.
+ *     for: it leads to no other when it ends. One asked for at an unconventionality is asked for at it again.
  */
-function createHistoryItem(songSeed) {
+function createHistoryItem(name) {
+    const { seed, given } = readSongName(name);
     const button = document.createElement("button");
     button.type = "button";
-    button.textContent = songSeed;
-    button.setAttribute("aria-label", `Song ${songSeed}`);
+    button.dataset.song = name;
+    button.textContent = given === null ? String(seed) : `${seed} · ${formatPercent(given / LAST_STEP)} wild`;
+    button.setAttribute("aria-label", given === null ? `Song ${seed}` : `Song ${seed}, ${formatPercent(given / LAST_STEP)} wild`);
 
     button.addEventListener("click", () => {
         if (isGenerating) return;
 
-        playNew(Number(songSeed), "history");
+        playNew(seed, "history", given);
     });
 
     return button;
@@ -903,17 +1051,17 @@ elements.share.addEventListener("click", share);
 
 /**
  *     Hands over a link to the song on the page. The share sheet where there is one, which is phones and
- *     little else, and the clipboard everywhere else. The link is only the seed, so what arrives is the
- *     song as it was generated rather than the mixer as it was left.
+ *     little else, and the clipboard everywhere else. The link is the seed and the settings, so what arrives is the
+ *     song with the mix as it was left.
  */
 async function share() {
     const seed = elements.seed.value;
-    const link = songLink(seed);
+    const link = songLink();
 
     if (navigator.share !== undefined) {
         try {
             await navigator.share({ title: `RMG song ${seed}`, url: link });
-            track("shared", { seed: Number(seed) || null, detail: "sheet", version: songVersion });
+            track("shared", aboutSong({ detail: "sheet" }));
             return;
         } catch (error) {
             // thinking better of it halfway through a share sheet is not a failure worth reporting
@@ -924,7 +1072,7 @@ async function share() {
     if (await copy(link)) {
         say("Copied");
         announce(`Link to song ${seed} copied.`);
-        track("shared", { seed: Number(seed) || null, detail: "clipboard", version: songVersion });
+        track("shared", aboutSong({ detail: "clipboard" }));
         return;
     }
 
@@ -981,8 +1129,7 @@ elements.exportMp3.addEventListener("click", exportMp3);
  *     they say how far along they are, and the page stays its own the whole time.
  */
 async function exportMp3() {
-    const songSeed = elements.seed.value;
-    const name = `song-${songSeed}.mp3`;
+    const name = `${fileName(elements.seed.value)}.mp3`;
 
     // taken now: a soundfont that fails to load while the song is fetched takes `source` with it
     const exporting = source;
@@ -992,7 +1139,7 @@ async function exportMp3() {
     setStatus("Fetching the song…");
 
     try {
-        const response = await requestSong({ seed: Number(songSeed), ...describeMix() });
+        const response = await requestSong(describeSong());
         if (!response.ok) throw new Error(await describeFailure(response));
 
         const song = await response.arrayBuffer();
@@ -1006,7 +1153,7 @@ async function exportMp3() {
 
         offerExport(mp3, name);
         announce(`Exported ${name}, ${formatSize(mp3.size)}.`);
-        track("export_mp3", { ms: since(), seed: Number(songSeed) || null, detail: `${elements.bitrate.value} kbps`, version: songVersion });
+        track("export_mp3", aboutSong({ ms: since(), detail: `${elements.bitrate.value} kbps` }));
     } catch (error) {
         setStatus(`Could not export ${name}: ${error.message}`, true);
     } finally {
@@ -1068,7 +1215,7 @@ async function startPlaying(player, origin = null) {
     setPlayIcon(true);
     showMedia(player);
     startedListening = performance.now();
-    track("play", { seed: Number(elements.seed.value) || null, detail: origin, version: songVersion });
+    track("play", aboutSong({ detail: origin }));
 }
 
 /**
@@ -1106,7 +1253,7 @@ function reportListening() {
     const seconds = (performance.now() - startedListening) / 1000;
     startedListening = null;
 
-    if (seconds >= 1) track("listened", { seconds, seed: Number(elements.seed.value) || null, version: songVersion });
+    if (seconds >= 1) track("listened", aboutSong({ seconds }));
 }
 
 elements.stop.addEventListener("click", async () => {
@@ -1315,18 +1462,19 @@ function createVolume(channel) {
     const fader = document.createElement("input");
     fader.type = "range";
     fader.min = "0";
-    fader.max = "1";
-    fader.step = "0.01";
-    fader.value = String(volumes.get(channel) ?? 1);
+    fader.max = String(LAST_STEP);
+    fader.step = "1";
+    fader.value = String(toStep(volumes.get(channel) ?? 1));
     fader.className = "fader";
     fader.setAttribute("aria-label", `Volume of channel ${channel + 1}`);
 
     const shown = document.createElement("output");
     shown.className = "percent";
-    shown.textContent = formatPercent(Number(fader.value));
+    shown.textContent = formatPercent(Number(fader.value) / LAST_STEP);
 
+    // in MIDI's steps, which is how the settings keep it
     fader.addEventListener("input", () => {
-        const volume = Number(fader.value);
+        const volume = Number(fader.value) / LAST_STEP;
         volumes.set(channel, volume);
         shown.textContent = formatPercent(volume);
         scheduleDownloadRefresh();
@@ -1377,7 +1525,7 @@ function readSong(header) {
     chosen.clear();
 
     songVolume = 1;
-    elements.songVolume.value = "1";
+    elements.songVolume.value = String(LAST_STEP);
     showSongVolume();
 
     for (const pair of (header ?? "").split(",").filter((pair) => pair !== "")) {
@@ -1438,7 +1586,7 @@ function applyMuting() {
 }
 
 elements.songVolume.addEventListener("input", async () => {
-    songVolume = Number(elements.songVolume.value);
+    songVolume = Number(elements.songVolume.value) / LAST_STEP;
     showSongVolume();
     scheduleDownloadRefresh();
 
@@ -1459,6 +1607,8 @@ function showSongVolume() {
  *     fetched again with the mix on the page. The seed is the same, so the song is the same song.
  */
 function scheduleDownloadRefresh() {
+    // the address is a link to the song as it is heard, so it follows the mix too
+    rememberSong();
     cancelDownloadRefresh();
     downloadTimer = setTimeout(refreshDownload, 400);
 }
@@ -1481,7 +1631,7 @@ async function refreshDownload() {
     const refresh = new AbortController();
     downloadRefresh = refresh;
     try {
-        const response = await requestSong({ seed: Number(songSeed), ...describeMix() }, refresh.signal);
+        const response = await requestSong(describeSong(), refresh.signal);
         if (!response.ok) throw new Error(await describeFailure(response));
 
         offerDownload(await response.arrayBuffer(), songSeed);
@@ -1548,15 +1698,16 @@ window.addEventListener("pagehide", reportListening);
  *     browser had, whether the page counts or not, since pressing it is saying so on purpose.
  */
 function rate(rating) {
-    const seed = elements.seed.value;
-    if (!IS_SEED.test(seed) || songVersion === null) return;
+    const song = currentSong();
+    if (!IS_SONG.test(song) || songVersion === null) return;
 
-    const current = recallRating(songVersion, seed);
+    const current = recallRating(songVersion, song);
     const next = current === rating ? null : rating;
-    keepRating(songVersion, seed, next);
+    keepRating(songVersion, song, next);
     showRating(next);
-    // the change, rather than the rating, since the server has no one to tell today's rating from yesterday's by
-    tell("rated", { seed: Number(seed), detail: `${current ?? "none"}>${next ?? "none"}`, version: songVersion });
+    // the change, rather than the rating, since the server has no one to tell today's rating from yesterday's by, and
+    // with the settings it was heard with, which say whether the unconventionality that names it was given
+    tell("rated", aboutSong({ detail: `${current ?? "none"}>${next ?? "none"}` }));
     announce(next === null ? "Rating taken back." : next === "up" ? "Liked." : "Disliked.");
 }
 
@@ -1591,10 +1742,18 @@ async function start() {
 
     // said afterwards, since the generating itself has the status line until it is done with it, and
     // only once a song has arrived: a failure has the status line to itself
-    const generating = generate(linked.seed, linked.seed === null || linked.wasRolled);
+    // a linked song is the one its settings name, drawn unless they say it was given; one rolled here goes by the page
+    const given = linked.seed === null
+        ? askedUnconventionality()
+        : linked.settings?.isGiven ? linked.settings.unconventionality : null;
+    const generating = generate(linked.seed, given, linked.seed === null || linked.wasRolled, linked.seed === null ? null : linked.settings);
     if (linked.wasAsked && linked.seed === null)
         generating.then((isGenerated) => {
             if (isGenerated) setStatus("That link has no valid seed, so here is a random song.", true);
+        });
+    else if (linked.isSettingsBad)
+        generating.then((isGenerated) => {
+            if (isGenerated) setStatus("That link's settings could not be read, so here is its song as it was generated.", true);
         });
 
     // listed whatever is loaded, so the dropdown is ready for anyone who opens the panel, and asked for

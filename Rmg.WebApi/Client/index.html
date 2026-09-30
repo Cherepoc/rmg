@@ -74,6 +74,20 @@
             <span>Play a new random song when one ends (seeded songs just stop)</span>
         </label>
 
+        <div class="row unconventionality-row">
+            <label class="field toggle">
+                <input type="checkbox" id="give-unconventionality" />
+                <span>Choose how plain or wild</span>
+            </label>
+            <label class="field unconventionality">
+                <span aria-hidden="true">Plainest</span>
+                <input type="range" id="unconventionality" min="0" max="127" step="1" value="64" disabled
+                       aria-label="How plain or wild the next song is, from plainest to wildest" />
+                <span aria-hidden="true">Wildest</span>
+                <output id="unconventionality-value" class="percent">50%</output>
+            </label>
+        </div>
+
         <details class="seeded" id="seeded">
             <summary>Play a specific seed</summary>
             <div class="row">
@@ -105,7 +119,7 @@
         <div class="row">
             <label class="field volume">
                 <span>Overall</span>
-                <input type="range" id="song-volume" min="0" max="1" step="0.01" value="1" />
+                <input type="range" id="song-volume" min="0" max="127" step="1" value="127" />
                 <output id="song-volume-value" class="percent">100%</output>
             </label>
             <button type="button" id="roll-instruments" class="small">Roll all instruments</button>

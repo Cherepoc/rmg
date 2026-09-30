@@ -515,6 +515,25 @@ input[type="range"] {
     flex-shrink: 0;
 }
 
+/* how plain or wild the songs asked for next are, or, left to the song, how plain or wild the one on show drew */
+.unconventionality-row {
+    margin-top: 14px;
+    row-gap: 8px;
+}
+
+.unconventionality-row .toggle {
+    margin-top: 0;
+}
+
+.unconventionality input {
+    width: 160px;
+    max-width: 40vw;
+}
+
+.unconventionality input:disabled {
+    opacity: 0.5;
+}
+
 .volume input {
     width: 90px;
 }
@@ -771,8 +790,13 @@ footer a:hover {
         margin-left: 0;
     }
 
-    .song-panel .toggle {
+    .song-panel .toggle,
+    .unconventionality-row {
         order: 5;
+    }
+
+    .unconventionality-row {
+        margin: 0;
     }
 
     .song-panel .seeded {
