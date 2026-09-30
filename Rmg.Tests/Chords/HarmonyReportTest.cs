@@ -16,7 +16,7 @@ public sealed class HarmonyReportTest
 
     private sealed record SectionChords(int Band, ImmutableArray<(string Place, int Level)> Chords);
 
-    private sealed record SongHarmony(int Band, string Scale, int Sections, int OtherScales, int Pentatonic, bool KeyChange, ImmutableArray<SectionChords> SectionChords,
+    private sealed record SongHarmony(int Band, string Scale, int Sections, int OtherScales, int Pentatonic, int KeyChanges, ImmutableArray<SectionChords> SectionChords,
         ImmutableArray<(int Band, ImmutableArray<int> Roots)> Progressions);
 
     // a place on the unconventionality's scale, in fifths: a section's chords facet for its chords, and the song's scale
@@ -53,7 +53,7 @@ public sealed class HarmonyReportTest
             var of = band.ToArray();
             var scales = string.Join(", ", of.GroupBy(x => x.Scale).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}"));
             Console.WriteLine($"  {band.Key}/5, {of.Length} songs: sections in another scale {of.Sum(x => x.OtherScales) / (double)of.Sum(x => x.Sections):P0}, " +
-                              $"pentatonic {of.Sum(x => x.Pentatonic) / (double)of.Sum(x => x.Sections):P0}, key change {of.Count(x => x.KeyChange) / (double)of.Length:P0}; scales {scales}");
+                              $"pentatonic {of.Sum(x => x.Pentatonic) / (double)of.Sum(x => x.Sections):P0}, key change {of.Count(x => x.KeyChanges > 0) / (double)of.Length:P0}, {of.Sum(x => x.KeyChanges) / (double)of.Length:F2} changes a song; scales {scales}");
         }
 
         await Task.CompletedTask;
@@ -66,7 +66,7 @@ public sealed class HarmonyReportTest
         var rhythms = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).ToDictionary(x => x.Section, x => (HarmonicRhythm)x.Value!);
         var scales = song.Trace.Where(x => x.Point == TracePoints.SectionScale).Select(x => (Scale)x.Value!).ToArray();
         var pentatonic = song.Trace.Count(x => x.Point == TracePoints.Pentatonic && (bool)x.Value!);
-        var keyChange = song.Trace.Single(x => x.Point == TracePoints.KeyChange).Value is not null;
+        var keyChanges = ((ImmutableArray<KeyChange>)song.Trace.Single(x => x.Point == TracePoints.KeyChange).Value!).Length;
 
         // a chord of every section's pattern once, as the chords track plays it: the role chord where the bar has one,
         // the pool's pick otherwise
@@ -94,6 +94,6 @@ public sealed class HarmonyReportTest
             .Select(x => (Math.Clamp((int)(facets[x.Section][Facet.Progression] * 5), 0, 4), (ImmutableArray<int>)x.Value!));
 
         var songFacets = (Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!;
-        return new SongHarmony(Band(songFacets[Facet.Scale]), scale.Name, scales.Length, scales.Count(x => x != scale), pentatonic, keyChange, [..chords], [..progressions]);
+        return new SongHarmony(Band(songFacets[Facet.Scale]), scale.Name, scales.Length, scales.Count(x => x != scale), pentatonic, keyChanges, [..chords], [..progressions]);
     }
 }
