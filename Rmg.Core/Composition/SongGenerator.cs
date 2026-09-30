@@ -142,8 +142,7 @@ public static class SongGenerator
             sectionEnergies,
             PercussionSections.GenerateSong(Stream(SongStream.Percussion)),
             commonStateMap.GetStateValue(StateKinds.KeyOffset),
-            absent,
-            meter
+            absent
         );
         // how the song starts and ends around its sections, decided before them: the one the song ends with leads home
         // to the tonic, where the ending lands
@@ -158,7 +157,7 @@ public static class SongGenerator
         var plan = formGenerator.Plan(sectionIds);
 
         // every section is generated once, where it first plays
-        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0], structure.Roles[id]))))
+        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0], structure.Roles[id], meter))))
             .CacheGeneratedValues();
         // and its melody placed afresh every time it plays, varied from the first as far as the song improvises
         var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), songUnconventionality[Facet.Melody]);
@@ -240,7 +239,7 @@ public static class SongGenerator
         var bassTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Bass);
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, BassLeadingLayers.Line);
         // and the bass walking with the drums' runs into a new section now and then, from where it is placed
-        songTrackNoteTimelineMap = BassFills.Apply(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, fills.Runs, Stream(SongStream.BassFills), meter);
+        songTrackNoteTimelineMap = BassFills.Apply(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, fills.Runs, Stream(SongStream.BassFills), form.Map.MeterAt);
         var counterTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.CounterMelody);
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, counterTrack.Key, (PitchInstrumentTrack)counterTrack.Value, CounterLayers.Line);
         var riffTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Riff);
@@ -263,7 +262,7 @@ public static class SongGenerator
 
         // and last the notes, decided from the state of the whole song, in its order, none sounding into a stop
         var notes = form.Edits.CutNotes(
-            Realizer.Realize(tracks.Definitions, songTrackNoteTimelineMap, meter),
+            Realizer.Realize(tracks.Definitions, songTrackNoteTimelineMap, form.Map.MeterAt),
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role)
         );
         // and the parts' instruments over the song, switched and articulated by every section's sound facet

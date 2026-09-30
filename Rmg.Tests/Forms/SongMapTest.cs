@@ -9,7 +9,7 @@ public sealed class SongMapTest
     private static readonly SongMap Map = new(
         Meter.FourFour,
         new IntroSpan(IntroKind.Entries, 8, new IntroWindow(2, true)),
-        [new SectionSpan(0, 8, 32), new SectionSpan(1, 40, 32)],
+        [new SectionSpan(0, 8, 32, Meter.FourFour), new SectionSpan(1, 40, 32, Meter.FourFour)],
         new EndingSpan(EndingKind.Button, 72, 4, 1)
     );
 
@@ -26,6 +26,26 @@ public sealed class SongMapTest
         await Assert.That(Map.PatternBarAt(21)).IsEqualTo(3);
         await Assert.That(Map.PatternBarAt(4)).IsEqualTo(3);
         await Assert.That(Map.BeatInBar(21.5)).IsEqualTo(1.5);
+    }
+
+    [Test]
+    public async Task ASectionInAMeterOfItsOwn_CountsItsBarsInIt_FromItsStart()
+    {
+        // 4/4 for 16 beats, then 3/4 for 12, and an ending after it
+        var threeFour = Meter.Options.Select(x => x.Meter).First(x => x.BarDuration == 3);
+        var map = new SongMap(
+            Meter.FourFour,
+            new IntroSpan(IntroKind.Cold, 0),
+            [new SectionSpan(0, 0, 16, Meter.FourFour), new SectionSpan(1, 16, 12, threeFour)],
+            new EndingSpan(EndingKind.Button, 28, 4, 1)
+        );
+
+        await Assert.That(map.MeterAt(15)).IsEqualTo(Meter.FourFour);
+        await Assert.That(map.MeterAt(16)).IsEqualTo(threeFour);
+        await Assert.That(map.MeterAt(30)).IsEqualTo(threeFour);
+        await Assert.That(map.PatternBarAt(19.5)).IsEqualTo(1);
+        await Assert.That(map.BeatInBar(19.5)).IsEqualTo(0.5);
+        await Assert.That(map.PatternBarAt(29)).IsEqualTo(0);
     }
 
     [Test]

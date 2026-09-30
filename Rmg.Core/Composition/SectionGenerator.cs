@@ -20,8 +20,6 @@ internal sealed class SectionGenerator
     private readonly IGenerationContext _context;
     private readonly ulong _seed;
 
-    // the meter the song's bars are in
-    private readonly Meter _meter;
     private readonly SongTracks _tracks;
 
     // how far the song strays from convention, facet by facet, which a section moves a little
@@ -33,8 +31,8 @@ internal sealed class SectionGenerator
     private readonly Tilt _songPercussion;
     private readonly int _key;
     private readonly ImmutableHashSet<TrackRole> _absent;
-    private readonly BarStateGenerator _barStateGenerator;
-    private readonly PatternGenerator _patternGenerator;
+    // the generators of a section's bar state and patterns, one for every meter a section is in
+    private readonly Func<Meter, (BarStateGenerator Bars, PatternGenerator Patterns)> _generators;
 
     // the song's shift of its lines' freedom to change register, before a section's, in spreads (LineProfile.RegisterFreedomSpread)
     private readonly double _songRegisterFreedomShift;
@@ -54,11 +52,9 @@ internal sealed class SectionGenerator
         ImmutableDictionary<int, StateMap> sectionEnergies,
         Tilt songPercussion,
         int key,
-        ImmutableHashSet<TrackRole> absent,
-        Meter meter
+        ImmutableHashSet<TrackRole> absent
     )
     {
-        _meter = meter;
         _absent = absent;
         _context = context;
         _seed = seed;
@@ -71,8 +67,8 @@ internal sealed class SectionGenerator
         _songPercussion = songPercussion;
         _key = key;
         _songRegisterFreedomShift = Generators.SplineValue()(context.CreateContext(Seeds.Derive(seed, SongRegisterFreedomStream)));
-        _barStateGenerator = new BarStateGenerator(settings, meter);
-        _patternGenerator = new PatternGenerator(context, tracks.Definitions, meter);
+        _generators = ((Func<Meter, (BarStateGenerator, PatternGenerator)>)(meter => (new BarStateGenerator(settings, meter), new PatternGenerator(context, tracks.Definitions, meter))))
+            .CacheGeneratedValues();
     }
 
     /// <summary>The random sequence a decision of a section draws from, apart from its own and every other decision's.</summary>
@@ -93,6 +89,7 @@ internal sealed class SectionGenerator
     {
         // every section draws from its own sequence, so a change to one leaves the others as they are
         var sectionId = plan.Id;
+        var meter = plan.Meter;
         var context = _context.CreateContext(Seeds.Derive(_seed, sectionId));
         // how far the section strays from convention, facet by facet, each from a sequence of its own
         var facets = _songFacets.GenerateSection(facet => _context.CreateContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Unconventionality), (int)facet)));
@@ -114,7 +111,7 @@ internal sealed class SectionGenerator
         if (plan.HasTonicHome)
             home = 0;
         // how often its chords change, from a sequence of its own, faster the more energy it has
-        var harmonicRhythm = HarmonicRhythm.Draw(Stream(sectionId, SectionStream.HarmonicRhythm), tilt, _meter);
+        var harmonicRhythm = HarmonicRhythm.Draw(Stream(sectionId, SectionStream.HarmonicRhythm), tilt, meter);
         StateTrace.Record(TracePoints.HarmonicRhythm, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{harmonicRhythm.Span}", harmonicRhythm);
         var progression = Progressions.Generate(context, scale, home, Progressions.Strictness.At(facets[Facet.Progression]), harmonicRhythm.Count);
         StateTrace.Record(TracePoints.Progression, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", progression), progression);
@@ -215,7 +212,7 @@ internal sealed class SectionGenerator
             0,
             1
         );
-        var barStateTimelineMap = _barStateGenerator.Generate(context, scale, progression, harmonicRhythm, home, raisedStep, unconventionality, bassLeading, facets);
+        var barStateTimelineMap = _generators(meter).Bars.Generate(context, scale, progression, harmonicRhythm, home, raisedStep, unconventionality, bassLeading, facets);
         var contour = barStateTimelineMap.GetStateTimeline(CompositionStateKinds.LineRegister).Select(x => x.Value).ToImmutableArray();
         StateTrace.Record(TracePoints.MelodyContour, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", contour), contour);
 
@@ -244,13 +241,13 @@ internal sealed class SectionGenerator
         // the drums in half time now and then, in the quieter sections, or double time, in the louder, from a sequence of its own
         var timeFeel = Groove.DrawTimeFeel(Stream(sectionId, SectionStream.TimeFeel), tilt);
         StateTrace.Record(TracePoints.TimeFeel, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{timeFeel}", timeFeel);
-        var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads.ToImmutable(), sectionRoles, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm, timeFeel).ToArray();
-        var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm).ToArray();
+        var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads.ToImmutable(), sectionRoles, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm, timeFeel, meter).ToArray();
+        var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
         var plays = SectionLength.Draw(Stream(sectionId, SectionStream.Length), facets[Facet.Form], plan.Role);
         StateTrace.Record(TracePoints.SectionLength, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{plays}", plays);
-        var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap, _meter).Repeat(plays);
+        var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap, meter).Repeat(plays);
         // the parts the section leaves out the first time it plays, from a sequence of its own, the likelier the less energy
         // it has; a later appearance draws them again (Appear)
         var arrangementSeed = StreamSeed(sectionId, SectionStream.Arrangement);
@@ -272,7 +269,7 @@ internal sealed class SectionGenerator
             plan.Role,
             arrangementSeed,
             _tracks.Definitions.ToImmutableDictionary(x => x.Key, x => x.Value.Role),
-            _meter
+            meter
         );
         // every part, which each appearance leaves out of it what it rests
         return section;
@@ -398,7 +395,8 @@ internal sealed class SectionGenerator
         BarDrums barDrums,
         StateTimelineMap barStateTimelineMap,
         SectionRhythm sectionRhythm,
-        int timeFeel
+        int timeFeel,
+        Meter meter
     )
     {
         foreach (var group in _tracks.Groups)
@@ -425,13 +423,13 @@ internal sealed class SectionGenerator
             var idleStateMap = groupStateMap.OfScope(StateScope.Render);
             var idleTrackNumbers = group.TrackNumbers.Where(x => !trackStateMaps.ContainsKey(x)).ToArray();
             yield return new GeneratedBars(TrackEventStateTimelineMap.Create(
-                _meter.PatternDuration,
+                meter.PatternDuration,
                 idleTrackNumbers.Select(x => new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
                         x,
-                        EventTimeline.Create<StateMap>(_meter.PatternDuration).ToEventStateTimelineMap(idleStateMap)
+                        EventTimeline.Create<StateMap>(meter.PatternDuration).ToEventStateTimelineMap(idleStateMap)
                     )
                 ),
-                StateTimelineMap.Create(_meter.PatternDuration)
+                StateTimelineMap.Create(meter.PatternDuration)
             ), [
                 ..idleTrackNumbers.Select(x => new BarFeel(
                         x,
@@ -445,7 +443,7 @@ internal sealed class SectionGenerator
             if (trackStateMaps.Count == 0)
                 continue;
 
-            yield return _patternGenerator.GenerateBars(context, sectionId, DoubleLeads(trackStateMaps, doubles), barDrums, doubles, feelLeads, barStateTimelineMap, sectionRhythm, null);
+            yield return _generators(meter).Patterns.GenerateBars(context, sectionId, DoubleLeads(trackStateMaps, doubles), barDrums, doubles, feelLeads, barStateTimelineMap, sectionRhythm, null);
         }
     }
 
@@ -456,7 +454,8 @@ internal sealed class SectionGenerator
         StateMap sectionStateMap,
         StateTimelineMap barStateTimelineMap,
         HarmonicRhythm harmonicRhythm,
-        SectionRhythm sectionRhythm
+        SectionRhythm sectionRhythm,
+        Meter meter
     )
     {
         foreach (var trackNumber in _tracks.NonGroupedTrackNumbers)
@@ -494,7 +493,7 @@ internal sealed class SectionGenerator
                 .MergeWith(sectionTrackLayer.ToStateMap(context));
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Pad)
             {
-                yield return (trackNumber, GeneratePad(trackNumber, trackStateMap, barStateTimelineMap, harmonicRhythm, _meter), null);
+                yield return (trackNumber, GeneratePad(trackNumber, trackStateMap, barStateTimelineMap, harmonicRhythm, meter), null);
                 continue;
             }
 
@@ -505,13 +504,13 @@ internal sealed class SectionGenerator
             var amount = MelodyLayers.AnswerAmounts.At(sectionRhythm.Facets[Facet.Melody]);
             var answerContext = Stream(sectionId, SectionStream.MelodyAnswer);
             var answerSeed = answerContext.GenerateSeed();
-            var questionEnd = barStateTimelineMap.GetEffectiveStateMapAt(_meter.PatternDuration - _meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
+            var questionEnd = barStateTimelineMap.GetEffectiveStateMapAt(meter.PatternDuration - meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
             var answer = isMelody ? LinePattern.DrawAnswer(answerContext, amount, questionEnd) : null;
             // a riff's bars follow a riff's scheme, from a sequence of its own, rather than the section's phrase
             var isRiff = _tracks.Definitions[trackNumber].Role == TrackRole.Riff;
             var trackRhythm = isRiff ? sectionRhythm with { Scheme = Stream(sectionId, SectionStream.Riff).Pick(RiffLayers.Schemes) } : sectionRhythm;
             var seeds = PatternGenerator.DrawSeeds(context, trackStateMaps.Keys, trackRhythm.Scheme);
-            GeneratedBars BuildBars(ImmutableArray<int> rhythmKeys) => _patternGenerator.BuildBars(
+            GeneratedBars BuildBars(ImmutableArray<int> rhythmKeys) => _generators(meter).Patterns.BuildBars(
                 seeds,
                 sectionId,
                 trackStateMaps.ToImmutableDictionary(),
@@ -548,7 +547,7 @@ internal sealed class SectionGenerator
                     BassLeadingLayers.Line.RegisterFreedom,
                     StreamSeed(sectionId, SectionStream.BassImprovisation)
                 );
-                yield return (trackNumber, bars with { Timeline = bass.Appear(0, 0).Trim(_meter.PatternDuration) }, bass);
+                yield return (trackNumber, bars with { Timeline = bass.Appear(0, 0).Trim(meter.PatternDuration) }, bass);
                 continue;
             }
 
@@ -572,7 +571,7 @@ internal sealed class SectionGenerator
                     RiffLayers.Line.RegisterFreedom,
                     StreamSeed(sectionId, SectionStream.RiffImprovisation)
                 );
-                yield return (trackNumber, bars with { Timeline = riff.Appear(0, 0).Trim(_meter.PatternDuration) }, riff);
+                yield return (trackNumber, bars with { Timeline = riff.Appear(0, 0).Trim(meter.PatternDuration) }, riff);
                 continue;
             }
 
@@ -596,7 +595,7 @@ internal sealed class SectionGenerator
                     CounterLayers.Line.RegisterFreedom,
                     StreamSeed(sectionId, SectionStream.CounterImprovisation)
                 );
-                yield return (trackNumber, bars with { Timeline = counter.Appear(0, 0).Trim(_meter.PatternDuration) }, counter);
+                yield return (trackNumber, bars with { Timeline = counter.Appear(0, 0).Trim(meter.PatternDuration) }, counter);
                 continue;
             }
 
@@ -623,11 +622,11 @@ internal sealed class SectionGenerator
             var melody = new SectionLine(
                 trackNumber,
                 MelodyLayers.Line,
-                LinePattern.Answer(bars.Timeline, trackNumber, MelodyLayers.Line, answerSeed, amount, _meter.BarDuration),
+                LinePattern.Answer(bars.Timeline, trackNumber, MelodyLayers.Line, answerSeed, amount, meter.BarDuration),
                 rhythmKeys =>
                 {
                     using var pause = StateTrace.Pause();
-                    return LinePattern.Answer(BuildBars(rhythmKeys).Timeline, trackNumber, MelodyLayers.Line, answerSeed, amount, _meter.BarDuration);
+                    return LinePattern.Answer(BuildBars(rhythmKeys).Timeline, trackNumber, MelodyLayers.Line, answerSeed, amount, meter.BarDuration);
                 },
                 sectionRhythm.Scheme.Letters,
                 harmonicRhythm,
@@ -637,7 +636,7 @@ internal sealed class SectionGenerator
                 StreamSeed(sectionId, SectionStream.MelodyImprovisation)
             );
             StateTrace.Record(TracePoints.MelodyAnswer, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{amount:F2}", amount);
-            yield return (trackNumber, bars with { Timeline = melody.Appear(0, 0).Trim(_meter.PatternDuration) }, melody);
+            yield return (trackNumber, bars with { Timeline = melody.Appear(0, 0).Trim(meter.PatternDuration) }, melody);
         }
     }
 
@@ -701,7 +700,8 @@ internal sealed class SectionGenerator
 /// <param name="HasTonicHome">Whether its home is the song's tonic, as the song's last section's is, where the song ends.</param>
 /// <param name="KeepsSongScale">Whether it plays in the song's scale, as the song's first does, which sets the key.</param>
 /// <param name="Role">What it does in the song's form, which leans its length and its home.</param>
-internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScale, SectionRole Role);
+/// <param name="Meter">The meter its bars are in.</param>
+internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScale, SectionRole Role, Meter Meter);
 
 /// <summary>A section's tracks, and what the fills need to know of its rhythm and energy.</summary>
 /// <param name="Rhythm">How far the section's rhythm strays from convention.</param>

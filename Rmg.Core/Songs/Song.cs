@@ -44,6 +44,9 @@ public sealed class Song
     /// <summary>The meter the song's bars are in.</summary>
     public Meter Meter { get; }
 
+    /// <summary>The meter the bar at a position is in, as the map has it; the song's where it has none.</summary>
+    public Meter MeterAt(double position) => Map?.MeterAt(position) ?? Meter;
+
     public ImmutableSortedDictionary<int, IInstrumentTrack> TrackDefinitions { get; }
 
     public TrackEventStateTimelineMap<StateMap> TrackEventStateTimelineMap { get; }

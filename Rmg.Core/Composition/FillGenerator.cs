@@ -75,7 +75,7 @@ internal sealed class FillGenerator
         var drummer = Drummer.Generate(_context, _songRhythm.Value);
         var edits = new TimelineEdits(_context, _meter, map);
         foreach (var line in lines)
-            MarkLine(song, edits, line, minNote, drummer, map?.Origin ?? 0);
+            MarkLine(song, edits, line, minNote, drummer, map);
 
         return edits.ApplyTo(song);
     }
@@ -86,8 +86,7 @@ internal sealed class FillGenerator
     ///     every section's 4-bar pattern and its repeat.
     /// </summary>
     /// <param name="start">Where the first section starts.</param>
-    /// <param name="meter">The meter the song's bars are in.</param>
-    public static ImmutableArray<FillLine> GetSectionLines(IReadOnlyList<FillSection> sections, Meter meter, double start = 0)
+    public static ImmutableArray<FillLine> GetSectionLines(IReadOnlyList<FillSection> sections, double start = 0)
     {
         var lines = ImmutableArray.CreateBuilder<FillLine>();
         for (var i = 0; i < sections.Count; i++)
@@ -98,7 +97,7 @@ internal sealed class FillGenerator
                 lines.Add(new FillLine(start, sections[i - 1], sections[i], 0));
 
             // a drum solo fills every bar, and any other section its phrases
-            var every = sections[i].IsDrumSolo ? meter.BarDuration : meter.PatternDuration;
+            var every = sections[i].IsDrumSolo ? sections[i].Meter.BarDuration : sections[i].Meter.PatternDuration;
             for (var line = start + every;
                  sections[i].HasDrums && line < start + sections[i].Duration;
                  line += every)
@@ -122,10 +121,12 @@ internal sealed class FillGenerator
         FillLine line,
         double minNote,
         Drummer drummer,
-        double origin
+        SongMap? map
     )
     {
         var ending = line.Ending;
+        // the fill is in the bars of the section it ends
+        var meter = ending.Meter;
         var chances = GetChances(drummer);
         var fills = ending.Fills.Value;
         // how much the line weighs: its own weight, and the energy it leads into, as far as the section's rhythm follows it
@@ -135,9 +136,9 @@ internal sealed class FillGenerator
         // and which way the energy goes, which makes stopping the groove likelier into a quieter section
         var direction = SectionEnergy.Tilt(lift, ending.Rhythm.Coupling);
         var play = line.HasFill ? DrawPlay(drummer, ending, chances, tilt, direction, weight) : FillPlay.None;
-        var rhythm = FillRhythm.Of(ending.Groove.Source, play.Layer, minNote, _meter);
+        var rhythm = FillRhythm.Of(ending.Groove.Source, play.Layer, minNote, meter);
         _lastRun = [];
-        var span = Fill(edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId);
+        var span = Fill(edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId, meter);
         if (span > 0 && line.Ending != line.Next && !_lastRun.IsEmpty)
             Runs.Add(new PlayedRun(line.Position, _lastRun, lift * ending.Rhythm.Coupling));
 
@@ -155,7 +156,9 @@ internal sealed class FillGenerator
         var isEarly = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.EarlyLandingChance, fills)) && line.HasFill;
         var landingPosition = isEarly ? line.Position - rhythm.Push : line.Position;
         Land(song, edits, landingPosition, line.Next.SectionId, landing);
-        RecordDecision(ending.SectionId, line.Position - origin, play, rhythm, span, landing, isEarly, lift);
+        // the bar of the pattern the fill plays in, the last before the line
+        var bar = map?.PatternBarAt(line.Position - meter.BarDuration) ?? ((int)Math.Floor(line.Position / meter.BarDuration) - 1).Mod(Meter.PatternBarCount);
+        RecordDecision(ending.SectionId, bar, meter, play, rhythm, span, landing, isEarly, lift);
     }
 
     /// <summary>
@@ -237,7 +240,7 @@ internal sealed class FillGenerator
     )
     {
         var edits = new TimelineEdits(_context, _meter);
-        Fill(edits, play, line, groove, FillRhythm.Of(groove.Source, play.Layer, minNote, _meter), minNote, 0);
+        Fill(edits, play, line, groove, FillRhythm.Of(groove.Source, play.Layer, minNote, _meter), minNote, 0, _meter);
         return edits.ApplyTo(song);
     }
 
@@ -283,7 +286,8 @@ internal sealed class FillGenerator
     /// <param name="line">Where the line is, from the start of the song's first section.</param>
     private void RecordDecision(
         int sectionId,
-        double line,
+        int bar,
+        Meter meter,
         FillPlay play,
         FillRhythm rhythm,
         double span,
@@ -295,7 +299,6 @@ internal sealed class FillGenerator
         if (!StateTrace.IsRunning)
             return;
 
-        var bar = (int)Math.Floor(line / _meter.BarDuration) - 1;
         var description = $"{span} beats, landing {(landing.IsEmpty ? "on nothing" : $"on {string.Join(" ", landing)}")}"
                           + (isEarly ? " early" : "")
                           + (span > 0
@@ -310,9 +313,9 @@ internal sealed class FillGenerator
             TracePoints.FillDecision,
             DrumsTrace,
             sectionId,
-            bar.Mod(Progressions.BarCount),
+            bar,
             StateMap.Default,
-            span > 0 ? Math.Max(0, _meter.BarDuration - span) : 0,
+            span > 0 ? Math.Max(0, meter.BarDuration - span) : 0,
             description,
             new FillDecision(span, play.Treatment, play.Run == FillRun.Rest, rhythm.Tuplet, rhythm.Rhythm.Fullness, landing, isEarly, lift)
         );
@@ -330,21 +333,22 @@ internal sealed class FillGenerator
         FillGrooves groove,
         FillRhythm rhythm,
         double minNote,
-        int sectionId
+        int sectionId,
+        Meter meter
     )
     {
         if (play.Span <= 0)
             return 0;
 
         // the bar's last node of the span's length in four
-        var span = _meter.SpanOf(play.Span);
+        var span = meter.SpanOf(play.Span);
         // a fill shorter than a beat is a note of the fill's rhythm, so that in a tuplet it falls on the tuplet
         if (rhythm.Tuplet != 1 && span < 1)
             span = rhythm.Push;
         // one off the beat starts a note of the fill's rhythm near an 8th earlier or later, and shorter where it is a
         // bar long
         if (play.SpanShift != 0)
-            span = span < _meter.BarDuration ? Math.Max(rhythm.Push, span + play.SpanShift * rhythm.Push) : span - rhythm.Push;
+            span = span < meter.BarDuration ? Math.Max(rhythm.Push, span + play.SpanShift * rhythm.Push) : span - rhythm.Push;
         var from = line - span;
 
         var cleared = play.Treatment switch
@@ -356,7 +360,7 @@ internal sealed class FillGenerator
         foreach (var track in cleared)
             edits.Clear(track, from, line);
 
-        PlayRun(edits, play, from, line, groove, rhythm, minNote, sectionId);
+        PlayRun(edits, play, from, line, groove, rhythm, minNote, sectionId, meter);
         return span;
     }
 
@@ -375,7 +379,8 @@ internal sealed class FillGenerator
         FillGrooves groove,
         FillRhythm rhythm,
         double minNote,
-        int sectionId
+        int sectionId,
+        Meter meter
     )
     {
         var run = play.Run;
@@ -402,7 +407,7 @@ internal sealed class FillGenerator
         else
             notes.AddRange(rhythm.Play(_context, seed, line, from, line, rhythm.MaxRank));
 
-        var drums = run.Sounds.Select(x => x.Track).Distinct().ToDictionary(x => x, x => FillRhythm.Of(groove.Of(x), play.Layer, minNote, _meter));
+        var drums = run.Sounds.Select(x => x.Track).Distinct().ToDictionary(x => x, x => FillRhythm.Of(groove.Of(x), play.Layer, minNote, meter));
         var places = FillSounds.Walk(_context, run.Path, run.Sounds.Length, notes.Count);
         var span = line - from;
         for (var k = 0; k < notes.Count; k++)
@@ -504,6 +509,7 @@ internal sealed record FillLine(
 /// <param name="Groove">The states of the rhythm the fills play from, in the last bar of the section's 4-bar pattern.</param>
 /// <param name="Energy">How loud and busy the section is meant to be (<see cref="SectionEnergy" />).</param>
 /// <param name="IsPercussionOnly">Whether the section plays its percussion without the drum kit.</param>
+/// <param name="Meter">The meter the section's bars are in, which its fills are counted in.</param>
 internal sealed record FillSection(
     int SectionId,
     double Duration,
@@ -513,7 +519,8 @@ internal sealed record FillSection(
     double Energy,
     bool IsPercussionOnly,
     bool HasDrums,
-    bool IsDrumSolo
+    bool IsDrumSolo,
+    Meter Meter
 )
 {
     /// <summary>How far the section's fills stray from convention, which their choices lean by.</summary>

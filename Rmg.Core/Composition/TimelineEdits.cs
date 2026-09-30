@@ -9,12 +9,14 @@ namespace Rmg.Core.Composition;
 ///     Changes to a song's notes, gathered, and made at once: the spans they clear and the hits they add, as the fills
 ///     and the song's form make them.
 /// </summary>
-/// <param name="meter">The meter the song's bars are in.</param>
-/// <param name="map">Where the song's parts are, from which the trace counts the bars of the sections' patterns; none for a
-///     song that starts with its first section.</param>
+/// <param name="meter">The meter the song's bars are in, where no map says otherwise.</param>
+/// <param name="map">Where the song's parts are and the meter of each, from which the trace counts the bars of the
+///     sections' patterns; none for a song that starts with its first section, in the meter given.</param>
 internal sealed class TimelineEdits(IGenerationContext context, Meter meter, SongMap? map = null)
 {
     private const double Epsilon = 1e-6;
+
+    private Meter MeterAt(double position) => map?.MeterAt(position) ?? meter;
 
     private readonly Dictionary<int, List<(double From, double To)>> _cleared = [];
     private readonly Dictionary<int, List<TimelineItem<StateMap>>> _hits = [];
@@ -45,9 +47,11 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
             builder.Add(StateKinds.ArticulationIndex, articulation);
         var stateMap = builder.ToStateMap(context);
         // sections are made of whole 4-bar patterns, so the bar of the pattern and the beat in it follow from the song's
-        var fromOrigin = position - (map?.Origin ?? 0);
-        var bar = (int)Math.Floor(fromOrigin / meter.BarDuration);
-        StateTrace.Record(TracePoints.Fill, track, sectionId, bar.Mod(Meter.PatternBarCount), stateMap, fromOrigin - bar * meter.BarDuration, fill);
+        var bar = (int)Math.Floor(position / meter.BarDuration);
+        var (patternBar, beat) = map is null
+            ? (bar.Mod(Meter.PatternBarCount), position - bar * meter.BarDuration)
+            : (map.PatternBarAt(position), map.BeatInBar(position));
+        StateTrace.Record(TracePoints.Fill, track, sectionId, patternBar, stateMap, beat, fill);
 
         Clear(track, position, position + Epsilon);
         if (!_hits.TryGetValue(track, out var hits))
@@ -93,7 +97,7 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
                 if (roles[track] != TrackRole.Drum)
                     for (var i = 0; i < timeline.Count && timeline[i].Position < cut - Epsilon; i++)
                         last = i;
-                if (last >= 0 && timeline[last].Position + timeline[last].Value.Duration < cut - meter.BarDuration - Epsilon)
+                if (last >= 0 && timeline[last].Position + timeline[last].Value.Duration < cut - MeterAt(cut).BarDuration - Epsilon)
                     last = -1;
 
                 timeline = EventTimeline.Create(timeline.Duration, timeline.Select((x, i) => EndBy(x, cut, i == last)));

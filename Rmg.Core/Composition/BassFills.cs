@@ -24,7 +24,7 @@ internal static class BassFills
         PitchInstrumentTrack definition,
         IReadOnlyList<PlayedRun> runs,
         IGenerationContext context,
-        Meter meter
+        Func<double, Meter> meterAt
     )
     {
         var track = song.TrackTimelineMap[bassTrack];
@@ -42,7 +42,7 @@ internal static class BassFills
             var before = events.FindLastIndex(x => x.Position < from - 1e-9);
             var after = events.FindIndex(x => x.Position >= run.Line - 1e-9);
             // where the bass plays on either side, not into a section it rests in or out of one
-            if (before < 0 || after < 0 || events[after].Position > run.Line + meter.BarDuration || events[before].Position < from - meter.BarDuration)
+            if (before < 0 || after < 0 || events[after].Position > run.Line + meterAt(run.Line).BarDuration || events[before].Position < from - meterAt(from).BarDuration)
                 continue;
 
             var start = Pitch(events[before]);

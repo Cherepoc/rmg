@@ -120,9 +120,9 @@ internal static class Solos
             // a melody with no notes there leaves nothing to solo on, and the parts play as they would
             if (line.Length == 0)
                 continue;
-            var phrases = Math.Max(1, (int)Math.Round(span.Duration / map.Meter.PatternDuration));
+            var phrases = Math.Max(1, (int)Math.Round(span.Duration / span.Meter.PatternDuration));
             // a solo of one phrase is traded by its halves
-            var turn = phrases > 1 ? map.Meter.PatternDuration : map.Meter.PatternDuration / 2;
+            var turn = phrases > 1 ? span.Meter.PatternDuration : span.Meter.PatternDuration / 2;
 
             var moves = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>();
             foreach (var (soloist, place) in solo.Soloists.Select((x, i) => (x, i)))

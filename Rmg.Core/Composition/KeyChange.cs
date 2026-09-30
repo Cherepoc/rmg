@@ -90,7 +90,7 @@ public sealed record KeyChange(double Position, int Semitones)
         var key = 0;
         var place = 0;
         foreach (var (section, index) in map.Sections.Select((x, i) => (x, i)))
-        for (var start = section.Start; start < section.End - 1e-9; start += map.Meter.PatternDuration, place++)
+        for (var start = section.Start; start < section.End - 1e-9; start += section.Meter.PatternDuration, place++)
         {
             // the song starts in its own key
             if (place == 0) continue;

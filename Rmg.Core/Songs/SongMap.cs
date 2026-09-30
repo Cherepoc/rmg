@@ -4,9 +4,10 @@ using Rmg.Core.Composition;
 namespace Rmg.Core.Songs;
 
 /// <summary>
-///     Where the parts of a song are, in beats from its start: its intro, its sections one after another, and its
-///     ending, and the meter its bars are in.
+///     Where the parts of a song are, in beats from its start: its intro, its sections one after another, each in its
+///     meter, and its ending, and the meter the song starts in.
 /// </summary>
+/// <param name="Meter">The meter the song starts in, its first section's, which its intro plays in.</param>
 public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<SectionSpan> Sections, EndingSpan Ending)
 {
     /// <summary>Where the first section starts, after the intro's bars.</summary>
@@ -20,17 +21,37 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
         return Sections.FirstOrDefault(x => position >= x.Start && position < x.End);
     }
 
-    /// <summary>The bar of a section's 4-bar pattern a position is in, counted from the first section, before it too.</summary>
-    public int PatternBarAt(double position)
+    /// <summary>
+    ///     The section whose bars a position is counted in: the one it is in, the first before it and the last after
+    ///     it; none for a song of no sections.
+    /// </summary>
+    private SectionSpan? BarsAt(double position)
     {
-        return ((int)Math.Floor((position - Origin) / Meter.BarDuration)).Mod(Meter.PatternBarCount);
+        if (Sections.IsEmpty)
+            return null;
+
+        return SectionAt(position) ?? (position < Origin ? Sections[0] : Sections[^1]);
     }
 
-    /// <summary>How far into its bar a position is, in beats, the bars counted from the first section.</summary>
+    /// <summary>The meter a position's bar is in: its section's, the first's before it and the last's after it.</summary>
+    public Meter MeterAt(double position)
+    {
+        return BarsAt(position)?.Meter ?? Meter;
+    }
+
+    /// <summary>The bar of a section's 4-bar pattern a position is in, counted from its section's start, before the first too.</summary>
+    public int PatternBarAt(double position)
+    {
+        var meter = MeterAt(position);
+        return ((int)Math.Floor((position - (BarsAt(position)?.Start ?? Origin)) / meter.BarDuration)).Mod(Meter.PatternBarCount);
+    }
+
+    /// <summary>How far into its bar a position is, in beats, the bars counted from its section's start.</summary>
     public double BeatInBar(double position)
     {
-        var fromOrigin = position - Origin;
-        return fromOrigin - Math.Floor(fromOrigin / Meter.BarDuration) * Meter.BarDuration;
+        var meter = MeterAt(position);
+        var fromStart = position - (BarsAt(position)?.Start ?? Origin);
+        return fromStart - Math.Floor(fromStart / meter.BarDuration) * meter.BarDuration;
     }
 }
 
@@ -44,8 +65,8 @@ public sealed record IntroSpan(IntroKind Kind, double Duration, IntroWindow Wind
 /// <param name="Entry">When it comes in, in beats from the start of the intro's window.</param>
 public sealed record IntroEntry(IntroPart Part, ImmutableArray<int> Tracks, double Entry);
 
-/// <summary>A section where the song plays it.</summary>
-public sealed record SectionSpan(int SectionId, double Start, double Duration)
+/// <summary>A section where the song plays it, and the meter its bars are in.</summary>
+public sealed record SectionSpan(int SectionId, double Start, double Duration, Meter Meter)
 {
     public double End => Start + Duration;
 }

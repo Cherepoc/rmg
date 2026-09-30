@@ -29,7 +29,7 @@ public static class Render
     /// </summary>
     public static RenderedSong RenderSong(Song song, SongMix mix)
     {
-        var notes = song.Notes ?? Realizer.Realize(song.TrackDefinitions, song.TrackEventStateTimelineMap, song.Meter);
+        var notes = song.Notes ?? Realizer.Realize(song.TrackDefinitions, song.TrackEventStateTimelineMap, song.MeterAt);
         var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap.OfScope(StateScope.Render);
         var swing = GetSwing(song);
         var renderedTracks = new List<RenderedTrack>();

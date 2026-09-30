@@ -23,11 +23,11 @@ internal static class Realizer
     private static readonly ImmutableArray<int> ChromaticScaleOffsets = [..Enumerable.Range(0, OctaveNoteCount)];
 
     /// <summary>The notes of every track that plays, by its number, from the song's state.</summary>
-    /// <param name="meter">The meter the song's bars are in.</param>
+    /// <param name="meterAt">The meter the song's bar at a position is in.</param>
     public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Realize(
         ImmutableSortedDictionary<int, IInstrumentTrack> trackDefinitions,
         TrackEventStateTimelineMap<StateMap> song,
-        Meter meter
+        Func<double, Meter> meterAt
     )
     {
         // a note reads only the state Render would; a track's definition also holds what its generation used
@@ -44,7 +44,7 @@ internal static class Realizer
             var notes = GetNoteStates(trackEventStateTimelineMap, track, commonStateTimelineMap);
             tracks[trackNumber] = track switch
             {
-                PitchInstrumentTrack pitchInstrumentTrack => RealizeStruck(pitchInstrumentTrack, trackEventStateTimelineMap, commonStateTimelineMap, changes, meter),
+                PitchInstrumentTrack pitchInstrumentTrack => RealizeStruck(pitchInstrumentTrack, trackEventStateTimelineMap, commonStateTimelineMap, changes, meterAt),
                 PercussionInstrumentTrack percussionInstrumentTrack => RealizePercussionTrack(percussionInstrumentTrack, notes),
                 _ => throw new ArgumentException($"Track {trackNumber} is of no kind that plays.", nameof(trackDefinitions))
             };
@@ -110,12 +110,12 @@ internal static class Realizer
         EventStateTimelineMap<StateMap> raw,
         StateTimelineMap commonStateTimelineMap,
         ImmutableArray<double> changes,
-        Meter meter
+        Func<double, Meter> meterAt
     )
     {
         while (true)
         {
-            var realized = RealizePitchTrack(track, GetNoteStates(raw, track, commonStateTimelineMap), changes, meter, out var crossings);
+            var realized = RealizePitchTrack(track, GetNoteStates(raw, track, commonStateTimelineMap), changes, meterAt, out var crossings);
             if (crossings.Count == 0 || !(track.Role.PlaysChords() || track.Role == TrackRole.Bass))
                 return realized;
 
@@ -123,7 +123,7 @@ internal static class Realizer
             var struck = new List<TimelineItem<StateMap>>();
             foreach (var (index, change) in crossings)
             {
-                if (index + 1 >= events.Count || events[index + 1].Position >= change + meter.BarDuration - 1e-9)
+                if (index + 1 >= events.Count || events[index + 1].Position >= change + meterAt(change).BarDuration - 1e-9)
                     continue;
 
                 var (note, next) = (events[index].Value, events[index + 1]);
@@ -156,7 +156,7 @@ internal static class Realizer
         PitchInstrumentTrack track,
         EventTimeline<StateMap> eventStateTimelineMap,
         ImmutableArray<double> changes,
-        Meter meter,
+        Func<double, Meter> meterAt,
         out List<(int Index, double Change)> crossings
     )
     {
@@ -177,7 +177,7 @@ internal static class Realizer
         for (var i = 0; i < items.Length; i++)
         {
             place = i > 0 && UntilChange(changes, items[i - 1].Position) > items[i].Position - items[i - 1].Position + 1e-9 ? place + 1 : 0;
-            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, GetRange(track), meter.BarDuration, changes, place, out var unclipped);
+            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, GetRange(track), meterAt(items[i].Position).BarDuration, changes, place, out var unclipped);
             var change = items[i].Position + UntilChange(changes, items[i].Position);
             var next = i + 1 < items.Length ? items[i + 1].Position : double.PositiveInfinity;
             if (items[i].Position + unclipped > change + 1e-9 && next > change + 1e-9)

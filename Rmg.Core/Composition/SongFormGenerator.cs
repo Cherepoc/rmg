@@ -84,8 +84,9 @@ internal sealed class SongFormGenerator
     /// <param name="sections">Every section in the song's order, as generated.</param>
     public SongAssembly Assemble(FormPlan plan, IReadOnlyList<int> sectionIds, IReadOnlyList<GeneratedSection> sections)
     {
-        // the song's meter, as its sections have it
+        // the meter the song starts in, its first section's, which its intro plays in, and the one it ends in
         var meter = sections[0].Meter;
+        var last = sections[^1].Meter;
         var first = sections[0];
         // an intro of entries before the first section plays its first bars, the parts cleared until they come in
         var windowDuration = plan.Window.Bars * meter.BarDuration;
@@ -103,7 +104,7 @@ internal sealed class SongFormGenerator
         var start = origin;
         foreach (var (id, section) in sectionIds.Zip(sections))
         {
-            spans.Add(new SectionSpan(id, start, section.Timeline.Duration));
+            spans.Add(new SectionSpan(id, start, section.Timeline.Duration, section.Meter));
             start += section.Timeline.Duration;
         }
 
@@ -112,7 +113,7 @@ internal sealed class SongFormGenerator
         {
             _ when !FormLayers.HasFinalChord(plan.Ending) => 0,
             EndingKind.RingOut => plan.Held,
-            _ => Math.Max(plan.Held, meter.BarDuration)
+            _ => Math.Max(plan.Held, last.BarDuration)
         };
         var map = new SongMap(
             meter,
@@ -128,10 +129,10 @@ internal sealed class SongFormGenerator
 
         ImmutableArray<FillSection> fillSections =
         [
-            ..map.Sections.Zip(sections, (span, section) => new FillSection(span.SectionId, span.Duration, section.Rhythm, section.Facets, section.Groove, section.Energy, section.IsPercussionOnly, section.HasDrums, section.Solo is { IsDrumSolo: true }))
+            ..map.Sections.Zip(sections, (span, section) => new FillSection(span.SectionId, span.Duration, section.Rhythm, section.Facets, section.Groove, section.Energy, section.IsPercussionOnly, section.HasDrums, section.Solo is { IsDrumSolo: true }, span.Meter))
         ];
         var edits = new TimelineEdits(_context, meter, map);
-        var lines = FillGenerator.GetSectionLines(fillSections, meter, origin).ToBuilder();
+        var lines = FillGenerator.GetSectionLines(fillSections, origin).ToBuilder();
         var songState = StateTimelineMap.Create(end);
         var introDescription = $"{plan.Intro} intro, {origin} beats";
 
@@ -206,14 +207,14 @@ internal sealed class SongFormGenerator
         // at least, a section of one play's pattern played twice
         if (plan.Ending == EndingKind.Fade)
         {
-            var fadeStart = Math.Min(spans[^1].Start, end - 2 * meter.PatternDuration);
+            var fadeStart = Math.Min(spans[^1].Start, end - 2 * last.PatternDuration);
             songState = songState.MergeWith(CreateFade(fadeStart, end));
             description += $", fading from beat {fadeStart} to {end}";
         }
 
         StateTrace.Record(TracePoints.SongEnding, FillGenerator.DrumsTrace, sectionIds[^1], 0, StateMap.Default, 0, description);
         // the band grows louder into a louder section
-        songState = songState.MergeWith(CreateLifts(lines, end, meter));
+        songState = songState.MergeWith(CreateLifts(lines, end));
 
         return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, songState);
     }
@@ -390,7 +391,7 @@ internal sealed class SongFormGenerator
     ///     as loud as it plays to louder by how much more energy the next section has, as far as the ending section's rhythm
     ///     follows its energy, a step every <see cref="FormLayers.FadeStep" />, the next section then as loud as it plays.
     /// </summary>
-    private static StateTimelineMap CreateLifts(IEnumerable<FillLine> lines, double end, Meter meter)
+    private static StateTimelineMap CreateLifts(IEnumerable<FillLine> lines, double end)
     {
         var items = new List<TimelineItem<double>>();
         foreach (var line in lines.Where(x => x.Ending != x.Next && x.Position < end))
@@ -399,8 +400,10 @@ internal sealed class SongFormGenerator
             if (lift <= 0)
                 continue;
 
-            var count = (int)Math.Round(meter.BarDuration / FormLayers.FadeStep);
-            var start = line.Position - meter.BarDuration;
+            // over the last bar of the section it ends
+            var bar = line.Ending.Meter.BarDuration;
+            var count = (int)Math.Round(bar / FormLayers.FadeStep);
+            var start = line.Position - bar;
             items.AddRange(Enumerable.Range(1, count).Select(i => (FormLayers.LiftVelocity * lift * i / count).ToTimelineItem(start + i * FormLayers.FadeStep - FormLayers.FadeStep)));
             items.Add(0.0.ToTimelineItem(line.Position));
         }
