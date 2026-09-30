@@ -171,18 +171,27 @@ public static class SongGenerator
         double Place(int index) => played.Length > 1 ? index / (double)(played.Length - 1) : 0.5;
         var averagePlaces = played.Select((id, index) => (id, index)).GroupBy(x => x.id).ToDictionary(x => x.Key, x => x.Average(y => Place(y.index)));
         var restedBefore = new Dictionary<int, ImmutableHashSet<TrackRole>>();
+        var solos = new Dictionary<int, SoloPlan>();
         var sections = new List<GeneratedSection>();
         for (var index = 0; index < played.Length; index++)
         {
             var id = played[index];
+            // a later appearance played as a solo now and then, from a sequence of its own, by the section's facets
+            var solo = Solos.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Solos), index)), index, generateSection(id).Facets, SongParts.All.Except(absent).ToArray());
             var section = generateSection(id).Appear(
                 played.Take(index).Count(x => x == id),
                 Tilt.Of(MelodyLayers.ImprovisationGrowth, Place(index)).Chance(improvisation, 1),
                 SectionEnergy.AppearanceStep(Place(index), averagePlaces[id]),
                 restedBefore.GetValueOrDefault(id, []),
                 // an intro of entries builds the first section's parts up itself
-                index == 0 && plan.Intro == IntroKind.Entries
+                index == 0 && plan.Intro == IntroKind.Entries,
+                solo
             );
+            if (solo is not null)
+            {
+                solos[index] = solo;
+                StateTrace.Record(TracePoints.Solo, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, $"{string.Join(", ", solo.Soloists)} {solo.Mode}", (index, solo));
+            }
             restedBefore[id] = section.Resting;
             StateTrace.Record(TracePoints.Arrangement, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, string.Join(", ", section.Resting.Order()), section.Resting);
             StateTrace.Record(TracePoints.Texture, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, $"{section.TextureKind}", (index, section.TextureKind, section.PhraseSilent));
@@ -229,6 +238,14 @@ public static class SongGenerator
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
             form.Map,
             (pair, section) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.LineDoubling), pair), section))
+        );
+        // and every pitched solo's line played by its soloists
+        songTrackNoteTimelineMap = Solos.Apply(
+            songTrackNoteTimelineMap,
+            tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
+            form.Map,
+            solos,
+            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloLines), index))
         );
 
         // and last the notes, decided from the state of the whole song, in its order, none sounding into a stop
@@ -345,5 +362,7 @@ internal enum SongStream
     Feel = 27,
     Parts = 28,
     Riff = 29,
-    LineDoubling = 30
+    LineDoubling = 30,
+    Solos = 31,
+    SoloLines = 32
 }

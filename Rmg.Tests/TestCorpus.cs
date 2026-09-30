@@ -111,6 +111,13 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     public (int Index, TextureKind Kind, ImmutableArray<ImmutableHashSet<TrackRole>> PhraseSilent) Texture(SectionSpan span) =>
         ((int, TextureKind, ImmutableArray<ImmutableHashSet<TrackRole>>))Trace.Where(x => x.Point == TracePoints.Texture).ElementAt(Array.IndexOf(Map.Sections.ToArray(), span)).Value!;
 
+    /// <summary>The sections the song plays as solos, by their places among its sections.</summary>
+    public ImmutableDictionary<int, SoloPlan> Solos =>
+        Trace.Where(x => x.Point == TracePoints.Solo).Select(x => ((int Index, SoloPlan Plan))x.Value!).ToImmutableDictionary(x => x.Index, x => x.Plan);
+
+    /// <summary>Whether the song plays a section as a solo where it plays it.</summary>
+    public bool IsSolo(SectionSpan span) => Solos.ContainsKey(Array.IndexOf(Map.Sections.ToArray(), span));
+
     /// <summary>Whether a section's drums play where the song plays it, rather than rest for a breakdown.</summary>
     public bool HasDrums(SectionSpan span) => !Resting(span).Contains(TrackRole.Drum);
 
@@ -124,6 +131,9 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
         var first = Map.Intro.Duration > 0 ? 0 : 1;
         var last = (int)Math.Round((Map.Sections[^1].End - Origin) / Map.Meter.PatternDuration) - (FormLayers.HasFinalChord(Map.Ending.Kind) ? 0 : 1);
         var windowEnd = Map.Intro.Kind == IntroKind.Entries && !Map.Intro.Window.IsBefore ? Origin + Map.Intro.Window.Bars * Map.Meter.BarDuration : double.NaN;
+        // and every bar of a drum solo
+        var soloBars = Solos.Where(x => x.Value.IsDrumSolo).Select(x => Map.Sections[x.Key])
+            .SelectMany(span => Enumerable.Range(1, (int)Math.Round(span.Duration / Map.Meter.BarDuration) - 1).Select(bar => span.Start + bar * Map.Meter.BarDuration));
         return
         [
             ..Enumerable.Range(first, last - first + 1)
@@ -131,6 +141,9 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
                 .Where(x => x >= Map.Sections[^1].End - 1e-9
                             || HasDrums(Map.Sections.Last(s => s.Start <= x + 1e-9))
                             || Math.Abs(x - windowEnd) < 1e-9 && HasDrums(Map.Sections[0]))
+                .Concat(soloBars)
+                .Distinct()
+                .Order()
         ];
     }
 

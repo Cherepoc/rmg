@@ -23,8 +23,11 @@ public sealed class SongGeneratorChordTrackTest
                 song.TrackEventStateTimelineMap
             );
 
+            // but a solo's line, which the chords may play
+            var solos = TestCorpus.Get(seed).Map.Sections.Where(TestCorpus.Get(seed).IsSolo).ToArray();
             var notes = Render.RenderSong(chordTrackSong).Tracks.Single().NoteTimeline;
             var smallestChord = notes
+                .Where(x => !solos.Any(span => x.Position >= span.Start - 1 && x.Position < span.End + 1))
                 .GroupBy(x => x.Position)
                 .Min(x => x.Select(note => note.Value.Offset).Distinct().Count());
 

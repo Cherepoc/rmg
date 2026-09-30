@@ -97,9 +97,11 @@ internal sealed class FillGenerator
             if (i > 0 && sections[i].HasDrums)
                 lines.Add(new FillLine(start, sections[i - 1], sections[i], 0));
 
-            for (var line = start + meter.PatternDuration;
+            // a drum solo fills every bar, and any other section its phrases
+            var every = sections[i].IsDrumSolo ? meter.BarDuration : meter.PatternDuration;
+            for (var line = start + every;
                  sections[i].HasDrums && line < start + sections[i].Duration;
-                 line += meter.PatternDuration)
+                 line += every)
                 lines.Add(new FillLine(line, sections[i], sections[i], FillLayers.PhraseWeight));
 
             start += sections[i].Duration;
@@ -510,7 +512,8 @@ internal sealed record FillSection(
     FillGrooves Groove,
     double Energy,
     bool IsPercussionOnly,
-    bool HasDrums
+    bool HasDrums,
+    bool IsDrumSolo
 )
 {
     /// <summary>How far the section's fills stray from convention, which their choices lean by.</summary>

@@ -733,6 +733,9 @@ internal sealed record GeneratedSection(
     /// <summary>How the appearance brings its parts in over its phrases.</summary>
     public TextureKind TextureKind { get; init; } = TextureKind.Steady;
 
+    /// <summary>The appearance's solo, none where it plays as it is.</summary>
+    public SoloPlan? Solo { get; init; }
+
     // the sequence an appearance's texture is drawn from, apart from its parts'
     private const int TextureStream = 1000;
 
@@ -745,7 +748,8 @@ internal sealed record GeneratedSection(
     /// <param name="energyStep">How far the appearance's energy is from the section's, such as more for a later one.</param>
     /// <param name="before">The parts that rested the time before, of which it may leave out no more.</param>
     /// <param name="keepsTexture">Whether it plays steady, whatever its texture draws, as the song's first section after an intro that brings its parts in.</param>
-    public GeneratedSection Appear(int appearance, double improvisation, double energyStep, ImmutableHashSet<TrackRole> before, bool keepsTexture)
+    /// <param name="solo">The appearance's solo, whose soloists, and for a pitched solo the melody, play it throughout.</param>
+    public GeneratedSection Appear(int appearance, double improvisation, double energyStep, ImmutableHashSet<TrackRole> before, bool keepsTexture, SoloPlan? solo)
     {
         var resting = appearance == 0
             ? Resting
@@ -754,8 +758,15 @@ internal sealed record GeneratedSection(
         // how the parts come in over its phrases, from a sequence of its own, by the form facet
         var playing = Roles.Values.Distinct().Where(x => !resting.Contains(x)).ToArray();
         var texture = Composition.Texture.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(ArrangementSeed, appearance), TextureStream)), Facets[Facet.Form], Plays, playing);
+        ImmutableArray<ImmutableHashSet<TrackRole>> steady = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, Plays)];
         if (keepsTexture)
-            texture = (TextureKind.Steady, ImmutableHashSet<TrackRole>.Empty, [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, Plays)]);
+            texture = (TextureKind.Steady, ImmutableHashSet<TrackRole>.Empty, steady);
+        // a solo plays through: a drum solo the drums alone, a pitched one its soloists and the melody, whose line it is,
+        // improvised through
+        if (solo is { IsDrumSolo: true })
+            return (this with { Resting = [..Roles.Values.Distinct().Where(x => x != TrackRole.Drum)], PhraseSilent = steady, TextureKind = TextureKind.Alone, Solo = solo }).Appear(appearance, improvisation);
+        if (solo is not null)
+            return (this with { Resting = resting.Except(solo.Soloists).Remove(TrackRole.Melody), PhraseSilent = steady, TextureKind = TextureKind.Steady, Solo = solo }).Appear(appearance, 1);
         return (this with { Resting = resting.Union(texture.Resting), PhraseSilent = texture.PhraseSilent, TextureKind = texture.Kind }).Appear(appearance, improvisation);
     }
 

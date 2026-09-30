@@ -19,7 +19,9 @@ public sealed class FillLineTest
         var sections = song.Map.Sections;
         foreach (var (position, decision) in song.FillLines().Zip(decisions))
         {
-            if (position <= sections[0].Start + 1e-9 || position >= sections[^1].End - 1e-9)
+            // a drum solo's bars fill as a solo does, apart from the phrases' lines
+            if (position <= sections[0].Start + 1e-9 || position >= sections[^1].End - 1e-9
+                || sections.Any(x => song.IsSolo(x) && song.Solos[Array.IndexOf(sections.ToArray(), x)].IsDrumSolo && position > x.Start + 1e-9 && position < x.End - 1e-9))
                 continue;
             yield return new Line(!sections.Any(x => Math.Abs(x.Start - position) < 1e-9), decision);
         }

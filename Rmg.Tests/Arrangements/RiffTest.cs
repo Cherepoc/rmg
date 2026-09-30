@@ -28,6 +28,9 @@ public sealed class RiffTest
         foreach (var (index, source, target, _) in Doublings(song))
         {
             var span = song.Map.Sections[index];
+            // a solo plays over a doubling
+            if (song.IsSolo(span))
+                continue;
             double[] At(TrackRole role) => [..song.Song.Notes!.Single(x => song.Song.TrackDefinitions[x.Key].Role == role).Value
                 .Where(x => x.Position >= span.Start && x.Position < span.End).Select(x => x.Position)];
             var (sourceAt, targetAt) = (At(source), At(target));

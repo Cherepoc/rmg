@@ -34,6 +34,12 @@ internal static class TracePoints
     /// </summary>
     public const string LineDoubling = "Line doubling";
 
+    /// <summary>
+    ///     A solo: its appearance's place among the song's sections, and its plan (a tuple of an <c>int</c> and a
+    ///     <see cref="Composition.SoloPlan" />).
+    /// </summary>
+    public const string Solo = "Solo";
+
     /// <summary>How many times a section plays its 4-bar pattern (an <c>int</c>).</summary>
     public const string SectionLength = "Section length";
 

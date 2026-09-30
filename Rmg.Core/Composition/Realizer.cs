@@ -261,9 +261,11 @@ internal static class Realizer
         var heldDuration = stateMap.GetStateValue(StateKinds.HeldDuration);
         // how long it would sound but for a change of chord, which a held note, as a phrase's or an ending's, is not cut by
         unclipped = heldDuration > 0 ? 0 : duration;
+        // a solo's note is a line's, whatever part plays it
+        var isLine = role is TrackRole.Melody or TrackRole.Bass or TrackRole.CounterMelody or TrackRole.Riff || stateMap.GetStateValue(CompositionStateKinds.LineSolo) == 1;
         if (heldDuration > 0)
             duration = heldDuration;
-        else if (role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Riff)
+        else if (isLine && role != TrackRole.Bass)
             duration = Math.Min(duration, nextNoteDuration);
         else
             // a note that plays the chord, the chords' or the bass's, ends where the chord changes, rather than sound the
@@ -283,7 +285,7 @@ internal static class Realizer
         // as its scale step above the chord's root and its alteration; the chords the whole chord, led from the one before
         ImmutableArray<int> notes = role switch
         {
-            TrackRole.Melody or TrackRole.Bass or TrackRole.CounterMelody or TrackRole.Riff => [InRange(ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)) + stateMap.GetStateValue(StateKinds.Alteration))],
+            _ when isLine => [InRange(ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)) + stateMap.GetStateValue(StateKinds.Alteration))],
             TrackRole.Chords or TrackRole.Pad => voiceLeader.Place(
                 [..chordSteps.Select(ToNote)],
                 ToNote(0),
