@@ -42,7 +42,7 @@ public sealed class DyadicRankThresholdPattern
         var kept = new List<TimelineItem<KeptBeat>>();
         var cycle = -1;
         var isRedrawn = true;
-        foreach (var slot in DyadicRankTimeline.GenerateSlots(descriptor.Duration, descriptor.Phase, descriptor.Period, descriptor.MaxRank, descriptor.Restart, descriptor.Split))
+        foreach (var slot in DyadicRankTimeline.GenerateSlots(descriptor.Duration, descriptor.Cycles, descriptor.MaxRank))
         {
             if (slot.Cycle != cycle)
             {

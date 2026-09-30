@@ -36,6 +36,32 @@ public sealed class DyadicRankTimeline
     }
 
     /// <summary>
+    ///     The cycles of a period in the duration, one after another from its start, starting again every restart,
+    ///     where the last of them is cut off, as they are at the duration's end, each split as given and shifted by the
+    ///     phase.
+    /// </summary>
+    /// <param name="restart">How often the cycles start again, such as every half bar; the duration for never.</param>
+    /// <param name="split">How many parts a cycle splits into first, before every part halves.</param>
+    public static ImmutableArray<RhythmCycle> GenerateCycles(double duration, double phase, double period, double restart, int split)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(duration);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(period);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(restart);
+        ArgumentOutOfRangeException.ThrowIfLessThan(split, 2);
+
+        var cycleCount = (int)Math.Ceiling(Math.Min(restart, duration) / period);
+        var cycles = ImmutableArray.CreateBuilder<RhythmCycle>();
+        for (var start = 0.0; start < duration - 1e-9; start += restart)
+        {
+            var end = Math.Min(start + restart, duration);
+            for (var inSpan = 0; inSpan < cycleCount; inSpan++)
+                cycles.Add(new RhythmCycle(start + inSpan * period, period, end, split, phase / period));
+        }
+
+        return cycles.ToImmutable();
+    }
+
+    /// <summary>
     ///     The positions of the cycles in the duration, in order, each with its rank, the cycle it is in and its slot
     ///     in the cycle, which is the same slot in every cycle. The cycles start again every restart, where the last of
     ///     them is cut off, as they are at the duration's end.
@@ -44,30 +70,31 @@ public sealed class DyadicRankTimeline
     /// <param name="split">How many parts a cycle splits into first, before every part halves.</param>
     public static ImmutableArray<DyadicRankSlot> GenerateSlots(double duration, double phase, double period, int maxRank, double restart, int split)
     {
+        return GenerateSlots(duration, GenerateCycles(duration, phase, period, restart, split), maxRank);
+    }
+
+    /// <summary>
+    ///     The positions of the cycles given in the duration, in order, each with its rank, the cycle it is in and its
+    ///     slot in the cycle, which is the same slot in every cycle of the same template: every cycle its template split
+    ///     as it splits, stretched to its length and shifted by its phase, from its start up to where it is cut off.
+    /// </summary>
+    public static ImmutableArray<DyadicRankSlot> GenerateSlots(double duration, IReadOnlyList<RhythmCycle> cycles, int maxRank)
+    {
         ArgumentOutOfRangeException.ThrowIfNegative(duration);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(period);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(restart);
         ArgumentOutOfRangeException.ThrowIfNegative(maxRank);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(maxRank, DyadicRankDistribution.MaxRank);
-        ArgumentOutOfRangeException.ThrowIfLessThan(split, 2);
 
-        var templateTimeline = RankTimelines.GetOrAdd((split, maxRank), x => BuildRankTimeline(x.Split, x.MaxRank))
-            .Stretch(period)
-            .PhaseShift(phase);
-
-        var cycleCount = (int)Math.Ceiling(Math.Min(restart, duration) / period);
         var slots = new List<DyadicRankSlot>();
-        var cycle = 0;
-        for (var start = 0.0; start < duration - 1e-9; start += restart)
+        for (var cycle = 0; cycle < cycles.Count; cycle++)
         {
-            var end = Math.Min(start + restart, duration);
-            for (var inSpan = 0; inSpan < cycleCount; inSpan++, cycle++)
-            {
-                var shifted = templateTimeline.Shift(start + inSpan * period);
-                for (var slot = 0; slot < shifted.Count; slot++)
-                    if (shifted[slot].Position < end)
-                        slots.Add(new DyadicRankSlot(shifted[slot].Position, shifted[slot].Value, cycle, slot));
-            }
+            var (start, length, end, split, phase) = cycles[cycle];
+            var shifted = RankTimelines.GetOrAdd((split, maxRank), x => BuildRankTimeline(x.Split, x.MaxRank))
+                .Stretch(length)
+                .PhaseShift(phase * length)
+                .Shift(start);
+            for (var slot = 0; slot < shifted.Count; slot++)
+                if (shifted[slot].Position < end)
+                    slots.Add(new DyadicRankSlot(shifted[slot].Position, shifted[slot].Value, cycle, slot));
         }
 
         // the positions are multiples of a period that can be a tuplet's, so they are snapped to the grid; one that
@@ -81,6 +108,9 @@ public sealed class DyadicRankTimeline
         ];
     }
 }
+
+/// <summary>A cycle of a rhythm: where it starts, how long its template is, where it is cut off, how it splits first and how far its phase shifts it, as a part of its length.</summary>
+public readonly record struct RhythmCycle(double Start, double Length, double End, int Split, double Phase);
 
 /// <param name="Rank">How strong the position is, 0 the strongest.</param>
 /// <param name="Cycle">Which repetition of the cycle the position is in, from 0.</param>
