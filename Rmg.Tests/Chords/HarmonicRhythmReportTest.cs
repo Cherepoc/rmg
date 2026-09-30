@@ -13,10 +13,13 @@ public sealed class HarmonicRhythmReportTest
     {
         foreach (var song in TestCorpus.Range(20))
         {
-            var spans = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).Select(x => ((HarmonicRhythm)x.Value!).Span).ToArray();
-            await Assert.That(spans.All(x => x is 2 or 4 or 8)).IsTrue();
+            var bars = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).Select(x => ((HarmonicRhythm)x.Value!).Bars).ToArray();
+            await Assert.That(bars.All(x => x is 0.5 or 1 or 2)).IsTrue();
 
+            // every change on the start of a group of the meter
             var changes = song.ChordChanges;
+            var meter = song.Map.Meter;
+            await Assert.That(changes.All(x => Math.Abs(meter.NearestGroupStart(x - song.Origin) - (x - song.Origin)) < 1e-9)).IsTrue().Because($"seed {song.Seed}");
 
             var gaps = changes.Zip(changes.Skip(1), (a, b) => b - a).ToArray();
             await Assert.That(gaps.All(x => x > 0)).IsTrue();
@@ -54,7 +57,7 @@ public sealed class HarmonicRhythmReportTest
             var energies = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy)
                 .ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
             sections.AddRange(song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm)
-                .Select(x => (((HarmonicRhythm)x.Value!).Span, energies[x.Section])));
+                .Select(x => (((HarmonicRhythm)x.Value!).Bars, energies[x.Section])));
 
             var changes = song.ChordChanges;
             foreach (var track in new[] { SongTracks.ChordsTrack, SongTracks.BassTrack })

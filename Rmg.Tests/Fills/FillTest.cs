@@ -8,8 +8,6 @@ namespace Rmg.Tests.Fills;
 
 public sealed class FillTest
 {
-    private static readonly double SectionDuration = 2 * Meter.FourFour.PatternDuration;
-
     private static readonly int[] Crashes = [..DrumDefinitions.Cymbal.ArticulationCodes];
 
     private static StateMap Velocity(double velocity) => StateMap.FromStates([StateKinds.Velocity.CreateState(velocity)]);
@@ -76,7 +74,7 @@ public sealed class FillTest
         {
             var song = TestCorpus.Get(seed).Song;
             var toms = song.TrackEventStateTimelineMap.TrackTimelineMap[DrumGroups.GetTrackNumber(DrumDefinitions.Tom)];
-            for (var position = 0.0; position < song.Duration; position += SectionDuration)
+            for (var position = 0.0; position < song.Duration; position += 2 * song.Map!.Meter.PatternDuration)
                 await Assert.That(toms.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.Velocity)).IsNotEqualTo(0);
         }
     }
@@ -102,7 +100,8 @@ public sealed class FillTest
         for (var seed = 0; seed < 200 && early < 5; seed++)
         {
             var landings = new List<StateTraceEntry>();
-            foreach (var entry in TestCorpus.Get(seed).Trace)
+            var song = TestCorpus.Get(seed);
+            foreach (var entry in song.Trace)
             {
                 if (entry.Point == TracePoints.Fill && entry.Phrase == "Landing")
                     landings.Add(entry);
@@ -113,7 +112,7 @@ public sealed class FillTest
                 {
                     early++;
                     // in the last bar before the line, where the fill is
-                    await Assert.That(landings.All(x => x.Bar == entry.Bar && x.Position > 3)).IsTrue();
+                    await Assert.That(landings.All(x => x.Bar == entry.Bar && x.Position > song.Map.Meter.BarDuration - 1)).IsTrue();
                 }
 
                 landings.Clear();

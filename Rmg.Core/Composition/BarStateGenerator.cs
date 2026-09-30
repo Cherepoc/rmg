@@ -36,28 +36,28 @@ internal sealed class BarStateGenerator
         [
             StateTimelineGenerator.Create(
                 StateKinds.Velocity,
-                settings.NoteStateStep,
+                settings.NoteStateStep * meter.BarDuration,
                 VelocityLayers.CreateGenerator(VelocityLayers.Bar),
                 settings.PoolSize,
                 "Bar"
             ),
             StateTimelineGenerator.Create(
                 StateKinds.QuarterNoteDurationPower,
-                settings.NoteStateStep,
+                settings.NoteStateStep * meter.BarDuration,
                 LayerStates.QuarterNoteDurationPower,
                 settings.PoolSize,
                 "Bar"
             ),
             StateTimelineGenerator.Create(
                 StateKinds.NextNoteDurationFactor,
-                settings.NoteStateStep,
+                settings.NoteStateStep * meter.BarDuration,
                 LayerStates.NextNoteDurationFactor,
                 settings.PoolSize,
                 "Bar"
             ),
             StateTimelineGenerator.Create(
                 CompositionStateKinds.ChordPool.Index,
-                settings.ChordShapeStep,
+                settings.ChordShapeStep * meter.BarDuration,
                 LayerStates.ChordPoolIndex,
                 settings.PoolSize,
                 "Bar"

@@ -10,9 +10,6 @@ namespace Rmg.Tests.SongGenerators;
 /// </summary>
 public sealed class SongGeneratorChordProgressionTest
 {
-    // a section is a 4-bar pattern played twice
-    private const double SectionDuration = 32;
-
     [Test]
     public async Task ChordShape_ChangesWithinASection()
     {
@@ -20,8 +17,9 @@ public sealed class SongGeneratorChordProgressionTest
         for (var seed = 0; seed < 10; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
+            // a section is a 4-bar pattern played twice
             changes += GetPitchedNotes(song)
-                .GroupBy(x => (x.TrackNumber, Section: Math.Floor(x.Position / SectionDuration)))
+                .GroupBy(x => (x.TrackNumber, Section: Math.Floor(x.Position / (2 * song.Map!.Meter.PatternDuration))))
                 .Count(x => x.Select(note => note.Shape).Distinct().Count() > 1);
         }
 
@@ -85,7 +83,7 @@ public sealed class SongGeneratorChordProgressionTest
             var corpusSong = TestCorpus.Get(seed);
             var changes = corpusSong.ChordChanges;
             int Chord(double position) => Array.FindLastIndex(changes, x => x <= position + 1e-9);
-            foreach (var bar in GetPitchedNotes(corpusSong.Song).Where(x => x.Shape != "").GroupBy(x => (x.TrackNumber, Bar: Math.Floor(x.Position / 4), Chord: Chord(x.Position))))
+            foreach (var bar in GetPitchedNotes(corpusSong.Song).Where(x => x.Shape != "").GroupBy(x => (x.TrackNumber, Bar: Math.Floor(x.Position / corpusSong.Map.Meter.BarDuration), Chord: Chord(x.Position))))
             {
                 await Assert.That(bar.Select(x => x.Shape).Distinct().Count())
                     .IsEqualTo(1)
@@ -97,14 +95,16 @@ public sealed class SongGeneratorChordProgressionTest
     [Test]
     public async Task HalfBarShapeSteps_ChangeTheShapeWithinABar()
     {
-        var settings = ProgressionSettings.Default with { ChordShapeStep = 2 };
+        var settings = ProgressionSettings.Default with { ChordShapeStep = 0.5 };
         var changesWithinABar = 0;
         for (var seed = 0; seed < 10; seed++)
         {
-            var notes = GetPitchedNotes(SongGenerator.GenerateSong(seed, settings)).Where(x => x.Shape != "").ToList();
+            var song = SongGenerator.GenerateSong(seed, settings);
+            var bar = song.Map!.Meter.BarDuration;
+            var notes = GetPitchedNotes(song).Where(x => x.Shape != "").ToList();
 
             // the shape still only changes at half-bar lines
-            foreach (var halfBar in notes.GroupBy(x => (x.TrackNumber, HalfBar: Math.Floor(x.Position / 2))))
+            foreach (var halfBar in notes.GroupBy(x => (x.TrackNumber, HalfBar: Math.Floor(x.Position / (bar / 2)))))
             {
                 await Assert.That(halfBar.Select(x => x.Shape).Distinct().Count())
                     .IsEqualTo(1)
@@ -112,7 +112,7 @@ public sealed class SongGeneratorChordProgressionTest
             }
 
             changesWithinABar += notes
-                .GroupBy(x => (x.TrackNumber, Bar: Math.Floor(x.Position / 4)))
+                .GroupBy(x => (x.TrackNumber, Bar: Math.Floor(x.Position / bar)))
                 .Count(x => x.Select(note => note.Shape).Distinct().Count() > 1);
         }
 
@@ -122,7 +122,7 @@ public sealed class SongGeneratorChordProgressionTest
     [Test]
     public async Task HalfBarShapeSteps_PitchedTracksShareTheChordShapeAtTheSameTime()
     {
-        var settings = ProgressionSettings.Default with { ChordShapeStep = 2 };
+        var settings = ProgressionSettings.Default with { ChordShapeStep = 0.5 };
         for (var seed = 0; seed < 10; seed++)
         {
             foreach (var notesAtPosition in GetPitchedNotes(SongGenerator.GenerateSong(seed, settings)).Where(x => x.Shape != "").GroupBy(x => x.Position))

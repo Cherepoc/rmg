@@ -35,9 +35,9 @@ public sealed class DrumUseReportTest
         Console.WriteLine($"Drums grooving in a section: {all.Average(x => DrumGroups.AllDrums.Count(d => Grooves(x.s, x.span, d))):F2}");
 
         // by bar: how many drums play in it, and how often that changes from the bar before within a section
-        var perBar = all.Select(x => Enumerable.Range(0, (int)(x.span.Duration / Meter.FourFour.BarDuration)).Select(bar =>
+        var perBar = all.Select(x => Enumerable.Range(0, (int)(x.span.Duration / x.s.Map.Meter.BarDuration)).Select(bar =>
                 DrumGroups.AllDrums.Select(DrumGroups.GetTrackNumber).Where(t => x.s.Song.Notes!.TryGetValue(t, out var n) &&
-                    n.Any(note => note.Position >= x.span.Start + bar * Meter.FourFour.BarDuration && note.Position < x.span.Start + (bar + 1) * Meter.FourFour.BarDuration)).ToHashSet())
+                    n.Any(note => note.Position >= x.span.Start + bar * x.s.Map.Meter.BarDuration && note.Position < x.span.Start + (bar + 1) * x.s.Map.Meter.BarDuration)).ToHashSet())
             .ToArray()).ToArray();
         var bars = perBar.SelectMany(x => x).ToArray();
         var changes = perBar.Sum(x => x.Zip(x.Skip(1)).Count(p => !p.First.SetEquals(p.Second)));
@@ -139,9 +139,9 @@ public sealed class DrumUseReportTest
                 var drums = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.Drum)
                     .SelectMany(x => x.Value.Where(n => n.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.ArticulationIndex) == 0)
                         .Select(n => (Track: x.Key, n.Position))).ToArray();
-                return song.Map.Sections.SelectMany(span => Enumerable.Range(0, (int)(span.Duration / Meter.FourFour.BarDuration)).Select(bar =>
-                    drums.Where(n => n.Position >= span.Start + bar * Meter.FourFour.BarDuration && n.Position < span.Start + (bar + 1) * Meter.FourFour.BarDuration)
-                        .Select(n => (n.Track, Place: Math.Round(n.Position - span.Start - bar * Meter.FourFour.BarDuration, 3))).OrderBy(n => n.Track).ThenBy(n => n.Place).ToArray()));
+                return song.Map.Sections.SelectMany(span => Enumerable.Range(0, (int)(span.Duration / song.Map.Meter.BarDuration)).Select(bar =>
+                    drums.Where(n => n.Position >= span.Start + bar * song.Map.Meter.BarDuration && n.Position < span.Start + (bar + 1) * song.Map.Meter.BarDuration)
+                        .Select(n => (n.Track, Place: Math.Round(n.Position - span.Start - bar * song.Map.Meter.BarDuration, 3))).OrderBy(n => n.Track).ThenBy(n => n.Place).ToArray()));
             }).ToArray();
             if (setupBars.Length == 0)
                 continue;
@@ -169,9 +169,9 @@ public sealed class DrumUseReportTest
         {
             var track = DrumGroups.GetTrackNumber(drum);
             var grooveBars = all.Where(x => Grooves(x.s, x.span, drum))
-                .SelectMany(x => Enumerable.Range(0, (int)(x.span.Duration / Meter.FourFour.BarDuration)).Select(bar =>
-                    x.s.Song.Notes![track].Where(n => n.Position >= x.span.Start + bar * Meter.FourFour.BarDuration && n.Position < x.span.Start + (bar + 1) * Meter.FourFour.BarDuration)
-                        .Select(n => Math.Round(n.Position - x.span.Start - bar * Meter.FourFour.BarDuration, 3)).ToArray()).ToArray())
+                .SelectMany(x => Enumerable.Range(0, (int)(x.span.Duration / x.s.Map.Meter.BarDuration)).Select(bar =>
+                    x.s.Song.Notes![track].Where(n => n.Position >= x.span.Start + bar * x.s.Map.Meter.BarDuration && n.Position < x.span.Start + (bar + 1) * x.s.Map.Meter.BarDuration)
+                        .Select(n => Math.Round(n.Position - x.span.Start - bar * x.s.Map.Meter.BarDuration, 3)).ToArray()).ToArray())
                 .ToArray();
             var places = grooveBars.SelectMany(x => x).ToArray();
             if (places.Length == 0)

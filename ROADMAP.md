@@ -13,7 +13,7 @@ measured before and after by a report test, by the measure its entry names.
 
 **Next** (P1), in this order:
 
-1. **The meter:** as its hierarchy (see *Meter*); the meter a value and the engine and the grooves from its tree are built, 3/4 and 6/8 next.
+1. **The meter:** as its hierarchy (see *Meter*); 3/4 and 6/8 are built, to be listened to; odd meters next.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -123,13 +123,17 @@ and threading a value that is always four through a hundred readers would change
      reads them: the backbeat on 2 and 4, on 2 and 3 in 3/4, on the fourth 8th in 6/8 and on the groups after the
      first in 15/16, the ground on the bar's and its groups' starts (`MeterTreeTest`). Tuplets and grouped periods run
      on from the bar's start as before. In four every cycle is as it was, the corpus unchanged.
-  3. **3/4 and 6/8,** drawn per song by a small chance, leaned away from convention; the harmonic rhythm counted in bars,
-     the fills' spans and the bass's pickup in the meter's groups, the count-in by groups, swing only where a meter's
-     groups are even. Listened to before going on.
+  3. **3/4 and 6/8** (built, to be listened to): drawn per song from a stream of its own, 4% each at middling
+     conventionality, leaned away from it (`Meter.Options`): over 400 songs 9%, 20% of the least conventional third.
+     A tuplet plays three over the nodes of its span, 6/8's 8ths, and a grouped period from every node that holds two
+     of it; chords change on the start of the group nearest where they would, 3/4's half bar on its third beat; the
+     progression's steps are in bars; a fill is the bar's last node of its length in four, 6/8's beat its last dotted
+     quarter; the bass's pickup on the pulse before the change; the count-in on the pulses; swing only where the
+     meter's groups hold whole pairs, never 6/8's 8ths. The drums play 3.7 notes a beat in four, 4.2 in 3/4 and 4.0 in
+     6/8, the backbeat's on 3/4's second and third beats and 6/8's fourth 8th (`MeterReportTest`). The tempo is still
+     in quarters, so 6/8 at 120 pulses at 80; to draw it by the pulse if it drags when listened to.
   4. **Odd meters,** 5/4, 7/8, 15/16 and the like, groupings drawn among the usual ones, rarely, and the bar of two
      beats before a section; then a section's meter of its own.
-  What it costs: the tempo is in quarter notes, so 6/8 at 120 pulses at
-  80, which may want the tempo drawn by the meter's pulse.
 - **Other meters** (with listening): 3/4, 6/8, 7/8 or 13/16 drawn, leaned conventional towards four; the first use a
   bar of two beats now and then before a section. Measured by: the meters drawn by conventionality; the drums' notes a
   bar, the downbeat and the backbeat as in four, per beat; the grid report's gaps under a 32nd.

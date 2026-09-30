@@ -18,7 +18,7 @@ public sealed class ArrangementReportTest
             // but the drums' fill in its last bar, where they come back into the next section
             foreach (var (track, notes) in song.Song.Notes!.Where(x => resting.Contains(song.Song.TrackDefinitions[x.Key].Role)))
             {
-                var end = song.Song.TrackDefinitions[track].Role == TrackRole.Drum ? span.End - Meter.FourFour.BarDuration : span.End - 1;
+                var end = song.Song.TrackDefinitions[track].Role == TrackRole.Drum ? span.End - song.Map.Meter.BarDuration : span.End - 1;
                 await Assert.That(notes.Count(x => x.Position >= span.Start + 1e-9 && x.Position < end - 1e-9)).IsEqualTo(0)
                     .Because($"seed {song.Seed}, track {track} at {span.Start}");
             }

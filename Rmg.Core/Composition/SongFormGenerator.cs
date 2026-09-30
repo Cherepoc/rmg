@@ -258,7 +258,7 @@ internal sealed class SongFormGenerator
     }
 
     /// <summary>
-    ///     A bar of clicks on the beats, or on the last two, over the first section's drum state: on the hi-hat's pedal,
+    ///     A bar of clicks on the meter's pulses, or on its second half of them, over the first section's drum state: on the hi-hat's pedal,
     ///     or where the song has no hi-hat, on another dry sound it has (<see cref="FormLayers.CountInSounds" />).
     /// </summary>
     private static TrackEventStateTimelineMap<StateMap> CreateCountIn(
@@ -276,6 +276,7 @@ internal sealed class SongFormGenerator
             sound = drum.Sounds[0].Code;
         }
         var clickTrack = DrumGroups.GetTrackNumber(drum);
+        var pulses = first.Meter.Pulses;
         var click = StateMap.FromStates(
             [
                 StateKinds.Velocity.CreateState(FormLayers.CountInVelocity),
@@ -289,7 +290,7 @@ internal sealed class SongFormGenerator
                     x.Value.WithEvents(
                         EventTimeline.Create(
                             first.Meter.BarDuration,
-                            x.Key == clickTrack ? Enumerable.Range(isHalf ? 2 : 0, isHalf ? 2 : 4).Select(beat => click.ToTimelineItem(beat)) : []
+                            x.Key == clickTrack ? pulses.Skip(isHalf ? pulses.Length / 2 : 0).Select(pulse => click.ToTimelineItem(pulse)) : []
                         )
                     )
                 )

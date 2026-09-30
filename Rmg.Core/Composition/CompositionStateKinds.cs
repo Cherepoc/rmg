@@ -50,7 +50,7 @@ internal static class CompositionStateKinds
     // before, as the line's freedom to change register draws it (LineProfile.RegisterFreedom); none for a note within one
     public static StateKind<int> LinePhraseStart { get; } = StateKinds.CreateAdditive<int>(Prefix + "LinePhraseStart", StateScope.Render);
 
-    // 1 for a note added in a bar's last beat for the line to lead into the next chord on, as the bass's pickup, which
+    // 1 for a note added in the pulse before a chord change for the line to lead into the next chord on, as the bass's pickup, which
     // stays only where the line does lead into a new chord (LinePattern.Place)
     public static StateKind<int> LinePickup { get; } = StateKinds.CreateAdditive<int>(Prefix + "LinePickup", StateScope.Render);
 

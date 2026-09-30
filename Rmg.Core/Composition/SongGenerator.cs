@@ -71,7 +71,8 @@ public static class SongGenerator
 
         // the song's form: one of the forms songs are written in, its sections playing their roles, or one of its own
         // the meter the song's bars are in
-        meter ??= Meter.FourFour;
+        meter ??= Meter.Draw(Stream(SongStream.Meter), rhythmicUnconventionality.Tilt);
+        StateTrace.Record(TracePoints.Meter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, meter.ToString(), meter);
 
         var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), rhythmicUnconventionality.Tilt);
         StateTrace.Record(TracePoints.SongForm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(" ", structure.SectionIds.Select(x => structure.Roles[x])), structure);
@@ -86,7 +87,7 @@ public static class SongGenerator
         var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common));
         // how the song swings, which its tempo sets the notes of
         var grooveContext = Stream(SongStream.Groove);
-        var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), rhythmicUnconventionality.Tilt);
+        var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), rhythmicUnconventionality.Tilt, meter);
         StateTrace.Record(TracePoints.Swing, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{swing.Delay:F3} of {swing.Period}", swing);
 
         var sectionGenerator = new SectionGenerator(
@@ -220,13 +221,13 @@ public static class SongGenerator
     }
 }
 
-/// <summary>How the state along a section's 4-bar pattern changes. The steps are in beats; a bar is 4 beats.</summary>
+/// <summary>How the state along a section's 4-bar pattern changes. The steps are in bars.</summary>
 /// <param name="ChordShapeStep">How often the chord shape of the progression can change.</param>
 /// <param name="NoteStateStep">How often the velocity and note duration of the progression can change.</param>
 /// <param name="PoolSize">How many values each state picks from along the pattern; 0 draws a new value every step.</param>
 internal sealed record ProgressionSettings(double ChordShapeStep, double NoteStateStep, int PoolSize)
 {
-    public static ProgressionSettings Default { get; } = new(4, 4, 4);
+    public static ProgressionSettings Default { get; } = new(1, 1, 4);
 }
 
 /// <summary>
@@ -258,5 +259,6 @@ internal enum SongStream
     Pad = 21,
     KeyChange = 22,
     CounterMelody = 23,
-    BassFills = 24
+    BassFills = 24,
+    Meter = 25
 }

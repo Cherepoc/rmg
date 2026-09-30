@@ -36,12 +36,23 @@ internal sealed record HarmonicRhythm(double Bars, Meter Meter)
     /// <summary>How many chords the pattern has.</summary>
     public int Count => (int)Math.Round(Meter.PatternDuration / Span);
 
-    /// <summary>Where every chord starts in the pattern, in beats.</summary>
-    public ImmutableArray<double> Changes => [..Enumerable.Range(0, Count).Select(x => x * Span)];
+    /// <summary>
+    ///     Where every chord starts in the pattern, in beats: every span on from the pattern's start, on the start of the
+    ///     group nearest it, so that two chords a bar change at 4/4's and 6/8's middle and on 3/4's third beat.
+    /// </summary>
+    public ImmutableArray<double> Changes => [..Enumerable.Range(0, Count).Select(x => Meter.NearestGroupStart(x * Span))];
+
+    /// <summary>How long a chord of the pattern lasts, in beats, up to the next chord's start.</summary>
+    public double LengthOf(int index)
+    {
+        var changes = Changes;
+        return (index + 1 < changes.Length ? changes[index + 1] : Meter.PatternDuration) - changes[index];
+    }
 
     /// <summary>The chord playing at a place in the section, of its pattern's chords, the pattern played again after it.</summary>
     public int IndexAt(double position)
     {
-        return Math.Clamp((int)Math.Floor(position.Mod(Meter.PatternDuration) / Span + 1e-9), 0, Count - 1);
+        var inPattern = position.Mod(Meter.PatternDuration);
+        return Math.Clamp(Changes.Count(x => x <= inPattern + 1e-9) - 1, 0, Count - 1);
     }
 }

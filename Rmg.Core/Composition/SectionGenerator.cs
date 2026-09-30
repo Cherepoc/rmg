@@ -585,10 +585,10 @@ internal sealed class SectionGenerator
     /// </summary>
     private static GeneratedBars GeneratePad(int trackNumber, StateMap trackStateMap, StateTimelineMap barStateTimelineMap, HarmonicRhythm harmonicRhythm, Meter meter)
     {
-        var notes = harmonicRhythm.Changes.Select(change => trackStateMap
+        var notes = harmonicRhythm.Changes.Select((change, index) => trackStateMap
             .MergeWith(PatternGenerator.PickChord(trackStateMap, barStateTimelineMap.GetEffectiveStateMapAt(change)))
             .With(CompositionStateKinds.BeatRank, 0)
-            .With(StateKinds.HeldDuration, harmonicRhythm.Span)
+            .With(StateKinds.HeldDuration, harmonicRhythm.LengthOf(index))
             .ToTimelineItem(change)
         );
         var timeline = TrackEventStateTimelineMap.Create(

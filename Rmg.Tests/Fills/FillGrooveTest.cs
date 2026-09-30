@@ -56,7 +56,7 @@ public sealed class FillGrooveTest
                 ];
 
                 var fill = Hands(from, lines[i]);
-                var groove = Hands(from - Meter.FourFour.BarDuration, from);
+                var groove = Hands(from - map.Meter.BarDuration, from);
                 if (fill.Length == 0 || groove.Length == 0)
                     continue;
 

@@ -305,7 +305,7 @@ internal sealed class PatternGenerator
     }
 
     /// <summary>
-    ///     A bass bar's notes with one in the beat before every change of chord in it or at its end, where the chord
+    ///     A bass bar's notes with one in the meter's pulse before every change of chord in it or at its end, where the chord
     ///     before leads into the next (<see cref="StateKinds.ChordApproach" />) and none starts there: the note sounding
     ///     there played again, over the chord at its place and on the rhythm's weakest beat, as lightly as a note there,
     ///     so that the approach has a note to play on; marked as a pickup, which stays only where the chord does change,
@@ -336,7 +336,8 @@ internal sealed class PatternGenerator
         var led = notes.ToList();
         foreach (var change in changes)
         {
-            var pickup = change - 1;
+            // on the meter's pulse before the change
+            var pickup = meter.Pulses.Last(x => x < change - 1e-9);
             var before = led.Where(x => x.Position < pickup - 1e-9).ToArray();
             if (barStateTimelineMap.GetEffectiveStateMapAt(start + pickup).GetStateValue(StateKinds.ChordApproach) == 0
                 || before.Length == 0

@@ -20,8 +20,8 @@ public sealed class DoublingTest
             // at a pattern's first beat, where a call may land with the band, pushed an 8th early now and then
             bool InFillBar(double position)
             {
-                var inPattern = (position - span.Start) % Meter.FourFour.PatternDuration;
-                return inPattern >= Meter.FourFour.PatternDuration - Meter.FourFour.BarDuration || inPattern < 0.5;
+                var inPattern = (position - span.Start) % song.Map.Meter.PatternDuration;
+                return inPattern >= song.Map.Meter.PatternDuration - song.Map.Meter.BarDuration || inPattern < 0.5;
             }
             // a drum the song never plays has no notes
             double[] Groove(int t) => [..song.Song.Notes!.GetValueOrDefault(t, EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0))

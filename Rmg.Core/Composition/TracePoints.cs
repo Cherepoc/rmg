@@ -45,6 +45,9 @@ internal static class TracePoints
     /// <summary>Where a song's pitched tracks sit from left to right (an <c>ImmutableDictionary</c> of tracks and pans).</summary>
     public const string Panning = "Panning";
 
+    /// <summary>The meter a song's bars are in (a <see cref="Meter" />).</summary>
+    public const string Meter = "Meter";
+
     /// <summary>What a song's drums are (a <see cref="DrumSetup" />).</summary>
     public const string DrumSetup = "Drum setup";
 

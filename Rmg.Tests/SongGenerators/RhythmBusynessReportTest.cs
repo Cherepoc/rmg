@@ -34,19 +34,19 @@ public sealed class RhythmBusynessReportTest
             foreach (var span in song.Map.Sections)
             {
                 var band = Band(span.SectionId);
-                for (var bar = 0; bar < span.Duration / Meter.FourFour.BarDuration; bar++)
+                for (var bar = 0; bar < span.Duration / song.Map.Meter.BarDuration; bar++)
                 {
                     if (bar % Meter.PatternBarCount == Meter.PatternBarCount - 1)
                         continue;
 
-                    var start = span.Start + bar * Meter.FourFour.BarDuration;
-                    var inBar = drums.Where(x => x >= start && x < start + Meter.FourFour.BarDuration).ToArray();
+                    var start = span.Start + bar * song.Map.Meter.BarDuration;
+                    var inBar = drums.Where(x => x >= start && x < start + song.Map.Meter.BarDuration).ToArray();
                     var b = bands[band];
                     bands[band] = b with
                     {
                         Bars = b.Bars + 1,
                         Drums = b.Drums + inBar.Length,
-                        Pitched = b.Pitched + pitched.Count(x => x >= start && x < start + Meter.FourFour.BarDuration),
+                        Pitched = b.Pitched + pitched.Count(x => x >= start && x < start + song.Map.Meter.BarDuration),
                         OffEighths = b.OffEighths + inBar.Count(x => !IsOn(x - start, 0.5)),
                         OffSixteenths = b.OffSixteenths + inBar.Count(x => !IsOn(x - start, 0.25))
                     };
@@ -57,8 +57,8 @@ public sealed class RhythmBusynessReportTest
             var map = song.Map;
             var decisions = song.Trace.Where(x => x.Point == TracePoints.FillDecision).ToArray();
             var first = map.Intro.Duration > 0 ? 0 : 1;
-            var last = (int)Math.Round((map.Sections[^1].End - song.Origin) / Meter.FourFour.PatternDuration) - (FormLayers.HasFinalChord(map.Ending.Kind) ? 0 : 1);
-            var lines = Enumerable.Range(first, last - first + 1).Select(x => song.Origin + x * Meter.FourFour.PatternDuration).ToArray();
+            var last = (int)Math.Round((map.Sections[^1].End - song.Origin) / song.Map.Meter.PatternDuration) - (FormLayers.HasFinalChord(map.Ending.Kind) ? 0 : 1);
+            var lines = Enumerable.Range(first, last - first + 1).Select(x => song.Origin + x * song.Map.Meter.PatternDuration).ToArray();
             for (var i = 0; i < Math.Min(lines.Length, decisions.Length); i++)
             {
                 var decision = (FillDecision)decisions[i].Value!;

@@ -47,7 +47,7 @@ public sealed class MelodyRepetitionTest
                 .Select(x => (Position: x.Key, Classes: x.SelectMany(n => n.Value.Pitches).Select(p => p.Mod(12)).ToHashSet()))
                 .ToArray();
             notes += melody.Length;
-            var patternStarts = song.Map.Sections.SelectMany(x => new[] { x.Start, x.Start + Meter.FourFour.PatternDuration }).ToArray();
+            var patternStarts = song.Map.Sections.SelectMany(x => new[] { x.Start, x.Start + song.Map.Meter.PatternDuration }).ToArray();
             for (var i = 1; i < melody.Length; i++)
             {
                 var move = Math.Abs(melody[i].Value.Pitches[0] - melody[i - 1].Value.Pitches[0]);
@@ -75,7 +75,7 @@ public sealed class MelodyRepetitionTest
             // what comes back: every section's second pattern against its first, and a section against its first place
             var pitches = melody.ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0]);
             var spans = song.Map.Sections;
-            var comparisons = spans.Select(x => (From: x.Start, To: x.Start + Meter.FourFour.PatternDuration, Length: Meter.FourFour.PatternDuration))
+            var comparisons = spans.Select(x => (From: x.Start, To: x.Start + song.Map.Meter.PatternDuration, Length: song.Map.Meter.PatternDuration))
                 .Concat(spans.Select((x, i) => (Span: x, First: spans.First(s => s.SectionId == x.SectionId)))
                     .Where(x => x.First != x.Span)
                     .Select(x => (From: x.First.Start, To: x.Span.Start, Length: x.Span.Duration)));
@@ -154,7 +154,7 @@ public sealed class MelodyRepetitionTest
                 foreach (var (position, pitch) in melody.Where(x => x.Key >= first.Start && x.Key < first.End))
                 {
                     var offset = position - first.Start;
-                    var phraseHalf = offset % Meter.FourFour.PatternDuration < Meter.FourFour.PatternDuration / 2 ? 0 : 1;
+                    var phraseHalf = offset % song.Map.Meter.PatternDuration < song.Map.Meter.PatternDuration / 2 ? 0 : 1;
                     if (span != first && improvises == 1)
                         onsets[phraseHalf]++;
                     if (span != first && melody.TryGetValue(Math.Round(span.Start + offset, 6), out var again))
@@ -171,10 +171,10 @@ public sealed class MelodyRepetitionTest
 
                     // the question's bars against the answer's, its first half and its second, where the section plays its
                     // pattern again
-                    if (span == first && offset < Meter.FourFour.PatternDuration && position + Meter.FourFour.PatternDuration < first.End
-                        && melody.TryGetValue(Math.Round(position + Meter.FourFour.PatternDuration, 6), out var answered))
+                    if (span == first && offset < song.Map.Meter.PatternDuration && position + song.Map.Meter.PatternDuration < first.End
+                        && melody.TryGetValue(Math.Round(position + song.Map.Meter.PatternDuration, 6), out var answered))
                     {
-                        var half = offset < Meter.FourFour.PatternDuration / 2 ? 0 : 1;
+                        var half = offset < song.Map.Meter.PatternDuration / 2 ? 0 : 1;
                         answer[half]++;
                         answerSame[half] += answered == pitch ? 1 : 0;
                         answerSameClass[half] += (answered - pitch).Mod(12) == 0 ? 1 : 0;

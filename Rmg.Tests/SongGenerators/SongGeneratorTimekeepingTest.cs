@@ -12,15 +12,19 @@ public sealed class SongGeneratorTimekeepingTest
         var hiHat = DrumGroups.GetTrackNumber(DrumDefinitions.HiHat);
         for (var seed = 0; seed < 40; seed++)
         {
-            var map = TestCorpus.Get(seed).Song.TrackEventStateTimelineMap.TrackTimelineMap;
-            if (!map.TryGetValue(hiHat, out var track))
+            // in a meter of two halves alike, as 4/4 and 6/8 are
+            var song = TestCorpus.Get(seed).Song;
+            var meter = song.Map!.Meter;
+            var map = song.TrackEventStateTimelineMap.TrackTimelineMap;
+            if (!map.TryGetValue(hiHat, out var track) || meter.Groups.Length != 2 || meter.Groups[0] != meter.Groups[1])
                 continue;
 
-            foreach (var bar in track.EventTimeline.GroupBy(x => (int)(x.Position / 4)))
+            var (length, half) = (meter.BarDuration, meter.BarDuration / 2);
+            foreach (var bar in track.EventTimeline.GroupBy(x => (int)(x.Position / length)))
             {
-                var positions = bar.Select(x => Math.Round(x.Position % 4, 3)).ToArray();
-                var first = positions.Where(x => x < 2).ToArray();
-                var second = positions.Where(x => x >= 2).Select(x => Math.Round(x - 2, 3)).ToArray();
+                var positions = bar.Select(x => Math.Round(x.Position % length, 3)).ToArray();
+                var first = positions.Where(x => x < half).ToArray();
+                var second = positions.Where(x => x >= half).Select(x => Math.Round(x - half, 3)).ToArray();
                 bars++;
                 if (first.SequenceEqual(second))
                     repeating++;

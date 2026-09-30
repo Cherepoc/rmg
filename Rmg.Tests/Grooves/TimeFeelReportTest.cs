@@ -12,7 +12,8 @@ public sealed class TimeFeelReportTest
     {
         var snares = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
         var stats = new Dictionary<int, (int Sections, int Bars, int Drums, int[] SnareBeats, double Energy)>();
-        foreach (var song in TestCorpus.Range(200))
+        // in four, whose beats the snare is counted on
+        foreach (var song in TestCorpus.Range(200).Where(x => x.Map.Meter == Meter.FourFour))
         {
             var feels = song.Trace.Where(x => x.Point == TracePoints.TimeFeel).ToDictionary(x => x.Section, x => (int)x.Value!);
             var energy = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);

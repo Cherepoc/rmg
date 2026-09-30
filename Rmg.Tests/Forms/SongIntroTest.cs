@@ -8,8 +8,6 @@ namespace Rmg.Tests.Forms;
 
 public sealed class SongIntroTest
 {
-    private static readonly double Phrase = Meter.FourFour.PatternDuration;
-
     // the longest fill before the line where the drums come in, an odd span of a bar less a note
     private const double LongestFill = 4.5;
 
@@ -36,12 +34,12 @@ public sealed class SongIntroTest
         {
             var intro = song.Map.Intro;
             var entries = intro.Entries.Select(x => x.Entry).ToArray();
-            var window = intro.Window.Bars * Meter.FourFour.BarDuration;
+            var window = intro.Window.Bars * song.Map.Meter.BarDuration;
 
             await Assert.That(entries[0]).IsEqualTo(0);
             await Assert.That(entries.Zip(entries.Skip(1)).All(x => x.First <= x.Second)).IsTrue();
             await Assert.That(entries[^1]).IsEqualTo(window);
-            await Assert.That(entries.All(x => x % Meter.FourFour.BarDuration == 0 && x <= window)).IsTrue();
+            await Assert.That(entries.All(x => x % song.Map.Meter.BarDuration == 0 && x <= window)).IsTrue();
             await Assert.That(intro.Duration).IsEqualTo(intro.Window.IsBefore ? window : 0);
         }
 
@@ -53,7 +51,7 @@ public sealed class SongIntroTest
     {
         foreach (var song in Entries)
         {
-            var window = song.Map.Intro.Window.Bars * Meter.FourFour.BarDuration;
+            var window = song.Map.Intro.Window.Bars * song.Map.Meter.BarDuration;
             foreach (var entry in song.Map.Intro.Entries)
             foreach (var track in entry.Tracks)
             {
@@ -93,8 +91,8 @@ public sealed class SongIntroTest
     {
         var songs = TestCorpus.Range(200).Where(x => x.Map.Intro.Kind == IntroKind.Entries).ToArray();
         var firsts = songs.GroupBy(x => x.Map.Intro.Entries[0].Part.ToString()).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}");
-        var melodyEarly = songs.Count(x => x.Map.Intro.Entries.Any(y => y.Part.Role == TrackRole.Melody && y.Entry < x.Map.Intro.Window.Bars * Meter.FourFour.BarDuration));
-        var inWindow = songs.Select(x => x.Map.Intro.Entries.Count(y => y.Entry < x.Map.Intro.Window.Bars * Meter.FourFour.BarDuration) / (double)x.Map.Intro.Entries.Length).Average();
+        var melodyEarly = songs.Count(x => x.Map.Intro.Entries.Any(y => y.Part.Role == TrackRole.Melody && y.Entry < x.Map.Intro.Window.Bars * x.Map.Meter.BarDuration));
+        var inWindow = songs.Select(x => x.Map.Intro.Entries.Count(y => y.Entry < x.Map.Intro.Window.Bars * x.Map.Meter.BarDuration) / (double)x.Map.Intro.Entries.Length).Average();
         var windows = songs.GroupBy(x => x.Map.Intro.Window).OrderBy(x => x.Key.Bars).Select(x => $"{x.Key.Bars}{(x.Key.IsBefore ? " before" : " in")} {x.Count()}");
         Console.WriteLine($"{songs.Length} intros of entries; windows {string.Join(", ", windows)}; first in {string.Join(", ", firsts)}; " +
                           $"the melody in the window {melodyEarly}; {inWindow:P0} of the parts come in in it");
@@ -102,7 +100,7 @@ public sealed class SongIntroTest
     }
 
     [Test]
-    public async Task CountIn_ClicksThePedalHiHat_OrADrySoundTheSongHas_OnTheBeats()
+    public async Task CountIn_ClicksThePedalHiHat_OrADrySoundTheSongHas_OnThePulses()
     {
         var songs = Of(IntroKind.CountIn);
         foreach (var song in songs)
@@ -110,9 +108,12 @@ public sealed class SongIntroTest
             var clicks = Drums(song).Where(x => x.Position < song.Origin).ToArray();
             var sound = FormLayers.CountInSounds.First(x => song.Song.TrackDefinitions.ContainsKey(DrumGroups.GetTrackNumber(x.Drum))).Sound;
 
-            await Assert.That(song.Origin).IsEqualTo(4);
-            await Assert.That(clicks.Length is 2 or 4).IsTrue();
-            await Assert.That(clicks.All(x => x.Value.Offset == sound && x.Position % 1 == 0)).IsTrue();
+            // a bar of them, on the meter's pulses or its second half of them
+            var pulses = song.Map.Meter.Pulses;
+            var places = clicks.Select(x => x.Position).ToArray();
+            await Assert.That(song.Origin).IsEqualTo(song.Map.Meter.BarDuration);
+            await Assert.That(places.SequenceEqual(pulses) || places.SequenceEqual(pulses.Skip(pulses.Length / 2))).IsTrue();
+            await Assert.That(clicks.All(x => x.Value.Offset == sound)).IsTrue();
         }
 
         await Assert.That(songs.Length).IsGreaterThan(0);

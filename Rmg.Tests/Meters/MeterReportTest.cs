@@ -59,4 +59,16 @@ public sealed class MeterReportTest
             Console.WriteLine($"  {role,-9} {Places(counts)}");
         Console.WriteLine($"  chords    {Places(chords)}");
     }
+
+    [Test]
+    [Explicit]
+    public async Task Meters()
+    {
+        // the meters drawn, by how unconventional the song's rhythm is
+        var songs = TestCorpus.Range(400).Select(x => (Meter: x.Map.Meter, Rhythm: ((RhythmicUnconventionality)x.Trace.Single(e => e.Point == TracePoints.SongRhythm).Value!).Value)).ToArray();
+        foreach (var band in songs.GroupBy(x => Math.Min(2, (int)(x.Rhythm * 3))).OrderBy(x => x.Key))
+            Console.WriteLine($"rhythm {band.Key}/3: {string.Join(", ", band.GroupBy(x => x.Meter.TimeSignature).Select(x => $"{x.Key.Numerator}/{x.Key.Denominator} {x.Count() / (double)band.Count():P0}"))} of {band.Count()}");
+        Console.WriteLine($"all: {string.Join(", ", songs.GroupBy(x => x.Meter.TimeSignature).Select(x => $"{x.Key.Numerator}/{x.Key.Denominator} {x.Count() / (double)songs.Length:P1}"))}");
+        await Task.CompletedTask;
+    }
 }

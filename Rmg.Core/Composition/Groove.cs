@@ -32,7 +32,8 @@ public readonly record struct Swing(double Delay, double Period)
 /// <summary>
 ///     How a song's notes sit off the grid: its swing, a song's own, which leans to swinging the less conventional the
 ///     song's rhythm, as straight time is the convention of most of what it plays. It swings the finest notes long
-///     enough to be heard swung: 16ths at slow tempos, 8ths otherwise. Generation decides it, <c>Render</c> plays it,
+///     enough to be heard swung: 16ths at slow tempos, 8ths otherwise, and none where the meter's groups do not pair
+///     them. Generation decides it, <c>Render</c> plays it,
 ///     every track alike.
 /// </summary>
 internal static class Groove
@@ -46,7 +47,8 @@ internal static class Groove
     /// <summary>The shortest note swung, in seconds: 16ths are swung where they are at least this long, 8ths otherwise.</summary>
     public const double ShortestSwungNote = 0.14;
 
-    public static Swing Generate(IGenerationContext context, double tempo, Tilt rhythm)
+    /// <param name="meter">The meter the song's bars are in, whose groups a pair must divide to swing, as 6/8's 8ths do not.</param>
+    public static Swing Generate(IGenerationContext context, double tempo, Tilt rhythm, Meter meter)
     {
         var swings = context.TestProbability(rhythm.Chance(SwingChance, 1));
         var amount = LightestSwing + (1 - LightestSwing) * context.GenerateDouble();
@@ -54,7 +56,7 @@ internal static class Groove
         var sixteenth = 60 / (Meter.BaseTempo * tempo) / 4;
         var period = sixteenth >= ShortestSwungNote ? 0.5 : 1;
         // a triplet's swing plays the pair's second note a third of the pair late of its middle, at two thirds
-        return swings ? new Swing(amount * period / 6, period) : Swing.None;
+        return swings && meter.Pairs(period) ? new Swing(amount * period / 6, period) : Swing.None;
     }
 
     /// <summary>The chance a section's drums play in half time, at a section of middling energy.</summary>

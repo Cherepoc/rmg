@@ -97,23 +97,23 @@ public sealed class SectionDynamicsTest
             .Select(span =>
                 {
                     var (energy, unconventionality) = energies.GetValueOrDefault(span.SectionId, (0, 0.5));
-                    return new SectionMeasures(span.SectionId, [..Bars(span).Select(bar => MeasureBar(notes, bar))], energy, unconventionality);
+                    return new SectionMeasures(span.SectionId, [..Bars(span, song.Map.Meter).Select(bar => MeasureBar(notes, bar, song.Map.Meter))], energy, unconventionality);
                 }
             )
             .ToArray();
     }
 
     /// <summary>The bars of a section where it plays, but the last of each 4-bar pattern.</summary>
-    private static IEnumerable<double> Bars(SectionSpan span)
+    private static IEnumerable<double> Bars(SectionSpan span, Meter meter)
     {
-        for (var bar = 0; bar * Meter.FourFour.BarDuration < span.Duration; bar++)
+        for (var bar = 0; bar * meter.BarDuration < span.Duration; bar++)
             if (bar % Meter.PatternBarCount != Meter.PatternBarCount - 1)
-                yield return span.Start + bar * Meter.FourFour.BarDuration;
+                yield return span.Start + bar * meter.BarDuration;
     }
 
-    private static double[] MeasureBar(IReadOnlyDictionary<int, Core.Events.EventTimeline<RealizedNote>> notes, double start)
+    private static double[] MeasureBar(IReadOnlyDictionary<int, Core.Events.EventTimeline<RealizedNote>> notes, double start, Meter meter)
     {
-        var end = start + Meter.FourFour.BarDuration;
+        var end = start + meter.BarDuration;
         var inBar = notes.ToDictionary(x => x.Key, x => x.Value.Where(n => n.Position >= start - 1e-9 && n.Position < end - 1e-9).ToArray());
         // the notes on the beat, which every track accents alike, so that a busier bar is not a quieter one
         var velocities = inBar.Values.SelectMany(x => x)

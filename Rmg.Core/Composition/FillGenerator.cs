@@ -328,7 +328,8 @@ internal sealed class FillGenerator
         if (play.Span <= 0)
             return 0;
 
-        var span = play.Span;
+        // the bar's last node of the span's length in four
+        var span = _meter.SpanOf(play.Span);
         // a fill shorter than a beat is a note of the fill's rhythm, so that in a tuplet it falls on the tuplet
         if (rhythm.Tuplet != 1 && span < 1)
             span = rhythm.Push;

@@ -14,6 +14,30 @@ public sealed record Meter(ImmutableArray<int> Groups)
     /// <summary>Four beats, as two halves of two.</summary>
     public static Meter FourFour { get; } = new([8, 8]);
 
+    /// <summary>Three beats.</summary>
+    public static Meter ThreeFour { get; } = new([4, 4, 4]);
+
+    /// <summary>Two dotted quarters, each of three 8ths.</summary>
+    public static Meter SixEight { get; } = new([6, 6]);
+
+    /// <summary>
+    ///     The meters a song is in, and how often: four the most, 3/4 and 6/8 now and then; each leans by how far from
+    ///     convention it is, so that a song of a less conventional rhythm is likelier in another meter than four.
+    /// </summary>
+    public static ImmutableArray<(Weighted<Meter> Meter, double Lean)> Options { get; } =
+    [
+        (new Weighted<Meter>(0.92, FourFour), 0),
+        (new Weighted<Meter>(0.04, ThreeFour), 1),
+        (new Weighted<Meter>(0.04, SixEight), 1)
+    ];
+
+    /// <summary>A song's meter, leaned by its rhythm's unconventionality.</summary>
+    public static Meter Draw(IGenerationContext context, Tilt rhythm)
+    {
+        var leans = Options.ToDictionary(x => x.Meter.Value, x => x.Lean);
+        return context.Pick(rhythm.Weigh(Options.Select(x => x.Meter), meter => leans[meter]));
+    }
+
     /// <summary>How many bars a section's pattern has.</summary>
     public const int PatternBarCount = Progressions.BarCount;
 
@@ -69,11 +93,33 @@ public sealed record Meter(ImmutableArray<int> Groups)
     }
 
     /// <summary>
+    ///     The start of the bar's or one of its groups' nearest a place, in beats, the later where two are as near.
+    /// </summary>
+    public double NearestGroupStart(double position)
+    {
+        var bar = Math.Floor(position / BarDuration + 1e-9) * BarDuration;
+        return Levels[1].Select(x => bar + x.Start / 4.0).Append(bar + BarDuration).MinBy(x => (Math.Round(Math.Abs(x - position), 9), -x));
+    }
+
+    /// <summary>
+    ///     Whether every group of the bar holds whole pairs of notes, a pair as long as given in beats, as 6/8's pairs of
+    ///     16ths fit and its 8ths' do not.
+    /// </summary>
+    public bool Pairs(double pair)
+    {
+        var steps = (int)Math.Round(pair * 4);
+        return Groups.All(x => x % steps == 0);
+    }
+
+    /// <summary>
     ///     The level of the meter's pulse, which a rhythm's period is counted in: the level whose nodes are most often
     ///     nearest a beat long, the coarser where two are as near, 4/4's and 3/4's quarters, 6/8's dotted quarters and
     ///     15/16's groups.
     /// </summary>
     public int Tactus => Enumerable.Range(0, Levels.Length).MinBy(x => (Math.Round(Math.Abs(Math.Log2(ModeLength(x) / 4.0)), 9), x));
+
+    /// <summary>Where the bar's pulses start, in beats: 4/4's four beats, 6/8's two dotted quarters.</summary>
+    public ImmutableArray<double> Pulses => [..Levels[Tactus].Select(x => x.Start / 4.0)];
 
     /// <summary>How long a level's nodes most often are, in 16ths, the longer where two lengths are as common.</summary>
     private int ModeLength(int level) =>
@@ -145,6 +191,13 @@ public sealed record Meter(ImmutableArray<int> Groups)
             ))
         ];
     }
+
+    /// <summary>
+    ///     How long a span before a bar line is in the meter, given in beats counted in the reference bar: the bar's last
+    ///     node of the level the span plays on as a straight period, such as a fill of half a bar 6/8's whole bar and a
+    ///     beat its last dotted quarter.
+    /// </summary>
+    public double SpanOf(double beats) => Levels[LevelOf(beats)][^1].Length / 4.0;
 
     /// <summary>
     ///     The level a straight period of the reference bar or less plays on: the bar for the reference bar, and for a
