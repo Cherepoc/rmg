@@ -147,6 +147,7 @@ public sealed class SongEndingTest
                 StateMap.FromStates([StateKinds.ChordArrival.CreateState((int)ChordArrival.Third)]).ToStateTimelineMap(32)
             ),
             new RhythmicUnconventionality(0.5),
+            Unconventionality.Generate(0.5, _ => new GenerationContext(0)),
             FillGrooves.FromSource(ResolvedRhythm.DefaultState),
             0,
             false,

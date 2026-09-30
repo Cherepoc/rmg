@@ -14,10 +14,6 @@ namespace Rmg.Core.Composition;
 ///     slow keeps its groove, so its speed changes <see cref="SpeedShare" /> as often, which leaves a drum at the
 ///     speed it is given in about half of the bars.
 /// </param>
-/// <param name="Tuplet">
-///     The chance to move the tuplet period, such as to a triplet feel or a 3+3+2. It is kept low for the whole song
-///     and higher for a section or a bar, so that tuplets come and go as a passage or a fill.
-/// </param>
 /// <param name="Density">
 ///     The chance to move the settings that make how busy the rhythm is: how many subdivisions it has and which of
 ///     them play. They change freely, most of all from bar to bar.
@@ -32,7 +28,6 @@ namespace Rmg.Core.Composition;
 public sealed record RhythmLayer(
     double Groove,
     double Density,
-    double Tuplet,
     double Fullness = 0,
     double Variation = 0,
     double SpeedScale = 1
@@ -50,7 +45,6 @@ public sealed record RhythmLayer(
         {
             Groove = groove,
             Density = tilt.Chance(Density, lean),
-            Tuplet = tilt.Chance(Tuplet, lean),
             Fullness = Fullness * tilt.Odds,
             Variation = Variation * tilt.Odds,
             SpeedScale = Groove == 0 ? SpeedScale : SpeedScale * Groove / groove
@@ -95,11 +89,6 @@ public sealed record RhythmLayer(
         return new Tilt(-Tilt.LogOdds).Step(Math.Min(1, Groove * SpeedShare * SpeedScale));
     }
 
-    public Func<IGenerationContext, int> CreateTupletGenerator()
-    {
-        return CreateStepGenerator(Tuplet);
-    }
-
     public Func<IGenerationContext, int> CreateDensityGenerator()
     {
         return Tilt.Step(Density);
@@ -115,7 +104,8 @@ public sealed record RhythmLayer(
 /// <summary>
 ///     The layers, from the song down to a bar. Their chances are small, so that together they leave most bars in the
 ///     groove the tracks are given: the snare keeps its backbeat in most bars, with a busier or shifted bar now and then.
-///     Tuplets play in about a fifth of a drum's bars, mostly as a section or a bar rather than a whole song.
+///     The feel, straight or a tuplet, is not theirs to move, but the song's, a section's, a bar's or a fill's
+///     (<see cref="Feels" />).
 /// </summary>
 internal static class RhythmLayers
 {
@@ -126,29 +116,28 @@ internal static class RhythmLayers
     /// </summary>
     public const double ChanceLean = 1.1;
 
-    public static RhythmLayer Song { get; } = new(0.075, 0.1, 0.025, 0.1, 0.2);
+    public static RhythmLayer Song { get; } = new(0.075, 0.1, 0.1, 0.2);
 
-    public static RhythmLayer Section { get; } = new(0.05, 0.1, 0.07, 0.1, 0.2);
+    public static RhythmLayer Section { get; } = new(0.05, 0.1, 0.1, 0.2);
 
     /// <summary>A track's own rhythm for the whole song.</summary>
-    public static RhythmLayer Track { get; } = new(0.025, 0.05, 0.008, 0.05, 0.1);
+    public static RhythmLayer Track { get; } = new(0.025, 0.05, 0.05, 0.1);
 
     /// <summary>How a track's rhythm differs in a section from the song.</summary>
-    public static RhythmLayer SectionTrack { get; } = new(0.025, 0.05, 0.035, 0.05, 0.1);
+    public static RhythmLayer SectionTrack { get; } = new(0.025, 0.05, 0.05, 0.1);
 
     /// <summary>The rhythm the drums share for the whole song.</summary>
-    public static RhythmLayer DrumGroup { get; } = new(0.025, 0.05, 0.008, 0.05, 0.1);
+    public static RhythmLayer DrumGroup { get; } = new(0.025, 0.05, 0.05, 0.1);
 
     /// <summary>How the drums' shared rhythm differs in a section.</summary>
-    public static RhythmLayer SectionDrumGroup { get; } = new(0.025, 0.05, 0.035, 0.05, 0.1);
+    public static RhythmLayer SectionDrumGroup { get; } = new(0.025, 0.05, 0.05, 0.1);
 
     /// <summary>
     ///     A fill's layer over the groove, over and above the ranks finer it plays: a rank more or less, its weight moved
-    ///     to weaker notes, a tuplet or a dotted feel now and then, and its fullness spread. Its cycle and phase stay the
-    ///     groove's.
+    ///     to weaker notes, and its fullness spread. Its cycle and phase stay the groove's.
     /// </summary>
-    public static RhythmLayer Fill { get; } = new(0, 0.5, 0.02, 0.2, 0);
+    public static RhythmLayer Fill { get; } = new(0, 0.5, 0.2, 0);
 
     /// <summary>A track's bar pattern, where a busier or sparser bar sounds like a variation, not a new groove.</summary>
-    public static RhythmLayer BarPattern { get; } = new(0.025, 0.15, 0.05, 0.05, 0.1);
+    public static RhythmLayer BarPattern { get; } = new(0.025, 0.15, 0.05, 0.1);
 }

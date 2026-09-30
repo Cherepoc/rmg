@@ -156,9 +156,10 @@ internal static class CompositionStateKinds
             RankOffset = StateKinds.CreateAdditive<int>(prefix + "RankOffset");
             Fullness = StateKinds.CreateAdditive<double>(prefix + "Fullness");
             Variation = StateKinds.CreateAdditive<double>(prefix + "Variation");
+            Feel = StateKinds.CreateLowestLayerWins<int>(prefix + "Feel");
             All =
             [
-                Period.Value, Period.Power, Period.PrimeIndex, Phase.Value, Phase.Rank, Phase.RankedOffset, MaxRank, Seed, RankOffset,
+                Period.Value, Period.Power, Feel, Phase.Value, Phase.Rank, Phase.RankedOffset, MaxRank, Seed, RankOffset,
                 Fullness, Variation
             ];
         }
@@ -167,6 +168,12 @@ internal static class CompositionStateKinds
         public ImmutableArray<IStateKind> All { get; }
 
         public PeriodStateKinds Period { get; }
+
+        /// <summary>
+        ///     The feel its cycles play in (<see cref="Feels" />), straight, or a tuplet or a grouping of a prime: the song's,
+        ///     or a section's, a bar's or a fill's where it changes it, the lowest layer's winning.
+        /// </summary>
+        public StateKind<LayerValue<int>> Feel { get; }
 
         public DyadicRhythmStateKinds Phase { get; }
 
@@ -195,14 +202,11 @@ internal static class CompositionStateKinds
         {
             Value = StateKinds.CreateAdditive<double>(prefix + "Value");
             Power = StateKinds.CreateAdditive<int>(prefix + "Power");
-            PrimeIndex = StateKinds.CreateAdditive<int>(prefix + "PrimeIndex");
         }
 
         public StateKind<double> Value { get; }
 
         public StateKind<int> Power { get; }
-
-        public StateKind<int> PrimeIndex { get; }
     }
 
     public sealed class DyadicRhythmStateKinds

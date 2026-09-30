@@ -87,7 +87,7 @@ public sealed class BackbeatReportTest
 
                 // the backbeat's period is half a bar, a step longer in half time and shorter in double time
                 var r = CompositionStateKinds.Rhythm;
-                var (power, prime, phase) = (entry.StateMap.GetStateValue(r.Period.Power), entry.StateMap.GetStateValue(r.Period.PrimeIndex), entry.StateMap.GetStateValue(r.Phase.Rank));
+                var (power, prime, phase) = (entry.StateMap.GetStateValue(r.Period.Power), Feels.Of(entry.StateMap), entry.StateMap.GetStateValue(r.Phase.Rank));
                 var expected = DrumRoles.Parts[DrumRole.Backbeat].PeriodPower + feels[span.SectionId];
                 var outcome = prime != 0 ? "tuplet" : power < expected ? "faster" : power > expected ? "slower" : phase != 1 ? "shifted" : "backbeat";
 

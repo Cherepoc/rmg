@@ -2,7 +2,10 @@ using Rmg.Core.Composition;
 
 namespace Rmg.Tests.SongGenerators;
 
-/// <summary>The hi-hat keeps time: its cycles repeat, so most of its bars play the same figure in both halves.</summary>
+/// <summary>
+///     The hi-hat keeps time: its cycles repeat, so most of its bars play the same figure in both halves, where the song is
+///     in straight time; one in a tuplet or a grouping, such as fives, does not split its bars in halves.
+/// </summary>
 public sealed class SongGeneratorTimekeepingTest
 {
     [Test]
@@ -12,11 +15,13 @@ public sealed class SongGeneratorTimekeepingTest
         var hiHat = DrumGroups.GetTrackNumber(DrumDefinitions.HiHat);
         for (var seed = 0; seed < 32; seed++)
         {
-            // in a meter of two halves alike, as 4/4 and 6/8 are
-            var song = TestCorpus.Get(seed).Song;
+            // in a meter of two halves alike, as 4/4 and 6/8 are, and a song in straight time
+            var corpusSong = TestCorpus.Get(seed);
+            var song = corpusSong.Song;
             var meter = song.Map!.Meter;
             var map = song.TrackEventStateTimelineMap.TrackTimelineMap;
-            if (!map.TryGetValue(hiHat, out var track) || meter.Groups.Length != 2 || meter.Groups[0] != meter.Groups[1])
+            var feel = (int)corpusSong.Trace.First(x => x.Point == TracePoints.Feel).Value!;
+            if (!map.TryGetValue(hiHat, out var track) || meter.Groups.Length != 2 || meter.Groups[0] != meter.Groups[1] || feel != Feels.Straight)
                 continue;
 
             var (length, half) = (meter.BarDuration, meter.BarDuration / 2);

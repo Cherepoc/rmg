@@ -36,7 +36,7 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit, Meter Me
     public int MaxRank => Rhythm.MaxRank;
 
     /// <summary>The tuplet the fill's notes fall on, 1 for straight.</summary>
-    public int Tuplet => Rhythm.PrimeIndex.ToTuplet();
+    public int Tuplet => Rhythm.Feel.ToTuplet();
 
     /// <summary>The fill's finest notes, in beats.</summary>
     public double Fine => Period / Math.Pow(2, MaxRank);

@@ -39,6 +39,16 @@ public sealed class ByConventionTest
     }
 
     [Test]
+    public async Task TheCurve_StaysNearItsTunedValue_AboutTheMiddle()
+    {
+        var chance = new ByConvention(0, 0.07, 1);
+
+        // a tenth of the way to an end has come the ease's power of it
+        await Assert.That(chance.At(0.55) - 0.07).IsEqualTo((1 - 0.07) * Math.Pow(0.1, ByConvention.Ease)).Within(1e-12);
+        await Assert.That(0.07 - chance.At(0.45)).IsEqualTo(0.07 * Math.Pow(0.1, ByConvention.Ease)).Within(1e-12);
+    }
+
+    [Test]
     public async Task AChance_OfAnUnconventionalThing_NeverHappensAtTheStart_AndAlwaysAtTheEnd()
     {
         var chance = new ByConvention(0, 0.07, 1);
@@ -58,9 +68,13 @@ public sealed class ByConventionTest
         var wild = ByConvention.Weigh(options, 1);
         var middle = ByConvention.Weigh(options, 0.5);
 
-        await Assert.That(plain.Select(x => (x.Value, x.Weight))).IsEquivalentTo([("straight", 1.0), ("triplets", 0.08)]);
-        await Assert.That(wild.Select(x => (x.Value, x.Weight))).IsEquivalentTo([("triplets", 0.5), ("fives", 1.0)]);
+        // every end's weights as shares of the end's, as they are picked there
+        await Assert.That(plain.Select(x => x.Value)).IsEquivalentTo(["straight", "triplets"]);
+        await Assert.That(plain[1].Weight / plain[0].Weight).IsEqualTo(0.08).Within(1e-9);
+        await Assert.That(wild.Select(x => x.Value)).IsEquivalentTo(["triplets", "fives"]);
+        await Assert.That(wild[0].Weight / wild[1].Weight).IsEqualTo(0.5).Within(1e-9);
         await Assert.That(middle.Length).IsEqualTo(3);
+        await Assert.That(middle.Sum(x => x.Weight)).IsEqualTo(1).Within(1e-9);
     }
 
     [Test]

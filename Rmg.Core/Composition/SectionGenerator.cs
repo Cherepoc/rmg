@@ -118,6 +118,10 @@ internal sealed class SectionGenerator
         var progression = Progressions.Generate(context, scale, home, Progressions.Strictness.At(facets[Facet.Progression]), harmonicRhythm.Count);
         StateTrace.Record(TracePoints.Progression, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", progression), progression);
 
+        // the section's change of the song's feel, now and then, from a sequence of its own, by its feel facet
+        var feelChange = Feels.DrawChange(Stream(sectionId, SectionStream.Feel), Feels.Of(songStateMap), Feels.SectionChange, facets[Facet.Feel]);
+        if (feelChange is { } feelOfSection)
+            StateTrace.Record(TracePoints.Feel, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{feelOfSection}", feelOfSection);
         var sectionStateMap = CreateSectionStateMap(
             songStateMap,
             new StateMapBuilder("Section")
@@ -127,7 +131,8 @@ internal sealed class SectionGenerator
                 .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.Section, tilt))
                 .Add(CompositionStateKinds.NoteDynamics, Math.Pow(rhythm.ChanceScale, VelocityLayers.DynamicsLean))
                 .AddNoteDurationLayer()
-                .ToStateMap(context),
+                .ToStateMap(context)
+                .MergeWith(feelChange is { } changed ? Feels.At(StateDepths.Section, changed) : StateMap.Default),
             new StateMapBuilder("Section")
                 .Add(CompositionStateKinds.ChordPool.Collection, chords)
                 .Add(StateKinds.ChordRoot, home)
@@ -246,6 +251,7 @@ internal sealed class SectionGenerator
         var section = new GeneratedSection(
             timeline,
             rhythm,
+            facets,
             GetGrooves(drums.SelectMany(x => x.Feels)),
             energy,
             isPercussionOnly,
@@ -665,6 +671,7 @@ internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScal
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
     RhythmicUnconventionality Rhythm,
+    Unconventionality Facets,
     FillGrooves Groove,
     double Energy,
     bool IsPercussionOnly,
@@ -768,5 +775,6 @@ internal enum SectionStream
     CounterImprovisation = 18,
     Pentatonic = 19,
     TimeFeel = 20,
-    Unconventionality = 21
+    Unconventionality = 21,
+    Feel = 22
 }

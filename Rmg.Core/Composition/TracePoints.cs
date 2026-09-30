@@ -30,6 +30,9 @@ internal static class TracePoints
     /// <summary>The register a section's melody aims at in each bar of its pattern (an <c>ImmutableArray</c> of doubles).</summary>
     public const string MelodyContour = "Melody contour";
 
+    /// <summary>The feel a song plays in, or a section changes it to (an <c>int</c>, a step of the rhythm's period, see <see cref="Feels" />).</summary>
+    public const string Feel = "Feel";
+
     /// <summary>How far a song strays from convention, its base and every facet (an <see cref="Unconventionality" />).</summary>
     public const string SongUnconventionality = "Song unconventionality";
 

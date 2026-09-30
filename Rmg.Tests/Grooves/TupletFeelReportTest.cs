@@ -3,7 +3,7 @@ using Rmg.Core.Composition;
 namespace Rmg.Tests.Grooves;
 
 /// <summary>
-///     How a song's drums play in tuplets, by how conventional its rhythm is: the share of its drum bars in a tuplet, and
+///     How a song's drums play in tuplets, by the feel facet of its unconventionality, in fifths: the share of its drum bars in a tuplet, and
 ///     whether one tuplet holds the song or its bars change between straight time and tuplets, a pattern's last bar, where a
 ///     fill may play, left out.
 /// </summary>
@@ -23,7 +23,7 @@ public sealed class TupletFeelReportTest
             var all = band.ToArray();
             var with = all.Where(x => x.TupletBars > 0).ToArray();
             string Count(Func<SongFeel, bool> of) => $"{with.Count(of)}";
-            Console.WriteLine($"rhythm {band.Key}/3, {all.Length} songs: {all.Sum(x => x.TupletBars) / (double)all.Sum(x => x.Bars):P0} of drum bars in a tuplet; " +
+            Console.WriteLine($"feel {band.Key}/5, {all.Length} songs: {all.Sum(x => x.TupletBars) / (double)all.Sum(x => x.Bars):P0} of drum bars in a tuplet; " +
                               $"{with.Length} songs with any, of them in a tuplet in under a tenth of their bars {Count(x => x.TupletBars < x.Bars / 10.0)}, " +
                               $"a tenth to a half {Count(x => x.TupletBars >= x.Bars / 10.0 && x.TupletBars < x.Bars / 2.0)}, over half {Count(x => x.TupletBars >= x.Bars / 2.0)}; " +
                               $"their main tuplet {with.Sum(x => x.MainTupletBars) / (double)Math.Max(1, with.Sum(x => x.TupletBars)):P0} of their tuplet bars, " +
@@ -45,7 +45,8 @@ public sealed class TupletFeelReportTest
 
     private static SongFeel Measure(CorpusSong song)
     {
-        var rhythm = Math.Min(2, (int)(((RhythmicUnconventionality)song.Trace.Single(x => x.Point == TracePoints.SongRhythm).Value!).Value * 3));
+        // the song's feel facet, in fifths
+        var rhythm = Math.Clamp((int)(((Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!)[Facet.Feel] * 5), 0, 4);
         // every drum's bars in the order the song plays its sections, each section's bars as it first made them
         var entries = song.Trace
             .Where(x => x.Point == TracePoints.BarPattern && song.Song.TrackDefinitions[x.Track].Role == Rmg.Core.Songs.TrackRole.Drum && x.Bar % Meter.PatternBarCount != Meter.PatternBarCount - 1)
@@ -59,7 +60,7 @@ public sealed class TupletFeelReportTest
             foreach (var span in song.Map.Sections)
             foreach (var entry in entries[(span.SectionId, track)].OrderBy(x => x.Bar))
             {
-                var prime = entry.StateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.PrimeIndex);
+                var prime = Feels.Of(entry.StateMap);
                 primes.Add(prime);
                 if (previous is { } p && p == 0 != (prime == 0))
                     changes++;

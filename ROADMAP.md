@@ -96,8 +96,10 @@ plainest, to 1, the wildest, a value of it for each facet, and every choice lean
 tuned and wild weights (`ByConvention`), in place of the rhythm's and the harmony's unconventionality leaning through
 `Tilt`, which never reaches either end. In this order, each measured against a baseline and committed on its own:
 
-1. **The rule and its primitive** (built): `ByConvention`, a monotone cubic through an option's plain, tuned and wild
-   weights, and a chance's.
+1. **The rule and its primitive** (built): `ByConvention`, a value easing from its tuned middle towards either end
+   as the cube of the way there, so that the songs about the middle play as tuned; a choice's weights at every end
+   taken as shares of the end's, so that many rare options equal at the wild end do not swamp a common one past the
+   middle.
 2. **Baselines** (built, `HarmonyReportTest`): a harmony report (the chords' levels, the home's and the cadence's, the scales, the sections' scale
    changes, the key changes, the pentatonic sections, the progressions' strictness) and the feel's, the backbeat's,
    the grid's, the busyness's and the drums' reports kept as they are.
@@ -120,7 +122,9 @@ tuned and wild weights (`ByConvention`), in place of the rhythm's and the harmon
 7. **The key change and the pentatonic melody** (built; pentatonic sections 58% of the plainest fifth to 9% of the
    wildest, key changes 25%, 9% and 55% where the form allows one) by the scale facet, in place of the rhythm's: a key change allowed at
    both ends and at every chance at 1, a pentatonic melody plain only.
-8. **The feel:** a feel a choice of eleven, straight, the threes, fives, sevens, elevens and thirteens as tuplets and
+8. **The feel** (built, `Feels`; by the feel facet in fifths, 15, 24, 18, 36 and 65% of the drums' bars in a tuplet or
+   a grouping, the middle's mostly threes as before, the plainest's mostly whole songs in threes, the wildest's spread
+   over all ten): a feel a choice of eleven, straight, the threes, fives, sevens, elevens and thirteens as tuplets and
    as groupings, the lowest layer's winning, in place of a prime index added up; the plain end straight and the
    threes, the wild end every feel but straight; a section's, a track's, a bar's or a fill's change of the song's feel
    never at 0 and every time at 1.
@@ -130,7 +134,11 @@ tuned and wild weights (`ByConvention`), in place of the rhythm's and the harmon
 Later, by the same rule: key changes anywhere and at any time, where the form now allows one; the voicings, the
 cadence's raised seventh and the chord pool's size; more modes for the wild end (with *Scales of other sizes*); a
 song's own coherence, how far its facets stray from its base; a user's conventionality setting, which moves the base.
-To tune by listening: the facets' spread, the harmony between its ends, the chords' and the scales' weights.
+To tune by listening: the facets' spread, the harmony between its ends, the chords' and the scales' weights. The
+chords' tuned weights are the corpus's mix, so that a middling song now plays a level 3 or 4 chord in about one in six,
+where most songs played none and a few many: the tuned middle wants the median song's mix (57% triads, 39% level 1, 4%
+level 2), the jazz left to the wild songs; the progressions' tuned strictness likewise the median's 0.85 rather than
+the mean's 0.77. A triplet fill in a straight song is conventional, but no change of feel happens at the plain end.
 
 ## Meter
 

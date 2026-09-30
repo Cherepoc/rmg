@@ -5,7 +5,7 @@ namespace Rmg.Tests.DrumKits;
 
 /// <summary>
 ///     How often a drum that does not lead plays in another feel than the lead of its main role in the same bar: its
-///     tuplet (<see cref="ResolvedRhythm.PrimeIndex" />), or whether its cycle is grouped, as a dotted 8th's is
+///     tuplet (<see cref="ResolvedRhythm.Feel" />), or whether its cycle is grouped, as a dotted 8th's is
 ///     (<see cref="ResolvedRhythm.IsGrouped" />), where the lead's is not, or the other way. A drum that colours, by
 ///     whether it follows its lead's feel, and one bound to its lead by a figure of its own, apart.
 /// </summary>
@@ -62,7 +62,7 @@ public sealed class PercussionFeelReportTest
                             continue;
 
                         tally.Bars++;
-                        tally.OtherTuplet += own.PrimeIndex != led.PrimeIndex ? 1 : 0;
+                        tally.OtherTuplet += own.Feel != led.Feel ? 1 : 0;
                         tally.OtherGrouping += ResolvedRhythm.IsGrouped(own.Period) != ResolvedRhythm.IsGrouped(led.Period) ? 1 : 0;
                     }
                 }

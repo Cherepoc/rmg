@@ -62,7 +62,7 @@ public sealed class FillArchetypeTest
         StateMap.FromStates(
             [
                 CompositionStateKinds.Rhythm.Period.Power.CreateState(periodPower),
-                CompositionStateKinds.Rhythm.Period.PrimeIndex.CreateState(primeIndex),
+                CompositionStateKinds.Rhythm.Feel.CreateState(new LayerValue<int>(StateDepths.Song, primeIndex)),
                 CompositionStateKinds.Rhythm.Phase.Rank.CreateState(phaseRank),
                 CompositionStateKinds.Rhythm.MaxRank.CreateState(maxRank),
                 CompositionStateKinds.Rhythm.Fullness.CreateState(fullness),

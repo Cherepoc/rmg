@@ -26,7 +26,6 @@ public sealed class RhythmicUnconventionalityTest
         var leaned = layer.Lean(tilt, RhythmLayers.ChanceLean);
 
         double Odds(double chance) => chance / (1 - chance);
-        await Assert.That(Odds(leaned.Tuplet)).IsEqualTo(Odds(layer.Tuplet) * Math.Pow(tilt.Odds, RhythmLayers.ChanceLean)).Within(1e-9);
         await Assert.That(Odds(leaned.Density)).IsEqualTo(Odds(layer.Density) * Math.Pow(tilt.Odds, RhythmLayers.ChanceLean)).Within(1e-9);
         await Assert.That(leaned.Groove).IsLessThan(1);
         // the chance of a speed change is the groove's times its share, which the lean leaves as it was

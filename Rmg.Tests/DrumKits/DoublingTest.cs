@@ -69,7 +69,7 @@ public sealed class DoublingTest
                 for (var bar = 0; bar < Rmg.Core.Composition.Progressions.BarCount; bar++)
                 {
                     bars++;
-                    await Assert.That(patterns[(entry.Section, track, bar)].PrimeIndex).IsEqualTo(patterns[(entry.Section, lead, bar)].PrimeIndex);
+                    await Assert.That(patterns[(entry.Section, track, bar)].Feel).IsEqualTo(patterns[(entry.Section, lead, bar)].Feel);
                 }
             }
         }

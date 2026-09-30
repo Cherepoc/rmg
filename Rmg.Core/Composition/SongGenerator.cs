@@ -72,7 +72,11 @@ public static class SongGenerator
         var unconventionality = new HarmonicUnconventionality(songUnconventionality[Facet.Chords]);
         var scale = Scales.Pick(harmonyContext, songUnconventionality[Facet.Scale]);
         StateTrace.Record(TracePoints.SongHarmony, SongTracks.ChordsTrack, 0, 0, StateMap.Default, 0, $"{unconventionality.Chords:F2} {scale.Name}", (unconventionality, scale));
-        var songStateMap = CreateSongStateMap(Stream(SongStream.SongState), unconventionality, rhythmicUnconventionality);
+        // the feel the song plays in, straight or a tuplet, from a sequence of its own, by its feel facet
+        var feel = Feels.DrawSong(Stream(SongStream.Feel), songUnconventionality[Facet.Feel]);
+        StateTrace.Record(TracePoints.Feel, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{feel}", feel);
+        var songStateMap = CreateSongStateMap(Stream(SongStream.SongState), unconventionality, rhythmicUnconventionality)
+            .MergeWith(Feels.At(StateDepths.Song, feel));
         // how busy the melody is, which a section moves
         var melodyBusyness = MelodyBusyness.Generate(Stream(SongStream.Melody));
 
@@ -274,5 +278,6 @@ internal enum SongStream
     CounterMelody = 23,
     BassFills = 24,
     Meter = 25,
-    Unconventionality = 26
+    Unconventionality = 26,
+    Feel = 27
 }

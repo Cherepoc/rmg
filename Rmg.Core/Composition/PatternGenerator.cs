@@ -150,7 +150,8 @@ internal sealed class PatternGenerator
                                 sectionRhythm.Energy,
                                 doubles.GetValueOrDefault(x.Key),
                                 feelLeads.TryGetValue(x.Key, out var feelLead) ? barFeels.Single(feel => feel.Track == feelLead).Rhythm : null,
-                                barFeels
+                                barFeels,
+                                sectionRhythm.Facets[Facet.Feel]
                             );
                     }
 
@@ -171,7 +172,10 @@ internal sealed class PatternGenerator
     }
 
     // the state that makes a track's feel, the tuplet its cycles play in, which its grouping follows
-    private static readonly IStateKind FeelKind = CompositionStateKinds.Rhythm.Period.PrimeIndex;
+    private static readonly IStateKind FeelKind = CompositionStateKinds.Rhythm.Feel;
+
+    // the stream of a bar's change of feel, derived from its bar pattern's seed apart from the pattern's own (0 to 3)
+    private const int FeelStream = 100;
 
     // how finely the places of a bar are told apart, where a drum accents its lead: a 48th of a beat, which holds the
     // 16ths, their triplets and the 32nds
@@ -203,7 +207,8 @@ internal sealed class PatternGenerator
         Tilt energy,
         Doubling? doubling,
         StateMap? leadFeel,
-        List<BarFeel> feels
+        List<BarFeel> feels,
+        double feelUnconventionality
     )
     {
         var patternSeeds = CreatePatternSeeds(seed);
@@ -222,6 +227,10 @@ internal sealed class PatternGenerator
         var stateMap = builder
             .ToStateMap(trackGenerationContext)
             .MergeWith(trackStateMap);
+        // the bar's change of the feel it comes to, now and then, a passage in another feel, from a sequence of its own
+        // by the bar pattern's seed, so that a drum playing its lead's bar patterns changes as its lead does
+        if (Feels.DrawChange(new GenerationContext(Seeds.Derive(seed, FeelStream)), Feels.Of(stateMap), Feels.BarChange, feelUnconventionality) is { } barFeel)
+            stateMap = stateMap.MergeWith(Feels.At(StateDepths.BarPattern, barFeel));
         // a track on another's feel plays its tuplet, all its layers' steps of it in place of its own
         if (leadFeel is not null)
             stateMap = stateMap.Except([FeelKind]).MergeWith(leadFeel.Subset([FeelKind]));
@@ -499,7 +508,7 @@ internal readonly record struct ResolvedRhythm(
     double PeriodValue,
     double PhaseValue,
     int MaxRank,
-    int PrimeIndex,
+    int Feel,
     double Fullness,
     double Variation,
     int RankOffset = 0
@@ -586,9 +595,8 @@ internal readonly record struct ResolvedRhythm(
     {
         var periodPower = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Power)
             .BounceInBounds(-2, 1);
-        var primeIndex = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.PrimeIndex)
-            .BounceInBounds(-RhythmPeriod.MaxPrimeIndex, RhythmPeriod.MaxPrimeIndex);
-        var periodValue = Math.Pow(2, periodPower) * primeIndex.ToRhythmPeriodValue();
+        var feel = Feels.Of(stateMap);
+        var periodValue = Math.Pow(2, periodPower) * feel.ToRhythmPeriodValue();
 
         // a bar pattern's to its limit, and a fill's as fine as its shortest note; a grouped cycle's no finer than the grid
         var maxRankLimit = minNote is { } note
@@ -609,7 +617,7 @@ internal readonly record struct ResolvedRhythm(
         var fullness = Math.Clamp(stateMap.GetStateValue(CompositionStateKinds.Rhythm.Fullness), RhythmSettings.MinFullness, 1);
         var variation = Math.Clamp(stateMap.GetStateValue(CompositionStateKinds.Rhythm.Variation), 0, 1);
         var rankOffset = stateMap.GetStateValue(CompositionStateKinds.Rhythm.RankOffset).BounceInBounds(0, maxRank);
-        return new ResolvedRhythm(periodValue, phaseValue, maxRank, primeIndex, fullness, variation, rankOffset);
+        return new ResolvedRhythm(periodValue, phaseValue, maxRank, feel, fullness, variation, rankOffset);
     }
 }
 

@@ -56,36 +56,6 @@ public sealed class RhythmLayerTest
     }
 
     [Test]
-    public async Task DrumTuplets_PlayInAboutAFifthOfTheBars()
-    {
-        var keptChance = DrumLayers.Aggregate(1.0, (chance, layer) => chance * (1 - layer.Tuplet));
-
-        await Assert.That(1 - keptChance).IsEqualTo(0.2).Within(0.03);
-    }
-
-    [Test]
-    public async Task Tuplets_ComeMostlyFromSectionsAndBars()
-    {
-        RhythmLayer[] songLayers = [RhythmLayers.Song, RhythmLayers.Track, RhythmLayers.DrumGroup];
-        RhythmLayer[] passageLayers =
-            [RhythmLayers.Section, RhythmLayers.SectionTrack, RhythmLayers.SectionDrumGroup, RhythmLayers.BarPattern];
-
-        await Assert.That(passageLayers.Sum(x => x.Tuplet)).IsGreaterThan(3 * songLayers.Sum(x => x.Tuplet));
-    }
-
-    [Test]
-    public async Task Tuplet_MovesWithItsOwnChance()
-    {
-        var context = new GenerationContext(1);
-        var layer = RhythmLayers.Section;
-        var tuplet = layer.CreateTupletGenerator();
-
-        var tupletMoves = Enumerable.Range(0, DrawCount).Count(_ => tuplet(context) != 0) / (double)DrawCount;
-
-        await Assert.That(tupletMoves).IsEqualTo(layer.Tuplet).Within(0.005);
-    }
-
-    [Test]
     public async Task DrumSpeed_IsKeptInAboutHalfOfTheBars()
     {
         // a drum's speed is the sum of the speed steps of all its layers; unchanged when they add up to 0

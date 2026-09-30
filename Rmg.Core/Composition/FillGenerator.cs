@@ -181,7 +181,7 @@ internal sealed class FillGenerator
         var treatments = rhythm.Tilt.Weigh(FillLayers.Treatments, x => x == GrooveTreatment.Stop ? 1 : 0);
         var treatment = _context.Pick(direction.Weigh(treatments, x => FillLayers.TreatmentLoudness[x]));
         var fullness = FillLayers.Fullness + FillLayers.FullnessPerWeight * weight + FillLayers.TreatmentFullness[treatment];
-        var layer = CreateLayer(drummer, rhythm, fullness);
+        var layer = CreateLayer(drummer, rhythm, fullness, Feels.Of(grooves.Source), section.Facets[Facet.Feel]);
         // where the drums stop, they rest half the time: a break
         // a run plays the percussion alone in a section of percussion only, and now and then in one of the drum kit
         var isPercussion = section.IsPercussionOnly ||
@@ -206,18 +206,22 @@ internal sealed class FillGenerator
     ///     share and as the drummer plays, its cycles repeating, and the steps of the fill's rhythm layer, as strange as
     ///     the section; how fine it plays stays near the groove's.
     /// </summary>
-    private StateMap CreateLayer(Drummer drummer, RhythmicUnconventionality rhythm, double fullness)
+    /// <param name="feel">The groove's feel, which the fill changes now and then (<see cref="Feels.FillChange" />).</param>
+    /// <param name="feelUnconventionality">The feel facet of the section's unconventionality.</param>
+    private StateMap CreateLayer(Drummer drummer, RhythmicUnconventionality rhythm, double fullness, int feel, double feelUnconventionality)
     {
         var layer = rhythm.Lean(RhythmLayers.Fill);
         var density = layer.CreateDensityGenerator();
         var spread = layer.CreateFullnessGenerator();
+        // the fill's change of feel from a sequence of its own, a single draw of the fill's
+        var feelChange = Feels.DrawChange(new GenerationContext(SeedGenerator(_context)), feel, Feels.FillChange, feelUnconventionality);
         return new StateMapBuilder("Fill", perTrack: true)
             .Add(CompositionStateKinds.Rhythm.MaxRank, context => FillLayers.FinerRanks + density(context))
             .Add(CompositionStateKinds.Rhythm.RankOffset, density)
-            .Add(CompositionStateKinds.Rhythm.Period.PrimeIndex, layer.CreateTupletGenerator())
             .Add(CompositionStateKinds.Rhythm.Fullness, context => fullness + drummer.FullnessOffset + spread(context))
             .Add(CompositionStateKinds.Rhythm.Variation, -1.0)
-            .ToStateMap(_context);
+            .ToStateMap(_context)
+            .MergeWith(feelChange is { } changed ? Feels.At(StateDepths.Note, changed) : StateMap.Default);
     }
 
     /// <summary>The song with one fill before the given line, played as given, and no landing.</summary>
@@ -500,6 +504,7 @@ internal sealed record FillSection(
     int SectionId,
     double Duration,
     RhythmicUnconventionality Rhythm,
+    Unconventionality Facets,
     FillGrooves Groove,
     double Energy,
     bool IsPercussionOnly,

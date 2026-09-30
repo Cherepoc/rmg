@@ -30,7 +30,7 @@ internal static class LayerStates
 
     /// <summary>
     ///     A layer's steps of the rhythm settings. The period and the phase make the groove, the speed changing more
-    ///     often and the tuplet period by a chance of its own, and the max rank and the rank offset how busy it is; the
+    ///     often, and the max rank and the rank offset how busy it is; the
     ///     phase's offset among the beats of its rank, and how full the pattern is and how often its cycles change,
     ///     are drawn around 0 in every layer.
     /// </summary>
@@ -38,7 +38,6 @@ internal static class LayerStates
     {
         return builder
             .Add(CompositionStateKinds.Rhythm.Period.Power, layer.CreateSpeedGenerator())
-            .Add(CompositionStateKinds.Rhythm.Period.PrimeIndex, layer.CreateTupletGenerator())
             .Add(CompositionStateKinds.Rhythm.Phase.Rank, layer.CreateGrooveGenerator())
             .Add(CompositionStateKinds.Rhythm.Phase.RankedOffset, Generators.SplineValue())
             .Add(CompositionStateKinds.Rhythm.MaxRank, layer.CreateDensityGenerator())
