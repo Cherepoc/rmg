@@ -65,6 +65,7 @@ public static class SongGenerator
         var harmonyContext = Stream(SongStream.Harmony);
         var unconventionality = HarmonicUnconventionality.Generate(harmonyContext);
         var scale = Scales.Pick(harmonyContext);
+        StateTrace.Record(TracePoints.SongHarmony, SongTracks.ChordsTrack, 0, 0, StateMap.Default, 0, $"{unconventionality.Anchor:F2} {scale.Name}", (unconventionality, scale));
         var songStateMap = CreateSongStateMap(Stream(SongStream.SongState), unconventionality, rhythmicUnconventionality);
         // how busy the melody is, which a section moves
         var melodyBusyness = MelodyBusyness.Generate(Stream(SongStream.Melody));

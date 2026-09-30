@@ -93,6 +93,7 @@ internal sealed class SectionGenerator
         var sectionId = plan.Id;
         var context = _context.CreateContext(Seeds.Derive(_seed, sectionId));
         var unconventionality = _songUnconventionality.GenerateSection(context);
+        StateTrace.Record(TracePoints.SectionHarmony, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{unconventionality.Anchor:F2}", unconventionality);
         var rhythm = _songRhythmicUnconventionality.GenerateSection(context);
         var chords = LayerStates.CreateChordPool(unconventionality)(context);
 

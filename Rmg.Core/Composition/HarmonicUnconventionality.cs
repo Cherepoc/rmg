@@ -96,7 +96,7 @@ public sealed record HarmonicUnconventionality(double Anchor, double Spread, dou
 
     private static Chord Voice(IGenerationContext context, ChordShape shape)
     {
-        return new Chord([..ChordVoicing.Apply(context, shape).Select(x => x / 12)], shape.IsVoicingFixed);
+        return new Chord([..ChordVoicing.Apply(context, shape).Select(x => x / 12)], shape.IsVoicingFixed, shape);
     }
 
     /// <summary>

@@ -10,7 +10,8 @@ namespace Rmg.Core.Composition;
 ///     Whether the layout is what the chord is, such as a quartal stack or a cluster, so that it is moved only by whole
 ///     octaves and never laid out another way.
 /// </param>
-public sealed record Chord(ImmutableArray<double> Heights, bool IsVoicingFixed)
+/// <param name="Shape">The shape the chord was voiced from, which tells how conventional it is; a chord is its notes, not its shape.</param>
+public sealed record Chord(ImmutableArray<double> Heights, bool IsVoicingFixed, ChordShape Shape)
 {
     public bool Equals(Chord? other)
     {

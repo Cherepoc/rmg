@@ -9,8 +9,8 @@ public sealed class BassLeadInTest
 {
     private const int MaxRank = 2;
 
-    private static readonly Chord Triad = new([0, 2, 4], false);
-    private static readonly Chord Seventh = new([0, 2, 4, 6], false);
+    private static readonly Chord Triad = new([0, 2, 4], false, ChordShapes.All.First(x => x.Name == "Triad"));
+    private static readonly Chord Seventh = new([0, 2, 4, 6], false, ChordShapes.All.First(x => x.Name == "Seventh"));
 
     private static readonly StateMap TrackState = StateMap.FromStates([CompositionStateKinds.NoteDynamics.CreateState(1.0)]);
 

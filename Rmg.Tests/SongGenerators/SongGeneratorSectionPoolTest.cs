@@ -11,7 +11,7 @@ public sealed class SongGeneratorSectionPoolTest
     private static readonly StateKind<int> Index = CompositionStateKinds.ChordPool.Index;
 
     private static StateMap PoolOf(params double[] firstHeights) =>
-        StateMap.FromStates([Pool.CreateState([..firstHeights.Select(x => new Chord([0, x], false))])]);
+        StateMap.FromStates([Pool.CreateState([..firstHeights.Select(x => new Chord([0, x], false, Rmg.Core.Composition.ChordShapes.All[0]))])]);
 
     [Test]
     public async Task SectionPool_ListsTheSongsEntriesFirst()

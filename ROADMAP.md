@@ -98,7 +98,7 @@ tuned and wild weights (`ByConvention`), in place of the rhythm's and the harmon
 
 1. **The rule and its primitive** (built): `ByConvention`, a monotone cubic through an option's plain, tuned and wild
    weights, and a chance's.
-2. **Baselines:** a harmony report (the chords' levels, the home's and the cadence's, the scales, the sections' scale
+2. **Baselines** (built, `HarmonyReportTest`): a harmony report (the chords' levels, the home's and the cadence's, the scales, the sections' scale
    changes, the key changes, the pentatonic sections, the progressions' strictness) and the feel's, the backbeat's,
    the grid's, the busyness's and the drums' reports kept as they are.
 3. **The facets**, as plumbing: a song's base conventionality, spread as the rhythm's is now, and the feel, the groove,
