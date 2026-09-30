@@ -6,23 +6,28 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     A song going up a key for its last section, where that section came back before, as a last chorus does: by a
-///     whole step most often and a half step otherwise, now and then, the likelier the more conventional the song's
-///     rhythm, as it is a convention of pop. The whole band moves, and the lines, placed after, go on into the new key.
+///     whole step most often and a half step otherwise, now and then by the scale facet of its unconventionality: the
+///     likelier the plainer, as it is a convention of pop, and every time at the wild end. The whole band moves, and the
+///     lines, placed after, go on into the new key.
 /// </summary>
 /// <param name="Position">Where the new key starts, the last section's start.</param>
 /// <param name="Semitones">How far up the key goes.</param>
 public sealed record KeyChange(double Position, int Semitones)
 {
-    /// <summary>The chance a song whose last section came back before goes up a key for it, at middling conventionality.</summary>
-    public const double Chance = 0.08;
+    /// <summary>
+    ///     The chance a song whose last section came back before goes up a key for it: a quarter of the plainest songs,
+    ///     fewer at the middle and every one at the wild end.
+    /// </summary>
+    public static ByConvention Chance { get; } = new(0.26, 0.08, 1);
 
     /// <summary>The chance the key goes up a half step, rather than a whole one.</summary>
     public const double HalfStepChance = 0.4;
 
     /// <param name="sectionIds">The song's sections in its order, before any it plays again to fade out.</param>
-    internal static KeyChange? Generate(IGenerationContext context, Tilt rhythm, SongMap map, IReadOnlyList<int> sectionIds)
+    /// <param name="unconventionality">The scale facet of the song's unconventionality.</param>
+    internal static KeyChange? Generate(IGenerationContext context, double unconventionality, SongMap map, IReadOnlyList<int> sectionIds)
     {
-        var changes = context.TestProbability(rhythm.Chance(Chance, -1));
+        var changes = context.TestProbability(Chance.At(unconventionality));
         var semitones = context.TestProbability(HalfStepChance) ? 1 : 2;
         var last = sectionIds.Count - 1;
         var cameBack = sectionIds.Take(last).Contains(sectionIds[last]);

@@ -117,7 +117,8 @@ tuned and wild weights (`ByConvention`), in place of the rhythm's and the harmon
    scale, the wildest mostly in harmonic minor, Lydian or Phrygian and 66% of sections in another; the anchor gone): the plain end major and natural minor, Mixolydian and Dorian a little; the wild end harmonic minor,
    Phrygian and Lydian, Mixolydian and Dorian a little; the sections' scale changes a chance by the rule, in place of
    one multiplied by hand.
-7. **The key change and the pentatonic melody** by the scale facet, in place of the rhythm's: a key change allowed at
+7. **The key change and the pentatonic melody** (built; pentatonic sections 58% of the plainest fifth to 9% of the
+   wildest, key changes 25%, 9% and 55% where the form allows one) by the scale facet, in place of the rhythm's: a key change allowed at
    both ends and at every chance at 1, a pentatonic melody plain only.
 8. **The feel:** a feel a choice of eleven, straight, the threes, fives, sevens, elevens and thirteens as tuplets and
    as groupings, the lowest layer's winning, in place of a prime index added up; the plain end straight and the

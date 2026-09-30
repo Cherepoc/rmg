@@ -156,7 +156,7 @@ public static class SongGenerator
         var form = formGenerator.Assemble(plan, played, sections);
         var songTrackNoteTimelineMap = form.Edits.ApplyTo(form.Blocks.Unroll());
         // a song whose last section came back before may go up a key for it, as for a last chorus
-        var keyChange = KeyChange.Generate(Stream(SongStream.KeyChange), rhythmicUnconventionality.Tilt, form.Map, sectionIds);
+        var keyChange = KeyChange.Generate(Stream(SongStream.KeyChange), songUnconventionality[Facet.Scale], form.Map, sectionIds);
         StateTrace.Record(TracePoints.KeyChange, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, keyChange?.ToString() ?? "none", keyChange);
         songTrackNoteTimelineMap = songTrackNoteTimelineMap.MergeStateTimelineMap(form.SongState)
             .MergeStateTimelineMap(KeyChange.ToStateTimelineMap(keyChange, form.Map.Duration))

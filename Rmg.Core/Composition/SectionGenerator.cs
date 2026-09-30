@@ -208,7 +208,7 @@ internal sealed class SectionGenerator
 
         // every track follows the section's phrase scheme, so they repeat their bars in the same places
         var scheme = PhraseSchemes.Pick(context, rhythm);
-        var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context, tilt), tilt);
+        var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context, tilt), tilt, facets);
 
         // the strokes the section changes from the song's, and how its drums play its bars, each from a sequence of its own
         var strokeContext =Stream(sectionId, SectionStream.DrumStrokes);
@@ -455,8 +455,8 @@ internal sealed class SectionGenerator
                     sectionTrackLayer.Add(CompositionStateKinds.LineStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Section)),
                     sectionRhythm.Energy
                 );
-                // a pentatonic melody now and then, from a sequence of its own, the likelier the more conventional the section
-                var isPentatonic = Stream(sectionId, SectionStream.Pentatonic).TestProbability(sectionRhythm.Unconventionality.Tilt.Chance(MelodyLayers.PentatonicChance, -1));
+                // a pentatonic melody now and then, from a sequence of its own, by the section's scale facet
+                var isPentatonic = Stream(sectionId, SectionStream.Pentatonic).TestProbability(MelodyLayers.PentatonicChance.At(sectionRhythm.Facets[Facet.Scale]));
                 StateTrace.Record(TracePoints.Pentatonic, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{isPentatonic}", isPentatonic);
                 sectionTrackLayer.Add(CompositionStateKinds.LinePentatonic, isPentatonic ? 1 : 0);
             }
@@ -732,13 +732,14 @@ internal sealed record GeneratedSection(
 
 /// <summary>
 ///     A section's rhythm: how far it strays from convention, the scheme its 4-bar pattern follows, how busy its
-///     melody is, and how its energy leans its draws.
+///     melody is, and how its energy leans its draws; and how far the section strays in every facet.
 /// </summary>
 internal sealed record SectionRhythm(
     RhythmicUnconventionality Unconventionality,
     PhraseScheme Scheme,
     MelodyBusyness MelodyBusyness,
-    Tilt Energy
+    Tilt Energy,
+    Unconventionality Facets
 );
 
 /// <summary>
