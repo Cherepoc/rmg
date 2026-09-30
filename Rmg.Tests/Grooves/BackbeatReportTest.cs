@@ -20,7 +20,7 @@ public sealed class BackbeatReportTest
     public async Task Report()
     {
         var stats = new SortedDictionary<int, (int Bars, int Both, SortedDictionary<double, (int Count, double Velocity)> Places, SortedDictionary<int, int> Ranks)>();
-        foreach (var song in TestCorpus.Range(200).Where(x => x.Map.Meter == Meter.FourFour))
+        foreach (var song in TestCorpus.Range(256).Where(x => x.Map.Meter == Meter.FourFour))
         {
             var meter = song.Map.Meter;
             var band = Math.Min(2, (int)(((RhythmicUnconventionality)song.Trace.Single(x => x.Point == TracePoints.SongRhythm).Value!).Value * 3));

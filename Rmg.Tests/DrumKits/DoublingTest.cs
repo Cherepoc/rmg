@@ -11,7 +11,7 @@ public sealed class DoublingTest
     {
         var checkedNotes = 0;
         int accentNotes = 0, accentedLeadNotes = 0;
-        foreach (var song in TestCorpus.Range(100))
+        foreach (var song in TestCorpus.Range(128))
         foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Doubles))
         foreach (var (track, doubling) in ((ImmutableDictionary<int, Doubling>)entry.Value!).Where(x => x.Value.Binding != DrumBinding.Figure))
         foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section))
@@ -50,7 +50,7 @@ public sealed class DoublingTest
     public async Task ADrumOnItsLeadsFeel_PlaysItsTuplet_EveryBar_TheBoundAlways_MostColouringOnes()
     {
         int bars = 0, colours = 0, following = 0;
-        foreach (var song in TestCorpus.Range(100))
+        foreach (var song in TestCorpus.Range(128))
         {
             var patterns = song.Trace.Where(x => x.Point == TracePoints.BarPattern)
                 .GroupBy(x => (x.Section, x.Track, x.Bar))

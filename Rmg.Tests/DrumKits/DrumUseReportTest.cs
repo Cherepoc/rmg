@@ -14,7 +14,7 @@ public sealed class DrumUseReportTest
     [Explicit]
     public async Task Report()
     {
-        var songs = TestCorpus.Range(200).ToArray();
+        var songs = TestCorpus.Range(256).ToArray();
         var sections = songs.Sum(x => x.Map.Sections.Length);
         foreach (var drum in DrumGroups.AllDrums)
         {

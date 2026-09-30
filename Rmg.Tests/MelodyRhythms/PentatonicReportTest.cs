@@ -16,7 +16,7 @@ public sealed class PentatonicReportTest
         var stats = new Dictionary<bool, (int Notes, int OnPair, int Moves, int Leaps, double Move)>();
         var sections = 0;
         var pentatonicSections = 0;
-        foreach (var song in TestCorpus.Range(200))
+        foreach (var song in TestCorpus.Range(256))
         {
             var pentatonic = song.Trace.Where(x => x.Point == TracePoints.Pentatonic).ToDictionary(x => x.Section, x => (bool)x.Value!);
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;

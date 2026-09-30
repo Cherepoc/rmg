@@ -10,7 +10,7 @@ public sealed class ArrangementReportTest
     [Test]
     public async Task ARestingPart_PlaysNoNotes_AndASectionKeepsItsHarmony()
     {
-        foreach (var song in TestCorpus.Range(30))
+        foreach (var song in TestCorpus.Range(32))
         foreach (var span in song.Map.Sections)
         {
             var resting = song.Resting(span);
@@ -30,7 +30,7 @@ public sealed class ArrangementReportTest
     public async Task Report()
     {
         var rows = new List<(double Energy, SectionRole Role, ImmutableHashSet<TrackRole> Resting)>();
-        foreach (var song in TestCorpus.Range(200))
+        foreach (var song in TestCorpus.Range(256))
         {
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
             var energy = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
@@ -52,7 +52,7 @@ public sealed class ArrangementReportTest
 
         // the parts a recurring section plays its first time and its last, as parts only join
         var (first, last, recurring, grown) = (0.0, 0.0, 0, 0);
-        foreach (var song in TestCorpus.Range(200))
+        foreach (var song in TestCorpus.Range(256))
         foreach (var group in song.Map.Sections.GroupBy(x => x.SectionId).Where(x => x.Count() > 1))
         {
             var (f, l) = (6 - song.Resting(group.First()).Count, 6 - song.Resting(group.Last()).Count);

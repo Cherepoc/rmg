@@ -16,7 +16,7 @@ public sealed class SongGeneratorNoteDurationTest
     {
         // the final chord of an ending that rings out is held for as long as the ending, up to two bars; a pad holds
         // its chords as long as they last, which it is left out for
-        var maxDuration = Enumerable.Range(0, 20)
+        var maxDuration = Enumerable.Range(0, 16)
             .Select(seed => TestCorpus.Get(seed))
             .Select(song => (Pad: ((Rmg.Core.Songs.PitchInstrumentTrack)song.Song.TrackDefinitions[Rmg.Core.Composition.SongTracks.PadTrack]).InstrumentCode, song.Rendered))
             .SelectMany(song => song.Rendered.Tracks

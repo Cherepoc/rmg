@@ -10,7 +10,7 @@ namespace Rmg.Tests.Fills;
 /// </summary>
 public sealed class FillGrooveTest
 {
-    private const int SongCount = 200;
+    private const int SongCount = 256;
 
     private sealed record Measured(string Kind, double FillGrid, double GrooveGrid, bool IsOffTheGroove, double FillVelocity, double GrooveVelocity);
 

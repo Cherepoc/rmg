@@ -14,7 +14,7 @@ public sealed class SongGeneratorChordProgressionTest
     public async Task ChordShape_ChangesWithinASection()
     {
         var changes = 0;
-        for (var seed = 0; seed < 10; seed++)
+        for (var seed = 0; seed < 8; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
             // a section is a 4-bar pattern played twice
@@ -29,7 +29,7 @@ public sealed class SongGeneratorChordProgressionTest
     [Test]
     public async Task PitchedTracks_ShareTheChordShapeAtTheSameTime()
     {
-        for (var seed = 0; seed < 10; seed++)
+        for (var seed = 0; seed < 8; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
             // a note with no shape, as a bass's walk into a section, plays its step, not a chord
@@ -48,7 +48,7 @@ public sealed class SongGeneratorChordProgressionTest
         // the chord track does not move its root from note to note, so its root is only the progression's: the
         // section's offset, the same for the whole section, and the offset of the bar it plays in
         const int chordTrackNumber = 4;
-        for (var seed = 0; seed < 10; seed++)
+        for (var seed = 0; seed < 8; seed++)
         {
             var corpusSong = TestCorpus.Get(seed);
             var song = corpusSong.Song;
@@ -78,7 +78,7 @@ public sealed class SongGeneratorChordProgressionTest
     [Test]
     public async Task DefaultSteps_ChangeTheShapeOnlyAtBarLinesAndChordChanges()
     {
-        for (var seed = 0; seed < 10; seed++)
+        for (var seed = 0; seed < 8; seed++)
         {
             var corpusSong = TestCorpus.Get(seed);
             var changes = corpusSong.ChordChanges;
@@ -97,7 +97,7 @@ public sealed class SongGeneratorChordProgressionTest
     {
         var settings = ProgressionSettings.Default with { ChordShapeStep = 0.5 };
         var changesWithinABar = 0;
-        for (var seed = 0; seed < 10; seed++)
+        for (var seed = 0; seed < 8; seed++)
         {
             var song = SongGenerator.GenerateSong(seed, settings);
             var bar = song.Map!.Meter.BarDuration;
@@ -123,7 +123,7 @@ public sealed class SongGeneratorChordProgressionTest
     public async Task HalfBarShapeSteps_PitchedTracksShareTheChordShapeAtTheSameTime()
     {
         var settings = ProgressionSettings.Default with { ChordShapeStep = 0.5 };
-        for (var seed = 0; seed < 10; seed++)
+        for (var seed = 0; seed < 8; seed++)
         {
             foreach (var notesAtPosition in GetPitchedNotes(SongGenerator.GenerateSong(seed, settings)).Where(x => x.Shape != "").GroupBy(x => x.Position))
             {

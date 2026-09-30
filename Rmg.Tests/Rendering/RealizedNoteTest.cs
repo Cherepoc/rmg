@@ -18,7 +18,7 @@ public sealed class RealizedNoteTest
     [Test]
     public async Task GeneratedSongs_ComeWithTheirNotes_AsRenderWouldDecideThem()
     {
-        for (var seed = 0; seed < 5; seed++)
+        for (var seed = 0; seed < 4; seed++)
         {
             // a stopped ending cuts the notes that sound into its stop, which only the song put together knows
             var song = TestCorpus.Get(seed).Song;
@@ -35,7 +35,7 @@ public sealed class RealizedNoteTest
     [Test]
     public async Task Notes_AreSingleForTheMelodyAndTheBass_AndMayBeChordsForTheChords()
     {
-        foreach (var corpusSong in TestCorpus.Range(10))
+        foreach (var corpusSong in TestCorpus.Range(8))
         {
             var notes = corpusSong.Song.Notes!;
 

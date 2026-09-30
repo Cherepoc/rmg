@@ -12,7 +12,7 @@ public sealed class PercussionSectionsTest
     public async Task ASectionOfPercussionOnly_PlaysNoDrumKit_ButALandingPushedIntoTheNext()
     {
         var sections = 0;
-        foreach (var song in TestCorpus.Range(100))
+        foreach (var song in TestCorpus.Range(128))
         {
             var only = song.Trace.Where(x => x.Point == TracePoints.PercussionOnly).ToDictionary(x => x.Section, x => (bool)x.Value!);
             foreach (var span in song.Map.Sections.Where(x => only[x.SectionId] && song.HasDrums(x)))
@@ -34,7 +34,7 @@ public sealed class PercussionSectionsTest
     [Test]
     public async Task OnlyASongWithEnoughPercussion_HasSectionsOfIt()
     {
-        foreach (var song in TestCorpus.Range(100))
+        foreach (var song in TestCorpus.Range(128))
         {
             var percussion = song.Song.TrackDefinitions.Keys.Count(x => x >= DrumGroups.FirstTrackNumber && IsPercussion(x));
             if (percussion < PercussionSections.MinDrums)
@@ -61,7 +61,7 @@ public sealed class PercussionSectionsTest
     public async Task ACountIn_AlwaysClicks()
     {
         var countIns = 0;
-        foreach (var song in TestCorpus.Range(200).Where(x => x.Map.Intro.Kind == IntroKind.CountIn))
+        foreach (var song in TestCorpus.Range(256).Where(x => x.Map.Intro.Kind == IntroKind.CountIn))
         {
             countIns++;
             var clicks = song.Song.Notes!.Where(x => x.Key >= DrumGroups.FirstTrackNumber).SelectMany(x => x.Value).Count(x => x.Position < song.Origin);

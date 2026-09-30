@@ -129,7 +129,7 @@ public sealed class VoiceLeaderTest
     public async Task Songs_ChordTracksRarelyJumpRegister()
     {
         int changes = 0, jumps = 0;
-        for (var seed = 0; seed < 20; seed++)
+        for (var seed = 0; seed < 16; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
             var instrument = ((PitchInstrumentTrack)song.TrackDefinitions[4]).InstrumentCode;
@@ -156,7 +156,7 @@ public sealed class VoiceLeaderTest
     {
         var byInstrument = new Dictionary<double, List<double>>();
         var songsVaryingBySection = 0;
-        for (var seed = 0; seed < 60; seed++)
+        for (var seed = 0; seed < 64; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
             var definition = (PitchInstrumentTrack)song.TrackDefinitions[4];

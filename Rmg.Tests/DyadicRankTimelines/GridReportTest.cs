@@ -13,7 +13,7 @@ public sealed class GridReportTest
     [Explicit]
     public async Task Report()
     {
-        var songs = TestCorpus.Measure(200, song =>
+        var songs = TestCorpus.Measure(256, song =>
         {
             var (notes, offGrid, rushed) = (0, 0, 0);
             foreach (var (_, drum) in song.Song.Notes!.Where(x => x.Key >= DrumGroups.FirstTrackNumber))

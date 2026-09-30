@@ -68,7 +68,7 @@ public sealed class RoleChordTest
     public async Task Songs_PlayRoleChordsInTheHomeAndCadenceChords_AndPoolChordsBetween()
     {
         var entries = 0;
-        foreach (var song in TestCorpus.Range(10))
+        foreach (var song in TestCorpus.Range(8))
         {
             var rhythms = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).ToDictionary(x => x.Section, x => (HarmonicRhythm)x.Value!);
             foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Chord))

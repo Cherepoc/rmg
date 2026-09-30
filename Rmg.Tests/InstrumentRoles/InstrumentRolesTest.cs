@@ -58,7 +58,7 @@ public sealed class InstrumentRolesTest
     [Test]
     public async Task Songs_PlayEachPitchedTrackWithAnInstrumentOfItsRole_TheMelodyNotAsTheChords()
     {
-        for (var seed = 0; seed < 50; seed++)
+        for (var seed = 0; seed < 64; seed++)
         {
             var tracks = TestCorpus.Get(seed).Song.TrackDefinitions;
             int Program(int track) => ((PitchInstrumentTrack)tracks[track]).InstrumentCode;

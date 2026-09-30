@@ -9,7 +9,7 @@ public sealed class LiftReportTest
     [Explicit]
     public async Task Report()
     {
-        var steps = TestCorpus.Measure(200, song =>
+        var steps = TestCorpus.Measure(256, song =>
         {
             var (louder, quieter) = (new List<double>(), new List<double>());
             var energy = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);

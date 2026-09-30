@@ -6,7 +6,7 @@ namespace Rmg.Tests.Rendering;
 /// </summary>
 public sealed class SectionLoudnessReportTest
 {
-    private const int SongCount = 100;
+    private const int SongCount = 128;
 
     /// <param name="Gaps">Every song's gap from its loudest section to its quietest, in dB.</param>
     /// <param name="Under">Every section's loudness under its song's loudest, in dB.</param>

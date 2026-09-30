@@ -11,7 +11,7 @@ public sealed class SongFormReportTest
     [Test]
     public async Task ASongOfAForm_PlaysASectionForEveryRole_NoneFollowingItself()
     {
-        foreach (var song in TestCorpus.Range(30))
+        foreach (var song in TestCorpus.Range(32))
         {
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
             var roles = structure.SectionIds.Select(x => structure.Roles[x]).ToArray();
@@ -28,7 +28,7 @@ public sealed class SongFormReportTest
     [Explicit]
     public async Task Report()
     {
-        var songs = TestCorpus.Range(200).ToArray();
+        var songs = TestCorpus.Range(256).ToArray();
         var energies = new Dictionary<SectionRole, List<double>>();
         var plays = new Dictionary<SectionRole, List<int>>();
         var (formed, chorusLoudest, withChorus, bridgesAway, bridges) = (0, 0, 0, 0, 0);

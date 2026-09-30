@@ -72,7 +72,7 @@ public sealed class CadenceRaisedStepTest
     public async Task Songs_RaiseSteps_OnlyInTheCadenceChord()
     {
         var raising = 0;
-        for (var seed = 0; seed < 60; seed++)
+        for (var seed = 0; seed < 64; seed++)
         {
             var corpusSong = TestCorpus.Get(seed);
             var (song, origin) = corpusSong;

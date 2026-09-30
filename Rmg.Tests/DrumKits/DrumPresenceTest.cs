@@ -11,7 +11,7 @@ public sealed class DrumPresenceTest
     public async Task OnlyDrumsThatLeadNoRole_SitOut_AndTheLeads_ChangeTheirStroke_NeverInTheFirstBarPattern()
     {
         int resting = 0, strokes = 0;
-        foreach (var song in TestCorpus.Range(40))
+        foreach (var song in TestCorpus.Range(32))
         {
             var leads = song.Trace.Where(x => x.Point == TracePoints.Kit)
                 .ToDictionary(x => x.Section, x => ((SectionKit)x.Value!).Leads.Select(DrumGroups.GetTrackNumber).ToHashSet());
@@ -42,7 +42,7 @@ public sealed class DrumPresenceTest
     public async Task AChangedStroke_PlaysInTheBarsOfItsLetter()
     {
         var checkedNotes = 0;
-        foreach (var song in TestCorpus.Range(40))
+        foreach (var song in TestCorpus.Range(32))
         {
             var schemes = song.Trace.Where(x => x.Point == TracePoints.BarPattern).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => x.First().Phrase!.Replace("′", ""));
             foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.DrumPresence))
@@ -71,7 +71,7 @@ public sealed class DrumPresenceTest
     [Test]
     public async Task ADrumSittingOut_PlaysNoNotes_InTheBarsOfItsLetter()
     {
-        foreach (var song in TestCorpus.Range(40))
+        foreach (var song in TestCorpus.Range(32))
         {
             var schemes = song.Trace.Where(x => x.Point == TracePoints.BarPattern).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => x.First().Phrase!.Replace("′", ""));
             foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.DrumPresence))

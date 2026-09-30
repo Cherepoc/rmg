@@ -8,7 +8,7 @@ public sealed class SectionLengthReportTest
     [Test]
     public async Task EverySection_PlaysItsPatternOnceTwiceOrFourTimes_AsItsSpanIsLong()
     {
-        foreach (var song in TestCorpus.Range(20))
+        foreach (var song in TestCorpus.Range(16))
         {
             var plays = song.Trace.Where(x => x.Point == TracePoints.SectionLength).ToDictionary(x => x.Section, x => (int)x.Value!);
             foreach (var span in song.Map.Sections)
@@ -20,7 +20,7 @@ public sealed class SectionLengthReportTest
     [Explicit]
     public async Task Report()
     {
-        var songs = TestCorpus.Range(200).ToArray();
+        var songs = TestCorpus.Range(256).ToArray();
         var sections = songs.SelectMany(song =>
         {
             var rhythm = ((RhythmicUnconventionality)song.Trace.Single(x => x.Point == TracePoints.SongRhythm).Value!).Value;

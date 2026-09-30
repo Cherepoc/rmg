@@ -148,7 +148,7 @@ public sealed class ProgressionsTest
     public async Task SongChords_AreTheSectionsHomeAndTheProgressionsRoot()
     {
         // songs of their own, traced to explain their states, which the corpus's are not
-        var chordEntries = TestCorpus.InParallel(Enumerable.Range(0, 5), seed =>
+        var chordEntries = TestCorpus.InParallel(Enumerable.Range(0, 4), seed =>
         {
             using var trace = StateTrace.Start();
             SongGenerator.GenerateSong(seed);

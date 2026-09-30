@@ -49,7 +49,7 @@ public sealed class ScalesTest
     public async Task Sections_AreInScalesOfTheTable_TheSongsFirstInTheSongsScale()
     {
         var scales = new HashSet<string>();
-        for (var seed = 0; seed < 30; seed++)
+        for (var seed = 0; seed < 32; seed++)
         {
             var song = TestCorpus.Get(seed);
             var timeline = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.ScaleOffsets);

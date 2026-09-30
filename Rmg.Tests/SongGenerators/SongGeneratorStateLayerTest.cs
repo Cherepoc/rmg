@@ -15,7 +15,7 @@ public sealed class SongGeneratorStateLayerTest
     {
         // a trace names the layer of every offset, so a layer whose offset shows up twice on a note is one applied
         // twice; the offsets themselves can be equal, such as a section's home and a bar's root of the same step
-        var checks = TestCorpus.InParallel(Enumerable.Range(0, 30), seed =>
+        var checks = TestCorpus.InParallel(Enumerable.Range(0, 32), seed =>
         {
             // a song of its own, traced to explain its states, which the corpus's are not; the merges below keep the
             // layers only while the trace runs, as the song's generation did

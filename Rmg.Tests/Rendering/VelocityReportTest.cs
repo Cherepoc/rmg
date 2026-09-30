@@ -11,7 +11,7 @@ namespace Rmg.Tests.Rendering;
 /// </summary>
 public sealed class VelocityReportTest
 {
-    private const int SongCount = 100;
+    private const int SongCount = 128;
 
     internal sealed record RoleMeasures(double Level, double Accent, double Spread, double Loudness);
 
@@ -85,7 +85,7 @@ public sealed class VelocityReportTest
     [Test]
     public async Task TheBassAndTheChordsPlayEvenly_AChordAsLoudAsANote_AndTheMelodyAndTheBassOnTop()
     {
-        var m = Measure(TestCorpus.Range(100));
+        var m = Measure(TestCorpus.Range(128));
         var (bass, chords, melody, drums) = (m["Bass"], m["Chords"], m["Melody"], m["Drum"]);
 
         // a bass and chords accent their beats less than a melody or the drums

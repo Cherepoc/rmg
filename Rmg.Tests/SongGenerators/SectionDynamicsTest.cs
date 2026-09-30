@@ -10,7 +10,7 @@ namespace Rmg.Tests.SongGenerators;
 /// </summary>
 public sealed class SectionDynamicsTest
 {
-    private const int SongCount = 200;
+    private const int SongCount = 256;
 
     private static readonly string[] Measures = ["Loudness", "Drum notes", "Drums", "Bass notes", "Chord notes", "Melody notes"];
 

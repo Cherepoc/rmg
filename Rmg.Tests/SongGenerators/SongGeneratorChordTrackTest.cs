@@ -13,7 +13,7 @@ public sealed class SongGeneratorChordTrackTest
     public async Task ChordTrack_PlaysEveryChordWithAtLeastTwoNotes()
     {
         // every shape has two notes or more, and snapping and fitting into the range never merges them
-        for (var seed = 0; seed < 50; seed++)
+        for (var seed = 0; seed < 64; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
             var chordTrackSong = new Song(

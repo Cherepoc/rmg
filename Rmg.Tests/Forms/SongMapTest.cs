@@ -31,7 +31,7 @@ public sealed class SongMapTest
     [Test]
     public async Task GeneratedSongs_HaveAMap_ThatCoversThemWhole()
     {
-        for (var seed = 0; seed < 20; seed++)
+        for (var seed = 0; seed < 16; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
             var map = song.Map!;

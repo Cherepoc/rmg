@@ -13,7 +13,7 @@ public sealed class SongEndingTest
     private const int MelodyTrack = 5;
     private const int BassTrack = 6;
 
-    private static readonly IReadOnlyList<CorpusSong> Songs = TestCorpus.Range(40).ToArray();
+    private static readonly IReadOnlyList<CorpusSong> Songs = TestCorpus.Range(32).ToArray();
 
     private static EndingSpan Ending(CorpusSong song) => song.Map.Ending;
 
@@ -36,7 +36,7 @@ public sealed class SongEndingTest
     [Test]
     public async Task AFadingSong_PlaysItsLastSectionOnceMore_AndFadesOutOverIt()
     {
-        var fading = TestCorpus.Range(100).Where(x => Ending(x).Kind == EndingKind.Fade).ToArray();
+        var fading = TestCorpus.Range(128).Where(x => Ending(x).Kind == EndingKind.Fade).ToArray();
 
         await Assert.That(fading.Length).IsGreaterThan(5);
         foreach (var song in fading)

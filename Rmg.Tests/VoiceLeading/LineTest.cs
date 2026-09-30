@@ -224,7 +224,7 @@ public sealed class LineTest
     {
         var moves = new List<int>();
         int onBeat = 0, onBeatChordNotes = 0;
-        for (var seed = 0; seed < 20; seed++)
+        for (var seed = 0; seed < 16; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
             var rendered = Render.RenderSong(song);

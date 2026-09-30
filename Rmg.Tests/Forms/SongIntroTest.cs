@@ -11,7 +11,7 @@ public sealed class SongIntroTest
     // the longest fill before the line where the drums come in, an odd span of a bar less a note
     private const double LongestFill = 4.5;
 
-    private static readonly IReadOnlyList<CorpusSong> Songs = TestCorpus.Range(60).ToArray();
+    private static readonly IReadOnlyList<CorpusSong> Songs = TestCorpus.Range(64).ToArray();
 
     private static TimelineItem<RenderedNote>[] Notes(CorpusSong song, int track) => song.Notes(track);
 
@@ -89,7 +89,7 @@ public sealed class SongIntroTest
     [Explicit]
     public async Task Report()
     {
-        var songs = TestCorpus.Range(200).Where(x => x.Map.Intro.Kind == IntroKind.Entries).ToArray();
+        var songs = TestCorpus.Range(256).Where(x => x.Map.Intro.Kind == IntroKind.Entries).ToArray();
         var firsts = songs.GroupBy(x => x.Map.Intro.Entries[0].Part.ToString()).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}");
         var melodyEarly = songs.Count(x => x.Map.Intro.Entries.Any(y => y.Part.Role == TrackRole.Melody && y.Entry < x.Map.Intro.Window.Bars * x.Map.Meter.BarDuration));
         var inWindow = songs.Select(x => x.Map.Intro.Entries.Count(y => y.Entry < x.Map.Intro.Window.Bars * x.Map.Meter.BarDuration) / (double)x.Map.Intro.Entries.Length).Average();

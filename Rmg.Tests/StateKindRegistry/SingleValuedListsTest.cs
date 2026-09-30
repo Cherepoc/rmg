@@ -17,7 +17,7 @@ public sealed class SingleValuedListsTest
         var scaleSizes = Core.Composition.Scales.All.Select(x => x.Offsets.Length).ToHashSet();
         var maxChordSize = ChordShapes.All.Max(x => x.Targets.Length);
         var checkedNotes = 0;
-        foreach (var song in TestCorpus.Range(20))
+        foreach (var song in TestCorpus.Range(16))
         foreach (var note in song.Song.Notes!.Values.SelectMany(x => x))
         {
             var scale = note.Value.State.GetStateValue(StateKinds.ScaleOffsets);

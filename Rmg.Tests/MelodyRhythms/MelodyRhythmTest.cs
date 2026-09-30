@@ -96,7 +96,7 @@ public sealed class MelodyRhythmTest
     [Test]
     public async Task Melody_PlaysOneNoteAtATime()
     {
-        for (var seed = 0; seed < 30; seed++)
+        for (var seed = 0; seed < 32; seed++)
         {
             var melody = RenderMelody(seed);
             for (var i = 1; i < melody.Length; i++)
@@ -108,7 +108,7 @@ public sealed class MelodyRhythmTest
     public async Task Phrases_MostlyEndWithAHeldNote_AndARest()
     {
         int phrases = 0, held = 0, rested = 0;
-        for (var seed = 0; seed < 30; seed++)
+        for (var seed = 0; seed < 32; seed++)
         {
             var (melody, origin) = RenderMelodyFrom(seed);
             var duration = melody[^1].Position + 4;
@@ -136,7 +136,7 @@ public sealed class MelodyRhythmTest
     [Test]
     public async Task Melody_IsBusierThanANoteOrTwoABar()
     {
-        var notesPerBar = Enumerable.Range(0, 30)
+        var notesPerBar = Enumerable.Range(0, 32)
             .Select(seed =>
                 {
                     var melody = RenderMelody(seed);

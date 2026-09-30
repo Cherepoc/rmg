@@ -13,7 +13,7 @@ public sealed class SongGeneratorDrumsTest
             .Select(x => x.ArticulationCodes.Except([37]).ToHashSet())
             .ToArray();
 
-        for (var seed = 0; seed < 60; seed++)
+        for (var seed = 0; seed < 64; seed++)
         {
             var song = TestCorpus.Get(seed).Rendered;
             var codes = song.Tracks

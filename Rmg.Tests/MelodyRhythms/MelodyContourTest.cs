@@ -12,7 +12,7 @@ namespace Rmg.Tests.MelodyRhythms;
 /// </summary>
 public sealed class MelodyContourTest
 {
-    private const int SongCount = 100;
+    private const int SongCount = 128;
 
     /// <param name="Bars">Bars with a melody note, in patterns with two or more of them.</param>
     /// <param name="Correlation">Of a bar's mean pitch with its aim, both from their pattern's mean.</param>

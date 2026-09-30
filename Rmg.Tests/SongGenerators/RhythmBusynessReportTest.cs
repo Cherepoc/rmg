@@ -12,7 +12,7 @@ namespace Rmg.Tests.SongGenerators;
 /// </summary>
 public sealed class RhythmBusynessReportTest
 {
-    private const int SongCount = 300;
+    private const int SongCount = 256;
 
     private static readonly (string Name, double From, double To)[] Bands = [("plain", 0, 0.35), ("middle", 0.35, 0.65), ("wild", 0.65, 0.8), ("wildest", 0.8, 1.01)];
 

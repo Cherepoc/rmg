@@ -12,7 +12,7 @@ namespace Rmg.Tests.SongGenerators;
 /// </summary>
 public sealed class BassLeadingReportTest
 {
-    private const int SongCount = 100;
+    private const int SongCount = 128;
 
     /// <param name="Changes">Bar lines where the chord changes and a bass note starts.</param>
     /// <param name="Asked">Of those, the bar before asks to lead in (<see cref="StateKinds.ChordApproach" />).</param>
@@ -98,7 +98,7 @@ public sealed class BassLeadingReportTest
 /// </summary>
 public sealed class BassArrivalReportTest
 {
-    private const int SongCount = 100;
+    private const int SongCount = 128;
 
     [Test]
     [Explicit]
@@ -151,7 +151,7 @@ public sealed class BassArrivalReportTest
 /// </summary>
 public sealed class BassLineReportTest
 {
-    private const int SongCount = 100;
+    private const int SongCount = 128;
 
     [Test]
     [Explicit]

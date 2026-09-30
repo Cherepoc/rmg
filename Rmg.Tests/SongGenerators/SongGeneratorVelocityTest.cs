@@ -8,11 +8,11 @@ public sealed class SongGeneratorVelocityTest
     [Test]
     public async Task NotesAtBarStart_AreLouder_ThanNotesOffTheEighthGrid()
     {
-        // the accent follows each pattern's own beats, not the bar's, so this only sees part of it: over 200 songs the
+        // the accent follows each pattern's own beats, not the bar's, so this only sees part of it: over a few hundred songs the
         // bar start is about 10 steps of 127 louder
         var barStart = new List<double>();
         var offGrid = new List<double>();
-        foreach (var seed in Enumerable.Range(0, 30))
+        foreach (var seed in Enumerable.Range(0, 32))
         {
             // a pad holds its chords evenly, with no accent to measure
             var pad = ((Rmg.Core.Songs.PitchInstrumentTrack)TestCorpus.Get(seed).Song.TrackDefinitions[Rmg.Core.Composition.SongTracks.PadTrack]).InstrumentCode;

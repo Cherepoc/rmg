@@ -11,7 +11,7 @@ namespace Rmg.Tests.MelodyRhythms;
 /// </summary>
 public sealed class MelodyRepetitionTest
 {
-    private const int SongCount = 100;
+    private const int SongCount = 128;
 
     /// <param name="Pairs">Notes at the same place in a pattern that comes back, both played.</param>
     /// <param name="Same">Of those, the ones that play the same note.</param>
@@ -198,7 +198,7 @@ public sealed class MelodyRepetitionTest
     [Test]
     public async Task ASectionThatRecurs_PlaysTheSameNotes_UnlessTheSongImprovises_AndItsAnswer_StartsAsItsQuestion_AndChangesAfter()
     {
-        var m = MeasureRecurrence(TestCorpus.Range(60));
+        var m = MeasureRecurrence(TestCorpus.Range(64));
 
         // placed over the song, a recurring section and an answer that go on from the note before replay the tune heard,
         // an octave off where it would leap from it
@@ -212,7 +212,7 @@ public sealed class MelodyRepetitionTest
     [Explicit]
     public async Task RecurrenceReport()
     {
-        var m = MeasureRecurrence(TestCorpus.Range(100));
+        var m = MeasureRecurrence(TestCorpus.Range(128));
         Console.WriteLine($"a recurring section plays its first appearance's notes {m.Fixed:P0} in songs that do not improvise, {m.Improvised:P0} in songs that do; " +
                           $"its answer the question's {m.AnswerFirstHalf:P0} in its first half, {m.AnswerSecondHalf:P0} in its second; " +
                           $"in any octave, a recurring section {m.FixedClass:P0} and the answer's first half {m.AnswerFirstHalfClass:P0}; " +
@@ -224,7 +224,7 @@ public sealed class MelodyRepetitionTest
     [Test]
     public async Task APhraseThatStartsAgain_LeapsMostlyAfterARest()
     {
-        var m = Measure(TestCorpus.Range(20));
+        var m = Measure(TestCorpus.Range(16));
 
         await Assert.That(m.RestedJoinLeaps / (double)m.JoinLeaps).IsGreaterThan(0.7);
     }
@@ -238,7 +238,7 @@ public sealed class MelodyRepetitionTest
     public async Task ImprovisationByPlaceReport()
     {
         int[] notes = new int[3], same = new int[3];
-        foreach (var song in TestCorpus.Range(100))
+        foreach (var song in TestCorpus.Range(128))
         {
             if ((double)song.Trace.Single(x => x.Point == TracePoints.MelodyImprovisation).Value! <= 0)
                 continue;

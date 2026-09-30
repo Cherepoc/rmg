@@ -13,7 +13,7 @@ public sealed class PitchedEnergyReportTest
     [Explicit]
     public async Task Report()
     {
-        var rows = TestCorpus.Measure(200, song =>
+        var rows = TestCorpus.Measure(256, song =>
         {
             var energy = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
             var answers = song.Trace.Where(x => x.Point == TracePoints.MelodyAnswer).ToDictionary(x => x.Section, x => (double)x.Value!);

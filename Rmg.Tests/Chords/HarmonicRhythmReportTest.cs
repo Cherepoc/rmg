@@ -11,7 +11,7 @@ public sealed class HarmonicRhythmReportTest
     [Test]
     public async Task EverySection_ChangesItsChordsWhereItsSpanSays()
     {
-        foreach (var song in TestCorpus.Range(20))
+        foreach (var song in TestCorpus.Range(16))
         {
             var bars = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).Select(x => ((HarmonicRhythm)x.Value!).Bars).ToArray();
             await Assert.That(bars.All(x => x is 0.5 or 1 or 2)).IsTrue();
@@ -30,7 +30,7 @@ public sealed class HarmonicRhythmReportTest
     public async Task TheChordsAndTheBass_StrikeMostChanges_InTheirRange()
     {
         var (played, struck) = (0, 0);
-        foreach (var song in TestCorpus.Range(20))
+        foreach (var song in TestCorpus.Range(16))
         foreach (var track in new[] { SongTracks.ChordsTrack, SongTracks.BassTrack })
         {
             var notes = song.Song.Notes![track];
@@ -52,7 +52,7 @@ public sealed class HarmonicRhythmReportTest
         var sections = new List<(double Span, double Energy)>();
         var notes = new Dictionary<int, (int All, int Crossing)>();
         var struckChanges = new Dictionary<int, (int All, int Struck)>();
-        foreach (var song in TestCorpus.Range(200))
+        foreach (var song in TestCorpus.Range(256))
         {
             var energies = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy)
                 .ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);

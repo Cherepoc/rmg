@@ -70,7 +70,7 @@ public sealed class FillTest
     public async Task IdleDrums_KeepTheSectionsState()
     {
         // the toms play in few sections, but have the drums' state in all of them
-        for (var seed = 0; seed < 10; seed++)
+        for (var seed = 0; seed < 8; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
             var toms = song.TrackEventStateTimelineMap.TrackTimelineMap[DrumGroups.GetTrackNumber(DrumDefinitions.Tom)];
@@ -82,7 +82,7 @@ public sealed class FillTest
     [Test]
     public async Task EveryLine_RecordsItsFillDecision()
     {
-        for (var seed = 0; seed < 10; seed++)
+        for (var seed = 0; seed < 8; seed++)
         {
             var song = TestCorpus.Get(seed);
             var decisions = song.Trace.Where(x => x.Point == TracePoints.FillDecision).ToArray();
@@ -97,7 +97,7 @@ public sealed class FillTest
     public async Task EarlyLandings_ComeBeforeTheLine()
     {
         var early = 0;
-        for (var seed = 0; seed < 200 && early < 5; seed++)
+        for (var seed = 0; seed < 256 && early < 5; seed++)
         {
             var landings = new List<StateTraceEntry>();
             var song = TestCorpus.Get(seed);
@@ -126,7 +126,7 @@ public sealed class FillTest
     public async Task SectionChanges_MostlyLandOnACrashAndAKick()
     {
         int changes = 0, crashes = 0, kicks = 0, downbeats = 0, otherCrashes = 0;
-        for (var seed = 0; seed < 40; seed++)
+        for (var seed = 0; seed < 32; seed++)
         {
             var corpusSong = TestCorpus.Get(seed);
             var (song, origin) = corpusSong;

@@ -14,7 +14,7 @@ public sealed class SongGeneratorTempoTest
     [Test]
     public async Task Tempo_IsBetween90And180Bpm_AndVariesBetweenSongs()
     {
-        var tempos = Enumerable.Range(0, 30).Select(GetTempo).ToArray();
+        var tempos = Enumerable.Range(0, 32).Select(GetTempo).ToArray();
 
         await Assert.That(tempos.All(x => x is >= 0.75 and <= 1.5)).IsTrue();
         await Assert.That(tempos.Distinct().Count()).IsGreaterThan(3);

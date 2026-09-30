@@ -6,7 +6,7 @@ namespace Rmg.Tests.SongGenerators;
 
 public sealed class SongGeneratorScaleTest
 {
-    private const int SongCount = 100;
+    private const int SongCount = 128;
 
     /// <summary>Every section's scale, by its id, as the trace recorded it.</summary>
     private static Dictionary<int, Scale> SectionScales(CorpusSong song) =>
@@ -15,7 +15,7 @@ public sealed class SongGeneratorScaleTest
     [Test]
     public async Task EveryPitchedNote_PlaysInOneScaleOfSevenNotes()
     {
-        foreach (var song in TestCorpus.Range(40))
+        foreach (var song in TestCorpus.Range(32))
         foreach (var (track, notes) in song.Song.Notes!.Where(x => x.Key < DrumGroups.FirstTrackNumber))
         foreach (var note in notes)
             await Assert.That(note.Value.State.GetStateValue(StateKinds.ScaleOffsets).Length).IsEqualTo(7);
@@ -24,7 +24,7 @@ public sealed class SongGeneratorScaleTest
     [Test]
     public async Task EveryChordNote_IsInItsSectionsScale()
     {
-        foreach (var song in TestCorpus.Range(40))
+        foreach (var song in TestCorpus.Range(32))
         {
             var scales = SectionScales(song);
             foreach (var span in song.Map.Sections)

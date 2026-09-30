@@ -11,7 +11,7 @@ namespace Rmg.Tests.DrumKits;
 /// </summary>
 public sealed class PercussionFeelReportTest
 {
-    private const int SongCount = 100;
+    private const int SongCount = 128;
 
     private sealed class Tally
     {

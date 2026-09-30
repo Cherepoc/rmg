@@ -12,7 +12,7 @@ namespace Rmg.Core.Versions;
 public static class SongFingerprint
 {
     /// <summary>How many seeds, from 0, the corpus has, which the deploy and the corpus report hash.</summary>
-    public const int CorpusSize = 200;
+    public const int CorpusSize = 256;
 
     /// <summary>The fingerprint of the songs of seeds 0 to <paramref name="count" /> - 1, as 16 hex digits.</summary>
     public static string Compute(int count)

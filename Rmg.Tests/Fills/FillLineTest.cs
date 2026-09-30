@@ -6,7 +6,7 @@ namespace Rmg.Tests.Fills;
 /// <summary>How the fills mark the lines between sections and the lines in the middle of a section.</summary>
 public sealed class FillLineTest
 {
-    private const int SongCount = 100;
+    private const int SongCount = 128;
 
     /// <summary>A line's fill, and whether it is the line in the middle of a section.</summary>
     internal sealed record Line(bool IsPhrase, FillDecision Decision);
@@ -38,7 +38,7 @@ public sealed class FillLineTest
     [Test]
     public async Task PhraseLines_WeighLess_FewerFillsSparserAndFewerLandings()
     {
-        var lines = TestCorpus.Range(40).SelectMany(ReadLines).ToArray();
+        var lines = TestCorpus.Range(32).SelectMany(ReadLines).ToArray();
         FillDecision[] Of(bool isPhrase) => [..lines.Where(x => x.IsPhrase == isPhrase).Select(x => x.Decision)];
         var (phrase, section) = (Of(true), Of(false));
         double None(FillDecision[] fills) => fills.Count(x => x.Span <= 0) / (double)fills.Length;

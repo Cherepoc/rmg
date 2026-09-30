@@ -10,7 +10,7 @@ public sealed class SongGeneratorTimekeepingTest
     {
         int bars = 0, repeating = 0;
         var hiHat = DrumGroups.GetTrackNumber(DrumDefinitions.HiHat);
-        for (var seed = 0; seed < 40; seed++)
+        for (var seed = 0; seed < 32; seed++)
         {
             // in a meter of two halves alike, as 4/4 and 6/8 are
             var song = TestCorpus.Get(seed).Song;

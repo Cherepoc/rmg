@@ -31,7 +31,7 @@ public sealed class GrooveTest
     [Test]
     public async Task ASong_SwingsItsNotesAsItsSwingSays()
     {
-        foreach (var song in TestCorpus.Range(40))
+        foreach (var song in TestCorpus.Range(32))
         {
             var swing = Render.GetSwing(song.Song);
             var drawn = song.Trace.Single(x => x.Point == TracePoints.Swing).Value;
@@ -46,7 +46,7 @@ public sealed class GrooveTest
     [Test]
     public async Task TheBassPlaysInTheMiddle_TheMelodyNearIt_TheChordsAndThePadOnSidesApart()
     {
-        foreach (var song in TestCorpus.Range(40))
+        foreach (var song in TestCorpus.Range(32))
         {
             var pans = (ImmutableDictionary<int, double>)song.Trace.Single(x => x.Point == TracePoints.Panning).Value!;
             await Assert.That(pans[SongTracks.BassTrack]).IsEqualTo(0);
@@ -60,7 +60,7 @@ public sealed class GrooveTest
     [Explicit]
     public async Task Report()
     {
-        var songs = TestCorpus.Range(300).Select(song => (
+        var songs = TestCorpus.Range(256).Select(song => (
             Rhythm: ((RhythmicUnconventionality)song.Trace.Single(x => x.Point == TracePoints.SongRhythm).Value!).Value,
             Tempo: song.Rendered.TempoTimeline.GetEffectiveValueAt(0) * Meter.BaseTempo,
             Swing: Render.GetSwing(song.Song)

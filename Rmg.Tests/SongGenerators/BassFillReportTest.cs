@@ -20,7 +20,7 @@ public sealed class BassFillReportTest
     public async Task Report()
     {
         var (changes, steps, leaps, moved) = (0, 0, 0, 0.0);
-        foreach (var song in TestCorpus.Range(200))
+        foreach (var song in TestCorpus.Range(256))
         {
             var bass = song.Song.Notes![SongTracks.BassTrack].ToArray();
             foreach (var span in song.Map.Sections.Skip(1))

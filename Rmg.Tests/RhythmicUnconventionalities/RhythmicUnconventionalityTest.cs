@@ -52,7 +52,7 @@ public sealed class RhythmicUnconventionalityTest
     {
         var shares = new List<(double Value, double Tuplets)>();
         // over enough songs that the quarters compared are not left to chance: over 80, the ratio swings from 1.4 to 1.7
-        for (var seed = 0; seed < 200; seed++)
+        for (var seed = 0; seed < 256; seed++)
         {
             var value = RhythmicUnconventionality.Generate(SongGenerator.CreateStream(seed, SongStream.Rhythm)).Value;
             var hits = TestCorpus.Get(seed).Song.TrackEventStateTimelineMap.TrackTimelineMap
