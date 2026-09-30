@@ -140,14 +140,16 @@ tuned and wild weights (`ByConvention`), in place of the rhythm's and the harmon
 Later, by the same rule: key changes anywhere and at any time, where the form now allows one; the voicings, the
 cadence's raised seventh and the chord pool's size; more modes for the wild end (with *Scales of other sizes*); a
 song's own coherence, how far its facets stray from its base; a user's conventionality setting, which moves the base.
-To tune by listening: the facets' spread, the harmony between its ends, the chords' and the scales' weights. The
-chords' tuned weights are the corpus's mix, so that a middling song now plays a level 3 or 4 chord in about one in six,
-where most songs played none and a few many: the tuned middle wants the median song's mix (57% triads, 39% level 1, 4%
-level 2), the jazz left to the wild songs; the progressions' tuned strictness likewise the median's 0.85 rather than
-the mean's 0.77. A triplet fill in a straight song is conventional, but no change of feel happens at the plain end. The feel facet
-now puts 19% of songs outside four and 12% in odd meters, against 12% and 5% before. At the plain end every section
-of a form plays its role's length and the rhythm layers never move a groove's density, so that a plain song's bars are
-alike; at the wild end every unconventional chance happens every time, as meant.
+Generated songs are drawn in log-odds (`Unconventionality`), so that a song as a whole is near an end in about one
+in a hundred and a facet in one in sixteen, chords and groove going together as 0.75; harmony's middle is a middling
+song's, the jazz and the clusters the wilder songs' (levels 3 to 5 about 7% of the corpus's chords, against 16% before
+the facets). To tune by listening: the spreads, the chords' and the scales' weights, and the plain end's rigidity: no
+change of feel, triplet fills included, every bar of a plain song at the same density. The feel facet puts 18% of songs
+outside four and 10% in odd meters, against 12% and 5% before.
+- **A song's parameters supplied** (P3): the conventionality first, its base or any facet (`SongOverrides`, see
+  CLAUDE.md's *Drawn or given*), then the meter, the tempo, the key and the like, each drawn or given from a stream of
+  its own, so that the same seed with a value supplied is the same song made so; in the page and the API, once the
+  generation settles.
 
 ## Meter
 
