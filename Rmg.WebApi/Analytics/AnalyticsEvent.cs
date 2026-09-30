@@ -44,7 +44,7 @@ public static class EventNames
 /// <param name="Bytes">How large something was.</param>
 /// <param name="Seconds">How long something was listened to.</param>
 /// <param name="Seed">
-///     The song it was about, in letters and digits (<see cref="Rmg.Core.Base62" />), all 64 of its bits, which a number
+///     The song it was about, in letters and digits (<see cref="Rmg.Core.Base64" />), all 64 of its bits, which a number
 ///     in JSON could not carry; the only thing here that identifies anything.
 /// </param>
 /// <param name="Detail">One short word of context: where a soundfont came from, which control was moved.</param>

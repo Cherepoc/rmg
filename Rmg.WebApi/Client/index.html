@@ -122,11 +122,16 @@
         </fieldset>
 
         <fieldset class="settings-group">
+            <legend>Sound</legend>
+            <div class="settings-grid" id="sound-settings"></div>
+        </fieldset>
+
+        <fieldset class="settings-group">
             <legend>Parts</legend>
             <div class="row">
                 <label class="field volume">
                     <span>Overall</span>
-                    <input type="range" id="song-volume" min="0" max="127" step="1" value="127" />
+                    <input type="range" id="song-volume" min="0" max="63" step="1" value="63" />
                     <output id="song-volume-value" class="percent">100%</output>
                 </label>
                 <button type="button" id="roll-instruments" class="small">Roll all instruments</button>

@@ -5,6 +5,6 @@ public static class SongFile
     /// <returns>The file name a song with <paramref name="songSeed" /> is stored and downloaded under.</returns>
     public static string GetName(ulong songSeed)
     {
-        return $"song-{Base62.FromSeed(songSeed)}.mid";
+        return $"song-{Base64.FromSeed(songSeed)}.mid";
     }
 }

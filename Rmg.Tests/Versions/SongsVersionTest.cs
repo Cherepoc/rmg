@@ -43,8 +43,8 @@ public sealed class SongsVersionTest
     [Test]
     public async Task ASong_IsNamedByItsSeed_InLettersAndDigits()
     {
-        await Assert.That(Rmg.Core.Songs.SongFile.GetName(62)).IsEqualTo("song-10.mid");
-        await Assert.That(SongsVersion.Label(62)).EndsWith("seed 10");
+        await Assert.That(Rmg.Core.Songs.SongFile.GetName(64)).IsEqualTo("song-10.mid");
+        await Assert.That(SongsVersion.Label(64)).EndsWith("seed 10");
     }
 
     [Test]

@@ -45,7 +45,7 @@ public sealed class CliOptionsParserTest
     {
         var result = Parse("--output", "out", "--count", "5", "--seed", "12");
 
-        await Assert.That(result.Options).IsEqualTo(new CliOptions("out", 5, 64));
+        await Assert.That(result.Options).IsEqualTo(new CliOptions("out", 5, 66));
     }
 
     [Test]
@@ -53,7 +53,7 @@ public sealed class CliOptionsParserTest
     {
         var result = Parse("-o", "out", "-n", "5", "-s", "12");
 
-        await Assert.That(result.Options).IsEqualTo(new CliOptions("out", 5, 64));
+        await Assert.That(result.Options).IsEqualTo(new CliOptions("out", 5, 66));
     }
 
     [Test]
@@ -61,14 +61,14 @@ public sealed class CliOptionsParserTest
     {
         var result = Parse("--output=some dir/x", "--count=3", "--seed=a8");
 
-        await Assert.That(result.Options).IsEqualTo(new CliOptions("some dir/x", 3, 2240));
+        await Assert.That(result.Options).IsEqualTo(new CliOptions("some dir/x", 3, 2312));
     }
 
     [Test]
     public async Task SeedBoundaries_AreParsed()
     {
         await Assert.That(Parse("-s", "0").Options!.Seed).IsEqualTo(0UL);
-        await Assert.That(Parse("-s", Rmg.Core.Base62.FromSeed(ulong.MaxValue)).Options!.Seed).IsEqualTo(ulong.MaxValue);
+        await Assert.That(Parse("-s", Rmg.Core.Base64.FromSeed(ulong.MaxValue)).Options!.Seed).IsEqualTo(ulong.MaxValue);
     }
 
     [Test]

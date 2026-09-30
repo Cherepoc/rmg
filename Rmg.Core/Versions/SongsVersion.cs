@@ -22,7 +22,7 @@ public static partial class SongsVersion
     /// <summary>What a song's MIDI file says it is: the number, the commit and the seed.</summary>
     public static string Label(ulong seed)
     {
-        var name = Base62.FromSeed(seed);
+        var name = Base64.FromSeed(seed);
         return Commit is null ? $"RMG {Number}, seed {name}" : $"RMG {Number} ({Commit[..Math.Min(7, Commit.Length)]}), seed {name}";
     }
 

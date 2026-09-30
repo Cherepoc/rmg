@@ -1,4 +1,4 @@
-import { DRUM_GROUPS, DRUM_SETUPS, FACETS, LAST_STEP, MIDDLE_PAN, PARTS } from "./settings.js";
+import { DRUM_GROUPS, DRUM_SETUPS, FACETS, FORMAT_PARTS, LAST_STEP, MIDDLE_PAN, PARTS } from "./settings.js";
 
 /**
  *     The settings a song is asked for with and heard with, as settings.js writes them, and what the server says of the
@@ -9,9 +9,12 @@ import { DRUM_GROUPS, DRUM_SETUPS, FACETS, LAST_STEP, MIDDLE_PAN, PARTS } from "
 /** Nothing given, every value in the middle and every part and drum group at its fullest, as a first visit starts. */
 export function defaultSettings() {
     return {
-        unconventionality: { isGiven: false, value: 64 },
-        facets: Object.fromEntries(FACETS.map((facet) => [facet, { isGiven: false, value: 64 }])),
-        parts: Object.fromEntries(PARTS.map((part) => [part, {
+        unconventionality: { isGiven: false, value: 32 },
+        facets: Object.fromEntries(FACETS.map((facet) => [facet, { isGiven: false, value: 32 }])),
+        tempo: { isGiven: false, value: 0 },
+        key: { isGiven: false, value: 0 },
+        meter: { isGiven: false, value: 0 },
+        parts: Object.fromEntries(FORMAT_PARTS.map((part) => [part, {
             plays: "random",
             instrument: { isGiven: false, value: 0 },
             volume: LAST_STEP,
@@ -31,7 +34,10 @@ export function givenOnly(settings) {
     return {
         unconventionality: keep(settings.unconventionality, fresh.unconventionality),
         facets: Object.fromEntries(FACETS.map((facet) => [facet, keep(settings.facets[facet], fresh.facets[facet])])),
-        parts: Object.fromEntries(PARTS.map((part) => {
+        tempo: keep(settings.tempo, fresh.tempo),
+        key: keep(settings.key, fresh.key),
+        meter: keep(settings.meter, fresh.meter),
+        parts: Object.fromEntries(FORMAT_PARTS.map((part) => {
             const given = settings.parts[part];
             return [part, { ...given, instrument: keep(given.instrument, fresh.parts[part].instrument), pan: keep(given.pan, fresh.parts[part].pan) }];
         })),
@@ -60,6 +66,9 @@ export function requestFor(seed, settings) {
             }];
         })),
         drumSetup: settings.drumSetup ?? undefined,
+        tempo: given(settings.tempo),
+        key: given(settings.key),
+        meter: given(settings.meter),
         drumGroups: Object.fromEntries(DRUM_GROUPS.map((group) => [group, { ...settings.drumGroups[group] }])),
     };
 }
@@ -74,6 +83,9 @@ export function applyReport(settings, report) {
     const drawn = (setting, reported) => (setting.isGiven ? setting : { isGiven: false, value: reported.value });
     next.unconventionality = drawn(settings.unconventionality, report.unconventionality);
     for (const facet of FACETS) next.facets[facet] = drawn(settings.facets[facet], report.facets[facet]);
+    next.tempo = drawn(settings.tempo, report.tempo);
+    next.key = drawn(settings.key, report.key);
+    next.meter = drawn(settings.meter, report.meter);
 
     const channels = {};
     const plays = {};

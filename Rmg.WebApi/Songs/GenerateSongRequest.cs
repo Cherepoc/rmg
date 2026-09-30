@@ -7,19 +7,19 @@ namespace Rmg.WebApi.Songs;
 
 /// <summary>
 ///     A song to generate: its seed, what is given in place of what it draws, and how it is to be heard. Every amount is
-///     a step from 0 to 127, as MIDI's are; anything left out is the song's own.
+///     a step from 0 to 63, a character of the page's settings each; anything left out is the song's own.
 /// </summary>
 /// <param name="Seed">
-///     Seed of the song, in letters and digits (<see cref="Rmg.Core.Base62" />), all 64 of its bits, which a number in
+///     Seed of the song, in letters and digits (<see cref="Rmg.Core.Base64" />), all 64 of its bits, which a number in
 ///     JSON could not carry. None asks for a random one, which the response reports back, so a song heard once can be
 ///     asked for again.
 /// </param>
 /// <param name="Unconventionality">
-///     How far the song strays from convention, from 0 for the plainest to 127 for the most experimental, which its
+///     How far the song strays from convention, from 0 for the plainest to 63 for the most experimental, which its
 ///     facets stray around. None lets the song draw its own, which keeps well away from both ends.
 /// </param>
 /// <param name="Facets">A facet of the unconventionality given outright, by its name, such as "chords".</param>
-/// <param name="Volume">How loud the whole song plays, 127 as it is made. None is 127.</param>
+/// <param name="Volume">How loud the whole song plays, 63 as it is made. None is 63.</param>
 /// <param name="Parts">A part given, by its role's name: "melody", "chords", "bass", "pad", "counterMelody" or "drum".</param>
 /// <param name="DrumSetup">The drums the song plays: "kit", "kitAndPercussion" or "percussion".</param>
 /// <param name="DrumGroups">A drum group's mix, by its name, such as "kick".</param>
@@ -39,16 +39,16 @@ public sealed record GenerateSongRequest(
     int? Meter = null
 )
 {
-    /// <summary>The last step of an amount: MIDI's 0 to 127.</summary>
-    public const int LastStep = 127;
+    /// <summary>The last step of an amount, from 0: as many as a character of the settings holds.</summary>
+    public const int LastStep = 63;
 
-    /// <summary>The middle of a pan's steps, where a part sits in the middle.</summary>
-    public const int MiddlePan = 64;
+    /// <summary>The middle of a pan's steps, where a part sits in the middle: 32 to its left and 31 to its right, as MIDI's 64 is.</summary>
+    public const int MiddlePan = 32;
 
     /// <summary>An amount from 0 to 1 as its nearest step.</summary>
     public static int ToStep(double amount) => (int)Math.Round(amount * LastStep);
 
-    /// <summary>A pan from -1, left, to 1, right, as its nearest step, 64 in the middle.</summary>
+    /// <summary>A pan from -1, left, to 1, right, as its nearest step, 32 in the middle.</summary>
     public static int ToPanStep(double pan) => (int)Math.Round(MiddlePan + pan * (pan < 0 ? MiddlePan : LastStep - MiddlePan));
 
     private static double FromPanStep(int step) => (step - MiddlePan) / (double)(step < MiddlePan ? MiddlePan : LastStep - MiddlePan);
@@ -63,8 +63,8 @@ public sealed record GenerateSongRequest(
 
         if (Seed is not null)
         {
-            if (Core.Base62.ToSeed(Seed) is not { } read)
-                return Fail($"{Seed} is not a seed. A seed is up to {Core.Base62.SeedLength} letters and digits.", out error);
+            if (Core.Base64.ToSeed(Seed) is not { } read)
+                return Fail($"{Seed} is not a seed. A seed is up to {Core.Base64.SeedLength} letters and digits.", out error);
             seed = read;
         }
 
@@ -87,8 +87,9 @@ public sealed record GenerateSongRequest(
         {
             if (!Enum.TryParse<TrackRole>(name, true, out var role) || !Enum.IsDefined(role))
                 return Fail($"{name} is not a part. Parts are {string.Join(", ", Enum.GetNames<TrackRole>())}.", out error);
-            if (!TryReadStep(part.Instrument, $"The {name}'s instrument", out error)
-                || !TryReadStep(part.Volume, $"The {name}'s volume", out error)
+            if (part.Instrument is < 0 or > 127)
+                return Fail($"The {name}'s instrument {part.Instrument} is not a General MIDI program from 0 to 127.", out error);
+            if (!TryReadStep(part.Volume, $"The {name}'s volume", out error)
                 || !TryReadStep(part.Pan, $"The {name}'s pan", out error))
                 return false;
             if (part.Plays is { } plays)
@@ -153,11 +154,11 @@ public sealed record GenerateSongRequest(
 
 /// <param name="Plays">Whether the part is in the song, given; none for the song to draw it.</param>
 /// <param name="Instrument">The General MIDI program it plays, the drums' kit; none for the song's own.</param>
-/// <param name="Volume">How loud it plays, 127 as it is made; none is 127.</param>
-/// <param name="Pan">Where it sits, from 0, left, through 64, the middle, to 127, right; none for the song's own.</param>
+/// <param name="Volume">How loud it plays, 63 as it is made; none is 63.</param>
+/// <param name="Pan">Where it sits, from 0, left, through 32, the middle, to 63, right; none for the song's own.</param>
 /// <param name="IsOn">Whether it is written in the file at all, which a part switched off is not.</param>
 public sealed record PartRequest(bool? Plays = null, int? Instrument = null, int? Volume = null, int? Pan = null, bool IsOn = true);
 
-/// <param name="Volume">How loud its drums play, 127 as they are made; none is 127.</param>
+/// <param name="Volume">How loud its drums play, 63 as they are made; none is 63.</param>
 /// <param name="IsOn">Whether its drums are written in the file at all.</param>
 public sealed record DrumGroupRequest(int? Volume = null, bool IsOn = true);

@@ -20,14 +20,14 @@ public sealed class GenerateSongRequestTest
     }
 
     [Test]
-    public async Task EveryStep_ReadsAsItsShareOf127()
+    public async Task EveryStep_ReadsAsItsShareOf63()
     {
         var request = new GenerateSongRequest(
             "g",
-            Unconventionality: 127,
+            Unconventionality: 63,
             Facets: new Dictionary<string, int> { ["chords"] = 0 },
-            Volume: 64,
-            Parts: new Dictionary<string, PartRequest> { ["bass"] = new(Plays: false, Instrument: 73, Volume: 127, Pan: 0), ["counterMelody"] = new(Plays: true, Pan: 127) },
+            Volume: 32,
+            Parts: new Dictionary<string, PartRequest> { ["bass"] = new(Plays: false, Instrument: 73, Volume: 63, Pan: 0), ["counterMelody"] = new(Plays: true, Pan: 63) },
             DrumSetup: "percussion",
             DrumGroups: new Dictionary<string, DrumGroupRequest> { ["kick"] = new(Volume: 0, IsOn: false) }
         );
@@ -37,7 +37,7 @@ public sealed class GenerateSongRequestTest
         await Assert.That(overrides.Facets![Facet.Chords]).IsEqualTo(0.0);
         await Assert.That(overrides.Parts!.ToArray()).IsEquivalentTo(new[] { KeyValuePair.Create(TrackRole.Bass, false), KeyValuePair.Create(TrackRole.CounterMelody, true) });
         await Assert.That(overrides.DrumSetup).IsEqualTo(DrumSetup.Percussion);
-        await Assert.That(mix.Volume).IsEqualTo(64 / 127.0);
+        await Assert.That(mix.Volume).IsEqualTo(32 / 63.0);
         await Assert.That(mix.Parts[TrackRole.Bass]).IsEqualTo(new PartMix(73, 1, -1, true));
         await Assert.That(mix.Parts[TrackRole.CounterMelody].Pan).IsEqualTo(1.0);
         await Assert.That(mix.DrumGroups["Kick"]).IsEqualTo(new DrumGroupMix(0, false));
@@ -45,8 +45,8 @@ public sealed class GenerateSongRequestTest
 
     [Test]
     [Arguments(0, -1.0)]
-    [Arguments(64, 0.0)]
-    [Arguments(127, 1.0)]
+    [Arguments(32, 0.0)]
+    [Arguments(63, 1.0)]
     public async Task APan_ReachesBothSides_AndTheMiddle(int step, double pan)
     {
         var request = new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["melody"] = new(Pan: step) });
@@ -82,7 +82,7 @@ public sealed class GenerateSongRequestTest
     {
         var request = what switch
         {
-            "unconventionality" => new GenerateSongRequest(Unconventionality: 128),
+            "unconventionality" => new GenerateSongRequest(Unconventionality: 64),
             "facet" => new GenerateSongRequest(Facets: new Dictionary<string, int> { ["feel"] = -1 }),
             "unknownFacet" => new GenerateSongRequest(Facets: new Dictionary<string, int> { ["tempo"] = 1 }),
             "part" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["kazoo"] = new() }),

@@ -135,7 +135,7 @@ public static class EventStoreSummary
 
         var seeds = new List<SeedListening>();
         using var reader = command.ExecuteReader();
-        while (reader.Read()) seeds.Add(new SeedListening(Base62.FromSeed(unchecked((ulong)reader.GetInt64(0))), Math.Round(reader.GetDouble(1), 1), reader.GetInt32(2)));
+        while (reader.Read()) seeds.Add(new SeedListening(Base64.FromSeed(unchecked((ulong)reader.GetInt64(0))), Math.Round(reader.GetDouble(1), 1), reader.GetInt32(2)));
 
         return seeds;
     }
@@ -269,7 +269,7 @@ public static class EventStoreSummary
     {
         var rated = ratings
             .Where(x => x.Version == version && x.Likes + x.Dislikes > 0)
-            .Select(x => new RatedSeed(Base62.FromSeed(unchecked((ulong)x.Seed)), x.Identity, x.Likes, x.Dislikes))
+            .Select(x => new RatedSeed(Base64.FromSeed(unchecked((ulong)x.Seed)), x.Identity, x.Likes, x.Dislikes))
             .OrderByDescending(x => x.Likes - x.Dislikes)
             .ThenByDescending(x => x.Likes)
             .ThenBy(x => x.Seed, StringComparer.Ordinal)
@@ -291,7 +291,7 @@ public static class EventStoreSummary
     {
         return ratings
             .Where(x => x.Version == version && x.Unconventionality is not null && x.Likes + x.Dislikes > 0)
-            .GroupBy(x => (x.IsGiven, Fifth: Math.Min(4, x.Unconventionality!.Value * 5 / 127)))
+            .GroupBy(x => (x.IsGiven, Fifth: Math.Min(4, x.Unconventionality!.Value * 5 / Songs.GenerateSongRequest.LastStep)))
             .Select(x => new RatedFifth(x.Key.IsGiven, x.Key.Fifth, x.Count(), x.Sum(r => r.Likes), x.Sum(r => r.Dislikes)))
             .OrderBy(x => x.IsGiven)
             .ThenBy(x => x.Fifth)

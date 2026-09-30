@@ -29,7 +29,10 @@ public enum Facet
     Scale,
 
     /// <summary>The melody's improvisation and its answers.</summary>
-    Melody
+    Melody,
+
+    /// <summary>How the parts sound: their instruments over the song, articulations, bends and vibrato, and effects.</summary>
+    Sound
 }
 
 /// <summary>

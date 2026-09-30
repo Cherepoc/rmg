@@ -101,8 +101,8 @@ public static class CliOptionsParser
                 case "-s" or "--seed":
                     if (!TryReadValue(args, ref i, name, inlineValue, out var seedText, out var seedError))
                         return CliParseResult.Failure(seedError);
-                    if (Base62.ToSeed(seedText) is not { } seedValue)
-                        return CliParseResult.Failure($"'{seedText}' is not a seed for '{name}'. A seed is up to {Base62.SeedLength} letters and digits.");
+                    if (Base64.ToSeed(seedText) is not { } seedValue)
+                        return CliParseResult.Failure($"'{seedText}' is not a seed for '{name}'. A seed is up to {Base64.SeedLength} letters and digits.");
                     seed = seedValue;
                     break;
 

@@ -56,6 +56,7 @@ const elements = {
     songSettings: document.getElementById("song-settings"),
     harmonySettings: document.getElementById("harmony-settings"),
     melodySettings: document.getElementById("melody-settings"),
+    soundSettings: document.getElementById("sound-settings"),
     drumSettings: document.getElementById("drum-settings"),
     drumGroups: document.getElementById("drum-groups"),
     seedInput: document.getElementById("seed-input"),
@@ -744,7 +745,7 @@ function aboutSong(measurements = {}) {
 /** A song as the page names it: its seed, and what of its settings names it too, which the same seed is another song by. */
 function songName(seed, songSettings) {
     const identity = identityOf(songSettings);
-    return identity === "" ? seed : `${seed}-${identity}`;
+    return identity === "" ? seed : `${seed}.${identity}`;
 }
 
 /** The song on the page, as the page names it; null before the first. */
@@ -754,7 +755,7 @@ function currentSong() {
 
 /** The name the song on the page is downloaded under. */
 function fileName() {
-    return `song-${currentSong()}`;
+    return `song-${songSeed}${identityOf(settings)}`;
 }
 
 function requestSong(song, signal = undefined) {
@@ -951,7 +952,7 @@ function restoreSettings() {
 /** Keeps the settings for the next visit, and says how many of them change the song. */
 function keepCurrentSettings() {
     keepSettings(formatSettings(givenOnly(settings)));
-    const given = [settings.unconventionality, ...FACETS.map((facet) => settings.facets[facet])].filter((x) => x.isGiven).length
+    const given = [settings.unconventionality, settings.tempo, settings.key, settings.meter, ...FACETS.map((facet) => settings.facets[facet])].filter((x) => x.isGiven).length
         + PARTS.filter((part) => settings.parts[part].plays !== "random").length
         + (settings.drumSetup === null ? 0 : 1);
     elements.settingsState.textContent = given === 0 ? "All drawn" : `${given} given`;
@@ -1332,6 +1333,7 @@ const SETTING_NAMES = {
     progression: ["Progression", "how freely the chords move"],
     chords: ["Chords", "colours and voicings"],
     melody: ["Melody", "improvisation and shape"],
+    sound: ["Sound", "instruments over the song, articulation, bends and effects"],
     groove: ["Groove", "the drums' patterns"],
     fills: ["Fills", "the drums' fills"],
 };
@@ -1347,6 +1349,11 @@ const SETUP_NAMES = { kit: "Kit", kitAndPercussion: "Kit and percussion", percus
 // the General MIDI instruments by their number, and the kits the drums play
 const INSTRUMENT_NAMES = INSTRUMENT_FAMILIES.flatMap((family) => family.instruments);
 
+const KEY_NAMES = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
+
+// every choice's row, by its key: the tempo, the key and the meter, listed as the server lists them
+const choiceRows = new Map();
+
 // every value's row, by its key, and every drum group's
 const settingRows = new Map();
 const groupRows = new Map();
@@ -1359,24 +1366,100 @@ buildSettings();
 
 /** The settings panel: the values that change the song, every part's row of the mixer, and the drums'. */
 function buildSettings() {
-    elements.songSettings.append(createSettingRow("unconventionality"), createSettingRow("feel"), createSettingRow("form"));
+    elements.songSettings.append(
+        createSettingRow("unconventionality"),
+        createChoiceRow("tempo", "Tempo", "beats a minute"),
+        createChoiceRow("key", "Key", "the key it starts in"),
+        createChoiceRow("meter", "Meter", "the beats of a bar"),
+        createSettingRow("feel"),
+        createSettingRow("form"),
+    );
     elements.harmonySettings.append(createSettingRow("scale"), createSettingRow("progression"), createSettingRow("chords"));
     elements.melodySettings.append(createSettingRow("melody"));
+    elements.soundSettings.append(createSettingRow("sound"));
     elements.drumSettings.append(createSetupRow(), createSettingRow("groove"), createSettingRow("fills"));
     elements.mixer.append(...PARTS.map(createPartRow));
     elements.drumGroups.append(...DRUM_GROUPS.map(createDrumGroupRow));
 
     showSettings();
     keepCurrentSettings();
+    listChoices();
 }
 
 function settingOf(key) {
-    return key === "unconventionality" ? settings.unconventionality : settings.facets[key];
+    return FACETS.includes(key) ? settings.facets[key] : settings[key];
 }
 
 function setSetting(key, setting) {
-    if (key === "unconventionality") settings.unconventionality = setting;
-    else settings.facets[key] = setting;
+    if (FACETS.includes(key)) settings.facets[key] = setting;
+    else settings[key] = setting;
+}
+
+/**
+ *     A value that changes the song and is one of a list, the tempo, the key or the meter: checked, it is given, and the
+ *     list sets it; unchecked, the list shows what the song on the page drew.
+ */
+function createChoiceRow(key, name, hint) {
+    const given = document.createElement("input");
+    given.type = "checkbox";
+    given.setAttribute("aria-label", `Give the ${name.toLowerCase()}`);
+
+    const label = document.createElement("span");
+    label.className = "setting-name";
+    label.textContent = name;
+    const explained = document.createElement("small");
+    explained.textContent = hint;
+    label.append(explained);
+
+    const select = document.createElement("select");
+    select.setAttribute("aria-label", name);
+    if (key === "key") select.append(...KEY_NAMES.map((x, i) => createOption(String(i), x)));
+
+    given.addEventListener("change", () => {
+        setSetting(key, { isGiven: given.checked, value: Number(select.value || 0) });
+        showChoice(key);
+        settingsChanged(true);
+    });
+    select.addEventListener("change", () => {
+        setSetting(key, { isGiven: true, value: Number(select.value) });
+        showChoice(key);
+        settingsChanged(true);
+    });
+
+    const row = document.createElement("div");
+    row.className = "setting";
+    row.append(given, label, select);
+    choiceRows.set(key, { given, select });
+    return row;
+}
+
+function showChoice(key) {
+    const row = choiceRows.get(key);
+    const setting = settingOf(key);
+    row.given.checked = setting.isGiven;
+    row.select.disabled = !setting.isGiven;
+    if (row.select.options.length > setting.value) row.select.value = String(setting.value);
+}
+
+/** The tempos and meters a song may be given, from the server, which only it knows. */
+async function listChoices() {
+    try {
+        const response = await fetch(new URL("api/songs/options", location.href));
+        if (!response.ok) return;
+
+        const { tempos, meters } = await response.json();
+        choiceRows.get("tempo").select.append(...tempos.map((x, i) => createOption(String(i), `${Math.round(x)}`)));
+        choiceRows.get("meter").select.append(...meters.map((x, i) => createOption(String(i), x)));
+        showChoice("tempo");
+        showChoice("meter");
+    } catch {
+        // without the lists, the tempo and the meter are the songs' own
+    }
+}
+
+/** A pan's step, from 0 to 63, as MIDI's, from 0 to 127, the middles together. */
+function toMidiPan(step) {
+    return step <= MIDDLE_PAN ? step * 2 : Math.round(64 + ((step - MIDDLE_PAN) * 63) / (LAST_STEP - MIDDLE_PAN));
 }
 
 /**
@@ -1576,7 +1659,7 @@ function createDrumGroupRow(group) {
     return row;
 }
 
-/** A fader from 0 to 127, saying where it is as a share, or where a pan sits. */
+/** A fader from 0 to 63, saying where it is as a share, or where a pan sits. */
 function createFader(label, onInput, isPan = false, onChange = null) {
     const input = document.createElement("input");
     input.type = "range";
@@ -1604,6 +1687,7 @@ function createFader(label, onInput, isPan = false, onChange = null) {
 /** Puts the settings, and what the song on the page drew and is made of, on the panel. */
 function showSettings() {
     for (const key of settingRows.keys()) showSetting(key);
+    for (const key of choiceRows.keys()) showChoice(key);
 
     setupSelect.value = settings.drumSetup ?? "";
     setupSelect.options[0].textContent = drumSetup === null ? "Song's own" : `Song's own: ${SETUP_NAMES[drumSetup]}`;
@@ -1680,7 +1764,7 @@ function setPartPan(part, pan) {
     settingsChanged(false);
 
     const channel = channels[part];
-    if (channel != null) withPlayer((player) => player.setChannelPan(channel, pan.value), "Could not set the pan");
+    if (channel != null) withPlayer((player) => player.setChannelPan(channel, toMidiPan(pan.value)), "Could not set the pan");
 }
 
 /** Switches a part off, which leaves it out of the file and silences it here, so what is heard is what is downloaded. */
@@ -1793,7 +1877,7 @@ function applyMix(player, isBankReset = false) {
             if (part === "drum") player.setChannelDrums(channel, true);
             player.setChannelInstrument(channel, mix.instrument.value, mix.instrument.isGiven);
             player.setChannelVolume(channel, (settings.volume / LAST_STEP) * (mix.volume / LAST_STEP));
-            player.setChannelPan(channel, mix.pan.value);
+            player.setChannelPan(channel, toMidiPan(mix.pan.value));
         }
 
         player.setChannelMuted(channel, isSilenced(part));

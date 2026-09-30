@@ -42,7 +42,7 @@ public static class SongBatch
             return InvalidOutput;
         }
 
-        output.WriteLine($"Seed: {Base62.FromSeed(options.Seed)}");
+        output.WriteLine($"Seed: {Base64.FromSeed(options.Seed)}");
 
         var songSeeds = GenerateSongSeeds(options.Seed, options.Count);
         var failedCount = 0;
@@ -60,12 +60,12 @@ public static class SongBatch
                 renderedSong.Write(stream, SongsVersion.Label(songSeed));
                 File.WriteAllBytes(path, stream.ToArray());
 
-                output.WriteLine($"[{index}/{options.Count}] seed {Base62.FromSeed(songSeed)} saved to {path}");
+                output.WriteLine($"[{index}/{options.Count}] seed {Base64.FromSeed(songSeed)} saved to {path}");
             }
             catch (Exception ex)
             {
                 failedCount++;
-                error.WriteLine($"[{index}/{options.Count}] seed {Base62.FromSeed(songSeed)} failed: {ex.Message}");
+                error.WriteLine($"[{index}/{options.Count}] seed {Base64.FromSeed(songSeed)} failed: {ex.Message}");
             }
         }
 

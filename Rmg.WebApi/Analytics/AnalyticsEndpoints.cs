@@ -40,7 +40,7 @@ public static class AnalyticsEndpoints
                 Sane(request.Ms, 0, (long)TimeSpan.FromHours(6).TotalMilliseconds),
                 Sane(request.Bytes, 0, 8L * 1024 * 1024 * 1024),
                 request.Seconds is >= 0 and <= 86_400 ? Math.Round(request.Seconds.Value, 1) : null,
-                request.Seed is null ? null : Base62.ToSeed(request.Seed) is { } seed ? unchecked((long)seed) : null,
+                request.Seed is null ? null : Base64.ToSeed(request.Seed) is { } seed ? unchecked((long)seed) : null,
                 Shorten(request.Detail),
                 SongsVersion.IsNumber(request.Version) ? request.Version : null,
                 SongSettings.Parse(request.Settings)
