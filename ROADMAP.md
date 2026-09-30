@@ -5,15 +5,13 @@ built so.
 
 ## Priorities
 
-Every section is a 4-bar pattern in four beats, played once, twice or four times, its chords changing every half bar,
-bar or two bars; the song's shape still comes before the drums' details, which are paused. Each item is
+Every section is a 4-bar pattern in the song's meter, played once, twice or four times, its chords changing every
+half bar, bar or two bars; the song's shape still comes before the drums' details, which are paused. Each item is
 measured before and after by a report test, by the measure its entry names.
 
-**Now** (P0): done; the next is the first of *Next*.
+**Now** (P0): done.
 
-**Next** (P1), in this order:
-
-1. **The meter:** as its hierarchy (see *Meter*); 3/4, 6/8 and odd meters are built, to be listened to; a meter by place in the song put off.
+**Next** (P1): none planned; the meter is built, to be listened to (see *Meter*); styles once they are chosen.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -92,57 +90,27 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
 
 ## Meter
 
-Every bar is four beats (`Meter.BarDuration`, read in about 50 places), a section's pattern four bars
-(`Progressions.BarCount`, about 20), and the rhythm engine halves from the bar: a rhythm's period is a fraction of the
-bar, halved again and again (`DyadicRankDistribution`). Until the meter is state, new work sizes what it adds in beats,
-chord changes or patterns, not in bars, and adds no reader of either constant.
+A song's meter (`Meter`) is its bar as groups of 16ths, a tree from the bar through its groups down to the 16ths,
+every node splitting by the odd number of its steps first and in two after; a section is 4-bar patterns in every
+meter. A rhythm's period and phase are counted in four (`Meter.ReferenceBar`) and the tree plays them: a straight
+period on the level nearest as many of the meter's pulses (`Tactus`), a finer level counted half as far again; every
+node a cycle of its own descendants; half a cycle late its other parts struck first, so the backbeat falls on 2 and 4,
+on 3/4's 2 and 3, on 6/8's fourth 8th and on an odd meter's later groups. Tuplets play over the nodes of their span,
+grouped periods from every node that holds two of them. Chords change on group starts, fills are the bar's last
+nodes, the bass's pickup and the count-in fall on the pulses, and swing only where the groups hold whole pairs.
 
-Planned in September 2026 as a refactor first, the meter as state with every song still in four, and put off: a bar
-of three beats halved gives dotted quarters, not beats, and 6/8's dotted quarters halve into two where they split into
-three 8ths, so no other meter plays right until the engine splits a cycle in three; the state's shape waits for that,
-and threading a value that is always four through a hundred readers would change nothing heard. In this order:
+Drawn per song, leaned away from convention (`Meter.Options`): 3/4 and 6/8 now and then, odd meters (5/4, 7/8, 5/8,
+9/8, 7/4, 11/8, 13/16, 15/16, their groups in a drawn order) rarely; over 400 songs 12% not in four, 5% odd. The drums
+play 3.7 notes a beat in four and 5/4, 4.0 to 4.3 in 6/8, 3/4, 7/8 and 15/16, and 4.9 in 13/16, whose pulse is a
+dotted 8th (`MeterReportTest`; `MeterSeedsReportTest` names seeds to hear).
 
-- **A cycle split in three** (built): a grouped cycle splits first into the odd number it groups the grid's steps by
-  (`ResolvedRhythm.SplitOf`), a dotted 8th into its three 16ths and a dotted quarter into its three 8ths, its first
-  strong and the others weak, and then halves as far as the grid, where it did not subdivide at all or halved into
-  dotted 8ths; every other cycle splits in two, as the template it is made from always did (`DyadicRankTimeline`). Over
-  200 corpus songs the drums play 8% more notes, the wildest sections 13.4 a bar against 11.5 and the plainest 13.1
-  against 12.5, so that grouped cycles no longer leave the wild sections sparser; the notes off both the 16ths and the
-  triplets 3.0% against 2.7%, those under a 32nd after the one before 3, as before (`GridReportTest`,
-  `RhythmBusynessReportTest`).
-- **The meter as state** (planned in September 2026, option 3, the meter's hierarchy): a bar is its groups in 16ths,
-  4/4 as two halves of two beats, 3/4 as three beats, 6/8 as two groups of three 8ths, 15/16 as 4+4+4+3 or
-  3+3+3+3+3, a tree from the bar down to its 16ths, every node splitting by the odd number of its steps first, as a
-  grouped cycle now does, and in two after. In this order, each measured:
-  1. **The meter as a value** (built): `Meter` a record, a song's, which every reader of the bar's length and the
-     pattern's reads, and the MIDI file's time signature; every song in four, the corpus unchanged.
-  2. **The engine and the grooves from the tree** (built): a straight period counted in the meter's pulse (`Tactus`,
-     the level nearest a beat), a period of the reference bar the bar, a longer one two bars, a shorter one the level
-     nearest as many pulses; every node a cycle of its own descendants, a rank the depth a start first appears at, and
-     half a cycle late its other parts struck first. So the drums' roles keep 4/4's periods and phases and the tree
-     reads them: the backbeat on 2 and 4, on 2 and 3 in 3/4, on the fourth 8th in 6/8 and on the groups after the
-     first in 15/16, the ground on the bar's and its groups' starts (`MeterTreeTest`). Tuplets and grouped periods run
-     on from the bar's start as before. In four every cycle is as it was, the corpus unchanged.
-  3. **3/4 and 6/8** (built, to be listened to): drawn per song from a stream of its own, 4% each at middling
-     conventionality, leaned away from it (`Meter.Options`): over 400 songs 9%, 20% of the least conventional third.
-     A tuplet plays three over the nodes of its span, 6/8's 8ths, and a grouped period from every node that holds two
-     of it; chords change on the start of the group nearest where they would, 3/4's half bar on its third beat; the
-     progression's steps are in bars; a fill is the bar's last node of its length in four, 6/8's beat its last dotted
-     quarter; the bass's pickup on the pulse before the change; the count-in on the pulses; swing only where the
-     meter's groups hold whole pairs, never 6/8's 8ths. The drums play 3.7 notes a beat in four, 4.2 in 3/4 and 4.0 in
-     6/8, the backbeat's on 3/4's second and third beats and 6/8's fourth 8th (`MeterReportTest`). The tempo is still
-     in quarters, so 6/8 at 120 pulses at 80; to draw it by the pulse if it drags when listened to.
-  4. **Odd meters** (built, to be listened to): 5/4, 7/8, 5/8, 9/8, 7/4, 11/8, 13/16 and 15/16, each in its usual
-     grouping, the order of its groups drawn (7/8 as 2+2+3, 3+2+2 or 2+3+2), rarely, leaned away from convention
-     twice as far as 3/4 and 6/8: over 400 songs 5%, 13% of the least conventional third. A period plays on the level
-     nearest its pulses, a finer level counted half as far again, so that 13/16's backbeat strikes its groups, not the
-     16ths inside them; the MIDI file's metronome clicks on the pulse. The drums play 3.7 notes a beat in 5/4, 4.2 in
-     7/8 and 4.9 in 13/16, whose pulse is a dotted 8th, as busy a pulse as four's.
-  5. **A bar of two beats before a section, and a section's meter of its own** (P3, planned and put off): both make
-     the meter a thing of a place in the song rather than of the song, the song map's bars no longer all alike, and
-     every reader of the song's meter (the fills, the edits, the bass's fills, the realizer, the trace's bars, the
-     tests' bar arithmetic) asking it at a position; the MIDI file a time signature at every change. Rare in the
-     music it plays, against a cost across the song's assembly; to take up when the song map holds its bars.
+- **To listen to:** whether 6/8 drags, its tempo counted in quarters so that 120 pulses at 80 (to draw the tempo by
+  the pulse if so), and whether 13/16 is too busy.
+- **A bar of two beats before a section, and a section's meter of its own** (P3, planned and put off): both make
+  the meter a thing of a place in the song rather than of the song, the song map's bars no longer all alike, and
+  every reader of the song's meter (the fills, the edits, the bass's fills, the realizer, the trace's bars, the
+  tests' bar arithmetic) asking it at a position; the MIDI file a time signature at every change. Rare in the
+  music it plays, against a cost across the song's assembly; to take up when the song map holds its bars.
 - **Overlapping polyrhythms** (P3, after *Long cycles*, needed someday): a figure of a length of its own, such as a
   riff of 23 16ths, running on against the bar, as the kick and the guitar do against the hi-hat and the snare in
   Meshuggah, meeting the bar again at a phrase's end; it covers cross-rhythms, a grouped cycle running on across the
