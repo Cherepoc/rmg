@@ -13,6 +13,10 @@ public sealed class EventStore
     private readonly string _connectionString;
     private readonly Lock _writing = new();
 
+    // the day the store last threw away what is older than it keeps, which the first write of every day does again,
+    // so that a server that runs for weeks keeps no more than one started today would
+    private string? _prunedDay;
+
     private EventStore(string connectionString, int retentionDays, int dailyEventsPerVisitor)
     {
         _connectionString = connectionString;
@@ -118,6 +122,8 @@ public sealed class EventStore
         lock (_writing)
         {
             using var connection = Open();
+            if (_prunedDay != stored.Day)
+                PruneOlder(connection, stored.At);
 
             using var counting = connection.CreateCommand();
             counting.CommandText = "SELECT COUNT(*) FROM events WHERE visitor = $visitor AND day = $day";
@@ -158,13 +164,18 @@ public sealed class EventStore
         lock (_writing)
         {
             using var connection = Open();
-            using var command = connection.CreateCommand();
-
-            command.CommandText = "DELETE FROM events WHERE day < $oldest";
-            command.Parameters.AddWithValue("$oldest", Day(now.AddDays(-RetentionDays)));
-
-            return command.ExecuteNonQuery();
+            return PruneOlder(connection, now);
         }
+    }
+
+    private int PruneOlder(SqliteConnection connection, DateTimeOffset now)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = "DELETE FROM events WHERE day < $oldest";
+        command.Parameters.AddWithValue("$oldest", Day(now.AddDays(-RetentionDays)));
+        var pruned = command.ExecuteNonQuery();
+        _prunedDay = Day(now);
+        return pruned;
     }
 
     public static string Day(DateTimeOffset at)

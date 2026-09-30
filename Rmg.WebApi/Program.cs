@@ -1,4 +1,6 @@
 using System.Net;
+using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
@@ -50,13 +52,26 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonContext.Default));
 
+// a song is a burst of work for one core, so as many are made at once as there are cores, a few more wait their turn,
+// and the rest are turned away at once rather than slowing every song down
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status503ServiceUnavailable;
+    options.AddConcurrencyLimiter(SongEndpoints.MakingPolicy, limiter =>
+    {
+        limiter.PermitLimit = Environment.ProcessorCount;
+        limiter.QueueLimit = 4 * Environment.ProcessorCount;
+        limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+    });
+});
+
 var app = builder.Build();
 
 // first, so that everything after it sees the request as the client made it, not as the proxy relayed it
 app.UseForwardedHeaders();
 
 var soundFonts = SoundFontLibrary.Create(
-    app.Environment.WebRootPath, settings.SoundFontDirectory, settings.DefaultSoundFont);
+    app.Environment.WebRootPath, settings!.SoundFontDirectory, settings.DefaultSoundFont);
 
 app.Logger.LogInformation("Offering the soundfonts in {Directory}", soundFonts.Directory);
 
@@ -103,6 +118,7 @@ app.UseStaticFiles(new StaticFileOptions
     }
 });
 
+app.UseRateLimiter();
 app.MapSoundFonts(soundFonts);
 app.MapSongs();
 

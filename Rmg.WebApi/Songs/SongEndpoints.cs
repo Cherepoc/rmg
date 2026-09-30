@@ -13,7 +13,7 @@ public static class SongEndpoints
 {
     public static void MapSongs(this IEndpointRouteBuilder routes)
     {
-        routes.MapPost("/api/songs/generate", GenerateSong);
+        routes.MapPost("/api/songs/generate", GenerateSong).RequireRateLimiting(MakingPolicy);
 
         // what a song may be given: its tempos, in beats a minute, and its meters, in the order a request names them by
         routes.MapGet("/api/songs/options", () => Results.Ok(new SongOptions(
@@ -24,6 +24,9 @@ public static class SongEndpoints
         // what the page shows as RMG's version
         routes.MapGet("/api/version", () => Results.Ok(new VersionResponse(SongsVersion.Number, SongsVersion.Commit)));
     }
+
+    /// <summary>The limit on songs made at once, which the server sets (Program).</summary>
+    public const string MakingPolicy = "making";
 
     private static readonly JsonSerializerOptions HeaderJson = new(JsonSerializerDefaults.Web);
 

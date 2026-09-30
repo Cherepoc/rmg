@@ -921,6 +921,7 @@ function explain(error) {
 }
 
 async function describeFailure(response) {
+    if (response.status === 503) return "the server is busy making other songs. Try again in a moment.";
     try {
         const body = await response.json();
         return body.error ?? body.detail ?? body.title ?? response.statusText;

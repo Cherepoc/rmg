@@ -202,6 +202,16 @@ public sealed class EventStoreTest : IDisposable
     }
 
     [Test]
+    public async Task TheFirstWriteOfADay_ThrowsAwayWhatIsTooOld_AsAServerRunsOn()
+    {
+        Write(EventNames.PageOpen, "ancient", Now.AddDays(-(_store.RetentionDays + 1)));
+        Write(EventNames.PageOpen, "today");
+
+        await Assert.That(_store.Prune(Now)).IsEqualTo(0);
+        await Assert.That(_store.Summarise(Now, _store.RetentionDays).Visitors).IsEqualTo(1);
+    }
+
+    [Test]
     public async Task EventsAreKeptForAsLongAsTheSettingsSay()
     {
         var directory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
