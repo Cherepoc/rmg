@@ -95,6 +95,9 @@ internal static class TracePoints
     /// <summary>Where a song goes up a key, and by how many semitones (a <see cref="Composition.KeyChange" />, or null for none).</summary>
     public const string KeyChange = "Key change";
 
+    /// <summary>Every section's tempo as a multiple of the song's, by its id (an <c>ImmutableDictionary&lt;int, double&gt;</c>).</summary>
+    public const string SectionTempo = "Section tempo";
+
     /// <summary>How a song swings (a <see cref="Swing" />).</summary>
     public const string Swing = "Swing";
 

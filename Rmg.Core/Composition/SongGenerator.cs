@@ -214,9 +214,18 @@ public static class SongGenerator
             sectionIds,
             structure.Roles
         );
+        // and play a section at a tempo of its own, a chorus the likelier, each section drawing from a stream of its own
+        var sectionTempos = SectionTempo.Generate(
+            id => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SectionTempo), id)),
+            songUnconventionality[Facet.Feel],
+            sectionIds,
+            structure.Roles
+        );
+        StateTrace.Record(TracePoints.SectionTempo, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", sectionTempos.Select(x => $"{x.Key} {x.Value:F2}")), sectionTempos);
         StateTrace.Record(TracePoints.KeyChange, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, keyChanges.IsEmpty ? "none" : string.Join(", ", keyChanges), keyChanges);
         songTrackNoteTimelineMap = songTrackNoteTimelineMap.MergeStateTimelineMap(form.SongState)
             .MergeStateTimelineMap(KeyChange.ToStateTimelineMap(keyChanges, form.Map.Duration))
+            .MergeStateTimelineMap(SectionTempo.ToStateTimelineMap(sectionTempos, form.Map, form.Map.Duration))
             .MergeStateMap(commonStateMap)
             .MergeStateMap(Groove.ToStateMap(swing, grooveContext));
 
@@ -391,5 +400,6 @@ internal enum SongStream
     Expression = 34,
     PartSound = 35,
     SectionKey = 36,
-    RhythmPart = 37
+    RhythmPart = 37,
+    SectionTempo = 38
 }

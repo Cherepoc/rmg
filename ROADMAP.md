@@ -293,6 +293,12 @@ planned together (P1):
   notes as the melody, 8.2 semitones below it on average, a semitone or a major seventh from the melody note over it
   3.7% of the time. A stop now holds a part's last note only where it still sounds in the bar before, not a note of a
   part that rested since.
+- **A section's own tempo** (built): a section but the first may play at a tempo of its own every time it plays, by
+  the feel facet (`SectionTempo`, 0.04 at the middle), a chorus or a bridge leaning to it as to a key of its own, a
+  tenth slower or faster most often and as far as two thirds or half again at the wild end, the ending slowing from
+  the last section's. Over 1024 songs, in the middle fifth 9% of the choruses and bridges and 4% of the others, in the
+  wildest 56% and 44% (`SectionTempoTest`). To listen to: whether a sudden change wants an accelerando or a
+  ritardando into it now and then.
 - **A rhythm part** (built): a second part playing the chords in a rhythm of its own, a guitar most often, a clavinet,
   an electric piano, an organ or a banjo, in 40% of the songs (`TrackRole.Rhythm`, `TrackRoles.PlaysChords`), voiced
   and led as the chords are, breaking them by a draw of its own, a little fuller, and panned against the chords. Over
