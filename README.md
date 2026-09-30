@@ -7,7 +7,8 @@ Most songs take one of the forms songs are written in, such as verse, chorus, ve
 chorus, with a pre-chorus now and then, a section for every role; the others, more the less conventional
 their rhythm, have 4-8 parts, each a sequence of 1-4 sections chosen from up to 3 distinct sections (in
 alternation, ping-pong or random order). No section follows itself. Every section
-plays its 4-bar pattern once, twice or four times, changes its chords every half bar, bar or two bars, and has a percussion kit and four pitched tracks (chords, melody, bass and a pad that holds the chords, in some sections), each with its own
+plays its 4-bar pattern once, twice or four times, changes its chords every half bar, bar or two bars, and has a percussion kit and five pitched tracks (chords, melody, bass, and in some sections a pad that holds the chords and a
+counter-melody under the melody), each with its own
 rhythm and note patterns. A song plays at its own tempo, from 90 to about 175 BPM, most often 120, and about one in five swings. Now and then a
 section leaves out a part, the drums for a breakdown or the melody for a section of the band alone, the
 likelier the quieter it is. The bass plays
