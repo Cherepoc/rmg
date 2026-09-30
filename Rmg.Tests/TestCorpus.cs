@@ -37,7 +37,9 @@ internal static class TestCorpus
         using (ExecutionContext.SuppressFlow())
             task = Task.Run(() =>
                 {
-                    using var trace = StateTrace.Start();
+                    // the entries and their values, not what every layer contributed, which would make the songs several times
+                    // slower to generate: a test that explains a state traces a song of its own
+                    using var trace = StateTrace.Start(explains: false);
                     var song = meter is null ? SongGenerator.GenerateSong(seed) : SongGenerator.GenerateSong(seed, ProgressionSettings.Default, meter);
                     return new CorpusSong(seed, song, Render.RenderSong(song), [..trace.Entries]);
                 }

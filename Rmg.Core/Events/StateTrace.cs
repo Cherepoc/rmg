@@ -32,9 +32,9 @@ public sealed record StateTraceEntry(
 );
 
 /// <summary>
-///     Records what every layer contributed to the state of the song being generated in this flow of execution (the
-///     thread, or the async method and what it awaits), to answer why a value came out as it did. It costs nothing
-///     when no trace runs: states then keep no record of their layers.
+///     Records the points of the song being generated in this flow of execution (the thread, or the async method and
+///     what it awaits), and, where it explains, what every layer contributed to their state, to answer why a value came
+///     out as it did. It costs nothing when no trace runs: states then keep no record of their layers.
 /// </summary>
 /// <example>
 ///     <code>
@@ -54,18 +54,25 @@ public sealed class StateTrace : IDisposable
 
     private bool _isDisposed;
 
+    // whether states keep what every layer contributed, which costs most of what the trace does
+    private readonly bool _explains;
+
     // how many pauses hold the trace here, which records nothing while one does
     private int _pauseCount;
 
     private readonly List<StateTraceEntry> _entries = [];
 
-    private StateTrace()
+    private StateTrace(bool explains)
     {
+        _explains = explains;
     }
 
     public IReadOnlyList<StateTraceEntry> Entries => _entries;
 
     internal static bool IsRunning => Volatile.Read(ref _runningCount) > 0 && Current.Value is { _isDisposed: false, _pauseCount: 0 };
+
+    /// <summary>Whether a trace runs here that keeps what every layer contributed to a state (<see cref="StateMap.Explain" />).</summary>
+    internal static bool IsExplaining => Volatile.Read(ref _runningCount) > 0 && Current.Value is { _isDisposed: false, _pauseCount: 0, _explains: true };
 
     /// <summary>
     ///     Stops recording in this flow of execution until the pause is disposed, for work done again that was recorded
@@ -103,12 +110,16 @@ public sealed class StateTrace : IDisposable
     }
 
     /// <summary>Starts recording in this flow of execution until the trace is disposed.</summary>
-    public static StateTrace Start()
+    /// <param name="explains">
+    ///     Whether states keep what every layer contributed to them, for <see cref="StateMap.Explain" />, which makes
+    ///     generation several times slower; the entries and their values are recorded either way.
+    /// </param>
+    public static StateTrace Start(bool explains = true)
     {
         if (Current.Value is { _isDisposed: false })
             throw new InvalidOperationException("A state trace already runs here.");
 
-        var trace = new StateTrace();
+        var trace = new StateTrace(explains);
         Current.Value = trace;
         Interlocked.Increment(ref _runningCount);
         return trace;

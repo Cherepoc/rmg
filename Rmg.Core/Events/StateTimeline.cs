@@ -143,7 +143,7 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
         if (timelineArray.All(x => x.Layer == layer) && layer is not null)
             return new StateTimeline<T>(duration, stateKind, [..items], layer, []);
 
-        return new StateTimeline<T>(duration, stateKind, [..items], null, StateTrace.IsRunning ? [..timelineArray] : []);
+        return new StateTimeline<T>(duration, stateKind, [..items], null, StateTrace.IsExplaining ? [..timelineArray] : []);
     }
 
     public double Duration { get; }
@@ -233,7 +233,7 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
     public State<T> GetEffectiveStateAt(double position)
     {
         var value = GetEffectiveValueAt(position);
-        if (!StateTrace.IsRunning)
+        if (!StateTrace.IsExplaining)
             return new State<T>(StateKind, value);
 
         if (Layer is not null)

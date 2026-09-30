@@ -72,7 +72,7 @@ internal static class DrumRoles
                 CompositionStateKinds.Rhythm.Variation.CreateState(sign * Variation)
             ];
             // a trace tells the role's part by its layer
-            return StateMap.FromStates([..states.Where(x => !x.IsDefault).Select(x => StateTrace.IsRunning ? x.WithLayer(Layer) : x)]);
+            return StateMap.FromStates([..states.Where(x => !x.IsDefault).Select(x => StateTrace.IsExplaining ? x.WithLayer(Layer) : x)]);
         }
     }
 

@@ -92,7 +92,7 @@ public sealed class StateMapBuilder
     {
         // the states made here are this layer's; those of the maps added keep the layers they were made in
         var states = stateGenerators.Select(generator => generator(context));
-        if (layer is not null && StateTrace.IsRunning)
+        if (layer is not null && StateTrace.IsExplaining)
             states = states.Select(x => x.Contributions.IsEmpty ? x.WithLayer(layer) : x);
 
         var stateMapStates = stateMapGenerators.SelectMany(x => x(context).States);

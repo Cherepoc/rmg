@@ -1,3 +1,4 @@
+using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
 
@@ -96,6 +97,40 @@ public sealed class StateTraceTest
 
         // the phase's offset is drawn in every rhythm layer, so each shows up
         await Assert.That(layers.IsSupersetOf(["Song", "Section", "Track", "Section track", "Drum group", "Section drum group", "Bar pattern"])).IsTrue();
+    }
+
+    [Test]
+    [Arguments(3)]
+    [Arguments(4)]
+    public async Task ATrace_ChangesNothingInTheSong(int seed)
+    {
+        static byte[] Midi(int seed)
+        {
+            var stream = new MemoryStream();
+            Rmg.Core.Rendering.Render.RenderSong(SongGenerator.GenerateSong(seed)).Write(stream, null);
+            return stream.ToArray();
+        }
+
+        var untraced = Midi(seed);
+        byte[] recorded, explained;
+        using (StateTrace.Start(explains: false))
+            recorded = Midi(seed);
+        using (StateTrace.Start())
+            explained = Midi(seed);
+
+        await Assert.That(recorded.SequenceEqual(untraced)).IsTrue();
+        await Assert.That(explained.SequenceEqual(untraced)).IsTrue();
+    }
+
+    [Test]
+    public async Task ARecordingTrace_KeepsNoContributions()
+    {
+        using var trace = StateTrace.Start(explains: false);
+        SongGenerator.GenerateSong(1);
+
+        var entries = trace.Entries.Where(x => x.Point == TracePoints.BarPattern).ToArray();
+        await Assert.That(entries.Length).IsGreaterThan(0);
+        await Assert.That(entries.All(x => x.StateMap.Explain(CompositionStateKinds.Rhythm.Phase.RankedOffset).IsEmpty)).IsTrue();
     }
 
     [Test]

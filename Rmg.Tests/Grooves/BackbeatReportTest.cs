@@ -43,10 +43,6 @@ public sealed class BackbeatReportTest
                         var m = entry.StateMap;
                         var isBackbeat = m.GetStateValue(r.Period.Power) == -1 && m.GetStateValue(r.Period.PrimeIndex) == 0 && m.GetStateValue(r.Phase.Rank) == 1;
                         Count($"band {band}: {(isBackbeat ? "backbeat" : "other")}");
-                        foreach (var c in m.Explain(r.Period.Power))
-                            Count($"  power from {c.Layer} {c.Value}");
-                        foreach (var c in m.Explain(r.Phase.Rank))
-                            Count($"  phase rank from {c.Layer} {c.Value}");
                     }
                 var s = stats.TryGetValue(feel, out var had) ? had : (Bars: 0, Both: 0, Places: new SortedDictionary<double, (int Count, double Velocity)>(), Ranks: new SortedDictionary<int, int>());
                 for (var bar = 0; bar * meter.BarDuration < span.Duration - 1e-9; bar++)

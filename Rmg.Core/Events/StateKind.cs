@@ -182,7 +182,7 @@ public sealed class StateKind<T> : IStateKind
             values[i] = ((State<T>)states[i]).Value;
         var value = AggregateValues(values);
 
-        if (!StateTrace.IsRunning)
+        if (!StateTrace.IsExplaining)
             return new State<T>(this, value);
 
         var contributions = ImmutableArray.CreateBuilder<StateContribution>();
