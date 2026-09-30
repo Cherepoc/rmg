@@ -9,7 +9,7 @@ public sealed class RoleChordTest
 {
     private const int DrawCount = 5_000;
 
-    private static readonly string[] CadenceShapeNames = ["Seventh", "Seven-sus4", "Sus4", "Triad", "Ninth"];
+    private static readonly string[] CadenceShapeNames = ["Seventh", "Seven-sus4", "Sus4", "Triad", "Ninth", "Nine-sus4"];
 
     /// <summary>The shape a chord is laid out from: voicings move notes by octaves, so the pitch classes tell.</summary>
     private static ChordShape ShapeOf(Chord chord)

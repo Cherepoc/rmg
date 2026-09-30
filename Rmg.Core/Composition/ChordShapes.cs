@@ -50,6 +50,10 @@ internal static class ChordShapes
         new("Seven-sus4", 2, 0.7, [0, 5, 7, Seventh]),
         new("Shell", 2, 0.8, [0, Third, Seventh]),
         new("Quartal triad", 2, 0.5, [0, 5, 10]),
+        // a triad with its second close under the third, as Steely Dan's
+        new("Mu", 2, 0.5, [0, 2, Third, 7]),
+        new("Add11", 2, 0.5, [0, Third, 7, 17]),
+        new("Nine-sus4", 2, 0.6, [0, 5, 7, Seventh, 14]),
 
         new("Eleventh", 3, 0.8, [0, Third, 7, Seventh, 14, 17]),
         new("Thirteenth", 3, 0.8, [0, Third, Seventh, 14, Thirteenth]),
@@ -63,12 +67,18 @@ internal static class ChordShapes
         new("Seven-sharp-nine", 4, 0.3, [0, 4, 10, 15]),
         new("Phrygian", 4, 0.6, [0, 1, 7]),
         new("Small cluster", 4, 0.6, [0, 2, 3], true),
+        // a minor triad with a major seventh, and a dominant with a sharp ninth and a flat thirteenth, each where the
+        // scale has its notes, and the nearest of the scale's where it has not
+        new("Minor-major seventh", 4, 0.4, [0, 3, 7, 11]),
+        new("Altered dominant", 4, 0.3, [0, 4, 10, 15, 20]),
 
         new("Dense cluster", 5, 0.8, [0, 1, 2, 3], true),
         new("Viennese trichord", 5, 0.6, [0, 1, 6]),
         new("Polychord", 5, 0.5, [0, 4, 7, 14, 18, 21], true),
         new("Mystic chord", 5, 0.4, [0, 6, 10, 16, 21, 26], true),
-        new("Tritone stack", 5, 0.5, [0, 6, 11, 17])
+        new("Tritone stack", 5, 0.5, [0, 6, 11, 17]),
+        // the minor and the major third together, as the blues plays them
+        new("Split third", 5, 0.4, [0, 3, 4, 7], true)
     ];
 
     private static readonly ImmutableArray<ImmutableArray<ChordShape>> ShapesByUnconventionality =
@@ -91,7 +101,8 @@ internal static class ChordShapes
         new(0.6, Named("Seven-sus4")),
         new(0.5, Named("Sus4")),
         new(0.5, Named("Triad")),
-        new(0.3, Named("Ninth"))
+        new(0.3, Named("Ninth")),
+        new(0.3, Named("Nine-sus4"))
     ];
 
     private static readonly Func<IGenerationContext, int> CadenceShapeIndexGenerator = Generators.WeightedIndex(CadenceShapes);

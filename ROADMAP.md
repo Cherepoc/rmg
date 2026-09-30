@@ -215,6 +215,13 @@ and 62% of its changes by its instrument, off the new chord 1 to 3%, the melody'
   they struck 77% (`HarmonicRhythmReportTest`); the bass leads into its changes as before (`BassLeadingReportTest`).
 - **The span by tempo:** a chord every half bar at 175 BPM lasts 0.7 s, and every two bars at 90 BPM 5.3 s; should
   either sound hurried or static, lean the span by its length in seconds.
+- **More chords** (built): Mu, Add11 and Nine-sus4 at level 2, the last a cadence's too; the minor-major seventh and
+  the altered dominant at level 4; the split third at level 5 (`ChordShapes`). A height snaps to the scale, so each
+  sounds as itself only where the scale has its notes, the minor-major seventh in harmonic or melodic minor, the split
+  third in Hungarian minor or double harmonic major, and as the scale's nearest elsewhere. Over 256 songs they are 28%
+  of level 2's chords, 22% of level 4's and 9% of level 5's (`ChordShapesTest.Report`).
+- **Chord tones off the scale** (P3): an altered or split chord sounding as itself in any scale needs a chord's notes
+  altered as the bass's approach notes are (`StateKinds.Alteration`), rather than snapped.
 
 ## Form
 

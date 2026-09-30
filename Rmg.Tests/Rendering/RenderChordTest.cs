@@ -57,6 +57,17 @@ public sealed class RenderChordTest
     }
 
     [Test]
+    public async Task SplitThird_InAScaleWithBothThirds_PlaysThemBoth()
+    {
+        // Hungarian minor on C has both thirds above its Ab: Ab, B, C and Eb
+        ImmutableArray<int> hungarianMinor = [0, 2, 3, 6, 7, 8, 11];
+        var shape = ChordShapes.All.Single(x => x.Name == "Split third");
+        var result = Realizer.SnapChordToScale(hungarianMinor, 5, shape.Targets);
+
+        await Assert.That(result.Select(x => hungarianMinor[(5 + x) % 7] + 12 * ((5 + x) / 7) - 8).ToArray()).IsEquivalentTo(new[] { 0, 3, 4, 7 });
+    }
+
+    [Test]
     public async Task NotesAboveAnOctave_LandInTheOctavesAbove()
     {
         // a ninth and a note below the root, as voicings give

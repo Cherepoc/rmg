@@ -1,5 +1,7 @@
 using Rmg.Core.Composition;
+using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
+using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Chords;
 
@@ -35,5 +37,22 @@ public sealed class ChordShapesTest
         await Assert.That(picks.All(x => x.Unconventionality == 1)).IsTrue();
         // the seventh weighs 1 and the sixth 0.5
         await Assert.That(picks.Count(x => x.Name == "Seventh")).IsGreaterThan(picks.Count(x => x.Name == "Sixth") * 3 / 2);
+    }
+
+    [Test]
+    [Explicit]
+    public async Task Report()
+    {
+        // the shapes the chords play, a pick of every bar's chord, by level
+        var shapes = TestCorpus.Measure(256, song => song.Trace
+                .Where(x => x.Point == TracePoints.Chord && x.Track == SongTracks.ChordsTrack)
+                .Select(x => x.StateMap.GetStateValue(CompositionStateKinds.RoleChord) is { IsEmpty: false } role ? role[0] : CompositionStateKinds.ChordPool.Pick(x.StateMap))
+                .Select(x => x.Shape)
+                .ToArray())
+            .SelectMany(x => x)
+            .ToArray();
+        foreach (var level in shapes.GroupBy(x => x.Unconventionality).OrderBy(x => x.Key))
+            Console.WriteLine($"  level {level.Key}, {level.Count() / (double)shapes.Length:P1}: {string.Join(", ", level.GroupBy(x => x.Name).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count() / (double)level.Count():P0}"))}");
+        await Task.CompletedTask;
     }
 }
