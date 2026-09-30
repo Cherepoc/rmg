@@ -101,7 +101,7 @@ public sealed class ScalesTest
         var song = TestCorpus.Get(seed).Song;
         var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
         var offsets = common.GetStateTimeline(StateKinds.ScaleOffsets);
-        var key = common.GetStateTimeline(StateKinds.KeyOffset).GetEffectiveValueAt(0);
+        var keys = common.GetStateTimeline(StateKinds.KeyOffset);
         var raisedSteps = common.GetStateTimeline(StateKinds.RaisedScaleSteps);
         var approaches = common.GetStateTimeline(StateKinds.ChordApproach);
         // a bass note leads into a change of chord in the beat before it
@@ -126,6 +126,7 @@ public sealed class ScalesTest
                 offsets.GetEffectiveValueAt(note.Position),
                 raisedSteps.GetEffectiveValueAt(note.Position)
             );
+            var key = keys.GetEffectiveValueAt(note.Position);
             var pitchClasses = scale.Select(x => (x + key) % 12).ToHashSet();
             await Assert.That(pitchClasses).Contains(note.Value.Offset % 12).Because($"position {note.Position}");
         }

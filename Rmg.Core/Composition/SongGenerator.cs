@@ -139,7 +139,12 @@ public static class SongGenerator
         // the song put together as planned, and the lines the drums mark
         var form = formGenerator.Assemble(plan, played, sections);
         var songTrackNoteTimelineMap = form.Edits.ApplyTo(form.Blocks.Unroll());
-        songTrackNoteTimelineMap = songTrackNoteTimelineMap.MergeStateTimelineMap(form.SongState).MergeStateMap(commonStateMap)
+        // a song whose last section came back before may go up a key for it, as for a last chorus
+        var keyChange = KeyChange.Generate(Stream(SongStream.KeyChange), rhythmicUnconventionality.Tilt, form.Map, sectionIds);
+        StateTrace.Record(TracePoints.KeyChange, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, keyChange?.ToString() ?? "none", keyChange);
+        songTrackNoteTimelineMap = songTrackNoteTimelineMap.MergeStateTimelineMap(form.SongState)
+            .MergeStateTimelineMap(KeyChange.ToStateTimelineMap(keyChange, form.Map.Duration))
+            .MergeStateMap(commonStateMap)
             .MergeStateMap(Groove.ToStateMap(swing, grooveContext));
 
         // the drums mark the lines, now that the song is put together
@@ -238,5 +243,6 @@ internal enum SongStream
     Groove = 18,
     Panning = 19,
     SongForm = 20,
-    Pad = 21
+    Pad = 21,
+    KeyChange = 22
 }

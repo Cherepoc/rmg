@@ -144,7 +144,9 @@ public sealed class MelodyRepetitionTest
         foreach (var song in songs)
         {
             var improvises = (double)song.Trace.Single(x => x.Point == TracePoints.MelodyImprovisation).Value! > 0 ? 1 : 0;
-            var melody = song.Song.Notes![SongTracks.MelodyTrack].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0]);
+            // every note in the song's key where it plays, which a key change for a last section moves
+            var keys = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.KeyOffset);
+            var melody = song.Song.Notes![SongTracks.MelodyTrack].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.Pitches[0] - keys.GetEffectiveValueAt(x.Position));
             var firsts = song.Map.Sections.GroupBy(x => x.SectionId).ToDictionary(x => x.Key, x => x.First());
             foreach (var span in song.Map.Sections)
             {

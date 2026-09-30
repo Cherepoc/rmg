@@ -30,6 +30,9 @@ internal static class TracePoints
     /// <summary>A song's sections in its order and their roles (a <see cref="SongStructure" />).</summary>
     public const string SongForm = "Song form";
 
+    /// <summary>Where a song goes up a key, and by how many semitones (a <see cref="Composition.KeyChange" />, or null for none).</summary>
+    public const string KeyChange = "Key change";
+
     /// <summary>How a song swings (a <see cref="Swing" />).</summary>
     public const string Swing = "Swing";
 

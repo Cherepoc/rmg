@@ -58,6 +58,8 @@ public sealed class SongFormReportTest
         foreach (var (role, e) in energies.OrderBy(x => x.Key))
             Console.WriteLine($"{role}: {e.Count} sections, energy {e.Average():F2}, plays once {plays[role].Count(x => x == 1) / (double)plays[role].Count:P0}, " +
                               $"twice {plays[role].Count(x => x == 2) / (double)plays[role].Count:P0}, four times {plays[role].Count(x => x == 4) / (double)plays[role].Count:P0}");
+        var keyChanges = songs.Select(x => (KeyChange?)x.Trace.Single(t => t.Point == TracePoints.KeyChange).Value).OfType<KeyChange>().ToArray();
+        Console.WriteLine($"{keyChanges.Length} songs go up a key for their last section, {keyChanges.Count(x => x.Semitones == 2)} a whole step");
         var sorted = bars.Order().ToArray();
         Console.WriteLine($"the sections' bars a song: median {sorted[sorted.Length / 2]}, 10% {sorted[sorted.Length / 10]}, 90% {sorted[sorted.Length * 9 / 10]}");
         await Task.CompletedTask;

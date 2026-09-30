@@ -17,8 +17,9 @@ public sealed class SongEndingTest
 
     private static EndingSpan Ending(CorpusSong song) => song.Map.Ending;
 
+    // the song's tonic as it ends, which a key change for its last section moves
     private static int Tonic(CorpusSong song) =>
-        song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(StateKinds.KeyOffset).Mod(12);
+        song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.KeyOffset).GetEffectiveValueAt(song.Map.Sections[^1].Start).Mod(12);
 
     [Test]
     public async Task ClosedEndings_LandOnTheTonic()

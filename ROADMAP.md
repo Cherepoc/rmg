@@ -227,8 +227,10 @@ planned together (P1):
   Over 200 corpus songs, a recurring section plays 4.31 of its five parts the first time and 4.78 the last, 230 of 577
   growing; the pad plays in 85% of the choruses as they play (`ArrangementReportTest`). Left: the appearance's energy
   for its loudness and the drums' changes (their colour, a drum's stroke), which are the section's as it was made.
-- **Key changes:** a last chorus a step up, a section's key as its own state, as its scale is now
-  (`Scales.PickSection`), drawn by appearance. Measured by: the songs that change, and the melody's range after.
+- **Key changes** (built): a song whose last section came back before goes up a key for it by a chance of 0.08, the
+  likelier the more conventional its rhythm, a whole step or, by 0.4, a half step (`KeyChange`), as the song's key
+  from the section's start, so that the whole band, the ending and a fade move with it and the lines, placed after, go
+  on into it. Over 200 corpus songs, 22 go up a key, 13 of them a whole step (`SongFormReportTest`).
 
 ## Fills
 
