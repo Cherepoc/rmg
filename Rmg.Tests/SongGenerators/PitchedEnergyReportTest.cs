@@ -13,15 +13,14 @@ public sealed class PitchedEnergyReportTest
     [Explicit]
     public async Task Report()
     {
-        var rows = new List<(double Energy, double Rhythm, double Melody, double Chords, double Bass, double Pitch)>();
-        foreach (var song in TestCorpus.Range(200))
+        var rows = TestCorpus.Measure(200, song =>
         {
             var energy = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
             var answers = song.Trace.Where(x => x.Point == TracePoints.MelodyAnswer).ToDictionary(x => x.Section, x => (double)x.Value!);
             var notes = song.Song.Notes!;
             var melody = notes.GetValueOrDefault(SongTracks.MelodyTrack)?.ToArray() ?? [];
             if (melody.Length == 0)
-                continue;
+                return [];
             var songPitch = melody.Average(x => x.Value.Pitches[0]);
             var songRows = new List<(double Energy, double Rhythm, double Melody, double Chords, double Bass, double Pitch)>();
             foreach (var span in song.Map.Sections)
@@ -37,10 +36,10 @@ public sealed class PitchedEnergyReportTest
 
             // every measure against its song's, so that what differs between songs leaves what differs between sections
             if (songRows.Count < 2)
-                continue;
+                return [];
             var (e, m, c, b) = (songRows.Average(x => x.Energy), songRows.Average(x => x.Melody), songRows.Average(x => x.Chords), songRows.Average(x => x.Bass));
-            rows.AddRange(songRows.Select(x => (x.Energy - e, x.Rhythm, x.Melody - m, x.Chords - c, x.Bass - b, x.Pitch)));
-        }
+            return songRows.Select(x => (x.Energy - e, x.Rhythm, x.Melody - m, x.Chords - c, x.Bass - b, x.Pitch)).ToArray();
+        }).SelectMany(x => x).ToList();
 
         foreach (var (name, band) in new[] { ("plain", rows.Where(x => x.Rhythm < 0.5)), ("wild", rows.Where(x => x.Rhythm >= 0.5)) })
         {

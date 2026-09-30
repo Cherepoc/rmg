@@ -9,9 +9,9 @@ public sealed class LiftReportTest
     [Explicit]
     public async Task Report()
     {
-        var (louder, quieter) = (new List<double>(), new List<double>());
-        foreach (var song in TestCorpus.Range(200))
+        var steps = TestCorpus.Measure(200, song =>
         {
+            var (louder, quieter) = (new List<double>(), new List<double>());
             var energy = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
             var notes = song.Rendered.Tracks.SelectMany(x => x.NoteTimeline).ToArray();
             double Loudness(double from, double to) => notes.Where(x => x.Position >= from && x.Position < to).Select(x => x.Value.Velocity * 127).DefaultIfEmpty(double.NaN).Average();
@@ -24,7 +24,10 @@ public sealed class LiftReportTest
                     continue;
                 (energy[sections[i].SectionId] > energy[sections[i - 1].SectionId] ? louder : quieter).Add(step);
             }
-        }
+
+            return (Louder: louder, Quieter: quieter);
+        });
+        var (louder, quieter) = (steps.SelectMany(x => x.Louder).ToList(), steps.SelectMany(x => x.Quieter).ToList());
 
         Console.WriteLine($"the bar before a change against the bar before it, in velocity: into a louder section {louder.Average():F1} over {louder.Count}, into a quieter {quieter.Average():F1} over {quieter.Count}");
         await Task.CompletedTask;

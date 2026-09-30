@@ -138,12 +138,19 @@ public sealed class StateTimeline<T> : IStateTimeline, IReadOnlyList<TimelineIte
         }
 
         // timelines of one layer, such as the sections' parts of it put one after another, stay that layer's; while a
-        // trace runs, timelines of different layers are kept for the parts of the merged values
+        // trace explains, timelines of different layers are kept for the parts of the merged values, a merged one's
+        // own parts in its place, so that a value's parts are one step away however many merges made it
         var layer = timelineArray[0].Layer;
         if (timelineArray.All(x => x.Layer == layer) && layer is not null)
             return new StateTimeline<T>(duration, stateKind, [..items], layer, []);
 
-        return new StateTimeline<T>(duration, stateKind, [..items], null, StateTrace.IsExplaining ? [..timelineArray] : []);
+        return new StateTimeline<T>(
+            duration,
+            stateKind,
+            [..items],
+            null,
+            StateTrace.IsExplaining ? [..timelineArray.SelectMany(x => x.Layer is null && !x._sources.IsEmpty ? x._sources : [x])] : []
+        );
     }
 
     public double Duration { get; }
