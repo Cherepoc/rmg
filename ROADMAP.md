@@ -11,17 +11,19 @@ measured before and after by a report test, by the measure its entry names.
 
 **Now** (P0): done.
 
-**Next** (P1): none planned; conventionality with two ends, by facet, is built, to be tuned by listening (see
-*Conventionality*), as the meter is (see *Meter*); styles once they are chosen.
+**Next** (P1): listening to 0.6: the section's own key, tempo and meter, the rhythm part, the twin riff, the
+polymeter, the line scales and the new chords and scales, each tuned by what listening says (see *Listening*), and the
+ratings by conventionality once enough are in.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
 **Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs
 rated enough; styles (see *Styles*), once they are chosen.
 
-**When the need shows** (P3): the melody's contour (see *Melody*); occasional chords (see *Instruments*); harmonised doubling and articulations, after styles; solos; long cycles, then
-overlapping polyrhythms, needed someday; timing by role; intros of their own material; scales of other sizes; the
-fills' loudness and sounds by convention; note keys.
+**When the need shows** (P3): a line scale by the chord and chord tones off the scale (see *Scales*, *Chords*);
+long cycles, then a figure running on across the pattern (see *Meter*); other parts' twins; drums coming in within a
+section; modulation and a ping-pong echo (see *Instruments*); occasional chords; timing by role; intros of their own
+material; scales of other sizes; the fills' loudness and sounds by convention; note keys.
 
 **Parked** (P4): see *Parked*, kept for their reasons, not planned.
 
@@ -327,6 +329,10 @@ planned together (P1):
   (`SectionContrast`). Over 1024 songs, in the middle fifth 13% of the choruses and bridges are in another key and 28%
   in another scale, against 7% and 11% of the other sections (`SectionKeyTest`).
 
+- **Drums coming in within a section** (P3): a texture that builds brings the drums in only at a section's start,
+  since fills and landings keep to sections whose drums play; a build whose drums enter at a phrase would need its
+  landing there.
+
 ## Fills
 
 The fills are the drums', and every track lands with them where a section lands.
@@ -376,6 +382,11 @@ chords out to the other side; a new role takes a spread of its own.
   and a solo line improvises over its chords, more (`LinePattern.Mutate`), busier and over a wider range, the other
   parts thinned; a bass solo by the bass's profile loosened. Special solo instruments by a pool of their own. The form
   decides which appearance is a solo, by the section's role.
+
+- **Modulation** (P3, when a soundfont maps it): CC1, which none of the soundfonts offered maps to tone, so it was
+  left out of expression. The rule to keep: modulation and a vibrato never at once, modulation and bends together.
+- **Ping-pong echo** (P3): an echo alternating sides, from the part's pan to its mirror, where a part's echo now
+  repeats in place (`ExpressionRender`).
 
 ## Groove
 
@@ -456,6 +467,13 @@ the rest as they were.
   at most. Should a report want thousands of songs, its seeds past the shared corpus would be made, measured and let
   go rather than cached.
 - **Note keys** (P3) are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
+
+- **Review, October 2026** (built): a pick sums its weights as it goes, expression walks a section's notes alone, the
+  MIDI file merges expression in one sweep (64 songs 8.7 s to 7.4 s); songs of few parts never fail; the server
+  makes as many songs at once as it has cores and turns the rest away busy, prunes analytics daily, and is published
+  compiled ahead of time. Left, measured with dotTrace: of the CLI's time a third is JIT and GC, and in the songs'
+  own a quarter is realizing notes, each map's state timeline built once per map (`StateTimelineMap`), which is how
+  the state is designed rather than a hot spot to fix.
 
 ## Parked
 
