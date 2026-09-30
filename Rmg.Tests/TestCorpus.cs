@@ -55,9 +55,12 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     /// <summary>Where the song's chords change, as its sections have them.</summary>
     public double[] ChordChanges => [..Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)];
 
-    /// <summary>Whether a section's drums play, rather than rest for a breakdown (<see cref="Arrangement" />).</summary>
-    public bool HasDrums(int sectionId) =>
-        !((ImmutableHashSet<TrackRole>)Trace.First(x => x.Point == TracePoints.Arrangement && x.Section == sectionId).Value!).Contains(TrackRole.Drum);
+    /// <summary>The parts a section leaves out where the song plays it, by its span's place among the song's (<see cref="Arrangement" />).</summary>
+    public ImmutableHashSet<TrackRole> Resting(SectionSpan span) =>
+        (ImmutableHashSet<TrackRole>)Trace.Where(x => x.Point == TracePoints.Arrangement).ElementAt(Array.IndexOf(Map.Sections.ToArray(), span)).Value!;
+
+    /// <summary>Whether a section's drums play where the song plays it, rather than rest for a breakdown.</summary>
+    public bool HasDrums(SectionSpan span) => !Resting(span).Contains(TrackRole.Drum);
 
     /// <summary>
     ///     Where the drums mark a line, as the song puts them: at every pattern from the first section on, the first after
@@ -74,8 +77,8 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
             ..Enumerable.Range(first, last - first + 1)
                 .Select(x => Origin + x * Meter.PatternDuration)
                 .Where(x => x >= Map.Sections[^1].End - 1e-9
-                            || HasDrums(Map.Sections.Last(s => s.Start <= x + 1e-9).SectionId)
-                            || Math.Abs(x - windowEnd) < 1e-9 && HasDrums(Map.Sections[0].SectionId))
+                            || HasDrums(Map.Sections.Last(s => s.Start <= x + 1e-9))
+                            || Math.Abs(x - windowEnd) < 1e-9 && HasDrums(Map.Sections[0]))
         ];
     }
 

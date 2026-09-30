@@ -223,15 +223,11 @@ internal sealed class SectionGenerator
         var plays = SectionLength.Draw(Stream(sectionId, SectionStream.Length), rhythm.Tilt, plan.Role);
         StateTrace.Record(TracePoints.SectionLength, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{plays}", plays);
         var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap).Repeat(plays);
-        // the parts the section leaves out, from a sequence of its own, the likelier the less energy it has
-        var resting = Arrangement.DrawRests(Stream(sectionId, SectionStream.Arrangement), tilt, plan.Role);
-        StateTrace.Record(TracePoints.Arrangement, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", resting.Order()), resting);
-        var silent = timeline.TrackTimelineMap.Keys.Where(x => resting.Contains(_tracks.Definitions[x].Role)).ToHashSet();
-        timeline = timeline.MapTrackEvents(silent.ToDictionary(
-            x => x,
-            _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes => EventTimeline.Create<StateMap>(notes.Duration))
-        ));
-        ImmutableArray<SectionLine> lines = [..pitched.Select(x => x.Line).OfType<SectionLine>().Where(x => !silent.Contains(x.Track))];
+        // the parts the section leaves out the first time it plays, from a sequence of its own, the likelier the less energy
+        // it has; a later appearance draws them again (Appear)
+        var arrangementSeed = StreamSeed(sectionId, SectionStream.Arrangement);
+        var resting = Arrangement.DrawRests(new GenerationContext(arrangementSeed), tilt, plan.Role);
+        ImmutableArray<SectionLine> lines = [..pitched.Select(x => x.Line).OfType<SectionLine>()];
         var section = new GeneratedSection(
             timeline,
             rhythm,
@@ -242,9 +238,13 @@ internal sealed class SectionGenerator
             lines,
             plays,
             doubles.ToImmutableDictionary(x => x.Key, x => x.Value.Lead),
-            !resting.Contains(TrackRole.Drum)
+            resting,
+            plan.Role,
+            arrangementSeed,
+            _tracks.Definitions.ToImmutableDictionary(x => x.Key, x => x.Value.Role)
         );
-        return section.Appear(0, 0);
+        // every part, which each appearance leaves out of it what it rests
+        return section;
     }
 
     /// <summary>
@@ -605,7 +605,10 @@ internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScal
 /// <param name="Lines">The section's lines, such as its melody, before they are placed, placed afresh every time it plays.</param>
 /// <param name="Plays">How many times the section plays its 4-bar pattern: once, twice or four times (<see cref="SectionLength" />).</param>
 /// <param name="Bindings">The drums bound to a lead, by their tracks, and their leads' tracks (<see cref="Doubling" />).</param>
-/// <param name="HasDrums">Whether the drums play in the section, rather than rest for a breakdown (<see cref="Arrangement" />).</param>
+/// <param name="Resting">The parts the section leaves out as it plays (<see cref="Arrangement" />).</param>
+/// <param name="Role">What the section does in the song's form.</param>
+/// <param name="ArrangementSeed">The seed of the sequences a later appearance draws its parts from.</param>
+/// <param name="Roles">What every track plays, by its number.</param>
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
     RhythmicUnconventionality Rhythm,
@@ -616,9 +619,32 @@ internal sealed record GeneratedSection(
     ImmutableArray<SectionLine> Lines,
     int Plays,
     ImmutableDictionary<int, int> Bindings,
-    bool HasDrums
+    ImmutableHashSet<TrackRole> Resting,
+    SectionRole Role,
+    int ArrangementSeed,
+    ImmutableDictionary<int, TrackRole> Roles
 )
 {
+    /// <summary>Whether the drums play in the section, rather than rest for a breakdown.</summary>
+    public bool HasDrums => !Resting.Contains(TrackRole.Drum);
+
+    /// <summary>
+    ///     The section as it plays the given time, its parts as <see cref="Appear(int, double)" /> plays them, the first
+    ///     time as drawn and a later time drawn again by the appearance's own energy, the section's and its step, from a
+    ///     sequence of the appearance's own, a part that played the time before playing on, so that parts only join as a
+    ///     section comes back.
+    /// </summary>
+    /// <param name="energyStep">How far the appearance's energy is from the section's, such as more for a later one.</param>
+    /// <param name="before">The parts that rested the time before, of which it may leave out no more.</param>
+    public GeneratedSection Appear(int appearance, double improvisation, double energyStep, ImmutableHashSet<TrackRole> before)
+    {
+        var resting = appearance == 0
+            ? Resting
+            : Arrangement.DrawRests(new GenerationContext(Seeds.Derive(ArrangementSeed, appearance)), SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), Role)
+                .Intersect(before);
+        return (this with { Resting = resting }).Appear(appearance, improvisation);
+    }
+
     /// <summary>
     ///     The section as it plays the given time, from 0: its lines placed for that time, mutated from the first by
     ///     the song's improvisation (<see cref="SectionLine.Place" />), and every other track as it was made. A section
@@ -627,8 +653,13 @@ internal sealed record GeneratedSection(
     /// </summary>
     public GeneratedSection Appear(int appearance, double improvisation)
     {
-        var timeline = Timeline;
-        foreach (var line in Lines)
+        // the resting parts' tracks play nothing, and their lines are not placed
+        var silent = Timeline.TrackTimelineMap.Keys.Where(x => Resting.Contains(Roles[x])).ToHashSet();
+        var timeline = Timeline.MapTrackEvents(silent.ToDictionary(
+            x => x,
+            _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes => EventTimeline.Create<StateMap>(notes.Duration))
+        ));
+        foreach (var line in Lines.Where(x => !silent.Contains(x.Track)))
         {
             var bars = Plays switch
             {
@@ -641,7 +672,7 @@ internal sealed record GeneratedSection(
             timeline = timeline.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [line.Track] = _ => placed });
         }
 
-        return this with { Timeline = timeline };
+        return this with { Timeline = timeline, Lines = [..Lines.Where(x => !silent.Contains(x.Track))] };
     }
 }
 

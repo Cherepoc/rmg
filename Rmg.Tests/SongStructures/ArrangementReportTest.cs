@@ -13,7 +13,7 @@ public sealed class ArrangementReportTest
         foreach (var song in TestCorpus.Range(30))
         foreach (var span in song.Map.Sections)
         {
-            var resting = (ImmutableHashSet<TrackRole>)song.Trace.First(x => x.Point == TracePoints.Arrangement && x.Section == span.SectionId).Value!;
+            var resting = song.Resting(span);
             await Assert.That(resting.Contains(TrackRole.Bass) && resting.Contains(TrackRole.Chords)).IsFalse();
             // but the drums' fill in its last bar, where they come back into the next section
             foreach (var (track, notes) in song.Song.Notes!.Where(x => resting.Contains(song.Song.TrackDefinitions[x.Key].Role)))
@@ -50,6 +50,16 @@ public sealed class ArrangementReportTest
                               string.Join(", ", rows.GroupBy(x => x.Role).OrderBy(x => x.Key).Select(x => $"{x.Key} {Share(x)}")));
         }
 
+        // the parts a recurring section plays its first time and its last, as parts only join
+        var (first, last, recurring, grown) = (0.0, 0.0, 0, 0);
+        foreach (var song in TestCorpus.Range(200))
+        foreach (var group in song.Map.Sections.GroupBy(x => x.SectionId).Where(x => x.Count() > 1))
+        {
+            var (f, l) = (5 - song.Resting(group.First()).Count, 5 - song.Resting(group.Last()).Count);
+            (first, last, recurring, grown) = (first + f, last + l, recurring + 1, grown + (l > f ? 1 : 0));
+        }
+
+        Console.WriteLine($"{recurring} recurring sections play {first / recurring:F2} parts the first time and {last / recurring:F2} the last; {grown} grow");
         await Task.CompletedTask;
     }
 }

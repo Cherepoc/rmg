@@ -116,13 +116,25 @@ public static class SongGenerator
         // only once, so that the fade takes eight bars at least
         var fading = plan.Ending != EndingKind.Fade ? 0 : generateSection(sectionIds[^1]).Plays == 1 ? 2 : 1;
         int[] played = [..sectionIds, ..Enumerable.Repeat(sectionIds[^1], fading)];
-        // the later in the song, the more
-        var sections = played.Select((id, index) => generateSection(id).Appear(
-                    played.Take(index).Count(x => x == id),
-                    Tilt.Of(MelodyLayers.ImprovisationGrowth, index / (double)Math.Max(1, played.Length - 1)).Chance(improvisation, 1)
-                )
-            )
-            .ToArray();
+        // the later in the song, the more, and with the energy of its own place in the song against the section's average,
+        // its parts only joining as it comes back
+        double Place(int index) => played.Length > 1 ? index / (double)(played.Length - 1) : 0.5;
+        var averagePlaces = played.Select((id, index) => (id, index)).GroupBy(x => x.id).ToDictionary(x => x.Key, x => x.Average(y => Place(y.index)));
+        var restedBefore = new Dictionary<int, ImmutableHashSet<TrackRole>>();
+        var sections = new List<GeneratedSection>();
+        for (var index = 0; index < played.Length; index++)
+        {
+            var id = played[index];
+            var section = generateSection(id).Appear(
+                played.Take(index).Count(x => x == id),
+                Tilt.Of(MelodyLayers.ImprovisationGrowth, Place(index)).Chance(improvisation, 1),
+                SectionEnergy.AppearanceStep(Place(index), averagePlaces[id]),
+                restedBefore.GetValueOrDefault(id, [])
+            );
+            restedBefore[id] = section.Resting;
+            StateTrace.Record(TracePoints.Arrangement, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, string.Join(", ", section.Resting.Order()), section.Resting);
+            sections.Add(section);
+        }
 
         // the song put together as planned, and the lines the drums mark
         var form = formGenerator.Assemble(plan, played, sections);

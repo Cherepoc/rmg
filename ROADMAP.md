@@ -220,10 +220,13 @@ planned together (P1):
   quiet end. The one mechanism for the drums and the pitched tracks, where it can be. More tracks and program changes
   need the web page's mixer to show them. Measured by: the parts that play against the energy, towards the drums' 0.46;
   the breakdowns by role.
-- **Energy by appearance:** an appearance's own step of the energy, rising the later it plays, so that the last chorus
-  plays bigger than the first, drawn in `Appear`: more parts (an appearance may add a pad or a counter-melody), louder,
-  the drums changed (their kit's colour, a drum's stroke). Measured by: the energy and the parts of a section's last
-  appearance against its first.
+- **Energy by appearance** (built for the parts): every appearance of a section has an energy of its own, the
+  section's and the arc's step for how much later or earlier it plays than the section does on average
+  (`SectionEnergy.AppearanceStep`), which a later appearance draws its parts again by, from a sequence of its own, a part
+  that played the time before playing on, so that parts only join as a section comes back (`GeneratedSection.Appear`).
+  Over 200 corpus songs, a recurring section plays 4.31 of its five parts the first time and 4.78 the last, 230 of 577
+  growing; the pad plays in 85% of the choruses as they play (`ArrangementReportTest`). Left: the appearance's energy
+  for its loudness and the drums' changes (their colour, a drum's stroke), which are the section's as it was made.
 - **Key changes:** a last chorus a step up, a section's key as its own state, as its scale is now
   (`Scales.PickSection`), drawn by appearance. Measured by: the songs that change, and the melody's range after.
 

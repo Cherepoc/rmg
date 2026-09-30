@@ -30,6 +30,15 @@ internal static class SectionEnergy
     /// <summary>The odds of a draw's high side at a pull of 1.</summary>
     public const double HighOdds = 32;
 
+    /// <summary>
+    ///     How far an appearance of a section is from the section's energy: the arc's step for how much later or earlier in
+    ///     the song it plays than the section does on average, so that its last chorus plays bigger than its first.
+    /// </summary>
+    public static double AppearanceStep(double place, double averagePlace)
+    {
+        return Arc * 2 * (place - averagePlace);
+    }
+
     /// <summary>The song's layer of the energy.</summary>
     public static StateMap GenerateSong(IGenerationContext context)
     {
