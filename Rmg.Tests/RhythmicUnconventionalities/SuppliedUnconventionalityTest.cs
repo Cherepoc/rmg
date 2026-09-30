@@ -20,13 +20,13 @@ public sealed class SuppliedUnconventionalityTest
     [Arguments(1.0)]
     public async Task ASuppliedUnconventionality_IsTheSongs(double unconventionality)
     {
-        await Assert.That(SongGenerator.GenerateSong(7, unconventionality).Unconventionality).IsEqualTo(unconventionality);
+        await Assert.That(SongGenerator.GenerateSong(7, new SongOverrides(Base: unconventionality)).Unconventionality).IsEqualTo(unconventionality);
     }
 
     [Test]
     public async Task NoneSupplied_IsTheSongItsSeedMakes()
     {
-        var drawn = SongGenerator.GenerateSong(7, (double?)null);
+        var drawn = SongGenerator.GenerateSong(7, SongOverrides.None);
 
         await Assert.That(Write(drawn)).IsEquivalentTo(Write(SongGenerator.GenerateSong(7)));
         await Assert.That(drawn.Unconventionality).IsNotNull();
@@ -38,6 +38,6 @@ public sealed class SuppliedUnconventionalityTest
     [Arguments(double.NaN)]
     public async Task AnUnconventionality_OutsideZeroToOne_Fails(double unconventionality)
     {
-        await Assert.That(() => SongGenerator.GenerateSong(7, unconventionality)).Throws<ArgumentOutOfRangeException>();
+        await Assert.That(() => SongGenerator.GenerateSong(7, new SongOverrides(Base: unconventionality))).Throws<ArgumentOutOfRangeException>();
     }
 }

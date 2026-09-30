@@ -159,6 +159,7 @@ public sealed class SongEndingTest
             2,
             ImmutableDictionary<int, int>.Empty,
             ImmutableHashSet<TrackRole>.Empty,
+            ImmutableHashSet<TrackRole>.Empty,
             SectionRole.Free,
             0,
             new Dictionary<int, TrackRole> { [MelodyTrack] = TrackRole.Melody, [BassTrack] = TrackRole.Bass, [drum] = TrackRole.Drum }.ToImmutableDictionary(),

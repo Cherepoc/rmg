@@ -88,6 +88,9 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
 {
     public SongMap Map => Song.Map!;
 
+    /// <summary>Whether the song has drums, which a few songs leave out (<see cref="SongParts" />).</summary>
+    public bool PlaysDrums => !((ImmutableHashSet<TrackRole>)Trace.Single(x => x.Point == TracePoints.SongParts).Value!).Contains(TrackRole.Drum);
+
     public void Deconstruct(out Song song, out double origin)
     {
         song = Song;

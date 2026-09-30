@@ -35,7 +35,7 @@ public static class SongEndpoints
         int unconventionality;
         try
         {
-            var song = SongGenerator.GenerateSong(songSeed, request.UnconventionalityValue);
+            var song = SongGenerator.GenerateSong(songSeed, new SongOverrides(Base: request.UnconventionalityValue));
             unconventionality = request.Unconventionality ?? GenerateSongRequest.ToStep(song.Unconventionality!.Value);
             var renderedSong = Render.RenderSong(song);
 

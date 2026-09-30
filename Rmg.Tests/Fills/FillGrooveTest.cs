@@ -27,7 +27,7 @@ public sealed class FillGrooveTest
     {
         var kick = DrumGroups.GetTrackNumber(DrumDefinitions.Kick);
         var measured = new List<Measured>();
-        foreach (var song in TestCorpus.Range(SongCount))
+        foreach (var song in TestCorpus.Range(SongCount).Where(x => x.PlaysDrums))
         {
             // a line at every pattern from the first section on, the first after the intro only if it has one, and the
             // last before the ending only if it has one

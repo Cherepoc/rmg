@@ -32,6 +32,7 @@ internal sealed class SectionGenerator
     private readonly ImmutableDictionary<int, StateMap> _sectionEnergies;
     private readonly Tilt _songPercussion;
     private readonly int _key;
+    private readonly ImmutableHashSet<TrackRole> _absent;
     private readonly BarStateGenerator _barStateGenerator;
     private readonly PatternGenerator _patternGenerator;
 
@@ -53,10 +54,12 @@ internal sealed class SectionGenerator
         ImmutableDictionary<int, StateMap> sectionEnergies,
         Tilt songPercussion,
         int key,
+        ImmutableHashSet<TrackRole> absent,
         Meter meter
     )
     {
         _meter = meter;
+        _absent = absent;
         _context = context;
         _seed = seed;
         _tracks = tracks;
@@ -251,7 +254,7 @@ internal sealed class SectionGenerator
         // the parts the section leaves out the first time it plays, from a sequence of its own, the likelier the less energy
         // it has; a later appearance draws them again (Appear)
         var arrangementSeed = StreamSeed(sectionId, SectionStream.Arrangement);
-        var resting = Arrangement.DrawRests(new GenerationContext(arrangementSeed), tilt, plan.Role);
+        var resting = Arrangement.DrawRests(new GenerationContext(arrangementSeed), tilt, plan.Role, _absent);
         ImmutableArray<SectionLine> lines = [..pitched.Select(x => x.Line).OfType<SectionLine>()];
         var section = new GeneratedSection(
             timeline,
@@ -265,6 +268,7 @@ internal sealed class SectionGenerator
             plays,
             doubles.ToImmutableDictionary(x => x.Key, x => x.Value.Lead),
             resting,
+            _absent,
             plan.Role,
             arrangementSeed,
             _tracks.Definitions.ToImmutableDictionary(x => x.Key, x => x.Value.Role),
@@ -669,6 +673,7 @@ internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScal
 /// <param name="Plays">How many times the section plays its 4-bar pattern: once, twice or four times (<see cref="SectionLength" />).</param>
 /// <param name="Bindings">The drums bound to a lead, by their tracks, and their leads' tracks (<see cref="Doubling" />).</param>
 /// <param name="Resting">The parts the section leaves out as it plays (<see cref="Arrangement" />).</param>
+/// <param name="Absent">The parts the song leaves out, which every section rests (<see cref="SongParts" />).</param>
 /// <param name="Role">What the section does in the song's form.</param>
 /// <param name="ArrangementSeed">The seed of the sequences a later appearance draws its parts from.</param>
 /// <param name="Roles">What every track plays, by its number.</param>
@@ -685,6 +690,7 @@ internal sealed record GeneratedSection(
     int Plays,
     ImmutableDictionary<int, int> Bindings,
     ImmutableHashSet<TrackRole> Resting,
+    ImmutableHashSet<TrackRole> Absent,
     SectionRole Role,
     int ArrangementSeed,
     ImmutableDictionary<int, TrackRole> Roles,
@@ -706,7 +712,7 @@ internal sealed record GeneratedSection(
     {
         var resting = appearance == 0
             ? Resting
-            : Arrangement.DrawRests(new GenerationContext(Seeds.Derive(ArrangementSeed, appearance)), SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), Role)
+            : Arrangement.DrawRests(new GenerationContext(Seeds.Derive(ArrangementSeed, appearance)), SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), Role, Absent)
                 .Intersect(before);
         return (this with { Resting = resting }).Appear(appearance, improvisation);
     }

@@ -37,15 +37,18 @@ public static class SongGenerator
     }
 
     /// <summary>
-    ///     Generates a song whose unconventionality's base is supplied, from 0 for the plainest to 1 for the wildest, and
-    ///     used as given; none draws it as <see cref="GenerateSong(int)" /> does.
+    ///     Generates a song with what is given used as given, such as its unconventionality's base, from 0 for the
+    ///     plainest to 1 for the wildest, or the parts it has, and the rest drawn as <see cref="GenerateSong(int)" />
+    ///     draws it.
     /// </summary>
-    public static Song GenerateSong(int seed, double? unconventionality)
+    public static Song GenerateSong(int seed, SongOverrides overrides)
     {
-        if (unconventionality is < 0 or > 1 or double.NaN)
-            throw new ArgumentOutOfRangeException(nameof(unconventionality), unconventionality, "An unconventionality is from 0 to 1.");
+        if (overrides.Base is < 0 or > 1 or double.NaN)
+            throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Base, "An unconventionality is from 0 to 1.");
+        if (overrides.Facets?.Values.Any(x => x is < 0 or > 1 or double.NaN) == true)
+            throw new ArgumentOutOfRangeException(nameof(overrides), "A facet is from 0 to 1.");
 
-        return GenerateSong(seed, ProgressionSettings.Default, new SongOverrides(Base: unconventionality));
+        return GenerateSong(seed, ProgressionSettings.Default, overrides);
     }
 
     internal static Song GenerateSong(int seed, ProgressionSettings progressionSettings) => GenerateSong(seed, progressionSettings, SongOverrides.None);
@@ -77,8 +80,12 @@ public static class SongGenerator
             rhythmicUnconventionality,
             Stream(SongStream.DrumStrokes),
             Stream(SongStream.DrumRoles),
-            DrumSetups.Pick(Stream(SongStream.DrumSetup), rhythmicUnconventionality.Value)
+            overrides.DrumSetup ?? DrumSetups.Pick(Stream(SongStream.DrumSetup), rhythmicUnconventionality.Value)
         );
+        // the parts the song leaves out, the pad, the counter-melody and the drums now and then, each from a sequence
+        // of its own, and any given in or out
+        var absent = SongParts.DrawAbsent(part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Parts), (int)part)), overrides.Parts);
+        StateTrace.Record(TracePoints.SongParts, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", absent.Order()), absent);
         StateTrace.Record(TracePoints.DrumSetup, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, tracks.DrumSetup.ToString(), tracks.DrumSetup);
 
         // the song's chords gather around its unconventionality, and a section's around its own shift of it
@@ -127,6 +134,7 @@ public static class SongGenerator
             sectionEnergies,
             PercussionSections.GenerateSong(Stream(SongStream.Percussion)),
             commonStateMap.GetStateValue(StateKinds.KeyOffset),
+            absent,
             meter
         );
         // how the song starts and ends around its sections, decided before them: the one the song ends with leads home
@@ -136,6 +144,7 @@ public static class SongGenerator
             Stream(SongStream.Intro),
             Of(Facet.Form),
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
+            !absent.Contains(TrackRole.Drum),
             meter
         );
         var plan = formGenerator.Plan(sectionIds);
@@ -300,5 +309,6 @@ internal enum SongStream
     BassFills = 24,
     Meter = 25,
     Unconventionality = 26,
-    Feel = 27
+    Feel = 27,
+    Parts = 28
 }

@@ -28,11 +28,15 @@ internal sealed class SongFormGenerator
     // the meter the song's bars are in, which an ending's lengths are counted in
     private readonly Meter _meter;
 
+    // whether the song has drums, which a count-in and a landing on the final chord play
+    private readonly bool _hasDrums;
+
     public SongFormGenerator(
         IGenerationContext context,
         IGenerationContext introContext,
         RhythmicUnconventionality songRhythm,
         IReadOnlyDictionary<int, TrackRole> roles,
+        bool hasDrums,
         Meter meter
     )
     {
@@ -40,6 +44,7 @@ internal sealed class SongFormGenerator
         _introContext = introContext;
         _songRhythm = songRhythm;
         _roles = roles;
+        _hasDrums = hasDrums;
         _meter = meter;
     }
 
@@ -54,6 +59,9 @@ internal sealed class SongFormGenerator
         var ending = _context.Pick(FormLayers.WeighEndings(_songRhythm.Value));
         var window = intro == IntroKind.Entries ? _introContext.Pick(FormLayers.IntroWindows) : default;
         var halfCountIn = intro == IntroKind.CountIn && _context.TestProbability(FormLayers.HalfCountInChance);
+        // a song without drums has nobody to count it in, so it starts cold, drawn as it would be all the same
+        if (intro == IntroKind.CountIn && !_hasDrums)
+            (intro, halfCountIn) = (IntroKind.Cold, false);
 
         double held = 0, stop = 0;
         var slowsDown = false;
@@ -180,9 +188,11 @@ internal sealed class SongFormGenerator
                 }
             }
 
-            lines.Add(
-                new FillLine(end, fillSections[^1], fillSections[^1], 0, plan.Ending != EndingKind.Stop, IsLandingForced: true)
-            );
+            // the drums land on the final chord, where the song has them
+            if (_hasDrums)
+                lines.Add(
+                    new FillLine(end, fillSections[^1], fillSections[^1], 0, plan.Ending != EndingKind.Stop, IsLandingForced: true)
+                );
 
             description += $", at beat {end}, held {plan.Held} beats";
             if (plan.SlowsDown)

@@ -129,6 +129,9 @@ public sealed class FillTest
         for (var seed = 0; seed < 32; seed++)
         {
             var corpusSong = TestCorpus.Get(seed);
+            if (!corpusSong.PlaysDrums)
+                continue;
+
             var (song, origin) = corpusSong;
             var drums = Render.RenderSong(song).Tracks.Single(x => x.IsPercussionInstrument).NoteTimeline;
             // the sections of percussion only land on the percussion

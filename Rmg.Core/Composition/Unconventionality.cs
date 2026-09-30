@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Rmg.Core.Probabilities;
+using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
@@ -107,11 +108,19 @@ public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, d
     private static double Logistic(double logOdds) => 1 / (1 + Math.Exp(-logOdds));
 }
 
-/// <summary>What a test sets in place of the song's own draws; none for the song as its seed makes it.</summary>
+/// <summary>What is given in place of the song's own draws, each used as given; none for the song as its seed makes it.</summary>
 /// <param name="Meter">The meter the song's bars are in.</param>
-/// <param name="Base">The song's unconventionality's base, which its facets are drawn around.</param>
-/// <param name="Facets">Facets set outright, over those drawn.</param>
-internal sealed record SongOverrides(Meter? Meter = null, double? Base = null, ImmutableDictionary<Facet, double>? Facets = null)
+/// <param name="Base">The song's unconventionality's base, from 0 to 1, which its facets are drawn around.</param>
+/// <param name="Facets">Facets set outright, from 0 to 1, over those drawn.</param>
+/// <param name="Parts">The parts given in the song (true) or out of it (false) (<see cref="SongParts" />).</param>
+/// <param name="DrumSetup">The drums the song plays: the kit, the kit and percussion, or percussion.</param>
+public sealed record SongOverrides(
+    Meter? Meter = null,
+    double? Base = null,
+    ImmutableDictionary<Facet, double>? Facets = null,
+    ImmutableDictionary<TrackRole, bool>? Parts = null,
+    DrumSetup? DrumSetup = null
+)
 {
     public static SongOverrides None { get; } = new();
 }

@@ -27,18 +27,20 @@ internal static class Arrangement
     /// <summary>How far a role that a tune carries keeps its melody, as the odds against it resting.</summary>
     public const double TuneOdds = 8;
 
-    /// <summary>The parts the section leaves out.</summary>
+    /// <summary>The parts the section leaves out, the song's absent ones among them.</summary>
     /// <param name="energy">How the section's energy leans the draws: the more, the fewer parts rest.</param>
-    public static ImmutableHashSet<TrackRole> DrawRests(IGenerationContext context, Tilt energy, SectionRole role)
+    /// <param name="absent">The parts the song leaves out (<see cref="SongParts" />), which rest whatever the draws.</param>
+    public static ImmutableHashSet<TrackRole> DrawRests(IGenerationContext context, Tilt energy, SectionRole role, ImmutableHashSet<TrackRole> absent)
     {
         var tune = Tilt.Of(TuneOdds, role is SectionRole.Verse or SectionRole.PreChorus or SectionRole.Chorus ? -1 : 0);
         var resting = Rests
             .Where(x => context.TestProbability((x.Part == TrackRole.Melody ? tune : Tilt.None).Chance(energy.Chance(x.Chance, -1), 1)))
             .Select(x => x.Part)
+            .Union(absent)
             .ToHashSet();
 
-        // a section keeps its harmony
-        if (resting.Contains(TrackRole.Bass) && resting.Contains(TrackRole.Chords))
+        // a section keeps its harmony, where the song has the chords
+        if (resting.Contains(TrackRole.Bass) && resting.Contains(TrackRole.Chords) && !absent.Contains(TrackRole.Chords))
             resting.Remove(TrackRole.Chords);
         return resting.ToImmutableHashSet();
     }
