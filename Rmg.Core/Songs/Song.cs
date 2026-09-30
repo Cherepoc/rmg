@@ -13,7 +13,7 @@ public sealed class Song
         TrackEventStateTimelineMap<StateMap> trackEventStateTimelineMap,
         SongMap? map = null,
         ImmutableSortedDictionary<int, EventTimeline<RealizedNote>>? notes = null,
-        double? unconventionality = null
+        SongDraws? draws = null
     )
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(duration);
@@ -24,14 +24,11 @@ public sealed class Song
         TrackEventStateTimelineMap = trackEventStateTimelineMap;
         Map = map;
         Notes = notes;
-        Unconventionality = unconventionality;
+        Draws = draws;
     }
 
-    /// <summary>
-    ///     How far a generated song strays from convention as a whole, from 0 for the plainest to 1 for the wildest,
-    ///     drawn or supplied; none for a song made otherwise.
-    /// </summary>
-    public double? Unconventionality { get; }
+    /// <summary>What a generated song drew, or was given in place of drawing; none for a song made otherwise.</summary>
+    public SongDraws? Draws { get; }
 
     /// <summary>
     ///     Every playing track's notes, by its number, as the song's generation decided them from its state; none for a

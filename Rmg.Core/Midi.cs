@@ -1,3 +1,4 @@
+using Rmg.Core.Songs;
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
@@ -310,93 +311,12 @@ public static class Midi
     }
 
     /// <summary>
-    ///     The instrument every channel of the song plays, by channel. The instrument of the percussion
-    ///     channel is its drum kit, which is what a program change means on that channel.
+    ///     The channel every part of the song is written to, by its role: the pitched parts in the order they are
+    ///     written, the drums on the channel General MIDI keeps for them.
     /// </summary>
-    public static ImmutableSortedDictionary<byte, int> GetChannelInstruments(this RenderedSong song)
+    public static ImmutableSortedDictionary<TrackRole, byte> GetPartChannels(this RenderedSong song)
     {
-        return song.Tracks
-            .ToIndexedTracks()
-            .ToImmutableSortedDictionary(x => x.channel, x => x.track.PitchInstrumentCode);
-    }
-
-    /// <summary>
-    ///     The song with the instrument of every channel in <paramref name="instruments" /> replaced, which
-    ///     is the whole of what an instrument is to a written song: not a note of it changes.
-    /// </summary>
-    /// <exception cref="ArgumentException">A channel the song does not play.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">An instrument outside the 0-127 of General MIDI.</exception>
-    public static RenderedSong WithChannelInstruments(
-        this RenderedSong song,
-        IReadOnlyDictionary<byte, int> instruments
-    )
-    {
-        if (instruments.Count == 0) return song;
-
-        var channels = song.Tracks.ThrowIfNotPlayed(instruments.Keys, nameof(instruments));
-        foreach (var instrument in instruments.Values)
-        {
-            ArgumentOutOfRangeException.ThrowIfNegative(instrument, nameof(instruments));
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(instrument, 127, nameof(instruments));
-        }
-
-        return song.WithTracks(song.Tracks.Select((track, index) =>
-            instruments.TryGetValue(channels[index], out var instrument)
-                ? new RenderedTrack(track.IsPercussionInstrument, track.Role, instrument, track.NoteTimeline, track.Pan, track.Volume)
-                : track));
-    }
-
-    /// <summary>
-    ///     The song with the volume of every channel in <paramref name="volumes" /> replaced: a part of the
-    ///     volume it plays at unasked, where 1 is that volume and 0 is silence. The notes keep their own
-    ///     dynamics, since this is the volume the whole track plays under.
-    /// </summary>
-    /// <exception cref="ArgumentException">A channel the song does not play.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">A volume outside 0 to 1.</exception>
-    public static RenderedSong WithChannelVolumes(this RenderedSong song, IReadOnlyDictionary<byte, double> volumes)
-    {
-        if (volumes.Count == 0) return song;
-
-        var channels = song.Tracks.ThrowIfNotPlayed(volumes.Keys, nameof(volumes));
-
-        return song.WithTracks(song.Tracks.Select((track, index) =>
-            volumes.TryGetValue(channels[index], out var volume)
-                ? new RenderedTrack(track.IsPercussionInstrument, track.Role, track.PitchInstrumentCode, track.NoteTimeline, track.Pan, volume)
-                : track));
-    }
-
-    /// <summary>
-    ///     The song without the given channels, which are not written at all: no notes, and nothing to say
-    ///     they were ever there. The pitched channels left behind close up, since they are handed out in
-    ///     the order the tracks are written.
-    /// </summary>
-    /// <exception cref="ArgumentException">A channel the song does not play.</exception>
-    public static RenderedSong WithoutChannels(this RenderedSong song, IReadOnlyCollection<byte> channels)
-    {
-        if (channels.Count == 0) return song;
-
-        var trackChannels = song.Tracks.ThrowIfNotPlayed(channels, nameof(channels));
-
-        return song.WithTracks(song.Tracks.Where((_, index) => !channels.Contains(trackChannels[index])));
-    }
-
-    /// <summary>The channels of the tracks, once every channel of <paramref name="asked" /> is known.</summary>
-    private static ImmutableArray<byte> ThrowIfNotPlayed(
-        this ImmutableArray<RenderedTrack> tracks,
-        IEnumerable<byte> asked,
-        string parameterName
-    )
-    {
-        var channels = tracks.ToChannels();
-        foreach (var channel in asked.Where(channel => !channels.Contains(channel)))
-            throw new ArgumentException($"The song does not play channel {channel}.", parameterName);
-
-        return channels;
-    }
-
-    private static RenderedSong WithTracks(this RenderedSong song, IEnumerable<RenderedTrack> tracks)
-    {
-        return new RenderedSong(song.Duration, song.Meter, song.TempoTimeline, song.FadeTimeline, [..tracks]);
+        return song.Tracks.ToChannels().Zip(song.Tracks).ToImmutableSortedDictionary(x => x.Second.Role, x => x.First);
     }
 
     /// <param name="label">

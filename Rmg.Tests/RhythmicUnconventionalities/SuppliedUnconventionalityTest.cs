@@ -20,7 +20,7 @@ public sealed class SuppliedUnconventionalityTest
     [Arguments(1.0)]
     public async Task ASuppliedUnconventionality_IsTheSongs(double unconventionality)
     {
-        await Assert.That(SongGenerator.GenerateSong(7, new SongOverrides(Base: unconventionality)).Unconventionality).IsEqualTo(unconventionality);
+        await Assert.That(SongGenerator.GenerateSong(7, new SongOverrides(Base: unconventionality)).Draws!.Unconventionality.Base).IsEqualTo(unconventionality);
     }
 
     [Test]
@@ -29,7 +29,7 @@ public sealed class SuppliedUnconventionalityTest
         var drawn = SongGenerator.GenerateSong(7, SongOverrides.None);
 
         await Assert.That(Write(drawn)).IsEquivalentTo(Write(SongGenerator.GenerateSong(7)));
-        await Assert.That(drawn.Unconventionality).IsNotNull();
+        await Assert.That(drawn.Draws).IsNotNull();
     }
 
     [Test]

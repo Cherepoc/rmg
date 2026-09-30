@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+using System.Text.Json;
 using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Rendering;
@@ -17,43 +17,28 @@ public static class SongEndpoints
         routes.MapGet("/api/version", () => Results.Ok(new VersionResponse(SongsVersion.Number, SongsVersion.Commit)));
     }
 
+    private static readonly JsonSerializerOptions HeaderJson = new(JsonSerializerDefaults.Web);
+
     /// <summary>
-    ///     Writes a song as a MIDI file. What it is made of is reported in the headers, since the body is
-    ///     the file itself.
+    ///     Writes a song as a MIDI file. What it is made of is reported in the headers, since the body is the file
+    ///     itself.
     /// </summary>
     private static IResult GenerateSong(HttpContext context, GenerateSongRequest? request)
     {
         request ??= new GenerateSongRequest();
 
-        if (!request.TryGetChannelTracks(out var channelTracks, out var error))
+        if (!request.TryRead(out var overrides, out var mix, out var error))
             return Results.BadRequest(new ErrorResponse(error!));
 
         var songSeed = request.Seed ?? Random.Shared.Next();
 
         MemoryStream stream;
-        ImmutableSortedDictionary<byte, int> channelInstruments;
-        int unconventionality;
+        SongReport report;
         try
         {
-            var song = SongGenerator.GenerateSong(songSeed, new SongOverrides(Base: request.UnconventionalityValue));
-            unconventionality = request.Unconventionality ?? GenerateSongRequest.ToStep(song.Unconventionality!.Value);
-            var renderedSong = Render.RenderSong(song);
-
-            // asking for a channel this song does not play is the caller's mistake, not a failed generation
-            var generatedInstruments = renderedSong.GetChannelInstruments();
-            foreach (var channel in channelTracks.Keys.Where(channel => !generatedInstruments.ContainsKey(channel)))
-                return Results.BadRequest(new ErrorResponse(
-                    $"Song {songSeed} does not play channel {channel + GenerateSongRequest.FirstChannel}."
-                ));
-
-            renderedSong = renderedSong.WithChannelInstruments(Instruments(channelTracks));
-
-            // what the song is made of, which is what the channels of the request name, switched off or not
-            channelInstruments = renderedSong.GetChannelInstruments();
-
-            renderedSong = renderedSong
-                .WithChannelVolumes(Volumes(channelInstruments.Keys, channelTracks, request.SongVolume))
-                .WithoutChannels(SwitchedOff(channelTracks));
+            var song = SongGenerator.GenerateSong(songSeed, overrides);
+            var renderedSong = Render.RenderSong(song, mix);
+            report = SongReport.Of(song, renderedSong, overrides);
 
             stream = new MemoryStream();
             renderedSong.Write(stream, SongsVersion.Label(songSeed, request.Unconventionality));
@@ -70,51 +55,11 @@ public static class SongEndpoints
         // and which songs' version it is, which the page reports with what it tells of the song
         context.Response.Headers["X-Song-Version"] = SongsVersion.Number;
 
-        // and show what every channel plays before a note of it is heard
-        context.Response.Headers["X-Song-Instruments"] = Describe(channelInstruments);
-
-        // and how far it strays from convention, as a step from 0 to 127, and whether it was asked for or drawn, which
-        // the page shows and a supplied one names the song by
-        context.Response.Headers["X-Song-Unconventionality"] = $"{unconventionality} {(request.Unconventionality is null ? "drawn" : "given")}";
+        // and everything the song drew or was given, and which channel plays which part, for the page to show and
+        // set before a note of it is heard
+        context.Response.Headers["X-Song-Settings"] = JsonSerializer.Serialize(report, HeaderJson);
 
         return Results.File(stream, "audio/midi", SongFile.GetName(songSeed, request.Unconventionality));
-    }
-
-    private static Dictionary<byte, int> Instruments(Dictionary<byte, TrackRequest> channelTracks)
-    {
-        return channelTracks
-            .Where(x => x.Value.Instrument.HasValue)
-            .ToDictionary(x => x.Key, x => x.Value.Instrument!.Value);
-    }
-
-    /// <summary>
-    ///     The volume of every channel of the song, since the volume of the song applies to all of them and
-    ///     not only to the channels the request names.
-    /// </summary>
-    private static Dictionary<byte, double> Volumes(
-        IEnumerable<byte> channels,
-        Dictionary<byte, TrackRequest> channelTracks,
-        double songVolume
-    )
-    {
-        return channels.ToDictionary(
-            channel => channel,
-            channel => songVolume * (channelTracks.TryGetValue(channel, out var track) ? track.Volume ?? 1 : 1)
-        );
-    }
-
-    private static List<byte> SwitchedOff(Dictionary<byte, TrackRequest> channelTracks)
-    {
-        return channelTracks.Where(x => !x.Value.IsEnabled).Select(x => x.Key).ToList();
-    }
-
-    /// <summary>"1:40,10:16": the instrument of every channel, with the channels counted from 1.</summary>
-    private static string Describe(ImmutableSortedDictionary<byte, int> channelInstruments)
-    {
-        return string.Join(
-            ",",
-            channelInstruments.Select(x => $"{x.Key + GenerateSongRequest.FirstChannel}:{x.Value}")
-        );
     }
 }
 

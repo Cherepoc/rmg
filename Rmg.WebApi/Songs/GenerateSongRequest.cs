@@ -1,100 +1,139 @@
+using System.Collections.Immutable;
+using Rmg.Core.Composition;
+using Rmg.Core.Rendering;
+using Rmg.Core.Songs;
+
 namespace Rmg.WebApi.Songs;
 
+/// <summary>
+///     A song to generate: its seed, what is given in place of what it draws, and how it is to be heard. Every amount is
+///     a step from 0 to 127, as MIDI's are; anything left out is the song's own.
+/// </summary>
 /// <param name="Seed">
-///     Seed of the song. None asks for a random one, which the response reports back, so a song heard once
-///     can be asked for again.
-/// </param>
-/// <param name="Volume">
-///     How loud the song plays, from 0 to 1 of the volume it plays at unasked. None is 1. It applies to
-///     every track, on top of whatever volume the track has of its own.
-/// </param>
-/// <param name="Tracks">
-///     What to play each track with, in place of what the generator picked. Every channel left out is
-///     played as it was generated.
+///     Seed of the song. None asks for a random one, which the response reports back, so a song heard once can be asked
+///     for again.
 /// </param>
 /// <param name="Unconventionality">
-///     How far the song strays from convention, in steps from 0 for the plainest to 127 for the wildest, used as
-///     given. None lets the song draw its own, which keeps well away from both ends. A seed and a step
-///     name a song as a seed alone does for a drawn one.
+///     How far the song strays from convention, from 0 for the plainest to 127 for the most experimental, which its
+///     facets stray around. None lets the song draw its own, which keeps well away from both ends.
 /// </param>
+/// <param name="Facets">A facet of the unconventionality given outright, by its name, such as "chords".</param>
+/// <param name="Volume">How loud the whole song plays, 127 as it is made. None is 127.</param>
+/// <param name="Parts">A part given, by its role's name: "melody", "chords", "bass", "pad", "counterMelody" or "drum".</param>
+/// <param name="DrumSetup">The drums the song plays: "kit", "kitAndPercussion" or "percussion".</param>
+/// <param name="DrumGroups">A drum group's mix, by its name, such as "kick".</param>
 public sealed record GenerateSongRequest(
     int? Seed = null,
-    double? Volume = null,
-    IReadOnlyList<TrackRequest>? Tracks = null,
-    int? Unconventionality = null
+    int? Unconventionality = null,
+    IReadOnlyDictionary<string, int>? Facets = null,
+    int? Volume = null,
+    IReadOnlyDictionary<string, PartRequest>? Parts = null,
+    string? DrumSetup = null,
+    IReadOnlyDictionary<string, DrumGroupRequest>? DrumGroups = null
 )
 {
-    public const int FirstChannel = 1;
-    public const int LastChannel = 16;
-    public const int LastInstrument = 127;
+    /// <summary>The last step of an amount: MIDI's 0 to 127.</summary>
+    public const int LastStep = 127;
 
-    /// <summary>The wildest step of an unconventionality, which is 1: its steps are MIDI's, 0 to 127.</summary>
-    public const int LastUnconventionality = 127;
+    /// <summary>The middle of a pan's steps, where a part sits in the middle.</summary>
+    public const int MiddlePan = 64;
 
-    /// <summary>The unconventionality asked for, from 0 to 1; none for the song's own.</summary>
-    public double? UnconventionalityValue => Unconventionality / (double)LastUnconventionality;
+    /// <summary>An amount from 0 to 1 as its nearest step.</summary>
+    public static int ToStep(double amount) => (int)Math.Round(amount * LastStep);
 
-    /// <summary>The step nearest to an unconventionality, which is how a drawn one is reported.</summary>
-    public static int ToStep(double unconventionality)
-    {
-        return (int)Math.Round(unconventionality * LastUnconventionality);
-    }
+    /// <summary>A pan from -1, left, to 1, right, as its nearest step, 64 in the middle.</summary>
+    public static int ToPanStep(double pan) => (int)Math.Round(MiddlePan + pan * (pan < 0 ? MiddlePan : LastStep - MiddlePan));
 
-    /// <summary>How loud the song is to play, which is 1 unless it says otherwise.</summary>
-    public double SongVolume => Volume ?? 1;
+    private static double FromPanStep(int step) => (step - MiddlePan) / (double)(step < MiddlePan ? MiddlePan : LastStep - MiddlePan);
 
     /// <summary>
-    ///     Reads the tracks into the channels a written song counts from 0, and checks the rest of the request.
+    ///     Reads the request into what is given in place of the song's draws and how it is to be heard, or says what
+    ///     cannot be read.
     /// </summary>
-    /// <param name="channelTracks">The track asked for on every channel named.</param>
-    /// <param name="error">Why the tracks cannot be read, if they cannot.</param>
-    public bool TryGetChannelTracks(out Dictionary<byte, TrackRequest> channelTracks, out string? error)
+    public bool TryRead(out SongOverrides overrides, out SongMix mix, out string? error)
     {
-        channelTracks = [];
+        (overrides, mix) = (SongOverrides.None, SongMix.None);
 
-        if (!TryReadVolume(Volume, "Song", out error)) return false;
-
-        if (Unconventionality is < 0 or > LastUnconventionality)
-        {
-            error = $"Unconventionality {Unconventionality} is not a step from 0 to {LastUnconventionality}.";
+        if (!TryReadStep(Unconventionality, "Unconventionality", out error) || !TryReadStep(Volume, "Volume", out error))
             return false;
-        }
 
-        foreach (var track in Tracks ?? [])
+        var facets = ImmutableDictionary.CreateBuilder<Facet, double>();
+        foreach (var (name, step) in Facets ?? ImmutableDictionary<string, int>.Empty)
         {
-            if (track.Channel is < FirstChannel or > LastChannel)
-            {
-                error = $"{track.Channel} is not a MIDI channel. "
-                    + $"Channels are {FirstChannel} to {LastChannel}.";
+            if (!Enum.TryParse<Facet>(name, true, out var facet) || !Enum.IsDefined(facet))
+                return Fail($"{name} is not a facet. Facets are {string.Join(", ", Enum.GetNames<Facet>())}.", out error);
+            if (!TryReadStep(step, $"Facet {name}", out error))
                 return false;
-            }
-
-            if (track.Instrument is < 0 or > LastInstrument)
-            {
-                error = $"{track.Instrument} is not a General MIDI instrument. "
-                    + $"Instruments are 0 to {LastInstrument}.";
-                return false;
-            }
-
-            if (!TryReadVolume(track.Volume, $"Channel {track.Channel}", out error)) return false;
-
-            // two ways to play one channel is a request that cannot be answered, not one to answer halfway
-            if (!channelTracks.TryAdd((byte)(track.Channel - FirstChannel), track))
-            {
-                error = $"Channel {track.Channel} appears more than once.";
-                return false;
-            }
+            facets[facet] = step / (double)LastStep;
         }
 
+        var parts = ImmutableDictionary.CreateBuilder<TrackRole, bool>();
+        var partMixes = ImmutableDictionary.CreateBuilder<TrackRole, PartMix>();
+        foreach (var (name, part) in Parts ?? ImmutableDictionary<string, PartRequest>.Empty)
+        {
+            if (!Enum.TryParse<TrackRole>(name, true, out var role) || !Enum.IsDefined(role))
+                return Fail($"{name} is not a part. Parts are {string.Join(", ", Enum.GetNames<TrackRole>())}.", out error);
+            if (!TryReadStep(part.Instrument, $"The {name}'s instrument", out error)
+                || !TryReadStep(part.Volume, $"The {name}'s volume", out error)
+                || !TryReadStep(part.Pan, $"The {name}'s pan", out error))
+                return false;
+            if (part.Plays is { } plays)
+                parts[role] = plays;
+            partMixes[role] = new PartMix(part.Instrument, (part.Volume ?? LastStep) / (double)LastStep, part.Pan is { } pan ? FromPanStep(pan) : null, part.IsOn);
+        }
+
+        if (Enum.GetValues<TrackRole>().All(x => parts.TryGetValue(x, out var plays) && !plays))
+            return Fail("Every part is left out, so there is nothing to play.", out error);
+
+        DrumSetup? drumSetup = null;
+        if (DrumSetup is not null)
+        {
+            if (!Enum.TryParse<DrumSetup>(DrumSetup, true, out var setup) || !Enum.IsDefined(setup))
+                return Fail($"{DrumSetup} is not a drum setup. Setups are {string.Join(", ", Enum.GetNames<DrumSetup>())}.", out error);
+            drumSetup = setup;
+        }
+
+        var groups = ImmutableDictionary.CreateBuilder<string, DrumGroupMix>();
+        foreach (var (name, group) in DrumGroups ?? ImmutableDictionary<string, DrumGroupRequest>.Empty)
+        {
+            var known = SongMix.DrumGroupNames.FirstOrDefault(x => string.Equals(x, name, StringComparison.OrdinalIgnoreCase));
+            if (known is null)
+                return Fail($"{name} is not a drum group. Groups are {string.Join(", ", SongMix.DrumGroupNames)}.", out error);
+            if (!TryReadStep(group.Volume, $"The {name}'s volume", out error))
+                return false;
+            groups[known] = new DrumGroupMix((group.Volume ?? LastStep) / (double)LastStep, group.IsOn);
+        }
+
+        overrides = new SongOverrides(
+            Base: Unconventionality / (double)LastStep,
+            Facets: facets.Count > 0 ? facets.ToImmutable() : null,
+            Parts: parts.Count > 0 ? parts.ToImmutable() : null,
+            DrumSetup: drumSetup
+        );
+        mix = new SongMix((Volume ?? LastStep) / (double)LastStep, partMixes.ToImmutable(), groups.ToImmutable());
         return true;
     }
 
-    private static bool TryReadVolume(double? volume, string what, out string? error)
+    private static bool TryReadStep(int? step, string what, out string? error)
     {
         error = null;
-        if (volume is null or >= 0 and <= 1) return true;
+        return step is null or >= 0 and <= LastStep || Fail($"{what} {step} is not a step from 0 to {LastStep}.", out error);
+    }
 
-        error = $"{what} volume {volume} is not between 0 and 1.";
+    private static bool Fail(string message, out string? error)
+    {
+        error = message;
         return false;
     }
 }
+
+/// <param name="Plays">Whether the part is in the song, given; none for the song to draw it.</param>
+/// <param name="Instrument">The General MIDI program it plays, the drums' kit; none for the song's own.</param>
+/// <param name="Volume">How loud it plays, 127 as it is made; none is 127.</param>
+/// <param name="Pan">Where it sits, from 0, left, through 64, the middle, to 127, right; none for the song's own.</param>
+/// <param name="IsOn">Whether it is written in the file at all, which a part switched off is not.</param>
+public sealed record PartRequest(bool? Plays = null, int? Instrument = null, int? Volume = null, int? Pan = null, bool IsOn = true);
+
+/// <param name="Volume">How loud its drums play, 127 as they are made; none is 127.</param>
+/// <param name="IsOn">Whether its drums are written in the file at all.</param>
+public sealed record DrumGroupRequest(int? Volume = null, bool IsOn = true);

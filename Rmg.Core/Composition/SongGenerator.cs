@@ -218,7 +218,7 @@ public static class SongGenerator
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role)
         );
 
-        return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, songUnconventionality.Base);
+        return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality, [..SongParts.All.Except(absent)], tracks.DrumSetup));
     }
 
     /// <summary>The random sequence a stage of the song of the given seed draws from.</summary>

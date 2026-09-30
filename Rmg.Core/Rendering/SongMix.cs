@@ -14,6 +14,21 @@ public sealed record SongMix(double Volume, ImmutableDictionary<TrackRole, PartM
 {
     /// <summary>The song as it was made.</summary>
     public static SongMix None { get; } = new(1, ImmutableDictionary<TrackRole, PartMix>.Empty, ImmutableDictionary<string, DrumGroupMix>.Empty);
+
+    /// <summary>The names of the drum groups a mix may name.</summary>
+    public static ImmutableArray<string> DrumGroupNames { get; } = [..Composition.DrumGroups.All.Select(x => x.Name)];
+
+    /// <summary>The names of the drum groups the song plays a note of.</summary>
+    public static ImmutableArray<string> DrumGroupsOf(Song song)
+    {
+        return
+        [
+            ..song.TrackDefinitions
+                .Where(x => x.Value is PercussionInstrumentTrack && song.Notes?.GetValueOrDefault(x.Key)?.Count > 0)
+                .Select(x => Composition.DrumGroups.GroupOf(Composition.DrumGroups.GetDrum(x.Key)).Name)
+                .Distinct()
+        ];
+    }
 }
 
 /// <param name="Instrument">The General MIDI program it plays, the drums' kit; none for the song's own.</param>

@@ -1,3 +1,6 @@
+using Rmg.Core.Composition;
+using Rmg.Core.Rendering;
+using Rmg.Core.Songs;
 using Rmg.WebApi.Songs;
 
 namespace Rmg.Tests.WebApi;
@@ -5,139 +8,86 @@ namespace Rmg.Tests.WebApi;
 public sealed class GenerateSongRequestTest
 {
     [Test]
-    public async Task NoTracks_ReadsNone()
+    public async Task NothingGiven_IsTheSongAsItsSeedMakesIt()
     {
-        var request = new GenerateSongRequest(42);
+        var isRead = new GenerateSongRequest(42).TryRead(out var overrides, out var mix, out var error);
 
-        var result = request.TryGetChannelTracks(out var channelTracks, out var error);
-
-        await Assert.That(result).IsTrue();
+        await Assert.That(isRead).IsTrue();
         await Assert.That(error).IsNull();
-        await Assert.That(channelTracks).IsEmpty();
-        await Assert.That(request.SongVolume).IsEqualTo(1);
+        await Assert.That(overrides).IsEqualTo(SongOverrides.None);
+        await Assert.That((mix.Volume, mix.Parts.Count, mix.DrumGroups.Count)).IsEqualTo((1.0, 0, 0));
     }
 
     [Test]
-    public async Task Tracks_AreReadIntoTheChannelsOfAWrittenSong()
+    public async Task EveryStep_ReadsAsItsShareOf127()
     {
         var request = new GenerateSongRequest(
             42,
-            Tracks: [new TrackRequest(1, 40), new TrackRequest(10, Volume: 0.5, IsEnabled: false)]
+            Unconventionality: 127,
+            Facets: new Dictionary<string, int> { ["chords"] = 0 },
+            Volume: 64,
+            Parts: new Dictionary<string, PartRequest> { ["bass"] = new(Plays: false, Instrument: 73, Volume: 127, Pan: 0), ["counterMelody"] = new(Plays: true, Pan: 127) },
+            DrumSetup: "percussion",
+            DrumGroups: new Dictionary<string, DrumGroupRequest> { ["kick"] = new(Volume: 0, IsOn: false) }
         );
 
-        var result = request.TryGetChannelTracks(out var channelTracks, out var error);
-
-        await Assert.That(result).IsTrue();
-        await Assert.That(error).IsNull();
-        await Check.That(channelTracks.Keys).IsEquivalentTo(new byte[] { 0, 9 });
-        await Assert.That(channelTracks[0].Instrument).IsEqualTo(40);
-        await Assert.That(channelTracks[9].Volume).IsEqualTo(0.5);
-        await Assert.That(channelTracks[9].IsEnabled).IsFalse();
+        await Assert.That(request.TryRead(out var overrides, out var mix, out _)).IsTrue();
+        await Assert.That(overrides.Base).IsEqualTo(1.0);
+        await Assert.That(overrides.Facets![Facet.Chords]).IsEqualTo(0.0);
+        await Assert.That(overrides.Parts!.ToArray()).IsEquivalentTo(new[] { KeyValuePair.Create(TrackRole.Bass, false), KeyValuePair.Create(TrackRole.CounterMelody, true) });
+        await Assert.That(overrides.DrumSetup).IsEqualTo(DrumSetup.Percussion);
+        await Assert.That(mix.Volume).IsEqualTo(64 / 127.0);
+        await Assert.That(mix.Parts[TrackRole.Bass]).IsEqualTo(new PartMix(73, 1, -1, true));
+        await Assert.That(mix.Parts[TrackRole.CounterMelody].Pan).IsEqualTo(1.0);
+        await Assert.That(mix.DrumGroups["Kick"]).IsEqualTo(new DrumGroupMix(0, false));
     }
 
     [Test]
-    public async Task TrackIsEnabledUnlessItSaysOtherwise()
-    {
-        var request = new GenerateSongRequest(42, Tracks: [new TrackRequest(1)]);
-
-        request.TryGetChannelTracks(out var channelTracks, out _);
-
-        await Assert.That(channelTracks[0].IsEnabled).IsTrue();
-        await Assert.That(channelTracks[0].Volume).IsNull();
-        await Assert.That(channelTracks[0].Instrument).IsNull();
-    }
-
-    [Test]
-    [Arguments(0)]
-    [Arguments(17)]
-    [Arguments(-1)]
-    public async Task ChannelOutsideMidi_Fails(int channel)
-    {
-        var request = new GenerateSongRequest(42, Tracks: [new TrackRequest(channel, 40)]);
-
-        var result = request.TryGetChannelTracks(out _, out var error);
-
-        await Assert.That(result).IsFalse();
-        await Assert.That(error).IsEqualTo($"{channel} is not a MIDI channel. Channels are 1 to 16.");
-    }
-
-    [Test]
-    [Arguments(-1)]
-    [Arguments(128)]
-    public async Task InstrumentOutsideGeneralMidi_Fails(int instrument)
-    {
-        var request = new GenerateSongRequest(42, Tracks: [new TrackRequest(1, instrument)]);
-
-        var result = request.TryGetChannelTracks(out _, out var error);
-
-        await Assert.That(result).IsFalse();
-        await Assert.That(error)
-            .IsEqualTo($"{instrument} is not a General MIDI instrument. Instruments are 0 to 127.");
-    }
-
-    [Test]
-    [Arguments(-0.5)]
-    [Arguments(1.5)]
-    public async Task TrackVolumeOutsideItsRange_Fails(double volume)
-    {
-        var request = new GenerateSongRequest(42, Tracks: [new TrackRequest(1, Volume: volume)]);
-
-        var result = request.TryGetChannelTracks(out _, out var error);
-
-        await Assert.That(result).IsFalse();
-        await Assert.That(error).IsEqualTo($"Channel 1 volume {volume} is not between 0 and 1.");
-    }
-
-    [Test]
-    public async Task SongVolumeOutsideItsRange_Fails()
-    {
-        var request = new GenerateSongRequest(42, 2);
-
-        var result = request.TryGetChannelTracks(out _, out var error);
-
-        await Assert.That(result).IsFalse();
-        await Assert.That(error).IsEqualTo("Song volume 2 is not between 0 and 1.");
-    }
-
-    [Test]
-    public async Task ChannelAskedTwice_Fails()
-    {
-        var request = new GenerateSongRequest(42, Tracks: [new TrackRequest(1, 40), new TrackRequest(1, 41)]);
-
-        var result = request.TryGetChannelTracks(out _, out var error);
-
-        await Assert.That(result).IsFalse();
-        await Assert.That(error).IsEqualTo("Channel 1 appears more than once.");
-    }
-
-    [Test]
-    [Arguments(0, 0.0)]
+    [Arguments(0, -1.0)]
+    [Arguments(64, 0.0)]
     [Arguments(127, 1.0)]
-    public async Task AnUnconventionalityStep_ReachesBothEnds(int step, double value)
+    public async Task APan_ReachesBothSides_AndTheMiddle(int step, double pan)
     {
-        var request = new GenerateSongRequest(42, Unconventionality: step);
+        var request = new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["melody"] = new(Pan: step) });
 
-        await Assert.That(request.TryGetChannelTracks(out _, out _)).IsTrue();
-        await Assert.That(request.UnconventionalityValue).IsEqualTo(value);
-        await Assert.That(GenerateSongRequest.ToStep(value)).IsEqualTo(step);
+        request.TryRead(out _, out var mix, out _);
+
+        await Assert.That(mix.Parts[TrackRole.Melody].Pan).IsEqualTo(pan);
+        await Assert.That(GenerateSongRequest.ToPanStep(pan)).IsEqualTo(step);
     }
 
     [Test]
-    public async Task NoUnconventionality_LeavesTheSongsOwn()
+    public async Task EveryPartLeftOut_IsRefused()
     {
-        await Assert.That(new GenerateSongRequest(42).UnconventionalityValue).IsNull();
+        var parts = Enum.GetNames<TrackRole>().ToDictionary(x => x, _ => new PartRequest(Plays: false));
+
+        await Assert.That(new GenerateSongRequest(Parts: parts).TryRead(out _, out _, out var error)).IsFalse();
+        await Assert.That(error).Contains("nothing to play");
     }
 
     [Test]
-    [Arguments(-1)]
-    [Arguments(128)]
-    public async Task UnconventionalityOutsideItsSteps_Fails(int step)
+    [Arguments("unconventionality")]
+    [Arguments("facet")]
+    [Arguments("unknownFacet")]
+    [Arguments("part")]
+    [Arguments("instrument")]
+    [Arguments("setup")]
+    [Arguments("group")]
+    public async Task AnythingOutOfItsRange_OrUnknown_IsRefused(string what)
     {
-        var request = new GenerateSongRequest(42, Unconventionality: step);
+        var request = what switch
+        {
+            "unconventionality" => new GenerateSongRequest(Unconventionality: 128),
+            "facet" => new GenerateSongRequest(Facets: new Dictionary<string, int> { ["feel"] = -1 }),
+            "unknownFacet" => new GenerateSongRequest(Facets: new Dictionary<string, int> { ["tempo"] = 1 }),
+            "part" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["kazoo"] = new() }),
+            "instrument" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["bass"] = new(Instrument: 128) }),
+            "setup" => new GenerateSongRequest(DrumSetup: "orchestra"),
+            "group" => new GenerateSongRequest(DrumGroups: new Dictionary<string, DrumGroupRequest> { ["gong"] = new() }),
+            _ => throw new ArgumentOutOfRangeException(nameof(what))
+        };
 
-        var result = request.TryGetChannelTracks(out _, out var error);
-
-        await Assert.That(result).IsFalse();
-        await Assert.That(error).Contains("Unconventionality");
+        await Assert.That(request.TryRead(out _, out _, out var error)).IsFalse();
+        await Assert.That(error).IsNotNull();
     }
 }
