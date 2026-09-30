@@ -45,7 +45,7 @@ internal static class Realizer
             var notes = GetNoteStates(trackEventStateTimelineMap, track, commonStateTimelineMap);
             tracks[trackNumber] = track switch
             {
-                PitchInstrumentTrack pitchInstrumentTrack => RealizePitchTrack(pitchInstrumentTrack, notes, changes),
+                PitchInstrumentTrack pitchInstrumentTrack => RealizeStruck(pitchInstrumentTrack, trackEventStateTimelineMap, commonStateTimelineMap, changes),
                 PercussionInstrumentTrack percussionInstrumentTrack => RealizePercussionTrack(percussionInstrumentTrack, notes),
                 _ => throw new ArgumentException($"Track {trackNumber} is of no kind that plays.", nameof(trackDefinitions))
             };
@@ -97,9 +97,67 @@ internal static class Realizer
         return (chord, chordSteps, chordSteps.Select(x => chord.GetPitch(x).Mod(OctaveNoteCount)).ToHashSet());
     }
 
+    /// <summary>
+    ///     A pitched track's notes, where a note of the chords or the bass that would sound across a change of chord stops
+    ///     there and is struck again on the change, over the new chord, as a player strikes a new chord where it comes: the
+    ///     bass's on the new root, as the bass lands most often, and the chords' in the shape of their next note, which
+    ///     their pool picked for the new chord, voiced from the chord before. Only where the track plays on within a bar
+    ///     of the change, and for the chords where their next note is of the same chord: a part that stops, for a rest or
+    ///     a section it sits out, only stops. Again until no note sounds across a change, as a struck note may sound across
+    ///     the next.
+    /// </summary>
+    private static EventTimeline<RealizedNote> RealizeStruck(
+        PitchInstrumentTrack track,
+        EventStateTimelineMap<StateMap> raw,
+        StateTimelineMap commonStateTimelineMap,
+        ImmutableArray<double> changes
+    )
+    {
+        while (true)
+        {
+            var realized = RealizePitchTrack(track, GetNoteStates(raw, track, commonStateTimelineMap), changes, out var crossings);
+            if (crossings.Count == 0 || track.Role is not (TrackRole.Chords or TrackRole.Bass))
+                return realized;
+
+            var events = raw.EventTimeline;
+            var struck = new List<TimelineItem<StateMap>>();
+            foreach (var (index, change) in crossings)
+            {
+                if (index + 1 >= events.Count || events[index + 1].Position >= change + Meter.BarDuration - 1e-9)
+                    continue;
+
+                var (note, next) = (events[index].Value, events[index + 1]);
+                // the new root in the octave of the note it goes on from, a line's step counting whole octaves of the scale
+                if (track.Role == TrackRole.Bass)
+                {
+                    var octave = (int)Math.Round(note.GetStateValue(StateKinds.ScaleStep) / (double)Scales.StepCount);
+                    struck.Add(note.With(StateKinds.ScaleStep, octave * Scales.StepCount).With(StateKinds.Alteration, 0).ToTimelineItem(change));
+                }
+                else if (next.Position < change + UntilChange(changes, change) - 1e-9)
+                    struck.Add(note
+                        .Except([StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed])
+                        .MergeWith(next.Value.Subset([StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed]))
+                        .ToTimelineItem(change));
+            }
+
+            if (struck.Count == 0)
+                return realized;
+            raw = raw.WithEvents(EventTimeline.Create(events.Duration, [..events, ..struck]));
+        }
+    }
+
     /// <summary>A pitched track's notes: its chords each placed from the one before, and a line's as it was placed.</summary>
     /// <param name="changes">Where the song's chords change, in order.</param>
-    private static EventTimeline<RealizedNote> RealizePitchTrack(PitchInstrumentTrack track, EventTimeline<StateMap> eventStateTimelineMap, ImmutableArray<double> changes)
+    /// <param name="crossings">
+    ///     The notes, by their index, that would sound across a change of chord with no note on it, and the change, which
+    ///     they stop at.
+    /// </param>
+    private static EventTimeline<RealizedNote> RealizePitchTrack(
+        PitchInstrumentTrack track,
+        EventTimeline<StateMap> eventStateTimelineMap,
+        ImmutableArray<double> changes,
+        out List<(int Index, double Change)> crossings
+    )
     {
         var absoluteMinOctave = track.MinOctaveOffset + ZeroOctaveOffset;
         var octaveCount = track.MaxOctaveOffset - track.MinOctaveOffset + 1;
@@ -112,8 +170,15 @@ internal static class Realizer
         );
         var items = eventStateTimelineMap.WithDurations().ToArray();
         var notes = new TimelineItem<RealizedNote>[items.Length];
+        crossings = [];
         for (var i = 0; i < items.Length; i++)
-            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, changes);
+        {
+            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, changes, out var unclipped);
+            var change = items[i].Position + UntilChange(changes, items[i].Position);
+            var next = i + 1 < items.Length ? items[i + 1].Position : double.PositiveInfinity;
+            if (items[i].Position + unclipped > change + 1e-9 && next > change + 1e-9)
+                crossings.Add((i, change));
+        }
 
         return EventTimeline.Create(eventStateTimelineMap.Duration, notes);
     }
@@ -161,7 +226,8 @@ internal static class Realizer
         TimelineItem<WithDuration<StateMap>> timelineItemWithDuration,
         VoiceLeader voiceLeader,
         TrackRole role,
-        ImmutableArray<double> changes
+        ImmutableArray<double> changes,
+        out double unclipped
     )
     {
         var position = timelineItemWithDuration.Position;
@@ -187,6 +253,8 @@ internal static class Realizer
         var duration = nextNoteDuration.WeightedAverage(nextNoteDurationFactor, quarterNoteDuration);
         // a melody sings one note at a time, so a note ends by the next, unless it is held, as a phrase's last note is
         var heldDuration = stateMap.GetStateValue(StateKinds.HeldDuration);
+        // how long it would sound but for a change of chord, which a held note, as a phrase's or an ending's, is not cut by
+        unclipped = heldDuration > 0 ? 0 : duration;
         if (heldDuration > 0)
             duration = heldDuration;
         else if (role is TrackRole.Melody or TrackRole.CounterMelody)

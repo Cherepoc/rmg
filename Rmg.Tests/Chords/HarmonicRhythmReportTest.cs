@@ -24,6 +24,25 @@ public sealed class HarmonicRhythmReportTest
     }
 
     [Test]
+    public async Task TheChordsAndTheBass_StrikeMostChanges_InTheirRange()
+    {
+        var (played, struck) = (0, 0);
+        foreach (var song in TestCorpus.Range(20))
+        foreach (var track in new[] { SongTracks.ChordsTrack, SongTracks.BassTrack })
+        {
+            var notes = song.Song.Notes![track];
+            var (low, high) = Realizer.GetRange((Rmg.Core.Songs.PitchInstrumentTrack)song.Song.TrackDefinitions[track]);
+            await Assert.That(notes.All(x => x.Value.Pitches.All(p => p >= low - 12 && p <= high + 12))).IsTrue().Because($"seed {song.Seed}, track {track}");
+
+            var onsets = notes.Select(x => Math.Round(x.Position, 6)).ToHashSet();
+            var through = song.ChordChanges.Where(x => x > notes[0].Position && x < notes[^1].Position).ToArray();
+            (played, struck) = (played + through.Length, struck + through.Count(x => onsets.Contains(Math.Round(x, 6))));
+        }
+
+        await Assert.That(struck / (double)played).IsGreaterThan(0.8);
+    }
+
+    [Test]
     [Explicit]
     public async Task Report()
     {

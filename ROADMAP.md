@@ -19,7 +19,7 @@ measured before and after by a report test, by the measure its entry names.
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
 **Later** (P2), roughly in this order: pitched fills (see *Fills*), once a fill can draw a line's notes; the ratings report (see *Listening data*), once the dashboard shows songs
-rated enough; a note held into a change, struck again (see *Chords*); occasional chords and a pentatonic melody (see *Instruments*, *Scales*); half time and double time (see *Groove*);
+rated enough; occasional chords and a pentatonic melody (see *Instruments*, *Scales*); half time and double time (see *Groove*);
 the melody's contour (see *Melody*); styles (see *Styles*); the song's memory (see
 *Architecture*), once the arrangement doubles the tracks.
 
@@ -142,11 +142,11 @@ two bars, at an energy of -0.26 on average, 52% every bar (0.05) and 21% every h
 and 62% of its changes by its instrument, off the new chord 1 to 3%, the melody's chord notes on the beat 88% against
 90% (`HarmonicRhythmReportTest`, `BassLeadingReportTest`).
 
-- **A note held into a change, struck again** (P2): the chords and the bass strike 77% of the changes they play
-  through; a note that would sound across a change now stops there, leaving the new chord unstruck until the track's
-  next note, where a player would strike it again on the change, or anticipate it from a push just before. Only
-  `Realizer` knows a note's length, so the note split there, its second part over the chord at the change. Measured
-  by: the changes struck, towards all.
+- **A note held into a change, struck again** (built): a note of the chords or the bass that would sound across a
+  change stops there and is struck again on it, where the track plays on within a bar (`Realizer.RealizeStruck`): the
+  bass on the new root in the octave it was in, the chords in the shape of their next note where it is of the same
+  chord, voiced from the chord before. The chords strike 87% of the changes they play through and the bass 90%, where
+  they struck 77% (`HarmonicRhythmReportTest`); the bass leads into its changes as before (`BassLeadingReportTest`).
 - **The span by tempo:** a chord every half bar at 175 BPM lasts 0.7 s, and every two bars at 90 BPM 5.3 s; should
   either sound hurried or static, lean the span by its length in seconds.
 
