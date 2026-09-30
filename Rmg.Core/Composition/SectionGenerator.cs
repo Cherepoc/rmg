@@ -118,7 +118,8 @@ internal sealed class SectionGenerator
         // how often its chords change, from a sequence of its own, faster the more energy it has
         var harmonicRhythm = HarmonicRhythm.Draw(Stream(sectionId, SectionStream.HarmonicRhythm), tilt, _meter);
         StateTrace.Record(TracePoints.HarmonicRhythm, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{harmonicRhythm.Span}", harmonicRhythm);
-        var progression = Progressions.Generate(context, scale, home, unconventionality.ProgressionStrictness, harmonicRhythm.Count);
+        var progression = Progressions.Generate(context, scale, home, Progressions.Strictness.At(facets[Facet.Progression]), harmonicRhythm.Count);
+        StateTrace.Record(TracePoints.Progression, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", progression), progression);
 
         var sectionStateMap = CreateSectionStateMap(
             songStateMap,

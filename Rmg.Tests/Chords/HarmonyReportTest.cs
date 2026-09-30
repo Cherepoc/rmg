@@ -16,7 +16,8 @@ public sealed class HarmonyReportTest
 
     private sealed record SectionChords(int Band, ImmutableArray<(string Place, int Level)> Chords);
 
-    private sealed record SongHarmony(int Band, string Scale, int Sections, int OtherScales, int Pentatonic, bool KeyChange, ImmutableArray<SectionChords> SectionChords);
+    private sealed record SongHarmony(int Band, string Scale, int Sections, int OtherScales, int Pentatonic, bool KeyChange, ImmutableArray<SectionChords> SectionChords,
+        ImmutableArray<(int Band, ImmutableArray<int> Roots)> Progressions);
 
     // a harmony's place on the unconventionality's scale, in fifths: its chords facet for its chords, and its anchor over
     // the chords' levels for the scales, the key change and the pentatonic melodies, which it leans until they go by
@@ -37,6 +38,14 @@ public sealed class HarmonyReportTest
         {
             var levels = band.SelectMany(x => x.Chords).Where(x => x.Place == place).Select(x => x.Level).ToArray();
             Console.WriteLine($"  {place,-8} {band.Key}/5, {levels.Length,5} chords: {string.Join(" ", Enumerable.Range(0, ChordShapes.MaxUnconventionality + 1).Select(l => $"{l}:{levels.Count(x => x == l) / (double)Math.Max(1, levels.Length):P0}"))}");
+        }
+
+        Console.WriteLine("progressions' roots, in steps above the home, by the section's progression facet, in fifths:");
+        foreach (var band in songs.SelectMany(x => x.Progressions).GroupBy(x => x.Band).OrderBy(x => x.Key))
+        {
+            var roots = band.SelectMany(x => x.Roots.Skip(1).SkipLast(1)).ToArray();
+            Console.WriteLine($"  {band.Key}/5, {band.Count()} sections, {roots.Length} chords between home and cadence: " +
+                              $"{string.Join(" ", roots.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Count() / (double)roots.Length:P0}"))}");
         }
 
         Console.WriteLine("by the song's harmonic anchor, in fifths:");
@@ -81,6 +90,10 @@ public sealed class HarmonyReportTest
                 return new SectionChords(ChordsBand(sectionHarmony[section.Key]), [..played]);
             });
 
-        return new SongHarmony(AnchorBand(harmony), scale.Name, scales.Length, scales.Count(x => x != scale), pentatonic, keyChange, [..chords]);
+        var facets = song.Trace.Where(x => x.Point == TracePoints.SectionUnconventionality).ToDictionary(x => x.Section, x => (Unconventionality)x.Value!);
+        var progressions = song.Trace.Where(x => x.Point == TracePoints.Progression)
+            .Select(x => (Math.Clamp((int)(facets[x.Section][Facet.Progression] * 5), 0, 4), (ImmutableArray<int>)x.Value!));
+
+        return new SongHarmony(AnchorBand(harmony), scale.Name, scales.Length, scales.Count(x => x != scale), pentatonic, keyChange, [..chords], [..progressions]);
     }
 }

@@ -36,6 +36,9 @@ internal static class TracePoints
     /// <summary>How far a section strays from convention, every facet (an <see cref="Unconventionality" />).</summary>
     public const string SectionUnconventionality = "Section unconventionality";
 
+    /// <summary>A section's progression, its chords' roots in steps above its home (an <c>ImmutableArray</c> of <c>int</c>).</summary>
+    public const string Progression = "Progression";
+
     /// <summary>How far a song's harmony strays from convention (a <see cref="HarmonicUnconventionality" />), and its scale.</summary>
     public const string SongHarmony = "Song harmony";
 

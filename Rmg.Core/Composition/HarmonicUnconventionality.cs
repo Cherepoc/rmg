@@ -6,10 +6,10 @@ namespace Rmg.Core.Composition;
 /// <summary>
 ///     How far the harmony of a song or a section strays from convention. Its chords' shapes by the chords facet of its
 ///     unconventionality (<see cref="Chords" />), from 0 to 1, through the levels' plain, tuned and wild weights
-///     (<see cref="ChordShapes.Levels" />); its progressions' strictness and its scales still by its anchor, from 0, the
-///     most conventional, to <see cref="ChordShapes.MaxUnconventionality" />, until they go by facets of their own.
+///     (<see cref="ChordShapes.Levels" />); its scales still by its anchor, from 0, the most conventional, to
+///     <see cref="ChordShapes.MaxUnconventionality" />, until they go by a facet of their own.
 /// </summary>
-/// <param name="Anchor">How strict its progressions are and how often a section plays another scale.</param>
+/// <param name="Anchor">How often a section plays another scale.</param>
 /// <param name="Chords">The chords facet of its unconventionality, from 0 to 1.</param>
 public sealed record HarmonicUnconventionality(double Anchor, double Chords)
 {
@@ -65,10 +65,4 @@ public sealed record HarmonicUnconventionality(double Anchor, double Chords)
     {
         return new Chord([..ChordVoicing.Apply(context, shape).Select(x => x / 12)], shape.IsVoicingFixed, shape);
     }
-
-    /// <summary>
-    ///     How closely the progressions keep to their rules (see <see cref="Progressions" />): 1 for an anchor of 0,
-    ///     falling evenly to 0 for an anchor at the most unconventional level, where every root is as likely.
-    /// </summary>
-    public double ProgressionStrictness => Math.Clamp(1 - Anchor / ChordShapes.MaxUnconventionality, 0, 1);
 }

@@ -111,7 +111,8 @@ tuned and wild weights (`ByConvention`), in place of the rhythm's and the harmon
    90% triads and level 1, the wildest 83% levels 3 to 5): a chord's level a choice by the chords facet, the plain end triads and the colours of level 1, a few
    of level 2, the wild end levels 2 to 5, rising; the home chord and the cadence choices of their own, with plainer
    tuned weights and the same ends; the anchor, peak and skew gone; the tuned weights the corpus's levels.
-5. **The progressions' strictness** by the progression facet.
+5. **The progressions' strictness** by the progression facet (built, `Progressions.Strictness`, 0.77 at the middle as
+   the corpus's mean: the wildest fifth of sections' roots between 12 and 19% each, the plainest's favourites at 25%).
 6. **The scales:** the plain end major and natural minor, Mixolydian and Dorian a little; the wild end harmonic minor,
    Phrygian and Lydian, Mixolydian and Dorian a little; the sections' scale changes a chance by the rule, in place of
    one multiplied by hand.

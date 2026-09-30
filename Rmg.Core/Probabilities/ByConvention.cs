@@ -3,11 +3,12 @@ using System.Collections.Immutable;
 namespace Rmg.Core.Probabilities;
 
 /// <summary>
-///     An option's weight, or a chance, by conventionality: <see cref="Plain" /> at 0, the plainest, where only what
-///     convention allows plays; <see cref="Tuned" /> at 0.5, as the generator is tuned; and <see cref="Wild" /> at 1, the
-///     wildest. A weight of 0 at an end leaves the option out there, and a chance of 1 has it happen every time. Between,
-///     the value follows a smooth curve through the three, which never leaves the range between its neighbours, so that
-///     it only rises or only falls between two of them and is never below 0.
+///     An option's weight, a chance or a value, such as how strictly a progression keeps to its rules, by
+///     conventionality: <see cref="Plain" /> at 0, the plainest, where only what convention allows plays; <see
+///     cref="Tuned" /> at 0.5, as the generator is tuned; and <see cref="Wild" /> at 1, the wildest. A weight of 0 at
+///     an end leaves the option out there, and a chance of 1 has it happen every time. Between, the value follows a
+///     smooth curve through the three, which never leaves the range between its neighbours, so that it only rises or
+///     only falls between two of them and is never below 0.
 /// </summary>
 public readonly record struct ByConvention(double Plain, double Tuned, double Wild)
 {

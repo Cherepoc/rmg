@@ -133,15 +133,11 @@ public sealed class ProgressionsTest
     }
 
     [Test]
-    [Arguments(0.0, 1.0)]
-    [Arguments(2.5, 0.5)]
-    [Arguments(5.0, 0.0)]
-    [Arguments(6.0, 0.0)]
-    public async Task Strictness_FallsWithTheAnchor(double anchor, double expected)
+    public async Task Strictness_KeepsToEveryRuleAtThePlainEnd_ToNoneAtTheWild_AndAsTheCorpusDidBetween()
     {
-        var unconventionality = new HarmonicUnconventionality(anchor, 0.5);
-
-        await Assert.That(unconventionality.ProgressionStrictness).IsEqualTo(expected).Within(1e-9);
+        await Assert.That(Rmg.Core.Composition.Progressions.Strictness.At(0)).IsEqualTo(1);
+        await Assert.That(Rmg.Core.Composition.Progressions.Strictness.At(0.5)).IsEqualTo(0.77).Within(1e-9);
+        await Assert.That(Rmg.Core.Composition.Progressions.Strictness.At(1)).IsEqualTo(0);
     }
 
     [Test]
