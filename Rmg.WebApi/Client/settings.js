@@ -26,7 +26,7 @@ export const PLAYS = ["random", "on", "off"];
 
 const BITS = 8 + FACETS.length * 8 + PARTS.length * (2 + 8 + 7 + 8 + 1) + 2 + DRUM_GROUPS.length * 8 + 7;
 const LENGTH = Math.ceil(BITS / Math.log2(62));
-const SEED_LENGTH = 6;
+const SEED_LENGTH = 11;
 
 function encode(number, length) {
     const digits = [];
@@ -47,16 +47,15 @@ function decode(text) {
     return number;
 }
 
-/** A seed as its letters and digits, its 32 bits read as unsigned, with no zeros in front. */
-export function seedToText(seed) {
-    return encode(BigInt(seed >>> 0), SEED_LENGTH).replace(/^0+(?=.)/, "");
-}
-
-/** The seed the letters and digits write, or null for anything that is not one. */
-export function textToSeed(text) {
+/**
+ *     A seed as the page keeps it: its letters and digits, all 64 of its bits, with no zeros in front, which is how the
+ *     server writes it; null for anything that is not a seed. A seed never becomes a JavaScript number, which holds 53
+ *     bits exactly and no more.
+ */
+export function readSeed(text) {
     if (typeof text !== "string" || text.length === 0 || text.length > SEED_LENGTH) return null;
     const number = decode(text);
-    return number !== null && number <= 0xFFFFFFFFn ? Number(BigInt.asIntN(32, number)) : null;
+    return number !== null && number <= 0xFFFFFFFFFFFFFFFFn ? encode(number, SEED_LENGTH).replace(/^0+(?=.)/, "") : null;
 }
 
 function writer() {

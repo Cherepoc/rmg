@@ -26,7 +26,12 @@ public sealed class FakeGenerationContext : IGenerationContext
         throw new NotImplementedException();
     }
 
-    public IGenerationContext CreateContext(int seed)
+    public ulong GenerateSeed()
+    {
+        throw new NotImplementedException();
+    }
+
+    public IGenerationContext CreateContext(ulong seed)
     {
         throw new NotImplementedException();
     }

@@ -23,7 +23,7 @@ public sealed class SectionBrushTest
         {
             for (var seed = 0; seed < 200; seed++)
             {
-                var result = brush.Paint(distinct, length, new GenerationContext(seed));
+                var result = brush.Paint(distinct, length, new GenerationContext((ulong)seed));
 
                 await Assert.That(result.Length).IsEqualTo(length);
                 await Assert.That(result.Distinct().Count()).IsEqualTo(distinct);

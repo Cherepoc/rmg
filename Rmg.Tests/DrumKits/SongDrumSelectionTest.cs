@@ -10,7 +10,7 @@ public sealed class SongDrumSelectionTest
 
     private static ImmutableArray<PercussionInstrumentDefinition> SongDrums(int seed, DrumSetup setup = DrumSetup.KitAndPercussion)
     {
-        return DrumSetups.SelectSongDrums(new GenerationContext(seed), setup);
+        return DrumSetups.SelectSongDrums(new GenerationContext((ulong)seed), setup);
     }
 
     private static PercussionInstrumentDefinition[] MainSnares =>
@@ -36,7 +36,7 @@ public sealed class SongDrumSelectionTest
 
         foreach (var seed in Seeds)
         {
-            var context = new GenerationContext(seed);
+            var context = new GenerationContext((ulong)seed);
             var kit = DrumKitGenerator.SelectKit(context, SongDrums(seed), default, false);
 
             await Assert.That(kit.Leads.Any(DrumGroups.Calls.Drums.Contains)).IsFalse();
@@ -114,7 +114,7 @@ public sealed class SongDrumSelectionTest
     public async Task MostSongs_PlayTheKitAlone_AFew_PercussionAlone_TheMoreTheWilder()
     {
         double Share(DrumSetup setup, double unconventionality) => Seeds.Count(seed =>
-            DrumSetups.Pick(new GenerationContext(seed), unconventionality) == setup) / (double)Seeds.Count();
+            DrumSetups.Pick(new GenerationContext((ulong)seed), unconventionality) == setup) / (double)Seeds.Count();
 
         await Assert.That(Share(DrumSetup.Kit, 0.5)).IsBetween(0.55, 0.7);
         await Assert.That(Share(DrumSetup.Percussion, 0.5)).IsBetween(0.02, 0.09);
@@ -144,7 +144,7 @@ public sealed class SongDrumSelectionTest
     {
         foreach (var seed in Seeds)
         {
-            var context = new GenerationContext(seed);
+            var context = new GenerationContext((ulong)seed);
             var songDrums = DrumSetups.SelectSongDrums(context, DrumSetup.KitAndPercussion);
 
             for (var i = 0; i < 5; i++)
@@ -161,7 +161,7 @@ public sealed class SongDrumSelectionTest
     {
         foreach (var seed in Seeds)
         {
-            var context = new GenerationContext(seed);
+            var context = new GenerationContext((ulong)seed);
             var songDrums = DrumSetups.SelectSongDrums(context, DrumSetup.KitAndPercussion);
             var usedMainSnares = Enumerable.Range(0, 20)
                 .SelectMany(_ => DrumKitGenerator.SelectKit(context, songDrums, default, false).Drums)

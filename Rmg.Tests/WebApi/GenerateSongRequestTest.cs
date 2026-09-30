@@ -10,10 +10,11 @@ public sealed class GenerateSongRequestTest
     [Test]
     public async Task NothingGiven_IsTheSongAsItsSeedMakesIt()
     {
-        var isRead = new GenerateSongRequest(42).TryRead(out var overrides, out var mix, out var error);
+        var isRead = new GenerateSongRequest("g").TryRead(out var seed, out var overrides, out var mix, out var error);
 
         await Assert.That(isRead).IsTrue();
         await Assert.That(error).IsNull();
+        await Assert.That(seed).IsEqualTo(42UL);
         await Assert.That(overrides).IsEqualTo(SongOverrides.None);
         await Assert.That((mix.Volume, mix.Parts.Count, mix.DrumGroups.Count)).IsEqualTo((1.0, 0, 0));
     }
@@ -22,7 +23,7 @@ public sealed class GenerateSongRequestTest
     public async Task EveryStep_ReadsAsItsShareOf127()
     {
         var request = new GenerateSongRequest(
-            42,
+            "g",
             Unconventionality: 127,
             Facets: new Dictionary<string, int> { ["chords"] = 0 },
             Volume: 64,
@@ -31,7 +32,7 @@ public sealed class GenerateSongRequestTest
             DrumGroups: new Dictionary<string, DrumGroupRequest> { ["kick"] = new(Volume: 0, IsOn: false) }
         );
 
-        await Assert.That(request.TryRead(out var overrides, out var mix, out _)).IsTrue();
+        await Assert.That(request.TryRead(out _, out var overrides, out var mix, out _)).IsTrue();
         await Assert.That(overrides.Base).IsEqualTo(1.0);
         await Assert.That(overrides.Facets![Facet.Chords]).IsEqualTo(0.0);
         await Assert.That(overrides.Parts!.ToArray()).IsEquivalentTo(new[] { KeyValuePair.Create(TrackRole.Bass, false), KeyValuePair.Create(TrackRole.CounterMelody, true) });
@@ -50,7 +51,7 @@ public sealed class GenerateSongRequestTest
     {
         var request = new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["melody"] = new(Pan: step) });
 
-        request.TryRead(out _, out var mix, out _);
+        request.TryRead(out _, out _, out var mix, out _);
 
         await Assert.That(mix.Parts[TrackRole.Melody].Pan).IsEqualTo(pan);
         await Assert.That(GenerateSongRequest.ToPanStep(pan)).IsEqualTo(step);
@@ -61,7 +62,7 @@ public sealed class GenerateSongRequestTest
     {
         var parts = Enum.GetNames<TrackRole>().ToDictionary(x => x, _ => new PartRequest(Plays: false));
 
-        await Assert.That(new GenerateSongRequest(Parts: parts).TryRead(out _, out _, out var error)).IsFalse();
+        await Assert.That(new GenerateSongRequest(Parts: parts).TryRead(out _, out _, out _, out var error)).IsFalse();
         await Assert.That(error).Contains("nothing to play");
     }
 
@@ -73,6 +74,7 @@ public sealed class GenerateSongRequestTest
     [Arguments("instrument")]
     [Arguments("setup")]
     [Arguments("group")]
+    [Arguments("seed")]
     public async Task AnythingOutOfItsRange_OrUnknown_IsRefused(string what)
     {
         var request = what switch
@@ -84,10 +86,11 @@ public sealed class GenerateSongRequestTest
             "instrument" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["bass"] = new(Instrument: 128) }),
             "setup" => new GenerateSongRequest(DrumSetup: "orchestra"),
             "group" => new GenerateSongRequest(DrumGroups: new Dictionary<string, DrumGroupRequest> { ["gong"] = new() }),
+            "seed" => new GenerateSongRequest("zzzzzzzzzzzz"),
             _ => throw new ArgumentOutOfRangeException(nameof(what))
         };
 
-        await Assert.That(request.TryRead(out _, out _, out var error)).IsFalse();
+        await Assert.That(request.TryRead(out _, out _, out _, out var error)).IsFalse();
         await Assert.That(error).IsNotNull();
     }
 }

@@ -29,7 +29,7 @@ public sealed class DrumRolesTest
     }
 
     [Test]
-    public async Task ADrumOfOneRole_AlwaysPlaysIt_AndAWildSong_ReachesForTheOtherRolesMore()
+    public async Task APlainSongsDrum_PlaysItsMainRole_AndAWildSong_ReachesForTheOtherRolesMore()
     {
         double OffRoles(double unconventionality)
         {
@@ -39,8 +39,10 @@ public sealed class DrumRolesTest
                     .GetStateValue(CompositionStateKinds.DrumRole).Value != DrumRole.Ground) / 4_000.0;
         }
 
-        var kick = DrumRoles.GenerateSong(new GenerationContext(1), DrumDefinitions.Kick, 1);
-        await Assert.That((DrumRole)kick.GetStateValue(CompositionStateKinds.DrumRole).Value).IsEqualTo(DrumRole.Ground);
+        // the plainest song's kick plays its main role, every time
+        var context = new GenerationContext(1);
+        var kicks = Enumerable.Range(0, 200).Select(_ => (DrumRole)DrumRoles.GenerateSong(context, DrumDefinitions.Kick, 0).GetStateValue(CompositionStateKinds.DrumRole).Value);
+        await Assert.That(kicks.All(x => x == DrumRole.Ground)).IsTrue();
         await Assert.That(OffRoles(1)).IsGreaterThan(OffRoles(0) * 3);
     }
 }

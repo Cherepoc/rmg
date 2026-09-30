@@ -215,7 +215,7 @@ internal sealed class FillGenerator
         var density = layer.CreateDensityGenerator();
         var spread = layer.CreateFullnessGenerator();
         // the fill's change of feel from a sequence of its own, a single draw of the fill's
-        var feelChange = Feels.DrawChange(new GenerationContext(SeedGenerator(_context)), feel, Feels.FillChange, feelUnconventionality);
+        var feelChange = Feels.DrawChange(new GenerationContext((uint)SeedGenerator(_context)), feel, Feels.FillChange, feelUnconventionality);
         return new StateMapBuilder("Fill", perTrack: true)
             .Add(CompositionStateKinds.Rhythm.MaxRank, context => FillLayers.FinerRanks + density(context))
             .Add(CompositionStateKinds.Rhythm.RankOffset, density)

@@ -11,10 +11,10 @@ public sealed class MeterSeedsReportTest
     {
         // the meter drawn as the song draws it, from its own stream, by the song's feel facet
         static Meter Of(int seed) => Meter.Draw(
-            SongGenerator.CreateStream(seed, SongStream.Meter),
+            SongGenerator.CreateStream((ulong)seed, SongStream.Meter),
             Unconventionality.Generate(
-                Unconventionality.DrawBase(SongGenerator.CreateStream(seed, SongStream.Rhythm)),
-                facet => SongGenerator.CreateStream(seed, SongStream.Unconventionality, facet)
+                Unconventionality.DrawBase(SongGenerator.CreateStream((ulong)seed, SongStream.Rhythm)),
+                facet => SongGenerator.CreateStream((ulong)seed, SongStream.Unconventionality, facet)
             )[Facet.Feel]
         );
 

@@ -145,10 +145,10 @@ public sealed class EventStoreTest : IDisposable
 
         var seeds = _store.Summarise(Now, 30).Seeds;
 
-        await Assert.That(seeds[0].Seed).IsEqualTo(222);
+        await Assert.That(seeds[0].Seed).IsEqualTo("3a");
         await Assert.That(seeds[0].Seconds).IsEqualTo(55);
         await Assert.That(seeds[0].Plays).IsEqualTo(2);
-        await Assert.That(seeds[1].Seed).IsEqualTo(111);
+        await Assert.That(seeds[1].Seed).IsEqualTo("1n");
     }
 
     [Test]
@@ -328,7 +328,7 @@ public sealed class EventStoreTest : IDisposable
         await Assert.That(version.Likes).IsEqualTo(2);
         await Assert.That(version.Dislikes).IsEqualTo(1);
         await Assert.That(summary.RatedVersion).IsEqualTo("0.5.000");
-        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed(3, "", 2, 0), new RatedSeed(1, "", 0, 1) });
+        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed("3", "", 2, 0), new RatedSeed("1", "", 0, 1) });
     }
 
     [Test]
@@ -350,7 +350,7 @@ public sealed class EventStoreTest : IDisposable
 
         var summary = _store.Summarise(Now, 30);
 
-        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed(1, "", 1, 0), new RatedSeed(2, "", 1, 0), new RatedSeed(3, "", 1, 0), new RatedSeed(1, Heard(120, true).Identity, 0, 1) });
+        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed("1", "", 1, 0), new RatedSeed("2", "", 1, 0), new RatedSeed("3", "", 1, 0), new RatedSeed("1", Heard(120, true).Identity, 0, 1) });
         await Assert.That(summary.RatedFifths).IsEquivalentTo(new[] { new RatedFifth(false, 0, 2, 2, 0), new RatedFifth(true, 4, 1, 0, 1) });
     }
 

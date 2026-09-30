@@ -18,7 +18,7 @@ internal sealed class SectionGenerator
     private const int SongRegisterFreedomStream = -1;
 
     private readonly IGenerationContext _context;
-    private readonly int _seed;
+    private readonly ulong _seed;
 
     // the meter the song's bars are in
     private readonly Meter _meter;
@@ -44,7 +44,7 @@ internal sealed class SectionGenerator
     /// <param name="songPercussion">How far the song leans to sections of percussion only (<see cref="PercussionSections" />).</param>
     public SectionGenerator(
         IGenerationContext context,
-        int seed,
+        ulong seed,
         ProgressionSettings settings,
         SongTracks tracks,
         Unconventionality songFacets,
@@ -82,7 +82,7 @@ internal sealed class SectionGenerator
     }
 
     /// <summary>The seed of <see cref="Stream" />, for a decision that derives its own sequences from it.</summary>
-    private int StreamSeed(int sectionId, SectionStream stream)
+    private ulong StreamSeed(int sectionId, SectionStream stream)
     {
         return Seeds.Derive(Seeds.Derive(_seed, sectionId), (int)stream);
     }
@@ -491,7 +491,7 @@ internal sealed class SectionGenerator
             var isMelody = _tracks.Definitions[trackNumber].Role == TrackRole.Melody;
             var amount = MelodyLayers.AnswerAmounts.At(sectionRhythm.Facets[Facet.Melody]);
             var answerContext = Stream(sectionId, SectionStream.MelodyAnswer);
-            var answerSeed = answerContext.GenerateInt();
+            var answerSeed = answerContext.GenerateSeed();
             var questionEnd = barStateTimelineMap.GetEffectiveStateMapAt(_meter.PatternDuration - _meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
             var answer = isMelody ? LinePattern.DrawAnswer(answerContext, amount, questionEnd) : null;
             var seeds = PatternGenerator.DrawSeeds(context, trackStateMaps.Keys, sectionRhythm.Scheme);
@@ -692,7 +692,7 @@ internal sealed record GeneratedSection(
     ImmutableHashSet<TrackRole> Resting,
     ImmutableHashSet<TrackRole> Absent,
     SectionRole Role,
-    int ArrangementSeed,
+    ulong ArrangementSeed,
     ImmutableDictionary<int, TrackRole> Roles,
     Meter Meter
 )

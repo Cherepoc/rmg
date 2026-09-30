@@ -99,7 +99,7 @@ public sealed class SongGeneratorChordProgressionTest
         var changesWithinABar = 0;
         for (var seed = 0; seed < 8; seed++)
         {
-            var song = SongGenerator.GenerateSong(seed, settings);
+            var song = SongGenerator.GenerateSong((ulong)seed, settings);
             var bar = song.Map!.Meter.BarDuration;
             var notes = GetPitchedNotes(song).Where(x => x.Shape != "").ToList();
 
@@ -125,7 +125,7 @@ public sealed class SongGeneratorChordProgressionTest
         var settings = ProgressionSettings.Default with { ChordShapeStep = 0.5 };
         for (var seed = 0; seed < 8; seed++)
         {
-            foreach (var notesAtPosition in GetPitchedNotes(SongGenerator.GenerateSong(seed, settings)).Where(x => x.Shape != "").GroupBy(x => x.Position))
+            foreach (var notesAtPosition in GetPitchedNotes(SongGenerator.GenerateSong((ulong)seed, settings)).Where(x => x.Shape != "").GroupBy(x => x.Position))
             {
                 await Assert.That(notesAtPosition.Select(x => x.Shape).Distinct().Count())
                     .IsEqualTo(1)

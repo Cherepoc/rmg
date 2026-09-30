@@ -10,7 +10,7 @@ public sealed class SongStructureGeneratorTest
     {
         for (var seed = 0; seed < 500; seed++)
         {
-            var parts = SongStructureGenerator.Generate(new GenerationContext(seed));
+            var parts = SongStructureGenerator.Generate(new GenerationContext((ulong)seed));
 
             await Assert.That(parts.Length).IsBetween(4, 8);
             foreach (var part in parts)
@@ -28,7 +28,7 @@ public sealed class SongStructureGeneratorTest
     {
         for (var seed = 0; seed < 2000; seed++)
         {
-            var sectionIds = SongStructureGenerator.Generate(new GenerationContext(seed))
+            var sectionIds = SongStructureGenerator.Generate(new GenerationContext((ulong)seed))
                 .SelectMany(x => x.SectionIds)
                 .ToArray();
 
@@ -42,7 +42,7 @@ public sealed class SongStructureGeneratorTest
     {
         for (var seed = 0; seed < 200; seed++)
         {
-            var ids = SongStructureGenerator.Generate(new GenerationContext(seed))
+            var ids = SongStructureGenerator.Generate(new GenerationContext((ulong)seed))
                 .SelectMany(x => x.SectionIds)
                 .Distinct()
                 .Order()
@@ -56,7 +56,7 @@ public sealed class SongStructureGeneratorTest
     public async Task SectionsAreSometimesSharedAcrossParts()
     {
         var shared = Enumerable.Range(0, 200)
-            .Select(seed => SongStructureGenerator.Generate(new GenerationContext(seed)))
+            .Select(seed => SongStructureGenerator.Generate(new GenerationContext((ulong)seed)))
             .Count(parts =>
                 {
                     var all = parts.SelectMany(p => p.SectionIds.Distinct()).ToList();

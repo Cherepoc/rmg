@@ -150,7 +150,7 @@ internal sealed class LinePattern
     /// <param name="seed">The seed of the answer's mutations.</param>
     /// <param name="amount">The chance a note of the answer's later bars is mutated.</param>
     /// <param name="barDuration">How long a bar is, in beats.</param>
-    public static TrackEventStateTimelineMap<StateMap> Answer(TrackEventStateTimelineMap<StateMap> bars, int trackNumber, LineProfile profile, int seed, double amount, double barDuration)
+    public static TrackEventStateTimelineMap<StateMap> Answer(TrackEventStateTimelineMap<StateMap> bars, int trackNumber, LineProfile profile, ulong seed, double amount, double barDuration)
     {
         return Mutate(
             bars,
@@ -175,7 +175,7 @@ internal sealed class LinePattern
         TrackEventStateTimelineMap<StateMap> bars,
         int trackNumber,
         LineProfile profile,
-        int seed,
+        ulong seed,
         double barDuration,
         Func<int, double> chance
     )
@@ -193,7 +193,7 @@ internal sealed class LinePattern
                     return note;
 
                 var (step, turn) = profile.GenerateStep(context, note.Value.GetStateValue(CompositionStateKinds.LineStepwiseness));
-                var key = Seeds.Derive(noteKey, seed);
+                var key = Seeds.Derive(noteKey, unchecked((int)seed));
                 return note.Value
                     .With(CompositionStateKinds.LineStep, step)
                     .With(CompositionStateKinds.LineTurn, turn)
@@ -279,7 +279,7 @@ internal sealed record SectionLine(
     ImmutableArray<ChordApproach> Approaches,
     ImmutableArray<ChordArrival> Landings,
     double RegisterFreedom,
-    int Seed
+    ulong Seed
 )
 {
     // the streams of an appearance's rhythm and of where its phrases start afresh, apart from its notes'

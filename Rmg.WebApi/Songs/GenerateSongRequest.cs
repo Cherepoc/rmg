@@ -10,8 +10,9 @@ namespace Rmg.WebApi.Songs;
 ///     a step from 0 to 127, as MIDI's are; anything left out is the song's own.
 /// </summary>
 /// <param name="Seed">
-///     Seed of the song. None asks for a random one, which the response reports back, so a song heard once can be asked
-///     for again.
+///     Seed of the song, in letters and digits (<see cref="Rmg.Core.Base62" />), all 64 of its bits, which a number in
+///     JSON could not carry. None asks for a random one, which the response reports back, so a song heard once can be
+///     asked for again.
 /// </param>
 /// <param name="Unconventionality">
 ///     How far the song strays from convention, from 0 for the plainest to 127 for the most experimental, which its
@@ -23,7 +24,7 @@ namespace Rmg.WebApi.Songs;
 /// <param name="DrumSetup">The drums the song plays: "kit", "kitAndPercussion" or "percussion".</param>
 /// <param name="DrumGroups">A drum group's mix, by its name, such as "kick".</param>
 public sealed record GenerateSongRequest(
-    int? Seed = null,
+    string? Seed = null,
     int? Unconventionality = null,
     IReadOnlyDictionary<string, int>? Facets = null,
     int? Volume = null,
@@ -50,9 +51,16 @@ public sealed record GenerateSongRequest(
     ///     Reads the request into what is given in place of the song's draws and how it is to be heard, or says what
     ///     cannot be read.
     /// </summary>
-    public bool TryRead(out SongOverrides overrides, out SongMix mix, out string? error)
+    public bool TryRead(out ulong? seed, out SongOverrides overrides, out SongMix mix, out string? error)
     {
-        (overrides, mix) = (SongOverrides.None, SongMix.None);
+        (seed, overrides, mix) = (null, SongOverrides.None, SongMix.None);
+
+        if (Seed is not null)
+        {
+            if (Core.Base62.ToSeed(Seed) is not { } read)
+                return Fail($"{Seed} is not a seed. A seed is up to {Core.Base62.SeedLength} letters and digits.", out error);
+            seed = read;
+        }
 
         if (!TryReadStep(Unconventionality, "Unconventionality", out error) || !TryReadStep(Volume, "Volume", out error))
             return false;

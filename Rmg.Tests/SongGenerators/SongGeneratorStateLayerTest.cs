@@ -20,7 +20,7 @@ public sealed class SongGeneratorStateLayerTest
             // a song of its own, traced to explain its states, which the corpus's are not; the merges below keep the
             // layers only while the trace runs, as the song's generation did
             using var trace = StateTrace.Start();
-            var song = SongGenerator.GenerateSong(seed);
+            var song = SongGenerator.GenerateSong((ulong)seed);
             var commonStateTimelineMap = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
             var seen = new HashSet<string>();
             var twice = new List<string>();

@@ -4,7 +4,7 @@ namespace Rmg.Tests.Cli;
 
 public sealed class CliOptionsParserTest
 {
-    private const int DefaultSeed = 4242;
+    private const ulong DefaultSeed = 4242;
 
     private static CliParseResult Parse(params string[] args) => CliOptionsParser.Parse(args, () => DefaultSeed);
 
@@ -23,20 +23,21 @@ public sealed class CliOptionsParserTest
     {
         var calls = 0;
 
-        var withoutSeed = CliOptionsParser.Parse([], () => { calls++; return 7; });
-        var withSeed = CliOptionsParser.Parse(["-s", "9"], () => { calls++; return 7; });
+        var withoutSeed = CliOptionsParser.Parse([], () => { calls++; return 7UL; });
+        var withSeed = CliOptionsParser.Parse(["-s", "9"], () => { calls++; return 7UL; });
 
-        await Assert.That(withoutSeed.Options!.Seed).IsEqualTo(7);
-        await Assert.That(withSeed.Options!.Seed).IsEqualTo(9);
+        await Assert.That(withoutSeed.Options!.Seed).IsEqualTo(7UL);
+        await Assert.That(withSeed.Options!.Seed).IsEqualTo(9UL);
         await Assert.That(calls).IsEqualTo(1);
     }
 
     [Test]
-    public async Task NoSeed_WithoutFactory_ResultsIn_NonNegativeSeed()
+    public async Task NoSeed_WithoutFactory_ResultsIn_ARandomSeed_OfAll64Bits()
     {
-        var result = CliOptionsParser.Parse([]);
+        var seeds = Enumerable.Range(0, 64).Select(_ => CliOptionsParser.Parse([]).Options!.Seed).ToArray();
 
-        await Assert.That(result.Options!.Seed).IsGreaterThanOrEqualTo(0);
+        await Assert.That(seeds.Distinct().Count()).IsEqualTo(64);
+        await Assert.That(seeds.Any(x => x > uint.MaxValue)).IsTrue();
     }
 
     [Test]
@@ -44,7 +45,7 @@ public sealed class CliOptionsParserTest
     {
         var result = Parse("--output", "out", "--count", "5", "--seed", "12");
 
-        await Assert.That(result.Options).IsEqualTo(new CliOptions("out", 5, 12));
+        await Assert.That(result.Options).IsEqualTo(new CliOptions("out", 5, 64));
     }
 
     [Test]
@@ -52,38 +53,22 @@ public sealed class CliOptionsParserTest
     {
         var result = Parse("-o", "out", "-n", "5", "-s", "12");
 
-        await Assert.That(result.Options).IsEqualTo(new CliOptions("out", 5, 12));
+        await Assert.That(result.Options).IsEqualTo(new CliOptions("out", 5, 64));
     }
 
     [Test]
     public async Task EqualsSyntax_IsParsed()
     {
-        var result = Parse("--output=some dir/x", "--count=3", "--seed=-8");
+        var result = Parse("--output=some dir/x", "--count=3", "--seed=a8");
 
-        await Assert.That(result.Options).IsEqualTo(new CliOptions("some dir/x", 3, -8));
-    }
-
-    [Test]
-    public async Task NegativeSeed_AsSeparateArgument_IsParsed()
-    {
-        var result = Parse("--seed", "-5");
-
-        await Assert.That(result.Options!.Seed).IsEqualTo(-5);
+        await Assert.That(result.Options).IsEqualTo(new CliOptions("some dir/x", 3, 2240));
     }
 
     [Test]
     public async Task SeedBoundaries_AreParsed()
     {
-        await Assert.That(Parse("-s", int.MaxValue.ToString()).Options!.Seed).IsEqualTo(int.MaxValue);
-        await Assert.That(Parse("-s", int.MinValue.ToString()).Options!.Seed).IsEqualTo(int.MinValue);
-    }
-
-    [Test]
-    public async Task RepeatedOption_LastOneWins()
-    {
-        var result = Parse("-n", "2", "-n", "4");
-
-        await Assert.That(result.Options!.Count).IsEqualTo(4);
+        await Assert.That(Parse("-s", "0").Options!.Seed).IsEqualTo(0UL);
+        await Assert.That(Parse("-s", Rmg.Core.Base62.FromSeed(ulong.MaxValue)).Options!.Seed).IsEqualTo(ulong.MaxValue);
     }
 
     [Test]
@@ -117,8 +102,8 @@ public sealed class CliOptionsParserTest
     [Arguments("--count", "abc")]
     [Arguments("--count", "1.5")]
     [Arguments("--count", "")]
-    [Arguments("--seed", "abc")]
-    [Arguments("--seed", "99999999999")]
+    [Arguments("--seed", "a.c")]
+    [Arguments("--seed", "zzzzzzzzzzzz")]
     [Arguments("--output", "")]
     [Arguments("--output", "   ")]
     public async Task InvalidValue_ResultsIn_Error(string option, string value)

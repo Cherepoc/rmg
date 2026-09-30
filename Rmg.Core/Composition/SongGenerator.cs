@@ -24,14 +24,14 @@ public static class SongGenerator
 
     public static Song GenerateSong()
     {
-        return GenerateSong(Random.Shared.Next());
+        return GenerateSong(Seeds.Random());
     }
 
     /// <summary>
     ///     Generates a song. The same seed always results in the same song in this version; changes to the generator
     ///     may turn a seed into a different song, which is accepted to keep the generator simple.
     /// </summary>
-    public static Song GenerateSong(int seed)
+    public static Song GenerateSong(ulong seed)
     {
         return GenerateSong(seed, ProgressionSettings.Default);
     }
@@ -41,7 +41,7 @@ public static class SongGenerator
     ///     plainest to 1 for the wildest, or the parts it has, and the rest drawn as <see cref="GenerateSong(int)" />
     ///     draws it.
     /// </summary>
-    public static Song GenerateSong(int seed, SongOverrides overrides)
+    public static Song GenerateSong(ulong seed, SongOverrides overrides)
     {
         if (overrides.Base is < 0 or > 1 or double.NaN)
             throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Base, "An unconventionality is from 0 to 1.");
@@ -51,10 +51,10 @@ public static class SongGenerator
         return GenerateSong(seed, ProgressionSettings.Default, overrides);
     }
 
-    internal static Song GenerateSong(int seed, ProgressionSettings progressionSettings) => GenerateSong(seed, progressionSettings, SongOverrides.None);
+    internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings) => GenerateSong(seed, progressionSettings, SongOverrides.None);
 
     /// <param name="overrides">What a test sets in place of the song's own draws.</param>
-    internal static Song GenerateSong(int seed, ProgressionSettings progressionSettings, SongOverrides overrides)
+    internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings, SongOverrides overrides)
     {
         // every stage draws from its own random sequence, derived from the seed by the stage, so a change to what one
         // stage draws leaves what the others draw as it was
@@ -222,13 +222,13 @@ public static class SongGenerator
     }
 
     /// <summary>The random sequence a stage of the song of the given seed draws from.</summary>
-    internal static IGenerationContext CreateStream(int seed, SongStream stream)
+    internal static IGenerationContext CreateStream(ulong seed, SongStream stream)
     {
         return new GenerationContext(Seeds.Derive(seed, (int)stream));
     }
 
     /// <summary>A stream's own sequence for a facet of the song's unconventionality.</summary>
-    internal static IGenerationContext CreateStream(int seed, SongStream stream, Facet facet)
+    internal static IGenerationContext CreateStream(ulong seed, SongStream stream, Facet facet)
     {
         return new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)stream), (int)facet));
     }

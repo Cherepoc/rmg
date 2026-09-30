@@ -77,7 +77,8 @@ public sealed class SongIntroTest
             var landsOn = PercussionOnly(song, song.Map.Sections[0].SectionId)
                 ? DrumGroups.Percussion.Drums.SelectMany(x => x.ArticulationCodes)
                 : DrumGroups.Accents.Drums.SelectMany(x => x.ArticulationCodes);
-            await Assert.That(Drums(song).Any(x => x.Position >= song.Origin - 0.5 && x.Position <= song.Origin && landsOn.Contains(x.Value.Offset)))
+            // an 8th early in straight time, and a little more in a tuplet feel, whose step can be longer than an 8th
+            await Assert.That(Drums(song).Any(x => x.Position >= song.Origin - 0.75 && x.Position <= song.Origin && landsOn.Contains(x.Value.Offset)))
                 .IsTrue()
                 .Because($"seed {song.Seed}");
         }

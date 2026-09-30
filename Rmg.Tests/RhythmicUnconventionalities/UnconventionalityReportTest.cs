@@ -16,8 +16,8 @@ public sealed class UnconventionalityReportTest
     public async Task Report()
     {
         var songs = TestCorpus.InParallel(Enumerable.Range(0, SongCount), seed => Unconventionality.Generate(
-            Unconventionality.DrawBase(SongGenerator.CreateStream(seed, SongStream.Rhythm)),
-            facet => new Rmg.Core.Probabilities.GenerationContext(Rmg.Core.Probabilities.Seeds.Derive(Rmg.Core.Probabilities.Seeds.Derive(seed, (int)SongStream.Unconventionality), (int)facet))
+            Unconventionality.DrawBase(SongGenerator.CreateStream((ulong)seed, SongStream.Rhythm)),
+            facet => new Rmg.Core.Probabilities.GenerationContext((uint)Rmg.Core.Probabilities.Seeds.Derive(Rmg.Core.Probabilities.Seeds.Derive(seed, (int)SongStream.Unconventionality), (int)facet))
         ));
 
         string Spread(double[] values) => $"10% {Percentile(values, 0.1):F2}, median {Percentile(values, 0.5):F2}, 90% {Percentile(values, 0.9):F2}";
@@ -33,7 +33,7 @@ public sealed class UnconventionalityReportTest
         static bool Near(double value) => value < 0.1 || value > 0.9;
         string Share(Func<Unconventionality, bool> of) => $"{songs.Count(of) / (double)songs.Length:P1}";
         Console.WriteLine($"near an end: the song as a whole, its facets' mean, {Share(x => Near(x.Facets.Values.Average()))}, the base {Share(x => Near(x.Base))}, any facet {Share(x => x.Facets.Values.Any(Near))}, " +
-                          $"any facet of a section {Share(x => Enumerable.Range(0, 5).Any(section => x.GenerateSection(facet => new Rmg.Core.Probabilities.GenerationContext(Rmg.Core.Probabilities.Seeds.Derive((int)(x.Base * 1e6) + section, (int)facet))).Facets.Values.Any(Near)))}; " +
+                          $"any facet of a section {Share(x => Enumerable.Range(0, 5).Any(section => x.GenerateSection(facet => new Rmg.Core.Probabilities.GenerationContext((uint)Rmg.Core.Probabilities.Seeds.Derive((int)(x.Base * 1e6) + section, (int)facet))).Facets.Values.Any(Near)))}; " +
                           $"by facet {string.Join(", ", Enum.GetValues<Facet>().Select(f => $"{f} {Share(x => Near(x[f]))}"))}");
         Console.WriteLine($"chords with groove {Correlation([..songs.Select(x => x[Facet.Chords])], [..songs.Select(x => x[Facet.Groove])]):F2}, " +
                           $"chords with the base {Correlation([..songs.Select(x => x[Facet.Chords])], [..songs.Select(x => x.Base)]):F2}");

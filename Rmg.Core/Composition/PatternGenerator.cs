@@ -168,7 +168,7 @@ internal sealed class PatternGenerator
     private static bool IsAccented(int seed, int trackNumber, double position, double share)
     {
         var key = Seeds.Derive(Seeds.Derive(seed, trackNumber), (int)Math.Round(position * AccentPlacesPerBeat));
-        return new GenerationContext(key).TestProbability(share);
+        return new GenerationContext((uint)key).TestProbability(share);
     }
 
     // the state that makes a track's feel, the tuplet its cycles play in, which its grouping follows
@@ -212,7 +212,7 @@ internal sealed class PatternGenerator
     )
     {
         var patternSeeds = CreatePatternSeeds(seed);
-        var trackGenerationContext = _context.CreateContext(patternSeeds.TrackState);
+        var trackGenerationContext = _context.CreateContext((uint)patternSeeds.TrackState);
         // an answer's bar that draws its rhythm afresh plays its bar pattern's settings on another rhythm
         var builder = new StateMapBuilder("Bar pattern", perTrack: true)
             .Add(barPatternLayerGenerator)
@@ -229,7 +229,7 @@ internal sealed class PatternGenerator
             .MergeWith(trackStateMap);
         // the bar's change of the feel it comes to, now and then, a passage in another feel, from a sequence of its own
         // by the bar pattern's seed, so that a drum playing its lead's bar patterns changes as its lead does
-        if (Feels.DrawChange(new GenerationContext(Seeds.Derive(seed, FeelStream)), Feels.Of(stateMap), Feels.BarChange, feelUnconventionality) is { } barFeel)
+        if (Feels.DrawChange(new GenerationContext((uint)Seeds.Derive(seed, FeelStream)), Feels.Of(stateMap), Feels.BarChange, feelUnconventionality) is { } barFeel)
             stateMap = stateMap.MergeWith(Feels.At(StateDepths.BarPattern, barFeel));
         // a track on another's feel plays its tuplet, all its layers' steps of it in place of its own
         if (leadFeel is not null)
@@ -279,7 +279,7 @@ internal sealed class PatternGenerator
         var rhythmPattern = _rhythmPatternGenerator(stateMap);
 
         var patternSeeds = CreatePatternSeeds(stateMap.GetStateValue(CompositionStateKinds.ValueSeed));
-        var changingContext = _context.CreateContext(patternSeeds.StateChanges);
+        var changingContext = _context.CreateContext((uint)patternSeeds.StateChanges);
         var changingStateTimelineMap = Generators.SequentialTimeline(CreateBeatLayerGenerator(stateMap), 1, 4)(changingContext)
             .ToStateTimelineMap();
 

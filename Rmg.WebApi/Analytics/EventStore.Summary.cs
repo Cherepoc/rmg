@@ -1,3 +1,4 @@
+using Rmg.Core;
 using Microsoft.Data.Sqlite;
 
 namespace Rmg.WebApi.Analytics;
@@ -134,7 +135,7 @@ public static class EventStoreSummary
 
         var seeds = new List<SeedListening>();
         using var reader = command.ExecuteReader();
-        while (reader.Read()) seeds.Add(new SeedListening(reader.GetInt64(0), Math.Round(reader.GetDouble(1), 1), reader.GetInt32(2)));
+        while (reader.Read()) seeds.Add(new SeedListening(Base62.FromSeed(unchecked((ulong)reader.GetInt64(0))), Math.Round(reader.GetDouble(1), 1), reader.GetInt32(2)));
 
         return seeds;
     }
@@ -268,10 +269,10 @@ public static class EventStoreSummary
     {
         var rated = ratings
             .Where(x => x.Version == version && x.Likes + x.Dislikes > 0)
-            .Select(x => new RatedSeed(x.Seed, x.Identity, x.Likes, x.Dislikes))
+            .Select(x => new RatedSeed(Base62.FromSeed(unchecked((ulong)x.Seed)), x.Identity, x.Likes, x.Dislikes))
             .OrderByDescending(x => x.Likes - x.Dislikes)
             .ThenByDescending(x => x.Likes)
-            .ThenBy(x => x.Seed)
+            .ThenBy(x => x.Seed, StringComparer.Ordinal)
             .ThenBy(x => x.Identity, StringComparer.Ordinal)
             .ToList();
 

@@ -124,7 +124,7 @@ internal sealed class BarStateGenerator
             _meter.PatternDuration,
             [
                 .._timelineGenerators.Select((generator, index) =>
-                    generator.Generate(context.CreateContext(Seeds.Derive(seed, index)), _meter.PatternDuration)
+                    generator.Generate(context.CreateContext((uint)Seeds.Derive(seed, index)), _meter.PatternDuration)
                 ),
                 StateTimeline.Create(_meter.PatternDuration, StateKinds.ScaleOffsets, [scale.Offsets.ToTimelineItem(0.0)]).WithLayer("Section"),
                 progressionTimeline,
@@ -132,8 +132,8 @@ internal sealed class BarStateGenerator
                 raisedStepTimeline,
                 roleChordTimeline,
                 GenerateResets(context, facets[Facet.Chords]),
-                ..GenerateBassLeading(context.CreateContext(Seeds.Derive(seed, BassLeadingStream)), changes, bassLeading, facets[Facet.Chords]),
-                GenerateMelodyContour(context, context.CreateContext(Seeds.Derive(seed, ContourPeriodStream)), facets[Facet.Melody]),
+                ..GenerateBassLeading(context.CreateContext((uint)Seeds.Derive(seed, BassLeadingStream)), changes, bassLeading, facets[Facet.Chords]),
+                GenerateMelodyContour(context, context.CreateContext((uint)Seeds.Derive(seed, ContourPeriodStream)), facets[Facet.Melody]),
                 GenerateMelodyPhraseEnd(context)
             ]
         );

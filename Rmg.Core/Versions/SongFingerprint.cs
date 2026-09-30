@@ -30,7 +30,7 @@ public static class SongFingerprint
     private static byte[] Write(int seed)
     {
         using var stream = new MemoryStream();
-        Render.RenderSong(SongGenerator.GenerateSong(seed)).Write(stream, null);
+        Render.RenderSong(SongGenerator.GenerateSong((ulong)seed)).Write(stream, null);
         return stream.ToArray();
     }
 }

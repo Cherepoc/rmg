@@ -28,7 +28,7 @@ public sealed class DyadicRankItemPattern<T>
         Func<double, KeptBeat, T, T>? complete = null
     )
     {
-        var seededContext = context.CreateContext(generationSeed);
+        var seededContext = context.CreateContext((uint)generationSeed);
         var draw = drawFunc(seededContext);
         complete ??= (_, _, values) => values;
         // every beat's values by its cycle and its place in it

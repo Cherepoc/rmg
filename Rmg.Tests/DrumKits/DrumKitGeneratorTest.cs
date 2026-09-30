@@ -14,7 +14,7 @@ public sealed class DrumKitGeneratorTest
         bool isPercussionOnly = false
     )
     {
-        var context = new GenerationContext(seed);
+        var context = new GenerationContext((ulong)seed);
         var songDrums = DrumSetups.SelectSongDrums(context, DrumSetup.KitAndPercussion);
         var kit = DrumKitGenerator.SelectKit(context, songDrums, tilt, isPercussionOnly);
         return (songDrums, kit.Drums, kit);

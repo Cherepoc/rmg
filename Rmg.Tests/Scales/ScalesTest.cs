@@ -128,10 +128,12 @@ public sealed class ScalesTest
         foreach (var track in tracks)
         foreach (var note in track.NoteTimeline)
         {
-            // a bass note leading into the next chord by a semitone leaves the scale on purpose
+            // a bass note leading into the next chord by a semitone leaves the scale on purpose: the last before the change,
+            // wherever it falls
             var approach = (ChordApproach)approaches.GetEffectiveValueAt(note.Position);
+            var nextChange = changes.Where(x => x > note.Position + 1e-9).DefaultIfEmpty(double.MaxValue).Min();
             var isChromaticApproach = track.PitchInstrumentCode == bassProgram
-                && changes.Any(x => x > note.Position && x <= note.Position + 1)
+                && !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9)
                 && approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove;
             if (isChromaticApproach)
                 continue;
@@ -141,7 +143,13 @@ public sealed class ScalesTest
                 raisedSteps.GetEffectiveValueAt(note.Position)
             );
             var key = keys.GetEffectiveValueAt(note.Position);
-            var pitchClasses = scale.Select(x => (x + key) % 12).ToHashSet();
+            var pitchClasses = scale.Select(x => ((x + key) % 12 + 12) % 12).ToHashSet();
+            // a track's last note before a change leads into the next chord from its scale, which a key change moves
+            if (nextChange < double.MaxValue && !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9))
+            {
+                var nextScale = Rmg.Core.Composition.Realizer.RaiseScaleSteps(offsets.GetEffectiveValueAt(nextChange), raisedSteps.GetEffectiveValueAt(nextChange));
+                pitchClasses.UnionWith(nextScale.Select(x => ((x + keys.GetEffectiveValueAt(nextChange)) % 12 + 12) % 12));
+            }
             await Assert.That(pitchClasses).Contains(note.Value.Offset % 12).Because($"position {note.Position}");
         }
     }

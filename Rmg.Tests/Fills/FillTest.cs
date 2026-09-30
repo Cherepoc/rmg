@@ -73,7 +73,10 @@ public sealed class FillTest
         for (var seed = 0; seed < 8; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
-            var toms = song.TrackEventStateTimelineMap.TrackTimelineMap[DrumGroups.GetTrackNumber(DrumDefinitions.Tom)];
+            // a percussion song has no toms
+            if (!song.TrackEventStateTimelineMap.TrackTimelineMap.TryGetValue(DrumGroups.GetTrackNumber(DrumDefinitions.Tom), out var toms))
+                continue;
+
             for (var position = 0.0; position < song.Duration; position += 2 * song.Map!.Meter.PatternDuration)
                 await Assert.That(toms.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.Velocity)).IsNotEqualTo(0);
         }
@@ -126,7 +129,7 @@ public sealed class FillTest
     public async Task SectionChanges_MostlyLandOnACrashAndAKick()
     {
         int changes = 0, crashes = 0, kicks = 0, downbeats = 0, otherCrashes = 0;
-        for (var seed = 0; seed < 32; seed++)
+        for (var seed = 0; seed < 128; seed++)
         {
             var corpusSong = TestCorpus.Get(seed);
             if (!corpusSong.PlaysDrums)
@@ -143,7 +146,8 @@ public sealed class FillTest
             {
                 var position = origin + bar * barLength;
                 var hits = drums.Where(x => x.Position.IsEqualToByEpsilon(position)).Select(x => x.Value.Offset).ToArray();
-                if (corpusSong.Map.Sections.Any(x => x.Start.IsEqualToByEpsilon(position) && percussionOnly[x.SectionId]))
+                // nor does a section whose drums rest, which no fill leads into
+                if (corpusSong.Map.Sections.Any(x => x.Start.IsEqualToByEpsilon(position) && (percussionOnly[x.SectionId] || !corpusSong.HasDrums(x))))
                     continue;
                 if (corpusSong.Map.Sections.Any(x => x.Start.IsEqualToByEpsilon(position)))
                 {

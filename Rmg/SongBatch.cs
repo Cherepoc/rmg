@@ -17,20 +17,20 @@ public static class SongBatch
     ///     Draws the seed of every song from a randomizer seeded with <paramref name="seed" />,
     ///     so the first <c>n</c> songs of a batch don't depend on the batch size.
     /// </summary>
-    public static ImmutableArray<int> GenerateSongSeeds(int seed, int count)
+    public static ImmutableArray<ulong> GenerateSongSeeds(ulong seed, int count)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(count);
 
         var context = new GenerationContext(seed);
-        var seeds = ImmutableArray.CreateBuilder<int>(count);
+        var seeds = ImmutableArray.CreateBuilder<ulong>(count);
         for (var i = 0; i < count; i++)
-            seeds.Add(context.GenerateInt());
+            seeds.Add(context.GenerateSeed());
 
         return seeds.MoveToImmutable();
     }
 
     /// <returns>Process exit code.</returns>
-    public static int Run(CliOptions options, Func<int, Song> generateSong, TextWriter output, TextWriter error)
+    public static int Run(CliOptions options, Func<ulong, Song> generateSong, TextWriter output, TextWriter error)
     {
         try
         {
@@ -42,7 +42,7 @@ public static class SongBatch
             return InvalidOutput;
         }
 
-        output.WriteLine($"Seed: {options.Seed}");
+        output.WriteLine($"Seed: {Base62.FromSeed(options.Seed)}");
 
         var songSeeds = GenerateSongSeeds(options.Seed, options.Count);
         var failedCount = 0;
@@ -60,12 +60,12 @@ public static class SongBatch
                 renderedSong.Write(stream, SongsVersion.Label(songSeed));
                 File.WriteAllBytes(path, stream.ToArray());
 
-                output.WriteLine($"[{index}/{options.Count}] seed {songSeed} saved to {path}");
+                output.WriteLine($"[{index}/{options.Count}] seed {Base62.FromSeed(songSeed)} saved to {path}");
             }
             catch (Exception ex)
             {
                 failedCount++;
-                error.WriteLine($"[{index}/{options.Count}] seed {songSeed} failed: {ex.Message}");
+                error.WriteLine($"[{index}/{options.Count}] seed {Base62.FromSeed(songSeed)} failed: {ex.Message}");
             }
         }
 

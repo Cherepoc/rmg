@@ -165,7 +165,7 @@ public sealed class SongBatchTest
 
             SongBatch.Run(new CliOptions(directory, 1, 31337), SongGenerator.GenerateSong, output, new StringWriter());
 
-            await Assert.That(output.ToString().Contains("31337")).IsTrue();
+            await Assert.That(output.ToString().Contains(Rmg.Core.Base62.FromSeed(31337))).IsTrue();
         }
         finally
         {
@@ -199,7 +199,7 @@ public sealed class SongBatchTest
             };
             await Assert.That(exitCode).IsEqualTo(SongBatch.SongsFailed);
             await Assert.That(Directory.GetFiles(directory).Select(Path.GetFileName)).IsEquivalentTo(expectedNames);
-            await Assert.That(error.ToString().Contains(failingSeed.ToString())).IsTrue();
+            await Assert.That(error.ToString().Contains(Rmg.Core.Base62.FromSeed(failingSeed))).IsTrue();
             await Assert.That(error.ToString().Contains("boom")).IsTrue();
         }
         finally

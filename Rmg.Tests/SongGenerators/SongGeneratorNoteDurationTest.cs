@@ -23,7 +23,7 @@ public sealed class SongGeneratorNoteDurationTest
             .SelectMany(song => song.Rendered.Tracks
                 .Where(x => !x.IsPercussionInstrument && x.PitchInstrumentCode != song.Pad)
                 .SelectMany(x => x.NoteTimeline)
-                .Where(x => x.Position + x.Value.Duration < song.Rendered.Duration - 1e-9 && Math.Abs(x.Position + x.Value.Duration - song.Silence) > 1e-6)
+                .Where(x => x.Position + x.Value.Duration < song.Rendered.Duration - 1e-9 && (double.IsNaN(song.Silence) || Math.Abs(x.Position + x.Value.Duration - song.Silence) > 1e-6))
                 .Select(x => x.Value.Duration / song.Meter.BarDuration)
             )
             .Max();

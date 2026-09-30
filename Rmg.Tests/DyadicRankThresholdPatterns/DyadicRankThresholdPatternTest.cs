@@ -77,7 +77,7 @@ public sealed class DyadicRankThresholdPatternTest
         {
             var descriptor = new DyadicTimelineDescriptor(BarDuration, 4 / 3.0, 0.25, 2, BarDuration, 2);
             var weights = Weights(1, 0.5);
-            var context = new GenerationContext(0).CreateContext(seed);
+            var context = new GenerationContext(0).CreateContext((ulong)seed);
             var expected = DyadicRankTimeline.Generate(BarDuration, descriptor.Phase, descriptor.Period, descriptor.MaxRank, descriptor.Restart, descriptor.Split)
                 .FilterValues(x => context.TestProbability(weights(x)))
                 .Select(x => x.Position)

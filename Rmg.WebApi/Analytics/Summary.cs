@@ -13,9 +13,9 @@ public sealed record FunnelStep(string Name, int Visitors);
 /// <param name="Day">The day, as yyyy-MM-dd.</param>
 public sealed record DayCount(string Day, int Visitors, int Songs, int Plays);
 
-/// <param name="Seed">The song.</param>
+/// <param name="Seed">The song, in letters and digits.</param>
 /// <param name="Seconds">How long it was listened to, over every visitor who played it.</param>
-public sealed record SeedListening(long Seed, double Seconds, int Plays);
+public sealed record SeedListening(string Seed, double Seconds, int Plays);
 
 /// <param name="Version">The songs' version, which a seed needs to name a song.</param>
 /// <param name="FirstDay">The first day an event of it arrived, as yyyy-MM-dd.</param>
@@ -42,7 +42,7 @@ public sealed record VersionListening(
 /// <param name="Identity">What of its settings names it with its seed (<see cref="Songs.SongSettings.Identity" />); empty for none.</param>
 /// <param name="Likes">Its likes as they stand now: the changes to a like less the changes from one.</param>
 /// <param name="Dislikes">Its dislikes, likewise.</param>
-public sealed record RatedSeed(long Seed, string Identity, int Likes, int Dislikes);
+public sealed record RatedSeed(string Seed, string Identity, int Likes, int Dislikes);
 
 /// <param name="IsGiven">Whether the songs were asked for at their unconventionality, or drew it.</param>
 /// <param name="Fifth">Which fifth of the unconventionality, from 0 for the plainest to 4 for the wildest.</param>

@@ -1,4 +1,3 @@
-import { seedToText } from "./settings.js";
 
 /**
  *     The analytics dashboard. It asks the server for one summary and draws it; nothing here talks to
@@ -530,7 +529,7 @@ function drawSeeds() {
             bar.className = "bar";
             bar.style.width = `${Math.max(2, (seed.seconds / longest) * 100)}%`;
 
-            return [seedToText(seed.seed), seconds(seed.seconds), String(seed.plays), bar];
+            return [seed.seed, seconds(seed.seconds), String(seed.plays), bar];
         })
     ));
 }
@@ -567,7 +566,7 @@ function drawRated() {
     elements.ratedHint.textContent = `The songs of ${summary.ratedVersion} rated, the most liked first. A seed is this song only in this version.`;
     elements.rated.replaceChildren(table(
         ["Song", "Settings given", "Liked", "Disliked"],
-        summary.rated.map((seed) => [seedToText(seed.seed), seed.identity === "" ? "drawn" : seed.identity, String(seed.likes), String(seed.dislikes)])
+        summary.rated.map((seed) => [seed.seed, seed.identity === "" ? "drawn" : seed.identity, String(seed.likes), String(seed.dislikes)])
     ));
 }
 

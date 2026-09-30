@@ -10,8 +10,8 @@ public static class Base62
 {
     private const string Digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-    /// <summary>The most digits a seed takes, its 32 bits read as unsigned.</summary>
-    public const int SeedLength = 6;
+    /// <summary>The most digits a seed takes, all 64 of its bits.</summary>
+    public const int SeedLength = 11;
 
     /// <summary>A number as the given count of digits, zero-padded.</summary>
     public static string Encode(BigInteger number, int length)
@@ -49,16 +49,16 @@ public static class Base62
         return number;
     }
 
-    /// <summary>A seed as its digits, its 32 bits read as unsigned, with no zeros in front.</summary>
-    public static string FromSeed(int seed)
+    /// <summary>A seed as its digits, with no zeros in front.</summary>
+    public static string FromSeed(ulong seed)
     {
-        var text = Encode((uint)seed, SeedLength).TrimStart('0');
+        var text = Encode(seed, SeedLength).TrimStart('0');
         return text.Length > 0 ? text : "0";
     }
 
     /// <summary>The seed the digits write, or none for anything that is not one.</summary>
-    public static int? ToSeed(string text)
+    public static ulong? ToSeed(string text)
     {
-        return text.Length <= SeedLength && Decode(text) is { } number && number <= uint.MaxValue ? unchecked((int)(uint)number) : null;
+        return text.Length <= SeedLength && Decode(text) is { } number && number <= ulong.MaxValue ? (ulong)number : null;
     }
 }

@@ -33,8 +33,7 @@ import {
     parseSettings,
     PARTS,
     PLAYS,
-    seedToText,
-    textToSeed,
+    readSeed,
 } from "./settings.js";
 import { applyReport, defaultSettings, givenOnly, isEveryPartOff, requestFor } from "./song-settings.js";
 import { since, tell, track } from "./tally.js";
@@ -96,7 +95,7 @@ const rows = new Map();
 // or as the song on the page drew it; kept in this browser for the next visit
 let settings = restoreSettings();
 
-// the song on the page, as its seed: null before the first
+// the song on the page, as its seed, in letters and digits: null before the first
 let songSeed = null;
 
 // what the song on the page is made of, as the server said: the channel every part plays on in the file the player
@@ -668,7 +667,7 @@ elements.generateSeeded.addEventListener("click", () => {
         return;
     }
 
-    const seed = textToSeed(text);
+    const seed = readSeed(text);
     if (seed === null) {
         setStatus(`'${text}' is not a seed. A seed is up to six letters and digits.`, true);
         return;
@@ -701,7 +700,7 @@ function linkedSong() {
 
     const linked = parameters.get("settings");
     const parsed = linked === null ? null : parseSettings(linked.trim());
-    return { seed: textToSeed(asked.trim()), wasAsked: true, isOld, wasRolled, settings: parsed, isSettingsBad: linked !== null && parsed === null };
+    return { seed: readSeed(asked.trim()), wasAsked: true, isOld, wasRolled, settings: parsed, isSettingsBad: linked !== null && parsed === null };
 }
 
 /**
@@ -726,7 +725,7 @@ function rememberSong(wasRolled = history.state?.rolled === true) {
 function songLink() {
     const address = new URL(location.href);
     address.searchParams.delete("seed");
-    address.searchParams.set("song", seedToText(songSeed));
+    address.searchParams.set("song", songSeed);
     address.searchParams.set("settings", formatSettings(settings));
 
     return address.toString();
@@ -745,7 +744,7 @@ function aboutSong(measurements = {}) {
 /** A song as the page names it: its seed, and what of its settings names it too, which the same seed is another song by. */
 function songName(seed, songSettings) {
     const identity = identityOf(songSettings);
-    return identity === "" ? seedToText(seed) : `${seedToText(seed)}-${identity}`;
+    return identity === "" ? seed : `${seed}-${identity}`;
 }
 
 /** The song on the page, as the page names it; null before the first. */
@@ -812,9 +811,9 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, sign
         partsInSong = made.plays;
         drumSetup = made.drumSetup;
         drumGroupsPresent = made.drumGroups;
-        songSeed = Number(response.headers.get("X-Song-Seed") ?? seed);
+        songSeed = response.headers.get("X-Song-Seed") ?? seed;
         songVersion = response.headers.get("X-Song-Version");
-        elements.seed.value = seedToText(songSeed);
+        elements.seed.value = songSeed;
         if (!isRemade) {
             muted.clear();
             soloed.clear();
@@ -829,7 +828,7 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, sign
         if (isRemade) {
             announce("The song is made again with the new settings.");
         } else {
-            announce(`Generated song ${seedToText(songSeed)}.`);
+            announce(`Generated song ${songSeed}.`);
             track("song_generated", aboutSong({ ms: since() }));
         }
 
@@ -995,9 +994,9 @@ elements.clearHistory.addEventListener("click", () => {
  */
 function addToHistory(isRemade) {
     const name = currentSong();
-    const entry = `${seedToText(songSeed)}:${formatSettings(givenOnly(settings))}`;
+    const entry = `${songSeed}:${formatSettings(givenOnly(settings))}`;
     const top = elements.history.firstElementChild;
-    const earlier = [...elements.history.children].filter((item) => item.dataset.song === name || (isRemade && item === top && top.dataset.seed === seedToText(songSeed)));
+    const earlier = [...elements.history.children].filter((item) => item.dataset.song === name || (isRemade && item === top && top.dataset.seed === songSeed));
 
     // the keyboard follows a pressed song to the top, rather than being dropped with the button it was on
     const wasFocused = earlier.includes(document.activeElement);
@@ -1032,7 +1031,7 @@ function markCurrentSong(name) {
 function createHistoryItem(entry) {
     const [seedText, settingsText] = entry.split(":");
     const entrySettings = parseSettings(settingsText) ?? defaultSettings();
-    const seed = textToSeed(seedText);
+    const seed = readSeed(seedText);
     const identity = identityOf(entrySettings);
 
     const button = document.createElement("button");

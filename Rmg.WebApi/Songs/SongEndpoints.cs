@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Rmg.Core;
 using Rmg.Core.Composition;
+using Rmg.Core.Probabilities;
 using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
 using Rmg.Core.Versions;
@@ -27,10 +28,10 @@ public static class SongEndpoints
     {
         request ??= new GenerateSongRequest();
 
-        if (!request.TryRead(out var overrides, out var mix, out var error))
+        if (!request.TryRead(out var seed, out var overrides, out var mix, out var error))
             return Results.BadRequest(new ErrorResponse(error!));
 
-        var songSeed = request.Seed ?? Random.Shared.Next();
+        var songSeed = seed ?? Seeds.Random();
 
         MemoryStream stream;
         SongReport report;
@@ -46,11 +47,11 @@ public static class SongEndpoints
         }
         catch (Exception ex)
         {
-            return Results.Problem($"Song {songSeed}: {ex.Message}", statusCode: 500);
+            return Results.Problem($"Song {Base62.FromSeed(songSeed)}: {ex.Message}", statusCode: 500);
         }
 
         // lets the page show and reuse the seed it actually got when it asked for a random one
-        context.Response.Headers["X-Song-Seed"] = songSeed.ToString();
+        context.Response.Headers["X-Song-Seed"] = Base62.FromSeed(songSeed);
 
         // and which songs' version it is, which the page reports with what it tells of the song
         context.Response.Headers["X-Song-Version"] = SongsVersion.Number;

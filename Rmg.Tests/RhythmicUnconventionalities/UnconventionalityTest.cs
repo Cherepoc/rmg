@@ -6,7 +6,7 @@ namespace Rmg.Tests.RhythmicUnconventionalities;
 
 public sealed class UnconventionalityTest
 {
-    private static IGenerationContext Stream(Facet facet) => new GenerationContext((int)facet + 1);
+    private static IGenerationContext Stream(Facet facet) => new GenerationContext((ulong)facet + 1);
 
     [Test]
     [Arguments(0.0)]
@@ -25,7 +25,7 @@ public sealed class UnconventionalityTest
     public async Task ASection_MovesItsFacets_ByUpToItsShift()
     {
         var song = Unconventionality.Generate(0.5, Stream);
-        var sections = Enumerable.Range(0, 64).Select(x => song.GenerateSection(facet => new GenerationContext(x * 16 + (int)facet))).ToArray();
+        var sections = Enumerable.Range(0, 64).Select(x => song.GenerateSection(facet => new GenerationContext((ulong)(x * 16 + (int)facet)))).ToArray();
 
         await Assert.That(sections.All(x => x.Facets.All(f => Math.Abs(f.Value - song[f.Key]) <= Unconventionality.SectionShift + 1e-9))).IsTrue();
         await Assert.That(sections.SelectMany(x => x.Facets.Values).Distinct().Count()).IsGreaterThan(1);

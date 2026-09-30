@@ -43,7 +43,10 @@ public static class EventNames
 /// <param name="Ms">How long something took, in milliseconds.</param>
 /// <param name="Bytes">How large something was.</param>
 /// <param name="Seconds">How long something was listened to.</param>
-/// <param name="Seed">The song it was about, which is the only thing here that identifies anything.</param>
+/// <param name="Seed">
+///     The song it was about, in letters and digits (<see cref="Rmg.Core.Base62" />), all 64 of its bits, which a number
+///     in JSON could not carry; the only thing here that identifies anything.
+/// </param>
 /// <param name="Detail">One short word of context: where a soundfont came from, which control was moved.</param>
 /// <param name="Version">
 ///     The songs' version the song was made by (<c>X-Song-Version</c>), which a seed needs to name a song: the same
@@ -58,13 +61,13 @@ public sealed record EventRequest(
     long? Ms = null,
     long? Bytes = null,
     double? Seconds = null,
-    long? Seed = null,
+    string? Seed = null,
     string? Detail = null,
     string? Version = null,
     string? Settings = null
 );
 
-/// <summary>An event as it is kept: the request, with the day and the visitor it came from.</summary>
+/// <summary>An event as it is kept: the request, with the day and the visitor it came from, the seed as its 64 bits.</summary>
 public sealed record StoredEvent(
     DateTimeOffset At,
     string Day,

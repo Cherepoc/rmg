@@ -5,4 +5,4 @@ namespace Rmg;
 /// <param name="Seed">
 ///     Seed of the randomizer that produces the seed of every song, so one value reproduces the whole batch.
 /// </param>
-public sealed record CliOptions(string OutputDirectory, int Count, int Seed);
+public sealed record CliOptions(string OutputDirectory, int Count, ulong Seed);

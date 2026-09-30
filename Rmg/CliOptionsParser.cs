@@ -1,3 +1,5 @@
+using Rmg.Core;
+using Rmg.Core.Probabilities;
 using System.Globalization;
 
 namespace Rmg;
@@ -43,8 +45,9 @@ public static class CliOptionsParser
         Options:
           -o, --output <dir>   Directory to write the songs to (default: ./songs)
           -n, --count <n>      Number of songs to generate, at least 1 (default: 1)
-          -s, --seed <n>       Seed of the randomizer that provides a seed for every song
-                               (default: random, printed so the run can be repeated)
+          -s, --seed <seed>    Seed of the randomizer that provides a seed for every song, in letters
+                               and digits as the page writes seeds (default: random, printed so the
+                               run can be repeated)
           --version            Print RMG's songs' version and commit
           --fingerprint        Print the fingerprint of the songs of the corpus's seeds, which changes
                                when the songs do
@@ -53,11 +56,11 @@ public static class CliOptionsParser
 
     /// <param name="args">Command line arguments.</param>
     /// <param name="defaultSeedFactory">Provides the seed when none is passed. Random by default.</param>
-    public static CliParseResult Parse(string[] args, Func<int>? defaultSeedFactory = null)
+    public static CliParseResult Parse(string[] args, Func<ulong>? defaultSeedFactory = null)
     {
         var outputDirectory = DefaultOutputDirectory;
         var count = DefaultCount;
-        int? seed = null;
+        ulong? seed = null;
 
         for (var i = 0; i < args.Length; i++)
         {
@@ -96,8 +99,10 @@ public static class CliOptionsParser
                     break;
 
                 case "-s" or "--seed":
-                    if (!TryReadInt(args, ref i, name, inlineValue, out var seedValue, out var seedError))
+                    if (!TryReadValue(args, ref i, name, inlineValue, out var seedText, out var seedError))
                         return CliParseResult.Failure(seedError);
+                    if (Base62.ToSeed(seedText) is not { } seedValue)
+                        return CliParseResult.Failure($"'{seedText}' is not a seed for '{name}'. A seed is up to {Base62.SeedLength} letters and digits.");
                     seed = seedValue;
                     break;
 
@@ -110,7 +115,7 @@ public static class CliOptionsParser
             }
         }
 
-        seed ??= (defaultSeedFactory ?? (() => Random.Shared.Next()))();
+        seed ??= (defaultSeedFactory ?? Seeds.Random)();
         return CliParseResult.Success(new CliOptions(outputDirectory, count, seed.Value));
     }
 

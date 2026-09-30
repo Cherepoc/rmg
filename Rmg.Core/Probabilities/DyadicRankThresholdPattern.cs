@@ -36,7 +36,7 @@ public sealed class DyadicRankThresholdPattern
         ArgumentOutOfRangeException.ThrowIfNegative(variation);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(variation, 1);
 
-        var seededGenerationContext = generationContext.CreateContext(generationSeed);
+        var seededGenerationContext = generationContext.CreateContext((uint)generationSeed);
         // every slot's last draw, and the cycle it was drawn in
         var decisions = new Dictionary<int, (bool IsKept, int Cycle)>();
         var kept = new List<TimelineItem<KeptBeat>>();

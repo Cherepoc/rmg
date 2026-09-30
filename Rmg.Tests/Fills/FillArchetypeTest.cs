@@ -25,7 +25,7 @@ public sealed class FillArchetypeTest
     /// <summary>A groove of kick on the beats, snare on the backbeats and hi-hat in 8ths, for three bars.</summary>
     private static Setup Create(int seed)
     {
-        var context = new GenerationContext(seed);
+        var context = new GenerationContext((ulong)seed);
         var tracks = SongTracks.Create(context, context, context, context, new RhythmicUnconventionality(0.5), context, context, DrumSetup.KitAndPercussion);
         // the fills play the snare itself, when the song has a sidestick too
         var snare = new[] { DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare, DrumDefinitions.Clap }
@@ -206,7 +206,7 @@ public sealed class FillArchetypeTest
     {
         // a half-bar cycle, its strongest note on the downbeat, and little kept of the weaker ones
         var sparse = FillRhythm.Of(Groove(-1, 0, 2, fullness: 0.05), StateMap.Default, 0.2, Meter.FourFour);
-        var empty = Enumerable.Range(0, 200).Count(x => sparse.Play(new GenerationContext(x), x, Line, Line - 1, Line, sparse.MaxRank).IsEmpty);
+        var empty = Enumerable.Range(0, 200).Count(x => sparse.Play(new GenerationContext((ulong)x), x, Line, Line - 1, Line, sparse.MaxRank).IsEmpty);
 
         await Assert.That(empty).IsGreaterThan(100);
     }

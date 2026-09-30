@@ -1,3 +1,4 @@
+using Rmg.Core;
 using System.Security.Cryptography;
 using System.Text;
 using Rmg.Core.Versions;
@@ -39,7 +40,7 @@ public static class AnalyticsEndpoints
                 Sane(request.Ms, 0, (long)TimeSpan.FromHours(6).TotalMilliseconds),
                 Sane(request.Bytes, 0, 8L * 1024 * 1024 * 1024),
                 request.Seconds is >= 0 and <= 86_400 ? Math.Round(request.Seconds.Value, 1) : null,
-                Sane(request.Seed, int.MinValue, int.MaxValue),
+                request.Seed is null ? null : Base62.ToSeed(request.Seed) is { } seed ? unchecked((long)seed) : null,
                 Shorten(request.Detail),
                 SongsVersion.IsNumber(request.Version) ? request.Version : null,
                 SongSettings.Parse(request.Settings)

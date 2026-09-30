@@ -305,7 +305,8 @@ internal sealed class SongFormGenerator
                     x.Value.WithEvents(
                         EventTimeline.Create(
                             first.Meter.BarDuration,
-                            x.Key == clickTrack ? pulses.Skip(isHalf ? pulses.Length / 2 : 0).Select(pulse => click.ToTimelineItem(pulse)) : []
+                            // half a bar of clicks where the bar has four pulses or more, since one alone counts nothing in
+                            x.Key == clickTrack ? pulses.Skip(isHalf && pulses.Length >= 4 ? pulses.Length / 2 : 0).Select(pulse => click.ToTimelineItem(pulse)) : []
                         )
                     )
                 )
