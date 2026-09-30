@@ -146,8 +146,8 @@ internal static class FormLayers
     /// <summary>How long a button's hit is, in beats, in the bar it has.</summary>
     public const double ButtonLength = 1;
 
-    /// <summary>How long a ringing chord is held, in beats: a bar or two.</summary>
-    public static ImmutableArray<Weighted<double>> RingOutLengths { get; } = [new(0.5, 4), new(0.5, 8)];
+    /// <summary>How long a ringing chord is held, in bars: a bar or two.</summary>
+    public static ImmutableArray<Weighted<double>> RingOutLengths { get; } = [new(0.5, 1), new(0.5, 2)];
 
     /// <summary>How long the band is silent before a stopped ending's hit, in beats.</summary>
     public static ImmutableArray<Weighted<double>> StopLengths { get; } = [new(0.6, 1), new(0.4, 2)];

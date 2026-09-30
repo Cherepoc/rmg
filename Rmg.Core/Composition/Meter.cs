@@ -21,33 +21,33 @@ public sealed record Meter(ImmutableArray<int> Groups)
     public static Meter SixEight { get; } = new([6, 6]);
 
     /// <summary>
-    ///     The meters a song is in, each in its usual grouping, and how often: four the most, 3/4 and 6/8 now and then,
-    ///     and odd meters, 5/4, 7/8, 15/16 and the like, rarely; each leans by how far from convention it is, so that a
-    ///     song of a less conventional rhythm is likelier in another meter than four, and in an odd one the likelier still.
+    ///     The meters a song is in, each in its usual grouping, and how often, by the feel facet of its unconventionality:
+    ///     the plainest in four, now and then in 3/4 or 6/8; at the middle mostly four, 3/4 and 6/8 now and then and odd
+    ///     meters, 5/4, 7/8, 15/16 and the like, rarely; the wildest in any odd meter as likely, 3/4 and 6/8 less often,
+    ///     never in four.
     /// </summary>
-    public static ImmutableArray<(Weighted<Meter> Meter, double Lean)> Options { get; } =
+    public static ImmutableArray<(Meter Meter, ByConvention Weight)> Options { get; } =
     [
-        (new Weighted<Meter>(0.92, FourFour), 0),
-        (new Weighted<Meter>(0.04, ThreeFour), 1),
-        (new Weighted<Meter>(0.04, SixEight), 1),
-        (new Weighted<Meter>(0.006, new Meter([8, 12])), 2),
-        (new Weighted<Meter>(0.006, new Meter([4, 4, 6])), 2),
-        (new Weighted<Meter>(0.003, new Meter([4, 6])), 2),
-        (new Weighted<Meter>(0.003, new Meter([4, 4, 4, 6])), 2),
-        (new Weighted<Meter>(0.002, new Meter([8, 8, 12])), 2),
-        (new Weighted<Meter>(0.002, new Meter([4, 6, 6, 6])), 2),
-        (new Weighted<Meter>(0.002, new Meter([4, 3, 3, 3])), 2),
-        (new Weighted<Meter>(0.002, new Meter([4, 4, 4, 3])), 2)
+        (FourFour, new ByConvention(1, 0.92, 0)),
+        (ThreeFour, new ByConvention(0.05, 0.04, 0.3)),
+        (SixEight, new ByConvention(0.05, 0.04, 0.3)),
+        (new Meter([8, 12]), new ByConvention(0, 0.006, 1)),
+        (new Meter([4, 4, 6]), new ByConvention(0, 0.006, 1)),
+        (new Meter([4, 6]), new ByConvention(0, 0.003, 1)),
+        (new Meter([4, 4, 4, 6]), new ByConvention(0, 0.003, 1)),
+        (new Meter([8, 8, 12]), new ByConvention(0, 0.002, 1)),
+        (new Meter([4, 6, 6, 6]), new ByConvention(0, 0.002, 1)),
+        (new Meter([4, 3, 3, 3]), new ByConvention(0, 0.002, 1)),
+        (new Meter([4, 4, 4, 3]), new ByConvention(0, 0.002, 1))
     ];
 
     /// <summary>
-    ///     A song's meter, leaned by its rhythm's unconventionality, its groups in an order drawn among theirs, as 7/8
+    ///     A song's meter, by the feel facet of its unconventionality, its groups in an order drawn among theirs, as 7/8
     ///     plays 2+2+3, 3+2+2 or 2+3+2.
     /// </summary>
-    public static Meter Draw(IGenerationContext context, Tilt rhythm)
+    public static Meter Draw(IGenerationContext context, double unconventionality)
     {
-        var leans = Options.ToDictionary(x => x.Meter.Value, x => x.Lean);
-        var meter = context.Pick(rhythm.Weigh(Options.Select(x => x.Meter), meter => leans[meter]));
+        var meter = context.Pick(ByConvention.Weigh(Options, unconventionality));
         var orders = Orders(meter.Groups).ToArray();
         return new Meter(orders[(int)(context.GenerateDouble() * orders.Length)]);
     }

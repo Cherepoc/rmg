@@ -198,7 +198,7 @@ public sealed class MelodyRepetitionTest
     [Test]
     public async Task ASectionThatRecurs_PlaysTheSameNotes_UnlessTheSongImprovises_AndItsAnswer_StartsAsItsQuestion_AndChangesAfter()
     {
-        var m = MeasureRecurrence(TestCorpus.Range(64));
+        var m = MeasureRecurrence(TestCorpus.Range(256));
 
         // placed over the song, a recurring section and an answer that go on from the note before replay the tune heard,
         // an octave off where it would leap from it

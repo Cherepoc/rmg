@@ -84,7 +84,7 @@ public static class SongGenerator
 
         // the song's form: one of the forms songs are written in, its sections playing their roles, or one of its own
         // the meter the song's bars are in
-        var meter = overrides.Meter ?? Meter.Draw(Stream(SongStream.Meter), Of(Facet.Feel).Tilt);
+        var meter = overrides.Meter ?? Meter.Draw(Stream(SongStream.Meter), songUnconventionality[Facet.Feel]);
         StateTrace.Record(TracePoints.Meter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, meter.ToString(), meter);
 
         var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), Of(Facet.Form).Tilt);
@@ -100,7 +100,7 @@ public static class SongGenerator
         var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common));
         // how the song swings, which its tempo sets the notes of
         var grooveContext = Stream(SongStream.Groove);
-        var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), Of(Facet.Feel).Tilt, meter);
+        var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), songUnconventionality[Facet.Feel], meter);
         StateTrace.Record(TracePoints.Swing, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{swing.Delay:F3} of {swing.Period}", swing);
 
         var sectionGenerator = new SectionGenerator(
@@ -124,7 +124,8 @@ public static class SongGenerator
             Stream(SongStream.Form),
             Stream(SongStream.Intro),
             Of(Facet.Form),
-            tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role)
+            tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
+            meter
         );
         var plan = formGenerator.Plan(sectionIds);
 
@@ -200,7 +201,7 @@ public static class SongGenerator
     }
 
     /// <summary>A stream's own sequence for a facet of the song's unconventionality.</summary>
-    private static IGenerationContext CreateStream(int seed, SongStream stream, Facet facet)
+    internal static IGenerationContext CreateStream(int seed, SongStream stream, Facet facet)
     {
         return new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)stream), (int)facet));
     }

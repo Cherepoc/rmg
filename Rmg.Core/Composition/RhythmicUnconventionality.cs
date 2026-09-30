@@ -43,6 +43,31 @@ public sealed record RhythmicUnconventionality(double Value)
         return new RhythmicUnconventionality(Math.Clamp(Value + Generators.SplineValue()(context) * SectionShift, 0, 1));
     }
 
+    /// <summary>
+    ///     A chance's ends, as it leaned by the unconventionality through <see cref="Tilt" />: an unconventional thing
+    ///     (a lean above 0) never at the plain end and every time at the wild; a conventional one (below 0) as the plainest
+    ///     tilt had it at the plain end and never at the wild; one of no lean as tuned at both.
+    /// </summary>
+    public static ByConvention Ends(double chance, double lean)
+    {
+        return lean > 0 ? new ByConvention(0, chance, 1)
+            : lean < 0 ? new ByConvention(Plainest.Tilt.Chance(chance, lean), chance, 0)
+            : new ByConvention(chance, chance, chance);
+    }
+
+    /// <summary>
+    ///     An option's weight's ends, as it leaned by the unconventionality through <see cref="Tilt" />: a conventional or
+    ///     a neutral option (a lean up to 0) allowed at the plain end, as the plainest tilt weighed it, and an unconventional
+    ///     or a neutral one (from 0) at the wild, every such option as likely.
+    /// </summary>
+    public static ByConvention WeightEnds(double weight, double lean)
+    {
+        return new ByConvention(lean <= 0 ? Plainest.Tilt.Weigh(weight, lean) : 0, weight, lean >= 0 ? 1 : 0);
+    }
+
+    // the plainest, whose tilt the ends of what leaned conventional keep
+    private static RhythmicUnconventionality Plainest { get; } = new(0);
+
     /// <summary>The layer with its chances leaned by the unconventionality; how often its speed changes stays.</summary>
     public RhythmLayer Lean(RhythmLayer layer)
     {

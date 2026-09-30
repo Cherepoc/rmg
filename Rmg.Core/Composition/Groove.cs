@@ -38,8 +38,8 @@ public readonly record struct Swing(double Delay, double Period)
 /// </summary>
 internal static class Groove
 {
-    /// <summary>The chance a song swings, at a rhythm of middling conventionality.</summary>
-    public const double SwingChance = 0.2;
+    /// <summary>The chance a song swings, by the feel facet of its unconventionality: never the plainest, every wildest.</summary>
+    public static ByConvention SwingChance { get; } = RhythmicUnconventionality.Ends(0.2, 1);
 
     /// <summary>The lightest swing, as a part of the triplet's; the heaviest is the triplet's, the second note of a pair a third late.</summary>
     public const double LightestSwing = 0.3;
@@ -48,9 +48,10 @@ internal static class Groove
     public const double ShortestSwungNote = 0.14;
 
     /// <param name="meter">The meter the song's bars are in, whose groups a pair must divide to swing, as 6/8's 8ths do not.</param>
-    public static Swing Generate(IGenerationContext context, double tempo, Tilt rhythm, Meter meter)
+    /// <param name="unconventionality">The feel facet of the song's unconventionality.</param>
+    public static Swing Generate(IGenerationContext context, double tempo, double unconventionality, Meter meter)
     {
-        var swings = context.TestProbability(rhythm.Chance(SwingChance, 1));
+        var swings = context.TestProbability(SwingChance.At(unconventionality));
         var amount = LightestSwing + (1 - LightestSwing) * context.GenerateDouble();
 
         var sixteenth = 60 / (Meter.BaseTempo * tempo) / 4;

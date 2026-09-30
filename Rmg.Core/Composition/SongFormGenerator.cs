@@ -25,17 +25,22 @@ internal sealed class SongFormGenerator
     // what every track plays, by its number, so that the form can bring in or leave out the drums or the bass
     private readonly IReadOnlyDictionary<int, TrackRole> _roles;
 
+    // the meter the song's bars are in, which an ending's lengths are counted in
+    private readonly Meter _meter;
+
     public SongFormGenerator(
         IGenerationContext context,
         IGenerationContext introContext,
         RhythmicUnconventionality songRhythm,
-        IReadOnlyDictionary<int, TrackRole> roles
+        IReadOnlyDictionary<int, TrackRole> roles,
+        Meter meter
     )
     {
         _context = context;
         _introContext = introContext;
         _songRhythm = songRhythm;
         _roles = roles;
+        _meter = meter;
     }
 
     /// <summary>
@@ -54,7 +59,7 @@ internal sealed class SongFormGenerator
         var slowsDown = false;
         if (FormLayers.HasFinalChord(ending))
         {
-            held = ending == EndingKind.RingOut ? _context.Pick(FormLayers.RingOutLengths) : FormLayers.ButtonLength;
+            held = ending == EndingKind.RingOut ? _context.Pick(FormLayers.RingOutLengths) * _meter.BarDuration : FormLayers.ButtonLength;
             if (ending == EndingKind.Stop)
                 stop = _context.Pick(FormLayers.StopLengths);
             slowsDown = ending == EndingKind.RingOut && _context.TestProbability(FormLayers.RitardandoChance);
