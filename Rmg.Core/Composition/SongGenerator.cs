@@ -83,6 +83,7 @@ public static class SongGenerator
             Stream(SongStream.Panning),
             Stream(SongStream.Pad),
             Stream(SongStream.CounterMelody),
+            Stream(SongStream.Riff),
             rhythmicUnconventionality,
             Stream(SongStream.DrumStrokes),
             Stream(SongStream.DrumRoles),
@@ -220,6 +221,15 @@ public static class SongGenerator
         songTrackNoteTimelineMap = BassFills.Apply(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, fills.Runs, Stream(SongStream.BassFills), meter);
         var counterTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.CounterMelody);
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, counterTrack.Key, (PitchInstrumentTrack)counterTrack.Value, CounterLayers.Line);
+        var riffTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Riff);
+        songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, riffTrack.Key, (PitchInstrumentTrack)riffTrack.Value, RiffLayers.Line);
+        // and a line doubled by another part in a section now and then, each pair and section from a sequence of its own
+        songTrackNoteTimelineMap = LineDoubling.Apply(
+            songTrackNoteTimelineMap,
+            tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
+            form.Map,
+            (pair, section) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.LineDoubling), pair), section))
+        );
 
         // and last the notes, decided from the state of the whole song, in its order, none sounding into a stop
         var notes = form.Edits.CutNotes(
@@ -333,5 +343,7 @@ internal enum SongStream
     Meter = 25,
     Unconventionality = 26,
     Feel = 27,
-    Parts = 28
+    Parts = 28,
+    Riff = 29,
+    LineDoubling = 30
 }

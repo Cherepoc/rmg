@@ -21,7 +21,8 @@ internal static class Arrangement
         (TrackRole.Chords, 0.05),
         (TrackRole.Melody, 0.1),
         (TrackRole.Pad, 0.6),
-        (TrackRole.CounterMelody, 0.75)
+        (TrackRole.CounterMelody, 0.75),
+        (TrackRole.Riff, 0.4)
     ];
 
     /// <summary>How far a role that a tune carries keeps its melody, as the odds against it resting.</summary>

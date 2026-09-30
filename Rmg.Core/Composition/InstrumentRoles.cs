@@ -111,6 +111,23 @@ internal static class InstrumentRoles
         ]
     );
 
+    /// <summary>The instruments that play a riff: guitars, overdriven or clean, a clavinet, synth leads, a baritone sax, brass.</summary>
+    public static InstrumentRole Riff { get; } = new(
+        nameof(Riff),
+        [
+            new(29, "Overdriven Guitar", 1),
+            new(30, "Distortion Guitar", 0.8),
+            new(27, "Electric Guitar (clean)", 0.6),
+            new(28, "Electric Guitar (muted)", 0.5),
+            new(7, "Clavinet", 0.4),
+            new(80, "Lead 1 (square)", 0.3),
+            new(81, "Lead 2 (sawtooth)", 0.3),
+            new(67, "Baritone Sax", 0.2),
+            new(17, "Percussive Organ", 0.2),
+            new(61, "Brass Section", 0.2)
+        ]
+    );
+
     /// <summary>The instruments that play a line under the melody: strings, horns, reeds, a clean guitar, an organ.</summary>
     public static InstrumentRole CounterMelody { get; } = new(
         nameof(CounterMelody),

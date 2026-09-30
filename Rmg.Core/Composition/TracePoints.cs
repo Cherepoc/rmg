@@ -28,6 +28,12 @@ internal static class TracePoints
     /// </summary>
     public const string Texture = "Texture";
 
+    /// <summary>
+    ///     A line doubled in a section: the section's place in the song, the part doubled, the part doubling and the scale
+    ///     steps between them (a tuple of an <c>int</c>, two <see cref="Songs.TrackRole" />s and an <c>int</c>).
+    /// </summary>
+    public const string LineDoubling = "Line doubling";
+
     /// <summary>How many times a section plays its 4-bar pattern (an <c>int</c>).</summary>
     public const string SectionLength = "Section length";
 

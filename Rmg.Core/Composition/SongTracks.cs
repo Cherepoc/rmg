@@ -16,6 +16,7 @@ internal sealed class SongTracks
     public const int BassTrack = 6;
     public const int PadTrack = 7;
     public const int CounterMelodyTrack = 8;
+    public const int RiffTrack = 9;
 
     private SongTracks(
         ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
@@ -62,6 +63,7 @@ internal sealed class SongTracks
         IGenerationContext panningContext,
         IGenerationContext padContext,
         IGenerationContext counterContext,
+        IGenerationContext riffContext,
         RhythmicUnconventionality rhythmicUnconventionality,
         IGenerationContext strokeContext,
         IGenerationContext roleContext,
@@ -85,7 +87,7 @@ internal sealed class SongTracks
             new Dictionary<int, TrackRole>
             {
                 [ChordsTrack] = TrackRole.Chords, [MelodyTrack] = TrackRole.Melody, [BassTrack] = TrackRole.Bass, [PadTrack] = TrackRole.Pad,
-                [CounterMelodyTrack] = TrackRole.CounterMelody
+                [CounterMelodyTrack] = TrackRole.CounterMelody, [RiffTrack] = TrackRole.Riff
             }
         );
         StateTrace.Record(TracePoints.Panning, ChordsTrack, 0, 0, StateMap.Default, 0, string.Join(", ", pans.Select(x => $"{x.Key} {x.Value:F2}")), pans);
@@ -94,9 +96,29 @@ internal sealed class SongTracks
         var padInstrument = InstrumentRoles.Pad.Pick(padContext, chordsInstrument.Program);
         // and the counter-melody a line in a sound of its own, apart from the melody's and the chords'
         var counterInstrument = InstrumentRoles.CounterMelody.Pick(counterContext, melodyInstrument.Program, chordsInstrument.Program);
+        // and the riff one of its own, apart from the melody's and the chords'
+        var riffInstrument = InstrumentRoles.Riff.Pick(riffContext, melodyInstrument.Program, chordsInstrument.Program);
 
         var definitions = new Dictionary<int, IInstrumentTrack>
         {
+            [RiffTrack] = new PitchInstrumentTrack(
+                LayerStates.CreateTrackLayer(
+                    riffContext,
+                    "Track",
+                    new StateMapBuilder("Track role", perTrack: true)
+                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Riff))
+                        .Add(CompositionStateKinds.LineStepwiseness, RiffLayers.Stepwiseness)
+                        .Add(CompositionStateKinds.Rhythm.Fullness, RiffLayers.Fullness)
+                        .ToStateMap(riffContext),
+                    _ => VelocityLayers.GetLevel(TrackRole.Riff),
+                    trackRhythmLayer
+                ),
+                riffInstrument.Program,
+                -1,
+                0,
+                TrackRole.Riff,
+                pans[RiffTrack]
+            ),
             [CounterMelodyTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
                     counterContext,

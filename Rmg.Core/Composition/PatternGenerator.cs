@@ -294,6 +294,7 @@ internal sealed class PatternGenerator
             TrackRole.Melody => new LinePattern(stateMap, MelodyLayers.Line),
             TrackRole.Bass => new LinePattern(stateMap, BassLeadingLayers.Line),
             TrackRole.CounterMelody => new LinePattern(stateMap, CounterLayers.Line),
+            TrackRole.Riff => new LinePattern(stateMap, RiffLayers.Line),
             _ => null
         };
         // a drum that strikes may accent a note with another of its sounds

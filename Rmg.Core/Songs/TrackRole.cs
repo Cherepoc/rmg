@@ -14,5 +14,8 @@ public enum TrackRole
     CounterMelody,
 
     /// <summary>A drum, one of the song's, which plays in its group's rhythm.</summary>
-    Drum
+    Drum,
+
+    /// <summary>A short figure played again and again, as a guitar or a synth plays a riff, under the melody or alone.</summary>
+    Riff
 }

@@ -494,7 +494,10 @@ internal sealed class SectionGenerator
             var answerSeed = answerContext.GenerateSeed();
             var questionEnd = barStateTimelineMap.GetEffectiveStateMapAt(_meter.PatternDuration - _meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
             var answer = isMelody ? LinePattern.DrawAnswer(answerContext, amount, questionEnd) : null;
-            var seeds = PatternGenerator.DrawSeeds(context, trackStateMaps.Keys, sectionRhythm.Scheme);
+            // a riff's bars follow a riff's scheme, from a sequence of its own, rather than the section's phrase
+            var isRiff = _tracks.Definitions[trackNumber].Role == TrackRole.Riff;
+            var trackRhythm = isRiff ? sectionRhythm with { Scheme = Stream(sectionId, SectionStream.Riff).Pick(RiffLayers.Schemes) } : sectionRhythm;
+            var seeds = PatternGenerator.DrawSeeds(context, trackStateMaps.Keys, trackRhythm.Scheme);
             GeneratedBars BuildBars(ImmutableArray<int> rhythmKeys) => _patternGenerator.BuildBars(
                 seeds,
                 sectionId,
@@ -503,7 +506,7 @@ internal sealed class SectionGenerator
                 ImmutableDictionary<int, Doubling>.Empty,
                 ImmutableDictionary<int, int>.Empty,
                 barStateTimelineMap,
-                sectionRhythm,
+                trackRhythm,
                 answer,
                 rhythmKeys
             );
@@ -533,6 +536,30 @@ internal sealed class SectionGenerator
                     StreamSeed(sectionId, SectionStream.BassImprovisation)
                 );
                 yield return (trackNumber, bars with { Timeline = bass.Appear(0, 0).Trim(_meter.PatternDuration) }, bass);
+                continue;
+            }
+
+            if (isRiff)
+            {
+                // the riff's line, placed with the song's, its pattern played twice as the section does, its figures played
+                // again as its scheme has them
+                var riff = new SectionLine(
+                    trackNumber,
+                    RiffLayers.Line,
+                    bars.Timeline.Repeat(2),
+                    rhythmKeys =>
+                    {
+                        using var pause = StateTrace.Pause();
+                        return BuildBars(rhythmKeys).Timeline.Repeat(2);
+                    },
+                    trackRhythm.Scheme.Letters,
+                    harmonicRhythm,
+                    LinePattern.DrawApproaches(Stream(sectionId, SectionStream.RiffLeading), RiffLayers.Leading, harmonicRhythm.Count),
+                    [..Enumerable.Repeat(ChordArrival.Free, harmonicRhythm.Count)],
+                    RiffLayers.Line.RegisterFreedom,
+                    StreamSeed(sectionId, SectionStream.RiffImprovisation)
+                );
+                yield return (trackNumber, bars with { Timeline = riff.Appear(0, 0).Trim(_meter.PatternDuration) }, riff);
                 continue;
             }
 
@@ -813,5 +840,8 @@ internal enum SectionStream
     TimeFeel = 20,
     Unconventionality = 21,
     Feel = 22,
-    CadenceRaise = 23
+    CadenceRaise = 23,
+    Riff = 24,
+    RiffLeading = 25,
+    RiffImprovisation = 26
 }

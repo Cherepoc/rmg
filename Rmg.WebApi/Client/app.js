@@ -1338,7 +1338,7 @@ const SETTING_NAMES = {
     fills: ["Fills", "the drums' fills"],
 };
 
-const PART_NAMES = { melody: "Melody", chords: "Chords", bass: "Bass", pad: "Pad", counterMelody: "Counter-melody", drum: "Drums" };
+const PART_NAMES = { melody: "Melody", chords: "Chords", bass: "Bass", pad: "Pad", counterMelody: "Counter-melody", drum: "Drums", riff: "Riff" };
 
 const DRUM_GROUP_NAMES = {
     kick: "Kick", snare: "Snare", timekeepers: "Hi-hat and ride", toms: "Toms", accents: "Cymbals", percussion: "Percussion", calls: "Calls",
