@@ -11,8 +11,8 @@ measured before and after by a report test, by the measure its entry names.
 
 **Now** (P0): done.
 
-**Next** (P1): **conventionality with two ends, by facet** (see *Conventionality*), step by step; the meter is built,
-to be listened to (see *Meter*); styles once they are chosen.
+**Next** (P1): none planned; conventionality with two ends, by facet, is built, to be tuned by listening (see
+*Conventionality*), as the meter is (see *Meter*); styles once they are chosen.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -128,10 +128,14 @@ tuned and wild weights (`ByConvention`), in place of the rhythm's and the harmon
    as groupings, the lowest layer's winning, in place of a prime index added up; the plain end straight and the
    threes, the wild end every feel but straight; a section's, a track's, a bar's or a fill's change of the song's feel
    never at 0 and every time at 1.
-9. **The rest of the rhythm's leans**, a facet at a time (routed, still through `Tilt`: the meter and the swing by the
-   feel facet, the song's form, its ending and intro, the sections' lengths and phrase schemes by the form's, the fills
-   by the fills', the improvisation and the answers by the melody's; the groove's own left to it; to go by their ends): the groove, the fills, the form, the melody; then the wrappers
-   gone.
+9. **The rest of the rhythm's leans** (built): every choice by its facet's ends, read from its old lean's sign
+   (`RhythmicUnconventionality.Ends`, `WeightEnds`) where it told them, and set outright where it did not: the meter
+   and the swing by the feel, the form, its ending and intro and the phrase schemes by the form's, the sections'
+   lengths left to their roles, the fills by the fills', the improvisation, the answers and the contour by the melody's,
+   the bass's arrivals by the chords', the rhythm layers' moves, the drums' roles, setups, bindings, strokes, sitting
+   out and percussion sections by the groove's; a section's rhythm its groove facet. A value keeps `Tilt`: the
+   fullness and variation spreads, the note dynamics and the energy's coupling. The plainest third of songs keeps the
+   backbeat in 53% of its bars and changes its speed less (13% faster against 19%).
 
 Later, by the same rule: key changes anywhere and at any time, where the form now allows one; the voicings, the
 cadence's raised seventh and the chord pool's size; more modes for the wild end (with *Scales of other sizes*); a
@@ -140,7 +144,10 @@ To tune by listening: the facets' spread, the harmony between its ends, the chor
 chords' tuned weights are the corpus's mix, so that a middling song now plays a level 3 or 4 chord in about one in six,
 where most songs played none and a few many: the tuned middle wants the median song's mix (57% triads, 39% level 1, 4%
 level 2), the jazz left to the wild songs; the progressions' tuned strictness likewise the median's 0.85 rather than
-the mean's 0.77. A triplet fill in a straight song is conventional, but no change of feel happens at the plain end.
+the mean's 0.77. A triplet fill in a straight song is conventional, but no change of feel happens at the plain end. The feel facet
+now puts 19% of songs outside four and 12% in odd meters, against 12% and 5% before. At the plain end every section
+of a form plays its role's length and the rhythm layers never move a groove's density, so that a plain song's bars are
+alike; at the wild end every unconventional chance happens every time, as meant.
 
 ## Meter
 
