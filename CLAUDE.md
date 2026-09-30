@@ -32,6 +32,11 @@
 - **Measure.** Measure a change in behaviour on the corpus before and after it (`TestCorpus`, explicit report
   tests), and tune it against the numbers. Tests read the trace's typed values (`StateTraceEntry.Value`,
   `TracePoints`), never its descriptions.
+- **Drawn or given.** A value the song draws, such as its unconventionality, follows the generator's taste, which may
+  keep songs away from the ends; a value supplied in its place (`SongOverrides`) is used as given, a facet set outright
+  as it is and a base as the centre its facets and sections stray around, so that a supplied 0 or 1 is the plainest or
+  the wildest song. Every such value draws from a stream of its own, so that supplying one leaves the rest of the song
+  as the seed made it.
 - **No silent defaults** in wiring: a missing argument or entry fails.
 
 Planned work and the decisions behind it are in `ROADMAP.md`.
