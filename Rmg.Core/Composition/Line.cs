@@ -12,7 +12,8 @@ namespace Rmg.Core.Composition;
 ///     strays too far, it turns back towards it. It keeps to a singable range in the middle of the
 ///     track's, and its first note is the chord's note nearest where the phrase aims.
 ///     A note that echoes one heard before, as the notes of a bar pattern that comes back or of a cycle that repeats the
-///     one before do, plays it again: the scale step it had from its chord's root, from the root of its own, where a run
+///     one before do, plays it again: the scale step it had from its chord's root, moved by as many steps as its phrase
+///     now aims away from where it aimed then, so that the phrase's shape carries its figures, from the root of its own, where a run
 ///     of echoes starts or its chord changes as it was heard over the same root, and in the octave nearest the note
 ///     before over another, and in the run's octave otherwise, so that over the same chords it repeats and over others it
 ///     sounds as a sequence. An echo on a strong
@@ -37,8 +38,9 @@ internal sealed class Line
     // bar lines too; an echo takes its step from the note it echoes, not from the way the melody went
     private int _heading = 1;
 
-    // every note that may be echoed, as the scale step it had from its chord's root, by its key
-    private readonly Dictionary<int, (int Step, int Root)> _heard = [];
+    // every note that may be echoed, as the scale step it had from its chord's root, by its key, with where its phrase
+    // aimed then
+    private readonly Dictionary<int, (int Step, int Root, double Aim)> _heard = [];
 
     // the run of echoes playing: the root of its chord, and the octave it plays in, in scale steps from where it was heard
     private (int Root, int Octave)? _echoRun;
@@ -93,6 +95,7 @@ internal sealed class Line
     )
     {
         _avoided = isPentatonic ? GetTritonePair(chord) : new HashSet<int>();
+        var aim = register * _profile.ContourShare;
         if (phraseStart == PhraseStart.Afresh)
             (_previous, _previousMove, _echoRun) = (null, 0, null);
         if (phraseStart != PhraseStart.None)
@@ -114,14 +117,20 @@ internal sealed class Line
         }
         else if (echo != 0 && _heard.TryGetValue(echo, out var heard))
         {
+            // moved by as many scale steps as the phrase now aims away from where it aimed when the note was heard, so that
+            // a figure repeated where its phrase rises or falls rises or falls with it, as a sequence, and one repeated
+            // where the phrase aims as it did plays as heard, as a section that comes back does
+            var echoStep = heard.Step + (int)Math.Round((aim - heard.Aim) * ScaleStepCount / OctaveNoteCount);
             // over the root it was heard over, as it was, but in a phrase that goes on, where that would leap from the
-            // note before; over another root, nearest the note before, as a sequence
+            // note before; over another root, nearest the note before, as a sequence: the octave the figure as heard
+            // plays in, which the move by the aim then takes up or down, rather than one nearest the note before again,
+            // which would take the move back
             if (_echoRun?.Root != chord.Root)
             {
                 var asHeard = chord.Root == heard.Root && !(_echoesNear && _previous is { } last && Math.Abs(chord.GetPitch(heard.Step) - last) >= _profile.LeapSize);
                 _echoRun = (chord.Root, asHeard ? 0 : GetNearestOctave(chord, heard.Step) - heard.Step);
             }
-            note = PlaceEcho(chord, chordToneClasses, beatRank, heard.Step + _echoRun.Value.Octave);
+            note = PlaceEcho(chord, chordToneClasses, beatRank, echoStep + _echoRun.Value.Octave);
         }
         else
         {
@@ -131,7 +140,7 @@ internal sealed class Line
 
         // the first time a note is heard it is remembered, as the step from its chord's root it has
         if (echo != 0)
-            _heard.TryAdd(echo, (LinePlacement.GetScaleStep(chord, note), chord.Root));
+            _heard.TryAdd(echo, (LinePlacement.GetScaleStep(chord, note), chord.Root, aim));
 
         _previousMove = _previous is { } before ? note - before : 0;
         if (_previousMove != 0)

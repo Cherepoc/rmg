@@ -310,6 +310,19 @@ public sealed class LineTest
         Place(line, ChordOn(1), [2, 5, 9], Strong, 1, -10);
         Place(line, ChordOn(1), [2, 5, 9], Strong, 1, -10);
 
-        await Assert.That(line.Place(C, CTones, Strong, 1, 0, 0, echo: 7, phraseStart: start)).IsEqualTo(expected);
+        // aimed where it was heard, so that only the octave moves it
+        await Assert.That(line.Place(C, CTones, Strong, 1, 0, 6, echo: 7, phraseStart: start)).IsEqualTo(expected);
+    }
+
+    [Test]
+    public async Task AnEcho_MovesByAsManyScaleStepsAsItsPhraseNowAimsAway_AsASequence()
+    {
+        // E4 heard over C, aimed at the middle; replayed where the phrase aims 7 semitones higher, four scale steps up,
+        // B4, and back where it aimed, as heard
+        var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
+        var heard = line.Place(C, CTones, Weak, 1, 0, 0, echo: 7, phraseStart: PhraseStart.Afresh);
+
+        await Assert.That(line.Place(C, CTones, Weak, 1, 0, 7, echo: 7)).IsEqualTo(heard + 7);
+        await Assert.That(line.Place(C, CTones, Weak, 1, 0, 0, echo: 7)).IsEqualTo(heard);
     }
 }

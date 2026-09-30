@@ -405,13 +405,13 @@ the rest as they were.
 
 ## Melody
 
-- **The contour shapes the melody weakly** (P3, tried in September 2026): a bar's mean pitch follows the register it
-  aims at about 0.2 (`MelodyContourTest`), as the echoes replay a note's step whatever the aim. Moving an echo run by
-  as many scale steps as its phrase now aims away from where it aimed when the note was heard, a figure repeated at
-  another place in the phrase as a sequence, was tried and dropped: the melody followed its aim 0.15 against 0.19, and
-  a recurring section kept its first appearance's notes 87% of the time against 94%, as the echoes' notes are heard
-  first anywhere in the song. The wave (`MelodyLayers.Periods`) and the lean towards the aim (`MelodyLayers.AimOdds`)
-  stay as they are; should the melody's shapes sound flat, the aim wants a way into the line other than the echoes.
+- **The contour carries the melody's figures** (built): an echo, 85% of the melody's notes, moves by as many scale
+  steps as its phrase now aims away from where it aimed when the note was heard, on top of the octave its figure as
+  heard plays in, so that a figure repeated where the phrase rises rises with it, as a sequence, and a section that
+  comes back, aimed as before, plays as heard. A bar's mean pitch follows its aim 0.40 (`MelodyContourTest`) against
+  0.18; a recurring section keeps its first appearance's notes 84% against 86%, 90% in some octave against 93%; leaps
+  9.4% of moves against 8.8%. The move tried before, with the octave then chosen nearest the note before again, took
+  the move back (0.15). To listen to: whether the sequences sound like a tune going somewhere, or like figures drifting.
 
 ## Architecture
 
