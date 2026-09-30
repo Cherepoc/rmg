@@ -115,4 +115,18 @@ public sealed class MidiWriteTest
 
         await Assert.That(result).IsEquivalentTo(expected);
     }
+
+    [Test]
+    [Arguments(new[] { 6, 6 }, 6, 3, 36)]
+    [Arguments(new[] { 4, 3, 3, 3 }, 13, 4, 18)]
+    [Arguments(new[] { 12, 8 }, 5, 2, 24)]
+    public async Task TheTimeSignature_IsTheMeters_ItsClickOnThePulse(int[] groups, int numerator, int denominatorPower, int clocks)
+    {
+        var track = new RenderedTrack(false, 1, EventTimeline.Create(1, [new RenderedNote(64, 1, 1).ToTimelineItem(0)]), 0);
+        var memoryStream = new MemoryStream();
+        new RenderedSong(1, new Meter([..groups]), StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), [track]).Write(memoryStream, null);
+
+        byte[] timeSignature = [0xff, 0x58, 0x04, (byte)numerator, (byte)denominatorPower, (byte)clocks, 0x08];
+        await Assert.That(memoryStream.ToArray().AsSpan().IndexOf(timeSignature)).IsGreaterThan(0);
+    }
 }
