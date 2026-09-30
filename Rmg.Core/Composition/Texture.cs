@@ -56,7 +56,9 @@ internal static class Texture
         TrackRole[] pitched = [..playing.Where(x => x != TrackRole.Drum).Order()];
         // the order the pitched parts come in, drawn whatever the texture, so that the draws stay as they are
         var order = pitched.OrderBy(_ => context.GenerateDouble()).ToArray();
-        var alone = playing.Order().ElementAt(context.GenerateInt(0, Math.Max(1, playing.Count)) % Math.Max(1, playing.Count));
+        // drawn whether any part plays or not, so that the draws stay as they are
+        var aloneIndex = context.GenerateInt(0, Math.Max(1, playing.Count));
+        var alone = playing.Count == 0 ? (TrackRole?)null : playing.Order().ElementAt(aloneIndex % playing.Count);
         ImmutableArray<ImmutableHashSet<TrackRole>> none = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, phrases)];
 
         switch (kind)

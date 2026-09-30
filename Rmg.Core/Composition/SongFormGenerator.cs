@@ -235,6 +235,9 @@ internal sealed class SongFormGenerator
         var listed = FormLayers.IntroParts.ToDictionary(x => x.Part);
         foreach (var part in parts.Keys.Where(x => !listed.ContainsKey(x)))
             throw new InvalidOperationException($"The intro has no weight for the part {part}.");
+        // a window no part plays in, as where a song's only part rests at first, has none to bring in
+        if (parts.Count == 0)
+            return [];
 
         var options = ByConvention.Weigh(
                 FormLayers.IntroParts.Where(x => parts.ContainsKey(x.Part)).Select(x => (x.Part, RhythmicUnconventionality.WeightEnds(x.Weight, x.Lean))),

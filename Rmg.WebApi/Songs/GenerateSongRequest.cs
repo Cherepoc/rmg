@@ -97,7 +97,7 @@ public sealed record GenerateSongRequest(
             partMixes[role] = new PartMix(part.Instrument, (part.Volume ?? LastStep) / (double)LastStep, part.Pan is { } pan ? FromPanStep(pan) : null, part.IsOn);
         }
 
-        if (Enum.GetValues<TrackRole>().All(x => parts.TryGetValue(x, out var plays) && !plays))
+        if (SongParts.LeaveNone(parts))
             return Fail("Every part is left out, so there is nothing to play.", out error);
 
         DrumSetup? drumSetup = null;

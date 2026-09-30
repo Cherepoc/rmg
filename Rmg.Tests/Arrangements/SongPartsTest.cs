@@ -61,6 +61,17 @@ public sealed class SongPartsTest
     }
 
     [Test]
+    public async Task APartDrawnOut_ComesIn_WhereEveryOtherIsGivenOut()
+    {
+        // all but the riff given out, which draws itself out in about half the songs
+        var parts = SongParts.All.Where(x => x is not (TrackRole.Riff or TrackRole.RiffTwin)).ToImmutableDictionary(x => x, _ => false);
+        for (ulong seed = 0; seed < 16; seed++)
+            await Assert.That(SongGenerator.GenerateSong(seed, new SongOverrides(Parts: parts)).Notes![SongTracks.RiffTrack].Count).IsGreaterThan(0);
+        await Assert.That(SongParts.LeaveNone(parts)).IsFalse();
+        await Assert.That(SongParts.LeaveNone(parts.Add(TrackRole.Riff, false))).IsTrue();
+    }
+
+    [Test]
     public async Task EveryPartGivenOut_IsNoSong()
     {
         var parts = SongParts.All.ToImmutableDictionary(x => x, _ => false);

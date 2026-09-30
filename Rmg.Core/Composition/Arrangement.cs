@@ -9,7 +9,8 @@ namespace Rmg.Core.Composition;
 ///     or the melody, for a section of the band alone, and more often than not the pad, which a section adds to lift
 ///     it, each the likelier the less energy the section has, and the melody
 ///     all but never where the section has a verse's, a pre-chorus's or a chorus's role, which a tune carries. A section
-///     keeps its harmony: where both the bass and the chords would rest, the chords play.
+///     keeps its harmony: where both the bass and the chords would rest, the chords play; and it never falls silent:
+///     where every part the song has would rest, the one least likely to plays.
 /// </summary>
 internal static class Arrangement
 {
@@ -44,6 +45,9 @@ internal static class Arrangement
         // a section keeps its harmony, where the song has the chords
         if (resting.Contains(TrackRole.Bass) && resting.Contains(TrackRole.Chords) && !absent.Contains(TrackRole.Chords))
             resting.Remove(TrackRole.Chords);
+        var parts = Rests.Where(x => !absent.Contains(x.Part)).ToArray();
+        if (parts.Length > 0 && parts.All(x => resting.Contains(x.Part)))
+            resting.Remove(parts.MinBy(x => x.Chance).Part);
         return resting.ToImmutableHashSet();
     }
 }
