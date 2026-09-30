@@ -11,7 +11,8 @@ measured before and after by a report test, by the measure its entry names.
 
 **Now** (P0): done.
 
-**Next** (P1): none planned; the meter is built, to be listened to (see *Meter*); styles once they are chosen.
+**Next** (P1): **conventionality with two ends, by facet** (see *Conventionality*), step by step; the meter is built,
+to be listened to (see *Meter*); styles once they are chosen.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -87,6 +88,44 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
 - **The lift:** is a crescendo of about 8 of 127 over the bar before a louder section heard as a lift?
 - **Half time and double time:** does double time, 22 drum notes a bar, sound like a lift or a scramble?
 - **The fade-outs:** a ritardando into the fade, the drums fading first, or a tag after it, if asked for.
+
+## Conventionality
+
+Planned in September 2026 (see CLAUDE.md's *Conventionality has two ends*): a song's conventionality from 0, the
+plainest, to 1, the wildest, a value of it for each facet, and every choice leaning by its facet through its plain,
+tuned and wild weights (`ByConvention`), in place of the rhythm's and the harmony's unconventionality leaning through
+`Tilt`, which never reaches either end. In this order, each measured against a baseline and committed on its own:
+
+1. **The rule and its primitive** (built): `ByConvention`, a monotone cubic through an option's plain, tuned and wild
+   weights, and a chance's.
+2. **Baselines:** a harmony report (the chords' levels, the home's and the cadence's, the scales, the sections' scale
+   changes, the key changes, the pentatonic sections, the progressions' strictness) and the feel's, the backbeat's,
+   the grid's, the busyness's and the drums' reports kept as they are.
+3. **The facets**, as plumbing: a song's base conventionality, spread as the rhythm's is now, and the feel, the groove,
+   the fills, the form, the chords, the progression, the scale and the melody drawn around it, each from a stream of
+   its own, the spread vanishing at the ends so that a base of 0 or 1 makes every facet so; a section moves each a
+   little. The rhythm's and the harmony's unconventionality stay as wrappers of one facet each until every choice reads
+   its own; a test makes songs with every facet at 0, at 1, and each alone at 1.
+4. **The chords:** a chord's level a choice by the chords facet, the plain end triads and the colours of level 1, a few
+   of level 2, the wild end levels 2 to 5, rising; the home chord and the cadence choices of their own, with plainer
+   tuned weights and the same ends; the anchor, peak and skew gone; the tuned weights the corpus's levels.
+5. **The progressions' strictness** by the progression facet.
+6. **The scales:** the plain end major and natural minor, Mixolydian and Dorian a little; the wild end harmonic minor,
+   Phrygian and Lydian, Mixolydian and Dorian a little; the sections' scale changes a chance by the rule, in place of
+   one multiplied by hand.
+7. **The key change and the pentatonic melody** by the scale facet, in place of the rhythm's: a key change allowed at
+   both ends and at every chance at 1, a pentatonic melody plain only.
+8. **The feel:** a feel a choice of eleven, straight, the threes, fives, sevens, elevens and thirteens as tuplets and
+   as groupings, the lowest layer's winning, in place of a prime index added up; the plain end straight and the
+   threes, the wild end every feel but straight; a section's, a track's, a bar's or a fill's change of the song's feel
+   never at 0 and every time at 1.
+9. **The rest of the rhythm's leans**, a facet at a time: the groove, the fills, the form, the melody; then the wrappers
+   gone.
+
+Later, by the same rule: key changes anywhere and at any time, where the form now allows one; the voicings, the
+cadence's raised seventh and the chord pool's size; more modes for the wild end (with *Scales of other sizes*); a
+song's own coherence, how far its facets stray from its base; a user's conventionality setting, which moves the base.
+To tune by listening: the facets' spread, the harmony between its ends, the chords' and the scales' weights.
 
 ## Meter
 
