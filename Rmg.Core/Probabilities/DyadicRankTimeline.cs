@@ -87,8 +87,12 @@ public sealed class DyadicRankTimeline
         var slots = new List<DyadicRankSlot>();
         for (var cycle = 0; cycle < cycles.Count; cycle++)
         {
-            var (start, length, end, split, phase, rankLimit) = cycles[cycle];
-            var shifted = RankTimelines.GetOrAdd((split, Math.Min(maxRank, rankLimit)), x => BuildRankTimeline(x.Split, x.MaxRank))
+            var (start, length, end, split, phase, rankLimit, template) = cycles[cycle];
+            var rank = Math.Min(maxRank, rankLimit);
+            var timeline = template.IsDefault
+                ? RankTimelines.GetOrAdd((split, rank), x => BuildRankTimeline(x.Split, x.MaxRank))
+                : EventTimeline.Create(1, template.Where(x => x.Rank <= rank).Select(x => new TimelineItem<int>(x.Position, x.Rank)));
+            var shifted = timeline
                 .Stretch(length)
                 .PhaseShift(phase * length)
                 .Shift(start);
@@ -111,7 +115,19 @@ public sealed class DyadicRankTimeline
 
 /// <summary>A cycle of a rhythm: where it starts, how long its template is, where it is cut off, how it splits first and how far its phase shifts it, as a part of its length.</summary>
 /// <param name="RankLimit">The finest rank the cycle plays, such as a node of three 16ths' 16ths; none finer than the rhythm's own for most.</param>
-public readonly record struct RhythmCycle(double Start, double Length, double End, int Split, double Phase, int RankLimit = int.MaxValue);
+/// <param name="Template">
+///     The cycle's positions, as parts of its length, each with its rank, where a meter's node sets them; none for the
+///     dyadic template of its split.
+/// </param>
+public readonly record struct RhythmCycle(
+    double Start,
+    double Length,
+    double End,
+    int Split,
+    double Phase,
+    int RankLimit = int.MaxValue,
+    ImmutableArray<(double Position, int Rank)> Template = default
+);
 
 /// <param name="Rank">How strong the position is, 0 the strongest.</param>
 /// <param name="Cycle">Which repetition of the cycle the position is in, from 0.</param>

@@ -76,4 +76,28 @@ public sealed class MeterTreeTest
             await Assert.That(now.SequenceEqual(before)).IsTrue().Because($"period {period}, phase {phase}, rank {maxRank}");
         }
     }
+
+    [Test]
+    [Arguments(new[] { 8, 8 }, new[] { 1.0, 3.0 })]
+    [Arguments(new[] { 4, 4, 4 }, new[] { 1.0, 2.0 })]
+    [Arguments(new[] { 6, 6 }, new[] { 1.5 })]
+    [Arguments(new[] { 4, 4, 4, 3 }, new[] { 1.0, 2.0, 3.0 })]
+    public async Task TheBackbeat_StrikesTheBarsOtherGroups(int[] groups, double[] beats)
+    {
+        // the backbeat's part: half a bar in four, half its cycle late
+        var meter = new Meter([..groups]);
+        var slots = DyadicRankTimeline.GenerateSlots(meter.BarDuration, meter.GetCycles(2, 1), 0);
+
+        await Assert.That(slots.Select(x => x.Position).ToArray()).IsEquivalentTo(beats);
+    }
+
+    [Test]
+    [Arguments(new[] { 8, 8 }, 2)]
+    [Arguments(new[] { 4, 4, 4 }, 1)]
+    [Arguments(new[] { 6, 6 }, 1)]
+    [Arguments(new[] { 4, 4, 4, 3 }, 1)]
+    public async Task ThePulse_IsTheLevelNearestABeat(int[] groups, int tactus)
+    {
+        await Assert.That(new Meter([..groups]).Tactus).IsEqualTo(tactus);
+    }
 }

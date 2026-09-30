@@ -69,12 +69,26 @@ public sealed record Meter(ImmutableArray<int> Groups)
     }
 
     /// <summary>
-    ///     A bar's cycles of a rhythm of the period and phase given, both in beats counted in the reference bar: a straight
-    ///     period, a power of two of 16ths, plays on the nodes of the level whose nodes are most often nearest its length,
-    ///     the coarser where two are as near, each node a cycle split as the node splits, so that the same settings play
-    ///     as busy in every meter; one of two bars or more over two bars, of which the bar plays the first; a tuplet's or
-    ///     a grouped period's cycles run on from the bar's start, starting again where two of them fit, as they always did.
-    ///     In four the levels are the halvings of the bar, so a straight period's cycles are its nodes, as they were.
+    ///     The level of the meter's pulse, which a rhythm's period is counted in: the level whose nodes are most often
+    ///     nearest a beat long, the coarser where two are as near, 4/4's and 3/4's quarters, 6/8's dotted quarters and
+    ///     15/16's groups.
+    /// </summary>
+    public int Tactus => Enumerable.Range(0, Levels.Length).MinBy(x => (Math.Round(Math.Abs(Math.Log2(ModeLength(x) / 4.0)), 9), x));
+
+    /// <summary>How long a level's nodes most often are, in 16ths, the longer where two lengths are as common.</summary>
+    private int ModeLength(int level) =>
+        Levels[level].GroupBy(x => x.Length).OrderByDescending(x => x.Count()).ThenByDescending(x => x.Key).First().Key;
+
+    /// <summary>
+    ///     A bar's cycles of a rhythm of the period and phase given, both in beats counted in the reference bar. A
+    ///     straight period, a power of two of 16ths, is counted in the pulses it has in four: the reference bar plays on
+    ///     the bar, two bars over two bars, of which the bar plays the first, and a shorter one on the nodes of the level
+    ///     whose nodes are most often nearest as many of the meter's pulses, the coarser where two are as near, so that a
+    ///     half bar is 6/8's bar and 3/4's too; each node a cycle of its own descendants, its ranks the depths they first
+    ///     start at. A phase of half a cycle strikes the node's other parts first, its first after, as 4/4's backbeat does
+    ///     on 2 and 4, 3/4's on 2 and 3 and 6/8's on its fourth 8th; another shifts it. A tuplet's or a grouped period's
+    ///     cycles run on from the bar's start, starting again where two of them fit, as they always did. In four every
+    ///     cycle is as it was.
     /// </summary>
     public ImmutableArray<RhythmCycle> GetCycles(double period, double phase)
     {
@@ -85,21 +99,59 @@ public sealed record Meter(ImmutableArray<int> Groups)
             return DyadicRankTimeline.GenerateCycles(BarDuration, phase, period, ResolvedRhythm.RestartOf(period, BarDuration), ResolvedRhythm.SplitOf(period));
 
         var fraction = phase / period;
-        if (Math.Abs(Math.Log2(steps / (2.0 * Sixteenths))) < Math.Abs(Math.Log2(steps / Sixteenths)))
+        if (period > ReferenceBar + 1e-9)
         {
             // two bars' cycle, the bar its first half
             var twoBars = 2 * BarDuration;
             return [new RhythmCycle(0, twoBars, BarDuration, ResolvedRhythm.SplitOf(twoBars), fraction, RankLimitOf(2 * Sixteenths))];
         }
 
-        var level = Levels
-            .Select((nodes, index) => (Nodes: nodes, Index: index, Length: nodes.GroupBy(x => x.Length).OrderByDescending(x => x.Count()).ThenByDescending(x => x.Key).First().Key))
-            .MinBy(x => (Math.Round(Math.Abs(Math.Log2(x.Length / steps)), 9), x.Index))
-            .Nodes;
+        var pulses = period / (ReferenceBar / 4);
+        var tactus = ModeLength(Tactus);
+        var level = period > ReferenceBar - 1e-9
+            ? 0
+            : Enumerable.Range(0, Levels.Length).MinBy(x => (Math.Round(Math.Abs(Math.Log2(ModeLength(x) / (double)tactus / pulses)), 9), x));
+        var weakFirst = Math.Abs(fraction - 0.5) < 1e-9;
         return
         [
-            ..level.Select(node => new RhythmCycle(node.Start / 4.0, node.Length / 4.0, (node.Start + node.Length) / 4.0, ResolvedRhythm.SplitOf(node.Length / 4.0), fraction, RankLimitOf(node.Length)))
+            ..Levels[level].Select(node => new RhythmCycle(
+                node.Start / 4.0,
+                node.Length / 4.0,
+                (node.Start + node.Length) / 4.0,
+                ResolvedRhythm.SplitOf(node.Length / 4.0),
+                weakFirst ? 0 : fraction,
+                RankLimitOf(node.Length),
+                Template(level, node, weakFirst)
+            ))
         ];
+    }
+
+    /// <summary>
+    ///     A node's cycle, as its positions in parts of its length, each with its rank: its start, then the starts of its
+    ///     descendants level by level, each rank the depth they first start at, and past the 16ths every part halved; with
+    ///     its other parts first, its first child's start a rank weaker than its others'.
+    /// </summary>
+    private ImmutableArray<(double Position, int Rank)> Template(int level, (int Start, int Length) node, bool weakFirst)
+    {
+        var ranks = new SortedDictionary<double, int> { [0] = 0 };
+        for (var depth = 1; depth <= DyadicRankDistribution.MaxRank; depth++)
+        {
+            double[] starts = level + depth < Levels.Length
+                ? [..Levels[level + depth].Where(x => x.Start >= node.Start && x.Start < node.Start + node.Length).Select(x => (x.Start - node.Start) / (double)node.Length)]
+                : [];
+            var fresh = starts.Where(x => !ranks.ContainsKey(x)).ToArray();
+            // past the tree, every part halved
+            if (fresh.Length == 0)
+            {
+                var bounds = ranks.Keys.Append(1.0).ToArray();
+                fresh = [..bounds.Zip(bounds.Skip(1), (a, b) => (a + b) / 2)];
+            }
+
+            foreach (var position in fresh)
+                ranks.TryAdd(position, depth);
+        }
+
+        return [..ranks.Select(x => (x.Key, weakFirst && x.Value <= 1 ? 1 - x.Value : x.Value))];
     }
 
     /// <summary>
