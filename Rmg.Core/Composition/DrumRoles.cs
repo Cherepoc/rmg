@@ -53,7 +53,12 @@ internal static class DrumRoles
     /// <param name="MaxRank">How many ranks finer than its cycle it plays: fewer for no weaker hits of its own.</param>
     /// <param name="Fullness">How full it plays.</param>
     /// <param name="Variation">How much less often it draws its cycles afresh, so that it keeps its figure.</param>
-    public sealed record Part(int PeriodPower, int PhaseRank, int MaxRank, double Fullness, double Variation)
+    /// <param name="GrooveLean">
+    ///     How the drum's own layers lean to move its groove, its speed and its phase (<see cref="GrooveHold" />): -1 for
+    ///     the backbeat, which the snare alone does not leave for double or half time while the kick and the hi-hat
+    ///     play on, the drums' shared layers still moving the groove of them all.
+    /// </param>
+    public sealed record Part(int PeriodPower, int PhaseRank, int MaxRank, double Fullness, double Variation, double GrooveLean)
     {
         /// <summary>The part as state, times the sign given, so that a section can take one part and add another.</summary>
         public StateMap ToStateMap(int sign = 1)
@@ -78,11 +83,23 @@ internal static class DrumRoles
     /// </summary>
     public static ImmutableDictionary<DrumRole, Part> Parts { get; } = new Dictionary<DrumRole, Part>
     {
-        [DrumRole.Ground] = new(0, 0, 0, 0, -0.4),
-        [DrumRole.Backbeat] = new(-1, 1, -2, 0, -0.3),
-        [DrumRole.Time] = new(-1, 0, 0, 0.35, -0.5),
-        [DrumRole.Colour] = new(0, 0, 0, 0, 0)
+        [DrumRole.Ground] = new(0, 0, 0, 0, -0.4, 0),
+        [DrumRole.Backbeat] = new(-1, 1, -2, 0, -0.3, -1),
+        [DrumRole.Time] = new(-1, 0, 0, 0.35, -0.5, 0),
+        [DrumRole.Colour] = new(0, 0, 0, 0, 0, 0)
     }.ToImmutableDictionary();
+
+    /// <summary>
+    ///     How far a role's groove lean moves the odds of a drum's own layers moving its speed or its phase: a lean of -1
+    ///     makes them an eighth.
+    /// </summary>
+    public static Tilt GrooveHold { get; } = Tilt.Of(8, 1);
+
+    /// <summary>A drum's own rhythm layer, its groove held as its role holds it (<see cref="Part.GrooveLean" />).</summary>
+    public static RhythmLayer Hold(RhythmLayer layer, DrumRole role) => layer.LeanGroove(GrooveHold, Parts[role].GrooveLean);
+
+    /// <summary>The role a drum's state gives it.</summary>
+    public static DrumRole Of(StateMap drumStateMap) => (DrumRole)drumStateMap.GetStateValue(CompositionStateKinds.DrumRole).Value;
 
     /// <summary>
     ///     The weakest rank of the lead's beats a drum that doubles it plays: the backbeat's main hits, and time's beats

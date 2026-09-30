@@ -392,7 +392,7 @@ internal sealed class SectionGenerator
                 .MergeWith(sectionStateMap);
             var trackStateMaps = new Dictionary<int, StateMap>();
             foreach (var trackNumber in group.TrackNumbers.Where(activeDrumTrackNumbers.Contains))
-                trackStateMaps[trackNumber] = CreateSectionTrackLayer(context, trackNumber, sectionRhythm, sectionRhythm.Energy)
+                trackStateMaps[trackNumber] = CreateSectionTrackLayer(context, trackNumber, sectionRhythm, sectionRhythm.Energy, SectionRole(sectionRoles, trackNumber))
                     .MergeWith(groupStateMap)
                     .MergeWith(sectionRoles[trackNumber])
                     .MergeWith(sectionStrokes.TryGetValue(trackNumber, out var stroke) ? DrumStrokes.At(StateDepths.Section, stroke) : StateMap.Default);
@@ -454,7 +454,7 @@ internal sealed class SectionGenerator
                 sectionTrackLayer.Add(CompositionStateKinds.LinePentatonic, isPentatonic ? 1 : 0);
             }
             // fuller and busier the more energy the section has, as its drums are
-            var trackStateMap = CreateSectionTrackLayer(context, trackNumber, sectionRhythm, sectionRhythm.Energy)
+            var trackStateMap = CreateSectionTrackLayer(context, trackNumber, sectionRhythm, sectionRhythm.Energy, null)
                 .MergeWith(sectionStateMap)
                 .MergeWith(sectionTrackLayer.ToStateMap(context));
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Pad)
@@ -608,14 +608,16 @@ internal sealed class SectionGenerator
     ///     A track's own layer in the section, over the state its definition brings, its fullness and density leaning by
     ///     the tilt given, such as a drum's by the section's energy.
     /// </summary>
-    private StateMap CreateSectionTrackLayer(IGenerationContext context, int trackNumber, SectionRhythm sectionRhythm, Tilt tilt = default)
+    /// <param name="role">A drum's role in the section, which holds its groove as it does; none for a pitched track.</param>
+    private StateMap CreateSectionTrackLayer(IGenerationContext context, int trackNumber, SectionRhythm sectionRhythm, Tilt tilt, DrumRole? role)
     {
+        var layer = sectionRhythm.Unconventionality.Lean(RhythmLayers.SectionTrack).Tilted(tilt);
         return LayerStates.CreateTrackLayer(
             context,
             "Section track",
             SongTracks.GetGenerationStateMap(_tracks.Definitions[trackNumber]),
             VelocityLayers.CreateGenerator(VelocityLayers.SectionTrack),
-            sectionRhythm.Unconventionality.Lean(RhythmLayers.SectionTrack).Tilted(tilt)
+            role is { } drumRole ? DrumRoles.Hold(layer, drumRole) : layer
         );
     }
 

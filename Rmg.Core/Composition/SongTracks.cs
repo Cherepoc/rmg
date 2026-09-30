@@ -207,7 +207,7 @@ internal sealed class SongTracks
                     .MergeWith(DrumStrokes.GenerateSong(strokeContext, drum))
                     .MergeWith(DrumRoles.GenerateSong(roleContext, drum, rhythmicUnconventionality.Tilt));
                 definitions[DrumGroups.GetTrackNumber(drum)] = new PercussionInstrumentTrack(
-                    LayerStates.CreateTrackLayer(context, "Track", drumStateMap, _ => VelocityLayers.GetLevel(drum), trackRhythmLayer),
+                    LayerStates.CreateTrackLayer(context, "Track", drumStateMap, _ => VelocityLayers.GetLevel(drum), DrumRoles.Hold(trackRhythmLayer, DrumRoles.Of(drumStateMap))),
                     drum.Sounds
                 );
             }

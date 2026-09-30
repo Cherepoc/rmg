@@ -98,12 +98,18 @@ internal sealed class PatternGenerator
     {
         // a bar pattern's own layer, drawn for every track and bar; no chord root offset here: every track plays the
         // progression's chord, and a track leaves it only by moving its root from note to note
-        var barPatternLayerGenerator = new StateMapBuilder("Bar pattern", perTrack: true)
-            .AddRhythmLayer(sectionRhythm.Unconventionality.Lean(RhythmLayers.BarPattern))
+        // a drum's held as its role holds its groove
+        Func<IGenerationContext, StateMap> BarPatternLayer(RhythmLayer layer) => new StateMapBuilder("Bar pattern", perTrack: true)
+            .AddRhythmLayer(layer)
             .AddNoteWalkLayer()
             .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.BarPattern))
             .AddNoteDurationLayer()
             .ToStateMapGenerator();
+        var barPatternLayer = sectionRhythm.Unconventionality.Lean(RhythmLayers.BarPattern);
+        var barPatternLayerGenerators = trackStateMaps.ToDictionary(
+            x => x.Key,
+            x => _trackDefinitions[x.Key].Role == TrackRole.Drum ? BarPatternLayer(DrumRoles.Hold(barPatternLayer, DrumRoles.Of(x.Value))) : BarPatternLayer(barPatternLayer)
+        );
 
         var scheme = sectionRhythm.Scheme;
         var feels = new List<BarFeel>();
@@ -123,14 +129,17 @@ internal sealed class PatternGenerator
                     var barFeels = new List<BarFeel>();
                     var bars = new Dictionary<int, EventStateTimelineMap<StateMap>>();
                     foreach (var x in seeds.OrderBy(x => feelLeads.ContainsKey(x.Key)))
+                    {
+                        // and its lead's bar pattern layer, held as the lead's role holds it
+                        var patternOf = doubles.TryGetValue(x.Key, out var doubling) && doubling.Binding != DrumBinding.Figure ? doubling.Lead : x.Key;
                         bars[x.Key] = GenerateBar(
                                 x.Key,
-                                doubles.TryGetValue(x.Key, out var doubling) && doubling.Binding != DrumBinding.Figure ? seeds[doubling.Lead] : x.Value,
+                                seeds[patternOf],
                                 trackStateMaps[x.Key],
                                 barStateTimelineMap,
                                 sectionId,
                                 barIndex,
-                                barPatternLayerGenerator,
+                                barPatternLayerGenerators[patternOf],
                                 scheme.IsVaried[patternBar],
                                 redrawsRhythm,
                                 rhythmKey,
@@ -143,6 +152,8 @@ internal sealed class PatternGenerator
                                 feelLeads.TryGetValue(x.Key, out var feelLead) ? barFeels.Single(feel => feel.Track == feelLead).Rhythm : null,
                                 barFeels
                             );
+                    }
+
                     feels.AddRange(seeds.Select(x => barFeels.Single(feel => feel.Track == x.Key)));
                     var trackNotePatterns = seeds.Select(x => new KeyValuePair<int, EventStateTimelineMap<StateMap>>(x.Key, bars[x.Key]));
                     return TrackEventStateTimelineMap.Create(_meter.BarDuration, trackNotePatterns, StateTimelineMap.Create(_meter.BarDuration));

@@ -57,6 +57,12 @@ public sealed record RhythmLayer(
         };
     }
 
+    /// <summary>The layer with the chance it moves the groove, its speed and its phase, leaned by the tilt.</summary>
+    public RhythmLayer LeanGroove(Tilt tilt, double lean)
+    {
+        return this with { Groove = tilt.Chance(Groove, lean) };
+    }
+
     /// <summary>How the layer's fullness, density and speed lean: fuller, busier and faster on the high side.</summary>
     public Tilt Tilt { get; init; } = Tilt.None;
 
