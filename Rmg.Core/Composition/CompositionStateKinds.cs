@@ -41,6 +41,9 @@ internal static class CompositionStateKinds
     // how a line's note's bar leads out into the next chord (a ChordApproach), and what its first note lands on (a
     // ChordArrival), the line's own, where bar state would be every track's
     public static StateKind<int> LineApproach { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineApproach", StateScope.Render);
+
+    // 1 for a line whose passing notes leave out the scale's tritone pair, a pentatonic melody (Line), 0 for all of the scale
+    public static StateKind<int> LinePentatonic { get; } = StateKinds.CreateAdditive<int>(Prefix + "LinePentatonic", StateScope.Render);
     public static StateKind<int> LineLanding { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineLanding", StateScope.Render);
 
     // how a line's note starts its phrase (a PhraseStart): afresh, at where the phrase aims, or going on from the note

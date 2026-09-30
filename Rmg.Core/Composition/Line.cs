@@ -43,6 +43,9 @@ internal sealed class Line
     // the run of echoes playing: the root of its chord, and the octave it plays in, in scale steps from where it was heard
     private (int Root, int Octave)? _echoRun;
 
+    // the notes a pentatonic line leaves out of the chord it plays over now, its scale's tritone pair; none for any other
+    private IReadOnlySet<int> _avoided = new HashSet<int>();
+
     // whether the phrase playing goes on from the note before, and so replays its echoes nearest it rather than where
     // they were heard
     private bool _echoesNear;
@@ -85,9 +88,11 @@ internal sealed class Line
         double register,
         int echo = 0,
         ChordArrival landing = ChordArrival.Free,
-        PhraseStart phraseStart = PhraseStart.None
+        PhraseStart phraseStart = PhraseStart.None,
+        bool isPentatonic = false
     )
     {
+        _avoided = isPentatonic ? GetTritonePair(chord) : new HashSet<int>();
         if (phraseStart == PhraseStart.Afresh)
             (_previous, _previousMove, _echoRun) = (null, 0, null);
         if (phraseStart != PhraseStart.None)
@@ -152,8 +157,12 @@ internal sealed class Line
     private int PlaceEcho(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int step)
     {
         var note = chord.GetPitch(step);
-        if (beatRank <= _profile.StrongestWeakRank && chordToneClasses.Count > 0 && !chordToneClasses.Contains(note.Mod(OctaveNoteCount)))
+        var isStrong = beatRank <= _profile.StrongestWeakRank && chordToneClasses.Count > 0;
+        if (isStrong && !chordToneClasses.Contains(note.Mod(OctaveNoteCount)))
             note = GetNearest(GetChordTones(chordToneClasses), note);
+        // a pentatonic line's echo on its tritone pair moves to the nearest note it takes
+        if (_avoided.Contains(note.Mod(OctaveNoteCount)))
+            note = GetNearest(Allowed(isStrong ? GetChordTones(chordToneClasses) : GetScaleNotes(chord)), note);
 
         return note >= _low && note <= _high ? note : GetNearest(GetScaleNotes(chord), note);
     }
@@ -234,7 +243,7 @@ internal sealed class Line
         int note;
         if (_previous is not { } previous)
         {
-            note = isStrong ? GetNearest(GetChordTones(chordToneClasses), aim) : GetNearest(GetScaleNotes(chord), aim);
+            note = isStrong ? GetNearest(Allowed(GetChordTones(chordToneClasses)), aim) : GetNearest(Allowed(GetScaleNotes(chord)), aim);
         }
         else
         {
@@ -253,8 +262,12 @@ internal sealed class Line
                 direction = Math.Sign(aim - previous);
             }
 
-            var candidates = isStrong ? GetChordTones(chordToneClasses) : GetScaleNotes(chord);
+            // a pentatonic line's strong beat moves among all the chord's notes, as the line would, and then off the tritone
+            // pair to the nearest other, so that it moves as far as it would; a weak one only among the notes it takes
+            var candidates = isStrong ? GetChordTones(chordToneClasses) : Allowed(GetScaleNotes(chord));
             note = GetNext(candidates, previous, direction, isLeap ? 2 : 1);
+            if (isStrong && _avoided.Contains(note.Mod(OctaveNoteCount)))
+                note = GetNearest(Allowed(candidates), note);
         }
 
         return note;
@@ -289,6 +302,28 @@ internal sealed class Line
     }
 
     /// <summary>The notes of the scale in the range, counted from the chord's root.</summary>
+    /// <summary>
+    ///     A pentatonic line's notes of a scale are the scale's but for its tritone pair, the two notes that make its only
+    ///     tritone, such as F and B in C major and A minor alike; a scale with more than one tritone, as harmonic minor,
+    ///     keeps all its notes.
+    /// </summary>
+    private static IReadOnlySet<int> GetTritonePair(ChordContext chord)
+    {
+        var classes = Enumerable.Range(0, ScaleStepCount).Select(x => chord.GetPitch(x).Mod(OctaveNoteCount)).Distinct().ToArray();
+        var pair = classes.Where(x => classes.Contains((x + 6) % OctaveNoteCount)).ToHashSet();
+        return pair.Count == 2 ? pair : new HashSet<int>();
+    }
+
+    /// <summary>The candidates but the notes the line leaves out, a pentatonic line's tritone pair, or all of them where no other is left.</summary>
+    private IReadOnlyList<int> Allowed(IReadOnlyList<int> candidates)
+    {
+        if (_avoided.Count == 0)
+            return candidates;
+
+        var allowed = candidates.Where(x => !_avoided.Contains(x.Mod(OctaveNoteCount))).ToArray();
+        return allowed.Length > 0 ? allowed : candidates;
+    }
+
     private IReadOnlyList<int> GetScaleNotes(ChordContext chord)
     {
         // a scale step is at least a semitone, so this many steps either way of the root reach past the range

@@ -19,11 +19,11 @@ measured before and after by a report test, by the measure its entry names.
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
 **Later** (P2), roughly in this order: pitched fills (see *Fills*), once a fill can draw a line's notes; the ratings report (see *Listening data*), once the dashboard shows songs
-rated enough; occasional chords and a pentatonic melody (see *Instruments*, *Scales*); half time and double time (see *Groove*);
+rated enough; half time and double time (see *Groove*);
 the melody's contour (see *Melody*); styles (see *Styles*); the song's memory (see
 *Architecture*), once the arrangement doubles the tracks.
 
-**When the need shows** (P3): harmonised doubling and articulations, after styles; solos; long cycles, then
+**When the need shows** (P3): occasional chords (see *Instruments*); harmonised doubling and articulations, after styles; solos; long cycles, then
 overlapping polyrhythms, needed someday; timing by role; intros of their own material; scales of other sizes; the
 fills' loudness and sounds by convention; note keys.
 
@@ -266,7 +266,7 @@ Four pitched tracks, the chords, the melody, the bass and a pad, each on one ins
 may leave any of them out (`Arrangement`). Each sits where its role spreads it (`Panning`): the bass in the middle, the melody near it and the
 chords out to the other side; a new role takes a spread of its own.
 
-- **Occasional chords** (P2): how many notes a track sounds at once is its role's (`Realizer`). As a note's state, a
+- **Occasional chords** (P3, planned in September 2026 and put off: a note of a line playing two or more notes is a new draw of every note, which moves the whole line even where it plays one, or a draw keyed by the note, and what it adds, a double stop in the melody, a bass chord, risks clashing with the chords for little): how many notes a track sounds at once is its role's (`Realizer`). As a note's state, a
   note, two or the chord, leaned by the beat's accent, the energy and the landings, the melody would play a double stop
   on an accent, a guitar a power chord where a section lands, the bass a chord now and then. Measured by: the notes
   sounding at once by role, on accents and off.
@@ -303,11 +303,14 @@ corpus songs, 16% of the plainest swing, 17% of the middle and 37% of the wildes
 
 Every scale has seven notes, and the progressions' rules are in its steps (`Progressions`, `StepCount`).
 
-- **A pentatonic melody** (P2): the melody's scale a subset of the section's, two of its steps left out (the 4th and
-  7th of a major scale, the 2nd and 6th of a minor one), so that it cannot clash with the chords, leaned conventional;
-  no scale of another size is needed, the chords keeping their seven. A blues note later, as an alteration
-  (`LinePlacement`). Measured by: the melody's notes off the chord on the beat, and its leaps, as the steps it skips
-  widen its moves.
+- **A pentatonic melody** (built): a section's melody is pentatonic by a chance of 0.35, the likelier the more
+  conventional its rhythm (`MelodyLayers.PentatonicChance`, `CompositionStateKinds.LinePentatonic`): the line leaves out
+  its scale's tritone pair, the two notes of its only tritone, F and B in C major and A minor alike, which in any
+  diatonic mode leaves its pentatonic scale; a weak beat moves among the notes it takes, a strong one among the chord's
+  as it would and then off the pair to the nearest other, and an echo on the pair moves to the nearest note it takes
+  (`Line`); a scale with more than one tritone keeps all its notes. Over 200 corpus songs, 37% of the sections are
+  pentatonic, 4.1% of their melody's notes on the pair against 23.1% in the others; they leap 9.1% of the time against
+  6.7%, a pentatonic line moving by thirds where another steps (`PentatonicReportTest`).
 - **Scales of other sizes** (P3): whole scales of more or fewer than seven notes, where the progressions' rules would
   need their steps as fractions of the octave. Then jitter on in-between heights: heights between two qualities, such
   as the third, move a little from chord to chord, so that a scale of more than seven notes picks sometimes one

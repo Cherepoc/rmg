@@ -430,10 +430,16 @@ internal sealed class SectionGenerator
             var sectionTrackLayer = new StateMapBuilder("Section track", perTrack: true)
                 .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Section));
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Melody)
+            {
                 sectionRhythm.MelodyBusyness.AddTo(
                     sectionTrackLayer.Add(CompositionStateKinds.LineStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Section)),
                     sectionRhythm.Energy
                 );
+                // a pentatonic melody now and then, from a sequence of its own, the likelier the more conventional the section
+                var isPentatonic = Stream(sectionId, SectionStream.Pentatonic).TestProbability(sectionRhythm.Unconventionality.Tilt.Chance(MelodyLayers.PentatonicChance, -1));
+                StateTrace.Record(TracePoints.Pentatonic, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{isPentatonic}", isPentatonic);
+                sectionTrackLayer.Add(CompositionStateKinds.LinePentatonic, isPentatonic ? 1 : 0);
+            }
             // fuller and busier the more energy the section has, as its drums are
             var trackStateMap = CreateSectionTrackLayer(context, trackNumber, sectionRhythm, sectionRhythm.Energy)
                 .MergeWith(sectionStateMap)
@@ -734,5 +740,6 @@ internal enum SectionStream
     Length = 15,
     Arrangement = 16,
     CounterLeading = 17,
-    CounterImprovisation = 18
+    CounterImprovisation = 18,
+    Pentatonic = 19
 }
