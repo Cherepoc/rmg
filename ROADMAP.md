@@ -194,11 +194,12 @@ dotted 8th (`MeterReportTest`; `MeterSeedsReportTest` names seeds to hear).
   (`RenderedSong.Meters`). Over 1024 songs, in the middle fifth 4% of the choruses and bridges and 2% of the others, in
   the wildest 65% and 42%, 3/4, 6/8 and 4/4 most often (`SectionMeterTest`). Left: a bar of two beats before a
   section, which would make the bars of a section unlike each other; swing, which the song's meter decides.
-- **Overlapping polyrhythms** (P3, after *Long cycles*, needed someday): a figure of a length of its own, such as a
-  riff of 23 16ths, running on against the bar, as the kick and the guitar do against the hi-hat and the snare in
-  Meshuggah, meeting the bar again at a phrase's end; it covers cross-rhythms, a grouped cycle running on across the
-  bars.
-
+- **Polymeter** (built): a section's figure of its own length in 16ths, dividing no bar, 3 and 6 most often and as
+  far as 23, run across the bar lines and started afresh at every 4-bar pattern (`Polymeter`), as an edit after
+  assembly: the riff plays it, or the bass where there is no riff, and the bass with the riff and the kick now and
+  then, each repeating its own first notes, so that its line, placed after, follows the chords where they land, and
+  the fills mark the phrase's end over it. By the feel facet: 0.7% of the middle fifth's sections, 22% of the
+  wildest's (`PolymeterTest`). Left: a figure running on across the pattern's start, which needs long cycles.
 ## Chords
 
 A section's chords change every two bars, every bar or every half bar (`HarmonicRhythm`, 0.25, 0.6 and 0.15, leaning

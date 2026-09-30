@@ -238,6 +238,24 @@ public static class SongGenerator
             .MergeStateMap(commonStateMap)
             .MergeStateMap(Groove.ToStateMap(swing, grooveContext));
 
+        // a section's figure of its own length run across the bar lines now and then, from a stream of its own for each
+        // section, before the drums mark the lines and the lines are placed over it
+        var polymeters = Polymeter.Generate(
+            id => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Polymeter), id)),
+            id => generateSection(id).Facets[Facet.Feel],
+            sectionMeters,
+            sectionIds,
+            absent
+        );
+        StateTrace.Record(TracePoints.Polymeter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", polymeters.Select(x => $"{x.Key} {x.Value}")), polymeters);
+        songTrackNoteTimelineMap = Polymeter.Apply(
+            songTrackNoteTimelineMap,
+            tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).ToDictionary(x => x.Key, x => x.Value.Role),
+            DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber),
+            form.Map,
+            polymeters
+        );
+
         // the drums mark the lines, now that the song is put together
         var fills = new FillGenerator(Stream(SongStream.Fills), tracks, Of(Facet.Fills), meter);
         songTrackNoteTimelineMap = fills.Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
@@ -412,5 +430,6 @@ internal enum SongStream
     SectionKey = 36,
     RhythmPart = 37,
     SectionTempo = 38,
-    SectionMeter = 39
+    SectionMeter = 39,
+    Polymeter = 40
 }
