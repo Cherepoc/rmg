@@ -17,6 +17,9 @@ public sealed class MeterReportTest
     [Arguments(new[] { 4, 4, 4 })]
     [Arguments(new[] { 6, 6 })]
     [Arguments(new[] { 4, 4, 4, 3 })]
+    [Arguments(new[] { 4, 3, 3, 3 })]
+    [Arguments(new[] { 4, 4, 6 })]
+    [Arguments(new[] { 12, 8 })]
     public async Task Report(int[] groups)
     {
         var meter = new Meter([..groups]);

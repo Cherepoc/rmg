@@ -94,7 +94,8 @@ public static class Midi
         return [header, controller, value];
     }
 
-    private static byte[] TimeSignature(byte numerator, byte denominator)
+    /// <param name="clocks">How many MIDI clocks a metronome click is, 24 a quarter note.</param>
+    private static byte[] TimeSignature(byte numerator, byte denominator, byte clocks)
     {
         return
         [
@@ -103,7 +104,7 @@ public static class Midi
             0x04,
             numerator,
             (byte)Math.Log2(denominator),
-            0x18,
+            clocks,
             0x08
         ];
     }
@@ -245,7 +246,8 @@ public static class Midi
             events = events.Prepend(new MidiEvent(0, Tempo(1)));
 
         var (numerator, denominator) = meter.TimeSignature;
-        events = events.Prepend(new MidiEvent(0, TimeSignature((byte)numerator, (byte)denominator)));
+        // a click on every pulse of the meter, six clocks a 16th
+        events = events.Prepend(new MidiEvent(0, TimeSignature((byte)numerator, (byte)denominator, (byte)(meter.PulseSixteenths * 6))));
         if (label is not null)
             events = events.Prepend(new MidiEvent(0, Text(label)));
 

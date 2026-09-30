@@ -84,6 +84,11 @@ public sealed class MeterTreeTest
     [Arguments(new[] { 4, 4, 4 }, new[] { 1.0, 2.0 })]
     [Arguments(new[] { 6, 6 }, new[] { 1.5 })]
     [Arguments(new[] { 4, 4, 4, 3 }, new[] { 1.0, 2.0, 3.0 })]
+    [Arguments(new[] { 4, 3, 3, 3 }, new[] { 1.0, 1.75, 2.5 })]
+    [Arguments(new[] { 4, 4, 6 }, new[] { 1.0, 2.0 })]
+    [Arguments(new[] { 6, 4 }, new[] { 1.5 })]
+    [Arguments(new[] { 12, 8 }, new[] { 1.0, 2.0, 4.0 })]
+    [Arguments(new[] { 4, 6, 6, 6 }, new[] { 1.0, 2.5, 4.0 })]
     public async Task TheBackbeat_StrikesTheBarsOtherGroups(int[] groups, double[] beats)
     {
         // the backbeat's part: half a bar in four, half its cycle late
@@ -125,5 +130,14 @@ public sealed class MeterTreeTest
 
         await Assert.That(cycles.Length).IsEqualTo(count);
         await Assert.That(cycles.All(x => Math.Abs(x.Length - length) < 1e-9)).IsTrue();
+    }
+
+    [Test]
+    public async Task TheMeters_DrawTheirGroupsInEveryOrder()
+    {
+        var context = new Rmg.Core.Probabilities.GenerationContext(1);
+        var sevens = Enumerable.Range(0, 3000).Select(_ => Meter.Draw(context, Rmg.Core.Probabilities.Tilt.Of(4, 1))).Where(x => x.Sixteenths == 14).Select(x => string.Join("+", x.Groups)).Distinct().Order().ToArray();
+
+        await Assert.That(sevens).IsEquivalentTo(["4+4+6", "4+6+4", "6+4+4"]);
     }
 }

@@ -13,7 +13,7 @@ measured before and after by a report test, by the measure its entry names.
 
 **Next** (P1), in this order:
 
-1. **The meter:** as its hierarchy (see *Meter*); 3/4 and 6/8 are built, to be listened to; odd meters next.
+1. **The meter:** as its hierarchy (see *Meter*); 3/4, 6/8 and odd meters are built, to be listened to; a meter by place in the song put off.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -132,11 +132,17 @@ and threading a value that is always four through a hundred readers would change
      meter's groups hold whole pairs, never 6/8's 8ths. The drums play 3.7 notes a beat in four, 4.2 in 3/4 and 4.0 in
      6/8, the backbeat's on 3/4's second and third beats and 6/8's fourth 8th (`MeterReportTest`). The tempo is still
      in quarters, so 6/8 at 120 pulses at 80; to draw it by the pulse if it drags when listened to.
-  4. **Odd meters,** 5/4, 7/8, 15/16 and the like, groupings drawn among the usual ones, rarely, and the bar of two
-     beats before a section; then a section's meter of its own.
-- **Other meters** (with listening): 3/4, 6/8, 7/8 or 13/16 drawn, leaned conventional towards four; the first use a
-  bar of two beats now and then before a section. Measured by: the meters drawn by conventionality; the drums' notes a
-  bar, the downbeat and the backbeat as in four, per beat; the grid report's gaps under a 32nd.
+  4. **Odd meters** (built, to be listened to): 5/4, 7/8, 5/8, 9/8, 7/4, 11/8, 13/16 and 15/16, each in its usual
+     grouping, the order of its groups drawn (7/8 as 2+2+3, 3+2+2 or 2+3+2), rarely, leaned away from convention
+     twice as far as 3/4 and 6/8: over 400 songs 5%, 13% of the least conventional third. A period plays on the level
+     nearest its pulses, a finer level counted half as far again, so that 13/16's backbeat strikes its groups, not the
+     16ths inside them; the MIDI file's metronome clicks on the pulse. The drums play 3.7 notes a beat in 5/4, 4.2 in
+     7/8 and 4.9 in 13/16, whose pulse is a dotted 8th, as busy a pulse as four's.
+  5. **A bar of two beats before a section, and a section's meter of its own** (P3, planned and put off): both make
+     the meter a thing of a place in the song rather than of the song, the song map's bars no longer all alike, and
+     every reader of the song's meter (the fills, the edits, the bass's fills, the realizer, the trace's bars, the
+     tests' bar arithmetic) asking it at a position; the MIDI file a time signature at every change. Rare in the
+     music it plays, against a cost across the song's assembly; to take up when the song map holds its bars.
 - **Overlapping polyrhythms** (P3, after *Long cycles*, needed someday): a figure of a length of its own, such as a
   riff of 23 16ths, running on against the bar, as the kick and the guitar do against the hi-hat and the snare in
   Meshuggah, meeting the bar again at a phrase's end; it covers cross-rhythms, a grouped cycle running on across the

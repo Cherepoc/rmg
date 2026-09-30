@@ -21,21 +21,49 @@ public sealed record Meter(ImmutableArray<int> Groups)
     public static Meter SixEight { get; } = new([6, 6]);
 
     /// <summary>
-    ///     The meters a song is in, and how often: four the most, 3/4 and 6/8 now and then; each leans by how far from
-    ///     convention it is, so that a song of a less conventional rhythm is likelier in another meter than four.
+    ///     The meters a song is in, each in its usual grouping, and how often: four the most, 3/4 and 6/8 now and then,
+    ///     and odd meters, 5/4, 7/8, 15/16 and the like, rarely; each leans by how far from convention it is, so that a
+    ///     song of a less conventional rhythm is likelier in another meter than four, and in an odd one the likelier still.
     /// </summary>
     public static ImmutableArray<(Weighted<Meter> Meter, double Lean)> Options { get; } =
     [
         (new Weighted<Meter>(0.92, FourFour), 0),
         (new Weighted<Meter>(0.04, ThreeFour), 1),
-        (new Weighted<Meter>(0.04, SixEight), 1)
+        (new Weighted<Meter>(0.04, SixEight), 1),
+        (new Weighted<Meter>(0.006, new Meter([8, 12])), 2),
+        (new Weighted<Meter>(0.006, new Meter([4, 4, 6])), 2),
+        (new Weighted<Meter>(0.003, new Meter([4, 6])), 2),
+        (new Weighted<Meter>(0.003, new Meter([4, 4, 4, 6])), 2),
+        (new Weighted<Meter>(0.002, new Meter([8, 8, 12])), 2),
+        (new Weighted<Meter>(0.002, new Meter([4, 6, 6, 6])), 2),
+        (new Weighted<Meter>(0.002, new Meter([4, 3, 3, 3])), 2),
+        (new Weighted<Meter>(0.002, new Meter([4, 4, 4, 3])), 2)
     ];
 
-    /// <summary>A song's meter, leaned by its rhythm's unconventionality.</summary>
+    /// <summary>
+    ///     A song's meter, leaned by its rhythm's unconventionality, its groups in an order drawn among theirs, as 7/8
+    ///     plays 2+2+3, 3+2+2 or 2+3+2.
+    /// </summary>
     public static Meter Draw(IGenerationContext context, Tilt rhythm)
     {
         var leans = Options.ToDictionary(x => x.Meter.Value, x => x.Lean);
-        return context.Pick(rhythm.Weigh(Options.Select(x => x.Meter), meter => leans[meter]));
+        var meter = context.Pick(rhythm.Weigh(Options.Select(x => x.Meter), meter => leans[meter]));
+        var orders = Orders(meter.Groups).ToArray();
+        return new Meter(orders[(int)(context.GenerateDouble() * orders.Length)]);
+    }
+
+    /// <summary>Every distinct order of the groups.</summary>
+    private static IEnumerable<ImmutableArray<int>> Orders(ImmutableArray<int> groups)
+    {
+        if (groups.Length <= 1)
+        {
+            yield return groups;
+            yield break;
+        }
+
+        foreach (var first in groups.Distinct())
+        foreach (var rest in Orders(groups.Remove(first)))
+            yield return [first, ..rest];
     }
 
     /// <summary>How many bars a section's pattern has.</summary>
@@ -120,6 +148,9 @@ public sealed record Meter(ImmutableArray<int> Groups)
 
     private int? _tactus;
 
+    /// <summary>How long the meter's pulse most often is, in 16ths: 4/4's quarter, 6/8's dotted quarter.</summary>
+    public int PulseSixteenths => ModeLength(Tactus);
+
     /// <summary>Where the bar's pulses start, in beats: 4/4's four beats, 6/8's two dotted quarters.</summary>
     public ImmutableArray<double> Pulses => [..Levels[Tactus].Select(x => x.Start / 4.0)];
 
@@ -131,8 +162,8 @@ public sealed record Meter(ImmutableArray<int> Groups)
     ///     A bar's cycles of a rhythm of the period and phase given, both in beats counted in the reference bar. A
     ///     straight period, a power of two of 16ths, is counted in the pulses it has in four: the reference bar plays on
     ///     the bar, two bars over two bars, of which the bar plays the first, and a shorter one on the nodes of the level
-    ///     whose nodes are most often nearest as many of the meter's pulses, the coarser where two are as near, so that a
-    ///     half bar is 6/8's bar and 3/4's too; each node a cycle of its own descendants, its ranks the depths they first
+    ///     whose nodes are most often nearest as many of the meter's pulses, a finer level counted half as far again, so
+    ///     that a half bar is 6/8's bar and 3/4's too; each node a cycle of its own descendants, its ranks the depths they first
     ///     start at. A phase of half a cycle strikes the node's other parts first, its first after, as 4/4's backbeat does
     ///     on 2 and 4, 3/4's on 2 and 3 and 6/8's on its fourth 8th; another shifts it. A tuplet plays its notes over the
     ///     nodes its span of them would play on as a straight period, three over a dotted quarter its 8ths, and a grouped
@@ -203,8 +234,8 @@ public sealed record Meter(ImmutableArray<int> Groups)
 
     /// <summary>
     ///     The level a straight period of the reference bar or less plays on: the bar for the reference bar, and for a
-    ///     shorter one the level whose nodes are most often nearest as many of the meter's pulses as it has in four, the
-    ///     coarser where two are as near.
+    ///     shorter one the level whose nodes are most often nearest as many of the meter's pulses as it has in four, a
+    ///     finer level counted half as far again (<see cref="FinerLevelWeight" />), the coarser where two are as near.
     /// </summary>
     private int LevelOf(double period)
     {
@@ -212,8 +243,19 @@ public sealed record Meter(ImmutableArray<int> Groups)
         var tactus = ModeLength(Tactus);
         return period > ReferenceBar - 1e-9
             ? 0
-            : Enumerable.Range(0, Levels.Length).MinBy(x => (Math.Round(Math.Abs(Math.Log2(ModeLength(x) / (double)tactus / pulses)), 9), x));
+            : Enumerable.Range(0, Levels.Length).MinBy(x =>
+            {
+                var distance = Math.Log2(ModeLength(x) / (double)tactus / pulses);
+                return (Math.Round(distance < 0 ? -distance * FinerLevelWeight : distance, 9), x);
+            });
     }
+
+    /// <summary>
+    ///     How much farther a level of nodes shorter than a period counts than one of longer nodes, so that a period
+    ///     between two plays on the coarser unless the finer is much nearer: 13/16's two pulses on its bar, not its groups
+    ///     of three 16ths, where the backbeat would strike inside every group.
+    /// </summary>
+    private const double FinerLevelWeight = 1.5;
 
     private static bool IsPowerOfTwo(double value) =>
         Math.Abs(value - Math.Round(value)) < 1e-9 && Math.Round(value) >= 1 && Math.Abs(Math.Log2(Math.Round(value)) - Math.Round(Math.Log2(Math.Round(value)))) < 1e-9;
