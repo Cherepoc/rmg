@@ -83,6 +83,22 @@ public static class Midi
         return [header, note, 0x40];
     }
 
+    private static byte[] PitchBend(byte channel, int value)
+    {
+        return [ChannelMidiEventHeader(channel, 0x0E), (byte)(value & 0x7F), (byte)(value >> 7 & 0x7F)];
+    }
+
+    /// <summary>The fade times the part's expression, wherever either changes; the fade alone where the part has none.</summary>
+    private static IEnumerable<(double Position, double Value)> Expression(StateTimeline<double> fade, ImmutableArray<(double Position, double Value)> expression)
+    {
+        if (expression.IsEmpty)
+            return fade.Select(x => (x.Position, x.Value));
+
+        var fadeAt = (double position) => fade.Count == 0 || fade[0].Position > position + 1e-9 ? 1 : fade.GetEffectiveValueAt(position);
+        var expressionAt = (double position) => expression.LastOrDefault(x => x.Position <= position + 1e-9, (0, 1)).Value;
+        return fade.Select(x => x.Position).Concat(expression.Select(x => x.Position)).Distinct().Order().Select(x => (x, fadeAt(x) * expressionAt(x)));
+    }
+
     private static byte[] ProgramChange(byte channel, byte program)
     {
         var header = ChannelMidiEventHeader(channel, 0x0C);
@@ -279,11 +295,27 @@ public static class Midi
             settings.Add(new MidiEvent(0, ControlChange(channel, PanController, pan)));
         }
 
-        // a fade plays as the channel's expression, under the volume the listener sets
-        var fade = fadeTimeline.Select(x => new MidiEvent(AbsoluteDelta(x.Position), ControlChange(channel, ExpressionController, (byte)Math.Round(x.Value * MaxControllerValue))));
-        // a change of instrument before the note that plays it, which the stable order by time keeps before it
+        // a bend's range, set once, by its registered parameter, before any bend
+        if (!track.PitchBends.IsEmpty)
+            settings.AddRange(
+                [
+                    new MidiEvent(0, ControlChange(channel, 101, 0)), new MidiEvent(0, ControlChange(channel, 100, 0)),
+                    new MidiEvent(0, ControlChange(channel, 6, ExpressionRender.BendRange)), new MidiEvent(0, ControlChange(channel, 38, 0)),
+                    new MidiEvent(0, ControlChange(channel, 101, 127)), new MidiEvent(0, ControlChange(channel, 100, 127))
+                ]
+            );
+
+        // a fade plays as the channel's expression, under the volume the listener sets, and the part's own expression,
+        // a swell or a tremolo, under the fade: the two multiplied wherever either changes
+        var fade = Expression(fadeTimeline, track.Expression).Select(x => new MidiEvent(AbsoluteDelta(x.Position), ControlChange(channel, ExpressionController, (byte)Math.Round(x.Value * MaxControllerValue))));
+        // a change of instrument before the note that plays it, which the stable order by time keeps before it, and the
+        // controllers and bends likewise
         var programs = track.ProgramChanges.Select(x => new MidiEvent(AbsoluteDelta(x.Position), ProgramChange(channel, (byte)x.Program)));
-        var events = settings.Concat(fade).Concat(programs).Concat(track.NoteTimeline.ToMidiNotes(durationDelta).SelectMany(x => x.ToEvents(channel)));
+        var controllers = track.Controllers.Select(x => new MidiEvent(AbsoluteDelta(x.Position), ControlChange(channel, (byte)x.Controller, (byte)x.Value)));
+        var bends = track.PitchBends.Select(x => new MidiEvent(AbsoluteDelta(x.Position), PitchBend(channel, x.Value)));
+        // the notes and their echoes, within the song
+        var notes = track.Echoes.IsEmpty ? track.NoteTimeline : EventTimeline.Create(track.NoteTimeline.Duration, track.NoteTimeline.Concat(track.Echoes.Where(x => x.Position < track.NoteTimeline.Duration)));
+        var events = settings.Concat(fade).Concat(programs).Concat(controllers).Concat(bends).Concat(notes.ToMidiNotes(durationDelta).SelectMany(x => x.ToEvents(channel)));
         WriteTrack(events, durationDelta, stream);
     }
 

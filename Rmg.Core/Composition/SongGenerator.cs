@@ -261,6 +261,16 @@ public static class SongGenerator
             [..sections.Select(x => x.Facets[Facet.Sound])],
             (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.InstrumentsOverTime), section), track))
         );
+        // and how the parts are played beyond their notes, by every section's sound facet
+        notes = Expression.Apply(
+            notes,
+            tracks.Definitions,
+            form.Map,
+            songUnconventionality[Facet.Sound],
+            [..sections.Select(x => x.Facets[Facet.Sound])],
+            track => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.PartSound), track)),
+            (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Expression), section), track))
+        );
 
         return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality, [..SongParts.All.Except(absent)], tracks.DrumSetup));
     }
@@ -373,5 +383,7 @@ internal enum SongStream
     LineDoubling = 30,
     Solos = 31,
     SoloLines = 32,
-    InstrumentsOverTime = 33
+    InstrumentsOverTime = 33,
+    Expression = 34,
+    PartSound = 35
 }

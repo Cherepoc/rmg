@@ -38,6 +38,18 @@ public sealed class RenderedTrack
     /// <summary>The track's changes of instrument after its first, each at its place: none for a track of one instrument throughout.</summary>
     public ImmutableArray<(double Position, int Program)> ProgramChanges { get; init; } = [];
 
+    /// <summary>The track's pitch bend over the song, 8192 in the middle, reaching <see cref="ExpressionRender.BendRange" /> semitones either way.</summary>
+    public ImmutableArray<(double Position, int Value)> PitchBends { get; init; } = [];
+
+    /// <summary>The track's controllers over the song, such as its reverb, its chorus and its pan's sweep.</summary>
+    public ImmutableArray<(double Position, int Controller, int Value)> Controllers { get; init; } = [];
+
+    /// <summary>The track's echoes, its notes repeated quieter after them, which sound with its notes but are not of its line.</summary>
+    public ImmutableArray<TimelineItem<RenderedNote>> Echoes { get; init; } = [];
+
+    /// <summary>The track's expression over the song, from 0 to 1, under the song's fade, full where none is said.</summary>
+    public ImmutableArray<(double Position, double Value)> Expression { get; init; } = [];
+
     /// <summary>Where the track sits from left to right, from -1, left, through 0, the middle, to 1, right.</summary>
     public double Pan { get; }
 

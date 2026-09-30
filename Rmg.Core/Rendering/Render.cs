@@ -34,6 +34,7 @@ public static class Render
         var swing = GetSwing(song);
         var renderedTracks = new List<RenderedTrack>();
         var percussionTrackNotes = new List<IEnumerable<TimelineItem<RenderedNote>>>();
+        ImmutableArray<(double Position, int Controller, int Value)> percussionSends = [];
         foreach (var (trackNumber, trackNotes) in notes)
         {
             // a drum plays as its group is asked to
@@ -53,21 +54,34 @@ public static class Render
                 }
             );
             if (song.TrackDefinitions[trackNumber] is PitchInstrumentTrack pitchInstrumentTrack)
+            {
+                // how the part is played beyond its notes, its echo among its notes
+                var expression = ExpressionRender.Render(trackNotes, swing, common.GetStateTimeline(StateKinds.Tempo), pitchInstrumentTrack.Pan, GetMidiVelocity);
                 renderedTracks.Add(
                     new RenderedTrack(false, pitchInstrumentTrack.Role, pitchInstrumentTrack.InstrumentCode, EventTimeline.Create(trackNotes.Duration, renderedNotes), pitchInstrumentTrack.Pan)
                     {
-                        ProgramChanges = ProgramChanges(trackNotes, pitchInstrumentTrack.InstrumentCode, swing)
+                        ProgramChanges = ProgramChanges(trackNotes, pitchInstrumentTrack.InstrumentCode, swing),
+                        PitchBends = expression.Bends,
+                        Controllers = expression.Controllers,
+                        Expression = expression.Expression,
+                        Echoes = expression.Echoes
                     }
                 );
+            }
             else
+            {
                 percussionTrackNotes.Add(renderedNotes);
+                // the drums' reverb and chorus, as their first note has them
+                if (percussionSends.IsEmpty && trackNotes.Count > 0)
+                    percussionSends = ExpressionRender.Render(EventTimeline.Create(trackNotes.Duration, [trackNotes[0]]), swing, common.GetStateTimeline(StateKinds.Tempo), 0, GetMidiVelocity).Controllers;
+            }
         }
 
         var percussionEventTimeline = EventTimeline.Create(song.Duration, percussionTrackNotes.SelectMany(x => x));
         if (percussionEventTimeline.Count > 0)
         {
             // the drums share their channel, where the soundfont places each drum as a kit stands
-            var percussionTrack = new RenderedTrack(true, TrackRole.Drum, 0, percussionEventTimeline, 0);
+            var percussionTrack = new RenderedTrack(true, TrackRole.Drum, 0, percussionEventTimeline, 0) { Controllers = [..percussionSends.Select(x => (0.0, x.Controller, x.Value))] };
             renderedTracks.Add(percussionTrack);
         }
 
@@ -83,7 +97,15 @@ public static class Render
                 x.Track.NoteTimeline,
                 x.Mix?.Pan ?? x.Track.Pan,
                 mix.Volume * (x.Mix?.Volume ?? 1)
-            ) { ProgramChanges = x.Mix?.Instrument is null ? x.Track.ProgramChanges : [] });
+            )
+            {
+                ProgramChanges = x.Mix?.Instrument is null ? x.Track.ProgramChanges : [],
+                PitchBends = x.Track.PitchBends,
+                // a pan given holds throughout, its sweep let go of
+                Controllers = [..x.Track.Controllers.Where(c => c.Controller != 10 || x.Mix?.Pan is null)],
+                Expression = x.Track.Expression,
+                Echoes = x.Track.Echoes
+            });
         return new RenderedSong(song.Duration, song.Meter, common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..mixed]);
     }
 

@@ -46,6 +46,18 @@ internal static class CompositionStateKinds
     public static StateKind<int> LinePentatonic { get; } = StateKinds.CreateAdditive<int>(Prefix + "LinePentatonic", StateScope.Render);
     public static StateKind<int> LineLanding { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineLanding", StateScope.Render);
 
+    // how a note is played beyond its pitch, as Expression decides it: its vibrato in cents, how it bends (a BendKind),
+    // 1 for a swell, its tremolo's and its sweep's depth in percent, its echo's delay in 16ths, and its reverb, 1 more
+    // than the send, and chorus, from 0 to 127
+    public static StateKind<int> Vibrato { get; } = StateKinds.CreateAdditive<int>(Prefix + "Vibrato", StateScope.Render);
+    public static StateKind<int> Bend { get; } = StateKinds.CreateAdditive<int>(Prefix + "Bend", StateScope.Render);
+    public static StateKind<int> Swell { get; } = StateKinds.CreateAdditive<int>(Prefix + "Swell", StateScope.Render);
+    public static StateKind<int> Tremolo { get; } = StateKinds.CreateAdditive<int>(Prefix + "Tremolo", StateScope.Render);
+    public static StateKind<int> AutoPan { get; } = StateKinds.CreateAdditive<int>(Prefix + "AutoPan", StateScope.Render);
+    public static StateKind<int> Echo { get; } = StateKinds.CreateAdditive<int>(Prefix + "Echo", StateScope.Render);
+    public static StateKind<int> Reverb { get; } = StateKinds.CreateAdditive<int>(Prefix + "Reverb", StateScope.Render);
+    public static StateKind<int> Chorus { get; } = StateKinds.CreateAdditive<int>(Prefix + "Chorus", StateScope.Render);
+
     // the General MIDI program a note plays, 1 more than its number, 0 for its track's own
     public static StateKind<int> Program { get; } = StateKinds.CreateAdditive<int>(Prefix + "Program", StateScope.Render);
 
