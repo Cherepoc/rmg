@@ -25,7 +25,7 @@ public enum Facet
     /// <summary>How closely the progressions keep to their rules.</summary>
     Progression,
 
-    /// <summary>The scales, the pentatonic melodies and the key change.</summary>
+    /// <summary>The scales, the melodies' and riffs' line scales and the key change.</summary>
     Scale,
 
     /// <summary>The melody's improvisation and its answers.</summary>

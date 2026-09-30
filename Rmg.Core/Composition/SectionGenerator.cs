@@ -470,10 +470,14 @@ internal sealed class SectionGenerator
                     sectionTrackLayer.Add(CompositionStateKinds.LineStepwiseness, MelodyLayers.CreateGenerator(MelodyLayers.Section)),
                     sectionRhythm.Energy
                 );
-                // a pentatonic melody now and then, from a sequence of its own, by the section's scale facet
-                var isPentatonic = Stream(sectionId, SectionStream.Pentatonic).TestProbability(MelodyLayers.PentatonicChance.At(sectionRhythm.Facets[Facet.Scale]));
-                StateTrace.Record(TracePoints.Pentatonic, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{isPentatonic}", isPentatonic);
-                sectionTrackLayer.Add(CompositionStateKinds.LinePentatonic, isPentatonic ? 1 : 0);
+            }
+            // the melody's and the riff's line scales, each from a sequence of its own, by the section's scale facet
+            if (_tracks.Definitions[trackNumber].Role is TrackRole.Melody or TrackRole.Riff)
+            {
+                var stream = _tracks.Definitions[trackNumber].Role == TrackRole.Melody ? SectionStream.LineScale : SectionStream.RiffLineScale;
+                var lineScale = LineScales.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Scale]);
+                StateTrace.Record(TracePoints.LineScale, trackNumber, sectionId, 0, StateMap.Default, 0, $"{lineScale}", lineScale);
+                sectionTrackLayer.Add(CompositionStateKinds.LineScale, (int)lineScale);
             }
             // the chords broken now and then, from a sequence of their own, by the section's chords facet
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Chords)
@@ -854,7 +858,7 @@ internal enum SectionStream
     Arrangement = 16,
     CounterLeading = 17,
     CounterImprovisation = 18,
-    Pentatonic = 19,
+    LineScale = 19,
     TimeFeel = 20,
     Unconventionality = 21,
     Feel = 22,
@@ -862,5 +866,6 @@ internal enum SectionStream
     Riff = 24,
     RiffLeading = 25,
     RiffImprovisation = 26,
-    Arpeggio = 27
+    Arpeggio = 27,
+    RiffLineScale = 28
 }

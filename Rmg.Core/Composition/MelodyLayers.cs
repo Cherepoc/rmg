@@ -123,12 +123,6 @@ internal static class MelodyLayers
         return improvisation > 0 ? Math.Min(improvisation, 1) : 0;
     }
 
-    /// <summary>
-    ///     The chance a section's melody is pentatonic (<see cref="CompositionStateKinds.LinePentatonic" />), by the scale
-    ///     facet of its unconventionality: two in three of the plainest, one in three at the middle, none of the wildest.
-    /// </summary>
-    public static ByConvention PentatonicChance { get; } = new(0.68, 0.35, 0);
-
     /// <summary>How long the melody rests before its next phrase, in beats.</summary>
     public const double PhraseEndRest = 1;
 

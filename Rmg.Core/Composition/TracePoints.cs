@@ -9,8 +9,8 @@ internal static class TracePoints
     /// <summary>How a section's drums keep time: 1 half time, -1 double time, 0 the song's (an <c>int</c>).</summary>
     public const string TimeFeel = "Time feel";
 
-    /// <summary>Whether a section's melody is pentatonic (a <c>bool</c>).</summary>
-    public const string Pentatonic = "Pentatonic";
+    /// <summary>A section's melody's or riff's line scale, by its track (a <see cref="Composition.LineScale" />).</summary>
+    public const string LineScale = "LineScale";
 
     /// <summary>How often a section's chords change (a <see cref="HarmonicRhythm" />).</summary>
     public const string HarmonicRhythm = "Harmonic rhythm";

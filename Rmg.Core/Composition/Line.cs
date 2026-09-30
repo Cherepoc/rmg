@@ -45,8 +45,8 @@ internal sealed class Line
     // the run of echoes playing: the root of its chord, and the octave it plays in, in scale steps from where it was heard
     private (int Root, int Octave)? _echoRun;
 
-    // the notes a pentatonic line leaves out of the chord it plays over now, its scale's tritone pair; none for any other
-    private IReadOnlySet<int> _avoided = new HashSet<int>();
+    // the pitch classes the line takes over the chord it plays over now, by its line scale; none for all of the section's scale
+    private IReadOnlySet<int>? _classes;
 
     // whether the phrase playing goes on from the note before, and so replays its echoes nearest it rather than where
     // they were heard
@@ -91,10 +91,10 @@ internal sealed class Line
         int echo = 0,
         ChordArrival landing = ChordArrival.Free,
         PhraseStart phraseStart = PhraseStart.None,
-        bool isPentatonic = false
+        LineScale lineScale = LineScale.Section
     )
     {
-        _avoided = isPentatonic ? GetTritonePair(chord) : new HashSet<int>();
+        _classes = LineScales.Classes(lineScale, chord);
         var aim = register * _profile.ContourShare;
         if (phraseStart == PhraseStart.Afresh)
             (_previous, _previousMove, _echoRun) = (null, 0, null);
@@ -169,11 +169,11 @@ internal sealed class Line
         var isStrong = beatRank <= _profile.StrongestWeakRank && chordToneClasses.Count > 0;
         if (isStrong && !chordToneClasses.Contains(note.Mod(OctaveNoteCount)))
             note = GetNearest(GetChordTones(chordToneClasses), note);
-        // a pentatonic line's echo on its tritone pair moves to the nearest note it takes
-        if (_avoided.Contains(note.Mod(OctaveNoteCount)))
-            note = GetNearest(Allowed(isStrong ? GetChordTones(chordToneClasses) : GetScaleNotes(chord)), note);
+        // an echo off the line's scale moves to the nearest note it takes
+        if (!Takes(note))
+            note = GetNearest(Allowed(isStrong ? GetChordTones(chordToneClasses) : GetLineNotes(chord)), note);
 
-        return note >= _low && note <= _high ? note : GetNearest(GetScaleNotes(chord), note);
+        return note >= _low && note <= _high ? note : GetNearest(GetLineNotes(chord), note);
     }
 
     /// <summary>The singable range in the middle of a track's, or all of the track's if it is narrower.</summary>
@@ -252,7 +252,7 @@ internal sealed class Line
         int note;
         if (_previous is not { } previous)
         {
-            note = isStrong ? GetNearest(Allowed(GetChordTones(chordToneClasses)), aim) : GetNearest(Allowed(GetScaleNotes(chord)), aim);
+            note = GetNearest(Allowed(isStrong ? GetChordTones(chordToneClasses) : GetLineNotes(chord)), aim);
         }
         else
         {
@@ -271,11 +271,11 @@ internal sealed class Line
                 direction = Math.Sign(aim - previous);
             }
 
-            // a pentatonic line's strong beat moves among all the chord's notes, as the line would, and then off the tritone
-            // pair to the nearest other, so that it moves as far as it would; a weak one only among the notes it takes
-            var candidates = isStrong ? GetChordTones(chordToneClasses) : Allowed(GetScaleNotes(chord));
+            // a strong beat moves among all the chord's notes, as the line would, and then off the notes its scale leaves out
+            // to the nearest other, so that it moves as far as it would; a weak one only among the notes of its scale
+            var candidates = isStrong ? GetChordTones(chordToneClasses) : GetLineNotes(chord);
             note = GetNext(candidates, previous, direction, isLeap ? 2 : 1);
-            if (isStrong && _avoided.Contains(note.Mod(OctaveNoteCount)))
+            if (isStrong && !Takes(note))
                 note = GetNearest(Allowed(candidates), note);
         }
 
@@ -310,29 +310,25 @@ internal sealed class Line
         return Enumerable.Range(_low, _high - _low + 1).Where(x => chordToneClasses.Contains(x % OctaveNoteCount)).ToArray();
     }
 
-    /// <summary>The notes of the scale in the range, counted from the chord's root.</summary>
-    /// <summary>
-    ///     A pentatonic line's notes of a scale are the scale's but for its tritone pair, the two notes that make its only
-    ///     tritone, such as F and B in C major and A minor alike; a scale with more than one tritone, as harmonic minor,
-    ///     keeps all its notes.
-    /// </summary>
-    private static IReadOnlySet<int> GetTritonePair(ChordContext chord)
-    {
-        var classes = Enumerable.Range(0, ScaleStepCount).Select(x => chord.GetPitch(x).Mod(OctaveNoteCount)).Distinct().ToArray();
-        var pair = classes.Where(x => classes.Contains((x + 6) % OctaveNoteCount)).ToHashSet();
-        return pair.Count == 2 ? pair : new HashSet<int>();
-    }
+    private bool Takes(int note) => _classes is null || _classes.Contains(note.Mod(OctaveNoteCount));
 
-    /// <summary>The candidates but the notes the line leaves out, a pentatonic line's tritone pair, or all of them where no other is left.</summary>
+    /// <summary>The candidates the line's scale takes, or all of them where it takes none.</summary>
     private IReadOnlyList<int> Allowed(IReadOnlyList<int> candidates)
     {
-        if (_avoided.Count == 0)
+        if (_classes is null)
             return candidates;
 
-        var allowed = candidates.Where(x => !_avoided.Contains(x.Mod(OctaveNoteCount))).ToArray();
+        var allowed = candidates.Where(Takes).ToArray();
         return allowed.Length > 0 ? allowed : candidates;
     }
 
+    /// <summary>The notes of the line's scale in the range: the section's scale's, counted from the chord's root, or its own.</summary>
+    private IReadOnlyList<int> GetLineNotes(ChordContext chord)
+    {
+        return _classes is null ? GetScaleNotes(chord) : Enumerable.Range(_low, _high - _low + 1).Where(Takes).ToArray();
+    }
+
+    /// <summary>The notes of the section's scale in the range, counted from the chord's root.</summary>
     private IReadOnlyList<int> GetScaleNotes(ChordContext chord)
     {
         // a scale step is at least a semitone, so this many steps either way of the root reach past the range

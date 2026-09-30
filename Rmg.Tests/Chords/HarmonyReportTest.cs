@@ -79,7 +79,7 @@ public sealed class HarmonyReportTest
         var sectionHarmony = song.Trace.Where(x => x.Point == TracePoints.SectionHarmony).ToDictionary(x => x.Section, x => (HarmonicUnconventionality)x.Value!);
         var rhythms = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).ToDictionary(x => x.Section, x => (HarmonicRhythm)x.Value!);
         var scales = song.Trace.Where(x => x.Point == TracePoints.SectionScale).Select(x => (Scale)x.Value!).ToArray();
-        var pentatonic = song.Trace.Count(x => x.Point == TracePoints.Pentatonic && (bool)x.Value!);
+        var pentatonic = song.Trace.Count(x => x.Point == TracePoints.LineScale && x.Track == SongTracks.MelodyTrack && (LineScale)x.Value! == LineScale.Pentatonic);
         var keyChanges = ((ImmutableArray<KeyChange>)song.Trace.Single(x => x.Point == TracePoints.KeyChange).Value!).Length;
 
         // a chord of every section's pattern once, as the chords track plays it: the role chord where the bar has one,

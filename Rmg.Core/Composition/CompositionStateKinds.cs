@@ -42,8 +42,8 @@ internal static class CompositionStateKinds
     // ChordArrival), the line's own, where bar state would be every track's
     public static StateKind<int> LineApproach { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineApproach", StateScope.Render);
 
-    // 1 for a line whose passing notes leave out the scale's tritone pair, a pentatonic melody (Line), 0 for all of the scale
-    public static StateKind<int> LinePentatonic { get; } = StateKinds.CreateAdditive<int>(Prefix + "LinePentatonic", StateScope.Render);
+    // the notes a line's passing notes take (a LineScale), a melody's or a riff's (Line), 0 for all of the section's scale
+    public static StateKind<int> LineScale { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineScale", StateScope.Render);
     public static StateKind<int> LineLanding { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineLanding", StateScope.Render);
 
     // how a note is played beyond its pitch, as Expression decides it: its vibrato in cents, how it bends (a BendKind),

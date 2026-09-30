@@ -81,7 +81,7 @@ public sealed class ScalesTest
         var changed = picks.Where(x => x != Rmg.Core.Composition.Scales.NaturalMinor).ToArray();
 
         await Assert.That(changed.Length / (double)picks.Length).IsEqualTo(Rmg.Core.Composition.Scales.SectionChange.Tuned).Within(0.01);
-        await Assert.That(changed.Count(x => x.Distance(Rmg.Core.Composition.Scales.NaturalMinor) == 1)).IsGreaterThan(changed.Length * 3 / 4);
+        await Assert.That(changed.Count(x => x.Distance(Rmg.Core.Composition.Scales.NaturalMinor) == 1)).IsGreaterThan(changed.Length * 7 / 10);
     }
 
     [Test]
@@ -99,9 +99,10 @@ public sealed class ScalesTest
     [Test]
     public async Task Brightness_OrdersTheModes_AndDistance_CountsTheNotesThatDiffer()
     {
-        string[] order = [..AllScales.Where(x => x != Rmg.Core.Composition.Scales.HarmonicMinor).OrderByDescending(x => x.Brightness).Select(x => x.Name)];
+        string[] modes = ["Lydian", "Major", "Mixolydian", "Dorian", "Natural minor", "Phrygian", "Locrian"];
+        string[] order = [..AllScales.Where(x => modes.Contains(x.Name)).OrderByDescending(x => x.Brightness).Select(x => x.Name)];
 
-        await Assert.That(order.SequenceEqual(["Lydian", "Major", "Mixolydian", "Dorian", "Natural minor", "Phrygian"])).IsTrue();
+        await Assert.That(order.SequenceEqual(["Lydian", "Major", "Mixolydian", "Dorian", "Natural minor", "Phrygian", "Locrian"])).IsTrue();
         await Assert.That(Rmg.Core.Composition.Scales.Major.Distance(Rmg.Core.Composition.Scales.NaturalMinor)).IsEqualTo(3);
         await Assert.That(Rmg.Core.Composition.Scales.HarmonicMinor.Distance(Rmg.Core.Composition.Scales.NaturalMinor)).IsEqualTo(1);
     }
@@ -121,6 +122,11 @@ public sealed class ScalesTest
         // a bass note leads into a change of chord in the beat before it
         var changes = TestCorpus.Get(seed).ChordChanges;
         var bassProgram = ((PitchInstrumentTrack)song.TrackDefinitions[6]).InstrumentCode;
+        // a section whose melody or riff takes a line scale of its own, whose notes any part may play as a solo or a doubling
+        var ownLineScales = TestCorpus.Get(seed).Trace
+            .Where(x => x.Point == TracePoints.LineScale && (LineScale)x.Value! > LineScale.Pentatonic)
+            .SelectMany(x => song.Map!.Sections.Where(s => s.SectionId == x.Section))
+            .ToArray();
 
         var tracks = Render.RenderSong(song).Tracks.Where(x => !x.IsPercussionInstrument).ToArray();
 
@@ -135,7 +141,7 @@ public sealed class ScalesTest
             var isChromaticApproach = track.PitchInstrumentCode == bassProgram
                 && !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9)
                 && approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove;
-            if (isChromaticApproach)
+            if (isChromaticApproach || ownLineScales.Any(x => note.Position >= x.Start && note.Position < x.End))
                 continue;
 
             var scale = Rmg.Core.Composition.Realizer.RaiseScaleSteps(

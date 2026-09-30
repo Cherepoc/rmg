@@ -372,14 +372,17 @@ corpus songs, 16% of the plainest swing, 17% of the middle and 37% of the wildes
 
 Every scale has seven notes, and the progressions' rules are in its steps (`Progressions`, `StepCount`).
 
-- **A pentatonic melody** (built): a section's melody is pentatonic by a chance of 0.35, the likelier the more
-  conventional its rhythm (`MelodyLayers.PentatonicChance`, `CompositionStateKinds.LinePentatonic`): the line leaves out
-  its scale's tritone pair, the two notes of its only tritone, F and B in C major and A minor alike, which in any
-  diatonic mode leaves its pentatonic scale; a weak beat moves among the notes it takes, a strong one among the chord's
-  as it would and then off the pair to the nearest other, and an echo on the pair moves to the nearest note it takes
-  (`Line`); a scale with more than one tritone keeps all its notes. Over 200 corpus songs, 37% of the sections are
-  pentatonic, 4.1% of their melody's notes on the pair against 23.1% in the others; they leap 9.1% of the time against
-  6.7%, a pentatonic line moving by thirds where another steps (`PentatonicReportTest`).
+- **Line scales** (built): a section's melody and its riff each draw the notes their passing notes take
+  (`LineScales`, `CompositionStateKinds.LineScale`), by the scale facet: the section's scale, or its pentatonic, the
+  scale but for its tritone pair, at the plain end; at the wild end mostly a scale of their own on every chord's root,
+  melodic minor, whole-tone, octatonic or chromatic, now and then the blues or the section's; a weak beat moves among
+  the notes it takes, a strong one among the chord's and then off the notes it leaves out (`Line`). Over 256 songs the
+  melody is pentatonic in 41% of the plainest fifth's sections and 15% of the wildest's, whose sections take a scale of
+  their own in 36%; those put 4 to 11% of their notes off the section's scale (`LineScaleTest`).
+- **Seven-note scales** (built): melodic minor, harmonic major, Locrian, Phrygian dominant, Hungarian minor and double
+  harmonic major beside the modes and harmonic minor, as likely as any other of the wild end's there and rare between.
+- **A line scale by the chord** (P3): at the wild end, a line changing its scale from chord to chord, as a player does
+  over changes, rather than one scale on every chord's root through a section.
 - **Scales of other sizes** (P3): whole scales of more or fewer than seven notes, where the progressions' rules would
   need their steps as fractions of the octave. Then jitter on in-between heights: heights between two qualities, such
   as the third, move a little from chord to chord, so that a scale of more than seven notes picks sometimes one

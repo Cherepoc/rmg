@@ -42,12 +42,29 @@ internal static class Scales
 
     public static Scale Lydian { get; } = new("Lydian", [0, 2, 4, 6, 7, 9, 11], new ByConvention(0, 0.05, 1));
 
+    public static Scale MelodicMinor { get; } = new("Melodic minor", [0, 2, 3, 5, 7, 9, 11], new ByConvention(0, 0.015, 1));
+
+    public static Scale HarmonicMajor { get; } = new("Harmonic major", [0, 2, 4, 5, 7, 8, 11], new ByConvention(0, 0.015, 1));
+
+    public static Scale Locrian { get; } = new("Locrian", [0, 1, 3, 5, 6, 8, 10], new ByConvention(0, 0.015, 1));
+
+    public static Scale PhrygianDominant { get; } = new("Phrygian dominant", [0, 1, 4, 5, 7, 8, 10], new ByConvention(0, 0.015, 1));
+
+    public static Scale HungarianMinor { get; } = new("Hungarian minor", [0, 2, 3, 6, 7, 8, 11], new ByConvention(0, 0.015, 1));
+
+    public static Scale DoubleHarmonicMajor { get; } = new("Double harmonic major", [0, 1, 4, 5, 7, 8, 11], new ByConvention(0, 0.015, 1));
+
     /// <summary>
     ///     Most songs are in minor or major, some in Dorian or Mixolydian, close to them and common in rock, folk and
-    ///     blues, and a few in a stranger one; the plainest in minor or major, the wildest in harmonic minor, Phrygian or Lydian and now and then Dorian or Mixolydian.
+    ///     blues, and a few in a stranger one; the plainest in minor or major, the wildest in any of the stranger ones, harmonic
+    ///     minor, Phrygian, Lydian, melodic minor, harmonic major, Locrian, Phrygian dominant, Hungarian minor or double
+    ///     harmonic major, and now and then Dorian or Mixolydian.
     /// </summary>
     public static ImmutableArray<Scale> All { get; } =
-        [NaturalMinor, Major, Dorian, Mixolydian, HarmonicMinor, Phrygian, Lydian];
+    [
+        NaturalMinor, Major, Dorian, Mixolydian, HarmonicMinor, Phrygian, Lydian,
+        MelodicMinor, HarmonicMajor, Locrian, PhrygianDominant, HungarianMinor, DoubleHarmonicMajor
+    ];
 
     /// <summary>
     ///     The chance a section is in another scale than the song's, by the scale facet of its unconventionality: never at
