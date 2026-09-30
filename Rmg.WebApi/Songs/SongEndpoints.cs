@@ -41,7 +41,7 @@ public static class SongEndpoints
             report = SongReport.Of(song, renderedSong, overrides);
 
             stream = new MemoryStream();
-            renderedSong.Write(stream, SongsVersion.Label(songSeed, request.Unconventionality));
+            renderedSong.Write(stream, SongsVersion.Label(songSeed));
             stream.Seek(0, SeekOrigin.Begin);
         }
         catch (Exception ex)
@@ -59,7 +59,7 @@ public static class SongEndpoints
         // set before a note of it is heard
         context.Response.Headers["X-Song-Settings"] = JsonSerializer.Serialize(report, HeaderJson);
 
-        return Results.File(stream, "audio/midi", SongFile.GetName(songSeed, request.Unconventionality));
+        return Results.File(stream, "audio/midi", SongFile.GetName(songSeed));
     }
 }
 

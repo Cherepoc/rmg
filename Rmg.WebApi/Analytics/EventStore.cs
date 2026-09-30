@@ -88,9 +88,9 @@ public sealed class EventStore
         command.ExecuteNonQuery();
 
         // the columns that came later than the table, which a file from before them has added: the songs' version, and
-        // what the song was heard with, as the page wrote it and, to be grouped by, its unconventionality and whether
-        // that was given
-        foreach (var (column, type) in new[] { ("version", "TEXT"), ("settings", "TEXT"), ("unconventionality", "INTEGER"), ("given", "INTEGER") })
+        // what the song was heard with, as the page wrote it and, to be grouped by, its unconventionality, whether that
+        // was given, and what of it names the song with its seed
+        foreach (var (column, type) in new[] { ("version", "TEXT"), ("settings", "TEXT"), ("unconventionality", "INTEGER"), ("given", "INTEGER"), ("identity", "TEXT") })
         {
             using var columns = connection.CreateCommand();
             columns.CommandText = "SELECT COUNT(*) FROM pragma_table_info('events') WHERE name = $column";
@@ -128,8 +128,8 @@ public sealed class EventStore
 
             using var writing = connection.CreateCommand();
             writing.CommandText = """
-                INSERT INTO events (at, day, visitor, name, ms, bytes, seconds, seed, detail, version, settings, unconventionality, given)
-                VALUES ($at, $day, $visitor, $name, $ms, $bytes, $seconds, $seed, $detail, $version, $settings, $unconventionality, $given)
+                INSERT INTO events (at, day, visitor, name, ms, bytes, seconds, seed, detail, version, settings, unconventionality, given, identity)
+                VALUES ($at, $day, $visitor, $name, $ms, $bytes, $seconds, $seed, $detail, $version, $settings, $unconventionality, $given, $identity)
                 """;
 
             writing.Parameters.AddWithValue("$at", stored.At.UtcDateTime.ToString("O"));
@@ -143,8 +143,9 @@ public sealed class EventStore
             writing.Parameters.AddWithValue("$detail", (object?)stored.Detail ?? DBNull.Value);
             writing.Parameters.AddWithValue("$version", (object?)stored.Version ?? DBNull.Value);
             writing.Parameters.AddWithValue("$settings", (object?)stored.Settings?.Format() ?? DBNull.Value);
-            writing.Parameters.AddWithValue("$unconventionality", (object?)stored.Settings?.Unconventionality ?? DBNull.Value);
-            writing.Parameters.AddWithValue("$given", (object?)stored.Settings?.IsGiven ?? DBNull.Value);
+            writing.Parameters.AddWithValue("$unconventionality", (object?)stored.Settings?.Unconventionality.Value ?? DBNull.Value);
+            writing.Parameters.AddWithValue("$given", (object?)stored.Settings?.Unconventionality.IsGiven ?? DBNull.Value);
+            writing.Parameters.AddWithValue("$identity", (object?)stored.Settings?.Identity ?? DBNull.Value);
 
             writing.ExecuteNonQuery();
             return true;

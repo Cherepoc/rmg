@@ -39,10 +39,10 @@ public sealed record VersionListening(
 );
 
 /// <param name="Seed">The song, in <see cref="AnalyticsSummary.RatedVersion" />.</param>
-/// <param name="Given">The unconventionality it was asked for with, from 0 to 127, which names it too; none for one drawn.</param>
+/// <param name="Identity">What of its settings names it with its seed (<see cref="Songs.SongSettings.Identity" />); empty for none.</param>
 /// <param name="Likes">Its likes as they stand now: the changes to a like less the changes from one.</param>
 /// <param name="Dislikes">Its dislikes, likewise.</param>
-public sealed record RatedSeed(long Seed, int? Given, int Likes, int Dislikes);
+public sealed record RatedSeed(long Seed, string Identity, int Likes, int Dislikes);
 
 /// <param name="IsGiven">Whether the songs were asked for at their unconventionality, or drew it.</param>
 /// <param name="Fifth">Which fifth of the unconventionality, from 0 for the plainest to 4 for the wildest.</param>

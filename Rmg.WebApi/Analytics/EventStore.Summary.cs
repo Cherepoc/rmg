@@ -205,10 +205,11 @@ public static class EventStoreSummary
     }
 
     /// <summary>
-    ///     A song's likes and dislikes in a version: its seed, and the unconventionality it was asked for with, which
-    ///     names it too, or none for one drawn; and how plain or wild it is, drawn or given, where its ratings say.
+    ///     A song's likes and dislikes in a version: its seed, and what of its settings names it too (<see cref="Songs.SongSettings.Identity" />),
+    ///     empty for one its seed alone names; how plain or experimental it is, where its ratings say, and whether that
+    ///     was given.
     /// </summary>
-    private sealed record SongRating(string Version, long Seed, int? Given, int? Unconventionality, int Likes, int Dislikes);
+    private sealed record SongRating(string Version, long Seed, string Identity, int? Unconventionality, bool IsGiven, int Likes, int Dislikes);
 
     /// <summary>How many rated songs the dashboard shows.</summary>
     private const int RatedSeedsShown = 20;
@@ -224,28 +225,28 @@ public static class EventStoreSummary
     {
         using var command = connection.CreateCommand();
         command.CommandText = $"""
-            SELECT version, seed, detail, unconventionality, given
+            SELECT version, seed, detail, unconventionality, given, identity
             FROM events
             WHERE name = '{EventNames.Rated}' AND version IS NOT NULL AND seed IS NOT NULL AND detail IS NOT NULL
             ORDER BY id
             """;
 
-        var counts = new Dictionary<(string Version, long Seed, int? Given), (int? Unconventionality, int Likes, int Dislikes)>();
+        var counts = new Dictionary<(string Version, long Seed, string Identity), (int? Unconventionality, bool IsGiven, int Likes, int Dislikes)>();
         using (var reader = command.ExecuteReader())
             while (reader.Read())
             {
                 if (!TryReadChange(reader.GetString(2), out var from, out var to)) continue;
 
-                // a rating from before the settings were kept has no unconventionality, and is of a drawn song
+                // a rating with no settings kept has no unconventionality, and is of a song its seed alone names
                 int? unconventionality = reader.IsDBNull(3) ? null : reader.GetInt32(3);
-                var given = !reader.IsDBNull(4) && reader.GetBoolean(4) ? unconventionality : null;
-                var key = (reader.GetString(0), reader.GetInt64(1), given);
-                var (known, likes, dislikes) = counts.GetValueOrDefault(key);
-                counts[key] = (unconventionality ?? known, likes + Count(to, "up") - Count(from, "up"), dislikes + Count(to, "down") - Count(from, "down"));
+                var isGiven = !reader.IsDBNull(4) && reader.GetBoolean(4);
+                var key = (reader.GetString(0), reader.GetInt64(1), reader.IsDBNull(5) ? "" : reader.GetString(5));
+                var (known, _, likes, dislikes) = counts.GetValueOrDefault(key);
+                counts[key] = (unconventionality ?? known, isGiven, likes + Count(to, "up") - Count(from, "up"), dislikes + Count(to, "down") - Count(from, "down"));
             }
 
         return counts
-            .Select(x => new SongRating(x.Key.Version, x.Key.Seed, x.Key.Given, x.Value.Unconventionality, Math.Max(0, x.Value.Likes), Math.Max(0, x.Value.Dislikes)))
+            .Select(x => new SongRating(x.Key.Version, x.Key.Seed, x.Key.Identity, x.Value.Unconventionality, x.Value.IsGiven, Math.Max(0, x.Value.Likes), Math.Max(0, x.Value.Dislikes)))
             .ToList();
 
         static int Count(string rating, string counted) => rating == counted ? 1 : 0;
@@ -267,11 +268,11 @@ public static class EventStoreSummary
     {
         var rated = ratings
             .Where(x => x.Version == version && x.Likes + x.Dislikes > 0)
-            .Select(x => new RatedSeed(x.Seed, x.Given, x.Likes, x.Dislikes))
+            .Select(x => new RatedSeed(x.Seed, x.Identity, x.Likes, x.Dislikes))
             .OrderByDescending(x => x.Likes - x.Dislikes)
             .ThenByDescending(x => x.Likes)
             .ThenBy(x => x.Seed)
-            .ThenBy(x => x.Given)
+            .ThenBy(x => x.Identity, StringComparer.Ordinal)
             .ToList();
 
         // the ends are what is worth hearing again, so a long list keeps both of them and drops its middle
@@ -289,7 +290,7 @@ public static class EventStoreSummary
     {
         return ratings
             .Where(x => x.Version == version && x.Unconventionality is not null && x.Likes + x.Dislikes > 0)
-            .GroupBy(x => (IsGiven: x.Given is not null, Fifth: Math.Min(4, x.Unconventionality!.Value * 5 / 127)))
+            .GroupBy(x => (x.IsGiven, Fifth: Math.Min(4, x.Unconventionality!.Value * 5 / 127)))
             .Select(x => new RatedFifth(x.Key.IsGiven, x.Key.Fifth, x.Count(), x.Sum(r => r.Likes), x.Sum(r => r.Dislikes)))
             .OrderBy(x => x.IsGiven)
             .ThenBy(x => x.Fifth)

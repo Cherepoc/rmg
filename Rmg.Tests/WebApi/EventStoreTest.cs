@@ -41,8 +41,8 @@ public sealed class EventStoreTest : IDisposable
 
         await Assert.That(rows.Read()).IsTrue();
         await Assert.That(rows.GetString(0)).IsEqualTo(settings.Format());
-        await Assert.That(rows.GetInt32(1)).IsEqualTo(settings.Unconventionality);
-        await Assert.That(rows.GetBoolean(2)).IsEqualTo(settings.IsGiven);
+        await Assert.That(rows.GetInt32(1)).IsEqualTo(settings.Unconventionality.Value);
+        await Assert.That(rows.GetBoolean(2)).IsEqualTo(settings.Unconventionality.IsGiven);
         await Assert.That(rows.Read()).IsTrue();
         await Assert.That(rows.IsDBNull(0) && rows.IsDBNull(1) && rows.IsDBNull(2)).IsTrue();
     }
@@ -328,13 +328,19 @@ public sealed class EventStoreTest : IDisposable
         await Assert.That(version.Likes).IsEqualTo(2);
         await Assert.That(version.Dislikes).IsEqualTo(1);
         await Assert.That(summary.RatedVersion).IsEqualTo("0.5.000");
-        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed(3, null, 2, 0), new RatedSeed(1, null, 0, 1) });
+        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed(3, "", 2, 0), new RatedSeed(1, "", 0, 1) });
     }
 
     [Test]
     public async Task ASeedAtAGivenUnconventionality_IsAnotherSong_AndSongsAreRatedByFifths()
     {
-        SongSettings Heard(int unconventionality, bool isGiven) => SongSettingsTest.Mixed with { Unconventionality = unconventionality, IsGiven = isGiven };
+        SongSettings Heard(int unconventionality, bool isGiven) => SongSettingsTest.Mixed with
+        {
+            Unconventionality = new Setting(isGiven, unconventionality),
+            Facets = [..SongSettingsTest.Mixed.Facets.Select(x => x with { IsGiven = false })],
+            Parts = [..SongSettingsTest.Mixed.Parts.Select(x => x with { Plays = 0 })],
+            DrumSetup = 0
+        };
         // seed 1 drawn at 10, liked, and asked for at 120, disliked; seed 2 drawn at 20, liked; seed 3 from before
         // the settings were kept, liked
         Write(EventNames.Rated, seed: 1, detail: "none>up", version: "0.5.000", settings: Heard(10, false));
@@ -344,7 +350,7 @@ public sealed class EventStoreTest : IDisposable
 
         var summary = _store.Summarise(Now, 30);
 
-        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed(1, null, 1, 0), new RatedSeed(2, null, 1, 0), new RatedSeed(3, null, 1, 0), new RatedSeed(1, 120, 0, 1) });
+        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed(1, "", 1, 0), new RatedSeed(2, "", 1, 0), new RatedSeed(3, "", 1, 0), new RatedSeed(1, Heard(120, true).Identity, 0, 1) });
         await Assert.That(summary.RatedFifths).IsEquivalentTo(new[] { new RatedFifth(false, 0, 2, 2, 0), new RatedFifth(true, 4, 1, 0, 1) });
     }
 
