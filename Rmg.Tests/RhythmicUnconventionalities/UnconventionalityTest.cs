@@ -27,7 +27,7 @@ public sealed class UnconventionalityTest
         var song = Unconventionality.Generate(0.5, Stream);
         var sections = Enumerable.Range(0, 64).Select(x => song.GenerateSection(facet => new GenerationContext(x * 16 + (int)facet))).ToArray();
 
-        await Assert.That(sections.SelectMany(x => x.Facets.Values).All(x => Math.Abs(x - 0.5) <= Unconventionality.SectionShift + 1e-9)).IsTrue();
+        await Assert.That(sections.All(x => x.Facets.All(f => Math.Abs(f.Value - song[f.Key]) <= Unconventionality.SectionShift + 1e-9))).IsTrue();
         await Assert.That(sections.SelectMany(x => x.Facets.Values).Distinct().Count()).IsGreaterThan(1);
     }
 

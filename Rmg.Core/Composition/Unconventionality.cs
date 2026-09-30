@@ -42,10 +42,10 @@ public enum Facet
 public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, double> Facets)
 {
     /// <summary>
-    ///     How far a facet strays from the base, either way, with the base in the middle: none until the facets lean the
-    ///     choices, as the rhythm's and the harmony's unconventionality do now (see the roadmap's *Conventionality*).
+    ///     How far a facet strays from the base, either way, with the base in the middle, so that a middling song's facets
+    ///     stray from it by up to about 0.27 nine times in ten, and chords and groove go together about as closely as 0.67.
     /// </summary>
-    public const double FacetSpread = 0;
+    public const double FacetSpread = 0.6;
 
     /// <summary>How far a section moves a facet, either way, with the facet in the middle.</summary>
     public const double SectionShift = 0.15;

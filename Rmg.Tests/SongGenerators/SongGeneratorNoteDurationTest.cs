@@ -9,23 +9,25 @@ namespace Rmg.Tests.SongGenerators;
 /// </summary>
 public sealed class SongGeneratorNoteDurationTest
 {
-    private const double BarDuration = 4;
-
     [Test]
     public async Task PitchedNotes_LastNoLongerThanABar_ButTheFinalChord()
     {
-        // the final chord of an ending that rings out is held for as long as the ending, up to two bars; a pad holds
-        // its chords as long as they last, which it is left out for
-        var maxDuration = Enumerable.Range(0, 16)
+        // the final chord of an ending that rings out is held for as long as the ending, up to two bars, and a note
+        // sounding where a stopped ending's band falls silent is held up to the silence; a pad holds its chords as long as
+        // they last, which it is left out for
+        // in the song's bars
+        var maxBars = Enumerable.Range(0, 16)
             .Select(seed => TestCorpus.Get(seed))
-            .Select(song => (Pad: ((Rmg.Core.Songs.PitchInstrumentTrack)song.Song.TrackDefinitions[Rmg.Core.Composition.SongTracks.PadTrack]).InstrumentCode, song.Rendered))
+            .Select(song => (Pad: ((Rmg.Core.Songs.PitchInstrumentTrack)song.Song.TrackDefinitions[Rmg.Core.Composition.SongTracks.PadTrack]).InstrumentCode, song.Rendered, song.Map.Meter,
+                Silence: song.Map.Ending.Kind == Rmg.Core.Composition.EndingKind.Stop ? song.Map.Ending.Start - song.Map.Ending.Stop : double.NaN))
             .SelectMany(song => song.Rendered.Tracks
                 .Where(x => !x.IsPercussionInstrument && x.PitchInstrumentCode != song.Pad)
                 .SelectMany(x => x.NoteTimeline)
-                .Where(x => x.Position + x.Value.Duration < song.Rendered.Duration - 1e-9)
+                .Where(x => x.Position + x.Value.Duration < song.Rendered.Duration - 1e-9 && Math.Abs(x.Position + x.Value.Duration - song.Silence) > 1e-6)
+                .Select(x => x.Value.Duration / song.Meter.BarDuration)
             )
-            .Max(x => x.Value.Duration);
+            .Max();
 
-        await Assert.That(maxDuration).IsLessThanOrEqualTo(BarDuration);
+        await Assert.That(maxBars).IsLessThanOrEqualTo(1 + 1e-9);
     }
 }

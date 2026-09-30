@@ -176,7 +176,7 @@ internal static class Realizer
         crossings = [];
         for (var i = 0; i < items.Length; i++)
         {
-            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, changes, out var unclipped);
+            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, GetRange(track), changes, out var unclipped);
             var change = items[i].Position + UntilChange(changes, items[i].Position);
             var next = i + 1 < items.Length ? items[i + 1].Position : double.PositiveInfinity;
             if (items[i].Position + unclipped > change + 1e-9 && next > change + 1e-9)
@@ -229,6 +229,7 @@ internal static class Realizer
         TimelineItem<WithDuration<StateMap>> timelineItemWithDuration,
         VoiceLeader voiceLeader,
         TrackRole role,
+        (int Low, int High) range,
         ImmutableArray<double> changes,
         out double unclipped
     )
@@ -269,11 +270,18 @@ internal static class Realizer
 
         int ToNote(int stepAboveRoot) => chord.GetPitch(stepAboveRoot);
 
+        // a line's note in the track's range, moved by octaves where its step lands outside it over a chord other than
+        // the one it was placed over
+        int InRange(int note) =>
+            note < range.Low ? note + OctaveNoteCount * (int)Math.Ceiling((range.Low - note) / (double)OctaveNoteCount)
+            : note > range.High ? note - OctaveNoteCount * (int)Math.Ceiling((note - range.High) / (double)OctaveNoteCount)
+            : note;
+
         // how a track plays its chord is its role's: a line, the melody's or the bass's, the note placed for it before,
         // as its scale step above the chord's root and its alteration; the chords the whole chord, led from the one before
         ImmutableArray<int> notes = role switch
         {
-            TrackRole.Melody or TrackRole.Bass or TrackRole.CounterMelody => [ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)) + stateMap.GetStateValue(StateKinds.Alteration)],
+            TrackRole.Melody or TrackRole.Bass or TrackRole.CounterMelody => [InRange(ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)) + stateMap.GetStateValue(StateKinds.Alteration))],
             TrackRole.Chords or TrackRole.Pad => voiceLeader.Place(
                 [..chordSteps.Select(ToNote)],
                 ToNote(0),
