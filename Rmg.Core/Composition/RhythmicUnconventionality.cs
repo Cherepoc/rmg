@@ -29,13 +29,14 @@ public sealed record RhythmicUnconventionality(double Value)
 
     /// <summary>
     ///     A chance's ends, as it leaned by the unconventionality through <see cref="Tilt" />: an unconventional thing
-    ///     (a lean above 0) never at the plain end and every time at the wild; a conventional one (below 0) as the plainest
-    ///     tilt had it at the plain end and never at the wild; one of no lean as tuned at both.
+    ///     (a lean above 0) never at the plain end and every time at the wild; a conventional one (below 0), such as a
+    ///     song in one of the forms, the other way round; one of no lean as tuned at both. A conventional flourish that
+    ///     the plainest song need not play, such as a key change, gives its ends outright.
     /// </summary>
     public static ByConvention Ends(double chance, double lean)
     {
         return lean > 0 ? new ByConvention(0, chance, 1)
-            : lean < 0 ? new ByConvention(Plainest.Tilt.Chance(chance, lean), chance, 0)
+            : lean < 0 ? new ByConvention(1, chance, 0)
             : new ByConvention(chance, chance, chance);
     }
 

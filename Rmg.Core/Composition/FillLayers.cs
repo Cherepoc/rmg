@@ -161,9 +161,8 @@ internal static class FillLayers
 
     /// <summary>
     ///     The chance, in a section of conventionality in the middle, that a run takes its toms in their order of pitch,
-    ///     down or up, which leans conventional twice as much as the rarer choices lean unconventional
-    ///     (<see cref="PitchOrderLean" />): 97% in the plainest section, 13% in the wildest. Otherwise every sound's place
-    ///     is drawn.
+    ///     down or up, a conventional thing (<see cref="PitchOrderLean" />): every run in the plainest section, none in the
+    ///     wildest. Otherwise every sound's place is drawn.
     /// </summary>
     public const double PitchOrderChance = 0.7;
 

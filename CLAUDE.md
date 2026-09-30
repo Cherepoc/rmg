@@ -12,9 +12,10 @@
   by its facet's value. At 0 a choice plays only the options its plain end allows, at their plain weights, and at 1 only
   those its wild end allows, at their wild weights; between, an option's weight follows a smooth curve from its plain
   weight through its tuned weight at 0.5 to its wild weight (`ByConvention`). A chance follows its own curve, so that an
-  unconventional thing never happens at 0 and happens every time at 1. Which options each end allows, and how heavily,
-  is data on the choice, never a special case. The facets reach the ends only together, as the song's value does; songs
-  are spread well away from both, and whatever an end makes, however wild, is meant.
+  unconventional thing never happens at 0 and happens every time at 1, and a conventional one, such as a song in one of
+  the forms, the other way round. Which options each end allows, and how heavily, is data on the choice, never a special
+  case. The facets reach the ends only together, as the song's value does; songs are spread well away from both, and
+  whatever an end makes, however wild, is meant.
 
 # Architecture
 
