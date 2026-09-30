@@ -14,7 +14,9 @@ public sealed class ArrangementReportTest
         foreach (var span in song.Map.Sections)
         {
             var resting = song.Resting(span);
-            await Assert.That(resting.Contains(TrackRole.Bass) && resting.Contains(TrackRole.Chords)).IsFalse();
+            // but where a part plays alone
+            if (song.Texture(span).Kind != TextureKind.Alone)
+                await Assert.That(resting.Contains(TrackRole.Bass) && resting.Contains(TrackRole.Chords)).IsFalse();
             // but the drums' fill in its last bar, where they come back into the next section
             foreach (var (track, notes) in song.Song.Notes!.Where(x => resting.Contains(song.Song.TrackDefinitions[x.Key].Role)))
             {

@@ -107,6 +107,10 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     public ImmutableHashSet<TrackRole> Resting(SectionSpan span) =>
         (ImmutableHashSet<TrackRole>)Trace.Where(x => x.Point == TracePoints.Arrangement).ElementAt(Array.IndexOf(Map.Sections.ToArray(), span)).Value!;
 
+    /// <summary>How a section brings its parts in where the song plays it (<see cref="Rmg.Core.Composition.Texture" />).</summary>
+    public (int Index, TextureKind Kind, ImmutableArray<ImmutableHashSet<TrackRole>> PhraseSilent) Texture(SectionSpan span) =>
+        ((int, TextureKind, ImmutableArray<ImmutableHashSet<TrackRole>>))Trace.Where(x => x.Point == TracePoints.Texture).ElementAt(Array.IndexOf(Map.Sections.ToArray(), span)).Value!;
+
     /// <summary>Whether a section's drums play where the song plays it, rather than rest for a breakdown.</summary>
     public bool HasDrums(SectionSpan span) => !Resting(span).Contains(TrackRole.Drum);
 

@@ -21,6 +21,13 @@ internal static class TracePoints
     /// </summary>
     public const string Arrangement = "Arrangement";
 
+    /// <summary>
+    ///     An appearance's texture: its place among the song's sections, its kind and the parts each phrase leaves out (a
+    ///     tuple of an <c>int</c>, a <see cref="Composition.TextureKind" /> and an <c>ImmutableArray</c> of
+    ///     <c>ImmutableHashSet</c>s of <see cref="Songs.TrackRole" />s).
+    /// </summary>
+    public const string Texture = "Texture";
+
     /// <summary>How many times a section plays its 4-bar pattern (an <c>int</c>).</summary>
     public const string SectionLength = "Section length";
 

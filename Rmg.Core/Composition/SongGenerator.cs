@@ -178,10 +178,13 @@ public static class SongGenerator
                 played.Take(index).Count(x => x == id),
                 Tilt.Of(MelodyLayers.ImprovisationGrowth, Place(index)).Chance(improvisation, 1),
                 SectionEnergy.AppearanceStep(Place(index), averagePlaces[id]),
-                restedBefore.GetValueOrDefault(id, [])
+                restedBefore.GetValueOrDefault(id, []),
+                // an intro of entries builds the first section's parts up itself
+                index == 0 && plan.Intro == IntroKind.Entries
             );
             restedBefore[id] = section.Resting;
             StateTrace.Record(TracePoints.Arrangement, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, string.Join(", ", section.Resting.Order()), section.Resting);
+            StateTrace.Record(TracePoints.Texture, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, $"{section.TextureKind}", (index, section.TextureKind, section.PhraseSilent));
             sections.Add(section);
         }
 

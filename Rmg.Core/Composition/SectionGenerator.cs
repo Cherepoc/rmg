@@ -700,6 +700,15 @@ internal sealed record GeneratedSection(
     /// <summary>Whether the drums play in the section, rather than rest for a breakdown.</summary>
     public bool HasDrums => !Resting.Contains(TrackRole.Drum);
 
+    /// <summary>The parts each of the appearance's phrases leaves out, over those it rests throughout (<see cref="Composition.Texture" />).</summary>
+    public ImmutableArray<ImmutableHashSet<TrackRole>> PhraseSilent { get; init; } = [];
+
+    /// <summary>How the appearance brings its parts in over its phrases.</summary>
+    public TextureKind TextureKind { get; init; } = TextureKind.Steady;
+
+    // the sequence an appearance's texture is drawn from, apart from its parts'
+    private const int TextureStream = 1000;
+
     /// <summary>
     ///     The section as it plays the given time, its parts as <see cref="Appear(int, double)" /> plays them, the first
     ///     time as drawn and a later time drawn again by the appearance's own energy, the section's and its step, from a
@@ -708,13 +717,19 @@ internal sealed record GeneratedSection(
     /// </summary>
     /// <param name="energyStep">How far the appearance's energy is from the section's, such as more for a later one.</param>
     /// <param name="before">The parts that rested the time before, of which it may leave out no more.</param>
-    public GeneratedSection Appear(int appearance, double improvisation, double energyStep, ImmutableHashSet<TrackRole> before)
+    /// <param name="keepsTexture">Whether it plays steady, whatever its texture draws, as the song's first section after an intro that brings its parts in.</param>
+    public GeneratedSection Appear(int appearance, double improvisation, double energyStep, ImmutableHashSet<TrackRole> before, bool keepsTexture)
     {
         var resting = appearance == 0
             ? Resting
             : Arrangement.DrawRests(new GenerationContext(Seeds.Derive(ArrangementSeed, appearance)), SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), Role, Absent)
                 .Intersect(before);
-        return (this with { Resting = resting }).Appear(appearance, improvisation);
+        // how the parts come in over its phrases, from a sequence of its own, by the form facet
+        var playing = Roles.Values.Distinct().Where(x => !resting.Contains(x)).ToArray();
+        var texture = Composition.Texture.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(ArrangementSeed, appearance), TextureStream)), Facets[Facet.Form], Plays, playing);
+        if (keepsTexture)
+            texture = (TextureKind.Steady, ImmutableHashSet<TrackRole>.Empty, [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, Plays)]);
+        return (this with { Resting = resting.Union(texture.Resting), PhraseSilent = texture.PhraseSilent, TextureKind = texture.Kind }).Appear(appearance, improvisation);
     }
 
     /// <summary>
@@ -742,6 +757,16 @@ internal sealed record GeneratedSection(
             };
             var placed = bars.TrackTimelineMap[line.Track].EventTimeline.MapValues(x => x.OfScope(StateScope.Render));
             timeline = timeline.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [line.Track] = _ => placed });
+        }
+
+        // and a phrase's silent parts play nothing in it
+        foreach (var (parts, phrase) in PhraseSilent.Select((x, i) => (x, i)).Where(x => !x.x.IsEmpty))
+        {
+            var (from, to) = (phrase * Meter.PatternDuration, (phrase + 1) * Meter.PatternDuration);
+            timeline = timeline.MapTrackEvents(Timeline.TrackTimelineMap.Keys.Where(x => parts.Contains(Roles[x])).ToDictionary(
+                x => x,
+                _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes => EventTimeline.Create(notes.Duration, notes.Where(n => n.Position < from - 1e-9 || n.Position >= to - 1e-9)))
+            ));
         }
 
         return this with { Timeline = timeline, Lines = [..Lines.Where(x => !silent.Contains(x.Track))] };
