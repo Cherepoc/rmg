@@ -42,6 +42,12 @@ internal static class TracePoints
     /// <summary>A section's progression, its chords' roots in steps above its home (an <c>ImmutableArray</c> of <c>int</c>).</summary>
     public const string Progression = "Progression";
 
+    /// <summary>
+    ///     The step a section's cadence could raise, none where the scale allows none, and whether it does (an
+    ///     <c>(int?, bool)</c>).
+    /// </summary>
+    public const string CadenceRaise = "Cadence raise";
+
     /// <summary>How far a song's harmony strays from convention (a <see cref="HarmonicUnconventionality" />), and its scale.</summary>
     public const string SongHarmony = "Song harmony";
 

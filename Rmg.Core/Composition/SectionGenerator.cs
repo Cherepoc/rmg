@@ -115,6 +115,13 @@ internal sealed class SectionGenerator
         StateTrace.Record(TracePoints.HarmonicRhythm, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{harmonicRhythm.Span}", harmonicRhythm);
         var progression = Progressions.Generate(context, scale, home, Progressions.Strictness.At(facets[Facet.Progression]), harmonicRhythm.Count);
         StateTrace.Record(TracePoints.Progression, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", progression), progression);
+        // the cadence raising the seventh for a major chord on the fifth, where the scale allows it, by the progression
+        // facet, from a sequence of its own
+        var raisable = Progressions.GetCadenceRaisedStep(scale.Offsets, home, progression[^1]);
+        var raisedStep = raisable is not null && Stream(sectionId, SectionStream.CadenceRaise).TestProbability(Progressions.CadenceRaise.At(facets[Facet.Progression]))
+            ? raisable
+            : null;
+        StateTrace.Record(TracePoints.CadenceRaise, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{raisable} {raisedStep is not null}", (raisable, raisedStep is not null));
 
         // the section's change of the song's feel, now and then, from a sequence of its own, by its feel facet
         var feelChange = Feels.DrawChange(Stream(sectionId, SectionStream.Feel), Feels.Of(songStateMap), Feels.SectionChange, facets[Facet.Feel]);
@@ -205,7 +212,7 @@ internal sealed class SectionGenerator
             0,
             1
         );
-        var barStateTimelineMap = _barStateGenerator.Generate(context, scale, progression, harmonicRhythm, home, unconventionality, bassLeading, facets);
+        var barStateTimelineMap = _barStateGenerator.Generate(context, scale, progression, harmonicRhythm, home, raisedStep, unconventionality, bassLeading, facets);
         var contour = barStateTimelineMap.GetStateTimeline(CompositionStateKinds.LineRegister).Select(x => x.Value).ToImmutableArray();
         StateTrace.Record(TracePoints.MelodyContour, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", contour), contour);
 
@@ -774,5 +781,6 @@ internal enum SectionStream
     Pentatonic = 19,
     TimeFeel = 20,
     Unconventionality = 21,
-    Feel = 22
+    Feel = 22,
+    CadenceRaise = 23
 }

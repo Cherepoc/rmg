@@ -93,4 +93,18 @@ public sealed class CadenceRaisedStepTest
 
         await Assert.That(raising).IsGreaterThan(0);
     }
+
+    [Test]
+    public async Task ThePlainestCadences_RaiseTheSeventhWhereTheyCan_AndTheWildestNever()
+    {
+        (int? Raisable, bool IsRaised)[] Raises(double @base) => TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new Rmg.Core.Composition.SongOverrides(Base: @base)))
+            .SelectMany(song => song.Trace.Where(x => x.Point == Rmg.Core.Composition.TracePoints.CadenceRaise).Select(x => ((int?, bool))x.Value!))
+            .Where(x => x.Item1 is not null)
+            .ToArray();
+
+        var plain = Raises(0);
+        await Assert.That(plain.Length).IsGreaterThan(0);
+        await Assert.That(plain.All(x => x.IsRaised)).IsTrue();
+        await Assert.That(Raises(1).Any(x => x.IsRaised)).IsFalse();
+    }
 }

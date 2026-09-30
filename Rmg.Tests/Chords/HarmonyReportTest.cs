@@ -17,7 +17,8 @@ public sealed class HarmonyReportTest
     private sealed record SectionChords(int Band, ImmutableArray<(string Place, int Level, bool? IsClose)> Chords);
 
     private sealed record SongHarmony(int Band, string Scale, int Sections, int OtherScales, int Pentatonic, int KeyChanges, ImmutableArray<SectionChords> SectionChords,
-        ImmutableArray<(int Band, ImmutableArray<int> Roots)> Progressions, ImmutableArray<(int Band, bool IsReset)> ChordBars);
+        ImmutableArray<(int Band, ImmutableArray<int> Roots)> Progressions, ImmutableArray<(int Band, bool IsReset)> ChordBars,
+        ImmutableArray<(int Band, bool IsRaised)> Raises);
 
     // a place on the unconventionality's scale, in fifths: a section's chords facet for its chords, and the song's scale
     // facet for its scales, its key change and its pentatonic melodies
@@ -55,6 +56,10 @@ public sealed class HarmonyReportTest
             Console.WriteLine($"  {band.Key}/5, {band.Count()} sections, {roots.Length} chords between home and cadence: " +
                               $"{string.Join(" ", roots.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Count() / (double)roots.Length:P0}"))}");
         }
+
+        Console.WriteLine("cadences raising the seventh, where the scale allows it, by the section's progression facet, in fifths:");
+        foreach (var band in songs.SelectMany(x => x.Raises).GroupBy(x => x.Band).OrderBy(x => x.Key))
+            Console.WriteLine($"  {band.Key}/5, {band.Count()} raisable cadences: raised {band.Count(x => x.IsRaised) / (double)band.Count():P0}");
 
         Console.WriteLine("by the song's scale facet, in fifths:");
         foreach (var band in songs.GroupBy(x => x.Band).OrderBy(x => x.Key))
@@ -111,6 +116,11 @@ public sealed class HarmonyReportTest
             .GroupBy(x => (int)Math.Floor(x.Position / song.Map.Meter.BarDuration + 1e-9))
             .Select(x => (Band: ChordsBand(sectionHarmony[song.Map.SectionAt(x.First().Position)!.SectionId]), IsReset: x.First().Value.State.GetStateValue(StateKinds.ChordVoicingReset) > 0));
 
-        return new SongHarmony(Band(songFacets[Facet.Scale]), scale.Name, scales.Length, scales.Count(x => x != scale), pentatonic, keyChanges, [..chords], [..progressions], [..bars]);
+        var raises = song.Trace.Where(x => x.Point == TracePoints.CadenceRaise)
+            .Select(x => (Section: x.Section, Value: ((int? Raisable, bool IsRaised))x.Value!))
+            .Where(x => x.Value.Raisable is not null)
+            .Select(x => (Band(facets[x.Section][Facet.Progression]), x.Value.IsRaised));
+
+        return new SongHarmony(Band(songFacets[Facet.Scale]), scale.Name, scales.Length, scales.Count(x => x != scale), pentatonic, keyChanges, [..chords], [..progressions], [..bars], [..raises]);
     }
 }

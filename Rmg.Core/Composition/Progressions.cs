@@ -146,6 +146,13 @@ internal static class Progressions
     ///     phrygian. It is the step a whole step below the home, as in natural minor, dorian and mixolydian.
     /// </summary>
     /// <param name="cadenceRoot">The cadence bar's root, in steps above the home.</param>
+    /// <summary>
+    ///     The chance a cadence raises the seventh where the scale allows it, by the progression facet: every time at the
+    ///     plain end and the middle, as a minor key leads home, and never at the wild end, whose chord on the fifth stays
+    ///     modal.
+    /// </summary>
+    public static ByConvention CadenceRaise { get; } = new(1, 1, 0);
+
     public static int? GetCadenceRaisedStep(ImmutableArray<int> scaleOffsets, int home, int cadenceRoot)
     {
         if (Mod(cadenceRoot) != 4 || GetQuality(scaleOffsets, home + 4) != TriadQuality.Minor)

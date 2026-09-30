@@ -69,6 +69,7 @@ internal sealed class BarStateGenerator
     /// <param name="progression">The roots of the chords, in steps above the home.</param>
     /// <param name="harmonicRhythm">Where the chords change.</param>
     /// <param name="home">The step of the section's home above the song's tonic.</param>
+    /// <param name="raisedStep">The step the cadence raises, none for a cadence that keeps the scale.</param>
     /// <param name="bassLeading">How much the section's bass leads into the chords, from 0 to 1.</param>
     /// <param name="context">The section's random sequence.</param>
     /// <param name="facets">How far the section strays from convention: its melody facet leans the melody's contour, its chords facet the bass's arrivals.</param>
@@ -78,6 +79,7 @@ internal sealed class BarStateGenerator
         ImmutableArray<int> progression,
         HarmonicRhythm harmonicRhythm,
         int home,
+        int? raisedStep,
         HarmonicUnconventionality unconventionality,
         double bassLeading,
         Unconventionality facets
@@ -101,7 +103,6 @@ internal sealed class BarStateGenerator
             .WithLayer("Progression");
 
         // the cadence chord may raise the seventh, for a major chord on the fifth; the chords before keep the scale
-        var raisedStep = Progressions.GetCadenceRaisedStep(scale.Offsets, home, progression[^1]);
         var raisedStepTimeline = StateTimeline.Create(
                 _meter.PatternDuration,
                 StateKinds.RaisedScaleSteps,
