@@ -19,8 +19,7 @@ measured before and after by a report test, by the measure its entry names.
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
 **Later** (P2), roughly in this order: pitched fills (see *Fills*), once a fill can draw a line's notes; the ratings report (see *Listening data*), once the dashboard shows songs
-rated enough; styles (see *Styles*); the song's memory (see
-*Architecture*), once the arrangement doubles the tracks.
+rated enough; styles (see *Styles*), once they are chosen.
 
 **When the need shows** (P3): the melody's contour (see *Melody*); occasional chords (see *Instruments*); harmonised doubling and articulations, after styles; solos; long cycles, then
 overlapping polyrhythms, needed someday; timing by role; intros of their own material; scales of other sizes; the
@@ -321,6 +320,10 @@ Every scale has seven notes, and the progressions' rules are in its steps (`Prog
 
 ## Styles
 
+Put off in September 2026 for a decision: which styles, and what each leans towards, is taste, and every lean needs
+data on the options it leans (an instrument's styles, a drum role's, a form's); made without it, a style would be a
+caricature. Wanted first: a short list of styles, and for each a sentence of what it sounds like.
+
 Genre is the answer deferred more than once: the tresillo keeping time is conventional in reggaeton, dancehall or
 afrobeats; twin guitars, slap bass and the calls belong to some styles and not others. A style (P2) is a named bundle
 of leans on the draws the generator already has (`Tilt` by style: the drums' roles and figures, the instruments'
@@ -349,9 +352,8 @@ the rest as they were.
 
 ## Architecture
 
-- **Memory** (P3, P2 once the arrangement doubles the tracks): every `RealizedNote` keeps the state it was decided
-  from, which a song holds on to (about 2 MB a song, 8 MB with a trace). Recompute it on demand instead; watch the
-  generation time too.
+- **Memory** (P4, measured in September 2026 with five pitched tracks): every `RealizedNote` keeps the state it was
+  decided from, which a song holds on to: 1.7 MB a song, generated in 86 ms, so nothing to do.
 - **Note keys** (P3) are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 
 ## Parked
