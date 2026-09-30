@@ -131,6 +131,9 @@ internal static class FormLayers
     /// <summary>How often a fade steps down, in beats.</summary>
     public const double FadeStep = 0.25;
 
+    /// <summary>How much louder the band plays at the end of a lift into a section of an energy more by 1, in velocity's layers.</summary>
+    public const double LiftVelocity = 0.6;
+
     /// <summary>The endings that lean unconventional, likelier the further the song's rhythm strays.</summary>
     public static ImmutableHashSet<EndingKind> AdventurousEndings { get; } = [EndingKind.Open, EndingKind.Stop];
 

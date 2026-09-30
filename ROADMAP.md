@@ -13,13 +13,12 @@ measured before and after by a report test, by the measure its entry names.
 
 **Next** (P1), in this order:
 
-1. **Pitched fills and the lift** (see *Fills*).
-2. **The meter:** the meter as state, then other meters (see *Meter*), once what a period means in another meter is
+1. **The meter:** the meter as state, then other meters (see *Meter*), once what a period means in another meter is
    decided by ear; a cycle split in three is built.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
-**Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs
+**Later** (P2), roughly in this order: pitched fills (see *Fills*), once a fill can draw a line's notes; the ratings report (see *Listening data*), once the dashboard shows songs
 rated enough; a note held into a change, struck again (see *Chords*); occasional chords and a pentatonic melody (see *Instruments*, *Scales*); half time and double time (see *Groove*);
 the melody's contour (see *Melody*); styles (see *Styles*); the song's memory (see
 *Architecture*), once the arrangement doubles the tracks.
@@ -90,6 +89,7 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
   of sections at the median against 116: too short?
 - **The rests:** do the breakdowns and the sections without a melody sound like an arrangement, or like parts gone
   missing? Is a drumless section before a chorus a lift, as the fill out of it means it to be?
+- **The lift:** is a crescendo of about 8 of 127 over the bar before a louder section heard as a lift?
 - **The fade-outs:** a ritardando into the fade, the drums fading first, or a tag after it, if asked for.
 
 ## Meter
@@ -239,16 +239,21 @@ planned together (P1):
 
 The fills are the drums', and every track lands with them where a section lands.
 
-- **Pitched fills** (P1): at a line the drums mark, a pitched track fills too, by the same lines and weights
-  (`FillLine`) and the same rhythm as a run: the melody or a counter-line running up or down the scale or the chord
-  into the next section's first note, the bass walking up to its root, the chords playing a stab or a push on the last
-  8th. A run's notes are a line's (`Line`), aimed at where the next section starts. Also where the melody has a gap
-  before a chord change within a phrase, should it sound empty. Measured by: pitched fills by the line's weight, and
-  leaps into a section, which a run aimed at the next note should lower.
-- **The lift** (P1): into a louder section, the last phrase before it builds across the band, as an edit after
-  assembly: the snare from its cross-stick to its head, the hi-hat opening, the chords' rhythm doubling, a part
-  entering early, the loudness rising. Measured by: the loudness and the notes a bar over the last phrase before a
-  louder section against the phrase before it.
+- **Pitched fills** (P2, planned in September 2026 and put off): at a line the drums mark, a pitched track fills too,
+  the bass walking up the run's rhythm into the next section's root first. The fills are made before the lines are
+  placed, so a note added in a fill is placed by its line's rules, but a line's note carries the draws it is placed by
+  (its step, its turn, its key, `LinePattern.AddNoteState`), which only the line's pattern draws; a note copied from the
+  one before would be placed as its echo, the same note again, not a walk. The fill needs the line's pattern to draw
+  its notes' states, or the fills to come after the lines are placed and pick their notes themselves. Measured by:
+  pitched fills by the line's weight, and leaps into a section. Also where the melody has a gap before a chord change,
+  should it sound empty.
+- **The lift** (built for the loudness): into a louder section, the band grows louder over the bar before, a step every
+  quarter beat, up to how much more energy the next section has as far as the ending section's rhythm follows it
+  (`SongFormGenerator.CreateLifts`, `FormLayers.LiftVelocity` 0.6), the next section then as loud as it plays. Over 200
+  corpus songs the bar before a change into a louder section plays 2.9 of 127 louder than the bar before it (was -0.1),
+  into a quieter one 1.4 quieter, as before (`LiftReportTest`). Left: the snare from its cross-stick to its head, the
+  hi-hat opening, the chords' rhythm doubling, a part of the next section coming in early, should the crescendo alone
+  not lift.
 - **Loudness** (P3): a run's swell, its accents and a landing's hit are constants, where the groove's loudness is
   layers; a fill's velocity layer would make them cumulative with the section's.
 - **Sounds by convention** (P3): runs and landings weigh a drum's sounds the same in a plain section as in a wild one;

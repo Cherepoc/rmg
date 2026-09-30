@@ -179,7 +179,7 @@ internal sealed class SongFormGenerator
             description += $", at beat {end}, held {plan.Held} beats";
             if (plan.SlowsDown)
             {
-                songState = CreateRitardando(end, end + plan.Held);
+                songState = songState.MergeWith(CreateRitardando(end, end + plan.Held));
                 description += ", slowing down";
             }
         }
@@ -189,11 +189,14 @@ internal sealed class SongFormGenerator
         if (plan.Ending == EndingKind.Fade)
         {
             var fadeStart = Math.Min(spans[^1].Start, end - 2 * Meter.PatternDuration);
-            songState = CreateFade(fadeStart, end);
+            songState = songState.MergeWith(CreateFade(fadeStart, end));
             description += $", fading from beat {fadeStart} to {end}";
         }
 
         StateTrace.Record(TracePoints.SongEnding, FillGenerator.DrumsTrace, sectionIds[^1], 0, StateMap.Default, 0, description);
+        // the band grows louder into a louder section
+        songState = songState.MergeWith(CreateLifts(lines, end));
+
         return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, songState);
     }
 
@@ -362,6 +365,30 @@ internal sealed class SongFormGenerator
     }
 
     /// <summary>The band fading out from the start given to the end, a step every <see cref="FormLayers.FadeStep" />, to silence.</summary>
+    /// <summary>
+    ///     The lifts into the louder sections: the band's loudness rising over the bar before a change of section, from
+    ///     as loud as it plays to louder by how much more energy the next section has, as far as the ending section's rhythm
+    ///     follows its energy, a step every <see cref="FormLayers.FadeStep" />, the next section then as loud as it plays.
+    /// </summary>
+    private static StateTimelineMap CreateLifts(IEnumerable<FillLine> lines, double end)
+    {
+        var items = new List<TimelineItem<double>>();
+        foreach (var line in lines.Where(x => x.Ending != x.Next && x.Position < end))
+        {
+            var lift = (line.Next.Energy - line.Ending.Energy) * line.Ending.Rhythm.Coupling;
+            if (lift <= 0)
+                continue;
+
+            var count = (int)Math.Round(Meter.BarDuration / FormLayers.FadeStep);
+            var start = line.Position - Meter.BarDuration;
+            items.AddRange(Enumerable.Range(1, count).Select(i => (FormLayers.LiftVelocity * lift * i / count).ToTimelineItem(start + i * FormLayers.FadeStep - FormLayers.FadeStep)));
+            items.Add(0.0.ToTimelineItem(line.Position));
+        }
+
+        IStateTimeline velocity = StateTimeline.Create(end, StateKinds.Velocity, items.OrderBy(x => x.Position)).WithLayer("Lift");
+        return new[] { velocity }.ToStateTimelineMap(end);
+    }
+
     private static StateTimelineMap CreateFade(double start, double end)
     {
         var count = (int)Math.Round((end - start) / FormLayers.FadeStep);
