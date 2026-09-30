@@ -23,6 +23,9 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Parts">A part given, by its role's name: "melody", "chords", "bass", "pad", "counterMelody" or "drum".</param>
 /// <param name="DrumSetup">The drums the song plays: "kit", "kitAndPercussion" or "percussion".</param>
 /// <param name="DrumGroups">A drum group's mix, by its name, such as "kick".</param>
+/// <param name="Tempo">The tempo, by its place among the tempos a song may play at (<c>/api/songs/options</c>).</param>
+/// <param name="Key">The key, as semitones above C, from 0 to 11.</param>
+/// <param name="Meter">The meter, by its place among the meters a song may play in (<c>/api/songs/options</c>).</param>
 public sealed record GenerateSongRequest(
     string? Seed = null,
     int? Unconventionality = null,
@@ -30,7 +33,10 @@ public sealed record GenerateSongRequest(
     int? Volume = null,
     IReadOnlyDictionary<string, PartRequest>? Parts = null,
     string? DrumSetup = null,
-    IReadOnlyDictionary<string, DrumGroupRequest>? DrumGroups = null
+    IReadOnlyDictionary<string, DrumGroupRequest>? DrumGroups = null,
+    int? Tempo = null,
+    int? Key = null,
+    int? Meter = null
 )
 {
     /// <summary>The last step of an amount: MIDI's 0 to 127.</summary>
@@ -112,11 +118,21 @@ public sealed record GenerateSongRequest(
             groups[known] = new DrumGroupMix((group.Volume ?? LastStep) / (double)LastStep, group.IsOn);
         }
 
+        if (Tempo is < 0 || Tempo >= SongGenerator.TempoOptions.Length)
+            return Fail($"Tempo {Tempo} is not one of the {SongGenerator.TempoOptions.Length} tempos.", out error);
+        if (Key is < 0 or > 11)
+            return Fail($"Key {Key} is not from 0 to 11.", out error);
+        if (Meter is < 0 || Meter >= Core.Composition.Meter.Options.Length)
+            return Fail($"Meter {Meter} is not one of the {Core.Composition.Meter.Options.Length} meters.", out error);
+
         overrides = new SongOverrides(
             Base: Unconventionality / (double)LastStep,
             Facets: facets.Count > 0 ? facets.ToImmutable() : null,
             Parts: parts.Count > 0 ? parts.ToImmutable() : null,
-            DrumSetup: drumSetup
+            DrumSetup: drumSetup,
+            MeterOption: Meter,
+            Tempo: Tempo,
+            Key: Key
         );
         mix = new SongMix((Volume ?? LastStep) / (double)LastStep, partMixes.ToImmutable(), groups.ToImmutable());
         return true;

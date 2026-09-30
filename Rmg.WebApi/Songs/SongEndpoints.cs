@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Text.Json;
 using Rmg.Core;
 using Rmg.Core.Composition;
@@ -13,6 +14,12 @@ public static class SongEndpoints
     public static void MapSongs(this IEndpointRouteBuilder routes)
     {
         routes.MapPost("/api/songs/generate", GenerateSong);
+
+        // what a song may be given: its tempos, in beats a minute, and its meters, in the order a request names them by
+        routes.MapGet("/api/songs/options", () => Results.Ok(new SongOptions(
+            [..SongGenerator.TempoOptions.Select(x => x * Meter.BaseTempo)],
+            [..Meter.Options.Select(x => $"{x.Meter.TimeSignature.Numerator}/{x.Meter.TimeSignature.Denominator}")]
+        )));
 
         // what the page shows as RMG's version
         routes.MapGet("/api/version", () => Results.Ok(new VersionResponse(SongsVersion.Number, SongsVersion.Commit)));
@@ -63,6 +70,11 @@ public static class SongEndpoints
         return Results.File(stream, "audio/midi", SongFile.GetName(songSeed));
     }
 }
+
+/// <summary>What a song may be given, in the order a request names them by.</summary>
+/// <param name="Tempos">The tempos, in beats a minute.</param>
+/// <param name="Meters">The meters, as time signatures.</param>
+public sealed record SongOptions(ImmutableArray<double> Tempos, ImmutableArray<string> Meters);
 
 /// <summary>RMG's version: the songs' number, which goes up when the songs change, and the commit it is built from.</summary>
 public sealed record VersionResponse(string Version, string? Commit);

@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Rmg.Core;
 using Rmg.Core.Composition;
+using Rmg.Core.Events;
 using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
 
@@ -15,17 +16,25 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Parts">Every part's, by its role's name.</param>
 /// <param name="DrumSetup">The drums it plays.</param>
 /// <param name="DrumGroups">The drum groups it plays, by name.</param>
+/// <param name="Tempo">Its tempo, by its place among the tempos (<c>/api/songs/options</c>).</param>
+/// <param name="Key">Its key, as semitones above C.</param>
+/// <param name="Meter">Its meter, by its place among the meters (<c>/api/songs/options</c>).</param>
 public sealed record SongReport(
     Drawn<int> Unconventionality,
     ImmutableSortedDictionary<string, Drawn<int>> Facets,
     ImmutableSortedDictionary<string, PartReport> Parts,
     Drawn<string> DrumSetup,
-    ImmutableArray<string> DrumGroups
+    ImmutableArray<string> DrumGroups,
+    Drawn<int> Tempo,
+    Drawn<int> Key,
+    Drawn<int> Meter
 )
 {
     public static SongReport Of(Song song, RenderedSong rendered, SongOverrides overrides)
     {
         var draws = song.Draws!;
+        // the key and the tempo the song starts in, before a key change or an ending's ritardando
+        var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0);
         var channels = rendered.GetPartChannels();
         // the song's own instrument and pan, whatever the mix plays, and the drums' kit, the standard one, in the middle
         var own = song.TrackDefinitions.Values.OfType<PitchInstrumentTrack>().ToDictionary(x => x.Role, x => (x.InstrumentCode, x.Pan));
@@ -48,7 +57,10 @@ public sealed record SongReport(
                 )
             ),
             new Drawn<string>(Name(draws.DrumSetup), overrides.DrumSetup is not null),
-            [..groups.Select(Name)]
+            [..groups.Select(Name)],
+            new Drawn<int>(SongGenerator.TempoOptions.IndexOf(common.GetStateValue(StateKinds.Tempo)), overrides.Tempo is not null),
+            new Drawn<int>(common.GetStateValue(StateKinds.KeyOffset).Mod(12), overrides.Key is not null),
+            new Drawn<int>(Core.Composition.Meter.OptionOf(song.Meter), overrides.MeterOption is not null || overrides.Meter is not null)
         );
     }
 

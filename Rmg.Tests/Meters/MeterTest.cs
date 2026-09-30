@@ -136,7 +136,7 @@ public sealed class MeterTreeTest
     public async Task TheMeters_DrawTheirGroupsInEveryOrder()
     {
         var context = new Rmg.Core.Probabilities.GenerationContext(1);
-        var sevens = Enumerable.Range(0, 3000).Select(_ => Meter.Draw(context, 1)).Where(x => x.Sixteenths == 14).Select(x => string.Join("+", x.Groups)).Distinct().Order().ToArray();
+        var sevens = Enumerable.Range(0, 3000).Select(_ => Meter.Draw(context, 1, null)).Where(x => x.Sixteenths == 14).Select(x => string.Join("+", x.Groups)).Distinct().Order().ToArray();
 
         await Assert.That(sevens).IsEquivalentTo(["4+4+6", "4+6+4", "6+4+4"]);
     }
@@ -145,8 +145,8 @@ public sealed class MeterTreeTest
     public async Task ThePlainestSongs_AreInFour_AndTheWildest_NeverInFour()
     {
         var context = new Rmg.Core.Probabilities.GenerationContext(1);
-        var plain = Enumerable.Range(0, 3000).Select(_ => Meter.Draw(context, 0)).ToArray();
-        var wild = Enumerable.Range(0, 3000).Select(_ => Meter.Draw(context, 1)).ToArray();
+        var plain = Enumerable.Range(0, 3000).Select(_ => Meter.Draw(context, 0, null)).ToArray();
+        var wild = Enumerable.Range(0, 3000).Select(_ => Meter.Draw(context, 1, null)).ToArray();
 
         await Assert.That(plain.All(x => x == Meter.FourFour)).IsTrue();
         await Assert.That(wild.All(x => x != Meter.FourFour)).IsTrue();

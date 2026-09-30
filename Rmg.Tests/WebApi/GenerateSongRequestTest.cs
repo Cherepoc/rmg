@@ -75,6 +75,9 @@ public sealed class GenerateSongRequestTest
     [Arguments("setup")]
     [Arguments("group")]
     [Arguments("seed")]
+    [Arguments("tempo")]
+    [Arguments("key")]
+    [Arguments("meter")]
     public async Task AnythingOutOfItsRange_OrUnknown_IsRefused(string what)
     {
         var request = what switch
@@ -87,6 +90,9 @@ public sealed class GenerateSongRequestTest
             "setup" => new GenerateSongRequest(DrumSetup: "orchestra"),
             "group" => new GenerateSongRequest(DrumGroups: new Dictionary<string, DrumGroupRequest> { ["gong"] = new() }),
             "seed" => new GenerateSongRequest("zzzzzzzzzzzz"),
+            "tempo" => new GenerateSongRequest(Tempo: 64),
+            "key" => new GenerateSongRequest(Key: 12),
+            "meter" => new GenerateSongRequest(Meter: -1),
             _ => throw new ArgumentOutOfRangeException(nameof(what))
         };
 

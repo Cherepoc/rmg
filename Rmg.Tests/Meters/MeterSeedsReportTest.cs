@@ -15,7 +15,8 @@ public sealed class MeterSeedsReportTest
             Unconventionality.Generate(
                 Unconventionality.DrawBase(SongGenerator.CreateStream((ulong)seed, SongStream.Rhythm)),
                 facet => SongGenerator.CreateStream((ulong)seed, SongStream.Unconventionality, facet)
-            )[Facet.Feel]
+            )[Facet.Feel],
+            null
         );
 
         foreach (var meter in Enumerable.Range(0, 3000).Select(seed => (Seed: seed, Meter: Of(seed))).GroupBy(x => x.Meter.TimeSignature))

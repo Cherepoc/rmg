@@ -47,6 +47,12 @@ public static class SongGenerator
             throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Base, "An unconventionality is from 0 to 1.");
         if (overrides.Facets?.Values.Any(x => x is < 0 or > 1 or double.NaN) == true)
             throw new ArgumentOutOfRangeException(nameof(overrides), "A facet is from 0 to 1.");
+        if (overrides.MeterOption is < 0 || overrides.MeterOption >= Meter.Options.Length)
+            throw new ArgumentOutOfRangeException(nameof(overrides), overrides.MeterOption, $"A meter is one of the {Meter.Options.Length} options.");
+        if (overrides.Tempo is < 0 || overrides.Tempo >= TempoOptions.Length)
+            throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Tempo, $"A tempo is one of the {TempoOptions.Length} options.");
+        if (overrides.Key is < 0 or > 11)
+            throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Key, "A key is from 0 to 11.");
 
         return GenerateSong(seed, ProgressionSettings.Default, overrides);
     }
@@ -103,7 +109,7 @@ public static class SongGenerator
 
         // the song's form: one of the forms songs are written in, its sections playing their roles, or one of its own
         // the meter the song's bars are in
-        var meter = overrides.Meter ?? Meter.Draw(Stream(SongStream.Meter), songUnconventionality[Facet.Feel]);
+        var meter = overrides.Meter ?? Meter.Draw(Stream(SongStream.Meter), songUnconventionality[Facet.Feel], overrides.MeterOption);
         StateTrace.Record(TracePoints.Meter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, meter.ToString(), meter);
 
         var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), songUnconventionality[Facet.Form]);
@@ -116,7 +122,7 @@ public static class SongGenerator
         var sectionEnergies = SectionEnergy.GenerateSections(dynamicsContext, sectionIds);
 
         // the song's key, which the sections place their melodies in
-        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common));
+        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), overrides);
         // how the song swings, which its tempo sets the notes of
         var grooveContext = Stream(SongStream.Groove);
         var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), songUnconventionality[Facet.Feel], meter);
@@ -258,14 +264,28 @@ public static class SongGenerator
     ///     The song's state that Render reads, the same for every track: its key and tempo. Its scale is each section's,
     ///     most often the song's.
     /// </summary>
-    private static StateMap CreateCommonStateMap(IGenerationContext context)
+    /// <summary>The song's key and tempo, drawn, and replaced where given, so that giving one leaves every other draw as it was.</summary>
+    private static StateMap CreateCommonStateMap(IGenerationContext context, SongOverrides overrides)
     {
-        return new StateMapBuilder("Song")
+        var drawn = new StateMapBuilder("Song")
             .Add(StateKinds.KeyOffset, Generators.Int(0, 12))
             .Add(StateKinds.Tempo, TempoGenerator)
             .AddNoteDurationLayer()
             .ToStateMap(context);
+        if (overrides.Key is { } key)
+            drawn = drawn.With(StateKinds.KeyOffset, key);
+        return overrides.Tempo is { } tempo ? drawn.With(StateKinds.Tempo, TempoOptions[tempo]) : drawn;
     }
+
+    /// <summary>The tempos a song may play at, as multiples of <see cref="Meter.BaseTempo" />, slowest first: every one the draw can land on.</summary>
+    public static ImmutableArray<double> TempoOptions { get; } =
+    [
+        ..Enumerable.Range(0, 5)
+            .SelectMany(rank => DyadicRankDistribution.GetMultiplierDistributionSlice(rank, 0.75, 1.5))
+            .Select(x => x.Position)
+            .Distinct()
+            .Order()
+    ];
 }
 
 /// <summary>How the state along a section's 4-bar pattern changes. The steps are in bars.</summary>

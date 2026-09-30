@@ -45,11 +45,20 @@ public sealed record Meter(ImmutableArray<int> Groups)
     ///     A song's meter, by the feel facet of its unconventionality, its groups in an order drawn among theirs, as 7/8
     ///     plays 2+2+3, 3+2+2 or 2+3+2.
     /// </summary>
-    public static Meter Draw(IGenerationContext context, double unconventionality)
+    /// <param name="given">A meter given in place of the one drawn, by its place in <see cref="Options" />, drawn all the same, its groups' order still drawn.</param>
+    public static Meter Draw(IGenerationContext context, double unconventionality, int? given)
     {
-        var meter = context.Pick(ByConvention.Weigh(Options, unconventionality));
+        var drawn = context.Pick(ByConvention.Weigh(Options, unconventionality));
+        var meter = given is { } option ? Options[option].Meter : drawn;
         var orders = Orders(meter.Groups).ToArray();
         return new Meter(orders[(int)(context.GenerateDouble() * orders.Length)]);
+    }
+
+    /// <summary>The place in <see cref="Options" /> of a meter, whatever the order of its groups.</summary>
+    public static int OptionOf(Meter meter)
+    {
+        var groups = meter.Groups.Order().ToArray();
+        return Options.Select((x, i) => (x.Meter, i)).Single(x => x.Meter.Groups.Order().SequenceEqual(groups)).i;
     }
 
     /// <summary>Every distinct order of the groups.</summary>
