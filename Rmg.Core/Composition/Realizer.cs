@@ -19,9 +19,6 @@ internal static class Realizer
     // drum sounds are mostly one-shots that play out whatever the note length, so every drum note is a sixteenth
     private const double PercussionNoteDuration = 0.25;
 
-    // a note is held towards the next note of its track, but a gap longer than a bar is silence, such as a bar in
-    // which the track does not play, and the note is not held through it
-    private const double MaxNextNoteDuration = 4;
 
     private static readonly ImmutableArray<int> ChromaticScaleOffsets = [..Enumerable.Range(0, OctaveNoteCount)];
 
@@ -118,7 +115,7 @@ internal static class Realizer
     {
         while (true)
         {
-            var realized = RealizePitchTrack(track, GetNoteStates(raw, track, commonStateTimelineMap), changes, out var crossings);
+            var realized = RealizePitchTrack(track, GetNoteStates(raw, track, commonStateTimelineMap), changes, meter, out var crossings);
             if (crossings.Count == 0 || track.Role is not (TrackRole.Chords or TrackRole.Bass))
                 return realized;
 
@@ -159,6 +156,7 @@ internal static class Realizer
         PitchInstrumentTrack track,
         EventTimeline<StateMap> eventStateTimelineMap,
         ImmutableArray<double> changes,
+        Meter meter,
         out List<(int Index, double Change)> crossings
     )
     {
@@ -176,7 +174,7 @@ internal static class Realizer
         crossings = [];
         for (var i = 0; i < items.Length; i++)
         {
-            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, GetRange(track), changes, out var unclipped);
+            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, GetRange(track), meter.BarDuration, changes, out var unclipped);
             var change = items[i].Position + UntilChange(changes, items[i].Position);
             var next = i + 1 < items.Length ? items[i + 1].Position : double.PositiveInfinity;
             if (items[i].Position + unclipped > change + 1e-9 && next > change + 1e-9)
@@ -230,12 +228,15 @@ internal static class Realizer
         VoiceLeader voiceLeader,
         TrackRole role,
         (int Low, int High) range,
+        double bar,
         ImmutableArray<double> changes,
         out double unclipped
     )
     {
         var position = timelineItemWithDuration.Position;
-        var nextNoteDuration = Math.Min(timelineItemWithDuration.Value.Duration, MaxNextNoteDuration);
+        // a note is held towards the next note of its track, but a gap longer than a bar is silence, such as a bar in
+        // which the track does not play, and the note is not held through it
+        var nextNoteDuration = Math.Min(timelineItemWithDuration.Value.Duration, bar);
         var stateMap = timelineItemWithDuration.Value.Value;
 
         var (scaleOffsets, chordRootNoteIndex, chord) = GetChord(stateMap);
