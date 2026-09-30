@@ -36,6 +36,18 @@ public static class SongGenerator
         return GenerateSong(seed, ProgressionSettings.Default);
     }
 
+    /// <summary>
+    ///     Generates a song whose unconventionality's base is supplied, from 0 for the plainest to 1 for the wildest, and
+    ///     used as given; none draws it as <see cref="GenerateSong(int)" /> does.
+    /// </summary>
+    public static Song GenerateSong(int seed, double? unconventionality)
+    {
+        if (unconventionality is < 0 or > 1 or double.NaN)
+            throw new ArgumentOutOfRangeException(nameof(unconventionality), unconventionality, "An unconventionality is from 0 to 1.");
+
+        return GenerateSong(seed, ProgressionSettings.Default, new SongOverrides(Base: unconventionality));
+    }
+
     internal static Song GenerateSong(int seed, ProgressionSettings progressionSettings) => GenerateSong(seed, progressionSettings, SongOverrides.None);
 
     /// <param name="overrides">What a test sets in place of the song's own draws.</param>
@@ -190,7 +202,7 @@ public static class SongGenerator
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role)
         );
 
-        return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes);
+        return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, songUnconventionality.Base);
     }
 
     /// <summary>The random sequence a stage of the song of the given seed draws from.</summary>
