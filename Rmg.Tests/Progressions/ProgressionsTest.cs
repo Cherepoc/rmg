@@ -136,7 +136,7 @@ public sealed class ProgressionsTest
     public async Task Strictness_KeepsToEveryRuleAtThePlainEnd_ToNoneAtTheWild_AndAsTheCorpusDidBetween()
     {
         await Assert.That(Rmg.Core.Composition.Progressions.Strictness.At(0)).IsEqualTo(1);
-        await Assert.That(Rmg.Core.Composition.Progressions.Strictness.At(0.5)).IsEqualTo(0.77).Within(1e-9);
+        await Assert.That(Rmg.Core.Composition.Progressions.Strictness.At(0.5)).IsEqualTo(0.85).Within(1e-9);
         await Assert.That(Rmg.Core.Composition.Progressions.Strictness.At(1)).IsEqualTo(0);
     }
 

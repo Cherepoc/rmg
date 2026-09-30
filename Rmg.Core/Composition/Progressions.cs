@@ -63,9 +63,9 @@ internal static class Progressions
 
     /// <summary>
     ///     How closely a section's progression keeps to its rules by its progression facet: to all of them at the plain
-    ///     end, to none at the wild, where every root is as likely, and at the middle as closely as the corpus did.
+    ///     end, to none at the wild, where every root is as likely, and at the middle as closely as a middling song did.
     /// </summary>
-    public static ByConvention Strictness { get; } = new(1, 0.77, 0);
+    public static ByConvention Strictness { get; } = new(1, 0.85, 0);
 
     /// <summary>
     ///     The roots of the chords, in steps above the section's home, from -3 to 3.

@@ -98,17 +98,18 @@ internal static class ChordShapes
 
     /// <summary>
     ///     How likely a chord of each level is, by the chords' unconventionality: a plain song plays triads and the colours
-    ///     of level 1, a ninth or a six-nine now and then; a wild one no triads or level 1, the stranger the likelier; the
-    ///     tuned weights the corpus's chords as its anchor drew them.
+    ///     of level 1, a ninth or a six-nine seldom; a wild one no triads or level 1, the stranger the likelier; the tuned
+    ///     weights a middling song's, as most songs played before the facets, mostly triads and level 1, so that the jazz
+    ///     and the clusters are the wilder songs'.
     /// </summary>
     public static ImmutableArray<(int Level, ByConvention Weight)> Levels { get; } =
     [
-        (0, new ByConvention(1, 0.35, 0)),
-        (1, new ByConvention(0.6, 0.35, 0)),
-        (2, new ByConvention(0.1, 0.13, 0.15)),
-        (3, new ByConvention(0, 0.10, 0.4)),
-        (4, new ByConvention(0, 0.055, 0.8)),
-        (5, new ByConvention(0, 0.011, 1))
+        (0, new ByConvention(1, 0.55, 0)),
+        (1, new ByConvention(0.6, 0.38, 0)),
+        (2, new ByConvention(0.05, 0.05, 0.15)),
+        (3, new ByConvention(0, 0.015, 0.4)),
+        (4, new ByConvention(0, 0.004, 0.8)),
+        (5, new ByConvention(0, 0.001, 1))
     ];
 
     /// <summary>
@@ -117,8 +118,8 @@ internal static class ChordShapes
     /// </summary>
     public static ImmutableArray<(int Level, ByConvention Weight)> HomeLevels { get; } =
     [
-        (0, new ByConvention(1, 0.37, 0)),
-        (1, new ByConvention(0.4, 0.63, 0)),
+        (0, new ByConvention(1, 0.6, 0)),
+        (1, new ByConvention(0.4, 0.4, 0)),
         (3, new ByConvention(0, 0, 0.3)),
         (4, new ByConvention(0, 0, 0.6)),
         (5, new ByConvention(0, 0, 1))
@@ -126,14 +127,14 @@ internal static class ChordShapes
 
     /// <summary>
     ///     How likely a cadence is to play a shape made for it (none for its level), which pulls towards home, or one of the
-    ///     strangest levels, which keeps a strange song's strangeness there; the tuned weights the corpus's cadences.
+    ///     strangest levels, which keeps a strange song's strangeness there; the tuned weights a middling song's.
     /// </summary>
     public static ImmutableArray<(int? Level, ByConvention Weight)> CadenceLevels { get; } =
     [
-        (null, new ByConvention(1, 0.86, 0)),
-        (3, new ByConvention(0, 0.095, 0.3)),
-        (4, new ByConvention(0, 0.034, 0.6)),
-        (5, new ByConvention(0, 0.015, 1))
+        (null, new ByConvention(1, 0.97, 0)),
+        (3, new ByConvention(0, 0.02, 0.3)),
+        (4, new ByConvention(0, 0.007, 0.6)),
+        (5, new ByConvention(0, 0.003, 1))
     ];
 
     /// <summary>A shape of a level drawn from those given at the chords' unconventionality.</summary>
