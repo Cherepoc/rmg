@@ -116,7 +116,9 @@ public sealed record Meter(ImmutableArray<int> Groups)
     ///     nearest a beat long, the coarser where two are as near, 4/4's and 3/4's quarters, 6/8's dotted quarters and
     ///     15/16's groups.
     /// </summary>
-    public int Tactus => Enumerable.Range(0, Levels.Length).MinBy(x => (Math.Round(Math.Abs(Math.Log2(ModeLength(x) / 4.0)), 9), x));
+    public int Tactus => _tactus ??= Enumerable.Range(0, Levels.Length).MinBy(x => (Math.Round(Math.Abs(Math.Log2(ModeLength(x) / 4.0)), 9), x));
+
+    private int? _tactus;
 
     /// <summary>Where the bar's pulses start, in beats: 4/4's four beats, 6/8's two dotted quarters.</summary>
     public ImmutableArray<double> Pulses => [..Levels[Tactus].Select(x => x.Start / 4.0)];

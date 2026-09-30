@@ -40,7 +40,13 @@ internal sealed record HarmonicRhythm(double Bars, Meter Meter)
     ///     Where every chord starts in the pattern, in beats: every span on from the pattern's start, on the start of the
     ///     group nearest it, so that two chords a bar change at 4/4's and 6/8's middle and on 3/4's third beat.
     /// </summary>
-    public ImmutableArray<double> Changes => [..Enumerable.Range(0, Count).Select(x => Meter.NearestGroupStart(x * Span))];
+    public ImmutableArray<double> Changes => _changes ??= [..Enumerable.Range(0, Count).Select(x => Meter.NearestGroupStart(x * Span))];
+
+    private ImmutableArray<double>? _changes;
+
+    public bool Equals(HarmonicRhythm? other) => other is not null && Bars.Equals(other.Bars) && Meter.Equals(other.Meter);
+
+    public override int GetHashCode() => HashCode.Combine(Bars, Meter);
 
     /// <summary>How long a chord of the pattern lasts, in beats, up to the next chord's start.</summary>
     public double LengthOf(int index)
