@@ -253,6 +253,14 @@ public static class SongGenerator
             Realizer.Realize(tracks.Definitions, songTrackNoteTimelineMap, meter),
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role)
         );
+        // and the parts' instruments over the song, switched and articulated by every section's sound facet
+        notes = InstrumentsOverTime.Apply(
+            notes,
+            tracks.Definitions,
+            form.Map,
+            [..sections.Select(x => x.Facets[Facet.Sound])],
+            (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.InstrumentsOverTime), section), track))
+        );
 
         return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality, [..SongParts.All.Except(absent)], tracks.DrumSetup));
     }
@@ -364,5 +372,6 @@ internal enum SongStream
     Riff = 29,
     LineDoubling = 30,
     Solos = 31,
-    SoloLines = 32
+    SoloLines = 32,
+    InstrumentsOverTime = 33
 }

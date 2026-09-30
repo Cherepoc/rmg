@@ -43,6 +43,13 @@ internal static class TracePoints
     /// <summary>How a section's chords are broken (an <see cref="Composition.ArpeggioPattern" />).</summary>
     public const string Arpeggio = "Arpeggio";
 
+    /// <summary>
+    ///     A part's instrument in a section, where it switches or articulates: the section's place among the song's, the
+    ///     part, its program, how it articulates and the variant (a tuple of an <c>int</c>, a <see cref="Songs.TrackRole" />,
+    ///     an <c>int</c>, an <see cref="Composition.ArticulationMode" /> and an <c>int</c>).
+    /// </summary>
+    public const string InstrumentOverTime = "Instrument over time";
+
     /// <summary>How many times a section plays its 4-bar pattern (an <c>int</c>).</summary>
     public const string SectionLength = "Section length";
 

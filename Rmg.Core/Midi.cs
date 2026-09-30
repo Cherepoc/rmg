@@ -281,7 +281,9 @@ public static class Midi
 
         // a fade plays as the channel's expression, under the volume the listener sets
         var fade = fadeTimeline.Select(x => new MidiEvent(AbsoluteDelta(x.Position), ControlChange(channel, ExpressionController, (byte)Math.Round(x.Value * MaxControllerValue))));
-        var events = settings.Concat(fade).Concat(track.NoteTimeline.ToMidiNotes(durationDelta).SelectMany(x => x.ToEvents(channel)));
+        // a change of instrument before the note that plays it, which the stable order by time keeps before it
+        var programs = track.ProgramChanges.Select(x => new MidiEvent(AbsoluteDelta(x.Position), ProgramChange(channel, (byte)x.Program)));
+        var events = settings.Concat(fade).Concat(programs).Concat(track.NoteTimeline.ToMidiNotes(durationDelta).SelectMany(x => x.ToEvents(channel)));
         WriteTrack(events, durationDelta, stream);
     }
 

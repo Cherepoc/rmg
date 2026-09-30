@@ -46,6 +46,9 @@ internal static class CompositionStateKinds
     public static StateKind<int> LinePentatonic { get; } = StateKinds.CreateAdditive<int>(Prefix + "LinePentatonic", StateScope.Render);
     public static StateKind<int> LineLanding { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineLanding", StateScope.Render);
 
+    // the General MIDI program a note plays, 1 more than its number, 0 for its track's own
+    public static StateKind<int> Program { get; } = StateKinds.CreateAdditive<int>(Prefix + "Program", StateScope.Render);
+
     // how a section's chords are broken, an ArpeggioPattern, 0 for the whole chord at once
     public static StateKind<int> Arpeggio { get; } = StateKinds.CreateAdditive<int>(Prefix + "Arpeggio", StateScope.Render);
 

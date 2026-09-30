@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Songs;
 
@@ -33,6 +34,9 @@ public sealed class RenderedTrack
     public TrackRole Role { get; }
     public int PitchInstrumentCode { get; }
     public EventTimeline<RenderedNote> NoteTimeline { get; }
+
+    /// <summary>The track's changes of instrument after its first, each at its place: none for a track of one instrument throughout.</summary>
+    public ImmutableArray<(double Position, int Program)> ProgramChanges { get; init; } = [];
 
     /// <summary>Where the track sits from left to right, from -1, left, through 0, the middle, to 1, right.</summary>
     public double Pan { get; }

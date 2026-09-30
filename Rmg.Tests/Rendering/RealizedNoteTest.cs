@@ -8,21 +8,24 @@ namespace Rmg.Tests.Rendering;
 
 public sealed class RealizedNoteTest
 {
+    // the song as written, but for its changes of instrument, which the song puts on its notes once they are decided
     private static byte[] Midi(Song song)
     {
         using var stream = new MemoryStream();
-        Render.RenderSong(song).Write(stream, null);
+        var rendered = Render.RenderSong(song);
+        new RenderedSong(rendered.Duration, rendered.Meter, rendered.TempoTimeline, rendered.FadeTimeline,
+            [..rendered.Tracks.Select(x => new RenderedTrack(x.IsPercussionInstrument, x.Role, x.PitchInstrumentCode, x.NoteTimeline, x.Pan, x.Volume))]).Write(stream, null);
         return stream.ToArray();
     }
 
     [Test]
     public async Task GeneratedSongs_ComeWithTheirNotes_AsRenderWouldDecideThem()
     {
-        for (var seed = 0; seed < 4; seed++)
+        for (var seed = 0; seed < 16; seed++)
         {
             // a stopped ending cuts the notes that sound into its stop, which only the song put together knows
             var song = TestCorpus.Get(seed).Song;
-            if (song.Map.Ending.Kind == EndingKind.Stop)
+            if (song.Map!.Ending.Kind == EndingKind.Stop)
                 continue;
 
             var withoutNotes = new Song(song.Duration, song.Meter, song.TrackDefinitions, song.TrackEventStateTimelineMap, song.Map);

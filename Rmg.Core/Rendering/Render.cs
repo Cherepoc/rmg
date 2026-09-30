@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Songs;
@@ -54,6 +55,9 @@ public static class Render
             if (song.TrackDefinitions[trackNumber] is PitchInstrumentTrack pitchInstrumentTrack)
                 renderedTracks.Add(
                     new RenderedTrack(false, pitchInstrumentTrack.Role, pitchInstrumentTrack.InstrumentCode, EventTimeline.Create(trackNotes.Duration, renderedNotes), pitchInstrumentTrack.Pan)
+                    {
+                        ProgramChanges = ProgramChanges(trackNotes, pitchInstrumentTrack.InstrumentCode, swing)
+                    }
                 );
             else
                 percussionTrackNotes.Add(renderedNotes);
@@ -67,7 +71,8 @@ public static class Render
             renderedTracks.Add(percussionTrack);
         }
 
-        // every part as it is asked to sound, over the song's volume, and those left out not written
+        // every part as it is asked to sound, over the song's volume, and those left out not written; an instrument given
+        // holds throughout, its changes let go of
         var mixed = renderedTracks
             .Select(track => (Track: track, Mix: mix.Parts.GetValueOrDefault(track.Role)))
             .Where(x => x.Mix is not { IsOn: false })
@@ -78,8 +83,26 @@ public static class Render
                 x.Track.NoteTimeline,
                 x.Mix?.Pan ?? x.Track.Pan,
                 mix.Volume * (x.Mix?.Volume ?? 1)
-            ));
+            ) { ProgramChanges = x.Mix?.Instrument is null ? x.Track.ProgramChanges : [] });
         return new RenderedSong(song.Duration, song.Meter, common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..mixed]);
+    }
+
+    /// <summary>Where a track's instrument changes, a note playing another than the one before it, swung as the note is.</summary>
+    private static ImmutableArray<(double Position, int Program)> ProgramChanges(EventTimeline<RealizedNote> notes, int own, Swing swing)
+    {
+        var changes = ImmutableArray.CreateBuilder<(double, int)>();
+        var playing = own;
+        foreach (var note in notes)
+        {
+            var program = note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : own;
+            if (program == playing)
+                continue;
+
+            changes.Add((swing.Apply(note.Position), program));
+            playing = program;
+        }
+
+        return changes.ToImmutable();
     }
 
     /// <summary>How the song swings, which moves where its every note plays.</summary>
