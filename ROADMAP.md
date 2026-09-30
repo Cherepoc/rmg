@@ -13,8 +13,7 @@ measured before and after by a report test, by the measure its entry names.
 
 **Next** (P1), in this order:
 
-1. **The meter:** the meter as state, then other meters (see *Meter*), once what a period means in another meter is
-   decided by ear; a cycle split in three is built.
+1. **The meter:** as its hierarchy, in five steps (see *Meter*); a cycle split in three is built.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -111,16 +110,29 @@ and threading a value that is always four through a hundred readers would change
   against 12.5, so that grouped cycles no longer leave the wild sections sparser; the notes off both the 16ths and the
   triplets 3.0% against 2.7%, those under a 32nd after the one before 3, as before (`GridReportTest`,
   `RhythmBusynessReportTest`).
-- **The meter as state** (put off again, a decision for listening): a song's, a section's or a bar's, a bar as its
-  groups of beats or 16ths, such as 4, 3, 2+2+3 or 3+3+3+2+2, the engine splitting a bar's groups as it now splits a
-  grouped cycle, and the progression's chords, the phrase scheme's bars, the contour, the fills' spans and lines, the
-  intro's windows, the count-in and the MIDI file's time signature (`Midi`, 4/4 now) taking the bar's length. What
-  holds it back is what a rhythm's period means in another meter, which decides how every other meter sounds: a
-  fraction of the bar, as now, halves a 3/4 bar into dotted quarters and its quarters off the grid; a length in beats
-  fits 3/4 but misses 6/8, whose unit is the dotted quarter; a level of the meter's hierarchy (the bar, its groups, their
-  beats, their halves) fits every meter, but 3/4 has no half-bar level, so the same settings play a level busier in it
-  than in four. The last is the likeliest, with the settings' levels shifted where a meter has fewer; it wants hearing
-  before the state takes its shape, and the refactor alone, every song still in four, changes nothing heard.
+- **The meter as state** (planned in September 2026, option 3, the meter's hierarchy): a bar is its groups in 16ths,
+  4/4 as two halves of two beats, 3/4 as three beats, 6/8 as two groups of three 8ths, 15/16 as 4+4+4+3 or
+  3+3+3+3+3, a tree from the bar down to its 16ths, every node splitting by the odd number of its steps first, as a
+  grouped cycle now does, and in two after. In this order, each measured:
+  1. **The meter as a value** (`Meter` a record, a song's), which every reader of the bar's length and the pattern's
+     reads, and the MIDI file's time signature; every song in four, the corpus unchanged.
+  2. **The engine from the tree:** a cycle's template the node's, from its start down, and a rhythm's period a level of
+     the tree, the level whose nodes are nearest the length the period has in four, the coarser where two are as near,
+     so that the same settings play as busy in every meter; a cycle restarting at every node of its level, as a grouped
+     one restarts now, a phase a place in the node, and a tuplet only on a node of a power of two of steps. In four the
+     tree is the dyadic template, so the corpus unchanged.
+  3. **The grooves from the tree,** where the drums' roles now set 4/4's periods and phases by hand: the backbeat the
+     weak nodes of the level nearest a beat and a half apart (4/4's 2 and 4, 3/4's 2 and 3, 6/8's 4), the ground the
+     bar's and its groups' starts, the time the level nearest an 8th; measured against 4/4 as it plays, the corpus
+     changing only as far as the derived grooves differ from the hand-set ones.
+  4. **3/4 and 6/8,** drawn per song by a small chance, leaned away from convention; the harmonic rhythm counted in bars,
+     the fills' spans and the bass's pickup in the meter's groups, the count-in by groups, swing only where a meter's
+     groups are even. Listened to before going on.
+  5. **Odd meters,** 5/4, 7/8, 15/16 and the like, groupings drawn among the usual ones, rarely, and the bar of two
+     beats before a section; then a section's meter of its own.
+  What it costs: the first three change nothing heard and touch about a hundred readers; the grooves are where the
+  musical risk is, as 4/4's conventions are set by hand today; the tempo is in quarter notes, so 6/8 at 120 pulses at
+  80, which may want the tempo drawn by the meter's pulse.
 - **Other meters** (with listening): 3/4, 6/8, 7/8 or 13/16 drawn, leaned conventional towards four; the first use a
   bar of two beats now and then before a section. Measured by: the meters drawn by conventionality; the drums' notes a
   bar, the downbeat and the backbeat as in four, per beat; the grid report's gaps under a 32nd.
