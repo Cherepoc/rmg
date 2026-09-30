@@ -23,24 +23,34 @@ public sealed class RoleChordTest
 
     [Test]
     [Arguments(0.0)]
-    [Arguments(2.5)]
-    [Arguments(5.0)]
-    public async Task HomeChords_StayPlain(double anchor)
+    [Arguments(0.5)]
+    public async Task HomeChords_StayPlain_ButInTheWildestSongs(double chords)
     {
-        var unconventionality = new HarmonicUnconventionality(anchor, 2, 0, 1);
+        var unconventionality = new HarmonicUnconventionality(0, chords);
         var context = new GenerationContext(1);
 
         var levels = Enumerable.Range(0, DrawCount)
             .Select(_ => ShapeOf(unconventionality.GenerateHomeChord(context)).Unconventionality)
             .ToArray();
 
-        await Assert.That(levels.Max()).IsLessThanOrEqualTo(HarmonicUnconventionality.HomeChordMaxUnconventionality);
+        await Assert.That(levels.Max()).IsLessThanOrEqualTo(1);
+    }
+
+    [Test]
+    public async Task TheWildestHomeChords_AreStrange()
+    {
+        var unconventionality = new HarmonicUnconventionality(0, 1);
+        var context = new GenerationContext(1);
+
+        var levels = Enumerable.Range(0, DrawCount).Select(_ => unconventionality.GenerateHomeChord(context).Shape.Unconventionality).ToArray();
+
+        await Assert.That(levels.All(x => x >= 3)).IsTrue();
     }
 
     [Test]
     public async Task ConventionalCadences_PlayCadenceShapes_TheSeventhMostOften()
     {
-        var unconventionality = new HarmonicUnconventionality(0, 0.5, 1, 1);
+        var unconventionality = new HarmonicUnconventionality(0, 0);
         var context = new GenerationContext(1);
 
         var names = Enumerable.Range(0, DrawCount)
@@ -54,14 +64,14 @@ public sealed class RoleChordTest
     [Test]
     public async Task UnconventionalCadences_KeepTheirStrangeness()
     {
-        var unconventionality = new HarmonicUnconventionality(4.5, 0.3, 1, 1);
+        var unconventionality = new HarmonicUnconventionality(0, 1);
         var context = new GenerationContext(1);
 
         var levels = Enumerable.Range(0, DrawCount)
-            .Select(_ => ShapeOf(unconventionality.GenerateCadenceChord(context)).Unconventionality)
+            .Select(_ => unconventionality.GenerateCadenceChord(context).Shape.Unconventionality)
             .ToArray();
 
-        await Assert.That(levels.All(x => x > HarmonicUnconventionality.CadenceShapeMaxUnconventionality)).IsTrue();
+        await Assert.That(levels.All(x => x >= 3)).IsTrue();
     }
 
     [Test]

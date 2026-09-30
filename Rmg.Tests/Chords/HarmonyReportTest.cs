@@ -18,8 +18,12 @@ public sealed class HarmonyReportTest
 
     private sealed record SongHarmony(int Band, string Scale, int Sections, int OtherScales, int Pentatonic, bool KeyChange, ImmutableArray<SectionChords> SectionChords);
 
-    // a harmony's place on the conventionality's scale, its anchor over the chords' levels, in fifths
-    private static int Band(HarmonicUnconventionality harmony) => Math.Clamp((int)(harmony.Anchor / ChordShapes.MaxUnconventionality * 5), 0, 4);
+    // a harmony's place on the unconventionality's scale, in fifths: its chords facet for its chords, and its anchor over
+    // the chords' levels for the scales, the key change and the pentatonic melodies, which it leans until they go by
+    // facets of their own
+    private static int ChordsBand(HarmonicUnconventionality harmony) => Math.Clamp((int)(harmony.Chords * 5), 0, 4);
+
+    private static int AnchorBand(HarmonicUnconventionality harmony) => Math.Clamp((int)(harmony.Anchor / ChordShapes.MaxUnconventionality * 5), 0, 4);
 
     [Test]
     [Explicit]
@@ -27,7 +31,7 @@ public sealed class HarmonyReportTest
     {
         var songs = TestCorpus.Measure(SongCount, Measure);
 
-        Console.WriteLine("chords' levels 0-5 by the section's harmony, in fifths:");
+        Console.WriteLine("chords' levels 0-5 by the section's chords facet, in fifths:");
         foreach (var place in new[] { "home", "between", "cadence" })
         foreach (var band in songs.SelectMany(x => x.SectionChords).GroupBy(x => x.Band).OrderBy(x => x.Key))
         {
@@ -35,7 +39,7 @@ public sealed class HarmonyReportTest
             Console.WriteLine($"  {place,-8} {band.Key}/5, {levels.Length,5} chords: {string.Join(" ", Enumerable.Range(0, ChordShapes.MaxUnconventionality + 1).Select(l => $"{l}:{levels.Count(x => x == l) / (double)Math.Max(1, levels.Length):P0}"))}");
         }
 
-        Console.WriteLine("by the song's harmony, in fifths:");
+        Console.WriteLine("by the song's harmonic anchor, in fifths:");
         foreach (var band in songs.GroupBy(x => x.Band).OrderBy(x => x.Key))
         {
             var of = band.ToArray();
@@ -74,9 +78,9 @@ public sealed class HarmonyReportTest
                         var place = x.Key == 0 ? "home" : x.Key == rhythm.Count - 1 ? "cadence" : "between";
                         return (place, chord.Shape.Unconventionality);
                     });
-                return new SectionChords(Band(sectionHarmony[section.Key]), [..played]);
+                return new SectionChords(ChordsBand(sectionHarmony[section.Key]), [..played]);
             });
 
-        return new SongHarmony(Band(harmony), scale.Name, scales.Length, scales.Count(x => x != scale), pentatonic, keyChange, [..chords]);
+        return new SongHarmony(AnchorBand(harmony), scale.Name, scales.Length, scales.Count(x => x != scale), pentatonic, keyChange, [..chords]);
     }
 }

@@ -74,7 +74,7 @@ public sealed class ScalesTest
     public async Task ASectionsScale_IsTheSongs_UnlessItChanges_ToACloseOneMostOften()
     {
         var context = new GenerationContext(1);
-        var plain = new HarmonicUnconventionality(0, 1, 1, 1);
+        var plain = new HarmonicUnconventionality(0, 0.5);
         var picks = Enumerable.Range(0, 20_000).Select(_ => Rmg.Core.Composition.Scales.PickSection(context, Rmg.Core.Composition.Scales.NaturalMinor, plain)).ToArray();
         var changed = picks.Where(x => x != Rmg.Core.Composition.Scales.NaturalMinor).ToArray();
 

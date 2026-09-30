@@ -97,11 +97,12 @@ internal sealed class SectionGenerator
         // every section draws from its own sequence, so a change to one leaves the others as they are
         var sectionId = plan.Id;
         var context = _context.CreateContext(Seeds.Derive(_seed, sectionId));
-        var unconventionality = _songUnconventionality.GenerateSection(context);
-        StateTrace.Record(TracePoints.SectionHarmony, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{unconventionality.Anchor:F2}", unconventionality);
-        var rhythm = _songRhythmicUnconventionality.GenerateSection(context);
+        // how far the section strays from convention, facet by facet, each from a sequence of its own
         var facets = _songFacets.GenerateSection(facet => _context.CreateContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Unconventionality), (int)facet)));
         StateTrace.Record(TracePoints.SectionUnconventionality, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", facets.Facets.OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Value:F2}")), facets);
+        var unconventionality = _songUnconventionality.GenerateSection(context, facets[Facet.Chords]);
+        StateTrace.Record(TracePoints.SectionHarmony, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{unconventionality.Anchor:F2}", unconventionality);
+        var rhythm = _songRhythmicUnconventionality.GenerateSection(context);
         var chords = LayerStates.CreateChordPool(unconventionality)(context);
 
         var (songStateMap, energy) = GetEnergy(sectionId, rhythm);

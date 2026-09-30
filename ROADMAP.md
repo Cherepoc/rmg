@@ -106,7 +106,9 @@ tuned and wild weights (`ByConvention`), in place of the rhythm's and the harmon
    its own, the spread vanishing at the ends so that a base of 0 or 1 makes every facet so; a section moves each a
    little. The rhythm's and the harmony's unconventionality stay as wrappers of one facet each until every choice reads
    its own; a test makes songs with every facet at 0, at 1, and each alone at 1.
-4. **The chords:** a chord's level a choice by the chords facet, the plain end triads and the colours of level 1, a few
+4. **The chords** (built; over the corpus the chords between home and cadence levels 0 to 5 in 32, 27, 13, 8, 9 and 11%
+   against 35, 35, 13, 10, 5 and 1%, the facet centred where the anchor leant plain; the plainest fifth of sections
+   90% triads and level 1, the wildest 83% levels 3 to 5): a chord's level a choice by the chords facet, the plain end triads and the colours of level 1, a few
    of level 2, the wild end levels 2 to 5, rising; the home chord and the cadence choices of their own, with plainer
    tuned weights and the same ends; the anchor, peak and skew gone; the tuned weights the corpus's levels.
 5. **The progressions' strictness** by the progression facet.

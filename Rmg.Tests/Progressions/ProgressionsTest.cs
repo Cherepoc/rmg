@@ -139,7 +139,7 @@ public sealed class ProgressionsTest
     [Arguments(6.0, 0.0)]
     public async Task Strictness_FallsWithTheAnchor(double anchor, double expected)
     {
-        var unconventionality = new HarmonicUnconventionality(anchor, 1, 1, 1);
+        var unconventionality = new HarmonicUnconventionality(anchor, 0.5);
 
         await Assert.That(unconventionality.ProgressionStrictness).IsEqualTo(expected).Within(1e-9);
     }

@@ -69,7 +69,7 @@ public static class SongGenerator
 
         // the song's chords gather around its unconventionality, and a section's around its own shift of it
         var harmonyContext = Stream(SongStream.Harmony);
-        var unconventionality = HarmonicUnconventionality.Generate(harmonyContext);
+        var unconventionality = HarmonicUnconventionality.Generate(harmonyContext, songUnconventionality[Facet.Chords]);
         var scale = Scales.Pick(harmonyContext);
         StateTrace.Record(TracePoints.SongHarmony, SongTracks.ChordsTrack, 0, 0, StateMap.Default, 0, $"{unconventionality.Anchor:F2} {scale.Name}", (unconventionality, scale));
         var songStateMap = CreateSongStateMap(Stream(SongStream.SongState), unconventionality, rhythmicUnconventionality);

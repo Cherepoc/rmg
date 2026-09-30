@@ -96,6 +96,59 @@ internal static class ChordShapes
 
     private static readonly Func<IGenerationContext, int> CadenceShapeIndexGenerator = Generators.WeightedIndex(CadenceShapes);
 
+    /// <summary>
+    ///     How likely a chord of each level is, by the chords' unconventionality: a plain song plays triads and the colours
+    ///     of level 1, a ninth or a six-nine now and then; a wild one no triads or level 1, the stranger the likelier; the
+    ///     tuned weights the corpus's chords as its anchor drew them.
+    /// </summary>
+    public static ImmutableArray<(int Level, ByConvention Weight)> Levels { get; } =
+    [
+        (0, new ByConvention(1, 0.35, 0)),
+        (1, new ByConvention(0.6, 0.35, 0)),
+        (2, new ByConvention(0.1, 0.13, 0.15)),
+        (3, new ByConvention(0, 0.10, 0.4)),
+        (4, new ByConvention(0, 0.055, 0.8)),
+        (5, new ByConvention(0, 0.011, 1))
+    ];
+
+    /// <summary>
+    ///     How likely a home chord of each level is, which stays plain for the release but in the wildest songs: a triad
+    ///     or a colour of level 1, and at the wild end the strangest levels.
+    /// </summary>
+    public static ImmutableArray<(int Level, ByConvention Weight)> HomeLevels { get; } =
+    [
+        (0, new ByConvention(1, 0.37, 0)),
+        (1, new ByConvention(0.4, 0.63, 0)),
+        (3, new ByConvention(0, 0, 0.3)),
+        (4, new ByConvention(0, 0, 0.6)),
+        (5, new ByConvention(0, 0, 1))
+    ];
+
+    /// <summary>
+    ///     How likely a cadence is to play a shape made for it (none for its level), which pulls towards home, or one of the
+    ///     strangest levels, which keeps a strange song's strangeness there; the tuned weights the corpus's cadences.
+    /// </summary>
+    public static ImmutableArray<(int? Level, ByConvention Weight)> CadenceLevels { get; } =
+    [
+        (null, new ByConvention(1, 0.86, 0)),
+        (3, new ByConvention(0, 0.095, 0.3)),
+        (4, new ByConvention(0, 0.034, 0.6)),
+        (5, new ByConvention(0, 0.015, 1))
+    ];
+
+    /// <summary>A shape of a level drawn from those given at the chords' unconventionality.</summary>
+    public static ChordShape Pick(IGenerationContext context, ImmutableArray<(int Level, ByConvention Weight)> levels, double unconventionality)
+    {
+        return Pick(context, context.Pick(ByConvention.Weigh(levels.Select(x => (x.Level, x.Weight)), unconventionality)));
+    }
+
+    /// <summary>A cadence's shape at the chords' unconventionality: one made for it, or one of a strange level.</summary>
+    public static ChordShape PickCadence(IGenerationContext context, double unconventionality)
+    {
+        var level = context.Pick(ByConvention.Weigh(CadenceLevels.Select(x => (x.Level, x.Weight)), unconventionality));
+        return level is { } strange ? Pick(context, strange) : PickCadence(context);
+    }
+
     /// <summary>A shape of the unconventionality, the heavier ones being more likely.</summary>
     public static ChordShape Pick(IGenerationContext context, int unconventionality)
     {
@@ -106,7 +159,7 @@ internal static class ChordShapes
     }
 
     /// <summary>A shape that ends a phrase with pull towards home, the heavier ones being more likely.</summary>
-    public static ChordShape PickCadence(IGenerationContext context)
+    private static ChordShape PickCadence(IGenerationContext context)
     {
         return CadenceShapes[CadenceShapeIndexGenerator(context)].Value;
     }
