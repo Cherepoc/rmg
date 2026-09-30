@@ -1,4 +1,5 @@
 using Rmg.WebApi.Analytics;
+using Rmg.WebApi.Songs;
 
 namespace Rmg.Tests.WebApi;
 
@@ -20,10 +21,30 @@ public sealed class EventStoreTest : IDisposable
     }
 
     private bool Write(string name, string visitor = "someone", DateTimeOffset? at = null,
-        long? ms = null, double? seconds = null, long? seed = null, string? detail = null, string? version = null)
+        long? ms = null, double? seconds = null, long? seed = null, string? detail = null, string? version = null, SongSettings? settings = null)
     {
         var when = at ?? Now;
-        return _store.Write(new StoredEvent(when, EventStore.Day(when), visitor, name, ms, null, seconds, seed, detail, version));
+        return _store.Write(new StoredEvent(when, EventStore.Day(when), visitor, name, ms, null, seconds, seed, detail, version, settings));
+    }
+
+    [Test]
+    public async Task ASongsSettings_AreKept_WithItsUnconventionalityAndWhetherItWasGiven()
+    {
+        var settings = SongSettingsTest.Mixed;
+        Write(EventNames.Rated, seed: 5, detail: "none>up", version: "0.5.000", settings: settings);
+        Write(EventNames.Rated, seed: 6, detail: "none>up", version: "0.5.000");
+
+        using var connection = _store.OpenForReading();
+        using var reading = connection.CreateCommand();
+        reading.CommandText = "SELECT settings, unconventionality, given FROM events ORDER BY seed";
+        using var rows = reading.ExecuteReader();
+
+        await Assert.That(rows.Read()).IsTrue();
+        await Assert.That(rows.GetString(0)).IsEqualTo(settings.Format());
+        await Assert.That(rows.GetInt32(1)).IsEqualTo(settings.Unconventionality);
+        await Assert.That(rows.GetBoolean(2)).IsEqualTo(settings.IsGiven);
+        await Assert.That(rows.Read()).IsTrue();
+        await Assert.That(rows.IsDBNull(0) && rows.IsDBNull(1) && rows.IsDBNull(2)).IsTrue();
     }
 
     [Test]
@@ -188,8 +209,8 @@ public sealed class EventStoreTest : IDisposable
         try
         {
             var store = EventStore.Create(directory, 7);
-            store.Write(new StoredEvent(Now.AddDays(-8), EventStore.Day(Now.AddDays(-8)), "old", EventNames.PageOpen, null, null, null, null, null, null));
-            store.Write(new StoredEvent(Now.AddDays(-6), EventStore.Day(Now.AddDays(-6)), "recent", EventNames.PageOpen, null, null, null, null, null, null));
+            store.Write(new StoredEvent(Now.AddDays(-8), EventStore.Day(Now.AddDays(-8)), "old", EventNames.PageOpen, null, null, null, null, null, null, null));
+            store.Write(new StoredEvent(Now.AddDays(-6), EventStore.Day(Now.AddDays(-6)), "recent", EventNames.PageOpen, null, null, null, null, null, null, null));
 
             await Assert.That(store.RetentionDays).IsEqualTo(7);
             await Assert.That(store.Prune(Now)).IsEqualTo(1);
@@ -275,7 +296,7 @@ public sealed class EventStoreTest : IDisposable
 
             Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
             var store = EventStore.Create(directory);
-            store.Write(new StoredEvent(Now, EventStore.Day(Now), "new", EventNames.Played, null, null, null, 1, null, "0.5.000"));
+            store.Write(new StoredEvent(Now, EventStore.Day(Now), "new", EventNames.Played, null, null, null, 1, null, "0.5.000", null));
 
             var summary = store.Summarise(Now, 30);
             await Assert.That(summary.Events).IsEqualTo(2);

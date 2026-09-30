@@ -1,3 +1,5 @@
+using Rmg.WebApi.Songs;
+
 namespace Rmg.WebApi.Analytics;
 
 /// <summary>
@@ -47,6 +49,10 @@ public static class EventNames
 ///     The songs' version the song was made by (<c>X-Song-Version</c>), which a seed needs to name a song: the same
 ///     seed is another song in another version.
 /// </param>
+/// <param name="Settings">
+///     What the song was heard with (<see cref="SongSettings" />): its unconventionality, which a given one names the
+///     song by, and its mix. Anything that does not read as settings is dropped, and the event kept.
+/// </param>
 public sealed record EventRequest(
     string? Name,
     long? Ms = null,
@@ -54,7 +60,8 @@ public sealed record EventRequest(
     double? Seconds = null,
     long? Seed = null,
     string? Detail = null,
-    string? Version = null
+    string? Version = null,
+    string? Settings = null
 );
 
 /// <summary>An event as it is kept: the request, with the day and the visitor it came from.</summary>
@@ -68,5 +75,6 @@ public sealed record StoredEvent(
     double? Seconds,
     long? Seed,
     string? Detail,
-    string? Version
+    string? Version,
+    SongSettings? Settings
 );

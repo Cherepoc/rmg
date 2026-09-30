@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Rmg.Core.Versions;
+using Rmg.WebApi.Songs;
 
 namespace Rmg.WebApi.Analytics;
 
@@ -40,7 +41,8 @@ public static class AnalyticsEndpoints
                 request.Seconds is >= 0 and <= 86_400 ? Math.Round(request.Seconds.Value, 1) : null,
                 Sane(request.Seed, int.MinValue, int.MaxValue),
                 Shorten(request.Detail),
-                SongsVersion.IsNumber(request.Version) ? request.Version : null
+                SongsVersion.IsNumber(request.Version) ? request.Version : null,
+                SongSettings.Parse(request.Settings)
             ));
 
             // always the same answer, whether it was kept or not: a caller has no business knowing

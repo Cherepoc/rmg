@@ -87,13 +87,18 @@ public sealed class EventStore
 
         command.ExecuteNonQuery();
 
-        // the songs' version came later than the table, so a file from before it has the column added
-        using var columns = connection.CreateCommand();
-        columns.CommandText = "SELECT COUNT(*) FROM pragma_table_info('events') WHERE name = 'version'";
-        if (Convert.ToInt64(columns.ExecuteScalar()) == 0)
+        // the columns that came later than the table, which a file from before them has added: the songs' version, and
+        // what the song was heard with, as the page wrote it and, to be grouped by, its unconventionality and whether
+        // that was given
+        foreach (var (column, type) in new[] { ("version", "TEXT"), ("settings", "TEXT"), ("unconventionality", "INTEGER"), ("given", "INTEGER") })
         {
+            using var columns = connection.CreateCommand();
+            columns.CommandText = "SELECT COUNT(*) FROM pragma_table_info('events') WHERE name = $column";
+            columns.Parameters.AddWithValue("$column", column);
+            if (Convert.ToInt64(columns.ExecuteScalar()) != 0) continue;
+
             using var adding = connection.CreateCommand();
-            adding.CommandText = "ALTER TABLE events ADD COLUMN version TEXT NULL";
+            adding.CommandText = $"ALTER TABLE events ADD COLUMN {column} {type} NULL";
             adding.ExecuteNonQuery();
         }
 
@@ -123,8 +128,8 @@ public sealed class EventStore
 
             using var writing = connection.CreateCommand();
             writing.CommandText = """
-                INSERT INTO events (at, day, visitor, name, ms, bytes, seconds, seed, detail, version)
-                VALUES ($at, $day, $visitor, $name, $ms, $bytes, $seconds, $seed, $detail, $version)
+                INSERT INTO events (at, day, visitor, name, ms, bytes, seconds, seed, detail, version, settings, unconventionality, given)
+                VALUES ($at, $day, $visitor, $name, $ms, $bytes, $seconds, $seed, $detail, $version, $settings, $unconventionality, $given)
                 """;
 
             writing.Parameters.AddWithValue("$at", stored.At.UtcDateTime.ToString("O"));
@@ -137,6 +142,9 @@ public sealed class EventStore
             writing.Parameters.AddWithValue("$seed", (object?)stored.Seed ?? DBNull.Value);
             writing.Parameters.AddWithValue("$detail", (object?)stored.Detail ?? DBNull.Value);
             writing.Parameters.AddWithValue("$version", (object?)stored.Version ?? DBNull.Value);
+            writing.Parameters.AddWithValue("$settings", (object?)stored.Settings?.Format() ?? DBNull.Value);
+            writing.Parameters.AddWithValue("$unconventionality", (object?)stored.Settings?.Unconventionality ?? DBNull.Value);
+            writing.Parameters.AddWithValue("$given", (object?)stored.Settings?.IsGiven ?? DBNull.Value);
 
             writing.ExecuteNonQuery();
             return true;
