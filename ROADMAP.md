@@ -19,10 +19,10 @@ measured before and after by a report test, by the measure its entry names.
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
 **Later** (P2), roughly in this order: pitched fills (see *Fills*), once a fill can draw a line's notes; the ratings report (see *Listening data*), once the dashboard shows songs
-rated enough; the melody's contour (see *Melody*); styles (see *Styles*); the song's memory (see
+rated enough; styles (see *Styles*); the song's memory (see
 *Architecture*), once the arrangement doubles the tracks.
 
-**When the need shows** (P3): occasional chords (see *Instruments*); harmonised doubling and articulations, after styles; solos; long cycles, then
+**When the need shows** (P3): the melody's contour (see *Melody*); occasional chords (see *Instruments*); harmonised doubling and articulations, after styles; solos; long cycles, then
 overlapping polyrhythms, needed someday; timing by role; intros of their own material; scales of other sizes; the
 fills' loudness and sounds by convention; note keys.
 
@@ -339,10 +339,13 @@ the rest as they were.
 
 ## Melody
 
-- **The contour shapes the melody weakly** (P2): a bar's mean pitch follows the register it aims at about 0.2
-  (`MelodyContourTest`). The echoes mask it (0.60 without them), as they replay a note's step whatever the aim: an
-  echo run's octave or transposition chosen towards the aim would let a repeated bar follow the arch as a sequence.
-  The wave (`MelodyLayers.Periods`) and the lean towards the aim (`MelodyLayers.AimOdds`) wait for this, then retune.
+- **The contour shapes the melody weakly** (P3, tried in September 2026): a bar's mean pitch follows the register it
+  aims at about 0.2 (`MelodyContourTest`), as the echoes replay a note's step whatever the aim. Moving an echo run by
+  as many scale steps as its phrase now aims away from where it aimed when the note was heard, a figure repeated at
+  another place in the phrase as a sequence, was tried and dropped: the melody followed its aim 0.15 against 0.19, and
+  a recurring section kept its first appearance's notes 87% of the time against 94%, as the echoes' notes are heard
+  first anywhere in the song. The wave (`MelodyLayers.Periods`) and the lean towards the aim (`MelodyLayers.AimOdds`)
+  stay as they are; should the melody's shapes sound flat, the aim wants a way into the line other than the echoes.
 
 ## Architecture
 
