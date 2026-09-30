@@ -15,21 +15,12 @@ public sealed class SongGeneratorChordTrackTest
         // every shape has two notes or more, and snapping and fitting into the range never merges them
         for (var seed = 0; seed < 64; seed++)
         {
-            var song = TestCorpus.Get(seed).Song;
-            var chordTrackSong = new Song(
-                song.Duration,
-                song.Meter,
-                song.TrackDefinitions.Where(x => x.Key == ChordTrackNumber).ToImmutableSortedDictionary(),
-                song.TrackEventStateTimelineMap
-            );
-
-            // but a solo's line, which the chords may play
-            var solos = TestCorpus.Get(seed).Map.Sections.Where(TestCorpus.Get(seed).IsSolo).ToArray();
-            var notes = Render.RenderSong(chordTrackSong).Tracks.Single().NoteTimeline;
-            var smallestChord = notes
-                .Where(x => !solos.Any(span => x.Position >= span.Start - 1 && x.Position < span.End + 1))
-                .GroupBy(x => x.Position)
-                .Min(x => x.Select(note => note.Value.Offset).Distinct().Count());
+            // as the song realizes them, but a solo's line, which the chords may play, and broken chords, one note at a time
+            var smallestChord = TestCorpus.Get(seed).Song.Notes![ChordTrackNumber]
+                .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0 && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0)
+                .Select(x => x.Value.Pitches.Distinct().Count())
+                .DefaultIfEmpty(2)
+                .Min();
 
             await Assert.That(smallestChord)
                 .IsGreaterThanOrEqualTo(2)

@@ -40,6 +40,9 @@ internal static class TracePoints
     /// </summary>
     public const string Solo = "Solo";
 
+    /// <summary>How a section's chords are broken (an <see cref="Composition.ArpeggioPattern" />).</summary>
+    public const string Arpeggio = "Arpeggio";
+
     /// <summary>How many times a section plays its 4-bar pattern (an <c>int</c>).</summary>
     public const string SectionLength = "Section length";
 

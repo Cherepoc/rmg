@@ -172,9 +172,12 @@ internal static class Realizer
         var items = eventStateTimelineMap.WithDurations().ToArray();
         var notes = new TimelineItem<RealizedNote>[items.Length];
         crossings = [];
+        // a note's place since its chord came in, which an arpeggio plays its chord's notes in turn by
+        var place = 0;
         for (var i = 0; i < items.Length; i++)
         {
-            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, GetRange(track), meter.BarDuration, changes, out var unclipped);
+            place = i > 0 && UntilChange(changes, items[i - 1].Position) > items[i].Position - items[i - 1].Position + 1e-9 ? place + 1 : 0;
+            notes[i] = RealizeNote(items[i], voiceLeader, track.Role, GetRange(track), meter.BarDuration, changes, place, out var unclipped);
             var change = items[i].Position + UntilChange(changes, items[i].Position);
             var next = i + 1 < items.Length ? items[i + 1].Position : double.PositiveInfinity;
             if (items[i].Position + unclipped > change + 1e-9 && next > change + 1e-9)
@@ -230,6 +233,7 @@ internal static class Realizer
         (int Low, int High) range,
         double bar,
         ImmutableArray<double> changes,
+        int place,
         out double unclipped
     )
     {
@@ -295,6 +299,11 @@ internal static class Realizer
             ),
             _ => throw new ArgumentOutOfRangeException(nameof(role), role, "A pitched track plays the chords, the melody, the bass or a pad.")
         };
+
+        // a broken chord plays one of its notes, by its pattern and its place since the chord came in
+        var arpeggio = (ArpeggioPattern)stateMap.GetStateValue(CompositionStateKinds.Arpeggio);
+        if (role == TrackRole.Chords && !isLine && arpeggio != ArpeggioPattern.None)
+            notes = [Arpeggios.Pick(arpeggio, notes, place, position)];
 
         return new RealizedNote(notes, noteVelocity, duration, stateMap).ToTimelineItem(position);
     }

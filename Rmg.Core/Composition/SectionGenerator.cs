@@ -475,6 +475,13 @@ internal sealed class SectionGenerator
                 StateTrace.Record(TracePoints.Pentatonic, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{isPentatonic}", isPentatonic);
                 sectionTrackLayer.Add(CompositionStateKinds.LinePentatonic, isPentatonic ? 1 : 0);
             }
+            // the chords broken now and then, from a sequence of their own, by the section's chords facet
+            if (_tracks.Definitions[trackNumber].Role == TrackRole.Chords)
+            {
+                var arpeggio = Arpeggios.Draw(Stream(sectionId, SectionStream.Arpeggio), sectionRhythm.Facets[Facet.Chords]);
+                StateTrace.Record(TracePoints.Arpeggio, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{arpeggio}", arpeggio);
+                sectionTrackLayer.Add(CompositionStateKinds.Arpeggio, (int)arpeggio);
+            }
             // fuller and busier the more energy the section has, as its drums are
             var trackStateMap = CreateSectionTrackLayer(context, trackNumber, sectionRhythm, sectionRhythm.Energy, null)
                 .MergeWith(sectionStateMap)
@@ -854,5 +861,6 @@ internal enum SectionStream
     CadenceRaise = 23,
     Riff = 24,
     RiffLeading = 25,
-    RiffImprovisation = 26
+    RiffImprovisation = 26,
+    Arpeggio = 27
 }
