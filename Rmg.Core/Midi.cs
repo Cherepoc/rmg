@@ -342,7 +342,7 @@ public static class Midi
 
         return song.WithTracks(song.Tracks.Select((track, index) =>
             instruments.TryGetValue(channels[index], out var instrument)
-                ? new RenderedTrack(track.IsPercussionInstrument, instrument, track.NoteTimeline, track.Pan, track.Volume)
+                ? new RenderedTrack(track.IsPercussionInstrument, track.Role, instrument, track.NoteTimeline, track.Pan, track.Volume)
                 : track));
     }
 
@@ -361,7 +361,7 @@ public static class Midi
 
         return song.WithTracks(song.Tracks.Select((track, index) =>
             volumes.TryGetValue(channels[index], out var volume)
-                ? new RenderedTrack(track.IsPercussionInstrument, track.PitchInstrumentCode, track.NoteTimeline, track.Pan, volume)
+                ? new RenderedTrack(track.IsPercussionInstrument, track.Role, track.PitchInstrumentCode, track.NoteTimeline, track.Pan, volume)
                 : track));
     }
 

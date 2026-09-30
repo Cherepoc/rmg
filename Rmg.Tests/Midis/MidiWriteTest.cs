@@ -1,3 +1,4 @@
+using Rmg.Core.Songs;
 using Rmg.Core.Composition;
 using System.Collections.Immutable;
 using Rmg.Core;
@@ -16,7 +17,7 @@ public sealed class MidiWriteTest
             new RenderedNote(64, 1, 1).ToTimelineItem(0),
         ];
         var noteTimeline = EventTimeline.Create(1, renderedNotes);
-        var track = new RenderedTrack(false, 1, noteTimeline, 0);
+        var track = new RenderedTrack(false, TrackRole.Chords, 1, noteTimeline, 0);
         
         ImmutableArray<RenderedTrack> tracks = [
             track
@@ -48,7 +49,7 @@ public sealed class MidiWriteTest
 
     private static byte[] WriteOneBeatSong(params TimelineItem<RenderedNote>[] renderedNotes)
     {
-        var track = new RenderedTrack(false, 1, EventTimeline.Create(1, renderedNotes), 0);
+        var track = new RenderedTrack(false, TrackRole.Chords, 1, EventTimeline.Create(1, renderedNotes), 0);
         var renderedSong = new RenderedSong(1, Meter.FourFour, StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), [track]);
 
         var memoryStream = new MemoryStream();
@@ -60,7 +61,7 @@ public sealed class MidiWriteTest
     public async Task AFade_PlaysAsTheChannelsExpression()
     {
         var fade = StateTimeline.Create(1, StateKinds.Fade, [0.75.ToTimelineItem(0), 0.5.ToTimelineItem(0.5)]);
-        var track = new RenderedTrack(false, 1, EventTimeline.Create(1, [new RenderedNote(64, 1, 1).ToTimelineItem(0)]), 0);
+        var track = new RenderedTrack(false, TrackRole.Chords, 1, EventTimeline.Create(1, [new RenderedNote(64, 1, 1).ToTimelineItem(0)]), 0);
         var memoryStream = new MemoryStream();
         new RenderedSong(1, Meter.FourFour, StateKinds.Tempo.CreateDefaultTimeline(0), fade, [track]).Write(memoryStream, null);
 
@@ -122,7 +123,7 @@ public sealed class MidiWriteTest
     [Arguments(new[] { 12, 8 }, 5, 2, 24)]
     public async Task TheTimeSignature_IsTheMeters_ItsClickOnThePulse(int[] groups, int numerator, int denominatorPower, int clocks)
     {
-        var track = new RenderedTrack(false, 1, EventTimeline.Create(1, [new RenderedNote(64, 1, 1).ToTimelineItem(0)]), 0);
+        var track = new RenderedTrack(false, TrackRole.Chords, 1, EventTimeline.Create(1, [new RenderedNote(64, 1, 1).ToTimelineItem(0)]), 0);
         var memoryStream = new MemoryStream();
         new RenderedSong(1, new Meter([..groups]), StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), [track]).Write(memoryStream, null);
 

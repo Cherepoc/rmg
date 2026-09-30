@@ -19,7 +19,14 @@ public static class Render
     ///     without them; a chord's pitches as notes together, the drums on the percussion channel, the velocities
     ///     on a fixed scale, and every note swung as the song swings.
     /// </summary>
-    public static RenderedSong RenderSong(Song song)
+    public static RenderedSong RenderSong(Song song) => RenderSong(song, SongMix.None);
+
+    /// <summary>
+    ///     The song as MIDI plays it, heard as the mix asks (<see cref="SongMix" />): a drum group quieter or left out,
+    ///     every part's instrument, volume and pan, and the parts left out not written. A track with no notes, such as a
+    ///     part the song leaves out, is not written either.
+    /// </summary>
+    public static RenderedSong RenderSong(Song song, SongMix mix)
     {
         var notes = song.Notes ?? Realizer.Realize(song.TrackDefinitions, song.TrackEventStateTimelineMap, song.Meter);
         var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap.OfScope(StateScope.Render);
@@ -28,9 +35,16 @@ public static class Render
         var percussionTrackNotes = new List<IEnumerable<TimelineItem<RenderedNote>>>();
         foreach (var (trackNumber, trackNotes) in notes)
         {
+            // a drum plays as its group is asked to
+            var group = song.TrackDefinitions[trackNumber] is PercussionInstrumentTrack && !mix.DrumGroups.IsEmpty
+                ? mix.DrumGroups.GetValueOrDefault(DrumGroups.GroupOf(DrumGroups.GetDrum(trackNumber)).Name)
+                : null;
+            if (group is { IsOn: false } || trackNotes.Count == 0)
+                continue;
+
             var renderedNotes = trackNotes.SelectMany(note =>
                 {
-                    var velocity = GetMidiVelocity(note.Value);
+                    var velocity = GetMidiVelocity(note.Value) * (group?.Volume ?? 1);
                     // swung, its end as its start, so that it still reaches the note it reached
                     var position = swing.Apply(note.Position);
                     var duration = swing.Apply(note.Position + note.Value.Duration) - position;
@@ -39,7 +53,7 @@ public static class Render
             );
             if (song.TrackDefinitions[trackNumber] is PitchInstrumentTrack pitchInstrumentTrack)
                 renderedTracks.Add(
-                    new RenderedTrack(false, pitchInstrumentTrack.InstrumentCode, EventTimeline.Create(trackNotes.Duration, renderedNotes), pitchInstrumentTrack.Pan)
+                    new RenderedTrack(false, pitchInstrumentTrack.Role, pitchInstrumentTrack.InstrumentCode, EventTimeline.Create(trackNotes.Duration, renderedNotes), pitchInstrumentTrack.Pan)
                 );
             else
                 percussionTrackNotes.Add(renderedNotes);
@@ -49,11 +63,23 @@ public static class Render
         if (percussionEventTimeline.Count > 0)
         {
             // the drums share their channel, where the soundfont places each drum as a kit stands
-            var percussionTrack = new RenderedTrack(true, 0, percussionEventTimeline, 0);
+            var percussionTrack = new RenderedTrack(true, TrackRole.Drum, 0, percussionEventTimeline, 0);
             renderedTracks.Add(percussionTrack);
         }
 
-        return new RenderedSong(song.Duration, song.Meter, common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..renderedTracks]);
+        // every part as it is asked to sound, over the song's volume, and those left out not written
+        var mixed = renderedTracks
+            .Select(track => (Track: track, Mix: mix.Parts.GetValueOrDefault(track.Role)))
+            .Where(x => x.Mix is not { IsOn: false })
+            .Select(x => new RenderedTrack(
+                x.Track.IsPercussionInstrument,
+                x.Track.Role,
+                x.Mix?.Instrument ?? x.Track.PitchInstrumentCode,
+                x.Track.NoteTimeline,
+                x.Mix?.Pan ?? x.Track.Pan,
+                mix.Volume * (x.Mix?.Volume ?? 1)
+            ));
+        return new RenderedSong(song.Duration, song.Meter, common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..mixed]);
     }
 
     /// <summary>How the song swings, which moves where its every note plays.</summary>

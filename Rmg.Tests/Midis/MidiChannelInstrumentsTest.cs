@@ -1,3 +1,4 @@
+using Rmg.Core.Songs;
 using Rmg.Core.Composition;
 using System.Collections.Immutable;
 using Rmg.Core;
@@ -14,7 +15,7 @@ public sealed class MidiChannelInstrumentsTest
         [
             new RenderedNote(64, 1, 1).ToTimelineItem(0),
         ];
-        return new RenderedTrack(isPercussionInstrument, instrument, EventTimeline.Create(1, renderedNotes), 0);
+        return new RenderedTrack(isPercussionInstrument, isPercussionInstrument ? TrackRole.Drum : TrackRole.Chords, instrument, EventTimeline.Create(1, renderedNotes), 0);
     }
 
     private static RenderedSong Song(params RenderedTrack[] tracks)

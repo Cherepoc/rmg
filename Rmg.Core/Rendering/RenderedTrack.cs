@@ -1,4 +1,5 @@
 using Rmg.Core.Events;
+using Rmg.Core.Songs;
 
 namespace Rmg.Core.Rendering;
 
@@ -6,6 +7,7 @@ public sealed class RenderedTrack
 {
     public RenderedTrack(
         bool isPercussionInstrument,
+        TrackRole role,
         int pitchInstrumentCode,
         EventTimeline<RenderedNote> noteTimeline,
         double pan,
@@ -18,6 +20,7 @@ public sealed class RenderedTrack
         ArgumentOutOfRangeException.ThrowIfGreaterThan(volume, 1);
 
         IsPercussionInstrument = isPercussionInstrument;
+        Role = role;
         PitchInstrumentCode = pitchInstrumentCode;
         NoteTimeline = noteTimeline;
         Pan = pan;
@@ -25,6 +28,9 @@ public sealed class RenderedTrack
     }
 
     public bool IsPercussionInstrument { get; }
+
+    /// <summary>The part the track plays, the drums' for the percussion track.</summary>
+    public TrackRole Role { get; }
     public int PitchInstrumentCode { get; }
     public EventTimeline<RenderedNote> NoteTimeline { get; }
 
