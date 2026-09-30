@@ -100,9 +100,14 @@ export function applyReport(settings, report) {
         own[part] = { instrument: reported.instrument, pan: reported.pan };
     }
 
+    // a part's twin, the riff's, which plays on a channel of its own as its part is mixed, on the other side
+    const twin = report.parts.riffTwin?.channel;
+    const twins = { riff: twin == null ? null : twin - 1 };
+
     return {
         settings: next,
         channels,
+        twins,
         plays,
         own,
         drumSetup: report.drumSetup.value,

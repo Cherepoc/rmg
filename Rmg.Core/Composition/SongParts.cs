@@ -15,7 +15,7 @@ internal static class SongParts
 {
     /// <summary>Every part a song can have.</summary>
     public static ImmutableArray<TrackRole> All { get; } =
-        [TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Drum, TrackRole.Riff, TrackRole.Rhythm];
+        [TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Drum, TrackRole.Riff, TrackRole.Rhythm, TrackRole.RiffTwin];
 
     /// <summary>The chance a song has the part, when not given; 1 for a part every song has.</summary>
     public static double Chance(TrackRole part) => part switch
@@ -25,6 +25,8 @@ internal static class SongParts
         TrackRole.Drum => 0.95,
         TrackRole.Riff => 0.5,
         TrackRole.Rhythm => 0.4,
+        // of the songs with a riff
+        TrackRole.RiffTwin => 0.4,
         TrackRole.Melody or TrackRole.Chords or TrackRole.Bass => 1,
         _ => throw new ArgumentOutOfRangeException(nameof(part), part, "Not a part of the band.")
     };
@@ -42,6 +44,9 @@ internal static class SongParts
                 }
             )
             .ToImmutableHashSet();
+        // a twin plays only with its riff
+        if (absent.Contains(TrackRole.Riff))
+            absent = absent.Add(TrackRole.RiffTwin);
         if (absent.Count == All.Length)
             throw new ArgumentException("A song needs at least one part in it.", nameof(given));
 

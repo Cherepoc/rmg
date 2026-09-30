@@ -361,12 +361,11 @@ chords out to the other side; a new role takes a spread of its own.
   note, two or the chord, leaned by the beat's accent, the energy and the landings, the melody would play a double stop
   on an accent, a guitar a power chord where a section lands, the bass a chord now and then. Measured by: the notes
   sounding at once by role, on accents and off.
-- **Harmonised doubling** (P3, after styles and the arrangement): a line doubled a diatonic third or sixth above, as
-  twin guitars play a riff, on a track of its own panned against it: a line's notes are scale steps above the chord's
-  root (`LinePlacement`), so the double is two steps up. Per section, leaned by energy. An idiom of some styles: over
-  a nylon guitar and a harpsichord it would sound as chance. Plain doubling, the same part twice, waits for timing by
-  role (see *Groove*): two copies with the same notes and timing only play louder. Measured by: the sections doubled
-  by energy and style, and the double's notes off the chord on the beat.
+- **A twin riff** (built): in 40% of the songs with a riff, its twin plays the riff's line a third above or a sixth below
+  in every section, in the riff's instrument and state, the two all the way to either side (`TrackRole.RiffTwin`,
+  `LineDoubling`); it switches instruments as the riff does, and on the page the riff's mix drives both, the twin's pan
+  mirrored. Over 256 songs, 50 of the 129 with a riff have one. Left: other parts' twins, such as a harmonised melody
+  on a track of its own, and plain doubling, which waits for timing by role (see *Groove*).
 - **Articulations** (P3, after styles): a finger, pick or slap bass, a muted guitar or its harmonics are General MIDI
   programs of their own. An instrument's articulations as data, picked as a drum's stroke is (`DrumStrokes`: the
   song's, changed by a section and by a bar of a later letter, the lowest layer winning), a program change where it

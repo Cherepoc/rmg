@@ -20,7 +20,10 @@ public enum TrackRole
     Riff,
 
     /// <summary>A second part playing the chords, in a rhythm of its own, as a rhythm guitar comps beside the keys.</summary>
-    Rhythm
+    Rhythm,
+
+    /// <summary>The riff's twin, its line a third above or a sixth below, on the other side, as twin guitars play a riff.</summary>
+    RiffTwin
 }
 
 public static class TrackRoles

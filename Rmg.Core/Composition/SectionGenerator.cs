@@ -460,6 +460,19 @@ internal sealed class SectionGenerator
     {
         foreach (var trackNumber in _tracks.NonGroupedTrackNumbers)
         {
+            // a riff's twin has no notes of its own, but the riff's, moved, once the song is put together (LineDoubling), and
+            // draws nothing
+            if (_tracks.Definitions[trackNumber].Role == TrackRole.RiffTwin)
+            {
+                var empty = TrackEventStateTimelineMap.Create(
+                    meter.PatternDuration,
+                    [new KeyValuePair<int, EventStateTimelineMap<StateMap>>(trackNumber, EventTimeline.Create<StateMap>(meter.PatternDuration).ToEventStateTimelineMap(StateMap.Default))],
+                    StateTimelineMap.Create(meter.PatternDuration)
+                );
+                yield return (trackNumber, new GeneratedBars(empty, []), null);
+                continue;
+            }
+
             // a section's chords move more smoothly or more in blocks than the song's, and its melody more or less by step,
             // and is as busy as the section has it
             var sectionTrackLayer = new StateMapBuilder("Section track", perTrack: true)
@@ -496,6 +509,7 @@ internal sealed class SectionGenerator
                 yield return (trackNumber, GeneratePad(trackNumber, trackStateMap, barStateTimelineMap, harmonicRhythm, meter), null);
                 continue;
             }
+
 
             var trackStateMaps = new Dictionary<int, StateMap> { [trackNumber] = trackStateMap };
             // the melody answers its question: the answer's later bars draw their rhythm afresh now and then, and its notes

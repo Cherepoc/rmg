@@ -78,6 +78,10 @@ public static class SongGenerator
         // a facet's value as the rhythm's unconventionality, for a choice that leans by it
         RhythmicUnconventionality Of(Facet facet) => new(songUnconventionality[facet]);
         StateTrace.Record(TracePoints.SongRhythm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{rhythmicUnconventionality.Value:F2}", rhythmicUnconventionality);
+        // the parts the song leaves out, the pad, the counter-melody and the drums now and then, each from a sequence
+        // of its own, and any given in or out
+        var absent = SongParts.DrawAbsent(part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Parts), (int)part)), overrides.Parts);
+        StateTrace.Record(TracePoints.SongParts, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", absent.Order()), absent);
         var tracks = SongTracks.Create(
             Stream(SongStream.Tracks),
             Stream(SongStream.Panning),
@@ -85,15 +89,12 @@ public static class SongGenerator
             Stream(SongStream.CounterMelody),
             Stream(SongStream.Riff),
             Stream(SongStream.RhythmPart),
+            !absent.Contains(TrackRole.RiffTwin),
             rhythmicUnconventionality,
             Stream(SongStream.DrumStrokes),
             Stream(SongStream.DrumRoles),
             overrides.DrumSetup ?? DrumSetups.Pick(Stream(SongStream.DrumSetup), rhythmicUnconventionality.Value)
         );
-        // the parts the song leaves out, the pad, the counter-melody and the drums now and then, each from a sequence
-        // of its own, and any given in or out
-        var absent = SongParts.DrawAbsent(part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Parts), (int)part)), overrides.Parts);
-        StateTrace.Record(TracePoints.SongParts, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", absent.Order()), absent);
         StateTrace.Record(TracePoints.DrumSetup, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, tracks.DrumSetup.ToString(), tracks.DrumSetup);
 
         // the song's chords gather around its unconventionality, and a section's around its own shift of it
@@ -256,7 +257,8 @@ public static class SongGenerator
         // and a line doubled by another part in a section now and then, each pair and section from a sequence of its own
         songTrackNoteTimelineMap = LineDoubling.Apply(
             songTrackNoteTimelineMap,
-            tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
+            // the parts the song has, which a twin left out is not
+            tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).ToDictionary(x => x.Key, x => x.Value.Role),
             form.Map,
             (pair, section) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.LineDoubling), pair), section))
         );

@@ -266,7 +266,7 @@ internal static class Realizer
         // how long it would sound but for a change of chord, which a held note, as a phrase's or an ending's, is not cut by
         unclipped = heldDuration > 0 ? 0 : duration;
         // a solo's note is a line's, whatever part plays it
-        var isLine = role is TrackRole.Melody or TrackRole.Bass or TrackRole.CounterMelody or TrackRole.Riff || stateMap.GetStateValue(CompositionStateKinds.LineSolo) == 1;
+        var isLine = role is TrackRole.Melody or TrackRole.Bass or TrackRole.CounterMelody or TrackRole.Riff or TrackRole.RiffTwin || stateMap.GetStateValue(CompositionStateKinds.LineSolo) == 1;
         if (heldDuration > 0)
             duration = heldDuration;
         else if (isLine && role != TrackRole.Bass)

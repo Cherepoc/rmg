@@ -18,6 +18,7 @@ internal sealed class SongTracks
     public const int CounterMelodyTrack = 8;
     public const int RiffTrack = 9;
     public const int RhythmTrack = 10;
+    public const int RiffTwinTrack = 11;
 
     /// <summary>How much fuller the rhythm part's rhythm is than a track's, as a comping part strums more often than the chords.</summary>
     public const double RhythmPartFullness = 0.2;
@@ -64,6 +65,7 @@ internal sealed class SongTracks
     /// <param name="counterContext">The sequence the counter-melody's instrument and state are drawn from.</param>
     /// <param name="riffContext">The sequence the riff's instrument and state are drawn from.</param>
     /// <param name="rhythmContext">The sequence the rhythm part's instrument, register and state are drawn from.</param>
+    /// <param name="hasTwin">Whether the song's riff has a twin, which the two play apart, on either side.</param>
     public static SongTracks Create(
         IGenerationContext context,
         IGenerationContext panningContext,
@@ -71,6 +73,7 @@ internal sealed class SongTracks
         IGenerationContext counterContext,
         IGenerationContext riffContext,
         IGenerationContext rhythmContext,
+        bool hasTwin,
         RhythmicUnconventionality rhythmicUnconventionality,
         IGenerationContext strokeContext,
         IGenerationContext roleContext,
@@ -98,6 +101,10 @@ internal sealed class SongTracks
                 [RhythmTrack] = TrackRole.Rhythm
             }
         );
+        // a riff and its twin all the way to either side, the riff on the side it drew; the twin draws no pan, so that a
+        // song without it pans as it would
+        var riffSide = Math.Sign(pans[RiffTrack]) is 0 ? 1 : Math.Sign(pans[RiffTrack]);
+        pans = hasTwin ? pans.SetItem(RiffTrack, riffSide).Add(RiffTwinTrack, -riffSide) : pans.Add(RiffTwinTrack, -pans[RiffTrack]);
         StateTrace.Record(TracePoints.Panning, ChordsTrack, 0, 0, StateMap.Default, 0, string.Join(", ", pans.Select(x => $"{x.Key} {x.Value:F2}")), pans);
 
         // the pad holds chords in a sound of its own, apart from the chords', which it plays under
@@ -109,8 +116,22 @@ internal sealed class SongTracks
         // and the rhythm part comps in a sound of its own, apart from the chords' and the riff's, in a register of its own
         var rhythmInstrument = InstrumentRoles.Rhythm.Pick(rhythmContext, chordsInstrument.Program, riffInstrument.Program);
 
+        // the riff's state, which its twin shares, so that the two play its notes alike
+        var riffLayer = LayerStates.CreateTrackLayer(
+            riffContext,
+            "Track",
+            new StateMapBuilder("Track role", perTrack: true)
+                .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Riff))
+                .Add(CompositionStateKinds.LineStepwiseness, RiffLayers.Stepwiseness)
+                .Add(CompositionStateKinds.Rhythm.Fullness, RiffLayers.Fullness)
+                .ToStateMap(riffContext),
+            _ => VelocityLayers.GetLevel(TrackRole.Riff),
+            trackRhythmLayer
+        );
         var definitions = new Dictionary<int, IInstrumentTrack>
         {
+            // the twin plays the riff's instrument in the riff's state, its notes the riff's, moved (LineDoubling)
+            [RiffTwinTrack] = new PitchInstrumentTrack(riffLayer, riffInstrument.Program, -1, 0, TrackRole.RiffTwin, pans[RiffTwinTrack]),
             [RhythmTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
                     rhythmContext,
@@ -131,17 +152,7 @@ internal sealed class SongTracks
                 pans[RhythmTrack]
             ),
             [RiffTrack] = new PitchInstrumentTrack(
-                LayerStates.CreateTrackLayer(
-                    riffContext,
-                    "Track",
-                    new StateMapBuilder("Track role", perTrack: true)
-                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Riff))
-                        .Add(CompositionStateKinds.LineStepwiseness, RiffLayers.Stepwiseness)
-                        .Add(CompositionStateKinds.Rhythm.Fullness, RiffLayers.Fullness)
-                        .ToStateMap(riffContext),
-                    _ => VelocityLayers.GetLevel(TrackRole.Riff),
-                    trackRhythmLayer
-                ),
+                riffLayer,
                 riffInstrument.Program,
                 -1,
                 0,

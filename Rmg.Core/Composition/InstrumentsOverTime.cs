@@ -71,7 +71,7 @@ internal static class InstrumentsOverTime
         TrackRole.Bass => InstrumentRoles.Bass,
         TrackRole.Pad => InstrumentRoles.Pad,
         TrackRole.CounterMelody => InstrumentRoles.CounterMelody,
-        TrackRole.Riff => InstrumentRoles.Riff,
+        TrackRole.Riff or TrackRole.RiffTwin => InstrumentRoles.Riff,
         TrackRole.Rhythm => InstrumentRoles.Rhythm,
         _ => null
     };
@@ -91,6 +91,8 @@ internal static class InstrumentsOverTime
     )
     {
         var result = notes.ToBuilder();
+        // a twin plays as its riff does, drawing from the riff's sequences
+        var riffTrack = definitions.FirstOrDefault(x => x.Value is PitchInstrumentTrack { Role: TrackRole.Riff }).Key;
         foreach (var (track, definition) in definitions.Where(x => x.Value is PitchInstrumentTrack && notes.ContainsKey(x.Key)))
         {
             var pitched = (PitchInstrumentTrack)definition;
@@ -98,7 +100,7 @@ internal static class InstrumentsOverTime
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
                 // a section plays as it did the time before, so that a chorus comes back in the instrument it switched to
-                var context = streams(span.SectionId, track);
+                var context = streams(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track);
                 var switches = context.TestProbability(SwitchChance.At(sound[index]));
                 var role = RoleOf(pitched.Role);
                 var switched = role is null ? pitched.InstrumentCode : role.Pick(context, pitched.InstrumentCode).Program;

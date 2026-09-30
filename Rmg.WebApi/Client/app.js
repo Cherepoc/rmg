@@ -102,6 +102,8 @@ let songSeed = null;
 // what the song on the page is made of, as the server said: the channel every part plays on in the file the player
 // has, null where it is not written, whether each part is in the song, its drum setup and the drum groups it plays
 let channels = {};
+// the channel of a part's twin, the riff's, which follows the part's mix on the other side
+let twins = {};
 let partsInSong = {};
 let drumSetup = null;
 let drumGroupsPresent = [];
@@ -808,7 +810,7 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, sign
 
         // only once the whole song is here: a body that fails halfway leaves the old song as it was
         const made = applyReport(settings, report);
-        ({ settings, channels, own } = made);
+        ({ settings, channels, twins, own } = made);
         partsInSong = made.plays;
         drumSetup = made.drumSetup;
         drumGroupsPresent = made.drumGroups;
@@ -1458,6 +1460,19 @@ async function listChoices() {
 }
 
 /** A pan's step, from 0 to 63, as MIDI's, from 0 to 127, the middles together. */
+/** A part's channels, its own and its twin's, and whether each sits on the other side of the part's pan. */
+function channelsOf(part) {
+    return [
+        ...(channels[part] == null ? [] : [{ channel: channels[part], mirrored: false }]),
+        ...(twins[part] == null ? [] : [{ channel: twins[part], mirrored: true }]),
+    ];
+}
+
+/** A pan step on the other side of the middle. */
+function mirrorPan(step) {
+    return Math.min(LAST_STEP, 2 * MIDDLE_PAN - step);
+}
+
 function toMidiPan(step) {
     return step <= MIDDLE_PAN ? step * 2 : Math.round(64 + ((step - MIDDLE_PAN) * 63) / (LAST_STEP - MIDDLE_PAN));
 }
@@ -1746,8 +1761,7 @@ function setPartInstrument(part, instrument) {
     settingsChanged(false);
 
     // the page and the download are right whatever the audio does, so the player is told separately
-    const channel = channels[part];
-    if (channel != null)
+    for (const { channel } of channelsOf(part))
         withPlayer((player) => player.setChannelInstrument(channel, instrument.value, instrument.isGiven), "Could not set the instrument");
 }
 
@@ -1763,8 +1777,8 @@ function setPartPan(part, pan) {
     rows.get(part).pan.show();
     settingsChanged(false);
 
-    const channel = channels[part];
-    if (channel != null) withPlayer((player) => player.setChannelPan(channel, toMidiPan(pan.value)), "Could not set the pan");
+    for (const { channel, mirrored } of channelsOf(part))
+        withPlayer((player) => player.setChannelPan(channel, toMidiPan(mirrored ? mirrorPan(pan.value) : pan.value)), "Could not set the pan");
 }
 
 /** Switches a part off, which leaves it out of the file and silences it here, so what is heard is what is downloaded. */
@@ -1777,11 +1791,9 @@ function setPartInFile(part, isOn) {
 
 /** A part's volume under the song's, on the player. */
 function applyVolume(part) {
-    const channel = channels[part];
-    if (channel == null) return;
-
     const volume = (settings.volume / LAST_STEP) * (settings.parts[part].volume / LAST_STEP);
-    withPlayer((player) => player.setChannelVolume(channel, volume), "Could not set the volume");
+    for (const { channel } of channelsOf(part))
+        withPlayer((player) => player.setChannelVolume(channel, volume), "Could not set the volume");
 }
 
 /**
@@ -1868,25 +1880,23 @@ function isSilenced(part) {
  *     song's to set when it starts over.
  */
 function applyMix(player, isBankReset = false) {
-    for (const part of PARTS) {
-        const channel = channels[part];
-        if (channel == null) continue;
+    for (const part of PARTS)
+        for (const { channel, mirrored } of channelsOf(part)) {
+            if (isBankReset) {
+                const mix = settings.parts[part];
+                if (part === "drum") player.setChannelDrums(channel, true);
+                player.setChannelInstrument(channel, mix.instrument.value, mix.instrument.isGiven);
+                player.setChannelVolume(channel, (settings.volume / LAST_STEP) * (mix.volume / LAST_STEP));
+                player.setChannelPan(channel, toMidiPan(mirrored ? mirrorPan(mix.pan.value) : mix.pan.value));
+            }
 
-        if (isBankReset) {
-            const mix = settings.parts[part];
-            if (part === "drum") player.setChannelDrums(channel, true);
-            player.setChannelInstrument(channel, mix.instrument.value, mix.instrument.isGiven);
-            player.setChannelVolume(channel, (settings.volume / LAST_STEP) * (mix.volume / LAST_STEP));
-            player.setChannelPan(channel, toMidiPan(mix.pan.value));
+            player.setChannelMuted(channel, isSilenced(part));
         }
-
-        player.setChannelMuted(channel, isSilenced(part));
-    }
 }
 
 function applyMuting() {
     withPlayer((player) => {
-        for (const part of PARTS) if (channels[part] != null) player.setChannelMuted(channels[part], isSilenced(part));
+        for (const part of PARTS) for (const { channel } of channelsOf(part)) player.setChannelMuted(channel, isSilenced(part));
     }, "Could not silence the part");
 }
 

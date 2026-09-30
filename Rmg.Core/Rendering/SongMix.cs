@@ -18,6 +18,15 @@ public sealed record SongMix(double Volume, ImmutableDictionary<TrackRole, PartM
     /// <summary>The names of the drum groups a mix may name.</summary>
     public static ImmutableArray<string> DrumGroupNames { get; } = [..Composition.DrumGroups.All.Select(x => x.Name)];
 
+    /// <summary>A part's mix, as it is named; a riff's twin's as its riff's, on the other side.</summary>
+    public PartMix? Of(TrackRole role)
+    {
+        if (Parts.TryGetValue(role, out var mix))
+            return mix;
+
+        return role == TrackRole.RiffTwin && Parts.TryGetValue(TrackRole.Riff, out var riff) ? riff with { Pan = -riff.Pan } : null;
+    }
+
     /// <summary>The names of the drum groups the song plays a note of.</summary>
     public static ImmutableArray<string> DrumGroupsOf(Song song)
     {

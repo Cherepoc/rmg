@@ -27,8 +27,8 @@ public sealed class StateTraceTest
         var tracks = trace.Entries.Select(x => x.Track).ToHashSet();
 
         await Assert.That(trace.Entries.Count).IsGreaterThan(0);
-        // a pad's chords come of the chord changes, not of bar patterns
-        await Assert.That(tracks.IsSupersetOf(song.TrackDefinitions.Keys.Where(x => x < DrumGroups.FirstTrackNumber && song.TrackDefinitions[x].Role != Rmg.Core.Songs.TrackRole.Pad))).IsTrue();
+        // a pad's chords come of the chord changes, not of bar patterns, and a riff's twin plays the riff's
+        await Assert.That(tracks.IsSupersetOf(song.TrackDefinitions.Keys.Where(x => x < DrumGroups.FirstTrackNumber && song.TrackDefinitions[x].Role is not (Rmg.Core.Songs.TrackRole.Pad or Rmg.Core.Songs.TrackRole.RiffTwin)))).IsTrue();
         // a bar of the 4-bar pattern, and a place in it, in the song's meter
         await Assert.That(trace.Entries.All(x => x.Bar is >= 0 and < Meter.PatternBarCount)).IsTrue();
         await Assert.That(trace.Entries.All(x => x.Position >= 0 && x.Position < song.Map!.Meter.BarDuration)).IsTrue();

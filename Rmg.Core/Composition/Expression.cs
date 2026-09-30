@@ -86,7 +86,7 @@ internal static class Expression
         TrackRole.Bass => 25,
         TrackRole.Pad => 80,
         TrackRole.Chords => 55,
-        TrackRole.Riff => 45,
+        TrackRole.Riff or TrackRole.RiffTwin => 45,
         TrackRole.Rhythm => 50,
         _ => 60
     };

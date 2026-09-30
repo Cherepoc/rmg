@@ -88,7 +88,7 @@ public static class Render
         // every part as it is asked to sound, over the song's volume, and those left out not written; an instrument given
         // holds throughout, its changes let go of
         var mixed = renderedTracks
-            .Select(track => (Track: track, Mix: mix.Parts.GetValueOrDefault(track.Role)))
+            .Select(track => (Track: track, Mix: mix.Of(track.Role)))
             .Where(x => x.Mix is not { IsOn: false })
             .Select(x => new RenderedTrack(
                 x.Track.IsPercussionInstrument,
