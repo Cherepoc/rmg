@@ -8,8 +8,8 @@ namespace Rmg.Core.Composition;
 ///     The feels a rhythm plays in, by their step of <see cref="RhythmPeriod" />: straight, and for 3, 5, 7, 11 and 13 a
 ///     tuplet, the prime's notes over a power of two of the grid's, and a grouping, cycles of the prime's steps, such as
 ///     triplets and a dotted 8th's 3+3+2. The song draws its feel, and a section, a track's bar and a fill change the feel
-///     they come to now and then, each by the feel facet of its unconventionality: the plainest song straight or in
-///     threes, all of it, the wildest in any feel but straight, changing at every section, bar and fill.
+///     they come to now and then, each by the feel facet of its unconventionality: the plainest song straight, all of it,
+///     the wildest in any feel but straight, changing at every section, bar and fill.
 /// </summary>
 internal static class Feels
 {
@@ -17,15 +17,15 @@ internal static class Feels
     public const int Straight = 0;
 
     /// <summary>
-    ///     How likely a feel is, for the song's and for a change: straight, and the threes now and then, at the plain
-    ///     end; almost always straight at the middle, where a song in a tuplet is rare; every other feel as likely at the
+    ///     How likely a feel is, for the song's and for a change: straight at the plain end; almost always straight at the
+    ///     middle, the threes now and then, where a song in a tuplet is rare; every other feel as likely at the
     ///     wild end.
     /// </summary>
     public static ImmutableArray<(int Feel, ByConvention Weight)> Weights { get; } =
     [
         (Straight, new ByConvention(1, 0.95, 0)),
-        (1, new ByConvention(0.08, 0.02, 1)),
-        (-1, new ByConvention(0.08, 0.02, 1)),
+        (1, new ByConvention(0, 0.02, 1)),
+        (-1, new ByConvention(0, 0.02, 1)),
         (-2, new ByConvention(0, 0.003, 1)),
         (2, new ByConvention(0, 0.003, 1)),
         (3, new ByConvention(0, 0.001, 1)),

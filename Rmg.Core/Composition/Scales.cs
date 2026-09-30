@@ -32,9 +32,9 @@ internal static class Scales
 
     public static Scale Major { get; } = new("Major", [0, 2, 4, 5, 7, 9, 11], new ByConvention(1, 0.3, 0));
 
-    public static Scale Dorian { get; } = new("Dorian", [0, 2, 3, 5, 7, 9, 10], new ByConvention(0.2, 0.12, 0.3));
+    public static Scale Dorian { get; } = new("Dorian", [0, 2, 3, 5, 7, 9, 10], new ByConvention(0, 0.12, 0.3));
 
-    public static Scale Mixolydian { get; } = new("Mixolydian", [0, 2, 4, 5, 7, 9, 10], new ByConvention(0.2, 0.12, 0.3));
+    public static Scale Mixolydian { get; } = new("Mixolydian", [0, 2, 4, 5, 7, 9, 10], new ByConvention(0, 0.12, 0.3));
 
     public static Scale HarmonicMinor { get; } = new("Harmonic minor", [0, 2, 3, 5, 7, 8, 11], new ByConvention(0, 0.06, 1));
 
@@ -44,8 +44,7 @@ internal static class Scales
 
     /// <summary>
     ///     Most songs are in minor or major, some in Dorian or Mixolydian, close to them and common in rock, folk and
-    ///     blues, and a few in a stranger one; the plainest in minor or major and now and then Dorian or Mixolydian, the
-    ///     wildest in harmonic minor, Phrygian or Lydian and now and then Dorian or Mixolydian.
+    ///     blues, and a few in a stranger one; the plainest in minor or major, the wildest in harmonic minor, Phrygian or Lydian and now and then Dorian or Mixolydian.
     /// </summary>
     public static ImmutableArray<Scale> All { get; } =
         [NaturalMinor, Major, Dorian, Mixolydian, HarmonicMinor, Phrygian, Lydian];

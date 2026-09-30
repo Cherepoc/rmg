@@ -8,13 +8,12 @@ public sealed class FeelsTest
     private const int DrawCount = 20000;
 
     [Test]
-    public async Task ThePlainestSongs_AreStraightOrInThrees_AndNeverChangeTheirFeel()
+    public async Task ThePlainestSongs_AreStraight_AndNeverChangeTheirFeel()
     {
         var context = new GenerationContext(1);
         var feels = Enumerable.Range(0, DrawCount).Select(_ => Feels.DrawSong(context, 0)).ToArray();
 
-        await Assert.That(feels.All(x => x is Feels.Straight or 1 or -1)).IsTrue();
-        await Assert.That(feels.Count(x => x == Feels.Straight) / (double)DrawCount).IsBetween(0.8, 0.9);
+        await Assert.That(feels.All(x => x == Feels.Straight)).IsTrue();
         foreach (var chance in new[] { Feels.SectionChange, Feels.BarChange, Feels.FillChange })
             await Assert.That(Enumerable.Range(0, 1000).All(_ => Feels.DrawChange(context, Feels.Straight, chance, 0) is null)).IsTrue();
     }

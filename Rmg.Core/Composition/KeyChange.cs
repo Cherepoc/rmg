@@ -6,8 +6,8 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     A song going up a key for its last section, where that section came back before, as a last chorus does: by a
-///     whole step most often and a half step otherwise, now and then by the scale facet of its unconventionality: the
-///     likelier the plainer, as it is a convention of pop, and every time at the wild end. The whole band moves, and the
+///     whole step most often and a half step otherwise, now and then by the scale facet of its unconventionality: never
+///     in the plainest song, which keeps its key, and every time at the wild end. The whole band moves, and the
 ///     lines, placed after, go on into the new key.
 /// </summary>
 /// <param name="Position">Where the new key starts, the last section's start.</param>
@@ -15,10 +15,10 @@ namespace Rmg.Core.Composition;
 public sealed record KeyChange(double Position, int Semitones)
 {
     /// <summary>
-    ///     The chance a song whose last section came back before goes up a key for it: a quarter of the plainest songs,
-    ///     fewer at the middle and every one at the wild end.
+    ///     The chance a song whose last section came back before goes up a key for it: none of the plainest songs, a few at
+    ///     the middle and every one at the wild end.
     /// </summary>
-    public static ByConvention Chance { get; } = new(0.26, 0.08, 1);
+    public static ByConvention Chance { get; } = new(0, 0.08, 1);
 
     /// <summary>The chance the key goes up a half step, rather than a whole one.</summary>
     public const double HalfStepChance = 0.4;

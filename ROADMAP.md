@@ -143,8 +143,9 @@ song's own coherence, how far its facets stray from its base; a user's conventio
 Generated songs are drawn in log-odds (`Unconventionality`), so that a song as a whole is near an end in about one
 in a hundred and a facet in one in sixteen, chords and groove going together as 0.75; harmony's middle is a middling
 song's, the jazz and the clusters the wilder songs' (levels 3 to 5 about 7% of the corpus's chords, against 16% before
-the facets). To tune by listening: the spreads, the chords' and the scales' weights, and the plain end's rigidity: no
-change of feel, triplet fills included, every bar of a plain song at the same density. The feel facet puts 18% of songs
+the facets). The plain end is the plainest of every choice: triads alone, cadences included, four, straight time, major or natural
+minor, no key change, one of the forms. To tune by listening: the spreads, the chords' and the scales' weights, and the
+plain end's rigidity: no change of feel, triplet fills included, every bar of a plain song at the same density. The feel facet puts 18% of songs
 outside four and 10% in odd meters, against 12% and 5% before.
 - **A song's parameters supplied** (P3): the conventionality first, its base or any facet (`SongOverrides`, see
   CLAUDE.md's *Drawn or given*), then the meter, the tempo, the key and the like, each drawn or given from a stream of

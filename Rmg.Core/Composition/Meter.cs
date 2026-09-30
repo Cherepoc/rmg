@@ -22,15 +22,15 @@ public sealed record Meter(ImmutableArray<int> Groups)
 
     /// <summary>
     ///     The meters a song is in, each in its usual grouping, and how often, by the feel facet of its unconventionality:
-    ///     the plainest in four, now and then in 3/4 or 6/8; at the middle mostly four, 3/4 and 6/8 now and then and odd
+    ///     the plainest in four; at the middle mostly four, 3/4 and 6/8 now and then and odd
     ///     meters, 5/4, 7/8, 15/16 and the like, rarely; the wildest in any odd meter as likely, 3/4 and 6/8 less often,
     ///     never in four.
     /// </summary>
     public static ImmutableArray<(Meter Meter, ByConvention Weight)> Options { get; } =
     [
         (FourFour, new ByConvention(1, 0.92, 0)),
-        (ThreeFour, new ByConvention(0.05, 0.04, 0.3)),
-        (SixEight, new ByConvention(0.05, 0.04, 0.3)),
+        (ThreeFour, new ByConvention(0, 0.04, 0.3)),
+        (SixEight, new ByConvention(0, 0.04, 0.3)),
         (new Meter([8, 12]), new ByConvention(0, 0.006, 1)),
         (new Meter([4, 4, 6]), new ByConvention(0, 0.006, 1)),
         (new Meter([4, 6]), new ByConvention(0, 0.003, 1)),

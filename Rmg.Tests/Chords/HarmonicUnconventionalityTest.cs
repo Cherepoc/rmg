@@ -13,13 +13,9 @@ public sealed class HarmonicUnconventionalityTest
     }
 
     [Test]
-    public async Task ThePlainestChords_AreTriadsAndLevelOnesColours_ANinthNowAndThen()
+    public async Task ThePlainestChords_AreTriadsAlone()
     {
-        var levels = DrawLevels(0);
-
-        await Assert.That(levels.All(x => x <= 2)).IsTrue();
-        await Assert.That(levels.Count(x => x == 0)).IsGreaterThan(levels.Count(x => x == 1));
-        await Assert.That(levels.Count(x => x == 2) / (double)levels.Length).IsBetween(0.02, 0.1);
+        await Assert.That(DrawLevels(0).All(x => x == 0)).IsTrue();
     }
 
     [Test]

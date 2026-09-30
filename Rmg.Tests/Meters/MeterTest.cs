@@ -142,13 +142,13 @@ public sealed class MeterTreeTest
     }
 
     [Test]
-    public async Task ThePlainestSongs_AreInFourOrThreeOrSix_AndTheWildest_NeverInFour()
+    public async Task ThePlainestSongs_AreInFour_AndTheWildest_NeverInFour()
     {
         var context = new Rmg.Core.Probabilities.GenerationContext(1);
         var plain = Enumerable.Range(0, 3000).Select(_ => Meter.Draw(context, 0)).ToArray();
         var wild = Enumerable.Range(0, 3000).Select(_ => Meter.Draw(context, 1)).ToArray();
 
-        await Assert.That(plain.All(x => x == Meter.FourFour || x == Meter.ThreeFour || x == Meter.SixEight)).IsTrue();
+        await Assert.That(plain.All(x => x == Meter.FourFour)).IsTrue();
         await Assert.That(wild.All(x => x != Meter.FourFour)).IsTrue();
     }
 }

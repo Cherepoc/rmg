@@ -48,17 +48,19 @@ public sealed class RoleChordTest
     }
 
     [Test]
-    public async Task ConventionalCadences_PlayCadenceShapes_TheSeventhMostOften()
+    public async Task ThePlainestCadences_AreTriads_AndMiddlingOnes_CadenceShapes_TheSeventhMostOften()
     {
-        var unconventionality = new HarmonicUnconventionality(0);
         var context = new GenerationContext(1);
-
-        var names = Enumerable.Range(0, DrawCount)
-            .Select(_ => ShapeOf(unconventionality.GenerateCadenceChord(context)).Name)
+        var plainest = Enumerable.Range(0, DrawCount).Select(_ => new HarmonicUnconventionality(0).GenerateCadenceChord(context).Shape.Name).ToArray();
+        var middling = Enumerable.Range(0, DrawCount)
+            .Select(_ => new HarmonicUnconventionality(0.5).GenerateCadenceChord(context).Shape)
+            .Where(x => x.Unconventionality <= 2)
+            .Select(x => x.Name)
             .ToArray();
 
-        await Assert.That(names.All(CadenceShapeNames.Contains)).IsTrue();
-        await Assert.That(names.CountBy(x => x).MaxBy(x => x.Value).Key).IsEqualTo("Seventh");
+        await Assert.That(plainest.All(x => x == "Triad")).IsTrue();
+        await Assert.That(middling.All(CadenceShapeNames.Contains)).IsTrue();
+        await Assert.That(middling.CountBy(x => x).MaxBy(x => x.Value).Key).IsEqualTo("Seventh");
     }
 
     [Test]
