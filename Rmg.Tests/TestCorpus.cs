@@ -22,7 +22,15 @@ internal static class TestCorpus
 
     public static IEnumerable<CorpusSong> Range(int count) => Enumerable.Range(0, count).Select(Get);
 
-    private static CorpusSong Generate(int seed)
+    private static readonly ConcurrentDictionary<(int, Meter), Lazy<CorpusSong>> MeterSongs = new();
+
+    /// <summary>The song of the seed with its bars in the meter given instead of its own.</summary>
+    public static CorpusSong Get(int seed, Meter meter)
+    {
+        return MeterSongs.GetOrAdd((seed, meter), x => new Lazy<CorpusSong>(() => Generate(x.Item1, x.Item2))).Value;
+    }
+
+    private static CorpusSong Generate(int seed, Meter? meter = null)
     {
         // the song's own trace, apart from any the calling test has started, which it would clash with
         Task<CorpusSong> task;
@@ -30,7 +38,7 @@ internal static class TestCorpus
             task = Task.Run(() =>
                 {
                     using var trace = StateTrace.Start();
-                    var song = SongGenerator.GenerateSong(seed);
+                    var song = meter is null ? SongGenerator.GenerateSong(seed) : SongGenerator.GenerateSong(seed, ProgressionSettings.Default, meter);
                     return new CorpusSong(seed, song, Render.RenderSong(song), [..trace.Entries]);
                 }
             );

@@ -36,7 +36,10 @@ public static class SongGenerator
         return GenerateSong(seed, ProgressionSettings.Default);
     }
 
-    internal static Song GenerateSong(int seed, ProgressionSettings progressionSettings)
+    internal static Song GenerateSong(int seed, ProgressionSettings progressionSettings) => GenerateSong(seed, progressionSettings, null);
+
+    /// <param name="meter">The meter the song's bars are in, or null for the song's own.</param>
+    internal static Song GenerateSong(int seed, ProgressionSettings progressionSettings, Meter? meter)
     {
         // every stage draws from its own random sequence, derived from the seed by the stage, so a change to what one
         // stage draws leaves what the others draw as it was
@@ -68,7 +71,7 @@ public static class SongGenerator
 
         // the song's form: one of the forms songs are written in, its sections playing their roles, or one of its own
         // the meter the song's bars are in
-        var meter = Meter.FourFour;
+        meter ??= Meter.FourFour;
 
         var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), rhythmicUnconventionality.Tilt);
         StateTrace.Record(TracePoints.SongForm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(" ", structure.SectionIds.Select(x => structure.Roles[x])), structure);

@@ -71,7 +71,9 @@ public sealed class MeterTreeTest
         {
             var period = Math.Pow(2, power) * primeIndex.ToRhythmPeriodValue() * Meter.ReferenceBar;
             var phase = phaseFraction * period;
-            var before = DyadicRankTimeline.GenerateSlots(4, phase, period, maxRank, ResolvedRhythm.RestartOf(period, 4), ResolvedRhythm.SplitOf(period));
+            // a grouped cycle started again every smallest power of two holding two of it, any other at the bar
+            var restart = ResolvedRhythm.IsGrouped(period) ? Math.Min(4, Math.Pow(2, Math.Ceiling(Math.Log2(2 * period) - 1e-9))) : 4;
+            var before = DyadicRankTimeline.GenerateSlots(4, phase, period, maxRank, restart, ResolvedRhythm.SplitOf(period));
             var now = DyadicRankTimeline.GenerateSlots(4, Meter.FourFour.GetCycles(period, phase), maxRank);
             await Assert.That(now.SequenceEqual(before)).IsTrue().Because($"period {period}, phase {phase}, rank {maxRank}");
         }
@@ -99,5 +101,29 @@ public sealed class MeterTreeTest
     public async Task ThePulse_IsTheLevelNearestABeat(int[] groups, int tactus)
     {
         await Assert.That(new Meter([..groups]).Tactus).IsEqualTo(tactus);
+    }
+
+    [Test]
+    [Arguments(new[] { 6, 6 }, new[] { 0, 0.75, 1.5, 2.25 })]
+    [Arguments(new[] { 4, 4, 4 }, new[] { 0, 0.75, 1.5, 2.25 })]
+    [Arguments(new[] { 4, 4, 4, 3 }, new[] { 0, 0.75, 1.5, 2.25, 3 })]
+    [Arguments(new[] { 8, 8 }, new[] { 0, 0.75, 1.5, 2, 2.75, 3.5 })]
+    public async Task DottedEighths_RunOnFromEveryNodeThatHoldsTwo(int[] groups, double[] starts)
+    {
+        var cycles = new Meter([..groups]).GetCycles(0.75, 0);
+
+        await Assert.That(cycles.Select(x => x.Start).ToArray()).IsEquivalentTo(starts);
+    }
+
+    [Test]
+    [Arguments(new[] { 8, 8 }, 1 / 3.0, 12)]
+    [Arguments(new[] { 6, 6 }, 0.5, 6)]
+    [Arguments(new[] { 4, 4, 4 }, 1 / 3.0, 9)]
+    public async Task EighthTriplets_PlayThreeOverEveryPulse(int[] groups, double length, int count)
+    {
+        var cycles = new Meter([..groups]).GetCycles(1 / 3.0, 0);
+
+        await Assert.That(cycles.Length).IsEqualTo(count);
+        await Assert.That(cycles.All(x => Math.Abs(x.Length - length) < 1e-9)).IsTrue();
     }
 }

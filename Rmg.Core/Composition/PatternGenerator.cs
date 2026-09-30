@@ -512,18 +512,6 @@ internal readonly record struct ResolvedRhythm(
     }
 
     /// <summary>
-    ///     How often a cycle starts again, in beats: a grouped one every smallest power-of-two span that holds two of it,
-    ///     so that a dotted 8th's plays 3+3+2 every half bar, as a tresillo does, where cut off at the bar it would crowd
-    ///     its last note onto the next bar's first; any other the bar.
-    /// </summary>
-    /// <param name="period">The cycle, in beats.</param>
-    /// <param name="bar">How long the bar is, in beats, which a cycle starts again at the end of.</param>
-    public static double RestartOf(double period, double bar)
-    {
-        return IsGrouped(period) ? Math.Min(bar, Math.Pow(2, Math.Ceiling(Math.Log2(2 * period) - 1e-9))) : bar;
-    }
-
-    /// <summary>
     ///     How many parts a cycle splits into first, before every part halves (<see cref="DyadicTimelineDescriptor.Split" />):
     ///     a grouped one by the odd number it groups the grid's steps by, a dotted 8th into its three 16ths and a dotted
     ///     quarter into its three 8ths, its first strong and the others weak, as a group of three is felt; any other in two.

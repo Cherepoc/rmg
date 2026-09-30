@@ -86,19 +86,43 @@ public sealed record Meter(ImmutableArray<int> Groups)
     ///     whose nodes are most often nearest as many of the meter's pulses, the coarser where two are as near, so that a
     ///     half bar is 6/8's bar and 3/4's too; each node a cycle of its own descendants, its ranks the depths they first
     ///     start at. A phase of half a cycle strikes the node's other parts first, its first after, as 4/4's backbeat does
-    ///     on 2 and 4, 3/4's on 2 and 3 and 6/8's on its fourth 8th; another shifts it. A tuplet's or a grouped period's
-    ///     cycles run on from the bar's start, starting again where two of them fit, as they always did. In four every
-    ///     cycle is as it was.
+    ///     on 2 and 4, 3/4's on 2 and 3 and 6/8's on its fourth 8th; another shifts it. A tuplet plays its notes over the
+    ///     nodes its span of them would play on as a straight period, three over a dotted quarter its 8ths, and a grouped
+    ///     period runs on from the start of every node of the finest level whose nodes hold two of it, 6/8's dotted 8ths
+    ///     3+3 in each of its groups; a tuplet whose span is no straight period of a bar or less runs on from the bar's
+    ///     start. In four every cycle is as it was.
     /// </summary>
     public ImmutableArray<RhythmCycle> GetCycles(double period, double phase)
     {
         var steps = period * 4;
-        var isStraight = Math.Abs(steps - Math.Round(steps)) < 1e-9 && Math.Round(steps) >= 1
-                         && Math.Abs(Math.Log2(Math.Round(steps)) - Math.Round(Math.Log2(Math.Round(steps)))) < 1e-9;
-        if (!isStraight)
-            return DyadicRankTimeline.GenerateCycles(BarDuration, phase, period, ResolvedRhythm.RestartOf(period, BarDuration), ResolvedRhythm.SplitOf(period));
-
+        var isStraight = IsPowerOfTwo(steps);
         var fraction = phase / period;
+        if (ResolvedRhythm.IsGrouped(period))
+        {
+            // from every node that holds two of its cycles, the bar where none does
+            var restart = Enumerable.Range(0, Levels.Length).LastOrDefault(x => Levels[x].Min(n => n.Length) >= 2 * steps - 1e-9);
+            return
+            [
+                ..Levels[restart].SelectMany(node => DyadicRankTimeline.GenerateCycles(node.Length / 4.0, phase, period, node.Length / 4.0, ResolvedRhythm.SplitOf(period))
+                    .Select(x => x with { Start = x.Start + node.Start / 4.0, End = x.End + node.Start / 4.0 }))
+            ];
+        }
+
+        if (!isStraight)
+        {
+            // a tuplet over the nodes of its span, where its span is a straight period of a bar or less
+            var tuplet = Enumerable.Range(1, 7).Select(x => 2 * x + 1).FirstOrDefault(x => IsPowerOfTwo(x * steps) && x * steps <= ReferenceBar * 4 + 1e-9);
+            if (tuplet == 0)
+                return DyadicRankTimeline.GenerateCycles(BarDuration, phase, period, BarDuration, ResolvedRhythm.SplitOf(period));
+
+            return
+            [
+                ..Levels[LevelOf(tuplet * period)].SelectMany(node => Enumerable.Range(0, tuplet).Select(x =>
+                    new RhythmCycle(node.Start / 4.0 + x * node.Length / 4.0 / tuplet, node.Length / 4.0 / tuplet, (node.Start + node.Length) / 4.0, 2, fraction)
+                ))
+            ];
+        }
+
         if (period > ReferenceBar + 1e-9)
         {
             // two bars' cycle, the bar its first half
@@ -106,11 +130,7 @@ public sealed record Meter(ImmutableArray<int> Groups)
             return [new RhythmCycle(0, twoBars, BarDuration, ResolvedRhythm.SplitOf(twoBars), fraction, RankLimitOf(2 * Sixteenths))];
         }
 
-        var pulses = period / (ReferenceBar / 4);
-        var tactus = ModeLength(Tactus);
-        var level = period > ReferenceBar - 1e-9
-            ? 0
-            : Enumerable.Range(0, Levels.Length).MinBy(x => (Math.Round(Math.Abs(Math.Log2(ModeLength(x) / (double)tactus / pulses)), 9), x));
+        var level = LevelOf(period);
         var weakFirst = Math.Abs(fraction - 0.5) < 1e-9;
         return
         [
@@ -125,6 +145,23 @@ public sealed record Meter(ImmutableArray<int> Groups)
             ))
         ];
     }
+
+    /// <summary>
+    ///     The level a straight period of the reference bar or less plays on: the bar for the reference bar, and for a
+    ///     shorter one the level whose nodes are most often nearest as many of the meter's pulses as it has in four, the
+    ///     coarser where two are as near.
+    /// </summary>
+    private int LevelOf(double period)
+    {
+        var pulses = period / (ReferenceBar / 4);
+        var tactus = ModeLength(Tactus);
+        return period > ReferenceBar - 1e-9
+            ? 0
+            : Enumerable.Range(0, Levels.Length).MinBy(x => (Math.Round(Math.Abs(Math.Log2(ModeLength(x) / (double)tactus / pulses)), 9), x));
+    }
+
+    private static bool IsPowerOfTwo(double value) =>
+        Math.Abs(value - Math.Round(value)) < 1e-9 && Math.Round(value) >= 1 && Math.Abs(Math.Log2(Math.Round(value)) - Math.Round(Math.Log2(Math.Round(value)))) < 1e-9;
 
     /// <summary>
     ///     A node's cycle, as its positions in parts of its length, each with its rank: its start, then the starts of its
