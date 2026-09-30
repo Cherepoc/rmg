@@ -8,7 +8,7 @@ public sealed class HarmonicUnconventionalityTest
     private static int[] DrawLevels(double chords, int count = 20000)
     {
         var context = new GenerationContext(0);
-        var unconventionality = new HarmonicUnconventionality(0, chords);
+        var unconventionality = new HarmonicUnconventionality(chords);
         return [..Enumerable.Range(0, count).Select(_ => unconventionality.GenerateChord(context).Shape.Unconventionality)];
     }
 
@@ -39,15 +39,5 @@ public sealed class HarmonicUnconventionalityTest
 
         foreach (var (level, weight) in ChordShapes.Levels)
             await Assert.That(levels.Count(x => x == level) / (double)levels.Length).IsEqualTo(weight.Tuned / ChordShapes.Levels.Sum(x => x.Weight.Tuned)).Within(0.01);
-    }
-
-    [Test]
-    public async Task SongAnchors_AreMostlyPlain()
-    {
-        var context = new GenerationContext(0);
-        var anchors = Enumerable.Range(0, 20000).Select(_ => HarmonicUnconventionality.Generate(context, 0.5).Anchor).ToArray();
-
-        await Assert.That(anchors.Count(x => x < 1) / 20000.0).IsEqualTo(0.6).Within(0.03);
-        await Assert.That(anchors.Count(x => x > 2.5) / 20000.0).IsEqualTo(0.13).Within(0.02);
     }
 }

@@ -42,6 +42,9 @@ public sealed class SongGeneratorScaleTest
     public async Task ASectionNowAndThen_PlaysInAnotherScale_MostlyANeighbour_BrighterTheMoreEnergyItHas()
     {
         var changes = new List<int>();
+        // the changes of sections of the scale facet's plain half, where the song's neighbours are allowed; the wild end
+        // allows only the stranger scales, rarely a neighbour of the song's
+        var plainChanges = new List<int>();
         var brighter = new List<double>();
         var darker = new List<double>();
         var sections = 0;
@@ -51,12 +54,15 @@ public sealed class SongGeneratorScaleTest
             var energies = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy)
                 .ToDictionary(x => x.Section, x => x.StateMap.GetStateValue(CompositionStateKinds.Energy));
             var first = song.Map.Sections[0].SectionId;
+            var facets = song.Trace.Where(x => x.Point == TracePoints.SectionUnconventionality).ToDictionary(x => x.Section, x => (Unconventionality)x.Value!);
             foreach (var (id, scale) in scales.Where(x => x.Key != first))
             {
                 sections++;
                 if (scale == scales[first])
                     continue;
                 changes.Add(scale.Distance(scales[first]));
+                if (facets[id][Facet.Scale] <= 0.5)
+                    plainChanges.Add(scale.Distance(scales[first]));
                 (scale.Brightness > scales[first].Brightness ? brighter : darker).Add(energies[id]);
             }
         }
@@ -67,6 +73,6 @@ public sealed class SongGeneratorScaleTest
         Console.WriteLine($"{changes.Count} of {sections} sections change scale; by notes changed: " +
                           string.Join(", ", changes.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key}: {x.Count()}")));
         await Assert.That(changes.Count / (double)sections).IsBetween(0.05, 0.3);
-        await Assert.That(changes.Count(x => x == 1)).IsGreaterThan(changes.Count / 2);
+        await Assert.That(plainChanges.Count(x => x == 1)).IsGreaterThan(plainChanges.Count / 2);
     }
 }

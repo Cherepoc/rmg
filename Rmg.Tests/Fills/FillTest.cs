@@ -134,9 +134,11 @@ public sealed class FillTest
             // the sections of percussion only land on the percussion
             var percussionOnly = corpusSong.Trace.Where(x => x.Point == TracePoints.PercussionOnly).ToDictionary(x => x.Section, x => (bool)x.Value!);
             // the bars of the sections, after the first, up to the ending's, which lands every time
-            for (var bar = 1.0; origin + bar * 4 < song.Duration - 8; bar++)
+            // in the song's bars, but the ending's two
+            var barLength = corpusSong.Map.Meter.BarDuration;
+            for (var bar = 1.0; origin + bar * barLength < song.Duration - 2 * barLength; bar++)
             {
-                var position = origin + bar * 4;
+                var position = origin + bar * barLength;
                 var hits = drums.Where(x => x.Position.IsEqualToByEpsilon(position)).Select(x => x.Value.Offset).ToArray();
                 if (corpusSong.Map.Sections.Any(x => x.Start.IsEqualToByEpsilon(position) && percussionOnly[x.SectionId]))
                     continue;

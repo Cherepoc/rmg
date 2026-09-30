@@ -52,6 +52,12 @@ public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, d
 
     private static readonly Func<IGenerationContext, double> ShiftGenerator = Generators.SplineValue();
 
+    /// <summary>
+    ///     How much of what a section's energy leans it to follows in a facet: all at 0, a fifth at 1, so that in a wild
+    ///     facet a loud section may be plain in it and a quiet one wild (<see cref="RhythmicUnconventionality.Coupling" />).
+    /// </summary>
+    public static double Coupling(double facet) => 1 - RhythmicUnconventionality.MaxDecoupling * facet;
+
     /// <summary>A facet's value.</summary>
     public double this[Facet facet] => Facets[facet];
 

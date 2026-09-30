@@ -23,7 +23,6 @@ internal sealed class SectionGenerator
     // the meter the song's bars are in
     private readonly Meter _meter;
     private readonly SongTracks _tracks;
-    private readonly HarmonicUnconventionality _songUnconventionality;
     private readonly RhythmicUnconventionality _songRhythmicUnconventionality;
 
     // how far the song strays from convention, facet by facet, which a section moves a little
@@ -48,7 +47,6 @@ internal sealed class SectionGenerator
         int seed,
         ProgressionSettings settings,
         SongTracks tracks,
-        HarmonicUnconventionality songUnconventionality,
         Unconventionality songFacets,
         RhythmicUnconventionality songRhythmicUnconventionality,
         MelodyBusyness songMelodyBusyness,
@@ -64,7 +62,6 @@ internal sealed class SectionGenerator
         _context = context;
         _seed = seed;
         _tracks = tracks;
-        _songUnconventionality = songUnconventionality;
         _songFacets = songFacets;
         _songRhythmicUnconventionality = songRhythmicUnconventionality;
         _songMelodyBusyness = songMelodyBusyness;
@@ -100,14 +97,14 @@ internal sealed class SectionGenerator
         // how far the section strays from convention, facet by facet, each from a sequence of its own
         var facets = _songFacets.GenerateSection(facet => _context.CreateContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Unconventionality), (int)facet)));
         StateTrace.Record(TracePoints.SectionUnconventionality, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", facets.Facets.OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Value:F2}")), facets);
-        var unconventionality = _songUnconventionality.GenerateSection(context, facets[Facet.Chords]);
-        StateTrace.Record(TracePoints.SectionHarmony, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{unconventionality.Anchor:F2}", unconventionality);
+        var unconventionality = new HarmonicUnconventionality(facets[Facet.Chords]);
+        StateTrace.Record(TracePoints.SectionHarmony, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{unconventionality.Chords:F2}", unconventionality);
         var rhythm = _songRhythmicUnconventionality.GenerateSection(context);
         var chords = LayerStates.CreateChordPool(unconventionality)(context);
 
         var (songStateMap, energy) = GetEnergy(sectionId, rhythm);
         var tilt = SectionEnergy.Tilt(energy, rhythm.Coupling);
-        var scale = plan.KeepsSongScale ? _songScale : PickScale(sectionId, unconventionality, energy);
+        var scale = plan.KeepsSongScale ? _songScale : PickScale(sectionId, facets[Facet.Scale], energy);
         StateTrace.Record(TracePoints.SectionScale, SectionTrace, sectionId, 0, StateMap.Default, 0, scale.Name, scale);
 
         // the section's chords move around its home, which every track's root starts from; the song's last section
@@ -322,13 +319,13 @@ internal sealed class SectionGenerator
     ///     section has, as far as its harmony follows it; drawn from a sequence of its own, so that the section's other
     ///     draws stay as they are.
     /// </summary>
-    private Scale PickScale(int sectionId, HarmonicUnconventionality harmony, double energy)
+    private Scale PickScale(int sectionId, double unconventionality, double energy)
     {
         return Scales.PickSection(
             Stream(sectionId, SectionStream.Scale),
             _songScale,
-            harmony,
-            SectionEnergy.Tilt(energy, harmony.Coupling)
+            unconventionality,
+            SectionEnergy.Tilt(energy, Unconventionality.Coupling(unconventionality))
         );
     }
 

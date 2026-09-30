@@ -113,7 +113,8 @@ tuned and wild weights (`ByConvention`), in place of the rhythm's and the harmon
    tuned weights and the same ends; the anchor, peak and skew gone; the tuned weights the corpus's levels.
 5. **The progressions' strictness** by the progression facet (built, `Progressions.Strictness`, 0.77 at the middle as
    the corpus's mean: the wildest fifth of sections' roots between 12 and 19% each, the plainest's favourites at 25%).
-6. **The scales:** the plain end major and natural minor, Mixolydian and Dorian a little; the wild end harmonic minor,
+6. **The scales** (built; the plainest fifth of songs nearly all in minor or major and 1% of sections in another
+   scale, the wildest mostly in harmonic minor, Lydian or Phrygian and 66% of sections in another; the anchor gone): the plain end major and natural minor, Mixolydian and Dorian a little; the wild end harmonic minor,
    Phrygian and Lydian, Mixolydian and Dorian a little; the sections' scale changes a chance by the rule, in place of
    one multiplied by hand.
 7. **The key change and the pentatonic melody** by the scale facet, in place of the rhythm's: a key change allowed at

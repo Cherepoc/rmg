@@ -19,12 +19,11 @@ public sealed class HarmonyReportTest
     private sealed record SongHarmony(int Band, string Scale, int Sections, int OtherScales, int Pentatonic, bool KeyChange, ImmutableArray<SectionChords> SectionChords,
         ImmutableArray<(int Band, ImmutableArray<int> Roots)> Progressions);
 
-    // a harmony's place on the unconventionality's scale, in fifths: its chords facet for its chords, and its anchor over
-    // the chords' levels for the scales, the key change and the pentatonic melodies, which it leans until they go by
-    // facets of their own
+    // a place on the unconventionality's scale, in fifths: a section's chords facet for its chords, and the song's scale
+    // facet for its scales, its key change and its pentatonic melodies
     private static int ChordsBand(HarmonicUnconventionality harmony) => Math.Clamp((int)(harmony.Chords * 5), 0, 4);
 
-    private static int AnchorBand(HarmonicUnconventionality harmony) => Math.Clamp((int)(harmony.Anchor / ChordShapes.MaxUnconventionality * 5), 0, 4);
+    private static int Band(double facet) => Math.Clamp((int)(facet * 5), 0, 4);
 
     [Test]
     [Explicit]
@@ -48,7 +47,7 @@ public sealed class HarmonyReportTest
                               $"{string.Join(" ", roots.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Count() / (double)roots.Length:P0}"))}");
         }
 
-        Console.WriteLine("by the song's harmonic anchor, in fifths:");
+        Console.WriteLine("by the song's scale facet, in fifths:");
         foreach (var band in songs.GroupBy(x => x.Band).OrderBy(x => x.Key))
         {
             var of = band.ToArray();
@@ -94,6 +93,7 @@ public sealed class HarmonyReportTest
         var progressions = song.Trace.Where(x => x.Point == TracePoints.Progression)
             .Select(x => (Math.Clamp((int)(facets[x.Section][Facet.Progression] * 5), 0, 4), (ImmutableArray<int>)x.Value!));
 
-        return new SongHarmony(AnchorBand(harmony), scale.Name, scales.Length, scales.Count(x => x != scale), pentatonic, keyChange, [..chords], [..progressions]);
+        var songFacets = (Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!;
+        return new SongHarmony(Band(songFacets[Facet.Scale]), scale.Name, scales.Length, scales.Count(x => x != scale), pentatonic, keyChange, [..chords], [..progressions]);
     }
 }

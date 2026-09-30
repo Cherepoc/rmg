@@ -26,7 +26,7 @@ public sealed class RoleChordTest
     [Arguments(0.5)]
     public async Task HomeChords_StayPlain_ButInTheWildestSongs(double chords)
     {
-        var unconventionality = new HarmonicUnconventionality(0, chords);
+        var unconventionality = new HarmonicUnconventionality(chords);
         var context = new GenerationContext(1);
 
         var levels = Enumerable.Range(0, DrawCount)
@@ -39,7 +39,7 @@ public sealed class RoleChordTest
     [Test]
     public async Task TheWildestHomeChords_AreStrange()
     {
-        var unconventionality = new HarmonicUnconventionality(0, 1);
+        var unconventionality = new HarmonicUnconventionality(1);
         var context = new GenerationContext(1);
 
         var levels = Enumerable.Range(0, DrawCount).Select(_ => unconventionality.GenerateHomeChord(context).Shape.Unconventionality).ToArray();
@@ -50,7 +50,7 @@ public sealed class RoleChordTest
     [Test]
     public async Task ConventionalCadences_PlayCadenceShapes_TheSeventhMostOften()
     {
-        var unconventionality = new HarmonicUnconventionality(0, 0);
+        var unconventionality = new HarmonicUnconventionality(0);
         var context = new GenerationContext(1);
 
         var names = Enumerable.Range(0, DrawCount)
@@ -64,7 +64,7 @@ public sealed class RoleChordTest
     [Test]
     public async Task UnconventionalCadences_KeepTheirStrangeness()
     {
-        var unconventionality = new HarmonicUnconventionality(0, 1);
+        var unconventionality = new HarmonicUnconventionality(1);
         var context = new GenerationContext(1);
 
         var levels = Enumerable.Range(0, DrawCount)
