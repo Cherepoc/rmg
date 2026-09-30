@@ -11,9 +11,8 @@ public sealed class PhraseSchemesTest
     private static Dictionary<string, int> DrawSchemes(double unconventionality)
     {
         var context = new GenerationContext(1);
-        var rhythm = new RhythmicUnconventionality(unconventionality);
         return Enumerable.Range(0, DrawCount)
-            .Select(_ => Rmg.Core.Composition.PhraseSchemes.Pick(context, rhythm).ToString().Replace("′", ""))
+            .Select(_ => Rmg.Core.Composition.PhraseSchemes.Pick(context, unconventionality).ToString().Replace("′", ""))
             .CountBy(x => x)
             .ToDictionary();
     }
@@ -53,11 +52,10 @@ public sealed class PhraseSchemesTest
     public async Task OnlyRepeats_AreVaried_AboutAQuarterOfThem()
     {
         var context = new GenerationContext(1);
-        var rhythm = new RhythmicUnconventionality(0.5);
         int repeats = 0, varied = 0;
         for (var i = 0; i < DrawCount; i++)
         {
-            var scheme = Rmg.Core.Composition.PhraseSchemes.Pick(context, rhythm);
+            var scheme = Rmg.Core.Composition.PhraseSchemes.Pick(context, 0.5);
             for (var bar = 0; bar < 4; bar++)
             {
                 var isRepeat = scheme.Letters[..bar].Contains(scheme.Letters[bar]);

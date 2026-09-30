@@ -87,7 +87,7 @@ public static class SongGenerator
         var meter = overrides.Meter ?? Meter.Draw(Stream(SongStream.Meter), songUnconventionality[Facet.Feel]);
         StateTrace.Record(TracePoints.Meter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, meter.ToString(), meter);
 
-        var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), Of(Facet.Form).Tilt);
+        var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), songUnconventionality[Facet.Form]);
         StateTrace.Record(TracePoints.SongForm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(" ", structure.SectionIds.Select(x => structure.Roles[x])), structure);
         var sectionIds = structure.SectionIds.ToArray();
 

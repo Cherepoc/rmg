@@ -120,14 +120,16 @@ public sealed class SongEndingTest
     [Test]
     public async Task WildSongs_EndOpenOrStoppedMoreOften()
     {
-        double Share(double chanceScale)
+        double Share(double unconventionality)
         {
-            var weights = FormLayers.WeighEndings(Tilt.Of(chanceScale, 1));
+            var weights = FormLayers.WeighEndings(unconventionality);
             return weights.Where(x => FormLayers.AdventurousEndings.Contains(x.Value)).Sum(x => x.Weight) / weights.Sum(x => x.Weight);
         }
 
-        await Assert.That(Share(0.25)).IsLessThan(Share(1));
-        await Assert.That(Share(4)).IsGreaterThan(Share(1));
+        await Assert.That(Share(0)).IsEqualTo(0);
+        await Assert.That(Share(0.25)).IsLessThan(Share(0.5));
+        await Assert.That(Share(0.75)).IsGreaterThan(Share(0.5));
+        await Assert.That(Share(1)).IsEqualTo(0.4).Within(1e-9);
     }
 
     [Test]

@@ -51,7 +51,7 @@ internal sealed class SongFormGenerator
     public FormPlan Plan(IReadOnlyList<int> sectionIds)
     {
         var intro = _context.Pick(FormLayers.Intros);
-        var ending = _context.Pick(FormLayers.WeighEndings(_songRhythm.Tilt));
+        var ending = _context.Pick(FormLayers.WeighEndings(_songRhythm.Value));
         var window = intro == IntroKind.Entries ? _introContext.Pick(FormLayers.IntroWindows) : default;
         var halfCountIn = intro == IntroKind.CountIn && _context.TestProbability(FormLayers.HalfCountInChance);
 
@@ -225,9 +225,9 @@ internal sealed class SongFormGenerator
         foreach (var part in parts.Keys.Where(x => !listed.ContainsKey(x)))
             throw new InvalidOperationException($"The intro has no weight for the part {part}.");
 
-        var options = _songRhythm.Tilt.Weigh(
-                FormLayers.IntroParts.Where(x => parts.ContainsKey(x.Part)).Select(x => new Weighted<IntroPart>(x.Weight, x.Part)),
-                x => listed[x].Lean
+        var options = ByConvention.Weigh(
+                FormLayers.IntroParts.Where(x => parts.ContainsKey(x.Part)).Select(x => (x.Part, RhythmicUnconventionality.WeightEnds(x.Weight, x.Lean))),
+                _songRhythm.Value
             )
             .ToList();
         var order = new List<IntroPart>();

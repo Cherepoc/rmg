@@ -212,7 +212,7 @@ internal sealed class SectionGenerator
         StateTrace.Record(TracePoints.MelodyContour, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", contour), contour);
 
         // every track follows the section's phrase scheme, so they repeat their bars in the same places
-        var scheme = PhraseSchemes.Pick(context, new RhythmicUnconventionality(facets[Facet.Form]));
+        var scheme = PhraseSchemes.Pick(context, facets[Facet.Form]);
         var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context, tilt), tilt, facets);
 
         // the strokes the section changes from the song's, and how its drums play its bars, each from a sequence of its own
@@ -240,7 +240,7 @@ internal sealed class SectionGenerator
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
-        var plays = SectionLength.Draw(Stream(sectionId, SectionStream.Length), new RhythmicUnconventionality(facets[Facet.Form]).Tilt, plan.Role);
+        var plays = SectionLength.Draw(Stream(sectionId, SectionStream.Length), facets[Facet.Form], plan.Role);
         StateTrace.Record(TracePoints.SectionLength, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{plays}", plays);
         var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap, _meter).Repeat(plays);
         // the parts the section leaves out the first time it plays, from a sequence of its own, the likelier the less energy

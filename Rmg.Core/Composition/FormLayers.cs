@@ -137,10 +137,13 @@ internal static class FormLayers
     /// <summary>The endings that lean unconventional, likelier the further the song's rhythm strays.</summary>
     public static ImmutableHashSet<EndingKind> AdventurousEndings { get; } = [EndingKind.Open, EndingKind.Stop];
 
-    /// <summary>The endings' weights in a song whose rhythm leans as the tilt given.</summary>
-    public static ImmutableArray<Weighted<EndingKind>> WeighEndings(Tilt tilt)
+    /// <summary>
+    ///     The endings' weights by the form facet of the song's unconventionality: the plainest song ends with a button, a
+    ///     ringing chord or a fade, the wildest in any way as likely.
+    /// </summary>
+    public static ImmutableArray<Weighted<EndingKind>> WeighEndings(double unconventionality)
     {
-        return tilt.Weigh(Endings, x => AdventurousEndings.Contains(x) ? 1 : 0);
+        return ByConvention.Weigh(Endings.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, AdventurousEndings.Contains(x.Value) ? 1 : 0))), unconventionality);
     }
 
     /// <summary>How long a button's hit is, in beats, in the bar it has.</summary>

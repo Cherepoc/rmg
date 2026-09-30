@@ -54,16 +54,13 @@ internal static class PhraseSchemes
     }
 
     /// <summary>
-    ///     A scheme, those that bring more new bars the more likely the more unconventional the rhythm, and some of its
-    ///     repeats varied.
+    ///     A scheme, those that bring more new bars the more likely the less conventional the section's form: the plainest
+    ///     a bar played throughout or two bars, the wildest never one; and some of its repeats varied.
     /// </summary>
-    public static PhraseScheme Pick(IGenerationContext context, RhythmicUnconventionality unconventionality)
+    /// <param name="unconventionality">The form facet of the section's unconventionality.</param>
+    public static PhraseScheme Pick(IGenerationContext context, double unconventionality)
     {
-        ImmutableArray<Weighted<string>> weights =
-        [
-            ..All.Select(x => new Weighted<string>(unconventionality.Tilt.Weigh(x.Weight, GetUnconventionality(x.Scheme)), x.Scheme))
-        ];
-        var scheme = context.Pick(weights);
+        var scheme = context.Pick(ByConvention.Weigh(All.Select(x => (x.Scheme, RhythmicUnconventionality.WeightEnds(x.Weight, GetUnconventionality(x.Scheme)))), unconventionality));
 
         var letters = scheme.Select(x => x - 'A').ToImmutableArray();
         var isVaried = letters

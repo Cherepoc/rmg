@@ -6,17 +6,18 @@ namespace Rmg.Core.Composition;
 /// <summary>
 ///     How many times a section plays its 4-bar pattern: twice the most, its melody a question and its answer, and now
 ///     and then once, a phrase alone, as a short section between others plays, or four times, as a long chorus or a
-///     groove that settles plays, both the likelier the less conventional the section's rhythm; a section's role leans
-///     it to its own length, a verse and a chorus to sixteen bars, a pre-chorus to four and a bridge to eight.
+///     groove that settles plays. A section's role leans it to its own length, a verse and a chorus to sixteen bars, a
+///     pre-chorus to four and a bridge to eight, which is where the convention is, so that no length leans by the form's
+///     unconventionality: every one is allowed at both ends.
 /// </summary>
 internal static class SectionLength
 {
-    /// <summary>The plays, how often, and how each leans: 1 away from convention, 0 not at all.</summary>
+    /// <summary>The plays, how often, and how each leans: none, the roles holding the convention.</summary>
     public static ImmutableArray<(Weighted<int> Plays, double Lean)> Options { get; } =
     [
-        (new Weighted<int>(0.2, 1), 1),
+        (new Weighted<int>(0.2, 1), 0),
         (new Weighted<int>(0.65, 2), 0),
-        (new Weighted<int>(0.15, 4), 1)
+        (new Weighted<int>(0.15, 4), 0)
     ];
 
     /// <summary>How far a role leans its section to the length it plays, as the odds of that length over the others.</summary>
@@ -35,11 +36,10 @@ internal static class SectionLength
         };
     }
 
-    public static int Draw(IGenerationContext context, Tilt rhythm, SectionRole role)
+    public static int Draw(IGenerationContext context, double unconventionality, SectionRole role)
     {
-        var leans = Options.ToDictionary(x => x.Plays.Value, x => x.Lean);
         var rolePlays = GetRolePlays(role);
-        var weights = rhythm.Weigh(Options.Select(x => x.Plays), plays => leans[plays]);
+        var weights = ByConvention.Weigh(Options.Select(x => (x.Plays.Value, RhythmicUnconventionality.WeightEnds(x.Plays.Weight, x.Lean))), unconventionality);
         return context.Pick(Tilt.Of(RoleOdds, 1).Weigh(weights, plays => plays == rolePlays ? 1 : 0));
     }
 }

@@ -41,10 +41,13 @@ internal static class SongForms
 
     /// <param name="context">The sequence the form is drawn from.</param>
     /// <param name="freeContext">The sequence a form of the song's own is drawn from (<see cref="SongStructureGenerator" />).</param>
-    /// <param name="rhythm">How far the song's rhythm strays from convention, which leans it to a form of its own.</param>
-    public static SongStructure Generate(IGenerationContext context, IGenerationContext freeContext, Tilt rhythm)
+    /// <param name="unconventionality">
+    ///     The form facet of the song's unconventionality: the plainest song always in one of the forms, the wildest always
+    ///     in one of its own.
+    /// </param>
+    public static SongStructure Generate(IGenerationContext context, IGenerationContext freeContext, double unconventionality)
     {
-        var isConventional = context.TestProbability(rhythm.Chance(FormChance, -1));
+        var isConventional = context.TestProbability(RhythmicUnconventionality.Ends(FormChance, -1).At(unconventionality));
         var form = context.Pick(Forms);
         if (!isConventional)
         {
