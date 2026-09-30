@@ -7,6 +7,8 @@
         <Nullable>enable</Nullable>
         <!-- the corpus's songs are generated in parallel, and allocate a lot: server GC keeps the cores busy -->
         <ServerGarbageCollection>true</ServerGarbageCollection>
+        <!-- a test run is too short for profile-guided optimisation to pay for its instrumentation: songs made 1.6 times faster without -->
+        <TieredPGO>false</TieredPGO>
     </PropertyGroup>
 
     <ItemGroup>
