@@ -133,7 +133,7 @@ public static class SongGenerator
         var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0], structure.Roles[id]))))
             .CacheGeneratedValues();
         // and its melody placed afresh every time it plays, varied from the first as far as the song improvises
-        var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), Of(Facet.Melody).Tilt);
+        var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), songUnconventionality[Facet.Melody]);
         StateTrace.Record(TracePoints.MelodyImprovisation, SongTracks.MelodyTrack, 0, 0, StateMap.Default, 0, $"{improvisation:F2}", improvisation);
         // a song that fades out plays its last section once more, over which it fades, twice where it plays its pattern
         // only once, so that the fade takes eight bars at least

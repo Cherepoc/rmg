@@ -480,7 +480,7 @@ internal sealed class SectionGenerator
             // the melody answers its question: the answer's later bars draw their rhythm afresh now and then, and its notes
             // there are mutated, by the section's amount, each decision from the answer's own sequence
             var isMelody = _tracks.Definitions[trackNumber].Role == TrackRole.Melody;
-            var amount = new RhythmicUnconventionality(sectionRhythm.Facets[Facet.Melody]).Tilt.Chance(MelodyLayers.AnswerAmount, 1);
+            var amount = MelodyLayers.AnswerAmounts.At(sectionRhythm.Facets[Facet.Melody]);
             var answerContext = Stream(sectionId, SectionStream.MelodyAnswer);
             var answerSeed = answerContext.GenerateInt();
             var questionEnd = barStateTimelineMap.GetEffectiveStateMapAt(_meter.PatternDuration - _meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);

@@ -70,8 +70,11 @@ internal static class MelodyLayers
     /// </summary>
     public const double AnswerRhythm = 1.25;
 
-    /// <summary>The chance a note of the answer's changing bars is mutated, with no lean; the less conventional the rhythm, the likelier.</summary>
+    /// <summary>The chance a note of the answer's changing bars is mutated, at the middle of the melody facet.</summary>
     public const double AnswerAmount = 0.5;
+
+    /// <summary>The chance a note of the answer's changing bars is mutated, by the melody facet: never at the plain end, every note at the wild.</summary>
+    public static ByConvention AnswerAmounts { get; } = RhythmicUnconventionality.Ends(AnswerAmount, 1);
 
     /// <summary>
     ///     The chance the melody leads into a chord change, its last note before the change a step from
@@ -105,10 +108,19 @@ internal static class MelodyLayers
     /// </summary>
     public const double ImprovisedRhythm = 2;
 
-    /// <summary>A song's improvisation (<see cref="Improvisation" />).</summary>
-    public static double GenerateImprovisation(IGenerationContext context, Tilt tilt)
+    /// <summary>
+    ///     How far a song's improvisation reaches, by the melody facet: none at the plain end, whose sections come back as
+    ///     first heard, as tuned at the middle, and the whole range at the wild end.
+    /// </summary>
+    public static ByConvention ImprovisationReach { get; } = new(0, Improvisation, 1);
+
+    /// <summary>A song's improvisation (<see cref="Improvisation" />), by the melody facet of its unconventionality.</summary>
+    public static double GenerateImprovisation(IGenerationContext context, double unconventionality)
     {
-        return Math.Clamp(tilt.SplineValue(0)(context) * Improvisation, 0, 1);
+        var tilt = new RhythmicUnconventionality(unconventionality).Tilt;
+        var improvisation = tilt.SplineValue(0)(context) * ImprovisationReach.At(unconventionality);
+        // none below 0, and none at all where the reach is none, not a negative zero
+        return improvisation > 0 ? Math.Min(improvisation, 1) : 0;
     }
 
     /// <summary>
