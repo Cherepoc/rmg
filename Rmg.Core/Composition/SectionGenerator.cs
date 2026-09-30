@@ -438,6 +438,12 @@ internal sealed class SectionGenerator
             var trackStateMap = CreateSectionTrackLayer(context, trackNumber, sectionRhythm, sectionRhythm.Energy)
                 .MergeWith(sectionStateMap)
                 .MergeWith(sectionTrackLayer.ToStateMap(context));
+            if (_tracks.Definitions[trackNumber].Role == TrackRole.Pad)
+            {
+                yield return (trackNumber, GeneratePad(trackNumber, trackStateMap, barStateTimelineMap, harmonicRhythm), null);
+                continue;
+            }
+
             var trackStateMaps = new Dictionary<int, StateMap> { [trackNumber] = trackStateMap };
             // the melody answers its question: the answer's later bars draw their rhythm afresh now and then, and its notes
             // there are mutated, by the section's amount, each decision from the answer's own sequence
@@ -528,6 +534,31 @@ internal sealed class SectionGenerator
             StateTrace.Record(TracePoints.MelodyAnswer, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{amount:F2}", amount);
             yield return (trackNumber, bars with { Timeline = melody.Appear(0, 0).Trim(Meter.PatternDuration) }, melody);
         }
+    }
+
+    /// <summary>
+    ///     A pad's pattern: a chord at every change of chord, held until the next, over the state of the section and the
+    ///     chord its pool picks there, as the chords' notes take theirs.
+    /// </summary>
+    private static GeneratedBars GeneratePad(int trackNumber, StateMap trackStateMap, StateTimelineMap barStateTimelineMap, HarmonicRhythm harmonicRhythm)
+    {
+        var notes = harmonicRhythm.Changes.Select(change => trackStateMap
+            .MergeWith(PatternGenerator.PickChord(trackStateMap, barStateTimelineMap.GetEffectiveStateMapAt(change)))
+            .With(CompositionStateKinds.BeatRank, 0)
+            .With(StateKinds.HeldDuration, harmonicRhythm.Span)
+            .ToTimelineItem(change)
+        );
+        var timeline = TrackEventStateTimelineMap.Create(
+            Meter.PatternDuration,
+            [
+                new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
+                    trackNumber,
+                    EventTimeline.Create(Meter.PatternDuration, notes).ToEventStateTimelineMap(StateMap.Default)
+                )
+            ],
+            StateTimelineMap.Create(Meter.PatternDuration)
+        );
+        return new GeneratedBars(timeline, []);
     }
 
     /// <summary>

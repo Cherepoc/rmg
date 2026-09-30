@@ -51,9 +51,15 @@ public sealed class VelocityReportTest
             }
         }
 
+        // a role with no notes off the beat, as a pad, has no accent to measure
         return values.ToDictionary(
             x => x.Key,
-            x => new RoleMeasures(x.Value.Level.Average(), x.Value.Down.Average() - x.Value.Off.Average(), x.Value.Spread.Average(), x.Value.Loud.Average())
+            x => new RoleMeasures(
+                x.Value.Level.Average(),
+                x.Value.Down.Count > 0 && x.Value.Off.Count > 0 ? x.Value.Down.Average() - x.Value.Off.Average() : double.NaN,
+                x.Value.Spread.Count > 0 ? x.Value.Spread.Average() : double.NaN,
+                x.Value.Loud.Average()
+            )
         );
     }
 

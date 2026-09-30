@@ -6,7 +6,8 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     Which of the band's parts a section leaves out: now and then the drums, for a breakdown, the bass or the chords,
-///     or the melody, for a section of the band alone, each the likelier the less energy the section has, and the melody
+///     or the melody, for a section of the band alone, and more often than not the pad, which a section adds to lift
+///     it, each the likelier the less energy the section has, and the melody
 ///     all but never where the section has a verse's, a pre-chorus's or a chorus's role, which a tune carries. A section
 ///     keeps its harmony: where both the bass and the chords would rest, the chords play.
 /// </summary>
@@ -18,7 +19,8 @@ internal static class Arrangement
         (TrackRole.Drum, 0.08),
         (TrackRole.Bass, 0.05),
         (TrackRole.Chords, 0.05),
-        (TrackRole.Melody, 0.1)
+        (TrackRole.Melody, 0.1),
+        (TrackRole.Pad, 0.6)
     ];
 
     /// <summary>How far a role that a tune carries keeps its melody, as the odds against it resting.</summary>

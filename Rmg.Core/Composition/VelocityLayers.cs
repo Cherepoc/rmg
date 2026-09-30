@@ -14,13 +14,14 @@ internal static class VelocityLayers
     /// <summary>
     ///     A track's level by its role: the melody and the bass on top, as they lead the mix, the bass a little quieter
     ///     for its even beats; the chords a little over the drums, their stacked notes already softened (<c>Render</c>),
-    ///     which by measure alone sounded too quiet; the drums as they are.
+    ///     which by measure alone sounded too quiet; a pad under them all, as it holds; the drums as they are.
     /// </summary>
     public static double GetLevel(TrackRole role) => role switch
     {
         TrackRole.Melody => 0.25,
         TrackRole.Bass => 0.25,
         TrackRole.Chords => 0.1,
+        TrackRole.Pad => -0.1,
         _ => 0
     };
 
@@ -64,6 +65,7 @@ internal static class VelocityLayers
         TrackRole.Bass => 0.4,
         TrackRole.Chords => 0.5,
         TrackRole.Melody => 0.8,
+        TrackRole.Pad => 0.2,
         _ => 1
     };
 

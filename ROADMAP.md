@@ -206,7 +206,14 @@ planned together (P1):
   10%, 26% of the bridges; the bass 7%, the chords 6% (`ArrangementReportTest`); within a song the energy follows the
   bass's notes 0.16 and the melody's 0.38 (`SectionDynamicsTest`).
 
-- **Pitched roles and the arrangement:** more pitched roles, such as a pad, a second chord instrument or a
+- **A pad** (built): a fourth pitched track (`TrackRole.Pad`, `InstrumentRoles.Pad`: strings, a choir, synth pads, an
+  organ, never the chords' own sound), a chord at every change held until the next (`SectionGenerator.GeneratePad`),
+  under the chords (`VelocityLayers.GetLevel`) and on the other side from them (`Panning`, the widest tracks taking sides
+  first); it rests in a section by a chance of 0.6, less the more energy (`Arrangement`), and comes in in an intro of
+  entries as a part of its own. Over 200 corpus songs it plays in 45% of the sections, 63% of the louder half and 28%
+  of the quieter, 70% of the choruses and 22% of the bridges, at -12.2 dB against the chords' -8.5
+  (`ArrangementReportTest`, `VelocityReportTest`).
+- **Pitched roles and the arrangement:** more pitched roles, such as a second chord instrument or a
   counter-melody (a third `LineProfile`), and a section's parts chosen as its drum kit is (`DrumKitGenerator.SelectKit`):
   roles, the ones that lead and the ones that colour, which play leaned by the section's energy and role, so that a
   section builds by what plays, not only by how loud; a breakdown, the drums out or only a pad and the melody, its
@@ -242,8 +249,8 @@ The fills are the drums', and every track lands with them where a section lands.
 
 ## Instruments
 
-Three pitched tracks, the chords, the melody and the bass, each on one instrument for the whole song; every section
-plays all three. Each sits where its role spreads it (`Panning`): the bass in the middle, the melody near it and the
+Four pitched tracks, the chords, the melody, the bass and a pad, each on one instrument for the whole song; a section
+may leave any of them out (`Arrangement`). Each sits where its role spreads it (`Panning`): the bass in the middle, the melody near it and the
 chords out to the other side; a new role takes a spread of its own.
 
 - **Occasional chords** (P2): how many notes a track sounds at once is its role's (`Realizer`). As a note's state, a

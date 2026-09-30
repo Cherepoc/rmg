@@ -90,6 +90,27 @@ internal static class InstrumentRoles
         ]
     );
 
+    /// <summary>The sustained sounds that hold chords under the band: strings, a choir, synth pads, an organ.</summary>
+    public static InstrumentRole Pad { get; } = new(
+        nameof(Pad),
+        [
+            new(48, "String Ensemble 1", 1, VoiceLeadingLayers.Sustained),
+            new(49, "String Ensemble 2", 0.6, VoiceLeadingLayers.Sustained),
+            new(50, "Synth Strings 1", 0.6, VoiceLeadingLayers.Sustained),
+            new(51, "Synth Strings 2", 0.3, VoiceLeadingLayers.Sustained),
+            new(52, "Choir Aahs", 0.4, VoiceLeadingLayers.Sustained),
+            new(53, "Voice Oohs", 0.3, VoiceLeadingLayers.Sustained),
+            new(16, "Drawbar Organ", 0.3, VoiceLeadingLayers.Sustained),
+            new(88, "Pad 1 (new age)", 0.5, VoiceLeadingLayers.Sustained),
+            new(89, "Pad 2 (warm)", 0.8, VoiceLeadingLayers.Sustained),
+            new(90, "Pad 3 (polysynth)", 0.5, VoiceLeadingLayers.Sustained),
+            new(91, "Pad 4 (choir)", 0.3, VoiceLeadingLayers.Sustained),
+            new(92, "Pad 5 (bowed)", 0.3, VoiceLeadingLayers.Sustained),
+            new(94, "Pad 7 (halo)", 0.4, VoiceLeadingLayers.Sustained),
+            new(95, "Pad 8 (sweep)", 0.2, VoiceLeadingLayers.Sustained)
+        ]
+    );
+
     public static InstrumentRole Melody { get; } = new(
         nameof(Melody),
         [

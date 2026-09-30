@@ -14,7 +14,9 @@ public sealed class SongGeneratorVelocityTest
         var offGrid = new List<double>();
         foreach (var seed in Enumerable.Range(0, 30))
         {
-            foreach (var track in TestCorpus.Get(seed).Rendered.Tracks)
+            // a pad holds its chords evenly, with no accent to measure
+            var pad = ((Rmg.Core.Songs.PitchInstrumentTrack)TestCorpus.Get(seed).Song.TrackDefinitions[Rmg.Core.Composition.SongTracks.PadTrack]).InstrumentCode;
+            foreach (var track in TestCorpus.Get(seed).Rendered.Tracks.Where(x => x.IsPercussionInstrument || x.PitchInstrumentCode != pad))
             {
                 foreach (var note in track.NoteTimeline)
                 {

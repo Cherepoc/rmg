@@ -49,6 +49,7 @@ public static class SongGenerator
         var tracks = SongTracks.Create(
             Stream(SongStream.Tracks),
             Stream(SongStream.Panning),
+            Stream(SongStream.Pad),
             rhythmicUnconventionality,
             Stream(SongStream.DrumStrokes),
             Stream(SongStream.DrumRoles),
@@ -224,5 +225,6 @@ internal enum SongStream
     Intro = 17,
     Groove = 18,
     Panning = 19,
-    SongForm = 20
+    SongForm = 20,
+    Pad = 21
 }

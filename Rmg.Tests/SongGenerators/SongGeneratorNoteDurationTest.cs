@@ -14,13 +14,15 @@ public sealed class SongGeneratorNoteDurationTest
     [Test]
     public async Task PitchedNotes_LastNoLongerThanABar_ButTheFinalChord()
     {
-        // the final chord of an ending that rings out is held for as long as the ending, up to two bars
+        // the final chord of an ending that rings out is held for as long as the ending, up to two bars; a pad holds
+        // its chords as long as they last, which it is left out for
         var maxDuration = Enumerable.Range(0, 20)
-            .Select(seed => TestCorpus.Get(seed).Rendered)
-            .SelectMany(song => song.Tracks
-                .Where(x => !x.IsPercussionInstrument)
+            .Select(seed => TestCorpus.Get(seed))
+            .Select(song => (Pad: ((Rmg.Core.Songs.PitchInstrumentTrack)song.Song.TrackDefinitions[Rmg.Core.Composition.SongTracks.PadTrack]).InstrumentCode, song.Rendered))
+            .SelectMany(song => song.Rendered.Tracks
+                .Where(x => !x.IsPercussionInstrument && x.PitchInstrumentCode != song.Pad)
                 .SelectMany(x => x.NoteTimeline)
-                .Where(x => x.Position + x.Value.Duration < song.Duration - 1e-9)
+                .Where(x => x.Position + x.Value.Duration < song.Rendered.Duration - 1e-9)
             )
             .Max(x => x.Value.Duration);
 

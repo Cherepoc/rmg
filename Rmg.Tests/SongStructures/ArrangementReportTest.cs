@@ -38,7 +38,7 @@ public sealed class ArrangementReportTest
                 .Select(x => (energy[x.Section], structure.Roles[x.Section], (ImmutableHashSet<TrackRole>)x.Value!)));
         }
 
-        foreach (var part in new[] { TrackRole.Drum, TrackRole.Bass, TrackRole.Chords, TrackRole.Melody })
+        foreach (var part in new[] { TrackRole.Drum, TrackRole.Bass, TrackRole.Chords, TrackRole.Melody, TrackRole.Pad })
         {
             string Share(IEnumerable<(double Energy, SectionRole Role, ImmutableHashSet<TrackRole> Resting)> band)
             {

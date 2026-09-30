@@ -86,6 +86,7 @@ internal static class FormLayers
     [
         (new IntroPart(TrackRole.Drum, DrumRole.Time), 2, 0),
         (new IntroPart(TrackRole.Chords), 2, 0),
+        (new IntroPart(TrackRole.Pad), 1, 0),
         (new IntroPart(TrackRole.Drum, DrumRole.Ground), 1.5, 0),
         (new IntroPart(TrackRole.Bass), 1, 0),
         (new IntroPart(TrackRole.Drum, DrumRole.Backbeat), 0.7, 1),

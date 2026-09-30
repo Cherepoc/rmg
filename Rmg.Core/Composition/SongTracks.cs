@@ -14,6 +14,7 @@ internal sealed class SongTracks
     public const int ChordsTrack = 4;
     public const int MelodyTrack = 5;
     public const int BassTrack = 6;
+    public const int PadTrack = 7;
 
     private SongTracks(
         ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
@@ -53,9 +54,11 @@ internal sealed class SongTracks
     /// <param name="roleContext">The sequence the drums' roles in the song are drawn from (<see cref="DrumRoles" />).</param>
     /// <param name="drumSetup">What the song's drums are (<see cref="DrumSetups" />).</param>
     /// <param name="panningContext">The sequence the pitched tracks' places from left to right are drawn from (<see cref="Panning" />).</param>
+    /// <param name="padContext">The sequence the pad's instrument and state are drawn from.</param>
     public static SongTracks Create(
         IGenerationContext context,
         IGenerationContext panningContext,
+        IGenerationContext padContext,
         RhythmicUnconventionality rhythmicUnconventionality,
         IGenerationContext strokeContext,
         IGenerationContext roleContext,
@@ -76,12 +79,35 @@ internal sealed class SongTracks
 
         var pans = Panning.Draw(
             panningContext,
-            new Dictionary<int, TrackRole> { [ChordsTrack] = TrackRole.Chords, [MelodyTrack] = TrackRole.Melody, [BassTrack] = TrackRole.Bass }
+            new Dictionary<int, TrackRole>
+            {
+                [ChordsTrack] = TrackRole.Chords, [MelodyTrack] = TrackRole.Melody, [BassTrack] = TrackRole.Bass, [PadTrack] = TrackRole.Pad
+            }
         );
         StateTrace.Record(TracePoints.Panning, ChordsTrack, 0, 0, StateMap.Default, 0, string.Join(", ", pans.Select(x => $"{x.Key} {x.Value:F2}")), pans);
 
+        // the pad holds chords in a sound of its own, apart from the chords', which it plays under
+        var padInstrument = InstrumentRoles.Pad.Pick(padContext, chordsInstrument.Program);
+
         var definitions = new Dictionary<int, IInstrumentTrack>
         {
+            [PadTrack] = new PitchInstrumentTrack(
+                LayerStates.CreateTrackLayer(
+                    padContext,
+                    "Track",
+                    new StateMapBuilder("Track role", perTrack: true)
+                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Pad))
+                        .Add(StateKinds.VoiceLeading, padInstrument.Leading)
+                        .ToStateMap(padContext),
+                    _ => VelocityLayers.GetLevel(TrackRole.Pad),
+                    trackRhythmLayer
+                ),
+                padInstrument.Program,
+                -1,
+                1,
+                TrackRole.Pad,
+                pans[PadTrack]
+            ),
             [ChordsTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
                     context,

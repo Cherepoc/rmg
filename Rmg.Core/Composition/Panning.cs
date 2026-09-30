@@ -20,19 +20,20 @@ internal static class Panning
             TrackRole.Bass => 0,
             TrackRole.Melody => 0.15,
             TrackRole.Chords => 0.6,
+            TrackRole.Pad => 0.5,
             _ => throw new ArgumentOutOfRangeException(nameof(role), role, "A drum is not panned on its own.")
         };
     }
 
     /// <summary>
     ///     Every pitched track's pan, by its number, from -1, left, to 1, right: a half to all of its role's spread, the
-    ///     tracks that spread taking sides in turn, in the order of their numbers, from a side drawn.
+    ///     tracks that spread taking sides in turn, the widest first, from a side drawn, so that the widest stand apart.
     /// </summary>
     public static ImmutableDictionary<int, double> Draw(IGenerationContext context, IReadOnlyDictionary<int, TrackRole> roles)
     {
         var side = context.TestProbability(0.5) ? 1 : -1;
         var pans = ImmutableDictionary.CreateBuilder<int, double>();
-        foreach (var (track, role) in roles.OrderBy(x => x.Key))
+        foreach (var (track, role) in roles.OrderByDescending(x => GetSpread(x.Value)).ThenBy(x => x.Key))
         {
             var spread = GetSpread(role);
             // ReSharper disable once CompareOfFloatsByEqualityOperator

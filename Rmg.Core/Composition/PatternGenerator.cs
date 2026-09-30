@@ -389,7 +389,7 @@ internal sealed class PatternGenerator
     }
 
     /// <summary>The chord at a position, from the bar's state there, as <see cref="GetChord" /> has it, unrecorded.</summary>
-    private static StateMap PickChord(StateMap stateMap, StateMap barStateMap)
+    internal static StateMap PickChord(StateMap stateMap, StateMap barStateMap)
     {
         var chordStateMap = stateMap.MergeWith(barStateMap.Subset([CompositionStateKinds.ChordPool.Index]));
         var roleChord = barStateMap.GetStateValue(CompositionStateKinds.RoleChord);

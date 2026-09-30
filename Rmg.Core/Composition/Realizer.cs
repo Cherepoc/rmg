@@ -203,14 +203,14 @@ internal static class Realizer
         ImmutableArray<int> notes = role switch
         {
             TrackRole.Melody or TrackRole.Bass => [ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)) + stateMap.GetStateValue(StateKinds.Alteration)],
-            TrackRole.Chords => voiceLeader.Place(
+            TrackRole.Chords or TrackRole.Pad => voiceLeader.Place(
                 [..chordSteps.Select(ToNote)],
                 ToNote(0),
                 stateMap.GetStateValue(StateKinds.ChordVoicingFixed) > 0,
                 stateMap.GetStateValue(StateKinds.VoiceLeading),
                 stateMap.GetStateValue(StateKinds.ChordVoicingReset)
             ),
-            _ => throw new ArgumentOutOfRangeException(nameof(role), role, "A pitched track plays the chords, the melody or the bass.")
+            _ => throw new ArgumentOutOfRangeException(nameof(role), role, "A pitched track plays the chords, the melody, the bass or a pad.")
         };
 
         return new RealizedNote(notes, noteVelocity, duration, stateMap).ToTimelineItem(position);
