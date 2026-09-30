@@ -127,7 +127,10 @@ internal sealed class FillGenerator
         var direction = SectionEnergy.Tilt(lift, ending.Rhythm.Coupling);
         var play = line.HasFill ? DrawPlay(drummer, ending, chances, tilt, direction, weight) : FillPlay.None;
         var rhythm = FillRhythm.Of(ending.Groove.Source, play.Layer, minNote);
+        _lastRun = [];
         var span = Fill(edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId);
+        if (span > 0 && line.Ending != line.Next && !_lastRun.IsEmpty)
+            Runs.Add(new PlayedRun(line.Position, _lastRun, lift * ending.Rhythm.Coupling));
 
         // the drums land after they stopped, as they come back, and always where the song's form marks the line,
         // such as where the band comes in; on the drum kit, or on the percussion into a section of percussion only
@@ -395,7 +398,15 @@ internal sealed class FillGenerator
             foreach (var sound in FillSounds.GetNoteSounds(run, places[k], x => drums[x].Has(position, line)))
                 edits.Hit(sound.Track, position, loudness, sound.Articulation, sectionId, "Fill");
         }
+
+        _lastRun = [..notes.Select(x => x.Position).Distinct().Order()];
     }
+
+    // the positions of the run the last fill played, which a section change keeps for the pitched fills
+    private ImmutableArray<double> _lastRun = [];
+
+    /// <summary>The runs the drums played into a change of section, for the pitched tracks to fill with (<see cref="BassFills" />).</summary>
+    public List<PlayedRun> Runs { get; } = [];
 
     /// <summary>The hits the drums land on at a line; a drum that already plays there keeps its note.</summary>
     private static void Land(
@@ -459,6 +470,9 @@ internal sealed record FillDecision(
 /// <param name="Weight">How much the line weighs before the energy it leads into (<see cref="FillLayers.PhraseWeight" />).</param>
 /// <param name="HasFill">Whether a fill may play before it; none where the song's form has the drums wait.</param>
 /// <param name="IsLandingForced">Whether the drums always land on it, as where the band comes in.</param>
+/// <summary>A run the drums played into a change of section: the line, the run's notes' positions, and the lift, the energy's rise into it as far as the rhythm follows it.</summary>
+internal sealed record PlayedRun(double Line, ImmutableArray<double> Positions, double Lift);
+
 internal sealed record FillLine(
     double Position,
     FillSection Ending,

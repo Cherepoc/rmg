@@ -34,7 +34,8 @@ public sealed class SongGeneratorChordProgressionTest
         for (var seed = 0; seed < 10; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
-            foreach (var notesAtPosition in GetPitchedNotes(song).GroupBy(x => x.Position))
+            // a note with no shape, as a bass's walk into a section, plays its step, not a chord
+            foreach (var notesAtPosition in GetPitchedNotes(song).Where(x => x.Shape != "").GroupBy(x => x.Position))
             {
                 await Assert.That(notesAtPosition.Select(x => x.Shape).Distinct().Count())
                     .IsEqualTo(1)
@@ -84,7 +85,7 @@ public sealed class SongGeneratorChordProgressionTest
             var corpusSong = TestCorpus.Get(seed);
             var changes = corpusSong.ChordChanges;
             int Chord(double position) => Array.FindLastIndex(changes, x => x <= position + 1e-9);
-            foreach (var bar in GetPitchedNotes(corpusSong.Song).GroupBy(x => (x.TrackNumber, Bar: Math.Floor(x.Position / 4), Chord: Chord(x.Position))))
+            foreach (var bar in GetPitchedNotes(corpusSong.Song).Where(x => x.Shape != "").GroupBy(x => (x.TrackNumber, Bar: Math.Floor(x.Position / 4), Chord: Chord(x.Position))))
             {
                 await Assert.That(bar.Select(x => x.Shape).Distinct().Count())
                     .IsEqualTo(1)
@@ -100,7 +101,7 @@ public sealed class SongGeneratorChordProgressionTest
         var changesWithinABar = 0;
         for (var seed = 0; seed < 10; seed++)
         {
-            var notes = GetPitchedNotes(SongGenerator.GenerateSong(seed, settings)).ToList();
+            var notes = GetPitchedNotes(SongGenerator.GenerateSong(seed, settings)).Where(x => x.Shape != "").ToList();
 
             // the shape still only changes at half-bar lines
             foreach (var halfBar in notes.GroupBy(x => (x.TrackNumber, HalfBar: Math.Floor(x.Position / 2))))
@@ -124,7 +125,7 @@ public sealed class SongGeneratorChordProgressionTest
         var settings = ProgressionSettings.Default with { ChordShapeStep = 2 };
         for (var seed = 0; seed < 10; seed++)
         {
-            foreach (var notesAtPosition in GetPitchedNotes(SongGenerator.GenerateSong(seed, settings)).GroupBy(x => x.Position))
+            foreach (var notesAtPosition in GetPitchedNotes(SongGenerator.GenerateSong(seed, settings)).Where(x => x.Shape != "").GroupBy(x => x.Position))
             {
                 await Assert.That(notesAtPosition.Select(x => x.Shape).Distinct().Count())
                     .IsEqualTo(1)

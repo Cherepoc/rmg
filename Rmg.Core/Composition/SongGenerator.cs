@@ -149,8 +149,8 @@ public static class SongGenerator
             .MergeStateMap(Groove.ToStateMap(swing, grooveContext));
 
         // the drums mark the lines, now that the song is put together
-        songTrackNoteTimelineMap = new FillGenerator(Stream(SongStream.Fills), tracks, rhythmicUnconventionality)
-            .Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
+        var fills = new FillGenerator(Stream(SongStream.Fills), tracks, rhythmicUnconventionality);
+        songTrackNoteTimelineMap = fills.Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
 
         // the lines placed over the whole song, as they go on from section to section and lead into the next: the melody,
         // and the bass
@@ -158,6 +158,8 @@ public static class SongGenerator
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, melodyTrack.Key, (PitchInstrumentTrack)melodyTrack.Value, MelodyLayers.Line);
         var bassTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Bass);
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, BassLeadingLayers.Line);
+        // and the bass walking with the drums' runs into a new section now and then, from where it is placed
+        songTrackNoteTimelineMap = BassFills.Apply(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, fills.Runs, Stream(SongStream.BassFills));
         var counterTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.CounterMelody);
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, counterTrack.Key, (PitchInstrumentTrack)counterTrack.Value, CounterLayers.Line);
 
@@ -248,5 +250,6 @@ internal enum SongStream
     SongForm = 20,
     Pad = 21,
     KeyChange = 22,
-    CounterMelody = 23
+    CounterMelody = 23,
+    BassFills = 24
 }

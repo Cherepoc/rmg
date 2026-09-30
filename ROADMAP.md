@@ -18,7 +18,7 @@ measured before and after by a report test, by the measure its entry names.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
-**Later** (P2), roughly in this order: pitched fills (see *Fills*), once a fill can draw a line's notes; the ratings report (see *Listening data*), once the dashboard shows songs
+**Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs
 rated enough; styles (see *Styles*), once they are chosen.
 
 **When the need shows** (P3): the melody's contour (see *Melody*); occasional chords (see *Instruments*); harmonised doubling and articulations, after styles; solos; long cycles, then
@@ -238,14 +238,14 @@ planned together (P1):
 
 The fills are the drums', and every track lands with them where a section lands.
 
-- **Pitched fills** (P2, planned in September 2026 and put off): at a line the drums mark, a pitched track fills too,
-  the bass walking up the run's rhythm into the next section's root first. The fills are made before the lines are
-  placed, so a note added in a fill is placed by its line's rules, but a line's note carries the draws it is placed by
-  (its step, its turn, its key, `LinePattern.AddNoteState`), which only the line's pattern draws; a note copied from the
-  one before would be placed as its echo, the same note again, not a walk. The fill needs the line's pattern to draw
-  its notes' states, or the fills to come after the lines are placed and pick their notes themselves. Measured by:
-  pitched fills by the line's weight, and leaps into a section. Also where the melody has a gap before a chord change,
-  should it sound empty.
+- **Pitched fills** (built for the bass): where the drums play a run into a change of section, the bass walks with it
+  by a chance of 0.5, the likelier into a louder section (`BassFills`), made once the lines are placed, as the fills'
+  runs are kept (`FillGenerator.Runs`): on the run's rhythm, an 8th apart at the most, by the scale's steps from its
+  note before to a step from the note the next section starts on, each kept as a line's note, a scale step over the
+  chord where it plays and on the scale there; only where the bass plays on both sides of the line. Over 200 corpus
+  songs the bass moves into a new section by step 68% of the time, where it did 47%, and leaps 9% against 11%
+  (`BassFillReportTest`). Left: the melody or the counter-melody running into a section, and filling the melody's gaps
+  before a chord change within a phrase, should they sound empty.
 - **The lift** (built for the loudness): into a louder section, the band grows louder over the bar before, a step every
   quarter beat, up to how much more energy the next section has as far as the ending section's rhythm follows it
   (`SongFormGenerator.CreateLifts`, `FormLayers.LiftVelocity` 0.6), the next section then as loud as it plays. Over 200
