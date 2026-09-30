@@ -6,8 +6,8 @@
 - **Generalization over hardcoding.** Prefer one mechanism that covers several cases over a case each, and a drawn or
   derived value over a fixed table or an order chosen by hand. Where convention matters, pull the draw toward it by the
   section's conventionality instead of hardcoding the conventional choice.
-- **Conventionality has two ends.** A song has a conventionality from 0, the plainest, to 1, the wildest, and a value of
-  it for each facet of the music, such as its feel, its chords or its form, drawn around the song's and moved a little
+- **Conventionality has two ends.** A song has an unconventionality (`Unconventionality`) from 0, the plainest, to 1,
+  the wildest, and a value of it for each facet of the music, such as its feel, its chords or its form, drawn around the song's and moved a little
   by a section, so that a song can be plain in one way and wild in another; every choice leans by its facet's value.
   At 0 a choice plays only the options its plain end allows, at their plain weights, and at 1 only those its wild end
   allows, at their wild weights; between, an option's weight follows a smooth curve from its plain weight through its

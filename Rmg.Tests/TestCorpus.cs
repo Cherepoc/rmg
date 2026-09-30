@@ -41,8 +41,11 @@ internal static class TestCorpus
     /// <summary>The song of the seed with its bars in the meter given instead of its own.</summary>
     public static CorpusSong Get(int seed, Meter meter)
     {
-        return MeterSongs.GetOrAdd((seed, meter), x => new Lazy<CorpusSong>(() => Generate(x.Item1, x.Item2))).Value;
+        return MeterSongs.GetOrAdd((seed, meter), x => new Lazy<CorpusSong>(() => Generate(x.Item1, new SongOverrides(Meter: x.Item2)))).Value;
     }
+
+    /// <summary>The song of the seed with what the overrides set in place of its own draws, made afresh every time.</summary>
+    public static CorpusSong Get(int seed, SongOverrides overrides) => Generate(seed, overrides);
 
     // a flow of execution with nothing of the caller's, no trace among it, captured on a thread of its own
     private static readonly ExecutionContext CleanContext = CaptureClean();
@@ -64,14 +67,16 @@ internal static class TestCorpus
         return result!;
     }
 
-    private static CorpusSong Generate(int seed, Meter? meter = null)
+    private static CorpusSong Generate(int seed) => Generate(seed, SongOverrides.None);
+
+    private static CorpusSong Generate(int seed, SongOverrides overrides)
     {
         return Isolated(() =>
             {
                 // the entries and their values, not what every layer contributed, which would make the songs several
                 // times slower to generate: a test that explains a state traces a song of its own
                 using var trace = StateTrace.Start(explains: false);
-                var song = meter is null ? SongGenerator.GenerateSong(seed) : SongGenerator.GenerateSong(seed, ProgressionSettings.Default, meter);
+                var song = SongGenerator.GenerateSong(seed, ProgressionSettings.Default, overrides);
                 return new CorpusSong(seed, song, Render.RenderSong(song), [..trace.Entries]);
             }
         );

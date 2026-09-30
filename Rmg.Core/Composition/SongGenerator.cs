@@ -36,18 +36,24 @@ public static class SongGenerator
         return GenerateSong(seed, ProgressionSettings.Default);
     }
 
-    internal static Song GenerateSong(int seed, ProgressionSettings progressionSettings) => GenerateSong(seed, progressionSettings, null);
+    internal static Song GenerateSong(int seed, ProgressionSettings progressionSettings) => GenerateSong(seed, progressionSettings, SongOverrides.None);
 
-    /// <param name="meter">The meter the song's bars are in, or null for the song's own.</param>
-    internal static Song GenerateSong(int seed, ProgressionSettings progressionSettings, Meter? meter)
+    /// <param name="overrides">What a test sets in place of the song's own draws.</param>
+    internal static Song GenerateSong(int seed, ProgressionSettings progressionSettings, SongOverrides overrides)
     {
         // every stage draws from its own random sequence, derived from the seed by the stage, so a change to what one
         // stage draws leaves what the others draw as it was
         var root = new GenerationContext(seed);
         IGenerationContext Stream(SongStream stream) => CreateStream(seed, stream);
 
-        // how far the rhythm strays from convention, which every rhythm layer from the tracks' own on is scaled by
-        var rhythmicUnconventionality = RhythmicUnconventionality.Generate(Stream(SongStream.Rhythm));
+        // how far the song strays from convention, and every facet of it, drawn around the song's; the rhythm strays as
+        // the groove does, which every rhythm layer from the tracks' own on is scaled by
+        var unconventionalityBase = overrides.Base ?? RhythmicUnconventionality.Generate(Stream(SongStream.Rhythm)).Value;
+        var songUnconventionality = Unconventionality.Generate(unconventionalityBase, facet => CreateStream(seed, SongStream.Unconventionality, facet));
+        if (overrides.Facets is { } facets)
+            songUnconventionality = songUnconventionality with { Facets = songUnconventionality.Facets.SetItems(facets) };
+        StateTrace.Record(TracePoints.SongUnconventionality, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{songUnconventionality.Base:F2}", songUnconventionality);
+        var rhythmicUnconventionality = new RhythmicUnconventionality(songUnconventionality[Facet.Groove]);
         StateTrace.Record(TracePoints.SongRhythm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{rhythmicUnconventionality.Value:F2}", rhythmicUnconventionality);
         var tracks = SongTracks.Create(
             Stream(SongStream.Tracks),
@@ -72,7 +78,7 @@ public static class SongGenerator
 
         // the song's form: one of the forms songs are written in, its sections playing their roles, or one of its own
         // the meter the song's bars are in
-        meter ??= Meter.Draw(Stream(SongStream.Meter), rhythmicUnconventionality.Tilt);
+        var meter = overrides.Meter ?? Meter.Draw(Stream(SongStream.Meter), rhythmicUnconventionality.Tilt);
         StateTrace.Record(TracePoints.Meter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, meter.ToString(), meter);
 
         var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), rhythmicUnconventionality.Tilt);
@@ -97,6 +103,7 @@ public static class SongGenerator
             progressionSettings,
             tracks,
             unconventionality,
+            songUnconventionality,
             rhythmicUnconventionality,
             melodyBusyness,
             scale,
@@ -187,6 +194,12 @@ public static class SongGenerator
         return new GenerationContext(Seeds.Derive(seed, (int)stream));
     }
 
+    /// <summary>A stream's own sequence for a facet of the song's unconventionality.</summary>
+    private static IGenerationContext CreateStream(int seed, SongStream stream, Facet facet)
+    {
+        return new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)stream), (int)facet));
+    }
+
     /// <summary>
     ///     The song's layer of the generation state, which every section starts from: its rhythm, its note walk, and
     ///     the first entries of the chord pool, which the song's chords make the likeliest.
@@ -261,5 +274,6 @@ internal enum SongStream
     KeyChange = 22,
     CounterMelody = 23,
     BassFills = 24,
-    Meter = 25
+    Meter = 25,
+    Unconventionality = 26
 }

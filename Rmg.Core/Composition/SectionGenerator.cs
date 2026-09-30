@@ -25,6 +25,9 @@ internal sealed class SectionGenerator
     private readonly SongTracks _tracks;
     private readonly HarmonicUnconventionality _songUnconventionality;
     private readonly RhythmicUnconventionality _songRhythmicUnconventionality;
+
+    // how far the song strays from convention, facet by facet, which a section moves a little
+    private readonly Unconventionality _songFacets;
     private readonly MelodyBusyness _songMelodyBusyness;
     private readonly Scale _songScale;
     private readonly StateMap _songStateMap;
@@ -46,6 +49,7 @@ internal sealed class SectionGenerator
         ProgressionSettings settings,
         SongTracks tracks,
         HarmonicUnconventionality songUnconventionality,
+        Unconventionality songFacets,
         RhythmicUnconventionality songRhythmicUnconventionality,
         MelodyBusyness songMelodyBusyness,
         Scale songScale,
@@ -61,6 +65,7 @@ internal sealed class SectionGenerator
         _seed = seed;
         _tracks = tracks;
         _songUnconventionality = songUnconventionality;
+        _songFacets = songFacets;
         _songRhythmicUnconventionality = songRhythmicUnconventionality;
         _songMelodyBusyness = songMelodyBusyness;
         _songScale = songScale;
@@ -95,6 +100,8 @@ internal sealed class SectionGenerator
         var unconventionality = _songUnconventionality.GenerateSection(context);
         StateTrace.Record(TracePoints.SectionHarmony, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{unconventionality.Anchor:F2}", unconventionality);
         var rhythm = _songRhythmicUnconventionality.GenerateSection(context);
+        var facets = _songFacets.GenerateSection(facet => _context.CreateContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Unconventionality), (int)facet)));
+        StateTrace.Record(TracePoints.SectionUnconventionality, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", facets.Facets.OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Value:F2}")), facets);
         var chords = LayerStates.CreateChordPool(unconventionality)(context);
 
         var (songStateMap, energy) = GetEnergy(sectionId, rhythm);
@@ -760,5 +767,6 @@ internal enum SectionStream
     CounterLeading = 17,
     CounterImprovisation = 18,
     Pentatonic = 19,
-    TimeFeel = 20
+    TimeFeel = 20,
+    Unconventionality = 21
 }
