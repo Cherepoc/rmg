@@ -1,3 +1,5 @@
+import { seedToText } from "./settings.js";
+
 /**
  *     The analytics dashboard. It asks the server for one summary and draws it; nothing here talks to
  *     anything else, and the charts are plain SVG rather than a library, for the same reason the rest of
@@ -528,7 +530,7 @@ function drawSeeds() {
             bar.className = "bar";
             bar.style.width = `${Math.max(2, (seed.seconds / longest) * 100)}%`;
 
-            return [String(seed.seed), seconds(seed.seconds), String(seed.plays), bar];
+            return [seedToText(seed.seed), seconds(seed.seconds), String(seed.plays), bar];
         })
     ));
 }
@@ -564,14 +566,14 @@ function drawRated() {
 
     elements.ratedHint.textContent = `The songs of ${summary.ratedVersion} rated, the most liked first. A seed is this song only in this version.`;
     elements.rated.replaceChildren(table(
-        ["Seed", "Asked for at", "Liked", "Disliked"],
-        summary.rated.map((seed) => [String(seed.seed), seed.given === null ? "drawn" : `${seed.given} of 127`, String(seed.likes), String(seed.dislikes)])
+        ["Song", "Settings given", "Liked", "Disliked"],
+        summary.rated.map((seed) => [seedToText(seed.seed), seed.identity === "" ? "drawn" : seed.identity, String(seed.likes), String(seed.dislikes)])
     ));
 }
 
-const FIFTHS = ["Plainest", "Plain", "Middle", "Wild", "Wildest"];
+const FIFTHS = ["Plainest", "Plain", "Middle", "Experimental", "Most experimental"];
 
-/** Ratings by fifths of how plain or wild the songs are, with how many songs each is of, as a share of few is little. */
+/** Ratings by fifths of how plain or experimental the songs are, with how many songs each is of, as a share of few is little. */
 function drawFifths() {
     if (summary.ratedFifths.length === 0) {
         elements.fifths.replaceChildren(empty("No song has been rated with its settings yet."));

@@ -30,9 +30,11 @@ fills' loudness and sounds by convention; note keys.
 A song's version (`VERSION`, `SongsVersion`: a number such as 0.5.001, which `deploy.sh` bumps and commits when the
 songs' fingerprint changes) is stored with every analytics event about a song, and the page rates songs, liked or
 not; the dashboard shows the listening and the ratings by version, and the songs of the latest one rated. Every
-event about a song carries its settings (`SongSettings`: its unconventionality as a step from 0 to 127, drawn or given,
-and its mix), kept with its unconventionality and whether it was given as columns; a seed asked for at a step is a
-song of its own, and the dashboard rates the latest version's songs by fifths of how plain or wild they are.
+event about a song carries its settings (`SongSettings`, 50 base62 digits: the unconventionality and facets, every
+part's plays, instrument, volume and pan, the drum setup and groups and the volume, each given or as drawn), kept with
+its unconventionality, whether it was given and its identity (what of the settings changes the song) as columns; a
+seed with an identity is a song of its own, and the dashboard rates the latest version's songs by fifths of how plain or
+experimental they are. Seeds are written in base62 everywhere.
 
 - **The ratings report** (P2, once the dashboard shows a few hundred songs rated in one version): an export of a
   version's ratings and time listened (seed, rating, seconds), behind the dashboard's token, and an explicit report
@@ -158,11 +160,13 @@ the facets). The plain end is the plainest of every choice: triads alone, cadenc
 minor, no key change, one of the forms. To tune by listening: the spreads, the chords' and the scales' weights, and the
 plain end's rigidity: no change of feel, triplet fills included, every bar of a plain song at the same density. The feel facet puts 18% of songs
 outside four and 10% in odd meters, against 12% and 5% before.
-- **More of a song's parameters supplied** (P3): the conventionality's base is supplied in the page and the API (a
-  step from 0 to 127, which names the song with its seed); next a facet, then the meter, the tempo, the key and the
-  like, each drawn or given from a stream of its own (`SongOverrides`, see CLAUDE.md's *Drawn or given*), so that the
-  same seed with a value supplied is the same song made so. Each goes in the next format of `SongSettings` (a new
-  first character), and names the song, in the page's list and ratings and the dashboard, as the step does.
+- **More of a song's parameters supplied** (P3): the page's settings give the unconventionality, every facet, whether
+  every part plays, the drum setup, and the mix; next the tempo, the key and the meter as given values, each from a
+  stream of its own (`SongOverrides`, see CLAUDE.md's *Drawn or given*), a field of the settings' next format (a new
+  first character) and part of a song's identity.
+- **The settings panel, to listen to and use:** whether a song made again with changed settings, going on from the same
+  share of its length, sounds like the same song moved or like a jump; whether the pad in 80% of songs, the
+  counter-melody in 60% and the drums in 95% leave songs too thin (sections rest the counter-melody 74% against 53%).
 
 ## Meter
 
