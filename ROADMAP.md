@@ -140,9 +140,17 @@ tuned and wild weights (`ByConvention`), in place of the rhythm's and the harmon
    fullness and variation spreads, the note dynamics and the energy's coupling. The plainest third of songs keeps the
    backbeat in 53% of its bars and changes its speed less (13% faster against 19%).
 
-Later, by the same rule: key changes anywhere and at any time, where the form now allows one; the voicings, the
-cadence's raised seventh and the chord pool's size; more modes for the wild end (with *Scales of other sizes*); a
-song's own coherence, how far its facets stray from its base; a user's conventionality setting, which moves the base.
+The wild end made complete (built): a key change at any pattern's start by the scale facet, a last section that came
+back as before and elsewhere never at the middle and every time at the wild end, by any step there (`KeyChange`: the
+scale facet's fifths change key in 2, 12, 10, 66 and 100% of songs, the wildest 8 times a song); the voicings and the
+chords' register by the chords facet, the plainest close or inverted and always led, the wildest never close and every
+bar afresh (`ChordVoicing`, `VoiceLeadingLayers`); the cadence's raised seventh by the progression facet, never at the
+wild end (`Progressions.CadenceRaise`). The chord pool's size was left as it is: the plain end's chords are all triads,
+so its variety is none there already, and the wild end's pool is varied enough beside its key changes and registers.
+To listen to: whether the fourth fifth's key changes, about two a song, are too many for a song that is only fairly wild.
+
+Later, by the same rule: more modes for the wild end (with *Scales of other sizes*); a song's own coherence, how far
+its facets stray from its base.
 Generated songs are drawn in log-odds (`Unconventionality`), so that a song as a whole is near an end in about one
 in a hundred and a facet in one in sixteen, chords and groove going together as 0.75; harmony's middle is a middling
 song's, the jazz and the clusters the wilder songs' (levels 3 to 5 about 7% of the corpus's chords, against 16% before
