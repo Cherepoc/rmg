@@ -216,7 +216,10 @@ internal sealed class SectionGenerator
         );
         StateTrace.Record(TracePoints.DrumPresence, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{string.Join(", ", barDrums.Resting)}; {string.Join(", ", barDrums.Strokes)}", barDrums);
 
-        var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads.ToImmutable(), sectionRoles, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm).ToArray();
+        // the drums in half time now and then, in the quieter sections, or double time, in the louder, from a sequence of its own
+        var timeFeel = Groove.DrawTimeFeel(Stream(sectionId, SectionStream.TimeFeel), tilt);
+        StateTrace.Record(TracePoints.TimeFeel, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{timeFeel}", timeFeel);
+        var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads.ToImmutable(), sectionRoles, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm, timeFeel).ToArray();
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
@@ -364,17 +367,20 @@ internal sealed class SectionGenerator
         ImmutableDictionary<int, int> sectionStrokes,
         BarDrums barDrums,
         StateTimelineMap barStateTimelineMap,
-        SectionRhythm sectionRhythm
+        SectionRhythm sectionRhythm,
+        int timeFeel
     )
     {
         foreach (var group in _tracks.Groups)
         {
+            // the section's time, as a step of every drum's period: half time twice as long, double time half
             var groupStateMap = new StateMapBuilder("Section drum group", perTrack: true)
                 .AddRhythmLayer(sectionRhythm.Unconventionality.Lean(RhythmLayers.SectionDrumGroup).Tilted(sectionRhythm.Energy))
                 .AddNoteWalkLayer()
                 .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.SectionDrumGroup))
                 .AddNoteDurationLayer()
                 .ToStateMap(context)
+                .MergeWith(new StateMapBuilder("Section time").Add(CompositionStateKinds.Rhythm.Period.Power, timeFeel).ToStateMap(context))
                 .MergeWith(group.StateMap)
                 .MergeWith(sectionStateMap);
             var trackStateMaps = new Dictionary<int, StateMap>();
@@ -741,5 +747,6 @@ internal enum SectionStream
     Arrangement = 16,
     CounterLeading = 17,
     CounterImprovisation = 18,
-    Pentatonic = 19
+    Pentatonic = 19,
+    TimeFeel = 20
 }

@@ -6,6 +6,9 @@ internal static class TracePoints
     /// <summary>A section's energy, with its pull (<see cref="SectionEnergyTrace" />).</summary>
     public const string SectionEnergy = "Section energy";
 
+    /// <summary>How a section's drums keep time: 1 half time, -1 double time, 0 the song's (an <c>int</c>).</summary>
+    public const string TimeFeel = "Time feel";
+
     /// <summary>Whether a section's melody is pentatonic (a <c>bool</c>).</summary>
     public const string Pentatonic = "Pentatonic";
 

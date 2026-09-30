@@ -19,8 +19,7 @@ measured before and after by a report test, by the measure its entry names.
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
 **Later** (P2), roughly in this order: pitched fills (see *Fills*), once a fill can draw a line's notes; the ratings report (see *Listening data*), once the dashboard shows songs
-rated enough; half time and double time (see *Groove*);
-the melody's contour (see *Melody*); styles (see *Styles*); the song's memory (see
+rated enough; the melody's contour (see *Melody*); styles (see *Styles*); the song's memory (see
 *Architecture*), once the arrangement doubles the tracks.
 
 **When the need shows** (P3): occasional chords (see *Instruments*); harmonised doubling and articulations, after styles; solos; long cycles, then
@@ -90,6 +89,7 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
 - **The rests:** do the breakdowns and the sections without a melody sound like an arrangement, or like parts gone
   missing? Is a drumless section before a chorus a lift, as the fill out of it means it to be?
 - **The lift:** is a crescendo of about 8 of 127 over the bar before a louder section heard as a lift?
+- **Half time and double time:** does double time, 22 drum notes a bar, sound like a lift or a scramble?
 - **The fade-outs:** a ritardando into the fade, the drums fading first, or a tag after it, if asked for.
 
 ## Meter
@@ -293,9 +293,12 @@ enough to be heard swung (0.14 s, 105 BPM and slower), its 8ths otherwise, from 
 it, `Render` moving every note by one continuous stretch of each pair, so that no note crosses another. Over 300
 corpus songs, 16% of the plainest swing, 17% of the middle and 37% of the wildest (`GrooveTest.Report`).
 
-- **Half time and double time** (P2): a section whose drums play at half or twice the song's tempo, the backbeat on 3
-  or on every beat, over the same chords, drawn by the energy, half time the quieter and double time the louder.
-  Measured by: the energy of the sections that change, and the drums' notes a bar in them.
+- **Half time and double time** (built): a section's drums play in half time by a chance of 0.08, the likelier the
+  less energy it has, or in double time by 0.04, the likelier the more (`Groove.DrawTimeFeel`), as a step of every
+  drum's period in the drum group's section layer, so that the snare's backbeat moves to the bar's third beat or to every
+  beat, its phase following its period, and every other drum with it, over the same chords. Over 200 corpus songs, 9% of
+  the sections play in half time, at an energy of -0.12, 6.5 drum notes a bar, the snare's beats on the third 46% of
+  the time; 9% in double time, at 0.39, 22 a bar (`TimeFeelReportTest`).
 - **Timing by role** (P3): the backbeat a little late, the hi-hat on top, should swing alone sound stiff; plain
   doubling needs it.
 

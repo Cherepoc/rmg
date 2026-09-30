@@ -57,6 +57,25 @@ internal static class Groove
         return swings ? new Swing(amount * period / 6, period) : Swing.None;
     }
 
+    /// <summary>The chance a section's drums play in half time, at a section of middling energy.</summary>
+    public const double HalfTimeChance = 0.08;
+
+    /// <summary>The chance a section's drums play in double time, at a section of middling energy, rarer, as it is a busy effect.</summary>
+    public const double DoubleTimeChance = 0.04;
+
+    /// <summary>
+    ///     How a section's drums keep time: as a step of every drum's period, 1 for half time, the backbeat on the bar's
+    ///     third beat and every cycle twice as long, -1 for double time, the backbeat on every beat, and 0 for the song's
+    ///     time; half time the likelier the less energy the section has, double time the more.
+    /// </summary>
+    public static int DrawTimeFeel(IGenerationContext context, Tilt energy)
+    {
+        var half = energy.Chance(HalfTimeChance, -1);
+        var twice = energy.Chance(DoubleTimeChance, 1);
+        var draw = context.GenerateDouble();
+        return draw < half ? 1 : draw < half + twice ? -1 : 0;
+    }
+
     public static StateMap ToStateMap(Swing swing, IGenerationContext context)
     {
         return new StateMapBuilder("Song")
