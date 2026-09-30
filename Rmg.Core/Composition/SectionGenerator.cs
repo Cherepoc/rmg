@@ -23,7 +23,6 @@ internal sealed class SectionGenerator
     // the meter the song's bars are in
     private readonly Meter _meter;
     private readonly SongTracks _tracks;
-    private readonly RhythmicUnconventionality _songRhythmicUnconventionality;
 
     // how far the song strays from convention, facet by facet, which a section moves a little
     private readonly Unconventionality _songFacets;
@@ -48,7 +47,6 @@ internal sealed class SectionGenerator
         ProgressionSettings settings,
         SongTracks tracks,
         Unconventionality songFacets,
-        RhythmicUnconventionality songRhythmicUnconventionality,
         MelodyBusyness songMelodyBusyness,
         Scale songScale,
         StateMap songStateMap,
@@ -63,7 +61,6 @@ internal sealed class SectionGenerator
         _seed = seed;
         _tracks = tracks;
         _songFacets = songFacets;
-        _songRhythmicUnconventionality = songRhythmicUnconventionality;
         _songMelodyBusyness = songMelodyBusyness;
         _songScale = songScale;
         _songStateMap = songStateMap;
@@ -99,7 +96,8 @@ internal sealed class SectionGenerator
         StateTrace.Record(TracePoints.SectionUnconventionality, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", facets.Facets.OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Value:F2}")), facets);
         var unconventionality = new HarmonicUnconventionality(facets[Facet.Chords]);
         StateTrace.Record(TracePoints.SectionHarmony, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{unconventionality.Chords:F2}", unconventionality);
-        var rhythm = _songRhythmicUnconventionality.GenerateSection(context);
+        // the section's rhythm strays as its groove does
+        var rhythm = new RhythmicUnconventionality(facets[Facet.Groove]);
         var chords = LayerStates.CreateChordPool(unconventionality)(context);
 
         var (songStateMap, energy) = GetEnergy(sectionId, rhythm);

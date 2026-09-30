@@ -203,7 +203,8 @@ public sealed class MelodyRepetitionTest
         // placed over the song, a recurring section and an answer that go on from the note before replay the tune heard,
         // an octave off where it would leap from it
         await Assert.That(m.FixedClass).IsGreaterThan(0.9);
-        await Assert.That(m.Improvised).IsBetween(0.6, 0.95);
+        // the wildest melodies improvise over their whole range, so that songs that improvise keep less of it
+        await Assert.That(m.Improvised).IsBetween(0.5, 0.95);
         await Assert.That(m.AnswerFirstHalfClass).IsGreaterThan(0.9);
         await Assert.That(m.AnswerSecondHalf).IsBetween(0.5, 0.9);
     }

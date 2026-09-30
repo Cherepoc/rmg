@@ -12,9 +12,6 @@ namespace Rmg.Core.Composition;
 /// </summary>
 public sealed record RhythmicUnconventionality(double Value)
 {
-    /// <summary>How far a section moves the song's value, either way.</summary>
-    public const double SectionShift = 0.15;
-
     /// <summary>How little a section of the wildest rhythm follows its energy.</summary>
     public const double MaxDecoupling = 0.8;
 
@@ -36,11 +33,6 @@ public sealed record RhythmicUnconventionality(double Value)
     public static RhythmicUnconventionality Generate(IGenerationContext context)
     {
         return new RhythmicUnconventionality(Math.Clamp(0.5 + SpreadGenerator(context) / 4, 0, 1));
-    }
-
-    public RhythmicUnconventionality GenerateSection(IGenerationContext context)
-    {
-        return new RhythmicUnconventionality(Math.Clamp(Value + Generators.SplineValue()(context) * SectionShift, 0, 1));
     }
 
     /// <summary>

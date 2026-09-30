@@ -109,7 +109,6 @@ public static class SongGenerator
             progressionSettings,
             tracks,
             songUnconventionality,
-            rhythmicUnconventionality,
             melodyBusyness,
             scale,
             songStateMap,
