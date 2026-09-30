@@ -65,7 +65,7 @@ public static class SongGenerator
             rhythmicUnconventionality,
             Stream(SongStream.DrumStrokes),
             Stream(SongStream.DrumRoles),
-            DrumSetups.Pick(Stream(SongStream.DrumSetup), rhythmicUnconventionality.Tilt)
+            DrumSetups.Pick(Stream(SongStream.DrumSetup), rhythmicUnconventionality.Value)
         );
         StateTrace.Record(TracePoints.DrumSetup, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, tracks.DrumSetup.ToString(), tracks.DrumSetup);
 

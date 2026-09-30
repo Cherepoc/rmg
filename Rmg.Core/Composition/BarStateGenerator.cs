@@ -71,7 +71,7 @@ internal sealed class BarStateGenerator
     /// <param name="home">The step of the section's home above the song's tonic.</param>
     /// <param name="bassLeading">How much the section's bass leads into the chords, from 0 to 1.</param>
     /// <param name="context">The section's random sequence.</param>
-    /// <param name="rhythmTilt">How unconventional the section's rhythm is, which leans the melody's contour.</param>
+    /// <param name="facets">How far the section strays from convention: its melody facet leans the melody's contour, its chords facet the bass's arrivals.</param>
     public StateTimelineMap Generate(
         IGenerationContext context,
         Scale scale,
@@ -80,7 +80,7 @@ internal sealed class BarStateGenerator
         int home,
         HarmonicUnconventionality unconventionality,
         double bassLeading,
-        Tilt rhythmTilt
+        Unconventionality facets
     )
     {
         // each state draws from its own random sequence, so tuning one does not change the others
@@ -131,8 +131,8 @@ internal sealed class BarStateGenerator
                 raisedStepTimeline,
                 roleChordTimeline,
                 GenerateResets(context),
-                ..GenerateBassLeading(context.CreateContext(Seeds.Derive(seed, BassLeadingStream)), changes, bassLeading, rhythmTilt),
-                GenerateMelodyContour(context, context.CreateContext(Seeds.Derive(seed, ContourPeriodStream)), rhythmTilt),
+                ..GenerateBassLeading(context.CreateContext(Seeds.Derive(seed, BassLeadingStream)), changes, bassLeading, facets[Facet.Chords]),
+                GenerateMelodyContour(context, context.CreateContext(Seeds.Derive(seed, ContourPeriodStream)), facets[Facet.Melody]),
                 GenerateMelodyPhraseEnd(context)
             ]
         );
@@ -162,9 +162,9 @@ internal sealed class BarStateGenerator
     }
 
     /// <summary>The shape the section's melody phrases take: the register the melody aims at in each bar.</summary>
-    private StateTimeline<double> GenerateMelodyContour(IGenerationContext context, IGenerationContext periodContext, Tilt tilt)
+    private StateTimeline<double> GenerateMelodyContour(IGenerationContext context, IGenerationContext periodContext, double unconventionality)
     {
-        var contour = MelodyLayers.GenerateContour(context, periodContext, tilt);
+        var contour = MelodyLayers.GenerateContour(context, periodContext, unconventionality);
         return StateTimeline.Create(
                 _meter.PatternDuration,
                 CompositionStateKinds.LineRegister,
@@ -189,7 +189,7 @@ internal sealed class BarStateGenerator
     ///     How the bass leads out of every chord into the next, by how much it leads, and what it lands on in every new
     ///     chord, the less conventional the section the less often the root.
     /// </summary>
-    private IEnumerable<IStateTimeline> GenerateBassLeading(IGenerationContext context, ImmutableArray<double> changes, double bassLeading, Tilt rhythmTilt)
+    private IEnumerable<IStateTimeline> GenerateBassLeading(IGenerationContext context, ImmutableArray<double> changes, double bassLeading, double unconventionality)
     {
         var approachGenerator = Generators.WeightedIndex(BassLeadingLayers.Approaches);
         var approaches = StateTimeline.Create(
@@ -209,7 +209,7 @@ internal sealed class BarStateGenerator
             )
             .WithLayer("Bar");
 
-        var arrivalWeights = rhythmTilt.Weigh(BassLeadingLayers.Arrivals, x => x == ChordArrival.Root ? 0 : 1);
+        var arrivalWeights = ByConvention.Weigh(BassLeadingLayers.Arrivals.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == ChordArrival.Root ? 0 : 1))), unconventionality);
         var arrivalGenerator = Generators.WeightedIndex(arrivalWeights);
         var arrivals = StateTimeline.Create(
                 _meter.PatternDuration,

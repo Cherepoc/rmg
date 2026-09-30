@@ -19,7 +19,7 @@ public sealed class DrumRolesTest
     {
         var context = new GenerationContext(1);
         var changed = Enumerable.Range(0, 2_000)
-            .Select(_ => DrumRoles.DrawSection(context, Spread, DrumRole.Ground, new RhythmicUnconventionality(1).Tilt))
+            .Select(_ => DrumRoles.DrawSection(context, Spread, DrumRole.Ground, 1))
             .First(x => !x.IsDefault);
         var role = (DrumRole)changed.GetStateValue(CompositionStateKinds.DrumRole).Value;
         var rhythm = DrumRoles.Parts[DrumRole.Ground].ToStateMap().MergeWith(changed);
@@ -35,11 +35,11 @@ public sealed class DrumRolesTest
         {
             var context = new GenerationContext(1);
             return Enumerable.Range(0, 4_000)
-                .Count(_ => (DrumRole)DrumRoles.GenerateSong(context, Spread, new RhythmicUnconventionality(unconventionality).Tilt)
+                .Count(_ => (DrumRole)DrumRoles.GenerateSong(context, Spread, unconventionality)
                     .GetStateValue(CompositionStateKinds.DrumRole).Value != DrumRole.Ground) / 4_000.0;
         }
 
-        var kick = DrumRoles.GenerateSong(new GenerationContext(1), DrumDefinitions.Kick, new RhythmicUnconventionality(1).Tilt);
+        var kick = DrumRoles.GenerateSong(new GenerationContext(1), DrumDefinitions.Kick, 1);
         await Assert.That((DrumRole)kick.GetStateValue(CompositionStateKinds.DrumRole).Value).IsEqualTo(DrumRole.Ground);
         await Assert.That(OffRoles(1)).IsGreaterThan(OffRoles(0) * 3);
     }

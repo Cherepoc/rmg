@@ -163,11 +163,12 @@ internal static class MelodyLayers
     /// </summary>
     /// <param name="periodContext">The sequence the period is drawn from.</param>
     /// <param name="tilt">How unconventional the section is, which leans the shorter period.</param>
-    public static ImmutableArray<double> GenerateContour(IGenerationContext context, IGenerationContext periodContext, Tilt tilt)
+    /// <param name="unconventionality">The melody facet of the section's unconventionality, whose ends the contour's periods lean by.</param>
+    public static ImmutableArray<double> GenerateContour(IGenerationContext context, IGenerationContext periodContext, double unconventionality)
     {
         var peak = PeakBars[PeakBarGenerator(context)].Value;
         var slope = SlopeGenerator(context);
-        var periods = tilt.Weigh(Periods, x => x < Progressions.BarCount ? 1 : 0);
+        var periods = ByConvention.Weigh(Periods.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value < Progressions.BarCount ? 1 : 0))), unconventionality);
         var period = periodContext.Pick(periods);
         return [..Enumerable.Range(0, Progressions.BarCount).Select(bar => PeakRegister - slope * Math.Abs(bar % period - peak % period))];
     }

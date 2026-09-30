@@ -48,13 +48,13 @@ public sealed class PercussionSectionsTest
         double Share(Tilt song, Tilt energy)
         {
             var context = new GenerationContext(1);
-            return Enumerable.Range(0, 4_000).Count(_ => PercussionSections.Draw(context, song, Tilt.None, energy, 3)) / 4_000.0;
+            return Enumerable.Range(0, 4_000).Count(_ => PercussionSections.Draw(context, song, 0.5, energy, 3)) / 4_000.0;
         }
 
         await Assert.That(Share(new Tilt(PercussionSections.SongSpread), Tilt.None)).IsGreaterThan(Share(Tilt.None, Tilt.None) * 4);
         await Assert.That(Share(Tilt.None, Tilt.None)).IsEqualTo(PercussionSections.Chance).Within(0.015);
         await Assert.That(Share(new Tilt(4), Tilt.Of(SectionEnergy.HighOdds, -0.5))).IsGreaterThan(Share(new Tilt(4), Tilt.Of(SectionEnergy.HighOdds, 0.5)));
-        await Assert.That(PercussionSections.Draw(new GenerationContext(1), new Tilt(100), Tilt.None, Tilt.None, PercussionSections.MinDrums - 1)).IsFalse();
+        await Assert.That(PercussionSections.Draw(new GenerationContext(1), new Tilt(100), 1, Tilt.None, PercussionSections.MinDrums - 1)).IsFalse();
     }
 
     [Test]

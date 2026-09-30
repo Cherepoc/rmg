@@ -38,10 +38,10 @@ internal static class DrumSetups
     public const double PercussionVariation = -0.3;
 
     /// <summary>A song's setup, the percussion likelier the less conventional its rhythm.</summary>
-    public static DrumSetup Pick(IGenerationContext context, Tilt rhythm)
+    /// <param name="unconventionality">The groove facet of the song's unconventionality, by whose ends the setups lean.</param>
+    public static DrumSetup Pick(IGenerationContext context, double unconventionality)
     {
-        ImmutableArray<Weighted<DrumSetup>> weights = [..All.Select(x => new Weighted<DrumSetup>(rhythm.Weigh(x.Weight, x.Lean), x.Setup))];
-        return context.Pick(weights);
+        return context.Pick(ByConvention.Weigh(All.Select(x => (x.Setup, RhythmicUnconventionality.WeightEnds(x.Weight, x.Lean))), unconventionality));
     }
 
     /// <summary>

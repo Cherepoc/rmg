@@ -32,11 +32,11 @@ internal static class DrumPresence
         PhraseScheme scheme,
         IReadOnlySet<int> leads,
         Func<int, int> stroke,
-        Tilt rhythm,
+        double unconventionality,
         Tilt energy
     )
     {
-        var sitOut = rhythm.Chance(energy.Chance(SitOutChance, -1), 1);
+        var sitOut = RhythmicUnconventionality.Ends(energy.Chance(SitOutChance, -1), 1).At(unconventionality);
         var resting = ImmutableHashSet.CreateBuilder<(int Track, int Letter)>();
         var strokes = ImmutableDictionary.CreateBuilder<(int Track, int Letter), int>();
         foreach (var track in tracks.Order())
@@ -50,7 +50,7 @@ internal static class DrumPresence
                     if (context.TestProbability(sitOut))
                         resting.Add((track, letter));
                 }
-                else if (drum.HasStrokes && DrumStrokes.DrawChange(context, drum, stroke(track), DrumStrokes.BarChangeChance, rhythm, energy) is { } change)
+                else if (drum.HasStrokes && DrumStrokes.DrawChange(context, drum, stroke(track), DrumStrokes.BarChangeChance, unconventionality, energy) is { } change)
                 {
                     strokes[(track, letter)] = change;
                 }

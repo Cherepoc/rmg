@@ -44,7 +44,7 @@ internal static class DrumStrokes
         PercussionInstrumentDefinition drum,
         int current,
         double chance,
-        Tilt rhythm,
+        double unconventionality,
         Tilt energy
     )
     {
@@ -52,7 +52,7 @@ internal static class DrumStrokes
         var (to, from) = (drum.Sounds[candidate], drum.Sounds[current]);
         var lean = Math.Clamp(to.Loudness - from.Loudness, -1, 1);
         var weighed = new Tilt(Math.Log(to.Stroke / from.Stroke)).Chance(chance, 1);
-        return context.TestProbability(rhythm.Chance(energy.Chance(weighed, lean), 1)) ? candidate : null;
+        return context.TestProbability(RhythmicUnconventionality.Ends(energy.Chance(weighed, lean), 1).At(unconventionality)) ? candidate : null;
     }
 
     private static int Pick(IGenerationContext context, PercussionInstrumentDefinition drum, Tilt energy, int except)

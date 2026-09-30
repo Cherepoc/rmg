@@ -20,7 +20,6 @@ namespace Rmg.Core.Composition;
 /// </param>
 /// <param name="Fullness">How far the layer moves a pattern's fullness either way, a value drawn around 0.</param>
 /// <param name="Variation">How far the layer moves how often a pattern's cycles are drawn afresh, either way.</param>
-/// <param name="SpeedScale">What the chance of a speed change is multiplied by, so that leaning the groove leaves it.</param>
 /// <remarks>
 ///     A layer can be tilted (<see cref="Tilted" />), as a section by its energy, so that its fullness, density and speed
 ///     lean fuller, busier and faster or sparser and slower, how often they move kept.
@@ -29,32 +28,33 @@ public sealed record RhythmLayer(
     double Groove,
     double Density,
     double Fullness = 0,
-    double Variation = 0,
-    double SpeedScale = 1
+    double Variation = 0
 )
 {
+    /// <summary>The chance to move a track's speed, <see cref="SpeedShare" /> times the groove's.</summary>
+    public double Speed { get; init; } = Math.Min(1, Groove * SpeedShare);
+
     /// <summary>
-    ///     The layer leaned by the tilt: its chances by its odds to the power of the lean, as a chance leans, and its
-    ///     spreads times the odds; how often its speed changes stays, which the tuning of the snare's backbeat and the
-    ///     hi-hat's speed rest on.
+    ///     The layer by the groove facet of an unconventionality: its moves, of the groove, the speed and the density, as
+    ///     unconventional things, never at the plain end, whose rhythm keeps what its drums are given, and every time at
+    ///     the wild; its spreads times the odds of the tilt given.
     /// </summary>
-    public RhythmLayer Lean(Tilt tilt, double lean)
+    public RhythmLayer Lean(double unconventionality, Tilt tilt)
     {
-        var groove = tilt.Chance(Groove, lean);
         return this with
         {
-            Groove = groove,
-            Density = tilt.Chance(Density, lean),
+            Groove = RhythmicUnconventionality.Ends(Groove, 1).At(unconventionality),
+            Speed = RhythmicUnconventionality.Ends(Speed, 1).At(unconventionality),
+            Density = RhythmicUnconventionality.Ends(Density, 1).At(unconventionality),
             Fullness = Fullness * tilt.Odds,
-            Variation = Variation * tilt.Odds,
-            SpeedScale = Groove == 0 ? SpeedScale : SpeedScale * Groove / groove
+            Variation = Variation * tilt.Odds
         };
     }
 
-    /// <summary>The layer with the chance it moves the groove, its speed and its phase, leaned by the tilt.</summary>
+    /// <summary>The layer with the chances it moves the groove, its speed and its phase, leaned by the tilt.</summary>
     public RhythmLayer LeanGroove(Tilt tilt, double lean)
     {
-        return this with { Groove = tilt.Chance(Groove, lean) };
+        return this with { Groove = tilt.Chance(Groove, lean), Speed = tilt.Chance(Speed, lean) };
     }
 
     /// <summary>How the layer's fullness, density and speed lean: fuller, busier and faster on the high side.</summary>
@@ -86,7 +86,7 @@ public sealed record RhythmLayer(
     /// <summary>A step of the period's power, faster on the tilt's high side, as its period shortens: -1 is twice as fast.</summary>
     public Func<IGenerationContext, int> CreateSpeedGenerator()
     {
-        return new Tilt(-Tilt.LogOdds).Step(Math.Min(1, Groove * SpeedShare * SpeedScale));
+        return new Tilt(-Tilt.LogOdds).Step(Speed);
     }
 
     public Func<IGenerationContext, int> CreateDensityGenerator()
@@ -109,13 +109,6 @@ public sealed record RhythmLayer(
 /// </summary>
 internal static class RhythmLayers
 {
-    /// <summary>
-    ///     How strongly the layers' chances lean by how far the rhythm strays from convention: their odds times the
-    ///     tilt's to this power, so that a wild section's chances reach as far as they were tuned to when they were
-    ///     multiplied, where odds alone would flatten the larger ones.
-    /// </summary>
-    public const double ChanceLean = 1.1;
-
     public static RhythmLayer Song { get; } = new(0.075, 0.1, 0.1, 0.2);
 
     public static RhythmLayer Section { get; } = new(0.05, 0.1, 0.1, 0.2);

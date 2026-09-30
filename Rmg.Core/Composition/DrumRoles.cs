@@ -119,31 +119,34 @@ internal static class DrumRoles
         return StateMap.FromStates([CompositionStateKinds.DrumRole.CreateState(new LayerValue<int>(depth, (int)role))]);
     }
 
-    /// <summary>The song's role of a drum, by its affinities, leaned by the rhythm's unconventionality, and its part.</summary>
-    public static StateMap GenerateSong(IGenerationContext context, PercussionInstrumentDefinition drum, Tilt rhythm)
+    /// <summary>The song's role of a drum, by its affinities at the groove facet (<see cref="Pick" />), and its part.</summary>
+    public static StateMap GenerateSong(IGenerationContext context, PercussionInstrumentDefinition drum, double unconventionality)
     {
-        var role = Pick(context, drum, rhythm);
+        var role = Pick(context, drum, unconventionality);
         return At(StateDepths.Song, role).MergeWith(Parts[role].ToStateMap());
     }
 
     /// <summary>
-    ///     A section's role of a drum, now and then drawn again by its affinities, the likelier and the more to the roles
-    ///     not its main one the less conventional the rhythm; the role and the difference of its part from the song's, or
-    ///     none for the song's. Always two draws.
+    ///     A section's role of a drum, now and then drawn again by its affinities at the groove facet, never at the plain
+    ///     end and always at the wild; the role and the difference of its part from the song's, or none for the song's.
+    ///     Always two draws.
     /// </summary>
-    public static StateMap DrawSection(IGenerationContext context, PercussionInstrumentDefinition drum, DrumRole songRole, Tilt rhythm)
+    public static StateMap DrawSection(IGenerationContext context, PercussionInstrumentDefinition drum, DrumRole songRole, double unconventionality)
     {
-        var drawsAgain = context.TestProbability(rhythm.Chance(SectionChangeChance, 1));
-        var role = Pick(context, drum, rhythm);
+        var drawsAgain = context.TestProbability(RhythmicUnconventionality.Ends(SectionChangeChance, 1).At(unconventionality));
+        var role = Pick(context, drum, unconventionality);
         if (!drawsAgain || role == songRole)
             return StateMap.Default;
 
         return At(StateDepths.Section, role).MergeWith(Parts[songRole].ToStateMap(-1)).MergeWith(Parts[role].ToStateMap());
     }
 
-    private static DrumRole Pick(IGenerationContext context, PercussionInstrumentDefinition drum, Tilt rhythm)
+    /// <summary>A drum's role by its affinities: its main one at the plain end, any it has as likely at the wild.</summary>
+    private static DrumRole Pick(IGenerationContext context, PercussionInstrumentDefinition drum, double unconventionality)
     {
-        var weights = rhythm.Weigh(drum.Roles.Where(x => x.Weight > 0), x => x == drum.MainRole ? 0 : 1);
-        return context.Pick(weights);
+        return context.Pick(ByConvention.Weigh(
+            drum.Roles.Where(x => x.Weight > 0).Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == drum.MainRole ? 0 : 1))),
+            unconventionality
+        ));
     }
 }

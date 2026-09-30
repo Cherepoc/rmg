@@ -3,12 +3,12 @@ using Rmg.Core.Probabilities;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     How far the rhythm of a song or a section strays from convention, from 0 to 1, apart from how far its harmony
-///     does. It leans the chances with which the rhythm layers move their settings, by their odds: at 0.5 they are as
-///     tuned, at 0 their odds are a quarter of that, or less as the layers lean (<see cref="RhythmLayers.ChanceLean" />),
-///     for plain grooves that keep their accents and rarely leave the straight grid, and at 1 four times or more, for
-///     grooves full of tuplets, displaced accents and syncopation. A song's is spread widely around the middle, and a
-///     section moves it a little.
+///     How far the rhythm of a song or a section strays from convention, from 0 to 1, as a facet of its
+///     unconventionality has it, such as the groove's: the rhythm layers' moves never happen at 0, where a groove keeps
+///     what its drums are given, happen as tuned at 0.5 and every time at 1 (<see cref="RhythmLayer.Lean" />); a choice
+///     leans by its ends (<see cref="Ends" />, <see cref="WeightEnds" />), and a value by <see cref="Tilt" />, whose
+///     odds run from a quarter at 0 to four times at 1. A song's is spread widely around the middle, and a section
+///     moves it a little.
 /// </summary>
 public sealed record RhythmicUnconventionality(double Value)
 {
@@ -68,9 +68,9 @@ public sealed record RhythmicUnconventionality(double Value)
     // the plainest, whose tilt the ends of what leaned conventional keep
     private static RhythmicUnconventionality Plainest { get; } = new(0);
 
-    /// <summary>The layer with its chances leaned by the unconventionality; how often its speed changes stays.</summary>
+    /// <summary>The layer by the unconventionality's ends (<see cref="RhythmLayer.Lean" />).</summary>
     public RhythmLayer Lean(RhythmLayer layer)
     {
-        return layer.Lean(Tilt, RhythmLayers.ChanceLean);
+        return layer.Lean(Value, Tilt);
     }
 }

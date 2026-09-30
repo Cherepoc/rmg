@@ -75,6 +75,7 @@ public sealed class DoublingTest
         }
 
         await Assert.That(bars).IsGreaterThan(0);
-        await Assert.That(following / (double)colours).IsBetween(0.7, 0.95);
+        // following the lead is the conventional choice, which the wildest sections never take
+        await Assert.That(following / (double)colours).IsBetween(0.55, 0.95);
     }
 }

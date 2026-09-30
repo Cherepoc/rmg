@@ -34,11 +34,11 @@ internal static class PercussionSections
 
     /// <summary>Whether a section plays percussion only; drawn only where the song has enough percussion.</summary>
     /// <param name="song">How far the song leans to such sections.</param>
-    /// <param name="rhythm">How unconventional the section's rhythm is, which leans it to percussion only.</param>
+    /// <param name="unconventionality">The section's groove facet: never percussion only at the plain end, always where it can at the wild.</param>
     /// <param name="energy">The section's pull of its energy, which leans it to the drum kit.</param>
     /// <param name="songPercussion">How many percussion drums the song has.</param>
-    public static bool Draw(IGenerationContext context, Tilt song, Tilt rhythm, Tilt energy, int songPercussion)
+    public static bool Draw(IGenerationContext context, Tilt song, double unconventionality, Tilt energy, int songPercussion)
     {
-        return songPercussion >= MinDrums && context.TestProbability(energy.Chance(rhythm.Chance(song.Chance(Chance, 1), 1), -1));
+        return songPercussion >= MinDrums && context.TestProbability(energy.Chance(RhythmicUnconventionality.Ends(song.Chance(Chance, 1), 1).At(unconventionality), -1));
     }
 }

@@ -142,7 +142,7 @@ internal sealed class SectionGenerator
         // sequence of its own
         var roleContext = Stream(sectionId, SectionStream.DrumRoles);
         var sectionRoles = _tracks.SongDrums.Select(DrumGroups.GetTrackNumber).Order()
-            .ToImmutableDictionary(x => x, x => DrumRoles.DrawSection(roleContext, DrumGroups.GetDrum(x), SongRole(x), rhythm.Tilt));
+            .ToImmutableDictionary(x => x, x => DrumRoles.DrawSection(roleContext, DrumGroups.GetDrum(x), SongRole(x), rhythm.Value));
         StateTrace.Record(
             TracePoints.DrumRoles,
             SectionTrace,
@@ -161,7 +161,7 @@ internal sealed class SectionGenerator
         // a percussion song's every section, and now and then a section of a song of the kit and percussion
         var isPercussionOnly = _tracks.DrumSetup == DrumSetup.Percussion ||
                                (_tracks.DrumSetup == DrumSetup.KitAndPercussion &&
-                                PercussionSections.Draw(percussionContext, _songPercussion, rhythm.Tilt, tilt, songPercussion));
+                                PercussionSections.Draw(percussionContext, _songPercussion, rhythm.Value, tilt, songPercussion));
         StateTrace.Record(TracePoints.PercussionOnly, SectionTrace, sectionId, 0, StateMap.Default, 0, isPercussionOnly ? "percussion only" : "drum kit", isPercussionOnly);
         var kit = DrumKitGenerator.SelectKit(
             Stream(sectionId, SectionStream.Kit),
@@ -180,7 +180,7 @@ internal sealed class SectionGenerator
             x => new Doubling(
                 DrumGroups.GetTrackNumber(x.Value),
                 DrumRoles.DoublingRanks[x.Value.MainRole],
-                bindingContext.Pick(rhythm.Tilt.Weigh(x.Key.Bindings, binding => binding == DrumBinding.Figure ? 1 : 0)),
+                bindingContext.Pick(ByConvention.Weigh(x.Key.Bindings.Select(b => (b.Value, RhythmicUnconventionality.WeightEnds(b.Weight, b.Value == DrumBinding.Figure ? 1 : 0))), rhythm.Value)),
                 DrumKitGenerator.AccentShare
             )
         );
@@ -194,7 +194,7 @@ internal sealed class SectionGenerator
             var track = DrumGroups.GetTrackNumber(drum);
             if (doubles.TryGetValue(track, out var doubling))
                 feelLeads[track] = doubling.Lead;
-            else if (kit.Leads.FirstOrDefault(x => x.MainRole == drum.MainRole) is { } lead && feelContext.TestProbability(rhythm.Tilt.Chance(DrumKitGenerator.FeelChance, -1)))
+            else if (kit.Leads.FirstOrDefault(x => x.MainRole == drum.MainRole) is { } lead && feelContext.TestProbability(RhythmicUnconventionality.Ends(DrumKitGenerator.FeelChance, -1).At(rhythm.Value)))
                 feelLeads[track] = DrumGroups.GetTrackNumber(lead);
         }
 
@@ -207,7 +207,7 @@ internal sealed class SectionGenerator
             0,
             1
         );
-        var barStateTimelineMap = _barStateGenerator.Generate(context, scale, progression, harmonicRhythm, home, unconventionality, bassLeading, rhythm.Tilt);
+        var barStateTimelineMap = _barStateGenerator.Generate(context, scale, progression, harmonicRhythm, home, unconventionality, bassLeading, facets);
         var contour = barStateTimelineMap.GetStateTimeline(CompositionStateKinds.LineRegister).Select(x => x.Value).ToImmutableArray();
         StateTrace.Record(TracePoints.MelodyContour, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", contour), contour);
 
@@ -219,7 +219,7 @@ internal sealed class SectionGenerator
         var strokeContext =Stream(sectionId, SectionStream.DrumStrokes);
         var sectionStrokes = ImmutableDictionary.CreateBuilder<int, int>();
         foreach (var track in activeDrumTrackNumbers.Order().Where(x => DrumGroups.GetDrum(x).HasStrokes))
-            if (DrumStrokes.DrawChange(strokeContext, DrumGroups.GetDrum(track), SongStroke(track), DrumStrokes.SectionChangeChance, rhythm.Tilt, tilt) is { } change)
+            if (DrumStrokes.DrawChange(strokeContext, DrumGroups.GetDrum(track), SongStroke(track), DrumStrokes.SectionChangeChance, rhythm.Value, tilt) is { } change)
                 sectionStrokes[track] = change;
         StateTrace.Record(TracePoints.DrumStrokes, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", sectionStrokes), sectionStrokes.ToImmutable());
         var barDrums = DrumPresence.Draw(
@@ -228,7 +228,7 @@ internal sealed class SectionGenerator
             scheme,
             kit.Leads.Select(DrumGroups.GetTrackNumber).ToHashSet(),
             track => sectionStrokes.TryGetValue(track, out var stroke) ? stroke : SongStroke(track),
-            rhythm.Tilt,
+            rhythm.Value,
             tilt
         );
         StateTrace.Record(TracePoints.DrumPresence, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{string.Join(", ", barDrums.Resting)}; {string.Join(", ", barDrums.Strokes)}", barDrums);

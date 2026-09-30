@@ -114,7 +114,7 @@ public sealed class SongDrumSelectionTest
     public async Task MostSongs_PlayTheKitAlone_AFew_PercussionAlone_TheMoreTheWilder()
     {
         double Share(DrumSetup setup, double unconventionality) => Seeds.Count(seed =>
-            DrumSetups.Pick(new GenerationContext(seed), new RhythmicUnconventionality(unconventionality).Tilt) == setup) / (double)Seeds.Count();
+            DrumSetups.Pick(new GenerationContext(seed), unconventionality) == setup) / (double)Seeds.Count();
 
         await Assert.That(Share(DrumSetup.Kit, 0.5)).IsBetween(0.55, 0.7);
         await Assert.That(Share(DrumSetup.Percussion, 0.5)).IsBetween(0.02, 0.09);

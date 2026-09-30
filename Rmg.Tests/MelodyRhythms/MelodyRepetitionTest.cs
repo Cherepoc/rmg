@@ -224,7 +224,7 @@ public sealed class MelodyRepetitionTest
     [Test]
     public async Task APhraseThatStartsAgain_LeapsMostlyAfterARest()
     {
-        var m = Measure(TestCorpus.Range(16));
+        var m = Measure(TestCorpus.Range(256));
 
         await Assert.That(m.RestedJoinLeaps / (double)m.JoinLeaps).IsGreaterThan(0.7);
     }
