@@ -9,9 +9,10 @@ namespace Rmg.Core.Composition;
 ///     Changes to a song's notes, gathered, and made at once: the spans they clear and the hits they add, as the fills
 ///     and the song's form make them.
 /// </summary>
+/// <param name="meter">The meter the song's bars are in.</param>
 /// <param name="map">Where the song's parts are, from which the trace counts the bars of the sections' patterns; none for a
 ///     song that starts with its first section.</param>
-internal sealed class TimelineEdits(IGenerationContext context, SongMap? map = null)
+internal sealed class TimelineEdits(IGenerationContext context, Meter meter, SongMap? map = null)
 {
     private const double Epsilon = 1e-6;
 
@@ -45,8 +46,8 @@ internal sealed class TimelineEdits(IGenerationContext context, SongMap? map = n
         var stateMap = builder.ToStateMap(context);
         // sections are made of whole 4-bar patterns, so the bar of the pattern and the beat in it follow from the song's
         var fromOrigin = position - (map?.Origin ?? 0);
-        var bar = (int)Math.Floor(fromOrigin / Meter.BarDuration);
-        StateTrace.Record(TracePoints.Fill, track, sectionId, bar.Mod(Meter.PatternBarCount), stateMap, fromOrigin - bar * Meter.BarDuration, fill);
+        var bar = (int)Math.Floor(fromOrigin / meter.BarDuration);
+        StateTrace.Record(TracePoints.Fill, track, sectionId, bar.Mod(Meter.PatternBarCount), stateMap, fromOrigin - bar * meter.BarDuration, fill);
 
         Clear(track, position, position + Epsilon);
         if (!_hits.TryGetValue(track, out var hits))
@@ -92,7 +93,7 @@ internal sealed class TimelineEdits(IGenerationContext context, SongMap? map = n
                 if (roles[track] != TrackRole.Drum)
                     for (var i = 0; i < timeline.Count && timeline[i].Position < cut - Epsilon; i++)
                         last = i;
-                if (last >= 0 && timeline[last].Position + timeline[last].Value.Duration < cut - Meter.BarDuration - Epsilon)
+                if (last >= 0 && timeline[last].Position + timeline[last].Value.Duration < cut - meter.BarDuration - Epsilon)
                     last = -1;
 
                 timeline = EventTimeline.Create(timeline.Duration, timeline.Select((x, i) => EndBy(x, cut, i == last)));

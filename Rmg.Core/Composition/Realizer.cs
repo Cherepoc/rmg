@@ -26,9 +26,11 @@ internal static class Realizer
     private static readonly ImmutableArray<int> ChromaticScaleOffsets = [..Enumerable.Range(0, OctaveNoteCount)];
 
     /// <summary>The notes of every track that plays, by its number, from the song's state.</summary>
+    /// <param name="meter">The meter the song's bars are in.</param>
     public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Realize(
         ImmutableSortedDictionary<int, IInstrumentTrack> trackDefinitions,
-        TrackEventStateTimelineMap<StateMap> song
+        TrackEventStateTimelineMap<StateMap> song,
+        Meter meter
     )
     {
         // a note reads only the state Render would; a track's definition also holds what its generation used
@@ -45,7 +47,7 @@ internal static class Realizer
             var notes = GetNoteStates(trackEventStateTimelineMap, track, commonStateTimelineMap);
             tracks[trackNumber] = track switch
             {
-                PitchInstrumentTrack pitchInstrumentTrack => RealizeStruck(pitchInstrumentTrack, trackEventStateTimelineMap, commonStateTimelineMap, changes),
+                PitchInstrumentTrack pitchInstrumentTrack => RealizeStruck(pitchInstrumentTrack, trackEventStateTimelineMap, commonStateTimelineMap, changes, meter),
                 PercussionInstrumentTrack percussionInstrumentTrack => RealizePercussionTrack(percussionInstrumentTrack, notes),
                 _ => throw new ArgumentException($"Track {trackNumber} is of no kind that plays.", nameof(trackDefinitions))
             };
@@ -110,7 +112,8 @@ internal static class Realizer
         PitchInstrumentTrack track,
         EventStateTimelineMap<StateMap> raw,
         StateTimelineMap commonStateTimelineMap,
-        ImmutableArray<double> changes
+        ImmutableArray<double> changes,
+        Meter meter
     )
     {
         while (true)
@@ -123,7 +126,7 @@ internal static class Realizer
             var struck = new List<TimelineItem<StateMap>>();
             foreach (var (index, change) in crossings)
             {
-                if (index + 1 >= events.Count || events[index + 1].Position >= change + Meter.BarDuration - 1e-9)
+                if (index + 1 >= events.Count || events[index + 1].Position >= change + meter.BarDuration - 1e-9)
                     continue;
 
                 var (note, next) = (events[index].Value, events[index + 1]);

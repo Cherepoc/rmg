@@ -21,7 +21,7 @@ public static class Render
     /// </summary>
     public static RenderedSong RenderSong(Song song)
     {
-        var notes = song.Notes ?? Realizer.Realize(song.TrackDefinitions, song.TrackEventStateTimelineMap);
+        var notes = song.Notes ?? Realizer.Realize(song.TrackDefinitions, song.TrackEventStateTimelineMap, song.Meter);
         var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap.OfScope(StateScope.Render);
         var swing = GetSwing(song);
         var renderedTracks = new List<RenderedTrack>();
@@ -53,7 +53,7 @@ public static class Render
             renderedTracks.Add(percussionTrack);
         }
 
-        return new RenderedSong(song.Duration, common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..renderedTracks]);
+        return new RenderedSong(song.Duration, song.Meter, common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..renderedTracks]);
     }
 
     /// <summary>How the song swings, which moves where its every note plays.</summary>

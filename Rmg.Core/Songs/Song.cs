@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core.Composition;
 using Rmg.Core.Events;
 
 namespace Rmg.Core.Songs;
@@ -7,6 +8,7 @@ public sealed class Song
 {
     public Song(
         double duration,
+        Meter meter,
         ImmutableSortedDictionary<int, IInstrumentTrack> trackDefinitions,
         TrackEventStateTimelineMap<StateMap> trackEventStateTimelineMap,
         SongMap? map = null,
@@ -16,6 +18,7 @@ public sealed class Song
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(duration);
 
         Duration = duration;
+        Meter = meter;
         TrackDefinitions = trackDefinitions;
         TrackEventStateTimelineMap = trackEventStateTimelineMap;
         Map = map;
@@ -32,6 +35,9 @@ public sealed class Song
     public SongMap? Map { get; }
 
     public double Duration { get; }
+
+    /// <summary>The meter the song's bars are in.</summary>
+    public Meter Meter { get; }
 
     public ImmutableSortedDictionary<int, IInstrumentTrack> TrackDefinitions { get; }
 

@@ -1,3 +1,4 @@
+using Rmg.Core.Composition;
 using System.Collections.Immutable;
 using Rmg.Core;
 using Rmg.Core.Events;
@@ -20,7 +21,7 @@ public sealed class MidiWriteTest
         ImmutableArray<RenderedTrack> tracks = [
             track
         ];
-        var renderedSong = new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), tracks);
+        var renderedSong = new RenderedSong(1, Meter.FourFour, StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), tracks);
         
         var memoryStream = new MemoryStream();
         renderedSong.Write(memoryStream, null);
@@ -48,7 +49,7 @@ public sealed class MidiWriteTest
     private static byte[] WriteOneBeatSong(params TimelineItem<RenderedNote>[] renderedNotes)
     {
         var track = new RenderedTrack(false, 1, EventTimeline.Create(1, renderedNotes), 0);
-        var renderedSong = new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), [track]);
+        var renderedSong = new RenderedSong(1, Meter.FourFour, StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), [track]);
 
         var memoryStream = new MemoryStream();
         renderedSong.Write(memoryStream, null);
@@ -61,7 +62,7 @@ public sealed class MidiWriteTest
         var fade = StateTimeline.Create(1, StateKinds.Fade, [0.75.ToTimelineItem(0), 0.5.ToTimelineItem(0.5)]);
         var track = new RenderedTrack(false, 1, EventTimeline.Create(1, [new RenderedNote(64, 1, 1).ToTimelineItem(0)]), 0);
         var memoryStream = new MemoryStream();
-        new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), fade, [track]).Write(memoryStream, null);
+        new RenderedSong(1, Meter.FourFour, StateKinds.Tempo.CreateDefaultTimeline(0), fade, [track]).Write(memoryStream, null);
 
         byte[] expected =
         [

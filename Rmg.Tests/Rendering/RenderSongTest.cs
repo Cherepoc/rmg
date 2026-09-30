@@ -1,3 +1,4 @@
+using Rmg.Core.Composition;
 using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Rendering;
@@ -17,7 +18,7 @@ public sealed class RenderSongTest
             StateTimelineMap.Create(0)
         );
         var tracks = ImmutableSortedDictionary<int, IInstrumentTrack>.Empty.Add(0, track);
-        return new Song(duration, tracks, trackEventStateTimelineMap);
+        return new Song(duration, Meter.FourFour, tracks, trackEventStateTimelineMap);
     }
 
     private static PitchInstrumentTrack PitchTrack(int minOctaveOffset = 0, int maxOctaveOffset = 4) =>

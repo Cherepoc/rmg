@@ -149,13 +149,15 @@ internal sealed class LinePattern
     /// <param name="bars">The section's bars, its 4-bar pattern's question and answer.</param>
     /// <param name="seed">The seed of the answer's mutations.</param>
     /// <param name="amount">The chance a note of the answer's later bars is mutated.</param>
-    public static TrackEventStateTimelineMap<StateMap> Answer(TrackEventStateTimelineMap<StateMap> bars, int trackNumber, LineProfile profile, int seed, double amount)
+    /// <param name="barDuration">How long a bar is, in beats.</param>
+    public static TrackEventStateTimelineMap<StateMap> Answer(TrackEventStateTimelineMap<StateMap> bars, int trackNumber, LineProfile profile, int seed, double amount, double barDuration)
     {
         return Mutate(
             bars,
             trackNumber,
             profile,
             seed,
+            barDuration,
             bar => bar < Progressions.BarCount ? 0 : amount * MelodyLayers.AnswerBars[bar - Progressions.BarCount]
         );
     }
@@ -167,19 +169,21 @@ internal sealed class LinePattern
     ///     notes of a figure that comes back mutate alike, and take a key of their own, so that they come back alike.
     /// </summary>
     /// <param name="seed">The seed of the mutations.</param>
+    /// <param name="barDuration">How long a bar is, in beats.</param>
     /// <param name="chance">The chance a note is mutated, by the bar it is in.</param>
     public static TrackEventStateTimelineMap<StateMap> Mutate(
         TrackEventStateTimelineMap<StateMap> bars,
         int trackNumber,
         LineProfile profile,
         int seed,
+        double barDuration,
         Func<int, double> chance
     )
     {
         var track = bars.TrackTimelineMap[trackNumber].EventTimeline;
         var mutated = track.Select(note =>
             {
-                var noteChance = chance((int)Math.Floor(note.Position / Meter.BarDuration));
+                var noteChance = chance((int)Math.Floor(note.Position / barDuration));
                 var noteKey = note.Value.GetStateValue(CompositionStateKinds.NoteKey);
                 if (noteChance <= 0)
                     return note;
@@ -237,7 +241,8 @@ internal sealed class LinePattern
         if (end <= 0)
             return notes;
 
-        var holdEnd = Meter.BarDuration - MelodyLayers.PhraseEndRest;
+        // the bar's timeline lasts the bar
+        var holdEnd = notes.Duration - MelodyLayers.PhraseEndRest;
         var kept = notes.Where(x => x.Position < end).ToList();
         if (kept.Count == 0 && notes.Count > 0 && notes[0].Position < holdEnd)
             kept.Add(notes[0]);
@@ -311,7 +316,7 @@ internal sealed record SectionLine(
             ];
             if (rhythmKeys.Any(x => x != 0))
                 bars = BuildBars(rhythmKeys);
-            bars = LinePattern.Mutate(bars, Track, Profile, seed, _ => amount);
+            bars = LinePattern.Mutate(bars, Track, Profile, seed, HarmonicRhythm.Meter.BarDuration, _ => amount);
         }
 
         // whether each phrase, the question and the answer, starts afresh, drawn for the appearance
@@ -319,12 +324,12 @@ internal sealed record SectionLine(
         bool[] resets = [..Enumerable.Range(0, 2).Select(_ => resetContext.TestProbability(RegisterFreedom))];
         var track = bars.TrackTimelineMap[Track].EventTimeline;
         var firsts = Enumerable.Range(0, 2)
-            .Select(phrase => track.Where(x => x.Position >= phrase * Meter.PatternDuration).Select(x => (double?)x.Position).FirstOrDefault())
+            .Select(phrase => track.Where(x => x.Position >= phrase * HarmonicRhythm.Meter.PatternDuration).Select(x => (double?)x.Position).FirstOrDefault())
             .ToArray();
         var marked = track.Select(note =>
             {
                 var chord = HarmonicRhythm.IndexAt(note.Position);
-                var phrase = (int)Math.Floor(note.Position / Meter.PatternDuration);
+                var phrase = (int)Math.Floor(note.Position / HarmonicRhythm.Meter.PatternDuration);
                 var value = note.Value
                     .With(CompositionStateKinds.LineApproach, (int)Approaches[chord])
                     .With(CompositionStateKinds.LineLanding, (int)Landings[chord]);

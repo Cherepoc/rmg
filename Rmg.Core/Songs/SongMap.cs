@@ -5,9 +5,9 @@ namespace Rmg.Core.Songs;
 
 /// <summary>
 ///     Where the parts of a song are, in beats from its start: its intro, its sections one after another, and its
-///     ending.
+///     ending, and the meter its bars are in.
 /// </summary>
-public sealed record SongMap(IntroSpan Intro, ImmutableArray<SectionSpan> Sections, EndingSpan Ending)
+public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<SectionSpan> Sections, EndingSpan Ending)
 {
     /// <summary>Where the first section starts, after the intro's bars.</summary>
     public double Origin => Sections.IsEmpty ? Intro.Duration : Sections[0].Start;

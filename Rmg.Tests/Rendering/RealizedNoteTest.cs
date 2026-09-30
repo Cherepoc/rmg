@@ -25,7 +25,7 @@ public sealed class RealizedNoteTest
             if (song.Map.Ending.Kind == EndingKind.Stop)
                 continue;
 
-            var withoutNotes = new Song(song.Duration, song.TrackDefinitions, song.TrackEventStateTimelineMap, song.Map);
+            var withoutNotes = new Song(song.Duration, song.Meter, song.TrackDefinitions, song.TrackEventStateTimelineMap, song.Map);
 
             await Assert.That(song.Notes).IsNotNull();
             await Assert.That(Midi(song)).IsEquivalentTo(Midi(withoutNotes));
@@ -64,7 +64,7 @@ public sealed class RealizedNoteTest
             melody.Duration,
             melody.Take(melody.Count - 1).Append((last.Value with { Pitches = [last.Value.Pitches[0] + 12] }).ToTimelineItem(last.Position))
         );
-        var edited = new Song(song.Duration, song.TrackDefinitions, song.TrackEventStateTimelineMap, song.Map, song.Notes.SetItem(SongTracks.MelodyTrack, changed));
+        var edited = new Song(song.Duration, song.Meter, song.TrackDefinitions, song.TrackEventStateTimelineMap, song.Map, song.Notes.SetItem(SongTracks.MelodyTrack, changed));
 
         var program = ((PitchInstrumentTrack)song.TrackDefinitions[SongTracks.MelodyTrack]).InstrumentCode;
         var rendered = Render.RenderSong(edited).Tracks.Single(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == program);

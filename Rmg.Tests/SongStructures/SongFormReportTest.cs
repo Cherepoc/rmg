@@ -38,7 +38,7 @@ public sealed class SongFormReportTest
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
             var energy = song.Trace.Where(x => x.Point == TracePoints.SectionEnergy).ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
             var lengths = song.Trace.Where(x => x.Point == TracePoints.SectionLength).ToDictionary(x => x.Section, x => (int)x.Value!);
-            bars.Add(song.Map.Sections.Sum(x => x.Duration) / Meter.BarDuration);
+            bars.Add(song.Map.Sections.Sum(x => x.Duration) / Meter.FourFour.BarDuration);
             if (structure.Roles.Values.Any(x => x != SectionRole.Free))
                 formed++;
             foreach (var (id, role) in structure.Roles)

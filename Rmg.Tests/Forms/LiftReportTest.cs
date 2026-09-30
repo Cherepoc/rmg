@@ -19,7 +19,7 @@ public sealed class LiftReportTest
             for (var i = 1; i < sections.Length; i++)
             {
                 var line = sections[i].Start;
-                var step = Loudness(line - Meter.BarDuration, line) - Loudness(line - 2 * Meter.BarDuration, line - Meter.BarDuration);
+                var step = Loudness(line - Meter.FourFour.BarDuration, line) - Loudness(line - 2 * Meter.FourFour.BarDuration, line - Meter.FourFour.BarDuration);
                 if (double.IsNaN(step))
                     continue;
                 (energy[sections[i].SectionId] > energy[sections[i - 1].SectionId] ? louder : quieter).Add(step);

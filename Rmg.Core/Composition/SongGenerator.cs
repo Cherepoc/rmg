@@ -67,6 +67,9 @@ public static class SongGenerator
         var melodyBusyness = MelodyBusyness.Generate(Stream(SongStream.Melody));
 
         // the song's form: one of the forms songs are written in, its sections playing their roles, or one of its own
+        // the meter the song's bars are in
+        var meter = Meter.FourFour;
+
         var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), rhythmicUnconventionality.Tilt);
         StateTrace.Record(TracePoints.SongForm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(" ", structure.SectionIds.Select(x => structure.Roles[x])), structure);
         var sectionIds = structure.SectionIds.ToArray();
@@ -95,7 +98,8 @@ public static class SongGenerator
             songStateMap,
             sectionEnergies,
             PercussionSections.GenerateSong(Stream(SongStream.Percussion)),
-            commonStateMap.GetStateValue(StateKinds.KeyOffset)
+            commonStateMap.GetStateValue(StateKinds.KeyOffset),
+            meter
         );
         // how the song starts and ends around its sections, decided before them: the one the song ends with leads home
         // to the tonic, where the ending lands
@@ -149,7 +153,7 @@ public static class SongGenerator
             .MergeStateMap(Groove.ToStateMap(swing, grooveContext));
 
         // the drums mark the lines, now that the song is put together
-        var fills = new FillGenerator(Stream(SongStream.Fills), tracks, rhythmicUnconventionality);
+        var fills = new FillGenerator(Stream(SongStream.Fills), tracks, rhythmicUnconventionality, meter);
         songTrackNoteTimelineMap = fills.Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
 
         // the lines placed over the whole song, as they go on from section to section and lead into the next: the melody,
@@ -159,17 +163,17 @@ public static class SongGenerator
         var bassTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Bass);
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, BassLeadingLayers.Line);
         // and the bass walking with the drums' runs into a new section now and then, from where it is placed
-        songTrackNoteTimelineMap = BassFills.Apply(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, fills.Runs, Stream(SongStream.BassFills));
+        songTrackNoteTimelineMap = BassFills.Apply(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, fills.Runs, Stream(SongStream.BassFills), meter);
         var counterTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.CounterMelody);
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, counterTrack.Key, (PitchInstrumentTrack)counterTrack.Value, CounterLayers.Line);
 
         // and last the notes, decided from the state of the whole song, in its order, none sounding into a stop
         var notes = form.Edits.CutNotes(
-            Realizer.Realize(tracks.Definitions, songTrackNoteTimelineMap),
+            Realizer.Realize(tracks.Definitions, songTrackNoteTimelineMap, meter),
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role)
         );
 
-        return new Song(songTrackNoteTimelineMap.Duration, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes);
+        return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes);
     }
 
     /// <summary>The random sequence a stage of the song of the given seed draws from.</summary>

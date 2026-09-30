@@ -52,10 +52,10 @@ public sealed class DrumPresenceTest
                 var code = DrumGroups.GetDrum(track).Sounds[stroke].Code;
                 foreach (var bar in schemes[entry.Section].Select((x, bar) => (x, bar)).Where(x => x.x - 'A' == letter).Select(x => x.bar))
                 {
-                    var start = span.Start + bar * Meter.BarDuration;
+                    var start = span.Start + bar * Meter.FourFour.BarDuration;
                     // but a fill's notes, which name their sounds, and an accent's, a note's own stroke
                     var notes = song.Song.Notes![track]
-                        .Where(x => x.Position >= start && x.Position < start + Meter.BarDuration &&
+                        .Where(x => x.Position >= start && x.Position < start + Meter.FourFour.BarDuration &&
                                     x.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.ArticulationIndex) == 0 &&
                                     x.Value.State.GetStateValue(Rmg.Core.Events.StateKinds.DrumStroke).Depth < Rmg.Core.Events.StateDepths.Note)
                         .ToArray();
@@ -86,8 +86,8 @@ public sealed class DrumPresenceTest
                 var bars = schemes[entry.Section].Select((x, bar) => (x, bar)).Where(x => x.x - 'A' == letter && x.bar < Meter.PatternBarCount - 1).Select(x => x.bar);
                 foreach (var bar in bars)
                 {
-                    var start = span.Start + bar * Meter.BarDuration;
-                    await Assert.That(notes.Count(x => x.Position >= start && x.Position < start + Meter.BarDuration)).IsEqualTo(0);
+                    var start = span.Start + bar * Meter.FourFour.BarDuration;
+                    await Assert.That(notes.Count(x => x.Position >= start && x.Position < start + Meter.FourFour.BarDuration)).IsEqualTo(0);
                 }
             }
         }

@@ -1,3 +1,4 @@
+using Rmg.Core.Composition;
 using System.Collections.Immutable;
 using Rmg.Core;
 using Rmg.Core.Events;
@@ -18,7 +19,7 @@ public sealed class MidiChannelInstrumentsTest
 
     private static RenderedSong Song(params RenderedTrack[] tracks)
     {
-        return new RenderedSong(1, StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), [..tracks]);
+        return new RenderedSong(1, Meter.FourFour, StateKinds.Tempo.CreateDefaultTimeline(0), StateKinds.Fade.CreateDefaultTimeline(0), [..tracks]);
     }
 
     [Test]

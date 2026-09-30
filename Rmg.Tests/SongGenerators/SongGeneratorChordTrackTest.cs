@@ -18,6 +18,7 @@ public sealed class SongGeneratorChordTrackTest
             var song = TestCorpus.Get(seed).Song;
             var chordTrackSong = new Song(
                 song.Duration,
+                song.Meter,
                 song.TrackDefinitions.Where(x => x.Key == ChordTrackNumber).ToImmutableSortedDictionary(),
                 song.TrackEventStateTimelineMap
             );

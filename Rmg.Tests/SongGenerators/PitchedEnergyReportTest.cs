@@ -26,7 +26,7 @@ public sealed class PitchedEnergyReportTest
             var songRows = new List<(double Energy, double Rhythm, double Melody, double Chords, double Bass, double Pitch)>();
             foreach (var span in song.Map.Sections)
             {
-                double PerBar(int track) => notes.GetValueOrDefault(track)?.Count(x => x.Position >= span.Start && x.Position < span.End) / (span.Duration / Meter.BarDuration) ?? 0;
+                double PerBar(int track) => notes.GetValueOrDefault(track)?.Count(x => x.Position >= span.Start && x.Position < span.End) / (span.Duration / Meter.FourFour.BarDuration) ?? 0;
                 var inSpan = melody.Where(x => x.Position >= span.Start && x.Position < span.End).ToArray();
                 if (inSpan.Length == 0)
                     continue;

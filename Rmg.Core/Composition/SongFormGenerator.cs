@@ -71,9 +71,11 @@ internal sealed class SongFormGenerator
     /// <param name="sections">Every section in the song's order, as generated.</param>
     public SongAssembly Assemble(FormPlan plan, IReadOnlyList<int> sectionIds, IReadOnlyList<GeneratedSection> sections)
     {
+        // the song's meter, as its sections have it
+        var meter = sections[0].Meter;
         var first = sections[0];
         // an intro of entries before the first section plays its first bars, the parts cleared until they come in
-        var windowDuration = plan.Window.Bars * Meter.BarDuration;
+        var windowDuration = plan.Window.Bars * meter.BarDuration;
         var introBlock = plan.Intro switch
         {
             IntroKind.Entries when plan.Window.IsBefore => first.Timeline.Trim(windowDuration),
@@ -97,9 +99,10 @@ internal sealed class SongFormGenerator
         {
             _ when !FormLayers.HasFinalChord(plan.Ending) => 0,
             EndingKind.RingOut => plan.Held,
-            _ => Math.Max(plan.Held, Meter.BarDuration)
+            _ => Math.Max(plan.Held, meter.BarDuration)
         };
         var map = new SongMap(
+            meter,
             new IntroSpan(plan.Intro, origin, plan.Window, entries),
             spans.ToImmutable(),
             new EndingSpan(plan.Ending, end, endingDuration, plan.Held, plan.Stop, plan.SlowsDown)
@@ -114,8 +117,8 @@ internal sealed class SongFormGenerator
         [
             ..map.Sections.Zip(sections, (span, section) => new FillSection(span.SectionId, span.Duration, section.Rhythm, section.Groove, section.Energy, section.IsPercussionOnly, section.HasDrums))
         ];
-        var edits = new TimelineEdits(_context, map);
-        var lines = FillGenerator.GetSectionLines(fillSections, origin).ToBuilder();
+        var edits = new TimelineEdits(_context, meter, map);
+        var lines = FillGenerator.GetSectionLines(fillSections, meter, origin).ToBuilder();
         var songState = StateTimelineMap.Create(end);
         var introDescription = $"{plan.Intro} intro, {origin} beats";
 
@@ -188,14 +191,14 @@ internal sealed class SongFormGenerator
         // at least, a section of one play's pattern played twice
         if (plan.Ending == EndingKind.Fade)
         {
-            var fadeStart = Math.Min(spans[^1].Start, end - 2 * Meter.PatternDuration);
+            var fadeStart = Math.Min(spans[^1].Start, end - 2 * meter.PatternDuration);
             songState = songState.MergeWith(CreateFade(fadeStart, end));
             description += $", fading from beat {fadeStart} to {end}";
         }
 
         StateTrace.Record(TracePoints.SongEnding, FillGenerator.DrumsTrace, sectionIds[^1], 0, StateMap.Default, 0, description);
         // the band grows louder into a louder section
-        songState = songState.MergeWith(CreateLifts(lines, end));
+        songState = songState.MergeWith(CreateLifts(lines, end, meter));
 
         return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, songState);
     }
@@ -208,7 +211,7 @@ internal sealed class SongFormGenerator
     /// </summary>
     internal ImmutableArray<IntroEntry> DrawEntries(GeneratedSection first, IntroWindow window)
     {
-        var windowDuration = window.Bars * Meter.BarDuration;
+        var windowDuration = window.Bars * first.Meter.BarDuration;
         var parts = first.Timeline.TrackTimelineMap
             .Where(x => x.Value.EventTimeline.Any(note => note.Position < windowDuration))
             .GroupBy(x => GetPart(x.Key, first))
@@ -236,7 +239,7 @@ internal sealed class SongFormGenerator
             ..order.Select((part, i) => new IntroEntry(
                     part,
                     parts[part],
-                    i < inWindow ? Math.Floor(i * window.Bars / (double)inWindow) * Meter.BarDuration : windowDuration
+                    i < inWindow ? Math.Floor(i * window.Bars / (double)inWindow) * first.Meter.BarDuration : windowDuration
                 )
             )
         ];
@@ -264,7 +267,7 @@ internal sealed class SongFormGenerator
         IReadOnlyDictionary<int, TrackRole> roles
     )
     {
-        var bar = first.Timeline.Trim(Meter.BarDuration);
+        var bar = first.Timeline.Trim(first.Meter.BarDuration);
         // or on the first sound of the song's first drum, such as a percussion song's with none of them
         var (drum, sound) = FormLayers.CountInSounds.FirstOrDefault(x => bar.TrackTimelineMap.ContainsKey(DrumGroups.GetTrackNumber(x.Drum)));
         if (drum is null)
@@ -285,13 +288,13 @@ internal sealed class SongFormGenerator
                     x.Key,
                     x.Value.WithEvents(
                         EventTimeline.Create(
-                            Meter.BarDuration,
+                            first.Meter.BarDuration,
                             x.Key == clickTrack ? Enumerable.Range(isHalf ? 2 : 0, isHalf ? 2 : 4).Select(beat => click.ToTimelineItem(beat)) : []
                         )
                     )
                 )
             );
-        return TrackEventStateTimelineMap.Create(Meter.BarDuration, tracks, bar.CommonStateTimelineMap);
+        return TrackEventStateTimelineMap.Create(first.Meter.BarDuration, tracks, bar.CommonStateTimelineMap);
     }
 
     /// <summary>
@@ -324,7 +327,7 @@ internal sealed class SongFormGenerator
         IReadOnlyDictionary<int, TrackRole> roles
     )
     {
-        var homeBar = lastSection.Timeline.Trim(Meter.BarDuration);
+        var homeBar = lastSection.Timeline.Trim(lastSection.Meter.BarDuration);
         var final = StateMap.FromStates([StateKinds.HeldDuration.CreateState(length)]);
         // every track plays the home bar's chord, whichever note it takes its own state from
         IStateKind[] shapeKinds = [StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed];
@@ -352,13 +355,13 @@ internal sealed class SongFormGenerator
                         .Select(LandOnRoot);
                 return new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
                     x.Key,
-                    EventStateTimelineMap.Create(Meter.BarDuration, EventTimeline.Create(Meter.BarDuration, notes), x.Value.StateTimelineMap)
+                    EventStateTimelineMap.Create(lastSection.Meter.BarDuration, EventTimeline.Create(lastSection.Meter.BarDuration, notes), x.Value.StateTimelineMap)
                 );
             }
         );
         return TrackEventStateTimelineMap.Merge(
             [
-                TrackEventStateTimelineMap.Create(Meter.BarDuration, tracks, homeBar.CommonStateTimelineMap),
+                TrackEventStateTimelineMap.Create(lastSection.Meter.BarDuration, tracks, homeBar.CommonStateTimelineMap),
                 TrackEventStateTimelineMap.Create<StateMap>(duration)
             ]
         );
@@ -370,7 +373,7 @@ internal sealed class SongFormGenerator
     ///     as loud as it plays to louder by how much more energy the next section has, as far as the ending section's rhythm
     ///     follows its energy, a step every <see cref="FormLayers.FadeStep" />, the next section then as loud as it plays.
     /// </summary>
-    private static StateTimelineMap CreateLifts(IEnumerable<FillLine> lines, double end)
+    private static StateTimelineMap CreateLifts(IEnumerable<FillLine> lines, double end, Meter meter)
     {
         var items = new List<TimelineItem<double>>();
         foreach (var line in lines.Where(x => x.Ending != x.Next && x.Position < end))
@@ -379,8 +382,8 @@ internal sealed class SongFormGenerator
             if (lift <= 0)
                 continue;
 
-            var count = (int)Math.Round(Meter.BarDuration / FormLayers.FadeStep);
-            var start = line.Position - Meter.BarDuration;
+            var count = (int)Math.Round(meter.BarDuration / FormLayers.FadeStep);
+            var start = line.Position - meter.BarDuration;
             items.AddRange(Enumerable.Range(1, count).Select(i => (FormLayers.LiftVelocity * lift * i / count).ToTimelineItem(start + i * FormLayers.FadeStep - FormLayers.FadeStep)));
             items.Add(0.0.ToTimelineItem(line.Position));
         }

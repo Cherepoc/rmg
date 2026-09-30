@@ -238,13 +238,14 @@ public static class Midi
         stream.Write(allEvents, 0, allEvents.Length);
     }
 
-    private static void WriteSystemTrack(StateTimeline<double> tempoTimeline, string? label, uint durationDelta, Stream stream)
+    private static void WriteSystemTrack(StateTimeline<double> tempoTimeline, Meter meter, string? label, uint durationDelta, Stream stream)
     {
         var events = tempoTimeline.Select(x => new MidiEvent(AbsoluteDelta(x.Position), Tempo(x.Value)));
         if (tempoTimeline.Count == 0 || tempoTimeline[0].Position > 0)
             events = events.Prepend(new MidiEvent(0, Tempo(1)));
 
-        events = events.Prepend(new MidiEvent(0, TimeSignature(4, 4)));
+        var (numerator, denominator) = meter.TimeSignature;
+        events = events.Prepend(new MidiEvent(0, TimeSignature((byte)numerator, (byte)denominator)));
         if (label is not null)
             events = events.Prepend(new MidiEvent(0, Text(label)));
 
@@ -393,7 +394,7 @@ public static class Midi
 
     private static RenderedSong WithTracks(this RenderedSong song, IEnumerable<RenderedTrack> tracks)
     {
-        return new RenderedSong(song.Duration, song.TempoTimeline, song.FadeTimeline, [..tracks]);
+        return new RenderedSong(song.Duration, song.Meter, song.TempoTimeline, song.FadeTimeline, [..tracks]);
     }
 
     /// <param name="label">
@@ -421,7 +422,7 @@ public static class Midi
         var ticksPerQuarterNoteBytes = IntToBytesFixed(TicksPerQuarterNote, 2);
         stream.Write(ticksPerQuarterNoteBytes, 0, ticksPerQuarterNoteBytes.Length);
 
-        WriteSystemTrack(song.TempoTimeline, label, songDurationDelta, stream);
+        WriteSystemTrack(song.TempoTimeline, song.Meter, label, songDurationDelta, stream);
 
         var indexedTracks = song.Tracks.ToIndexedTracks();
         foreach (var (channel, track) in indexedTracks) WriteNoteTrack(track, channel, song.FadeTimeline, songDurationDelta, stream);

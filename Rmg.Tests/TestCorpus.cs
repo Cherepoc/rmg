@@ -70,12 +70,12 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     public double[] FillLines()
     {
         var first = Map.Intro.Duration > 0 ? 0 : 1;
-        var last = (int)Math.Round((Map.Sections[^1].End - Origin) / Meter.PatternDuration) - (FormLayers.HasFinalChord(Map.Ending.Kind) ? 0 : 1);
-        var windowEnd = Map.Intro.Kind == IntroKind.Entries && !Map.Intro.Window.IsBefore ? Origin + Map.Intro.Window.Bars * Meter.BarDuration : double.NaN;
+        var last = (int)Math.Round((Map.Sections[^1].End - Origin) / Meter.FourFour.PatternDuration) - (FormLayers.HasFinalChord(Map.Ending.Kind) ? 0 : 1);
+        var windowEnd = Map.Intro.Kind == IntroKind.Entries && !Map.Intro.Window.IsBefore ? Origin + Map.Intro.Window.Bars * Meter.FourFour.BarDuration : double.NaN;
         return
         [
             ..Enumerable.Range(first, last - first + 1)
-                .Select(x => Origin + x * Meter.PatternDuration)
+                .Select(x => Origin + x * Meter.FourFour.PatternDuration)
                 .Where(x => x >= Map.Sections[^1].End - 1e-9
                             || HasDrums(Map.Sections.Last(s => s.Start <= x + 1e-9))
                             || Math.Abs(x - windowEnd) < 1e-9 && HasDrums(Map.Sections[0]))

@@ -8,7 +8,7 @@ namespace Rmg.Tests.Forms;
 
 public sealed class SongIntroTest
 {
-    private const double Phrase = Meter.PatternDuration;
+    private static readonly double Phrase = Meter.FourFour.PatternDuration;
 
     // the longest fill before the line where the drums come in, an odd span of a bar less a note
     private const double LongestFill = 4.5;
@@ -36,12 +36,12 @@ public sealed class SongIntroTest
         {
             var intro = song.Map.Intro;
             var entries = intro.Entries.Select(x => x.Entry).ToArray();
-            var window = intro.Window.Bars * Meter.BarDuration;
+            var window = intro.Window.Bars * Meter.FourFour.BarDuration;
 
             await Assert.That(entries[0]).IsEqualTo(0);
             await Assert.That(entries.Zip(entries.Skip(1)).All(x => x.First <= x.Second)).IsTrue();
             await Assert.That(entries[^1]).IsEqualTo(window);
-            await Assert.That(entries.All(x => x % Meter.BarDuration == 0 && x <= window)).IsTrue();
+            await Assert.That(entries.All(x => x % Meter.FourFour.BarDuration == 0 && x <= window)).IsTrue();
             await Assert.That(intro.Duration).IsEqualTo(intro.Window.IsBefore ? window : 0);
         }
 
@@ -53,7 +53,7 @@ public sealed class SongIntroTest
     {
         foreach (var song in Entries)
         {
-            var window = song.Map.Intro.Window.Bars * Meter.BarDuration;
+            var window = song.Map.Intro.Window.Bars * Meter.FourFour.BarDuration;
             foreach (var entry in song.Map.Intro.Entries)
             foreach (var track in entry.Tracks)
             {
@@ -93,8 +93,8 @@ public sealed class SongIntroTest
     {
         var songs = TestCorpus.Range(200).Where(x => x.Map.Intro.Kind == IntroKind.Entries).ToArray();
         var firsts = songs.GroupBy(x => x.Map.Intro.Entries[0].Part.ToString()).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}");
-        var melodyEarly = songs.Count(x => x.Map.Intro.Entries.Any(y => y.Part.Role == TrackRole.Melody && y.Entry < x.Map.Intro.Window.Bars * Meter.BarDuration));
-        var inWindow = songs.Select(x => x.Map.Intro.Entries.Count(y => y.Entry < x.Map.Intro.Window.Bars * Meter.BarDuration) / (double)x.Map.Intro.Entries.Length).Average();
+        var melodyEarly = songs.Count(x => x.Map.Intro.Entries.Any(y => y.Part.Role == TrackRole.Melody && y.Entry < x.Map.Intro.Window.Bars * Meter.FourFour.BarDuration));
+        var inWindow = songs.Select(x => x.Map.Intro.Entries.Count(y => y.Entry < x.Map.Intro.Window.Bars * Meter.FourFour.BarDuration) / (double)x.Map.Intro.Entries.Length).Average();
         var windows = songs.GroupBy(x => x.Map.Intro.Window).OrderBy(x => x.Key.Bars).Select(x => $"{x.Key.Bars}{(x.Key.IsBefore ? " before" : " in")} {x.Count()}");
         Console.WriteLine($"{songs.Length} intros of entries; windows {string.Join(", ", windows)}; first in {string.Join(", ", firsts)}; " +
                           $"the melody in the window {melodyEarly}; {inWindow:P0} of the parts come in in it");

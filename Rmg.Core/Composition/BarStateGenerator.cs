@@ -26,8 +26,12 @@ internal sealed class BarStateGenerator
     // change at its own pace
     private readonly ImmutableArray<IStateTimelineGenerator> _timelineGenerators;
 
-    public BarStateGenerator(ProgressionSettings settings)
+    private readonly Meter _meter;
+
+    /// <param name="meter">The meter the section's bars are in.</param>
+    public BarStateGenerator(ProgressionSettings settings, Meter meter)
     {
+        _meter = meter;
         _timelineGenerators =
         [
             StateTimelineGenerator.Create(
@@ -84,13 +88,13 @@ internal sealed class BarStateGenerator
         var changes = harmonicRhythm.Changes;
         var cadencePosition = changes[^1];
         var progressionTimeline = StateTimeline.Create(
-                Meter.PatternDuration,
+                _meter.PatternDuration,
                 StateKinds.ChordRoot,
                 progression.Select((root, chord) => root.ToTimelineItem(changes[chord]))
             )
             .WithLayer("Progression");
         var changeTimeline = StateTimeline.Create(
-                Meter.PatternDuration,
+                _meter.PatternDuration,
                 StateKinds.ChordChange,
                 changes.Select((position, chord) => (chord + 1).ToTimelineItem(position))
             )
@@ -99,7 +103,7 @@ internal sealed class BarStateGenerator
         // the cadence chord may raise the seventh, for a major chord on the fifth; the chords before keep the scale
         var raisedStep = Progressions.GetCadenceRaisedStep(scale.Offsets, home, progression[^1]);
         var raisedStepTimeline = StateTimeline.Create(
-                Meter.PatternDuration,
+                _meter.PatternDuration,
                 StateKinds.RaisedScaleSteps,
                 raisedStep is { } step ? [ImmutableArray.Create(step).ToTimelineItem(cadencePosition)] : []
             )
@@ -109,19 +113,19 @@ internal sealed class BarStateGenerator
         var homeChord = ImmutableArray.Create(unconventionality.GenerateHomeChord(context)).ToTimelineItem(0.0);
         var cadenceChord = ImmutableArray.Create(unconventionality.GenerateCadenceChord(context)).ToTimelineItem(cadencePosition);
         var roleChordTimeline = StateTimeline.Create(
-                Meter.PatternDuration,
+                _meter.PatternDuration,
                 CompositionStateKinds.RoleChord,
                 changes.Length > 2 ? [homeChord, ImmutableArray<Chord>.Empty.ToTimelineItem(changes[1]), cadenceChord] : [homeChord, cadenceChord]
             )
             .WithLayer("Progression");
 
         return StateTimelineMap.Create(
-            Meter.PatternDuration,
+            _meter.PatternDuration,
             [
                 .._timelineGenerators.Select((generator, index) =>
-                    generator.Generate(context.CreateContext(Seeds.Derive(seed, index)), Meter.PatternDuration)
+                    generator.Generate(context.CreateContext(Seeds.Derive(seed, index)), _meter.PatternDuration)
                 ),
-                StateTimeline.Create(Meter.PatternDuration, StateKinds.ScaleOffsets, [scale.Offsets.ToTimelineItem(0.0)]).WithLayer("Section"),
+                StateTimeline.Create(_meter.PatternDuration, StateKinds.ScaleOffsets, [scale.Offsets.ToTimelineItem(0.0)]).WithLayer("Section"),
                 progressionTimeline,
                 changeTimeline,
                 raisedStepTimeline,
@@ -134,7 +138,7 @@ internal sealed class BarStateGenerator
         );
     }
 
-    private static double LastBarPosition => (Progressions.BarCount - 1) * Meter.BarDuration;
+    private double LastBarPosition => (Progressions.BarCount - 1) * _meter.BarDuration;
 
     /// <summary>
     ///     The bars whose first chord starts afresh in its own register, now and then, most often the pattern's first;
@@ -143,13 +147,13 @@ internal sealed class BarStateGenerator
     private StateTimeline<int> GenerateResets(IGenerationContext context)
     {
         return StateTimeline.Create(
-                Meter.PatternDuration,
+                _meter.PatternDuration,
                 StateKinds.ChordVoicingReset,
                 Enumerable.Range(0, Progressions.BarCount)
                     .Select(bar =>
                         {
                             var chance = bar == 0 ? VoiceLeadingLayers.ResetAtPatternStart : VoiceLeadingLayers.ResetElsewhere;
-                            return (context.TestProbability(chance) ? bar + 1 : 0).ToTimelineItem(bar * Meter.BarDuration);
+                            return (context.TestProbability(chance) ? bar + 1 : 0).ToTimelineItem(bar * _meter.BarDuration);
                         }
                     )
                     .ToArray()
@@ -162,9 +166,9 @@ internal sealed class BarStateGenerator
     {
         var contour = MelodyLayers.GenerateContour(context, periodContext, tilt);
         return StateTimeline.Create(
-                Meter.PatternDuration,
+                _meter.PatternDuration,
                 CompositionStateKinds.LineRegister,
-                contour.Select((register, bar) => register.ToTimelineItem(bar * Meter.BarDuration)).ToArray()
+                contour.Select((register, bar) => register.ToTimelineItem(bar * _meter.BarDuration)).ToArray()
             )
             .WithLayer("Bar");
     }
@@ -174,7 +178,7 @@ internal sealed class BarStateGenerator
     {
         var end = context.Pick(MelodyLayers.PhraseEnds);
         return StateTimeline.Create(
-                Meter.PatternDuration,
+                _meter.PatternDuration,
                 CompositionStateKinds.MelodyPhraseEnd,
                 [end.ToTimelineItem(LastBarPosition)]
             )
@@ -189,7 +193,7 @@ internal sealed class BarStateGenerator
     {
         var approachGenerator = Generators.WeightedIndex(BassLeadingLayers.Approaches);
         var approaches = StateTimeline.Create(
-                Meter.PatternDuration,
+                _meter.PatternDuration,
                 StateKinds.ChordApproach,
                 changes
                     .Select(position =>
@@ -208,7 +212,7 @@ internal sealed class BarStateGenerator
         var arrivalWeights = rhythmTilt.Weigh(BassLeadingLayers.Arrivals, x => x == ChordArrival.Root ? 0 : 1);
         var arrivalGenerator = Generators.WeightedIndex(arrivalWeights);
         var arrivals = StateTimeline.Create(
-                Meter.PatternDuration,
+                _meter.PatternDuration,
                 StateKinds.ChordArrival,
                 changes
                     .Select(position => ((int)arrivalWeights[arrivalGenerator(context)].Value).ToTimelineItem(position))

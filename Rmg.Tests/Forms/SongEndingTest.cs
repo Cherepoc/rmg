@@ -48,7 +48,7 @@ public sealed class SongEndingTest
             await Assert.That(song.Map.Duration).IsEqualTo(sections[^1].End).Within(1e-9);
             // its first step down a step into the last section, or eight bars from the end where the section is shorter, as a
             // step of 1, as loud as the band plays, is none
-            var fadeStart = Math.Min(sections[^1].Start, sections[^1].End - 2 * Meter.PatternDuration);
+            var fadeStart = Math.Min(sections[^1].Start, sections[^1].End - 2 * Meter.FourFour.PatternDuration);
             await Assert.That(fade[0].Position).IsEqualTo(fadeStart + FormLayers.FadeStep).Within(1e-9);
             await Assert.That(fade[0].Value).IsLessThan(1);
             await Assert.That(fade.Zip(fade.Skip(1)).All(x => x.Second.Value < x.First.Value)).IsTrue();
@@ -157,7 +157,8 @@ public sealed class SongEndingTest
             ImmutableHashSet<TrackRole>.Empty,
             SectionRole.Free,
             0,
-            new Dictionary<int, TrackRole> { [MelodyTrack] = TrackRole.Melody, [BassTrack] = TrackRole.Bass, [drum] = TrackRole.Drum }.ToImmutableDictionary()
+            new Dictionary<int, TrackRole> { [MelodyTrack] = TrackRole.Melody, [BassTrack] = TrackRole.Bass, [drum] = TrackRole.Drum }.ToImmutableDictionary(),
+            Meter.FourFour
         );
 
         var ending = SongFormGenerator.CreateEnding(

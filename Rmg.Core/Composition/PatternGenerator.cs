@@ -26,8 +26,12 @@ internal sealed class PatternGenerator
     // the rhythm of a bar pattern, by its resolved settings, which many bar patterns share
     private readonly Func<StateMap, DyadicRankThresholdPattern> _rhythmPatternGenerator;
 
-    public PatternGenerator(IGenerationContext context, ImmutableSortedDictionary<int, IInstrumentTrack> trackDefinitions)
+    private readonly Meter _meter;
+
+    /// <param name="meter">The meter the song's bars are in.</param>
+    public PatternGenerator(IGenerationContext context, ImmutableSortedDictionary<int, IInstrumentTrack> trackDefinitions, Meter meter)
     {
+        _meter = meter;
         _context = context;
         _trackDefinitions = trackDefinitions;
         _rhythmPatternGenerator = ((Func<StateMap, DyadicRankThresholdPattern>)GenerateRhythmPattern)
@@ -141,7 +145,7 @@ internal sealed class PatternGenerator
                             );
                     feels.AddRange(seeds.Select(x => barFeels.Single(feel => feel.Track == x.Key)));
                     var trackNotePatterns = seeds.Select(x => new KeyValuePair<int, EventStateTimelineMap<StateMap>>(x.Key, bars[x.Key]));
-                    return TrackEventStateTimelineMap.Create(Meter.BarDuration, trackNotePatterns, StateTimelineMap.Create(Meter.BarDuration));
+                    return TrackEventStateTimelineMap.Create(_meter.BarDuration, trackNotePatterns, StateTimelineMap.Create(_meter.BarDuration));
                 }
             )
             .Unroll();
@@ -216,8 +220,8 @@ internal sealed class PatternGenerator
         // the bar's place in the 4-bar pattern, whose state an answer's bar plays over as its question's does
         var patternBar = barIndex % Progressions.BarCount;
         var notes = isResting
-            ? EventTimeline.Create<StateMap>(Meter.BarDuration)
-            : GenerateNotes(stateMap, barStateTimelineMap, patternBar * Meter.BarDuration, trackNumber, sectionId, patternBar, energy).GeneratedTimeline;
+            ? EventTimeline.Create<StateMap>(_meter.BarDuration)
+            : GenerateNotes(stateMap, barStateTimelineMap, patternBar * _meter.BarDuration, trackNumber, sectionId, patternBar, energy).GeneratedTimeline;
         // a drum bound to a lead plays its strong beats, and one that accents it a share of them, the same ones wherever
         // its bar pattern plays, by a draw keyed by the drum and the beat's place
         if (doubling is not null)
@@ -228,9 +232,9 @@ internal sealed class PatternGenerator
             );
         // a bass bar that leads into the next chord plays a note in its last beat, for its approach to play on
         if (_trackDefinitions[trackNumber].Role == TrackRole.Bass)
-            notes = LeadIn(notes, stateMap, barStateTimelineMap, barIndex, _rhythmPatternGenerator(stateMap).MaxRank);
+            notes = LeadIn(notes, stateMap, barStateTimelineMap, barIndex, _rhythmPatternGenerator(stateMap).MaxRank, _meter);
         // a melody's phrase ends where its bar has it, or where its answer does
-        var barEnd = barStateTimelineMap.GetEffectiveStateMapAt(patternBar * Meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
+        var barEnd = barStateTimelineMap.GetEffectiveStateMapAt(patternBar * _meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
         if (_trackDefinitions[trackNumber].Role == TrackRole.Melody)
             notes = LinePattern.EndPhrase(notes, patternBar == Progressions.BarCount - 1 && phraseEnd is { } answerEnd ? answerEnd : barEnd);
         feels.Add(new BarFeel(trackNumber, barIndex, stateMap, notes.Count));
@@ -308,23 +312,25 @@ internal sealed class PatternGenerator
     ///     as the song put together knows, the next section's chord too (<see cref="LinePattern.Place" />).
     /// </summary>
     /// <param name="maxRank">The weakest rank of the bar's rhythm.</param>
+    /// <param name="meter">The meter the bar is in.</param>
     internal static EventTimeline<StateMap> LeadIn(
         EventTimeline<StateMap> notes,
         StateMap stateMap,
         StateTimelineMap barStateTimelineMap,
         int barIndex,
-        int maxRank
+        int maxRank,
+        Meter meter
     )
     {
         var patternBar = barIndex % Progressions.BarCount;
-        var start = patternBar * Meter.BarDuration;
-        var end = start + Meter.BarDuration;
+        var start = patternBar * meter.BarDuration;
+        var end = start + meter.BarDuration;
         // the changes of chord in the bar, and at its end where the next bar starts a chord or the pattern starts again
         var patternChanges = barStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         var changes = patternChanges
             .Where(x => x > start + 1e-9 && x < end - 1e-9)
             .Append(end)
-            .Where(x => x >= Meter.PatternDuration - 1e-9 || patternChanges.Any(c => Math.Abs(c - x) < 1e-9))
+            .Where(x => x >= meter.PatternDuration - 1e-9 || patternChanges.Any(c => Math.Abs(c - x) < 1e-9))
             .Select(x => x - start);
 
         var led = notes.ToList();
@@ -419,8 +425,8 @@ internal sealed class PatternGenerator
     /// <summary>The rhythm of a bar pattern, by its resolved settings: its period, phase, ranks and seed.</summary>
     private DyadicRankThresholdPattern GenerateRhythmPattern(StateMap stateMap)
     {
-        var period = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Value) * Meter.BarDuration;
-        var phase = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.Value) * Meter.BarDuration;
+        var period = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Period.Value) * Meter.ReferenceBar;
+        var phase = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Phase.Value) * Meter.ReferenceBar;
         var maxRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.MaxRank);
         var seed = stateMap.GetStateValue(CompositionStateKinds.Rhythm.Seed);
         var rankOffset = stateMap.GetStateValue(CompositionStateKinds.Rhythm.RankOffset);
@@ -431,7 +437,7 @@ internal sealed class PatternGenerator
             _context,
             seed,
             WeightUtil.CreateGeometricRankWeightFunc(rankOffset, 0, 1.0, fullness),
-            new DyadicTimelineDescriptor(Meter.BarDuration, period, phase, maxRank, ResolvedRhythm.RestartOf(period), ResolvedRhythm.SplitOf(period)),
+            new DyadicTimelineDescriptor(_meter.BarDuration, period, phase, maxRank, ResolvedRhythm.RestartOf(period, _meter.BarDuration), ResolvedRhythm.SplitOf(period)),
             variation
         );
     }
@@ -511,9 +517,10 @@ internal readonly record struct ResolvedRhythm(
     ///     its last note onto the next bar's first; any other the bar.
     /// </summary>
     /// <param name="period">The cycle, in beats.</param>
-    public static double RestartOf(double period)
+    /// <param name="bar">How long the bar is, in beats, which a cycle starts again at the end of.</param>
+    public static double RestartOf(double period, double bar)
     {
-        return IsGrouped(period) ? Math.Min(Meter.BarDuration, Math.Pow(2, Math.Ceiling(Math.Log2(2 * period) - 1e-9))) : Meter.BarDuration;
+        return IsGrouped(period) ? Math.Min(bar, Math.Pow(2, Math.Ceiling(Math.Log2(2 * period) - 1e-9))) : bar;
     }
 
     /// <summary>
@@ -566,10 +573,10 @@ internal readonly record struct ResolvedRhythm(
     );
 
     /// <summary>The period in beats.</summary>
-    public double Period => PeriodValue * Meter.BarDuration;
+    public double Period => PeriodValue * Meter.ReferenceBar;
 
     /// <summary>The phase in beats.</summary>
-    public double Phase => PhaseValue * Meter.BarDuration;
+    public double Phase => PhaseValue * Meter.ReferenceBar;
 
     /// <param name="minNote">
     ///     The shortest note, in beats, which sets the finest rank the rhythm folds into, as a fill's does; none for a
@@ -585,10 +592,10 @@ internal readonly record struct ResolvedRhythm(
 
         // a bar pattern's to its limit, and a fill's as fine as its shortest note; a grouped cycle's no finer than the grid
         var maxRankLimit = minNote is { } note
-            ? Math.Max(0, (int)Math.Floor(Math.Log2(periodValue * Meter.BarDuration / note) + 1e-9))
+            ? Math.Max(0, (int)Math.Floor(Math.Log2(periodValue * Meter.ReferenceBar / note) + 1e-9))
             : MaxRankLimit;
-        if (IsGrouped(periodValue * Meter.BarDuration))
-            maxRankLimit = Math.Min(maxRankLimit, GridRankLimit(periodValue * Meter.BarDuration));
+        if (IsGrouped(periodValue * Meter.ReferenceBar))
+            maxRankLimit = Math.Min(maxRankLimit, GridRankLimit(periodValue * Meter.ReferenceBar));
         var maxRank = stateMap.GetStateValue(CompositionStateKinds.Rhythm.MaxRank)
             .BounceInBounds(0, maxRankLimit);
 

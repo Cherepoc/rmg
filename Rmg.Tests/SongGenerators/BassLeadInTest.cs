@@ -18,14 +18,14 @@ public sealed class BassLeadInTest
     private static StateTimelineMap BarStates(ChordApproach approach, (double Position, Chord Chord, double Root)[] chords)
     {
         return StateTimelineMap.Create(
-            Meter.PatternDuration,
+            Meter.FourFour.PatternDuration,
             [
-                StateTimeline.Create(Meter.PatternDuration, StateKinds.ChordApproach, [((int)approach).ToTimelineItem(0.0)]),
-                StateTimeline.Create(Meter.PatternDuration, CompositionStateKinds.RoleChord, chords.Select(x => ImmutableArray.Create(x.Chord).ToTimelineItem(x.Position))),
-                StateTimeline.Create(Meter.PatternDuration, StateKinds.ChordRoot, chords.Select(x => ((int)x.Root).ToTimelineItem(x.Position))),
+                StateTimeline.Create(Meter.FourFour.PatternDuration, StateKinds.ChordApproach, [((int)approach).ToTimelineItem(0.0)]),
+                StateTimeline.Create(Meter.FourFour.PatternDuration, CompositionStateKinds.RoleChord, chords.Select(x => ImmutableArray.Create(x.Chord).ToTimelineItem(x.Position))),
+                StateTimeline.Create(Meter.FourFour.PatternDuration, StateKinds.ChordRoot, chords.Select(x => ((int)x.Root).ToTimelineItem(x.Position))),
                 // the progression's chords change where the root does
                 StateTimeline.Create(
-                    Meter.PatternDuration,
+                    Meter.FourFour.PatternDuration,
                     StateKinds.ChordChange,
                     chords.Where((x, i) => i == 0 || x.Root != chords[i - 1].Root).Select((x, i) => (i + 1).ToTimelineItem(x.Position))
                 )
@@ -36,7 +36,7 @@ public sealed class BassLeadInTest
     private static EventTimeline<StateMap> Notes(params double[] positions)
     {
         return EventTimeline.Create(
-            Meter.BarDuration,
+            Meter.FourFour.BarDuration,
             positions.Select(x => StateMap.FromStates([StateKinds.Velocity.CreateState(1.0), CompositionStateKinds.BeatRank.CreateState(0)]).ToTimelineItem(x))
         );
     }
@@ -46,7 +46,7 @@ public sealed class BassLeadInTest
     {
         var barStates = BarStates(ChordApproach.HalfStepBelow, [(0, Triad, 0), (2, Seventh, 0), (4, Triad, 3)]);
 
-        var notes = PatternGenerator.LeadIn(Notes(0, 1), TrackState, barStates, 0, MaxRank);
+        var notes = PatternGenerator.LeadIn(Notes(0, 1), TrackState, barStates, 0, MaxRank, Meter.FourFour);
 
         await Assert.That(notes.Select(x => x.Position)).IsEquivalentTo([0.0, 1, 3]);
         var pickup = notes[^1].Value;
@@ -64,7 +64,7 @@ public sealed class BassLeadInTest
         var barStates = BarStates(approach, [(0, Triad, 0), (4, Triad, nextRoot)]);
         var notes = Notes(lastNote == 0 ? [0.0] : [0.0, lastNote]);
 
-        var led = PatternGenerator.LeadIn(notes, TrackState, barStates, 0, MaxRank);
+        var led = PatternGenerator.LeadIn(notes, TrackState, barStates, 0, MaxRank, Meter.FourFour);
 
         await Assert.That(led.Select(x => x.Position)).IsEquivalentTo(notes.Select(x => x.Position));
     }

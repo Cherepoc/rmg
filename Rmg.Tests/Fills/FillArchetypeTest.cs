@@ -43,7 +43,7 @@ public sealed class FillArchetypeTest
             ],
             StateTimelineMap.Create(12)
         );
-        return new Setup(new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5)), song, snare);
+        return new Setup(new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5), Meter.FourFour), song, snare);
     }
 
     private static TimelineItem<StateMap>[] Events(TrackEventStateTimelineMap<StateMap> song, int track, double from, double to) =>
@@ -179,13 +179,13 @@ public sealed class FillArchetypeTest
     [Test]
     public async Task FillRhythm_KeepsThePhase_AndTheTempoLimitsTheFinestNotes()
     {
-        var rhythm = FillRhythm.Of(Backbeat, Layer(2), 0.2);
+        var rhythm = FillRhythm.Of(Backbeat, Layer(2), 0.2, Meter.FourFour.BarDuration);
         var notes = rhythm.Play(new GenerationContext(1), 1, Line, 4, Line, rhythm.MaxRank);
 
         // 16ths, and at a limit of 16ths a rank finer folds back into 32nds' place, and at 8ths into 8ths
         await Assert.That(rhythm.Fine).IsEqualTo(0.25);
-        await Assert.That(FillRhythm.Of(Backbeat, Layer(2), 0.1).Fine).IsEqualTo(0.25);
-        await Assert.That(FillRhythm.Of(Backbeat, Layer(2), 0.5).Fine).IsEqualTo(0.5);
+        await Assert.That(FillRhythm.Of(Backbeat, Layer(2), 0.1, Meter.FourFour.BarDuration).Fine).IsEqualTo(0.25);
+        await Assert.That(FillRhythm.Of(Backbeat, Layer(2), 0.5, Meter.FourFour.BarDuration).Fine).IsEqualTo(0.5);
         // the strongest notes on the backbeats
         await Assert.That(notes.Where(x => x.Rank == 0).Select(x => x.Position).ToArray()).IsEquivalentTo([5.0, 7.0]);
     }
@@ -195,17 +195,17 @@ public sealed class FillArchetypeTest
     {
         // a beat's cycle down to 16ths, at a limit of 16ths: a rank finer stays at 16ths, two fold back into 8ths
         var sixteenths = Groove(-2, 0, 2);
-        await Assert.That(FillRhythm.Of(sixteenths, Layer(1), 0.25).MaxRank).IsEqualTo(2);
-        await Assert.That(FillRhythm.Of(sixteenths, Layer(2), 0.25).MaxRank).IsEqualTo(1);
+        await Assert.That(FillRhythm.Of(sixteenths, Layer(1), 0.25, Meter.FourFour.BarDuration).MaxRank).IsEqualTo(2);
+        await Assert.That(FillRhythm.Of(sixteenths, Layer(2), 0.25, Meter.FourFour.BarDuration).MaxRank).IsEqualTo(1);
         // and a slower tempo lets it go finer
-        await Assert.That(FillRhythm.Of(sixteenths, Layer(1), 0.1).MaxRank).IsEqualTo(3);
+        await Assert.That(FillRhythm.Of(sixteenths, Layer(1), 0.1, Meter.FourFour.BarDuration).MaxRank).IsEqualTo(3);
     }
 
     [Test]
     public async Task ASparseFill_OverAShortSpan_MayKeepNothing()
     {
         // a half-bar cycle, its strongest note on the downbeat, and little kept of the weaker ones
-        var sparse = FillRhythm.Of(Groove(-1, 0, 2, fullness: 0.05), StateMap.Default, 0.2);
+        var sparse = FillRhythm.Of(Groove(-1, 0, 2, fullness: 0.05), StateMap.Default, 0.2, Meter.FourFour.BarDuration);
         var empty = Enumerable.Range(0, 200).Count(x => sparse.Play(new GenerationContext(x), x, Line, Line - 1, Line, sparse.MaxRank).IsEmpty);
 
         await Assert.That(empty).IsGreaterThan(100);

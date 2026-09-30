@@ -35,8 +35,13 @@ internal sealed class FillGenerator
     private readonly StateMap _chances;
 
     /// <param name="songRhythm">How far the song's rhythm strays, which makes a drummer's signature likelier.</param>
-    public FillGenerator(IGenerationContext context, SongTracks tracks, RhythmicUnconventionality songRhythm)
+    // the meter the song's bars are in
+    private readonly Meter _meter;
+
+    /// <param name="meter">The meter the song's bars are in.</param>
+    public FillGenerator(IGenerationContext context, SongTracks tracks, RhythmicUnconventionality songRhythm, Meter meter)
     {
+        _meter = meter;
         _context = context;
         _songRhythm = songRhythm;
         _drumTracks = [..tracks.SongDrums.Select(DrumGroups.GetTrackNumber)];
@@ -68,7 +73,7 @@ internal sealed class FillGenerator
         var minNote = FillLayers.MinNoteSeconds * tempo / 60;
 
         var drummer = Drummer.Generate(_context, _songRhythm);
-        var edits = new TimelineEdits(_context, map);
+        var edits = new TimelineEdits(_context, _meter, map);
         foreach (var line in lines)
             MarkLine(song, edits, line, minNote, drummer, map?.Origin ?? 0);
 
@@ -81,7 +86,8 @@ internal sealed class FillGenerator
     ///     every section's 4-bar pattern and its repeat.
     /// </summary>
     /// <param name="start">Where the first section starts.</param>
-    public static ImmutableArray<FillLine> GetSectionLines(IReadOnlyList<FillSection> sections, double start = 0)
+    /// <param name="meter">The meter the song's bars are in.</param>
+    public static ImmutableArray<FillLine> GetSectionLines(IReadOnlyList<FillSection> sections, Meter meter, double start = 0)
     {
         var lines = ImmutableArray.CreateBuilder<FillLine>();
         for (var i = 0; i < sections.Count; i++)
@@ -91,9 +97,9 @@ internal sealed class FillGenerator
             if (i > 0 && sections[i].HasDrums)
                 lines.Add(new FillLine(start, sections[i - 1], sections[i], 0));
 
-            for (var line = start + Meter.PatternDuration;
+            for (var line = start + meter.PatternDuration;
                  sections[i].HasDrums && line < start + sections[i].Duration;
-                 line += Meter.PatternDuration)
+                 line += meter.PatternDuration)
                 lines.Add(new FillLine(line, sections[i], sections[i], FillLayers.PhraseWeight));
 
             start += sections[i].Duration;
@@ -126,7 +132,7 @@ internal sealed class FillGenerator
         // and which way the energy goes, which makes stopping the groove likelier into a quieter section
         var direction = SectionEnergy.Tilt(lift, ending.Rhythm.Coupling);
         var play = line.HasFill ? DrawPlay(drummer, ending, chances, tilt, direction, weight) : FillPlay.None;
-        var rhythm = FillRhythm.Of(ending.Groove.Source, play.Layer, minNote);
+        var rhythm = FillRhythm.Of(ending.Groove.Source, play.Layer, minNote, _meter.BarDuration);
         _lastRun = [];
         var span = Fill(edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId);
         if (span > 0 && line.Ending != line.Next && !_lastRun.IsEmpty)
@@ -223,8 +229,8 @@ internal sealed class FillGenerator
         double minNote
     )
     {
-        var edits = new TimelineEdits(_context);
-        Fill(edits, play, line, groove, FillRhythm.Of(groove.Source, play.Layer, minNote), minNote, 0);
+        var edits = new TimelineEdits(_context, _meter);
+        Fill(edits, play, line, groove, FillRhythm.Of(groove.Source, play.Layer, minNote, _meter.BarDuration), minNote, 0);
         return edits.ApplyTo(song);
     }
 
@@ -267,7 +273,7 @@ internal sealed class FillGenerator
 
     /// <summary>What was decided at a line, recorded in the last bar before it, where its fill is.</summary>
     /// <param name="line">Where the line is, from the start of the song's first section.</param>
-    private static void RecordDecision(
+    private void RecordDecision(
         int sectionId,
         double line,
         FillPlay play,
@@ -281,7 +287,7 @@ internal sealed class FillGenerator
         if (!StateTrace.IsRunning)
             return;
 
-        var bar = (int)Math.Floor(line / Meter.BarDuration) - 1;
+        var bar = (int)Math.Floor(line / _meter.BarDuration) - 1;
         var description = $"{span} beats, landing {(landing.IsEmpty ? "on nothing" : $"on {string.Join(" ", landing)}")}"
                           + (isEarly ? " early" : "")
                           + (span > 0
@@ -298,7 +304,7 @@ internal sealed class FillGenerator
             sectionId,
             bar.Mod(Progressions.BarCount),
             StateMap.Default,
-            span > 0 ? Math.Max(0, Meter.BarDuration - span) : 0,
+            span > 0 ? Math.Max(0, _meter.BarDuration - span) : 0,
             description,
             new FillDecision(span, play.Treatment, play.Run == FillRun.Rest, rhythm.Tuplet, rhythm.Rhythm.Fullness, landing, isEarly, lift)
         );
@@ -329,7 +335,7 @@ internal sealed class FillGenerator
         // one off the beat starts a note of the fill's rhythm near an 8th earlier or later, and shorter where it is a
         // bar long
         if (play.SpanShift != 0)
-            span = span < Meter.BarDuration ? Math.Max(rhythm.Push, span + play.SpanShift * rhythm.Push) : span - rhythm.Push;
+            span = span < _meter.BarDuration ? Math.Max(rhythm.Push, span + play.SpanShift * rhythm.Push) : span - rhythm.Push;
         var from = line - span;
 
         var cleared = play.Treatment switch
@@ -387,7 +393,7 @@ internal sealed class FillGenerator
         else
             notes.AddRange(rhythm.Play(_context, seed, line, from, line, rhythm.MaxRank));
 
-        var drums = run.Sounds.Select(x => x.Track).Distinct().ToDictionary(x => x, x => FillRhythm.Of(groove.Of(x), play.Layer, minNote));
+        var drums = run.Sounds.Select(x => x.Track).Distinct().ToDictionary(x => x, x => FillRhythm.Of(groove.Of(x), play.Layer, minNote, _meter.BarDuration));
         var places = FillSounds.Walk(_context, run.Path, run.Sounds.Length, notes.Count);
         var span = line - from;
         for (var k = 0; k < notes.Count; k++)

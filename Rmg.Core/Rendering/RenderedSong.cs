@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core.Composition;
 using Rmg.Core.Events;
 
 namespace Rmg.Core.Rendering;
@@ -7,6 +8,7 @@ public sealed class RenderedSong
 {
     public RenderedSong(
         double duration,
+        Meter meter,
         StateTimeline<double> tempoTimeline,
         StateTimeline<double> fadeTimeline,
         ImmutableArray<RenderedTrack> tracks
@@ -19,12 +21,16 @@ public sealed class RenderedSong
             throw new ArgumentException("Fade timeline must be of kind Fade.", nameof(fadeTimeline));
 
         Duration = duration;
+        Meter = meter;
         TempoTimeline = tempoTimeline;
         FadeTimeline = fadeTimeline;
         Tracks = tracks;
     }
 
     public double Duration { get; }
+
+    /// <summary>The meter the song's bars are in, which its MIDI file writes as its time signature.</summary>
+    public Meter Meter { get; }
 
     public StateTimeline<double> TempoTimeline { get; }
 

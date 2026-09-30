@@ -7,6 +7,7 @@ namespace Rmg.Tests.Forms;
 public sealed class SongMapTest
 {
     private static readonly SongMap Map = new(
+        Meter.FourFour,
         new IntroSpan(IntroKind.Entries, 8, new IntroWindow(2, true)),
         [new SectionSpan(0, 8, 32), new SectionSpan(1, 40, 32)],
         new EndingSpan(EndingKind.Button, 72, 4, 1)
