@@ -202,13 +202,16 @@ public static class SongGenerator
         var form = formGenerator.Assemble(plan, played, sections);
         var songTrackNoteTimelineMap = form.Edits.ApplyTo(form.Blocks.Unroll());
         // a song may change key at a pattern's start: a middling one now and then going up for a last section that came
-        // back before, as for a last chorus, and the wilder ones anywhere, each place drawing from a stream of its own
+        // back before, as for a last chorus, or playing a section, a chorus the likelier, in a key of its own, and the
+        // wilder ones anywhere, each place and each section drawing from a stream of its own
         var keyChanges = KeyChange.Generate(
             Stream(SongStream.KeyChange),
             place => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.KeyChange), place)),
+            id => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SectionKey), id)),
             songUnconventionality[Facet.Scale],
             form.Map,
-            sectionIds
+            sectionIds,
+            structure.Roles
         );
         StateTrace.Record(TracePoints.KeyChange, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, keyChanges.IsEmpty ? "none" : string.Join(", ", keyChanges), keyChanges);
         songTrackNoteTimelineMap = songTrackNoteTimelineMap.MergeStateTimelineMap(form.SongState)
@@ -385,5 +388,6 @@ internal enum SongStream
     SoloLines = 32,
     InstrumentsOverTime = 33,
     Expression = 34,
-    PartSound = 35
+    PartSound = 35,
+    SectionKey = 36
 }

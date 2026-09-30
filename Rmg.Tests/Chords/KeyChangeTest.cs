@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Rmg.Core;
 using Rmg.Core.Composition;
+using Rmg.Core.Events;
 
 namespace Rmg.Tests.Chords;
 
@@ -31,7 +32,9 @@ public sealed class KeyChangeTest
             var song = TestCorpus.Get(seed, new SongOverrides(Base: 1));
             var changes = Changes(song);
 
-            await Assert.That(changes.Select(x => x.Position).ToArray()).IsEquivalentTo(PatternStarts(song));
+            // nearly every one, a step and a section's own key now and then coming back to the key it left
+            await Assert.That(changes.All(x => PatternStarts(song).Contains(x.Position))).IsTrue();
+            await Assert.That(changes.Length).IsGreaterThanOrEqualTo(PatternStarts(song).Length * 3 / 4);
             await Assert.That(changes.All(x => x.Semitones is >= -5 and <= 6)).IsTrue();
             // every change moves the key
             await Assert.That(changes.Zip(changes.Skip(1)).All(x => x.First.Semitones != x.Second.Semitones)).IsTrue();
@@ -43,22 +46,28 @@ public sealed class KeyChangeTest
     }
 
     [Test]
-    public async Task AMiddlingSong_ChangesKeyOnlyForALastSectionThatCameBack_UpAWholeOrAHalfStep()
+    public async Task AMiddlingSong_ChangesKeyOnlyWhereASectionStarts_ALastSectionThatCameBackGoingUpAWholeOrAHalfStep()
     {
         var middling = new SongOverrides(Base: 0.5, Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Scale, 0.5));
-        var changes = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, middling))
-            .Select(x => (Song: x, Changes: Changes(x)))
-            .Where(x => !x.Changes.IsEmpty)
-            .ToArray();
-
-        await Assert.That(changes.Length).IsGreaterThan(0);
-        foreach (var (song, change) in changes)
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, middling));
+        var lifts = 0;
+        foreach (var song in songs)
         {
-            // the section it starts, and one before it the same, a fading song's last played once or twice more after it
-            var at = song.Map.Sections.Select((x, i) => (Section: x, Index: i)).Single(x => x.Section.Start == change.Single().Position);
-            await Assert.That(song.Map.Sections.Take(at.Index).Any(x => x.SectionId == at.Section.SectionId)).IsTrue();
-            await Assert.That(at.Index).IsGreaterThanOrEqualTo(song.Map.Sections.Length - 3);
-            await Assert.That(change.Single().Semitones).IsBetween(1, 2);
+            var keys = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.KeyOffset);
+            await Assert.That(Changes(song).All(x => song.Map.Sections.Any(y => y.Start == x.Position))).IsTrue();
+
+            // the last section in its key, or a whole or half step above it where it played before
+            var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
+            var last = song.Map.Sections[structure.SectionIds.Length - 1];
+            var before = song.Map.Sections.Take(structure.SectionIds.Length - 1).FirstOrDefault(x => x.SectionId == last.SectionId);
+            if (before is null)
+                continue;
+
+            var lift = (keys.GetEffectiveValueAt(last.Start) - keys.GetEffectiveValueAt(before.Start)).Mod(12);
+            await Assert.That(lift).IsBetween(0, 2).Because($"seed {song.Seed}");
+            lifts += lift > 0 ? 1 : 0;
         }
+
+        await Assert.That(lifts).IsGreaterThan(0);
     }
 }

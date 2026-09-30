@@ -105,7 +105,7 @@ internal sealed class SectionGenerator
 
         var (songStateMap, energy) = GetEnergy(sectionId, rhythm);
         var tilt = SectionEnergy.Tilt(energy, rhythm.Coupling);
-        var scale = plan.KeepsSongScale ? _songScale : PickScale(sectionId, facets[Facet.Scale], energy);
+        var scale = plan.KeepsSongScale ? _songScale : PickScale(sectionId, facets[Facet.Scale], energy, plan.Role);
         StateTrace.Record(TracePoints.SectionScale, SectionTrace, sectionId, 0, StateMap.Default, 0, scale.Name, scale);
 
         // the section's chords move around its home, which every track's root starts from; the song's last section
@@ -331,16 +331,17 @@ internal sealed class SectionGenerator
 
     /// <summary>
     ///     The section's scale: the song's, or now and then another on its tonic, leaning brighter the more energy the
-    ///     section has, as far as its harmony follows it; drawn from a sequence of its own, so that the section's other
-    ///     draws stay as they are.
+    ///     section has, as far as its harmony follows it, and a chorus or a bridge changing the likelier; drawn from a
+    ///     sequence of its own, so that the section's other draws stay as they are.
     /// </summary>
-    private Scale PickScale(int sectionId, double unconventionality, double energy)
+    private Scale PickScale(int sectionId, double unconventionality, double energy, SectionRole role)
     {
         return Scales.PickSection(
             Stream(sectionId, SectionStream.Scale),
             _songScale,
             unconventionality,
-            SectionEnergy.Tilt(energy, Unconventionality.Coupling(unconventionality))
+            SectionEnergy.Tilt(energy, Unconventionality.Coupling(unconventionality)),
+            SectionContrast.Of(role)
         );
     }
 

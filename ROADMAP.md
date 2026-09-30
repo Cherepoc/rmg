@@ -300,6 +300,11 @@ planned together (P1):
   likelier the more conventional its rhythm, a whole step or, by 0.4, a half step (`KeyChange`), as the song's key
   from the section's start, so that the whole band, the ending and a fade move with it and the lines, placed after, go
   on into it. Over 200 corpus songs, 22 go up a key, 13 of them a whole step (`SongFormReportTest`).
+- **A section's own key and scale** (built): a section but the first may play in a key of its own every time it
+  plays, by the scale facet (`KeyChange.SectionChance`, 0.08 at the middle), up or down a fourth most often, and a
+  chorus or a bridge, which contrast with the verse, leans to it and to a scale of its own by odds of 2
+  (`SectionContrast`). Over 1024 songs, in the middle fifth 13% of the choruses and bridges are in another key and 28%
+  in another scale, against 7% and 11% of the other sections (`SectionKeyTest`).
 
 ## Fills
 

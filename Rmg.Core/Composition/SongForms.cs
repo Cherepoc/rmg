@@ -23,6 +23,21 @@ public sealed record SongStructure(ImmutableArray<int> SectionIds, ImmutableDict
 ///     role; and otherwise a form of its own (<see cref="SongStructureGenerator" />), whose sections have no role, the
 ///     likelier the less conventional the song's rhythm.
 /// </summary>
+internal static class SectionContrast
+{
+    /// <summary>How far a section that contrasts with the verse leans to a key or a scale of its own, as odds.</summary>
+    public const double Odds = 2;
+
+    /// <summary>
+    ///     How a section leans to a key or a scale of its own: the chorus and the bridge, which contrast with the verse,
+    ///     to it, and the others not at all.
+    /// </summary>
+    public static Tilt Of(SectionRole role)
+    {
+        return Tilt.Of(Odds, role is SectionRole.Chorus or SectionRole.Bridge ? 1 : 0);
+    }
+}
+
 internal static class SongForms
 {
     /// <summary>The chance a song takes one of the forms, at a rhythm of middling conventionality.</summary>
