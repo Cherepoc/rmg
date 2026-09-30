@@ -51,6 +51,7 @@ internal static class Solos
         (TrackRole.Melody, new ByConvention(1, 0.35, 1)),
         (TrackRole.Chords, new ByConvention(1, 0.25, 1)),
         (TrackRole.Riff, new ByConvention(1, 0.2, 1)),
+        (TrackRole.Rhythm, new ByConvention(1, 0.15, 1)),
         (TrackRole.CounterMelody, new ByConvention(0, 0.08, 1)),
         (TrackRole.Bass, new ByConvention(0, 0.05, 1)),
         (TrackRole.Pad, new ByConvention(0, 0.02, 1)),

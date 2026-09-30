@@ -111,6 +111,24 @@ internal static class InstrumentRoles
         ]
     );
 
+    /// <summary>The instruments that comp beside the chords: guitars most, a clavinet, an electric piano, an organ, a banjo.</summary>
+    public static InstrumentRole Rhythm { get; } = new(
+        nameof(Rhythm),
+        [
+            new(25, "Acoustic Guitar (steel)", 1, VoiceLeadingLayers.Guitar),
+            new(27, "Electric Guitar (clean)", 1, VoiceLeadingLayers.Guitar),
+            new(28, "Electric Guitar (muted)", 0.6, VoiceLeadingLayers.Guitar),
+            new(24, "Acoustic Guitar (nylon)", 0.5, VoiceLeadingLayers.Guitar),
+            new(29, "Overdriven Guitar", 0.5, VoiceLeadingLayers.Guitar),
+            new(26, "Electric Guitar (jazz)", 0.4, VoiceLeadingLayers.Guitar),
+            new(30, "Distortion Guitar", 0.4, VoiceLeadingLayers.Guitar),
+            new(7, "Clavinet", 0.3),
+            new(4, "Electric Piano 1", 0.3),
+            new(18, "Rock Organ", 0.2, VoiceLeadingLayers.Sustained),
+            new(105, "Banjo", 0.1, VoiceLeadingLayers.Guitar)
+        ]
+    );
+
     /// <summary>The instruments that play a riff: guitars, overdriven or clean, a clavinet, synth leads, a baritone sax, brass.</summary>
     public static InstrumentRole Riff { get; } = new(
         nameof(Riff),

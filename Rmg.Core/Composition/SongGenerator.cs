@@ -84,6 +84,7 @@ public static class SongGenerator
             Stream(SongStream.Pad),
             Stream(SongStream.CounterMelody),
             Stream(SongStream.Riff),
+            Stream(SongStream.RhythmPart),
             rhythmicUnconventionality,
             Stream(SongStream.DrumStrokes),
             Stream(SongStream.DrumRoles),
@@ -389,5 +390,6 @@ internal enum SongStream
     InstrumentsOverTime = 33,
     Expression = 34,
     PartSound = 35,
-    SectionKey = 36
+    SectionKey = 36,
+    RhythmPart = 37
 }

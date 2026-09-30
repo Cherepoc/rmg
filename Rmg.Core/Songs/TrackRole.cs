@@ -17,5 +17,14 @@ public enum TrackRole
     Drum,
 
     /// <summary>A short figure played again and again, as a guitar or a synth plays a riff, under the melody or alone.</summary>
-    Riff
+    Riff,
+
+    /// <summary>A second part playing the chords, in a rhythm of its own, as a rhythm guitar comps beside the keys.</summary>
+    Rhythm
+}
+
+public static class TrackRoles
+{
+    /// <summary>Whether the part plays the chords, voiced and led from one to the next: the chords and the rhythm part.</summary>
+    public static bool PlaysChords(this TrackRole role) => role is TrackRole.Chords or TrackRole.Rhythm;
 }

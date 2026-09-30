@@ -20,14 +20,11 @@ export const MIDDLE_PAN = 32;
 /** The facets, the parts, the drum setups and the drum groups, by the names the server takes, in the format's order. */
 export const FACETS = ["feel", "groove", "fills", "form", "chords", "progression", "scale", "melody", "sound"];
 
-/**
- *     The parts the format keeps a place for: the seven the songs play, and the rhythm part a later version adds, which
- *     the page neither shows nor asks for yet.
- */
+/** The parts the format keeps a place for, every one the songs play. */
 export const FORMAT_PARTS = ["melody", "chords", "bass", "pad", "counterMelody", "drum", "riff", "rhythm"];
 
 /** The parts the songs play. */
-export const PARTS = FORMAT_PARTS.slice(0, 7);
+export const PARTS = FORMAT_PARTS;
 
 export const DRUM_SETUPS = ["kit", "kitAndPercussion", "percussion"];
 export const DRUM_GROUPS = ["kick", "snare", "timekeepers", "toms", "accents", "percussion", "calls"];

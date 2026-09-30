@@ -87,6 +87,7 @@ internal static class Expression
         TrackRole.Pad => 80,
         TrackRole.Chords => 55,
         TrackRole.Riff => 45,
+        TrackRole.Rhythm => 50,
         _ => 60
     };
 
@@ -147,7 +148,7 @@ internal static class Expression
                         continue;
 
                     var noteProgram = note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : program;
-                    var isLine = note.Value.Pitches.Length == 1 && role is not (TrackRole.Chords or TrackRole.Pad or TrackRole.Drum)
+                    var isLine = note.Value.Pitches.Length == 1 && !role.PlaysChords() && role is not (TrackRole.Pad or TrackRole.Drum)
                                  || note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1;
                     var bends = isLine && Bends(noteProgram);
                     var isSolo = note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1;

@@ -42,8 +42,7 @@ public sealed record SongSettings(
         [Facet.Feel, Facet.Groove, Facet.Fills, Facet.Form, Facet.Chords, Facet.Progression, Facet.Scale, Facet.Melody, Facet.Sound];
 
     /// <summary>
-    ///     The parts, by the names a request takes them by: the six the songs play, and the riff and the rhythm part a later
-    ///     version adds, kept a place already so that adding them leaves the format as it is.
+    ///     The parts, by the names a request takes them by, every one the songs play.
     /// </summary>
     public static ImmutableArray<string> PartOrder { get; } = ["melody", "chords", "bass", "pad", "counterMelody", "drum", "riff", "rhythm"];
 

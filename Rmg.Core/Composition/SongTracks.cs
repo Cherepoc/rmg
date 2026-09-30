@@ -17,6 +17,10 @@ internal sealed class SongTracks
     public const int PadTrack = 7;
     public const int CounterMelodyTrack = 8;
     public const int RiffTrack = 9;
+    public const int RhythmTrack = 10;
+
+    /// <summary>How much fuller the rhythm part's rhythm is than a track's, as a comping part strums more often than the chords.</summary>
+    public const double RhythmPartFullness = 0.2;
 
     private SongTracks(
         ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
@@ -58,12 +62,15 @@ internal sealed class SongTracks
     /// <param name="panningContext">The sequence the pitched tracks' places from left to right are drawn from (<see cref="Panning" />).</param>
     /// <param name="padContext">The sequence the pad's instrument and state are drawn from.</param>
     /// <param name="counterContext">The sequence the counter-melody's instrument and state are drawn from.</param>
+    /// <param name="riffContext">The sequence the riff's instrument and state are drawn from.</param>
+    /// <param name="rhythmContext">The sequence the rhythm part's instrument, register and state are drawn from.</param>
     public static SongTracks Create(
         IGenerationContext context,
         IGenerationContext panningContext,
         IGenerationContext padContext,
         IGenerationContext counterContext,
         IGenerationContext riffContext,
+        IGenerationContext rhythmContext,
         RhythmicUnconventionality rhythmicUnconventionality,
         IGenerationContext strokeContext,
         IGenerationContext roleContext,
@@ -87,7 +94,8 @@ internal sealed class SongTracks
             new Dictionary<int, TrackRole>
             {
                 [ChordsTrack] = TrackRole.Chords, [MelodyTrack] = TrackRole.Melody, [BassTrack] = TrackRole.Bass, [PadTrack] = TrackRole.Pad,
-                [CounterMelodyTrack] = TrackRole.CounterMelody, [RiffTrack] = TrackRole.Riff
+                [CounterMelodyTrack] = TrackRole.CounterMelody, [RiffTrack] = TrackRole.Riff,
+                [RhythmTrack] = TrackRole.Rhythm
             }
         );
         StateTrace.Record(TracePoints.Panning, ChordsTrack, 0, 0, StateMap.Default, 0, string.Join(", ", pans.Select(x => $"{x.Key} {x.Value:F2}")), pans);
@@ -98,9 +106,30 @@ internal sealed class SongTracks
         var counterInstrument = InstrumentRoles.CounterMelody.Pick(counterContext, melodyInstrument.Program, chordsInstrument.Program);
         // and the riff one of its own, apart from the melody's and the chords'
         var riffInstrument = InstrumentRoles.Riff.Pick(riffContext, melodyInstrument.Program, chordsInstrument.Program);
+        // and the rhythm part comps in a sound of its own, apart from the chords' and the riff's, in a register of its own
+        var rhythmInstrument = InstrumentRoles.Rhythm.Pick(rhythmContext, chordsInstrument.Program, riffInstrument.Program);
 
         var definitions = new Dictionary<int, IInstrumentTrack>
         {
+            [RhythmTrack] = new PitchInstrumentTrack(
+                LayerStates.CreateTrackLayer(
+                    rhythmContext,
+                    "Track",
+                    new StateMapBuilder("Track role", perTrack: true)
+                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Rhythm))
+                        // as the chords', its instrument sets how smoothly its chords move, and the song moves it a little
+                        .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(x => rhythmInstrument.Leading + x))
+                        .Add(CompositionStateKinds.Rhythm.Fullness, RhythmPartFullness)
+                        .ToStateMap(rhythmContext),
+                    _ => VelocityLayers.GetLevel(TrackRole.Rhythm),
+                    trackRhythmLayer
+                ),
+                rhythmInstrument.Program,
+                Generators.Int(-1, 1).WithContext(rhythmContext)(),
+                Generators.Int(1, 3).WithContext(rhythmContext)(),
+                TrackRole.Rhythm,
+                pans[RhythmTrack]
+            ),
             [RiffTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
                     riffContext,

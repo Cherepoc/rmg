@@ -116,7 +116,7 @@ internal static class Realizer
         while (true)
         {
             var realized = RealizePitchTrack(track, GetNoteStates(raw, track, commonStateTimelineMap), changes, meter, out var crossings);
-            if (crossings.Count == 0 || track.Role is not (TrackRole.Chords or TrackRole.Bass))
+            if (crossings.Count == 0 || !(track.Role.PlaysChords() || track.Role == TrackRole.Bass))
                 return realized;
 
             var events = raw.EventTimeline;
@@ -290,7 +290,7 @@ internal static class Realizer
         ImmutableArray<int> notes = role switch
         {
             _ when isLine => [InRange(ToNote(stateMap.GetStateValue(StateKinds.ScaleStep)) + stateMap.GetStateValue(StateKinds.Alteration))],
-            TrackRole.Chords or TrackRole.Pad => voiceLeader.Place(
+            TrackRole.Chords or TrackRole.Rhythm or TrackRole.Pad => voiceLeader.Place(
                 [..chordSteps.Select(ToNote)],
                 ToNote(0),
                 stateMap.GetStateValue(StateKinds.ChordVoicingFixed) > 0,
@@ -302,7 +302,7 @@ internal static class Realizer
 
         // a broken chord plays one of its notes, by its pattern and its place since the chord came in
         var arpeggio = (ArpeggioPattern)stateMap.GetStateValue(CompositionStateKinds.Arpeggio);
-        if (role == TrackRole.Chords && !isLine && arpeggio != ArpeggioPattern.None)
+        if (role.PlaysChords() && !isLine && arpeggio != ArpeggioPattern.None)
             notes = [Arpeggios.Pick(arpeggio, notes, place, position)];
 
         return new RealizedNote(notes, noteVelocity, duration, stateMap).ToTimelineItem(position);

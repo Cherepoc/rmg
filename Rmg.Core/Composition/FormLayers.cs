@@ -93,7 +93,8 @@ internal static class FormLayers
         (new IntroPart(TrackRole.Drum, DrumRole.Colour), 0.5, 1),
         (new IntroPart(TrackRole.Melody), 0.05, 1),
         (new IntroPart(TrackRole.CounterMelody), 0.1, 1),
-        (new IntroPart(TrackRole.Riff), 1.5, 0)
+        (new IntroPart(TrackRole.Riff), 1.5, 0),
+        (new IntroPart(TrackRole.Rhythm), 1.5, 0)
     ];
 
     /// <summary>The chance that a count-in clicks only the last two beats, rather than all four.</summary>

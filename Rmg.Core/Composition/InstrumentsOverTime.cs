@@ -72,6 +72,7 @@ internal static class InstrumentsOverTime
         TrackRole.Pad => InstrumentRoles.Pad,
         TrackRole.CounterMelody => InstrumentRoles.CounterMelody,
         TrackRole.Riff => InstrumentRoles.Riff,
+        TrackRole.Rhythm => InstrumentRoles.Rhythm,
         _ => null
     };
 

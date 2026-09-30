@@ -44,14 +44,14 @@ public sealed class GrooveTest
     }
 
     [Test]
-    public async Task TheBassPlaysInTheMiddle_TheMelodyNearIt_TheChordsAndThePadOnSidesApart()
+    public async Task TheBassPlaysInTheMiddle_TheMelodyNearIt_TheTwoChordPartsOnSidesApart()
     {
         foreach (var song in TestCorpus.Range(32))
         {
             var pans = (ImmutableDictionary<int, double>)song.Trace.Single(x => x.Point == TracePoints.Panning).Value!;
             await Assert.That(pans[SongTracks.BassTrack]).IsEqualTo(0);
             await Assert.That(Math.Abs(pans[SongTracks.MelodyTrack])).IsLessThanOrEqualTo(Panning.GetSpread(Rmg.Core.Songs.TrackRole.Melody));
-            await Assert.That(Math.Sign(pans[SongTracks.ChordsTrack])).IsEqualTo(-Math.Sign(pans[SongTracks.PadTrack]));
+            await Assert.That(Math.Sign(pans[SongTracks.ChordsTrack])).IsEqualTo(-Math.Sign(pans[SongTracks.RhythmTrack]));
         }
     }
 

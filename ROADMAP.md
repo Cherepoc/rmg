@@ -293,9 +293,13 @@ planned together (P1):
   notes as the melody, 8.2 semitones below it on average, a semitone or a major seventh from the melody note over it
   3.7% of the time. A stop now holds a part's last note only where it still sounds in the bar before, not a note of a
   part that rested since.
-- **Pitched roles and the arrangement:** left: a second chord instrument, and a section's parts chosen as its drum kit
-  is (`DrumKitGenerator.SelectKit`), leading and colouring roles, where now each part rests on its own
-  (`Arrangement`); the page's mixer shows every track the file has.
+- **A rhythm part** (built): a second part playing the chords in a rhythm of its own, a guitar most often, a clavinet,
+  an electric piano, an organ or a banjo, in 40% of the songs (`TrackRole.Rhythm`, `TrackRoles.PlaysChords`), voiced
+  and led as the chords are, breaking them by a draw of its own, a little fuller, and panned against the chords. Over
+  256 songs 110 have one; it strikes 2.91 times a bar against the chords' 2.74 (`RhythmPartTest`).
+- **Pitched roles and the arrangement:** left: a section's parts chosen as its drum kit is
+  (`DrumKitGenerator.SelectKit`), leading and colouring roles, where now each part rests on its own (`Arrangement`);
+  the page's mixer shows every track the file has.
 - **Energy by appearance** (built for the parts): every appearance of a section has an energy of its own, the
   section's and the arc's step for how much later or earlier it plays than the section does on average
   (`SectionEnergy.AppearanceStep`), which a later appearance draws its parts again by, from a sequence of its own, a part

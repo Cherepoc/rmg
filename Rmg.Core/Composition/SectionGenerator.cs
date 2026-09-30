@@ -480,10 +480,11 @@ internal sealed class SectionGenerator
                 StateTrace.Record(TracePoints.LineScale, trackNumber, sectionId, 0, StateMap.Default, 0, $"{lineScale}", lineScale);
                 sectionTrackLayer.Add(CompositionStateKinds.LineScale, (int)lineScale);
             }
-            // the chords broken now and then, from a sequence of their own, by the section's chords facet
-            if (_tracks.Definitions[trackNumber].Role == TrackRole.Chords)
+            // the chords broken now and then, each part that plays them from a sequence of its own, by the section's chords facet
+            if (_tracks.Definitions[trackNumber].Role.PlaysChords())
             {
-                var arpeggio = Arpeggios.Draw(Stream(sectionId, SectionStream.Arpeggio), sectionRhythm.Facets[Facet.Chords]);
+                var stream = _tracks.Definitions[trackNumber].Role == TrackRole.Chords ? SectionStream.Arpeggio : SectionStream.RhythmArpeggio;
+                var arpeggio = Arpeggios.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Chords]);
                 StateTrace.Record(TracePoints.Arpeggio, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{arpeggio}", arpeggio);
                 sectionTrackLayer.Add(CompositionStateKinds.Arpeggio, (int)arpeggio);
             }
@@ -868,5 +869,6 @@ internal enum SectionStream
     RiffLeading = 25,
     RiffImprovisation = 26,
     Arpeggio = 27,
-    RiffLineScale = 28
+    RiffLineScale = 28,
+    RhythmArpeggio = 29
 }
