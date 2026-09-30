@@ -95,8 +95,20 @@ public static class Midi
             return fade.Select(x => (x.Position, x.Value));
 
         var fadeAt = (double position) => fade.Count == 0 || fade[0].Position > position + 1e-9 ? 1 : fade.GetEffectiveValueAt(position);
-        var expressionAt = (double position) => expression.LastOrDefault(x => x.Position <= position + 1e-9, (0, 1)).Value;
-        return fade.Select(x => x.Position).Concat(expression.Select(x => x.Position)).Distinct().Order().Select(x => (x, fadeAt(x) * expressionAt(x)));
+        // the expression at a position: its latest step, in its order, of those at or before it, swept in the positions'
+        // order rather than looked for at each
+        var byPosition = Enumerable.Range(0, expression.Length).OrderBy(i => expression[i].Position).ToArray();
+        var next = 0;
+        var latest = -1;
+        var merged = new List<(double Position, double Value)>();
+        foreach (var position in fade.Select(x => x.Position).Concat(expression.Select(x => x.Position)).Distinct().Order())
+        {
+            for (; next < byPosition.Length && expression[byPosition[next]].Position <= position + 1e-9; next++)
+                latest = Math.Max(latest, byPosition[next]);
+            merged.Add((position, fadeAt(position) * (latest < 0 ? 1 : expression[latest].Value)));
+        }
+
+        return merged;
     }
 
     private static byte[] ProgramChange(byte channel, byte program)

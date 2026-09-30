@@ -8,7 +8,24 @@ public static class Generators
     /// <summary>One of the options, drawn as likely as its weight has it.</summary>
     public static T Pick<T>(this IGenerationContext context, ImmutableArray<Weighted<T>> options)
     {
-        return options[WeightedIndex(options)(context)].Value;
+        // as WeightedIndex draws, its thresholds summed as it goes rather than kept, for a pick made once
+        if (options.IsEmpty)
+            throw new ArgumentException("Probability thresholds must not be empty", nameof(options));
+
+        var sum = 0.0;
+        foreach (var option in options)
+            sum += option.Weight;
+        var probability = context.GenerateDouble();
+        var threshold = 0.0;
+        for (var i = 0; i < options.Length; i++)
+        {
+            threshold = (threshold + options[i].Weight / sum).RoundByEpsilon(1);
+            ProbabilityThreshold.ValidateProbabilityThreshold(threshold);
+            if (threshold >= probability)
+                return options[i].Value;
+        }
+
+        throw new IndexOutOfRangeException("No option's threshold reaches the draw.");
     }
 
     public static Func<IGenerationContext, int> WeightedIndex<T>(ImmutableArray<Weighted<T>> items)

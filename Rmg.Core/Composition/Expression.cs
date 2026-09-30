@@ -124,6 +124,22 @@ internal static class Expression
             var role = definition.Role;
             var program = definition is PitchInstrumentTrack pitched ? pitched.InstrumentCode : -1;
             var states = new StateMap?[timeline.Count];
+            // the first note at or after a position
+            int first(double position)
+            {
+                var (low, high) = (0, timeline.Count);
+                while (low < high)
+                {
+                    var middle = (low + high) / 2;
+                    if (timeline[middle].Position < position - 1e-9)
+                        low = middle + 1;
+                    else
+                        high = middle;
+                }
+
+                return low;
+            }
+
             // the part's sound for the whole song
             var part = partStreams(track);
             var vibrato = part.Pick(ByConvention.Weigh(Vibratos, songSound));
@@ -140,12 +156,12 @@ internal static class Expression
                 var context = streams(span.SectionId, track);
                 var u = sound[index];
                 var bendChance = BendChance.At(u);
+                var bendKinds = ByConvention.Weigh(BendKinds, u);
 
-                for (var i = 0; i < timeline.Count; i++)
+                // the notes in the section, in order, the timeline's being
+                for (var i = first(span.Start); i < timeline.Count && timeline[i].Position < span.End - 1e-9; i++)
                 {
                     var note = timeline[i];
-                    if (note.Position < span.Start - 1e-9 || note.Position >= span.End - 1e-9)
-                        continue;
 
                     var noteProgram = note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : program;
                     var isLine = note.Value.Pitches.Length == 1 && !role.PlaysChords() && role is not (TrackRole.Pad or TrackRole.Drum)
@@ -154,7 +170,7 @@ internal static class Expression
                     var isSolo = note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1;
                     // every note draws whether it bends, and how, so that the draws stay as they are
                     var bendsHere = context.TestProbability(Math.Min(1, bendChance * (isSolo ? 3 : 1)));
-                    var kind = context.Pick(ByConvention.Weigh(BendKinds, u));
+                    var kind = context.Pick(bendKinds);
                     var state = note.Value.State
                         .With(CompositionStateKinds.Reverb, reverb + 1)
                         .With(CompositionStateKinds.Chorus, choruses && Choruses(noteProgram) ? chorus : 0);
