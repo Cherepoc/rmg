@@ -20,7 +20,21 @@ internal static class TestCorpus
         return Songs.GetOrAdd(seed, x => new Lazy<CorpusSong>(() => Generate(x))).Value;
     }
 
-    public static IEnumerable<CorpusSong> Range(int count) => Enumerable.Range(0, count).Select(Get);
+    /// <summary>The songs of seeds 0 to <paramref name="count" /> - 1, in order, those not yet made made in parallel.</summary>
+    public static CorpusSong[] Range(int count) => InParallel(Enumerable.Range(0, count), Get);
+
+    /// <summary>
+    ///     A measure of every song of seeds 0 to <paramref name="count" /> - 1, in the seeds' order, each song made and
+    ///     measured in parallel with the others, so that a report adds its measures up in the same order every run.
+    /// </summary>
+    public static T[] Measure<T>(int count, Func<CorpusSong, T> measure) => InParallel(Enumerable.Range(0, count), seed => measure(Get(seed)));
+
+    /// <summary>
+    ///     The work of every seed, in the seeds' order, done in parallel, each in a flow of execution of its own, so that
+    ///     a trace it starts is its own, such as a test's that explains the states of songs it makes itself.
+    /// </summary>
+    public static T[] InParallel<T>(IEnumerable<int> seeds, Func<int, T> work) =>
+        seeds.AsParallel().AsOrdered().Select(seed => Isolated(() => work(seed))).ToArray();
 
     private static readonly ConcurrentDictionary<(int, Meter), Lazy<CorpusSong>> MeterSongs = new();
 
@@ -30,21 +44,37 @@ internal static class TestCorpus
         return MeterSongs.GetOrAdd((seed, meter), x => new Lazy<CorpusSong>(() => Generate(x.Item1, x.Item2))).Value;
     }
 
+    // a flow of execution with nothing of the caller's, no trace among it, captured on a thread of its own
+    private static readonly ExecutionContext CleanContext = CaptureClean();
+
+    private static ExecutionContext CaptureClean()
+    {
+        ExecutionContext? context = null;
+        var thread = new Thread(() => context = ExecutionContext.Capture());
+        thread.Start();
+        thread.Join();
+        return context!;
+    }
+
+    /// <summary>The work done here and now, in a flow of its own, apart from any trace the caller has started.</summary>
+    private static T Isolated<T>(Func<T> work)
+    {
+        var result = default(T);
+        ExecutionContext.Run(CleanContext, _ => result = work(), null);
+        return result!;
+    }
+
     private static CorpusSong Generate(int seed, Meter? meter = null)
     {
-        // the song's own trace, apart from any the calling test has started, which it would clash with
-        Task<CorpusSong> task;
-        using (ExecutionContext.SuppressFlow())
-            task = Task.Run(() =>
-                {
-                    // the entries and their values, not what every layer contributed, which would make the songs several times
-                    // slower to generate: a test that explains a state traces a song of its own
-                    using var trace = StateTrace.Start(explains: false);
-                    var song = meter is null ? SongGenerator.GenerateSong(seed) : SongGenerator.GenerateSong(seed, ProgressionSettings.Default, meter);
-                    return new CorpusSong(seed, song, Render.RenderSong(song), [..trace.Entries]);
-                }
-            );
-        return task.GetAwaiter().GetResult();
+        return Isolated(() =>
+            {
+                // the entries and their values, not what every layer contributed, which would make the songs several
+                // times slower to generate: a test that explains a state traces a song of its own
+                using var trace = StateTrace.Start(explains: false);
+                var song = meter is null ? SongGenerator.GenerateSong(seed) : SongGenerator.GenerateSong(seed, ProgressionSettings.Default, meter);
+                return new CorpusSong(seed, song, Render.RenderSong(song), [..trace.Entries]);
+            }
+        );
     }
 }
 

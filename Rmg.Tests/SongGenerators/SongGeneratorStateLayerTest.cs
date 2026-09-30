@@ -15,15 +15,15 @@ public sealed class SongGeneratorStateLayerTest
     {
         // a trace names the layer of every offset, so a layer whose offset shows up twice on a note is one applied
         // twice; the offsets themselves can be equal, such as a section's home and a bar's root of the same step
-        var layersSeen = new HashSet<string>();
-        for (var seed = 0; seed < 30; seed++)
+        var checks = TestCorpus.InParallel(Enumerable.Range(0, 30), seed =>
         {
             // a song of its own, traced to explain its states, which the corpus's are not; the merges below keep the
             // layers only while the trace runs, as the song's generation did
             using var trace = StateTrace.Start();
             var song = SongGenerator.GenerateSong(seed);
             var commonStateTimelineMap = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
-
+            var seen = new HashSet<string>();
+            var twice = new List<string>();
             foreach (var (trackNumber, trackTimelineMap) in song.TrackEventStateTimelineMap.TrackTimelineMap)
             {
                 // the same merge as Render does
@@ -35,14 +35,17 @@ public sealed class SongGeneratorStateLayerTest
                 foreach (var note in notes)
                 {
                     var layers = note.Value.Explain(StateKinds.ChordRoot).Select(x => x.Layer).ToArray();
-                    layersSeen.UnionWith(layers);
-                    await Assert.That(layers.Distinct().Count())
-                        .IsEqualTo(layers.Length)
-                        .Because($"seed {seed}, track {trackNumber}, position {note.Position}: {string.Join(", ", layers)}");
+                    seen.UnionWith(layers);
+                    if (layers.Distinct().Count() != layers.Length)
+                        twice.Add($"seed {seed}, track {trackNumber}, position {note.Position}: {string.Join(", ", layers)}");
                 }
             }
-        }
 
+            return (Seen: seen, Twice: twice);
+        });
+
+        await Assert.That(checks.SelectMany(x => x.Twice).ToArray()).IsEmpty();
+        var layersSeen = checks.SelectMany(x => x.Seen).ToHashSet();
         // the section's home and the progression's root both reach the notes
         await Assert.That(layersSeen.IsSupersetOf(["Section", "Progression"])).IsTrue().Because(string.Join(", ", layersSeen));
     }

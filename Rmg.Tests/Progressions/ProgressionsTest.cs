@@ -148,12 +148,12 @@ public sealed class ProgressionsTest
     public async Task SongChords_AreTheSectionsHomeAndTheProgressionsRoot()
     {
         // songs of their own, traced to explain their states, which the corpus's are not
-        var chordEntries = Enumerable.Range(0, 5).SelectMany(seed =>
+        var chordEntries = TestCorpus.InParallel(Enumerable.Range(0, 5), seed =>
         {
             using var trace = StateTrace.Start();
             SongGenerator.GenerateSong(seed);
-            return trace.Entries.ToArray();
-        }).Where(x => x.Point == TracePoints.Chord).ToArray();
+            return trace.Entries.Where(x => x.Point == TracePoints.Chord).ToArray();
+        }).SelectMany(x => x).ToArray();
 
         await Assert.That(chordEntries.Length).IsGreaterThan(0);
         // a root of 0, the tonic, is left out as the default, so a chord may show one layer or none
