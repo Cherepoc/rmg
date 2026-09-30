@@ -109,4 +109,35 @@ public sealed class GenerateSongRequestTest
         await Assert.That(result).IsFalse();
         await Assert.That(error).IsEqualTo("Channel 1 appears more than once.");
     }
+
+    [Test]
+    [Arguments(0, 0.0)]
+    [Arguments(127, 1.0)]
+    public async Task AnUnconventionalityStep_ReachesBothEnds(int step, double value)
+    {
+        var request = new GenerateSongRequest(42, Unconventionality: step);
+
+        await Assert.That(request.TryGetChannelTracks(out _, out _)).IsTrue();
+        await Assert.That(request.UnconventionalityValue).IsEqualTo(value);
+        await Assert.That(GenerateSongRequest.ToStep(value)).IsEqualTo(step);
+    }
+
+    [Test]
+    public async Task NoUnconventionality_LeavesTheSongsOwn()
+    {
+        await Assert.That(new GenerateSongRequest(42).UnconventionalityValue).IsNull();
+    }
+
+    [Test]
+    [Arguments(-1)]
+    [Arguments(128)]
+    public async Task UnconventionalityOutsideItsSteps_Fails(int step)
+    {
+        var request = new GenerateSongRequest(42, Unconventionality: step);
+
+        var result = request.TryGetChannelTracks(out _, out var error);
+
+        await Assert.That(result).IsFalse();
+        await Assert.That(error).Contains("Unconventionality");
+    }
 }

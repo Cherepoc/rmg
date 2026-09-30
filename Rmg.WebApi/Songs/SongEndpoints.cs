@@ -32,9 +32,12 @@ public static class SongEndpoints
 
         MemoryStream stream;
         ImmutableSortedDictionary<byte, int> channelInstruments;
+        int unconventionality;
         try
         {
-            var renderedSong = Render.RenderSong(SongGenerator.GenerateSong(songSeed));
+            var song = SongGenerator.GenerateSong(songSeed, request.UnconventionalityValue);
+            unconventionality = request.Unconventionality ?? GenerateSongRequest.ToStep(song.Unconventionality!.Value);
+            var renderedSong = Render.RenderSong(song);
 
             // asking for a channel this song does not play is the caller's mistake, not a failed generation
             var generatedInstruments = renderedSong.GetChannelInstruments();
@@ -53,7 +56,7 @@ public static class SongEndpoints
                 .WithoutChannels(SwitchedOff(channelTracks));
 
             stream = new MemoryStream();
-            renderedSong.Write(stream, SongsVersion.Label(songSeed));
+            renderedSong.Write(stream, SongsVersion.Label(songSeed, request.Unconventionality));
             stream.Seek(0, SeekOrigin.Begin);
         }
         catch (Exception ex)
@@ -70,7 +73,11 @@ public static class SongEndpoints
         // and show what every channel plays before a note of it is heard
         context.Response.Headers["X-Song-Instruments"] = Describe(channelInstruments);
 
-        return Results.File(stream, "audio/midi", SongFile.GetName(songSeed));
+        // and how far it strays from convention, as a step from 0 to 127, and whether it was asked for or drawn, which
+        // the page shows and a supplied one names the song by
+        context.Response.Headers["X-Song-Unconventionality"] = $"{unconventionality} {(request.Unconventionality is null ? "drawn" : "given")}";
+
+        return Results.File(stream, "audio/midi", SongFile.GetName(songSeed, request.Unconventionality));
     }
 
     private static Dictionary<byte, int> Instruments(Dictionary<byte, TrackRequest> channelTracks)

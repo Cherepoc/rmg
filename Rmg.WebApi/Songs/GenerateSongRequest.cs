@@ -12,21 +12,39 @@ namespace Rmg.WebApi.Songs;
 ///     What to play each track with, in place of what the generator picked. Every channel left out is
 ///     played as it was generated.
 /// </param>
+/// <param name="Unconventionality">
+///     How far the song strays from convention, in steps from 0 for the plainest to 127 for the wildest, used as
+///     given. None lets the song draw its own, which keeps well away from both ends. A seed and a step
+///     name a song as a seed alone does for a drawn one.
+/// </param>
 public sealed record GenerateSongRequest(
     int? Seed = null,
     double? Volume = null,
-    IReadOnlyList<TrackRequest>? Tracks = null
+    IReadOnlyList<TrackRequest>? Tracks = null,
+    int? Unconventionality = null
 )
 {
     public const int FirstChannel = 1;
     public const int LastChannel = 16;
     public const int LastInstrument = 127;
 
+    /// <summary>The wildest step of an unconventionality, which is 1: its steps are MIDI's, 0 to 127.</summary>
+    public const int LastUnconventionality = 127;
+
+    /// <summary>The unconventionality asked for, from 0 to 1; none for the song's own.</summary>
+    public double? UnconventionalityValue => Unconventionality / (double)LastUnconventionality;
+
+    /// <summary>The step nearest to an unconventionality, which is how a drawn one is reported.</summary>
+    public static int ToStep(double unconventionality)
+    {
+        return (int)Math.Round(unconventionality * LastUnconventionality);
+    }
+
     /// <summary>How loud the song is to play, which is 1 unless it says otherwise.</summary>
     public double SongVolume => Volume ?? 1;
 
     /// <summary>
-    ///     Reads the tracks into the channels a written song counts from 0.
+    ///     Reads the tracks into the channels a written song counts from 0, and checks the rest of the request.
     /// </summary>
     /// <param name="channelTracks">The track asked for on every channel named.</param>
     /// <param name="error">Why the tracks cannot be read, if they cannot.</param>
@@ -35,6 +53,12 @@ public sealed record GenerateSongRequest(
         channelTracks = [];
 
         if (!TryReadVolume(Volume, "Song", out error)) return false;
+
+        if (Unconventionality is < 0 or > LastUnconventionality)
+        {
+            error = $"Unconventionality {Unconventionality} is not a step from 0 to {LastUnconventionality}.";
+            return false;
+        }
 
         foreach (var track in Tracks ?? [])
         {

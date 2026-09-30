@@ -7,4 +7,10 @@ public static class SongFile
     {
         return $"song-{songSeed}.mid";
     }
+
+    /// <summary>The name of a song whose unconventionality may be given, as a step from 0 to 127, which names it too.</summary>
+    public static string GetName(int songSeed, int? unconventionality)
+    {
+        return unconventionality is { } step ? $"song-{songSeed}-u{step}.mid" : GetName(songSeed);
+    }
 }

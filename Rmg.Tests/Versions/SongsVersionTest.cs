@@ -41,6 +41,15 @@ public sealed class SongsVersionTest
     }
 
     [Test]
+    public async Task AGivenUnconventionality_NamesTheSong_AsItsSeedDoes()
+    {
+        await Assert.That(SongsVersion.Label(3, 64)).IsEqualTo($"{SongsVersion.Label(3)}, unconventionality 64/127");
+        await Assert.That(SongsVersion.Label(3, null)).IsEqualTo(SongsVersion.Label(3));
+        await Assert.That(Rmg.Core.Songs.SongFile.GetName(3, 64)).IsEqualTo("song-3-u64.mid");
+        await Assert.That(Rmg.Core.Songs.SongFile.GetName(3, null)).IsEqualTo("song-3.mid");
+    }
+
+    [Test]
     public async Task TheFingerprint_IsTheSameEveryTime()
     {
         await Assert.That(SongFingerprint.Compute(3)).IsEqualTo(SongFingerprint.Compute(3));

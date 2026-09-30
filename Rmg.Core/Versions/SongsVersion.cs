@@ -25,6 +25,12 @@ public static partial class SongsVersion
         return Commit is null ? $"RMG {Number}, seed {seed}" : $"RMG {Number} ({Commit[..Math.Min(7, Commit.Length)]}), seed {seed}";
     }
 
+    /// <summary>The label of a song whose unconventionality may be given, as a step from 0 to 127, which names it too.</summary>
+    public static string Label(int seed, int? unconventionality)
+    {
+        return unconventionality is { } step ? $"{Label(seed)}, unconventionality {step}/127" : Label(seed);
+    }
+
     /// <summary>Whether a text is a number of the version's form, which is all the analytics accept as one.</summary>
     public static bool IsNumber(string? text)
     {
