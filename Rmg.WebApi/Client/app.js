@@ -1,5 +1,4 @@
 import {
-    DRUM_CHANNEL,
     DRUM_KITS,
     INSTRUMENT_FAMILIES,
     LAST_INSTRUMENT_BEFORE_EFFECTS,
@@ -10,22 +9,34 @@ import { getPlayer } from "./player.js";
 import {
     askToPersist,
     forget,
-    IS_SEED,
-    IS_SONG,
     isAutoplaying,
     isKeeping,
     keep,
     keepHistory,
     keepRating,
-    keepUnconventionality,
+    keepSettings,
     recall,
     recallHistory,
     recallRating,
-    recallUnconventionality,
+    recallSettings,
     setAutoplaying,
     setKeeping,
 } from "./storage.js";
-import { CHANNEL_COUNT, formatSettings, LAST_STEP, parseSettings, toStep } from "./settings.js";
+import {
+    DRUM_GROUPS,
+    DRUM_SETUPS,
+    FACETS,
+    formatSettings,
+    identityOf,
+    LAST_STEP,
+    MIDDLE_PAN,
+    parseSettings,
+    PARTS,
+    PLAYS,
+    seedToText,
+    textToSeed,
+} from "./settings.js";
+import { applyReport, defaultSettings, givenOnly, isEveryPartOff, requestFor } from "./song-settings.js";
 import { since, tell, track } from "./tally.js";
 
 const PLAY_ICON = "M8 5v14l11-7z";
@@ -40,7 +51,14 @@ const elements = {
     keep: document.getElementById("keep"),
     seed: document.getElementById("seed"),
     generate: document.getElementById("generate"),
-    seeded: document.getElementById("seeded"),
+    settingsPanel: document.getElementById("settings-panel"),
+    settingsState: document.getElementById("settings-state"),
+    allOff: document.getElementById("all-off"),
+    songSettings: document.getElementById("song-settings"),
+    harmonySettings: document.getElementById("harmony-settings"),
+    melodySettings: document.getElementById("melody-settings"),
+    drumSettings: document.getElementById("drum-settings"),
+    drumGroups: document.getElementById("drum-groups"),
     seedInput: document.getElementById("seed-input"),
     generateSeeded: document.getElementById("generate-seeded"),
     history: document.getElementById("history"),
@@ -57,10 +75,6 @@ const elements = {
     volume: document.getElementById("volume"),
     volumeValue: document.getElementById("volume-value"),
     autoplay: document.getElementById("autoplay"),
-    giveUnconventionality: document.getElementById("give-unconventionality"),
-    unconventionality: document.getElementById("unconventionality"),
-    unconventionalityValue: document.getElementById("unconventionality-value"),
-    mixerPanel: document.getElementById("mixer-panel"),
     songVolume: document.getElementById("song-volume"),
     songVolumeValue: document.getElementById("song-volume-value"),
     rollInstruments: document.getElementById("roll-instruments"),
@@ -73,18 +87,29 @@ const elements = {
     dislike: document.getElementById("dislike"),
 };
 
+// the parts muted or soloed here, which only this page hears, and every part's row of the mixer, by the part
 const muted = new Set();
 const soloed = new Set();
 const rows = new Map();
 
-// the mix: what every channel plays, how loud, and whether it is in the song at all
-const instruments = new Map();
-const volumes = new Map();
-const switchedOff = new Set();
+// the settings every song is asked for with, and the one on the page heard with (song-settings.js): every value given,
+// or as the song on the page drew it; kept in this browser for the next visit
+let settings = restoreSettings();
 
-// the channels whose instrument was picked here, rather than the one the song was generated with
-const chosen = new Set();
-let songVolume = 1;
+// the song on the page, as its seed: null before the first
+let songSeed = null;
+
+// what the song on the page is made of, as the server said: the channel every part plays on in the file the player
+// has, null where it is not written, whether each part is in the song, its drum setup and the drum groups it plays
+let channels = {};
+let partsInSong = {};
+let drumSetup = null;
+let drumGroupsPresent = [];
+
+// the song asked for again with changed settings, while the one on the page plays on, and where it is to go on from
+let regenerationTimer = null;
+let regeneration = null;
+let pendingSwap = false;
 
 // hasSoundFont and hasSong say that the bytes are here, not that the player has them: the page fetches
 // both the moment it opens, and the audio stack cannot exist until the page has been interacted with
@@ -102,10 +127,6 @@ let startedListening = null;
 // the songs' version the song on the page was made by, which every event about the song carries: the same seed
 // is another song in another version, and a page open across a deploy still plays the song it got
 let songVersion = null;
-// how plain or wild the song on the page is, as a step from 0 to 127, and that step again where it was asked for
-// rather than drawn, which names the song as much as its seed does; null for a drawn one
-let songUnconventionality = null;
-let songGiven = null;
 let isSeeking = false;
 let seekedFrom = null;
 let isExporting = false;
@@ -215,6 +236,10 @@ function listen(player) {
  */
 function advance() {
     if (!elements.autoplay.checked || !isSongRandom || isGenerating) return false;
+    if (isEveryPartOff(settings)) {
+        setStatus("Every part is off, so no next song plays. Turn a part on in the song settings.", true);
+        return false;
+    }
 
     playNew(null, "auto");
     return true;
@@ -224,12 +249,12 @@ function advance() {
  *     Gets a song and starts it the moment it has reached the player: asking for a song is asking to hear
  *     it, whether by the button, by a seed, from the list, or by the song before it running out.
  */
-async function playNew(seed, origin, given = askedUnconventionality()) {
+async function playNew(seed, origin) {
     // one already on its way is the one that will play: a second ask would only cancel it for nothing
     if (isGenerating) return;
 
     const request = ++playRequest;
-    const generated = await generate(seed, given);
+    const generated = await generate(seed);
 
     // the player has to have been handed the song before it can be started on it
     await delivery;
@@ -404,8 +429,20 @@ async function deliverPending() {
 
     try {
         if (song !== null) {
+            // a song made again with changed settings goes on from the same share of its length, playing if it was
+            const swap = pendingSwap ? { share: player.duration > 0 ? player.currentTime / player.duration : 0, wasPlaying: !player.paused } : null;
+            pendingSwap = false;
+            const loaded = player.nextSong();
             player.loadSong(song);
             applyMix(player);
+            if (swap !== null) {
+                await loaded;
+                player.currentTime = swap.share * player.duration;
+                if (swap.wasPlaying && player.paused) await player.play();
+                else if (!swap.wasPlaying && !player.paused) player.pause();
+                render(player);
+                showMedia(player);
+            }
         } else if (soundFont !== null) {
             // a soundfont swapped under a song already playing: the bank took every channel back to
             // where it started, and the song will not say what it plays again until it comes round
@@ -620,17 +657,20 @@ function firstGesture() {
 
 // --- generating ------------------------------------------------------------
 
-elements.seeded.addEventListener("toggle", () => {
-    if (elements.seeded.open) elements.seedInput.focus();
-});
-
 // no seed at all, so the server rolls one and reports it back in X-Song-Seed
 elements.generate.addEventListener("click", () => playNew(null, "generate"));
 
+// the seed typed, or a random one where none is, with the settings as they are
 elements.generateSeeded.addEventListener("click", () => {
-    const seed = readSeed(elements.seedInput.value.trim());
+    const text = elements.seedInput.value.trim();
+    if (text === "") {
+        playNew(null, "generate");
+        return;
+    }
+
+    const seed = textToSeed(text);
     if (seed === null) {
-        setStatus(`'${elements.seedInput.value.trim()}' is not a valid seed. A seed is a 32-bit integer.`, true);
+        setStatus(`'${text}' is not a seed. A seed is up to six letters and digits.`, true);
         return;
     }
 
@@ -642,113 +682,80 @@ elements.seedInput.addEventListener("keydown", (event) => {
 });
 
 /**
- *     A seed is a 32-bit integer, and anything else is worth saying so before it is sent. Written out in
- *     digits, too: Number takes "0x10" and "1e3" as well, which are not what anybody means by a seed.
- */
-function readSeed(text) {
-    const seed = Number(text);
-    const isSeed = IS_SEED.test(text) && seed >= -(2 ** 31) && seed <= 2 ** 31 - 1;
-    return isSeed ? seed : null;
-}
-
-/**
- *     The seed asked for in the address, as <c>?seed=12345</c>: the seed itself, and whether one was
- *     asked for at all. A link carrying something that is not a seed is worth saying so about, rather
- *     than quietly playing a different song and letting whoever sent it wonder.
+ *     The song asked for in the address, as <c>?song=12Ab&settings=1…</c>: its seed and the settings it was heard with,
+ *     and whether one was asked for at all. A link carrying something that is not a seed, or settings that cannot be
+ *     read, is worth saying so about, as is a link from before seeds were written in letters (<c>?seed=12345</c>),
+ *     rather than quietly playing a different song and letting whoever sent it wonder.
  *
- *     <c>wasRolled</c> tells a refresh from a link. The page writes the seed it is playing into the
- *     address, so every refresh after the first arrives looking exactly like a seed somebody asked for;
- *     what marks it as the page's own roll is the state left on the history entry, which a refresh
- *     keeps and a link followed from anywhere else does not have.
- *
- *     A link carries the song's settings too, as <c>&settings=</c>: the unconventionality it was asked for with,
- *     which names the song, and the mix it was heard with, which is put back.
+ *     <c>wasRolled</c> tells a refresh from a link. The page writes the song it is playing into the address, so every
+ *     refresh after the first arrives looking exactly like a song somebody asked for; what marks it as the page's own
+ *     roll is the state left on the history entry, which a refresh keeps and a link followed from anywhere else does
+ *     not have.
  */
-function linkedSeed() {
+function linkedSong() {
     const parameters = new URL(location.href).searchParams;
-    const asked = parameters.get("seed");
     const wasRolled = history.state?.rolled === true;
+    const isOld = parameters.has("seed") && !parameters.has("song");
+    const asked = parameters.get("song");
+    if (asked === null) return { seed: null, wasAsked: false, isOld, wasRolled, settings: null, isSettingsBad: false };
 
-    if (asked === null) return { seed: null, wasAsked: false, wasRolled, settings: null, isSettingsBad: false };
-
-    const settings = parseSettings(parameters.get("settings")?.trim() ?? null);
-    const isSettingsBad = settings === null && parameters.get("settings") !== null;
-    return { seed: readSeed(asked.trim()), wasAsked: true, wasRolled, settings, isSettingsBad };
+    const linked = parameters.get("settings");
+    const parsed = linked === null ? null : parseSettings(linked.trim());
+    return { seed: textToSeed(asked.trim()), wasAsked: true, isOld, wasRolled, settings: parsed, isSettingsBad: linked !== null && parsed === null };
 }
 
 /**
- *     Keeps the address on the song being heard, so a refresh gives the same one back and the address
- *     bar is itself a shareable link. Replaced rather than pushed: every roll of the dice is not a place
- *     to go back to.
+ *     Keeps the address on the song being heard, as it is heard, so a refresh gives the same one back and the address
+ *     bar is itself a shareable link. Replaced rather than pushed: every roll of the dice is not a place to go back to.
  *
- *     Whether the page rolled this one goes on the entry with it. The address cannot say so by itself:
- *     a seed the page put there and a seed somebody sent read the same, and a refresh of a rolled song
- *     is still a rolled song, so it should go on rolling when it ends.
+ *     Whether the page rolled this one goes on the entry with it. The address cannot say so by itself: a song the page
+ *     put there and a song somebody sent read the same, and a refresh of a rolled song is still a rolled song, so it
+ *     should go on rolling when it ends.
  */
 function rememberSong(wasRolled = history.state?.rolled === true) {
+    if (songSeed === null) return;
+
     try {
         history.replaceState({ rolled: wasRolled }, "", songLink());
     } catch {
-        // an address that cannot be rewritten costs nothing here; the share button reads the seed itself
+        // an address that cannot be rewritten costs nothing here; the share button reads the song itself
     }
 }
 
-/** The link to the song on the page, which is this address with its seed and its settings, the mix as it is now. */
+/** The link to the song on the page, which is this address with its seed and its settings as they are now. */
 function songLink() {
     const address = new URL(location.href);
-    address.searchParams.set("seed", elements.seed.value);
-    address.searchParams.set("settings", currentSettings());
+    address.searchParams.delete("seed");
+    address.searchParams.set("song", seedToText(songSeed));
+    address.searchParams.set("settings", formatSettings(settings));
 
     return address.toString();
-}
-
-/**
- *     What the song on the page is heard with (settings.js): its unconventionality, drawn or given, and the mix the
- *     file is written with. A channel the song does not play is written as off, at nothing.
- */
-function currentSettings() {
-    const channels = [];
-    for (let channel = 0; channel < CHANNEL_COUNT; channel++)
-        channels.push(instruments.has(channel)
-            ? { instrument: instruments.get(channel), isEnabled: !switchedOff.has(channel), volume: toStep(volumes.get(channel) ?? 1) }
-            : { instrument: 0, isEnabled: false, volume: 0 });
-
-    return formatSettings({
-        unconventionality: songUnconventionality,
-        isGiven: songGiven !== null,
-        songVolume: toStep(songVolume),
-        channels,
-    });
 }
 
 /** What every event about the song on the page carries: which song it is, and what it was heard with. */
 function aboutSong(measurements = {}) {
     return {
-        seed: IS_SEED.test(elements.seed.value) ? Number(elements.seed.value) : null,
+        seed: songSeed,
         version: songVersion,
-        settings: songUnconventionality === null ? null : currentSettings(),
+        settings: songSeed === null ? null : formatSettings(settings),
         ...measurements,
     };
 }
 
-/** A song as the page names it (IS_SONG): its seed, and its unconventionality's step where that was given. */
-function songName(seed, given) {
-    return given === null ? String(seed) : `${seed}u${given}`;
+/** A song as the page names it: its seed, and what of its settings names it too, which the same seed is another song by. */
+function songName(seed, songSettings) {
+    const identity = identityOf(songSettings);
+    return identity === "" ? seedToText(seed) : `${seedToText(seed)}-${identity}`;
 }
 
-function readSongName(name) {
-    const [seed, given] = name.split("u");
-    return { seed: Number(seed), given: given === undefined ? null : Number(given) };
-}
-
-/** The song on the page, as the page names it. */
+/** The song on the page, as the page names it; null before the first. */
 function currentSong() {
-    return songName(elements.seed.value, songGiven);
+    return songSeed === null ? null : songName(songSeed, settings);
 }
 
-/** The song on the page as the server is asked for it, with the mix on the page. */
-function describeSong() {
-    return { seed: Number(elements.seed.value), unconventionality: songGiven ?? undefined, ...describeMix() };
+/** The name the song on the page is downloaded under. */
+function fileName() {
+    return `song-${currentSong()}`;
 }
 
 function requestSong(song, signal = undefined) {
@@ -760,37 +767,30 @@ function requestSong(song, signal = undefined) {
     });
 }
 
-/** The song as the mixer has it: every channel, whatever was done to it. */
-function describeMix() {
-    return {
-        volume: songVolume,
-        tracks: [...instruments].map(([channel, instrument]) => ({
-            channel: channel + 1,
-            instrument,
-            volume: volumes.get(channel) ?? 1,
-            isEnabled: !switchedOff.has(channel),
-        })),
-    };
-}
-
 /**
- *     Answers whether a song arrived, which is what tells a roll of the next one that it has something
- *     to play. <paramref name="isRolled" /> says the song was the page's own to roll rather than one
- *     asked for, which is what makes it lead to another when it ends; a seed refreshed back into the
- *     address is still one the page rolled, so the caller is allowed to say so.
- *
- *     <paramref name="given" /> is the unconventionality to ask for, as a step from 0 to 127, or null for the song to
- *     draw its own; <paramref name="settings" /> a linked song's settings, whose mix is put back once it arrives.
+ *     Answers whether a song arrived, which is what tells a roll of the next one that it has something to play. A new
+ *     song is asked for by its seed, null for a random one, with the settings as they are; <paramref name="isRolled" />
+ *     says it was the page's own to roll rather than one asked for, which is what makes it lead to another when it
+ *     ends, and a seed refreshed back into the address is still one the page rolled, so the caller is allowed to say
+ *     so. A song remade (<paramref name="isRemade" />) is the one on the page asked for again with changed settings,
+ *     which replaces it where it plays, and takes its place on the list.
  */
-async function generate(seed, given, isRolled = seed === null, settings = null) {
-    if (isGenerating) return false;
+async function generate(seed, { isRolled = seed === null, isRemade = false, signal = undefined } = {}) {
+    if (isEveryPartOff(settings)) {
+        showEveryPartOff();
+        return false;
+    }
 
-    setGenerating(true);
-    cancelDownloadRefresh();
-    setStatus("Generating…");
+    if (!isRemade) {
+        if (isGenerating) return false;
+        setGenerating(true);
+        cancelRegeneration();
+        cancelDownloadRefresh();
+        setStatus("Generating…");
+    }
 
     try {
-        const response = await requestSong({ seed, unconventionality: given ?? undefined });
+        const response = await requestSong(requestFor(seed, settings), signal);
         if (!response.ok) {
             setStatus(`Could not generate a song: ${await describeFailure(response)}`, true);
             track("song_failed", { detail: `http ${response.status}` });
@@ -798,131 +798,112 @@ async function generate(seed, given, isRolled = seed === null, settings = null) 
         }
 
         const song = await response.arrayBuffer();
-        const songSeed = response.headers.get("X-Song-Seed") ?? String(seed);
+        const report = JSON.parse(response.headers.get("X-Song-Settings"));
 
-        // a song replaced while playing was listened to up to here, with its own mix, and the next one is from here
-        if (startedListening !== null) {
+        // a song replaced while playing was listened to up to here, and the next one is from here
+        if (!isRemade && startedListening !== null) {
             reportListening();
             startedListening = performance.now();
         }
 
-        // only once the whole song is here: a body that fails halfway leaves the old song and its mix
-        readSong(response.headers.get("X-Song-Instruments"));
-        if (settings !== null) putBack(settings);
-
-        // built from what the server reported rather than from the loaded song, so the mix is on the
-        // page as soon as there is a song at all, without waiting for the audio stack a click builds
-        buildMixer([...instruments.keys()].sort((first, second) => first - second));
-
-        elements.seed.value = songSeed;
+        // only once the whole song is here: a body that fails halfway leaves the old song as it was
+        const made = applyReport(settings, report);
+        ({ settings, channels, own } = made);
+        partsInSong = made.plays;
+        drumSetup = made.drumSetup;
+        drumGroupsPresent = made.drumGroups;
+        songSeed = Number(response.headers.get("X-Song-Seed") ?? seed);
         songVersion = response.headers.get("X-Song-Version");
-        songGiven = given;
-        songUnconventionality = readUnconventionality(response.headers.get("X-Song-Unconventionality")) ?? given;
-        showUnconventionality();
+        elements.seed.value = seedToText(songSeed);
+        if (!isRemade) {
+            muted.clear();
+            soloed.clear();
+        }
+
+        showSettings();
         showRating(recallRating(songVersion, currentSong()));
-        rememberSong(isRolled);
-        addToHistory(currentSong());
+        rememberSong(isRemade ? undefined : isRolled);
+        addToHistory(isRemade);
         // offered for download first, and as a copy, so it stays usable whatever the audio stack does
-        offerDownload(song, songSeed);
-        // a mix put back from a link is heard at once, and the file offered is fetched again with it
-        if (settings !== null) scheduleDownloadRefresh();
-        announce(`Generated song ${songSeed}.`);
-        track("song_generated", aboutSong({ ms: since() }));
+        offerDownload(song);
+        if (isRemade) {
+            announce("The song is made again with the new settings.");
+        } else {
+            announce(`Generated song ${seedToText(songSeed)}.`);
+            track("song_generated", aboutSong({ ms: since() }));
+        }
 
         pendingSong = song;
+        pendingSwap = isRemade;
         hasSong = true;
-        isSongRandom = isRolled;
+        if (!isRemade) isSongRandom = isRolled;
         updateTransport();
         deliver();
 
         return true;
     } catch (error) {
+        // one let go of for a later change is not a failure: that change is asking for its own song
+        if (signal?.aborted) return false;
+
         setStatus(`Could not generate a song: ${error.message}`, true);
         track("song_failed", { detail: error.name || "failed" });
         return false;
     } finally {
-        setGenerating(false);
+        if (!isRemade) setGenerating(false);
     }
 }
 
-/** "64 drawn" or "64 given": the song's unconventionality as a step, or null for anything else. */
-function readUnconventionality(header) {
-    const step = Number((header ?? "").split(" ")[0]);
-    return header && Number.isInteger(step) && step >= 0 && step <= LAST_STEP ? step : null;
-}
-
-/** A file of the song on the page, named as the server names it: by its seed, and by a given unconventionality. */
-function fileName(songSeed) {
-    return songGiven === null ? `song-${songSeed}` : `song-${songSeed}-u${songGiven}`;
-}
-
 /**
- *     Puts a linked song's mix back on the page, over the one it arrived with, for the channels it plays. Only what
- *     differs from the song is set, as though it had been changed here.
+ *     The song on the page asked for again, once the settings have stopped changing for a moment, with them, to replace
+ *     it where it plays; one on its way is let go of for the newer change.
  */
-function putBack(settings) {
-    songVolume = settings.songVolume / LAST_STEP;
-    elements.songVolume.value = String(settings.songVolume);
-    showSongVolume();
+function scheduleRegeneration() {
+    cancelRegeneration();
+    if (songSeed === null || isEveryPartOff(settings)) return;
 
-    for (const channel of instruments.keys()) {
-        const linked = settings.channels[channel];
-        if (linked.instrument !== instruments.get(channel)) {
-            instruments.set(channel, linked.instrument);
-            chosen.add(channel);
-        }
-        if (linked.volume !== LAST_STEP) volumes.set(channel, linked.volume / LAST_STEP);
-        if (!linked.isEnabled) switchedOff.add(channel);
-    }
+    regenerationTimer = setTimeout(() => {
+        regenerationTimer = null;
+        cancelDownloadRefresh();
+        regeneration = new AbortController();
+        const signal = regeneration.signal;
+        generate(songSeed, { isRemade: true, signal }).finally(() => {
+            if (regeneration?.signal === signal) regeneration = null;
+        });
+    }, 400);
 }
 
-// --- how plain or wild -----------------------------------------------------
-
-/**
- *     The unconventionality new songs are asked for with, as a step from 0 to 127, or null for each to draw its own.
- *     A song from the list or a link is asked for as it was, whatever this says.
- */
-function askedUnconventionality() {
-    return elements.giveUnconventionality.checked ? Number(elements.unconventionality.value) : null;
+function cancelRegeneration() {
+    clearTimeout(regenerationTimer);
+    regenerationTimer = null;
+    regeneration?.abort();
+    regeneration = null;
 }
 
 /**
- *     The slider says what the next song is asked for with, and, while songs draw their own, how plain or wild the one
- *     on the page drew, which is where it starts from once it is asked for.
- */
-function showUnconventionality() {
-    const isGiven = elements.giveUnconventionality.checked;
-    elements.unconventionality.disabled = !isGiven;
-    if (!isGiven && songUnconventionality !== null) elements.unconventionality.value = String(songUnconventionality);
-    elements.unconventionalityValue.textContent = formatPercent(Number(elements.unconventionality.value) / LAST_STEP);
-}
-
-{
-    const kept = recallUnconventionality();
-    elements.giveUnconventionality.checked = kept !== null;
-    if (kept !== null) elements.unconventionality.value = String(kept);
-    showUnconventionality();
-}
-
-elements.giveUnconventionality.addEventListener("change", () => {
-    keepUnconventionality(askedUnconventionality());
-    showUnconventionality();
-    track("mix_changed", { detail: "unconventionality" });
-});
-
-elements.unconventionality.addEventListener("input", () => {
-    keepUnconventionality(askedUnconventionality());
-    showUnconventionality();
-});
-
-/**
- *     The buttons up top are disabled while a song is on its way. The list is not, since a disabled
- *     button drops the keyboard; generate simply ignores a press that arrives in the meantime.
+ *     The buttons up top are disabled while a song is on its way, or while every part is off, which leaves nothing to
+ *     play. The list is not, since a disabled button drops the keyboard; generate simply ignores a press that arrives
+ *     in the meantime.
  */
 function setGenerating(isOn) {
     isGenerating = isOn;
-    elements.generate.disabled = isOn;
-    elements.generateSeeded.disabled = isOn;
+    updateGenerateButtons();
+}
+
+function updateGenerateButtons() {
+    const isBlocked = isGenerating || isEveryPartOff(settings);
+    elements.generate.disabled = isBlocked;
+    elements.generateSeeded.disabled = isBlocked;
+}
+
+/** Says, where the settings are and on the status line, that every part is off, and why nothing can be generated. */
+const EVERY_PART_OFF = "Every part is off, so there is nothing to play. Turn a part on in the song settings.";
+
+function showEveryPartOff() {
+    const isOff = isEveryPartOff(settings);
+    elements.allOff.hidden = !isOff;
+    updateGenerateButtons();
+    if (isOff) setStatus(EVERY_PART_OFF, true);
+    else if (elements.status.textContent === EVERY_PART_OFF) setStatus("");
 }
 
 /**
@@ -946,12 +927,12 @@ async function describeFailure(response) {
     }
 }
 
-function offerDownload(song, songSeed) {
+function offerDownload(song) {
     if (downloadUrl) URL.revokeObjectURL(downloadUrl);
 
     downloadUrl = URL.createObjectURL(new Blob([song], { type: "audio/midi" }));
     elements.download.href = downloadUrl;
-    elements.download.download = `${fileName(songSeed)}.mid`;
+    elements.download.download = `${fileName()}.mid`;
     elements.download.removeAttribute("aria-disabled");
 }
 
@@ -960,9 +941,26 @@ elements.download.addEventListener("click", () => {
     track("download_mid", aboutSong());
 });
 
+// --- the settings kept -----------------------------------------------------
+
+/** The settings this browser left last time, every value given as it was; none given on a first visit. */
+function restoreSettings() {
+    const kept = parseSettings(recallSettings());
+    return kept === null ? defaultSettings() : givenOnly(kept);
+}
+
+/** Keeps the settings for the next visit, and says how many of them change the song. */
+function keepCurrentSettings() {
+    keepSettings(formatSettings(givenOnly(settings)));
+    const given = [settings.unconventionality, ...FACETS.map((facet) => settings.facets[facet])].filter((x) => x.isGiven).length
+        + PARTS.filter((part) => settings.parts[part].plays !== "random").length
+        + (settings.drumSetup === null ? 0 : 1);
+    elements.settingsState.textContent = given === 0 ? "All drawn" : `${given} given`;
+}
+
 // --- the songs so far ------------------------------------------------------
 
-/** How many seeds the page keeps before the oldest is let go of. */
+/** How many songs the page keeps before the oldest is let go of. */
 const SONGS_KEPT = 50;
 
 restoreHistory();
@@ -972,15 +970,14 @@ restoreHistory();
  *     with goes on top of what came before rather than starting the list over.
  */
 function restoreHistory() {
-    // a song is on the list once, where it was last heard, which a list kept before that rule may not say
-    const songs = [...new Set(recallHistory())].slice(0, SONGS_KEPT);
-    elements.history.append(...songs.map(createHistoryItem));
+    const entries = recallHistory().slice(0, SONGS_KEPT);
+    elements.history.append(...entries.map(createHistoryItem));
     elements.clearHistory.disabled = elements.history.children.length === 0;
 }
 
-/** The songs in the list, newest first, as the page names them: the buttons are the list, so it is read off them. */
-function historySongs() {
-    return [...elements.history.children].map((item) => item.dataset.song);
+/** The songs in the list, newest first, as the page keeps them: the buttons are the list, so it is read off them. */
+function historyEntries() {
+    return [...elements.history.children].map((item) => item.dataset.entry);
 }
 
 /** The list is this browser's to be rid of, being the one thing here that says what anybody listened to. */
@@ -991,18 +988,22 @@ elements.clearHistory.addEventListener("click", () => {
 });
 
 /**
- *     Puts a seed on top of the list, however it came about: rolled, typed, followed from a link, rolled
- *     by the song before it running out, or pressed on the list itself. The list is the order songs were
- *     heard in, so a seed heard again moves to the top, and wherever it was before is taken off.
+ *     Puts the song on the page on top of the list, however it came about: rolled, typed, followed from a link, rolled
+ *     by the song before it running out, or pressed on the list itself. The list is the order songs were heard in, so a
+ *     song heard again moves to the top, and wherever it was before is taken off; a song remade with changed settings
+ *     takes the place of the one it was made from, so that trying settings does not fill the list.
  */
-function addToHistory(name) {
-    const earlier = [...elements.history.children].filter((item) => item.dataset.song === name);
+function addToHistory(isRemade) {
+    const name = currentSong();
+    const entry = `${seedToText(songSeed)}:${formatSettings(givenOnly(settings))}`;
+    const top = elements.history.firstElementChild;
+    const earlier = [...elements.history.children].filter((item) => item.dataset.song === name || (isRemade && item === top && top.dataset.seed === seedToText(songSeed)));
 
-    // the keyboard follows a pressed seed to the top, rather than being dropped with the button it was on
+    // the keyboard follows a pressed song to the top, rather than being dropped with the button it was on
     const wasFocused = earlier.includes(document.activeElement);
     for (const item of earlier) item.remove();
 
-    const item = createHistoryItem(name);
+    const item = createHistoryItem(entry);
     elements.history.prepend(item);
     while (elements.history.children.length > SONGS_KEPT) elements.history.lastElementChild.remove();
 
@@ -1010,7 +1011,7 @@ function addToHistory(name) {
     elements.history.scrollTop = 0;
     if (wasFocused) item.focus({ preventScroll: true });
 
-    keepHistory(historySongs());
+    keepHistory(historyEntries());
     markCurrentSong(name);
     elements.clearHistory.disabled = false;
 }
@@ -1024,22 +1025,31 @@ function markCurrentSong(name) {
 }
 
 /**
- *     One song to come back to. It is asked for by its seed like any other, so what comes back is the
- *     song as it was generated rather than the mixer as it was left, and it is the song that was asked
- *     for: it leads to no other when it ends. One asked for at an unconventionality is asked for at it again.
+ *     One song to come back to: its seed, marked where it was asked for with settings that change it, which it is asked
+ *     for with again, the settings becoming the page's. What comes back is the song as it was generated and heard, and
+ *     it is the song that was asked for: it leads to no other when it ends.
  */
-function createHistoryItem(name) {
-    const { seed, given } = readSongName(name);
+function createHistoryItem(entry) {
+    const [seedText, settingsText] = entry.split(":");
+    const entrySettings = parseSettings(settingsText) ?? defaultSettings();
+    const seed = textToSeed(seedText);
+    const identity = identityOf(entrySettings);
+
     const button = document.createElement("button");
     button.type = "button";
-    button.dataset.song = name;
-    button.textContent = given === null ? String(seed) : `${seed} · ${formatPercent(given / LAST_STEP)} wild`;
-    button.setAttribute("aria-label", given === null ? `Song ${seed}` : `Song ${seed}, ${formatPercent(given / LAST_STEP)} wild`);
+    button.dataset.entry = entry;
+    button.dataset.seed = seedText;
+    button.dataset.song = songName(seed, entrySettings);
+    button.textContent = identity === "" ? seedText : `${seedText} ⚙`;
+    button.setAttribute("aria-label", identity === "" ? `Song ${seedText}` : `Song ${seedText}, with its settings`);
 
     button.addEventListener("click", () => {
         if (isGenerating) return;
 
-        playNew(seed, "history", given);
+        settings = entrySettings;
+        keepCurrentSettings();
+        showSettings();
+        playNew(seed, "history");
     });
 
     return button;
@@ -1129,7 +1139,7 @@ elements.exportMp3.addEventListener("click", exportMp3);
  *     they say how far along they are, and the page stays its own the whole time.
  */
 async function exportMp3() {
-    const name = `${fileName(elements.seed.value)}.mp3`;
+    const name = `${fileName()}.mp3`;
 
     // taken now: a soundfont that fails to load while the song is fetched takes `source` with it
     const exporting = source;
@@ -1139,7 +1149,7 @@ async function exportMp3() {
     setStatus("Fetching the song…");
 
     try {
-        const response = await requestSong(describeSong());
+        const response = await requestSong(requestFor(songSeed, settings));
         if (!response.ok) throw new Error(await describeFailure(response));
 
         const song = await response.arrayBuffer();
@@ -1312,111 +1322,391 @@ elements.volume.addEventListener("input", async () => {
     await withPlayer((player) => (player.masterGain = Number(elements.volume.value)), "Could not set the volume");
 });
 
-// --- mixer -----------------------------------------------------------------
+// --- the settings ----------------------------------------------------------
 
-function buildMixer(channels) {
-    rows.clear();
-    muted.clear();
-    soloed.clear();
-    elements.mixer.replaceChildren();
+/** What every value is called on the page, and what it moves, by its key: the unconventionality or a facet. */
+const SETTING_NAMES = {
+    unconventionality: ["How plain or experimental", "everything below strays around it"],
+    feel: ["Feel", "meter, tuplets and swing"],
+    form: ["Form", "song form, intro and ending"],
+    scale: ["Scale", "modes and key changes"],
+    progression: ["Progression", "how freely the chords move"],
+    chords: ["Chords", "colours and voicings"],
+    melody: ["Melody", "improvisation and shape"],
+    groove: ["Groove", "the drums' patterns"],
+    fills: ["Fills", "the drums' fills"],
+};
 
-    for (const channel of channels) {
-        const number = document.createElement("td");
-        number.textContent = String(channel + 1);
+const PART_NAMES = { melody: "Melody", chords: "Chords", bass: "Bass", pad: "Pad", counterMelody: "Counter-melody", drum: "Drums" };
 
-        const onCell = document.createElement("td");
-        onCell.append(createSwitch(channel));
+const DRUM_GROUP_NAMES = {
+    kick: "Kick", snare: "Snare", timekeepers: "Hi-hat and ride", toms: "Toms", accents: "Cymbals", percussion: "Percussion", calls: "Calls",
+};
 
-        const instrumentCell = document.createElement("td");
-        const instrument = createInstrumentPicker(channel);
-        const roll = createRoll(channel);
-        const instrumentField = document.createElement("div");
-        instrumentField.className = "instrument-field";
-        instrumentField.append(instrument, roll);
-        instrumentCell.append(instrumentField);
+const SETUP_NAMES = { kit: "Kit", kitAndPercussion: "Kit and percussion", percussion: "Percussion" };
 
-        const volumeCell = document.createElement("td");
-        volumeCell.append(createVolume(channel));
+// the General MIDI instruments by their number, and the kits the drums play
+const INSTRUMENT_NAMES = INSTRUMENT_FAMILIES.flatMap((family) => family.instruments);
 
-        const muteCell = document.createElement("td");
-        const mute = createToggle("Mute", () => {
-            toggle(muted, channel, mute);
-            applyMuting();
-            track("mix_changed", { detail: "mute" });
-        });
-        muteCell.append(mute);
+// every value's row, by its key, and every drum group's
+const settingRows = new Map();
+const groupRows = new Map();
+let setupSelect = null;
 
-        const soloCell = document.createElement("td");
-        const solo = createToggle("Solo", () => {
-            toggle(soloed, channel, solo);
-            applyMuting();
-            track("mix_changed", { detail: "solo" });
-        });
-        soloCell.append(solo);
+// the song's own instrument and pan of every part, whatever the mix plays, as the server said
+let own = {};
 
-        const meterCell = document.createElement("td");
-        const meter = document.createElement("div");
-        meter.className = "meter";
-        const level = document.createElement("span");
-        meter.append(level);
-        meterCell.append(meter);
+buildSettings();
 
-        const row = document.createElement("tr");
-        row.append(number, onCell, instrumentCell, volumeCell, muteCell, soloCell, meterCell);
-        elements.mixer.append(row);
-        rows.set(channel, { instrument, level });
+/** The settings panel: the values that change the song, every part's row of the mixer, and the drums'. */
+function buildSettings() {
+    elements.songSettings.append(createSettingRow("unconventionality"), createSettingRow("feel"), createSettingRow("form"));
+    elements.harmonySettings.append(createSettingRow("scale"), createSettingRow("progression"), createSettingRow("chords"));
+    elements.melodySettings.append(createSettingRow("melody"));
+    elements.drumSettings.append(createSetupRow(), createSettingRow("groove"), createSettingRow("fills"));
+    elements.mixer.append(...PARTS.map(createPartRow));
+    elements.drumGroups.append(...DRUM_GROUPS.map(createDrumGroupRow));
+
+    showSettings();
+    keepCurrentSettings();
+}
+
+function settingOf(key) {
+    return key === "unconventionality" ? settings.unconventionality : settings.facets[key];
+}
+
+function setSetting(key, setting) {
+    if (key === "unconventionality") settings.unconventionality = setting;
+    else settings.facets[key] = setting;
+}
+
+/**
+ *     A value that changes the song: checked, it is given, and the slider sets it; unchecked, the slider shows what the
+ *     song on the page drew. A change asks for the song again once the slider is let go of.
+ */
+function createSettingRow(key) {
+    const [name, hint] = SETTING_NAMES[key];
+    const isBase = key === "unconventionality";
+
+    const given = document.createElement("input");
+    given.type = "checkbox";
+    given.setAttribute("aria-label", `Give the ${name.toLowerCase()}`);
+
+    const label = document.createElement("span");
+    label.className = "setting-name";
+    label.textContent = name;
+    const explained = document.createElement("small");
+    explained.textContent = hint;
+    label.append(explained);
+
+    const range = document.createElement("input");
+    range.type = "range";
+    range.min = "0";
+    range.max = String(LAST_STEP);
+    range.step = "1";
+    range.setAttribute("aria-label", `${name}, from ${isBase ? "plainest" : "plain"} to ${isBase ? "most experimental" : "experimental"}`);
+
+    const plain = document.createElement("span");
+    plain.className = "end";
+    plain.setAttribute("aria-hidden", "true");
+    plain.textContent = isBase ? "Plainest" : "Plain";
+    const experimental = document.createElement("span");
+    experimental.className = "end";
+    experimental.setAttribute("aria-hidden", "true");
+    experimental.textContent = isBase ? "Most experimental" : "Experimental";
+
+    const output = document.createElement("output");
+    output.className = "percent";
+
+    given.addEventListener("change", () => {
+        setSetting(key, { isGiven: given.checked, value: Number(range.value) });
+        showSetting(key);
+        settingsChanged(true);
+    });
+    range.addEventListener("input", () => {
+        setSetting(key, { isGiven: true, value: Number(range.value) });
+        showSetting(key);
+    });
+    range.addEventListener("change", () => settingsChanged(true));
+
+    const row = document.createElement("div");
+    row.className = "setting";
+    const slider = document.createElement("span");
+    slider.className = "setting-slider";
+    slider.append(plain, range, experimental, output);
+    row.append(given, label, slider);
+    settingRows.set(key, { given, range, output });
+    return row;
+}
+
+function showSetting(key) {
+    const row = settingRows.get(key);
+    const setting = settingOf(key);
+    row.given.checked = setting.isGiven;
+    row.range.disabled = !setting.isGiven;
+    row.range.value = String(setting.value);
+    row.output.textContent = formatPercent(setting.value / LAST_STEP);
+}
+
+/** The drums' setup: the song's own, or one given. */
+function createSetupRow() {
+    setupSelect = document.createElement("select");
+    setupSelect.setAttribute("aria-label", "The drums' setup");
+    setupSelect.append(createOption("", "Song's own"), ...DRUM_SETUPS.map((setup) => createOption(setup, SETUP_NAMES[setup])));
+    setupSelect.addEventListener("change", () => {
+        settings.drumSetup = setupSelect.value === "" ? null : setupSelect.value;
+        settingsChanged(true);
+    });
+
+    const label = document.createElement("span");
+    label.className = "setting-name";
+    label.textContent = "Setup";
+
+    const row = document.createElement("div");
+    row.className = "setting";
+    row.append(document.createElement("span"), label, setupSelect);
+    return row;
+}
+
+/**
+ *     A part's row: whether it plays, given or drawn, which changes the song; the instrument it plays, its volume and its
+ *     pan, which are heard at once; whether it is written in the file; and muting and soloing, which only this page
+ *     hears.
+ */
+function createPartRow(part) {
+    const name = PART_NAMES[part];
+
+    const plays = document.createElement("select");
+    plays.setAttribute("aria-label", `Whether the ${name.toLowerCase()} plays`);
+    const random = createOption("random", "Random");
+    plays.append(random, createOption("on", "On"), createOption("off", "Off"));
+    plays.addEventListener("change", () => {
+        settings.parts[part].plays = plays.value;
+        showEveryPartOff();
+        settingsChanged(true);
+    });
+
+    const instrument = document.createElement("select");
+    instrument.setAttribute("aria-label", `Instrument of the ${name.toLowerCase()}`);
+    const ownInstrument = createOption("", "Song's own");
+    instrument.append(ownInstrument);
+    if (part === "drum") instrument.append(...DRUM_KITS.map((kit) => createOption(String(kit.instrument), kit.name)));
+    else fillInstruments(instrument);
+    instrument.addEventListener("change", () =>
+        setPartInstrument(part, instrument.value === "" ? { isGiven: false, value: own[part]?.instrument ?? 0 } : { isGiven: true, value: Number(instrument.value) }));
+
+    const roll = document.createElement("button");
+    roll.type = "button";
+    roll.className = "roll";
+    roll.textContent = "Roll";
+    roll.setAttribute("aria-label", `Roll the instrument of the ${name.toLowerCase()}`);
+    roll.addEventListener("click", () => rollInstrument(part));
+
+    const instrumentField = document.createElement("div");
+    instrumentField.className = "instrument-field";
+    instrumentField.append(instrument, roll);
+
+    const volume = createFader(`Volume of the ${name.toLowerCase()}`, (step) => setPartVolume(part, step));
+    // a double click puts the pan back where the song sits the part
+    const pan = createFader(`Pan of the ${name.toLowerCase()}, from left to right`, (step) => setPartPan(part, { isGiven: true, value: step }), true);
+    pan.input.addEventListener("dblclick", () => setPartPan(part, { isGiven: false, value: own[part]?.pan ?? MIDDLE_PAN }));
+    const levels = document.createElement("div");
+    levels.className = "fader-pair";
+    levels.append(volume.field, pan.field);
+
+    const inFile = document.createElement("input");
+    inFile.type = "checkbox";
+    inFile.setAttribute("aria-label", `The ${name.toLowerCase()} in the file`);
+    inFile.addEventListener("change", () => setPartInFile(part, inFile.checked));
+
+    const mute = createToggle("Mute", () => {
+        toggle(muted, part, mute);
+        applyMuting();
+        track("mix_changed", { detail: "mute" });
+    });
+    const solo = createToggle("Solo", () => {
+        toggle(soloed, part, solo);
+        applyMuting();
+        track("mix_changed", { detail: "solo" });
+    });
+
+    const meter = document.createElement("div");
+    meter.className = "meter";
+    const level = document.createElement("span");
+    meter.append(level);
+
+    const heading = document.createElement("th");
+    heading.scope = "row";
+    heading.textContent = name;
+
+    const row = document.createElement("tr");
+    row.append(heading, ...[plays, instrumentField, levels, inFile, mute, solo, meter].map((x) => {
+        const cell = document.createElement("td");
+        cell.append(x);
+        return cell;
+    }));
+    rows.set(part, { row, plays, random, instrument, ownInstrument, volume, pan, inFile, mute, solo, level });
+    return row;
+}
+
+/** A drum group's row: whether it is in the file and how loud it plays, which are made by the server. */
+function createDrumGroupRow(group) {
+    const name = DRUM_GROUP_NAMES[group];
+
+    const inFile = document.createElement("input");
+    inFile.type = "checkbox";
+    inFile.setAttribute("aria-label", `${name} in the file`);
+    inFile.addEventListener("change", () => {
+        settings.drumGroups[group].isOn = inFile.checked;
+        settingsChanged(true);
+    });
+
+    const volume = createFader(`Volume of the ${name.toLowerCase()}`, (step) => (settings.drumGroups[group].volume = step), false, () => settingsChanged(true));
+
+    const heading = document.createElement("th");
+    heading.scope = "row";
+    heading.textContent = name;
+
+    const row = document.createElement("tr");
+    row.append(heading, ...[inFile, volume.field].map((x) => {
+        const cell = document.createElement("td");
+        cell.append(x);
+        return cell;
+    }));
+    groupRows.set(group, { row, inFile, volume });
+    return row;
+}
+
+/** A fader from 0 to 127, saying where it is as a share, or where a pan sits. */
+function createFader(label, onInput, isPan = false, onChange = null) {
+    const input = document.createElement("input");
+    input.type = "range";
+    input.min = "0";
+    input.max = String(LAST_STEP);
+    input.step = "1";
+    input.className = "fader";
+    input.setAttribute("aria-label", label);
+
+    const output = document.createElement("output");
+    output.className = "percent";
+    const show = () => (output.textContent = isPan ? formatPan(Number(input.value)) : formatPercent(Number(input.value) / LAST_STEP));
+    input.addEventListener("input", () => {
+        show();
+        onInput(Number(input.value));
+    });
+    if (onChange !== null) input.addEventListener("change", onChange);
+
+    const field = document.createElement("div");
+    field.className = "fader-field";
+    field.append(input, output);
+    return { field, input, show };
+}
+
+/** Puts the settings, and what the song on the page drew and is made of, on the panel. */
+function showSettings() {
+    for (const key of settingRows.keys()) showSetting(key);
+
+    setupSelect.value = settings.drumSetup ?? "";
+    setupSelect.options[0].textContent = drumSetup === null ? "Song's own" : `Song's own: ${SETUP_NAMES[drumSetup]}`;
+
+    for (const part of PARTS) {
+        const row = rows.get(part);
+        const mix = settings.parts[part];
+        row.plays.value = mix.plays;
+        row.random.textContent = part in partsInSong ? `Random: ${partsInSong[part] ? "in" : "out"}` : "Random";
+        row.ownInstrument.textContent = part in own ? `Song's own: ${instrumentName(part, own[part].instrument)}` : "Song's own";
+        row.instrument.value = mix.instrument.isGiven ? String(mix.instrument.value) : "";
+        row.volume.input.value = String(mix.volume);
+        row.volume.show();
+        row.pan.input.value = String(mix.pan.value);
+        row.pan.show();
+        row.inFile.checked = mix.isOn;
+        // a part the song does not play is still set here, for the songs after it
+        row.row.classList.toggle("absent", channels[part] == null);
     }
 
-    elements.mixerPanel.hidden = channels.length === 0;
+    for (const group of DRUM_GROUPS) {
+        const row = groupRows.get(group);
+        row.inFile.checked = settings.drumGroups[group].isOn;
+        row.volume.input.value = String(settings.drumGroups[group].volume);
+        row.volume.show();
+        row.row.classList.toggle("absent", !drumGroupsPresent.includes(group));
+    }
+
+    elements.songVolume.value = String(settings.volume);
+    showSongVolume();
+    elements.allOff.hidden = !isEveryPartOff(settings);
+    updateGenerateButtons();
+}
+
+function instrumentName(part, instrument) {
+    return part === "drum"
+        ? DRUM_KITS.find((kit) => kit.instrument === instrument)?.name ?? `Kit ${instrument}`
+        : INSTRUMENT_NAMES[instrument] ?? `Instrument ${instrument}`;
 }
 
 /**
- *     The instruments of a channel: the General MIDI ones, or the drum kits, which is what an instrument
- *     means on the percussion channel.
+ *     After a change of the settings: kept for the next visit and in the address, and then either the song asked for
+ *     again, for a change of what it is made of, or its file fetched again with the mix, for one only heard.
  */
-function createInstrumentPicker(channel) {
-    const select = document.createElement("select");
-    select.setAttribute("aria-label", `Instrument of channel ${channel + 1}`);
-
-    if (channel === DRUM_CHANNEL)
-        select.append(...DRUM_KITS.map((kit) => createInstrumentOption(kit.instrument, kit.name)));
-    else
-        fillInstruments(select);
-
-    select.value = String(instruments.get(channel) ?? 0);
-    select.addEventListener("change", () => setInstrument(channel, Number(select.value)));
-
-    return select;
+function settingsChanged(isRemade) {
+    keepCurrentSettings();
+    rememberSong();
+    if (isRemade) scheduleRegeneration();
+    else scheduleDownloadRefresh();
 }
 
-/** Takes one instrument at random, which is worth nothing if it is the one already playing. */
-function createRoll(channel) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "roll";
-    button.textContent = "Roll";
-    button.setAttribute("aria-label", `Roll the instrument of channel ${channel + 1}`);
-    button.addEventListener("click", () => rollInstrument(channel));
-    return button;
-}
-
-function setInstrument(channel, instrument) {
+function setPartInstrument(part, instrument) {
+    settings.parts[part].instrument = instrument;
+    rows.get(part).instrument.value = instrument.isGiven ? String(instrument.value) : "";
     track("mix_changed", { detail: "instrument" });
-    instruments.set(channel, instrument);
-    chosen.add(channel);
-    rows.get(channel).instrument.value = String(instrument);
-    scheduleDownloadRefresh();
+    settingsChanged(false);
 
     // the page and the download are right whatever the audio does, so the player is told separately
-    withPlayer((player) => player.setChannelInstrument(channel, instrument), "Could not set the instrument");
+    const channel = channels[part];
+    if (channel != null)
+        withPlayer((player) => player.setChannelInstrument(channel, instrument.value, instrument.isGiven), "Could not set the instrument");
+}
+
+function setPartVolume(part, step) {
+    settings.parts[part].volume = step;
+    applyVolume(part);
+    settingsChanged(false);
+}
+
+function setPartPan(part, pan) {
+    settings.parts[part].pan = pan;
+    rows.get(part).pan.input.value = String(pan.value);
+    rows.get(part).pan.show();
+    settingsChanged(false);
+
+    const channel = channels[part];
+    if (channel != null) withPlayer((player) => player.setChannelPan(channel, pan.value), "Could not set the pan");
+}
+
+/** Switches a part off, which leaves it out of the file and silences it here, so what is heard is what is downloaded. */
+function setPartInFile(part, isOn) {
+    settings.parts[part].isOn = isOn;
+    applyMuting();
+    track("mix_changed", { detail: "channel" });
+    settingsChanged(false);
+}
+
+/** A part's volume under the song's, on the player. */
+function applyVolume(part) {
+    const channel = channels[part];
+    if (channel == null) return;
+
+    const volume = (settings.volume / LAST_STEP) * (settings.parts[part].volume / LAST_STEP);
+    withPlayer((player) => player.setChannelVolume(channel, volume), "Could not set the volume");
 }
 
 /**
- *     What a roll of this channel may land on: the drum kits on the percussion channel, and the range the
- *     settings hold everywhere else, whichever way round it was set.
+ *     What a roll of a part may land on: the drum kits for the drums, and the range the settings hold everywhere else,
+ *     whichever way round it was set.
  */
-function rollable(channel) {
-    if (channel === DRUM_CHANNEL) return DRUM_KITS.map((kit) => kit.instrument);
+function rollable(part) {
+    if (part === "drum") return DRUM_KITS.map((kit) => kit.instrument);
 
     const bounds = [Number(elements.rollFirst.value), Number(elements.rollLast.value)];
     const first = Math.min(...bounds);
@@ -1424,75 +1714,25 @@ function rollable(channel) {
 }
 
 /** Rolls one instrument, never landing on the one already playing while there is anything else to land on. */
-function rollInstrument(channel) {
-    const choices = rollable(channel).filter((instrument) => instrument !== instruments.get(channel));
+function rollInstrument(part) {
+    const choices = rollable(part).filter((instrument) => instrument !== settings.parts[part].instrument.value);
     if (choices.length === 0) return;
 
-    setInstrument(channel, choices[Math.floor(Math.random() * choices.length)]);
+    setPartInstrument(part, { isGiven: true, value: choices[Math.floor(Math.random() * choices.length)] });
 }
 
 elements.rollInstruments.addEventListener("click", () => {
-    for (const channel of instruments.keys()) rollInstrument(channel);
+    for (const part of PARTS) rollInstrument(part);
 });
-
-/**
- *     Switches a track off, which leaves it out of the file and silences it here, so what is heard is what
- *     would be downloaded.
- */
-function createSwitch(channel) {
-    const toggle = document.createElement("input");
-    toggle.type = "checkbox";
-    toggle.checked = !switchedOff.has(channel);
-    toggle.setAttribute("aria-label", `Channel ${channel + 1} on`);
-
-    toggle.addEventListener("change", () => {
-        if (toggle.checked) switchedOff.delete(channel);
-        else switchedOff.add(channel);
-
-        applyMuting();
-        scheduleDownloadRefresh();
-        track("mix_changed", { detail: "channel" });
-    });
-
-    return toggle;
-}
-
-/** The volume of a track, which the song carries, rather than the volume this page is played at. */
-function createVolume(channel) {
-    const fader = document.createElement("input");
-    fader.type = "range";
-    fader.min = "0";
-    fader.max = String(LAST_STEP);
-    fader.step = "1";
-    fader.value = String(toStep(volumes.get(channel) ?? 1));
-    fader.className = "fader";
-    fader.setAttribute("aria-label", `Volume of channel ${channel + 1}`);
-
-    const shown = document.createElement("output");
-    shown.className = "percent";
-    shown.textContent = formatPercent(Number(fader.value) / LAST_STEP);
-
-    // in MIDI's steps, which is how the settings keep it
-    fader.addEventListener("input", () => {
-        const volume = Number(fader.value) / LAST_STEP;
-        volumes.set(channel, volume);
-        shown.textContent = formatPercent(volume);
-        scheduleDownloadRefresh();
-
-        withPlayer((player) => player.setChannelVolume(channel, songVolume * volume), "Could not set the volume");
-    });
-
-    // counted once it is let go of: a drag is one change, not one for every step it passed through
-    fader.addEventListener("change", () => track("mix_changed", { detail: "volume" }));
-
-    const field = document.createElement("div");
-    field.className = "fader-field";
-    field.append(fader, shown);
-    return field;
-}
 
 function formatPercent(volume) {
     return `${Math.round(volume * 100)}%`;
+}
+
+/** Where a pan sits: in the middle, or how far left or right. */
+function formatPan(step) {
+    if (step === MIDDLE_PAN) return "C";
+    return step < MIDDLE_PAN ? `L${Math.round(((MIDDLE_PAN - step) / MIDDLE_PAN) * 100)}` : `R${Math.round(((step - MIDDLE_PAN) / (LAST_STEP - MIDDLE_PAN)) * 100)}`;
 }
 
 /** The General MIDI instruments, grouped by family and numbered by counting through them in order. */
@@ -1502,36 +1742,16 @@ function fillInstruments(select) {
     select.append(...INSTRUMENT_FAMILIES.map((family) => {
         const group = document.createElement("optgroup");
         group.label = family.name;
-        group.append(...family.instruments.map((name) => createInstrumentOption(instrument++, name)));
+        group.append(...family.instruments.map((name) => createOption(String(instrument++), name)));
         return group;
     }));
 }
 
-function createInstrumentOption(instrument, name) {
+function createOption(value, name) {
     const option = document.createElement("option");
-    option.value = String(instrument);
+    option.value = value;
     option.textContent = name;
     return option;
-}
-
-/**
- *     "1:40,10:0": what every channel of a song plays, with the channels counted from 1 as the page shows
- *     them. A new song arrives with a clean mix, so the rest of it is reset to what the song itself says.
- */
-function readSong(header) {
-    instruments.clear();
-    volumes.clear();
-    switchedOff.clear();
-    chosen.clear();
-
-    songVolume = 1;
-    elements.songVolume.value = String(LAST_STEP);
-    showSongVolume();
-
-    for (const pair of (header ?? "").split(",").filter((pair) => pair !== "")) {
-        const [channel, instrument] = pair.split(":").map(Number);
-        instruments.set(channel - 1, instrument);
-    }
 }
 
 function createToggle(label, onToggle) {
@@ -1543,61 +1763,59 @@ function createToggle(label, onToggle) {
     return button;
 }
 
-function toggle(set, channel, button) {
-    const isOn = !set.has(channel);
-    if (isOn) set.add(channel);
-    else set.delete(channel);
+function toggle(set, part, button) {
+    const isOn = !set.has(part);
+    if (isOn) set.add(part);
+    else set.delete(part);
     button.setAttribute("aria-pressed", String(isOn));
 }
 
-/** An explicit mute still wins over a solo, so soloing never un-mutes something silenced on purpose. */
-function isSilenced(channel) {
-    return switchedOff.has(channel) || muted.has(channel) || (soloed.size > 0 && !soloed.has(channel));
+/** Switched off, or muted, or another part soloed; an explicit mute still wins over a solo. */
+function isSilenced(part) {
+    return !settings.parts[part].isOn || muted.has(part) || (soloed.size > 0 && !soloed.has(part));
 }
 
 /**
- *     Puts the mix on the page onto the player. Loading a song lets go of every lock the mixer set, and
- *     anything chosen before the first click had nowhere to go until now. Only what was actually changed
- *     here is applied: the song carries its own instruments and volumes, and locking a channel to what it
- *     already plays would stop the song setting it again on the way round.
+ *     Puts the mix on the page onto the player. A new song's file carries its instruments, volumes and pans, and loading
+ *     it lets go of every lock the mixer set, so only what this page alone hears is left to apply.
  *
- *     A new sound bank undoes more than that: it resets every channel to the first program, so what the
- *     song itself asked for is as lost as what anybody picked, and the drum channel forgets it is one.
- *     After a bank, every channel is told what it plays, but only a choice made here is locked, so a
- *     channel the song owns is still the song's to set when it starts over.
+ *     A new sound bank undoes more than that: it resets every channel to the first program, so what the song asked for
+ *     is as lost as what anybody picked, and the drum channel forgets it is one. After a bank, every channel is told
+ *     what it plays, how loud and where, but only a choice made here is locked, so a channel the song owns is still the
+ *     song's to set when it starts over.
  */
 function applyMix(player, isBankReset = false) {
-    for (const [channel, instrument] of instruments) {
-        if (isBankReset && channel === DRUM_CHANNEL) player.setChannelDrums(channel, true);
+    for (const part of PARTS) {
+        const channel = channels[part];
+        if (channel == null) continue;
 
-        if (isBankReset || chosen.has(channel)) player.setChannelInstrument(channel, instrument, chosen.has(channel));
+        if (isBankReset) {
+            const mix = settings.parts[part];
+            if (part === "drum") player.setChannelDrums(channel, true);
+            player.setChannelInstrument(channel, mix.instrument.value, mix.instrument.isGiven);
+            player.setChannelVolume(channel, (settings.volume / LAST_STEP) * (mix.volume / LAST_STEP));
+            player.setChannelPan(channel, mix.pan.value);
+        }
 
-        if (volumes.has(channel) || songVolume !== 1)
-            player.setChannelVolume(channel, songVolume * (volumes.get(channel) ?? 1));
-
-        player.setChannelMuted(channel, isSilenced(channel));
+        player.setChannelMuted(channel, isSilenced(part));
     }
 }
 
 function applyMuting() {
     withPlayer((player) => {
-        for (const channel of instruments.keys()) player.setChannelMuted(channel, isSilenced(channel));
-    }, "Could not silence the channel");
+        for (const part of PARTS) if (channels[part] != null) player.setChannelMuted(channels[part], isSilenced(part));
+    }, "Could not silence the part");
 }
 
-elements.songVolume.addEventListener("input", async () => {
-    songVolume = Number(elements.songVolume.value) / LAST_STEP;
+elements.songVolume.addEventListener("input", () => {
+    settings.volume = Number(elements.songVolume.value);
     showSongVolume();
-    scheduleDownloadRefresh();
-
-    await withPlayer((player) => {
-        for (const channel of instruments.keys())
-            player.setChannelVolume(channel, songVolume * (volumes.get(channel) ?? 1));
-    }, "Could not set the volume of the song");
+    for (const part of PARTS) applyVolume(part);
+    settingsChanged(false);
 });
 
 function showSongVolume() {
-    elements.songVolumeValue.textContent = formatPercent(songVolume);
+    elements.songVolumeValue.textContent = formatPercent(settings.volume / LAST_STEP);
 }
 
 // --- the download ----------------------------------------------------------
@@ -1607,8 +1825,6 @@ function showSongVolume() {
  *     fetched again with the mix on the page. The seed is the same, so the song is the same song.
  */
 function scheduleDownloadRefresh() {
-    // the address is a link to the song as it is heard, so it follows the mix too
-    rememberSong();
     cancelDownloadRefresh();
     downloadTimer = setTimeout(refreshDownload, 400);
 }
@@ -1624,17 +1840,15 @@ function cancelDownloadRefresh() {
 
 async function refreshDownload() {
     downloadTimer = null;
-
-    const songSeed = elements.seed.value;
-    if (songSeed === "") return;
+    if (songSeed === null) return;
 
     const refresh = new AbortController();
     downloadRefresh = refresh;
     try {
-        const response = await requestSong(describeSong(), refresh.signal);
+        const response = await requestSong(requestFor(songSeed, settings), refresh.signal);
         if (!response.ok) throw new Error(await describeFailure(response));
 
-        offerDownload(await response.arrayBuffer(), songSeed);
+        offerDownload(await response.arrayBuffer());
     } catch (error) {
         // one let go of for a later choice is not a failure: that choice is asking for its own file
         if (!refresh.signal.aborted) setStatus(`The download does not include your mix: ${error.message}`, true);
@@ -1659,8 +1873,8 @@ function render(player, time = player.currentTime) {
         elements.elapsed.textContent = formatTime(time);
     }
 
-    for (const [channel, row] of rows) {
-        const voices = player.paused ? 0 : player.getVoiceCount(channel);
+    for (const [part, row] of rows) {
+        const voices = player.paused || channels[part] == null ? 0 : player.getVoiceCount(channels[part]);
         row.level.style.width = `${Math.min(100, voices * 12)}%`;
     }
 }
@@ -1699,14 +1913,14 @@ window.addEventListener("pagehide", reportListening);
  */
 function rate(rating) {
     const song = currentSong();
-    if (!IS_SONG.test(song) || songVersion === null) return;
+    if (song === null || songVersion === null) return;
 
     const current = recallRating(songVersion, song);
     const next = current === rating ? null : rating;
     keepRating(songVersion, song, next);
     showRating(next);
     // the change, rather than the rating, since the server has no one to tell today's rating from yesterday's by, and
-    // with the settings it was heard with, which say whether the unconventionality that names it was given
+    // with the settings it was heard with, which say what of them names the song
     tell("rated", aboutSong({ detail: `${current ?? "none"}>${next ?? "none"}` }));
     announce(next === null ? "Rating taken back." : next === "up" ? "Liked." : "Disliked.");
 }
@@ -1736,24 +1950,31 @@ start();
  *     gesture, and pressing play is one.
  */
 async function start() {
-    const linked = linkedSeed();
+    const linked = linkedSong();
     track("page_open", { detail: linked.wasAsked ? "link" : "fresh" });
     showVersion();
 
+    // a linked song is asked for with the settings it was heard with, which become the page's; a song rolled here
+    // with the settings this browser kept
+    if (linked.settings !== null) {
+        settings = givenOnly(linked.settings);
+        keepCurrentSettings();
+        showSettings();
+    }
+
     // said afterwards, since the generating itself has the status line until it is done with it, and
     // only once a song has arrived: a failure has the status line to itself
-    // a linked song is the one its settings name, drawn unless they say it was given; one rolled here goes by the page
-    const given = linked.seed === null
-        ? askedUnconventionality()
-        : linked.settings?.isGiven ? linked.settings.unconventionality : null;
-    const generating = generate(linked.seed, given, linked.seed === null || linked.wasRolled, linked.seed === null ? null : linked.settings);
-    if (linked.wasAsked && linked.seed === null)
+    const generating = generate(linked.seed, { isRolled: linked.seed === null || linked.wasRolled });
+    const complaint = linked.isOld
+        ? "That link is from an older version of RMG, whose songs sound different now, so here is a random song."
+        : linked.wasAsked && linked.seed === null
+            ? "That link has no valid song, so here is a random one."
+            : linked.isSettingsBad
+                ? "That link's settings could not be read, so here is its song with the settings you had."
+                : null;
+    if (complaint !== null)
         generating.then((isGenerated) => {
-            if (isGenerated) setStatus("That link has no valid seed, so here is a random song.", true);
-        });
-    else if (linked.isSettingsBad)
-        generating.then((isGenerated) => {
-            if (isGenerated) setStatus("That link's settings could not be read, so here is its song as it was generated.", true);
+            if (isGenerated) setStatus(complaint, true);
         });
 
     // listed whatever is loaded, so the dropdown is ready for anyone who opens the panel, and asked for

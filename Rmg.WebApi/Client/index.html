@@ -74,29 +74,6 @@
             <span>Play a new random song when one ends (seeded songs just stop)</span>
         </label>
 
-        <div class="row unconventionality-row">
-            <label class="field toggle">
-                <input type="checkbox" id="give-unconventionality" />
-                <span>Choose how plain or wild</span>
-            </label>
-            <label class="field unconventionality">
-                <span aria-hidden="true">Plainest</span>
-                <input type="range" id="unconventionality" min="0" max="127" step="1" value="64" disabled
-                       aria-label="How plain or wild the next song is, from plainest to wildest" />
-                <span aria-hidden="true">Wildest</span>
-                <output id="unconventionality-value" class="percent">50%</output>
-            </label>
-        </div>
-
-        <details class="seeded" id="seeded">
-            <summary>Play a specific seed</summary>
-            <div class="row">
-                <input type="text" id="seed-input" class="seed-input" inputmode="numeric" placeholder="e.g. 12345"
-                       autocomplete="off" aria-label="Seed to play" />
-                <button type="button" id="generate-seeded" class="secondary">Play seed</button>
-            </div>
-        </details>
-
         <p id="status" role="status" aria-live="polite"></p>
     </section>
 
@@ -110,37 +87,86 @@
         </section>
     </aside>
 
-    <section class="panel" id="mixer-panel" hidden>
-        <h2>Mixer</h2>
+    <details class="panel settings-panel" id="settings-panel">
+        <summary>
+            <h2>Song settings</h2><span class="visually-hidden">: </span><span class="state" id="settings-state">All drawn</span>
+        </summary>
         <p class="hint">
-            These volumes are saved in the downloaded file; the player volume is not. Tracks switched off
-            are left out of the file.
+            A checked value is given; an unchecked one shows what the song drew. Instruments, volumes and pans
+            change the song you hear at once. Anything else makes the song again, which goes on from the same place.
+            Every new song, random ones and the ones that play next included, takes these settings.
+        </p>
+        <p class="warning" id="all-off" role="alert" hidden>
+            Every part is off, so there is nothing to play. Turn a part on to generate again.
         </p>
         <div class="row">
-            <label class="field volume">
-                <span>Overall</span>
-                <input type="range" id="song-volume" min="0" max="127" step="1" value="127" />
-                <output id="song-volume-value" class="percent">100%</output>
+            <label class="field">
+                <span>Seed</span>
+                <input type="text" id="seed-input" class="seed-input" placeholder="random" autocomplete="off"
+                       spellcheck="false" aria-label="Seed to generate, empty for a random one" />
             </label>
-            <button type="button" id="roll-instruments" class="small">Roll all instruments</button>
+            <button type="button" id="generate-seeded" class="secondary">Generate</button>
         </div>
-        <div class="mixer-scroll">
-            <table class="mixer">
-                <thead>
-                <tr>
-                    <th scope="col">Ch</th>
-                    <th scope="col">On</th>
-                    <th scope="col">Instrument</th>
-                    <th scope="col">Volume</th>
-                    <th scope="col">Mute</th>
-                    <th scope="col">Solo</th>
-                    <th scope="col">Voices</th>
-                </tr>
-                </thead>
-                <tbody id="mixer"></tbody>
-            </table>
-        </div>
-    </section>
+
+        <fieldset class="settings-group">
+            <legend>Song</legend>
+            <div class="settings-grid" id="song-settings"></div>
+        </fieldset>
+        <fieldset class="settings-group">
+            <legend>Harmony</legend>
+            <div class="settings-grid" id="harmony-settings"></div>
+        </fieldset>
+        <fieldset class="settings-group">
+            <legend>Melody</legend>
+            <div class="settings-grid" id="melody-settings"></div>
+        </fieldset>
+
+        <fieldset class="settings-group">
+            <legend>Parts</legend>
+            <div class="row">
+                <label class="field volume">
+                    <span>Overall</span>
+                    <input type="range" id="song-volume" min="0" max="127" step="1" value="127" />
+                    <output id="song-volume-value" class="percent">100%</output>
+                </label>
+                <button type="button" id="roll-instruments" class="small">Roll all instruments</button>
+            </div>
+            <div class="mixer-scroll">
+                <table class="mixer">
+                    <thead>
+                    <tr>
+                        <th scope="col">Part</th>
+                        <th scope="col">Plays</th>
+                        <th scope="col">Instrument</th>
+                        <th scope="col">Volume and pan</th>
+                        <th scope="col">In file</th>
+                        <th scope="col">Mute</th>
+                        <th scope="col">Solo</th>
+                        <th scope="col">Voices</th>
+                    </tr>
+                    </thead>
+                    <tbody id="mixer"></tbody>
+                </table>
+            </div>
+        </fieldset>
+
+        <fieldset class="settings-group">
+            <legend>Drums</legend>
+            <div class="settings-grid" id="drum-settings"></div>
+            <div class="mixer-scroll">
+                <table class="mixer">
+                    <thead>
+                    <tr>
+                        <th scope="col">Drums</th>
+                        <th scope="col">In file</th>
+                        <th scope="col">Volume</th>
+                    </tr>
+                    </thead>
+                    <tbody id="drum-groups"></tbody>
+                </table>
+            </div>
+        </fieldset>
+    </details>
 
     <details class="panel" id="soundfont-panel">
         <summary>

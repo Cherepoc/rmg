@@ -3,9 +3,16 @@ const STORE = "soundfonts";
 const KEY = "current";
 const SETTING = "rmg.keep-soundfont";
 const AUTOPLAY = "rmg.autoplay";
-const HISTORY = "rmg.history";
-const RATINGS = "rmg.ratings";
-const UNCONVENTIONALITY = "rmg.unconventionality";
+const HISTORY = "rmg.songs";
+const RATINGS = "rmg.song-ratings";
+const SETTINGS = "rmg.settings";
+
+// what earlier versions kept, of songs named by decimal seeds that no longer sound as they did, let go of once
+try {
+    for (const old of ["rmg.history", "rmg.ratings", "rmg.unconventionality"]) localStorage.removeItem(old);
+} catch {
+    // a browser that will not let go of them never reads them either
+}
 
 /** How many ratings the browser keeps, the oldest let go of first. */
 const RATINGS_KEPT = 500;
@@ -36,34 +43,26 @@ function writeFlag(key, isOn) {
     }
 }
 
-/** A seed as the page keeps it: the digits the server reported, and nothing that is not one. */
-export const IS_SEED = /^-?\d{1,10}$/;
-
 /**
- *     A song as the page keeps it: its seed, and, where it was asked for rather than drawn, its unconventionality's
- *     step after a "u", which names the song as much as the seed does: "12345" or "12345u64".
+ *     A song of the list as the page keeps it: its seed and the settings it was asked for with, in letters and digits,
+ *     "12Ab:1…", which is what asking for it again takes.
  */
-export const IS_SONG = /^-?\d{1,10}(u\d{1,3})?$/;
+export const IS_SONG = /^[0-9A-Za-z]{1,6}:1[0-9A-Za-z]{50}$/;
 
-/**
- *     The unconventionality the next songs are asked for with, as a step from 0 to 127, or null for each to draw its
- *     own, which is how a first visit starts.
- */
-export function recallUnconventionality() {
+/** The settings the next songs are asked for with (settings.js), as this browser last left them; null for none yet. */
+export function recallSettings() {
     try {
-        const step = Number(localStorage.getItem(UNCONVENTIONALITY));
-        return localStorage.getItem(UNCONVENTIONALITY) !== null && Number.isInteger(step) && step >= 0 && step <= 127 ? step : null;
+        return localStorage.getItem(SETTINGS);
     } catch {
         return null;
     }
 }
 
-export function keepUnconventionality(step) {
+export function keepSettings(settings) {
     try {
-        if (step === null) localStorage.removeItem(UNCONVENTIONALITY);
-        else localStorage.setItem(UNCONVENTIONALITY, String(step));
+        localStorage.setItem(SETTINGS, settings);
     } catch {
-        // a browser that will not remember it lets every visit start with songs drawing their own
+        // a browser that will not remember them starts every visit with every value drawn
     }
 }
 
@@ -92,8 +91,9 @@ export function keepHistory(songs) {
 }
 
 /**
- *     How this browser rated a song, "up", "down" or null, by the songs' version and the song (IS_SONG), since the
- *     same seed is another song in another version, and at another given unconventionality.
+ *     How this browser rated a song, "up", "down" or null, by the songs' version and the song's name, its seed and
+ *     what of its settings names it too, since the same seed is another song in another version, and with other
+ *     settings.
  */
 export function recallRating(version, song) {
     const rating = readRatings()[`${version}:${song}`];

@@ -27,7 +27,9 @@ public sealed record SongReport(
     {
         var draws = song.Draws!;
         var channels = rendered.GetPartChannels();
-        var tracks = rendered.Tracks.ToDictionary(x => x.Role);
+        // the song's own instrument and pan, whatever the mix plays, and the drums' kit, the standard one, in the middle
+        var own = song.TrackDefinitions.Values.OfType<PitchInstrumentTrack>().ToDictionary(x => x.Role, x => (x.InstrumentCode, x.Pan));
+        own[TrackRole.Drum] = (0, 0);
         var groups = SongMix.DrumGroupsOf(song).Order();
 
         return new SongReport(
@@ -41,8 +43,8 @@ public sealed record SongReport(
                 role => new PartReport(
                     new Drawn<bool>(draws.Parts.Contains(role), overrides.Parts?.ContainsKey(role) == true),
                     channels.TryGetValue(role, out var channel) ? channel + 1 : null,
-                    tracks.TryGetValue(role, out var track) ? track.PitchInstrumentCode : null,
-                    track is null ? null : GenerateSongRequest.ToPanStep(track.Pan)
+                    own[role].InstrumentCode,
+                    GenerateSongRequest.ToPanStep(own[role].Pan)
                 )
             ),
             new Drawn<string>(Name(draws.DrumSetup), overrides.DrumSetup is not null),
@@ -64,6 +66,6 @@ public sealed record Drawn<T>(T Value, bool IsGiven);
 
 /// <param name="Plays">Whether the part is in the song.</param>
 /// <param name="Channel">The channel it plays on, from 1; none where it is not written.</param>
-/// <param name="Instrument">The General MIDI program it plays, the drums' kit; none where it is not written.</param>
-/// <param name="Pan">Where it sits, from 0, left, through 64, the middle, to 127, right; none where it is not written.</param>
-public sealed record PartReport(Drawn<bool> Plays, int? Channel, int? Instrument, int? Pan);
+/// <param name="Instrument">The General MIDI program the song gives it, the drums' kit, whatever the mix plays.</param>
+/// <param name="Pan">Where the song sits it, from 0, left, through 64, the middle, to 127, right, whatever the mix does.</param>
+public sealed record PartReport(Drawn<bool> Plays, int? Channel, int Instrument, int Pan);

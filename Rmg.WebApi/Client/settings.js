@@ -19,7 +19,7 @@ export const MIDDLE_PAN = 64;
 export const FACETS = ["feel", "groove", "fills", "form", "chords", "progression", "scale", "melody"];
 export const PARTS = ["melody", "chords", "bass", "pad", "counterMelody", "drum"];
 export const DRUM_SETUPS = ["kit", "kitAndPercussion", "percussion"];
-export const DRUM_GROUPS = ["Kick", "Snare", "Timekeepers", "Toms", "Accents", "Percussion", "Calls"];
+export const DRUM_GROUPS = ["kick", "snare", "timekeepers", "toms", "accents", "percussion", "calls"];
 
 /** Whether a part plays: as the song draws it, given in, or given out. */
 export const PLAYS = ["random", "on", "off"];

@@ -371,26 +371,6 @@ button.icon svg {
     margin-top: 16px;
 }
 
-/* asking for one seed in particular is the less common way in, so it waits behind a line of text */
-.seeded {
-    margin-top: 10px;
-}
-
-.seeded > summary {
-    width: fit-content;
-    font-size: 14px;
-    color: var(--muted);
-    cursor: pointer;
-}
-
-.seeded > summary:hover {
-    color: var(--text);
-}
-
-.seeded[open] > summary {
-    margin-bottom: 10px;
-}
-
 /*
  * every song the page has had: a list to come back to, rather than a row of controls. It follows the
  * song panel in the page, so a phone finds it there, and a wide screen lifts it into the free column,
@@ -438,6 +418,7 @@ button.icon svg {
 /* a list of songs rather than a stack of fields: no boxes, only a highlight under the pointer */
 .history button {
     flex-shrink: 0;
+    white-space: nowrap;
     padding: 5px 10px;
     border-color: transparent;
     background: none;
@@ -515,24 +496,6 @@ input[type="range"] {
     flex-shrink: 0;
 }
 
-/* how plain or wild the songs asked for next are, or, left to the song, how plain or wild the one on show drew */
-.unconventionality-row {
-    margin-top: 14px;
-    row-gap: 8px;
-}
-
-.unconventionality-row .toggle {
-    margin-top: 0;
-}
-
-.unconventionality input {
-    width: 160px;
-    max-width: 40vw;
-}
-
-.unconventionality input:disabled {
-    opacity: 0.5;
-}
 
 .volume input {
     width: 90px;
@@ -541,6 +504,100 @@ input[type="range"] {
 /* the whole mix rolled at once, kept apart from the volume it shares a row with */
 #roll-instruments {
     margin-left: auto;
+}
+
+/* the settings of the song: values given or drawn, a part's row of the mixer, and the drums' */
+.settings-group {
+    /* a fieldset is as wide as what it holds unless told otherwise, and the mixer scrolls within it instead */
+    min-width: 0;
+    margin: 14px 0 0;
+    padding: 10px 12px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.settings-group legend {
+    padding: 0 6px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.settings-grid {
+    display: grid;
+    gap: 8px;
+}
+
+.setting {
+    display: grid;
+    grid-template-columns: auto minmax(9em, 14em) minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.setting input[type="checkbox"] {
+    accent-color: var(--accent);
+    margin: 0;
+}
+
+.setting-name small {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.setting-slider {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.setting-slider input {
+    flex: 1;
+    min-width: 60px;
+}
+
+/* a value the song drew, shown and not set */
+.setting-slider input:disabled {
+    opacity: 0.5;
+}
+
+.setting select {
+    justify-self: start;
+    max-width: 16em;
+}
+
+.setting .end {
+    font-size: 12px;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.warning {
+    margin: 10px 0 0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    font-size: 14px;
+}
+
+.fader-pair {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+}
+
+/* a part or drum group the song on the page does not play, still set here for the songs after it */
+.mixer tr.absent th,
+.mixer tr.absent .meter {
+    opacity: 0.45;
+}
+
+.mixer th[scope="row"] {
+    font-weight: normal;
+    white-space: nowrap;
 }
 
 /* the table cannot get narrower than its controls, so a phone scrolls it rather than the whole page */
@@ -749,6 +806,15 @@ footer a:hover {
         padding: 14px;
     }
 
+    /* a value's slider goes under its name, which leaves it the width of the panel */
+    .setting {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .setting-slider {
+        grid-column: 1 / -1;
+    }
+
     /*
      * the song panel in the order a phone uses it: roll a song, play it, then pass it on or take it
      * away. The row that holds them on a wide screen steps aside, so they can be put in that order
@@ -766,7 +832,6 @@ footer a:hover {
     .song-panel h2,
     .song-panel .song-row + .transport,
     .song-panel .toggle,
-    .song-panel .seeded,
     .song-panel #status {
         margin: 0;
     }
@@ -790,18 +855,8 @@ footer a:hover {
         margin-left: 0;
     }
 
-    /* the autoplay switch, not the one inside the row under it, which stays before its slider */
-    .song-panel > .toggle,
-    .unconventionality-row {
+    .song-panel .toggle {
         order: 5;
-    }
-
-    .unconventionality-row {
-        margin: 0;
-    }
-
-    .song-panel .seeded {
-        order: 6;
     }
 
     .song-panel #status {

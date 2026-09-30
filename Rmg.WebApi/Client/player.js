@@ -4,6 +4,7 @@ import { Sequencer, WorkletSynthesizer } from "spessasynth_lib";
 export const WORKLET_URL = new URL("spessasynth_processor.min.js", import.meta.resolve("spessasynth_lib")).href;
 const SOUND_BANK_ID = "main";
 const MAIN_VOLUME = 7;
+const PAN = 10;
 
 /** What a channel plays at when nothing says otherwise, which General MIDI puts at 100 of 127. */
 const DEFAULT_CHANNEL_VOLUME = 100;
@@ -13,11 +14,20 @@ class Player {
     #synth;
     #sequencer;
     #hasSoundFont = false;
+    #songWaiters = [];
 
     constructor(context, synth, sequencer) {
         this.#context = context;
         this.#synth = synth;
         this.#sequencer = sequencer;
+        this.#sequencer.eventHandler.addEvent("songChange", "rmg-song-loaded", () => {
+            for (const resolve of this.#songWaiters.splice(0)) resolve();
+        });
+    }
+
+    /** Resolves once the sequencer has taken the next song, when its length is known. */
+    nextSong() {
+        return new Promise((resolve) => this.#songWaiters.push(resolve));
     }
 
     async loadSoundFont(buffer) {
@@ -35,6 +45,7 @@ class Player {
         for (const channel of this.#synth.midiChannels) {
             channel.setSystemParameter("presetLock", false);
             channel.lockController(MAIN_VOLUME, false);
+            channel.lockController(PAN, false);
         }
 
         this.#sequencer.loadNewSongList([{ binary: buffer }]);
@@ -114,6 +125,16 @@ class Player {
         midiChannel.lockController(MAIN_VOLUME, false);
         this.#synth.controllerChange(channel, MAIN_VOLUME, Math.min(127, Math.round(volume * DEFAULT_CHANNEL_VOLUME)));
         midiChannel.lockController(MAIN_VOLUME, true);
+    }
+
+    /** Sets where a channel sits, from 0, left, through 64, the middle, to 127, right, locked as the volume is. */
+    setChannelPan(channel, pan) {
+        const midiChannel = this.#synth.midiChannels[channel];
+        if (!midiChannel) return;
+
+        midiChannel.lockController(PAN, false);
+        this.#synth.controllerChange(channel, PAN, pan);
+        midiChannel.lockController(PAN, true);
     }
 
     setChannelMuted(channel, isMuted) {
