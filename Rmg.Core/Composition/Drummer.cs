@@ -24,15 +24,15 @@ internal sealed record Drummer(double Busyness, FillPath Favourite, StateMap? La
     // around 0 with a flat peak, from -2 to 2, so that songs spread over the whole range and more of them near the middle
     private static readonly Func<IGenerationContext, double> SpreadGenerator = Generators.SplineValue(0);
 
-    /// <param name="rhythm">How far the song's rhythm strays, which makes a signature likelier.</param>
-    public static Drummer Generate(IGenerationContext context, RhythmicUnconventionality rhythm)
+    /// <param name="unconventionality">The fills facet of the song's unconventionality: no signature at the plain end, always one at the wild.</param>
+    public static Drummer Generate(IGenerationContext context, double unconventionality)
     {
         var busyness = Math.Clamp(0.5 + SpreadGenerator(context) / 4, 0, 1);
         // any walk can be the favourite, the likelier ones more often
         var favourite = context.Pick(FillLayers.Paths);
         // and any of the rarer choices the signature, the likelier ones more often
         var builder = new StateMapBuilder("Drummer", perTrack: true);
-        if (context.TestProbability(rhythm.Tilt.Chance(FillLayers.SignatureChance, 1)))
+        if (context.TestProbability(RhythmicUnconventionality.Ends(FillLayers.SignatureChance, 1).At(unconventionality)))
         {
             ImmutableArray<Weighted<StateKind<double>>> kinds = [..FillLayers.Chances.Select(x => new Weighted<StateKind<double>>(x.Chance, x.Kind))];
             builder.Add(context.Pick(kinds), FillLayers.SignatureWeight);
@@ -58,12 +58,15 @@ internal sealed record Drummer(double Busyness, FillPath Favourite, StateMap? La
         ];
     }
 
-    /// <summary>The walks' weights as this drummer takes them: the favourite more likely, and the random walk leaning by the tilt.</summary>
-    public ImmutableArray<Weighted<FillPath>> WeighPaths(ImmutableArray<Weighted<FillPath>> paths, Tilt tilt = default)
+    /// <summary>
+    ///     The walks' weights as this drummer takes them, by the fills facet: the favourite more likely, the random walk
+    ///     never at the plain end, every walk as likely at the wild.
+    /// </summary>
+    public ImmutableArray<Weighted<FillPath>> WeighPaths(ImmutableArray<Weighted<FillPath>> paths, double unconventionality)
     {
-        return tilt.Weigh(
-            paths.Select(x => x.Value == Favourite ? x with { Weight = x.Weight * FavouriteWeight } : x),
-            x => x == FillPath.Random ? 1 : 0
+        return ByConvention.Weigh(
+            paths.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Value == Favourite ? x.Weight * FavouriteWeight : x.Weight, x.Value == FillPath.Random ? 1 : 0))),
+            unconventionality
         );
     }
 

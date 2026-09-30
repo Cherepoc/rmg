@@ -57,8 +57,8 @@ internal sealed class FillSounds
 
     /// <summary>A run's sounds, their order, its walk and window, and whether it changes speed.</summary>
     /// <param name="roleChance">The chance a run plays a role's drums, as their state has it in the section.</param>
-    /// <param name="tilt">How the section's rhythm leans the run's rarer choices.</param>
-    public FillRun Draw(IGenerationContext context, Drummer drummer, Tilt tilt, Func<FillDrumRole, int, double> roleChance)
+    /// <param name="unconventionality">The fills facet of the section's unconventionality, which the run's rarer choices lean by.</param>
+    public FillRun Draw(IGenerationContext context, Drummer drummer, double unconventionality, Func<FillDrumRole, int, double> roleChance)
     {
         var sounds = new List<RunSound>();
         foreach (var (role, candidates) in _weightedSounds)
@@ -81,16 +81,16 @@ internal sealed class FillSounds
 
         var order = Shuffle(context, sounds);
         // the toms keep their order of pitch, as their note numbers have it, down or up
-        if (context.TestProbability(tilt.Chance(FillLayers.PitchOrderChance, FillLayers.PitchOrderLean)))
+        if (context.TestProbability(RhythmicUnconventionality.Ends(FillLayers.PitchOrderChance, FillLayers.PitchOrderLean).At(unconventionality)))
         {
             var isDown = context.TestProbability(0.5);
             var toms = new Queue<RunSound>(order.Where(x => x.Role == FillDrumRole.Toms).OrderBy(x => isDown ? -x.Code : x.Code));
             order = [..order.Select(x => x.Role == FillDrumRole.Toms ? toms.Dequeue() : x)];
         }
 
-        var width = Math.Min(context.Pick(tilt.Weigh(FillLayers.Widths, x => x > 1 ? 1 : 0)), Math.Max(1, order.Length));
-        var path = context.Pick(drummer.WeighPaths(FillLayers.Paths, tilt));
-        var speed = context.Pick(tilt.Weigh(FillLayers.Speeds, x => x == FillSpeed.SlowsDown ? 1 : 0));
+        var width = Math.Min(context.Pick(ByConvention.Weigh(FillLayers.Widths.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value > 1 ? 1 : 0))), unconventionality)), Math.Max(1, order.Length));
+        var path = context.Pick(drummer.WeighPaths(FillLayers.Paths, unconventionality));
+        var speed = context.Pick(ByConvention.Weigh(FillLayers.Speeds.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == FillSpeed.SlowsDown ? 1 : 0))), unconventionality));
         return new FillRun(order, path, width, speed);
     }
 

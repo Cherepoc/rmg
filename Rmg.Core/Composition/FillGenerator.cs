@@ -72,7 +72,7 @@ internal sealed class FillGenerator
         var tempo = Meter.BaseTempo * song.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(StateKinds.Tempo);
         var minNote = FillLayers.MinNoteSeconds * tempo / 60;
 
-        var drummer = Drummer.Generate(_context, _songRhythm);
+        var drummer = Drummer.Generate(_context, _songRhythm.Value);
         var edits = new TimelineEdits(_context, _meter, map);
         foreach (var line in lines)
             MarkLine(song, edits, line, minNote, drummer, map?.Origin ?? 0);
@@ -124,7 +124,8 @@ internal sealed class FillGenerator
     )
     {
         var ending = line.Ending;
-        var chances = GetChances(drummer, ending.Fills);
+        var chances = GetChances(drummer);
+        var fills = ending.Fills.Value;
         // how much the line weighs: its own weight, and the energy it leads into, as far as the section's rhythm follows it
         var lift = line.Next.Energy - ending.Energy;
         var weight = line.Weight + lift * ending.Rhythm.Coupling;
@@ -149,7 +150,7 @@ internal sealed class FillGenerator
         var landing = _sounds.DrawLanding(_context, landings);
         // a pushed landing comes a note of the fill's rhythm near an 8th early, after a fill, not where the band stops
         // or counts in and lands on the line together
-        var isEarly = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.EarlyLandingChance)) && line.HasFill;
+        var isEarly = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.EarlyLandingChance, fills)) && line.HasFill;
         var landingPosition = isEarly ? line.Position - rhythm.Push : line.Position;
         Land(song, edits, landingPosition, line.Next.SectionId, landing);
         RecordDecision(ending.SectionId, line.Position - origin, play, rhythm, span, landing, isEarly, lift);
@@ -178,26 +179,26 @@ internal sealed class FillGenerator
             return FillPlay.None;
 
         // stopping is the unconventional treatment, and the quiet one
-        var treatments = rhythm.Tilt.Weigh(FillLayers.Treatments, x => x == GrooveTreatment.Stop ? 1 : 0);
+        var treatments = ByConvention.Weigh(FillLayers.Treatments.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == GrooveTreatment.Stop ? 1 : 0))), rhythm.Value);
         var treatment = _context.Pick(direction.Weigh(treatments, x => FillLayers.TreatmentLoudness[x]));
         var fullness = FillLayers.Fullness + FillLayers.FullnessPerWeight * weight + FillLayers.TreatmentFullness[treatment];
         var layer = CreateLayer(drummer, rhythm, fullness, Feels.Of(grooves.Source), section.Facets[Facet.Feel]);
         // where the drums stop, they rest half the time: a break
         // a run plays the percussion alone in a section of percussion only, and now and then in one of the drum kit
         var isPercussion = section.IsPercussionOnly ||
-                           (_sounds.Sounds.ContainsKey(FillDrumRole.Percussion) && _context.TestProbability(rhythm.Tilt.Chance(FillLayers.PercussionRunChance, 1)));
+                           (_sounds.Sounds.ContainsKey(FillDrumRole.Percussion) && _context.TestProbability(RhythmicUnconventionality.Ends(FillLayers.PercussionRunChance, 1).At(rhythm.Value)));
         var run = treatment == GrooveTreatment.Stop && _context.TestProbability(direction.Chance(FillLayers.StopRestChance, -1))
             ? FillRun.Rest
             : _sounds.Draw(
                 _context,
                 drummer,
-                rhythm.Tilt,
-                (role, track) => !isPercussion ? GetRunChance(grooves.Of(track), rhythm.Tilt) : role == FillDrumRole.Percussion ? 1 : 0
+                rhythm.Value,
+                (role, track) => !isPercussion ? GetRunChance(grooves.Of(track), rhythm.Value) : role == FillDrumRole.Percussion ? 1 : 0
             );
-        var spanShift = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.OffBeatChance))
+        var spanShift = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.OffBeatChance, rhythm.Value))
             ? _context.TestProbability(0.5) ? 1 : -1
             : 0;
-        var fades = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.FadeChance));
+        var fades = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.FadeChance, rhythm.Value));
         return new FillPlay(span, treatment, run, layer, spanShift, fades);
     }
 
@@ -239,40 +240,41 @@ internal sealed class FillGenerator
     }
 
     /// <summary>
-    ///     The chances of the fills' rarer choices at a line, as layers: the base, the drummer's, such as its signature,
-    ///     and the section's chance scale over them all.
+    ///     The chances of the fills' rarer choices at a line, as layers: the base and the drummer's, such as its
+    ///     signature, which multiplies a choice's odds.
     /// </summary>
-    internal StateMap GetChances(Drummer drummer, RhythmicUnconventionality rhythm)
+    internal StateMap GetChances(Drummer drummer)
     {
-        var section = new StateMapBuilder("Section fill", perTrack: true);
-        foreach (var (kind, _) in FillLayers.Chances)
-            section.Add(kind, rhythm.ChanceScale);
-        return _chances.MergeWith(drummer.Layer ?? StateMap.Default).MergeWith(section.ToStateMap(_context));
+        return _chances.MergeWith(drummer.Layer ?? StateMap.Default);
     }
 
     /// <summary>
-    ///     A rarer choice's chance at a line (<see cref="GetChances" />): its base chance, its odds times what the layers
-    ///     over it multiply it by, as a chance leans.
+    ///     A rarer choice's chance at a line (<see cref="GetChances" />): its base chance at the section's fills facet, as
+    ///     an unconventional thing is, never at the plain end and every time at the wild, its odds times what the drummer
+    ///     multiplies them by.
     /// </summary>
-    internal static double GetChance(StateMap chances, StateKind<double> kind)
+    internal static double GetChance(StateMap chances, StateKind<double> kind, double unconventionality)
     {
         var chance = FillLayers.Chances.Single(x => x.Kind == kind).Chance;
-        return new Tilt(Math.Log(chances.GetStateValue(kind) / chance)).Chance(chance, 1);
+        return new Tilt(Math.Log(chances.GetStateValue(kind) / chance)).Chance(RhythmicUnconventionality.Ends(chance, 1).At(unconventionality), 1);
     }
 
-    /// <summary>The chance a run plays a drum, as its group's state has it: its run chance, leaning by how unconventional it is.</summary>
-    internal static double GetRunChance(StateMap drum, Tilt tilt)
+    /// <summary>
+    ///     The chance a run plays a drum, as its group's state has it: its run chance, by the fills facet as its group
+    ///     leans, an unconventional group never at the plain end and every time at the wild.
+    /// </summary>
+    internal static double GetRunChance(StateMap drum, double unconventionality)
     {
-        return tilt.Chance(
+        return RhythmicUnconventionality.Ends(
             Math.Clamp(drum.GetStateValue(CompositionStateKinds.Fill.RunChance), 0, 1),
             drum.GetStateValue(CompositionStateKinds.Fill.Unconventionality)
-        );
+        ).At(unconventionality);
     }
 
-    /// <summary>A run as drawn over the song's own drum states, for the tests to play.</summary>
-    internal FillRun DrawRun(Drummer drummer, Tilt tilt = default)
+    /// <summary>A run as drawn over the song's own drum states at a fills facet, for the tests to play.</summary>
+    internal FillRun DrawRun(Drummer drummer, double unconventionality)
     {
-        return _sounds.Draw(_context, drummer, tilt, (_, track) => GetRunChance(_songDrums.Of(track), tilt));
+        return _sounds.Draw(_context, drummer, unconventionality, (_, track) => GetRunChance(_songDrums.Of(track), unconventionality));
     }
 
     /// <summary>What was decided at a line, recorded in the last bar before it, where its fill is.</summary>
