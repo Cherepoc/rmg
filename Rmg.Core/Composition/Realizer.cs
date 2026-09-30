@@ -255,7 +255,8 @@ internal static class Realizer
             .Pow2();
         var nextNoteDurationFactor = stateMap.GetStateValue(StateKinds.NextNoteDurationFactor)
             .BounceInBounds(0, 1);
-        var duration = nextNoteDuration.WeightedAverage(nextNoteDurationFactor, quarterNoteDuration);
+        // no longer than a bar, as a note of the track's own length may be in a short one, such as a whole note in 3/4
+        var duration = Math.Min(nextNoteDuration.WeightedAverage(nextNoteDurationFactor, quarterNoteDuration), bar);
         // a melody sings one note at a time, so a note ends by the next, unless it is held, as a phrase's last note is
         var heldDuration = stateMap.GetStateValue(StateKinds.HeldDuration);
         // how long it would sound but for a change of chord, which a held note, as a phrase's or an ending's, is not cut by

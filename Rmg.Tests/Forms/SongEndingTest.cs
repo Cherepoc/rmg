@@ -52,7 +52,8 @@ public sealed class SongEndingTest
             await Assert.That(fade[0].Position).IsEqualTo(fadeStart + FormLayers.FadeStep).Within(1e-9);
             await Assert.That(fade[0].Value).IsLessThan(1);
             await Assert.That(fade.Zip(fade.Skip(1)).All(x => x.Second.Value < x.First.Value)).IsTrue();
-            await Assert.That(fade[^1].Value).IsLessThan(0.01);
+            // a step above silence at the song's end, the steps as many as the fade's span holds
+            await Assert.That(fade[^1].Value).IsEqualTo(FormLayers.FadeStep / (sections[^1].End - fadeStart)).Within(1e-9);
         }
 
         await Assert.That(Songs.Where(x => Ending(x).Kind != EndingKind.Fade).All(x => x.Rendered.FadeTimeline.Count == 0)).IsTrue();

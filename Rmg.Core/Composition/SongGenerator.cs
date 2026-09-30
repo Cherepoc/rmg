@@ -54,6 +54,8 @@ public static class SongGenerator
             songUnconventionality = songUnconventionality with { Facets = songUnconventionality.Facets.SetItems(facets) };
         StateTrace.Record(TracePoints.SongUnconventionality, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{songUnconventionality.Base:F2}", songUnconventionality);
         var rhythmicUnconventionality = new RhythmicUnconventionality(songUnconventionality[Facet.Groove]);
+        // a facet's value as the rhythm's unconventionality, for a choice that leans by it
+        RhythmicUnconventionality Of(Facet facet) => new(songUnconventionality[facet]);
         StateTrace.Record(TracePoints.SongRhythm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{rhythmicUnconventionality.Value:F2}", rhythmicUnconventionality);
         var tracks = SongTracks.Create(
             Stream(SongStream.Tracks),
@@ -82,10 +84,10 @@ public static class SongGenerator
 
         // the song's form: one of the forms songs are written in, its sections playing their roles, or one of its own
         // the meter the song's bars are in
-        var meter = overrides.Meter ?? Meter.Draw(Stream(SongStream.Meter), rhythmicUnconventionality.Tilt);
+        var meter = overrides.Meter ?? Meter.Draw(Stream(SongStream.Meter), Of(Facet.Feel).Tilt);
         StateTrace.Record(TracePoints.Meter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, meter.ToString(), meter);
 
-        var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), rhythmicUnconventionality.Tilt);
+        var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), Of(Facet.Form).Tilt);
         StateTrace.Record(TracePoints.SongForm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(" ", structure.SectionIds.Select(x => structure.Roles[x])), structure);
         var sectionIds = structure.SectionIds.ToArray();
 
@@ -98,7 +100,7 @@ public static class SongGenerator
         var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common));
         // how the song swings, which its tempo sets the notes of
         var grooveContext = Stream(SongStream.Groove);
-        var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), rhythmicUnconventionality.Tilt, meter);
+        var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), Of(Facet.Feel).Tilt, meter);
         StateTrace.Record(TracePoints.Swing, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{swing.Delay:F3} of {swing.Period}", swing);
 
         var sectionGenerator = new SectionGenerator(
@@ -121,7 +123,7 @@ public static class SongGenerator
         var formGenerator = new SongFormGenerator(
             Stream(SongStream.Form),
             Stream(SongStream.Intro),
-            rhythmicUnconventionality,
+            Of(Facet.Form),
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role)
         );
         var plan = formGenerator.Plan(sectionIds);
@@ -130,7 +132,7 @@ public static class SongGenerator
         var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0], structure.Roles[id]))))
             .CacheGeneratedValues();
         // and its melody placed afresh every time it plays, varied from the first as far as the song improvises
-        var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), rhythmicUnconventionality.Tilt);
+        var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), Of(Facet.Melody).Tilt);
         StateTrace.Record(TracePoints.MelodyImprovisation, SongTracks.MelodyTrack, 0, 0, StateMap.Default, 0, $"{improvisation:F2}", improvisation);
         // a song that fades out plays its last section once more, over which it fades, twice where it plays its pattern
         // only once, so that the fade takes eight bars at least
@@ -168,7 +170,7 @@ public static class SongGenerator
             .MergeStateMap(Groove.ToStateMap(swing, grooveContext));
 
         // the drums mark the lines, now that the song is put together
-        var fills = new FillGenerator(Stream(SongStream.Fills), tracks, rhythmicUnconventionality, meter);
+        var fills = new FillGenerator(Stream(SongStream.Fills), tracks, Of(Facet.Fills), meter);
         songTrackNoteTimelineMap = fills.Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
 
         // the lines placed over the whole song, as they go on from section to section and lead into the next: the melody,

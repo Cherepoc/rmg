@@ -128,7 +128,9 @@ tuned and wild weights (`ByConvention`), in place of the rhythm's and the harmon
    as groupings, the lowest layer's winning, in place of a prime index added up; the plain end straight and the
    threes, the wild end every feel but straight; a section's, a track's, a bar's or a fill's change of the song's feel
    never at 0 and every time at 1.
-9. **The rest of the rhythm's leans**, a facet at a time: the groove, the fills, the form, the melody; then the wrappers
+9. **The rest of the rhythm's leans**, a facet at a time (routed, still through `Tilt`: the meter and the swing by the
+   feel facet, the song's form, its ending and intro, the sections' lengths and phrase schemes by the form's, the fills
+   by the fills', the improvisation and the answers by the melody's; the groove's own left to it; to go by their ends): the groove, the fills, the form, the melody; then the wrappers
    gone.
 
 Later, by the same rule: key changes anywhere and at any time, where the form now allows one; the voicings, the

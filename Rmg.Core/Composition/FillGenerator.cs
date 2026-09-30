@@ -124,7 +124,7 @@ internal sealed class FillGenerator
     )
     {
         var ending = line.Ending;
-        var chances = GetChances(drummer, ending.Rhythm);
+        var chances = GetChances(drummer, ending.Fills);
         // how much the line weighs: its own weight, and the energy it leads into, as far as the section's rhythm follows it
         var lift = line.Next.Energy - ending.Energy;
         var weight = line.Weight + lift * ending.Rhythm.Coupling;
@@ -172,7 +172,7 @@ internal sealed class FillGenerator
         double weight
     )
     {
-        var (rhythm, grooves) = (section.Rhythm, section.Groove);
+        var (rhythm, grooves) = (section.Fills, section.Groove);
         var span = _context.Pick(tilt.Weigh(drummer.WeighSpans(FillLayers.Spans), FillLayers.GetSpanLoudness));
         if (span <= 0)
             return FillPlay.None;
@@ -509,7 +509,11 @@ internal sealed record FillSection(
     double Energy,
     bool IsPercussionOnly,
     bool HasDrums
-);
+)
+{
+    /// <summary>How far the section's fills stray from convention, which their choices lean by.</summary>
+    public RhythmicUnconventionality Fills => new(Facets[Facet.Fills]);
+}
 
 /// <summary>
 ///     The states of the groove's rhythm that a fill adds its layer to: the one its rhythm is, the snare's, and every
