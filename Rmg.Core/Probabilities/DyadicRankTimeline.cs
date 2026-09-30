@@ -87,8 +87,8 @@ public sealed class DyadicRankTimeline
         var slots = new List<DyadicRankSlot>();
         for (var cycle = 0; cycle < cycles.Count; cycle++)
         {
-            var (start, length, end, split, phase) = cycles[cycle];
-            var shifted = RankTimelines.GetOrAdd((split, maxRank), x => BuildRankTimeline(x.Split, x.MaxRank))
+            var (start, length, end, split, phase, rankLimit) = cycles[cycle];
+            var shifted = RankTimelines.GetOrAdd((split, Math.Min(maxRank, rankLimit)), x => BuildRankTimeline(x.Split, x.MaxRank))
                 .Stretch(length)
                 .PhaseShift(phase * length)
                 .Shift(start);
@@ -110,7 +110,8 @@ public sealed class DyadicRankTimeline
 }
 
 /// <summary>A cycle of a rhythm: where it starts, how long its template is, where it is cut off, how it splits first and how far its phase shifts it, as a part of its length.</summary>
-public readonly record struct RhythmCycle(double Start, double Length, double End, int Split, double Phase);
+/// <param name="RankLimit">The finest rank the cycle plays, such as a node of three 16ths' 16ths; none finer than the rhythm's own for most.</param>
+public readonly record struct RhythmCycle(double Start, double Length, double End, int Split, double Phase, int RankLimit = int.MaxValue);
 
 /// <param name="Rank">How strong the position is, 0 the strongest.</param>
 /// <param name="Cycle">Which repetition of the cycle the position is in, from 0.</param>

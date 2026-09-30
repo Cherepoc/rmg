@@ -14,8 +14,8 @@ namespace Rmg.Core.Composition;
 /// </summary>
 /// <param name="Rhythm">The resolved settings.</param>
 /// <param name="RankLimit">The finest rank the tempo allows, which a change of speed folds into.</param>
-/// <param name="Bar">How long the bar is, in beats, that ends at the line the fill leads into.</param>
-internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit, double Bar)
+/// <param name="Meter">The meter of the bar that ends at the line the fill leads into.</param>
+internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit, Meter Meter)
 {
     /// <summary>The layer of a plain fill: finer, fuller by a section change's share, its cycles repeating.</summary>
     public static StateMap PlainLayer { get; } = StateMap.FromStates(
@@ -53,19 +53,19 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit, double B
     /// <param name="groove">The state of the groove's rhythm.</param>
     /// <param name="layer">The fill's layer over it.</param>
     /// <param name="minNote">The shortest note the fill may play, in beats.</param>
-    /// <param name="bar">How long a bar is, in beats.</param>
-    public static FillRhythm Of(StateMap groove, StateMap layer, double minNote, double bar)
+    /// <param name="meter">The meter the song's bars are in.</param>
+    public static FillRhythm Of(StateMap groove, StateMap layer, double minNote, Meter meter)
     {
         var rhythm = ResolvedRhythm.Of(groove.MergeWith(layer), minNote);
         // no finer than the tempo allows, nor, for a grouped cycle, than the grid
         var noteLimit = Math.Max(0, (int)Math.Floor(Math.Log2(rhythm.Period / minNote) + 1e-9));
-        return new FillRhythm(rhythm, ResolvedRhythm.IsGrouped(rhythm.Period) ? Math.Min(noteLimit, ResolvedRhythm.GridRankLimit(rhythm.Period)) : noteLimit, bar);
+        return new FillRhythm(rhythm, ResolvedRhythm.IsGrouped(rhythm.Period) ? Math.Min(noteLimit, ResolvedRhythm.GridRankLimit(rhythm.Period)) : noteLimit, meter);
     }
 
     /// <summary>Whether the fill's finest notes have one at a position, in the bar that ends at the line.</summary>
     public bool Has(double position, double line)
     {
-        var steps = (position - (line - Bar) - Phase) / Fine;
+        var steps = (position - (line - Meter.BarDuration) - Phase) / Fine;
         return Math.Abs(steps - Math.Round(steps)) < 1e-6;
     }
 
@@ -90,12 +90,12 @@ internal sealed record FillRhythm(ResolvedRhythm Rhythm, int RankLimit, double B
         int maxRank
     )
     {
-        var barStart = line - Bar;
+        var barStart = line - Meter.BarDuration;
         var pattern = DyadicRankThresholdPattern.Create(
             context,
             seed,
             WeightUtil.CreateGeometricRankWeightFunc(Math.Min(Rhythm.RankOffset, maxRank), 0, 1, Rhythm.Fullness),
-            new DyadicTimelineDescriptor(Bar, Period, Phase, maxRank, ResolvedRhythm.RestartOf(Period, Bar), ResolvedRhythm.SplitOf(Period)),
+            new DyadicTimelineDescriptor(Meter.BarDuration, Meter.GetCycles(Period, Phase), maxRank),
             Rhythm.Variation
         );
         return

@@ -132,7 +132,7 @@ internal sealed class FillGenerator
         // and which way the energy goes, which makes stopping the groove likelier into a quieter section
         var direction = SectionEnergy.Tilt(lift, ending.Rhythm.Coupling);
         var play = line.HasFill ? DrawPlay(drummer, ending, chances, tilt, direction, weight) : FillPlay.None;
-        var rhythm = FillRhythm.Of(ending.Groove.Source, play.Layer, minNote, _meter.BarDuration);
+        var rhythm = FillRhythm.Of(ending.Groove.Source, play.Layer, minNote, _meter);
         _lastRun = [];
         var span = Fill(edits, play, line.Position, ending.Groove, rhythm, minNote, ending.SectionId);
         if (span > 0 && line.Ending != line.Next && !_lastRun.IsEmpty)
@@ -230,7 +230,7 @@ internal sealed class FillGenerator
     )
     {
         var edits = new TimelineEdits(_context, _meter);
-        Fill(edits, play, line, groove, FillRhythm.Of(groove.Source, play.Layer, minNote, _meter.BarDuration), minNote, 0);
+        Fill(edits, play, line, groove, FillRhythm.Of(groove.Source, play.Layer, minNote, _meter), minNote, 0);
         return edits.ApplyTo(song);
     }
 
@@ -393,7 +393,7 @@ internal sealed class FillGenerator
         else
             notes.AddRange(rhythm.Play(_context, seed, line, from, line, rhythm.MaxRank));
 
-        var drums = run.Sounds.Select(x => x.Track).Distinct().ToDictionary(x => x, x => FillRhythm.Of(groove.Of(x), play.Layer, minNote, _meter.BarDuration));
+        var drums = run.Sounds.Select(x => x.Track).Distinct().ToDictionary(x => x, x => FillRhythm.Of(groove.Of(x), play.Layer, minNote, _meter));
         var places = FillSounds.Walk(_context, run.Path, run.Sounds.Length, notes.Count);
         var span = line - from;
         for (var k = 0; k < notes.Count; k++)

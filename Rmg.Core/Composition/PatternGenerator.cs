@@ -437,7 +437,7 @@ internal sealed class PatternGenerator
             _context,
             seed,
             WeightUtil.CreateGeometricRankWeightFunc(rankOffset, 0, 1.0, fullness),
-            new DyadicTimelineDescriptor(_meter.BarDuration, period, phase, maxRank, ResolvedRhythm.RestartOf(period, _meter.BarDuration), ResolvedRhythm.SplitOf(period)),
+            new DyadicTimelineDescriptor(_meter.BarDuration, _meter.GetCycles(period, phase), maxRank),
             variation
         );
     }
