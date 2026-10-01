@@ -18,8 +18,6 @@ built since 0.6 (October 2026): parts entering late, the solos placed by their r
 answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
 this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
 
-2. the lift beyond loudness, the hi-hat opening on the bar before's last beat and the snare from its cross-stick to its
-   head, into a section louder by more than the lift's threshold, as data by drum role (see *Fills*);
 3. the counter-melody running into a section, `LineFills`' third way, never where the melody walks in;
 4. the melody's double stops on its accented strong beats, an instrument that plays chords only, 0.25 a section;
 5. the last chorus played twice, the repeat an appearance of its own taking the last section's lift, never with a fade;
@@ -447,9 +445,10 @@ The fills are the drums', and every track lands with them where a section lands.
   quarter beat, up to how much more energy the next section has as far as the ending section's rhythm follows it
   (`SongFormGenerator.CreateLifts`, `FormLayers.LiftVelocity` 0.6), the next section then as loud as it plays. Over 200
   corpus songs the bar before a change into a louder section plays 2.9 of 127 louder than the bar before it (was -0.1),
-  into a quieter one 1.4 quieter, as before (`LiftReportTest`). Left: the snare from its cross-stick to its head, the
-  hi-hat opening, the chords' rhythm doubling, a part of the next section coming in early, should the crescendo alone
-  not lift.
+  into a quieter one 1.4 quieter, as before (`LiftReportTest`). Into a section bigger by more than
+  0.15 of the lift's measure the drums announce it, the hi-hat opening on the last beat and the snare on its head over
+  the last bar (`LiftCues`): 328 cues in 114 of 128 songs (`LiftReportTest`). Left: the chords' rhythm doubling, a part
+  of the next section coming in early, should the cues not lift.
 - **Loudness** (P3): a run's swell, its accents and a landing's hit are constants, where the groove's loudness is
   layers; a fill's velocity layer would make them cumulative with the section's.
 - **Sounds by convention** (P3): runs and landings weigh a drum's sounds the same in a plain section as in a wild one;

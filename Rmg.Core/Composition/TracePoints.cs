@@ -21,6 +21,9 @@ internal static class TracePoints
     /// </summary>
     public const string Arrangement = "Arrangement";
 
+    /// <summary>A line the drums announce a bigger section at, opening the hi-hat and striking the snare's head (a <c>double</c>, the line's place).</summary>
+    public const string LiftCue = "Lift cue";
+
     /// <summary>
     ///     A line's walk into a change of section with the drums' run (<see cref="Composition.LineFills" />): the line the
     ///     section changes at and the walk's notes' places (a tuple of a <c>double</c> and an array of <c>double</c>s).

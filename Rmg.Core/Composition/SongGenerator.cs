@@ -221,8 +221,8 @@ public static class SongGenerator
                 [..lateEntries.Where(x => index < x.Value).Select(x => x.Key)],
                 [..lateEntries.Where(x => index == x.Value).Select(x => x.Key)]
             );
-            // as loud as its energy's step from the section's, as far as the lift into it grows, so that its last chorus plays
-            // the louder
+            // as loud as its energy's step from the section's, by the lift's measure of loudness, so that its last chorus
+            // plays the louder
             section = section with { Timeline = section.Timeline.MergeStateMap(StateMap.FromStates([StateKinds.Velocity.CreateState(FormLayers.LiftVelocity * energyStep)])) };
             if (solo is not null)
             {
@@ -312,6 +312,8 @@ public static class SongGenerator
         cancellation.ThrowIfCancellationRequested();
         var fills = new FillGenerator(Stream(SongStream.Fills), tracks, Of(Facet.Fills), meter);
         songTrackNoteTimelineMap = fills.Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
+        // and announce a bigger section, the hi-hat opening and the snare on its head before it
+        songTrackNoteTimelineMap = LiftCues.Apply(songTrackNoteTimelineMap, form.Lines);
         // and the drum solos, the drummer's own, over the groove they quote
         songTrackNoteTimelineMap = DrumSolos.Apply(
             songTrackNoteTimelineMap,
