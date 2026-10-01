@@ -473,6 +473,9 @@ the rest as they were.
 - **A mix written by the page** (P4): a change of the mix, volume, pan or instrument, asks the server for the file
   again only for the download. Writing the mix into the file in the page would leave the server out of it, at the cost
   of the MIDI writing in JavaScript too.
+- **The server's figures read in full** (P4): the dashboard reads every song made in its window to work out the
+  spreads, as it does the events, which is nothing at hundreds a day and slow at the 200,000 a day the table keeps at
+  most; should the server ever make that many, the spreads would be worked out a day at a time and kept.
 - **Note keys** (P3) are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 
 - **Review, October 2026** (built): a pick sums its weights as it goes, expression walks a section's notes alone, the
