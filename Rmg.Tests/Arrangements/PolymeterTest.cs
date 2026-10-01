@@ -56,6 +56,32 @@ public sealed class PolymeterTest
     }
 
     [Test]
+    public async Task ASnareOnTheCycle_StrikesOnlyItsCellsStarts()
+    {
+        var checkedSections = 0;
+        var snares = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
+        foreach (var song in TestCorpus.Range(512).Where(x => !Plans(x).IsEmpty))
+        foreach (var span in song.Map.Sections)
+        {
+            if (!Plans(song).TryGetValue(span.SectionId, out var plan) || !plan.Snare || song.IsSolo(span))
+                continue;
+
+            var frame = span.Meter.PatternDuration * plan.Patterns;
+            var starts = new HashSet<double>();
+            for (var start = span.Start; start < span.End - 1e-9; start += frame)
+            for (var (cell, at) = (0, start); at < Math.Min(start + frame, span.End) - 1e-9; at += plan.Cells[cell++ % plan.Cells.Length] * 0.25)
+                starts.Add(Math.Round(at, 6));
+            // but in the bar before a line, which the fill takes
+            var notes = song.Song.Notes!.Where(x => snares.Contains(x.Key)).SelectMany(x => x.Value)
+                .Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - span.Meter.BarDuration - 1e-9 && (x.Position - span.Start) % span.Meter.PatternDuration < span.Meter.PatternDuration - span.Meter.BarDuration).ToArray();
+            await Assert.That(notes.All(x => starts.Contains(Math.Round(x.Position, 6)))).IsTrue().Because($"seed {song.Seed} at {span.Start}");
+            checkedSections++;
+        }
+
+        await Assert.That(checkedSections).IsGreaterThan(3);
+    }
+
+    [Test]
     public async Task ThePlainestSongs_PlayNoPolymeter()
     {
         foreach (var seed in Enumerable.Range(0, 8))
@@ -79,7 +105,7 @@ public sealed class PolymeterTest
         var plans = sections.Select(x => x.Plan).OfType<Polymeter.Plan>().ToArray();
         Console.WriteLine($"  lengths {string.Join(", ", plans.GroupBy(x => x.Sixteenths).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count()}"))}; " +
                           $"parts {string.Join(", ", plans.GroupBy(x => string.Join("+", x.Parts) + (x.Kick ? "+kick" : "")).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}"))}");
-        Console.WriteLine($"  {plans.Length} polymeters: the kick with them {plans.Count(x => x.Kick) / (double)plans.Length:P0}, over 8 bars {plans.Count(x => x.Patterns == 2) / (double)plans.Length:P0}, " +
+        Console.WriteLine($"  {plans.Length} polymeters: the bass with the riff {plans.Count(x => x.Parts.Contains(TrackRole.Riff) && x.Parts.Contains(TrackRole.Bass)) / (double)Math.Max(1, plans.Count(x => x.Parts.Contains(TrackRole.Riff))):P0}, the snare {plans.Count(x => x.Snare) / (double)plans.Length:P0}, the kick with them {plans.Count(x => x.Kick) / (double)plans.Length:P0}, over 8 bars {plans.Count(x => x.Patterns == 2) / (double)plans.Length:P0}, " +
                           $"composite {plans.Count(x => x.Cells.Length > 1) / (double)plans.Length:P0}: {string.Join(", ", plans.Where(x => x.Cells.Length > 1).Select(x => string.Join("+", x.Cells)).GroupBy(x => x).OrderByDescending(x => x.Count()).Take(12).Select(x => $"{x.Key} {x.Count()}"))}");
         await Task.CompletedTask;
     }

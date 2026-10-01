@@ -13,10 +13,9 @@ measured before and after by a report test, by the measure its entry names.
 
 **Next** (P1): listening to what is deployed, 0.6 and on: the section's own key, tempo and meter, the rhythm part, the
 twin riff, the polymeter, the line scales, the new chords and scales, the solos, their chords and their loudness, each
-tuned by what listening says (see *Listening*), and the ratings by conventionality once enough are in. Then, in this
-order, each small and each measured:
-
-1. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
+tuned by what listening says (see *Listening*), and the ratings by conventionality once enough are in, with what was built since 0.6 (October 2026): parts entering late,
+the solos placed by their role, their motifs and the solo part's answers, the riff's chords, the melody's walks, the
+prepared key changes and the polymeter's unison and snare.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -239,13 +238,13 @@ dotted 8th (`MeterReportTest`; `MeterSeedsReportTest` names seeds to hear).
   or the bass where there is no riff, the bass with the riff now and then and the kick with them the oftener the wilder,
   with the drums bound to it; each part in the bars it plays, repeating its own first notes, so
   that its line, placed after, follows the chords where they land, and the fills mark the phrase's end over it. By the
-  feel facet: 0.7% of the middle fifth's sections, 22% of the wildest's; of them the kick 84%, 8 bars 44%, composite
-  41% (`PolymeterTest`). Its cells are heard as phrases already: a cell's first note is the motif's, on the frame's
+  feel facet: 0.7% of the middle fifth's sections, 22% of the wildest's; of them the kick 84%, the bass in unison with
+  the riff 82% where 50%, the snare on its cells' starts against the hi-hat's pulse 54%, with the drums bound to it,
+  8 bars 44%, composite 41% (`PolymeterTest`). Its cells are heard as phrases already: a cell's first note is the motif's, on the frame's
   downbeat, and plays its accent with it, 0.52 of velocity against the rest's 0.15, so that an accent of their own was
   measured and left out (October 2026). Left (P3), the cycle a tune played in unison against a pulse still felt
-  rather than a chugged drift: **the ostinato in unison,** the bass with
-  the riff the oftener, and the chords joining the cycle, their notes repeated cell by cell as the riff's; **the snare
-  on its accents and the hi-hat on the pulse,** so that the cycle sits against a beat; **a metric modulation,** a
+  rather than a chugged drift: **the chords joining the cycle,** their notes
+  repeated cell by cell as the riff's, should the unison want more weight; **a metric modulation,** a
   section's own tempo leaning at the wild end to 3:2 or 4:3 of the one before, a tuplet's pulse becoming the beat
   (`SectionTempo`); a figure running on across the frame's start, which needs long cycles; a cycle growing each time
   round (3, 4, 5).

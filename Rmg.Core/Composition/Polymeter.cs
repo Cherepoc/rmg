@@ -11,7 +11,7 @@ namespace Rmg.Core.Composition;
 ///     again where every 4-bar pattern, or every second at the wilder, starts it afresh. A cycle is a cell, or a cell
 ///     played again and then a closing one of another length, as 7, 7 and 9 make 23; each cell plays the same motif, cut
 ///     to its length. The riff plays it, or the bass where the song has no riff, the bass with the riff now and then, and
-///     the kick with them, the oftener the wilder; each part repeats its own first notes of the cycle's start, so that its
+///     the kick with them, the oftener the wilder, and the snare on its cells' starts against the hi-hat's pulse; each part repeats its own first notes of the cycle's start, so that its
 ///     line, placed after, follows the chords where they land. By the feel facet of the section's unconventionality:
 ///     never at the plain end, rarely at the middle, and at the wild end in half the sections, of any length as likely.
 /// </summary>
@@ -34,8 +34,14 @@ internal static class Polymeter
         (23, new ByConvention(0, 0.03, 1))
     ];
 
-    /// <summary>The chance the bass, with a riff, plays the cycle with it.</summary>
-    public const double JoinChance = 0.5;
+    /// <summary>The chance the bass, with a riff, plays the cycle with it, in unison: the wilder, the oftener.</summary>
+    public static ByConvention BassChance { get; } = new(0, 0.75, 1);
+
+    /// <summary>
+    ///     The chance the snare, where the kick plays the cycle, strikes every cell's start in place of its own beats, the
+    ///     hi-hat keeping the pulse the cycle runs against: the wilder, the oftener.
+    /// </summary>
+    public static ByConvention SnareChance { get; } = new(0, 0.5, 1);
 
     /// <summary>The chance the kick plays the cycle with the part that leads it, as it would always in a band built on such cycles: the wilder, the oftener.</summary>
     public static ByConvention KickChance { get; } = new(0, 0.85, 1);
@@ -55,7 +61,7 @@ internal static class Polymeter
     ///     A section's polymeter: its cycle's cells' lengths in 16ths, in turn, the parts that play it, and how many patterns
     ///     it runs over before starting afresh; none for a section in its bars.
     /// </summary>
-    public sealed record Plan(ImmutableArray<int> Cells, ImmutableArray<TrackRole> Parts, bool Kick, int Patterns)
+    public sealed record Plan(ImmutableArray<int> Cells, ImmutableArray<TrackRole> Parts, bool Kick, int Patterns, bool Snare)
     {
         /// <summary>The cycle's length in 16ths.</summary>
         public int Sixteenths => Cells.Sum();
@@ -86,7 +92,7 @@ internal static class Polymeter
             var lengths = Lengths.Where(x => bar % x.Sixteenths != 0).ToArray();
             var length = context.Pick(ByConvention.Weigh(lengths, unconventionality));
             var hasRiff = !absent.Contains(TrackRole.Riff);
-            var bassJoins = context.TestProbability(JoinChance);
+            var bassJoins = context.TestProbability(BassChance.At(unconventionality));
             var kick = context.TestProbability(KickChance.At(unconventionality)) && !absent.Contains(TrackRole.Drum);
             ImmutableArray<TrackRole> parts = hasRiff ? bassJoins ? [TrackRole.Riff, TrackRole.Bass] : [TrackRole.Riff] : [TrackRole.Bass];
             // drawn after the rest, so that it stays as it was: the frame, and a closing cell of another length, the cycle as
@@ -97,7 +103,8 @@ internal static class Polymeter
             var closing = Lengths.Where(x => x.Sixteenths != length && Drifts(length * repeats + x.Sixteenths, bar)).ToArray();
             var tail = closing.Length > 0 ? context.Pick(ByConvention.Weigh(closing, unconventionality)) : 0;
             ImmutableArray<int> cells = tails && tail > 0 ? [..Enumerable.Repeat(length, repeats), tail] : [length];
-            plans[id] = new Plan(cells, parts, kick, frame);
+            var snare = context.TestProbability(SnareChance.At(unconventionality)) && kick;
+            plans[id] = new Plan(cells, parts, kick, frame, snare);
         }
 
         return plans.ToImmutable();
@@ -116,6 +123,7 @@ internal static class Polymeter
         TrackEventStateTimelineMap<StateMap> song,
         IReadOnlyDictionary<int, TrackRole> roles,
         IEnumerable<int> kickTracks,
+        IEnumerable<int> snareTracks,
         SongMap map,
         ImmutableDictionary<int, Plan> plans,
         Func<int, IReadOnlyDictionary<int, int>> bindings
@@ -123,6 +131,7 @@ internal static class Polymeter
     {
         var trackOf = roles.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.First().Key);
         var kicks = kickTracks.ToArray();
+        var snares = snareTracks.ToArray();
         foreach (var span in map.Sections)
         {
             if (!plans.TryGetValue(span.SectionId, out var plan))
@@ -152,6 +161,31 @@ internal static class Polymeter
 
                 return EventTimeline.Create(notes.Duration, notes.Where(x => x.Position < span.Start - 1e-9 || x.Position >= span.End - 1e-9).Concat(played).OrderBy(x => x.Position));
             })));
+
+            // the snare on every cell's start, as its first note there plays, in the bars it plays, and the drums bound to it
+            // with it
+            var onSnare = bindings(span.SectionId).Where(x => snares.Contains(x.Value)).Select(x => x.Key);
+            if (plan.Snare)
+                song = song.MapTrackEvents(snares.Concat(onSnare).Distinct().Where(song.TrackTimelineMap.ContainsKey).ToDictionary(x => x, _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
+                {
+                    int Bar(double position) => (int)Math.Floor((position - span.Start) / span.Meter.BarDuration + 1e-9);
+                    var inSpan = notes.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9).ToArray();
+                    if (inSpan.Length == 0)
+                        return notes;
+
+                    var plays = inSpan.Select(x => Bar(x.Position)).ToHashSet();
+                    var struck = new List<TimelineItem<StateMap>>();
+                    for (var start = span.Start; start < span.End - 1e-9; start += frame)
+                    {
+                        var end = Math.Min(start + frame, span.End);
+                        var cell = 0;
+                        for (var at = start; at < end - 1e-9; at += plan.Cells[cell++ % plan.Cells.Length] * Sixteenth)
+                            if (plays.Contains(Bar(at)))
+                                struck.Add(inSpan[0].Value.ToTimelineItem(at));
+                    }
+
+                    return EventTimeline.Create(notes.Duration, notes.Where(x => x.Position < span.Start - 1e-9 || x.Position >= span.End - 1e-9).Concat(struck).OrderBy(x => x.Position));
+                })));
         }
 
         return song;

@@ -299,6 +299,7 @@ public static class SongGenerator
             songTrackNoteTimelineMap,
             tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).ToDictionary(x => x.Key, x => x.Value.Role),
             DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber),
+            DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber),
             form.Map,
             polymeters,
             id => generateSection(id).Bindings
