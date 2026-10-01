@@ -427,7 +427,7 @@ internal sealed class FillGenerator
     // the positions of the run the last fill played, which a section change keeps for the pitched fills
     private ImmutableArray<double> _lastRun = [];
 
-    /// <summary>The runs the drums played into a change of section, for the pitched tracks to fill with (<see cref="BassFills" />).</summary>
+    /// <summary>The runs the drums played into a change of section, for the pitched tracks to fill with (<see cref="LineFills" />).</summary>
     public List<PlayedRun> Runs { get; } = [];
 
     /// <summary>The hits the drums land on at a line; a drum that already plays there keeps its note.</summary>

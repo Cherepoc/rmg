@@ -112,6 +112,10 @@ public sealed class MelodyRhythmTest
         {
             var (melody, origin) = RenderMelodyFrom(seed);
             var map = TestCorpus.Get(seed).Map;
+            // a walk into a section is the next phrase's pickup, not this one's end (LineFills), however swung
+            var walks = TestCorpus.Get(seed).Trace.Where(x => x.Point == TracePoints.LineFill && x.Track == MelodyTrackNumber)
+                .SelectMany(x => (((double, double[]))x.Value!).Item2).ToArray();
+            melody = [..melody.Where(x => !walks.Any(w => Math.Abs(x.Position - w) < 0.2))];
             // a phrase is a section's 4-bar pattern, so its last bar ends at every pattern's end in its section's meter
             var ends = map.Sections.SelectMany(x => Enumerable.Range(1, (int)Math.Round(x.Duration / x.Meter.PatternDuration)).Select(p => (End: x.Start + p * x.Meter.PatternDuration, x.Meter)));
             foreach (var (end, meter) in ends)

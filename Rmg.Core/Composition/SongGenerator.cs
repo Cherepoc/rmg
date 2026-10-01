@@ -315,8 +315,10 @@ public static class SongGenerator
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, melodyTrack.Key, (PitchInstrumentTrack)melodyTrack.Value, MelodyLayers.Line);
         var bassTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Bass);
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, BassLeadingLayers.Line);
-        // and the bass walking with the drums' runs into a new section now and then, from where it is placed
-        songTrackNoteTimelineMap = BassFills.Apply(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, fills.Runs, Stream(SongStream.BassFills), form.Map.MeterAt);
+        // and the bass walking with the drums' runs into a new section now and then, from where it is placed, and the
+        // melody leading into it where it rests, each from a sequence of its own
+        songTrackNoteTimelineMap = LineFills.Apply(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, fills.Runs, Stream(SongStream.BassFills), form.Map.MeterAt, LineFills.Bass);
+        songTrackNoteTimelineMap = LineFills.Apply(songTrackNoteTimelineMap, melodyTrack.Key, (PitchInstrumentTrack)melodyTrack.Value, fills.Runs, Stream(SongStream.MelodyFills), form.Map.MeterAt, LineFills.Melody);
         var counterTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.CounterMelody);
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, counterTrack.Key, (PitchInstrumentTrack)counterTrack.Value, CounterLayers.Line);
         var riffTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Riff);
@@ -526,5 +528,6 @@ internal enum SongStream
     SoloChords = 45,
     LateEntries = 46,
     LineChords = 47,
-    SoloAnswers = 48
+    SoloAnswers = 48,
+    MelodyFills = 49
 }

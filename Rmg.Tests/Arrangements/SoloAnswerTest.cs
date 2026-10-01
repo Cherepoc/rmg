@@ -21,7 +21,7 @@ public sealed class SoloAnswerTest
     [Test]
     public async Task AnAnswer_PlaysInTheMelodysGaps_UnderIt()
     {
-        var (answers, louder) = (0, 0);
+        var (answers, louder, sections) = (0, 0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Melody(0.5))))
         {
             var (answerNotes, melody) = Notes(song);
@@ -36,12 +36,22 @@ public sealed class SoloAnswerTest
                 answers++;
             }
 
-            if (answerNotes.Length > 0 && answerNotes.Average(x => x.Value.Velocity) > melody.Average(x => x.Value.Velocity))
-                louder++;
+            // as heard in each section it answers in, against the melody there
+            foreach (var span in song.Map.Sections)
+            {
+                var there = answerNotes.Where(x => x.Position >= span.Start && x.Position < span.End).ToArray();
+                var sung = melody.Where(x => x.Position >= span.Start && x.Position < span.End).ToArray();
+                if (there.Length > 0 && sung.Length > 0)
+                {
+                    sections++;
+                    if (there.Average(x => Render.ToMidiVelocity(x.Value.Velocity)) > sung.Average(x => Render.ToMidiVelocity(x.Value.Velocity)))
+                        louder++;
+                }
+            }
         }
 
         await Assert.That(answers).IsGreaterThan(100);
-        await Assert.That(louder).IsLessThan(10);
+        await Assert.That(louder / (double)sections).IsLessThan(0.1);
     }
 
     [Test]

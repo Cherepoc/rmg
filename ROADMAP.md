@@ -16,12 +16,11 @@ twin riff, the polymeter, the line scales, the new chords and scales, the solos,
 tuned by what listening says (see *Listening*), and the ratings by conventionality once enough are in. Then, in this
 order, each small and each measured:
 
-1. the melody running into a section, as the bass's run-in does (see *Fills*);
-2. prepared key changes, a chain of chords leading into the new key, a dominant at the plain end and the middle,
+1. prepared key changes, a chain of chords leading into the new key, a dominant at the plain end and the middle,
    chromatic and third-related ones wilder (see *Appearances*);
-3. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
+2. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
    *Solos*);
-4. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
+3. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -426,8 +425,11 @@ The fills are the drums', and every track lands with them where a section lands.
   note before to a step from the note the next section starts on, each kept as a line's note, a scale step over the
   chord where it plays and on the scale there; only where the bass plays on both sides of the line. Over 200 corpus
   songs the bass moves into a new section by step 68% of the time, where it did 47%, and leaps 9% against 11%
-  (`BassFillReportTest`). Left: the melody or the counter-melody running into a section, and filling the melody's gaps
-  before a chord change within a phrase, should they sound empty.
+  (`BassFillReportTest`). The melody leads into a section the same way (`LineFills`), with a third of the runs where it
+  rests, three notes at most, its note held into the rest let go where the walk starts: over 1024 songs 1314 walks
+  into 8483 changes of section, in 70% of the songs, most of three notes, 96% into the next section's note by a step
+  (`MelodyFillTest`). Left: the counter-melody running into a section, and filling the melody's gaps before a chord
+  change within a phrase, should they sound empty.
 - **The lift** (built for the loudness): into a louder section, the band grows louder over the bar before, a step every
   quarter beat, up to how much more energy the next section has as far as the ending section's rhythm follows it
   (`SongFormGenerator.CreateLifts`, `FormLayers.LiftVelocity` 0.6), the next section then as loud as it plays. Over 200

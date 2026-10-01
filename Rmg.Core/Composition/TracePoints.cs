@@ -22,6 +22,12 @@ internal static class TracePoints
     public const string Arrangement = "Arrangement";
 
     /// <summary>
+    ///     A line's walk into a change of section with the drums' run (<see cref="Composition.LineFills" />): the line the
+    ///     section changes at and the walk's notes' places (a tuple of a <c>double</c> and an array of <c>double</c>s).
+    /// </summary>
+    public const string LineFill = "Line fill";
+
+    /// <summary>
     ///     The parts the song holds back at its start, and the appearance each enters at, by its place among the song's
     ///     sections (an <c>ImmutableDictionary</c> of <see cref="Songs.TrackRole" />s and <c>int</c>s).
     /// </summary>
