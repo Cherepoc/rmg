@@ -23,9 +23,11 @@ order, each small and each measured:
 5. the solo part answering the melody, in its small version: in some sections in the counter-melody's place in the
    melody's gaps, sparse and under the melody, the page given the part (see *Instruments*, *Solos*);
 6. the melody running into a section, as the bass's run-in does (see *Fills*);
-7. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
+7. prepared key changes, a chain of chords leading into the new key, a dominant at the plain end and the middle,
+   chromatic and third-related ones wilder (see *Appearances*);
+8. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
    *Solos*);
-8. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
+9. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -390,6 +392,23 @@ planned together (P1):
   step, by the scale facet, 0.08 at the middle (`KeyChange`), and at the wild end elsewhere too and by any step (see
   *Conventionality*, the wild end made complete), as the song's key from the section's start, so that the whole band,
   the ending and a fade move with it and the lines, placed after, go on into it.
+- **Prepared key changes** (P1, planned in October 2026): a key change led into by a chain of chords, each leading to
+  the next, as a dominant leads to its tonic, in place of the jump: the last one to three chords of the pattern before
+  it, as many as it has. A link is a chord of some key, its key a step from the next chord's and its root a step of
+  that key, data with weights by the scale facet: a fifth above, the dominant, at the plain end and the middle; a half
+  step above, a tritone's substitute, and the leading tone's chord from the middle out; a third away, a mediant, at the
+  wild end; a chain repeating one kind, so that chains of fifths, chromatic dominants and cycles of thirds come of it
+  without rules of their own. Every key change may be prepared, the last chorus's lift, a section's own key and the way
+  back from it, by a flat chance of 0.5, since a prepared change is no wilder than a jump; from a stream of its own. A
+  chord of the chain is a key change at its chord's start (`KeyChange`, `KeyOffset`), its root moved to its step by a
+  delta (`ChordRoot`, additive), its leading tone raised where the scale has none, as the cadence's is
+  (`Progressions.CadenceRaise`), its shape as the pool drew it; the lines, placed after, follow. First to check: that
+  every part reads the roots the progression sets, so that one delta moves them all. Measured by: the key changes
+  prepared, their chains' lengths and kinds by the scale facet (`HarmonyReportTest`); tested: every chord of a chain
+  leads by its link to the next, the last into the new key, none in the plainest songs. To resist: forcing sevenths,
+  chains of mixed links, a chain's length leaned by the chords' length, all unless listening asks. Later, devices of
+  their own: a pivot chord both keys share, a common tone held across, a pedal, a phrase sequenced up a step until it
+  stays, a lift repeated chorus after chorus.
 - **A section's own key and scale** (built): a section but the first may play in a key of its own every time it
   plays, by the scale facet (`KeyChange.SectionChance`, 0.08 at the middle), up or down a fourth most often, and a
   chorus or a bridge, which contrast with the verse, leans to it and to a scale of its own by odds of 2
