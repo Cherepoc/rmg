@@ -462,7 +462,7 @@ internal sealed class SectionGenerator
         {
             // a riff's twin has no notes of its own, but the riff's, moved, once the song is put together (LineDoubling), and
             // the solo part none but a solo's (Solos), and they draw nothing
-            if (_tracks.Definitions[trackNumber].Role is TrackRole.RiffTwin or TrackRole.Solo)
+            if (!_tracks.Definitions[trackNumber].Role.HasNotesOfItsOwn())
             {
                 var empty = TrackEventStateTimelineMap.Create(
                     meter.PatternDuration,
@@ -783,7 +783,10 @@ internal sealed record GeneratedSection(
             : Arrangement.DrawRests(new GenerationContext(Seeds.Derive(ArrangementSeed, appearance)), SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), Role, Absent)
                 .Intersect(before);
         // how the parts come in over its phrases, from a sequence of its own, by the form facet
-        var playing = Roles.Values.Distinct().Where(x => !resting.Contains(x)).ToArray();
+        // of the parts that have notes in the section, so that a part alone is never one that has none, such as the riff's
+        // twin, the solo part or a line whose patterns came out empty
+        bool HasNotes(TrackRole role) => Roles.Any(x => x.Value == role && Timeline.TrackTimelineMap.TryGetValue(x.Key, out var track) && track.EventTimeline.Count > 0);
+        var playing = Roles.Values.Distinct().Where(x => !resting.Contains(x) && HasNotes(x)).ToArray();
         var texture = Composition.Texture.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(ArrangementSeed, appearance), TextureStream)), Facets[Facet.Form], Plays, playing);
         ImmutableArray<ImmutableHashSet<TrackRole>> steady = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, Plays)];
         if (keepsTexture)

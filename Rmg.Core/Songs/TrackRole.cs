@@ -33,4 +33,10 @@ public static class TrackRoles
 {
     /// <summary>Whether the part plays the chords, voiced and led from one to the next: the chords and the rhythm part.</summary>
     public static bool PlaysChords(this TrackRole role) => role is TrackRole.Chords or TrackRole.Rhythm;
+
+    /// <summary>
+    ///     Whether the part plays notes of its own in a section, as all do but the riff's twin, which plays the riff's, and
+    ///     the solo part, which plays only a solo's: the parts a section can play its texture with.
+    /// </summary>
+    public static bool HasNotesOfItsOwn(this TrackRole role) => role is not (TrackRole.RiffTwin or TrackRole.Solo);
 }

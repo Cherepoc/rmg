@@ -7,6 +7,17 @@ namespace Rmg.Tests.Arrangements;
 
 public sealed class TextureTest
 {
+    [Test]
+    public async Task NoAppearanceOfASection_FallsSilent_ItsPartAloneOneWithNotesThere()
+    {
+        var silent = TestCorpus.Measure(512, song => song.Map.Sections
+            .Where(span => !song.Song.Notes!.Values.Any(notes => notes.Any(n => n.Position >= span.Start - 1e-9 && n.Position < span.End - 1e-9)))
+            .Select(span => $"seed {song.Seed} at {span.Start}")
+            .ToArray()).SelectMany(x => x).ToArray();
+
+        await Assert.That(silent).IsEmpty().Because(string.Join("; ", silent.Take(5)));
+    }
+
     private static readonly TrackRole[] Band = [TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.Drum];
 
     [Test]
