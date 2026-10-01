@@ -160,6 +160,7 @@ details.panel > summary .state.error {
 }
 
 .hint {
+    max-width: 75ch;
     margin: -4px 0 12px;
     color: var(--muted);
     font-size: 14px;
@@ -788,6 +789,13 @@ footer a:hover {
  * no room for a second column: the list goes under the panels, above the footer, and with nothing
  * beside it to be as tall as, it keeps a height of its own
  */
+/* a wide screen gives the page its width, so that every part's row of the mixer fits without scrolling across */
+@media (min-width: 1340px) {
+    .layout {
+        max-width: 1300px;
+    }
+}
+
 @media (max-width: 1040px) {
     .layout {
         max-width: 760px;
