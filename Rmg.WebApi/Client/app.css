@@ -777,9 +777,8 @@ input[type="range"] {
     width: 160px;
 }
 
-/* a drum group's row under the drums', set in from them */
+/* a drum group's row under the drums', its name in line with the parts' and quieter */
 .mixer tr.drum-group th[scope="row"] {
-    padding-left: 12px;
     color: var(--muted);
     font-size: 13px;
 }
