@@ -183,7 +183,12 @@ public static class SongGenerator
         // a song that fades out plays its last section once more, over which it fades, twice where it plays its pattern
         // only once, so that the fade takes eight bars at least
         var fading = plan.Ending != EndingKind.Fade ? 0 : generateSection(sectionIds[^1]).Plays == 1 ? 2 : 1;
-        int[] played = [..sectionIds, ..Enumerable.Repeat(sectionIds[^1], fading)];
+        // and a last section that came back before played once more now and then, as a last chorus is, where it does not
+        // fade, from a stream of its own, the last section's lift moving to it
+        var repeats = Stream(SongStream.LastRepeat).TestProbability(SongForms.LastRepeatChance.At(songUnconventionality[Facet.Form]))
+                      && fading == 0 && sectionIds.Take(sectionIds.Length - 1).Contains(sectionIds[^1]);
+        int[] played = [..sectionIds, ..(repeats ? [sectionIds[^1]] : Array.Empty<int>()), ..Enumerable.Repeat(sectionIds[^1], fading)];
+        StateTrace.Record(TracePoints.LastRepeat, SectionGenerator.SectionTrace, 0, 0, StateMap.Default, 0, $"{repeats}", repeats);
         // the later in the song, the more, and with the energy of its own place in the song against the section's average,
         // its parts only joining as it comes back
         double Place(int index) => played.Length > 1 ? index / (double)(played.Length - 1) : 0.5;
@@ -261,7 +266,9 @@ public static class SongGenerator
             songUnconventionality[Facet.Scale],
             form.Map,
             sectionIds,
-            structure.Roles
+            structure.Roles,
+            // the last section's lift, at its repeat where it plays twice
+            sectionIds.Length - 1 + (repeats ? 1 : 0)
         );
         // and play a section at a tempo of its own, a chorus the likelier, each section drawing from a stream of its own
         var sectionTempos = SectionTempo.Generate(
@@ -566,5 +573,6 @@ internal enum SongStream
     TempoRamps = 52,
     DrumSoloStacks = 53,
     CounterFills = 54,
-    MelodyChords = 55
+    MelodyChords = 55,
+    LastRepeat = 56
 }

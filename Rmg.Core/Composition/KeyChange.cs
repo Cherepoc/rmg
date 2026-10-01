@@ -64,6 +64,7 @@ public sealed record KeyChange(double Position, int Semitones)
     /// <param name="unconventionality">The scale facet of the song's unconventionality.</param>
     /// <param name="sectionIds">The song's sections in its order, before any it plays again to fade out.</param>
     /// <param name="roles">What each section does in the song's form, by its id.</param>
+    /// <param name="liftAt">The appearance, by its place, a last section's lift may come at: the last section, or its repeat.</param>
     internal static ImmutableArray<KeyChange> Generate(
         IGenerationContext context,
         Func<int, IGenerationContext> places,
@@ -71,7 +72,8 @@ public sealed record KeyChange(double Position, int Semitones)
         double unconventionality,
         SongMap map,
         IReadOnlyList<int> sectionIds,
-        IReadOnlyDictionary<int, SectionRole> roles
+        IReadOnlyDictionary<int, SectionRole> roles,
+        int liftAt
     )
     {
         var last = sectionIds.Count - 1;
@@ -95,7 +97,7 @@ public sealed record KeyChange(double Position, int Semitones)
             // the song starts in its own key
             if (place == 0) continue;
 
-            var isLastSection = index == last && start == section.Start;
+            var isLastSection = index == liftAt && start == section.Start;
             var drawing = isLastSection ? context : places(place);
             var chance = isLastSection && cameBack ? LastSectionChance : ElsewhereChance;
             var isChanging = drawing.TestProbability(chance.At(unconventionality));

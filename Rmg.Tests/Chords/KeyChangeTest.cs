@@ -17,6 +17,28 @@ public sealed class KeyChangeTest
         .ToArray();
 
     [Test]
+    public async Task ALastSectionPlayedTwice_IsLiftedAtItsRepeat_NowAndThen()
+    {
+        var (repeated, lifted) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, 0.5).Add(Facet.Scale, 0.6)))))
+        {
+            if (!(bool)song.Trace.Single(x => x.Point == TracePoints.LastRepeat).Value!)
+                continue;
+
+            // the last two sections the same, the key moving where the repeat starts now and then, a section's own key apart
+            var sections = song.Map.Sections;
+            var (first, repeat) = (sections[^2], sections[^1]);
+            await Assert.That(first.SectionId).IsEqualTo(repeat.SectionId);
+            repeated++;
+            if (Changes(song).Any(x => Math.Abs(x.Position - repeat.Start) < 1e-9))
+                lifted++;
+        }
+
+        await Assert.That(repeated).IsGreaterThan(10);
+        await Assert.That(lifted).IsGreaterThan(0);
+    }
+
+    [Test]
     public async Task ThePlainestSongs_KeepTheirKey()
     {
         foreach (var seed in Enumerable.Range(0, 8))

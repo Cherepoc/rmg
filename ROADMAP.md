@@ -18,7 +18,6 @@ built since 0.6 (October 2026): parts entering late, the solos placed by their r
 answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
 this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
 
-5. the last chorus played twice, the repeat an appearance of its own taking the last section's lift, never with a fade;
 6. a section's switch within the instrument's family as its own option, the family by General MIDI's groups split where
    they hold other players, the plain end keeping the family and the wild end handing over (see *Instruments*);
 7. a crash on a drum solo's climax, its intensity 0.8 or more, on a cell's first hit;
@@ -304,7 +303,10 @@ and 62% of its changes by its instrument, off the new chord 1 to 3%, the melody'
   -0.24; half the verses and choruses play sixteen bars; a song's sections take 80 bars at the median, 48 to 152 from
   10% to 90%, against 116 before (`SongFormReportTest`). Left: the role leaning the arrangement and the solos (see
   *Appearances*, *Instruments*); an intro and an outro as roles of their own, should the form's intros and endings not
-  do; a form with a last chorus played twice over, as a section may not follow itself.
+  do; a last chorus played twice (built,
+  `SongForms.LastRepeatChance`): a last section that came back before plays once more, by the form facet, never in a
+  plain song and 0.25 from the middle, but where the song fades, which repeats it already, the last section's key lift
+  moving to the repeat: 16.7% of 1024 songs, 17% of those lifted there (`KeyChangeTest`).
 - **A section's length** (built): a section plays its pattern once, twice or four times (`SectionLength`, 0.2, 0.65
   and 0.15), other than twice the likelier the wilder its form facet; once plays its lines' question alone, four
   times the question and the answer twice, the second time as a further appearance, improvised as far as the song

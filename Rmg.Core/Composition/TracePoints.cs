@@ -24,6 +24,9 @@ internal static class TracePoints
     /// <summary>A line the drums announce a bigger section at, opening the hi-hat and striking the snare's head (a <c>double</c>, the line's place).</summary>
     public const string LiftCue = "Lift cue";
 
+    /// <summary>Whether a song plays its last section once more (a <c>bool</c>).</summary>
+    public const string LastRepeat = "Last repeat";
+
     /// <summary>
     ///     A line's walk into a change of section with the drums' run (<see cref="Composition.LineFills" />): the line the
     ///     section changes at and the walk's notes' places (a tuple of a <c>double</c> and an array of <c>double</c>s).

@@ -40,6 +40,9 @@ internal static class SectionContrast
 
 internal static class SongForms
 {
+    /// <summary>The chance a song plays its last section once more, as a last chorus is played twice, by the form facet: never in a plain song.</summary>
+    public static ByConvention LastRepeatChance { get; } = new(0, 0.25, 0.25);
+
     /// <summary>The chance a song takes one of the forms, at a rhythm of middling conventionality.</summary>
     public const double FormChance = 0.7;
 
