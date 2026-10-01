@@ -144,6 +144,20 @@ class Player {
     }
 
     /** How loud a channel plays now, as the root mean square of its last samples, before reverb and chorus; 0 for silence. */
+    setChannelMuted(channel, isMuted) {
+        this.#synth.midiChannels[channel]?.setSystemParameter("isMuted", isMuted);
+    }
+
+    /** Silences one note of a channel, as a drum of the drums'. */
+    muteNote(channel, note) {
+        this.#synth.keyModifierManager.addModifier(channel, note, { gain: 0 });
+    }
+
+    /** Lets every note silenced sound again, on whichever channel it was. */
+    unmuteNotes() {
+        this.#synth.keyModifierManager.clearModifiers();
+    }
+
     getLevel(channel) {
         const analyser = this.#analysers[channel];
         if (analyser === undefined) return 0;

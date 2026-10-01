@@ -55,6 +55,27 @@ public sealed class GivingAPartTest(Site site)
     }
 
     [Test]
+    public async Task MuteAndSolo_ArePressedHere_AndAskTheServerForNothing()
+    {
+        await using var page = await SongPage.Open(site);
+        await page.FirstSong();
+        await page.Settled();
+        var asked = page.Requests.Count;
+
+        foreach (var control in new[] { $"{Row} button.listen", "#mixer tr.drum-group button.listen[aria-label^='Solo']" })
+        {
+            await page.Page.EvaluateAsync("selector => document.querySelector(selector).click()", control);
+            await Assert.That(await page.Page.EvaluateAsync<string>("selector => document.querySelector(selector).getAttribute('aria-pressed')", control)).IsEqualTo("true");
+            await page.Page.EvaluateAsync("selector => document.querySelector(selector).click()", control);
+            await Assert.That(await page.Page.EvaluateAsync<string>("selector => document.querySelector(selector).getAttribute('aria-pressed')", control)).IsEqualTo("false");
+        }
+
+        await Task.Delay(800);
+        await Assert.That(page.Requests.Count).IsEqualTo(asked);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task APartGiven_IsAskedForAsDrawn_ThenAsSet_AndLetGoOf_AsTheSongs()
     {
         await using var page = await SongPage.Open(site);

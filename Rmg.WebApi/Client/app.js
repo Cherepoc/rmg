@@ -40,6 +40,9 @@ import { since, tell, track } from "./tally.js";
 
 const PLAY_ICON = "M8 5v14l11-7z";
 const PAUSE_ICON = "M7 5h3.5v14H7zM13.5 5H17v14h-3.5z";
+// a row's mute, a speaker struck through, and its solo, headphones
+const MUTE_ICON = "M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63zM19 12c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.8 8.8 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3 3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06a8.99 8.99 0 0 0 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4 9.91 6.09 12 8.18V4z";
+const SOLO_ICON = "M12 3a9 9 0 0 0-9 9v7a2 2 0 0 0 2 2h3v-8H5v-1a7 7 0 0 1 14 0v1h-3v8h3a2 2 0 0 0 2-2v-7a9 9 0 0 0-9-9z";
 
 const elements = {
     soundFont: document.getElementById("soundfont"),
@@ -81,7 +84,9 @@ const elements = {
     dislike: document.getElementById("dislike"),
 };
 
-// every part's row of the mixer, by the part
+// the parts and drum groups muted or soloed here, which only this page hears, and every part's row of the mixer, by the part
+const muted = new Set();
+const soloed = new Set();
 const rows = new Map();
 
 // the settings every song is asked for with, and the one on the page heard with (song-settings.js): every value given,
@@ -230,7 +235,7 @@ function listen(player) {
     // a drum struck lifts its group's pulse, as loud as it is struck and its group plays, which one channel's level cannot tell apart
     player.onNoteOn((channel, note, velocity) => {
         const group = drumGroupOfNote.get(note);
-        if (channel !== channels.drum || group === undefined) return;
+        if (channel !== channels.drum || group === undefined || isGroupSilenced(group)) return;
         const hit = (velocity / 127) * (settings.drumGroups[group].volume / LAST_STEP);
         drumHits.set(group, Math.max(drumHits.get(group) ?? 0, hit));
     });
@@ -448,6 +453,7 @@ async function deliverPending() {
             pendingSwap = false;
             const loaded = player.nextSong();
             player.loadSong(song);
+            applyMuting(player);
             if (swap !== null) {
                 await loaded;
                 player.currentTime = swap.share * player.duration;
@@ -872,6 +878,11 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         songVersion = response.headers.get("X-Song-Version");
         elements.seed.value = songSeed;
 
+        // a new song is heard whole, a song made again as it was being heard
+        if (!isRemade) {
+            muted.clear();
+            soloed.clear();
+        }
         showSettings();
         showRating(recallRating(songVersion, currentSong()));
         rememberSong(isRemade ? undefined : isRolled);
@@ -1472,7 +1483,7 @@ const SCALE_ENDS = { tempo: ["Slow", "Fast"] };
 const PART_NAMES = { melody: "Melody", chords: "Chords", bass: "Bass", pad: "Pad", counterMelody: "Counter-melody", drum: "Drums", riff: "Riff", rhythm: "Rhythm", solo: "Soloist" };
 
 const DRUM_GROUP_NAMES = {
-    kick: "Kick", snare: "Snare", timekeepers: "Hi-hat and ride", toms: "Toms", accents: "Cymbals", percussion: "Percussion", calls: "Calls",
+    kick: "Kick", snare: "Snare", timekeepers: "Timekeepers", toms: "Toms", accents: "Cymbals", percussion: "Percussion", calls: "Calls",
 };
 
 
@@ -1498,8 +1509,8 @@ buildSettings();
 function buildSettings() {
     // in the order they are named, the key and the meter chosen from a list and every other on a slider
     elements.songSettings.append(...Object.keys(SETTING_NAMES).map((key) => (key === "key" || key === "meter" ? createChoiceRow(key) : createSettingRow(key))));
-    // the drums' groups under the drums, each with its pieces
-    elements.mixer.append(...PARTS.flatMap((part) => [createPartRow(part), ...(part === "drum" ? DRUM_GROUPS.map(createDrumGroupRow) : [])]));
+    // the drums last, their groups under them, each with its pieces
+    elements.mixer.append(...PARTS.filter((part) => part !== "drum").map(createPartRow), createPartRow("drum"), ...DRUM_GROUPS.map(createDrumGroupRow));
 
     showSettings();
     keepCurrentSettings();
@@ -1571,6 +1582,7 @@ async function listChoices() {
             groupRows.get(piece.group.toLowerCase()).chips.append(createDrumPieceChip(piece));
             for (const note of piece.notes) drumGroupOfNote.set(note, piece.group.toLowerCase());
         }
+        evenDrumGroupRows();
         showSettings();
         choiceRows.get("meter").select.append(...options.meters.map((x, i) => createOption(String(i), x)));
         showSetting("tempo");
@@ -1700,10 +1712,6 @@ function createPartRow(part) {
 
     const volume = createFader(`Volume of the ${name.toLowerCase()}`, (step) => setPartVolume(part, step));
     const pan = createFader(`Pan of the ${name.toLowerCase()}, from left to right`, (step) => setPartPan(part, { isGiven: true, value: step }), true);
-    const levels = document.createElement("div");
-    levels.className = "fader-pair";
-    // the drums sit in the middle, as a kit does
-    levels.append(...(part === "drum" ? [volume.field] : [volume.field, pan.field]));
 
     // every part a colour of its own, the same in every song, spread round the wheel
     const pulse = createPulse(Math.round((PARTS.indexOf(part) * 360) / PARTS.length));
@@ -1713,14 +1721,11 @@ function createPartRow(part) {
     heading.textContent = name;
 
     const row = document.createElement("tr");
-    const givenCell = document.createElement("td");
-    givenCell.append(given);
-    row.append(givenCell, heading, ...[plays, instrument, levels, pulse.canvas].map((x) => {
-        const cell = document.createElement("td");
-        cell.append(x);
-        return cell;
-    }));
-    rows.set(part, { row, given, plays, instrument, volume, pan, pulse });
+    row.className = "part";
+    // the drums sit in the middle, as a kit does, and have no pan
+    const [mute, solo] = createListening(part, name);
+    row.append(cellOf(given), heading, ...[plays, instrument, volume.field, part === "drum" ? null : pan.field, mute, solo, pulse.canvas].map(cellOf));
+    rows.set(part, { row, given, plays, instrument, volume, pan, mute, solo, pulse });
     return row;
 }
 
@@ -1766,23 +1771,16 @@ function toggleDrumPiece(piece) {
 function createDrumGroupRow(group) {
     const name = DRUM_GROUP_NAMES[group];
 
-    // the group's pieces, which come with the options the server lists
+    // the group's pieces, which come with the options the server lists, where a part has whether it plays and its instrument
     const chips = document.createElement("div");
     chips.className = "chips";
     chips.setAttribute("role", "group");
     chips.setAttribute("aria-label", `${name} pieces`);
-    const chipsCell = document.createElement("td");
-    chipsCell.colSpan = 2;
-    chipsCell.append(chips);
 
     const volume = createFader(`Volume of the ${name.toLowerCase()}`, (step) => (settings.drumGroups[group].volume = step), false, () => settingsChanged(true));
-    const volumeCell = document.createElement("td");
-    volumeCell.append(volume.field);
 
-    // the drums' colour, fanned a little from group to group, so that a group is told from the next and all are the drums'
-    const pulse = createPulse(Math.round((PARTS.indexOf("drum") * 360) / PARTS.length + (DRUM_GROUPS.indexOf(group) - 3) * 14));
-    const pulseCell = document.createElement("td");
-    pulseCell.append(pulse.canvas);
+    // every group a colour of its own, between the parts' round the wheel
+    const pulse = createPulse(Math.round(((DRUM_GROUPS.indexOf(group) + 0.5) * 360) / DRUM_GROUPS.length));
 
     const heading = document.createElement("th");
     heading.scope = "row";
@@ -1790,9 +1788,101 @@ function createDrumGroupRow(group) {
 
     const row = document.createElement("tr");
     row.className = "drum-group";
-    row.append(document.createElement("td"), heading, chipsCell, volumeCell, pulseCell);
-    groupRows.set(group, { row, volume, chips, pulse });
+    const [mute, solo] = createListening(`drums:${group}`, name);
+    const chipsCell = cellOf(chips);
+    chipsCell.colSpan = 2;
+    row.append(cellOf(null), heading, chipsCell, ...[volume.field, null, mute, solo, pulse.canvas].map(cellOf));
+    groupRows.set(group, { row, volume, chips, mute, solo, pulse });
     return row;
+}
+
+
+/**
+ *     A row's mute and solo, as icons pressed in, which only this page hears: a part's by its name, a drum group's as
+ *     "drums:" and its own.
+ */
+function createListening(key, name) {
+    const button = (label, icon, set) => {
+        const toggle = document.createElement("button");
+        toggle.type = "button";
+        toggle.className = "icon listen";
+        toggle.setAttribute("aria-pressed", "false");
+        toggle.setAttribute("aria-label", `${label} the ${name.toLowerCase()}`);
+        toggle.title = `${label} the ${name.toLowerCase()}, here only`;
+        toggle.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${icon}" /></svg>`;
+        toggle.addEventListener("click", () => {
+            if (set.has(key)) set.delete(key);
+            else set.add(key);
+            showListening();
+            applyMuting();
+            track("mix_changed", { detail: label.toLowerCase() });
+        });
+        return toggle;
+    };
+    return [button("Mute", MUTE_ICON, muted), button("Solo", SOLO_ICON, soloed)];
+}
+
+/** Every mute and solo pressed as it is. */
+function showListening() {
+    for (const [part, row] of rows) {
+        row.mute.setAttribute("aria-pressed", String(muted.has(part)));
+        row.solo.setAttribute("aria-pressed", String(soloed.has(part)));
+    }
+    for (const [group, row] of groupRows) {
+        row.mute.setAttribute("aria-pressed", String(muted.has(`drums:${group}`)));
+        row.solo.setAttribute("aria-pressed", String(soloed.has(`drums:${group}`)));
+    }
+}
+
+/**
+ *     Muted, or left out of a solo: a part where another is soloed and it is not, the drums with every group of theirs but
+ *     where one of their groups is soloed, as that solo is the drums'.
+ */
+function isSilenced(part) {
+    const soloedGroups = DRUM_GROUPS.some((group) => soloed.has(`drums:${group}`));
+    const isSoloed = soloed.has(part) || (part === "drum" && soloedGroups);
+    return muted.has(part) || (soloed.size > 0 && !isSoloed);
+}
+
+/** A drum group muted, or left out where another group of the drums is soloed, or with the drums silenced. */
+function isGroupSilenced(group) {
+    const key = `drums:${group}`;
+    const soloedGroups = DRUM_GROUPS.some((other) => soloed.has(`drums:${other}`));
+    return isSilenced("drum") || muted.has(key) || (soloedGroups && !soloed.has(key));
+}
+
+/** Puts the mutes and solos on the player: a part's channel, a drum group's notes on the drums'. */
+function applyMuting(on = null) {
+    const apply = (player) => {
+        for (const part of PARTS) for (const { channel } of channelsOf(part)) player.setChannelMuted(channel, isSilenced(part));
+        // a song's drums may be on another channel than the last's
+        player.unmuteNotes();
+        if (channels.drum == null) return;
+        for (const [note, group] of drumGroupOfNote) if (isGroupSilenced(group)) player.muteNote(channels.drum, note);
+    };
+    if (on !== null) apply(on);
+    else withPlayer(apply, "Could not silence the part");
+}
+
+/**
+ *     Every drum group's row as high as the highest, whose pieces take the most lines, so that the groups read as a block;
+ *     measured again when the page is narrowed or widened, and when the panel opens, as a closed one has no height.
+ */
+function evenDrumGroupRows() {
+    const groups = [...groupRows.values()].map((x) => x.row);
+    for (const row of groups) row.style.height = "";
+    const highest = Math.max(...groups.map((row) => row.getBoundingClientRect().height));
+    if (highest > 0) for (const row of groups) row.style.height = `${highest}px`;
+}
+
+window.addEventListener("resize", evenDrumGroupRows);
+document.getElementById("settings-panel").addEventListener("toggle", evenDrumGroupRows);
+
+/** A table cell holding a control, or nothing. */
+function cellOf(content) {
+    const cell = document.createElement("td");
+    if (content !== null) cell.append(content);
+    return cell;
 }
 
 /** A drum piece's switch in its group's row, in the song when pressed. */
@@ -1801,7 +1891,8 @@ function createDrumPieceChip(piece) {
     chip.type = "button";
     chip.className = "chip";
     chip.dataset.piece = piece.name;
-    chip.textContent = piece.label;
+    // its group's name left out of it, as its row says it: "Acoustic" among the snares
+    chip.textContent = piece.label.split(" ").filter((word) => word !== piece.group).join(" ") || piece.label;
     chip.setAttribute("aria-pressed", "false");
     chip.addEventListener("click", () => toggleDrumPiece(piece.name));
     return chip;
@@ -1869,6 +1960,7 @@ function showSettings() {
         }
     }
 
+    showListening();
     elements.songVolume.value = String(settings.volume);
     showSongVolume();
     elements.allOff.hidden = !isEveryPartOff(settings);

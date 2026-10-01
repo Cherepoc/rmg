@@ -597,10 +597,19 @@ input[type="range"] {
     font-size: 14px;
 }
 
-.fader-pair {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 12px;
+/* every part's row as high, a name on two lines among them, and every drum group's as high, its pieces on two lines */
+.mixer tr.part {
+    height: 48px;
+}
+
+/* a drum group's row as close as its pieces' lines allow, its height set to the highest group's (evenDrumGroupRows) */
+.mixer tr.drum-group > * {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.mixer tr.part th[scope="row"] {
+    line-height: 1.15;
 }
 
 /* a part or drum group the song on the page does not play, still set here for the songs after it */
@@ -666,7 +675,7 @@ input[type="range"] {
 }
 
 .mixer select {
-    width: 24ch;
+    width: 19ch;
     padding: 4px 8px;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -701,7 +710,7 @@ input[type="range"] {
 }
 
 .fader {
-    width: 90px;
+    width: 70px;
 }
 
 .percent {
@@ -726,18 +735,28 @@ input[type="range"] {
 .chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 2px;
 }
 
 .chip {
-    padding: 2px 8px;
+    padding: 1px 5px;
     border-radius: 999px;
-    font-size: 12px;
+    font-size: 11px;
 }
 
 .chip[aria-pressed="true"] {
     background: color-mix(in srgb, var(--accent) 30%, var(--panel));
     border-color: var(--accent);
+}
+
+/* a row's mute and solo, small among its controls, pressed in as the rating is */
+button.icon.listen {
+    padding: 4px;
+}
+
+button.icon.listen svg {
+    width: 15px;
+    height: 15px;
 }
 
 /* a part's pulse, in the square it ripples within */
