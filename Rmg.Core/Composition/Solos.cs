@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
+using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
@@ -76,6 +77,9 @@ internal static class Solos
     /// <summary>The chance a note of a soloist playing together with the first is left out, which tells their lines apart.</summary>
     public const double LeftOutChance = 0.2;
 
+    /// <summary>How much louder a soloist plays than the loudest part under it, on the average of their velocities as rendered.</summary>
+    public const double Margin = 0.06;
+
     /// <summary>An appearance's solo, drawn whatever it turns out to be, so that the draws stay as they are; none for no solo.</summary>
     /// <param name="index">The appearance's place among the song's sections; the first is never a solo.</param>
     /// <param name="parts">The parts the song has.</param>
@@ -107,7 +111,7 @@ internal static class Solos
     /// <summary>
     ///     The song with every pitched solo's line (<see cref="SoloLines" />) played by its soloists instead of the melody:
     ///     in turn by phrase, or together, the others a step away with some of its notes left out, each note a line's,
-    ///     whatever its part plays otherwise.
+    ///     whatever its part plays otherwise, and every soloist a margin over the loudest part playing under it.
     /// </summary>
     /// <param name="definitions">Every track's definition, the soloists' ranges.</param>
     /// <param name="soloists">Every part's soloist, whose vocabulary its solos are played in.</param>
@@ -148,17 +152,30 @@ internal static class Solos
             // a solo of one phrase is traded by its halves
             var turn = phrases > 1 ? span.Meter.PatternDuration : span.Meter.PatternDuration / 2;
 
+            // as loud as the band's loudest part there and a margin over it, the melody resting and the drums apart
+            var band = song.TrackTimelineMap
+                .Where(x => definitions[x.Key] is PitchInstrumentTrack && x.Key != trackOf[TrackRole.Melody] && !solo.Soloists.Any(s => trackOf[s] == x.Key))
+                .Select(x => Loudness(Realizer.GetNoteStates(x.Value, definitions[x.Key], song.CommonStateTimelineMap).Where(IsIn), 0))
+                .Where(x => !double.IsNaN(x))
+                .DefaultIfEmpty(0)
+                .Max();
             var moves = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>();
             foreach (var (soloist, place) in solo.Soloists.Select((x, i) => (x, i)))
             {
-                var notes = solo.Mode == SoloMode.Trading
-                    ? line.Where(x => (int)Math.Floor((x.Position - span.Start) / turn + 1e-9) % solo.Soloists.Length == place)
+                TimelineItem<StateMap>[] notes = solo.Mode == SoloMode.Trading
+                    ? [..line.Where(x => (int)Math.Floor((x.Position - span.Start) / turn + 1e-9) % solo.Soloists.Length == place)]
                     : place == 0
                         ? line
-                        : line.Where(_ => !context.TestProbability(LeftOutChance))
-                            .Select(x => x.Value.With(StateKinds.ScaleStep, x.Value.GetStateValue(StateKinds.ScaleStep) + solo.Step).With(StateKinds.Alteration, 0).ToTimelineItem(x.Position));
-                // at the lead's level, whatever its part's, as a pad that solos is not comping any more
-                var lift = VelocityLayers.GetLevel(TrackRole.Melody) - VelocityLayers.GetLevel(soloist);
+                        : [..line.Where(_ => !context.TestProbability(LeftOutChance))
+                            .Select(x => x.Value.With(StateKinds.ScaleStep, x.Value.GetStateValue(StateKinds.ScaleStep) + solo.Step).With(StateKinds.Alteration, 0).ToTimelineItem(x.Position))];
+                // over the band, however loud its part and its draws there, as a pad that solos is not comping any more
+                var track = song.TrackTimelineMap[trackOf[soloist]];
+                var heard = Realizer.GetNoteStates(
+                    EventStateTimelineMap.Create(song.Duration, EventTimeline.Create(song.Duration, notes), track.StateTimelineMap),
+                    definitions[trackOf[soloist]],
+                    song.CommonStateTimelineMap
+                ).ToArray();
+                var lift = Lift(heard, band + Margin);
                 TimelineItem<StateMap>[] played =
                 [
                     ..notes.Select(x => x.Value.With(CompositionStateKinds.LineSolo, 1)
@@ -176,4 +193,35 @@ internal static class Solos
 
         return song;
     }
+
+    /// <summary>The average velocity of notes as rendered, each moved by a lift; none where there are no notes.</summary>
+    private static double Loudness(IEnumerable<TimelineItem<StateMap>> notes, double lift) =>
+        notes.Select(x => Render.ToMidiVelocity(x.Value.GetStateValue(StateKinds.Velocity) + lift)).DefaultIfEmpty(double.NaN).Average();
+
+    /// <summary>
+    ///     How much the notes' velocities move so that their average as rendered is the loudness aimed at, or as near the
+    ///     loudest as a velocity is where it cannot be.
+    /// </summary>
+    private static double Lift(IReadOnlyList<TimelineItem<StateMap>> notes, double loudness)
+    {
+        if (notes.Count == 0)
+            return 0;
+
+        // the lift that renders the loudness aimed at, between a lift that renders less and one past any it can need
+        var (low, high) = (-LiftReach, LiftReach);
+        for (var i = 0; i < LiftSteps; i++)
+        {
+            var middle = (low + high) / 2;
+            if (Loudness(notes, middle) < loudness)
+                low = middle;
+            else
+                high = middle;
+        }
+
+        return high;
+    }
+
+    private const double LiftReach = 4;
+
+    private const int LiftSteps = 30;
 }

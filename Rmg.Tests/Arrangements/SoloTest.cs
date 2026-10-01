@@ -271,6 +271,51 @@ public sealed class SoloTest
         await Assert.That(above / (double)solos).IsGreaterThan(0.85);
     }
 
+    /// <summary>
+    ///     Every solo of one soloist in the songs: its soloist's average velocity there as rendered, and the loudest other
+    ///     pitched part's, the melody resting; a note of several pitches as loud as one, as its pitches are rendered the
+    ///     softer to sound so.
+    /// </summary>
+    private static (int Seed, TrackRole Soloist, double Solo, double Band)[] Loudness(IEnumerable<CorpusSong> songs) =>
+    [
+        ..songs.SelectMany(song => song.Solos.Where(x => !x.Value.IsDrumSolo && x.Value.Soloists.Length == 1).Select(x =>
+        {
+            var span = song.Map.Sections[x.Key];
+            var parts = song.Song.Notes!.Where(n => song.Song.TrackDefinitions[n.Key] is PitchInstrumentTrack)
+                .Select(n => (song.Song.TrackDefinitions[n.Key].Role, Loudness: n.Value.Where(v => v.Position >= span.Start - 1e-9 && v.Position < span.End - 1e-9)
+                    .Select(v => Rmg.Core.Rendering.Render.ToMidiVelocity(v.Value.Velocity)).DefaultIfEmpty(double.NaN).Average()))
+                .Where(n => !double.IsNaN(n.Loudness))
+                .ToArray();
+            var solo = parts.Where(n => n.Role == x.Value.Soloists[0]).Select(n => n.Loudness).DefaultIfEmpty(double.NaN).First();
+            var band = parts.Where(n => n.Role != x.Value.Soloists[0]).Select(n => n.Loudness).DefaultIfEmpty(0).Max();
+            return (song.Seed, x.Value.Soloists[0], solo, band);
+        }).Where(x => !double.IsNaN(x.solo)))
+    ];
+
+    [Test]
+    public async Task ALoneSoloist_PlaysAtLeastAsLoudAsTheLoudestOfItsBand()
+    {
+        var solos = Loudness(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 0.5))));
+
+        await Assert.That(solos.Length).IsGreaterThan(20);
+        foreach (var (seed, soloist, solo, band) in solos)
+            await Assert.That(solo).IsGreaterThanOrEqualTo(band).Because($"seed {seed}, {soloist}");
+    }
+
+    /// <summary>How loud a lone soloist plays over the loudest part of its band, as rendered, over the corpus.</summary>
+    [Test]
+    [Explicit]
+    public async Task LoudnessReport()
+    {
+        var solos = Loudness(TestCorpus.Range(1024));
+        Console.WriteLine($"{solos.Length} solos of one soloist: the soloist {solos.Average(x => x.Solo):F3}, the band's loudest part {solos.Average(x => x.Band):F3}, " +
+                          $"the soloist the quieter {solos.Count(x => x.Solo < x.Band) / (double)solos.Length:P0}, by 0.05 or more {solos.Count(x => x.Solo < x.Band - 0.05) / (double)solos.Length:P0}, " +
+                          $"the most {solos.Max(x => x.Band - x.Solo):+0.000;-0.000}");
+        foreach (var g in solos.GroupBy(x => x.Soloist).OrderByDescending(g => g.Count()))
+            Console.WriteLine($"  {g.Key}: {g.Count()}, {g.Average(x => x.Solo - x.Band):+0.000;-0.000} over the band");
+        await Task.CompletedTask;
+    }
+
     [Test]
     public async Task TheCounterMelodyAndThePad_MakeRoomForASolo()
     {

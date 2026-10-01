@@ -96,7 +96,8 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
   or seven heard as a grouping or as stumbling? Is the intensity's arc heard, its jumps a soloist's or random? A pause
   is 17 to 20% of the segments: too many breaths? A middling solo plays 2.1 notes a beat, two thirds of its runs at
   16ths or faster, the rest slowed by its stamina: busy enough, or should the stamina be longer? Its notes of an 8th or
-  longer: 59% with a vibrato, 16% bent, 3% a wide vibrato: too few wide ones? Since no part bends or slides a note shorter than an 8th, slides
+  longer: 59% with a vibrato, 16% bent, 3% a wide vibrato: too few wide ones? A soloist plays 0.06 of velocity over
+  the band's loudest part: heard over it, a quiet instrument such as a flute too? Since no part bends or slides a note shorter than an 8th, slides
   are 44% of the corpus's pitch shapes against bends' 56%: too many slides? A soloist chooses to bend and to sing a
   vibrato itself, the band the song's way: 85% of guitar and synth lead solos bend, 54% of the other instruments' that
   can: a straight band under a bending lead heard as meant? The drum solos: do the shapes sound like a drummer's
@@ -434,7 +435,8 @@ and slides, is `Expression`'s (see *Listening*).
   soloist's facet, runs the heavier from the middle out, and picked by its intensity there, a run leaning to the
   faster speeds; a soloist's held notes bent at its own rate and sung with a vibrato from half a beat; on the melody near the plain end, its own over the chords at the wild; runs of the soloist's cells
   in its shapes, grouped, accented, going on over the bar lines, as fast as 64ths at the wild end for as long as the
-  soloist's stamina, a burst or bars of it; the counter-melody and the pad resting for it (`SoloTest`, `SoloistTest`).
+  soloist's stamina, a burst or bars of it; the counter-melody and the pad resting for it; every soloist a margin
+  over the loudest part under it, whatever their draws (`SoloTest`, `SoloistTest`).
   Left (P3): **motifs,** a phrase answering the one before with its opening cell moved up or down, as call and
   response, a phrase's motif carried on to the next as state; **the solo part answering the
   melody** outside its solos, in the melody's gaps, as a guitarist fills between a singer's phrases; **the role,**
