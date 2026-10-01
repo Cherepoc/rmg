@@ -38,10 +38,10 @@ public enum StrongEffect
 ///     from side to side; a lead's echo, its notes repeated quieter after it, as a delay pedal plays; and every part's
 ///     reverb and chorus. Decided once a song's notes are, by the song's sound facet: first which effects the song plays
 ///     at all, the gentle ones, a vibrato, a chorus, a swell and bends, each of its own, and of the strong ones, a tremolo,
-///     an echo and a sweep, one at most, from a sequence of the song's; then which of them each part plays, from a
-///     sequence of the part's, the gentle ones together as they come and the strong one by the parts it suits the
-///     likelier; and a note's bend from its section's, by the section's. The plainest songs play a reverb alone, and the
-///     wildest every gentle effect, and one strong one, on some of their parts.
+///     an echo and a sweep, one at most, and the one part that plays it, the likelier one it suits, from a sequence of the
+///     song's; then which of the gentle ones each part plays, together as they come, from a sequence of the part's; and a
+///     note's bend from its section's, by the section's. The plainest songs play a reverb alone, and the wildest every
+///     gentle effect on some of their parts, and one strong one on one.
 /// </summary>
 internal static class Expression
 {
@@ -66,6 +66,9 @@ internal static class Expression
         _ => false
     };
 
+    /// <summary>Whether a part plays lines, single notes one after another, rather than chords or drums.</summary>
+    private static bool IsLineRole(TrackRole role) => !role.PlaysChords() && role is not (TrackRole.Pad or TrackRole.Drum);
+
     /// <summary>The chances a song plays each gentle effect at all, on whichever of its parts take it.</summary>
     public static ByConvention SongVibratoChance { get; } = new(0, 0.7, 1);
 
@@ -85,12 +88,10 @@ internal static class Expression
     ];
 
     /// <summary>
-    ///     The chance a part that may plays the song's strong effect, one it suits the likelier: a share of the parts even
-    ///     in the wildest song, which plays the effect every time but not everywhere.
+    ///     How much likelier a part the song's strong effect suits is to be the one that plays it than any other that may:
+    ///     an echo goes to a line, and a tremolo and a sweep to any pitched part.
     /// </summary>
-    public static ByConvention SuitedStrongChance { get; } = new(0, 0.4, 0.6);
-
-    public static ByConvention StrongChance { get; } = new(0, 0.1, 0.25);
+    public const double SuitedStrongWeight = 4;
 
     /// <summary>The chance a part that can sings a vibrato where the song does, on its long notes.</summary>
     public static ByConvention VibratoChance { get; } = new(0, 0.6, 0.9);
@@ -170,6 +171,13 @@ internal static class Expression
         var songBends = songStream.TestProbability(SongBendChance.At(songSound));
         var strong = songStream.Pick(ByConvention.Weigh(StrongEffects, songSound));
 
+        // and the one part that plays the strong effect, the likelier one it suits, if any part may
+        var mayCarry = notes
+            .Where(x => x.Value.Count > 0 && definitions[x.Key] is PitchInstrumentTrack && (strong != StrongEffect.Echo || IsLineRole(definitions[x.Key].Role)))
+            .Select(x => new Weighted<int>(Suits(strong, definitions[x.Key].Role, ((PitchInstrumentTrack)definitions[x.Key]).InstrumentCode) ? SuitedStrongWeight : 1, x.Key))
+            .ToImmutableArray();
+        var carrier = strong != StrongEffect.None && !mayCarry.IsEmpty ? songStream.Pick(mayCarry) : -1;
+
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
         {
@@ -200,7 +208,7 @@ internal static class Expression
             var vibrato = part.Pick(ByConvention.Weigh(Vibratos, songSound));
             var swells = part.TestProbability((role == TrackRole.Pad ? PadSwellChance : SwellChance).At(songSound)) & songSwell;
             var bendsHere = part.TestProbability(PartBendChance.At(songSound)) & songBends;
-            var carries = part.TestProbability((Suits(strong, role, program) ? SuitedStrongChance : StrongChance).At(songSound));
+            var carries = track == carrier;
             var tremoloDepth = 30 + part.GenerateInt(0, 40);
             var sweepDepth = 40 + part.GenerateInt(0, 60);
             var tremolo = carries && strong == StrongEffect.Tremolo ? tremoloDepth : 0;
@@ -223,7 +231,7 @@ internal static class Expression
                     var note = timeline[i];
 
                     var noteProgram = note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : program;
-                    var isLine = note.Value.Pitches.Length == 1 && !role.PlaysChords() && role is not (TrackRole.Pad or TrackRole.Drum)
+                    var isLine = note.Value.Pitches.Length == 1 && IsLineRole(role)
                                  || note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1;
                     var bends = bendsHere && isLine && Bends(noteProgram);
                     var isSolo = note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1;

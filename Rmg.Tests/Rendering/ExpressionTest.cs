@@ -23,18 +23,19 @@ public sealed class ExpressionTest
     }
 
     [Test]
-    public async Task TheWildestSongs_PlayOneStrongEffect_OnSomeParts_AndTheGentleOnes_Together()
+    public async Task TheWildestSongs_PlayOneStrongEffect_OnOnePart_AndTheGentleOnes_Together()
     {
         var wild = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => PartEffects(TestCorpus.Get(seed, Sound(1))));
         var strong = Effects.Select((e, i) => (e, i)).Where(x => x.e.IsStrong).Select(x => x.i).ToArray();
         var gentle = Effects.Select((e, i) => (e, i)).Where(x => !x.e.IsStrong).Select(x => x.i).ToArray();
 
         foreach (var song in wild)
+        {
             await Assert.That(strong.Count(i => song.Any(p => p[i]))).IsLessThanOrEqualTo(1);
+            await Assert.That(song.Count(p => strong.Any(i => p[i]))).IsLessThanOrEqualTo(1);
+        }
 
-        // the strong effect on a share of the parts, never on all of them in every song
-        await Assert.That(wild.Count(song => strong.Any(i => song.Any(p => p[i])))).IsGreaterThan(wild.Length / 2);
-        await Assert.That(wild.SelectMany(x => x).Count(p => strong.Any(i => p[i]))).IsLessThan(wild.Sum(x => x.Length) * 2 / 3);
+        await Assert.That(wild.Count(song => strong.Any(i => song.Any(p => p[i])))).IsGreaterThan(wild.Length * 3 / 4);
         await Assert.That(wild.SelectMany(x => x).Any(p => gentle.Count(i => p[i]) >= 2)).IsTrue();
     }
 
@@ -68,7 +69,8 @@ public sealed class ExpressionTest
     /// <summary>
     ///     How much of each effect the songs play, by fifths of their sound facet and at its ends given: the share of songs
     ///     that play it anywhere and of pitched parts that do, how many kinds of the gentle effects and of the strong ones a
-    ///     song plays, the most strong ones any song does, and how many strong ones a pitched part plays.
+    ///     song plays, the most strong ones any song does, how many strong ones a pitched part plays, and how many parts of a
+    ///     song play one.
     /// </summary>
     [Test]
     [Explicit]
@@ -82,10 +84,12 @@ public sealed class ExpressionTest
         {
             var songs = band.Select(x => x.Parts).ToArray();
             var parts = songs.SelectMany(x => x).ToArray();
+            int StrongParts(bool[][] song) => song.Count(p => Effects.Select((e, i) => (e, i)).Any(x => x.e.IsStrong && p[x.i]));
             int Kinds(bool[][] song, bool isStrong) => Effects.Select((e, i) => (e, i)).Count(x => x.e.IsStrong == isStrong && song.Any(p => p[x.i]));
             var shares = Effects.Select((e, i) => $"{e.Name} {songs.Count(x => x.Any(p => p[i])) / (double)songs.Length:P0}/{parts.Count(p => p[i]) / (double)parts.Length:P0}");
             Console.WriteLine($"  {band.Key}, {songs.Length} songs: {string.Join(", ", shares)}; kinds a song: gentle {songs.Average(x => Kinds(x, false)):F1}, " +
-                              $"strong {songs.Average(x => Kinds(x, true)):F2}, at most {songs.Max(x => Kinds(x, true))}; strong a part {parts.Average(p => Effects.Select((e, i) => (e, i)).Count(x => x.e.IsStrong && p[x.i])):F2}");
+                              $"strong {songs.Average(x => Kinds(x, true)):F2}, at most {songs.Max(x => Kinds(x, true))}; strong a part {parts.Average(p => Effects.Select((e, i) => (e, i)).Count(x => x.e.IsStrong && p[x.i])):F2}; " +
+                              $"parts with a strong one a song {songs.Average(StrongParts):F2}, at most {songs.Max(StrongParts)}");
         }
 
         await Task.CompletedTask;
