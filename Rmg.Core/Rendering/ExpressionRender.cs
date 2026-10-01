@@ -72,6 +72,7 @@ internal static class ExpressionRender
             // a line's bend and vibrato, from its start to its end, and the pitch back where it was
             var pitch = note.Value.Pitches[0];
             var bend = (BendKind)state.GetStateValue(CompositionStateKinds.Bend);
+            var depth = state.GetStateValue(CompositionStateKinds.BendDepth);
             var vibrato = state.GetStateValue(CompositionStateKinds.Vibrato);
             if (bend != BendKind.None || vibrato > 0)
             {
@@ -82,10 +83,10 @@ internal static class ExpressionRender
                     var share = t / duration;
                     var semitones = bend switch
                     {
-                        BendKind.Scoop => Math.Min(0, -2 + 2 * t / Math.Min(0.25, duration / 3)),
+                        BendKind.Scoop => depth * Math.Max(0, 1 - t / Math.Min(0.25, duration / 3)),
                         BendKind.Slide => slideFrom * Math.Max(0, 1 - t / Math.Min(0.25, duration / 3)),
-                        BendKind.BendAndRelease => 2 * Math.Sin(Math.PI * share),
-                        BendKind.FallOff => share < 0.75 ? 0 : -3 * (share - 0.75) / 0.25,
+                        BendKind.BendAndRelease => depth * Math.Sin(Math.PI * share),
+                        BendKind.FallOff => share < 0.75 ? 0 : depth * (share - 0.75) / 0.25,
                         _ => 0
                     };
                     // a vibrato grows in after the attack, from a third of the note to its middle

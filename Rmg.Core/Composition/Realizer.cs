@@ -13,7 +13,7 @@ namespace Rmg.Core.Composition;
 /// </summary>
 internal static class Realizer
 {
-    private const int OctaveNoteCount = 12;
+    internal const int OctaveNoteCount = 12;
     private const int ZeroOctaveOffset = 5;
 
     // drum sounds are mostly one-shots that play out whatever the note length, so every drum note is a sixteenth

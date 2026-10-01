@@ -51,6 +51,9 @@ internal static class CompositionStateKinds
     // than the send, and chorus, from 0 to 127
     public static StateKind<int> Vibrato { get; } = StateKinds.CreateAdditive<int>(Prefix + "Vibrato", StateScope.Render);
     public static StateKind<int> Bend { get; } = StateKinds.CreateAdditive<int>(Prefix + "Bend", StateScope.Render);
+
+    // how far a bend goes, in semitones, up or down, to the scale note its size in scale steps reaches
+    public static StateKind<int> BendDepth { get; } = StateKinds.CreateAdditive<int>(Prefix + "BendDepth", StateScope.Render);
     public static StateKind<int> Swell { get; } = StateKinds.CreateAdditive<int>(Prefix + "Swell", StateScope.Render);
     public static StateKind<int> Tremolo { get; } = StateKinds.CreateAdditive<int>(Prefix + "Tremolo", StateScope.Render);
     public static StateKind<int> AutoPan { get; } = StateKinds.CreateAdditive<int>(Prefix + "AutoPan", StateScope.Render);

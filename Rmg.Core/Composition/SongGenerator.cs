@@ -330,6 +330,7 @@ public static class SongGenerator
             songUnconventionality[Facet.Sound],
             Stream(SongStream.Effects),
             [..sections.Select(x => x.Facets[Facet.Sound])],
+            energies,
             track => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.PartSound), track)),
             (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Expression), section), track))
         );

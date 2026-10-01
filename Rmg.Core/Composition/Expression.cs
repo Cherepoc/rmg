@@ -108,6 +108,27 @@ internal static class Expression
 
     public static ByConvention BendChance { get; } = new(0, 0.03, 0.5);
 
+    /// <summary>
+    ///     A bend's size, in scale steps, so that it starts and ends on scale notes: a step the plainest, two the wilder, at
+    ///     most four semitones, beyond which it would be a slide.
+    /// </summary>
+    public static ImmutableArray<(int Steps, ByConvention Weight)> BendSizes { get; } =
+    [
+        (1, new ByConvention(1, 0.85, 0.5)),
+        (2, new ByConvention(0, 0.15, 0.5))
+    ];
+
+    /// <summary>
+    ///     How far a part's strength, its lean to the bigger sizes, strays from the middle, by the song's sound facet: parts
+    ///     alike in a plain song, and some bending far and some barely in a wild one.
+    /// </summary>
+    public static ByConvention StrengthSpread { get; } = new(0, 0.5, 1);
+
+    /// <summary>The odds of the bigger size at a strength of 1, and how far a section's energy leans the sizes the same way.</summary>
+    public const double StrengthOdds = 8;
+
+    public const double SizeCoupling = 0.3;
+
     public static ImmutableArray<(BendKind Kind, ByConvention Weight)> BendKinds { get; } =
     [
         (BendKind.Scoop, new ByConvention(1, 0.4, 1)),
@@ -120,6 +141,26 @@ internal static class Expression
     public static ByConvention PadSwellChance { get; } = new(0, 0.5, 0.9);
 
     public static ByConvention SwellChance { get; } = new(0, 0.05, 0.3);
+
+    /// <summary>
+    ///     The semitones from a note to the scale note the given scale steps above it, or below for fewer than none, by
+    ///     the scale at the note, as its line was placed in: a note off the scale counts the nearest scale note beyond it as
+    ///     its first step.
+    /// </summary>
+    internal static int ScaleDistance(RealizedNote note, int steps)
+    {
+        var (offsets, _, chord) = Realizer.GetChord(note.State);
+        var classes = Enumerable.Range(0, offsets.Length).Select(i => chord.GetPitch(i).Mod(Realizer.OctaveNoteCount)).ToHashSet();
+        var (direction, found, distance) = (Math.Sign(steps), 0, 0);
+        while (found < Math.Abs(steps))
+        {
+            distance += direction;
+            if (classes.Contains((note.Pitches[0] + distance).Mod(Realizer.OctaveNoteCount)))
+                found++;
+        }
+
+        return distance;
+    }
 
     /// <summary>The delays an echo repeats after, in beats: a dotted 8th, a quarter, an 8th.</summary>
     public static ImmutableArray<double> EchoDelays { get; } = [0.75, 1, 0.5];
@@ -151,6 +192,7 @@ internal static class Expression
     /// <param name="songSound">The song's sound facet, which the song's effects and a part's lean by.</param>
     /// <param name="songStream">The song's sequence, which the effects it plays at all are drawn from.</param>
     /// <param name="sound">Every section's sound facet, by its place among the song's sections.</param>
+    /// <param name="energies">Every section's energy, by its place, which leans its bends' sizes.</param>
     /// <param name="partStreams">A part's sequence for the whole song, by its track.</param>
     /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
     public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Apply(
@@ -160,6 +202,7 @@ internal static class Expression
         double songSound,
         IGenerationContext songStream,
         IReadOnlyList<double> sound,
+        IReadOnlyList<double> energies,
         Func<int, IGenerationContext> partStreams,
         Func<int, int, IGenerationContext> streams
     )
@@ -222,12 +265,17 @@ internal static class Expression
             var reverb = (int)Math.Round(Reverb(role) + ReverbSpread.At(songSound) * (part.GenerateDouble() * 127 - Reverb(role)));
             var choruses = part.TestProbability((ChorusesClassically(program) ? ClassicChorusChance : ChorusChance).At(songSound)) & songChorus;
             var chorus = 40 + part.GenerateInt(0, 60);
+            // how much the part leans to the bigger sizes, around 0
+            var strength = StrengthSpread.At(songSound) * Generators.SplineValue()(part);
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
                 var context = streams(span.SectionId, track);
                 var u = sound[index];
                 var bendChance = BendChance.At(u);
                 var bendKinds = ByConvention.Weigh(BendKinds, u);
+                // the part's strength and the section's energy, as one lean to the bigger sizes
+                var sizes = new Tilt(Tilt.Of(StrengthOdds, strength).LogOdds + SectionEnergy.Tilt(energies[index], SizeCoupling).LogOdds)
+                    .Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1);
 
                 // the notes in the section, in order, the timeline's being
                 for (var i = first(span.Start); i < timeline.Count && timeline[i].Position < span.End - 1e-9; i++)
@@ -243,13 +291,19 @@ internal static class Expression
                     // every note draws whether it bends, and how, so that the draws stay as they are
                     var bendsNow = context.TestProbability(Math.Min(1, bendChance * (isSolo ? 3 : 1)));
                     var kind = context.Pick(bendKinds);
+                    var size = context.Pick(sizes);
                     var state = note.Value.State
                         .With(CompositionStateKinds.Reverb, reverb + 1)
                         .With(CompositionStateKinds.Chorus, choruses && Choruses(noteProgram) ? chorus : 0);
                     if (vibrates && isLine && Bends(noteProgram) && note.Value.Duration >= 1)
                         state = state.With(CompositionStateKinds.Vibrato, vibrato);
                     if (bends && bendsNow)
-                        state = state.With(CompositionStateKinds.Bend, (int)kind);
+                        state = state.With(CompositionStateKinds.Bend, (int)kind).With(CompositionStateKinds.BendDepth, kind switch
+                        {
+                            BendKind.BendAndRelease => ScaleDistance(note.Value, size),
+                            BendKind.Scoop or BendKind.FallOff => ScaleDistance(note.Value, -size),
+                            _ => 0
+                        });
                     if (swells && note.Value.Duration >= 1)
                         state = state.With(CompositionStateKinds.Swell, 1);
                     if (role != TrackRole.Drum)
