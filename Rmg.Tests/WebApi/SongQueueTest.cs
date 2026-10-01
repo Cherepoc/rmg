@@ -85,9 +85,11 @@ public sealed class SongQueueTest
 
     // a turn is handed over on another thread, so one given is waited for, generously, and one waiting is still so a
     // moment later
+    // a turn arriving within ten seconds: given in milliseconds, its continuation may wait for a thread while the rest of
+    // the suite keeps every core busy
     private static async Task<bool> IsGiven(Task<SongQueue.Turn> turn)
     {
-        return await Task.WhenAny(turn, Task.Delay(5000)) == turn;
+        return await Task.WhenAny(turn, Task.Delay(10_000)) == turn;
     }
 
     private static async Task<bool> IsWaiting(Task<SongQueue.Turn> turn)
