@@ -18,9 +18,10 @@ public sealed class GivenTempoKeyMeterTest
     [Test]
     public async Task AGivenTempoKeyAndMeter_AreTheSongs()
     {
-        var song = TestCorpus.Get(3, new SongOverrides(Tempo: 0, Key: 7, MeterOption: 2));
+        // a tempo the song never draws, as given
+        var song = TestCorpus.Get(3, new SongOverrides(Tempo: 0.5, Key: 7, MeterOption: 2));
 
-        await Assert.That(Start(song).GetStateValue(StateKinds.Tempo)).IsEqualTo(SongGenerator.TempoOptions[0]);
+        await Assert.That(Start(song).GetStateValue(StateKinds.Tempo)).IsEqualTo(0.5);
         await Assert.That(Start(song).GetStateValue(StateKinds.KeyOffset)).IsEqualTo(7);
         await Assert.That(Meter.OptionOf(song.Map.Meter)).IsEqualTo(2);
     }
@@ -32,7 +33,7 @@ public sealed class GivenTempoKeyMeterTest
         {
             var drawn = TestCorpus.Get(seed);
             var given = TestCorpus.Get(seed, new SongOverrides(
-                Tempo: SongGenerator.TempoOptions.IndexOf(Start(drawn).GetStateValue(StateKinds.Tempo)),
+                Tempo: Start(drawn).GetStateValue(StateKinds.Tempo),
                 Key: Start(drawn).GetStateValue(StateKinds.KeyOffset),
                 MeterOption: Meter.OptionOf(drawn.Map.Meter)
             ));

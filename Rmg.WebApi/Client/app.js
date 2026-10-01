@@ -53,9 +53,6 @@ const elements = {
     settingsState: document.getElementById("settings-state"),
     allOff: document.getElementById("all-off"),
     songSettings: document.getElementById("song-settings"),
-    harmonySettings: document.getElementById("harmony-settings"),
-    melodySettings: document.getElementById("melody-settings"),
-    soundSettings: document.getElementById("sound-settings"),
     drumSettings: document.getElementById("drum-settings"),
     drumGroups: document.getElementById("drum-groups"),
     seedInput: document.getElementById("seed-input"),
@@ -1448,18 +1445,25 @@ elements.volume.addEventListener("input", async () => {
 // --- the settings ----------------------------------------------------------
 
 /** What every value is called on the page, and what it moves, by its key: the unconventionality or a facet. */
+// every value's name and what it does, which is shown under the pointer rather than taking a line of its own
 const SETTING_NAMES = {
-    unconventionality: ["How plain or experimental", "everything below strays around it"],
-    feel: ["Feel", "meter, tuplets, swing and tempo changes"],
-    form: ["Form", "form, arrangement and solos"],
-    scale: ["Scale", "modes, key changes and line scales"],
-    progression: ["Progression", "how freely the chords move"],
-    chords: ["Chords", "colours and voicings"],
-    melody: ["Melody", "its lines and the soloists"],
-    sound: ["Sound", "instruments over the song, articulation, bends and effects"],
-    groove: ["Groove", "the drums' patterns"],
-    fills: ["Fills", "the drums' fills and solos"],
+    unconventionality: ["How experimental", "How far the whole song strays from convention. Every facet below is drawn around it, so that a song can be plain in one way and wild in another; a facet given is set outright."],
+    tempo: ["Tempo", "The song's tempo, in beats a minute: 60 at the left, 120 in the middle and 240 at the right. Its sections may change it, as its feel allows, and an ending may slow it."],
+    key: ["Key", "The key the song starts in. Its key changes, as its scale allows, move on from it."],
+    meter: ["Meter", "The beats of the first section's bars. Its later sections may change the meter, as its feel allows."],
+    feel: ["Feel", "How the time moves: odd meters and meter changes, tuplets and polymeters, swing, and tempo changes between sections."],
+    form: ["Form", "How the song is put together: its sections and their order, which parts play where, and its solos."],
+    scale: ["Scale", "The notes the song draws on: modes beyond major and minor, key changes, and the scales its lines take."],
+    progression: ["Progression", "How freely the chords move, from the common progressions to ones that wander."],
+    chords: ["Chords", "The chords' colours, from plain triads to extended and altered ones, and how they are voiced."],
+    melody: ["Melody", "How the lines move, their leaps, rhythms and ranges, and how freely the soloists play."],
+    sound: ["Sound", "The instruments over the song, and how they play: articulation, bends and effects."],
+    groove: ["Groove", "The drums' patterns, from the common beats to unusual ones."],
+    fills: ["Fills", "The drums' fills between phrases and sections, and their solos."],
 };
+
+// a slider's two ends, where they are not the plain and the experimental
+const SCALE_ENDS = { tempo: ["Slow", "Fast"] };
 
 const PART_NAMES = { melody: "Melody", chords: "Chords", bass: "Bass", pad: "Pad", counterMelody: "Counter-melody", drum: "Drums", riff: "Riff", rhythm: "Rhythm", solo: "Soloist" };
 
@@ -1474,8 +1478,11 @@ const INSTRUMENT_NAMES = INSTRUMENT_FAMILIES.flatMap((family) => family.instrume
 
 const KEY_NAMES = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
 
-// every choice's row, by its key: the tempo, the key and the meter, listed as the server lists them
+// every choice's row, by its key: the key and the meter, listed as the server lists them
 const choiceRows = new Map();
+
+// the tempos a song may be given, in beats a minute, by their steps, as the server lists them
+let tempos = [];
 
 // every value's row, by its key, and every drum group's
 const settingRows = new Map();
@@ -1489,18 +1496,9 @@ buildSettings();
 
 /** The settings panel: the values that change the song, every part's row of the mixer, and the drums'. */
 function buildSettings() {
-    elements.songSettings.append(
-        createSettingRow("unconventionality"),
-        createChoiceRow("tempo", "Tempo", "beats a minute, the first section's"),
-        createChoiceRow("key", "Key", "the key it starts in"),
-        createChoiceRow("meter", "Meter", "the beats of a bar, the first section's"),
-        createSettingRow("feel"),
-        createSettingRow("form"),
-    );
-    elements.harmonySettings.append(createSettingRow("scale"), createSettingRow("progression"), createSettingRow("chords"));
-    elements.melodySettings.append(createSettingRow("melody"));
-    elements.soundSettings.append(createSettingRow("sound"));
-    elements.drumSettings.append(createSetupRow(), createSettingRow("groove"), createSettingRow("fills"));
+    // in the order they are named, the key and the meter chosen from a list and every other on a slider
+    elements.songSettings.append(...Object.keys(SETTING_NAMES).map((key) => (key === "key" || key === "meter" ? createChoiceRow(key) : createSettingRow(key))));
+    elements.drumSettings.append(createSetupRow());
     elements.mixer.append(...PARTS.map(createPartRow));
     elements.drumGroups.append(...DRUM_GROUPS.map(createDrumGroupRow));
 
@@ -1519,20 +1517,16 @@ function setSetting(key, setting) {
 }
 
 /**
- *     A value that changes the song and is one of a list, the tempo, the key or the meter: checked, it is given, and the
- *     list sets it; unchecked, the list shows what the song on the page drew.
+ *     A value that changes the song and is one of a list, the key or the meter: checked, it is given, and the list sets
+ *     it; unchecked, the list shows what the song on the page drew.
  */
-function createChoiceRow(key, name, hint) {
-    const given = document.createElement("input");
-    given.type = "checkbox";
-    given.setAttribute("aria-label", `Give the ${name.toLowerCase()}`);
+function createChoiceRow(key) {
+    const [name, description] = SETTING_NAMES[key];
+    const given = createGiven(name);
 
     const label = document.createElement("span");
     label.className = "setting-name";
     label.textContent = name;
-    const explained = document.createElement("small");
-    explained.textContent = hint;
-    label.append(explained);
 
     const select = document.createElement("select");
     select.setAttribute("aria-label", name);
@@ -1549,8 +1543,10 @@ function createChoiceRow(key, name, hint) {
         settingsChanged(true);
     });
 
+    select.setAttribute("aria-description", description);
     const row = document.createElement("div");
     row.className = "setting";
+    row.title = description;
     row.append(given, label, select);
     choiceRows.set(key, { given, select });
     return row;
@@ -1570,10 +1566,10 @@ async function listChoices() {
         const response = await fetch(new URL("api/songs/options", location.href));
         if (!response.ok) return;
 
-        const { tempos, meters } = await response.json();
-        choiceRows.get("tempo").select.append(...tempos.map((x, i) => createOption(String(i), `${Math.round(x)}`)));
-        choiceRows.get("meter").select.append(...meters.map((x, i) => createOption(String(i), x)));
-        showChoice("tempo");
+        const options = await response.json();
+        tempos = options.tempos;
+        choiceRows.get("meter").select.append(...options.meters.map((x, i) => createOption(String(i), x)));
+        showSetting("tempo");
         showChoice("meter");
     } catch {
         // without the lists, the tempo and the meter are the songs' own
@@ -1602,20 +1598,23 @@ function toMidiPan(step) {
  *     A value that changes the song: checked, it is given, and the slider sets it; unchecked, the slider shows what the
  *     song on the page drew. A change asks for the song again once the slider is let go of.
  */
-function createSettingRow(key) {
-    const [name, hint] = SETTING_NAMES[key];
-    const isBase = key === "unconventionality";
-
+/** Whether a value is given, rather than shown as the song drew it. */
+function createGiven(name) {
     const given = document.createElement("input");
     given.type = "checkbox";
     given.setAttribute("aria-label", `Give the ${name.toLowerCase()}`);
+    given.title = "Checked, it is given; unchecked, it shows what the song drew";
+    return given;
+}
+
+function createSettingRow(key) {
+    const [name, description] = SETTING_NAMES[key];
+    const [low, high] = SCALE_ENDS[key] ?? ["Plain", "Experimental"];
+    const given = createGiven(name);
 
     const label = document.createElement("span");
     label.className = "setting-name";
     label.textContent = name;
-    const explained = document.createElement("small");
-    explained.textContent = hint;
-    label.append(explained);
 
     const range = document.createElement("input");
     range.type = "range";
@@ -1623,16 +1622,17 @@ function createSettingRow(key) {
     range.min = "0";
     range.max = String(LAST_STEP);
     range.step = "1";
-    range.setAttribute("aria-label", `${name}, from ${isBase ? "plainest" : "plain"} to ${isBase ? "most experimental" : "experimental"}`);
+    range.setAttribute("aria-label", `${name}, from ${low.toLowerCase()} to ${high.toLowerCase()}`);
+    range.setAttribute("aria-description", description);
 
     const plain = document.createElement("span");
     plain.className = "end";
     plain.setAttribute("aria-hidden", "true");
-    plain.textContent = isBase ? "Plainest" : "Plain";
+    plain.textContent = low;
     const experimental = document.createElement("span");
     experimental.className = "end";
     experimental.setAttribute("aria-hidden", "true");
-    experimental.textContent = isBase ? "Most experimental" : "Experimental";
+    experimental.textContent = high;
 
     const output = document.createElement("output");
     output.className = "percent";
@@ -1650,6 +1650,7 @@ function createSettingRow(key) {
 
     const row = document.createElement("div");
     row.className = "setting";
+    row.title = description;
     const slider = document.createElement("span");
     slider.className = "setting-slider";
     slider.append(plain, range, experimental, output);
@@ -1664,7 +1665,7 @@ function showSetting(key) {
     row.given.checked = setting.isGiven;
     row.range.disabled = !setting.isGiven;
     row.range.value = String(setting.value);
-    row.output.textContent = formatPercent(setting.value / LAST_STEP);
+    row.output.textContent = key !== "tempo" ? formatPercent(setting.value / LAST_STEP) : tempos.length > 0 ? `${Math.round(tempos[setting.value])} bpm` : "";
 }
 
 /** The drums' setup: the song's own, or one given. */

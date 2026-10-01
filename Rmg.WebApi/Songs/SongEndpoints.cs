@@ -17,9 +17,10 @@ public static class SongEndpoints
     {
         routes.MapPost("/api/songs/generate", GenerateSong);
 
-        // what a song may be given: its tempos, in beats a minute, and its meters, in the order a request names them by
+        // what a song may be given: its tempos, in beats a minute, by their steps, and its meters, in the order a request
+        // names them by
         routes.MapGet("/api/songs/options", () => Results.Ok(new SongOptions(
-            [..SongGenerator.TempoOptions.Select(x => x * Meter.BaseTempo)],
+            [..Enumerable.Range(0, TempoScale.Steps).Select(x => TempoScale.Multiplier(x) * Meter.BaseTempo)],
             [..Meter.Options.Select(x => $"{x.Meter.TimeSignature.Numerator}/{x.Meter.TimeSignature.Denominator}")]
         )));
 
@@ -133,7 +134,7 @@ public static class SongEndpoints
 }
 
 /// <summary>What a song may be given, in the order a request names them by.</summary>
-/// <param name="Tempos">The tempos, in beats a minute.</param>
+/// <param name="Tempos">The tempos, in beats a minute, by their steps (<see cref="TempoScale" />).</param>
 /// <param name="Meters">The meters, as time signatures.</param>
 public sealed record SongOptions(ImmutableArray<double> Tempos, ImmutableArray<string> Meters);
 

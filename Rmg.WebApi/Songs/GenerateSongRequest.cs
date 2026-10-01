@@ -23,7 +23,7 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Parts">A part given, by its role's name: "melody", "chords", "bass", "pad", "counterMelody" or "drum".</param>
 /// <param name="DrumSetup">The drums the song plays: "kit", "kitAndPercussion" or "percussion".</param>
 /// <param name="DrumGroups">A drum group's mix, by its name, such as "kick".</param>
-/// <param name="Tempo">The tempo, by its place among the tempos a song may play at (<c>/api/songs/options</c>).</param>
+/// <param name="Tempo">The tempo, by its step from 0, 60 beats a minute, through 32, 120, to 63, 240 (<see cref="TempoScale" />).</param>
 /// <param name="Key">The key, as semitones above C, from 0 to 11.</param>
 /// <param name="Meter">The meter, by its place among the meters a song may play in (<c>/api/songs/options</c>).</param>
 public sealed record GenerateSongRequest(
@@ -119,8 +119,8 @@ public sealed record GenerateSongRequest(
             groups[known] = new DrumGroupMix((group.Volume ?? LastStep) / (double)LastStep, group.IsOn);
         }
 
-        if (Tempo is < 0 || Tempo >= SongGenerator.TempoOptions.Length)
-            return Fail($"Tempo {Tempo} is not one of the {SongGenerator.TempoOptions.Length} tempos.", out error);
+        if (Tempo is < 0 or >= TempoScale.Steps)
+            return Fail($"Tempo {Tempo} is not from 0 to {TempoScale.Steps - 1}.", out error);
         if (Key is < 0 or > 11)
             return Fail($"Key {Key} is not from 0 to 11.", out error);
         if (Meter is < 0 || Meter >= Core.Composition.Meter.Options.Length)
@@ -132,7 +132,7 @@ public sealed record GenerateSongRequest(
             Parts: parts.Count > 0 ? parts.ToImmutable() : null,
             DrumSetup: drumSetup,
             MeterOption: Meter,
-            Tempo: Tempo,
+            Tempo: Tempo is { } tempo ? TempoScale.Multiplier(tempo) : null,
             Key: Key
         );
         mix = new SongMix((Volume ?? LastStep) / (double)LastStep, partMixes.ToImmutable(), groups.ToImmutable());

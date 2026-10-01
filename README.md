@@ -80,7 +80,7 @@ Listens on every interface, on port 5000 by default. See [Settings](#settings).
     "seed": "1A",
     "unconventionality": 40,
     "facets": { "chords": 50 },
-    "tempo": 3,
+    "tempo": 40,
     "parts": {
       "melody": { "instrument": 40, "volume": 32 },
       "drum": { "isOn": false }
@@ -92,11 +92,12 @@ Listens on every interface, on port 5000 by default. See [Settings](#settings).
   The seed is in letters and digits, all 64 bits of it; without one a random song is made. A part, by its role's name,
   may be given in or out (`plays`), an instrument (General MIDI 0-127), a volume and a pan, or left out of the file
   (`isOn: false`); `drumSetup` and `drumGroups` do the same for the drums, and `key`, `tempo` and `meter` give those
-  (the tempos and meters by their place in `GET /api/songs/options`). The response carries the seed (`X-Song-Seed`),
+  (the tempo by its step from 0 to 63, 60 to 240 beats a minute with 120 at 32, and the meter by its place in
+  `GET /api/songs/options`). The response carries the seed (`X-Song-Seed`),
   the songs' version (`X-Song-Version`) and everything the song drew or was given, with every part's channel
   (`X-Song-Settings`). The file is named `song-<seed>.mid`. The server makes as many songs at once as it has cores;
   the rest wait their turn, a client at a time, and are turned away with 429 or 503 when too many wait.
-- `GET /api/songs/options` lists the tempos and meters a song may be given.
+- `GET /api/songs/options` lists the tempos a song may be given, in beats a minute by their steps, and the meters.
 - `GET /api/version` returns the songs' version and commit.
 - `GET /api/soundfonts` lists the soundfonts the server offers, with their licence files.
 - `POST /api/tally` records one page event, and `GET /api/tally/summary` returns the analytics, with the dashboard
@@ -110,10 +111,10 @@ internet connection.
 - **Playing.** The page loads a song and a soundfont as it opens, so you only need to press play. When a random song
   ends it plays another, unless the autoplay switch beside **Generate Next** is off. **Previous** and **Next** walk the
   list of songs so far, Next past the latest making a new one, and a seed typed under the downloads plays that song.
-- **Song settings.** The unconventionality and every facet, the tempo, key and meter, every part (as drawn, in or
+- **Song settings.** How experimental the song is and every facet, the tempo, key and meter, every part (as drawn, in or
   out) and the drums can be given or left to the song. Changing one remakes the song from the same seed, going on
   from the same place. What changes only how it sounds (a part's instrument, volume and pan, the drum groups, the
-  volume) is heard at once.
+  volume) is heard at once. What each setting does is shown under the pointer.
 - **Rating.** Like or dislike a song; the ratings go with the analytics, by the songs' version.
 - **So far** lists the last fifty songs, newest first, kept in the browser; a song walked to keeps its place.
 - **Sharing.** The address always follows the song and its settings, `?song=<seed>&settings=<settings>`, so it is

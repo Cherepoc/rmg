@@ -1,3 +1,4 @@
+using Rmg.Core.Composition;
 using Rmg.Core.Rendering;
 using Rmg.WebApi.Songs;
 
@@ -69,28 +70,54 @@ public sealed class SongSettingsTest
     public async Task TheFormat_IsFixed()
     {
         // the page writes the same, so a change to either side shows here and in the page's check against it
-        await Assert.That(Silent.Format()).IsEqualTo("3" + new string('0', SongSettings.Length));
+        await Assert.That(Silent.Format()).IsEqualTo("4" + new string('0', SongSettings.Length));
         await Assert.That(Mixed.Format()).IsEqualTo(MixedText);
         await Assert.That(Mixed.Identity).IsEqualTo(MixedIdentity);
     }
 
-    public const string MixedText = "3_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8ph2";
+    public const string MixedText = "4_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8ph2";
 
-    /// <summary>The mixed settings as the format before wrote them, its first eight parts.</summary>
+    /// <summary>The mixed settings as the format before wrote them, its tempo by its place among those the song draws.</summary>
+    public const string MixedTextThree = "3_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8ph2";
+
+    /// <summary>The mixed settings as the format before that wrote them, its first eight parts.</summary>
     public const string MixedTextTwo = "2_07ELSZgnu3B2o_0-9zIyRxawjvsu_309IRajs002I0a2s183Q1i3-hQPh8f8hA";
 
     public const string MixedIdentity = "hQ1_0ESgu320120120131";
 
     [Test]
-    public async Task TheFormatBefore_ReadsAsItWas_ItsSoloPartAsTheSongDrawsIt()
+    public async Task ATempoStep_RunsFrom60Through120To240BeatsAMinute_EveryStepFasterByAboutTheSame()
+    {
+        await Assert.That(TempoScale.Multiplier(0) * Meter.BaseTempo).IsEqualTo(60).Within(1e-9);
+        await Assert.That(TempoScale.Multiplier(TempoScale.Middle) * Meter.BaseTempo).IsEqualTo(120).Within(1e-9);
+        await Assert.That(TempoScale.Multiplier(TempoScale.Steps - 1) * Meter.BaseTempo).IsEqualTo(240).Within(1e-9);
+        var ratios = Enumerable.Range(1, TempoScale.Steps - 1).Select(x => TempoScale.Multiplier(x) / TempoScale.Multiplier(x - 1)).ToArray();
+        await Assert.That(ratios.Min()).IsGreaterThan(1.02);
+        await Assert.That(ratios.Max()).IsLessThan(1.025);
+        // and every step its own nearest
+        foreach (var step in Enumerable.Range(0, TempoScale.Steps))
+            await Assert.That(TempoScale.StepOf(TempoScale.Multiplier(step))).IsEqualTo(step);
+    }
+
+    [Test]
+    public async Task TheFormatBefore_ReadsAsItWas_ItsTempoAsTheSongDrawsIt()
+    {
+        var read = SongSettings.Parse(MixedTextThree)!;
+
+        await Assert.That(AreSame(read, Mixed with { Tempo = new Setting(false, TempoScale.Middle) })).IsTrue();
+    }
+
+    [Test]
+    public async Task TheFormatBeforeThat_ReadsAsItWas_ItsTempoAndSoloPartAsTheSongDrawsThem()
     {
         var read = SongSettings.Parse(MixedTextTwo)!;
 
         await Assert.That(read.Parts.Length).IsEqualTo(SongSettings.PartOrder.Length);
         await Assert.That(read.Parts.Take(8).SequenceEqual(Mixed.Parts.Take(8))).IsTrue();
         await Assert.That(read.Parts[^1]).IsEqualTo(new PartSettings(0, new Setting(false, 0), 63, new Setting(false, 32), true));
+        await Assert.That(read.Tempo).IsEqualTo(new Setting(false, TempoScale.Middle));
         // and named as it was, a part it did not name as drawn
-        await Assert.That(read.Identity).IsEqualTo((Mixed with { Parts = [..Mixed.Parts.Take(8), read.Parts[^1]] }).Identity);
+        await Assert.That(read.Identity).IsEqualTo((Mixed with { Tempo = read.Tempo, Parts = [..Mixed.Parts.Take(8), read.Parts[^1]] }).Identity);
     }
 
     [Test]

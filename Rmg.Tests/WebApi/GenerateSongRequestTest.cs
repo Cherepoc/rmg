@@ -58,6 +58,16 @@ public sealed class GenerateSongRequestTest
     }
 
     [Test]
+    [Arguments(0, 60.0)]
+    [Arguments(32, 120.0)]
+    [Arguments(63, 240.0)]
+    public async Task ATempoStep_IsGivenAsItsTempo(int step, double beatsAMinute)
+    {
+        await Assert.That(new GenerateSongRequest(Tempo: step).TryRead(out _, out var overrides, out _, out _)).IsTrue();
+        await Assert.That(overrides.Tempo!.Value * Meter.BaseTempo).IsEqualTo(beatsAMinute).Within(1e-9);
+    }
+
+    [Test]
     public async Task EveryPartLeftOut_IsRefused()
     {
         var parts = Enum.GetNames<TrackRole>().ToDictionary(x => x, _ => new PartRequest(Plays: false));

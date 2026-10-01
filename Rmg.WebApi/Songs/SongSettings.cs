@@ -16,7 +16,7 @@ namespace Rmg.WebApi.Songs;
 /// </summary>
 /// <param name="Unconventionality">How far the song strays from convention, from 0 to 63.</param>
 /// <param name="Facets">Every facet's, in the order of <see cref="FacetOrder" />.</param>
-/// <param name="Tempo">Its tempo, by its place among <see cref="SongGenerator.TempoOptions" />.</param>
+/// <param name="Tempo">Its tempo, by its step (<see cref="TempoScale" />).</param>
 /// <param name="Key">Its key, as semitones above C.</param>
 /// <param name="Meter">Its meter, by its place among <see cref="Core.Composition.Meter.Options" />.</param>
 /// <param name="Parts">Every part's, in the order of <see cref="PartOrder" />.</param>
@@ -36,9 +36,15 @@ public sealed record SongSettings(
 )
 {
     /// <summary>The format this writes, as its first character; one that is read differently takes the next.</summary>
+    public const char FormatFour = '4';
+
+    /// <summary>
+    ///     The format before, which gave a tempo by its place among the tempos a song draws, read with its tempo as the
+    ///     song draws it.
+    /// </summary>
     public const char FormatThree = '3';
 
-    /// <summary>The format before, which named every part but the solo part, which it plays as the song draws it.</summary>
+    /// <summary>The format before that, which named every part but the solo part, which it plays as the song draws it.</summary>
     public const char FormatTwo = '2';
 
     public static ImmutableArray<Facet> FacetOrder { get; } =
@@ -99,18 +105,18 @@ public sealed record SongSettings(
 
         if (values.Any(x => x is < 0 or > 63))
             throw new InvalidOperationException("A value does not fit in a character.");
-        return FormatThree + new string([..values.Select(x => Base64.Digits[x])]);
+        return FormatFour + new string([..values.Select(x => Base64.Digits[x])]);
     }
 
     /// <summary>
-    ///     Reads settings the page wrote, or none for anything that is not settings of the format; the format before too,
-    ///     its song's solo part as the song draws it.
+    ///     Reads settings the page wrote, or none for anything that is not settings of the format; the formats before too,
+    ///     their tempo, and the solo part the oldest does not name, as the song draws them.
     /// </summary>
     public static SongSettings? Parse(string? text)
     {
         var partCount = text?.Length > 0 ? text[0] switch
         {
-            FormatThree => PartOrder.Length,
+            FormatFour or FormatThree => PartOrder.Length,
             FormatTwo => PartsOfFormatTwo,
             _ => 0
         } : 0;
@@ -144,11 +150,13 @@ public sealed record SongSettings(
         ).Concat(PartOrder.Skip(partCount).Select(_ => Unnamed)).ToImmutableArray();
         var groups = groupVolumes.Select(x => new DrumGroupSettings(switches[s++], x)).ToImmutableArray();
 
-        // a part plays as its own, in or out; a drum setup is one of three, or none; a key one of twelve; and a tempo and a
-        // meter one of theirs
+        // a part plays as its own, in or out; a drum setup is one of three, or none; a key one of twelve; and a meter one
+        // of its options, as every character is a tempo's step
         if (parts.Any(x => x.Plays > 2) || drumSetup > SetupOrder.Length || instruments.Any(x => x >= 256)
-            || settings[^2].Value > 11 || settings[^3].Value >= SongGenerator.TempoOptions.Length || settings[^1].Value >= Core.Composition.Meter.Options.Length)
+            || settings[^2].Value > 11 || settings[^1].Value >= Core.Composition.Meter.Options.Length)
             return null;
+        if (text[0] != FormatFour)
+            settings[^3] = new Setting(false, TempoScale.Middle);
 
         return new SongSettings(settings[0], [..settings[1..^3]], settings[^3], settings[^2], settings[^1], parts, drumSetup, groups, volume);
     }

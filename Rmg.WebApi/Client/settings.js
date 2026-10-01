@@ -6,9 +6,12 @@
  *     characters each, then the switches, six to a character. Seeds are written in the same 64 digits.
  */
 
+const FORMAT_FOUR = "4";
+
+/** The format before, which gave a tempo by its place among those a song draws, read with its tempo as the song draws it. */
 const FORMAT_THREE = "3";
 
-/** The format before, which named every part but the solo part, which it plays as the song draws it. */
+/** The format before that, which named every part but the solo part, which it plays as the song draws it. */
 const FORMAT_TWO = "2";
 const PARTS_OF_FORMAT_TWO = 8;
 
@@ -20,6 +23,9 @@ export const LAST_STEP = 63;
 
 /** The middle of a pan's steps: 32 to its left and 31 to its right, as MIDI's 64 is. */
 export const MIDDLE_PAN = 32;
+
+/** The tempo's middle step, 120 beats a minute, from 60 at the first to 240 at the last (the server's TempoScale). */
+export const MIDDLE_TEMPO = 32;
 
 /** The facets, the parts, the drum setups and the drum groups, by the names the server takes, in the format's order. */
 export const FACETS = ["feel", "groove", "fills", "form", "chords", "progression", "scale", "melody", "sound"];
@@ -109,13 +115,13 @@ export function formatSettings(settings) {
     values.push(...packSwitches(switches));
 
     if (values.some((x) => !Number.isInteger(x) || x < 0 || x > 63)) throw new RangeError("A value does not fit in a character.");
-    return FORMAT_THREE + values.map((x) => DIGITS[x]).join("");
+    return FORMAT_FOUR + values.map((x) => DIGITS[x]).join("");
 }
 
-/** Reads settings, or null for anything that is not settings of the format; the format before too, its solo part as the song draws it. */
+/** Reads settings, or null for anything that is not settings of the format; the formats before too, their tempo and the solo part the oldest does not name as the song draws them. */
 export function parseSettings(text) {
     if (typeof text !== "string") return null;
-    const count = { [FORMAT_THREE]: FORMAT_PARTS.length, [FORMAT_TWO]: PARTS_OF_FORMAT_TWO }[text[0]];
+    const count = { [FORMAT_FOUR]: FORMAT_PARTS.length, [FORMAT_THREE]: FORMAT_PARTS.length, [FORMAT_TWO]: PARTS_OF_FORMAT_TWO }[text[0]];
     if (count === undefined || text.length !== 1 + lengthOf(count)) return null;
     const named = FORMAT_PARTS.slice(0, count);
     const values = [...text.slice(1)].map((x) => DIGITS.indexOf(x));
@@ -151,6 +157,7 @@ export function parseSettings(text) {
     for (const [i, group] of DRUM_GROUPS.entries()) settings.drumGroups[group] = { isOn: switches[s++], volume: groupVolumes[i] };
     if (setup > DRUM_SETUPS.length || settings.key.value > 11) return null;
     settings.drumSetup = setup === 0 ? null : DRUM_SETUPS[setup - 1];
+    if (text[0] !== FORMAT_FOUR) settings.tempo = { isGiven: false, value: MIDDLE_TEMPO };
     settings.volume = volume;
     return settings;
 }

@@ -16,7 +16,7 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Parts">Every part's, by its role's name.</param>
 /// <param name="DrumSetup">The drums it plays.</param>
 /// <param name="DrumGroups">The drum groups it plays, by name.</param>
-/// <param name="Tempo">Its tempo, by its place among the tempos (<c>/api/songs/options</c>).</param>
+/// <param name="Tempo">Its tempo, by its step (<see cref="TempoScale" />), the nearest to a tempo it drew.</param>
 /// <param name="Key">Its key, as semitones above C.</param>
 /// <param name="Meter">Its meter, by its place among the meters (<c>/api/songs/options</c>).</param>
 public sealed record SongReport(
@@ -58,7 +58,7 @@ public sealed record SongReport(
             ),
             new Drawn<string>(Name(draws.DrumSetup), overrides.DrumSetup is not null),
             [..groups.Select(Name)],
-            new Drawn<int>(SongGenerator.TempoOptions.IndexOf(common.GetStateValue(StateKinds.Tempo)), overrides.Tempo is not null),
+            new Drawn<int>(TempoScale.StepOf(common.GetStateValue(StateKinds.Tempo)), overrides.Tempo is not null),
             new Drawn<int>(common.GetStateValue(StateKinds.KeyOffset).Mod(12), overrides.Key is not null),
             new Drawn<int>(Core.Composition.Meter.OptionOf(song.Meter), overrides.MeterOption is not null || overrides.Meter is not null)
         );

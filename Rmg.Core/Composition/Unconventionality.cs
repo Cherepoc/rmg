@@ -114,7 +114,7 @@ public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, d
 /// <summary>What is given in place of the song's own draws, each used as given; none for the song as its seed makes it.</summary>
 /// <param name="Meter">The meter the song's bars are in, its groups in the order given.</param>
 /// <param name="MeterOption">The meter given by its place in <see cref="Composition.Meter.Options" />, its groups' order drawn.</param>
-/// <param name="Tempo">The tempo given by its place in <see cref="SongGenerator.TempoOptions" />.</param>
+/// <param name="Tempo">The tempo given, as a multiple of <see cref="Composition.Meter.BaseTempo" />, which need not be one the song may draw.</param>
 /// <param name="Key">The key given, as semitones above C, from 0 to 11.</param>
 /// <param name="Base">The song's unconventionality's base, from 0 to 1, which its facets are drawn around.</param>
 /// <param name="Facets">Facets set outright, from 0 to 1, over those drawn.</param>
@@ -127,7 +127,7 @@ public sealed record SongOverrides(
     ImmutableDictionary<TrackRole, bool>? Parts = null,
     DrumSetup? DrumSetup = null,
     int? MeterOption = null,
-    int? Tempo = null,
+    double? Tempo = null,
     int? Key = null
 )
 {

@@ -530,10 +530,9 @@ input[type="range"] {
     margin: 0;
 }
 
-.setting-name small {
-    display: block;
-    font-size: 12px;
-    color: var(--muted);
+/* what a value does is shown under the pointer, which the name invites */
+.setting[title] .setting-name {
+    cursor: help;
 }
 
 .setting-slider {
@@ -576,10 +575,23 @@ input[type="range"] {
     cursor: default;
 }
 
+/* the ends and the value as wide on every row, so that the sliders line up whatever their ends are called */
 .setting .end {
     font-size: 12px;
     color: var(--muted);
     white-space: nowrap;
+}
+
+.setting .end:first-child {
+    width: 4ch;
+}
+
+.setting .end:nth-child(3) {
+    width: 12ch;
+}
+
+.setting-slider output {
+    width: 8ch;
 }
 
 .warning {

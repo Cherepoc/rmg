@@ -55,8 +55,8 @@ public static class SongGenerator
             throw new ArgumentOutOfRangeException(nameof(overrides), "A facet is from 0 to 1.");
         if (overrides.MeterOption is < 0 || overrides.MeterOption >= Meter.Options.Length)
             throw new ArgumentOutOfRangeException(nameof(overrides), overrides.MeterOption, $"A meter is one of the {Meter.Options.Length} options.");
-        if (overrides.Tempo is < 0 || overrides.Tempo >= TempoOptions.Length)
-            throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Tempo, $"A tempo is one of the {TempoOptions.Length} options.");
+        if (overrides.Tempo is <= 0 or double.NaN or double.PositiveInfinity)
+            throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Tempo, "A tempo is a positive multiple of the base tempo.");
         if (overrides.Key is < 0 or > 11)
             throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Key, "A key is from 0 to 11.");
 
@@ -498,7 +498,7 @@ public static class SongGenerator
             .ToStateMap(context);
         if (overrides.Key is { } key)
             drawn = drawn.With(StateKinds.KeyOffset, key);
-        return overrides.Tempo is { } tempo ? drawn.With(StateKinds.Tempo, TempoOptions[tempo]) : drawn;
+        return overrides.Tempo is { } tempo ? drawn.With(StateKinds.Tempo, tempo) : drawn;
     }
 
     /// <summary>The tempos a song may play at, as multiples of <see cref="Meter.BaseTempo" />, slowest first: every one the draw can land on.</summary>
