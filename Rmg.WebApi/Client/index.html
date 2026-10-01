@@ -93,9 +93,8 @@
                        spellcheck="false" aria-label="Seed to play" />
             </label>
             <button type="button" id="generate-seeded" class="secondary" disabled>Play seed</button>
+            <p id="status" role="status" aria-live="polite"></p>
         </div>
-
-        <p id="status" role="status" aria-live="polite"></p>
     </section>
 
     <aside class="side" aria-label="Songs so far">
@@ -206,13 +205,13 @@
                 <a class="license" href="https://midkar.com/SoundFonts/index.html" target="_blank" rel="noopener">Timbres of Heaven</a>
             </span>
         </div>
-        <p class="hint below">
-            Your own <code>.sf2</code>, <code>.sf3</code> or <code>.dls</code> file is played here and never uploaded.
-        </p>
         <label class="field toggle">
             <input type="checkbox" id="keep" checked />
             <span>Remember this soundfont next time</span>
         </label>
+        <p class="hint below">
+            Your own <code>.sf2</code>, <code>.sf3</code> or <code>.dls</code> file is played here and never uploaded.
+        </p>
     </details>
 
 </main>
