@@ -352,6 +352,24 @@ public static class SongGenerator
             index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloLines), index)),
             index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloChords), index))
         );
+        // and the solo part answering the melody in its gaps now and then outside its solos, in its soloist's vocabulary,
+        // the one its solos are played in, drawn from the same sequence
+        var soloDefinition = tracks.Definitions.Values.OfType<PitchInstrumentTrack>().FirstOrDefault(x => x.Role == TrackRole.Solo);
+        if (soloDefinition is not null && !absent.Contains(TrackRole.Solo))
+            songTrackNoteTimelineMap = SoloAnswers.Apply(
+                songTrackNoteTimelineMap,
+                tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
+                tracks.Definitions,
+                form.Map,
+                solos,
+                soloists.GetValueOrDefault(TrackRole.Solo) ?? Soloist.Generate(
+                    new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Soloist), (int)TrackRole.Solo)),
+                    songUnconventionality[Facet.Melody],
+                    songUnconventionality[Facet.Sound],
+                    soloDefinition.InstrumentCode),
+                index => sections[index].Facets[Facet.Melody],
+                index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloAnswers), index))
+            );
 
         // and last the notes, decided from the state of the whole song, in its order, none sounding into a stop
         cancellation.ThrowIfCancellationRequested();
@@ -507,5 +525,6 @@ internal enum SongStream
     DrumSolo = 44,
     SoloChords = 45,
     LateEntries = 46,
-    LineChords = 47
+    LineChords = 47,
+    SoloAnswers = 48
 }

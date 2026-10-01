@@ -499,11 +499,15 @@ and slides, is `Expression`'s (see *Listening*).
   gestures, held notes and quotes whole and runs and licks on their cells' first notes, the band's chord under its
   note where its note is the chord's, or at the wild end the chord's shape planed with the line (`SoloTest`,
   `SoloistTest`).
+  The solo part answering the melody (built, `SoloAnswers`): in a section the counter-melody leaves to it, by the melody
+  facet (0, 0.3, 0.3), half the melody's gaps of two beats or more answered from a beat in to a quarter before the
+  melody goes on, in the soloist's vocabulary, a held chord note in a short gap and a lick and a held note in a longer,
+  0.06 under the melody as heard. Over 1024 songs the solo part plays in 70% of them where 26%, answering in 59%, 0.48
+  notes a bar where it answers (`SoloAnswerTest`). Left: **the page** given the part, in the settings and the mixer.
   Left (P3): **a solo's octaves its own,** a solo now playing in octaves where the melody it takes over does, its
   soloist's choice instead; **a drum solo's stacked hits,** the kick under its accents, by the same voices the
   drummer's vocabulary leaves at one; **motifs,** a phrase answering the one before with its opening cell moved up or down, as call and
-  response, a phrase's motif carried on to the next as state; **the solo part answering the
-  melody** outside its solos, in the melody's gaps, as a guitarist fills between a singer's phrases; **the
+  response, a phrase's motif carried on to the next as state; **the
   page**, the solo part in the settings and the mixer, a new part of the settings' format, where it plays as the file
   mixes it; **the drummer as one player,** the fills' `Drummer` and the drum solo's `Soloist` one record, its fill habits
   and its solo habits together; **a crash on a drum solo's intense accents,** should its runs want more weight.

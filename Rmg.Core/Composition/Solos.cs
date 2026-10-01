@@ -217,14 +217,14 @@ internal static class Solos
     }
 
     /// <summary>The average velocity of notes as rendered, each moved by a lift; none where there are no notes.</summary>
-    private static double Loudness(IEnumerable<TimelineItem<StateMap>> notes, double lift) =>
+    internal static double Loudness(IEnumerable<TimelineItem<StateMap>> notes, double lift) =>
         notes.Select(x => Render.ToMidiVelocity(x.Value.GetStateValue(StateKinds.Velocity) + lift)).DefaultIfEmpty(double.NaN).Average();
 
     /// <summary>
     ///     How much the notes' velocities move so that their average as rendered is the loudness aimed at, or as near the
     ///     loudest as a velocity is where it cannot be.
     /// </summary>
-    private static double Lift(IReadOnlyList<TimelineItem<StateMap>> notes, double loudness)
+    internal static double Lift(IReadOnlyList<TimelineItem<StateMap>> notes, double loudness)
     {
         if (notes.Count == 0)
             return 0;
