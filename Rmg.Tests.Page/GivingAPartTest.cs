@@ -45,6 +45,9 @@ public sealed class GivingAPartTest(Site site)
         var released = Melody(await Click(page, "td:first-child input"));
         await Assert.That(Has(released, "plays") || Has(released, "instrument") || Has(released, "pan")).IsFalse();
         await Assert.That(await IsDisabled(page, "select")).IsTrue();
+        // and its volume the song's own, the fullest, not to be moved
+        await Assert.That(await IsDisabled(page, "input.fader")).IsTrue();
+        await Assert.That(released.GetProperty("volume").GetInt32()).IsEqualTo(63);
         await Assert.That(page.Errors).IsEmpty();
     }
 }

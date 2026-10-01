@@ -1689,7 +1689,7 @@ function createPartRow(part) {
     const name = PART_NAMES[part];
 
     const given = createGiven(name);
-    given.title = "Checked, whether it plays, its instrument and its pan are given, for this song and the next; unchecked, they show what the song drew";
+    given.title = "Checked, whether it plays, its instrument, volume and pan are set, for this song and the next; unchecked, they are the song's own";
     given.addEventListener("change", () => setPartGiven(part, given.checked));
 
     const plays = document.createElement("input");
@@ -1733,13 +1733,15 @@ function createPartRow(part) {
 }
 
 /**
- *     Gives a part's playing, instrument and pan together, as the song drew them, or lets the song have them again, as
- *     one switch has them all.
+ *     Gives a part's playing, instrument and pan together, as the song drew them, or lets the song have them again, its
+ *     volume at the fullest, as one switch has them all.
  */
 function setPartGiven(part, isGiven) {
     const mix = settings.parts[part];
     const drawn = own[part] ?? { instrument: mix.instrument.value, pan: mix.pan.value };
     mix.plays = !isGiven ? "random" : partsInSong[part] === false ? "off" : "on";
+    // the song's own volume, the fullest, once it is let go of
+    if (!isGiven) setPartVolume(part, LAST_STEP);
     setPartInstrument(part, { isGiven, value: isGiven ? mix.instrument.value : drawn.instrument });
     setPartPan(part, { isGiven, value: isGiven ? mix.pan.value : drawn.pan });
     showSettings();
@@ -1806,7 +1808,7 @@ function showSettings() {
         row.given.checked = isGiven;
         row.plays.checked = mix.plays === "random" ? partsInSong[part] !== false : mix.plays === "on";
         row.instrument.value = String(mix.instrument.value);
-        for (const control of [row.plays, row.instrument, row.pan.input]) control.disabled = !isGiven;
+        for (const control of [row.plays, row.instrument, row.volume.input, row.pan.input]) control.disabled = !isGiven;
         row.volume.input.value = String(mix.volume);
         row.volume.show();
         row.pan.input.value = String(mix.pan.value);

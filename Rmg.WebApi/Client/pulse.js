@@ -37,12 +37,15 @@ export function createPulse(hue) {
         rings = rings.filter((born) => isPlaying && now - born < RING_SECONDS);
 
         const middle = SIZE / 2;
-        const radius = 2.5 + last * (middle - 5);
+        const radius = 4 + last * (middle - 5);
         context.clearRect(0, 0, SIZE, SIZE);
 
+        // bright in the middle and clear at the edge, a glow rather than a disc
+        const strength = 0.4 + 0.6 * last;
         const glow = context.createRadialGradient(middle, middle, 0, middle, middle, radius);
-        glow.addColorStop(0, `hsl(${hue} 90% 75% / ${0.35 + 0.65 * last})`);
-        glow.addColorStop(1, `hsl(${hue} 80% 55% / ${0.25 + 0.5 * last})`);
+        glow.addColorStop(0, `hsl(${hue} 90% 78% / ${strength})`);
+        glow.addColorStop(0.45, `hsl(${hue} 85% 60% / ${0.6 * strength})`);
+        glow.addColorStop(1, `hsl(${hue} 80% 55% / 0)`);
         context.fillStyle = glow;
         context.beginPath();
         context.arc(middle, middle, radius, 0, 2 * Math.PI);
