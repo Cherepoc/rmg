@@ -45,11 +45,34 @@ internal sealed record Soloist(
     double SlideLean,
     double MaxNotesASecond,
     bool Bends,
-    bool Vibrates
+    bool Vibrates,
+    double Stamina
 )
 {
     /// <summary>The fastest a soloist plays, in notes a second, which its speeds keep under at a song's tempo: a plain one's 16ths at 120, a wild one's sextuplets at 160.</summary>
-    public static ByConvention MaxNotesASeconds { get; } = new(8, 11, 16);
+    public static ByConvention MaxNotesASeconds { get; } = new(8, 11, 28);
+
+    /// <summary>
+    ///     The wildest speeds, 32nds in sextuplets and 64ths, of the wild end alone, as a shredder's, each by a chance of its
+    ///     own, drawn after the rest of the vocabulary so that it stays as it was.
+    /// </summary>
+    public static ImmutableArray<(int NotesABeat, ByConvention Chance)> FastestSpeedChances { get; } =
+    [
+        (12, new ByConvention(0, 0, 0.5)),
+        (16, new ByConvention(0, 0, 0.35))
+    ];
+
+    /// <summary>
+    ///     How long a soloist keeps up its fastest speed, in beats, as a power of two about which each draws its own: a beat
+    ///     at the plain end, a few in the middle, and anything from a burst to bars of it at the wild end, as a Shawn Lane
+    ///     runs on; a slower speed lasts the longer, as many notes as the fastest's.
+    /// </summary>
+    public static ByConvention StaminaPowers { get; } = new(0, 1.5, 2.5);
+
+    public static ByConvention StaminaSpread { get; } = new(0, 0.5, 2);
+
+    /// <summary>How many beats the soloist may play a speed at in one run: its stamina at its fastest, the longer the slower.</summary>
+    public double BeatsAt(int notesABeat) => Stamina * Speeds[^1] / notesABeat;
 
     /// <summary>The speeds a soloist may run at, in notes a beat, each by a chance of its own: 8ths and 16ths always, triplets, sextuplets and 32nds the wilder.</summary>
     public static ImmutableArray<(int NotesABeat, ByConvention Chance)> SpeedChances { get; } =
@@ -131,7 +154,9 @@ internal sealed record Soloist(
         var slideLean = ExpressionLean + ExpressionSpread.At(sound) * Generators.SplineValue()(context);
         var bends = context.TestProbability(Tilt.Of(BendSuitOdds, BendSuit(program)).Chance(BendChance.At(sound), 1));
         var vibrates = context.TestProbability(VibratoChance.At(sound));
-        return new Soloist([..speeds], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody), bends, vibrates);
+        var fastest = FastestSpeedChances.Where(x => context.TestProbability(x.Chance.At(melody))).Select(x => x.NotesABeat);
+        var stamina = Math.Pow(2, StaminaPowers.At(melody) + StaminaSpread.At(melody) * Generators.SplineValue()(context));
+        return new Soloist([..speeds.Concat(fastest).Order()], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody), bends, vibrates, stamina);
     }
 
     /// <summary>The options a soloist favours, as many as it draws, each picked from those left.</summary>

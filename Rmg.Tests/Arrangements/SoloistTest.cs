@@ -14,6 +14,20 @@ public sealed class SoloistTest
         [..Enumerable.Range(0, 400).Select(seed => Soloist.Generate(new GenerationContext((ulong)seed), conventionality, conventionality, program))];
 
     [Test]
+    public async Task AWildSoloist_MayShredIn64ths_ForABurstOrForBars_APlainOneNever()
+    {
+        var (plain, wild) = (Draw(0), Draw(1));
+
+        await Assert.That(plain.Any(x => x.Speeds.Any(speed => speed > 8))).IsFalse();
+        await Assert.That(wild.Count(x => x.Speeds.Contains(16))).IsGreaterThan(wild.Length / 5);
+        await Assert.That(wild.Count(x => x.Speeds.Contains(12))).IsGreaterThan(wild.Length / 3);
+        // a plain one's stamina a beat, a wild one's anything from a burst to bars
+        await Assert.That(plain.All(x => x.Stamina is > 0.9 and < 1.1)).IsTrue();
+        await Assert.That(wild.Max(x => x.Stamina) / wild.Min(x => x.Stamina)).IsGreaterThan(6);
+        await Assert.That(wild.Max(x => x.Stamina)).IsGreaterThan(8);
+    }
+
+    [Test]
     public async Task ASoloistChoosesToBendAndToSingAVibrato_NeverAtThePlainEnd_AlwaysAtTheWild_AGuitaristTheLikelierToBend()
     {
         await Assert.That(Draw(0).Any(x => x.Bends || x.Vibrates)).IsFalse();

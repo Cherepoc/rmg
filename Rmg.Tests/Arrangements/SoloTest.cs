@@ -63,9 +63,12 @@ public sealed class SoloTest
     /// <summary>Every pitched solo's segments, as the trace records them: whether it is its own, and each segment's start, end, intensity and gesture.</summary>
     private static (int Index, bool IsOwn, (double Start, double End, double Intensity, SoloGesture Gesture)[] Segments)[] Gestures(CorpusSong song) =>
     [
-        ..song.Trace.Where(x => x.Point == TracePoints.SoloGestures).Select(x => ((int Index, bool IsOwn, (double Start, double Intensity, SoloGesture Gesture)[] Segments))x.Value!)
-            .Select(x => (x.Index, x.IsOwn, x.Segments.Select((g, i) => (g.Start, i + 1 < x.Segments.Length ? x.Segments[i + 1].Start : song.Map.Sections[x.Index].End, g.Intensity, g.Gesture)).ToArray()))
+        ..Plans(song).Select(x => (x.Index, x.IsOwn, x.Plan.Select(g => (g.Start, g.End, g.Intensity, g.Gesture)).ToArray()))
     ];
+
+    /// <summary>Every pitched solo's plan, as the trace records it, and whether it is its own.</summary>
+    private static (int Index, bool IsOwn, SoloLines.Segment[] Plan)[] Plans(CorpusSong song) =>
+        [..song.Trace.Where(x => x.Point == TracePoints.SoloGestures).Select(x => ((int, bool, SoloLines.Segment[]))x.Value!)];
 
     [Test]
     public async Task APlainSolo_IsOnTheMelody_AndAWildOne_ItsOwn()
@@ -326,6 +329,66 @@ public sealed class SoloTest
             Console.WriteLine($"  sound {band.Key}/5, {band.Count()} solos: bend {band.Count(x => x.Bends) / (double)band.Count():P0}, a vibrato {band.Count(x => x.Vibrato) / (double)band.Count():P0}");
         foreach (var family in solos.GroupBy(x => x.Family).OrderBy(x => x.Key))
             Console.WriteLine($"  {family.Key}, {family.Count()} solos: bend {family.Count(x => x.Bends) / (double)family.Count():P0}, a vibrato {family.Count(x => x.Vibrato) / (double)family.Count():P0}");
+        await Task.CompletedTask;
+    }
+
+    [Test]
+    public async Task ARun_KeepsToItsSoloistsStamina_AtEverySpeed_AndToItsCap()
+    {
+        var checkedRuns = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 1))))
+        {
+            var soloists = song.Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => ((TrackRole Role, Soloist Soloist))x.Value!).ToDictionary(x => x.Role, x => x.Soloist);
+            var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
+            foreach (var (index, _, plan) in Plans(song))
+            {
+                var soloist = soloists[song.Solos[index].Soloists[0]];
+                var played = new Dictionary<int, double>();
+                foreach (var segment in plan)
+                {
+                    if (!segment.GoesOn)
+                        played.Clear();
+                    if (segment.Gesture != SoloGesture.Run)
+                        continue;
+
+                    checkedRuns++;
+                    played[segment.Speed] = played.GetValueOrDefault(segment.Speed) + segment.End - segment.Start;
+                    var beatsASecond = common.GetEffectiveStateMapAt(segment.Start).GetStateValue(Rmg.Core.Events.StateKinds.Tempo) * Meter.BaseTempo / 60;
+                    // where a soloist has nothing slower to play at, its slowest
+                    if (segment.Speed == soloist.Speeds[0])
+                        continue;
+                    await Assert.That(played[segment.Speed]).IsLessThanOrEqualTo(soloist.BeatsAt(segment.Speed) + 1e-9).Because($"seed {song.Seed} at {segment.Start}");
+                    await Assert.That(segment.Speed * beatsASecond).IsLessThanOrEqualTo(soloist.MaxNotesASecond + 1e-9);
+                }
+            }
+        }
+
+        await Assert.That(checkedRuns).IsGreaterThan(50);
+    }
+
+    /// <summary>
+    ///     How fast the solos' runs go, by fifth of the melody facet: the share of their notes at each speed, and the longest
+    ///     any run keeps up a speed of 32nds or faster, in beats.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task SpeedReport()
+    {
+        static double MelodyOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Melody];
+        var drawn = TestCorpus.Measure(512, song => Plans(song).Select(x => (Fifth: Math.Clamp((int)(MelodyOf(song) * 5), 0, 4), x.Plan)).ToArray()).SelectMany(x => x)
+            .Concat(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Plans(TestCorpus.Get(seed, Facets(1, 1))).Select(x => (Fifth: 5, x.Plan)).ToArray()).SelectMany(x => x))
+            .ToArray();
+        foreach (var band in drawn.GroupBy(x => x.Fifth).OrderBy(x => x.Key))
+        {
+            var runs = band.SelectMany(x => x.Plan).Where(x => x.Gesture == SoloGesture.Run).ToArray();
+            var notes = runs.Sum(x => (x.End - x.Start) * x.Speed);
+            var shares = runs.GroupBy(x => x.Speed).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Sum(r => (r.End - r.Start) * r.Speed) / notes:P0}");
+            // the longest stretch a run keeps to one fast speed, segment after segment
+            var longest = band.Select(x => x.Plan).SelectMany(plan => plan.Select((s, i) => (s, i)).Where(x => x.s.Gesture == SoloGesture.Run && x.s.Speed >= 8)
+                .Select(x => plan.Skip(x.i).TakeWhile((s, k) => s.Gesture == SoloGesture.Run && s.Speed == x.s.Speed && (k == 0 || s.GoesOn)).Sum(s => s.End - s.Start))).DefaultIfEmpty().Max();
+            Console.WriteLine($"  {(band.Key == 5 ? "melody 1 given" : $"melody {band.Key}/5")}, {runs.Length} run segments: notes at {string.Join(", ", shares)} a beat; longest at 32nds or faster {longest:F1} beats");
+        }
+
         await Task.CompletedTask;
     }
 
