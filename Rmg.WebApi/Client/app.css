@@ -560,6 +560,11 @@ input[type="range"] {
     cursor: pointer;
 }
 
+/* a list where a slider is, as far in as a slider's own margin */
+.setting-slider select {
+    margin-left: 2px;
+}
+
 .setting select:hover:enabled {
     border-color: var(--accent);
 }
@@ -604,8 +609,8 @@ input[type="range"] {
 
 /* a drum group's row as close as its pieces' lines allow, its height set to the highest group's (evenDrumGroupRows) */
 .mixer tr.drum-group > * {
-    padding-top: 3px;
-    padding-bottom: 3px;
+    padding-top: 6px;
+    padding-bottom: 6px;
 }
 
 .mixer tr.part th[scope="row"] {
@@ -662,20 +667,54 @@ input[type="range"] {
     letter-spacing: normal;
 }
 
-/* a part's narrow enough that the longest, the counter-melody, breaks after its hyphen, as the parts' controls want room */
-#mixer th[scope="row"] {
-    width: 6.5em;
+/* a part's narrow enough that the longest, the counter-melody, breaks after its hyphen, as the parts' controls want room;
+   a drum group's over the column a part has whether it plays in, which it has not */
+#mixer tr.part th[scope="row"] {
+    width: 4.6em;
     white-space: normal;
 }
 
-.mixer td:first-child {
-    font-variant-numeric: tabular-nums;
-    color: var(--muted);
-    width: 3ch;
+/* the given switches' column, as wide as a checkbox and its gap, which the song volume above the table steps in by */
+.mixer .given {
+    width: 13px;
 }
 
+.song-volume {
+    padding-left: 23px;
+}
+
+/* a checkbox in a cell by itself, in the middle of the cell's height rather than on a line's baseline */
+.mixer td > input[type="checkbox"] {
+    display: block;
+}
+
+/* whether a part plays, a checkbox under the middle of its column's name */
+.mixer .on {
+    text-align: center;
+}
+
+.mixer td.on > input[type="checkbox"] {
+    margin: 0 auto;
+}
+
+/* the pan near its volume, and a row's mute, solo and pulse near one another */
+.mixer .pan {
+    padding-right: 4px;
+}
+
+.mixer .listen,
+.mixer .pulse {
+    padding-right: 2px;
+}
+
+.mixer td.listen > button {
+    display: flex;
+}
+
+/* an instrument's list as wide as its column, which the table's room to spare goes to */
 .mixer select {
-    width: 19ch;
+    width: 100%;
+    min-width: 24ch;
     padding: 4px 8px;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -735,7 +774,7 @@ input[type="range"] {
 .chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 2px;
+    gap: 4px 5px;
 }
 
 .chip {
@@ -888,7 +927,7 @@ footer a:hover {
 
     /* the instrument names are long, and the table has no room to spare on a phone */
     .mixer select {
-        width: 16ch;
+        min-width: 16ch;
     }
 
     .fader {

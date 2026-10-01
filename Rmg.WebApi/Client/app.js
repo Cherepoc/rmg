@@ -1554,10 +1554,17 @@ function createChoiceRow(key) {
     });
 
     select.setAttribute("aria-description", description);
+    // where a slider's row has its plain end, nothing, so that the list starts where the sliders do
+    const place = document.createElement("span");
+    place.className = "setting-slider";
+    const end = document.createElement("span");
+    end.className = "end";
+    end.setAttribute("aria-hidden", "true");
+    place.append(end, select);
     const row = document.createElement("div");
     row.className = "setting";
     row.title = description;
-    row.append(given, label, select);
+    row.append(given, label, place);
     choiceRows.set(key, { given, select });
     return row;
 }
@@ -1724,7 +1731,8 @@ function createPartRow(part) {
     row.className = "part";
     // the drums sit in the middle, as a kit does, and have no pan
     const [mute, solo] = createListening(part, name);
-    row.append(cellOf(given), heading, ...[plays, instrument, part === "drum" ? null : pan.field, volume.field, mute, solo, pulse.canvas].map(cellOf));
+    row.append(cellOf(given, "given"), heading, cellOf(plays, "on"), cellOf(instrument), cellOf(part === "drum" ? null : pan.field, "pan"), cellOf(volume.field),
+        cellOf(mute, "listen"), cellOf(solo, "listen"), cellOf(pulse.canvas, "pulse"));
     rows.set(part, { row, given, plays, instrument, volume, pan, mute, solo, pulse });
     return row;
 }
@@ -1782,8 +1790,10 @@ function createDrumGroupRow(group) {
     // every group a colour of its own, between the parts' round the wheel
     const pulse = createPulse(Math.round(((DRUM_GROUPS.indexOf(group) + 0.5) * 360) / DRUM_GROUPS.length));
 
+    // its name over the column of whether a part plays, which a group has not, so that the parts' names can be narrower
     const heading = document.createElement("th");
     heading.scope = "row";
+    heading.colSpan = 2;
     heading.textContent = name;
 
     const row = document.createElement("tr");
@@ -1791,7 +1801,7 @@ function createDrumGroupRow(group) {
     const [mute, solo] = createListening(`drums:${group}`, name);
     const chipsCell = cellOf(chips);
     chipsCell.colSpan = 2;
-    row.append(cellOf(null), heading, cellOf(null), chipsCell, ...[volume.field, mute, solo, pulse.canvas].map(cellOf));
+    row.append(cellOf(null, "given"), heading, chipsCell, cellOf(volume.field), cellOf(mute, "listen"), cellOf(solo, "listen"), cellOf(pulse.canvas, "pulse"));
     groupRows.set(group, { row, volume, chips, mute, solo, pulse });
     return row;
 }
@@ -1878,9 +1888,10 @@ function evenDrumGroupRows() {
 window.addEventListener("resize", evenDrumGroupRows);
 document.getElementById("settings-panel").addEventListener("toggle", evenDrumGroupRows);
 
-/** A table cell holding a control, or nothing. */
-function cellOf(content) {
+/** A table cell holding a control, or nothing, of the column its class names, where it has one. */
+function cellOf(content, column = "") {
     const cell = document.createElement("td");
+    if (column !== "") cell.className = column;
     if (content !== null) cell.append(content);
     return cell;
 }

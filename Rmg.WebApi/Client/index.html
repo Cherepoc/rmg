@@ -121,7 +121,7 @@
 
         <fieldset class="settings-group">
             <legend>Parts</legend>
-            <div class="row">
+            <div class="row song-volume">
                 <label class="field volume">
                     <span>Song volume</span>
                     <input type="range" id="song-volume" min="0" max="63" step="1" value="63" />
@@ -132,15 +132,15 @@
                 <table class="mixer">
                     <thead>
                     <tr>
-                        <td></td>
+                        <td class="given"></td>
                         <th scope="col">Part</th>
-                        <th scope="col">On</th>
+                        <th scope="col" class="on">On</th>
                         <th scope="col">Instrument</th>
-                        <th scope="col">Pan</th>
+                        <th scope="col" class="pan">Pan</th>
                         <th scope="col">Volume</th>
-                        <td></td>
-                        <td></td>
-                        <td></td>
+                        <td class="listen"></td>
+                        <td class="listen"></td>
+                        <td class="pulse"></td>
                     </tr>
                     </thead>
                     <tbody id="mixer"></tbody>
