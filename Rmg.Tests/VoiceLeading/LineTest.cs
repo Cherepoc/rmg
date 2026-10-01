@@ -230,8 +230,12 @@ public sealed class LineTest
             var rendered = Render.RenderSong(song);
             RenderedTrack TrackOf(int number) =>
                 rendered.Tracks.First(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == ((PitchInstrumentTrack)song.TrackDefinitions[number]).InstrumentCode);
-            // a note in octaves once, by its own pitch, which comes first
-            var melody = TrackOf(SongTracks.MelodyTrack).NoteTimeline.GroupBy(x => x.Position).Select(x => x.First()).ToArray();
+            // a note in octaves once, by its own pitch, which comes first, and none of a solo, whose line is its own; the
+            // rendered notes in the order of the song's, which say which is a solo's
+            var solo = song.Notes![SongTracks.MelodyTrack].Select(x => x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1).ToArray();
+            var heard = TrackOf(SongTracks.MelodyTrack).NoteTimeline.GroupBy(x => x.Position).Select(x => x.First()).ToArray();
+            await Assert.That(heard.Length).IsEqualTo(solo.Length);
+            var melody = heard.Where((_, i) => !solo[i]).ToArray();
             var chords = TrackOf(SongTracks.ChordsTrack).NoteTimeline.GroupBy(x => x.Position)
                 .Select(x => (Position: x.Key, Classes: x.Select(note => note.Value.Offset % 12).ToHashSet()))
                 .ToArray();

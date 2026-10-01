@@ -41,9 +41,13 @@ internal sealed record Soloist(
     double Volatility,
     int RegisterSteps,
     double BendLean,
-    double SlideLean
+    double SlideLean,
+    double MaxNotesASecond
 )
 {
+    /// <summary>The fastest a soloist plays, in notes a second, which its speeds keep under at a song's tempo: a plain one's 16ths at 120, a wild one's sextuplets at 160.</summary>
+    public static ByConvention MaxNotesASeconds { get; } = new(8, 11, 16);
+
     /// <summary>The speeds a soloist may run at, in notes a beat, each by a chance of its own: 8ths and 16ths always, triplets, sextuplets and 32nds the wilder.</summary>
     public static ImmutableArray<(int NotesABeat, ByConvention Chance)> SpeedChances { get; } =
     [
@@ -110,7 +114,7 @@ internal sealed record Soloist(
         var register = (int)Math.Round(Registers.At(melody)) + context.GenerateInt(-2, 3);
         var bendLean = ExpressionLean + ExpressionSpread.At(sound) * Generators.SplineValue()(context);
         var slideLean = ExpressionLean + ExpressionSpread.At(sound) * Generators.SplineValue()(context);
-        return new Soloist([..speeds], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean);
+        return new Soloist([..speeds], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody));
     }
 
     /// <summary>The options a soloist favours, as many as it draws, each picked from those left.</summary>

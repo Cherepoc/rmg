@@ -45,6 +45,12 @@ internal static class TracePoints
     public const string SoloGestures = "Solo gestures";
 
     /// <summary>
+    ///     A solo's run or lick: its start, its shape and the sizes of its cells in turn (a tuple of a <c>double</c>, a
+    ///     <see cref="Composition.SoloShape" /> and an array of <c>int</c>s).
+    /// </summary>
+    public const string SoloCells = "Solo cells";
+
+    /// <summary>
     ///     A pitched solo's line as its soloists take it: the appearance's place and how many of the melody's notes there are
     ///     to solo on (a tuple of two <c>int</c>s), none leaving the parts to play as they would.
     /// </summary>

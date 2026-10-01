@@ -66,6 +66,24 @@ internal static class SoloLines
     /// <summary>The chance a step throws the intensity anywhere, times the soloist's volatility.</summary>
     public const double JumpRate = 0.5;
 
+    /// <summary>
+    ///     A shape's cell, as the scale steps its notes are from the cell's first, its figure going round for as many notes as
+    ///     the cell has, and how far the next cell starts on, the way the run goes: a scale's straight on, a sequence's and a
+    ///     turn's a step, an arpeggio's a third, a pedal's under its moving notes a step.
+    /// </summary>
+    public static (int[] Figure, int Advance, bool Continues) Shape(SoloShape shape) => shape switch
+    {
+        SoloShape.Scale => ([0, 1, 2, 3, 4, 5, 6, 7, 8], 1, true),
+        SoloShape.Sequence => ([0, 1, 2, 3, 4, 5, 6, 7, 8], 1, false),
+        SoloShape.Arpeggio => ([0, 2, 4, 7, 9, 11, 14, 16, 18], 2, false),
+        SoloShape.Turn => ([0, 1, 0, -1], 1, false),
+        SoloShape.Pedal => ([0, 1, 0, 2, 0, 3, 0, 4, 0], 1, false),
+        _ => throw new ArgumentOutOfRangeException(nameof(shape), shape, null)
+    };
+
+    /// <summary>How much louder a cell's first note is, so that its grouping is heard.</summary>
+    public const double CellAccent = 0.1;
+
     /// <summary>The steps above a chord's root its notes are: the root, the third and the fifth.</summary>
     private static readonly int[] ChordSteps = [0, 2, 4];
 
@@ -113,9 +131,11 @@ internal static class SoloLines
         int Nearest(int[] notes, int pitch) => notes.Length == 0 ? Math.Clamp(pitch, bottom, top) : notes.MinBy(x => Math.Abs(x - pitch));
 
         // a note of the line at its place, as a line's note: the step above the chord there nearest it, on the scale there
-        TimelineItem<StateMap> Place(double position, int pitch, double intensity, double held = 0)
+        TimelineItem<StateMap> Place(double position, int pitch, double intensity, double held = 0, bool accented = false)
         {
             var state = MelodyAt(position).Value.Except([StateKinds.HeldDuration, CompositionStateKinds.LinePickup, StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed]);
+            if (accented)
+                state = state.With(StateKinds.Velocity, state.GetStateValue(StateKinds.Velocity) + CellAccent);
             state = state.With(StateKinds.ScaleStep, LinePlacement.GetScaleStep(Chord(state, position), pitch))
                 .With(StateKinds.Alteration, 0)
                 .With(CompositionStateKinds.SoloIntensity, (int)Math.Round(intensity * 100));
@@ -129,6 +149,8 @@ internal static class SoloLines
         var segments = new List<(double, double, SoloGesture)>();
         var level = ArcStart;
         var current = Nearest(ChordNotes(span.Start), middle);
+        // a run going on from the segment before, its shape, its cells and where in them it is
+        (SoloShape Shape, int[] Sizes, CellCursor Cursor)? going = null;
         for (var k = 0; k < count; k++)
         {
             var (start, end) = (span.Start + k * segment, Math.Min(span.End, span.Start + (k + 1) * segment));
@@ -153,7 +175,19 @@ internal static class SoloLines
                 },
                 x.Gesture));
             var gesture = context.Pick(lean.Weigh(weights.Where(x => x.Weight > 0), x => Gestures.Single(g => g.Gesture == x).Lean));
-            var speed = context.Pick(lean.Weigh(soloist.Speeds.Select(x => new Weighted<int>(1, x)), x => soloist.Speeds.Length == 1 ? 0 : 2.0 * soloist.Speeds.IndexOf(x) / (soloist.Speeds.Length - 1) - 1));
+            // the speed, faster the more intense, of those the soloist can play at the tempo there
+            var notesASecond = common.GetEffectiveStateMapAt(start).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60;
+            var speeds = soloist.Speeds.Where(x => x * notesASecond <= soloist.MaxNotesASecond + 1e-9).DefaultIfEmpty(soloist.Speeds[0]).ToArray();
+            var speed = context.Pick(lean.Weigh(speeds.Select(x => new Weighted<int>(1, x)), x => speeds.Length == 1 ? 0 : 2.0 * Array.IndexOf(speeds, x) / (speeds.Length - 1) - 1));
+            // and the cells: one of the soloist's shapes, and its sizes in turn where it groups them, or one of them
+            var shape = context.Pick(soloist.Shapes.Select(x => new Weighted<SoloShape>(1, x)).ToImmutableArray());
+            var size = context.Pick(soloist.CellSizes.Select(x => new Weighted<int>(1, x)).ToImmutableArray());
+            int[] sizes = soloist.Groups ? [..soloist.CellSizes] : [size];
+            // a run after a run goes on, its shape and its cells as they were
+            if (gesture == SoloGesture.Run && going is { } on)
+                (shape, sizes) = (on.Shape, on.Sizes);
+            var cursor = gesture == SoloGesture.Run && going is { } run ? run.Cursor : new CellCursor(current);
+            going = gesture == SoloGesture.Run ? (shape, sizes, cursor) : null;
             var heading = isOwn
                 ? Nearest(ChordNotes(Math.Min(end, span.End - 1e-6)), (current + bottom + (int)Math.Round(level * (top - bottom))) / 2)
                 : Nearest(ScaleNotes(end - 1e-6), FoldTowards(MelodyPitch(MelodyAt(Math.Min(end, span.End - 1e-6))), current));
@@ -168,12 +202,12 @@ internal static class SoloLines
                 case SoloGesture.Run:
                 case SoloGesture.Lick:
                 {
-                    // a lick at half the speed, about its note, and a run the scale's way to where it heads
+                    // a lick at half the speed, its cell again in place, and a run its cells on the way to where it heads
                     var notesABeat = gesture == SoloGesture.Lick ? Math.Max(2, speed / 2) : speed;
                     var positions = Enumerable.Range(0, (int)Math.Round((end - start) * notesABeat)).Select(i => start + i / (double)notesABeat).Where(x => x < end - 1e-9).ToArray();
-                    var scale = ScaleNotes(start);
-                    var pitches = gesture == SoloGesture.Run ? Run(scale, current, heading, positions.Length) : Lick(scale, current, positions.Length);
-                    line.AddRange(positions.Zip(pitches, (position, pitch) => Place(position, pitch, level)));
+                    var (pitches, accents, cells) = Cells(ScaleNotes(start), cursor, heading, positions.Length, shape, sizes, gesture == SoloGesture.Run);
+                    line.AddRange(positions.Select((position, i) => Place(position, pitches[i], level, accented: accents[i])));
+                    StateTrace.Record(TracePoints.SoloCells, SectionGenerator.SectionTrace, span.SectionId, 0, StateMap.Default, 0, $"{gesture} {shape} {string.Join("+", cells)}", (start, shape, cells));
                     if (pitches.Length > 0)
                         current = pitches[^1];
                     break;
@@ -194,44 +228,62 @@ internal static class SoloLines
         return ([..line], [..segments]);
     }
 
-    /// <summary>
-    ///     A run's pitches, as many as asked, by the scale from the note after the start: the way to where it heads, or as
-    ///     much of it as the run has notes for, and where it has notes to spare, away first and back, turning at the
-    ///     range's ends.
-    /// </summary>
-    internal static int[] Run(IReadOnlyList<int> scale, int start, int heading, int count)
+    /// <summary>Where a run is in its cells: on which cell, on which note of it, from which note the cell starts and which way it goes.</summary>
+    internal sealed class CellCursor(int root)
     {
-        if (count == 0 || scale.Count == 0)
-            return [];
+        public int Cell { get; set; }
+        public int Note { get; set; }
+        public int Root { get; set; } = root;
 
-        int Index(int pitch) => Enumerable.Range(0, scale.Count).MinBy(i => Math.Abs(scale[i] - pitch));
-        var (from, to) = (Index(start), Index(heading));
-        var direction = to >= from ? 1 : -1;
-        // the notes to spare go away from where it heads first, half of them, and come back
-        var spare = Math.Max(0, count - Math.Abs(to - from));
-        var path = new List<int>();
-        var at = from;
-        var away = -direction;
-        for (var i = 0; i < count; i++)
-        {
-            var step = i < spare / 2 ? away : i < spare ? -away : direction;
-            if (at + step < 0 || at + step >= scale.Count)
-                step = -step;
-            at = Math.Clamp(at + step, 0, scale.Count - 1);
-            path.Add(scale[at]);
-        }
-
-        return [..path];
+        /// <summary>The way it goes, up or down, none before its first cell, which takes the way to where it heads.</summary>
+        public int Direction { get; set; }
     }
 
-    /// <summary>A lick's pitches: its note, a step above, the note and a step below, again, as many as asked.</summary>
-    internal static int[] Lick(IReadOnlyList<int> scale, int start, int count)
+    /// <summary>
+    ///     A run's or a lick's pitches, as many as asked, cell by cell from where the cursor is: each cell the shape's figure
+    ///     from its first note, as many notes as its size, its sizes taken in turn; a run's cells each starting on where the
+    ///     shape moves the last, the way to where it heads, turning back at the range's end, and a lick's all on its note.
+    ///     The first note of every cell is marked, to be played the louder. Answers the sizes of the cells it started.
+    /// </summary>
+    internal static (int[] Pitches, bool[] Accents, int[] Cells) Cells(IReadOnlyList<int> scale, CellCursor cursor, int heading, int count, SoloShape shape, int[] sizes, bool moves)
     {
         if (count == 0 || scale.Count == 0)
-            return [];
+            return ([], [], []);
 
-        var at = Enumerable.Range(0, scale.Count).MinBy(i => Math.Abs(scale[i] - start));
-        int[] figure = [0, 1, 0, -1];
-        return [..Enumerable.Range(0, count).Select(i => scale[Math.Clamp(at + figure[i % figure.Length], 0, scale.Count - 1)])];
+        int Index(int pitch) => Enumerable.Range(0, scale.Count).MinBy(i => Math.Abs(scale[i] - pitch));
+        var (figure, advance, continues) = Shape(shape);
+        var root = Index(cursor.Root);
+        if (cursor.Direction == 0)
+            cursor.Direction = Index(heading) >= root ? 1 : -1;
+        var (pitches, accents, cells) = (new List<int>(), new List<bool>(), new List<int>());
+        while (pitches.Count < count)
+        {
+            var size = sizes[cursor.Cell % sizes.Length];
+            // a cell that would leave the range turns the run round
+            int Reach(int i) => root + cursor.Direction * figure[i % figure.Length];
+            if (cursor.Note == 0)
+            {
+                cells.Add(size);
+                if (Enumerable.Range(0, size).Any(i => Reach(i) < 0 || Reach(i) >= scale.Count))
+                    cursor.Direction = -cursor.Direction;
+            }
+
+            for (; cursor.Note < size && pitches.Count < count; cursor.Note++)
+            {
+                pitches.Add(scale[Math.Clamp(Reach(cursor.Note), 0, scale.Count - 1)]);
+                accents.Add(cursor.Note == 0);
+            }
+
+            if (cursor.Note < size)
+                break;
+
+            // the next cell on, a scale's from where this one ended, or in place, a lick's
+            if (moves)
+                root = Math.Clamp(continues ? Reach(size - 1) + cursor.Direction : root + cursor.Direction * advance, 0, scale.Count - 1);
+            (cursor.Cell, cursor.Note) = (cursor.Cell + 1, 0);
+        }
+
+        cursor.Root = scale[root];
+        return ([..pitches], [..accents], [..cells]);
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Rmg.Core;
+using Rmg.Core.Events;
 using Rmg.Core.Composition;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
@@ -93,9 +94,9 @@ public sealed class SoloTest
     }
 
     [Test]
-    public async Task ASolosRun_StepsByTheScale_AndItsHeldNotes_AreTheChords()
+    public async Task ASolosScaleRun_StepsByTheScale_AndItsHeldNotes_AreTheChords()
     {
-        int held = 0, onChord = 0;
+        int held = 0, onChord = 0, scaleRuns = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Facets(1, 1))))
         foreach (var (index, _, segments) in Gestures(song))
         {
@@ -105,10 +106,12 @@ public sealed class SoloTest
                 continue;
 
             var notes = song.Song.Notes!.Single(x => song.Song.TrackDefinitions[x.Key].Role == solo.Soloists[0]).Value;
+            var shapes = song.Trace.Where(x => x.Point == TracePoints.SoloCells).Select(x => ((double Start, SoloShape Shape, int[]))x.Value!).ToDictionary(x => Math.Round(x.Start, 6), x => x.Shape);
             foreach (var (start, end, _, gesture) in segments)
             {
                 var played = notes.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9).ToArray();
-                if (gesture == SoloGesture.Run)
+                // a run up or down the scale, the others leaping by their figures
+                if (gesture == SoloGesture.Run && shapes.GetValueOrDefault(Math.Round(start, 6)) == SoloShape.Scale && scaleRuns++ >= 0)
                     foreach (var (a, b) in played.Zip(played.Skip(1)))
                         await Assert.That(Math.Abs(b.Value.Pitches[0] - a.Value.Pitches[0])).IsLessThanOrEqualTo(4).Because($"seed {song.Seed} at {b.Position}");
                 if (gesture == SoloGesture.Held && played.Length > 0)
@@ -123,7 +126,87 @@ public sealed class SoloTest
         }
 
         await Assert.That(held).IsGreaterThan(0);
+        await Assert.That(scaleRuns).IsGreaterThan(0);
         await Assert.That(onChord / (double)held).IsGreaterThan(0.9);
+    }
+
+    /// <summary>
+    ///     Every run and lick of a song's solos, with its soloist's vocabulary: its start and end, its shape, the sizes of its
+    ///     cells and the notes its first soloist plays in it.
+    /// </summary>
+    private static (Soloist Soloist, double Start, double End, SoloShape Shape, int[] Cells, TimelineItem<RealizedNote>[] Notes)[] Runs(CorpusSong song)
+    {
+        var soloists = song.Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => ((TrackRole Role, Soloist Soloist))x.Value!).ToDictionary(x => x.Role, x => x.Soloist);
+        var cells = song.Trace.Where(x => x.Point == TracePoints.SoloCells).Select(x => ((double Start, SoloShape Shape, int[] Cells))x.Value!).ToDictionary(x => Math.Round(x.Start, 6));
+        return
+        [
+            ..Gestures(song).Where(x => song.Solos[x.Index].Soloists.Length == 1).SelectMany(solo =>
+            {
+                var role = song.Solos[solo.Index].Soloists[0];
+                var notes = song.Song.Notes!.Single(x => song.Song.TrackDefinitions[x.Key].Role == role).Value;
+                return solo.Segments.Where(x => cells.ContainsKey(Math.Round(x.Start, 6))).Select(x =>
+                {
+                    var run = cells[Math.Round(x.Start, 6)];
+                    return (soloists[role], x.Start, x.End, run.Shape, run.Cells, notes.Where(n => n.Position >= x.Start - 1e-9 && n.Position < x.End - 1e-9).ToArray());
+                });
+            })
+        ];
+    }
+
+    [Test]
+    public async Task ARun_IsMadeOfItsSoloistsCells_AccentedAsTheyStart_NoFasterThanItPlays()
+    {
+        var plain = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => Runs(TestCorpus.Get(seed, Facets(1, 0)))).SelectMany(x => x).ToArray();
+        var wild = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => (Song: TestCorpus.Get(seed, Facets(1, 1)), Seed: seed)).Select(x => (x.Song, Runs: Runs(x.Song))).ToArray();
+        var runs = plain.Concat(wild.SelectMany(x => x.Runs)).ToArray();
+
+        foreach (var run in runs)
+        {
+            await Assert.That(run.Soloist.Shapes).Contains(run.Shape);
+            // every cell of the soloist's sizes, as it was started, however the run's end cut it short
+            await Assert.That(run.Cells.All(run.Soloist.CellSizes.Contains)).IsTrue();
+        }
+
+        await Assert.That(plain.SelectMany(x => x.Cells).All(x => x is 3 or 4)).IsTrue();
+        await Assert.That(runs.Where(x => x.Soloist.Groups && x.Cells.Length > 1).All(x => x.Cells.Distinct().Count() > 1)).IsTrue();
+
+        // the first note of a cell the louder
+        var (first, rest) = (new List<double>(), new List<double>());
+        foreach (var run in runs.Where(x => x.Notes.Length == x.Cells.Sum()))
+        {
+            var starts = run.Cells.Select((_, i) => run.Cells.Take(i).Sum()).ToHashSet();
+            foreach (var (note, i) in run.Notes.Select((x, i) => (x, i)))
+                (starts.Contains(i) ? first : rest).Add(note.Value.Velocity);
+        }
+
+        await Assert.That(first.Average()).IsGreaterThan(rest.Average());
+
+        // and no faster than the soloist plays at the song's tempo there
+        foreach (var (song, songRuns) in wild)
+        foreach (var run in songRuns.Where(x => x.Notes.Length > 1))
+        {
+            var beatsASecond = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(run.Start).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60;
+            var shortest = run.Notes.Zip(run.Notes.Skip(1), (a, b) => b.Position - a.Position).Min();
+            await Assert.That(beatsASecond / shortest).IsLessThanOrEqualTo(Math.Max(run.Soloist.MaxNotesASecond, run.Soloist.Speeds[0] * beatsASecond) + 1e-6);
+        }
+    }
+
+    /// <summary>The solos' runs, by fifth of the melody facet: the sizes of their cells, their shapes, and the share grouping cells of several sizes.</summary>
+    [Test]
+    [Explicit]
+    public async Task CellReport()
+    {
+        static double MelodyOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Melody];
+        var runs = TestCorpus.Measure(512, song => Runs(song).Select(x => (Fifth: Math.Clamp((int)(MelodyOf(song) * 5), 0, 4), Run: x)).ToArray()).SelectMany(x => x).ToArray();
+        foreach (var band in runs.GroupBy(x => x.Fifth).OrderBy(x => x.Key))
+        {
+            var cells = band.SelectMany(x => x.Run.Cells).ToArray();
+            string Shares<T>(IEnumerable<T> values, int total) => string.Join(" ", values.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count() / (double)total:P0}"));
+            Console.WriteLine($"  melody {band.Key}/5, {band.Count()} runs and licks: cells {Shares(cells, cells.Length)}; shapes {Shares(band.Select(x => x.Run.Shape), band.Count())}; " +
+                              $"cells of several sizes in {band.Count(x => x.Run.Cells.Distinct().Count() > 1) / (double)band.Count():P0}, by {band.Select(x => x.Run.Soloist).Distinct().Count(x => x.Groups)} grouping soloists");
+        }
+
+        await Task.CompletedTask;
     }
 
     /// <summary>The solos' gestures, by fifth of the melody facet: each gesture's share, the notes a beat, how far the intensity swings, and the share of solos of their own.</summary>
