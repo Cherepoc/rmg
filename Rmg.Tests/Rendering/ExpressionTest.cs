@@ -13,21 +13,29 @@ public sealed class ExpressionTest
     private static int Count(CorpusSong song, Func<RealizedNote, bool> has) => song.Song.Notes!.Values.Sum(x => x.Count(n => has(n.Value)));
 
     [Test]
-    public async Task ThePlainestSongs_PlayAVibratoAndAReverbAlone_AndTheWildest_EveryEffect()
+    public async Task ThePlainestSongs_PlayAReverbAlone()
     {
-        var plain = TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, Sound(0)));
-        foreach (var song in plain)
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, Sound(0))))
         {
-            await Assert.That(Count(song, x => x.State.GetStateValue(CompositionStateKinds.Bend) != 0)).IsEqualTo(0);
-            await Assert.That(Count(song, x => x.State.GetStateValue(CompositionStateKinds.Echo) != 0)).IsEqualTo(0);
-            await Assert.That(Count(song, x => x.State.GetStateValue(CompositionStateKinds.Tremolo) != 0 || x.State.GetStateValue(CompositionStateKinds.AutoPan) != 0)).IsEqualTo(0);
+            await Assert.That(PartEffects(song).Sum(x => x.Count(has => has))).IsEqualTo(0);
             await Assert.That(song.Rendered.Tracks.All(x => x.Controllers.Any(c => c.Controller == ExpressionRender.ReverbController))).IsTrue();
         }
+    }
 
-        var wild = TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, Sound(1)));
-        await Assert.That(wild.Sum(x => Count(x, n => n.State.GetStateValue(CompositionStateKinds.Bend) != 0))).IsGreaterThan(0);
-        await Assert.That(wild.Sum(x => x.Rendered.Tracks.Sum(t => t.Echoes.Length))).IsGreaterThan(0);
-        await Assert.That(wild.Sum(x => x.Rendered.Tracks.Sum(t => t.Expression.Length))).IsGreaterThan(0);
+    [Test]
+    public async Task TheWildestSongs_PlayOneStrongEffect_OnSomeParts_AndTheGentleOnes_Together()
+    {
+        var wild = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => PartEffects(TestCorpus.Get(seed, Sound(1))));
+        var strong = Effects.Select((e, i) => (e, i)).Where(x => x.e.IsStrong).Select(x => x.i).ToArray();
+        var gentle = Effects.Select((e, i) => (e, i)).Where(x => !x.e.IsStrong).Select(x => x.i).ToArray();
+
+        foreach (var song in wild)
+            await Assert.That(strong.Count(i => song.Any(p => p[i]))).IsLessThanOrEqualTo(1);
+
+        // the strong effect on a share of the parts, never on all of them in every song
+        await Assert.That(wild.Count(song => strong.Any(i => song.Any(p => p[i])))).IsGreaterThan(wild.Length / 2);
+        await Assert.That(wild.SelectMany(x => x).Count(p => strong.Any(i => p[i]))).IsLessThan(wild.Sum(x => x.Length) * 2 / 3);
+        await Assert.That(wild.SelectMany(x => x).Any(p => gentle.Count(i => p[i]) >= 2)).IsTrue();
     }
 
     [Test]

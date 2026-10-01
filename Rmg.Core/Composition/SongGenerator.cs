@@ -320,6 +320,7 @@ public static class SongGenerator
             tracks.Definitions,
             form.Map,
             songUnconventionality[Facet.Sound],
+            Stream(SongStream.Effects),
             [..sections.Select(x => x.Facets[Facet.Sound])],
             track => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.PartSound), track)),
             (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Expression), section), track))
@@ -443,5 +444,6 @@ internal enum SongStream
     RhythmPart = 37,
     SectionTempo = 38,
     SectionMeter = 39,
-    Polymeter = 40
+    Polymeter = 40,
+    Effects = 41
 }

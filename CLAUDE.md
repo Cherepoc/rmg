@@ -14,7 +14,9 @@
   weight through its tuned weight at 0.5 to its wild weight (`ByConvention`). A chance follows its own curve, so that an
   unconventional thing never happens at 0 and happens every time at 1, and a conventional one, such as a song in one of
   the forms, the other way round. Which options each end allows, and how heavily, is data on the choice, never a special
-  case. The facets reach the ends only together, as the song's value does; songs are spread well away from both, and
+  case. Where the song decides a thing and its parts or notes then take it, such as an effect, the song's chance reaches
+  its end and the parts' share may stop short of it, so that the wildest song plays the thing every time but not
+  everywhere. The facets reach the ends only together, as the song's value does; songs are spread well away from both, and
   whatever an end makes, however wild, is meant.
 
 # Architecture
