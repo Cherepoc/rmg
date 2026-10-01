@@ -14,6 +14,34 @@ public sealed class SectionDynamicsTest
 
     private static readonly string[] Measures = ["Loudness", "Drum notes", "Drums", "Bass notes", "Chord notes", "Melody notes"];
 
+    /// <summary>
+    ///     How much louder each section's last appearance plays than its first, as rendered, every pitched part's notes
+    ///     but the soloists', in the first pattern of each; over a song's sections that play more than once.
+    /// </summary>
+    private static double[] Growth(CorpusSong song)
+    {
+        double Loudness(SectionSpan span) =>
+            song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack).SelectMany(x => x.Value)
+                .Where(x => x.Position >= span.Start && x.Position < span.Start + span.Meter.PatternDuration - span.Meter.BarDuration && x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0)
+                .Select(x => Rmg.Core.Rendering.Render.ToMidiVelocity(x.Value.Velocity)).DefaultIfEmpty(double.NaN).Average();
+        return
+        [
+            ..song.Map.Sections.Select((x, i) => (x, i)).Where(x => !song.Solos.ContainsKey(x.i)).GroupBy(x => x.x.SectionId).Where(x => x.Count() > 1)
+                .Select(x => Loudness(x.Last().x) - Loudness(x.First().x)).Where(x => !double.IsNaN(x))
+        ];
+    }
+
+    [Test]
+    public async Task ASectionsLastAppearance_PlaysLouderThanItsFirst()
+    {
+        var growth = TestCorpus.Measure(256, Growth).SelectMany(x => x).ToArray();
+
+        await Assert.That(growth.Length).IsGreaterThan(100);
+        // as loud as before, the last a little quieter, where the energy's step played no part in the loudness
+        await Assert.That(growth.Average()).IsGreaterThan(0.05);
+        await Assert.That(growth.Count(x => x > 0) / (double)growth.Length).IsGreaterThan(0.8);
+    }
+
     [Test]
     [Explicit]
     public async Task Report()

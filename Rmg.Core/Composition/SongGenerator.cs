@@ -221,6 +221,9 @@ public static class SongGenerator
                 [..lateEntries.Where(x => index < x.Value).Select(x => x.Key)],
                 [..lateEntries.Where(x => index == x.Value).Select(x => x.Key)]
             );
+            // as loud as its energy's step from the section's, as far as the lift into it grows, so that its last chorus plays
+            // the louder
+            section = section with { Timeline = section.Timeline.MergeStateMap(StateMap.FromStates([StateKinds.Velocity.CreateState(FormLayers.LiftVelocity * energyStep)])) };
             if (solo is not null)
             {
                 solos[index] = solo;

@@ -18,7 +18,6 @@ built since 0.6 (October 2026): parts entering late, the solos placed by their r
 answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
 this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
 
-1. the appearance's energy in its loudness, a later appearance louder by its energy's step, about the lift's at most;
 2. the lift beyond loudness, the hi-hat opening on the bar before's last beat and the snare from its cross-stick to its
    head, into a section louder by more than the lift's threshold, as data by drum role (see *Fills*);
 3. the counter-melody running into a section, `LineFills`' third way, never where the melody walks in;
@@ -400,8 +399,11 @@ planned together (P1):
   (`SectionEnergy.AppearanceStep`), which a later appearance draws its parts again by, from a sequence of its own, a part
   that played the time before playing on, so that parts only join as a section comes back (`GeneratedSection.Appear`).
   Over 200 corpus songs, a recurring section plays 4.31 of its five parts the first time and 4.78 the last, 230 of 577
-  growing; the pad plays in 85% of the choruses as they play (`ArrangementReportTest`). Left: the appearance's energy
-  for its loudness and the drums' changes (their colour, a drum's stroke), which are the section's as it was made.
+  growing; the pad plays in 85% of the choruses as they play (`ArrangementReportTest`). An appearance plays as loud as its
+  energy's step from the section's, as far as the lift into it grows (`FormLayers.LiftVelocity`): over 256 songs a
+  section's last appearance 0.10 of velocity louder than its first, louder in 94% of them, where 0.005 quieter
+  (`SectionDynamicsTest`). Left: the drums' changes by the appearance's energy (their colour, a drum's stroke), which are
+  the section's as it was made.
 - **Key changes** (built): a song whose last section came back before goes up a key for it, a whole step or a half
   step, by the scale facet, 0.08 at the middle (`KeyChange`), and at the wild end elsewhere too and by any step (see
   *Conventionality*, the wild end made complete), as the song's key from the section's start, so that the whole band,
