@@ -79,10 +79,6 @@ internal sealed record Soloist(
     /// </summary>
     public static ByConvention PlaneChance { get; } = new(0, 0.15, 0.6);
 
-    /// <summary>Whether an instrument plays chords: one the song might give its chords or its rhythm part.</summary>
-    private static bool PlaysChords(int program) =>
-        InstrumentRoles.Chords.Instruments.Concat(InstrumentRoles.Rhythm.Instruments).Any(x => x.Program == program);
-
     /// <summary>
     ///     How often a soloist that bends bends a note it holds, an 8th or longer, by the sound facet: a third of them in the
     ///     middle, as a rock guitarist bends, most of them at the wild end; leaned by its lean to bends and its solo's intensity.
@@ -215,7 +211,7 @@ internal sealed record Soloist(
         var stamina = Math.Pow(2, StaminaPowers.At(melody) + StaminaSpread.At(melody) * Generators.SplineValue()(context));
         var phraseBars = Favourites(context, PhraseBarOptions, melody);
         // drawn last, so that the rest stays as it was
-        var chordRate = PlaysChords(program) ? ChordRates.At(melody) * (0.5 + context.GenerateDouble()) : 0;
+        var chordRate = InstrumentRoles.PlaysChords(program) ? ChordRates.At(melody) * (0.5 + context.GenerateDouble()) : 0;
         var voices = context.Pick(ByConvention.Weigh(VoiceOptions, melody));
         var planes = context.TestProbability(PlaneChance.At(melody));
         return new Soloist([..speeds.Concat(fastest).Order()], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody), bends, vibrates, stamina,

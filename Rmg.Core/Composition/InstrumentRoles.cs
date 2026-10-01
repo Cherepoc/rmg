@@ -55,6 +55,9 @@ public sealed class InstrumentRole
 /// </summary>
 internal static class InstrumentRoles
 {
+    /// <summary>Whether an instrument plays chords: one the song might give its chords or its rhythm part.</summary>
+    public static bool PlaysChords(int program) => Chords.Instruments.Concat(Rhythm.Instruments).Any(x => x.Program == program);
+
     public static InstrumentRole Chords { get; } = new(
         nameof(Chords),
         [

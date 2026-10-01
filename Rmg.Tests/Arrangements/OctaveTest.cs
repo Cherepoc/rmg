@@ -31,7 +31,7 @@ public sealed class OctaveTest
             if (note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0)
                 await Assert.That(LineDoubling.OctaveRoles).Contains(song.Song.TrackDefinitions[track].Role);
             // a solo's stacked note plays its chord in place of the octave
-            if (note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.SoloVoices) > 1)
+            if (note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1)
                 continue;
 
             doubled++;

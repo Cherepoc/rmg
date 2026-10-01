@@ -607,7 +607,7 @@ public sealed class SoloTest
         ];
     }
 
-    private static bool IsStacked(RealizedNote note) => note.Pitches.Length > 1 && note.State.GetStateValue(CompositionStateKinds.SoloVoices) > 1;
+    private static bool IsStacked(RealizedNote note) => note.Pitches.Length > 1 && note.State.GetStateValue(CompositionStateKinds.LineVoices) > 1;
 
     [Test]
     public async Task ASoloistOnAnInstrumentThatPlaysChords_StacksItsHeldNotesMoreThanItsRuns_TheBandsChordUnderItsOwnNote()
@@ -627,8 +627,8 @@ public sealed class SoloTest
         {
             // its own note on top, no more notes than its voices, the line's soloist's, who may not be the one playing it
             await Assert.That(note.Pitches.Skip(1).All(x => x < note.Pitches[0])).IsTrue().Because($"top {string.Join(",", note.Pitches)}");
-            await Assert.That(note.Pitches.Length).IsLessThanOrEqualTo(note.State.GetStateValue(CompositionStateKinds.SoloVoices));
-            if (note.State.GetStateValue(CompositionStateKinds.SoloPlanes) > 0)
+            await Assert.That(note.Pitches.Length).IsLessThanOrEqualTo(note.State.GetStateValue(CompositionStateKinds.LineVoices));
+            if (note.State.GetStateValue(CompositionStateKinds.LinePlanes) > 0)
             {
                 planing++;
                 continue;

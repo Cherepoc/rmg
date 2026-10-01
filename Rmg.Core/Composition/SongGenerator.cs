@@ -333,6 +333,14 @@ public static class SongGenerator
             energies,
             (pair, section) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.LineDoubling), pair), section))
         );
+        // and the riff landing on a chord where a section starts now and then, its twin as it is
+        songTrackNoteTimelineMap = LineChords.Apply(
+            songTrackNoteTimelineMap,
+            riffTrack.Key,
+            (PitchInstrumentTrack)riffTrack.Value,
+            form.Map,
+            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.LineChords), index))
+        );
         // and every pitched solo's line played by its soloists
         songTrackNoteTimelineMap = Solos.Apply(
             songTrackNoteTimelineMap,
@@ -498,5 +506,6 @@ internal enum SongStream
     Soloist = 43,
     DrumSolo = 44,
     SoloChords = 45,
-    LateEntries = 46
+    LateEntries = 46,
+    LineChords = 47
 }

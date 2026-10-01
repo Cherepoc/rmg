@@ -76,11 +76,11 @@ internal static class CompositionStateKinds
     // 1 for a solo's release, the held note a phrase ends on
     public static StateKind<int> SoloRelease { get; } = StateKinds.CreateAdditive<int>(Prefix + "SoloRelease", StateScope.Render);
 
-    // how many notes a solo's note stacks, its own on top and the chord's below, 0 or 1 for the note alone
-    public static StateKind<int> SoloVoices { get; } = StateKinds.CreateAdditive<int>(Prefix + "SoloVoices", StateScope.Render);
+    // how many notes a line's note stacks, its own on top and the chord's below, as a solo's or a riff's landing may, 0 or 1 for the note alone
+    public static StateKind<int> LineVoices { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineVoices", StateScope.Render);
 
-    // 1 for a solo's stacked note that planes, its chord's shape moved with it whatever the band plays, rather than the band's chord under it
-    public static StateKind<int> SoloPlanes { get; } = StateKinds.CreateAdditive<int>(Prefix + "SoloPlanes", StateScope.Render);
+    // 1 for a line's stacked note that planes, its chord's shape moved with it whatever the band plays, rather than the band's chord under it
+    public static StateKind<int> LinePlanes { get; } = StateKinds.CreateAdditive<int>(Prefix + "LinePlanes", StateScope.Render);
 
     // how intense a solo is at a note, from 0 to 100, which leans how it is played
     public static StateKind<int> SoloIntensity { get; } = StateKinds.CreateAdditive<int>(Prefix + "SoloIntensity", StateScope.Render);

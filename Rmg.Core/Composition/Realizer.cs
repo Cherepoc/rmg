@@ -303,10 +303,10 @@ internal static class Realizer
             _ => throw new ArgumentOutOfRangeException(nameof(role), role, "A pitched track plays the chords, the melody, the bass or a pad.")
         };
 
-        // a solo's stacked note plays its note on top and the chord's under it, from a minor third down so that its note
+        // a line's stacked note, a solo's or a riff's, plays its note on top and the chord's under it, from a minor third down so that its note
         // stays clear, where its note is the chord's, and alone where not, or the chord's shape from its top down, planed
         // with the line whatever its note; a chord's notes in no octave of their own
-        var voices = stateMap.GetStateValue(CompositionStateKinds.SoloVoices);
+        var voices = stateMap.GetStateValue(CompositionStateKinds.LineVoices);
         if (isLine && voices > 1)
             notes = [notes[0], ..Stack(notes[0], voices - 1, stateMap).Where(x => x >= range.Low)];
         // a line in octaves plays its note and the note an octave above, or below where above would leave the range, its
@@ -329,13 +329,13 @@ internal static class Realizer
     ///     it, and the pitch of every step counted from the root, in the key and the octave.
     /// </summary>
     /// <summary>
-    ///     The notes a solo's stacked note plays under its own, from the highest down: the band's chord's where its note is
+    ///     The notes a line's stacked note plays under its own, from the highest down: the band's chord's where its note is
     ///     the chord's, none where not, or the chord's shape's from its top down where it planes.
     /// </summary>
     private static IEnumerable<int> Stack(int top, int count, StateMap stateMap)
     {
         var (chord, steps, classes) = GetChordNotes(stateMap);
-        if (stateMap.GetStateValue(CompositionStateKinds.SoloPlanes) > 0)
+        if (stateMap.GetStateValue(CompositionStateKinds.LinePlanes) > 0)
         {
             // the shape in close position, its highest note on the line's
             var heights = steps.Select(x => (chord.GetPitch(x) - chord.GetPitch(0)).Mod(OctaveNoteCount)).Distinct().OrderDescending().ToArray();

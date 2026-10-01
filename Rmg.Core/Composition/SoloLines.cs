@@ -212,8 +212,8 @@ internal static class SoloLines
             // a stacked note the band's chord there under it, or the chord's shape planed (Realizer)
             if (stacked && soloist.Voices > 1)
                 state = state.With(StateKinds.ChordNotePitchOffsets, melodyNote.GetStateValue(StateKinds.ChordNotePitchOffsets))
-                    .With(CompositionStateKinds.SoloVoices, soloist.Voices)
-                    .With(CompositionStateKinds.SoloPlanes, soloist.Planes ? 1 : 0);
+                    .With(CompositionStateKinds.LineVoices, soloist.Voices)
+                    .With(CompositionStateKinds.LinePlanes, soloist.Planes ? 1 : 0);
 
             return (held > 0 ? state.With(StateKinds.HeldDuration, held) : state).ToTimelineItem(position);
         }

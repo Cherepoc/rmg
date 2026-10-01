@@ -16,15 +16,14 @@ twin riff, the polymeter, the line scales, the new chords and scales, the solos,
 tuned by what listening says (see *Listening*), and the ratings by conventionality once enough are in. Then, in this
 order, each small and each measured:
 
-1. occasional chords, a riff's power chords where a section lands first (see *Instruments*);
-2. the solo part answering the melody, in its small version: in some sections in the counter-melody's place in the
+1. the solo part answering the melody, in its small version: in some sections in the counter-melody's place in the
    melody's gaps, sparse and under the melody, the page given the part (see *Instruments*, *Solos*);
-3. the melody running into a section, as the bass's run-in does (see *Fills*);
-4. prepared key changes, a chain of chords leading into the new key, a dominant at the plain end and the middle,
+2. the melody running into a section, as the bass's run-in does (see *Fills*);
+3. prepared key changes, a chain of chords leading into the new key, a dominant at the plain end and the middle,
    chromatic and third-related ones wilder (see *Appearances*);
-5. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
+4. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
    *Solos*);
-6. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
+5. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -453,14 +452,11 @@ Each sits where its role spreads it (`Panning`): the bass in the middle, the mel
 other side; a new role takes a spread of its own. How a part is played beyond its notes, its effects, bends, vibrato
 and slides, is `Expression`'s (see *Listening*).
 
-- **Occasional chords** (P3, planned in September 2026 and put off: what it adds, a double stop in the melody, a bass
-  chord, risks clashing with the chords for little): how many notes a track sounds at once is its role's (`Realizer`),
-  but for a line in octaves, a state on its notes that the Realizer adds the octave for (`CompositionStateKinds.Octave`),
-  which is the way an occasional chord would take, as a state drawn by section or by accent rather than a draw of
-  every note. As a note's state, a
-  note, two or the chord, leaned by the beat's accent, the energy and the landings, the melody would play a double stop
-  on an accent, a guitar a power chord where a section lands, the bass a chord now and then. Measured by: the notes
-  sounding at once by role, on accents and off.
+- **Occasional chords** (built for the riff's landings, `LineChords`): a riff on an instrument that plays chords lands
+  on one where a section starts, by a flat chance of 0.5, two or three notes, the band's chord under its note
+  (`CompositionStateKinds.LineVoices`, the Realizer's stack, as a solo's); 252 of 509 such starts over 256 songs
+  (`RiffTest`). Left (P3): the melody's double stop on an accent, a bass's chord now and then, by the same state, should
+  listening miss them.
 - **A twin riff** (built): a song with a riff harmonises it by its twin by the melody facet, never in a plain song and
   in 15% of riff songs from the middle on (`SongParts.TwinChance`), the twin playing the riff's line in every section,
   in its instrument and state, the two all the way to either side (`TrackRole.RiffTwin`, `LineDoubling`): a third above

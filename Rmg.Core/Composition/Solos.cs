@@ -200,7 +200,7 @@ internal static class Solos
                 [
                     // a soloist that plays no chords playing the line's stacked notes alone
                     ..notes.Select(x => x.Value.With(CompositionStateKinds.LineSolo, 1)
-                        .With(CompositionStateKinds.SoloVoices, soloists[soloist].ChordRate > 0 ? x.Value.GetStateValue(CompositionStateKinds.SoloVoices) : 0)
+                        .With(CompositionStateKinds.LineVoices, soloists[soloist].ChordRate > 0 ? x.Value.GetStateValue(CompositionStateKinds.LineVoices) : 0)
                         .With(StateKinds.Velocity, x.Value.GetStateValue(StateKinds.Velocity) + lift)
                         .ToTimelineItem(x.Position))
                 ];

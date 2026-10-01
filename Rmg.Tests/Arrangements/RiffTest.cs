@@ -21,6 +21,38 @@ public sealed class RiffTest
     }
 
     [Test]
+    public async Task ARiff_StacksANote_OnlyWhereASectionStarts_OnAnInstrumentThatPlaysChords()
+    {
+        var (starts, stacked) = (0, 0);
+        foreach (var song in TestCorpus.Range(256).Where(x => !Absent(x).Contains(TrackRole.Riff)))
+        {
+            var riff = (PitchInstrumentTrack)song.Song.TrackDefinitions[SongTracks.RiffTrack];
+            var sectionStarts = song.Map.Sections.Select(x => Math.Round(x.Start, 6)).ToHashSet();
+            foreach (var note in song.Song.Notes!.GetValueOrDefault(SongTracks.RiffTrack, Rmg.Core.Events.EventTimeline.Create<RealizedNote>(0))
+                         .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0))
+            {
+                var isStart = sectionStarts.Contains(Math.Round(note.Position, 6));
+                var isStacked = note.Value.Pitches.Length > 1 && note.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1;
+                if (isStacked)
+                {
+                    await Assert.That(isStart).IsTrue().Because($"seed {song.Seed} at {note.Position}");
+                    await Assert.That(Rmg.Core.Composition.InstrumentRoles.PlaysChords(riff.InstrumentCode)).IsTrue();
+                    // the riff's own note on top
+                    await Assert.That(note.Value.Pitches.Skip(1).All(x => x < note.Value.Pitches[0])).IsTrue();
+                    stacked++;
+                }
+
+                if (isStart && Rmg.Core.Composition.InstrumentRoles.PlaysChords(riff.InstrumentCode))
+                    starts++;
+            }
+        }
+
+        await Assert.That(stacked).IsGreaterThan(10);
+        // by its chance, where its note is the chord's, as a section's first note mostly is
+        await Assert.That(stacked / (double)starts).IsBetween(0.35, 0.55);
+    }
+
+    [Test]
     public async Task ADoubledLine_PlaysTheOthersNotes_AtTheirPlaces()
     {
         var doubled = 0;
