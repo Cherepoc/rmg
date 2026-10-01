@@ -521,12 +521,9 @@ and slides, is `Expression`'s (see *Listening*).
   `SettingsLinkTest`).
   A soloist plays its held notes, licks and quotes in octaves by a choice of its own, by the melody facet (0, 0.1,
   0.2), its runs alone, where a solo played in octaves where the melody it took over did; a drum solo stacks the kick
-  under its runs' and licks' accents half the time (`SoloTest`, `DrumSoloTest`).
-  Left (P3): **the drummer as one player,** the fills' `Drummer` and the drum solo's `Soloist` one record, its fill habits
-  and its solo habits together, a refactor with no sound of its own, put off in October 2026 until the two drift apart;
-  a drum solo's run or lick of its climax, 0.8 intense or
-  more, starts on the song's crash, and its held notes crash on it whether the section's groove played it or not
-  (`DrumSoloTest`).
+  under its runs' and licks' accents half the time, and a run or lick of its climax, 0.8 intense or more, starts on
+  the song's crash, its held notes crashing on it whether the section's groove played it or not (`SoloTest`,
+  `DrumSoloTest`). The drummer as one player is parked (see *Parked*).
 
 - **Modulation** (P3, when a soundfont maps it): CC1, which none of the soundfonts offered maps to tone, so it was
   left out of expression. The rule to keep: modulation and a vibrato never at once, modulation and bends together.
