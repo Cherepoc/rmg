@@ -52,8 +52,11 @@ internal sealed record Soloist(
     double BreathChance
 )
 {
-    /// <summary>The fastest a soloist plays, in notes a second, which its speeds keep under at a song's tempo: a plain one's 16ths at 120, a wild one's sextuplets at 160.</summary>
-    public static ByConvention MaxNotesASeconds { get; } = new(8, 11, 28);
+    /// <summary>
+    ///     The fastest a soloist plays, in notes a second, which its speeds keep under at a song's tempo: a plain one's
+    ///     16ths at 120, a middling one's sextuplets at 130, a wild one's 64ths at 105.
+    /// </summary>
+    public static ByConvention MaxNotesASeconds { get; } = new(8, 13, 28);
 
     /// <summary>
     ///     The wildest speeds, 32nds in sextuplets and 64ths, of the wild end alone, as a shredder's, each by a chance of its
@@ -70,7 +73,7 @@ internal sealed record Soloist(
     ///     at the plain end, a few in the middle, and anything from a burst to bars of it at the wild end, as a Shawn Lane
     ///     runs on; a slower speed lasts the longer, as many notes as the fastest's.
     /// </summary>
-    public static ByConvention StaminaPowers { get; } = new(0, 1.5, 2.5);
+    public static ByConvention StaminaPowers { get; } = new(0, 2, 2.5);
 
     public static ByConvention StaminaSpread { get; } = new(0, 0.5, 2);
 
@@ -97,18 +100,18 @@ internal sealed record Soloist(
         (2, new ByConvention(1, 1, 1)),
         (4, new ByConvention(1, 0.9, 1)),
         (3, new ByConvention(0, 0.4, 1)),
-        (6, new ByConvention(0, 0.2, 0.8)),
-        (8, new ByConvention(0, 0.05, 0.5))
+        (6, new ByConvention(0, 0.5, 0.8)),
+        (8, new ByConvention(0, 0.2, 0.5))
     ];
 
     /// <summary>The sizes of a run's cells, in notes: four and three the plainest, the odd and long ones the wilder.</summary>
     public static ImmutableArray<(int Size, ByConvention Weight)> CellSizeOptions { get; } =
     [
-        (4, new ByConvention(1, 0.5, 0.15)),
-        (3, new ByConvention(1, 0.35, 0.15)),
-        (6, new ByConvention(0, 0.1, 0.2)),
-        (5, new ByConvention(0, 0.03, 0.2)),
-        (7, new ByConvention(0, 0.02, 0.2)),
+        (4, new ByConvention(1, 0.35, 0.15)),
+        (3, new ByConvention(1, 0.24, 0.15)),
+        (6, new ByConvention(0, 0.25, 0.2)),
+        (5, new ByConvention(0, 0.08, 0.2)),
+        (7, new ByConvention(0, 0.08, 0.2)),
         (9, new ByConvention(0, 0, 0.1))
     ];
 
@@ -121,7 +124,7 @@ internal sealed record Soloist(
     ];
 
     /// <summary>The chance a soloist groups cells of several sizes into one figure, five and seven say.</summary>
-    public static ByConvention GroupingChance { get; } = new(0, 0.15, 1);
+    public static ByConvention GroupingChance { get; } = new(0, 0.3, 1);
 
     public static ImmutableArray<(SoloShape Shape, ByConvention Weight)> ShapeOptions { get; } =
     [
