@@ -38,8 +38,8 @@ public enum StrongEffect
 ///     from side to side; a lead's echo, its notes repeated quieter after it, as a delay pedal plays; and every part's
 ///     reverb and chorus. Decided once a song's notes are, by the song's sound facet: first which effects the song plays
 ///     at all, the gentle ones, a vibrato, a chorus, a swell and bends, each of its own, and of the strong ones, a tremolo,
-///     an echo and a sweep, one at most, and the one part that plays it, the likelier one it suits, from a sequence of the
-///     song's; then which of the gentle ones each part plays, together as they come, from a sequence of the part's; and a
+///     an echo and a sweep, one at most, and the one part that plays it, the likelier one it suits, an echo's playing no
+///     vibrato or bends, from a sequence of the song's; then which of the gentle ones each part plays, together as they come, from a sequence of the part's; and a
 ///     note's bend from its section's, by the section's. The plainest songs play a reverb alone, and the wildest every
 ///     gentle effect on some of their parts, and one strong one on one.
 /// </summary>
@@ -214,6 +214,10 @@ internal static class Expression
             var tremolo = carries && strong == StrongEffect.Tremolo ? tremoloDepth : 0;
             var sweeps = carries && strong == StrongEffect.Sweep ? sweepDepth : 0;
             var echoes = carries && strong == StrongEffect.Echo;
+            // an echo repeats the notes as they are played, so a bent or wavering one would smear: the part that echoes plays
+            // them straight
+            vibrates &= !echoes;
+            bendsHere &= !echoes;
             var delay = EchoDelays[part.GenerateInt(0, EchoDelays.Length)];
             var reverb = (int)Math.Round(Reverb(role) + ReverbSpread.At(songSound) * (part.GenerateDouble() * 127 - Reverb(role)));
             var choruses = part.TestProbability((ChorusesClassically(program) ? ClassicChorusChance : ChorusChance).At(songSound)) & songChorus;

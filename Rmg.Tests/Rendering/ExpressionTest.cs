@@ -40,6 +40,16 @@ public sealed class ExpressionTest
     }
 
     [Test]
+    public async Task ThePartThatEchoes_NeitherSingsAVibrato_NorBends()
+    {
+        var parts = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => PartEffects(TestCorpus.Get(seed, Sound(1)))).SelectMany(x => x).ToArray();
+        var (vibrato, bends, echo) = (Array.FindIndex(Effects, x => x.Name == "vibrato"), Array.FindIndex(Effects, x => x.Name == "bends"), Array.FindIndex(Effects, x => x.Name == "echo"));
+
+        await Assert.That(parts.Count(p => p[echo])).IsGreaterThan(0);
+        await Assert.That(parts.Count(p => p[echo] && (p[vibrato] || p[bends]))).IsEqualTo(0);
+    }
+
+    [Test]
     public async Task OnlyALineOfAnInstrumentThatBends_Bends()
     {
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, Sound(1))))
