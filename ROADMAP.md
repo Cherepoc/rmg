@@ -16,17 +16,16 @@ twin riff, the polymeter, the line scales, the new chords and scales, the solos,
 tuned by what listening says (see *Listening*), and the ratings by conventionality once enough are in. Then, in this
 order, each small and each measured:
 
-1. a polymeter's cells accented, so that a composite cycle is heard as phrases (see *Meter*);
-2. which appearance solos, by its section's role (see *Instruments*, *Solos*);
-3. occasional chords, a riff's power chords where a section lands first (see *Instruments*);
-4. the solo part answering the melody, in its small version: in some sections in the counter-melody's place in the
+1. which appearance solos, by its section's role (see *Instruments*, *Solos*);
+2. occasional chords, a riff's power chords where a section lands first (see *Instruments*);
+3. the solo part answering the melody, in its small version: in some sections in the counter-melody's place in the
    melody's gaps, sparse and under the melody, the page given the part (see *Instruments*, *Solos*);
-5. the melody running into a section, as the bass's run-in does (see *Fills*);
-6. prepared key changes, a chain of chords leading into the new key, a dominant at the plain end and the middle,
+4. the melody running into a section, as the bass's run-in does (see *Fills*);
+5. prepared key changes, a chain of chords leading into the new key, a dominant at the plain end and the middle,
    chromatic and third-related ones wilder (see *Appearances*);
-7. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
+6. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
    *Solos*);
-8. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
+7. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -250,9 +249,10 @@ dotted 8th (`MeterReportTest`; `MeterSeedsReportTest` names seeds to hear).
   with the drums bound to it; each part in the bars it plays, repeating its own first notes, so
   that its line, placed after, follows the chords where they land, and the fills mark the phrase's end over it. By the
   feel facet: 0.7% of the middle fifth's sections, 22% of the wildest's; of them the kick 84%, 8 bars 44%, composite
-  41% (`PolymeterTest`). Left (P3), the cycle a tune played in unison against a pulse still felt
-  rather than a chugged drift: **its cells accented,** every cell's first note leaned on, as a solo's are, so
-  that 7, 7 and 9 are heard as phrases rather than drift, the most needed; **the ostinato in unison,** the bass with
+  41% (`PolymeterTest`). Its cells are heard as phrases already: a cell's first note is the motif's, on the frame's
+  downbeat, and plays its accent with it, 0.52 of velocity against the rest's 0.15, so that an accent of their own was
+  measured and left out (October 2026). Left (P3), the cycle a tune played in unison against a pulse still felt
+  rather than a chugged drift: **the ostinato in unison,** the bass with
   the riff the oftener, and the chords joining the cycle, their notes repeated cell by cell as the riff's; **the snare
   on its accents and the hi-hat on the pulse,** so that the cycle sits against a beat; **a metric modulation,** a
   section's own tempo leaning at the wild end to 3:2 or 4:3 of the one before, a tuplet's pulse becoming the beat
