@@ -41,7 +41,13 @@ public static class SongGenerator
     ///     plainest to 1 for the wildest, or the parts it has, and the rest drawn as <see cref="GenerateSong(int)" />
     ///     draws it.
     /// </summary>
-    public static Song GenerateSong(ulong seed, SongOverrides overrides)
+    public static Song GenerateSong(ulong seed, SongOverrides overrides) => GenerateSong(seed, overrides, CancellationToken.None);
+
+    /// <summary>
+    ///     Generates a song as <see cref="GenerateSong(ulong, SongOverrides)" /> does, given up at the next stage once
+    ///     nobody waits for it any more.
+    /// </summary>
+    public static Song GenerateSong(ulong seed, SongOverrides overrides, CancellationToken cancellation)
     {
         if (overrides.Base is < 0 or > 1 or double.NaN)
             throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Base, "An unconventionality is from 0 to 1.");
@@ -54,13 +60,14 @@ public static class SongGenerator
         if (overrides.Key is < 0 or > 11)
             throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Key, "A key is from 0 to 11.");
 
-        return GenerateSong(seed, ProgressionSettings.Default, overrides);
+        return GenerateSong(seed, ProgressionSettings.Default, overrides, cancellation);
     }
 
-    internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings) => GenerateSong(seed, progressionSettings, SongOverrides.None);
+    internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings) => GenerateSong(seed, progressionSettings, SongOverrides.None, CancellationToken.None);
 
     /// <param name="overrides">What a test sets in place of the song's own draws.</param>
-    internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings, SongOverrides overrides)
+    /// <param name="cancellation">Gives the song up between its stages, which draw nothing to check it.</param>
+    internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings, SongOverrides overrides, CancellationToken cancellation)
     {
         // every stage draws from its own random sequence, derived from the seed by the stage, so a change to what one
         // stage draws leaves what the others draw as it was
@@ -185,6 +192,7 @@ public static class SongGenerator
         var sections = new List<GeneratedSection>();
         for (var index = 0; index < played.Length; index++)
         {
+            cancellation.ThrowIfCancellationRequested();
             var id = played[index];
             // a later appearance played as a solo now and then, from a sequence of its own, by the section's facets
             var solo = Solos.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Solos), index)), index, generateSection(id).Facets, SongParts.All.Except(absent).ToArray());
@@ -209,6 +217,7 @@ public static class SongGenerator
         }
 
         // the song put together as planned, and the lines the drums mark
+        cancellation.ThrowIfCancellationRequested();
         var form = formGenerator.Assemble(plan, played, sections);
         var songTrackNoteTimelineMap = form.Edits.ApplyTo(form.Blocks.Unroll());
         // a song may change key at a pattern's start: a middling one now and then going up for a last section that came
@@ -257,6 +266,7 @@ public static class SongGenerator
         );
 
         // the drums mark the lines, now that the song is put together
+        cancellation.ThrowIfCancellationRequested();
         var fills = new FillGenerator(Stream(SongStream.Fills), tracks, Of(Facet.Fills), meter);
         songTrackNoteTimelineMap = fills.Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
 
@@ -290,6 +300,7 @@ public static class SongGenerator
         );
 
         // and last the notes, decided from the state of the whole song, in its order, none sounding into a stop
+        cancellation.ThrowIfCancellationRequested();
         var notes = form.Edits.CutNotes(
             Realizer.Realize(tracks.Definitions, songTrackNoteTimelineMap, form.Map.MeterAt),
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role)
@@ -303,6 +314,7 @@ public static class SongGenerator
             (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.InstrumentsOverTime), section), track))
         );
         // and how the parts are played beyond their notes, by every section's sound facet
+        cancellation.ThrowIfCancellationRequested();
         notes = Expression.Apply(
             notes,
             tracks.Definitions,

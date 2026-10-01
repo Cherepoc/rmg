@@ -53,15 +53,16 @@ public static class SongEndpoints
         SongReport report;
         try
         {
-            var song = SongGenerator.GenerateSong(songSeed, overrides);
-            var renderedSong = Render.RenderSong(song, mix);
+            // a song nobody waits for any more is given up, its core going to the next
+            var song = SongGenerator.GenerateSong(songSeed, overrides, context.RequestAborted);
+            var renderedSong = Render.RenderSong(song, mix, context.RequestAborted);
             report = SongReport.Of(song, renderedSong, overrides);
 
             stream = new MemoryStream();
             renderedSong.Write(stream, SongsVersion.Label(songSeed));
             stream.Seek(0, SeekOrigin.Begin);
         }
-        catch (Exception ex)
+        catch (Exception ex) when (!context.RequestAborted.IsCancellationRequested)
         {
             return Results.Problem($"Song {Base64.FromSeed(songSeed)}: {ex.Message}", statusCode: 500);
         }

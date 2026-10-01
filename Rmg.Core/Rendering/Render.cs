@@ -27,7 +27,13 @@ public static class Render
     ///     every part's instrument, volume and pan, and the parts left out not written. A track with no notes, such as a
     ///     part the song leaves out, is not written either.
     /// </summary>
-    public static RenderedSong RenderSong(Song song, SongMix mix)
+    public static RenderedSong RenderSong(Song song, SongMix mix) => RenderSong(song, mix, CancellationToken.None);
+
+    /// <summary>
+    ///     The song as <see cref="RenderSong(Song, SongMix)" /> renders it, given up at the next track once nobody
+    ///     waits for it any more.
+    /// </summary>
+    public static RenderedSong RenderSong(Song song, SongMix mix, CancellationToken cancellation)
     {
         var notes = song.Notes ?? Realizer.Realize(song.TrackDefinitions, song.TrackEventStateTimelineMap, song.MeterAt);
         var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap.OfScope(StateScope.Render);
@@ -37,6 +43,7 @@ public static class Render
         ImmutableArray<(double Position, int Controller, int Value)> percussionSends = [];
         foreach (var (trackNumber, trackNotes) in notes)
         {
+            cancellation.ThrowIfCancellationRequested();
             // a drum plays as its group is asked to
             var group = song.TrackDefinitions[trackNumber] is PercussionInstrumentTrack && !mix.DrumGroups.IsEmpty
                 ? mix.DrumGroups.GetValueOrDefault(DrumGroups.GroupOf(DrumGroups.GetDrum(trackNumber)).Name)

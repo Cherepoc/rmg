@@ -470,7 +470,8 @@ the rest as they were.
 
 - **Review, October 2026** (built): a pick sums its weights as it goes, expression walks a section's notes alone, the
   MIDI file merges expression in one sweep (64 songs 8.7 s to 7.4 s); songs of few parts never fail; the server
-  makes as many songs at once as it has cores and turns the rest away busy, prunes analytics daily, and is published
+  makes as many songs at once as it has cores, the rest waiting their turns client by client and given up when their
+  client goes, and turns away what is past the queue busy, prunes analytics daily, and is published
   compiled ahead of time. Left, measured with dotTrace: of the CLI's time a third is JIT and GC, and in the songs'
   own a quarter is realizing notes, each map's state timeline built once per map (`StateTimelineMap`), which is how
   the state is designed rather than a hot spot to fix.
