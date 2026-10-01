@@ -3,22 +3,17 @@
 Random Music Generator: generates random, reproducible MIDI songs. The same seed always gives the same song in the
 same version of RMG; a new version may turn a seed into a different song.
 
-Most songs take one of the forms songs are written in, such as verse, chorus, verse, chorus, bridge,
-chorus, with a pre-chorus now and then, a section for every role; the others, more the less conventional
-their rhythm, have 4-8 parts, each a sequence of 1-4 sections chosen from up to 3 distinct sections (in
-alternation, ping-pong or random order). No section follows itself. Every section
-plays its 4-bar pattern once, twice or four times, changes its chords every half bar, bar or two bars, and has a percussion kit and five pitched tracks (chords, melody, bass, and in some sections a pad that holds the chords and a
-counter-melody under the melody), each with its own
-rhythm and note patterns. A song plays at its own tempo, from 90 to about 175 BPM, most often 120, and about one in five swings. Now and then a
-section leaves out a part, the drums for a breakdown or the melody for a section of the band alone, the
-likelier the quieter it is. The bass plays
-in the middle of the stereo field, the melody near it and the chords to one side.
+A song has an unconventionality, from 0, the plainest, to 1, the wildest, and a value of it for each facet of the
+music (its feel, groove, fills, form, chords, progression, scale, melody and sound), drawn around the song's, so that
+a song can be plain in one way and wild in another. Every choice leans by its facet: a plain song is in one of the
+forms songs are written in, in four, in major or minor, its band playing straight through; a wild one takes any
+meter, feel, scale or chord, changes key and tempo, plays polymeters and solos.
 
-Each song picks its own drums: one main snare (acoustic, electric, clap or sidestick; a sidestick can also
-join an acoustic or electric snare) and up to four other percussion instruments. Kick and snare always
-play in a section, plus one or two other drum groups (timekeepers, toms, accents, percussion). The toms
-and the crash are kept for fills and landings: a section grooves on them only now and then, the crash
-then only on the downbeats.
+A song is a sequence of sections, most often verse, chorus and bridge with a pre-chorus now and then, now and then an
+intro and an outro of their own. Its parts are drums and up to eight pitched parts: chords, melody, bass, a pad, a
+counter-melody, a riff (with a twin that harmonises it), a rhythm part and a solo part. Sections leave parts out,
+bring them in phrase by phrase, hold some back until a later section, double lines, play solos and fills, and change
+key or tempo, each by a chance of its own.
 
 ## Requirements
 
@@ -32,7 +27,7 @@ Any MIDI player or DAW can play the generated `.mid` files.
 ## Quick start
 
 ```
-dotnet run --project Rmg -- --count 5 --seed 42
+dotnet run --project Rmg -- --count 5 --seed 1A
 ```
 
 This writes five songs to `./songs` and prints the seed it used.
@@ -44,8 +39,9 @@ dotnet run --project Rmg -- [options]
 
   -o, --output <dir>   Directory to write the songs to (default: ./songs)
   -n, --count <n>      Number of songs to generate, at least 1 (default: 1)
-  -s, --seed <n>       Seed of the randomizer that provides a seed for every song
-                       (default: random, printed so the run can be repeated)
+  -s, --seed <seed>    Seed of the randomizer that provides a seed for every song, in letters
+                       and digits as the page writes seeds (default: random, printed so the
+                       run can be repeated)
   --version            Print RMG's songs' version and commit
   --fingerprint        Print the fingerprint of the songs of the corpus's seeds, which changes
                        when the songs do
@@ -75,80 +71,57 @@ dotnet run --project Rmg.WebApi
 
 Listens on every interface, on port 5000 by default. See [Settings](#settings).
 
-- `/` is a page that generates a song, plays it in the browser and lets you mix it. It loads a song
-  and a soundfont as it opens, so you only need to press play.
-- `POST /api/songs/generate` returns a `.mid` file. The JSON body is optional:
+- `/` is a page that generates a song, plays it in the browser and lets you set and mix it.
+- `POST /api/songs/generate` returns a `.mid` file. Every field of the JSON body is optional; an amount is a step from
+  0 to 63, and anything left out is the song's own:
 
   ```json
   {
-    "seed": 42,
-    "volume": 0.8,
-    "tracks": [
-      { "channel": 1, "instrument": 40, "volume": 0.5 },
-      { "channel": 10, "instrument": 16, "isEnabled": false }
-    ]
+    "seed": "1A",
+    "unconventionality": 40,
+    "facets": { "chords": 50 },
+    "tempo": 3,
+    "parts": {
+      "melody": { "instrument": 40, "volume": 32 },
+      "drum": { "isOn": false }
+    },
+    "volume": 50
   }
   ```
 
-  - `seed` picks the song; without it a random one is used.
-  - `volume` is the whole song's volume, 0 to 1, on top of each track's own.
-  - `tracks` changes channels 1-16. Instruments are General MIDI 0-127, volumes are 0 to 1, and
-    `isEnabled: false` leaves the track out of the file. Channels not listed play as generated.
-
-  The example plays channel 1 as a violin at half volume, drops the drums and sets the song to 80%.
-
-  The response headers carry the seed (`X-Song-Seed`) and every channel's instrument
-  (`X-Song-Instruments`, as `<channel>:<instrument>` pairs). The file is named `song-<seed>.mid`.
+  The seed is in letters and digits, all 64 bits of it; without one a random song is made. A part, by its role's name,
+  may be given in or out (`plays`), an instrument (General MIDI 0-127), a volume and a pan, or left out of the file
+  (`isOn: false`); `drumSetup` and `drumGroups` do the same for the drums, and `key`, `tempo` and `meter` give those
+  (the tempos and meters by their place in `GET /api/songs/options`). The response carries the seed (`X-Song-Seed`),
+  the songs' version (`X-Song-Version`) and everything the song drew or was given, with every part's channel
+  (`X-Song-Settings`). The file is named `song-<seed>.mid`. The server makes as many songs at once as it has cores;
+  the rest wait their turn, a client at a time, and are turned away with 429 or 503 when too many wait.
+- `GET /api/songs/options` lists the tempos and meters a song may be given.
+- `GET /api/version` returns the songs' version and commit.
 - `GET /api/soundfonts` lists the soundfonts the server offers, with their licence files.
-- `POST /api/tally` records one page event. See [Analytics](#analytics).
-- `GET /api/tally/summary` returns the analytics summary, with the dashboard token.
+- `POST /api/tally` records one page event, and `GET /api/tally/summary` returns the analytics, with the dashboard
+  token. See [Analytics](#analytics).
 
-The player ([spessasynth](https://github.com/spessasus/spessasynth_lib)) is loaded from a CDN, so the
-page needs an internet connection.
+The player ([spessasynth](https://github.com/spessasus/spessasynth_lib)) is loaded from a CDN, so the page needs an
+internet connection.
 
-### Autoplay
+### The page
 
-When a random song ends, the page generates and plays another. The checkbox under the player turns this
-off, and the browser remembers the choice. Songs asked for by seed, by link or from the history just stop.
+- **Playing.** The page loads a song and a soundfont as it opens, so you only need to press play. When a random song
+  ends it plays another, unless the checkbox under the player turns that off.
+- **Song settings.** The unconventionality and every facet, the tempo, key and meter, every part (as drawn, in or
+  out) and the drums can be given or left to the song. Changing one remakes the song from the same seed, going on
+  from the same place. What changes only how it sounds (a part's instrument, volume and pan, the drum groups, the
+  volume) is heard at once.
+- **Rating.** Like or dislike a song; the ratings go with the analytics, by the songs' version.
+- **So far** lists the last fifty songs, newest first, kept in the browser.
+- **Sharing.** The address always follows the song and its settings, `?song=<seed>&settings=<settings>`, so it is
+  itself a link; **Share** opens the share sheet or copies it. Seeds are not kept stable across versions, so after
+  an update an old link can play a different song.
+- **Downloads.** The `.mid` carries the mix. **Export .mp3** renders the song with the mix and the soundfont in the
+  browser, with [lamejs](https://www.npmjs.com/package/@breezystack/lamejs) (LGPL-3.0, from a CDN); nothing is uploaded.
 
-### History
-
-**So far** lists the last fifty songs, newest first. Click one to play it again. It is kept in the browser;
-**Clear** deletes it.
-
-### Sharing
-
-A link to a song is the page with its seed:
-
-```
-https://your-server/?seed=42
-```
-
-The address always follows the song that is playing. **Share** opens the phone's share sheet or copies the
-link. The link carries only the seed, not the mix. Seeds are not kept stable across versions, so after an update
-an old link, like the history, can play a different song.
-
-### The mix
-
-The mixer shows every channel's instrument, volume and on/off switch, plus a volume for the whole song.
-Instruments can be chosen or rolled at random, per track or all at once. Random pitched instruments come
-from the range in the settings, which by default leaves out the General MIDI sound effects; drums are
-rolled from the drum kits.
-
-The mix is written into the downloaded `.mid`: volumes as channel volumes, and tracks switched off are left
-out. The player volume only affects playback on the page. Changes are heard straight away.
-
-A soundfont with only one drum kit plays that kit for every kit choice.
-
-### Exporting an MP3
-
-**Export .mp3** renders the song with the current mix and soundfont and encodes it in the browser, in a
-few seconds. Nothing is uploaded. The bitrate is in the settings (192 kbps by default).
-
-The encoder is [lamejs](https://www.npmjs.com/package/@breezystack/lamejs) (LGPL-3.0), loaded unmodified
-from a CDN.
-
-### Soundfonts
+## Soundfonts
 
 Playback needs a soundfont. None is in the repository, since good ones are tens of megabytes and not all
 can be redistributed.
@@ -177,7 +150,7 @@ MuseScore General is the recommended one. Take the `.sf3`; the `.sf2` is the sam
 Timbres of Heaven sounds best, but may only be served with permission from its authors. You can use it
 on a private server, and anyone can load it into the page with the file picker.
 
-#### Licence files
+### Licence files
 
 A `.md` or `.txt` file ending in `License`, `Licence` or `Copyright` is the licence for every soundfont
 whose name it starts: `MuseScore_General_License.md` covers `MuseScore_General.sf3`. A file named just
@@ -189,211 +162,22 @@ whose name it starts: `MuseScore_General_License.md` covers `MuseScore_General.s
 seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
 ```
 
-- **Generation stages.** `SongGenerator` runs the stages in turn: the tracks and their instruments
-  (`SongTracks`), the song's harmony and state, the structure of parts and sections, every section
-  (`SectionGenerator`), which makes its harmony, its bar state (`BarStateGenerator`) and its tracks'
-  patterns (`PatternGenerator`), the form (`SongFormGenerator`), which puts the intro, the sections
-  and the ending one after another, and last the fills (`FillGenerator`), which mark the lines between
-  them. Each stage draws from its own random sequence, derived from the song's seed by the stage
-  (`SongStream`), and each section from its own, derived by its id, so a change to what one stage or
-  section draws leaves what the others draw as it was. The state every layer draws a part of is drawn
-  in one place (`LayerStates`).
-- **Timelines and state.** Music is modelled as immutable timelines of events (notes) and of *state*
-  (velocity, tempo, scale, chord, octave, ...). State kinds define their own default and how values
-  combine, so state from the song, a section, a track group and a track is merged with a single rule.
-  A timeline with nothing in it still keeps its duration: a bar in which nothing plays is still a bar.
-  "No content" and "no duration" are separate checks: `Count == 0` for events, `IsDefault` for state
-  and for the maps, and `Duration == 0` for length. Only zero-duration timelines are dropped when
-  timelines are put one after another.
-- **State kinds.** A kind's name is its identity: creating a second kind with a taken name throws.
-  Every kind has a scope. Composition state, such as the rhythm settings, is read only while the
-  song is generated; render state, such as velocity and the pitch offsets, is what the song keeps
-  and `Render` reads. Some kinds are shared, because every track must see the same value at the same
-  time: the key, the scale, the tempo and the chord shape. Only the layers all tracks share (the song,
-  a section, a bar) may set them. A builder made for a layer only some tracks see
-  (`new StateMapBuilder(layer, perTrack: true)`) checks every map it makes and throws if a shared
-  kind is in it.
-- **Pools.** Where a layer should pick one of several values rather than add to one, such as a chord
-  shape, the layers add entries to a pool and draws to an index into it. A pool lists its entries in
-  the order its layers are merged, and the index gathers around 0, so the first entries are the
-  likeliest: a section's pool starts with the song's entries and adds its own after them.
-- **Tracing.** To see why a value came out as it did, run the generation inside a `StateTrace`. It
-  records every track's state for each bar pattern and the pool and index behind each chord shape, and
-  `StateMap.Explain(kind)` lists what each layer contributed, such as the snare's +1 to its rhythm and
-  the song's and a section's steps. Without a trace, states keep no record and it costs nothing.
-- **Rhythm.** Rhythm patterns are generated from dyadic ranks: positions in a period ranked by how
-  "strong" the beat is, and kept or dropped by a rank-weighted probability. Every layer, from the song
-  to a bar, may move a track's rhythm settings a step, each with its own chance (`RhythmLayers`), so a
-  drum keeps the rhythm it is given in about half of the bars. A pattern's fullness sets how many of its
-  positions play, up to all of them, which on a fast cycle is a roll, and its variation how often a cycle
-  draws afresh what it plays rather than repeating the cycle before, down to a fixed riff; a cycle of one
-  rank repeated is a steady pulse. A cycle that repeats the one before plays its notes as they were, not
-  only where they were: their accents, their walks (such as the hi-hat's open or closed sound or an
-  arpeggio's notes) and their lengths; only the chord is each note's own (`DyadicRankItemPattern`). The
-  hi-hat and the ride keep time full and steady, and the kick and the snare mostly keep their figures.
-- **Phrase schemes.** A section's four bars follow a scheme (`PhraseSchemes`) that every track shares:
-  AABA and AAAB most often, then ABAB, AAAA, AABB and ABAC, and rarely four different bars; the more
-  different bars a scheme brings, the likelier it is the more unconventional the rhythm. Bars of the
-  same letter play the same bar pattern, and a repeat is now and then varied: it starts as the first did
-  and then changes.
-- **Rhythmic unconventionality.** How far a song's rhythm strays from convention
-  (`RhythmicUnconventionality`), apart from its harmony, scales the chances with which the rhythm layers
-  move their settings, from a quarter for plain grooves to four times for wild ones, full of tuplets,
-  syncopation and displaced accents. It leans the song's rarer choices too (`Tilt`), each by how
-  unconventional it is, through its weight or its odds: phrase schemes of more new bars, open and stopped
-  endings, fills that stop the groove, walk at random, play wider or slow down, toms out of their order
-  of pitch, and a drummer's signature. A section moves the song's a little. A period can be a tuplet's,
-  such as a triplet's, which is not exact in binary, so rhythm positions are snapped to a grid of
-  1024 · 3 · 5 · 7 ticks per beat (`TimelineGrid`), on which the dyadic subdivisions and the triplets,
-  quintuplets and septuplets fall exactly; two ways to the same moment then give the same position.
-- **Section energy.** Every section has an energy (`SectionEnergy`), how loud and busy it is meant to be:
-  the song's, more the more often the section recurs, more the later it plays on average, and a step of
-  its own. It leans the section's draws and never decides them, as far as its rhythm is conventional, so
-  that a wild section is loud and sparse as often as not: its loudness, the drums' fullness and how busy
-  they play, which drums play (each drum leans loud or quiet, the crash and the ride loud, the
-  cross-stick quiet), how bright its scale is, as far as its harmony is conventional, and the fills that
-  lead into it.
-- **Generators.** Randomness is expressed as small composable generators that take a seeded
-  context, which is what makes every song reproducible.
-- **Notes and rendering.** The state decides the notes, and the last stage of the generation,
-  `Realizer`, plays them, over the whole song in order: every note's pitches, loudness and length, and
-  every drum hit's sound (`Song.Notes`, a `RealizedNote` per note, with the state it was decided from),
-  in the register that follows from the notes before, since a track's line goes on across its sections:
-  a chord's voicing and the bass's octave; the melody plays where it was placed. A stage that comes after it can
-  change the notes themselves; the state still explains how they came about, but does not show
-  the change. `Render` then plays the notes: a chord's pitches together, the drums on one channel,
-  and every note's velocity on a fixed scale, the same for every song, so that a quiet section or an evenly
-  played bass sounds so; a chord's notes play softer, at n^-1/4 for n notes, so that together they sound
-  about as loud as one note. A note's velocity is the sum of its layers (`VelocityLayers`): its track's
-  level by its role, the melody on top of the mix and the chords a little under it; its section's, leaned
-  by the section's energy; and its beat's accent with a variation around it, as far as the track's
-  dynamics have them (`BeatAccent`): a bass and chords play evenly, a melody moves more, and a plain
-  section plays more evenly than a wild one. `Midi`
-  writes them as a standard MIDI file.
-- **Scales.** A song has a scale, in a random key. The scale is drawn from a weighted table of 7-note
-  scales (`Scales`): natural minor and major are the most common (30% each), dorian and mixolydian
-  occasional (12% each), and harmonic minor, phrygian and lydian rare (5–6%). A section plays in the
-  song's scale, or now and then (about one in seven) in another on the same tonic: a close one most
-  often, such as dorian for natural minor or mixolydian for major, now and then the parallel major or
-  minor, leaning brighter the more energy the section has. The song's first section keeps its scale,
-  which sets the key.
-  Chord roots move by scale steps and chord heights sit between the qualities a 7-note scale gives,
-  so scales of other sizes, such as pentatonic, are not in the table.
-- **Chords.** A chord is the heights of its notes above the chord root, as fractions of an octave in
-  pitch, so the same chord works in any scale: `Realizer` snaps every height to the nearest note of the
-  scale, lowest first, and a note already taken goes to a free neighbour or is dropped. A height can
-  sit between two qualities, such as a third between minor and major, and the scale decides, so a
-  triad is Cm, D° or Eb in C minor and C major in C major pentatonic. Shapes come from a table ranked
-  by unconventionality, from triads (0) to clusters and polychords (5); a song draws where its chords gather,
-  how far and how evenly they stray and which way they lean, and a section moves that by up to a rank. A voicing
-  step then inverts or opens the shape, and `Realizer` moves the whole chord into the track's range.
-  The chord root, unlike the shape, is a fraction of the scale's note count, as it moves along the
-  scale.
-- **Progressions.** Every section has a home, the tonic most often (60%) and otherwise the relative
-  key, IV or V, and a progression of chord roots around it over its 4-bar pattern (`Progressions`), two, four or
-  eight chords as the section's harmonic rhythm has it: the first is the home chord, the last the
-  cadence, which resolves to the first as the pattern repeats, the one before it prepares the cadence
-  (ii or IV), and the others move away. A root is drawn by how strongly the previous one leads to
-  it, falling a fifth the most, and by how well it suits its bar. The cadence chords follow from the
-  chords the scale builds around the home, so they suit the mode: V where it is major, ♭VII in
-  mixolydian or natural minor, ♭II in phrygian, IV or ♭VII in dorian. Roots stay within 3 steps of the
-  home, so the bass keeps to one register. The more unconventional a section's harmony, the looser it
-  keeps to these rules, until every root is as likely. Where the chord on the fifth is minor and the
-  seventh step sits a whole step below the home, as in natural minor, dorian and mixolydian, a
-  cadence on the fifth raises that seventh for the bar (`StateKinds.RaisedScaleSteps`), so the chord
-  turns major and leads home as in harmonic minor. The home bar plays a plain chord, a triad or a mild
-  colour, and the cadence bar a chord with pull, a seventh most often, then a suspended chord, a triad
-  or a ninth; a strange song keeps its strangeness at the cadence. The bars between pick from the
-  section's pool of chord shapes.
-- **Voice leading.** `Realizer` places a track's chords one after another (`VoiceLeader`): each takes
-  the layout, among its inversions in every octave of the track's range, that follows best from the
-  chord before, with a pull towards the middle of the range so that the chords do not drift. How it
-  follows is the track's smoothness (`StateKinds.VoiceLeading`), from 1, where every note moves as
-  little as it can and shared notes are held, to 0, where the chord keeps the previous one's shape and
-  slides with the root, as guitar chords do. The chord instrument sets the song's smoothness
-  (strings, pads and organs smooth, pianos in between, guitars in blocks), a section moves it, and a
-  4-bar pattern's first bar sometimes starts afresh in its own register. Chords whose layout is what
-  they are, such as quartal stacks and clusters, only move by whole octaves.
-- **Bass leading.** The bass is a line as the melody is (`Line`), by a profile of its own
-  (`BassLeadingLayers.Line`): a note on a strong beat takes a note of the chord and one on a weak beat
-  moves along the scale, over the whole of its range, and it never starts afresh in another register.
-  Both lines are placed once the song is put together (`LinePattern`), over the whole song, so that
-  they go on from section to section, kept as scale steps above their chords' roots, and a semitone
-  off them for a chromatic approach. The bass's first note in a bar lands on the chord's root most
-  often, or on its third or fifth for an inversion, and a note in the last beat before a bar line
-  leads into the next root: by the scale step next to it, a semitone below or above it, the next
-  chord's fifth, or the root a little early. How much the bass leads (`BassLeadingLayers`) comes from
-  its instrument (upright and fretless basses walk, synth basses sit on the roots), and a section moves
-  it; each bar then draws whether and how it leads.
-- **Melody.** The melody is placed once the song is put together (`LinePattern`), over the whole
-  song, note by note by rule (`Line`), so that it goes on from section to section; a section's bars,
-  and every appearance's variation of them, are made before, and a phrase starts afresh at its aim
-  now and then, as freely as the song and the section change register. A note on a strong beat takes a note of the chord, the nearest one the way the
-  melody goes, and a note on a weak beat moves along the scale between them; a note means to go on the
-  way the melody goes or to turn back, and now and then to leap, less the more stepwise the melody
-  (`MelodyLayers`, set by the melody instrument and moved by the section). After a leap it steps back,
-  and it turns towards where its phrase aims, a shape drawn per section: it rises to a peak in a bar
-  drawn, most often the third, and falls from it. It keeps to a singable 17 semitones in the middle of
-  its range. A bar pattern that comes back, or a cycle that repeats the one before, plays its notes
-  again as the scale steps they had from the chord's root, so that over another chord they sound as a
-  sequence. Every note keeps its scale step (`StateKinds.ScaleStep`), so a section plays its melody the
-  same wherever it plays, every bar moved by an octave at most to start nearest the note before it. The
-  song's last note is the chord's root, its octave chosen as a bar's is.
-- **The melody's rhythm.** A song draws how busy its melody is (`MelodyBusyness`), from a sparse, held
-  line of a note or two a bar to riffs in 8ths, and a section moves it: the busier, the fuller its
-  pattern and the likelier it plays twice as fast, about 2 to 7 notes a bar across songs and 4 on
-  average. Its cycles repeat more than the other tracks', as riffs. It sings one note at a time, so a
-  note ends by the next. Most phrases end in their last bar (`MelodyLayers.PhraseEnds`): the notes
-  from beat 2, 3 or 4 on are left out, and the last one is held on a note of the chord until a beat
-  before the next phrase, the one place where a note's length is set over the gap to the next.
-- **Fills.** The drums mark the line before every section and the line in the middle of each
-  (`FillGenerator`, `FillLayers`). Every fill is a run in the groove's rhythm, a rank or two finer, with a
-  layer of its own over it (`FillRhythm`), coarser in a fast song: its span, from half a beat to a bar
-  before the line, or none for the groove running on; what it does with the groove, its drums leaving it
-  for the run, playing over it, a few hits or a lift, or stopping, a break or stop-time; and the sounds it
-  walks (`FillSounds`), some of each drum role's, such as the toms in their order of pitch, walked one way,
-  turning, looping or at random, each drum playing where its own rhythm has a note. Every line weighs
-  (`FillLine.Weight`): a section change more than the line in the middle of a section, where the groove
-  mostly runs on, and more still into a section of more energy; the weight leans the span, how full the
-  fill is and whether the drums land, and a section of less energy makes stopping likelier. The next
-  section lands on a kick, often with a crash, after a section change, now and then after a phrase line,
-  and after the drums stopped almost always. The more a section's rhythm strays, the likelier the rarer
-  choices: stopping, a tuplet, a random walk, wider notes, a run that slows down, a fill off the beat, a
-  fade or a landing pushed early. A song's drummer (`Drummer`) sets how busy its fills are, and has a
-  favourite walk and now and then a signature, one of the rarer choices it makes more often, so a song's
-  fills sound like one player's. The fills are edits of the song once it is put together
-  (`TimelineEdits`); a drum names its sound outright (`StateKinds.ArticulationIndex`), and a drum out of a
-  section's groove still has the section's drum state, so a fill's notes are as loud as the section.
-- **Form.** `SongFormGenerator` plans the song's form before its sections are generated, then puts the
-  song together around them, and tells the fills where the lines are; `Song.Map` records where the
-  intro, every section and the ending are. The meter, bars of four beats and 4-bar patterns, is in
-  one place (`Meter`). A song starts (`FormLayers`) with the whole band (30%), with a bar, two or four of
-  the first section's drums alone (25%), with a count-in on the pedal hi-hat (10%), with the chords
-  alone for the first phrase, now and then with the bass (20%), or building up through it: the
-  chords, then the bass, then the drums, and the melody after it (15%). Where the band or the melody
-  comes in, the drums play a fill and land on a crash and a kick. The song's last section has the tonic as its home, so its cadence leads home, and
-  the song ends there (`FormLayers`): on a button (everyone hits the home chord on a last downbeat,
-  short), ringing out (the chord held a bar or two, the bar before slowing down half the time), a stop
-  (the band silent a beat or two, then the hit), or open, on the cadence, unresolved. The more the
-  song's rhythm strays, the likelier a stop or an open ending. The final chord is the last section's
-  home bar: every track's first note of it, moved to the downbeat and held, all on the bar's chord, the
-  bass on the root and the melody's last note on it too; the drums land on it with a crash and a kick.
-- **Instruments.** Each pitched track has a role (`InstrumentRoles`): the chords are played by pianos,
-  organs, guitars, strings or pads, the melody by keys, mallets, guitars, strings, brass, reeds, pipes
-  or leads, and the bass by basses, with a few unusual choices weighted low. The melody never plays
-  the chords' instrument. Drums and sound effects are never picked.
-- **Chords and lines.** A chord's root is whole scale steps above the key's tonic, the section's home
-  and the progression's step from it (`StateKinds.ChordRoot`). How a track plays its chord is its
-  role's: the chords play it whole, and the melody and the bass the notes their lines placed.
-- **Offsets are rounded before they are summed.** A drum's articulation offset, which walks from note
-  to note through its sounds, is a collection of fractional values, one from each layer (section, bar,
-  note, ...). `Realizer` turns each value into a whole number of sounds first and adds up the results,
-  so it computes `round(a * n) + round(b * n)` rather than `round((a + b) * n)`. This is deliberate: a
-  layer then shifts everything beneath it by a whole step, the same for every note of the pattern. If
-  the values were summed first, the same layer offset could move one note by a step and leave the next
-  one alone, depending on the note's own fraction. Each value goes to the nearest step (halves away
-  from zero), so every step covers the same range and an offset of less than half a step either way
-  leaves the note where it is.
+- **State decides, `Realizer` realizes.** Music is immutable timelines of events (notes) and of state (velocity,
+  tempo, key, scale, chord, a note's scale step, ...), layered from the song to a section, a track, a bar and a note;
+  every state kind says how its layers combine. Generation decides the notes as this state; `Realizer` only chooses
+  their register from what came before (a chord's voicing, a line's octave), and `Render` plays them.
+- **Stages and streams.** `SongGenerator` runs the stages in turn: the tracks, the structure, every section
+  (`SectionGenerator`, `PatternGenerator`), the form (`SongFormGenerator`), and then edits of the song put together,
+  such as the fills, the lines placed over the whole song, the key changes, the polymeters, the solos and the
+  expression. Every stage, section and decision draws from a random sequence of its own (`SongStream`), so that a
+  change to one leaves what the others draw as it was; `CorpusFingerprintTest` shows when the songs change.
+- **Conventionality.** A choice's options carry their weights at the plain end, the middle and the wild end
+  (`ByConvention`), and lean by energy or anything else through their odds (`Tilt`); a lean is data on the option.
+- **Tracing.** Inside a `StateTrace`, generation records what it decided as values at named points (`TracePoints`),
+  which the tests read; without one it records nothing.
+
+The principles the code keeps to are in [`CLAUDE.md`](CLAUDE.md), and the plans and the decisions behind them in
+[`ROADMAP.md`](ROADMAP.md).
 
 ## Project layout
 
@@ -416,27 +200,23 @@ from the CDN as before.
 ## Tests
 
 ```
-dotnet run --project Rmg.Tests
+dotnet run --project Rmg.Tests -c Release
 ```
 
-Tests that look at whole songs share them: `TestCorpus` generates each seed once, with its rendering and
-the trace of its generation, and every test that asks for it gets the same song. A song's `Map` says
-where its intro, sections and ending are, so tests read positions from it rather than assume them, and
-the trace carries what was decided as values (`StateTraceEntry.Value`, at points named in `TracePoints`),
-which tests read rather than the trace's words. Explicit tests report what the corpus measures, such as
-how sections differ (`SectionDynamicsTest`), how the melody repeats (`MelodyRepetitionTest`) or how the
-fills mark the lines (`FillLineTest`), and `CorpusFingerprintTest` fingerprints the corpus's notes, to show
-that a change leaves the songs as they were:
+Tests that look at whole songs share them: `TestCorpus` generates each seed once, with its rendering and the trace of
+its generation. A song's `Map` says where its intro, sections and ending are, so tests read positions from it, and
+the trace's values (`StateTraceEntry.Value`), not its words. Explicit tests report what the corpus measures, such as
+how the solos play (`SoloTest`) or how the sections differ (`SectionDynamicsTest`); run one class, its reports
+included, with:
 
 ```
-dotnet run --project Rmg.Tests -- --treenode-filter "/*/*/CorpusFingerprintTest/*" --output Detailed
+dotnet run --project Rmg.Tests -c Release -- --treenode-filter "/*/*/SoloTest/*" --output Detailed
 ```
 
-The page is tested apart, as it is used: `Rmg.Tests.Page` starts the server as it is built, on a port of its own
-with its analytics in a directory of their own, and drives its pages in Playwright's headless Chromium, which its
-first run installs into `~/.cache/ms-playwright`. The songs come from the server; a test only holds them back or
-answers busy (`SongPage.Slow`, `SongPage.Busy`), so that what it checks is how the page asks for songs, waits and
-lets go of them. The page loads its synthesizer from the CDN, so the tests want the network. They take about 15 s:
+The page is tested as it is used: `Rmg.Tests.Page` starts the server as it is built, on a port and with analytics of
+its own, and drives its pages in Playwright's headless Chromium, which its first run installs into
+`~/.cache/ms-playwright`. The page loads its synthesizer from the CDN, so the tests want the network. They take about
+15 s:
 
 ```
 dotnet run --project Rmg.Tests.Page -c Release
@@ -480,8 +260,9 @@ third parties.
   cut to 16 characters. The address is never stored, and no analytics data is kept in the browser.
 - **Opt-out.** Browsers sending Global Privacy Control or Do Not Track send nothing.
 - **Events:** `page_open`, `song_generated`, `song_failed`, `soundfont_ready`, `soundfont_failed`,
-  `audio_ready`, `play`, `listened`, `mix_changed`, `download_mid`, `export_mp3` and `shared`. Others
-  are dropped. Soundfonts are recorded by size and source, not name.
+  `audio_ready`, `play`, `listened`, `mix_changed`, `download_mid`, `export_mp3`, `shared` and `rated`, each
+  with the song's seed, version and settings. Others are dropped. Soundfonts are recorded by size and source,
+  not name.
 
 The script is `tally.js` and the path `/api/tally` because blocklists block `analytics.js` and
 `/api/events` by name. Opting out still works as above.
@@ -490,7 +271,8 @@ Events older than `RetentionDays` are deleted on start. `AnalyticsEnabled: false
 
 ### The dashboard
 
-`/dashboard.html` shows visitors, load times, how far people got and which seeds were listened to most.
+`/dashboard.html` shows visitors, load times, how far people got, the songs listened to and rated by version
+and by how plain or wild they are, and the server: how long songs took to make and how many waited.
 It needs `DashboardToken` (`RMG_DASHBOARDTOKEN`) and sends it as `Authorization: Bearer <token>`;
 without a token the summary is not served.
 
