@@ -9,17 +9,23 @@ const PAN = 10;
 /** What a channel plays at when nothing says otherwise, which General MIDI puts at 100 of 127. */
 const DEFAULT_CHANNEL_VOLUME = 100;
 
+/** How many samples a level is measured over: about 6 ms. */
+const LEVEL_SAMPLES = 256;
+
 class Player {
     #context;
     #synth;
     #sequencer;
+    #analysers;
+    #samples = new Float32Array(LEVEL_SAMPLES);
     #hasSoundFont = false;
     #songWaiters = [];
 
-    constructor(context, synth, sequencer) {
+    constructor(context, synth, sequencer, analysers) {
         this.#context = context;
         this.#synth = synth;
         this.#sequencer = sequencer;
+        this.#analysers = analysers;
         this.#sequencer.eventHandler.addEvent("songChange", "rmg-song-loaded", () => {
             for (const resolve of this.#songWaiters.splice(0)) resolve();
         });
@@ -137,8 +143,15 @@ class Player {
         midiChannel.lockController(PAN, true);
     }
 
-    getVoiceCount(channel) {
-        return this.#synth.midiChannels[channel]?.voiceCount ?? 0;
+    /** How loud a channel plays now, as the root mean square of its last samples, before reverb and chorus; 0 for silence. */
+    getLevel(channel) {
+        const analyser = this.#analysers[channel];
+        if (analyser === undefined) return 0;
+
+        analyser.getFloatTimeDomainData(this.#samples);
+        let sum = 0;
+        for (const sample of this.#samples) sum += sample * sample;
+        return Math.sqrt(sum / this.#samples.length);
     }
 
     onSongChange(callback) {
@@ -168,7 +181,9 @@ async function create() {
 
     const synth = new WorkletSynthesizer(context);
     synth.connect(context.destination);
+    // every channel's own output, which the synthesizer offers to be looked at, measured and heard no further
+    const analysers = Array.from({ length: 16 }, (_, channel) => synth.connectChannel(new AnalyserNode(context, { fftSize: LEVEL_SAMPLES }), channel));
     await synth.isReady;
 
-    return new Player(context, synth, new Sequencer(synth));
+    return new Player(context, synth, new Sequencer(synth), analysers);
 }

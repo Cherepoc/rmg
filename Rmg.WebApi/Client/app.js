@@ -1992,11 +1992,24 @@ function render(player, time = player.currentTime) {
         elements.elapsed.textContent = formatTime(time);
     }
 
+    // every part's level, the loudest of its channels, rising at once and falling back steadily, as a meter's does
+    const now = performance.now();
+    const elapsed = (now - lastRendered) / 1000;
+    lastRendered = now;
     for (const [part, row] of rows) {
-        const voices = player.paused || channels[part] == null ? 0 : player.getVoiceCount(channels[part]);
-        row.level.style.width = `${Math.min(100, voices * 12)}%`;
+        const level = player.paused ? 0 : Math.max(0, ...channelsOf(part).map(({ channel }) => player.getLevel(channel)));
+        const reading = level > 0 ? Math.min(1, Math.max(0, (20 * Math.log10(level) - METER_FLOOR) / (METER_TOP - METER_FLOOR))) : 0;
+        row.shown = player.paused ? 0 : Math.max(reading, (row.shown ?? 0) - (METER_FALL * elapsed) / (METER_TOP - METER_FLOOR));
+        row.level.style.width = `${row.shown * 100}%`;
     }
 }
+
+// the quietest and the loudest a part's meter shows, in decibels under full scale, a channel's own output before reverb
+// playing at about -40, and how fast it falls back, in decibels a second
+const METER_FLOOR = -60;
+const METER_TOP = -18;
+const METER_FALL = 24;
+let lastRendered = performance.now();
 
 function startTicking(player) {
     if (frame !== null) return;
