@@ -76,6 +76,9 @@ internal static class CompositionStateKinds
     // 1 for a solo's release, the held note a phrase ends on
     public static StateKind<int> SoloRelease { get; } = StateKinds.CreateAdditive<int>(Prefix + "SoloRelease", StateScope.Render);
 
+    // 1 for a bass note holding a pedal under a key change, which is not struck again on the chord where the chord changes
+    public static StateKind<int> BassPedal { get; } = StateKinds.CreateAdditive<int>(Prefix + "BassPedal", StateScope.Render);
+
     // how many notes a line's note stacks, its own on top and the chord's below, as a solo's or a riff's landing may, 0 or 1 for the note alone
     public static StateKind<int> LineVoices { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineVoices", StateScope.Render);
 

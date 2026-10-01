@@ -63,6 +63,29 @@ public sealed class KeyPreparationTest
     }
 
     [Test]
+    public async Task APedal_HoldsTheNewKeysDominant_InTheBassUnderTheBarBefore()
+    {
+        var (notes, held) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Scale(1))))
+        {
+            var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
+            foreach (var (change, from, _) in Preparations(song).Where(x => x.Device == KeyChange.Device.Pedal).Select(x => (x.Change, x.Chords[0], x.Device)))
+            {
+                var dominant = Realizer.GetChord(common.GetEffectiveStateMapAt(change).With(StateKinds.ChordRoot, 4)).Chord.GetPitch(0).Mod(12);
+                foreach (var note in song.Song.Notes!.GetValueOrDefault(SongTracks.BassTrack, EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0)).Where(x => x.Position >= from - 1e-9 && x.Position < change - 1e-9))
+                {
+                    notes++;
+                    if (note.Value.Pitches[0].Mod(12) == dominant)
+                        held++;
+                }
+            }
+        }
+
+        await Assert.That(notes).IsGreaterThan(20);
+        await Assert.That(held / (double)notes).IsGreaterThan(0.9);
+    }
+
+    [Test]
     public async Task AMiddlingSongsChain_IsTheDominant_MostOften()
     {
         var links = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => Links(TestCorpus.Get(seed, Scale(0.5)))).SelectMany(x => x).Select(x => x[0]).ToArray();
@@ -78,11 +101,11 @@ public sealed class KeyPreparationTest
     {
         var songs = TestCorpus.Measure(1024, song => (Scale: ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Scale],
             Changes: ((ImmutableArray<KeyChange>)song.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!).Length, Links: Links(song),
-            Pivots: Preparations(song).Count(x => x.Device == KeyChange.Device.Pivot)));
+            Pivots: Preparations(song).Count(x => x.Device == KeyChange.Device.Pivot), Pedals: Preparations(song).Count(x => x.Device == KeyChange.Device.Pedal)));
         foreach (var band in songs.GroupBy(x => Math.Clamp((int)(x.Scale * 5), 0, 4)).OrderBy(x => x.Key))
         {
             var chains = band.SelectMany(x => x.Links).ToArray();
-            Console.WriteLine($"  scale {band.Key}/5: {band.Sum(x => x.Changes)} key changes, {chains.Length} chains, {band.Sum(x => x.Pivots)} pivots; chains of {string.Join(" ", chains.GroupBy(x => x.Length).OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Count()}"))}, " +
+            Console.WriteLine($"  scale {band.Key}/5: {band.Sum(x => x.Changes)} key changes, {chains.Length} chains, {band.Sum(x => x.Pivots)} pivots, {band.Sum(x => x.Pedals)} pedals; chains of {string.Join(" ", chains.GroupBy(x => x.Length).OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Count()}"))}, " +
                               $"links {string.Join(" ", chains.GroupBy(x => x[0]).OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Count()}"))}");
         }
 

@@ -392,6 +392,10 @@ public static class SongGenerator
             index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloChords), index)),
             index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloMotifs), index))
         );
+        // and the bass holding the new key's dominant under the bar before a key change led into by a pedal, over whatever
+        // it doubles or walks there
+        songTrackNoteTimelineMap = KeyChange.Pedal(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value,
+            chains.Where(x => x.Device == KeyChange.Device.Pedal).Select(x => (x.Chords[0], x.Change)));
         // and the solo part answering the melody in its gaps now and then outside its solos, in its soloist's vocabulary,
         // the one its solos are played in, drawn from the same sequence
         var soloDefinition = tracks.Definitions.Values.OfType<PitchInstrumentTrack>().FirstOrDefault(x => x.Role == TrackRole.Solo);

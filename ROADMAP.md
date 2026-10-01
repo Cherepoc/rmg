@@ -18,7 +18,6 @@ built since 0.6 (October 2026): parts entering late, the solos placed by their r
 answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
 this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
 
-10. a key change's pedal on the new key's dominant, the bass holding it over the bar before (see *Appearances*);
 12. a metric modulation, a section's tempo drawn by appearance, leaned at the wild end to 3:2 or 4:3 of the tempo
     before and to the one it played at before, so that a chorus keeps its tempo unless it modulates;
 13. a harmonised melody's twin on a track of its own, as the riff's, the counter-melody resting for it, the page given
@@ -412,7 +411,9 @@ planned together (P1):
   the melody over a passing key turns well. A prepared change draws its device (`KeyChange.Devices`): the chain,
   or a pivot chord, the last before the change on a step of the new key, ii, IV, vi or iii, whose triad the old key has
   too, as it sounds there, the smoother and the plainer: 31% of the plainest fifth's prepared changes, 14% of the
-  wildest's. Left: a pedal; a common tone held across, put off in October 2026, a line's note held over the change into
+  wildest's; or a pedal, the old key's chords as they are and the bass holding the new key's dominant over their last
+  bar, in its own rhythm, struck again on no chord, the wilder: 4 of the plainest fifth's prepared changes, 201 of the
+  wildest's 920 (`KeyPreparationTest`). Left: a common tone held across, put off in October 2026, a line's note held over the change into
   the new key being what the lines' placement does not make, the pad perhaps carrying it; a phrase sequenced up a step
   until it stays.
 - **A section's own key and scale** (built): a section but the first may play in a key of its own every time it

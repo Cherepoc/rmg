@@ -21,17 +21,19 @@ public sealed record KeyChange(double Position, int Semitones)
     public enum Device
     {
         Chain,
-        Pivot
+        Pivot,
+        Pedal
     }
 
     /// <summary>
-    ///     How a key change is led into, by the scale facet: a pivot chord, the smoothest, the plainer, and a chain of chords,
-    ///     the more striking, the wilder.
+    ///     How a key change is led into, by the scale facet: a pivot chord, the smoothest, the plainer, a chain of chords,
+    ///     the more striking, and a pedal on the new key's dominant under the old key's last bar, the wilder.
     /// </summary>
     public static ImmutableArray<(Device Device, ByConvention Weight)> Devices { get; } =
     [
         (Device.Chain, new ByConvention(1, 0.6, 0.4)),
-        (Device.Pivot, new ByConvention(1, 0.3, 0.2))
+        (Device.Pivot, new ByConvention(1, 0.3, 0.2)),
+        (Device.Pedal, new ByConvention(0, 0.1, 0.4))
     ];
 
     /// <summary>The steps of the new key a pivot chord may be on, a predominant's the likeliest, and how likely.</summary>
@@ -209,6 +211,13 @@ public sealed record KeyChange(double Position, int Semitones)
             var old = Scale(chords[^1], before);
             // its triad as it sounds where it plays, the scale and any raised step there, in the new key
             ImmutableArray<Weighted<int>> pivots = [..PivotSteps.Where(x => Triad(chords[^1], target, x.Value).All(old.Contains))];
+            // a pedal: the old key's chords as they are, the bass holding the new key's dominant over their last bar
+            if (device == Device.Pedal)
+            {
+                chains.Add((change, [Math.Max(since, change - map.MeterAt(change - 1e-6).BarDuration)], Device.Pedal));
+                continue;
+            }
+
             if (device == Device.Pivot && !pivots.IsEmpty)
             {
                 // the step the draw falls on among the pivots' weights, drawn whatever the device, so that the draws stay as they are
@@ -246,6 +255,45 @@ public sealed record KeyChange(double Position, int Semitones)
             ? StateTimelineMap.Create(duration)
             : StateTimelineMap.Create(duration, [StateTimeline.Create(duration, StateKinds.ChordRoot, [..roots.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change")]);
         return ([..keys.OrderBy(x => x.Position)], moved, chains.ToImmutable());
+    }
+
+    /// <summary>
+    ///     The song with the bass holding every pedal's note, the new key's dominant, in the octave nearest each of its notes
+    ///     there, its rhythm as it was; made once the bass's line and walks are placed.
+    /// </summary>
+    /// <param name="pedals">Every pedal: where it starts, and the change it leads to.</param>
+    internal static TrackEventStateTimelineMap<StateMap> Pedal(TrackEventStateTimelineMap<StateMap> song, int bassTrack, PitchInstrumentTrack definition, IEnumerable<(double From, double Change)> pedals)
+    {
+        if (!song.TrackTimelineMap.TryGetValue(bassTrack, out var track))
+            return song;
+
+        var common = song.CommonStateTimelineMap;
+        ChordContext Chord(StateMap note, double position) => Realizer.GetChord(StateMap.Aggregate([
+            note,
+            track.GetEffectiveStateMapAt(position),
+            definition.StateMap.OfScope(StateScope.Render),
+            common.GetEffectiveStateMapAt(position)
+        ])).Chord;
+        var events = track.EventTimeline.ToArray();
+        foreach (var (from, change) in pedals)
+        {
+            // the new key's dominant, as the chord on its fifth step there has it
+            var dominant = Realizer.GetChord(common.GetEffectiveStateMapAt(change).With(StateKinds.ChordRoot, 4)).Chord.GetPitch(0).Mod(12);
+            for (var i = 0; i < events.Length; i++)
+            {
+                var (position, note) = (events[i].Position, events[i].Value);
+                if (position < from - 1e-9 || position >= change - 1e-9)
+                    continue;
+
+                var chord = Chord(note, position);
+                var pitch = chord.GetPitch(note.GetStateValue(StateKinds.ScaleStep)) + note.GetStateValue(StateKinds.Alteration);
+                var held = pitch + ((dominant - pitch).Mod(12) is var up && up > 6 ? up - 12 : up);
+                var step = LinePlacement.GetScaleStep(chord, held);
+                events[i] = note.With(StateKinds.ScaleStep, step).With(StateKinds.Alteration, held - chord.GetPitch(step)).With(CompositionStateKinds.BassPedal, 1).ToTimelineItem(position);
+            }
+        }
+
+        return song.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [bassTrack] = _ => EventTimeline.Create(track.EventTimeline.Duration, events) });
     }
 
     /// <summary>The key's step from the song's own, from each change on; none for a song that keeps its key.</summary>

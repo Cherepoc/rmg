@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
@@ -128,6 +129,10 @@ public sealed class ScalesTest
             .SelectMany(x => song.Map!.Sections.Where(s => s.SectionId == x.Section))
             .ToArray();
 
+        // a pedal's, the bass holding the new key's dominant under the old key's last bar on purpose, however swung
+        var pedals = ((ImmutableArray<(double Change, ImmutableArray<double> Chords, KeyChange.Device Device)>)TestCorpus.Get(seed).Trace.Single(x => x.Point == TracePoints.KeyPreparation).Value!)
+            .Where(x => x.Device == KeyChange.Device.Pedal).Select(x => (From: x.Chords[0], To: x.Change)).ToArray();
+
         var tracks = Render.RenderSong(song).Tracks.Where(x => !x.IsPercussionInstrument).ToArray();
 
         await Assert.That(tracks.Sum(x => x.NoteTimeline.Count)).IsGreaterThan(0);
@@ -141,7 +146,8 @@ public sealed class ScalesTest
             var isChromaticApproach = track.PitchInstrumentCode == bassProgram
                 && !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9)
                 && approach is ChordApproach.HalfStepBelow or ChordApproach.HalfStepAbove;
-            if (isChromaticApproach || ownLineScales.Any(x => note.Position >= x.Start && note.Position < x.End))
+            var isPedal = track.PitchInstrumentCode == bassProgram && pedals.Any(x => note.Position >= x.From - 0.2 && note.Position < x.To);
+            if (isChromaticApproach || isPedal || ownLineScales.Any(x => note.Position >= x.Start && note.Position < x.End))
                 continue;
 
             var scale = Rmg.Core.Composition.Realizer.RaiseScaleSteps(

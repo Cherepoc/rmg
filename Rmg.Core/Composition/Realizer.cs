@@ -126,7 +126,9 @@ internal static class Realizer
                 // where the track plays on within a bar, as it played, not a solo's line, which holds its note as a line does,
                 // nor into one
                 if (index + 1 >= events.Count || events[index + 1].Position >= change + meterAt(change).BarDuration - 1e-9
-                    || events[index].Value.GetStateValue(CompositionStateKinds.LineSolo) == 1 || events[index + 1].Value.GetStateValue(CompositionStateKinds.LineSolo) == 1)
+                    || events[index].Value.GetStateValue(CompositionStateKinds.LineSolo) == 1 || events[index + 1].Value.GetStateValue(CompositionStateKinds.LineSolo) == 1
+                    // nor a pedal, which holds its note across the chords
+                    || events[index].Value.GetStateValue(CompositionStateKinds.BassPedal) == 1)
                     continue;
 
                 var (note, next) = (events[index].Value, events[index + 1]);
