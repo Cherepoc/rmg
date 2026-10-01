@@ -20,7 +20,13 @@ public enum BendKind
     Slide,
 
     /// <summary>Falling away at its end.</summary>
-    FallOff
+    FallOff,
+
+    /// <summary>Struck bent, from a step below, so that it sounds as it is, then released down that step and bent back.</summary>
+    ReleaseAndBend,
+
+    /// <summary>Struck bent up a step, sounding it, and released down onto the note.</summary>
+    PrebendRelease
 }
 
 /// <summary>A vibrato's width: in cents either side of the note, or in scale steps up from it, the wide sort.</summary>
@@ -154,7 +160,9 @@ internal static class Expression
         (BendKind.Scoop, new ByConvention(1, 0.4, 1)),
         (BendKind.FallOff, new ByConvention(1, 0.25, 1)),
         (BendKind.Slide, new ByConvention(1, 0.2, 1)),
-        (BendKind.BendAndRelease, new ByConvention(1, 0.15, 1))
+        (BendKind.BendAndRelease, new ByConvention(1, 0.15, 1)),
+        (BendKind.ReleaseAndBend, new ByConvention(0, 0.06, 1)),
+        (BendKind.PrebendRelease, new ByConvention(0, 0.08, 1))
     ];
 
     /// <summary>The chance a part's held notes swell in where the song's do, a pad's likely, any other's now and then.</summary>
@@ -334,8 +342,8 @@ internal static class Expression
                     if (bends && bendsNow)
                         state = state.With(CompositionStateKinds.Bend, (int)kind).With(CompositionStateKinds.BendDepth, kind switch
                         {
-                            BendKind.BendAndRelease => ScaleDistance(note.Value, size),
-                            BendKind.Scoop or BendKind.FallOff => ScaleDistance(note.Value, -size),
+                            BendKind.BendAndRelease or BendKind.PrebendRelease => ScaleDistance(note.Value, size),
+                            BendKind.Scoop or BendKind.FallOff or BendKind.ReleaseAndBend => ScaleDistance(note.Value, -size),
                             _ => 0
                         });
                     if (swells && note.Value.Duration >= 1)

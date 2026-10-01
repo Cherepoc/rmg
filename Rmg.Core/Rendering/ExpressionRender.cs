@@ -84,9 +84,11 @@ internal static class ExpressionRender
                     var share = t / duration;
                     var semitones = bend switch
                     {
-                        BendKind.Scoop => depth * Math.Max(0, 1 - t / Math.Min(0.25, duration / 3)),
+                        // from a scale note below or above, onto the note
+                        BendKind.Scoop or BendKind.PrebendRelease => depth * Math.Max(0, 1 - t / Math.Min(0.25, duration / 3)),
                         BendKind.Slide => slideFrom * Math.Max(0, 1 - t / Math.Min(0.25, duration / 3)),
-                        BendKind.BendAndRelease => depth * Math.Sin(Math.PI * share),
+                        // to a scale note above or below, and back
+                        BendKind.BendAndRelease or BendKind.ReleaseAndBend => depth * Math.Sin(Math.PI * share),
                         BendKind.FallOff => share < 0.75 ? 0 : depth * (share - 0.75) / 0.25,
                         _ => 0
                     };

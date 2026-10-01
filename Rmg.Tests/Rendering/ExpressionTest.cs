@@ -78,13 +78,26 @@ public sealed class ExpressionTest
         {
             var kind = (BendKind)note.Value.State.GetStateValue(CompositionStateKinds.Bend);
             var depth = note.Value.State.GetStateValue(CompositionStateKinds.BendDepth);
-            if (kind is not (BendKind.Scoop or BendKind.BendAndRelease or BendKind.FallOff))
+            if (kind is BendKind.None or BendKind.Slide)
                 continue;
 
-            var direction = kind == BendKind.BendAndRelease ? 1 : -1;
+            var direction = kind is BendKind.BendAndRelease or BendKind.PrebendRelease ? 1 : -1;
             await Assert.That(depth == Expression.ScaleDistance(note.Value, direction) || depth == Expression.ScaleDistance(note.Value, 2 * direction)).IsTrue();
             await Assert.That(Math.Abs(depth)).IsBetween(1, 4);
         }
+    }
+
+    [Test]
+    public async Task AWildSong_Prebends_BothWays_AndAPlainOneNever()
+    {
+        static BendKind[] Kinds(CorpusSong song) => song.Song.Notes!.Values.SelectMany(x => x).Select(x => (BendKind)x.Value.State.GetStateValue(CompositionStateKinds.Bend)).ToArray();
+
+        var wild = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => Kinds(TestCorpus.Get(seed, Sound(1)))).SelectMany(x => x).ToArray();
+        await Assert.That(wild.Count(x => x == BendKind.ReleaseAndBend)).IsGreaterThan(0);
+        await Assert.That(wild.Count(x => x == BendKind.PrebendRelease)).IsGreaterThan(0);
+
+        var plain = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => Kinds(TestCorpus.Get(seed, Sound(0)))).SelectMany(x => x);
+        await Assert.That(plain.Count(x => x != BendKind.None)).IsEqualTo(0);
     }
 
     [Test]
@@ -126,7 +139,7 @@ public sealed class ExpressionTest
         await Task.CompletedTask;
     }
 
-    /// <summary>How big the bends are: the share of two steps, by fifth of the sound facet and at its ends given, and by third of the sections' energy.</summary>
+    /// <summary>How big the bends are: the share of two steps, by fifth of the sound facet and at its ends given, and by third of the sections' energy; and each kind's share.</summary>
     [Test]
     [Explicit]
     public async Task BendReport()
@@ -144,6 +157,12 @@ public sealed class ExpressionTest
             Console.WriteLine($"  sound 1 given, {name} third of the sections: {Far(placed.Skip(third * placed.Length / 3).Take(placed.Length / 3).ToArray())}");
         var parts = wild.SelectMany(song => song.GroupBy(x => x.Track).Where(x => x.Count() >= 8).Select(x => x.Count(b => Math.Abs(b.Steps) == 2) / (double)x.Count())).Order().ToArray();
         Console.WriteLine($"  sound 1 given, parts of 8 bends or more: two steps from {parts.First():P0} to {parts.Last():P0}, the middle {parts[parts.Length / 2]:P0}");
+
+        // and how a bend goes, by its kind
+        static BendKind[] Kinds(CorpusSong song) => song.Song.Notes!.Values.SelectMany(x => x).Select(x => (BendKind)x.Value.State.GetStateValue(CompositionStateKinds.Bend)).Where(x => x != BendKind.None).ToArray();
+        static string KindShares(BendKind[] kinds) => string.Join(", ", kinds.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count() / (double)kinds.Length:P0}"));
+        Console.WriteLine($"  kinds, the corpus: {KindShares(TestCorpus.Measure(512, Kinds).SelectMany(x => x).ToArray())}");
+        Console.WriteLine($"  kinds, sound 1 given: {KindShares(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Kinds(TestCorpus.Get(seed, Sound(1)))).SelectMany(x => x).ToArray())}");
 
         await Task.CompletedTask;
     }
