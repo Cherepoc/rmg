@@ -129,6 +129,17 @@ internal static class Expression
     /// <summary>Whether a wide vibrato suits an instrument: a guitar's or a synth lead's.</summary>
     private static bool VibratesWide(int program) => program is >= 24 and <= 31 or >= 80 and <= 87;
 
+    /// <summary>
+    ///     The chance a part slides from note to note at all, never in a plain song and not every part in a wild one, and
+    ///     how often one that does slides into a note it may, its own rate spread about this.
+    /// </summary>
+    public static ByConvention SlideChance { get; } = new(0, 0.25, 0.6);
+
+    public static ByConvention SlideRate { get; } = new(0, 0.1, 0.3);
+
+    /// <summary>How soon before a note the one before it must have ended for the note to slide from it, in beats: a slide starts from a note heard.</summary>
+    public const double SlideGap = 0.25;
+
     /// <summary>The chance a line that can bends where the song does, and then a note's chance to, three times it in a solo.</summary>
     public static ByConvention PartBendChance { get; } = new(0, 0.6, 0.9);
 
@@ -159,7 +170,6 @@ internal static class Expression
     [
         (BendKind.Scoop, new ByConvention(1, 0.4, 1)),
         (BendKind.FallOff, new ByConvention(1, 0.25, 1)),
-        (BendKind.Slide, new ByConvention(1, 0.2, 1)),
         (BendKind.BendAndRelease, new ByConvention(1, 0.15, 1)),
         (BendKind.ReleaseAndBend, new ByConvention(0, 0.06, 1)),
         (BendKind.PrebendRelease, new ByConvention(0, 0.08, 1))
@@ -301,6 +311,9 @@ internal static class Expression
             var chorus = 40 + part.GenerateInt(0, 60);
             // how much the part leans to the bigger sizes, around 0
             var strength = StrengthSpread.At(songSound) * Generators.SplineValue()(part);
+            // and whether it slides from note to note, and how often, but where it echoes, playing straight
+            var slides = part.TestProbability(SlideChance.At(songSound)) & !echoes;
+            var slideRate = SlideRate.At(songSound) * 2 * part.GenerateDouble();
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
                 var context = streams(span.SectionId, track);
@@ -328,6 +341,11 @@ internal static class Expression
                     var bendsNow = context.TestProbability(Math.Min(1, bendChance * (isSolo ? 3 : 1)));
                     var kind = context.Pick(bendKinds);
                     var size = context.Pick(sizes);
+                    var slidesNow = context.TestProbability(slideRate);
+                    // from the note before, where it was heard up to a moment before, and no further than a pitch bend reaches
+                    var from = i > 0 && timeline[i - 1].Position + timeline[i - 1].Value.Duration >= note.Position - SlideGap
+                        ? timeline[i - 1].Value.Pitches[0] - note.Value.Pitches[0]
+                        : 0;
                     var state = note.Value.State
                         .With(CompositionStateKinds.Reverb, reverb + 1)
                         .With(CompositionStateKinds.Chorus, choruses && Choruses(noteProgram) ? chorus : 0);
@@ -339,7 +357,10 @@ internal static class Expression
                             ? state.With(CompositionStateKinds.WideVibrato, ScaleDistance(note.Value, width.Steps))
                             : state.With(CompositionStateKinds.Vibrato, width.Cents);
                     }
-                    if (bends && bendsNow)
+                    // a note that slides in bends no other way
+                    if (slides && slidesNow && isLine && Bends(noteProgram) && Math.Abs(from) is >= 1 and <= Rendering.ExpressionRender.BendRange)
+                        state = state.With(CompositionStateKinds.Bend, (int)BendKind.Slide).With(CompositionStateKinds.BendDepth, from);
+                    else if (bends && bendsNow)
                         state = state.With(CompositionStateKinds.Bend, (int)kind).With(CompositionStateKinds.BendDepth, kind switch
                         {
                             BendKind.BendAndRelease or BendKind.PrebendRelease => ScaleDistance(note.Value, size),

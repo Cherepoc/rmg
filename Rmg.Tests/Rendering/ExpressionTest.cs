@@ -60,7 +60,9 @@ public sealed class ExpressionTest
         int? SectionOf(double position) => song.Map.Sections.Select((x, i) => (x, i)).Where(x => position >= x.x.Start - 1e-9 && position < x.x.End - 1e-9).Select(x => (int?)x.i).FirstOrDefault();
         return song.Song.Notes!
             .SelectMany(track => track.Value.Select(note => (track.Key, note)))
-            .Where(x => x.note.Value.State.GetStateValue(CompositionStateKinds.BendDepth) != 0)
+            // a slide is as far as the note before, not a size
+            .Where(x => x.note.Value.State.GetStateValue(CompositionStateKinds.BendDepth) != 0
+                        && (BendKind)x.note.Value.State.GetStateValue(CompositionStateKinds.Bend) != BendKind.Slide)
             .Select(x =>
             {
                 var depth = x.note.Value.State.GetStateValue(CompositionStateKinds.BendDepth);
@@ -98,6 +100,77 @@ public sealed class ExpressionTest
 
         var plain = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => Kinds(TestCorpus.Get(seed, Sound(0)))).SelectMany(x => x);
         await Assert.That(plain.Count(x => x != BendKind.None)).IsEqualTo(0);
+    }
+
+    /// <summary>
+    ///     Every pitched part of a song that bends, by its track: the note changes it may slide over, from a note that ended a
+    ///     moment before and a pitch bend away, and the ones it slides over.
+    /// </summary>
+    private static (int Track, int May, int Slides)[] Slides(CorpusSong song) => song.Song.Notes!
+        .Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack pitched && Expression.Bends(pitched.InstrumentCode))
+        .Select(x =>
+        {
+            var notes = x.Value;
+            var may = Enumerable.Range(1, Math.Max(0, notes.Count - 1)).Count(i => notes[i - 1].Position + notes[i - 1].Value.Duration >= notes[i].Position - Expression.SlideGap
+                                                                                   && Math.Abs(notes[i - 1].Value.Pitches[0] - notes[i].Value.Pitches[0]) is >= 1 and <= 12);
+            return (x.Key, may, notes.Count(n => (BendKind)n.Value.State.GetStateValue(CompositionStateKinds.Bend) == BendKind.Slide));
+        })
+        .Where(x => x.may > 0)
+        .ToArray();
+
+    [Test]
+    public async Task ASlide_IsFromTheNoteBefore_HeardAMomentBefore_AndAPitchBendAway()
+    {
+        var slides = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1))))
+        foreach (var notes in song.Song.Notes!.Values)
+            for (var i = 0; i < notes.Count; i++)
+            {
+                if ((BendKind)notes[i].Value.State.GetStateValue(CompositionStateKinds.Bend) != BendKind.Slide)
+                    continue;
+
+                slides++;
+                await Assert.That(i).IsGreaterThan(0);
+                await Assert.That(notes[i - 1].Position + notes[i - 1].Value.Duration).IsGreaterThanOrEqualTo(notes[i].Position - Expression.SlideGap);
+                var from = notes[i].Value.State.GetStateValue(CompositionStateKinds.BendDepth);
+                await Assert.That(from).IsEqualTo(notes[i - 1].Value.Pitches[0] - notes[i].Value.Pitches[0]);
+                await Assert.That(Math.Abs(from)).IsBetween(1, 12);
+            }
+
+        await Assert.That(slides).IsGreaterThan(0);
+    }
+
+    [Test]
+    public async Task APlainSong_SlidesNever_AndAWildOne_OnSomeParts_NowAndThen()
+    {
+        var plain = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => Slides(TestCorpus.Get(seed, Sound(0)))).SelectMany(x => x).ToArray();
+        await Assert.That(plain.Sum(x => x.Slides)).IsEqualTo(0);
+
+        var wild = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => Slides(TestCorpus.Get(seed, Sound(1)))).SelectMany(x => x).ToArray();
+        await Assert.That(wild.Count(x => x.Slides > 0)).IsGreaterThan(0);
+        await Assert.That(wild.Count(x => x.Slides > 0)).IsLessThan(wild.Length);
+        await Assert.That(wild.Where(x => x.May >= 8).All(x => x.Slides < x.May)).IsTrue();
+    }
+
+    /// <summary>How many parts that may slide do, and how often, by fifth of the sound facet and at its ends given.</summary>
+    [Test]
+    [Explicit]
+    public async Task SlideReport()
+    {
+        static double SoundOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Sound];
+        static string Of((int, int May, int Slides)[] parts)
+        {
+            var sliding = parts.Where(x => x.Slides > 0).ToArray();
+            return $"{sliding.Length / (double)Math.Max(1, parts.Length):P0} of {parts.Length} parts slide, over {sliding.Sum(x => x.Slides) / (double)Math.Max(1, sliding.Sum(x => x.May)):P0} of the changes they may";
+        }
+
+        var drawn = TestCorpus.Measure(512, song => (Fifth: Math.Clamp((int)(SoundOf(song) * 5), 0, 4), Parts: Slides(song)));
+        foreach (var band in drawn.GroupBy(x => x.Fifth).OrderBy(x => x.Key))
+            Console.WriteLine($"  sound {band.Key}/5: {Of(band.SelectMany(x => x.Parts).ToArray())}");
+        foreach (var sound in new[] { 0.0, 1.0 })
+            Console.WriteLine($"  sound {sound} given: {Of(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Slides(TestCorpus.Get(seed, Sound(sound)))).SelectMany(x => x).ToArray())}");
+
+        await Task.CompletedTask;
     }
 
     [Test]
