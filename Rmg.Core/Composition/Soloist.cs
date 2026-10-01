@@ -46,7 +46,10 @@ internal sealed record Soloist(
     double MaxNotesASecond,
     bool Bends,
     bool Vibrates,
-    double Stamina
+    double Stamina,
+    ImmutableArray<int> PhraseBars,
+    double OffBarChance,
+    double BreathChance
 )
 {
     /// <summary>The fastest a soloist plays, in notes a second, which its speeds keep under at a song's tempo: a plain one's 16ths at 120, a wild one's sextuplets at 160.</summary>
@@ -70,6 +73,20 @@ internal sealed record Soloist(
     public static ByConvention StaminaPowers { get; } = new(0, 1.5, 2.5);
 
     public static ByConvention StaminaSpread { get; } = new(0, 0.5, 2);
+
+    /// <summary>How long a soloist's phrases are, in bars: two or four the plainest, one the wilder too.</summary>
+    public static ImmutableArray<(int Bars, ByConvention Weight)> PhraseBarOptions { get; } =
+    [
+        (2, new ByConvention(1, 0.5, 0.35)),
+        (4, new ByConvention(1, 0.4, 0.3)),
+        (1, new ByConvention(0, 0.1, 0.35))
+    ];
+
+    /// <summary>The chance a phrase starts off the bar, a beat or two in, as a wild soloist's may: never at the plain end.</summary>
+    public static ByConvention OffBarChances { get; } = new(0, 0.05, 0.5);
+
+    /// <summary>The chance a soloist breathes after a phrase's release, a plain one the oftener.</summary>
+    public static ByConvention BreathChances { get; } = new(0.8, 0.6, 0.4);
 
     /// <summary>How many beats the soloist may play a speed at in one run: its stamina at its fastest, the longer the slower.</summary>
     public double BeatsAt(int notesABeat) => Stamina * Speeds[^1] / notesABeat;
@@ -156,7 +173,9 @@ internal sealed record Soloist(
         var vibrates = context.TestProbability(VibratoChance.At(sound));
         var fastest = FastestSpeedChances.Where(x => context.TestProbability(x.Chance.At(melody))).Select(x => x.NotesABeat);
         var stamina = Math.Pow(2, StaminaPowers.At(melody) + StaminaSpread.At(melody) * Generators.SplineValue()(context));
-        return new Soloist([..speeds.Concat(fastest).Order()], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody), bends, vibrates, stamina);
+        var phraseBars = Favourites(context, PhraseBarOptions, melody);
+        return new Soloist([..speeds.Concat(fastest).Order()], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody), bends, vibrates, stamina,
+            phraseBars, OffBarChances.At(melody), BreathChances.At(melody));
     }
 
     /// <summary>The options a soloist favours, as many as it draws, each picked from those left.</summary>

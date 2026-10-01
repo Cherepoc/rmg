@@ -10,8 +10,8 @@ namespace Rmg.Core.Composition;
 ///     vocabulary (<see cref="Soloist" />), the kit its scale: the section's snare, its toms from the highest to the
 ///     lowest, and its kick, in that order, so that a run's cells go round the kit as a pitched run's go up the scale, a
 ///     sequence a drum on at a time, an arpeggio skipping one, a turn between neighbours and a pedal on one drum between
-///     the moving others. A held note is a crash with the kick, ringing; a pause is the drums silent; a quote is the
-///     section's own groove. It leaves its last bar to the fill into the section after, so that the band comes back in on
+///     the moving others. A held note is a crash with the kick, ringing, as is the release every phrase ends on; a pause is
+///     the drums silent; a quote is the section's own groove. It leaves its last bar to the fill into the section after, so that the band comes back in on
 ///     its landing.
 /// </summary>
 internal static class DrumSolos
@@ -73,7 +73,7 @@ internal static class DrumSolos
             var indices = Enumerable.Range(0, kit.Length).ToArray();
             var at = 0;
             SoloLines.CellCursor? cursor = null;
-            foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn) in plan)
+            foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn, _, _) in plan)
             {
                 // the groove quoted as it plays, and anything else in place of it
                 if (gesture == SoloGesture.Quote)

@@ -366,6 +366,87 @@ public sealed class SoloTest
         await Assert.That(checkedRuns).IsGreaterThan(50);
     }
 
+    [Test]
+    public async Task EveryPhraseOfASolo_EndsOnARelease_AChordsNoteHeldFromAStrongBeat()
+    {
+        var (releases, onChord) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Facets(1, 0.5))))
+        foreach (var (index, _, plan) in Plans(song))
+        {
+            var span = song.Map.Sections[index];
+            var strong = span.Meter.BarDuration >= 4 ? span.Meter.BarDuration / 2 : span.Meter.BarDuration;
+            foreach (var phrase in plan.GroupBy(x => x.Phrase))
+            {
+                var release = phrase.Last(x => x.Gesture != SoloGesture.Pause);
+                await Assert.That(release.IsRelease).IsTrue().Because($"seed {song.Seed} at {release.Start}");
+                await Assert.That(Math.Abs(Math.Round((release.Start - span.Start) / strong) * strong - (release.Start - span.Start))).IsLessThan(1e-6);
+                await Assert.That(release.End - release.Start).IsGreaterThanOrEqualTo(1 - 1e-9);
+            }
+
+            // its note the chord's, marked as a release, on the first soloist's part
+            var soloist = song.Song.TrackDefinitions.First(x => x.Value.Role == song.Solos[index].Soloists[0]).Key;
+            foreach (var note in song.Song.Notes![soloist].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.SoloRelease) == 1 && x.Position >= span.Start && x.Position < span.End))
+            {
+                releases++;
+                var (_, _, chord) = Realizer.GetChord(note.Value.State);
+                if (new[] { 0, 2, 4 }.Select(x => chord.GetPitch(x).Mod(12)).Contains(note.Value.Pitches[0].Mod(12)))
+                    onChord++;
+            }
+        }
+
+        await Assert.That(releases).IsGreaterThan(20);
+        await Assert.That(onChord / (double)releases).IsGreaterThan(0.9);
+    }
+
+    [Test]
+    public async Task APlainSolosPhrases_StartOnTheBar_AWildOnesNowAndThenOff_AndASoloBuildsToItsClimax()
+    {
+        static bool IsLate(SoloLines.Segment[] plan, int phrase) => plan.First(x => x.Phrase == phrase) is { Gesture: SoloGesture.Pause, IsRelease: false };
+        var plain = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => Plans(TestCorpus.Get(seed, Facets(1, 0)))).SelectMany(x => x).ToArray();
+        var wild = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => Plans(TestCorpus.Get(seed, Facets(1, 1)))).SelectMany(x => x).ToArray();
+
+        await Assert.That(plain.All(x => x.Plan.Select(s => s.Phrase).Distinct().All(p => !IsLate(x.Plan, p)))).IsTrue();
+        await Assert.That(wild.Count(x => x.Plan.Select(s => s.Phrase).Distinct().Any(p => IsLate(x.Plan, p)))).IsGreaterThan(0);
+
+        // the intensity of a solo's first fifth against that about its climax, the fourth
+        double Around(IEnumerable<(int, bool, SoloLines.Segment[] Plan)> solos, double from, double to) => solos
+            .SelectMany(x => x.Plan.Where(s => s.Gesture != SoloGesture.Pause)
+                .Select(s => (Place: (s.Start - x.Plan[0].Start) / (x.Plan[^1].End - x.Plan[0].Start), s.Intensity)))
+            .Where(x => x.Place >= from && x.Place < to).Select(x => x.Intensity).DefaultIfEmpty().Average();
+        var all = plain.Concat(wild).ToArray();
+        await Assert.That(Around(all, 0.6, 0.8)).IsGreaterThan(Around(all, 0, 0.2) + 0.15);
+    }
+
+    /// <summary>
+    ///     The solos' phrases, by fifth of the melody facet: how long, how many come in late, how many breathe after their
+    ///     release, the share of runs that go on over a bar line, and the intensity by fifth of the way through a solo.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task PhraseReport()
+    {
+        static double MelodyOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Melody];
+        var solos = TestCorpus.Measure(512, song => Plans(song).Select(x => (Fifth: Math.Clamp((int)(MelodyOf(song) * 5), 0, 4), Bar: song.Map.Sections[x.Index].Meter.BarDuration, x.Plan)).ToArray()).SelectMany(x => x).ToArray();
+        foreach (var band in solos.GroupBy(x => x.Fifth).OrderBy(x => x.Key))
+        {
+            var phrases = band.SelectMany(x => x.Plan.GroupBy(s => s.Phrase).Select(p => (x.Bar, Segments: p.ToArray()))).ToArray();
+            var lengths = phrases.GroupBy(p => Math.Round((p.Segments[^1].End - p.Segments[0].Start) / p.Bar)).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count() / (double)phrases.Length:P0}");
+            var late = phrases.Count(p => p.Segments[0] is { Gesture: SoloGesture.Pause, IsRelease: false });
+            var breathe = phrases.Count(p => p.Segments[^1] is { Gesture: SoloGesture.Pause });
+            // a run's chain of segments, going on over a bar line
+            var chains = band.SelectMany(x => x.Plan.Select((s, i) => (s, i, x.Bar, x.Plan)).Where(c => c.s.Gesture == SoloGesture.Run && !c.s.GoesOn)
+                .Select(c => (Start: c.s.Start, End: c.Plan.Skip(c.i).TakeWhile((s, k) => k == 0 || s.GoesOn).Last().End, Origin: x.Plan[0].Start, c.Bar))).ToArray();
+            var crossing = chains.Count(c => Math.Floor((c.Start - c.Origin) / c.Bar + 1e-9) != Math.Floor((c.End - c.Origin) / c.Bar - 1e-9));
+            var arc = Enumerable.Range(0, 5).Select(f => band.SelectMany(x => x.Plan.Where(s => s.Gesture != SoloGesture.Pause)
+                    .Select(s => (Place: (s.Start - x.Plan[0].Start) / (x.Plan[^1].End - x.Plan[0].Start), s.Intensity)))
+                .Where(x => x.Place >= f / 5.0 && x.Place < (f + 1) / 5.0).Select(x => x.Intensity).DefaultIfEmpty().Average());
+            Console.WriteLine($"  melody {band.Key}/5, {phrases.Length} phrases: {string.Join(", ", lengths)} bars; late {late / (double)phrases.Length:P0}, breathe {breathe / (double)phrases.Length:P0}; " +
+                              $"runs over a bar line {crossing / (double)Math.Max(1, chains.Length):P0} of {chains.Length}; intensity by fifth {string.Join(" ", arc.Select(x => $"{x:F2}"))}");
+        }
+
+        await Task.CompletedTask;
+    }
+
     /// <summary>
     ///     How fast the solos' runs go, by fifth of the melody facet: the share of their notes at each speed, and the longest
     ///     any run keeps up a speed of 32nds or faster, in beats.

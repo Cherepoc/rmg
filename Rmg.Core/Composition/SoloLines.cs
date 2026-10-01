@@ -5,6 +5,19 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
+/// <summary>The shape a solo's phrase's intensity takes over it.</summary>
+public enum PhraseContour
+{
+    /// <summary>Up to its peak in its middle and down.</summary>
+    RiseAndFall,
+
+    /// <summary>Up to its peak at its end.</summary>
+    Rise,
+
+    /// <summary>From its peak down.</summary>
+    Fall
+}
+
 /// <summary>What a soloist plays from one point of its solo to the next.</summary>
 public enum SoloGesture
 {
@@ -25,10 +38,11 @@ public enum SoloGesture
 }
 
 /// <summary>
-///     A solo's line, gesture by gesture: the solo goes by half bars, or bars in a short meter, each with an intensity
-///     that rises over the solo as a soloist builds, stepped about and now and then thrown somewhere else, as far and as
-///     often as the soloist's volatility, and the gesture there picked by it, a run the likelier the more intense, a held
-///     note or a pause the less, from the soloist's vocabulary (<see cref="Soloist" />). Each gesture heads for where the
+///     A solo's line, phrase by phrase and gesture by gesture (<see cref="Plan" />): phrases of the soloist's lengths, their
+///     peaks building to the solo's climax and easing after, each ending on a release, a note of the chord held from a
+///     strong beat; within a phrase gestures of lengths of their own, picked by its intensity there, a run the likelier the
+///     more intense, a held note or a pause the less, from the soloist's vocabulary (<see cref="Soloist" />), a run going
+///     on over the bar lines in the phrase. Each gesture heads for where the
 ///     next starts: a note of the chord there, higher the more intense, in a solo of its own, or the melody's note there in
 ///     one on the melody, which quotes it the more. Every note is a scale note in the soloist's range, as its chord there
 ///     has it, kept as its scale step over that chord, so that a run crossing a change of chord stays on the scale.
@@ -53,18 +67,41 @@ internal static class SoloLines
     /// <summary>The odds the most intense gesture has over the calmest at an intensity of 1, and the other way at 0.</summary>
     public const double IntensityOdds = 16;
 
-    /// <summary>Where the intensity starts and how far it rises over the solo, the arc it is pulled towards.</summary>
-    public const double ArcStart = 0.25;
+    /// <summary>
+    ///     The solo's arc, which its phrases' peaks follow: where it starts, the climax it rises to at about 70% of the way,
+    ///     and where it eases to by its end.
+    /// </summary>
+    public const double ArcStart = 0.3;
 
-    public const double ArcRise = 0.6;
+    public const double ClimaxAt = 0.7;
 
-    /// <summary>How far a step pulls the intensity towards the arc, and how far the soloist's volatility moves it about.</summary>
-    public const double ArcPull = 0.5;
+    public const double ArcEnd = 0.6;
 
+    /// <summary>How far the soloist's volatility moves a phrase's peak and a gesture's intensity about.</summary>
     public const double Drift = 0.4;
 
-    /// <summary>The chance a step throws the intensity anywhere, times the soloist's volatility.</summary>
+    /// <summary>The chance a gesture's intensity is thrown anywhere, times the soloist's volatility.</summary>
     public const double JumpRate = 0.5;
+
+    /// <summary>The shape a phrase's intensity takes, up to its peak and down, how likely each is.</summary>
+    public static ImmutableArray<Weighted<PhraseContour>> Contours { get; } =
+    [
+        new(0.5, PhraseContour.RiseAndFall),
+        new(0.3, PhraseContour.Rise),
+        new(0.2, PhraseContour.Fall)
+    ];
+
+    /// <summary>A phrase's intensity a share of the way through it, as a share of its peak.</summary>
+    public static double Contour(PhraseContour contour, double share) => contour switch
+    {
+        PhraseContour.RiseAndFall => 0.4 + 0.6 * Math.Sin(Math.PI * share),
+        PhraseContour.Rise => 0.4 + 0.6 * share,
+        PhraseContour.Fall => 1 - 0.6 * share,
+        _ => throw new ArgumentOutOfRangeException(nameof(contour), contour, null)
+    };
+
+    /// <summary>How long a gesture lasts, in beats, and how it leans with the intensity: the longer the more intense.</summary>
+    public static ImmutableArray<(double Beats, double Lean)> GestureLengths { get; } = [(1, -1), (2, 0), (4, 1)];
 
     /// <summary>
     ///     A shape's cell, as the scale steps its notes are from the cell's first, its figure going round for as many notes as
@@ -138,13 +175,14 @@ internal static class SoloLines
         var loudness = melody.Average(x => x.Value.GetStateValue(StateKinds.Velocity));
 
         // a note of the line at its place, as a line's note: the step above the chord there nearest it, on the scale there
-        TimelineItem<StateMap> Place(double position, int pitch, double intensity, double held = 0, bool accented = false)
+        TimelineItem<StateMap> Place(double position, int pitch, double intensity, double held = 0, bool accented = false, bool release = false)
         {
             var state = MelodyAt(position).Value.Except([StateKinds.HeldDuration, CompositionStateKinds.LinePickup, StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed]);
             state = state.With(StateKinds.Velocity, loudness + IntensityVelocity * (intensity - 0.5) + (accented ? CellAccent : 0));
             state = state.With(StateKinds.ScaleStep, LinePlacement.GetScaleStep(Chord(state, position), pitch))
                 .With(StateKinds.Alteration, 0)
-                .With(CompositionStateKinds.SoloIntensity, (int)Math.Round(intensity * 100));
+                .With(CompositionStateKinds.SoloIntensity, (int)Math.Round(intensity * 100))
+                .With(CompositionStateKinds.SoloRelease, release ? 1 : 0);
             return (held > 0 ? state.With(StateKinds.HeldDuration, held) : state).ToTimelineItem(position);
         }
 
@@ -159,7 +197,7 @@ internal static class SoloLines
         var line = new List<TimelineItem<StateMap>>();
         var current = Nearest(ChordNotes(span.Start), middle);
         CellCursor? cursor = null;
-        foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn) in plan)
+        foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn, _, isRelease) in plan)
         {
             // a run going on from the segment before keeps where it is in its cells
             cursor = goesOn && cursor is not null ? cursor : new CellCursor(current);
@@ -172,7 +210,7 @@ internal static class SoloLines
             {
                 case SoloGesture.Held:
                     current = Nearest(ChordNotes(start), current);
-                    line.Add(Place(start, current, level, end - start));
+                    line.Add(Place(start, current, level, end - start, release: isRelease));
                     break;
                 case SoloGesture.Run:
                 case SoloGesture.Lick:
@@ -214,67 +252,105 @@ internal static class SoloLines
 
     /// <summary>
     ///     A solo's segment as planned: where it starts and ends, its intensity, its gesture, the speed it runs at in notes a
-    ///     beat, its cells' shape and sizes, and whether it goes on with the run of the segment before.
+    ///     beat, its cells' shape and sizes, whether it goes on with the run of the segment before, the phrase it is of, and
+    ///     whether it is the phrase's release.
     /// </summary>
-    internal sealed record Segment(double Start, double End, double Intensity, SoloGesture Gesture, int Speed, SoloShape Shape, int[] Sizes, bool GoesOn);
+    internal sealed record Segment(double Start, double End, double Intensity, SoloGesture Gesture, int Speed, SoloShape Shape, int[] Sizes, bool GoesOn, int Phrase, bool IsRelease);
 
     /// <summary>
-    ///     A solo's segments, a pitched one's or a drum solo's, by half bars, or bars in a short meter: each segment's intensity,
-    ///     pulled towards an arc rising over the solo and moved about, or thrown somewhere else, as far and as often as the
-    ///     soloist's volatility, and the gesture, the speed, the shape and the cells there, from its vocabulary, leaned by it.
+    ///     A solo's segments, a pitched one's or a drum solo's, phrase by phrase: each phrase of one of the soloist's
+    ///     lengths, a wild soloist's now and then coming in a beat or two late; its peak following the solo's arc to the
+    ///     climax and easing after, moved about by the soloist's volatility; its intensity shaped over it by a contour; its
+    ///     gestures, each of a length of its own, the longer the more intense, so that a run goes on over the bar lines in it,
+    ///     its gesture, speed, shape and cells from the soloist's vocabulary, leaned by the intensity there; and its release, a
+    ///     note held from the last strong beat a beat or more before its end, and a breath after it now and then.
     /// </summary>
     /// <param name="quoteWeight">How much a quote weighs from a segment's start to its end: what there is to quote there.</param>
     /// <param name="beatsASecond">The tempo at a position, in beats a second, which the speeds keep under the soloist's fastest.</param>
     internal static Segment[] Plan(IGenerationContext context, SectionSpan span, Soloist soloist, Func<double, double, double> quoteWeight, Func<double, double> beatsASecond)
     {
-        var segment = span.Meter.BarDuration >= 4 ? span.Meter.BarDuration / 2 : span.Meter.BarDuration;
-        var count = Math.Max(1, (int)Math.Round(span.Duration / segment));
+        var bar = span.Meter.BarDuration;
+        var strong = bar >= 4 ? bar / 2 : bar;
         var segments = new List<Segment>();
-        var level = ArcStart;
         // how long the run going on has played at each speed, which the soloist's stamina keeps it to
         var played = new Dictionary<int, double>();
-        for (var k = 0; k < count; k++)
+        for (var (from, phrase) = (span.Start, 0); from < span.End - 1e-9; phrase++)
         {
-            var (start, end) = (span.Start + k * segment, Math.Min(span.End, span.Start + (k + 1) * segment));
+            // the phrase, to the solo's end rather than leave a scrap of less than a bar
+            var bars = context.Pick(soloist.PhraseBars.Select(x => new Weighted<int>(1, x)).ToImmutableArray());
+            var to = Math.Min(span.End, from + bars * bar);
+            if (span.End - to < bar - 1e-9)
+                to = span.End;
 
-            // the intensity, pulled towards the arc and moved about, or thrown somewhere else
-            var arc = ArcStart + ArcRise * (count == 1 ? 1 : k / (double)(count - 1));
-            var jumps = context.TestProbability(Math.Min(1, soloist.Volatility * JumpRate));
-            var thrown = context.GenerateDouble();
-            var drift = Generators.SplineValue()(context);
-            level = Math.Clamp(jumps ? thrown : level + (arc - level) * ArcPull + soloist.Volatility * Drift * drift, 0, 1);
-            var lean = Tilt.Of(IntensityOdds, 2 * level - 1);
+            // its peak, on the way to the solo's climax or easing after it, and the shape of its intensity
+            var place = ((from + to) / 2 - span.Start) / span.Duration;
+            var arc = place < ClimaxAt ? ArcStart + (1 - ArcStart) * place / ClimaxAt : 1 - (1 - ArcEnd) * (place - ClimaxAt) / (1 - ClimaxAt);
+            var peak = Math.Clamp(arc + soloist.Volatility * Drift * Generators.SplineValue()(context), 0.05, 1);
+            var contour = context.Pick(Contours);
+            // a wild soloist's coming in a beat or two late, where the phrase has a bar to spare
+            var isLate = context.TestProbability(soloist.OffBarChance);
+            var late = context.GenerateInt(1, 3);
+            var start = isLate && to - from >= 2 * bar ? from + late : from;
+            // and its release from the last strong beat a beat or more before its end, and whether a breath follows
+            var releaseAt = Math.Max(start, from + Math.Floor((to - 1 - from) / strong + 1e-9) * strong);
+            var breathes = context.TestProbability(soloist.BreathChance);
+            if (start > from)
+                segments.Add(new Segment(from, start, peak * Contour(contour, 0), SoloGesture.Pause, soloist.Speeds[0], soloist.Shapes[0], [soloist.CellSizes[0]], false, phrase, false));
 
-            // the gesture
-            var weights = Gestures.Select(x => new Weighted<SoloGesture>(
-                x.Gesture switch
-                {
-                    SoloGesture.Quote => quoteWeight(start, end),
-                    // a pause is a breath between gestures: never the first, nor one after another
-                    SoloGesture.Pause => k == 0 || segments[^1].Gesture == SoloGesture.Pause ? 0 : x.Weight * soloist.PauseRate / Soloist.PauseRates.Tuned,
-                    _ => x.Weight
-                },
-                x.Gesture));
-            var gesture = context.Pick(lean.Weigh(weights.Where(x => x.Weight > 0), x => Gestures.Single(g => g.Gesture == x).Lean));
-            // the speed, faster the more intense, of those the soloist can play at the tempo there
-            var goingOn = gesture == SoloGesture.Run && segments.Count > 0 && segments[^1].Gesture == SoloGesture.Run;
-            if (!goingOn)
-                played.Clear();
-            var speeds = soloist.Speeds
-                .Where(x => x * beatsASecond(start) <= soloist.MaxNotesASecond + 1e-9 && played.GetValueOrDefault(x) + (end - start) <= soloist.BeatsAt(x) + 1e-9)
-                .DefaultIfEmpty(soloist.Speeds[0])
-                .ToArray();
-            var speed = context.Pick(lean.Weigh(speeds.Select(x => new Weighted<int>(1, x)), x => speeds.Length == 1 ? 0 : 2.0 * Array.IndexOf(speeds, x) / (speeds.Length - 1) - 1));
-            // and the cells: one of the soloist's shapes, and its sizes in turn where it groups them, or one of them
-            var shape = context.Pick(soloist.Shapes.Select(x => new Weighted<SoloShape>(1, x)).ToImmutableArray());
-            var size = context.Pick(soloist.CellSizes.Select(x => new Weighted<int>(1, x)).ToImmutableArray());
-            int[] sizes = soloist.Groups ? [..soloist.CellSizes] : [size];
-            // a run after a run goes on, its shape and its cells as they were
-            if (goingOn)
-                (shape, sizes) = (segments[^1].Shape, segments[^1].Sizes);
-            if (gesture == SoloGesture.Run)
-                played[speed] = played.GetValueOrDefault(speed) + (end - start);
-            segments.Add(new Segment(start, end, level, gesture, speed, shape, sizes, goingOn));
+            for (var at = start; at < releaseAt - 1e-9;)
+            {
+                // the intensity there, as the contour has it, moved about, or thrown somewhere else
+                var target = peak * Contour(contour, (at - from) / (to - from));
+                var jumps = context.TestProbability(Math.Min(1, soloist.Volatility * JumpRate));
+                var thrown = context.GenerateDouble();
+                var drift = Generators.SplineValue()(context);
+                var level = Math.Clamp(jumps ? thrown : target + soloist.Volatility * Drift * drift, 0, 1);
+                var lean = Tilt.Of(IntensityOdds, 2 * level - 1);
+                // no longer than a bar, a note held that long being a bar's at most
+                var length = Math.Min(Math.Min(context.Pick(lean.Weigh(GestureLengths.Select(x => new Weighted<double>(1, x.Beats)), x => GestureLengths.Single(g => g.Beats.Equals(x)).Lean)), bar), releaseAt - at);
+                var end = at + length;
+                var previous = segments.Count > 0 && segments[^1].Phrase == phrase ? segments[^1] : null;
+
+                // the gesture
+                var weights = Gestures.Select(x => new Weighted<SoloGesture>(
+                    x.Gesture switch
+                    {
+                        SoloGesture.Quote => quoteWeight(at, end),
+                        // a pause is a breath between gestures: never a phrase's first, nor one after another
+                        SoloGesture.Pause => previous is null or { Gesture: SoloGesture.Pause } ? 0 : x.Weight * soloist.PauseRate / Soloist.PauseRates.Tuned,
+                        _ => x.Weight
+                    },
+                    x.Gesture));
+                var gesture = context.Pick(lean.Weigh(weights.Where(x => x.Weight > 0), x => Gestures.Single(g => g.Gesture == x).Lean));
+                // a run after a run in the phrase goes on, its shape and its cells as they were
+                var goingOn = gesture == SoloGesture.Run && previous is { Gesture: SoloGesture.Run };
+                if (!goingOn)
+                    played.Clear();
+                // the speed, faster the more intense, of those the soloist can play at the tempo there and keep up
+                var speeds = soloist.Speeds
+                    .Where(x => x * beatsASecond(at) <= soloist.MaxNotesASecond + 1e-9 && played.GetValueOrDefault(x) + length <= soloist.BeatsAt(x) + 1e-9)
+                    .DefaultIfEmpty(soloist.Speeds[0])
+                    .ToArray();
+                var speed = context.Pick(lean.Weigh(speeds.Select(x => new Weighted<int>(1, x)), x => speeds.Length == 1 ? 0 : 2.0 * Array.IndexOf(speeds, x) / (speeds.Length - 1) - 1));
+                // and the cells: one of the soloist's shapes, and its sizes in turn where it groups them, or one of them
+                var shape = context.Pick(soloist.Shapes.Select(x => new Weighted<SoloShape>(1, x)).ToImmutableArray());
+                var size = context.Pick(soloist.CellSizes.Select(x => new Weighted<int>(1, x)).ToImmutableArray());
+                int[] sizes = soloist.Groups ? [..soloist.CellSizes] : [size];
+                if (goingOn)
+                    (shape, sizes) = (previous!.Shape, previous.Sizes);
+                if (gesture == SoloGesture.Run)
+                    played[speed] = played.GetValueOrDefault(speed) + length;
+                segments.Add(new Segment(at, end, level, gesture, speed, shape, sizes, goingOn, phrase, false));
+                at = end;
+            }
+
+            // the release, held to the phrase's end, or to halfway there and a breath
+            var releaseLevel = peak * Contour(contour, 1);
+            var releaseEnd = Math.Min(releaseAt + bar, breathes && to - releaseAt >= 2 ? releaseAt + (to - releaseAt) / 2 : to);
+            segments.Add(new Segment(releaseAt, releaseEnd, releaseLevel, SoloGesture.Held, soloist.Speeds[0], soloist.Shapes[0], [soloist.CellSizes[0]], false, phrase, true));
+            if (releaseEnd < to - 1e-9)
+                segments.Add(new Segment(releaseEnd, to, releaseLevel, SoloGesture.Pause, soloist.Speeds[0], soloist.Shapes[0], [soloist.CellSizes[0]], false, phrase, false));
+            from = to;
         }
 
         return [..segments];

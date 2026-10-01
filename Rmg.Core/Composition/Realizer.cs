@@ -123,7 +123,9 @@ internal static class Realizer
             var struck = new List<TimelineItem<StateMap>>();
             foreach (var (index, change) in crossings)
             {
-                if (index + 1 >= events.Count || events[index + 1].Position >= change + meterAt(change).BarDuration - 1e-9)
+                // where the track plays on within a bar, as it played, not into a solo's line or out of one
+                if (index + 1 >= events.Count || events[index + 1].Position >= change + meterAt(change).BarDuration - 1e-9
+                    || events[index].Value.GetStateValue(CompositionStateKinds.LineSolo) != events[index + 1].Value.GetStateValue(CompositionStateKinds.LineSolo))
                     continue;
 
                 var (note, next) = (events[index].Value, events[index + 1]);
