@@ -82,7 +82,7 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
 - **The octaves** (`LineDoubling`, the report in `OctaveTest`): the melody, the counter-melody or the riff plays a
   section in octaves, its own note and the one an octave above, below at the top of its range, in 10% of a plain
   song's appearances, 15% of a middling one's and 20% of the wildest, 6% of the quietest third of the sections and 26%
-  of the loudest. Too often? Does a counter-melody an octave up cross the melody, and should the octave rather go
+  of the loudest. It bends and echoes as any line. Too often? Does a counter-melody an octave up cross the melody, and should the octave rather go
   below there? The riff's twin, now in 15% of riff songs from the middle on, by fourths and fifths in wild songs: too
   rare, or the wild intervals too sour?
 - **The bass's pickup** always falls on the beat: the 8th before the bar line, leaned by convention, if it sounds

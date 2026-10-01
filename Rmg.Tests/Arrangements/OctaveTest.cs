@@ -42,6 +42,17 @@ public sealed class OctaveTest
     }
 
     [Test]
+    public async Task ALineInOctaves_BendsAndSingsAVibrato_AsAnyLine()
+    {
+        var notes = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1)))
+            .SelectMany(x => x.Song.Notes!.Values.SelectMany(n => n))
+            .Where(x => x.Value.Pitches.Length == 2 && x.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0)
+            .ToArray();
+
+        await Assert.That(notes.Count(x => x.Value.State.GetStateValue(CompositionStateKinds.Bend) != 0 || x.Value.State.GetStateValue(CompositionStateKinds.Vibrato) > 0)).IsGreaterThan(0);
+    }
+
+    [Test]
     public async Task APartPlaysOneDoublingAtATime()
     {
         foreach (var song in TestCorpus.Range(128))

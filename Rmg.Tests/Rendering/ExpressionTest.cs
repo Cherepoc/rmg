@@ -50,7 +50,7 @@ public sealed class ExpressionTest
     }
 
     [Test]
-    public async Task OnlyALineOfAnInstrumentThatBends_Bends()
+    public async Task OnlyALineOfAnInstrumentThatBends_Bends_InOctavesToo()
     {
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, Sound(1))))
         foreach (var (track, notes) in song.Song.Notes!)
@@ -58,7 +58,7 @@ public sealed class ExpressionTest
         {
             var program = note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
             await Assert.That(Expression.Bends(program)).IsTrue();
-            await Assert.That(note.Value.Pitches.Length).IsEqualTo(1);
+            await Assert.That(note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0).IsTrue();
         }
     }
 

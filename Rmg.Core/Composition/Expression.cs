@@ -235,8 +235,8 @@ internal static class Expression
                     var note = timeline[i];
 
                     var noteProgram = note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : program;
-                    // one note at a time, as a line in octaves is not
-                    var isLine = note.Value.Pitches.Length == 1
+                    // one note at a time, or in octaves, which bend and echo together
+                    var isLine = (note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0)
                                  && (IsLineRole(role) || note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1);
                     var bends = bendsHere && isLine && Bends(noteProgram);
                     var isSolo = note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1;
