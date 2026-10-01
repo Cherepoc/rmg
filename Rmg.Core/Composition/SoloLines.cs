@@ -144,6 +144,12 @@ internal static class SoloLines
     /// <summary>The odds a gesture leaning to stacking has over one leaning away, and an intense moment over a calm one, as the odds of 1.</summary>
     public const double ChordOdds = 3;
 
+    /// <summary>
+    ///     The chance a phrase's first run or lick opens on the phrase before's first cell moved a scale step, up or down, as
+    ///     a soloist answers its own idea: neither plainer nor wilder.
+    /// </summary>
+    public const double MotifChance = 0.5;
+
     /// <summary>How much louder a cell's first note is, so that its grouping is heard.</summary>
     public const double CellAccent = 0.1;
 
@@ -155,9 +161,11 @@ internal static class SoloLines
     /// <param name="track">The soloist's track, whose state its notes are realized over.</param>
     /// <param name="definition">The soloist's definition, its range.</param>
     /// <param name="voicing">The sequence that draws which gestures the soloist stacks, a stream of its own.</param>
+    /// <param name="motifs">The sequence that draws which phrases open on the phrase before's motif, a stream of its own.</param>
     public static (TimelineItem<StateMap>[] Line, Segment[] Segments) Generate(
         IGenerationContext context,
         IGenerationContext voicing,
+        IGenerationContext motifs,
         SectionSpan span,
         Soloist soloist,
         bool isOwn,
@@ -229,7 +237,10 @@ internal static class SoloLines
         var line = new List<TimelineItem<StateMap>>();
         var current = Nearest(ChordNotes(span.Start), middle);
         CellCursor? cursor = null;
-        foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn, _, isRelease) in plan)
+        // the phrase before's motif, its first run's or lick's first cell, and the phrase whose motif is taken
+        int[]? motif = null;
+        var (motifPhrase, motifShape) = (-1, SoloShape.Scale);
+        foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn, phrase, isRelease) in plan)
         {
             // whether the soloist stacks the gesture, the likelier the more it leans to it and the more intense
             var stacks = voicing.TestProbability(new Tilt(Tilt.Of(ChordOdds, ChordLeans[gesture]).LogOdds + Tilt.Of(ChordOdds, 2 * level - 1).LogOdds).Chance(soloist.ChordRate, 1));
@@ -251,7 +262,28 @@ internal static class SoloLines
                 {
                     // a lick at half the speed, its cell again in place, and a run its cells on the way to where it heads
                     var positions = Positions(start, end, gesture, speed);
-                    var (pitches, accents, cells) = Cells(ScaleNotes(start), cursor, heading, positions.Length, shape, sizes, gesture == SoloGesture.Run);
+                    var scale = ScaleNotes(start);
+                    var (pitches, accents, cells) = Cells(scale, cursor, heading, positions.Length, shape, sizes, gesture == SoloGesture.Run);
+                    // a phrase's first opening on the phrase before's motif a step away now and then, its own the next's
+                    if (phrase != motifPhrase && pitches.Length > 0)
+                    {
+                        var answers = motifs.TestProbability(MotifChance);
+                        var step = motifs.GenerateInt(0, 2) * 2 - 1;
+                        // in the motif's own figure, a scale's answered by a scale
+                        if (answers && motif is not null && shape == motifShape && scale.Length > 0)
+                        {
+                            // the motif in place of the first cell, and the rest moved with its last note, so that the
+                            // gesture goes on from it as it went on from its own
+                            int Index(int pitch) => Array.IndexOf(scale, Nearest(scale, pitch));
+                            var count = Math.Min(motif.Length, pitches.Length);
+                            var moved = Index(motif[count - 1]) + step - Index(pitches[count - 1]);
+                            for (var i = 0; i < pitches.Length; i++)
+                                pitches[i] = scale[Math.Clamp(i < count ? Index(motif[i]) + step : Index(pitches[i]) + moved, 0, scale.Length - 1)];
+                        }
+                        motif = pitches[..Math.Min(cells.Length > 0 ? cells[0] : pitches.Length, pitches.Length)];
+                        (motifPhrase, motifShape) = (phrase, shape);
+                    }
+
                     line.AddRange(positions.Select((position, i) => Place(position, pitches[i], level, accented: accents[i], stacked: stacks && accents[i])));
                     StateTrace.Record(TracePoints.SoloCells, SectionGenerator.SectionTrace, span.SectionId, 0, StateMap.Default, 0, $"{gesture} {shape} {string.Join("+", cells)}", (start, shape, cells));
                     if (pitches.Length > 0)

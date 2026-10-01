@@ -362,7 +362,8 @@ public static class SongGenerator
             soloists,
             solos,
             index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloLines), index)),
-            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloChords), index))
+            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloChords), index)),
+            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloMotifs), index))
         );
         // and the solo part answering the melody in its gaps now and then outside its solos, in its soloist's vocabulary,
         // the one its solos are played in, drawn from the same sequence
@@ -540,5 +541,6 @@ internal enum SongStream
     LineChords = 47,
     SoloAnswers = 48,
     MelodyFills = 49,
-    KeyPreparation = 50
+    KeyPreparation = 50,
+    SoloMotifs = 51
 }

@@ -578,6 +578,50 @@ public sealed class SoloTest
         await Task.CompletedTask;
     }
 
+    /// <summary>
+    ///     The share of a song's solos' phrases opening on the phrase before's first cell moved by a step: their first
+    ///     run's or lick's first cell of the same contour, its intervals each within a semitone, a step's move on the scale.
+    /// </summary>
+    private static (int Answering, int Phrases) Motifs(CorpusSong song)
+    {
+        var (answering, phrases) = (0, 0);
+        var cells = song.Trace.Where(x => x.Point == TracePoints.SoloCells).Select(x => ((double Start, SoloShape, int[] Cells))x.Value!).ToDictionary(x => Math.Round(x.Start, 6), x => x.Cells);
+        foreach (var (index, _, plan) in Plans(song).Where(x => song.Solos[x.Index].Soloists.Length == 1))
+        {
+            var notes = song.Song.Notes!.Single(x => song.Song.TrackDefinitions[x.Key].Role == song.Solos[index].Soloists[0]).Value;
+            int[]? before = null;
+            foreach (var opening in plan.Where(x => x.Gesture is SoloGesture.Run or SoloGesture.Lick).GroupBy(x => x.Phrase).Select(x => x.First()))
+            {
+                if (!cells.TryGetValue(Math.Round(opening.Start, 6), out var sizes) || sizes.Length == 0)
+                    continue;
+
+                var pitches = notes.Where(x => x.Position >= opening.Start - 1e-9 && x.Position < opening.End - 1e-9).Take(sizes[0]).Select(x => x.Value.Pitches[0]).ToArray();
+                int[] intervals = [..pitches.Zip(pitches.Skip(1), (a, b) => b - a)];
+                if (before is not null && intervals.Length > 0 && intervals.Length == before.Length)
+                {
+                    phrases++;
+                    if (intervals.Zip(before).All(x => Math.Sign(x.First) == Math.Sign(x.Second) && Math.Abs(x.First - x.Second) <= 1))
+                        answering++;
+                }
+
+                before = intervals;
+            }
+        }
+
+        return (answering, phrases);
+    }
+
+    [Test]
+    public async Task ASolosPhrase_OpensOnThePhraseBeforesMotif_MovedAStep_NowAndThen()
+    {
+        var motifs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Motifs(TestCorpus.Get(seed, Facets(1, 0.5))));
+        var (answering, phrases) = (motifs.Sum(x => x.Answering), motifs.Sum(x => x.Phrases));
+
+        await Assert.That(phrases).IsGreaterThan(50);
+        // 38% where no phrase answers, a run of one shape after another's alike by itself
+        await Assert.That(answering / (double)phrases).IsGreaterThan(0.48);
+    }
+
     /// <summary>Where the solos fall, by the role of the section they play: the share of the solos, and of the role's later appearances that solo.</summary>
     [Test]
     [Explicit]

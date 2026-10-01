@@ -16,9 +16,7 @@ twin riff, the polymeter, the line scales, the new chords and scales, the solos,
 tuned by what listening says (see *Listening*), and the ratings by conventionality once enough are in. Then, in this
 order, each small and each measured:
 
-1. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
-   *Solos*);
-2. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
+1. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -490,6 +488,10 @@ and slides, is `Expression`'s (see *Listening*).
   gestures, held notes and quotes whole and runs and licks on their cells' first notes, the band's chord under its
   note where its note is the chord's, or at the wild end the chord's shape planed with the line (`SoloTest`,
   `SoloistTest`).
+  Motifs (built, `SoloLines.MotifChance`): half a solo's phrases open their first run or lick in the figure of the
+  phrase before's on its first cell moved a scale step, the rest of the gesture moved with it: 51% of a middling
+  solo's phrases where 38% by chance alone (`SoloTest`). Left: a motif developed further, inverted or stretched, should
+  the sequences alone sound mechanical.
   The solo part answering the melody (built, `SoloAnswers`): in a section the counter-melody leaves to it, by the melody
   facet (0, 0.3, 0.3), half the melody's gaps of two beats or more answered from a beat in to a quarter before the
   melody goes on, in the soloist's vocabulary, a held chord note in a short gap and a lick and a held note in a longer,
@@ -499,8 +501,7 @@ and slides, is `Expression`'s (see *Listening*).
   `SettingsLinkTest`).
   Left (P3): **a solo's octaves its own,** a solo now playing in octaves where the melody it takes over does, its
   soloist's choice instead; **a drum solo's stacked hits,** the kick under its accents, by the same voices the
-  drummer's vocabulary leaves at one; **motifs,** a phrase answering the one before with its opening cell moved up or down, as call and
-  response, a phrase's motif carried on to the next as state; **the drummer as one player,** the fills' `Drummer` and the drum solo's `Soloist` one record, its fill habits
+  drummer's vocabulary leaves at one; **the drummer as one player,** the fills' `Drummer` and the drum solo's `Soloist` one record, its fill habits
   and its solo habits together; **a crash on a drum solo's intense accents,** should its runs want more weight.
 
 - **Modulation** (P3, when a soundfont maps it): CC1, which none of the soundfonts offered maps to tone, so it was
