@@ -552,11 +552,13 @@ input[type="range"] {
     opacity: 0.5;
 }
 
-/* a choice of the song's settings, as the mixer's are, and dimmed where it shows what the song drew, as a slider is */
+/* a choice of the song's settings, as the mixer's are, and dimmed where it shows what the song drew, as a slider is; no
+   taller than a slider's row, so that every row is as high */
 .setting select {
     justify-self: start;
     max-width: 16em;
-    padding: 4px 8px;
+    height: 21px;
+    padding: 0 6px;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: var(--bg);
