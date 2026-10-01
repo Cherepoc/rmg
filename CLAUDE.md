@@ -16,7 +16,8 @@
   the forms, the other way round. Which options each end allows, and how heavily, is data on the choice, never a special
   case. Where the song decides a thing and its parts or notes then take it, such as an effect, the song's chance reaches
   its end and the parts' share may stop short of it, so that the wildest song plays the thing every time but not
-  everywhere. The facets reach the ends only together, as the song's value does; songs are spread well away from both, and
+  everywhere; and a thing that is no more apt in a wild song than in a middling one, such as a riff harmonised, may stop
+  short at the song too, never at 0 and as often at 1 as at 0.5, the wild end choosing how it is played instead. The facets reach the ends only together, as the song's value does; songs are spread well away from both, and
   whatever an end makes, however wild, is meant.
 
 # Architecture

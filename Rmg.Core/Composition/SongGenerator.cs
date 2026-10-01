@@ -87,7 +87,7 @@ public static class SongGenerator
         StateTrace.Record(TracePoints.SongRhythm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{rhythmicUnconventionality.Value:F2}", rhythmicUnconventionality);
         // the parts the song leaves out, the pad, the counter-melody and the drums now and then, each from a sequence
         // of its own, and any given in or out
-        var absent = SongParts.DrawAbsent(part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Parts), (int)part)), overrides.Parts);
+        var absent = SongParts.DrawAbsent(part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Parts), (int)part)), overrides.Parts, songUnconventionality[Facet.Melody]);
         StateTrace.Record(TracePoints.SongParts, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", absent.Order()), absent);
         var tracks = SongTracks.Create(
             Stream(SongStream.Tracks),
@@ -288,6 +288,7 @@ public static class SongGenerator
             // the parts the song has, which a twin left out is not
             tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).ToDictionary(x => x.Key, x => x.Value.Role),
             form.Map,
+            songUnconventionality[Facet.Melody],
             (pair, section) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.LineDoubling), pair), section))
         );
         // and every pitched solo's line played by its soloists

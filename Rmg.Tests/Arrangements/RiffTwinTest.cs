@@ -13,7 +13,7 @@ public sealed class RiffTwinTest
         (ImmutableHashSet<TrackRole>)song.Trace.Single(x => x.Point == TracePoints.SongParts).Value!;
 
     [Test]
-    public async Task ATwin_PlaysTheRiffsNotes_AThirdAboveOrASixthBelow_AllTheWayToTheOtherSide()
+    public async Task ATwin_PlaysTheRiffsNotes_ByAStepOfItsOwn_AllTheWayToTheOtherSide()
     {
         var twins = 0;
         foreach (var song in TestCorpus.Range(64))
@@ -33,7 +33,7 @@ public sealed class RiffTwinTest
             await Assert.That(Math.Abs(riffPan)).IsEqualTo(1);
             await Assert.That(twinPan).IsEqualTo(-riffPan);
             // every note where the riff plays one, but where the riff solos, which the twin keeps the riff under: its scale
-            // step a third above or a sixth below the riff's, the same in a section
+            // step one of a twin's apart from the riff's, the same in a section
             var riff = song.Song.Notes![SongTracks.RiffTrack].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.State);
             foreach (var span in song.Map.Sections)
             {
@@ -41,23 +41,66 @@ public sealed class RiffTwinTest
                     .Select(x => x.Value.State.GetStateValue(StateKinds.ScaleStep) - riff[Math.Round(x.Position, 6)].GetStateValue(StateKinds.ScaleStep))
                     .Distinct()
                     .ToArray();
-                await Assert.That(apart.Length <= 1 && apart.All(x => x is 2 or -5)).IsTrue().Because($"seed {song.Seed} at {span.Start}");
+                await Assert.That(apart.Length <= 1 && apart.All(x => LineDoubling.TwinSteps.Any(t => t.Step == x))).IsTrue().Because($"seed {song.Seed} at {span.Start}");
             }
         }
 
         await Assert.That(twins).IsGreaterThan(3);
     }
 
+    private static SongOverrides Melody(double melody, bool? twin) => new(
+        Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Melody, melody),
+        Parts: twin is null
+            ? ImmutableDictionary<TrackRole, bool>.Empty.Add(TrackRole.Riff, true)
+            : ImmutableDictionary<TrackRole, bool>.Empty.Add(TrackRole.Riff, true).Add(TrackRole.RiffTwin, twin.Value));
+
+    [Test]
+    public async Task APlainSong_HarmonisesNoRiff_AndOneGivenATwin_InThirdsAndSixthsAlone()
+    {
+        var drawn = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Melody(0, null)));
+        await Assert.That(drawn.Count(x => !Absent(x).Contains(TrackRole.RiffTwin))).IsEqualTo(0);
+
+        var given = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, Melody(0, true)));
+        await Assert.That(given.SelectMany(Intervals).Distinct().Order()).IsEquivalentTo(new[] { -5, 2 });
+    }
+
+    [Test]
+    public async Task AWildSong_HarmonisesItsRiff_ByWiderIntervalsToo()
+    {
+        var given = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, Melody(1, true)));
+        var intervals = given.SelectMany(Intervals).ToArray();
+
+        await Assert.That(intervals.Count(x => x is not (2 or -5))).IsGreaterThan(intervals.Length / 3);
+    }
+
+    /// <summary>The steps a twin plays apart from the riff in each section it plays, where the riff does not solo.</summary>
+    private static IEnumerable<int> Intervals(CorpusSong song)
+    {
+        var riff = song.Song.Notes![SongTracks.RiffTrack].ToDictionary(x => Math.Round(x.Position, 6), x => x.Value.State);
+        var twin = song.Song.Notes!.GetValueOrDefault(SongTracks.RiffTwinTrack)?.ToArray() ?? [];
+        return song.Map.Sections.SelectMany(span => twin
+            .Where(x => x.Position >= span.Start && x.Position < span.End && riff.TryGetValue(Math.Round(x.Position, 6), out var r) && r.GetStateValue(CompositionStateKinds.LineSolo) == 0)
+            .Select(x => x.Value.State.GetStateValue(StateKinds.ScaleStep) - riff[Math.Round(x.Position, 6)].GetStateValue(StateKinds.ScaleStep))
+            .Distinct());
+    }
+
+    /// <summary>
+    ///     How many songs with a riff have a twin, and the steps it plays apart in its sections, by fifths of the song's
+    ///     melody facet.
+    /// </summary>
     [Test]
     [Explicit]
     public async Task Report()
     {
-        var songs = TestCorpus.Range(256);
-        var riffs = songs.Count(x => !Absent(x).Contains(TrackRole.Riff));
-        var twins = songs.Where(x => !Absent(x).Contains(TrackRole.RiffTwin)).ToArray();
-        var notes = twins.Sum(x => x.Song.Notes![SongTracks.RiffTwinTrack].Count);
-        var riffNotes = twins.Sum(x => x.Song.Notes![SongTracks.RiffTrack].Count);
-        Console.WriteLine($"  {riffs} of {songs.Length} songs have a riff, {twins.Length} of them a twin, playing {notes} notes against the riff's {riffNotes}");
+        var songs = TestCorpus.Range(512).Where(x => !Absent(x).Contains(TrackRole.Riff)).ToArray();
+        foreach (var band in songs.GroupBy(x => Math.Clamp((int)(((Unconventionality)x.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Melody] * 5), 0, 4)).OrderBy(x => x.Key))
+        {
+            var twins = band.Where(x => !Absent(x).Contains(TrackRole.RiffTwin)).ToArray();
+            var intervals = twins.SelectMany(Intervals).ToArray();
+            var shares = intervals.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key:+0;-0} {x.Count() / (double)intervals.Length:P0}");
+            Console.WriteLine($"  melody {band.Key}/5: {twins.Length} of {band.Count()} songs with a riff have a twin ({twins.Length / (double)band.Count():P0}); its sections apart by {string.Join(", ", shares)}");
+        }
+
         await Task.CompletedTask;
     }
 }
