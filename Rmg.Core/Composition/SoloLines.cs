@@ -49,14 +49,18 @@ public enum SoloGesture
 /// </summary>
 internal static class SoloLines
 {
-    /// <summary>The gestures, their weights and how each leans with the intensity, from the calmest to the most intense.</summary>
-    public static ImmutableArray<(SoloGesture Gesture, double Weight, double Lean)> Gestures { get; } =
+    /// <summary>
+    ///     The gestures, their weights by the soloist's facet, the runs the heavier and the held notes and the pauses the
+    ///     lighter the wilder, and how each leans with the intensity, from the calmest to the most intense; a quote's weight
+    ///     is what there is to quote.
+    /// </summary>
+    public static ImmutableArray<(SoloGesture Gesture, ByConvention Weight, double Lean)> Gestures { get; } =
     [
-        (SoloGesture.Run, 1, 1),
-        (SoloGesture.Lick, 0.8, 0.3),
-        (SoloGesture.Quote, 1, 0),
-        (SoloGesture.Held, 1, -0.6),
-        (SoloGesture.Pause, 1, -1)
+        (SoloGesture.Run, new ByConvention(0.6, 2.2, 2.5), 1),
+        (SoloGesture.Lick, new ByConvention(0.8, 1, 1), 0.3),
+        (SoloGesture.Quote, new ByConvention(1, 1, 1), 0),
+        (SoloGesture.Held, new ByConvention(1.2, 0.5, 0.4), -0.6),
+        (SoloGesture.Pause, new ByConvention(1, 0.4, 0.3), -1)
     ];
 
     /// <summary>How much a quote weighs in a solo of its own and in one on the melody, which paraphrases it.</summary>
@@ -317,8 +321,8 @@ internal static class SoloLines
                     {
                         SoloGesture.Quote => quoteWeight(at, end),
                         // a pause is a breath between gestures: never a phrase's first, nor one after another
-                        SoloGesture.Pause => previous is null or { Gesture: SoloGesture.Pause } ? 0 : x.Weight * soloist.PauseRate / Soloist.PauseRates.Tuned,
-                        _ => x.Weight
+                        SoloGesture.Pause => previous is null or { Gesture: SoloGesture.Pause } ? 0 : soloist.GestureWeights[x.Gesture] * soloist.PauseRate / Soloist.PauseRates.Tuned,
+                        _ => soloist.GestureWeights[x.Gesture]
                     },
                     x.Gesture));
                 var gesture = context.Pick(lean.Weigh(weights.Where(x => x.Weight > 0), x => Gestures.Single(g => g.Gesture == x).Lean));

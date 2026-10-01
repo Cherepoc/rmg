@@ -49,7 +49,8 @@ internal sealed record Soloist(
     double Stamina,
     ImmutableArray<int> PhraseBars,
     double OffBarChance,
-    double BreathChance
+    double BreathChance,
+    ImmutableDictionary<SoloGesture, double> GestureWeights
 )
 {
     /// <summary>
@@ -89,7 +90,7 @@ internal sealed record Soloist(
     public static ByConvention OffBarChances { get; } = new(0, 0.05, 0.5);
 
     /// <summary>The chance a soloist breathes after a phrase's release, a plain one the oftener.</summary>
-    public static ByConvention BreathChances { get; } = new(0.8, 0.6, 0.4);
+    public static ByConvention BreathChances { get; } = new(0.8, 0.45, 0.4);
 
     /// <summary>How many beats the soloist may play a speed at in one run: its stamina at its fastest, the longer the slower.</summary>
     public double BeatsAt(int notesABeat) => Stamina * Speeds[^1] / notesABeat;
@@ -136,7 +137,7 @@ internal sealed record Soloist(
     ];
 
     /// <summary>How often a soloist pauses between its gestures, a plain one breathing the more, about which each draws its own.</summary>
-    public static ByConvention PauseRates { get; } = new(0.35, 0.25, 0.1);
+    public static ByConvention PauseRates { get; } = new(0.35, 0.15, 0.1);
 
     /// <summary>How far and how fast its intensity swings, a plain soloist building steadily and a wild one leaping.</summary>
     public static ByConvention Volatilities { get; } = new(0.1, 0.3, 0.9);
@@ -178,7 +179,7 @@ internal sealed record Soloist(
         var stamina = Math.Pow(2, StaminaPowers.At(melody) + StaminaSpread.At(melody) * Generators.SplineValue()(context));
         var phraseBars = Favourites(context, PhraseBarOptions, melody);
         return new Soloist([..speeds.Concat(fastest).Order()], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody), bends, vibrates, stamina,
-            phraseBars, OffBarChances.At(melody), BreathChances.At(melody));
+            phraseBars, OffBarChances.At(melody), BreathChances.At(melody), SoloLines.Gestures.ToImmutableDictionary(x => x.Gesture, x => x.Weight.At(melody)));
     }
 
     /// <summary>The options a soloist favours, as many as it draws, each picked from those left.</summary>
