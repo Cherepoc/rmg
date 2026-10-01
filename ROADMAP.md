@@ -246,9 +246,8 @@ dotted 8th (`MeterReportTest`; `MeterSeedsReportTest` names seeds to hear).
   54% of cells of six sixteenths or more and 39% of shorter; running on through the whole section in 17%, and a
   cycle of one cell growing a sixteenth every time round, to twice its length and from it again, in 8% (`PolymeterTest`). Its cells are heard as phrases already: a cell's first note is the motif's, on the frame's
   downbeat, and plays its accent with it, 0.52 of velocity against the rest's 0.15, so that an accent of their own was
-  measured and left out (October 2026). Left (P3), the cycle a tune played in unison against a pulse still felt
-  rather than a chugged drift: a metric modulation (see
-  *Appearances*, the section's own tempo); 
+  measured and left out (October 2026).
+
 ## Chords
 
 A section's chords change every two bars, every bar or every half bar (`HarmonicRhythm`, 0.25, 0.6 and 0.15, leaning
