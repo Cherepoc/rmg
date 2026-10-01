@@ -65,6 +65,12 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
+// a song holds its thread until it is made, and the pool starts only as many threads at once as there are cores, so
+// with every core making one, the rest of the server, a page, a soundfont or the next song let out of the queue, would
+// wait for the pool to notice and add a thread; it gets as many again of its own
+ThreadPool.GetMinThreads(out var workerThreads, out var completionThreads);
+ThreadPool.SetMinThreads(workerThreads + Environment.ProcessorCount, completionThreads);
+
 var app = builder.Build();
 
 // first, so that everything after it sees the request as the client made it, not as the proxy relayed it

@@ -865,6 +865,13 @@ function scheduleRegeneration() {
 
     regenerationTimer = setTimeout(() => {
         regenerationTimer = null;
+
+        // a new song on its way is the one to remake once it is here, not the one it replaces
+        if (isGenerating) {
+            scheduleRegeneration();
+            return;
+        }
+
         cancelDownloadRefresh();
         regeneration = new AbortController();
         const signal = regeneration.signal;
@@ -1935,6 +1942,12 @@ function cancelDownloadRefresh() {
 async function refreshDownload() {
     downloadTimer = null;
     if (songSeed === null) return;
+
+    // a song on its way, new or remade, would replace the file this fetches with one of an older mix or another song
+    if (isGenerating || regeneration !== null) {
+        scheduleDownloadRefresh();
+        return;
+    }
 
     const refresh = new AbortController();
     downloadRefresh = refresh;
