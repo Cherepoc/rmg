@@ -40,6 +40,12 @@ const elements = {
     fifths: document.getElementById("fifths"),
     failuresPanel: document.getElementById("failures-panel"),
     failures: document.getElementById("failures"),
+    serverPanel: document.getElementById("server-panel"),
+    outcomes: document.getElementById("outcomes"),
+    speeds: document.getElementById("speeds"),
+    speedFifthsTitle: document.getElementById("speed-fifths-title"),
+    speedFifths: document.getElementById("speed-fifths"),
+    serverDaily: document.getElementById("server-daily"),
 };
 
 const SERIES = [
@@ -102,7 +108,7 @@ function setStatus(message, isError = false) {
 
 function showPanels(isShown) {
     for (const panel of [elements.headline, elements.timings, elements.funnelPanel,
-        elements.dailyPanel, elements.seedsPanel, elements.versionsPanel, elements.ratedPanel, elements.fifthsPanel, elements.failuresPanel])
+        elements.dailyPanel, elements.seedsPanel, elements.versionsPanel, elements.ratedPanel, elements.fifthsPanel, elements.failuresPanel, elements.serverPanel])
         panel.hidden = !isShown;
 
     elements.controls.hidden = !isShown;
@@ -214,6 +220,7 @@ function draw() {
     drawRated();
     drawFifths();
     drawFailures();
+    drawServer();
 }
 
 function drawSpread(prefix, spread, format) {
@@ -602,6 +609,59 @@ function drawFailures() {
         ["What", "Why", "Times"],
         summary.failures.map((failure) => [failure.name, failure.detail, String(failure.count)])
     ));
+}
+
+const OUTCOMES = {
+    made: "Made",
+    cancelled_waiting: "Given up while waiting",
+    cancelled_making: "Given up while being made",
+    refused_client: "Turned away, too many of one client's waiting",
+    refused_full: "Turned away, the queue full",
+    failed: "Failed",
+};
+
+function drawServer() {
+    const server = summary.server;
+    drawSpread("mk", server.makeMs, duration);
+    drawSpread("rn", server.renderMs, duration);
+    drawSpread("wt", server.waitMs, duration);
+
+    const asked = server.outcomes.reduce((sum, outcome) => sum + outcome.count, 0);
+    elements.outcomes.replaceChildren(asked === 0
+        ? empty("No song has been asked of the server yet.")
+        : table(
+            ["How it ended", "Songs", "Share"],
+            server.outcomes.map((outcome) => [OUTCOMES[outcome.outcome] ?? outcome.outcome, count(outcome.count), percent(outcome.count, asked)])
+        ));
+
+    elements.speeds.replaceChildren(server.versions.length === 0
+        ? empty("No song has been made yet.")
+        : table(
+            ["Version", "Made", "Median", "19 in 20"],
+            server.versions.map((version) => [version.version, count(version.songs), duration(version.medianMs), duration(version.worstMs)])
+        ));
+
+    elements.speedFifthsTitle.textContent = server.fifthsVersion === null
+        ? "By how plain or experimental"
+        : `By how plain or experimental, in ${server.fifthsVersion}`;
+    elements.speedFifths.replaceChildren(server.fifths.length === 0
+        ? empty("No song has been made yet.")
+        : table(
+            ["Fifth", "Made", "Median", "19 in 20"],
+            server.fifths.map((fifth) => [
+                `${FIFTHS[fifth.fifth]} (${fifth.fifth * 20}–${fifth.fifth * 20 + 20}%)`,
+                count(fifth.songs),
+                duration(fifth.medianMs),
+                duration(fifth.worstMs),
+            ])
+        ));
+
+    elements.serverDaily.replaceChildren(server.daily.length === 0
+        ? empty("No song has been asked of the server yet.")
+        : table(
+            ["Day", "Made", "Given up", "Turned away", "Failed", "Most waiting"],
+            server.daily.map((day) => [day.day, count(day.made), count(day.cancelled), count(day.refused), count(day.failed), count(day.mostWaiting)])
+        ));
 }
 
 // --- wiring ----------------------------------------------------------------

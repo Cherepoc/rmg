@@ -55,6 +55,48 @@ public sealed record RatedFifth(bool IsGiven, int Fifth, int Songs, int Likes, i
 /// <param name="Detail">Why, as far as the page could say.</param>
 public sealed record Failure(string Name, string Detail, int Count);
 
+/// <param name="Outcome">How songs asked of the server ended (<see cref="SongOutcomes.Name" />).</param>
+public sealed record OutcomeCount(string Outcome, int Count);
+
+/// <param name="Songs">How many songs of it were made.</param>
+/// <param name="MedianMs">How long one took to generate, in the middle of them.</param>
+/// <param name="WorstMs">The nineteen in twenty mark of it.</param>
+public sealed record VersionSpeed(string Version, int Songs, double? MedianMs, double? WorstMs);
+
+/// <param name="Fifth">Which fifth of the unconventionality, from 0 for the plainest to 4 for the wildest.</param>
+/// <param name="Songs">How many songs of it were made.</param>
+/// <param name="MedianMs">How long one took to generate, in the middle of them.</param>
+/// <param name="WorstMs">The nineteen in twenty mark of it.</param>
+public sealed record FifthSpeed(int Fifth, int Songs, double? MedianMs, double? WorstMs);
+
+/// <param name="Day">The day, as yyyy-MM-dd.</param>
+/// <param name="Made">Songs made.</param>
+/// <param name="Cancelled">Songs given up by who asked, while waiting or being made.</param>
+/// <param name="Refused">Songs turned away, the client having as many waiting as it may or the queue being full.</param>
+/// <param name="Failed">Songs that could not be made.</param>
+/// <param name="MostWaiting">The most songs waiting their turns that one arrived to.</param>
+public sealed record ServerDay(string Day, int Made, int Cancelled, int Refused, int Failed, int MostWaiting);
+
+/// <summary>What the server measured of the songs asked of it, which says nothing of who asked.</summary>
+/// <param name="MakeMs">How long a song made took to generate.</param>
+/// <param name="RenderMs">How long a song made took to render and write.</param>
+/// <param name="WaitMs">How long a song made waited for its turn.</param>
+/// <param name="Outcomes">How the songs asked for ended, the commonest first.</param>
+/// <param name="Versions">How long each songs' version took to generate a song, the latest first.</param>
+/// <param name="FifthsVersion">The latest songs' version any song was made in, which <paramref name="Fifths" /> is of.</param>
+/// <param name="Fifths">How long its songs took to generate, by how plain or wild they are.</param>
+/// <param name="Daily">Day by day.</param>
+public sealed record ServerSummary(
+    Spread MakeMs,
+    Spread RenderMs,
+    Spread WaitMs,
+    IReadOnlyList<OutcomeCount> Outcomes,
+    IReadOnlyList<VersionSpeed> Versions,
+    string? FifthsVersion,
+    IReadOnlyList<FifthSpeed> Fifths,
+    IReadOnlyList<ServerDay> Daily
+);
+
 /// <param name="Days">How many days this covers.</param>
 /// <param name="Visitors">Distinct visitors over the whole window, counted once per day each.</param>
 /// <param name="SoundFontMs">How long the soundfont took to arrive.</param>
@@ -67,6 +109,7 @@ public sealed record Failure(string Name, string Detail, int Count);
 /// <param name="Rated">The songs of it rated, the most liked first and the most disliked last.</param>
 /// <param name="RatedFifths">Its songs' ratings by how plain or wild they are, given apart from drawn.</param>
 /// <param name="Failures">What went wrong, and how often.</param>
+/// <param name="Server">What the server measured of the songs asked of it.</param>
 public sealed record AnalyticsSummary(
     int Days,
     int Visitors,
@@ -82,5 +125,6 @@ public sealed record AnalyticsSummary(
     IReadOnlyList<RatedSeed> Rated,
     IReadOnlyList<RatedFifth> RatedFifths,
     IReadOnlyList<Failure> Failures,
-    int Events
+    int Events,
+    ServerSummary Server
 );

@@ -32,7 +32,8 @@ public static class EventStoreSummary
             RatedSeeds(ratings, ratedVersion),
             RatedFifths(ratings, ratedVersion),
             Failures(connection, since),
-            Count(connection, "SELECT COUNT(*) FROM events WHERE day >= $since", since)
+            Count(connection, "SELECT COUNT(*) FROM events WHERE day >= $since", since),
+            Server(connection, since)
         );
     }
 
@@ -65,6 +66,14 @@ public static class EventStoreSummary
         if (values.Count == 0) return new Spread(null, null, null, 0);
 
         return new Spread(At(values, 0.5), At(values, 0.75), At(values, 0.95), values.Count);
+    }
+
+    private static Spread SpreadOf(IEnumerable<double> values)
+    {
+        var sorted = values.Order().ToList();
+        return sorted.Count == 0
+            ? new Spread(null, null, null, 0)
+            : new Spread(At(sorted, 0.5), At(sorted, 0.75), At(sorted, 0.95), sorted.Count);
     }
 
     /// <summary>The value a given part of the way through a sorted list, taking the nearer of two.</summary>
@@ -305,6 +314,89 @@ public static class EventStoreSummary
         var secondParts = second.Split('.').Select(long.Parse).ToArray();
         return firstParts.Zip(secondParts, (x, y) => x.CompareTo(y)).FirstOrDefault(x => x != 0);
     });
+
+    /// <summary>
+    ///     What the server measured of the songs asked of it: the songs made read out in full, as the spreads want, and
+    ///     the rest counted by the file.
+    /// </summary>
+    private static ServerSummary Server(SqliteConnection connection, string since)
+    {
+        var made = new List<(string Version, int? Unconventionality, double Wait, double Make, double Render)>();
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = $"""
+                SELECT version, unconventionality, wait_ms, make_ms, render_ms
+                FROM songs
+                WHERE outcome = '{SongOutcomes.Name(SongOutcome.Made)}' AND day >= $since
+                """;
+            command.Parameters.AddWithValue("$since", since);
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+                made.Add((reader.GetString(0), reader.IsDBNull(1) ? null : reader.GetInt32(1), reader.GetDouble(2), reader.GetDouble(3), reader.GetDouble(4)));
+        }
+
+        var versions = made
+            .GroupBy(x => x.Version)
+            .OrderByDescending(x => x.Key, VersionOrder)
+            .Select(x =>
+            {
+                var spread = SpreadOf(x.Select(song => song.Make));
+                return new VersionSpeed(x.Key, spread.Count, spread.Median, spread.Worst);
+            })
+            .ToList();
+        var latest = versions.FirstOrDefault()?.Version;
+        var fifths = made
+            .Where(x => x.Version == latest && x.Unconventionality is not null)
+            .GroupBy(x => Math.Min(4, x.Unconventionality!.Value * 5 / Songs.GenerateSongRequest.LastStep))
+            .OrderBy(x => x.Key)
+            .Select(x =>
+            {
+                var spread = SpreadOf(x.Select(song => song.Make));
+                return new FifthSpeed(x.Key, spread.Count, spread.Median, spread.Worst);
+            })
+            .ToList();
+
+        var outcomes = new List<OutcomeCount>();
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "SELECT outcome, COUNT(*) FROM songs WHERE day >= $since GROUP BY outcome ORDER BY COUNT(*) DESC";
+            command.Parameters.AddWithValue("$since", since);
+            using var reader = command.ExecuteReader();
+            while (reader.Read()) outcomes.Add(new OutcomeCount(reader.GetString(0), reader.GetInt32(1)));
+        }
+
+        var daily = new List<ServerDay>();
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = $"""
+                SELECT day,
+                       COUNT(CASE WHEN outcome = '{SongOutcomes.Name(SongOutcome.Made)}' THEN 1 END),
+                       COUNT(CASE WHEN outcome IN ('{SongOutcomes.Name(SongOutcome.CancelledWaiting)}', '{SongOutcomes.Name(SongOutcome.CancelledMaking)}') THEN 1 END),
+                       COUNT(CASE WHEN outcome IN ('{SongOutcomes.Name(SongOutcome.RefusedClient)}', '{SongOutcomes.Name(SongOutcome.RefusedFull)}') THEN 1 END),
+                       COUNT(CASE WHEN outcome = '{SongOutcomes.Name(SongOutcome.Failed)}' THEN 1 END),
+                       MAX(waiting)
+                FROM songs
+                WHERE day >= $since
+                GROUP BY day
+                ORDER BY day
+                """;
+            command.Parameters.AddWithValue("$since", since);
+            using var reader = command.ExecuteReader();
+            while (reader.Read())
+                daily.Add(new ServerDay(reader.GetString(0), reader.GetInt32(1), reader.GetInt32(2), reader.GetInt32(3), reader.GetInt32(4), reader.GetInt32(5)));
+        }
+
+        return new ServerSummary(
+            SpreadOf(made.Select(x => x.Make)),
+            SpreadOf(made.Select(x => x.Render)),
+            SpreadOf(made.Select(x => x.Wait)),
+            outcomes,
+            versions,
+            latest,
+            fifths,
+            daily
+        );
+    }
 
     private static List<Failure> Failures(SqliteConnection connection, string since)
     {

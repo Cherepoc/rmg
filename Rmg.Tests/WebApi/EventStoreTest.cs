@@ -57,6 +57,9 @@ public sealed class EventStoreTest : IDisposable
         await Assert.That(summary.SoundFontMs.Median).IsNull();
         await Assert.That(summary.Daily).IsEmpty();
         await Check.That(summary.Funnel.Select(step => step.Visitors).Distinct()).IsEquivalentTo(new[] { 0 });
+        await Assert.That(summary.Server.MakeMs.Median).IsNull();
+        await Assert.That(summary.Server.Outcomes).IsEmpty();
+        await Assert.That(summary.Server.FifthsVersion).IsNull();
     }
 
     [Test]
@@ -466,5 +469,40 @@ public sealed class EventStoreTest : IDisposable
         await Assert.That(_store.Write(Song(SongOutcome.Made))).IsTrue();
         await Assert.That(_store.Write(Song(SongOutcome.Made))).IsFalse();
         await Assert.That(_store.Write(Song(SongOutcome.Made, Now.AddDays(1)))).IsTrue();
+    }
+
+    [Test]
+    public async Task TheServersSongs_AreSummarised_ByHowTheyEnded_TheirVersion_TheirFifth_AndTheDay()
+    {
+        SongMeasurement Made(string version, long makeMs, int unconventionality, DateTimeOffset? at = null) =>
+            new(at ?? Now, SongOutcome.Made, 5, makeMs, 20, 1, 2, version, unconventionality, 3000);
+
+        _store.Write(Made("0.5.999", 100, 10));
+        _store.Write(Made("0.5.1000", 200, 5));
+        _store.Write(Made("0.5.1000", 400, 60));
+        _store.Write(Made("0.5.1000", 300, 62, Now.AddDays(-1)));
+        _store.Write(Song(SongOutcome.RefusedFull) with { Waiting = 9 });
+        _store.Write(Song(SongOutcome.CancelledMaking));
+        _store.Write(Song(SongOutcome.CancelledWaiting));
+
+        var server = _store.Summarise(Now, 30).Server;
+
+        await Assert.That(server.MakeMs.Count).IsEqualTo(4);
+        await Assert.That(server.MakeMs.Median).IsEqualTo(300);
+        await Assert.That(server.Outcomes[0]).IsEqualTo(new OutcomeCount("made", 4));
+        await Assert.That(server.Outcomes.Sum(x => x.Count)).IsEqualTo(7);
+
+        // 0.5.1000 is the later, whatever text would say
+        await Assert.That(server.Versions.Count).IsEqualTo(2);
+        await Assert.That(server.Versions[0]).IsEqualTo(new VersionSpeed("0.5.1000", 3, 300, 400));
+        await Assert.That(server.Versions[1]).IsEqualTo(new VersionSpeed("0.5.999", 1, 100, 100));
+        await Assert.That(server.FifthsVersion).IsEqualTo("0.5.1000");
+        await Assert.That(server.Fifths.Count).IsEqualTo(2);
+        await Assert.That(server.Fifths[0]).IsEqualTo(new FifthSpeed(0, 1, 200, 200));
+        await Assert.That(server.Fifths[1]).IsEqualTo(new FifthSpeed(4, 2, 400, 400));
+
+        await Assert.That(server.Daily.Count).IsEqualTo(2);
+        await Assert.That(server.Daily[0]).IsEqualTo(new ServerDay(EventStore.Day(Now.AddDays(-1)), 1, 0, 0, 0, 2));
+        await Assert.That(server.Daily[1]).IsEqualTo(new ServerDay(EventStore.Day(Now), 3, 2, 1, 0, 9));
     }
 }

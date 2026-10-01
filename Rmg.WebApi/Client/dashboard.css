@@ -294,3 +294,11 @@ button.small {
         font-size: 40px;
     }
 }
+
+/* a panel of several tables names each, quieter than the panel's own heading */
+.panel h3 {
+    margin: 20px 0 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+}
