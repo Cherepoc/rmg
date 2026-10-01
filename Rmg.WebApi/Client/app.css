@@ -812,7 +812,7 @@ button.icon.listen svg {
 }
 
 /* a part's pulse, in the square it ripples within */
-.pulse {
+canvas.pulse {
     display: block;
     width: 28px;
     height: 28px;
