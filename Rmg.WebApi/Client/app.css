@@ -356,9 +356,11 @@ button.icon svg {
     margin-top: 16px;
 }
 
+/* the rating and Share at the end of the song's row, apart from what plays */
 .rating {
     display: flex;
     gap: 4px;
+    margin-left: auto;
 }
 
 /* a switch pressed in, the song rated or autoplay on, shown as the accent, as the mixer's switches are */
