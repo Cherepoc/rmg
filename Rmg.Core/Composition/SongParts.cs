@@ -16,7 +16,7 @@ public static class SongParts
 {
     /// <summary>Every part a song can have.</summary>
     public static ImmutableArray<TrackRole> All { get; } =
-        [TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Drum, TrackRole.Riff, TrackRole.Rhythm, TrackRole.RiffTwin];
+        [TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Drum, TrackRole.Riff, TrackRole.Rhythm, TrackRole.RiffTwin, TrackRole.Solo];
 
     /// <summary>The chance a song with a riff has a twin to harmonise it, by the song's melody facet.</summary>
     public static ByConvention TwinChance { get; } = new(0, 0.15, 0.15);
@@ -31,7 +31,8 @@ public static class SongParts
         TrackRole.Rhythm => 0.4,
         // of the songs with a riff
         TrackRole.RiffTwin => TwinChance.At(melody),
-        TrackRole.Melody or TrackRole.Chords or TrackRole.Bass => 1,
+        // the solo part plays only where a section's appearance is its solo
+        TrackRole.Melody or TrackRole.Chords or TrackRole.Bass or TrackRole.Solo => 1,
         _ => throw new ArgumentOutOfRangeException(nameof(part), part, "Not a part of the band.")
     };
 

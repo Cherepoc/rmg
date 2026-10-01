@@ -461,8 +461,8 @@ internal sealed class SectionGenerator
         foreach (var trackNumber in _tracks.NonGroupedTrackNumbers)
         {
             // a riff's twin has no notes of its own, but the riff's, moved, once the song is put together (LineDoubling), and
-            // draws nothing
-            if (_tracks.Definitions[trackNumber].Role == TrackRole.RiffTwin)
+            // the solo part none but a solo's (Solos), and they draw nothing
+            if (_tracks.Definitions[trackNumber].Role is TrackRole.RiffTwin or TrackRole.Solo)
             {
                 var empty = TrackEventStateTimelineMap.Create(
                     meter.PatternDuration,

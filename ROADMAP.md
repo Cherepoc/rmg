@@ -411,6 +411,10 @@ and slides, is `Expression`'s (see *Listening*).
   at the wild end any part as likely, by the melody facet; one most often, two or three the wilder, trading the phrases
   or playing together, the others a third or a sixth away with a fifth of the notes left out. A drum solo plays alone,
   a fill at every bar. A soloist's note is a line's (`CompositionStateKinds.LineSolo`) and bends three times as often.
+  A solo part of its own (`TrackRole.Solo`): a lead guitar, a sax, a trumpet, a violin, a flute, a harmonica or a
+  synth lead, never the melody's sound, in every song and playing only its solos, the likeliest soloist, a third to a
+  half of the soloists from the plain end to the middle (`SoloTest.Report`). Left: **its place on the page,** the solo
+  part in the settings and the mixer, a new part in the settings' format, where it now plays as the file mixes it.
   Left (P3): **a solo's own line,** busier and over a wider range than the melody's, in place of its line improvised,
   and a bass solo by the bass's profile loosened; **the band making room,** the other parts thinned; **solo
   instruments** by a pool of their own; **the role,** which appearance solos by the section's role, a bridge or a

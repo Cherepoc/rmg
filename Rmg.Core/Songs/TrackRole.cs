@@ -23,7 +23,10 @@ public enum TrackRole
     Rhythm,
 
     /// <summary>The riff's twin, its line a third above or a sixth below, on the other side, as twin guitars play a riff.</summary>
-    RiffTwin
+    RiffTwin,
+
+    /// <summary>A soloist, as a lead guitar or a sax takes a chorus, which plays only where a section's appearance is its solo.</summary>
+    Solo
 }
 
 public static class TrackRoles

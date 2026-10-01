@@ -96,6 +96,7 @@ public static class SongGenerator
             Stream(SongStream.CounterMelody),
             Stream(SongStream.Riff),
             Stream(SongStream.RhythmPart),
+            Stream(SongStream.SoloPart),
             !absent.Contains(TrackRole.RiffTwin),
             rhythmicUnconventionality,
             Stream(SongStream.DrumStrokes),
@@ -454,5 +455,6 @@ internal enum SongStream
     SectionTempo = 38,
     SectionMeter = 39,
     Polymeter = 40,
-    Effects = 41
+    Effects = 41,
+    SoloPart = 42
 }

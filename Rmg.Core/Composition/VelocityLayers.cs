@@ -18,7 +18,7 @@ internal static class VelocityLayers
     /// </summary>
     public static double GetLevel(TrackRole role) => role switch
     {
-        TrackRole.Melody => 0.25,
+        TrackRole.Melody or TrackRole.Solo => 0.25,
         TrackRole.Bass => 0.25,
         TrackRole.Chords => 0.1,
         TrackRole.Pad => -0.1,
@@ -67,7 +67,7 @@ internal static class VelocityLayers
     {
         TrackRole.Bass => 0.4,
         TrackRole.Chords => 0.5,
-        TrackRole.Melody => 0.8,
+        TrackRole.Melody or TrackRole.Solo => 0.8,
         TrackRole.Pad => 0.2,
         TrackRole.CounterMelody => 0.6,
         TrackRole.Riff => 0.7,

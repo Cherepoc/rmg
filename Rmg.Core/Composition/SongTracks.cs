@@ -19,6 +19,7 @@ internal sealed class SongTracks
     public const int RiffTrack = 9;
     public const int RhythmTrack = 10;
     public const int RiffTwinTrack = 11;
+    public const int SoloTrack = 12;
 
     /// <summary>How much fuller the rhythm part's rhythm is than a track's, as a comping part strums more often than the chords.</summary>
     public const double RhythmPartFullness = 0.2;
@@ -65,6 +66,7 @@ internal sealed class SongTracks
     /// <param name="counterContext">The sequence the counter-melody's instrument and state are drawn from.</param>
     /// <param name="riffContext">The sequence the riff's instrument and state are drawn from.</param>
     /// <param name="rhythmContext">The sequence the rhythm part's instrument, register and state are drawn from.</param>
+    /// <param name="soloContext">The sequence the solo part's instrument and state are drawn from.</param>
     /// <param name="hasTwin">Whether the song's riff has a twin, which the two play apart, on either side.</param>
     public static SongTracks Create(
         IGenerationContext context,
@@ -73,6 +75,7 @@ internal sealed class SongTracks
         IGenerationContext counterContext,
         IGenerationContext riffContext,
         IGenerationContext rhythmContext,
+        IGenerationContext soloContext,
         bool hasTwin,
         RhythmicUnconventionality rhythmicUnconventionality,
         IGenerationContext strokeContext,
@@ -116,6 +119,9 @@ internal sealed class SongTracks
         // and the rhythm part comps in a sound of its own, apart from the chords' and the riff's, in a register of its own
         var rhythmInstrument = InstrumentRoles.Rhythm.Pick(rhythmContext, chordsInstrument.Program, riffInstrument.Program);
 
+        // and the solo part a lead of its own, apart from the melody's, which it takes over from
+        var soloInstrument = InstrumentRoles.Solo.Pick(soloContext, melodyInstrument.Program);
+
         // the riff's state, which its twin shares, so that the two play its notes alike
         var riffLayer = LayerStates.CreateTrackLayer(
             riffContext,
@@ -130,6 +136,24 @@ internal sealed class SongTracks
         );
         var definitions = new Dictionary<int, IInstrumentTrack>
         {
+            // the solo part, near the middle as the melody is, on its other side, drawing no pan of its own, so that a song
+            // pans as it would; its notes are a solo's alone (Solos)
+            [SoloTrack] = new PitchInstrumentTrack(
+                LayerStates.CreateTrackLayer(
+                    soloContext,
+                    "Track",
+                    new StateMapBuilder("Track role", perTrack: true)
+                        .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Solo))
+                        .ToStateMap(soloContext),
+                    _ => VelocityLayers.GetLevel(TrackRole.Solo),
+                    trackRhythmLayer
+                ),
+                soloInstrument.Program,
+                -1,
+                1,
+                TrackRole.Solo,
+                -pans[MelodyTrack]
+            ),
             // the twin plays the riff's instrument in the riff's state, its notes the riff's, moved (LineDoubling)
             [RiffTwinTrack] = new PitchInstrumentTrack(riffLayer, riffInstrument.Program, -1, 0, TrackRole.RiffTwin, pans[RiffTwinTrack]),
             [RhythmTrack] = new PitchInstrumentTrack(

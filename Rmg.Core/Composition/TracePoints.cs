@@ -35,6 +35,12 @@ internal static class TracePoints
     public const string LineDoubling = "Line doubling";
 
     /// <summary>
+    ///     A pitched solo's line as its soloists take it: the appearance's place and how many of the melody's notes there are
+    ///     to solo on (a tuple of two <c>int</c>s), none leaving the parts to play as they would.
+    /// </summary>
+    public const string SoloLine = "Solo line";
+
+    /// <summary>
     ///     Whether a part that may play its line in octaves in a section does: the section's place, the part, the
     ///     section's energy and whether it does (a tuple of an <c>int</c>, a <see cref="Songs.TrackRole" />, a
     ///     <c>double</c> and a <c>bool</c>).

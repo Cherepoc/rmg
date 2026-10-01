@@ -29,8 +29,9 @@ public sealed record SoloPlan(ImmutableArray<TrackRole> Soloists, SoloMode Mode,
 ///     and at the wild end as likely as not, so that a wild song may be solos throughout without having to be. A pitched
 ///     solo is the melody's line for that appearance improvised through, played by the soloists instead, the melody
 ///     resting; several soloists take its phrases in turn or play it together, the others a similar line; the drums solo
-///     alone, the band resting, a fill at every bar. Who solos leans by the melody facet: near the plain end the melody's
-///     instrument, the chords or the riff, and at the wild end any part as likely.
+///     alone, the band resting, a fill at every bar. Who solos leans by the melody facet: near the plain end the solo
+///     part, a lead of its own, the likeliest, and the melody's instrument, the chords or the riff now and then, and at
+///     the wild end any part as likely.
 /// </summary>
 internal static class Solos
 {
@@ -48,10 +49,11 @@ internal static class Solos
     /// <summary>Who solos, and how likely each is.</summary>
     public static ImmutableArray<(TrackRole Part, ByConvention Weight)> Soloists { get; } =
     [
-        (TrackRole.Melody, new ByConvention(1, 0.35, 1)),
-        (TrackRole.Chords, new ByConvention(1, 0.25, 1)),
-        (TrackRole.Riff, new ByConvention(1, 0.2, 1)),
-        (TrackRole.Rhythm, new ByConvention(1, 0.15, 1)),
+        (TrackRole.Solo, new ByConvention(4, 0.45, 1)),
+        (TrackRole.Melody, new ByConvention(1, 0.2, 1)),
+        (TrackRole.Chords, new ByConvention(1, 0.13, 1)),
+        (TrackRole.Riff, new ByConvention(1, 0.1, 1)),
+        (TrackRole.Rhythm, new ByConvention(1, 0.07, 1)),
         (TrackRole.CounterMelody, new ByConvention(0, 0.08, 1)),
         (TrackRole.Bass, new ByConvention(0, 0.05, 1)),
         (TrackRole.Pad, new ByConvention(0, 0.02, 1)),
@@ -117,6 +119,7 @@ internal static class Solos
             var context = streams(index);
             bool IsIn(TimelineItem<StateMap> note) => note.Position >= span.Start - 1e-9 && note.Position < span.End - 1e-9;
             var line = song.TrackTimelineMap[trackOf[TrackRole.Melody]].EventTimeline.Where(IsIn).ToArray();
+            StateTrace.Record(TracePoints.SoloLine, trackOf[TrackRole.Melody], span.SectionId, 0, StateMap.Default, 0, $"{line.Length} notes", (index, line.Length));
             // a melody with no notes there leaves nothing to solo on, and the parts play as they would
             if (line.Length == 0)
                 continue;

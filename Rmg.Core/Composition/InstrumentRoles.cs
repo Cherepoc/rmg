@@ -129,6 +129,30 @@ internal static class InstrumentRoles
         ]
     );
 
+    /// <summary>
+    ///     The instruments that take a solo: a lead guitar, overdriven or distorted most often, a sax, a trumpet, a violin, a
+    ///     flute, a harmonica or a synth lead.
+    /// </summary>
+    public static InstrumentRole Solo { get; } = new(
+        nameof(Solo),
+        [
+            new(29, "Overdriven Guitar", 0.7, MelodyLayers.Mixed),
+            new(30, "Distortion Guitar", 0.7, MelodyLayers.Mixed),
+            new(27, "Electric Guitar (clean)", 0.2, MelodyLayers.Mixed),
+            new(26, "Electric Guitar (jazz)", 0.2, MelodyLayers.Mixed),
+            new(65, "Alto Sax", 0.5, MelodyLayers.Stepwise),
+            new(66, "Tenor Sax", 0.4, MelodyLayers.Stepwise),
+            new(64, "Soprano Sax", 0.2, MelodyLayers.Stepwise),
+            new(56, "Trumpet", 0.4, MelodyLayers.Stepwise),
+            new(40, "Violin", 0.3, MelodyLayers.Stepwise),
+            new(73, "Flute", 0.2, MelodyLayers.Stepwise),
+            new(22, "Harmonica", 0.2, MelodyLayers.Stepwise),
+            new(80, "Lead 1 (square)", 0.3, MelodyLayers.Mixed),
+            new(81, "Lead 2 (sawtooth)", 0.4, MelodyLayers.Mixed),
+            new(84, "Lead 5 (charang)", 0.2, MelodyLayers.Mixed)
+        ]
+    );
+
     /// <summary>The instruments that play a riff: guitars, overdriven or clean, a clavinet, synth leads, a baritone sax, brass.</summary>
     public static InstrumentRole Riff { get; } = new(
         nameof(Riff),
