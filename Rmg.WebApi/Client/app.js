@@ -1724,7 +1724,7 @@ function createPartRow(part) {
     row.className = "part";
     // the drums sit in the middle, as a kit does, and have no pan
     const [mute, solo] = createListening(part, name);
-    row.append(cellOf(given), heading, ...[plays, instrument, volume.field, part === "drum" ? null : pan.field, mute, solo, pulse.canvas].map(cellOf));
+    row.append(cellOf(given), heading, ...[plays, instrument, part === "drum" ? null : pan.field, volume.field, mute, solo, pulse.canvas].map(cellOf));
     rows.set(part, { row, given, plays, instrument, volume, pan, mute, solo, pulse });
     return row;
 }
@@ -1771,7 +1771,7 @@ function toggleDrumPiece(piece) {
 function createDrumGroupRow(group) {
     const name = DRUM_GROUP_NAMES[group];
 
-    // the group's pieces, which come with the options the server lists, where a part has whether it plays and its instrument
+    // the group's pieces, which come with the options the server lists, where a part has its instrument and its pan
     const chips = document.createElement("div");
     chips.className = "chips";
     chips.setAttribute("role", "group");
@@ -1791,7 +1791,7 @@ function createDrumGroupRow(group) {
     const [mute, solo] = createListening(`drums:${group}`, name);
     const chipsCell = cellOf(chips);
     chipsCell.colSpan = 2;
-    row.append(cellOf(null), heading, chipsCell, ...[volume.field, null, mute, solo, pulse.canvas].map(cellOf));
+    row.append(cellOf(null), heading, cellOf(null), chipsCell, ...[volume.field, mute, solo, pulse.canvas].map(cellOf));
     groupRows.set(group, { row, volume, chips, mute, solo, pulse });
     return row;
 }
