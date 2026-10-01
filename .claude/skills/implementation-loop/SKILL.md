@@ -15,14 +15,16 @@ recommendation), or when a step fails its reviews twice (postpone it in `ROADMAP
    tests, the targets, and what the corpus should and should not change. Measure a baseline first where the step
    changes behaviour.
 2. **Critical review of the plan.** Check it against `CLAUDE.md`'s principles (simplicity, generalization, state
-   decides, leaning through data, streams, no silent defaults), against what is musical, and against whether it is
-   worth doing. Name what is wrong, risky or guessed, and revise the plan. Repeat until it is doable, or postpone.
+   decides, leaning through data, streams, no silent defaults) and against whether it is worth doing, and always name
+   two things explicitly: **overengineering** (what could be cut, a smaller mechanism, a case that needs no code of
+   its own) and **musicality** (how it will sound, what a player would do, what could sound wrong). Name what is
+   wrong, risky or guessed, and revise the plan. Repeat until it is doable, or postpone.
 3. **Implement.** Follow the surrounding code's style and comment density. Build, and run the whole test suite, and
    the page tests when the page (`Rmg.WebApi/Client/`) changed.
 4. **Measure.** Run the reports before and after; compare against the targets. A refactor must keep the corpus
    fingerprint (`dotnet Rmg/bin/Release/net10.0/Rmg.dll --fingerprint`); a change in behaviour says in the commit what
    it changed, in numbers.
-5. **Implementation review.** Review the diff critically: correctness, principles, dead code, tests reading the
+5. **Implementation review.** Review the diff critically: correctness, principles, overengineering, musicality, dead code, tests reading the
    trace's typed values, what the measurements do and do not show. Fix, edit or undo, and measure again.
 6. **Commit.** One summary line, no body, no trailers, on master. Do not push or deploy.
 7. **Roadmap.** Remove what the step implemented from `ROADMAP.md`, add what it deferred, and keep its sections intact
