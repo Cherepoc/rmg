@@ -329,7 +329,8 @@ public static class SongGenerator
             form.Map,
             soloists,
             solos,
-            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloLines), index))
+            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloLines), index)),
+            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloChords), index))
         );
 
         // and last the notes, decided from the state of the whole song, in its order, none sounding into a stop
@@ -483,5 +484,6 @@ internal enum SongStream
     Effects = 41,
     SoloPart = 42,
     Soloist = 43,
-    DrumSolo = 44
+    DrumSolo = 44,
+    SoloChords = 45
 }

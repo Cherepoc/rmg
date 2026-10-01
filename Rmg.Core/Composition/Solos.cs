@@ -117,6 +117,7 @@ internal static class Solos
     /// <param name="soloists">Every part's soloist, whose vocabulary its solos are played in.</param>
     /// <param name="solos">Every solo, by its appearance's place among the song's sections.</param>
     /// <param name="streams">A solo's sequence, by its appearance's place.</param>
+    /// <param name="voicings">A solo's sequence of the gestures its soloist stacks, by its appearance's place.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
         IReadOnlyDictionary<int, TrackRole> roles,
@@ -124,7 +125,8 @@ internal static class Solos
         SongMap map,
         IReadOnlyDictionary<TrackRole, Soloist> soloists,
         IReadOnlyDictionary<int, SoloPlan> solos,
-        Func<int, IGenerationContext> streams
+        Func<int, IGenerationContext> streams,
+        Func<int, IGenerationContext> voicings
     )
     {
         var trackOf = roles.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.First().Key);
@@ -146,7 +148,7 @@ internal static class Solos
 
             // the solo's line, in the first soloist's vocabulary and range
             var first = trackOf[solo.Soloists[0]];
-            var (line, segments) = SoloLines.Generate(context, span, soloists[solo.Soloists[0]], solo.IsOwn, melody, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
+            var (line, segments) = SoloLines.Generate(context, voicings(index), span, soloists[solo.Soloists[0]], solo.IsOwn, melody, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
             StateTrace.Record(TracePoints.SoloGestures, first, span.SectionId, 0, StateMap.Default, 0, $"{(solo.IsOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, solo.IsOwn, segments));
             var phrases = Math.Max(1, (int)Math.Round(span.Duration / span.Meter.PatternDuration));
             // a solo of one phrase is traded by its halves
@@ -178,7 +180,9 @@ internal static class Solos
                 var lift = Lift(heard, band + Margin);
                 TimelineItem<StateMap>[] played =
                 [
+                    // a soloist that plays no chords playing the line's stacked notes alone
                     ..notes.Select(x => x.Value.With(CompositionStateKinds.LineSolo, 1)
+                        .With(CompositionStateKinds.SoloVoices, soloists[soloist].ChordRate > 0 ? x.Value.GetStateValue(CompositionStateKinds.SoloVoices) : 0)
                         .With(StateKinds.Velocity, x.Value.GetStateValue(StateKinds.Velocity) + lift)
                         .ToTimelineItem(x.Position))
                 ];

@@ -31,7 +31,9 @@ public enum SoloShape
 ///     the band's, a guitar or a synth lead the likelier to bend. Drawn once for every part that solos in a song, by the
 ///     song's melody facet, its expression by the sound facet: at the plain end 8ths and 16ths in cells of three or four, the scale, a sequence or the chord, and a steady
 ///     player; at the wild end any speed, cells of five, seven or nine grouped, and one who swings from runs to long notes
-///     in a beat.
+///     in a beat. A soloist on an instrument that plays chords stacks some of its notes, the chord's notes under its own,
+///     as a pianist's or a guitarist's solo does, as many as it favours, and a wild one now and then planes them, its
+///     chord's shape moved with its line.
 /// </summary>
 internal sealed record Soloist(
     ImmutableArray<int> Speeds,
@@ -51,9 +53,36 @@ internal sealed record Soloist(
     double OffBarChance,
     double BreathChance,
     ImmutableDictionary<SoloGesture, double> GestureWeights,
-    double BendRate
+    double BendRate,
+    double ChordRate,
+    int Voices,
+    bool Planes
 )
 {
+    /// <summary>
+    ///     How often a soloist on an instrument that plays chords stacks a gesture, about which each draws its own: a
+    ///     conventional way to solo on one, a plain soloist's too, leaned by the gesture and its intensity (<see cref="SoloLines" />).
+    /// </summary>
+    public static ByConvention ChordRates { get; } = new(0.25, 0.3, 0.35);
+
+    /// <summary>How many notes a soloist's stacked notes have, its own and the chord's under it: two or three the plainest, four the wilder.</summary>
+    public static ImmutableArray<(int Voices, ByConvention Weight)> VoiceOptions { get; } =
+    [
+        (2, new ByConvention(1, 0.4, 0.3)),
+        (3, new ByConvention(1, 0.4, 0.3)),
+        (4, new ByConvention(0, 0.2, 0.4))
+    ];
+
+    /// <summary>
+    ///     The chance a soloist planes its chords, their shape moved with its line note for note rather than the band's chord
+    ///     under it, as McCoy Tyner's fourths move: never at the plain end.
+    /// </summary>
+    public static ByConvention PlaneChance { get; } = new(0, 0.15, 0.6);
+
+    /// <summary>Whether an instrument plays chords: one the song might give its chords or its rhythm part.</summary>
+    private static bool PlaysChords(int program) =>
+        InstrumentRoles.Chords.Instruments.Concat(InstrumentRoles.Rhythm.Instruments).Any(x => x.Program == program);
+
     /// <summary>
     ///     How often a soloist that bends bends a note it holds, an 8th or longer, by the sound facet: a third of them in the
     ///     middle, as a rock guitarist bends, most of them at the wild end; leaned by its lean to bends and its solo's intensity.
@@ -185,8 +214,12 @@ internal sealed record Soloist(
         var fastest = FastestSpeedChances.Where(x => context.TestProbability(x.Chance.At(melody))).Select(x => x.NotesABeat);
         var stamina = Math.Pow(2, StaminaPowers.At(melody) + StaminaSpread.At(melody) * Generators.SplineValue()(context));
         var phraseBars = Favourites(context, PhraseBarOptions, melody);
+        // drawn last, so that the rest stays as it was
+        var chordRate = PlaysChords(program) ? ChordRates.At(melody) * (0.5 + context.GenerateDouble()) : 0;
+        var voices = context.Pick(ByConvention.Weigh(VoiceOptions, melody));
+        var planes = context.TestProbability(PlaneChance.At(melody));
         return new Soloist([..speeds.Concat(fastest).Order()], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody), bends, vibrates, stamina,
-            phraseBars, OffBarChances.At(melody), BreathChances.At(melody), SoloLines.Gestures.ToImmutableDictionary(x => x.Gesture, x => x.Weight.At(melody)), BendRates.At(sound));
+            phraseBars, OffBarChances.At(melody), BreathChances.At(melody), SoloLines.Gestures.ToImmutableDictionary(x => x.Gesture, x => x.Weight.At(melody)), BendRates.At(sound), chordRate, voices, planes);
     }
 
     /// <summary>The options a soloist favours, as many as it draws, each picked from those left.</summary>

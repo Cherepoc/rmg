@@ -128,6 +128,22 @@ internal static class SoloLines
     /// <summary>How much louder a solo plays at its most intense than at its calmest, about the melody's loudness there.</summary>
     public const double IntensityVelocity = 0.15;
 
+    /// <summary>
+    ///     How each gesture leans a soloist to stacking it: a held note the most, a lick or a quote as it is, a run the least,
+    ///     as a run in chords blurs; a stacked run or lick stacks only its cells' first notes, a held note or a quote every one.
+    /// </summary>
+    public static ImmutableDictionary<SoloGesture, double> ChordLeans { get; } = new Dictionary<SoloGesture, double>
+    {
+        [SoloGesture.Run] = -1,
+        [SoloGesture.Lick] = 0,
+        [SoloGesture.Quote] = 0,
+        [SoloGesture.Held] = 1,
+        [SoloGesture.Pause] = 0
+    }.ToImmutableDictionary();
+
+    /// <summary>The odds a gesture leaning to stacking has over one leaning away, and an intense moment over a calm one, as the odds of 1.</summary>
+    public const double ChordOdds = 3;
+
     /// <summary>How much louder a cell's first note is, so that its grouping is heard.</summary>
     public const double CellAccent = 0.1;
 
@@ -138,8 +154,10 @@ internal static class SoloLines
     /// <param name="melody">The melody's notes in the solo, which a solo on the melody aims at and quotes, and every note takes its state from.</param>
     /// <param name="track">The soloist's track, whose state its notes are realized over.</param>
     /// <param name="definition">The soloist's definition, its range.</param>
+    /// <param name="voicing">The sequence that draws which gestures the soloist stacks, a stream of its own.</param>
     public static (TimelineItem<StateMap>[] Line, Segment[] Segments) Generate(
         IGenerationContext context,
+        IGenerationContext voicing,
         SectionSpan span,
         Soloist soloist,
         bool isOwn,
@@ -182,14 +200,21 @@ internal static class SoloLines
         var loudness = melody.Average(x => x.Value.GetStateValue(StateKinds.Velocity));
 
         // a note of the line at its place, as a line's note: the step above the chord there nearest it, on the scale there
-        TimelineItem<StateMap> Place(double position, int pitch, double intensity, double held = 0, bool accented = false, bool release = false)
+        TimelineItem<StateMap> Place(double position, int pitch, double intensity, double held = 0, bool accented = false, bool release = false, bool stacked = false)
         {
-            var state = MelodyAt(position).Value.Except([StateKinds.HeldDuration, CompositionStateKinds.LinePickup, StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed]);
+            var melodyNote = MelodyAt(position).Value;
+            var state = melodyNote.Except([StateKinds.HeldDuration, CompositionStateKinds.LinePickup, StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed]);
             state = state.With(StateKinds.Velocity, loudness + IntensityVelocity * (intensity - 0.5) + (accented ? CellAccent : 0));
             state = state.With(StateKinds.ScaleStep, LinePlacement.GetScaleStep(Chord(state, position), pitch))
                 .With(StateKinds.Alteration, 0)
                 .With(CompositionStateKinds.SoloIntensity, (int)Math.Round(intensity * 100))
                 .With(CompositionStateKinds.SoloRelease, release ? 1 : 0);
+            // a stacked note the band's chord there under it, or the chord's shape planed (Realizer)
+            if (stacked && soloist.Voices > 1)
+                state = state.With(StateKinds.ChordNotePitchOffsets, melodyNote.GetStateValue(StateKinds.ChordNotePitchOffsets))
+                    .With(CompositionStateKinds.SoloVoices, soloist.Voices)
+                    .With(CompositionStateKinds.SoloPlanes, soloist.Planes ? 1 : 0);
+
             return (held > 0 ? state.With(StateKinds.HeldDuration, held) : state).ToTimelineItem(position);
         }
 
@@ -206,6 +231,8 @@ internal static class SoloLines
         CellCursor? cursor = null;
         foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn, _, isRelease) in plan)
         {
+            // whether the soloist stacks the gesture, the likelier the more it leans to it and the more intense
+            var stacks = voicing.TestProbability(new Tilt(Tilt.Of(ChordOdds, ChordLeans[gesture]).LogOdds + Tilt.Of(ChordOdds, 2 * level - 1).LogOdds).Chance(soloist.ChordRate, 1));
             // a run going on from the segment before keeps where it is in its cells
             cursor = goesOn && cursor is not null ? cursor : new CellCursor(current);
             // and where the gesture heads: a note of the chord there, higher the more intense, or the melody's there
@@ -217,7 +244,7 @@ internal static class SoloLines
             {
                 case SoloGesture.Held:
                     current = Nearest(ChordNotes(start), current);
-                    line.Add(Place(start, current, level, end - start, release: isRelease));
+                    line.Add(Place(start, current, level, end - start, release: isRelease, stacked: stacks));
                     break;
                 case SoloGesture.Run:
                 case SoloGesture.Lick:
@@ -225,7 +252,7 @@ internal static class SoloLines
                     // a lick at half the speed, its cell again in place, and a run its cells on the way to where it heads
                     var positions = Positions(start, end, gesture, speed);
                     var (pitches, accents, cells) = Cells(ScaleNotes(start), cursor, heading, positions.Length, shape, sizes, gesture == SoloGesture.Run);
-                    line.AddRange(positions.Select((position, i) => Place(position, pitches[i], level, accented: accents[i])));
+                    line.AddRange(positions.Select((position, i) => Place(position, pitches[i], level, accented: accents[i], stacked: stacks && accents[i])));
                     StateTrace.Record(TracePoints.SoloCells, SectionGenerator.SectionTrace, span.SectionId, 0, StateMap.Default, 0, $"{gesture} {shape} {string.Join("+", cells)}", (start, shape, cells));
                     if (pitches.Length > 0)
                         current = pitches[^1];
@@ -235,7 +262,7 @@ internal static class SoloLines
                     foreach (var note in melody.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9))
                     {
                         current = Nearest(ScaleNotes(note.Position), FoldTowards(MelodyPitch(note), current));
-                        line.Add(Place(note.Position, current, level));
+                        line.Add(Place(note.Position, current, level, stacked: stacks));
                     }
 
                     break;

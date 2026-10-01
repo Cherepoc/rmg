@@ -97,7 +97,9 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
   is 17 to 20% of the segments: too many breaths? A middling solo plays 2.1 notes a beat, two thirds of its runs at
   16ths or faster, the rest slowed by its stamina: busy enough, or should the stamina be longer? Its notes of an 8th or
   longer: 59% with a vibrato, 16% bent, 3% a wide vibrato: too few wide ones? A soloist plays 0.06 of velocity over
-  the band's loudest part: heard over it, a quiet instrument such as a flute too? Since no part bends or slides a note shorter than an 8th, slides
+  the band's loudest part: heard over it, a quiet instrument such as a flute too? A chord soloist stacks 41% of its
+  held notes and 2 to 3% of its runs' notes, and planes 17% of the time at the middle and 59% at the wild end: block
+  chords heard as a pianist's, the planing as meant or as wrong notes? Since no part bends or slides a note shorter than an 8th, slides
   are 44% of the corpus's pitch shapes against bends' 56%: too many slides? A soloist chooses to bend and to sing a
   vibrato itself, the band the song's way: 85% of guitar and synth lead solos bend, 54% of the other instruments' that
   can: a straight band under a bending lead heard as meant? The drum solos: do the shapes sound like a drummer's
@@ -436,8 +438,13 @@ and slides, is `Expression`'s (see *Listening*).
   faster speeds; a soloist's held notes bent at its own rate and sung with a vibrato from half a beat; on the melody near the plain end, its own over the chords at the wild; runs of the soloist's cells
   in its shapes, grouped, accented, going on over the bar lines, as fast as 64ths at the wild end for as long as the
   soloist's stamina, a burst or bars of it; the counter-melody and the pad resting for it; every soloist a margin
-  over the loudest part under it, whatever their draws (`SoloTest`, `SoloistTest`).
-  Left (P3): **motifs,** a phrase answering the one before with its opening cell moved up or down, as call and
+  over the loudest part under it, whatever their draws; a soloist on an instrument that plays chords stacking some
+  gestures, held notes and quotes whole and runs and licks on their cells' first notes, the band's chord under its
+  note where its note is the chord's, or at the wild end the chord's shape planed with the line (`SoloTest`,
+  `SoloistTest`).
+  Left (P3): **a solo's octaves its own,** a solo now playing in octaves where the melody it takes over does, its
+  soloist's choice instead; **a drum solo's stacked hits,** the kick under its accents, by the same voices the
+  drummer's vocabulary leaves at one; **motifs,** a phrase answering the one before with its opening cell moved up or down, as call and
   response, a phrase's motif carried on to the next as state; **the solo part answering the
   melody** outside its solos, in the melody's gaps, as a guitarist fills between a singer's phrases; **the role,**
   which appearance solos by the section's role, a bridge or a last chorus, where now any later appearance may; **the

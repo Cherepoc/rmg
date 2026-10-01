@@ -461,7 +461,8 @@ public sealed class SoloTest
                     var program = state.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
                     var bend = (BendKind)state.GetStateValue(CompositionStateKinds.Bend);
                     await Assert.That(bend is BendKind.None or BendKind.Scoop or BendKind.PrebendRelease).IsTrue().Because($"seed {song.Seed} at {note.Position}");
-                    if (!soloists.TryGetValue(role, out var soloist) || !soloist.Vibrates || echoes || !Expression.Bends(program) || note.Value.Duration < 1)
+                    // nor a stacked one, a chord rather than a line
+                    if (!soloists.TryGetValue(role, out var soloist) || !soloist.Vibrates || echoes || !Expression.Bends(program) || note.Value.Duration < 1 || note.Value.Pitches.Length > 1)
                         continue;
                     releases.Add((state.GetStateValue(CompositionStateKinds.SoloIntensity) / 100.0, bend,
                         state.GetStateValue(CompositionStateKinds.Vibrato) > 0 || state.GetStateValue(CompositionStateKinds.WideVibrato) > 0));
@@ -559,6 +560,79 @@ public sealed class SoloTest
                               $"slid {Share(longNotes.Count(n => (BendKind)n.State.GetStateValue(CompositionStateKinds.Bend) == BendKind.Slide), longNotes.Length)}, " +
                               $"a vibrato {Share(longNotes.Count(n => n.State.GetStateValue(CompositionStateKinds.Vibrato) > 0 || n.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0), longNotes.Length)}, " +
                               $"a wide one {Share(longNotes.Count(n => n.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0), longNotes.Length)}");
+        }
+
+        await Task.CompletedTask;
+    }
+
+    /// <summary>Every note of a song's pitched solos, with its soloist and the gesture it plays in.</summary>
+    private static (Soloist Soloist, SoloGesture Gesture, RealizedNote Note)[] SoloistNotes(CorpusSong song)
+    {
+        var soloists = song.Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => ((TrackRole Role, Soloist Soloist))x.Value!).ToDictionary(x => x.Role, x => x.Soloist);
+        return
+        [
+            ..Plans(song).SelectMany(plan => song.Song.Notes!
+                .Where(x => song.Solos[plan.Index].Soloists.Contains(song.Song.TrackDefinitions[x.Key].Role))
+                .SelectMany(x => x.Value
+                    .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1 && n.Position >= plan.Plan[0].Start - 1e-9 && n.Position < plan.Plan[^1].End - 1e-9)
+                    .Select(n => (soloists[song.Song.TrackDefinitions[x.Key].Role], plan.Plan.Last(g => g.Start <= n.Position + 1e-9).Gesture, n.Value))))
+        ];
+    }
+
+    private static bool IsStacked(RealizedNote note) => note.Pitches.Length > 1 && note.State.GetStateValue(CompositionStateKinds.SoloVoices) > 1;
+
+    [Test]
+    public async Task ASoloistOnAnInstrumentThatPlaysChords_StacksItsHeldNotesMoreThanItsRuns_TheBandsChordUnderItsOwnNote()
+    {
+        var notes = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => SoloistNotes(TestCorpus.Get(seed, Facets(1, 0.5)))).SelectMany(x => x).ToArray();
+        var plain = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => SoloistNotes(TestCorpus.Get(seed, Facets(1, 0)))).SelectMany(x => x).ToArray();
+
+        // only a soloist on an instrument that plays chords stacks, and a plain one never planes
+        await Assert.That(notes.Concat(plain).Where(x => IsStacked(x.Note)).All(x => x.Soloist.ChordRate > 0)).IsTrue().Because("chord instruments");
+        await Assert.That(plain.All(x => !x.Soloist.Planes)).IsTrue().Because("plain planes");
+        var chordal = notes.Where(x => x.Soloist.ChordRate > 0).ToArray();
+        double Stacked(SoloGesture gesture) => chordal.Count(x => x.Gesture == gesture && IsStacked(x.Note)) / (double)Math.Max(1, chordal.Count(x => x.Gesture == gesture));
+        await Assert.That(Stacked(SoloGesture.Held)).IsGreaterThan(Stacked(SoloGesture.Run) * 2);
+
+        var (following, planing) = (0, 0);
+        foreach (var (_, _, note) in notes.Concat(plain).Where(x => IsStacked(x.Note)))
+        {
+            // its own note on top, no more notes than its voices, the line's soloist's, who may not be the one playing it
+            await Assert.That(note.Pitches.Skip(1).All(x => x < note.Pitches[0])).IsTrue().Because($"top {string.Join(",", note.Pitches)}");
+            await Assert.That(note.Pitches.Length).IsLessThanOrEqualTo(note.State.GetStateValue(CompositionStateKinds.SoloVoices));
+            if (note.State.GetStateValue(CompositionStateKinds.SoloPlanes) > 0)
+            {
+                planing++;
+                continue;
+            }
+
+            // the band's chord, its note the chord's, the others a minor third or more under it: in whatever key a key
+            // change moved it to, its notes as far from its top as the chord's are from one of them
+            following++;
+            var (_, _, classes) = Realizer.GetChordNotes(note.State);
+            await Assert.That(classes.Any(top => note.Pitches.All(x => classes.Contains((x - note.Pitches[0] + top).Mod(12))))).IsTrue().Because($"chord {string.Join(",", note.Pitches)} of {string.Join(",", classes)}");
+            await Assert.That(note.Pitches.Skip(1).All(x => note.Pitches[0] - x >= 3)).IsTrue().Because($"gap {string.Join(",", note.Pitches)}");
+        }
+
+        await Assert.That(following).IsGreaterThan(50);
+        await Assert.That(planing).IsGreaterThan(0);
+    }
+
+    /// <summary>How a solo stacks its notes, by its facets: the soloists that can and that plane, and the share of their notes stacked by gesture and by voices.</summary>
+    [Test]
+    [Explicit]
+    public async Task ChordReport()
+    {
+        foreach (var value in new[] { 0.0, 0.25, 0.5, 0.75, 1.0 })
+        {
+            var notes = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => SoloistNotes(TestCorpus.Get(seed, Facets(1, value)))).SelectMany(x => x).ToArray();
+            var soloists = notes.Select(x => x.Soloist).Distinct().ToArray();
+            var chordal = notes.Where(x => x.Soloist.ChordRate > 0).ToArray();
+            var stacked = chordal.Where(x => IsStacked(x.Note)).ToArray();
+            string Share(double part, double whole) => $"{part / Math.Max(1, whole):P0}";
+            Console.WriteLine($"  melody {value}: {soloists.Length} soloists, {Share(soloists.Count(x => x.ChordRate > 0), soloists.Length)} on chords, of those planing {Share(soloists.Count(x => x.ChordRate > 0 && x.Planes), soloists.Count(x => x.ChordRate > 0))}; " +
+                              $"their notes stacked {Share(stacked.Length, chordal.Length)}, by gesture {string.Join(" ", chordal.GroupBy(x => x.Gesture).OrderBy(x => x.Key).Select(g => $"{g.Key}:{Share(g.Count(x => IsStacked(x.Note)), g.Count())}"))}; " +
+                              $"of {stacked.Length} stacked {string.Join(" ", stacked.GroupBy(x => x.Note.Pitches.Length).OrderBy(x => x.Key).Select(g => $"{g.Key} notes:{Share(g.Count(), stacked.Length)}"))}");
         }
 
         await Task.CompletedTask;

@@ -123,9 +123,10 @@ internal static class Realizer
             var struck = new List<TimelineItem<StateMap>>();
             foreach (var (index, change) in crossings)
             {
-                // where the track plays on within a bar, as it played, not into a solo's line or out of one
+                // where the track plays on within a bar, as it played, not a solo's line, which holds its note as a line does,
+                // nor into one
                 if (index + 1 >= events.Count || events[index + 1].Position >= change + meterAt(change).BarDuration - 1e-9
-                    || events[index].Value.GetStateValue(CompositionStateKinds.LineSolo) != events[index + 1].Value.GetStateValue(CompositionStateKinds.LineSolo))
+                    || events[index].Value.GetStateValue(CompositionStateKinds.LineSolo) == 1 || events[index + 1].Value.GetStateValue(CompositionStateKinds.LineSolo) == 1)
                     continue;
 
                 var (note, next) = (events[index].Value, events[index + 1]);
@@ -302,9 +303,15 @@ internal static class Realizer
             _ => throw new ArgumentOutOfRangeException(nameof(role), role, "A pitched track plays the chords, the melody, the bass or a pad.")
         };
 
+        // a solo's stacked note plays its note on top and the chord's under it, from a minor third down so that its note
+        // stays clear, where its note is the chord's, and alone where not, or the chord's shape from its top down, planed
+        // with the line whatever its note; a chord's notes in no octave of their own
+        var voices = stateMap.GetStateValue(CompositionStateKinds.SoloVoices);
+        if (isLine && voices > 1)
+            notes = [notes[0], ..Stack(notes[0], voices - 1, stateMap).Where(x => x >= range.Low)];
         // a line in octaves plays its note and the note an octave above, or below where above would leave the range, its
         // own first
-        if (isLine && stateMap.GetStateValue(CompositionStateKinds.Octave) > 0)
+        else if (isLine && stateMap.GetStateValue(CompositionStateKinds.Octave) > 0)
             notes = notes[0] + OctaveNoteCount <= range.High ? [notes[0], notes[0] + OctaveNoteCount]
                 : notes[0] - OctaveNoteCount >= range.Low ? [notes[0], notes[0] - OctaveNoteCount]
                 : notes;
@@ -321,6 +328,28 @@ internal static class Realizer
     ///     The chord a note is played over: the scale, with the steps the note's bar raises, the chord root's step in
     ///     it, and the pitch of every step counted from the root, in the key and the octave.
     /// </summary>
+    /// <summary>
+    ///     The notes a solo's stacked note plays under its own, from the highest down: the band's chord's where its note is
+    ///     the chord's, none where not, or the chord's shape's from its top down where it planes.
+    /// </summary>
+    private static IEnumerable<int> Stack(int top, int count, StateMap stateMap)
+    {
+        var (chord, steps, classes) = GetChordNotes(stateMap);
+        if (stateMap.GetStateValue(CompositionStateKinds.SoloPlanes) > 0)
+        {
+            // the shape in close position, its highest note on the line's
+            var heights = steps.Select(x => (chord.GetPitch(x) - chord.GetPitch(0)).Mod(OctaveNoteCount)).Distinct().OrderDescending().ToArray();
+            return heights.Skip(1).Select(x => top - (heights[0] - x)).Take(count);
+        }
+
+        return classes.Contains(top.Mod(OctaveNoteCount))
+            ? Enumerable.Range(MinStackGap, OctaveNoteCount).Select(x => top - x).Where(x => classes.Contains(x.Mod(OctaveNoteCount))).Take(count)
+            : [];
+    }
+
+    /// <summary>How far under a stacked note its chord's notes start, in semitones: a minor third, so that a note beside the chord's stays clear of them.</summary>
+    private const int MinStackGap = 3;
+
     internal static (ImmutableArray<int> ScaleOffsets, int RootIndex, ChordContext Chord) GetChord(StateMap stateMap)
     {
         var scaleOffsets = stateMap.GetStateValue(StateKinds.ScaleOffsets);
