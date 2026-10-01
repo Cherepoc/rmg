@@ -5,9 +5,10 @@ description: Implement a feature or a roadmap plan step by step, each step plann
 
 # The implementation loop
 
-Work through the task given (a feature, a plan in `ROADMAP.md`, or the roadmap's priorities) one step at a time, without
-stopping to ask between steps. Stop only when every step is done, when a decision is genuinely the user's (ask it, with a
-recommendation), or when a step fails its reviews twice (postpone it in `ROADMAP.md` with the reason and go on).
+Work through the task given (a feature, a plan in `ROADMAP.md`, or the roadmap's priorities) one step at a time,
+without stopping to ask between steps. Stop only when every step is done, when a decision is genuinely the user's (ask
+it, with a recommendation), or when a step fails its reviews twice (postpone it in `ROADMAP.md` with the reason and go
+on).
 
 The steps given are a starting point, not a contract. Split a step into smaller ones where it is too big to measure or
 review on its own, or where one part of it can be committed and judged before the rest; merge steps where they
@@ -29,8 +30,9 @@ step's plan, with the reason, and report the steps as done.
 4. **Measure.** Run the reports before and after; compare against the targets. A refactor must keep the corpus
    fingerprint (`dotnet Rmg/bin/Release/net10.0/Rmg.dll --fingerprint`); a change in behaviour says in the commit what
    it changed, in numbers.
-5. **Implementation review.** Review the diff critically: correctness, principles, overengineering, musicality, dead code, tests reading the
-   trace's typed values, what the measurements do and do not show. Fix, edit or undo, and measure again.
+5. **Implementation review.** Review the diff critically: correctness, principles, overengineering, musicality, dead
+   code, tests reading the trace's typed values, what the measurements do and do not show. Fix, edit or undo, and
+   measure again.
 6. **Commit.** One summary line, no body, no trailers, on master. Do not push or deploy.
 7. **Roadmap.** Remove what the step implemented from `ROADMAP.md`, add what it deferred, and keep its sections intact
    (`grep -c "^## " ROADMAP.md` before and after).

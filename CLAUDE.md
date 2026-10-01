@@ -17,15 +17,16 @@
   case. Where the song decides a thing and its parts or notes then take it, such as an effect, the song's chance reaches
   its end and the parts' share may stop short of it, so that the wildest song plays the thing every time but not
   everywhere; and a thing that is no more apt in a wild song than in a middling one, such as a riff harmonised, may stop
-  short at the song too, never at 0 and as often at 1 as at 0.5, the wild end choosing how it is played instead. The facets reach the ends only together, as the song's value does; songs are spread well away from both, and
-  whatever an end makes, however wild, is meant.
+  short at the song too, never at 0 and as often at 1 as at 0.5, the wild end choosing how it is played instead. The
+  facets reach the ends only together, as the song's value does; songs are spread well away from both, and whatever an
+  end makes, however wild, is meant.
 
 # Architecture
 
 - **State decides, `Realizer` realizes.** Generation decides the notes as layered state (song, section, track, bar,
-  note); `Realizer` only chooses their register from what came before (a chord's voicing) and
-  leads into what follows. A decision that needs the song put together, such as a fill,
-  the form or a stop, is an edit after assembly, not a render flag.
+  note); `Realizer` only chooses their register from what came before (a chord's voicing) and leads into what follows. A
+  decision that needs the song put together, such as a fill, the form or a stop, is an edit after assembly, not a render
+  flag.
 - **Lean, don't decide.** Bias a choice by conventionality through its ends (`ByConvention`), and by energy, a line's
   weight or anything else with `Tilt`: an option's weight times the odds to the power of its lean, a chance through its
   odds, a value around its middle by its skew. A lean is data on the option; never multiply or cap a chance by hand.
