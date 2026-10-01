@@ -11,7 +11,13 @@ public enum SectionRole
     Verse,
     PreChorus,
     Chorus,
-    Bridge
+    Bridge,
+
+    /// <summary>A section of its own material that opens the song, played once.</summary>
+    Intro,
+
+    /// <summary>A section of its own material that closes the song, played once.</summary>
+    Outro
 }
 
 /// <summary>A song's sections in its order, and the role each plays.</summary>
@@ -43,6 +49,14 @@ internal static class SongForms
     /// <summary>The chance a song plays its last section once more, as a last chorus is played twice, by the form facet: never in a plain song.</summary>
     public static ByConvention LastRepeatChance { get; } = new(0, 0.25, 0.25);
 
+    /// <summary>
+    ///     The chances a song opens on an intro and closes on an outro of their own material, sections played once, by the
+    ///     form facet: never in a plain song, which plays one of the forms as it is.
+    /// </summary>
+    public static ByConvention IntroChance { get; } = new(0, 0.3, 0.3);
+
+    public static ByConvention OutroChance { get; } = new(0, 0.15, 0.25);
+
     /// <summary>The chance a song takes one of the forms, at a rhythm of middling conventionality.</summary>
     public const double FormChance = 0.7;
 
@@ -63,19 +77,32 @@ internal static class SongForms
     ///     The form facet of the song's unconventionality: the plainest song always in one of the forms, the wildest always
     ///     in one of its own.
     /// </param>
-    public static SongStructure Generate(IGenerationContext context, IGenerationContext freeContext, double unconventionality)
+    /// <param name="ends">The sequence the intro and the outro are drawn from.</param>
+    public static SongStructure Generate(IGenerationContext context, IGenerationContext freeContext, IGenerationContext ends, double unconventionality)
     {
         var isConventional = context.TestProbability(RhythmicUnconventionality.Ends(FormChance, -1).At(unconventionality));
         var form = context.Pick(Forms);
+        SongStructure structure;
         if (!isConventional)
         {
             var free = SongStructureGenerator.Generate(freeContext).SelectMany(part => part.SectionIds).ToImmutableArray();
-            return new SongStructure(free, free.Distinct().ToImmutableDictionary(x => x, _ => SectionRole.Free));
+            structure = new SongStructure(free, free.Distinct().ToImmutableDictionary(x => x, _ => SectionRole.Free));
+        }
+        else
+        {
+            // a section for every role, numbered in the order the roles first play
+            var ids = form.Distinct().Select((role, id) => (role, id)).ToDictionary(x => x.role, x => x.id);
+            structure = new SongStructure([..form.Select(x => ids[x])], ids.ToImmutableDictionary(x => x.Value, x => x.Key));
         }
 
-        // a section for every role, numbered in the order the roles first play
-        var ids = form.Distinct().Select((role, id) => (role, id)).ToDictionary(x => x.role, x => x.id);
-        return new SongStructure([..form.Select(x => ids[x])], ids.ToImmutableDictionary(x => x.Value, x => x.Key));
+        // and an intro and an outro of their own now and then, sections of their own after the others
+        var (intro, outro) = (ends.TestProbability(IntroChance.At(unconventionality)), ends.TestProbability(OutroChance.At(unconventionality)));
+        var next = structure.SectionIds.Max() + 1;
+        var (introId, outroId) = (next, next + 1);
+        return new SongStructure(
+            [..(intro ? [introId] : Array.Empty<int>()), ..structure.SectionIds, ..(outro ? [outroId] : Array.Empty<int>())],
+            structure.Roles.AddRange(new[] { (intro, introId, SectionRole.Intro), (outro, outroId, SectionRole.Outro) }.Where(x => x.Item1).Select(x => new KeyValuePair<int, SectionRole>(x.Item2, x.Item3)))
+        );
     }
 
     private static ImmutableArray<SectionRole> Parse(string roles)

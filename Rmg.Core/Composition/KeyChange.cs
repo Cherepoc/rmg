@@ -86,7 +86,7 @@ public sealed record KeyChange(double Position, int Semitones)
     /// <param name="unconventionality">The scale facet of the song's unconventionality.</param>
     /// <param name="sectionIds">The song's sections in its order, before any it plays again to fade out.</param>
     /// <param name="roles">What each section does in the song's form, by its id.</param>
-    /// <param name="liftAt">The appearance, by its place, a last section's lift may come at: the last section, or its repeat.</param>
+    /// <param name="liftAt">The appearance, by its place, a last section's lift may come at: the last section, its repeat, or the one before an outro.</param>
     internal static ImmutableArray<KeyChange> Generate(
         IGenerationContext context,
         Func<int, IGenerationContext> places,
@@ -98,8 +98,8 @@ public sealed record KeyChange(double Position, int Semitones)
         int liftAt
     )
     {
-        var last = sectionIds.Count - 1;
-        var cameBack = sectionIds.Take(last).Contains(sectionIds[last]);
+        // the section the lift may come at having played before
+        var cameBack = map.Sections.Take(liftAt).Any(x => x.SectionId == map.Sections[liftAt].SectionId);
         var ownKeys = sectionIds.Distinct().ToDictionary(id => id, id =>
         {
             var drawing = sections(id);

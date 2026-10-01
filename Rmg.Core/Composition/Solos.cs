@@ -51,7 +51,9 @@ internal static class Solos
         [SectionRole.Verse] = 0.5,
         [SectionRole.PreChorus] = -1,
         [SectionRole.Chorus] = -0.5,
-        [SectionRole.Bridge] = 1
+        [SectionRole.Bridge] = 1,
+        [SectionRole.Intro] = -1,
+        [SectionRole.Outro] = 0.5
     }.ToImmutableDictionary();
 
     /// <summary>The odds a role leaning to a solo has, as the odds of 1.</summary>

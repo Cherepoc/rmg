@@ -38,7 +38,9 @@ public sealed class SongIntroTest
 
             await Assert.That(entries[0]).IsEqualTo(0);
             await Assert.That(entries.Zip(entries.Skip(1)).All(x => x.First <= x.Second)).IsTrue();
-            await Assert.That(entries[^1]).IsEqualTo(window);
+            // the parts left at its end, where one comes in alone at its start
+            if (entries.Length > 1)
+                await Assert.That(entries[^1]).IsEqualTo(window);
             await Assert.That(entries.All(x => x % song.Map.Meter.BarDuration == 0 && x <= window)).IsTrue();
             await Assert.That(intro.Duration).IsEqualTo(intro.Window.IsBefore ? window : 0);
         }

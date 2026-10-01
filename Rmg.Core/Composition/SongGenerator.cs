@@ -123,7 +123,7 @@ public static class SongGenerator
         var meter = overrides.Meter ?? Meter.Draw(Stream(SongStream.Meter), songUnconventionality[Facet.Feel], overrides.MeterOption);
         StateTrace.Record(TracePoints.Meter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, meter.ToString(), meter);
 
-        var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), songUnconventionality[Facet.Form]);
+        var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), Stream(SongStream.SongEnds), songUnconventionality[Facet.Form]);
         StateTrace.Record(TracePoints.SongForm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(" ", structure.SectionIds.Select(x => structure.Roles[x])), structure);
         var sectionIds = structure.SectionIds.ToArray();
 
@@ -186,7 +186,7 @@ public static class SongGenerator
         // and a last section that came back before played once more now and then, as a last chorus is, where it does not
         // fade, from a stream of its own, the last section's lift moving to it
         var repeats = Stream(SongStream.LastRepeat).TestProbability(SongForms.LastRepeatChance.At(songUnconventionality[Facet.Form]))
-                      && fading == 0 && sectionIds.Take(sectionIds.Length - 1).Contains(sectionIds[^1]);
+                      && fading == 0 && sectionIds.Take(sectionIds.Length - 1).Contains(sectionIds[^1]) && structure.Roles[sectionIds[^1]] != SectionRole.Outro;
         int[] played = [..sectionIds, ..(repeats ? [sectionIds[^1]] : Array.Empty<int>()), ..Enumerable.Repeat(sectionIds[^1], fading)];
         StateTrace.Record(TracePoints.LastRepeat, SectionGenerator.SectionTrace, 0, 0, StateMap.Default, 0, $"{repeats}", repeats);
         // the later in the song, the more, and with the energy of its own place in the song against the section's average,
@@ -212,7 +212,9 @@ public static class SongGenerator
             cancellation.ThrowIfCancellationRequested();
             var id = played[index];
             // a later appearance played as a solo now and then, from a sequence of its own, by the section's facets
-            var solo = Solos.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Solos), index)), index, structure.Roles[id], generateSection(id).Facets, SongParts.All.Except(absent).ToArray());
+            var solo = Solos.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Solos), index)), index, structure.Roles[id], generateSection(id).Facets,
+                // a part held back yet soloing no sooner than it comes in
+                SongParts.All.Except(absent).Except(lateEntries.Where(x => index < x.Value).Select(x => x.Key)).ToArray());
             var energyStep = SectionEnergy.AppearanceStep(Place(index), averagePlaces[id]);
             energies.Add(generateSection(id).Energy + energyStep);
             var section = generateSection(id).Appear(
@@ -267,8 +269,8 @@ public static class SongGenerator
             form.Map,
             sectionIds,
             structure.Roles,
-            // the last section's lift, at its repeat where it plays twice
-            sectionIds.Length - 1 + (repeats ? 1 : 0)
+            // the last section's lift, at its repeat where it plays twice, before the outro where there is one
+            sectionIds.Length - 1 + (repeats ? 1 : 0) - (structure.Roles[sectionIds[^1]] == SectionRole.Outro ? 1 : 0)
         );
         // and play a section at a tempo of its own, a chorus the likelier, each section drawing from a stream of its own
         var sectionTempos = SectionTempo.Generate(
@@ -582,5 +584,6 @@ internal enum SongStream
     MelodyChords = 55,
     LastRepeat = 56,
     InstrumentFamilies = 57,
-    TwinTimbres = 58
+    TwinTimbres = 58,
+    SongEnds = 59
 }

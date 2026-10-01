@@ -23,7 +23,11 @@ public sealed class LateEntryTest
             var until = sections[entry].Start - (part == TrackRole.Drum ? sections[entry - 1].Meter.BarDuration : 0);
             int Notes(double from, double to) => song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == part)
                 .Sum(x => x.Value.Count(n => n.Position >= from - 1e-9 && n.Position < to - 1e-9));
-            await Assert.That(Notes(sections[0].Start, until)).IsEqualTo(0).Because($"seed {song.Seed}, {part} before {entry}");
+            // but in a section it would otherwise leave silent, which plays it
+            int Others(SectionSpan span) => song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role != part && song.Song.TrackDefinitions[x.Key].Role != TrackRole.Drum)
+                .Sum(x => x.Value.Count(n => n.Position >= span.Start - 1e-9 && n.Position < span.End - 1e-9));
+            foreach (var span in sections.Take(entry).Where(x => Others(x) > 0))
+                await Assert.That(Notes(span.Start, Math.Min(span.End, until))).IsEqualTo(0).Because($"seed {song.Seed}, {part} before {entry}");
             held++;
             if (Notes(sections[entry].Start, sections[entry].End) > 0)
                 heard++;

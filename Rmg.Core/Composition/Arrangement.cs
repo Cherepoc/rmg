@@ -35,7 +35,13 @@ internal static class Arrangement
     /// <param name="absent">The parts the song leaves out (<see cref="SongParts" />), which rest whatever the draws.</param>
     public static ImmutableHashSet<TrackRole> DrawRests(IGenerationContext context, Tilt energy, SectionRole role, ImmutableHashSet<TrackRole> absent)
     {
-        var tune = Tilt.Of(TuneOdds, role is SectionRole.Verse or SectionRole.PreChorus or SectionRole.Chorus ? -1 : 0);
+        // a tune's roles keeping their melody, and an intro and an outro, mostly the band's, leaving it out the oftener
+        var tune = Tilt.Of(TuneOdds, role switch
+        {
+            SectionRole.Verse or SectionRole.PreChorus or SectionRole.Chorus => -1,
+            SectionRole.Intro or SectionRole.Outro => 1,
+            _ => 0
+        });
         var resting = Rests
             .Where(x => context.TestProbability((x.Part == TrackRole.Melody ? tune : Tilt.None).Chance(energy.Chance(x.Chance, -1), 1)))
             .Select(x => x.Part)

@@ -15,13 +15,43 @@ public sealed class SongFormReportTest
         foreach (var song in TestCorpus.Range(32))
         {
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
-            var roles = structure.SectionIds.Select(x => structure.Roles[x]).ToArray();
+            // an intro and an outro of their own around the form
+            var roles = structure.SectionIds.Select(x => structure.Roles[x]).Where(x => x is not (SectionRole.Intro or SectionRole.Outro)).ToArray();
             await Assert.That(structure.SectionIds.Zip(structure.SectionIds.Skip(1)).All(x => x.First != x.Second)).IsTrue();
             if (roles.All(x => x == SectionRole.Free))
                 continue;
 
             await Assert.That(structure.Roles.Values.Distinct().Count()).IsEqualTo(structure.Roles.Count);
             await Assert.That(SongForms.Forms.Any(x => x.Value.SequenceEqual(roles))).IsTrue();
+        }
+    }
+
+    [Test]
+    public async Task AnIntroAndAnOutroOfTheirOwn_PlayOnce_FirstAndLast_NeverInAPlainSong()
+    {
+        var (intros, outros) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, new SongOverrides(Facets: System.Collections.Immutable.ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, 0.5)))))
+        {
+            var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
+            var roles = structure.SectionIds.Select(x => structure.Roles[x]).ToArray();
+            foreach (var (role, place) in new[] { (SectionRole.Intro, 0), (SectionRole.Outro, roles.Length - 1) })
+            {
+                var count = roles.Count(x => x == role);
+                await Assert.That(count).IsLessThanOrEqualTo(1);
+                if (count == 1)
+                    await Assert.That(roles[place]).IsEqualTo(role).Because($"seed {song.Seed}");
+            }
+
+            intros += roles.Contains(SectionRole.Intro) ? 1 : 0;
+            outros += roles.Contains(SectionRole.Outro) ? 1 : 0;
+        }
+
+        await Assert.That(intros / 256.0).IsEqualTo(0.3).Within(0.08);
+        await Assert.That(outros / 256.0).IsEqualTo(0.15).Within(0.07);
+        foreach (var seed in Enumerable.Range(0, 16))
+        {
+            var structure = (SongStructure)TestCorpus.Get(seed, new SongOverrides(Base: 0)).Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
+            await Assert.That(structure.Roles.Values.Any(x => x is SectionRole.Intro or SectionRole.Outro)).IsFalse();
         }
     }
 

@@ -18,8 +18,6 @@ built since 0.6 (October 2026): parts entering late, the solos placed by their r
 answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
 this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
 
-14. an intro and an outro of their own material, sections with roles of their own, their harmony leaned to the song's
-    home (see *Form*);
 15. to 17. long cycles, patterns of two bars in the rhythm engine, then a polymeter's figure running on across its
     frame and its cycle growing each time round (see *Rhythm engine*, *Meter*);
 18. a key change's phrase sequenced up a step until it stays;
@@ -292,8 +290,7 @@ and 62% of its changes by its instrument, off the new chord 1 to 3%, the melody'
   loudest section in 127 of them; the energy of a chorus 0.50 on average, a verse -0.17, a pre-chorus -0.12, a bridge
   -0.24; half the verses and choruses play sixteen bars; a song's sections take 80 bars at the median, 48 to 152 from
   10% to 90%, against 116 before (`SongFormReportTest`). Left: the role leaning the arrangement and the solos (see
-  *Appearances*, *Instruments*); an intro and an outro as roles of their own, should the form's intros and endings not
-  do; a last chorus played twice (built,
+  *Appearances*, *Instruments*); a last chorus played twice (built,
   `SongForms.LastRepeatChance`): a last section that came back before plays once more, by the form facet, never in a
   plain song and 0.25 from the middle, but where the song fades, which repeats it already, the last section's key lift
   moving to the repeat: 16.7% of 1024 songs, 17% of those lifted there (`KeyChangeTest`).
@@ -306,8 +303,13 @@ and 62% of its changes by its instrument, off the new chord 1 to 3%, the melody'
   section changes, which breaks the pattern's grid for the fills' lines and the phrases, with the meter as state, put
   off in October 2026 as an engine's change for a rare idiom; and
   the energy's recurrence, which counts a section's appearances, not its plays, should long sections sound too quiet.
-- **Intros of their own material** (P3), such as a riff the song does not play otherwise: an intro generated as a
-  section of its own, a change to the form, put off in October 2026 until the intros there are are listened to.
+- **An intro and an outro of their own** (built, `SectionRole.Intro`, `Outro`): a song opens on a section of its own
+  material, its own riff, chords and lines, played once, by the form facet (0, 0.3, 0.3), and closes on one (0, 0.15,
+  0.25), never in a plain song, which plays its form as it is; a pattern long, its melody leaning to rest, the outro
+  leaning to a solo, the intro setting the song's key and the outro leading home; the last chorus's lift and repeat the
+  section's before the outro. Over 256 middling songs 73 intros and 36 outros (`SongFormReportTest`). A part held back
+  solos no sooner than it comes in. Measured on the way: a melody's notes on the beat chord tones 71% over 64 songs,
+  where the 16 a test was set on said 82%, as before (`LineTest`).
 
 ## Section dynamics
 
