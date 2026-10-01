@@ -111,6 +111,10 @@ each from the trace; the seeds named here are ones already found.
   accent.
 - **Swing and panning,** set by measurement only: is a triplet's swing too heavy at 16ths, and do wild songs' tuplets,
   swung, sound played or broken? Are the chords too far out, or the melody too near the middle?
+- **Drum pieces given:** both snares given double the backbeat, which the song never draws: heard as wrong? Then give
+  the snare group one of its snares, as its rule draws. A piece put in plays by its roles alone: do a whistle or congas
+  given to a kit song sound placed? The page's pieces are those the song may play, every timekeeper among them, of
+  which a section plays one or two: confusing? Then show the pieces a section plays apart.
 - **The polymeters:** the snare on every cell's start of a short cycle: too busy? The chords joining a cycle of short
   cells: mud? A cycle running on through a section or growing each time round: heard as a drift resolving?
 
@@ -231,6 +235,8 @@ Each item with its plan, and what it waits for.
   JavaScript.
 - **The server's figures read in full** (P4): the dashboard reads every song made in its window, nothing at hundreds a
   day and slow at the 200,000 a day the table keeps at most; then the spreads would be worked out a day at a time.
+- **The drum groups' pulses fading by their sounds** (P4): every group fades as fast as the parts' meters, a cymbal's
+  wash as a click; a fade of each group's own would follow its sound, for little.
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them; playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
