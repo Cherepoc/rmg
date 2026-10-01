@@ -75,6 +75,11 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
 - **The drums:** the percussion songs; the wild end, where the kick or the snare in a role not theirs may sound broken
   rather than bold (the snares keep time in 2 to 4% of their sections, a train beat); bound drums, too rare to hear at
   a doubling chance of 0.15?; the clap's ghost notes, soft hits around the backbeat, built only if missed.
+- **The effects** (`Expression`, the report in `ExpressionTest`): the song picks its effects and the parts then take
+  them, the strong ones, tremolo, echo and sweep, one a song at most. Too few now? The middle fifth plays 1.4 gentle
+  kinds a song and a strong one in 18% of songs, the wildest fifth a strong one in 51%, on 0.15 of the pitched parts,
+  and a song given sound 1 in 89%, its strong effect sometimes suiting none of its parts. Lean the song's weights
+  (`StrongEffects`, `Song…Chance`) before the parts'.
 - **The bass's pickup** always falls on the beat: the 8th before the bar line, leaned by convention, if it sounds
   square.
 - **The fills:** wild songs play about 1.8 times the tuplet notes of plain ones, as a run plays the snare's feel only:
