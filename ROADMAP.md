@@ -25,8 +25,7 @@ rated enough; styles (see *Styles*), once they are chosen.
 **When the need shows** (P3), roughly in this order: timing by role, once swing alone sounds stiff (see *Groove*); a
 metric modulation, a section's tempo drawn by appearance (see *Appearances*, *Meter*); the tempo leaning by the energy,
 should the songs sound metronomic (see *Appearances*); long cycles, then a figure running on across the frame (see *Rhythm engine*,
-*Meter*); a line scale by the chord and chord tones off the scale (see *Scales*, *Chords*); a tag, intros of their own
-material and drums coming in within a section (see *Form*, *Appearances*); a solo's octaves its own, a drum solo's
+*Meter*); a line scale by the chord and chord tones off the scale (see *Scales*, *Chords*); a tag and intros of their own material (see *Form*); a solo's octaves its own, a drum solo's
 stacked hits and the drummer as one player (see *Solos*); other parts' twins; modulation, a ping-pong echo and legato
 slides (see *Instruments*); scales of other sizes; the fills' loudness and sounds by convention; note keys.
 
@@ -294,9 +293,11 @@ and 62% of its changes by its instrument, off the new chord 1 to 3%, the melody'
   improvises; a fade plays eight bars at least. Over 200 corpus songs, the plainest sections play twice 81% of the
   time, the middle 66% and the wildest 44%; a song's sections take 116 bars at the median, 64 to 180 from 10% to 90%;
   the melody as before (`SectionLengthReportTest`, `MelodyRepetitionTest`). Left: **a tag,** half a pattern before a
-  section changes, which breaks the pattern's grid for the fills' lines and the phrases, with the meter as state; and
+  section changes, which breaks the pattern's grid for the fills' lines and the phrases, with the meter as state, put
+  off in October 2026 as an engine's change for a rare idiom; and
   the energy's recurrence, which counts a section's appearances, not its plays, should long sections sound too quiet.
-- **Intros of their own material** (P3), such as a riff the song does not play otherwise.
+- **Intros of their own material** (P3), such as a riff the song does not play otherwise: an intro generated as a
+  section of its own, a change to the form, put off in October 2026 until the intros there are are listened to.
 
 ## Section dynamics
 
@@ -398,16 +399,16 @@ planned together (P1):
   (`SectionContrast`). Over 1024 songs, in the middle fifth 13% of the choruses and bridges are in another key and 28%
   in another scale, against 7% and 11% of the other sections (`SectionKeyTest`).
 
-- **Drums coming in within a section** (P3): a texture that builds brings the drums in only at a section's start,
-  since fills and landings keep to sections whose drums play; a build whose drums enter at a phrase would need its
-  landing there.
+- **Drums coming in within a section** (built, `Texture`): a build brings the drums in as one of its parts, at a
+  phrase, with the fill before it, no line leading into the section nor marking its phrases before (`FillSection.DrumsFrom`);
+  a thinning keeps them throughout. 79 sections of 128 songs of the wildest form (`TextureTest`).
 
 ## Fills
 
 The fills are the drums', and every track lands with them where a section lands.
 
 - **Pitched fills** (built for the bass): where the drums play a run into a change of section, the bass walks with it
-  by a chance of 0.5, the likelier into a louder section (`BassFills`), made once the lines are placed, as the fills'
+  by a chance of 0.5, the likelier into a louder section (`LineFills`), made once the lines are placed, as the fills'
   runs are kept (`FillGenerator.Runs`): on the run's rhythm, an 8th apart at the most, by the scale's steps from its
   note before to a step from the note the next section starts on, each kept as a line's note, a scale step over the
   chord where it plays and on the scale there; only where the bass plays on both sides of the line. Over 200 corpus

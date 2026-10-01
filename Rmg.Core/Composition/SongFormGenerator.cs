@@ -129,7 +129,7 @@ internal sealed class SongFormGenerator
 
         ImmutableArray<FillSection> fillSections =
         [
-            ..map.Sections.Zip(sections, (span, section) => new FillSection(span.SectionId, span.Duration, section.Rhythm, section.Facets, section.Groove, section.Energy, section.IsPercussionOnly, section.HasDrums, section.Solo is { IsDrumSolo: true }, span.Meter))
+            ..map.Sections.Zip(sections, (span, section) => new FillSection(span.SectionId, span.Duration, section.Rhythm, section.Facets, section.Groove, section.Energy, section.IsPercussionOnly, section.HasDrums, section.Solo is { IsDrumSolo: true }, span.Meter, section.DrumsFrom))
         ];
         var edits = new TimelineEdits(_context, meter, map);
         var lines = FillGenerator.GetSectionLines(fillSections, origin).ToBuilder();
@@ -139,7 +139,7 @@ internal sealed class SongFormGenerator
         switch (plan.Intro)
         {
             // the drums land where the first section starts, but in a first section whose drums rest
-            case IntroKind.CountIn when fillSections[0].HasDrums:
+            case IntroKind.CountIn when fillSections[0].HasDrums && fillSections[0].DrumsFrom == 0:
                 lines.Insert(0, new FillLine(origin, fillSections[0], fillSections[0], 0, HasFill: false));
                 break;
             case IntroKind.Entries:

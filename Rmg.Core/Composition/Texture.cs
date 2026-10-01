@@ -24,8 +24,8 @@ public enum TextureKind
 ///     The texture of an appearance of a section: which of the parts that play play in each of its phrases, its 4-bar
 ///     patterns, so that a section can build up as an intro does, thin out, or play one instrument alone; by the form
 ///     facet: the plainest songs play every part through each section, their textures changing only where a section
-///     does, the wildest take every texture as likely. The drums play through a phrase or rest the whole appearance, as
-///     their fills and landings keep to the sections whose drums play.
+///     does, the wildest take every texture as likely. The drums play through a phrase or rest the whole appearance, but
+///     where a section builds, which brings them in at a phrase now and then with a fill, as a band builds.
 /// </summary>
 internal static class Texture
 {
@@ -58,6 +58,8 @@ internal static class Texture
         var order = pitched.OrderBy(_ => context.GenerateDouble()).ToArray();
         // drawn whether any part plays or not, so that the draws stay as they are
         var aloneIndex = context.GenerateInt(0, Math.Max(1, playing.Count));
+        // and where the drums come in a build, among the pitched parts, drawn after the rest so that they stay as they were
+        var drumsAt = context.GenerateInt(0, order.Length + 1);
         var alone = playing.Count == 0 ? (TrackRole?)null : playing.Order().ElementAt(aloneIndex % playing.Count);
         ImmutableArray<ImmutableHashSet<TrackRole>> none = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, phrases)];
 
@@ -65,9 +67,11 @@ internal static class Texture
         {
             case TextureKind.Build or TextureKind.Thin when phrases >= 2 && order.Length >= 2:
             {
-                // phrase p plays the first of the order, more every phrase, from one to all
+                // phrase p plays the first of the order, more every phrase, from one to all; a build's drums among them,
+                // a thinning's playing through, as the drums never stop within a section
+                TrackRole[] parts = kind == TextureKind.Build && playing.Contains(TrackRole.Drum) ? [..order.Take(drumsAt), TrackRole.Drum, ..order.Skip(drumsAt)] : order;
                 var silent = Enumerable.Range(0, phrases)
-                    .Select(phrase => order.Skip((int)Math.Ceiling((phrase + 1) * order.Length / (double)phrases)).ToImmutableHashSet())
+                    .Select(phrase => parts.Skip((int)Math.Ceiling((phrase + 1) * parts.Length / (double)phrases)).ToImmutableHashSet())
                     .ToArray();
                 if (kind == TextureKind.Thin)
                     Array.Reverse(silent);

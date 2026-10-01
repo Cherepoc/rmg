@@ -148,8 +148,8 @@ public sealed class FillTest
             foreach (var position in bars)
             {
                 var hits = drums.Where(x => x.Position.IsEqualToByEpsilon(position)).Select(x => x.Value.Offset).ToArray();
-                // nor does a section whose drums rest, which no fill leads into
-                if (corpusSong.Map.Sections.Any(x => x.Start.IsEqualToByEpsilon(position) && (percussionOnly[x.SectionId] || !corpusSong.HasDrums(x))))
+                // nor does a section whose drums rest, which no fill leads into, nor one a build brings its drums in late in
+                if (corpusSong.Map.Sections.Select((x, i) => (x, i)).Any(x => x.x.Start.IsEqualToByEpsilon(position) && (percussionOnly[x.x.SectionId] || !corpusSong.HasDrums(x.x) || corpusSong.DrumsFrom(x.i) > 0)))
                     continue;
                 if (corpusSong.Map.Sections.Any(x => x.Start.IsEqualToByEpsilon(position)))
                 {

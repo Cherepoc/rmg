@@ -754,6 +754,9 @@ internal sealed record GeneratedSection(
     /// <summary>Whether the drums play in the section, rather than rest for a breakdown.</summary>
     public bool HasDrums => !Resting.Contains(TrackRole.Drum);
 
+    /// <summary>The phrase the drums come in at, a build bringing them in late; 0 where they play from the start.</summary>
+    public int DrumsFrom => PhraseSilent.Select((parts, phrase) => parts.Contains(TrackRole.Drum) ? phrase + 1 : 0).DefaultIfEmpty(0).Max();
+
     /// <summary>The parts each of the appearance's phrases leaves out, over those it rests throughout (<see cref="Composition.Texture" />).</summary>
     public ImmutableArray<ImmutableHashSet<TrackRole>> PhraseSilent { get; init; } = [];
 

@@ -95,15 +95,17 @@ internal sealed class FillGenerator
         {
             // the fill before a line belongs to the section it ends, one out of a breakdown the drums coming back; no line
             // leads into a section whose drums rest, nor marks its phrases
-            if (i > 0 && sections[i].HasDrums)
+            if (i > 0 && sections[i].HasDrums && sections[i].DrumsFrom == 0)
                 lines.Add(new FillLine(start, sections[i - 1], sections[i], 0));
 
-            // a section marks its phrases, but a drum solo, which plays its own (DrumSolos)
+            // a section marks its phrases, but a drum solo, which plays its own (DrumSolos), and those before its drums
+            // come in, the line they come in at with a fill
             var every = sections[i].Meter.PatternDuration;
-            for (var line = start + every;
+            for (var (line, phrase) = (start + every, 1);
                  sections[i].HasDrums && !sections[i].IsDrumSolo && line < start + sections[i].Duration;
-                 line += every)
-                lines.Add(new FillLine(line, sections[i], sections[i], FillLayers.PhraseWeight));
+                 line += every, phrase++)
+                if (phrase >= sections[i].DrumsFrom)
+                    lines.Add(new FillLine(line, sections[i], sections[i], FillLayers.PhraseWeight));
 
             start += sections[i].Duration;
         }
@@ -522,7 +524,8 @@ internal sealed record FillSection(
     bool IsPercussionOnly,
     bool HasDrums,
     bool IsDrumSolo,
-    Meter Meter
+    Meter Meter,
+    int DrumsFrom
 )
 {
     /// <summary>How far the section's fills stray from convention, which their choices lean by.</summary>

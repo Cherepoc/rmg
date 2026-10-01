@@ -33,7 +33,7 @@ public sealed class TextureTest
     }
 
     [Test]
-    public async Task ABuild_BringsItsPitchedPartsIn_PhraseByPhrase_TheDrumsThroughout_AndAThinTakesThemOut()
+    public async Task ABuild_BringsItsPartsIn_PhraseByPhrase_ItsDrumsNowAndThenLate_AndAThinTakesItsPitchedOnesOut()
     {
         var context = new GenerationContext(2);
         var draws = Enumerable.Range(0, 400).Select(_ => Texture.Draw(context, 1, 4, Band)).ToArray();
@@ -46,11 +46,39 @@ public sealed class TextureTest
             await Assert.That(order.Zip(order.Skip(1)).All(x => x.First >= x.Second)).IsTrue();
             await Assert.That(order[^1]).IsEqualTo(0);
             await Assert.That(order[0]).IsLessThan(4);
-            await Assert.That(silent.All(x => !x.Contains(TrackRole.Drum))).IsTrue();
+            // a build's drums come in as a part, once and for good; a thinning's play throughout
+            if (kind == TextureKind.Thin)
+                await Assert.That(silent.All(x => !x.Contains(TrackRole.Drum))).IsTrue();
+            else
+                await Assert.That(silent.SkipWhile(x => x.Contains(TrackRole.Drum)).All(x => !x.Contains(TrackRole.Drum))).IsTrue();
         }
+
+        await Assert.That(draws.Any(x => x.Kind == TextureKind.Build && x.PhraseSilent.Any(p => p.Contains(TrackRole.Drum)))).IsTrue();
 
         foreach (var (_, resting, _) in draws.Where(x => x.Kind == TextureKind.Alone))
             await Assert.That(resting.Count).IsEqualTo(Band.Length - 1);
+    }
+
+    [Test]
+    public async Task DrumsABuildBringsInLate_PlayNothingBefore_ButTheFillTheyComeInOn()
+    {
+        var late = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, 1)))))
+        foreach (var (span, index) in song.Map.Sections.Select((x, i) => (x, i)))
+        {
+            var from = song.DrumsFrom(index);
+            if (from == 0 || !song.HasDrums(span))
+                continue;
+
+            // the drums' notes before the phrase they come in at, but in its last bar before, the fill's
+            var entry = span.Start + from * span.Meter.PatternDuration;
+            var before = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.Drum).SelectMany(x => x.Value)
+                .Count(x => x.Position >= span.Start - 1e-9 && x.Position < entry - span.Meter.BarDuration - 1e-9);
+            await Assert.That(before).IsEqualTo(0).Because($"seed {song.Seed} at {span.Start}");
+            late++;
+        }
+
+        await Assert.That(late).IsGreaterThan(5);
     }
 
     [Test]

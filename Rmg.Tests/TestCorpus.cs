@@ -121,6 +121,10 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     /// <summary>Whether a section's drums play where the song plays it, rather than rest for a breakdown.</summary>
     public bool HasDrums(SectionSpan span) => !Resting(span).Contains(TrackRole.Drum);
 
+    /// <summary>The phrase an appearance's drums come in at, a build bringing them in late, as its texture has it; 0 where they play from its start.</summary>
+    public int DrumsFrom(int index) => Trace.Where(x => x.Point == TracePoints.Texture).Select(x => ((int Index, TextureKind, ImmutableArray<ImmutableHashSet<TrackRole>> Silent))x.Value!)
+        .Where(x => x.Index == index).Select(x => x.Silent.Select((parts, phrase) => parts.Contains(TrackRole.Drum) ? phrase + 1 : 0).DefaultIfEmpty(0).Max()).DefaultIfEmpty(0).First();
+
     /// <summary>
     ///     Where the drums mark a line, as the song puts them: at every pattern from the first section on, the first after
     ///     the intro only if it has one, and the last before the ending only if it has one; but for a line into a section
@@ -137,11 +141,19 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
             .Concat(FormLayers.HasFinalChord(Map.Ending.Kind) ? [Map.Sections[^1].End] : []);
         var windowEnd = Map.Intro.Kind == IntroKind.Entries && !Map.Intro.Window.IsBefore ? Origin + Map.Intro.Window.Bars * Map.Meter.BarDuration : double.NaN;
         var drumSolos = Solos.Where(x => x.Value.IsDrumSolo).Select(x => Map.Sections[x.Key]).ToArray();
+        // a line at a phrase a build's drums have come in by, with the fill they come in on
+        bool IsAfterDrumsComeIn(double line)
+        {
+            var index = Array.FindLastIndex(Map.Sections.ToArray(), s => s.Start <= line + 1e-9);
+            var span = Map.Sections[index];
+            return (int)Math.Round((line - span.Start) / span.Meter.PatternDuration) >= DrumsFrom(index);
+        }
+
         return
         [
             ..patterns
                 .Where(x => x >= Map.Sections[^1].End - 1e-9
-                            || HasDrums(Map.Sections.Last(s => s.Start <= x + 1e-9))
+                            || HasDrums(Map.Sections.Last(s => s.Start <= x + 1e-9)) && IsAfterDrumsComeIn(x)
                             || Math.Abs(x - windowEnd) < 1e-9 && HasDrums(Map.Sections[0]))
                 .Where(x => !drumSolos.Any(span => x > span.Start + 1e-9 && x < span.End - 1e-9))
                 .Distinct()
