@@ -132,7 +132,10 @@ let songVersion = null;
 let isSeeking = false;
 let seekedFrom = null;
 let isExporting = false;
-let isGenerating = false;
+
+// the new song on its way: what it was asked for with, which an ask for the same leaves to come, and the settings of
+// the song on the page, which a Stop puts back
+let arrival = null;
 
 // whether the song on the page was rolled here rather than asked for by seed, which is the only kind
 // that leads to another when it ends, and which request to start a song once it arrives is the last one
@@ -237,7 +240,7 @@ function listen(player) {
  *     arrived at by a link, is the song that was asked for, and it ends where it ends.
  */
 function advance() {
-    if (!elements.autoplay.checked || !isSongRandom || isGenerating) return false;
+    if (!elements.autoplay.checked || !isSongRandom || arrival !== null) return false;
     if (isEveryPartOff(settings)) {
         setStatus("Every part is off, so no next song plays. Turn a part on in the song settings.", true);
         return false;
@@ -249,14 +252,15 @@ function advance() {
 
 /**
  *     Gets a song and starts it the moment it has reached the player: asking for a song is asking to hear
- *     it, whether by the button, by a seed, from the list, or by the song before it running out.
+ *     it, whether by the button, by a seed, from the list, or by the song before it running out. The song is asked for
+ *     with the settings given, which become the page's, and the latest ask is the one that plays.
  */
-async function playNew(seed, origin) {
-    // one already on its way is the one that will play: a second ask would only cancel it for nothing
-    if (isGenerating) return;
+async function playNew(seed, origin, asked = settings) {
+    // the same song asked for again is the one already on its way: asking anew would only cancel it for nothing
+    if (arrival !== null && arrival.wanted === wantedOf(seed, asked)) return;
 
     const request = ++playRequest;
-    const generated = await generate(seed);
+    const generated = await generate(seed, { asked });
 
     // the player has to have been handed the song before it can be started on it
     await delivery;
@@ -271,6 +275,11 @@ async function playNew(seed, origin) {
  */
 function cancelPendingPlay() {
     playRequest++;
+}
+
+/** What a new song is asked for with, as the request says it, which tells one ask for the same song from another. */
+function wantedOf(seed, songSettings) {
+    return JSON.stringify(requestFor(seed, songSettings));
 }
 
 // --- soundfont -------------------------------------------------------------
@@ -777,15 +786,27 @@ function requestSong(song, signal = undefined) {
  *     so. A song remade (<paramref name="isRemade" />) is the one on the page asked for again with changed settings,
  *     which replaces it where it plays, and takes its place on the list.
  */
-async function generate(seed, { isRolled = seed === null, isRemade = false, signal = undefined } = {}) {
-    if (isEveryPartOff(settings)) {
+async function generate(seed, { isRolled = seed === null, isRemade = false, signal = undefined, asked = settings } = {}) {
+    if (isEveryPartOff(asked)) {
         showEveryPartOff();
         return false;
     }
 
+    // a new song lets go of the one on its way, the latest ask being the one that plays, and keeps the settings of the
+    // song on the page for a Stop to put back
+    let ask = null;
     if (!isRemade) {
-        if (isGenerating) return false;
-        setGenerating(true);
+        ask = { controller: new AbortController(), wanted: wantedOf(seed, asked), restore: arrival?.restore ?? settings };
+        arrival?.controller.abort();
+        arrival = ask;
+        signal = ask.controller.signal;
+        if (asked !== settings) {
+            settings = asked;
+            keepCurrentSettings();
+            showSettings();
+        }
+
+        updateGenerateButtons();
         cancelRegeneration();
         cancelDownloadRefresh();
         setStatus("Generating…");
@@ -794,12 +815,16 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, sign
     try {
         const response = await requestSong(requestFor(seed, settings), signal);
         if (!response.ok) {
+            if (signal?.aborted) return false;
             setStatus(`Could not generate a song: ${await describeFailure(response)}`, true);
             track("song_failed", { detail: `http ${response.status}` });
             return false;
         }
 
         const song = await response.arrayBuffer();
+        // let go of once it was all here, which the reading no longer notices
+        if (signal?.aborted) return false;
+
         const report = JSON.parse(response.headers.get("X-Song-Settings"));
 
         // a song replaced while playing was listened to up to here, and the next one is from here
@@ -851,7 +876,20 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, sign
         track("song_failed", { detail: error.name || "failed" });
         return false;
     } finally {
-        if (!isRemade) setGenerating(false);
+        // one let go of for a newer song leaves the page to that one, and one stopped leaves it as it was, with the
+        // settings of the song on it
+        if (ask !== null && arrival === ask) {
+            if (signal.aborted) {
+                if (settings !== ask.restore) {
+                    settings = ask.restore;
+                    keepCurrentSettings();
+                    showSettings();
+                }
+                setStatus("");
+            }
+            arrival = null;
+            updateGenerateButtons();
+        }
     }
 }
 
@@ -867,7 +905,7 @@ function scheduleRegeneration() {
         regenerationTimer = null;
 
         // a new song on its way is the one to remake once it is here, not the one it replaces
-        if (isGenerating) {
+        if (arrival !== null) {
             scheduleRegeneration();
             return;
         }
@@ -889,19 +927,13 @@ function cancelRegeneration() {
 }
 
 /**
- *     The buttons up top are disabled while a song is on its way, or while every part is off, which leaves nothing to
- *     play. The list is not, since a disabled button drops the keyboard; generate simply ignores a press that arrives
- *     in the meantime.
+ *     The buttons up top are disabled while every part is off, which leaves nothing to play, and Generate while a song is
+ *     on its way, as a second press would let go of a song for another just as random, unheard. A seed, typed or from
+ *     the list, is a song of its own asked for, which takes the place of the one on its way.
  */
-function setGenerating(isOn) {
-    isGenerating = isOn;
-    updateGenerateButtons();
-}
-
 function updateGenerateButtons() {
-    const isBlocked = isGenerating || isEveryPartOff(settings);
-    elements.generate.disabled = isBlocked;
-    elements.generateSeeded.disabled = isBlocked;
+    elements.generate.disabled = arrival !== null || isEveryPartOff(settings);
+    elements.generateSeeded.disabled = isEveryPartOff(settings);
 }
 
 /** Says, where the settings are and on the status line, that every part is off, and why nothing can be generated. */
@@ -1054,14 +1086,7 @@ function createHistoryItem(entry) {
     button.textContent = identity === "" ? seedText : `${seedText} ⚙`;
     button.setAttribute("aria-label", identity === "" ? `Song ${seedText}` : `Song ${seedText}, with its settings`);
 
-    button.addEventListener("click", () => {
-        if (isGenerating) return;
-
-        settings = entrySettings;
-        keepCurrentSettings();
-        showSettings();
-        playNew(seed, "history");
-    });
+    button.addEventListener("click", () => playNew(seed, "history", entrySettings));
 
     return button;
 }
@@ -1278,6 +1303,8 @@ function reportListening() {
 }
 
 elements.stop.addEventListener("click", async () => {
+    // a song on its way is let go of: Stop is the last word on what plays, and the page keeps the song it has
+    arrival?.controller.abort();
     cancelPendingPlay();
     reportListening();
 
@@ -1945,7 +1972,7 @@ async function refreshDownload() {
     if (songSeed === null) return;
 
     // a song on its way, new or remade, would replace the file this fetches with one of an older mix or another song
-    if (isGenerating || regeneration !== null) {
+    if (arrival !== null || regeneration !== null) {
         scheduleDownloadRefresh();
         return;
     }
