@@ -534,8 +534,16 @@ function sofar(got, total) {
     return total > 0 ? formatPercent(got / total) : formatSize(got);
 }
 
-function pause(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+/** Waits, and stops waiting the moment the signal, if any, lets go, which it throws as the fetch it stands in for would. */
+function pause(ms, signal = undefined) {
+    return new Promise((resolve, reject) => {
+        signal?.throwIfAborted();
+        const timer = setTimeout(resolve, ms);
+        signal?.addEventListener("abort", () => {
+            clearTimeout(timer);
+            reject(signal.reason);
+        }, { once: true });
+    });
 }
 
 /** Saves a soundfont the player has taken, and says so beside its name only if it could not. */
@@ -769,13 +777,32 @@ function fileName() {
     return `song-${songSeed}${identityOf(settings)}`;
 }
 
-function requestSong(song, signal = undefined) {
-    return fetch(new URL("api/songs/generate", location.href), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(song),
-        signal,
-    });
+const BUSY = "The server is busy. Trying again…";
+const BUSY_RETRIES = 3;
+
+/**
+ *     Asks for a song, and again, a few times, while the server is too busy to make it, after as long as it says, and
+ *     a little longer at random, so that the pages it turned away at once do not all come back at once.
+ */
+async function requestSong(song, signal = undefined) {
+    try {
+        for (let attempt = 0; ; attempt++) {
+            const response = await fetch(new URL("api/songs/generate", location.href), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(song),
+                signal,
+            });
+            if ((response.status !== 503 && response.status !== 429) || attempt === BUSY_RETRIES) return response;
+
+            setStatus(BUSY);
+            const seconds = Math.min(Math.max(Number(response.headers.get("Retry-After")) || 1, 1), 10);
+            await pause(seconds * 1000 * (1 + Math.random() / 2), signal);
+        }
+    } finally {
+        // whatever came of it, the waiting is over
+        if (elements.status.textContent === BUSY) setStatus("");
+    }
 }
 
 /**
