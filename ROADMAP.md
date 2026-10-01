@@ -13,20 +13,45 @@ measured before and after by a report test, by the measure its entry names.
 
 **Next** (P1): listening to what is deployed, 0.6 and on: the section's own key, tempo and meter, the rhythm part, the
 twin riff, the polymeter, the line scales, the new chords and scales, the solos, their chords and their loudness, each
-tuned by what listening says (see *Listening*), and the ratings by conventionality once enough are in, with what was built since 0.6 (October 2026): parts entering late,
-the solos placed by their role, their motifs and the solo part's answers, the riff's chords, the melody's walks, the
-prepared key changes and the polymeter's unison and snare.
+tuned by what listening says (see *Listening*), and the ratings by conventionality once enough are in, with what was
+built since 0.6 (October 2026): parts entering late, the solos placed by their role, their motifs and the solo part's
+answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
+this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
+
+1. the appearance's energy in its loudness, a later appearance louder by its energy's step, about the lift's at most;
+2. the lift beyond loudness, the hi-hat opening on the bar before's last beat and the snare from its cross-stick to its
+   head, into a section louder by more than the lift's threshold, as data by drum role (see *Fills*);
+3. the counter-melody running into a section, `LineFills`' third way, never where the melody walks in;
+4. the melody's double stops on its accented strong beats, an instrument that plays chords only, 0.25 a section;
+5. the last chorus played twice, the repeat an appearance of its own taking the last section's lift, never with a fade;
+6. a section's switch within the instrument's family as its own option, the family by General MIDI's groups split where
+   they hold other players, the plain end keeping the family and the wild end handing over (see *Instruments*);
+7. a crash on a drum solo's climax, its intensity 0.8 or more, on a cell's first hit;
+8. a polymeter's chords joining its cycle by their rhythm, their voicing kept, leaned to longer cells (see *Meter*);
+9. to 11. a key change's devices of their own, one a change, in place of a chain: a common tone held across, a pedal on
+   the new key's dominant, a pivot chord both keys share (see *Appearances*);
+12. a metric modulation, a section's tempo drawn by appearance, leaned at the wild end to 3:2 or 4:3 of the tempo
+    before and to the one it played at before, so that a chorus keeps its tempo unless it modulates;
+13. a harmonised melody's twin on a track of its own, as the riff's, the counter-melody resting for it, the page given
+    the part;
+14. an intro and an outro of their own material, sections with roles of their own, their harmony leaned to the song's
+    home (see *Form*);
+15. to 17. long cycles, patterns of two bars in the rhythm engine, then a polymeter's figure running on across its
+    frame and its cycle growing each time round (see *Rhythm engine*, *Meter*);
+18. a key change's phrase sequenced up a step until it stays;
+19. a tag, half a pattern before a section, on the two-bar grid (see *Form*);
+20. scales of other sizes, or stopped where the line scales cover the need (see *Scales*).
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
 **Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs
 rated enough; styles (see *Styles*), once they are chosen.
 
-**When the need shows** (P3), roughly in this order: timing by role, once swing alone sounds stiff (see *Groove*); a
-metric modulation, a section's tempo drawn by appearance (see *Appearances*, *Meter*); the tempo leaning by the energy,
-should the songs sound metronomic (see *Appearances*); long cycles, then a figure running on across the frame (see *Rhythm engine*,
-*Meter*); a line scale by the chord and chord tones off the scale (see *Scales*, *Chords*); a tag and intros of their own material (see *Form*); the drummer as one player (see *Solos*); other parts' twins; modulation, a ping-pong echo and legato
-slides (see *Instruments*); scales of other sizes; the fills' loudness and sounds by convention; note keys.
+**When the need shows** (P3), roughly in this order: timing by role, once swing alone sounds stiff (see *Groove*); the
+tempo leaning by the energy, should the songs sound metronomic (see *Appearances*); a line scale by the chord and chord
+tones off the scale (see *Scales*, *Chords*); legato slides, a motif developed further and the page's wait for a remake,
+by listening; modulation, when a soundfont maps it, and a ping-pong echo (see *Instruments*); the fills' loudness and
+sounds by convention.
 
 **Parked** (P4): see *Parked*, kept for their reasons, not planned.
 
@@ -195,10 +220,9 @@ the facets). The plain end is the plainest of every choice: triads alone, cadenc
 minor, no key change, one of the forms. To tune by listening: the spreads, the chords' and the scales' weights, and the
 plain end's rigidity: no change of feel, triplet fills included, every bar of a plain song at the same density. The feel facet puts 18% of songs
 outside four and 10% in odd meters, against 12% and 5% before.
-- **More of a song's parameters supplied** (P3): the page's settings give the unconventionality, every facet, whether
-  every part plays, the drum setup, and the mix; next the tempo, the key and the meter as given values, each from a
-  stream of its own (`SongOverrides`, see CLAUDE.md's *Drawn or given*), a field of the settings' next format (a new
-  first character) and part of a song's identity.
+- **A song's parameters supplied** (built): the page's settings give the unconventionality, every facet, the tempo,
+  the key and the meter, whether every part plays, the drum setup and the mix, each given value from a stream of its own
+  (`SongOverrides`, see CLAUDE.md's *Drawn or given*), part of a song's identity.
 - **The settings panel, to listen to and use:** whether a song made again with changed settings, going on from the same
   share of its length, sounds like the same song moved or like a jump; whether the pad in 80% of songs, the
   counter-melody in 60% and the drums in 95% leave songs too thin (sections rest the counter-melody 74% against 53%).
@@ -606,7 +630,6 @@ the rest as they were.
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them. Playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones; Chromium plays a song headless,
   so a test of the player's state after Play is possible when a change to it calls for one.
-- **Note keys** (P3) are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 
 - **Review, October 2026** (built): a pick sums its weights as it goes, expression walks a section's notes alone, the
   MIDI file merges expression in one sweep (64 songs 8.7 s to 7.4 s); songs of few parts never fail; the server
@@ -619,6 +642,11 @@ the rest as they were.
 ## Parked
 
 Ideas with a reason, not planned: none has shown a need. Taken up only when listening or another item asks for one.
+
+- **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do: readable, but
+  nothing needs them read.
+- **The drummer as one player:** the fills' `Drummer` and the drum solo's `Soloist` one record, a refactor with no sound
+  of its own, until the two drift apart.
 
 - **Segments in any pattern:** bars that mix feels, such as three straight beats and a quintuplet beat; a fill's speed
   change, a rank more for one half of its span, would be a case of it.
