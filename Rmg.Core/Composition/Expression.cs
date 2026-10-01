@@ -177,6 +177,9 @@ internal static class Expression
 
     public const double ReleaseBendChance = 0.4;
 
+    /// <summary>How long a soloist's note must be to sing a vibrato, in beats: half a beat, as a soloist sings one on any note it holds, where a part's lines from a beat.</summary>
+    public const double SoloVibratoBeats = 0.5;
+
     /// <summary>How far a solo's intensity leans its notes, as a strength does: the bigger bends and vibratos, and the oftener bends and slides, the more intense.</summary>
     public const double SoloOdds = 8;
 
@@ -381,7 +384,7 @@ internal static class Expression
                         .With(CompositionStateKinds.Reverb, reverb + 1)
                         .With(CompositionStateKinds.Chorus, choruses && Choruses(noteProgram) ? chorus : 0);
                     // and whether it sings a vibrato at all likewise
-                    if ((soloist is null ? vibrates : soloist.Vibrates && !echoes) && isLine && Bends(noteProgram) && note.Value.Duration >= 1)
+                    if ((soloist is null ? vibrates : soloist.Vibrates && !echoes) && isLine && Bends(noteProgram) && note.Value.Duration >= (soloist is null ? 1 : SoloVibratoBeats))
                     {
                         // a wide one between the note and a scale note above it, so the note must be on the scale
                         var width = noteVibrato.Steps > 0 && (!VibratesWide(noteProgram) || !IsOnScale(note.Value)) ? WidestNarrow : noteVibrato;

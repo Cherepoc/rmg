@@ -160,7 +160,7 @@ internal sealed record Soloist(
     /// <summary>The chances a soloist bends at all and sings a vibrato at all, by the sound facet: never at the plain end, always at the wild.</summary>
     public static ByConvention BendChance { get; } = new(0, 0.6, 1);
 
-    public static ByConvention VibratoChance { get; } = new(0, 0.75, 1);
+    public static ByConvention VibratoChance { get; } = new(0, 0.85, 1);
 
     /// <summary>How much likelier a guitar or a synth lead is to bend than another instrument that bends, as the odds of 1.</summary>
     public const double BendSuitOdds = 4;
