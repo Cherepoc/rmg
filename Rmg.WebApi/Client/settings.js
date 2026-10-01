@@ -2,13 +2,19 @@
  *     What a song is heard with, written short enough for a link: its unconventionality and facets, its tempo, key and
  *     meter, its parts and their mix, its drum groups and drum pieces, and its volume, each value given, or as the song
  *     drew it. The server reads the same format (SongSettings), which a link and every event about a song carry: a
- *     format's character, then a character for each value from 0 to 63 at a fixed place, then the instruments' two
- *     characters each, then the switches, six to a character. Seeds are written in the same 64 digits.
+ *     format's character, then a character for every value of 64 steps at a fixed place, then every other value as its
+ *     bits, one after another, six to a character. Seeds are written in the same 64 digits.
  */
 
+const FORMAT_SIX = "6";
+
+/**
+ *     The format before, every value a character, a drum setup and every part's and drum group's being in the file among
+ *     them, which it is read without.
+ */
 const FORMAT_FIVE = "5";
 
-/** The format before, which gave no drum pieces, read with the song's own. */
+/** The format before that, which gave no drum pieces, read with the song's own. */
 const FORMAT_FOUR = "4";
 
 /** The format before, which gave a tempo by its place among those a song draws, read with its tempo as the song draws it. */
@@ -55,7 +61,21 @@ export const PLAYS = ["random", "on", "off"];
 /** The values a song may be given that change its notes: the unconventionality, the facets, the tempo, the key and the meter. */
 const GIVEN = ["unconventionality", ...FACETS, "tempo", "key", "meter"];
 
-const lengthOf = (parts, hasPieces) => GIVEN.length + 1 + 2 * parts + 1 + DRUM_GROUPS.length + 2 * parts
+// the bits of a key, of twelve, of a meter, of up to sixteen options, of a part's plays, of three, and of a program, of 128
+const KEY_BITS = 4;
+const METER_BITS = 4;
+const PLAYS_BITS = 2;
+const PROGRAM_BITS = 7;
+
+// the values of 64 steps, a character each: the unconventionality, the facets, the tempo, the volume, every part's volume
+// and pan, and every drum group's volume; then the rest, bit by bit: whether each value is given, the key and the meter,
+// every part's plays, whether its pan and its instrument are given and its program, and whether the drum pieces are given
+// and every piece's being in
+const CHARACTER_COUNT = 1 + FACETS.length + 1 + 1 + 2 * FORMAT_PARTS.length + DRUM_GROUPS.length;
+const BIT_COUNT = GIVEN.length + KEY_BITS + METER_BITS + FORMAT_PARTS.length * (PLAYS_BITS + 2 + PROGRAM_BITS) + 1 + DRUM_PIECES.length;
+
+// the length of a format before's settings
+const lengthBefore = (parts, hasPieces) => GIVEN.length + 1 + 2 * parts + 1 + DRUM_GROUPS.length + 2 * parts
     + Math.ceil((GIVEN.length + 4 * parts + DRUM_GROUPS.length + (hasPieces ? 1 + DRUM_PIECES.length : 0)) / 6);
 const SEED_LENGTH = 11;
 
@@ -101,46 +121,88 @@ function packSwitches(switches) {
     return values;
 }
 
-/** The settings as text, every facet, part and drum group named, as parseSettings reads them. */
+/** The settings as text, every facet, part, drum group and drum piece named, as parseSettings reads them. */
 export function formatSettings(settings) {
-    const values = [];
-    for (const name of GIVEN) values.push(givenSetting(settings, name).value);
-    values.push(settings.volume);
-    for (const name of FORMAT_PARTS) values.push(settings.parts[name].volume, settings.parts[name].pan.value);
-    // the drum setup, which the drum pieces make now
-    values.push(0);
-    for (const group of DRUM_GROUPS) values.push(settings.drumGroups[group].volume);
-    for (const name of FORMAT_PARTS) {
-        const instrument = settings.parts[name].instrument;
-        const value = (instrument.isGiven ? 128 : 0) + instrument.value;
-        values.push(value >> 6, value & 63);
-    }
+    const characters = [settings.unconventionality.value, ...FACETS.map((facet) => settings.facets[facet].value), settings.tempo.value, settings.volume];
+    for (const name of FORMAT_PARTS) characters.push(settings.parts[name].volume, settings.parts[name].pan.value);
+    for (const group of DRUM_GROUPS) characters.push(settings.drumGroups[group].volume);
+    if (characters.some((x) => !Number.isInteger(x) || x < 0 || x > 63)) throw new RangeError("A value does not fit in a character.");
 
-    const switches = GIVEN.map((name) => givenSetting(settings, name).isGiven);
+    const bits = GIVEN.map((name) => givenSetting(settings, name).isGiven);
+    const write = (value, count) => {
+        if (!Number.isInteger(value) || value < 0 || value >= 1 << count) throw new RangeError(`${value} does not fit in ${count} bits.`);
+        for (let bit = 0; bit < count; bit++) bits.push(((value >> bit) & 1) === 1);
+    };
+    write(settings.key.value, KEY_BITS);
+    write(settings.meter.value, METER_BITS);
     for (const name of FORMAT_PARTS) {
         const part = settings.parts[name];
-        const plays = PLAYS.indexOf(part.plays);
-        // every part in the file, which the format still has a place for
-        switches.push((plays & 2) !== 0, (plays & 1) !== 0, true, part.pan.isGiven);
+        write(PLAYS.indexOf(part.plays), PLAYS_BITS);
+        bits.push(part.pan.isGiven, part.instrument.isGiven);
+        write(part.instrument.value, PROGRAM_BITS);
     }
-    for (const group of DRUM_GROUPS) switches.push(true);
-    switches.push(settings.drumPieces.isGiven, ...DRUM_PIECES.map((piece) => settings.drumPieces.value.includes(piece)));
-    values.push(...packSwitches(switches));
+    bits.push(settings.drumPieces.isGiven, ...DRUM_PIECES.map((piece) => settings.drumPieces.value.includes(piece)));
+    return FORMAT_SIX + [...characters, ...packSwitches(bits)].map((x) => DIGITS[x]).join("");
+}
 
-    if (values.some((x) => !Number.isInteger(x) || x < 0 || x > 63)) throw new RangeError("A value does not fit in a character.");
-    return FORMAT_FIVE + values.map((x) => DIGITS[x]).join("");
+/** Reads settings, or null for anything that is not settings of a format; the formats before too (parseBefore). */
+export function parseSettings(text) {
+    if (typeof text !== "string") return null;
+    if (text[0] !== FORMAT_SIX) return parseBefore(text);
+    if (text.length !== 1 + CHARACTER_COUNT + Math.ceil(BIT_COUNT / 6)) return null;
+    const values = [...text.slice(1)].map((x) => DIGITS.indexOf(x));
+    if (values.some((x) => x < 0)) return null;
+
+    let at = 0;
+    const next = () => values[at++];
+    const unconventionality = next();
+    const facets = FACETS.map(() => next());
+    const tempo = next();
+    const volume = next();
+    const mixes = FORMAT_PARTS.map(() => ({ volume: next(), pan: next() }));
+    const groupVolumes = DRUM_GROUPS.map(() => next());
+    const bits = values.slice(at).flatMap((x) => [0, 1, 2, 3, 4, 5].map((bit) => ((x >> bit) & 1) === 1));
+
+    let b = 0;
+    const bit = () => bits[b++];
+    const read = (count) => Array.from({ length: count }, (_, i) => (bit() ? 1 << i : 0)).reduce((sum, x) => sum + x, 0);
+    const isGiven = GIVEN.map(() => bit());
+    const key = read(KEY_BITS);
+    const meter = read(METER_BITS);
+    const settings = {
+        unconventionality: { isGiven: isGiven[0], value: unconventionality },
+        facets: Object.fromEntries(FACETS.map((facet, i) => [facet, { isGiven: isGiven[1 + i], value: facets[i] }])),
+        tempo: { isGiven: isGiven[GIVEN.length - 3], value: tempo },
+        key: { isGiven: isGiven[GIVEN.length - 2], value: key },
+        meter: { isGiven: isGiven[GIVEN.length - 1], value: meter },
+        parts: {},
+        drumGroups: Object.fromEntries(DRUM_GROUPS.map((group, i) => [group, { volume: groupVolumes[i] }])),
+        volume,
+    };
+    for (const [i, name] of FORMAT_PARTS.entries()) {
+        const plays = PLAYS[read(PLAYS_BITS)];
+        const pan = { isGiven: bit(), value: mixes[i].pan };
+        const instrumentGiven = bit();
+        if (plays === undefined) return null;
+        settings.parts[name] = { plays, instrument: { isGiven: instrumentGiven, value: read(PROGRAM_BITS) }, volume: mixes[i].volume, pan };
+    }
+    const piecesGiven = bit();
+    const pieces = DRUM_PIECES.filter(() => bit());
+    settings.drumPieces = { isGiven: piecesGiven, value: piecesGiven ? pieces : [] };
+    // a key is one of twelve, the meter's options the server's, and pieces given at least one
+    if (key > 11 || (piecesGiven && pieces.length === 0)) return null;
+    return settings;
 }
 
 /**
- *     Reads settings, or null for anything that is not settings of the format; the formats before too, their drum pieces,
- *     their tempo and the solo part the oldest does not name as the song draws them, and a drum setup given as the song's,
- *     as the drum pieces make it now.
+ *     Reads settings of a format before: a character for every value, the instruments' two each, and the switches after
+ *     them, six to a character; their drum pieces, their tempo and the solo part the oldest does not name as the song draws
+ *     them, and their drum setup and their being in the file let go of, as the drum pieces make the setup now.
  */
-export function parseSettings(text) {
-    if (typeof text !== "string") return null;
+function parseBefore(text) {
     const count = { [FORMAT_FIVE]: FORMAT_PARTS.length, [FORMAT_FOUR]: FORMAT_PARTS.length, [FORMAT_THREE]: FORMAT_PARTS.length, [FORMAT_TWO]: PARTS_OF_FORMAT_TWO }[text[0]];
     const hasPieces = text[0] === FORMAT_FIVE;
-    if (count === undefined || text.length !== 1 + lengthOf(count, hasPieces)) return null;
+    if (count === undefined || text.length !== 1 + lengthBefore(count, hasPieces)) return null;
     const named = FORMAT_PARTS.slice(0, count);
     const values = [...text.slice(1)].map((x) => DIGITS.indexOf(x));
     if (values.some((x) => x < 0)) return null;

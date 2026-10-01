@@ -14,11 +14,10 @@ public sealed class SongSettingsTest
         new Setting(false, 11),
         new Setting(true, 2),
         [
-            ..SongSettings.PartOrder.SkipLast(1).Select((_, i) => new PartSettings(i % 3, new Setting(i % 2 == 1, i * 18), 63 - i, new Setting(i == 0, i * 9), i != 4)),
-            new PartSettings(1, new Setting(true, 65), 40, new Setting(true, 50), true)
+            ..SongSettings.PartOrder.SkipLast(1).Select((_, i) => new PartSettings(i % 3, new Setting(i % 2 == 1, i * 18), 63 - i, new Setting(i == 0, i * 9))),
+            new PartSettings(1, new Setting(true, 65), 40, new Setting(true, 50))
         ],
-        3,
-        [..SongMix.DrumGroupNames.Select((_, i) => new DrumGroupSettings(i % 2 == 0, i * 9))],
+        [..SongMix.DrumGroupNames.Select((_, i) => new DrumGroupSettings(i * 9))],
         50,
         new DrumPieceSettings(true, [..DrumPieces.All.Select((_, i) => i % 3 == 0)])
     );
@@ -30,9 +29,8 @@ public sealed class SongSettingsTest
         new Setting(false, 0),
         new Setting(false, 0),
         new Setting(false, 0),
-        [..SongSettings.PartOrder.Select(_ => new PartSettings(0, new Setting(false, 0), 0, new Setting(false, 0), false))],
-        0,
-        [..SongMix.DrumGroupNames.Select(_ => new DrumGroupSettings(false, 0))],
+        [..SongSettings.PartOrder.Select(_ => new PartSettings(0, new Setting(false, 0), 0, new Setting(false, 0)))],
+        [..SongMix.DrumGroupNames.Select(_ => new DrumGroupSettings(0))],
         0,
         DrumPieceSettings.Drawn
     );
@@ -40,7 +38,7 @@ public sealed class SongSettingsTest
     private static bool AreSame(SongSettings first, SongSettings second) =>
         first.Unconventionality == second.Unconventionality && first.Facets.SequenceEqual(second.Facets)
         && (first.Tempo, first.Key, first.Meter) == (second.Tempo, second.Key, second.Meter) && first.Parts.SequenceEqual(second.Parts)
-        && first.DrumSetup == second.DrumSetup && first.DrumGroups.SequenceEqual(second.DrumGroups) && first.Volume == second.Volume
+        && first.DrumGroups.SequenceEqual(second.DrumGroups) && first.Volume == second.Volume
         && first.DrumPieces.IsGiven == second.DrumPieces.IsGiven && first.DrumPieces.Pieces.SequenceEqual(second.DrumPieces.Pieces);
 
     [Test]
@@ -57,30 +55,34 @@ public sealed class SongSettingsTest
     }
 
     [Test]
-    public async Task EveryValue_IsACharacterAtAFixedPlace()
+    public async Task EveryValueOf64Steps_IsACharacterAtAFixedPlace_AndTheRestBitsSixToACharacter()
     {
-        // the unconventionality first, then the facets, the tempo, the key, the meter and the volume
+        // the unconventionality first, then the facets, the tempo and the volume, every part's volume and pan, and every
+        // drum group's volume, 37 characters; then the rest's 144 bits, 24 characters
         var text = Mixed.Format();
         await Assert.That(text[1]).IsEqualTo('_');
         await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length]).IsEqualTo('3');
-        await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 1]).IsEqualTo('B');
-        await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 2]).IsEqualTo('2');
-        await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 3]).IsEqualTo('o');
-        await Assert.That(SongSettings.Length).IsEqualTo(72);
+        await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 1]).IsEqualTo('o');
+        await Assert.That(SongSettings.Length).IsEqualTo(37 + 24);
+        // every meter fits its bits
+        await Assert.That(Meter.Options.Length).IsLessThanOrEqualTo(1 << SongSettings.MeterBits);
     }
 
     [Test]
     public async Task TheFormat_IsFixed()
     {
         // the page writes the same, so a change to either side shows here and in the page's check against it
-        await Assert.That(Silent.Format()).IsEqualTo("5" + new string('0', SongSettings.Length));
+        await Assert.That(Silent.Format()).IsEqualTo("6" + new string('0', SongSettings.Length));
         await Assert.That(Mixed.Format()).IsEqualTo(MixedText);
         await Assert.That(Mixed.Identity).IsEqualTo(MixedIdentity);
     }
 
-    public const string MixedText = "5_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8phE9991";
+    public const string MixedText = "6_07ELSZgnu3o_0-9zIyRxawjvsu_eo09IRajshQNX0aI4Iej0fg5Od-xWJIII";
 
-    /// <summary>The mixed settings as the format before wrote them, its drum pieces the song's own.</summary>
+    /// <summary>The mixed settings as the format before wrote them, every value a character.</summary>
+    public const string MixedTextFive = "5_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8phE9991";
+
+    /// <summary>The mixed settings as the format before that wrote them, its drum pieces the song's own.</summary>
     public const string MixedTextFour = "4_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8ph2";
 
     /// <summary>The mixed settings as the format before wrote them, its tempo by its place among those the song draws.</summary>
@@ -89,7 +91,7 @@ public sealed class SongSettingsTest
     /// <summary>The mixed settings as the format before that wrote them, its first eight parts.</summary>
     public const string MixedTextTwo = "2_07ELSZgnu3B2o_0-9zIyRxawjvsu_309IRajs002I0a2s183Q1i3-hQPh8f8hA";
 
-    public const string MixedIdentity = "hQ1_0ESgu32012012013119999";
+    public const string MixedIdentity = "hQ1_0ESgu32012012010119999";
 
     [Test]
     public async Task ATempoStep_RunsFrom60Through120To240BeatsAMinute_EveryStepFasterByAboutTheSame()
@@ -106,7 +108,13 @@ public sealed class SongSettingsTest
     }
 
     [Test]
-    public async Task TheFormatBefore_ReadsAsItWas_ItsDrumPiecesTheSongsOwn()
+    public async Task TheFormatBefore_ReadsAsItWas()
+    {
+        await Assert.That(AreSame(SongSettings.Parse(MixedTextFive)!, Mixed)).IsTrue();
+    }
+
+    [Test]
+    public async Task TheFormatBeforeThat_ReadsAsItWas_ItsDrumPiecesTheSongsOwn()
     {
         var read = SongSettings.Parse(MixedTextFour)!;
 
@@ -116,7 +124,7 @@ public sealed class SongSettingsTest
     }
 
     [Test]
-    public async Task TheFormatBeforeThat_ReadsAsItWas_ItsTempoAsTheSongDrawsIt()
+    public async Task AFormatBefore_ReadsAsItWas_ItsTempoAsTheSongDrawsIt()
     {
         var read = SongSettings.Parse(MixedTextThree)!;
 
@@ -130,7 +138,7 @@ public sealed class SongSettingsTest
 
         await Assert.That(read.Parts.Length).IsEqualTo(SongSettings.PartOrder.Length);
         await Assert.That(read.Parts.Take(8).SequenceEqual(Mixed.Parts.Take(8))).IsTrue();
-        await Assert.That(read.Parts[^1]).IsEqualTo(new PartSettings(0, new Setting(false, 0), 63, new Setting(false, 32), true));
+        await Assert.That(read.Parts[^1]).IsEqualTo(new PartSettings(0, new Setting(false, 0), 63, new Setting(false, 32)));
         await Assert.That(read.Tempo).IsEqualTo(new Setting(false, TempoScale.Middle));
         // and named as it was, a part it did not name as drawn
         await Assert.That(read.Identity).IsEqualTo((Mixed with { Tempo = read.Tempo, Parts = [..Mixed.Parts.Take(8), read.Parts[^1]], DrumPieces = DrumPieceSettings.Drawn }).Identity);
@@ -144,7 +152,7 @@ public sealed class SongSettingsTest
         var heard = Silent with
         {
             Parts = [..Silent.Parts.Select(x => x with { Instrument = new Setting(true, 5), Pan = new Setting(true, 5), Volume = 5 })],
-            DrumGroups = [..Silent.DrumGroups.Select(_ => new DrumGroupSettings(true, 5))],
+            DrumGroups = [..Silent.DrumGroups.Select(_ => new DrumGroupSettings(5))],
             Volume = 5
         };
         await Assert.That(heard.Identity).IsEqualTo("");
@@ -152,7 +160,7 @@ public sealed class SongSettingsTest
         await Assert.That((Silent with { Unconventionality = new Setting(false, 50) }).Identity).IsEqualTo("");
         await Assert.That((Silent with { Unconventionality = new Setting(true, 50) }).Identity).IsNotEqualTo("");
         await Assert.That((Silent with { Key = new Setting(true, 0) }).Identity).IsNotEqualTo("");
-        await Assert.That((Silent with { DrumSetup = 2 }).Identity).IsNotEqualTo("");
+        await Assert.That((Silent with { DrumPieces = new DrumPieceSettings(true, [..DrumPieces.All.Select((_, i) => i == 0)]) }).Identity).IsNotEqualTo("");
     }
 
     [Test]

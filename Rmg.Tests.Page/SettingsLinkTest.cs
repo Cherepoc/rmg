@@ -7,8 +7,9 @@ namespace Rmg.Tests.Page;
 public sealed class SettingsLinkTest(Site site)
 {
     // settings with every field set apart from its neighbours, as the server writes them now and wrote them before the
-    // solo part was named, its tempo a step and its drum pieces given (Rmg.Tests' SongSettingsTest.MixedText and MixedTextTwo)
-    private const string MixedText = "5_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8phE9991";
+    // solo part was named, its tempo a step, its drum pieces given and the values not of 64 steps bits (Rmg.Tests'
+    // SongSettingsTest.MixedText and MixedTextTwo)
+    private const string MixedText = "6_07ELSZgnu3o_0-9zIyRxawjvsu_eo09IRajshQNX0aI4Iej0fg5Od-xWJIII";
     private const string MixedTextTwo = "2_07ELSZgnu3B2o_0-9zIyRxawjvsu_309IRajs002I0a2s183Q1i3-hQPh8f8hA";
 
     private static JsonElement Part(SongRequest request, string part) => request.Body.GetProperty("parts").GetProperty(part);
@@ -51,7 +52,7 @@ public sealed class SettingsLinkTest(Site site)
         await Assert.That(asked.Body.TryGetProperty("drumPieces", out var pieces) && pieces.ValueKind != JsonValueKind.Null).IsFalse();
         // the address now in the format the page writes
         var settings = new Uri(page.Page.Url).Query.Split('&').Single(x => x.TrimStart('?').StartsWith("settings=")).Split('=')[1];
-        await Assert.That(settings[0]).IsEqualTo('5');
+        await Assert.That(settings[0]).IsEqualTo('6');
         await Assert.That(settings.Length).IsEqualTo(MixedText.Length);
         await Assert.That(page.Errors).IsEmpty();
     }
