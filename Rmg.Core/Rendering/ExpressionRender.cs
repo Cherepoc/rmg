@@ -74,7 +74,8 @@ internal static class ExpressionRender
             var bend = (BendKind)state.GetStateValue(CompositionStateKinds.Bend);
             var depth = state.GetStateValue(CompositionStateKinds.BendDepth);
             var vibrato = state.GetStateValue(CompositionStateKinds.Vibrato);
-            if (bend != BendKind.None || vibrato > 0)
+            var wide = state.GetStateValue(CompositionStateKinds.WideVibrato);
+            if (bend != BendKind.None || vibrato > 0 || wide > 0)
             {
                 var cyclesPerBeat = VibratoRate * 60 / (tempo.GetEffectiveValueAt(note.Position) * Meter.BaseTempo);
                 var slideFrom = Math.Clamp((previousPitch ?? pitch) - pitch, -BendRange, BendRange);
@@ -92,6 +93,8 @@ internal static class ExpressionRender
                     // a vibrato grows in after the attack, from a third of the note to its middle
                     var growth = Math.Clamp((share - 0.3) / 0.3, 0, 1);
                     semitones += vibrato / 100.0 * growth * Math.Sin(2 * Math.PI * cyclesPerBeat * t);
+                    // a wide one bends up from the note to its top and back, as a guitar's does, never below it
+                    semitones += wide * growth * (0.5 - 0.5 * Math.Cos(2 * Math.PI * cyclesPerBeat * t));
                     bends.Add((start + t, ToBend(semitones)));
                 }
 

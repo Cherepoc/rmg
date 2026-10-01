@@ -50,6 +50,9 @@ internal static class CompositionStateKinds
     // 1 for a swell, its tremolo's and its sweep's depth in percent, its echo's delay in 16ths, and its reverb, 1 more
     // than the send, and chorus, from 0 to 127
     public static StateKind<int> Vibrato { get; } = StateKinds.CreateAdditive<int>(Prefix + "Vibrato", StateScope.Render);
+
+    // a wide vibrato, a guitar's: how many semitones above the note it reaches, a scale note, and back
+    public static StateKind<int> WideVibrato { get; } = StateKinds.CreateAdditive<int>(Prefix + "WideVibrato", StateScope.Render);
     public static StateKind<int> Bend { get; } = StateKinds.CreateAdditive<int>(Prefix + "Bend", StateScope.Render);
 
     // how far a bend goes, in semitones, up or down, to the scale note its size in scale steps reaches

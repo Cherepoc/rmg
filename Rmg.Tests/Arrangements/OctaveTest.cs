@@ -49,7 +49,7 @@ public sealed class OctaveTest
             .Where(x => x.Value.Pitches.Length == 2 && x.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0)
             .ToArray();
 
-        await Assert.That(notes.Count(x => x.Value.State.GetStateValue(CompositionStateKinds.Bend) != 0 || x.Value.State.GetStateValue(CompositionStateKinds.Vibrato) > 0)).IsGreaterThan(0);
+        await Assert.That(notes.Count(x => x.Value.State.GetStateValue(CompositionStateKinds.Bend) != 0 || (x.Value.State.GetStateValue(CompositionStateKinds.Vibrato) > 0 || x.Value.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0))).IsGreaterThan(0);
     }
 
     [Test]

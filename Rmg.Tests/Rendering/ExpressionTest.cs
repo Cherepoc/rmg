@@ -100,6 +100,32 @@ public sealed class ExpressionTest
         await Assert.That(Far(placed.TakeLast(placed.Length / 3))).IsGreaterThan(Far(placed.Take(placed.Length / 3)));
     }
 
+    /// <summary>
+    ///     How wide the vibratos are, of the notes that sing one on a guitar or a synth lead, which may sing the wide sort:
+    ///     the share of each width, by fifth of the sound facet and at its ends given.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task VibratoReport()
+    {
+        static double SoundOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Sound];
+        static string[] Widths(CorpusSong song) => song.Song.Notes!
+            .Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack { InstrumentCode: >= 24 and <= 31 or >= 80 and <= 87 })
+            .SelectMany(x => x.Value)
+            .Select(x => (Cents: x.Value.State.GetStateValue(CompositionStateKinds.Vibrato), Wide: x.Value.State.GetStateValue(CompositionStateKinds.WideVibrato)))
+            .Where(x => x.Cents > 0 || x.Wide > 0)
+            .Select(x => x.Wide > 0 ? $"wide {x.Wide} semitones" : $"{x.Cents} cents")
+            .ToArray();
+        static string Shares(string[] widths) => string.Join(", ", widths.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count() / (double)widths.Length:P0}")) + $" of {widths.Length}";
+
+        var drawn = TestCorpus.Measure(512, song => (Fifth: Math.Clamp((int)(SoundOf(song) * 5), 0, 4), Widths: Widths(song)));
+        foreach (var band in drawn.GroupBy(x => x.Fifth).OrderBy(x => x.Key))
+            Console.WriteLine($"  sound {band.Key}/5: {Shares(band.SelectMany(x => x.Widths).ToArray())}");
+        Console.WriteLine($"  sound 1 given: {Shares(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Widths(TestCorpus.Get(seed, Sound(1)))).SelectMany(x => x).ToArray())}");
+
+        await Task.CompletedTask;
+    }
+
     /// <summary>How big the bends are: the share of two steps, by fifth of the sound facet and at its ends given, and by third of the sections' energy.</summary>
     [Test]
     [Explicit]
@@ -123,11 +149,36 @@ public sealed class ExpressionTest
     }
 
     [Test]
+    public async Task AWideVibrato_IsAGuitarsOrASynthLeads_FromAScaleNoteToTheOneAStepOrTwoAbove_AndAWildSongs()
+    {
+        static bool IsWide(RealizedNote note) => note.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0;
+        int Program(CorpusSong song, int track, RealizedNote note) =>
+            note.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
+
+        var plain = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, Sound(0)));
+        await Assert.That(plain.Sum(x => x.Song.Notes!.Values.Sum(n => n.Count(note => IsWide(note.Value))))).IsEqualTo(0);
+
+        var wide = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Sound(1))))
+        foreach (var (track, notes) in song.Song.Notes!)
+        foreach (var note in notes.Where(x => IsWide(x.Value)))
+        {
+            wide++;
+            await Assert.That(Program(song, track, note.Value) is >= 24 and <= 31 or >= 80 and <= 87).IsTrue();
+            await Assert.That(Expression.IsOnScale(note.Value)).IsTrue();
+            var top = note.Value.State.GetStateValue(CompositionStateKinds.WideVibrato);
+            await Assert.That(top == Expression.ScaleDistance(note.Value, 1) || top == Expression.ScaleDistance(note.Value, 2)).IsTrue();
+        }
+
+        await Assert.That(wide).IsGreaterThan(0);
+    }
+
+    [Test]
     public async Task OnlyALineOfAnInstrumentThatBends_Bends_InOctavesToo()
     {
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, Sound(1))))
         foreach (var (track, notes) in song.Song.Notes!)
-        foreach (var note in notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Bend) != 0 || x.Value.State.GetStateValue(CompositionStateKinds.Vibrato) != 0))
+        foreach (var note in notes.Where(x => Has(CompositionStateKinds.Bend, CompositionStateKinds.Vibrato, CompositionStateKinds.WideVibrato)(x.Value.State)))
         {
             var program = note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
             await Assert.That(Expression.Bends(program)).IsTrue();
@@ -135,18 +186,20 @@ public sealed class ExpressionTest
         }
     }
 
-    private static readonly (string Name, bool IsStrong, Core.Events.StateKind<int> Kind)[] Effects =
+    private static Func<Core.Events.StateMap, bool> Has(params Core.Events.StateKind<int>[] kinds) => state => kinds.Any(x => state.GetStateValue(x) != 0);
+
+    private static readonly (string Name, bool IsStrong, Func<Core.Events.StateMap, bool> Has)[] Effects =
     [
-        ("vibrato", false, CompositionStateKinds.Vibrato), ("chorus", false, CompositionStateKinds.Chorus),
-        ("swell", false, CompositionStateKinds.Swell), ("bends", false, CompositionStateKinds.Bend),
-        ("tremolo", true, CompositionStateKinds.Tremolo), ("echo", true, CompositionStateKinds.Echo),
-        ("sweep", true, CompositionStateKinds.AutoPan)
+        ("vibrato", false, Has(CompositionStateKinds.Vibrato, CompositionStateKinds.WideVibrato)), ("chorus", false, Has(CompositionStateKinds.Chorus)),
+        ("swell", false, Has(CompositionStateKinds.Swell)), ("bends", false, Has(CompositionStateKinds.Bend)),
+        ("tremolo", true, Has(CompositionStateKinds.Tremolo)), ("echo", true, Has(CompositionStateKinds.Echo)),
+        ("sweep", true, Has(CompositionStateKinds.AutoPan))
     ];
 
     /// <summary>Which effects each pitched part of a song plays anywhere in it, in the order of <see cref="Effects" />.</summary>
     private static bool[][] PartEffects(CorpusSong song) => song.Song.Notes!
         .Where(x => x.Value.Count > 0 && song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack)
-        .Select(x => Effects.Select(e => x.Value.Any(n => n.Value.State.GetStateValue(e.Kind) != 0)).ToArray())
+        .Select(x => Effects.Select(e => x.Value.Any(n => e.Has(n.Value.State))).ToArray())
         .ToArray();
 
     /// <summary>

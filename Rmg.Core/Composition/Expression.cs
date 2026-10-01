@@ -23,6 +23,9 @@ public enum BendKind
     FallOff
 }
 
+/// <summary>A vibrato's width: in cents either side of the note, or in scale steps up from it, the wide sort.</summary>
+public readonly record struct Vibrato(int Cents, int Steps);
+
 /// <summary>The strong effects, which move a part's sound about, a song playing one of them at most.</summary>
 public enum StrongEffect
 {
@@ -96,12 +99,29 @@ internal static class Expression
     /// <summary>The chance a part that can sings a vibrato where the song does, on its long notes.</summary>
     public static ByConvention VibratoChance { get; } = new(0, 0.6, 0.9);
 
-    /// <summary>A held note's vibrato, in cents at its widest.</summary>
-    public static ImmutableArray<(int Cents, ByConvention Weight)> Vibratos { get; } =
+    /// <summary>
+    ///     How wide a held note's vibrato is: narrow, in cents either side of the note, as a voice or a violin sings, or
+    ///     wide, in scale steps up from the note and back, as a guitar's does, up to four semitones, both its ends on scale
+    ///     notes; the wide the wilder, and only an instrument it suits plays it. Each leans as a part's strength and its
+    ///     section's energy lean, the wider the more.
+    /// </summary>
+    public static ImmutableArray<(Vibrato Width, ByConvention Weight)> Vibratos { get; } =
     [
-        (15, new ByConvention(1, 0.7, 1)),
-        (35, new ByConvention(0, 0.3, 1))
+        (new Vibrato(15, 0), new ByConvention(1, 0.5, 0.2)),
+        (new Vibrato(35, 0), new ByConvention(0, 0.35, 0.2)),
+        (new Vibrato(60, 0), new ByConvention(0, 0.15, 0.2)),
+        (new Vibrato(0, 1), new ByConvention(0, 0.02, 0.25)),
+        (new Vibrato(0, 2), new ByConvention(0, 0, 0.15))
     ];
+
+    /// <summary>How far a width leans to the wide side, for a strength or an energy to lean it.</summary>
+    private static double Lean(Vibrato width) => width.Steps > 0 ? 0.5 * width.Steps : width.Cents / 60.0 - 1;
+
+    /// <summary>The narrow vibrato a note plays in place of a wide one it cannot, a note off the scale or an instrument it does not suit.</summary>
+    private static Vibrato WidestNarrow => new(60, 0);
+
+    /// <summary>Whether a wide vibrato suits an instrument: a guitar's or a synth lead's.</summary>
+    private static bool VibratesWide(int program) => program is >= 24 and <= 31 or >= 80 and <= 87;
 
     /// <summary>The chance a line that can bends where the song does, and then a note's chance to, three times it in a solo.</summary>
     public static ByConvention PartBendChance { get; } = new(0, 0.6, 0.9);
@@ -160,6 +180,13 @@ internal static class Expression
         }
 
         return distance;
+    }
+
+    /// <summary>Whether a note is on the scale at it, as its line placed it, rather than a chromatic step.</summary>
+    internal static bool IsOnScale(RealizedNote note)
+    {
+        var (offsets, _, chord) = Realizer.GetChord(note.State);
+        return Enumerable.Range(0, offsets.Length).Any(i => chord.GetPitch(i).Mod(Realizer.OctaveNoteCount) == note.Pitches[0].Mod(Realizer.OctaveNoteCount));
     }
 
     /// <summary>The delays an echo repeats after, in beats: a dotted 8th, a quarter, an 8th.</summary>
@@ -248,7 +275,6 @@ internal static class Expression
             // plays, so that what one effect decides leaves the others' draws as they are
             var part = partStreams(track);
             var vibrates = part.TestProbability(VibratoChance.At(songSound)) & songVibrato;
-            var vibrato = part.Pick(ByConvention.Weigh(Vibratos, songSound));
             var swells = part.TestProbability((role == TrackRole.Pad ? PadSwellChance : SwellChance).At(songSound)) & songSwell;
             var bendsHere = part.TestProbability(PartBendChance.At(songSound)) & songBends;
             var carries = track == carrier;
@@ -273,9 +299,11 @@ internal static class Expression
                 var u = sound[index];
                 var bendChance = BendChance.At(u);
                 var bendKinds = ByConvention.Weigh(BendKinds, u);
-                // the part's strength and the section's energy, as one lean to the bigger sizes
-                var sizes = new Tilt(Tilt.Of(StrengthOdds, strength).LogOdds + SectionEnergy.Tilt(energies[index], SizeCoupling).LogOdds)
-                    .Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1);
+                // the part's strength and the section's energy, as one lean to the bigger sizes and the wider vibrato, the wide
+                // only where its instrument suits it
+                var lean = new Tilt(Tilt.Of(StrengthOdds, strength).LogOdds + SectionEnergy.Tilt(energies[index], SizeCoupling).LogOdds);
+                var sizes = lean.Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1);
+                var vibrato = context.Pick(lean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u), Lean));
 
                 // the notes in the section, in order, the timeline's being
                 for (var i = first(span.Start); i < timeline.Count && timeline[i].Position < span.End - 1e-9; i++)
@@ -296,7 +324,13 @@ internal static class Expression
                         .With(CompositionStateKinds.Reverb, reverb + 1)
                         .With(CompositionStateKinds.Chorus, choruses && Choruses(noteProgram) ? chorus : 0);
                     if (vibrates && isLine && Bends(noteProgram) && note.Value.Duration >= 1)
-                        state = state.With(CompositionStateKinds.Vibrato, vibrato);
+                    {
+                        // a wide one between the note and a scale note above it, so the note must be on the scale
+                        var width = vibrato.Steps > 0 && (!VibratesWide(noteProgram) || !IsOnScale(note.Value)) ? WidestNarrow : vibrato;
+                        state = width.Steps > 0
+                            ? state.With(CompositionStateKinds.WideVibrato, ScaleDistance(note.Value, width.Steps))
+                            : state.With(CompositionStateKinds.Vibrato, width.Cents);
+                    }
                     if (bends && bendsNow)
                         state = state.With(CompositionStateKinds.Bend, (int)kind).With(CompositionStateKinds.BendDepth, kind switch
                         {
