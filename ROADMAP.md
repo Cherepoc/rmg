@@ -236,9 +236,14 @@ dotted 8th (`MeterReportTest`; `MeterSeedsReportTest` names seeds to hear).
   as Meshuggah's does, with the drums bound to it; each part in the bars it plays, repeating its own first notes, so
   that its line, placed after, follows the chords where they land, and the fills mark the phrase's end over it. By the
   feel facet: 0.7% of the middle fifth's sections, 22% of the wildest's; of them the kick 84%, 8 bars 44%, composite
-  41% (`PolymeterTest`). Left: a figure running on across the frame's start, which needs long cycles; a cycle growing
-  each time round (3, 4, 5); the riff's figure a chugged rhythm on one low note, its accents and rests carrying it,
-  rather than its first notes; the drums in half time under it.
+  41% (`PolymeterTest`). Left (P3), towards Tigran Hamasyan's rather than Meshuggah's, the cycle a tune played in
+  unison against a pulse still felt: **its cells accented,** every cell's first note leaned on, as a solo's are, so
+  that 7, 7 and 9 are heard as phrases rather than drift, the most needed; **the ostinato in unison,** the bass with
+  the riff the oftener, and the chords joining the cycle, their notes repeated cell by cell as the riff's; **the snare
+  on its accents and the hi-hat on the pulse,** so that the cycle sits against a beat; **a metric modulation,** a
+  section's own tempo leaning at the wild end to 3:2 or 4:3 of the one before, a tuplet's pulse becoming the beat
+  (`SectionTempo`); a figure running on across the frame's start, which needs long cycles; a cycle growing each time
+  round (3, 4, 5).
 ## Chords
 
 A section's chords change every two bars, every bar or every half bar (`HarmonicRhythm`, 0.25, 0.6 and 0.15, leaning
