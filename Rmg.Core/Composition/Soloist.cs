@@ -75,7 +75,7 @@ internal sealed record Soloist(
 
     /// <summary>
     ///     The chance a soloist planes its chords, their shape moved with its line note for note rather than the band's chord
-    ///     under it, as McCoy Tyner's fourths move: never at the plain end.
+    ///     under it, as a pianist moves fourths in parallel: never at the plain end.
     /// </summary>
     public static ByConvention PlaneChance { get; } = new(0, 0.15, 0.6);
 
@@ -107,8 +107,8 @@ internal sealed record Soloist(
 
     /// <summary>
     ///     How long a soloist keeps up its fastest speed, in beats, as a power of two about which each draws its own: a beat
-    ///     at the plain end, a few in the middle, and anything from a burst to bars of it at the wild end, as a Shawn Lane
-    ///     runs on; a slower speed lasts the longer, as many notes as the fastest's.
+    ///     at the plain end, a few in the middle, and anything from a burst to bars of it at the wild end, as the fastest
+    ///     players run on; a slower speed lasts the longer, as many notes as the fastest's.
     /// </summary>
     public static ByConvention StaminaPowers { get; } = new(0, 2, 2.5);
 

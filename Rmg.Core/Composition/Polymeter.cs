@@ -7,7 +7,7 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     A section's polymeter: a cycle of a length of its own, in 16ths, that divides no bar, played again and again across
-///     the bar lines, as the guitar and the kick run against the hi-hat and the snare in Meshuggah, and meeting the bar
+///     the bar lines, as a guitar and a kick run against the hi-hat and the snare, and meeting the bar
 ///     again where every 4-bar pattern, or every second at the wilder, starts it afresh. A cycle is a cell, or a cell
 ///     played again and then a closing one of another length, as 7, 7 and 9 make 23; each cell plays the same motif, cut
 ///     to its length. The riff plays it, or the bass where the song has no riff, the bass with the riff now and then, and
@@ -37,7 +37,7 @@ internal static class Polymeter
     /// <summary>The chance the bass, with a riff, plays the cycle with it.</summary>
     public const double JoinChance = 0.5;
 
-    /// <summary>The chance the kick plays the cycle with the part that leads it, as Meshuggah's always does: the wilder, the oftener.</summary>
+    /// <summary>The chance the kick plays the cycle with the part that leads it, as it would always in a band built on such cycles: the wilder, the oftener.</summary>
     public static ByConvention KickChance { get; } = new(0, 0.85, 1);
 
     /// <summary>The chance the cycle starts afresh every second pattern rather than every one, so that it drifts for 8 bars where a section has them.</summary>
