@@ -46,6 +46,15 @@ internal static class Polymeter
     /// <summary>The chance the kick plays the cycle with the part that leads it, as it would always in a band built on such cycles: the wilder, the oftener.</summary>
     public static ByConvention KickChance { get; } = new(0, 0.85, 1);
 
+    /// <summary>
+    ///     The chance the chords join the cycle, by their rhythm, their voicing kept, leaned to longer cells by
+    ///     <see cref="ChordCellOdds" />, as a band's whole unison on a short cell turns to mud: the wilder, the oftener.
+    /// </summary>
+    public static ByConvention ChordsChance { get; } = new(0, 0.3, 0.6);
+
+    /// <summary>How much likelier the chords join a cycle whose cells are 6 sixteenths longer on average, as the odds of 1, from 6.</summary>
+    public const double ChordCellOdds = 3;
+
     /// <summary>The chance the cycle starts afresh every second pattern rather than every one, so that it drifts for 8 bars where a section has them.</summary>
     public static ByConvention FrameChance { get; } = new(0, 0.3, 0.6);
 
@@ -104,6 +113,9 @@ internal static class Polymeter
             var tail = closing.Length > 0 ? context.Pick(ByConvention.Weigh(closing, unconventionality)) : 0;
             ImmutableArray<int> cells = tails && tail > 0 ? [..Enumerable.Repeat(length, repeats), tail] : [length];
             var snare = context.TestProbability(SnareChance.At(unconventionality)) && kick;
+            var chords = context.TestProbability(Tilt.Of(ChordCellOdds, (cells.Average() - 6) / 6).Chance(ChordsChance.At(unconventionality), 1)) && !absent.Contains(TrackRole.Chords);
+            if (chords)
+                parts = [..parts, TrackRole.Chords];
             plans[id] = new Plan(cells, parts, kick, frame, snare);
         }
 

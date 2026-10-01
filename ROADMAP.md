@@ -18,7 +18,6 @@ built since 0.6 (October 2026): parts entering late, the solos placed by their r
 answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
 this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
 
-8. a polymeter's chords joining its cycle by their rhythm, their voicing kept, leaned to longer cells (see *Meter*);
 9. to 11. a key change's devices of their own, one a change, in place of a chain: a common tone held across, a pedal on
    the new key's dominant, a pivot chord both keys share (see *Appearances*);
 12. a metric modulation, a section's tempo drawn by appearance, leaned at the wild end to 3:2 or 4:3 of the tempo
@@ -253,11 +252,11 @@ dotted 8th (`MeterReportTest`; `MeterSeedsReportTest` names seeds to hear).
   that its line, placed after, follows the chords where they land, and the fills mark the phrase's end over it. By the
   feel facet: 0.7% of the middle fifth's sections, 22% of the wildest's; of them the kick 84%, the bass in unison with
   the riff 82% where 50%, the snare on its cells' starts against the hi-hat's pulse 54%, with the drums bound to it,
-  8 bars 44%, composite 41% (`PolymeterTest`). Its cells are heard as phrases already: a cell's first note is the motif's, on the frame's
+  8 bars 44%, composite 41%; the chords joining by their rhythm, their voicing kept, in 50%, leaned to longer cells,
+  54% of cells of six sixteenths or more and 39% of shorter (`PolymeterTest`). Its cells are heard as phrases already: a cell's first note is the motif's, on the frame's
   downbeat, and plays its accent with it, 0.52 of velocity against the rest's 0.15, so that an accent of their own was
   measured and left out (October 2026). Left (P3), the cycle a tune played in unison against a pulse still felt
-  rather than a chugged drift: **the chords joining the cycle,** their notes
-  repeated cell by cell as the riff's, should the unison want more weight; a metric modulation (see
+  rather than a chugged drift: a metric modulation (see
   *Appearances*, the section's own tempo); a figure running on across the frame's start, which needs long cycles; a cycle growing each time
   round (3, 4, 5).
 ## Chords

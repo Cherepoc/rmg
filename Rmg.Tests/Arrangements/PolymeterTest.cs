@@ -56,6 +56,50 @@ public sealed class PolymeterTest
     }
 
     [Test]
+    public async Task ThePolymetersChords_JoinItsCycle_ByTheirRhythm_TheLongerItsCellsTheOftener()
+    {
+        var (joined, plans, longJoined, longPlans) = (0, 0, 0, 0);
+        foreach (var song in TestCorpus.Range(512).Where(x => !Plans(x).IsEmpty))
+        foreach (var span in song.Map.Sections)
+        {
+            if (!Plans(song).TryGetValue(span.SectionId, out var plan) || song.IsSolo(span))
+                continue;
+
+            plans++;
+            var isLong = plan.Cells.Average() >= 6;
+            longPlans += isLong ? 1 : 0;
+            if (!plan.Parts.Contains(TrackRole.Chords))
+                continue;
+
+            joined++;
+            longJoined += isLong ? 1 : 0;
+            // the chords' events, as decided, every one in a frame the first cell's again from where its cell starts
+            var events = song.Song.TrackEventStateTimelineMap.TrackTimelineMap.GetValueOrDefault(SongTracks.ChordsTrack)?.EventTimeline.Select(x => x.Position).ToArray() ?? [];
+            var frame = span.Meter.PatternDuration * plan.Patterns;
+            for (var start = span.Start; start < span.End - 1e-9; start += frame)
+            {
+                var end = Math.Min(start + frame, span.End);
+                var cells = new List<(double At, double Length)>();
+                for (var (cell, at) = (0, start); at < end - 1e-9; at += cells[^1].Length)
+                    cells.Add((at, plan.Cells[cell++ % plan.Cells.Length] * 0.25));
+                // the motif as the longest cell plays it whole where it first does
+                var longest = cells.FirstOrDefault(x => x.Length.Equals(plan.Cells.Max() * 0.25) && x.At + x.Length <= end + 1e-9);
+                if (longest == default)
+                    continue;
+                var first = events.Where(x => x >= longest.At - 1e-9 && x < longest.At + longest.Length - 1e-9).Select(x => Math.Round(x - longest.At, 6)).ToHashSet();
+                foreach (var onset in events.Where(x => x >= start - 1e-9 && x < Math.Min(start + frame, span.End) - 1e-9))
+                {
+                    var from = cells.Last(x => x.At <= onset + 1e-9).At;
+                    await Assert.That(first.Contains(Math.Round(onset - from, 6))).IsTrue().Because($"seed {song.Seed} at {onset}");
+                }
+            }
+        }
+
+        await Assert.That(joined).IsGreaterThan(5);
+        await Assert.That(longJoined / (double)Math.Max(1, longPlans)).IsGreaterThan((joined - longJoined) / (double)Math.Max(1, plans - longPlans));
+    }
+
+    [Test]
     public async Task ASnareOnTheCycle_StrikesOnlyItsCellsStarts()
     {
         var checkedSections = 0;
@@ -105,6 +149,7 @@ public sealed class PolymeterTest
         var plans = sections.Select(x => x.Plan).OfType<Polymeter.Plan>().ToArray();
         Console.WriteLine($"  lengths {string.Join(", ", plans.GroupBy(x => x.Sixteenths).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count()}"))}; " +
                           $"parts {string.Join(", ", plans.GroupBy(x => string.Join("+", x.Parts) + (x.Kick ? "+kick" : "")).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}"))}");
+        Console.WriteLine($"  the chords with them {plans.Count(x => x.Parts.Contains(TrackRole.Chords)) / (double)plans.Length:P0}, of cells of 6 or more {plans.Count(x => x.Cells.Average() >= 6 && x.Parts.Contains(TrackRole.Chords)) / (double)Math.Max(1, plans.Count(x => x.Cells.Average() >= 6)):P0}, shorter {plans.Count(x => x.Cells.Average() < 6 && x.Parts.Contains(TrackRole.Chords)) / (double)Math.Max(1, plans.Count(x => x.Cells.Average() < 6)):P0}");
         Console.WriteLine($"  {plans.Length} polymeters: the bass with the riff {plans.Count(x => x.Parts.Contains(TrackRole.Riff) && x.Parts.Contains(TrackRole.Bass)) / (double)Math.Max(1, plans.Count(x => x.Parts.Contains(TrackRole.Riff))):P0}, the snare {plans.Count(x => x.Snare) / (double)plans.Length:P0}, the kick with them {plans.Count(x => x.Kick) / (double)plans.Length:P0}, over 8 bars {plans.Count(x => x.Patterns == 2) / (double)plans.Length:P0}, " +
                           $"composite {plans.Count(x => x.Cells.Length > 1) / (double)plans.Length:P0}: {string.Join(", ", plans.Where(x => x.Cells.Length > 1).Select(x => string.Join("+", x.Cells)).GroupBy(x => x).OrderByDescending(x => x.Count()).Take(12).Select(x => $"{x.Key} {x.Count()}"))}");
         await Task.CompletedTask;
