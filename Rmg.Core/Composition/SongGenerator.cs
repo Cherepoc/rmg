@@ -272,12 +272,12 @@ public static class SongGenerator
         );
         // and play a section at a tempo of its own, a chorus the likelier, each section drawing from a stream of its own
         var sectionTempos = SectionTempo.Generate(
-            id => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SectionTempo), id)),
+            place => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SectionTempo), place)),
             songUnconventionality[Facet.Feel],
-            sectionIds,
+            played,
             structure.Roles
         );
-        StateTrace.Record(TracePoints.SectionTempo, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", sectionTempos.Select(x => $"{x.Key} {x.Value:F2}")), sectionTempos);
+        StateTrace.Record(TracePoints.SectionTempo, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", sectionTempos.Select(x => $"{x:F2}")), sectionTempos);
         StateTrace.Record(TracePoints.KeyChange, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, keyChanges.IsEmpty ? "none" : string.Join(", ", keyChanges), keyChanges);
         // and a key change led into by a chain of chords now and then, each change from a stream of its own
         var (preparedKeys, preparedRoots, chains) = KeyChange.Prepare(

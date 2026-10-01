@@ -7,11 +7,12 @@ namespace Rmg.Tests.Forms;
 
 public sealed class SectionTempoTest
 {
-    private static ImmutableDictionary<int, double> Tempos(CorpusSong song) =>
-        (ImmutableDictionary<int, double>)song.Trace.Single(x => x.Point == TracePoints.SectionTempo).Value!;
+    /// <summary>Every appearance's tempo as a multiple of the song's, by its place.</summary>
+    private static ImmutableArray<double> Tempos(CorpusSong song) =>
+        (ImmutableArray<double>)song.Trace.Single(x => x.Point == TracePoints.SectionTempo).Value!;
 
     [Test]
-    public async Task ASection_PlaysAtTheSongsTempoTimesItsOwn_EveryTimeItPlays_TheFirstAtTheSongs()
+    public async Task AnAppearance_PlaysAtTheSongsTempoTimesItsOwn_TheFirstSectionAtTheSongs()
     {
         var changed = 0;
         foreach (var song in TestCorpus.Range(128))
@@ -19,11 +20,11 @@ public sealed class SectionTempoTest
             var tempos = Tempos(song);
             var tempo = song.Rendered.TempoTimeline;
             var songTempo = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo).GetEffectiveValueAt(0);
-            await Assert.That(tempos[song.Map.Sections[0].SectionId]).IsEqualTo(1);
+            await Assert.That(tempos[0]).IsEqualTo(1);
             // every section's start, the ending's slowing after them all
-            foreach (var section in song.Map.Sections)
-                await Assert.That(tempo.GetEffectiveValueAt(section.Start)).IsEqualTo(songTempo * tempos[section.SectionId]).Within(1e-9).Because($"seed {song.Seed}");
-            changed += tempos.Values.Any(x => x != 1) ? 1 : 0;
+            foreach (var (section, index) in song.Map.Sections.Select((x, i) => (x, i)))
+                await Assert.That(tempo.GetEffectiveValueAt(section.Start)).IsEqualTo(songTempo * tempos[index]).Within(1e-9).Because($"seed {song.Seed}");
+            changed += tempos.Any(x => x != 1) ? 1 : 0;
         }
 
         await Assert.That(changed).IsGreaterThan(0);
@@ -40,7 +41,7 @@ public sealed class SectionTempoTest
             var sections = song.Map.Sections;
             for (var i = 1; i < sections.Length; i++)
             {
-                var (before, next) = (tempos[sections[i - 1].SectionId], tempos[sections[i].SectionId]);
+                var (before, next) = (tempos[i - 1], tempos[i]);
                 if (Math.Abs(next / before - 1) < 1e-9)
                     continue;
 
@@ -66,7 +67,7 @@ public sealed class SectionTempoTest
     public async Task ThePlainestSongs_KeepTheirTempo()
     {
         foreach (var seed in Enumerable.Range(0, 8))
-            await Assert.That(Tempos(TestCorpus.Get(seed, new SongOverrides(Base: 0))).Values.All(x => x == 1)).IsTrue();
+            await Assert.That(Tempos(TestCorpus.Get(seed, new SongOverrides(Base: 0))).All(x => x == 1)).IsTrue();
     }
 
     [Test]
@@ -77,8 +78,10 @@ public sealed class SectionTempoTest
         {
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
             var facet = ((Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!)[Facet.Feel];
-            return Tempos(song).Where(x => x.Key != structure.SectionIds[0])
-                .Select(x => (Band: Math.Clamp((int)(facet * 5), 0, 4), Contrasts: structure.Roles[x.Key] is SectionRole.Chorus or SectionRole.Bridge, Factor: x.Value))
+            var tempos = Tempos(song);
+            return song.Map.Sections.Select((x, i) => (x.SectionId, Index: i)).Where(x => x.SectionId != structure.SectionIds[0])
+                .Select(x => (Band: Math.Clamp((int)(facet * 5), 0, 4), Contrasts: structure.Roles[x.SectionId] is SectionRole.Chorus or SectionRole.Bridge, Factor: tempos[x.Index],
+                    Metric: x.Index > 0 && SectionTempo.MetricRatios.Any(r => Math.Abs(tempos[x.Index] / tempos[x.Index - 1] - r) < 1e-9)))
                 .ToArray();
         }).SelectMany(x => x).ToArray();
 
@@ -86,6 +89,8 @@ public sealed class SectionTempoTest
             Console.WriteLine($"  feel {band.Key}/5: " + string.Join("; ", band.GroupBy(x => x.Contrasts).OrderBy(x => x.Key)
                 .Select(x => $"{(x.Key ? "chorus or bridge" : "other")} {x.Count()}, own tempo {x.Count(y => y.Factor != 1) / (double)x.Count():P0}")));
         Console.WriteLine($"  factors {string.Join(", ", sections.Where(x => x.Factor != 1).GroupBy(x => Math.Round(x.Factor, 2)).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count()}"))}");
+        foreach (var band in sections.GroupBy(x => x.Band).OrderBy(x => x.Key))
+            Console.WriteLine($"  feel {band.Key}/5: metric changes from the tempo before {band.Count(x => x.Metric) / (double)band.Count():P1}");
         await Task.CompletedTask;
     }
 }

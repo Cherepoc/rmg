@@ -18,8 +18,6 @@ built since 0.6 (October 2026): parts entering late, the solos placed by their r
 answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
 this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
 
-12. a metric modulation, a section's tempo drawn by appearance, leaned at the wild end to 3:2 or 4:3 of the tempo
-    before and to the one it played at before, so that a chorus keeps its tempo unless it modulates;
 13. a harmonised melody's twin on a track of its own, as the riff's, the counter-melody resting for it, the page given
     the part;
 14. an intro and an outro of their own material, sections with roles of their own, their harmony leaned to the song's
@@ -373,9 +371,10 @@ planned together (P1):
   the last section's. Over 1024 songs, in the middle fifth 9% of the choruses and bridges and 4% of the others, in the
   wildest 56% and 44% (`SectionTempoTest`). A change of tempo is eased into over the bar before half the time, beat by beat, evenly in its ratio, but
   where its ratio is metric, 3:2, 4:3 or their inverses, which is taken at once: 173 of 352 changes of a wild feel
-  eased (`SectionTempoTest`). Left (P3): **a metric modulation** leaned to, a section's tempo drawn as 3:2 or 4:3 of the
-  one before it at the wild end, which needs a section's tempo drawn per appearance, the section before it changing
-  from one to the next, where it is drawn once per section now.
+  eased (`SectionTempoTest`). A section's tempo is drawn by appearance: a section that played before keeps its tempo
+  (1, 0.9, 0.5 by the feel facet), else now and then (0, 0.05, 0.5) takes the tempo before it by a metric ratio within
+  the factors' range, taken at once: changes by a metric ratio from the tempo before 3.5% of the plainest fifth's
+  appearances, 35% of the wildest's (`SectionTempoTest`).
   **The tempo leaning by the energy** (P3, by listening only, should the songs sound metronomic): a section's tempo
   nudged a percent or two by its energy, a chorus pushing and a breakdown easing, through the section's tempo layer by
   `Tilt`, never in a plain song, which keeps to the click; no drift, push or recovery of its own.
