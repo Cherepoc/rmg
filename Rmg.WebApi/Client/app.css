@@ -611,10 +611,7 @@ input[type="range"] {
     opacity: 0.45;
 }
 
-.mixer th[scope="row"] {
-    font-weight: normal;
-    white-space: nowrap;
-}
+
 
 /* the table cannot get narrower than its controls, so a phone scrolls it rather than the whole page */
 .mixer-scroll {
@@ -639,9 +636,29 @@ input[type="range"] {
     white-space: nowrap;
 }
 
-.mixer td {
+.mixer td,
+.mixer th[scope="row"] {
     padding: 7px 10px 7px 0;
+}
+
+/* a line between rows, on the row, so that it runs under every cell, the name's among them */
+.mixer tbody tr {
     border-top: 1px solid var(--border);
+}
+
+/* a part's or a drum group's name as a song setting's is */
+.mixer th[scope="row"] {
+    color: var(--text);
+    font-size: 14px;
+    font-weight: normal;
+    text-transform: none;
+    letter-spacing: normal;
+}
+
+/* a part's narrow enough that the longest, the counter-melody, breaks after its hyphen, as the parts' controls want room */
+#mixer th[scope="row"] {
+    width: 6.5em;
+    white-space: normal;
 }
 
 .mixer td:first-child {
