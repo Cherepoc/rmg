@@ -157,7 +157,14 @@ internal static class Solos
                         ? line
                         : line.Where(_ => !context.TestProbability(LeftOutChance))
                             .Select(x => x.Value.With(StateKinds.ScaleStep, x.Value.GetStateValue(StateKinds.ScaleStep) + solo.Step).With(StateKinds.Alteration, 0).ToTimelineItem(x.Position));
-                TimelineItem<StateMap>[] played = [..notes.Select(x => x.Value.With(CompositionStateKinds.LineSolo, 1).ToTimelineItem(x.Position))];
+                // at the lead's level, whatever its part's, as a pad that solos is not comping any more
+                var lift = VelocityLayers.GetLevel(TrackRole.Melody) - VelocityLayers.GetLevel(soloist);
+                TimelineItem<StateMap>[] played =
+                [
+                    ..notes.Select(x => x.Value.With(CompositionStateKinds.LineSolo, 1)
+                        .With(StateKinds.Velocity, x.Value.GetStateValue(StateKinds.Velocity) + lift)
+                        .ToTimelineItem(x.Position))
+                ];
                 moves[trackOf[soloist]] = own => EventTimeline.Create(own.Duration, own.Where(x => !IsIn(x)).Concat(played).OrderBy(x => x.Position));
             }
 

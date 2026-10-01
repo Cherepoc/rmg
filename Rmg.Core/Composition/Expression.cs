@@ -385,7 +385,8 @@ internal static class Expression
                             BendKind.Scoop or BendKind.FallOff or BendKind.ReleaseAndBend => ScaleDistance(note.Value, -size),
                             _ => 0
                         });
-                    if (swells && note.Value.Duration >= 1)
+                    // a soloist attacks its notes rather than swell into them
+                    if (swells && !isSolo && note.Value.Duration >= 1)
                         state = state.With(CompositionStateKinds.Swell, 1);
                     if (role != TrackRole.Drum)
                         state = state.With(CompositionStateKinds.Tremolo, tremolo).With(CompositionStateKinds.AutoPan, sweeps);

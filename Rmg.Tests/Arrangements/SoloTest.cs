@@ -243,6 +243,32 @@ public sealed class SoloTest
     }
 
     [Test]
+    public async Task ASolo_PlaysOverItsBand_WhateverPartSolos()
+    {
+        var (above, solos) = (0, 0);
+        foreach (var song in TestCorpus.Range(256))
+        {
+            var band = song.Rendered.Tracks.Where(t => t.Role is TrackRole.Chords or TrackRole.Drum or TrackRole.Bass).ToArray();
+            foreach (var (index, solo) in song.Solos.Where(x => !x.Value.IsDrumSolo))
+            {
+                var span = song.Map.Sections[index];
+                bool InSolo(double p) => p >= span.Start - 1e-9 && p < span.End - 1e-9;
+                var soloing = song.Rendered.Tracks.Where(t => solo.Soloists.Contains(t.Role)).SelectMany(t => t.NoteTimeline.Where(x => InSolo(x.Position))).ToArray();
+                var backing = band.Where(t => !solo.Soloists.Contains(t.Role)).SelectMany(t => t.NoteTimeline.Where(x => InSolo(x.Position))).ToArray();
+                if (soloing.Length == 0 || backing.Length == 0)
+                    continue;
+
+                solos++;
+                if (soloing.Average(x => x.Value.Velocity) > backing.Average(x => x.Value.Velocity))
+                    above++;
+            }
+        }
+
+        await Assert.That(solos).IsGreaterThan(50);
+        await Assert.That(above / (double)solos).IsGreaterThan(0.85);
+    }
+
+    [Test]
     public async Task TheCounterMelodyAndThePad_MakeRoomForASolo()
     {
         var checkedSolos = 0;

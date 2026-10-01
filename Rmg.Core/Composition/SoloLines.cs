@@ -81,6 +81,9 @@ internal static class SoloLines
         _ => throw new ArgumentOutOfRangeException(nameof(shape), shape, null)
     };
 
+    /// <summary>How much louder a solo plays at its most intense than at its calmest, about the melody's loudness there.</summary>
+    public const double IntensityVelocity = 0.15;
+
     /// <summary>How much louder a cell's first note is, so that its grouping is heard.</summary>
     public const double CellAccent = 0.1;
 
@@ -130,12 +133,15 @@ internal static class SoloLines
         int[] ChordNotes(double position) => Notes(position, Enumerable.Range(-4, 12).SelectMany(octave => ChordSteps.Select(x => x + octave * Scales.StepCount)));
         int Nearest(int[] notes, int pitch) => notes.Length == 0 ? Math.Clamp(pitch, bottom, top) : notes.MinBy(x => Math.Abs(x - pitch));
 
+        // a solo as loud as the melody there, on average, rather than as a note of it it plays over, a soft pickup say, and
+        // the louder the more intense
+        var loudness = melody.Average(x => x.Value.GetStateValue(StateKinds.Velocity));
+
         // a note of the line at its place, as a line's note: the step above the chord there nearest it, on the scale there
         TimelineItem<StateMap> Place(double position, int pitch, double intensity, double held = 0, bool accented = false)
         {
             var state = MelodyAt(position).Value.Except([StateKinds.HeldDuration, CompositionStateKinds.LinePickup, StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed]);
-            if (accented)
-                state = state.With(StateKinds.Velocity, state.GetStateValue(StateKinds.Velocity) + CellAccent);
+            state = state.With(StateKinds.Velocity, loudness + IntensityVelocity * (intensity - 0.5) + (accented ? CellAccent : 0));
             state = state.With(StateKinds.ScaleStep, LinePlacement.GetScaleStep(Chord(state, position), pitch))
                 .With(StateKinds.Alteration, 0)
                 .With(CompositionStateKinds.SoloIntensity, (int)Math.Round(intensity * 100));
