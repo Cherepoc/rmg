@@ -19,7 +19,8 @@ public enum SoloMode
 /// <param name="Soloists">The parts that solo; the drums alone for a drum solo.</param>
 /// <param name="Mode">How several share it.</param>
 /// <param name="Step">How many scale steps from the first the others play, playing together.</param>
-public sealed record SoloPlan(ImmutableArray<TrackRole> Soloists, SoloMode Mode, int Step)
+/// <param name="IsOwn">Whether its line is its own, over the chords, rather than on the melody's.</param>
+public sealed record SoloPlan(ImmutableArray<TrackRole> Soloists, SoloMode Mode, int Step, bool IsOwn)
 {
     public bool IsDrumSolo => Soloists.Contains(TrackRole.Drum);
 }
@@ -27,8 +28,8 @@ public sealed record SoloPlan(ImmutableArray<TrackRole> Soloists, SoloMode Mode,
 /// <summary>
 ///     Solos: a section's later appearance played as a solo now and then, by the form facet: none in the plainest songs,
 ///     and at the wild end as likely as not, so that a wild song may be solos throughout without having to be. A pitched
-///     solo is the melody's line for that appearance improvised through, played by the soloists instead, the melody
-///     resting; several soloists take its phrases in turn or play it together, the others a similar line; the drums solo
+///     solo is a line of the solo's own (<see cref="SoloLines" />), on the melody's near the plain end and its own over
+///     the chords at the wild, by the melody facet, played by the soloists instead of the melody, the melody resting; several soloists take its phrases in turn or play it together, the others a similar line; the drums solo
 ///     alone, the band resting, a fill at every bar. Who solos leans by the melody facet: near the plain end the solo
 ///     part, a lead of its own, the likeliest, and the melody's instrument, the chords or the riff now and then, and at
 ///     the wild end any part as likely.
@@ -66,6 +67,9 @@ internal static class Solos
         (SoloMode.Together, new ByConvention(1, 0.4, 1))
     ];
 
+    /// <summary>The chance a solo's line is its own rather than on the melody's, by the melody facet: never at the plain end, always at the wild.</summary>
+    public static ByConvention OwnChance { get; } = new(0, 0.5, 1);
+
     /// <summary>The steps from the first soloist the others play together: the same notes, a third or a sixth away.</summary>
     public static ImmutableArray<int> Steps { get; } = [0, 2, -2, 5, -5];
 
@@ -91,23 +95,30 @@ internal static class Solos
             candidates.RemoveAll(x => x.Part == soloist);
         }
 
+        var isOwn = context.TestProbability(OwnChance.At(melody));
+
         if (!isSolo || index == 0 || soloists.Count == 0 || !parts.Contains(TrackRole.Melody) && !soloists.Contains(TrackRole.Drum))
             return null;
 
         // the drums solo alone
-        return soloists.Contains(TrackRole.Drum) ? new SoloPlan([TrackRole.Drum], SoloMode.Trading, 0) : new SoloPlan([..soloists], mode, step);
+        return soloists.Contains(TrackRole.Drum) ? new SoloPlan([TrackRole.Drum], SoloMode.Trading, 0, false) : new SoloPlan([..soloists], mode, step, isOwn);
     }
 
     /// <summary>
-    ///     The song with every pitched solo's line moved from the melody to its soloists: in turn by phrase, or together,
-    ///     the others a step away with some of its notes left out, each note a line's, whatever its part plays otherwise.
+    ///     The song with every pitched solo's line (<see cref="SoloLines" />) played by its soloists instead of the melody:
+    ///     in turn by phrase, or together, the others a step away with some of its notes left out, each note a line's,
+    ///     whatever its part plays otherwise.
     /// </summary>
+    /// <param name="definitions">Every track's definition, the soloists' ranges.</param>
+    /// <param name="soloists">Every part's soloist, whose vocabulary its solos are played in.</param>
     /// <param name="solos">Every solo, by its appearance's place among the song's sections.</param>
     /// <param name="streams">A solo's sequence, by its appearance's place.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
         IReadOnlyDictionary<int, TrackRole> roles,
+        IReadOnlyDictionary<int, IInstrumentTrack> definitions,
         SongMap map,
+        IReadOnlyDictionary<TrackRole, Soloist> soloists,
         IReadOnlyDictionary<int, SoloPlan> solos,
         Func<int, IGenerationContext> streams
     )
@@ -118,11 +129,21 @@ internal static class Solos
             var span = map.Sections[index];
             var context = streams(index);
             bool IsIn(TimelineItem<StateMap> note) => note.Position >= span.Start - 1e-9 && note.Position < span.End - 1e-9;
-            var line = song.TrackTimelineMap[trackOf[TrackRole.Melody]].EventTimeline.Where(IsIn).ToArray();
-            StateTrace.Record(TracePoints.SoloLine, trackOf[TrackRole.Melody], span.SectionId, 0, StateMap.Default, 0, $"{line.Length} notes", (index, line.Length));
+            var melody = song.TrackTimelineMap[trackOf[TrackRole.Melody]].EventTimeline.Where(IsIn).ToArray();
+            StateTrace.Record(TracePoints.SoloLine, trackOf[TrackRole.Melody], span.SectionId, 0, StateMap.Default, 0, $"{melody.Length} notes", (index, melody.Length));
             // a melody with no notes there leaves nothing to solo on, and the parts play as they would
-            if (line.Length == 0)
+            if (melody.Length == 0)
                 continue;
+
+            // a soloist with no notes of its own, such as the solo part, plays over the melody's state, whose line it takes over
+            foreach (var soloist in solo.Soloists.Select(x => trackOf[x]).Where(x => !song.TrackTimelineMap.ContainsKey(x)))
+                song = TrackEventStateTimelineMap.Create(song.Duration, song.TrackTimelineMap.SetItem(soloist, EventStateTimelineMap.Create(
+                    song.Duration, EventTimeline.Create<StateMap>(song.Duration), song.TrackTimelineMap[trackOf[TrackRole.Melody]].StateTimelineMap)), song.CommonStateTimelineMap);
+
+            // the solo's line, in the first soloist's vocabulary and range
+            var first = trackOf[solo.Soloists[0]];
+            var (line, segments) = SoloLines.Generate(context, span, soloists[solo.Soloists[0]], solo.IsOwn, melody, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
+            StateTrace.Record(TracePoints.SoloGestures, first, span.SectionId, 0, StateMap.Default, 0, $"{(solo.IsOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, solo.IsOwn, segments));
             var phrases = Math.Max(1, (int)Math.Round(span.Duration / span.Meter.PatternDuration));
             // a solo of one phrase is traded by its halves
             var turn = phrases > 1 ? span.Meter.PatternDuration : span.Meter.PatternDuration / 2;

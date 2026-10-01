@@ -38,6 +38,13 @@ internal static class TracePoints
     public const string Soloist = "Soloist";
 
     /// <summary>
+    ///     A pitched solo's segments: the appearance's place, whether the solo is of its own rather than on the melody, and
+    ///     every segment's start, intensity and gesture (a tuple of an <c>int</c>, a <c>bool</c> and an array of tuples of
+    ///     two <c>double</c>s and a <see cref="Composition.SoloGesture" />).
+    /// </summary>
+    public const string SoloGestures = "Solo gestures";
+
+    /// <summary>
     ///     A pitched solo's line as its soloists take it: the appearance's place and how many of the melody's notes there are
     ///     to solo on (a tuple of two <c>int</c>s), none leaving the parts to play as they would.
     /// </summary>

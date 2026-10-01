@@ -73,6 +73,9 @@ internal static class CompositionStateKinds
     // 1 for a note of a solo's line, which any part plays as a line, one note at a time, rather than as its part would
     public static StateKind<int> LineSolo { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineSolo", StateScope.Render);
 
+    // how intense a solo is at a note, from 0 to 100, which leans how it is played
+    public static StateKind<int> SoloIntensity { get; } = StateKinds.CreateAdditive<int>(Prefix + "SoloIntensity", StateScope.Render);
+
     // 1 for a line's note played in octaves by its own part, the note and the note an octave from it
     public static StateKind<int> Octave { get; } = StateKinds.CreateAdditive<int>(Prefix + "Octave", StateScope.Render);
 

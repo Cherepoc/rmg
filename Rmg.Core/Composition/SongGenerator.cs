@@ -310,7 +310,9 @@ public static class SongGenerator
         songTrackNoteTimelineMap = Solos.Apply(
             songTrackNoteTimelineMap,
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
+            tracks.Definitions,
             form.Map,
+            soloists,
             solos,
             index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloLines), index))
         );
