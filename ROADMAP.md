@@ -18,7 +18,6 @@ built since 0.6 (October 2026): parts entering late, the solos placed by their r
 answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
 this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
 
-4. the melody's double stops on its accented strong beats, an instrument that plays chords only, 0.25 a section;
 5. the last chorus played twice, the repeat an appearance of its own taking the last section's lift, never with a fade;
 6. a section's switch within the instrument's family as its own option, the family by General MIDI's groups split where
    they hold other players, the plain end keeping the family and the wild end handing over (see *Instruments*);
@@ -467,8 +466,8 @@ and slides, is `Expression`'s (see *Listening*).
 - **Occasional chords** (built for the riff's landings, `LineChords`): a riff on an instrument that plays chords lands
   on one where a section starts, by a flat chance of 0.5, two or three notes, the band's chord under its note
   (`CompositionStateKinds.LineVoices`, the Realizer's stack, as a solo's); 252 of 509 such starts over 256 songs
-  (`RiffTest`). Left (P3): the melody's double stop on an accent, a bass's chord now and then, by the same state, should
-  listening miss them.
+  (`RiffTest`); a melody on such an instrument leans on a double stop on every bar's downbeat of a quarter of its
+  sections, the band's chord under it (`LineChords.Melody`). A bass's chord left out, mud on most basses.
 - **A twin riff** (built): a song with a riff harmonises it by its twin by the melody facet, never in a plain song and
   in 15% of riff songs from the middle on (`SongParts.TwinChance`), the twin playing the riff's line in every section,
   in its instrument and state, the two all the way to either side (`TrackRole.RiffTwin`, `LineDoubling`): a third above

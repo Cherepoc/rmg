@@ -42,10 +42,13 @@ public sealed class RealizedNoteTest
         {
             var notes = corpusSong.Song.Notes!;
 
-            // but the melody's in octaves, its own note first and the note an octave from it
-            await Assert.That(notes[SongTracks.MelodyTrack].All(x => x.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0
-                ? x.Value.Pitches.Length == 2 && Math.Abs(x.Value.Pitches[1] - x.Value.Pitches[0]) == 12 || x.Value.Pitches.Length == 1
-                : x.Value.Pitches.Length == 1)).IsTrue();
+            // but the melody's in octaves, its own note first and the note an octave from it, and its stacked notes, a double
+            // stop or a solo's chord, its own note on top
+            await Assert.That(notes[SongTracks.MelodyTrack].All(x => x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) > 1
+                ? x.Value.Pitches.Skip(1).All(p => p < x.Value.Pitches[0])
+                : x.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0
+                    ? x.Value.Pitches.Length == 2 && Math.Abs(x.Value.Pitches[1] - x.Value.Pitches[0]) == 12 || x.Value.Pitches.Length == 1
+                    : x.Value.Pitches.Length == 1)).IsTrue();
             await Assert.That(notes[SongTracks.BassTrack].All(x => x.Value.Pitches.Length == 1)).IsTrue();
             await Assert.That(notes[SongTracks.ChordsTrack].Any(x => x.Value.Pitches.Length > 1)).IsTrue();
             // every note keeps the state it was decided from, and a drum's plays as loud as its sound is over the drum

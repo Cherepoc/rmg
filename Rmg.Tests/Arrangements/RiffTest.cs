@@ -53,6 +53,32 @@ public sealed class RiffTest
     }
 
     [Test]
+    public async Task AMelodyOnAChordInstrument_LeansOnDoubleStops_OnItsBarsDownbeats_InAQuarterOfItsSections()
+    {
+        var (sections, stacking) = (0, 0);
+        foreach (var song in TestCorpus.Range(256))
+        {
+            var melody = (PitchInstrumentTrack)song.Song.TrackDefinitions[SongTracks.MelodyTrack];
+            if (!Rmg.Core.Composition.InstrumentRoles.PlaysChords(melody.InstrumentCode))
+                continue;
+
+            var notes = song.Song.Notes![SongTracks.MelodyTrack].Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 0).ToArray();
+            foreach (var span in song.Map.Sections)
+            {
+                var stacked = notes.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9 && x.Value.Pitches.Length == 2 && x.Value.State.GetStateValue(CompositionStateKinds.LineVoices) == 2).ToArray();
+                // on its bars' downbeats alone
+                await Assert.That(stacked.All(x => Math.Abs((x.Position - span.Start) / span.Meter.BarDuration - Math.Round((x.Position - span.Start) / span.Meter.BarDuration)) < 1e-6)).IsTrue();
+                sections++;
+                if (stacked.Length > 0)
+                    stacking++;
+            }
+        }
+
+        await Assert.That(sections).IsGreaterThan(50);
+        await Assert.That(stacking / (double)sections).IsBetween(0.1, 0.3);
+    }
+
+    [Test]
     public async Task ADoubledLine_PlaysTheOthersNotes_AtTheirPlaces()
     {
         var doubled = 0;

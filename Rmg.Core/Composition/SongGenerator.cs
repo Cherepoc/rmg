@@ -361,7 +361,17 @@ public static class SongGenerator
             riffTrack.Key,
             (PitchInstrumentTrack)riffTrack.Value,
             form.Map,
-            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.LineChords), index))
+            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.LineChords), index)),
+            LineChords.Riff
+        );
+        // and the melody leaning on double stops through a section now and then
+        songTrackNoteTimelineMap = LineChords.Apply(
+            songTrackNoteTimelineMap,
+            melodyTrack.Key,
+            (PitchInstrumentTrack)melodyTrack.Value,
+            form.Map,
+            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.MelodyChords), index)),
+            LineChords.Melody
         );
         // and every pitched solo's line played by its soloists
         songTrackNoteTimelineMap = Solos.Apply(
@@ -555,5 +565,6 @@ internal enum SongStream
     SoloMotifs = 51,
     TempoRamps = 52,
     DrumSoloStacks = 53,
-    CounterFills = 54
+    CounterFills = 54,
+    MelodyChords = 55
 }
