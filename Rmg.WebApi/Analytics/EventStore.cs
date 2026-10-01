@@ -52,6 +52,13 @@ public sealed class EventStore
         var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
+        // with WAL, a commit is written but not waited on to reach the disk, which only a checkpoint is: a power cut
+        // loses the last few, an app that falls over none, and the file is never corrupt, for an event written in 0.1 ms
+        // rather than 7; a setting of the connection, not of the file
+        using var synchronous = connection.CreateCommand();
+        synchronous.CommandText = "PRAGMA synchronous = NORMAL";
+        synchronous.ExecuteNonQuery();
+
         return connection;
     }
 
