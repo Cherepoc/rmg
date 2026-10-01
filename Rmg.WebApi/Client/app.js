@@ -1466,8 +1466,6 @@ const DRUM_GROUP_NAMES = {
 
 const SETUP_NAMES = { kit: "Kit", kitAndPercussion: "Kit and percussion", percussion: "Percussion" };
 
-// the General MIDI instruments by their number, and the kits the drums play
-const INSTRUMENT_NAMES = INSTRUMENT_FAMILIES.flatMap((family) => family.instruments);
 
 const KEY_NAMES = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
 
@@ -1682,36 +1680,33 @@ function createSetupRow() {
 }
 
 /**
- *     A part's row: whether it plays, given or drawn, which changes the song; the instrument it plays, its volume and its
- *     pan, which are heard at once; whether it is written in the file; and muting and soloing, which only this page
- *     hears.
+ *     A part's row: given or as the song drew it, whether it plays, which changes the song, and its instrument and pan,
+ *     which are heard at once; its volume, which the song never draws; and how loud it plays as it is heard.
  */
 function createPartRow(part) {
     const name = PART_NAMES[part];
 
-    const plays = document.createElement("select");
-    plays.setAttribute("aria-label", `Whether the ${name.toLowerCase()} plays`);
-    const random = createOption("random", "Random");
-    plays.append(random, createOption("on", "On"), createOption("off", "Off"));
+    const given = createGiven(name);
+    given.title = "Checked, whether it plays, its instrument and its pan are given, for this song and the next; unchecked, they show what the song drew";
+    given.addEventListener("change", () => setPartGiven(part, given.checked));
+
+    const plays = document.createElement("input");
+    plays.type = "checkbox";
+    plays.setAttribute("aria-label", `The ${name.toLowerCase()} plays`);
     plays.addEventListener("change", () => {
-        settings.parts[part].plays = plays.value;
+        settings.parts[part].plays = plays.checked ? "on" : "off";
         showEveryPartOff();
         settingsChanged(true);
     });
 
     const instrument = document.createElement("select");
     instrument.setAttribute("aria-label", `Instrument of the ${name.toLowerCase()}`);
-    const ownInstrument = createOption("", "Song's own");
-    instrument.append(ownInstrument);
     if (part === "drum") instrument.append(...DRUM_KITS.map((kit) => createOption(String(kit.instrument), kit.name)));
     else fillInstruments(instrument);
-    instrument.addEventListener("change", () =>
-        setPartInstrument(part, instrument.value === "" ? { isGiven: false, value: own[part]?.instrument ?? 0 } : { isGiven: true, value: Number(instrument.value) }));
+    instrument.addEventListener("change", () => setPartInstrument(part, { isGiven: true, value: Number(instrument.value) }));
 
     const volume = createFader(`Volume of the ${name.toLowerCase()}`, (step) => setPartVolume(part, step));
-    // a double click puts the pan back where the song sits the part
     const pan = createFader(`Pan of the ${name.toLowerCase()}, from left to right`, (step) => setPartPan(part, { isGiven: true, value: step }), true);
-    pan.input.addEventListener("dblclick", () => setPartPan(part, { isGiven: false, value: own[part]?.pan ?? MIDDLE_PAN }));
     const levels = document.createElement("div");
     levels.className = "fader-pair";
     levels.append(volume.field, pan.field);
@@ -1726,13 +1721,29 @@ function createPartRow(part) {
     heading.textContent = name;
 
     const row = document.createElement("tr");
-    row.append(heading, ...[plays, instrument, levels, meter].map((x) => {
+    const givenCell = document.createElement("td");
+    givenCell.append(given);
+    row.append(givenCell, heading, ...[plays, instrument, levels, meter].map((x) => {
         const cell = document.createElement("td");
         cell.append(x);
         return cell;
     }));
-    rows.set(part, { row, plays, random, instrument, ownInstrument, volume, pan, level });
+    rows.set(part, { row, given, plays, instrument, volume, pan, level });
     return row;
+}
+
+/**
+ *     Gives a part's playing, instrument and pan together, as the song drew them, or lets the song have them again, as
+ *     one switch has them all.
+ */
+function setPartGiven(part, isGiven) {
+    const mix = settings.parts[part];
+    const drawn = own[part] ?? { instrument: mix.instrument.value, pan: mix.pan.value };
+    mix.plays = !isGiven ? "random" : partsInSong[part] === false ? "off" : "on";
+    setPartInstrument(part, { isGiven, value: isGiven ? mix.instrument.value : drawn.instrument });
+    setPartPan(part, { isGiven, value: isGiven ? mix.pan.value : drawn.pan });
+    showSettings();
+    settingsChanged(true);
 }
 
 /** A drum group's row: how loud it plays, which the server makes. */
@@ -1791,10 +1802,11 @@ function showSettings() {
     for (const part of PARTS) {
         const row = rows.get(part);
         const mix = settings.parts[part];
-        row.plays.value = mix.plays;
-        row.random.textContent = part in partsInSong ? `Random: ${partsInSong[part] ? "in" : "out"}` : "Random";
-        row.ownInstrument.textContent = part in own ? `Song's own: ${instrumentName(part, own[part].instrument)}` : "Song's own";
-        row.instrument.value = mix.instrument.isGiven ? String(mix.instrument.value) : "";
+        const isGiven = mix.plays !== "random" || mix.instrument.isGiven || mix.pan.isGiven;
+        row.given.checked = isGiven;
+        row.plays.checked = mix.plays === "random" ? partsInSong[part] !== false : mix.plays === "on";
+        row.instrument.value = String(mix.instrument.value);
+        for (const control of [row.plays, row.instrument, row.pan.input]) control.disabled = !isGiven;
         row.volume.input.value = String(mix.volume);
         row.volume.show();
         row.pan.input.value = String(mix.pan.value);
@@ -1816,12 +1828,6 @@ function showSettings() {
     updateGenerateButtons();
 }
 
-function instrumentName(part, instrument) {
-    return part === "drum"
-        ? DRUM_KITS.find((kit) => kit.instrument === instrument)?.name ?? `Kit ${instrument}`
-        : INSTRUMENT_NAMES[instrument] ?? `Instrument ${instrument}`;
-}
-
 /**
  *     After a change of the settings: kept for the next visit and in the address, and then either the song asked for
  *     again, for a change of what it is made of, or its file fetched again with the mix, for one only heard.
@@ -1835,7 +1841,7 @@ function settingsChanged(isRemade) {
 
 function setPartInstrument(part, instrument) {
     settings.parts[part].instrument = instrument;
-    rows.get(part).instrument.value = instrument.isGiven ? String(instrument.value) : "";
+    rows.get(part).instrument.value = String(instrument.value);
     track("mix_changed", { detail: "instrument" });
     settingsChanged(false);
 
@@ -1860,7 +1866,6 @@ function setPartPan(part, pan) {
         withPlayer((player) => player.setChannelPan(channel, toMidiPan(mirrored ? mirrorPan(pan.value) : pan.value)), "Could not set the pan");
 }
 
-/** Switches a part off, which leaves it out of the file and silences it here, so what is heard is what is downloaded. */
 /** A part's volume under the song's, on the player. */
 function applyVolume(part) {
     const volume = (settings.volume / LAST_STEP) * (settings.parts[part].volume / LAST_STEP);

@@ -662,8 +662,15 @@ input[type="range"] {
     cursor: pointer;
 }
 
-.mixer select:hover {
+.mixer select:hover:enabled {
     border-color: var(--accent);
+}
+
+/* what a part not given shows the song drew, dimmed as the song settings' sliders are */
+.mixer select:disabled,
+.mixer input:disabled {
+    opacity: 0.5;
+    cursor: default;
 }
 
 .mixer input[type="checkbox"] {
