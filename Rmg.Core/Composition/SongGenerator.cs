@@ -423,7 +423,8 @@ public static class SongGenerator
             tracks.Definitions,
             form.Map,
             [..sections.Select(x => x.Facets[Facet.Sound])],
-            (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.InstrumentsOverTime), section), track))
+            (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.InstrumentsOverTime), section), track)),
+            (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.InstrumentFamilies), section), track))
         );
         // and how the parts are played beyond their notes, by every section's sound facet
         cancellation.ThrowIfCancellationRequested();
@@ -574,5 +575,6 @@ internal enum SongStream
     DrumSoloStacks = 53,
     CounterFills = 54,
     MelodyChords = 55,
-    LastRepeat = 56
+    LastRepeat = 56,
+    InstrumentFamilies = 57
 }

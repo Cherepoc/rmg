@@ -57,6 +57,24 @@ public sealed class InstrumentsOverTimeTest
             await Assert.That((clean.Contains(program) ? clean : driven).Contains(variant)).IsTrue().Because($"{role} {program} to {variant}");
     }
 
+    /// <summary>The share of a song's switches that keep to the instrument's family.</summary>
+    private static (int Kept, int Switches) Kept(CorpusSong song)
+    {
+        var switches = Changes(song).Where(x => x.Program != ((PitchInstrumentTrack)song.Song.TrackDefinitions.Values.First(d => d.Role == x.Role)).InstrumentCode).ToArray();
+        return (switches.Count(x => InstrumentsOverTime.FamilyOf(((PitchInstrumentTrack)song.Song.TrackDefinitions.Values.First(d => d.Role == x.Role)).InstrumentCode).Contains(x.Program)), switches.Length);
+    }
+
+    [Test]
+    public async Task ASwitch_KeepsToTheFamily_ThePlainerTheOftener()
+    {
+        (int, int) Share(double sound) => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Kept(TestCorpus.Get(seed, Sound(sound)))).Aggregate((0, 0), (a, x) => (a.Item1 + x.Kept, a.Item2 + x.Switches));
+        var (middleKept, middle) = Share(0.6);
+        var (wildKept, wild) = Share(1);
+
+        await Assert.That(middle).IsGreaterThan(20);
+        await Assert.That(middleKept / (double)middle).IsGreaterThan(wildKept / (double)wild + 0.15);
+    }
+
     [Test]
     [Explicit]
     public async Task Report()

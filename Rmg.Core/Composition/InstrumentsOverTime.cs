@@ -30,6 +30,29 @@ internal static class InstrumentsOverTime
     /// <summary>The chance a section switches a part to another instrument of its role.</summary>
     public static ByConvention SwitchChance { get; } = new(0, 0.015, 1);
 
+    /// <summary>
+    ///     The chance a switch keeps to the instrument's family, the same player's other sound, rather than hand the part to
+    ///     another of its role's: the plainer, the likelier, as a chorus's strings taking over from a verse's piano is the
+    ///     wilder.
+    /// </summary>
+    public static ByConvention FamilyChance { get; } = new(1, 0.6, 0.2);
+
+    /// <summary>
+    ///     The instruments one player moves between, by General MIDI's groups of eight, split where a group holds other
+    ///     players or sounds: the guitars acoustic, clean and driven, the basses acoustic, electric and synth, the organs
+    ///     and the reed organs; an instrument in none is a family of its own.
+    /// </summary>
+    public static ImmutableArray<ImmutableHashSet<int>> Families { get; } =
+    [
+        [0, 1, 2, 3], [4, 5, 7], [8, 9, 10, 11, 12, 13, 14, 15], [16, 17, 18], [20, 21, 22, 23], [24, 25], [26, 27, 28], [29, 30, 31],
+        [32, 43], [33, 34, 35, 36, 37], [38, 39], [40, 41, 42, 44, 45, 48, 49, 50, 51], [52, 53, 54], [56, 57, 58, 59, 60, 61, 62, 63],
+        [64, 65, 66, 67], [68, 69, 70, 71], [72, 73, 74, 75, 76, 77, 78, 79], [80, 81, 82, 83, 84, 85, 86, 87], [88, 89, 90, 91, 92, 93, 94, 95],
+        [104, 105, 106, 107, 108]
+    ];
+
+    /// <summary>The instruments of a program's family, itself alone where it has none.</summary>
+    public static ImmutableHashSet<int> FamilyOf(int program) => Families.FirstOrDefault(x => x.Contains(program)) ?? [program];
+
     public static ImmutableArray<(ArticulationMode Mode, ByConvention Weight)> Modes { get; } =
     [
         (ArticulationMode.None, new ByConvention(1, 0.93, 1)),
@@ -85,12 +108,14 @@ internal static class InstrumentsOverTime
     /// </summary>
     /// <param name="sound">Every section's sound facet, by its place among the song's sections.</param>
     /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
+    /// <param name="families">A part's draw of whether a switch keeps to its family, by the section and the part's track.</param>
     public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Apply(
         ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> notes,
         ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
         SongMap map,
         IReadOnlyList<double> sound,
-        Func<int, int, IGenerationContext> streams
+        Func<int, int, IGenerationContext> streams,
+        Func<int, int, IGenerationContext> families
     )
     {
         var result = notes.ToBuilder();
@@ -106,7 +131,13 @@ internal static class InstrumentsOverTime
                 var context = streams(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track);
                 var switches = context.TestProbability(SwitchChance.At(sound[index]));
                 var role = RoleOf(pitched.Role);
-                var switched = role is null ? pitched.InstrumentCode : role.Pick(context, pitched.InstrumentCode).Program;
+                // within the family where it keeps to it and the role has another of it, or to any other of the role's
+                var keeps = families(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track).TestProbability(FamilyChance.At(sound[index]));
+                var family = FamilyOf(pitched.InstrumentCode);
+                var kin = role?.Instruments.Where(x => x.Program != pitched.InstrumentCode && family.Contains(x.Program)).ToArray() ?? [];
+                var switched = role is null ? pitched.InstrumentCode
+                    : keeps && kin.Length > 0 ? context.Pick([..kin.Select(x => new Weighted<RoleInstrument>(x.Weight, x))]).Program
+                    : role.Pick(context, pitched.InstrumentCode).Program;
                 var program = switches ? switched : pitched.InstrumentCode;
                 var mode = context.Pick(ByConvention.Weigh(Modes, sound[index]));
                 var variants = Variants.GetValueOrDefault(program, []);
