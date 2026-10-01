@@ -1,0 +1,173 @@
+using System.Text.Json;
+using Microsoft.Playwright;
+
+namespace Rmg.Tests.Page;
+
+/// <summary>A song asked of the server by the page: what it was asked with, and how it ended, null while on its way.</summary>
+public sealed class SongRequest(JsonElement body)
+{
+    public JsonElement Body { get; } = body;
+
+    /// <summary>The seed asked for, null for a random one.</summary>
+    public string? Seed => Body.TryGetProperty("seed", out var seed) && seed.ValueKind == JsonValueKind.String ? seed.GetString() : null;
+
+    /// <summary>The status it was answered with, "aborted" for one let go of, null while on its way.</summary>
+    public string? Ended { get; set; }
+
+    public override string ToString() => $"{Seed ?? "random"}: {Ended ?? "on its way"}";
+}
+
+/// <summary>
+///     The player's page in a browser context of its own, with what it asks the server for songs watched, and slowed or
+///     answered busy as a test asks: the song itself comes from the server, so only its timing is the test's.
+/// </summary>
+public sealed class SongPage : IAsyncDisposable
+{
+    private readonly IBrowserContext _context;
+    private readonly List<SongRequest> _requests = [];
+    private readonly Dictionary<IRequest, SongRequest> _byRequest = [];
+    private readonly List<string> _errors = [];
+
+    private SongPage(IBrowserContext context, IPage page)
+    {
+        _context = context;
+        Page = page;
+    }
+
+    public IPage Page { get; }
+
+    /// <summary>How long every song asked for is held back before it goes to the server.</summary>
+    public TimeSpan Slow { get; set; } = TimeSpan.Zero;
+
+    /// <summary>How many songs asked for are still to be answered busy, as the server answers one it has no room for.</summary>
+    public int Busy { get; set; }
+
+    /// <summary>Every song asked for so far, in order.</summary>
+    public IReadOnlyList<SongRequest> Requests
+    {
+        get
+        {
+            lock (_requests) return [.._requests];
+        }
+    }
+
+    /// <summary>What the page has written to its console as an error.</summary>
+    public IReadOnlyList<string> Errors
+    {
+        get
+        {
+            lock (_errors) return [.._errors];
+        }
+    }
+
+    public static async Task<SongPage> Open(Site site, string path = "")
+    {
+        var context = await site.Browser.NewContextAsync(new BrowserNewContextOptions { BaseURL = site.Address.ToString() });
+        var page = await context.NewPageAsync();
+        var songPage = new SongPage(context, page);
+
+        page.Console += (_, message) =>
+        {
+            if (message.Type == "error") lock (songPage._errors) songPage._errors.Add(message.Text);
+        };
+        page.PageError += (_, error) =>
+        {
+            lock (songPage._errors) songPage._errors.Add(error);
+        };
+        page.RequestFailed += (_, request) => songPage.End(request, "aborted");
+        page.RequestFinished += async (_, request) =>
+        {
+            var response = await request.ResponseAsync();
+            songPage.End(request, response is null ? "aborted" : response.Status.ToString());
+        };
+
+        await page.RouteAsync("**/api/songs/generate", songPage.Answer);
+        await page.GotoAsync(path);
+        return songPage;
+    }
+
+    private async Task Answer(IRoute route)
+    {
+        var asked = new SongRequest(JsonDocument.Parse(route.Request.PostData ?? "{}").RootElement.Clone());
+        lock (_requests)
+        {
+            _requests.Add(asked);
+            _byRequest[route.Request] = asked;
+        }
+
+        if (Busy > 0)
+        {
+            Busy--;
+            await route.FulfillAsync(new RouteFulfillOptions
+            {
+                Status = 503,
+                Headers = new Dictionary<string, string> { ["Retry-After"] = "1" },
+                ContentType = "application/problem+json",
+                Body = "{}"
+            });
+            return;
+        }
+
+        if (Slow > TimeSpan.Zero) await Task.Delay(Slow);
+
+        try
+        {
+            await route.ContinueAsync();
+        }
+        catch (PlaywrightException)
+        {
+            // let go of by the page while it was held back
+        }
+    }
+
+    private void End(IRequest request, string ended)
+    {
+        lock (_requests)
+            if (_byRequest.TryGetValue(request, out var asked))
+                asked.Ended ??= ended;
+    }
+
+    /// <summary>Waits until the condition holds, and fails saying what was asked for if it does not in time.</summary>
+    public async Task Until(Func<Task<bool>> condition, string what, int seconds = 10)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(seconds);
+        while (!await condition())
+        {
+            if (DateTime.UtcNow > deadline)
+                throw new TimeoutException($"{what} did not happen within {seconds} s; songs asked for: {string.Join(", ", Requests)}");
+
+            await Task.Delay(25);
+        }
+    }
+
+    public Task Until(Func<bool> condition, string what, int seconds = 10) => Until(() => Task.FromResult(condition()), what, seconds);
+
+    /// <summary>Waits for every song asked for to have ended.</summary>
+    public Task Settled(int seconds = 10) => Until(() => Requests.All(x => x.Ended is not null), "every song asked for ending", seconds);
+
+    /// <summary>The song on the page, by its seed.</summary>
+    public Task<string> Seed() => Page.Locator("#seed").InputValueAsync();
+
+    public Task<string> Status() => Page.Locator("#status").InnerTextAsync();
+
+    public Task<bool> IsGenerateEnabled() => Page.Locator("#generate").IsEnabledAsync();
+
+    /// <summary>Waits for the first song, which the page asks for the moment it opens.</summary>
+    public Task FirstSong() => Until(async () => await Seed() != "" && await IsGenerateEnabled(), "the first song arriving");
+
+    /// <summary>Asks for a new random song, and waits for it while nothing is held back.</summary>
+    public async Task Generate()
+    {
+        var before = await Seed();
+        await Page.Locator("#generate").ClickAsync();
+        if (Slow == TimeSpan.Zero && Busy == 0)
+            await Until(async () => await Seed() != before && await IsGenerateEnabled(), "a new song arriving");
+    }
+
+    /// <summary>The songs on the list, by their seeds, the latest first.</summary>
+    public async Task<IReadOnlyList<string>> History() => await Page.Locator("button[data-entry]").EvaluateAllAsync<string[]>("xs => xs.map(x => x.dataset.seed)");
+
+    public ILocator HistoryItem(string seed) => Page.Locator($"button[data-entry][data-seed='{seed}']");
+
+    public ValueTask DisposeAsync() => _context.DisposeAsync();
+}
