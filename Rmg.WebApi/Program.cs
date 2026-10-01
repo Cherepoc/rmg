@@ -1,6 +1,4 @@
 using System.Net;
-using System.Threading.RateLimiting;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
@@ -53,17 +51,9 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonContext.Default));
 
 // a song is a burst of work for one core, so as many are made at once as there are cores, a few more wait their turn,
-// and the rest are turned away at once rather than slowing every song down
-builder.Services.AddRateLimiter(options =>
-{
-    options.RejectionStatusCode = StatusCodes.Status503ServiceUnavailable;
-    options.AddConcurrencyLimiter(SongEndpoints.MakingPolicy, limiter =>
-    {
-        limiter.PermitLimit = Environment.ProcessorCount;
-        limiter.QueueLimit = 4 * Environment.ProcessorCount;
-        limiter.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-    });
-});
+// a few a client, taking their turns client by client, and the rest are turned away at once rather than slowing every
+// song down
+builder.Services.AddSingleton(new SongQueue(Environment.ProcessorCount, 4 * Environment.ProcessorCount, 4));
 
 // a song holds its thread until it is made, and the pool starts only as many threads at once as there are cores, so
 // with every core making one, the rest of the server, a page, a soundfont or the next song let out of the queue, would
@@ -124,7 +114,6 @@ app.UseStaticFiles(new StaticFileOptions
     }
 });
 
-app.UseRateLimiter();
 app.MapSoundFonts(soundFonts);
 app.MapSongs();
 
