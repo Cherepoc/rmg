@@ -18,8 +18,6 @@ built since 0.6 (October 2026): parts entering late, the solos placed by their r
 answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
 this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
 
-15. to 17. long cycles, patterns of two bars in the rhythm engine, then a polymeter's figure running on across its
-    frame and its cycle growing each time round (see *Rhythm engine*, *Meter*);
 18. a key change's phrase sequenced up a step until it stays;
 19. a tag, half a pattern before a section, on the two-bar grid (see *Form*);
 20. scales of other sizes, or stopped where the line scales cover the need (see *Scales*).
@@ -245,12 +243,12 @@ dotted 8th (`MeterReportTest`; `MeterSeedsReportTest` names seeds to hear).
   feel facet: 0.7% of the middle fifth's sections, 22% of the wildest's; of them the kick 84%, the bass in unison with
   the riff 82% where 50%, the snare on its cells' starts against the hi-hat's pulse 54%, with the drums bound to it,
   8 bars 44%, composite 41%; the chords joining by their rhythm, their voicing kept, in 50%, leaned to longer cells,
-  54% of cells of six sixteenths or more and 39% of shorter (`PolymeterTest`). Its cells are heard as phrases already: a cell's first note is the motif's, on the frame's
+  54% of cells of six sixteenths or more and 39% of shorter; running on through the whole section in 17%, and a
+  cycle of one cell growing a sixteenth every time round, to twice its length and from it again, in 8% (`PolymeterTest`). Its cells are heard as phrases already: a cell's first note is the motif's, on the frame's
   downbeat, and plays its accent with it, 0.52 of velocity against the rest's 0.15, so that an accent of their own was
   measured and left out (October 2026). Left (P3), the cycle a tune played in unison against a pulse still felt
   rather than a chugged drift: a metric modulation (see
-  *Appearances*, the section's own tempo); a figure running on across the frame's start, which needs long cycles; a cycle growing each time
-  round (3, 4, 5).
+  *Appearances*, the section's own tempo); 
 ## Chords
 
 A section's chords change every two bars, every bar or every half bar (`HarmonicRhythm`, 0.25, 0.6 and 0.15, leaning
@@ -593,10 +591,13 @@ the rest as they were.
 
 ## Rhythm engine
 
-- **Long cycles** (P3, needed someday): a bar pattern is one bar long, so a slower cycle, such as the kick's slowed to
-  two bars, plays its first half and starts again at every bar line. Patterns as long as their cycle would let slow
-  figures run whole, such as a crash every two bars or a kick figure answered in the second bar. Overlapping
-  polyrhythms and a chord of two bars need them.
+- **Long cycles** (P3, put off in October 2026): a bar pattern is one bar long, so a slower cycle, such as the kick's
+  slowed to two bars, plays its first half and starts again at every bar line. Patterns as long as their cycle would let
+  slow figures run whole, such as a crash every two bars or a kick figure answered in the second bar, and a chord of two
+  bars. Put off as an engine's change: the bar is the unit of the scheme's letters, the state's layers, the melody's
+  question and answer, the drums' presence, the fills' lines and the feels; the polymeter's figures running on and
+  growing, which it was thought to need, are the polymeter's own. A crash every two bars, should it be missed, an edit
+  after assembly as the lift's cues are.
 
 ## Melody
 

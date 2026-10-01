@@ -55,6 +55,15 @@ internal static class Polymeter
     /// <summary>How much likelier the chords join a cycle whose cells are 6 sixteenths longer on average, as the odds of 1, from 6.</summary>
     public const double ChordCellOdds = 3;
 
+    /// <summary>The chance the cycle runs on through the whole section, never starting afresh within it: the wilder, the oftener.</summary>
+    public static ByConvention RunsOnChance { get; } = new(0, 0.1, 0.4);
+
+    /// <summary>
+    ///     The chance a cycle of one cell grows a sixteenth every time round, 3, 4, 5, to twice its length and from it again,
+    ///     its motif cut to each: the wilder, the oftener.
+    /// </summary>
+    public static ByConvention GrowChance { get; } = new(0, 0.1, 0.3);
+
     /// <summary>The chance the cycle starts afresh every second pattern rather than every one, so that it drifts for 8 bars where a section has them.</summary>
     public static ByConvention FrameChance { get; } = new(0, 0.3, 0.6);
 
@@ -70,10 +79,21 @@ internal static class Polymeter
     ///     A section's polymeter: its cycle's cells' lengths in 16ths, in turn, the parts that play it, and how many patterns
     ///     it runs over before starting afresh; none for a section in its bars.
     /// </summary>
-    public sealed record Plan(ImmutableArray<int> Cells, ImmutableArray<TrackRole> Parts, bool Kick, int Patterns, bool Snare)
+    /// <param name="Patterns">How many patterns the cycle runs over before starting afresh, the whole section's where it runs on.</param>
+    /// <param name="Grows">Whether its one cell grows a sixteenth every time round.</param>
+    public sealed record Plan(ImmutableArray<int> Cells, ImmutableArray<TrackRole> Parts, bool Kick, int Patterns, bool Snare, bool Grows)
     {
-        /// <summary>The cycle's length in 16ths.</summary>
+        /// <summary>The cycle's length in 16ths, its first time round.</summary>
         public int Sixteenths => Cells.Sum();
+
+        /// <summary>The length of its cell played the given time from a frame's start, in 16ths.</summary>
+        public int CellAt(int time) => Grows ? Cells[0] + time % Cells[0] : Cells[time % Cells.Length];
+
+        /// <summary>Its longest cell, in 16ths, which its motif is taken over.</summary>
+        public int Longest => Grows ? 2 * Cells[0] - 1 : Cells.Max();
+
+        /// <summary>The whole section's, for a cycle that runs on through it.</summary>
+        public const int Section = int.MaxValue;
     }
 
     /// <summary>Every section's polymeter, by its id, each drawing from a sequence of its own; none for one it does not play.</summary>
@@ -116,7 +136,9 @@ internal static class Polymeter
             var chords = context.TestProbability(Tilt.Of(ChordCellOdds, (cells.Average() - 6) / 6).Chance(ChordsChance.At(unconventionality), 1)) && !absent.Contains(TrackRole.Chords);
             if (chords)
                 parts = [..parts, TrackRole.Chords];
-            plans[id] = new Plan(cells, parts, kick, frame, snare);
+            var runsOn = context.TestProbability(RunsOnChance.At(unconventionality));
+            var grows = context.TestProbability(GrowChance.At(unconventionality)) && cells.Length == 1;
+            plans[id] = new Plan(cells, parts, kick, runsOn ? Plan.Section : frame, snare, grows);
         }
 
         return plans.ToImmutable();
@@ -151,8 +173,8 @@ internal static class Polymeter
 
             var bound = bindings(span.SectionId).Where(x => kicks.Contains(x.Value)).Select(x => x.Key);
             var tracks = plan.Parts.Where(trackOf.ContainsKey).Select(x => trackOf[x]).Concat(plan.Kick ? kicks.Concat(bound) : []).Distinct().Where(song.TrackTimelineMap.ContainsKey);
-            var longest = plan.Cells.Max() * Sixteenth;
-            var frame = span.Meter.PatternDuration * plan.Patterns;
+            var longest = plan.Longest * Sixteenth;
+            var frame = plan.Patterns == Plan.Section ? span.Duration : span.Meter.PatternDuration * plan.Patterns;
             song = song.MapTrackEvents(tracks.ToDictionary(x => x, _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
             {
                 // in the bars the part plays, none where it sits out
@@ -164,9 +186,9 @@ internal static class Polymeter
                     var end = Math.Min(start + frame, span.End);
                     var first = notes.Where(x => x.Position >= start - 1e-9 && x.Position < start + longest - 1e-9).ToArray();
                     var cell = 0;
-                    for (var repeat = start; repeat < end - 1e-9; repeat += plan.Cells[cell++ % plan.Cells.Length] * Sixteenth)
+                    for (var repeat = start; repeat < end - 1e-9; repeat += plan.CellAt(cell++) * Sixteenth)
                     {
-                        var length = plan.Cells[cell % plan.Cells.Length] * Sixteenth;
+                        var length = plan.CellAt(cell) * Sixteenth;
                         played.AddRange(first.Where(x => x.Position - start < length - 1e-9).Select(x => x.Value.ToTimelineItem(x.Position - start + repeat)).Where(x => x.Position < end - 1e-9 && plays.Contains(Bar(x.Position))));
                     }
                 }
@@ -191,7 +213,7 @@ internal static class Polymeter
                     {
                         var end = Math.Min(start + frame, span.End);
                         var cell = 0;
-                        for (var at = start; at < end - 1e-9; at += plan.Cells[cell++ % plan.Cells.Length] * Sixteenth)
+                        for (var at = start; at < end - 1e-9; at += plan.CellAt(cell++) * Sixteenth)
                             if (plays.Contains(Bar(at)))
                                 struck.Add(inSpan[0].Value.ToTimelineItem(at));
                     }
