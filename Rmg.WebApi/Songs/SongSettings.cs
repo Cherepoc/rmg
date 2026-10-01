@@ -23,6 +23,7 @@ namespace Rmg.WebApi.Songs;
 /// <param name="DrumSetup">The drums given: 0 for the song's own, or one of <see cref="SetupOrder" />, from 1.</param>
 /// <param name="DrumGroups">Every drum group's, in the order of <see cref="SongMix.DrumGroupNames" />.</param>
 /// <param name="Volume">How loud the whole song plays, from 0 to 63.</param>
+/// <param name="DrumPieces">The drum pieces given, as a set, or not; every piece in or out, in the order of <see cref="Core.Composition.DrumPieces.All" />.</param>
 public sealed record SongSettings(
     Setting Unconventionality,
     ImmutableArray<Setting> Facets,
@@ -32,10 +33,14 @@ public sealed record SongSettings(
     ImmutableArray<PartSettings> Parts,
     int DrumSetup,
     ImmutableArray<DrumGroupSettings> DrumGroups,
-    int Volume
+    int Volume,
+    DrumPieceSettings DrumPieces
 )
 {
     /// <summary>The format this writes, as its first character; one that is read differently takes the next.</summary>
+    public const char FormatFive = '5';
+
+    /// <summary>The format before, which gave no drum pieces, read with the song's own.</summary>
     public const char FormatFour = '4';
 
     /// <summary>
@@ -68,20 +73,23 @@ public sealed record SongSettings(
     // every drum group is in the file
     private static int ValueCount(int parts) => 1 + FacetOrder.Length + 3 + 1 + 2 * parts + 1 + SongMix.DrumGroupNames.Length;
 
-    private static int SwitchCount(int parts) => 1 + FacetOrder.Length + 3 + 4 * parts + SongMix.DrumGroupNames.Length;
+    // and, in the format now, whether the drum pieces are given and every piece's being in or out
+    private static int SwitchCount(int parts, bool hasPieces) =>
+        1 + FacetOrder.Length + 3 + 4 * parts + SongMix.DrumGroupNames.Length + (hasPieces ? 1 + Core.Composition.DrumPieces.All.Length : 0);
 
-    private static int LengthOf(int parts) => ValueCount(parts) + 2 * parts + (SwitchCount(parts) + 5) / 6;
+    private static int LengthOf(int parts, bool hasPieces) => ValueCount(parts) + 2 * parts + (SwitchCount(parts, hasPieces) + 5) / 6;
 
     /// <summary>How many characters follow the format's.</summary>
-    public static int Length => LengthOf(PartOrder.Length);
+    public static int Length => LengthOf(PartOrder.Length, true);
 
     private IEnumerable<Setting> GivenValues => [Unconventionality, ..Facets, Tempo, Key, Meter];
 
     /// <summary>The settings as their format's character and a character for each value.</summary>
     public string Format()
     {
-        if (Facets.Length != FacetOrder.Length || Parts.Length != PartOrder.Length || DrumGroups.Length != SongMix.DrumGroupNames.Length)
-            throw new InvalidOperationException("Settings name every facet, part and drum group.");
+        if (Facets.Length != FacetOrder.Length || Parts.Length != PartOrder.Length || DrumGroups.Length != SongMix.DrumGroupNames.Length
+            || DrumPieces.Pieces.Length != Core.Composition.DrumPieces.All.Length)
+            throw new InvalidOperationException("Settings name every facet, part, drum group and drum piece.");
 
         var values = new List<int>();
         values.AddRange(GivenValues.Select(x => x.Value));
@@ -100,27 +108,29 @@ public sealed record SongSettings(
         foreach (var part in Parts)
             switches.AddRange([(part.Plays & 2) != 0, (part.Plays & 1) != 0, part.IsOn, part.Pan.IsGiven]);
         switches.AddRange(DrumGroups.Select(x => x.IsOn));
+        switches.AddRange([DrumPieces.IsGiven, ..DrumPieces.Pieces]);
         for (var i = 0; i < switches.Count; i += 6)
             values.Add(switches.Skip(i).Take(6).Select((x, bit) => x ? 1 << bit : 0).Sum());
 
         if (values.Any(x => x is < 0 or > 63))
             throw new InvalidOperationException("A value does not fit in a character.");
-        return FormatFour + new string([..values.Select(x => Base64.Digits[x])]);
+        return FormatFive + new string([..values.Select(x => Base64.Digits[x])]);
     }
 
     /// <summary>
     ///     Reads settings the page wrote, or none for anything that is not settings of the format; the formats before too,
-    ///     their tempo, and the solo part the oldest does not name, as the song draws them.
+    ///     their drum pieces, their tempo, and the solo part the oldest does not name, as the song draws them.
     /// </summary>
     public static SongSettings? Parse(string? text)
     {
         var partCount = text?.Length > 0 ? text[0] switch
         {
-            FormatFour or FormatThree => PartOrder.Length,
+            FormatFive or FormatFour or FormatThree => PartOrder.Length,
             FormatTwo => PartsOfFormatTwo,
             _ => 0
         } : 0;
-        if (text is null || partCount == 0 || text.Length != 1 + LengthOf(partCount))
+        var hasPieces = text?.Length > 0 && text[0] == FormatFive;
+        if (text is null || partCount == 0 || text.Length != 1 + LengthOf(partCount, hasPieces))
             return null;
 
         var values = text[1..].Select(x => Base64.Digits.IndexOf(x)).ToArray();
@@ -149,16 +159,19 @@ public sealed record SongSettings(
             }
         ).Concat(PartOrder.Skip(partCount).Select(_ => Unnamed)).ToImmutableArray();
         var groups = groupVolumes.Select(x => new DrumGroupSettings(switches[s++], x)).ToImmutableArray();
+        var pieces = hasPieces
+            ? new DrumPieceSettings(switches[s++], [..Core.Composition.DrumPieces.All.Select(_ => switches[s++])])
+            : DrumPieceSettings.Drawn;
 
         // a part plays as its own, in or out; a drum setup is one of three, or none; a key one of twelve; and a meter one
         // of its options, as every character is a tempo's step
         if (parts.Any(x => x.Plays > 2) || drumSetup > SetupOrder.Length || instruments.Any(x => x >= 256)
             || settings[^2].Value > 11 || settings[^1].Value >= Core.Composition.Meter.Options.Length)
             return null;
-        if (text[0] != FormatFour)
+        if (text[0] is FormatThree or FormatTwo)
             settings[^3] = new Setting(false, TempoScale.Middle);
 
-        return new SongSettings(settings[0], [..settings[1..^3]], settings[^3], settings[^2], settings[^1], parts, drumSetup, groups, volume);
+        return new SongSettings(settings[0], [..settings[1..^3]], settings[^3], settings[^2], settings[^1], parts, drumSetup, groups, volume, pieces);
     }
 
     /// <summary>
@@ -167,7 +180,8 @@ public sealed record SongSettings(
     ///     those given alone, every part's plays, and the drum setup, with the zeros at its end left off; empty where
     ///     nothing is given, for a song its seed alone names. The switches say how many values follow, so that it reads
     ///     one way only. A part the format before did not name comes after the drum setup, so that a song naming it as
-    ///     the song draws it is named as it was.
+    ///     the song draws it is named as it was, and the drum pieces given after it, six to a character behind a 1, so
+    ///     that a song with its own drums is named as it was.
     /// </summary>
     public string Identity
     {
@@ -181,6 +195,13 @@ public sealed record SongSettings(
             values.AddRange(Parts.Take(PartsOfFormatTwo).Select(x => x.Plays));
             values.Add(DrumSetup);
             values.AddRange(Parts.Skip(PartsOfFormatTwo).Select(x => x.Plays));
+            if (DrumPieces.IsGiven)
+            {
+                values.Add(1);
+                for (var i = 0; i < DrumPieces.Pieces.Length; i += 6)
+                    values.Add(DrumPieces.Pieces.Skip(i).Take(6).Select((x, bit) => x ? 1 << bit : 0).Sum());
+            }
+
             return new string([..values.Select(x => Base64.Digits[x])]).TrimEnd('0');
         }
     }
@@ -196,6 +217,14 @@ public sealed record Setting(bool IsGiven, int Value);
 /// <param name="Pan">Where it sits, from 0, left, through 32, the middle, to 63, right.</param>
 /// <param name="IsOn">Whether it is written in the file, rather than switched off.</param>
 public sealed record PartSettings(int Plays, Setting Instrument, int Volume, Setting Pan, bool IsOn);
+
+/// <param name="IsGiven">Whether the drum pieces are given, in place of those the song draws.</param>
+/// <param name="Pieces">Every piece's being in the song, in the order of <see cref="Core.Composition.DrumPieces.All" />, where they are given.</param>
+public sealed record DrumPieceSettings(bool IsGiven, ImmutableArray<bool> Pieces)
+{
+    /// <summary>The song's own drum pieces.</summary>
+    public static DrumPieceSettings Drawn { get; } = new(false, [..Core.Composition.DrumPieces.All.Select(_ => false)]);
+}
 
 /// <param name="IsOn">Whether its drums are written in the file.</param>
 /// <param name="Volume">How loud its drums play, from 0 to 63.</param>

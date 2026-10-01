@@ -58,6 +58,13 @@ public sealed class GenerateSongRequestTest
     }
 
     [Test]
+    public async Task DrumPieces_AreGivenAsASet()
+    {
+        await Assert.That(new GenerateSongRequest(DrumPieces: ["kick", "conga", "kick"]).TryRead(out _, out var overrides, out _, out _)).IsTrue();
+        await Assert.That(overrides.DrumPieces!.SetEquals(["kick", "conga"])).IsTrue();
+    }
+
+    [Test]
     [Arguments(0, 60.0)]
     [Arguments(32, 120.0)]
     [Arguments(63, 240.0)]
@@ -88,6 +95,8 @@ public sealed class GenerateSongRequestTest
     [Arguments("tempo")]
     [Arguments("key")]
     [Arguments("meter")]
+    [Arguments("noPieces")]
+    [Arguments("piece")]
     public async Task AnythingOutOfItsRange_OrUnknown_IsRefused(string what)
     {
         var request = what switch
@@ -98,6 +107,8 @@ public sealed class GenerateSongRequestTest
             "part" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["kazoo"] = new() }),
             "instrument" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["bass"] = new(Instrument: 128) }),
             "setup" => new GenerateSongRequest(DrumSetup: "orchestra"),
+            "noPieces" => new GenerateSongRequest(DrumPieces: []),
+            "piece" => new GenerateSongRequest(DrumPieces: ["kick", "gong"]),
             "group" => new GenerateSongRequest(DrumGroups: new Dictionary<string, DrumGroupRequest> { ["gong"] = new() }),
             "seed" => new GenerateSongRequest("zzzzzzzzzzzz"),
             "tempo" => new GenerateSongRequest(Tempo: 64),

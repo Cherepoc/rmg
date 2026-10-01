@@ -15,6 +15,7 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Facets">Every facet's, by its name.</param>
 /// <param name="Parts">Every part's, by its role's name.</param>
 /// <param name="DrumSetup">The drums it plays.</param>
+/// <param name="DrumPieces">The drum pieces it plays, by their names (<c>/api/songs/options</c>).</param>
 /// <param name="DrumGroups">The drum groups it plays, by name.</param>
 /// <param name="Tempo">Its tempo, by its step (<see cref="TempoScale" />), the nearest to a tempo it drew.</param>
 /// <param name="Key">Its key, as semitones above C.</param>
@@ -24,6 +25,7 @@ public sealed record SongReport(
     ImmutableSortedDictionary<string, Drawn<int>> Facets,
     ImmutableSortedDictionary<string, PartReport> Parts,
     Drawn<string> DrumSetup,
+    Drawn<ImmutableArray<string>> DrumPieces,
     ImmutableArray<string> DrumGroups,
     Drawn<int> Tempo,
     Drawn<int> Key,
@@ -56,7 +58,8 @@ public sealed record SongReport(
                     GenerateSongRequest.ToPanStep(own[role].Pan)
                 )
             ),
-            new Drawn<string>(Name(draws.DrumSetup), overrides.DrumSetup is not null),
+            new Drawn<string>(Name(draws.DrumSetup), overrides.DrumSetup is not null || overrides.DrumPieces is not null),
+            new Drawn<ImmutableArray<string>>(draws.DrumPieces, overrides.DrumPieces is not null),
             [..groups.Select(Name)],
             new Drawn<int>(TempoScale.StepOf(common.GetStateValue(StateKinds.Tempo)), overrides.Tempo is not null),
             new Drawn<int>(common.GetStateValue(StateKinds.KeyOffset).Mod(12), overrides.Key is not null),

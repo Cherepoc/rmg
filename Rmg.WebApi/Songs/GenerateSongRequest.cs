@@ -22,6 +22,10 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Volume">How loud the whole song plays, 63 as it is made. None is 63.</param>
 /// <param name="Parts">A part given, by its role's name: "melody", "chords", "bass", "pad", "counterMelody" or "drum".</param>
 /// <param name="DrumSetup">The drums the song plays: "kit", "kitAndPercussion" or "percussion".</param>
+/// <param name="DrumPieces">
+///     The drum pieces the song plays, by their names (<c>/api/songs/options</c>), in place of those it draws, which make
+///     its setup over <paramref name="DrumSetup" />.
+/// </param>
 /// <param name="DrumGroups">A drum group's mix, by its name, such as "kick".</param>
 /// <param name="Tempo">The tempo, by its step from 0, 60 beats a minute, through 32, 120, to 63, 240 (<see cref="TempoScale" />).</param>
 /// <param name="Key">The key, as semitones above C, from 0 to 11.</param>
@@ -36,7 +40,8 @@ public sealed record GenerateSongRequest(
     IReadOnlyDictionary<string, DrumGroupRequest>? DrumGroups = null,
     int? Tempo = null,
     int? Key = null,
-    int? Meter = null
+    int? Meter = null,
+    IReadOnlyList<string>? DrumPieces = null
 )
 {
     /// <summary>The last step of an amount, from 0: as many as a character of the settings holds.</summary>
@@ -108,6 +113,11 @@ public sealed record GenerateSongRequest(
             drumSetup = setup;
         }
 
+        if (DrumPieces is { Count: 0 })
+            return Fail("No drum pieces are given; leave the drums out instead.", out error);
+        if (DrumPieces?.FirstOrDefault(x => !Core.Composition.DrumPieces.IsPiece(x)) is { } unknown)
+            return Fail($"{unknown} is not a drum piece. Pieces are {string.Join(", ", Core.Composition.DrumPieces.All.Select(x => x.Name))}.", out error);
+
         var groups = ImmutableDictionary.CreateBuilder<string, DrumGroupMix>();
         foreach (var (name, group) in DrumGroups ?? ImmutableDictionary<string, DrumGroupRequest>.Empty)
         {
@@ -131,6 +141,7 @@ public sealed record GenerateSongRequest(
             Facets: facets.Count > 0 ? facets.ToImmutable() : null,
             Parts: parts.Count > 0 ? parts.ToImmutable() : null,
             DrumSetup: drumSetup,
+            DrumPieces: DrumPieces is null ? null : [..DrumPieces],
             MeterOption: Meter,
             Tempo: Tempo is { } tempo ? TempoScale.Multiplier(tempo) : null,
             Key: Key

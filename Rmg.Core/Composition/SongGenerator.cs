@@ -452,7 +452,7 @@ public static class SongGenerator
             (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Expression), section), track))
         );
 
-        return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality, [..SongParts.All.Except(absent)], tracks.DrumSetup));
+        return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality, [..SongParts.All.Except(absent)], tracks.DrumSetup, [..tracks.SongDrums.Select(DrumPieces.NameOf)]));
     }
 
     /// <summary>The random sequence a stage of the song of the given seed draws from.</summary>
