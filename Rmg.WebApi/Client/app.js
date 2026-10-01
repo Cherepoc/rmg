@@ -67,6 +67,7 @@ const elements = {
     share: document.getElementById("share"),
     bitrate: document.getElementById("bitrate"),
     previous: document.getElementById("previous"),
+    next: document.getElementById("next"),
     play: document.getElementById("play"),
     stop: document.getElementById("stop"),
     seek: document.getElementById("seek"),
@@ -957,6 +958,7 @@ function cancelRegeneration() {
 function updateGenerateButtons() {
     elements.generate.disabled = arrival !== null || isEveryPartOff(settings);
     elements.generateSeeded.disabled = isEveryPartOff(settings) || elements.seedInput.value.trim() === "";
+    updateWalkButtons();
 }
 
 /** Says, where the settings are and on the status line, that every part is off, and why nothing can be generated. */
@@ -1051,7 +1053,7 @@ elements.clearHistory.addEventListener("click", () => {
     elements.history.replaceChildren();
     elements.clearHistory.disabled = true;
     keepHistory([]);
-    updatePrevious();
+    updateWalkButtons();
 });
 
 /**
@@ -1097,7 +1099,7 @@ function markCurrentSong(name) {
         else item.removeAttribute("aria-current");
     }
 
-    updatePrevious();
+    updateWalkButtons();
 }
 
 /** The song heard before the one on the page, the next down the list, null where there is none. */
@@ -1105,20 +1107,37 @@ function previousSong() {
     return elements.history.querySelector("[aria-current]")?.nextElementSibling ?? null;
 }
 
-function updatePrevious() {
+/** The song heard after the one on the page, the next up the list, null where it is the latest. */
+function nextSong() {
+    return elements.history.querySelector("[aria-current]")?.previousElementSibling ?? null;
+}
+
+/** Previous wants a song before; Next, past the latest, a new one, which wants what Generate does. */
+function updateWalkButtons() {
     elements.previous.disabled = previousSong() === null;
+    elements.next.disabled = nextSong() === null && elements.generate.disabled;
 }
 
-/** The song before, asked for as it was heard, keeping its place on the list. */
-function playPrevious() {
-    const item = previousSong();
-    if (item === null) return;
-
+/** A song of the list, asked for as it was heard, keeping its place on it. */
+function playFromList(item, origin) {
     const { seed, entrySettings } = readEntry(item.dataset.entry);
-    playNew(seed, "previous", entrySettings, { keepsPlace: true });
+    playNew(seed, origin, entrySettings, { keepsPlace: true });
 }
 
-elements.previous.addEventListener("click", playPrevious);
+function playPrevious(origin = "previous") {
+    const item = previousSong();
+    if (item !== null) playFromList(item, origin);
+}
+
+/** The song heard after this one, or a new one from the latest, the way a song running out leads to one. */
+function playNext(origin = "next") {
+    const item = nextSong();
+    if (item !== null) playFromList(item, origin);
+    else if (!elements.generate.disabled) playNew(null, origin);
+}
+
+elements.previous.addEventListener("click", () => playPrevious());
+elements.next.addEventListener("click", () => playNext());
 
 /** A song of the list, as its entry keeps it: its seed, and the settings it was asked for with. */
 function readEntry(entry) {
@@ -1328,15 +1347,15 @@ async function startPlaying(player, origin = null) {
 }
 
 /**
- *     The lock screen and media keys, which drive the page the way its own buttons do. Next is a new
- *     random song, the way the song after this one would be.
+ *     The lock screen and media keys, which drive the page the way its own buttons do, Previous and Next walking the
+ *     list as theirs do.
  */
 const mediaControls = createMediaControls({
     play: () => playOrPause(true),
     pause: () => playOrPause(false),
     stop: () => elements.stop.click(),
-    next: () => playNew(null, "lockscreen"),
-    previous: playPrevious,
+    next: () => playNext("lockscreen"),
+    previous: () => playPrevious("lockscreen"),
     seek: (time, offset) => withPlayer((player) => {
         const duration = player.duration;
         const target = Math.min(Math.max(time ?? player.currentTime + offset, 0), duration);

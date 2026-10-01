@@ -1,11 +1,11 @@
 namespace Rmg.Tests.Page;
 
 /// <summary>
-///     Going back to a song heard before: Previous walks down the list, each song gone back to keeping its place, and a seed
-///     typed is asked for as it is.
+///     Walking the songs heard: Previous goes down the list and Next back up it, each song gone to keeping its place, Next
+///     past the latest asking for a new one; and a seed typed is asked for as it is.
 /// </summary>
 [ClassDataSource<Site>(Shared = SharedType.PerTestSession)]
-public sealed class GoingBackTest(Site site)
+public sealed class WalkingTheListTest(Site site)
 {
     [Test]
     public async Task Previous_WalksDownTheList_KeepingItsOrder()
@@ -26,6 +26,31 @@ public sealed class GoingBackTest(Site site)
 
         // the oldest has nothing before it
         await Assert.That(await previous.IsEnabledAsync()).IsFalse();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task Next_WalksBackUpTheList_ThenAsksForANewSong()
+    {
+        await using var page = await SongPage.Open(site);
+        await page.FirstSong();
+        await page.Generate();
+        var heard = await page.History();
+        var latest = heard[0];
+        await page.Page.Locator("#previous").ClickAsync();
+        await page.Until(async () => await page.Seed() == heard[1] && await page.IsGenerateEnabled(), "the first song gone back to");
+        var next = page.Page.Locator("#next");
+
+        await next.ClickAsync();
+        await page.Until(async () => await page.Seed() == latest && await page.IsGenerateEnabled(), "the latest song gone on to");
+        await Assert.That(await page.History()).IsEquivalentTo(heard, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+
+        // past the latest, a new random song on top
+        var asked = page.Requests.Count;
+        await next.ClickAsync();
+        await page.Until(async () => await page.Seed() != latest && await page.IsGenerateEnabled(), "a new song");
+        await Assert.That(page.Since(asked).Single().Seed).IsNull();
+        await Assert.That((await page.History())[0]).IsEqualTo(await page.Seed());
         await Assert.That(page.Errors).IsEmpty();
     }
 
