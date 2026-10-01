@@ -34,6 +34,9 @@ internal static class TracePoints
     /// </summary>
     public const string LineDoubling = "Line doubling";
 
+    /// <summary>A part that solos in the song, and the soloist it is (a tuple of a <see cref="Songs.TrackRole" /> and a <see cref="Soloist" />).</summary>
+    public const string Soloist = "Soloist";
+
     /// <summary>
     ///     A pitched solo's line as its soloists take it: the appearance's place and how many of the melody's notes there are
     ///     to solo on (a tuple of two <c>int</c>s), none leaving the parts to play as they would.
