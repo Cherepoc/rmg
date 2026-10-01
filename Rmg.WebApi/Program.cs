@@ -55,6 +55,15 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 // song down
 builder.Services.AddSingleton(new SongQueue(Environment.ProcessorCount, 4 * Environment.ProcessorCount, 4));
 
+// kept beside the app rather than in it, so a deploy replaces the app and leaves the figures alone, and with them what
+// the server measured of every song asked of it
+var events = settings!.IsCounting
+    ? EventStore.Create(settings.StateDirectory, settings.RetentionDays, settings.EventsPerVisitorPerDay)
+    : null;
+builder.Services.AddSingleton(provider => events is null
+    ? SongLog.Off
+    : SongLog.To(events, provider.GetRequiredService<ILogger<SongLog>>()));
+
 // a song holds its thread until it is made, and the pool starts only as many threads at once as there are cores, so
 // with every core making one, the rest of the server, a page, a soundfont or the next song let out of the queue, would
 // wait for the pool to notice and add a thread; it gets as many again of its own
@@ -117,14 +126,12 @@ app.UseStaticFiles(new StaticFileOptions
 app.MapSoundFonts(soundFonts);
 app.MapSongs();
 
-if (settings.IsCounting)
+if (events is not null)
 {
-    // kept beside the app rather than in it, so a deploy replaces the app and leaves the figures alone
-    var events = EventStore.Create(settings.StateDirectory, settings.RetentionDays, settings.EventsPerVisitorPerDay);
     var pruned = events.Prune(DateTimeOffset.UtcNow);
 
     app.Logger.LogInformation(
-        "Keeping analytics in {Directory} for {Days} days; {Pruned} older events were dropped",
+        "Keeping analytics in {Directory} for {Days} days; {Pruned} older events and songs were dropped",
         settings.StateDirectory, settings.RetentionDays, pruned);
 
     if (settings.DashboardToken is null)

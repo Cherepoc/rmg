@@ -13,6 +13,11 @@ public sealed class EventStore
     private readonly string _connectionString;
     private readonly Lock _writing = new();
 
+    // how many songs today's measurements are of, read from the file on the first of a day, so that a flood of
+    // requests, refused for next to nothing, cannot fill the disk with rows
+    private string? _songsDay;
+    private int _songsToday;
+
     // the day the store last threw away what is older than it keeps, which the first write of every day does again,
     // so that a server that runs for weeks keeps no more than one started today would
     private string? _prunedDay;
@@ -29,6 +34,12 @@ public sealed class EventStore
 
     /// <summary>How many events one visitor can write in one day, which is well above honest use.</summary>
     public int DailyEventsPerVisitor { get; }
+
+    /// <summary>
+    ///     How many songs' measurements are kept in one day, well above what the server makes, as many as two a second
+    ///     all day long, and a few megabytes.
+    /// </summary>
+    public const int DailySongs = 200_000;
 
     public static EventStore Create(
         string directory,
@@ -116,6 +127,28 @@ public sealed class EventStore
         using var indexing = connection.CreateCommand();
         indexing.CommandText = "CREATE INDEX IF NOT EXISTS events_version_name ON events (version, name)";
         indexing.ExecuteNonQuery();
+
+        // what the server measured of every song asked of it, which is nothing about who asked
+        using var songs = connection.CreateCommand();
+        songs.CommandText = """
+            CREATE TABLE IF NOT EXISTS songs (
+                id                INTEGER PRIMARY KEY AUTOINCREMENT,
+                at                TEXT    NOT NULL,
+                day               TEXT    NOT NULL,
+                outcome           TEXT    NOT NULL,
+                wait_ms           INTEGER NOT NULL,
+                make_ms           INTEGER NULL,
+                render_ms         INTEGER NULL,
+                running           INTEGER NOT NULL,
+                waiting           INTEGER NOT NULL,
+                version           TEXT    NOT NULL,
+                unconventionality INTEGER NULL,
+                notes             INTEGER NULL
+            );
+
+            CREATE INDEX IF NOT EXISTS songs_day ON songs (day);
+            """;
+        songs.ExecuteNonQuery();
     }
 
     /// <summary>
@@ -165,6 +198,54 @@ public sealed class EventStore
         }
     }
 
+    /// <summary>
+    ///     Writes what the server measured of a song, unless as many songs have been written today as are kept
+    ///     (<see cref="DailySongs" />). Answers whether it was kept.
+    /// </summary>
+    public bool Write(SongMeasurement song)
+    {
+        lock (_writing)
+        {
+            using var connection = Open();
+            var day = Day(song.At);
+            if (_prunedDay != day)
+                PruneOlder(connection, song.At);
+
+            if (_songsDay != day)
+            {
+                using var counting = connection.CreateCommand();
+                counting.CommandText = "SELECT COUNT(*) FROM songs WHERE day = $day";
+                counting.Parameters.AddWithValue("$day", day);
+                _songsToday = Convert.ToInt32(counting.ExecuteScalar());
+                _songsDay = day;
+            }
+
+            if (_songsToday >= DailySongs) return false;
+
+            using var writing = connection.CreateCommand();
+            writing.CommandText = """
+                INSERT INTO songs (at, day, outcome, wait_ms, make_ms, render_ms, running, waiting, version, unconventionality, notes)
+                VALUES ($at, $day, $outcome, $wait, $make, $render, $running, $waiting, $version, $unconventionality, $notes)
+                """;
+
+            writing.Parameters.AddWithValue("$at", song.At.UtcDateTime.ToString("O"));
+            writing.Parameters.AddWithValue("$day", day);
+            writing.Parameters.AddWithValue("$outcome", SongOutcomes.Name(song.Outcome));
+            writing.Parameters.AddWithValue("$wait", song.WaitMs);
+            writing.Parameters.AddWithValue("$make", (object?)song.MakeMs ?? DBNull.Value);
+            writing.Parameters.AddWithValue("$render", (object?)song.RenderMs ?? DBNull.Value);
+            writing.Parameters.AddWithValue("$running", song.Running);
+            writing.Parameters.AddWithValue("$waiting", song.Waiting);
+            writing.Parameters.AddWithValue("$version", song.Version);
+            writing.Parameters.AddWithValue("$unconventionality", (object?)song.Unconventionality ?? DBNull.Value);
+            writing.Parameters.AddWithValue("$notes", (object?)song.Notes ?? DBNull.Value);
+
+            writing.ExecuteNonQuery();
+            _songsToday++;
+            return true;
+        }
+    }
+
     /// <summary>Throws away everything older than <see cref="RetentionDays" />, and says how much went.</summary>
     public int Prune(DateTimeOffset now)
     {
@@ -178,7 +259,7 @@ public sealed class EventStore
     private int PruneOlder(SqliteConnection connection, DateTimeOffset now)
     {
         using var command = connection.CreateCommand();
-        command.CommandText = "DELETE FROM events WHERE day < $oldest";
+        command.CommandText = "DELETE FROM events WHERE day < $oldest; DELETE FROM songs WHERE day < $oldest";
         command.Parameters.AddWithValue("$oldest", Day(now.AddDays(-RetentionDays)));
         var pruned = command.ExecuteNonQuery();
         _prunedDay = Day(now);

@@ -405,4 +405,66 @@ public sealed class EventStoreTest : IDisposable
         await Assert.That(rated.Likes).IsEqualTo(0);
         await Assert.That(rated.Dislikes).IsEqualTo(1);
     }
+
+    private static SongMeasurement Song(SongOutcome outcome, DateTimeOffset? at = null) => outcome == SongOutcome.Made
+        ? new SongMeasurement(at ?? Now, outcome, 12, 340, 25, 3, 1, "0.6.000", 40, 5000)
+        : new SongMeasurement(at ?? Now, outcome, 12, null, null, 3, 1, "0.6.000", null, null);
+
+    [Test]
+    public async Task ASongsMeasurements_AreKept_WithHowItEnded()
+    {
+        foreach (var outcome in Enum.GetValues<SongOutcome>()) await Assert.That(_store.Write(Song(outcome))).IsTrue();
+
+        using var connection = _store.OpenForReading();
+        using var reading = connection.CreateCommand();
+        reading.CommandText = "SELECT outcome, wait_ms, make_ms, render_ms, running, waiting, version, unconventionality, notes FROM songs ORDER BY id";
+        using var rows = reading.ExecuteReader();
+
+        await Assert.That(rows.Read()).IsTrue();
+        await Assert.That(rows.GetString(0)).IsEqualTo("made");
+        await Assert.That(new[] { rows.GetInt64(1), rows.GetInt64(2), rows.GetInt64(3), rows.GetInt64(4), rows.GetInt64(5), rows.GetInt64(7), rows.GetInt64(8) })
+            .IsEquivalentTo(new long[] { 12, 340, 25, 3, 1, 40, 5000 });
+        await Assert.That(rows.GetString(6)).IsEqualTo("0.6.000");
+
+        var others = new List<string>();
+        while (rows.Read())
+        {
+            others.Add(rows.GetString(0));
+            await Assert.That(rows.IsDBNull(2) && rows.IsDBNull(3) && rows.IsDBNull(7) && rows.IsDBNull(8)).IsTrue();
+        }
+
+        await Assert.That(others).IsEquivalentTo(new[] { "cancelled_waiting", "cancelled_making", "refused_client", "refused_full", "failed" });
+    }
+
+    [Test]
+    public async Task OldSongsAreThrownAway_AsOldEventsAre()
+    {
+        _store.Write(Song(SongOutcome.Made, Now.AddDays(-(_store.RetentionDays + 1))));
+        _store.Write(Song(SongOutcome.Made, Now.AddDays(-1)));
+
+        await Assert.That(_store.Prune(Now)).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task ADaysSongs_AreKept_OnlyAsManyAsADayKeeps()
+    {
+        // a day all but full, filled in one go rather than written one by one
+        using (var connection = _store.OpenForReading())
+        using (var filling = connection.CreateCommand())
+        {
+            filling.CommandText = """
+                WITH RECURSIVE n(i) AS (SELECT 1 UNION ALL SELECT i + 1 FROM n WHERE i < $count)
+                INSERT INTO songs (at, day, outcome, wait_ms, running, waiting, version)
+                SELECT $at, $day, 'refused_full', 0, 0, 0, '0.6.000' FROM n
+                """;
+            filling.Parameters.AddWithValue("$count", EventStore.DailySongs - 1);
+            filling.Parameters.AddWithValue("$at", Now.UtcDateTime.ToString("O"));
+            filling.Parameters.AddWithValue("$day", EventStore.Day(Now));
+            filling.ExecuteNonQuery();
+        }
+
+        await Assert.That(_store.Write(Song(SongOutcome.Made))).IsTrue();
+        await Assert.That(_store.Write(Song(SongOutcome.Made))).IsFalse();
+        await Assert.That(_store.Write(Song(SongOutcome.Made, Now.AddDays(1)))).IsTrue();
+    }
 }

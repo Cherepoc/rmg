@@ -18,6 +18,15 @@ public sealed class SongQueue(int running, int waiting, int waitingPerClient)
     private int _running;
     private int _waiting;
 
+    /// <summary>How many songs are being made and how many are waiting their turns, as of now.</summary>
+    public (int Running, int Waiting) Load
+    {
+        get
+        {
+            lock (_lock) return (_running, _waiting);
+        }
+    }
+
     /// <summary>
     ///     A turn to make a song, or why there is none; one given is held until it is disposed, which hands it to the
     ///     next song waiting.

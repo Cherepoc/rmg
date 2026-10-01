@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Text.Json;
 using Rmg.Core;
 using Rmg.Core.Composition;
@@ -6,6 +7,7 @@ using Rmg.Core.Probabilities;
 using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
 using Rmg.Core.Versions;
+using Rmg.WebApi.Analytics;
 
 namespace Rmg.WebApi.Songs;
 
@@ -30,17 +32,40 @@ public static class SongEndpoints
     /// <summary>
     ///     Writes a song as a MIDI file. What it is made of is reported in the headers, since the body is the file
     ///     itself. A song waits its turn (<see cref="SongQueue" />), and one turned away is told to ask again in a moment.
+    ///     How long it waited and took, and how it ended, is kept (<see cref="SongLog" />) once its turn is given back, so
+    ///     that no core waits on the disk.
     /// </summary>
-    private static async Task<IResult> GenerateSong(HttpContext context, SongQueue queue, GenerateSongRequest? request)
+    private static async Task<IResult> GenerateSong(HttpContext context, SongQueue queue, SongLog log, GenerateSongRequest? request)
     {
         request ??= new GenerateSongRequest();
 
         if (!request.TryRead(out var seed, out var overrides, out var mix, out var error))
             return Results.BadRequest(new ErrorResponse(error!));
 
-        using var turn = await queue.Enter(SongQueue.ClientOf(context.Connection.RemoteIpAddress), context.RequestAborted);
+        var arrived = Stopwatch.GetTimestamp();
+        var (running, waiting) = queue.Load;
+        long waited;
+        long? made = null, rendered = null;
+        int? unconventionality = null, notes = null;
+        void Record(SongOutcome outcome) => log.Write(new SongMeasurement(
+            DateTimeOffset.UtcNow, outcome, waited, made, rendered, running, waiting, SongsVersion.Number, unconventionality, notes));
+
+        SongQueue.Turn turn;
+        try
+        {
+            turn = await queue.Enter(SongQueue.ClientOf(context.Connection.RemoteIpAddress), context.RequestAborted);
+        }
+        catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
+        {
+            waited = Milliseconds(arrived);
+            Record(SongOutcome.CancelledWaiting);
+            throw;
+        }
+
+        waited = Milliseconds(arrived);
         if (turn.Refusal is { } refusal)
         {
+            Record(refusal == SongQueue.Refusal.Client ? SongOutcome.RefusedClient : SongOutcome.RefusedFull);
             context.Response.Headers.RetryAfter = "1";
             return refusal == SongQueue.Refusal.Client
                 ? Results.Problem("You have as many songs waiting as you may.", statusCode: StatusCodes.Status429TooManyRequests)
@@ -49,24 +74,50 @@ public static class SongEndpoints
 
         var songSeed = seed ?? Seeds.Random();
 
-        MemoryStream stream;
-        SongReport report;
-        try
+        IResult result;
+        SongOutcome ended;
+        using (turn)
         {
-            // a song nobody waits for any more is given up, its core going to the next
-            var song = SongGenerator.GenerateSong(songSeed, overrides, context.RequestAborted);
-            var renderedSong = Render.RenderSong(song, mix, context.RequestAborted);
-            report = SongReport.Of(song, renderedSong, overrides);
+            try
+            {
+                // a song nobody waits for any more is given up, its core going to the next
+                var started = Stopwatch.GetTimestamp();
+                var song = SongGenerator.GenerateSong(songSeed, overrides, context.RequestAborted);
+                made = Milliseconds(started);
+                notes = song.Notes?.Values.Sum(x => x.Count);
 
-            stream = new MemoryStream();
-            renderedSong.Write(stream, SongsVersion.Label(songSeed));
-            stream.Seek(0, SeekOrigin.Begin);
-        }
-        catch (Exception ex) when (!context.RequestAborted.IsCancellationRequested)
-        {
-            return Results.Problem($"Song {Base64.FromSeed(songSeed)}: {ex.Message}", statusCode: 500);
+                started = Stopwatch.GetTimestamp();
+                var renderedSong = Render.RenderSong(song, mix, context.RequestAborted);
+                var report = SongReport.Of(song, renderedSong, overrides);
+                var stream = new MemoryStream();
+                renderedSong.Write(stream, SongsVersion.Label(songSeed));
+                stream.Seek(0, SeekOrigin.Begin);
+                rendered = Milliseconds(started);
+                unconventionality = report.Unconventionality.Value;
+
+                ended = SongOutcome.Made;
+                result = Respond(context, songSeed, report, stream);
+            }
+            catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
+            {
+                ended = SongOutcome.CancelledMaking;
+                result = Results.Empty;
+            }
+            catch (Exception ex)
+            {
+                ended = SongOutcome.Failed;
+                result = Results.Problem($"Song {Base64.FromSeed(songSeed)}: {ex.Message}", statusCode: 500);
+            }
         }
 
+        Record(ended);
+        return result;
+    }
+
+    private static long Milliseconds(long since) => (long)Stopwatch.GetElapsedTime(since).TotalMilliseconds;
+
+    private static IResult Respond(HttpContext context, ulong songSeed, SongReport report, MemoryStream stream)
+    {
         // lets the page show and reuse the seed it actually got when it asked for a random one
         context.Response.Headers["X-Song-Seed"] = Base64.FromSeed(songSeed);
 
