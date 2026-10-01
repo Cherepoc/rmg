@@ -362,8 +362,10 @@ internal static class Expression
                     // every note draws whether it bends, and how, so that the draws stay as they are
                     // a release bends into it now and then, the likelier the more intense, and slides into it never
                     var isRelease = note.Value.State.GetStateValue(CompositionStateKinds.SoloRelease) == 1;
+                    // a soloist's note bends as often as it bends a note, leaned by its lean to bends as well as by the intensity
                     var bendsNow = context.TestProbability(soloist is null ? Math.Min(1, bendChance * (isSolo ? 3 : 1))
-                        : intensity.Chance(isRelease ? ReleaseBendChance : Math.Min(1, bendChance * 3), 1));
+                        : isRelease ? intensity.Chance(ReleaseBendChance, 1)
+                        : new Tilt(intensity.LogOdds + Tilt.Of(StrengthOdds, soloist.BendLean - Soloist.ExpressionLean).LogOdds).Chance(soloist.BendRate, 1));
                     var kind = context.Pick(bendKinds);
                     if (isRelease)
                         kind = context.Pick(ReleaseBends);

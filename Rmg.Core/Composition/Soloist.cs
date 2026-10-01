@@ -50,9 +50,16 @@ internal sealed record Soloist(
     ImmutableArray<int> PhraseBars,
     double OffBarChance,
     double BreathChance,
-    ImmutableDictionary<SoloGesture, double> GestureWeights
+    ImmutableDictionary<SoloGesture, double> GestureWeights,
+    double BendRate
 )
 {
+    /// <summary>
+    ///     How often a soloist that bends bends a note it holds, an 8th or longer, by the sound facet: a third of them in the
+    ///     middle, as a rock guitarist bends, most of them at the wild end; leaned by its lean to bends and its solo's intensity.
+    /// </summary>
+    public static ByConvention BendRates { get; } = new(0, 0.35, 0.85);
+
     /// <summary>
     ///     The fastest a soloist plays, in notes a second, which its speeds keep under at a song's tempo: a plain one's
     ///     16ths at 120, a middling one's sextuplets at 130, a wild one's 64ths at 105.
@@ -179,7 +186,7 @@ internal sealed record Soloist(
         var stamina = Math.Pow(2, StaminaPowers.At(melody) + StaminaSpread.At(melody) * Generators.SplineValue()(context));
         var phraseBars = Favourites(context, PhraseBarOptions, melody);
         return new Soloist([..speeds.Concat(fastest).Order()], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody), bends, vibrates, stamina,
-            phraseBars, OffBarChances.At(melody), BreathChances.At(melody), SoloLines.Gestures.ToImmutableDictionary(x => x.Gesture, x => x.Weight.At(melody)));
+            phraseBars, OffBarChances.At(melody), BreathChances.At(melody), SoloLines.Gestures.ToImmutableDictionary(x => x.Gesture, x => x.Weight.At(melody)), BendRates.At(sound));
     }
 
     /// <summary>The options a soloist favours, as many as it draws, each picked from those left.</summary>
