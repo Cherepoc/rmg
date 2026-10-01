@@ -281,7 +281,7 @@ public static class SongGenerator
         songTrackNoteTimelineMap = songTrackNoteTimelineMap.MergeStateTimelineMap(form.SongState)
             .MergeStateTimelineMap(KeyChange.ToStateTimelineMap(preparedKeys, form.Map.Duration))
             .MergeStateTimelineMap(preparedRoots)
-            .MergeStateTimelineMap(SectionTempo.ToStateTimelineMap(sectionTempos, form.Map, form.Map.Duration))
+            .MergeStateTimelineMap(SectionTempo.ToStateTimelineMap(sectionTempos, form.Map, form.Map.Duration, place => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.TempoRamps), place))))
             .MergeStateMap(commonStateMap)
             .MergeStateMap(Groove.ToStateMap(swing, grooveContext));
 
@@ -543,5 +543,6 @@ internal enum SongStream
     SoloAnswers = 48,
     MelodyFills = 49,
     KeyPreparation = 50,
-    SoloMotifs = 51
+    SoloMotifs = 51,
+    TempoRamps = 52
 }

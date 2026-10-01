@@ -9,7 +9,8 @@ namespace Rmg.Core.Composition;
 ///     A section playing at a tempo of its own, every time it plays, by the feel facet of the song's unconventionality:
 ///     never in the plainest song, which keeps its tempo; now and then at the middle, a chorus or a bridge the likelier,
 ///     a little slower or faster most often; and every section but the first at the wild end, by any step. The tempo
-///     changes where the section starts, and the ending slows from the last section's.
+///     changes where the section starts, eased into over the bar before half the time, but where it changes by a metric
+///     ratio, which a pulse taken over is heard in; and the ending slows from the last section's.
 /// </summary>
 internal static class SectionTempo
 {
@@ -54,19 +55,48 @@ internal static class SectionTempo
         });
     }
 
-    /// <summary>The tempo, as a multiple of the song's, from every section's start on; none for a song that keeps its tempo.</summary>
-    public static StateTimelineMap ToStateTimelineMap(ImmutableDictionary<int, double> tempos, SongMap map, double duration)
+    /// <summary>The chance a change of tempo is eased into over the bar before, beat by beat, rather than taken at once.</summary>
+    public const double RampChance = 0.5;
+
+    /// <summary>
+    ///     The ratios of a tempo to the one before that a pulse of the one becomes the beat of the other at, as a triplet's
+    ///     quarter does at 3:2: taken at once, never eased into, so that the pulse is heard taken over.
+    /// </summary>
+    public static ImmutableArray<double> MetricRatios { get; } = [1.5, 4 / 3.0, 2 / 3.0, 0.75];
+
+    /// <summary>
+    ///     The tempo, as a multiple of the song's, from every section's start on, eased into over the bar before now and
+    ///     then, beat by beat, evenly in its ratio, but for a metric one; none for a song that keeps its tempo.
+    /// </summary>
+    /// <param name="ramps">A change's draws, by the place among the song's sections of the section it changes to.</param>
+    public static StateTimelineMap ToStateTimelineMap(ImmutableDictionary<int, double> tempos, SongMap map, double duration, Func<int, IGenerationContext> ramps)
     {
         // ReSharper disable once CompareOfFloatsByEqualityOperator
         if (tempos.Values.All(x => x == 1))
             return StateTimelineMap.Create(duration);
 
-        IStateTimeline tempo = StateTimeline.Create(
-                duration,
-                StateKinds.Tempo,
-                map.Sections.Select(x => tempos[x.SectionId].ToTimelineItem(x.Start))
-            )
-            .WithLayer("Section tempo");
+        var items = new List<TimelineItem<double>>();
+        for (var i = 0; i < map.Sections.Length; i++)
+        {
+            var (section, next) = (map.Sections[i], tempos[map.Sections[i].SectionId]);
+            if (i > 0)
+            {
+                var before = tempos[map.Sections[i - 1].SectionId];
+                var eases = ramps(i).TestProbability(RampChance);
+                var ratio = next / before;
+                if (eases && Math.Abs(ratio - 1) > 1e-9 && !MetricRatios.Any(x => Math.Abs(x - ratio) < 1e-9))
+                {
+                    var bar = map.Sections[i - 1].Meter.BarDuration;
+                    var beats = (int)Math.Ceiling(bar - 1e-9);
+                    for (var k = 0; k < beats; k++)
+                        items.Add((before * Math.Pow(ratio, (k + 1) / (double)(beats + 1))).ToTimelineItem(section.Start - bar + k));
+                }
+            }
+
+            items.Add(next.ToTimelineItem(section.Start));
+        }
+
+        IStateTimeline tempo = StateTimeline.Create(duration, StateKinds.Tempo, items).WithLayer("Section tempo");
         return new[] { tempo }.ToStateTimelineMap(duration);
     }
 }

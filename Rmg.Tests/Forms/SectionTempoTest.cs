@@ -1,3 +1,4 @@
+using Rmg.Core;
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
@@ -26,6 +27,39 @@ public sealed class SectionTempoTest
         }
 
         await Assert.That(changed).IsGreaterThan(0);
+    }
+
+    [Test]
+    public async Task AChangeOfTempo_IsEasedIntoHalfTheTime_OverTheBarBefore_ButAMetricOne()
+    {
+        var (changes, eased) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Feel, 1)))))
+        {
+            var tempos = Tempos(song);
+            var tempo = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.Tempo);
+            var sections = song.Map.Sections;
+            for (var i = 1; i < sections.Length; i++)
+            {
+                var (before, next) = (tempos[sections[i - 1].SectionId], tempos[sections[i].SectionId]);
+                if (Math.Abs(next / before - 1) < 1e-9)
+                    continue;
+
+                // the tempo a moment before the section, the one before's where it changes at once
+                var at = tempo.GetEffectiveValueAt(sections[i].Start - 1e-6) / tempo.GetEffectiveValueAt(sections[i].Start);
+                var isMetric = SectionTempo.MetricRatios.Any(x => Math.Abs(x - next / before) < 1e-9);
+                if (isMetric)
+                    await Assert.That(Math.Abs(at - before / next)).IsLessThan(1e-9).Because($"seed {song.Seed}, a metric change at {sections[i].Start}");
+                else
+                {
+                    changes++;
+                    if (Math.Abs(at - before / next) > 1e-9)
+                        eased++;
+                }
+            }
+        }
+
+        await Assert.That(changes).IsGreaterThan(30);
+        await Assert.That(eased / (double)changes).IsEqualTo(0.5).Within(0.15);
     }
 
     [Test]

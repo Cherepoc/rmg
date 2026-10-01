@@ -23,7 +23,7 @@ Alongside, continuously and never as a gate: **listening** through the checklist
 rated enough; styles (see *Styles*), once they are chosen.
 
 **When the need shows** (P3), roughly in this order: timing by role, once swing alone sounds stiff (see *Groove*); a
-ramp into a section's own tempo, then a metric modulation (see *Appearances*, *Meter*); the tempo leaning by the energy,
+metric modulation, a section's tempo drawn by appearance (see *Appearances*, *Meter*); the tempo leaning by the energy,
 should the songs sound metronomic (see *Appearances*); long cycles, then a figure running on across the frame (see *Rhythm engine*,
 *Meter*); a line scale by the chord and chord tones off the scale (see *Scales*, *Chords*); a tag, intros of their own
 material and drums coming in within a section (see *Form*, *Appearances*); a solo's octaves its own, a drum solo's
@@ -244,9 +244,8 @@ dotted 8th (`MeterReportTest`; `MeterSeedsReportTest` names seeds to hear).
   downbeat, and plays its accent with it, 0.52 of velocity against the rest's 0.15, so that an accent of their own was
   measured and left out (October 2026). Left (P3), the cycle a tune played in unison against a pulse still felt
   rather than a chugged drift: **the chords joining the cycle,** their notes
-  repeated cell by cell as the riff's, should the unison want more weight; **a metric modulation,** a
-  section's own tempo leaning at the wild end to 3:2 or 4:3 of the one before, a tuplet's pulse becoming the beat
-  (`SectionTempo`); a figure running on across the frame's start, which needs long cycles; a cycle growing each time
+  repeated cell by cell as the riff's, should the unison want more weight; a metric modulation (see
+  *Appearances*, the section's own tempo); a figure running on across the frame's start, which needs long cycles; a cycle growing each time
   round (3, 4, 5).
 ## Chords
 
@@ -357,11 +356,11 @@ planned together (P1):
   the feel facet (`SectionTempo`, 0.04 at the middle), a chorus or a bridge leaning to it as to a key of its own, a
   tenth slower or faster most often and as far as two thirds or half again at the wild end, the ending slowing from
   the last section's. Over 1024 songs, in the middle fifth 9% of the choruses and bridges and 4% of the others, in the
-  wildest 56% and 44% (`SectionTempoTest`). Left (P3): **a ramp into it,** the bar before a section of another tempo
-  easing to it beat by beat, slowing or speeding, by a flat chance of 0.5 as the ending's ritardando, the ending's own
-  steps (`SongFormGenerator.CreateRitardando`) taking where they start and where they go; one bar and one shape, never
-  for a metric modulation, whose point is the pulse taken at once (see *Meter*); the fill before it played over the
-  ramp, as a drummer pulls or pushes it. Measured by: the changes ramped, the tempo over the bar before (`SectionTempoTest`).
+  wildest 56% and 44% (`SectionTempoTest`). A change of tempo is eased into over the bar before half the time, beat by beat, evenly in its ratio, but
+  where its ratio is metric, 3:2, 4:3 or their inverses, which is taken at once: 173 of 352 changes of a wild feel
+  eased (`SectionTempoTest`). Left (P3): **a metric modulation** leaned to, a section's tempo drawn as 3:2 or 4:3 of the
+  one before it at the wild end, which needs a section's tempo drawn per appearance, the section before it changing
+  from one to the next, where it is drawn once per section now.
   **The tempo leaning by the energy** (P3, by listening only, should the songs sound metronomic): a section's tempo
   nudged a percent or two by its energy, a chorus pushing and a breakdown easing, through the section's tempo layer by
   `Tilt`, never in a plain song, which keeps to the click; no drift, push or recovery of its own.
