@@ -11,21 +11,32 @@ measured before and after by a report test, by the measure its entry names.
 
 **Now** (P0): done.
 
-**Next** (P1): listening to 0.6: the section's own key, tempo and meter, the rhythm part, the twin riff, the
-polymeter, the line scales and the new chords and scales, each tuned by what listening says (see *Listening*), and the
-ratings by conventionality once enough are in.
+**Next** (P1): listening to what is deployed, 0.6 and on: the section's own key, tempo and meter, the rhythm part, the
+twin riff, the polymeter, the line scales, the new chords and scales, the solos, their chords and their loudness, each
+tuned by what listening says (see *Listening*), and the ratings by conventionality once enough are in. Then, in this
+order, each small and each measured:
+
+1. a polymeter's cells accented, so that a composite cycle is heard as phrases (see *Meter*);
+2. which appearance solos, by its section's role (see *Instruments*, *Solos*);
+3. occasional chords, a riff's power chords where a section lands first (see *Instruments*);
+4. the solo part answering the melody, in its small version: in some sections in the counter-melody's place in the
+   melody's gaps, sparse and under the melody, the page given the part (see *Instruments*, *Solos*);
+5. the melody running into a section, as the bass's run-in does (see *Fills*);
+6. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
+   *Solos*);
+7. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
 **Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs
 rated enough; styles (see *Styles*), once they are chosen.
 
-**When the need shows** (P3): a line scale by the chord and chord tones off the scale (see *Scales*, *Chords*);
-long cycles, then a figure running on across the pattern (see *Meter*); other parts' twins; drums coming in within a
-section; modulation, a ping-pong echo and legato slides (see *Instruments*); the solo part answering the melody (see
-*Instruments*);
-occasional chords; timing by role; intros of their own material; scales of other sizes; the fills' loudness and sounds
-by convention; note keys.
+**When the need shows** (P3), roughly in this order: timing by role, once swing alone sounds stiff (see *Groove*); a
+metric modulation (see *Meter*); long cycles, then a figure running on across the frame (see *Rhythm engine*,
+*Meter*); a line scale by the chord and chord tones off the scale (see *Scales*, *Chords*); a tag, intros of their own
+material and drums coming in within a section (see *Form*, *Appearances*); a solo's octaves its own, a drum solo's
+stacked hits and the drummer as one player (see *Solos*); other parts' twins; modulation, a ping-pong echo and legato
+slides (see *Instruments*); scales of other sizes; the fills' loudness and sounds by convention; note keys.
 
 **Parked** (P4): see *Parked*, kept for their reasons, not planned.
 
