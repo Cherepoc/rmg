@@ -10,7 +10,8 @@ namespace Rmg.Core.Composition;
 ///     vocabulary (<see cref="Soloist" />), the kit its scale: the section's snare, its toms from the highest to the
 ///     lowest, and its kick, in that order, so that a run's cells go round the kit as a pitched run's go up the scale, a
 ///     sequence a drum on at a time, an arpeggio skipping one, a turn between neighbours and a pedal on one drum between
-///     the moving others. A held note is a crash with the kick, ringing, as is the release every phrase ends on; a pause is
+///     the moving others, a gesture of the climax starting on a crash. A held note is a crash with the kick, ringing, as
+///     is the release every phrase ends on; a pause is
 ///     the drums silent; a quote is the section's own groove. It leaves its last bar to the fill into the section after, so that the band comes back in on
 ///     its landing.
 /// </summary>
@@ -22,6 +23,9 @@ internal static class DrumSolos
     public const double IntensityVelocity = 0.3;
 
     public const double CellAccent = 0.15;
+
+    /// <summary>How intense a run or a lick is before it starts on a crash, the solo's climax.</summary>
+    public const double ClimaxIntensity = 0.8;
 
     /// <summary>The chance a drum solo stacks the kick under its runs' and licks' accents, as a drummer weighs a grouping.</summary>
     public const double KickUnderAccents = 0.5;
@@ -60,7 +64,8 @@ internal static class DrumSolos
             if (kit.Length == 0)
                 continue;
 
-            var crash = Of(FillDrumRole.Cymbal).FirstOrDefault();
+            // the song's crash, whether its groove there played it or not
+            var crash = sounds.TryGetValue(FillDrumRole.Cymbal, out var cymbals) ? cymbals.FirstOrDefault() : null;
             var tracks = song.TrackTimelineMap.Keys.Where(x => x >= DrumGroups.FirstTrackNumber).ToArray();
             var context = streams(index);
             var kick = Of(FillDrumRole.Kick).FirstOrDefault();
@@ -107,6 +112,9 @@ internal static class DrumSolos
                         for (var i = 0; i < hits.Length; i++)
                         {
                             edits.Hit(kit[hits[i]].Track, positions[i], loudness + (accents[i] ? CellAccent : 0), kit[hits[i]].Articulation, whole.SectionId, "Drum solo");
+                            // a climax's gesture starting on a crash
+                            if (i == 0 && level >= ClimaxIntensity && crash is not null)
+                                edits.Hit(crash.Track, positions[i], loudness + CellAccent, crash.Articulation, whole.SectionId, "Drum solo");
                             // and the kick under an accent, but where the accent is the kick's own
                             if (stacksKick && accents[i] && kit[hits[i]].Track != kick!.Track)
                                 edits.Hit(kick.Track, positions[i], loudness + CellAccent, kick.Articulation, whole.SectionId, "Drum solo");

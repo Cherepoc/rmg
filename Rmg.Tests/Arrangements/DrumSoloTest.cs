@@ -42,6 +42,30 @@ public sealed class DrumSoloTest
     }
 
     [Test]
+    public async Task ADrumSolosClimax_StartsItsRunsOnACrash_ItsCalmerOnesNot()
+    {
+        var crashes = new HashSet<int> { DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal) };
+        var (climax, crashed, calm, calmCrashed) = (0, 0, 0, 0);
+        foreach (var song in Songs)
+        foreach (var (_, plan) in DrumSolos(song))
+        {
+            var starts = song.Song.Notes!.Where(x => crashes.Contains(x.Key)).SelectMany(x => x.Value).Select(x => Math.Round(x.Position, 6)).ToHashSet();
+            foreach (var gesture in plan.Where(x => x.Gesture is SoloGesture.Run or SoloGesture.Lick))
+            {
+                var on = starts.Contains(Math.Round(gesture.Start, 6));
+                if (gesture.Intensity >= Rmg.Core.Composition.DrumSolos.ClimaxIntensity)
+                    (climax, crashed) = (climax + 1, crashed + (on ? 1 : 0));
+                else
+                    (calm, calmCrashed) = (calm + 1, calmCrashed + (on ? 1 : 0));
+            }
+        }
+
+        await Assert.That(climax).IsGreaterThan(10);
+        await Assert.That(crashed / (double)climax).IsGreaterThan(0.8);
+        await Assert.That(calmCrashed / (double)Math.Max(1, calm)).IsLessThan(0.2);
+    }
+
+    [Test]
     public async Task ADrumSolosRuns_GoRoundItsKit_InTheDrummersCells_TheirFirstHitsTheLouder_ItsPausesSilent()
     {
         var (solos, first, rest) = (0, new List<double>(), new List<double>());
@@ -67,7 +91,8 @@ public sealed class DrumSoloTest
 
                     await Assert.That(drummer.Shapes).Contains(segment.Shape);
                     await Assert.That(segment.Sizes.All(drummer.CellSizes.Contains)).IsTrue();
-                    foreach (var (track, _) in hits)
+                    // and a climax's gesture its crash on its first hit
+                    foreach (var (track, _) in hits.Where(x => !(segment.Intensity >= Rmg.Core.Composition.DrumSolos.ClimaxIntensity && Math.Abs(x.Note.Position - segment.Start) < 1e-9 && x.Track == DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal))))
                         await Assert.That(DrumGroups.GroupOf(DrumGroups.GetDrum(track)) is var group && (group == DrumGroups.Snare || group == DrumGroups.Toms || group == DrumGroups.Kick)).IsTrue()
                             .Because($"seed {song.Seed}, {DrumGroups.GetDrum(track).Name} at {segment.Start}");
                     // a lick's cell on every note's place: the first of every cell the louder

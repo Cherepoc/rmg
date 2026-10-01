@@ -18,7 +18,6 @@ built since 0.6 (October 2026): parts entering late, the solos placed by their r
 answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
 this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
 
-7. a crash on a drum solo's climax, its intensity 0.8 or more, on a cell's first hit;
 8. a polymeter's chords joining its cycle by their rhythm, their voicing kept, leaned to longer cells (see *Meter*);
 9. to 11. a key change's devices of their own, one a change, in place of a chain: a common tone held across, a pedal on
    the new key's dominant, a pivot chord both keys share (see *Appearances*);
@@ -525,7 +524,9 @@ and slides, is `Expression`'s (see *Listening*).
   under its runs' and licks' accents half the time (`SoloTest`, `DrumSoloTest`).
   Left (P3): **the drummer as one player,** the fills' `Drummer` and the drum solo's `Soloist` one record, its fill habits
   and its solo habits together, a refactor with no sound of its own, put off in October 2026 until the two drift apart;
-  **a crash on a drum solo's intense accents,** should its runs want more weight.
+  a drum solo's run or lick of its climax, 0.8 intense or
+  more, starts on the song's crash, and its held notes crash on it whether the section's groove played it or not
+  (`DrumSoloTest`).
 
 - **Modulation** (P3, when a soundfont maps it): CC1, which none of the soundfonts offered maps to tone, so it was
   left out of expression. The rule to keep: modulation and a vibrato never at once, modulation and bends together.
