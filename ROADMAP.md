@@ -100,7 +100,9 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
   vibrato itself, the band the song's way: 85% of guitar and synth lead solos bend, 54% of the other instruments' that
   can: a straight band under a bending lead heard as meant? The drum solos: do the shapes sound like a drummer's
   stickings round the kit or like a pitched run on drums, the arpeggio's skipped tom in particular; a crash with the
-  kick held 23% of the segments: too many?
+  kick held 23% of the segments: too many? The phrases: heard as a soloist's sentences, each landing, the climax at
+  70%? A breath after 60% of the releases; a wild phrase coming in late 13% of the time. Long 64th runs under 16th
+  swing are swung with the rest, squeezed and stretched within a beat: rubato, or smeared?
 - **The bass's pickup** always falls on the beat: the 8th before the bar line, leaned by convention, if it sounds
   square.
 - **The fills:** wild songs play about 1.8 times the tuplet notes of plain ones, as a run plays the snare's feel only:
@@ -424,11 +426,15 @@ and slides, is `Expression`'s (see *Listening*).
   lead, never the melody's sound) is the likeliest soloist, any part as likely at the wild end; several trade the
   phrases or play together. Every part that solos has a soloist's vocabulary for the song (speeds, cell sizes and
   their grouping, shapes, pauses, volatility, range, leans to bends and slides), by the melody facet. A solo's line is
-  made gesture by gesture by half bars, a run, a lick, a held note, a pause or a quote, picked by an intensity rising
-  over it and swung about by the soloist's volatility; on the melody near the plain end, its own over the chords at
-  the wild; runs of the soloist's cells in its shapes, grouped, accented, going on across the segments, no faster than
-  it plays at the tempo; its notes bending further and oftener the more intense, as its soloist leans; the
-  counter-melody and the pad resting for it (`SoloTest`, `SoloistTest`). Left (P3): **the solo part answering the
+  made phrase by phrase (`SoloLines.Plan`): phrases of the soloist's lengths, now and then coming in off the bar at
+  the wild end, their peaks building to a climax at 70% of the solo and easing after, each ending on a release, a
+  chord's note held from a strong beat with the soloist's vibrato and bent into now and then, often a breath after it;
+  within a phrase gestures of lengths of their own, a run, a lick, a held note, a pause or a quote, picked by its
+  intensity there; on the melody near the plain end, its own over the chords at the wild; runs of the soloist's cells
+  in its shapes, grouped, accented, going on over the bar lines, as fast as 64ths at the wild end for as long as the
+  soloist's stamina, a burst or bars of it; the counter-melody and the pad resting for it (`SoloTest`, `SoloistTest`).
+  Left (P3): **motifs,** a phrase answering the one before with its opening cell moved up or down, as call and
+  response, a phrase's motif carried on to the next as state; **the solo part answering the
   melody** outside its solos, in the melody's gaps, as a guitarist fills between a singer's phrases; **the role,**
   which appearance solos by the section's role, a bridge or a last chorus, where now any later appearance may; **the
   page**, the solo part in the settings and the mixer, a new part of the settings' format, where it plays as the file
