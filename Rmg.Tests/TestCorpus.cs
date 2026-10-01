@@ -124,7 +124,8 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     /// <summary>
     ///     Where the drums mark a line, as the song puts them: at every pattern from the first section on, the first after
     ///     the intro only if it has one, and the last before the ending only if it has one; but for a line into a section
-    ///     whose drums rest, or in one, where an intro's window into the first section ends on its own line.
+    ///     whose drums rest, or in one, where an intro's window into the first section ends on its own line, and within a
+    ///     drum solo, which plays its own.
     /// </summary>
     public double[] FillLines()
     {
@@ -135,16 +136,14 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
             .Where(x => Map.Intro.Duration > 0 || x > Origin + 1e-9)
             .Concat(FormLayers.HasFinalChord(Map.Ending.Kind) ? [Map.Sections[^1].End] : []);
         var windowEnd = Map.Intro.Kind == IntroKind.Entries && !Map.Intro.Window.IsBefore ? Origin + Map.Intro.Window.Bars * Map.Meter.BarDuration : double.NaN;
-        // and every bar of a drum solo
-        var soloBars = Solos.Where(x => x.Value.IsDrumSolo).Select(x => Map.Sections[x.Key])
-            .SelectMany(span => Enumerable.Range(1, (int)Math.Round(span.Duration / span.Meter.BarDuration) - 1).Select(bar => span.Start + bar * span.Meter.BarDuration));
+        var drumSolos = Solos.Where(x => x.Value.IsDrumSolo).Select(x => Map.Sections[x.Key]).ToArray();
         return
         [
             ..patterns
                 .Where(x => x >= Map.Sections[^1].End - 1e-9
                             || HasDrums(Map.Sections.Last(s => s.Start <= x + 1e-9))
                             || Math.Abs(x - windowEnd) < 1e-9 && HasDrums(Map.Sections[0]))
-                .Concat(soloBars)
+                .Where(x => !drumSolos.Any(span => x > span.Start + 1e-9 && x < span.End - 1e-9))
                 .Distinct()
                 .Order()
         ];

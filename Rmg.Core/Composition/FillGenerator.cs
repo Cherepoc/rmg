@@ -98,10 +98,10 @@ internal sealed class FillGenerator
             if (i > 0 && sections[i].HasDrums)
                 lines.Add(new FillLine(start, sections[i - 1], sections[i], 0));
 
-            // a drum solo fills every bar, and any other section its phrases
-            var every = sections[i].IsDrumSolo ? sections[i].Meter.BarDuration : sections[i].Meter.PatternDuration;
+            // a section marks its phrases, but a drum solo, which plays its own (DrumSolos)
+            var every = sections[i].Meter.PatternDuration;
             for (var line = start + every;
-                 sections[i].HasDrums && line < start + sections[i].Duration;
+                 sections[i].HasDrums && !sections[i].IsDrumSolo && line < start + sections[i].Duration;
                  line += every)
                 lines.Add(new FillLine(line, sections[i], sections[i], FillLayers.PhraseWeight));
 

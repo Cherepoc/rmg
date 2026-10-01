@@ -221,14 +221,15 @@ public static class SongGenerator
             sections.Add(section);
         }
 
-        // every part that solos a soloist of its own, whose solos sound like one player's, each from a sequence of its own
-        var soloists = solos.Values.Where(x => !x.IsDrumSolo).SelectMany(x => x.Soloists).Distinct().ToDictionary(
+        // every part that solos a soloist of its own, whose solos sound like one player's, each from a sequence of its own,
+        // by the melody facet, and the drummer by the fills facet
+        var soloists = solos.Values.SelectMany(x => x.Soloists).Distinct().ToDictionary(
             role => role,
             role => Soloist.Generate(
                 new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Soloist), (int)role)),
-                songUnconventionality[Facet.Melody],
+                songUnconventionality[role == TrackRole.Drum ? Facet.Fills : Facet.Melody],
                 songUnconventionality[Facet.Sound],
-                tracks.Definitions.Values.OfType<PitchInstrumentTrack>().First(x => x.Role == role).InstrumentCode));
+                tracks.Definitions.Values.OfType<PitchInstrumentTrack>().FirstOrDefault(x => x.Role == role)?.InstrumentCode ?? -1));
         foreach (var (role, soloist) in soloists)
             StateTrace.Record(TracePoints.Soloist, SectionGenerator.SectionTrace, 0, 0, StateMap.Default, 0, $"{role}", (role, soloist));
 
@@ -285,6 +286,16 @@ public static class SongGenerator
         cancellation.ThrowIfCancellationRequested();
         var fills = new FillGenerator(Stream(SongStream.Fills), tracks, Of(Facet.Fills), meter);
         songTrackNoteTimelineMap = fills.Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
+        // and the drum solos, the drummer's own, over the groove they quote
+        songTrackNoteTimelineMap = DrumSolos.Apply(
+            songTrackNoteTimelineMap,
+            tracks.SongDrums,
+            form.Map,
+            solos,
+            soloists.GetValueOrDefault(TrackRole.Drum),
+            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.DrumSolo), index)),
+            meter
+        );
 
         // the lines placed over the whole song, as they go on from section to section and lead into the next: the melody,
         // and the bass
@@ -471,5 +482,6 @@ internal enum SongStream
     Polymeter = 40,
     Effects = 41,
     SoloPart = 42,
-    Soloist = 43
+    Soloist = 43,
+    DrumSolo = 44
 }

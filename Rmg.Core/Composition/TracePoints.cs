@@ -44,6 +44,9 @@ internal static class TracePoints
     /// </summary>
     public const string SoloGestures = "Solo gestures";
 
+    /// <summary>A drum solo's segments: the appearance's place and its plan (a tuple of an <c>int</c> and an array of <see cref="SoloLines.Segment" />s).</summary>
+    public const string DrumSolo = "Drum solo";
+
     /// <summary>
     ///     A solo's run or lick: its start, its shape and the sizes of its cells in turn (a tuple of a <c>double</c>, a
     ///     <see cref="Composition.SoloShape" /> and an array of <c>int</c>s).
