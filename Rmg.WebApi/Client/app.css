@@ -229,12 +229,6 @@ button:disabled,
     pointer-events: none;
 }
 
-/* a button among small controls, where a full-size one would shout */
-button.small {
-    padding: 4px 10px;
-    font-size: 13px;
-}
-
 .primary {
     background: var(--accent);
     border-color: var(--accent);
@@ -672,20 +666,10 @@ input[type="range"] {
     border-color: var(--accent);
 }
 
-.mixer button {
-    padding: 3px 10px;
-    font-size: 13px;
-}
-
 .mixer input[type="checkbox"] {
     accent-color: var(--accent);
     margin: 0;
     cursor: pointer;
-}
-
-/* a row switched off still reads, but says at a glance that it is out of the song */
-.mixer tr:has(input[type="checkbox"]:not(:checked)) {
-    opacity: 0.55;
 }
 
 .fader-field {
@@ -707,12 +691,6 @@ input[type="range"] {
 
 #song-volume {
     width: 160px;
-}
-
-.mixer button[aria-pressed="true"] {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--accent-text);
 }
 
 /* a quiet track, so a silent meter reads as nothing playing rather than as something missing */
@@ -867,13 +845,6 @@ footer a:hover {
  * whatever the width of the screen they are on
  */
 @media (pointer: coarse) {
-    .mixer button,
-    button.small {
-        min-height: 44px;
-        min-width: 44px;
-        justify-content: center;
-    }
-
     .history button {
         min-height: 44px;
     }

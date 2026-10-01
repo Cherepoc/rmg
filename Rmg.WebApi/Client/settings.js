@@ -109,9 +109,10 @@ export function formatSettings(settings) {
     for (const name of FORMAT_PARTS) {
         const part = settings.parts[name];
         const plays = PLAYS.indexOf(part.plays);
-        switches.push((plays & 2) !== 0, (plays & 1) !== 0, part.isOn, part.pan.isGiven);
+        // every part in the file, which the format still has a place for
+        switches.push((plays & 2) !== 0, (plays & 1) !== 0, true, part.pan.isGiven);
     }
-    for (const group of DRUM_GROUPS) switches.push(settings.drumGroups[group].isOn);
+    for (const group of DRUM_GROUPS) switches.push(true);
     values.push(...packSwitches(switches));
 
     if (values.some((x) => !Number.isInteger(x) || x < 0 || x > 63)) throw new RangeError("A value does not fit in a character.");
@@ -146,15 +147,16 @@ export function parseSettings(text) {
     });
     for (const [i, name] of named.entries()) {
         const plays = PLAYS[(switches[s++] ? 2 : 0) + (switches[s++] ? 1 : 0)];
-        const isOn = switches[s++];
+        // whether it was in the file, which every part now is
+        s++;
         const pan = { isGiven: switches[s++], value: mixes[i].pan };
         if (plays === undefined || instruments[i] >= 256) return null;
-        settings.parts[name] = { plays, instrument: { isGiven: instruments[i] >= 128, value: instruments[i] & 127 }, volume: mixes[i].volume, pan, isOn };
+        settings.parts[name] = { plays, instrument: { isGiven: instruments[i] >= 128, value: instruments[i] & 127 }, volume: mixes[i].volume, pan };
     }
     // a part the format did not name as the song draws it, at its fullest, in the file
     for (const name of FORMAT_PARTS.slice(count))
-        settings.parts[name] = { plays: "random", instrument: { isGiven: false, value: 0 }, volume: LAST_STEP, pan: { isGiven: false, value: MIDDLE_PAN }, isOn: true };
-    for (const [i, group] of DRUM_GROUPS.entries()) settings.drumGroups[group] = { isOn: switches[s++], volume: groupVolumes[i] };
+        settings.parts[name] = { plays: "random", instrument: { isGiven: false, value: 0 }, volume: LAST_STEP, pan: { isGiven: false, value: MIDDLE_PAN } };
+    for (const [i, group] of DRUM_GROUPS.entries()) settings.drumGroups[group] = { volume: groupVolumes[i] };
     if (setup > DRUM_SETUPS.length || settings.key.value > 11) return null;
     settings.drumSetup = setup === 0 ? null : DRUM_SETUPS[setup - 1];
     if (text[0] !== FORMAT_FOUR) settings.tempo = { isGiven: false, value: MIDDLE_TEMPO };

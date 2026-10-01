@@ -19,10 +19,9 @@ export function defaultSettings() {
             instrument: { isGiven: false, value: 0 },
             volume: LAST_STEP,
             pan: { isGiven: false, value: MIDDLE_PAN },
-            isOn: true,
         }])),
         drumSetup: null,
-        drumGroups: Object.fromEntries(DRUM_GROUPS.map((group) => [group, { isOn: true, volume: LAST_STEP }])),
+        drumGroups: Object.fromEntries(DRUM_GROUPS.map((group) => [group, { volume: LAST_STEP }])),
         volume: LAST_STEP,
     };
 }
@@ -62,7 +61,6 @@ export function requestFor(seed, settings) {
                 instrument: given(mix.instrument),
                 volume: mix.volume,
                 pan: given(mix.pan),
-                isOn: mix.isOn,
             }];
         })),
         drumSetup: settings.drumSetup ?? undefined,

@@ -137,10 +137,6 @@ class Player {
         midiChannel.lockController(PAN, true);
     }
 
-    setChannelMuted(channel, isMuted) {
-        this.#synth.midiChannels[channel]?.setSystemParameter("isMuted", isMuted);
-    }
-
     getVoiceCount(channel) {
         return this.#synth.midiChannels[channel]?.voiceCount ?? 0;
     }

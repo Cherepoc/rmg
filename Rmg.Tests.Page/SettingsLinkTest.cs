@@ -26,6 +26,8 @@ public sealed class SettingsLinkTest(Site site)
         await Assert.That(asked.Facet("fills")).IsEqualTo(14);
         await Assert.That(Part(asked, "chords").GetProperty("instrument").GetInt32()).IsEqualTo(18);
         await Assert.That(asked.Body.GetProperty("tempo").GetInt32()).IsEqualTo(3);
+        // the counter-melody left out of the file, which the page no longer does, every part in it
+        await Assert.That(Part(asked, "counterMelody").TryGetProperty("isOn", out _)).IsFalse();
         // and the solo part's, given in on its instrument
         await Assert.That(Part(asked, "solo").GetProperty("instrument").GetInt32()).IsEqualTo(65);
         await Assert.That(Part(asked, "solo").GetProperty("plays").GetBoolean()).IsTrue();

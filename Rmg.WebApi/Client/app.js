@@ -82,9 +82,7 @@ const elements = {
     dislike: document.getElementById("dislike"),
 };
 
-// the parts muted or soloed here, which only this page hears, and every part's row of the mixer, by the part
-const muted = new Set();
-const soloed = new Set();
+// every part's row of the mixer, by the part
 const rows = new Map();
 
 // the settings every song is asked for with, and the one on the page heard with (song-settings.js): every value given,
@@ -440,7 +438,6 @@ async function deliverPending() {
             pendingSwap = false;
             const loaded = player.nextSong();
             player.loadSong(song);
-            applyMix(player);
             if (swap !== null) {
                 await loaded;
                 player.currentTime = swap.share * player.duration;
@@ -452,7 +449,7 @@ async function deliverPending() {
         } else if (soundFont !== null) {
             // a soundfont swapped under a song already playing: the bank took every channel back to
             // where it started, and the song will not say what it plays again until it comes round
-            applyMix(player, true);
+            applyMix(player);
         }
     } catch (error) {
         setStatus(`The player could not take the song: ${error.message}`, true);
@@ -864,10 +861,6 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         songSeed = response.headers.get("X-Song-Seed") ?? seed;
         songVersion = response.headers.get("X-Song-Version");
         elements.seed.value = songSeed;
-        if (!isRemade) {
-            muted.clear();
-            soloed.clear();
-        }
 
         showSettings();
         showRating(recallRating(songVersion, currentSong()));
@@ -1723,25 +1716,6 @@ function createPartRow(part) {
     levels.className = "fader-pair";
     levels.append(volume.field, pan.field);
 
-    const inFile = document.createElement("input");
-    inFile.type = "checkbox";
-    inFile.setAttribute("aria-label", `The ${name.toLowerCase()} in the file`);
-    inFile.addEventListener("change", () => setPartInFile(part, inFile.checked));
-
-    const mute = createToggle("Mute", () => {
-        toggle(muted, part, mute);
-        applyMuting();
-        track("mix_changed", { detail: "mute" });
-    });
-    const solo = createToggle("Solo", () => {
-        toggle(soloed, part, solo);
-        applyMuting();
-        track("mix_changed", { detail: "solo" });
-    });
-    // the part named, as a reader hears a row's buttons one by one
-    mute.setAttribute("aria-label", `Mute the ${name.toLowerCase()}`);
-    solo.setAttribute("aria-label", `Solo the ${name.toLowerCase()}`);
-
     const meter = document.createElement("div");
     meter.className = "meter";
     const level = document.createElement("span");
@@ -1752,26 +1726,18 @@ function createPartRow(part) {
     heading.textContent = name;
 
     const row = document.createElement("tr");
-    row.append(heading, ...[plays, instrument, levels, inFile, mute, solo, meter].map((x) => {
+    row.append(heading, ...[plays, instrument, levels, meter].map((x) => {
         const cell = document.createElement("td");
         cell.append(x);
         return cell;
     }));
-    rows.set(part, { row, plays, random, instrument, ownInstrument, volume, pan, inFile, mute, solo, level });
+    rows.set(part, { row, plays, random, instrument, ownInstrument, volume, pan, level });
     return row;
 }
 
-/** A drum group's row: whether it is in the file and how loud it plays, which are made by the server. */
+/** A drum group's row: how loud it plays, which the server makes. */
 function createDrumGroupRow(group) {
     const name = DRUM_GROUP_NAMES[group];
-
-    const inFile = document.createElement("input");
-    inFile.type = "checkbox";
-    inFile.setAttribute("aria-label", `${name} in the file`);
-    inFile.addEventListener("change", () => {
-        settings.drumGroups[group].isOn = inFile.checked;
-        settingsChanged(true);
-    });
 
     const volume = createFader(`Volume of the ${name.toLowerCase()}`, (step) => (settings.drumGroups[group].volume = step), false, () => settingsChanged(true));
 
@@ -1780,12 +1746,12 @@ function createDrumGroupRow(group) {
     heading.textContent = name;
 
     const row = document.createElement("tr");
-    row.append(heading, ...[inFile, volume.field].map((x) => {
+    row.append(heading, ...[volume.field].map((x) => {
         const cell = document.createElement("td");
         cell.append(x);
         return cell;
     }));
-    groupRows.set(group, { row, inFile, volume });
+    groupRows.set(group, { row, volume });
     return row;
 }
 
@@ -1833,14 +1799,12 @@ function showSettings() {
         row.volume.show();
         row.pan.input.value = String(mix.pan.value);
         row.pan.show();
-        row.inFile.checked = mix.isOn;
         // a part the song does not play is still set here, for the songs after it
         row.row.classList.toggle("absent", channels[part] == null);
     }
 
     for (const group of DRUM_GROUPS) {
         const row = groupRows.get(group);
-        row.inFile.checked = settings.drumGroups[group].isOn;
         row.volume.input.value = String(settings.drumGroups[group].volume);
         row.volume.show();
         row.row.classList.toggle("absent", !drumGroupsPresent.includes(group));
@@ -1897,13 +1861,6 @@ function setPartPan(part, pan) {
 }
 
 /** Switches a part off, which leaves it out of the file and silences it here, so what is heard is what is downloaded. */
-function setPartInFile(part, isOn) {
-    settings.parts[part].isOn = isOn;
-    applyMuting();
-    track("mix_changed", { detail: "channel" });
-    settingsChanged(false);
-}
-
 /** A part's volume under the song's, on the player. */
 function applyVolume(part) {
     const volume = (settings.volume / LAST_STEP) * (settings.parts[part].volume / LAST_STEP);
@@ -1940,55 +1897,22 @@ function createOption(value, name) {
     return option;
 }
 
-function createToggle(label, onToggle) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.textContent = label;
-    button.setAttribute("aria-pressed", "false");
-    button.addEventListener("click", onToggle);
-    return button;
-}
-
-function toggle(set, part, button) {
-    const isOn = !set.has(part);
-    if (isOn) set.add(part);
-    else set.delete(part);
-    button.setAttribute("aria-pressed", String(isOn));
-}
-
-/** Switched off, or muted, or another part soloed; an explicit mute still wins over a solo. */
-function isSilenced(part) {
-    return !settings.parts[part].isOn || muted.has(part) || (soloed.size > 0 && !soloed.has(part));
-}
-
 /**
- *     Puts the mix on the page onto the player. A new song's file carries its instruments, volumes and pans, and loading
- *     it lets go of every lock the mixer set, so only what this page alone hears is left to apply.
- *
- *     A new sound bank undoes more than that: it resets every channel to the first program, so what the song asked for
- *     is as lost as what anybody picked, and the drum channel forgets it is one. After a bank, every channel is told
- *     what it plays, how loud and where, but only a choice made here is locked, so a channel the song owns is still the
- *     song's to set when it starts over.
+ *     Puts the mix on the page back onto the player after a new sound bank, which a new song's file needs no help with,
+ *     carrying its instruments, volumes and pans. A bank resets every channel to the first program, so what the song
+ *     asked for is as lost as what anybody picked, and the drum channel forgets it is one. Every channel is told what it
+ *     plays, how loud and where, but only a choice made here is locked, so a channel the song owns is still the song's
+ *     to set when it starts over.
  */
-function applyMix(player, isBankReset = false) {
+function applyMix(player) {
     for (const part of PARTS)
         for (const { channel, mirrored } of channelsOf(part)) {
-            if (isBankReset) {
-                const mix = settings.parts[part];
-                if (part === "drum") player.setChannelDrums(channel, true);
-                player.setChannelInstrument(channel, mix.instrument.value, mix.instrument.isGiven);
-                player.setChannelVolume(channel, (settings.volume / LAST_STEP) * (mix.volume / LAST_STEP));
-                player.setChannelPan(channel, toMidiPan(mirrored ? mirrorPan(mix.pan.value) : mix.pan.value));
-            }
-
-            player.setChannelMuted(channel, isSilenced(part));
+            const mix = settings.parts[part];
+            if (part === "drum") player.setChannelDrums(channel, true);
+            player.setChannelInstrument(channel, mix.instrument.value, mix.instrument.isGiven);
+            player.setChannelVolume(channel, (settings.volume / LAST_STEP) * (mix.volume / LAST_STEP));
+            player.setChannelPan(channel, toMidiPan(mirrored ? mirrorPan(mix.pan.value) : mix.pan.value));
         }
-}
-
-function applyMuting() {
-    withPlayer((player) => {
-        for (const part of PARTS) for (const { channel } of channelsOf(part)) player.setChannelMuted(channel, isSilenced(part));
-    }, "Could not silence the part");
 }
 
 elements.songVolume.addEventListener("input", () => {
