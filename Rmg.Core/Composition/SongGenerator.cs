@@ -269,8 +269,18 @@ public static class SongGenerator
         );
         StateTrace.Record(TracePoints.SectionTempo, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", sectionTempos.Select(x => $"{x.Key} {x.Value:F2}")), sectionTempos);
         StateTrace.Record(TracePoints.KeyChange, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, keyChanges.IsEmpty ? "none" : string.Join(", ", keyChanges), keyChanges);
+        // and a key change led into by a chain of chords now and then, each change from a stream of its own
+        var (preparedKeys, preparedRoots, chains) = KeyChange.Prepare(
+            keyChanges,
+            songTrackNoteTimelineMap.CommonStateTimelineMap,
+            form.Map,
+            songUnconventionality[Facet.Scale],
+            place => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.KeyPreparation), place))
+        );
+        StateTrace.Record(TracePoints.KeyPreparation, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", chains.Select(x => $"{x.Chords.Length} into {x.Change}")), chains);
         songTrackNoteTimelineMap = songTrackNoteTimelineMap.MergeStateTimelineMap(form.SongState)
-            .MergeStateTimelineMap(KeyChange.ToStateTimelineMap(keyChanges, form.Map.Duration))
+            .MergeStateTimelineMap(KeyChange.ToStateTimelineMap(preparedKeys, form.Map.Duration))
+            .MergeStateTimelineMap(preparedRoots)
             .MergeStateTimelineMap(SectionTempo.ToStateTimelineMap(sectionTempos, form.Map, form.Map.Duration))
             .MergeStateMap(commonStateMap)
             .MergeStateMap(Groove.ToStateMap(swing, grooveContext));
@@ -529,5 +539,6 @@ internal enum SongStream
     LateEntries = 46,
     LineChords = 47,
     SoloAnswers = 48,
-    MelodyFills = 49
+    MelodyFills = 49,
+    KeyPreparation = 50
 }

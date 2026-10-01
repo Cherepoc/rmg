@@ -114,6 +114,89 @@ public sealed record KeyChange(double Position, int Semitones)
         return changes.ToImmutable();
     }
 
+    /// <summary>The chance a key change is led into by a chain of chords, rather than jumped to; no wilder than a jump.</summary>
+    public const double PrepareChance = 0.5;
+
+    /// <summary>How many chords lead into a key change, by the scale facet: the dominant alone the plainest, a chain the wilder.</summary>
+    public static ImmutableArray<(int Chords, ByConvention Weight)> ChainLengths { get; } =
+    [
+        (1, new ByConvention(1, 0.6, 0.3)),
+        (2, new ByConvention(0, 0.3, 0.4)),
+        (3, new ByConvention(0, 0.1, 0.3))
+    ];
+
+    /// <summary>
+    ///     How a chord of a chain leads to the one after it, as a chord of a key: the key's tonic in semitones from the next
+    ///     chord's root, and its root's step in that key. The dominant, a fifth above, the plainest; a tritone's substitute,
+    ///     a half step above, and the leading tone's chord, a half step below, from the middle out; a mediant, a major third
+    ///     above, at the wild end. A chain repeats one, so that chains of fifths, chromatic dominants and cycles of thirds
+    ///     come of it.
+    /// </summary>
+    public static ImmutableArray<((int KeyFromNext, int RootStep) Link, ByConvention Weight)> Links { get; } =
+    [
+        ((0, 4), new ByConvention(1, 0.75, 0.25)),
+        ((-6, 4), new ByConvention(0, 0.15, 0.25)),
+        ((0, 6), new ByConvention(0, 0.1, 0.25)),
+        ((4, 0), new ByConvention(0, 0, 0.25))
+    ];
+
+    /// <summary>
+    ///     The key changes with every one prepared that draws to be: the last chords of the pattern before it, as many as its
+    ///     chain has and it has, each a key change of one chord whose root its link puts it on, leading to the next, the
+    ///     last to the new key's first chord; each change drawing from a sequence of its own. The chords keep their shapes,
+    ///     the scale making their quality, a cadence's raised step a minor scale's dominant major.
+    /// </summary>
+    /// <param name="common">The song's common state, its chords and scales, before any key change.</param>
+    /// <param name="streams">A key change's draws, by its place among the song's.</param>
+    /// <returns>The key changes, the chains' among them; the roots' moves, a layer of the common state; and every chain, for the trace.</returns>
+    internal static (ImmutableArray<KeyChange> Keys, StateTimelineMap Roots, ImmutableArray<(double Change, ImmutableArray<double> Chords)> Chains) Prepare(
+        ImmutableArray<KeyChange> changes,
+        StateTimelineMap common,
+        SongMap map,
+        double unconventionality,
+        Func<int, IGenerationContext> streams
+    )
+    {
+        var chordStarts = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+        var keys = changes.ToList();
+        var roots = new List<TimelineItem<int>>();
+        var chains = ImmutableArray.CreateBuilder<(double, ImmutableArray<double>)>();
+        int Root(double position) => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
+        int RootPitch(double position, int key, int step) => (key + Realizer.GetChord(common.GetEffectiveStateMapAt(position).With(StateKinds.ChordRoot, step)).Chord.GetPitch(0)).Mod(12);
+        for (var i = 0; i < changes.Length; i++)
+        {
+            var context = streams(i);
+            var prepares = context.TestProbability(PrepareChance);
+            var length = context.Pick(ByConvention.Weigh(ChainLengths, unconventionality));
+            var (keyFromNext, rootStep) = context.Pick(ByConvention.Weigh(Links, unconventionality));
+            var (change, target) = (changes[i].Position, changes[i].Semitones);
+            // the chords of the pattern before, after any change before it
+            var since = Math.Max(i > 0 ? changes[i - 1].Position : 0, change - map.MeterAt(Math.Max(0, change - 1e-6)).PatternDuration);
+            var chords = chordStarts.Where(x => x > since + 1e-9 && x < change - 1e-9).TakeLast(length).ToArray();
+            if (!prepares || chords.Length == 0)
+                continue;
+
+            // from the new key's first chord back, every chord the one leading to the one after it
+            var next = RootPitch(change, target, Root(change));
+            for (var j = chords.Length - 1; j >= 0; j--)
+            {
+                var key = (next + keyFromNext + 5).Mod(12) - 5;
+                keys.Add(new KeyChange(chords[j], key));
+                roots.Add((rootStep - Root(chords[j])).ToTimelineItem(chords[j]));
+                roots.Add(0.ToTimelineItem(j + 1 < chords.Length ? chords[j + 1] : change));
+                next = RootPitch(chords[j], key, rootStep);
+            }
+
+            chains.Add((change, [..chords]));
+        }
+
+        var duration = common.Duration;
+        var moved = roots.Count == 0
+            ? StateTimelineMap.Create(duration)
+            : StateTimelineMap.Create(duration, [StateTimeline.Create(duration, StateKinds.ChordRoot, [..roots.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change")]);
+        return ([..keys.OrderBy(x => x.Position)], moved, chains.ToImmutable());
+    }
+
     /// <summary>The key's step from the song's own, from each change on; none for a song that keeps its key.</summary>
     internal static StateTimelineMap ToStateTimelineMap(ImmutableArray<KeyChange> changes, double duration)
     {

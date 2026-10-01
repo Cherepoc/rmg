@@ -129,6 +129,12 @@ internal static class TracePoints
     /// <summary>How far a song's rhythm strays from convention (a <see cref="RhythmicUnconventionality" />).</summary>
     public const string SongRhythm = "Song rhythm";
 
+    /// <summary>
+    ///     The key changes led into by a chain of chords: each change's place and its chain's chords' starts (an
+    ///     <c>ImmutableArray</c> of tuples of a <c>double</c> and an <c>ImmutableArray</c> of <c>double</c>s).
+    /// </summary>
+    public const string KeyPreparation = "Key preparation";
+
     /// <summary>A song's sections in its order and their roles (a <see cref="SongStructure" />).</summary>
     public const string SongForm = "Song form";
 
