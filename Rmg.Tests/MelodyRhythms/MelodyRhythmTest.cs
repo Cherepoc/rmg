@@ -83,14 +83,14 @@ public sealed class MelodyRhythmTest
 
     private static TimelineItem<RenderedNote>[] RenderMelody(int seed) => RenderMelodyFrom(seed).Melody;
 
-    /// <summary>The melody, and where the song's first section starts.</summary>
+    /// <summary>The melody, a note in octaves once, by its own pitch, which comes first, and where the song's first section starts.</summary>
     private static (TimelineItem<RenderedNote>[] Melody, double Origin) RenderMelodyFrom(int seed)
     {
         var (song, origin) = TestCorpus.Get(seed);
         var program = ((PitchInstrumentTrack)song.TrackDefinitions[MelodyTrackNumber]).InstrumentCode;
         return (Render.RenderSong(song)
             .Tracks.First(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == program)
-            .NoteTimeline.ToArray(), origin);
+            .NoteTimeline.GroupBy(x => x.Position).Select(x => x.First()).ToArray(), origin);
     }
 
     [Test]

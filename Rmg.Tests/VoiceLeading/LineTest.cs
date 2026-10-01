@@ -230,7 +230,8 @@ public sealed class LineTest
             var rendered = Render.RenderSong(song);
             RenderedTrack TrackOf(int number) =>
                 rendered.Tracks.First(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == ((PitchInstrumentTrack)song.TrackDefinitions[number]).InstrumentCode);
-            var melody = TrackOf(SongTracks.MelodyTrack).NoteTimeline.ToArray();
+            // a note in octaves once, by its own pitch, which comes first
+            var melody = TrackOf(SongTracks.MelodyTrack).NoteTimeline.GroupBy(x => x.Position).Select(x => x.First()).ToArray();
             var chords = TrackOf(SongTracks.ChordsTrack).NoteTimeline.GroupBy(x => x.Position)
                 .Select(x => (Position: x.Key, Classes: x.Select(note => note.Value.Offset % 12).ToHashSet()))
                 .ToArray();

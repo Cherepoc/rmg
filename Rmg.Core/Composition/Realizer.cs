@@ -300,6 +300,13 @@ internal static class Realizer
             _ => throw new ArgumentOutOfRangeException(nameof(role), role, "A pitched track plays the chords, the melody, the bass or a pad.")
         };
 
+        // a line in octaves plays its note and the note an octave above, or below where above would leave the range, its
+        // own first
+        if (isLine && stateMap.GetStateValue(CompositionStateKinds.Octave) > 0)
+            notes = notes[0] + OctaveNoteCount <= range.High ? [notes[0], notes[0] + OctaveNoteCount]
+                : notes[0] - OctaveNoteCount >= range.Low ? [notes[0], notes[0] - OctaveNoteCount]
+                : notes;
+
         // a broken chord plays one of its notes, by its pattern and its place since the chord came in
         var arpeggio = (ArpeggioPattern)stateMap.GetStateValue(CompositionStateKinds.Arpeggio);
         if (role.PlaysChords() && !isLine && arpeggio != ArpeggioPattern.None)

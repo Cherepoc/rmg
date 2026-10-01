@@ -190,16 +190,20 @@ public static class SongGenerator
         var restedBefore = new Dictionary<int, ImmutableHashSet<TrackRole>>();
         var solos = new Dictionary<int, SoloPlan>();
         var sections = new List<GeneratedSection>();
+        // how loud and busy each appearance is meant to be: its section's energy, stepped by its place in the song
+        var energies = new List<double>();
         for (var index = 0; index < played.Length; index++)
         {
             cancellation.ThrowIfCancellationRequested();
             var id = played[index];
             // a later appearance played as a solo now and then, from a sequence of its own, by the section's facets
             var solo = Solos.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Solos), index)), index, generateSection(id).Facets, SongParts.All.Except(absent).ToArray());
+            var energyStep = SectionEnergy.AppearanceStep(Place(index), averagePlaces[id]);
+            energies.Add(generateSection(id).Energy + energyStep);
             var section = generateSection(id).Appear(
                 played.Take(index).Count(x => x == id),
                 Tilt.Of(MelodyLayers.ImprovisationGrowth, Place(index)).Chance(improvisation, 1),
-                SectionEnergy.AppearanceStep(Place(index), averagePlaces[id]),
+                energyStep,
                 restedBefore.GetValueOrDefault(id, []),
                 // an intro of entries builds the first section's parts up itself
                 index == 0 && plan.Intro == IntroKind.Entries,
@@ -282,13 +286,16 @@ public static class SongGenerator
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, counterTrack.Key, (PitchInstrumentTrack)counterTrack.Value, CounterLayers.Line);
         var riffTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Riff);
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, riffTrack.Key, (PitchInstrumentTrack)riffTrack.Value, RiffLayers.Line);
-        // and a line doubled by another part in a section now and then, each pair and section from a sequence of its own
+        // and a line doubled in a section now and then, by another part or by its own an octave apart, each pair and
+        // section from a sequence of its own
         songTrackNoteTimelineMap = LineDoubling.Apply(
             songTrackNoteTimelineMap,
             // the parts the song has, which a twin left out is not
             tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).ToDictionary(x => x.Key, x => x.Value.Role),
             form.Map,
             songUnconventionality[Facet.Melody],
+            songUnconventionality[Facet.Sound],
+            energies,
             (pair, section) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.LineDoubling), pair), section))
         );
         // and every pitched solo's line played by its soloists

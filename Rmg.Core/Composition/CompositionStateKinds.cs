@@ -67,6 +67,9 @@ internal static class CompositionStateKinds
     // 1 for a note of a solo's line, which any part plays as a line, one note at a time, rather than as its part would
     public static StateKind<int> LineSolo { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineSolo", StateScope.Render);
 
+    // 1 for a line's note played in octaves by its own part, the note and the note an octave from it
+    public static StateKind<int> Octave { get; } = StateKinds.CreateAdditive<int>(Prefix + "Octave", StateScope.Render);
+
     // how a line's note starts its phrase (a PhraseStart): afresh, at where the phrase aims, or going on from the note
     // before, as the line's freedom to change register draws it (LineProfile.RegisterFreedom); none for a note within one
     public static StateKind<int> LinePhraseStart { get; } = StateKinds.CreateAdditive<int>(Prefix + "LinePhraseStart", StateScope.Render);

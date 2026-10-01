@@ -79,6 +79,12 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
   the gentle ones, while the strong ones, tremolo, echo and sweep, are one a song at most, on one part. Too many or too
   few? The middle fifth plays 1.4 gentle kinds a song and a strong one in 28% of songs, the plainest fifth in 16%, the
   wildest in 60%, and a song given sound 1 always. Lean the song's weights (`StrongEffects`, `Song…Chance`).
+- **The octaves** (`LineDoubling`, the report in `OctaveTest`): the melody, the counter-melody or the riff plays a
+  section in octaves, its own note and the one an octave above, below at the top of its range, in 10% of a plain
+  song's appearances, 15% of a middling one's and 20% of the wildest, 6% of the quietest third of the sections and 26%
+  of the loudest. Too often? Does a counter-melody an octave up cross the melody, and should the octave rather go
+  below there? The riff's twin, now in 15% of riff songs from the middle on, by fourths and fifths in wild songs: too
+  rare, or the wild intervals too sour?
 - **The bass's pickup** always falls on the beat: the 8th before the bar line, leaned by convention, if it sounds
   square.
 - **The fills:** wild songs play about 1.8 times the tuplet notes of plain ones, as a run plays the snare's feel only:

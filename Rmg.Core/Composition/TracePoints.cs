@@ -35,6 +35,13 @@ internal static class TracePoints
     public const string LineDoubling = "Line doubling";
 
     /// <summary>
+    ///     Whether a part that may play its line in octaves in a section does: the section's place, the part, the
+    ///     section's energy and whether it does (a tuple of an <c>int</c>, a <see cref="Songs.TrackRole" />, a
+    ///     <c>double</c> and a <c>bool</c>).
+    /// </summary>
+    public const string Octave = "Octave";
+
+    /// <summary>
     ///     A solo: its appearance's place among the song's sections, and its plan (a tuple of an <c>int</c> and a
     ///     <see cref="Composition.SoloPlan" />).
     /// </summary>
