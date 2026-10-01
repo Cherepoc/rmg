@@ -466,6 +466,13 @@ the rest as they were.
   169 s; a report's own measuring is negligible beside the songs'. A corpus song holds about 5 MB, the full run 1.6 GB
   at most. Should a report want thousands of songs, its seeds past the shared corpus would be made, measured and let
   go rather than cached.
+- **The page's wait for a remake** (P3, by listening): a song is asked for again 400 ms after the settings last
+  changed. A remake let go of now frees its core on the server, so the wait could be 200 ms, a change heard sooner; a
+  slider only asks on release, so it is felt after a click on a choice, and each ask still takes a place in the queue
+  until it is let go of. To shorten if the wait is noticed.
+- **A mix written by the page** (P4): a change of the mix, volume, pan or instrument, asks the server for the file
+  again only for the download. Writing the mix into the file in the page would leave the server out of it, at the cost
+  of the MIDI writing in JavaScript too.
 - **Note keys** (P3) are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 
 - **Review, October 2026** (built): a pick sums its weights as it goes, expression walks a section's notes alone, the
