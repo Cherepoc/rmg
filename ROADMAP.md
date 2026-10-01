@@ -18,8 +18,6 @@ built since 0.6 (October 2026): parts entering late, the solos placed by their r
 answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
 this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
 
-6. a section's switch within the instrument's family as its own option, the family by General MIDI's groups split where
-   they hold other players, the plain end keeping the family and the wild end handing over (see *Instruments*);
 7. a crash on a drum solo's climax, its intensity 0.8 or more, on a cell's first hit;
 8. a polymeter's chords joining its cycle by their rhythm, their voicing kept, leaned to longer cells (see *Meter*);
 9. to 11. a key change's devices of their own, one a change, in place of a chain: a common tone held across, a pedal on
@@ -484,11 +482,10 @@ and slides, is `Expression`'s (see *Listening*).
   nor a clean one in harmonics, tremolo or pizzicato strings, a muted trumpet, General MIDI programs of their own, the
   same player's on the same rig, in some bars or on its accents, by the sound facet. Left (P3, after styles): the
   playing following the sound, such as octaves popped in slap and short notes muted, without which it is only another
-  sound, and that is the hard part; **a section's switch within a family** (P3, held back to keep the handovers, a
-  chorus's strings taking over from a verse's piano): families of patches one player moves between, by General MIDI's
-  groups of eight split where they hold other players (clean, driven and acoustic guitars; electric, acoustic and synth
-  basses), a switch to the role's instruments of the part's family where it has any, perhaps the handovers a switch of
-  its own, by the sound facet, from the part's family to any of the role's.
+  sound, and that is the hard part; and **a section's switch within a family** is built
+  (`InstrumentsOverTime.Families`): a switch keeps to the part's family, the same player's other sound, by the sound
+  facet (1, 0.6, 0.2), or hands the part over to any of the role's, as a chorus's strings take over from a verse's
+  piano: 58% of a middling song's switches kept, 28% of the wildest's (`InstrumentsOverTimeTest`).
 - **Solos** (built, `Solos`, `SoloLines`, `Soloist`): a later appearance of a section is a solo by the form facet,
   never in a plain song, 0.06 at the middle and 0.5 at the wild end, leaned by the section's role (`Solos.RoleLeans`,
   odds of 3): over 1024 songs a bridge's later appearances solo 19.6% of the time where 8.2%, a verse's 11.1% where
