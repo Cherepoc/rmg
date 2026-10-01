@@ -22,8 +22,9 @@ rated enough; styles (see *Styles*), once they are chosen.
 
 **When the need shows** (P3): a line scale by the chord and chord tones off the scale (see *Scales*, *Chords*);
 long cycles, then a figure running on across the pattern (see *Meter*); other parts' twins; drums coming in within a
-section; modulation and a ping-pong echo (see *Instruments*); occasional chords; timing by role; intros of their own
-material; scales of other sizes; the fills' loudness and sounds by convention; note keys.
+section; modulation, a ping-pong echo and legato slides (see *Instruments*); the solos' own lines (see *Instruments*);
+occasional chords; timing by role; intros of their own material; scales of other sizes; the fills' loudness and sounds
+by convention; note keys.
 
 **Parked** (P4): see *Parked*, kept for their reasons, not planned.
 
@@ -82,9 +83,9 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
 - **The octaves** (`LineDoubling`, the report in `OctaveTest`): the melody, the counter-melody or the riff plays a
   section in octaves, its own note and the one an octave above, below at the top of its range, in 10% of a plain
   song's appearances, 15% of a middling one's and 20% of the wildest, 6% of the quietest third of the sections and 26%
-  of the loudest. It bends and echoes as any line. Too often? Does a counter-melody an octave up cross the melody, and should the octave rather go
-  below there? The riff's twin, now in 15% of riff songs from the middle on, by fourths and fifths in wild songs: too
-  rare, or the wild intervals too sour?
+  of the loudest. It bends and echoes as any line. Too often? Does a counter-melody an octave up cross the melody, and
+  should the octave rather go below there? The riff's twin, now in 15% of riff songs from the middle on, by fourths
+  and fifths in wild songs: too rare, or the wild intervals too sour?
 - **The bends, vibratos and slides** (`Expression`, the reports in `ExpressionTest`): bends of one or two scale steps,
   two in a third of a middling song's and 61% of a song given sound 1's, its loud sections the more; wide vibratos on
   guitars and synth leads, a fifth of the wildest fifth's; prebends a tenth of the bends each; slides on 13% of a
@@ -247,7 +248,7 @@ and 62% of its changes by its instrument, off the new chord 1 to 3%, the melody'
 ## Form
 
 - **Sections with a role, as the form** (built): a song takes one of the forms songs are written in by a chance of
-  0.7, less the less conventional its rhythm (`SongForms`: V C V C B C, V P C V P C B C, V C V C B V C, V C V C,
+  0.7 at the middle, by the form facet (`SongForms`: V C V C B C, V P C V P C B C, V C V C B V C, V C V C,
   C V C V B C, V P C V P C), a section for every role, or else a form of its own as before (`SongStructureGenerator`),
   whose sections have no role. A role leans its section's length (`SectionLength.GetRolePlays`, odds of 8: a verse and a
   chorus to sixteen bars, a pre-chorus to four, a bridge to eight) and a bridge's home away from the tonic (odds of 4);
@@ -259,7 +260,7 @@ and 62% of its changes by its instrument, off the new chord 1 to 3%, the melody'
   *Appearances*, *Instruments*); an intro and an outro as roles of their own, should the form's intros and endings not
   do; a form with a last chorus played twice over, as a section may not follow itself.
 - **A section's length** (built): a section plays its pattern once, twice or four times (`SectionLength`, 0.2, 0.65
-  and 0.15), other than twice the likelier the less conventional its rhythm; once plays its lines' question alone, four
+  and 0.15), other than twice the likelier the wilder its form facet; once plays its lines' question alone, four
   times the question and the answer twice, the second time as a further appearance, improvised as far as the song
   improvises; a fade plays eight bars at least. Over 200 corpus songs, the plainest sections play twice 81% of the
   time, the middle 66% and the wildest 44%; a song's sections take 116 bars at the median, 64 to 180 from 10% to 90%;
@@ -334,10 +335,10 @@ planned together (P1):
   Over 200 corpus songs, a recurring section plays 4.31 of its five parts the first time and 4.78 the last, 230 of 577
   growing; the pad plays in 85% of the choruses as they play (`ArrangementReportTest`). Left: the appearance's energy
   for its loudness and the drums' changes (their colour, a drum's stroke), which are the section's as it was made.
-- **Key changes** (built): a song whose last section came back before goes up a key for it by a chance of 0.08, the
-  likelier the more conventional its rhythm, a whole step or, by 0.4, a half step (`KeyChange`), as the song's key
-  from the section's start, so that the whole band, the ending and a fade move with it and the lines, placed after, go
-  on into it. Over 200 corpus songs, 22 go up a key, 13 of them a whole step (`SongFormReportTest`).
+- **Key changes** (built): a song whose last section came back before goes up a key for it, a whole step or a half
+  step, by the scale facet, 0.08 at the middle (`KeyChange`), and at the wild end elsewhere too and by any step (see
+  *Conventionality*, the wild end made complete), as the song's key from the section's start, so that the whole band,
+  the ending and a fade move with it and the lines, placed after, go on into it.
 - **A section's own key and scale** (built): a section but the first may play in a key of its own every time it
   plays, by the scale facet (`KeyChange.SectionChance`, 0.08 at the middle), up or down a fourth most often, and a
   chorus or a bridge, which contrast with the verse, leans to it and to a scale of its own by odds of 2
@@ -375,28 +376,45 @@ The fills are the drums', and every track lands with them where a section lands.
 
 ## Instruments
 
-Four pitched tracks, the chords, the melody, the bass and a pad, each on one instrument for the whole song; a section
-may leave any of them out (`Arrangement`). Each sits where its role spreads it (`Panning`): the bass in the middle, the melody near it and the
-chords out to the other side; a new role takes a spread of its own.
+The pitched parts, the melody, the chords, the bass, a pad, a counter-melody, a riff and its twin, and a rhythm part,
+each on an instrument of its role, which a section switches now and then and a bar or an accent may play as one of
+its articulations, by the sound facet (`InstrumentsOverTime`); a section may leave any of them out (`Arrangement`).
+Each sits where its role spreads it (`Panning`): the bass in the middle, the melody near it and the chords out to the
+other side; a new role takes a spread of its own. How a part is played beyond its notes, its effects, bends, vibrato
+and slides, is `Expression`'s (see *Listening*).
 
-- **Occasional chords** (P3, planned in September 2026 and put off: a note of a line playing two or more notes is a new draw of every note, which moves the whole line even where it plays one, or a draw keyed by the note, and what it adds, a double stop in the melody, a bass chord, risks clashing with the chords for little): how many notes a track sounds at once is its role's (`Realizer`). As a note's state, a
+- **Occasional chords** (P3, planned in September 2026 and put off: what it adds, a double stop in the melody, a bass
+  chord, risks clashing with the chords for little): how many notes a track sounds at once is its role's (`Realizer`),
+  but for a line in octaves, a state on its notes that the Realizer adds the octave for (`CompositionStateKinds.Octave`),
+  which is the way an occasional chord would take, as a state drawn by section or by accent rather than a draw of
+  every note. As a note's state, a
   note, two or the chord, leaned by the beat's accent, the energy and the landings, the melody would play a double stop
   on an accent, a guitar a power chord where a section lands, the bass a chord now and then. Measured by: the notes
   sounding at once by role, on accents and off.
-- **A twin riff** (built): in 40% of the songs with a riff, its twin plays the riff's line a third above or a sixth below
-  in every section, in the riff's instrument and state, the two all the way to either side (`TrackRole.RiffTwin`,
-  `LineDoubling`); it switches instruments as the riff does, and on the page the riff's mix drives both, the twin's pan
-  mirrored. Over 256 songs, 50 of the 129 with a riff have one. Left: other parts' twins, such as a harmonised melody
-  on a track of its own, and plain doubling, which waits for timing by role (see *Groove*).
-- **Articulations** (P3, after styles): a finger, pick or slap bass, a muted guitar or its harmonics are General MIDI
-  programs of their own. An instrument's articulations as data, picked as a drum's stroke is (`DrumStrokes`: the
-  song's, changed by a section and by a bar of a later letter, the lowest layer winning), a program change where it
-  changes; the playing should follow, such as octaves popped in slap and short notes muted, or it is only another
-  sound, and that is the hard part.
-- **Solos** (P3, after sections with a role and the arrangement): an appearance of a section in which the melody rests
-  and a solo line improvises over its chords, more (`LinePattern.Mutate`), busier and over a wider range, the other
-  parts thinned; a bass solo by the bass's profile loosened. Special solo instruments by a pool of their own. The form
-  decides which appearance is a solo, by the section's role.
+- **A twin riff** (built): a song with a riff harmonises it by its twin by the melody facet, never in a plain song and
+  in 15% of riff songs from the middle on (`SongParts.TwinChance`), the twin playing the riff's line in every section,
+  in its instrument and state, the two all the way to either side (`TrackRole.RiffTwin`, `LineDoubling`): a third above
+  or a sixth below in a middling song, and the wilder the song, the oftener a fourth or a fifth, and at the wild end a
+  second or a seventh (`LineDoubling.TwinSteps`). It switches instruments as the riff does, and on the page the riff's
+  mix drives both, the twin's pan mirrored (`RiffTwinTest`). Left: other parts' twins, such as a harmonised melody on a
+  track of its own, and plain doubling, which waits for timing by role (see *Groove*).
+- **Octaves** (built): the melody, the counter-melody or the riff plays a section in octaves now and then, the likelier
+  the louder, where it plays no other doubling (`LineDoubling`, `OctaveTest`; see *Listening*).
+- **Articulations** (built as sounds, `InstrumentsOverTime`): a section plays a part's articulation, a slapped or
+  picked bass, a muted guitar or its harmonics, tremolo or pizzicato strings, a muted trumpet, General MIDI programs of
+  their own, in some bars or on its accents, by the sound facet. Left (P3, after styles): the playing following the
+  sound, such as octaves popped in slap and short notes muted, without which it is only another sound, and that is the
+  hard part.
+- **Solos** (built, `Solos`): a later appearance of a section is a solo by the form facet, never in a plain song, 0.06
+  at the middle and 0.5 at the wild end. Its melody's line, improvised throughout, is played by its soloists instead,
+  the melody resting unless it is one: near the plain end the melody's part, the chords, the riff or the rhythm part,
+  at the wild end any part as likely, by the melody facet; one most often, two or three the wilder, trading the phrases
+  or playing together, the others a third or a sixth away with a fifth of the notes left out. A drum solo plays alone,
+  a fill at every bar. A soloist's note is a line's (`CompositionStateKinds.LineSolo`) and bends three times as often.
+  Left (P3): **a solo's own line,** busier and over a wider range than the melody's, in place of its line improvised,
+  and a bass solo by the bass's profile loosened; **the band making room,** the other parts thinned; **solo
+  instruments** by a pool of their own; **the role,** which appearance solos by the section's role, a bridge or a
+  chorus played again, where now any later appearance may.
 
 - **Modulation** (P3, when a soundfont maps it): CC1, which none of the soundfonts offered maps to tone, so it was
   left out of expression. The rule to keep: modulation and a vibrato never at once, modulation and bends together.
