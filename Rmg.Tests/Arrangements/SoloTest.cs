@@ -481,6 +481,45 @@ public sealed class SoloTest
     }
 
     /// <summary>
+    ///     What a solo can do and does, at its form, melody and sound facets given together, from fairly plain to the wildest:
+    ///     how many songs solo, the soloists' vocabularies, how dense the solos play, how much of them is runs and how fast,
+    ///     their gestures, and how their long notes, an 8th or longer, are bent and sung.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task CapabilityReport()
+    {
+        foreach (var value in new[] { 0.25, 0.5, 0.75, 1.0 })
+        {
+            var overrides = new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, value).Add(Facet.Melody, value).Add(Facet.Sound, value));
+            var songs = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, overrides));
+            var soloists = songs.SelectMany(s => s.Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => (((TrackRole, Soloist))x.Value!).Item2)).ToArray();
+            var plans = songs.SelectMany(Plans).ToArray();
+            var segments = plans.SelectMany(x => x.Plan).ToArray();
+            var runs = segments.Where(x => x.Gesture == SoloGesture.Run).ToArray();
+            var notes = songs.SelectMany(s => s.Song.Notes!.Values.SelectMany(n => n).Where(n => n.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1)).Select(n => n.Value).ToArray();
+            var longNotes = notes.Where(n => n.Duration >= 0.5).ToArray();
+            var beats = plans.Sum(x => x.Plan[^1].End - x.Plan[0].Start);
+            string Share(double part, double whole) => $"{part / Math.Max(1, whole):P0}";
+            string Has(Func<Soloist, bool> has) => Share(soloists.Count(has), soloists.Length);
+            Console.WriteLine($"  facets {value}: songs with a pitched solo {Share(songs.Count(s => s.Solos.Values.Any(x => !x.IsDrumSolo)), songs.Length)}, " +
+                              $"solos a song {plans.Length / (double)songs.Length:F2}, own {Share(plans.Count(x => x.IsOwn), plans.Length)}");
+            Console.WriteLine($"    vocabulary of {soloists.Length}: speeds {string.Join(" ", new[] { 3, 6, 8, 12, 16 }.Select(x => $"{x}:{Has(s => s.Speeds.Contains(x))}"))}; " +
+                              $"cells of 5 or more {Has(s => s.CellSizes.Any(c => c >= 5))}, grouped {Has(s => s.Groups)}; stamina {soloists.Average(x => x.Stamina):F1} beats, " +
+                              $"cap {soloists.Average(x => x.MaxNotesASecond):F1} a second; volatility {soloists.Average(x => x.Volatility):F2}; bends {Has(s => s.Bends)}, vibrato {Has(s => s.Vibrates)}");
+            Console.WriteLine($"    played: {notes.Length / Math.Max(1, beats):F2} notes a beat, runs {Share(runs.Sum(x => x.End - x.Start), beats)} of the time, " +
+                              $"at {string.Join(" ", runs.GroupBy(x => x.Speed).OrderBy(x => x.Key).Select(x => $"{x.Key}:{Share(x.Count(), runs.Length)}"))} a beat; " +
+                              $"gestures {string.Join(" ", segments.GroupBy(x => x.Gesture).OrderBy(x => x.Key).Select(x => $"{x.Key}:{Share(x.Count(), segments.Length)}"))}");
+            Console.WriteLine($"    {longNotes.Length} long notes: bent {Share(longNotes.Count(n => (BendKind)n.State.GetStateValue(CompositionStateKinds.Bend) is not (BendKind.None or BendKind.Slide)), longNotes.Length)}, " +
+                              $"slid {Share(longNotes.Count(n => (BendKind)n.State.GetStateValue(CompositionStateKinds.Bend) == BendKind.Slide), longNotes.Length)}, " +
+                              $"a vibrato {Share(longNotes.Count(n => n.State.GetStateValue(CompositionStateKinds.Vibrato) > 0 || n.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0), longNotes.Length)}, " +
+                              $"a wide one {Share(longNotes.Count(n => n.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0), longNotes.Length)}");
+        }
+
+        await Task.CompletedTask;
+    }
+
+    /// <summary>
     ///     How fast the solos' runs go, by fifth of the melody facet: the share of their notes at each speed, and the longest
     ///     any run keeps up a speed of 32nds or faster, in beats.
     /// </summary>
