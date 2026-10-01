@@ -429,7 +429,7 @@ and slides, is `Expression`'s (see *Listening*).
 
 ## Groove
 
-A song swings by a chance of 0.2, leaned by its rhythm's unconventionality (`Groove`): its 16ths where they are long
+A song swings by a chance of 0.2 at the middle, by the feel facet (`Groove`): its 16ths where they are long
 enough to be heard swung (0.14 s, 105 BPM and slower), its 8ths otherwise, from 30% of a triplet's swing to all of
 it, `Render` moving every note by one continuous stretch of each pair, so that no note crosses another. Over 300
 corpus songs, 16% of the plainest swing, 17% of the middle and 37% of the wildest (`GrooveTest.Report`).
