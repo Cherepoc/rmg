@@ -71,6 +71,9 @@ internal static class SoloLines
     /// <summary>The odds the most intense gesture has over the calmest at an intensity of 1, and the other way at 0.</summary>
     public const double IntensityOdds = 16;
 
+    /// <summary>How much a run leans to the soloist's faster speeds beyond the intensity, as the odds of 1, a run being a soloist's fastest playing.</summary>
+    public const double RunSpeedOdds = 3;
+
     /// <summary>
     ///     The solo's arc, which its phrases' peaks follow: where it starts, the climax it rises to at about 70% of the way,
     ///     and where it eases to by its end.
@@ -330,12 +333,13 @@ internal static class SoloLines
                 var goingOn = gesture == SoloGesture.Run && previous is { Gesture: SoloGesture.Run };
                 if (!goingOn)
                     played.Clear();
-                // the speed, faster the more intense, of those the soloist can play at the tempo there and keep up
+                // the speed, faster the more intense and a run's the faster, of those the soloist can play at the tempo there and keep up
                 var speeds = soloist.Speeds
                     .Where(x => x * beatsASecond(at) <= soloist.MaxNotesASecond + 1e-9 && played.GetValueOrDefault(x) + length <= soloist.BeatsAt(x) + 1e-9)
                     .DefaultIfEmpty(soloist.Speeds[0])
                     .ToArray();
-                var speed = context.Pick(lean.Weigh(speeds.Select(x => new Weighted<int>(1, x)), x => speeds.Length == 1 ? 0 : 2.0 * Array.IndexOf(speeds, x) / (speeds.Length - 1) - 1));
+                var speedLean = gesture == SoloGesture.Run ? new Tilt(lean.LogOdds + Tilt.Of(RunSpeedOdds, 1).LogOdds) : lean;
+                var speed = context.Pick(speedLean.Weigh(speeds.Select(x => new Weighted<int>(1, x)), x => speeds.Length == 1 ? 0 : 2.0 * Array.IndexOf(speeds, x) / (speeds.Length - 1) - 1));
                 // and the cells: one of the soloist's shapes, and its sizes in turn where it groups them, or one of them
                 var shape = context.Pick(soloist.Shapes.Select(x => new Weighted<SoloShape>(1, x)).ToImmutableArray());
                 var size = context.Pick(soloist.CellSizes.Select(x => new Weighted<int>(1, x)).ToImmutableArray());
