@@ -39,5 +39,7 @@
   the wildest song. Every such value draws from a stream of its own, so that supplying one leaves the rest of the song
   as the seed made it.
 - **No silent defaults** in wiring: a missing argument or entry fails.
+- **The page is tested in a browser** (`Rmg.Tests.Page`): a change to `Rmg.WebApi/Client/` runs those tests, and a new
+  behaviour of the page gets one there, rather than being tried by hand in Chrome, which is for looking at the page.
 
 Planned work and the decisions behind it are in `ROADMAP.md`.

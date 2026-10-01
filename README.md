@@ -403,6 +403,7 @@ seed -> SongGenerator -> Song -> Render -> RenderedSong -> Midi.Write -> .mid
 | `Rmg` | Command line application |
 | `Rmg.WebApi` | Web service and page |
 | `Rmg.Tests` | Tests ([TUnit](https://tunit.dev)) |
+| `Rmg.Tests.Page` | The page driven in a browser ([Playwright](https://playwright.dev/dotnet/)) |
 
 The page's sources are in `Rmg.WebApi/Client`. Every build bundles and minifies them with esbuild into
 `Rmg.WebApi/wwwroot`, which is build output apart from `soundfonts`: one JS and one CSS file for each
@@ -429,6 +430,16 @@ that a change leaves the songs as they were:
 
 ```
 dotnet run --project Rmg.Tests -- --treenode-filter "/*/*/CorpusFingerprintTest/*" --output Detailed
+```
+
+The page is tested apart, as it is used: `Rmg.Tests.Page` starts the server as it is built, on a port of its own
+with its analytics in a directory of their own, and drives its pages in Playwright's headless Chromium, which its
+first run installs into `~/.cache/ms-playwright`. The songs come from the server; a test only holds them back or
+answers busy (`SongPage.Slow`, `SongPage.Busy`), so that what it checks is how the page asks for songs, waits and
+lets go of them. The page loads its synthesizer from the CDN, so the tests want the network. They take about 15 s:
+
+```
+dotnet run --project Rmg.Tests.Page -c Release
 ```
 
 ## Settings

@@ -476,6 +476,9 @@ the rest as they were.
 - **The server's figures read in full** (P4): the dashboard reads every song made in its window to work out the
   spreads, as it does the events, which is nothing at hundreds a day and slow at the 200,000 a day the table keeps at
   most; should the server ever make that many, the spreads would be worked out a day at a time and kept.
+- **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them. Playing, seeking, the
+  MP3 export and the lock screen's controls are tried by hand, as are Safari and phones; Chromium plays a song headless,
+  so a test of the player's state after Play is possible when a change to it calls for one.
 - **Note keys** (P3) are hashed seeds where a plain key of the bar pattern, the cycle and the place would do.
 
 - **Review, October 2026** (built): a pick sums its weights as it goes, expression walks a section's notes alone, the

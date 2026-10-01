@@ -17,7 +17,8 @@ recommendation), or when a step fails its reviews twice (postpone it in `ROADMAP
 2. **Critical review of the plan.** Check it against `CLAUDE.md`'s principles (simplicity, generalization, state
    decides, leaning through data, streams, no silent defaults), against what is musical, and against whether it is
    worth doing. Name what is wrong, risky or guessed, and revise the plan. Repeat until it is doable, or postpone.
-3. **Implement.** Follow the surrounding code's style and comment density. Build, and run the whole test suite.
+3. **Implement.** Follow the surrounding code's style and comment density. Build, and run the whole test suite, and
+   the page tests when the page (`Rmg.WebApi/Client/`) changed.
 4. **Measure.** Run the reports before and after; compare against the targets. A refactor must keep the corpus
    fingerprint (`dotnet Rmg/bin/Release/net10.0/Rmg.dll --fingerprint`); a change in behaviour says in the commit what
    it changed, in numbers.
@@ -36,6 +37,7 @@ every step with its commit, its measurements, and whatever was postponed or left
 
 - `dotnet` is `~/.dotnet/dotnet`: `export PATH=$HOME/.dotnet:$PATH`.
 - Build: `dotnet build Rmg.slnx -c Release --nologo -v quiet`.
+- Page tests: `dotnet run --project Rmg.Tests.Page -c Release --no-build`, about 15 s, after a build of the solution.
 - Tests: `dotnet run --project Rmg.Tests -c Release --no-build`; one class, explicit report tests included:
   `-- --treenode-filter "/*/*/ClassName/*" --output detailed`.
 - The corpus: `TestCorpus.Range(n)`, `TestCorpus.Measure(n, song => ...)` and `TestCorpus.InParallel`, with song counts
