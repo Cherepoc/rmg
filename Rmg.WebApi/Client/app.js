@@ -593,7 +593,9 @@ function showLicense(option) {
     if (!file) return;
 
     elements.libraryLicense.href = new URL(`soundfonts/${encodeURIComponent(file)}`, location.href);
-    elements.libraryLicense.textContent = `Licence for ${option.dataset.name}`;
+    // beside the soundfont's name, which says whose it is
+    elements.libraryLicense.textContent = "Licence";
+    elements.libraryLicense.setAttribute("aria-label", `Licence for ${option.dataset.name}`);
 }
 
 /** Fills the dropdown, and answers with the soundfont to load unasked, which the server names. */

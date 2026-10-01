@@ -716,6 +716,17 @@ input[type="range"] {
     transition: width 80ms linear;
 }
 
+/* where the soundfont comes from, on one line where there is room: the server's, with its licence, or a file */
+.library {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.library[hidden] {
+    display: none;
+}
+
 /* the licence sits beside the soundfont it belongs to, quietly, as a label rather than a button */
 .license {
     font-size: 13px;

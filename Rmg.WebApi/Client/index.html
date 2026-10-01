@@ -188,26 +188,26 @@
         <summary>
             <h2>Soundfont</h2><span class="visually-hidden">: </span><span class="state" id="soundfont-name">Starting…</span>
         </summary>
-        <p class="hint">
-            Pick one from the server or use your own <code>.sf2</code>, <code>.sf3</code> or <code>.dls</code>
-            file. Your file is never uploaded.
-        </p>
-        <div class="row" id="library-row" hidden>
-            <label class="field">
-                <span>From the server</span>
-                <select id="library"></select>
-            </label>
-            <a id="library-license" class="license" target="_blank" rel="noopener" hidden></a>
-        </div>
-        <div class="row">
+        <div class="row soundfont-row">
+            <div class="library" id="library-row" hidden>
+                <label class="field">
+                    <span>From the server</span>
+                    <select id="library"></select>
+                </label>
+                <a id="library-license" class="license" target="_blank" rel="noopener" hidden></a>
+                <span class="field">or use your own</span>
+            </div>
             <label class="file-button">
                 <input type="file" id="soundfont" accept=".sf2,.sf3,.sfogg,.dls" />
                 <span>Choose a file</span>
             </label>
+            <span class="field">
+                Also worth a try:
+                <a class="license" href="https://midkar.com/SoundFonts/index.html" target="_blank" rel="noopener">Timbres of Heaven</a>
+            </span>
         </div>
         <p class="hint below">
-            Also worth a try:
-            <a href="https://midkar.com/SoundFonts/index.html" target="_blank" rel="noopener">Timbres of Heaven</a>
+            Your own <code>.sf2</code>, <code>.sf3</code> or <code>.dls</code> file is played here and never uploaded.
         </p>
         <label class="field toggle">
             <input type="checkbox" id="keep" checked />
