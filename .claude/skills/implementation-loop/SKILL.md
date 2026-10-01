@@ -9,6 +9,11 @@ Work through the task given (a feature, a plan in `ROADMAP.md`, or the roadmap's
 stopping to ask between steps. Stop only when every step is done, when a decision is genuinely the user's (ask it, with a
 recommendation), or when a step fails its reviews twice (postpone it in `ROADMAP.md` with the reason and go on).
 
+The steps given are a starting point, not a contract. Split a step into smaller ones where it is too big to measure or
+review on its own, or where one part of it can be committed and judged before the rest; merge steps where they
+change the same code for the same reason, or where one alone would leave nothing worth measuring. Say so in the
+step's plan, with the reason, and report the steps as done.
+
 ## Each step
 
 1. **Plan.** Read the code the step touches. Say what changes, where, why, and how it will be measured: the report
