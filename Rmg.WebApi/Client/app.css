@@ -9,7 +9,6 @@
     --border: #dcdce3;
     --accent: #4c5bd4;
     --accent-text: #ffffff;
-    --meter: #4c5bd4;
     --danger: #b3261e;
     --radius: 10px;
 }
@@ -23,7 +22,6 @@
         --border: #32323c;
         --accent: #7d8bf0;
         --accent-text: #16161a;
-        --meter: #7d8bf0;
         --danger: #f2b8b5;
     }
 }
@@ -32,7 +30,7 @@
     box-sizing: border-box;
 }
 
-/* the display on .button and .meter would otherwise win over the user agent's [hidden] rule */
+/* the display on .button would otherwise win over the user agent's [hidden] rule */
 [hidden] {
     display: none !important;
 }
@@ -607,7 +605,7 @@ input[type="range"] {
 
 /* a part or drum group the song on the page does not play, still set here for the songs after it */
 .mixer tr.absent th,
-.mixer tr.absent .meter {
+.mixer tr.absent .pulse {
     opacity: 0.45;
 }
 
@@ -717,20 +715,11 @@ input[type="range"] {
     width: 160px;
 }
 
-/* a quiet track, so a silent meter reads as nothing playing rather than as something missing */
-.meter {
-    width: 100px;
-    height: 6px;
-    border-radius: 3px;
-    background: color-mix(in srgb, var(--border) 45%, transparent);
-    overflow: hidden;
-}
-
-.meter span {
+/* a part's pulse, in the square it ripples within */
+.pulse {
     display: block;
-    height: 100%;
-    width: 0;
-    background: var(--meter);
+    width: 28px;
+    height: 28px;
 }
 
 /* where the soundfont comes from, on one line where there is room: the server's, with its licence, or a file */

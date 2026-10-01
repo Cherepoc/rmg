@@ -5,6 +5,7 @@ import {
 import { encodeMp3, renderSong } from "./export.js";
 import { createMediaControls } from "./media-session.js";
 import { getPlayer } from "./player.js";
+import { createPulse } from "./pulse.js";
 import {
     askToPersist,
     forget,
@@ -1324,6 +1325,7 @@ async function playOrPause(wanted) {
         player.pause();
         reportListening();
         setPlayIcon(false);
+        render(player);
         showMedia(player);
     }, "Playback failed");
 }
@@ -1711,10 +1713,8 @@ function createPartRow(part) {
     levels.className = "fader-pair";
     levels.append(volume.field, pan.field);
 
-    const meter = document.createElement("div");
-    meter.className = "meter";
-    const level = document.createElement("span");
-    meter.append(level);
+    // every part a colour of its own, the same in every song, spread round the wheel
+    const pulse = createPulse(Math.round((PARTS.indexOf(part) * 360) / PARTS.length));
 
     const heading = document.createElement("th");
     heading.scope = "row";
@@ -1723,12 +1723,12 @@ function createPartRow(part) {
     const row = document.createElement("tr");
     const givenCell = document.createElement("td");
     givenCell.append(given);
-    row.append(givenCell, heading, ...[plays, instrument, levels, meter].map((x) => {
+    row.append(givenCell, heading, ...[plays, instrument, levels, pulse.canvas].map((x) => {
         const cell = document.createElement("td");
         cell.append(x);
         return cell;
     }));
-    rows.set(part, { row, given, plays, instrument, volume, pan, level });
+    rows.set(part, { row, given, plays, instrument, volume, pan, pulse });
     return row;
 }
 
@@ -2000,7 +2000,7 @@ function render(player, time = player.currentTime) {
         const level = player.paused ? 0 : Math.max(0, ...channelsOf(part).map(({ channel }) => player.getLevel(channel)));
         const reading = level > 0 ? Math.min(1, Math.max(0, (20 * Math.log10(level) - METER_FLOOR) / (METER_TOP - METER_FLOOR))) : 0;
         row.shown = player.paused ? 0 : Math.max(reading, (row.shown ?? 0) - (METER_FALL * elapsed) / (METER_TOP - METER_FLOOR));
-        row.level.style.width = `${row.shown * 100}%`;
+        row.pulse.update(row.shown, !player.paused, now / 1000);
     }
 }
 
@@ -2018,6 +2018,7 @@ function startTicking(player) {
         if (player.paused) {
             frame = null;
             setPlayIcon(false);
+            render(player);
             return;
         }
 
