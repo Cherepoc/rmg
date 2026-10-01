@@ -85,6 +85,11 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
   of the loudest. It bends and echoes as any line. Too often? Does a counter-melody an octave up cross the melody, and should the octave rather go
   below there? The riff's twin, now in 15% of riff songs from the middle on, by fourths and fifths in wild songs: too
   rare, or the wild intervals too sour?
+- **The bends, vibratos and slides** (`Expression`, the reports in `ExpressionTest`): bends of one or two scale steps,
+  two in a third of a middling song's and 61% of a song given sound 1's, its loud sections the more; wide vibratos on
+  guitars and synth leads, a fifth of the wildest fifth's; prebends a tenth of the bends each; slides on 13% of a
+  middling song's parts and 28% of the wildest's. Do the wide vibratos sound like a guitar's, does a part bending two
+  steps everywhere tire, and are slides heard as slides?
 - **The bass's pickup** always falls on the beat: the 8th before the bar line, leaned by convention, if it sounds
   square.
 - **The fills:** wild songs play about 1.8 times the tuplet notes of plain ones, as a run plays the snare's feel only:
@@ -395,6 +400,12 @@ chords out to the other side; a new role takes a spread of its own.
 
 - **Modulation** (P3, when a soundfont maps it): CC1, which none of the soundfonts offered maps to tone, so it was
   left out of expression. The rule to keep: modulation and a vibrato never at once, modulation and bends together.
+- **Legato slides** (P3, by listening): a slide strikes its note anew, starting at the note before and gliding to its
+  own (`ExpressionRender`), where a player's note before goes on sounding into the next, unstruck. Holding the note
+  before into the slide and leaving the next unstruck edits two notes at render, the next's start and the one before's
+  length; built if the struck slide sounds like a stutter.
+- **Long fall-offs** (P4): a fall-off is a bend, of a step or two (`Expression.BendSizes`); a fall of an octave into
+  nothing at a note's end is a slide's, for the parts that slide, a kind of its own if listening misses it.
 - **Ping-pong echo** (P3): an echo alternating sides, from the part's pan to its mirror, where a part's echo now
   repeats in place (`ExpressionRender`).
 
