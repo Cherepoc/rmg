@@ -158,6 +158,7 @@ internal static class SoloLines
 
     /// <summary>A solo's line, and every segment's intensity and gesture, by its start.</summary>
     /// <param name="melody">The melody's notes in the solo, which a solo on the melody aims at and quotes, and every note takes its state from.</param>
+    /// <param name="band">The chords' notes in the solo, the band's chord a stacked note stacks; the melody's where they rest.</param>
     /// <param name="track">The soloist's track, whose state its notes are realized over.</param>
     /// <param name="definition">The soloist's definition, its range.</param>
     /// <param name="voicing">The sequence that draws which gestures the soloist stacks, a stream of its own.</param>
@@ -170,6 +171,7 @@ internal static class SoloLines
         Soloist soloist,
         bool isOwn,
         IReadOnlyList<TimelineItem<StateMap>> melody,
+        IReadOnlyList<TimelineItem<StateMap>> band,
         EventStateTimelineMap<StateMap> track,
         PitchInstrumentTrack definition,
         StateTimelineMap common
@@ -191,6 +193,7 @@ internal static class SoloLines
 
         // the melody's note sounding at a position, the first before it where none does, whose state a note there takes
         TimelineItem<StateMap> MelodyAt(double position) => melody.LastOrDefault(x => x.Position <= position + 1e-9, melody[0]);
+        StateMap BandAt(double position) => band.Any(x => x.Position <= position + 1e-9) ? band.Last(x => x.Position <= position + 1e-9).Value : MelodyAt(position).Value;
         int MelodyPitch(TimelineItem<StateMap> note) =>
             Chord(note.Value, note.Position).GetPitch(note.Value.GetStateValue(StateKinds.ScaleStep)) + note.Value.GetStateValue(StateKinds.Alteration);
         int[] Notes(double position, IEnumerable<int> steps)
@@ -219,9 +222,10 @@ internal static class SoloLines
                 .With(StateKinds.Alteration, 0)
                 .With(CompositionStateKinds.SoloIntensity, (int)Math.Round(intensity * 100))
                 .With(CompositionStateKinds.SoloRelease, release ? 1 : 0);
-            // a stacked note the band's chord there under it, or the chord's shape planed (Realizer)
+            // a stacked note the band's chord there under it, or the chord's shape planed (Realizer): the chords' note sounding
+            // there, as the melody's before it may be of a chord before
             if (stacked && soloist.Voices > 1)
-                state = state.With(StateKinds.ChordNotePitchOffsets, melodyNote.GetStateValue(StateKinds.ChordNotePitchOffsets))
+                state = state.With(StateKinds.ChordNotePitchOffsets, BandAt(position).GetStateValue(StateKinds.ChordNotePitchOffsets))
                     .With(CompositionStateKinds.LineVoices, soloist.Voices)
                     .With(CompositionStateKinds.LinePlanes, soloist.Planes ? 1 : 0);
 

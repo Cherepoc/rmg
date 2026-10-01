@@ -61,6 +61,7 @@ internal static class SoloAnswers
             bool IsIn(TimelineItem<StateMap> note) => note.Position >= span.Start - 1e-9 && note.Position < span.End - 1e-9;
             var counterRests = !trackOf.TryGetValue(TrackRole.CounterMelody, out var counter) || !song.TrackTimelineMap.TryGetValue(counter, out var counterTrack) || !counterTrack.EventTimeline.Any(IsIn);
             var melody = melodyTrack.EventTimeline.Where(IsIn).ToArray();
+            var band = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
             if (!answering || solos.ContainsKey(index) || !counterRests || melody.Length == 0)
                 continue;
 
@@ -77,7 +78,7 @@ internal static class SoloAnswers
                     continue;
 
                 var gap = span with { Start = start, Duration = end - start };
-                var (line, _) = SoloLines.Generate(context, context, context, gap, answerer, true, melody, track, (PitchInstrumentTrack)definitions[soloTrack], song.CommonStateTimelineMap);
+                var (line, _) = SoloLines.Generate(context, context, context, gap, answerer, true, melody, band, track, (PitchInstrumentTrack)definitions[soloTrack], song.CommonStateTimelineMap);
                 var lift = Solos.Lift(
                     Realizer.GetNoteStates(EventStateTimelineMap.Create(song.Duration, EventTimeline.Create(song.Duration, line), track.StateTimelineMap), definitions[soloTrack], song.CommonStateTimelineMap).ToArray(),
                     heard - Quieter);

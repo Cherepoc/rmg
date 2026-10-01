@@ -170,7 +170,8 @@ internal static class Solos
 
             // the solo's line, in the first soloist's vocabulary and range
             var first = trackOf[solo.Soloists[0]];
-            var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), span, soloists[solo.Soloists[0]], solo.IsOwn, melody, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
+            var chordsHeld = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
+            var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), span, soloists[solo.Soloists[0]], solo.IsOwn, melody, chordsHeld, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
             StateTrace.Record(TracePoints.SoloGestures, first, span.SectionId, 0, StateMap.Default, 0, $"{(solo.IsOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, solo.IsOwn, segments));
             var phrases = Math.Max(1, (int)Math.Round(span.Duration / span.Meter.PatternDuration));
             // a solo of one phrase is traded by its halves
