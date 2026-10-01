@@ -137,6 +137,9 @@ internal static class Expression
 
     public static ByConvention SlideRate { get; } = new(0, 0.1, 0.3);
 
+    /// <summary>How long a note must be for a bend or a slide on it to be heard, in beats: an 8th, a run's notes going by straight.</summary>
+    public const double ShortestShaped = 0.5;
+
     /// <summary>How soon before a note the one before it must have ended for the note to slide from it, in beats: a slide starts from a note heard.</summary>
     public const double SlideGap = 0.25;
 
@@ -165,6 +168,9 @@ internal static class Expression
     public const double StrengthOdds = 8;
 
     public const double SizeCoupling = 0.3;
+
+    /// <summary>How far a solo's intensity leans its notes, as a strength does: the bigger bends and vibratos, and the oftener bends and slides, the more intense.</summary>
+    public const double SoloOdds = 8;
 
     public static ImmutableArray<(BendKind Kind, ByConvention Weight)> BendKinds { get; } =
     [
@@ -238,6 +244,7 @@ internal static class Expression
     /// <param name="songStream">The song's sequence, which the effects it plays at all are drawn from.</param>
     /// <param name="sound">Every section's sound facet, by its place among the song's sections.</param>
     /// <param name="energies">Every section's energy, by its place, which leans its bends' sizes.</param>
+    /// <param name="soloists">Every part's soloist, whose leans its solos' notes play by, as intense as the solo is there.</param>
     /// <param name="partStreams">A part's sequence for the whole song, by its track.</param>
     /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
     public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Apply(
@@ -248,6 +255,7 @@ internal static class Expression
         IGenerationContext songStream,
         IReadOnlyList<double> sound,
         IReadOnlyList<double> energies,
+        IReadOnlyDictionary<TrackRole, Soloist> soloists,
         Func<int, IGenerationContext> partStreams,
         Func<int, int, IGenerationContext> streams
     )
@@ -337,11 +345,18 @@ internal static class Expression
                                  && (IsLineRole(role) || note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1);
                     var bends = bendsHere && isLine && Bends(noteProgram);
                     var isSolo = note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1;
+                    // a solo's note plays as its soloist leans, its strength in place of the part's, and the more intense the
+                    // solo there, the bigger and the oftener
+                    var soloist = isSolo ? soloists.GetValueOrDefault(role) : null;
+                    var intensity = Tilt.Of(SoloOdds, 2 * note.Value.State.GetStateValue(CompositionStateKinds.SoloIntensity) / 100.0 - 1);
+                    var soloLean = soloist is null ? lean : new Tilt(Tilt.Of(StrengthOdds, soloist.BendLean).LogOdds + SectionEnergy.Tilt(energies[index], SizeCoupling).LogOdds + intensity.LogOdds);
                     // every note draws whether it bends, and how, so that the draws stay as they are
-                    var bendsNow = context.TestProbability(Math.Min(1, bendChance * (isSolo ? 3 : 1)));
+                    var bendsNow = context.TestProbability(soloist is null ? Math.Min(1, bendChance * (isSolo ? 3 : 1)) : intensity.Chance(Math.Min(1, bendChance * 3), 1));
                     var kind = context.Pick(bendKinds);
-                    var size = context.Pick(sizes);
-                    var slidesNow = context.TestProbability(slideRate);
+                    var size = context.Pick(soloist is null ? sizes : soloLean.Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1));
+                    var slidesNow = context.TestProbability(soloist is null ? slideRate : intensity.Chance(SlideRate.At(songSound) * 2 * Math.Clamp(soloist.SlideLean, 0, 1), 1));
+                    // and its vibrato, a note at a time, the wide likelier the more intense
+                    var noteVibrato = soloist is null ? vibrato : context.Pick(soloLean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u), Lean));
                     // from the note before, where it was heard up to a moment before, and no further than a pitch bend reaches
                     var from = i > 0 && timeline[i - 1].Position + timeline[i - 1].Value.Duration >= note.Position - SlideGap
                         ? timeline[i - 1].Value.Pitches[0] - note.Value.Pitches[0]
@@ -349,18 +364,20 @@ internal static class Expression
                     var state = note.Value.State
                         .With(CompositionStateKinds.Reverb, reverb + 1)
                         .With(CompositionStateKinds.Chorus, choruses && Choruses(noteProgram) ? chorus : 0);
-                    if (vibrates && isLine && Bends(noteProgram) && note.Value.Duration >= 1)
+                    // a soloist sings one wherever the song does, but where it echoes
+                    if ((vibrates || soloist is not null && songVibrato && !echoes) && isLine && Bends(noteProgram) && note.Value.Duration >= 1)
                     {
                         // a wide one between the note and a scale note above it, so the note must be on the scale
-                        var width = vibrato.Steps > 0 && (!VibratesWide(noteProgram) || !IsOnScale(note.Value)) ? WidestNarrow : vibrato;
+                        var width = noteVibrato.Steps > 0 && (!VibratesWide(noteProgram) || !IsOnScale(note.Value)) ? WidestNarrow : noteVibrato;
                         state = width.Steps > 0
                             ? state.With(CompositionStateKinds.WideVibrato, ScaleDistance(note.Value, width.Steps))
                             : state.With(CompositionStateKinds.Vibrato, width.Cents);
                     }
                     // a note that slides in bends no other way
-                    if (slides && slidesNow && isLine && Bends(noteProgram) && Math.Abs(from) is >= 1 and <= Rendering.ExpressionRender.BendRange)
+                    var shaped = note.Value.Duration >= ShortestShaped - 1e-9;
+                    if ((slides || soloist is not null && !echoes) && slidesNow && shaped && isLine && Bends(noteProgram) && Math.Abs(from) is >= 1 and <= Rendering.ExpressionRender.BendRange)
                         state = state.With(CompositionStateKinds.Bend, (int)BendKind.Slide).With(CompositionStateKinds.BendDepth, from);
-                    else if (bends && bendsNow)
+                    else if (bends && bendsNow && shaped)
                         state = state.With(CompositionStateKinds.Bend, (int)kind).With(CompositionStateKinds.BendDepth, kind switch
                         {
                             BendKind.BendAndRelease or BendKind.PrebendRelease => ScaleDistance(note.Value, size),

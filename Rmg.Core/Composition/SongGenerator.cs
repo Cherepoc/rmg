@@ -341,6 +341,7 @@ public static class SongGenerator
             Stream(SongStream.Effects),
             [..sections.Select(x => x.Facets[Facet.Sound])],
             energies,
+            soloists,
             track => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.PartSound), track)),
             (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Expression), section), track))
         );

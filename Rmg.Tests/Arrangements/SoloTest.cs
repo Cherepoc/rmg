@@ -209,6 +209,74 @@ public sealed class SoloTest
         await Task.CompletedTask;
     }
 
+    /// <summary>A song of solos played as wild as can be, its form, its melody and its sound.</summary>
+    private static SongOverrides Wild => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Form, 1).Add(Facet.Melody, 1).Add(Facet.Sound, 1));
+
+    /// <summary>Every note of a song's solos, by the intensity there, from 0 to 1.</summary>
+    private static (double Intensity, RealizedNote Note)[] SoloNotes(CorpusSong song) =>
+    [
+        ..song.Song.Notes!.Values.SelectMany(x => x)
+            .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1)
+            .Select(x => (x.Value.State.GetStateValue(CompositionStateKinds.SoloIntensity) / 100.0, x.Value))
+    ];
+
+    [Test]
+    public async Task AnIntenseMomentOfASolo_BendsOftener_AndFurther()
+    {
+        // of the notes long enough to bend, a run's going by straight, by thirds of the intensity
+        static ((double, RealizedNote Note)[] Calm, (double, RealizedNote Note)[] Intense) Thirds(SongOverrides overrides)
+        {
+            var notes = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => SoloNotes(TestCorpus.Get(seed, overrides)))
+                .SelectMany(x => x).Where(x => x.Note.Duration >= Expression.ShortestShaped).OrderBy(x => x.Intensity).ToArray();
+            return ([..notes.Take(notes.Length / 3)], [..notes.TakeLast(notes.Length / 3)]);
+        }
+
+        static bool Bent(RealizedNote note) => (BendKind)note.State.GetStateValue(CompositionStateKinds.Bend) is not (BendKind.None or BendKind.Slide);
+        static double Depth(IEnumerable<(double, RealizedNote Note)> some) => some.Where(x => Bent(x.Note)).Select(x => Math.Abs(x.Note.State.GetStateValue(CompositionStateKinds.BendDepth))).DefaultIfEmpty().Average();
+
+        // oftener where the song's sound leaves its notes room to bend more, as the wildest bend every one they can
+        var middling = Thirds(Wild with { Facets = Wild.Facets!.SetItem(Facet.Sound, 0.5) });
+        await Assert.That(middling.Intense.Count(x => Bent(x.Note))).IsGreaterThan(middling.Calm.Count(x => Bent(x.Note)));
+
+        var wild = Thirds(Wild);
+        await Assert.That(Depth(wild.Intense)).IsGreaterThan(Depth(wild.Calm));
+    }
+
+    [Test]
+    public async Task TheCounterMelodyAndThePad_MakeRoomForASolo()
+    {
+        var checkedSolos = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 0.5))))
+        foreach (var (index, solo) in song.Solos.Where(x => !x.Value.IsDrumSolo))
+        {
+            var span = song.Map.Sections[index];
+            foreach (var role in new[] { TrackRole.CounterMelody, TrackRole.Pad }.Where(x => !solo.Soloists.Contains(x)))
+                await Assert.That(song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == role)
+                    .Sum(x => x.Value.Count(n => n.Position >= span.Start + 1e-9 && n.Position < span.End - 1e-9))).IsEqualTo(0).Because($"seed {song.Seed}, {role} in a solo");
+            checkedSolos++;
+        }
+
+        await Assert.That(checkedSolos).IsGreaterThan(10);
+    }
+
+    /// <summary>How a solo's notes are played by its intensity, in thirds: how many bend, how far, how many sing a wide vibrato, and how many slide.</summary>
+    [Test]
+    [Explicit]
+    public async Task ExpressionReport()
+    {
+        var notes = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => SoloNotes(TestCorpus.Get(seed, Wild)))
+            .SelectMany(x => x).Where(x => x.Note.Duration >= Expression.ShortestShaped).OrderBy(x => x.Intensity).ToArray();
+        foreach (var (name, third) in new[] { ("calmest", 0), ("middle", 1), ("most intense", 2) })
+        {
+            var some = notes.Skip(third * notes.Length / 3).Take(notes.Length / 3).Select(x => x.Note).ToArray();
+            var bent = some.Where(x => (BendKind)x.State.GetStateValue(CompositionStateKinds.Bend) is not (BendKind.None or BendKind.Slide)).ToArray();
+            Console.WriteLine($"  sound 1 given, the {name} third of the solos' notes of an 8th or longer: {bent.Length / (double)some.Length:P0} bend, by {bent.Select(x => Math.Abs(x.State.GetStateValue(CompositionStateKinds.BendDepth))).DefaultIfEmpty().Average():F1} semitones; " +
+                              $"{some.Count(x => x.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0) / (double)some.Length:P1} a wide vibrato; {some.Count(x => (BendKind)x.State.GetStateValue(CompositionStateKinds.Bend) == BendKind.Slide) / (double)some.Length:P1} slide");
+        }
+
+        await Task.CompletedTask;
+    }
+
     /// <summary>The solos' gestures, by fifth of the melody facet: each gesture's share, the notes a beat, how far the intensity swings, and the share of solos of their own.</summary>
     [Test]
     [Explicit]

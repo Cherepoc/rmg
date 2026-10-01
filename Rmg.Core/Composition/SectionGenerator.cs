@@ -792,8 +792,9 @@ internal sealed record GeneratedSection(
         // improvised through
         if (solo is { IsDrumSolo: true })
             return (this with { Resting = [..Roles.Values.Distinct().Where(x => x != TrackRole.Drum)], PhraseSilent = steady, TextureKind = TextureKind.Alone, Solo = solo }).Appear(appearance, improvisation);
+        // and the counter-melody and the pad make room for it, unless they solo
         if (solo is not null)
-            return (this with { Resting = resting.Except(solo.Soloists).Remove(TrackRole.Melody), PhraseSilent = steady, TextureKind = TextureKind.Steady, Solo = solo }).Appear(appearance, 1);
+            return (this with { Resting = resting.Union([TrackRole.CounterMelody, TrackRole.Pad]).Except(solo.Soloists).Remove(TrackRole.Melody), PhraseSilent = steady, TextureKind = TextureKind.Steady, Solo = solo }).Appear(appearance, 1);
         return (this with { Resting = resting.Union(texture.Resting), PhraseSilent = texture.PhraseSilent, TextureKind = texture.Kind }).Appear(appearance, improvisation);
     }
 
