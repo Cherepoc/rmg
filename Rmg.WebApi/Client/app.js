@@ -1731,7 +1731,7 @@ function createPartRow(part) {
     row.className = "part";
     // the drums sit in the middle, as a kit does, and have no pan
     const [mute, solo] = createListening(part, name);
-    row.append(cellOf(given, "given"), heading, cellOf(plays, "on"), cellOf(instrument), cellOf(part === "drum" ? null : pan.field, "pan"), cellOf(volume.field),
+    row.append(cellOf(given, "given"), heading, cellOf(plays, "on"), cellOf(instrument), cellOf(part === "drum" ? null : pan.field, "pan"), cellOf(volume.field, "volume"),
         cellOf(mute, "listen"), cellOf(solo, "listen"), cellOf(pulse.canvas, "pulse"));
     rows.set(part, { row, given, plays, instrument, volume, pan, mute, solo, pulse });
     return row;
@@ -1801,7 +1801,7 @@ function createDrumGroupRow(group) {
     const [mute, solo] = createListening(`drums:${group}`, name);
     const chipsCell = cellOf(chips);
     chipsCell.colSpan = 2;
-    row.append(cellOf(null, "given"), heading, chipsCell, cellOf(volume.field), cellOf(mute, "listen"), cellOf(solo, "listen"), cellOf(pulse.canvas, "pulse"));
+    row.append(cellOf(null, "given"), heading, chipsCell, cellOf(volume.field, "volume"), cellOf(mute, "listen"), cellOf(solo, "listen"), cellOf(pulse.canvas, "pulse"));
     groupRows.set(group, { row, volume, chips, mute, solo, pulse });
     return row;
 }

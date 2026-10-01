@@ -697,24 +697,27 @@ input[type="range"] {
     margin: 0 auto;
 }
 
-/* the pan near its volume, and a row's mute, solo and pulse near one another */
+/* the pan near its volume, and the volume, mute, solo and pulse a little apart */
 .mixer .pan {
-    padding-right: 4px;
+    padding-right: 2px;
 }
 
-.mixer .listen,
+.mixer .volume,
+.mixer .listen {
+    padding-right: 6px;
+}
+
 .mixer .pulse {
-    padding-right: 2px;
+    padding-right: 0;
 }
 
 .mixer td.listen > button {
     display: flex;
 }
 
-/* an instrument's list as wide as its column, which the table's room to spare goes to */
+/* every part's list as wide, the longest instrument's name, "Electric Guitar (muted)", and its arrow in it */
 .mixer select {
-    width: 100%;
-    min-width: 24ch;
+    width: 26ch;
     padding: 4px 8px;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -750,6 +753,17 @@ input[type="range"] {
 
 .fader {
     width: 70px;
+}
+
+/* the pan's and the volume's columns, which the table's room to spare goes to, their sliders as wide */
+.mixer .pan,
+.mixer .volume {
+    width: 30%;
+}
+
+.mixer .fader-field .fader {
+    flex: 1;
+    min-width: 60px;
 }
 
 .percent {
@@ -923,11 +937,6 @@ footer a:hover {
 
     .transport .volume {
         margin-left: auto;
-    }
-
-    /* the instrument names are long, and the table has no room to spare on a phone */
-    .mixer select {
-        min-width: 16ch;
     }
 
     .fader {
