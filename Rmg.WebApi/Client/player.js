@@ -9,6 +9,15 @@ const PAN = 10;
 /** What a channel plays at when nothing says otherwise, which General MIDI puts at 100 of 127. */
 const DEFAULT_CHANNEL_VOLUME = 100;
 
+/**
+ *     A limiter between the synthesizer and what it is heard through, so that the loudest moments are held under full
+ *     scale rather than clipped, which is heard as distortion: a compressor at its hardest, a few decibels down, quick to
+ *     catch a peak and quick to let go. The playback and the MP3 export are limited alike.
+ */
+export function createLimiter(context) {
+    return new DynamicsCompressorNode(context, { threshold: -3, knee: 0, ratio: 20, attack: 0.002, release: 0.15 });
+}
+
 /** How many samples a level is measured over: about 6 ms. */
 const LEVEL_SAMPLES = 256;
 
@@ -199,7 +208,7 @@ async function create() {
     await context.audioWorklet.addModule(WORKLET_URL);
 
     const synth = new WorkletSynthesizer(context);
-    synth.connect(context.destination);
+    synth.connect(createLimiter(context)).connect(context.destination);
     // every channel's own output, which the synthesizer offers to be looked at, measured and heard no further
     const analysers = Array.from({ length: 16 }, (_, channel) => synth.connectChannel(new AnalyserNode(context, { fftSize: LEVEL_SAMPLES }), channel));
     await synth.isReady;

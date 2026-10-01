@@ -1,6 +1,6 @@
 import { BasicMIDI } from "spessasynth_core";
 import { WorkletSynthesizer } from "spessasynth_lib";
-import { WORKLET_URL } from "./player.js";
+import { createLimiter, WORKLET_URL } from "./player.js";
 
 const SAMPLE_RATE = 44_100;
 
@@ -24,7 +24,7 @@ export async function renderSong(song, soundFont, onProgress) {
     // nothing may come between building the synthesizer and starting the render: Chromium drops
     // worklet messages sent to an offline context, so the render is what carries the song and the bank
     const synth = new WorkletSynthesizer(context, { eventsEnabled: false });
-    synth.connect(context.destination);
+    synth.connect(createLimiter(context)).connect(context.destination);
     await synth.startOfflineRender({
         soundBankList: [{ bankOffset: 0, soundBankBuffer: soundFont }],
         midiSequence: midi,
