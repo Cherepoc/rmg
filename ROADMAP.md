@@ -228,12 +228,17 @@ dotted 8th (`MeterReportTest`; `MeterSeedsReportTest` names seeds to hear).
   (`RenderedSong.Meters`). Over 1024 songs, in the middle fifth 4% of the choruses and bridges and 2% of the others, in
   the wildest 65% and 42%, 3/4, 6/8 and 4/4 most often (`SectionMeterTest`). Left: a bar of two beats before a
   section, which would make the bars of a section unlike each other; swing, which the song's meter decides.
-- **Polymeter** (built): a section's figure of its own length in 16ths, dividing no bar, 3 and 6 most often and as
-  far as 23, run across the bar lines and started afresh at every 4-bar pattern (`Polymeter`), as an edit after
-  assembly: the riff plays it, or the bass where there is no riff, and the bass with the riff and the kick now and
-  then, each repeating its own first notes, so that its line, placed after, follows the chords where they land, and
-  the fills mark the phrase's end over it. By the feel facet: 0.7% of the middle fifth's sections, 22% of the
-  wildest's (`PolymeterTest`). Left: a figure running on across the pattern's start, which needs long cycles.
+- **Polymeter** (built): a section's cycle of its own length in 16ths, dividing no bar and no whole number of bars,
+  3 and 6 most often and as far as 23 for a cell, run across the bar lines and started afresh at every 4-bar pattern,
+  or every second at the wilder (`Polymeter`), as an edit after assembly: a cell, or a cell played up to three times
+  and a closing one of another length, as 7, 7 and 9, each cell the part's motif cut to its length; the riff plays it,
+  or the bass where there is no riff, the bass with the riff now and then and the kick with them the oftener the wilder,
+  as Meshuggah's does, with the drums bound to it; each part in the bars it plays, repeating its own first notes, so
+  that its line, placed after, follows the chords where they land, and the fills mark the phrase's end over it. By the
+  feel facet: 0.7% of the middle fifth's sections, 22% of the wildest's; of them the kick 84%, 8 bars 44%, composite
+  41% (`PolymeterTest`). Left: a figure running on across the frame's start, which needs long cycles; a cycle growing
+  each time round (3, 4, 5); the riff's figure a chugged rhythm on one low note, its accents and rests carrying it,
+  rather than its first notes; the drums in half time under it.
 ## Chords
 
 A section's chords change every two bars, every bar or every half bar (`HarmonicRhythm`, 0.25, 0.6 and 0.15, leaning

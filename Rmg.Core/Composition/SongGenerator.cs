@@ -279,7 +279,8 @@ public static class SongGenerator
             tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).ToDictionary(x => x.Key, x => x.Value.Role),
             DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber),
             form.Map,
-            polymeters
+            polymeters,
+            id => generateSection(id).Bindings
         );
 
         // the drums mark the lines, now that the song is put together
