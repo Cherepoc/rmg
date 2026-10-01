@@ -399,6 +399,39 @@ public sealed class SoloTest
     }
 
     [Test]
+    public async Task ARelease_SingsItsSoloistsVibrato_BendsOnlyIntoIt_TheMoreIntenseTheOftener_AndNeverSlides()
+    {
+        var releases = new List<(double Intensity, BendKind Bend, bool Vibrato)>();
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Wild)))
+        {
+            var soloists = song.Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => ((TrackRole Role, Soloist Soloist))x.Value!).ToDictionary(x => x.Role, x => x.Soloist);
+            foreach (var (track, notes) in song.Song.Notes!)
+            {
+                var role = song.Song.TrackDefinitions[track].Role;
+                // a soloist that sings one, on an instrument that bends, playing a line, but where it echoes
+                var echoes = notes.Any(x => x.Value.State.GetStateValue(CompositionStateKinds.Echo) != 0);
+                foreach (var note in notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.SoloRelease) == 1))
+                {
+                    var state = note.Value.State;
+                    var program = state.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
+                    var bend = (BendKind)state.GetStateValue(CompositionStateKinds.Bend);
+                    await Assert.That(bend is BendKind.None or BendKind.Scoop or BendKind.PrebendRelease).IsTrue().Because($"seed {song.Seed} at {note.Position}");
+                    if (!soloists.TryGetValue(role, out var soloist) || !soloist.Vibrates || echoes || !Expression.Bends(program) || note.Value.Duration < 1)
+                        continue;
+                    releases.Add((state.GetStateValue(CompositionStateKinds.SoloIntensity) / 100.0, bend,
+                        state.GetStateValue(CompositionStateKinds.Vibrato) > 0 || state.GetStateValue(CompositionStateKinds.WideVibrato) > 0));
+                }
+            }
+        }
+
+        await Assert.That(releases.Count).IsGreaterThan(20);
+        await Assert.That(releases.All(x => x.Vibrato)).IsTrue();
+        var ordered = releases.OrderBy(x => x.Intensity).ToArray();
+        int Bent(IEnumerable<(double, BendKind Bend, bool)> some) => some.Count(x => x.Bend != BendKind.None);
+        await Assert.That(Bent(ordered.TakeLast(ordered.Length / 3))).IsGreaterThan(Bent(ordered.Take(ordered.Length / 3)));
+    }
+
+    [Test]
     public async Task APlainSolosPhrases_StartOnTheBar_AWildOnesNowAndThenOff_AndASoloBuildsToItsClimax()
     {
         static bool IsLate(SoloLines.Segment[] plan, int phrase) => plan.First(x => x.Phrase == phrase) is { Gesture: SoloGesture.Pause, IsRelease: false };

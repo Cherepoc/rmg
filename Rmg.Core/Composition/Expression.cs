@@ -169,6 +169,14 @@ internal static class Expression
 
     public const double SizeCoupling = 0.3;
 
+    /// <summary>
+    ///     A release's bend, the note a solo's phrase ends on: into it, from below or from a prebent step above, never away
+    ///     from it, by a chance of its own, the likelier the more intense.
+    /// </summary>
+    public static ImmutableArray<Weighted<BendKind>> ReleaseBends { get; } = [new(0.6, BendKind.Scoop), new(0.4, BendKind.PrebendRelease)];
+
+    public const double ReleaseBendChance = 0.4;
+
     /// <summary>How far a solo's intensity leans its notes, as a strength does: the bigger bends and vibratos, and the oftener bends and slides, the more intense.</summary>
     public const double SoloOdds = 8;
 
@@ -352,8 +360,13 @@ internal static class Expression
                     var intensity = Tilt.Of(SoloOdds, 2 * note.Value.State.GetStateValue(CompositionStateKinds.SoloIntensity) / 100.0 - 1);
                     var soloLean = soloist is null ? lean : new Tilt(Tilt.Of(StrengthOdds, soloist.BendLean).LogOdds + SectionEnergy.Tilt(energies[index], SizeCoupling).LogOdds + intensity.LogOdds);
                     // every note draws whether it bends, and how, so that the draws stay as they are
-                    var bendsNow = context.TestProbability(soloist is null ? Math.Min(1, bendChance * (isSolo ? 3 : 1)) : intensity.Chance(Math.Min(1, bendChance * 3), 1));
+                    // a release bends into it now and then, the likelier the more intense, and slides into it never
+                    var isRelease = note.Value.State.GetStateValue(CompositionStateKinds.SoloRelease) == 1;
+                    var bendsNow = context.TestProbability(soloist is null ? Math.Min(1, bendChance * (isSolo ? 3 : 1))
+                        : intensity.Chance(isRelease ? ReleaseBendChance : Math.Min(1, bendChance * 3), 1));
                     var kind = context.Pick(bendKinds);
+                    if (isRelease)
+                        kind = context.Pick(ReleaseBends);
                     var size = context.Pick(soloist is null ? sizes : soloLean.Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1));
                     var slidesNow = context.TestProbability(soloist is null ? slideRate : intensity.Chance(SlideRate.At(songSound) * 2 * Math.Clamp(soloist.SlideLean, 0, 1), 1));
                     // and its vibrato, a note at a time, the wide likelier the more intense
@@ -376,7 +389,7 @@ internal static class Expression
                     }
                     // a note that slides in bends no other way
                     var shaped = note.Value.Duration >= ShortestShaped - 1e-9;
-                    if ((slides || soloist is not null && !echoes) && slidesNow && shaped && isLine && Bends(noteProgram) && Math.Abs(from) is >= 1 and <= Rendering.ExpressionRender.BendRange)
+                    if ((slides || soloist is not null && !echoes) && slidesNow && shaped && !isRelease && isLine && Bends(noteProgram) && Math.Abs(from) is >= 1 and <= Rendering.ExpressionRender.BendRange)
                         state = state.With(CompositionStateKinds.Bend, (int)BendKind.Slide).With(CompositionStateKinds.BendDepth, from);
                     else if (bends && bendsNow && shaped)
                         state = state.With(CompositionStateKinds.Bend, (int)kind).With(CompositionStateKinds.BendDepth, kind switch
