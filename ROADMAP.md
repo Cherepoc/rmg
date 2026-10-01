@@ -16,18 +16,17 @@ twin riff, the polymeter, the line scales, the new chords and scales, the solos,
 tuned by what listening says (see *Listening*), and the ratings by conventionality once enough are in. Then, in this
 order, each small and each measured:
 
-1. parts entering late, the drums at the second verse, the bass at the first chorus (see *Appearances*);
-2. a polymeter's cells accented, so that a composite cycle is heard as phrases (see *Meter*);
-3. which appearance solos, by its section's role (see *Instruments*, *Solos*);
-4. occasional chords, a riff's power chords where a section lands first (see *Instruments*);
-5. the solo part answering the melody, in its small version: in some sections in the counter-melody's place in the
+1. a polymeter's cells accented, so that a composite cycle is heard as phrases (see *Meter*);
+2. which appearance solos, by its section's role (see *Instruments*, *Solos*);
+3. occasional chords, a riff's power chords where a section lands first (see *Instruments*);
+4. the solo part answering the melody, in its small version: in some sections in the counter-melody's place in the
    melody's gaps, sparse and under the melody, the page given the part (see *Instruments*, *Solos*);
-6. the melody running into a section, as the bass's run-in does (see *Fills*);
-7. prepared key changes, a chain of chords leading into the new key, a dominant at the plain end and the middle,
+5. the melody running into a section, as the bass's run-in does (see *Fills*);
+6. prepared key changes, a chain of chords leading into the new key, a dominant at the plain end and the middle,
    chromatic and third-related ones wilder (see *Appearances*);
-8. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
+7. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
    *Solos*);
-9. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
+8. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -340,19 +339,14 @@ planned together (P1):
   the sections, 15% of the quieter half and 4% of the louder, 18% of the bridges and 1% of the choruses; the melody in
   10%, 26% of the bridges; the bass 7%, the chords 6% (`ArrangementReportTest`); within a song the energy follows the
   bass's notes 0.16 and the melody's 0.38 (`SectionDynamicsTest`).
-- **Parts entering late** (P1, planned in October 2026): a song holds back parts at its start and brings each in at a
-  section's start, as the drums come in at the second verse or the bass at the first chorus, the rest of the band
-  unchanged. Each part draws on its own, from a stream of its own, whether it is held back, by a chance by the form
-  facet that never holds one in a plain song and holds as often at the wild end as at the middle (the drums 0.1, the
-  bass, the riff and the rhythm part 0.05; never the melody, which an intro holds back, nor the chords, so that the
-  opening keeps its harmony), and where it enters: any section's start from the second to the first that came before,
-  the louder the likelier (`Tilt` by the section's energy), so that several parts enter apart or together without a
-  rule of their own. Before its entry a part rests whatever the section draws, at its entry it plays whatever it draws,
-  so that the entry is heard, and after it rests as drawn (`SectionGenerator.Appear`); drums come in with the fill into
-  the section, as after a breakdown. Measured by: the songs holding parts back, by part and by how many; where the
-  entries land, by section, role and energy; how often two enter apart (`ArrangementReportTest`); tested: nothing
-  before an entry, the part at it, none in the plainest songs. To resist: an order of entries, a limit on how many, a
-  rule that they enter apart; a lean if listening asks for one.
+- **Parts entering late** (built, `LateEntries`): a song holds back parts at its start and brings each in at a
+  section's start, the drums 0.1 and the bass, the riff and the rhythm part 0.05 each by the form facet, never in a
+  plain song and as often at the wild end as at the middle, never the melody nor the chords; each enters at a section
+  from the second to the first that came back, the louder the likelier, so that several enter apart or together. Before
+  its entry a part rests whatever the section draws, at its entry it plays, after it rests as drawn
+  (`SectionGenerator.Appear`); drums come in with the fill into the section. Over 1024 songs, 15 to 18% of the songs
+  hold a part back, the drums 82 times, the bass 60, the riff 24, the rhythm part 15; they enter at the second section or
+  the third mostly, 44% at the first return; 11 songs hold several, 64% of them entering apart (`LateEntryTest`).
 
 - **A pad** (built): a fourth pitched track (`TrackRole.Pad`, `InstrumentRoles.Pad`: strings, a choir, synth pads, an
   organ, never the chords' own sound), a chord at every change held until the next (`SectionGenerator.GeneratePad`),

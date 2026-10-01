@@ -776,12 +776,26 @@ internal sealed record GeneratedSection(
     /// <param name="before">The parts that rested the time before, of which it may leave out no more.</param>
     /// <param name="keepsTexture">Whether it plays steady, whatever its texture draws, as the song's first section after an intro that brings its parts in.</param>
     /// <param name="solo">The appearance's solo, whose soloists, and for a pitched solo the melody, play it throughout.</param>
-    public GeneratedSection Appear(int appearance, double improvisation, double energyStep, ImmutableHashSet<TrackRole> before, bool keepsTexture, SoloPlan? solo)
+    /// <param name="held">The parts the song holds back yet, which rest whatever the appearance draws, unless it would fall silent.</param>
+    /// <param name="entering">The parts the song brings in at the appearance, which play whatever it draws, so that they are heard coming in.</param>
+    public GeneratedSection Appear(
+        int appearance,
+        double improvisation,
+        double energyStep,
+        ImmutableHashSet<TrackRole> before,
+        bool keepsTexture,
+        SoloPlan? solo,
+        ImmutableHashSet<TrackRole> held,
+        ImmutableHashSet<TrackRole> entering
+    )
     {
-        var resting = appearance == 0
+        var drawn = appearance == 0
             ? Resting
             : Arrangement.DrawRests(new GenerationContext(Seeds.Derive(ArrangementSeed, appearance)), SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), Role, Absent)
                 .Intersect(before);
+        var resting = drawn.Union(held).Except(entering);
+        if (!Roles.Values.Distinct().Any(x => !resting.Contains(x) && HasNotes(x)))
+            resting = resting.Except(held);
         // how the parts come in over its phrases, from a sequence of its own, by the form facet
         // of the parts that have notes in the section, so that a part alone is never one that has none, such as the riff's
         // twin, the solo part or a line whose patterns came out empty

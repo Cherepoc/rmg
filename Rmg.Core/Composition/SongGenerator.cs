@@ -193,6 +193,15 @@ public static class SongGenerator
         var sections = new List<GeneratedSection>();
         // how loud and busy each appearance is meant to be: its section's energy, stepped by its place in the song
         var energies = new List<double>();
+        // the parts held back at the song's start, each entering at a later section, from a stream of their own
+        var lateEntries = LateEntries.Generate(
+            Stream(SongStream.LateEntries),
+            played,
+            [..played.Select((id, index) => generateSection(id).Energy + SectionEnergy.AppearanceStep(Place(index), averagePlaces[id]))],
+            songUnconventionality[Facet.Form],
+            absent
+        );
+        StateTrace.Record(TracePoints.LateEntries, SectionGenerator.SectionTrace, 0, 0, StateMap.Default, 0, string.Join(", ", lateEntries.Select(x => $"{x.Key} at {x.Value}")), lateEntries);
         for (var index = 0; index < played.Length; index++)
         {
             cancellation.ThrowIfCancellationRequested();
@@ -208,7 +217,9 @@ public static class SongGenerator
                 restedBefore.GetValueOrDefault(id, []),
                 // an intro of entries builds the first section's parts up itself
                 index == 0 && plan.Intro == IntroKind.Entries,
-                solo
+                solo,
+                [..lateEntries.Where(x => index < x.Value).Select(x => x.Key)],
+                [..lateEntries.Where(x => index == x.Value).Select(x => x.Key)]
             );
             if (solo is not null)
             {
@@ -486,5 +497,6 @@ internal enum SongStream
     SoloPart = 42,
     Soloist = 43,
     DrumSolo = 44,
-    SoloChords = 45
+    SoloChords = 45,
+    LateEntries = 46
 }

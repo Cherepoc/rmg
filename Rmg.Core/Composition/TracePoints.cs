@@ -22,6 +22,12 @@ internal static class TracePoints
     public const string Arrangement = "Arrangement";
 
     /// <summary>
+    ///     The parts the song holds back at its start, and the appearance each enters at, by its place among the song's
+    ///     sections (an <c>ImmutableDictionary</c> of <see cref="Songs.TrackRole" />s and <c>int</c>s).
+    /// </summary>
+    public const string LateEntries = "Late entries";
+
+    /// <summary>
     ///     An appearance's texture: its place among the song's sections, its kind and the parts each phrase leaves out (a
     ///     tuple of an <c>int</c>, a <see cref="Composition.TextureKind" /> and an <c>ImmutableArray</c> of
     ///     <c>ImmutableHashSet</c>s of <see cref="Songs.TrackRole" />s).
