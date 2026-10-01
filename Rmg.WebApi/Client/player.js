@@ -161,6 +161,11 @@ class Player {
     onSongEnded(callback) {
         this.#sequencer.eventHandler.addEvent("songEnded", "rmg-song-ended", () => callback());
     }
+
+    /** Every note as the synthesizer starts it: its channel, its MIDI note and its velocity, from 0 to 127. */
+    onNoteOn(callback) {
+        this.#synth.eventHandler.addEvent("noteOn", "rmg-note-on", (event) => callback(event.channel, event.midiNote, event.velocity));
+    }
 }
 
 let pending = null;

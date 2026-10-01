@@ -100,6 +100,10 @@ let partsInSong = {};
 let drumGroupsPresent = [];
 let drumPiecesPlayed = [];
 
+// every drum's MIDI note's group, as the server lists the pieces, and the hardest each group was struck since the last frame
+const drumGroupOfNote = new Map();
+const drumHits = new Map();
+
 // the song asked for again with changed settings, while the one on the page plays on, and where it is to go on from
 let regenerationTimer = null;
 let regeneration = null;
@@ -222,6 +226,13 @@ function listen(player) {
 
         // one on its way keeps the controls playing across the gap, or a locked phone may let go of them
         if (!advance()) mediaControls.paused(elements.seed.value, player.duration, player.duration);
+    });
+    // a drum struck lifts its group's pulse, as loud as it is struck and its group plays, which one channel's level cannot tell apart
+    player.onNoteOn((channel, note, velocity) => {
+        const group = drumGroupOfNote.get(note);
+        if (channel !== channels.drum || group === undefined) return;
+        const hit = (velocity / 127) * (settings.drumGroups[group].volume / LAST_STEP);
+        drumHits.set(group, Math.max(drumHits.get(group) ?? 0, hit));
     });
     player.masterGain = Number(elements.volume.value);
 }
@@ -1556,7 +1567,10 @@ async function listChoices() {
 
         const options = await response.json();
         tempos = options.tempos;
-        for (const piece of options.drumPieces) groupRows.get(piece.group.toLowerCase()).chips.append(createDrumPieceChip(piece));
+        for (const piece of options.drumPieces) {
+            groupRows.get(piece.group.toLowerCase()).chips.append(createDrumPieceChip(piece));
+            for (const note of piece.notes) drumGroupOfNote.set(note, piece.group.toLowerCase());
+        }
         showSettings();
         choiceRows.get("meter").select.append(...options.meters.map((x, i) => createOption(String(i), x)));
         showSetting("tempo");
@@ -1765,7 +1779,8 @@ function createDrumGroupRow(group) {
     const volumeCell = document.createElement("td");
     volumeCell.append(volume.field);
 
-    const pulse = createPulse(Math.round((PARTS.indexOf("drum") * 360) / PARTS.length));
+    // the drums' colour, fanned a little from group to group, so that a group is told from the next and all are the drums'
+    const pulse = createPulse(Math.round((PARTS.indexOf("drum") * 360) / PARTS.length + (DRUM_GROUPS.indexOf(group) - 3) * 14));
     const pulseCell = document.createElement("td");
     pulseCell.append(pulse.canvas);
 
@@ -2034,6 +2049,13 @@ function render(player, time = player.currentTime) {
         row.shown = player.paused ? 0 : Math.max(reading, (row.shown ?? 0) - (METER_FALL * elapsed) / (METER_TOP - METER_FLOOR));
         row.pulse.update(row.shown, !player.paused, now / 1000);
     }
+    // and every drum group's, by its hits, falling back as the parts' do
+    for (const [group, row] of groupRows) {
+        const hit = player.paused ? 0 : drumHits.get(group) ?? 0;
+        row.shown = player.paused ? 0 : Math.max(hit, (row.shown ?? 0) - (METER_FALL * elapsed) / (METER_TOP - METER_FLOOR));
+        row.pulse.update(row.shown, !player.paused, now / 1000);
+    }
+    drumHits.clear();
 }
 
 // the quietest and the loudest a part's meter shows, in decibels under full scale, a channel's own output before reverb
