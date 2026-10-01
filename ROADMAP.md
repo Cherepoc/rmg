@@ -22,7 +22,8 @@ rated enough; styles (see *Styles*), once they are chosen.
 
 **When the need shows** (P3): a line scale by the chord and chord tones off the scale (see *Scales*, *Chords*);
 long cycles, then a figure running on across the pattern (see *Meter*); other parts' twins; drums coming in within a
-section; modulation, a ping-pong echo and legato slides (see *Instruments*); the solos' own lines (see *Instruments*);
+section; modulation, a ping-pong echo and legato slides (see *Instruments*); the solo part answering the melody (see
+*Instruments*);
 occasional chords; timing by role; intros of their own material; scales of other sizes; the fills' loudness and sounds
 by convention; note keys.
 
@@ -91,6 +92,11 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
   guitars and synth leads, a fifth of the wildest fifth's; prebends a tenth of the bends each; slides on 13% of a
   middling song's parts and 28% of the wildest's. Do the wide vibratos sound like a guitar's, does a part bending two
   steps everywhere tire, and are slides heard as slides?
+- **The solos** (`SoloTest`'s reports): do the runs sound like a player's or like a scale exercise, a cell of five
+  or seven heard as a grouping or as stumbling? Is the intensity's arc heard, its jumps a soloist's or random? A pause
+  is 15 to 19% of the segments: too many breaths? Wide vibratos are 2% of the solos' notes of an 8th or longer, as most
+  of a solo's long notes are slides or bends: too few? Since no part bends or slides a note shorter than an 8th, slides
+  are 44% of the corpus's pitch shapes against bends' 56%: too many slides?
 - **The bass's pickup** always falls on the beat: the 8th before the bar line, leaned by convention, if it sounds
   square.
 - **The fills:** wild songs play about 1.8 times the tuplet notes of plain ones, as a run plays the snare's feel only:
@@ -405,20 +411,21 @@ and slides, is `Expression`'s (see *Listening*).
   their own, in some bars or on its accents, by the sound facet. Left (P3, after styles): the playing following the
   sound, such as octaves popped in slap and short notes muted, without which it is only another sound, and that is the
   hard part.
-- **Solos** (built, `Solos`): a later appearance of a section is a solo by the form facet, never in a plain song, 0.06
-  at the middle and 0.5 at the wild end. Its melody's line, improvised throughout, is played by its soloists instead,
-  the melody resting unless it is one: near the plain end the melody's part, the chords, the riff or the rhythm part,
-  at the wild end any part as likely, by the melody facet; one most often, two or three the wilder, trading the phrases
-  or playing together, the others a third or a sixth away with a fifth of the notes left out. A drum solo plays alone,
-  a fill at every bar. A soloist's note is a line's (`CompositionStateKinds.LineSolo`) and bends three times as often.
-  A solo part of its own (`TrackRole.Solo`): a lead guitar, a sax, a trumpet, a violin, a flute, a harmonica or a
-  synth lead, never the melody's sound, in every song and playing only its solos, the likeliest soloist, a third to a
-  half of the soloists from the plain end to the middle (`SoloTest.Report`). Left: **its place on the page,** the solo
-  part in the settings and the mixer, a new part in the settings' format, where it now plays as the file mixes it.
-  Left (P3): **a solo's own line,** busier and over a wider range than the melody's, in place of its line improvised,
-  and a bass solo by the bass's profile loosened; **the band making room,** the other parts thinned; **solo
-  instruments** by a pool of their own; **the role,** which appearance solos by the section's role, a bridge or a
-  chorus played again, where now any later appearance may.
+- **Solos** (built, `Solos`, `SoloLines`, `Soloist`): a later appearance of a section is a solo by the form facet,
+  never in a plain song, 0.06 at the middle and 0.5 at the wild end; a drum solo plays alone, a fill at every bar.
+  A solo part of its own (`TrackRole.Solo`: a lead guitar, a sax, a trumpet, a violin, a flute, a harmonica or a synth
+  lead, never the melody's sound) is the likeliest soloist, any part as likely at the wild end; several trade the
+  phrases or play together. Every part that solos has a soloist's vocabulary for the song (speeds, cell sizes and
+  their grouping, shapes, pauses, volatility, range, leans to bends and slides), by the melody facet. A solo's line is
+  made gesture by gesture by half bars, a run, a lick, a held note, a pause or a quote, picked by an intensity rising
+  over it and swung about by the soloist's volatility; on the melody near the plain end, its own over the chords at
+  the wild; runs of the soloist's cells in its shapes, grouped, accented, going on across the segments, no faster than
+  it plays at the tempo; its notes bending further and oftener the more intense, as its soloist leans; the
+  counter-melody and the pad resting for it (`SoloTest`, `SoloistTest`). Left (P3): **the solo part answering the
+  melody** outside its solos, in the melody's gaps, as a guitarist fills between a singer's phrases; **the role,**
+  which appearance solos by the section's role, a bridge or a last chorus, where now any later appearance may; **the
+  page**, the solo part in the settings and the mixer, a new part of the settings' format, where it plays as the file
+  mixes it.
 
 - **Modulation** (P3, when a soundfont maps it): CC1, which none of the soundfonts offered maps to tone, so it was
   left out of expression. The rule to keep: modulation and a vibrato never at once, modulation and bends together.
