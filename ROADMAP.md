@@ -98,7 +98,9 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
   of a solo's long notes are slides or bends: too few? Since no part bends or slides a note shorter than an 8th, slides
   are 44% of the corpus's pitch shapes against bends' 56%: too many slides? A soloist chooses to bend and to sing a
   vibrato itself, the band the song's way: 85% of guitar and synth lead solos bend, 54% of the other instruments' that
-  can: a straight band under a bending lead heard as meant?
+  can: a straight band under a bending lead heard as meant? The drum solos: do the shapes sound like a drummer's
+  stickings round the kit or like a pitched run on drums, the arpeggio's skipped tom in particular; a crash with the
+  kick held 23% of the segments: too many?
 - **The bass's pickup** always falls on the beat: the 8th before the bar line, leaned by convention, if it sounds
   square.
 - **The fills:** wild songs play about 1.8 times the tuplet notes of plain ones, as a run plays the snare's feel only:
@@ -414,7 +416,10 @@ and slides, is `Expression`'s (see *Listening*).
   sound, such as octaves popped in slap and short notes muted, without which it is only another sound, and that is the
   hard part.
 - **Solos** (built, `Solos`, `SoloLines`, `Soloist`): a later appearance of a section is a solo by the form facet,
-  never in a plain song, 0.06 at the middle and 0.5 at the wild end; a drum solo plays alone, a fill at every bar.
+  never in a plain song, 0.06 at the middle and 0.5 at the wild end. A drum solo plays alone, as a pitched solo is
+  made (`DrumSolos`), by the drummer's solo vocabulary by the fills facet, the kit its scale: snare, toms from high to
+  low, kick; runs and licks of its cells round the kit, a crash with the kick held, pauses, the groove quoted, its last
+  bar left to the fill into the next section (`DrumSoloTest`).
   A solo part of its own (`TrackRole.Solo`: a lead guitar, a sax, a trumpet, a violin, a flute, a harmonica or a synth
   lead, never the melody's sound) is the likeliest soloist, any part as likely at the wild end; several trade the
   phrases or play together. Every part that solos has a soloist's vocabulary for the song (speeds, cell sizes and
@@ -427,7 +432,8 @@ and slides, is `Expression`'s (see *Listening*).
   melody** outside its solos, in the melody's gaps, as a guitarist fills between a singer's phrases; **the role,**
   which appearance solos by the section's role, a bridge or a last chorus, where now any later appearance may; **the
   page**, the solo part in the settings and the mixer, a new part of the settings' format, where it plays as the file
-  mixes it.
+  mixes it; **the drummer as one player,** the fills' `Drummer` and the drum solo's `Soloist` one record, its fill habits
+  and its solo habits together; **a crash on a drum solo's intense accents,** should its runs want more weight.
 
 - **Modulation** (P3, when a soundfont maps it): CC1, which none of the soundfonts offered maps to tone, so it was
   left out of expression. The rule to keep: modulation and a vibrato never at once, modulation and bends together.
