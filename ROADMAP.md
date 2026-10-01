@@ -422,10 +422,15 @@ and slides, is `Expression`'s (see *Listening*).
 - **Octaves** (built): the melody, the counter-melody or the riff plays a section in octaves now and then, the likelier
   the louder, where it plays no other doubling (`LineDoubling`, `OctaveTest`; see *Listening*).
 - **Articulations** (built as sounds, `InstrumentsOverTime`): a section plays a part's articulation, a slapped or
-  picked bass, a muted guitar or its harmonics, tremolo or pizzicato strings, a muted trumpet, General MIDI programs of
-  their own, in some bars or on its accents, by the sound facet. Left (P3, after styles): the playing following the
-  sound, such as octaves popped in slap and short notes muted, without which it is only another sound, and that is the
-  hard part.
+  picked bass, a clean guitar muted and a muted one clean, a driven one in pinch harmonics, never a driven guitar muted
+  nor a clean one in harmonics, tremolo or pizzicato strings, a muted trumpet, General MIDI programs of their own, the
+  same player's on the same rig, in some bars or on its accents, by the sound facet. Left (P3, after styles): the
+  playing following the sound, such as octaves popped in slap and short notes muted, without which it is only another
+  sound, and that is the hard part; **a section's switch within a family** (P3, held back to keep the handovers, a
+  chorus's strings taking over from a verse's piano): families of patches one player moves between, by General MIDI's
+  groups of eight split where they hold other players (clean, driven and acoustic guitars; electric, acoustic and synth
+  basses), a switch to the role's instruments of the part's family where it has any, perhaps the handovers a switch of
+  its own, by the sound facet, from the part's family to any of the role's.
 - **Solos** (built, `Solos`, `SoloLines`, `Soloist`): a later appearance of a section is a solo by the form facet,
   never in a plain song, 0.06 at the middle and 0.5 at the wild end. A drum solo plays alone, as a pitched solo is
   made (`DrumSolos`), by the drummer's solo vocabulary by the fills facet, the kit its scale: snare, toms from high to

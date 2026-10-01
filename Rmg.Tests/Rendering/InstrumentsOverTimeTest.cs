@@ -46,6 +46,18 @@ public sealed class InstrumentsOverTimeTest
     }
 
     [Test]
+    public async Task AGuitarArticulates_OnItsOwnRig_ACleanOneMutedAndADrivenOneInHarmonics_NeverTheOther()
+    {
+        int[] clean = [26, 27, 28], driven = [29, 30, 31];
+        var articulated = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Changes(TestCorpus.Get(seed, Sound(1)))).SelectMany(x => x)
+            .Where(x => x.Mode != ArticulationMode.None && (clean.Contains(x.Program) || driven.Contains(x.Program))).ToArray();
+
+        await Assert.That(articulated.Length).IsGreaterThan(10);
+        foreach (var (_, role, program, _, variant) in articulated)
+            await Assert.That((clean.Contains(program) ? clean : driven).Contains(variant)).IsTrue().Because($"{role} {program} to {variant}");
+    }
+
+    [Test]
     [Explicit]
     public async Task Report()
     {

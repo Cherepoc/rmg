@@ -44,17 +44,19 @@ internal static class InstrumentsOverTime
     public const double AccentShare = 0.25;
 
     /// <summary>
-    ///     The variants of an instrument, as General MIDI has them: a finger or picked bass slapped or picked, a guitar
-    ///     muted or played in harmonics, strings in tremolo or pizzicato, a muted trumpet.
+    ///     The variants of an instrument, as General MIDI has them, each one the same player's on the same rig: a finger or
+    ///     picked bass slapped or picked, a clean guitar muted and a muted one clean, a driven one in pinch harmonics but
+    ///     never muted, General MIDI's muted guitar being clean, strings in tremolo or pizzicato, a muted trumpet.
     /// </summary>
     public static ImmutableDictionary<int, ImmutableArray<int>> Variants { get; } = new Dictionary<int, ImmutableArray<int>>
     {
         [33] = [36, 37, 34],
         [34] = [33, 36],
         [26] = [28],
-        [27] = [28, 31],
-        [29] = [28, 31],
-        [30] = [28, 31],
+        [27] = [28],
+        [28] = [27],
+        [29] = [31],
+        [30] = [31],
         [40] = [44, 45],
         [41] = [44, 45],
         [42] = [44, 45],
