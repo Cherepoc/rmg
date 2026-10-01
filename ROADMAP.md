@@ -25,8 +25,7 @@ rated enough; styles (see *Styles*), once they are chosen.
 **When the need shows** (P3), roughly in this order: timing by role, once swing alone sounds stiff (see *Groove*); a
 metric modulation, a section's tempo drawn by appearance (see *Appearances*, *Meter*); the tempo leaning by the energy,
 should the songs sound metronomic (see *Appearances*); long cycles, then a figure running on across the frame (see *Rhythm engine*,
-*Meter*); a line scale by the chord and chord tones off the scale (see *Scales*, *Chords*); a tag and intros of their own material (see *Form*); a solo's octaves its own, a drum solo's
-stacked hits and the drummer as one player (see *Solos*); other parts' twins; modulation, a ping-pong echo and legato
+*Meter*); a line scale by the chord and chord tones off the scale (see *Scales*, *Chords*); a tag and intros of their own material (see *Form*); the drummer as one player (see *Solos*); other parts' twins; modulation, a ping-pong echo and legato
 slides (see *Instruments*); scales of other sizes; the fills' loudness and sounds by convention; note keys.
 
 **Parked** (P4): see *Parked*, kept for their reasons, not planned.
@@ -498,10 +497,12 @@ and slides, is `Expression`'s (see *Listening*).
   notes a bar where it answers (`SoloAnswerTest`); the page gives it a row in the settings and the mixer, the settings'
   format 3 naming it, a link of format 2 read as it was, its solo part as the song draws it (`SongSettingsTest`,
   `SettingsLinkTest`).
-  Left (P3): **a solo's octaves its own,** a solo now playing in octaves where the melody it takes over does, its
-  soloist's choice instead; **a drum solo's stacked hits,** the kick under its accents, by the same voices the
-  drummer's vocabulary leaves at one; **the drummer as one player,** the fills' `Drummer` and the drum solo's `Soloist` one record, its fill habits
-  and its solo habits together; **a crash on a drum solo's intense accents,** should its runs want more weight.
+  A soloist plays its held notes, licks and quotes in octaves by a choice of its own, by the melody facet (0, 0.1,
+  0.2), its runs alone, where a solo played in octaves where the melody it took over did; a drum solo stacks the kick
+  under its runs' and licks' accents half the time (`SoloTest`, `DrumSoloTest`).
+  Left (P3): **the drummer as one player,** the fills' `Drummer` and the drum solo's `Soloist` one record, its fill habits
+  and its solo habits together, a refactor with no sound of its own, put off in October 2026 until the two drift apart;
+  **a crash on a drum solo's intense accents,** should its runs want more weight.
 
 - **Modulation** (P3, when a soundfont maps it): CC1, which none of the soundfonts offered maps to tone, so it was
   left out of expression. The rule to keep: modulation and a vibrato never at once, modulation and bends together.

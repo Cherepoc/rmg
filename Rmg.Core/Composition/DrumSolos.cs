@@ -23,11 +23,15 @@ internal static class DrumSolos
 
     public const double CellAccent = 0.15;
 
+    /// <summary>The chance a drum solo stacks the kick under its runs' and licks' accents, as a drummer weighs a grouping.</summary>
+    public const double KickUnderAccents = 0.5;
+
     /// <summary>
     ///     The song with every drum solo played, each from a sequence of its own by its appearance's place; the drums that
     ///     play in the section are its kit.
     /// </summary>
     /// <param name="drummer">The drummer's solo vocabulary; none where the song has no drum solo.</param>
+    /// <param name="stacks">A solo's draw of whether it stacks the kick under its accents, by its appearance's place.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
         IEnumerable<PercussionInstrumentDefinition> songDrums,
@@ -35,6 +39,7 @@ internal static class DrumSolos
         IReadOnlyDictionary<int, SoloPlan> solos,
         Soloist? drummer,
         Func<int, IGenerationContext> streams,
+        Func<int, IGenerationContext> stacks,
         Meter meter
     )
     {
@@ -58,6 +63,8 @@ internal static class DrumSolos
             var crash = Of(FillDrumRole.Cymbal).FirstOrDefault();
             var tracks = song.TrackTimelineMap.Keys.Where(x => x >= DrumGroups.FirstTrackNumber).ToArray();
             var context = streams(index);
+            var kick = Of(FillDrumRole.Kick).FirstOrDefault();
+            var stacksKick = stacks(index).TestProbability(KickUnderAccents) && kick is not null;
             var common = song.CommonStateTimelineMap;
             var plan = SoloLines.Plan(
                 context,
@@ -98,7 +105,12 @@ internal static class DrumSolos
                         var positions = SoloLines.Positions(start, end, gesture, speed);
                         var (hits, accents, _) = SoloLines.Cells(indices, cursor, heading, positions.Length, shape, sizes, gesture == SoloGesture.Run);
                         for (var i = 0; i < hits.Length; i++)
+                        {
                             edits.Hit(kit[hits[i]].Track, positions[i], loudness + (accents[i] ? CellAccent : 0), kit[hits[i]].Articulation, whole.SectionId, "Drum solo");
+                            // and the kick under an accent, but where the accent is the kick's own
+                            if (stacksKick && accents[i] && kit[hits[i]].Track != kick!.Track)
+                                edits.Hit(kick.Track, positions[i], loudness + CellAccent, kick.Articulation, whole.SectionId, "Drum solo");
+                        }
                         if (hits.Length > 0)
                             at = hits[^1];
                         break;

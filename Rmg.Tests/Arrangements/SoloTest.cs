@@ -622,6 +622,29 @@ public sealed class SoloTest
         await Assert.That(answering / (double)phrases).IsGreaterThan(0.48);
     }
 
+    [Test]
+    public async Task ASoloInOctaves_IsItsSoloistsChoice_ItsRunsAlone()
+    {
+        // the solos of one soloist, whose line is its own, each note with its soloist and the gesture it plays in
+        var notes = TestCorpus.InParallel(Enumerable.Range(0, 128), seed =>
+        {
+            var song = TestCorpus.Get(seed, Facets(1, 1));
+            var soloists = song.Trace.Where(x => x.Point == TracePoints.Soloist).Select(x => ((TrackRole Role, Soloist Soloist))x.Value!).ToDictionary(x => x.Role, x => x.Soloist);
+            return Plans(song).Where(x => song.Solos[x.Index].Soloists.Length == 1).SelectMany(plan =>
+            {
+                var role = song.Solos[plan.Index].Soloists[0];
+                return song.Song.Notes!.Single(x => song.Song.TrackDefinitions[x.Key].Role == role).Value
+                    .Where(n => n.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1 && n.Position >= plan.Plan[0].Start - 1e-9 && n.Position < plan.Plan[^1].End - 1e-9)
+                    .Select(n => (Soloist: soloists[role], plan.Plan.Last(g => g.Start <= n.Position + 1e-9).Gesture, Note: n.Value));
+            }).ToArray();
+        }).SelectMany(x => x).ToArray();
+        var octaves = notes.Where(x => x.Note.State.GetStateValue(CompositionStateKinds.Octave) > 0).ToArray();
+
+        await Assert.That(octaves.Length).IsGreaterThan(0);
+        await Assert.That(octaves.All(x => x.Gesture != SoloGesture.Run)).IsTrue();
+        await Assert.That(octaves.All(x => x.Soloist.Octaves)).IsTrue();
+    }
+
     /// <summary>Where the solos fall, by the role of the section they play: the share of the solos, and of the role's later appearances that solo.</summary>
     [Test]
     [Explicit]

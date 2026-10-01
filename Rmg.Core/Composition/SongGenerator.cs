@@ -317,6 +317,7 @@ public static class SongGenerator
             solos,
             soloists.GetValueOrDefault(TrackRole.Drum),
             index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.DrumSolo), index)),
+            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.DrumSoloStacks), index)),
             meter
         );
 
@@ -544,5 +545,6 @@ internal enum SongStream
     MelodyFills = 49,
     KeyPreparation = 50,
     SoloMotifs = 51,
-    TempoRamps = 52
+    TempoRamps = 52,
+    DrumSoloStacks = 53
 }

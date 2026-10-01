@@ -20,6 +20,28 @@ public sealed class DrumSoloTest
     private static readonly CorpusSong[] Songs = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Wild));
 
     [Test]
+    public async Task ADrumSolo_StacksTheKickUnderItsAccents_NowAndThen()
+    {
+        var kick = DrumGroups.GetTrackNumber(DrumDefinitions.Kick);
+        var (solos, stacking) = (0, 0);
+        foreach (var song in Songs)
+        foreach (var (span, plan) in DrumSolos(song))
+        {
+            // the kick struck with another drum in its runs and licks, which a cell's single hits never are
+            var runs = plan.Where(x => x.Gesture is SoloGesture.Run or SoloGesture.Lick).ToArray();
+            var drums = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.Drum).ToArray();
+            var kicks = drums.Where(x => x.Key == kick).SelectMany(x => x.Value).Where(x => runs.Any(r => x.Position >= r.Start - 1e-9 && x.Position < r.End - 1e-9)).Select(x => Math.Round(x.Position, 6)).ToHashSet();
+            var others = drums.Where(x => x.Key != kick).SelectMany(x => x.Value).Select(x => Math.Round(x.Position, 6)).ToHashSet();
+            solos++;
+            if (kicks.Any(others.Contains))
+                stacking++;
+        }
+
+        await Assert.That(solos).IsGreaterThan(10);
+        await Assert.That(stacking / (double)solos).IsBetween(0.2, 0.8);
+    }
+
+    [Test]
     public async Task ADrumSolosRuns_GoRoundItsKit_InTheDrummersCells_TheirFirstHitsTheLouder_ItsPausesSilent()
     {
         var (solos, first, rest) = (0, new List<double>(), new List<double>());

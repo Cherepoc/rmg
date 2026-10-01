@@ -56,9 +56,13 @@ internal sealed record Soloist(
     double BendRate,
     double ChordRate,
     int Voices,
-    bool Planes
+    bool Planes,
+    bool Octaves
 )
 {
+    /// <summary>The chance a soloist plays its held notes, licks and quotes in octaves, its runs alone, by the melody facet: never at the plain end.</summary>
+    public static ByConvention OctaveChance { get; } = new(0, 0.1, 0.2);
+
     /// <summary>
     ///     How often a soloist on an instrument that plays chords stacks a gesture, about which each draws its own: a
     ///     conventional way to solo on one, a plain soloist's too, leaned by the gesture and its intensity (<see cref="SoloLines" />).
@@ -214,8 +218,9 @@ internal sealed record Soloist(
         var chordRate = InstrumentRoles.PlaysChords(program) ? ChordRates.At(melody) * (0.5 + context.GenerateDouble()) : 0;
         var voices = context.Pick(ByConvention.Weigh(VoiceOptions, melody));
         var planes = context.TestProbability(PlaneChance.At(melody));
+        var octaves = context.TestProbability(OctaveChance.At(melody));
         return new Soloist([..speeds.Concat(fastest).Order()], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody), bends, vibrates, stamina,
-            phraseBars, OffBarChances.At(melody), BreathChances.At(melody), SoloLines.Gestures.ToImmutableDictionary(x => x.Gesture, x => x.Weight.At(melody)), BendRates.At(sound), chordRate, voices, planes);
+            phraseBars, OffBarChances.At(melody), BreathChances.At(melody), SoloLines.Gestures.ToImmutableDictionary(x => x.Gesture, x => x.Weight.At(melody)), BendRates.At(sound), chordRate, voices, planes, octaves);
     }
 
     /// <summary>The options a soloist favours, as many as it draws, each picked from those left.</summary>
