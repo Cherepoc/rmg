@@ -18,7 +18,6 @@ built since 0.6 (October 2026): parts entering late, the solos placed by their r
 answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
 this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
 
-18. a key change's phrase sequenced up a step until it stays;
 19. a tag, half a pattern before a section, on the two-bar grid (see *Form*);
 20. scales of other sizes, or stopped where the line scales cover the need (see *Scales*).
 
@@ -409,9 +408,11 @@ planned together (P1):
   too, as it sounds there, the smoother and the plainer: 31% of the plainest fifth's prepared changes, 14% of the
   wildest's; or a pedal, the old key's chords as they are and the bass holding the new key's dominant over their last
   bar, in its own rhythm, struck again on no chord, the wilder: 4 of the plainest fifth's prepared changes, 201 of the
-  wildest's 920 (`KeyPreparationTest`). Left: a common tone held across, put off in October 2026, a line's note held over the change into
-  the new key being what the lines' placement does not make, the pad perhaps carrying it; a phrase sequenced up a step
-  until it stays.
+  wildest's 920; or a sequence, the section's last pattern, its phrase again, halfway to the new key round the octave,
+  where the change leaves a step between and the section plays its phrase twice: 3 of the plainest fifth's prepared
+  changes to 30 of the wildest's, where the key changes at every pattern and leaves none to climb in
+  (`KeyPreparationTest`). Left: a common tone held across, put off in October 2026, a line's note held over the change into
+  the new key being what the lines' placement does not make, the pad perhaps carrying it.
 - **A section's own key and scale** (built): a section but the first may play in a key of its own every time it
   plays, by the scale facet (`KeyChange.SectionChance`, 0.08 at the middle), up or down a fourth most often, and a
   chorus or a bridge, which contrast with the verse, leans to it and to a scale of its own by odds of 2

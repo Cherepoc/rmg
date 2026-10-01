@@ -86,6 +86,28 @@ public sealed class KeyPreparationTest
     }
 
     [Test]
+    public async Task ASequence_PlaysTheSectionsLastPhrase_HalfwayToTheNewKey()
+    {
+        var sequences = 0;
+        // between the middle and the wild end, where a change leaves its section's last phrase to climb in
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 256), seed => TestCorpus.Get(seed, Scale(0.8))))
+        {
+            var keys = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.KeyOffset);
+            foreach (var (change, chords, _) in Preparations(song).Where(x => x.Device == KeyChange.Device.Sequence))
+            {
+                // the way round the octave from the key before to the new one, and the phrase's key on it, strictly between
+                var (before, halfway, after) = (keys.GetEffectiveValueAt(chords[0] - 1e-6), keys.GetEffectiveValueAt(chords[0]), keys.GetEffectiveValueAt(change));
+                var way = (after - before + 6).Mod(12) - 6;
+                var first = (halfway - before + 6).Mod(12) - 6;
+                await Assert.That(Math.Sign(first) == Math.Sign(way) && Math.Abs(first) < Math.Abs(way)).IsTrue().Because($"seed {song.Seed} at {change}: {before} {halfway} {after}");
+                sequences++;
+            }
+        }
+
+        await Assert.That(sequences).IsGreaterThan(5);
+    }
+
+    [Test]
     public async Task AMiddlingSongsChain_IsTheDominant_MostOften()
     {
         var links = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => Links(TestCorpus.Get(seed, Scale(0.5)))).SelectMany(x => x).Select(x => x[0]).ToArray();
@@ -101,11 +123,11 @@ public sealed class KeyPreparationTest
     {
         var songs = TestCorpus.Measure(1024, song => (Scale: ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Scale],
             Changes: ((ImmutableArray<KeyChange>)song.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!).Length, Links: Links(song),
-            Pivots: Preparations(song).Count(x => x.Device == KeyChange.Device.Pivot), Pedals: Preparations(song).Count(x => x.Device == KeyChange.Device.Pedal)));
+            Pivots: Preparations(song).Count(x => x.Device == KeyChange.Device.Pivot), Pedals: Preparations(song).Count(x => x.Device == KeyChange.Device.Pedal), Sequences: Preparations(song).Count(x => x.Device == KeyChange.Device.Sequence)));
         foreach (var band in songs.GroupBy(x => Math.Clamp((int)(x.Scale * 5), 0, 4)).OrderBy(x => x.Key))
         {
             var chains = band.SelectMany(x => x.Links).ToArray();
-            Console.WriteLine($"  scale {band.Key}/5: {band.Sum(x => x.Changes)} key changes, {chains.Length} chains, {band.Sum(x => x.Pivots)} pivots, {band.Sum(x => x.Pedals)} pedals; chains of {string.Join(" ", chains.GroupBy(x => x.Length).OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Count()}"))}, " +
+            Console.WriteLine($"  scale {band.Key}/5: {band.Sum(x => x.Changes)} key changes, {chains.Length} chains, {band.Sum(x => x.Pivots)} pivots, {band.Sum(x => x.Pedals)} pedals, {band.Sum(x => x.Sequences)} sequences; chains of {string.Join(" ", chains.GroupBy(x => x.Length).OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Count()}"))}, " +
                               $"links {string.Join(" ", chains.GroupBy(x => x[0]).OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Count()}"))}");
         }
 

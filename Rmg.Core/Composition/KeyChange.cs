@@ -22,18 +22,21 @@ public sealed record KeyChange(double Position, int Semitones)
     {
         Chain,
         Pivot,
-        Pedal
+        Pedal,
+        Sequence
     }
 
     /// <summary>
     ///     How a key change is led into, by the scale facet: a pivot chord, the smoothest, the plainer, a chain of chords,
-    ///     the more striking, and a pedal on the new key's dominant under the old key's last bar, the wilder.
+    ///     the more striking, a pedal on the new key's dominant under the old key's last bar, the wilder, and the section's
+    ///     last pattern, its phrase again, played halfway to the new key, a sequence climbing into it.
     /// </summary>
     public static ImmutableArray<(Device Device, ByConvention Weight)> Devices { get; } =
     [
         (Device.Chain, new ByConvention(1, 0.6, 0.4)),
         (Device.Pivot, new ByConvention(1, 0.3, 0.2)),
-        (Device.Pedal, new ByConvention(0, 0.1, 0.4))
+        (Device.Pedal, new ByConvention(0, 0.1, 0.4)),
+        (Device.Sequence, new ByConvention(0, 0.1, 0.2))
     ];
 
     /// <summary>The steps of the new key a pivot chord may be on, a predominant's the likeliest, and how likely.</summary>
@@ -211,6 +214,20 @@ public sealed record KeyChange(double Position, int Semitones)
             var old = Scale(chords[^1], before);
             // its triad as it sounds where it plays, the scale and any raised step there, in the new key
             ImmutableArray<Weighted<int>> pivots = [..PivotSteps.Where(x => Triad(chords[^1], target, x.Value).All(old.Contains))];
+            // a sequence: the section's last pattern, its phrase again, halfway to the new key, where the section plays its
+            // phrase twice and the change leaves a step between
+            var pattern = map.MeterAt(change - 1e-6).PatternDuration;
+            var section = map.Sections.Last(x => x.Start < change - 1e-9);
+            // the way to the new key round the octave, as a whole step up from 5 to -5 is
+            var way = (target - before + 6).Mod(12) - 6;
+            var halfway = (before + (int)Math.Round(way / 2.0, MidpointRounding.AwayFromZero) + 5).Mod(12) - 5;
+            if (device == Device.Sequence && Math.Abs(way) >= 2 && section.Start <= change - 2 * pattern + 1e-9 && (i == 0 || changes[i - 1].Position < change - pattern - 1e-9))
+            {
+                keys.Add(new KeyChange(change - pattern, halfway));
+                chains.Add((change, [change - pattern], Device.Sequence));
+                continue;
+            }
+
             // a pedal: the old key's chords as they are, the bass holding the new key's dominant over their last bar
             if (device == Device.Pedal)
             {
