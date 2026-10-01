@@ -18,7 +18,6 @@ built since 0.6 (October 2026): parts entering late, the solos placed by their r
 answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
 this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
 
-3. the counter-melody running into a section, `LineFills`' third way, never where the melody walks in;
 4. the melody's double stops on its accented strong beats, an instrument that plays chords only, 0.25 a section;
 5. the last chorus played twice, the repeat an appearance of its own taking the last section's lift, never with a fade;
 6. a section's switch within the instrument's family as its own option, the family by General MIDI's groups split where
@@ -439,8 +438,9 @@ The fills are the drums', and every track lands with them where a section lands.
   (`BassFillReportTest`). The melody leads into a section the same way (`LineFills`), with a third of the runs where it
   rests, three notes at most, its note held into the rest let go where the walk starts: over 1024 songs 1314 walks
   into 8483 changes of section, in 70% of the songs, most of three notes, 96% into the next section's note by a step
-  (`MelodyFillTest`). Left: the counter-melody running into a section, and filling the melody's gaps before a chord
-  change within a phrase, should they sound empty.
+  (`MelodyFillTest`). The counter-melody leads in the same way where the melody does not, 26
+  walks over 256 songs, sparse as it rests most sections. Left: filling the melody's gaps before a chord change within
+  a phrase, should they sound empty.
 - **The lift** (built for the loudness): into a louder section, the band grows louder over the bar before, a step every
   quarter beat, up to how much more energy the next section has as far as the ending section's rhythm follows it
   (`SongFormGenerator.CreateLifts`, `FormLayers.LiftVelocity` 0.6), the next section then as loud as it plays. Over 200

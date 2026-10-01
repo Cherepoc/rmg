@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
@@ -23,22 +24,29 @@ internal static class LineFills
     /// <summary>The melody, leading into a section with a third of the runs where it rests, three notes at most, two bars from its note before.</summary>
     public static Way Melody { get; } = new(0.3, true, 3, 2);
 
+    /// <summary>The counter-melody, as the melody, where the melody does not.</summary>
+    public static Way CounterMelody { get; } = Melody;
+
     /// <summary>The shortest a walk's note is, in beats: an 8th.</summary>
     public const double ShortestNote = 0.5;
 
-    public static TrackEventStateTimelineMap<StateMap> Apply(
+    /// <param name="taken">The lines another line walks into, which this one leaves to it.</param>
+    /// <returns>The song, and the lines this line walks into.</returns>
+    public static (TrackEventStateTimelineMap<StateMap> Song, ImmutableHashSet<double> Walked) Apply(
         TrackEventStateTimelineMap<StateMap> song,
         int lineTrack,
         PitchInstrumentTrack definition,
         IReadOnlyList<PlayedRun> runs,
         IGenerationContext context,
         Func<double, Meter> meterAt,
-        Way way
+        Way way,
+        IReadOnlySet<double> taken
     )
     {
         var track = song.TrackTimelineMap[lineTrack];
         var common = song.CommonStateTimelineMap;
         var (low, high) = Realizer.GetRange(definition);
+        var walkedInto = new HashSet<double>();
         var events = track.EventTimeline.ToList();
         foreach (var run in runs)
         {
@@ -53,7 +61,7 @@ internal static class LineFills
             // where the line plays on either side, not into a section it rests in or out of one, and into its own rest
             // where it walks only there
             if (before < 0 || after < 0 || events[after].Position > run.Line + meterAt(run.Line).BarDuration || events[before].Position < from - way.ReachBars * meterAt(from).BarDuration
-                || way.IntoRest && events.Any(x => x.Position >= from - 1e-9 && x.Position < run.Line - 1e-9))
+                || way.IntoRest && events.Any(x => x.Position >= from - 1e-9 && x.Position < run.Line - 1e-9) || taken.Contains(run.Line))
                 continue;
 
             var start = Pitch(events[before]);
@@ -61,6 +69,7 @@ internal static class LineFills
             var scale = ScaleNotes(events[before], low, high);
             var walk = Walk(scale, start, target, positions.Length);
             var walked = positions.Zip(walk, (position, pitch) => Place(events[before].Value, position, pitch)).ToArray();
+            walkedInto.Add(run.Line);
             StateTrace.Record(TracePoints.LineFill, lineTrack, 0, 0, StateMap.Default, 0, $"{positions.Length} notes into {run.Line}", (run.Line, positions));
             // a note held into the rest let go where the walk starts, a line singing one note at a time
             var held = events[before].Value.GetStateValue(StateKinds.HeldDuration);
@@ -72,7 +81,7 @@ internal static class LineFills
         }
 
         var filled = EventTimeline.Create(track.EventTimeline.Duration, events);
-        return song.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [lineTrack] = _ => filled });
+        return (song.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [lineTrack] = _ => filled }), [..walkedInto]);
 
         // the chord a note plays over, as Realizer reads its state there: its own, its track's, its definition's and the song's
         ChordContext Chord(TimelineItem<StateMap> note) => Realizer.GetChord(StateMap.Aggregate([

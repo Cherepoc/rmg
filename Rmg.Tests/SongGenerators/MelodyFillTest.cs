@@ -41,6 +41,21 @@ public sealed class MelodyFillTest
         await Assert.That(stepping / (double)walks).IsGreaterThan(0.85);
     }
 
+    [Test]
+    public async Task TheCounterMelody_LeadsIntoASection_WhereTheMelodyDoesNot()
+    {
+        var walks = 0;
+        foreach (var song in TestCorpus.Range(256))
+        {
+            double[] Lines(int track) => [..song.Trace.Where(x => x.Point == TracePoints.LineFill && x.Track == track).Select(x => (((double Line, double[]))x.Value!).Line)];
+            var counter = Lines(SongTracks.CounterMelodyTrack);
+            await Assert.That(counter.Intersect(Lines(SongTracks.MelodyTrack))).IsEmpty().Because($"seed {song.Seed}");
+            walks += counter.Length;
+        }
+
+        await Assert.That(walks).IsGreaterThan(20);
+    }
+
     /// <summary>How often the melody leads into a section, of its changes with a run, and with how many notes.</summary>
     [Test]
     [Explicit]

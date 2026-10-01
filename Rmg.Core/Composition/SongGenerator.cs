@@ -334,10 +334,13 @@ public static class SongGenerator
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, BassLeadingLayers.Line);
         // and the bass walking with the drums' runs into a new section now and then, from where it is placed, and the
         // melody leading into it where it rests, each from a sequence of its own
-        songTrackNoteTimelineMap = LineFills.Apply(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, fills.Runs, Stream(SongStream.BassFills), form.Map.MeterAt, LineFills.Bass);
-        songTrackNoteTimelineMap = LineFills.Apply(songTrackNoteTimelineMap, melodyTrack.Key, (PitchInstrumentTrack)melodyTrack.Value, fills.Runs, Stream(SongStream.MelodyFills), form.Map.MeterAt, LineFills.Melody);
+        (songTrackNoteTimelineMap, _) = LineFills.Apply(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, fills.Runs, Stream(SongStream.BassFills), form.Map.MeterAt, LineFills.Bass, ImmutableHashSet<double>.Empty);
+        (songTrackNoteTimelineMap, var melodyWalks) = LineFills.Apply(songTrackNoteTimelineMap, melodyTrack.Key, (PitchInstrumentTrack)melodyTrack.Value, fills.Runs, Stream(SongStream.MelodyFills), form.Map.MeterAt, LineFills.Melody, ImmutableHashSet<double>.Empty);
         var counterTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.CounterMelody);
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, counterTrack.Key, (PitchInstrumentTrack)counterTrack.Value, CounterLayers.Line);
+        // and the counter-melody leading into a section where the melody does not
+        if (songTrackNoteTimelineMap.TrackTimelineMap.ContainsKey(counterTrack.Key))
+            (songTrackNoteTimelineMap, _) = LineFills.Apply(songTrackNoteTimelineMap, counterTrack.Key, (PitchInstrumentTrack)counterTrack.Value, fills.Runs, Stream(SongStream.CounterFills), form.Map.MeterAt, LineFills.CounterMelody, melodyWalks);
         var riffTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Riff);
         songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, riffTrack.Key, (PitchInstrumentTrack)riffTrack.Value, RiffLayers.Line);
         // and a line doubled in a section now and then, by another part or by its own an octave apart, each pair and
@@ -551,5 +554,6 @@ internal enum SongStream
     KeyPreparation = 50,
     SoloMotifs = 51,
     TempoRamps = 52,
-    DrumSoloStacks = 53
+    DrumSoloStacks = 53,
+    CounterFills = 54
 }
