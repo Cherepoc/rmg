@@ -1561,6 +1561,7 @@ function createSettingRow(key) {
 
     const range = document.createElement("input");
     range.type = "range";
+    range.dataset.setting = key;
     range.min = "0";
     range.max = String(LAST_STEP);
     range.step = "1";

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Playwright;
 
@@ -11,8 +12,26 @@ public sealed class SongRequest(JsonElement body)
     /// <summary>The seed asked for, null for a random one.</summary>
     public string? Seed => Body.TryGetProperty("seed", out var seed) && seed.ValueKind == JsonValueKind.String ? seed.GetString() : null;
 
+    /// <summary>A facet it was asked with, null for one left to the song to draw.</summary>
+    public int? Facet(string facet) => Body.GetProperty("facets").TryGetProperty(facet, out var value) ? value.GetInt32() : null;
+
+    /// <summary>The song's volume it was asked with, which is of the mix.</summary>
+    public int Volume => Body.GetProperty("volume").GetInt32();
+
+    /// <summary>When it was sent, and when it ended, by <see cref="Stopwatch.GetTimestamp" />.</summary>
+    public long SentAt { get; } = Stopwatch.GetTimestamp();
+
+    public long? EndedAt { get; private set; }
+
     /// <summary>The status it was answered with, "aborted" for one let go of, null while on its way.</summary>
-    public string? Ended { get; set; }
+    public string? Ended { get; private set; }
+
+    public void End(string ended)
+    {
+        if (Ended is not null) return;
+        Ended = ended;
+        EndedAt = Stopwatch.GetTimestamp();
+    }
 
     public override string ToString() => $"{Seed ?? "random"}: {Ended ?? "on its way"}";
 }
@@ -124,7 +143,7 @@ public sealed class SongPage : IAsyncDisposable
     {
         lock (_requests)
             if (_byRequest.TryGetValue(request, out var asked))
-                asked.Ended ??= ended;
+                asked.End(ended);
     }
 
     /// <summary>Waits until the condition holds, and fails saying what was asked for if it does not in time.</summary>
@@ -168,6 +187,28 @@ public sealed class SongPage : IAsyncDisposable
     public async Task<IReadOnlyList<string>> History() => await Page.Locator("button[data-entry]").EvaluateAllAsync<string[]>("xs => xs.map(x => x.dataset.seed)");
 
     public ILocator HistoryItem(string seed) => Page.Locator($"button[data-entry][data-seed='{seed}']");
+
+    /// <summary>The songs asked for since the given count of them.</summary>
+    public IReadOnlyList<SongRequest> Since(int count) => [..Requests.Skip(count)];
+
+    /// <summary>Waits for a song asked for to be on its way, held back.</summary>
+    public Task OnItsWay() => Until(() => Requests.Any(x => x.Ended is null), "a song on its way");
+
+    /// <summary>Moves a setting's slider and lets go of it, as a hand would, wherever its panel is folded away.</summary>
+    public Task SetSetting(string key, int value) => Page.EvaluateAsync(
+        "([key, value]) => { const range = document.querySelector(`input[data-setting='${key}']`); range.value = String(value); range.dispatchEvent(new Event('input')); range.dispatchEvent(new Event('change')); }",
+        new object[] { key, value });
+
+    /// <summary>Moves the song's volume, which is of the mix and heard at once.</summary>
+    public Task SetSongVolume(int value) => Page.EvaluateAsync(
+        "value => { const range = document.getElementById('song-volume'); range.value = String(value); range.dispatchEvent(new Event('input')); }",
+        value);
+
+    /// <summary>How many of the settings are given, as the settings panel says.</summary>
+    public async Task<string> Given() => await Page.Locator("#settings-state").TextContentAsync() ?? "";
+
+    /// <summary>Waits until the player can be stopped, which wants the soundfont as well as the song.</summary>
+    public Task Playable() => Until(() => Page.Locator("#stop").IsEnabledAsync(), "the song and the soundfont being ready");
 
     public ValueTask DisposeAsync() => _context.DisposeAsync();
 }
