@@ -7,8 +7,11 @@ namespace Rmg.Tests.Chords;
 
 public sealed class KeyPreparationTest
 {
-    private static ImmutableArray<(double Change, ImmutableArray<double> Chords)> Chains(CorpusSong song) =>
-        (ImmutableArray<(double, ImmutableArray<double>)>)song.Trace.Single(x => x.Point == TracePoints.KeyPreparation).Value!;
+    private static ImmutableArray<(double Change, ImmutableArray<double> Chords, KeyChange.Device Device)> Preparations(CorpusSong song) =>
+        (ImmutableArray<(double, ImmutableArray<double>, KeyChange.Device)>)song.Trace.Single(x => x.Point == TracePoints.KeyPreparation).Value!;
+
+    private static (double Change, ImmutableArray<double> Chords, KeyChange.Device Device)[] Chains(CorpusSong song) =>
+        [..Preparations(song).Where(x => x.Device == KeyChange.Device.Chain)];
 
     /// <summary>The root's pitch class of the chord sounding at a place, as every part reads it.</summary>
     private static int Root(CorpusSong song, double position) =>
@@ -37,6 +40,29 @@ public sealed class KeyPreparationTest
     }
 
     [Test]
+    public async Task APivotChord_IsOneTheOldKeyHasToo()
+    {
+        var pivots = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Scale(0.4))))
+        {
+            var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
+            foreach (var (_, chords, _) in Preparations(song).Where(x => x.Device == KeyChange.Device.Pivot))
+            {
+                // its triad's notes, as every part reads them, all of the scale the moment before it plays
+                var state = common.GetEffectiveStateMapAt(chords[0]);
+                var triad = new[] { 0, 2, 4 }.Select(x => Realizer.GetChord(state).Chord.GetPitch(x).Mod(12));
+                // the scale there in the key before
+                var key = common.GetEffectiveStateMapAt(chords[0] - 1e-6).GetStateValue(StateKinds.KeyOffset);
+                var scale = Enumerable.Range(0, 7).Select(x => Realizer.GetChord(state.With(StateKinds.KeyOffset, key).With(StateKinds.ChordRoot, x)).Chord.GetPitch(0).Mod(12)).ToHashSet();
+                await Assert.That(triad.All(scale.Contains)).IsTrue().Because($"seed {song.Seed} at {chords[0]}");
+                pivots++;
+            }
+        }
+
+        await Assert.That(pivots).IsGreaterThan(5);
+    }
+
+    [Test]
     public async Task AMiddlingSongsChain_IsTheDominant_MostOften()
     {
         var links = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => Links(TestCorpus.Get(seed, Scale(0.5)))).SelectMany(x => x).Select(x => x[0]).ToArray();
@@ -51,11 +77,12 @@ public sealed class KeyPreparationTest
     public async Task Report()
     {
         var songs = TestCorpus.Measure(1024, song => (Scale: ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Scale],
-            Changes: ((ImmutableArray<KeyChange>)song.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!).Length, Links: Links(song)));
+            Changes: ((ImmutableArray<KeyChange>)song.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!).Length, Links: Links(song),
+            Pivots: Preparations(song).Count(x => x.Device == KeyChange.Device.Pivot)));
         foreach (var band in songs.GroupBy(x => Math.Clamp((int)(x.Scale * 5), 0, 4)).OrderBy(x => x.Key))
         {
             var chains = band.SelectMany(x => x.Links).ToArray();
-            Console.WriteLine($"  scale {band.Key}/5: {band.Sum(x => x.Changes)} key changes, {chains.Length} prepared; chains of {string.Join(" ", chains.GroupBy(x => x.Length).OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Count()}"))}, " +
+            Console.WriteLine($"  scale {band.Key}/5: {band.Sum(x => x.Changes)} key changes, {chains.Length} chains, {band.Sum(x => x.Pivots)} pivots; chains of {string.Join(" ", chains.GroupBy(x => x.Length).OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Count()}"))}, " +
                               $"links {string.Join(" ", chains.GroupBy(x => x[0]).OrderBy(x => x.Key).Select(x => $"{x.Key}:{x.Count()}"))}");
         }
 

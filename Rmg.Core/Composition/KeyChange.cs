@@ -17,6 +17,26 @@ namespace Rmg.Core.Composition;
 /// <param name="Semitones">The new key, as its step from the song's own, from -5 to 6.</param>
 public sealed record KeyChange(double Position, int Semitones)
 {
+    /// <summary>How a key change is led into, where it is: a chain of chords, or a pivot chord both keys share.</summary>
+    public enum Device
+    {
+        Chain,
+        Pivot
+    }
+
+    /// <summary>
+    ///     How a key change is led into, by the scale facet: a pivot chord, the smoothest, the plainer, and a chain of chords,
+    ///     the more striking, the wilder.
+    /// </summary>
+    public static ImmutableArray<(Device Device, ByConvention Weight)> Devices { get; } =
+    [
+        (Device.Chain, new ByConvention(1, 0.6, 0.4)),
+        (Device.Pivot, new ByConvention(1, 0.3, 0.2))
+    ];
+
+    /// <summary>The steps of the new key a pivot chord may be on, a predominant's the likeliest, and how likely.</summary>
+    public static ImmutableArray<Weighted<int>> PivotSteps { get; } = [new(1, 1), new(1, 3), new(0.6, 5), new(0.3, 2)];
+
     /// <summary>
     ///     The chance a last section that came back before changes key: none of the plainest songs, a few at the middle
     ///     and every one at the wild end.
@@ -151,7 +171,7 @@ public sealed record KeyChange(double Position, int Semitones)
     /// <param name="common">The song's common state, its chords and scales, before any key change.</param>
     /// <param name="streams">A key change's draws, by its place among the song's.</param>
     /// <returns>The key changes, the chains' among them; the roots' moves, a layer of the common state; and every chain, for the trace.</returns>
-    internal static (ImmutableArray<KeyChange> Keys, StateTimelineMap Roots, ImmutableArray<(double Change, ImmutableArray<double> Chords)> Chains) Prepare(
+    internal static (ImmutableArray<KeyChange> Keys, StateTimelineMap Roots, ImmutableArray<(double Change, ImmutableArray<double> Chords, Device Device)> Chains) Prepare(
         ImmutableArray<KeyChange> changes,
         StateTimelineMap common,
         SongMap map,
@@ -162,21 +182,50 @@ public sealed record KeyChange(double Position, int Semitones)
         var chordStarts = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         var keys = changes.ToList();
         var roots = new List<TimelineItem<int>>();
-        var chains = ImmutableArray.CreateBuilder<(double, ImmutableArray<double>)>();
+        var chains = ImmutableArray.CreateBuilder<(double, ImmutableArray<double>, Device)>();
         int Root(double position) => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
         int RootPitch(double position, int key, int step) => (key + Realizer.GetChord(common.GetEffectiveStateMapAt(position).With(StateKinds.ChordRoot, step)).Chord.GetPitch(0)).Mod(12);
+        // a triad's pitch classes on a step of the scale there, in a key, and the scale's
+        int[] Triad(double position, int key, int step) => [..new[] { 0, 2, 4 }.Select(x => (key + Realizer.GetChord(common.GetEffectiveStateMapAt(position).With(StateKinds.ChordRoot, step)).Chord.GetPitch(x)).Mod(12))];
+        HashSet<int> Scale(double position, int key) => [..Enumerable.Range(0, Scales.StepCount).Select(x => RootPitch(position, key, x))];
         for (var i = 0; i < changes.Length; i++)
         {
             var context = streams(i);
             var prepares = context.TestProbability(PrepareChance);
             var length = context.Pick(ByConvention.Weigh(ChainLengths, unconventionality));
             var (keyFromNext, rootStep) = context.Pick(ByConvention.Weigh(Links, unconventionality));
+            var device = context.Pick(ByConvention.Weigh(Devices, unconventionality));
+            var pivotDraw = context.GenerateDouble();
             var (change, target) = (changes[i].Position, changes[i].Semitones);
             // the chords of the pattern before, after any change before it
             var since = Math.Max(i > 0 ? changes[i - 1].Position : 0, change - map.MeterAt(Math.Max(0, change - 1e-6)).PatternDuration);
             var chords = chordStarts.Where(x => x > since + 1e-9 && x < change - 1e-9).TakeLast(length).ToArray();
             if (!prepares || chords.Length == 0)
                 continue;
+
+            // a pivot: the last chord before the change on a step of the new key whose triad the old key has too, as
+            // likely as its step is, a chain where none is
+            var before = i > 0 ? changes[i - 1].Semitones : 0;
+            var old = Scale(chords[^1], before);
+            // its triad as it sounds where it plays, the scale and any raised step there, in the new key
+            ImmutableArray<Weighted<int>> pivots = [..PivotSteps.Where(x => Triad(chords[^1], target, x.Value).All(old.Contains))];
+            if (device == Device.Pivot && !pivots.IsEmpty)
+            {
+                // the step the draw falls on among the pivots' weights, drawn whatever the device, so that the draws stay as they are
+                var (at, pivot) = (pivotDraw * pivots.Sum(x => x.Weight), pivots[^1].Value);
+                foreach (var option in pivots)
+                    if ((at -= option.Weight) < 0)
+                    {
+                        pivot = option.Value;
+                        break;
+                    }
+
+                keys.Add(new KeyChange(chords[^1], target));
+                roots.Add((pivot - Root(chords[^1])).ToTimelineItem(chords[^1]));
+                roots.Add(0.ToTimelineItem(change));
+                chains.Add((change, [chords[^1]], Device.Pivot));
+                continue;
+            }
 
             // from the new key's first chord back, every chord the one leading to the one after it
             var next = RootPitch(change, target, Root(change));
@@ -189,7 +238,7 @@ public sealed record KeyChange(double Position, int Semitones)
                 next = RootPitch(chords[j], key, rootStep);
             }
 
-            chains.Add((change, [..chords]));
+            chains.Add((change, [..chords], Device.Chain));
         }
 
         var duration = common.Duration;
