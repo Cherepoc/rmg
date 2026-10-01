@@ -1,3 +1,4 @@
+using Rmg.Core.Events;
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Songs;
@@ -76,6 +77,42 @@ public sealed class RiffTest
 
         await Assert.That(sections).IsGreaterThan(50);
         await Assert.That(stacking / (double)sections).IsBetween(0.1, 0.3);
+    }
+
+    [Test]
+    public async Task ACounterMelodyHarmonisingTheMelody_PlaysInItsSound_HalfTheTime()
+    {
+        var (doubled, inTimbre) = (0, 0);
+        foreach (var song in TestCorpus.Range(256))
+        {
+            var program = (int track, TimelineItem<RealizedNote> note) => note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0
+                ? stated - 1 : ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
+            var melody = song.Song.Notes!.GetValueOrDefault(SongTracks.MelodyTrack, Rmg.Core.Events.EventTimeline.Create<RealizedNote>(0));
+            var counter = song.Song.Notes!.GetValueOrDefault(SongTracks.CounterMelodyTrack, Rmg.Core.Events.EventTimeline.Create<RealizedNote>(0));
+            foreach (var (index, source, _, _) in Doublings(song).Where(x => x.Source == TrackRole.Melody && x.Target == TrackRole.CounterMelody))
+            {
+                var span = song.Map.Sections[index];
+                var notes = counter.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9).ToArray();
+                if (notes.Length == 0)
+                    continue;
+
+                doubled++;
+                var twinned = notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.SoundsAs) > 0).ToArray();
+                if (twinned.Length == 0)
+                    continue;
+
+                inTimbre++;
+                // in the program the melody plays there
+                foreach (var note in twinned)
+                {
+                    var near = melody.LastOrDefault(x => x.Position <= note.Position + 1e-9, melody[0]);
+                    await Assert.That(program(SongTracks.CounterMelodyTrack, note)).IsEqualTo(program(SongTracks.MelodyTrack, near)).Because($"seed {song.Seed} at {note.Position}");
+                }
+            }
+        }
+
+        await Assert.That(doubled).IsGreaterThan(20);
+        await Assert.That(inTimbre / (double)doubled).IsBetween(0.3, 0.7);
     }
 
     [Test]

@@ -45,6 +45,9 @@ internal static class LineDoubling
         (TrackRole.Riff, TrackRole.RiffTwin, TwinSteps, 1, true)
     ];
 
+    /// <summary>The chance a counter-melody doubling the melody plays it in the melody's sound, twin leads a third apart.</summary>
+    public const double TwinTimbreChance = 0.5;
+
     /// <summary>A step a doubling plays whatever the song's melody facet.</summary>
     private static ByConvention Any => new(1, 1, 1);
 
@@ -72,7 +75,8 @@ internal static class LineDoubling
         double melody,
         double sound,
         IReadOnlyList<double> energies,
-        Func<int, int, IGenerationContext> streams
+        Func<int, int, IGenerationContext> streams,
+        Func<int, IGenerationContext> timbres
     )
     {
         var trackOf = roles.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.First().Key);
@@ -107,9 +111,12 @@ internal static class LineDoubling
                 // than it would, as into an intro that brings it in
                 var own = events[isTwin ? sourceTrack : targetTrack].EventTimeline.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9).Select(x => x.Position).ToArray();
                 var (from, to) = (own.Min(), own.Max());
+                // a counter-melody harmonising the melody in the melody's own sound now and then, as twin leads play
+                var inTimbre = source == TrackRole.Melody && !isTwin && timbres(index).TestProbability(TwinTimbreChance);
                 var doubled = events[sourceTrack].EventTimeline
                     .Where(x => x.Position >= from - 1e-9 && x.Position <= to + 1e-9)
-                    .Select(x => x.Value.With(StateKinds.ScaleStep, x.Value.GetStateValue(StateKinds.ScaleStep) + step).With(StateKinds.Alteration, 0).ToTimelineItem(x.Position));
+                    .Select(x => x.Value.With(StateKinds.ScaleStep, x.Value.GetStateValue(StateKinds.ScaleStep) + step).With(StateKinds.Alteration, 0)
+                        .With(CompositionStateKinds.SoundsAs, inTimbre ? (int)TrackRole.Melody + 1 : 0).ToTimelineItem(x.Position));
                 song = song.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>
                 {
                     [targetTrack] = notes => EventTimeline.Create(

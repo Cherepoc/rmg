@@ -76,6 +76,10 @@ internal static class CompositionStateKinds
     // 1 for a solo's release, the held note a phrase ends on
     public static StateKind<int> SoloRelease { get; } = StateKinds.CreateAdditive<int>(Prefix + "SoloRelease", StateScope.Render);
 
+    // the part whose sound a note plays in, its role's number plus 1, as a counter-melody doubling the melody in its
+    // timbre does; 0 for its own part's
+    public static StateKind<int> SoundsAs { get; } = StateKinds.CreateAdditive<int>(Prefix + "SoundsAs", StateScope.Render);
+
     // 1 for a bass note holding a pedal under a key change, which is not struck again on the chord where the chord changes
     public static StateKind<int> BassPedal { get; } = StateKinds.CreateAdditive<int>(Prefix + "BassPedal", StateScope.Render);
 

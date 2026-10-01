@@ -18,8 +18,6 @@ built since 0.6 (October 2026): parts entering late, the solos placed by their r
 answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
 this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
 
-13. a harmonised melody's twin on a track of its own, as the riff's, the counter-melody resting for it, the page given
-    the part;
 14. an intro and an outro of their own material, sections with roles of their own, their harmony leaned to the song's
     home (see *Form*);
 15. to 17. long cycles, patterns of two bars in the rhythm engine, then a polymeter's figure running on across its
@@ -474,8 +472,10 @@ and slides, is `Expression`'s (see *Listening*).
   in its instrument and state, the two all the way to either side (`TrackRole.RiffTwin`, `LineDoubling`): a third above
   or a sixth below in a middling song, and the wilder the song, the oftener a fourth or a fifth, and at the wild end a
   second or a seventh (`LineDoubling.TwinSteps`). It switches instruments as the riff does, and on the page the riff's
-  mix drives both, the twin's pan mirrored (`RiffTwinTest`). Left: other parts' twins, such as a harmonised melody on a
-  track of its own, and plain doubling, which waits for timing by role (see *Groove*).
+  mix drives both, the twin's pan mirrored (`RiffTwinTest`). A counter-melody harmonising the melody plays in the
+  melody's own sound half the time, the program the melody plays there, twin leads a third apart and panned apart, with
+  no track of its own (`LineDoubling.TwinTimbreChance`, `CompositionStateKinds.SoundsAs`). Left: plain doubling, which
+  waits for timing by role (see *Groove*).
 - **Octaves** (built): the melody, the counter-melody or the riff plays a section in octaves now and then, the likelier
   the louder, where it plays no other doubling (`LineDoubling`, `OctaveTest`; see *Listening*).
 - **Articulations** (built as sounds, `InstrumentsOverTime`): a section plays a part's articulation, a slapped or

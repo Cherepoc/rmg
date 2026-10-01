@@ -172,6 +172,26 @@ internal static class InstrumentsOverTime
             );
         }
 
+        // a note in another part's sound, as twin leads are, in the program that part plays there, its own notes' or its own
+        var playing = definitions.Where(x => x.Value is PitchInstrumentTrack).ToDictionary(x => x.Value.Role, x => x.Key);
+        foreach (var (track, timeline) in result.ToArray())
+        {
+            if (!timeline.Any(x => x.Value.State.GetStateValue(CompositionStateKinds.SoundsAs) > 0))
+                continue;
+
+            result[track] = EventTimeline.Create(timeline.Duration, timeline.Select(x =>
+            {
+                var role = (TrackRole)(x.Value.State.GetStateValue(CompositionStateKinds.SoundsAs) - 1);
+                if (role < 0 || !playing.TryGetValue(role, out var other) || !result.TryGetValue(other, out var notes))
+                    return x;
+
+                var near = notes.LastOrDefault(n => n.Position <= x.Position + 1e-9, notes.FirstOrDefault());
+                var stated = near.Value?.State.GetStateValue(CompositionStateKinds.Program) ?? 0;
+                var program = stated > 0 ? stated - 1 : ((PitchInstrumentTrack)definitions[other]).InstrumentCode;
+                return (x.Value with { State = x.Value.State.With(CompositionStateKinds.Program, program + 1) }).ToTimelineItem(x.Position);
+            }));
+        }
+
         return result.ToImmutable();
     }
 }

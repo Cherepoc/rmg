@@ -360,7 +360,8 @@ public static class SongGenerator
             songUnconventionality[Facet.Melody],
             songUnconventionality[Facet.Sound],
             energies,
-            (pair, section) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.LineDoubling), pair), section))
+            (pair, section) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.LineDoubling), pair), section)),
+            section => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.TwinTimbres), section))
         );
         // and the riff landing on a chord where a section starts now and then, its twin as it is
         songTrackNoteTimelineMap = LineChords.Apply(
@@ -580,5 +581,6 @@ internal enum SongStream
     CounterFills = 54,
     MelodyChords = 55,
     LastRepeat = 56,
-    InstrumentFamilies = 57
+    InstrumentFamilies = 57,
+    TwinTimbres = 58
 }
