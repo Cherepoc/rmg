@@ -35,7 +35,8 @@ Alongside, continuously and never as a gate: **listening** through the checklist
 rated enough; styles (see *Styles*), once they are chosen.
 
 **When the need shows** (P3), roughly in this order: timing by role, once swing alone sounds stiff (see *Groove*); a
-metric modulation (see *Meter*); long cycles, then a figure running on across the frame (see *Rhythm engine*,
+ramp into a section's own tempo, then a metric modulation (see *Appearances*, *Meter*); the tempo leaning by the energy,
+should the songs sound metronomic (see *Appearances*); long cycles, then a figure running on across the frame (see *Rhythm engine*,
 *Meter*); a line scale by the chord and chord tones off the scale (see *Scales*, *Chords*); a tag, intros of their own
 material and drums coming in within a section (see *Form*, *Appearances*); a solo's octaves its own, a drum solo's
 stacked hits and the drummer as one player (see *Solos*); other parts' twins; modulation, a ping-pong echo and legato
@@ -372,8 +373,14 @@ planned together (P1):
   the feel facet (`SectionTempo`, 0.04 at the middle), a chorus or a bridge leaning to it as to a key of its own, a
   tenth slower or faster most often and as far as two thirds or half again at the wild end, the ending slowing from
   the last section's. Over 1024 songs, in the middle fifth 9% of the choruses and bridges and 4% of the others, in the
-  wildest 56% and 44% (`SectionTempoTest`). To listen to: whether a sudden change wants an accelerando or a
-  ritardando into it now and then.
+  wildest 56% and 44% (`SectionTempoTest`). Left (P3): **a ramp into it,** the bar before a section of another tempo
+  easing to it beat by beat, slowing or speeding, by a flat chance of 0.5 as the ending's ritardando, the ending's own
+  steps (`SongFormGenerator.CreateRitardando`) taking where they start and where they go; one bar and one shape, never
+  for a metric modulation, whose point is the pulse taken at once (see *Meter*); the fill before it played over the
+  ramp, as a drummer pulls or pushes it. Measured by: the changes ramped, the tempo over the bar before (`SectionTempoTest`).
+  **The tempo leaning by the energy** (P3, by listening only, should the songs sound metronomic): a section's tempo
+  nudged a percent or two by its energy, a chorus pushing and a breakdown easing, through the section's tempo layer by
+  `Tilt`, never in a plain song, which keeps to the click; no drift, push or recovery of its own.
 - **A rhythm part** (built): a second part playing the chords in a rhythm of its own, a guitar most often, a clavinet,
   an electric piano, an organ or a banjo, in 40% of the songs (`TrackRole.Rhythm`, `TrackRoles.PlaysChords`), voiced
   and led as the chords are, breaking them by a draw of its own, a little fuller, and panned against the chords. Over
