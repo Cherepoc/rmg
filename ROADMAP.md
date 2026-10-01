@@ -233,11 +233,11 @@ dotted 8th (`MeterReportTest`; `MeterSeedsReportTest` names seeds to hear).
   or every second at the wilder (`Polymeter`), as an edit after assembly: a cell, or a cell played up to three times
   and a closing one of another length, as 7, 7 and 9, each cell the part's motif cut to its length; the riff plays it,
   or the bass where there is no riff, the bass with the riff now and then and the kick with them the oftener the wilder,
-  as Meshuggah's does, with the drums bound to it; each part in the bars it plays, repeating its own first notes, so
+  with the drums bound to it; each part in the bars it plays, repeating its own first notes, so
   that its line, placed after, follows the chords where they land, and the fills mark the phrase's end over it. By the
   feel facet: 0.7% of the middle fifth's sections, 22% of the wildest's; of them the kick 84%, 8 bars 44%, composite
-  41% (`PolymeterTest`). Left (P3), towards Tigran Hamasyan's rather than Meshuggah's, the cycle a tune played in
-  unison against a pulse still felt: **its cells accented,** every cell's first note leaned on, as a solo's are, so
+  41% (`PolymeterTest`). Left (P3), the cycle a tune played in unison against a pulse still felt
+  rather than a chugged drift: **its cells accented,** every cell's first note leaned on, as a solo's are, so
   that 7, 7 and 9 are heard as phrases rather than drift, the most needed; **the ostinato in unison,** the bass with
   the riff the oftener, and the chords joining the cycle, their notes repeated cell by cell as the riff's; **the snare
   on its accents and the hi-hat on the pulse,** so that the cycle sits against a beat; **a metric modulation,** a
