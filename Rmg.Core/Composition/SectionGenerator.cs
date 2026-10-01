@@ -241,7 +241,8 @@ internal sealed class SectionGenerator
         // the drums in half time now and then, in the quieter sections, or double time, in the louder, from a sequence of its own
         var timeFeel = Groove.DrawTimeFeel(Stream(sectionId, SectionStream.TimeFeel), tilt);
         StateTrace.Record(TracePoints.TimeFeel, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{timeFeel}", timeFeel);
-        var drums = GenerateDrums(context, sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads.ToImmutable(), sectionRoles, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm, timeFeel, meter).ToArray();
+        // the drums from a sequence of their own, so that the pitched tracks are the same whichever drums the song plays
+        var drums = GenerateDrums(Stream(sectionId, SectionStream.Drums), sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads.ToImmutable(), sectionRoles, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm, timeFeel, meter).ToArray();
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
@@ -905,5 +906,6 @@ internal enum SectionStream
     RiffImprovisation = 26,
     Arpeggio = 27,
     RiffLineScale = 28,
-    RhythmArpeggio = 29
+    RhythmArpeggio = 29,
+    Drums = 30
 }

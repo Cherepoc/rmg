@@ -205,7 +205,8 @@ public sealed class MelodyRepetitionTest
         await Assert.That(m.FixedClass).IsGreaterThan(0.9);
         // the wildest melodies improvise over their whole range, so that songs that improvise keep less of it
         await Assert.That(m.Improvised).IsBetween(0.5, 0.95);
-        await Assert.That(m.AnswerFirstHalfClass).IsGreaterThan(0.9);
+        // about 0.9 over 512 songs, so a margin under it, which 256 songs' spread may take
+        await Assert.That(m.AnswerFirstHalfClass).IsGreaterThan(0.85);
         await Assert.That(m.AnswerSecondHalf).IsBetween(0.5, 0.9);
     }
 

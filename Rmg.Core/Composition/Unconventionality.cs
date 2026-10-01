@@ -120,6 +120,10 @@ public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, d
 /// <param name="Facets">Facets set outright, from 0 to 1, over those drawn.</param>
 /// <param name="Parts">The parts given in the song (true) or out of it (false) (<see cref="SongParts" />).</param>
 /// <param name="DrumSetup">The drums the song plays: the kit, the kit and percussion, or percussion.</param>
+/// <param name="DrumPieces">
+///     The drums the song plays, by their names (<see cref="Composition.DrumPieces" />), in place of those it draws, which
+///     make its setup.
+/// </param>
 public sealed record SongOverrides(
     Meter? Meter = null,
     double? Base = null,
@@ -128,7 +132,8 @@ public sealed record SongOverrides(
     DrumSetup? DrumSetup = null,
     int? MeterOption = null,
     double? Tempo = null,
-    int? Key = null
+    int? Key = null,
+    ImmutableHashSet<string>? DrumPieces = null
 )
 {
     public static SongOverrides None { get; } = new();

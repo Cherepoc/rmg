@@ -68,6 +68,7 @@ internal sealed class SongTracks
     /// <param name="rhythmContext">The sequence the rhythm part's instrument, register and state are drawn from.</param>
     /// <param name="soloContext">The sequence the solo part's instrument and state are drawn from.</param>
     /// <param name="hasTwin">Whether the song's riff has a twin, which the two play apart, on either side.</param>
+    /// <param name="givenDrums">The drums given in place of those the song draws, which it still draws, so that the rest is as it was.</param>
     public static SongTracks Create(
         IGenerationContext context,
         IGenerationContext panningContext,
@@ -80,7 +81,8 @@ internal sealed class SongTracks
         RhythmicUnconventionality rhythmicUnconventionality,
         IGenerationContext strokeContext,
         IGenerationContext roleContext,
-        DrumSetup drumSetup
+        DrumSetup drumSetup,
+        ImmutableArray<PercussionInstrumentDefinition>? givenDrums
     )
     {
         var trackRhythmLayer = rhythmicUnconventionality.Lean(RhythmLayers.Track);
@@ -277,7 +279,8 @@ internal sealed class SongTracks
         };
 
         // the song has its own drums, and the drums picked by the section kit play in a section
-        var songDrums = DrumSetups.SelectSongDrums(context, drumSetup);
+        var drawnDrums = DrumSetups.SelectSongDrums(context, drumSetup);
+        var songDrums = givenDrums ?? drawnDrums;
         foreach (var drumGroup in DrumGroups.All)
         {
             foreach (var drum in drumGroup.Drums.Where(songDrums.Contains))

@@ -1,0 +1,94 @@
+using System.Collections.Immutable;
+using Rmg.Core;
+using Rmg.Core.Composition;
+using Rmg.Core.Songs;
+
+namespace Rmg.Tests.SongGenerators;
+
+/// <summary>A song's drums given as a set of pieces, in place of those it draws, changing nothing but the drums.</summary>
+public sealed class GivenDrumPiecesTest
+{
+    /// <summary>The drums a song plays, by their names.</summary>
+    private static ImmutableHashSet<string> Drums(CorpusSong song) =>
+    [
+        ..song.Song.TrackDefinitions.Keys.Where(x => x >= DrumGroups.FirstTrackNumber).Select(x => DrumPieces.NameOf(DrumGroups.GetDrum(x)))
+    ];
+
+    /// <summary>A pitched track's notes from <paramref name="from" /> on, as text, which two songs alike in everything but their drums share.</summary>
+    private static string[] Notes(CorpusSong song, int track, double from) =>
+    [
+        ..song.Song.Notes!.GetValueOrDefault(track)?.Where(n => n.Position >= from - 1e-9)
+            .Select(n => $"{n.Position:F6} {string.Join(",", n.Value.Pitches)} {n.Value.Velocity:F6} {n.Value.Duration:F6}") ?? []
+    ];
+
+    /// <summary>
+    ///     Where the song's second section starts, after an intro's entries, which bring the parts in one by one, the drums'
+    ///     roles among them, and the first section they land in.
+    /// </summary>
+    private static double AfterEntries(CorpusSong song) => song.Map.Sections[1].Start;
+
+    // the parts that join the drums' fills at the lines (LineFills) and the soloists, who trade with the drums, which
+    // follow the drums the song plays, as the others do not
+    private static readonly TrackRole[] FollowTheDrums = [TrackRole.Bass, TrackRole.Melody, TrackRole.CounterMelody, TrackRole.Solo];
+
+    private static byte[] Write(CorpusSong song)
+    {
+        using var stream = new MemoryStream();
+        song.Rendered.Write(stream, null);
+        return stream.ToArray();
+    }
+
+    [Test]
+    public async Task TheDrumsDrawn_MakeTheSetupDrawn()
+    {
+        foreach (var song in TestCorpus.Range(128))
+            await Assert.That(DrumPieces.SetupOf(Drums(song))).IsEqualTo((DrumSetup)song.Trace.Single(x => x.Point == TracePoints.DrumSetup).Value!).Because($"seed {song.Seed}");
+    }
+
+    [Test]
+    public async Task TheDrumsDrawn_GivenBack_LeaveTheSongAsItsSeedMadeIt()
+    {
+        foreach (var seed in Enumerable.Range(0, 8))
+        {
+            var drawn = TestCorpus.Get(seed);
+            var given = TestCorpus.Get(seed, new SongOverrides(DrumPieces: Drums(drawn)));
+
+            await Assert.That(Write(given)).IsEquivalentTo(Write(drawn)).Because($"seed {seed}");
+        }
+    }
+
+    [Test]
+    [Arguments("kick", "acousticSnare", "hiHat", "conga", "cowbell", "whistle")]
+    [Arguments("claves")]
+    [Arguments("electricSnare", "acousticSnare", "ride", "tom", "cymbal")]
+    [Arguments("bongo", "tambourine", "guiro", "triangle")]
+    public async Task OtherDrumsGiven_AreTheSongs_AndChangeNoOtherPart_ButWhereItFollowsTheDrumsOrEntersWithThem(params string[] pieces)
+    {
+        var (notes, changed) = (0, 0);
+        foreach (var seed in Enumerable.Range(0, 16))
+        {
+            var drawn = TestCorpus.Get(seed);
+            var given = TestCorpus.Get(seed, new SongOverrides(DrumPieces: [..pieces]));
+
+            await Assert.That(Drums(given).SetEquals(pieces)).IsTrue().Because($"seed {seed}");
+            foreach (var (track, definition) in drawn.Song.TrackDefinitions.Where(x => x.Key < DrumGroups.FirstTrackNumber))
+            {
+                var from = Math.Max(AfterEntries(drawn), AfterEntries(given));
+                var (before, after) = (Notes(drawn, track, from), Notes(given, track, from));
+                if (!FollowTheDrums.Contains(definition.Role))
+                    await Assert.That(after).IsEquivalentTo(before).Because($"seed {seed}, the {definition.Role}");
+                else
+                    (notes, changed) = (notes + before.Length, changed + before.Except(after).Count());
+            }
+        }
+
+        await Assert.That(changed / (double)notes).IsLessThan(0.05);
+    }
+
+    [Test]
+    public async Task NoDrums_OrADrumUnknown_IsRefused()
+    {
+        await Assert.That(() => SongGenerator.GenerateSong(0, new SongOverrides(DrumPieces: []), CancellationToken.None)).Throws<ArgumentOutOfRangeException>();
+        await Assert.That(() => SongGenerator.GenerateSong(0, new SongOverrides(DrumPieces: ["gong"]), CancellationToken.None)).Throws<ArgumentOutOfRangeException>();
+    }
+}

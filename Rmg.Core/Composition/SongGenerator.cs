@@ -59,6 +59,8 @@ public static class SongGenerator
             throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Tempo, "A tempo is a positive multiple of the base tempo.");
         if (overrides.Key is < 0 or > 11)
             throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Key, "A key is from 0 to 11.");
+        if (overrides.DrumPieces is { } pieces && (pieces.IsEmpty || !pieces.All(DrumPieces.IsPiece)))
+            throw new ArgumentOutOfRangeException(nameof(overrides), "Drums given are one or more of the drum pieces.");
 
         return GenerateSong(seed, ProgressionSettings.Default, overrides, cancellation);
     }
@@ -101,7 +103,9 @@ public static class SongGenerator
             rhythmicUnconventionality,
             Stream(SongStream.DrumStrokes),
             Stream(SongStream.DrumRoles),
-            overrides.DrumSetup ?? DrumSetups.Pick(Stream(SongStream.DrumSetup), rhythmicUnconventionality.Value)
+            // the drums given make the setup, which the song still draws its own drums by, so that the rest is as it was
+            overrides.DrumPieces is { } pieces ? DrumPieces.SetupOf(pieces) : overrides.DrumSetup ?? DrumSetups.Pick(Stream(SongStream.DrumSetup), rhythmicUnconventionality.Value),
+            overrides.DrumPieces is { } given ? DrumPieces.Of(given) : null
         );
         StateTrace.Record(TracePoints.DrumSetup, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, tracks.DrumSetup.ToString(), tracks.DrumSetup);
 
