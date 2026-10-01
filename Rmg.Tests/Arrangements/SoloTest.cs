@@ -277,6 +277,32 @@ public sealed class SoloTest
         await Task.CompletedTask;
     }
 
+    /// <summary>
+    ///     How many pitched solos of 8 bars or more bend at all or sing a vibrato, by fifth of the sound facet and by the
+    ///     family of the first soloist's instrument: guitars and synth leads, the other instruments that bend, and the rest.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task PitchReport()
+    {
+        static double SoundOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Sound];
+        static string Family(int program) => program is >= 24 and <= 31 or >= 80 and <= 87 ? "guitar or lead" : Expression.Bends(program) ? "other bending" : "not bending";
+        var solos = TestCorpus.Measure(1024, song => Gestures(song).Select(g =>
+        {
+            var span = song.Map.Sections[g.Index];
+            var track = song.Song.TrackDefinitions.First(t => t.Value.Role == song.Solos[g.Index].Soloists[0]);
+            var notes = song.Song.Notes!.GetValueOrDefault(track.Key)?.Where(n => n.Position >= span.Start - 1e-9 && n.Position < span.End - 1e-9 && n.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1).Select(n => n.Value.State).ToArray() ?? [];
+            return (Fifth: Math.Clamp((int)(SoundOf(song) * 5), 0, 4), Family: Family(((PitchInstrumentTrack)track.Value).InstrumentCode), Bars: span.Duration / span.Meter.BarDuration,
+                Bends: notes.Any(n => (BendKind)n.GetStateValue(CompositionStateKinds.Bend) is not (BendKind.None or BendKind.Slide)),
+                Vibrato: notes.Any(n => n.GetStateValue(CompositionStateKinds.Vibrato) > 0 || n.GetStateValue(CompositionStateKinds.WideVibrato) > 0));
+        }).Where(x => x.Bars >= 8).ToArray()).SelectMany(x => x).ToArray();
+        foreach (var band in solos.GroupBy(x => x.Fifth).OrderBy(x => x.Key))
+            Console.WriteLine($"  sound {band.Key}/5, {band.Count()} solos: bend {band.Count(x => x.Bends) / (double)band.Count():P0}, a vibrato {band.Count(x => x.Vibrato) / (double)band.Count():P0}");
+        foreach (var family in solos.GroupBy(x => x.Family).OrderBy(x => x.Key))
+            Console.WriteLine($"  {family.Key}, {family.Count()} solos: bend {family.Count(x => x.Bends) / (double)family.Count():P0}, a vibrato {family.Count(x => x.Vibrato) / (double)family.Count():P0}");
+        await Task.CompletedTask;
+    }
+
     /// <summary>The solos' gestures, by fifth of the melody facet: each gesture's share, the notes a beat, how far the intensity swings, and the share of solos of their own.</summary>
     [Test]
     [Explicit]

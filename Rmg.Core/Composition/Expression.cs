@@ -343,11 +343,12 @@ internal static class Expression
                     // one note at a time, or in octaves, which bend and echo together
                     var isLine = (note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0)
                                  && (IsLineRole(role) || note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1);
-                    var bends = bendsHere && isLine && Bends(noteProgram);
                     var isSolo = note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1;
                     // a solo's note plays as its soloist leans, its strength in place of the part's, and the more intense the
-                    // solo there, the bigger and the oftener
+                    // solo there, the bigger and the oftener; whether it bends at all is the soloist's choice, not the song's,
+                    // which is the band's, but where it echoes
                     var soloist = isSolo ? soloists.GetValueOrDefault(role) : null;
+                    var bends = (soloist is null ? bendsHere : soloist.Bends && !echoes) && isLine && Bends(noteProgram);
                     var intensity = Tilt.Of(SoloOdds, 2 * note.Value.State.GetStateValue(CompositionStateKinds.SoloIntensity) / 100.0 - 1);
                     var soloLean = soloist is null ? lean : new Tilt(Tilt.Of(StrengthOdds, soloist.BendLean).LogOdds + SectionEnergy.Tilt(energies[index], SizeCoupling).LogOdds + intensity.LogOdds);
                     // every note draws whether it bends, and how, so that the draws stay as they are
@@ -364,8 +365,8 @@ internal static class Expression
                     var state = note.Value.State
                         .With(CompositionStateKinds.Reverb, reverb + 1)
                         .With(CompositionStateKinds.Chorus, choruses && Choruses(noteProgram) ? chorus : 0);
-                    // a soloist sings one wherever the song does, but where it echoes
-                    if ((vibrates || soloist is not null && songVibrato && !echoes) && isLine && Bends(noteProgram) && note.Value.Duration >= 1)
+                    // and whether it sings a vibrato at all likewise
+                    if ((soloist is null ? vibrates : soloist.Vibrates && !echoes) && isLine && Bends(noteProgram) && note.Value.Duration >= 1)
                     {
                         // a wide one between the note and a scale note above it, so the note must be on the scale
                         var width = noteVibrato.Steps > 0 && (!VibratesWide(noteProgram) || !IsOnScale(note.Value)) ? WidestNarrow : noteVibrato;

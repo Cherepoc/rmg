@@ -96,7 +96,9 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
   or seven heard as a grouping or as stumbling? Is the intensity's arc heard, its jumps a soloist's or random? A pause
   is 15 to 19% of the segments: too many breaths? Wide vibratos are 2% of the solos' notes of an 8th or longer, as most
   of a solo's long notes are slides or bends: too few? Since no part bends or slides a note shorter than an 8th, slides
-  are 44% of the corpus's pitch shapes against bends' 56%: too many slides?
+  are 44% of the corpus's pitch shapes against bends' 56%: too many slides? A soloist chooses to bend and to sing a
+  vibrato itself, the band the song's way: 85% of guitar and synth lead solos bend, 54% of the other instruments' that
+  can: a straight band under a bending lead heard as meant?
 - **The bass's pickup** always falls on the beat: the 8th before the bar line, leaned by convention, if it sounds
   square.
 - **The fills:** wild songs play about 1.8 times the tuplet notes of plain ones, as a run plays the snare's feel only:

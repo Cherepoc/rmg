@@ -27,8 +27,9 @@ public enum SoloShape
 ///     speeds it runs at, in notes a beat, the sizes of the cells its runs are made of, and whether it groups cells of
 ///     several sizes into a larger figure, such as five and seven; the shapes it plays them in; how often it pauses; how
 ///     far and how fast its intensity swings; how wide it ranges, in scale steps; and how far it leans to bigger bends and
-///     to slides. Drawn once for every part that solos in a song, by the song's melody facet, its expression by the sound
-///     facet: at the plain end 8ths and 16ths in cells of three or four, the scale, a sequence or the chord, and a steady
+///     to slides, and whether it bends at all and sings a vibrato at all, its own choice rather than the song's, which is
+///     the band's, a guitar or a synth lead the likelier to bend. Drawn once for every part that solos in a song, by the
+///     song's melody facet, its expression by the sound facet: at the plain end 8ths and 16ths in cells of three or four, the scale, a sequence or the chord, and a steady
 ///     player; at the wild end any speed, cells of five, seven or nine grouped, and one who swings from runs to long notes
 ///     in a beat.
 /// </summary>
@@ -42,7 +43,9 @@ internal sealed record Soloist(
     int RegisterSteps,
     double BendLean,
     double SlideLean,
-    double MaxNotesASecond
+    double MaxNotesASecond,
+    bool Bends,
+    bool Vibrates
 )
 {
     /// <summary>The fastest a soloist plays, in notes a second, which its speeds keep under at a song's tempo: a plain one's 16ths at 120, a wild one's sextuplets at 160.</summary>
@@ -103,7 +106,19 @@ internal sealed record Soloist(
 
     public const double ExpressionLean = 0.5;
 
-    public static Soloist Generate(IGenerationContext context, double melody, double sound)
+    /// <summary>The chances a soloist bends at all and sings a vibrato at all, by the sound facet: never at the plain end, always at the wild.</summary>
+    public static ByConvention BendChance { get; } = new(0, 0.6, 1);
+
+    public static ByConvention VibratoChance { get; } = new(0, 0.75, 1);
+
+    /// <summary>How much likelier a guitar or a synth lead is to bend than another instrument that bends, as the odds of 1.</summary>
+    public const double BendSuitOdds = 4;
+
+    /// <summary>How far an instrument leans to bending: a guitar's and a synth lead's the most, as their players do.</summary>
+    private static double BendSuit(int program) => program is >= 24 and <= 31 or >= 80 and <= 87 ? 1 : 0;
+
+    /// <param name="program">The instrument the soloing part plays, which leans whether it bends.</param>
+    public static Soloist Generate(IGenerationContext context, double melody, double sound, int program)
     {
         var speeds = SpeedChances.Where(x => context.TestProbability(x.Chance.At(melody))).Select(x => x.NotesABeat).Order();
         var sizes = Favourites(context, CellSizeOptions, melody);
@@ -114,7 +129,9 @@ internal sealed record Soloist(
         var register = (int)Math.Round(Registers.At(melody)) + context.GenerateInt(-2, 3);
         var bendLean = ExpressionLean + ExpressionSpread.At(sound) * Generators.SplineValue()(context);
         var slideLean = ExpressionLean + ExpressionSpread.At(sound) * Generators.SplineValue()(context);
-        return new Soloist([..speeds], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody));
+        var bends = context.TestProbability(Tilt.Of(BendSuitOdds, BendSuit(program)).Chance(BendChance.At(sound), 1));
+        var vibrates = context.TestProbability(VibratoChance.At(sound));
+        return new Soloist([..speeds], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody), bends, vibrates);
     }
 
     /// <summary>The options a soloist favours, as many as it draws, each picked from those left.</summary>

@@ -224,7 +224,11 @@ public static class SongGenerator
         // every part that solos a soloist of its own, whose solos sound like one player's, each from a sequence of its own
         var soloists = solos.Values.Where(x => !x.IsDrumSolo).SelectMany(x => x.Soloists).Distinct().ToDictionary(
             role => role,
-            role => Soloist.Generate(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Soloist), (int)role)), songUnconventionality[Facet.Melody], songUnconventionality[Facet.Sound]));
+            role => Soloist.Generate(
+                new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Soloist), (int)role)),
+                songUnconventionality[Facet.Melody],
+                songUnconventionality[Facet.Sound],
+                tracks.Definitions.Values.OfType<PitchInstrumentTrack>().First(x => x.Role == role).InstrumentCode));
         foreach (var (role, soloist) in soloists)
             StateTrace.Record(TracePoints.Soloist, SectionGenerator.SectionTrace, 0, 0, StateMap.Default, 0, $"{role}", (role, soloist));
 

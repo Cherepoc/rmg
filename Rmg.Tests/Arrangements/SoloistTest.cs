@@ -7,8 +7,19 @@ namespace Rmg.Tests.Arrangements;
 /// <summary>A soloist's vocabulary (<see cref="Soloist" />): a plain one's runs of 8ths and 16ths in cells of three or four, a wild one's of any speed and size, grouped.</summary>
 public sealed class SoloistTest
 {
-    private static Soloist[] Draw(double conventionality) =>
-        [..Enumerable.Range(0, 400).Select(seed => Soloist.Generate(new GenerationContext((ulong)seed), conventionality, conventionality))];
+    /// <summary>Distortion Guitar and Alto Sax, the one likelier to bend than the other.</summary>
+    private const int Guitar = 30, Sax = 65;
+
+    private static Soloist[] Draw(double conventionality, int program = Guitar) =>
+        [..Enumerable.Range(0, 400).Select(seed => Soloist.Generate(new GenerationContext((ulong)seed), conventionality, conventionality, program))];
+
+    [Test]
+    public async Task ASoloistChoosesToBendAndToSingAVibrato_NeverAtThePlainEnd_AlwaysAtTheWild_AGuitaristTheLikelierToBend()
+    {
+        await Assert.That(Draw(0).Any(x => x.Bends || x.Vibrates)).IsFalse();
+        await Assert.That(Draw(1).All(x => x.Bends && x.Vibrates)).IsTrue();
+        await Assert.That(Draw(0.5).Count(x => x.Bends)).IsGreaterThan(Draw(0.5, Sax).Count(x => x.Bends) + 40);
+    }
 
     [Test]
     public async Task APlainSoloist_RunsIn8thsAnd16ths_InCellsOfThreeOrFour_TheScaleASequenceOrTheChord()
