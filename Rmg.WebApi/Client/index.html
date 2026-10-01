@@ -23,7 +23,7 @@
 <div class="layout">
 <header class="page-header">
     <h1>RMG</h1>
-    <p>Random Music Generator. The same seed always gives the same song.</p>
+    <p>Random Music Generator. The same seed gives the same song, in the same version.</p>
 </header>
 
 <main>
@@ -63,7 +63,7 @@
                 </button>
             </div>
             <label class="field volume">
-                <span>Volume</span>
+                <span>Playback</span>
                 <input type="range" id="volume" min="0" max="2" step="0.01" value="1" />
                 <output id="volume-value" class="percent">100%</output>
             </label>
@@ -130,7 +130,7 @@
             <legend>Parts</legend>
             <div class="row">
                 <label class="field volume">
-                    <span>Overall</span>
+                    <span>Song volume</span>
                     <input type="range" id="song-volume" min="0" max="63" step="1" value="63" />
                     <output id="song-volume-value" class="percent">100%</output>
                 </label>

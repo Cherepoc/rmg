@@ -1392,18 +1392,18 @@ elements.volume.addEventListener("input", async () => {
 /** What every value is called on the page, and what it moves, by its key: the unconventionality or a facet. */
 const SETTING_NAMES = {
     unconventionality: ["How plain or experimental", "everything below strays around it"],
-    feel: ["Feel", "meter, tuplets and swing"],
-    form: ["Form", "song form, intro and ending"],
-    scale: ["Scale", "modes and key changes"],
+    feel: ["Feel", "meter, tuplets, swing and tempo changes"],
+    form: ["Form", "form, arrangement and solos"],
+    scale: ["Scale", "modes, key changes and line scales"],
     progression: ["Progression", "how freely the chords move"],
     chords: ["Chords", "colours and voicings"],
-    melody: ["Melody", "improvisation and shape"],
+    melody: ["Melody", "its lines and the soloists"],
     sound: ["Sound", "instruments over the song, articulation, bends and effects"],
     groove: ["Groove", "the drums' patterns"],
-    fills: ["Fills", "the drums' fills"],
+    fills: ["Fills", "the drums' fills and solos"],
 };
 
-const PART_NAMES = { melody: "Melody", chords: "Chords", bass: "Bass", pad: "Pad", counterMelody: "Counter-melody", drum: "Drums", riff: "Riff", rhythm: "Rhythm", solo: "Solo" };
+const PART_NAMES = { melody: "Melody", chords: "Chords", bass: "Bass", pad: "Pad", counterMelody: "Counter-melody", drum: "Drums", riff: "Riff", rhythm: "Rhythm", solo: "Soloist" };
 
 const DRUM_GROUP_NAMES = {
     kick: "Kick", snare: "Snare", timekeepers: "Hi-hat and ride", toms: "Toms", accents: "Cymbals", percussion: "Percussion", calls: "Calls",
@@ -1433,9 +1433,9 @@ buildSettings();
 function buildSettings() {
     elements.songSettings.append(
         createSettingRow("unconventionality"),
-        createChoiceRow("tempo", "Tempo", "beats a minute"),
+        createChoiceRow("tempo", "Tempo", "beats a minute, the first section's"),
         createChoiceRow("key", "Key", "the key it starts in"),
-        createChoiceRow("meter", "Meter", "the beats of a bar"),
+        createChoiceRow("meter", "Meter", "the beats of a bar, the first section's"),
         createSettingRow("feel"),
         createSettingRow("form"),
     );
@@ -1690,6 +1690,9 @@ function createPartRow(part) {
         applyMuting();
         track("mix_changed", { detail: "solo" });
     });
+    // the part named, as a reader hears a row's buttons one by one
+    mute.setAttribute("aria-label", `Mute the ${name.toLowerCase()}`);
+    solo.setAttribute("aria-label", `Solo the ${name.toLowerCase()}`);
 
     const meter = document.createElement("div");
     meter.className = "meter";

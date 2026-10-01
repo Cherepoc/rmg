@@ -302,9 +302,10 @@ button.icon svg {
     font-variant-numeric: tabular-nums;
 }
 
-/* the seed of the song on show: a value to read and copy, not a field to fill in, as wide as the longest seed */
+/* the seed of the song on show: a value to read and copy, not a field to fill in, as wide as the longest seed, whose
+   letters are wider than the digit a ch is */
 .field input[readonly] {
-    width: 11.5ch;
+    width: 14ch;
     border-color: transparent;
     background: none;
     padding-left: 0;
@@ -563,9 +564,27 @@ input[type="range"] {
     opacity: 0.5;
 }
 
+/* a choice of the song's settings, as the mixer's are, and dimmed where it shows what the song drew, as a slider is */
 .setting select {
     justify-self: start;
     max-width: 16em;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.setting select:hover:enabled {
+    border-color: var(--accent);
+}
+
+.setting select:disabled {
+    opacity: 0.5;
+    cursor: default;
 }
 
 .setting .end {
