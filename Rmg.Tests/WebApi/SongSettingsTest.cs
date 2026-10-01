@@ -12,7 +12,10 @@ public sealed class SongSettingsTest
         new Setting(true, 3),
         new Setting(false, 11),
         new Setting(true, 2),
-        [..SongSettings.PartOrder.Select((_, i) => new PartSettings(i % 3, new Setting(i % 2 == 1, i * 18), 63 - i, new Setting(i == 0, i * 9), i != 4))],
+        [
+            ..SongSettings.PartOrder.SkipLast(1).Select((_, i) => new PartSettings(i % 3, new Setting(i % 2 == 1, i * 18), 63 - i, new Setting(i == 0, i * 9), i != 4)),
+            new PartSettings(1, new Setting(true, 65), 40, new Setting(true, 50), true)
+        ],
         3,
         [..SongMix.DrumGroupNames.Select((_, i) => new DrumGroupSettings(i % 2 == 0, i * 9))],
         50
@@ -59,21 +62,36 @@ public sealed class SongSettingsTest
         await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 1]).IsEqualTo('B');
         await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 2]).IsEqualTo('2');
         await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 3]).IsEqualTo('o');
-        await Assert.That(SongSettings.Length).IsEqualTo(63);
+        await Assert.That(SongSettings.Length).IsEqualTo(68);
     }
 
     [Test]
     public async Task TheFormat_IsFixed()
     {
         // the page writes the same, so a change to either side shows here and in the page's check against it
-        await Assert.That(Silent.Format()).IsEqualTo("2" + new string('0', SongSettings.Length));
+        await Assert.That(Silent.Format()).IsEqualTo("3" + new string('0', SongSettings.Length));
         await Assert.That(Mixed.Format()).IsEqualTo(MixedText);
         await Assert.That(Mixed.Identity).IsEqualTo(MixedIdentity);
     }
 
-    public const string MixedText = "2_07ELSZgnu3B2o_0-9zIyRxawjvsu_309IRajs002I0a2s183Q1i3-hQPh8f8hA";
+    public const string MixedText = "3_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8ph2";
 
-    public const string MixedIdentity = "hQ1_0ESgu32012012013";
+    /// <summary>The mixed settings as the format before wrote them, its first eight parts.</summary>
+    public const string MixedTextTwo = "2_07ELSZgnu3B2o_0-9zIyRxawjvsu_309IRajs002I0a2s183Q1i3-hQPh8f8hA";
+
+    public const string MixedIdentity = "hQ1_0ESgu320120120131";
+
+    [Test]
+    public async Task TheFormatBefore_ReadsAsItWas_ItsSoloPartAsTheSongDrawsIt()
+    {
+        var read = SongSettings.Parse(MixedTextTwo)!;
+
+        await Assert.That(read.Parts.Length).IsEqualTo(SongSettings.PartOrder.Length);
+        await Assert.That(read.Parts.Take(8).SequenceEqual(Mixed.Parts.Take(8))).IsTrue();
+        await Assert.That(read.Parts[^1]).IsEqualTo(new PartSettings(0, new Setting(false, 0), 63, new Setting(false, 32), true));
+        // and named as it was, a part it did not name as drawn
+        await Assert.That(read.Identity).IsEqualTo((Mixed with { Parts = [..Mixed.Parts.Take(8), read.Parts[^1]] }).Identity);
+    }
 
     [Test]
     public async Task OnlyWhatIsGivenAndChangesTheSong_NamesIt()

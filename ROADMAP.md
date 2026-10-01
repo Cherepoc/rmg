@@ -16,14 +16,12 @@ twin riff, the polymeter, the line scales, the new chords and scales, the solos,
 tuned by what listening says (see *Listening*), and the ratings by conventionality once enough are in. Then, in this
 order, each small and each measured:
 
-1. the solo part answering the melody, in its small version: in some sections in the counter-melody's place in the
-   melody's gaps, sparse and under the melody, the page given the part (see *Instruments*, *Solos*);
-2. the melody running into a section, as the bass's run-in does (see *Fills*);
-3. prepared key changes, a chain of chords leading into the new key, a dominant at the plain end and the middle,
+1. the melody running into a section, as the bass's run-in does (see *Fills*);
+2. prepared key changes, a chain of chords leading into the new key, a dominant at the plain end and the middle,
    chromatic and third-related ones wilder (see *Appearances*);
-4. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
+3. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
    *Solos*);
-5. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
+4. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -503,13 +501,13 @@ and slides, is `Expression`'s (see *Listening*).
   facet (0, 0.3, 0.3), half the melody's gaps of two beats or more answered from a beat in to a quarter before the
   melody goes on, in the soloist's vocabulary, a held chord note in a short gap and a lick and a held note in a longer,
   0.06 under the melody as heard. Over 1024 songs the solo part plays in 70% of them where 26%, answering in 59%, 0.48
-  notes a bar where it answers (`SoloAnswerTest`). Left: **the page** given the part, in the settings and the mixer.
+  notes a bar where it answers (`SoloAnswerTest`); the page gives it a row in the settings and the mixer, the settings'
+  format 3 naming it, a link of format 2 read as it was, its solo part as the song draws it (`SongSettingsTest`,
+  `SettingsLinkTest`).
   Left (P3): **a solo's octaves its own,** a solo now playing in octaves where the melody it takes over does, its
   soloist's choice instead; **a drum solo's stacked hits,** the kick under its accents, by the same voices the
   drummer's vocabulary leaves at one; **motifs,** a phrase answering the one before with its opening cell moved up or down, as call and
-  response, a phrase's motif carried on to the next as state; **the
-  page**, the solo part in the settings and the mixer, a new part of the settings' format, where it plays as the file
-  mixes it; **the drummer as one player,** the fills' `Drummer` and the drum solo's `Soloist` one record, its fill habits
+  response, a phrase's motif carried on to the next as state; **the drummer as one player,** the fills' `Drummer` and the drum solo's `Soloist` one record, its fill habits
   and its solo habits together; **a crash on a drum solo's intense accents,** should its runs want more weight.
 
 - **Modulation** (P3, when a soundfont maps it): CC1, which none of the soundfonts offered maps to tone, so it was

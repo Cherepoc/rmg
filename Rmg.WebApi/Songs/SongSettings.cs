@@ -36,6 +36,9 @@ public sealed record SongSettings(
 )
 {
     /// <summary>The format this writes, as its first character; one that is read differently takes the next.</summary>
+    public const char FormatThree = '3';
+
+    /// <summary>The format before, which named every part but the solo part, which it plays as the song draws it.</summary>
     public const char FormatTwo = '2';
 
     public static ImmutableArray<Facet> FacetOrder { get; } =
@@ -44,19 +47,27 @@ public sealed record SongSettings(
     /// <summary>
     ///     The parts, by the names a request takes them by, every one the songs play.
     /// </summary>
-    public static ImmutableArray<string> PartOrder { get; } = ["melody", "chords", "bass", "pad", "counterMelody", "drum", "riff", "rhythm"];
+    public static ImmutableArray<string> PartOrder { get; } = ["melody", "chords", "bass", "pad", "counterMelody", "drum", "riff", "rhythm", "solo"];
+
+    /// <summary>How many parts the format before named, the first of <see cref="PartOrder" />.</summary>
+    private const int PartsOfFormatTwo = 8;
+
+    /// <summary>A part the format before did not name: as the song draws it, at its fullest, in the file.</summary>
+    private static PartSettings Unnamed { get; } = new(0, new Setting(false, 0), 63, new Setting(false, 32), true);
 
     public static ImmutableArray<DrumSetup> SetupOrder { get; } = [Core.Composition.DrumSetup.Kit, Core.Composition.DrumSetup.KitAndPercussion, Core.Composition.DrumSetup.Percussion];
 
     // the values of a character each, then the instruments' two characters, then the switches, six to a character: whether
     // each value is given, and every part's plays (2), whether it is in the file and whether its pan is given, and whether
     // every drum group is in the file
-    private static int ValueCount => 1 + FacetOrder.Length + 3 + 1 + 2 * PartOrder.Length + 1 + SongMix.DrumGroupNames.Length;
+    private static int ValueCount(int parts) => 1 + FacetOrder.Length + 3 + 1 + 2 * parts + 1 + SongMix.DrumGroupNames.Length;
 
-    private static int SwitchCount => 1 + FacetOrder.Length + 3 + 4 * PartOrder.Length + SongMix.DrumGroupNames.Length;
+    private static int SwitchCount(int parts) => 1 + FacetOrder.Length + 3 + 4 * parts + SongMix.DrumGroupNames.Length;
+
+    private static int LengthOf(int parts) => ValueCount(parts) + 2 * parts + (SwitchCount(parts) + 5) / 6;
 
     /// <summary>How many characters follow the format's.</summary>
-    public static int Length => ValueCount + 2 * PartOrder.Length + (SwitchCount + 5) / 6;
+    public static int Length => LengthOf(PartOrder.Length);
 
     private IEnumerable<Setting> GivenValues => [Unconventionality, ..Facets, Tempo, Key, Meter];
 
@@ -88,13 +99,22 @@ public sealed record SongSettings(
 
         if (values.Any(x => x is < 0 or > 63))
             throw new InvalidOperationException("A value does not fit in a character.");
-        return FormatTwo + new string([..values.Select(x => Base64.Digits[x])]);
+        return FormatThree + new string([..values.Select(x => Base64.Digits[x])]);
     }
 
-    /// <summary>Reads settings the page wrote, or none for anything that is not settings of the format.</summary>
+    /// <summary>
+    ///     Reads settings the page wrote, or none for anything that is not settings of the format; the format before too,
+    ///     its song's solo part as the song draws it.
+    /// </summary>
     public static SongSettings? Parse(string? text)
     {
-        if (text is null || text.Length != 1 + Length || text[0] != FormatTwo)
+        var partCount = text?.Length > 0 ? text[0] switch
+        {
+            FormatThree => PartOrder.Length,
+            FormatTwo => PartsOfFormatTwo,
+            _ => 0
+        } : 0;
+        if (text is null || partCount == 0 || text.Length != 1 + LengthOf(partCount))
             return null;
 
         var values = text[1..].Select(x => Base64.Digits.IndexOf(x)).ToArray();
@@ -105,22 +125,23 @@ public sealed record SongSettings(
         int Next() => values[at++];
         var given = Enumerable.Range(0, 1 + FacetOrder.Length + 3).Select(_ => Next()).ToArray();
         var volume = Next();
-        var mixes = PartOrder.Select(_ => (Volume: Next(), Pan: Next())).ToArray();
+        var named = PartOrder.Take(partCount).ToArray();
+        var mixes = named.Select(_ => (Volume: Next(), Pan: Next())).ToArray();
         var drumSetup = Next();
         var groupVolumes = SongMix.DrumGroupNames.Select(_ => Next()).ToArray();
-        var instruments = PartOrder.Select(_ => Next() * 64 + Next()).ToArray();
+        var instruments = named.Select(_ => Next() * 64 + Next()).ToArray();
         var switches = values[at..].SelectMany(x => Enumerable.Range(0, 6).Select(bit => (x >> bit & 1) == 1)).ToArray();
 
         var s = 0;
         var settings = given.Select(value => new Setting(switches[s++], value)).ToArray();
-        var parts = PartOrder.Select((_, i) =>
+        var parts = named.Select((_, i) =>
             {
                 var plays = (switches[s++] ? 2 : 0) + (switches[s++] ? 1 : 0);
                 var isOn = switches[s++];
                 var pan = new Setting(switches[s++], mixes[i].Pan);
                 return new PartSettings(plays, new Setting(instruments[i] >= 128, instruments[i] & 127), mixes[i].Volume, pan, isOn);
             }
-        ).ToImmutableArray();
+        ).Concat(PartOrder.Skip(partCount).Select(_ => Unnamed)).ToImmutableArray();
         var groups = groupVolumes.Select(x => new DrumGroupSettings(switches[s++], x)).ToImmutableArray();
 
         // a part plays as its own, in or out; a drum setup is one of three, or none; a key one of twelve; and a tempo and a
@@ -137,7 +158,8 @@ public sealed record SongSettings(
     ///     unconventionality, the facets, the tempo, the key and the meter are given, six to a character, the values of
     ///     those given alone, every part's plays, and the drum setup, with the zeros at its end left off; empty where
     ///     nothing is given, for a song its seed alone names. The switches say how many values follow, so that it reads
-    ///     one way only.
+    ///     one way only. A part the format before did not name comes after the drum setup, so that a song naming it as
+    ///     the song draws it is named as it was.
     /// </summary>
     public string Identity
     {
@@ -148,8 +170,9 @@ public sealed record SongSettings(
             for (var i = 0; i < switches.Length; i += 6)
                 values.Add(switches.Skip(i).Take(6).Select((x, bit) => x ? 1 << bit : 0).Sum());
             values.AddRange(GivenValues.Where(x => x.IsGiven).Select(x => x.Value));
-            values.AddRange(Parts.Select(x => x.Plays));
+            values.AddRange(Parts.Take(PartsOfFormatTwo).Select(x => x.Plays));
             values.Add(DrumSetup);
+            values.AddRange(Parts.Skip(PartsOfFormatTwo).Select(x => x.Plays));
             return new string([..values.Select(x => Base64.Digits[x])]).TrimEnd('0');
         }
     }

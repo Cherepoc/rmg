@@ -6,7 +6,11 @@
  *     characters each, then the switches, six to a character. Seeds are written in the same 64 digits.
  */
 
+const FORMAT_THREE = "3";
+
+/** The format before, which named every part but the solo part, which it plays as the song draws it. */
 const FORMAT_TWO = "2";
+const PARTS_OF_FORMAT_TWO = 8;
 
 /** The 64 digits: the digits, the letters, "-" and "_", in base 62's order and on from it. */
 const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_";
@@ -21,7 +25,7 @@ export const MIDDLE_PAN = 32;
 export const FACETS = ["feel", "groove", "fills", "form", "chords", "progression", "scale", "melody", "sound"];
 
 /** The parts the format keeps a place for, every one the songs play. */
-export const FORMAT_PARTS = ["melody", "chords", "bass", "pad", "counterMelody", "drum", "riff", "rhythm"];
+export const FORMAT_PARTS = ["melody", "chords", "bass", "pad", "counterMelody", "drum", "riff", "rhythm", "solo"];
 
 /** The parts the songs play. */
 export const PARTS = FORMAT_PARTS;
@@ -35,8 +39,8 @@ export const PLAYS = ["random", "on", "off"];
 /** The values a song may be given that change its notes: the unconventionality, the facets, the tempo, the key and the meter. */
 const GIVEN = ["unconventionality", ...FACETS, "tempo", "key", "meter"];
 
-const LENGTH = GIVEN.length + 1 + 2 * FORMAT_PARTS.length + 1 + DRUM_GROUPS.length + 2 * FORMAT_PARTS.length
-    + Math.ceil((GIVEN.length + 4 * FORMAT_PARTS.length + DRUM_GROUPS.length) / 6);
+const lengthOf = (parts) => GIVEN.length + 1 + 2 * parts + 1 + DRUM_GROUPS.length + 2 * parts
+    + Math.ceil((GIVEN.length + 4 * parts + DRUM_GROUPS.length) / 6);
 const SEED_LENGTH = 11;
 
 function encode(number, length) {
@@ -105,12 +109,15 @@ export function formatSettings(settings) {
     values.push(...packSwitches(switches));
 
     if (values.some((x) => !Number.isInteger(x) || x < 0 || x > 63)) throw new RangeError("A value does not fit in a character.");
-    return FORMAT_TWO + values.map((x) => DIGITS[x]).join("");
+    return FORMAT_THREE + values.map((x) => DIGITS[x]).join("");
 }
 
-/** Reads settings, or null for anything that is not settings of the format. */
+/** Reads settings, or null for anything that is not settings of the format; the format before too, its solo part as the song draws it. */
 export function parseSettings(text) {
-    if (typeof text !== "string" || text.length !== 1 + LENGTH || text[0] !== FORMAT_TWO) return null;
+    if (typeof text !== "string") return null;
+    const count = { [FORMAT_THREE]: FORMAT_PARTS.length, [FORMAT_TWO]: PARTS_OF_FORMAT_TWO }[text[0]];
+    if (count === undefined || text.length !== 1 + lengthOf(count)) return null;
+    const named = FORMAT_PARTS.slice(0, count);
     const values = [...text.slice(1)].map((x) => DIGITS.indexOf(x));
     if (values.some((x) => x < 0)) return null;
 
@@ -118,10 +125,10 @@ export function parseSettings(text) {
     const next = () => values[at++];
     const given = GIVEN.map(() => next());
     const volume = next();
-    const mixes = FORMAT_PARTS.map(() => ({ volume: next(), pan: next() }));
+    const mixes = named.map(() => ({ volume: next(), pan: next() }));
     const setup = next();
     const groupVolumes = DRUM_GROUPS.map(() => next());
-    const instruments = FORMAT_PARTS.map(() => next() * 64 + next());
+    const instruments = named.map(() => next() * 64 + next());
     const switches = values.slice(at).flatMap((x) => [0, 1, 2, 3, 4, 5].map((bit) => ((x >> bit) & 1) === 1));
 
     let s = 0;
@@ -131,13 +138,16 @@ export function parseSettings(text) {
         if (FACETS.includes(name)) settings.facets[name] = setting;
         else settings[name] = setting;
     });
-    for (const [i, name] of FORMAT_PARTS.entries()) {
+    for (const [i, name] of named.entries()) {
         const plays = PLAYS[(switches[s++] ? 2 : 0) + (switches[s++] ? 1 : 0)];
         const isOn = switches[s++];
         const pan = { isGiven: switches[s++], value: mixes[i].pan };
         if (plays === undefined || instruments[i] >= 256) return null;
         settings.parts[name] = { plays, instrument: { isGiven: instruments[i] >= 128, value: instruments[i] & 127 }, volume: mixes[i].volume, pan, isOn };
     }
+    // a part the format did not name as the song draws it, at its fullest, in the file
+    for (const name of FORMAT_PARTS.slice(count))
+        settings.parts[name] = { plays: "random", instrument: { isGiven: false, value: 0 }, volume: LAST_STEP, pan: { isGiven: false, value: MIDDLE_PAN }, isOn: true };
     for (const [i, group] of DRUM_GROUPS.entries()) settings.drumGroups[group] = { isOn: switches[s++], volume: groupVolumes[i] };
     if (setup > DRUM_SETUPS.length || settings.key.value > 11) return null;
     settings.drumSetup = setup === 0 ? null : DRUM_SETUPS[setup - 1];
@@ -154,7 +164,9 @@ export function identityOf(settings) {
     const given = GIVEN.map((name) => givenSetting(settings, name));
     const values = packSwitches(given.map((x) => x.isGiven));
     values.push(...given.filter((x) => x.isGiven).map((x) => x.value));
-    values.push(...FORMAT_PARTS.map((name) => PLAYS.indexOf(settings.parts[name].plays)));
+    values.push(...FORMAT_PARTS.slice(0, PARTS_OF_FORMAT_TWO).map((name) => PLAYS.indexOf(settings.parts[name].plays)));
     values.push(settings.drumSetup === null ? 0 : DRUM_SETUPS.indexOf(settings.drumSetup) + 1);
+    // a part the format before did not name after the drum setup, so that a song naming it as the song draws it is named as it was
+    values.push(...FORMAT_PARTS.slice(PARTS_OF_FORMAT_TWO).map((name) => PLAYS.indexOf(settings.parts[name].plays)));
     return values.map((x) => DIGITS[x]).join("").replace(/0+$/, "");
 }
