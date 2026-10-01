@@ -1,7 +1,6 @@
 import {
     DRUM_KITS,
     INSTRUMENT_FAMILIES,
-    LAST_INSTRUMENT_BEFORE_EFFECTS,
 } from "./instruments.js";
 import { encodeMp3, renderSong } from "./export.js";
 import { createMediaControls } from "./media-session.js";
@@ -67,6 +66,7 @@ const elements = {
     exportMp3: document.getElementById("export-mp3"),
     share: document.getElementById("share"),
     bitrate: document.getElementById("bitrate"),
+    previous: document.getElementById("previous"),
     play: document.getElementById("play"),
     stop: document.getElementById("stop"),
     seek: document.getElementById("seek"),
@@ -77,9 +77,6 @@ const elements = {
     autoplay: document.getElementById("autoplay"),
     songVolume: document.getElementById("song-volume"),
     songVolumeValue: document.getElementById("song-volume-value"),
-    rollInstruments: document.getElementById("roll-instruments"),
-    rollFirst: document.getElementById("roll-first"),
-    rollLast: document.getElementById("roll-last"),
     mixer: document.getElementById("mixer"),
     status: document.getElementById("status"),
     version: document.getElementById("version"),
@@ -240,7 +237,7 @@ function listen(player) {
  *     arrived at by a link, is the song that was asked for, and it ends where it ends.
  */
 function advance() {
-    if (!elements.autoplay.checked || !isSongRandom || arrival !== null) return false;
+    if (!isAutoplayOn() || !isSongRandom || arrival !== null) return false;
     if (isEveryPartOff(settings)) {
         setStatus("Every part is off, so no next song plays. Turn a part on in the song settings.", true);
         return false;
@@ -255,12 +252,12 @@ function advance() {
  *     it, whether by the button, by a seed, from the list, or by the song before it running out. The song is asked for
  *     with the settings given, which become the page's, and the latest ask is the one that plays.
  */
-async function playNew(seed, origin, asked = settings) {
+async function playNew(seed, origin, asked = settings, { keepsPlace = false } = {}) {
     // the same song asked for again is the one already on its way: asking anew would only cancel it for nothing
     if (arrival !== null && arrival.wanted === wantedOf(seed, asked)) return;
 
     const request = ++playRequest;
-    const generated = await generate(seed, { asked });
+    const generated = await generate(seed, { asked, keepsPlace });
 
     // the player has to have been handed the song before it can be started on it
     await delivery;
@@ -679,22 +676,19 @@ function firstGesture() {
 // no seed at all, so the server rolls one and reports it back in X-Song-Seed
 elements.generate.addEventListener("click", () => playNew(null, "generate"));
 
-// the seed typed, or a random one where none is, with the settings as they are
+// the seed typed, with the settings as they are
 elements.generateSeeded.addEventListener("click", () => {
     const text = elements.seedInput.value.trim();
-    if (text === "") {
-        playNew(null, "generate");
-        return;
-    }
-
     const seed = readSeed(text);
     if (seed === null) {
-        setStatus(`'${text}' is not a seed. A seed is up to six letters and digits.`, true);
+        setStatus(`'${text}' is not a seed. A seed is up to eleven letters and digits.`, true);
         return;
     }
 
     playNew(seed, "seed");
 });
+
+elements.seedInput.addEventListener("input", updateGenerateButtons);
 
 elements.seedInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter") elements.generateSeeded.click();
@@ -811,9 +805,10 @@ async function requestSong(song, signal = undefined) {
  *     says it was the page's own to roll rather than one asked for, which is what makes it lead to another when it
  *     ends, and a seed refreshed back into the address is still one the page rolled, so the caller is allowed to say
  *     so. A song remade (<paramref name="isRemade" />) is the one on the page asked for again with changed settings,
- *     which replaces it where it plays, and takes its place on the list.
+ *     which replaces it where it plays, and takes its place on the list, as one gone back to keeps its own
+ *     (<paramref name="keepsPlace" />).
  */
-async function generate(seed, { isRolled = seed === null, isRemade = false, signal = undefined, asked = settings } = {}) {
+async function generate(seed, { isRolled = seed === null, isRemade = false, keepsPlace = false, signal = undefined, asked = settings } = {}) {
     if (isEveryPartOff(asked)) {
         showEveryPartOff();
         return false;
@@ -877,7 +872,7 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, sign
         showSettings();
         showRating(recallRating(songVersion, currentSong()));
         rememberSong(isRemade ? undefined : isRolled);
-        addToHistory(isRemade);
+        addToHistory(isRemade, keepsPlace);
         // offered for download first, and as a copy, so it stays usable whatever the audio stack does
         offerDownload(song);
         if (isRemade) {
@@ -954,13 +949,14 @@ function cancelRegeneration() {
 }
 
 /**
- *     The buttons up top are disabled while every part is off, which leaves nothing to play, and Generate while a song is
- *     on its way, as a second press would let go of a song for another just as random, unheard. A seed, typed or from
- *     the list, is a song of its own asked for, which takes the place of the one on its way.
+ *     The buttons that ask for a song are disabled while every part is off, which leaves nothing to play, Generate while a
+ *     song is on its way, as a second press would let go of a song for another just as random, unheard, and the seed's
+ *     while none is typed. A seed, typed or from the list, is a song of its own asked for, which takes the place of the
+ *     one on its way.
  */
 function updateGenerateButtons() {
     elements.generate.disabled = arrival !== null || isEveryPartOff(settings);
-    elements.generateSeeded.disabled = isEveryPartOff(settings);
+    elements.generateSeeded.disabled = isEveryPartOff(settings) || elements.seedInput.value.trim() === "";
 }
 
 /** Says, where the settings are and on the status line, that every part is off, and why nothing can be generated. */
@@ -1055,30 +1051,38 @@ elements.clearHistory.addEventListener("click", () => {
     elements.history.replaceChildren();
     elements.clearHistory.disabled = true;
     keepHistory([]);
+    updatePrevious();
 });
 
 /**
  *     Puts the song on the page on top of the list, however it came about: rolled, typed, followed from a link, rolled
  *     by the song before it running out, or pressed on the list itself. The list is the order songs were heard in, so a
- *     song heard again moves to the top, and wherever it was before is taken off; a song remade with changed settings
- *     takes the place of the one it was made from, so that trying settings does not fill the list.
+ *     song heard again moves to the top, and wherever it was before is taken off; but a song gone back to with Previous
+ *     keeps its place, so that Previous goes on back down the list, and a song remade with changed settings takes the
+ *     place of the one it was made from, so that trying settings does not fill the list.
  */
-function addToHistory(isRemade) {
+function addToHistory(isRemade, keepsPlace) {
     const name = currentSong();
     const entry = `${songSeed}:${formatSettings(givenOnly(settings))}`;
-    const top = elements.history.firstElementChild;
-    const earlier = [...elements.history.children].filter((item) => item.dataset.song === name || (isRemade && item === top && top.dataset.seed === songSeed));
+    const current = elements.history.querySelector("[aria-current]");
+    const earlier = [...elements.history.children].filter((item) => item.dataset.song === name || (isRemade && item === current));
+    const place = isRemade || keepsPlace ? (earlier.includes(current) ? current : earlier[0]) : undefined;
 
-    // the keyboard follows a pressed song to the top, rather than being dropped with the button it was on
+    // the keyboard follows a pressed song to its place, rather than being dropped with the button it was on
     const wasFocused = earlier.includes(document.activeElement);
-    for (const item of earlier) item.remove();
-
     const item = createHistoryItem(entry);
-    elements.history.prepend(item);
-    while (elements.history.children.length > SONGS_KEPT) elements.history.lastElementChild.remove();
+    if (place === undefined) {
+        for (const other of earlier) other.remove();
+        elements.history.prepend(item);
+        // the song on the page is the top of the list, so that is where the list is scrolled to
+        elements.history.scrollTop = 0;
+    } else {
+        place.replaceWith(item);
+        for (const other of earlier) other.remove();
+        item.scrollIntoView({ block: "nearest" });
+    }
 
-    // the song on the page is the top of the list, so that is where the list is scrolled to
-    elements.history.scrollTop = 0;
+    while (elements.history.children.length > SONGS_KEPT) elements.history.lastElementChild.remove();
     if (wasFocused) item.focus({ preventScroll: true });
 
     keepHistory(historyEntries());
@@ -1092,6 +1096,34 @@ function markCurrentSong(name) {
         if (item.dataset.song === name) item.setAttribute("aria-current", "true");
         else item.removeAttribute("aria-current");
     }
+
+    updatePrevious();
+}
+
+/** The song heard before the one on the page, the next down the list, null where there is none. */
+function previousSong() {
+    return elements.history.querySelector("[aria-current]")?.nextElementSibling ?? null;
+}
+
+function updatePrevious() {
+    elements.previous.disabled = previousSong() === null;
+}
+
+/** The song before, asked for as it was heard, keeping its place on the list. */
+function playPrevious() {
+    const item = previousSong();
+    if (item === null) return;
+
+    const { seed, entrySettings } = readEntry(item.dataset.entry);
+    playNew(seed, "previous", entrySettings, { keepsPlace: true });
+}
+
+elements.previous.addEventListener("click", playPrevious);
+
+/** A song of the list, as its entry keeps it: its seed, and the settings it was asked for with. */
+function readEntry(entry) {
+    const [seedText, settingsText] = entry.split(":");
+    return { seedText, seed: readSeed(seedText), entrySettings: parseSettings(settingsText) ?? defaultSettings() };
 }
 
 /**
@@ -1100,9 +1132,7 @@ function markCurrentSong(name) {
  *     it is the song that was asked for: it leads to no other when it ends.
  */
 function createHistoryItem(entry) {
-    const [seedText, settingsText] = entry.split(":");
-    const entrySettings = parseSettings(settingsText) ?? defaultSettings();
-    const seed = readSeed(seedText);
+    const { seedText, seed, entrySettings } = readEntry(entry);
     const identity = identityOf(entrySettings);
 
     const button = document.createElement("button");
@@ -1249,9 +1279,15 @@ function offerExport(mp3, name) {
 
 // --- transport -------------------------------------------------------------
 
-elements.autoplay.checked = isAutoplaying();
+// a switch pressed in or not, as the rating is
+const isAutoplayOn = () => elements.autoplay.getAttribute("aria-pressed") === "true";
 
-elements.autoplay.addEventListener("change", () => setAutoplaying(elements.autoplay.checked));
+elements.autoplay.setAttribute("aria-pressed", String(isAutoplaying()));
+
+elements.autoplay.addEventListener("click", () => {
+    elements.autoplay.setAttribute("aria-pressed", String(!isAutoplayOn()));
+    setAutoplaying(isAutoplayOn());
+});
 
 elements.play.addEventListener("click", () => playOrPause());
 
@@ -1300,6 +1336,7 @@ const mediaControls = createMediaControls({
     pause: () => playOrPause(false),
     stop: () => elements.stop.click(),
     next: () => playNew(null, "lockscreen"),
+    previous: playPrevious,
     seek: (time, offset) => withPlayer((player) => {
         const duration = player.duration;
         const target = Math.min(Math.max(time ?? player.currentTime + offset, 0), duration);
@@ -1656,17 +1693,6 @@ function createPartRow(part) {
     instrument.addEventListener("change", () =>
         setPartInstrument(part, instrument.value === "" ? { isGiven: false, value: own[part]?.instrument ?? 0 } : { isGiven: true, value: Number(instrument.value) }));
 
-    const roll = document.createElement("button");
-    roll.type = "button";
-    roll.className = "roll";
-    roll.textContent = "Roll";
-    roll.setAttribute("aria-label", `Roll the instrument of the ${name.toLowerCase()}`);
-    roll.addEventListener("click", () => rollInstrument(part));
-
-    const instrumentField = document.createElement("div");
-    instrumentField.className = "instrument-field";
-    instrumentField.append(instrument, roll);
-
     const volume = createFader(`Volume of the ${name.toLowerCase()}`, (step) => setPartVolume(part, step));
     // a double click puts the pan back where the song sits the part
     const pan = createFader(`Pan of the ${name.toLowerCase()}, from left to right`, (step) => setPartPan(part, { isGiven: true, value: step }), true);
@@ -1704,7 +1730,7 @@ function createPartRow(part) {
     heading.textContent = name;
 
     const row = document.createElement("tr");
-    row.append(heading, ...[plays, instrumentField, levels, inFile, mute, solo, meter].map((x) => {
+    row.append(heading, ...[plays, instrument, levels, inFile, mute, solo, meter].map((x) => {
         const cell = document.createElement("td");
         cell.append(x);
         return cell;
@@ -1862,30 +1888,6 @@ function applyVolume(part) {
     for (const { channel } of channelsOf(part))
         withPlayer((player) => player.setChannelVolume(channel, volume), "Could not set the volume");
 }
-
-/**
- *     What a roll of a part may land on: the drum kits for the drums, and the range the settings hold everywhere else,
- *     whichever way round it was set.
- */
-function rollable(part) {
-    if (part === "drum") return DRUM_KITS.map((kit) => kit.instrument);
-
-    const bounds = [Number(elements.rollFirst.value), Number(elements.rollLast.value)];
-    const first = Math.min(...bounds);
-    return Array.from({ length: Math.max(...bounds) - first + 1 }, (_, index) => first + index);
-}
-
-/** Rolls one instrument, never landing on the one already playing while there is anything else to land on. */
-function rollInstrument(part) {
-    const choices = rollable(part).filter((instrument) => instrument !== settings.parts[part].instrument.value);
-    if (choices.length === 0) return;
-
-    setPartInstrument(part, { isGiven: true, value: choices[Math.floor(Math.random() * choices.length)] });
-}
-
-elements.rollInstruments.addEventListener("click", () => {
-    for (const part of PARTS) rollInstrument(part);
-});
 
 function formatPercent(volume) {
     return `${Math.round(volume * 100)}%`;
@@ -2100,11 +2102,6 @@ elements.like.addEventListener("click", () => rate("up"));
 elements.dislike.addEventListener("click", () => rate("down"));
 
 // --- wiring ----------------------------------------------------------------
-
-fillInstruments(elements.rollFirst);
-fillInstruments(elements.rollLast);
-elements.rollFirst.value = "0";
-elements.rollLast.value = String(LAST_INSTRUMENT_BEFORE_EFFECTS);
 
 updateTransport();
 setPlayIcon(false);

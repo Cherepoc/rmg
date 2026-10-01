@@ -118,14 +118,6 @@ export const INSTRUMENT_FAMILIES = [
 ];
 
 /**
- *     Where a roll stops unless the settings say otherwise: everything but the family General MIDI ends
- *     with, the sound effects, which the generator leaves out of a song of its own accord too.
- */
-export const LAST_INSTRUMENT_BEFORE_EFFECTS = INSTRUMENT_FAMILIES
-    .slice(0, -1)
-    .reduce((count, family) => count + family.instruments.length, 0) - 1;
-
-/**
  *     The drum kits a program change on the percussion channel selects. They are the General MIDI 2 kits,
  *     so a soundfont that only carries the standard one answers every one of them with that.
  */

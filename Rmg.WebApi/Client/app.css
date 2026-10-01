@@ -290,8 +290,7 @@ button.icon svg {
     color: var(--muted);
 }
 
-.field input[type="text"],
-.seed-input {
+.field input[type="text"] {
     width: 12ch;
     padding: 8px 10px;
     border: 1px solid var(--border);
@@ -303,10 +302,18 @@ button.icon svg {
     font-variant-numeric: tabular-nums;
 }
 
-/* the seed of the song on show: a value to read and copy, not a field to fill in, as wide as the longest seed, whose
-   letters are wider than the digit a ch is */
+/* a seed, in a font whose every letter is as wide, at most 0.62 of its size, so that the field holds the longest, eleven
+   of the widest; a ch is no measure of it, being taken from the font list's first font, whichever is on the machine */
+.field input.seed {
+    --seed-width: calc(11 * 0.62em);
+    font-family: "Cascadia Mono", "Consolas", "DejaVu Sans Mono", "Menlo", monospace;
+    font-size: 14px;
+    width: calc(var(--seed-width) + 22px);
+}
+
+/* the seed of the song on show: a value to read and copy, not a field to fill in */
 .field input[readonly] {
-    width: 14ch;
+    width: var(--seed-width);
     border-color: transparent;
     background: none;
     padding-left: 0;
@@ -340,37 +347,25 @@ button.icon svg {
     margin: 0;
 }
 
-/* what the song panel does: roll one, see which it is and pass it on, and take it away as a file */
-.song-row {
+/* the song panel's rows: the song on the page, playing it, taking it away as a file, and asking for one by its seed */
+.song-panel .row {
     row-gap: 10px;
 }
 
-.seed-group,
-.downloads {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.song-panel .row + .row {
+    margin-top: 16px;
 }
 
-.downloads {
-    margin-left: auto;
-}
-
-/* the song rated, which a pressed button shows as the accent, as the mixer's switches do */
 .rating {
     display: flex;
     gap: 4px;
 }
 
-.rating button[aria-pressed="true"] {
+/* a switch pressed in, the song rated or autoplay on, shown as the accent, as the mixer's switches are */
+button.icon[aria-pressed="true"] {
     background: var(--accent);
     border-color: var(--accent);
     color: var(--accent-text);
-}
-
-/* the song panel is played from, so a row of controls has a little more room than elsewhere */
-.song-row + .transport {
-    margin-top: 16px;
 }
 
 /*
@@ -470,11 +465,6 @@ button.icon svg {
     color: var(--accent-text);
 }
 
-/* the seed to ask for, which the summary above it already names */
-.seed-input {
-    width: 14ch;
-}
-
 .transport {
     flex-wrap: nowrap;
 }
@@ -503,10 +493,6 @@ input[type="range"] {
     width: 90px;
 }
 
-/* the whole mix rolled at once, kept apart from the volume it shares a row with */
-#roll-instruments {
-    margin-left: auto;
-}
 
 /* the settings of the song: values given or drawn, a part's row of the mixer, and the drums' */
 .settings-group {
@@ -652,12 +638,6 @@ input[type="range"] {
     font-variant-numeric: tabular-nums;
     color: var(--muted);
     width: 3ch;
-}
-
-.instrument-field {
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 .mixer select {
@@ -842,68 +822,14 @@ footer a:hover {
         grid-column: 1 / -1;
     }
 
-    /*
-     * the song panel in the order a phone uses it: roll a song, play it, then pass it on or take it
-     * away. The row that holds them on a wide screen steps aside, so they can be put in that order
-     */
-    .song-panel {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .song-panel .song-row {
-        display: contents;
-    }
-
-    .song-panel h2,
-    .song-panel .song-row + .transport,
-    .song-panel .toggle,
-    .song-panel #status {
-        margin: 0;
-    }
-
-    /* the full width of the panel, with its label in the middle of it */
-    #generate {
-        order: 1;
-        justify-content: center;
-    }
-
-    .song-panel .transport {
-        order: 2;
-    }
-
-    .seed-group {
-        order: 3;
-    }
-
-    .downloads {
-        order: 4;
-        margin-left: 0;
-    }
-
-    .song-panel .toggle {
-        order: 5;
-    }
-
-    .song-panel #status {
-        order: 7;
-    }
-
-    #roll-instruments {
-        margin-left: 0;
-    }
-
-    /* the song and where it is stay on one line, between its two times, and the rating and the volume go under them */
+    /* the buttons and where the song is stay on one line, and the volume goes under them */
     .transport {
         flex-wrap: wrap;
     }
 
-    /* the rating and the volume share the second line */
     .transport .volume {
         margin-left: auto;
     }
-
 
     /* the instrument names are long, and the table has no room to spare on a phone */
     .mixer select {

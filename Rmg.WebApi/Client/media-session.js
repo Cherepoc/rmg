@@ -15,7 +15,7 @@ const SILENCE_SECONDS = 6;
 const SKIP_SECONDS = 10;
 
 /**
- *     <paramref name="actions" /> is what the buttons do: play, pause, stop, next, and seek, which is
+ *     <paramref name="actions" /> is what the buttons do: play, pause, stop, next, previous, and seek, which is
  *     given a time to go to, or null and an offset to move by.
  */
 export function createMediaControls(actions) {
@@ -30,6 +30,7 @@ export function createMediaControls(actions) {
     handle("pause", () => actions.pause());
     handle("stop", () => actions.stop());
     handle("nexttrack", () => actions.next());
+    handle("previoustrack", () => actions.previous());
     handle("seekto", (details) => actions.seek(details.seekTime, 0));
     handle("seekbackward", (details) => actions.seek(null, -(details.seekOffset ?? SKIP_SECONDS)));
     handle("seekforward", (details) => actions.seek(null, details.seekOffset ?? SKIP_SECONDS));

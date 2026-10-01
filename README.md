@@ -108,17 +108,18 @@ internet connection.
 ### The page
 
 - **Playing.** The page loads a song and a soundfont as it opens, so you only need to press play. When a random song
-  ends it plays another, unless the checkbox under the player turns that off.
+  ends it plays another, unless the autoplay switch beside **Generate Next** is off. **Previous** goes back down the
+  list of songs so far, and a seed typed under the downloads plays that song.
 - **Song settings.** The unconventionality and every facet, the tempo, key and meter, every part (as drawn, in or
   out) and the drums can be given or left to the song. Changing one remakes the song from the same seed, going on
   from the same place. What changes only how it sounds (a part's instrument, volume and pan, the drum groups, the
   volume) is heard at once.
 - **Rating.** Like or dislike a song; the ratings go with the analytics, by the songs' version.
-- **So far** lists the last fifty songs, newest first, kept in the browser.
+- **So far** lists the last fifty songs, newest first, kept in the browser; a song gone back to keeps its place.
 - **Sharing.** The address always follows the song and its settings, `?song=<seed>&settings=<settings>`, so it is
   itself a link; **Share** opens the share sheet or copies it. Seeds are not kept stable across versions, so after
   an update an old link can play a different song.
-- **Downloads.** The `.mid` carries the mix. **Export .mp3** renders the song with the mix and the soundfont in the
+- **Downloads.** The `.mid` carries the mix. **Download .mp3** renders the song, at the bitrate beside it, with the mix and the soundfont in the
   browser, with [lamejs](https://www.npmjs.com/package/@breezystack/lamejs) (LGPL-3.0, from a CDN); nothing is uploaded.
 
 ## Soundfonts
