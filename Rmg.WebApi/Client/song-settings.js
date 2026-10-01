@@ -1,4 +1,4 @@
-import { DRUM_GROUPS, DRUM_SETUPS, FACETS, FORMAT_PARTS, LAST_STEP, MIDDLE_PAN, MIDDLE_TEMPO, PARTS } from "./settings.js";
+import { DRUM_GROUPS, FACETS, FORMAT_PARTS, LAST_STEP, MIDDLE_PAN, MIDDLE_TEMPO, PARTS } from "./settings.js";
 
 /**
  *     The settings a song is asked for with and heard with, as settings.js writes them, and what the server says of the
@@ -20,7 +20,7 @@ export function defaultSettings() {
             volume: LAST_STEP,
             pan: { isGiven: false, value: MIDDLE_PAN },
         }])),
-        drumSetup: null,
+        drumPieces: { isGiven: false, value: [] },
         drumGroups: Object.fromEntries(DRUM_GROUPS.map((group) => [group, { volume: LAST_STEP }])),
         volume: LAST_STEP,
     };
@@ -40,7 +40,7 @@ export function givenOnly(settings) {
             const given = settings.parts[part];
             return [part, { ...given, instrument: keep(given.instrument, fresh.parts[part].instrument), pan: keep(given.pan, fresh.parts[part].pan) }];
         })),
-        drumSetup: settings.drumSetup,
+        drumPieces: keep(settings.drumPieces, fresh.drumPieces),
         drumGroups: structuredClone(settings.drumGroups),
         volume: settings.volume,
     };
@@ -63,7 +63,7 @@ export function requestFor(seed, settings) {
                 pan: given(mix.pan),
             }];
         })),
-        drumSetup: settings.drumSetup ?? undefined,
+        drumPieces: given(settings.drumPieces),
         tempo: given(settings.tempo),
         key: given(settings.key),
         meter: given(settings.meter),
@@ -74,7 +74,7 @@ export function requestFor(seed, settings) {
 /**
  *     The settings with what the song drew where nothing was given, from the server's report of it, and what the song
  *     is made of: every part's channel, from 0, as the file has it, whether it is in the song, its own instrument and
- *     pan, whatever the mix plays, and the drum groups it plays.
+ *     pan, whatever the mix plays, the drum groups it plays and its drum pieces, given or drawn.
  */
 export function applyReport(settings, report) {
     const next = structuredClone(settings);
@@ -84,6 +84,7 @@ export function applyReport(settings, report) {
     next.tempo = drawn(settings.tempo, report.tempo);
     next.key = drawn(settings.key, report.key);
     next.meter = drawn(settings.meter, report.meter);
+    next.drumPieces = drawn(settings.drumPieces, report.drumPieces);
 
     const channels = {};
     const plays = {};
@@ -108,8 +109,8 @@ export function applyReport(settings, report) {
         twins,
         plays,
         own,
-        drumSetup: report.drumSetup.value,
         drumGroups: report.drumGroups.map((group) => group.toLowerCase()),
+        drumPieces: report.drumPieces.value,
     };
 }
 
@@ -118,4 +119,3 @@ export function isEveryPartOff(settings) {
     return PARTS.every((part) => settings.parts[part].plays === "off");
 }
 
-export { DRUM_SETUPS };

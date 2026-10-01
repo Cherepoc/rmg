@@ -11,6 +11,10 @@ public sealed class GivingAPartTest(Site site)
 {
     private const string Row = "#mixer tr:first-child";
 
+    // the drums' row, and their pieces' switches in the rows of their groups under it
+    private const string Drums = "#mixer tr:has(+ tr.drum-group)";
+    private const string Chips = "#mixer tr.drum-group .chip";
+
     private static JsonElement Melody(SongRequest request) => request.Body.GetProperty("parts").GetProperty("melody");
 
     private static bool Has(JsonElement part, string property) => part.TryGetProperty(property, out var value) && value.ValueKind != JsonValueKind.Null;
@@ -26,6 +30,29 @@ public sealed class GivingAPartTest(Site site)
 
     private static Task<bool> IsDisabled(SongPage page, string control) =>
         page.Page.EvaluateAsync<bool>("selector => document.querySelector(selector).disabled", $"{Row} {control}");
+
+    [Test]
+    public async Task TheDrumsGiven_AreAskedForWithTheirPieces_APieceAddedOrTakenOut()
+    {
+        await using var page = await SongPage.Open(site);
+        await page.FirstSong();
+        await page.Until(() => page.Page.Locator(Chips).CountAsync().ContinueWith(x => x.Result > 0), "the drum pieces listed");
+        await Assert.That(await page.Page.EvaluateAsync<bool>("selector => document.querySelector(selector).disabled", Chips)).IsTrue();
+
+        var asked = page.Requests.Count;
+        await page.Page.EvaluateAsync("selector => document.querySelector(selector).click()", $"{Drums} td:first-child input");
+        await page.Until(() => page.Requests.Count > asked && page.Requests[^1].Ended == "200", "the song made again");
+        var given = page.Requests[^1].Body.GetProperty("drumPieces").EnumerateArray().Select(x => x.GetString()!).ToArray();
+        await Assert.That(given).IsNotEmpty();
+
+        // a piece the song does not play put in
+        var outside = await page.Page.EvaluateAsync<string>("selector => [...document.querySelectorAll(selector)].find(x => x.getAttribute('aria-pressed') === 'false').dataset.piece", Chips);
+        asked = page.Requests.Count;
+        await page.Page.EvaluateAsync("([selector, piece]) => document.querySelector(`${selector}[data-piece='${piece}']`).click()", new object[] { Chips, outside });
+        await page.Until(() => page.Requests.Count > asked && page.Requests[^1].Ended == "200", "the song made again");
+        await Assert.That(page.Requests[^1].Body.GetProperty("drumPieces").EnumerateArray().Select(x => x.GetString())).Contains(outside);
+        await Assert.That(page.Errors).IsEmpty();
+    }
 
     [Test]
     public async Task APartGiven_IsAskedForAsDrawn_ThenAsSet_AndLetGoOf_AsTheSongs()

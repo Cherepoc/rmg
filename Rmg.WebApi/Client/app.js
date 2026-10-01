@@ -24,7 +24,7 @@ import {
 } from "./storage.js";
 import {
     DRUM_GROUPS,
-    DRUM_SETUPS,
+    DRUM_PIECES,
     FACETS,
     formatSettings,
     identityOf,
@@ -54,8 +54,6 @@ const elements = {
     settingsState: document.getElementById("settings-state"),
     allOff: document.getElementById("all-off"),
     songSettings: document.getElementById("song-settings"),
-    drumSettings: document.getElementById("drum-settings"),
-    drumGroups: document.getElementById("drum-groups"),
     seedInput: document.getElementById("seed-input"),
     generateSeeded: document.getElementById("generate-seeded"),
     history: document.getElementById("history"),
@@ -94,13 +92,13 @@ let settings = restoreSettings();
 let songSeed = null;
 
 // what the song on the page is made of, as the server said: the channel every part plays on in the file the player
-// has, null where it is not written, whether each part is in the song, its drum setup and the drum groups it plays
+// has, null where it is not written, whether each part is in the song, the drum groups it plays and its drum pieces
 let channels = {};
 // the channel of a part's twin, the riff's, which follows the part's mix on the other side
 let twins = {};
 let partsInSong = {};
-let drumSetup = null;
 let drumGroupsPresent = [];
+let drumPiecesPlayed = [];
 
 // the song asked for again with changed settings, while the one on the page plays on, and where it is to go on from
 let regenerationTimer = null;
@@ -857,8 +855,8 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         const made = applyReport(settings, report);
         ({ settings, channels, twins, own } = made);
         partsInSong = made.plays;
-        drumSetup = made.drumSetup;
         drumGroupsPresent = made.drumGroups;
+        drumPiecesPlayed = made.drumPieces;
         songSeed = response.headers.get("X-Song-Seed") ?? seed;
         songVersion = response.headers.get("X-Song-Version");
         elements.seed.value = songSeed;
@@ -1015,7 +1013,7 @@ function keepCurrentSettings() {
     keepSettings(formatSettings(givenOnly(settings)));
     const given = [settings.unconventionality, settings.tempo, settings.key, settings.meter, ...FACETS.map((facet) => settings.facets[facet])].filter((x) => x.isGiven).length
         + PARTS.filter((part) => settings.parts[part].plays !== "random").length
-        + (settings.drumSetup === null ? 0 : 1);
+        + (settings.drumPieces.isGiven ? 1 : 0);
     elements.settingsState.textContent = given === 0 ? "All drawn" : `${given} given`;
 }
 
@@ -1466,7 +1464,6 @@ const DRUM_GROUP_NAMES = {
     kick: "Kick", snare: "Snare", timekeepers: "Hi-hat and ride", toms: "Toms", accents: "Cymbals", percussion: "Percussion", calls: "Calls",
 };
 
-const SETUP_NAMES = { kit: "Kit", kitAndPercussion: "Kit and percussion", percussion: "Percussion" };
 
 
 const KEY_NAMES = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
@@ -1480,7 +1477,6 @@ let tempos = [];
 // every value's row, by its key, and every drum group's
 const settingRows = new Map();
 const groupRows = new Map();
-let setupSelect = null;
 
 // the song's own instrument and pan of every part, whatever the mix plays, as the server said
 let own = {};
@@ -1491,9 +1487,8 @@ buildSettings();
 function buildSettings() {
     // in the order they are named, the key and the meter chosen from a list and every other on a slider
     elements.songSettings.append(...Object.keys(SETTING_NAMES).map((key) => (key === "key" || key === "meter" ? createChoiceRow(key) : createSettingRow(key))));
-    elements.drumSettings.append(createSetupRow());
-    elements.mixer.append(...PARTS.map(createPartRow));
-    elements.drumGroups.append(...DRUM_GROUPS.map(createDrumGroupRow));
+    // the drums' groups under the drums, each with its pieces
+    elements.mixer.append(...PARTS.flatMap((part) => [createPartRow(part), ...(part === "drum" ? DRUM_GROUPS.map(createDrumGroupRow) : [])]));
 
     showSettings();
     keepCurrentSettings();
@@ -1553,7 +1548,7 @@ function showChoice(key) {
     if (row.select.options.length > setting.value) row.select.value = String(setting.value);
 }
 
-/** The tempos and meters a song may be given, from the server, which only it knows. */
+/** The tempos, meters and drum pieces a song may be given, from the server, which only it knows. */
 async function listChoices() {
     try {
         const response = await fetch(new URL("api/songs/options", location.href));
@@ -1561,6 +1556,8 @@ async function listChoices() {
 
         const options = await response.json();
         tempos = options.tempos;
+        for (const piece of options.drumPieces) groupRows.get(piece.group.toLowerCase()).chips.append(createDrumPieceChip(piece));
+        showSettings();
         choiceRows.get("meter").select.append(...options.meters.map((x, i) => createOption(String(i), x)));
         showSetting("tempo");
         showChoice("meter");
@@ -1661,26 +1658,6 @@ function showSetting(key) {
     row.output.textContent = key !== "tempo" ? formatPercent(setting.value / LAST_STEP) : tempos.length > 0 ? `${Math.round(tempos[setting.value])} bpm` : "";
 }
 
-/** The drums' setup: the song's own, or one given. */
-function createSetupRow() {
-    setupSelect = document.createElement("select");
-    setupSelect.setAttribute("aria-label", "The drums' setup");
-    setupSelect.append(createOption("", "Song's own"), ...DRUM_SETUPS.map((setup) => createOption(setup, SETUP_NAMES[setup])));
-    setupSelect.addEventListener("change", () => {
-        settings.drumSetup = setupSelect.value === "" ? null : setupSelect.value;
-        settingsChanged(true);
-    });
-
-    const label = document.createElement("span");
-    label.className = "setting-name";
-    label.textContent = "Setup";
-
-    const row = document.createElement("div");
-    row.className = "setting";
-    row.append(document.createElement("span"), label, setupSelect);
-    return row;
-}
-
 /**
  *     A part's row: given or as the song drew it, whether it plays, which changes the song, and its instrument and pan,
  *     which are heard at once; its volume, which the song never draws; and how loud it plays as it is heard.
@@ -1711,7 +1688,8 @@ function createPartRow(part) {
     const pan = createFader(`Pan of the ${name.toLowerCase()}, from left to right`, (step) => setPartPan(part, { isGiven: true, value: step }), true);
     const levels = document.createElement("div");
     levels.className = "fader-pair";
-    levels.append(volume.field, pan.field);
+    // the drums sit in the middle, as a kit does
+    levels.append(...(part === "drum" ? [volume.field] : [volume.field, pan.field]));
 
     // every part a colour of its own, the same in every song, spread round the wheel
     const pulse = createPulse(Math.round((PARTS.indexOf(part) * 360) / PARTS.length));
@@ -1732,9 +1710,15 @@ function createPartRow(part) {
     return row;
 }
 
+/** Whether a part's row is given: its playing, instrument or pan, and the drums' pieces. */
+function isPartGiven(part) {
+    const mix = settings.parts[part];
+    return mix.plays !== "random" || mix.instrument.isGiven || mix.pan.isGiven || (part === "drum" && settings.drumPieces.isGiven);
+}
+
 /**
- *     Gives a part's playing, instrument and pan together, as the song drew them, or lets the song have them again, its
- *     volume at the fullest, as one switch has them all.
+ *     Gives a part's playing, instrument and pan together, as the song drew them, the drums' pieces and their groups'
+ *     volumes with them, or lets the song have them again, its volumes at the fullest, as one switch has them all.
  */
 function setPartGiven(part, isGiven) {
     const mix = settings.parts[part];
@@ -1743,29 +1727,69 @@ function setPartGiven(part, isGiven) {
     // the song's own volume, the fullest, once it is let go of
     if (!isGiven) setPartVolume(part, LAST_STEP);
     setPartInstrument(part, { isGiven, value: isGiven ? mix.instrument.value : drawn.instrument });
-    setPartPan(part, { isGiven, value: isGiven ? mix.pan.value : drawn.pan });
+    if (part === "drum") {
+        settings.drumPieces = { isGiven, value: [...drumPiecesPlayed] };
+        if (!isGiven) for (const group of DRUM_GROUPS) settings.drumGroups[group].volume = LAST_STEP;
+    } else setPartPan(part, { isGiven, value: isGiven ? mix.pan.value : drawn.pan });
     showSettings();
     settingsChanged(true);
 }
 
-/** A drum group's row: how loud it plays, which the server makes. */
+/** Puts a drum piece in the drums given, or takes it out, which makes the song again. */
+function toggleDrumPiece(piece) {
+    const pieces = settings.drumPieces.value;
+    const next = pieces.includes(piece) ? pieces.filter((x) => x !== piece) : [...pieces, piece];
+    settings.drumPieces = { isGiven: true, value: DRUM_PIECES.filter((x) => next.includes(x)) };
+    showSettings();
+    track("mix_changed", { detail: "drum piece" });
+    settingsChanged(true);
+}
+
+/**
+ *     A drum group's row, under the drums: its pieces, in the song or out, which the drums' switch gives with them, and how
+ *     loud it plays, which the server makes; its pulse as its drums are struck.
+ */
 function createDrumGroupRow(group) {
     const name = DRUM_GROUP_NAMES[group];
 
+    // the group's pieces, which come with the options the server lists
+    const chips = document.createElement("div");
+    chips.className = "chips";
+    chips.setAttribute("role", "group");
+    chips.setAttribute("aria-label", `${name} pieces`);
+    const chipsCell = document.createElement("td");
+    chipsCell.colSpan = 2;
+    chipsCell.append(chips);
+
     const volume = createFader(`Volume of the ${name.toLowerCase()}`, (step) => (settings.drumGroups[group].volume = step), false, () => settingsChanged(true));
+    const volumeCell = document.createElement("td");
+    volumeCell.append(volume.field);
+
+    const pulse = createPulse(Math.round((PARTS.indexOf("drum") * 360) / PARTS.length));
+    const pulseCell = document.createElement("td");
+    pulseCell.append(pulse.canvas);
 
     const heading = document.createElement("th");
     heading.scope = "row";
     heading.textContent = name;
 
     const row = document.createElement("tr");
-    row.append(heading, ...[volume.field].map((x) => {
-        const cell = document.createElement("td");
-        cell.append(x);
-        return cell;
-    }));
-    groupRows.set(group, { row, volume });
+    row.className = "drum-group";
+    row.append(document.createElement("td"), heading, chipsCell, volumeCell, pulseCell);
+    groupRows.set(group, { row, volume, chips, pulse });
     return row;
+}
+
+/** A drum piece's switch in its group's row, in the song when pressed. */
+function createDrumPieceChip(piece) {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "chip";
+    chip.dataset.piece = piece.name;
+    chip.textContent = piece.label;
+    chip.setAttribute("aria-pressed", "false");
+    chip.addEventListener("click", () => toggleDrumPiece(piece.name));
+    return chip;
 }
 
 /** A fader from 0 to 63, saying where it is as a share, or where a pan sits. */
@@ -1798,13 +1822,10 @@ function showSettings() {
     for (const key of settingRows.keys()) showSetting(key);
     for (const key of choiceRows.keys()) showChoice(key);
 
-    setupSelect.value = settings.drumSetup ?? "";
-    setupSelect.options[0].textContent = drumSetup === null ? "Song's own" : `Song's own: ${SETUP_NAMES[drumSetup]}`;
-
     for (const part of PARTS) {
         const row = rows.get(part);
         const mix = settings.parts[part];
-        const isGiven = mix.plays !== "random" || mix.instrument.isGiven || mix.pan.isGiven;
+        const isGiven = isPartGiven(part);
         row.given.checked = isGiven;
         row.plays.checked = mix.plays === "random" ? partsInSong[part] !== false : mix.plays === "on";
         row.instrument.value = String(mix.instrument.value);
@@ -1817,11 +1838,20 @@ function showSettings() {
         row.row.classList.toggle("absent", channels[part] == null);
     }
 
+    // the drums' groups and pieces are given with the drums, a piece kept while it is the last
+    const areDrumsGiven = isPartGiven("drum");
+    const pieces = settings.drumPieces.value;
     for (const group of DRUM_GROUPS) {
         const row = groupRows.get(group);
         row.volume.input.value = String(settings.drumGroups[group].volume);
+        row.volume.input.disabled = !areDrumsGiven;
         row.volume.show();
         row.row.classList.toggle("absent", !drumGroupsPresent.includes(group));
+        for (const chip of row.chips.children) {
+            const isIn = pieces.includes(chip.dataset.piece);
+            chip.setAttribute("aria-pressed", String(isIn));
+            chip.disabled = !areDrumsGiven || (isIn && pieces.length === 1);
+        }
     }
 
     elements.songVolume.value = String(settings.volume);

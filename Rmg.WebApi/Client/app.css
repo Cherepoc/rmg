@@ -715,6 +715,31 @@ input[type="range"] {
     width: 160px;
 }
 
+/* a drum group's row under the drums', set in from them */
+.mixer tr.drum-group th[scope="row"] {
+    padding-left: 12px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+/* a drum group's pieces, pressed where the song plays them, as the rating's switches are */
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.chip {
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+}
+
+.chip[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--accent) 30%, var(--panel));
+    border-color: var(--accent);
+}
+
 /* a part's pulse, in the square it ripples within */
 .pulse {
     display: block;

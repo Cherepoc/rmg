@@ -7,8 +7,8 @@ namespace Rmg.Tests.Page;
 public sealed class SettingsLinkTest(Site site)
 {
     // settings with every field set apart from its neighbours, as the server writes them now and wrote them before the
-    // solo part was named and its tempo a step (Rmg.Tests' SongSettingsTest.MixedText and MixedTextTwo)
-    private const string MixedText = "4_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8ph2";
+    // solo part was named, its tempo a step and its drum pieces given (Rmg.Tests' SongSettingsTest.MixedText and MixedTextTwo)
+    private const string MixedText = "5_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8phE9991";
     private const string MixedTextTwo = "2_07ELSZgnu3B2o_0-9zIyRxawjvsu_309IRajs002I0a2s183Q1i3-hQPh8f8hA";
 
     private static JsonElement Part(SongRequest request, string part) => request.Body.GetProperty("parts").GetProperty(part);
@@ -26,6 +26,9 @@ public sealed class SettingsLinkTest(Site site)
         await Assert.That(asked.Facet("fills")).IsEqualTo(14);
         await Assert.That(Part(asked, "chords").GetProperty("instrument").GetInt32()).IsEqualTo(18);
         await Assert.That(asked.Body.GetProperty("tempo").GetInt32()).IsEqualTo(3);
+        // every third drum piece, from the first, in the server's order, which the page keeps the same
+        await Assert.That(asked.Body.GetProperty("drumPieces").EnumerateArray().Select(x => x.GetString())).IsEquivalentTo(
+            ["kick", "clap", "tambourine", "tom", "bongo", "agogo", "woodBlock", "cuica"]);
         // the counter-melody left out of the file, which the page no longer does, every part in it
         await Assert.That(Part(asked, "counterMelody").TryGetProperty("isOn", out _)).IsFalse();
         // and the solo part's, given in on its instrument
@@ -45,9 +48,10 @@ public sealed class SettingsLinkTest(Site site)
         await Assert.That(Part(asked, "chords").GetProperty("instrument").GetInt32()).IsEqualTo(18);
         await Assert.That(Part(asked, "solo").TryGetProperty("plays", out _)).IsFalse();
         await Assert.That(asked.Body.TryGetProperty("tempo", out var tempo) && tempo.ValueKind != JsonValueKind.Null).IsFalse();
+        await Assert.That(asked.Body.TryGetProperty("drumPieces", out var pieces) && pieces.ValueKind != JsonValueKind.Null).IsFalse();
         // the address now in the format the page writes
         var settings = new Uri(page.Page.Url).Query.Split('&').Single(x => x.TrimStart('?').StartsWith("settings=")).Split('=')[1];
-        await Assert.That(settings[0]).IsEqualTo('4');
+        await Assert.That(settings[0]).IsEqualTo('5');
         await Assert.That(settings.Length).IsEqualTo(MixedText.Length);
         await Assert.That(page.Errors).IsEmpty();
     }

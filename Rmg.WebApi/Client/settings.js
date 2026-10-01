@@ -1,11 +1,14 @@
 /**
  *     What a song is heard with, written short enough for a link: its unconventionality and facets, its tempo, key and
- *     meter, its parts and their mix, its drum setup and drum groups, and its volume, each value given, or as the song
+ *     meter, its parts and their mix, its drum groups and drum pieces, and its volume, each value given, or as the song
  *     drew it. The server reads the same format (SongSettings), which a link and every event about a song carry: a
  *     format's character, then a character for each value from 0 to 63 at a fixed place, then the instruments' two
  *     characters each, then the switches, six to a character. Seeds are written in the same 64 digits.
  */
 
+const FORMAT_FIVE = "5";
+
+/** The format before, which gave no drum pieces, read with the song's own. */
 const FORMAT_FOUR = "4";
 
 /** The format before, which gave a tempo by its place among those a song draws, read with its tempo as the song draws it. */
@@ -36,8 +39,15 @@ export const FORMAT_PARTS = ["melody", "chords", "bass", "pad", "counterMelody",
 /** The parts the songs play. */
 export const PARTS = FORMAT_PARTS;
 
-export const DRUM_SETUPS = ["kit", "kitAndPercussion", "percussion"];
+// the drum setups a link of a format before may give, which the drum pieces make now
+const DRUM_SETUPS = ["kit", "kitAndPercussion", "percussion"];
 export const DRUM_GROUPS = ["kick", "snare", "timekeepers", "toms", "accents", "percussion", "calls"];
+
+/** The drum pieces, by the names the server takes, in its order (DrumPieces.All), which the format keeps a switch for each of. */
+export const DRUM_PIECES = [
+    "kick", "acousticSnare", "electricSnare", "clap", "hiHat", "ride", "tambourine", "cabasa", "maracas", "tom", "cymbal", "vibraslap",
+    "bongo", "conga", "timbale", "agogo", "cowbell", "claves", "woodBlock", "guiro", "triangle", "cuica", "whistle",
+];
 
 /** Whether a part plays: as the song draws it, given in, or given out. */
 export const PLAYS = ["random", "on", "off"];
@@ -45,8 +55,8 @@ export const PLAYS = ["random", "on", "off"];
 /** The values a song may be given that change its notes: the unconventionality, the facets, the tempo, the key and the meter. */
 const GIVEN = ["unconventionality", ...FACETS, "tempo", "key", "meter"];
 
-const lengthOf = (parts) => GIVEN.length + 1 + 2 * parts + 1 + DRUM_GROUPS.length + 2 * parts
-    + Math.ceil((GIVEN.length + 4 * parts + DRUM_GROUPS.length) / 6);
+const lengthOf = (parts, hasPieces) => GIVEN.length + 1 + 2 * parts + 1 + DRUM_GROUPS.length + 2 * parts
+    + Math.ceil((GIVEN.length + 4 * parts + DRUM_GROUPS.length + (hasPieces ? 1 + DRUM_PIECES.length : 0)) / 6);
 const SEED_LENGTH = 11;
 
 function encode(number, length) {
@@ -97,7 +107,8 @@ export function formatSettings(settings) {
     for (const name of GIVEN) values.push(givenSetting(settings, name).value);
     values.push(settings.volume);
     for (const name of FORMAT_PARTS) values.push(settings.parts[name].volume, settings.parts[name].pan.value);
-    values.push(settings.drumSetup === null ? 0 : DRUM_SETUPS.indexOf(settings.drumSetup) + 1);
+    // the drum setup, which the drum pieces make now
+    values.push(0);
     for (const group of DRUM_GROUPS) values.push(settings.drumGroups[group].volume);
     for (const name of FORMAT_PARTS) {
         const instrument = settings.parts[name].instrument;
@@ -113,17 +124,23 @@ export function formatSettings(settings) {
         switches.push((plays & 2) !== 0, (plays & 1) !== 0, true, part.pan.isGiven);
     }
     for (const group of DRUM_GROUPS) switches.push(true);
+    switches.push(settings.drumPieces.isGiven, ...DRUM_PIECES.map((piece) => settings.drumPieces.value.includes(piece)));
     values.push(...packSwitches(switches));
 
     if (values.some((x) => !Number.isInteger(x) || x < 0 || x > 63)) throw new RangeError("A value does not fit in a character.");
-    return FORMAT_FOUR + values.map((x) => DIGITS[x]).join("");
+    return FORMAT_FIVE + values.map((x) => DIGITS[x]).join("");
 }
 
-/** Reads settings, or null for anything that is not settings of the format; the formats before too, their tempo and the solo part the oldest does not name as the song draws them. */
+/**
+ *     Reads settings, or null for anything that is not settings of the format; the formats before too, their drum pieces,
+ *     their tempo and the solo part the oldest does not name as the song draws them, and a drum setup given as the song's,
+ *     as the drum pieces make it now.
+ */
 export function parseSettings(text) {
     if (typeof text !== "string") return null;
-    const count = { [FORMAT_FOUR]: FORMAT_PARTS.length, [FORMAT_THREE]: FORMAT_PARTS.length, [FORMAT_TWO]: PARTS_OF_FORMAT_TWO }[text[0]];
-    if (count === undefined || text.length !== 1 + lengthOf(count)) return null;
+    const count = { [FORMAT_FIVE]: FORMAT_PARTS.length, [FORMAT_FOUR]: FORMAT_PARTS.length, [FORMAT_THREE]: FORMAT_PARTS.length, [FORMAT_TWO]: PARTS_OF_FORMAT_TWO }[text[0]];
+    const hasPieces = text[0] === FORMAT_FIVE;
+    if (count === undefined || text.length !== 1 + lengthOf(count, hasPieces)) return null;
     const named = FORMAT_PARTS.slice(0, count);
     const values = [...text.slice(1)].map((x) => DIGITS.indexOf(x));
     if (values.some((x) => x < 0)) return null;
@@ -156,26 +173,34 @@ export function parseSettings(text) {
     // a part the format did not name as the song draws it, at its fullest, in the file
     for (const name of FORMAT_PARTS.slice(count))
         settings.parts[name] = { plays: "random", instrument: { isGiven: false, value: 0 }, volume: LAST_STEP, pan: { isGiven: false, value: MIDDLE_PAN } };
-    for (const [i, group] of DRUM_GROUPS.entries()) settings.drumGroups[group] = { volume: groupVolumes[i] };
-    if (setup > DRUM_SETUPS.length || settings.key.value > 11) return null;
-    settings.drumSetup = setup === 0 ? null : DRUM_SETUPS[setup - 1];
-    if (text[0] !== FORMAT_FOUR) settings.tempo = { isGiven: false, value: MIDDLE_TEMPO };
+    for (const [i, group] of DRUM_GROUPS.entries()) {
+        // whether its drums were in the file, which every group's now are
+        s++;
+        settings.drumGroups[group] = { volume: groupVolumes[i] };
+    }
+    const piecesGiven = hasPieces && switches[s++];
+    const pieces = DRUM_PIECES.filter(() => hasPieces && switches[s++]);
+    settings.drumPieces = { isGiven: piecesGiven, value: piecesGiven ? pieces : [] };
+    if (setup > DRUM_SETUPS.length || settings.key.value > 11 || (piecesGiven && pieces.length === 0)) return null;
+    if (text[0] === FORMAT_THREE || text[0] === FORMAT_TWO) settings.tempo = { isGiven: false, value: MIDDLE_TEMPO };
     settings.volume = volume;
     return settings;
 }
 
 /**
  *     What of the settings names the song, as its seed does, whatever changes its notes: the switches of which values
- *     are given, six to a character, the values of those given alone, every part's plays, and the drum setup, with the
- *     zeros at its end left off; "" where nothing is given. The server works it out the same way (SongSettings.Identity).
+ *     are given, six to a character, the values of those given alone, every part's plays, the drum setup, none now, and
+ *     the drum pieces given, six to a character behind a 1, with the zeros at its end left off; "" where nothing is given.
+ *     The server works it out the same way (SongSettings.Identity).
  */
 export function identityOf(settings) {
     const given = GIVEN.map((name) => givenSetting(settings, name));
     const values = packSwitches(given.map((x) => x.isGiven));
     values.push(...given.filter((x) => x.isGiven).map((x) => x.value));
     values.push(...FORMAT_PARTS.slice(0, PARTS_OF_FORMAT_TWO).map((name) => PLAYS.indexOf(settings.parts[name].plays)));
-    values.push(settings.drumSetup === null ? 0 : DRUM_SETUPS.indexOf(settings.drumSetup) + 1);
+    values.push(0);
     // a part the format before did not name after the drum setup, so that a song naming it as the song draws it is named as it was
     values.push(...FORMAT_PARTS.slice(PARTS_OF_FORMAT_TWO).map((name) => PLAYS.indexOf(settings.parts[name].plays)));
+    if (settings.drumPieces.isGiven) values.push(1, ...packSwitches(DRUM_PIECES.map((piece) => settings.drumPieces.value.includes(piece))));
     return values.map((x) => DIGITS[x]).join("").replace(/0+$/, "");
 }

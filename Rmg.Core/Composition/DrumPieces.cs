@@ -2,8 +2,11 @@ using System.Collections.Immutable;
 
 namespace Rmg.Core.Composition;
 
-/// <summary>A drum a song may play, as a request names it: its name, its group's, and the General MIDI notes it sounds.</summary>
-public sealed record DrumPiece(string Name, string Group, ImmutableArray<int> Notes);
+/// <summary>
+///     A drum a song may play, as a request names it: its name, as it is shown, its group's, and the General MIDI notes it
+///     sounds.
+/// </summary>
+public sealed record DrumPiece(string Name, string Label, string Group, ImmutableArray<int> Notes);
 
 /// <summary>
 ///     The drums a song may play, every one of every group, by the names a request gives them in, which a song may be given
@@ -13,7 +16,7 @@ public static class DrumPieces
 {
     public static ImmutableArray<DrumPiece> All { get; } =
     [
-        ..DrumGroups.All.SelectMany(group => group.Drums.Select(drum => new DrumPiece(NameOf(drum), group.Name, [..drum.Sounds.Select(x => x.Code).Distinct()])))
+        ..DrumGroups.All.SelectMany(group => group.Drums.Select(drum => new DrumPiece(NameOf(drum), drum.Name, group.Name, [..drum.Sounds.Select(x => x.Code).Distinct()])))
     ];
 
     private static readonly ImmutableDictionary<string, PercussionInstrumentDefinition> ByName =
