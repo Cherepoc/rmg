@@ -15,11 +15,12 @@ measured before and after by a report test, by the measure its entry names.
 twin riff, the polymeter, the line scales, the new chords and scales, the solos, their chords and their loudness, each
 tuned by what listening says (see *Listening*), and the ratings by conventionality once enough are in, with what was
 built since 0.6 (October 2026): parts entering late, the solos placed by their role, their motifs and the solo part's
-answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare. Then, in
-this order, planned and reviewed in October 2026, each measured, the loop free to split or merge them:
-
-19. a tag, half a pattern before a section, on the two-bar grid (see *Form*);
-20. scales of other sizes, or stopped where the line scales cover the need (see *Scales*).
+answers, the riff's chords, the melody's walks, the prepared key changes and the polymeter's unison and snare, and the
+second round: an appearance's loudness by its energy, the drums' cues into a bigger section, the counter-melody's walks,
+the melody's double stops, the last chorus twice, a switch within the family, a drum solo's climax, the polymeter's
+chords, running on and growing, the pivot, the pedal and the sequence, a metric modulation, twin leads, and an intro and
+an outro of their own. The planned items are built or put off with their reasons: two-bar patterns, the tag and scales
+of other sizes, as engine changes their uses do not yet ask for.
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -569,10 +570,6 @@ Every scale has seven notes, and the progressions' rules are in its steps (`Prog
   harmonic major beside the modes and harmonic minor, as likely as any other of the wild end's there and rare between.
 - **A line scale by the chord** (P3): at the wild end, a line changing its scale from chord to chord, as a player does
   over changes, rather than one scale on every chord's root through a section.
-- **Scales of other sizes** (P3): whole scales of more or fewer than seven notes, where the progressions' rules would
-  need their steps as fractions of the octave. Then jitter on in-between heights: heights between two qualities, such
-  as the third, move a little from chord to chord, so that a scale of more than seven notes picks sometimes one
-  quality and sometimes the other.
 
 ## Styles
 
@@ -645,6 +642,10 @@ the rest as they were.
 
 Ideas with a reason, not planned: none has shown a need. Taken up only when listening or another item asks for one.
 
+- **Scales of other sizes:** whole scales of more or fewer than seven notes, where the progressions' rules would need
+  their steps as fractions of the octave, then jitter on in-between heights. Parked in October 2026: the line scales
+  give the melodies and riffs pentatonic, whole-tone, octatonic, chromatic and blues notes already, and harmony in such
+  scales is a narrow sound for the largest change the engine could take.
 - **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do: readable, but
   nothing needs them read.
 - **The drummer as one player:** the fills' `Drummer` and the drum solo's `Soloist` one record, a refactor with no sound
