@@ -207,7 +207,7 @@ public static class SongGenerator
             cancellation.ThrowIfCancellationRequested();
             var id = played[index];
             // a later appearance played as a solo now and then, from a sequence of its own, by the section's facets
-            var solo = Solos.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Solos), index)), index, generateSection(id).Facets, SongParts.All.Except(absent).ToArray());
+            var solo = Solos.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Solos), index)), index, structure.Roles[id], generateSection(id).Facets, SongParts.All.Except(absent).ToArray());
             var energyStep = SectionEnergy.AppearanceStep(Place(index), averagePlaces[id]);
             energies.Add(generateSection(id).Energy + energyStep);
             var section = generateSection(id).Appear(

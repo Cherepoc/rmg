@@ -40,6 +40,23 @@ internal static class Solos
     /// <summary>The chance a later appearance is a solo, by the form facet.</summary>
     public static ByConvention Chance { get; } = new(0, 0.06, 0.5);
 
+    /// <summary>
+    ///     How a section's role leans it to a solo: a bridge the most, played as a solo in its place, a verse's changes
+    ///     after it, a chorus less, which is sung, and a pre-chorus the least, too short to solo over; a section with no
+    ///     role not at all.
+    /// </summary>
+    public static ImmutableDictionary<SectionRole, double> RoleLeans { get; } = new Dictionary<SectionRole, double>
+    {
+        [SectionRole.Free] = 0,
+        [SectionRole.Verse] = 0.5,
+        [SectionRole.PreChorus] = -1,
+        [SectionRole.Chorus] = -0.5,
+        [SectionRole.Bridge] = 1
+    }.ToImmutableDictionary();
+
+    /// <summary>The odds a role leaning to a solo has, as the odds of 1.</summary>
+    public const double RoleOdds = 3;
+
     /// <summary>How many parts solo at once.</summary>
     public static ImmutableArray<(int Count, ByConvention Weight)> Counts { get; } =
     [
@@ -82,10 +99,11 @@ internal static class Solos
 
     /// <summary>An appearance's solo, drawn whatever it turns out to be, so that the draws stay as they are; none for no solo.</summary>
     /// <param name="index">The appearance's place among the song's sections; the first is never a solo.</param>
+    /// <param name="role">The section's role in the song's form, which leans it to a solo.</param>
     /// <param name="parts">The parts the song has.</param>
-    public static SoloPlan? Draw(IGenerationContext context, int index, Unconventionality facets, IReadOnlyCollection<TrackRole> parts)
+    public static SoloPlan? Draw(IGenerationContext context, int index, SectionRole role, Unconventionality facets, IReadOnlyCollection<TrackRole> parts)
     {
-        var isSolo = context.TestProbability(Chance.At(facets[Facet.Form]));
+        var isSolo = context.TestProbability(Tilt.Of(RoleOdds, RoleLeans[role]).Chance(Chance.At(facets[Facet.Form]), 1));
         var melody = facets[Facet.Melody];
         var count = context.Pick(ByConvention.Weigh(Counts, melody));
         var mode = context.Pick(ByConvention.Weigh(Modes, melody));

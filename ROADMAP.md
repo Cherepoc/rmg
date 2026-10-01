@@ -16,16 +16,15 @@ twin riff, the polymeter, the line scales, the new chords and scales, the solos,
 tuned by what listening says (see *Listening*), and the ratings by conventionality once enough are in. Then, in this
 order, each small and each measured:
 
-1. which appearance solos, by its section's role (see *Instruments*, *Solos*);
-2. occasional chords, a riff's power chords where a section lands first (see *Instruments*);
-3. the solo part answering the melody, in its small version: in some sections in the counter-melody's place in the
+1. occasional chords, a riff's power chords where a section lands first (see *Instruments*);
+2. the solo part answering the melody, in its small version: in some sections in the counter-melody's place in the
    melody's gaps, sparse and under the melody, the page given the part (see *Instruments*, *Solos*);
-4. the melody running into a section, as the bass's run-in does (see *Fills*);
-5. prepared key changes, a chain of chords leading into the new key, a dominant at the plain end and the middle,
+3. the melody running into a section, as the bass's run-in does (see *Fills*);
+4. prepared key changes, a chain of chords leading into the new key, a dominant at the plain end and the middle,
    chromatic and third-related ones wilder (see *Appearances*);
-6. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
+5. a solo's motifs, in their smallest version: a phrase opening on the one before's first cell moved by a step (see
    *Solos*);
-7. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
+6. a polymeter's ostinato in unison, the bass with the riff the oftener, then the snare on its accents (see *Meter*).
 
 Alongside, continuously and never as a gate: **listening** through the checklist (see *Listening*).
 
@@ -482,7 +481,9 @@ and slides, is `Expression`'s (see *Listening*).
   basses), a switch to the role's instruments of the part's family where it has any, perhaps the handovers a switch of
   its own, by the sound facet, from the part's family to any of the role's.
 - **Solos** (built, `Solos`, `SoloLines`, `Soloist`): a later appearance of a section is a solo by the form facet,
-  never in a plain song, 0.06 at the middle and 0.5 at the wild end. A drum solo plays alone, as a pitched solo is
+  never in a plain song, 0.06 at the middle and 0.5 at the wild end, leaned by the section's role (`Solos.RoleLeans`,
+  odds of 3): over 1024 songs a bridge's later appearances solo 19.6% of the time where 8.2%, a verse's 11.1% where
+  7.6%, a chorus's 4.8% where 8.1%, a pre-chorus's 3.3% where 7.9% (`SoloTest.RoleReport`). A drum solo plays alone, as a pitched solo is
   made (`DrumSolos`), by the drummer's solo vocabulary by the fills facet, the kit its scale: snare, toms from high to
   low, kick; runs and licks of its cells round the kit, a crash with the kick held, pauses, the groove quoted, its last
   bar left to the fill into the next section (`DrumSoloTest`).
@@ -506,8 +507,7 @@ and slides, is `Expression`'s (see *Listening*).
   soloist's choice instead; **a drum solo's stacked hits,** the kick under its accents, by the same voices the
   drummer's vocabulary leaves at one; **motifs,** a phrase answering the one before with its opening cell moved up or down, as call and
   response, a phrase's motif carried on to the next as state; **the solo part answering the
-  melody** outside its solos, in the melody's gaps, as a guitarist fills between a singer's phrases; **the role,**
-  which appearance solos by the section's role, a bridge or a last chorus, where now any later appearance may; **the
+  melody** outside its solos, in the melody's gaps, as a guitarist fills between a singer's phrases; **the
   page**, the solo part in the settings and the mixer, a new part of the settings' format, where it plays as the file
   mixes it; **the drummer as one player,** the fills' `Drummer` and the drum solo's `Soloist` one record, its fill habits
   and its solo habits together; **a crash on a drum solo's intense accents,** should its runs want more weight.

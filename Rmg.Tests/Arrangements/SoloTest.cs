@@ -18,11 +18,24 @@ public sealed class SoloTest
         var plain = Unconventionality.Generate(0, _ => context);
         var wild = Unconventionality.Generate(1, _ => context);
 
-        await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.Draw(context, 1, plain, Band) is null)).IsTrue();
-        var solos = Enumerable.Range(0, 4000).Count(_ => Solos.Draw(context, 1, wild, Band) is not null) / 4000.0;
+        await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.Draw(context, 1, SectionRole.Free, plain, Band) is null)).IsTrue();
+        var solos = Enumerable.Range(0, 4000).Count(_ => Solos.Draw(context, 1, SectionRole.Free, wild, Band) is not null) / 4000.0;
         await Assert.That(solos).IsEqualTo(0.5).Within(0.03);
         // and never the song's first section
-        await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.Draw(context, 0, wild, Band) is null)).IsTrue();
+        await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.Draw(context, 0, SectionRole.Free, wild, Band) is null)).IsTrue();
+    }
+
+    [Test]
+    public async Task ABridge_SolosTheOftenest_AndAPreChorus_TheLeast()
+    {
+        var context = new GenerationContext(2);
+        var middling = Unconventionality.Generate(0.5, _ => context);
+        double Rate(SectionRole role) => Enumerable.Range(0, 8000).Count(_ => Solos.Draw(context, 1, role, middling, Band) is not null) / 8000.0;
+
+        var (bridge, verse, chorus, preChorus) = (Rate(SectionRole.Bridge), Rate(SectionRole.Verse), Rate(SectionRole.Chorus), Rate(SectionRole.PreChorus));
+        await Assert.That(bridge).IsGreaterThan(verse);
+        await Assert.That(verse).IsGreaterThan(chorus);
+        await Assert.That(chorus).IsGreaterThan(preChorus);
     }
 
     [Test]
@@ -562,6 +575,21 @@ public sealed class SoloTest
                               $"a wide one {Share(longNotes.Count(n => n.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0), longNotes.Length)}");
         }
 
+        await Task.CompletedTask;
+    }
+
+    /// <summary>Where the solos fall, by the role of the section they play: the share of the solos, and of the role's later appearances that solo.</summary>
+    [Test]
+    [Explicit]
+    public async Task RoleReport()
+    {
+        var appearances = TestCorpus.Measure(1024, song =>
+        {
+            var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
+            return song.Map.Sections.Select((span, index) => (Role: structure.Roles.GetValueOrDefault(span.SectionId, SectionRole.Free), Index: index, Solo: song.Solos.ContainsKey(index))).Skip(1).ToArray();
+        }).SelectMany(x => x).ToArray();
+        var solos = appearances.Where(x => x.Solo).ToArray();
+        Console.WriteLine($"  {solos.Length} solos: {string.Join(", ", appearances.GroupBy(x => x.Role).OrderBy(x => x.Key).Select(g => $"{g.Key} {g.Count(x => x.Solo) / (double)solos.Length:P0} of them, {g.Count(x => x.Solo) / (double)g.Count():P1} of its appearances"))}");
         await Task.CompletedTask;
     }
 
