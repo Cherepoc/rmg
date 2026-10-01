@@ -222,6 +222,10 @@ Each item with its plan, and what it waits for.
 
 - **The page's wait for a remake** (P3): a song is asked for again 400 ms after the settings last changed; a remake let
   go of frees its core on the server, so the wait could be 200 ms. To shorten if the wait is noticed.
+- **The sections on the seek bar** (P3): the report gives where each section starts, in seconds, with its role and any
+  solo, and the song's length; the page marks the starts on the seek bar, named on hover, and shows the length before
+  Play, where it now shows 0:00. Put off from the UI round of October 2026.
+- **The ratings in the history** (P4): the list of songs so far does not show which were liked or disliked.
 - **A mix written by the page** (P4): a change of the mix asks the server for the file again only for the download;
   writing the mix into the file in the page would leave the server out of it, at the cost of MIDI writing in
   JavaScript.
