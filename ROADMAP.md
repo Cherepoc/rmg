@@ -94,8 +94,9 @@ report test picks the corpus seeds to hear for each from the trace; the seeds na
   steps everywhere tire, and are slides heard as slides?
 - **The solos** (`SoloTest`'s reports): do the runs sound like a player's or like a scale exercise, a cell of five
   or seven heard as a grouping or as stumbling? Is the intensity's arc heard, its jumps a soloist's or random? A pause
-  is 15 to 19% of the segments: too many breaths? Wide vibratos are 2% of the solos' notes of an 8th or longer, as most
-  of a solo's long notes are slides or bends: too few? Since no part bends or slides a note shorter than an 8th, slides
+  is 17 to 20% of the segments: too many breaths? A middling solo plays 2.1 notes a beat, two thirds of its runs at
+  16ths or faster, the rest slowed by its stamina: busy enough, or should the stamina be longer? Its notes of an 8th or
+  longer: 59% with a vibrato, 16% bent, 3% a wide vibrato: too few wide ones? Since no part bends or slides a note shorter than an 8th, slides
   are 44% of the corpus's pitch shapes against bends' 56%: too many slides? A soloist chooses to bend and to sing a
   vibrato itself, the band the song's way: 85% of guitar and synth lead solos bend, 54% of the other instruments' that
   can: a straight band under a bending lead heard as meant? The drum solos: do the shapes sound like a drummer's
@@ -429,8 +430,9 @@ and slides, is `Expression`'s (see *Listening*).
   made phrase by phrase (`SoloLines.Plan`): phrases of the soloist's lengths, now and then coming in off the bar at
   the wild end, their peaks building to a climax at 70% of the solo and easing after, each ending on a release, a
   chord's note held from a strong beat with the soloist's vibrato and bent into now and then, often a breath after it;
-  within a phrase gestures of lengths of their own, a run, a lick, a held note, a pause or a quote, picked by its
-  intensity there; on the melody near the plain end, its own over the chords at the wild; runs of the soloist's cells
+  within a phrase gestures of lengths of their own, a run, a lick, a held note, a pause or a quote, weighed by the
+  soloist's facet, runs the heavier from the middle out, and picked by its intensity there, a run leaning to the
+  faster speeds; a soloist's held notes bent at its own rate and sung with a vibrato from half a beat; on the melody near the plain end, its own over the chords at the wild; runs of the soloist's cells
   in its shapes, grouped, accented, going on over the bar lines, as fast as 64ths at the wild end for as long as the
   soloist's stamina, a burst or bars of it; the counter-melody and the pad resting for it (`SoloTest`, `SoloistTest`).
   Left (P3): **motifs,** a phrase answering the one before with its opening cell moved up or down, as call and
