@@ -9,7 +9,8 @@ namespace Rmg.Core.Composition;
 ///     more often it plays, so that a drum the song has, drawn or given, is heard.
 ///     A drum of the kit fits a section of the kit, and a hand or percussion drum any; where no section plays the kit,
 ///     one drawn plays it again, its kit drawn as a kit section's. The drums of the fills and landings, which all but
-///     never groove, are heard where they fill or land.
+///     never groove, are heard where they fill or land, and a drum the form leaves out of every section that has it
+///     lands once after all (<see cref="FillGenerator" />).
 /// </summary>
 internal static class DrumCoverage
 {

@@ -93,20 +93,22 @@ internal sealed class FillGenerator
     }
 
     /// <summary>
-    ///     A drum of the fills and landings the song has that it never sounded, in its grooves, its runs or its landings,
-    ///     such as a vibraslap, which a cymbal outweighs, lands once: with a landing of its role, as a vibraslap with a
-    ///     crash, or with any where none is, into a section it fits, a drum of the kit not into one of percussion only,
-    ///     drawn from a sequence of its own, so that a drum the song has is heard.
+    ///     A drum the song has that it never sounded, in its grooves, its runs or its landings, lands once: a drum of the
+    ///     fills and landings, such as a vibraslap, which a cymbal outweighs, or one of the groove that the song's form left
+    ///     out of every section that had it (<see cref="DrumCoverage" />). It lands on its loudest sound, so that the one
+    ///     note tells, as an open hi-hat or a ride's bell, with a landing of its role, as a vibraslap with a crash, or with
+    ///     any where none is, into a section it fits, a drum of the kit not into one of percussion only, drawn from a
+    ///     sequence of its own, so that a drum the song has is heard.
     /// </summary>
     private void LandTheUnheard(TrackEventStateTimelineMap<StateMap> song, TimelineEdits edits)
     {
-        foreach (var sound in _sounds.Sounds.Values.Select(x => x.DistinctBy(y => y.Track)).SelectMany(x => x))
+        foreach (var sounds in _sounds.Sounds.Values.SelectMany(x => x.GroupBy(y => y.Track)))
         {
-            var drum = DrumGroups.GetDrum(sound.Track);
-            if (DrumGroups.GroupOf(drum).GrooveChance >= 1 || _filled.Contains(sound.Track)
-                || song.TrackTimelineMap.TryGetValue(sound.Track, out var timeline) && timeline.EventTimeline.Any())
+            var drum = DrumGroups.GetDrum(sounds.Key);
+            if (_filled.Contains(sounds.Key) || song.TrackTimelineMap.TryGetValue(sounds.Key, out var timeline) && timeline.EventTimeline.Any())
                 continue;
 
+            var sound = sounds.MaxBy(x => drum.Sounds.First(y => y.Code == x.Code).Loudness)!;
             var fits = _landings.Where(x => !x.IsPercussionOnly || drum.Family.HasFlag(DrumFamily.Percussion)).ToArray();
             var withRole = fits.Where(x => x.Sounds.Any(y => y.Role == sound.Role)).ToArray();
             var landings = withRole.Length > 0 ? withRole : fits;

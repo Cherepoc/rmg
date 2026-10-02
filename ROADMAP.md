@@ -216,11 +216,6 @@ Each item with its plan, and what it waits for.
 
 - **Timing by role** (P3): the backbeat a little late, the hi-hat on top, should swing alone sound stiff; plain
   doubling needs it.
-- **A drum left out after all** (P3): a drum joins a section whose drums play where it first plays, but the form may
-  rest them in its later appearances, or a texture of one part alone, or an intro's entries leave it out; and a drum
-  accenting a lead that plays its strong beats only in fills, such as a clap on a kick, has none to accent; so that
-  about 2.5% of songs with drums still never sound one. Covering it after assembly, where the rests are known, would close it, if the page's pieces showing a
-  drum never heard is missed.
 
 ### Scales and chords
 
