@@ -52,26 +52,21 @@ public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, d
     public const double BaseCentre = 0.25;
 
     /// <summary>
-    ///     How far a generated song's base strays from its centre (<see cref="BaseCentre" />), in log-odds, as far as the
-    ///     widest draw goes: its values gather about the centre and thin out towards the ends, which only a supplied base
-    ///     reaches.
+    ///     How far a generated song's base strays from its centre (<see cref="BaseCentre" />), as the scale of a logistic
+    ///     draw in log-odds: half the songs between about 0.17 and 0.35, and every value possible, ever rarer towards the
+    ///     ends, above 0.75 in about one song in eighty and above 0.9 in about one in seven hundred.
     /// </summary>
-    public const double BaseSpread = 1.2;
+    public const double BaseSpread = 0.5;
 
     /// <summary>
-    ///     How far a facet strays from the base, either way, in log-odds: freely about the middle, and less and less
-    ///     towards an end the nearer the base is to it, and not at all at an end; so that a generated song's chords and
-    ///     groove go together about as closely as 0.75, a facet is near an end in about one song in sixteen, and a song as
-    ///     a whole, its facets' mean, in about one in a hundred.
+    ///     How far a facet strays from the base, as the scale of a logistic draw in log-odds about it: freely about the
+    ///     middle, less and less towards an end the nearer the base is to it, and not at all at an end, every value
+    ///     between possible.
     /// </summary>
-    public const double FacetSpread = 2;
+    public const double FacetSpread = 0.35;
 
-    /// <summary>How far a section moves a facet, either way, in log-odds: about 0.15 about the middle.</summary>
-    public const double SectionShift = 0.6;
-
-    private static readonly Func<IGenerationContext, double> BaseGenerator = Generators.SplineValue(0);
-
-    private static readonly Func<IGenerationContext, double> ShiftGenerator = Generators.SplineValue();
+    /// <summary>How far a section moves a facet, as the scale of a logistic draw in log-odds about it: a little.</summary>
+    public const double SectionShift = 0.1;
 
     /// <summary>
     ///     How much of what a section's energy leans it to follows in a facet: all at 0, a fifth at 1, so that in a wild
@@ -96,22 +91,23 @@ public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, d
     }
 
     /// <summary>
-    ///     A generated song's base, drawn in log-odds about its centre (<see cref="BaseCentre" />, <see cref="BaseSpread" />),
-    ///     in place of a supplied one, which is used as given.
+    ///     A generated song's base, drawn about its centre (<see cref="BaseCentre" />, <see cref="BaseSpread" />), in place
+    ///     of a supplied one, which is used as given.
     /// </summary>
     public static double DrawBase(IGenerationContext context)
     {
-        return Logistic(Math.Log(BaseCentre / (1 - BaseCentre)) + BaseGenerator(context) * BaseSpread);
+        return Around(BaseCentre, BaseSpread, context);
     }
 
     /// <summary>
-    ///     A value around the one given, moved by up to the spread either way in log-odds, so that it moves the less the
-    ///     nearer it is to an end, towards which it thins out, and not at all at one.
+    ///     A value drawn about the one given, its centre, by one law for the base, the facets and the sections: a logistic
+    ///     draw in log-odds of the spread's scale, so that the values gather about the centre, every one between the ends
+    ///     possible and ever rarer towards them, the less spread the nearer the centre is to an end, and none at one.
     /// </summary>
-    private static double Around(double value, double spread, IGenerationContext context)
+    private static double Around(double centre, double spread, IGenerationContext context)
     {
-        var shift = ShiftGenerator(context) * spread;
-        return value is 0 or 1 ? value : Logistic(Math.Log(value / (1 - value)) + shift);
+        var draw = context.GenerateDouble();
+        return centre is 0 or 1 ? centre : Logistic(Math.Log(centre / (1 - centre)) + spread * Math.Log(draw / (1 - draw)));
     }
 
     private static double Logistic(double logOdds) => 1 / (1 + Math.Exp(-logOdds));

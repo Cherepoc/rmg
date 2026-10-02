@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Probabilities;
 
@@ -28,37 +29,39 @@ public sealed class RhythmicUnconventionalityTest
     }
 
     [Test]
-    public async Task GeneratedSongs_GatherAboutTheirCentre_PlainerThanTheMiddle_AndSeldomNearAnEnd()
+    public async Task GeneratedSongs_GatherAboutTheirCentre_PlainerThanTheMiddle_EveryValuePossible_TheWildRarely()
     {
         var context = new GenerationContext(1);
         var values = Enumerable.Range(0, 20_000).Select(_ => Unconventionality.DrawBase(context)).Order().ToArray();
 
-        await Assert.That(values[values.Length / 2]).IsEqualTo(Unconventionality.BaseCentre).Within(0.03);
-        await Assert.That(values[values.Length / 4]).IsLessThan(0.2);
-        await Assert.That(values[values.Length * 3 / 4]).IsGreaterThan(0.3);
-        await Assert.That(values.Count(x => x is < 0.03 or > 0.75) / (double)values.Length).IsLessThan(0.02);
+        await Assert.That(values[values.Length / 2]).IsEqualTo(Unconventionality.BaseCentre).Within(0.01);
+        await Assert.That(values[values.Length / 4]).IsBetween(0.14, 0.2);
+        await Assert.That(values[values.Length * 3 / 4]).IsBetween(0.3, 0.37);
+        // above 0.75 in about one song in eighty, and now and then the wildest
+        await Assert.That(values.Count(x => x > 0.75) / (double)values.Length).IsBetween(0.005, 0.03);
+        await Assert.That(values[^1]).IsGreaterThan(0.9);
     }
 
     [Test]
     public async Task WildSongs_PlayMoreTuplets_ThanPlainOnes()
     {
-        var shares = new List<(double Value, double Tuplets)>();
-        // over enough songs that the quarters compared are not left to chance: over 80, the ratio swings from 1.4 to 1.7
-        for (var seed = 0; seed < 256; seed++)
-        {
-            var value = ((Unconventionality)TestCorpus.Get(seed).Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!)[Facet.Feel];
-            var hits = TestCorpus.Get(seed).Song.TrackEventStateTimelineMap.TrackTimelineMap
-                .Where(x => x.Key >= DrumGroups.FirstTrackNumber)
-                .SelectMany(x => x.Value.EventTimeline.Select(e => e.Position))
-                .ToArray();
-            if (hits.Length > 0)
+        // the same songs at a plainer and a wilder feel, given, so that the comparison does not hang on how the songs drawn
+        // spread
+        double Tuplets(double feel) => TestCorpus.InParallel(Enumerable.Range(0, 128), seed =>
+            {
+                var song = TestCorpus.Get(seed, new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Feel, feel)));
+                var hits = song.Song.TrackEventStateTimelineMap.TrackTimelineMap
+                    .Where(x => x.Key >= DrumGroups.FirstTrackNumber)
+                    .SelectMany(x => x.Value.EventTimeline.Select(e => e.Position))
+                    .ToArray();
                 // a tuplet's note is off every dyadic grid, where a fill's 32nds are on one
-                shares.Add((value, hits.Count(x => Math.Abs(x * 16 - Math.Round(x * 16)) > 1e-6) / (double)hits.Length));
-        }
+                return hits.Length == 0 ? 0 : hits.Count(x => Math.Abs(x * 16 - Math.Round(x * 16)) > 1e-6) / (double)hits.Length;
+            })
+            .Average();
 
-        var ordered = shares.OrderBy(x => x.Value).ToArray();
-        var quarter = ordered.Length / 4;
+        var (plain, wild) = (Tuplets(0.25), Tuplets(0.75));
+        Console.WriteLine($"Tuplets: {plain:P1} at a feel of 0.25, {wild:P1} at 0.75");
         // the fills play the snare's feel, so a tuplet the other drums play leaves them straight
-        await Assert.That(ordered[^quarter..].Average(x => x.Tuplets)).IsGreaterThan(ordered[..quarter].Average(x => x.Tuplets) * 1.5);
+        await Assert.That(wild).IsGreaterThan(plain * 1.5);
     }
 }

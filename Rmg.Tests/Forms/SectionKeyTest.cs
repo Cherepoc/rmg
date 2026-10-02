@@ -14,11 +14,13 @@ public sealed class SectionKeyTest
         var ownKeys = 0;
         foreach (var song in songs)
         {
-            // but for a last section going up, which only the last does, every section starts in its key every time
+            // but for a last section going up, which only the last does, before the outro where there is one, and the outro
+            // after it, every section starts in its key every time
             var keys = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.KeyOffset);
             var home = keys.GetEffectiveValueAt(song.Map.Sections[0].Start);
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
-            var played = song.Map.Sections.Take(structure.SectionIds.Length - 1).ToArray();
+            var outro = structure.Roles[structure.SectionIds[^1]] == SectionRole.Outro ? 1 : 0;
+            var played = song.Map.Sections.Take(structure.SectionIds.Length - 1 - outro).ToArray();
             foreach (var appearances in played.GroupBy(x => x.SectionId))
                 await Assert.That(appearances.Select(x => keys.GetEffectiveValueAt(x.Start)).Distinct().Count()).IsEqualTo(1).Because($"seed {song.Seed}");
 

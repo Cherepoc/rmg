@@ -28,9 +28,10 @@ each from the trace; the seeds named here are ones already found.
 
 ### The song and its sections
 
-- **How plain by default:** drawn songs gather about a base of 0.25 (`Unconventionality.BaseCentre`), and the major and
-  minor scales and one scale through a song weigh more at the middle; 54% of drawn songs are in major or minor
-  throughout, 61% straight, 68% in one key and 11% plain in every convention measured
+- **How plain by default:** drawn songs gather about a base of 0.25 (`Unconventionality.BaseCentre`), every value
+  possible, above 0.75 in about one song in eighty (`BaseSpread`), the facets and sections drawn about it by the same
+  law, and the major and minor scales and one scale through a song weigh more at the middle; 52% of drawn songs are in
+  major or minor throughout, 61% straight, 70% in one key and 9% plain in every convention measured
   (`ConventionalityLevelsReportTest`). Still too adventurous? Then lower the centre, or the ease of the conventions'
   curves from 3 to 2, which makes a value below the middle plainer and one above it wilder, or retune the middles of the
   feel's tuplets and the key changes.
@@ -217,7 +218,7 @@ Each item with its plan, and what it waits for.
   doubling needs it.
 - **A drum of the colour silent in a plain groove** (P2): a drum a section's kit holds but does not lead, such as a
   tambourine joined to it or bound to the snare by a figure of its own, may play no note at all where the section's
-  groove is plain, its patterns empty; with the songs plainer by default, 7% of songs with drums never sound a drum they
+  groove is plain, its patterns empty; with the songs plainer by default, 4% of songs with drums never sound a drum they
   have, mostly a tambourine in the first section. Find why its patterns come out empty at a plain groove, and give a
   drum of the colour a note at least where it is the section's only time it plays.
 - **A drum left out after all** (P3): a drum joins a section whose drums play where it first plays, but the form may

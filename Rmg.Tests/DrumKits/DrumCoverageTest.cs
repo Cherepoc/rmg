@@ -77,7 +77,7 @@ public sealed class DrumCoverageTest
             .Any(x => !song.Song.Notes!.TryGetValue(x, out var notes) || notes.Count == 0));
 
         // a drum the form leaves out of a section's later appearances, as its first one plays it, now and then, and a drum
-        // of the colour a plain section's groove gives no notes (7% of these songs, plainer than the middle; 82% before
+        // of the colour a plain section's groove gives no notes (4% of these songs, plainer than the middle; 82% before
         // every drum was given a section and a landing)
         await Assert.That(silent / (double)songs.Length).IsLessThan(0.08);
     }
