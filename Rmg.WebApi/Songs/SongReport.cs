@@ -8,13 +8,12 @@ using Rmg.Core.Songs;
 namespace Rmg.WebApi.Songs;
 
 /// <summary>
-///     What a song drew or was given, as the page shows it: every amount a step from 0 to 127, the names as the request
+///     What a song drew or was given, as the page shows it: every amount a step from 0 to 63, the names as the request
 ///     takes them, and every part's channel, counted from 1, as its mix plays it.
 /// </summary>
 /// <param name="Unconventionality">How far it strays from convention as a whole.</param>
 /// <param name="Facets">Every facet's, by its name.</param>
 /// <param name="Parts">Every part's, by its role's name.</param>
-/// <param name="DrumSetup">The drums it plays.</param>
 /// <param name="DrumPieces">The drum pieces it plays, by their names (<c>/api/songs/options</c>).</param>
 /// <param name="DrumGroups">The drum groups it plays, by name.</param>
 /// <param name="Tempo">Its tempo, by its step (<see cref="TempoScale" />), the nearest to a tempo it drew.</param>
@@ -24,7 +23,6 @@ public sealed record SongReport(
     Drawn<int> Unconventionality,
     ImmutableSortedDictionary<string, Drawn<int>> Facets,
     ImmutableSortedDictionary<string, PartReport> Parts,
-    Drawn<string> DrumSetup,
     Drawn<ImmutableArray<string>> DrumPieces,
     ImmutableArray<string> DrumGroups,
     Drawn<int> Tempo,
@@ -58,7 +56,6 @@ public sealed record SongReport(
                     GenerateSongRequest.ToPanStep(own[role].Pan)
                 )
             ),
-            new Drawn<string>(Name(draws.DrumSetup), overrides.DrumSetup is not null || overrides.DrumPieces is not null),
             new Drawn<ImmutableArray<string>>(draws.DrumPieces, overrides.DrumPieces is not null),
             [..groups.Select(Name)],
             new Drawn<int>(TempoScale.StepOf(common.GetStateValue(StateKinds.Tempo)), overrides.Tempo is not null),

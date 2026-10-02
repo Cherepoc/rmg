@@ -28,7 +28,6 @@ public sealed class GenerateSongRequestTest
             Facets: new Dictionary<string, int> { ["chords"] = 0 },
             Volume: 32,
             Parts: new Dictionary<string, PartRequest> { ["bass"] = new(Plays: false, Instrument: 73, Volume: 63, Pan: 0), ["counterMelody"] = new(Plays: true, Pan: 63) },
-            DrumSetup: "percussion",
             DrumGroups: new Dictionary<string, DrumGroupRequest> { ["kick"] = new(Volume: 0, IsOn: false) }
         );
 
@@ -36,7 +35,6 @@ public sealed class GenerateSongRequestTest
         await Assert.That(overrides.Base).IsEqualTo(1.0);
         await Assert.That(overrides.Facets![Facet.Chords]).IsEqualTo(0.0);
         await Assert.That(overrides.Parts!.ToArray()).IsEquivalentTo(new[] { KeyValuePair.Create(TrackRole.Bass, false), KeyValuePair.Create(TrackRole.CounterMelody, true) });
-        await Assert.That(overrides.DrumSetup).IsEqualTo(DrumSetup.Percussion);
         await Assert.That(mix.Volume).IsEqualTo(0.5);
         await Assert.That(mix.Parts[TrackRole.Bass]).IsEqualTo(new PartMix(73, 1, -1, true));
         await Assert.That(mix.Parts[TrackRole.CounterMelody].Pan).IsEqualTo(1.0);
@@ -89,7 +87,6 @@ public sealed class GenerateSongRequestTest
     [Arguments("unknownFacet")]
     [Arguments("part")]
     [Arguments("instrument")]
-    [Arguments("setup")]
     [Arguments("group")]
     [Arguments("seed")]
     [Arguments("tempo")]
@@ -106,7 +103,6 @@ public sealed class GenerateSongRequestTest
             "unknownFacet" => new GenerateSongRequest(Facets: new Dictionary<string, int> { ["tempo"] = 1 }),
             "part" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["kazoo"] = new() }),
             "instrument" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["bass"] = new(Instrument: 128) }),
-            "setup" => new GenerateSongRequest(DrumSetup: "orchestra"),
             "noPieces" => new GenerateSongRequest(DrumPieces: []),
             "piece" => new GenerateSongRequest(DrumPieces: ["kick", "gong"]),
             "group" => new GenerateSongRequest(DrumGroups: new Dictionary<string, DrumGroupRequest> { ["gong"] = new() }),

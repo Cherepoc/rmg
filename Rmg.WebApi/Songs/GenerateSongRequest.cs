@@ -21,10 +21,9 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Facets">A facet of the unconventionality given outright, by its name, such as "chords".</param>
 /// <param name="Volume">How loud the whole song plays, 63 as it is made. None is 63.</param>
 /// <param name="Parts">A part given, by its role's name: "melody", "chords", "bass", "pad", "counterMelody" or "drum".</param>
-/// <param name="DrumSetup">The drums the song plays: "kit", "kitAndPercussion" or "percussion".</param>
 /// <param name="DrumPieces">
 ///     The drum pieces the song plays, by their names (<c>/api/songs/options</c>), in place of those it draws, which make
-///     its setup over <paramref name="DrumSetup" />.
+///     its setup.
 /// </param>
 /// <param name="DrumGroups">A drum group's mix, by its name, such as "kick".</param>
 /// <param name="Tempo">The tempo, by its step from 0, 60 beats a minute, through 32, 120, to 63, 240 (<see cref="TempoScale" />).</param>
@@ -36,7 +35,6 @@ public sealed record GenerateSongRequest(
     IReadOnlyDictionary<string, int>? Facets = null,
     int? Volume = null,
     IReadOnlyDictionary<string, PartRequest>? Parts = null,
-    string? DrumSetup = null,
     IReadOnlyDictionary<string, DrumGroupRequest>? DrumGroups = null,
     int? Tempo = null,
     int? Key = null,
@@ -96,14 +94,6 @@ public sealed record GenerateSongRequest(
         if (SongParts.LeaveNone(parts))
             return Fail("Every part is left out, so there is nothing to play.", out error);
 
-        DrumSetup? drumSetup = null;
-        if (DrumSetup is not null)
-        {
-            if (!Enum.TryParse<DrumSetup>(DrumSetup, true, out var setup) || !Enum.IsDefined(setup))
-                return Fail($"{DrumSetup} is not a drum setup. Setups are {string.Join(", ", Enum.GetNames<DrumSetup>())}.", out error);
-            drumSetup = setup;
-        }
-
         if (DrumPieces is { Count: 0 })
             return Fail("No drum pieces are given; leave the drums out instead.", out error);
         if (DrumPieces?.FirstOrDefault(x => !Core.Composition.DrumPieces.IsPiece(x)) is { } unknown)
@@ -131,7 +121,6 @@ public sealed record GenerateSongRequest(
             Base: Unconventionality is { } unconventionality ? StepScale.ToAmount(unconventionality) : null,
             Facets: facets.Count > 0 ? facets.ToImmutable() : null,
             Parts: parts.Count > 0 ? parts.ToImmutable() : null,
-            DrumSetup: drumSetup,
             DrumPieces: DrumPieces is null ? null : [..DrumPieces],
             MeterOption: Meter,
             Tempo: Tempo is { } tempo ? TempoScale.Multiplier(tempo) : null,
