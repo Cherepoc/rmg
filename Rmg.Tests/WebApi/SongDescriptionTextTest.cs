@@ -44,9 +44,9 @@ public sealed class SongDescriptionTextTest
 
             await Assert.That(rows.Length).IsEqualTo(description.Sections.Length);
             foreach (var (row, section) in rows.Zip(description.Sections))
-                await Assert.That(row.StartsWith($"| {section.Place} | {section.Name} | {section.Bars} | {section.Energy} | ")).IsTrue();
+                await Assert.That(row.StartsWith($"| {section.Place} | {section.Name} | {section.Bars} | {section.Energy} | {section.Density} | ")).IsTrue();
             // a progression spelled out once, and pointed back to after
-            var spelled = rows.Select(x => x.Split(" | ")[4]).Where(x => x != "—" && !x.StartsWith("as in ")).ToArray();
+            var spelled = rows.Select(x => x.Split(" | ")[5]).Where(x => x != "—" && !x.StartsWith("as in ")).ToArray();
             await Assert.That(spelled.Distinct().Count()).IsEqualTo(spelled.Length);
         }
     }

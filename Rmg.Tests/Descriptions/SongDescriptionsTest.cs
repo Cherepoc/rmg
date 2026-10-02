@@ -99,6 +99,53 @@ public sealed class SongDescriptionsTest
     }
 
     [Test]
+    public async Task TheBusiestSection_IsBusy_AndTheSparsestSparse()
+    {
+        var checkedSongs = 0;
+        foreach (var song in TestCorpus.Range(32))
+        {
+            var densities = song.Map.Sections.Select(span => song.Song.Notes!.Values.Sum(x => x.Count(n => n.Position >= span.Start && n.Position < span.End)) / span.Duration).ToArray();
+            if (densities.Distinct().Count() < 3)
+                continue;
+
+            checkedSongs++;
+            var description = Describe(song);
+            await Assert.That(description.Sections[Array.IndexOf(densities, densities.Max())].Density).IsEqualTo("busy");
+            await Assert.That(description.Sections[Array.IndexOf(densities, densities.Min())].Density).IsEqualTo("sparse");
+        }
+
+        await Assert.That(checkedSongs).IsGreaterThan(16);
+    }
+
+    [Test]
+    public async Task ABurst_IsWhereAPartRunsFourNotesEvenly_FasterThan16ths_AndTheSongsFastestRunsAtLeastAsFast()
+    {
+        var bursts = 0;
+        foreach (var song in TestCorpus.Range(64))
+        {
+            var description = Describe(song);
+            foreach (var (section, span) in description.Sections.Zip(song.Map.Sections))
+            {
+                // four notes of one part, each the same short gap after the last, the drums' pieces as one part
+                var runs = song.Song.TrackDefinitions.Where(x => song.Song.Notes!.ContainsKey(x.Key)).GroupBy(x => x.Value.Role == TrackRole.RiffTwin ? TrackRole.Riff : x.Value.Role)
+                    .Select(part => part.SelectMany(x => song.Song.Notes![x.Key].Select(n => n.Position)).Where(x => x >= span.Start && x < span.End).Distinct().Order().ToArray())
+                    .Any(on => Enumerable.Range(0, Math.Max(0, on.Length - 3)).Any(i =>
+                        on[i + 1] - on[i] < 0.25 - 1e-6 && Math.Abs(on[i + 2] - on[i + 1] - (on[i + 1] - on[i])) < 1e-6 && Math.Abs(on[i + 3] - on[i + 2] - (on[i + 1] - on[i])) < 1e-6));
+                await Assert.That(section.Burst is not null).IsEqualTo(runs);
+                if (section.Burst is not { } burst)
+                    continue;
+
+                bursts++;
+                await Assert.That(burst.Section).IsEqualTo(section.Place);
+                await Assert.That(burst.Parts.All(x => section.Parts.Contains(x))).IsTrue();
+                await Assert.That(burst.NotesPerSecond).IsLessThanOrEqualTo(description.Fastest!.NotesPerSecond);
+            }
+        }
+
+        await Assert.That(bursts).IsGreaterThan(4);
+    }
+
+    [Test]
     [Explicit]
     public async Task Report()
     {

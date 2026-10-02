@@ -22,6 +22,7 @@ namespace Rmg.Core.Songs;
 /// <param name="Ending">How it ends.</param>
 /// <param name="Sections">Its sections, in the order they play.</param>
 /// <param name="Melody">Its melody, or none for a song without one.</param>
+/// <param name="Fastest">Its fastest run of notes, 16ths or faster, or none where nothing runs that fast.</param>
 public sealed record SongDescription(
     double Seconds,
     int Bars,
@@ -37,7 +38,8 @@ public sealed record SongDescription(
     string Intro,
     string Ending,
     ImmutableArray<SectionDescription> Sections,
-    MelodyDescription? Melody
+    MelodyDescription? Melody,
+    RunDescription? Fastest
 );
 
 /// <param name="Section">The place among the sections, from 1, of the first the new key plays in.</param>
@@ -69,6 +71,7 @@ public sealed record DrumsDescription(string Setup, string Kit, ImmutableArray<s
 /// <param name="Name">What it is, such as "Chorus", or "Section B" in a form of the song's own.</param>
 /// <param name="Bars">How many bars it plays.</param>
 /// <param name="Energy">How loud and busy it is against the song's other sections: quiet, medium or loud.</param>
+/// <param name="Density">How many notes its parts play against the song's other sections: sparse, medium or busy.</param>
 /// <param name="Key">Its key, its tonic and scale, where it differs from the song's.</param>
 /// <param name="TimeSignature">Its meter, where it differs from the song's.</param>
 /// <param name="Bpm">Its tempo, where it differs from the song's.</param>
@@ -78,11 +81,13 @@ public sealed record DrumsDescription(string Setup, string Kit, ImmutableArray<s
 /// <param name="Parts">The parts that play in it.</param>
 /// <param name="Soloists">The parts that solo in it, none where none does.</param>
 /// <param name="Chords">Its chords, in Roman numerals and by name (<see cref="ChordDescription" />), none where it has none.</param>
+/// <param name="Burst">Its fastest run of notes where it runs faster than 16ths, which the songs play only now and then.</param>
 public sealed record SectionDescription(
     int Place,
     string Name,
     int Bars,
     string Energy,
+    string Density,
     string? Key,
     string? TimeSignature,
     double? Bpm,
@@ -91,7 +96,8 @@ public sealed record SectionDescription(
     string Texture,
     ImmutableArray<string> Parts,
     ImmutableArray<string> Soloists,
-    ImmutableArray<ChordDescription> Chords
+    ImmutableArray<ChordDescription> Chords,
+    RunDescription? Burst
 );
 
 /// <param name="Numeral">The chord in Roman numerals in the section's key, such as "ii7" or "♭VII".</param>
@@ -103,3 +109,10 @@ public sealed record ChordDescription(string Numeral, string? Name);
 /// <param name="NotesPerBar">How many notes it plays a bar where it plays.</param>
 /// <param name="Improvisation">How freely it varies its tune where a section comes back, in a word: little, some or much.</param>
 public sealed record MelodyDescription(string Lowest, string Highest, double NotesPerBar, string Improvisation);
+
+/// <summary>A run of at least four notes a part plays evenly spaced, 16ths or faster.</summary>
+/// <param name="Parts">The parts that play it, as fast as each other.</param>
+/// <param name="Value">Its notes' value, such as "32nds" or "16th triplets".</param>
+/// <param name="NotesPerSecond">How many notes a second it plays at its tempo, which is how fast it sounds.</param>
+/// <param name="Section">The place among the sections, from 1, of the first it plays in.</param>
+public sealed record RunDescription(ImmutableArray<string> Parts, string Value, double NotesPerSecond, int Section);

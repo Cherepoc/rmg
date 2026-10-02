@@ -24,12 +24,14 @@ public static class SongDescriptionText
 
         text.AppendLine();
         text.AppendLine("## Sound");
-        text.AppendLine($"- Tempo: {Number(song.Bpm)} bpm{Changes(song.Sections.Where(x => x.Bpm is not null).Select(x => $"{Number(x.Bpm!.Value)} bpm in {x.Name.ToLowerInvariant()} ({x.Place})"))}");
+        text.AppendLine($"- Tempo: {Number(song.Bpm)} bpm{Changes(song.Sections.Where(x => x.Bpm is not null).Select(x => $"{Number(x.Bpm!.Value)} bpm in {x.Name} ({x.Place})"))}");
         text.AppendLine($"- Meter: {song.TimeSignature}; feel: {song.Feel}; swing: {song.Swing}");
         text.AppendLine($"- Key: {song.Key}{Changes(song.KeyChanges.Select(x => $"{(x.Semitones > 0 ? "up" : "down")} {Math.Abs(x.Semitones)} semitones to {x.Key} at section {x.Section}"))}");
         text.AppendLine($"- Parts: {string.Join("; ", song.Parts.Select(x => $"{x.Role} on {x.Instrument}{(x.Others.IsEmpty ? "" : $", also {string.Join(", ", x.Others)}")}"))}");
         if (song.Drums is { } drums)
             text.AppendLine($"- Drums: {drums.Setup}, {drums.Kit} kit: {string.Join(", ", drums.Pieces)}");
+        if (song.Fastest is { } fastest)
+            text.AppendLine($"- Fastest: {Run(fastest)}, first in {song.Sections[fastest.Section - 1].Name} ({fastest.Section})");
         text.AppendLine($"- How experimental, 0 the plainest and 1 the wildest: {song.Unconventionality.Word} ({Number(song.Unconventionality.Value)}); " +
                         string.Join(", ", song.Unconventionality.Facets.Select(x => $"{x.Facet.ToLowerInvariant()} {x.Word} ({Number(x.Value)})")));
 
@@ -37,8 +39,8 @@ public static class SongDescriptionText
         text.AppendLine($"## Form: {song.Sections.Length} sections, {song.Bars} bars");
         text.AppendLine($"Starts with {song.Intro}; ends with {song.Ending}.");
         text.AppendLine();
-        text.AppendLine("| # | Section | Bars | Energy | Chords | Parts | Notes |");
-        text.AppendLine("|---|---|---|---|---|---|---|");
+        text.AppendLine("| # | Section | Bars | Energy | Density | Chords | Parts | Notes |");
+        text.AppendLine("|---|---|---|---|---|---|---|---|");
         var heard = new Dictionary<string, int>();
         foreach (var section in song.Sections)
         {
@@ -53,9 +55,10 @@ public static class SongDescriptionText
                 section.Feel is null ? null : $"in {section.Feel}",
                 section.Drums is null ? null : $"drums {section.Drums}",
                 section.Texture == "steady" ? null : section.Texture,
-                section.Soloists.IsEmpty ? null : $"{string.Join(" and ", section.Soloists)} soloing"
+                section.Soloists.IsEmpty ? null : $"{string.Join(" and ", section.Soloists)} soloing",
+                section.Burst is null ? null : $"a burst: {Run(section.Burst)}"
             }.OfType<string>();
-            text.AppendLine($"| {section.Place} | {section.Name} | {section.Bars} | {section.Energy} | {shown} | {string.Join(", ", section.Parts)} | {string.Join("; ", notes)} |");
+            text.AppendLine($"| {section.Place} | {section.Name} | {section.Bars} | {section.Energy} | {section.Density} | {shown} | {string.Join(", ", section.Parts)} | {string.Join("; ", notes)} |");
         }
 
         if (song.Melody is { } melody)
@@ -76,6 +79,8 @@ public static class SongDescriptionText
         var numerals = string.Join(" ", section.Chords.Select(x => x.Numeral));
         return section.Chords.All(x => x.Name is null) ? numerals : $"{numerals} ({string.Join(" ", section.Chords.Select(x => x.Name ?? "–"))})";
     }
+
+    private static string Run(RunDescription run) => $"{string.Join(" and ", run.Parts)} in {run.Value}, {Number(run.NotesPerSecond)} notes a second";
 
     private static string Changes(IEnumerable<string> changes)
     {

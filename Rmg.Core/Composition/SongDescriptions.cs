@@ -45,7 +45,7 @@ public static class SongDescriptions
 
         // the sections' energies against the song's: its quietest third quiet and its loudest loud
         var energies = trace.Where(x => x.Point == TracePoints.SectionEnergy).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => ((SectionEnergyTrace)x.First().Value!).Energy);
-        var levels = Levels(energies);
+        var levels = Thirds(energies, "quiet", "medium", "loud");
         var structure = Value<SongStructure>(TracePoints.SongForm);
         var letters = structure.SectionIds.Distinct().Select((id, i) => (id, i)).ToDictionary(x => x.id, x => (char)('A' + x.i));
         var rests = trace.Where(x => x.Point == TracePoints.Arrangement).Select(x => (ImmutableHashSet<TrackRole>)x.Value!).ToArray();
@@ -93,6 +93,14 @@ public static class SongDescriptions
             ];
         }
 
+        // how many notes a beat a section plays, its parts together, against the song's other sections
+        var densities = Thirds(map.Sections.Select((span, index) => (index, notes: song.Notes!.Values.Sum(x => x.Count(n => n.Position >= span.Start && n.Position < span.End)) / span.Duration))
+            .ToDictionary(x => x.index, x => x.notes), "sparse", "medium", "busy");
+        // every part's notes where they start, as the song decides them, before its swing moves them
+        var onsets = parts.GroupBy(x => PartName(x.Key))
+            .ToDictionary(x => x.Key, x => x.SelectMany(y => y.Value).SelectMany(track => song.Notes![track].Select(n => n.Position)).Distinct().Order().ToArray());
+        RunDescription? Run(int index, double slowest) => FastestRun(onsets, map.Sections[index], index + 1, Bpm(map.Sections[index].Start) / 60, slowest);
+
         var sections = map.Sections.Select((span, index) =>
         {
             var id = span.SectionId;
@@ -112,6 +120,7 @@ public static class SongDescriptions
                 role == SectionRole.Free ? $"Section {letters[id]}" : RoleName(role),
                 (int)Math.Round(span.Duration / span.Meter.BarDuration),
                 levels[id],
+                densities[index],
                 key == songKey ? null : key,
                 span.Meter == map.Meter ? null : TimeSignature(span.Meter),
                 Math.Abs(bpm - songBpm) < 0.5 ? null : bpm,
@@ -120,7 +129,9 @@ public static class SongDescriptions
                 TextureName(textures.GetValueOrDefault(index, TextureKind.Steady)),
                 playing,
                 solos.TryGetValue(index, out var solo) ? [..solo.Soloists.Select(PartName)] : [],
-                ChordsOf(id)
+                ChordsOf(id),
+                // 16ths run through many a section, so that only a run faster stands out
+                Run(index, 4.01)
             );
         }).ToImmutableArray();
 
@@ -166,20 +177,67 @@ public static class SongDescriptions
             IntroName(map.Intro, map.Meter),
             EndingName(map.Ending),
             sections,
-            MelodyOf(song, trace)
+            MelodyOf(song, trace),
+            Enumerable.Range(0, map.Sections.Length).Select(x => Run(x, 4)).OfType<RunDescription>().MaxBy(x => x.NotesPerSecond)
         );
     }
 
-    /// <summary>Every section's energy in a word, by its rank among the song's: its quietest third quiet, its loudest loud.</summary>
-    private static Dictionary<int, string> Levels(Dictionary<int, double> energies)
+    /// <summary>Every section's value in a word, by its rank among the song's: its lowest third low, its highest high.</summary>
+    private static Dictionary<int, string> Thirds(Dictionary<int, double> values, string low, string middle, string high)
     {
-        var ordered = energies.Values.Distinct().Order().ToArray();
-        return energies.ToDictionary(x => x.Key, x =>
+        var ordered = values.Values.Distinct().Order().ToArray();
+        return values.ToDictionary(x => x.Key, x =>
         {
             var rank = Array.IndexOf(ordered, x.Value);
-            return ordered.Length < 2 ? "medium" : rank < ordered.Length / 3.0 ? "quiet" : rank >= 2 * ordered.Length / 3.0 ? "loud" : "medium";
+            return ordered.Length < 2 ? middle : rank < ordered.Length / 3.0 ? low : rank >= 2 * ordered.Length / 3.0 ? high : middle;
         });
     }
+
+    /// <summary>
+    ///     A section's fastest run: four notes or more a part plays evenly spaced, at least as many a beat as the slowest
+    ///     given, and the parts that run as fast; none where no part does.
+    /// </summary>
+    private static RunDescription? FastestRun(Dictionary<string, double[]> onsets, SectionSpan span, int place, double beatsPerSecond, double slowest)
+    {
+        const int least = 4;
+        const double tolerance = 1e-6;
+        var fastest = onsets.Select(part =>
+        {
+            var on = part.Value.Where(x => x >= span.Start && x < span.End).ToArray();
+            var shortest = double.MaxValue;
+            for (var i = 0; i + least - 1 < on.Length;)
+            {
+                var gap = on[i + 1] - on[i];
+                var j = i + 1;
+                while (j + 1 < on.Length && Math.Abs(on[j + 1] - on[j] - gap) < tolerance)
+                    j++;
+                if (j - i + 1 >= least && gap < shortest)
+                    shortest = gap;
+                i = j;
+            }
+
+            return (part: part.Key, perBeat: Math.Round(1 / shortest, 2));
+        }).Where(x => x.perBeat >= slowest).GroupBy(x => x.perBeat).MaxBy(x => x.Key);
+        return fastest is null ? null : new RunDescription([..fastest.Select(x => x.part)], ValueName(fastest.Key), Math.Round(fastest.Key * beatsPerSecond, 1), place);
+    }
+
+    /// <summary>
+    ///     A note's value by how many play a beat: 16ths, 32nds and further, their triplets, or a tuplet of 16ths, such as
+    ///     quintuplets, or the number a beat where it is none of these.
+    /// </summary>
+    private static string ValueName(double perBeat)
+    {
+        var n = (int)Math.Round(perBeat);
+        if (Math.Abs(perBeat - n) > 0.01)
+            return $"{perBeat:0.#} notes a beat";
+        if (int.IsPow2(n))
+            return $"{Ordinal(4 * n)}s";
+        if (n % 3 == 0 && int.IsPow2(n / 3))
+            return $"{Ordinal(8 * n / 3)} triplets";
+        return n switch { 5 => "quintuplets", 7 => "septuplets", _ => $"{n}-tuplets" };
+    }
+
+    private static string Ordinal(int n) => n % 10 == 2 && n % 100 != 12 ? $"{n}nd" : $"{n}th";
 
     /// <summary>How long the song plays, its tempo as it changes over it, from its start, where none has changed it yet.</summary>
     private static double Seconds(StateTimeline<double> tempo, double duration)
