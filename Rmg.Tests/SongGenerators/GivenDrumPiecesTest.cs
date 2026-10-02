@@ -93,8 +93,8 @@ public sealed class GivenDrumPiecesTest
 
             await Assert.That(Drums(given).SetEquals(pieces)).IsTrue().Because($"seed {seed}");
             // where the drums change the form, the parts move with it: where they enter, as an intro bringing the parts in
-            // one by one or a build does, its order taking the drums' roles, and a drum solo
-            if (!SameForm(drawn.Map, given.Map) || drawn.Trace.Concat(given.Trace).Any(x => x.Point == TracePoints.DrumSolo || x.Point == TracePoints.Texture && x.Phrase == nameof(TextureKind.Build)))
+            // one by one does, its order taking the drums' roles, and a drum solo
+            if (!SameForm(drawn.Map, given.Map) || drawn.Trace.Concat(given.Trace).Any(x => x.Point == TracePoints.DrumSolo))
                 continue;
             compared++;
             foreach (var (track, definition) in drawn.Song.TrackDefinitions.Where(x => x.Key < DrumGroups.FirstTrackNumber))
@@ -110,8 +110,8 @@ public sealed class GivenDrumPiecesTest
 
         // a few in a hundred, from 1% to 5% over these songs and drums
         await Assert.That(changed / (double)notes).IsLessThan(0.06);
-        // (7 of the 32 over these songs, the rest bringing their parts in by the drums or soloing on them)
-        await Assert.That(compared).IsGreaterThanOrEqualTo(6);
+        // (19 to 26 of the 32 over these songs and drums, the rest bringing their parts in by the drums or soloing on them)
+        await Assert.That(compared).IsGreaterThanOrEqualTo(16);
     }
 
     [Test]
