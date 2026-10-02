@@ -335,7 +335,7 @@ public static class SongGenerator
 
         // the drums mark the lines, now that the song is put together
         cancellation.ThrowIfCancellationRequested();
-        var fills = new FillGenerator(Stream(SongStream.Fills), tracks, Of(Facet.Fills), meter);
+        var fills = new FillGenerator(Stream(SongStream.Fills), tracks, Of(Facet.Fills), meter, Stream(SongStream.UnheardLandings));
         songTrackNoteTimelineMap = fills.Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
         // and announce a bigger section, the hi-hat opening and the snare on its head before it
         songTrackNoteTimelineMap = LiftCues.Apply(songTrackNoteTimelineMap, form.Lines);
@@ -602,5 +602,6 @@ internal enum SongStream
     InstrumentFamilies = 57,
     TwinTimbres = 58,
     SongEnds = 59,
-    DrumCoverage = 60
+    DrumCoverage = 60,
+    UnheardLandings = 61
 }

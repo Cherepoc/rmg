@@ -38,10 +38,19 @@ internal sealed class FillGenerator
     // the meter the song's bars are in
     private readonly Meter _meter;
 
+    // the sequence a drum of the fills and landings that never sounded lands from (LandTheUnheard)
+    private readonly IGenerationContext _unheard;
+
+    // the drums the fills played, and the landings, as they are marked
+    private readonly HashSet<int> _filled = [];
+    private readonly List<(double Position, int SectionId, bool IsPercussionOnly, ImmutableArray<RunSound> Sounds)> _landings = [];
+
     /// <param name="meter">The meter the song's bars are in.</param>
-    public FillGenerator(IGenerationContext context, SongTracks tracks, RhythmicUnconventionality songRhythm, Meter meter)
+    /// <param name="unheard">The sequence a drum of the fills and landings that never sounded lands from (<see cref="LandTheUnheard" />).</param>
+    public FillGenerator(IGenerationContext context, SongTracks tracks, RhythmicUnconventionality songRhythm, Meter meter, IGenerationContext unheard)
     {
         _meter = meter;
+        _unheard = unheard;
         _context = context;
         _songRhythm = songRhythm;
         _drumTracks = [..tracks.SongDrums.Select(DrumGroups.GetTrackNumber)];
@@ -78,8 +87,35 @@ internal sealed class FillGenerator
         var edits = new TimelineEdits(_context, _meter, map);
         foreach (var line in lines)
             MarkLine(song, edits, line, MinNote(line.Position), drummer, map);
+        LandTheUnheard(song, edits);
 
         return edits.ApplyTo(song);
+    }
+
+    /// <summary>
+    ///     A drum of the fills and landings the song has that it never sounded, in its grooves, its runs or its landings,
+    ///     such as a vibraslap, which a cymbal outweighs, lands once: with a landing of its role, as a vibraslap with a
+    ///     crash, or with any where none is, into a section it fits, a drum of the kit not into one of percussion only,
+    ///     drawn from a sequence of its own, so that a drum the song has is heard.
+    /// </summary>
+    private void LandTheUnheard(TrackEventStateTimelineMap<StateMap> song, TimelineEdits edits)
+    {
+        foreach (var sound in _sounds.Sounds.Values.Select(x => x.DistinctBy(y => y.Track)).SelectMany(x => x))
+        {
+            var drum = DrumGroups.GetDrum(sound.Track);
+            if (DrumGroups.GroupOf(drum).GrooveChance >= 1 || _filled.Contains(sound.Track)
+                || song.TrackTimelineMap.TryGetValue(sound.Track, out var timeline) && timeline.EventTimeline.Any())
+                continue;
+
+            var fits = _landings.Where(x => !x.IsPercussionOnly || drum.Family.HasFlag(DrumFamily.Percussion)).ToArray();
+            var withRole = fits.Where(x => x.Sounds.Any(y => y.Role == sound.Role)).ToArray();
+            var landings = withRole.Length > 0 ? withRole : fits;
+            if (landings.Length == 0)
+                continue;
+
+            var (position, sectionId, _, _) = landings[_unheard.GenerateInt(0, landings.Length)];
+            edits.Hit(sound.Track, position, FillLayers.LandingVelocity, sound.Articulation, sectionId, "Landing");
+        }
     }
 
     /// <summary>
@@ -160,6 +196,11 @@ internal sealed class FillGenerator
         var isEarly = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.EarlyLandingChance, fills)) && line.HasFill;
         var landingPosition = isEarly ? line.Position - rhythm.Push : line.Position;
         Land(song, edits, landingPosition, line.Next.SectionId, landing);
+        if (!landing.IsEmpty)
+        {
+            _landings.Add((landingPosition, line.Next.SectionId, line.Next.IsPercussionOnly, landing));
+            _filled.UnionWith(landing.Select(x => x.Track));
+        }
         // the bar of the pattern the fill plays in, the last before the line
         var bar = map?.PatternBarAt(line.Position - meter.BarDuration) ?? ((int)Math.Floor(line.Position / meter.BarDuration) - 1).Mod(Meter.PatternBarCount);
         RecordDecision(ending.SectionId, bar, meter, play, rhythm, span, landing, isEarly, lift);
@@ -420,7 +461,10 @@ internal sealed class FillGenerator
             var loudness = startVelocity + (endVelocity - startVelocity) * (position - from) / span
                            + FillLayers.AccentWeight * BeatAccent.CreateVelocityGenerator(rank, maxRank)(_context);
             foreach (var sound in FillSounds.GetNoteSounds(run, places[k], x => drums[x].Has(position, line)))
+            {
                 edits.Hit(sound.Track, position, loudness, sound.Articulation, sectionId, "Fill");
+                _filled.Add(sound.Track);
+            }
         }
 
         _lastRun = [..notes.Select(x => x.Position).Distinct().Order()];

@@ -69,14 +69,15 @@ public sealed class DrumCoverageTest
     }
 
     [Test]
-    public async Task ASongWithDrums_PlaysEveryDrumOfItsGroove_AllButNow_AndThen()
+    public async Task ASongWithDrums_PlaysEveryDrumItHas_InItsGroove_ItsFills_OrItsLandings_AllButNow_AndThen()
     {
         var songs = TestCorpus.Range(256).Where(x => x.Song.Draws!.Parts.Contains(TrackRole.Drum)).ToArray();
         var silent = songs.Count(song => song.Song.TrackDefinitions.Keys
-            .Where(x => x >= DrumGroups.FirstTrackNumber && DrumGroups.GroupOf(DrumGroups.GetDrum(x)).GrooveChance >= 1)
+            .Where(x => x >= DrumGroups.FirstTrackNumber)
             .Any(x => !song.Song.Notes!.TryGetValue(x, out var notes) || notes.Count == 0));
 
-        // a drum the form leaves out of a section's later appearances, as its first one plays it, now and then
+        // a drum the form leaves out of a section's later appearances, as its first one plays it, now and then (2% of
+        // these songs; 82% before every drum was given a section and a landing)
         await Assert.That(silent / (double)songs.Length).IsLessThan(0.03);
     }
 }
