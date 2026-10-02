@@ -37,24 +37,6 @@ public sealed record SongSettings(
     /// <summary>The format this writes, as its first character; one that is read differently takes the next.</summary>
     public const char FormatSix = '6';
 
-    /// <summary>
-    ///     The format before, every value a character, a drum setup and every part's and drum group's being in the file
-    ///     among them, which it is read without, the drum pieces making the setup and everything being in the file.
-    /// </summary>
-    public const char FormatFive = '5';
-
-    /// <summary>The format before that, which gave no drum pieces, read with the song's own.</summary>
-    public const char FormatFour = '4';
-
-    /// <summary>
-    ///     A format before, which gave a tempo by its place among the tempos a song draws, read with its tempo as the
-    ///     song draws it.
-    /// </summary>
-    public const char FormatThree = '3';
-
-    /// <summary>The oldest format, which named every part but the solo part, which it plays as the song draws it.</summary>
-    public const char FormatTwo = '2';
-
     public static ImmutableArray<Facet> FacetOrder { get; } =
         [Facet.Feel, Facet.Groove, Facet.Fills, Facet.Form, Facet.Chords, Facet.Progression, Facet.Scale, Facet.Melody, Facet.Sound];
 
@@ -62,12 +44,6 @@ public sealed record SongSettings(
     ///     The parts, by the names a request takes them by, every one the songs play.
     /// </summary>
     public static ImmutableArray<string> PartOrder { get; } = ["melody", "chords", "bass", "pad", "counterMelody", "drum", "riff", "rhythm", "solo"];
-
-    /// <summary>How many parts the oldest format named, the first of <see cref="PartOrder" />.</summary>
-    private const int PartsOfFormatTwo = 8;
-
-    /// <summary>A part the oldest format did not name: as the song draws it, at its fullest.</summary>
-    private static PartSettings Unnamed { get; } = new(0, new Setting(false, 0), 63, new Setting(false, 32));
 
     // the bits of a key, of twelve, of a meter, of up to sixteen options, of a part's plays, of three, and of a program, of 128
     private const int KeyBits = 4;
@@ -133,15 +109,10 @@ public sealed record SongSettings(
             yield return bits.Skip(i).Take(6).Select((x, bit) => x ? 1 << bit : 0).Sum();
     }
 
-    /// <summary>
-    ///     Reads settings the page wrote, or none for anything that is not settings of a format; the formats before too
-    ///     (<see cref="ParseBefore" />).
-    /// </summary>
+    /// <summary>Reads settings the page wrote, or none for anything that is not settings of this format.</summary>
     public static SongSettings? Parse(string? text)
     {
-        if (text?.Length > 0 && text[0] != FormatSix)
-            return ParseBefore(text);
-        if (text is null || text.Length != 1 + Length)
+        if (text is null || text.Length != 1 + Length || text[0] != FormatSix)
             return null;
 
         var values = text[1..].Select(x => Base64.Digits.IndexOf(x)).ToArray();
@@ -182,75 +153,11 @@ public sealed record SongSettings(
     }
 
     /// <summary>
-    ///     Reads settings of a format before: a character for every value, the instruments' two each, and the switches after
-    ///     them, six to a character; their drum pieces, their tempo, and the solo part the oldest does not name as the song
-    ///     draws them, and their drum setup and their being in the file let go of.
-    /// </summary>
-    private static SongSettings? ParseBefore(string text)
-    {
-        var partCount = text[0] switch
-        {
-            FormatFive or FormatFour or FormatThree => PartOrder.Length,
-            FormatTwo => PartsOfFormatTwo,
-            _ => 0
-        };
-        var hasPieces = text[0] == FormatFive;
-        var switchCount = 1 + FacetOrder.Length + 3 + 4 * partCount + SongMix.DrumGroupNames.Length + (hasPieces ? 1 + Core.Composition.DrumPieces.All.Length : 0);
-        var valueCount = 1 + FacetOrder.Length + 3 + 1 + 2 * partCount + 1 + SongMix.DrumGroupNames.Length;
-        if (partCount == 0 || text.Length != 1 + valueCount + 2 * partCount + (switchCount + 5) / 6)
-            return null;
-
-        var values = text[1..].Select(x => Base64.Digits.IndexOf(x)).ToArray();
-        if (values.Any(x => x < 0))
-            return null;
-
-        var at = 0;
-        int Next() => values[at++];
-        var given = Enumerable.Range(0, 1 + FacetOrder.Length + 3).Select(_ => Next()).ToArray();
-        var volume = Next();
-        var named = PartOrder.Take(partCount).ToArray();
-        var mixes = named.Select(_ => (Volume: Next(), Pan: Next())).ToArray();
-        var drumSetup = Next();
-        var groups = SongMix.DrumGroupNames.Select(_ => new DrumGroupSettings(Next())).ToImmutableArray();
-        var instruments = named.Select(_ => Next() * 64 + Next()).ToArray();
-        var switches = values[at..].SelectMany(x => Enumerable.Range(0, 6).Select(bit => (x >> bit & 1) == 1)).ToArray();
-
-        var s = 0;
-        var settings = given.Select(value => new Setting(switches[s++], value)).ToArray();
-        var parts = named.Select((_, i) =>
-            {
-                var plays = (switches[s++] ? 2 : 0) + (switches[s++] ? 1 : 0);
-                // whether it was in the file, which every part now is
-                s++;
-                var pan = new Setting(switches[s++], mixes[i].Pan);
-                return new PartSettings(plays, new Setting(instruments[i] >= 128, instruments[i] & 127), mixes[i].Volume, pan);
-            }
-        ).Concat(PartOrder.Skip(partCount).Select(_ => Unnamed)).ToImmutableArray();
-        // whether every drum group was in the file, which every one now is
-        s += SongMix.DrumGroupNames.Length;
-        var pieces = hasPieces
-            ? new DrumPieceSettings(switches[s++], [..Core.Composition.DrumPieces.All.Select(_ => switches[s++])])
-            : DrumPieceSettings.Drawn;
-
-        // a part plays as its own, in or out; a drum setup is one of three, or none; a key one of twelve; and a meter one
-        // of its options, as every character is a tempo's step
-        if (parts.Any(x => x.Plays > 2) || drumSetup > 3 || instruments.Any(x => x >= 256)
-            || settings[^2].Value > 11 || settings[^1].Value >= Core.Composition.Meter.Options.Length)
-            return null;
-        if (text[0] is FormatThree or FormatTwo)
-            settings[^3] = new Setting(false, TempoScale.Middle);
-
-        return new SongSettings(settings[0], [..settings[1..^3]], settings[^3], settings[^2], settings[^1], parts, groups, volume, pieces);
-    }
-
-    /// <summary>
     ///     What of the settings names the song, as a seed does, whatever changes its notes: the switches of which of the
     ///     unconventionality, the facets, the tempo, the key and the meter are given, six to a character, the values of
-    ///     those given alone, every part's plays, and a 0 where a drum setup was, with the zeros at its end left off; empty
-    ///     where nothing is given, for a song its seed alone names. The switches say how many values follow, so that it
-    ///     reads one way only. A part the oldest format did not name comes after the 0, so that a song naming it as the
-    ///     song draws it is named as it was, and the drum pieces given after it, six to a character behind a 1, so that a
-    ///     song with its own drums is named as it was.
+    ///     those given alone, every part's plays, and the drum pieces given, six to a character behind a 1, with the zeros
+    ///     at its end left off; empty where nothing is given, for a song its seed alone names. The switches say how many
+    ///     values follow, and the parts are as many as ever, so that it reads one way only.
     /// </summary>
     public string Identity
     {
@@ -258,9 +165,7 @@ public sealed record SongSettings(
         {
             var values = Pack([..GivenValues.Select(x => x.IsGiven)]).ToList();
             values.AddRange(GivenValues.Where(x => x.IsGiven).Select(x => x.Value));
-            values.AddRange(Parts.Take(PartsOfFormatTwo).Select(x => x.Plays));
-            values.Add(0);
-            values.AddRange(Parts.Skip(PartsOfFormatTwo).Select(x => x.Plays));
+            values.AddRange(Parts.Select(x => x.Plays));
             if (DrumPieces.IsGiven)
                 values.AddRange([1, ..Pack(DrumPieces.Pieces)]);
 

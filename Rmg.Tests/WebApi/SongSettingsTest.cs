@@ -79,19 +79,7 @@ public sealed class SongSettingsTest
 
     public const string MixedText = "6_07ELSZgnu3o_0-9zIyRxawjvsu_eo09IRajshQNX0aI4Iej0fg5Od-xWJIII";
 
-    /// <summary>The mixed settings as the format before wrote them, every value a character.</summary>
-    public const string MixedTextFive = "5_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8phE9991";
-
-    /// <summary>The mixed settings as the format before that wrote them, its drum pieces the song's own.</summary>
-    public const string MixedTextFour = "4_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8ph2";
-
-    /// <summary>The mixed settings as the format before wrote them, its tempo by its place among those the song draws.</summary>
-    public const string MixedTextThree = "3_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8ph2";
-
-    /// <summary>The mixed settings as the format before that wrote them, its first eight parts.</summary>
-    public const string MixedTextTwo = "2_07ELSZgnu3B2o_0-9zIyRxawjvsu_309IRajs002I0a2s183Q1i3-hQPh8f8hA";
-
-    public const string MixedIdentity = "hQ1_0ESgu32012012010119999";
+    public const string MixedIdentity = "hQ1_0ESgu3201201201119999";
 
     [Test]
     public async Task ATempoStep_RunsFrom60Through120To240BeatsAMinute_EveryStepFasterByAboutTheSame()
@@ -108,40 +96,13 @@ public sealed class SongSettingsTest
     }
 
     [Test]
-    public async Task TheFormatBefore_ReadsAsItWas()
+    [Arguments("5_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8phE9991")]
+    [Arguments("4_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8ph2")]
+    [Arguments("3_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8ph2")]
+    [Arguments("2_07ELSZgnu3B2o_0-9zIyRxawjvsu_309IRajs002I0a2s183Q1i3-hQPh8f8hA")]
+    public async Task TheMixedSettings_AsAFormatBeforeWroteThem_ReadAsNone(string text)
     {
-        await Assert.That(AreSame(SongSettings.Parse(MixedTextFive)!, Mixed)).IsTrue();
-    }
-
-    [Test]
-    public async Task TheFormatBeforeThat_ReadsAsItWas_ItsDrumPiecesTheSongsOwn()
-    {
-        var read = SongSettings.Parse(MixedTextFour)!;
-
-        await Assert.That(AreSame(read, Mixed with { DrumPieces = DrumPieceSettings.Drawn })).IsTrue();
-        // and named as a song with its own drums is
-        await Assert.That(read.Identity).IsEqualTo((Mixed with { DrumPieces = DrumPieceSettings.Drawn }).Identity);
-    }
-
-    [Test]
-    public async Task AFormatBefore_ReadsAsItWas_ItsTempoAsTheSongDrawsIt()
-    {
-        var read = SongSettings.Parse(MixedTextThree)!;
-
-        await Assert.That(AreSame(read, Mixed with { Tempo = new Setting(false, TempoScale.Middle), DrumPieces = DrumPieceSettings.Drawn })).IsTrue();
-    }
-
-    [Test]
-    public async Task TheOldestFormat_ReadsAsItWas_ItsTempoAndSoloPartAsTheSongDrawsThem()
-    {
-        var read = SongSettings.Parse(MixedTextTwo)!;
-
-        await Assert.That(read.Parts.Length).IsEqualTo(SongSettings.PartOrder.Length);
-        await Assert.That(read.Parts.Take(8).SequenceEqual(Mixed.Parts.Take(8))).IsTrue();
-        await Assert.That(read.Parts[^1]).IsEqualTo(new PartSettings(0, new Setting(false, 0), 63, new Setting(false, 32)));
-        await Assert.That(read.Tempo).IsEqualTo(new Setting(false, TempoScale.Middle));
-        // and named as it was, a part it did not name as drawn
-        await Assert.That(read.Identity).IsEqualTo((Mixed with { Tempo = read.Tempo, Parts = [..Mixed.Parts.Take(8), read.Parts[^1]], DrumPieces = DrumPieceSettings.Drawn }).Identity);
+        await Assert.That(SongSettings.Parse(text)).IsNull();
     }
 
     [Test]

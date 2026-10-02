@@ -6,11 +6,13 @@ namespace Rmg.Tests.Page;
 [ClassDataSource<Site>(Shared = SharedType.PerTestSession)]
 public sealed class SettingsLinkTest(Site site)
 {
-    // settings with every field set apart from its neighbours, as the server writes them now and wrote them before the
-    // solo part was named, its tempo a step, its drum pieces given and the values not of 64 steps bits (Rmg.Tests'
-    // SongSettingsTest.MixedText and MixedTextTwo)
+    // settings with every field set apart from its neighbours, as the server writes them (Rmg.Tests'
+    // SongSettingsTest.MixedText), and as the oldest format wrote them, which is read no more
     private const string MixedText = "6_07ELSZgnu3o_0-9zIyRxawjvsu_eo09IRajshQNX0aI4Iej0fg5Od-xWJIII";
     private const string MixedTextTwo = "2_07ELSZgnu3B2o_0-9zIyRxawjvsu_309IRajs002I0a2s183Q1i3-hQPh8f8hA";
+
+    // what of them names the song, as the server works it out (SongSettingsTest.MixedIdentity)
+    private const string MixedIdentity = "hQ1_0ESgu3201201201119999";
 
     private static JsonElement Part(SongRequest request, string part) => request.Body.GetProperty("parts").GetProperty(part);
 
@@ -39,21 +41,26 @@ public sealed class SettingsLinkTest(Site site)
     }
 
     [Test]
-    public async Task ALinkOfAFormatBefore_IsReadAsItWas_ItsTempoAndSoloPartAsTheSongDrawsThem_AndWrittenInTheFormatNow()
+    public async Task ASongWithTheLinksSettings_IsNamedAsTheServerNamesIt()
+    {
+        await using var page = await SongPage.Open(site, $"?song=1&settings={MixedText}");
+        await page.FirstSong();
+
+        await Assert.That(await page.HistoryItem("1").GetAttributeAsync("data-song")).IsEqualTo($"1.{MixedIdentity}");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task ALinkOfAFormatBefore_PlaysItsSong_WithTheSettingsThePageHad_AndSaysSo()
     {
         await using var page = await SongPage.Open(site, $"?song=1&settings={MixedTextTwo}");
         await page.FirstSong();
         var asked = page.Requests[0];
 
-        await Assert.That(asked.Facet("fills")).IsEqualTo(14);
-        await Assert.That(Part(asked, "chords").GetProperty("instrument").GetInt32()).IsEqualTo(18);
-        await Assert.That(Part(asked, "solo").TryGetProperty("plays", out _)).IsFalse();
-        await Assert.That(asked.Body.TryGetProperty("tempo", out var tempo) && tempo.ValueKind != JsonValueKind.Null).IsFalse();
-        await Assert.That(asked.Body.TryGetProperty("drumPieces", out var pieces) && pieces.ValueKind != JsonValueKind.Null).IsFalse();
-        // the address now in the format the page writes
-        var settings = new Uri(page.Page.Url).Query.Split('&').Single(x => x.TrimStart('?').StartsWith("settings=")).Split('=')[1];
-        await Assert.That(settings[0]).IsEqualTo('6');
-        await Assert.That(settings.Length).IsEqualTo(MixedText.Length);
+        // asked for with nothing given, as a page opened for the first time has
+        await Assert.That(asked.Seed).IsEqualTo("1");
+        await Assert.That(asked.Facet("fills")).IsNull();
+        await page.Until(async () => (await page.Status()).Contains("settings could not be read"), "the page saying so");
         await Assert.That(page.Errors).IsEmpty();
     }
 }
