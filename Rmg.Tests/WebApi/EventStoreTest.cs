@@ -285,44 +285,6 @@ public sealed class EventStoreTest : IDisposable
     }
 
     [Test]
-    public async Task AFileFromBeforeTheVersion_GetsItsColumn_AndKeepsItsEvents()
-    {
-        var directory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-        Directory.CreateDirectory(directory);
-
-        try
-        {
-            using (var connection = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={Path.Combine(directory, EventStore.FileName)}"))
-            {
-                connection.Open();
-                using var command = connection.CreateCommand();
-                command.CommandText = """
-                    CREATE TABLE events (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL, day TEXT NOT NULL, visitor TEXT NOT NULL,
-                        name TEXT NOT NULL, ms INTEGER NULL, bytes INTEGER NULL, seconds REAL NULL, seed INTEGER NULL,
-                        detail TEXT NULL
-                    );
-                    INSERT INTO events (at, day, visitor, name) VALUES ('2026-09-24T12:00:00Z', '2026-09-24', 'old', 'page_open');
-                    """;
-                command.ExecuteNonQuery();
-            }
-
-            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
-            var store = EventStore.Create(directory);
-            store.Write(new StoredEvent(Now, EventStore.Day(Now), "new", EventNames.Played, null, null, null, 1, null, "0.5.000", null));
-
-            var summary = store.Summarise(Now, 30);
-            await Assert.That(summary.Events).IsEqualTo(2);
-            await Assert.That(summary.Versions.Single().Version).IsEqualTo("0.5.000");
-        }
-        finally
-        {
-            Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
-            Directory.Delete(directory, true);
-        }
-    }
-
-    [Test]
     public async Task ARatingChanged_CountsAsItStandsNow_WhoeverAndWheneverChangedIt()
     {
         // liked yesterday, as a visitor of yesterday's hash, and turned into a dislike today, as another

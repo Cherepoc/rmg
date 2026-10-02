@@ -90,43 +90,30 @@ public sealed class EventStore
             PRAGMA journal_mode = WAL;
 
             CREATE TABLE IF NOT EXISTS events (
-                id      INTEGER PRIMARY KEY AUTOINCREMENT,
-                at      TEXT    NOT NULL,
-                day     TEXT    NOT NULL,
-                visitor TEXT    NOT NULL,
-                name    TEXT    NOT NULL,
-                ms      INTEGER NULL,
-                bytes   INTEGER NULL,
-                seconds REAL    NULL,
-                seed    INTEGER NULL,
-                detail  TEXT    NULL
+                id                INTEGER PRIMARY KEY AUTOINCREMENT,
+                at                TEXT    NOT NULL,
+                day               TEXT    NOT NULL,
+                visitor           TEXT    NOT NULL,
+                name              TEXT    NOT NULL,
+                ms                INTEGER NULL,
+                bytes             INTEGER NULL,
+                seconds           REAL    NULL,
+                seed              INTEGER NULL,
+                detail            TEXT    NULL,
+                version           TEXT    NULL,
+                settings          TEXT    NULL,
+                unconventionality INTEGER NULL,
+                given             INTEGER NULL,
+                identity          TEXT    NULL
             );
 
             CREATE INDEX IF NOT EXISTS events_day ON events (day);
             CREATE INDEX IF NOT EXISTS events_name_day ON events (name, day);
             CREATE INDEX IF NOT EXISTS events_visitor_day ON events (visitor, day);
+            CREATE INDEX IF NOT EXISTS events_version_name ON events (version, name);
             """;
 
         command.ExecuteNonQuery();
-
-        // the columns that came later than the table, which a file from before them has added: the songs' version, and
-        // what the song was heard with, as the page wrote it and, to be grouped by, its unconventionality, whether that
-        // was given, and what of it names the song with its seed
-        foreach (var (column, type) in new[] { ("version", "TEXT"), ("settings", "TEXT"), ("unconventionality", "INTEGER"), ("given", "INTEGER"), ("identity", "TEXT") })
-        {
-            using var columns = connection.CreateCommand();
-            columns.CommandText = "SELECT COUNT(*) FROM pragma_table_info('events') WHERE name = $column";
-            columns.Parameters.AddWithValue("$column", column);
-            if (Convert.ToInt64(columns.ExecuteScalar()) != 0) continue;
-
-            using var adding = connection.CreateCommand();
-            adding.CommandText = $"ALTER TABLE events ADD COLUMN {column} {type} NULL";
-            adding.ExecuteNonQuery();
-        }
-
-        using var indexing = connection.CreateCommand();
-        indexing.CommandText = "CREATE INDEX IF NOT EXISTS events_version_name ON events (version, name)";
-        indexing.ExecuteNonQuery();
 
         // what the server measured of every song asked of it, which is nothing about who asked
         using var songs = connection.CreateCommand();
