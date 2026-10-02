@@ -7,6 +7,7 @@
     <meta name="version" content="{{version}}" />
     <title>RMG admin</title>
     <link rel="stylesheet" href="{{assets}}/dashboard.css" />
+    <script type="module" src="{{assets}}/admin.js"></script>
 </head>
 <body>
 <main class="viz">
@@ -14,6 +15,25 @@
         <h1>Admin</h1>
         <p>What is the operator's: the figures, and the tools that are not for the page.</p>
     </header>
+
+    <section class="panel">
+        <h2>Describe a song</h2>
+        <p class="hint">
+            Paste a song's link, or its seed, for a description of it as the songs make it now: its tempo, feel and key,
+            its parts, and its form section by section with its chords. The text is written for an agent to name the
+            song by.
+        </p>
+        <div class="row">
+            <label class="field link">
+                <span>Song</span>
+                <input type="text" id="song-link" autocomplete="off" spellcheck="false" placeholder="a link or a seed" />
+            </label>
+            <button type="button" id="describe" class="primary">Describe</button>
+            <button type="button" id="copy" class="secondary" disabled>Copy text</button>
+        </div>
+        <p id="describe-status" role="status" aria-live="polite"></p>
+        <textarea id="description" readonly hidden rows="24" aria-label="The song described"></textarea>
+    </section>
 
     <section class="panel">
         <h2>Figures</h2>

@@ -302,3 +302,42 @@ button.small {
     font-weight: 600;
     color: var(--muted);
 }
+
+/* the admin index's description of a song: its link given room, and its text as written, to copy */
+.field.link {
+    flex: 1;
+    min-width: 0;
+}
+
+.field.link input {
+    width: 100%;
+}
+
+#describe-status {
+    margin: 12px 0 0;
+    font-size: 14px;
+    color: var(--muted);
+}
+
+#describe-status.error {
+    color: var(--danger);
+}
+
+#description {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font: 13px/1.5 "Cascadia Mono", "Consolas", "DejaVu Sans Mono", "Menlo", monospace;
+    white-space: pre;
+    overflow: auto;
+    resize: vertical;
+}
+
+#description[hidden] {
+    display: none;
+}

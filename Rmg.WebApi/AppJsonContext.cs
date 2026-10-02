@@ -18,6 +18,7 @@ namespace Rmg.WebApi;
 [JsonSerializable(typeof(AnalyticsSummary))]
 [JsonSerializable(typeof(ErrorResponse))]
 [JsonSerializable(typeof(VersionResponse))]
+[JsonSerializable(typeof(Admin.SongDescriptionResponse))]
 internal sealed partial class AppJsonContext : JsonSerializerContext;
 
 /// <summary>What a request the API will not serve is told, as <c>{ "error": "…" }</c>.</summary>

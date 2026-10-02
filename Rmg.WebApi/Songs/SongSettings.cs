@@ -153,6 +153,30 @@ public sealed record SongSettings(
     }
 
     /// <summary>
+    ///     The song of the seed asked for with these settings, as the page asks for it: every value given as given and the
+    ///     rest the song's own, every part's and drum group's mix, and the drum pieces where they are given.
+    /// </summary>
+    public GenerateSongRequest ToRequest(string seed)
+    {
+        int? Given(Setting setting) => setting.IsGiven ? setting.Value : null;
+        return new GenerateSongRequest(
+            seed,
+            Given(Unconventionality),
+            FacetOrder.Zip(Facets).Where(x => x.Second.IsGiven).ToDictionary(x => x.First.ToString(), x => x.Second.Value),
+            Volume,
+            PartOrder.Zip(Parts).ToDictionary(
+                x => x.First,
+                x => new PartRequest(x.Second.Plays switch { 1 => true, 2 => false, _ => null }, Given(x.Second.Instrument), x.Second.Volume, Given(x.Second.Pan))
+            ),
+            SongMix.DrumGroupNames.Zip(DrumGroups).ToDictionary(x => x.First, x => new DrumGroupRequest(x.Second.Volume)),
+            Given(Tempo),
+            Given(Key),
+            Given(Meter),
+            DrumPieces.IsGiven ? [..Core.Composition.DrumPieces.All.Where((_, i) => DrumPieces.Pieces[i]).Select(x => x.Name)] : null
+        );
+    }
+
+    /// <summary>
     ///     What of the settings names the song, as a seed does, whatever changes its notes: the switches of which of the
     ///     unconventionality, the facets, the tempo, the key and the meter are given, six to a character, the values of
     ///     those given alone, every part's plays, and the drum pieces given, six to a character behind a 1, with the zeros

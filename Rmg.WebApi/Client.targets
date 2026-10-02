@@ -68,7 +68,7 @@
         <RemoveDir Directories="$(ClientBundle)" />
 
         <Exec WorkingDirectory="$(ClientDirectory)"
-              Command="&quot;$(EsbuildPath)&quot; index=app.js index=app.css dashboard=dashboard.js dashboard=dashboard.css mp3-worker=mp3-worker.js --bundle --minify --sourcemap --format=esm --external:spessasynth_lib --external:spessasynth_core --external:stb-vorbis --external:https://* --outdir=&quot;$(ClientBundle)&quot; --log-level=warning" />
+              Command="&quot;$(EsbuildPath)&quot; index=app.js index=app.css dashboard=dashboard.js dashboard=dashboard.css admin=admin.js mp3-worker=mp3-worker.js --bundle --minify --sourcemap --format=esm --external:spessasynth_lib --external:spessasynth_core --external:stb-vorbis --external:https://* --outdir=&quot;$(ClientBundle)&quot; --log-level=warning" />
 
         <Touch Files="$(ClientIntermediate)bundle.stamp" AlwaysCreate="true" />
     </Target>

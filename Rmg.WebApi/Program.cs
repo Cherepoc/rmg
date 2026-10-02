@@ -131,6 +131,7 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.MapSoundFonts(soundFonts);
 app.MapSongs();
+app.MapSongDescriptions();
 
 if (events is not null)
 {

@@ -102,6 +102,30 @@ public sealed class SongSettingsTest
     }
 
     [Test]
+    public async Task Settings_AskForTheirSong_AsThePageDoes_EveryValueGivenAsGiven_AndTheRestTheSongsOwn()
+    {
+        var request = Mixed.ToRequest("g");
+
+        await Assert.That(request.Seed).IsEqualTo("g");
+        await Assert.That(request.Unconventionality).IsEqualTo(Mixed.Unconventionality.IsGiven ? Mixed.Unconventionality.Value : null);
+        await Assert.That(request.Facets!.Count).IsEqualTo(Mixed.Facets.Count(x => x.IsGiven));
+        foreach (var (facet, setting) in SongSettings.FacetOrder.Zip(Mixed.Facets).Where(x => x.Second.IsGiven))
+            await Assert.That(request.Facets[facet.ToString()]).IsEqualTo(setting.Value);
+        foreach (var (name, part) in SongSettings.PartOrder.Zip(Mixed.Parts))
+        {
+            var asked = request.Parts![name];
+            await Assert.That(asked.Plays).IsEqualTo(part.Plays switch { 1 => true, 2 => false, _ => (bool?)null });
+            await Assert.That(asked.Instrument).IsEqualTo(part.Instrument.IsGiven ? part.Instrument.Value : null);
+            await Assert.That(asked.Pan).IsEqualTo(part.Pan.IsGiven ? part.Pan.Value : null);
+            await Assert.That(asked.Volume).IsEqualTo(part.Volume);
+        }
+
+        await Assert.That(request.DrumPieces!.Count).IsEqualTo(Mixed.DrumPieces.Pieces.Count(x => x));
+        // and read as any request is
+        await Assert.That(request.TryRead(out _, out _, out _, out var error)).IsTrue().Because(error ?? "");
+    }
+
+    [Test]
     public async Task OnlyWhatIsGivenAndChangesTheSong_NamesIt()
     {
         await Assert.That(Silent.Identity).IsEqualTo("");
