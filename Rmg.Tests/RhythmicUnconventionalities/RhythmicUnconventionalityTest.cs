@@ -28,15 +28,15 @@ public sealed class RhythmicUnconventionalityTest
     }
 
     [Test]
-    public async Task GeneratedSongs_GatherAboutTheMiddle_AndSeldomNearAnEnd()
+    public async Task GeneratedSongs_GatherAboutTheirCentre_PlainerThanTheMiddle_AndSeldomNearAnEnd()
     {
         var context = new GenerationContext(1);
         var values = Enumerable.Range(0, 20_000).Select(_ => Unconventionality.DrawBase(context)).Order().ToArray();
 
-        await Assert.That(values[values.Length / 2]).IsEqualTo(0.5).Within(0.03);
-        await Assert.That(values[values.Length / 4]).IsLessThan(0.4);
-        await Assert.That(values[values.Length * 3 / 4]).IsGreaterThan(0.6);
-        await Assert.That(values.Count(x => x is < 0.1 or > 0.9) / (double)values.Length).IsLessThan(0.02);
+        await Assert.That(values[values.Length / 2]).IsEqualTo(Unconventionality.BaseCentre).Within(0.03);
+        await Assert.That(values[values.Length / 4]).IsLessThan(0.2);
+        await Assert.That(values[values.Length * 3 / 4]).IsGreaterThan(0.3);
+        await Assert.That(values.Count(x => x is < 0.03 or > 0.75) / (double)values.Length).IsLessThan(0.02);
     }
 
     [Test]

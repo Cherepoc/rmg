@@ -46,9 +46,15 @@ public enum Facet
 public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, double> Facets)
 {
     /// <summary>
-    ///     How far a generated song's base strays from the middle, in log-odds, as far as the widest draw goes: its values
-    ///     gather about the middle and thin out towards the ends, which only a supplied base reaches, near one in about one
-    ///     song in eighty.
+    ///     Where a generated song's base gathers: plainer than the middle, where every choice is tuned, as most songs keep
+    ///     to most conventions; a wilder song is one asked for.
+    /// </summary>
+    public const double BaseCentre = 0.25;
+
+    /// <summary>
+    ///     How far a generated song's base strays from its centre (<see cref="BaseCentre" />), in log-odds, as far as the
+    ///     widest draw goes: its values gather about the centre and thin out towards the ends, which only a supplied base
+    ///     reaches.
     /// </summary>
     public const double BaseSpread = 1.2;
 
@@ -90,12 +96,12 @@ public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, d
     }
 
     /// <summary>
-    ///     A generated song's base, drawn in log-odds about the middle (<see cref="BaseSpread" />), in place of a supplied
-    ///     one, which is used as given.
+    ///     A generated song's base, drawn in log-odds about its centre (<see cref="BaseCentre" />, <see cref="BaseSpread" />),
+    ///     in place of a supplied one, which is used as given.
     /// </summary>
     public static double DrawBase(IGenerationContext context)
     {
-        return Logistic(BaseGenerator(context) * BaseSpread);
+        return Logistic(Math.Log(BaseCentre / (1 - BaseCentre)) + BaseGenerator(context) * BaseSpread);
     }
 
     /// <summary>

@@ -208,6 +208,11 @@ Each item with its plan, and what it waits for.
 
 - **Timing by role** (P3): the backbeat a little late, the hi-hat on top, should swing alone sound stiff; plain
   doubling needs it.
+- **A drum of the colour silent in a plain groove** (P2): a drum a section's kit holds but does not lead, such as a
+  tambourine joined to it or bound to the snare by a figure of its own, may play no note at all where the section's
+  groove is plain, its patterns empty; with the songs plainer by default, 7% of songs with drums never sound a drum they
+  have, mostly a tambourine in the first section. Find why its patterns come out empty at a plain groove, and give a
+  drum of the colour a note at least where it is the section's only time it plays.
 - **A drum left out after all** (P3): a drum joins a section whose drums play where it first plays, but the form may
   rest them in its later appearances, or an intro's entries leave it out, so that about 2% of songs with drums still
   never sound one. Covering it after assembly, where the rests are known, would close it, if the page's pieces showing a

@@ -45,7 +45,9 @@ public sealed class DrumPresenceTest
         foreach (var song in TestCorpus.Range(32).Where(x => x.PlaysDrums))
         {
             var schemes = song.Trace.Where(x => x.Point == TracePoints.BarPattern).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => x.First().Phrase!.Replace("′", ""));
-            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.DrumPresence))
+            // a drum solo plays its own segments in place of the groove (DrumSolos)
+            var solos = song.Trace.Where(x => x.Point == TracePoints.DrumSolo).Select(x => x.Section).ToHashSet();
+            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.DrumPresence && !solos.Contains(x.Section)))
             foreach (var ((track, letter), stroke) in ((BarDrums)entry.Value!).Strokes)
             foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section))
             {
@@ -74,7 +76,9 @@ public sealed class DrumPresenceTest
         foreach (var song in TestCorpus.Range(32).Where(x => x.PlaysDrums))
         {
             var schemes = song.Trace.Where(x => x.Point == TracePoints.BarPattern).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => x.First().Phrase!.Replace("′", ""));
-            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.DrumPresence))
+            // a drum solo plays its own segments in place of the groove (DrumSolos)
+            var solos = song.Trace.Where(x => x.Point == TracePoints.DrumSolo).Select(x => x.Section).ToHashSet();
+            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.DrumPresence && !solos.Contains(x.Section)))
             foreach (var (track, letter) in ((BarDrums)entry.Value!).Resting)
             foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section))
             {

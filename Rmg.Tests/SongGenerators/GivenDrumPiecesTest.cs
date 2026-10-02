@@ -31,6 +31,12 @@ public sealed class GivenDrumPiecesTest
     // follow the drums the song plays, as the others do not
     private static readonly TrackRole[] FollowTheDrums = [TrackRole.Bass, TrackRole.Melody, TrackRole.CounterMelody, TrackRole.Solo];
 
+    /// <summary>Whether two songs have the same intro, its parts entering in the same order, and sections, in the same places.</summary>
+    private static bool SameForm(SongMap first, SongMap second) =>
+        first.Intro.Kind == second.Intro.Kind && Math.Abs(first.Intro.Duration - second.Intro.Duration) < 1e-9
+        && (first.Intro.Entries.IsDefault ? [] : first.Intro.Entries).Select(x => (x.Part, x.Entry)).SequenceEqual((second.Intro.Entries.IsDefault ? [] : second.Intro.Entries).Select(x => (x.Part, x.Entry)))
+        && first.Sections.Select(x => (x.SectionId, x.Start, x.Duration)).SequenceEqual(second.Sections.Select(x => (x.SectionId, x.Start, x.Duration)));
+
     private static byte[] Write(CorpusSong song)
     {
         using var stream = new MemoryStream();
@@ -79,13 +85,18 @@ public sealed class GivenDrumPiecesTest
     [Arguments("bongo", "tambourine", "guiro", "triangle")]
     public async Task OtherDrumsGiven_AreTheSongs_AndChangeNoOtherPart_ButWhereItFollowsTheDrumsOrEntersWithThem(params string[] pieces)
     {
-        var (notes, changed) = (0, 0);
-        foreach (var seed in Enumerable.Range(0, 16))
+        var (notes, changed, compared) = (0, 0, 0);
+        foreach (var seed in Enumerable.Range(0, 32))
         {
             var drawn = TestCorpus.Get(seed);
             var given = TestCorpus.Get(seed, new SongOverrides(DrumPieces: [..pieces]));
 
             await Assert.That(Drums(given).SetEquals(pieces)).IsTrue().Because($"seed {seed}");
+            // where the drums change the form, the parts move with it: where they enter, as an intro bringing the parts in
+            // one by one or a build does, its order taking the drums' roles, and a drum solo
+            if (!SameForm(drawn.Map, given.Map) || drawn.Trace.Concat(given.Trace).Any(x => x.Point == TracePoints.DrumSolo || x.Point == TracePoints.Texture && x.Phrase == nameof(TextureKind.Build)))
+                continue;
+            compared++;
             foreach (var (track, definition) in drawn.Song.TrackDefinitions.Where(x => x.Key < DrumGroups.FirstTrackNumber))
             {
                 var from = Math.Max(AfterEntries(drawn), AfterEntries(given));
@@ -99,6 +110,8 @@ public sealed class GivenDrumPiecesTest
 
         // a few in a hundred, from 1% to 5% over these songs and drums
         await Assert.That(changed / (double)notes).IsLessThan(0.06);
+        // (7 of the 32 over these songs, the rest bringing their parts in by the drums or soloing on them)
+        await Assert.That(compared).IsGreaterThanOrEqualTo(6);
     }
 
     [Test]

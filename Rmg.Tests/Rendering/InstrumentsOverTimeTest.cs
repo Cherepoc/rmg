@@ -20,7 +20,10 @@ public sealed class InstrumentsOverTimeTest
         {
             var plain = TestCorpus.Get(seed, Sound(0));
             await Assert.That(Changes(plain)).IsEmpty();
-            await Assert.That(plain.Rendered.Tracks.All(x => x.ProgramChanges.IsEmpty)).IsTrue();
+            // but where a part plays in another's sound, as a twin lead does, which is the arrangement's and not the sound's
+            var soundsAs = plain.Song.Notes!.Where(x => x.Value.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.SoundsAs) > 0))
+                .Select(x => plain.Song.TrackDefinitions[x.Key].Role).ToHashSet();
+            await Assert.That(plain.Rendered.Tracks.All(x => x.ProgramChanges.IsEmpty || soundsAs.Contains(x.Role))).IsTrue();
 
             var wild = TestCorpus.Get(seed, Sound(1));
             await Assert.That(wild.Rendered.Tracks.Any(x => !x.ProgramChanges.IsEmpty)).IsTrue();
