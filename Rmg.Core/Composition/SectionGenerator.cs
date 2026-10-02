@@ -161,7 +161,7 @@ internal sealed class SectionGenerator
 
         // the drums: the kit's or, now and then, the percussion's alone, by the roles they play, as the song drew them
         // (DrawDrums)
-        var (isPercussionOnly, kit) = plan.Drums;
+        var (isPercussionOnly, kit, _) = plan.Drums;
         StateTrace.Record(TracePoints.PercussionOnly, SectionTrace, sectionId, 0, StateMap.Default, 0, isPercussionOnly ? "percussion only" : "drum kit", isPercussionOnly);
         StateTrace.Record(TracePoints.Kit, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", kit.Drums.Select(x => x.Name)), kit);
         var activeDrumTrackNumbers = kit.Drums.Select(DrumGroups.GetTrackNumber).ToImmutableHashSet();
@@ -270,11 +270,11 @@ internal sealed class SectionGenerator
     ///     their sum, which leans the section's draws as far as its rhythm follows it.
     /// </summary>
     /// <summary>
-    ///     A section's drums, drawn before the sections are made, so that the song sees them all:
+    ///     A section's drums, drawn before the sections are made, so that the song sees them all (<see cref="DrumCoverage" />):
     ///     whether it plays percussion only, a percussion song's every section and now and then a section of a song of the
     ///     kit and percussion, unless the song says, and its kit, each from a sequence of its own.
     /// </summary>
-    public SectionDrums DrawDrums(int sectionId, bool? isPercussionOnly = null)
+    public SectionDrums DrawDrums(int sectionId, SectionRole role, bool? isPercussionOnly = null)
     {
         var rhythm = new RhythmicUnconventionality(Facets(sectionId)[Facet.Groove]);
         var tilt = SectionEnergy.Tilt(_songStateMap.MergeWith(_sectionEnergies[sectionId]).GetStateValue(CompositionStateKinds.Energy), rhythm.Coupling);
@@ -282,7 +282,9 @@ internal sealed class SectionGenerator
         var percussionOnly = isPercussionOnly ?? (_tracks.DrumSetup == DrumSetup.Percussion ||
                                                   (_tracks.DrumSetup == DrumSetup.KitAndPercussion &&
                                                    PercussionSections.Draw(Stream(sectionId, SectionStream.Percussion), _songPercussion, rhythm.Value, tilt, songPercussion)));
-        return new SectionDrums(percussionOnly, DrumKitGenerator.SelectKit(Stream(sectionId, SectionStream.Kit), _tracks.SongDrums, tilt, percussionOnly));
+        // whether its drums play where it first plays, as its arrangement draws them there (Generate)
+        var playsDrums = !Arrangement.DrawRests(new GenerationContext(StreamSeed(sectionId, SectionStream.Arrangement)), tilt, role, _absent).Contains(TrackRole.Drum);
+        return new SectionDrums(percussionOnly, DrumKitGenerator.SelectKit(Stream(sectionId, SectionStream.Kit), _tracks.SongDrums, tilt, percussionOnly), playsDrums);
     }
 
     /// <summary>How far a section strays from convention, facet by facet, each from a sequence of its own.</summary>
@@ -731,7 +733,8 @@ internal sealed class SectionGenerator
 internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScale, SectionRole Role, Meter Meter, SectionDrums Drums);
 
 /// <summary>A section's drums: whether it plays its percussion without the drum kit, and the kit it plays.</summary>
-internal sealed record SectionDrums(bool IsPercussionOnly, SectionKit Kit);
+/// <param name="PlaysDrums">Whether its drums play where it first plays, rather than rest for a breakdown.</param>
+internal sealed record SectionDrums(bool IsPercussionOnly, SectionKit Kit, bool PlaysDrums);
 
 /// <summary>A section's tracks, and what the fills need to know of its rhythm and energy.</summary>
 /// <param name="Rhythm">How far the section's rhythm strays from convention.</param>

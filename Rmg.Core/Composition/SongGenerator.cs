@@ -178,8 +178,17 @@ public static class SongGenerator
         );
         StateTrace.Record(TracePoints.SectionMeter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", sectionMeters.Select(x => $"{x.Key} {x.Value}")), sectionMeters);
 
-        // every section's drums, drawn before the sections are made
-        var sectionDrums = sectionIds.Distinct().ToImmutableDictionary(id => id, id => sectionGenerator.DrawDrums(id));
+        // every section's drums, drawn before the sections are made, every drum of the song's groove in one of them at
+        // least, from a stream of its own, where the song plays drums
+        var sectionDrums = sectionIds.Distinct().ToImmutableDictionary(id => id, id => sectionGenerator.DrawDrums(id, structure.Roles[id]));
+        if (!absent.Contains(TrackRole.Drum))
+            sectionDrums = DrumCoverage.Cover(
+                Stream(SongStream.DrumCoverage),
+                tracks.SongDrums,
+                sectionDrums,
+                sectionIds.CountBy(x => x).ToDictionary(),
+                id => sectionGenerator.DrawDrums(id, structure.Roles[id], isPercussionOnly: false)
+            );
         // every section is generated once, where it first plays
         var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(
                 new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0], structure.Roles[id], sectionMeters[id], sectionDrums[id]))))
@@ -592,5 +601,6 @@ internal enum SongStream
     LastRepeat = 56,
     InstrumentFamilies = 57,
     TwinTimbres = 58,
-    SongEnds = 59
+    SongEnds = 59,
+    DrumCoverage = 60
 }

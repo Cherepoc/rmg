@@ -39,6 +39,21 @@ public sealed class GivenDrumPiecesTest
     }
 
     [Test]
+    [Arguments(0.5)]
+    [Arguments(1.0)]
+    public async Task TheKickAndPercussionGiven_AreHeard_HoweverWildTheGroove(double groove)
+    {
+        foreach (var seed in Enumerable.Range(0, 16))
+        {
+            var song = TestCorpus.Get(seed, new SongOverrides(DrumPieces: ["kick", "bongo", "conga"], Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Groove, groove)));
+            var silent = song.Song.TrackDefinitions.Keys.Where(x => x >= DrumGroups.FirstTrackNumber)
+                .Where(x => !song.Song.Notes!.TryGetValue(x, out var notes) || notes.Count == 0)
+                .Select(x => DrumPieces.NameOf(DrumGroups.GetDrum(x)));
+            await Assert.That(silent).IsEmpty().Because($"seed {seed}");
+        }
+    }
+
+    [Test]
     public async Task TheDrumsDrawn_MakeTheSetupDrawn()
     {
         foreach (var song in TestCorpus.Range(128))

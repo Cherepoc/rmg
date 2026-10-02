@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Songs;
 
@@ -80,6 +79,23 @@ public sealed class DrumsHeardReportTest
                 if (!drums.Any(d => song.Song.Notes!.TryGetValue(d, out var n) && n.Any(x => x.Position >= span.Start && x.Position < span.End))) sectionsWithout++;
             }
         }
+        // the drums of the groove a kit took that are never heard: whether the sections that took them play drums at all
+        var (inQuiet, inPlaying) = (0, 0);
+        foreach (var song in songs.Where(x => x.Song.Draws!.Parts.Contains(TrackRole.Drum)))
+        {
+            var kits = song.Trace.Where(x => x.Point == TracePoints.Kit).ToDictionary(x => x.Section, x => (SectionKit)x.Value!);
+            var drums = song.Song.TrackDefinitions.Keys.Where(x => x >= DrumGroups.FirstTrackNumber).ToArray();
+            bool Plays(int track, SectionSpan span) => song.Song.Notes!.TryGetValue(track, out var n) && n.Any(x => x.Position >= span.Start && x.Position < span.End);
+            foreach (var track in drums.Where(x => Grooves(DrumGroups.GetDrum(x)) && !(song.Song.Notes!.TryGetValue(x, out var n) && n.Count > 0)))
+            {
+                var spans = song.Map.Sections.Where(x => kits.TryGetValue(x.SectionId, out var kit) && kit.Drums.Contains(DrumGroups.GetDrum(track))).ToArray();
+                if (spans.Length == 0) continue;
+                if (spans.Any(span => drums.Any(d => Plays(d, span)))) inPlaying++;
+                else inQuiet++;
+                Console.WriteLine($"  seed {song.Seed}: {DrumGroups.GetDrum(track).Name} in sections {string.Join(",", spans.Select(x => x.SectionId).Distinct())}, which play drums: {spans.Any(span => drums.Any(d => Plays(d, span)))}");
+            }
+        }
+        Console.WriteLine($"Taken but never heard: in sections that play no drums {inQuiet}, in sections that do {inPlaying}");
         Console.WriteLine($"{songs.Length} songs, drumless {drumless}; pool drums {pool} ({poolSizes.Average():F1} a song, {poolSizes.Min()}-{poolSizes.Max()}); " +
                           $"never picked by a section {unpicked}, picked but never heard {pickedNotHeard}; kits drawn {distinct} ({distinct / (double)(songs.Length - drumless):F1} a song); " +
                           $"sections with no drum {sectionsWithout} of {sections}");
