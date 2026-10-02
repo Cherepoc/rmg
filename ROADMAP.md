@@ -10,7 +10,7 @@ is removed once it is built.
 ratings by conventionality once enough are in. Alongside, continuously and never as a gate.
 
 **Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs rated
-enough; genres (see *Genres*), once their presets are agreed.
+enough; listening to the genres' presets (see *Genres*).
 
 **When the need shows** (P3), each by what listening says, roughly in this order: timing by role; the tempo leaning by
 the energy; a line scale by the chord and chord tones off the scale; legato slides; a motif developed further; the
@@ -255,95 +255,19 @@ Each item with its plan, and what it waits for.
 
 ## Genres
 
-A genre (P2) is data: a name and what it says of the choices the generator already makes. The page makes and keeps
-genres, ships a few as presets, and sends what they say with a request. The server knows the choices and their options,
-never a genre. A genre is not a facet and leaves the unconventionality as it is. With no genre, every song is as it was
-(`CorpusFingerprintTest`).
+Built: a genre is the page's data, pools of the options of the choices the songs draw, chances and rhythm values
+(`Genre`, `GenreChoices`, `GenreRhythm`), ten presets (`Client/genres.json`), a picker and an editor on the page, and a
+genre in the link (`GenreSettings`). What is left:
 
-**A genre is a pool.** For every choice it names, it gives each option a weight from 0 to 1 (0 to 63 in the editor):
-the options above 0 are the pool the song draws from, at every conventionality, so that a genre of 4/4 alone plays 4/4
-however wild the song. An option of weight 0 never plays; one option alone is forced, which a genre may do and the
-presets mostly do not. A choice the genre leaves unnamed is as the songs have it. A choice it names with no option
-above 0 is not a genre, and the request fails. A chance the genre names is a weight from 0 to 1 the same way, never at
-0 and always at 1, and a value a shift of the middle the song's layers vary around, as a drum role's part moves a
-drum's rhythm (`DrumRoles.Parts`).
-
-Within the pool, the genre's weights are the options' in the middle, where the songs gather, in place of their tuned
-ones, and the conventionality still chooses at the ends: each end keeps to the options it allows, times the pool's
-weights, and an end left with none of the pool, as the wild end of the meters is by 4/4 alone, takes the middle's, so
-that what a genre keeps is its own plainest and wildest (`ByConvention.Weigh` with a pool). A chance's weight leans its
-odds, 1/2 as it is. A choice the songs draw without ends, such as an instrument or a drum piece, takes the pool's
-weights as its own. The page starts a choice it adds from the songs' own weights (`GenreOption.Default`).
-
-What is given wins over the genre: a setting, then the genre's pool, then the song's draw. A setting outside the pool,
-such as 3/4 in a genre of 4/4 alone, is played as given.
-
-**The choices,** each with options of stable names (`GenreChoices`, served at `/api/genres/choices`), grouped as the
-editor shows them:
-- *Tempo and feel:* the tempo, its options leaning by how fast they are (a dyadic draw that becomes a weighted pick of
-  its multipliers only where a genre leans it); the meter (`Meter.Options`); the song's feel (`Feels`); the swing's
-  chance (`Groove.SwingChance`) and its amount, a value.
-- *Harmony:* the scale (`Scales`); the chord shapes (`ChordShapes`, through `HarmonicUnconventionality`).
-- *Sound:* every pitched role's instruments (`InstrumentRoles`, eight pools as they are); the drum kit's sound
-  (Standard, Room, Power, Electronic, TR-808, Jazz, Brush, Orchestra), a new draw from a stream of its own, always
-  Standard with no genre, where the mix gives none. Check the soundfonts play the kits.
-- *Parts and drums:* the parts' chances (`SongParts`); the drum setup (`DrumSetups`); the drum pieces (the kit groups'
-  rules, the percussion's weights), whose offs follow the rules of drum pieces given; which drum takes which role, the
-  drums' affinities (`DrumRoles`); half time and double time's chances (`Groove`).
-- *Rhythm,* for every pitched role and every drum role: its speed (`Rhythm.Period.Power`), how far off the beat it
-  plays (`Rhythm.Phase.Rank`), how fine it goes and where its weight sits (`MaxRank`, `RankOffset`), how full it is
-  (`Fullness`) and how much it repeats its cycles, from a riff to varying every cycle (`Variation`), each a value; and
-  its feel, straight, a tuplet or a grouping such as the tresillo's 3+3+2, an option of `Feels` drawn for the part, from
-  a stream of its own, only where a genre names it. The melody's busyness (`MelodyBusyness`) is a value too.
-
-The rhythm's values are a layer at the song's depth of the part's state, added as a role's part is, so that every
-layer below still varies around it and a plain song plays it as it is. A shift means what the part's own state makes
-of it: half a cycle off the beat is an 8th's offbeat for a part in quarters and beat 3 for one in bars, so a preset
-gives a part's speed and its offset together, and is tuned by measuring where its notes fall.
-
-Each choice takes the genre explicitly where it draws, with no ambient default: about twenty sites. Instruments a role
-must avoid, such as the melody's apart from the chords', give way where the genre leaves nothing else.
-
-**Settings split where a genre shows a choice worth setting for one song,** as the scale and the swing were. Making
-the settings a forced genre was considered and rejected: a setting gives values no draw reaches, such as any tempo and
-a facet's exact value.
-
-**The link.** The settings' format adds a tail: the number of options the genre weighs, then each one, by its place in
-the choices' order (10 bits), and its weight (6 bits), about 2.7 characters each, so 30 options take about 80
-characters. A change to the choices takes a new format, as seeds take a new version. The genre's name rides in the link
-as a parameter of its own, for display only. Events carry the genre in their settings.
-
-**The presets,** in `Client/genres.json`, by the options' names, checked against the choices by a test, each a sentence
-of what it sounds like, agreed as a start:
-- Rock: overdriven and distorted riff and rhythm guitars, a picked bass, power chords, the riff likely and repeating,
-  the kick and snare on the beat and backbeat, the hi-hat in 8ths, the Power kit, minor and Mixolydian, mid to fast.
-- Jazz: swung, the ride keeping time, Jazz or Brush kit, the kick sparse, an upright bass walking in quarters,
-  sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.
-- Electronic: the kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, bass and pads,
-  TR-808 or Electronic kit, straight and fast, minor, sus and add9.
-- Hip-hop: slow, lightly swung 16ths, TR-808, a sparse syncopated kick, a repeating bass, electric piano and pads,
-  minor and Dorian.
-- Reggae: slow, the one drop (kick and snare on beat 3), the chords and rhythm guitar on the offbeats, a sparse
-  repeating bass, organ, major and minor.
-- Latin: kit and percussion (congas, bongos, claves, cowbell, timbales, guiro), a time keeper in the tresillo's
-  grouping, the bass anticipating, nylon guitar, piano, trumpet, minor and Dorian, fast.
-- Funk: the hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and muted guitar comping in 16ths, brass,
-  sevenths and ninths, Dorian and Mixolydian, everything repeating.
-- Folk: steel and nylon guitars strummed, fiddle, banjo, harmonica, acoustic bass, triads, major and Mixolydian, 3/4
-  and 6/8 leaned up, tambourine and shaker, Room kit.
-- Blues: a shuffle, sevenths, Mixolydian, harmonica, overdriven guitar, organ, slow to mid.
-- Ambient: slow, pads, strings, choir, harp, celesta, the pad always likely, drums rarely and sparse, chords held, sus
-  and add9, Lydian and major.
-
-**Steps,** each committed and measured on its own, per preset 64 songs against none, the fingerprint unchanged with
-no genre:
-12. *The editor:* from a preset or from none, the choices in their groups, each a row of the options it keeps with a
-    weight from 0 to 63, an option added from the choice's list, chances and values as sliders, a name; kept in
-    localStorage, one opened from a link savable, exported and imported as JSON. Page tests.
-
-**Later:** the progressions' root motions (ii–V, ♭VII); instruments outside a role's pool, with their leading drawn
-from their family; forms of a genre's own, such as the 12-bar blues; a genre's sections differing, such as a jazz
-song's solos swung harder; ratings by genre on the dashboard.
+- **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
+  half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
+  alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.
+- **The rhythm's values against the part's own:** a value moves a setting by steps from where the part rests, so that
+  one part's "faster" is another's "as fast as can be"; a value set outright, where it lands, would read the same for
+  every part, should listening ask for it.
+- **Later:** the progressions' root motions (ii–V, ♭VII); instruments outside a role's pool, with their leading drawn
+  from their family; forms of a genre's own, such as the 12-bar blues; a genre's sections differing, such as a jazz
+  song's solos swung harder; ratings by genre on the dashboard.
 
 ## Parked
 

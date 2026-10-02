@@ -680,6 +680,78 @@ input[type="range"] {
     cursor: default;
 }
 
+/* the genre's editor's button beside its list, as small as the list */
+.genre-edit {
+    height: 21px;
+    padding: 0 8px;
+    font-size: 13px;
+}
+
+/* the genre's editor, under the genre's row, its choices in their groups, every option a slider and its step */
+.genre-editor {
+    display: grid;
+    gap: 8px;
+    padding: 8px 0 4px;
+}
+
+.genre-editor input[type="text"] {
+    max-width: 20em;
+    font: inherit;
+}
+
+.genre-groups {
+    display: grid;
+    gap: 8px;
+}
+
+.genre-choice {
+    display: grid;
+    gap: 4px;
+    padding: 4px 0;
+    border-top: 1px solid var(--border);
+}
+
+.genre-choice-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.genre-option {
+    display: grid;
+    grid-template-columns: minmax(6em, 14em) minmax(0, 1fr) 2.5em auto;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.genre-option input[type="range"] {
+    min-width: 0;
+}
+
+.genre-choice select,
+.genre-groups > fieldset > select {
+    justify-self: start;
+    max-width: 100%;
+    font: inherit;
+    font-size: 13px;
+}
+
+.genre-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.genre-json {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+}
+
 /* the ends and the value as wide on every row, so that the sliders line up whatever their ends are called */
 .setting .end {
     font-size: 12px;

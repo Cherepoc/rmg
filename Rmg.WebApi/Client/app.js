@@ -14,6 +14,7 @@ import {
     isKeeping,
     keep,
     keepHistory,
+    keepGenres,
     keepRating,
     keepSettings,
     recall,
@@ -45,6 +46,7 @@ import {
 } from "./settings.js";
 import { applyReport, defaultSettings, givenOnly, isEveryPartOff, noGenre, requestFor } from "./song-settings.js";
 import { asGenre, hasAGenre, isSameGenre, PRESETS } from "./genres.js";
+import { createGenreEditor } from "./genre-editor.js";
 import { since, tell, track } from "./tally.js";
 
 const PLAY_ICON = "M8 5v14l11-7z";
@@ -1563,8 +1565,28 @@ const CHOICES = ["key", "mode", "meter"];
 
 const KEY_NAMES = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
 
-/** The list of genres, which waits for the choices a genre is written by. */
+/** The list of genres and its editor's button, which wait for the choices a genre is written by, and the choices. */
 let genreSelect = null;
+let genreEdit = null;
+let genreChoices = null;
+
+/** The editor of a genre of one's own (genre-editor.js), its draft played, kept here or let go of. */
+const genreEditor = createGenreEditor({
+    onPlay: (genre) => genre !== null && useGenre(genre),
+    onSave: (genre) => {
+        if (genre === null) return;
+        const own = recallGenres().filter((x) => x.name !== genre.name);
+        keepGenres([...own, genre]);
+        useGenre(genre);
+    },
+    onDelete: (name) => {
+        keepGenres(recallGenres().filter((x) => x.name !== name));
+        genreEditor.close();
+        showGenre();
+    },
+    isOwn: (name) => recallGenres().some((x) => x.name === name),
+});
+
 
 // every choice's row, by its key: the key, the mode and the meter, listed as the server lists them
 const choiceRows = new Map();
@@ -1583,9 +1605,9 @@ buildSettings();
 
 /** The settings panel: the values that change the song, every part's row of the mixer, and the drums'. */
 function buildSettings() {
-    // the genre first, then in the order they are named, the key, the mode and the meter chosen from a list and every
-    // other on a slider
-    elements.songSettings.append(createGenreRow(), ...Object.keys(SETTING_NAMES).map((key) => (CHOICES.includes(key) ? createChoiceRow(key) : createSettingRow(key))));
+    // the genre first, and its editor, then in the order they are named, the key, the mode and the meter chosen from a
+    // list and every other on a slider
+    elements.songSettings.append(createGenreRow(), genreEditor.element, ...Object.keys(SETTING_NAMES).map((key) => (CHOICES.includes(key) ? createChoiceRow(key) : createSettingRow(key))));
     // the drums last, their groups under them, each with its pieces
     elements.mixer.append(...PARTS.filter((part) => part !== "drum").map(createPartRow), createPartRow("drum"), ...DRUM_GROUPS.map(createDrumGroupRow));
 
@@ -1679,12 +1701,27 @@ function createGenreRow() {
     const end = document.createElement("span");
     end.className = "end";
     end.setAttribute("aria-hidden", "true");
-    place.append(end, genreSelect);
+    genreEdit = document.createElement("button");
+    genreEdit.type = "button";
+    genreEdit.className = "genre-edit";
+    genreEdit.textContent = "Edit";
+    genreEdit.title = "Make a genre of your own, from this one or from none";
+    genreEdit.disabled = true;
+    genreEdit.addEventListener("click", () => genreEditor.open(hasAGenre(settings.genre) ? settings.genre : noGenre(), genreChoices));
+    place.append(end, genreSelect, genreEdit);
     const row = document.createElement("div");
     row.className = "setting";
     row.title = GENRE_DESCRIPTION;
     row.append(none, label, place);
     return row;
+}
+
+/** Asks for the song again in a genre the editor made. */
+function useGenre(genre) {
+    settings.genre = asGenre(genre);
+    track("genre_chosen", { detail: "own" });
+    showGenre();
+    settingsChanged(true);
 }
 
 /** Every genre the list offers, by its value in it: the presets, then the genres made here. */
@@ -2492,7 +2529,8 @@ async function listGenreChoices() {
         if (!response.ok) return null;
         const choices = await response.json();
         setGenreChoices(choices);
-        if (genreSelect !== null) genreSelect.disabled = false;
+        genreChoices = choices;
+        genreSelect.disabled = genreEdit.disabled = false;
         return choices;
     } catch {
         return null;
