@@ -96,13 +96,9 @@ public sealed class SongSettingsTest
     }
 
     [Test]
-    [Arguments("5_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8phE9991")]
-    [Arguments("4_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8ph2")]
-    [Arguments("3_07ELSZgnu3B2o_0-9zIyRxawjvsu_eo309IRajs002I0a2s183Q1i3-31hQPh8f8ph2")]
-    [Arguments("2_07ELSZgnu3B2o_0-9zIyRxawjvsu_309IRajs002I0a2s183Q1i3-hQPh8f8hA")]
-    public async Task TheMixedSettings_AsAFormatBeforeWroteThem_ReadAsNone(string text)
+    public async Task SettingsOfAnotherFormat_ReadAsNone()
     {
-        await Assert.That(SongSettings.Parse(text)).IsNull();
+        await Assert.That(SongSettings.Parse("5" + MixedText[1..])).IsNull();
     }
 
     [Test]

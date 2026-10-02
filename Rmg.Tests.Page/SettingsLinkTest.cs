@@ -7,9 +7,8 @@ namespace Rmg.Tests.Page;
 public sealed class SettingsLinkTest(Site site)
 {
     // settings with every field set apart from its neighbours, as the server writes them (Rmg.Tests'
-    // SongSettingsTest.MixedText), and as the oldest format wrote them, which is read no more
+    // SongSettingsTest.MixedText)
     private const string MixedText = "6_07ELSZgnu3o_0-9zIyRxawjvsu_eo09IRajshQNX0aI4Iej0fg5Od-xWJIII";
-    private const string MixedTextTwo = "2_07ELSZgnu3B2o_0-9zIyRxawjvsu_309IRajs002I0a2s183Q1i3-hQPh8f8hA";
 
     // what of them names the song, as the server works it out (SongSettingsTest.MixedIdentity)
     private const string MixedIdentity = "hQ1_0ESgu3201201201119999";
@@ -51,9 +50,9 @@ public sealed class SettingsLinkTest(Site site)
     }
 
     [Test]
-    public async Task ALinkOfAFormatBefore_PlaysItsSong_WithTheSettingsThePageHad_AndSaysSo()
+    public async Task ALinkOfAnotherFormat_PlaysItsSong_WithTheSettingsThePageHad_AndSaysSo()
     {
-        await using var page = await SongPage.Open(site, $"?song=1&settings={MixedTextTwo}");
+        await using var page = await SongPage.Open(site, $"?song=1&settings=5{MixedText[1..]}");
         await page.FirstSong();
         var asked = page.Requests[0];
 

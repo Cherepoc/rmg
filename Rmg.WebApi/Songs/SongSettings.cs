@@ -35,7 +35,7 @@ public sealed record SongSettings(
 )
 {
     /// <summary>The format this writes, as its first character; one that is read differently takes the next.</summary>
-    public const char FormatSix = '6';
+    public const char FormatCharacter = '6';
 
     public static ImmutableArray<Facet> FacetOrder { get; } =
         [Facet.Feel, Facet.Groove, Facet.Fills, Facet.Form, Facet.Chords, Facet.Progression, Facet.Scale, Facet.Melody, Facet.Sound];
@@ -99,7 +99,7 @@ public sealed record SongSettings(
 
         bits.AddRange([DrumPieces.IsGiven, ..DrumPieces.Pieces]);
         characters.AddRange(Pack(bits));
-        return FormatSix + new string([..characters.Select(x => Base64.Digits[x])]);
+        return FormatCharacter + new string([..characters.Select(x => Base64.Digits[x])]);
     }
 
     /// <summary>Bits six to a character, the first the lowest, the last character's left over as zeros.</summary>
@@ -112,7 +112,7 @@ public sealed record SongSettings(
     /// <summary>Reads settings the page wrote, or none for anything that is not settings of this format.</summary>
     public static SongSettings? Parse(string? text)
     {
-        if (text is null || text.Length != 1 + Length || text[0] != FormatSix)
+        if (text is null || text.Length != 1 + Length || text[0] != FormatCharacter)
             return null;
 
         var values = text[1..].Select(x => Base64.Digits.IndexOf(x)).ToArray();

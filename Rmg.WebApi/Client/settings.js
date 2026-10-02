@@ -6,7 +6,8 @@
  *     bits, one after another, six to a character. Seeds are written in the same 64 digits.
  */
 
-const FORMAT_SIX = "6";
+/** The format this writes, as its first character; one that is read differently takes the next. */
+const FORMAT_CHARACTER = "6";
 
 /** The 64 digits: the digits, the letters, "-" and "_", in base 62's order and on from it. */
 const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_";
@@ -131,12 +132,12 @@ export function formatSettings(settings) {
         write(part.instrument.value, PROGRAM_BITS);
     }
     bits.push(settings.drumPieces.isGiven, ...DRUM_PIECES.map((piece) => settings.drumPieces.value.includes(piece)));
-    return FORMAT_SIX + [...characters, ...packSwitches(bits)].map((x) => DIGITS[x]).join("");
+    return FORMAT_CHARACTER + [...characters, ...packSwitches(bits)].map((x) => DIGITS[x]).join("");
 }
 
 /** Reads settings, or null for anything that is not settings of this format. */
 export function parseSettings(text) {
-    if (typeof text !== "string" || text[0] !== FORMAT_SIX || text.length !== 1 + CHARACTER_COUNT + Math.ceil(BIT_COUNT / 6)) return null;
+    if (typeof text !== "string" || text[0] !== FORMAT_CHARACTER || text.length !== 1 + CHARACTER_COUNT + Math.ceil(BIT_COUNT / 6)) return null;
     const values = [...text.slice(1)].map((x) => DIGITS.indexOf(x));
     if (values.some((x) => x < 0)) return null;
 

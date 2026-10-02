@@ -1,5 +1,3 @@
-using System.Numerics;
-
 namespace Rmg.Core;
 
 /// <summary>
@@ -14,52 +12,36 @@ public static class Base64
     /// <summary>The most digits a seed takes, all 64 of its bits.</summary>
     public const int SeedLength = 11;
 
-    /// <summary>A number as the given count of digits, zero-padded.</summary>
-    public static string Encode(BigInteger number, int length)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(number.Sign);
-
-        var digits = new char[length];
-        for (var i = length - 1; i >= 0; i--)
-        {
-            digits[i] = Digits[(int)(number % Digits.Length)];
-            number /= Digits.Length;
-        }
-
-        if (!number.IsZero)
-            throw new ArgumentOutOfRangeException(nameof(number), $"The number takes more than {length} digits.");
-
-        return new string(digits);
-    }
-
-    /// <summary>The number the digits write, or none for anything that is not digits of base 64.</summary>
-    public static BigInteger? Decode(string text)
-    {
-        if (text.Length == 0)
-            return null;
-
-        var number = BigInteger.Zero;
-        foreach (var digit in text)
-        {
-            var value = Digits.IndexOf(digit);
-            if (value < 0)
-                return null;
-            number = number * Digits.Length + value;
-        }
-
-        return number;
-    }
-
-    /// <summary>A seed as its digits, with no zeros in front.</summary>
+    /// <summary>A seed as its digits, six bits each, with no zeros in front.</summary>
     public static string FromSeed(ulong seed)
     {
-        var text = Encode(seed, SeedLength).TrimStart('0');
+        var digits = new char[SeedLength];
+        for (var i = SeedLength - 1; i >= 0; i--, seed >>= 6)
+            digits[i] = Digits[(int)(seed & 63)];
+
+        var text = new string(digits).TrimStart('0');
         return text.Length > 0 ? text : "0";
     }
 
-    /// <summary>The seed the digits write, or none for anything that is not one.</summary>
+    /// <summary>
+    ///     The seed the digits write, or none for anything that is not one: no digits, a character not a digit, or more
+    ///     than 64 bits.
+    /// </summary>
     public static ulong? ToSeed(string text)
     {
-        return text.Length <= SeedLength && Decode(text) is { } number && number <= ulong.MaxValue ? (ulong)number : null;
+        if (text.Length is 0 or > SeedLength)
+            return null;
+
+        var seed = 0UL;
+        foreach (var digit in text)
+        {
+            var value = Digits.IndexOf(digit);
+            // a digit more would push bits past the 64th
+            if (value < 0 || seed > ulong.MaxValue >> 6)
+                return null;
+            seed = seed << 6 | (uint)value;
+        }
+
+        return seed;
     }
 }
