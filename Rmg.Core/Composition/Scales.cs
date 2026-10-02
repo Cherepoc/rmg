@@ -28,9 +28,9 @@ internal static class Scales
     /// <summary>How many notes every scale has.</summary>
     public const int StepCount = 7;
 
-    public static Scale NaturalMinor { get; } = new("Natural minor", [0, 2, 3, 5, 7, 8, 10], new ByConvention(1, 0.3, 0));
+    public static Scale NaturalMinor { get; } = new("Natural minor", [0, 2, 3, 5, 7, 8, 10], new ByConvention(1, 0.5, 0));
 
-    public static Scale Major { get; } = new("Major", [0, 2, 4, 5, 7, 9, 11], new ByConvention(1, 0.3, 0));
+    public static Scale Major { get; } = new("Major", [0, 2, 4, 5, 7, 9, 11], new ByConvention(1, 0.5, 0));
 
     public static Scale Dorian { get; } = new("Dorian", [0, 2, 3, 5, 7, 9, 10], new ByConvention(0, 0.12, 0.3));
 
@@ -68,9 +68,9 @@ internal static class Scales
 
     /// <summary>
     ///     The chance a section is in another scale than the song's, by the scale facet of its unconventionality: never at
-    ///     the plain end, always at the wild, and as often as the corpus's sections were between.
+    ///     the plain end, always at the wild, and now and then between, as most songs keep to their scale.
     /// </summary>
-    public static ByConvention SectionChange { get; } = new(0, 0.16, 1);
+    public static ByConvention SectionChange { get; } = new(0, 0.08, 1);
 
     /// <summary>How much less likely a scale is for every note it changes beyond the first.</summary>
     public const double Closeness = 0.3;

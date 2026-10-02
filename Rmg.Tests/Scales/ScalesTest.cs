@@ -82,7 +82,8 @@ public sealed class ScalesTest
         var changed = picks.Where(x => x != Rmg.Core.Composition.Scales.NaturalMinor).ToArray();
 
         await Assert.That(changed.Length / (double)picks.Length).IsEqualTo(Rmg.Core.Composition.Scales.SectionChange.Tuned).Within(0.01);
-        await Assert.That(changed.Count(x => x.Distance(Rmg.Core.Composition.Scales.NaturalMinor) == 1)).IsGreaterThan(changed.Length * 7 / 10);
+        // a close one most often, the major, three notes away, the likeliest of the others (64% close as tuned)
+        await Assert.That(changed.Count(x => x.Distance(Rmg.Core.Composition.Scales.NaturalMinor) == 1)).IsGreaterThan(changed.Length / 2);
     }
 
     [Test]

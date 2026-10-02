@@ -20,6 +20,8 @@ public sealed class ConventionalityLevelsReportTest
         bool Unswung,
         bool InAForm,
         bool MajorOrMinor,
+        bool SongMajorOrMinor,
+        bool OneScale,
         bool OneKey,
         bool OneMeter,
         bool OneTempo,
@@ -52,6 +54,8 @@ public sealed class ConventionalityLevelsReportTest
             Value<Swing>(TracePoints.Swing).Delay == 0,
             structure.Roles.Values.All(x => x != SectionRole.Free),
             (scale == Core.Composition.Scales.Major || scale == Core.Composition.Scales.NaturalMinor) && trace.Where(x => x.Point == TracePoints.SectionScale).All(x => (Scale)x.Value! == scale),
+            scale == Core.Composition.Scales.Major || scale == Core.Composition.Scales.NaturalMinor,
+            trace.Where(x => x.Point == TracePoints.SectionScale).All(x => (Scale)x.Value! == scale),
             Value<System.Collections.IEnumerable>(TracePoints.KeyChange).Cast<object>().Any() == false,
             Value<ImmutableDictionary<int, Meter>>(TracePoints.SectionMeter).Values.All(x => x == song.Map.Meter),
             Value<ImmutableArray<double>>(TracePoints.SectionTempo).All(x => Math.Abs(x - 1) < 1e-9),
@@ -69,7 +73,7 @@ public sealed class ConventionalityLevelsReportTest
         Console.WriteLine($"{what,-10} base {songs.Average(x => x.Base):F2} ({songs.Min(x => x.Base):F2}-{songs.Max(x => x.Base):F2}); facets mean {songs.Average(x => x.Facets.Values.Average()):F2}, " +
                           $"a facet above 0.75 in {Share(x => x.Facets.Values.Any(f => f > 0.75))} of songs, below 0.25 in {Share(x => x.Facets.Values.Any(f => f < 0.25))}");
         Console.WriteLine($"           4/4 {Share(x => x.FourFour)}, straight {Share(x => x.Straight)}, unswung {Share(x => x.Unswung)}, a form {Share(x => x.InAForm)}, " +
-                          $"major or minor {Share(x => x.MajorOrMinor)}, one key {Share(x => x.OneKey)}, one meter {Share(x => x.OneMeter)}, one tempo {Share(x => x.OneTempo)}, " +
+                          $"major or minor {Share(x => x.MajorOrMinor)} (the song's {Share(x => x.SongMajorOrMinor)}, one scale {Share(x => x.OneScale)}), one key {Share(x => x.OneKey)}, one meter {Share(x => x.OneMeter)}, one tempo {Share(x => x.OneTempo)}, " +
                           $"no polymeter {Share(x => x.NoPolymeter)}, kit only {Share(x => x.KitOnly)}");
         Console.WriteLine($"           triads {songs.Average(x => x.Triads):P0} of chords, chord level {songs.Average(x => x.ChordLevel):F2}, improvisation {songs.Average(x => x.Improvisation):F2}; " +
                           $"plain in all ten {Share(x => x.FourFour && x.Straight && x.Unswung && x.InAForm && x.MajorOrMinor && x.OneKey && x.OneMeter && x.OneTempo && x.NoPolymeter && x.KitOnly)}");
