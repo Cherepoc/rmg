@@ -74,15 +74,17 @@ public sealed class SongDrumSelectionTest
     }
 
     [Test]
-    public async Task Song_AllTimekeepersAndTomsAreAvailable()
+    public async Task ASong_HasTheTom_ItsHiHat_MostlyARide_AndAFewOfTheOtherTimekeepers()
     {
-        foreach (var seed in Seeds)
+        var songs = Seeds.Select(seed => SongDrums(seed)).ToArray();
+        foreach (var songDrums in songs)
         {
-            var songDrums = SongDrums(seed);
-
-            foreach (var drum in DrumGroups.Timekeepers.Drums.Concat(DrumGroups.Toms.Drums))
-                await Assert.That(songDrums.Contains(drum)).IsTrue();
+            await Assert.That(songDrums.Contains(DrumDefinitions.Tom)).IsTrue();
+            await Assert.That(songDrums.Contains(DrumDefinitions.HiHat)).IsTrue();
+            await Assert.That(songDrums.Count(new[] { DrumDefinitions.Tambourine, DrumDefinitions.Cabasa, DrumDefinitions.Maracas }.Contains)).IsLessThanOrEqualTo(2);
         }
+
+        await Assert.That(songs.Count(x => x.Contains(DrumDefinitions.Ride)) / (double)songs.Length).IsBetween(0.65, 0.85);
     }
 
     [Test]

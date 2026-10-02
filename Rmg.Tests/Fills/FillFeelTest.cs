@@ -30,7 +30,10 @@ public sealed class FillFeelTest
         var context = new GenerationContext(1);
         var tracks = SongTracks.Create(context, context, context, context, context, context, context, true, new RhythmicUnconventionality(0.5), context, context, DrumSetup.KitAndPercussion, null);
         var song = TrackEventStateTimelineMap.Create<StateMap>(8 * 32);
-        var sections = Enumerable.Range(0, 8).Select(x => new FillSection(x, 32, new RhythmicUnconventionality(0.5), Unconventionality.Generate(0.5, _ => new GenerationContext(0)), FillGrooves.FromSource(Rhythm(3)), 0, false, true, false, Meter.FourFour, 0)).ToArray();
+        // a feel as plain as it comes, which a fill never changes, so that every fill is in the section's tuplet
+        var unconventionality = Unconventionality.Generate(0.5, _ => new GenerationContext(0));
+        unconventionality = unconventionality with { Facets = unconventionality.Facets.SetItem(Facet.Feel, 0) };
+        var sections = Enumerable.Range(0, 8).Select(x => new FillSection(x, 32, new RhythmicUnconventionality(0.5), unconventionality, FillGrooves.FromSource(Rhythm(3)), 0, false, true, false, Meter.FourFour, 0)).ToArray();
         using var trace = StateTrace.Start();
 
         new FillGenerator(context, tracks, new RhythmicUnconventionality(0.5), Meter.FourFour).Generate(song, FillGenerator.GetSectionLines(sections));

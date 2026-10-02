@@ -16,6 +16,9 @@ internal static class DrumGroups
     /// <summary>The chance of a song having a clap beside its snare.</summary>
     private const double ClapChance = 0.3;
 
+    /// <summary>The chance of a song having a ride beside its hi-hat, which a louder section keeps time on.</summary>
+    private const double RideChance = 0.75;
+
     /// <summary>The chance of a song having the vibraslap, which it plays as a landing, with the cymbal.</summary>
     private const double VibraslapChance = 0.2;
 
@@ -68,7 +71,9 @@ internal static class DrumGroups
         holdsARole: true
     );
 
-    // the timekeepers, of which a section mostly has one keep time (DrumKitGenerator.TimeChance)
+    // the timekeepers, of which a section mostly has one keep time (DrumKitGenerator.TimeChance): a song has its hi-hat,
+    // mostly a ride, and a tambourine or a shaker or two, which a quieter section leans to, as a drummer brings a few, so
+    // that the song plays what it has
     public static DrumGroup Timekeepers { get; } = new(
         nameof(Timekeepers),
         [
@@ -81,6 +86,13 @@ internal static class DrumGroups
         3.0,
         1,
         configureStateMap: builder => builder.InRuns(0.05),
+        songRule: new SongDrumRule(
+            [
+                SongDrumRule.Always(DrumDefinitions.HiHat),
+                SongDrumRule.Optional(DrumDefinitions.Ride, RideChance),
+                SongDrumRule.Pool(1, 2, DrumDefinitions.Tambourine, DrumDefinitions.Cabasa, DrumDefinitions.Maracas)
+            ]
+        ),
         holdsARole: true
     );
 

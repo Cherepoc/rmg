@@ -85,8 +85,12 @@ public sealed class DrumKitGeneratorTest
     {
         (double Drums, double Loud, double Quiet) Measure(Tilt tilt)
         {
-            var kits = Seeds.Select(seed => Select(seed, tilt).Kit).ToArray();
-            return (kits.Average(x => x.Length), kits.Average(x => x.Count(d => d.Loudness > 0)), kits.Average(x => x.Count(d => d.Loudness < 0)));
+            var kits = Seeds.Select(seed => Select(seed, tilt)).ToArray();
+            // the quiet drums as a share of the kit, where the song has one to play, as a quieter section has fewer drums
+            // of every kind
+            var quiet = kits.Where(x => x.Song.Any(d => d.Loudness < 0)).ToArray();
+            return (kits.Average(x => x.Kit.Length), kits.Average(x => x.Kit.Count(d => d.Loudness > 0)),
+                quiet.Average(x => x.Kit.Count(d => d.Loudness < 0) / (double)Math.Max(1, x.Kit.Length)));
         }
 
         var even = Measure(Tilt.None);
