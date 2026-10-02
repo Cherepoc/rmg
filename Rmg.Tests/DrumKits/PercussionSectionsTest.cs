@@ -58,6 +58,21 @@ public sealed class PercussionSectionsTest
     }
 
     [Test]
+    public async Task TheWildestSection_PlaysPercussionOnly_ByItsShare_SoThatTheKitIsHeardToo_AndThePlainestNever()
+    {
+        double Share(Tilt song, double unconventionality)
+        {
+            var context = new GenerationContext(1);
+            return Enumerable.Range(0, 4_000).Count(_ => PercussionSections.Draw(context, song, unconventionality, Tilt.None, 3)) / 4_000.0;
+        }
+
+        await Assert.That(Share(Tilt.None, 1)).IsEqualTo(PercussionSections.WildShare).Within(0.03);
+        // however far the song leans to it
+        await Assert.That(Share(new Tilt(100), 1)).IsEqualTo(PercussionSections.WildShare).Within(0.03);
+        await Assert.That(Share(new Tilt(100), 0)).IsEqualTo(0);
+    }
+
+    [Test]
     public async Task ACountIn_AlwaysClicks()
     {
         var countIns = 0;

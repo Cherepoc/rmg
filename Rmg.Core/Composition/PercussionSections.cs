@@ -20,6 +20,12 @@ internal static class PercussionSections
     /// <summary>How few percussion drums a song has for its sections to play them alone.</summary>
     public const int MinDrums = 2;
 
+    /// <summary>
+    ///     The share of its sections the wildest song plays percussion only: the song plays them every time, but not
+    ///     everywhere, so that its kit is heard too.
+    /// </summary>
+    public const double WildShare = 0.5;
+
     /// <summary>How many of the song's percussion drums a section of percussion only plays at most.</summary>
     public const int MaxActiveDrums = 4;
 
@@ -34,11 +40,11 @@ internal static class PercussionSections
 
     /// <summary>Whether a section plays percussion only; drawn only where the song has enough percussion.</summary>
     /// <param name="song">How far the song leans to such sections.</param>
-    /// <param name="unconventionality">The section's groove facet: never percussion only at the plain end, always where it can at the wild.</param>
+    /// <param name="unconventionality">The section's groove facet: never percussion only at the plain end, and <see cref="WildShare" /> of the time at the wild.</param>
     /// <param name="energy">The section's pull of its energy, which leans it to the drum kit.</param>
     /// <param name="songPercussion">How many percussion drums the song has.</param>
     public static bool Draw(IGenerationContext context, Tilt song, double unconventionality, Tilt energy, int songPercussion)
     {
-        return songPercussion >= MinDrums && context.TestProbability(energy.Chance(RhythmicUnconventionality.Ends(song.Chance(Chance, 1), 1).At(unconventionality), -1));
+        return songPercussion >= MinDrums && context.TestProbability(energy.Chance(new ByConvention(0, song.Chance(Chance, 1), WildShare).At(unconventionality), -1));
     }
 }
