@@ -53,6 +53,29 @@ public sealed class DoubleClickTest(Site site)
     }
 
     [Test]
+    public async Task OnAPhone_ADoubleTap_PutsAFacetBackToItsMiddle_AndOneTapDoesNot()
+    {
+        await using var page = await SongPage.Open(site, phone: true);
+        await page.FirstSong();
+        await page.Page.EvaluateAsync("() => document.getElementById('settings-panel').open = true");
+        await page.SetSetting("feel", 10);
+        var slider = Setting(page, "feel");
+        await slider.ScrollIntoViewIfNeededAsync();
+        var box = (await slider.BoundingBoxAsync())!;
+        var (x, y) = (box.X + 4, box.Y + box.Height / 2);
+
+        await page.Page.Touchscreen.TapAsync(x, y);
+        await page.Page.WaitForTimeoutAsync(500);
+        await Assert.That(await slider.InputValueAsync()).IsNotEqualTo("32");
+
+        await page.Page.Touchscreen.TapAsync(x, y);
+        await page.Page.Touchscreen.TapAsync(x, y);
+        await page.Until(async () => await slider.InputValueAsync() == "32", "the feel back to its middle");
+        await Assert.That(await ValueOf(page, "feel").TextContentAsync()).IsEqualTo("50%");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task AFacetTheSongDrew_IsLeftAsItIs()
     {
         await using var page = await Opened(site);

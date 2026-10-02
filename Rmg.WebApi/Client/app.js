@@ -1986,14 +1986,37 @@ function createFader(label, onInput, isPan = false, onChange = null) {
     return { field, input, show };
 }
 
-// a slider back to its default on a double-click, as if it were dragged there, so that its own handlers apply it; one
-// that shows what the song drew is not set, and is left alone, as it is to a drag
-document.addEventListener("dblclick", (event) => {
-    const slider = event.target;
-    if (!(slider instanceof HTMLInputElement) || slider.type !== "range" || slider.dataset.default === undefined || slider.disabled) return;
+/** A slider that has a default, and is set rather than showing what the song drew, which is left alone, as it is to a drag. */
+function isResettable(target) {
+    return target instanceof HTMLInputElement && target.type === "range" && target.dataset.default !== undefined && !target.disabled;
+}
+
+/** A slider back to its default, as if it were dragged there, so that its own handlers apply it. */
+function resetSlider(slider) {
     slider.value = slider.dataset.default;
     slider.dispatchEvent(new Event("input", { bubbles: true }));
     slider.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+// a slider back to its default on a double-click
+document.addEventListener("dblclick", (event) => {
+    if (isResettable(event.target)) resetSlider(event.target);
+});
+
+// and on a double-tap, which a touch screen never makes a double-click of on a slider, its touches being drags: a second
+// press of the same slider soon after the first and near it, the reset made once the press lets go, after the thumb's
+// own move to where it touched
+const DOUBLE_TAP_MS = 350;
+const DOUBLE_TAP_REACH = 24;
+let lastTap = null;
+document.addEventListener("pointerdown", (event) => {
+    if (event.pointerType !== "touch") return;
+    const slider = event.target;
+    const tap = { slider, time: event.timeStamp, x: event.clientX, y: event.clientY };
+    const isDouble = lastTap !== null && lastTap.slider === slider && tap.time - lastTap.time < DOUBLE_TAP_MS
+        && Math.hypot(tap.x - lastTap.x, tap.y - lastTap.y) < DOUBLE_TAP_REACH;
+    lastTap = isDouble || !isResettable(slider) ? null : tap;
+    if (isDouble && isResettable(slider)) slider.addEventListener("pointerup", () => resetSlider(slider), { once: true });
 });
 
 /** Puts the settings, and what the song on the page drew and is made of, on the panel. */
