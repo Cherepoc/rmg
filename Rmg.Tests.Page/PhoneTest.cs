@@ -65,4 +65,18 @@ public sealed class PhoneTest(Site site)
         await Assert.That(await label.TextContentAsync()).IsEqualTo("Copied");
         await Assert.That(page.Errors).IsEmpty();
     }
+
+    [Test]
+    public async Task OnAPhone_Share_HandsTheLinkToTheShareSheet()
+    {
+        await using var page = await SongPage.Open(site, phone: true);
+        await page.Page.AddInitScriptAsync("navigator.share = (data) => { window.shared = data.url; return Promise.resolve(); };");
+        await page.Page.ReloadAsync();
+        await page.FirstSong();
+
+        await page.Page.Locator("#share").ClickAsync();
+        await page.Until(async () => await page.Page.EvaluateAsync<string?>("() => window.shared ?? null") is not null, "the link handed to the share sheet");
+        await Assert.That(await page.Page.EvaluateAsync<string>("() => window.shared")).Contains("settings=");
+        await Assert.That(page.Errors).IsEmpty();
+    }
 }

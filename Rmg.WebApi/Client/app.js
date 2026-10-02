@@ -1223,24 +1223,18 @@ function createHistoryItem(entry) {
 elements.share.addEventListener("click", share);
 
 /**
- *     Hands over a link to the song on the page. The share sheet where there is one, which is phones and
- *     little else, and the clipboard everywhere else. The link is the seed and the settings, so what arrives is the
- *     song with the mix as it was left.
+ *     Hands over a link to the song on the page: on a touch screen by its share sheet, as a phone shares, and everywhere
+ *     else by the clipboard, where a browser may offer a share sheet with nothing behind it, as one on Linux does, which
+ *     fails as if it were closed; each falling back on the other, and on the link shown to copy by hand. The link is the
+ *     seed and the settings, so what arrives is the song with the mix as it was left.
  */
 async function share() {
     const seed = elements.seed.value;
     const link = songLink();
+    const isSheetFirst = navigator.share !== undefined && matchMedia("(pointer: coarse)").matches;
 
-    if (navigator.share !== undefined) {
-        try {
-            await navigator.share({ title: `RMG song ${seed}`, url: link });
-            track("shared", aboutSong({ detail: "sheet" }));
-            return;
-        } catch (error) {
-            // thinking better of it halfway through a share sheet is not a failure worth reporting
-            if (error.name === "AbortError") return;
-        }
-    }
+    // closing a phone's share sheet halfway is thinking better of it, not a failure worth reporting
+    if (isSheetFirst && (await shareBySheet(seed, link)) !== "failed") return;
 
     if (await copy(link)) {
         say("Copied");
@@ -1249,9 +1243,22 @@ async function share() {
         return;
     }
 
+    if (!isSheetFirst && navigator.share !== undefined && (await shareBySheet(seed, link)) === "shared") return;
+
     // nothing worked, so the link goes where it can at least be read and copied by hand
     setStatus(link);
     say("Above");
+}
+
+/** The link handed to the share sheet: shared, the sheet closed, or failed. */
+async function shareBySheet(seed, link) {
+    try {
+        await navigator.share({ title: `RMG song ${seed}`, url: link });
+        track("shared", aboutSong({ detail: "sheet" }));
+        return "shared";
+    } catch (error) {
+        return error.name === "AbortError" ? "closed" : "failed";
+    }
 }
 
 async function copy(text) {
