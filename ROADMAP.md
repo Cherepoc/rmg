@@ -337,8 +337,6 @@ of what it sounds like, agreed as a start:
 
 **Steps,** each committed and measured on its own, per preset 64 songs against none, the fingerprint unchanged with
 no genre:
-5. *The chord shapes:* the pool through `HarmonicUnconventionality`, its levels moved by the shapes' share, cadence
-   and home shapes included. Measured: the shares of the levels and of the sevenths per preset.
 6. *The kit's sound:* a draw from a stream of its own, Standard with no genre, under the mix's; the soundfonts checked
    for the kits.
 7. *The rhythm's values per role:* a genre layer at the song's depth of every pitched role's and drum role's state

@@ -31,6 +31,12 @@ public sealed class GenreReportTest
         };
     }
 
+    /// <summary>The shapes the chords play, a pick of every bar's chord.</summary>
+    internal static IEnumerable<ChordShape> Shapes(CorpusSong song) => song.Trace
+        .Where(x => x.Point == TracePoints.Chord && x.Track == SongTracks.ChordsTrack)
+        .Select(x => x.StateMap.GetStateValue(CompositionStateKinds.RoleChord) is { IsEmpty: false } role ? role[0] : CompositionStateKinds.ChordPool.Pick(x.StateMap))
+        .Select(x => x.Shape);
+
     /// <summary>Every measure's shares over the songs, the commonest first, and how many values it takes.</summary>
     internal static void Report(string name, IReadOnlyList<Dictionary<string, string>> songs)
     {
@@ -52,11 +58,16 @@ public sealed class GenreReportTest
             ["scale"] = ImmutableDictionary<string, double>.Empty.Add("dorian", 1).Add("major", 0.6).Add("mixolydian", 0.4),
             ["instrument.bass"] = ImmutableDictionary<string, double>.Empty.Add("acousticBass", 1).Add("contrabass", 0.3),
             ["instrument.melody"] = ImmutableDictionary<string, double>.Empty.Add("tenorSax", 1).Add("altoSax", 1).Add("trumpet", 0.8).Add("mutedTrumpet", 0.5),
-            ["tempo"] = ImmutableDictionary<string, double>.Empty.Add("moderate", 1).Add("brisk", 0.7).Add("slow", 0.3)
+            ["tempo"] = ImmutableDictionary<string, double>.Empty.Add("moderate", 1).Add("brisk", 0.7).Add("slow", 0.3),
+            ["chordShape"] = ImmutableDictionary<string, double>.Empty.Add("seventh", 1).Add("ninth", 0.6).Add("shell", 0.5).Add("sixNine", 0.3).Add("triad", 0.2)
         }.ToImmutableDictionary());
 
         Report("none", TestCorpus.Measure(Count, Measure));
-        Report("a genre", TestCorpus.InParallel(Enumerable.Range(0, Count), seed => Measure(TestCorpus.Get(seed, new SongOverrides(Genre: genre)))));
+        var songs = TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
+        Report("a genre", [..songs.Select(Measure)]);
+        // the chords' shapes over every bar of every song
+        foreach (var (name, shapes) in new[] { ("none", TestCorpus.Measure(Count, x => Shapes(x).ToArray()).SelectMany(x => x).ToArray()), ("a genre", songs.SelectMany(Shapes).ToArray()) })
+            Console.WriteLine($"  shapes, {name}: " + string.Join(", ", shapes.GroupBy(x => x.Name).OrderByDescending(x => x.Count()).Take(8).Select(x => $"{x.Key} {100.0 * x.Count() / shapes.Length:0}%")));
         await Task.CompletedTask;
     }
 }

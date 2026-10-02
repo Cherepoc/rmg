@@ -73,6 +73,28 @@ public readonly record struct ByConvention(double Plain, double Tuned, double Wi
     }
 
     /// <summary>
+    ///     The options' weights at a conventionality leaned by a pool, such as a genre's, for a choice drawn in roles of
+    ///     its own weights, such as a cadence's chord: every end's weights times the pool's, those of none left out, and
+    ///     an end left with none taking the middle's, or the pool's own where the middle has none either.
+    /// </summary>
+    /// <param name="pool">An option's weight in the pool, from 0, out of it, to 1; none for the options as they are.</param>
+    public static ImmutableArray<Weighted<T>> Lean<T>(IEnumerable<(T Option, ByConvention Weight)> options, double conventionality, Func<T, double>? pool)
+    {
+        if (pool is null)
+            return Weigh(options, conventionality);
+
+        var kept = options.Select(x => (x.Option, x.Weight, Pool: pool(x.Option))).Where(x => x.Pool > 0).ToArray();
+        if (kept.Length == 0)
+            throw new InvalidOperationException("The pool keeps none of the options.");
+
+        var leaned = kept.Select(x => new ByConvention(x.Weight.Plain * x.Pool, x.Weight.Tuned * x.Pool, x.Weight.Wild * x.Pool)).ToArray();
+        if (leaned.All(x => x is { Plain: 0, Tuned: 0, Wild: 0 }))
+            leaned = [..kept.Select(x => new ByConvention(0, x.Pool, 0))];
+        var ends = WithEnds(leaned);
+        return Weigh(kept.Select((x, i) => (x.Option, ends[i])), conventionality);
+    }
+
+    /// <summary>
     ///     A chance at a conventionality by a pool's weight of it, from 0, never, through 1/2, the chance as it is, to 1,
     ///     always: its odds at each end times the weight's, and an end it leaves with neither a yes nor a no, as always
     ///     leaves one that never does, taking the middle's; none for the chance as it is.

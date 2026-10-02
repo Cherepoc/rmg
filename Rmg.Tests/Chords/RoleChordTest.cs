@@ -26,7 +26,7 @@ public sealed class RoleChordTest
     [Arguments(0.5)]
     public async Task HomeChords_StayPlain_ButInTheWildestSongs(double chords)
     {
-        var unconventionality = new HarmonicUnconventionality(chords);
+        var unconventionality = new HarmonicUnconventionality(chords, Genre.None);
         var context = new GenerationContext(1);
 
         var levels = Enumerable.Range(0, DrawCount)
@@ -39,7 +39,7 @@ public sealed class RoleChordTest
     [Test]
     public async Task TheWildestHomeChords_AreStrange()
     {
-        var unconventionality = new HarmonicUnconventionality(1);
+        var unconventionality = new HarmonicUnconventionality(1, Genre.None);
         var context = new GenerationContext(1);
 
         var levels = Enumerable.Range(0, DrawCount).Select(_ => unconventionality.GenerateHomeChord(context).Shape.Unconventionality).ToArray();
@@ -51,9 +51,9 @@ public sealed class RoleChordTest
     public async Task ThePlainestCadences_AreTriads_AndMiddlingOnes_CadenceShapes_TheSeventhMostOften()
     {
         var context = new GenerationContext(1);
-        var plainest = Enumerable.Range(0, DrawCount).Select(_ => new HarmonicUnconventionality(0).GenerateCadenceChord(context).Shape.Name).ToArray();
+        var plainest = Enumerable.Range(0, DrawCount).Select(_ => new HarmonicUnconventionality(0, Genre.None).GenerateCadenceChord(context).Shape.Name).ToArray();
         var middling = Enumerable.Range(0, DrawCount)
-            .Select(_ => new HarmonicUnconventionality(0.5).GenerateCadenceChord(context).Shape)
+            .Select(_ => new HarmonicUnconventionality(0.5, Genre.None).GenerateCadenceChord(context).Shape)
             .Where(x => x.Unconventionality <= 2)
             .Select(x => x.Name)
             .ToArray();
@@ -66,7 +66,7 @@ public sealed class RoleChordTest
     [Test]
     public async Task UnconventionalCadences_KeepTheirStrangeness()
     {
-        var unconventionality = new HarmonicUnconventionality(1);
+        var unconventionality = new HarmonicUnconventionality(1, Genre.None);
         var context = new GenerationContext(1);
 
         var levels = Enumerable.Range(0, DrawCount)

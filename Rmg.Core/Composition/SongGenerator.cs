@@ -119,7 +119,7 @@ public static class SongGenerator
 
         // the song's chords gather around its unconventionality, and a section's around its own shift of it
         var harmonyContext = Stream(SongStream.Harmony);
-        var unconventionality = new HarmonicUnconventionality(songUnconventionality[Facet.Chords]);
+        var unconventionality = new HarmonicUnconventionality(songUnconventionality[Facet.Chords], genre);
         // drawn when it is given too, so that the rest is as it was
         var scale = Scales.Pick(harmonyContext, songUnconventionality[Facet.Scale], genre);
         scale = overrides.Scale ?? scale;

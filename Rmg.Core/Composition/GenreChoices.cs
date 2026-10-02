@@ -46,6 +46,14 @@ public static class GenreChoices
     /// <summary>The scale the song starts in (<see cref="Scales" />).</summary>
     public static GenreChoice Scale { get; } = Pool("scale", "Scale", Harmony, Scales.All.Select(x => (Name(x.Name), x.Name, x.Weight.Tuned)));
 
+    /// <summary>
+    ///     The chords' shapes (<see cref="ChordShapes" />), as likely as the songs have them in the middle, their levels'
+    ///     weights times their shares of them.
+    /// </summary>
+    public static GenreChoice ChordShape { get; } = Pool("chordShape", "Chord shapes", Harmony,
+        ChordShapes.All.Select(x => (Name(x.Name), x.Name,
+            ChordShapes.Levels.Single(l => l.Level == x.Unconventionality).Weight.Tuned * x.Weight / ChordShapes.All.Where(y => y.Unconventionality == x.Unconventionality).Sum(y => y.Weight))));
+
     // the pitched parts' pools, in the order the page shows them
     private static readonly (TrackRole Role, string Label, InstrumentRole Pool)[] InstrumentPools =
     [
@@ -91,7 +99,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order the page shows them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Meter, Feel, FeelChances, FeelValues, Scale,
+        Tempo, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Parts, DrumSetup, DrumPieces
     ];

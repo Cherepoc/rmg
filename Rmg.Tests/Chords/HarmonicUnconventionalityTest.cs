@@ -8,7 +8,7 @@ public sealed class HarmonicUnconventionalityTest
     private static int[] DrawLevels(double chords, int count = 20000)
     {
         var context = new GenerationContext(0);
-        var unconventionality = new HarmonicUnconventionality(chords);
+        var unconventionality = new HarmonicUnconventionality(chords, Genre.None);
         return [..Enumerable.Range(0, count).Select(_ => unconventionality.GenerateChord(context).Shape.Unconventionality)];
     }
 

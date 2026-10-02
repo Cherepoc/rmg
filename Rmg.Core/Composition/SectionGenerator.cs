@@ -97,7 +97,7 @@ internal sealed class SectionGenerator
         // how far the section strays from convention, facet by facet, each from a sequence of its own
         var facets = Facets(sectionId);
         StateTrace.Record(TracePoints.SectionUnconventionality, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", facets.Facets.OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Value:F2}")), facets);
-        var unconventionality = new HarmonicUnconventionality(facets[Facet.Chords]);
+        var unconventionality = new HarmonicUnconventionality(facets[Facet.Chords], _genre);
         StateTrace.Record(TracePoints.SectionHarmony, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{unconventionality.Chords:F2}", unconventionality);
         // the section's rhythm strays as its groove does
         var rhythm = new RhythmicUnconventionality(facets[Facet.Groove]);

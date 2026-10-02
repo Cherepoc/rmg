@@ -161,6 +161,18 @@ public sealed class GenreTest
     }
 
     [Test]
+    public async Task AGenresChords_KeepToItsShapes_TheirHomesAndCadencesToo()
+    {
+        var genre = Of((GenreChoices.ChordShape, [("seventh", 1), ("ninth", 1), ("sus4", 0.5)]));
+        foreach (var seed in Enumerable.Range(0, 8))
+        foreach (var @base in new[] { 0.0, 0.5, 1.0 })
+        {
+            var shapes = GenreReportTest.Shapes(TestCorpus.Get(seed, new SongOverrides(Base: @base, Genre: genre))).Select(x => x.Name).Distinct().ToArray();
+            await Assert.That(shapes.All(x => x is "Seventh" or "Ninth" or "Sus4")).IsTrue().Because(string.Join(", ", shapes));
+        }
+    }
+
+    [Test]
     public async Task AGenresChances_AreNeverAt0_AndAlwaysAt1()
     {
         var genre = Of((GenreChoices.Parts, [("pad", 0), ("counterMelody", 1)]), (GenreChoices.FeelChances, [("swing", 1)]));

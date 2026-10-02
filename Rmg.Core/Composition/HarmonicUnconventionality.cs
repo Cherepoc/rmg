@@ -9,21 +9,25 @@ namespace Rmg.Core.Composition;
 ///     (<see cref="ChordShapes.Levels" />).
 /// </summary>
 /// <param name="Chords">The chords facet of its unconventionality, from 0 to 1.</param>
-public sealed record HarmonicUnconventionality(double Chords)
+/// <param name="Genre">The genre whose pool of the shapes its chords keep to.</param>
+public sealed record HarmonicUnconventionality(double Chords, Genre Genre)
 {
+    // the genre's pool of the shapes, none where it names none
+    private Func<ChordShape, double>? Pool => Genre.Pool<ChordShape>(GenreChoices.ChordShape, x => GenreChoices.Name(x.Name));
+
     /// <summary>
     ///     A chord: a shape of a level drawn by the chords facet, laid out by a voicing, as the heights of its notes above
     ///     the root in fractions of an octave, which <c>Render</c> snaps to the scale.
     /// </summary>
     public Chord GenerateChord(IGenerationContext context)
     {
-        return Voice(context, ChordShapes.Pick(context, ChordShapes.Levels, Chords));
+        return Voice(context, ChordShapes.Pick(context, ChordShapes.Levels, Chords, Pool, isOwn: false));
     }
 
     /// <summary>The home chord of a phrase, which stays plain for the release but in the wildest songs (<see cref="ChordShapes.HomeLevels" />).</summary>
     public Chord GenerateHomeChord(IGenerationContext context)
     {
-        return Voice(context, ChordShapes.Pick(context, ChordShapes.HomeLevels, Chords));
+        return Voice(context, ChordShapes.Pick(context, ChordShapes.HomeLevels, Chords, Pool, isOwn: true));
     }
 
     /// <summary>
@@ -32,7 +36,7 @@ public sealed record HarmonicUnconventionality(double Chords)
     /// </summary>
     public Chord GenerateCadenceChord(IGenerationContext context)
     {
-        return Voice(context, ChordShapes.PickCadence(context, Chords));
+        return Voice(context, ChordShapes.PickCadence(context, Chords, Pool));
     }
 
     private Chord Voice(IGenerationContext context, ChordShape shape)
