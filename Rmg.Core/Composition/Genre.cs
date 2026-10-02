@@ -15,7 +15,10 @@ public enum GenreChoiceKind
     Chances,
 
     /// <summary>Values, each its own: from 0, its least, through 1/2, as it is, to 1, its most; one not named as it is.</summary>
-    Values
+    Values,
+
+    /// <summary>A range, its two options its ends, "from" and "to", each from 0 to 1, the first no greater; both named or neither.</summary>
+    Range
 }
 
 /// <param name="Name">How a genre names it, unique in its choice.</param>
@@ -78,6 +81,14 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
         return Choices.TryGetValue(choice.Name, out var chances) && chances.TryGetValue(option, out var chance) ? chance : null;
     }
 
+    /// <summary>A range's ends, from 0 to 1, the first no greater; none where it is not named.</summary>
+    public (double From, double To)? Range(GenreChoice choice)
+    {
+        if (choice.Kind != GenreChoiceKind.Range)
+            throw new ArgumentException($"The choice {choice.Name} is not a range.", nameof(choice));
+        return Choices.TryGetValue(choice.Name, out var ends) ? (ends["from"], ends["to"]) : null;
+    }
+
     /// <summary>A value's shift, from -1, its least, through 0, as it is, to 1, its most.</summary>
     public double Shift(GenreChoice choice, string option)
     {
@@ -94,7 +105,7 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
 
     /// <summary>
     ///     A genre read from its choices' names, its options' and their amounts, or what is wrong with it: a choice or an
-    ///     option the songs do not have, an amount outside 0 to 1, or a pool that keeps nothing.
+    ///     option the songs do not have, an amount outside 0 to 1, a pool that keeps nothing, or a range not of two ends in order.
     /// </summary>
     public static Genre? Read(IReadOnlyDictionary<string, IReadOnlyDictionary<string, double>> choices, out string? error)
     {
@@ -124,6 +135,12 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
             if (choice.Kind == GenreChoiceKind.Pool && options.Values.All(x => x == 0))
             {
                 error = $"The pool of {name} keeps none of its options.";
+                return null;
+            }
+
+            if (choice.Kind == GenreChoiceKind.Range && !(options.TryGetValue("from", out var from) && options.TryGetValue("to", out var to) && from <= to))
+            {
+                error = $"The range of {name} is from one end to the other, the first no greater.";
                 return null;
             }
 

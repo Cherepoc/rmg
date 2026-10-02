@@ -262,6 +262,12 @@ genre in the link (`GenreSettings`). What is left:
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
   half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
   alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.
+- **The editor in a popup** (P1, planned): a `<dialog>`, full screen on a phone. Every choice a checkbox, named or
+  as the songs have it. A pool is rows, each a list of its options and a slider of no number, swapped in its list,
+  removed, or added as the next unused option; it starts from its commonest options, half the heaviest's weight or
+  more. Choices of the same fields for every part are tabs over one set of fields: the instruments by part, the
+  drums' roles, and every part's rhythm with its feel; a tab marks a part its genre names. The tempo a range of beats
+  a minute; one style for every list on the page.
 - **The rhythm's values against the part's own:** a value moves a setting by steps from where the part rests, so that
   one part's "faster" is another's "as fast as can be"; a value set outright, where it lands, would read the same for
   every part, should listening ask for it.

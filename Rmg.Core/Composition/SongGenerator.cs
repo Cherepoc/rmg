@@ -529,14 +529,8 @@ public static class SongGenerator
     {
         var drawn = new StateMapBuilder("Song")
             .Add(StateKinds.KeyOffset, Generators.Int(0, 12))
-            // the dyadic draw of the tempo, or, where a genre keeps to bands of it, a band by the genre's weights, as its pool's
-            // are the middle's, and a tempo in it as likely as the draw lands on it among the band's
-            .Add(StateKinds.Tempo, genre.Pool<double>(GenreChoices.Tempo, GenreChoices.TempoBandOf) is { } bands
-                ? (Func<IGenerationContext, double>)(c => c.Pick([
-                    ..TempoOptions.Select((x, i) => new Weighted<double>(bands(x) * TempoWeights[i] / BandWeight(GenreChoices.TempoBandOf(x)), x))
-                        .Where(x => x.Weight > 0)
-                ]))
-                : TempoGenerator)
+            // the dyadic draw of the tempo, or, where a genre gives a range of it, a tempo in the range, leaning to its middle
+            .Add(StateKinds.Tempo, genre.Range(GenreChoices.Tempo) is { } range ? c => TempoIn(c, range) : TempoGenerator)
             .AddNoteDurationLayer()
             .ToStateMap(context);
         if (overrides.Key is { } key)
@@ -554,23 +548,15 @@ public static class SongGenerator
             .Order()
     ];
 
-    // how likely the dyadic draw lands on every tempo, as its rank's weight shared among the rank's tempos
-    internal static ImmutableArray<double> TempoWeights { get; } = [..TempoOptionWeights()];
-
-    /// <summary>How likely the dyadic draw lands in a band of the tempos (<see cref="GenreChoices.TempoBands" />).</summary>
-    internal static double BandWeight(string band) => TempoOptions.Select((x, i) => (x, i)).Where(x => GenreChoices.TempoBandOf(x.x) == band).Sum(x => TempoWeights[x.i]);
-
-    private static IEnumerable<double> TempoOptionWeights()
+    /// <summary>
+    ///     A tempo in a range of amounts (<see cref="GenreChoices.TempoOf" />), leaning to its middle, as the mean of two
+    ///     draws across it does, at a whole number of beats a minute.
+    /// </summary>
+    internal static double TempoIn(IGenerationContext context, (double From, double To) range)
     {
-        var weight = WeightUtil.CreateGeometricRankWeightFunc(0, 0, 1.0, 0.75);
-        var ranks = Enumerable.Range(0, 5).Select(rank => (rank, slice: DyadicRankDistribution.GetMultiplierDistributionSlice(rank, 0.75, 1.5)))
-            .Where(x => !x.slice.IsEmpty).ToArray();
-        var total = ranks.Sum(x => weight(x.rank));
-        var options = TempoOptions.ToDictionary(x => x, _ => 0.0);
-        foreach (var (rank, slice) in ranks)
-        foreach (var multiplier in slice)
-            options[multiplier.Position] += weight(rank) / total / slice.Length;
-        return TempoOptions.Select(x => options[x]);
+        var across = (context.GenerateDouble() + context.GenerateDouble()) / 2;
+        var tempo = GenreChoices.TempoOf(range.From + (range.To - range.From) * across);
+        return Math.Round(tempo * Meter.BaseTempo) / Meter.BaseTempo;
     }
 }
 

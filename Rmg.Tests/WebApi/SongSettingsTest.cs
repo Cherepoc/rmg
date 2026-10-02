@@ -88,9 +88,9 @@ public sealed class SongSettingsTest
         await Assert.That(Mixed.Identity).IsEqualTo(MixedIdentity);
     }
 
-    public const string MixedText = "8_07ELSZgnu3jo_0-9zIyRxawjvsu_eo09IRajshQR5c0aI4Iej0fg5Od-xWJIIIC4LdOWGsmfoMQZ56T305ml604Gm";
+    public const string MixedText = "8_07ELSZgnu3jo_0-9zIyRxawjvsu_eo09IRajshQR5c0aI4Iej0fg5Od-xWJIIIC4LdOWGsmfoMQZ56T303mF60yFm";
 
-    public const string MixedIdentity = "hQ3_0ESgu32C012012011199992305ml604Gm";
+    public const string MixedIdentity = "hQ3_0ESgu32C012012011199992303mF60yFm";
 
     [Test]
     public async Task ATempoStep_RunsFrom60Through120To240BeatsAMinute_EveryStepFasterByAboutTheSame()

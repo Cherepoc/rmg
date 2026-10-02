@@ -19,7 +19,7 @@ public sealed class GenreReportTest
         return new Dictionary<string, string>
         {
             ["meter"] = Meter.NameOf(song.Map.Meter),
-            ["tempo"] = GenreChoices.TempoBandOf(tempo),
+            ["tempo"] = $"{(int)(tempo * Meter.BaseTempo / 15) * 15}s",
             ["swings"] = $"{draws.Swing.Delay > 0}",
             ["scale"] = draws.Scale.Name,
             ["drumSetup"] = $"{draws.DrumSetup}",
@@ -58,7 +58,7 @@ public sealed class GenreReportTest
             ["scale"] = ImmutableDictionary<string, double>.Empty.Add("dorian", 1).Add("major", 0.6).Add("mixolydian", 0.4),
             ["instrument.bass"] = ImmutableDictionary<string, double>.Empty.Add("acousticBass", 1).Add("contrabass", 0.3),
             ["instrument.melody"] = ImmutableDictionary<string, double>.Empty.Add("tenorSax", 1).Add("altoSax", 1).Add("trumpet", 0.8).Add("mutedTrumpet", 0.5),
-            ["tempo"] = ImmutableDictionary<string, double>.Empty.Add("moderate", 1).Add("brisk", 0.7).Add("slow", 0.3),
+            ["tempo"] = ImmutableDictionary<string, double>.Empty.Add("from", GenreChoices.AmountOfTempo(1)).Add("to", GenreChoices.AmountOfTempo(1.4)),
             ["chordShape"] = ImmutableDictionary<string, double>.Empty.Add("seventh", 1).Add("ninth", 0.6).Add("shell", 0.5).Add("sixNine", 0.3).Add("triad", 0.2)
         }.ToImmutableDictionary());
 

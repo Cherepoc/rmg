@@ -88,9 +88,11 @@ public sealed class GenreTest
         {
             await Assert.That(choice.Options.Select(x => x.Name).Distinct().Count()).IsEqualTo(choice.Options.Length).Because(choice.Name);
             await Assert.That(choice.Options.All(x => x.Name.Length > 0 && !x.Name.Contains(' '))).IsTrue().Because(choice.Name);
-            // every default as the songs have it: a pool's heaviest 1, a chance and a value as they are
+            // every default as the songs have it: a pool's heaviest 1, a range's the songs', a chance and a value as they are
             if (choice.Kind == GenreChoiceKind.Pool)
                 await Assert.That(choice.Options.Max(x => x.Default)).IsEqualTo(1).Because(choice.Name);
+            else if (choice.Kind == GenreChoiceKind.Range)
+                await Assert.That(choice["from"].Default).IsLessThanOrEqualTo(choice["to"].Default).Because(choice.Name);
             else
                 await Assert.That(choice.Options.All(x => x.Default == 0.5)).IsTrue().Because(choice.Name);
             await Assert.That(choice.Options.All(x => x.Default is >= 0 and <= 1)).IsTrue().Because(choice.Name);
@@ -105,7 +107,7 @@ public sealed class GenreTest
             (GenreChoices.Scale, [("dorian", 1), ("mixolydian", 0.5)]),
             (GenreChoices.Instruments[TrackRole.Bass], [("acousticBass", 1)]),
             (GenreChoices.Instruments[TrackRole.Melody], [("flute", 1), ("clarinet", 1)]),
-            (GenreChoices.Tempo, [("slow", 1)]),
+            (GenreChoices.Tempo, [("from", GenreChoices.AmountOfTempo(70 / Meter.BaseTempo)), ("to", GenreChoices.AmountOfTempo(85 / Meter.BaseTempo))]),
             (GenreChoices.DrumPieces, [..DrumPieces.All.Where(x => x.Name != "cowbell").Select(x => (x.Name, 1.0))])
         );
         var melody = new[] { 73, 71 };
@@ -116,7 +118,10 @@ public sealed class GenreTest
 
             await Assert.That(Meter.NameOf(song.Map.Meter)).IsEqualTo("3/4");
             await Assert.That(song.Song.Draws!.Scale.Name).IsIn(["Dorian", "Mixolydian"]);
-            await Assert.That(GenreChoices.TempoBandOf(song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(Rmg.Core.Events.StateKinds.Tempo))).IsEqualTo("slow");
+            // a tempo the songs never draw, below 90 beats a minute, a whole number of them
+            var bpm = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(Rmg.Core.Events.StateKinds.Tempo) * Meter.BaseTempo;
+            await Assert.That(bpm).IsBetween(70, 85);
+            await Assert.That(bpm).IsEqualTo(Math.Round(bpm)).Within(1e-9);
             var pitched = song.Song.TrackDefinitions.Values.OfType<PitchInstrumentTrack>().ToDictionary(x => x.Role, x => x.InstrumentCode);
             await Assert.That(pitched[TrackRole.Bass]).IsEqualTo(32);
             await Assert.That(pitched[TrackRole.Melody]).IsIn(melody);
@@ -240,6 +245,18 @@ public sealed class GenreTest
         }
 
         await Assert.That(keepers).IsGreaterThan(0);
+    }
+
+    [Test]
+    public async Task ATempoRange_LeansToItsMiddle()
+    {
+        var genre = Of((GenreChoices.Tempo, [("from", GenreChoices.AmountOfTempo(60 / Meter.BaseTempo)), ("to", GenreChoices.AmountOfTempo(240 / Meter.BaseTempo))]));
+        var tempos = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre))
+            .Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(Rmg.Core.Events.StateKinds.Tempo) * Meter.BaseTempo);
+
+        // within it, and its middle half, from 85 to 170, likelier than its outer halves together
+        await Assert.That(tempos.All(x => x is >= 60 and <= 240)).IsTrue();
+        await Assert.That(tempos.Count(x => x is >= 85 and <= 170)).IsGreaterThan(tempos.Length / 2);
     }
 
     [Test]

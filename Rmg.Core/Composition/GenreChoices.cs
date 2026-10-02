@@ -15,21 +15,24 @@ public static class GenreChoices
     private const string PartsAndDrums = "Parts and drums";
     private const string Rhythm = "Rhythm";
 
-    /// <summary>The tempos' bands, by the beats a minute they start at, the slowest first.</summary>
-    public static ImmutableArray<(string Name, string Label, double From)> TempoBands { get; } =
+    /// <summary>
+    ///     A tempo, as a multiple of <see cref="Composition.Meter.BaseTempo" />, by its amount from 0, 60 beats a minute,
+    ///     through 1/2, 120, to 1, 240, every like step a like ratio, as a tempo given is (the page's tempo's steps).
+    /// </summary>
+    public static double TempoOf(double amount) => Math.Pow(2, 2 * amount - 1);
+
+    /// <summary>A tempo's amount, as a multiple of <see cref="Composition.Meter.BaseTempo" /> (<see cref="TempoOf" />).</summary>
+    public static double AmountOfTempo(double tempo) => (Math.Log2(tempo) + 1) / 2;
+
+    /// <summary>
+    ///     The song's tempo, a range of them from 60 to 240 beats a minute, as wide as a tempo given may be, starting from the
+    ///     tempos the songs draw, from 90 to about 175.
+    /// </summary>
+    public static GenreChoice Tempo { get; } = new("tempo", "Tempo", TempoAndFeel, GenreChoiceKind.Range,
     [
-        ("slow", "Slow", 0),
-        ("moderate", "Moderate", 105),
-        ("brisk", "Brisk", 125),
-        ("fast", "Fast", 150)
-    ];
-
-    /// <summary>The band of a tempo, as a multiple of <see cref="Composition.Meter.BaseTempo" />.</summary>
-    public static string TempoBandOf(double tempo) => TempoBands.Last(x => tempo * Composition.Meter.BaseTempo >= x.From - 1e-9).Name;
-
-    /// <summary>The song's tempo, by the bands of the tempos it may draw.</summary>
-    public static GenreChoice Tempo { get; } = Pool("tempo", "Tempo", TempoAndFeel,
-        TempoBands.Select(band => (band.Name, band.Label, SongGenerator.BandWeight(band.Name))));
+        new("from", "From", AmountOfTempo(SongGenerator.TempoOptions[0])),
+        new("to", "To", AmountOfTempo(SongGenerator.TempoOptions[^1]))
+    ]);
 
     /// <summary>The meter the song's bars are in (<see cref="Composition.Meter.Options" />).</summary>
     public static GenreChoice Meter { get; } = Pool("meter", "Meter", TempoAndFeel,

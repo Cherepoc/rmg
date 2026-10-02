@@ -4,7 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
-      "tempo": { "moderate": 40, "brisk": 63, "fast": 40 },
+      "tempo": { "from": 28, "to": 42 },
       "meter": { "4/4": 63, "6/8": 4 },
       "scale": { "naturalMinor": 63, "mixolydian": 40, "major": 30, "dorian": 15, "phrygian": 6 },
       "chordShape": { "powerChord": 63, "triad": 24, "sus4": 20, "sus2": 15, "seventh": 8, "add9": 8 },
@@ -28,7 +28,7 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
-      "tempo": { "slow": 30, "moderate": 63, "brisk": 50, "fast": 20 },
+      "tempo": { "from": 28, "to": 50 },
       "meter": { "4/4": 63, "3/4": 8 },
       "feelChances": { "swing": 58 },
       "feelValues": { "swing": 44 },
@@ -53,7 +53,7 @@
     "name": "Electronic",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, bass and pads, a TR-808 or electronic kit, straight and fast, minor, sus and add9 chords.",
     "choices": {
-      "tempo": { "brisk": 63, "fast": 50, "moderate": 20 },
+      "tempo": { "from": 31, "to": 36 },
       "meter": { "4/4": 63 },
       "feelChances": { "swing": 10 },
       "scale": { "naturalMinor": 63, "dorian": 30, "phrygian": 15, "major": 15 },
@@ -81,7 +81,7 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano and pads, minor and Dorian.",
     "choices": {
-      "tempo": { "slow": 63, "moderate": 30 },
+      "tempo": { "from": 13, "to": 23 },
       "meter": { "4/4": 63 },
       "feelChances": { "swing": 58 },
       "feelValues": { "swing": 12 },
@@ -106,7 +106,7 @@
     "name": "Reggae",
     "description": "Slow, the one drop with the kick and snare on beat 3, the chords and a rhythm guitar skanking on the offbeats, a sparse repeating bass, organ, major and minor.",
     "choices": {
-      "tempo": { "slow": 63, "moderate": 40 },
+      "tempo": { "from": 6, "to": 19 },
       "meter": { "4/4": 63 },
       "scale": { "major": 63, "naturalMinor": 50, "dorian": 20, "mixolydian": 15 },
       "chordShape": { "triad": 63, "seventh": 20, "sus4": 8 },
@@ -130,7 +130,7 @@
     "name": "Latin",
     "description": "The kit and percussion, congas, bongos, claves, cowbell, timbales and a guiro, a time keeper in the tresillo's 3+3+2, the bass anticipating the beat, nylon guitar, piano and trumpet, minor and Dorian, fast.",
     "choices": {
-      "tempo": { "brisk": 63, "fast": 50, "moderate": 25 },
+      "tempo": { "from": 24, "to": 39 },
       "meter": { "4/4": 63, "6/8": 10 },
       "scale": { "naturalMinor": 63, "dorian": 50, "harmonicMinor": 20, "major": 30, "phrygianDominant": 8 },
       "chordShape": { "triad": 50, "seventh": 63, "ninth": 25, "sixth": 15 },
@@ -153,7 +153,7 @@
     "name": "Funk",
     "description": "The hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and a muted guitar comping in 16ths, brass, sevenths and ninths, Dorian and Mixolydian, everything repeating.",
     "choices": {
-      "tempo": { "moderate": 63, "brisk": 50, "slow": 15 },
+      "tempo": { "from": 21, "to": 32 },
       "meter": { "4/4": 63 },
       "scale": { "dorian": 63, "mixolydian": 63, "naturalMinor": 25 },
       "chordShape": { "seventh": 63, "ninth": 63, "sevenSus4": 25, "sixNine": 15, "sevenSharpNine": 10 },
@@ -175,7 +175,7 @@
     "name": "Folk",
     "description": "Steel and nylon guitars strummed, a fiddle, a banjo, a harmonica, an acoustic bass, plain triads, major and Mixolydian, 3/4 and 6/8 as likely as not, a tambourine and a shaker on a room kit.",
     "choices": {
-      "tempo": { "slow": 40, "moderate": 63, "brisk": 40 },
+      "tempo": { "from": 13, "to": 36 },
       "meter": { "4/4": 63, "3/4": 40, "6/8": 40 },
       "scale": { "major": 63, "mixolydian": 40, "dorian": 25, "naturalMinor": 30 },
       "chordShape": { "triad": 63, "sus4": 25, "sus2": 25, "add9": 10 },
@@ -197,7 +197,7 @@
     "name": "Blues",
     "description": "A shuffle, sevenths over Mixolydian, a harmonica, an overdriven guitar and an organ, slow to mid.",
     "choices": {
-      "tempo": { "slow": 63, "moderate": 50, "brisk": 15 },
+      "tempo": { "from": 4, "to": 30 },
       "meter": { "4/4": 63, "6/8": 15 },
       "feelChances": { "swing": 60 },
       "feelValues": { "swing": 56 },
@@ -219,7 +219,7 @@
     "name": "Ambient",
     "description": "Slow, pads, strings, a choir, a harp and a celesta, chords held long, sus and add9 chords, Lydian and major, the drums rare and sparse.",
     "choices": {
-      "tempo": { "slow": 63, "moderate": 20 },
+      "tempo": { "from": 0, "to": 16 },
       "meter": { "4/4": 63, "3/4": 20, "6/8": 15 },
       "scale": { "lydian": 63, "major": 50, "dorian": 30, "naturalMinor": 30, "mixolydian": 15 },
       "chordShape": { "add9": 63, "sus2": 63, "sus4": 40, "sixNine": 30, "triad": 30, "quartalTriad": 25, "lydian": 20 },
