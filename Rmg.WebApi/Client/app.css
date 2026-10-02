@@ -253,6 +253,77 @@ button.icon svg {
     fill: currentColor;
 }
 
+/* work under way (busy.js): a bar along the bottom of what waits for it, filling as it goes, or sweeping where how far
+   it has gone is not known */
+.working {
+    position: relative;
+}
+
+.work {
+    position: absolute;
+    left: 6px;
+    right: 6px;
+    bottom: 3px;
+    height: 3px;
+    border-radius: 2px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--accent) 22%, transparent);
+    pointer-events: none;
+}
+
+.work > span {
+    display: block;
+    height: 100%;
+    width: calc(var(--done) * 100%);
+    border-radius: inherit;
+    background: var(--accent);
+    transition: width 0.2s;
+}
+
+.work.sweeping > span {
+    width: 35%;
+    animation: sweep 1.2s ease-in-out infinite;
+}
+
+@keyframes sweep {
+    from {
+        transform: translateX(-100%);
+    }
+
+    to {
+        transform: translateX(290%);
+    }
+}
+
+/* a button waiting for the work faded as a disabled one is, all but its bar */
+button.working:disabled {
+    opacity: 1;
+}
+
+button.working:disabled > :not(.work) {
+    opacity: 0.45;
+}
+
+/* Play, filled with the accent, faded as its icon is, so that the bar shows on it */
+#play.working:disabled {
+    background: color-mix(in srgb, var(--accent) 25%, var(--panel));
+    border-color: transparent;
+}
+
+/* under the seed, and under a panel's heading, a little below the text rather than across it */
+.now-playing .work,
+summary .work {
+    left: 0;
+    right: 0;
+    bottom: -5px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .work.sweeping > span {
+        animation-duration: 4s;
+    }
+}
+
 .file-button input {
     position: absolute;
     width: 1px;
@@ -1033,7 +1104,7 @@ footer a:hover {
         order: 5;
     }
 
-    .now-playing > span {
+    .now-playing > span:first-child {
         position: absolute;
         width: 1px;
         height: 1px;

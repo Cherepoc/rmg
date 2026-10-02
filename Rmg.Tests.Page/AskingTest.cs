@@ -20,6 +20,30 @@ public sealed class AskingTest(Site site)
     }
 
     [Test]
+    public async Task ASongOnItsWay_NewOrMadeAgain_IsShownUnderTheSeed_UntilItIsHere()
+    {
+        await using var page = await SongPage.Open(site);
+        await page.FirstSong();
+        var making = page.Page.Locator(".now-playing [role=progressbar]");
+        await Assert.That(await making.CountAsync()).IsEqualTo(0);
+
+        page.Slow = Held;
+        await page.Page.Locator("#generate").ClickAsync();
+        await page.OnItsWay();
+        await Assert.That(await making.GetAttributeAsync("aria-label")).IsEqualTo("Making the song");
+        await page.Settled();
+        await page.Until(async () => await making.CountAsync() == 0, "the bar gone with the song here");
+
+        // and a song made again for a setting changed, which says nothing else of it
+        await page.SetSetting("fills", 10);
+        await page.OnItsWay();
+        await Assert.That(await making.IsVisibleAsync()).IsTrue();
+        await page.Settled();
+        await page.Until(async () => await making.CountAsync() == 0, "the bar gone with the song made again");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task ASeedFromTheList_WhileASongIsOnItsWay_TakesItsPlace()
     {
         await using var page = await WithTwoSongs();

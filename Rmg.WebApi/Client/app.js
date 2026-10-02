@@ -2,6 +2,7 @@ import {
     DRUM_KITS,
     INSTRUMENT_FAMILIES,
 } from "./instruments.js";
+import { hideWork, showWork } from "./busy.js";
 import { encodeMp3, renderSong } from "./export.js";
 import { createMediaControls } from "./media-session.js";
 import { getPlayer } from "./player.js";
@@ -49,6 +50,8 @@ const SOLO_ICON = "M12 3a9 9 0 0 0-9 9v7a2 2 0 0 0 2 2h3v-8H5v-1a7 7 0 0 1 14 0v
 const elements = {
     soundFont: document.getElementById("soundfont"),
     soundFontName: document.getElementById("soundfont-name"),
+    soundFontSummary: document.querySelector("#soundfont-panel > summary"),
+    nowPlaying: document.querySelector(".now-playing"),
     libraryRow: document.getElementById("library-row"),
     library: document.getElementById("library"),
     libraryLicense: document.getElementById("library-license"),
@@ -140,6 +143,8 @@ let isExporting = false;
 // the new song on its way: what it was asked for with, which an ask for the same leaves to come, and the settings of
 // the song on the page, which a Stop puts back
 let arrival = null;
+// how many songs are on their way, new or remade, which the song on the page shows it is waiting for
+let songsComing = 0;
 
 // whether the song on the page was rolled here rather than asked for by seed, which is the only kind
 // that leads to another when it ends, and which request to start a song once it arrives is the last one
@@ -173,6 +178,21 @@ function announce(message) {
 function setSoundFontState(message, isError = false) {
     elements.soundFontName.textContent = message;
     elements.soundFontName.classList.toggle("error", isError);
+}
+
+/**
+ *     A soundfont on its way, on the panel that names it and on Play, which waits for it: how much of it has arrived
+ *     where its size is known, and the bar sweeping where it is not, or while it is read.
+ */
+function showSoundFontWork(name, fraction) {
+    setSoundFontState(name);
+    showWork(elements.soundFontSummary, `Loading ${name}`, fraction);
+    showWork(elements.play, `Loading ${name}`, fraction);
+}
+
+function hideSoundFontWork() {
+    hideWork(elements.soundFontSummary);
+    hideWork(elements.play);
 }
 
 function formatTime(seconds) {
@@ -333,9 +353,9 @@ elements.keep.addEventListener("change", async () => {
     }
 
     const saving = source;
-    setStatus(`Saving ${saving.name}…`);
-
+    showWork(elements.soundFontSummary, `Saving ${saving.name}`);
     const problem = await store(saving.name, saving.blob);
+    hideWork(elements.soundFontSummary);
     if (problem !== null) {
         setStatus(`Could not save ${saving.name}: ${problem}.`, true);
         return;
@@ -359,7 +379,7 @@ function useSoundFont(name, read, origin, isStored = false) {
  *     Blob, and the player is handed a copy of its bytes, since loading detaches the buffer it is given.
  */
 async function loadSoundFont(name, read, origin, isStored = false) {
-    setSoundFontState(`Loading ${name}…`);
+    showSoundFontWork(name, null);
 
     let blob;
     let soundFont;
@@ -368,6 +388,7 @@ async function loadSoundFont(name, read, origin, isStored = false) {
         blob = data instanceof Blob ? data : new Blob([data]);
         soundFont = await blob.arrayBuffer();
     } catch (error) {
+        hideSoundFontWork();
         setStatus(`Could not read ${name}: ${explain(error)}`, true);
 
         // one already loaded is still the one playing, so it is what the page goes on showing
@@ -384,6 +405,8 @@ async function loadSoundFont(name, read, origin, isStored = false) {
         track("soundfont_failed", { detail: error.name || "unreadable", bytes: error.got ?? null });
         return;
     }
+
+    hideSoundFontWork();
 
     // kept only once the player has taken it, so a file that will not load never replaces one that does
     source = { name, blob, isStored };
@@ -523,7 +546,7 @@ async function download(file, name) {
 
                 pieces.push(value);
                 got += value.length;
-                setSoundFontState(`Downloading ${name}… ${sofar(got, total)}`);
+                showSoundFontWork(name, total > 0 ? got / total : null);
             }
 
             return new Blob(pieces);
@@ -531,7 +554,7 @@ async function download(file, name) {
             failure = error;
             if (attempt === DOWNLOAD_ATTEMPTS || error.isFinal) break;
 
-            setSoundFontState(`Downloading ${name}… ${sofar(got, total)}, trying again`);
+            setSoundFontState(`${name}, trying again`);
             await pause(400 * attempt);
         }
     }
@@ -539,10 +562,6 @@ async function download(file, name) {
     // how far it got says which kind of failure this was: nothing at all, or a connection that gave out
     failure.got = got;
     throw failure;
-}
-
-function sofar(got, total) {
-    return total > 0 ? formatPercent(got / total) : formatSize(got);
 }
 
 /** Waits, and stops waiting the moment the signal, if any, lets go, which it throws as the fetch it stands in for would. */
@@ -845,9 +864,11 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         updateGenerateButtons();
         cancelRegeneration();
         cancelDownloadRefresh();
-        setStatus("Generating…");
+        setStatus("");
     }
 
+    songsComing++;
+    showWork(elements.nowPlaying, "Making the song");
     try {
         const response = await requestSong(requestFor(seed, settings), signal);
         if (!response.ok) {
@@ -913,6 +934,8 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         track("song_failed", { detail: error.name || "failed" });
         return false;
     } finally {
+        if (--songsComing === 0) hideWork(elements.nowPlaying);
+
         // one let go of for a newer song leaves the page to that one, and one stopped leaves it as it was, with the
         // settings of the song on it
         if (ask !== null && arrival === ask) {
@@ -1291,7 +1314,9 @@ async function exportMp3() {
 
     isExporting = true;
     updateTransport();
-    setStatus("Fetching the song…");
+    setStatus("");
+    // the song fetched, then rendered through the soundfont for the first half and encoded for the second
+    showWork(elements.exportMp3, `Exporting ${name}`);
 
     try {
         const response = await requestSong(requestFor(songSeed, settings));
@@ -1300,11 +1325,10 @@ async function exportMp3() {
         const song = await response.arrayBuffer();
         const soundFont = await exporting.blob.arrayBuffer();
 
-        const audio = await renderSong(song, soundFont, (progress) =>
-            setStatus(`Rendering ${formatPercent(progress)}…`));
+        const audio = await renderSong(song, soundFont, (progress) => showWork(elements.exportMp3, `Exporting ${name}`, progress / 2));
 
         const mp3 = await encodeMp3(audio, Number(elements.bitrate.value), (progress) =>
-            setStatus(`Encoding ${formatPercent(progress)}…`));
+            showWork(elements.exportMp3, `Exporting ${name}`, 0.5 + progress / 2));
 
         offerExport(mp3, name);
         announce(`Exported ${name}, ${formatSize(mp3.size)}.`);
@@ -1312,6 +1336,7 @@ async function exportMp3() {
     } catch (error) {
         setStatus(`Could not export ${name}: ${error.message}`, true);
     } finally {
+        hideWork(elements.exportMp3);
         isExporting = false;
         updateTransport();
     }
