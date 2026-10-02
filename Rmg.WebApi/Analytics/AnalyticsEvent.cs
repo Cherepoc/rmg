@@ -21,6 +21,9 @@ public static class EventNames
     public const string ExportedMp3 = "export_mp3";
     public const string Shared = "shared";
 
+    /// <summary>A genre was chosen, its detail the preset's id, "own" for one made here, or "none".</summary>
+    public const string GenreChosen = "genre_chosen";
+
     /// <summary>
     ///     A song's rating changed, its detail the change, "from>to", each "up", "down" or "none": a like is "none>up", a
     ///     like turned into a dislike "up>down" and taken back "down>none".
@@ -30,7 +33,7 @@ public static class EventNames
     private static readonly HashSet<string> Known =
     [
         PageOpen, SongGenerated, SongFailed, SoundFontReady, SoundFontFailed, AudioReady,
-        Played, Listened, MixChanged, DownloadedMidi, ExportedMp3, Shared, Rated
+        Played, Listened, MixChanged, DownloadedMidi, ExportedMp3, Shared, Rated, GenreChosen
     ];
 
     public static bool IsKnown(string? name)

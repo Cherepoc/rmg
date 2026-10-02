@@ -19,6 +19,7 @@ import {
     recall,
     recallHistory,
     recallRating,
+    recallGenres,
     recallSettings,
     setAutoplaying,
     setKeeping,
@@ -42,7 +43,8 @@ import {
     toStep,
     withoutGenre,
 } from "./settings.js";
-import { applyReport, defaultSettings, givenOnly, isEveryPartOff, requestFor } from "./song-settings.js";
+import { applyReport, defaultSettings, givenOnly, isEveryPartOff, noGenre, requestFor } from "./song-settings.js";
+import { asGenre, hasAGenre, isSameGenre, PRESETS } from "./genres.js";
 import { since, tell, track } from "./tally.js";
 
 const PLAY_ICON = "M8 5v14l11-7z";
@@ -1072,7 +1074,8 @@ function keepCurrentSettings() {
     if (!isGenreUnread) keepSettings(formatSettings(givenOnly(settings)));
     const given = [settings.unconventionality, settings.tempo, settings.key, settings.mode, settings.meter, settings.swing, ...FACETS.map((facet) => settings.facets[facet])].filter((x) => x.isGiven).length
         + PARTS.filter((part) => settings.parts[part].plays !== "random").length
-        + (settings.drumPieces.isGiven ? 1 : 0);
+        + (settings.drumPieces.isGiven ? 1 : 0)
+        + (hasAGenre(settings.genre) ? 1 : 0);
     elements.settingsState.textContent = given === 0 ? "All drawn" : `${given} given`;
 }
 
@@ -1560,6 +1563,9 @@ const CHOICES = ["key", "mode", "meter"];
 
 const KEY_NAMES = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
 
+/** The list of genres, which waits for the choices a genre is written by. */
+let genreSelect = null;
+
 // every choice's row, by its key: the key, the mode and the meter, listed as the server lists them
 const choiceRows = new Map();
 
@@ -1577,8 +1583,9 @@ buildSettings();
 
 /** The settings panel: the values that change the song, every part's row of the mixer, and the drums'. */
 function buildSettings() {
-    // in the order they are named, the key, the mode and the meter chosen from a list and every other on a slider
-    elements.songSettings.append(...Object.keys(SETTING_NAMES).map((key) => (CHOICES.includes(key) ? createChoiceRow(key) : createSettingRow(key))));
+    // the genre first, then in the order they are named, the key, the mode and the meter chosen from a list and every
+    // other on a slider
+    elements.songSettings.append(createGenreRow(), ...Object.keys(SETTING_NAMES).map((key) => (CHOICES.includes(key) ? createChoiceRow(key) : createSettingRow(key))));
     // the drums last, their groups under them, each with its pieces
     elements.mixer.append(...PARTS.filter((part) => part !== "drum").map(createPartRow), createPartRow("drum"), ...DRUM_GROUPS.map(createDrumGroupRow));
 
@@ -1645,6 +1652,77 @@ function showChoice(key) {
     row.given.checked = setting.isGiven;
     row.select.disabled = !setting.isGiven;
     if (row.select.options.length > setting.value) row.select.value = String(setting.value);
+}
+
+// --- the genre ---------------------------------------------------------------
+
+
+const GENRE_DESCRIPTION = "What the song's draws keep to: its tempo and feel, its harmony, its instruments, its drums and its rhythm. "
+    + "A preset, or one of your own; none for the songs as they are.";
+
+/** The genre's row: a list of none, the presets and the genres made here, and the song's own where it is none of them. */
+function createGenreRow() {
+    const label = document.createElement("span");
+    label.className = "setting-name";
+    label.textContent = "Genre";
+
+    genreSelect = document.createElement("select");
+    genreSelect.setAttribute("aria-label", "Genre");
+    genreSelect.setAttribute("aria-description", GENRE_DESCRIPTION);
+    genreSelect.disabled = true;
+    genreSelect.addEventListener("change", () => chooseGenre(genreSelect.value));
+
+    // where a given value's checkbox is, nothing, as a genre is chosen or none
+    const none = document.createElement("span");
+    const place = document.createElement("span");
+    place.className = "setting-slider";
+    const end = document.createElement("span");
+    end.className = "end";
+    end.setAttribute("aria-hidden", "true");
+    place.append(end, genreSelect);
+    const row = document.createElement("div");
+    row.className = "setting";
+    row.title = GENRE_DESCRIPTION;
+    row.append(none, label, place);
+    return row;
+}
+
+/** Every genre the list offers, by its value in it: the presets, then the genres made here. */
+function listedGenres() {
+    return [
+        ...PRESETS.map((preset) => ({ value: `preset:${preset.id}`, genre: asGenre(preset), group: "Presets" })),
+        ...recallGenres().map((genre, i) => ({ value: `own:${i}`, genre: asGenre(genre), group: "Yours" })),
+    ];
+}
+
+/** The list as the settings have it: the genre chosen, or the song's own, as a link brought it, under its name. */
+function showGenre() {
+    if (genreSelect === null) return;
+
+    const listed = listedGenres();
+    const chosen = hasAGenre(settings.genre) ? listed.find((x) => isSameGenre(x.genre, settings.genre)) : null;
+    const groups = new Map();
+    for (const item of listed) {
+        if (!groups.has(item.group)) {
+            const group = document.createElement("optgroup");
+            group.label = item.group;
+            groups.set(item.group, group);
+        }
+        groups.get(item.group).append(createOption(item.value, item.genre.name || "Unnamed"));
+    }
+    const options = [createOption("none", "None"), ...groups.values()];
+    if (hasAGenre(settings.genre) && chosen === undefined) options.splice(1, 0, createOption("song", settings.genre.name || "This song's genre"));
+    genreSelect.replaceChildren(...options);
+    genreSelect.value = !hasAGenre(settings.genre) ? "none" : chosen?.value ?? "song";
+}
+
+/** Asks for the song again in the genre chosen, or in none. */
+function chooseGenre(value) {
+    if (value === "song") return;
+    settings.genre = value === "none" ? noGenre() : asGenre(listedGenres().find((x) => x.value === value).genre);
+    track("genre_chosen", { detail: value.startsWith("preset:") ? value.slice("preset:".length) : value.startsWith("own:") ? "own" : "none" });
+    showGenre();
+    settingsChanged(true);
 }
 
 /** The tempos, meters, drum pieces and scales a song may be given, from the server, which only it knows. */
@@ -2048,6 +2126,7 @@ document.addEventListener("pointerdown", (event) => {
 
 /** Puts the settings, and what the song on the page drew and is made of, on the panel. */
 function showSettings() {
+    showGenre();
     for (const key of settingRows.keys()) showSetting(key);
     for (const key of choiceRows.keys()) showChoice(key);
 
@@ -2413,6 +2492,7 @@ async function listGenreChoices() {
         if (!response.ok) return null;
         const choices = await response.json();
         setGenreChoices(choices);
+        if (genreSelect !== null) genreSelect.disabled = false;
         return choices;
     } catch {
         return null;

@@ -6,6 +6,7 @@ const AUTOPLAY = "rmg.autoplay";
 const HISTORY = "rmg.songs";
 const RATINGS = "rmg.song-ratings";
 const SETTINGS = "rmg.settings";
+const GENRES = "rmg.genres";
 
 /** How many ratings the browser keeps, the oldest let go of first. */
 const RATINGS_KEPT = 500;
@@ -49,6 +50,25 @@ export function recallSettings() {
         return localStorage.getItem(SETTINGS);
     } catch {
         return null;
+    }
+}
+
+/** The genres made in this browser (genres.js), each a name and what it says of the choices; none for none. */
+export function recallGenres() {
+    try {
+        const kept = JSON.parse(localStorage.getItem(GENRES) ?? "[]");
+        return Array.isArray(kept) ? kept.filter((x) => typeof x?.name === "string" && typeof x?.choices === "object" && x.choices !== null) : [];
+    } catch {
+        return [];
+    }
+}
+
+export function keepGenres(genres) {
+    try {
+        if (genres.length === 0) localStorage.removeItem(GENRES);
+        else localStorage.setItem(GENRES, JSON.stringify(genres));
+    } catch {
+        // a browser that will not remember them keeps them for this visit only
     }
 }
 

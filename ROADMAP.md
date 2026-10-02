@@ -337,8 +337,6 @@ of what it sounds like, agreed as a start:
 
 **Steps,** each committed and measured on its own, per preset 64 songs against none, the fingerprint unchanged with
 no genre:
-11. *The page's picker:* None, the presets, the genres made here, above the settings, kept as the settings are, in the
-    link and the history. Page tests.
 12. *The editor:* from a preset or from none, the choices in their groups, each a row of the options it keeps with a
     weight from 0 to 63, an option added from the choice's list, chances and values as sliders, a name; kept in
     localStorage, one opened from a link savable, exported and imported as JSON. Page tests.
