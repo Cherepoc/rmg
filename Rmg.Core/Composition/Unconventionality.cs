@@ -126,6 +126,10 @@ public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, d
 ///     The drums the song plays, by their names (<see cref="Composition.DrumPieces" />), in place of those it draws, which
 ///     make its setup.
 /// </param>
+/// <param name="Scale">The scale the song starts in, on its key, which its sections may change as its scale facet allows.</param>
+/// <param name="Swing">
+///     How much the song swings, from 0, straight, to 1, a triplet's swing, where its meter pairs its notes; 0 is straight.
+/// </param>
 public sealed record SongOverrides(
     Meter? Meter = null,
     double? Base = null,
@@ -135,7 +139,9 @@ public sealed record SongOverrides(
     int? MeterOption = null,
     double? Tempo = null,
     int? Key = null,
-    ImmutableHashSet<string>? DrumPieces = null
+    ImmutableHashSet<string>? DrumPieces = null,
+    Scale? Scale = null,
+    double? Swing = null
 )
 {
     public static SongOverrides None { get; } = new();

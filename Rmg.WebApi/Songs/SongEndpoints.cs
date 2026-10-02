@@ -17,12 +17,13 @@ public static class SongEndpoints
     {
         routes.MapPost("/api/songs/generate", GenerateSong);
 
-        // what a song may be given: its tempos, in beats a minute, by their steps, and its meters, in the order a request
-        // names them by
+        // what a song may be given: its tempos, in beats a minute, by their steps, its meters, its drum pieces and its
+        // scales, in the order a request names them by
         routes.MapGet("/api/songs/options", () => Results.Ok(new SongOptions(
             [..Enumerable.Range(0, TempoScale.Steps).Select(x => TempoScale.Multiplier(x) * Meter.BaseTempo)],
             [..Meter.Options.Select(x => $"{x.Meter.TimeSignature.Numerator}/{x.Meter.TimeSignature.Denominator}")],
-            DrumPieces.All
+            DrumPieces.All,
+            [..Scales.All.Select(x => x.Name)]
         )));
 
         // what the page shows as RMG's version
@@ -138,7 +139,8 @@ public static class SongEndpoints
 /// <param name="Tempos">The tempos, in beats a minute, by their steps (<see cref="TempoScale" />).</param>
 /// <param name="Meters">The meters, as time signatures.</param>
 /// <param name="DrumPieces">The drum pieces, by the names a request gives them in, with their groups and the notes they sound.</param>
-public sealed record SongOptions(ImmutableArray<double> Tempos, ImmutableArray<string> Meters, ImmutableArray<DrumPiece> DrumPieces);
+/// <param name="Modes">The scales a song may start in, by their names.</param>
+public sealed record SongOptions(ImmutableArray<double> Tempos, ImmutableArray<string> Meters, ImmutableArray<DrumPiece> DrumPieces, ImmutableArray<string> Modes);
 
 /// <summary>RMG's version: the songs' number, which goes up when the songs change, and the commit it is built from.</summary>
 public sealed record VersionResponse(string Version, string? Commit);

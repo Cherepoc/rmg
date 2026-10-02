@@ -23,7 +23,7 @@ public sealed record Scale(string Name, ImmutableArray<int> Offsets, ByConventio
 ///     The scales a song can be in. They all have seven notes, since the chord root moves by scale steps and chord
 ///     heights are placed between the qualities a 7-note scale gives; scales of other sizes need more than that.
 /// </summary>
-internal static class Scales
+public static class Scales
 {
     /// <summary>How many notes every scale has.</summary>
     public const int StepCount = 7;
@@ -76,7 +76,7 @@ internal static class Scales
     public const double Closeness = 0.3;
 
     /// <summary>A song's scale, by the scale facet of its unconventionality.</summary>
-    public static Scale Pick(IGenerationContext context, double unconventionality)
+    internal static Scale Pick(IGenerationContext context, double unconventionality)
     {
         return context.Pick(ByConvention.Weigh(All.Select(x => (x, x.Weight)), unconventionality));
     }
@@ -87,7 +87,7 @@ internal static class Scales
     ///     and leaning brighter or darker by the tilt, such as the section's energy; one the facet allows, and none it
     ///     does not; a section that contrasts, such as a chorus, changing the likelier by its contrast.
     /// </summary>
-    public static Scale PickSection(IGenerationContext context, Scale song, double unconventionality, Tilt tilt, Tilt contrast)
+    internal static Scale PickSection(IGenerationContext context, Scale song, double unconventionality, Tilt tilt, Tilt contrast)
     {
         if (!context.TestProbability(contrast.Chance(SectionChange.At(unconventionality), 1)))
             return song;

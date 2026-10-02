@@ -59,6 +59,10 @@ public static class SongGenerator
             throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Tempo, "A tempo is a positive multiple of the base tempo.");
         if (overrides.Key is < 0 or > 11)
             throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Key, "A key is from 0 to 11.");
+        if (overrides.Swing is < 0 or > 1 or double.NaN)
+            throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Swing, "A swing is from 0 to 1.");
+        if (overrides.Scale is { } given && !Scales.All.Contains(given))
+            throw new ArgumentOutOfRangeException(nameof(overrides), given.Name, "A scale is one of the scales.");
         if (overrides.DrumPieces is { } pieces && (pieces.IsEmpty || !pieces.All(DrumPieces.IsPiece)))
             throw new ArgumentOutOfRangeException(nameof(overrides), "Drums given are one or more of the drum pieces.");
 
@@ -112,7 +116,9 @@ public static class SongGenerator
         // the song's chords gather around its unconventionality, and a section's around its own shift of it
         var harmonyContext = Stream(SongStream.Harmony);
         var unconventionality = new HarmonicUnconventionality(songUnconventionality[Facet.Chords]);
+        // drawn when it is given too, so that the rest is as it was
         var scale = Scales.Pick(harmonyContext, songUnconventionality[Facet.Scale]);
+        scale = overrides.Scale ?? scale;
         StateTrace.Record(TracePoints.SongHarmony, SongTracks.ChordsTrack, 0, 0, StateMap.Default, 0, $"{unconventionality.Chords:F2} {scale.Name}", (unconventionality, scale));
         // the feel the song plays in, straight or a tuplet, from a sequence of its own, by its feel facet
         var feel = Feels.DrawSong(Stream(SongStream.Feel), songUnconventionality[Facet.Feel]);
@@ -140,7 +146,7 @@ public static class SongGenerator
         var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), overrides);
         // how the song swings, which its tempo sets the notes of
         var grooveContext = Stream(SongStream.Groove);
-        var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), songUnconventionality[Facet.Feel], meter);
+        var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), songUnconventionality[Facet.Feel], meter, overrides.Swing);
         StateTrace.Record(TracePoints.Swing, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{swing.Delay:F3} of {swing.Period}", swing);
 
         var sectionGenerator = new SectionGenerator(
@@ -464,7 +470,7 @@ public static class SongGenerator
             (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Expression), section), track))
         );
 
-        return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality, [..SongParts.All.Except(absent)], tracks.DrumSetup, [..tracks.SongDrums.Select(DrumPieces.NameOf)]));
+        return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality, [..SongParts.All.Except(absent)], tracks.DrumSetup, [..tracks.SongDrums.Select(DrumPieces.NameOf)], scale, swing));
     }
 
     /// <summary>The random sequence a stage of the song of the given seed draws from.</summary>

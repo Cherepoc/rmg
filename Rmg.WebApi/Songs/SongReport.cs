@@ -19,6 +19,8 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Tempo">Its tempo, by its step (<see cref="TempoScale" />), the nearest to a tempo it drew.</param>
 /// <param name="Key">Its key, as semitones above C.</param>
 /// <param name="Meter">Its meter, by its place among the meters (<c>/api/songs/options</c>).</param>
+/// <param name="Mode">The scale it starts in, by its place among the scales (<c>/api/songs/options</c>).</param>
+/// <param name="Swing">How much it swings, from 0, straight, to 63, a triplet's swing: 0 where its meter pairs no notes to swing.</param>
 public sealed record SongReport(
     Drawn<int> Unconventionality,
     ImmutableSortedDictionary<string, Drawn<int>> Facets,
@@ -27,7 +29,9 @@ public sealed record SongReport(
     ImmutableArray<string> DrumGroups,
     Drawn<int> Tempo,
     Drawn<int> Key,
-    Drawn<int> Meter
+    Drawn<int> Meter,
+    Drawn<int> Mode,
+    Drawn<int> Swing
 )
 {
     public static SongReport Of(Song song, RenderedSong rendered, SongOverrides overrides)
@@ -60,7 +64,9 @@ public sealed record SongReport(
             [..groups.Select(Name)],
             new Drawn<int>(TempoScale.StepOf(common.GetStateValue(StateKinds.Tempo)), overrides.Tempo is not null),
             new Drawn<int>(common.GetStateValue(StateKinds.KeyOffset).Mod(12), overrides.Key is not null),
-            new Drawn<int>(Core.Composition.Meter.OptionOf(song.Meter), overrides.MeterOption is not null || overrides.Meter is not null)
+            new Drawn<int>(Core.Composition.Meter.OptionOf(song.Meter), overrides.MeterOption is not null || overrides.Meter is not null),
+            new Drawn<int>(Scales.All.IndexOf(draws.Scale), overrides.Scale is not null),
+            new Drawn<int>(StepScale.ToStep(draws.SwingAmount), overrides.Swing is not null)
         );
     }
 

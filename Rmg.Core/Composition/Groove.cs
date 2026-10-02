@@ -49,10 +49,14 @@ internal static class Groove
 
     /// <param name="meter">The meter the song's bars are in, whose groups a pair must divide to swing, as 6/8's 8ths do not.</param>
     /// <param name="unconventionality">The feel facet of the song's unconventionality.</param>
-    public static Swing Generate(IGenerationContext context, double tempo, double unconventionality, Meter meter)
+    /// <param name="given">How much the song swings where it is given, as a part of the triplet's, 0 for straight.</param>
+    public static Swing Generate(IGenerationContext context, double tempo, double unconventionality, Meter meter, double? given)
     {
+        // drawn when it is given too, so that the rest is as it was
         var swings = context.TestProbability(SwingChance.At(unconventionality));
         var amount = LightestSwing + (1 - LightestSwing) * context.GenerateDouble();
+        if (given is { } amountGiven)
+            (swings, amount) = (amountGiven > 0, amountGiven);
 
         var sixteenth = 60 / (Meter.BaseTempo * tempo) / 4;
         var period = sixteenth >= ShortestSwungNote ? 0.5 : 1;

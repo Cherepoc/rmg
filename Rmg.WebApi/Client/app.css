@@ -664,8 +664,10 @@ input[type="range"] {
     cursor: pointer;
 }
 
-/* a list where a slider is, as far in as a slider's own margin */
+/* a list where a slider is, as far in as a slider's own margin, and narrower than its longest option where the row is,
+   as a scale's long name would make it on a phone */
 .setting-slider select {
+    min-width: 0;
     margin-left: 2px;
 }
 

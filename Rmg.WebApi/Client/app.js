@@ -1057,7 +1057,7 @@ function restoreSettings() {
 /** Keeps the settings for the next visit, and says how many of them change the song. */
 function keepCurrentSettings() {
     keepSettings(formatSettings(givenOnly(settings)));
-    const given = [settings.unconventionality, settings.tempo, settings.key, settings.meter, ...FACETS.map((facet) => settings.facets[facet])].filter((x) => x.isGiven).length
+    const given = [settings.unconventionality, settings.tempo, settings.key, settings.mode, settings.meter, settings.swing, ...FACETS.map((facet) => settings.facets[facet])].filter((x) => x.isGiven).length
         + PARTS.filter((part) => settings.parts[part].plays !== "random").length
         + (settings.drumPieces.isGiven ? 1 : 0);
     elements.settingsState.textContent = given === 0 ? "All drawn" : `${given} given`;
@@ -1517,7 +1517,9 @@ const SETTING_NAMES = {
     unconventionality: ["How experimental", "How far the whole song strays from convention. Every facet below is drawn around it, so that a song can be plain in one way and wild in another; a facet given is set outright."],
     tempo: ["Tempo", "The song's tempo, in beats a minute: 60 at the left, 120 in the middle and 240 at the right. Its sections may change it, as its feel allows, and an ending may slow it."],
     key: ["Key", "The key the song starts in. Its key changes, as its scale allows, move on from it."],
+    mode: ["Mode", "The scale the song starts in, on its key: major, minor, a mode or a stranger scale. Its sections may change it, as its scale allows."],
     meter: ["Meter", "The beats of the first section's bars. Its later sections may change the meter, as its feel allows."],
+    swing: ["Swing", "How late the second of every pair of notes plays: straight at the left, a triplet's swing at the right. A meter that does not pair its notes, such as 6/8, plays straight."],
     feel: ["Feel", "How the time moves: odd meters and meter changes, tuplets and polymeters, swing, and tempo changes between sections."],
     form: ["Form", "How the song is put together: its sections and their order, which parts play where, and its solos."],
     scale: ["Scale", "The notes the song draws on: modes beyond major and minor, key changes, and the scales its lines take."],
@@ -1530,7 +1532,7 @@ const SETTING_NAMES = {
 };
 
 // a slider's two ends, where they are not the plain and the experimental
-const SCALE_ENDS = { tempo: ["Slow", "Fast"] };
+const SCALE_ENDS = { tempo: ["Slow", "Fast"], swing: ["Straight", "Triplet"] };
 
 const PART_NAMES = { melody: "Melody", chords: "Chords", bass: "Bass", pad: "Pad", counterMelody: "Counter-melody", drum: "Drums", riff: "Riff", rhythm: "Rhythm", solo: "Soloist" };
 
@@ -1540,9 +1542,12 @@ const DRUM_GROUP_NAMES = {
 
 
 
+/** The values chosen from a list rather than on a slider. */
+const CHOICES = ["key", "mode", "meter"];
+
 const KEY_NAMES = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
 
-// every choice's row, by its key: the key and the meter, listed as the server lists them
+// every choice's row, by its key: the key, the mode and the meter, listed as the server lists them
 const choiceRows = new Map();
 
 // the tempos a song may be given, in beats a minute, by their steps, as the server lists them
@@ -1559,8 +1564,8 @@ buildSettings();
 
 /** The settings panel: the values that change the song, every part's row of the mixer, and the drums'. */
 function buildSettings() {
-    // in the order they are named, the key and the meter chosen from a list and every other on a slider
-    elements.songSettings.append(...Object.keys(SETTING_NAMES).map((key) => (key === "key" || key === "meter" ? createChoiceRow(key) : createSettingRow(key))));
+    // in the order they are named, the key, the mode and the meter chosen from a list and every other on a slider
+    elements.songSettings.append(...Object.keys(SETTING_NAMES).map((key) => (CHOICES.includes(key) ? createChoiceRow(key) : createSettingRow(key))));
     // the drums last, their groups under them, each with its pieces
     elements.mixer.append(...PARTS.filter((part) => part !== "drum").map(createPartRow), createPartRow("drum"), ...DRUM_GROUPS.map(createDrumGroupRow));
 
@@ -1579,7 +1584,7 @@ function setSetting(key, setting) {
 }
 
 /**
- *     A value that changes the song and is one of a list, the key or the meter: checked, it is given, and the list sets
+ *     A value that changes the song and is one of a list, the key, the mode or the meter: checked, it is given, and the list sets
  *     it; unchecked, the list shows what the song on the page drew.
  */
 function createChoiceRow(key) {
@@ -1629,7 +1634,7 @@ function showChoice(key) {
     if (row.select.options.length > setting.value) row.select.value = String(setting.value);
 }
 
-/** The tempos, meters and drum pieces a song may be given, from the server, which only it knows. */
+/** The tempos, meters, drum pieces and scales a song may be given, from the server, which only it knows. */
 async function listChoices() {
     try {
         const response = await fetch(new URL("api/songs/options", location.href));
@@ -1644,10 +1649,12 @@ async function listChoices() {
         evenDrumGroupRows();
         showSettings();
         choiceRows.get("meter").select.append(...options.meters.map((x, i) => createOption(String(i), x)));
+        choiceRows.get("mode").select.append(...options.modes.map((x, i) => createOption(String(i), x)));
         showSetting("tempo");
         showChoice("meter");
+        showChoice("mode");
     } catch {
-        // without the lists, the tempo and the meter are the songs' own
+        // without the lists, the tempo, the meter and the mode are the songs' own
     }
 }
 

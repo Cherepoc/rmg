@@ -27,6 +27,38 @@ public sealed class GivenTempoKeyMeterTest
     }
 
     [Test]
+    public async Task AGivenScaleAndSwing_AreTheSongs_TheRestAsItsSeedMadeIt()
+    {
+        var swung = 0;
+        foreach (var seed in Enumerable.Range(0, 8))
+        {
+            var drawn = TestCorpus.Get(seed);
+            var scale = Core.Composition.Scales.All.First(x => x != drawn.Song.Draws!.Scale);
+            var given = TestCorpus.Get(seed, new SongOverrides(Scale: scale, Swing: 0.5));
+
+            var (_, songScale) = ((HarmonicUnconventionality, Scale))given.Trace.Single(x => x.Point == TracePoints.SongHarmony).Value!;
+            await Assert.That(songScale).IsEqualTo(scale);
+            // swung half a triplet's swing, or straight where the meter pairs no notes to swing
+            var amount = given.Song.Draws!.SwingAmount;
+            await Assert.That(amount is 0 || Math.Abs(amount - 0.5) < 1e-9).IsTrue();
+            swung += amount > 0 ? 1 : 0;
+            // and the rest drawn as it was: the same form, tempo and instruments
+            await Assert.That(given.Map.Sections.Select(x => (x.SectionId, x.Duration))).IsEquivalentTo(drawn.Map.Sections.Select(x => (x.SectionId, x.Duration)));
+            await Assert.That(Start(given).GetStateValue(StateKinds.Tempo)).IsEqualTo(Start(drawn).GetStateValue(StateKinds.Tempo));
+            await Assert.That(given.Rendered.Tracks.Select(x => x.PitchInstrumentCode)).IsEquivalentTo(drawn.Rendered.Tracks.Select(x => x.PitchInstrumentCode));
+        }
+
+        await Assert.That(swung).IsGreaterThan(4);
+    }
+
+    [Test]
+    public async Task ASwingOf0_IsStraight()
+    {
+        foreach (var seed in Enumerable.Range(0, 8))
+            await Assert.That(TestCorpus.Get(seed, new SongOverrides(Swing: 0)).Song.Draws!.Swing).IsEqualTo(Swing.None);
+    }
+
+    [Test]
     public async Task GivenAsDrawn_LeavesTheSongAsItsSeedMadeIt()
     {
         foreach (var seed in Enumerable.Range(0, 4))
@@ -35,7 +67,9 @@ public sealed class GivenTempoKeyMeterTest
             var given = TestCorpus.Get(seed, new SongOverrides(
                 Tempo: Start(drawn).GetStateValue(StateKinds.Tempo),
                 Key: Start(drawn).GetStateValue(StateKinds.KeyOffset),
-                MeterOption: Meter.OptionOf(drawn.Map.Meter)
+                MeterOption: Meter.OptionOf(drawn.Map.Meter),
+                Scale: drawn.Song.Draws!.Scale,
+                Swing: drawn.Song.Draws.SwingAmount
             ));
 
             await Assert.That(Write(given)).IsEquivalentTo(Write(drawn));

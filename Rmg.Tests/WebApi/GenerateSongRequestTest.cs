@@ -73,6 +73,14 @@ public sealed class GenerateSongRequestTest
     }
 
     [Test]
+    public async Task AModeAndASwing_AreGivenAsTheScaleAndAPartOfATripletsSwing()
+    {
+        await Assert.That(new GenerateSongRequest(Mode: 2, Swing: StepScale.Last).TryRead(out _, out var overrides, out _, out _)).IsTrue();
+        await Assert.That(overrides.Scale).IsEqualTo(Core.Composition.Scales.Dorian);
+        await Assert.That(overrides.Swing).IsEqualTo(1);
+    }
+
+    [Test]
     public async Task EveryPartLeftOut_IsRefused()
     {
         var parts = Enum.GetNames<TrackRole>().ToDictionary(x => x, _ => new PartRequest(Plays: false));
@@ -92,6 +100,8 @@ public sealed class GenerateSongRequestTest
     [Arguments("tempo")]
     [Arguments("key")]
     [Arguments("meter")]
+    [Arguments("mode")]
+    [Arguments("swing")]
     [Arguments("noPieces")]
     [Arguments("piece")]
     public async Task AnythingOutOfItsRange_OrUnknown_IsRefused(string what)
@@ -110,6 +120,8 @@ public sealed class GenerateSongRequestTest
             "tempo" => new GenerateSongRequest(Tempo: 64),
             "key" => new GenerateSongRequest(Key: 12),
             "meter" => new GenerateSongRequest(Meter: -1),
+            "mode" => new GenerateSongRequest(Mode: Core.Composition.Scales.All.Length),
+            "swing" => new GenerateSongRequest(Swing: 64),
             _ => throw new ArgumentOutOfRangeException(nameof(what))
         };
 

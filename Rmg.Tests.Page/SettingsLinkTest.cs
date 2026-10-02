@@ -8,10 +8,10 @@ public sealed class SettingsLinkTest(Site site)
 {
     // settings with every field set apart from its neighbours, as the server writes them (Rmg.Tests'
     // SongSettingsTest.MixedText)
-    private const string MixedText = "6_07ELSZgnu3o_0-9zIyRxawjvsu_eo09IRajshQNX0aI4Iej0fg5Od-xWJIII";
+    private const string MixedText = "7_07ELSZgnu3jo_0-9zIyRxawjvsu_eo09IRajshQR5c0aI4Iej0fg5Od-xWJIII";
 
     // what of them names the song, as the server works it out (SongSettingsTest.MixedIdentity)
-    private const string MixedIdentity = "hQ1_0ESgu3201201201119999";
+    private const string MixedIdentity = "hQ3_0ESgu32C01201201119999";
 
     private static JsonElement Part(SongRequest request, string part) => request.Body.GetProperty("parts").GetProperty(part);
 
@@ -28,6 +28,9 @@ public sealed class SettingsLinkTest(Site site)
         await Assert.That(asked.Facet("fills")).IsEqualTo(14);
         await Assert.That(Part(asked, "chords").GetProperty("instrument").GetInt32()).IsEqualTo(18);
         await Assert.That(asked.Body.GetProperty("tempo").GetInt32()).IsEqualTo(3);
+        // the mode given, the last scale but one, and the swing drawn
+        await Assert.That(asked.Body.GetProperty("mode").GetInt32()).IsEqualTo(12);
+        await Assert.That(asked.Body.TryGetProperty("swing", out _)).IsFalse();
         // every third drum piece, from the first, in the server's order, which the page keeps the same
         await Assert.That(asked.Body.GetProperty("drumPieces").EnumerateArray().Select(x => x.GetString())).IsEquivalentTo(
             ["kick", "clap", "tambourine", "tom", "bongo", "agogo", "woodBlock", "cuica"]);
@@ -36,6 +39,35 @@ public sealed class SettingsLinkTest(Site site)
         // and the solo part's, given in on its instrument
         await Assert.That(Part(asked, "solo").GetProperty("instrument").GetInt32()).IsEqualTo(65);
         await Assert.That(Part(asked, "solo").GetProperty("plays").GetBoolean()).IsTrue();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task AModeChosen_AndASwingSet_AreAskedFor_AndKeptInTheLink()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        await page.FirstSong();
+
+        // the scales listed as the server lists them, the song's own shown until one is chosen
+        var mode = page.Page.Locator("select[aria-label='Mode']");
+        await page.Until(async () => await mode.Locator("option").CountAsync() == 13, "the scales listed");
+        // as a hand would, wherever the settings' panel is folded away: given, then chosen
+        await page.Page.EvaluateAsync("() => { const given = document.querySelector(\"input[aria-label='Give the mode']\"); given.checked = true; given.dispatchEvent(new Event('change')); }");
+        await page.Settled();
+        var count = page.Requests.Count;
+        await mode.EvaluateAsync("select => { select.value = '2'; select.dispatchEvent(new Event('change')); }");
+        await page.Until(() => page.Requests.Count > count, "the song asked for in Dorian");
+        await Assert.That(page.Requests[^1].Body.GetProperty("mode").GetInt32()).IsEqualTo(2);
+        await page.Settled();
+
+        count = page.Requests.Count;
+        await page.SetSetting("swing", 40);
+        await page.Until(() => page.Requests.Count > count, "the song asked for swung");
+        await page.Until(() => page.Requests[^1].Body.TryGetProperty("swing", out _), "the swing given");
+        await Assert.That(page.Requests[^1].Body.GetProperty("swing").GetInt32()).IsEqualTo(40);
+        await Assert.That(page.Requests[^1].Body.GetProperty("mode").GetInt32()).IsEqualTo(2);
+        await page.Settled();
+        await Assert.That(await page.Given()).IsEqualTo("2 given");
         await Assert.That(page.Errors).IsEmpty();
     }
 

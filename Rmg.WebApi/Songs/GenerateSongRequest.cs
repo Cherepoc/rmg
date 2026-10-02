@@ -29,6 +29,8 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Tempo">The tempo, by its step from 0, 60 beats a minute, through 32, 120, to 63, 240 (<see cref="TempoScale" />).</param>
 /// <param name="Key">The key, as semitones above C, from 0 to 11.</param>
 /// <param name="Meter">The meter, by its place among the meters a song may play in (<c>/api/songs/options</c>).</param>
+/// <param name="Mode">The scale the song starts in, on its key, by its place among the scales (<c>/api/songs/options</c>).</param>
+/// <param name="Swing">How much the song swings, from 0, straight, to 63, a triplet's swing, where its meter pairs its notes.</param>
 public sealed record GenerateSongRequest(
     string? Seed = null,
     int? Unconventionality = null,
@@ -39,7 +41,9 @@ public sealed record GenerateSongRequest(
     int? Tempo = null,
     int? Key = null,
     int? Meter = null,
-    IReadOnlyList<string>? DrumPieces = null
+    IReadOnlyList<string>? DrumPieces = null,
+    int? Mode = null,
+    int? Swing = null
 )
 {
     /// <summary>A pan from -1, left, to 1, right, as its nearest step, the middle step in the middle.</summary>
@@ -62,7 +66,7 @@ public sealed record GenerateSongRequest(
             seed = read;
         }
 
-        if (!TryReadStep(Unconventionality, "Unconventionality", out error) || !TryReadStep(Volume, "Volume", out error))
+        if (!TryReadStep(Unconventionality, "Unconventionality", out error) || !TryReadStep(Volume, "Volume", out error) || !TryReadStep(Swing, "Swing", out error))
             return false;
 
         var facets = ImmutableDictionary.CreateBuilder<Facet, double>();
@@ -116,6 +120,8 @@ public sealed record GenerateSongRequest(
             return Fail($"Key {Key} is not from 0 to 11.", out error);
         if (Meter is < 0 || Meter >= Core.Composition.Meter.Options.Length)
             return Fail($"Meter {Meter} is not one of the {Core.Composition.Meter.Options.Length} meters.", out error);
+        if (Mode is < 0 || Mode >= Scales.All.Length)
+            return Fail($"Mode {Mode} is not one of the {Scales.All.Length} scales.", out error);
 
         overrides = new SongOverrides(
             Base: Unconventionality is { } unconventionality ? StepScale.ToAmount(unconventionality) : null,
@@ -124,7 +130,9 @@ public sealed record GenerateSongRequest(
             DrumPieces: DrumPieces is null ? null : [..DrumPieces],
             MeterOption: Meter,
             Tempo: Tempo is { } tempo ? TempoScale.Multiplier(tempo) : null,
-            Key: Key
+            Key: Key,
+            Scale: Mode is { } mode ? Scales.All[mode] : null,
+            Swing: Swing is { } swing ? StepScale.ToAmount(swing) : null
         );
         mix = new SongMix(StepScale.ToAmount(Volume ?? StepScale.Last), partMixes.ToImmutable(), groups.ToImmutable());
         return true;
