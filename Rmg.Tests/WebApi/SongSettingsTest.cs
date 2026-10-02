@@ -21,7 +21,8 @@ public sealed class SongSettingsTest
         ],
         [..SongMix.DrumGroupNames.Select((_, i) => new DrumGroupSettings(i * 9))],
         50,
-        new DrumPieceSettings(true, [..DrumPieces.All.Select((_, i) => i % 3 == 0)])
+        new DrumPieceSettings(true, [..DrumPieces.All.Select((_, i) => i % 3 == 0)]),
+        new GenreSettings("Dub délicat", [new("meter", "3/4", 63), new("feelChances", "swing", 0), new("rhythm.chords", "offbeat", 48)])
     );
 
     /// <summary>Nothing given, everything at nothing.</summary>
@@ -36,14 +37,16 @@ public sealed class SongSettingsTest
         [..SongSettings.PartOrder.Select(_ => new PartSettings(0, new Setting(false, 0), 0, new Setting(false, 0)))],
         [..SongMix.DrumGroupNames.Select(_ => new DrumGroupSettings(0))],
         0,
-        DrumPieceSettings.Drawn
+        DrumPieceSettings.Drawn,
+        GenreSettings.None
     );
 
     private static bool AreSame(SongSettings first, SongSettings second) =>
         first.Unconventionality == second.Unconventionality && first.Facets.SequenceEqual(second.Facets)
         && (first.Tempo, first.Key, first.Meter, first.Mode, first.Swing) == (second.Tempo, second.Key, second.Meter, second.Mode, second.Swing) && first.Parts.SequenceEqual(second.Parts)
         && first.DrumGroups.SequenceEqual(second.DrumGroups) && first.Volume == second.Volume
-        && first.DrumPieces.IsGiven == second.DrumPieces.IsGiven && first.DrumPieces.Pieces.SequenceEqual(second.DrumPieces.Pieces);
+        && first.DrumPieces.IsGiven == second.DrumPieces.IsGiven && first.DrumPieces.Pieces.SequenceEqual(second.DrumPieces.Pieces)
+        && first.Genre.Name == second.Genre.Name && first.Genre.Options.SequenceEqual(second.Genre.Options);
 
     [Test]
     public async Task Settings_ReadBackAsTheyWereWritten_ACharacterAValue()
@@ -52,7 +55,7 @@ public sealed class SongSettingsTest
         {
             var text = settings.Format();
 
-            await Assert.That(text.Length).IsEqualTo(1 + SongSettings.Length);
+            await Assert.That(text.Length).IsEqualTo(1 + SongSettings.Length + settings.Genre.Format().Length);
             await Assert.That(text.All(x => char.IsAsciiLetterOrDigit(x) || x is '-' or '_')).IsTrue();
             await Assert.That(AreSame(SongSettings.Parse(text)!, settings)).IsTrue();
         }
@@ -64,6 +67,8 @@ public sealed class SongSettingsTest
         // the unconventionality first, then the facets, the tempo, the swing and the volume, every part's volume and pan,
         // and every drum group's volume, 38 characters; then the rest's 150 bits, 25 characters
         var text = Mixed.Format();
+        // settings of no genre write nothing behind the fixed places
+        await Assert.That(Silent.Format().Length).IsEqualTo(1 + SongSettings.Length);
         await Assert.That(text[1]).IsEqualTo('_');
         await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length]).IsEqualTo('3');
         await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 1]).IsEqualTo('j');
@@ -78,14 +83,14 @@ public sealed class SongSettingsTest
     public async Task TheFormat_IsFixed()
     {
         // the page writes the same, so a change to either side shows here and in the page's check against it
-        await Assert.That(Silent.Format()).IsEqualTo("7" + new string('0', SongSettings.Length));
+        await Assert.That(Silent.Format()).IsEqualTo("8" + new string('0', SongSettings.Length));
         await Assert.That(Mixed.Format()).IsEqualTo(MixedText);
         await Assert.That(Mixed.Identity).IsEqualTo(MixedIdentity);
     }
 
-    public const string MixedText = "7_07ELSZgnu3jo_0-9zIyRxawjvsu_eo09IRajshQR5c0aI4Iej0fg5Od-xWJIII";
+    public const string MixedText = "8_07ELSZgnu3jo_0-9zIyRxawjvsu_eo09IRajshQR5c0aI4Iej0fg5Od-xWJIIIC4LdOWGsmfoMQZ56T305ml604Gm";
 
-    public const string MixedIdentity = "hQ3_0ESgu32C01201201119999";
+    public const string MixedIdentity = "hQ3_0ESgu32C012012011199992305ml604Gm";
 
     [Test]
     public async Task ATempoStep_RunsFrom60Through120To240BeatsAMinute_EveryStepFasterByAboutTheSame()
@@ -104,7 +109,10 @@ public sealed class SongSettingsTest
     [Test]
     public async Task SettingsOfAnotherFormat_ReadAsNone()
     {
-        await Assert.That(SongSettings.Parse("6" + MixedText[1..])).IsNull();
+        await Assert.That(SongSettings.Parse("7" + MixedText[1..])).IsNull();
+        // and a genre's characters that are not one
+        await Assert.That(SongSettings.Parse(Silent.Format() + "5")).IsNull();
+        await Assert.That(SongSettings.Parse(MixedText + "A")).IsNull();
     }
 
     [Test]
@@ -127,6 +135,8 @@ public sealed class SongSettingsTest
         }
 
         await Assert.That(request.DrumPieces!.Count).IsEqualTo(Mixed.DrumPieces.Pieces.Count(x => x));
+        await Assert.That(request.Genre!["meter"]["3/4"]).IsEqualTo(63);
+        await Assert.That(request.Genre["rhythm.chords"]["offbeat"]).IsEqualTo(48);
         // and read as any request is
         await Assert.That(request.TryRead(out _, out _, out _, out var error)).IsTrue().Because(error ?? "");
     }

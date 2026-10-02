@@ -318,7 +318,8 @@ public sealed class EventStoreTest : IDisposable
             Mode = SongSettingsTest.Mixed.Mode with { IsGiven = false },
             Facets = [..SongSettingsTest.Mixed.Facets.Select(x => x with { IsGiven = false })],
             Parts = [..SongSettingsTest.Mixed.Parts.Select(x => x with { Plays = 0 })],
-            DrumPieces = DrumPieceSettings.Drawn
+            DrumPieces = DrumPieceSettings.Drawn,
+            Genre = GenreSettings.None
         };
         // seed 1 drawn at 10, liked, and asked for at 120, disliked; seed 2 drawn at 20, liked; seed 3 from before
         // the settings were kept, liked

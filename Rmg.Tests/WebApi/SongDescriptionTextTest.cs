@@ -9,7 +9,7 @@ public sealed class SongDescriptionTextTest
     {
         var song = TestCorpus.Get(seed);
         var description = SongDescriptions.Of(song.Song, song.Rendered, song.Trace);
-        return (SongDescriptionText.ToMarkdown(description, "abc", "6xyz", "0.7.003"), description);
+        return (SongDescriptionText.ToMarkdown(description, "abc", "6xyz", "Dub", "0.7.003"), description);
     }
 
     [Test]
@@ -22,6 +22,7 @@ public sealed class SongDescriptionTextTest
         await Assert.That(places.All(x => x >= 0)).IsTrue();
         await Assert.That(places).IsInOrder();
         await Assert.That(text).Contains("Settings: 6xyz");
+        await Assert.That(text).Contains("Genre: Dub");
         await Assert.That(text).Contains(description.Key);
     }
 

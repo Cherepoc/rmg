@@ -337,8 +337,6 @@ of what it sounds like, agreed as a start:
 
 **Steps,** each committed and measured on its own, per preset 64 songs against none, the fingerprint unchanged with
 no genre:
-10. *The link:* the settings' tail of the genre's weights, the round trip on both sides, the genre's name as a link
-    parameter, events carrying it, the describe endpoint and its text naming the genre.
 11. *The page's picker:* None, the presets, the genres made here, above the settings, kept as the settings are, in the
     link and the history. Page tests.
 12. *The editor:* from a preset or from none, the choices in their groups, each a row of the options it keeps with a

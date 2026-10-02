@@ -11,13 +11,16 @@ namespace Rmg.WebApi.Admin;
 /// </summary>
 public static class SongDescriptionText
 {
-    public static string ToMarkdown(SongDescription song, string seed, string? settings, string songsVersion)
+    /// <param name="genre">The name of the genre the song kept to, none for none or one of no name.</param>
+    public static string ToMarkdown(SongDescription song, string seed, string? settings, string? genre, string songsVersion)
     {
         var text = new StringBuilder();
         var form = string.Join(" – ", song.Sections.Select(x => x.Name));
         text.AppendLine($"# Song {seed} (songs {songsVersion})");
         if (settings is not null)
             text.AppendLine($"Settings: {settings}");
+        if (genre is not null)
+            text.AppendLine($"Genre: {genre}");
         text.AppendLine();
         text.AppendLine($"At a glance: {Length(song.Seconds)}, {Number(song.Bpm)} bpm, {song.TimeSignature}{(song.Feel == "straight" ? "" : $" in {song.Feel}")}, {song.Key}; " +
                         $"{form}; {song.Unconventionality.Word} ({Number(song.Unconventionality.Value)} of 1).");

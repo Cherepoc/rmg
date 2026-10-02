@@ -1,13 +1,13 @@
 /**
  *     What a song is heard with, written short enough for a link: its unconventionality and facets, its tempo, key, meter,
- *     scale and swing, its parts and their mix, its drum groups and drum pieces, and its volume, each value given, or as the song
+ *     scale and swing, its genre, its parts and their mix, its drum groups and drum pieces, and its volume, each value given, or as the song
  *     drew it. The server reads the same format (SongSettings), which a link and every event about a song carry: a
  *     format's character, then a character for every value of 64 steps at a fixed place, then every other value as its
  *     bits, one after another, six to a character. Seeds are written in the same 64 digits.
  */
 
 /** The format this writes, as its first character; one that is read differently takes the next. */
-const FORMAT_CHARACTER = "7";
+const FORMAT_CHARACTER = "8";
 
 /** The 64 digits: the digits, the letters, "-" and "_", in base 62's order and on from it. */
 const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_";
@@ -72,6 +72,9 @@ const PROGRAM_BITS = 7;
 const CHARACTER_COUNT = 1 + FACETS.length + 1 + 1 + 1 + 2 * FORMAT_PARTS.length + DRUM_GROUPS.length;
 const BIT_COUNT = GIVEN.length + KEY_BITS + METER_BITS + MODE_BITS + FORMAT_PARTS.length * (PLAYS_BITS + 2 + PROGRAM_BITS) + 1 + DRUM_PIECES.length;
 
+// how many characters the fixed places take, behind the format's, a genre's after them
+const FIXED_LENGTH = CHARACTER_COUNT + Math.ceil(BIT_COUNT / 6);
+
 const SEED_LENGTH = 11;
 
 function encode(number, length) {
@@ -116,6 +119,120 @@ function packSwitches(switches) {
     return values;
 }
 
+// --- the genre ----------------------------------------------------------------
+
+/**
+ *     Every option of every choice a genre may weigh, in the server's order (/api/genres/choices), by which a link writes
+ *     a genre's options: none until the page has them, before which a genre is neither read nor written.
+ */
+let genrePlaces = null;
+
+/** Takes the choices a genre may weigh, as the server lists them, in its order. */
+export function setGenreChoices(choices) {
+    genrePlaces = choices.flatMap((choice) => choice.options.map((option) => ({ choice: choice.name, option: option.name })));
+}
+
+/** Whether the choices a genre may weigh are known, which reading or writing one needs. */
+export function hasGenreChoices() {
+    return genrePlaces !== null;
+}
+
+// a genre's place among every option, its step, how many it weighs, and its name's longest, in bytes
+const PLACE_BITS = 10;
+const STEP_BITS = 6;
+const COUNT_BITS = 12;
+export const MAX_GENRE_NAME_BYTES = 63;
+
+/** Whether settings as text carry a genre behind their fixed places, which reading them needs the choices for. */
+export function hasGenre(text) {
+    return typeof text === "string" && text[0] === FORMAT_CHARACTER && text.length > 1 + FIXED_LENGTH;
+}
+
+/** Settings as text with their genre left off, for reading them before the page has the choices a genre needs. */
+export function withoutGenre(text) {
+    return hasGenre(text) ? text.slice(0, 1 + FIXED_LENGTH) : text;
+}
+
+/** A genre's options in the order a link writes them: every choice's, in the choices' order. */
+function genreOptions(genre) {
+    const options = [];
+    for (const [choice, steps] of Object.entries(genre.choices))
+        for (const [name, step] of Object.entries(steps)) {
+            const place = genrePlaces.findIndex((x) => x.choice === choice && x.option === name);
+            if (place < 0) throw new RangeError(`${choice} has no option ${name}.`);
+            options.push({ place, step });
+        }
+    return options.sort((first, second) => first.place - second.place);
+}
+
+/** A genre's options as a link writes them: how many, then every one's place and step, six bits to a character (GenreSettings.OptionCharacters). */
+function genreOptionCharacters(genre) {
+    const bits = [];
+    const write = (value, count) => {
+        if (!Number.isInteger(value) || value < 0 || value >= 1 << count) throw new RangeError(`${value} does not fit in ${count} bits.`);
+        for (let bit = 0; bit < count; bit++) bits.push(((value >> bit) & 1) === 1);
+    };
+    const options = genreOptions(genre);
+    write(options.length, COUNT_BITS);
+    for (const option of options) {
+        write(option.place, PLACE_BITS);
+        write(option.step, STEP_BITS);
+    }
+    return packSwitches(bits);
+}
+
+/** Whether there is a genre: a name or an option it weighs. */
+function isGenre(genre) {
+    return genre.name.length > 0 || Object.keys(genre.choices).length > 0;
+}
+
+/** The genre as the characters behind the settings' fixed places, none where there is no genre (GenreSettings.Format). */
+function formatGenre(genre) {
+    if (!isGenre(genre)) return [];
+    if (genrePlaces === null) throw new Error("A genre is written by the choices, which the page does not have yet.");
+
+    const name = new TextEncoder().encode(genre.name);
+    if (name.length > MAX_GENRE_NAME_BYTES) throw new RangeError(`A genre's name is ${MAX_GENRE_NAME_BYTES} bytes at the most.`);
+    const nameBits = [...name].flatMap((byte) => [0, 1, 2, 3, 4, 5, 6, 7].map((bit) => ((byte >> bit) & 1) === 1));
+    return [name.length, ...packSwitches(nameBits), ...genreOptionCharacters(genre)];
+}
+
+/** A genre read from the characters behind the settings' fixed places, or null for anything that is not one (GenreSettings.Parse). */
+function parseGenre(values) {
+    if (values.length === 0) return { name: "", choices: {} };
+    if (genrePlaces === null) return null;
+
+    const unpack = (characters) => characters.flatMap((x) => [0, 1, 2, 3, 4, 5].map((bit) => ((x >> bit) & 1) === 1));
+    const nameBytes = values[0];
+    const nameCharacters = Math.ceil((nameBytes * 8) / 6);
+    if (values.length < 1 + nameCharacters) return null;
+    const nameBits = unpack(values.slice(1, 1 + nameCharacters));
+    const name = new Uint8Array(Array.from({ length: nameBytes }, (_, i) => [0, 1, 2, 3, 4, 5, 6, 7].reduce((sum, bit) => sum + (nameBits[i * 8 + bit] ? 1 << bit : 0), 0)));
+
+    const bits = unpack(values.slice(1 + nameCharacters));
+    let b = 0;
+    const read = (count) => {
+        if (b + count > bits.length) return null;
+        let value = 0;
+        for (let bit = 0; bit < count; bit++) value += bits[b + bit] ? 1 << bit : 0;
+        b += count;
+        return value;
+    };
+    const count = read(COUNT_BITS);
+    if (count === null) return null;
+    const choices = {};
+    for (let i = 0; i < count; i++) {
+        const place = read(PLACE_BITS);
+        const step = read(STEP_BITS);
+        if (place === null || step === null || place >= genrePlaces.length) return null;
+        const { choice, option } = genrePlaces[place];
+        (choices[choice] ??= {})[option] = step;
+    }
+    // nothing but the last character's zeros past the options
+    if (bits.length - b >= 6 || bits.slice(b).some((x) => x)) return null;
+    return { name: new TextDecoder().decode(name), choices };
+}
+
 /** The settings as text, every facet, part, drum group and drum piece named, as parseSettings reads them. */
 export function formatSettings(settings) {
     const characters = [settings.unconventionality.value, ...FACETS.map((facet) => settings.facets[facet].value), settings.tempo.value, settings.swing.value, settings.volume];
@@ -138,14 +255,17 @@ export function formatSettings(settings) {
         write(part.instrument.value, PROGRAM_BITS);
     }
     bits.push(settings.drumPieces.isGiven, ...DRUM_PIECES.map((piece) => settings.drumPieces.value.includes(piece)));
-    return FORMAT_CHARACTER + [...characters, ...packSwitches(bits)].map((x) => DIGITS[x]).join("");
+    return FORMAT_CHARACTER + [...characters, ...packSwitches(bits), ...formatGenre(settings.genre)].map((x) => DIGITS[x]).join("");
 }
 
 /** Reads settings, or null for anything that is not settings of this format. */
 export function parseSettings(text) {
-    if (typeof text !== "string" || text[0] !== FORMAT_CHARACTER || text.length !== 1 + CHARACTER_COUNT + Math.ceil(BIT_COUNT / 6)) return null;
-    const values = [...text.slice(1)].map((x) => DIGITS.indexOf(x));
-    if (values.some((x) => x < 0)) return null;
+    if (typeof text !== "string" || text[0] !== FORMAT_CHARACTER || text.length < 1 + FIXED_LENGTH) return null;
+    const all = [...text.slice(1)].map((x) => DIGITS.indexOf(x));
+    if (all.some((x) => x < 0)) return null;
+    const genre = parseGenre(all.slice(FIXED_LENGTH));
+    if (genre === null) return null;
+    const values = all.slice(0, FIXED_LENGTH);
 
     let at = 0;
     const next = () => values[at++];
@@ -176,6 +296,7 @@ export function parseSettings(text) {
         parts: {},
         drumGroups: Object.fromEntries(DRUM_GROUPS.map((group, i) => [group, { volume: groupVolumes[i] }])),
         volume,
+        genre,
     };
     for (const [i, name] of FORMAT_PARTS.entries()) {
         const plays = PLAYS[read(PLAYS_BITS)];
@@ -194,8 +315,9 @@ export function parseSettings(text) {
 
 /**
  *     What of the settings names the song, as its seed does, whatever changes its notes: the switches of which values
- *     are given, six to a character, the values of those given alone, every part's plays, and the drum pieces given, six
- *     to a character behind a 1, with the zeros at its end left off; "" where nothing is given.
+ *     are given, six to a character, the values of those given alone, every part's plays, the drum pieces given, six
+ *     to a character behind a 1, and the genre's options behind a 2, its name left out, with the zeros at its end left
+ *     off; "" where nothing is given.
  *     The server works it out the same way (SongSettings.Identity).
  */
 export function identityOf(settings) {
@@ -204,5 +326,6 @@ export function identityOf(settings) {
     values.push(...given.filter((x) => x.isGiven).map((x) => x.value));
     values.push(...FORMAT_PARTS.map((name) => PLAYS.indexOf(settings.parts[name].plays)));
     if (settings.drumPieces.isGiven) values.push(1, ...packSwitches(DRUM_PIECES.map((piece) => settings.drumPieces.value.includes(piece))));
+    if (Object.keys(settings.genre.choices).length > 0) values.push(2, ...genreOptionCharacters(settings.genre));
     return values.map((x) => DIGITS[x]).join("").replace(/0+$/, "");
 }

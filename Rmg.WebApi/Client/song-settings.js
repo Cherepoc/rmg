@@ -25,7 +25,13 @@ export function defaultSettings() {
         drumPieces: { isGiven: false, value: [] },
         drumGroups: Object.fromEntries(DRUM_GROUPS.map((group) => [group, { volume: LAST_STEP }])),
         volume: LAST_STEP,
+        genre: noGenre(),
     };
+}
+
+/** No genre: every choice as the songs have it. */
+export function noGenre() {
+    return { name: "", choices: {} };
 }
 
 /** The settings with what the song drew let go of, as they are kept for the next visit and the next song. */
@@ -47,6 +53,7 @@ export function givenOnly(settings) {
         drumPieces: keep(settings.drumPieces, fresh.drumPieces),
         drumGroups: structuredClone(settings.drumGroups),
         volume: settings.volume,
+        genre: structuredClone(settings.genre),
     };
 }
 
@@ -74,6 +81,7 @@ export function requestFor(seed, settings) {
         mode: given(settings.mode),
         swing: given(settings.swing),
         drumGroups: Object.fromEntries(DRUM_GROUPS.map((group) => [group, { ...settings.drumGroups[group] }])),
+        genre: Object.keys(settings.genre.choices).length > 0 ? settings.genre.choices : undefined,
     };
 }
 

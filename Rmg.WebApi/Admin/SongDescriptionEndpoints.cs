@@ -45,7 +45,7 @@ public static class SongDescriptionEndpoints
             text,
             settingsText,
             description,
-            SongDescriptionText.ToMarkdown(description, text, settingsText, SongsVersion.Number)
+            SongDescriptionText.ToMarkdown(description, text, settingsText, given?.Genre.Name is { Length: > 0 } genre ? genre : null, SongsVersion.Number)
         ));
     }
 }

@@ -8,10 +8,10 @@ public sealed class SettingsLinkTest(Site site)
 {
     // settings with every field set apart from its neighbours, as the server writes them (Rmg.Tests'
     // SongSettingsTest.MixedText)
-    private const string MixedText = "7_07ELSZgnu3jo_0-9zIyRxawjvsu_eo09IRajshQR5c0aI4Iej0fg5Od-xWJIII";
+    private const string MixedText = "8_07ELSZgnu3jo_0-9zIyRxawjvsu_eo09IRajshQR5c0aI4Iej0fg5Od-xWJIIIC4LdOWGsmfoMQZ56T305ml604Gm";
 
     // what of them names the song, as the server works it out (SongSettingsTest.MixedIdentity)
-    private const string MixedIdentity = "hQ3_0ESgu32C01201201119999";
+    private const string MixedIdentity = "hQ3_0ESgu32C012012011199992305ml604Gm";
 
     private static JsonElement Part(SongRequest request, string part) => request.Body.GetProperty("parts").GetProperty(part);
 
@@ -28,6 +28,9 @@ public sealed class SettingsLinkTest(Site site)
         await Assert.That(asked.Facet("fills")).IsEqualTo(14);
         await Assert.That(Part(asked, "chords").GetProperty("instrument").GetInt32()).IsEqualTo(18);
         await Assert.That(asked.Body.GetProperty("tempo").GetInt32()).IsEqualTo(3);
+        // the genre, by the choices' names, as the server wrote it
+        await Assert.That(asked.Body.GetProperty("genre").GetProperty("meter").GetProperty("3/4").GetInt32()).IsEqualTo(63);
+        await Assert.That(asked.Body.GetProperty("genre").GetProperty("rhythm.chords").GetProperty("offbeat").GetInt32()).IsEqualTo(48);
         // the mode given, the last scale but one, and the swing drawn
         await Assert.That(asked.Body.GetProperty("mode").GetInt32()).IsEqualTo(12);
         await Assert.That(asked.Body.TryGetProperty("swing", out _)).IsFalse();
@@ -68,6 +71,20 @@ public sealed class SettingsLinkTest(Site site)
         await Assert.That(page.Requests[^1].Body.GetProperty("mode").GetInt32()).IsEqualTo(2);
         await page.Settled();
         await Assert.That(await page.Given()).IsEqualTo("2 given");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task ALinksGenre_IsKept_AndAskedForAgainOnTheNextVisit()
+    {
+        await using var page = await SongPage.Open(site, $"?song=1&settings={MixedText}");
+        await page.FirstSong();
+        await page.Settled();
+
+        // opened again with no link, the genre kept is read once the choices are, and asked for
+        await page.Page.GotoAsync("/");
+        await page.Until(() => page.Requests.Count >= 2, "a song asked for on the next visit");
+        await Assert.That(page.Requests[^1].Body.TryGetProperty("genre", out var genre) && genre.TryGetProperty("meter", out _)).IsTrue();
         await Assert.That(page.Errors).IsEmpty();
     }
 
