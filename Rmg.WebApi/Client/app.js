@@ -713,8 +713,7 @@ elements.seedInput.addEventListener("keydown", (event) => {
 /**
  *     The song asked for in the address, as <c>?song=12Ab&settings=1…</c>: its seed and the settings it was heard with,
  *     and whether one was asked for at all. A link carrying something that is not a seed, or settings that cannot be
- *     read, is worth saying so about, as is a link from before seeds were written in letters (<c>?seed=12345</c>),
- *     rather than quietly playing a different song and letting whoever sent it wonder.
+ *     read, is worth saying so about, rather than quietly playing a different song and letting whoever sent it wonder.
  *
  *     <c>wasRolled</c> tells a refresh from a link. The page writes the song it is playing into the address, so every
  *     refresh after the first arrives looking exactly like a song somebody asked for; what marks it as the page's own
@@ -724,13 +723,12 @@ elements.seedInput.addEventListener("keydown", (event) => {
 function linkedSong() {
     const parameters = new URL(location.href).searchParams;
     const wasRolled = history.state?.rolled === true;
-    const isOld = parameters.has("seed") && !parameters.has("song");
     const asked = parameters.get("song");
-    if (asked === null) return { seed: null, wasAsked: false, isOld, wasRolled, settings: null, isSettingsBad: false };
+    if (asked === null) return { seed: null, wasAsked: false, wasRolled, settings: null, isSettingsBad: false };
 
     const linked = parameters.get("settings");
     const parsed = linked === null ? null : parseSettings(linked.trim());
-    return { seed: readSeed(asked.trim()), wasAsked: true, isOld, wasRolled, settings: parsed, isSettingsBad: linked !== null && parsed === null };
+    return { seed: readSeed(asked.trim()), wasAsked: true, wasRolled, settings: parsed, isSettingsBad: linked !== null && parsed === null };
 }
 
 /**
@@ -2280,13 +2278,11 @@ async function start() {
     // said afterwards, since the generating itself has the status line until it is done with it, and
     // only once a song has arrived: a failure has the status line to itself
     const generating = generate(linked.seed, { isRolled: linked.seed === null || linked.wasRolled });
-    const complaint = linked.isOld
-        ? "That link is from an older version of RMG, whose songs sound different now, so here is a random song."
-        : linked.wasAsked && linked.seed === null
-            ? "That link has no valid song, so here is a random one."
-            : linked.isSettingsBad
-                ? "That link's settings could not be read, so here is its song with the settings you had."
-                : null;
+    const complaint = linked.wasAsked && linked.seed === null
+        ? "That link has no valid song, so here is a random one."
+        : linked.isSettingsBad
+            ? "That link's settings could not be read, so here is its song with the settings you had."
+            : null;
     if (complaint !== null)
         generating.then((isGenerated) => {
             if (isGenerated) setStatus(complaint, true);

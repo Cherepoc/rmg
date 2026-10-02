@@ -7,13 +7,6 @@ const HISTORY = "rmg.songs";
 const RATINGS = "rmg.song-ratings";
 const SETTINGS = "rmg.settings";
 
-// what earlier versions kept, of songs named by decimal seeds that no longer sound as they did, let go of once
-try {
-    for (const old of ["rmg.history", "rmg.ratings", "rmg.unconventionality"]) localStorage.removeItem(old);
-} catch {
-    // a browser that will not let go of them never reads them either
-}
-
 /** How many ratings the browser keeps, the oldest let go of first. */
 const RATINGS_KEPT = 500;
 
