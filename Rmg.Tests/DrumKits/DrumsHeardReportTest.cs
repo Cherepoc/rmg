@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Songs;
 
@@ -13,12 +14,24 @@ public sealed class DrumsHeardReportTest
     private static bool[] PercussionOnly(CorpusSong song) =>
         [..song.Trace.Where(x => x.Point == TracePoints.PercussionOnly).Select(x => (bool)x.Value!)];
 
-    private static string[] Silent(CorpusSong song) =>
-    [
-        ..song.Song.TrackDefinitions.Keys.Where(x => x >= DrumGroups.FirstTrackNumber)
+    /// <summary>The drums a song with drums has and never sounds, those that groove apart from those of the fills and landings.</summary>
+    private static (string[] Groove, string[] Other) Silent(CorpusSong song)
+    {
+        if (!song.Song.Draws!.Parts.Contains(TrackRole.Drum))
+            return ([], []);
+        var silent = song.Song.TrackDefinitions.Keys.Where(x => x >= DrumGroups.FirstTrackNumber)
             .Where(x => !song.Song.Notes!.TryGetValue(x, out var notes) || notes.Count == 0)
-            .Select(x => DrumGroups.GetDrum(x).Name)
-    ];
+            .Select(DrumGroups.GetDrum).ToArray();
+        return ([..silent.Where(Grooves).Select(x => x.Name)], [..silent.Where(x => !Grooves(x)).Select(x => x.Name)]);
+    }
+
+    private static bool Grooves(PercussionInstrumentDefinition drum) => DrumGroups.GroupOf(drum).GrooveChance >= 1;
+
+    private static string Count(IEnumerable<string[]> silent)
+    {
+        var all = silent.ToArray();
+        return $"{all.Count(x => x.Length > 0)} ({string.Join(", ", all.SelectMany(x => x).GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}"))})";
+    }
 
     private static void Describe(string what, IReadOnlyList<CorpusSong> songs)
     {
@@ -27,8 +40,10 @@ public sealed class DrumsHeardReportTest
         var shares = mixed.Select(x => PercussionOnly(x).Count(y => y) / (double)PercussionOnly(x).Length).ToArray();
         var kitless = mixed.Count(x => PercussionOnly(x).All(y => y));
         var silent = songs.Select(Silent).ToArray();
-        Console.WriteLine($"{what}: {songs.Count} songs, {mixed.Length} of the kit and percussion; sections percussion only {(shares.Length > 0 ? shares.Average() : 0):P0}, " +
-                          $"kit never {kitless}; songs with a drum never heard {silent.Count(x => x.Length > 0)} ({string.Join(", ", silent.SelectMany(x => x).GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}"))})");
+        Console.WriteLine($"{what}: {songs.Count} songs, {songs.Count(x => !x.Song.Draws!.Parts.Contains(TrackRole.Drum))} drumless, {mixed.Length} of the kit and percussion; " +
+                          $"sections percussion only {(shares.Length > 0 ? shares.Average() : 0):P0}, kit never {kitless}");
+        Console.WriteLine($"    songs with a drum of the groove never heard {Count(silent.Select(x => x.Groove))}");
+        Console.WriteLine($"    songs with a drum of the fills and landings never heard {Count(silent.Select(x => x.Other))}");
         foreach (var (low, high) in new[] { (0.0, 0.33), (0.33, 0.67), (0.67, 1.01) })
         {
             var band = mixed.Where(x => x.Song.Draws!.Unconventionality[Facet.Groove] is var g && g >= low && g < high).ToArray();

@@ -178,8 +178,11 @@ public static class SongGenerator
         );
         StateTrace.Record(TracePoints.SectionMeter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", sectionMeters.Select(x => $"{x.Key} {x.Value}")), sectionMeters);
 
+        // every section's drums, drawn before the sections are made
+        var sectionDrums = sectionIds.Distinct().ToImmutableDictionary(id => id, id => sectionGenerator.DrawDrums(id));
         // every section is generated once, where it first plays
-        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0], structure.Roles[id], sectionMeters[id]))))
+        var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(
+                new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0], structure.Roles[id], sectionMeters[id], sectionDrums[id]))))
             .CacheGeneratedValues();
         // and its melody placed afresh every time it plays, varied from the first as far as the song improvises
         var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), songUnconventionality[Facet.Melody]);
