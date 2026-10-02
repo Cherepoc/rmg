@@ -44,10 +44,10 @@ public sealed record SongReport(
         var groups = SongMix.DrumGroupsOf(song).Order();
 
         return new SongReport(
-            new Drawn<int>(GenerateSongRequest.ToStep(draws.Unconventionality.Base), overrides.Base is not null),
+            new Drawn<int>(StepScale.ToStep(draws.Unconventionality.Base), overrides.Base is not null),
             draws.Unconventionality.Facets.ToImmutableSortedDictionary(
                 x => Name(x.Key),
-                x => new Drawn<int>(GenerateSongRequest.ToStep(x.Value), overrides.Facets?.ContainsKey(x.Key) == true)
+                x => new Drawn<int>(StepScale.ToStep(x.Value), overrides.Facets?.ContainsKey(x.Key) == true)
             ),
             Enum.GetValues<TrackRole>().ToImmutableSortedDictionary(
                 Name,

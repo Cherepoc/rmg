@@ -30,11 +30,21 @@ const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_
 /** The last step of a value: the most experimental, the loudest, the right. */
 export const LAST_STEP = 63;
 
-/** The middle of a pan's steps: 32 to its left and 31 to its right, as MIDI's 64 is. */
-export const MIDDLE_PAN = 32;
+/**
+ *     The middle step, 32 below it and 31 above, as MIDI's pan has, so that a value can be given at its middle: 50%, a pan
+ *     in the middle, a tempo of 120 beats a minute (the server's StepScale).
+ */
+export const MIDDLE_STEP = 32;
 
-/** The tempo's middle step, 120 beats a minute, from 60 at the first to 240 at the last (the server's TempoScale). */
-export const MIDDLE_TEMPO = 32;
+/** A step's amount, from 0 at the first through 0.5 at the middle to 1 at the last. */
+export function fromStep(step) {
+    return step <= MIDDLE_STEP ? step / (2 * MIDDLE_STEP) : 0.5 + (step - MIDDLE_STEP) / (2 * (LAST_STEP - MIDDLE_STEP));
+}
+
+/** An amount from 0 to 1 as its nearest step. */
+export function toStep(amount) {
+    return Math.round(amount <= 0.5 ? amount * 2 * MIDDLE_STEP : MIDDLE_STEP + (amount - 0.5) * 2 * (LAST_STEP - MIDDLE_STEP));
+}
 
 /** The facets, the parts, the drum setups and the drum groups, by the names the server takes, in the format's order. */
 export const FACETS = ["feel", "groove", "fills", "form", "chords", "progression", "scale", "melody", "sound"];
@@ -234,7 +244,7 @@ function parseBefore(text) {
     }
     // a part the format did not name as the song draws it, at its fullest, in the file
     for (const name of FORMAT_PARTS.slice(count))
-        settings.parts[name] = { plays: "random", instrument: { isGiven: false, value: 0 }, volume: LAST_STEP, pan: { isGiven: false, value: MIDDLE_PAN } };
+        settings.parts[name] = { plays: "random", instrument: { isGiven: false, value: 0 }, volume: LAST_STEP, pan: { isGiven: false, value: MIDDLE_STEP } };
     for (const [i, group] of DRUM_GROUPS.entries()) {
         // whether its drums were in the file, which every group's now are
         s++;
@@ -244,7 +254,7 @@ function parseBefore(text) {
     const pieces = DRUM_PIECES.filter(() => hasPieces && switches[s++]);
     settings.drumPieces = { isGiven: piecesGiven, value: piecesGiven ? pieces : [] };
     if (setup > DRUM_SETUPS.length || settings.key.value > 11 || (piecesGiven && pieces.length === 0)) return null;
-    if (text[0] === FORMAT_THREE || text[0] === FORMAT_TWO) settings.tempo = { isGiven: false, value: MIDDLE_TEMPO };
+    if (text[0] === FORMAT_THREE || text[0] === FORMAT_TWO) settings.tempo = { isGiven: false, value: MIDDLE_STEP };
     settings.volume = volume;
     return settings;
 }

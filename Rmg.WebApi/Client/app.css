@@ -348,11 +348,36 @@ button.icon svg {
     margin-top: 16px;
 }
 
+/* Share in words, its icon kept for a phone's narrower panel */
+#share svg {
+    display: none;
+}
+
+/* a download's icon where its word would be, the word read out */
+.downloads svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+/* the MP3 and its bitrate together, on a line of their own when the row wraps */
+.mp3 {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
 /* the rating and Share at the end of the song's row, apart from what plays */
+.song-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+}
+
 .rating {
     display: flex;
     gap: 4px;
-    margin-left: auto;
 }
 
 /* a switch pressed in, the song rated or autoplay on, shown as the accent, as the mixer's switches are */
@@ -487,6 +512,14 @@ input[type="range"] {
     width: 90px;
 }
 
+/* the playback volume's speaker, where its name would be, in the muted colour a name is */
+.volume-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    fill: currentColor;
+}
+
 
 /* the settings of the song: values given or drawn, a part's row of the mixer, and the drums' */
 .settings-group {
@@ -591,6 +624,7 @@ input[type="range"] {
 
 .setting-slider output {
     width: 8ch;
+    white-space: nowrap;
 }
 
 .warning {
@@ -920,26 +954,269 @@ footer a:hover {
         padding: 14px;
     }
 
-    /* a value's slider goes under its name, which leaves it the width of the panel */
+    /* a value on one line, its slider beside its name without the words for its ends, which its name says enough of */
     .setting {
-        grid-template-columns: auto minmax(0, 1fr);
+        grid-template-columns: auto 9em minmax(0, 1fr);
     }
 
-    .setting-slider {
-        grid-column: 1 / -1;
+    .setting-name {
+        white-space: nowrap;
     }
 
-    /* the buttons and where the song is stay on one line, and the volume goes under them */
-    .transport {
+    .setting .end {
+        display: none;
+    }
+
+    .setting-slider output {
+        width: 7ch;
+    }
+
+    /*
+     * the song panel's controls flow as one: the song's own buttons and its seed on a line, the seed's name read out
+     * rather than shown to leave it room; the playing buttons, the rating and Share on the next; where the song is, its
+     * times either side of it and the volume after them, on the next; and the downloads and the seed to play under them
+     */
+    .song-panel {
+        display: flex;
         flex-wrap: wrap;
+        align-items: center;
+        column-gap: 6px;
+    }
+
+    .song-panel > h2 {
+        flex-basis: 100%;
+    }
+
+    /* the lines apart by their controls' margins rather than a gap, which the breaks between them would double */
+    .transport > *,
+    .song-actions {
+        margin-top: 16px;
+    }
+
+    .song-row,
+    .transport {
+        display: contents;
+    }
+
+    .downloads,
+    .seed-row {
+        flex-basis: 100%;
+        order: 6;
+    }
+
+    /* a line of its own that only breaks */
+    .song-row::after,
+    .transport::after {
+        content: "";
+        flex-basis: 100%;
+    }
+
+    .song-row::after {
+        order: 1;
+    }
+
+    .transport > button {
+        order: 2;
+    }
+
+    .song-actions {
+        order: 3;
+    }
+
+    .transport::after {
+        order: 4;
+    }
+
+    .transport time,
+    #seek,
+    .transport .volume {
+        order: 5;
+    }
+
+    .now-playing > span {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    /* the song panel's buttons that are an icon a little smaller, so that the playing buttons, rating and Share fit */
+    .song-panel button.icon,
+    #share {
+        padding: 7px;
+        line-height: 0;
+    }
+
+    .song-actions {
+        gap: 6px;
+    }
+
+    /* Share its icon, its word shown under it only while it says something */
+    #share {
+        position: relative;
+    }
+
+    #share svg {
+        display: block;
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
+    }
+
+    #share .label {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+
+    #share.saying .label {
+        top: calc(100% + 6px);
+        right: 0;
+        width: auto;
+        height: auto;
+        clip-path: none;
+        padding: 4px 8px;
+        border-radius: 6px;
+        background: var(--text);
+        color: var(--panel);
+        font-size: 13px;
+        line-height: normal;
+        z-index: 1;
+    }
+
+    #seek {
+        min-width: 60px;
     }
 
     .transport .volume {
-        margin-left: auto;
+        gap: 6px;
+    }
+
+    .transport .volume input {
+        width: 60px;
+    }
+
+    /* the downloads and the bitrate on one line, the bitrate's own words saying what it is */
+    .downloads,
+    .mp3 {
+        gap: 8px;
+    }
+
+    .downloads .button,
+    .downloads button {
+        padding: 9px 12px;
+    }
+
+    .bitrate-at {
+        display: none;
     }
 
     .fader {
         width: 60px;
+    }
+
+    /* where the soundfont comes from wraps rather than run off the page */
+    .library {
+        flex-wrap: wrap;
+    }
+
+    .song-volume {
+        padding-left: 28px;
+    }
+
+    .song-volume .volume {
+        flex: 1;
+    }
+
+    #song-volume {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /*
+     * the mixer's rows on two lines each, as wide as the panel rather than scrolled: the name, whether it plays and its
+     * instrument or pieces, then its pan and volume under them, and its mute, solo and pulse at the end
+     */
+    .mixer,
+    .mixer tbody {
+        display: block;
+    }
+
+    .mixer thead {
+        display: none;
+    }
+
+    .mixer tr.part,
+    .mixer tr.drum-group {
+        display: grid;
+        /* the given switch's column as wide as the switch a finger gets (pointer: coarse), so that it keeps off the name */
+        grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1fr) auto auto auto;
+        align-items: center;
+        gap: 8px 6px;
+        height: auto;
+        padding: 8px 0;
+    }
+
+    .mixer tr.part > *,
+    .mixer tr.drum-group > * {
+        padding: 0;
+    }
+
+    .mixer .given {
+        grid-area: 1 / 1;
+        width: auto;
+    }
+
+    .mixer tr > th[scope="row"] {
+        grid-area: 1 / 2;
+    }
+
+    .mixer td.on {
+        grid-area: 1 / 2;
+        justify-self: end;
+    }
+
+    .mixer .instrument,
+    .mixer .pieces {
+        grid-area: 1 / 3 / auto / -1;
+    }
+
+    .mixer select {
+        width: 100%;
+    }
+
+    .mixer .pan,
+    .mixer .volume {
+        width: auto;
+    }
+
+    .mixer .pan {
+        grid-area: 2 / 2;
+    }
+
+    .mixer .volume {
+        grid-area: 2 / 3;
+    }
+
+    .mixer td:nth-last-child(3) {
+        grid-area: 2 / 4;
+    }
+
+    .mixer td:nth-last-child(2) {
+        grid-area: 2 / 5;
+    }
+
+    .mixer .pulse {
+        grid-area: 2 / 6;
+    }
+
+    .mixer .fader-field .fader {
+        min-width: 0;
     }
 }
 

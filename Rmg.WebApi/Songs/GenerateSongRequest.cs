@@ -7,7 +7,7 @@ namespace Rmg.WebApi.Songs;
 
 /// <summary>
 ///     A song to generate: its seed, what is given in place of what it draws, and how it is to be heard. Every amount is
-///     a step from 0 to 63, a character of the page's settings each; anything left out is the song's own.
+///     a step from 0 to 63 (<see cref="StepScale" />), a character of the page's settings each; anything left out is the song's own.
 /// </summary>
 /// <param name="Seed">
 ///     Seed of the song, in letters and digits (<see cref="Rmg.Core.Base64" />), all 64 of its bits, which a number in
@@ -44,19 +44,10 @@ public sealed record GenerateSongRequest(
     IReadOnlyList<string>? DrumPieces = null
 )
 {
-    /// <summary>The last step of an amount, from 0: as many as a character of the settings holds.</summary>
-    public const int LastStep = 63;
+    /// <summary>A pan from -1, left, to 1, right, as its nearest step, the middle step in the middle.</summary>
+    public static int ToPanStep(double pan) => StepScale.ToStep((pan + 1) / 2);
 
-    /// <summary>The middle of a pan's steps, where a part sits in the middle: 32 to its left and 31 to its right, as MIDI's 64 is.</summary>
-    public const int MiddlePan = 32;
-
-    /// <summary>An amount from 0 to 1 as its nearest step.</summary>
-    public static int ToStep(double amount) => (int)Math.Round(amount * LastStep);
-
-    /// <summary>A pan from -1, left, to 1, right, as its nearest step, 32 in the middle.</summary>
-    public static int ToPanStep(double pan) => (int)Math.Round(MiddlePan + pan * (pan < 0 ? MiddlePan : LastStep - MiddlePan));
-
-    private static double FromPanStep(int step) => (step - MiddlePan) / (double)(step < MiddlePan ? MiddlePan : LastStep - MiddlePan);
+    private static double FromPanStep(int step) => 2 * StepScale.ToAmount(step) - 1;
 
     /// <summary>
     ///     Reads the request into what is given in place of the song's draws and how it is to be heard, or says what
@@ -83,7 +74,7 @@ public sealed record GenerateSongRequest(
                 return Fail($"{name} is not a facet. Facets are {string.Join(", ", Enum.GetNames<Facet>())}.", out error);
             if (!TryReadStep(step, $"Facet {name}", out error))
                 return false;
-            facets[facet] = step / (double)LastStep;
+            facets[facet] = StepScale.ToAmount(step);
         }
 
         var parts = ImmutableDictionary.CreateBuilder<TrackRole, bool>();
@@ -99,7 +90,7 @@ public sealed record GenerateSongRequest(
                 return false;
             if (part.Plays is { } plays)
                 parts[role] = plays;
-            partMixes[role] = new PartMix(part.Instrument, (part.Volume ?? LastStep) / (double)LastStep, part.Pan is { } pan ? FromPanStep(pan) : null, part.IsOn);
+            partMixes[role] = new PartMix(part.Instrument, StepScale.ToAmount(part.Volume ?? StepScale.Last), part.Pan is { } pan ? FromPanStep(pan) : null, part.IsOn);
         }
 
         if (SongParts.LeaveNone(parts))
@@ -126,7 +117,7 @@ public sealed record GenerateSongRequest(
                 return Fail($"{name} is not a drum group. Groups are {string.Join(", ", SongMix.DrumGroupNames)}.", out error);
             if (!TryReadStep(group.Volume, $"The {name}'s volume", out error))
                 return false;
-            groups[known] = new DrumGroupMix((group.Volume ?? LastStep) / (double)LastStep, group.IsOn);
+            groups[known] = new DrumGroupMix(StepScale.ToAmount(group.Volume ?? StepScale.Last), group.IsOn);
         }
 
         if (Tempo is < 0 or >= TempoScale.Steps)
@@ -137,7 +128,7 @@ public sealed record GenerateSongRequest(
             return Fail($"Meter {Meter} is not one of the {Core.Composition.Meter.Options.Length} meters.", out error);
 
         overrides = new SongOverrides(
-            Base: Unconventionality / (double)LastStep,
+            Base: Unconventionality is { } unconventionality ? StepScale.ToAmount(unconventionality) : null,
             Facets: facets.Count > 0 ? facets.ToImmutable() : null,
             Parts: parts.Count > 0 ? parts.ToImmutable() : null,
             DrumSetup: drumSetup,
@@ -146,14 +137,14 @@ public sealed record GenerateSongRequest(
             Tempo: Tempo is { } tempo ? TempoScale.Multiplier(tempo) : null,
             Key: Key
         );
-        mix = new SongMix((Volume ?? LastStep) / (double)LastStep, partMixes.ToImmutable(), groups.ToImmutable());
+        mix = new SongMix(StepScale.ToAmount(Volume ?? StepScale.Last), partMixes.ToImmutable(), groups.ToImmutable());
         return true;
     }
 
     private static bool TryReadStep(int? step, string what, out string? error)
     {
         error = null;
-        return step is null or >= 0 and <= LastStep || Fail($"{what} {step} is not a step from 0 to {LastStep}.", out error);
+        return step is null or >= 0 and <= StepScale.Last || Fail($"{what} {step} is not a step from 0 to {StepScale.Last}.", out error);
     }
 
     private static bool Fail(string message, out string? error)

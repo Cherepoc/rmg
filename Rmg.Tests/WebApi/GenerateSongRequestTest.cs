@@ -20,7 +20,7 @@ public sealed class GenerateSongRequestTest
     }
 
     [Test]
-    public async Task EveryStep_ReadsAsItsShareOf63()
+    public async Task EveryStep_ReadsAsItsAmount_TheMiddleStepAHalf()
     {
         var request = new GenerateSongRequest(
             "g",
@@ -37,7 +37,7 @@ public sealed class GenerateSongRequestTest
         await Assert.That(overrides.Facets![Facet.Chords]).IsEqualTo(0.0);
         await Assert.That(overrides.Parts!.ToArray()).IsEquivalentTo(new[] { KeyValuePair.Create(TrackRole.Bass, false), KeyValuePair.Create(TrackRole.CounterMelody, true) });
         await Assert.That(overrides.DrumSetup).IsEqualTo(DrumSetup.Percussion);
-        await Assert.That(mix.Volume).IsEqualTo(32 / 63.0);
+        await Assert.That(mix.Volume).IsEqualTo(0.5);
         await Assert.That(mix.Parts[TrackRole.Bass]).IsEqualTo(new PartMix(73, 1, -1, true));
         await Assert.That(mix.Parts[TrackRole.CounterMelody].Pan).IsEqualTo(1.0);
         await Assert.That(mix.DrumGroups["Kick"]).IsEqualTo(new DrumGroupMix(0, false));

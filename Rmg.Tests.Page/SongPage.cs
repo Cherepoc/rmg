@@ -79,9 +79,18 @@ public sealed class SongPage : IAsyncDisposable
         }
     }
 
-    public static async Task<SongPage> Open(Site site, string path = "")
+    /// <summary>The page at <paramref name="path" />, on a phone's narrow touch screen when <paramref name="phone" />.</summary>
+    public static async Task<SongPage> Open(Site site, string path = "", bool phone = false)
     {
-        var context = await site.Browser.NewContextAsync(new BrowserNewContextOptions { BaseURL = site.Address.ToString() });
+        var options = new BrowserNewContextOptions { BaseURL = site.Address.ToString() };
+        if (phone)
+        {
+            options.ViewportSize = new ViewportSize { Width = 360, Height = 780 };
+            options.IsMobile = true;
+            options.HasTouch = true;
+        }
+
+        var context = await site.Browser.NewContextAsync(options);
         var page = await context.NewPageAsync();
         var songPage = new SongPage(context, page);
 
@@ -96,8 +105,16 @@ public sealed class SongPage : IAsyncDisposable
         page.RequestFailed += (_, request) => songPage.End(request, "aborted");
         page.RequestFinished += async (_, request) =>
         {
-            var response = await request.ResponseAsync();
-            songPage.End(request, response is null ? "aborted" : response.Status.ToString());
+            // a request that finishes as its test closes the page has no one left to read it, and an event handler's
+            // exception would end every test's run rather than this one
+            try
+            {
+                var response = await request.ResponseAsync();
+                songPage.End(request, response is null ? "aborted" : response.Status.ToString());
+            }
+            catch (PlaywrightException) when (page.IsClosed)
+            {
+            }
         };
 
         await page.RouteAsync("**/api/songs/generate", songPage.Answer);

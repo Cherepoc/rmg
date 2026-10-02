@@ -300,7 +300,7 @@ public static class EventStoreSummary
     {
         return ratings
             .Where(x => x.Version == version && x.Unconventionality is not null && x.Likes + x.Dislikes > 0)
-            .GroupBy(x => (x.IsGiven, Fifth: Math.Min(4, x.Unconventionality!.Value * 5 / Songs.GenerateSongRequest.LastStep)))
+            .GroupBy(x => (x.IsGiven, Fifth: Math.Min(4, (int)(Songs.StepScale.ToAmount(x.Unconventionality!.Value) * 5))))
             .Select(x => new RatedFifth(x.Key.IsGiven, x.Key.Fifth, x.Count(), x.Sum(r => r.Likes), x.Sum(r => r.Dislikes)))
             .OrderBy(x => x.IsGiven)
             .ThenBy(x => x.Fifth)
@@ -347,7 +347,7 @@ public static class EventStoreSummary
         var latest = versions.FirstOrDefault()?.Version;
         var fifths = made
             .Where(x => x.Version == latest && x.Unconventionality is not null)
-            .GroupBy(x => Math.Min(4, x.Unconventionality!.Value * 5 / Songs.GenerateSongRequest.LastStep))
+            .GroupBy(x => Math.Min(4, (int)(Songs.StepScale.ToAmount(x.Unconventionality!.Value) * 5)))
             .OrderBy(x => x.Key)
             .Select(x =>
             {

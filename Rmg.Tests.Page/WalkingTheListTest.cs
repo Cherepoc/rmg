@@ -30,6 +30,23 @@ public sealed class WalkingTheListTest(Site site)
     }
 
     [Test]
+    public async Task TheList_IsKept_ForThePageOpenedAgain()
+    {
+        await using var page = await SongPage.Open(site);
+        await page.FirstSong();
+        await page.Generate();
+        var heard = await page.History();
+
+        // opened again at its own address, rather than reloaded at the song's, which would open with that song
+        await page.Page.GotoAsync("/");
+        await page.Until(async () => await page.Seed() is var seed && seed != "" && seed != heard[0] && await page.IsGenerateEnabled(), "a new song");
+
+        // the songs heard before under the one the page opens with
+        await Assert.That((await page.History()).Skip(1)).IsEquivalentTo(heard, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task Next_WalksBackUpTheList_ThenAsksForANewSong()
     {
         await using var page = await SongPage.Open(site);

@@ -27,13 +27,15 @@ import {
     DRUM_PIECES,
     FACETS,
     formatSettings,
+    fromStep,
     identityOf,
     LAST_STEP,
-    MIDDLE_PAN,
+    MIDDLE_STEP,
     parseSettings,
     PARTS,
     PLAYS,
     readSeed,
+    toStep,
 } from "./settings.js";
 import { applyReport, defaultSettings, givenOnly, isEveryPartOff, requestFor } from "./song-settings.js";
 import { since, tell, track } from "./tally.js";
@@ -64,6 +66,7 @@ const elements = {
     download: document.getElementById("download"),
     exportMp3: document.getElementById("export-mp3"),
     share: document.getElementById("share"),
+    shareLabel: document.getElementById("share-label"),
     bitrate: document.getElementById("bitrate"),
     previous: document.getElementById("previous"),
     next: document.getElementById("next"),
@@ -236,7 +239,7 @@ function listen(player) {
     player.onNoteOn((channel, note, velocity) => {
         const group = drumGroupOfNote.get(note);
         if (channel !== channels.drum || group === undefined || isGroupSilenced(group)) return;
-        const hit = (velocity / 127) * (settings.drumGroups[group].volume / LAST_STEP);
+        const hit = (velocity / 127) * fromStep(settings.drumGroups[group].volume);
         drumHits.set(group, Math.max(drumHits.get(group) ?? 0, hit));
     });
     player.masterGain = Number(elements.volume.value);
@@ -1051,7 +1054,10 @@ restoreHistory();
  *     with goes on top of what came before rather than starting the list over.
  */
 function restoreHistory() {
-    const entries = recallHistory().slice(0, SONGS_KEPT);
+    // a song whose settings are of no format the page reads any more is let go of, rather than played with none
+    const entries = recallHistory()
+        .filter((entry) => readSeed(entry.split(":")[0]) !== null && parseSettings(entry.split(":")[1]) !== null)
+        .slice(0, SONGS_KEPT);
     elements.history.append(...entries.map(createHistoryItem));
     elements.clearHistory.disabled = elements.history.children.length === 0;
 }
@@ -1248,11 +1254,16 @@ function copyTheOldWay(text) {
 
 /** Says so on the button itself, which is where the eye already is, and puts it back afterwards. */
 function say(word) {
-    elements.share.textContent = word;
+    elements.shareLabel.textContent = word;
+    // where the button is only its icon, the word shows beside it for as long as it is said
+    elements.share.classList.add("saying");
 
     // a second press starts the wait over, rather than the first one cutting the second short
     clearTimeout(sayTimer);
-    sayTimer = setTimeout(() => (elements.share.textContent = "Share"), 1600);
+    sayTimer = setTimeout(() => {
+        elements.shareLabel.textContent = "Share";
+        elements.share.classList.remove("saying");
+    }, 1600);
 }
 
 // --- exporting -------------------------------------------------------------
@@ -1608,13 +1619,15 @@ function channelsOf(part) {
     ];
 }
 
-/** A pan step on the other side of the middle. */
+/** A pan step on the other side of the middle, as far from it. */
 function mirrorPan(step) {
-    return Math.min(LAST_STEP, 2 * MIDDLE_PAN - step);
+    return toStep(1 - fromStep(step));
 }
 
+/** A pan step as MIDI's, 64 in the middle, as the steps have theirs. */
 function toMidiPan(step) {
-    return step <= MIDDLE_PAN ? step * 2 : Math.round(64 + ((step - MIDDLE_PAN) * 63) / (LAST_STEP - MIDDLE_PAN));
+    const amount = fromStep(step);
+    return Math.round(amount <= 0.5 ? amount * 128 : 64 + (amount - 0.5) * 126);
 }
 
 /**
@@ -1645,6 +1658,8 @@ function createSettingRow(key) {
     range.min = "0";
     range.max = String(LAST_STEP);
     range.step = "1";
+    // its middle, 50% or 120 beats a minute, which a double-click puts it back to
+    range.dataset.default = String(MIDDLE_STEP);
     range.setAttribute("aria-label", `${name}, from ${low.toLowerCase()} to ${high.toLowerCase()}`);
     range.setAttribute("aria-description", description);
 
@@ -1688,7 +1703,7 @@ function showSetting(key) {
     row.given.checked = setting.isGiven;
     row.range.disabled = !setting.isGiven;
     row.range.value = String(setting.value);
-    row.output.textContent = key !== "tempo" ? formatPercent(setting.value / LAST_STEP) : tempos.length > 0 ? `${Math.round(tempos[setting.value])} bpm` : "";
+    row.output.textContent = key !== "tempo" ? formatPercent(fromStep(setting.value)) : tempos.length > 0 ? `${Math.round(tempos[setting.value])} bpm` : "";
 }
 
 /**
@@ -1731,7 +1746,7 @@ function createPartRow(part) {
     row.className = "part";
     // the drums sit in the middle, as a kit does, and have no pan
     const [mute, solo] = createListening(part, name);
-    row.append(cellOf(given, "given"), heading, cellOf(plays, "on"), cellOf(instrument), cellOf(part === "drum" ? null : pan.field, "pan"), cellOf(volume.field, "volume"),
+    row.append(cellOf(given, "given"), heading, cellOf(plays, "on"), cellOf(instrument, "instrument"), cellOf(part === "drum" ? null : pan.field, "pan"), cellOf(volume.field, "volume"),
         cellOf(mute, "listen"), cellOf(solo, "listen"), cellOf(pulse.canvas, "pulse"));
     rows.set(part, { row, given, plays, instrument, volume, pan, mute, solo, pulse });
     return row;
@@ -1799,7 +1814,7 @@ function createDrumGroupRow(group) {
     const row = document.createElement("tr");
     row.className = "drum-group";
     const [mute, solo] = createListening(`drums:${group}`, name);
-    const chipsCell = cellOf(chips);
+    const chipsCell = cellOf(chips, "pieces");
     chipsCell.colSpan = 2;
     row.append(cellOf(null, "given"), heading, chipsCell, cellOf(volume.field, "volume"), cellOf(mute, "listen"), cellOf(solo, "listen"), cellOf(pulse.canvas, "pulse"));
     groupRows.set(group, { row, volume, chips, mute, solo, pulse });
@@ -1881,6 +1896,8 @@ function applyMuting(on = null) {
 function evenDrumGroupRows() {
     const groups = [...groupRows.values()].map((x) => x.row);
     for (const row of groups) row.style.height = "";
+    // a phone's rows are laid out on two lines each rather than as a table's, and are as high as they need
+    if (groups.length === 0 || getComputedStyle(groups[0]).display !== "table-row") return;
     const highest = Math.max(...groups.map((row) => row.getBoundingClientRect().height));
     if (highest > 0) for (const row of groups) row.style.height = `${highest}px`;
 }
@@ -1918,10 +1935,12 @@ function createFader(label, onInput, isPan = false, onChange = null) {
     input.step = "1";
     input.className = "fader";
     input.setAttribute("aria-label", label);
+    // a pan in the middle and a volume as loud as it is made, which a double-click puts it back to
+    input.dataset.default = String(isPan ? MIDDLE_STEP : LAST_STEP);
 
     const output = document.createElement("output");
     output.className = "percent";
-    const show = () => (output.textContent = isPan ? formatPan(Number(input.value)) : formatPercent(Number(input.value) / LAST_STEP));
+    const show = () => (output.textContent = isPan ? formatPan(Number(input.value)) : formatPercent(fromStep(Number(input.value))));
     input.addEventListener("input", () => {
         show();
         onInput(Number(input.value));
@@ -1933,6 +1952,16 @@ function createFader(label, onInput, isPan = false, onChange = null) {
     field.append(input, output);
     return { field, input, show };
 }
+
+// a slider back to its default on a double-click, as if it were dragged there, so that its own handlers apply it; one
+// that shows what the song drew is not set, and is left alone, as it is to a drag
+document.addEventListener("dblclick", (event) => {
+    const slider = event.target;
+    if (!(slider instanceof HTMLInputElement) || slider.type !== "range" || slider.dataset.default === undefined || slider.disabled) return;
+    slider.value = slider.dataset.default;
+    slider.dispatchEvent(new Event("input", { bubbles: true }));
+    slider.dispatchEvent(new Event("change", { bubbles: true }));
+});
 
 /** Puts the settings, and what the song on the page drew and is made of, on the panel. */
 function showSettings() {
@@ -2018,7 +2047,7 @@ function setPartPan(part, pan) {
 
 /** A part's volume under the song's, on the player. */
 function applyVolume(part) {
-    const volume = (settings.volume / LAST_STEP) * (settings.parts[part].volume / LAST_STEP);
+    const volume = fromStep(settings.volume) * fromStep(settings.parts[part].volume);
     for (const { channel } of channelsOf(part))
         withPlayer((player) => player.setChannelVolume(channel, volume), "Could not set the volume");
 }
@@ -2029,8 +2058,9 @@ function formatPercent(volume) {
 
 /** Where a pan sits: in the middle, or how far left or right. */
 function formatPan(step) {
-    if (step === MIDDLE_PAN) return "C";
-    return step < MIDDLE_PAN ? `L${Math.round(((MIDDLE_PAN - step) / MIDDLE_PAN) * 100)}` : `R${Math.round(((step - MIDDLE_PAN) / (LAST_STEP - MIDDLE_PAN)) * 100)}`;
+    const pan = 2 * fromStep(step) - 1;
+    if (pan === 0) return "C";
+    return pan < 0 ? `L${Math.round(-pan * 100)}` : `R${Math.round(pan * 100)}`;
 }
 
 /** The General MIDI instruments, grouped by family and numbered by counting through them in order. */
@@ -2065,7 +2095,7 @@ function applyMix(player) {
             const mix = settings.parts[part];
             if (part === "drum") player.setChannelDrums(channel, true);
             player.setChannelInstrument(channel, mix.instrument.value, mix.instrument.isGiven);
-            player.setChannelVolume(channel, (settings.volume / LAST_STEP) * (mix.volume / LAST_STEP));
+            player.setChannelVolume(channel, fromStep(settings.volume) * fromStep(mix.volume));
             player.setChannelPan(channel, toMidiPan(mirrored ? mirrorPan(mix.pan.value) : mix.pan.value));
         }
 }
@@ -2078,7 +2108,7 @@ elements.songVolume.addEventListener("input", () => {
 });
 
 function showSongVolume() {
-    elements.songVolumeValue.textContent = formatPercent(settings.volume / LAST_STEP);
+    elements.songVolumeValue.textContent = formatPercent(fromStep(settings.volume));
 }
 
 // --- the download ----------------------------------------------------------
