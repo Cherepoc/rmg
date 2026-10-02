@@ -33,7 +33,7 @@
             read, and added by the render itself once it exists. Listed early, a folder this build replaces
             would still be expected, and the build would fail looking for it.
         -->
-        <Content Remove="wwwroot/assets/**;wwwroot/*.html;wwwroot/favicon.svg" />
+        <Content Remove="wwwroot/assets/**;wwwroot/*.html;wwwroot/admin/*.html;wwwroot/favicon.svg" />
 
         <ClientSource Include="$(ClientDirectory)**/*" />
 
@@ -91,7 +91,8 @@
         </Exec>
 
         <RenderClientPages Bundle="$(ClientBundle)"
-                           Pages="$(ClientDirectory)index.html;$(ClientDirectory)dashboard.html"
+                           Root="$(ClientDirectory)"
+                           Pages="$(ClientDirectory)index.html;$(ClientDirectory)admin/index.html;$(ClientDirectory)admin/dashboard.html"
                            Copied="$(ClientDirectory)favicon.svg"
                            WebRoot="$(ClientWebRoot)"
                            Version="$(_ClientVersion)">
@@ -105,7 +106,7 @@
             written is added by hand, or a publish from a clean checkout would leave it behind.
         -->
         <ItemGroup>
-            <Content Include="$(ClientWebRoot)assets/**;$(ClientWebRoot)*.html;$(ClientWebRoot)favicon.svg"
+            <Content Include="$(ClientWebRoot)assets/**;$(ClientWebRoot)*.html;$(ClientWebRoot)admin/*.html;$(ClientWebRoot)favicon.svg"
                      Exclude="@(Content)"
                      CopyToPublishDirectory="PreserveNewest" />
         </ItemGroup>
@@ -116,6 +117,7 @@
                AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
         <ParameterGroup>
             <Bundle ParameterType="System.String" Required="true" />
+            <Root ParameterType="System.String" Required="true" />
             <Pages ParameterType="System.String[]" Required="true" />
             <Copied ParameterType="System.String[]" Required="true" />
             <WebRoot ParameterType="System.String" Required="true" />
@@ -162,10 +164,18 @@
                 }
 
                 var version = string.IsNullOrWhiteSpace(Version) ? "unknown" : Version.Trim();
+                // a page at its place under the client's sources, as one in the admin folder, its bundle a folder up
+                // for every folder it is in
                 foreach (var page in Pages)
                 {
-                    var html = File.ReadAllText(page).Replace("{{assets}}", AssetsFolder).Replace("{{version}}", version);
-                    var written = Path.Combine(WebRoot, Path.GetFileName(page));
+                    var root = Path.GetFullPath(Root).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+                    var full = Path.GetFullPath(page);
+                    if (!full.StartsWith(root)) throw new InvalidOperationException(page + " is not under " + root);
+                    var relative = full.Substring(root.Length);
+                    var up = string.Concat(Enumerable.Repeat("../", relative.Count(c => c == Path.DirectorySeparatorChar)));
+                    var html = File.ReadAllText(page).Replace("{{assets}}", up + AssetsFolder).Replace("{{version}}", version);
+                    var written = Path.Combine(WebRoot, relative);
+                    Directory.CreateDirectory(Path.GetDirectoryName(written));
 
                     // left alone when nothing changed, so a build that changed nothing touches nothing
                     if (!File.Exists(written) || File.ReadAllText(written) != html) File.WriteAllText(written, html);

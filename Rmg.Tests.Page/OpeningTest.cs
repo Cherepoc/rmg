@@ -22,9 +22,7 @@ public sealed class OpeningTest(Site site)
     {
         await using (var player = await SongPage.Open(site)) await player.FirstSong();
 
-        await using var page = await SongPage.Open(site, "dashboard.html");
-        await page.Page.EvaluateAsync($"localStorage.setItem('rmg.dashboard-token', '{Site.Token}')");
-        await page.Page.ReloadAsync();
+        await using var page = await SongPage.Open(site, "admin/dashboard.html", admin: true);
 
         var server = page.Page.Locator("#server-panel");
         await Assertions.Expect(server).ToBeVisibleAsync();

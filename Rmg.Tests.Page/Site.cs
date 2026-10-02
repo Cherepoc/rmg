@@ -15,7 +15,7 @@ namespace Rmg.Tests.Page;
 /// </summary>
 public sealed class Site : IAsyncInitializer, IAsyncDisposable
 {
-    /// <summary>The dashboard's token on this server.</summary>
+    /// <summary>The admin area's password on this server.</summary>
     public const string Token = "page-test-token";
 
     private readonly StringBuilder _output = new();

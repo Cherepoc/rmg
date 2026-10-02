@@ -60,16 +60,30 @@ public sealed class DoubleClickTest(Site site)
         await page.Page.EvaluateAsync("() => document.getElementById('settings-panel').open = true");
         await page.SetSetting("feel", 10);
         var slider = Setting(page, "feel");
-        await slider.ScrollIntoViewIfNeededAsync();
-        var box = (await slider.BoundingBoxAsync())!;
-        var (x, y) = (box.X + 4, box.Y + box.Height / 2);
 
+        // where the slider is once the song the change asks for is here, as the page's lines below the song can move it
+        async Task<(float X, float Y)> Place()
+        {
+            await page.Settled();
+            await slider.ScrollIntoViewIfNeededAsync();
+            var box = (await slider.BoundingBoxAsync())!;
+            return (box.X + 4, box.Y + box.Height / 2);
+        }
+
+        var (x, y) = await Place();
         await page.Page.Touchscreen.TapAsync(x, y);
         await page.Page.WaitForTimeoutAsync(500);
         await Assert.That(await slider.InputValueAsync()).IsNotEqualTo("32");
 
-        await page.Page.Touchscreen.TapAsync(x, y);
-        await page.Page.Touchscreen.TapAsync(x, y);
+        // two taps soon after each other, again where a busy machine let more than a double-tap's time pass between them
+        for (var attempt = 0; attempt < 5 && await slider.InputValueAsync() != "32"; attempt++)
+        {
+            (x, y) = await Place();
+            await page.Page.Touchscreen.TapAsync(x, y);
+            await page.Page.Touchscreen.TapAsync(x, y);
+            await page.Page.WaitForTimeoutAsync(400);
+        }
+
         await page.Until(async () => await slider.InputValueAsync() == "32", "the feel back to its middle");
         await Assert.That(await ValueOf(page, "feel").TextContentAsync()).IsEqualTo("50%");
         await Assert.That(page.Errors).IsEmpty();

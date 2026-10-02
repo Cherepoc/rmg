@@ -5,18 +5,11 @@
  *     this page has no build step.
  */
 
-const TOKEN_KEY = "rmg.dashboard-token";
-
 const elements = {
     controls: document.getElementById("controls"),
     range: document.getElementById("range"),
     refresh: document.getElementById("refresh"),
     taken: document.getElementById("taken"),
-    gate: document.getElementById("gate"),
-    gateHint: document.getElementById("gate-hint"),
-    token: document.getElementById("token"),
-    unlock: document.getElementById("unlock"),
-    forget: document.getElementById("forget"),
     status: document.getElementById("status"),
     headline: document.getElementById("headline"),
     timings: document.getElementById("timings"),
@@ -59,43 +52,6 @@ let summary = null;
 // what the pointer over the day by day chart reads from, replaced on every draw
 let chart = null;
 
-// --- the token -------------------------------------------------------------
-
-function readToken() {
-    try {
-        return localStorage.getItem(TOKEN_KEY) ?? "";
-    } catch {
-        return "";
-    }
-}
-
-function writeToken(token) {
-    try {
-        if (token) localStorage.setItem(TOKEN_KEY, token);
-        else localStorage.removeItem(TOKEN_KEY);
-    } catch {
-        // a browser that refuses storage simply asks again next time
-    }
-}
-
-elements.unlock.addEventListener("click", async () => {
-    const token = elements.token.value.trim();
-    if (token === "") return;
-
-    writeToken(token);
-    await load();
-});
-
-elements.token.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") elements.unlock.click();
-});
-
-elements.forget.addEventListener("click", () => {
-    writeToken("");
-    elements.token.value = "";
-    location.reload();
-});
-
 // --- loading ---------------------------------------------------------------
 
 elements.refresh.addEventListener("click", () => load());
@@ -114,40 +70,24 @@ function showPanels(isShown) {
     elements.controls.hidden = !isShown;
 }
 
+/**
+ *     Reads the summary from the admin area, whose credentials the browser asked for when the page was opened and sends
+ *     on with every request under it.
+ */
 async function load() {
-    const token = readToken();
-    if (token === "") {
-        elements.gate.hidden = false;
-        showPanels(false);
-        return;
-    }
-
     setStatus("Reading…");
 
     let response;
     try {
-        response = await fetch(new URL(`api/tally/summary?days=${encodeURIComponent(elements.range.value)}`, location.href), {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        response = await fetch(new URL(`api/summary?days=${encodeURIComponent(elements.range.value)}`, location.href));
     } catch (error) {
         setStatus(`Could not reach the server: ${error.message}`, true);
         return;
     }
 
-    if (response.status === 401) {
-        elements.gate.hidden = false;
-        elements.forget.hidden = false;
-        showPanels(false);
-        setStatus("That token was not accepted.", true);
-        return;
-    }
-
     if (response.status === 404) {
-        elements.gate.hidden = false;
-        elements.gateHint.textContent =
-            "This server was started without RMG_DASHBOARDTOKEN, so it does not serve the summary at all.";
         showPanels(false);
-        setStatus("The dashboard is switched off on this server.", true);
+        setStatus("This server counts nothing, so it has no summary to show.", true);
         return;
     }
 
@@ -157,8 +97,6 @@ async function load() {
     }
 
     summary = await response.json();
-    elements.gate.hidden = true;
-    elements.forget.hidden = false;
     showPanels(true);
     draw();
     setStatus("");
@@ -666,6 +604,4 @@ function drawServer() {
 
 // --- wiring ----------------------------------------------------------------
 
-elements.token.value = readToken();
-elements.forget.hidden = readToken() === "";
 load();

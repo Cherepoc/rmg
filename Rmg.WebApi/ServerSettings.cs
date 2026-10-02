@@ -33,7 +33,7 @@ public enum Interfaces
 /// <param name="DefaultSoundFont">Which one the page takes unasked, or null for the first it is offered.</param>
 /// <param name="StateDirectory">Where the analytics are kept, which is the only thing this writes.</param>
 /// <param name="IsCounting">Whether anything is counted at all.</param>
-/// <param name="DashboardToken">What the analytics summary asks for, or null to not serve it at all.</param>
+/// <param name="DashboardToken">The admin area's password (<see cref="Admin.AdminArea" />), or null to not serve it at all.</param>
 /// <param name="RetentionDays">How long an event is kept before it is thrown away.</param>
 /// <param name="EventsPerVisitorPerDay">How much one visitor may write in a day before being ignored.</param>
 public sealed record ServerSettings(

@@ -33,7 +33,7 @@ ADDRESS="${RMG_ADDRESS:-loopback}"
 # the reverse proxy, if it is not on this same machine. Loopback is trusted without being named.
 KNOWN_PROXIES="${RMG_KNOWNPROXIES:-}"
 
-# what the analytics dashboard asks for before it shows anything. Empty leaves it switched off.
+# the admin area's password, for the user admin, its dashboard among it. Empty leaves it switched off.
 DASHBOARD_TOKEN="${RMG_DASHBOARDTOKEN:-}"
 
 # these are left out of the settings file altogether when empty, so appsettings.json decides
@@ -462,8 +462,9 @@ for _ in $(seq 1 20); do
     if curl -fsS --max-time 3 "http://127.0.0.1:$port/api/soundfonts" >/dev/null 2>&1; then
         echo "    up, and serving $(curl -fsS "http://127.0.0.1:$port/api/soundfonts" | grep -o '"file"' | wc -l) soundfont(s)"
 
-        # every file the pages point at, which is what a mismatch between the pages and the bundles breaks
-        for page in / /dashboard.html; do
+        # every file the page points at, which is what a mismatch between the pages and the bundles breaks; the admin
+        # pages share its bundle, and are not served without their credentials
+        for page in /; do
             for file in $(curl -fsS "http://127.0.0.1:$port$page" | grep -o 'assets/[0-9a-f]\{8\}/[a-z0-9.-]*' | sort -u); do
                 if ! curl -fsS -o /dev/null "http://127.0.0.1:$port/$file"; then
                     echo "    $page points at $file, which is not served" >&2
@@ -471,7 +472,12 @@ for _ in $(seq 1 20); do
                 fi
             done
         done
-        echo "    the pages and their bundles all answer"
+        admin="$(curl -s -o /dev/null -w '%{http_code}' "http://127.0.0.1:$port/admin/")"
+        if [[ $admin != 401 && $admin != 404 ]]; then
+            echo "    /admin/ answered $admin without credentials" >&2
+            exit 1
+        fi
+        echo "    the page and its bundle answer, and /admin/ asks for its credentials ($admin)"
         exit 0
     fi
     sleep 1
@@ -492,7 +498,7 @@ if [[ "$ADDRESS" == "loopback" ]]; then
 fi
 
 if [[ -n "$DASHBOARD_TOKEN" ]]; then
-    note "analytics: /dashboard.html, which asks for the token in RMG_DASHBOARDTOKEN."
+    note "admin: /admin/, as the user admin with the password in RMG_DASHBOARDTOKEN."
 else
-    note "analytics are collected, but the dashboard is off: set RMG_DASHBOARDTOKEN to see them."
+    note "the admin area is off: set RMG_DASHBOARDTOKEN to serve it, its password."
 fi

@@ -79,10 +79,16 @@ public sealed class SongPage : IAsyncDisposable
         }
     }
 
-    /// <summary>The page at <paramref name="path" />, on a phone's narrow touch screen when <paramref name="phone" />.</summary>
-    public static async Task<SongPage> Open(Site site, string path = "", bool phone = false)
+    /// <summary>
+    ///     The page at <paramref name="path" />, on a phone's narrow touch screen when <paramref name="phone" />, and with
+    ///     the admin area's credentials when <paramref name="admin" />.
+    /// </summary>
+    public static async Task<SongPage> Open(Site site, string path = "", bool phone = false, bool admin = false)
     {
         var options = new BrowserNewContextOptions { BaseURL = site.Address.ToString() };
+        // the admin area's credentials, which the browser gives when the area asks for them
+        if (admin)
+            options.HttpCredentials = new HttpCredentials { Username = "admin", Password = Site.Token };
         if (phone)
         {
             options.ViewportSize = new ViewportSize { Width = 360, Height = 780 };

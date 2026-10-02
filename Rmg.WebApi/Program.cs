@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.FileProviders;
 using Rmg.WebApi;
+using Rmg.WebApi.Admin;
 using Rmg.WebApi.Analytics;
 using Rmg.WebApi.Songs;
 using Rmg.WebApi.SoundFonts;
@@ -85,6 +86,11 @@ if (soundFonts.IsPreferredMissing())
         "DefaultSoundFont is {Preferred}, which is not in {Directory}, so the first one there is used instead",
         settings.DefaultSoundFont, soundFonts.Directory);
 
+// the operator's pages and what they ask for, before anything is served from them
+if (settings.DashboardToken is null)
+    app.Logger.LogInformation("No DashboardToken, so the admin area is not served at all");
+app.UseAdmin(settings.DashboardToken);
+
 app.UseDefaultFiles();
 
 // soundfonts have no registered media type, so static files would refuse to serve them unasked
@@ -134,10 +140,7 @@ if (events is not null)
         "Keeping analytics in {Directory} for {Days} days; {Pruned} older events and songs were dropped",
         settings.StateDirectory, settings.RetentionDays, pruned);
 
-    if (settings.DashboardToken is null)
-        app.Logger.LogInformation("No DashboardToken, so the analytics summary is not served at all");
-
-    app.MapAnalytics(events, VisitorHasher.Create(settings.StateDirectory), settings.DashboardToken);
+    app.MapAnalytics(events, VisitorHasher.Create(settings.StateDirectory));
 }
 else
 {
