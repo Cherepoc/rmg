@@ -191,6 +191,25 @@ public sealed class GenreTest
     }
 
     [Test]
+    public async Task AGenresRhythm_MovesWhereAPartsNotesFall()
+    {
+        var genre = Of(
+            (GenreChoices.Rhythms[RhythmPart.Chords], [("speed", 1), ("offbeat", 0.75), ("fineness", 0)]),
+            (GenreChoices.Rhythms[RhythmPart.Ground], [("speed", 1), ("fineness", 0), ("fullness", 1), ("repetition", 1)])
+        );
+        var none = TestCorpus.Measure(16, GenreRhythmReportTest.Falls);
+        var moved = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => GenreRhythmReportTest.Falls(TestCorpus.Get(seed, new SongOverrides(Genre: genre))));
+        double Average(IEnumerable<Dictionary<RhythmPart, GenreRhythmReportTest.Fall>> songs, RhythmPart part, Func<GenreRhythmReportTest.Fall, double> of) =>
+            songs.Where(x => x.ContainsKey(part)).Average(x => of(x[part]));
+
+        // the chords skanking on the offbeats, the kick on every beat, repeating its bars, and the melody as it was
+        await Assert.That(Average(moved, RhythmPart.Chords, x => x.Offbeat)).IsGreaterThan(Average(none, RhythmPart.Chords, x => x.Offbeat) + 0.2);
+        await Assert.That(Average(moved, RhythmPart.Ground, x => x.PerBeat)).IsGreaterThan(Average(none, RhythmPart.Ground, x => x.PerBeat) + 0.1);
+        await Assert.That(Average(moved, RhythmPart.Ground, x => x.Repeated)).IsGreaterThan(Average(none, RhythmPart.Ground, x => x.Repeated) + 0.1);
+        await Assert.That(Average(moved, RhythmPart.Melody, x => x.PerBeat)).IsEqualTo(Average(none, RhythmPart.Melody, x => x.PerBeat)).Within(0.05);
+    }
+
+    [Test]
     public async Task AGenresChances_AreNeverAt0_AndAlwaysAt1()
     {
         var genre = Of((GenreChoices.Parts, [("pad", 0), ("counterMelody", 1)]), (GenreChoices.FeelChances, [("swing", 1)]));

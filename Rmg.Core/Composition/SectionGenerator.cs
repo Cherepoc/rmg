@@ -150,7 +150,7 @@ internal sealed class SectionGenerator
         // sequence of its own
         var roleContext = Stream(sectionId, SectionStream.DrumRoles);
         var sectionRoles = _tracks.SongDrums.Select(DrumGroups.GetTrackNumber).Order()
-            .ToImmutableDictionary(x => x, x => DrumRoles.DrawSection(roleContext, DrumGroups.GetDrum(x), SongRole(x), rhythm.Value));
+            .ToImmutableDictionary(x => x, x => DrumRoles.DrawSection(roleContext, DrumGroups.GetDrum(x), SongRole(x), rhythm.Value, _genre));
         StateTrace.Record(
             TracePoints.DrumRoles,
             SectionTrace,

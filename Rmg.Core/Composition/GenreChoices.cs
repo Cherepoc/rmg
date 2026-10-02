@@ -13,6 +13,7 @@ public static class GenreChoices
     private const string Harmony = "Harmony";
     private const string Sound = "Sound";
     private const string PartsAndDrums = "Parts and drums";
+    private const string Rhythm = "Rhythm";
 
     /// <summary>The tempos' bands, by the beats a minute they start at, the slowest first.</summary>
     public static ImmutableArray<(string Name, string Label, double From)> TempoBands { get; } =
@@ -83,6 +84,25 @@ public static class GenreChoices
     /// <summary>The drum kit's sound (<see cref="GeneralMidi.KitName" />).</summary>
     public static GenreChoice Kit { get; } = Pool("kit", "Drum kit", Sound, Kits.Select(x => (x.Name, GeneralMidi.KitName(x.Program), x.Program == 0 ? 1.0 : 0)));
 
+    /// <summary>
+    ///     Every part's rhythm, a pitched part's or the drums' of a role, as values: its speed, how far off the beat it
+    ///     plays, how fine it goes, how much weight its weaker beats have, how full it is and how much it repeats its
+    ///     cycles (<see cref="GenreRhythm" />), and the melody's busyness.
+    /// </summary>
+    public static ImmutableDictionary<RhythmPart, GenreChoice> Rhythms { get; } = Enum.GetValues<RhythmPart>().ToImmutableDictionary(
+        x => x,
+        x => AsTheyAre($"rhythm.{Name(x.ToString())}", x switch
+            {
+                RhythmPart.CounterMelody => "Counter-melody",
+                RhythmPart.Ground => "Drums keeping the ground, as a kick",
+                RhythmPart.Backbeat => "Drums on the backbeat, as a snare",
+                RhythmPart.Time => "Drums keeping time, as a hi-hat",
+                RhythmPart.Colour => "Drums colouring, as toms",
+                _ => x.ToString()
+            }, Rhythm, GenreChoiceKind.Values,
+            [..GenreRhythm.Settings, ..x == RhythmPart.Melody ? [("busyness", "Busyness")] : Array.Empty<(string, string)>()])
+    );
+
     /// <summary>The chances of the parts a song may leave out.</summary>
     public static GenreChoice Parts { get; } = AsTheyAre("parts", "Parts", PartsAndDrums, GenreChoiceKind.Chances,
     [
@@ -112,7 +132,8 @@ public static class GenreChoices
         Tempo, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
-        Parts, DrumSetup, DrumPieces
+        Parts, DrumSetup, DrumPieces,
+        ..Enum.GetValues<RhythmPart>().Select(x => Rhythms[x])
     ];
 
     /// <summary>A pool's choice, every option's default its weight against the heaviest's.</summary>

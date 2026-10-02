@@ -298,12 +298,37 @@ internal sealed class SongTracks
                     builder.Add(CompositionStateKinds.Rhythm.Variation, DrumSetups.PercussionVariation);
                 var drumStateMap = builder.ToStateMap(context)
                     .MergeWith(DrumStrokes.GenerateSong(strokeContext, drum))
-                    .MergeWith(DrumRoles.GenerateSong(roleContext, drum, rhythmicUnconventionality.Value));
+                    .MergeWith(DrumRoles.GenerateSong(roleContext, drum, rhythmicUnconventionality.Value, genre));
                 definitions[DrumGroups.GetTrackNumber(drum)] = new PercussionInstrumentTrack(
                     LayerStates.CreateTrackLayer(context, "Track", drumStateMap, _ => VelocityLayers.GetLevel(drum), DrumRoles.Hold(trackRhythmLayer, DrumRoles.Of(drumStateMap))),
                     drum.Sounds
                 );
             }
+        }
+
+        // every pitched part's rhythm as the genre moves it, a riff's twin's as the riff's
+        foreach (var (track, pitched) in definitions.Where(x => x.Value is PitchInstrumentTrack).Select(x => (x.Key, (PitchInstrumentTrack)x.Value)).ToArray())
+        {
+            RhythmPart? part = pitched.Role switch
+            {
+                TrackRole.Melody => RhythmPart.Melody,
+                TrackRole.Chords => RhythmPart.Chords,
+                TrackRole.Bass => RhythmPart.Bass,
+                TrackRole.Pad => RhythmPart.Pad,
+                TrackRole.CounterMelody => RhythmPart.CounterMelody,
+                TrackRole.Riff or TrackRole.RiffTwin => RhythmPart.Riff,
+                TrackRole.Rhythm => RhythmPart.Rhythm,
+                _ => null
+            };
+            if (part is { } moved && genre.Names(GenreChoices.Rhythms[moved]))
+                definitions[track] = new PitchInstrumentTrack(
+                    pitched.StateMap.MergeWith(GenreRhythm.Of(genre, GenreChoices.Rhythms[moved])),
+                    pitched.InstrumentCode,
+                    pitched.MinOctaveOffset,
+                    pitched.MaxOctaveOffset,
+                    pitched.Role,
+                    pitched.Pan
+                );
         }
 
         // the drums share the rhythm-related state

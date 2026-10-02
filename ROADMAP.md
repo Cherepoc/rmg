@@ -337,9 +337,6 @@ of what it sounds like, agreed as a start:
 
 **Steps,** each committed and measured on its own, per preset 64 songs against none, the fingerprint unchanged with
 no genre:
-7. *The rhythm's values per role:* a genre layer at the song's depth of every pitched role's and drum role's state
-   (speed, offset, how fine, where its weight sits, fullness, repetition), and the melody's busyness. Measured by where
-   each part's notes fall: on the beat, on 8th and 16th offbeats, notes a beat, cycles repeated.
 8. *The rhythm's options per role:* each part's feel (a grouping such as the tresillo), drawn from a stream of its own
    only where a genre names it; which drum takes which role (`DrumRoles`, song and section); half and double time.
 9. *The presets:* `Client/genres.json` with the ten, checked against the choices by a test, each tuned against its

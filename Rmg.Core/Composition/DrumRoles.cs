@@ -119,26 +119,39 @@ internal static class DrumRoles
         return StateMap.FromStates([CompositionStateKinds.DrumRole.CreateState(new LayerValue<int>(depth, (int)role))]);
     }
 
-    /// <summary>The song's role of a drum, by its affinities at the groove facet (<see cref="Pick" />), and its part.</summary>
-    public static StateMap GenerateSong(IGenerationContext context, PercussionInstrumentDefinition drum, double unconventionality)
+    /// <summary>
+    ///     The song's role of a drum, by its affinities at the groove facet (<see cref="Pick" />), and its part, and the
+    ///     genre's rhythm of the role (<see cref="GenreRhythm" />).
+    /// </summary>
+    public static StateMap GenerateSong(IGenerationContext context, PercussionInstrumentDefinition drum, double unconventionality, Genre genre)
     {
         var role = Pick(context, drum, unconventionality);
-        return At(StateDepths.Song, role).MergeWith(Parts[role].ToStateMap());
+        return At(StateDepths.Song, role).MergeWith(Parts[role].ToStateMap()).MergeWith(GenreRhythm.Of(genre, GenreChoices.Rhythms[PartOf(role)]));
     }
+
+    /// <summary>The part of a role whose rhythm a genre may move.</summary>
+    public static RhythmPart PartOf(DrumRole role) => role switch
+    {
+        DrumRole.Ground => RhythmPart.Ground,
+        DrumRole.Backbeat => RhythmPart.Backbeat,
+        DrumRole.Time => RhythmPart.Time,
+        _ => RhythmPart.Colour
+    };
 
     /// <summary>
     ///     A section's role of a drum, now and then drawn again by its affinities at the groove facet, never at the plain
-    ///     end and always at the wild; the role and the difference of its part from the song's, or none for the song's.
-    ///     Always two draws.
+    ///     end and always at the wild; the role and the difference of its part from the song's, the genre's rhythm of the
+    ///     role's too, or none for the song's. Always two draws.
     /// </summary>
-    public static StateMap DrawSection(IGenerationContext context, PercussionInstrumentDefinition drum, DrumRole songRole, double unconventionality)
+    public static StateMap DrawSection(IGenerationContext context, PercussionInstrumentDefinition drum, DrumRole songRole, double unconventionality, Genre genre)
     {
         var drawsAgain = context.TestProbability(RhythmicUnconventionality.Ends(SectionChangeChance, 1).At(unconventionality));
         var role = Pick(context, drum, unconventionality);
         if (!drawsAgain || role == songRole)
             return StateMap.Default;
 
-        return At(StateDepths.Section, role).MergeWith(Parts[songRole].ToStateMap(-1)).MergeWith(Parts[role].ToStateMap());
+        return At(StateDepths.Section, role).MergeWith(Parts[songRole].ToStateMap(-1)).MergeWith(Parts[role].ToStateMap())
+            .MergeWith(GenreRhythm.Of(genre, GenreChoices.Rhythms[PartOf(songRole)], -1)).MergeWith(GenreRhythm.Of(genre, GenreChoices.Rhythms[PartOf(role)]));
     }
 
     /// <summary>A drum's role by its affinities: its main one at the plain end, any it has as likely at the wild.</summary>

@@ -130,7 +130,7 @@ public static class SongGenerator
         var songStateMap = CreateSongStateMap(Stream(SongStream.SongState), unconventionality, rhythmicUnconventionality)
             .MergeWith(Feels.At(StateDepths.Song, feel));
         // how busy the melody is, which a section moves
-        var melodyBusyness = MelodyBusyness.Generate(Stream(SongStream.Melody));
+        var melodyBusyness = GenreRhythm.Of(genre, MelodyBusyness.Generate(Stream(SongStream.Melody)));
 
         // the song's form: one of the forms songs are written in, its sections playing their roles, or one of its own
         // the meter the song's bars are in
