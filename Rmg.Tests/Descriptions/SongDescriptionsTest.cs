@@ -37,6 +37,24 @@ public sealed class SongDescriptionsTest
     }
 
     [Test]
+    public async Task ASectionsChords_AreItsProgressions_EveryOneNamed_WhereTheChordsPlay()
+    {
+        var named = 0;
+        foreach (var song in TestCorpus.Range(32))
+        {
+            var description = Describe(song);
+            var progressions = song.Trace.Where(x => x.Point == TracePoints.Progression).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => ((System.Collections.Immutable.ImmutableArray<int>)x.First().Value!).Length);
+            foreach (var (section, span) in description.Sections.Zip(song.Map.Sections))
+            {
+                await Assert.That(section.Chords.Length).IsEqualTo(progressions.GetValueOrDefault(span.SectionId));
+                named += section.Chords.Count(x => x.Name is not null);
+            }
+        }
+
+        await Assert.That(named).IsGreaterThan(0);
+    }
+
+    [Test]
     public async Task TheLoudestSection_IsLoud_AndTheQuietestQuiet()
     {
         var checkedSongs = 0;

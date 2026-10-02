@@ -57,6 +57,42 @@ public static class SongDescriptions
         var parts = song.TrackDefinitions.Where(x => song.Notes!.TryGetValue(x.Key, out var notes) && notes.Count > 0)
             .GroupBy(x => x.Value.Role).ToDictionary(x => x.Key, x => x.Select(y => y.Key).ToArray());
 
+        // a section's chords: its progression's degrees, each named as the chords' part plays it where the section first
+        // has it play, by the notes it sounds over the chord's span, and by its scale's triad where the part does not
+        var progressions = trace.Where(x => x.Point == TracePoints.Progression).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => (ImmutableArray<int>)x.First().Value!);
+        var rhythms = trace.Where(x => x.Point == TracePoints.HarmonicRhythm).GroupBy(x => x.Section).ToDictionary(x => x.Key, x => (HarmonicRhythm)x.First().Value!);
+        var chordNotes = parts.GetValueOrDefault(TrackRole.Chords, []).SelectMany(x => song.Notes![x]).ToArray();
+        ImmutableArray<ChordDescription> ChordsOf(int id)
+        {
+            if (!progressions.TryGetValue(id, out var degrees) || !rhythms.TryGetValue(id, out var rhythm))
+                return [];
+
+            var scale = sectionScales.GetValueOrDefault(id, songScale);
+            var spans = map.Sections.Where(x => x.SectionId == id).ToArray();
+            return
+            [
+                ..degrees.Select((degree, i) =>
+                {
+                    var step = degree.Mod(scale.Offsets.Length);
+                    foreach (var span in spans)
+                    {
+                        var start = span.Start + rhythm.Changes[i];
+                        var end = start + rhythm.LengthOf(i);
+                        var root = (keys.GetEffectiveValueAt(start) + scale.Offsets[step]).Mod(12);
+                        var intervals = chordNotes.Where(n => n.Position >= start - 1e-9 && n.Position < end - 1e-9)
+                            .SelectMany(n => n.Value.Pitches).Select(pitch => (pitch - root).Mod(12)).ToHashSet();
+                        if (intervals.Count < 2)
+                            continue;
+
+                        var played = ChordNames.Of(intervals);
+                        return new ChordDescription(ChordNames.Numeral(step, scale.Offsets, played), KeyNames[root] + played.Suffix);
+                    }
+
+                    return new ChordDescription(ChordNames.Numeral(step, scale.Offsets, ChordNames.Of(ChordNames.Triad(step, scale.Offsets))), null);
+                })
+            ];
+        }
+
         var sections = map.Sections.Select((span, index) =>
         {
             var id = span.SectionId;
@@ -84,7 +120,7 @@ public static class SongDescriptions
                 TextureName(textures.GetValueOrDefault(index, TextureKind.Steady)),
                 playing,
                 solos.TryGetValue(index, out var solo) ? [..solo.Soloists.Select(PartName)] : [],
-                []
+                ChordsOf(id)
             );
         }).ToImmutableArray();
 
