@@ -82,10 +82,12 @@ internal static class Groove
     ///     third beat and every cycle twice as long, -1 for double time, the backbeat on every beat, and 0 for the song's
     ///     time; half time the likelier the less energy the section has, double time the more.
     /// </summary>
-    public static int DrawTimeFeel(IGenerationContext context, Tilt energy)
+    /// <param name="genre">The genre whose chances of half and double time lean them.</param>
+    public static int DrawTimeFeel(IGenerationContext context, Tilt energy, Genre genre)
     {
-        var half = energy.Chance(HalfTimeChance, -1);
-        var twice = energy.Chance(DoubleTimeChance, 1);
+        double Within(double chance, string option) => new ByConvention(chance, chance, chance).At(0.5, genre.Chance(GenreChoices.FeelChances, option));
+        var half = Within(energy.Chance(HalfTimeChance, -1), "halfTime");
+        var twice = Within(energy.Chance(DoubleTimeChance, 1), "doubleTime");
         var draw = context.GenerateDouble();
         return draw < half ? 1 : draw < half + twice ? -1 : 0;
     }

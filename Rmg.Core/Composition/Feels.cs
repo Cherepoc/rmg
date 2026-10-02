@@ -64,9 +64,12 @@ internal static class Feels
     }
 
     /// <summary>A song's feel, at the feel facet of its unconventionality.</summary>
-    public static int DrawSong(IGenerationContext context, double unconventionality, Genre genre)
+    public static int DrawSong(IGenerationContext context, double unconventionality, Genre genre) => Draw(context, unconventionality, genre.Pool<int>(GenreChoices.Feel, NameOf));
+
+    /// <summary>A feel at the feel facet of an unconventionality, within a pool of them, such as a genre's of a part's.</summary>
+    public static int Draw(IGenerationContext context, double unconventionality, Func<int, double>? pool)
     {
-        return context.Pick(ByConvention.Weigh(Weights, unconventionality, genre.Pool<int>(GenreChoices.Feel, NameOf)));
+        return context.Pick(ByConvention.Weigh(Weights, unconventionality, pool));
     }
 
     /// <summary>

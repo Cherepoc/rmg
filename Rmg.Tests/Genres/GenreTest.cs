@@ -210,6 +210,39 @@ public sealed class GenreTest
     }
 
     [Test]
+    public async Task APartsOwnFeel_TheDrumsRoles_AndHalfTime_AreTheGenres()
+    {
+        var grouped = Feels.Weights.Select(x => x.Feel).Single(x => Feels.NameOf(x) == "grouped3");
+        var genre = Of(
+            (GenreChoices.PartFeels[RhythmPart.Time], [("grouped3", 1)]),
+            (GenreChoices.DrumRoles[DrumRole.Time], [("ride", 1), ("maracas", 0.5)]),
+            (GenreChoices.FeelChances, [("halfTime", 1)])
+        );
+        var keepers = 0;
+        foreach (var seed in Enumerable.Range(0, 8))
+        {
+            var song = TestCorpus.Get(seed, new SongOverrides(Genre: genre));
+            foreach (var (track, definition) in song.Song.TrackDefinitions.Where(x => x.Value is PercussionInstrumentTrack))
+            {
+                var drum = (PercussionInstrumentTrack)definition;
+                // only the ride or the maracas keep time, in the tresillo's grouping
+                if (DrumRoles.Of(drum.StateMap) == DrumRole.Time)
+                {
+                    await Assert.That(DrumPieces.NameOf(DrumGroups.GetDrum(track))).IsIn(["ride", "maracas"]);
+                    await Assert.That(Feels.Of(drum.StateMap)).IsEqualTo(grouped);
+                    keepers++;
+                }
+            }
+
+            // every section's drums in half time
+            var timeFeels = song.Trace.Where(x => x.Point == TracePoints.TimeFeel).Select(x => (int)x.Value!).ToArray();
+            await Assert.That(timeFeels.All(x => x == 1)).IsTrue();
+        }
+
+        await Assert.That(keepers).IsGreaterThan(0);
+    }
+
+    [Test]
     public async Task AGenresChances_AreNeverAt0_AndAlwaysAt1()
     {
         var genre = Of((GenreChoices.Parts, [("pad", 0), ("counterMelody", 1)]), (GenreChoices.FeelChances, [("swing", 1)]));

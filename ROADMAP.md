@@ -337,8 +337,6 @@ of what it sounds like, agreed as a start:
 
 **Steps,** each committed and measured on its own, per preset 64 songs against none, the fingerprint unchanged with
 no genre:
-8. *The rhythm's options per role:* each part's feel (a grouping such as the tresillo), drawn from a stream of its own
-   only where a genre names it; which drum takes which role (`DrumRoles`, song and section); half and double time.
 9. *The presets:* `Client/genres.json` with the ten, checked against the choices by a test, each tuned against its
    sentence by the measures of steps 3 to 8 (Reggae's chords on the offbeats in most bars, Electronic's kick on every
    beat, Jazz's bass in quarters).

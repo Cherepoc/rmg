@@ -178,9 +178,13 @@ public static class StateKinds
 public static class StateDepths
 {
     public const int Song = 0;
-    public const int Section = 1;
-    public const int BarPattern = 2;
-    public const int Note = 3;
+
+    /// <summary>A part's own for the song, over the song's, such as a feel a genre gives it.</summary>
+    public const int Track = 1;
+
+    public const int Section = 2;
+    public const int BarPattern = 3;
+    public const int Note = 4;
 }
 
 /// <summary>A value as a layer sets it, with the layer's depth (<see cref="StateDepths" />); unset below 0.</summary>

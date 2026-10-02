@@ -39,7 +39,8 @@ public static class GenreChoices
     public static GenreChoice Feel { get; } = Pool("feel", "Feel", TempoAndFeel, Feels.Weights.Select(x => (Feels.NameOf(x.Feel), Feels.Label(x.Feel), x.Weight.Tuned)));
 
     /// <summary>The chances of the feel's: that the song swings.</summary>
-    public static GenreChoice FeelChances { get; } = AsTheyAre("feelChances", "Chances", TempoAndFeel, GenreChoiceKind.Chances, [("swing", "Swing")]);
+    public static GenreChoice FeelChances { get; } = AsTheyAre("feelChances", "Chances", TempoAndFeel, GenreChoiceKind.Chances,
+        [("swing", "Swing"), ("halfTime", "A section's drums in half time"), ("doubleTime", "A section's drums in double time")]);
 
     /// <summary>The values of the feel's: how much a song that swings swings.</summary>
     public static GenreChoice FeelValues { get; } = AsTheyAre("feelValues", "Amounts", TempoAndFeel, GenreChoiceKind.Values, [("swing", "Swing")]);
@@ -103,6 +104,25 @@ public static class GenreChoices
             [..GenreRhythm.Settings, ..x == RhythmPart.Melody ? [("busyness", "Busyness")] : Array.Empty<(string, string)>()])
     );
 
+    /// <summary>
+    ///     Every part's own feel, a pitched part's or the drums' of a role, such as a time keeper's grouping of the
+    ///     tresillo's 3+3+2, over the song's, drawn only where a genre names it.
+    /// </summary>
+    public static ImmutableDictionary<RhythmPart, GenreChoice> PartFeels { get; } = Enum.GetValues<RhythmPart>().ToImmutableDictionary(
+        x => x,
+        x => Pool($"feel.{Name(x.ToString())}", Rhythms[x].Label, Rhythm, Feels.Weights.Select(f => (Feels.NameOf(f.Feel), Feels.Label(f.Feel), f.Weight.Tuned)))
+    );
+
+    // the drums' roles in the order the page shows them
+    private static readonly DrumRole[] RolesInOrder = [DrumRole.Ground, DrumRole.Backbeat, DrumRole.Time, DrumRole.Colour];
+
+    /// <summary>Which drums take a role in the groove, each by its affinity for it as the songs have it (<see cref="DrumRoles" />).</summary>
+    public static ImmutableDictionary<DrumRole, GenreChoice> DrumRoles { get; } = RolesInOrder.ToImmutableDictionary(
+            x => x,
+            x => Pool($"drumRole.{Name(x.ToString())}", Rhythms[Composition.DrumRoles.PartOf(x)].Label, Rhythm,
+                DrumGroups.AllDrums.Select(d => (Composition.DrumPieces.NameOf(d), d.Name, d.AffinityFor(x))))
+        );
+
     /// <summary>The chances of the parts a song may leave out.</summary>
     public static GenreChoice Parts { get; } = AsTheyAre("parts", "Parts", PartsAndDrums, GenreChoiceKind.Chances,
     [
@@ -133,7 +153,9 @@ public static class GenreChoices
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,
-        ..Enum.GetValues<RhythmPart>().Select(x => Rhythms[x])
+        ..Enum.GetValues<RhythmPart>().Select(x => Rhythms[x]),
+        ..Enum.GetValues<RhythmPart>().Select(x => PartFeels[x]),
+        ..RolesInOrder.Select(x => DrumRoles[x])
     ];
 
     /// <summary>A pool's choice, every option's default its weight against the heaviest's.</summary>

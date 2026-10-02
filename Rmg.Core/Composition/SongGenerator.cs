@@ -113,7 +113,9 @@ public static class SongGenerator
             // the drums given make the setup, which the song still draws its own drums by, so that the rest is as it was
             overrides.DrumPieces is { } pieces ? DrumPieces.SetupOf(pieces) : overrides.DrumSetup ?? DrumSetups.Pick(Stream(SongStream.DrumSetup), rhythmicUnconventionality.Value, genre),
             overrides.DrumPieces is { } given ? DrumPieces.Of(given) : null,
-            genre
+            genre,
+            part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.PartFeel), (int)part)),
+            songUnconventionality[Facet.Feel]
         );
         StateTrace.Record(TracePoints.DrumSetup, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, tracks.DrumSetup.ToString(), tracks.DrumSetup);
 
@@ -645,5 +647,6 @@ internal enum SongStream
     SongEnds = 59,
     DrumCoverage = 60,
     UnheardLandings = 61,
-    Kit = 62
+    Kit = 62,
+    PartFeel = 63
 }

@@ -125,7 +125,7 @@ internal static class DrumRoles
     /// </summary>
     public static StateMap GenerateSong(IGenerationContext context, PercussionInstrumentDefinition drum, double unconventionality, Genre genre)
     {
-        var role = Pick(context, drum, unconventionality);
+        var role = Pick(context, drum, unconventionality, genre);
         return At(StateDepths.Song, role).MergeWith(Parts[role].ToStateMap()).MergeWith(GenreRhythm.Of(genre, GenreChoices.Rhythms[PartOf(role)]));
     }
 
@@ -146,7 +146,7 @@ internal static class DrumRoles
     public static StateMap DrawSection(IGenerationContext context, PercussionInstrumentDefinition drum, DrumRole songRole, double unconventionality, Genre genre)
     {
         var drawsAgain = context.TestProbability(RhythmicUnconventionality.Ends(SectionChangeChance, 1).At(unconventionality));
-        var role = Pick(context, drum, unconventionality);
+        var role = Pick(context, drum, unconventionality, genre);
         if (!drawsAgain || role == songRole)
             return StateMap.Default;
 
@@ -154,11 +154,22 @@ internal static class DrumRoles
             .MergeWith(GenreRhythm.Of(genre, GenreChoices.Rhythms[PartOf(songRole)], -1)).MergeWith(GenreRhythm.Of(genre, GenreChoices.Rhythms[PartOf(role)]));
     }
 
-    /// <summary>A drum's role by its affinities: its main one at the plain end, any it has as likely at the wild.</summary>
-    private static DrumRole Pick(IGenerationContext context, PercussionInstrumentDefinition drum, double unconventionality)
+    /// <summary>
+    ///     A drum's role by its affinities: its main one at the plain end, any it has as likely at the wild; a role whose
+    ///     drums a genre names by the drum's weight in its pool in place of its affinity, none it leaves out, and by its own
+    ///     affinities where the genre leaves it no role.
+    /// </summary>
+    private static DrumRole Pick(IGenerationContext context, PercussionInstrumentDefinition drum, double unconventionality, Genre genre)
     {
+        double Affinity(DrumRole role) => genre.Pool<PercussionInstrumentDefinition>(GenreChoices.DrumRoles[role], DrumPieces.NameOf) is { } pool
+            ? pool(drum)
+            : drum.AffinityFor(role);
+        var roles = drum.Roles.Select(x => x.Value).Distinct().Concat(GenreChoices.DrumRoles.Keys.Where(x => genre.Names(GenreChoices.DrumRoles[x])))
+            .Distinct().Select(x => new Weighted<DrumRole>(Affinity(x), x)).Where(x => x.Weight > 0).ToArray();
+        if (roles.Length == 0)
+            roles = [..drum.Roles.Where(x => x.Weight > 0)];
         return context.Pick(ByConvention.Weigh(
-            drum.Roles.Where(x => x.Weight > 0).Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == drum.MainRole ? 0 : 1))),
+            roles.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == drum.MainRole ? 0 : 1))),
             unconventionality
         ));
     }

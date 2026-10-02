@@ -69,7 +69,9 @@ internal sealed class SongTracks
     /// <param name="soloContext">The sequence the solo part's instrument and state are drawn from.</param>
     /// <param name="hasTwin">Whether the song's riff has a twin, which the two play apart, on either side.</param>
     /// <param name="givenDrums">The drums given in place of those the song draws, which it still draws, so that the rest is as it was.</param>
-    /// <param name="genre">The genre whose pools the instruments and the drums keep to.</param>
+    /// <param name="genre">The genre whose pools the instruments and the drums keep to, and whose rhythms and feels the parts play.</param>
+    /// <param name="feelStreams">The sequence a part's own feel is drawn from, where the genre names one.</param>
+    /// <param name="feel">The feel facet of the song's unconventionality, which a part's own feel is drawn by.</param>
     public static SongTracks Create(
         IGenerationContext context,
         IGenerationContext panningContext,
@@ -84,9 +86,18 @@ internal sealed class SongTracks
         IGenerationContext roleContext,
         DrumSetup drumSetup,
         ImmutableArray<PercussionInstrumentDefinition>? givenDrums,
-        Genre genre
+        Genre genre,
+        Func<RhythmPart, IGenerationContext> feelStreams,
+        double feel
     )
     {
+        // a part's own feel over the song's, drawn once from its own sequence where the genre names it
+        var partFeels = new Dictionary<RhythmPart, StateMap>();
+        StateMap FeelOf(RhythmPart part) => genre.Names(GenreChoices.PartFeels[part])
+            ? partFeels.TryGetValue(part, out var drawn) ? drawn
+            : partFeels[part] = Feels.At(StateDepths.Track, Feels.Draw(feelStreams(part), feel, genre.Pool<int>(GenreChoices.PartFeels[part], Feels.NameOf)))
+            : StateMap.Default;
+
         var trackRhythmLayer = rhythmicUnconventionality.Lean(RhythmLayers.Track);
         // an instrument's weight in the genre's pool of its role
         Func<RoleInstrument, double>? Pool(TrackRole role) => genre.Pool<RoleInstrument>(GenreChoices.Instruments[role], x => GenreChoices.Name(x.Name));
@@ -299,6 +310,7 @@ internal sealed class SongTracks
                 var drumStateMap = builder.ToStateMap(context)
                     .MergeWith(DrumStrokes.GenerateSong(strokeContext, drum))
                     .MergeWith(DrumRoles.GenerateSong(roleContext, drum, rhythmicUnconventionality.Value, genre));
+                drumStateMap = drumStateMap.MergeWith(FeelOf(DrumRoles.PartOf(DrumRoles.Of(drumStateMap))));
                 definitions[DrumGroups.GetTrackNumber(drum)] = new PercussionInstrumentTrack(
                     LayerStates.CreateTrackLayer(context, "Track", drumStateMap, _ => VelocityLayers.GetLevel(drum), DrumRoles.Hold(trackRhythmLayer, DrumRoles.Of(drumStateMap))),
                     drum.Sounds
@@ -306,7 +318,7 @@ internal sealed class SongTracks
             }
         }
 
-        // every pitched part's rhythm as the genre moves it, a riff's twin's as the riff's
+        // every pitched part's rhythm and feel as the genre gives them, a riff's twin's as the riff's
         foreach (var (track, pitched) in definitions.Where(x => x.Value is PitchInstrumentTrack).Select(x => (x.Key, (PitchInstrumentTrack)x.Value)).ToArray())
         {
             RhythmPart? part = pitched.Role switch
@@ -320,9 +332,9 @@ internal sealed class SongTracks
                 TrackRole.Rhythm => RhythmPart.Rhythm,
                 _ => null
             };
-            if (part is { } moved && genre.Names(GenreChoices.Rhythms[moved]))
+            if (part is { } moved && (genre.Names(GenreChoices.Rhythms[moved]) || genre.Names(GenreChoices.PartFeels[moved])))
                 definitions[track] = new PitchInstrumentTrack(
-                    pitched.StateMap.MergeWith(GenreRhythm.Of(genre, GenreChoices.Rhythms[moved])),
+                    pitched.StateMap.MergeWith(GenreRhythm.Of(genre, GenreChoices.Rhythms[moved])).MergeWith(FeelOf(moved)),
                     pitched.InstrumentCode,
                     pitched.MinOctaveOffset,
                     pitched.MaxOctaveOffset,
