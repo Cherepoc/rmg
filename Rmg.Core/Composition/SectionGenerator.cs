@@ -31,6 +31,7 @@ internal sealed class SectionGenerator
     private readonly Tilt _songPercussion;
     private readonly int _key;
     private readonly ImmutableHashSet<TrackRole> _absent;
+    private readonly Genre _genre;
     // the generators of a section's bar state and patterns, one for every meter a section is in
     private readonly Func<Meter, (BarStateGenerator Bars, PatternGenerator Patterns)> _generators;
 
@@ -52,10 +53,12 @@ internal sealed class SectionGenerator
         ImmutableDictionary<int, StateMap> sectionEnergies,
         Tilt songPercussion,
         int key,
-        ImmutableHashSet<TrackRole> absent
+        ImmutableHashSet<TrackRole> absent,
+        Genre genre
     )
     {
         _absent = absent;
+        _genre = genre;
         _context = context;
         _seed = seed;
         _tracks = tracks;
@@ -67,7 +70,7 @@ internal sealed class SectionGenerator
         _songPercussion = songPercussion;
         _key = key;
         _songRegisterFreedomShift = Generators.SplineValue()(context.CreateContext(Seeds.Derive(seed, SongRegisterFreedomStream)));
-        _generators = ((Func<Meter, (BarStateGenerator, PatternGenerator)>)(meter => (new BarStateGenerator(settings, meter), new PatternGenerator(context, tracks.Definitions, meter))))
+        _generators = ((Func<Meter, (BarStateGenerator, PatternGenerator)>)(meter => (new BarStateGenerator(settings, meter), new PatternGenerator(context, tracks.Definitions, meter, genre))))
             .CacheGeneratedValues();
     }
 
@@ -124,7 +127,7 @@ internal sealed class SectionGenerator
         StateTrace.Record(TracePoints.CadenceRaise, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{raisable} {raisedStep is not null}", (raisable, raisedStep is not null));
 
         // the section's change of the song's feel, now and then, from a sequence of its own, by its feel facet
-        var feelChange = Feels.DrawChange(Stream(sectionId, SectionStream.Feel), Feels.Of(songStateMap), Feels.SectionChange, facets[Facet.Feel]);
+        var feelChange = Feels.DrawChange(Stream(sectionId, SectionStream.Feel), Feels.Of(songStateMap), Feels.SectionChange, facets[Facet.Feel], _genre);
         if (feelChange is { } feelOfSection)
             StateTrace.Record(TracePoints.Feel, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{feelOfSection}", feelOfSection);
         var sectionStateMap = CreateSectionStateMap(
@@ -352,7 +355,8 @@ internal sealed class SectionGenerator
             _songScale,
             unconventionality,
             SectionEnergy.Tilt(energy, Unconventionality.Coupling(unconventionality)),
-            SectionContrast.Of(role)
+            SectionContrast.Of(role),
+            _genre
         );
     }
 

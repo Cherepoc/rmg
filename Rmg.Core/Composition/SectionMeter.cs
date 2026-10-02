@@ -20,25 +20,29 @@ internal static class SectionMeter
     /// <param name="unconventionality">The feel facet of the song's unconventionality.</param>
     /// <param name="sectionIds">The song's sections in its order.</param>
     /// <param name="roles">What each section does in the song's form, by its id.</param>
+    /// <param name="genre">The genre whose pool of the meters a section keeps to, the song's alone where it has no other.</param>
     public static ImmutableDictionary<int, Meter> Generate(
         Func<int, IGenerationContext> sections,
         Meter song,
         double unconventionality,
         IReadOnlyList<int> sectionIds,
-        IReadOnlyDictionary<int, SectionRole> roles
+        IReadOnlyDictionary<int, SectionRole> roles,
+        Genre genre
     )
     {
         var songOption = Meter.OptionOf(song);
+        var pool = genre.Pool<Meter>(GenreChoices.Meter, Meter.NameOf);
+        var options = Meter.Options.Where((x, i) => i != songOption && (pool is null || pool(x.Meter) > 0)).ToArray();
         return sectionIds.Distinct().ToImmutableDictionary(id => id, id =>
         {
             var drawing = sections(id);
             var hasOwn = drawing.TestProbability(SectionContrast.Of(roles[id]).Chance(Chance.At(unconventionality), 1));
             // the first section sets the song's meter
-            if (!hasOwn || id == sectionIds[0])
+            if (!hasOwn || id == sectionIds[0] || options.Length == 0)
                 return song;
 
             // another of the options the facet allows, drawn from the section's own sequence, whose draws touch no other's
-            var others = ByConvention.Weigh(Meter.Options.Where((_, i) => i != songOption).Select(x => (x.Meter, x.Weight)), unconventionality);
+            var others = ByConvention.Weigh(options.Select(x => (x.Meter, x.Weight)), unconventionality, pool);
             return Meter.InAnOrder(drawing, drawing.Pick(others));
         });
     }

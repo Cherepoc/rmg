@@ -78,7 +78,7 @@ public sealed class ScalesTest
     public async Task ASectionsScale_IsTheSongs_UnlessItChanges_ToACloseOneMostOften()
     {
         var context = new GenerationContext(1);
-        var picks = Enumerable.Range(0, 20_000).Select(_ => Rmg.Core.Composition.Scales.PickSection(context, Rmg.Core.Composition.Scales.NaturalMinor, 0.5, Tilt.None, Tilt.None)).ToArray();
+        var picks = Enumerable.Range(0, 20_000).Select(_ => Rmg.Core.Composition.Scales.PickSection(context, Rmg.Core.Composition.Scales.NaturalMinor, 0.5, Tilt.None, Tilt.None, Genre.None)).ToArray();
         var changed = picks.Where(x => x != Rmg.Core.Composition.Scales.NaturalMinor).ToArray();
 
         await Assert.That(changed.Length / (double)picks.Length).IsEqualTo(Rmg.Core.Composition.Scales.SectionChange.Tuned).Within(0.01);
@@ -91,8 +91,8 @@ public sealed class ScalesTest
     {
         var context = new GenerationContext(1);
         var minor = Rmg.Core.Composition.Scales.NaturalMinor;
-        var plain = Enumerable.Range(0, 2000).Select(_ => Rmg.Core.Composition.Scales.PickSection(context, minor, 0, Tilt.None, Tilt.None)).ToArray();
-        var wild = Enumerable.Range(0, 2000).Select(_ => Rmg.Core.Composition.Scales.PickSection(context, minor, 1, Tilt.None, Tilt.None)).ToArray();
+        var plain = Enumerable.Range(0, 2000).Select(_ => Rmg.Core.Composition.Scales.PickSection(context, minor, 0, Tilt.None, Tilt.None, Genre.None)).ToArray();
+        var wild = Enumerable.Range(0, 2000).Select(_ => Rmg.Core.Composition.Scales.PickSection(context, minor, 1, Tilt.None, Tilt.None, Genre.None)).ToArray();
 
         await Assert.That(plain.All(x => x == minor)).IsTrue();
         await Assert.That(wild.All(x => x != minor && x.Weight.Wild > 0)).IsTrue();

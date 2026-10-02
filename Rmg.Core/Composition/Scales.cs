@@ -85,15 +85,18 @@ public static class Scales
     ///     A section's scale, on the song's tonic, by the scale facet of the section's unconventionality: the song's, or
     ///     another by <see cref="SectionChange" />, the closer to the song's and the heavier at the facet the likelier,
     ///     and leaning brighter or darker by the tilt, such as the section's energy; one the facet allows, and none it
-    ///     does not; a section that contrasts, such as a chorus, changing the likelier by its contrast.
+    ///     does not; a section that contrasts, such as a chorus, changing the likelier by its contrast; another of the
+    ///     genre's pool, and the song's where it has no other.
     /// </summary>
-    internal static Scale PickSection(IGenerationContext context, Scale song, double unconventionality, Tilt tilt, Tilt contrast)
+    internal static Scale PickSection(IGenerationContext context, Scale song, double unconventionality, Tilt tilt, Tilt contrast, Genre genre)
     {
-        if (!context.TestProbability(contrast.Chance(SectionChange.At(unconventionality), 1)))
+        var pool = genre.Pool<Scale>(GenreChoices.Scale, x => GenreChoices.Name(x.Name));
+        var others = All.Where(x => x != song && (pool is null || pool(x) > 0)).ToArray();
+        if (!context.TestProbability(contrast.Chance(SectionChange.At(unconventionality), 1)) || others.Length == 0)
             return song;
 
         var options = tilt.Weigh(
-            ByConvention.Weigh(All.Where(x => x != song).Select(x => (x, x.Weight)), unconventionality)
+            ByConvention.Weigh(others.Select(x => (x, x.Weight)), unconventionality, pool)
                 .Select(x => x with { Weight = x.Weight * Math.Pow(Closeness, x.Value.Distance(song) - 1) }),
             x => Math.Sign(x.Brightness - song.Brightness)
         );

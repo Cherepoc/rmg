@@ -135,6 +135,32 @@ public sealed class GenreTest
     }
 
     [Test]
+    public async Task ASongsSections_BarsAndFills_KeepToTheGenresPools_TheWildestToo()
+    {
+        var genre = Of(
+            (GenreChoices.Meter, [("4/4", 1), ("3/4", 0.5)]),
+            (GenreChoices.Scale, [("dorian", 1), ("major", 1)]),
+            (GenreChoices.Feel, [("straight", 1), ("tuplets3", 0.5)])
+        );
+        var feels = Feels.Weights.Select(x => x.Feel).Where(x => Feels.NameOf(x) is "straight" or "tuplets3").ToHashSet();
+        var changed = 0;
+        foreach (var seed in Enumerable.Range(0, 8))
+        {
+            var song = TestCorpus.Get(seed, new SongOverrides(Base: 1, Genre: genre));
+            var meters = (ImmutableDictionary<int, Meter>)song.Trace.Single(x => x.Point == TracePoints.SectionMeter).Value!;
+            await Assert.That(meters.Values.All(x => Meter.NameOf(x) is "4/4" or "3/4")).IsTrue();
+            var scales = song.Trace.Where(x => x.Point == TracePoints.SectionScale).Select(x => ((Scale)x.Value!).Name).ToArray();
+            await Assert.That(scales.All(x => x is "Dorian" or "Major")).IsTrue();
+            var played = song.Song.Notes!.Values.SelectMany(x => x).Select(x => Feels.Of(x.Value.State)).Distinct().ToArray();
+            await Assert.That(played.All(feels.Contains)).IsTrue();
+            changed += scales.Distinct().Count() > 1 || meters.Values.Distinct().Count() > 1 ? 1 : 0;
+        }
+
+        // and the wildest change them within the pools
+        await Assert.That(changed).IsGreaterThan(0);
+    }
+
+    [Test]
     public async Task AGenresChances_AreNeverAt0_AndAlwaysAt1()
     {
         var genre = Of((GenreChoices.Parts, [("pad", 0), ("counterMelody", 1)]), (GenreChoices.FeelChances, [("swing", 1)]));

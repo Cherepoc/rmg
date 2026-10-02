@@ -27,11 +27,14 @@ internal sealed class PatternGenerator
     private readonly Func<StateMap, DyadicRankThresholdPattern> _rhythmPatternGenerator;
 
     private readonly Meter _meter;
+    private readonly Genre _genre;
 
     /// <param name="meter">The meter the song's bars are in.</param>
-    public PatternGenerator(IGenerationContext context, ImmutableSortedDictionary<int, IInstrumentTrack> trackDefinitions, Meter meter)
+    /// <param name="genre">The genre whose pool of the feels a bar's change keeps to.</param>
+    public PatternGenerator(IGenerationContext context, ImmutableSortedDictionary<int, IInstrumentTrack> trackDefinitions, Meter meter, Genre genre)
     {
         _meter = meter;
+        _genre = genre;
         _context = context;
         _trackDefinitions = trackDefinitions;
         _rhythmPatternGenerator = ((Func<StateMap, DyadicRankThresholdPattern>)GenerateRhythmPattern)
@@ -229,7 +232,7 @@ internal sealed class PatternGenerator
             .MergeWith(trackStateMap);
         // the bar's change of the feel it comes to, now and then, a passage in another feel, from a sequence of its own
         // by the bar pattern's seed, so that a drum playing its lead's bar patterns changes as its lead does
-        if (Feels.DrawChange(new GenerationContext((uint)Seeds.Derive(seed, FeelStream)), Feels.Of(stateMap), Feels.BarChange, feelUnconventionality) is { } barFeel)
+        if (Feels.DrawChange(new GenerationContext((uint)Seeds.Derive(seed, FeelStream)), Feels.Of(stateMap), Feels.BarChange, feelUnconventionality, _genre) is { } barFeel)
             stateMap = stateMap.MergeWith(Feels.At(StateDepths.BarPattern, barFeel));
         // a track on another's feel plays its tuplet, all its layers' steps of it in place of its own
         if (leadFeel is not null)

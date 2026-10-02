@@ -165,7 +165,8 @@ public static class SongGenerator
             sectionEnergies,
             PercussionSections.GenerateSong(Stream(SongStream.Percussion)),
             commonStateMap.GetStateValue(StateKinds.KeyOffset),
-            absent
+            absent,
+            genre
         );
         // how the song starts and ends around its sections, decided before them: the one the song ends with leads home
         // to the tonic, where the ending lands
@@ -184,7 +185,8 @@ public static class SongGenerator
             meter,
             songUnconventionality[Facet.Feel],
             sectionIds,
-            structure.Roles
+            structure.Roles,
+            genre
         );
         StateTrace.Record(TracePoints.SectionMeter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", sectionMeters.Select(x => $"{x.Key} {x.Value}")), sectionMeters);
 
@@ -345,7 +347,7 @@ public static class SongGenerator
 
         // the drums mark the lines, now that the song is put together
         cancellation.ThrowIfCancellationRequested();
-        var fills = new FillGenerator(Stream(SongStream.Fills), tracks, Of(Facet.Fills), meter, Stream(SongStream.UnheardLandings));
+        var fills = new FillGenerator(Stream(SongStream.Fills), tracks, Of(Facet.Fills), meter, Stream(SongStream.UnheardLandings), genre);
         songTrackNoteTimelineMap = fills.Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
         // and announce a bigger section, the hi-hat opening and the snare on its head before it
         songTrackNoteTimelineMap = LiftCues.Apply(songTrackNoteTimelineMap, form.Lines);

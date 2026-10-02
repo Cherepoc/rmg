@@ -337,9 +337,6 @@ of what it sounds like, agreed as a start:
 
 **Steps,** each committed and measured on its own, per preset 64 songs against none, the fingerprint unchanged with
 no genre:
-4. *The pool held where a choice is drawn again:* the sections' scales (`Scales.PickSection`) and meters
-   (`SectionMeter`), and the feel's changes at a section, a bar and a fill (`Feels.DrawChange`). Measured: no note of a
-   genre's song outside its pools, over the corpus.
 5. *The chord shapes:* the pool through `HarmonicUnconventionality`, its levels moved by the shapes' share, cadence
    and home shapes included. Measured: the shares of the levels and of the sevenths per preset.
 6. *The kit's sound:* a draw from a stream of its own, Standard with no genre, under the mix's; the soundfonts checked

@@ -37,6 +37,7 @@ internal sealed class FillGenerator
     /// <param name="songRhythm">How far the song's rhythm strays, which makes a drummer's signature likelier.</param>
     // the meter the song's bars are in
     private readonly Meter _meter;
+    private readonly Genre _genre;
 
     // the sequence a drum of the fills and landings that never sounded lands from (LandTheUnheard)
     private readonly IGenerationContext _unheard;
@@ -47,9 +48,11 @@ internal sealed class FillGenerator
 
     /// <param name="meter">The meter the song's bars are in.</param>
     /// <param name="unheard">The sequence a drum of the fills and landings that never sounded lands from (<see cref="LandTheUnheard" />).</param>
-    public FillGenerator(IGenerationContext context, SongTracks tracks, RhythmicUnconventionality songRhythm, Meter meter, IGenerationContext unheard)
+    /// <param name="genre">The genre whose pool of the feels a fill's change keeps to.</param>
+    public FillGenerator(IGenerationContext context, SongTracks tracks, RhythmicUnconventionality songRhythm, Meter meter, IGenerationContext unheard, Genre genre)
     {
         _meter = meter;
+        _genre = genre;
         _unheard = unheard;
         _context = context;
         _songRhythm = songRhythm;
@@ -267,7 +270,7 @@ internal sealed class FillGenerator
         var density = layer.CreateDensityGenerator();
         var spread = layer.CreateFullnessGenerator();
         // the fill's change of feel from a sequence of its own, a single draw of the fill's
-        var feelChange = Feels.DrawChange(new GenerationContext((uint)SeedGenerator(_context)), feel, Feels.FillChange, feelUnconventionality);
+        var feelChange = Feels.DrawChange(new GenerationContext((uint)SeedGenerator(_context)), feel, Feels.FillChange, feelUnconventionality, _genre);
         return new StateMapBuilder("Fill", perTrack: true)
             .Add(CompositionStateKinds.Rhythm.MaxRank, context => FillLayers.FinerRanks + density(context))
             .Add(CompositionStateKinds.Rhythm.RankOffset, density)
