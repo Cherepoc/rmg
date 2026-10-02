@@ -260,6 +260,18 @@ public sealed class GenreTest
     }
 
     [Test]
+    public async Task APartEverySongHas_IsLeftOutByAGenre_InHalfItsSongsAtAQuarter_AndInEveryOneAt0()
+    {
+        var half = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Of((GenreChoices.Parts, [("bass", 0.25)])))).Song.Draws!.Parts.Contains(TrackRole.Bass));
+        await Assert.That(half.Count(x => x)).IsBetween(20, 44);
+        foreach (var seed in Enumerable.Range(0, 8))
+        {
+            await Assert.That(TestCorpus.Get(seed, new SongOverrides(Genre: Of((GenreChoices.Parts, [("bass", 0)])))).Song.Draws!.Parts).DoesNotContain(TrackRole.Bass);
+            await Assert.That(TestCorpus.Get(seed, new SongOverrides(Genre: Of((GenreChoices.Parts, [("bass", 0.5)])))).Song.Draws!.Parts).Contains(TrackRole.Bass);
+        }
+    }
+
+    [Test]
     public async Task AGenresChances_AreNeverAt0_AndAlwaysAt1()
     {
         var genre = Of((GenreChoices.Parts, [("pad", 0), ("counterMelody", 1)]), (GenreChoices.FeelChances, [("swing", 1)]));

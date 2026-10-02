@@ -25,10 +25,15 @@ public static class SongParts
     ///     The chance a song has the part, when not given, by its melody facet, and within a genre's chance of it; 1 for a
     ///     part every song has.
     /// </summary>
+    /// <remarks>
+    ///     A part every song has is certain, which a chance's odds cannot lean, so that a genre's weight of it is its chance
+    ///     doubled: as it is from the middle up, and halving it below, never at 0.
+    /// </remarks>
     public static double Chance(TrackRole part, double melody, Genre genre)
     {
-        var name = GenreChoices.Name(part.ToString());
-        return Chance(part).At(melody, GenreChoices.Parts.Options.Any(x => x.Name == name) ? genre.Chance(GenreChoices.Parts, name) : null);
+        var weight = genre.Chance(GenreChoices.Parts, GenreChoices.Name(part.ToString()));
+        var chance = Chance(part);
+        return chance == Even(1) ? Math.Min(1, (2 * weight) ?? 1) : chance.At(melody, weight);
     }
 
     private static ByConvention Chance(TrackRole part) => part switch

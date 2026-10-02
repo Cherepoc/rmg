@@ -17,7 +17,7 @@ public static class GenreEndpoints
             x.Name,
             x.Label,
             x.Kind.ToString().ToLowerInvariant(),
-            [..x.Options.Select(o => new GenreOptionResponse(o.Name, o.Label, Songs.StepScale.ToStep(o.Default)))]
+            [..x.Options.Select(o => new GenreOptionResponse(o.Name, o.Label, Songs.StepScale.ToStep(o.Default), o.Tags))]
         ))
     ];
 }
@@ -31,4 +31,5 @@ public sealed record GenreChoiceResponse(string Name, string Label, string Kind,
 /// <param name="Name">How a genre names it.</param>
 /// <param name="Label">How the page shows it.</param>
 /// <param name="Default">Its step as the songs have it, which a genre naming its choice starts from: a pool's option's weight, the heaviest's 63; a chance's or a value's 32.</param>
-public sealed record GenreOptionResponse(string Name, string Label, int Default);
+/// <param name="Tags">What the page needs to know of it besides, such as a drum piece's families, "kit" and "percussion".</param>
+public sealed record GenreOptionResponse(string Name, string Label, int Default, IReadOnlyList<string> Tags);

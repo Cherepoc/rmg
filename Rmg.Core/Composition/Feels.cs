@@ -48,7 +48,7 @@ internal static class Feels
     /// <summary>A feel's name, as a genre gives it: "straight", "tuplets3" for triplets, "grouped3" for the 3+3+2.</summary>
     public static string NameOf(int feel) => feel == Straight ? "straight" : feel.ToTuplet() > 1 ? $"tuplets{feel.ToPrime()}" : $"grouped{feel.ToPrime()}";
 
-    /// <summary>A feel as a listener tells it: "straight", "triplets", "grouped in 1.5s".</summary>
+    /// <summary>A feel as a listener tells it: "straight", "triplets", "groups of 3", the grid's steps grouped in threes.</summary>
     public static string Label(int feel)
     {
         if (feel == Straight)
@@ -58,7 +58,7 @@ internal static class Feels
             3 => "triplets",
             5 => "quintuplets",
             7 => "septuplets",
-            1 => $"grouped in {feel.ToRhythmPeriodValue():0.##}s",
+            1 => $"groups of {feel.ToPrime()}",
             var tuplet => $"{tuplet}-tuplets"
         };
     }

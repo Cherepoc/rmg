@@ -27,7 +27,11 @@ public enum GenreChoiceKind
 ///     Its amount as the songs have it, which a genre that names its choice starts from: a pool's option's weight in the
 ///     middle, the heaviest's 1; a chance's or a value's 1/2.
 /// </param>
-public sealed record GenreOption(string Name, string Label, double Default);
+public sealed record GenreOption(string Name, string Label, double Default)
+{
+    /// <summary>What the page needs to know of it besides, such as a drum piece's families, "kit" and "percussion".</summary>
+    public ImmutableArray<string> Tags { get; init; } = [];
+}
 
 /// <summary>A choice a genre may speak of: one the songs draw already, with its options by stable names.</summary>
 /// <param name="Name">How a genre names it, such as "meter" or "instrument.bass".</param>

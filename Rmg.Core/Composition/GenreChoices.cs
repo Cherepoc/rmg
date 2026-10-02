@@ -36,7 +36,7 @@ public static class GenreChoices
         Composition.Meter.Options.Select(x => (Composition.Meter.NameOf(x.Meter), Composition.Meter.NameOf(x.Meter), x.Weight.Tuned)));
 
     /// <summary>The feel the song plays in, straight, a tuplet or a grouping (<see cref="Feels" />).</summary>
-    public static GenreChoice Feel { get; } = Pool("feel", "Feel", Feels.Weights.Select(x => (Feels.NameOf(x.Feel), Feels.Label(x.Feel), x.Weight.Tuned)));
+    public static GenreChoice Feel { get; } = Pool("feel", "Feel", Feels.Weights.Select(x => (Feels.NameOf(x.Feel), Capitalised(Feels.Label(x.Feel)), x.Weight.Tuned)));
 
     /// <summary>The chances of the feel's: that the song swings.</summary>
     public static GenreChoice FeelChances { get; } = AsTheyAre("feelChances", "Swing and half time", GenreChoiceKind.Chances,
@@ -110,7 +110,7 @@ public static class GenreChoices
     /// </summary>
     public static ImmutableDictionary<RhythmPart, GenreChoice> PartFeels { get; } = Enum.GetValues<RhythmPart>().ToImmutableDictionary(
         x => x,
-        x => Pool($"feel.{Name(x.ToString())}", Rhythms[x].Label, Feels.Weights.Select(f => (Feels.NameOf(f.Feel), Feels.Label(f.Feel), f.Weight.Tuned)))
+        x => Pool($"feel.{Name(x.ToString())}", Rhythms[x].Label, Feels.Weights.Select(f => (Feels.NameOf(f.Feel), Capitalised(Feels.Label(f.Feel)), f.Weight.Tuned)))
     );
 
     // the drums' roles in the order the page shows them
@@ -119,17 +119,18 @@ public static class GenreChoices
     /// <summary>Which drums take a role in the groove, each by its affinity for it as the songs have it (<see cref="DrumRoles" />).</summary>
     public static ImmutableDictionary<DrumRole, GenreChoice> DrumRoles { get; } = RolesInOrder.ToImmutableDictionary(
             x => x,
-            x => Pool($"drumRole.{Name(x.ToString())}", Rhythms[Composition.DrumRoles.PartOf(x)].Label,
-                DrumGroups.AllDrums.Select(d => (Composition.DrumPieces.NameOf(d), d.Name, d.AffinityFor(x))))
+            x => WithFamilies(Pool($"drumRole.{Name(x.ToString())}", Rhythms[Composition.DrumRoles.PartOf(x)].Label,
+                DrumGroups.AllDrums.Select(d => (Composition.DrumPieces.NameOf(d), d.Name, d.AffinityFor(x)))))
         );
 
-    /// <summary>The chances of the parts a song may leave out.</summary>
+    /// <summary>The chances of the parts, every one a song may have or leave out.</summary>
     public static GenreChoice Parts { get; } = AsTheyAre("parts", "Parts playing", GenreChoiceKind.Chances,
     [
         ..new (TrackRole Role, string Label)[]
         {
-            (TrackRole.Pad, "Pad"), (TrackRole.CounterMelody, "Counter-melody"), (TrackRole.Drum, "Drums"), (TrackRole.Riff, "Riff"),
-            (TrackRole.RiffTwin, "Riff's twin"), (TrackRole.Rhythm, "Rhythm")
+            (TrackRole.Melody, "Melody"), (TrackRole.Chords, "Chords"), (TrackRole.Bass, "Bass"), (TrackRole.Pad, "Pad"),
+            (TrackRole.CounterMelody, "Counter-melody"), (TrackRole.Drum, "Drums"), (TrackRole.Riff, "Riff"), (TrackRole.RiffTwin, "Riff's twin"),
+            (TrackRole.Rhythm, "Rhythm"), (TrackRole.Solo, "Soloist")
         }.Select(x => (Name(x.Role.ToString()), x.Label))
     ]);
 
@@ -137,14 +138,28 @@ public static class GenreChoices
     public static GenreChoice DrumSetup { get; } = Pool("drumSetup", "Drum setup",
         DrumSetups.All.Select(x => (NameOf(x.Setup), x.Setup switch
         {
-            Composition.DrumSetup.Kit => "Drum kit",
-            Composition.DrumSetup.KitAndPercussion => "Kit and percussion",
+            Composition.DrumSetup.Kit => "Kit",
+            Composition.DrumSetup.KitAndPercussion => "Both",
             _ => "Percussion"
         }, x.Weight)));
 
     /// <summary>The drum pieces the song may draw (<see cref="DrumPieces" />).</summary>
-    public static GenreChoice DrumPieces { get; } = Pool("drumPieces", "Drum pieces",
-        DrumGroups.AllDrums.Select(x => (Composition.DrumPieces.NameOf(x), x.Name, x.Weight)));
+    public static GenreChoice DrumPieces { get; } = WithFamilies(Pool("drumPieces", "Drum pieces",
+        DrumGroups.AllDrums.Select(x => (Composition.DrumPieces.NameOf(x), x.Name, x.Weight))));
+
+    /// <summary>
+    ///     A choice of drums, every one tagged with its families, "kit" and "percussion", so that the page offers the setups
+    ///     the drums chosen make.
+    /// </summary>
+    private static GenreChoice WithFamilies(GenreChoice choice) => choice with
+    {
+        Options = [..choice.Options.Select(option => option with { Tags = FamiliesOf(DrumGroups.AllDrums.Single(x => Composition.DrumPieces.NameOf(x) == option.Name)) })]
+    };
+
+    private static ImmutableArray<string> FamiliesOf(PercussionInstrumentDefinition drum) =>
+        [..new[] { (DrumFamily.Kit, "kit"), (DrumFamily.Percussion, "percussion") }.Where(x => drum.Family.HasFlag(x.Item1)).Select(x => x.Item2)];
+
+    private static string Capitalised(string text) => char.ToUpperInvariant(text[0]) + text[1..];
 
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
