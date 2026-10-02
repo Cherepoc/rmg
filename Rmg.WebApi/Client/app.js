@@ -1098,7 +1098,7 @@ function addToHistory(isRemade, keepsPlace) {
     } else {
         place.replaceWith(item);
         for (const other of earlier) other.remove();
-        item.scrollIntoView({ block: "nearest" });
+        showInList(item);
     }
 
     while (elements.history.children.length > SONGS_KEPT) elements.history.lastElementChild.remove();
@@ -1117,6 +1117,17 @@ function markCurrentSong(name) {
     }
 
     updateWalkButtons();
+}
+
+/**
+ *     Scrolls the list, and the list alone, to show a song in it, as little as it takes: the page stays where it is, as
+ *     whoever changed a setting further down is still there.
+ */
+function showInList(item) {
+    const list = elements.history.getBoundingClientRect();
+    const shown = item.getBoundingClientRect();
+    if (shown.top < list.top) elements.history.scrollTop -= list.top - shown.top;
+    else if (shown.bottom > list.bottom) elements.history.scrollTop += shown.bottom - list.bottom;
 }
 
 /** The song heard before the one on the page, the next down the list, null where there is none. */
@@ -1628,19 +1639,19 @@ function toMidiPan(step) {
     return Math.round(amount <= 0.5 ? amount * 128 : 64 + (amount - 0.5) * 126);
 }
 
-/**
- *     A value that changes the song: checked, it is given, and the slider sets it; unchecked, the slider shows what the
- *     song on the page drew. A change asks for the song again once the slider is let go of.
- */
 /** Whether a value is given, rather than shown as the song drew it. */
 function createGiven(name) {
     const given = document.createElement("input");
     given.type = "checkbox";
     given.setAttribute("aria-label", `Give the ${name.toLowerCase()}`);
-    given.title = "Checked, it is given; unchecked, it shows what the song drew";
+    given.title = "Check to override, uncheck to randomize";
     return given;
 }
 
+/**
+ *     A value that changes the song: checked, it is given, and the slider sets it; unchecked, the slider shows what the
+ *     song on the page drew. A change asks for the song again once the slider is let go of.
+ */
 function createSettingRow(key) {
     const [name, description] = SETTING_NAMES[key];
     const [low, high] = SCALE_ENDS[key] ?? ["Plain", "Experimental"];
@@ -1712,7 +1723,6 @@ function createPartRow(part) {
     const name = PART_NAMES[part];
 
     const given = createGiven(name);
-    given.title = "Checked, whether it plays, its instrument, volume and pan are set, for this song and the next; unchecked, they are the song's own";
     given.addEventListener("change", () => setPartGiven(part, given.checked));
 
     const plays = document.createElement("input");
