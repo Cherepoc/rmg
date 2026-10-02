@@ -79,4 +79,29 @@ public sealed class PhoneTest(Site site)
         await Assert.That(await page.Page.EvaluateAsync<string>("() => window.shared")).Contains("settings=");
         await Assert.That(page.Errors).IsEmpty();
     }
+
+    [Test]
+    public async Task OnAPhone_TheGenreEditor_FillsTheScreen_AndNothingRunsOffIt()
+    {
+        await using var page = await SongPage.Open(site, phone: true);
+        await page.FirstSong();
+        await page.Page.EvaluateAsync("() => document.getElementById('settings-panel').open = true");
+        var genre = page.Page.Locator("select[aria-label='Genre']");
+        await page.Until(() => genre.IsEnabledAsync(), "the genres listed");
+        await genre.SelectOptionAsync("preset:reggae");
+        await page.Page.Locator("button.genre-edit").ClickAsync();
+        var dialog = page.Page.Locator("dialog.genre-dialog");
+        await page.Until(() => dialog.IsVisibleAsync(), "the editor open");
+
+        var box = await dialog.BoundingBoxAsync();
+        await Assert.That(box!.Width).IsEqualTo(360).Within(1);
+        var past = await page.Page.EvaluateAsync<string[]>(
+            "() => [...document.querySelectorAll('dialog.genre-dialog button, dialog.genre-dialog input, dialog.genre-dialog select')]" +
+            ".filter(x => { const r = x.getBoundingClientRect(); return r.width > 0 && r.right > innerWidth; })" +
+            ".map(x => x.getAttribute('aria-label') || x.textContent)");
+        await Assert.That(past).IsEmpty();
+        if (Environment.GetEnvironmentVariable("RMG_SCREENSHOTS") is { } directory)
+            await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-editor-phone.png") });
+        await Assert.That(page.Errors).IsEmpty();
+    }
 }

@@ -5,15 +5,12 @@ namespace Rmg.Core.Composition;
 
 /// <summary>
 ///     The choices a genre may speak of (<see cref="Genre" />), each one the songs draw already, with its options by stable
-///     names, in the order the page shows them and a link writes them; a change to them takes a new settings format.
+///     names, in the order a link writes them; a change to them takes a new settings format. The page shows them by their
+///     names' families: the instruments ("instrument."), the drums' roles ("drumRole."), and every part's rhythm and feel
+///     ("rhythm.", "feel.") as tabs of a part each.
 /// </summary>
 public static class GenreChoices
 {
-    private const string TempoAndFeel = "Tempo and feel";
-    private const string Harmony = "Harmony";
-    private const string Sound = "Sound";
-    private const string PartsAndDrums = "Parts and drums";
-    private const string Rhythm = "Rhythm";
 
     /// <summary>
     ///     A tempo, as a multiple of <see cref="Composition.Meter.BaseTempo" />, by its amount from 0, 60 beats a minute,
@@ -28,34 +25,34 @@ public static class GenreChoices
     ///     The song's tempo, a range of them from 60 to 240 beats a minute, as wide as a tempo given may be, starting from the
     ///     tempos the songs draw, from 90 to about 175.
     /// </summary>
-    public static GenreChoice Tempo { get; } = new("tempo", "Tempo", TempoAndFeel, GenreChoiceKind.Range,
+    public static GenreChoice Tempo { get; } = new("tempo", "Tempo", GenreChoiceKind.Range,
     [
         new("from", "From", AmountOfTempo(SongGenerator.TempoOptions[0])),
         new("to", "To", AmountOfTempo(SongGenerator.TempoOptions[^1]))
     ]);
 
     /// <summary>The meter the song's bars are in (<see cref="Composition.Meter.Options" />).</summary>
-    public static GenreChoice Meter { get; } = Pool("meter", "Meter", TempoAndFeel,
+    public static GenreChoice Meter { get; } = Pool("meter", "Meter",
         Composition.Meter.Options.Select(x => (Composition.Meter.NameOf(x.Meter), Composition.Meter.NameOf(x.Meter), x.Weight.Tuned)));
 
     /// <summary>The feel the song plays in, straight, a tuplet or a grouping (<see cref="Feels" />).</summary>
-    public static GenreChoice Feel { get; } = Pool("feel", "Feel", TempoAndFeel, Feels.Weights.Select(x => (Feels.NameOf(x.Feel), Feels.Label(x.Feel), x.Weight.Tuned)));
+    public static GenreChoice Feel { get; } = Pool("feel", "Feel", Feels.Weights.Select(x => (Feels.NameOf(x.Feel), Feels.Label(x.Feel), x.Weight.Tuned)));
 
     /// <summary>The chances of the feel's: that the song swings.</summary>
-    public static GenreChoice FeelChances { get; } = AsTheyAre("feelChances", "Chances", TempoAndFeel, GenreChoiceKind.Chances,
-        [("swing", "Swing"), ("halfTime", "A section's drums in half time"), ("doubleTime", "A section's drums in double time")]);
+    public static GenreChoice FeelChances { get; } = AsTheyAre("feelChances", "Swing and half time", GenreChoiceKind.Chances,
+        [("swing", "Swings"), ("halfTime", "A section's drums in half time"), ("doubleTime", "A section's drums in double time")]);
 
     /// <summary>The values of the feel's: how much a song that swings swings.</summary>
-    public static GenreChoice FeelValues { get; } = AsTheyAre("feelValues", "Amounts", TempoAndFeel, GenreChoiceKind.Values, [("swing", "Swing")]);
+    public static GenreChoice FeelValues { get; } = AsTheyAre("feelValues", "Swing amount", GenreChoiceKind.Values, [("swing", "How much it swings")]);
 
     /// <summary>The scale the song starts in (<see cref="Scales" />).</summary>
-    public static GenreChoice Scale { get; } = Pool("scale", "Scale", Harmony, Scales.All.Select(x => (Name(x.Name), x.Name, x.Weight.Tuned)));
+    public static GenreChoice Scale { get; } = Pool("scale", "Scale", Scales.All.Select(x => (Name(x.Name), x.Name, x.Weight.Tuned)));
 
     /// <summary>
     ///     The chords' shapes (<see cref="ChordShapes" />), as likely as the songs have them in the middle, their levels'
     ///     weights times their shares of them.
     /// </summary>
-    public static GenreChoice ChordShape { get; } = Pool("chordShape", "Chord shapes", Harmony,
+    public static GenreChoice ChordShape { get; } = Pool("chordShape", "Chord shapes",
         ChordShapes.All.Select(x => (Name(x.Name), x.Name,
             ChordShapes.Levels.Single(l => l.Level == x.Unconventionality).Weight.Tuned * x.Weight / ChordShapes.All.Where(y => y.Unconventionality == x.Unconventionality).Sum(y => y.Weight))));
 
@@ -75,7 +72,7 @@ public static class GenreChoices
     /// <summary>Every pitched part's instruments, by its role, its pool's (<see cref="InstrumentRoles" />).</summary>
     public static ImmutableDictionary<TrackRole, GenreChoice> Instruments { get; } = InstrumentPools.ToImmutableDictionary(
         x => x.Role,
-        x => Pool($"instrument.{Name(x.Role.ToString())}", x.Label, Sound, x.Pool.Instruments.Select(i => (Name(i.Name), i.Name, i.Weight)))
+        x => Pool($"instrument.{Name(x.Role.ToString())}", x.Label, x.Pool.Instruments.Select(i => (Name(i.Name), i.Name, i.Weight)))
     );
 
     /// <summary>The drum kits' sounds, by their General MIDI programs, the standard one every song's with no genre.</summary>
@@ -86,7 +83,7 @@ public static class GenreChoices
     public static string KitNameOf(int program) => Kits.Single(x => x.Program == program).Name;
 
     /// <summary>The drum kit's sound (<see cref="GeneralMidi.KitName" />).</summary>
-    public static GenreChoice Kit { get; } = Pool("kit", "Drum kit", Sound, Kits.Select(x => (x.Name, GeneralMidi.KitName(x.Program), x.Program == 0 ? 1.0 : 0)));
+    public static GenreChoice Kit { get; } = Pool("kit", "Drum kit", Kits.Select(x => (x.Name, GeneralMidi.KitName(x.Program), x.Program == 0 ? 1.0 : 0)));
 
     /// <summary>
     ///     Every part's rhythm, a pitched part's or the drums' of a role, as values: its speed, how far off the beat it
@@ -98,12 +95,12 @@ public static class GenreChoices
         x => AsTheyAre($"rhythm.{Name(x.ToString())}", x switch
             {
                 RhythmPart.CounterMelody => "Counter-melody",
-                RhythmPart.Ground => "Drums keeping the ground, as a kick",
-                RhythmPart.Backbeat => "Drums on the backbeat, as a snare",
-                RhythmPart.Time => "Drums keeping time, as a hi-hat",
-                RhythmPart.Colour => "Drums colouring, as toms",
+                RhythmPart.Ground => "Ground (kick)",
+                RhythmPart.Backbeat => "Backbeat (snare)",
+                RhythmPart.Time => "Time (hi-hat)",
+                RhythmPart.Colour => "Colour (toms)",
                 _ => x.ToString()
-            }, Rhythm, GenreChoiceKind.Values,
+            }, GenreChoiceKind.Values,
             [..GenreRhythm.Settings, ..x == RhythmPart.Melody ? [("busyness", "Busyness")] : Array.Empty<(string, string)>()])
     );
 
@@ -113,7 +110,7 @@ public static class GenreChoices
     /// </summary>
     public static ImmutableDictionary<RhythmPart, GenreChoice> PartFeels { get; } = Enum.GetValues<RhythmPart>().ToImmutableDictionary(
         x => x,
-        x => Pool($"feel.{Name(x.ToString())}", Rhythms[x].Label, Rhythm, Feels.Weights.Select(f => (Feels.NameOf(f.Feel), Feels.Label(f.Feel), f.Weight.Tuned)))
+        x => Pool($"feel.{Name(x.ToString())}", Rhythms[x].Label, Feels.Weights.Select(f => (Feels.NameOf(f.Feel), Feels.Label(f.Feel), f.Weight.Tuned)))
     );
 
     // the drums' roles in the order the page shows them
@@ -122,12 +119,12 @@ public static class GenreChoices
     /// <summary>Which drums take a role in the groove, each by its affinity for it as the songs have it (<see cref="DrumRoles" />).</summary>
     public static ImmutableDictionary<DrumRole, GenreChoice> DrumRoles { get; } = RolesInOrder.ToImmutableDictionary(
             x => x,
-            x => Pool($"drumRole.{Name(x.ToString())}", Rhythms[Composition.DrumRoles.PartOf(x)].Label, Rhythm,
+            x => Pool($"drumRole.{Name(x.ToString())}", Rhythms[Composition.DrumRoles.PartOf(x)].Label,
                 DrumGroups.AllDrums.Select(d => (Composition.DrumPieces.NameOf(d), d.Name, d.AffinityFor(x))))
         );
 
     /// <summary>The chances of the parts a song may leave out.</summary>
-    public static GenreChoice Parts { get; } = AsTheyAre("parts", "Parts", PartsAndDrums, GenreChoiceKind.Chances,
+    public static GenreChoice Parts { get; } = AsTheyAre("parts", "Parts playing", GenreChoiceKind.Chances,
     [
         ..new (TrackRole Role, string Label)[]
         {
@@ -137,7 +134,7 @@ public static class GenreChoices
     ]);
 
     /// <summary>The drums the song plays: the kit, the kit and percussion, or percussion (<see cref="DrumSetups" />).</summary>
-    public static GenreChoice DrumSetup { get; } = Pool("drumSetup", "Drum setup", PartsAndDrums,
+    public static GenreChoice DrumSetup { get; } = Pool("drumSetup", "Drum setup",
         DrumSetups.All.Select(x => (NameOf(x.Setup), x.Setup switch
         {
             Composition.DrumSetup.Kit => "Drum kit",
@@ -146,10 +143,10 @@ public static class GenreChoices
         }, x.Weight)));
 
     /// <summary>The drum pieces the song may draw (<see cref="DrumPieces" />).</summary>
-    public static GenreChoice DrumPieces { get; } = Pool("drumPieces", "Drum pieces", PartsAndDrums,
+    public static GenreChoice DrumPieces { get; } = Pool("drumPieces", "Drum pieces",
         DrumGroups.AllDrums.Select(x => (Composition.DrumPieces.NameOf(x), x.Name, x.Weight)));
 
-    /// <summary>Every choice, in the order the page shows them.</summary>
+    /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
         Tempo, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape,
@@ -162,16 +159,16 @@ public static class GenreChoices
     ];
 
     /// <summary>A pool's choice, every option's default its weight against the heaviest's.</summary>
-    private static GenreChoice Pool(string name, string label, string group, IEnumerable<(string Name, string Label, double Weight)> options)
+    private static GenreChoice Pool(string name, string label, IEnumerable<(string Name, string Label, double Weight)> options)
     {
         var all = options.ToArray();
         var heaviest = all.Max(x => x.Weight);
-        return new GenreChoice(name, label, group, GenreChoiceKind.Pool, [..all.Select(x => new GenreOption(x.Name, x.Label, x.Weight / heaviest))]);
+        return new GenreChoice(name, label, GenreChoiceKind.Pool, [..all.Select(x => new GenreOption(x.Name, x.Label, x.Weight / heaviest))]);
     }
 
     /// <summary>A choice of chances or values, every one's default as it is.</summary>
-    private static GenreChoice AsTheyAre(string name, string label, string group, GenreChoiceKind kind, IEnumerable<(string Name, string Label)> options) =>
-        new(name, label, group, kind, [..options.Select(x => new GenreOption(x.Name, x.Label, 0.5))]);
+    private static GenreChoice AsTheyAre(string name, string label, GenreChoiceKind kind, IEnumerable<(string Name, string Label)> options) =>
+        new(name, label, kind, [..options.Select(x => new GenreOption(x.Name, x.Label, 0.5))]);
 
     /// <summary>
     ///     A name as a genre gives it: in camel case, its words run together, "harmonicMinor", "electricBassFinger",

@@ -1585,8 +1585,10 @@ const genreEditor = createGenreEditor({
         showGenre();
     },
     isOwn: (name) => recallGenres().some((x) => x.name === name),
+    // a tempo's step in beats a minute, as the server lists the tempos
+    tempoOf: (step) => (tempos.length > step ? Math.round(tempos[step]) : "…"),
 });
-
+document.body.append(genreEditor.element);
 
 // every choice's row, by its key: the key, the mode and the meter, listed as the server lists them
 const choiceRows = new Map();
@@ -1605,9 +1607,9 @@ buildSettings();
 
 /** The settings panel: the values that change the song, every part's row of the mixer, and the drums'. */
 function buildSettings() {
-    // the genre first, and its editor, then in the order they are named, the key, the mode and the meter chosen from a
+    // the genre first, then in the order they are named, the key, the mode and the meter chosen from a
     // list and every other on a slider
-    elements.songSettings.append(createGenreRow(), genreEditor.element, ...Object.keys(SETTING_NAMES).map((key) => (CHOICES.includes(key) ? createChoiceRow(key) : createSettingRow(key))));
+    elements.songSettings.append(createGenreRow(), ...Object.keys(SETTING_NAMES).map((key) => (CHOICES.includes(key) ? createChoiceRow(key) : createSettingRow(key))));
     // the drums last, their groups under them, each with its pieces
     elements.mixer.append(...PARTS.filter((part) => part !== "drum").map(createPartRow), createPartRow("drum"), ...DRUM_GROUPS.map(createDrumGroupRow));
 

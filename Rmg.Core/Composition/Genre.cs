@@ -32,8 +32,7 @@ public sealed record GenreOption(string Name, string Label, double Default);
 /// <summary>A choice a genre may speak of: one the songs draw already, with its options by stable names.</summary>
 /// <param name="Name">How a genre names it, such as "meter" or "instrument.bass".</param>
 /// <param name="Label">How the page shows it.</param>
-/// <param name="Group">The group the page shows it in, such as "Rhythm".</param>
-public sealed record GenreChoice(string Name, string Label, string Group, GenreChoiceKind Kind, ImmutableArray<GenreOption> Options)
+public sealed record GenreChoice(string Name, string Label, GenreChoiceKind Kind, ImmutableArray<GenreOption> Options)
 {
     /// <summary>The option of the name; one the choice does not have is a mistake.</summary>
     public GenreOption this[string name] => Options.FirstOrDefault(x => x.Name == name)
