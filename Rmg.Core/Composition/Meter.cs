@@ -46,9 +46,9 @@ public sealed record Meter(ImmutableArray<int> Groups)
     ///     plays 2+2+3, 3+2+2 or 2+3+2.
     /// </summary>
     /// <param name="given">A meter given in place of the one drawn, by its place in <see cref="Options" />, drawn all the same, its groups' order still drawn.</param>
-    public static Meter Draw(IGenerationContext context, double unconventionality, int? given)
+    public static Meter Draw(IGenerationContext context, double unconventionality, int? given, Genre genre)
     {
-        var drawn = context.Pick(ByConvention.Weigh(Options, unconventionality));
+        var drawn = context.Pick(ByConvention.Weigh(Options, unconventionality, genre.Pool<Meter>(GenreChoices.Meter, NameOf)));
         return InAnOrder(context, given is { } option ? Options[option].Meter : drawn);
     }
 
@@ -58,6 +58,9 @@ public sealed record Meter(ImmutableArray<int> Groups)
         var orders = Orders(meter.Groups).ToArray();
         return new Meter(orders[(int)(context.GenerateDouble() * orders.Length)]);
     }
+
+    /// <summary>A meter's name, its time signature, such as "4/4".</summary>
+    public static string NameOf(Meter meter) => $"{meter.TimeSignature.Numerator}/{meter.TimeSignature.Denominator}";
 
     /// <summary>The place in <see cref="Options" /> of a meter, whatever the order of its groups.</summary>
     public static int OptionOf(Meter meter)

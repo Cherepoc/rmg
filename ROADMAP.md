@@ -268,12 +268,12 @@ above 0 is not a genre, and the request fails. A chance the genre names is a wei
 0 and always at 1, and a value a shift of the middle the song's layers vary around, as a drum role's part moves a
 drum's rhythm (`DrumRoles.Parts`).
 
-Within the pool, the conventionality still chooses: an option's weight at each end of its choice (`ByConvention`) times
-the genre's. An end left with no option of the pool allowed, as the wild end of the meters is by 4/4 alone, or the plain
-end of the chord shapes by a pool of sevenths, takes the pool's tuned weights, so that a genre's convention is its
-plainest: the plainest jazz plays sevenths. One law on `ByConvention` (`InPool`), for weights and chances alike, worked
-out in step 1 against the corpus. An option picked inside a group, such as a chord shape within its level, moves its
-group by its pool's share.
+Within the pool, the genre's weights are the options' in the middle, where the songs gather, in place of their tuned
+ones, and the conventionality still chooses at the ends: each end keeps to the options it allows, times the pool's
+weights, and an end left with none of the pool, as the wild end of the meters is by 4/4 alone, takes the middle's, so
+that what a genre keeps is its own plainest and wildest (`ByConvention.Weigh` with a pool). A chance's weight leans its
+odds, 1/2 as it is. A choice the songs draw without ends, such as an instrument or a drum piece, takes the pool's
+weights as its own. The page starts a choice it adds from the songs' own weights (`GenreOption.Default`).
 
 What is given wins over the genre: a setting, then the genre's pool, then the song's draw. A setting outside the pool,
 such as 3/4 in a genre of 4/4 alone, is played as given.
@@ -335,22 +335,30 @@ of what it sounds like, agreed as a start:
 - Ambient: slow, pads, strings, choir, harp, celesta, the pad always likely, drums rarely and sparse, chords held, sus
   and add9, Lydian and major.
 
-**Steps,** each committed and measured on its own, per preset 64 songs against none:
-1. The choices of options and chances: `ByConvention.InPool`, `Genre`, `GenreChoices` and their sites, the pools, a
-   request's genre (JSON, by option names, weights from 0 to 1; an unknown name or an empty pool fails). Measured: the leaned measures
-   move their way (the swing's share, the meters', the scales', the chord levels', the instrument families', the drum
-   setup's and pieces', the median tempo), the unleaned stay put (form, key, sections, length), and diversity holds,
-   the distinct instrument line-ups per preset at least half of no genre's. The fingerprint unchanged.
-2. The rhythm: the values per role, the parts' feels, the drums' roles, half and double time, the swing's amount, the
-   melody's busyness. Measured by where each part's notes fall: the share on the beat, on 8th and 16th offbeats, notes
-   a beat, and cycles repeated, each preset against its sentence, such as Reggae's chords on the offbeats in most bars,
-   Electronic's kick on every beat, and Jazz's bass in quarters. The fingerprint unchanged.
-3. The link: a new format, its tail, the round trip on both sides, the describe endpoint and its text naming the genre.
-4. The page: a genre picker above the settings (None, the presets, the genres made here), kept as the settings are,
-   in the link and the history. Page tests.
-5. The editor: a genre made from a preset or from none, the choices in their groups, each a row of the options it
-   names, an option added from the choice's list, a weight from 0 to 63 for each option it keeps, a name.
-   Kept in localStorage; one opened from a link can be saved. Page tests.
+**Steps,** each committed and measured on its own, per preset 64 songs against none, the fingerprint unchanged with
+no genre:
+4. *The pool held where a choice is drawn again:* the sections' scales (`Scales.PickSection`) and meters
+   (`SectionMeter`), and the feel's changes at a section, a bar and a fill (`Feels.DrawChange`). Measured: no note of a
+   genre's song outside its pools, over the corpus.
+5. *The chord shapes:* the pool through `HarmonicUnconventionality`, its levels moved by the shapes' share, cadence
+   and home shapes included. Measured: the shares of the levels and of the sevenths per preset.
+6. *The kit's sound:* a draw from a stream of its own, Standard with no genre, under the mix's; the soundfonts checked
+   for the kits.
+7. *The rhythm's values per role:* a genre layer at the song's depth of every pitched role's and drum role's state
+   (speed, offset, how fine, where its weight sits, fullness, repetition), and the melody's busyness. Measured by where
+   each part's notes fall: on the beat, on 8th and 16th offbeats, notes a beat, cycles repeated.
+8. *The rhythm's options per role:* each part's feel (a grouping such as the tresillo), drawn from a stream of its own
+   only where a genre names it; which drum takes which role (`DrumRoles`, song and section); half and double time.
+9. *The presets:* `Client/genres.json` with the ten, checked against the choices by a test, each tuned against its
+   sentence by the measures of steps 3 to 8 (Reggae's chords on the offbeats in most bars, Electronic's kick on every
+   beat, Jazz's bass in quarters).
+10. *The link:* the settings' tail of the genre's weights, the round trip on both sides, the genre's name as a link
+    parameter, events carrying it, the describe endpoint and its text naming the genre.
+11. *The page's picker:* None, the presets, the genres made here, above the settings, kept as the settings are, in the
+    link and the history. Page tests.
+12. *The editor:* from a preset or from none, the choices in their groups, each a row of the options it keeps with a
+    weight from 0 to 63, an option added from the choice's list, chances and values as sliders, a name; kept in
+    localStorage, one opened from a link savable, exported and imported as JSON. Page tests.
 
 **Later:** the progressions' root motions (ii–V, ♭VII); instruments outside a role's pool, with their leading drawn
 from their family; forms of a genre's own, such as the 12-bar blues; a genre's sections differing, such as a jazz

@@ -31,6 +31,10 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Meter">The meter, by its place among the meters a song may play in (<c>/api/songs/options</c>).</param>
 /// <param name="Mode">The scale the song starts in, on its key, by its place among the scales (<c>/api/songs/options</c>).</param>
 /// <param name="Swing">How much the song swings, from 0, straight, to 63, a triplet's swing, where its meter pairs its notes.</param>
+/// <param name="Genre">
+///     The genre the song's draws keep to: every choice it names (<c>/api/genres/choices</c>), and its options' amounts,
+///     each a step from 0 to 63, a pool's from out of it to its heaviest, a chance's or a value's 32 as it is.
+/// </param>
 public sealed record GenerateSongRequest(
     string? Seed = null,
     int? Unconventionality = null,
@@ -43,7 +47,8 @@ public sealed record GenerateSongRequest(
     int? Meter = null,
     IReadOnlyList<string>? DrumPieces = null,
     int? Mode = null,
-    int? Swing = null
+    int? Swing = null,
+    IReadOnlyDictionary<string, IReadOnlyDictionary<string, int>>? Genre = null
 )
 {
     /// <summary>A pan from -1, left, to 1, right, as its nearest step, the middle step in the middle.</summary>
@@ -123,6 +128,19 @@ public sealed record GenerateSongRequest(
         if (Mode is < 0 || Mode >= Scales.All.Length)
             return Fail($"Mode {Mode} is not one of the {Scales.All.Length} scales.", out error);
 
+        Genre? genre = null;
+        if (Genre is not null)
+        {
+            if (Genre.SelectMany(x => x.Value).FirstOrDefault(x => x.Value is < 0 or > StepScale.Last) is { Key: { } outOfRange })
+                return Fail($"The genre's {outOfRange} is not a step from 0 to {StepScale.Last}.", out error);
+            genre = Core.Composition.Genre.Read(
+                Genre.ToDictionary(x => x.Key, x => (IReadOnlyDictionary<string, double>)x.Value.ToDictionary(y => y.Key, y => StepScale.ToAmount(y.Value))),
+                out error
+            );
+            if (genre is null)
+                return false;
+        }
+
         overrides = new SongOverrides(
             Base: Unconventionality is { } unconventionality ? StepScale.ToAmount(unconventionality) : null,
             Facets: facets.Count > 0 ? facets.ToImmutable() : null,
@@ -132,7 +150,8 @@ public sealed record GenerateSongRequest(
             Tempo: Tempo is { } tempo ? TempoScale.Multiplier(tempo) : null,
             Key: Key,
             Scale: Mode is { } mode ? Scales.All[mode] : null,
-            Swing: Swing is { } swing ? StepScale.ToAmount(swing) : null
+            Swing: Swing is { } swing ? StepScale.ToAmount(swing) : null,
+            Genre: genre
         );
         mix = new SongMix(StepScale.ToAmount(Volume ?? StepScale.Last), partMixes.ToImmutable(), groups.ToImmutable());
         return true;

@@ -37,6 +37,9 @@ public static class RhythmPeriod
     ///     triplets; 1 where they stay on the straight grid, as a straight period does, or one the prime lengthens, such as
     ///     3/4 for dotted 8ths, whose notes group in threes but fall on 16ths.
     /// </summary>
+    /// <summary>The prime of a step, 3 for a triplet or a grouping of threes; 1 for straight.</summary>
+    public static int ToPrime(this int primeIndex) => primeIndex == 0 ? 1 : Primes[Math.Abs(primeIndex) - 1];
+
     public static int ToTuplet(this int primeIndex)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(primeIndex, MaxPrimeIndex);

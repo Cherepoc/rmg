@@ -80,6 +80,17 @@ public sealed class GenerateSongRequestTest
         await Assert.That(overrides.Swing).IsEqualTo(1);
     }
 
+    private static IReadOnlyDictionary<string, IReadOnlyDictionary<string, int>> Genre(string choice, string option, int step) =>
+        new Dictionary<string, IReadOnlyDictionary<string, int>> { [choice] = new Dictionary<string, int> { [option] = step } };
+
+    [Test]
+    public async Task AGenre_IsGivenByItsChoicesNames_ItsStepsAsAmountsFrom0To1()
+    {
+        await Assert.That(new GenerateSongRequest(Genre: Genre("parts", "pad", StepScale.Middle)).TryRead(out _, out var overrides, out _, out var error)).IsTrue().Because(error ?? "");
+        await Assert.That(overrides.Genre!.Chance(GenreChoices.Parts, "pad")).IsEqualTo(0.5);
+        await Assert.That(overrides.Genre.Chance(GenreChoices.Parts, "riff")).IsNull();
+    }
+
     [Test]
     public async Task EveryPartLeftOut_IsRefused()
     {
@@ -102,6 +113,10 @@ public sealed class GenerateSongRequestTest
     [Arguments("meter")]
     [Arguments("mode")]
     [Arguments("swing")]
+    [Arguments("genreChoice")]
+    [Arguments("genreOption")]
+    [Arguments("genreStep")]
+    [Arguments("genreEmptyPool")]
     [Arguments("noPieces")]
     [Arguments("piece")]
     public async Task AnythingOutOfItsRange_OrUnknown_IsRefused(string what)
@@ -122,6 +137,10 @@ public sealed class GenerateSongRequestTest
             "meter" => new GenerateSongRequest(Meter: -1),
             "mode" => new GenerateSongRequest(Mode: Core.Composition.Scales.All.Length),
             "swing" => new GenerateSongRequest(Swing: 64),
+            "genreChoice" => new GenerateSongRequest(Genre: Genre("kazoo", "3/4", 63)),
+            "genreOption" => new GenerateSongRequest(Genre: Genre("meter", "1/1", 63)),
+            "genreStep" => new GenerateSongRequest(Genre: Genre("meter", "3/4", 64)),
+            "genreEmptyPool" => new GenerateSongRequest(Genre: Genre("meter", "3/4", 0)),
             _ => throw new ArgumentOutOfRangeException(nameof(what))
         };
 

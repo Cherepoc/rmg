@@ -63,6 +63,8 @@ public static class SongGenerator
             throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Swing, "A swing is from 0 to 1.");
         if (overrides.Scale is { } given && !Scales.All.Contains(given))
             throw new ArgumentOutOfRangeException(nameof(overrides), given.Name, "A scale is one of the scales.");
+        if (overrides.Genre?.Choices.Any(x => x.Value.Values.Any(v => v is < 0 or > 1 or double.NaN)) == true)
+            throw new ArgumentOutOfRangeException(nameof(overrides), "A genre's amounts are from 0 to 1.");
         if (overrides.DrumPieces is { } pieces && (pieces.IsEmpty || !pieces.All(DrumPieces.IsPiece)))
             throw new ArgumentOutOfRangeException(nameof(overrides), "Drums given are one or more of the drum pieces.");
 
@@ -79,6 +81,7 @@ public static class SongGenerator
         // stage draws leaves what the others draw as it was
         var root = new GenerationContext(seed);
         IGenerationContext Stream(SongStream stream) => CreateStream(seed, stream);
+        var genre = overrides.Genre ?? Genre.None;
 
         // how far the song strays from convention, and every facet of it, drawn around the song's; the rhythm strays as
         // the groove does, which every rhythm layer from the tracks' own on is scaled by
@@ -93,7 +96,7 @@ public static class SongGenerator
         StateTrace.Record(TracePoints.SongRhythm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{rhythmicUnconventionality.Value:F2}", rhythmicUnconventionality);
         // the parts the song leaves out, the pad, the counter-melody and the drums now and then, each from a sequence
         // of its own, and any given in or out
-        var absent = SongParts.DrawAbsent(part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Parts), (int)part)), overrides.Parts, songUnconventionality[Facet.Melody]);
+        var absent = SongParts.DrawAbsent(part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Parts), (int)part)), overrides.Parts, songUnconventionality[Facet.Melody], genre);
         StateTrace.Record(TracePoints.SongParts, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", absent.Order()), absent);
         var tracks = SongTracks.Create(
             Stream(SongStream.Tracks),
@@ -108,8 +111,9 @@ public static class SongGenerator
             Stream(SongStream.DrumStrokes),
             Stream(SongStream.DrumRoles),
             // the drums given make the setup, which the song still draws its own drums by, so that the rest is as it was
-            overrides.DrumPieces is { } pieces ? DrumPieces.SetupOf(pieces) : overrides.DrumSetup ?? DrumSetups.Pick(Stream(SongStream.DrumSetup), rhythmicUnconventionality.Value),
-            overrides.DrumPieces is { } given ? DrumPieces.Of(given) : null
+            overrides.DrumPieces is { } pieces ? DrumPieces.SetupOf(pieces) : overrides.DrumSetup ?? DrumSetups.Pick(Stream(SongStream.DrumSetup), rhythmicUnconventionality.Value, genre),
+            overrides.DrumPieces is { } given ? DrumPieces.Of(given) : null,
+            genre
         );
         StateTrace.Record(TracePoints.DrumSetup, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, tracks.DrumSetup.ToString(), tracks.DrumSetup);
 
@@ -117,11 +121,11 @@ public static class SongGenerator
         var harmonyContext = Stream(SongStream.Harmony);
         var unconventionality = new HarmonicUnconventionality(songUnconventionality[Facet.Chords]);
         // drawn when it is given too, so that the rest is as it was
-        var scale = Scales.Pick(harmonyContext, songUnconventionality[Facet.Scale]);
+        var scale = Scales.Pick(harmonyContext, songUnconventionality[Facet.Scale], genre);
         scale = overrides.Scale ?? scale;
         StateTrace.Record(TracePoints.SongHarmony, SongTracks.ChordsTrack, 0, 0, StateMap.Default, 0, $"{unconventionality.Chords:F2} {scale.Name}", (unconventionality, scale));
         // the feel the song plays in, straight or a tuplet, from a sequence of its own, by its feel facet
-        var feel = Feels.DrawSong(Stream(SongStream.Feel), songUnconventionality[Facet.Feel]);
+        var feel = Feels.DrawSong(Stream(SongStream.Feel), songUnconventionality[Facet.Feel], genre);
         StateTrace.Record(TracePoints.Feel, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{feel}", feel);
         var songStateMap = CreateSongStateMap(Stream(SongStream.SongState), unconventionality, rhythmicUnconventionality)
             .MergeWith(Feels.At(StateDepths.Song, feel));
@@ -130,7 +134,7 @@ public static class SongGenerator
 
         // the song's form: one of the forms songs are written in, its sections playing their roles, or one of its own
         // the meter the song's bars are in
-        var meter = overrides.Meter ?? Meter.Draw(Stream(SongStream.Meter), songUnconventionality[Facet.Feel], overrides.MeterOption);
+        var meter = overrides.Meter ?? Meter.Draw(Stream(SongStream.Meter), songUnconventionality[Facet.Feel], overrides.MeterOption, genre);
         StateTrace.Record(TracePoints.Meter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, meter.ToString(), meter);
 
         var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), Stream(SongStream.SongEnds), songUnconventionality[Facet.Form]);
@@ -143,10 +147,10 @@ public static class SongGenerator
         var sectionEnergies = SectionEnergy.GenerateSections(dynamicsContext, sectionIds);
 
         // the song's key, which the sections place their melodies in
-        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), overrides);
+        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), overrides, genre);
         // how the song swings, which its tempo sets the notes of
         var grooveContext = Stream(SongStream.Groove);
-        var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), songUnconventionality[Facet.Feel], meter, overrides.Swing);
+        var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), songUnconventionality[Facet.Feel], meter, overrides.Swing, genre);
         StateTrace.Record(TracePoints.Swing, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{swing.Delay:F3} of {swing.Period}", swing);
 
         var sectionGenerator = new SectionGenerator(
@@ -453,7 +457,8 @@ public static class SongGenerator
             form.Map,
             [..sections.Select(x => x.Facets[Facet.Sound])],
             (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.InstrumentsOverTime), section), track)),
-            (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.InstrumentFamilies), section), track))
+            (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.InstrumentFamilies), section), track)),
+            genre
         );
         // and how the parts are played beyond their notes, by every section's sound facet
         cancellation.ThrowIfCancellationRequested();
@@ -511,11 +516,18 @@ public static class SongGenerator
     ///     most often the song's.
     /// </summary>
     /// <summary>The song's key and tempo, drawn, and replaced where given, so that giving one leaves every other draw as it was.</summary>
-    private static StateMap CreateCommonStateMap(IGenerationContext context, SongOverrides overrides)
+    private static StateMap CreateCommonStateMap(IGenerationContext context, SongOverrides overrides, Genre genre)
     {
         var drawn = new StateMapBuilder("Song")
             .Add(StateKinds.KeyOffset, Generators.Int(0, 12))
-            .Add(StateKinds.Tempo, TempoGenerator)
+            // the dyadic draw of the tempo, or, where a genre keeps to bands of it, its tempos weighed as likely as the draw
+            // lands on them, by their bands' weights
+            .Add(StateKinds.Tempo, genre.Names(GenreChoices.Tempo)
+                ? (Func<IGenerationContext, double>)(c => c.Pick([
+                    ..TempoOptions.Select((x, i) => new Weighted<double>(TempoWeights[i] * genre.Pool<double>(GenreChoices.Tempo, GenreChoices.TempoBandOf)!(x), x))
+                        .Where(x => x.Weight > 0)
+                ]))
+                : TempoGenerator)
             .AddNoteDurationLayer()
             .ToStateMap(context);
         if (overrides.Key is { } key)
@@ -532,6 +544,22 @@ public static class SongGenerator
             .Distinct()
             .Order()
     ];
+
+    // how likely the dyadic draw lands on every tempo, as its rank's weight shared among the rank's tempos
+    internal static ImmutableArray<double> TempoWeights { get; } = [..TempoOptionWeights()];
+
+    private static IEnumerable<double> TempoOptionWeights()
+    {
+        var weight = WeightUtil.CreateGeometricRankWeightFunc(0, 0, 1.0, 0.75);
+        var ranks = Enumerable.Range(0, 5).Select(rank => (rank, slice: DyadicRankDistribution.GetMultiplierDistributionSlice(rank, 0.75, 1.5)))
+            .Where(x => !x.slice.IsEmpty).ToArray();
+        var total = ranks.Sum(x => weight(x.rank));
+        var options = TempoOptions.ToDictionary(x => x, _ => 0.0);
+        foreach (var (rank, slice) in ranks)
+        foreach (var multiplier in slice)
+            options[multiplier.Position] += weight(rank) / total / slice.Length;
+        return TempoOptions.Select(x => options[x]);
+    }
 }
 
 /// <summary>How the state along a section's 4-bar pattern changes. The steps are in bars.</summary>

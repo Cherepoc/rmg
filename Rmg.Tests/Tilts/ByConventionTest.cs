@@ -31,7 +31,7 @@ public sealed class ByConventionTest
         var weight = new ByConvention(plain, tuned, wild);
         foreach (var (from, to, first, last) in new[] { (0.0, 0.5, plain, tuned), (0.5, 1.0, tuned, wild) })
         {
-            var values = Conventionalities.Where(x => x >= from && x <= to).Select(weight.At).ToArray();
+            var values = Conventionalities.Where(x => x >= from && x <= to).Select(x => weight.At(x)).ToArray();
             var rising = last >= first;
             await Assert.That(values.Zip(values.Skip(1)).All(x => rising ? x.Second >= x.First - 1e-12 : x.Second <= x.First + 1e-12)).IsTrue();
             await Assert.That(values.All(x => x >= Math.Min(first, last) - 1e-12 && x <= Math.Max(first, last) + 1e-12)).IsTrue();

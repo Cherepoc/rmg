@@ -28,7 +28,7 @@ public sealed class FillFeelTest
     public async Task TupletSections_PlayTheirFillsInTheirTuplet()
     {
         var context = new GenerationContext(1);
-        var tracks = SongTracks.Create(context, context, context, context, context, context, context, true, new RhythmicUnconventionality(0.5), context, context, DrumSetup.KitAndPercussion, null);
+        var tracks = SongTracks.Create(context, context, context, context, context, context, context, true, new RhythmicUnconventionality(0.5), context, context, DrumSetup.KitAndPercussion, null, Genre.None);
         var song = TrackEventStateTimelineMap.Create<StateMap>(8 * 32);
         // a feel as plain as it comes, which a fill never changes, so that every fill is in the section's tuplet
         var unconventionality = Unconventionality.Generate(0.5, _ => new GenerationContext(0));

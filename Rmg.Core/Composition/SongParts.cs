@@ -21,31 +21,44 @@ public static class SongParts
     /// <summary>The chance a song with a riff has a twin to harmonise it, by the song's melody facet.</summary>
     public static ByConvention TwinChance { get; } = new(0, 0.15, 0.15);
 
-    /// <summary>The chance a song has the part, when not given, by its melody facet; 1 for a part every song has.</summary>
-    public static double Chance(TrackRole part, double melody) => part switch
+    /// <summary>
+    ///     The chance a song has the part, when not given, by its melody facet, and within a genre's chance of it; 1 for a
+    ///     part every song has.
+    /// </summary>
+    public static double Chance(TrackRole part, double melody, Genre genre)
     {
-        TrackRole.Pad => 0.8,
-        TrackRole.CounterMelody => 0.6,
-        TrackRole.Drum => 0.95,
-        TrackRole.Riff => 0.5,
-        TrackRole.Rhythm => 0.4,
+        var name = GenreChoices.Name(part.ToString());
+        return Chance(part).At(melody, GenreChoices.Parts.Options.Any(x => x.Name == name) ? genre.Chance(GenreChoices.Parts, name) : null);
+    }
+
+    private static ByConvention Chance(TrackRole part) => part switch
+    {
+        TrackRole.Pad => Even(0.8),
+        TrackRole.CounterMelody => Even(0.6),
+        TrackRole.Drum => Even(0.95),
+        TrackRole.Riff => Even(0.5),
+        TrackRole.Rhythm => Even(0.4),
         // of the songs with a riff
-        TrackRole.RiffTwin => TwinChance.At(melody),
+        TrackRole.RiffTwin => TwinChance,
         // the solo part plays only where a section's appearance is its solo
-        TrackRole.Melody or TrackRole.Chords or TrackRole.Bass or TrackRole.Solo => 1,
+        TrackRole.Melody or TrackRole.Chords or TrackRole.Bass or TrackRole.Solo => Even(1),
         _ => throw new ArgumentOutOfRangeException(nameof(part), part, "Not a part of the band.")
     };
+
+    // a chance as likely at every conventionality
+    private static ByConvention Even(double chance) => new(chance, chance, chance);
 
     /// <summary>The parts the song leaves out, drawn or given, and never all of them.</summary>
     /// <param name="streams">A part's own sequence.</param>
     /// <param name="given">The parts given in (true) or out (false), in place of their draws.</param>
     /// <param name="melody">The song's melody facet, which its twin leans by.</param>
-    public static ImmutableHashSet<TrackRole> DrawAbsent(Func<TrackRole, IGenerationContext> streams, IReadOnlyDictionary<TrackRole, bool>? given, double melody)
+    /// <param name="genre">The genre whose chances of the parts the draws keep to.</param>
+    public static ImmutableHashSet<TrackRole> DrawAbsent(Func<TrackRole, IGenerationContext> streams, IReadOnlyDictionary<TrackRole, bool>? given, double melody, Genre genre)
     {
         var absent = WithTwins(All
             .Where(part =>
                 {
-                    var isIn = streams(part).TestProbability(Chance(part, melody));
+                    var isIn = streams(part).TestProbability(Chance(part, melody, genre));
                     return !(given is not null && given.TryGetValue(part, out var isGiven) ? isGiven : isIn);
                 }
             )

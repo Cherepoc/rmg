@@ -113,7 +113,10 @@ public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, d
     private static double Logistic(double logOdds) => 1 / (1 + Math.Exp(-logOdds));
 }
 
-/// <summary>What is given in place of the song's own draws, each used as given; none for the song as its seed makes it.</summary>
+/// <summary>
+///     What is given in place of the song's own draws, each used as given, and the genre its draws keep to; none for the
+///     song as its seed makes it.
+/// </summary>
 /// <param name="Meter">The meter the song's bars are in, its groups in the order given.</param>
 /// <param name="MeterOption">The meter given by its place in <see cref="Composition.Meter.Options" />, its groups' order drawn.</param>
 /// <param name="Tempo">The tempo given, as a multiple of <see cref="Composition.Meter.BaseTempo" />, which need not be one the song may draw.</param>
@@ -130,6 +133,7 @@ public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, d
 /// <param name="Swing">
 ///     How much the song swings, from 0, straight, to 1, a triplet's swing, where its meter pairs its notes; 0 is straight.
 /// </param>
+/// <param name="Genre">The genre the song's draws keep to (<see cref="Composition.Genre" />), what is given winning over it.</param>
 public sealed record SongOverrides(
     Meter? Meter = null,
     double? Base = null,
@@ -141,7 +145,8 @@ public sealed record SongOverrides(
     int? Key = null,
     ImmutableHashSet<string>? DrumPieces = null,
     Scale? Scale = null,
-    double? Swing = null
+    double? Swing = null,
+    Genre? Genre = null
 )
 {
     public static SongOverrides None { get; } = new();

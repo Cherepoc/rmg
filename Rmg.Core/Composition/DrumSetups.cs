@@ -39,32 +39,42 @@ internal static class DrumSetups
 
     /// <summary>A song's setup, the percussion likelier the less conventional its rhythm.</summary>
     /// <param name="unconventionality">The groove facet of the song's unconventionality, by whose ends the setups lean.</param>
-    public static DrumSetup Pick(IGenerationContext context, double unconventionality)
+    public static DrumSetup Pick(IGenerationContext context, double unconventionality, Genre genre)
     {
-        return context.Pick(ByConvention.Weigh(All.Select(x => (x.Setup, RhythmicUnconventionality.WeightEnds(x.Weight, x.Lean))), unconventionality));
+        return context.Pick(ByConvention.Weigh(All.Select(x => (x.Setup, RhythmicUnconventionality.WeightEnds(x.Weight, x.Lean))), unconventionality,
+            genre.Pool<DrumSetup>(GenreChoices.DrumSetup, GenreChoices.NameOf)));
     }
 
     /// <summary>
     ///     The drums of a song of the setup: the drum kit's by its groups' rules, and the percussion's by the setup; a
     ///     percussion song's, a drum of the percussion for every role, then more.
     /// </summary>
-    public static ImmutableArray<PercussionInstrumentDefinition> SelectSongDrums(IGenerationContext context, DrumSetup setup)
+    /// <param name="pool">
+    ///     A drum's weight in a pool, such as a genre's, in place of its own, from 0, never in the song, to 1; none for the
+    ///     drums as they are.
+    /// </param>
+    public static ImmutableArray<PercussionInstrumentDefinition> SelectSongDrums(IGenerationContext context, DrumSetup setup, Func<PercussionInstrumentDefinition, double>? pool)
     {
+        double Weight(PercussionInstrumentDefinition drum) => pool?.Invoke(drum) ?? drum.Weight;
+        IEnumerable<Weighted<PercussionInstrumentDefinition>> Weighed(IEnumerable<PercussionInstrumentDefinition> drums) =>
+            drums.Where(x => Weight(x) > 0).Select(x => new Weighted<PercussionInstrumentDefinition>(Weight(x), x));
+
         if (setup == DrumSetup.Percussion)
         {
             var family = DrumGroups.AllDrums.Where(x => x.Family.HasFlag(DrumFamily.Percussion)).ToArray();
             var drums = new List<PercussionInstrumentDefinition>();
             foreach (var role in DrumKitGenerator.LeadRoles)
-                drums.AddRange(DrumKitGenerator.PickWeighted(context, family.Where(x => x.MainRole == role).Except(drums).Select(Weighed), 1));
+                drums.AddRange(DrumKitGenerator.PickWeighted(context, Weighed(family.Where(x => x.MainRole == role).Except(drums)), 1));
             var more = context.Pick(MorePercussion);
-            drums.AddRange(DrumKitGenerator.PickWeighted(context, family.Except(drums).Select(Weighed), more));
+            drums.AddRange(DrumKitGenerator.PickWeighted(context, Weighed(family.Except(drums)), more));
             return [..DrumGroups.AllDrums.Where(drums.Contains)];
         }
 
+        // an always-on group has drums in the song, unless the pool keeps none of them
         var kit = DrumGroups.All.Where(x => x != DrumGroups.Percussion).SelectMany(group =>
             {
-                var drums = group.SongRule.Select(context, group.Drums);
-                if (group.IsAlwaysOn && drums.IsEmpty)
+                var drums = group.SongRule.Select(context, group.Drums, pool);
+                if (group.IsAlwaysOn && drums.IsEmpty && group.Drums.Any(x => Weight(x) > 0))
                     throw new InvalidOperationException($"An always-on drum group '{group.Name}' has no drums in the song.");
                 return drums;
             }
@@ -73,9 +83,7 @@ internal static class DrumSetups
             return [..DrumGroups.AllDrums.Where(kit.Contains)];
 
         var count = context.Pick(PercussionCounts);
-        var percussion = DrumKitGenerator.PickWeighted(context, DrumGroups.Percussion.Drums.Select(Weighed), count);
+        var percussion = DrumKitGenerator.PickWeighted(context, Weighed(DrumGroups.Percussion.Drums), count);
         return [..DrumGroups.AllDrums.Where(x => kit.Contains(x) || percussion.Contains(x))];
     }
-
-    private static Weighted<PercussionInstrumentDefinition> Weighed(PercussionInstrumentDefinition drum) => new(drum.Weight, drum);
 }

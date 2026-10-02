@@ -69,6 +69,7 @@ internal sealed class SongTracks
     /// <param name="soloContext">The sequence the solo part's instrument and state are drawn from.</param>
     /// <param name="hasTwin">Whether the song's riff has a twin, which the two play apart, on either side.</param>
     /// <param name="givenDrums">The drums given in place of those the song draws, which it still draws, so that the rest is as it was.</param>
+    /// <param name="genre">The genre whose pools the instruments and the drums keep to.</param>
     public static SongTracks Create(
         IGenerationContext context,
         IGenerationContext panningContext,
@@ -82,15 +83,18 @@ internal sealed class SongTracks
         IGenerationContext strokeContext,
         IGenerationContext roleContext,
         DrumSetup drumSetup,
-        ImmutableArray<PercussionInstrumentDefinition>? givenDrums
+        ImmutableArray<PercussionInstrumentDefinition>? givenDrums,
+        Genre genre
     )
     {
         var trackRhythmLayer = rhythmicUnconventionality.Lean(RhythmLayers.Track);
+        // an instrument's weight in the genre's pool of its role
+        Func<RoleInstrument, double>? Pool(TrackRole role) => genre.Pool<RoleInstrument>(GenreChoices.Instruments[role], x => GenreChoices.Name(x.Name));
 
         // the melody plays something other than the chords, so the two can be told apart
-        var chordsInstrument = InstrumentRoles.Chords.Pick(context);
-        var melodyInstrument = InstrumentRoles.Melody.Pick(context, chordsInstrument.Program);
-        var bassInstrument = InstrumentRoles.Bass.Pick(context);
+        var chordsInstrument = InstrumentRoles.Chords.Pick(context, Pool(TrackRole.Chords));
+        var melodyInstrument = InstrumentRoles.Melody.Pick(context, Pool(TrackRole.Melody), chordsInstrument.Program);
+        var bassInstrument = InstrumentRoles.Bass.Pick(context, Pool(TrackRole.Bass));
 
         // how much the bass leads into the chords: its instrument sets where the song starts, a section moves it
         var bassLeading = bassInstrument.Leading + BassLeadingLayers.CreateGenerator(BassLeadingLayers.Song)(context);
@@ -113,16 +117,16 @@ internal sealed class SongTracks
         StateTrace.Record(TracePoints.Panning, ChordsTrack, 0, 0, StateMap.Default, 0, string.Join(", ", pans.Select(x => $"{x.Key} {x.Value:F2}")), pans);
 
         // the pad holds chords in a sound of its own, apart from the chords', which it plays under
-        var padInstrument = InstrumentRoles.Pad.Pick(padContext, chordsInstrument.Program);
+        var padInstrument = InstrumentRoles.Pad.Pick(padContext, Pool(TrackRole.Pad), chordsInstrument.Program);
         // and the counter-melody a line in a sound of its own, apart from the melody's and the chords'
-        var counterInstrument = InstrumentRoles.CounterMelody.Pick(counterContext, melodyInstrument.Program, chordsInstrument.Program);
+        var counterInstrument = InstrumentRoles.CounterMelody.Pick(counterContext, Pool(TrackRole.CounterMelody), melodyInstrument.Program, chordsInstrument.Program);
         // and the riff one of its own, apart from the melody's and the chords'
-        var riffInstrument = InstrumentRoles.Riff.Pick(riffContext, melodyInstrument.Program, chordsInstrument.Program);
+        var riffInstrument = InstrumentRoles.Riff.Pick(riffContext, Pool(TrackRole.Riff), melodyInstrument.Program, chordsInstrument.Program);
         // and the rhythm part comps in a sound of its own, apart from the chords' and the riff's, in a register of its own
-        var rhythmInstrument = InstrumentRoles.Rhythm.Pick(rhythmContext, chordsInstrument.Program, riffInstrument.Program);
+        var rhythmInstrument = InstrumentRoles.Rhythm.Pick(rhythmContext, Pool(TrackRole.Rhythm), chordsInstrument.Program, riffInstrument.Program);
 
         // and the solo part a lead of its own, apart from the melody's, which it takes over from
-        var soloInstrument = InstrumentRoles.Solo.Pick(soloContext, melodyInstrument.Program);
+        var soloInstrument = InstrumentRoles.Solo.Pick(soloContext, Pool(TrackRole.Solo), melodyInstrument.Program);
 
         // the riff's state, which its twin shares, so that the two play its notes alike
         var riffLayer = LayerStates.CreateTrackLayer(
@@ -279,7 +283,7 @@ internal sealed class SongTracks
         };
 
         // the song has its own drums, and the drums picked by the section kit play in a section
-        var drawnDrums = DrumSetups.SelectSongDrums(context, drumSetup);
+        var drawnDrums = DrumSetups.SelectSongDrums(context, drumSetup, genre.Pool<PercussionInstrumentDefinition>(GenreChoices.DrumPieces, DrumPieces.NameOf));
         var songDrums = givenDrums ?? drawnDrums;
         foreach (var drumGroup in DrumGroups.All)
         {

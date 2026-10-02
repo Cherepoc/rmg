@@ -37,15 +37,22 @@ public sealed class InstrumentRole
 
     public ImmutableArray<RoleInstrument> Instruments { get; }
 
-    /// <summary>An instrument of the role, the heavier ones being more likely, other than the ones given.</summary>
-    public RoleInstrument Pick(IGenerationContext context, params IEnumerable<int> excludedPrograms)
+    /// <summary>
+    ///     An instrument of the role, the heavier ones being more likely, by their weights or a pool's, such as a genre's,
+    ///     other than the ones given, which a pool that keeps nothing else lets play.
+    /// </summary>
+    /// <param name="pool">An instrument's weight in the pool, in place of its own, from 0, out of it, to 1; none for the role's own.</param>
+    public RoleInstrument Pick(IGenerationContext context, Func<RoleInstrument, double>? pool, params IEnumerable<int> excludedPrograms)
     {
         var excluded = excludedPrograms.ToHashSet();
-        var candidates = Instruments.Where(x => !excluded.Contains(x.Program)).ToImmutableArray();
-        if (candidates.IsEmpty)
+        var kept = Instruments.Select(x => (Instrument: x, Weight: pool?.Invoke(x) ?? x.Weight)).Where(x => x.Weight > 0).ToArray();
+        var candidates = kept.Where(x => !excluded.Contains(x.Instrument.Program)).ToArray();
+        if (candidates.Length == 0 && pool is not null)
+            candidates = kept;
+        if (candidates.Length == 0)
             throw new InvalidOperationException($"Every instrument of the {Name} role is excluded.");
 
-        return context.Pick([..candidates.Select(x => new Weighted<RoleInstrument>(x.Weight, x))]);
+        return context.Pick([..candidates.Select(x => new Weighted<RoleInstrument>(x.Weight, x.Instrument))]);
     }
 }
 

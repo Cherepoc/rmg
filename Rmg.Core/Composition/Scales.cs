@@ -76,9 +76,9 @@ public static class Scales
     public const double Closeness = 0.3;
 
     /// <summary>A song's scale, by the scale facet of its unconventionality.</summary>
-    internal static Scale Pick(IGenerationContext context, double unconventionality)
+    internal static Scale Pick(IGenerationContext context, double unconventionality, Genre genre)
     {
-        return context.Pick(ByConvention.Weigh(All.Select(x => (x, x.Weight)), unconventionality));
+        return context.Pick(ByConvention.Weigh(All.Select(x => (x, x.Weight)), unconventionality, genre.Pool<Scale>(GenreChoices.Scale, x => GenreChoices.Name(x.Name))));
     }
 
     /// <summary>

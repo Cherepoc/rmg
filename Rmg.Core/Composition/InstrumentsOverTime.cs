@@ -109,13 +109,18 @@ internal static class InstrumentsOverTime
     /// <param name="sound">Every section's sound facet, by its place among the song's sections.</param>
     /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
     /// <param name="families">A part's draw of whether a switch keeps to its family, by the section and the part's track.</param>
+    /// <param name="genre">
+    ///     The genre whose pools of the roles' instruments a switch keeps to; an instrument's articulations, its variants,
+    ///     are its own.
+    /// </param>
     public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Apply(
         ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> notes,
         ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
         SongMap map,
         IReadOnlyList<double> sound,
         Func<int, int, IGenerationContext> streams,
-        Func<int, int, IGenerationContext> families
+        Func<int, int, IGenerationContext> families,
+        Genre genre
     )
     {
         var result = notes.ToBuilder();
@@ -131,13 +136,16 @@ internal static class InstrumentsOverTime
                 var context = streams(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track);
                 var switches = context.TestProbability(SwitchChance.At(sound[index]));
                 var role = RoleOf(pitched.Role);
+                var choice = GenreChoices.Instruments[pitched.Role == TrackRole.RiffTwin ? TrackRole.Riff : pitched.Role];
+                var pool = genre.Pool<RoleInstrument>(choice, x => GenreChoices.Name(x.Name));
+                double Weight(RoleInstrument instrument) => pool?.Invoke(instrument) ?? instrument.Weight;
                 // within the family where it keeps to it and the role has another of it, or to any other of the role's
                 var keeps = families(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track).TestProbability(FamilyChance.At(sound[index]));
                 var family = FamilyOf(pitched.InstrumentCode);
-                var kin = role?.Instruments.Where(x => x.Program != pitched.InstrumentCode && family.Contains(x.Program)).ToArray() ?? [];
+                var kin = role?.Instruments.Where(x => x.Program != pitched.InstrumentCode && family.Contains(x.Program) && Weight(x) > 0).ToArray() ?? [];
                 var switched = role is null ? pitched.InstrumentCode
-                    : keeps && kin.Length > 0 ? context.Pick([..kin.Select(x => new Weighted<RoleInstrument>(x.Weight, x))]).Program
-                    : role.Pick(context, pitched.InstrumentCode).Program;
+                    : keeps && kin.Length > 0 ? context.Pick([..kin.Select(x => new Weighted<RoleInstrument>(Weight(x), x))]).Program
+                    : role.Pick(context, pool, pitched.InstrumentCode).Program;
                 var program = switches ? switched : pitched.InstrumentCode;
                 var mode = context.Pick(ByConvention.Weigh(Modes, sound[index]));
                 var variants = Variants.GetValueOrDefault(program, []);

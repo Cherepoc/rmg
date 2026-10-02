@@ -5,6 +5,7 @@ using Microsoft.Extensions.FileProviders;
 using Rmg.WebApi;
 using Rmg.WebApi.Admin;
 using Rmg.WebApi.Analytics;
+using Rmg.WebApi.Genres;
 using Rmg.WebApi.Songs;
 using Rmg.WebApi.SoundFonts;
 
@@ -132,6 +133,7 @@ app.UseStaticFiles(new StaticFileOptions
 app.MapSoundFonts(soundFonts);
 app.MapSongs();
 app.MapSongDescriptions();
+app.MapGenres();
 
 if (events is not null)
 {

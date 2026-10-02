@@ -251,19 +251,7 @@ public static class SongDescriptions
 
     private static string TimeSignature(Meter meter) => $"{meter.TimeSignature.Numerator}/{meter.TimeSignature.Denominator}";
 
-    private static string FeelName(int feel)
-    {
-        if (feel == Feels.Straight)
-            return "straight";
-        return feel.ToTuplet() switch
-        {
-            3 => "triplets",
-            5 => "quintuplets",
-            7 => "septuplets",
-            1 => $"grouped in {feel.ToRhythmPeriodValue():0.##}s",
-            var tuplet => $"{tuplet}-tuplets"
-        };
-    }
+    private static string FeelName(int feel) => Feels.Label(feel);
 
     private static string SwingName(Swing swing) =>
         swing.Delay == 0 ? "none" : $"swung {(swing.Period switch { 1 => "8ths", 0.5 => "16ths", 2 => "quarters", var p => $"pairs of {p:0.##} beats" })}, {swing.Delay:0.##} of a beat late";

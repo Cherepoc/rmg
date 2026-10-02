@@ -45,10 +45,28 @@ internal static class Feels
     /// <summary>The chance a fill changes the groove's feel, such as into triplets.</summary>
     public static ByConvention FillChange { get; } = new(0, 0.02, 1);
 
-    /// <summary>A song's feel, at the feel facet of its unconventionality.</summary>
-    public static int DrawSong(IGenerationContext context, double unconventionality)
+    /// <summary>A feel's name, as a genre gives it: "straight", "tuplets3" for triplets, "grouped3" for the 3+3+2.</summary>
+    public static string NameOf(int feel) => feel == Straight ? "straight" : feel.ToTuplet() > 1 ? $"tuplets{feel.ToPrime()}" : $"grouped{feel.ToPrime()}";
+
+    /// <summary>A feel as a listener tells it: "straight", "triplets", "grouped in 1.5s".</summary>
+    public static string Label(int feel)
     {
-        return context.Pick(ByConvention.Weigh(Weights, unconventionality));
+        if (feel == Straight)
+            return "straight";
+        return feel.ToTuplet() switch
+        {
+            3 => "triplets",
+            5 => "quintuplets",
+            7 => "septuplets",
+            1 => $"grouped in {feel.ToRhythmPeriodValue():0.##}s",
+            var tuplet => $"{tuplet}-tuplets"
+        };
+    }
+
+    /// <summary>A song's feel, at the feel facet of its unconventionality.</summary>
+    public static int DrawSong(IGenerationContext context, double unconventionality, Genre genre)
+    {
+        return context.Pick(ByConvention.Weigh(Weights, unconventionality, genre.Pool<int>(GenreChoices.Feel, NameOf)));
     }
 
     /// <summary>A layer's change of the feel it comes to, by its chance, another feel; none for keeping it.</summary>

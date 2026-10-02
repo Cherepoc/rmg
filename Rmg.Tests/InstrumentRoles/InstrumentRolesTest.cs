@@ -36,7 +36,7 @@ public sealed class InstrumentRolesTest
         const int drawCount = 50_000;
         var role = Rmg.Core.Composition.InstrumentRoles.Bass;
         var context = new GenerationContext(1);
-        var counts = Enumerable.Range(0, drawCount).Select(_ => role.Pick(context, 33).Program).CountBy(x => x).ToDictionary();
+        var counts = Enumerable.Range(0, drawCount).Select(_ => role.Pick(context, null, 33).Program).CountBy(x => x).ToDictionary();
         var weightSum = role.Instruments.Where(x => x.Program != 33).Sum(x => x.Weight);
 
         await Assert.That(counts.ContainsKey(33)).IsFalse();
@@ -52,7 +52,7 @@ public sealed class InstrumentRolesTest
     {
         var role = new InstrumentRole("Solo", [new RoleInstrument(0, "Piano", 1)]);
 
-        await Assert.That(() => role.Pick(new GenerationContext(0), 0)).Throws<InvalidOperationException>();
+        await Assert.That(() => role.Pick(new GenerationContext(0), null, 0)).Throws<InvalidOperationException>();
     }
 
     [Test]

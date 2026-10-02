@@ -44,17 +44,24 @@ internal static class Groove
     /// <summary>The lightest swing, as a part of the triplet's; the heaviest is the triplet's, the second note of a pair a third late.</summary>
     public const double LightestSwing = 0.3;
 
+    /// <summary>
+    ///     How far a genre leans a swing's amount: the draw from 0 to 1 to the power of e to this times its shift, at the
+    ///     most an amount's draw to the power of about 7, light, or of about 1/7, heavy.
+    /// </summary>
+    public const double AmountLean = 2;
+
     /// <summary>The shortest note swung, in seconds: 16ths are swung where they are at least this long, 8ths otherwise.</summary>
     public const double ShortestSwungNote = 0.14;
 
     /// <param name="meter">The meter the song's bars are in, whose groups a pair must divide to swing, as 6/8's 8ths do not.</param>
     /// <param name="unconventionality">The feel facet of the song's unconventionality.</param>
     /// <param name="given">How much the song swings where it is given, as a part of the triplet's, 0 for straight.</param>
-    public static Swing Generate(IGenerationContext context, double tempo, double unconventionality, Meter meter, double? given)
+    /// <param name="genre">The genre the chance and the amount keep to, the amount leaning heavier or lighter.</param>
+    public static Swing Generate(IGenerationContext context, double tempo, double unconventionality, Meter meter, double? given, Genre genre)
     {
         // drawn when it is given too, so that the rest is as it was
-        var swings = context.TestProbability(SwingChance.At(unconventionality));
-        var amount = LightestSwing + (1 - LightestSwing) * context.GenerateDouble();
+        var swings = context.TestProbability(SwingChance.At(unconventionality, genre.Chance(GenreChoices.FeelChances, "swing")));
+        var amount = LightestSwing + (1 - LightestSwing) * Math.Pow(context.GenerateDouble(), Math.Exp(-AmountLean * genre.Shift(GenreChoices.FeelValues, "swing")));
         if (given is { } amountGiven)
             (swings, amount) = (amountGiven > 0, amountGiven);
 

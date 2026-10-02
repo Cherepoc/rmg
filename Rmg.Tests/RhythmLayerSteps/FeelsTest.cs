@@ -11,7 +11,7 @@ public sealed class FeelsTest
     public async Task ThePlainestSongs_AreStraight_AndNeverChangeTheirFeel()
     {
         var context = new GenerationContext(1);
-        var feels = Enumerable.Range(0, DrawCount).Select(_ => Feels.DrawSong(context, 0)).ToArray();
+        var feels = Enumerable.Range(0, DrawCount).Select(_ => Feels.DrawSong(context, 0, Genre.None)).ToArray();
 
         await Assert.That(feels.All(x => x == Feels.Straight)).IsTrue();
         foreach (var chance in new[] { Feels.SectionChange, Feels.BarChange, Feels.FillChange })
@@ -22,7 +22,7 @@ public sealed class FeelsTest
     public async Task TheWildestSongs_PlayEveryFeelButStraight_AsLikely_AndChangeItEverywhere()
     {
         var context = new GenerationContext(1);
-        var feels = Enumerable.Range(0, DrawCount).Select(_ => Feels.DrawSong(context, 1)).ToArray();
+        var feels = Enumerable.Range(0, DrawCount).Select(_ => Feels.DrawSong(context, 1, Genre.None)).ToArray();
 
         await Assert.That(feels.All(x => x != Feels.Straight)).IsTrue();
         foreach (var feel in Feels.Weights.Select(x => x.Feel).Where(x => x != Feels.Straight))

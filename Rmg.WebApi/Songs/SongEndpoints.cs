@@ -21,7 +21,7 @@ public static class SongEndpoints
         // scales, in the order a request names them by
         routes.MapGet("/api/songs/options", () => Results.Ok(new SongOptions(
             [..Enumerable.Range(0, TempoScale.Steps).Select(x => TempoScale.Multiplier(x) * Meter.BaseTempo)],
-            [..Meter.Options.Select(x => $"{x.Meter.TimeSignature.Numerator}/{x.Meter.TimeSignature.Denominator}")],
+            [..Meter.Options.Select(x => Meter.NameOf(x.Meter))],
             DrumPieces.All,
             [..Scales.All.Select(x => x.Name)]
         )));
