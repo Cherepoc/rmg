@@ -47,6 +47,37 @@ public sealed class DoublingTest
     }
 
     [Test]
+    public async Task ADrumThatAccentsALead_PlaysWhereTheLeadPlaysItsStrongBeats_HoweverPlainTheSection()
+    {
+        var accents = 0;
+        foreach (var song in TestCorpus.Range(128))
+        foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.Doubles))
+        foreach (var (track, doubling) in ((ImmutableDictionary<int, Doubling>)entry.Value!).Where(x => x.Value.Binding == DrumBinding.Accent))
+        foreach (var span in song.Map.Sections.Where(x => x.SectionId == entry.Section))
+        {
+            var notes = song.Song.Notes!;
+            // the lead's strong beats in its groove, not in a pattern's last bar, where a fill plays, nor at its first beat,
+            // where a landing does
+            bool InGroove(double position)
+            {
+                var inPattern = (position - span.Start) % span.Meter.PatternDuration;
+                return inPattern < span.Meter.PatternDuration - span.Meter.BarDuration && inPattern >= 0.5;
+            }
+            var strong = notes.GetValueOrDefault(doubling.Lead, EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0))
+                .Any(x => x.Position >= span.Start && x.Position < span.End && InGroove(x.Position) && x.Value.State.GetStateValue(CompositionStateKinds.BeatRank) <= doubling.MaxRank);
+            if (!strong)
+                continue;
+
+            accents++;
+            // a bar that plays over and over in a plain section, its draw picking none of the lead's beats, still has the last
+            await Assert.That(notes.GetValueOrDefault(track, EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0)).Any(x => x.Position >= span.Start && x.Position < span.End))
+                .IsTrue().Because($"seed {song.Seed}, section {entry.Section} at {span.Start}, {DrumGroups.GetDrum(track).Name} on {DrumGroups.GetDrum(doubling.Lead).Name}");
+        }
+
+        await Assert.That(accents).IsGreaterThan(0);
+    }
+
+    [Test]
     public async Task ADrumOnItsLeadsFeel_PlaysItsTuplet_EveryBar_TheBoundAlways_MostColouringOnes()
     {
         int bars = 0, colours = 0, following = 0;

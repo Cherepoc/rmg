@@ -243,13 +243,14 @@ internal sealed class PatternGenerator
             ? EventTimeline.Create<StateMap>(_meter.BarDuration)
             : GenerateNotes(stateMap, barStateTimelineMap, patternBar * _meter.BarDuration, trackNumber, sectionId, patternBar, energy).GeneratedTimeline;
         // a drum bound to a lead plays its strong beats, and one that accents it a share of them, the same ones wherever
-        // its bar pattern plays, by a draw keyed by the drum and the beat's place
+        // its bar pattern plays, by a draw keyed by the drum and the beat's place, and the last of them where the draw
+        // picks none, as a tambourine on the snare's 4, so that a bar a plain section plays over and over is not silent
         if (doubling is not null)
-            notes = EventTimeline.Create(
-                notes.Duration,
-                notes.Where(x => x.Value.GetStateValue(CompositionStateKinds.BeatRank) <= doubling.MaxRank
-                                 && (doubling.Binding != DrumBinding.Accent || IsAccented(seed, trackNumber, x.Position, doubling.Share)))
-            );
+        {
+            var strong = notes.Where(x => x.Value.GetStateValue(CompositionStateKinds.BeatRank) <= doubling.MaxRank).ToArray();
+            var played = doubling.Binding != DrumBinding.Accent ? strong : strong.Where(x => IsAccented(seed, trackNumber, x.Position, doubling.Share)).ToArray();
+            notes = EventTimeline.Create(notes.Duration, played.Length > 0 || strong.Length == 0 ? played : [strong[^1]]);
+        }
         // a bass bar that leads into the next chord plays a note in its last beat, for its approach to play on
         if (_trackDefinitions[trackNumber].Role == TrackRole.Bass)
             notes = LeadIn(notes, stateMap, barStateTimelineMap, barIndex, _rhythmPatternGenerator(stateMap).MaxRank, _meter);
