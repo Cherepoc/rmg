@@ -113,8 +113,11 @@ each from the trace; the seeds named here are ones already found.
   swung, sound played or broken? Are the chords too far out, or the melody too near the middle?
 - **Drum pieces given:** both snares given double the backbeat, which the song never draws: heard as wrong? Then give
   the snare group one of its snares, as its rule draws. A piece put in plays by its roles alone: do a whistle or congas
-  given to a kit song sound placed? The page's pieces are those the song may play, every timekeeper among them, of
-  which a section plays one or two: confusing? Then show the pieces a section plays apart.
+  given to a kit song sound placed?
+- **Every drum heard:** a drum no section's kit took joins one section (`DrumCoverage`), and a vibraslap or a tom the
+  song never sounded lands once, with a crash where it can: placed, or tacked on? At the wildest groove a song of the kit
+  and percussion plays percussion only in half its sections (`PercussionSections.WildShare`): the kit too seldom, or
+  too often?
 - **The polymeters:** the snare on every cell's start of a short cycle: too busy? The chords joining a cycle of short
   cells: mud? A cycle running on through a section or growing each time round: heard as a drift resolving?
 
@@ -205,6 +208,10 @@ Each item with its plan, and what it waits for.
 
 - **Timing by role** (P3): the backbeat a little late, the hi-hat on top, should swing alone sound stiff; plain
   doubling needs it.
+- **A drum left out after all** (P3): a drum joins a section whose drums play where it first plays, but the form may
+  rest them in its later appearances, or an intro's entries leave it out, so that about 2% of songs with drums still
+  never sound one. Covering it after assembly, where the rests are known, would close it, if the page's pieces showing a
+  drum never heard is missed.
 
 ### Scales and chords
 
