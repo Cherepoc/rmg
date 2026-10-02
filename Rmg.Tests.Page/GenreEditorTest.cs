@@ -2,7 +2,7 @@ using Microsoft.Playwright;
 
 namespace Rmg.Tests.Page;
 
-/// <summary>A genre made in the editor's popup: its pools swapped in their lists, its tabs, played, kept among one's own, and let go of.</summary>
+/// <summary>A genre made in the editor's popup: its sections, its checklists and lists, its parts' tabs, played, kept among one's own.</summary>
 [ClassDataSource<Site>(Shared = SharedType.PerTestSession)]
 public sealed class GenreEditorTest(Site site)
 {
@@ -19,29 +19,40 @@ public sealed class GenreEditorTest(Site site)
         return dialog;
     }
 
-    private static ILocator Section(ILocator dialog, string title) => dialog.Locator(".genre-section", new() { Has = dialog.Page.Locator("h3", new() { HasTextString = title }) });
+    /// <summary>A section of the editor, opened.</summary>
+    private static async Task<ILocator> Section(ILocator dialog, string title)
+    {
+        var section = dialog.Locator($"details[data-section='{title}']");
+        if (await section.GetAttributeAsync("open") is null)
+            await section.Locator("summary").First.ClickAsync();
+        return section;
+    }
+
+    private static ILocator Row(ILocator within, string option) => within.Locator($".genre-row[data-option='{option}']:visible");
+
+    private static async Task<System.Text.Json.JsonElement> Played(SongPage page, ILocator dialog)
+    {
+        var count = page.Requests.Count;
+        await dialog.Locator("footer button", new() { HasTextString = "Play" }).ClickAsync();
+        await page.Until(() => page.Requests.Count > count, "the song asked for in the genre made");
+        return page.Requests[^1].Body;
+    }
 
     [Test]
-    public async Task AGenreMade_ItsMeterSwappedInItsList_IsPlayed_KeptAmongOnesOwn_AndListedOnTheNextVisit()
+    public async Task AMeterChecked_IsTheGenres_SavedAmongOnesOwn_AndListedOnTheNextVisit()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
 
-        // the meter kept to its commonest, 4/4 alone, then swapped for 3/4 in its list
-        var meter = Section(dialog, "Meter");
-        await meter.Locator(".genre-check input").CheckAsync();
-        await Assert.That(await meter.Locator(".genre-row select").CountAsync()).IsEqualTo(1);
-        await meter.Locator(".genre-row select").SelectOptionAsync("3/4");
+        var meter = await Section(dialog, "Meter");
+        await Row(meter, "3/4").Locator("input[type=checkbox]").CheckAsync();
         await dialog.Locator("input[aria-label='Genre name']").FillAsync("Waltzes");
         var count = page.Requests.Count;
         await dialog.Locator("footer button", new() { HasTextString = "Save" }).ClickAsync();
-
         await page.Until(() => page.Requests.Count > count, "the song asked for in the genre made");
-        var meters = page.Requests[^1].Body.GetProperty("genre").GetProperty("meter");
-        await Assert.That(meters.EnumerateObject().Select(x => x.Name)).IsEquivalentTo(["3/4"]);
+        await Assert.That(page.Requests[^1].Body.GetProperty("genre").GetProperty("meter").EnumerateObject().Select(x => x.Name)).IsEquivalentTo(["3/4"]);
         await page.Settled();
 
-        // listed among one's own on the next visit, and chosen there
         await page.Page.GotoAsync("/");
         var genre = page.Page.Locator("select[aria-label='Genre']");
         await page.Until(async () => await genre.Locator("optgroup[label='Yours'] option").CountAsync() == 1, "the genre made listed");
@@ -51,46 +62,85 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
-    public async Task APoolKeepingNothing_IsNotPlayed()
+    public async Task NoneChecked_IsAsTheSongsHaveIt()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-        var scale = Section(dialog, "Scale");
-        await scale.Locator(".genre-check input").CheckAsync();
-        while (await scale.Locator("button.genre-remove").CountAsync() > 0)
-            await scale.Locator("button.genre-remove").First.ClickAsync();
+        var scale = await Section(dialog, "Scale");
+        var dorian = Row(scale, "dorian").Locator("input[type=checkbox]");
+        await dorian.CheckAsync();
+        await dorian.UncheckAsync();
+        await Section(dialog, "Meter").ContinueWith(async x => await Row(await x, "4/4").Locator("input[type=checkbox]").CheckAsync()).Unwrap();
 
-        await Assert.That(await dialog.Locator("footer button", new() { HasTextString = "Play" }).IsDisabledAsync()).IsTrue();
-        await Assert.That(await dialog.Locator("p.warning").TextContentAsync()).Contains("keeps none");
+        var genre = (await Played(page, dialog)).GetProperty("genre");
+        await Assert.That(genre.TryGetProperty("scale", out _)).IsFalse();
+        await Assert.That(genre.TryGetProperty("meter", out _)).IsTrue();
         await Assert.That(page.Errors).IsEmpty();
     }
 
     [Test]
-    public async Task ATabsFields_AreOneSet_BoundToTheTabsPart_AndATabTheGenreNamesIsMarked()
+    public async Task APartsTab_ItsInstrumentsSwappedInTheirLists_AndTheOtherPartsAsTheSongsHaveThem()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-        var instruments = Section(dialog, "Instruments");
+        var parts = await Section(dialog, "Parts");
 
-        // the bass's instruments kept to its commonest, one more added
-        await instruments.GetByRole(AriaRole.Tab, new() { Name = "Bass", Exact = true }).ClickAsync();
-        await instruments.Locator(".genre-check input").CheckAsync();
-        var rows = await instruments.Locator(".genre-row").CountAsync();
-        await instruments.Locator("button.genre-add").ClickAsync();
-        await Assert.That(await instruments.Locator(".genre-row").CountAsync()).IsEqualTo(rows + 1);
+        await parts.GetByRole(AriaRole.Tab, new() { Name = "Bass", Exact = true }).ClickAsync();
+        await parts.Locator("button.genre-add:visible").ClickAsync();
+        var rows = await parts.Locator(".genre-rows .genre-row:visible").CountAsync();
+        await Assert.That(rows).IsGreaterThan(0);
+        await parts.Locator(".genre-rows .genre-row:visible select").First.SelectOptionAsync("tuba");
 
-        // the melody's tab the same fields, as the songs have it, and the bass's marked
-        await instruments.GetByRole(AriaRole.Tab, new() { Name = "Melody", Exact = true }).ClickAsync();
-        await Assert.That(await instruments.Locator(".genre-check input").IsCheckedAsync()).IsFalse();
-        await Assert.That(await instruments.Locator(".genre-row").CountAsync()).IsEqualTo(0);
-        await Assert.That(await instruments.Locator("[role=tab].named").TextContentAsync()).IsEqualTo("Bass");
+        await parts.GetByRole(AriaRole.Tab, new() { Name = "Melody", Exact = true }).ClickAsync();
+        await Assert.That(await parts.Locator(".genre-rows .genre-row:visible").CountAsync()).IsEqualTo(0);
+        await Assert.That(await parts.Locator("[role=tab].named").First.TextContentAsync()).IsEqualTo("Bass");
 
-        var count = page.Requests.Count;
-        await dialog.Locator("footer button", new() { HasTextString = "Play" }).ClickAsync();
-        await page.Until(() => page.Requests.Count > count, "the song asked for in the genre made");
-        var genre = page.Requests[^1].Body.GetProperty("genre");
-        await Assert.That(genre.GetProperty("instrument.bass").EnumerateObject().Count()).IsEqualTo(rows + 1);
+        var genre = (await Played(page, dialog)).GetProperty("genre");
+        await Assert.That(genre.GetProperty("instrument.bass").TryGetProperty("tuba", out _)).IsTrue();
         await Assert.That(genre.TryGetProperty("instrument.melody", out _)).IsFalse();
         await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task TheDrumsSetupsAndRoles_KeepToThePiecesChosen()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var parts = await Section(dialog, "Parts");
+        await parts.GetByRole(AriaRole.Tab, new() { Name = "Drums", Exact = true }).ClickAsync();
+
+        // congas and bongos alone, percussion: no kit to set up, and only they to take a role
+        var pieces = parts.Locator(".genre-sliders[data-choice='drumPieces']");
+        await Row(pieces, "conga").Locator("input[type=checkbox]").CheckAsync();
+        await Row(pieces, "bongo").Locator("input[type=checkbox]").CheckAsync();
+        var setup = parts.Locator(".genre-sliders[data-choice='drumSetup']");
+        await Assert.That(await setup.Locator(".genre-row").EvaluateAllAsync<string[]>("rows => rows.map(x => x.dataset.option)")).IsEquivalentTo(["percussion"]);
+        var ground = parts.Locator(".genre-sliders[data-choice='drumRole.ground']");
+        await Assert.That(await ground.Locator(".genre-row").EvaluateAllAsync<string[]>("rows => rows.map(x => x.dataset.option)")).IsEquivalentTo(["bongo", "conga"]);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    /// <summary>The editor's parts as they look, a preset's, its melody's tab and its drums', where RMG_SCREENSHOTS names a folder.</summary>
+    [Test]
+    [Explicit]
+    public async Task Screenshots()
+    {
+        var directory = Environment.GetEnvironmentVariable("RMG_SCREENSHOTS") ?? Path.GetTempPath();
+        await using var page = await SongPage.Open(site, "?song=1");
+        await page.FirstSong();
+        await page.Page.SetViewportSizeAsync(1280, 1000);
+        await page.Page.Locator("#settings-panel summary").ClickAsync();
+        var genre = page.Page.Locator("select[aria-label='Genre']");
+        await page.Until(() => genre.IsEnabledAsync(), "the genres listed");
+        await genre.EvaluateAsync("s => { s.value = 'preset:latin'; s.dispatchEvent(new Event('change')); }");
+        await page.Page.Locator("button.genre-edit").EvaluateAsync("b => b.click()");
+        var dialog = page.Page.Locator("dialog.genre-dialog");
+        await page.Until(() => dialog.IsVisibleAsync(), "the editor open");
+        var parts = await Section(dialog, "Parts");
+        await parts.ScrollIntoViewIfNeededAsync();
+        await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-editor-melody.png") });
+        await parts.GetByRole(AriaRole.Tab, new() { Name = "Drums", Exact = true }).ClickAsync();
+        await parts.Locator(".genre-sliders[data-choice='drumSetup']").ScrollIntoViewIfNeededAsync();
+        await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-editor-drums.png") });
     }
 }

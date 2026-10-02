@@ -262,11 +262,6 @@ genre in the link (`GenreSettings`). What is left:
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
   half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
   alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.
-- **The editor by part** (P1, planned): sections that fold; small pools (meter, feel, scale, chord shapes, the drum
-  kit, the drum setup, the drum pieces, the drums of a role) every option a checkbox and a slider, none checked as the
-  songs have it; the parts playing, then a tab for every part, a pitched part's instruments by lists, its rhythm and
-  its feel, the drums' kit, pieces, a setup of those the pieces chosen allow, and a sub-tab for every role, its drums
-  of the pieces chosen, its rhythm and its feel. Feels named as heard: a grouping of three the dotted one.
 - **The rhythm's values against the part's own:** a value moves a setting by steps from where the part rests, so that
   one part's "faster" is another's "as fast as can be"; a value set outright, where it lands, would read the same for
   every part, should listening ask for it.
