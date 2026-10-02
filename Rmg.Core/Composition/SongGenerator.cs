@@ -529,11 +529,11 @@ public static class SongGenerator
     {
         var drawn = new StateMapBuilder("Song")
             .Add(StateKinds.KeyOffset, Generators.Int(0, 12))
-            // the dyadic draw of the tempo, or, where a genre keeps to bands of it, its tempos weighed as likely as the draw
-            // lands on them, by their bands' weights
-            .Add(StateKinds.Tempo, genre.Names(GenreChoices.Tempo)
+            // the dyadic draw of the tempo, or, where a genre keeps to bands of it, a band by the genre's weights, as its pool's
+            // are the middle's, and a tempo in it as likely as the draw lands on it among the band's
+            .Add(StateKinds.Tempo, genre.Pool<double>(GenreChoices.Tempo, GenreChoices.TempoBandOf) is { } bands
                 ? (Func<IGenerationContext, double>)(c => c.Pick([
-                    ..TempoOptions.Select((x, i) => new Weighted<double>(TempoWeights[i] * genre.Pool<double>(GenreChoices.Tempo, GenreChoices.TempoBandOf)!(x), x))
+                    ..TempoOptions.Select((x, i) => new Weighted<double>(bands(x) * TempoWeights[i] / BandWeight(GenreChoices.TempoBandOf(x)), x))
                         .Where(x => x.Weight > 0)
                 ]))
                 : TempoGenerator)
@@ -556,6 +556,9 @@ public static class SongGenerator
 
     // how likely the dyadic draw lands on every tempo, as its rank's weight shared among the rank's tempos
     internal static ImmutableArray<double> TempoWeights { get; } = [..TempoOptionWeights()];
+
+    /// <summary>How likely the dyadic draw lands in a band of the tempos (<see cref="GenreChoices.TempoBands" />).</summary>
+    internal static double BandWeight(string band) => TempoOptions.Select((x, i) => (x, i)).Where(x => GenreChoices.TempoBandOf(x.x) == band).Sum(x => TempoWeights[x.i]);
 
     private static IEnumerable<double> TempoOptionWeights()
     {

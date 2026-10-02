@@ -168,9 +168,13 @@ internal static class DrumRoles
             .Distinct().Select(x => new Weighted<DrumRole>(Affinity(x), x)).Where(x => x.Weight > 0).ToArray();
         if (roles.Length == 0)
             roles = [..drum.Roles.Where(x => x.Weight > 0)];
-        return context.Pick(ByConvention.Weigh(
+        // where a genre names a role, an end it leaves with none of the drum's, as one keeping it from its main role does
+        // the plain end, takes the middle's
+        var named = GenreChoices.DrumRoles.Values.Any(genre.Names);
+        return context.Pick(ByConvention.Lean(
             roles.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == drum.MainRole ? 0 : 1))),
-            unconventionality
+            unconventionality,
+            named ? _ => 1 : null
         ));
     }
 }

@@ -29,7 +29,7 @@ public static class GenreChoices
 
     /// <summary>The song's tempo, by the bands of the tempos it may draw.</summary>
     public static GenreChoice Tempo { get; } = Pool("tempo", "Tempo", TempoAndFeel,
-        TempoBands.Select(band => (band.Name, band.Label, SongGenerator.TempoOptions.Select((x, i) => (x, i)).Where(x => TempoBandOf(x.x) == band.Name).Sum(x => SongGenerator.TempoWeights[x.i]))));
+        TempoBands.Select(band => (band.Name, band.Label, SongGenerator.BandWeight(band.Name))));
 
     /// <summary>The meter the song's bars are in (<see cref="Composition.Meter.Options" />).</summary>
     public static GenreChoice Meter { get; } = Pool("meter", "Meter", TempoAndFeel,

@@ -337,9 +337,6 @@ of what it sounds like, agreed as a start:
 
 **Steps,** each committed and measured on its own, per preset 64 songs against none, the fingerprint unchanged with
 no genre:
-9. *The presets:* `Client/genres.json` with the ten, checked against the choices by a test, each tuned against its
-   sentence by the measures of steps 3 to 8 (Reggae's chords on the offbeats in most bars, Electronic's kick on every
-   beat, Jazz's bass in quarters).
 10. *The link:* the settings' tail of the genre's weights, the round trip on both sides, the genre's name as a link
     parameter, events carrying it, the describe endpoint and its text naming the genre.
 11. *The page's picker:* None, the presets, the genres made here, above the settings, kept as the settings are, in the

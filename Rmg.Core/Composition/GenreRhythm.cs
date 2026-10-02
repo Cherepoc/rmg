@@ -11,16 +11,12 @@ namespace Rmg.Core.Composition;
 internal static class GenreRhythm
 {
     /// <summary>
-    ///     How many steps the most of a value moves the speed and the offset off the beat: two, so that a part of a bar's
-    ///     cycle can play a beat's, and one of a beat's cycle a 16th off it.
+    ///     How many steps the most of a value moves a rhythm setting: two, so that a part of a bar's cycle can play a beat's,
+    ///     one of a beat's cycle a 16th off it, and one down to 16ths play its cycle's beats alone. A setting moves only away
+    ///     from the end of its range where the parts rest, as a step past an end folds back: how fine a part goes down from
+    ///     its finest, where the song sets it, and its offset off the beat and its weight on weaker beats up from none.
     /// </summary>
     public const int Steps = 2;
-
-    /// <summary>
-    ///     How many steps the most of a value moves how fine a part goes and where its weight sits: one, as their ranges are
-    ///     three steps, which a layer's step past an end folds back from.
-    /// </summary>
-    public const int FineSteps = 1;
 
     /// <summary>How far the most of a value moves the fullness, either way.</summary>
     public const double FullnessRange = 0.4;
@@ -45,7 +41,7 @@ internal static class GenreRhythm
     /// <summary>
     ///     The genre's layer of a part's rhythm, times the sign given, so that a section can take one role's and add
     ///     another's; none where the genre does not name it. Off the beat moves only off it: its least is on the beat, as
-    ///     the part is.
+    ///     the part is, as is the most of how fine it goes and the least of its weight on weaker beats (<see cref="Steps" />).
     /// </summary>
     public static StateMap Of(Genre genre, GenreChoice choice, int sign = 1)
     {
@@ -53,13 +49,13 @@ internal static class GenreRhythm
             return StateMap.Default;
 
         double Shift(string setting) => genre.Shift(choice, setting);
-        int Step(double shift, int steps = Steps) => sign * (int)Math.Round(steps * shift, MidpointRounding.AwayFromZero);
+        int Step(double shift) => sign * (int)Math.Round(Steps * shift, MidpointRounding.AwayFromZero);
         IState[] states =
         [
             CompositionStateKinds.Rhythm.Period.Power.CreateState(Step(-Shift("speed"))),
             CompositionStateKinds.Rhythm.Phase.Rank.CreateState(Step(Math.Max(0, Shift("offbeat")))),
-            CompositionStateKinds.Rhythm.MaxRank.CreateState(Step(Shift("fineness"), FineSteps)),
-            CompositionStateKinds.Rhythm.RankOffset.CreateState(Step(Shift("syncopation"), FineSteps)),
+            CompositionStateKinds.Rhythm.MaxRank.CreateState(Step(Math.Min(0, Shift("fineness")))),
+            CompositionStateKinds.Rhythm.RankOffset.CreateState(Step(Math.Max(0, Shift("syncopation")))),
             CompositionStateKinds.Rhythm.Fullness.CreateState(sign * FullnessRange * Shift("fullness")),
             CompositionStateKinds.Rhythm.Variation.CreateState(-sign * VariationRange * Shift("repetition"))
         ];
