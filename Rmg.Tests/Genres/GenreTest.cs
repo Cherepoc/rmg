@@ -173,6 +173,24 @@ public sealed class GenreTest
     }
 
     [Test]
+    public async Task ADrumKitsSound_IsOneOfTheGenres_TheStandardWithNone_AndTheMixWinsOverIt()
+    {
+        var genre = Of((GenreChoices.Kit, [("tr808", 1), ("electronic", 1)]));
+        foreach (var seed in Enumerable.Range(0, 8))
+        {
+            var song = TestCorpus.Get(seed, new SongOverrides(Genre: genre));
+            if (!song.PlaysDrums)
+                continue;
+
+            await Assert.That(song.Rendered.Tracks.Single(x => x.IsPercussionInstrument).PitchInstrumentCode).IsIn([24, 25]);
+            await Assert.That(TestCorpus.Get(seed).Rendered.Tracks.Single(x => x.IsPercussionInstrument).PitchInstrumentCode).IsEqualTo(0);
+            var mix = new Rmg.Core.Rendering.SongMix(1, ImmutableDictionary<TrackRole, Rmg.Core.Rendering.PartMix>.Empty.Add(TrackRole.Drum, new(40, 1, null, true)),
+                ImmutableDictionary<string, Rmg.Core.Rendering.DrumGroupMix>.Empty);
+            await Assert.That(Rmg.Core.Rendering.Render.RenderSong(song.Song, mix, CancellationToken.None).Tracks.Single(x => x.IsPercussionInstrument).PitchInstrumentCode).IsEqualTo(40);
+        }
+    }
+
+    [Test]
     public async Task AGenresChances_AreNeverAt0_AndAlwaysAt1()
     {
         var genre = Of((GenreChoices.Parts, [("pad", 0), ("counterMelody", 1)]), (GenreChoices.FeelChances, [("swing", 1)]));

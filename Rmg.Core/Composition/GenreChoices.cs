@@ -73,6 +73,16 @@ public static class GenreChoices
         x => Pool($"instrument.{Name(x.Role.ToString())}", x.Label, Sound, x.Pool.Instruments.Select(i => (Name(i.Name), i.Name, i.Weight)))
     );
 
+    /// <summary>The drum kits' sounds, by their General MIDI programs, the standard one every song's with no genre.</summary>
+    public static ImmutableArray<(int Program, string Name)> Kits { get; } =
+        [(0, "standard"), (8, "room"), (16, "power"), (24, "electronic"), (25, "tr808"), (32, "jazz"), (40, "brush"), (48, "orchestra")];
+
+    /// <summary>A kit's name, by its program.</summary>
+    public static string KitNameOf(int program) => Kits.Single(x => x.Program == program).Name;
+
+    /// <summary>The drum kit's sound (<see cref="GeneralMidi.KitName" />).</summary>
+    public static GenreChoice Kit { get; } = Pool("kit", "Drum kit", Sound, Kits.Select(x => (x.Name, GeneralMidi.KitName(x.Program), x.Program == 0 ? 1.0 : 0)));
+
     /// <summary>The chances of the parts a song may leave out.</summary>
     public static GenreChoice Parts { get; } = AsTheyAre("parts", "Parts", PartsAndDrums, GenreChoiceKind.Chances,
     [
@@ -101,6 +111,7 @@ public static class GenreChoices
     [
         Tempo, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
+        Kit,
         Parts, DrumSetup, DrumPieces
     ];
 

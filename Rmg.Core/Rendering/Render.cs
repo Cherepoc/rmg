@@ -87,8 +87,8 @@ public static class Render
         var percussionEventTimeline = EventTimeline.Create(song.Duration, percussionTrackNotes.SelectMany(x => x));
         if (percussionEventTimeline.Count > 0)
         {
-            // the drums share their channel, where the soundfont places each drum as a kit stands
-            var percussionTrack = new RenderedTrack(true, TrackRole.Drum, 0, percussionEventTimeline, 0) { Controllers = [..percussionSends.Select(x => (0.0, x.Controller, x.Value))] };
+            // the drums share their channel, where the soundfont places each drum as a kit stands, in the kit's sound
+            var percussionTrack = new RenderedTrack(true, TrackRole.Drum, song.Draws?.Kit ?? 0, percussionEventTimeline, 0) { Controllers = [..percussionSends.Select(x => (0.0, x.Controller, x.Value))] };
             renderedTracks.Add(percussionTrack);
         }
 

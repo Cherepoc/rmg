@@ -40,9 +40,9 @@ public sealed record SongReport(
         // the key and the tempo the song starts in, before a key change or an ending's ritardando
         var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0);
         var channels = rendered.GetPartChannels();
-        // the song's own instrument and pan, whatever the mix plays, and the drums' kit, the standard one, in the middle
+        // the song's own instrument and pan, whatever the mix plays, and the drums' kit, in the middle
         var own = song.TrackDefinitions.Values.OfType<PitchInstrumentTrack>().ToDictionary(x => x.Role, x => (x.InstrumentCode, x.Pan));
-        own[TrackRole.Drum] = (0, 0);
+        own[TrackRole.Drum] = (draws.Kit, 0);
         var groups = SongMix.DrumGroupsOf(song).Order();
 
         return new SongReport(

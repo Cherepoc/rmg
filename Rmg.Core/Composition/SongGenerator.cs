@@ -477,7 +477,12 @@ public static class SongGenerator
             (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Expression), section), track))
         );
 
-        return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality, [..SongParts.All.Except(absent)], tracks.DrumSetup, [..tracks.SongDrums.Select(DrumPieces.NameOf)], scale, swing));
+        // the drum kit's sound, the standard kit's, or one of a genre's pool of them, from a stream of its own
+        var kit = genre.Pool<int>(GenreChoices.Kit, GenreChoices.KitNameOf) is { } kits
+            ? Stream(SongStream.Kit).Pick([..GenreChoices.Kits.Select(x => new Weighted<int>(kits(x.Program), x.Program)).Where(x => x.Weight > 0)])
+            : 0;
+
+        return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality, [..SongParts.All.Except(absent)], tracks.DrumSetup, [..tracks.SongDrums.Select(DrumPieces.NameOf)], scale, swing, kit));
     }
 
     /// <summary>The random sequence a stage of the song of the given seed draws from.</summary>
@@ -639,5 +644,6 @@ internal enum SongStream
     TwinTimbres = 58,
     SongEnds = 59,
     DrumCoverage = 60,
-    UnheardLandings = 61
+    UnheardLandings = 61,
+    Kit = 62
 }
