@@ -1,4 +1,4 @@
 # The songs' version: deploy.sh bumps the last number when the songs' fingerprint (Rmg --fingerprint) changes, and
 # commits it. Raise the first two by hand, the last back to 000, for a change worth naming.
-version 0.7.001
-fingerprint E039055312C9D728
+version 0.7.002
+fingerprint 3E92F706528C2EA0
