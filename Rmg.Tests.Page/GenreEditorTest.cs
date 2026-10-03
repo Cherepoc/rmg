@@ -154,13 +154,20 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
-    public async Task ASliderShowsItsStepFrom0To100_ItsMiddle50_AChanceInPercent_AndTheTemposEndsInBeatsAMinute()
+    public async Task AWeightShowsItsStepFrom0To100_AChanceItsLeanFromAsItIs_NeverToAlways_AndTheTemposEndsInBeatsAMinute()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
 
         var playing = await Checked(dialog, "Parts playing");
-        await Assert.That(await Row(playing, "melody").Locator("output").TextContentAsync()).IsEqualTo("50%");
+        var melody = Row(playing, "melody");
+        await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("as is");
+        await melody.Locator("input[type=range]").FillAsync("0");
+        await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("never");
+        await melody.Locator("input[type=range]").FillAsync("63");
+        await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("always");
+        await melody.Locator("input[type=range]").FillAsync("16");
+        await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("−50");
 
         var meter = await Section(dialog, "Meter");
         await Choose(meter, "meter").CheckAsync();
@@ -295,6 +302,27 @@ public sealed class GenreEditorTest(Site site)
         using var json = System.Text.Json.JsonDocument.Parse(await File.ReadAllTextAsync(await download.PathAsync()));
         await Assert.That(json.RootElement.GetProperty("name").GetString()).IsEqualTo("Waltzes");
         await Assert.That(json.RootElement.GetProperty("choices").TryGetProperty("meter", out _)).IsTrue();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task AGenreFile_IsImported_AndOneThatIsNotAGenre_IsAProblem()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var file = dialog.Locator("input[type=file]");
+
+        await file.SetInputFilesAsync(new FilePayload { Name = "waltzes.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "Waltzes", "choices": { "meter": { "3/4": 63 } } }""") });
+
+        await Assert.That(await dialog.Locator("input[aria-label='Genre name']").InputValueAsync()).IsEqualTo("Waltzes");
+        var meter = dialog.Locator("details[data-section='Meter']");
+        await Assert.That(await meter.GetAttributeAsync("open")).IsNotNull();
+        await Assert.That(await Row(meter, "3/4").Locator("input[type=checkbox]").IsCheckedAsync()).IsTrue();
+        await Assert.That(await Row(meter, "4/4").Locator("input[type=checkbox]").IsCheckedAsync()).IsFalse();
+
+        await file.SetInputFilesAsync(new FilePayload { Name = "other.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "Other", "choices": { "nothing": {} } }""") });
+        await Assert.That(await dialog.Locator("footer .warning").TextContentAsync()).IsEqualTo("That file is not a genre: a name and the choices the editor knows.");
+        await Assert.That(await dialog.Locator("input[aria-label='Genre name']").InputValueAsync()).IsEqualTo("Waltzes");
         await Assert.That(page.Errors).IsEmpty();
     }
 

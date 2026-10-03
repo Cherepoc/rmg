@@ -721,7 +721,7 @@ input[type="range"] {
     border-top: 1px solid var(--border);
 }
 
-/* exporting apart from what is done with the genre on the page */
+/* importing and exporting apart from what is done with the genre on the page */
 .genre-dialog footer .genre-export {
     margin-right: auto;
 }
@@ -863,9 +863,9 @@ input[type="range"] {
     white-space: nowrap;
 }
 
-/* the step from 0 to 100, as wide on every row, so that the sliders line up */
+/* the step or the lean, as wide on every row, so that the sliders line up */
 .genre-slider .value {
-    width: 4ch;
+    width: 6ch;
     font-size: 12px;
     text-align: right;
     font-variant-numeric: tabular-nums;
