@@ -746,14 +746,68 @@ input[type="range"] {
 
 /* a section that folds, its title its summary */
 .genre-section > summary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     padding: 4px 0;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
+    list-style: none;
+}
+
+.genre-section > summary::-webkit-details-marker {
+    display: none;
 }
 
 .genre-section[open] > summary {
     margin-bottom: 6px;
+}
+
+/* the folding mark, drawn so that it follows a choice's checkbox, and where a section has none as far in, so that the
+   marks line up */
+.genre-section > summary::before,
+.genre-section > summary .genre-choose > span::before {
+    content: "";
+    flex-shrink: 0;
+    border-left: 5px solid currentColor;
+    border-block: 4px solid transparent;
+    transition: transform 0.1s;
+}
+
+.genre-section[open] > summary::before,
+.genre-section[open] > summary .genre-choose > span::before {
+    transform: rotate(90deg);
+}
+
+.genre-section > summary::before {
+    margin-left: 19px;
+}
+
+.genre-section > summary:has(.genre-choose)::before {
+    display: none;
+}
+
+/* in a section's title the checkbox alone checks: the mark and the name fold the section, as a title does */
+.genre-section > summary .genre-choose {
+    pointer-events: none;
+}
+
+.genre-section > summary .genre-choose input {
+    pointer-events: auto;
+}
+
+.genre-section > summary .genre-choose > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .genre-section > summary::before,
+    .genre-section > summary .genre-choose > span::before {
+        transition: none;
+    }
 }
 
 .genre-body h4 {

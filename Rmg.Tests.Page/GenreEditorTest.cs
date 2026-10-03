@@ -102,7 +102,7 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
-    public async Task AChoicesCheckbox_IsItsSectionsTitle_AndCheckedOpensIt()
+    public async Task AChoicesCheckbox_ComesBeforeItsSectionsFoldingTitle_AndCheckedOpensIt()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
@@ -111,6 +111,18 @@ public sealed class GenreEditorTest(Site site)
 
         var title = meter.Locator("summary .genre-choose");
         await Assert.That(await title.TextContentAsync()).IsEqualTo("Meter");
+
+        // the name folds the section, as a title does, and checks nothing
+        await title.Locator("span").ClickAsync(new() { Force = true });
+        await Assert.That(await meter.GetAttributeAsync("open")).IsNotNull();
+        await Assert.That(await title.Locator("input").IsCheckedAsync()).IsFalse();
+        await title.Locator("span").ClickAsync(new() { Force = true });
+        await Assert.That(await meter.GetAttributeAsync("open")).IsNull();
+
+        // the checkbox, before the folding mark, checks it and opens the section
+        var box = await title.Locator("input").BoundingBoxAsync();
+        var name = await title.Locator("span").BoundingBoxAsync();
+        await Assert.That(box!.X).IsLessThan(name!.X);
         await title.Locator("input").CheckAsync();
         await Assert.That(await meter.GetAttributeAsync("open")).IsNotNull();
         await Assert.That(await Row(meter, "4/4").Locator("input[type=checkbox]").IsCheckedAsync()).IsTrue();
