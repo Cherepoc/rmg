@@ -106,32 +106,43 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         return element;
     }
 
-    function heading(text) {
+    function heading(title) {
         const element = document.createElement("h4");
-        element.textContent = text;
+        element.append(title);
         return element;
     }
 
-    /** A section that folds, open where the draft names one of its choices as the editor opens. */
+    /**
+     *     A section that folds, open where the draft names one of its choices as the editor opens; titled in words, or by
+     *     the checkbox of the one choice it holds, which opens it once checked.
+     */
     function section(title, names, ...content) {
         const element = document.createElement("details");
         element.className = "genre-section";
-        element.dataset.section = title;
         const summary = document.createElement("summary");
-        summary.textContent = title;
+        summary.append(title);
+        element.dataset.section = summary.textContent;
+        title.querySelector?.("input").addEventListener("change", (event) => {
+            if (event.target.checked) element.open = true;
+        });
         element.append(summary, ...content);
         sections.push({ element, names });
         return element;
     }
 
+    /** A section of one choice, titled by its field's checkbox. */
+    function choiceSection(made, choiceName) {
+        return section(made.head, [choiceName], single(made, choiceName));
+    }
+
     // --- the fields, each bound to a choice and shown again as the draft changes -----------------------------------------
 
     /**
-     *     A pool's checkbox: unchecked, the genre leaves the choice as the songs have it and its options are hidden;
-     *     checked, it names it, as it did before it was unchecked, or from the options given.
+     *     A choice's checkbox, its title: unchecked, the genre leaves the choice as the songs have it and its fields are
+     *     hidden; checked, it names it, as it did before it was unchecked, or from the amounts given.
      */
-    function chosen(text, content, start) {
-        const check = checkbox(text);
+    function chosen(title, content, start) {
+        const check = checkbox(title);
         check.element.classList.add("genre-choose");
         let choice = null;
         check.input.addEventListener("change", () => {
@@ -146,6 +157,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
             element: check.element,
             bind(bound) {
                 choice = bound;
+                check.element.dataset.choice = choice.name;
                 check.input.checked = choice.name in draft.choices;
                 content.hidden = !check.input.checked;
             },
@@ -156,17 +168,18 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
     const asTheSongsHaveThem = (options) => Object.fromEntries(options.filter((x) => x.default > 0).map((x) => [x.name, x.default]));
 
     /**
-     *     A short pool: its checkbox, then every option it may keep, a checkbox and a slider of its weight; those it may
-     *     keep, all of them, or as the draft allows them, such as the drums of the pieces chosen.
+     *     A short pool: its checkbox, its title, then every option it may keep, a checkbox and a slider of its weight;
+     *     those it may keep, all of them, or as the draft allows them, such as the drums of the pieces chosen.
      */
-    function checklistField(allowed = () => true) {
+    function checklistField(title, allowed = () => true) {
         const element = document.createElement("div");
         element.className = "genre-sliders";
         const rows = document.createElement("div");
         rows.className = "genre-sliders";
-        const choose = chosen("Choose", rows, (choice) => asTheSongsHaveThem(choice.options.filter(allowed)));
-        element.append(choose.element, rows);
+        const choose = chosen(title, rows, (choice) => asTheSongsHaveThem(choice.options.filter(allowed)));
+        element.append(rows);
         return {
+            head: choose.element,
             element,
             bind(choice) {
                 element.dataset.choice = choice.name;
@@ -197,8 +210,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         };
     }
 
-    /** The instruments: their checkbox, then rows, each a list of them and a slider of its weight, swapped, removed, or added. */
-    function rowsField() {
+    /** The instruments: their checkbox, their title, then rows, each a list of them and a slider of its weight, swapped, removed, or added. */
+    function rowsField(title) {
         const element = document.createElement("div");
         element.className = "genre-pool";
         const pool = document.createElement("div");
@@ -214,10 +227,11 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         }, "genre-add");
         pool.append(rows, add);
         // the commonest the songs have, as they have them
-        const choose = chosen("Choose instruments", pool, (bound) => asTheSongsHaveThem(bound.options.filter((x) => x.default >= ADDED_WEIGHT)));
-        element.append(choose.element, pool);
+        const choose = chosen(title, pool, (bound) => asTheSongsHaveThem(bound.options.filter((x) => x.default >= ADDED_WEIGHT)));
+        element.append(pool);
 
         return {
+            head: choose.element,
             element,
             bind(bound) {
                 choice = bound;
@@ -289,11 +303,12 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         };
     }
 
-    /** The tempo: named or the songs', and its range, from and to, shown in beats a minute. */
-    function rangeField() {
+    /** The tempo: its checkbox, its title, named or the songs', and its range, from and to, shown in beats a minute. */
+    function rangeField(title) {
         const element = document.createElement("div");
         element.className = "genre-range";
-        const named = checkbox("Keep to a range");
+        const range = document.createElement("div");
+        range.className = "genre-range";
         const shown = document.createElement("output");
         let choice = null;
         // the ends kept in order, the other moving with the one moved past it, the sliders kept as they are dragged
@@ -307,12 +322,9 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         const ends = document.createElement("div");
         ends.className = "genre-sliders";
         ends.append(from, to);
-        element.append(named.element, ends, shown);
-        named.input.addEventListener("change", () => {
-            if (named.input.checked) draft.choices[choice.name] = Object.fromEntries(choice.options.map((x) => [x.name, x.default]));
-            else delete draft.choices[choice.name];
-            changed();
-        });
+        range.append(ends, shown);
+        element.append(range);
+        const named = chosen(title, range, (bound) => Object.fromEntries(bound.options.map((x) => [x.name, x.default])));
 
         function showRange() {
             const range = draft.choices[choice.name] ?? { from: choice.options[0].default, to: choice.options[1].default };
@@ -322,19 +334,19 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         }
 
         return {
+            head: named.element,
             element,
             bind(bound) {
                 choice = bound;
-                named.input.checked = choice.name in draft.choices;
-                ends.hidden = !named.input.checked;
+                named.bind(choice);
                 showRange();
             },
         };
     }
 
-    /** A field shown under a heading, bound to the choice its part's name gives. */
+    /** A field shown under a heading, its checkbox where it has one, bound to the choice its part's name gives. */
     function bound(made, choiceOf) {
-        return { element: made.element, show: (part) => made.bind(choices.get(choiceOf(part))) };
+        return { head: made.head, element: made.element, show: (part) => made.bind(choices.get(choiceOf(part))) };
     }
 
     /** A field of one choice, shown as the draft changes. */
@@ -383,13 +395,14 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         return { element, show };
     }
 
-    /** A panel: fields under headings, each bound to its part's choice, shown for the part given. */
+    /** A panel: fields under headings, a pool's its checkbox, each bound to its part's choice, shown for the part given. */
     function panel(...parts) {
         const element = document.createElement("div");
         const fields = [];
         for (const part of parts) {
             if (typeof part === "string") element.append(heading(part));
             else {
+                if (part.head) element.append(heading(part.head));
                 element.append(part.element);
                 fields.push(part);
             }
@@ -431,21 +444,21 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
     // --- the body ----------------------------------------------------------------------------------------------------------
 
     const pitched = panel(
-        "Instruments", bound(rowsField(), (part) => `instrument.${part}`),
+        bound(rowsField("Instruments"), (part) => `instrument.${part}`),
         "Rhythm", bound(slidersField(), (part) => `rhythm.${part}`),
-        "Feel", bound(checklistField(), (part) => `feel.${part}`),
+        bound(checklistField("Feel"), (part) => `feel.${part}`),
     );
-    const solo = panel("Instruments", bound(rowsField(), () => "instrument.solo"));
+    const solo = panel(bound(rowsField("Instruments"), () => "instrument.solo"));
     const role = panel(
-        "Drums", bound(checklistField(isPieceAllowed), (x) => `drumRole.${x}`),
+        bound(checklistField("Drums", isPieceAllowed), (x) => `drumRole.${x}`),
         "Rhythm", bound(slidersField(), (x) => `rhythm.${x}`),
-        "Feel", bound(checklistField(), (x) => `feel.${x}`),
+        bound(checklistField("Feel"), (x) => `feel.${x}`),
     );
     const roles = tabs("Drums' roles", ROLES.map(([part, label]) => ({ label, part, names: [`drumRole.${part}`, `rhythm.${part}`, `feel.${part}`], panel: role })));
     const drums = panel(
-        "Kit", bound(checklistField(), () => "kit"),
-        "Pieces", bound(checklistField(), () => "drumPieces"),
-        "Setup", bound(checklistField(isSetupAllowed), () => "drumSetup"),
+        bound(checklistField("Kit"), () => "kit"),
+        bound(checklistField("Pieces"), () => "drumPieces"),
+        bound(checklistField("Setup", isSetupAllowed), () => "drumSetup"),
         { element: roles.element, show: () => roles.show() },
     );
     const parts = tabs("Parts", [
@@ -467,12 +480,12 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
     const body = document.createElement("div");
     body.className = "genre-body";
     body.append(
-        section("Tempo", ["tempo"], single(rangeField(), "tempo")),
-        section("Meter", ["meter"], single(checklistField(), "meter")),
-        section("Feel", ["feel"], single(checklistField(), "feel")),
+        choiceSection(rangeField("Tempo"), "tempo"),
+        choiceSection(checklistField("Meter"), "meter"),
+        choiceSection(checklistField("Feel"), "feel"),
         section("Swing and half time", ["feelChances", "feelValues"], single(slidersField(), "feelChances"), single(slidersField(), "feelValues")),
-        section("Scale", ["scale"], single(checklistField(), "scale")),
-        section("Chord shapes", ["chordShape"], single(checklistField(), "chordShape")),
+        choiceSection(checklistField("Scale"), "scale"),
+        choiceSection(checklistField("Chord shapes"), "chordShape"),
         section("Parts playing", ["parts"], single(slidersField(), "parts")),
         section("Parts", [...PITCHED.flatMap(([part]) => [`instrument.${part}`, `rhythm.${part}`, `feel.${part}`]), "kit", "drumPieces", "drumSetup",
             ...ROLES.flatMap(([role]) => [`drumRole.${role}`, `rhythm.${role}`, `feel.${role}`])], parts.element),

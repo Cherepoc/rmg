@@ -830,10 +830,11 @@ input[type="range"] {
     margin: 0;
 }
 
-/* a pool's own checkbox, over its options */
+/* a choice's own checkbox, the title of its section or its heading, and looking as they do */
 .genre-choose {
-    justify-self: start;
-    font-weight: 600;
+    display: inline-flex;
+    font: inherit;
+    color: inherit;
 }
 
 .genre-add,

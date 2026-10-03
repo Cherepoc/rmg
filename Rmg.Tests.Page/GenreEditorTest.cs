@@ -30,8 +30,8 @@ public sealed class GenreEditorTest(Site site)
 
     private static ILocator Row(ILocator within, string option) => within.Locator($".genre-row[data-option='{option}']:visible");
 
-    /// <summary>A pool's own checkbox, which names its choice.</summary>
-    private static ILocator Choose(ILocator within, string choice) => within.Locator($"[data-choice='{choice}'] > .genre-choose input");
+    /// <summary>A choice's own checkbox, its title, which names it.</summary>
+    private static ILocator Choose(ILocator within, string choice) => within.Locator($".genre-choose[data-choice='{choice}'] input");
 
     /// <summary>A pool's options' checkboxes, those checked unchecked.</summary>
     private static async Task UncheckAll(ILocator within, string choice)
@@ -98,6 +98,22 @@ public sealed class GenreEditorTest(Site site)
         await Choose(scale, "scale").CheckAsync();
         await Assert.That(await Row(scale, "major").Locator("input[type=checkbox]").IsCheckedAsync()).IsFalse();
         await Assert.That(await Row(scale, "naturalMinor").Locator("input[type=checkbox]").IsCheckedAsync()).IsTrue();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task AChoicesCheckbox_IsItsSectionsTitle_AndCheckedOpensIt()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var meter = dialog.Locator("details[data-section='Meter']");
+        await Assert.That(await meter.GetAttributeAsync("open")).IsNull();
+
+        var title = meter.Locator("summary .genre-choose");
+        await Assert.That(await title.TextContentAsync()).IsEqualTo("Meter");
+        await title.Locator("input").CheckAsync();
+        await Assert.That(await meter.GetAttributeAsync("open")).IsNotNull();
+        await Assert.That(await Row(meter, "4/4").Locator("input[type=checkbox]").IsCheckedAsync()).IsTrue();
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -189,7 +205,7 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
-    /// <summary>The editor's parts as they look, a preset's, its melody's tab and its drums', where RMG_SCREENSHOTS names a folder.</summary>
+    /// <summary>The editor as it looks, a preset's, its sections, its melody's tab and its drums', where RMG_SCREENSHOTS names a folder.</summary>
     [Test]
     [Explicit]
     public async Task Screenshots()
@@ -205,6 +221,7 @@ public sealed class GenreEditorTest(Site site)
         await page.Page.Locator("button.genre-edit").EvaluateAsync("b => b.click()");
         var dialog = page.Page.Locator("dialog.genre-dialog");
         await page.Until(() => dialog.IsVisibleAsync(), "the editor open");
+        await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-editor-sections.png") });
         var parts = await Section(dialog, "Parts");
         await parts.ScrollIntoViewIfNeededAsync();
         await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-editor-melody.png") });
