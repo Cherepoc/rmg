@@ -48,6 +48,23 @@ public sealed class GenreTest
     }
 
     [Test]
+    public async Task AGenreOf4By4And3By4_Plays4By4AtThePlainEnd_ItsWeightsInTheMiddle_And3By4AtTheWild()
+    {
+        // 4/4 the plain end's meter, 3/4 one the wild end allows and 4/4 not, each end keeping to what it allows of the pool
+        var genre = Of((GenreChoices.Meter, [("4/4", 1), ("3/4", 0.5)]));
+        var pool = genre.Pool<Meter>(GenreChoices.Meter, Meter.NameOf);
+        double ThreeFour(double conventionality)
+        {
+            var weights = ByConvention.Weigh(Meter.Options, conventionality, pool);
+            return weights.Where(x => x.Value == Meter.ThreeFour).Sum(x => x.Weight) / weights.Sum(x => x.Weight);
+        }
+
+        await Assert.That(ThreeFour(0)).IsEqualTo(0);
+        await Assert.That(ThreeFour(0.5)).IsEqualTo(0.5 / 1.5).Within(1e-9);
+        await Assert.That(ThreeFour(1)).IsEqualTo(1).Within(1e-9);
+    }
+
+    [Test]
     public async Task AChancesWeight_IsNeverAt0_AsItIsAtAHalf_AndAlwaysAt1()
     {
         var chance = new ByConvention(0, 0.2, 1);
