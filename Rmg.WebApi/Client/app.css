@@ -809,6 +809,14 @@ input[type="range"] {
     white-space: nowrap;
 }
 
+/* the step from 0 to 100, as wide on every row, so that the sliders line up */
+.genre-slider .value {
+    width: 4ch;
+    font-size: 12px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
 .genre-check {
     display: flex;
     align-items: center;

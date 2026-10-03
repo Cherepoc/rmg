@@ -67,8 +67,11 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         return { element, input };
     }
 
-    /** A slider of a step from its least to 63, its ends in words and no number. */
-    function slider(label, least, value, low, high, onInput) {
+    /**
+     *     A slider of a step from its least to 63, its ends in words, and its step shown from 0 to 100 in the unit given,
+     *     none where it shows elsewhere: step 32, a chance or a value as it is, at 50, a half of the steps either side.
+     */
+    function slider(label, least, value, low, high, onInput, unit = null) {
         const element = document.createElement("span");
         element.className = "genre-slider";
         const range = document.createElement("input");
@@ -78,7 +81,18 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         range.step = "1";
         range.value = String(value);
         range.setAttribute("aria-label", label);
-        range.addEventListener("input", () => onInput(Number(range.value)));
+        const shown = document.createElement("output");
+        shown.className = "value";
+        const show = () => {
+            if (unit === null) return;
+            const step = Number(range.value);
+            shown.textContent = `${Math.round(step <= 32 ? step * 50 / 32 : 50 + (step - 32) * 50 / 31)}${unit}`;
+            range.setAttribute("aria-valuetext", shown.textContent);
+        };
+        range.addEventListener("input", () => {
+            show();
+            onInput(Number(range.value));
+        });
         const [lowEnd, highEnd] = [low, high].map((text) => {
             const end = document.createElement("span");
             end.className = "end";
@@ -87,6 +101,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
             return end;
         });
         element.append(lowEnd, range, highEnd);
+        if (unit !== null) element.append(shown);
+        show();
         return element;
     }
 
@@ -171,7 +187,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                     const weight = slider(`${choice.label}: ${option.label}`, 1, kept ?? Math.max(1, option.default), "rarer", "commoner", (value) => {
                         options[option.name] = value;
                         showProblem();
-                    });
+                    }, "");
                     // an option left out its checkbox alone, its weight once it is in
                     weight.hidden = kept === undefined;
                     row.append(check.element, weight);
@@ -226,7 +242,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                     const weight = slider(`${choice.label}: ${option.label}`, 1, options[option.name], "rarer", "commoner", (value) => {
                         options[option.name] = value;
                         showProblem();
-                    });
+                    }, "");
                     row.append(select, weight, button("×", `Leave out ${option.label}`, () => {
                         delete options[option.name];
                         changed();
@@ -264,7 +280,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                     const range = slider(`${choice.label}: ${option.label}`, 0, value ?? option.default, low, high, (step) => {
                         draft.choices[choice.name][option.name] = step;
                         showProblem();
-                    });
+                    }, choice.kind === "chances" ? "%" : "");
                     range.hidden = value === undefined;
                     row.append(named.element, range);
                     return row;
@@ -281,7 +297,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         const shown = document.createElement("output");
         let choice = null;
         // the ends kept in order, the other moving with the one moved past it, the sliders kept as they are dragged
-        const [from, to] = ["from", "to"].map((end) => slider(`Tempo: ${end}`, 0, 0, "slower", "faster", (step) => {
+        const [from, to] = ["from", "to"].map((end) => slider(`Tempo: ${end}`, 0, 0, "60 bpm", "240 bpm", (step) => {
             const range = draft.choices[choice.name];
             range[end] = step;
             if (range.from > range.to) range[end === "from" ? "to" : "from"] = step;

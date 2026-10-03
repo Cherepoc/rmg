@@ -118,6 +118,32 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task ASliderShowsItsStepFrom0To100_ItsMiddle50_AChanceInPercent_AndTheTemposEndsInBeatsAMinute()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+
+        var playing = await Section(dialog, "Parts playing");
+        await Row(playing, "melody").Locator("input[type=checkbox]").CheckAsync();
+        await Assert.That(await Row(playing, "melody").Locator("output").TextContentAsync()).IsEqualTo("50%");
+
+        var meter = await Section(dialog, "Meter");
+        await Choose(meter, "meter").CheckAsync();
+        var fourFour = Row(meter, "4/4");
+        await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("100");
+        await fourFour.Locator("input[type=range]").FillAsync("32");
+        await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("50");
+        await fourFour.Locator("input[type=range]").FillAsync("1");
+        await Assert.That(await fourFour.Locator("input[type=range]").GetAttributeAsync("aria-valuetext")).IsEqualTo("2");
+
+        var tempo = await Section(dialog, "Tempo");
+        await tempo.Locator(".genre-check input").First.CheckAsync();
+        await Assert.That(await tempo.Locator(".genre-slider").First.Locator(".end").AllTextContentsAsync()).IsEquivalentTo(["60 bpm", "240 bpm"]);
+        await Assert.That(await tempo.Locator(".genre-slider output").CountAsync()).IsEqualTo(0);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task APartsTab_ItsInstrumentsSwappedInTheirLists_AndTheOtherPartsAsTheSongsHaveThem()
     {
         await using var page = await SongPage.Open(site, "?song=1");
