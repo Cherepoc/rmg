@@ -829,7 +829,7 @@ input[type="range"] {
     gap: 6px;
 }
 
-/* a row: an option's list or its checkbox, its slider between its ends, and its removal */
+/* a row: an option's list or its checkbox, its slider, and its removal */
 .genre-row {
     display: grid;
     grid-template-columns: minmax(8em, 16em) minmax(0, 1fr) auto;

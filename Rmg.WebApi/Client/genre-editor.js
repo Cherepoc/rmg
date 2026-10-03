@@ -5,10 +5,11 @@ import { MAX_GENRE_NAME_BYTES } from "./settings.js";
  *     (/api/genres/choices), in sections that fold. A pool is a checkbox, unchecked for the choice as the songs have it,
  *     and once checked its options: a short pool's every option, a checkbox and a slider of its weight, and the
  *     instruments rows, each a list of them and a slider, swapped in their lists, removed or added; a pool keeping none is
- *     a problem. A chance and a value are sliders between their ends; the tempo is a range of beats a minute. The parts
- *     playing come first, then a tab for every part: a pitched part's instruments, rhythm and feel, and the drums' kit,
- *     pieces and setup, and a tab for every role of them, its drums of the pieces chosen, its rhythm and its feel. The
- *     draft is played or saved as the page says (app.js), and read or written as JSON.
+ *     a problem. A chance and a value are sliders, the swing's and half time's under a checkbox of their own; the tempo is
+ *     a range of beats a minute, between its ends. The parts playing come first, then a tab for every part: a pitched
+ *     part's instruments, rhythm and feel, and the drums' kit, pieces and setup, and a tab for every role of them, its
+ *     drums of the pieces chosen, its rhythm and its feel. The draft is played or saved as the page says (app.js), and
+ *     read or written as JSON.
  */
 
 /** A pool's weight where an option is checked or added with none of its own, and where the instruments start from: half the heaviest's or more. */
@@ -68,10 +69,11 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
     }
 
     /**
-     *     A slider of a step from its least to 63, its ends in words, and its step shown from 0 to 100 in the unit given,
-     *     none where it shows elsewhere: step 32, a chance or a value as it is, at 50, a half of the steps either side.
+     *     A slider of a step from its least to 63, its ends in words where it has them, and its step shown from 0 to 100 in
+     *     the unit given, none where it shows elsewhere: step 32, a chance or a value as it is, at 50, a half of the steps
+     *     either side.
      */
-    function slider(label, least, value, low, high, onInput, unit = null) {
+    function slider(label, least, value, onInput, unit = null, ends = []) {
         const element = document.createElement("span");
         element.className = "genre-slider";
         const range = document.createElement("input");
@@ -93,14 +95,14 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
             show();
             onInput(Number(range.value));
         });
-        const [lowEnd, highEnd] = [low, high].map((text) => {
+        const [lowEnd, highEnd] = ends.map((text) => {
             const end = document.createElement("span");
             end.className = "end";
             end.setAttribute("aria-hidden", "true");
             end.textContent = text;
             return end;
         });
-        element.append(lowEnd, range, highEnd);
+        element.append(...(ends.length > 0 ? [lowEnd, range, highEnd] : [range]));
         if (unit !== null) element.append(shown);
         show();
         return element;
@@ -138,27 +140,29 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
     // --- the fields, each bound to a choice and shown again as the draft changes -----------------------------------------
 
     /**
-     *     A choice's checkbox, its title: unchecked, the genre leaves the choice as the songs have it and its fields are
-     *     hidden; checked, it names it, as it did before it was unchecked, or from the amounts given.
+     *     A choice's checkbox, its title, or several choices': unchecked, the genre leaves them as the songs have them and
+     *     their fields are hidden; checked, it names them, as it did before they were unchecked, or from the amounts given.
      */
     function chosen(title, content, start) {
         const check = checkbox(title);
         check.element.classList.add("genre-choose");
-        let choice = null;
+        let bound = [];
         check.input.addEventListener("change", () => {
-            if (check.input.checked) draft.choices[choice.name] = uncheckedPools.get(choice.name) ?? start(choice);
-            else {
-                uncheckedPools.set(choice.name, draft.choices[choice.name]);
-                delete draft.choices[choice.name];
+            for (const choice of bound) {
+                if (check.input.checked) draft.choices[choice.name] = uncheckedPools.get(choice.name) ?? start(choice);
+                else if (choice.name in draft.choices) {
+                    uncheckedPools.set(choice.name, draft.choices[choice.name]);
+                    delete draft.choices[choice.name];
+                }
             }
             changed();
         });
         return {
             element: check.element,
-            bind(bound) {
-                choice = bound;
-                check.element.dataset.choice = choice.name;
-                check.input.checked = choice.name in draft.choices;
+            bind(choiceOrChoices) {
+                bound = [choiceOrChoices].flat();
+                check.element.dataset.choice = bound.map((x) => x.name).join(" ");
+                check.input.checked = bound.some((x) => x.name in draft.choices);
                 content.hidden = !check.input.checked;
             },
         };
@@ -197,7 +201,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                         else delete options[option.name];
                         changed();
                     });
-                    const weight = slider(`${choice.label}: ${option.label}`, 1, kept ?? Math.max(1, option.default), "rarer", "commoner", (value) => {
+                    const weight = slider(`${choice.label}: ${option.label}`, 1, kept ?? Math.max(1, option.default), (value) => {
                         options[option.name] = value;
                         showProblem();
                     }, "");
@@ -253,7 +257,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                         options[select.value] = weight;
                         changed();
                     });
-                    const weight = slider(`${choice.label}: ${option.label}`, 1, options[option.name], "rarer", "commoner", (value) => {
+                    const weight = slider(`${choice.label}: ${option.label}`, 1, options[option.name], (value) => {
                         options[option.name] = value;
                         showProblem();
                     }, "");
@@ -268,15 +272,17 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         };
     }
 
-    /** Chances or values: each a checkbox, named or as it is, and a slider between its ends, its middle as it is. */
-    function slidersField() {
+    /**
+     *     Chances or values: each a checkbox, named or as it is, and a slider, its middle as it is; under a checkbox of its
+     *     own, the choice kept while it is checked though it names none.
+     */
+    function slidersField(isChosen = false) {
         const element = document.createElement("div");
         element.className = "genre-sliders";
         return {
             element,
             bind(choice) {
                 element.dataset.choice = choice.name;
-                const [low, high] = choice.kind === "chances" ? ["never", "always"] : ["less", "more"];
                 element.replaceChildren(...choice.options.map((option) => {
                     const row = document.createElement("div");
                     row.className = "genre-row";
@@ -288,10 +294,10 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                         const options = (draft.choices[choice.name] ??= {});
                         if (named.input.checked) options[option.name] = option.default;
                         else delete options[option.name];
-                        if (Object.keys(options).length === 0) delete draft.choices[choice.name];
+                        if (!isChosen && Object.keys(options).length === 0) delete draft.choices[choice.name];
                         changed();
                     });
-                    const range = slider(`${choice.label}: ${option.label}`, 0, value ?? option.default, low, high, (step) => {
+                    const range = slider(`${choice.label}: ${option.label}`, 0, value ?? option.default, (step) => {
                         draft.choices[choice.name][option.name] = step;
                         showProblem();
                     }, choice.kind === "chances" ? "%" : "");
@@ -303,6 +309,21 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         };
     }
 
+    /** Chances and values under one checkbox, a section's title: checked, every one of them named as the songs have it in the middle. */
+    function slidersSection(title, names) {
+        const fields = names.map(() => slidersField(true));
+        const content = document.createElement("div");
+        content.className = "genre-sliders";
+        content.append(...fields.map((x) => x.element));
+        const named = chosen(title, content, (choice) => Object.fromEntries(choice.options.map((x) => [x.name, x.default])));
+        shows.push(() => {
+            const bound = names.map((x) => choices.get(x));
+            named.bind(bound);
+            fields.forEach((field, i) => field.bind(bound[i]));
+        });
+        return section(named.element, names, content);
+    }
+
     /** The tempo: its checkbox, its title, named or the songs', and its range, from and to, shown in beats a minute. */
     function rangeField(title) {
         const element = document.createElement("div");
@@ -312,13 +333,13 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         const shown = document.createElement("output");
         let choice = null;
         // the ends kept in order, the other moving with the one moved past it, the sliders kept as they are dragged
-        const [from, to] = ["from", "to"].map((end) => slider(`Tempo: ${end}`, 0, 0, "60 bpm", "240 bpm", (step) => {
+        const [from, to] = ["from", "to"].map((end) => slider(`Tempo: ${end}`, 0, 0, (step) => {
             const range = draft.choices[choice.name];
             range[end] = step;
             if (range.from > range.to) range[end === "from" ? "to" : "from"] = step;
             showRange();
             showProblem();
-        }));
+        }, null, ["60 bpm", "240 bpm"]));
         const ends = document.createElement("div");
         ends.className = "genre-sliders";
         ends.append(from, to);
@@ -483,7 +504,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         choiceSection(rangeField("Tempo"), "tempo"),
         choiceSection(checklistField("Meter"), "meter"),
         choiceSection(checklistField("Feel"), "feel"),
-        section("Swing and half time", ["feelChances", "feelValues"], single(slidersField(), "feelChances"), single(slidersField(), "feelValues")),
+        slidersSection("Swing and half time", ["feelChances", "feelValues"]),
         choiceSection(checklistField("Scale"), "scale"),
         choiceSection(checklistField("Chord shapes"), "chordShape"),
         section("Parts playing", ["parts"], single(slidersField(), "parts")),
@@ -537,7 +558,9 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
 
     /** The draft as it is played or kept; none if it is not a genre. */
     function finished() {
-        const result = { name: draft.name.trim(), choices: structuredClone(draft.choices) };
+        // a choice of chances or values naming none is as the songs have it
+        const named = Object.entries(draft.choices).filter(([name, options]) => choices.get(name)?.kind === "pool" || Object.keys(options).length > 0);
+        const result = { name: draft.name.trim(), choices: structuredClone(Object.fromEntries(named)) };
         return problemOf(result) === null ? result : null;
     }
 

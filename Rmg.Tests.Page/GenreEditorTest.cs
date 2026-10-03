@@ -172,6 +172,34 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task SwingAndHalfTime_HaveACheckboxOfTheirOwn_NamingEveryOneAsTheSongsHaveIt_AndTheirSlidersNoEndWords()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var swing = dialog.Locator("details[data-section='Swing and half time']");
+        var title = swing.Locator("summary .genre-choose input");
+        await Assert.That(await title.IsCheckedAsync()).IsFalse();
+
+        await title.CheckAsync();
+        await Assert.That(await swing.GetAttributeAsync("open")).IsNotNull();
+        await Assert.That(await Row(swing, "halfTime").Locator("input[type=checkbox]").IsCheckedAsync()).IsTrue();
+        await Assert.That(await swing.Locator(".genre-slider .end").CountAsync()).IsEqualTo(0);
+        var genre = (await Played(page, dialog)).GetProperty("genre");
+        await Assert.That(genre.GetProperty("feelChances").TryGetProperty("swing", out _)).IsTrue();
+        await Assert.That(genre.GetProperty("feelValues").TryGetProperty("swing", out _)).IsTrue();
+
+        // every one left out, the section stays checked, and the genre is as the songs have it
+        await UncheckAll(swing, "feelChances");
+        await UncheckAll(swing, "feelValues");
+        await Assert.That(await title.IsCheckedAsync()).IsTrue();
+        await Assert.That((await Played(page, dialog)).TryGetProperty("genre", out var none) && none.TryGetProperty("feelChances", out _)).IsFalse();
+
+        await title.UncheckAsync();
+        await Assert.That(await Row(swing, "swing").CountAsync()).IsEqualTo(0);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task APartsTab_ItsInstrumentsSwappedInTheirLists_AndTheOtherPartsAsTheSongsHaveThem()
     {
         await using var page = await SongPage.Open(site, "?song=1");
