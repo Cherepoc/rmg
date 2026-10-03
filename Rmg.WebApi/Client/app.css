@@ -762,12 +762,6 @@ input[type="range"] {
     color: var(--muted);
 }
 
-.genre-note {
-    margin: 0;
-    font-size: 12px;
-    color: var(--muted);
-}
-
 /* the drums' roles, tabs inside the drums' tab */
 .tab-panel .genre-tabs {
     margin-top: 10px;
@@ -826,6 +820,12 @@ input[type="range"] {
 .genre-check input {
     accent-color: var(--accent);
     margin: 0;
+}
+
+/* a pool's own checkbox, over its options */
+.genre-choose {
+    justify-self: start;
+    font-weight: 600;
 }
 
 .genre-add,

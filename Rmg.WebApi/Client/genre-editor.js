@@ -2,12 +2,13 @@ import { MAX_GENRE_NAME_BYTES } from "./settings.js";
 
 /**
  *     The genre editor, a popup over the page: a draft genre, a name and what it says of the choices the songs draw
- *     (/api/genres/choices), in sections that fold. A short pool lists every option, a checkbox and a slider of its
- *     weight, none checked for the choice as the songs have it; the instruments are rows, each a list of them and a
- *     slider, swapped in their lists, removed or added; a chance and a value are sliders between their ends; the tempo is
- *     a range of beats a minute. The parts playing come first, then a tab for every part: a pitched part's instruments,
- *     rhythm and feel, and the drums' kit, pieces and setup, and a tab for every role of them, its drums of the pieces
- *     chosen, its rhythm and its feel. The draft is played or saved as the page says (app.js), and read or written as JSON.
+ *     (/api/genres/choices), in sections that fold. A pool is a checkbox, unchecked for the choice as the songs have it,
+ *     and once checked its options: a short pool's every option, a checkbox and a slider of its weight, and the
+ *     instruments rows, each a list of them and a slider, swapped in their lists, removed or added; a pool keeping none is
+ *     a problem. A chance and a value are sliders between their ends; the tempo is a range of beats a minute. The parts
+ *     playing come first, then a tab for every part: a pitched part's instruments, rhythm and feel, and the drums' kit,
+ *     pieces and setup, and a tab for every role of them, its drums of the pieces chosen, its rhythm and its feel. The
+ *     draft is played or saved as the page says (app.js), and read or written as JSON.
  */
 
 /** A pool's weight where an option is checked or added with none of its own, and where the instruments start from: half the heaviest's or more. */
@@ -19,6 +20,8 @@ const ROLES = [["ground", "Ground (kick)"], ["backbeat", "Backbeat (snare)"], ["
 export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) {
     let choices = new Map();
     let draft = { name: "", choices: {} };
+    // every pool's options as it was unchecked, for it to come back to, by its choice's name
+    let uncheckedPools = new Map();
 
     const dialog = document.createElement("dialog");
     dialog.className = "genre-dialog";
@@ -87,13 +90,6 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         return element;
     }
 
-    function note(text) {
-        const element = document.createElement("p");
-        element.className = "genre-note";
-        element.textContent = text;
-        return element;
-    }
-
     function heading(text) {
         const element = document.createElement("h4");
         element.textContent = text;
@@ -115,18 +111,52 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
     // --- the fields, each bound to a choice and shown again as the draft changes -----------------------------------------
 
     /**
-     *     A short pool: every option it may keep, a checkbox and a slider of its weight, none checked as the songs have
-     *     it; those it may keep, all of them, or as the draft allows them, such as the drums of the pieces chosen.
+     *     A pool's checkbox: unchecked, the genre leaves the choice as the songs have it and its options are hidden;
+     *     checked, it names it, as it did before it was unchecked, or from the options given.
+     */
+    function chosen(text, content, start) {
+        const check = checkbox(text);
+        check.element.classList.add("genre-choose");
+        let choice = null;
+        check.input.addEventListener("change", () => {
+            if (check.input.checked) draft.choices[choice.name] = uncheckedPools.get(choice.name) ?? start(choice);
+            else {
+                uncheckedPools.set(choice.name, draft.choices[choice.name]);
+                delete draft.choices[choice.name];
+            }
+            changed();
+        });
+        return {
+            element: check.element,
+            bind(bound) {
+                choice = bound;
+                check.input.checked = choice.name in draft.choices;
+                content.hidden = !check.input.checked;
+            },
+        };
+    }
+
+    /** A pool's options as the songs have them in the middle, those of a weight of a step or more, at their weights. */
+    const asTheSongsHaveThem = (options) => Object.fromEntries(options.filter((x) => x.default > 0).map((x) => [x.name, x.default]));
+
+    /**
+     *     A short pool: its checkbox, then every option it may keep, a checkbox and a slider of its weight; those it may
+     *     keep, all of them, or as the draft allows them, such as the drums of the pieces chosen.
      */
     function checklistField(allowed = () => true) {
         const element = document.createElement("div");
         element.className = "genre-sliders";
+        const rows = document.createElement("div");
+        rows.className = "genre-sliders";
+        const choose = chosen("Choose", rows, (choice) => asTheSongsHaveThem(choice.options.filter(allowed)));
+        element.append(choose.element, rows);
         return {
             element,
             bind(choice) {
                 element.dataset.choice = choice.name;
+                choose.bind(choice);
                 const options = draft.choices[choice.name];
-                element.replaceChildren(...choice.options.filter(allowed).map((option) => {
+                rows.replaceChildren(...choice.options.filter(allowed).map((option) => {
                     const row = document.createElement("div");
                     row.className = "genre-row";
                     row.dataset.option = option.name;
@@ -134,47 +164,49 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                     const check = checkbox(option.label);
                     check.input.checked = kept !== undefined;
                     check.input.addEventListener("change", () => {
-                        const pool = (draft.choices[choice.name] ??= {});
-                        if (check.input.checked) pool[option.name] = option.default > 0 ? option.default : ADDED_WEIGHT;
-                        else delete pool[option.name];
-                        if (Object.keys(pool).length === 0) delete draft.choices[choice.name];
+                        if (check.input.checked) options[option.name] = option.default > 0 ? option.default : ADDED_WEIGHT;
+                        else delete options[option.name];
                         changed();
                     });
                     const weight = slider(`${choice.label}: ${option.label}`, 1, kept ?? Math.max(1, option.default), "rarer", "commoner", (value) => {
-                        draft.choices[choice.name][option.name] = value;
+                        options[option.name] = value;
                         showProblem();
                     });
                     // an option left out its checkbox alone, its weight once it is in
                     weight.hidden = kept === undefined;
                     row.append(check.element, weight);
                     return row;
-                }), note("None checked: as the songs have it."));
+                }));
             },
         };
     }
 
-    /** The instruments: rows, each a list of them and a slider of its weight, swapped, removed, or added; none as the songs have them. */
+    /** The instruments: their checkbox, then rows, each a list of them and a slider of its weight, swapped, removed, or added. */
     function rowsField() {
         const element = document.createElement("div");
         element.className = "genre-pool";
+        const pool = document.createElement("div");
+        pool.className = "genre-pool";
         const rows = document.createElement("div");
         rows.className = "genre-rows";
         let choice = null;
         const add = button("Add", "Add the next instrument", () => {
-            const options = (draft.choices[choice.name] ??= {});
-            // the first the songs have, the commonest of them first
-            const unused = Object.keys(options).length === 0
-                ? choice.options.filter((x) => x.default >= ADDED_WEIGHT)
-                : [choice.options.find((x) => !(x.name in options))].filter((x) => x !== undefined);
-            for (const option of unused) options[option.name] = option.default > 0 ? option.default : ADDED_WEIGHT;
+            const options = draft.choices[choice.name];
+            const unused = choice.options.find((x) => !(x.name in options));
+            options[unused.name] = unused.default > 0 ? unused.default : ADDED_WEIGHT;
             changed();
         }, "genre-add");
-        element.append(rows, add, note("None: as the songs have them."));
+        pool.append(rows, add);
+        // the commonest the songs have, as they have them
+        const choose = chosen("Choose instruments", pool, (bound) => asTheSongsHaveThem(bound.options.filter((x) => x.default >= ADDED_WEIGHT)));
+        element.append(choose.element, pool);
 
         return {
             element,
             bind(bound) {
                 choice = bound;
+                element.dataset.choice = choice.name;
+                choose.bind(choice);
                 const options = draft.choices[choice.name] ?? {};
                 const kept = choice.options.filter((x) => x.name in options);
                 rows.replaceChildren(...kept.map((option) => {
@@ -197,12 +229,10 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                     });
                     row.append(select, weight, button("×", `Leave out ${option.label}`, () => {
                         delete options[option.name];
-                        if (Object.keys(options).length === 0) delete draft.choices[choice.name];
                         changed();
                     }, "genre-remove"));
                     return row;
                 }));
-                add.textContent = kept.length === 0 ? "Choose instruments" : "Add";
                 add.disabled = kept.length === choice.options.length;
             },
         };
@@ -371,13 +401,12 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
 
     const isPieceAllowed = (option) => piecesChosen()?.has(option.name) ?? true;
 
-    /** The setups and the roles' drums the pieces chosen no longer allow let go of, and a choice keeping nothing with them. */
+    /** The setups and the roles' drums the pieces chosen no longer allow let go of; a choice they leave with none a problem. */
     function prune() {
         const keep = (choiceName, allowed) => {
             const options = draft.choices[choiceName];
             if (!options) return;
             for (const option of Object.keys(options)) if (!allowed({ name: option })) delete options[option];
-            if (Object.keys(options).length === 0) delete draft.choices[choiceName];
         };
         keep("drumSetup", (x) => isSetupAllowed(x));
         for (const [role] of ROLES) keep(`drumRole.${role}`, isPieceAllowed);
@@ -453,6 +482,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
             const parsed = JSON.parse(json.value);
             if (typeof parsed?.name !== "string" || typeof parsed?.choices !== "object" || parsed.choices === null) throw new Error();
             draft = { name: parsed.name, choices: structuredClone(parsed.choices) };
+            uncheckedPools = new Map();
             changed();
         } catch {
             showProblem("That is not a genre: a name and its choices.");
@@ -482,8 +512,17 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         return problemOf(result) === null ? result : null;
     }
 
+    /** A pool as the problem names it: a part's by its part and what it chooses, such as "Melody's feel". */
+    function poolName(choiceName) {
+        const label = choices.get(choiceName).label;
+        const of = { instrument: "instruments", feel: "feel", drumRole: "drums" }[choiceName.split(".")[0]];
+        return choiceName.includes(".") ? `${label}'s ${of}` : label;
+    }
+
     function problemOf(genre) {
-        return new TextEncoder().encode(genre.name).length > MAX_GENRE_NAME_BYTES ? "The name is too long." : null;
+        if (new TextEncoder().encode(genre.name).length > MAX_GENRE_NAME_BYTES) return "The name is too long.";
+        const empty = Object.entries(genre.choices).find(([name, options]) => choices.get(name)?.kind === "pool" && Object.keys(options).length === 0);
+        return empty ? `${poolName(empty[0])} keeps none of its options.` : null;
     }
 
     function showProblem(text = problemOf(draft)) {
@@ -501,6 +540,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         open(genre, choiceList) {
             choices = new Map(choiceList.map((x) => [x.name, x]));
             draft = { name: genre.name, choices: structuredClone(genre.choices) };
+            uncheckedPools = new Map();
             for (const { element, names } of sections) element.open = names.some((x) => x in draft.choices);
             changed();
             dialog.showModal();

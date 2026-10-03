@@ -30,6 +30,17 @@ public sealed class GenreEditorTest(Site site)
 
     private static ILocator Row(ILocator within, string option) => within.Locator($".genre-row[data-option='{option}']:visible");
 
+    /// <summary>A pool's own checkbox, which names its choice.</summary>
+    private static ILocator Choose(ILocator within, string choice) => within.Locator($"[data-choice='{choice}'] > .genre-choose input");
+
+    /// <summary>A pool's options' checkboxes, those checked unchecked.</summary>
+    private static async Task UncheckAll(ILocator within, string choice)
+    {
+        var checkedOnes = within.Locator($"[data-choice='{choice}'] .genre-row input[type=checkbox]:checked");
+        while (await checkedOnes.CountAsync() > 0)
+            await checkedOnes.First.ClickAsync();
+    }
+
     private static async Task<System.Text.Json.JsonElement> Played(SongPage page, ILocator dialog)
     {
         var count = page.Requests.Count;
@@ -45,6 +56,8 @@ public sealed class GenreEditorTest(Site site)
         var dialog = await OpenEditor(page);
 
         var meter = await Section(dialog, "Meter");
+        await Choose(meter, "meter").CheckAsync();
+        await UncheckAll(meter, "meter");
         await Row(meter, "3/4").Locator("input[type=checkbox]").CheckAsync();
         await dialog.Locator("input[aria-label='Genre name']").FillAsync("Waltzes");
         var count = page.Requests.Count;
@@ -62,19 +75,45 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
-    public async Task NoneChecked_IsAsTheSongsHaveIt()
+    public async Task AChoiceUnchecked_IsAsTheSongsHaveIt_ItsOptionsHidden_AndCheckedAgainAsItWas()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
         var scale = await Section(dialog, "Scale");
-        var dorian = Row(scale, "dorian").Locator("input[type=checkbox]");
-        await dorian.CheckAsync();
-        await dorian.UncheckAsync();
-        await Section(dialog, "Meter").ContinueWith(async x => await Row(await x, "4/4").Locator("input[type=checkbox]").CheckAsync()).Unwrap();
+        await Assert.That(await Row(scale, "major").CountAsync()).IsEqualTo(0);
 
+        // checked, the scales the songs have, major among them, and one left out
+        await Choose(scale, "scale").CheckAsync();
+        await Assert.That(await Row(scale, "major").Locator("input[type=checkbox]").IsCheckedAsync()).IsTrue();
+        await Row(scale, "major").Locator("input[type=checkbox]").UncheckAsync();
         var genre = (await Played(page, dialog)).GetProperty("genre");
-        await Assert.That(genre.TryGetProperty("scale", out _)).IsFalse();
-        await Assert.That(genre.TryGetProperty("meter", out _)).IsTrue();
+        await Assert.That(genre.GetProperty("scale").TryGetProperty("major", out _)).IsFalse();
+        await Assert.That(genre.GetProperty("scale").EnumerateObject().Count()).IsGreaterThan(0);
+
+        await Choose(scale, "scale").UncheckAsync();
+        await Assert.That(await Row(scale, "naturalMinor").CountAsync()).IsEqualTo(0);
+        // a genre naming nothing asked for as none
+        await Assert.That((await Played(page, dialog)).TryGetProperty("genre", out var none) && none.TryGetProperty("scale", out _)).IsFalse();
+
+        await Choose(scale, "scale").CheckAsync();
+        await Assert.That(await Row(scale, "major").Locator("input[type=checkbox]").IsCheckedAsync()).IsFalse();
+        await Assert.That(await Row(scale, "naturalMinor").Locator("input[type=checkbox]").IsCheckedAsync()).IsTrue();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task APoolKeepingNone_IsAProblem_NotPlayed()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var meter = await Section(dialog, "Meter");
+        await Choose(meter, "meter").CheckAsync();
+        await UncheckAll(meter, "meter");
+
+        await Assert.That(await dialog.Locator("footer .warning").TextContentAsync()).IsEqualTo("Meter keeps none of its options.");
+        await Assert.That(await dialog.Locator("footer button", new() { HasTextString = "Play" }).IsDisabledAsync()).IsTrue();
+        await Row(meter, "4/4").Locator("input[type=checkbox]").CheckAsync();
+        await Assert.That(await dialog.Locator("footer .warning").IsHiddenAsync()).IsTrue();
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -86,7 +125,7 @@ public sealed class GenreEditorTest(Site site)
         var parts = await Section(dialog, "Parts");
 
         await parts.GetByRole(AriaRole.Tab, new() { Name = "Bass", Exact = true }).ClickAsync();
-        await parts.Locator("button.genre-add:visible").ClickAsync();
+        await Choose(parts, "instrument.bass").CheckAsync();
         var rows = await parts.Locator(".genre-rows .genre-row:visible").CountAsync();
         await Assert.That(rows).IsGreaterThan(0);
         await parts.Locator(".genre-rows .genre-row:visible select").First.SelectOptionAsync("tuba");
@@ -111,11 +150,15 @@ public sealed class GenreEditorTest(Site site)
 
         // congas and bongos alone, percussion: no kit to set up, and only they to take a role
         var pieces = parts.Locator(".genre-sliders[data-choice='drumPieces']");
+        await Choose(parts, "drumPieces").CheckAsync();
+        await UncheckAll(parts, "drumPieces");
         await Row(pieces, "conga").Locator("input[type=checkbox]").CheckAsync();
         await Row(pieces, "bongo").Locator("input[type=checkbox]").CheckAsync();
         var setup = parts.Locator(".genre-sliders[data-choice='drumSetup']");
+        await Choose(parts, "drumSetup").CheckAsync();
         await Assert.That(await setup.Locator(".genre-row").EvaluateAllAsync<string[]>("rows => rows.map(x => x.dataset.option)")).IsEquivalentTo(["percussion"]);
         var ground = parts.Locator(".genre-sliders[data-choice='drumRole.ground']");
+        await Choose(parts, "drumRole.ground").CheckAsync();
         await Assert.That(await ground.Locator(".genre-row").EvaluateAllAsync<string[]>("rows => rows.map(x => x.dataset.option)")).IsEquivalentTo(["bongo", "conga"]);
         await Assert.That(page.Errors).IsEmpty();
     }
