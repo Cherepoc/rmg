@@ -21,7 +21,11 @@ public sealed record ChordShape(
     double Weight,
     ImmutableArray<double> Targets,
     bool IsVoicingFixed = false
-);
+)
+{
+    /// <summary>How it sounds, in a sentence, which the page shows over its name.</summary>
+    public required string Description { get; init; }
+}
 
 internal static class ChordShapes
 {
@@ -36,49 +40,49 @@ internal static class ChordShapes
 
     public static ImmutableArray<ChordShape> All { get; } =
     [
-        new("Triad", 0, 1, [0, Third, 7]),
+        new("Triad", 0, 1, [0, Third, 7]) { Description = "Root, third and fifth: the plain chord." },
 
-        new("Power chord", 1, 0.8, [0, 7]),
-        new("Sus2", 1, 0.6, [0, 2, 7]),
-        new("Sus4", 1, 0.6, [0, 5, 7]),
-        new("Seventh", 1, 1, [0, Third, 7, Seventh]),
-        new("Add9", 1, 0.7, [0, Third, 7, 14]),
-        new("Sixth", 1, 0.5, [0, Third, 7, Sixth]),
+        new("Power chord", 1, 0.8, [0, 7]) { Description = "Root and fifth, no third: neither major nor minor, as rock plays it." },
+        new("Sus2", 1, 0.6, [0, 2, 7]) { Description = "The second for the third: open and unresolved." },
+        new("Sus4", 1, 0.6, [0, 5, 7]) { Description = "The fourth for the third: leaning to fall back to the third." },
+        new("Seventh", 1, 1, [0, Third, 7, Seventh]) { Description = "A triad with the seventh: fuller, and on the fifth the pull home." },
+        new("Add9", 1, 0.7, [0, Third, 7, 14]) { Description = "A triad with the ninth: bright and open, no seventh." },
+        new("Sixth", 1, 0.5, [0, Third, 7, Sixth]) { Description = "A triad with the sixth: sweet, as swing and old pop play it." },
 
-        new("Ninth", 2, 1, [0, Third, 7, Seventh, 14]),
-        new("Six-nine", 2, 0.6, [0, Third, 7, Sixth, 14]),
-        new("Seven-sus4", 2, 0.7, [0, 5, 7, Seventh]),
-        new("Shell", 2, 0.8, [0, Third, Seventh]),
-        new("Quartal triad", 2, 0.5, [0, 5, 10]),
-        // a triad with its second close under the third, as Steely Dan's
-        new("Mu", 2, 0.5, [0, 2, Third, 7]),
-        new("Add11", 2, 0.5, [0, Third, 7, 17]),
-        new("Nine-sus4", 2, 0.6, [0, 5, 7, Seventh, 14]),
+        new("Ninth", 2, 1, [0, Third, 7, Seventh, 14]) { Description = "A seventh chord with the ninth: smooth and jazzy." },
+        new("Six-nine", 2, 0.6, [0, Third, 7, Sixth, 14]) { Description = "A triad with the sixth and ninth: lush and settled, a jazz ending." },
+        new("Seven-sus4", 2, 0.7, [0, 5, 7, Seventh]) { Description = "A seventh with the fourth for the third: a soft dominant, as gospel and soul play it." },
+        new("Shell", 2, 0.8, [0, Third, Seventh]) { Description = "Root, third and seventh, no fifth: the lean voicing of jazz piano." },
+        new("Quartal triad", 2, 0.5, [0, 5, 10]) { Description = "Two fourths stacked: open and modern, no third." },
+        // a triad with its second close under the third, as jazz-tinged pop plays it
+        new("Mu", 2, 0.5, [0, 2, Third, 7]) { Description = "A triad with the second close under the third: a glassy colour." },
+        new("Add11", 2, 0.5, [0, Third, 7, 17]) { Description = "A triad with the eleventh: the fourth rubbing on the third." },
+        new("Nine-sus4", 2, 0.6, [0, 5, 7, Seventh, 14]) { Description = "A ninth with the fourth for the third: smooth and floating." },
 
-        new("Eleventh", 3, 0.8, [0, Third, 7, Seventh, 14, 17]),
-        new("Thirteenth", 3, 0.8, [0, Third, Seventh, 14, Thirteenth]),
-        new("Quartal stack", 3, 0.6, [0, 5, 10, 15, 20], true),
-        new("So What", 3, 0.5, [0, 5, 10, 15, 19], true),
-        new("Lydian", 3, 0.6, [0, 4, 7, 11, 18]),
+        new("Eleventh", 3, 0.8, [0, Third, 7, Seventh, 14, 17]) { Description = "Thirds stacked up to the eleventh: full and ambiguous." },
+        new("Thirteenth", 3, 0.8, [0, Third, Seventh, 14, Thirteenth]) { Description = "Third, seventh, ninth and thirteenth: the richest dominant." },
+        new("Quartal stack", 3, 0.6, [0, 5, 10, 15, 20], true) { Description = "Four fourths stacked: modal jazz, open and suspended." },
+        new("So What", 3, 0.5, [0, 5, 10, 15, 19], true) { Description = "Three fourths and a third on top: the voicing of modal jazz." },
+        new("Lydian", 3, 0.6, [0, 4, 7, 11, 18]) { Description = "A major seventh with the sharp eleventh: bright and floating." },
 
-        new("Augmented", 4, 0.8, [0, 4, 8]),
-        new("Diminished seventh", 4, 0.8, [0, 3, 6, 9]),
-        new("Seven-flat-nine", 4, 0.3, [0, 4, 10, 13]),
-        new("Seven-sharp-nine", 4, 0.3, [0, 4, 10, 15]),
-        new("Phrygian", 4, 0.6, [0, 1, 7]),
-        new("Small cluster", 4, 0.6, [0, 2, 3], true),
+        new("Augmented", 4, 0.8, [0, 4, 8]) { Description = "Two major thirds, the fifth raised: restless and dreamlike." },
+        new("Diminished seventh", 4, 0.8, [0, 3, 6, 9]) { Description = "Minor thirds stacked, the octave split evenly: tense, suspense." },
+        new("Seven-flat-nine", 4, 0.3, [0, 4, 10, 13]) { Description = "A dominant seventh with the flat ninth: dark, pulling hard home." },
+        new("Seven-sharp-nine", 4, 0.3, [0, 4, 10, 15]) { Description = "A dominant seventh with the sharp ninth: major and minor at once, gritty." },
+        new("Phrygian", 4, 0.6, [0, 1, 7]) { Description = "Root, flat second and fifth: dark and Spanish." },
+        new("Small cluster", 4, 0.6, [0, 2, 3], true) { Description = "Three notes a step or less apart: a soft rub." },
         // a minor triad with a major seventh, and a dominant with a sharp ninth and a flat thirteenth, each where the
         // scale has its notes, and the nearest of the scale's where it has not
-        new("Minor-major seventh", 4, 0.4, [0, 3, 7, 11]),
-        new("Altered dominant", 4, 0.3, [0, 4, 10, 15, 20]),
+        new("Minor-major seventh", 4, 0.4, [0, 3, 7, 11]) { Description = "A minor triad with a major seventh: suspense, film noir." },
+        new("Altered dominant", 4, 0.3, [0, 4, 10, 15, 20]) { Description = "A dominant with the sharp ninth and flat thirteenth: tense jazz." },
 
-        new("Dense cluster", 5, 0.8, [0, 1, 2, 3], true),
-        new("Viennese trichord", 5, 0.6, [0, 1, 6]),
-        new("Polychord", 5, 0.5, [0, 4, 7, 14, 18, 21], true),
-        new("Mystic chord", 5, 0.4, [0, 6, 10, 16, 21, 26], true),
-        new("Tritone stack", 5, 0.5, [0, 6, 11, 17]),
+        new("Dense cluster", 5, 0.8, [0, 1, 2, 3], true) { Description = "Four notes a half step apart: a smear of sound." },
+        new("Viennese trichord", 5, 0.6, [0, 1, 6]) { Description = "A half step and a tritone: atonal, of the twentieth century." },
+        new("Polychord", 5, 0.5, [0, 4, 7, 14, 18, 21], true) { Description = "A major triad with another a step above: two keys at once." },
+        new("Mystic chord", 5, 0.4, [0, 6, 10, 16, 21, 26], true) { Description = "Fourths stacked, some of them augmented: shimmering and mysterious." },
+        new("Tritone stack", 5, 0.5, [0, 6, 11, 17]) { Description = "Tritones and fourths: harsh and unsettled." },
         // the minor and the major third together, as the blues plays them
-        new("Split third", 5, 0.4, [0, 3, 4, 7], true)
+        new("Split third", 5, 0.4, [0, 3, 4, 7], true) { Description = "The minor and the major third together: the blues' clash." }
     ];
 
     private static readonly ImmutableArray<ImmutableArray<ChordShape>> ShapesByUnconventionality =

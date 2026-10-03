@@ -31,6 +31,9 @@ public sealed record GenreOption(string Name, string Label, double Default)
 {
     /// <summary>What the page needs to know of it besides, such as a drum piece's families, "kit" and "percussion".</summary>
     public ImmutableArray<string> Tags { get; init; } = [];
+
+    /// <summary>What the page shows over its name, such as how a scale sounds and its notes; none for most.</summary>
+    public string Description { get; init; } = "";
 }
 
 /// <summary>A choice a genre may speak of: one the songs draw already, with its options by stable names.</summary>

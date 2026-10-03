@@ -46,15 +46,17 @@ public static class GenreChoices
     public static GenreChoice FeelValues { get; } = AsTheyAre("feelValues", "Swing amount", GenreChoiceKind.Values, [("swing", "How much it swings")]);
 
     /// <summary>The scale the song starts in (<see cref="Scales" />).</summary>
-    public static GenreChoice Scale { get; } = Pool("scale", "Scale", Scales.All.Select(x => (Name(x.Name), x.Name, x.Weight.Tuned)));
+    public static GenreChoice Scale { get; } = Described(Pool("scale", "Scale", Scales.All.Select(x => (Name(x.Name), x.Name, x.Weight.Tuned))),
+        Scales.All.Select(x => $"{x.Description} {NotesOnC(x.Offsets.Select(o => (double)o))}"));
 
     /// <summary>
     ///     The chords' shapes (<see cref="ChordShapes" />), as likely as the songs have them in the middle, their levels'
     ///     weights times their shares of them.
     /// </summary>
-    public static GenreChoice ChordShape { get; } = Pool("chordShape", "Chord shapes",
+    public static GenreChoice ChordShape { get; } = Described(Pool("chordShape", "Chord shapes",
         ChordShapes.All.Select(x => (Name(x.Name), x.Name,
-            ChordShapes.Levels.Single(l => l.Level == x.Unconventionality).Weight.Tuned * x.Weight / ChordShapes.All.Where(y => y.Unconventionality == x.Unconventionality).Sum(y => y.Weight))));
+            ChordShapes.Levels.Single(l => l.Level == x.Unconventionality).Weight.Tuned * x.Weight / ChordShapes.All.Where(y => y.Unconventionality == x.Unconventionality).Sum(y => y.Weight)))),
+        ChordShapes.All.Select(x => $"{x.Description} {NotesOnC(x.Targets)}"));
 
     // the pitched parts' pools, in the order the page shows them
     private static readonly (TrackRole Role, string Label, InstrumentRole Pool)[] InstrumentPools =
@@ -179,6 +181,21 @@ public static class GenreChoices
         var all = options.ToArray();
         var heaviest = all.Max(x => x.Weight);
         return new GenreChoice(name, label, GenreChoiceKind.Pool, [..all.Select(x => new GenreOption(x.Name, x.Label, x.Weight / heaviest))]);
+    }
+
+    /// <summary>A choice with its options described, in their order.</summary>
+    private static GenreChoice Described(GenreChoice choice, IEnumerable<string> descriptions) =>
+        choice with { Options = [..choice.Options.Zip(descriptions, (option, description) => option with { Description = description })] };
+
+    /// <summary>
+    ///     Heights in semitones as notes on C, "On C: C E♭ G.", a height between two notes both, "E♭/E", as the scale
+    ///     chooses between them.
+    /// </summary>
+    public static string NotesOnC(IEnumerable<double> heights)
+    {
+        string[] names = ["C", "D♭", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A", "B♭", "B"];
+        string Note(double height) => names[(int)height % 12];
+        return $"On C: {string.Join(" ", heights.Select(x => x == Math.Floor(x) ? Note(x) : $"{Note(Math.Floor(x))}/{Note(Math.Ceiling(x))}"))}.";
     }
 
     /// <summary>A choice of chances or values, every one's default as it is.</summary>

@@ -9,6 +9,9 @@ namespace Rmg.Core.Composition;
 [DebuggerDisplay("Scale {Name}")]
 public sealed record Scale(string Name, ImmutableArray<int> Offsets, ByConvention Weight)
 {
+    /// <summary>How it sounds, in a sentence, which the page shows over its name.</summary>
+    public required string Description { get; init; }
+
     /// <summary>How bright the scale sounds: the sum of its offsets, lydian's the highest and phrygian's the lowest.</summary>
     public int Brightness => Offsets.Sum();
 
@@ -28,31 +31,31 @@ public static class Scales
     /// <summary>How many notes every scale has.</summary>
     public const int StepCount = 7;
 
-    public static Scale NaturalMinor { get; } = new("Natural minor", [0, 2, 3, 5, 7, 8, 10], new ByConvention(1, 0.5, 0));
+    public static Scale NaturalMinor { get; } = new("Natural minor", [0, 2, 3, 5, 7, 8, 10], new ByConvention(1, 0.5, 0)) { Description = "The plain minor: dark and sad." };
 
-    public static Scale Major { get; } = new("Major", [0, 2, 4, 5, 7, 9, 11], new ByConvention(1, 0.5, 0));
+    public static Scale Major { get; } = new("Major", [0, 2, 4, 5, 7, 9, 11], new ByConvention(1, 0.5, 0)) { Description = "The plain major: bright and settled." };
 
-    public static Scale Dorian { get; } = new("Dorian", [0, 2, 3, 5, 7, 9, 10], new ByConvention(0, 0.12, 0.3));
+    public static Scale Dorian { get; } = new("Dorian", [0, 2, 3, 5, 7, 9, 10], new ByConvention(0, 0.12, 0.3)) { Description = "Minor with a raised sixth: dark but hopeful, at home in funk, folk and jazz." };
 
-    public static Scale Mixolydian { get; } = new("Mixolydian", [0, 2, 4, 5, 7, 9, 10], new ByConvention(0, 0.12, 0.3));
+    public static Scale Mixolydian { get; } = new("Mixolydian", [0, 2, 4, 5, 7, 9, 10], new ByConvention(0, 0.12, 0.3)) { Description = "Major with a flat seventh: bright and bluesy, at home in rock and folk." };
 
-    public static Scale HarmonicMinor { get; } = new("Harmonic minor", [0, 2, 3, 5, 7, 8, 11], new ByConvention(0, 0.06, 1));
+    public static Scale HarmonicMinor { get; } = new("Harmonic minor", [0, 2, 3, 5, 7, 8, 11], new ByConvention(0, 0.06, 1)) { Description = "Minor with a raised seventh: a strong pull home, classical and exotic." };
 
-    public static Scale Phrygian { get; } = new("Phrygian", [0, 1, 3, 5, 7, 8, 10], new ByConvention(0, 0.05, 1));
+    public static Scale Phrygian { get; } = new("Phrygian", [0, 1, 3, 5, 7, 8, 10], new ByConvention(0, 0.05, 1)) { Description = "Minor with a flat second: dark, tense and Spanish." };
 
-    public static Scale Lydian { get; } = new("Lydian", [0, 2, 4, 6, 7, 9, 11], new ByConvention(0, 0.05, 1));
+    public static Scale Lydian { get; } = new("Lydian", [0, 2, 4, 6, 7, 9, 11], new ByConvention(0, 0.05, 1)) { Description = "Major with a raised fourth: bright, floating and dreamy." };
 
-    public static Scale MelodicMinor { get; } = new("Melodic minor", [0, 2, 3, 5, 7, 9, 11], new ByConvention(0, 0.015, 1));
+    public static Scale MelodicMinor { get; } = new("Melodic minor", [0, 2, 3, 5, 7, 9, 11], new ByConvention(0, 0.015, 1)) { Description = "Minor with a raised sixth and seventh: smooth, at home in jazz." };
 
-    public static Scale HarmonicMajor { get; } = new("Harmonic major", [0, 2, 4, 5, 7, 8, 11], new ByConvention(0, 0.015, 1));
+    public static Scale HarmonicMajor { get; } = new("Harmonic major", [0, 2, 4, 5, 7, 8, 11], new ByConvention(0, 0.015, 1)) { Description = "Major with a flat sixth: bright turning wistful." };
 
-    public static Scale Locrian { get; } = new("Locrian", [0, 1, 3, 5, 6, 8, 10], new ByConvention(0, 0.015, 1));
+    public static Scale Locrian { get; } = new("Locrian", [0, 1, 3, 5, 6, 8, 10], new ByConvention(0, 0.015, 1)) { Description = "Flat second and flat fifth: unstable, its home chord diminished." };
 
-    public static Scale PhrygianDominant { get; } = new("Phrygian dominant", [0, 1, 4, 5, 7, 8, 10], new ByConvention(0, 0.015, 1));
+    public static Scale PhrygianDominant { get; } = new("Phrygian dominant", [0, 1, 4, 5, 7, 8, 10], new ByConvention(0, 0.015, 1)) { Description = "Phrygian with a major third: flamenco and the Middle East." };
 
-    public static Scale HungarianMinor { get; } = new("Hungarian minor", [0, 2, 3, 6, 7, 8, 11], new ByConvention(0, 0.015, 1));
+    public static Scale HungarianMinor { get; } = new("Hungarian minor", [0, 2, 3, 6, 7, 8, 11], new ByConvention(0, 0.015, 1)) { Description = "Harmonic minor with a raised fourth: dramatic, two wide steps in it." };
 
-    public static Scale DoubleHarmonicMajor { get; } = new("Double harmonic major", [0, 1, 4, 5, 7, 8, 11], new ByConvention(0, 0.015, 1));
+    public static Scale DoubleHarmonicMajor { get; } = new("Double harmonic major", [0, 1, 4, 5, 7, 8, 11], new ByConvention(0, 0.015, 1)) { Description = "Flat second and flat sixth over a major third: strongly Middle Eastern." };
 
     /// <summary>
     ///     Most songs are in minor or major, some in Dorian or Mixolydian, close to them and common in rock, folk and

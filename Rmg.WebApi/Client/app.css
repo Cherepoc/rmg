@@ -721,6 +721,11 @@ input[type="range"] {
     border-top: 1px solid var(--border);
 }
 
+/* exporting apart from what is done with the genre on the page */
+.genre-dialog footer .genre-export {
+    margin-right: auto;
+}
+
 .genre-dialog footer .warning {
     flex: 1 1 100%;
     margin: 0;
@@ -764,9 +769,12 @@ input[type="range"] {
     margin-bottom: 6px;
 }
 
-/* the folding mark, drawn so that it follows a choice's checkbox, and where a section has none as far in, so that the
-   marks line up */
-.genre-section > summary::before,
+/* a section's fields a step in from its title, by as much as its name is from its checkbox */
+.genre-section > :not(summary) {
+    margin-left: 19px;
+}
+
+/* the folding mark, drawn so that it follows the section's checkbox */
 .genre-section > summary .genre-choose > span::before {
     content: "";
     flex-shrink: 0;
@@ -775,18 +783,10 @@ input[type="range"] {
     transition: transform 0.1s;
 }
 
-.genre-section[open] > summary::before,
 .genre-section[open] > summary .genre-choose > span::before {
     transform: rotate(90deg);
 }
 
-.genre-section > summary::before {
-    margin-left: 19px;
-}
-
-.genre-section > summary:has(.genre-choose)::before {
-    display: none;
-}
 
 /* in a section's title the checkbox alone checks: the mark and the name fold the section, as a title does */
 .genre-section > summary .genre-choose {
@@ -804,7 +804,6 @@ input[type="range"] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .genre-section > summary::before,
     .genre-section > summary .genre-choose > span::before {
         transition: none;
     }
@@ -821,6 +820,7 @@ input[type="range"] {
     margin-top: 10px;
 }
 
+.genre-group,
 .genre-pool,
 .genre-range,
 .genre-sliders,
@@ -928,12 +928,6 @@ input[type="range"] {
 .genre-range output {
     font-size: 13px;
     color: var(--muted);
-}
-
-.genre-json {
-    width: 100%;
-    font-family: ui-monospace, monospace;
-    font-size: 12px;
 }
 
 @media (max-width: 640px) {
