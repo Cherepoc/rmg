@@ -4,7 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
-      "tempo": { "from": 44, "to": 66 },
+      "tempo": { "from": [110, 110, 90], "to": [150, 150, 175] },
       "meter": { "4/4": [100, 100, 2], "6/8": [0, 6, 100] },
       "scale": { "naturalMinor": [100, 100, 0], "major": [45, 45, 54], "dorian": [0, 25, 31], "mixolydian": [0, 65, 81], "phrygian": [0, 10, 100] },
       "chordShape": { "triad": [100, 35, 100], "powerChord": [0, 100, 42], "sus2": [0, 25, 10], "sus4": [0, 30, 13], "seventh": [0, 12, 14], "add9": [0, 12, 8] },
@@ -28,7 +28,7 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
-      "tempo": { "from": 44, "to": 79 },
+      "tempo": { "from": [110, 110, 90], "to": [179, 179, 179] },
       "meter": { "4/4": [100, 100, 7], "3/4": [0, 12, 100] },
       "feelChances": { "swing": [0, 75, 34], "halfTime": 8, "doubleTime": 5 },
       "feelValues": { "swing": 69 },
@@ -53,7 +53,7 @@
     "name": "Electronic",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, bass and pads, a TR-808 or electronic kit, straight and fast, minor, sus and add9 chords.",
     "choices": {
-      "tempo": { "from": 48, "to": 56 },
+      "tempo": { "from": [117, 117, 90], "to": [130, 130, 175] },
       "meter": { "4/4": 100 },
       "feelChances": { "swing": [0, 5, 19], "halfTime": 8, "doubleTime": 5 },
       "scale": { "naturalMinor": [100, 100, 0], "major": [25, 25, 52], "dorian": [0, 45, 22], "phrygian": [0, 25, 100] },
@@ -81,7 +81,7 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano and pads, minor and Dorian.",
     "choices": {
-      "tempo": { "from": 20, "to": 36 },
+      "tempo": { "from": [79, 79, 79], "to": [99, 99, 175] },
       "meter": { "4/4": 100 },
       "feelChances": { "swing": [0, 75, 34], "halfTime": 8, "doubleTime": 5 },
       "feelValues": { "swing": 19 },
@@ -106,7 +106,7 @@
     "name": "Reggae",
     "description": "Slow, the one drop with the kick and snare on beat 3, the chords and a rhythm guitar skanking on the offbeats, a sparse repeating bass, organ, major and minor.",
     "choices": {
-      "tempo": { "from": 9, "to": 30 },
+      "tempo": { "from": [68, 68, 68], "to": [91, 91, 175] },
       "meter": { "4/4": 100 },
       "scale": { "naturalMinor": [80, 80, 12], "major": [100, 100, 0], "dorian": [0, 30, 100], "mixolydian": [0, 25, 83] },
       "chordShape": { "triad": 100, "sus4": [0, 12, 11], "seventh": [0, 30, 26] },
@@ -130,7 +130,7 @@
     "name": "Latin",
     "description": "The kit and percussion, congas, bongos, claves, cowbell, timbales and a guiro, a time keeper in the tresillo's 3+3+2, the bass anticipating the beat, nylon guitar, piano and trumpet, minor and Dorian, fast.",
     "choices": {
-      "tempo": { "from": 38, "to": 61 },
+      "tempo": { "from": [102, 102, 90], "to": [140, 140, 175] },
       "meter": { "4/4": [100, 100, 10], "6/8": [0, 15, 100] },
       "scale": { "naturalMinor": [100, 100, 12], "major": [45, 45, 66], "dorian": [0, 80, 25], "harmonicMinor": [0, 30, 62], "phrygianDominant": [0, 12, 100] },
       "chordShape": { "triad": [100, 80, 87], "seventh": [0, 100, 0], "sixth": [0, 25, 0], "ninth": [0, 40, 100] },
@@ -153,7 +153,7 @@
     "name": "Funk",
     "description": "The hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and a muted guitar comping in 16ths, brass, sevenths and ninths, Dorian and Mixolydian, everything repeating.",
     "choices": {
-      "tempo": { "from": 33, "to": 50 },
+      "tempo": { "from": [95, 95, 90], "to": [120, 120, 175] },
       "meter": { "4/4": 100 },
       "scale": { "naturalMinor": [100, 40, 100], "dorian": [0, 100, 48], "mixolydian": [0, 100, 48] },
       "chordShape": { "seventh": [100, 100, 93], "ninth": [100, 100, 10], "sixNine": [25, 25, 2], "sevenSus4": [40, 40, 4], "sevenSharpNine": [15, 15, 100] },
@@ -175,7 +175,7 @@
     "name": "Folk",
     "description": "Steel and nylon guitars strummed, a fiddle, a banjo, a harmonica, an acoustic bass, plain triads, major and Mixolydian, 3/4 and 6/8 as likely as not, a tambourine and a shaker on a room kit.",
     "choices": {
-      "tempo": { "from": 20, "to": 56 },
+      "tempo": { "from": [79, 79, 79], "to": [130, 130, 175] },
       "meter": { "4/4": 100, "3/4": [0, 65, 53], "6/8": [0, 65, 53] },
       "scale": { "naturalMinor": [45, 45, 47], "major": [100, 100, 1], "dorian": [0, 40, 62], "mixolydian": [0, 65, 100] },
       "chordShape": { "triad": 100, "sus2": [0, 40, 24], "sus4": [0, 40, 24], "add9": [0, 15, 11] },
@@ -197,7 +197,7 @@
     "name": "Blues",
     "description": "A shuffle, sevenths over Mixolydian, a harmonica, an overdriven guitar and an organ, slow to mid.",
     "choices": {
-      "tempo": { "from": 6, "to": 47 },
+      "tempo": { "from": [65, 65, 65], "to": [115, 115, 175] },
       "meter": { "4/4": [100, 100, 19], "6/8": [0, 25, 100] },
       "feelChances": { "swing": [0, 85, 30], "halfTime": 8, "doubleTime": 5 },
       "feelValues": { "swing": 89 },
@@ -219,7 +219,7 @@
     "name": "Ambient",
     "description": "Slow, pads, strings, a choir, a harp and a celesta, chords held long, sus and add9 chords, Lydian and major, the drums rare and sparse.",
     "choices": {
-      "tempo": { "from": 0, "to": 25 },
+      "tempo": { "from": [60, 60, 60], "to": [85, 85, 175] },
       "meter": { "4/4": [100, 100, 69], "3/4": [0, 30, 100], "6/8": [0, 25, 83] },
       "scale": { "naturalMinor": [56, 45, 40], "major": [100, 80, 20], "dorian": [0, 45, 6], "mixolydian": [0, 25, 5], "lydian": [0, 100, 100] },
       "chordShape": { "triad": [100, 45, 100], "sus2": [0, 100, 0], "sus4": [0, 65, 0], "add9": [0, 100, 0], "sixNine": [0, 45, 7], "quartalTriad": [0, 40, 6], "lydian": [0, 30, 42] },

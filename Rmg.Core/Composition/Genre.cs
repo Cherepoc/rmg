@@ -23,7 +23,10 @@ public enum GenreChoiceKind
     /// <summary>Values, each its own: from 0, its least, through 1/2, as it is, to 1, its most; one not named as it is.</summary>
     Values,
 
-    /// <summary>A range, its two options its ends, "from" and "to", each from 0 to 1, the first no greater; both named or neither.</summary>
+    /// <summary>
+    ///     A range, its options its ends, "from" and "to", each from 0 to 1, the first no greater, both named or neither, and
+    ///     its "lean" within them, from 0, to its first, through 1/2, its middle, to 1, to its last, the middle where not named.
+    /// </summary>
     Range
 }
 
@@ -118,12 +121,18 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
         return chances.TryGetValue(option, out var chance) ? chance : default(ByConvention);
     }
 
-    /// <summary>A range's ends in the middle, from 0 to 1, the first no greater; none where it is not named.</summary>
-    public (double From, double To)? Range(GenreChoice choice)
+    /// <summary>
+    ///     A range at a conventionality: its ends, from 0 to 1, the first no greater, and how it leans within them, from -1,
+    ///     to its first, through 0, its middle, to 1, to its last, each eased between its own ends; none where it is not named.
+    /// </summary>
+    public (double From, double To, double Lean)? Range(GenreChoice choice, double conventionality)
     {
         if (choice.Kind != GenreChoiceKind.Range)
             throw new ArgumentException($"The choice {choice.Name} is not a range.", nameof(choice));
-        return Choices.TryGetValue(choice.Name, out var ends) ? (ends["from"].Tuned, ends["to"].Tuned) : null;
+        if (!Choices.TryGetValue(choice.Name, out var range))
+            return null;
+        var lean = range.TryGetValue("lean", out var leaning) ? 2 * leaning.At(conventionality) - 1 : 0;
+        return (range["from"].At(conventionality), range["to"].At(conventionality), lean);
     }
 
     /// <summary>A value's shift, from -1, its least, through 0, as it is, to 1, its most.</summary>
@@ -176,9 +185,10 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
                 return null;
             }
 
-            if (choice.Kind == GenreChoiceKind.Range && !(options.TryGetValue("from", out var from) && options.TryGetValue("to", out var to) && from.Tuned <= to.Tuned))
+            if (choice.Kind == GenreChoiceKind.Range && !(options.TryGetValue("from", out var from) && options.TryGetValue("to", out var to)
+                                                          && from.Plain <= to.Plain && from.Tuned <= to.Tuned && from.Wild <= to.Wild))
             {
-                error = $"The range of {name} is from one end to the other, the first no greater.";
+                error = $"The range of {name} is from one end to the other, the first no greater at every end.";
                 return null;
             }
 

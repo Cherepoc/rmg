@@ -36,8 +36,9 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Length">How long the song is to play, by its step (<see cref="LengthScale" />), which its form comes as near as it can.</param>
 /// <param name="Genre">
 ///     The genre the song's draws keep to: every choice it names (<c>/api/genres/choices</c>), and its options' amounts in
-///     whole percents, from 0 to 100, each one number, alike at every end, or three, at the plain end, in the middle and at
-///     the wild: a pool's weights, a chance's chances, a value's 50 as it is, and a range's ends.
+///     whole numbers (<see cref="Genres.GenreAmounts" />), each one, alike at every end, or three, at the plain end, in the
+///     middle and at the wild: a pool's weights, a chance's chances and a value's in percents, a value's 50 as it is, and
+///     the tempo's ends in beats a minute and its lean.
 /// </param>
 public sealed record GenerateSongRequest(
     string? Seed = null,
@@ -138,17 +139,21 @@ public sealed record GenerateSongRequest(
         if (Genre is not null)
         {
             var amounts = new Dictionary<string, IReadOnlyDictionary<string, ByConvention>>();
-            foreach (var (choice, options) in Genre)
+            foreach (var (name, options) in Genre)
             {
+                if (GenreChoices.All.FirstOrDefault(x => x.Name == name) is not { } choice)
+                    return Fail($"{name} is not a choice a genre may name (/api/genres/choices).", out error);
                 var read = new Dictionary<string, ByConvention>();
                 foreach (var (option, amount) in options)
                 {
-                    if (ReadAmounts(amount) is not { } ends)
-                        return Fail($"The genre's {choice} {option} is not a whole percent, from 0 to 100, or three of them.", out error);
-                    read[option] = ends;
+                    var (least, most) = Genres.GenreAmounts.RangeOf(choice, option);
+                    if (ReadAmounts(amount, least, most) is not { } ends)
+                        return Fail($"The genre's {name} {option} is not a whole number from {least} to {most}, or three of them.", out error);
+                    read[option] = new ByConvention(Genres.GenreAmounts.ToAmount(choice, option, ends.Plain), Genres.GenreAmounts.ToAmount(choice, option, ends.Middle),
+                        Genres.GenreAmounts.ToAmount(choice, option, ends.Wild));
                 }
 
-                amounts[choice] = read;
+                amounts[name] = read;
             }
 
             genre = Core.Composition.Genre.Read(amounts, out error);
@@ -173,16 +178,16 @@ public sealed record GenerateSongRequest(
         return true;
     }
 
-    /// <summary>An option's amounts from whole percents, one alike at every end or three, at the plain end, in the middle and at the wild; none for anything else.</summary>
-    private static ByConvention? ReadAmounts(JsonElement amount)
+    /// <summary>An option's whole numbers, one alike at every end or three, at the plain end, in the middle and at the wild, each from the least to the most; none for anything else.</summary>
+    private static (int Plain, int Middle, int Wild)? ReadAmounts(JsonElement amount, int least, int most)
     {
-        static double? Percent(JsonElement x) => x.ValueKind == JsonValueKind.Number && x.TryGetInt32(out var value) && value is >= 0 and <= 100 ? value / 100.0 : null;
-        if (Percent(amount) is { } alike)
-            return new ByConvention(alike, alike, alike);
+        int? Number(JsonElement x) => x.ValueKind == JsonValueKind.Number && x.TryGetInt32(out var value) && value >= least && value <= most ? value : null;
+        if (Number(amount) is { } alike)
+            return (alike, alike, alike);
         if (amount.ValueKind != JsonValueKind.Array || amount.GetArrayLength() != 3)
             return null;
-        var ends = amount.EnumerateArray().Select(Percent).ToArray();
-        return ends.All(x => x is not null) ? new ByConvention(ends[0]!.Value, ends[1]!.Value, ends[2]!.Value) : null;
+        var ends = amount.EnumerateArray().Select(Number).ToArray();
+        return ends.All(x => x is not null) ? (ends[0]!.Value, ends[1]!.Value, ends[2]!.Value) : null;
     }
 
     private static bool TryReadStep(int? step, string what, out string? error)

@@ -396,6 +396,24 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task TheTempo_IsAskedForInBeatsAMinute_AndItsLeanToo()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var tempo = await Section(dialog, "Tempo");
+        await Choose(tempo, "tempo").CheckAsync();
+        await tempo.Locator("input[aria-label='Tempo: lean']").FillAsync("60");
+
+        var asked = (await Played(page, dialog)).GetProperty("genre").GetProperty("tempo");
+        int Middle(System.Text.Json.JsonElement x) => x.ValueKind == System.Text.Json.JsonValueKind.Array ? x[1].GetInt32() : x.GetInt32();
+        // the songs' own, 90 to about 175, leaning as given
+        await Assert.That(Middle(asked.GetProperty("from"))).IsEqualTo(90);
+        await Assert.That(Middle(asked.GetProperty("to"))).IsBetween(170, 180);
+        await Assert.That(Middle(asked.GetProperty("lean"))).IsEqualTo(60);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task APartsTab_ItsInstrumentsSwappedInTheirLists_AndTheOtherPartsAsTheSongsHaveThem()
     {
         await using var page = await SongPage.Open(site, "?song=1");

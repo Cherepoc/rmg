@@ -147,14 +147,10 @@ public sealed class GenreTest
 
             await Assert.That(Meter.NameOf(song.Map.Meter)).IsEqualTo("3/4");
             await Assert.That(song.Song.Draws!.Scale.Name).IsIn(["Dorian", "Mixolydian"]);
-            // a tempo the songs never draw, below 90 beats a minute, a whole number of them, up to the middling songs, the
-            // wilder straying (ATempoRange_HoldsUpToTheMiddle_TheWildestStrayingToTheSongsOwn)
+            // a tempo the songs never draw, below 90 beats a minute, a whole number of them
             var bpm = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(Rmg.Core.Events.StateKinds.Tempo) * Meter.BaseTempo;
-            if (@base <= 0.5)
-            {
-                await Assert.That(bpm).IsBetween(70, 85);
-                await Assert.That(bpm).IsEqualTo(Math.Round(bpm)).Within(1e-9);
-            }
+            await Assert.That(bpm).IsBetween(70, 85);
+            await Assert.That(bpm).IsEqualTo(Math.Round(bpm)).Within(1e-9);
             var pitched = song.Song.TrackDefinitions.Values.OfType<PitchInstrumentTrack>().ToDictionary(x => x.Role, x => x.InstrumentCode);
             await Assert.That(pitched[TrackRole.Bass]).IsEqualTo(32);
             await Assert.That(pitched[TrackRole.Melody]).IsIn(melody);
@@ -280,19 +276,37 @@ public sealed class GenreTest
         await Assert.That(keepers).IsGreaterThan(0);
     }
 
+    // a tempo's amount of beats a minute
+    private static double TempoAmount(double bpm) => GenreChoices.AmountOfTempo(bpm / Meter.BaseTempo);
+
+    private static double Bpm(CorpusSong song) =>
+        song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(Rmg.Core.Events.StateKinds.Tempo) * Meter.BaseTempo;
+
     [Test]
-    public async Task ATempoRange_HoldsUpToTheMiddle_TheWildestStrayingToTheSongsOwn()
+    public async Task ATempoRange_IsItsOwnAtEveryEnd()
     {
-        // a range below every tempo the songs draw, which the wildest songs give back
-        var genre = Of((GenreChoices.Tempo, [("from", GenreChoices.AmountOfTempo(70 / Meter.BaseTempo)), ("to", GenreChoices.AmountOfTempo(85 / Meter.BaseTempo))]));
-        double Bpm(int seed, double @base) => TestCorpus.Get(seed, new SongOverrides(Base: @base, Genre: genre))
-            .Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(Rmg.Core.Events.StateKinds.Tempo) * Meter.BaseTempo;
+        // 70 to 85 beats a minute up to the middle, 100 to 130 at the wild end
+        var genre = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty.Add(GenreChoices.Tempo.Name,
+            ImmutableDictionary<string, ByConvention>.Empty
+                .Add("from", new ByConvention(TempoAmount(70), TempoAmount(70), TempoAmount(100)))
+                .Add("to", new ByConvention(TempoAmount(85), TempoAmount(85), TempoAmount(130)))));
         foreach (var seed in Enumerable.Range(0, 16))
         {
-            await Assert.That(Bpm(seed, 0)).IsBetween(70, 85);
-            await Assert.That(Bpm(seed, 0.5)).IsBetween(70, 85);
-            await Assert.That(SongGenerator.TempoOptions.Select(x => x * Meter.BaseTempo)).Contains(x => Math.Abs(x - Bpm(seed, 1)) < 1e-6);
+            await Assert.That(Bpm(TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: genre)))).IsBetween(70, 85);
+            await Assert.That(Bpm(TestCorpus.Get(seed, new SongOverrides(Base: 0.5, Genre: genre)))).IsBetween(70, 85);
+            await Assert.That(Bpm(TestCorpus.Get(seed, new SongOverrides(Base: 1, Genre: genre)))).IsBetween(100, 130);
         }
+    }
+
+    [Test]
+    public async Task ATempoRange_LeansToItsFastEnd_OrItsSlow()
+    {
+        Genre Leaning(double lean) => new(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty.Add(GenreChoices.Tempo.Name,
+            ImmutableDictionary<string, ByConvention>.Empty.Add("from", Alike(TempoAmount(80))).Add("to", Alike(TempoAmount(160))).Add("lean", Alike(lean))));
+        double Average(Genre genre) => TestCorpus.InParallel(Enumerable.Range(0, 32), seed => Bpm(TestCorpus.Get(seed, new SongOverrides(Genre: genre)))).Average();
+
+        await Assert.That(Average(Leaning(1))).IsGreaterThan(Average(Leaning(0.5)) + 10);
+        await Assert.That(Average(Leaning(0))).IsLessThan(Average(Leaning(0.5)) - 10);
     }
 
     [Test]

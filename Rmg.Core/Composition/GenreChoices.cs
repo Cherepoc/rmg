@@ -24,12 +24,13 @@ public static class GenreChoices
 
     /// <summary>
     ///     The song's tempo, a range of them from 60 to 240 beats a minute, as wide as a tempo given may be, starting from the
-    ///     tempos the songs draw, from 90 to about 175.
+    ///     tempos the songs draw, from 90 to about 175, and how a song's leans within it, to the slow end or the fast.
     /// </summary>
     public static GenreChoice Tempo { get; } = new("tempo", "Tempo", GenreChoiceKind.Range,
     [
         new("from", "From", Even(AmountOfTempo(SongGenerator.TempoOptions[0]))),
-        new("to", "To", Even(AmountOfTempo(SongGenerator.TempoOptions[^1])))
+        new("to", "To", Even(AmountOfTempo(SongGenerator.TempoOptions[^1]))),
+        new("lean", "Lean", Even(0.5))
     ]);
 
     /// <summary>The meter the song's bars are in (<see cref="Composition.Meter.Options" />).</summary>

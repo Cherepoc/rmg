@@ -151,18 +151,25 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
      *     The amounts with the middle moved and the ends moved alike, by its ratio, so that a curve keeps its shape; the
      *     ends as they are where the middle comes to 0 or comes from it, so that an option of the wild end alone stays so.
      */
-    function withMiddle(amount, middle) {
+    function withMiddle(amount, middle, most = MOST) {
         const [plain, was, wild] = endsOf(amount);
         if (was === 0 || middle === 0) return written([plain, middle, wild]);
-        const moved = (x) => Math.min(MOST, Math.round((x * middle) / was));
+        const moved = (x) => Math.min(most, Math.round((x * middle) / was));
         return written([moved(plain), middle, moved(wild)]);
     }
 
-    /** An option's amounts as the songs have them (/api/genres/choices), in whole percents. */
-    const ownOf = (option) => written(option.own.map((x) => Math.round(MOST * x)));
+    /** The amounts with the middle moved and the ends moved by as much, as a lean's are, from -100 to 100. */
+    function shifted(amount, middle) {
+        const [plain, was, wild] = endsOf(amount);
+        const moved = (x) => Math.max(-MOST, Math.min(MOST, x + middle - was));
+        return written([moved(plain), middle, moved(wild)]);
+    }
+
+    /** An option's amounts as the songs have them (/api/genres/choices), in the whole numbers a genre gives. */
+    const ownOf = (option) => written(option.own.map((x) => Math.round(x)));
 
     /** An option's amounts with its slider moved: the curve it starts from where the slider comes to its default, as a double-click brings it, and otherwise the middle moved (withMiddle). */
-    const moved = (amount, middle, start) => (middle === middleOf(start) ? start : withMiddle(amount, middle));
+    const moved = (amount, middle, start, move = withMiddle) => (middle === middleOf(start) ? start : move(amount, middle));
 
     /** Whether the songs play an option at all, at one end or another. */
     const isPlayed = (option) => option.own.some((x) => x > 0);
@@ -205,9 +212,6 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
 
     /** A chance in a middling song, in percent. */
     const asChance = (middle) => `${middle}%`;
-
-    /** A tempo's amount, from 0, 60 beats a minute, through 50, 120, to 100, 240, as beats a minute. */
-    const tempoOf = (amount) => Math.round(60 * 4 ** (amount / MOST));
 
     function heading(title) {
         const element = document.createElement("h4");
@@ -459,7 +463,10 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     /** Chances or values, every one named as the songs have it in the middle. */
     const asTheyAre = (choice) => Object.fromEntries(choice.options.map((x) => [x.name, ownOf(x)]));
 
-    /** The tempo: its checkbox, its title, named or the songs', and its range, from and to, shown in beats a minute. */
+    /**
+     *     The tempo: its checkbox, its title, named or the songs', its range, from and to, in beats a minute, and its lean
+     *     within it, to the slow end or the fast; each slider its middle, its ends moving alike.
+     */
     function rangeField(title) {
         const element = document.createElement("div");
         element.className = "genre-range";
@@ -467,28 +474,37 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         range.className = "genre-range";
         const shown = document.createElement("output");
         let choice = null;
+        const option = (name) => choice.options.find((x) => x.name === name);
         // the ends kept in order, the other moving with the one moved past it, the sliders kept as they are dragged
-        const [from, to] = ["from", "to"].map((end) => slider(`Tempo: ${end}`, 0, MOST, 0, 0, (step) => {
+        const [from, to] = ["from", "to"].map((end) => slider(`Tempo: ${end}`, 60, 240, 60, 60, (bpm) => {
             const range = draft.choices[choice.name];
-            range[end] = step;
-            if (range.from > range.to) range[end === "from" ? "to" : "from"] = step;
+            const inBpm = (amount, middle) => withMiddle(amount, middle, 240);
+            range[end] = moved(range[end], bpm, ownOf(option(end)), inBpm);
+            const other = end === "from" ? "to" : "from";
+            if (middleOf(range.from) > middleOf(range.to)) range[other] = moved(range[other], bpm, ownOf(option(other)), inBpm);
             showRange();
             showProblem();
         }, null, null, ["60 bpm", "240 bpm"]));
+        const lean = slider("Tempo: lean", -100, 100, 0, 0, (value) => {
+            const range = draft.choices[choice.name];
+            range.lean = moved(range.lean ?? 0, value, ownOf(option("lean")), shifted);
+            showProblem();
+        }, null, null, ["Slower", "Faster"]);
         const ends = document.createElement("div");
         ends.className = "genre-sliders";
-        ends.append(from, to);
+        ends.append(from, to, lean);
         range.append(ends, shown);
         element.append(range);
         const named = chosen(title, range, asTheyAre);
 
         function showRange() {
             const range = draft.choices[choice.name] ?? asTheyAre(choice);
-            from.querySelector("input").value = String(middleOf(range.from));
-            to.querySelector("input").value = String(middleOf(range.to));
-            from.querySelector("input").dataset.default = String(middleOf(ownOf(choice.options[0])));
-            to.querySelector("input").dataset.default = String(middleOf(ownOf(choice.options[1])));
-            shown.textContent = `${tempoOf(range.from)}–${tempoOf(range.to)} bpm`;
+            for (const [end, element] of [["from", from], ["to", to], ["lean", lean]]) {
+                const input = element.querySelector("input");
+                input.value = String(middleOf(range[end] ?? 0));
+                input.dataset.default = String(middleOf(ownOf(option(end))));
+            }
+            shown.textContent = `${middleOf(range.from)}–${middleOf(range.to)} bpm in a middling song`;
             showMeanings();
         }
 
