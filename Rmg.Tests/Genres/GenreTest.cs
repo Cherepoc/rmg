@@ -170,10 +170,14 @@ public sealed class GenreTest
 
             await Assert.That(Meter.NameOf(song.Map.Meter)).IsEqualTo("3/4");
             await Assert.That(song.Song.Draws!.Scale.Name).IsIn(["Dorian", "Mixolydian"]);
-            // a tempo the songs never draw, below 90 beats a minute, a whole number of them
+            // a tempo the songs never draw, below 90 beats a minute, a whole number of them, up to the middling songs, the
+            // wilder straying (ATempoRange_HoldsUpToTheMiddle_TheWildestStrayingToTheSongsOwn)
             var bpm = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(Rmg.Core.Events.StateKinds.Tempo) * Meter.BaseTempo;
-            await Assert.That(bpm).IsBetween(70, 85);
-            await Assert.That(bpm).IsEqualTo(Math.Round(bpm)).Within(1e-9);
+            if (@base <= 0.5)
+            {
+                await Assert.That(bpm).IsBetween(70, 85);
+                await Assert.That(bpm).IsEqualTo(Math.Round(bpm)).Within(1e-9);
+            }
             var pitched = song.Song.TrackDefinitions.Values.OfType<PitchInstrumentTrack>().ToDictionary(x => x.Role, x => x.InstrumentCode);
             await Assert.That(pitched[TrackRole.Bass]).IsEqualTo(32);
             await Assert.That(pitched[TrackRole.Melody]).IsIn(melody);
@@ -297,6 +301,21 @@ public sealed class GenreTest
         }
 
         await Assert.That(keepers).IsGreaterThan(0);
+    }
+
+    [Test]
+    public async Task ATempoRange_HoldsUpToTheMiddle_TheWildestStrayingToTheSongsOwn()
+    {
+        // a range below every tempo the songs draw, which the wildest songs give back
+        var genre = Of((GenreChoices.Tempo, [("from", GenreChoices.AmountOfTempo(70 / Meter.BaseTempo)), ("to", GenreChoices.AmountOfTempo(85 / Meter.BaseTempo))]));
+        double Bpm(int seed, double @base) => TestCorpus.Get(seed, new SongOverrides(Base: @base, Genre: genre))
+            .Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(Rmg.Core.Events.StateKinds.Tempo) * Meter.BaseTempo;
+        foreach (var seed in Enumerable.Range(0, 16))
+        {
+            await Assert.That(Bpm(seed, 0)).IsBetween(70, 85);
+            await Assert.That(Bpm(seed, 0.5)).IsBetween(70, 85);
+            await Assert.That(SongGenerator.TempoOptions.Select(x => x * Meter.BaseTempo)).Contains(x => Math.Abs(x - Bpm(seed, 1)) < 1e-6);
+        }
     }
 
     [Test]

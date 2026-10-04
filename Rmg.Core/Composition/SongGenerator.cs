@@ -150,7 +150,7 @@ public static class SongGenerator
         var sectionEnergies = SectionEnergy.GenerateSections(dynamicsContext, sectionIds);
 
         // the song's key, which the sections place their melodies in
-        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), overrides, genre);
+        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), Stream(SongStream.TempoStray), songUnconventionality[Facet.Feel], overrides, genre);
         // how the song swings, which its tempo sets the notes of
         var grooveContext = Stream(SongStream.Groove);
         var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), songUnconventionality[Facet.Feel], meter, overrides.Swing, genre);
@@ -534,12 +534,15 @@ public static class SongGenerator
     ///     most often the song's.
     /// </summary>
     /// <summary>The song's key and tempo, drawn, and replaced where given, so that giving one leaves every other draw as it was.</summary>
-    private static StateMap CreateCommonStateMap(IGenerationContext context, SongOverrides overrides, Genre genre)
+    /// <param name="stray">The sequence a wilder song's tempo strays out of a genre's range by.</param>
+    /// <param name="feel">The feel facet of the song's unconventionality, by which it strays.</param>
+    private static StateMap CreateCommonStateMap(IGenerationContext context, IGenerationContext stray, double feel, SongOverrides overrides, Genre genre)
     {
         var drawn = new StateMapBuilder("Song")
             .Add(StateKinds.KeyOffset, Generators.Int(0, 12))
-            // the dyadic draw of the tempo, or, where a genre gives a range of it, a tempo in the range, leaning to its middle
-            .Add(StateKinds.Tempo, genre.Range(GenreChoices.Tempo) is { } range ? c => TempoIn(c, range) : TempoGenerator)
+            // the dyadic draw of the tempo, or, where a genre gives a range of it, a tempo in the range, leaning to its middle,
+            // and the wilder the song the likelier one the songs have out of it
+            .Add(StateKinds.Tempo, genre.Range(GenreChoices.Tempo) is { } range ? c => Stray(stray, TempoIn(c, range), range, feel) : TempoGenerator)
             .AddNoteDurationLayer()
             .ToStateMap(context);
         if (overrides.Key is { } key)
@@ -556,6 +559,22 @@ public static class SongGenerator
             .Distinct()
             .Order()
     ];
+
+    /// <summary>
+    ///     The chance a song's tempo is the songs' own where that is out of a genre's range, by the feel facet: none up to
+    ///     the middle, where the genre's range holds, and every time at the wild end, which so gives back the tempos the
+    ///     range takes from the songs, as every genre's choice does (<see cref="ByConvention.Weigh{T}(IEnumerable{ValueTuple{T, ByConvention}}, double, Func{T, double?})" />).
+    /// </summary>
+    public static ByConvention StrayChance { get; } = new(0, 0, 1);
+
+    /// <summary>A tempo in a genre's range, or, by <see cref="StrayChance" />, the songs' own where it is out of it; drawn whatever it turns out to be.</summary>
+    internal static double Stray(IGenerationContext context, double inRange, (double From, double To) range, double feel)
+    {
+        var own = TempoGenerator(context);
+        var strays = context.TestProbability(StrayChance.At(feel));
+        var amount = GenreChoices.AmountOfTempo(own);
+        return strays && (amount < range.From || amount > range.To) ? own : inRange;
+    }
 
     /// <summary>
     ///     A tempo in a range of amounts (<see cref="GenreChoices.TempoOf" />), leaning to its middle, as the mean of two
@@ -647,5 +666,6 @@ internal enum SongStream
     UnheardLandings = 61,
     Kit = 62,
     PartFeel = 63,
-    SoloistSolo = 64
+    SoloistSolo = 64,
+    TempoStray = 65
 }

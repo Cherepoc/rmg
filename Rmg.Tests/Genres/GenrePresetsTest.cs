@@ -76,8 +76,13 @@ public sealed class GenrePresetsReportTest
             {
                 var songs = TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Base: @base, Genre: genre)));
                 var scale = songs.GroupBy(x => x.Song.Draws!.Scale.Name).MaxBy(x => x.Count())!;
+                // the songs out of the genre's range of tempos, which it holds up to the middle
+                var outOfRange = genre.Range(GenreChoices.Tempo) is { } range
+                    ? songs.Count(x => GenreChoices.AmountOfTempo(x.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(0).GetStateValue(Rmg.Core.Events.StateKinds.Tempo)) is var amount
+                                        && (amount < range.From - 1e-3 || amount > range.To + 1e-3))
+                    : 0;
                 return $"{@base:0.0}: parts {songs.Average(x => x.Song.Draws!.Parts.Count):0.0}, 4/4 {100.0 * songs.Count(x => Meter.NameOf(x.Map.Meter) == "4/4") / Count:0}%, "
-                       + $"swung {100.0 * songs.Count(x => x.Song.Draws!.Swing.Delay > 0) / Count:0}%, {scale.Key} {100.0 * scale.Count() / Count:0}%";
+                       + $"swung {100.0 * songs.Count(x => x.Song.Draws!.Swing.Delay > 0) / Count:0}%, {scale.Key} {100.0 * scale.Count() / Count:0}%, tempo out {100.0 * outOfRange / Count:0}%";
             });
             Console.WriteLine($"{name,-12} " + string.Join(" | ", cells));
         }
