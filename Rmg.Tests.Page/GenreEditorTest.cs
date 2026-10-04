@@ -453,7 +453,7 @@ public sealed class GenreEditorTest(Site site)
         amount.ValueKind == System.Text.Json.JsonValueKind.Array ? [..amount.EnumerateArray().Select(x => x.GetInt32())] : [amount.GetInt32(), amount.GetInt32(), amount.GetInt32()];
 
     [Test]
-    public async Task AnOptionFineTuned_ItsWildestSetByItsNumber_AndShapedExperimentalOnly_IsAskedForSo()
+    public async Task AnOptionFineTuned_ItsMostExperimentalSetByItsNumber_AndItsTabShowingItsNumbers_IsAskedForSo()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
@@ -464,10 +464,16 @@ public sealed class GenreEditorTest(Site site)
         // the songs' own lines drawn, a pool's chances beside
         await page.Until(async () => await tune.Locator(".tune-shares path").CountAsync() > 0, "the chances drawn");
         await tune.Locator(".tune-option[data-option='3/4']").ClickAsync();
-        await tune.Locator("input[aria-label='3/4, wildest']").FillAsync("80");
-        await tune.Locator("input[aria-label='3/4, wildest']").DispatchEventAsync("change");
+        await tune.Locator("input[aria-label='3/4, most experimental']").FillAsync("80");
+        await tune.Locator("input[aria-label='3/4, most experimental']").DispatchEventAsync("change");
         await tune.Locator(".tune-option[data-option='7/8']").ClickAsync();
-        await tune.GetByRole(AriaRole.Button, new() { Name = "Experimental only" }).ClickAsync();
+        foreach (var (end, value) in new[] { ("plainest", "0"), ("middling", "0"), ("most experimental", "30") })
+        {
+            await tune.Locator($"input[aria-label='7/8, {end}']").FillAsync(value);
+            await tune.Locator($"input[aria-label='7/8, {end}']").DispatchEventAsync("change");
+        }
+        // an option of the experimental songs alone its numbers, as every other's
+        await Assert.That(await tune.Locator(".tune-option[data-option='7/8'] .tune-values").TextContentAsync()).IsEqualTo("0 · 0 · 30");
         await tune.GetByRole(AriaRole.Button, new() { Name = "Done" }).ClickAsync();
 
         var asked = (await Played(page, dialog)).GetProperty("genre").GetProperty("meter");

@@ -247,7 +247,7 @@ public static class SongDescriptions
             .Sum(x => (x.end - x.start) * 60 / (tempo.GetEffectiveValueAt(x.start) * Meter.BaseTempo));
     }
 
-    private static string Word(double value) => value < 1 / 3.0 ? "plain" : value > 2 / 3.0 ? "wild" : "middling";
+    private static string Word(double value) => value < 1 / 3.0 ? "plain" : value > 2 / 3.0 ? "experimental" : "middling";
 
     private static string TimeSignature(Meter meter) => $"{meter.TimeSignature.Numerator}/{meter.TimeSignature.Denominator}";
 

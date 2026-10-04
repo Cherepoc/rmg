@@ -1668,7 +1668,7 @@ footer a:hover {
 }
 
 /* the genre editor's fine-tune window, over the editor: the options at the left, the chart of their amounts, its handles,
-   numbers and shapes, and a pool's chances beside; the whole screen on a phone, the options a strip above */
+   numbers, and a pool's chances beside; the whole screen on a phone, the options a strip above */
 .genre-tune {
     width: min(1040px, 100vw - 32px);
     max-height: min(92vh, 100dvh - 32px);
@@ -1847,23 +1847,6 @@ footer a:hover {
     background: var(--bg);
     color: var(--text);
     font: inherit;
-}
-
-.tune-shapes {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-}
-
-.tune-shapes button {
-    padding: 6px 10px;
-    font-size: 13px;
-}
-
-.tune-shapes button[aria-pressed="true"] {
-    border-color: var(--accent);
-    background: var(--accent);
-    color: var(--accent-text);
 }
 
 .tune-shares-row {

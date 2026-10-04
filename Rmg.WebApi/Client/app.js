@@ -1573,7 +1573,7 @@ elements.volume.addEventListener("input", async () => {
 /** What every value is called on the page, and what it moves, by its key: the unconventionality or a facet. */
 // every value's name and what it does, which is shown under the pointer rather than taking a line of its own
 const SETTING_NAMES = {
-    unconventionality: ["How experimental", "How far the whole song strays from convention. Every facet below is drawn around it, so that a song can be plain in one way and wild in another; a facet given is set outright."],
+    unconventionality: ["How experimental", "How far the whole song strays from convention. Every facet below is drawn around it, so that a song can be plain in one way and experimental in another; a facet given is set outright."],
     tempo: ["Tempo", "The song's tempo, in beats a minute: 60 at the left, 120 in the middle and 240 at the right. Its sections may change it, as its feel allows, and an ending may slow it."],
     key: ["Key", "The key the song starts in. Its key changes, as its scale allows, move on from it."],
     mode: ["Mode", "The scale the song starts in, on its key: major, minor, a mode or a stranger scale. Its sections may change it, as its scale allows."],

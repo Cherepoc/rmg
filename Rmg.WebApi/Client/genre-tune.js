@@ -3,7 +3,7 @@ import { endsOf, ownOf, written } from "./genres.js";
 /**
  *     The genre editor's fine-tune window, over the editor: one choice's options kept, each its amounts in the plainest
  *     songs, the middling and the wildest, drawn on a chart of them across how experimental a song is, the one chosen
- *     moved by its three handles, up and down or by the arrow keys, or by its numbers, or shaped at once; and, for a pool,
+ *     moved by its three handles, up and down or by the arrow keys, or by its numbers; and, for a pool,
  *     what the songs draw of each, the chance of a song drawing it, beside. Every line is the server's, as the songs
  *     draw it (/api/genres/preview), the handles' straight between them until it comes. Done gives the amounts back to
  *     the editor; closing lets them go.
@@ -27,7 +27,7 @@ const SVG = "http://www.w3.org/2000/svg";
 /** How long the window waits after a change before it asks for the lines again. */
 const PREVIEW_WAIT_MS = 150;
 
-const ENDS = ["Plainest", "Middling", "Wildest"];
+const ENDS = ["Plainest", "Middling", "Most experimental"];
 
 function svg(name, attributes = {}) {
     const element = document.createElementNS(SVG, name);
@@ -43,23 +43,6 @@ function html(name, attributes = {}, ...children) {
     }
     element.append(...children);
     return element;
-}
-
-/**
- *     The shapes an option's amounts take at once, from its amount in a middling song, or its greatest where that is 0:
- *     the plain end's alone, leaning plainer, alike everywhere, leaning wilder, and the wild end's alone, each leaning
- *     four times either way.
- */
-function shapesOf([plain, middle, wild], most) {
-    const base = middle || Math.max(plain, wild) || Math.round(most / 2);
-    const capped = (x) => Math.min(most, Math.round(x));
-    return [
-        ["Plain only", [base, base, 0]],
-        ["Plainer", [capped(base * 4), base, capped(base / 4)]],
-        ["Everywhere", [base, base, base]],
-        ["Wilder", [capped(base / 4), base, capped(base * 4)]],
-        ["Experimental only", [0, 0, Math.max(wild, base)]],
-    ];
 }
 
 export function createGenreTune() {
@@ -90,7 +73,6 @@ export function createGenreTune() {
         const label = html("label", {}, end, input);
         return { label, input };
     });
-    const shapes = html("div", { class: "tune-shapes", role: "group", "aria-label": "Shapes" });
     const sharesHeading = html("h3", { text: "The chance a song draws each" });
     const shares = svg("svg", { viewBox: `0 0 ${WIDTH} ${HEIGHT}`, preserveAspectRatio: "none", class: "tune-shares", role: "img" });
     const legend = html("div", { class: "tune-legend" });
@@ -100,7 +82,7 @@ export function createGenreTune() {
         heading,
         html("div", { class: "tune-chart-row" }, axis, chart),
         ends,
-        html("div", { class: "tune-fields" }, ...fields.map((x) => x.label), shapes),
+        html("div", { class: "tune-fields" }, ...fields.map((x) => x.label)),
         sharesBox,
     );
     const body = html("div", { class: "tune-body" }, list, main);
@@ -183,11 +165,10 @@ export function createGenreTune() {
         const option = optionOf(selected);
         const points = endsOf(amounts[selected]);
 
-        // the list and the shapes made once a window and changed in place, so that a click on one is never on one made
-        // again under it, as a number's change does as it is left
+        // the list made once a window and changed in place, so that a click on one is never on one made again under it,
+        // as a number's change does as it is left
         for (const row of list.children) {
-            const [plain, middle, wild] = endsOf(amounts[row.dataset.option]);
-            row.querySelector(".tune-values").textContent = middle === 0 && plain === 0 && wild > 0 ? `experimental songs only · ${wild}` : `${plain} · ${middle} · ${wild}`;
+            row.querySelector(".tune-values").textContent = endsOf(amounts[row.dataset.option]).join(" · ");
             if (row.dataset.option === selected) row.setAttribute("aria-current", "true");
             else row.removeAttribute("aria-current");
         }
@@ -202,9 +183,6 @@ export function createGenreTune() {
             input.value = String(points[end]);
             input.setAttribute("aria-label", `${option.label}, ${ENDS[end].toLowerCase()}`);
         });
-
-        shapes.hidden = choice.kind === "range";
-        shapesOf(points, most).forEach(([, shape], i) => shapes.children[i].setAttribute("aria-pressed", String(shape.every((x, end) => x === points[end]))));
 
         sharesBox.hidden = choice.kind !== "pool";
         renderCharts();
@@ -221,7 +199,7 @@ export function createGenreTune() {
             ...[0, HEIGHT / 2, HEIGHT].map((y) => svg("line", { x1: 0, y1: y, x2: WIDTH, y2: y, class: "tune-grid" })),
             ...[0, WIDTH / 2, WIDTH].map((x) => svg("line", { x1: x, y1: 0, x2: x, y2: HEIGHT, class: "tune-grid" })),
         );
-        chart.setAttribute("aria-label", `${choice.label}: every option's amounts from the plainest songs to the wildest`);
+        chart.setAttribute("aria-label", `${choice.label}: every option's amounts from the plainest songs to the most experimental`);
         for (const other of alongside()) {
             const curve = dragging === null && preview?.curves?.[other.name];
             const along = curve
@@ -302,20 +280,10 @@ export function createGenreTune() {
             legend.prepend(html("span", {}, swatch, x.label));
             below = above;
         });
-        const wildest = options.map((x) => `${x.label} ${Math.round(share[x.name][points - 1])}%`).join(", ");
+        const experimental = options.map((x) => `${x.label} ${Math.round(share[x.name][points - 1])}%`).join(", ");
         const middling = options.map((x) => `${x.label} ${Math.round(share[x.name][(points - 1) / 2])}%`).join(", ");
-        shares.setAttribute("aria-label", `The chance a song draws each: in a middling song ${middling}; in the wildest ${wildest}`);
+        shares.setAttribute("aria-label", `The chance a song draws each: in a middling song ${middling}; in the most experimental ${experimental}`);
     }
-
-    // the shapes' buttons, each shaping the option chosen as it is pressed
-    shapes.append(...shapesOf([0, 0, 0], 100).map(([name], i) => {
-        const button = html("button", { type: "button", text: name, "aria-pressed": "false" });
-        button.addEventListener("click", () => {
-            amounts[selected] = written(shapesOf(endsOf(amounts[selected]), rangeOf(choice, selected)[1])[i][1]);
-            changed();
-        });
-        return button;
-    }));
 
     return {
         element: dialog,

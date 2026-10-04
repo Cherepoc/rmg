@@ -35,7 +35,7 @@ public static class SongDescriptionText
             text.AppendLine($"- Drums: {drums.Setup}, {drums.Kit} kit: {string.Join(", ", drums.Pieces)}");
         if (song.Fastest is { } fastest)
             text.AppendLine($"- Fastest: {Run(fastest)}, first in {song.Sections[fastest.Section - 1].Name} ({fastest.Section})");
-        text.AppendLine($"- How experimental, 0 the plainest and 1 the wildest: {song.Unconventionality.Word} ({Number(song.Unconventionality.Value)}); " +
+        text.AppendLine($"- How experimental, 0 the plainest and 1 the most experimental: {song.Unconventionality.Word} ({Number(song.Unconventionality.Value)}); " +
                         string.Join(", ", song.Unconventionality.Facets.Select(x => $"{x.Facet.ToLowerInvariant()} {x.Word} ({Number(x.Value)})")));
 
         text.AppendLine();
