@@ -318,14 +318,15 @@ public sealed class GenreEditorTest(Site site)
 
         await file.SetInputFilesAsync(new FilePayload { Name = "waltzes.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "Waltzes", "choices": { "meter": { "3/4": 100 } } }""") });
 
-        await Assert.That(await dialog.Locator("input[aria-label='Genre name']").InputValueAsync()).IsEqualTo("Waltzes");
+        await page.Until(async () => await dialog.Locator("input[aria-label='Genre name']").InputValueAsync() == "Waltzes", "the file read");
         var meter = dialog.Locator("details[data-section='Meter']");
         await Assert.That(await meter.GetAttributeAsync("open")).IsNotNull();
         await Assert.That(await Row(meter, "3/4").Locator("input[type=checkbox]").IsCheckedAsync()).IsTrue();
         await Assert.That(await Row(meter, "4/4").Locator("input[type=checkbox]").IsCheckedAsync()).IsFalse();
 
         await file.SetInputFilesAsync(new FilePayload { Name = "other.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "Other", "choices": { "nothing": {} } }""") });
-        await Assert.That(await dialog.Locator("footer .warning").TextContentAsync()).IsEqualTo("That file is not a genre: a name and the choices the editor knows.");
+        // read as the file is, after the choosing
+        await page.Until(async () => await dialog.Locator("footer .warning").TextContentAsync() == "That file is not a genre: a name and the choices the editor knows.", "the file refused");
         await Assert.That(await dialog.Locator("input[aria-label='Genre name']").InputValueAsync()).IsEqualTo("Waltzes");
         await Assert.That(page.Errors).IsEmpty();
     }
