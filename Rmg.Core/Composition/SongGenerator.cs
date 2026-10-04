@@ -238,14 +238,22 @@ public static class SongGenerator
             absent
         );
         StateTrace.Record(TracePoints.LateEntries, SectionGenerator.SectionTrace, 0, 0, StateMap.Default, 0, string.Join(", ", lateEntries.Select(x => $"{x.Key} at {x.Value}")), lateEntries);
+        // every appearance's parts, a part held back yet soloing no sooner than it comes in
+        IReadOnlyCollection<TrackRole>[] partsAt = [..played.Select((_, index) => SongParts.All.Except(absent).Except(lateEntries.Where(x => index < x.Value).Select(x => x.Key)).ToArray())];
+        // a later appearance played as a solo now and then, each from a sequence of its own, by the section's facets, and
+        // one the soloist's where the song has it
+        var drawnSolos = Solos.WithSoloist(
+            Stream(SongStream.SoloistSolo),
+            [..played.Select((id, index) => Solos.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Solos), index)), index, structure.Roles[id], generateSection(id).Facets, partsAt[index]))],
+            [..played.Select(id => structure.Roles[id])],
+            [..played.Select(id => generateSection(id).Facets[Facet.Melody])],
+            [..SongParts.All.Except(absent)]
+        );
         for (var index = 0; index < played.Length; index++)
         {
             cancellation.ThrowIfCancellationRequested();
             var id = played[index];
-            // a later appearance played as a solo now and then, from a sequence of its own, by the section's facets
-            var solo = Solos.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Solos), index)), index, structure.Roles[id], generateSection(id).Facets,
-                // a part held back yet soloing no sooner than it comes in
-                SongParts.All.Except(absent).Except(lateEntries.Where(x => index < x.Value).Select(x => x.Key)).ToArray());
+            var solo = drawnSolos[index];
             var energyStep = SectionEnergy.AppearanceStep(Place(index), averagePlaces[id]);
             energies.Add(generateSection(id).Energy + energyStep);
             var section = generateSection(id).Appear(
@@ -638,5 +646,6 @@ internal enum SongStream
     DrumCoverage = 60,
     UnheardLandings = 61,
     Kit = 62,
-    PartFeel = 63
+    PartFeel = 63,
+    SoloistSolo = 64
 }

@@ -38,7 +38,7 @@ public sealed record SoloPlan(ImmutableArray<TrackRole> Soloists, SoloMode Mode,
 internal static class Solos
 {
     /// <summary>The chance a later appearance is a solo, by the form facet.</summary>
-    public static ByConvention Chance { get; } = new(0, 0.06, 0.5);
+    public static ByConvention Chance { get; } = new(0, 0.035, 0.5);
 
     /// <summary>
     ///     How a section's role leans it to a solo: a bridge the most, played as a solo in its place, a verse's changes
@@ -98,6 +98,30 @@ internal static class Solos
 
     /// <summary>How much louder a soloist plays than the loudest part under it, on the average of their velocities as rendered.</summary>
     public const double Margin = 0.06;
+
+    /// <summary>
+    ///     The song's solos, by its appearances' places, with one of the soloist's where the song has the soloist and the
+    ///     melody: a later appearance drawn by how its role leans to a solo, a bridge the likeliest, played by the soloist
+    ///     alone, on the melody's line or its own by the melody facet, in place of the solo it drew; as they are where the
+    ///     place drawn is a drum solo. Drawn from a sequence of its own, whatever it turns out to be, and by the song's parts
+    ///     alone, so that what enters late and the drums leave it as it is.
+    /// </summary>
+    /// <param name="solos">Every appearance's solo, none for no solo.</param>
+    /// <param name="roles">Every appearance's role in the song's form.</param>
+    /// <param name="melody">Every appearance's melody facet.</param>
+    /// <param name="parts">The parts the song has.</param>
+    public static ImmutableArray<SoloPlan?> WithSoloist(IGenerationContext context, IReadOnlyList<SoloPlan?> solos, IReadOnlyList<SectionRole> roles, IReadOnlyList<double> melody,
+        IReadOnlyCollection<TrackRole> parts)
+    {
+        var own = context.GenerateDouble();
+        var place = solos.Count > 1
+            ? context.Pick([..Enumerable.Range(1, solos.Count - 1).Select(i => new Weighted<int>(Math.Pow(RoleOdds, RoleLeans[roles[i]]), i))])
+            : 0;
+        if (place == 0 || !parts.Contains(TrackRole.Solo) || !parts.Contains(TrackRole.Melody) || solos[place]?.IsDrumSolo == true)
+            return [..solos];
+
+        return [..solos.Select((x, i) => i == place ? new SoloPlan([TrackRole.Solo], SoloMode.Trading, 0, own < OwnChance.At(melody[i])) : x)];
+    }
 
     /// <summary>An appearance's solo, drawn whatever it turns out to be, so that the draws stay as they are; none for no solo.</summary>
     /// <param name="index">The appearance's place among the song's sections; the first is never a solo.</param>

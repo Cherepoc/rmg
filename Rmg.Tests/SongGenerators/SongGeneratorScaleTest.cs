@@ -1,6 +1,7 @@
 using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
+using Rmg.Core.Songs;
 
 namespace Rmg.Tests.SongGenerators;
 
@@ -27,7 +28,8 @@ public sealed class SongGeneratorScaleTest
         foreach (var song in TestCorpus.Range(32))
         {
             var scales = SectionScales(song);
-            foreach (var span in song.Map.Sections)
+            // but where the chords solo, their notes a solo's line in a line scale of its own (LineScales)
+            foreach (var span in song.Map.Sections.Where(x => !(song.Solos.TryGetValue(song.Map.Sections.IndexOf(x), out var solo) && solo.Soloists.Contains(TrackRole.Chords))))
             foreach (var note in song.Song.Notes![SongTracks.ChordsTrack].Where(x => x.Position >= span.Start && x.Position < span.End))
             {
                 var state = note.Value.State;

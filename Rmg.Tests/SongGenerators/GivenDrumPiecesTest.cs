@@ -28,8 +28,11 @@ public sealed class GivenDrumPiecesTest
     private static double AfterEntries(CorpusSong song) => song.Map.Sections[1].Start;
 
     // the parts that join the drums' fills at the lines (LineFills) and the soloists, who trade with the drums, which
-    // follow the drums the song plays, as the others do not
+    // follow the drums the song plays, as the others do not; and any other part where it solos
     private static readonly TrackRole[] FollowTheDrums = [TrackRole.Bass, TrackRole.Melody, TrackRole.CounterMelody, TrackRole.Solo];
+
+    private static bool FollowsTheDrums(TrackRole role, params CorpusSong[] songs) =>
+        FollowTheDrums.Contains(role) || songs.Any(x => x.Solos.Values.Any(s => s.Soloists.Contains(role)));
 
     /// <summary>Whether two songs have the same intro, its parts entering in the same order, and sections, in the same places.</summary>
     private static bool SameForm(SongMap first, SongMap second) =>
@@ -101,7 +104,7 @@ public sealed class GivenDrumPiecesTest
             {
                 var from = Math.Max(AfterEntries(drawn), AfterEntries(given));
                 var (before, after) = (Notes(drawn, track, from), Notes(given, track, from));
-                if (!FollowTheDrums.Contains(definition.Role))
+                if (!FollowsTheDrums(definition.Role, drawn, given))
                     await Assert.That(after).IsEquivalentTo(before).Because($"seed {seed}, the {definition.Role}");
                 else
                     (notes, changed) = (notes + before.Length, changed + before.Except(after).Count());

@@ -42,8 +42,10 @@ public static class SongParts
         TrackRole.Rhythm => Even(0.4),
         // of the songs with a riff
         TrackRole.RiffTwin => TwinChance,
-        // the solo part plays only where a section's appearance is its solo
-        TrackRole.Melody or TrackRole.Chords or TrackRole.Bass or TrackRole.Solo => Even(1),
+        // the soloist, which plays only a solo of its own, as often as songs solo: none in the plainest, which never do,
+        // and most of the wildest, which solo throughout (Solos.WithSoloist)
+        TrackRole.Solo => new ByConvention(0, 0.2, 0.8),
+        TrackRole.Melody or TrackRole.Chords or TrackRole.Bass => Even(1),
         _ => throw new ArgumentOutOfRangeException(nameof(part), part, "Not a part of the band.")
     };
 
