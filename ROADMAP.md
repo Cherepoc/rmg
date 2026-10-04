@@ -273,13 +273,6 @@ a picker, an editor and a fine-tune window on the page (`genre-tune.js`), with a
 (`/api/genres/preview`); a genre kept on the server by an 11-character key of its canonical form (`GenreStore`), which
 a link carries. What is left:
 
-- **The editor through its dialog** (P1, under way, the mockups for review: the canvas's second row): every choice a
-  graph in its section, as the songs draw it (`/api/genres/previews`), a pool's shares and another kind's lines, grey
-  and "as the songs have it" where the genre leaves it, which opens the fine-tune window on it, the sliders gone; the
-  window picking the options the genre keeps, a multiselect with a search, each option's tab removable, the riff's
-  twin with the riff alone, the drum pieces by the setup's families, a pool's last option kept; "Leave it to the
-  songs" taking the choice out of the genre; a point moving alone; the window the whole screen on a phone. The steps
-  left: (3) the sections' graphs, (4) the multiselect and the removing, (5) the page tests on them.
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
   half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
   alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.

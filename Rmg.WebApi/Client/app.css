@@ -703,35 +703,35 @@ input[type="range"] {
     background: rgb(0 0 0 / 0.5);
 }
 
-.genre-dialog header,
-.genre-dialog footer {
+.genre-dialog > header,
+.genre-dialog > footer {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 12px 16px;
 }
 
-.genre-dialog header {
+.genre-dialog > header {
     border-bottom: 1px solid var(--border);
 }
 
-.genre-dialog footer {
+.genre-dialog > footer {
     flex-wrap: wrap;
     justify-content: flex-end;
     border-top: 1px solid var(--border);
 }
 
 /* importing and exporting apart from what is done with the genre on the page */
-.genre-dialog footer .genre-export {
+.genre-dialog > footer .genre-export {
     margin-right: auto;
 }
 
-.genre-dialog footer .warning {
+.genre-dialog > footer .warning {
     flex: 1 1 100%;
     margin: 0;
 }
 
-.genre-dialog header input {
+.genre-dialog > header input {
     flex: 1;
     min-width: 0;
     padding: 6px 10px;
@@ -769,13 +769,12 @@ input[type="range"] {
     margin-bottom: 6px;
 }
 
-/* a section's fields a step in from its title, by as much as its name is from its checkbox */
+/* a section's tiles a step in from its title, under its folding mark */
 .genre-section > :not(summary) {
     margin-left: 19px;
 }
 
-/* the folding mark, drawn so that it follows the section's checkbox */
-.genre-section > summary .genre-choose > span::before {
+.genre-section > summary::before {
     content: "";
     flex-shrink: 0;
     border-left: 5px solid currentColor;
@@ -783,36 +782,18 @@ input[type="range"] {
     transition: transform 0.1s;
 }
 
-.genre-section[open] > summary .genre-choose > span::before {
+.genre-section[open] > summary::before {
     transform: rotate(90deg);
 }
 
-
-/* in a section's title the checkbox alone checks: the mark and the name fold the section, as a title does */
-.genre-section > summary .genre-choose {
-    pointer-events: none;
-}
-
-.genre-section > summary .genre-choose input {
-    pointer-events: auto;
-}
-
-.genre-section > summary .genre-choose > span {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
 @media (prefers-reduced-motion: reduce) {
-    .genre-section > summary .genre-choose > span::before {
+    .genre-section > summary::before {
         transition: none;
     }
 }
 
-.genre-body h4 {
-    margin: 10px 0 4px;
-    font-size: 13px;
-    color: var(--muted);
+.genre-section > .genre-tile + .genre-tile {
+    margin-top: 10px;
 }
 
 /* the drums' roles, tabs inside the drums' tab */
@@ -820,116 +801,116 @@ input[type="range"] {
     margin-top: 10px;
 }
 
-.genre-group,
-.genre-pool,
-.genre-range,
-.genre-sliders,
-.genre-rows {
+/* a choice's tile: its name, how many options the genre keeps and its override on one line, its graph, which opens the
+   window that changes it, and what each end of the songs draws; greyed where the genre leaves it as the songs have it */
+.genre-tiles {
     display: grid;
-    gap: 6px;
+    gap: 10px;
 }
 
-/* a row: an option's list or its checkbox, its slider, and its removal */
-.genre-row {
+.genre-tile {
     display: grid;
-    grid-template-columns: minmax(8em, 16em) minmax(0, 1fr) auto;
+    gap: 6px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+}
+
+.genre-tile.own {
+    border-style: dashed;
+    background: var(--bg);
+}
+
+.genre-tile.own .genre-graph svg {
+    opacity: 0.55;
+}
+
+.genre-tile-head {
+    display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
+    min-height: 32px;
 }
 
-.genre-row select {
-    min-width: 0;
-    height: 26px;
-    padding: 0 6px;
-    font-size: 13px;
+.genre-tile-head h4 {
+    flex: 1;
+    margin: 0;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
 }
 
-.genre-slider {
+.genre-count {
+    font-size: 12px;
+    line-height: 20px;
+    color: var(--muted);
+}
+
+.genre-override,
+.tune-override {
     display: flex;
     align-items: center;
     gap: 6px;
-    min-width: 0;
+    font-size: 13px;
+    line-height: 20px;
+    cursor: pointer;
 }
 
-/* a slider's track a pill, filled to its step, with what the step means written inside it */
-.genre-track {
-    position: relative;
-    display: flex;
-    flex: 1;
-    align-items: center;
-    min-width: 40px;
-    --fill: 0%;
-}
-
-.genre-track input[type="range"] {
-    width: 100%;
-    height: 18px;
-    margin: 0;
-    background: transparent;
-    -webkit-appearance: none;
-    appearance: none;
-}
-
-.genre-track input[type="range"]::-webkit-slider-runnable-track {
-    height: 18px;
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    background: linear-gradient(to right, color-mix(in srgb, var(--accent) 22%, var(--bg)) var(--fill), var(--bg) var(--fill));
-}
-
-.genre-track input[type="range"]::-moz-range-track {
+.genre-override input,
+.tune-override input {
+    width: 16px;
     height: 16px;
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    background: linear-gradient(to right, color-mix(in srgb, var(--accent) 22%, var(--bg)) var(--fill), var(--bg) var(--fill));
+    margin: 0;
+    accent-color: var(--accent);
 }
 
-.genre-track input[type="range"]::-webkit-slider-thumb {
-    width: 14px;
-    height: 14px;
-    margin-top: 1px;
-    border-radius: 50%;
-    background: var(--accent);
-    -webkit-appearance: none;
-    appearance: none;
-}
-
-.genre-track input[type="range"]::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
+.genre-graph {
+    display: block;
+    width: 100%;
+    padding: 0;
     border: 0;
-    border-radius: 50%;
-    background: var(--accent);
+    background: transparent;
+    cursor: pointer;
 }
 
-.genre-track input[type="range"]:focus-visible {
+.genre-graph svg {
+    display: block;
+    width: 100%;
+    height: 72px;
+}
+
+.genre-graph:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
-    border-radius: 9px;
 }
 
-/* the meaning in the part of the track on the wider side of the thumb */
-.genre-meaning {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: calc(100% - var(--fill));
+.genre-band {
+    fill: var(--accent);
+    opacity: 0.18;
+}
+
+.genre-band-end {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+}
+
+.genre-ends {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    padding: 0 10px;
-    font-size: 11px;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+    line-height: 18px;
     color: var(--muted);
-    white-space: nowrap;
-    pointer-events: none;
 }
 
-.genre-meaning.after {
-    left: var(--fill);
-    right: 0;
+.genre-ends span:nth-child(2) {
+    text-align: center;
+}
+
+.genre-ends span:last-child {
+    text-align: right;
 }
 
 /* how a genre works, above the sections, closed once read */
@@ -954,47 +935,6 @@ input[type="range"] {
 
 .genre-principles li + li {
     margin-top: 3px;
-}
-
-.genre-slider .end {
-    font-size: 11px;
-    color: var(--muted);
-    white-space: nowrap;
-}
-
-/* the step or the lean, as wide on every row, so that the sliders line up */
-.genre-slider .value {
-    width: 6ch;
-    font-size: 12px;
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-}
-
-.genre-check {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    cursor: pointer;
-}
-
-.genre-check input {
-    accent-color: var(--accent);
-    margin: 0;
-}
-
-/* a choice's own checkbox, the title of its section or its heading, and looking as they do */
-.genre-choose {
-    display: inline-flex;
-    font: inherit;
-    color: inherit;
-}
-
-.genre-add,
-.genre-remove {
-    justify-self: start;
-    padding: 2px 10px;
-    font-size: 13px;
 }
 
 /* tabs of every part's choices, the fields under them one set, a tab its genre names marked */
@@ -1024,11 +964,6 @@ input[type="range"] {
     display: block;
 }
 
-.genre-range output {
-    font-size: 13px;
-    color: var(--muted);
-}
-
 @media (max-width: 640px) {
     .genre-dialog {
         width: 100vw;
@@ -1039,13 +974,17 @@ input[type="range"] {
         border-radius: 0;
     }
 
-    .genre-row {
-        grid-template-columns: minmax(0, 1fr) auto;
+    .genre-ends {
+        flex-direction: column;
+        gap: 0;
     }
 
-    .genre-row .genre-slider {
-        grid-column: 1 / -1;
-        grid-row: 2;
+    .genre-ends span:nth-child(n) {
+        text-align: left;
+    }
+
+    .genre-override {
+        min-height: 44px;
     }
 }
 
@@ -1705,20 +1644,107 @@ footer a:hover {
 }
 
 .genre-tune h2 {
-    flex: 1;
     margin: 0;
     font-size: 15px;
+    line-height: 20px;
     font-weight: 600;
 }
 
 .genre-tune h3 {
     margin: 0;
     font-size: 14px;
+    line-height: 20px;
     font-weight: 600;
 }
 
 .tune-gap {
     flex: 1;
+}
+
+/* the options to pick, a list under its button with a search, as wide as it needs */
+.tune-pick {
+    position: relative;
+}
+
+.tune-pick-open {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 32px;
+    padding: 0 10px;
+    font-size: 13px;
+    line-height: 20px;
+}
+
+.tune-pick-open::after {
+    content: "";
+    border-top: 5px solid var(--muted);
+    border-inline: 4px solid transparent;
+}
+
+.tune-popup {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 260px;
+    max-height: 340px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.16);
+}
+
+.tune-popup[hidden] {
+    display: none;
+}
+
+.tune-popup input[type="search"] {
+    flex: none;
+    height: 32px;
+    margin-bottom: 4px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+}
+
+.tune-picks {
+    display: grid;
+    gap: 2px;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.tune-picks label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    min-height: 30px;
+    padding: 0 6px;
+    font-size: 13px;
+    line-height: 20px;
+    cursor: pointer;
+}
+
+.tune-picks label[hidden] {
+    display: none;
+}
+
+.tune-picks input {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--accent);
 }
 
 .tune-body {
@@ -1736,19 +1762,43 @@ footer a:hover {
     flex-shrink: 0;
 }
 
+/* an option's tab, its numbers under its name, and a button leaving it out */
+.tune-row {
+    display: flex;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+}
+
+.tune-row[aria-current="true"] {
+    background: color-mix(in srgb, var(--accent) 16%, var(--panel));
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+
 .tune-option {
     display: flex;
+    flex: 1;
     flex-direction: column;
     align-items: flex-start;
     gap: 2px;
+    min-width: 0;
     padding: 8px 10px;
+    border: 0;
+    background: transparent;
     text-align: left;
     font-size: 13px;
 }
 
-.tune-option[aria-current="true"] {
-    background: color-mix(in srgb, var(--accent) 16%, var(--panel));
-    box-shadow: inset 3px 0 0 var(--accent);
+.tune-remove {
+    width: 36px;
+    flex-shrink: 0;
+    padding: 0;
+    border: 0;
+    border-left: 1px solid var(--border);
+    border-radius: 0 8px 8px 0;
+    background: transparent;
+    color: var(--muted);
+    font-size: 16px;
 }
 
 .tune-values {
@@ -1761,39 +1811,96 @@ footer a:hover {
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     min-width: 0;
 }
 
-.tune-chart-row {
-    display: flex;
-    gap: 10px;
+.tune-empty {
+    margin: 0;
+    color: var(--muted);
+}
+
+/* the heading over the chart, at its left edge */
+.tune-main > h3 {
+    margin-left: 44px;
+}
+
+/* the charts one above the other, as wide as each other, the axis at their left and the legend at their right */
+.tune-grid {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    column-gap: 10px;
+    row-gap: 10px;
+    align-items: start;
+}
+
+.tune-grid[hidden] {
+    display: none;
+}
+
+.tune-grid > :not(.tune-axis, .tune-legend) {
+    grid-column: 2;
 }
 
 .tune-axis {
+    grid-column: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    width: 32px;
+    height: 200px;
     font-size: 12px;
     color: var(--muted);
     text-align: right;
 }
 
+.tune-shares-axis {
+    height: 150px;
+}
+
+.tune-axis[hidden],
+.tune-grid > [hidden] {
+    display: none;
+}
+
+.tune-plot {
+    height: 200px;
+}
+
 .tune-chart {
-    flex: 1;
-    min-width: 0;
-    max-width: 560px;
+    display: block;
+    margin: -12px;
     touch-action: none;
 }
 
-.tune-grid {
+.tune-legend {
+    grid-column: 3;
+    grid-row: 1 / span 5;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    min-width: 90px;
+    font-size: 12px;
+}
+
+.tune-legend > span {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.tune-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+}
+
+.tune-gridline {
     stroke: var(--border);
 }
 
 .tune-line {
     fill: none;
-    stroke: color-mix(in srgb, var(--muted) 45%, var(--panel));
     stroke-width: 2;
 }
 
@@ -1814,28 +1921,27 @@ footer a:hover {
     fill: var(--accent);
 }
 
-.tune-ends {
-    display: flex;
-    justify-content: space-between;
-    max-width: 560px;
-    margin-left: 42px;
-    font-size: 12px;
-    color: var(--muted);
-}
-
+/* the numbers at the chart's left edge, its middle and its right edge */
 .tune-fields {
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: flex-end;
+    justify-content: space-between;
 }
 
 .tune-fields label {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    width: 130px;
     font-size: 13px;
     color: var(--muted);
+}
+
+.tune-fields label:nth-child(2) {
+    align-items: center;
+}
+
+.tune-fields label:last-child {
+    align-items: flex-end;
 }
 
 .tune-fields input {
@@ -1849,49 +1955,47 @@ footer a:hover {
     font: inherit;
 }
 
-.tune-shares-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+.tune-shares-heading {
+    margin-top: 6px !important;
 }
 
 .tune-shares {
-    flex: 1;
-    min-width: 0;
-    max-width: 560px;
-    height: 170px;
-    margin-left: 42px;
+    display: block;
+    width: 100%;
+    height: 150px;
 }
 
-.tune-legend {
+/* what each end of the songs draws, the greatest first, under the chart's left edge, its middle and its right edge */
+.tune-lists {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
-    font-size: 12px;
-}
-
-.tune-legend > span {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-}
-
-.tune-swatch {
-    width: 10px;
-    height: 10px;
-    border-radius: 2px;
-}
-
-.tune-note {
-    margin: 0;
-    font-size: 12px;
-    color: var(--muted);
-}
-
-.genre-tune-open {
-    justify-self: start;
-    padding: 2px 10px;
+    justify-content: space-between;
     font-size: 13px;
+    line-height: 20px;
+    font-variant-numeric: tabular-nums;
+}
+
+.tune-lists > div {
+    width: 150px;
+}
+
+.tune-lists > div:nth-child(2) {
+    text-align: center;
+}
+
+.tune-lists > div:last-child {
+    text-align: right;
+}
+
+.tune-lists h4 {
+    margin: 0 0 2px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.tune-lists ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
 @media (max-width: 640px) {
@@ -1904,6 +2008,10 @@ footer a:hover {
         border-radius: 0;
     }
 
+    .genre-tune header {
+        flex-wrap: wrap;
+    }
+
     .tune-body {
         flex-direction: column;
     }
@@ -1914,7 +2022,9 @@ footer a:hover {
         width: auto;
     }
 
-    .tune-option {
+    .tune-option,
+    .tune-pick-open,
+    .tune-picks label {
         min-height: 44px;
     }
 
@@ -1922,12 +2032,39 @@ footer a:hover {
         display: none;
     }
 
-    .tune-ends,
-    .tune-shares {
-        margin-left: 0;
+    .tune-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .tune-grid > :not(.tune-axis, .tune-legend) {
+        grid-column: 1;
     }
 
     .tune-axis {
         display: none;
+    }
+
+    .tune-legend {
+        grid-column: 1;
+        grid-row: auto;
+        flex-direction: row;
+        flex-wrap: wrap;
+        padding-top: 12px;
+    }
+
+    .tune-main > h3 {
+        margin-left: 0;
+    }
+
+    /* the options to pick under their button's right edge, on the screen */
+    .tune-popup {
+        right: 0;
+        left: auto;
+        max-width: calc(100vw - 32px);
+    }
+
+    .tune-fields label,
+    .tune-lists > div {
+        width: auto;
     }
 }

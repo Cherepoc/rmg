@@ -2,7 +2,10 @@ using Microsoft.Playwright;
 
 namespace Rmg.Tests.Page;
 
-/// <summary>A genre made in the editor's popup: its sections, its checklists and lists, its parts' tabs, played, kept among one's own.</summary>
+/// <summary>
+///     A genre made in the editor's popup: its sections of tiles, each a choice's graph and its override, the window a
+///     graph opens, its options picked and removed and their amounts set, its parts' tabs, played, kept among one's own.
+/// </summary>
 [ClassDataSource<Site>(Shared = SharedType.PerTestSession)]
 public sealed class GenreEditorTest(Site site)
 {
@@ -28,29 +31,44 @@ public sealed class GenreEditorTest(Site site)
         return section;
     }
 
-    /// <summary>A section of several choices, its own checkbox checked, which opens it.</summary>
-    private static async Task<ILocator> Checked(ILocator dialog, string title)
+    /// <summary>A choice's tile, as it shows.</summary>
+    private static ILocator Tile(ILocator within, string choice) => within.Locator($".genre-tile[data-choice='{choice}']:visible");
+
+    /// <summary>A choice's override, its tile's checkbox.</summary>
+    private static ILocator Override(ILocator within, string choice) => Tile(within, choice).Locator(".genre-override input");
+
+    /// <summary>The window changing a choice, opened by its tile's graph.</summary>
+    private static async Task<ILocator> Change(ILocator within, string choice)
     {
-        var section = dialog.Locator($"details[data-section='{title}']");
-        await section.Locator("summary .genre-choose input").CheckAsync();
-        return section;
+        await Tile(within, choice).Locator(".genre-graph").ClickAsync();
+        var tune = within.Page.Locator("dialog.genre-tune");
+        await Assert.That(await tune.IsVisibleAsync()).IsTrue();
+        return tune;
     }
 
-    /// <summary>A weight's or a chance's position on its slider, the page's share scale (genre-editor.js, SHARE_SCALE).</summary>
-    private static string Position(int amount) => Math.Round(1000 * Math.Pow(amount / 100.0, 1 / 1.6)).ToString(System.Globalization.CultureInfo.InvariantCulture);
+    /// <summary>The options the window's choice keeps, by their tabs.</summary>
+    private static Task<string[]> Kept(ILocator tune) => tune.Locator(".tune-row").EvaluateAllAsync<string[]>("rows => rows.map(x => x.dataset.option)");
 
-    private static ILocator Row(ILocator within, string option) => within.Locator($".genre-row[data-option='{option}']:visible");
-
-    /// <summary>A choice's own checkbox, its title, which names it.</summary>
-    private static ILocator Choose(ILocator within, string choice) => within.Locator($".genre-choose[data-choice='{choice}'] input");
-
-    /// <summary>A pool's options' checkboxes, those checked unchecked.</summary>
-    private static async Task UncheckAll(ILocator within, string choice)
+    /// <summary>An option's checkbox in the list of those to pick, the list opened.</summary>
+    private static async Task<ILocator> Pick(ILocator tune, string option)
     {
-        var checkedOnes = within.Locator($"[data-choice='{choice}'] .genre-row input[type=checkbox]:checked");
-        while (await checkedOnes.CountAsync() > 0)
-            await checkedOnes.First.ClickAsync();
+        if (await tune.Locator(".tune-popup").IsHiddenAsync())
+            await tune.Locator(".tune-pick-open").ClickAsync();
+        return tune.Locator($".tune-picks label[data-option='{option}'] input");
     }
+
+    /// <summary>Every option the window's choice keeps left out by its tab's button, but those given.</summary>
+    private static async Task LeaveOutAllBut(ILocator tune, params string[] kept)
+    {
+        // the list of those to pick closed, as a click elsewhere would, which it lies over
+        if (await tune.Locator(".tune-popup").IsVisibleAsync())
+            await tune.Locator(".tune-pick-open").ClickAsync();
+        foreach (var option in await Kept(tune))
+            if (!kept.Contains(option))
+                await tune.Locator($".tune-row[data-option='{option}'] .tune-remove").ClickAsync();
+    }
+
+    private static Task Done(ILocator tune) => tune.GetByRole(AriaRole.Button, new() { Name = "Done" }).ClickAsync();
 
     private static async Task<System.Text.Json.JsonElement> Played(SongPage page, ILocator dialog)
     {
@@ -60,16 +78,21 @@ public sealed class GenreEditorTest(Site site)
         return page.Requests[^1].Body;
     }
 
+    private static int[] Ends(System.Text.Json.JsonElement amount) =>
+        amount.ValueKind == System.Text.Json.JsonValueKind.Array ? [..amount.EnumerateArray().Select(x => x.GetInt32())] : [amount.GetInt32(), amount.GetInt32(), amount.GetInt32()];
+
     [Test]
-    public async Task AMeterChecked_IsTheGenres_SavedAmongOnesOwn_AndListedOnTheNextVisit()
+    public async Task AMeterChanged_IsTheGenres_SavedAmongOnesOwn_AndListedOnTheNextVisit()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
+        var time = await Section(dialog, "Time and feel");
 
-        var meter = await Section(dialog, "Meter");
-        await Choose(meter, "meter").CheckAsync();
-        await UncheckAll(meter, "meter");
-        await Row(meter, "3/4").Locator("input[type=checkbox]").CheckAsync();
+        var tune = await Change(time, "meter");
+        await (await Pick(tune, "3/4")).CheckAsync();
+        await LeaveOutAllBut(tune, "3/4");
+        await Done(tune);
+        await Assert.That(await Override(time, "meter").IsCheckedAsync()).IsTrue();
         await dialog.Locator("input[aria-label='Genre name']").FillAsync("Waltzes");
         var count = page.Requests.Count;
         await dialog.Locator("footer button", new() { HasTextString = "Save" }).ClickAsync();
@@ -86,174 +109,148 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
-    public async Task AChoiceUnchecked_IsAsTheSongsHaveIt_ItsOptionsHidden_AndCheckedAgainAsItWas()
+    public async Task AChoicesGraph_DrawsWhatTheSongsDraw_AndSaysWhatEachEndDraws()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-        var scale = await Section(dialog, "Scale");
-        await Assert.That(await Row(scale, "major").CountAsync()).IsEqualTo(0);
+        var time = await Section(dialog, "Time and feel");
 
-        // checked, the scales the songs have, major among them, and one left out
-        await Choose(scale, "scale").CheckAsync();
-        await Assert.That(await Row(scale, "major").Locator("input[type=checkbox]").IsCheckedAsync()).IsTrue();
-        await Row(scale, "major").Locator("input[type=checkbox]").UncheckAsync();
+        // as the songs have it: greyed, its graph theirs, every song in the plainest in 4/4
+        var meter = Tile(time, "meter");
+        await page.Until(async () => await meter.Locator(".genre-graph path").CountAsync() > 1, "the meter's graph drawn");
+        await Assert.That(await meter.GetAttributeAsync("class")).Contains("own");
+        await Assert.That(await meter.Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: 4/4 100%");
+        await Assert.That(await Tile(time, "tempo").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: 90–175 bpm");
+        await Assert.That(await Tile(time, "feelValues").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: as is");
+
+        // overridden, its own, and how many options it keeps
+        await Override(time, "meter").CheckAsync();
+        await Assert.That(await meter.GetAttributeAsync("class")).DoesNotContain("own");
+        await Assert.That(await meter.Locator(".genre-count").TextContentAsync()).EndsWith(" options");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task AnOverrideUnchecked_IsAsTheSongsHaveIt_AndCheckedAgainAsItWas()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var harmony = await Section(dialog, "Harmony");
+
+        // overridden, the scales the songs have, major among them, and one left out
+        await Override(harmony, "scale").CheckAsync();
+        var tune = await Change(harmony, "scale");
+        await Assert.That(await Kept(tune)).Contains("major");
+        await tune.Locator(".tune-row[data-option='major'] .tune-remove").ClickAsync();
+        await Done(tune);
         var genre = (await Played(page, dialog)).GetProperty("genre");
         await Assert.That(genre.GetProperty("scale").TryGetProperty("major", out _)).IsFalse();
         await Assert.That(genre.GetProperty("scale").EnumerateObject().Count()).IsGreaterThan(0);
 
-        await Choose(scale, "scale").UncheckAsync();
-        await Assert.That(await Row(scale, "naturalMinor").CountAsync()).IsEqualTo(0);
+        await Override(harmony, "scale").UncheckAsync();
         // a genre naming nothing asked for as none
         await Assert.That((await Played(page, dialog)).TryGetProperty("genre", out var none) && none.TryGetProperty("scale", out _)).IsFalse();
 
-        await Choose(scale, "scale").CheckAsync();
-        await Assert.That(await Row(scale, "major").Locator("input[type=checkbox]").IsCheckedAsync()).IsFalse();
-        await Assert.That(await Row(scale, "naturalMinor").Locator("input[type=checkbox]").IsCheckedAsync()).IsTrue();
+        await Override(harmony, "scale").CheckAsync();
+        tune = await Change(harmony, "scale");
+        await Assert.That(await Kept(tune)).DoesNotContain("major");
+        await Assert.That(await Kept(tune)).Contains("naturalMinor");
         await Assert.That(page.Errors).IsEmpty();
     }
 
     [Test]
-    public async Task AChoicesCheckbox_ComesBeforeItsSectionsFoldingTitle_AndCheckedOpensIt()
+    public async Task TheWindowsOverride_IsCheckedByAChange_AndUncheckedLeavesTheChoiceToTheSongs()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-        var meter = dialog.Locator("details[data-section='Meter']");
-        await Assert.That(await meter.GetAttributeAsync("open")).IsNull();
+        var time = await Section(dialog, "Time and feel");
 
-        var title = meter.Locator("summary .genre-choose");
-        await Assert.That(await title.TextContentAsync()).IsEqualTo("Meter");
+        var tune = await Change(time, "meter");
+        var own = tune.Locator(".tune-override input");
+        await Assert.That(await own.IsCheckedAsync()).IsFalse();
+        await tune.Locator("input[aria-label='4/4, experimental']").FillAsync("20");
+        await tune.Locator("input[aria-label='4/4, experimental']").DispatchEventAsync("change");
+        await Assert.That(await own.IsCheckedAsync()).IsTrue();
+        await Done(tune);
+        await Assert.That(Ends((await Played(page, dialog)).GetProperty("genre").GetProperty("meter").GetProperty("4/4"))[2]).IsEqualTo(20);
 
-        // the name folds the section, as a title does, and checks nothing
-        await title.Locator("span").ClickAsync(new() { Force = true });
-        await Assert.That(await meter.GetAttributeAsync("open")).IsNotNull();
-        await Assert.That(await title.Locator("input").IsCheckedAsync()).IsFalse();
-        await title.Locator("span").ClickAsync(new() { Force = true });
-        await Assert.That(await meter.GetAttributeAsync("open")).IsNull();
-
-        // the checkbox, before the folding mark, checks it and opens the section
-        var box = await title.Locator("input").BoundingBoxAsync();
-        var name = await title.Locator("span").BoundingBoxAsync();
-        await Assert.That(box!.X).IsLessThan(name!.X);
-        await title.Locator("input").CheckAsync();
-        await Assert.That(await meter.GetAttributeAsync("open")).IsNotNull();
-        await Assert.That(await Row(meter, "4/4").Locator("input[type=checkbox]").IsCheckedAsync()).IsTrue();
+        tune = await Change(time, "meter");
+        await tune.Locator(".tune-override input").UncheckAsync();
+        await Done(tune);
+        await Assert.That(await Override(time, "meter").IsCheckedAsync()).IsFalse();
+        await Assert.That((await Played(page, dialog)).TryGetProperty("genre", out var none) && none.TryGetProperty("meter", out _)).IsFalse();
         await Assert.That(page.Errors).IsEmpty();
     }
 
     [Test]
-    public async Task APoolKeepingNone_IsAProblem_NotPlayed()
+    public async Task APoolsLastOption_IsKept_AndAGenreFileOfAPoolKeepingNone_IsAProblem()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-        var meter = await Section(dialog, "Meter");
-        await Choose(meter, "meter").CheckAsync();
-        await UncheckAll(meter, "meter");
+        var time = await Section(dialog, "Time and feel");
+        var tune = await Change(time, "meter");
+        await LeaveOutAllBut(tune, "4/4");
 
-        await Assert.That(await dialog.Locator("footer .warning").TextContentAsync()).IsEqualTo("Meter keeps none of its options.");
+        await Assert.That(await Kept(tune)).IsEquivalentTo(["4/4"]);
+        await Assert.That(await tune.Locator(".tune-row[data-option='4/4'] .tune-remove").IsDisabledAsync()).IsTrue();
+        await Assert.That(await (await Pick(tune, "4/4")).IsDisabledAsync()).IsTrue();
+        await tune.Locator(".genre-close").ClickAsync();
+
+        await dialog.Locator("input[type=file]").SetInputFilesAsync(new FilePayload { Name = "none.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "None", "choices": { "meter": {} } }""") });
+        await page.Until(async () => await dialog.Locator("footer .warning").TextContentAsync() == "Meter keeps none of its options.", "the problem said");
         await Assert.That(await dialog.Locator("footer button", new() { HasTextString = "Play" }).IsDisabledAsync()).IsTrue();
-        await Row(meter, "4/4").Locator("input[type=checkbox]").CheckAsync();
-        await Assert.That(await dialog.Locator("footer .warning").IsHiddenAsync()).IsTrue();
         await Assert.That(page.Errors).IsEmpty();
     }
 
     [Test]
-    public async Task AWeightShowsItsAmountInAMiddlingSong_AChanceItsChance_AndTheTemposEndsInBeatsAMinute()
+    public async Task TheOptionsToPick_AreFoundByTheirNames_AndAPickedOneIsKeptAtItsOwnAmounts()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-
-        var playing = await Checked(dialog, "Parts playing");
-        // every song has a melody, and a quarter of the middling ones in a genre where it is set so
-        var melody = Row(playing, "melody");
-        await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("100%");
-        await melody.Locator("input[type=range]").FillAsync(Position(25));
-        await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("25%");
-
-        var meter = await Section(dialog, "Meter");
-        await Choose(meter, "meter").CheckAsync();
-        var fourFour = Row(meter, "4/4");
-        // in whole percents, its weight in a middling song
-        await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("100");
-        await fourFour.Locator("input[type=range]").FillAsync(Position(50));
-        await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("50");
-        await fourFour.Locator("input[type=range]").FillAsync(Position(1));
-        await Assert.That(await fourFour.Locator("input[type=range]").GetAttributeAsync("aria-valuetext")).StartsWith("1, ");
-
-        var tempo = await Section(dialog, "Tempo");
-        await tempo.Locator(".genre-check input").First.CheckAsync();
-        await Assert.That(await tempo.Locator(".genre-slider").First.Locator(".end").AllTextContentsAsync()).IsEquivalentTo(["60 bpm", "240 bpm"]);
-        await Assert.That(await tempo.Locator(".genre-slider output").CountAsync()).IsEqualTo(0);
-        await Assert.That(page.Errors).IsEmpty();
-    }
-
-    [Test]
-    public async Task SwingAndHalfTime_HaveACheckboxOfTheirOwn_NamingEveryOneAsTheSongsHaveIt_AndTheirSlidersNoEndWords()
-    {
-        await using var page = await SongPage.Open(site, "?song=1");
-        var dialog = await OpenEditor(page);
-        var swing = dialog.Locator("details[data-section='Swing and half time']");
-        var title = swing.Locator("summary .genre-choose input");
-        await Assert.That(await title.IsCheckedAsync()).IsFalse();
-
-        await title.CheckAsync();
-        await Assert.That(await swing.GetAttributeAsync("open")).IsNotNull();
-        await Assert.That(await Row(swing, "halfTime").Locator("input[type=checkbox]").IsCheckedAsync()).IsTrue();
-        await Assert.That(await swing.Locator(".genre-slider .end").CountAsync()).IsEqualTo(0);
-        var genre = (await Played(page, dialog)).GetProperty("genre");
-        await Assert.That(genre.GetProperty("feelChances").TryGetProperty("swing", out _)).IsTrue();
-        await Assert.That(genre.GetProperty("feelValues").TryGetProperty("swing", out _)).IsTrue();
-
-        // every chance left out, never, and every value as it is
-        await UncheckAll(swing, "feelChances");
-        await UncheckAll(swing, "feelValues");
-        await Assert.That(await title.IsCheckedAsync()).IsTrue();
-        var never = (await Played(page, dialog)).GetProperty("genre");
-        await Assert.That(never.GetProperty("feelChances").EnumerateObject().Count()).IsEqualTo(0);
-        await Assert.That(never.TryGetProperty("feelValues", out _)).IsFalse();
-
-        await title.UncheckAsync();
-        await Assert.That(await Row(swing, "swing").CountAsync()).IsEqualTo(0);
-        await Assert.That(page.Errors).IsEmpty();
-    }
-
-    [Test]
-    public async Task ThePartsPlayingAndTheParts_HaveACheckboxEach_ThePartsCheckedNamingNoneTillAPartsChoiceIs_AndUncheckedLettingThemGo()
-    {
-        await using var page = await SongPage.Open(site, "?song=1");
-        var dialog = await OpenEditor(page);
-
-        var playing = dialog.Locator("details[data-section='Parts playing']");
-        await playing.Locator("summary .genre-choose input").CheckAsync();
-        await Assert.That(await Row(playing, "melody").Locator("input[type=checkbox]").IsCheckedAsync()).IsTrue();
-
-        var parts = dialog.Locator("details[data-section='Parts']");
-        var title = parts.Locator("summary .genre-choose input");
-        await Assert.That(await parts.GetByRole(AriaRole.Tab, new() { Name = "Bass", Exact = true }).IsVisibleAsync()).IsFalse();
-        await title.CheckAsync();
+        var parts = await Section(dialog, "Parts");
         await parts.GetByRole(AriaRole.Tab, new() { Name = "Bass", Exact = true }).ClickAsync();
-        await Choose(parts, "instrument.bass").CheckAsync();
-        var genre = (await Played(page, dialog)).GetProperty("genre");
-        await Assert.That(genre.TryGetProperty("instrument.bass", out _)).IsTrue();
-        await Assert.That(genre.GetProperty("parts").TryGetProperty("melody", out _)).IsTrue();
 
-        await title.UncheckAsync();
-        await Assert.That((await Played(page, dialog)).GetProperty("genre").TryGetProperty("instrument.bass", out _)).IsFalse();
-        await title.CheckAsync();
-        await Assert.That((await Played(page, dialog)).GetProperty("genre").TryGetProperty("instrument.bass", out _)).IsTrue();
+        var tune = await Change(parts, "instrument.bass");
+        await tune.Locator(".tune-pick-open").ClickAsync();
+        await tune.Locator(".tune-popup input[type=search]").FillAsync("tub");
+        await Assert.That(await tune.Locator(".tune-picks label:visible").AllTextContentsAsync()).IsEquivalentTo(["Tuba"]);
+        await tune.Locator(".tune-picks label[data-option='tuba'] input").CheckAsync();
+        await Assert.That(await Kept(tune)).Contains("tuba");
+        // the window open, the list closed by Escape
+        await page.Page.Keyboard.PressAsync("Escape");
+        await Assert.That(await tune.Locator(".tune-popup").IsHiddenAsync()).IsTrue();
+        await Assert.That(await tune.IsVisibleAsync()).IsTrue();
+        await Done(tune);
+
+        await parts.GetByRole(AriaRole.Tab, new() { Name = "Melody", Exact = true }).ClickAsync();
+        await Assert.That(await Override(parts, "instrument.melody").IsCheckedAsync()).IsFalse();
+        await Assert.That(await parts.Locator("[role=tab].named").First.TextContentAsync()).IsEqualTo("Bass");
+        var genre = (await Played(page, dialog)).GetProperty("genre");
+        await Assert.That(genre.GetProperty("instrument.bass").TryGetProperty("tuba", out _)).IsTrue();
+        await Assert.That(genre.TryGetProperty("instrument.melody", out _)).IsFalse();
         await Assert.That(page.Errors).IsEmpty();
     }
 
     [Test]
-    public async Task ASectionsFields_AreAStepInFromItsCheckbox()
+    public async Task SwingAndHalfTime_LeftOutAreNever_AndTheSwingsValuesLeftOutAsTheyAre()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-        var meter = dialog.Locator("details[data-section='Meter']");
-        await meter.Locator("summary .genre-choose input").CheckAsync();
+        var time = await Section(dialog, "Time and feel");
 
-        var title = await meter.Locator("summary .genre-choose input").BoundingBoxAsync();
-        var option = await Row(meter, "4/4").Locator("input[type=checkbox]").BoundingBoxAsync();
-        await Assert.That(option!.X - title!.X).IsGreaterThan(10);
+        var chances = await Change(time, "feelChances");
+        await Assert.That(await Kept(chances)).Contains("halfTime");
+        // chances are no shares: no chart of them
+        await Assert.That(await chances.Locator(".tune-shares").IsHiddenAsync()).IsTrue();
+        await LeaveOutAllBut(chances);
+        await Done(chances);
+        var values = await Change(time, "feelValues");
+        await LeaveOutAllBut(values);
+        await Done(values);
+
+        var genre = (await Played(page, dialog)).GetProperty("genre");
+        await Assert.That(genre.GetProperty("feelChances").EnumerateObject().Count()).IsEqualTo(0);
+        await Assert.That(genre.TryGetProperty("feelValues", out _)).IsFalse();
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -262,31 +259,15 @@ public sealed class GenreEditorTest(Site site)
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-        var scale = await Section(dialog, "Scale");
-        await Choose(scale, "scale").CheckAsync();
-        await Assert.That(await Row(scale, "dorian").GetAttributeAsync("title")).IsEqualTo("Minor with a raised sixth: dark but hopeful, at home in funk, folk and jazz. On C: C D E♭ F G A B♭.");
+        var harmony = await Section(dialog, "Harmony");
+        var scale = await Change(harmony, "scale");
+        await (await Pick(scale, "dorian")).IsVisibleAsync();
+        await Assert.That(await scale.Locator(".tune-picks label[data-option='dorian']").GetAttributeAsync("title")).IsEqualTo("Minor with a raised sixth: dark but hopeful, at home in funk, folk and jazz. On C: C D E♭ F G A B♭.");
+        await scale.Locator(".genre-close").ClickAsync();
 
-        var shapes = await Section(dialog, "Chord shapes");
-        await Choose(shapes, "chordShape").CheckAsync();
-        await Assert.That(await Row(shapes, "triad").GetAttributeAsync("title")).IsEqualTo("Root, third and fifth: the plain chord. On C: C E♭/E G.");
-        await Assert.That(page.Errors).IsEmpty();
-    }
-
-    [Test]
-    public async Task ASliderDoubleClicked_GoesBackToItsDefault()
-    {
-        await using var page = await SongPage.Open(site, "?song=1");
-        var dialog = await OpenEditor(page);
-        var meter = await Section(dialog, "Meter");
-        await Choose(meter, "meter").CheckAsync();
-        var weight = Row(meter, "4/4").Locator("input[type=range]");
-        await weight.FillAsync(Position(10));
-
-        await weight.DblClickAsync(new() { Position = new Position { X = 3, Y = 5 } });
-
-        // its own, 100 in a middling song, the ends moved with it, as the songs have it: none at the wild end
-        await Assert.That(await weight.InputValueAsync()).IsEqualTo(Position(100));
-        await Assert.That((await Played(page, dialog)).GetProperty("genre").GetProperty("meter").GetProperty("4/4").EnumerateArray().Select(x => x.GetInt32())).IsEquivalentTo([100, 100, 0]);
+        var shapes = await Change(harmony, "chordShape");
+        await (await Pick(shapes, "triad")).IsVisibleAsync();
+        await Assert.That(await shapes.Locator(".tune-picks label[data-option='triad']").GetAttributeAsync("title")).IsEqualTo("Root, third and fifth: the plain chord. On C: C E♭/E G.");
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -295,10 +276,9 @@ public sealed class GenreEditorTest(Site site)
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-        await Assert.That(await dialog.Locator("details[data-section='As JSON']").CountAsync()).IsEqualTo(0);
         await dialog.Locator("input[aria-label='Genre name']").FillAsync("Waltzes");
-        var meter = await Section(dialog, "Meter");
-        await Choose(meter, "meter").CheckAsync();
+        var time = await Section(dialog, "Time and feel");
+        await Override(time, "meter").CheckAsync();
 
         var download = await page.Page.RunAndWaitForDownloadAsync(() => dialog.Locator("footer button", new() { HasTextString = "Export JSON" }).ClickAsync());
 
@@ -319,10 +299,12 @@ public sealed class GenreEditorTest(Site site)
         await file.SetInputFilesAsync(new FilePayload { Name = "waltzes.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "Waltzes", "choices": { "meter": { "3/4": 100 } } }""") });
 
         await page.Until(async () => await dialog.Locator("input[aria-label='Genre name']").InputValueAsync() == "Waltzes", "the file read");
-        var meter = dialog.Locator("details[data-section='Meter']");
-        await Assert.That(await meter.GetAttributeAsync("open")).IsNotNull();
-        await Assert.That(await Row(meter, "3/4").Locator("input[type=checkbox]").IsCheckedAsync()).IsTrue();
-        await Assert.That(await Row(meter, "4/4").Locator("input[type=checkbox]").IsCheckedAsync()).IsFalse();
+        var time = dialog.Locator("details[data-section='Time and feel']");
+        await Assert.That(await time.GetAttributeAsync("open")).IsNotNull();
+        await Assert.That(await Override(time, "meter").IsCheckedAsync()).IsTrue();
+        var tune = await Change(time, "meter");
+        await Assert.That(await Kept(tune)).IsEquivalentTo(["3/4"]);
+        await tune.Locator(".genre-close").ClickAsync();
 
         await file.SetInputFilesAsync(new FilePayload { Name = "other.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "Other", "choices": { "nothing": {} } }""") });
         // read as the file is, after the choosing
@@ -332,51 +314,26 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
-    public async Task TheRiffsTwin_IsUncheckedAndDisabled_WhileTheRiffIs()
+    public async Task TheRiffsTwin_IsLeftOutWithTheRiff_AndPickedOnlyWithIt()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-        var playing = await Checked(dialog, "Parts playing");
-        var twin = Row(playing, "riffTwin").Locator("input[type=checkbox]");
-        await Assert.That(await twin.IsCheckedAsync()).IsTrue();
+        var playing = await Section(dialog, "Parts playing");
+        var tune = await Change(playing, "parts");
+        await Assert.That(await Kept(tune)).Contains("riffTwin");
 
-        await Row(playing, "riff").Locator("input[type=checkbox]").UncheckAsync();
-        await Assert.That(await twin.IsCheckedAsync()).IsFalse();
+        await tune.Locator(".tune-row[data-option='riff'] .tune-remove").ClickAsync();
+        await Assert.That(await Kept(tune)).DoesNotContain("riffTwin");
+        var twin = await Pick(tune, "riffTwin");
         await Assert.That(await twin.IsDisabledAsync()).IsTrue();
+        await Done(tune);
         var parts = (await Played(page, dialog)).GetProperty("genre").GetProperty("parts");
         await Assert.That(parts.TryGetProperty("riffTwin", out _)).IsFalse();
 
-        await Row(playing, "riff").Locator("input[type=checkbox]").CheckAsync();
-        await Assert.That(await twin.IsDisabledAsync()).IsFalse();
-        await Assert.That(await twin.IsCheckedAsync()).IsFalse();
-        await Assert.That(page.Errors).IsEmpty();
-    }
-
-    [Test]
-    public async Task ASlider_SaysWhatItMeansInsideIt_AShareOfTheMiddlingSongs_ExperimentalSongsOnlyAt0_AndEverySongAlone()
-    {
-        await using var page = await SongPage.Open(site, "?song=1");
-        var dialog = await OpenEditor(page);
-        var meter = await Section(dialog, "Meter");
-        await Choose(meter, "meter").CheckAsync();
-        await UncheckAll(meter, "meter");
-        await Row(meter, "4/4").Locator("input[type=checkbox]").CheckAsync();
-        ILocator Meaning(string option) => Row(meter, option).Locator(".genre-meaning");
-
-        await Assert.That(await Meaning("4/4").TextContentAsync()).IsEqualTo("every song");
-        await Row(meter, "3/4").Locator("input[type=checkbox]").CheckAsync();
-        // 4/4 at 100 and 3/4 at 4: 96% and 4% of the middling songs, and 3/4 at 0 in experimental songs only, 4/4 then all
-        await Assert.That(await Meaning("4/4").TextContentAsync()).IsEqualTo("96% of middling songs");
-        await Assert.That(await Meaning("3/4").TextContentAsync()).IsEqualTo("4% of middling songs");
-        await Row(meter, "3/4").Locator("input[type=range]").FillAsync("0");
-        await Assert.That(await Meaning("3/4").TextContentAsync()).IsEqualTo("experimental songs only");
-        await Assert.That(await Meaning("4/4").TextContentAsync()).IsEqualTo("100% of middling songs");
-
-        var playing = await Checked(dialog, "Parts playing");
-        await Assert.That(await Row(playing, "melody").Locator(".genre-meaning").TextContentAsync()).IsEqualTo("every song");
-        await Assert.That(await Row(playing, "pad").Locator(".genre-meaning").TextContentAsync()).IsEqualTo("of middling songs");
-        await Row(playing, "pad").Locator("input[type=range]").FillAsync("0");
-        await Assert.That(await Row(playing, "pad").Locator(".genre-meaning").TextContentAsync()).IsEqualTo("experimental songs only");
+        tune = await Change(playing, "parts");
+        await (await Pick(tune, "riff")).CheckAsync();
+        await Assert.That(await tune.Locator(".tune-picks label[data-option='riffTwin'] input").IsDisabledAsync()).IsFalse();
+        await Assert.That(await tune.Locator(".tune-picks label[data-option='riffTwin'] input").IsCheckedAsync()).IsFalse();
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -404,65 +361,36 @@ public sealed class GenreEditorTest(Site site)
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-        var tempo = await Section(dialog, "Tempo");
-        await Choose(tempo, "tempo").CheckAsync();
-        await tempo.Locator("input[aria-label='Tempo: lean']").FillAsync("60");
+        var time = await Section(dialog, "Time and feel");
+        var tune = await Change(time, "tempo");
+        // its ends and its lean, none left out nor picked
+        await Assert.That(await Kept(tune)).IsEquivalentTo(["from", "to", "lean"]);
+        await Assert.That(await tune.Locator(".tune-remove").CountAsync()).IsEqualTo(0);
+        await Assert.That(await tune.Locator(".tune-pick").IsHiddenAsync()).IsTrue();
+        await tune.Locator(".tune-option[data-option='lean']").ClickAsync();
+        await tune.Locator("input[aria-label='Lean, middling']").FillAsync("60");
+        await tune.Locator("input[aria-label='Lean, middling']").DispatchEventAsync("change");
+        await Done(tune);
 
         var asked = (await Played(page, dialog)).GetProperty("genre").GetProperty("tempo");
-        int Middle(System.Text.Json.JsonElement x) => x.ValueKind == System.Text.Json.JsonValueKind.Array ? x[1].GetInt32() : x.GetInt32();
         // the songs' own, 90 to about 175, leaning as given
-        await Assert.That(Middle(asked.GetProperty("from"))).IsEqualTo(90);
-        await Assert.That(Middle(asked.GetProperty("to"))).IsBetween(170, 180);
-        await Assert.That(Middle(asked.GetProperty("lean"))).IsEqualTo(60);
+        await Assert.That(Ends(asked.GetProperty("from"))[1]).IsEqualTo(90);
+        await Assert.That(Ends(asked.GetProperty("to"))[1]).IsBetween(170, 180);
+        await Assert.That(Ends(asked.GetProperty("lean"))[1]).IsEqualTo(60);
         await Assert.That(page.Errors).IsEmpty();
     }
 
     [Test]
-    public async Task AWeightsSlider_SnapsToARoundAmount_AndItsArrowKeysStepAWholePercent()
+    public async Task AnOptionsAmounts_AreSetByTheirNumbers_ItsTabShowingThem_AndAPoolsSharesToldAtEachEnd()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-        var meter = await Section(dialog, "Meter");
-        await Choose(meter, "meter").CheckAsync();
-        var fourFour = Row(meter, "4/4");
-        var range = fourFour.Locator("input[type=range]");
+        var time = await Section(dialog, "Time and feel");
+        var tune = await Change(time, "meter");
 
-        await range.FillAsync(Position(52));
-        await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("50");
-        await range.PressAsync("ArrowRight");
-        await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("51");
-        await range.PressAsync("ArrowLeft");
-        await range.PressAsync("ArrowLeft");
-        await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("49");
-        // the small amounts the finer: the first tenth of the way is 3 at the most
-        await range.FillAsync("100");
-        await Assert.That(int.Parse((await fourFour.Locator("output").TextContentAsync())!)).IsLessThanOrEqualTo(3);
-        await Assert.That(page.Errors).IsEmpty();
-    }
-
-    /// <summary>The fine-tune window of a choice, opened from its section.</summary>
-    private static async Task<ILocator> FineTune(ILocator section)
-    {
-        await section.Locator("button.genre-tune-open").First.ClickAsync();
-        var tune = section.Page.Locator("dialog.genre-tune");
-        await Assert.That(await tune.IsVisibleAsync()).IsTrue();
-        return tune;
-    }
-
-    private static int[] Ends(System.Text.Json.JsonElement amount) =>
-        amount.ValueKind == System.Text.Json.JsonValueKind.Array ? [..amount.EnumerateArray().Select(x => x.GetInt32())] : [amount.GetInt32(), amount.GetInt32(), amount.GetInt32()];
-
-    [Test]
-    public async Task AnOptionFineTuned_ItsMostExperimentalSetByItsNumber_AndItsTabShowingItsNumbers_IsAskedForSo()
-    {
-        await using var page = await SongPage.Open(site, "?song=1");
-        var dialog = await OpenEditor(page);
-        var meter = await Section(dialog, "Meter");
-        await Choose(meter, "meter").CheckAsync();
-        var tune = await FineTune(meter);
-
-        // the songs' own lines drawn, a pool's chances beside
+        // the songs' own lines drawn, a pool's chances under them, and what each end draws, the commonest first
         await page.Until(async () => await tune.Locator(".tune-shares path").CountAsync() > 0, "the chances drawn");
+        await Assert.That(await tune.Locator(".tune-lists > div").First.Locator("li").AllTextContentsAsync()).IsEquivalentTo(["4/4 100%"]);
         await tune.Locator(".tune-option[data-option='3/4']").ClickAsync();
         await tune.Locator("input[aria-label='3/4, experimental']").FillAsync("80");
         await tune.Locator("input[aria-label='3/4, experimental']").DispatchEventAsync("change");
@@ -472,27 +400,28 @@ public sealed class GenreEditorTest(Site site)
             await tune.Locator($"input[aria-label='7/8, {end}']").FillAsync(value);
             await tune.Locator($"input[aria-label='7/8, {end}']").DispatchEventAsync("change");
         }
-        // an option of the experimental songs alone its numbers, as every other's
         await Assert.That(await tune.Locator(".tune-option[data-option='7/8'] .tune-values").TextContentAsync()).IsEqualTo("0 · 0 · 30");
-        await tune.GetByRole(AriaRole.Button, new() { Name = "Done" }).ClickAsync();
+        // the charts as wide as each other
+        var amounts = await tune.Locator(".tune-plot").BoundingBoxAsync();
+        var shares = await tune.Locator(".tune-shares").BoundingBoxAsync();
+        await Assert.That(Math.Abs(amounts!.Width - shares!.Width)).IsLessThan(1);
+        await Assert.That(Math.Abs(amounts.X - shares.X)).IsLessThan(1);
+        await Done(tune);
 
         var asked = (await Played(page, dialog)).GetProperty("genre").GetProperty("meter");
         await Assert.That(Ends(asked.GetProperty("3/4"))[2]).IsEqualTo(80);
-        var sevenEight = Ends(asked.GetProperty("7/8"));
-        await Assert.That(sevenEight[0]).IsEqualTo(0);
-        await Assert.That(sevenEight[1]).IsEqualTo(0);
-        await Assert.That(sevenEight[2]).IsGreaterThan(0);
+        await Assert.That(Ends(asked.GetProperty("7/8"))).IsEquivalentTo([0, 0, 30]);
         await Assert.That(page.Errors).IsEmpty();
     }
 
     [Test]
-    public async Task AFineTunesHandle_StepsByTheArrowKeys_AndClosingLetsItGo()
+    public async Task AHandle_StepsByTheArrowKeys_AndClosingLetsItGo()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-        var meter = await Section(dialog, "Meter");
-        await Choose(meter, "meter").CheckAsync();
-        var tune = await FineTune(meter);
+        var time = await Section(dialog, "Time and feel");
+        await Override(time, "meter").CheckAsync();
+        var tune = await Change(time, "meter");
 
         var middling = tune.Locator(".tune-handle[data-end='1']");
         var before = int.Parse((await middling.GetAttributeAsync("aria-valuenow"))!);
@@ -509,48 +438,29 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
-    public async Task APartsTab_ItsInstrumentsSwappedInTheirLists_AndTheOtherPartsAsTheSongsHaveThem()
-    {
-        await using var page = await SongPage.Open(site, "?song=1");
-        var dialog = await OpenEditor(page);
-        var parts = await Checked(dialog, "Parts");
-
-        await parts.GetByRole(AriaRole.Tab, new() { Name = "Bass", Exact = true }).ClickAsync();
-        await Choose(parts, "instrument.bass").CheckAsync();
-        var rows = await parts.Locator(".genre-rows .genre-row:visible").CountAsync();
-        await Assert.That(rows).IsGreaterThan(0);
-        await parts.Locator(".genre-rows .genre-row:visible select").First.SelectOptionAsync("tuba");
-
-        await parts.GetByRole(AriaRole.Tab, new() { Name = "Melody", Exact = true }).ClickAsync();
-        await Assert.That(await parts.Locator(".genre-rows .genre-row:visible").CountAsync()).IsEqualTo(0);
-        await Assert.That(await parts.Locator("[role=tab].named").First.TextContentAsync()).IsEqualTo("Bass");
-
-        var genre = (await Played(page, dialog)).GetProperty("genre");
-        await Assert.That(genre.GetProperty("instrument.bass").TryGetProperty("tuba", out _)).IsTrue();
-        await Assert.That(genre.TryGetProperty("instrument.melody", out _)).IsFalse();
-        await Assert.That(page.Errors).IsEmpty();
-    }
-
-    [Test]
     public async Task TheDrumsSetupsAndRoles_KeepToThePiecesChosen()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-        var parts = await Checked(dialog, "Parts");
+        var parts = await Section(dialog, "Parts");
         await parts.GetByRole(AriaRole.Tab, new() { Name = "Drums", Exact = true }).ClickAsync();
 
         // congas and bongos alone, percussion: no kit to set up, and only they to take a role
-        var pieces = parts.Locator(".genre-sliders[data-choice='drumPieces']");
-        await Choose(parts, "drumPieces").CheckAsync();
-        await UncheckAll(parts, "drumPieces");
-        await Row(pieces, "conga").Locator("input[type=checkbox]").CheckAsync();
-        await Row(pieces, "bongo").Locator("input[type=checkbox]").CheckAsync();
-        var setup = parts.Locator(".genre-sliders[data-choice='drumSetup']");
-        await Choose(parts, "drumSetup").CheckAsync();
-        await Assert.That(await setup.Locator(".genre-row").EvaluateAllAsync<string[]>("rows => rows.map(x => x.dataset.option)")).IsEquivalentTo(["percussion"]);
-        var ground = parts.Locator(".genre-sliders[data-choice='drumRole.ground']");
-        await Choose(parts, "drumRole.ground").CheckAsync();
-        await Assert.That(await ground.Locator(".genre-row").EvaluateAllAsync<string[]>("rows => rows.map(x => x.dataset.option)")).IsEquivalentTo(["bongo", "conga"]);
+        var pieces = await Change(parts, "drumPieces");
+        await (await Pick(pieces, "conga")).CheckAsync();
+        await (await Pick(pieces, "bongo")).CheckAsync();
+        await LeaveOutAllBut(pieces, "conga", "bongo");
+        await Done(pieces);
+        var setup = await Change(parts, "drumSetup");
+        await Assert.That(await Kept(setup)).IsEquivalentTo(["percussion"]);
+        await setup.Locator(".tune-pick-open").ClickAsync();
+        await Assert.That(await setup.Locator(".tune-picks label").EvaluateAllAsync<string[]>("rows => rows.map(x => x.dataset.option)")).IsEquivalentTo(["percussion"]);
+        await setup.Locator(".genre-close").ClickAsync();
+        var roles = parts.Locator(".genre-tabs .genre-tabs");
+        await roles.GetByRole(AriaRole.Tab, new() { Name = "Ground (kick)", Exact = true }).ClickAsync();
+        var ground = await Change(parts, "drumRole.ground");
+        await ground.Locator(".tune-pick-open").ClickAsync();
+        await Assert.That(await ground.Locator(".tune-picks label").EvaluateAllAsync<string[]>("rows => rows.map(x => x.dataset.option)")).IsEquivalentTo(["bongo", "conga"]);
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -570,17 +480,20 @@ public sealed class GenreEditorTest(Site site)
         await page.Page.Locator("button.genre-edit").EvaluateAsync("b => b.click()");
         var dialog = page.Page.Locator("dialog.genre-dialog");
         await page.Until(() => dialog.IsVisibleAsync(), "the editor open");
+        var time = await Section(dialog, "Time and feel");
+        await page.Until(async () => await Tile(time, "meter").Locator(".genre-graph path").CountAsync() > 0, "the graphs drawn");
         await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-editor-sections.png") });
-        var parts = await Checked(dialog, "Parts");
+        var parts = await Section(dialog, "Parts");
         await parts.ScrollIntoViewIfNeededAsync();
         await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-editor-melody.png") });
         await parts.GetByRole(AriaRole.Tab, new() { Name = "Drums", Exact = true }).ClickAsync();
-        await parts.Locator(".genre-sliders[data-choice='drumSetup']").ScrollIntoViewIfNeededAsync();
+        await Tile(parts, "drumSetup").ScrollIntoViewIfNeededAsync();
         await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-editor-drums.png") });
-        var meter = await Section(dialog, "Meter");
-        var tune = await FineTune(meter);
+        var tune = await Change(time, "meter");
         await page.Until(async () => await tune.Locator(".tune-shares path").CountAsync() > 0, "the chances drawn");
         await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-tune.png") });
+        await tune.Locator(".tune-pick-open").ClickAsync();
+        await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-tune-options.png") });
         await page.Page.SetViewportSizeAsync(390, 844);
         await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-tune-phone.png") });
     }
