@@ -6,7 +6,8 @@ is removed once it is built.
 
 ## Priorities
 
-**Next** (P1): a song's length given (see *Open work*), then a genre's three points (see *Genres*); listening to
+**Next** (P1): a song's length given (see *Open work*), then a genre's three points (see *Genres*), then the drum
+solos' feet and players (see *Open work*); listening to
 what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the ratings by conventionality once
 enough are in, alongside, continuously and never as a gate.
 
@@ -177,6 +178,17 @@ Each item with its plan, and what it waits for.
   the songs as they were; (3) the leans, measured by the error at 1, 2, 3, 5 and 10 minutes, the long lengths the
   likeliest to fall short, which solos might fill; (4) the setting, its link's place, the length drawn shown, and the
   page's tests.
+- **The drum solos' feet and players** (P1, planned): a drum solo is the hands' line round the kit, the kick a note
+  of it and every other drum silent (`DrumSolos`). (1) The feet keep time in most solos, about 70%, drawn from a
+  stream of its own: the drums of the kick's role keep the section's groove under the line, a little softer, which
+  then leaves the kick out of the hands' scale and stacks none under their accents. (2) Every percussion drum is a
+  player of its own: under a kit solo it keeps its groove or rests, drawn for each; in a song with percussion a drum
+  solo's soloists are drawn among the kit's drummer and the players, as many at once and trading or together as the
+  pitched solos' counts and modes have it (`Solos.Counts`, `Solos.Modes`), by the groove facet, one soloist and the
+  others keeping time at the plain end and several at the wild; a player's line its own sounds, a conga's open, slap
+  and mute; those keeping time under the soloist by the solos' margin. Measured by the kick's share under the line,
+  the notes a bar of a solo, which a busy groove's kick could crowd, and how often the players keep time, trade or
+  play together. A hi-hat's foot on the backbeats only if listening asks for it, a pattern of its own.
 - **More modes for the wild end** and **a song's own coherence,** how far its facets stray from its base, by the same
   rule (`ByConvention`), should the wild end sound samey or a song incoherent.
 - **The plain end's rigidity,** to tune by listening: no change of feel, triplet fills included, every bar of a plain
