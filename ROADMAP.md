@@ -170,7 +170,8 @@ Each item with its plan, and what it waits for.
   hundredth, the wildest to 8:07), by their beats (correlation 0.91), which their sections make (0.78), more than by
   their tempo (0.25). Leaning the draws that make the form already, none deciding and every one drawing as often as
   it did, so that a song with none given is as it was: the forms (`SongForms.Forms`), which are one another shortened
-  and lengthened, each by how near its length comes, with a longer one or two added at small weights; a free form
+  and lengthened, each by how near its length comes, with a longer one or two added at small weights (such as VCVCBCVC), solos filling a length still
+  short only if the measures ask for it; a free form
   (`SongStructureGenerator`) adding parts until it nears it; and what is left leaning a section's plays
   (`SectionLength`) and the intro, the outro and the last section played again. A section is made once and every
   appearance drawn again, so that one played more is varied as any is. The tempo is never moved. The steps: (1) a
@@ -295,8 +296,8 @@ genre in the link (`GenreSettings`). What is left:
   collapsing a wild end onto one option). The steps: (1) the engine, the old rule (`ByConvention.Toward`) gone, draws
   with no conventionality of their own by their facet, homes and cadences leaning by the genre's curve over the songs',
   the default genre served from the code, exact, presets converted as they play now; (2) the tempo, a range in beats a
-  minute and a lean within it at each end, replacing its straying; (3) genres out of the links: stored on the server by
-  an 11-character key of a hash of their canonical form, the link carrying the key, the history the key and a copy; (4)
+  minute and a lean within it at each end, replacing its straying; (3) genres out of the links: stored on the server as
+  a song's request brings one, by an 11-character key of a hash of their canonical form, the link carrying the key, the history the key and a copy; (4)
   a preview of a choice's shares along the axis; (5) a mockup of a fine-tune window, an option's three points dragged
   up and down on a chart of weights, the shares beside them; (6) the editor, its sliders 0 to 100, finer at the low end
   and snapping to round amounts, scaling an option's curve; (7) the presets authored, their idioms everywhere and their
