@@ -20,6 +20,8 @@ namespace Rmg.WebApi;
 [JsonSerializable(typeof(VersionResponse))]
 [JsonSerializable(typeof(Admin.SongDescriptionResponse))]
 [JsonSerializable(typeof(IReadOnlyList<Genres.GenreChoiceResponse>))]
+[JsonSerializable(typeof(Genres.GenrePreviewRequest))]
+[JsonSerializable(typeof(Genres.GenrePreviewResponse))]
 internal sealed partial class AppJsonContext : JsonSerializerContext;
 
 /// <summary>What a request the API will not serve is told, as <c>{ "error": "…" }</c>.</summary>

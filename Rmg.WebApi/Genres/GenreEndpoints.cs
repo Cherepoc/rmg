@@ -10,6 +10,11 @@ public static class GenreEndpoints
     {
         routes.MapGet("/api/genres/choices", () => Results.Ok(Choices));
 
+        // what a choice of a genre makes of its options from the plainest songs to the wildest, for the editor's chart
+        routes.MapPost("/api/genres/preview", (GenrePreviewRequest request) => GenrePreview.Of(request, out var error) is { } preview
+            ? Results.Ok(preview)
+            : Results.BadRequest(new ErrorResponse(error!)));
+
         // a genre a link names by its key (GenreStore), as it was asked for
         routes.MapGet("/api/genres/{key}", (string key, GenreStore store) => store.Find(key) is { } body
             ? Results.Content(body, "application/json")
