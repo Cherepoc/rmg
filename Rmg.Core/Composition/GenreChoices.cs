@@ -28,8 +28,8 @@ public static class GenreChoices
     /// </summary>
     public static GenreChoice Tempo { get; } = new("tempo", "Tempo", GenreChoiceKind.Range,
     [
-        new("from", "From", AmountOfTempo(SongGenerator.TempoOptions[0]), true),
-        new("to", "To", AmountOfTempo(SongGenerator.TempoOptions[^1]), true)
+        new("from", "From", Even(AmountOfTempo(SongGenerator.TempoOptions[0]))),
+        new("to", "To", Even(AmountOfTempo(SongGenerator.TempoOptions[^1])))
     ]);
 
     /// <summary>The meter the song's bars are in (<see cref="Composition.Meter.Options" />).</summary>
@@ -42,8 +42,8 @@ public static class GenreChoices
     /// <summary>The chances of the feel's: that the song swings, and that a section's drums play in half or double time.</summary>
     public static GenreChoice FeelChances { get; } = Chances("feelChances", "Swing and half time",
     [
-        ("swing", "Swings", Groove.SwingChance.Tuned), ("halfTime", "A section's drums in half time", Groove.HalfTimeChance),
-        ("doubleTime", "A section's drums in double time", Groove.DoubleTimeChance)
+        ("swing", "Swings", Groove.SwingChance), ("halfTime", "A section's drums in half time", Even(Groove.HalfTimeChance)),
+        ("doubleTime", "A section's drums in double time", Even(Groove.DoubleTimeChance))
     ]);
 
     /// <summary>The values of the feel's: how much a song that swings swings.</summary>
@@ -139,7 +139,7 @@ public static class GenreChoices
             (TrackRole.Melody, "Melody"), (TrackRole.Chords, "Chords"), (TrackRole.Bass, "Bass"), (TrackRole.Pad, "Pad"),
             (TrackRole.CounterMelody, "Counter-melody"), (TrackRole.Drum, "Drums"), (TrackRole.Riff, "Riff"), (TrackRole.RiffTwin, "Riff's twin"),
             (TrackRole.Rhythm, "Rhythm"), (TrackRole.Solo, "Soloist")
-        }.Select(x => (Name(x.Role.ToString()), x.Label, SongParts.ChanceOf(x.Role).Tuned))
+        }.Select(x => (Name(x.Role.ToString()), x.Label, SongParts.ChanceOf(x.Role)))
     ]));
 
     // the riff's twin tagged as playing only with the riff
@@ -185,16 +185,14 @@ public static class GenreChoices
         ..RolesInOrder.Select(x => DrumRoles[x])
     ];
 
-    /// <summary>
-    ///     A pool's choice, every option's default its weight in the middle against the heaviest's, and played where the
-    ///     songs play it at any end.
-    /// </summary>
+    /// <summary>A pool's choice, every option's own weights against every end's heaviest, 0 at an end that allows none.</summary>
     private static GenreChoice Pool(string name, string label, IEnumerable<(string Name, string Label, ByConvention Weight)> options)
     {
         var all = options.ToArray();
-        var heaviest = all.Max(x => x.Weight.Tuned);
+        var (plain, tuned, wild) = (all.Max(x => x.Weight.Plain), all.Max(x => x.Weight.Tuned), all.Max(x => x.Weight.Wild));
+        static double Of(double weight, double heaviest) => heaviest > 0 ? weight / heaviest : 0;
         return new GenreChoice(name, label, GenreChoiceKind.Pool,
-            [..all.Select(x => new GenreOption(x.Name, x.Label, x.Weight.Tuned / heaviest, x.Weight.Plain > 0 || x.Weight.Tuned > 0 || x.Weight.Wild > 0))]);
+            [..all.Select(x => new GenreOption(x.Name, x.Label, new ByConvention(Of(x.Weight.Plain, plain), Of(x.Weight.Tuned, tuned), Of(x.Weight.Wild, wild))))]);
     }
 
     // a weight drawn alike at every conventionality
@@ -215,13 +213,13 @@ public static class GenreChoices
         return $"On C: {string.Join(" ", heights.Select(x => x == Math.Floor(x) ? Note(x) : $"{Note(Math.Floor(x))}/{Note(Math.Ceiling(x))}"))}.";
     }
 
-    /// <summary>A choice of chances, every one's default its chance in a middling song.</summary>
-    private static GenreChoice Chances(string name, string label, IEnumerable<(string Name, string Label, double Chance)> options) =>
-        new(name, label, GenreChoiceKind.Chances, [..options.Select(x => new GenreOption(x.Name, x.Label, x.Chance, true))]);
+    /// <summary>A choice of chances, every one's own its chances as the songs have them.</summary>
+    private static GenreChoice Chances(string name, string label, IEnumerable<(string Name, string Label, ByConvention Chance)> options) =>
+        new(name, label, GenreChoiceKind.Chances, [..options.Select(x => new GenreOption(x.Name, x.Label, x.Chance))]);
 
-    /// <summary>A choice of values, every one's default as it is.</summary>
+    /// <summary>A choice of values, every one's own as it is.</summary>
     private static GenreChoice Values(string name, string label, IEnumerable<(string Name, string Label)> options) =>
-        new(name, label, GenreChoiceKind.Values, [..options.Select(x => new GenreOption(x.Name, x.Label, 0.5, true))]);
+        new(name, label, GenreChoiceKind.Values, [..options.Select(x => new GenreOption(x.Name, x.Label, Even(0.5)))]);
 
     /// <summary>
     ///     A name as a genre gives it: in camel case, its words run together, "harmonicMinor", "electricBassFinger",

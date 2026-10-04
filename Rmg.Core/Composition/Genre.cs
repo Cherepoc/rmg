@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
 
@@ -6,15 +7,16 @@ namespace Rmg.Core.Composition;
 public enum GenreChoiceKind
 {
     /// <summary>
-    ///     A pool: the options the choice keeps to, each its weight from 0 to 1 in a middling song, the ends following the
-    ///     songs' own (<see cref="Probabilities.ByConvention.Weigh{T}(IEnumerable{ValueTuple{T, Probabilities.ByConvention}}, double, Func{T, double?})" />):
-    ///     one at 0 plays only the wilder a song is, and one it does not name never; one alone always.
+    ///     A pool: the options the choice keeps to, each its weights from 0 to 1 at the plain end, in the middle and at the
+    ///     wild, drawn as the songs' own are (<see cref="ByConvention.Weigh{T}(IEnumerable{ValueTuple{T, ByConvention}}, double, Func{T, ByConvention?})" />):
+    ///     one at 0 in the middle and above it at the wild end plays only the wilder a song is, one it does not name never,
+    ///     and one alone always.
     /// </summary>
     Pool,
 
     /// <summary>
-    ///     Chances, each its own, from 0 to 1 in a middling song, the ends following the songs' own: 0 only the wilder a
-    ///     song is, 1 always, and one not named never.
+    ///     Chances, each its own, from 0 to 1 at the plain end, in the middle and at the wild: 1 at every end always, and
+    ///     one not named never.
     /// </summary>
     Chances,
 
@@ -27,13 +29,19 @@ public enum GenreChoiceKind
 
 /// <param name="Name">How a genre names it, unique in its choice.</param>
 /// <param name="Label">How the page shows it.</param>
-/// <param name="Default">
-///     Its amount as the songs have it, which a genre that names its choice starts from: a pool's option's weight in the
-///     middle, the heaviest's 1; a chance's in the middle; a value's 1/2.
+/// <param name="Own">
+///     Its amounts as the songs have them, at the plain end, in the middle and at the wild, which a genre that names its
+///     choice starts from: a pool's option's weight, every end's heaviest 1; a chance's; a value's 1/2, as it is; a range's
+///     end's.
 /// </param>
-/// <param name="IsPlayed">Whether the songs play it at all, at one end or another, which a genre starting from theirs keeps.</param>
-public sealed record GenreOption(string Name, string Label, double Default, bool IsPlayed)
+public sealed record GenreOption(string Name, string Label, ByConvention Own)
 {
+    /// <summary>Its amount as the songs have it in the middle.</summary>
+    public double Default => Own.Tuned;
+
+    /// <summary>Whether the songs play it at all, at one end or another, which a genre starting from theirs keeps.</summary>
+    public bool IsPlayed => Own.Plain > 0 || Own.Tuned > 0 || Own.Wild > 0;
+
     /// <summary>
     ///     What the page needs to know of it besides, such as a drum piece's families, "kit" and "percussion", or another
     ///     option it plays only with, "with:riff".
@@ -55,25 +63,26 @@ public sealed record GenreChoice(string Name, string Label, GenreChoiceKind Kind
 }
 
 /// <summary>
-///     A genre: what it says of the choices the songs draw, every amount from 0 to 1, a choice it does not name as the songs
-///     have it. Made by the page, which keeps it and sends it; the songs know the choices (<see cref="GenreChoices" />),
-///     never a genre. It is not a facet, and leaves the unconventionality as it is.
+///     A genre: what it says of the choices the songs draw, every option's amounts at the plain end, in the middle and at the
+///     wild, each from 0 to 1, a choice it does not name as the songs have it. Made by the page, which keeps it and sends
+///     it; the songs know the choices (<see cref="GenreChoices" />), never a genre. It is not a facet, and leaves the
+///     unconventionality as it is.
 /// </summary>
 /// <param name="Choices">Every choice it names, by its name, and its options' amounts, by theirs.</param>
-public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<string, double>> Choices)
+public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>> Choices)
 {
     /// <summary>No genre: every choice as the songs have it.</summary>
-    public static Genre None { get; } = new(ImmutableDictionary<string, ImmutableDictionary<string, double>>.Empty);
+    public static Genre None { get; } = new(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty);
 
     /// <summary>Whether it names the choice.</summary>
     public bool Names(GenreChoice choice) => Choices.ContainsKey(choice.Name);
 
     /// <summary>
-    ///     The pool of a choice, every option's weight in its middle by the option's name, none for one it leaves out; none
+    ///     The pool of a choice, every option's weights at its ends by the option's name, none for one it leaves out; none
     ///     where the genre does not name the choice, which is then as the songs have it.
     /// </summary>
     /// <param name="name">An option's name, as the choice gives it.</param>
-    public Func<T, double?>? Pool<T>(GenreChoice choice, Func<T, string> name)
+    public Func<T, ByConvention?>? Pool<T>(GenreChoice choice, Func<T, string> name)
     {
         if (choice.Kind != GenreChoiceKind.Pool)
             throw new ArgumentException($"The choice {choice.Name} is not a pool.", nameof(choice));
@@ -84,50 +93,44 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
         {
             var named = name(option);
             _ = choice[named];
-            return pool.TryGetValue(named, out var weight) ? weight : null;
+            return pool.TryGetValue(named, out var weights) ? weights : null;
         };
     }
 
     /// <summary>
-    ///     The lean of a choice's options, for one drawn in roles of their own weights: every option's weight in the pool
-    ///     over its weight as the songs have it, the least of those taken as <see cref="LeastWeight" />; none for one it
-    ///     leaves out, and none where the genre does not name the choice.
+    ///     The pool of a choice and the songs' own weights beside it, for one drawn in roles of its own weights, which the
+    ///     pool leans by its weights over the songs' (<see cref="ByConvention.Lean{T}" />); none for an option it leaves
+    ///     out, and none where the genre does not name the choice.
     /// </summary>
-    public Func<T, double?>? Lean<T>(GenreChoice choice, Func<T, string> name) => Pool(choice, name) is { } pool
-        ? option => pool(option) is { } weight ? weight / Math.Max(LeastWeight, choice[name(option)].Default) : null
+    public Func<T, (ByConvention Pool, ByConvention Songs)?>? Lean<T>(GenreChoice choice, Func<T, string> name) => Pool(choice, name) is { } pool
+        ? option => pool(option) is { } weights ? (weights, choice[name(option)].Own) : null
         : null;
 
-    /// <summary>The least weight a genre gives an option above 0, as a part of the heaviest's.</summary>
-    public const double LeastWeight = 0.01;
-
     /// <summary>
-    ///     A chance's pool of its yes (true) and its no (false), the yes's weight its chance in the middle: the yes alone
-    ///     where it is 1, the no alone where the genre names the choice but not the chance; none where it does not name
-    ///     the choice, for the chance as it is.
+    ///     A chance's chances at its ends; never where the genre names the choice but not the chance; none where it does not
+    ///     name the choice, for the chance as it is.
     /// </summary>
-    public Func<bool, double?>? Chance(GenreChoice choice, string option)
+    public ByConvention? Chance(GenreChoice choice, string option)
     {
         Check(choice, GenreChoiceKind.Chances, option);
         if (!Choices.TryGetValue(choice.Name, out var chances))
             return null;
-
-        double? chance = chances.TryGetValue(option, out var named) ? named : null;
-        return yes => yes ? chance : chance is { } c ? c < 1 ? 1 - c : null : 1;
+        return chances.TryGetValue(option, out var chance) ? chance : default(ByConvention);
     }
 
-    /// <summary>A range's ends, from 0 to 1, the first no greater; none where it is not named.</summary>
+    /// <summary>A range's ends in the middle, from 0 to 1, the first no greater; none where it is not named.</summary>
     public (double From, double To)? Range(GenreChoice choice)
     {
         if (choice.Kind != GenreChoiceKind.Range)
             throw new ArgumentException($"The choice {choice.Name} is not a range.", nameof(choice));
-        return Choices.TryGetValue(choice.Name, out var ends) ? (ends["from"], ends["to"]) : null;
+        return Choices.TryGetValue(choice.Name, out var ends) ? (ends["from"].Tuned, ends["to"].Tuned) : null;
     }
 
     /// <summary>A value's shift, from -1, its least, through 0, as it is, to 1, its most.</summary>
     public double Shift(GenreChoice choice, string option)
     {
         Check(choice, GenreChoiceKind.Values, option);
-        return Choices.TryGetValue(choice.Name, out var values) && values.TryGetValue(option, out var value) ? 2 * value - 1 : 0;
+        return Choices.TryGetValue(choice.Name, out var values) && values.TryGetValue(option, out var value) ? 2 * value.Tuned - 1 : 0;
     }
 
     private static void Check(GenreChoice choice, GenreChoiceKind kind, string option)
@@ -138,13 +141,14 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
     }
 
     /// <summary>
-    ///     A genre read from its choices' names, its options' and their amounts, or what is wrong with it: a choice or an
-    ///     option the songs do not have, an amount outside 0 to 1, a pool that keeps nothing, or a range not of two ends in order.
+    ///     A genre read from its choices' names, its options' and their amounts at the plain end, in the middle and at the
+    ///     wild, or what is wrong with it: a choice or an option the songs do not have, an amount outside 0 to 1, a pool that
+    ///     keeps nothing, or a range not of two ends in order.
     /// </summary>
-    public static Genre? Read(IReadOnlyDictionary<string, IReadOnlyDictionary<string, double>> choices, out string? error)
+    public static Genre? Read(IReadOnlyDictionary<string, IReadOnlyDictionary<string, ByConvention>> choices, out string? error)
     {
         error = null;
-        var read = ImmutableDictionary.CreateBuilder<string, ImmutableDictionary<string, double>>();
+        var read = ImmutableDictionary.CreateBuilder<string, ImmutableDictionary<string, ByConvention>>();
         foreach (var (name, options) in choices)
         {
             var choice = GenreChoices.All.FirstOrDefault(x => x.Name == name);
@@ -160,7 +164,7 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
                 return null;
             }
 
-            if (options.Values.Any(x => x is < 0 or > 1 or double.NaN))
+            if (options.Values.SelectMany(x => new[] { x.Plain, x.Tuned, x.Wild }).Any(x => x is < 0 or > 1 or double.NaN))
             {
                 error = $"An amount of {name} is not from 0 to 1.";
                 return null;
@@ -172,7 +176,7 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
                 return null;
             }
 
-            if (choice.Kind == GenreChoiceKind.Range && !(options.TryGetValue("from", out var from) && options.TryGetValue("to", out var to) && from <= to))
+            if (choice.Kind == GenreChoiceKind.Range && !(options.TryGetValue("from", out var from) && options.TryGetValue("to", out var to) && from.Tuned <= to.Tuned))
             {
                 error = $"The range of {name} is from one end to the other, the first no greater.";
                 return null;

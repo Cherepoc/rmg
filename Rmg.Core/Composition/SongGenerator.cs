@@ -63,7 +63,7 @@ public static class SongGenerator
             throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Swing, "A swing is from 0 to 1.");
         if (overrides.Scale is { } given && !Scales.All.Contains(given))
             throw new ArgumentOutOfRangeException(nameof(overrides), given.Name, "A scale is one of the scales.");
-        if (overrides.Genre?.Choices.Any(x => x.Value.Values.Any(v => v is < 0 or > 1 or double.NaN)) == true)
+        if (overrides.Genre?.Choices.Any(x => x.Value.Values.Any(v => new[] { v.Plain, v.Tuned, v.Wild }.Any(a => a is < 0 or > 1 or double.NaN))) == true)
             throw new ArgumentOutOfRangeException(nameof(overrides), "A genre's amounts are from 0 to 1.");
         if (overrides.DrumPieces is { } pieces && (pieces.IsEmpty || !pieces.All(DrumPieces.IsPiece)))
             throw new ArgumentOutOfRangeException(nameof(overrides), "Drums given are one or more of the drum pieces.");

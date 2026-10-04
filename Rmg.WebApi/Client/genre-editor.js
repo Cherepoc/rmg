@@ -11,21 +11,22 @@ import { isShowingGenrePrinciples, setShowingGenrePrinciples } from "./storage.j
  *     back to its default on a double-click, and a scale and a chord shape say over their names how they sound. The parts
  *     playing come first, then a tab for every part: a pitched part's instruments, rhythm and feel, and the drums' kit,
  *     pieces and setup, and a tab for every role of them, its drums of the pieces chosen, its rhythm and its feel. The
- *     draft is played or saved as the page says (app.js), and exported to and imported from a JSON file. A value shows
- *     its lean from as it is, a chance its chance in a middling song, and a pool's weight its amount, on steps finer at
- *     the low end (/api/genres/choices).
+ *     draft is played or saved as the page says (app.js), and exported to and imported from a JSON file. Every amount is
+ *     a whole percent, an option's one alike at every end or three, at the plain end, in the middle and at the wild; a
+ *     slider sets its middle, its ends moving alike, as the songs have them where the slider comes to its default: a value
+ *     shows its lean from as it is, a chance its chance in a middling song, and a pool's weight its weight there.
  */
 
 /** A pool's weight where an option is checked or added with none of its own, and where the instruments start from: half the heaviest's or more. */
-const ADDED_WEIGHT = 0.5;
+const ADDED_WEIGHT = 50;
 
-/** The last step of a value's or a range's 64. */
-const LAST_STEP = 63;
+/** The most of any amount, a whole percent. */
+const MOST = 100;
 
 const PITCHED = [["melody", "Melody"], ["chords", "Chords"], ["bass", "Bass"], ["pad", "Pad"], ["counterMelody", "Counter-melody"], ["riff", "Riff"], ["rhythm", "Rhythm"], ["solo", "Soloist"]];
 const ROLES = [["ground", "Ground (kick)"], ["backbeat", "Backbeat (snare)"], ["time", "Time (hi-hat)"], ["colour", "Colour (toms)"]];
 
-export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) {
+export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     let choices = new Map();
     let draft = { name: "", choices: {} };
     // every pool's options as it was unchecked, for it to come back to, by its choice's name
@@ -135,46 +136,78 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         for (const said of dialog.querySelectorAll(".genre-meaning")) said.show();
     }
 
+    // --- an option's amounts: one alike at every end, or three, at the plain end, in the middle and at the wild ---------
+
+    /** An option's amounts at its three ends, in whole percents. */
+    const endsOf = (amount) => (Array.isArray(amount) ? amount : [amount, amount, amount]);
+
+    /** Amounts as a genre writes them: one where they are alike, three otherwise. */
+    const written = ([plain, middle, wild]) => (plain === middle && middle === wild ? middle : [plain, middle, wild]);
+
+    /** Its amount in a middling song, which the slider sets. */
+    const middleOf = (amount) => endsOf(amount)[1];
+
+    /**
+     *     The amounts with the middle moved and the ends moved alike, by its ratio, so that a curve keeps its shape; the
+     *     ends as they are where the middle comes to 0 or comes from it, so that an option of the wild end alone stays so.
+     */
+    function withMiddle(amount, middle) {
+        const [plain, was, wild] = endsOf(amount);
+        if (was === 0 || middle === 0) return written([plain, middle, wild]);
+        const moved = (x) => Math.min(MOST, Math.round((x * middle) / was));
+        return written([moved(plain), middle, moved(wild)]);
+    }
+
+    /** An option's amounts as the songs have them (/api/genres/choices), in whole percents. */
+    const ownOf = (option) => written(option.own.map((x) => Math.round(MOST * x)));
+
+    /** An option's amounts with its slider moved: the curve it starts from where the slider comes to its default, as a double-click brings it, and otherwise the middle moved (withMiddle). */
+    const moved = (amount, middle, start) => (middle === middleOf(start) ? start : withMiddle(amount, middle));
+
+    /** Whether the songs play an option at all, at one end or another. */
+    const isPlayed = (option) => option.own.some((x) => x > 0);
+
     const EXPERIMENTAL_ONLY = "experimental songs only";
     const EVERY_SONG = "every song";
 
-    /** What a pool's weight means: its share of the middling songs among the options kept, every song where it is alone, and at 0 experimental songs only. */
-    const weightMeaning = (choice) => (step) => {
+    /** What an option at 0 in the middle means: experimental songs only where the wild end plays it, never otherwise. */
+    const atNothing = (amount) => (endsOf(amount)[2] > 0 ? EXPERIMENTAL_ONLY : "never");
+
+    /** What a pool's weight means: its share of the middling songs among the options kept, every song where it is alone. */
+    const weightMeaning = (choice, option) => (middle) => {
         const options = draft.choices[choice.name] ?? {};
         const kept = Object.values(options);
         if (kept.length === 1) return EVERY_SONG;
-        if (step === 0) return EXPERIMENTAL_ONLY;
-        const total = kept.reduce((sum, x) => sum + choice.amounts[x], 0);
-        return `${Math.round((100 * choice.amounts[step]) / total)}% of middling songs`;
+        if (middle === 0) return atNothing(options[option.name]);
+        const total = kept.reduce((sum, x) => sum + middleOf(x), 0);
+        return `${Math.round((MOST * middle) / total)}% of middling songs`;
     };
 
-    /** What a chance means: in middling songs, every song at its last step, and experimental songs only at 0. */
-    const chanceMeaning = (choice) => (step) => (step === 0 ? EXPERIMENTAL_ONLY : step === choice.amounts.length - 1 ? EVERY_SONG : "of middling songs");
+    /** What a chance means: in middling songs, every song where it is so at every end. */
+    const chanceMeaning = (choice, option) => (middle) => {
+        const amount = draft.choices[choice.name]?.[option.name];
+        if (middle === 0) return atNothing(amount);
+        return endsOf(amount ?? middle).every((x) => x === MOST) ? EVERY_SONG : "of middling songs";
+    };
 
-    /** What a value means: as the songs have it in the middle, more or less of it either side. */
-    const valueMeaning = (step) => (step === 32 ? "as the songs have it" : step > 32 ? "more" : "less");
+    /** What a value means: as the songs have it at 50, more or less of it either side. */
+    const valueMeaning = (middle) => (middle === MOST / 2 ? "as the songs have it" : middle > MOST / 2 ? "more" : "less");
 
-    /** A value's step from 0 to 100, step 32 at 50, a half of the steps either side. */
-    const percentOf = (step) => Math.round(step <= 32 ? step * 50 / 32 : 50 + (step - 32) * 50 / 31);
+    /** A pool's weight. */
+    const asWeight = (middle) => String(middle);
 
-    /** A pool's or a chance's step as its amount, by its choice's steps (/api/genres/choices), in percent. */
-    const percentAt = (choice, step) => Math.round(choice.amounts[step] * 100);
-
-    /** The step of a pool's or a chance's amount, the nearest. */
-    const stepAt = (choice, amount) => choice.amounts.reduce((best, x, i) => (Math.abs(x - amount) < Math.abs(choice.amounts[best] - amount) ? i : best), 0);
-
-    /** A pool's weight, from 0 to 100. */
-    const asWeight = (choice) => (step) => String(percentAt(choice, step));
-
-    /** A value's lean from as it is, at the middle, to its least, -100, or its most, +100. */
-    const asLean = (step) => {
-        if (step === 32) return "as is";
-        const lean = 2 * percentOf(step) - 100;
+    /** A value's lean from as it is, at 50, to its least, -100, or its most, +100. */
+    const asLean = (middle) => {
+        if (middle === MOST / 2) return "as is";
+        const lean = 2 * middle - MOST;
         return `${lean > 0 ? "+" : "−"}${Math.abs(lean)}`;
     };
 
     /** A chance in a middling song, in percent. */
-    const asChance = (choice) => (step) => `${percentAt(choice, step)}%`;
+    const asChance = (middle) => `${middle}%`;
+
+    /** A tempo's amount, from 0, 60 beats a minute, through 50, 120, to 100, 240, as beats a minute. */
+    const tempoOf = (amount) => Math.round(60 * 4 ** (amount / MOST));
 
     function heading(title) {
         const element = document.createElement("h4");
@@ -234,11 +267,11 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         };
     }
 
-    /** A weight where an option is checked or added: its own, 0 for one the songs play only the wilder they are, or ADDED_WEIGHT for one they never play. */
-    const weightOf = (choice, option) => (option.isPlayed ? option.default : stepAt(choice, ADDED_WEIGHT));
+    /** A weight where an option is checked or added: its own, or ADDED_WEIGHT at every end for one the songs never play. */
+    const weightOf = (option) => (isPlayed(option) ? ownOf(option) : ADDED_WEIGHT);
 
-    /** A pool's options as the songs have them: every one they play, at its weight in the middle, 0 for one they play only the wilder they are. */
-    const asTheSongsHaveThem = (options) => Object.fromEntries(options.filter((x) => x.isPlayed).map((x) => [x.name, x.default]));
+    /** A pool's options as the songs have them: every one they play, at its own weights. */
+    const asTheSongsHaveThem = (options) => Object.fromEntries(options.filter(isPlayed).map((x) => [x.name, ownOf(x)]));
 
     /**
      *     A short pool: its checkbox, its title, then every option it may keep, a checkbox and a slider of its weight;
@@ -267,14 +300,14 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                     const check = checkbox(option.label);
                     check.input.checked = kept !== undefined;
                     check.input.addEventListener("change", () => {
-                        if (check.input.checked) options[option.name] = weightOf(choice, option);
+                        if (check.input.checked) options[option.name] = weightOf(option);
                         else delete options[option.name];
                         changed();
                     });
-                    const weight = slider(`${choice.label}: ${option.label}`, 0, choice.amounts.length - 1, kept ?? weightOf(choice, option), weightOf(choice, option), (value) => {
-                        options[option.name] = value;
+                    const weight = slider(`${choice.label}: ${option.label}`, 0, MOST, middleOf(kept ?? weightOf(option)), middleOf(weightOf(option)), (value) => {
+                        options[option.name] = moved(options[option.name], value, weightOf(option));
                         showProblem();
-                    }, asWeight(choice), weightMeaning(choice), []);
+                    }, asWeight, weightMeaning(choice, option), []);
                     // an option left out its checkbox alone, its weight once it is in
                     weight.hidden = kept === undefined;
                     row.append(check.element, weight);
@@ -296,12 +329,12 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         const add = button("Add", "Add the next instrument", () => {
             const options = draft.choices[choice.name];
             const unused = choice.options.find((x) => !(x.name in options));
-            options[unused.name] = weightOf(choice, unused);
+            options[unused.name] = weightOf(unused);
             changed();
         }, "genre-add");
         pool.append(rows, add);
         // the commonest the songs have, as they have them
-        const choose = chosen(title, pool, (bound) => asTheSongsHaveThem(bound.options.filter((x) => bound.amounts[x.default] >= ADDED_WEIGHT)));
+        const choose = chosen(title, pool, (bound) => asTheSongsHaveThem(bound.options.filter((x) => middleOf(ownOf(x)) >= ADDED_WEIGHT)));
         element.append(pool);
 
         return {
@@ -327,10 +360,10 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                         options[select.value] = weight;
                         changed();
                     });
-                    const weight = slider(`${choice.label}: ${option.label}`, 0, choice.amounts.length - 1, options[option.name], weightOf(choice, option), (value) => {
-                        options[option.name] = value;
+                    const weight = slider(`${choice.label}: ${option.label}`, 0, MOST, middleOf(options[option.name]), middleOf(weightOf(option)), (value) => {
+                        options[option.name] = moved(options[option.name], value, weightOf(option));
                         showProblem();
-                    }, asWeight(choice), weightMeaning(choice), []);
+                    }, asWeight, weightMeaning(choice, option), []);
                     row.append(select, weight, button("×", `Leave out ${option.label}`, () => {
                         delete options[option.name];
                         changed();
@@ -369,7 +402,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                     named.input.disabled = partner !== null && !(partner in (draft.choices[choice.name] ?? {}));
                     named.input.addEventListener("change", () => {
                         const options = (draft.choices[choice.name] ??= {});
-                        if (named.input.checked) options[option.name] = option.default;
+                        if (named.input.checked) options[option.name] = ownOf(option);
                         else {
                             delete options[option.name];
                             for (const other of choice.options.filter((x) => partnerOf(x) === option.name)) delete options[other.name];
@@ -377,10 +410,11 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                         if (!isChances && Object.keys(options).length === 0) delete draft.choices[choice.name];
                         changed();
                     });
-                    const range = slider(`${choice.label}: ${option.label}`, 0, isChances ? choice.amounts.length - 1 : LAST_STEP, value ?? option.default, option.default, (step) => {
-                        draft.choices[choice.name][option.name] = step;
+                    const range = slider(`${choice.label}: ${option.label}`, 0, MOST, middleOf(value ?? ownOf(option)), middleOf(ownOf(option)), (middle) => {
+                        const options = draft.choices[choice.name];
+                        options[option.name] = moved(options[option.name], middle, ownOf(option));
                         showProblem();
-                    }, isChances ? asChance(choice) : asLean, isChances ? chanceMeaning(choice) : valueMeaning, []);
+                    }, isChances ? asChance : asLean, isChances ? chanceMeaning(choice, option) : valueMeaning, []);
                     range.hidden = value === undefined;
                     row.append(named.element, range);
                     return row;
@@ -423,7 +457,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
     }
 
     /** Chances or values, every one named as the songs have it in the middle. */
-    const asTheyAre = (choice) => Object.fromEntries(choice.options.map((x) => [x.name, x.default]));
+    const asTheyAre = (choice) => Object.fromEntries(choice.options.map((x) => [x.name, ownOf(x)]));
 
     /** The tempo: its checkbox, its title, named or the songs', and its range, from and to, shown in beats a minute. */
     function rangeField(title) {
@@ -434,7 +468,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         const shown = document.createElement("output");
         let choice = null;
         // the ends kept in order, the other moving with the one moved past it, the sliders kept as they are dragged
-        const [from, to] = ["from", "to"].map((end) => slider(`Tempo: ${end}`, 0, LAST_STEP, 0, 0, (step) => {
+        const [from, to] = ["from", "to"].map((end) => slider(`Tempo: ${end}`, 0, MOST, 0, 0, (step) => {
             const range = draft.choices[choice.name];
             range[end] = step;
             if (range.from > range.to) range[end === "from" ? "to" : "from"] = step;
@@ -449,11 +483,11 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         const named = chosen(title, range, asTheyAre);
 
         function showRange() {
-            const range = draft.choices[choice.name] ?? { from: choice.options[0].default, to: choice.options[1].default };
-            from.querySelector("input").value = String(range.from);
-            to.querySelector("input").value = String(range.to);
-            from.querySelector("input").dataset.default = String(choice.options[0].default);
-            to.querySelector("input").dataset.default = String(choice.options[1].default);
+            const range = draft.choices[choice.name] ?? asTheyAre(choice);
+            from.querySelector("input").value = String(middleOf(range.from));
+            to.querySelector("input").value = String(middleOf(range.to));
+            from.querySelector("input").dataset.default = String(middleOf(ownOf(choice.options[0])));
+            to.querySelector("input").dataset.default = String(middleOf(ownOf(choice.options[1])));
             shown.textContent = `${tempoOf(range.from)}–${tempoOf(range.to)} bpm`;
             showMeanings();
         }
@@ -613,7 +647,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
     principlesList.append(...[
         "A genre sets what a middling song does. Plainer songs keep to its commonest options; wilder ones stray from it, towards what it makes rare.",
         "A checked choice is the genre's; an unchecked one is as the songs have it without a genre.",
-        "An option unchecked never plays. At 0 it plays only in experimental songs. A chance at 100%, or the only option kept, plays in every song.",
+        "An option unchecked never plays. At 0 it plays only in the experimental songs its wild end weighs. A chance at 100% at every end, or the only option kept, plays in every song.",
         "A weight is a share among the options kept; a chance is out of 100 middling songs.",
         "Double-click a slider to put it back as the songs have it.",
     ].map((text) => {

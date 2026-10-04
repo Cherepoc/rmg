@@ -70,7 +70,7 @@ public sealed class GenreRhythmReportTest
     }
 
     private static Genre Of(params (RhythmPart Part, (string Setting, double Amount)[] Settings)[] parts) =>
-        new(parts.ToImmutableDictionary(x => GenreChoices.Rhythms[x.Part].Name, x => x.Settings.ToImmutableDictionary(y => y.Setting, y => y.Amount)));
+        new(parts.ToImmutableDictionary(x => GenreChoices.Rhythms[x.Part].Name, x => x.Settings.ToImmutableDictionary(y => y.Setting, y => new Rmg.Core.Probabilities.ByConvention(y.Amount, y.Amount, y.Amount))));
 
     [Test]
     [Explicit]

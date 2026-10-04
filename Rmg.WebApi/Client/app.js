@@ -14,12 +14,14 @@ import {
     isKeeping,
     keep,
     keepHistory,
+    keepGenre,
     keepGenres,
     keepRating,
     keepSettings,
     recall,
     recallHistory,
     recallRating,
+    recallGenre,
     recallGenres,
     recallSettings,
     setAutoplaying,
@@ -31,8 +33,6 @@ import {
     FACETS,
     formatSettings,
     fromStep,
-    hasGenre,
-    hasGenreChoices,
     identityOf,
     LAST_STEP,
     MIDDLE_STEP,
@@ -40,9 +40,7 @@ import {
     PARTS,
     PLAYS,
     readSeed,
-    setGenreChoices,
     toStep,
-    withoutGenre,
 } from "./settings.js";
 import { applyReport, defaultSettings, givenOnly, isEveryPartOff, noGenre, requestFor } from "./song-settings.js";
 import { asGenre, hasAGenre, isSameGenre, PRESETS } from "./genres.js";
@@ -102,9 +100,6 @@ const elements = {
 const muted = new Set();
 const soloed = new Set();
 const rows = new Map();
-
-/** Whether the settings kept have a genre the page has not read yet, for want of the choices it is written by. */
-let isGenreUnread = false;
 
 // the settings every song is asked for with, and the one on the page heard with (song-settings.js): every value given,
 // or as the song on the page drew it; kept in this browser for the next visit
@@ -1059,21 +1054,16 @@ elements.download.addEventListener("click", () => {
 
 // --- the settings kept -----------------------------------------------------
 
-/**
- *     The settings this browser left last time, every value given as it was; none given on a first visit. A genre among
- *     them waits for the choices it is written by, which the page asks the server for as it opens (start); until then
- *     they are read without it, and not kept over what was kept.
- */
+/** The settings and the genre this browser left last time, every value given as it was; none given on a first visit. */
 function restoreSettings() {
-    const recalled = recallSettings();
-    isGenreUnread = hasGenre(recalled) && !hasGenreChoices();
-    const kept = parseSettings(isGenreUnread ? withoutGenre(recalled) : recalled);
-    return kept === null ? defaultSettings() : givenOnly(kept);
+    const kept = parseSettings(recallSettings());
+    return { ...(kept === null ? defaultSettings() : givenOnly(kept)), genre: recallGenre() ?? noGenre() };
 }
 
 /** Keeps the settings for the next visit, and says how many of them change the song. */
 function keepCurrentSettings() {
-    if (!isGenreUnread) keepSettings(formatSettings(givenOnly(settings)));
+    keepSettings(formatSettings(givenOnly(settings)));
+    keepGenre(hasAGenre(settings.genre) ? settings.genre : null);
     const given = [settings.unconventionality, settings.tempo, settings.key, settings.mode, settings.meter, settings.swing, settings.length, ...FACETS.map((facet) => settings.facets[facet])].filter((x) => x.isGiven).length
         + PARTS.filter((part) => settings.parts[part].plays !== "random").length
         + (settings.drumPieces.isGiven ? 1 : 0)
@@ -1586,8 +1576,6 @@ const genreEditor = createGenreEditor({
         showGenre();
     },
     isOwn: (name) => recallGenres().some((x) => x.name === name),
-    // a tempo's step in beats a minute, as the server lists the tempos
-    tempoOf: (step) => (tempos.length > step ? Math.round(tempos[step]) : "…"),
 });
 document.body.append(genreEditor.element);
 
@@ -2483,16 +2471,8 @@ start();
  *     gesture, and pressing play is one.
  */
 async function start() {
-    // the choices a genre is written by, which a genre in the link or kept here waits for, and nothing else does
-    const choices = listGenreChoices();
-    if (isGenreUnread || hasGenre(new URL(location.href).searchParams.get("settings")?.trim())) {
-        await choices;
-        if (isGenreUnread) {
-            settings = restoreSettings();
-            showSettings();
-            keepCurrentSettings();
-        }
-    }
+    // the choices a genre may name, which its editor needs and nothing else waits for
+    listGenreChoices();
 
     const linked = linkedSong();
     track("page_open", { detail: linked.wasAsked ? "link" : "fresh" });
@@ -2547,7 +2527,6 @@ async function listGenreChoices() {
         const response = await fetch(new URL("api/genres/choices", location.href));
         if (!response.ok) return null;
         const choices = await response.json();
-        setGenreChoices(choices);
         genreChoices = choices;
         genreSelect.disabled = genreEdit.disabled = false;
         return choices;

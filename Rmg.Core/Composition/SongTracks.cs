@@ -297,7 +297,7 @@ internal sealed class SongTracks
 
         // the song has its own drums, and the drums picked by the section kit play in a section
         var drawnDrums = DrumSetups.SelectSongDrums(context, drumSetup, genre.Pool<PercussionInstrumentDefinition>(GenreChoices.DrumPieces, DrumPieces.NameOf) is { } pieces
-            ? ByConvention.Within(DrumGroups.AllDrums.Select(x => (x, x.Weight)), rhythmicUnconventionality.Value, pieces)
+            ? ByConvention.Within(DrumGroups.AllDrums, rhythmicUnconventionality.Value, pieces)
             : null);
         var songDrums = givenDrums ?? drawnDrums;
         foreach (var drumGroup in DrumGroups.All)

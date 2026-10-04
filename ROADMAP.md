@@ -280,25 +280,22 @@ genre in the link (`GenreSettings`). What is left:
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
   half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
   alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.
-- **A genre's three points** (P1, planned): every option a genre names is three amounts, 0 to 100, its plainest
-  songs', its middling ones' and its wildest ones', drawn by `ByConvention` as the generator's own are, so that a genre
-  has its own idea of plain and of experimental: plain funk in Dorian, the split third everywhere in blues, wild rock in
-  odd meters (`EveryPreset_ChoicesByEnd` shows the derived ends inheriting the generator's pop-centred plain end and
-  collapsing a wild end onto one option). The steps: (1) the engine, the old rule (`ByConvention.Toward`) gone, draws
-  with no conventionality of their own by their facet, homes and cadences leaning by the genre's curve over the songs',
-  the default genre served from the code, exact, presets converted as they play now; (2) the tempo, a range in beats a
-  minute and a lean within it at each end, replacing its straying; (3) genres out of the links: stored on the server as
-  a song's request brings one, by an 11-character key of a hash of their canonical form, the link carrying the key, the history the key and a copy; (4)
-  a preview of a choice's shares along the axis; (5) a mockup of a fine-tune window, an option's three points dragged
-  up and down on a chart of weights, the shares beside them; (6) the editor, its sliders 0 to 100, finer at the low end
-  and snapping to round amounts, scaling an option's curve; (7) the presets authored, their idioms everywhere and their
-  experimental directions experimental only.
-- **Listening to the genres' wild ends:** a genre's middle is its own and its ends follow the songs', the wild giving
-  back what the genre makes rare (`ByConvention.Toward`). The wildest Jazz songs swing in 39% and Blues in 11%, the
-  wild end giving back the straight feel the genre takes. Homes and cadences
-  lean by the genre's weights over the songs', so that Rock's cadences take its sus4 often (22% of its chords). A
-  tempo range strays as the wild end nears, the wildest songs out of it as often as the songs' own tempos are: all of
-  Ambient's, most of Reggae's and Hip-hop's narrow ranges (`EveryPreset_PlainMiddlingAndWild`).
+- **A genre's three points** (P1, under way): every option a genre names is three amounts in whole percents, its
+  plainest songs', its middling ones' and its wildest ones', drawn as the generator's own are (`ByConvention.Weigh`),
+  the songs' own served as the choices' (`GenreOption.Own`); the presets written as the old rule played them. A link
+  carries no genre until the store; the page keeps the one in use. The steps left: (2) the tempo, a range in beats a
+  minute and a lean within it at each end, replacing its straying; (3) genres stored on the server as a song's request
+  brings one, by an 11-character key of a hash of their canonical form, the link carrying the key, the history the
+  key and a copy; (4) a preview of a choice's shares along the axis; (5) a mockup of a fine-tune window, an option's
+  three points dragged up and down on a chart of weights, the shares beside them; (6) the editor's sliders finer at
+  the low end and snapping to round amounts; (7) the presets authored, their idioms everywhere and their experimental
+  directions experimental only.
+- **Listening to the genres' wild ends:** the presets' ends are the old rule's, which gave back at the wild end what a
+  genre made rare: Rock's meter 4/4 at 2 and 6/8 at 100 there, so that its wildest songs are in 6/8; the wildest Jazz
+  songs swing in 39% and Blues in 11%; the wildest Funk's chords 76% seven-sharp-nine (`EveryPreset_ChoicesByEnd`).
+  For the presets' authoring (step 7). A tempo range strays as the wild end nears, the wildest songs out of it as
+  often as the songs' own tempos are: all of Ambient's, most of Reggae's and Hip-hop's narrow ranges
+  (`EveryPreset_PlainMiddlingAndWild`), until the tempo's own three points (step 2).
 - **How the wild end swings:** a swing is as likely in the wildest songs as in a middling one, and the principle has
   the wild end choose how it is played instead, such as a heavier swing or one past the triplet's; the amount is drawn
   alike at every conventionality now (`Groove.Generate`).

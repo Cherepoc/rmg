@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
+using Rmg.Core.Probabilities;
 using Rmg.Core.Events;
 using Rmg.Core.Songs;
 
@@ -60,7 +61,7 @@ public sealed class GenreReportTest
             ["instrument.melody"] = ImmutableDictionary<string, double>.Empty.Add("tenorSax", 1).Add("altoSax", 1).Add("trumpet", 0.8).Add("mutedTrumpet", 0.5),
             ["tempo"] = ImmutableDictionary<string, double>.Empty.Add("from", GenreChoices.AmountOfTempo(1)).Add("to", GenreChoices.AmountOfTempo(1.4)),
             ["chordShape"] = ImmutableDictionary<string, double>.Empty.Add("seventh", 1).Add("ninth", 0.6).Add("shell", 0.5).Add("sixNine", 0.3).Add("triad", 0.2)
-        }.ToImmutableDictionary());
+        }.ToImmutableDictionary(x => x.Key, x => x.Value.ToImmutableDictionary(y => y.Key, y => new ByConvention(y.Value, y.Value, y.Value))));
 
         Report("none", TestCorpus.Measure(Count, Measure));
         var songs = TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)));

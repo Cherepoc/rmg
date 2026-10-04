@@ -157,12 +157,12 @@ internal static class ChordShapes
     /// <summary>
     ///     A shape of a level drawn from those given at the chords' unconventionality, or, within a genre's pool of the
     ///     shapes, a shape drawn at once among the levels' shapes, each weighing its level's weight times its share of it:
-    ///     the pool's weights the middle of a chord's (<see cref="ByConvention.Weigh{T}(IEnumerable{ValueTuple{T, ByConvention}}, double, Func{T, double?})" />),
+    ///     the pool's weights a chord's (<see cref="ByConvention.Weigh{T}(IEnumerable{ValueTuple{T, ByConvention}}, double, Func{T, ByConvention?})" />),
     ///     and leaning a home's own (<see cref="ByConvention.Lean{T}" />), which stays plainer.
     /// </summary>
     /// <param name="isOwn">Whether the levels are a role's own, such as a home's, which the pool leans rather than sets.</param>
-    /// <summary>A genre's pool of the shapes: every shape's weight in its middle, and its lean, its weight over the songs'.</summary>
-    public sealed record GenrePool(Func<ChordShape, double?> Middle, Func<ChordShape, double?> Lean);
+    /// <summary>A genre's pool of the shapes: every shape's weights at its ends, and those beside the songs', which a role's own lean by.</summary>
+    public sealed record GenrePool(Func<ChordShape, ByConvention?> Middle, Func<ChordShape, (ByConvention Pool, ByConvention Songs)?> Lean);
 
     public static ChordShape Pick(IGenerationContext context, ImmutableArray<(int Level, ByConvention Weight)> levels, double unconventionality, GenrePool? pool, bool isOwn)
     {

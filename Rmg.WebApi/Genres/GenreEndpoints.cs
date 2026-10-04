@@ -18,23 +18,24 @@ public static class GenreEndpoints
             x.Name,
             x.Label,
             x.Kind.ToString().ToLowerInvariant(),
-            [..x.Options.Select(o => new GenreOptionResponse(o.Name, o.Label, ShareScale.StepOf(x, o.Default), o.IsPlayed, o.Tags, o.Description))],
-            ShareScale.Steps(x) ? ShareScale.Amounts : null
+            [..x.Options.Select(o => new GenreOptionResponse(o.Name, o.Label, [o.Own.Plain, o.Own.Tuned, o.Own.Wild], o.Tags, o.Description))]
         ))
     ];
 }
 
 /// <param name="Name">How a genre names it, such as "meter".</param>
 /// <param name="Label">How the page shows it.</param>
-/// <param name="Kind">"pool", its options a pool each weighing in a middling song a step of its amounts, 0 only in wilder songs, one left out never; "chances", each its chance in a middling song a step of its amounts, 0 only in wilder songs, the last always, one left out never; "values", each from 0, its least, through 32, as it is, to 63, its most; or "range", its "from" and "to" the steps of its ends, the first no greater.</param>
+/// <param name="Kind">"pool", its options a pool, each its weights at the ends, one left out never; "chances", each its chances at the ends, one left out never; "values", each from 0, its least, through 50, as it is, to 100, its most; or "range", its "from" and "to" its ends, the first no greater. A genre gives every amount in whole percents (<see cref="Songs.GenerateSongRequest.Genre" />).</param>
 /// <param name="Options">Its options, in order.</param>
-/// <param name="Amounts">Every step's amount, from 0 to 1, where its steps are a pool's or chances' (<see cref="ShareScale" />); none for the 64 steps of a value or a range.</param>
-public sealed record GenreChoiceResponse(string Name, string Label, string Kind, IReadOnlyList<GenreOptionResponse> Options, IReadOnlyList<double>? Amounts);
+public sealed record GenreChoiceResponse(string Name, string Label, string Kind, IReadOnlyList<GenreOptionResponse> Options);
 
 /// <param name="Name">How a genre names it.</param>
 /// <param name="Label">How the page shows it.</param>
-/// <param name="Default">Its step as the songs have it, the nearest, which a genre naming its choice starts from: a pool's option's weight in the middle, the heaviest's 63; a chance's in the middle; a value's 32.</param>
-/// <param name="IsPlayed">Whether the songs play it at all, at one end or another, which a genre starting from theirs keeps.</param>
+/// <param name="Own">
+///     Its amounts as the songs have them, from 0 to 1, at the plain end, in the middle and at the wild, which a genre naming
+///     its choice starts from: a pool's option's weights, every end's heaviest 1, 0 at all three for one the songs never
+///     play; a chance's chances; a value's 1/2; a range's end's.
+/// </param>
 /// <param name="Tags">What the page needs to know of it besides, such as a drum piece's families, "kit" and "percussion", or another option it plays only with, "with:riff".</param>
 /// <param name="Description">What the page shows over its name, such as how a scale sounds and its notes; empty for most.</param>
-public sealed record GenreOptionResponse(string Name, string Label, int Default, bool IsPlayed, IReadOnlyList<string> Tags, string Description);
+public sealed record GenreOptionResponse(string Name, string Label, IReadOnlyList<double> Own, IReadOnlyList<string> Tags, string Description);

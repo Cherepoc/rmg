@@ -7,6 +7,7 @@ const HISTORY = "rmg.songs";
 const RATINGS = "rmg.song-ratings";
 const SETTINGS = "rmg.settings";
 const GENRES = "rmg.genres";
+const GENRE = "rmg.genre";
 const GENRE_PRINCIPLES = "rmg.genre-principles";
 
 /** How many ratings the browser keeps, the oldest let go of first. */
@@ -80,6 +81,26 @@ export function keepSettings(settings) {
         localStorage.setItem(SETTINGS, settings);
     } catch {
         // a browser that will not remember them starts every visit with every value drawn
+    }
+}
+
+/** The genre the next songs are asked for in, a name and what it says of the choices; null for none. */
+export function recallGenre() {
+    try {
+        const kept = JSON.parse(localStorage.getItem(GENRE) ?? "null");
+        return typeof kept?.name === "string" && typeof kept?.choices === "object" && kept.choices !== null ? kept : null;
+    } catch {
+        return null;
+    }
+}
+
+/** Keeps the genre the next songs are asked for in, none for no genre. */
+export function keepGenre(genre) {
+    try {
+        if (genre === null) localStorage.removeItem(GENRE);
+        else localStorage.setItem(GENRE, JSON.stringify(genre));
+    } catch {
+        // a browser that will not remember it asks for the next visit's songs in no genre
     }
 }
 

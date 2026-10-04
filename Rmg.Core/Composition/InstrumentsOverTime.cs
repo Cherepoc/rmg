@@ -108,7 +108,7 @@ internal static class InstrumentsOverTime
     /// </summary>
     public static Func<RoleInstrument, double>? PoolOf(TrackRole part, double sound, Genre genre) =>
         genre.Pool<RoleInstrument>(GenreChoices.Instruments[part], x => GenreChoices.Name(x.Name)) is { } pool && RoleOf(part) is { } role
-            ? ByConvention.Within(role.Instruments.Select(x => (x, x.Weight)), sound, pool)
+            ? ByConvention.Within(role.Instruments, sound, pool)
             : null;
 
     /// <summary>

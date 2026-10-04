@@ -1,5 +1,7 @@
 using System.Collections.Immutable;
+using System.Text.Json;
 using Rmg.Core.Composition;
+using Rmg.Core.Probabilities;
 using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
 
@@ -33,8 +35,9 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Swing">How much the song swings, from 0, straight, to 63, a triplet's swing, where its meter pairs its notes.</param>
 /// <param name="Length">How long the song is to play, by its step (<see cref="LengthScale" />), which its form comes as near as it can.</param>
 /// <param name="Genre">
-///     The genre the song's draws keep to: every choice it names (<c>/api/genres/choices</c>), and its options' amounts,
-///     each a step from 0 to 63, a pool's from out of it to its heaviest, a chance's or a value's 32 as it is.
+///     The genre the song's draws keep to: every choice it names (<c>/api/genres/choices</c>), and its options' amounts in
+///     whole percents, from 0 to 100, each one number, alike at every end, or three, at the plain end, in the middle and at
+///     the wild: a pool's weights, a chance's chances, a value's 50 as it is, and a range's ends.
 /// </param>
 public sealed record GenerateSongRequest(
     string? Seed = null,
@@ -49,7 +52,7 @@ public sealed record GenerateSongRequest(
     IReadOnlyList<string>? DrumPieces = null,
     int? Mode = null,
     int? Swing = null,
-    IReadOnlyDictionary<string, IReadOnlyDictionary<string, int>>? Genre = null,
+    IReadOnlyDictionary<string, IReadOnlyDictionary<string, JsonElement>>? Genre = null,
     int? Length = null
 )
 {
@@ -134,16 +137,21 @@ public sealed record GenerateSongRequest(
         Genre? genre = null;
         if (Genre is not null)
         {
-            if (Genre.Keys.FirstOrDefault(x => GenreChoices.All.All(c => c.Name != x)) is { } unknownChoice)
-                return Fail($"{unknownChoice} is not a choice a genre may name (/api/genres/choices).", out error);
-            var choices = Genre.ToDictionary(x => x.Key, x => GenreChoices.All.Single(c => c.Name == x.Key));
-            if (Genre.SelectMany(x => x.Value.Select(y => (Choice: choices[x.Key], Option: y.Key, Step: y.Value))).FirstOrDefault(x => x.Step < 0 || x.Step > ShareScale.LastOf(x.Choice))
-                is { Option: { } outOfRange } step)
-                return Fail($"The genre's {outOfRange} is not a step from 0 to {ShareScale.LastOf(step.Choice)}.", out error);
-            genre = Core.Composition.Genre.Read(
-                Genre.ToDictionary(x => x.Key, x => (IReadOnlyDictionary<string, double>)x.Value.ToDictionary(y => y.Key, y => ShareScale.AmountOf(choices[x.Key], y.Value))),
-                out error
-            );
+            var amounts = new Dictionary<string, IReadOnlyDictionary<string, ByConvention>>();
+            foreach (var (choice, options) in Genre)
+            {
+                var read = new Dictionary<string, ByConvention>();
+                foreach (var (option, amount) in options)
+                {
+                    if (ReadAmounts(amount) is not { } ends)
+                        return Fail($"The genre's {choice} {option} is not a whole percent, from 0 to 100, or three of them.", out error);
+                    read[option] = ends;
+                }
+
+                amounts[choice] = read;
+            }
+
+            genre = Core.Composition.Genre.Read(amounts, out error);
             if (genre is null)
                 return false;
         }
@@ -163,6 +171,18 @@ public sealed record GenerateSongRequest(
         );
         mix = new SongMix(StepScale.ToAmount(Volume ?? StepScale.Last), partMixes.ToImmutable(), groups.ToImmutable());
         return true;
+    }
+
+    /// <summary>An option's amounts from whole percents, one alike at every end or three, at the plain end, in the middle and at the wild; none for anything else.</summary>
+    private static ByConvention? ReadAmounts(JsonElement amount)
+    {
+        static double? Percent(JsonElement x) => x.ValueKind == JsonValueKind.Number && x.TryGetInt32(out var value) && value is >= 0 and <= 100 ? value / 100.0 : null;
+        if (Percent(amount) is { } alike)
+            return new ByConvention(alike, alike, alike);
+        if (amount.ValueKind != JsonValueKind.Array || amount.GetArrayLength() != 3)
+            return null;
+        var ends = amount.EnumerateArray().Select(Percent).ToArray();
+        return ends.All(x => x is not null) ? new ByConvention(ends[0]!.Value, ends[1]!.Value, ends[2]!.Value) : null;
     }
 
     private static bool TryReadStep(int? step, string what, out string? error)

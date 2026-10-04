@@ -154,7 +154,7 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
-    public async Task AWeightShowsItsAmount_OnStepsFinerAtTheLowEnd_AChanceItsChanceInAMiddlingSong_AndTheTemposEndsInBeatsAMinute()
+    public async Task AWeightShowsItsAmountInAMiddlingSong_AChanceItsChance_AndTheTemposEndsInBeatsAMinute()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
@@ -163,15 +163,15 @@ public sealed class GenreEditorTest(Site site)
         // every song has a melody, and a quarter of the middling ones in a genre where it is set so
         var melody = Row(playing, "melody");
         await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("100%");
-        await melody.Locator("input[type=range]").FillAsync("12");
+        await melody.Locator("input[type=range]").FillAsync("25");
         await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("25%");
 
         var meter = await Section(dialog, "Meter");
         await Choose(meter, "meter").CheckAsync();
         var fourFour = Row(meter, "4/4");
-        // on steps finer at the low end, 1, 2, 3 at the first, and by fives from 20
+        // in whole percents, its weight in a middling song
         await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("100");
-        await fourFour.Locator("input[type=range]").FillAsync("17");
+        await fourFour.Locator("input[type=range]").FillAsync("50");
         await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("50");
         await fourFour.Locator("input[type=range]").FillAsync("1");
         await Assert.That(await fourFour.Locator("input[type=range]").GetAttributeAsync("aria-valuetext")).StartsWith("1, ");
@@ -281,8 +281,9 @@ public sealed class GenreEditorTest(Site site)
 
         await weight.DblClickAsync(new() { Position = new Position { X = 3, Y = 5 } });
 
-        await Assert.That(await weight.InputValueAsync()).IsEqualTo("27");
-        await Assert.That((await Played(page, dialog)).GetProperty("genre").GetProperty("meter").GetProperty("4/4").GetInt32()).IsEqualTo(27);
+        // its own, 100 in a middling song, the ends moved with it, as the songs have it: none at the wild end
+        await Assert.That(await weight.InputValueAsync()).IsEqualTo("100");
+        await Assert.That((await Played(page, dialog)).GetProperty("genre").GetProperty("meter").GetProperty("4/4").EnumerateArray().Select(x => x.GetInt32())).IsEquivalentTo([100, 100, 0]);
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -312,7 +313,7 @@ public sealed class GenreEditorTest(Site site)
         var dialog = await OpenEditor(page);
         var file = dialog.Locator("input[type=file]");
 
-        await file.SetInputFilesAsync(new FilePayload { Name = "waltzes.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "Waltzes", "choices": { "meter": { "3/4": 27 } } }""") });
+        await file.SetInputFilesAsync(new FilePayload { Name = "waltzes.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "Waltzes", "choices": { "meter": { "3/4": 100 } } }""") });
 
         await Assert.That(await dialog.Locator("input[aria-label='Genre name']").InputValueAsync()).IsEqualTo("Waltzes");
         var meter = dialog.Locator("details[data-section='Meter']");

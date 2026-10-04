@@ -80,16 +80,20 @@ public sealed class GenerateSongRequestTest
         await Assert.That(overrides.Swing).IsEqualTo(1);
     }
 
-    private static IReadOnlyDictionary<string, IReadOnlyDictionary<string, int>> Genre(string choice, string option, int step) =>
-        new Dictionary<string, IReadOnlyDictionary<string, int>> { [choice] = new Dictionary<string, int> { [option] = step } };
+    private static IReadOnlyDictionary<string, IReadOnlyDictionary<string, System.Text.Json.JsonElement>> Genre(string choice, string option, object amounts) =>
+        new Dictionary<string, IReadOnlyDictionary<string, System.Text.Json.JsonElement>>
+            { [choice] = new Dictionary<string, System.Text.Json.JsonElement> { [option] = System.Text.Json.JsonSerializer.SerializeToElement(amounts) } };
 
     [Test]
-    public async Task AGenre_IsGivenByItsChoicesNames_ItsStepsAsAmountsFrom0To1()
+    public async Task AGenre_IsGivenByItsChoicesNames_ItsAmountsWholePercents_OneAlikeAtEveryEnd_OrThree()
     {
-        await Assert.That(new GenerateSongRequest(Genre: Genre("parts", "pad", ShareScale.ToStep(0.5))).TryRead(out _, out var overrides, out _, out var error)).IsTrue().Because(error ?? "");
-        // the pad's chance in a middling song, its yes's weight; the riff, a part the genre leaves out, never
-        await Assert.That(overrides.Genre!.Chance(GenreChoices.Parts, "pad")!(true)).IsEqualTo(0.5);
-        await Assert.That(overrides.Genre.Chance(GenreChoices.Parts, "riff")!(true)).IsNull();
+        await Assert.That(new GenerateSongRequest(Genre: Genre("parts", "pad", 50)).TryRead(out _, out var overrides, out _, out var error)).IsTrue().Because(error ?? "");
+        // the pad's chances alike at every end; the riff, a part the genre leaves out, never
+        await Assert.That(overrides.Genre!.Chance(GenreChoices.Parts, "pad")).IsEqualTo(new Rmg.Core.Probabilities.ByConvention(0.5, 0.5, 0.5));
+        await Assert.That(overrides.Genre.Chance(GenreChoices.Parts, "riff")).IsEqualTo(default(Rmg.Core.Probabilities.ByConvention));
+
+        await Assert.That(new GenerateSongRequest(Genre: Genre("meter", "3/4", new[] { 0, 20, 100 })).TryRead(out _, out overrides, out _, out _)).IsTrue();
+        await Assert.That(overrides.Genre!.Pool<string>(GenreChoices.Meter, x => x)!("3/4")).IsEqualTo(new Rmg.Core.Probabilities.ByConvention(0, 0.2, 1));
     }
 
     [Test]
@@ -117,6 +121,7 @@ public sealed class GenerateSongRequestTest
     [Arguments("genreChoice")]
     [Arguments("genreOption")]
     [Arguments("genreStep")]
+    [Arguments("genreEnds")]
     [Arguments("genreEmptyPool")]
     [Arguments("noPieces")]
     [Arguments("piece")]
@@ -140,8 +145,9 @@ public sealed class GenerateSongRequestTest
             "swing" => new GenerateSongRequest(Swing: 64),
             "genreChoice" => new GenerateSongRequest(Genre: Genre("kazoo", "3/4", 63)),
             "genreOption" => new GenerateSongRequest(Genre: Genre("meter", "1/1", 63)),
-            "genreStep" => new GenerateSongRequest(Genre: Genre("meter", "3/4", 64)),
-            "genreEmptyPool" => new GenerateSongRequest(Genre: new Dictionary<string, IReadOnlyDictionary<string, int>> { ["meter"] = new Dictionary<string, int>() }),
+            "genreStep" => new GenerateSongRequest(Genre: Genre("meter", "3/4", 101)),
+            "genreEnds" => new GenerateSongRequest(Genre: Genre("meter", "3/4", new[] { 0, 100 })),
+            "genreEmptyPool" => new GenerateSongRequest(Genre: new Dictionary<string, IReadOnlyDictionary<string, System.Text.Json.JsonElement>> { ["meter"] = new Dictionary<string, System.Text.Json.JsonElement>() }),
             _ => throw new ArgumentOutOfRangeException(nameof(what))
         };
 

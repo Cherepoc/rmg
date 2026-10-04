@@ -18,13 +18,19 @@ public sealed class GenreTest(Site site)
         await genre.EvaluateAsync("select => { select.value = 'preset:jazz'; select.dispatchEvent(new Event('change')); }");
         await page.Until(() => page.Requests.Count > count, "the song asked for in the genre");
         var asked = page.Requests[^1].Body.GetProperty("genre");
-        await Assert.That(asked.GetProperty("kit").GetProperty("jazz").GetInt32()).IsEqualTo(27);
-        await Assert.That(asked.GetProperty("drumRole.time").GetProperty("ride").GetInt32()).IsEqualTo(27);
+        await Assert.That(asked.GetProperty("kit").GetProperty("jazz").GetInt32()).IsEqualTo(100);
+        await Assert.That(asked.GetProperty("drumRole.time").GetProperty("ride").GetInt32()).IsEqualTo(100);
         await page.Settled();
         await Assert.That(await page.Given()).IsEqualTo("1 given");
-        // the link carries it, and the list shows it chosen
-        await Assert.That(page.Page.Url).Contains("settings=9");
+        // the list shows it chosen, and the next visit asks for it again, kept in this browser, not the link
+        await Assert.That(page.Page.Url).Contains("settings=A");
         await Assert.That(await genre.InputValueAsync()).IsEqualTo("preset:jazz");
+        await page.Page.GotoAsync("/");
+        await page.Until(() => page.Requests.Count > count + 1 && page.Requests[^1].Body.TryGetProperty("genre", out var kept) && kept.TryGetProperty("kit", out _),
+            "the song of the next visit asked for in the genre kept");
+        await page.Settled();
+        genre = page.Page.Locator("select[aria-label='Genre']");
+        await page.Until(async () => await genre.InputValueAsync() == "preset:jazz", "the genre kept shown chosen");
 
         count = page.Requests.Count;
         await genre.EvaluateAsync("select => { select.value = 'none'; select.dispatchEvent(new Event('change')); }");

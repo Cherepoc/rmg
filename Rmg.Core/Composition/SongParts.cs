@@ -29,8 +29,7 @@ public static class SongParts
         ChanceOf(part).At(facets[part == TrackRole.RiffTwin ? Facet.Melody : Facet.Form], genre.Chance(GenreChoices.Parts, GenreChoices.Name(part.ToString())));
 
     /// <summary>Whether a genre leaves the part out of every song.</summary>
-    private static bool IsLeftOut(TrackRole part, Genre genre) => genre.Chance(GenreChoices.Parts, GenreChoices.Name(part.ToString()))?.Invoke(true) is null
-                                                                  && genre.Names(GenreChoices.Parts);
+    private static bool IsLeftOut(TrackRole part, Genre genre) => genre.Chance(GenreChoices.Parts, GenreChoices.Name(part.ToString())) is { Plain: 0, Tuned: 0, Wild: 0 };
 
     /// <summary>The chance a song has the part, by the facet it leans by; 1 for a part every song has.</summary>
     public static ByConvention ChanceOf(TrackRole part) => part switch

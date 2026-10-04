@@ -2,8 +2,9 @@ import PRESETS from "./genres.json";
 
 /**
  *     Genres as the page has them: the presets it ships (genres.json), and those made here, which this browser keeps. A
- *     genre is a name and what it says of the choices the songs draw (/api/genres/choices), every option's amount a step
- *     of its choice's scale (/api/genres/choices); the server knows the choices, never a genre.
+ *     genre is a name and what it says of the choices the songs draw (/api/genres/choices), every option's amounts whole
+ *     percents, one alike at every end or three, at the plain end, in the middle and at the wild; the server knows the
+ *     choices, never a genre.
  */
 export { PRESETS };
 
@@ -22,7 +23,7 @@ function sameChoices(first, second) {
     for (const choice of choices) {
         const [a, b] = [first[choice] ?? {}, second[choice] ?? {}];
         const options = new Set([...Object.keys(a), ...Object.keys(b)]);
-        for (const option of options) if (a[option] !== b[option]) return false;
+        for (const option of options) if (JSON.stringify(a[option]) !== JSON.stringify(b[option])) return false;
     }
     return true;
 }

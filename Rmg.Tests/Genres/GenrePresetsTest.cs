@@ -5,25 +5,11 @@ namespace Rmg.Tests.Genres;
 public sealed class GenrePresetsTest
 {
     [Test]
-    public async Task EveryPreset_IsAGenre_ByTheChoicesNames_ItsStepsItsChoicesScales()
+    public async Task EveryPreset_IsAGenre_AsARequestReadsIt()
     {
-        var errors = new List<string>();
         foreach (var preset in GenrePresets.All)
-        {
-            foreach (var (choice, options) in preset.Choices)
-            {
-                var known = GenreChoices.All.FirstOrDefault(x => x.Name == choice);
-                if (known is null)
-                    errors.Add($"{preset.Name}: no choice {choice}");
-                else
-                    errors.AddRange(options.Where(x => known.Options.All(o => o.Name != x.Key) || x.Value < 0 || x.Value > Rmg.WebApi.Songs.ShareScale.LastOf(known)).Select(x => $"{preset.Name}: {choice} {x.Key} {x.Value}"));
-            }
+            _ = GenrePresets.Genre(preset);
 
-            if (errors.Count == 0)
-                _ = GenrePresets.Genre(preset);
-        }
-
-        await Assert.That(errors).IsEmpty().Because(string.Join("; ", errors));
         await Assert.That(GenrePresets.All.Select(x => x.Id).Distinct().Count()).IsEqualTo(GenrePresets.All.Count);
         await Assert.That(GenrePresets.All.Count).IsEqualTo(10);
     }
