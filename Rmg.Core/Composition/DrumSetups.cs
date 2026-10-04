@@ -50,8 +50,8 @@ internal static class DrumSetups
     ///     percussion song's, a drum of the percussion for every role, then more.
     /// </summary>
     /// <param name="pool">
-    ///     A drum's weight in a pool, such as a genre's, in place of its own, from 0, never in the song, to 1; none for the
-    ///     drums as they are.
+    ///     A drum's weight in a pool, such as a genre's at the song's conventionality, in place of its own, 0 never in the
+    ///     song; none for the drums as they are.
     /// </param>
     public static ImmutableArray<PercussionInstrumentDefinition> SelectSongDrums(IGenerationContext context, DrumSetup setup, Func<PercussionInstrumentDefinition, double>? pool)
     {

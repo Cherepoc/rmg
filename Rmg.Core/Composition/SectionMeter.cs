@@ -32,7 +32,7 @@ internal static class SectionMeter
     {
         var songOption = Meter.OptionOf(song);
         var pool = genre.Pool<Meter>(GenreChoices.Meter, Meter.NameOf);
-        var options = Meter.Options.Where((x, i) => i != songOption && (pool is null || pool(x.Meter) > 0)).ToArray();
+        var options = Meter.Options.Where((x, i) => i != songOption && (pool is null || pool(x.Meter) is not null)).ToArray();
         return sectionIds.Distinct().ToImmutableDictionary(id => id, id =>
         {
             var drawing = sections(id);

@@ -262,6 +262,10 @@ genre in the link (`GenreSettings`). What is left:
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
   half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
   alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.
+- **Listening to the genres' wild ends:** a genre's middle is its own and its ends follow the songs', the wild giving
+  back what the genre makes rare (`ByConvention.Toward`). An end the songs keep to one option stays so: the wildest
+  songs swing whatever a genre's chance of it, but where it leaves swing out, as Electronic might. Homes and cadences
+  lean by the genre's weights over the songs', so that Rock's cadences take its sus4 often (22% of its chords).
 - **The rhythm's values against the part's own:** a value moves a setting by steps from where the part rests, so that
   one part's "faster" is another's "as fast as can be"; a value set outright, where it lands, would read the same for
   every part, should listening ask for it.

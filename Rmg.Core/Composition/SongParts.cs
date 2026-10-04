@@ -22,21 +22,18 @@ public static class SongParts
     public static ByConvention TwinChance { get; } = new(0, 0.15, 0.15);
 
     /// <summary>
-    ///     The chance a song has the part, when not given, by its melody facet, and within a genre's chance of it; 1 for a
-    ///     part every song has.
+    ///     The chance a song has the part, when not given, by its facet, the form's, as which parts play is the form's, or
+    ///     the melody's for the riff's twin, a harmony; and within a genre's chance of it in a middling song.
     /// </summary>
-    /// <remarks>
-    ///     A part every song has is certain, which a chance's odds cannot lean, so that a genre's weight of it is its chance
-    ///     doubled: as it is from the middle up, and halving it below, never at 0.
-    /// </remarks>
-    public static double Chance(TrackRole part, double melody, Genre genre)
-    {
-        var weight = genre.Chance(GenreChoices.Parts, GenreChoices.Name(part.ToString()));
-        var chance = Chance(part);
-        return chance == Even(1) ? Math.Min(1, (2 * weight) ?? 1) : chance.At(melody, weight);
-    }
+    public static double Chance(TrackRole part, Unconventionality facets, Genre genre) =>
+        ChanceOf(part).At(facets[part == TrackRole.RiffTwin ? Facet.Melody : Facet.Form], genre.Chance(GenreChoices.Parts, GenreChoices.Name(part.ToString())));
 
-    private static ByConvention Chance(TrackRole part) => part switch
+    /// <summary>Whether a genre leaves the part out of every song.</summary>
+    private static bool IsLeftOut(TrackRole part, Genre genre) => genre.Chance(GenreChoices.Parts, GenreChoices.Name(part.ToString()))?.Invoke(true) is null
+                                                                  && genre.Names(GenreChoices.Parts);
+
+    /// <summary>The chance a song has the part, by the facet it leans by; 1 for a part every song has.</summary>
+    public static ByConvention ChanceOf(TrackRole part) => part switch
     {
         TrackRole.Pad => Even(0.8),
         TrackRole.CounterMelody => Even(0.6),
@@ -56,20 +53,22 @@ public static class SongParts
     /// <summary>The parts the song leaves out, drawn or given, and never all of them.</summary>
     /// <param name="streams">A part's own sequence.</param>
     /// <param name="given">The parts given in (true) or out (false), in place of their draws.</param>
-    /// <param name="melody">The song's melody facet, which its twin leans by.</param>
+    /// <param name="facets">The song's facets, which the parts lean by.</param>
     /// <param name="genre">The genre whose chances of the parts the draws keep to.</param>
-    public static ImmutableHashSet<TrackRole> DrawAbsent(Func<TrackRole, IGenerationContext> streams, IReadOnlyDictionary<TrackRole, bool>? given, double melody, Genre genre)
+    public static ImmutableHashSet<TrackRole> DrawAbsent(Func<TrackRole, IGenerationContext> streams, IReadOnlyDictionary<TrackRole, bool>? given, Unconventionality facets, Genre genre)
     {
         var absent = WithTwins(All
             .Where(part =>
                 {
-                    var isIn = streams(part).TestProbability(Chance(part, melody, genre));
+                    var isIn = streams(part).TestProbability(Chance(part, facets, genre));
                     return !(given is not null && given.TryGetValue(part, out var isGiven) ? isGiven : isIn);
                 }
             )
             .ToImmutableHashSet());
-        // where every part would be out, those drawn out come in, as a song needs a part to play; only every part given
-        // out leaves none
+        // where every part would be out, those drawn out come in but those the genre leaves out, as a song needs a part
+        // to play, and every one where the genre leaves out all; only every part given out leaves none
+        if (absent.Count == All.Length)
+            absent = WithTwins([..GivenOut(given).Union(All.Where(x => IsLeftOut(x, genre) && !(given?.GetValueOrDefault(x) ?? false)))]);
         if (absent.Count == All.Length)
             absent = GivenOut(given);
         if (absent.Count == All.Length)

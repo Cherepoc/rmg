@@ -6,12 +6,16 @@ namespace Rmg.Core.Composition;
 public enum GenreChoiceKind
 {
     /// <summary>
-    ///     A pool: the options the choice keeps to, each weighing from 0, out of it, to 1, at every conventionality; the
-    ///     options it does not name are out.
+    ///     A pool: the options the choice keeps to, each its weight from 0 to 1 in a middling song, the ends following the
+    ///     songs' own (<see cref="Probabilities.ByConvention.Weigh{T}(IEnumerable{ValueTuple{T, Probabilities.ByConvention}}, double, Func{T, double?})" />):
+    ///     one at 0 plays only the wilder a song is, and one it does not name never; one alone always.
     /// </summary>
     Pool,
 
-    /// <summary>Chances, each its own: from 0, never, through 1/2, as it is, to 1, always; one not named as it is.</summary>
+    /// <summary>
+    ///     Chances, each its own, from 0 to 1 in a middling song, the ends following the songs' own: 0 only the wilder a
+    ///     song is, 1 always, and one not named never.
+    /// </summary>
     Chances,
 
     /// <summary>Values, each its own: from 0, its least, through 1/2, as it is, to 1, its most; one not named as it is.</summary>
@@ -25,11 +29,15 @@ public enum GenreChoiceKind
 /// <param name="Label">How the page shows it.</param>
 /// <param name="Default">
 ///     Its amount as the songs have it, which a genre that names its choice starts from: a pool's option's weight in the
-///     middle, the heaviest's 1; a chance's or a value's 1/2.
+///     middle, the heaviest's 1; a chance's in the middle; a value's 1/2.
 /// </param>
-public sealed record GenreOption(string Name, string Label, double Default)
+/// <param name="IsPlayed">Whether the songs play it at all, at one end or another, which a genre starting from theirs keeps.</param>
+public sealed record GenreOption(string Name, string Label, double Default, bool IsPlayed)
 {
-    /// <summary>What the page needs to know of it besides, such as a drum piece's families, "kit" and "percussion".</summary>
+    /// <summary>
+    ///     What the page needs to know of it besides, such as a drum piece's families, "kit" and "percussion", or another
+    ///     option it plays only with, "with:riff".
+    /// </summary>
     public ImmutableArray<string> Tags { get; init; } = [];
 
     /// <summary>What the page shows over its name, such as how a scale sounds and its notes; none for most.</summary>
@@ -61,11 +69,11 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
     public bool Names(GenreChoice choice) => Choices.ContainsKey(choice.Name);
 
     /// <summary>
-    ///     The pool of a choice, every option's weight in it by the option's name, 0 for one it leaves out; none where the
-    ///     genre does not name the choice, which is then as the songs have it.
+    ///     The pool of a choice, every option's weight in its middle by the option's name, none for one it leaves out; none
+    ///     where the genre does not name the choice, which is then as the songs have it.
     /// </summary>
     /// <param name="name">An option's name, as the choice gives it.</param>
-    public Func<T, double>? Pool<T>(GenreChoice choice, Func<T, string> name)
+    public Func<T, double?>? Pool<T>(GenreChoice choice, Func<T, string> name)
     {
         if (choice.Kind != GenreChoiceKind.Pool)
             throw new ArgumentException($"The choice {choice.Name} is not a pool.", nameof(choice));
@@ -76,15 +84,35 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
         {
             var named = name(option);
             _ = choice[named];
-            return pool.GetValueOrDefault(named);
+            return pool.TryGetValue(named, out var weight) ? weight : null;
         };
     }
 
-    /// <summary>A chance's weight, from 0, never, to 1, always; none where it is not named, for the chance as it is.</summary>
-    public double? Chance(GenreChoice choice, string option)
+    /// <summary>
+    ///     The lean of a choice's options, for one drawn in roles of their own weights: every option's weight in the pool
+    ///     over its weight as the songs have it, the least of those taken as <see cref="LeastWeight" />; none for one it
+    ///     leaves out, and none where the genre does not name the choice.
+    /// </summary>
+    public Func<T, double?>? Lean<T>(GenreChoice choice, Func<T, string> name) => Pool(choice, name) is { } pool
+        ? option => pool(option) is { } weight ? weight / Math.Max(LeastWeight, choice[name(option)].Default) : null
+        : null;
+
+    /// <summary>The least weight a genre gives an option above 0, as a part of the heaviest's.</summary>
+    public const double LeastWeight = 0.01;
+
+    /// <summary>
+    ///     A chance's pool of its yes (true) and its no (false), the yes's weight its chance in the middle: the yes alone
+    ///     where it is 1, the no alone where the genre names the choice but not the chance; none where it does not name
+    ///     the choice, for the chance as it is.
+    /// </summary>
+    public Func<bool, double?>? Chance(GenreChoice choice, string option)
     {
         Check(choice, GenreChoiceKind.Chances, option);
-        return Choices.TryGetValue(choice.Name, out var chances) && chances.TryGetValue(option, out var chance) ? chance : null;
+        if (!Choices.TryGetValue(choice.Name, out var chances))
+            return null;
+
+        double? chance = chances.TryGetValue(option, out var named) ? named : null;
+        return yes => yes ? chance : chance is { } c ? c < 1 ? 1 - c : null : 1;
     }
 
     /// <summary>A range's ends, from 0 to 1, the first no greater; none where it is not named.</summary>
@@ -138,7 +166,7 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
                 return null;
             }
 
-            if (choice.Kind == GenreChoiceKind.Pool && options.Values.All(x => x == 0))
+            if (choice.Kind == GenreChoiceKind.Pool && options.Count == 0)
             {
                 error = $"The pool of {name} keeps none of its options.";
                 return null;

@@ -154,20 +154,17 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
-    public async Task AWeightShowsItsStepFrom0To100_AChanceItsLeanFromAsItIs_NeverToAlways_AndTheTemposEndsInBeatsAMinute()
+    public async Task AWeightShowsItsStepFrom0To100_AChanceItsChanceInAMiddlingSong_AndTheTemposEndsInBeatsAMinute()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
 
         var playing = await Checked(dialog, "Parts playing");
+        // every song has a melody, and a quarter of the middling ones in a genre where it is set so
         var melody = Row(playing, "melody");
-        await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("as is");
-        await melody.Locator("input[type=range]").FillAsync("0");
-        await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("never");
-        await melody.Locator("input[type=range]").FillAsync("63");
-        await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("always");
+        await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("100%");
         await melody.Locator("input[type=range]").FillAsync("16");
-        await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("−50");
+        await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("25%");
 
         var meter = await Section(dialog, "Meter");
         await Choose(meter, "meter").CheckAsync();
@@ -202,11 +199,13 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(genre.GetProperty("feelChances").TryGetProperty("swing", out _)).IsTrue();
         await Assert.That(genre.GetProperty("feelValues").TryGetProperty("swing", out _)).IsTrue();
 
-        // every one left out, the section stays checked, and the genre is as the songs have it
+        // every chance left out, never, and every value as it is
         await UncheckAll(swing, "feelChances");
         await UncheckAll(swing, "feelValues");
         await Assert.That(await title.IsCheckedAsync()).IsTrue();
-        await Assert.That((await Played(page, dialog)).TryGetProperty("genre", out var none) && none.TryGetProperty("feelChances", out _)).IsFalse();
+        var never = (await Played(page, dialog)).GetProperty("genre");
+        await Assert.That(never.GetProperty("feelChances").EnumerateObject().Count()).IsEqualTo(0);
+        await Assert.That(never.TryGetProperty("feelValues", out _)).IsFalse();
 
         await title.UncheckAsync();
         await Assert.That(await Row(swing, "swing").CountAsync()).IsEqualTo(0);
@@ -323,6 +322,27 @@ public sealed class GenreEditorTest(Site site)
         await file.SetInputFilesAsync(new FilePayload { Name = "other.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "Other", "choices": { "nothing": {} } }""") });
         await Assert.That(await dialog.Locator("footer .warning").TextContentAsync()).IsEqualTo("That file is not a genre: a name and the choices the editor knows.");
         await Assert.That(await dialog.Locator("input[aria-label='Genre name']").InputValueAsync()).IsEqualTo("Waltzes");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task TheRiffsTwin_IsUncheckedAndDisabled_WhileTheRiffIs()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var playing = await Checked(dialog, "Parts playing");
+        var twin = Row(playing, "riffTwin").Locator("input[type=checkbox]");
+        await Assert.That(await twin.IsCheckedAsync()).IsTrue();
+
+        await Row(playing, "riff").Locator("input[type=checkbox]").UncheckAsync();
+        await Assert.That(await twin.IsCheckedAsync()).IsFalse();
+        await Assert.That(await twin.IsDisabledAsync()).IsTrue();
+        var parts = (await Played(page, dialog)).GetProperty("genre").GetProperty("parts");
+        await Assert.That(parts.TryGetProperty("riffTwin", out _)).IsFalse();
+
+        await Row(playing, "riff").Locator("input[type=checkbox]").CheckAsync();
+        await Assert.That(await twin.IsDisabledAsync()).IsFalse();
+        await Assert.That(await twin.IsCheckedAsync()).IsFalse();
         await Assert.That(page.Errors).IsEmpty();
     }
 

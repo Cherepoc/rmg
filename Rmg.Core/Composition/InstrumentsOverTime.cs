@@ -103,6 +103,15 @@ internal static class InstrumentsOverTime
     };
 
     /// <summary>
+    ///     An instrument's weight in a genre's pool of a part's instruments at the sound facet, drawn alike at every
+    ///     conventionality as the songs draw them (<see cref="ByConvention.Within{T}" />); none where the genre names none.
+    /// </summary>
+    public static Func<RoleInstrument, double>? PoolOf(TrackRole part, double sound, Genre genre) =>
+        genre.Pool<RoleInstrument>(GenreChoices.Instruments[part], x => GenreChoices.Name(x.Name)) is { } pool && RoleOf(part) is { } role
+            ? ByConvention.Within(role.Instruments.Select(x => (x, x.Weight)), sound, pool)
+            : null;
+
+    /// <summary>
     ///     The song's notes with every pitched part's instrument over the song on them (<see cref="CompositionStateKinds.Program" />),
     ///     each section and part drawing from a sequence of its own.
     /// </summary>
@@ -136,8 +145,7 @@ internal static class InstrumentsOverTime
                 var context = streams(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track);
                 var switches = context.TestProbability(SwitchChance.At(sound[index]));
                 var role = RoleOf(pitched.Role);
-                var choice = GenreChoices.Instruments[pitched.Role == TrackRole.RiffTwin ? TrackRole.Riff : pitched.Role];
-                var pool = genre.Pool<RoleInstrument>(choice, x => GenreChoices.Name(x.Name));
+                var pool = PoolOf(pitched.Role == TrackRole.RiffTwin ? TrackRole.Riff : pitched.Role, sound[index], genre);
                 double Weight(RoleInstrument instrument) => pool?.Invoke(instrument) ?? instrument.Weight;
                 // within the family where it keeps to it and the role has another of it, or to any other of the role's
                 var keeps = families(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track).TestProbability(FamilyChance.At(sound[index]));

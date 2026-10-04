@@ -72,6 +72,7 @@ internal sealed class SongTracks
     /// <param name="genre">The genre whose pools the instruments and the drums keep to, and whose rhythms and feels the parts play.</param>
     /// <param name="feelStreams">The sequence a part's own feel is drawn from, where the genre names one.</param>
     /// <param name="feel">The feel facet of the song's unconventionality, which a part's own feel is drawn by.</param>
+    /// <param name="sound">The sound facet of the song's unconventionality, which a genre's pools of the instruments lean by.</param>
     public static SongTracks Create(
         IGenerationContext context,
         IGenerationContext panningContext,
@@ -88,7 +89,8 @@ internal sealed class SongTracks
         ImmutableArray<PercussionInstrumentDefinition>? givenDrums,
         Genre genre,
         Func<RhythmPart, IGenerationContext> feelStreams,
-        double feel
+        double feel,
+        double sound
     )
     {
         // a part's own feel over the song's, drawn once from its own sequence where the genre names it
@@ -99,8 +101,8 @@ internal sealed class SongTracks
             : StateMap.Default;
 
         var trackRhythmLayer = rhythmicUnconventionality.Lean(RhythmLayers.Track);
-        // an instrument's weight in the genre's pool of its role
-        Func<RoleInstrument, double>? Pool(TrackRole role) => genre.Pool<RoleInstrument>(GenreChoices.Instruments[role], x => GenreChoices.Name(x.Name));
+        // an instrument's weight in the genre's pool of its role, at the sound facet
+        Func<RoleInstrument, double>? Pool(TrackRole role) => InstrumentsOverTime.PoolOf(role, sound, genre);
 
         // the melody plays something other than the chords, so the two can be told apart
         var chordsInstrument = InstrumentRoles.Chords.Pick(context, Pool(TrackRole.Chords));
@@ -294,7 +296,9 @@ internal sealed class SongTracks
         };
 
         // the song has its own drums, and the drums picked by the section kit play in a section
-        var drawnDrums = DrumSetups.SelectSongDrums(context, drumSetup, genre.Pool<PercussionInstrumentDefinition>(GenreChoices.DrumPieces, DrumPieces.NameOf));
+        var drawnDrums = DrumSetups.SelectSongDrums(context, drumSetup, genre.Pool<PercussionInstrumentDefinition>(GenreChoices.DrumPieces, DrumPieces.NameOf) is { } pieces
+            ? ByConvention.Within(DrumGroups.AllDrums.Select(x => (x, x.Weight)), rhythmicUnconventionality.Value, pieces)
+            : null);
         var songDrums = givenDrums ?? drawnDrums;
         foreach (var drumGroup in DrumGroups.All)
         {

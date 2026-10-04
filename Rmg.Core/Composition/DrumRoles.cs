@@ -161,8 +161,9 @@ internal static class DrumRoles
     /// </summary>
     private static DrumRole Pick(IGenerationContext context, PercussionInstrumentDefinition drum, double unconventionality, Genre genre)
     {
+        // a named role's drums as the genre weighs them at the conventionality, the drums' affinities drawn alike at every one
         double Affinity(DrumRole role) => genre.Pool<PercussionInstrumentDefinition>(GenreChoices.DrumRoles[role], DrumPieces.NameOf) is { } pool
-            ? pool(drum)
+            ? ByConvention.Within(DrumGroups.AllDrums.Select(x => (x, x.AffinityFor(role))), unconventionality, pool)(drum)
             : drum.AffinityFor(role);
         var roles = drum.Roles.Select(x => x.Value).Distinct().Concat(GenreChoices.DrumRoles.Keys.Where(x => genre.Names(GenreChoices.DrumRoles[x])))
             .Distinct().Select(x => new Weighted<DrumRole>(Affinity(x), x)).Where(x => x.Weight > 0).ToArray();

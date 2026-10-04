@@ -94,7 +94,7 @@ public static class Scales
     internal static Scale PickSection(IGenerationContext context, Scale song, double unconventionality, Tilt tilt, Tilt contrast, Genre genre)
     {
         var pool = genre.Pool<Scale>(GenreChoices.Scale, x => GenreChoices.Name(x.Name));
-        var others = All.Where(x => x != song && (pool is null || pool(x) > 0)).ToArray();
+        var others = All.Where(x => x != song && (pool is null || pool(x) is not null)).ToArray();
         if (!context.TestProbability(contrast.Chance(SectionChange.At(unconventionality), 1)) || others.Length == 0)
             return song;
 

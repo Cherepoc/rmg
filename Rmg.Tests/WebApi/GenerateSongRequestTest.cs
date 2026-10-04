@@ -87,8 +87,9 @@ public sealed class GenerateSongRequestTest
     public async Task AGenre_IsGivenByItsChoicesNames_ItsStepsAsAmountsFrom0To1()
     {
         await Assert.That(new GenerateSongRequest(Genre: Genre("parts", "pad", StepScale.Middle)).TryRead(out _, out var overrides, out _, out var error)).IsTrue().Because(error ?? "");
-        await Assert.That(overrides.Genre!.Chance(GenreChoices.Parts, "pad")).IsEqualTo(0.5);
-        await Assert.That(overrides.Genre.Chance(GenreChoices.Parts, "riff")).IsNull();
+        // the pad's chance in a middling song, its yes's weight; the riff, a part the genre leaves out, never
+        await Assert.That(overrides.Genre!.Chance(GenreChoices.Parts, "pad")!(true)).IsEqualTo(0.5);
+        await Assert.That(overrides.Genre.Chance(GenreChoices.Parts, "riff")!(true)).IsNull();
     }
 
     [Test]
@@ -140,7 +141,7 @@ public sealed class GenerateSongRequestTest
             "genreChoice" => new GenerateSongRequest(Genre: Genre("kazoo", "3/4", 63)),
             "genreOption" => new GenerateSongRequest(Genre: Genre("meter", "1/1", 63)),
             "genreStep" => new GenerateSongRequest(Genre: Genre("meter", "3/4", 64)),
-            "genreEmptyPool" => new GenerateSongRequest(Genre: Genre("meter", "3/4", 0)),
+            "genreEmptyPool" => new GenerateSongRequest(Genre: new Dictionary<string, IReadOnlyDictionary<string, int>> { ["meter"] = new Dictionary<string, int>() }),
             _ => throw new ArgumentOutOfRangeException(nameof(what))
         };
 

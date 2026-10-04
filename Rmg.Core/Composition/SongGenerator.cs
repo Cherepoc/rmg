@@ -96,7 +96,7 @@ public static class SongGenerator
         StateTrace.Record(TracePoints.SongRhythm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{rhythmicUnconventionality.Value:F2}", rhythmicUnconventionality);
         // the parts the song leaves out, the pad, the counter-melody and the drums now and then, each from a sequence
         // of its own, and any given in or out
-        var absent = SongParts.DrawAbsent(part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Parts), (int)part)), overrides.Parts, songUnconventionality[Facet.Melody], genre);
+        var absent = SongParts.DrawAbsent(part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Parts), (int)part)), overrides.Parts, songUnconventionality, genre);
         StateTrace.Record(TracePoints.SongParts, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", absent.Order()), absent);
         var tracks = SongTracks.Create(
             Stream(SongStream.Tracks),
@@ -115,7 +115,8 @@ public static class SongGenerator
             overrides.DrumPieces is { } given ? DrumPieces.Of(given) : null,
             genre,
             part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.PartFeel), (int)part)),
-            songUnconventionality[Facet.Feel]
+            songUnconventionality[Facet.Feel],
+            songUnconventionality[Facet.Sound]
         );
         StateTrace.Record(TracePoints.DrumSetup, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, tracks.DrumSetup.ToString(), tracks.DrumSetup);
 
@@ -481,7 +482,7 @@ public static class SongGenerator
 
         // the drum kit's sound, the standard kit's, or one of a genre's pool of them, from a stream of its own
         var kit = genre.Pool<int>(GenreChoices.Kit, GenreChoices.KitNameOf) is { } kits
-            ? Stream(SongStream.Kit).Pick([..GenreChoices.Kits.Select(x => new Weighted<int>(kits(x.Program), x.Program)).Where(x => x.Weight > 0)])
+            ? Stream(SongStream.Kit).Pick(ByConvention.Weigh(GenreChoices.Kits.Select(x => (x.Program, x.Program == 0 ? new ByConvention(1, 1, 1) : default)), songUnconventionality[Facet.Sound], kits))
             : 0;
 
         return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality, [..SongParts.All.Except(absent)], tracks.DrumSetup, [..tracks.SongDrums.Select(DrumPieces.NameOf)], scale, swing, kit));

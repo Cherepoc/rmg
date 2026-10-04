@@ -67,7 +67,7 @@ internal static class Feels
     public static int DrawSong(IGenerationContext context, double unconventionality, Genre genre) => Draw(context, unconventionality, genre.Pool<int>(GenreChoices.Feel, NameOf));
 
     /// <summary>A feel at the feel facet of an unconventionality, within a pool of them, such as a genre's of a part's.</summary>
-    public static int Draw(IGenerationContext context, double unconventionality, Func<int, double>? pool)
+    public static int Draw(IGenerationContext context, double unconventionality, Func<int, double?>? pool)
     {
         return context.Pick(ByConvention.Weigh(Weights, unconventionality, pool));
     }
@@ -79,7 +79,7 @@ internal static class Feels
     public static int? DrawChange(IGenerationContext context, int feel, ByConvention chance, double unconventionality, Genre genre)
     {
         var pool = genre.Pool<int>(GenreChoices.Feel, NameOf);
-        var others = Weights.Where(x => x.Feel != feel && (pool is null || pool(x.Feel) > 0)).ToArray();
+        var others = Weights.Where(x => x.Feel != feel && (pool is null || pool(x.Feel) is not null)).ToArray();
         return context.TestProbability(chance.At(unconventionality)) && others.Length > 0
             ? context.Pick(ByConvention.Weigh(others, unconventionality, pool))
             : null;

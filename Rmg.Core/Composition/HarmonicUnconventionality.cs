@@ -12,8 +12,12 @@ namespace Rmg.Core.Composition;
 /// <param name="Genre">The genre whose pool of the shapes its chords keep to.</param>
 public sealed record HarmonicUnconventionality(double Chords, Genre Genre)
 {
-    // the genre's pool of the shapes, none where it names none
-    private Func<ChordShape, double>? Pool => Genre.Pool<ChordShape>(GenreChoices.ChordShape, x => GenreChoices.Name(x.Name));
+    // the genre's pool of the shapes, their middles and their leans, none where it names none
+    private ChordShapes.GenrePool? Pool => Genre.Pool<ChordShape>(GenreChoices.ChordShape, ShapeName) is { } middle
+        ? new ChordShapes.GenrePool(middle, Genre.Lean<ChordShape>(GenreChoices.ChordShape, ShapeName)!)
+        : null;
+
+    private static string ShapeName(ChordShape shape) => GenreChoices.Name(shape.Name);
 
     /// <summary>
     ///     A chord: a shape of a level drawn by the chords facet, laid out by a voicing, as the heights of its notes above

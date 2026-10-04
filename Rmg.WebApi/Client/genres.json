@@ -15,7 +15,7 @@
       "instrument.rhythm": { "overdrivenGuitar": 63, "distortionGuitar": 50, "electricGuitarMuted": 30, "electricGuitarClean": 20 },
       "instrument.solo": { "overdrivenGuitar": 63, "distortionGuitar": 63, "lead2Sawtooth": 10, "harmonica": 10 },
       "kit": { "standard": 40, "power": 63, "room": 20 },
-      "parts": { "riff": 50, "rhythm": 44, "pad": 20 },
+      "parts": { "melody": 63, "chords": 63, "bass": 63, "pad": 41, "counterMelody": 38, "drum": 60, "riff": 50, "riffTwin": 10, "rhythm": 38, "solo": 63 },
       "drumSetup": { "kit": 63, "kitAndPercussion": 8 },
       "rhythm.riff": { "repetition": 52 },
       "rhythm.ground": { "repetition": 44 },
@@ -30,7 +30,7 @@
     "choices": {
       "tempo": { "from": 28, "to": 50 },
       "meter": { "4/4": 63, "3/4": 8 },
-      "feelChances": { "swing": 58 },
+      "feelChances": { "swing": 47, "halfTime": 5, "doubleTime": 3 },
       "feelValues": { "swing": 44 },
       "scale": { "dorian": 63, "major": 50, "mixolydian": 30, "melodicMinor": 10, "naturalMinor": 20 },
       "chordShape": { "seventh": 63, "ninth": 50, "shell": 44, "sixNine": 24, "sixth": 20, "thirteenth": 16, "eleventh": 10, "sevenSus4": 12 },
@@ -40,7 +40,7 @@
       "instrument.solo": { "tenorSax": 63, "altoSax": 55, "trumpet": 50, "electricGuitarJazz": 25 },
       "instrument.counterMelody": { "clarinet": 40, "trombone": 50, "frenchHorn": 30, "flute": 25 },
       "kit": { "jazz": 63, "brush": 50 },
-      "parts": { "riff": 4, "rhythm": 10, "pad": 10 },
+      "parts": { "melody": 63, "chords": 63, "bass": 63, "pad": 27, "counterMelody": 38, "drum": 60, "riff": 4, "riffTwin": 10, "rhythm": 7, "solo": 63 },
       "drumSetup": { "kit": 63 },
       "drumRole.time": { "ride": 63, "hiHat": 12 },
       "rhythm.bass": { "speed": 63, "fineness": 0, "fullness": 63 },
@@ -55,7 +55,7 @@
     "choices": {
       "tempo": { "from": 31, "to": 36 },
       "meter": { "4/4": 63 },
-      "feelChances": { "swing": 10 },
+      "feelChances": { "swing": 3, "halfTime": 5, "doubleTime": 3 },
       "scale": { "naturalMinor": 63, "dorian": 30, "phrygian": 15, "major": 15 },
       "chordShape": { "triad": 40, "sus2": 50, "sus4": 30, "add9": 50, "seventh": 20, "quartalTriad": 15 },
       "instrument.melody": { "lead1Square": 63, "lead2Sawtooth": 63, "lead5Charang": 20 },
@@ -66,7 +66,7 @@
       "instrument.counterMelody": { "lead2Sawtooth": 63 },
       "instrument.solo": { "lead1Square": 63, "lead2Sawtooth": 63, "lead5Charang": 20 },
       "kit": { "tr808": 63, "electronic": 63 },
-      "parts": { "pad": 50, "riff": 44, "rhythm": 10 },
+      "parts": { "melody": 63, "chords": 63, "bass": 63, "pad": 59, "counterMelody": 38, "drum": 60, "riff": 44, "riffTwin": 10, "rhythm": 7, "solo": 63 },
       "drumSetup": { "kit": 63 },
       "drumPieces": { "kick": 63, "electricSnare": 63, "clap": 63, "hiHat": 63, "cymbal": 40, "tom": 20, "tambourine": 15, "maracas": 15 },
       "rhythm.ground": { "speed": 63, "fineness": 0, "fullness": 63, "repetition": 63 },
@@ -83,7 +83,7 @@
     "choices": {
       "tempo": { "from": 13, "to": 23 },
       "meter": { "4/4": 63 },
-      "feelChances": { "swing": 58 },
+      "feelChances": { "swing": 47, "halfTime": 5, "doubleTime": 3 },
       "feelValues": { "swing": 12 },
       "scale": { "naturalMinor": 63, "dorian": 50, "phrygian": 15 },
       "chordShape": { "seventh": 63, "ninth": 40, "triad": 30, "add9": 20, "shell": 15 },
@@ -92,7 +92,7 @@
       "instrument.bass": { "synthBass1": 63, "synthBass2": 40, "electricBassFinger": 30 },
       "instrument.pad": { "pad2Warm": 63, "stringEnsemble1": 30, "choirAahs": 20 },
       "kit": { "tr808": 63, "electronic": 25 },
-      "parts": { "riff": 15, "rhythm": 8, "pad": 44 },
+      "parts": { "melody": 63, "chords": 63, "bass": 63, "pad": 57, "counterMelody": 38, "drum": 60, "riff": 15, "riffTwin": 10, "rhythm": 6, "solo": 63 },
       "drumSetup": { "kit": 63 },
       "drumPieces": { "kick": 63, "acousticSnare": 30, "electricSnare": 40, "clap": 63, "hiHat": 63, "cymbal": 20 },
       "rhythm.ground": { "syncopation": 63, "fullness": 20, "repetition": 58 },
@@ -116,7 +116,7 @@
       "instrument.pad": { "drawbarOrgan": 63, "stringEnsemble1": 15 },
       "instrument.bass": { "electricBassFinger": 63, "synthBass1": 15 },
       "kit": { "standard": 63, "room": 30 },
-      "parts": { "rhythm": 58, "pad": 50, "riff": 10 },
+      "parts": { "melody": 63, "chords": 63, "bass": 63, "pad": 59, "counterMelody": 38, "drum": 60, "riff": 10, "riffTwin": 10, "rhythm": 56, "solo": 63 },
       "drumSetup": { "kit": 50, "kitAndPercussion": 30 },
       "rhythm.chords": { "speed": 63, "offbeat": 48, "fineness": 0 },
       "rhythm.rhythm": { "speed": 63, "offbeat": 48, "fineness": 0 },
@@ -145,7 +145,7 @@
       "feel.time": { "grouped3": 63, "straight": 30 },
       "rhythm.bass": { "syncopation": 63, "repetition": 52 },
       "rhythm.colour": { "fullness": 44 },
-      "parts": { "rhythm": 50 }
+      "parts": { "melody": 63, "chords": 63, "bass": 63, "pad": 51, "counterMelody": 38, "drum": 60, "riff": 32, "riffTwin": 10, "rhythm": 45, "solo": 63 }
     }
   },
   {
@@ -163,7 +163,7 @@
       "instrument.bass": { "slapBass1": 63, "slapBass2": 40, "electricBassFinger": 50 },
       "instrument.riff": { "brassSection": 63, "clavinet": 40, "electricGuitarMuted": 30 },
       "kit": { "standard": 63, "room": 40 },
-      "parts": { "rhythm": 63, "riff": 50 },
+      "parts": { "melody": 63, "chords": 63, "bass": 63, "pad": 51, "counterMelody": 38, "drum": 60, "riff": 50, "riffTwin": 10, "rhythm": 63, "solo": 63 },
       "rhythm.time": { "speed": 48, "fullness": 52, "repetition": 52 },
       "rhythm.bass": { "speed": 63, "syncopation": 63, "fullness": 48, "repetition": 52 },
       "rhythm.rhythm": { "speed": 63, "syncopation": 48, "fullness": 44, "repetition": 52 },
@@ -186,7 +186,7 @@
       "instrument.counterMelody": { "violin": 50, "cello": 50, "flute": 40, "clarinet": 20 },
       "instrument.solo": { "harmonica": 63, "violin": 50, "flute": 40 },
       "kit": { "room": 63, "standard": 30, "brush": 20 },
-      "parts": { "rhythm": 50, "riff": 6, "pad": 15 },
+      "parts": { "melody": 63, "chords": 63, "bass": 63, "pad": 35, "counterMelody": 38, "drum": 60, "riff": 6, "riffTwin": 10, "rhythm": 45, "solo": 63 },
       "drumSetup": { "kit": 40, "kitAndPercussion": 63 },
       "drumPieces": { "kick": 63, "acousticSnare": 63, "hiHat": 40, "ride": 20, "cymbal": 30, "tom": 20, "tambourine": 63, "maracas": 50, "cabasa": 30, "triangle": 20, "woodBlock": 15 },
       "rhythm.rhythm": { "speed": 44, "fullness": 52 }
@@ -199,7 +199,7 @@
     "choices": {
       "tempo": { "from": 4, "to": 30 },
       "meter": { "4/4": 63, "6/8": 15 },
-      "feelChances": { "swing": 60 },
+      "feelChances": { "swing": 53, "halfTime": 5, "doubleTime": 3 },
       "feelValues": { "swing": 56 },
       "scale": { "mixolydian": 63, "dorian": 40, "naturalMinor": 25 },
       "chordShape": { "seventh": 63, "ninth": 25, "splitThird": 8 },
@@ -209,7 +209,7 @@
       "instrument.bass": { "electricBassFinger": 63, "acousticBass": 40 },
       "instrument.solo": { "overdrivenGuitar": 63, "harmonica": 50, "tenorSax": 30 },
       "kit": { "standard": 63, "room": 40, "brush": 20 },
-      "parts": { "rhythm": 44, "pad": 15 },
+      "parts": { "melody": 63, "chords": 63, "bass": 63, "pad": 35, "counterMelody": 38, "drum": 60, "riff": 32, "riffTwin": 10, "rhythm": 38, "solo": 63 },
       "drumSetup": { "kit": 63 },
       "rhythm.bass": { "speed": 48, "fineness": 16, "fullness": 52, "repetition": 52 }
     }
@@ -229,7 +229,7 @@
       "instrument.bass": { "fretlessBass": 40, "synthBass2": 30, "contrabass": 30, "acousticBass": 20 },
       "instrument.counterMelody": { "cello": 50, "stringEnsemble1": 50, "frenchHorn": 30, "flute": 30 },
       "kit": { "orchestra": 40, "brush": 40, "room": 30 },
-      "parts": { "pad": 60, "drum": 2, "riff": 4, "rhythm": 4 },
+      "parts": { "melody": 63, "chords": 63, "bass": 63, "pad": 62, "counterMelody": 38, "drum": 24, "riff": 4, "riffTwin": 10, "rhythm": 3, "solo": 63 },
       "drumSetup": { "kit": 40, "percussion": 30 },
       "rhythm.chords": { "speed": 0, "fullness": 12 },
       "rhythm.melody": { "busyness": 8, "speed": 20 },

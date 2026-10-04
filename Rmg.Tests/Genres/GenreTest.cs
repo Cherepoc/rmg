@@ -30,21 +30,38 @@ public sealed class GenreTest
     {
         foreach (var conventionality in new[] { 0, 0.5, 1 })
         {
-            var plainOnly = ByConvention.Weigh(Options, conventionality, x => x == "plain" ? 1 : 0);
+            var plainOnly = ByConvention.Weigh(Options, conventionality, x => x == "plain" ? 1 : null);
             await Assert.That(plainOnly.Select(x => x.Value)).IsEquivalentTo(["plain"]);
-            var oddOnly = ByConvention.Weigh(Options, conventionality, x => x == "odd" ? 1 : 0);
+            var oddOnly = ByConvention.Weigh(Options, conventionality, x => x == "odd" ? 1 : null);
             await Assert.That(oddOnly.Select(x => x.Value)).IsEquivalentTo(["odd"]);
         }
     }
 
     [Test]
-    public async Task APoolsWeights_AreTheMiddles_TheEndsStillChoosing()
+    public async Task APoolsWeights_AreTheMiddles_TheEndsStillChoosing_AndTheWildGivingBackWhatThePoolTook()
     {
-        // the odd option a fifth as likely as the plain one in the pool's middle, and still the only one at the wild end
-        var middle = Share(ByConvention.Weigh(Options, 0.5, x => x == "odd" ? 0.2 : 1), "odd");
-        await Assert.That(middle).IsEqualTo(0.2 / 1.2).Within(1e-9);
-        await Assert.That(Share(ByConvention.Weigh(Options, 1, x => x == "odd" ? 0.2 : 1), "odd")).IsEqualTo(1).Within(1e-9);
-        await Assert.That(Share(ByConvention.Weigh(Options, 0, x => x == "odd" ? 0.2 : 1), "odd")).IsEqualTo(0).Within(1e-9);
+        // the odd option a fifth as likely as the plain one in the pool's middle, the plain end's none, and the wild end's
+        // but for what the pool took from the plain one's middle, 0.9 as the songs have it, 1/1.2 in the pool
+        Func<string, double?> pool = x => x == "odd" ? 0.2 : 1;
+        await Assert.That(Share(ByConvention.Weigh(Options, 0.5, pool), "odd")).IsEqualTo(0.2 / 1.2).Within(1e-9);
+        await Assert.That(Share(ByConvention.Weigh(Options, 0, pool), "odd")).IsEqualTo(0).Within(1e-9);
+        await Assert.That(Share(ByConvention.Weigh(Options, 1, pool), "odd")).IsEqualTo(1 - (0.9 - 1 / 1.2)).Within(1e-9);
+    }
+
+    [Test]
+    public async Task APoolAsTheSongsHaveIt_WeighsTheOptionsAsTheyAre_AndOneAt0_PlaysOnlyTheWilder()
+    {
+        foreach (var conventionality in new[] { 0, 0.25, 0.5, 0.75, 1 })
+        {
+            var asTheyAre = ByConvention.Weigh(Options, conventionality, x => x == "odd" ? 0.1 : 0.9);
+            await Assert.That(Share(asTheyAre, "odd")).IsEqualTo(Share(ByConvention.Weigh(Options, conventionality), "odd")).Within(1e-9);
+        }
+
+        // the odd option at 0: none of it up to the middle, then the more the wilder, all the songs' 0.1 given back
+        Func<string, double?> wildOnly = x => x == "odd" ? 0 : 1;
+        await Assert.That(Share(ByConvention.Weigh(Options, 0.5, wildOnly), "odd")).IsEqualTo(0);
+        await Assert.That(Share(ByConvention.Weigh(Options, 0.75, wildOnly), "odd")).IsGreaterThan(0);
+        await Assert.That(Share(ByConvention.Weigh(Options, 1, wildOnly), "odd")).IsEqualTo(0.1).Within(1e-9);
     }
 
     [Test]
@@ -61,23 +78,40 @@ public sealed class GenreTest
 
         await Assert.That(ThreeFour(0)).IsEqualTo(0);
         await Assert.That(ThreeFour(0.5)).IsEqualTo(0.5 / 1.5).Within(1e-9);
-        await Assert.That(ThreeFour(1)).IsEqualTo(1).Within(1e-9);
+        // and the wild end 3/4's, but for what the pool took from 4/4's middle as the songs have it among the two
+        await Assert.That(ThreeFour(1)).IsEqualTo(1 - (0.92 / 0.96 - 1 / 1.5)).Within(1e-9);
+    }
+
+    // a chance's pool: the yes at its chance in the middle, or never or always
+    private static Func<bool, double?> InTheMiddle(double chance) => yes => yes ? chance : 1 - chance;
+    private static readonly Func<bool, double?> Never = yes => yes ? null : 1;
+    private static readonly Func<bool, double?> Always = yes => yes ? 1 : null;
+
+    [Test]
+    public async Task AChance_IsItsOwnAsTheSongsHaveIt_NeverOutOfThePool_AlwaysAlone_AndItsMiddleTheGenres()
+    {
+        foreach (var chance in new[] { new ByConvention(0, 0.2, 1), new ByConvention(0.8, 0.8, 0.8), new ByConvention(1, 1, 1) })
+        foreach (var conventionality in new[] { 0, 0.25, 0.5, 0.75, 1 })
+        {
+            await Assert.That(chance.At(conventionality, InTheMiddle(chance.Tuned))).IsEqualTo(chance.At(conventionality)).Within(1e-9);
+            await Assert.That(chance.At(conventionality, Never)).IsEqualTo(0);
+            await Assert.That(chance.At(conventionality, Always)).IsEqualTo(1);
+            await Assert.That(chance.At(conventionality, null)).IsEqualTo(chance.At(conventionality));
+            await Assert.That(chance.At(0.5, InTheMiddle(0.3))).IsEqualTo(0.3).Within(1e-9);
+        }
     }
 
     [Test]
-    public async Task AChancesWeight_IsNeverAt0_AsItIsAtAHalf_AndAlwaysAt1()
+    public async Task AChanceAt0_NeverPlaysUpToTheMiddle_ThenTheWilderTheLikelier()
     {
-        var chance = new ByConvention(0, 0.2, 1);
-        foreach (var conventionality in new[] { 0, 0.25, 0.5, 0.75, 1 })
-        {
-            await Assert.That(chance.At(conventionality, 0)).IsEqualTo(0);
-            await Assert.That(chance.At(conventionality, 0.5)).IsEqualTo(chance.At(conventionality)).Within(1e-12);
-            await Assert.That(chance.At(conventionality, 1)).IsEqualTo(1).Within(1e-12);
-            await Assert.That(chance.At(conventionality, null)).IsEqualTo(chance.At(conventionality));
-        }
-
-        // and between, leaning by its odds
-        await Assert.That(chance.At(0.5, 0.8)).IsEqualTo(0.2 * 4 / (0.2 * 4 + 0.8)).Within(1e-12);
+        // a pad, as likely in every song as the songs have it, at 0 in a genre: its 0.8 given back at the wild end
+        var pad = new ByConvention(0.8, 0.8, 0.8);
+        await Assert.That(pad.At(0, InTheMiddle(0))).IsEqualTo(0);
+        await Assert.That(pad.At(0.5, InTheMiddle(0))).IsEqualTo(0);
+        await Assert.That(pad.At(0.75, InTheMiddle(0))).IsGreaterThan(0);
+        await Assert.That(pad.At(1, InTheMiddle(0))).IsEqualTo(0.8).Within(1e-9);
+        // a harmony never in the plainest songs stays out of them whatever the genre's middle
+        await Assert.That(new ByConvention(0, 0.15, 0.15).At(0, InTheMiddle(0.9))).IsEqualTo(0);
     }
 
     [Test]
@@ -88,9 +122,10 @@ public sealed class GenreTest
 
         var pool = Genre.Read(Choices("meter", "3/4", 1), out _)!.Pool<string>(GenreChoices.Meter, x => x)!;
         await Assert.That(pool("3/4")).IsEqualTo(1);
-        await Assert.That(pool("4/4")).IsEqualTo(0);
+        await Assert.That(pool("4/4")).IsNull();
+        await Assert.That(Genre.Read(Choices("meter", "3/4", 0), out _)!.Pool<string>(GenreChoices.Meter, x => x)!("3/4")).IsEqualTo(0);
         await Assert.That(Genre.None.Pool<string>(GenreChoices.Meter, x => x)).IsNull();
-        foreach (var (choice, option, amount) in new[] { ("kazoo", "3/4", 1.0), ("meter", "1/1", 1.0), ("meter", "3/4", 1.5), ("meter", "3/4", 0.0) })
+        foreach (var (choice, option, amount) in new[] { ("kazoo", "3/4", 1.0), ("meter", "1/1", 1.0), ("meter", "3/4", 1.5) })
         {
             await Assert.That(Genre.Read(Choices(choice, option, amount), out var error)).IsNull();
             await Assert.That(error).IsNotNull();
@@ -105,12 +140,12 @@ public sealed class GenreTest
         {
             await Assert.That(choice.Options.Select(x => x.Name).Distinct().Count()).IsEqualTo(choice.Options.Length).Because(choice.Name);
             await Assert.That(choice.Options.All(x => x.Name.Length > 0 && !x.Name.Contains(' '))).IsTrue().Because(choice.Name);
-            // every default as the songs have it: a pool's heaviest 1, a range's the songs', a chance and a value as they are
+            // every default as the songs have it: a pool's heaviest 1, a range's the songs', a value as it is
             if (choice.Kind == GenreChoiceKind.Pool)
                 await Assert.That(choice.Options.Max(x => x.Default)).IsEqualTo(1).Because(choice.Name);
             else if (choice.Kind == GenreChoiceKind.Range)
                 await Assert.That(choice["from"].Default).IsLessThanOrEqualTo(choice["to"].Default).Because(choice.Name);
-            else
+            else if (choice.Kind == GenreChoiceKind.Values)
                 await Assert.That(choice.Options.All(x => x.Default == 0.5)).IsTrue().Because(choice.Name);
             await Assert.That(choice.Options.All(x => x.Default is >= 0 and <= 1)).IsTrue().Because(choice.Name);
         }
@@ -276,22 +311,28 @@ public sealed class GenreTest
         await Assert.That(tempos.Count(x => x is >= 85 and <= 170)).IsGreaterThan(tempos.Length / 2);
     }
 
+    // the parts as the songs have them in a middling song, but those given, and those left out
+    private static (GenreChoice, (string, double)[]) Parts(IReadOnlyDictionary<string, double> given, params string[] leftOut) =>
+        (GenreChoices.Parts, [..GenreChoices.Parts.Options.Where(x => !leftOut.Contains(x.Name)).Select(x => (x.Name, given.GetValueOrDefault(x.Name, x.Default)))]);
+
     [Test]
-    public async Task APartEverySongHas_IsLeftOutByAGenre_InHalfItsSongsAtAQuarter_AndInEveryOneAt0()
+    public async Task APartEverySongHas_IsInAMiddlingSongAsTheGenreSays_InEveryOneOrNoneByItsEnds()
     {
-        var half = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Of((GenreChoices.Parts, [("bass", 0.25)])))).Song.Draws!.Parts.Contains(TrackRole.Bass));
-        await Assert.That(half.Count(x => x)).IsBetween(20, 44);
+        var quarter = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Base: 0.5, Genre: Of(Parts(new Dictionary<string, double> { ["bass"] = 0.25 }))))
+            .Song.Draws!.Parts.Contains(TrackRole.Bass));
+        await Assert.That(quarter.Count(x => x)).IsBetween(6, 30);
         foreach (var seed in Enumerable.Range(0, 8))
         {
-            await Assert.That(TestCorpus.Get(seed, new SongOverrides(Genre: Of((GenreChoices.Parts, [("bass", 0)])))).Song.Draws!.Parts).DoesNotContain(TrackRole.Bass);
-            await Assert.That(TestCorpus.Get(seed, new SongOverrides(Genre: Of((GenreChoices.Parts, [("bass", 0.5)])))).Song.Draws!.Parts).Contains(TrackRole.Bass);
+            await Assert.That(TestCorpus.Get(seed, new SongOverrides(Genre: Of(Parts(new Dictionary<string, double>(), "bass")))).Song.Draws!.Parts).DoesNotContain(TrackRole.Bass);
+            await Assert.That(TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: Of(Parts(new Dictionary<string, double> { ["bass"] = 0 })))).Song.Draws!.Parts).DoesNotContain(TrackRole.Bass);
+            await Assert.That(TestCorpus.Get(seed, new SongOverrides(Genre: Of(Parts(new Dictionary<string, double>())))).Song.Draws!.Parts).Contains(TrackRole.Bass);
         }
     }
 
     [Test]
-    public async Task AGenresChances_AreNeverAt0_AndAlwaysAt1()
+    public async Task AGenresChances_AreNeverLeftOut_AndAlwaysAt1()
     {
-        var genre = Of((GenreChoices.Parts, [("pad", 0), ("counterMelody", 1)]), (GenreChoices.FeelChances, [("swing", 1)]));
+        var genre = Of(Parts(new Dictionary<string, double> { ["counterMelody"] = 1 }, "pad"), (GenreChoices.FeelChances, [("swing", 1)]));
         foreach (var seed in Enumerable.Range(0, 16))
         {
             var song = TestCorpus.Get(seed, new SongOverrides(Genre: genre));

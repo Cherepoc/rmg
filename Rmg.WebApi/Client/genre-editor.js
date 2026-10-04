@@ -117,16 +117,15 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
     /** A pool's weight, from 0 to 100. */
     const asWeight = (step) => String(percentOf(step));
 
-    /**
-     *     A value's lean from as it is, at the middle, to its least, -100, or its most, +100; a chance's ends never and
-     *     always, a chance being as it is in the middle, not even.
-     */
-    const asLean = (isChance) => (step) => {
+    /** A value's lean from as it is, at the middle, to its least, -100, or its most, +100. */
+    const asLean = (step) => {
         if (step === 32) return "as is";
-        if (isChance && (step === 0 || step === 63)) return step === 0 ? "never" : "always";
         const lean = 2 * percentOf(step) - 100;
         return `${lean > 0 ? "+" : "−"}${Math.abs(lean)}`;
     };
+
+    /** A chance in a middling song, in percent. */
+    const asChance = (step) => `${percentOf(step)}%`;
 
     function heading(title) {
         const element = document.createElement("h4");
@@ -186,11 +185,11 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         };
     }
 
-    /** A weight where an option is checked or added: its own, or where it has none, ADDED_WEIGHT. */
-    const weightOf = (option) => (option.default > 0 ? option.default : ADDED_WEIGHT);
+    /** A weight where an option is checked or added: its own, 0 for one the songs play only the wilder they are, or ADDED_WEIGHT for one they never play. */
+    const weightOf = (option) => (option.isPlayed ? option.default : ADDED_WEIGHT);
 
-    /** A pool's options as the songs have them in the middle, those of a weight of a step or more, at their weights. */
-    const asTheSongsHaveThem = (options) => Object.fromEntries(options.filter((x) => x.default > 0).map((x) => [x.name, x.default]));
+    /** A pool's options as the songs have them: every one they play, at its weight in the middle, 0 for one they play only the wilder they are. */
+    const asTheSongsHaveThem = (options) => Object.fromEntries(options.filter((x) => x.isPlayed).map((x) => [x.name, x.default]));
 
     /**
      *     A short pool: its checkbox, its title, then every option it may keep, a checkbox and a slider of its weight;
@@ -223,7 +222,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                         else delete options[option.name];
                         changed();
                     });
-                    const weight = slider(`${choice.label}: ${option.label}`, 1, kept ?? weightOf(option), weightOf(option), (value) => {
+                    const weight = slider(`${choice.label}: ${option.label}`, 0, kept ?? weightOf(option), weightOf(option), (value) => {
                         options[option.name] = value;
                         showProblem();
                     }, asWeight);
@@ -279,7 +278,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                         options[select.value] = weight;
                         changed();
                     });
-                    const weight = slider(`${choice.label}: ${option.label}`, 1, options[option.name], weightOf(option), (value) => {
+                    const weight = slider(`${choice.label}: ${option.label}`, 0, options[option.name], weightOf(option), (value) => {
                         options[option.name] = value;
                         showProblem();
                     }, asWeight);
@@ -294,32 +293,45 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         };
     }
 
-    /** Chances or values: each a checkbox, named or as it is, and a slider, its middle as it is. */
+    /** The option another plays only with, by its tag, "with:riff"; none for one that plays alone. */
+    const partnerOf = (option) => option.tags.find((x) => x.startsWith("with:"))?.slice("with:".length) ?? null;
+
+    /**
+     *     Chances or values, each a checkbox and a slider: a value unchecked as it is, its slider its lean from it; a chance
+     *     unchecked never, its slider its chance in a middling song, and one that plays only with another unchecked and
+     *     disabled while that one is.
+     */
     function slidersField() {
         const element = document.createElement("div");
         element.className = "genre-sliders";
         return {
             element,
             bind(choice) {
+                const isChances = choice.kind === "chances";
                 element.dataset.choice = choice.name;
                 element.replaceChildren(...choice.options.map((option) => {
                     const row = document.createElement("div");
                     row.className = "genre-row";
                     row.dataset.option = option.name;
                     const value = draft.choices[choice.name]?.[option.name];
+                    const partner = partnerOf(option);
                     const named = checkbox(option.label);
                     named.input.checked = value !== undefined;
+                    named.input.disabled = partner !== null && !(partner in (draft.choices[choice.name] ?? {}));
                     named.input.addEventListener("change", () => {
                         const options = (draft.choices[choice.name] ??= {});
                         if (named.input.checked) options[option.name] = option.default;
-                        else delete options[option.name];
-                        if (Object.keys(options).length === 0) delete draft.choices[choice.name];
+                        else {
+                            delete options[option.name];
+                            for (const other of choice.options.filter((x) => partnerOf(x) === option.name)) delete options[other.name];
+                        }
+                        if (!isChances && Object.keys(options).length === 0) delete draft.choices[choice.name];
                         changed();
                     });
                     const range = slider(`${choice.label}: ${option.label}`, 0, value ?? option.default, option.default, (step) => {
                         draft.choices[choice.name][option.name] = step;
                         showProblem();
-                    }, asLean(choice.kind === "chances"));
+                    }, isChances ? asChance : asLean);
                     range.hidden = value === undefined;
                     row.append(named.element, range);
                     return row;

@@ -157,30 +157,33 @@ internal static class ChordShapes
     /// <summary>
     ///     A shape of a level drawn from those given at the chords' unconventionality, or, within a genre's pool of the
     ///     shapes, a shape drawn at once among the levels' shapes, each weighing its level's weight times its share of it:
-    ///     the pool's weights the middle of a chord's (<see cref="ByConvention.Weigh{T}(IEnumerable{ValueTuple{T, ByConvention}}, double, Func{T, double})" />),
+    ///     the pool's weights the middle of a chord's (<see cref="ByConvention.Weigh{T}(IEnumerable{ValueTuple{T, ByConvention}}, double, Func{T, double?})" />),
     ///     and leaning a home's own (<see cref="ByConvention.Lean{T}" />), which stays plainer.
     /// </summary>
     /// <param name="isOwn">Whether the levels are a role's own, such as a home's, which the pool leans rather than sets.</param>
-    public static ChordShape Pick(IGenerationContext context, ImmutableArray<(int Level, ByConvention Weight)> levels, double unconventionality, Func<ChordShape, double>? pool, bool isOwn)
+    /// <summary>A genre's pool of the shapes: every shape's weight in its middle, and its lean, its weight over the songs'.</summary>
+    public sealed record GenrePool(Func<ChordShape, double?> Middle, Func<ChordShape, double?> Lean);
+
+    public static ChordShape Pick(IGenerationContext context, ImmutableArray<(int Level, ByConvention Weight)> levels, double unconventionality, GenrePool? pool, bool isOwn)
     {
         if (pool is null)
             return Pick(context, context.Pick(ByConvention.Weigh(levels.Select(x => (x.Level, x.Weight)), unconventionality)));
 
         var shapes = levels.SelectMany(x => Shares(OfLevel(x.Level), x.Weight));
-        return context.Pick(isOwn ? ByConvention.Lean(shapes, unconventionality, pool) : ByConvention.Weigh(shapes, unconventionality, pool));
+        return context.Pick(isOwn ? ByConvention.Lean(shapes, unconventionality, pool.Lean) : ByConvention.Weigh(shapes, unconventionality, pool.Middle));
     }
 
     /// <summary>
     ///     A cadence's shape at the chords' unconventionality: one made for it, or one of a strange level; within a genre's
     ///     pool, a shape drawn at once among them, the pool leaning the cadence's own weights.
     /// </summary>
-    public static ChordShape PickCadence(IGenerationContext context, double unconventionality, Func<ChordShape, double>? pool)
+    public static ChordShape PickCadence(IGenerationContext context, double unconventionality, GenrePool? pool)
     {
         if (pool is not null)
             return context.Pick(ByConvention.Lean(
                 CadenceLevels.SelectMany(x => Shares(x.Level is { } level ? OfLevel(level) : CadenceShapes, x.Weight)),
                 unconventionality,
-                pool
+                pool.Lean
             ));
 
         var level = context.Pick(ByConvention.Weigh(CadenceLevels.Select(x => (x.Level, x.Weight)), unconventionality));

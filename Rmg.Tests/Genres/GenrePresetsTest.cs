@@ -61,4 +61,30 @@ public sealed class GenrePresetsReportTest
             Print(preset.Name, TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset)))));
         await Task.CompletedTask;
     }
+
+    /// <summary>
+    ///     Every preset's songs at the plainest, a middling and the wildest base: how many parts they have, how many in
+    ///     4/4, swung, and in the commonest scale, against none, so that a genre's wild end is seen to stray from it.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task EveryPreset_PlainMiddlingAndWild()
+    {
+        void Print(string name, Genre genre)
+        {
+            var cells = new[] { 0.0, 0.5, 1.0 }.Select(@base =>
+            {
+                var songs = TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Base: @base, Genre: genre)));
+                var scale = songs.GroupBy(x => x.Song.Draws!.Scale.Name).MaxBy(x => x.Count())!;
+                return $"{@base:0.0}: parts {songs.Average(x => x.Song.Draws!.Parts.Count):0.0}, 4/4 {100.0 * songs.Count(x => Meter.NameOf(x.Map.Meter) == "4/4") / Count:0}%, "
+                       + $"swung {100.0 * songs.Count(x => x.Song.Draws!.Swing.Delay > 0) / Count:0}%, {scale.Key} {100.0 * scale.Count() / Count:0}%";
+            });
+            Console.WriteLine($"{name,-12} " + string.Join(" | ", cells));
+        }
+
+        Print("none", Genre.None);
+        foreach (var preset in GenrePresets.All)
+            Print(preset.Name, GenrePresets.Genre(preset));
+        await Task.CompletedTask;
+    }
 }
