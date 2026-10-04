@@ -68,7 +68,10 @@ internal static class SongForms
         new(0.15, Parse("VCVCBVC")),
         new(0.1, Parse("VCVC")),
         new(0.1, Parse("CVCVBC")),
-        new(0.05, Parse("VPCVPC"))
+        new(0.05, Parse("VPCVPC")),
+        // and two longer, seldom drawn but where a song is to play long
+        new(0.02, Parse("VCVCBCVC")),
+        new(0.02, Parse("VPCVPCBCVPC"))
     ];
 
     /// <param name="context">The sequence the form is drawn from.</param>
@@ -78,14 +81,16 @@ internal static class SongForms
     ///     in one of its own.
     /// </param>
     /// <param name="ends">The sequence the intro and the outro are drawn from.</param>
-    public static SongStructure Generate(IGenerationContext context, IGenerationContext freeContext, IGenerationContext ends, double unconventionality)
+    /// <param name="length">The song's length given, which the forms lean to by how near theirs come; none for none.</param>
+    public static SongStructure Generate(IGenerationContext context, IGenerationContext freeContext, IGenerationContext ends, double unconventionality, SongLength? length)
     {
-        var isConventional = context.TestProbability(RhythmicUnconventionality.Ends(FormChance, -1).At(unconventionality));
-        var form = context.Pick(Forms);
+        var formChance = RhythmicUnconventionality.Ends(FormChance, -1).At(unconventionality);
+        var isConventional = context.TestProbability(length is null ? formChance : length.FormChance(formChance, Forms.Select(x => (IEnumerable<SectionRole>)x.Value)));
+        var form = context.Pick(length is null ? Forms : [..Forms.Select(x => x with { Weight = x.Weight * length.Closeness(x.Value.Sum(length.AppearanceSeconds)) })]);
         SongStructure structure;
         if (!isConventional)
         {
-            var free = SongStructureGenerator.Generate(freeContext).SelectMany(part => part.SectionIds).ToImmutableArray();
+            var free = SongStructureGenerator.Generate(freeContext, length).SelectMany(part => part.SectionIds).ToImmutableArray();
             structure = new SongStructure(free, free.Distinct().ToImmutableDictionary(x => x, _ => SectionRole.Free));
         }
         else

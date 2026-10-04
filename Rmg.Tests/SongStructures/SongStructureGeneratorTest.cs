@@ -10,7 +10,7 @@ public sealed class SongStructureGeneratorTest
     {
         for (var seed = 0; seed < 500; seed++)
         {
-            var parts = SongStructureGenerator.Generate(new GenerationContext((ulong)seed));
+            var parts = SongStructureGenerator.Generate(new GenerationContext((ulong)seed), null);
 
             await Assert.That(parts.Length).IsBetween(4, 8);
             foreach (var part in parts)
@@ -28,7 +28,7 @@ public sealed class SongStructureGeneratorTest
     {
         for (var seed = 0; seed < 2000; seed++)
         {
-            var sectionIds = SongStructureGenerator.Generate(new GenerationContext((ulong)seed))
+            var sectionIds = SongStructureGenerator.Generate(new GenerationContext((ulong)seed), null)
                 .SelectMany(x => x.SectionIds)
                 .ToArray();
 
@@ -42,7 +42,7 @@ public sealed class SongStructureGeneratorTest
     {
         for (var seed = 0; seed < 200; seed++)
         {
-            var ids = SongStructureGenerator.Generate(new GenerationContext((ulong)seed))
+            var ids = SongStructureGenerator.Generate(new GenerationContext((ulong)seed), null)
                 .SelectMany(x => x.SectionIds)
                 .Distinct()
                 .Order()
@@ -56,7 +56,7 @@ public sealed class SongStructureGeneratorTest
     public async Task SectionsAreSometimesSharedAcrossParts()
     {
         var shared = Enumerable.Range(0, 200)
-            .Select(seed => SongStructureGenerator.Generate(new GenerationContext((ulong)seed)))
+            .Select(seed => SongStructureGenerator.Generate(new GenerationContext((ulong)seed), null))
             .Count(parts =>
                 {
                     var all = parts.SelectMany(p => p.SectionIds.Distinct()).ToList();
@@ -70,8 +70,8 @@ public sealed class SongStructureGeneratorTest
     [Test]
     public async Task SameSeed_ResultsIn_SameStructure()
     {
-        var first = SongStructureGenerator.Generate(new GenerationContext(5));
-        var second = SongStructureGenerator.Generate(new GenerationContext(5));
+        var first = SongStructureGenerator.Generate(new GenerationContext(5), null);
+        var second = SongStructureGenerator.Generate(new GenerationContext(5), null);
 
         await Assert.That(first.SelectMany(x => x.SectionIds).ToArray())
             .IsEquivalentTo(second.SelectMany(x => x.SectionIds).ToArray());

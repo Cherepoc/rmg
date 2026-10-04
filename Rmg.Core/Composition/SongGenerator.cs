@@ -142,7 +142,13 @@ public static class SongGenerator
 
         // the song's key and tempo, drawn before its form, which how long the song plays takes after
         var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), Stream(SongStream.TempoStray), songUnconventionality[Facet.Feel], overrides, genre);
-        var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), Stream(SongStream.SongEnds), songUnconventionality[Facet.Form]);
+        // a length given leans the form to it, by how long an appearance of each role plays on the average at the tempo
+        var tempo = commonStateMap.GetStateValue(StateKinds.Tempo);
+        double SecondsOf(double beats) => beats * 60 / (Meter.BaseTempo * tempo);
+        var length = overrides.Length is { } target
+            ? new SongLength(target, (role, lean) => SecondsOf(SectionLength.Expected(songUnconventionality[Facet.Form], role, lean) * meter.PatternDuration))
+            : null;
+        var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), Stream(SongStream.SongEnds), songUnconventionality[Facet.Form], length);
         StateTrace.Record(TracePoints.SongForm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(" ", structure.SectionIds.Select(x => structure.Roles[x])), structure);
         var sectionIds = structure.SectionIds.ToArray();
 
@@ -204,20 +210,34 @@ public static class SongGenerator
                 sectionIds.CountBy(x => x).ToDictionary(),
                 id => sectionGenerator.DrawDrums(id, structure.Roles[id], isPercussionOnly: false)
             );
+        // how many times more a song that fades plays its last section, by how often the section plays its pattern
+        static int Fading(EndingKind ending, int plays) => ending != EndingKind.Fade ? 0 : plays == 1 ? 2 : 1;
+        bool Repeats(bool drawn, int fades) =>
+            drawn && fades == 0 && sectionIds.Take(sectionIds.Length - 1).Contains(sectionIds[^1]) && structure.Roles[sectionIds[^1]] != SectionRole.Outro;
+        // a last section that came back before played once more now and then, drawn here, which the length takes in
+        var lastRepeatDrawn = Stream(SongStream.LastRepeat).TestProbability(SongForms.LastRepeatChance.At(songUnconventionality[Facet.Form]));
+        // a length given leans every section's plays alike, the lean whose song comes nearest it, the ending's plays too
+        var playsLean = length?.NearestLean(lean =>
+        {
+            var plays = sectionIds.Distinct().ToDictionary(id => id, id => sectionGenerator.DrawPlays(id, structure.Roles[id], lean));
+            var fades = Fading(plan.Ending, plays[sectionIds[^1]]);
+            var appearances = sectionIds.Length + (Repeats(lastRepeatDrawn, fades) ? 1 : 0);
+            return SecondsOf(sectionIds.Sum(id => plays[id] * sectionMeters[id].PatternDuration)
+                             + (appearances - sectionIds.Length + fades) * plays[sectionIds[^1]] * sectionMeters[sectionIds[^1]].PatternDuration);
+        }) ?? 0;
         // every section is generated once, where it first plays
         var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(
-                new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0], structure.Roles[id], sectionMeters[id], sectionDrums[id]))))
+                new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0], structure.Roles[id], sectionMeters[id], sectionDrums[id], playsLean))))
             .CacheGeneratedValues();
         // and its melody placed afresh every time it plays, varied from the first as far as the song improvises
         var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), songUnconventionality[Facet.Melody]);
         StateTrace.Record(TracePoints.MelodyImprovisation, SongTracks.MelodyTrack, 0, 0, StateMap.Default, 0, $"{improvisation:F2}", improvisation);
         // a song that fades out plays its last section once more, over which it fades, twice where it plays its pattern
         // only once, so that the fade takes eight bars at least
-        var fading = plan.Ending != EndingKind.Fade ? 0 : generateSection(sectionIds[^1]).Plays == 1 ? 2 : 1;
+        var fading = Fading(plan.Ending, generateSection(sectionIds[^1]).Plays);
         // and a last section that came back before played once more now and then, as a last chorus is, where it does not
         // fade, from a stream of its own, the last section's lift moving to it
-        var repeats = Stream(SongStream.LastRepeat).TestProbability(SongForms.LastRepeatChance.At(songUnconventionality[Facet.Form]))
-                      && fading == 0 && sectionIds.Take(sectionIds.Length - 1).Contains(sectionIds[^1]) && structure.Roles[sectionIds[^1]] != SectionRole.Outro;
+        var repeats = Repeats(lastRepeatDrawn, fading);
         int[] played = [..sectionIds, ..(repeats ? [sectionIds[^1]] : Array.Empty<int>()), ..Enumerable.Repeat(sectionIds[^1], fading)];
         StateTrace.Record(TracePoints.LastRepeat, SectionGenerator.SectionTrace, 0, 0, StateMap.Default, 0, $"{repeats}", repeats);
         // the later in the song, the more, and with the energy of its own place in the song against the section's average,

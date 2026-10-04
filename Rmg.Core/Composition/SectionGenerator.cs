@@ -238,7 +238,7 @@ internal sealed class SectionGenerator
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
-        var plays = DrawPlays(sectionId, plan.Role);
+        var plays = DrawPlays(sectionId, plan.Role, plan.PlaysLean);
         StateTrace.Record(TracePoints.SectionLength, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{plays}", plays);
         var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap, meter).Repeat(plays);
         // the parts the section leaves out the first time it plays, from a sequence of its own, the likelier the less energy
@@ -295,9 +295,10 @@ internal sealed class SectionGenerator
     ///     How many times a section plays its pattern, from a sequence of its own, by the form facet of the section's
     ///     unconventionality, the same before the section is made as when it is (<see cref="SectionLength" />).
     /// </summary>
-    public int DrawPlays(int sectionId, SectionRole role)
+    /// <param name="lean">How far the song's length leans the plays (<see cref="SectionLength.Draw" />).</param>
+    public int DrawPlays(int sectionId, SectionRole role, double lean)
     {
-        return SectionLength.Draw(Stream(sectionId, SectionStream.Length), Facets(sectionId)[Facet.Form], role);
+        return SectionLength.Draw(Stream(sectionId, SectionStream.Length), Facets(sectionId)[Facet.Form], role, lean);
     }
 
     private Unconventionality Facets(int sectionId)
@@ -743,7 +744,8 @@ internal sealed class SectionGenerator
 /// <param name="Role">What it does in the song's form, which leans its length and its home.</param>
 /// <param name="Meter">The meter its bars are in.</param>
 /// <param name="Drums">Its drums, as the song drew them before its sections (<see cref="SectionGenerator.DrawDrums" />).</param>
-internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScale, SectionRole Role, Meter Meter, SectionDrums Drums);
+/// <param name="PlaysLean">How far the song's length leans how many times the section plays its pattern (<see cref="SectionLength.Draw" />).</param>
+internal sealed record SectionPlan(int Id, bool HasTonicHome, bool KeepsSongScale, SectionRole Role, Meter Meter, SectionDrums Drums, double PlaysLean);
 
 /// <summary>A section's drums: whether it plays its percussion without the drum kit, and the kit it plays.</summary>
 /// <param name="PlaysDrums">Whether its drums play where it first plays, rather than rest for a breakdown.</param>

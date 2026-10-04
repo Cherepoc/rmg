@@ -22,9 +22,17 @@ internal static class SongStructureGenerator
     private static readonly Func<IGenerationContext, SectionBrush> BrushGenerator =
         Generators.ItemSelector(SectionBrush.All);
 
-    public static ImmutableArray<SongPart> Generate(IGenerationContext context)
+    /// <summary>The most parts a free form draws where a song's length is given, which it keeps as many of as come nearest.</summary>
+    public const int MaxPartCountForLength = 32;
+
+    /// <param name="songLength">
+    ///     The song's length given: the parts drawn on to the most there may be, and as many of them kept, the first, as
+    ///     come nearest it; none for the parts as many as drawn.
+    /// </param>
+    public static ImmutableArray<SongPart> Generate(IGenerationContext context, SongLength? songLength)
     {
-        var partCount = PartCountGenerator(context);
+        var drawnCount = PartCountGenerator(context);
+        var partCount = songLength is null ? drawnCount : MaxPartCountForLength;
         var parts = ImmutableArray.CreateBuilder<SongPart>(partCount);
         var sectionCount = 0;
         int? previousSectionId = null;
@@ -73,6 +81,11 @@ internal static class SongStructureGenerator
             previousSectionId = sectionIds[^1];
         }
 
-        return parts.ToImmutable();
+        if (songLength is null)
+            return parts.ToImmutable();
+
+        var seconds = songLength.AppearanceSeconds(SectionRole.Free);
+        var kept = Enumerable.Range(1, parts.Count).MinBy(n => Math.Abs(Math.Log(parts.Take(n).Sum(x => x.SectionIds.Length) * seconds / songLength.Target)));
+        return [..parts.Take(kept)];
     }
 }

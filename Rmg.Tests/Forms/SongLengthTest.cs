@@ -1,0 +1,30 @@
+using Rmg.Core.Composition;
+
+namespace Rmg.Tests.Forms;
+
+public sealed class SongLengthTest
+{
+    [Test]
+    [Arguments(120.0)]
+    [Arguments(300.0)]
+    public async Task ASongGivenALength_ComesWithinAFifthOfItMostly(double target)
+    {
+        var errors = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => Math.Abs(TestCorpus.Get(seed, new SongOverrides(Length: target)).Rendered.Seconds / target - 1));
+
+        // 77% within 15% of two minutes and 92% of five over 128 songs (SongLengthReportTest)
+        await Assert.That(errors.Count(x => x <= 0.2)).IsGreaterThanOrEqualTo(24);
+    }
+
+    [Test]
+    public async Task ALongerLength_PlaysItsSectionsLonger_AmongThoseTheFormsReach()
+    {
+        int Plays(CorpusSong song) => song.Trace.Where(x => x.Point == TracePoints.SectionLength).Sum(x => (int)x.Value!);
+        double Average(double target) => TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Length: target)))
+            .Average(x => Plays(x) / (double)x.Trace.Count(t => t.Point == TracePoints.SectionLength));
+
+        // among the lengths the forms reach: 1.43 plays a section at a minute, 2.81 at three and 3.19 at five; ten, mostly
+        // in free forms, as many more sections as longer ones, 2.77
+        await Assert.That(Average(60)).IsLessThan(Average(180));
+        await Assert.That(Average(180)).IsLessThan(Average(300));
+    }
+}

@@ -134,6 +134,7 @@ public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, d
 ///     How much the song swings, from 0, straight, to 1, a triplet's swing, where its meter pairs its notes; 0 is straight.
 /// </param>
 /// <param name="Genre">The genre the song's draws keep to (<see cref="Composition.Genre" />), what is given winning over it.</param>
+/// <param name="Length">How long the song is to play, in seconds, which its form leans to (<see cref="SongLength" />), and comes as near as it can.</param>
 public sealed record SongOverrides(
     Meter? Meter = null,
     double? Base = null,
@@ -146,7 +147,8 @@ public sealed record SongOverrides(
     ImmutableHashSet<string>? DrumPieces = null,
     Scale? Scale = null,
     double? Swing = null,
-    Genre? Genre = null
+    Genre? Genre = null,
+    double? Length = null
 )
 {
     public static SongOverrides None { get; } = new();

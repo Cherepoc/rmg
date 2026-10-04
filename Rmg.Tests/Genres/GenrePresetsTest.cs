@@ -63,6 +63,44 @@ public sealed class GenrePresetsReportTest
     }
 
     /// <summary>
+    ///     Every preset's choices at the plainest, a middling and the wildest base, the three commonest options of each
+    ///     and their shares, so that what a genre's ends make of it is seen: an end collapsing onto one option, or one
+    ///     losing the genre.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task EveryPreset_ChoicesByEnd()
+    {
+        static string Top(IEnumerable<string> values)
+        {
+            var all = values.ToArray();
+            return string.Join(", ", all.GroupBy(x => x).OrderByDescending(x => x.Count()).Take(3).Select(x => $"{x.Key} {100.0 * x.Count() / all.Length:0}%"));
+        }
+
+        void Print(string name, Genre genre)
+        {
+            Console.WriteLine($"== {name}");
+            var ends = new[] { 0.0, 0.5, 1.0 }.Select(@base => TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Base: @base, Genre: genre)))).ToArray();
+            void Row(string choice, Func<CorpusSong, IEnumerable<string>> of) =>
+                Console.WriteLine($"  {choice,-10} " + string.Join(" | ", ends.Select(x => Top(x.SelectMany(of)))));
+            Row("meter", x => [Meter.NameOf(x.Map.Meter)]);
+            Row("feel", x => [Feels.NameOf(Feels.Of(x.Song.Notes![SongTracks.ChordsTrack].First().Value.State))]);
+            Row("scale", x => [x.Song.Draws!.Scale.Name]);
+            Row("shapes", x => GenreReportTest.Shapes(x).Select(y => y.Name));
+            Row("setup", x => [$"{x.Song.Draws!.DrumSetup}"]);
+            Row("kit", x => x.PlaysDrums ? [Rmg.Core.Songs.GeneralMidi.KitName(x.Song.Draws!.Kit)] : []);
+            Row("melody", x => x.Song.TrackDefinitions.Values.OfType<Rmg.Core.Songs.PitchInstrumentTrack>().Where(y => y.Role == Rmg.Core.Songs.TrackRole.Melody).Select(y => Rmg.Core.Songs.GeneralMidi.Programs[y.InstrumentCode]));
+            Row("parts", x => x.Song.Draws!.Parts.Select(y => $"{y}"));
+            Row("timeFeel", x => x.Trace.Where(y => y.Point == TracePoints.TimeFeel).Select(y => (int)y.Value! switch { 1 => "half", -1 => "double", _ => "as it is" }));
+        }
+
+        Print("none", Genre.None);
+        foreach (var preset in GenrePresets.All)
+            Print(preset.Name, GenrePresets.Genre(preset));
+        await Task.CompletedTask;
+    }
+
+    /// <summary>
     ///     Every preset's songs at the plainest, a middling and the wildest base: how many parts they have, how many in
     ///     4/4, swung, and in the commonest scale, against none, so that a genre's wild end is seen to stray from it.
     /// </summary>
