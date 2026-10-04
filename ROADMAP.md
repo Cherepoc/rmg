@@ -269,8 +269,9 @@ Built: a genre is the page's data, pools of the options of the choices the songs
 (`Genre`, `GenreChoices`, `GenreRhythm`), every option three amounts in whole percents, its plainest songs', its
 middling ones' and its wildest ones' (`ByConvention.Weigh`), the songs' own served as the choices' (`GenreOption.Own`);
 ten presets (`Client/genres.json`), their idioms at every end and their experimental directions at the wild end alone;
-a picker, an editor and a fine-tune window on the page (`genre-tune.js`), with a choice's shares along the axis
-(`/api/genres/preview`); a genre kept on the server by an 11-character key of its canonical form (`GenreStore`), which
+a picker and an editor on the page, every choice a graph of what the songs draw of it and its override
+(`/api/genres/previews`), changed in a window over it, its options picked and removed and their amounts dragged
+(`genre-tune.js`); a genre kept on the server by an 11-character key of its canonical form (`GenreStore`), which
 a link carries. What is left:
 
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
