@@ -31,6 +31,7 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Meter">The meter, by its place among the meters a song may play in (<c>/api/songs/options</c>).</param>
 /// <param name="Mode">The scale the song starts in, on its key, by its place among the scales (<c>/api/songs/options</c>).</param>
 /// <param name="Swing">How much the song swings, from 0, straight, to 63, a triplet's swing, where its meter pairs its notes.</param>
+/// <param name="Length">How long the song is to play, by its step (<see cref="LengthScale" />), which its form comes as near as it can.</param>
 /// <param name="Genre">
 ///     The genre the song's draws keep to: every choice it names (<c>/api/genres/choices</c>), and its options' amounts,
 ///     each a step from 0 to 63, a pool's from out of it to its heaviest, a chance's or a value's 32 as it is.
@@ -48,7 +49,8 @@ public sealed record GenerateSongRequest(
     IReadOnlyList<string>? DrumPieces = null,
     int? Mode = null,
     int? Swing = null,
-    IReadOnlyDictionary<string, IReadOnlyDictionary<string, int>>? Genre = null
+    IReadOnlyDictionary<string, IReadOnlyDictionary<string, int>>? Genre = null,
+    int? Length = null
 )
 {
     /// <summary>A pan from -1, left, to 1, right, as its nearest step, the middle step in the middle.</summary>
@@ -71,7 +73,8 @@ public sealed record GenerateSongRequest(
             seed = read;
         }
 
-        if (!TryReadStep(Unconventionality, "Unconventionality", out error) || !TryReadStep(Volume, "Volume", out error) || !TryReadStep(Swing, "Swing", out error))
+        if (!TryReadStep(Unconventionality, "Unconventionality", out error) || !TryReadStep(Volume, "Volume", out error) || !TryReadStep(Swing, "Swing", out error)
+            || !TryReadStep(Length, "Length", out error))
             return false;
 
         var facets = ImmutableDictionary.CreateBuilder<Facet, double>();
@@ -155,7 +158,8 @@ public sealed record GenerateSongRequest(
             Key: Key,
             Scale: Mode is { } mode ? Scales.All[mode] : null,
             Swing: Swing is { } swing ? StepScale.ToAmount(swing) : null,
-            Genre: genre
+            Genre: genre,
+            Length: Length is { } length ? LengthScale.Seconds(length) : null
         );
         mix = new SongMix(StepScale.ToAmount(Volume ?? StepScale.Last), partMixes.ToImmutable(), groups.ToImmutable());
         return true;

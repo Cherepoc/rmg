@@ -23,7 +23,7 @@ public sealed class GenreTest(Site site)
         await page.Settled();
         await Assert.That(await page.Given()).IsEqualTo("1 given");
         // the link carries it, and the list shows it chosen
-        await Assert.That(page.Page.Url).Contains("settings=8");
+        await Assert.That(page.Page.Url).Contains("settings=9");
         await Assert.That(await genre.InputValueAsync()).IsEqualTo("preset:jazz");
 
         count = page.Requests.Count;

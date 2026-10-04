@@ -1074,7 +1074,7 @@ function restoreSettings() {
 /** Keeps the settings for the next visit, and says how many of them change the song. */
 function keepCurrentSettings() {
     if (!isGenreUnread) keepSettings(formatSettings(givenOnly(settings)));
-    const given = [settings.unconventionality, settings.tempo, settings.key, settings.mode, settings.meter, settings.swing, ...FACETS.map((facet) => settings.facets[facet])].filter((x) => x.isGiven).length
+    const given = [settings.unconventionality, settings.tempo, settings.key, settings.mode, settings.meter, settings.swing, settings.length, ...FACETS.map((facet) => settings.facets[facet])].filter((x) => x.isGiven).length
         + PARTS.filter((part) => settings.parts[part].plays !== "random").length
         + (settings.drumPieces.isGiven ? 1 : 0)
         + (hasAGenre(settings.genre) ? 1 : 0);
@@ -1538,6 +1538,7 @@ const SETTING_NAMES = {
     mode: ["Mode", "The scale the song starts in, on its key: major, minor, a mode or a stranger scale. Its sections may change it, as its scale allows."],
     meter: ["Meter", "The beats of the first section's bars. Its later sections may change the meter, as its feel allows."],
     swing: ["Swing", "How late the second of every pair of notes plays: straight at the left, a triplet's swing at the right. A meter that does not pair its notes, such as 6/8, plays straight."],
+    length: ["Length", "How long the song plays, from half a minute to fifteen. Its form comes as near as it can, more and longer sections for a long song; a minute's song may run a little longer."],
     feel: ["Feel", "How the time moves: odd meters and meter changes, tuplets and polymeters, swing, and tempo changes between sections."],
     form: ["Form", "How the song is put together: its sections and their order, which parts play where, and its solos."],
     scale: ["Scale", "The notes the song draws on: modes beyond major and minor, key changes, and the scales its lines take."],
@@ -1550,7 +1551,7 @@ const SETTING_NAMES = {
 };
 
 // a slider's two ends, where they are not the plain and the experimental
-const SCALE_ENDS = { tempo: ["Slow", "Fast"], swing: ["Straight", "Triplet"] };
+const SCALE_ENDS = { tempo: ["Slow", "Fast"], swing: ["Straight", "Triplet"], length: ["Short", "Long"] };
 
 const PART_NAMES = { melody: "Melody", chords: "Chords", bass: "Bass", pad: "Pad", counterMelody: "Counter-melody", drum: "Drums", riff: "Riff", rhythm: "Rhythm", solo: "Soloist" };
 
@@ -1593,8 +1594,22 @@ document.body.append(genreEditor.element);
 // every choice's row, by its key: the key, the mode and the meter, listed as the server lists them
 const choiceRows = new Map();
 
-// the tempos a song may be given, in beats a minute, by their steps, as the server lists them
+// the tempos a song may be given, in beats a minute, and its lengths, in seconds, by their steps, as the server lists them
 let tempos = [];
+let lengths = [];
+
+/** A length in seconds as minutes and seconds, "2:49". */
+function formatLength(seconds) {
+    const whole = Math.round(seconds);
+    return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
+}
+
+/** What a setting's step shows: its tempo in beats a minute, its length in minutes, or its share. */
+function settingText(key, step) {
+    if (key === "tempo") return tempos.length > 0 ? `${Math.round(tempos[step])} bpm` : "";
+    if (key === "length") return lengths.length > 0 ? formatLength(lengths[step]) : "";
+    return formatPercent(fromStep(step));
+}
 
 // every value's row, by its key, and every drum group's
 const settingRows = new Map();
@@ -1772,6 +1787,7 @@ async function listChoices() {
 
         const options = await response.json();
         tempos = options.tempos;
+        lengths = options.lengths;
         for (const piece of options.drumPieces) {
             groupRows.get(piece.group.toLowerCase()).chips.append(createDrumPieceChip(piece));
             for (const note of piece.notes) drumGroupOfNote.set(note, piece.group.toLowerCase());
@@ -1781,6 +1797,7 @@ async function listChoices() {
         choiceRows.get("meter").select.append(...options.meters.map((x, i) => createOption(String(i), x)));
         choiceRows.get("mode").select.append(...options.modes.map((x, i) => createOption(String(i), x)));
         showSetting("tempo");
+        showSetting("length");
         showChoice("meter");
         showChoice("mode");
     } catch {
@@ -1881,7 +1898,7 @@ function showSetting(key) {
     row.given.checked = setting.isGiven;
     row.range.disabled = !setting.isGiven;
     row.range.value = String(setting.value);
-    row.output.textContent = key !== "tempo" ? formatPercent(fromStep(setting.value)) : tempos.length > 0 ? `${Math.round(tempos[setting.value])} bpm` : "";
+    row.output.textContent = settingText(key, setting.value);
 }
 
 /**

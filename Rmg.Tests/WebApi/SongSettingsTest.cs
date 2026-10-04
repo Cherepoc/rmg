@@ -15,6 +15,7 @@ public sealed class SongSettingsTest
         new Setting(true, 2),
         new Setting(true, 12),
         new Setting(false, 45),
+        new Setting(true, 20),
         [
             ..SongSettings.PartOrder.SkipLast(1).Select((_, i) => new PartSettings(i % 3, new Setting(i % 2 == 1, i * 18), 63 - i, new Setting(i == 0, i * 9))),
             new PartSettings(1, new Setting(true, 65), 40, new Setting(true, 50))
@@ -34,6 +35,7 @@ public sealed class SongSettingsTest
         new Setting(false, 0),
         new Setting(false, 0),
         new Setting(false, 0),
+        new Setting(false, 0),
         [..SongSettings.PartOrder.Select(_ => new PartSettings(0, new Setting(false, 0), 0, new Setting(false, 0)))],
         [..SongMix.DrumGroupNames.Select(_ => new DrumGroupSettings(0))],
         0,
@@ -43,7 +45,7 @@ public sealed class SongSettingsTest
 
     private static bool AreSame(SongSettings first, SongSettings second) =>
         first.Unconventionality == second.Unconventionality && first.Facets.SequenceEqual(second.Facets)
-        && (first.Tempo, first.Key, first.Meter, first.Mode, first.Swing) == (second.Tempo, second.Key, second.Meter, second.Mode, second.Swing) && first.Parts.SequenceEqual(second.Parts)
+        && (first.Tempo, first.Key, first.Meter, first.Mode, first.Swing, first.Length) == (second.Tempo, second.Key, second.Meter, second.Mode, second.Swing, second.Length) && first.Parts.SequenceEqual(second.Parts)
         && first.DrumGroups.SequenceEqual(second.DrumGroups) && first.Volume == second.Volume
         && first.DrumPieces.IsGiven == second.DrumPieces.IsGiven && first.DrumPieces.Pieces.SequenceEqual(second.DrumPieces.Pieces)
         && first.Genre.Name == second.Genre.Name && first.Genre.Options.SequenceEqual(second.Genre.Options);
@@ -55,7 +57,7 @@ public sealed class SongSettingsTest
         {
             var text = settings.Format();
 
-            await Assert.That(text.Length).IsEqualTo(1 + SongSettings.Length + settings.Genre.Format().Length);
+            await Assert.That(text.Length).IsEqualTo(1 + SongSettings.FixedLength + settings.Genre.Format().Length);
             await Assert.That(text.All(x => char.IsAsciiLetterOrDigit(x) || x is '-' or '_')).IsTrue();
             await Assert.That(AreSame(SongSettings.Parse(text)!, settings)).IsTrue();
         }
@@ -64,16 +66,17 @@ public sealed class SongSettingsTest
     [Test]
     public async Task EveryValueOf64Steps_IsACharacterAtAFixedPlace_AndTheRestBitsSixToACharacter()
     {
-        // the unconventionality first, then the facets, the tempo, the swing and the volume, every part's volume and pan,
-        // and every drum group's volume, 38 characters; then the rest's 150 bits, 25 characters
+        // the unconventionality first, then the facets, the tempo, the swing, the length and the volume, every part's
+        // volume and pan, and every drum group's volume, 39 characters; then the rest's 151 bits, 26 characters
         var text = Mixed.Format();
         // settings of no genre write nothing behind the fixed places
-        await Assert.That(Silent.Format().Length).IsEqualTo(1 + SongSettings.Length);
+        await Assert.That(Silent.Format().Length).IsEqualTo(1 + SongSettings.FixedLength);
         await Assert.That(text[1]).IsEqualTo('_');
         await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length]).IsEqualTo('3');
         await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 1]).IsEqualTo('j');
-        await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 2]).IsEqualTo('o');
-        await Assert.That(SongSettings.Length).IsEqualTo(38 + 25);
+        await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 2]).IsEqualTo('K');
+        await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 3]).IsEqualTo('o');
+        await Assert.That(SongSettings.FixedLength).IsEqualTo(39 + 26);
         // every meter and every scale fits its bits
         await Assert.That(Meter.Options.Length).IsLessThanOrEqualTo(1 << SongSettings.MeterBits);
         await Assert.That(Rmg.Core.Composition.Scales.All.Length).IsLessThanOrEqualTo(1 << SongSettings.ModeBits);
@@ -83,14 +86,14 @@ public sealed class SongSettingsTest
     public async Task TheFormat_IsFixed()
     {
         // the page writes the same, so a change to either side shows here and in the page's check against it
-        await Assert.That(Silent.Format()).IsEqualTo("8" + new string('0', SongSettings.Length));
+        await Assert.That(Silent.Format()).IsEqualTo("9" + new string('0', SongSettings.FixedLength));
         await Assert.That(Mixed.Format()).IsEqualTo(MixedText);
         await Assert.That(Mixed.Identity).IsEqualTo(MixedIdentity);
     }
 
-    public const string MixedText = "8_07ELSZgnu3jo_0-9zIyRxawjvsu_eo09IRajshQR5c0aI4Iej0fg5Od-xWJIIIC4LdOWGsmfoMQZ56T303m660CGm";
+    public const string MixedText = "9_07ELSZgnu3jKo_0-9zIyRxawjvsu_eo09IRajshQxAC18b8aGR1ILBmEzt1daaa0C4LdOWGsmfoMQZ56T303m660CGm";
 
-    public const string MixedIdentity = "hQ3_0ESgu32C012012011199992303m660CGm";
+    public const string MixedIdentity = "hQB_0ESgu32CK012012011199992303m660CGm";
 
     [Test]
     public async Task ATempoStep_RunsFrom60Through120To240BeatsAMinute_EveryStepFasterByAboutTheSame()
@@ -109,7 +112,7 @@ public sealed class SongSettingsTest
     [Test]
     public async Task SettingsOfAnotherFormat_ReadAsNone()
     {
-        await Assert.That(SongSettings.Parse("7" + MixedText[1..])).IsNull();
+        await Assert.That(SongSettings.Parse("8" + MixedText[1..])).IsNull();
         // and a genre's characters that are not one
         await Assert.That(SongSettings.Parse(Silent.Format() + "5")).IsNull();
         await Assert.That(SongSettings.Parse(MixedText + "A")).IsNull();
@@ -135,6 +138,7 @@ public sealed class SongSettingsTest
         }
 
         await Assert.That(request.DrumPieces!.Count).IsEqualTo(Mixed.DrumPieces.Pieces.Count(x => x));
+        await Assert.That(request.Length).IsEqualTo(20);
         await Assert.That(request.Genre!["meter"]["3/4"]).IsEqualTo(27);
         await Assert.That(request.Genre["rhythm.chords"]["offbeat"]).IsEqualTo(48);
         // and read as any request is

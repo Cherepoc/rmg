@@ -20,6 +20,7 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Meter">Its meter, by its place among <see cref="Core.Composition.Meter.Options" />.</param>
 /// <param name="Mode">The scale it starts in, by its place among <see cref="Scales.All" />.</param>
 /// <param name="Swing">How much it swings, from 0, straight, to 63, a triplet's swing.</param>
+/// <param name="Length">How long it plays, by its step (<see cref="LengthScale" />).</param>
 /// <param name="Parts">Every part's, in the order of <see cref="PartOrder" />.</param>
 /// <param name="DrumGroups">Every drum group's, in the order of <see cref="SongMix.DrumGroupNames" />.</param>
 /// <param name="Volume">How loud the whole song plays, from 0 to 63.</param>
@@ -33,6 +34,7 @@ public sealed record SongSettings(
     Setting Meter,
     Setting Mode,
     Setting Swing,
+    Setting Length,
     ImmutableArray<PartSettings> Parts,
     ImmutableArray<DrumGroupSettings> DrumGroups,
     int Volume,
@@ -41,7 +43,7 @@ public sealed record SongSettings(
 )
 {
     /// <summary>The format this writes, as its first character; one that is read differently takes the next.</summary>
-    public const char FormatCharacter = '8';
+    public const char FormatCharacter = '9';
 
     public static ImmutableArray<Facet> FacetOrder { get; } =
         [Facet.Feel, Facet.Groove, Facet.Fills, Facet.Form, Facet.Chords, Facet.Progression, Facet.Scale, Facet.Melody, Facet.Sound];
@@ -59,19 +61,19 @@ public sealed record SongSettings(
     private const int PlaysBits = 2;
     private const int ProgramBits = 7;
 
-    // the values of 64 steps, a character each: the unconventionality, the facets, the tempo, the swing, the volume,
-    // every part's volume and pan, and every drum group's volume
-    private static int CharacterCount => 1 + FacetOrder.Length + 1 + 1 + 1 + 2 * PartOrder.Length + SongMix.DrumGroupNames.Length;
+    // the values of 64 steps, a character each: the unconventionality, the facets, the tempo, the swing, the length,
+    // the volume, every part's volume and pan, and every drum group's volume
+    private static int CharacterCount => 1 + FacetOrder.Length + 1 + 1 + 1 + 1 + 2 * PartOrder.Length + SongMix.DrumGroupNames.Length;
 
     // and the rest, bit by bit: whether each value is given, the key, the meter and the scale, every part's plays, whether
     // its pan and its instrument are given and its program, and whether the drum pieces are given and every piece's being in
-    private static int BitCount => 1 + FacetOrder.Length + 5 + KeyBits + MeterBits + ModeBits + PartOrder.Length * (PlaysBits + 2 + ProgramBits)
+    private static int BitCount => 1 + FacetOrder.Length + 6 + KeyBits + MeterBits + ModeBits + PartOrder.Length * (PlaysBits + 2 + ProgramBits)
                                    + 1 + Core.Composition.DrumPieces.All.Length;
 
     /// <summary>How many characters follow the format's, a genre's after them.</summary>
-    public static int Length => CharacterCount + (BitCount + 5) / 6;
+    public static int FixedLength => CharacterCount + (BitCount + 5) / 6;
 
-    private IEnumerable<Setting> GivenValues => [Unconventionality, ..Facets, Tempo, Key, Meter, Mode, Swing];
+    private IEnumerable<Setting> GivenValues => [Unconventionality, ..Facets, Tempo, Key, Meter, Mode, Swing, Length];
 
     /// <summary>The settings as their format's character, a character for every value of 64 steps, and the rest's bits.</summary>
     public string Format()
@@ -80,7 +82,7 @@ public sealed record SongSettings(
             || DrumPieces.Pieces.Length != Core.Composition.DrumPieces.All.Length)
             throw new InvalidOperationException("Settings name every facet, part, drum group and drum piece.");
 
-        List<int> characters = [Unconventionality.Value, ..Facets.Select(x => x.Value), Tempo.Value, Swing.Value, Volume];
+        List<int> characters = [Unconventionality.Value, ..Facets.Select(x => x.Value), Tempo.Value, Swing.Value, Length.Value, Volume];
         foreach (var part in Parts)
             characters.AddRange([part.Volume, part.Pan.Value]);
         characters.AddRange(DrumGroups.Select(x => x.Volume));
@@ -121,10 +123,10 @@ public sealed record SongSettings(
     /// <summary>Reads settings the page wrote, or none for anything that is not settings of this format.</summary>
     public static SongSettings? Parse(string? text)
     {
-        if (text is null || text.Length < 1 + Length || text[0] != FormatCharacter || GenreSettings.Parse(text[(1 + Length)..]) is not { } genre)
+        if (text is null || text.Length < 1 + FixedLength || text[0] != FormatCharacter || GenreSettings.Parse(text[(1 + FixedLength)..]) is not { } genre)
             return null;
 
-        var values = text[1..(1 + Length)].Select(x => Base64.Digits.IndexOf(x)).ToArray();
+        var values = text[1..(1 + FixedLength)].Select(x => Base64.Digits.IndexOf(x)).ToArray();
         if (values.Any(x => x < 0))
             return null;
 
@@ -132,6 +134,7 @@ public sealed record SongSettings(
         int Next() => values[at++];
         var given = Enumerable.Range(0, 1 + FacetOrder.Length + 1).Select(_ => Next()).ToArray();
         var swing = Next();
+        var length = Next();
         var volume = Next();
         var mixes = PartOrder.Select(_ => (Volume: Next(), Pan: Next())).ToArray();
         var groups = SongMix.DrumGroupNames.Select(_ => new DrumGroupSettings(Next())).ToImmutableArray();
@@ -140,7 +143,7 @@ public sealed record SongSettings(
         var b = 0;
         bool Bit() => bits[b++];
         int Read(int count) => Enumerable.Range(0, count).Sum(bit => Bit() ? 1 << bit : 0);
-        var isGiven = Enumerable.Range(0, 1 + FacetOrder.Length + 5).Select(_ => Bit()).ToArray();
+        var isGiven = Enumerable.Range(0, 1 + FacetOrder.Length + 6).Select(_ => Bit()).ToArray();
         var key = Read(KeyBits);
         var meter = Read(MeterBits);
         var mode = Read(ModeBits);
@@ -159,8 +162,9 @@ public sealed record SongSettings(
             return null;
 
         var facets = given[1..^1].Select((value, i) => new Setting(isGiven[1 + i], value));
-        return new SongSettings(new Setting(isGiven[0], given[0]), [..facets], new Setting(isGiven[^5], given[^1]), new Setting(isGiven[^4], key),
-            new Setting(isGiven[^3], meter), new Setting(isGiven[^2], mode), new Setting(isGiven[^1], swing), parts, groups, volume, pieces, genre);
+        return new SongSettings(new Setting(isGiven[0], given[0]), [..facets], new Setting(isGiven[^6], given[^1]), new Setting(isGiven[^5], key),
+            new Setting(isGiven[^4], meter), new Setting(isGiven[^3], mode), new Setting(isGiven[^2], swing), new Setting(isGiven[^1], length), parts, groups, volume,
+            pieces, genre);
     }
 
     /// <summary>
@@ -186,13 +190,14 @@ public sealed record SongSettings(
             DrumPieces.IsGiven ? [..Core.Composition.DrumPieces.All.Where((_, i) => DrumPieces.Pieces[i]).Select(x => x.Name)] : null,
             Given(Mode),
             Given(Swing),
-            Genre.ToRequest()
+            Genre.ToRequest(),
+            Given(Length)
         );
     }
 
     /// <summary>
     ///     What of the settings names the song, as a seed does, whatever changes its notes: the switches of which of the
-    ///     unconventionality, the facets, the tempo, the key, the meter, the scale and the swing are given, six to a
+    ///     unconventionality, the facets, the tempo, the key, the meter, the scale, the swing and the length are given, six to a
     ///     character, the values of those given alone, every part's plays, the drum pieces given, six to a character behind
     ///     a 1, and the genre's options behind a 2 (<see cref="GenreSettings.OptionCharacters" />), its name left out, with
     ///     the zeros at its end left off; empty where nothing is given, for a song its seed alone names. The switches say

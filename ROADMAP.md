@@ -6,8 +6,8 @@ is removed once it is built.
 
 ## Priorities
 
-**Next** (P1): a song's length given (see *Open work*), then a genre's three points (see *Genres*), then the drum
-solos' feet and players (see *Open work*); listening to
+**Next** (P1): a genre's three points (see *Genres*), then the drum solos' feet and players (see *Open work*);
+listening to
 what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the ratings by conventionality once
 enough are in, alongside, continuously and never as a gate.
 
@@ -165,20 +165,11 @@ Each item with its plan, and what it waits for.
 
 ### Conventionality
 
-- **A song's length given** (P1, planned): a length in minutes among the settings, given or as the form makes it,
-  and the song as close to it as its form allows. Songs last from 1:30 to 4:02 (the tenth and the ninetieth
-  hundredth, the wildest to 8:07), by their beats (correlation 0.91), which their sections make (0.78), more than by
-  their tempo (0.25). Leaning the draws that make the form already, none deciding and every one drawing as often as
-  it did, so that a song with none given is as it was: the forms (`SongForms.Forms`), which are one another shortened
-  and lengthened, each by how near its length comes, with a longer one or two added at small weights (such as VCVCBCVC), solos filling a length still
-  short only if the measures ask for it; a free form
-  (`SongStructureGenerator`) adding parts until it nears it; and what is left leaning a section's plays
-  (`SectionLength`) and the intro, the outro and the last section played again. A section is made once and every
-  appearance drawn again, so that one played more is varied as any is. The tempo is never moved. The steps: (1) a
-  report of the songs' lengths; (2) the tempo, the sections' meters and their plays drawn before the form is fixed,
-  the songs as they were; (3) the leans, measured by the error at 1, 2, 3, 5 and 10 minutes, the long lengths the
-  likeliest to fall short, which solos might fill; (4) the setting, its link's place, the length drawn shown, and the
-  page's tests.
+- **A song's length, the rest:** a short length runs long, a quarter of the songs given a minute past 1:09 and a
+  fifth of those given two past 2:18 (`SongLengthReportTest`), as an intro, an outro or a fade adds a section the
+  length leans no draw of; their chances leaned by the length as the form's are, should it matter. Long songs, ten
+  minutes, are free forms seven times in ten, as no form reaches them: heard as rambling? Solos filling a long length
+  rather than more parts, if so.
 - **The drum solos' feet and players** (P1, planned): a drum solo is the hands' line round the kit, the kick a note
   of it and every other drum silent (`DrumSolos`). (1) The feet keep time in most solos, about 70%, drawn from a
   stream of its own: the drums of the kick's role keep the section's groove under the line, a little softer, which

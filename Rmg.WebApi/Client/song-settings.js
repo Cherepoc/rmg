@@ -16,6 +16,7 @@ export function defaultSettings() {
         meter: { isGiven: false, value: 0 },
         mode: { isGiven: false, value: 0 },
         swing: { isGiven: false, value: 0 },
+        length: { isGiven: false, value: MIDDLE_STEP },
         parts: Object.fromEntries(FORMAT_PARTS.map((part) => [part, {
             plays: "random",
             instrument: { isGiven: false, value: 0 },
@@ -46,6 +47,7 @@ export function givenOnly(settings) {
         meter: keep(settings.meter, fresh.meter),
         mode: keep(settings.mode, fresh.mode),
         swing: keep(settings.swing, fresh.swing),
+        length: keep(settings.length, fresh.length),
         parts: Object.fromEntries(FORMAT_PARTS.map((part) => {
             const given = settings.parts[part];
             return [part, { ...given, instrument: keep(given.instrument, fresh.parts[part].instrument), pan: keep(given.pan, fresh.parts[part].pan) }];
@@ -80,6 +82,7 @@ export function requestFor(seed, settings) {
         meter: given(settings.meter),
         mode: given(settings.mode),
         swing: given(settings.swing),
+        length: given(settings.length),
         drumGroups: Object.fromEntries(DRUM_GROUPS.map((group) => [group, { ...settings.drumGroups[group] }])),
         genre: Object.keys(settings.genre.choices).length > 0 ? settings.genre.choices : undefined,
     };
@@ -100,6 +103,7 @@ export function applyReport(settings, report) {
     next.meter = drawn(settings.meter, report.meter);
     next.mode = drawn(settings.mode, report.mode);
     next.swing = drawn(settings.swing, report.swing);
+    next.length = drawn(settings.length, report.length);
     next.drumPieces = drawn(settings.drumPieces, report.drumPieces);
 
     const channels = {};

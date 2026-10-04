@@ -316,6 +316,7 @@ public sealed class EventStoreTest : IDisposable
             Key = SongSettingsTest.Mixed.Key with { IsGiven = false },
             Meter = SongSettingsTest.Mixed.Meter with { IsGiven = false },
             Mode = SongSettingsTest.Mixed.Mode with { IsGiven = false },
+            Length = SongSettingsTest.Mixed.Length with { IsGiven = false },
             Facets = [..SongSettingsTest.Mixed.Facets.Select(x => x with { IsGiven = false })],
             Parts = [..SongSettingsTest.Mixed.Parts.Select(x => x with { Plays = 0 })],
             DrumPieces = DrumPieceSettings.Drawn,

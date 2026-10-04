@@ -1,13 +1,13 @@
 /**
  *     What a song is heard with, written short enough for a link: its unconventionality and facets, its tempo, key, meter,
- *     scale and swing, its genre, its parts and their mix, its drum groups and drum pieces, and its volume, each value given, or as the song
+ *     scale, swing and length, its genre, its parts and their mix, its drum groups and drum pieces, and its volume, each value given, or as the song
  *     drew it. The server reads the same format (SongSettings), which a link and every event about a song carry: a
  *     format's character, then a character for every value of 64 steps at a fixed place, then every other value as its
  *     bits, one after another, six to a character. Seeds are written in the same 64 digits.
  */
 
 /** The format this writes, as its first character; one that is read differently takes the next. */
-const FORMAT_CHARACTER = "8";
+const FORMAT_CHARACTER = "9";
 
 /** The 64 digits: the digits, the letters, "-" and "_", in base 62's order and on from it. */
 const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_";
@@ -53,9 +53,9 @@ export const PLAYS = ["random", "on", "off"];
 
 /**
  *     The values a song may be given that change its notes: the unconventionality, the facets, the tempo, the key, the
- *     meter, the scale, called its mode beside the facet of that name, and the swing.
+ *     meter, the scale, called its mode beside the facet of that name, the swing and the length.
  */
-const GIVEN = ["unconventionality", ...FACETS, "tempo", "key", "meter", "mode", "swing"];
+const GIVEN = ["unconventionality", ...FACETS, "tempo", "key", "meter", "mode", "swing", "length"];
 
 // the bits of a key, of twelve, of a meter and of a scale, of up to sixteen options each, of a part's plays, of three,
 // and of a program, of 128
@@ -65,11 +65,11 @@ const MODE_BITS = 4;
 const PLAYS_BITS = 2;
 const PROGRAM_BITS = 7;
 
-// the values of 64 steps, a character each: the unconventionality, the facets, the tempo, the swing, the volume, every
+// the values of 64 steps, a character each: the unconventionality, the facets, the tempo, the swing, the length, the volume, every
 // part's volume and pan, and every drum group's volume; then the rest, bit by bit: whether each value is given, the key,
 // the meter and the scale, every part's plays, whether its pan and its instrument are given and its program, and whether
 // the drum pieces are given and every piece's being in
-const CHARACTER_COUNT = 1 + FACETS.length + 1 + 1 + 1 + 2 * FORMAT_PARTS.length + DRUM_GROUPS.length;
+const CHARACTER_COUNT = 1 + FACETS.length + 1 + 1 + 1 + 1 + 2 * FORMAT_PARTS.length + DRUM_GROUPS.length;
 const BIT_COUNT = GIVEN.length + KEY_BITS + METER_BITS + MODE_BITS + FORMAT_PARTS.length * (PLAYS_BITS + 2 + PROGRAM_BITS) + 1 + DRUM_PIECES.length;
 
 // how many characters the fixed places take, behind the format's, a genre's after them
@@ -235,7 +235,7 @@ function parseGenre(values) {
 
 /** The settings as text, every facet, part, drum group and drum piece named, as parseSettings reads them. */
 export function formatSettings(settings) {
-    const characters = [settings.unconventionality.value, ...FACETS.map((facet) => settings.facets[facet].value), settings.tempo.value, settings.swing.value, settings.volume];
+    const characters = [settings.unconventionality.value, ...FACETS.map((facet) => settings.facets[facet].value), settings.tempo.value, settings.swing.value, settings.length.value, settings.volume];
     for (const name of FORMAT_PARTS) characters.push(settings.parts[name].volume, settings.parts[name].pan.value);
     for (const group of DRUM_GROUPS) characters.push(settings.drumGroups[group].volume);
     if (characters.some((x) => !Number.isInteger(x) || x < 0 || x > 63)) throw new RangeError("A value does not fit in a character.");
@@ -273,6 +273,7 @@ export function parseSettings(text) {
     const facets = FACETS.map(() => next());
     const tempo = next();
     const swing = next();
+    const length = next();
     const volume = next();
     const mixes = FORMAT_PARTS.map(() => ({ volume: next(), pan: next() }));
     const groupVolumes = DRUM_GROUPS.map(() => next());
@@ -293,6 +294,7 @@ export function parseSettings(text) {
         meter: { isGiven: isGiven[GIVEN.indexOf("meter")], value: meter },
         mode: { isGiven: isGiven[GIVEN.indexOf("mode")], value: mode },
         swing: { isGiven: isGiven[GIVEN.indexOf("swing")], value: swing },
+        length: { isGiven: isGiven[GIVEN.indexOf("length")], value: length },
         parts: {},
         drumGroups: Object.fromEntries(DRUM_GROUPS.map((group, i) => [group, { volume: groupVolumes[i] }])),
         volume,
