@@ -210,7 +210,10 @@ public sealed class GenreEditorTest(Site site)
         var parts = await Section(dialog, "Parts");
         await parts.GetByRole(AriaRole.Tab, new() { Name = "Bass", Exact = true }).ClickAsync();
 
+        // a part's tile titled by what of it it sets, its window by the part and that
+        await Assert.That(await Tile(parts, "instrument.bass").Locator("h4").TextContentAsync()).IsEqualTo("Instruments");
         var tune = await Change(parts, "instrument.bass");
+        await Assert.That(await tune.Locator("h2").TextContentAsync()).IsEqualTo("Bass – Instruments");
         await tune.Locator(".tune-pick-open").ClickAsync();
         await tune.Locator(".tune-popup input[type=search]").FillAsync("tub");
         await Assert.That(await tune.Locator(".tune-picks label:visible").AllTextContentsAsync()).IsEquivalentTo(["Tuba"]);
@@ -489,6 +492,9 @@ public sealed class GenreEditorTest(Site site)
         await parts.GetByRole(AriaRole.Tab, new() { Name = "Drums", Exact = true }).ClickAsync();
         await Tile(parts, "drumSetup").ScrollIntoViewIfNeededAsync();
         await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-editor-drums.png") });
+        var pieces = await Change(parts, "drumPieces");
+        await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-tune-many.png") });
+        await pieces.Locator(".genre-close").ClickAsync();
         var tune = await Change(time, "meter");
         await page.Until(async () => await tune.Locator(".tune-shares path").CountAsync() > 0, "the chances drawn");
         await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-tune.png") });

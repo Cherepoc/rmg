@@ -71,7 +71,8 @@ export function drawBand(element, from, to, [least, most], width, height) {
 
 /**
  *     What each end of the songs draws, in words: a pool's options by their shares, a chance's by its chance and a value
- *     by its lean from as it is, the greatest first, none at 0, at most as many as given; the tempo its range.
+ *     by how far it is from as it is, at 50, the greatest first, none at 0 or as it is, at most as many as given; the
+ *     tempo its range.
  */
 export function endsInWords(choice, preview, count = Infinity) {
     const labelOf = (name) => choice.options.find((x) => x.name === name)?.label ?? name;
@@ -81,13 +82,9 @@ export function endsInWords(choice, preview, count = Infinity) {
     }
 
     const amounts = choice.kind === "pool" ? preview.shares : preview.curves;
-    // a value's lean from as it is, at 50, to its least, -100, or its most, +100
-    const sizeOf = (amount) => (choice.kind === "values" ? Math.abs(2 * amount - 100) : amount);
-    const said = (amount) => {
-        if (choice.kind !== "values") return `${Math.round(amount)}%`;
-        const lean = Math.round(2 * amount - 100);
-        return lean > 0 ? `+${lean}` : `−${-lean}`;
-    };
+    // a value by how far it is from as it is, at 50, in its own numbers, as the window shows them
+    const sizeOf = (amount) => (choice.kind === "values" ? Math.abs(amount - 50) : amount);
+    const said = (amount) => (choice.kind === "values" ? `${Math.round(amount)}` : `${Math.round(amount)}%`);
     return [0, 1, 2].map((end) => Object.keys(amounts)
         .map((name) => ({ name, amount: atEnds(amounts[name])[end] }))
         .filter((x) => Math.round(sizeOf(x.amount)) > 0)

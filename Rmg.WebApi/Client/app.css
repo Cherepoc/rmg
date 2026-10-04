@@ -1749,30 +1749,42 @@ footer a:hover {
 
 .tune-body {
     display: flex;
+    flex: 1;
     gap: 20px;
+    min-height: 0;
     padding: 16px;
-    overflow-y: auto;
 }
 
+/* the options, scrolling on their own where there are many, the chart beside them where it is */
 .tune-list {
     display: flex;
     flex-direction: column;
     gap: 4px;
     width: 220px;
     flex-shrink: 0;
+    overflow-y: auto;
+    padding-right: 4px;
 }
 
 /* an option's tab, its numbers under its name, and a button leaving it out */
 .tune-row {
     display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 4px;
+    padding-right: 6px;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: var(--panel);
 }
 
+.tune-row:hover {
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
 .tune-row[aria-current="true"] {
-    background: color-mix(in srgb, var(--accent) 16%, var(--panel));
-    box-shadow: inset 3px 0 0 var(--accent);
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, var(--panel));
 }
 
 .tune-option {
@@ -1782,23 +1794,37 @@ footer a:hover {
     align-items: flex-start;
     gap: 2px;
     min-width: 0;
-    padding: 8px 10px;
+    padding: 7px 10px;
     border: 0;
     background: transparent;
+    color: var(--text);
     text-align: left;
     font-size: 13px;
+    line-height: 18px;
 }
 
 .tune-remove {
-    width: 36px;
-    flex-shrink: 0;
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
     padding: 0;
     border: 0;
-    border-left: 1px solid var(--border);
-    border-radius: 0 8px 8px 0;
+    border-radius: 6px;
     background: transparent;
     color: var(--muted);
     font-size: 16px;
+    line-height: 1;
+}
+
+.tune-remove:hover:not(:disabled) {
+    background: var(--bg);
+    color: var(--danger);
+}
+
+.tune-remove:disabled {
+    opacity: 0.35;
 }
 
 .tune-values {
@@ -1813,6 +1839,7 @@ footer a:hover {
     flex-direction: column;
     gap: 10px;
     min-width: 0;
+    overflow-y: auto;
 }
 
 .tune-empty {
@@ -2014,12 +2041,18 @@ footer a:hover {
 
     .tune-body {
         flex-direction: column;
+        overflow-y: auto;
     }
 
     .tune-list {
         flex-direction: row;
         flex-wrap: wrap;
         width: auto;
+        max-height: 160px;
+    }
+
+    .tune-main {
+        overflow-y: visible;
     }
 
     .tune-option,

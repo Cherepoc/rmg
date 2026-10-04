@@ -110,10 +110,11 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
 
     /**
      *     A choice's tile: its name, how many options the genre keeps, its Override checkbox, and its graph, which opens the
-     *     window that changes it, with what each end of the songs draws under it; those options the genre may keep, all of
-     *     them, or as the draft allows them, such as the drums of the pieces chosen.
+     *     window that changes it, with what each end of the songs draws most under it; those options the genre may keep,
+     *     all of them, or as the draft allows them, such as the drums of the pieces chosen; and, a part's, what of it it
+     *     sets, such as its instruments, its title, the window's after the part's.
      */
-    function tile(allowed = () => true) {
+    function tile(allowed = () => true, what = null) {
         const element = html("div", "genre-tile");
         const title = html("h4");
         const count = html("span", "genre-count");
@@ -140,7 +141,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
             }
             changed();
         });
-        graph.addEventListener("click", () => tune.open(choice, draft.choices[choice.name] ?? null, { allowed, start }, (amounts) => {
+        graph.addEventListener("click", () => tune.open(choice, draft.choices[choice.name] ?? null, { allowed, start, title: what ? `${choice.label} – ${what}` : choice.label }, (amounts) => {
             // values leaning none are as the songs have them
             if (amounts === null || (choice.kind === "values" && Object.keys(amounts).length === 0)) {
                 if (choice.name in draft.choices) unchecked.set(choice.name, draft.choices[choice.name]);
@@ -164,7 +165,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
                 const names = Object.keys(preview.curves);
                 drawLines(chart, preview.curves, names, [0, 100], (x) => COLOURS[names.indexOf(x) % COLOURS.length], GRAPH_WIDTH, GRAPH_HEIGHT);
             }
-            const words = endsInWords(choice, preview, 2);
+            // the most of each end alone, on one line
+            const words = endsInWords(choice, preview, 1);
             ends.append(...["Plainest", "Middling", "Experimental"].map((end, i) => {
                 const said = words[i].length > 0 ? words[i].join(", ") : choice.kind === "values" ? "as is" : "none";
                 return html("span", "", `${end}: ${said}`);
@@ -178,7 +180,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
             bind(bound) {
                 choice = bound;
                 element.dataset.choice = choice.name;
-                title.textContent = choice.label;
+                title.textContent = what ?? choice.label;
                 input.checked = choice.name in draft.choices;
                 input.setAttribute("aria-label", `Override ${choice.label}`);
                 element.classList.toggle("own", !input.checked);
@@ -287,15 +289,15 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     // --- the body ----------------------------------------------------------------------------------------------------------
 
     const pitched = panel(
-        bound(tile(), (part) => `instrument.${part}`),
-        bound(tile(), (part) => `rhythm.${part}`),
-        bound(tile(), (part) => `feel.${part}`),
+        bound(tile(undefined, "Instruments"), (part) => `instrument.${part}`),
+        bound(tile(undefined, "Rhythm"), (part) => `rhythm.${part}`),
+        bound(tile(undefined, "Feel"), (part) => `feel.${part}`),
     );
-    const solo = panel(bound(tile(), () => "instrument.solo"));
+    const solo = panel(bound(tile(undefined, "Instruments"), () => "instrument.solo"));
     const role = panel(
-        bound(tile(isPieceAllowed), (x) => `drumRole.${x}`),
-        bound(tile(), (x) => `rhythm.${x}`),
-        bound(tile(), (x) => `feel.${x}`),
+        bound(tile(isPieceAllowed, "Drums"), (x) => `drumRole.${x}`),
+        bound(tile(undefined, "Rhythm"), (x) => `rhythm.${x}`),
+        bound(tile(undefined, "Feel"), (x) => `feel.${x}`),
     );
     const roles = tabs("Drums' roles", ROLES.map(([part, label]) => ({ label, part, names: [`drumRole.${part}`, `rhythm.${part}`, `feel.${part}`], panel: role })));
     const drums = panel(

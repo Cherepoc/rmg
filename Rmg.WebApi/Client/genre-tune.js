@@ -86,7 +86,7 @@ export function createGenreTune() {
     const main = html("div", { class: "tune-main" }, heading, grid, empty);
     const body = html("div", { class: "tune-body" }, list, main);
 
-    const reset = html("button", { type: "button", text: "Back to the songs' amounts" });
+    const reset = html("button", { type: "button", text: "Restore defaults", title: "The options and their amounts as the songs have them" });
     const finish = html("button", { type: "button", class: "primary", text: "Done" });
     const footer = html("footer", {}, reset, html("span", { class: "tune-gap" }), finish);
     dialog.append(header, body, footer);
@@ -269,7 +269,6 @@ export function createGenreTune() {
     }
 
     function render() {
-        title.textContent = choice.label;
         pick.hidden = choice.kind === "range";
         renderPicks();
         for (const row of list.children) {
@@ -410,11 +409,12 @@ export function createGenreTune() {
         element: dialog,
         /**
          *     Opens on a choice, its options' amounts as the genre gives them, none where it does not override it, which
-         *     then start as the songs have them; the options it may keep, how the songs have them, and what to do as it is
-         *     done: the amounts given back, none where it no longer overrides it.
+         *     then start as the songs have them; the options it may keep, how the songs have them, its title, and what to do
+         *     as it is done: the amounts given back, none where it no longer overrides it.
          */
-        open(bound, given, { allowed: isAllowed, start: startOf }, onDone) {
+        open(bound, given, { allowed: isAllowed, start: startOf, title: titled }, onDone) {
             choice = bound;
+            title.textContent = titled;
             allowed = isAllowed;
             start = startOf;
             overridden = override.checked = given !== null;
