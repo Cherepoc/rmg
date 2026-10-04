@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Rmg.Core.Composition;
 using Rmg.WebApi.Songs;
 
@@ -14,6 +15,10 @@ public static class GenreEndpoints
         routes.MapPost("/api/genres/preview", (GenrePreviewRequest request) => GenrePreview.Of(request, out var error) is { } preview
             ? Results.Ok(preview)
             : Results.BadRequest(new ErrorResponse(error!)));
+
+        // every choice of a genre so, those it does not name as the songs have them, for the editor's graphs
+        routes.MapPost("/api/genres/previews", (IReadOnlyDictionary<string, IReadOnlyDictionary<string, JsonElement>> genre) =>
+            GenrePreview.OfGenre(genre, out var error) is { } previews ? Results.Ok(previews) : Results.BadRequest(new ErrorResponse(error!)));
 
         // a genre a link names by its key (GenreStore), as it was asked for
         routes.MapGet("/api/genres/{key}", (string key, GenreStore store) => store.Find(key) is { } body

@@ -37,4 +37,28 @@ public sealed class GenrePreviewTest
         await Assert.That(GenrePreview.Of(Request("kazoo", """{ "a": 1 }"""), out var error)).IsNull();
         await Assert.That(error).IsNotNull();
     }
+
+    [Test]
+    public async Task AGenresEveryChoice_IsPreviewedAtOnce_ThoseItNamesAsItNamesThem_TheOthersAsTheSongsHaveThem()
+    {
+        var genre = JsonSerializer.Deserialize<Dictionary<string, IReadOnlyDictionary<string, JsonElement>>>("""{ "meter": { "4/4": [100, 80, 0], "7/8": [0, 20, 100] } }""")!;
+        var previews = GenrePreview.OfGenre(genre, out var error)!;
+
+        await Assert.That(error).IsNull();
+        await Assert.That(previews.Choices.Keys).IsEquivalentTo(GenreChoices.All.Select(x => x.Name));
+        // the named choice as the one choice's preview has it
+        var meter = GenrePreview.Of(Request("meter", """{ "4/4": [100, 80, 0], "7/8": [0, 20, 100] }"""), out _)!;
+        await Assert.That(previews.Choices["meter"].Shares!["7/8"]).IsEquivalentTo(meter.Shares!["7/8"]);
+        // a pool it does not name its shares as the songs draw them, no curves
+        var scale = previews.Choices["scale"];
+        await Assert.That(scale.Curves).IsNull();
+        var weights = ByConvention.Weigh(GenreChoices.Scale.Options.Select(x => (x.Name, x.Own)), 1);
+        var first = weights.First().Value;
+        await Assert.That(scale.Shares![first][^1]).IsEqualTo(100 * weights.Where(x => x.Value == first).Sum(x => x.Weight) / weights.Sum(x => x.Weight)).Within(1e-9);
+        // and a chance its own along, a pool's shares none
+        var parts = previews.Choices["parts"];
+        await Assert.That(parts.Shares).IsNull();
+        var pad = GenreChoices.Parts["pad"];
+        await Assert.That(parts.Curves!["pad"][0]).IsEqualTo(GenreAmounts.ToNumber(GenreChoices.Parts, "pad", pad.Own.Plain)).Within(1e-9);
+    }
 }
