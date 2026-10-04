@@ -262,6 +262,19 @@ genre in the link (`GenreSettings`). What is left:
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
   half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
   alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.
+- **A genre's three points** (P1, planned): every option a genre names is three amounts, 0 to 100, its plainest
+  songs', its middling ones' and its wildest ones', drawn by `ByConvention` as the generator's own are, so that a genre
+  has its own idea of plain and of experimental: plain funk in Dorian, the split third everywhere in blues, wild rock in
+  odd meters (`EveryPreset_ChoicesByEnd` shows the derived ends inheriting the generator's pop-centred plain end and
+  collapsing a wild end onto one option). The steps: (1) the engine, the old rule (`ByConvention.Toward`) gone, draws
+  with no conventionality of their own by their facet, homes and cadences leaning by the genre's curve over the songs',
+  the default genre served from the code, exact, presets converted as they play now; (2) the tempo, a range in beats a
+  minute and a lean within it at each end, replacing its straying; (3) genres out of the links: stored on the server by
+  an 11-character key of a hash of their canonical form, the link carrying the key, the history the key and a copy; (4)
+  a preview of a choice's shares along the axis; (5) a mockup of a fine-tune window, an option's three points dragged
+  up and down on a chart of weights, the shares beside them; (6) the editor, its sliders 0 to 100, finer at the low end
+  and snapping to round amounts, scaling an option's curve; (7) the presets authored, their idioms everywhere and their
+  experimental directions experimental only.
 - **Listening to the genres' wild ends:** a genre's middle is its own and its ends follow the songs', the wild giving
   back what the genre makes rare (`ByConvention.Toward`). The wildest Jazz songs swing in 39% and Blues in 11%, the
   wild end giving back the straight feel the genre takes. Homes and cadences
