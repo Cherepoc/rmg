@@ -263,11 +263,14 @@ genre in the link (`GenreSettings`). What is left:
   half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
   alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.
 - **Listening to the genres' wild ends:** a genre's middle is its own and its ends follow the songs', the wild giving
-  back what the genre makes rare (`ByConvention.Toward`). An end the songs keep to one option stays so: the wildest
-  songs swing whatever a genre's chance of it, but where it leaves swing out, as Electronic might. Homes and cadences
+  back what the genre makes rare (`ByConvention.Toward`). The wildest Jazz songs swing in 39% and Blues in 11%, the
+  wild end giving back the straight feel the genre takes. Homes and cadences
   lean by the genre's weights over the songs', so that Rock's cadences take its sus4 often (22% of its chords). A
   tempo range strays as the wild end nears, the wildest songs out of it as often as the songs' own tempos are: all of
   Ambient's, most of Reggae's and Hip-hop's narrow ranges (`EveryPreset_PlainMiddlingAndWild`).
+- **How the wild end swings:** a swing is as likely in the wildest songs as in a middling one, and the principle has
+  the wild end choose how it is played instead, such as a heavier swing or one past the triplet's; the amount is drawn
+  alike at every conventionality now (`Groove.Generate`).
 - **The rhythm's values against the part's own:** a value moves a setting by steps from where the part rests, so that
   one part's "faster" is another's "as fast as can be"; a value set outright, where it lands, would read the same for
   every part, should listening ask for it.

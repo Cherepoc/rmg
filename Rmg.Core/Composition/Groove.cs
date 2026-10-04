@@ -38,8 +38,12 @@ public readonly record struct Swing(double Delay, double Period)
 /// </summary>
 internal static class Groove
 {
-    /// <summary>The chance a song swings, by the feel facet of its unconventionality: never the plainest, every wildest.</summary>
-    public static ByConvention SwingChance { get; } = RhythmicUnconventionality.Ends(0.2, 1);
+    /// <summary>
+    ///     The chance a song swings, by the feel facet of its unconventionality: never the plainest, and as often the
+    ///     wildest as a middling one, as a swing is a feel, no stranger than straight, which the wild end strays from by
+    ///     its meters and tuplets instead.
+    /// </summary>
+    public static ByConvention SwingChance { get; } = new(0, 0.2, 0.2);
 
     /// <summary>The lightest swing, as a part of the triplet's; the heaviest is the triplet's, the second note of a pair a third late.</summary>
     public const double LightestSwing = 0.3;
