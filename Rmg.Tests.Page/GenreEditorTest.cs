@@ -174,7 +174,7 @@ public sealed class GenreEditorTest(Site site)
         await fourFour.Locator("input[type=range]").FillAsync("17");
         await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("50");
         await fourFour.Locator("input[type=range]").FillAsync("1");
-        await Assert.That(await fourFour.Locator("input[type=range]").GetAttributeAsync("aria-valuetext")).IsEqualTo("1");
+        await Assert.That(await fourFour.Locator("input[type=range]").GetAttributeAsync("aria-valuetext")).StartsWith("1, ");
 
         var tempo = await Section(dialog, "Tempo");
         await tempo.Locator(".genre-check input").First.CheckAsync();
@@ -344,6 +344,53 @@ public sealed class GenreEditorTest(Site site)
         await Row(playing, "riff").Locator("input[type=checkbox]").CheckAsync();
         await Assert.That(await twin.IsDisabledAsync()).IsFalse();
         await Assert.That(await twin.IsCheckedAsync()).IsFalse();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task ASlider_SaysWhatItMeansInsideIt_AShareOfTheMiddlingSongs_ExperimentalSongsOnlyAt0_AndEverySongAlone()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var meter = await Section(dialog, "Meter");
+        await Choose(meter, "meter").CheckAsync();
+        await UncheckAll(meter, "meter");
+        await Row(meter, "4/4").Locator("input[type=checkbox]").CheckAsync();
+        ILocator Meaning(string option) => Row(meter, option).Locator(".genre-meaning");
+
+        await Assert.That(await Meaning("4/4").TextContentAsync()).IsEqualTo("every song");
+        await Row(meter, "3/4").Locator("input[type=checkbox]").CheckAsync();
+        // 4/4 at 100 and 3/4 at 4: 96% and 4% of the middling songs, and 3/4 at 0 in experimental songs only, 4/4 then all
+        await Assert.That(await Meaning("4/4").TextContentAsync()).IsEqualTo("96% of middling songs");
+        await Assert.That(await Meaning("3/4").TextContentAsync()).IsEqualTo("4% of middling songs");
+        await Row(meter, "3/4").Locator("input[type=range]").FillAsync("0");
+        await Assert.That(await Meaning("3/4").TextContentAsync()).IsEqualTo("experimental songs only");
+        await Assert.That(await Meaning("4/4").TextContentAsync()).IsEqualTo("100% of middling songs");
+
+        var playing = await Checked(dialog, "Parts playing");
+        await Assert.That(await Row(playing, "melody").Locator(".genre-meaning").TextContentAsync()).IsEqualTo("every song");
+        await Assert.That(await Row(playing, "pad").Locator(".genre-meaning").TextContentAsync()).IsEqualTo("of middling songs");
+        await Row(playing, "pad").Locator("input[type=range]").FillAsync("0");
+        await Assert.That(await Row(playing, "pad").Locator(".genre-meaning").TextContentAsync()).IsEqualTo("experimental songs only");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task HowAGenreWorks_IsOpenAboveTheSections_UntilItIsClosed_OnTheNextVisitToo()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var principles = dialog.Locator("details.genre-principles");
+        await Assert.That(await principles.GetAttributeAsync("open")).IsNotNull();
+        await Assert.That(await principles.Locator("li").CountAsync()).IsGreaterThan(3);
+
+        await principles.Locator("summary").ClickAsync();
+        await Assert.That(await principles.GetAttributeAsync("open")).IsNull();
+        // kept once the panel says it closed
+        await page.Until(() => page.Page.EvaluateAsync<bool>("() => localStorage.getItem('rmg.genre-principles') === 'off'"), "the closing kept");
+        await page.Page.ReloadAsync();
+        dialog = await OpenEditor(page);
+        await Assert.That(await dialog.Locator("details.genre-principles").GetAttributeAsync("open")).IsNull();
         await Assert.That(page.Errors).IsEmpty();
     }
 

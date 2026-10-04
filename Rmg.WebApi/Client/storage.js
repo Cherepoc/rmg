@@ -7,6 +7,7 @@ const HISTORY = "rmg.songs";
 const RATINGS = "rmg.song-ratings";
 const SETTINGS = "rmg.settings";
 const GENRES = "rmg.genres";
+const GENRE_PRINCIPLES = "rmg.genre-principles";
 
 /** How many ratings the browser keeps, the oldest let go of first. */
 const RATINGS_KEPT = 500;
@@ -15,6 +16,8 @@ export const isKeeping = () => readFlag(SETTING);
 export const setKeeping = (isOn) => writeFlag(SETTING, isOn);
 export const isAutoplaying = () => readFlag(AUTOPLAY);
 export const setAutoplaying = (isOn) => writeFlag(AUTOPLAY, isOn);
+export const isShowingGenrePrinciples = () => readFlag(GENRE_PRINCIPLES);
+export const setShowingGenrePrinciples = (isOn) => writeFlag(GENRE_PRINCIPLES, isOn);
 
 /**
  *     A setting kept as the absence of an opt-out, so it stays on for a first visit and for a browser

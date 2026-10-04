@@ -1,4 +1,5 @@
 import { MAX_GENRE_NAME_BYTES } from "./settings.js";
+import { isShowingGenrePrinciples, setShowingGenrePrinciples } from "./storage.js";
 
 /**
  *     The genre editor, a popup over the page: a draft genre, a name and what it says of the choices the songs draw
@@ -77,10 +78,11 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
     }
 
     /**
-     *     A slider of a step from its least to 63, back to its default on a double-click (app.js), its ends in words where it
-     *     has them, and its step shown as the form given says, none where it shows elsewhere.
+     *     A slider of a step from its least to its last, back to its default on a double-click (app.js), its ends in words
+     *     where it has them, its step shown as the form given says, none where it shows elsewhere, and what it means, such
+     *     as "experimental songs only", inside it, read again as any slider moves (showMeanings).
      */
-    function slider(label, least, last, value, byDefault, onInput, form = null, ends = []) {
+    function slider(label, least, last, value, byDefault, onInput, form, meaning, ends) {
         const element = document.createElement("span");
         element.className = "genre-slider";
         const range = document.createElement("input");
@@ -93,14 +95,27 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         range.setAttribute("aria-label", label);
         const shown = document.createElement("output");
         shown.className = "value";
+        const track = document.createElement("span");
+        track.className = "genre-track";
+        const said = document.createElement("span");
+        said.className = "genre-meaning";
+        said.setAttribute("aria-hidden", "true");
+        track.append(range, said);
         const show = () => {
-            if (form === null) return;
-            shown.textContent = form(Number(range.value));
-            range.setAttribute("aria-valuetext", shown.textContent);
+            const step = Number(range.value);
+            const fill = (step - least) / (last - least);
+            track.style.setProperty("--fill", `${100 * fill}%`);
+            // written on the wider side of the thumb, never under it
+            said.classList.toggle("after", fill < 0.5);
+            said.textContent = meaning?.(step) ?? "";
+            if (form !== null) shown.textContent = form(step);
+            const text = [form === null ? null : shown.textContent, said.textContent].filter(Boolean).join(", ");
+            if (text) range.setAttribute("aria-valuetext", text);
         };
+        said.show = show;
         range.addEventListener("input", () => {
-            show();
             onInput(Number(range.value));
+            showMeanings();
         });
         const [lowEnd, highEnd] = ends.map((text) => {
             const end = document.createElement("span");
@@ -109,11 +124,35 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
             end.textContent = text;
             return end;
         });
-        element.append(...(ends.length > 0 ? [lowEnd, range, highEnd] : [range]));
+        element.append(...(ends.length > 0 ? [lowEnd, track, highEnd] : [track]));
         if (form !== null) element.append(shown);
         show();
         return element;
     }
+
+    /** Every slider shown again, as what one means may follow another, such as a weight's share of its pool. */
+    function showMeanings() {
+        for (const said of dialog.querySelectorAll(".genre-meaning")) said.show();
+    }
+
+    const EXPERIMENTAL_ONLY = "experimental songs only";
+    const EVERY_SONG = "every song";
+
+    /** What a pool's weight means: its share of the middling songs among the options kept, every song where it is alone, and at 0 experimental songs only. */
+    const weightMeaning = (choice) => (step) => {
+        const options = draft.choices[choice.name] ?? {};
+        const kept = Object.values(options);
+        if (kept.length === 1) return EVERY_SONG;
+        if (step === 0) return EXPERIMENTAL_ONLY;
+        const total = kept.reduce((sum, x) => sum + choice.amounts[x], 0);
+        return `${Math.round((100 * choice.amounts[step]) / total)}% of middling songs`;
+    };
+
+    /** What a chance means: in middling songs, every song at its last step, and experimental songs only at 0. */
+    const chanceMeaning = (choice) => (step) => (step === 0 ? EXPERIMENTAL_ONLY : step === choice.amounts.length - 1 ? EVERY_SONG : "of middling songs");
+
+    /** What a value means: as the songs have it in the middle, more or less of it either side. */
+    const valueMeaning = (step) => (step === 32 ? "as the songs have it" : step > 32 ? "more" : "less");
 
     /** A value's step from 0 to 100, step 32 at 50, a half of the steps either side. */
     const percentOf = (step) => Math.round(step <= 32 ? step * 50 / 32 : 50 + (step - 32) * 50 / 31);
@@ -235,7 +274,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                     const weight = slider(`${choice.label}: ${option.label}`, 0, choice.amounts.length - 1, kept ?? weightOf(choice, option), weightOf(choice, option), (value) => {
                         options[option.name] = value;
                         showProblem();
-                    }, asWeight(choice));
+                    }, asWeight(choice), weightMeaning(choice), []);
                     // an option left out its checkbox alone, its weight once it is in
                     weight.hidden = kept === undefined;
                     row.append(check.element, weight);
@@ -291,7 +330,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                     const weight = slider(`${choice.label}: ${option.label}`, 0, choice.amounts.length - 1, options[option.name], weightOf(choice, option), (value) => {
                         options[option.name] = value;
                         showProblem();
-                    }, asWeight(choice));
+                    }, asWeight(choice), weightMeaning(choice), []);
                     row.append(select, weight, button("×", `Leave out ${option.label}`, () => {
                         delete options[option.name];
                         changed();
@@ -341,7 +380,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                     const range = slider(`${choice.label}: ${option.label}`, 0, isChances ? choice.amounts.length - 1 : LAST_STEP, value ?? option.default, option.default, (step) => {
                         draft.choices[choice.name][option.name] = step;
                         showProblem();
-                    }, isChances ? asChance(choice) : asLean);
+                    }, isChances ? asChance(choice) : asLean, isChances ? chanceMeaning(choice) : valueMeaning, []);
                     range.hidden = value === undefined;
                     row.append(named.element, range);
                     return row;
@@ -401,7 +440,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
             if (range.from > range.to) range[end === "from" ? "to" : "from"] = step;
             showRange();
             showProblem();
-        }, null, ["60 bpm", "240 bpm"]));
+        }, null, null, ["60 bpm", "240 bpm"]));
         const ends = document.createElement("div");
         ends.className = "genre-sliders";
         ends.append(from, to);
@@ -416,6 +455,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
             from.querySelector("input").dataset.default = String(choice.options[0].default);
             to.querySelector("input").dataset.default = String(choice.options[1].default);
             shown.textContent = `${tempoOf(range.from)}–${tempoOf(range.to)} bpm`;
+            showMeanings();
         }
 
         return {
@@ -562,9 +602,31 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
     ]);
     shows.push(parts.show);
 
+    // how a genre works, open until it is closed, which this browser keeps
+    const principles = document.createElement("details");
+    principles.className = "genre-principles";
+    principles.open = isShowingGenrePrinciples();
+    principles.addEventListener("toggle", () => setShowingGenrePrinciples(principles.open));
+    const principlesSummary = document.createElement("summary");
+    principlesSummary.textContent = "How a genre works";
+    const principlesList = document.createElement("ul");
+    principlesList.append(...[
+        "A genre sets what a middling song does. Plainer songs keep to its commonest options; wilder ones stray from it, towards what it makes rare.",
+        "A checked choice is the genre's; an unchecked one is as the songs have it without a genre.",
+        "An option unchecked never plays. At 0 it plays only in experimental songs. A chance at 100%, or the only option kept, plays in every song.",
+        "A weight is a share among the options kept; a chance is out of 100 middling songs.",
+        "Double-click a slider to put it back as the songs have it.",
+    ].map((text) => {
+        const item = document.createElement("li");
+        item.textContent = text;
+        return item;
+    }));
+    principles.append(principlesSummary, principlesList);
+
     const body = document.createElement("div");
     body.className = "genre-body";
     body.append(
+        principles,
         choiceSection(rangeField("Tempo"), "tempo"),
         choiceSection(checklistField("Meter"), "meter"),
         choiceSection(checklistField("Feel"), "feel"),

@@ -852,9 +852,108 @@ input[type="range"] {
     min-width: 0;
 }
 
-.genre-slider input {
+/* a slider's track a pill, filled to its step, with what the step means written inside it */
+.genre-track {
+    position: relative;
+    display: flex;
     flex: 1;
+    align-items: center;
     min-width: 40px;
+    --fill: 0%;
+}
+
+.genre-track input[type="range"] {
+    width: 100%;
+    height: 18px;
+    margin: 0;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.genre-track input[type="range"]::-webkit-slider-runnable-track {
+    height: 18px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: linear-gradient(to right, color-mix(in srgb, var(--accent) 22%, var(--bg)) var(--fill), var(--bg) var(--fill));
+}
+
+.genre-track input[type="range"]::-moz-range-track {
+    height: 16px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: linear-gradient(to right, color-mix(in srgb, var(--accent) 22%, var(--bg)) var(--fill), var(--bg) var(--fill));
+}
+
+.genre-track input[type="range"]::-webkit-slider-thumb {
+    width: 14px;
+    height: 14px;
+    margin-top: 1px;
+    border-radius: 50%;
+    background: var(--accent);
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.genre-track input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--accent);
+}
+
+.genre-track input[type="range"]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 9px;
+}
+
+/* the meaning in the part of the track on the wider side of the thumb */
+.genre-meaning {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: calc(100% - var(--fill));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 0 10px;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.genre-meaning.after {
+    left: var(--fill);
+    right: 0;
+}
+
+/* how a genre works, above the sections, closed once read */
+.genre-principles {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    font-size: 13px;
+}
+
+.genre-principles > summary {
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.genre-principles ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    color: var(--muted);
+}
+
+.genre-principles li + li {
+    margin-top: 3px;
 }
 
 .genre-slider .end {
