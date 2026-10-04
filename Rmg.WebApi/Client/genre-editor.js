@@ -317,7 +317,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
 
     /** A choice's button to fine-tune its options, the choice the one bound as it is pressed, the amounts it gives back the draft's. */
     function tuneButton(choiceOf) {
-        return button("Fine-tune…", "Set the options in the plainest, middling and most experimental songs", () => {
+        return button("Fine-tune…", "Set the options in the plainest, middling and experimental songs", () => {
             const choice = choiceOf();
             tune.open(choice, draft.choices[choice.name] ?? {}, (amounts) => {
                 draft.choices[choice.name] = amounts;
@@ -718,7 +718,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     principlesList.append(...[
         "A genre sets what a middling song does. Plainer songs keep to its commonest options; more experimental ones stray from it, towards what it makes rare.",
         "A checked choice is the genre's; an unchecked one is as the songs have it without a genre.",
-        "An option unchecked never plays. At 0 it plays only in the experimental songs, as its most experimental amount has it. A chance at 100% at every end, or the only option kept, plays in every song.",
+        "An option unchecked never plays. At 0 it plays only in the experimental songs, as its experimental amount has it. A chance at 100% at every end, or the only option kept, plays in every song.",
         "A weight is a share among the options kept; a chance is out of 100 middling songs.",
         "Double-click a slider to put it back as the songs have it.",
     ].map((text) => {

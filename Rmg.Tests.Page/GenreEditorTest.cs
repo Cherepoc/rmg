@@ -464,10 +464,10 @@ public sealed class GenreEditorTest(Site site)
         // the songs' own lines drawn, a pool's chances beside
         await page.Until(async () => await tune.Locator(".tune-shares path").CountAsync() > 0, "the chances drawn");
         await tune.Locator(".tune-option[data-option='3/4']").ClickAsync();
-        await tune.Locator("input[aria-label='3/4, most experimental']").FillAsync("80");
-        await tune.Locator("input[aria-label='3/4, most experimental']").DispatchEventAsync("change");
+        await tune.Locator("input[aria-label='3/4, experimental']").FillAsync("80");
+        await tune.Locator("input[aria-label='3/4, experimental']").DispatchEventAsync("change");
         await tune.Locator(".tune-option[data-option='7/8']").ClickAsync();
-        foreach (var (end, value) in new[] { ("plainest", "0"), ("middling", "0"), ("most experimental", "30") })
+        foreach (var (end, value) in new[] { ("plainest", "0"), ("middling", "0"), ("experimental", "30") })
         {
             await tune.Locator($"input[aria-label='7/8, {end}']").FillAsync(value);
             await tune.Locator($"input[aria-label='7/8, {end}']").DispatchEventAsync("change");

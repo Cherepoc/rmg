@@ -27,7 +27,7 @@ const SVG = "http://www.w3.org/2000/svg";
 /** How long the window waits after a change before it asks for the lines again. */
 const PREVIEW_WAIT_MS = 150;
 
-const ENDS = ["Plainest", "Middling", "Most experimental"];
+const ENDS = ["Plainest", "Middling", "Experimental"];
 
 function svg(name, attributes = {}) {
     const element = document.createElementNS(SVG, name);
@@ -199,7 +199,7 @@ export function createGenreTune() {
             ...[0, HEIGHT / 2, HEIGHT].map((y) => svg("line", { x1: 0, y1: y, x2: WIDTH, y2: y, class: "tune-grid" })),
             ...[0, WIDTH / 2, WIDTH].map((x) => svg("line", { x1: x, y1: 0, x2: x, y2: HEIGHT, class: "tune-grid" })),
         );
-        chart.setAttribute("aria-label", `${choice.label}: every option's amounts from the plainest songs to the most experimental`);
+        chart.setAttribute("aria-label", `${choice.label}: every option's amounts from the plainest songs to the experimental`);
         for (const other of alongside()) {
             const curve = dragging === null && preview?.curves?.[other.name];
             const along = curve
@@ -282,7 +282,7 @@ export function createGenreTune() {
         });
         const experimental = options.map((x) => `${x.label} ${Math.round(share[x.name][points - 1])}%`).join(", ");
         const middling = options.map((x) => `${x.label} ${Math.round(share[x.name][(points - 1) / 2])}%`).join(", ");
-        shares.setAttribute("aria-label", `The chance a song draws each: in a middling song ${middling}; in the most experimental ${experimental}`);
+        shares.setAttribute("aria-label", `The chance a song draws each: in a middling song ${middling}; in the experimental ${experimental}`);
     }
 
     return {
