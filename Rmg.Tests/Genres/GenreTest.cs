@@ -73,6 +73,10 @@ public sealed class GenreTest
         Func<string, (ByConvention, ByConvention)?> lean = x => x == "odd" ? (Alike(0.2), Alike(0.1)) : (Alike(0.5), Alike(1));
         var own = new[] { ("plain", Alike(1)), ("odd", Alike(1)) };
         await Assert.That(Share(ByConvention.Lean(own, 0.5, lean), "odd")).IsEqualTo(2 / 2.5).Within(1e-9);
+        // where the songs never play an option the pool keeps, the pool's weight alone, though the role's own is 0
+        Func<string, (ByConvention, ByConvention)?> plainKept = x => x == "odd" ? (Alike(1), Alike(1)) : (Alike(1), Alike(0));
+        var oddOnly = new[] { ("plain", Alike(0)), ("odd", Alike(1)) };
+        await Assert.That(Share(ByConvention.Lean(oddOnly, 0.5, plainKept), "plain")).IsEqualTo(0.5).Within(1e-9);
     }
 
     [Test]

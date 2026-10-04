@@ -6,7 +6,7 @@ is removed once it is built.
 
 ## Priorities
 
-**Next** (P1): a genre's three points (see *Genres*), then the drum solos' feet and players (see *Open work*);
+**Next** (P1): the drum solos' feet and players (see *Open work*);
 listening to
 what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the ratings by conventionality once
 enough are in, alongside, continuously and never as a gate.
@@ -274,30 +274,25 @@ Each item with its plan, and what it waits for.
 ## Genres
 
 Built: a genre is the page's data, pools of the options of the choices the songs draw, chances and rhythm values
-(`Genre`, `GenreChoices`, `GenreRhythm`), ten presets (`Client/genres.json`), a picker and an editor on the page, and a
-genre in the link (`GenreSettings`). What is left:
+(`Genre`, `GenreChoices`, `GenreRhythm`), every option three amounts in whole percents, its plainest songs', its
+middling ones' and its wildest ones' (`ByConvention.Weigh`), the songs' own served as the choices' (`GenreOption.Own`);
+ten presets (`Client/genres.json`), their idioms at every end and their experimental directions at the wild end alone;
+a picker, an editor and a fine-tune window on the page (`genre-tune.js`), with a choice's shares along the axis
+(`/api/genres/preview`); a genre kept on the server by an 11-character key of its canonical form (`GenreStore`), which
+a link carries. What is left:
 
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
   half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
   alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.
-- **A genre's three points** (P1, under way): every option a genre names is three amounts in whole percents, its
-  plainest songs', its middling ones' and its wildest ones', drawn as the generator's own are (`ByConvention.Weigh`),
-  the songs' own served as the choices' (`GenreOption.Own`); the presets written as the old rule played them. The
-  events about a song carry no genre since a link stopped writing one: its key beside them, should the ratings by
-  genre ask for it. A genre is kept on the server as a song's request brings one, by an
-  11-character key of a hash of its canonical form (`GenreStore`), which a link carries, and the list of songs with a
-  copy. A choice's shares along the axis, as the songs draw them, are the
-  editor's to show (`/api/genres/preview`). An option's three points are set in a fine-tune window, dragged on
-  a chart of them, its chances beside (`genre-tune.js`), and a weight or a chance on a slider finer at its small
-  amounts. The step left: (7) the presets authored, their idioms everywhere and their experimental
-  directions experimental only.
-- **Listening to the genres' wild ends:** the presets' ends are the old rule's, which gave back at the wild end what a
-  genre made rare: Rock's meter 4/4 at 2 and 6/8 at 100 there, so that its wildest songs are in 6/8; the wildest Jazz
-  songs swing in 39% and Blues in 11%; the wildest Funk's chords 76% seven-sharp-nine (`EveryPreset_ChoicesByEnd`).
-  For the presets' authoring (step 7). The tempo is a range in beats a minute and a lean within it at each end, the
-  presets' wild ends their range and the songs' own, 90 to 175, together, as the old straying gave, so that the
-  wildest Ambient plays about 110 and the wildest Reggae 117 (`EveryPreset_PlainMiddlingAndWild`): an ambient song's
-  wild end slower still, for one.
+- **The events carry no genre:** since a link stopped writing one; its key beside them, should the ratings by genre
+  ask for it.
+- **Listening to the genres' wild ends:** the presets' wild ends keep their idioms most and stray by what each names
+  experimental (`EveryPreset_ChoicesByEnd`): the wildest Rock 34% in 4/4, its chords 7% quartal or tritone stacks; the
+  wildest Jazz 56% swung, 50% sevenths, about a fifth So What, quartal, altered or eleventh; Electronic 11% quartal
+  triads or clusters. A home and a cadence lean the genre's shapes by their own over the songs', and where the songs
+  never play a shape at an end the genre's weight alone (`ByConvention.Lean`), so that at the wild end a home is a
+  genre's plain shape or one of its strangest, never a level-2 one (a ninth, a thirteenth): a wild song's homes
+  plainer than its other chords, which the experimental shapes' amounts may be raised against, should listening ask.
 - **How the wild end swings:** a swing is as likely in the wildest songs as in a middling one, and the principle has
   the wild end choose how it is played instead, such as a heavier swing or one past the triplet's; the amount is drawn
   alike at every conventionality now (`Groove.Generate`).

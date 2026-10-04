@@ -76,7 +76,7 @@ public readonly record struct ByConvention(double Plain, double Tuned, double Wi
         if (lean is null)
             return Weigh(options, conventionality);
 
-        static double Times(double own, double pool, double songs) => own * (songs > 0 ? pool / songs : pool);
+        static double Times(double own, double pool, double songs) => songs > 0 ? own * pool / songs : pool;
         var kept = options.Select(x => (x.Option, x.Weight, Lean: lean(x.Option))).Where(x => x.Lean is not null)
             .Select(x => (x.Option, new ByConvention(Times(x.Weight.Plain, x.Lean!.Value.Pool.Plain, x.Lean.Value.Songs.Plain),
                 Times(x.Weight.Tuned, x.Lean.Value.Pool.Tuned, x.Lean.Value.Songs.Tuned), Times(x.Weight.Wild, x.Lean.Value.Pool.Wild, x.Lean.Value.Songs.Wild))))
