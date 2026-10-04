@@ -23,6 +23,30 @@ const ADDED_WEIGHT = 50;
 /** The most of any amount, a whole percent. */
 const MOST = 100;
 
+/**
+ *     The scale a weight's or a chance's slider moves on: its amount, from 0 to 100, its position's share of the way to
+ *     the power of CURVE, so that half the way is a third, the small amounts the finer; and the round amounts a drag
+ *     within SNAP of comes to.
+ */
+export const SHARE_SCALE = {
+    POSITIONS: 1000,
+    CURVE: 1.6,
+    SNAP: 2,
+    ROUND: [10, 15, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 100],
+};
+
+/** A position's amount on the share scale, a whole percent, snapped to a round one within reach. */
+function shareAmountOf(position) {
+    const amount = Math.round(MOST * (position / SHARE_SCALE.POSITIONS) ** SHARE_SCALE.CURVE);
+    const round = SHARE_SCALE.ROUND.find((x) => Math.abs(x - amount) <= SHARE_SCALE.SNAP);
+    return round ?? amount;
+}
+
+/** An amount's position on the share scale. */
+function sharePositionOf(amount) {
+    return Math.round(SHARE_SCALE.POSITIONS * (amount / MOST) ** (1 / SHARE_SCALE.CURVE));
+}
+
 const PITCHED = [["melody", "Melody"], ["chords", "Chords"], ["bass", "Bass"], ["pad", "Pad"], ["counterMelody", "Counter-melody"], ["riff", "Riff"], ["rhythm", "Rhythm"], ["solo", "Soloist"]];
 const ROLES = [["ground", "Ground (kick)"], ["backbeat", "Backbeat (snare)"], ["time", "Time (hi-hat)"], ["colour", "Colour (toms)"]];
 
@@ -81,18 +105,25 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     /**
      *     A slider of a step from its least to its last, back to its default on a double-click (app.js), its ends in words
      *     where it has them, its step shown as the form given says, none where it shows elsewhere, and what it means, such
-     *     as "experimental songs only", inside it, read again as any slider moves (showMeanings).
+     *     as "experimental songs only", inside it, read again as any slider moves (showMeanings). On the share scale, a
+     *     weight's or a chance's, it moves finer at the small amounts and snaps to round ones, the arrow keys stepping a
+     *     whole percent; otherwise a step a position.
      */
-    function slider(label, least, last, value, byDefault, onInput, form, meaning, ends) {
+    function slider(label, least, last, value, byDefault, onInput, form, meaning, ends, isShare) {
         const element = document.createElement("span");
         element.className = "genre-slider";
         const range = document.createElement("input");
         range.type = "range";
-        range.min = String(least);
-        range.max = String(last);
+        range.min = String(isShare ? 0 : least);
+        range.max = String(isShare ? SHARE_SCALE.POSITIONS : last);
         range.step = "1";
-        range.value = String(value);
-        range.dataset.default = String(byDefault);
+        range.value = String(isShare ? sharePositionOf(value) : value);
+        range.dataset.default = String(isShare ? sharePositionOf(byDefault) : byDefault);
+        if (isShare) range.dataset.scale = "share";
+        // the amount the slider stands at, kept apart from its position on the share scale, where a key steps a whole
+        // percent a drag would snap away from
+        let amount = value;
+        const amountOf = () => (isShare ? amount : Number(range.value));
         range.setAttribute("aria-label", label);
         const shown = document.createElement("output");
         shown.className = "value";
@@ -103,8 +134,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         said.setAttribute("aria-hidden", "true");
         track.append(range, said);
         const show = () => {
-            const step = Number(range.value);
-            const fill = (step - least) / (last - least);
+            const step = amountOf();
+            const fill = (Number(range.value) - Number(range.min)) / (Number(range.max) - Number(range.min));
             track.style.setProperty("--fill", `${100 * fill}%`);
             // written on the wider side of the thumb, never under it
             said.classList.toggle("after", fill < 0.5);
@@ -114,10 +145,27 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
             if (text) range.setAttribute("aria-valuetext", text);
         };
         said.show = show;
-        range.addEventListener("input", () => {
-            onInput(Number(range.value));
+        const moved = () => {
+            if (isShare) {
+                // its default as it is, a double-click's, and otherwise the round amount within reach, the thumb on it
+                amount = range.value === range.dataset.default ? byDefault : shareAmountOf(Number(range.value));
+                range.value = String(sharePositionOf(amount));
+            }
+            onInput(amountOf());
             showMeanings();
-        });
+        };
+        range.addEventListener("input", moved);
+        if (isShare)
+            range.addEventListener("keydown", (event) => {
+                const by = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1 }[event.key];
+                if (by === undefined) return;
+                event.preventDefault();
+                amount = Math.max(0, Math.min(MOST, amount + by));
+                range.value = String(sharePositionOf(amount));
+                // a whole percent at a time, snapping no further
+                onInput(amount);
+                showMeanings();
+            });
         const [lowEnd, highEnd] = ends.map((text) => {
             const end = document.createElement("span");
             end.className = "end";
@@ -311,7 +359,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
                     const weight = slider(`${choice.label}: ${option.label}`, 0, MOST, middleOf(kept ?? weightOf(option)), middleOf(weightOf(option)), (value) => {
                         options[option.name] = moved(options[option.name], value, weightOf(option));
                         showProblem();
-                    }, asWeight, weightMeaning(choice, option), []);
+                    }, asWeight, weightMeaning(choice, option), [], true);
                     // an option left out its checkbox alone, its weight once it is in
                     weight.hidden = kept === undefined;
                     row.append(check.element, weight);
@@ -367,7 +415,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
                     const weight = slider(`${choice.label}: ${option.label}`, 0, MOST, middleOf(options[option.name]), middleOf(weightOf(option)), (value) => {
                         options[option.name] = moved(options[option.name], value, weightOf(option));
                         showProblem();
-                    }, asWeight, weightMeaning(choice, option), []);
+                    }, asWeight, weightMeaning(choice, option), [], true);
                     row.append(select, weight, button("×", `Leave out ${option.label}`, () => {
                         delete options[option.name];
                         changed();
@@ -418,7 +466,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
                         const options = draft.choices[choice.name];
                         options[option.name] = moved(options[option.name], middle, ownOf(option));
                         showProblem();
-                    }, isChances ? asChance : asLean, isChances ? chanceMeaning(choice, option) : valueMeaning, []);
+                    }, isChances ? asChance : asLean, isChances ? chanceMeaning(choice, option) : valueMeaning, [], isChances);
                     range.hidden = value === undefined;
                     row.append(named.element, range);
                     return row;
@@ -484,12 +532,12 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
             if (middleOf(range.from) > middleOf(range.to)) range[other] = moved(range[other], bpm, ownOf(option(other)), inBpm);
             showRange();
             showProblem();
-        }, null, null, ["60 bpm", "240 bpm"]));
+        }, null, null, ["60 bpm", "240 bpm"], false));
         const lean = slider("Tempo: lean", -100, 100, 0, 0, (value) => {
             const range = draft.choices[choice.name];
             range.lean = moved(range.lean ?? 0, value, ownOf(option("lean")), shifted);
             showProblem();
-        }, null, null, ["Slower", "Faster"]);
+        }, null, null, ["Slower", "Faster"], false);
         const ends = document.createElement("div");
         ends.className = "genre-sliders";
         ends.append(from, to, lean);

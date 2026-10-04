@@ -36,6 +36,9 @@ public sealed class GenreEditorTest(Site site)
         return section;
     }
 
+    /// <summary>A weight's or a chance's position on its slider, the page's share scale (genre-editor.js, SHARE_SCALE).</summary>
+    private static string Position(int amount) => Math.Round(1000 * Math.Pow(amount / 100.0, 1 / 1.6)).ToString(System.Globalization.CultureInfo.InvariantCulture);
+
     private static ILocator Row(ILocator within, string option) => within.Locator($".genre-row[data-option='{option}']:visible");
 
     /// <summary>A choice's own checkbox, its title, which names it.</summary>
@@ -163,7 +166,7 @@ public sealed class GenreEditorTest(Site site)
         // every song has a melody, and a quarter of the middling ones in a genre where it is set so
         var melody = Row(playing, "melody");
         await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("100%");
-        await melody.Locator("input[type=range]").FillAsync("25");
+        await melody.Locator("input[type=range]").FillAsync(Position(25));
         await Assert.That(await melody.Locator("output").TextContentAsync()).IsEqualTo("25%");
 
         var meter = await Section(dialog, "Meter");
@@ -171,9 +174,9 @@ public sealed class GenreEditorTest(Site site)
         var fourFour = Row(meter, "4/4");
         // in whole percents, its weight in a middling song
         await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("100");
-        await fourFour.Locator("input[type=range]").FillAsync("50");
+        await fourFour.Locator("input[type=range]").FillAsync(Position(50));
         await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("50");
-        await fourFour.Locator("input[type=range]").FillAsync("1");
+        await fourFour.Locator("input[type=range]").FillAsync(Position(1));
         await Assert.That(await fourFour.Locator("input[type=range]").GetAttributeAsync("aria-valuetext")).StartsWith("1, ");
 
         var tempo = await Section(dialog, "Tempo");
@@ -277,12 +280,12 @@ public sealed class GenreEditorTest(Site site)
         var meter = await Section(dialog, "Meter");
         await Choose(meter, "meter").CheckAsync();
         var weight = Row(meter, "4/4").Locator("input[type=range]");
-        await weight.FillAsync("10");
+        await weight.FillAsync(Position(10));
 
         await weight.DblClickAsync(new() { Position = new Position { X = 3, Y = 5 } });
 
         // its own, 100 in a middling song, the ends moved with it, as the songs have it: none at the wild end
-        await Assert.That(await weight.InputValueAsync()).IsEqualTo("100");
+        await Assert.That(await weight.InputValueAsync()).IsEqualTo(Position(100));
         await Assert.That((await Played(page, dialog)).GetProperty("genre").GetProperty("meter").GetProperty("4/4").EnumerateArray().Select(x => x.GetInt32())).IsEquivalentTo([100, 100, 0]);
         await Assert.That(page.Errors).IsEmpty();
     }
@@ -410,6 +413,29 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(Middle(asked.GetProperty("from"))).IsEqualTo(90);
         await Assert.That(Middle(asked.GetProperty("to"))).IsBetween(170, 180);
         await Assert.That(Middle(asked.GetProperty("lean"))).IsEqualTo(60);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task AWeightsSlider_SnapsToARoundAmount_AndItsArrowKeysStepAWholePercent()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var meter = await Section(dialog, "Meter");
+        await Choose(meter, "meter").CheckAsync();
+        var fourFour = Row(meter, "4/4");
+        var range = fourFour.Locator("input[type=range]");
+
+        await range.FillAsync(Position(52));
+        await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("50");
+        await range.PressAsync("ArrowRight");
+        await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("51");
+        await range.PressAsync("ArrowLeft");
+        await range.PressAsync("ArrowLeft");
+        await Assert.That(await fourFour.Locator("output").TextContentAsync()).IsEqualTo("49");
+        // the small amounts the finer: the first tenth of the way is 3 at the most
+        await range.FillAsync("100");
+        await Assert.That(int.Parse((await fourFour.Locator("output").TextContentAsync())!)).IsLessThanOrEqualTo(3);
         await Assert.That(page.Errors).IsEmpty();
     }
 
