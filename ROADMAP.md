@@ -6,8 +6,9 @@ is removed once it is built.
 
 ## Priorities
 
-**Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
-ratings by conventionality once enough are in. Alongside, continuously and never as a gate.
+**Next** (P1): a song's length given (see *Open work*), then a genre's three points (see *Genres*); listening to
+what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the ratings by conventionality once
+enough are in, alongside, continuously and never as a gate.
 
 **Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs rated
 enough; listening to the genres' presets (see *Genres*).
@@ -163,6 +164,19 @@ Each item with its plan, and what it waits for.
 
 ### Conventionality
 
+- **A song's length given** (P1, planned): a length in minutes among the settings, given or as the form makes it,
+  and the song as close to it as its form allows. Songs last from 1:30 to 4:02 (the tenth and the ninetieth
+  hundredth, the wildest to 8:07), by their beats (correlation 0.91), which their sections make (0.78), more than by
+  their tempo (0.25). An edit of the form's plan, every section's length known before the song is put together: a
+  song too short repeats the form's own units near the end, a verse and a chorus before the bridge and the last
+  chorus, or a part of a free form; one too long drops what a short edit drops, the second verse and chorus, the
+  bridge, the pre-choruses; the first section and the ending kept, the closest length taken, from a stream of its own,
+  so that a song with none given is as it was. The tempo is never moved. Repeats are capped, a long length leaning to
+  solos or a free form instead of a chorus five times. The steps: (1) a report of the songs' lengths; (2) the draws of
+  a section's appearances keyed by the section and how often it has played, not by its place, so that an appearance
+  added leaves the others as they were (a refactor changing the songs once); (3) the edit, measured by its error at
+  1, 2, 3, 5 and 10 minutes and the longest run of a section repeated; (4) the setting, its link's place, the length
+  drawn shown, and the page's tests.
 - **More modes for the wild end** and **a song's own coherence,** how far its facets stray from its base, by the same
   rule (`ByConvention`), should the wild end sound samey or a song incoherent.
 - **The plain end's rigidity,** to tune by listening: no change of feel, triplet fills included, every bar of a plain
