@@ -15,6 +15,7 @@ import {
     keep,
     keepHistory,
     keepGenre,
+    keepGenreCopies,
     keepGenres,
     keepRating,
     keepSettings,
@@ -22,6 +23,7 @@ import {
     recallHistory,
     recallRating,
     recallGenre,
+    recallGenreCopies,
     recallGenres,
     recallSettings,
     setAutoplaying,
@@ -107,6 +109,8 @@ let settings = restoreSettings();
 
 // the song on the page, as its seed, in letters and digits: null before the first
 let songSeed = null;
+// and the key its genre is kept by on the server, which a link to it carries: null for a song of no genre
+let songGenreKey = null;
 
 // what the song on the page is made of, as the server said: the channel every part plays on in the file the player
 // has, null where it is not written, whether each part is in the song, the drum groups it plays and its drum pieces
@@ -749,11 +753,18 @@ function linkedSong() {
     const parameters = new URL(location.href).searchParams;
     const wasRolled = history.state?.rolled === true;
     const asked = parameters.get("song");
-    if (asked === null) return { seed: null, wasAsked: false, wasRolled, settings: null, isSettingsBad: false };
+    if (asked === null) return { seed: null, wasAsked: false, wasRolled, settings: null, isSettingsBad: false, genreKey: null };
 
     const linked = parameters.get("settings");
     const parsed = linked === null ? null : parseSettings(linked.trim());
-    return { seed: readSeed(asked.trim()), wasAsked: true, wasRolled, settings: parsed, isSettingsBad: linked !== null && parsed === null };
+    return {
+        seed: readSeed(asked.trim()),
+        wasAsked: true,
+        wasRolled,
+        settings: parsed,
+        isSettingsBad: linked !== null && parsed === null,
+        genreKey: parameters.get("genre")?.trim() || null,
+    };
 }
 
 /**
@@ -780,6 +791,8 @@ function songLink() {
     address.searchParams.delete("seed");
     address.searchParams.set("song", songSeed);
     address.searchParams.set("settings", formatSettings(settings));
+    if (songGenreKey === null) address.searchParams.delete("genre");
+    else address.searchParams.set("genre", songGenreKey);
 
     return address.toString();
 }
@@ -794,15 +807,19 @@ function aboutSong(measurements = {}) {
     };
 }
 
-/** A song as the page names it: its seed, and what of its settings names it too, which the same seed is another song by. */
-function songName(seed, songSettings) {
+/**
+ *     A song as the page names it: its seed, and what of its settings names it too, and its genre's key, which the same
+ *     seed is another song by.
+ */
+function songName(seed, songSettings, genreKey) {
     const identity = identityOf(songSettings);
-    return identity === "" ? seed : `${seed}.${identity}`;
+    const named = identity === "" ? seed : `${seed}.${identity}`;
+    return genreKey === null ? named : `${named}~${genreKey}`;
 }
 
 /** The song on the page, as the page names it; null before the first. */
 function currentSong() {
-    return songSeed === null ? null : songName(songSeed, settings);
+    return songSeed === null ? null : songName(songSeed, settings, songGenreKey);
 }
 
 /** The name the song on the page is downloaded under. */
@@ -903,6 +920,7 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         drumGroupsPresent = made.drumGroups;
         drumPiecesPlayed = made.drumPieces;
         songSeed = response.headers.get("X-Song-Seed") ?? seed;
+        songGenreKey = response.headers.get("X-Genre-Key");
         songVersion = response.headers.get("X-Song-Version");
         elements.seed.value = songSeed;
 
@@ -1113,7 +1131,7 @@ elements.clearHistory.addEventListener("click", () => {
  */
 function addToHistory(isRemade, keepsPlace) {
     const name = currentSong();
-    const entry = `${songSeed}:${formatSettings(givenOnly(settings))}`;
+    const entry = `${songSeed}:${formatSettings(givenOnly(settings))}${songGenreKey === null ? "" : `:${songGenreKey}`}`;
     const current = elements.history.querySelector("[aria-current]");
     const earlier = [...elements.history.children].filter((item) => item.dataset.song === name || (isRemade && item === current));
     const place = isRemade || keepsPlace ? (earlier.includes(current) ? current : earlier[0]) : undefined;
@@ -1136,6 +1154,7 @@ function addToHistory(isRemade, keepsPlace) {
     if (wasFocused) item.focus({ preventScroll: true });
 
     keepHistory(historyEntries());
+    keepGenreCopy(songGenreKey, settings.genre);
     markCurrentSong(name);
     elements.clearHistory.disabled = false;
 }
@@ -1177,10 +1196,41 @@ function updateWalkButtons() {
     elements.next.disabled = nextSong() === null && elements.generate.disabled;
 }
 
-/** A song of the list, asked for as it was heard, keeping its place on it. */
-function playFromList(item, origin) {
-    const { seed, entrySettings } = readEntry(item.dataset.entry);
-    playNew(seed, origin, entrySettings, { keepsPlace: true });
+/** A song of the list, asked for as it was heard, in its genre, keeping its place on it. */
+async function playFromList(item, origin) {
+    const { seed, entrySettings, genreKey } = readEntry(item.dataset.entry);
+    playNew(seed, origin, await withGenre(entrySettings, genreKey), { keepsPlace: true });
+}
+
+/**
+ *     Keeps a copy of the genre a song of the list was made in, by its key, and lets go of those of songs no longer on
+ *     it, so that a song played again from the list has its genre without asking the server.
+ */
+function keepGenreCopy(key, genre) {
+    const keys = new Set(historyEntries().map((entry) => readEntry(entry).genreKey).filter((x) => x !== null));
+    const copies = Object.fromEntries(Object.entries(recallGenreCopies()).filter(([kept]) => keys.has(kept)));
+    if (key !== null && hasAGenre(genre)) copies[key] = asGenre(genre);
+    keepGenreCopies(copies);
+}
+
+/** The genre kept by a key, as this browser kept a copy of it or as the server keeps it; null where neither has it. */
+async function genreOf(key) {
+    const copy = recallGenreCopies()[key];
+    if (copy !== undefined) return copy;
+    try {
+        const response = await fetch(new URL(`api/genres/${encodeURIComponent(key)}`, location.href));
+        if (!response.ok) return null;
+        const kept = await response.json();
+        return { name: kept.name, choices: kept.choices };
+    } catch {
+        return null;
+    }
+}
+
+/** Settings with the genre of a key, or with none where there is no key or none is found by it. */
+async function withGenre(songSettings, genreKey) {
+    const genre = genreKey === null ? null : await genreOf(genreKey);
+    return { ...songSettings, genre: genre ?? noGenre() };
 }
 
 function playPrevious(origin = "previous") {
@@ -1198,10 +1248,10 @@ function playNext(origin = "next") {
 elements.previous.addEventListener("click", () => playPrevious());
 elements.next.addEventListener("click", () => playNext());
 
-/** A song of the list, as its entry keeps it: its seed, and the settings it was asked for with. */
+/** A song of the list, as its entry keeps it: its seed, the settings it was asked for with, and its genre's key, if it has one. */
 function readEntry(entry) {
-    const [seedText, settingsText] = entry.split(":");
-    return { seedText, seed: readSeed(seedText), entrySettings: parseSettings(settingsText) ?? defaultSettings() };
+    const [seedText, settingsText, genreKey] = entry.split(":");
+    return { seedText, seed: readSeed(seedText), entrySettings: parseSettings(settingsText) ?? defaultSettings(), genreKey: genreKey ?? null };
 }
 
 /**
@@ -1210,18 +1260,19 @@ function readEntry(entry) {
  *     it is the song that was asked for: it leads to no other when it ends.
  */
 function createHistoryItem(entry) {
-    const { seedText, seed, entrySettings } = readEntry(entry);
+    const { seedText, seed, entrySettings, genreKey } = readEntry(entry);
     const identity = identityOf(entrySettings);
 
     const button = document.createElement("button");
     button.type = "button";
     button.dataset.entry = entry;
     button.dataset.seed = seedText;
-    button.dataset.song = songName(seed, entrySettings);
-    button.textContent = identity === "" ? seedText : `${seedText} ⚙`;
-    button.setAttribute("aria-label", identity === "" ? `Song ${seedText}` : `Song ${seedText}, with its settings`);
+    button.dataset.song = songName(seed, entrySettings, genreKey);
+    const isGiven = identity !== "" || genreKey !== null;
+    button.textContent = isGiven ? `${seedText} ⚙` : seedText;
+    button.setAttribute("aria-label", isGiven ? `Song ${seedText}, with its settings` : `Song ${seedText}`);
 
-    button.addEventListener("click", () => playNew(seed, "history", entrySettings));
+    button.addEventListener("click", async () => playNew(seed, "history", await withGenre(entrySettings, genreKey)));
 
     return button;
 }
@@ -2481,7 +2532,7 @@ async function start() {
     // a linked song is asked for with the settings it was heard with, which become the page's; a song rolled here
     // with the settings this browser kept
     if (linked.settings !== null) {
-        settings = givenOnly(linked.settings);
+        settings = givenOnly(await withGenre(linked.settings, linked.genreKey));
         keepCurrentSettings();
         showSettings();
     }
@@ -2493,7 +2544,9 @@ async function start() {
         ? "That link has no valid song, so here is a random one."
         : linked.isSettingsBad
             ? "That link's settings could not be read, so here is its song with the settings you had."
-            : null;
+            : linked.settings !== null && linked.genreKey !== null && !hasAGenre(settings.genre)
+                ? "That link's genre is not kept here, so here is its song in no genre."
+                : null;
     if (complaint !== null)
         generating.then((isGenerated) => {
             if (isGenerated) setStatus(complaint, true);

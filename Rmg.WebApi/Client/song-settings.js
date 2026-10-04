@@ -85,6 +85,7 @@ export function requestFor(seed, settings) {
         length: given(settings.length),
         drumGroups: Object.fromEntries(DRUM_GROUPS.map((group) => [group, { ...settings.drumGroups[group] }])),
         genre: Object.keys(settings.genre.choices).length > 0 ? settings.genre.choices : undefined,
+        genreName: Object.keys(settings.genre.choices).length > 0 ? settings.genre.name : undefined,
     };
 }
 

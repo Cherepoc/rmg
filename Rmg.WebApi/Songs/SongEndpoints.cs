@@ -39,12 +39,15 @@ public static class SongEndpoints
     ///     How long it waited and took, and how it ended, is kept (<see cref="SongLog" />) once its turn is given back, so
     ///     that no core waits on the disk.
     /// </summary>
-    private static async Task<IResult> GenerateSong(HttpContext context, SongQueue queue, SongLog log, GenerateSongRequest? request)
+    private static async Task<IResult> GenerateSong(HttpContext context, SongQueue queue, SongLog log, Genres.GenreStore genres, GenerateSongRequest? request)
     {
         request ??= new GenerateSongRequest();
 
         if (!request.TryRead(out var seed, out var overrides, out var mix, out var error))
             return Results.BadRequest(new ErrorResponse(error!));
+
+        // the genre kept, so that a link to the song carries it by its key, before the song waits its turn
+        var genreKey = request.Genre is { } genre ? genres.Keep(Genres.GenreStore.Canonical(request.GenreName?.Trim() ?? "", genre)) : null;
 
         var arrived = Stopwatch.GetTimestamp();
         var (running, waiting) = queue.Load;
@@ -100,7 +103,7 @@ public static class SongEndpoints
                 unconventionality = report.Unconventionality.Value;
 
                 ended = SongOutcome.Made;
-                result = Respond(context, songSeed, report, stream);
+                result = Respond(context, songSeed, report, stream, genreKey);
             }
             catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
             {
@@ -120,13 +123,16 @@ public static class SongEndpoints
 
     private static long Milliseconds(long since) => (long)Stopwatch.GetElapsedTime(since).TotalMilliseconds;
 
-    private static IResult Respond(HttpContext context, ulong songSeed, SongReport report, MemoryStream stream)
+    /// <param name="genreKey">The key the song's genre is kept by, which a link to it carries; none for no genre.</param>
+    private static IResult Respond(HttpContext context, ulong songSeed, SongReport report, MemoryStream stream, string? genreKey)
     {
         // lets the page show and reuse the seed it actually got when it asked for a random one
         context.Response.Headers["X-Song-Seed"] = Base64.FromSeed(songSeed);
 
         // and which songs' version it is, which the page reports with what it tells of the song
         context.Response.Headers["X-Song-Version"] = SongsVersion.Number;
+        if (genreKey is not null)
+            context.Response.Headers["X-Genre-Key"] = genreKey;
 
         // and everything the song drew or was given, and which channel plays which part, for the page to show and
         // set before a note of it is heard

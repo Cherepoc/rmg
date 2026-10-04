@@ -282,10 +282,11 @@ genre in the link (`GenreSettings`). What is left:
   alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.
 - **A genre's three points** (P1, under way): every option a genre names is three amounts in whole percents, its
   plainest songs', its middling ones' and its wildest ones', drawn as the generator's own are (`ByConvention.Weigh`),
-  the songs' own served as the choices' (`GenreOption.Own`); the presets written as the old rule played them. A link
-  carries no genre until the store; the page keeps the one in use. The steps left: (3) genres stored on the server as a song's request
-  brings one, by an 11-character key of a hash of their canonical form, the link carrying the key, the history the
-  key and a copy; (4) a preview of a choice's shares along the axis; (5) a mockup of a fine-tune window, an option's
+  the songs' own served as the choices' (`GenreOption.Own`); the presets written as the old rule played them. The
+  events about a song carry no genre since a link stopped writing one: its key beside them, should the ratings by
+  genre ask for it. A genre is kept on the server as a song's request brings one, by an
+  11-character key of a hash of its canonical form (`GenreStore`), which a link carries, and the list of songs with a
+  copy. The steps left: (4) a preview of a choice's shares along the axis; (5) a mockup of a fine-tune window, an option's
   three points dragged up and down on a chart of weights, the shares beside them; (6) the editor's sliders finer at
   the low end and snapping to round amounts; (7) the presets authored, their idioms everywhere and their experimental
   directions experimental only.

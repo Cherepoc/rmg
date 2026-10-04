@@ -57,6 +57,10 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 // song down
 builder.Services.AddSingleton(new SongQueue(Environment.ProcessorCount, 4 * Environment.ProcessorCount, 4));
 
+// the genres songs were asked for in, which a link names by a key, kept beside the analytics whether anything is
+// counted or not, as links play by them
+builder.Services.AddSingleton(Rmg.WebApi.Genres.GenreStore.Create(settings!.StateDirectory));
+
 // kept beside the app rather than in it, so a deploy replaces the app and leaves the figures alone, and with them what
 // the server measured of every song asked of it
 var events = settings!.IsCounting

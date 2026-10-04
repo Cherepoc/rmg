@@ -8,6 +8,7 @@ const RATINGS = "rmg.song-ratings";
 const SETTINGS = "rmg.settings";
 const GENRES = "rmg.genres";
 const GENRE = "rmg.genre";
+const GENRE_COPIES = "rmg.genre-copies";
 const GENRE_PRINCIPLES = "rmg.genre-principles";
 
 /** How many ratings the browser keeps, the oldest let go of first. */
@@ -43,10 +44,10 @@ function writeFlag(key, isOn) {
 
 /**
  *     A song of the list as the page keeps it: its seed and the settings it was asked for with, in letters and digits,
- *     "12Ab:6…", which is what asking for it again takes; whether its settings are of a format the page reads is the
+ *     and the key of the genre it was made in, where it was, "12Ab:6…:Xy3…", which is what asking for it again takes; whether its settings are of a format the page reads is the
  *     page's to say (settings.js), as the format changes.
  */
-export const IS_SONG = /^[0-9A-Za-z_-]{1,11}:[0-9A-Za-z_-]+$/;
+export const IS_SONG = /^[0-9A-Za-z_-]{1,11}:[0-9A-Za-z_-]+(:[0-9A-Za-z_-]{11})?$/;
 
 /** The settings the next songs are asked for with (settings.js), as this browser last left them; null for none yet. */
 export function recallSettings() {
@@ -91,6 +92,26 @@ export function recallGenre() {
         return typeof kept?.name === "string" && typeof kept?.choices === "object" && kept.choices !== null ? kept : null;
     } catch {
         return null;
+    }
+}
+
+/** The genres songs of the list were made in, by their keys (/api/genres/{key}), a copy kept here; none for none. */
+export function recallGenreCopies() {
+    try {
+        const kept = JSON.parse(localStorage.getItem(GENRE_COPIES) ?? "{}");
+        return kept !== null && typeof kept === "object" && !Array.isArray(kept) ? kept : {};
+    } catch {
+        return {};
+    }
+}
+
+/** Keeps the genres songs of the list were made in, by their keys, those of no song on it let go of. */
+export function keepGenreCopies(copies) {
+    try {
+        if (Object.keys(copies).length === 0) localStorage.removeItem(GENRE_COPIES);
+        else localStorage.setItem(GENRE_COPIES, JSON.stringify(copies));
+    } catch {
+        // a browser that will not remember them asks the server for a song's genre when the song is played again
     }
 }
 

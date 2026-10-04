@@ -38,4 +38,28 @@ public sealed class GenreTest(Site site)
         await Assert.That(page.Requests[^1].Body.TryGetProperty("genre", out _)).IsFalse();
         await Assert.That(page.Errors).IsEmpty();
     }
+
+    [Test]
+    public async Task ASongsLink_CarriesItsGenresKey_AndOpensInIt_WhereTheBrowserNeverHadIt()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        await page.FirstSong();
+        await page.Settled();
+        var genre = page.Page.Locator("select[aria-label='Genre']");
+        await page.Until(async () => await genre.IsEnabledAsync() && await genre.Locator("option").CountAsync() > 10, "the genres listed");
+        await genre.EvaluateAsync("select => { select.value = 'preset:jazz'; select.dispatchEvent(new Event('change')); }");
+        await page.Until(() => Task.FromResult(page.Page.Url.Contains("genre=")), "the link carrying the genre's key");
+        var link = page.Page.Url;
+        await page.Settled();
+
+        // a browser that never had it: nothing kept, the genre read by its key
+        await page.Page.EvaluateAsync("() => localStorage.clear()");
+        var count = page.Requests.Count;
+        await page.Page.GotoAsync(link);
+        await page.Until(() => page.Requests.Count > count, "the linked song asked for");
+        var asked = page.Requests[^1].Body;
+        await Assert.That(asked.GetProperty("genre").GetProperty("kit").GetProperty("jazz").GetInt32()).IsEqualTo(100);
+        await Assert.That(asked.GetProperty("genreName").GetString()).IsEqualTo("Jazz");
+        await Assert.That(page.Errors).IsEmpty();
+    }
 }

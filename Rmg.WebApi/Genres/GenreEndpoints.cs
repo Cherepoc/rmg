@@ -9,6 +9,11 @@ public static class GenreEndpoints
     public static void MapGenres(this IEndpointRouteBuilder routes)
     {
         routes.MapGet("/api/genres/choices", () => Results.Ok(Choices));
+
+        // a genre a link names by its key (GenreStore), as it was asked for
+        routes.MapGet("/api/genres/{key}", (string key, GenreStore store) => store.Find(key) is { } body
+            ? Results.Content(body, "application/json")
+            : Results.NotFound(new ErrorResponse($"'{key}' is no genre kept here.")));
     }
 
     /// <summary>Every choice, in the order the page shows them and a link writes them.</summary>
