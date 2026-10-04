@@ -167,18 +167,16 @@ Each item with its plan, and what it waits for.
 - **A song's length given** (P1, planned): a length in minutes among the settings, given or as the form makes it,
   and the song as close to it as its form allows. Songs last from 1:30 to 4:02 (the tenth and the ninetieth
   hundredth, the wildest to 8:07), by their beats (correlation 0.91), which their sections make (0.78), more than by
-  their tempo (0.25). Decided where the form is, before anything else plays by it: every appearance's length known
-  from the tempo, the section's meter and its plays, each drawn from a stream of its own and so drawn the earlier
-  as they are; a form too long drops appearances, the least important the likeliest by its role's weight, a
-  pre-chorus with its chorus or not at all, and one too short repeats the most important, a chorus or a verse and its
-  chorus, before the ending; the first section and the ending kept, the closest length taken, from a stream of its
-  own, so that a song with none given is as it was. The tempo is never moved; repeats are capped, a long length
-  leaning to solos or a free form. The steps: (1) a report of the songs' lengths; (2) the tempo, the sections' meters
-  and their plays drawn before the form is fixed, the songs as they were; (3) the draws of a section's appearances
-  keyed by the section and how often it has played, not by its place, so that an appearance added leaves the others
-  as they were (the songs changing once); (4) the fit, measured by its error at 1, 2, 3, 5 and 10 minutes and the
-  longest run of a section repeated; (5) the setting, its link's place, the length drawn shown, and the page's
-  tests.
+  their tempo (0.25). Leaning the draws that make the form already, none deciding and every one drawing as often as
+  it did, so that a song with none given is as it was: the forms (`SongForms.Forms`), which are one another shortened
+  and lengthened, each by how near its length comes, with a longer one or two added at small weights; a free form
+  (`SongStructureGenerator`) adding parts until it nears it; and what is left leaning a section's plays
+  (`SectionLength`) and the intro, the outro and the last section played again. A section is made once and every
+  appearance drawn again, so that one played more is varied as any is. The tempo is never moved. The steps: (1) a
+  report of the songs' lengths; (2) the tempo, the sections' meters and their plays drawn before the form is fixed,
+  the songs as they were; (3) the leans, measured by the error at 1, 2, 3, 5 and 10 minutes, the long lengths the
+  likeliest to fall short, which solos might fill; (4) the setting, its link's place, the length drawn shown, and the
+  page's tests.
 - **More modes for the wild end** and **a song's own coherence,** how far its facets stray from its base, by the same
   rule (`ByConvention`), should the wild end sound samey or a song incoherent.
 - **The plain end's rigidity,** to tune by listening: no change of feel, triplet fills included, every bar of a plain
