@@ -39,6 +39,16 @@ public sealed class RenderedSong
 
     public StateTimeline<double> TempoTimeline { get; }
 
+    /// <summary>How long the song plays, in seconds: every stretch of its beats at the tempo it plays at there.</summary>
+    public double Seconds
+    {
+        get
+        {
+            var changes = TempoTimeline.Select(x => x.Position).Where(x => x > 0 && x < Duration).Prepend(0).Append(Duration).Distinct().Order().ToArray();
+            return changes.Zip(changes.Skip(1)).Sum(x => (x.Second - x.First) * 60 / (TempoTimeline.GetEffectiveValueAt(x.First) * Meter.BaseTempo));
+        }
+    }
+
     /// <summary>How far the whole band is faded in, as the song fades out; no steps for a song that does not.</summary>
     public StateTimeline<double> FadeTimeline { get; }
 
