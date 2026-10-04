@@ -318,7 +318,10 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
   dyadic engine; euclidean patterns that fit no cycle; a library of idioms such as clave and bossa, which genres may
   take up; and drums generated together, the snare avoiding the kick and the hi-hat filling the gaps.
 - **An endless song:** sections generated afresh as it plays, with no ending. The sections generated per appearance
-  are a step towards it; the form's plan, its intro and ending, and the song's single pass are not.
+  are a step towards it; the form's plan, its intro and ending, and the song's single pass are not. The time is no
+  obstacle: an hour's song asked of the generator is made in one to two seconds, but plays 33 to 45 minutes at 120
+  bpm, its form's parts running out (`SongLength`'s free form of up to 32), and the page's length stops at fifteen
+  minutes (`LengthScale`); an hour and more is the endless song's, not the length's.
 - **Memory:** every `RealizedNote` keeps the state it was decided from, about 1.7 MB a song: nothing to do.
 
 ## Decided, and kept
