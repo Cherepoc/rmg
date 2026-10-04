@@ -1,5 +1,7 @@
 import { MAX_GENRE_NAME_BYTES } from "./settings.js";
 import { isShowingGenrePrinciples, setShowingGenrePrinciples } from "./storage.js";
+import { endsOf, ownOf, written } from "./genres.js";
+import { createGenreTune } from "./genre-tune.js";
 
 /**
  *     The genre editor, a popup over the page: a draft genre, a name and what it says of the choices the songs draw
@@ -186,12 +188,6 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
 
     // --- an option's amounts: one alike at every end, or three, at the plain end, in the middle and at the wild ---------
 
-    /** An option's amounts at its three ends, in whole percents. */
-    const endsOf = (amount) => (Array.isArray(amount) ? amount : [amount, amount, amount]);
-
-    /** Amounts as a genre writes them: one where they are alike, three otherwise. */
-    const written = ([plain, middle, wild]) => (plain === middle && middle === wild ? middle : [plain, middle, wild]);
-
     /** Its amount in a middling song, which the slider sets. */
     const middleOf = (amount) => endsOf(amount)[1];
 
@@ -212,9 +208,6 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         const moved = (x) => Math.max(-MOST, Math.min(MOST, x + middle - was));
         return written([moved(plain), middle, moved(wild)]);
     }
-
-    /** An option's amounts as the songs have them (/api/genres/choices), in the whole numbers a genre gives. */
-    const ownOf = (option) => written(option.own.map((x) => Math.round(x)));
 
     /** An option's amounts with its slider moved: the curve it starts from where the slider comes to its default, as a double-click brings it, and otherwise the middle moved (withMiddle). */
     const moved = (amount, middle, start, move = withMiddle) => (middle === middleOf(start) ? start : move(amount, middle));
@@ -319,6 +312,20 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         };
     }
 
+    // the window an option's amounts at its three ends are tuned in (genre-tune.js), over the editor
+    const tune = createGenreTune();
+
+    /** A choice's button to fine-tune its options, the choice the one bound as it is pressed, the amounts it gives back the draft's. */
+    function tuneButton(choiceOf) {
+        return button("Fine-tune…", "Set the options in the plainest, middling and wildest songs", () => {
+            const choice = choiceOf();
+            tune.open(choice, draft.choices[choice.name] ?? {}, (amounts) => {
+                draft.choices[choice.name] = amounts;
+                changed();
+            });
+        }, "genre-tune-open");
+    }
+
     /** A weight where an option is checked or added: its own, or ADDED_WEIGHT at every end for one the songs never play. */
     const weightOf = (option) => (isPlayed(option) ? ownOf(option) : ADDED_WEIGHT);
 
@@ -343,7 +350,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
                 element.dataset.choice = choice.name;
                 choose.bind(choice);
                 const options = draft.choices[choice.name];
-                rows.replaceChildren(...choice.options.filter(allowed).map((option) => {
+                rows.replaceChildren(tuneButton(() => choice), ...choice.options.filter(allowed).map((option) => {
                     const row = document.createElement("div");
                     row.className = "genre-row";
                     row.dataset.option = option.name;
@@ -384,7 +391,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
             options[unused.name] = weightOf(unused);
             changed();
         }, "genre-add");
-        pool.append(rows, add);
+        pool.append(tuneButton(() => choice), rows, add);
         // the commonest the songs have, as they have them
         const choose = chosen(title, pool, (bound) => asTheSongsHaveThem(bound.options.filter((x) => middleOf(ownOf(x)) >= ADDED_WEIGHT)));
         element.append(pool);
@@ -443,7 +450,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
             bind(choice) {
                 const isChances = choice.kind === "chances";
                 element.dataset.choice = choice.name;
-                element.replaceChildren(...choice.options.map((option) => {
+                element.replaceChildren(...(isChances ? [tuneButton(() => choice)] : []), ...choice.options.map((option) => {
                     const row = document.createElement("div");
                     row.className = "genre-row";
                     row.dataset.option = option.name;
@@ -541,7 +548,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         const ends = document.createElement("div");
         ends.className = "genre-sliders";
         ends.append(from, to, lean);
-        range.append(ends, shown);
+        range.append(tuneButton(() => choice), ends, shown);
         element.append(range);
         const named = chosen(title, range, asTheyAre);
 
@@ -777,7 +784,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     const remove = button("Delete", "Let go of this genre of yours", () => onDelete(draft.name.trim()));
     const footer = document.createElement("footer");
     footer.append(problem, file, imported, exported, remove, save, play);
-    dialog.append(header, body, footer);
+    dialog.append(header, body, footer, tune.element);
 
     // --- the draft ------------------------------------------------------------------------------------------------------------
 

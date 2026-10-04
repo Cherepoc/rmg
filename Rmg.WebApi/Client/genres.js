@@ -32,3 +32,12 @@ function sameChoices(first, second) {
 export function hasAGenre(genre) {
     return genre.name.length > 0 || Object.keys(genre.choices).length > 0;
 }
+
+/** An option's amounts at its three ends, plainest, middling and wildest, from a genre's one alike at every end or three. */
+export const endsOf = (amount) => (Array.isArray(amount) ? amount : [amount, amount, amount]);
+
+/** Amounts as a genre writes them: one where they are alike, three otherwise. */
+export const written = ([plain, middle, wild]) => (plain === middle && middle === wild ? middle : [plain, middle, wild]);
+
+/** An option's amounts as the songs have them (/api/genres/choices), in the whole numbers a genre gives. */
+export const ownOf = (option) => written(option.own.map((x) => Math.round(x)));

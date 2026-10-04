@@ -440,6 +440,68 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>The fine-tune window of a choice, opened from its section.</summary>
+    private static async Task<ILocator> FineTune(ILocator section)
+    {
+        await section.Locator("button.genre-tune-open").First.ClickAsync();
+        var tune = section.Page.Locator("dialog.genre-tune");
+        await Assert.That(await tune.IsVisibleAsync()).IsTrue();
+        return tune;
+    }
+
+    private static int[] Ends(System.Text.Json.JsonElement amount) =>
+        amount.ValueKind == System.Text.Json.JsonValueKind.Array ? [..amount.EnumerateArray().Select(x => x.GetInt32())] : [amount.GetInt32(), amount.GetInt32(), amount.GetInt32()];
+
+    [Test]
+    public async Task AnOptionFineTuned_ItsWildestSetByItsNumber_AndShapedExperimentalOnly_IsAskedForSo()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var meter = await Section(dialog, "Meter");
+        await Choose(meter, "meter").CheckAsync();
+        var tune = await FineTune(meter);
+
+        // the songs' own lines drawn, a pool's chances beside
+        await page.Until(async () => await tune.Locator(".tune-shares path").CountAsync() > 0, "the chances drawn");
+        await tune.Locator(".tune-option[data-option='3/4']").ClickAsync();
+        await tune.Locator("input[aria-label='3/4, wildest']").FillAsync("80");
+        await tune.Locator("input[aria-label='3/4, wildest']").DispatchEventAsync("change");
+        await tune.Locator(".tune-option[data-option='7/8']").ClickAsync();
+        await tune.GetByRole(AriaRole.Button, new() { Name = "Experimental only" }).ClickAsync();
+        await tune.GetByRole(AriaRole.Button, new() { Name = "Done" }).ClickAsync();
+
+        var asked = (await Played(page, dialog)).GetProperty("genre").GetProperty("meter");
+        await Assert.That(Ends(asked.GetProperty("3/4"))[2]).IsEqualTo(80);
+        var sevenEight = Ends(asked.GetProperty("7/8"));
+        await Assert.That(sevenEight[0]).IsEqualTo(0);
+        await Assert.That(sevenEight[1]).IsEqualTo(0);
+        await Assert.That(sevenEight[2]).IsGreaterThan(0);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task AFineTunesHandle_StepsByTheArrowKeys_AndClosingLetsItGo()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var meter = await Section(dialog, "Meter");
+        await Choose(meter, "meter").CheckAsync();
+        var tune = await FineTune(meter);
+
+        var middling = tune.Locator(".tune-handle[data-end='1']");
+        var before = int.Parse((await middling.GetAttributeAsync("aria-valuenow"))!);
+        await middling.FocusAsync();
+        await page.Page.Keyboard.PressAsync("ArrowDown");
+        await page.Page.Keyboard.PressAsync("ArrowDown");
+        await Assert.That(int.Parse((await tune.Locator(".tune-handle[data-end='1']").GetAttributeAsync("aria-valuenow"))!)).IsEqualTo(before - 2);
+
+        // closed with the ×, the editor's as it was
+        await tune.Locator("button.genre-close").ClickAsync();
+        var asked = (await Played(page, dialog)).GetProperty("genre").GetProperty("meter");
+        await Assert.That(Ends(asked.GetProperty("4/4"))[1]).IsEqualTo(before);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     [Test]
     public async Task APartsTab_ItsInstrumentsSwappedInTheirLists_AndTheOtherPartsAsTheSongsHaveThem()
     {
@@ -509,5 +571,11 @@ public sealed class GenreEditorTest(Site site)
         await parts.GetByRole(AriaRole.Tab, new() { Name = "Drums", Exact = true }).ClickAsync();
         await parts.Locator(".genre-sliders[data-choice='drumSetup']").ScrollIntoViewIfNeededAsync();
         await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-editor-drums.png") });
+        var meter = await Section(dialog, "Meter");
+        var tune = await FineTune(meter);
+        await page.Until(async () => await tune.Locator(".tune-shares path").CountAsync() > 0, "the chances drawn");
+        await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-tune.png") });
+        await page.Page.SetViewportSizeAsync(390, 844);
+        await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-tune-phone.png") });
     }
 }
