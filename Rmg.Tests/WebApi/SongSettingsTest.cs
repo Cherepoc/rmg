@@ -22,7 +22,7 @@ public sealed class SongSettingsTest
         [..SongMix.DrumGroupNames.Select((_, i) => new DrumGroupSettings(i * 9))],
         50,
         new DrumPieceSettings(true, [..DrumPieces.All.Select((_, i) => i % 3 == 0)]),
-        new GenreSettings("Dub délicat", [new("meter", "3/4", 63), new("feelChances", "swing", 0), new("rhythm.chords", "offbeat", 48)])
+        new GenreSettings("Dub délicat", [new("meter", "3/4", 27), new("feelChances", "swing", 0), new("rhythm.chords", "offbeat", 48)])
     );
 
     /// <summary>Nothing given, everything at nothing.</summary>
@@ -88,9 +88,9 @@ public sealed class SongSettingsTest
         await Assert.That(Mixed.Identity).IsEqualTo(MixedIdentity);
     }
 
-    public const string MixedText = "8_07ELSZgnu3jo_0-9zIyRxawjvsu_eo09IRajshQR5c0aI4Iej0fg5Od-xWJIIIC4LdOWGsmfoMQZ56T303mF60CGm";
+    public const string MixedText = "8_07ELSZgnu3jo_0-9zIyRxawjvsu_eo09IRajshQR5c0aI4Iej0fg5Od-xWJIIIC4LdOWGsmfoMQZ56T303m660CGm";
 
-    public const string MixedIdentity = "hQ3_0ESgu32C012012011199992303mF60CGm";
+    public const string MixedIdentity = "hQ3_0ESgu32C012012011199992303m660CGm";
 
     [Test]
     public async Task ATempoStep_RunsFrom60Through120To240BeatsAMinute_EveryStepFasterByAboutTheSame()
@@ -135,7 +135,7 @@ public sealed class SongSettingsTest
         }
 
         await Assert.That(request.DrumPieces!.Count).IsEqualTo(Mixed.DrumPieces.Pieces.Count(x => x));
-        await Assert.That(request.Genre!["meter"]["3/4"]).IsEqualTo(63);
+        await Assert.That(request.Genre!["meter"]["3/4"]).IsEqualTo(27);
         await Assert.That(request.Genre["rhythm.chords"]["offbeat"]).IsEqualTo(48);
         // and read as any request is
         await Assert.That(request.TryRead(out _, out _, out _, out var error)).IsTrue().Because(error ?? "");

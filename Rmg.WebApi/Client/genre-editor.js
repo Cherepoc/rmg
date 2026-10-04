@@ -10,12 +10,16 @@ import { MAX_GENRE_NAME_BYTES } from "./settings.js";
  *     back to its default on a double-click, and a scale and a chord shape say over their names how they sound. The parts
  *     playing come first, then a tab for every part: a pitched part's instruments, rhythm and feel, and the drums' kit,
  *     pieces and setup, and a tab for every role of them, its drums of the pieces chosen, its rhythm and its feel. The
- *     draft is played or saved as the page says (app.js), and exported to and imported from a JSON file. A chance or a
- *     value shows its lean from as it is, a pool's weight its step from 0 to 100.
+ *     draft is played or saved as the page says (app.js), and exported to and imported from a JSON file. A value shows
+ *     its lean from as it is, a chance its chance in a middling song, and a pool's weight its amount, on steps finer at
+ *     the low end (/api/genres/choices).
  */
 
 /** A pool's weight where an option is checked or added with none of its own, and where the instruments start from: half the heaviest's or more. */
-const ADDED_WEIGHT = 32;
+const ADDED_WEIGHT = 0.5;
+
+/** The last step of a value's or a range's 64. */
+const LAST_STEP = 63;
 
 const PITCHED = [["melody", "Melody"], ["chords", "Chords"], ["bass", "Bass"], ["pad", "Pad"], ["counterMelody", "Counter-melody"], ["riff", "Riff"], ["rhythm", "Rhythm"], ["solo", "Soloist"]];
 const ROLES = [["ground", "Ground (kick)"], ["backbeat", "Backbeat (snare)"], ["time", "Time (hi-hat)"], ["colour", "Colour (toms)"]];
@@ -76,13 +80,13 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
      *     A slider of a step from its least to 63, back to its default on a double-click (app.js), its ends in words where it
      *     has them, and its step shown as the form given says, none where it shows elsewhere.
      */
-    function slider(label, least, value, byDefault, onInput, form = null, ends = []) {
+    function slider(label, least, last, value, byDefault, onInput, form = null, ends = []) {
         const element = document.createElement("span");
         element.className = "genre-slider";
         const range = document.createElement("input");
         range.type = "range";
         range.min = String(least);
-        range.max = "63";
+        range.max = String(last);
         range.step = "1";
         range.value = String(value);
         range.dataset.default = String(byDefault);
@@ -111,11 +115,17 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         return element;
     }
 
-    /** A step from 0 to 100, step 32 at 50, a half of the steps either side. */
+    /** A value's step from 0 to 100, step 32 at 50, a half of the steps either side. */
     const percentOf = (step) => Math.round(step <= 32 ? step * 50 / 32 : 50 + (step - 32) * 50 / 31);
 
+    /** A pool's or a chance's step as its amount, by its choice's steps (/api/genres/choices), in percent. */
+    const percentAt = (choice, step) => Math.round(choice.amounts[step] * 100);
+
+    /** The step of a pool's or a chance's amount, the nearest. */
+    const stepAt = (choice, amount) => choice.amounts.reduce((best, x, i) => (Math.abs(x - amount) < Math.abs(choice.amounts[best] - amount) ? i : best), 0);
+
     /** A pool's weight, from 0 to 100. */
-    const asWeight = (step) => String(percentOf(step));
+    const asWeight = (choice) => (step) => String(percentAt(choice, step));
 
     /** A value's lean from as it is, at the middle, to its least, -100, or its most, +100. */
     const asLean = (step) => {
@@ -125,7 +135,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
     };
 
     /** A chance in a middling song, in percent. */
-    const asChance = (step) => `${percentOf(step)}%`;
+    const asChance = (choice) => (step) => `${percentAt(choice, step)}%`;
 
     function heading(title) {
         const element = document.createElement("h4");
@@ -186,7 +196,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
     }
 
     /** A weight where an option is checked or added: its own, 0 for one the songs play only the wilder they are, or ADDED_WEIGHT for one they never play. */
-    const weightOf = (option) => (option.isPlayed ? option.default : ADDED_WEIGHT);
+    const weightOf = (choice, option) => (option.isPlayed ? option.default : stepAt(choice, ADDED_WEIGHT));
 
     /** A pool's options as the songs have them: every one they play, at its weight in the middle, 0 for one they play only the wilder they are. */
     const asTheSongsHaveThem = (options) => Object.fromEntries(options.filter((x) => x.isPlayed).map((x) => [x.name, x.default]));
@@ -218,14 +228,14 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                     const check = checkbox(option.label);
                     check.input.checked = kept !== undefined;
                     check.input.addEventListener("change", () => {
-                        if (check.input.checked) options[option.name] = weightOf(option);
+                        if (check.input.checked) options[option.name] = weightOf(choice, option);
                         else delete options[option.name];
                         changed();
                     });
-                    const weight = slider(`${choice.label}: ${option.label}`, 0, kept ?? weightOf(option), weightOf(option), (value) => {
+                    const weight = slider(`${choice.label}: ${option.label}`, 0, choice.amounts.length - 1, kept ?? weightOf(choice, option), weightOf(choice, option), (value) => {
                         options[option.name] = value;
                         showProblem();
-                    }, asWeight);
+                    }, asWeight(choice));
                     // an option left out its checkbox alone, its weight once it is in
                     weight.hidden = kept === undefined;
                     row.append(check.element, weight);
@@ -247,12 +257,12 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         const add = button("Add", "Add the next instrument", () => {
             const options = draft.choices[choice.name];
             const unused = choice.options.find((x) => !(x.name in options));
-            options[unused.name] = weightOf(unused);
+            options[unused.name] = weightOf(choice, unused);
             changed();
         }, "genre-add");
         pool.append(rows, add);
         // the commonest the songs have, as they have them
-        const choose = chosen(title, pool, (bound) => asTheSongsHaveThem(bound.options.filter((x) => x.default >= ADDED_WEIGHT)));
+        const choose = chosen(title, pool, (bound) => asTheSongsHaveThem(bound.options.filter((x) => bound.amounts[x.default] >= ADDED_WEIGHT)));
         element.append(pool);
 
         return {
@@ -278,10 +288,10 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                         options[select.value] = weight;
                         changed();
                     });
-                    const weight = slider(`${choice.label}: ${option.label}`, 0, options[option.name], weightOf(option), (value) => {
+                    const weight = slider(`${choice.label}: ${option.label}`, 0, choice.amounts.length - 1, options[option.name], weightOf(choice, option), (value) => {
                         options[option.name] = value;
                         showProblem();
-                    }, asWeight);
+                    }, asWeight(choice));
                     row.append(select, weight, button("×", `Leave out ${option.label}`, () => {
                         delete options[option.name];
                         changed();
@@ -328,10 +338,10 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
                         if (!isChances && Object.keys(options).length === 0) delete draft.choices[choice.name];
                         changed();
                     });
-                    const range = slider(`${choice.label}: ${option.label}`, 0, value ?? option.default, option.default, (step) => {
+                    const range = slider(`${choice.label}: ${option.label}`, 0, isChances ? choice.amounts.length - 1 : LAST_STEP, value ?? option.default, option.default, (step) => {
                         draft.choices[choice.name][option.name] = step;
                         showProblem();
-                    }, isChances ? asChance : asLean);
+                    }, isChances ? asChance(choice) : asLean);
                     range.hidden = value === undefined;
                     row.append(named.element, range);
                     return row;
@@ -385,7 +395,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, tempoOf }) 
         const shown = document.createElement("output");
         let choice = null;
         // the ends kept in order, the other moving with the one moved past it, the sliders kept as they are dragged
-        const [from, to] = ["from", "to"].map((end) => slider(`Tempo: ${end}`, 0, 0, 0, (step) => {
+        const [from, to] = ["from", "to"].map((end) => slider(`Tempo: ${end}`, 0, LAST_STEP, 0, 0, (step) => {
             const range = draft.choices[choice.name];
             range[end] = step;
             if (range.from > range.to) range[end === "from" ? "to" : "from"] = step;

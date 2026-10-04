@@ -18,8 +18,8 @@ public sealed class GenreTest(Site site)
         await genre.EvaluateAsync("select => { select.value = 'preset:jazz'; select.dispatchEvent(new Event('change')); }");
         await page.Until(() => page.Requests.Count > count, "the song asked for in the genre");
         var asked = page.Requests[^1].Body.GetProperty("genre");
-        await Assert.That(asked.GetProperty("kit").GetProperty("jazz").GetInt32()).IsEqualTo(63);
-        await Assert.That(asked.GetProperty("drumRole.time").GetProperty("ride").GetInt32()).IsEqualTo(63);
+        await Assert.That(asked.GetProperty("kit").GetProperty("jazz").GetInt32()).IsEqualTo(27);
+        await Assert.That(asked.GetProperty("drumRole.time").GetProperty("ride").GetInt32()).IsEqualTo(27);
         await page.Settled();
         await Assert.That(await page.Given()).IsEqualTo("1 given");
         // the link carries it, and the list shows it chosen

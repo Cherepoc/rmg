@@ -1,4 +1,5 @@
 using Rmg.Core.Composition;
+using Rmg.WebApi.Songs;
 
 namespace Rmg.WebApi.Genres;
 
@@ -17,20 +18,22 @@ public static class GenreEndpoints
             x.Name,
             x.Label,
             x.Kind.ToString().ToLowerInvariant(),
-            [..x.Options.Select(o => new GenreOptionResponse(o.Name, o.Label, Songs.StepScale.ToStep(o.Default), o.IsPlayed, o.Tags, o.Description))]
+            [..x.Options.Select(o => new GenreOptionResponse(o.Name, o.Label, ShareScale.StepOf(x, o.Default), o.IsPlayed, o.Tags, o.Description))],
+            ShareScale.Steps(x) ? ShareScale.Amounts : null
         ))
     ];
 }
 
 /// <param name="Name">How a genre names it, such as "meter".</param>
 /// <param name="Label">How the page shows it.</param>
-/// <param name="Kind">"pool", its options a pool each weighing from 0, only in wilder songs, to 63 in a middling song, one left out never; "chances", each its chance in a middling song from 0, only in wilder songs, to 63, always, one left out never; "values", each from 0, its least, through 32, as it is, to 63, its most; or "range", its "from" and "to" the steps of its ends, the first no greater.</param>
+/// <param name="Kind">"pool", its options a pool each weighing in a middling song a step of its amounts, 0 only in wilder songs, one left out never; "chances", each its chance in a middling song a step of its amounts, 0 only in wilder songs, the last always, one left out never; "values", each from 0, its least, through 32, as it is, to 63, its most; or "range", its "from" and "to" the steps of its ends, the first no greater.</param>
 /// <param name="Options">Its options, in order.</param>
-public sealed record GenreChoiceResponse(string Name, string Label, string Kind, IReadOnlyList<GenreOptionResponse> Options);
+/// <param name="Amounts">Every step's amount, from 0 to 1, where its steps are a pool's or chances' (<see cref="ShareScale" />); none for the 64 steps of a value or a range.</param>
+public sealed record GenreChoiceResponse(string Name, string Label, string Kind, IReadOnlyList<GenreOptionResponse> Options, IReadOnlyList<double>? Amounts);
 
 /// <param name="Name">How a genre names it.</param>
 /// <param name="Label">How the page shows it.</param>
-/// <param name="Default">Its step as the songs have it, which a genre naming its choice starts from: a pool's option's weight in the middle, the heaviest's 63; a chance's in the middle; a value's 32.</param>
+/// <param name="Default">Its step as the songs have it, the nearest, which a genre naming its choice starts from: a pool's option's weight in the middle, the heaviest's 63; a chance's in the middle; a value's 32.</param>
 /// <param name="IsPlayed">Whether the songs play it at all, at one end or another, which a genre starting from theirs keeps.</param>
 /// <param name="Tags">What the page needs to know of it besides, such as a drum piece's families, "kit" and "percussion", or another option it plays only with, "with:riff".</param>
 /// <param name="Description">What the page shows over its name, such as how a scale sounds and its notes; empty for most.</param>

@@ -7,7 +7,7 @@ namespace Rmg.WebApi.Songs;
 
 /// <summary>
 ///     A song's genre as the page had it (<see cref="Genre" />): its name, which only shows it, and every option it weighs,
-///     by its choice's name and its own, and its step from 0 to 63. Written behind the settings' fixed places, where a
+///     by its choice's name and its own, and its step of its choice's scale (<see cref="ShareScale" />), 63 at the most. Written behind the settings' fixed places, where a
 ///     link carries it, only where there is a genre: its name's length and its bytes, then how many options it weighs and
 ///     every one as its place among all the choices' options (<see cref="GenreChoices.All" />), in 10 bits, and its step,
 ///     in 6, one after another, six bits to a character.
@@ -18,7 +18,7 @@ public sealed record GenreSettings(string Name, ImmutableArray<GenreSettings.Opt
 {
     /// <param name="Choice">The choice's name, such as "meter".</param>
     /// <param name="Name">The option's name, such as "3/4".</param>
-    /// <param name="Step">Its amount, from 0 to 63.</param>
+    /// <param name="Step">Its amount, a step of its choice's scale (<see cref="ShareScale" />).</param>
     public sealed record Option(string Choice, string Name, int Step);
 
     public static GenreSettings None { get; } = new("", []);

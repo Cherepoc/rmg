@@ -3,7 +3,7 @@ import PRESETS from "./genres.json";
 /**
  *     Genres as the page has them: the presets it ships (genres.json), and those made here, which this browser keeps. A
  *     genre is a name and what it says of the choices the songs draw (/api/genres/choices), every option's amount a step
- *     from 0 to 63; the server knows the choices, never a genre.
+ *     of its choice's scale (/api/genres/choices); the server knows the choices, never a genre.
  */
 export { PRESETS };
 

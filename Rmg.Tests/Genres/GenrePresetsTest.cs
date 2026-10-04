@@ -5,7 +5,7 @@ namespace Rmg.Tests.Genres;
 public sealed class GenrePresetsTest
 {
     [Test]
-    public async Task EveryPreset_IsAGenre_ByTheChoicesNames_ItsStepsFrom0To63()
+    public async Task EveryPreset_IsAGenre_ByTheChoicesNames_ItsStepsItsChoicesScales()
     {
         var errors = new List<string>();
         foreach (var preset in GenrePresets.All)
@@ -16,7 +16,7 @@ public sealed class GenrePresetsTest
                 if (known is null)
                     errors.Add($"{preset.Name}: no choice {choice}");
                 else
-                    errors.AddRange(options.Where(x => known.Options.All(o => o.Name != x.Key) || x.Value is < 0 or > 63).Select(x => $"{preset.Name}: {choice} {x.Key} {x.Value}"));
+                    errors.AddRange(options.Where(x => known.Options.All(o => o.Name != x.Key) || x.Value < 0 || x.Value > Rmg.WebApi.Songs.ShareScale.LastOf(known)).Select(x => $"{preset.Name}: {choice} {x.Key} {x.Value}"));
             }
 
             if (errors.Count == 0)

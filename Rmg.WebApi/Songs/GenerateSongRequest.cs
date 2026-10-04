@@ -131,10 +131,14 @@ public sealed record GenerateSongRequest(
         Genre? genre = null;
         if (Genre is not null)
         {
-            if (Genre.SelectMany(x => x.Value).FirstOrDefault(x => x.Value is < 0 or > StepScale.Last) is { Key: { } outOfRange })
-                return Fail($"The genre's {outOfRange} is not a step from 0 to {StepScale.Last}.", out error);
+            if (Genre.Keys.FirstOrDefault(x => GenreChoices.All.All(c => c.Name != x)) is { } unknownChoice)
+                return Fail($"{unknownChoice} is not a choice a genre may name (/api/genres/choices).", out error);
+            var choices = Genre.ToDictionary(x => x.Key, x => GenreChoices.All.Single(c => c.Name == x.Key));
+            if (Genre.SelectMany(x => x.Value.Select(y => (Choice: choices[x.Key], Option: y.Key, Step: y.Value))).FirstOrDefault(x => x.Step < 0 || x.Step > ShareScale.LastOf(x.Choice))
+                is { Option: { } outOfRange } step)
+                return Fail($"The genre's {outOfRange} is not a step from 0 to {ShareScale.LastOf(step.Choice)}.", out error);
             genre = Core.Composition.Genre.Read(
-                Genre.ToDictionary(x => x.Key, x => (IReadOnlyDictionary<string, double>)x.Value.ToDictionary(y => y.Key, y => StepScale.ToAmount(y.Value))),
+                Genre.ToDictionary(x => x.Key, x => (IReadOnlyDictionary<string, double>)x.Value.ToDictionary(y => y.Key, y => ShareScale.AmountOf(choices[x.Key], y.Value))),
                 out error
             );
             if (genre is null)

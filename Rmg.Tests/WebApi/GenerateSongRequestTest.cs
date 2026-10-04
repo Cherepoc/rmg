@@ -86,7 +86,7 @@ public sealed class GenerateSongRequestTest
     [Test]
     public async Task AGenre_IsGivenByItsChoicesNames_ItsStepsAsAmountsFrom0To1()
     {
-        await Assert.That(new GenerateSongRequest(Genre: Genre("parts", "pad", StepScale.Middle)).TryRead(out _, out var overrides, out _, out var error)).IsTrue().Because(error ?? "");
+        await Assert.That(new GenerateSongRequest(Genre: Genre("parts", "pad", ShareScale.ToStep(0.5))).TryRead(out _, out var overrides, out _, out var error)).IsTrue().Because(error ?? "");
         // the pad's chance in a middling song, its yes's weight; the riff, a part the genre leaves out, never
         await Assert.That(overrides.Genre!.Chance(GenreChoices.Parts, "pad")!(true)).IsEqualTo(0.5);
         await Assert.That(overrides.Genre.Chance(GenreChoices.Parts, "riff")!(true)).IsNull();

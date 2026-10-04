@@ -3,7 +3,7 @@ using Rmg.Core.Composition;
 
 namespace Rmg.Tests.Genres;
 
-/// <summary>The page's presets (<c>Rmg.WebApi/Client/genres.json</c>), as the page sends them, every amount a step from 0 to 63.</summary>
+/// <summary>The page's presets (<c>Rmg.WebApi/Client/genres.json</c>), as the page sends them, every amount a step of its choice's scale (<see cref="Rmg.WebApi.Songs.ShareScale" />).</summary>
 internal static class GenrePresets
 {
     internal sealed record Preset(string Id, string Name, string Description, Dictionary<string, Dictionary<string, int>> Choices);
@@ -25,7 +25,7 @@ internal static class GenrePresets
     /// <summary>A preset's genre, its steps as amounts, as a request reads them; what is wrong with it fails.</summary>
     public static Genre Genre(Preset preset) =>
         Core.Composition.Genre.Read(
-            preset.Choices.ToDictionary(x => x.Key, x => (IReadOnlyDictionary<string, double>)x.Value.ToDictionary(y => y.Key, y => Rmg.WebApi.Songs.StepScale.ToAmount(y.Value))),
+            preset.Choices.ToDictionary(x => x.Key, x => (IReadOnlyDictionary<string, double>)x.Value.ToDictionary(y => y.Key, y => Rmg.WebApi.Songs.ShareScale.AmountOf(GenreChoices.All.Single(c => c.Name == x.Key), y.Value))),
             out var error
         ) ?? throw new InvalidOperationException($"{preset.Name}: {error}");
 
