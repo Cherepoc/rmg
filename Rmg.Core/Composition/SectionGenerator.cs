@@ -238,7 +238,7 @@ internal sealed class SectionGenerator
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
-        var plays = SectionLength.Draw(Stream(sectionId, SectionStream.Length), facets[Facet.Form], plan.Role);
+        var plays = DrawPlays(sectionId, plan.Role);
         StateTrace.Record(TracePoints.SectionLength, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{plays}", plays);
         var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap, meter).Repeat(plays);
         // the parts the section leaves out the first time it plays, from a sequence of its own, the likelier the less energy
@@ -291,6 +291,15 @@ internal sealed class SectionGenerator
     }
 
     /// <summary>How far a section strays from convention, facet by facet, each from a sequence of its own.</summary>
+    /// <summary>
+    ///     How many times a section plays its pattern, from a sequence of its own, by the form facet of the section's
+    ///     unconventionality, the same before the section is made as when it is (<see cref="SectionLength" />).
+    /// </summary>
+    public int DrawPlays(int sectionId, SectionRole role)
+    {
+        return SectionLength.Draw(Stream(sectionId, SectionStream.Length), Facets(sectionId)[Facet.Form], role);
+    }
+
     private Unconventionality Facets(int sectionId)
     {
         return _songFacets.GenerateSection(facet => _context.CreateContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Unconventionality), (int)facet)));

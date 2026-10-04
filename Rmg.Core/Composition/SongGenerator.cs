@@ -140,6 +140,8 @@ public static class SongGenerator
         var meter = overrides.Meter ?? Meter.Draw(Stream(SongStream.Meter), songUnconventionality[Facet.Feel], overrides.MeterOption, genre);
         StateTrace.Record(TracePoints.Meter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, meter.ToString(), meter);
 
+        // the song's key and tempo, drawn before its form, which how long the song plays takes after
+        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), Stream(SongStream.TempoStray), songUnconventionality[Facet.Feel], overrides, genre);
         var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), Stream(SongStream.SongEnds), songUnconventionality[Facet.Form]);
         StateTrace.Record(TracePoints.SongForm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(" ", structure.SectionIds.Select(x => structure.Roles[x])), structure);
         var sectionIds = structure.SectionIds.ToArray();
@@ -149,8 +151,6 @@ public static class SongGenerator
         songStateMap = songStateMap.MergeWith(SectionEnergy.GenerateSong(dynamicsContext));
         var sectionEnergies = SectionEnergy.GenerateSections(dynamicsContext, sectionIds);
 
-        // the song's key, which the sections place their melodies in
-        var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), Stream(SongStream.TempoStray), songUnconventionality[Facet.Feel], overrides, genre);
         // how the song swings, which its tempo sets the notes of
         var grooveContext = Stream(SongStream.Groove);
         var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), songUnconventionality[Facet.Feel], meter, overrides.Swing, genre);
