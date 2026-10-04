@@ -392,6 +392,8 @@ public static class SongGenerator
             index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.DrumSolo), index)),
             index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.DrumSoloStacks), index)),
             index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.DrumSoloFeet), index)),
+            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.DrumSoloPlayers), index)),
+            index => generateSection(played[index]).Facets[Facet.Groove],
             meter
         );
 
@@ -674,5 +676,6 @@ internal enum SongStream
     Kit = 62,
     PartFeel = 63,
     SoloistSolo = 64,
-    DrumSoloFeet = 65
+    DrumSoloFeet = 65,
+    DrumSoloPlayers = 66
 }

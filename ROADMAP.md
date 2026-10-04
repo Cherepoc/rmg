@@ -6,10 +6,8 @@ is removed once it is built.
 
 ## Priorities
 
-**Next** (P1): the drum solos' players (see *Open work*);
-listening to
-what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the ratings by conventionality once
-enough are in, alongside, continuously and never as a gate.
+**Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
+ratings by conventionality once enough are in, alongside, continuously and never as a gate.
 
 **Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs rated
 enough; listening to the genres' presets (see *Genres*).
@@ -170,15 +168,11 @@ Each item with its plan, and what it waits for.
   length leans no draw of; their chances leaned by the length as the form's are, should it matter. Long songs, ten
   minutes, are free forms seven times in ten, as no form reaches them: heard as rambling? Solos filling a long length
   rather than more parts, if so.
-- **The drum solos' players** (P1, under way): a drum solo is the hands' line round the kit, the feet keeping the
-  section's kick under it in 70% of them, softer, and every other drum silent (`DrumSolos`). (2) Every percussion drum is a
-  player of its own: under a kit solo it keeps its groove or rests, drawn for each; in a song with percussion a drum
-  solo's soloists are drawn among the kit's drummer and the players, as many at once and trading or together as the
-  pitched solos' counts and modes have it (`Solos.Counts`, `Solos.Modes`), by the groove facet, one soloist and the
-  others keeping time at the plain end and several at the wild; a player's line its own sounds, a conga's open, slap
-  and mute; those keeping time under the soloist by the solos' margin. Measured by the kick's share under the line,
-  the notes a bar of a solo, which a busy groove's kick could crowd, and how often the players keep time, trade or
-  play together. A hi-hat's foot on the backbeats only if listening asks for it, a pattern of its own.
+- **Listening to the drum solos' players:** a soloist is drawn evenly among the kit's drummer and the percussion
+  drums of two sounds or more, so that in a song with percussion a percussion drum solos in 68% of the drum solos and
+  without the kit in 64% (`DrumSoloTest.Report`); the kit weighed more, should listening miss the drummer. A player's
+  turn traded away rests, its feet aside. A hi-hat's foot on the backbeats under the kit's solo only if listening asks
+  for it, a pattern of its own.
 - **More modes for the wild end** and **a song's own coherence,** how far its facets stray from its base, by the same
   rule (`ByConvention`), should the wild end sound samey or a song incoherent.
 - **The plain end's rigidity,** to tune by listening: no change of feel, triplet fills included, every bar of a plain

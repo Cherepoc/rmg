@@ -60,6 +60,16 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
         hits.Add(stateMap.ToTimelineItem(position));
     }
 
+    /// <summary>A note of a track played again in place of itself, as loud as given, its sound and the rest as they are.</summary>
+    public void Replay(int track, TimelineItem<StateMap> note, double velocity)
+    {
+        Clear(track, note.Position, note.Position + Epsilon);
+        if (!_hits.TryGetValue(track, out var hits))
+            _hits[track] = hits = [];
+        hits.RemoveAll(x => x.Position.IsEqualToByEpsilon(note.Position));
+        hits.Add(note.Value.With(StateKinds.Velocity, velocity).ToTimelineItem(note.Position));
+    }
+
     public TrackEventStateTimelineMap<StateMap> ApplyTo(TrackEventStateTimelineMap<StateMap> song)
     {
         var maps = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>();
