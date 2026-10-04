@@ -6,7 +6,7 @@ is removed once it is built.
 
 ## Priorities
 
-**Next** (P1): the drum solos' feet and players (see *Open work*);
+**Next** (P1): the drum solos' players (see *Open work*);
 listening to
 what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the ratings by conventionality once
 enough are in, alongside, continuously and never as a gate.
@@ -170,10 +170,8 @@ Each item with its plan, and what it waits for.
   length leans no draw of; their chances leaned by the length as the form's are, should it matter. Long songs, ten
   minutes, are free forms seven times in ten, as no form reaches them: heard as rambling? Solos filling a long length
   rather than more parts, if so.
-- **The drum solos' feet and players** (P1, planned): a drum solo is the hands' line round the kit, the kick a note
-  of it and every other drum silent (`DrumSolos`). (1) The feet keep time in most solos, about 70%, drawn from a
-  stream of its own: the drums of the kick's role keep the section's groove under the line, a little softer, which
-  then leaves the kick out of the hands' scale and stacks none under their accents. (2) Every percussion drum is a
+- **The drum solos' players** (P1, under way): a drum solo is the hands' line round the kit, the feet keeping the
+  section's kick under it in 70% of them, softer, and every other drum silent (`DrumSolos`). (2) Every percussion drum is a
   player of its own: under a kit solo it keeps its groove or rests, drawn for each; in a song with percussion a drum
   solo's soloists are drawn among the kit's drummer and the players, as many at once and trading or together as the
   pitched solos' counts and modes have it (`Solos.Counts`, `Solos.Modes`), by the groove facet, one soloist and the
