@@ -287,8 +287,9 @@ genre in the link (`GenreSettings`). What is left:
   genre ask for it. A genre is kept on the server as a song's request brings one, by an
   11-character key of a hash of its canonical form (`GenreStore`), which a link carries, and the list of songs with a
   copy. A choice's shares along the axis, as the songs draw them, are the
-  editor's to show (`/api/genres/preview`). The steps left: (5) a mockup of a fine-tune window, an option's
-  three points dragged up and down on a chart of weights, the shares beside them; (6) the editor's sliders finer at
+  editor's to show (`/api/genres/preview`). The steps left: (5) the fine-tune window's mockup, an option's
+  three points dragged up and down on a chart of weights, the shares under them, for review
+  (https://claude.ai/artifact/B7mMGagmNGamGkW8dSFLU1); (6) the window built as reviewed, and the editor's sliders finer at
   the low end and snapping to round amounts; (7) the presets authored, their idioms everywhere and their experimental
   directions experimental only.
 - **Listening to the genres' wild ends:** the presets' ends are the old rule's, which gave back at the wild end what a
