@@ -10,10 +10,10 @@ namespace Rmg.Core.Composition;
 ///     vocabulary (<see cref="Soloist" />), the kit its scale: the section's snare, its toms from the highest to the
 ///     lowest, and its kick, in that order, so that a run's cells go round the kit as a pitched run's go up the scale, a
 ///     sequence a drum on at a time, an arpeggio skipping one, a turn between neighbours and a pedal on one drum between
-///     the moving others, a gesture of the climax starting on a crash. A held note is a crash with the kick, ringing, as
-///     is the release every phrase ends on; a pause is
-///     the drums silent; a quote is the section's own groove. It leaves its last bar to the fill into the section after, so that the band comes back in on
-///     its landing.
+///     the moving others, a gesture of the climax starting on a crash. In most solos the feet keep time, the section's
+///     kick under the line, softer, and the kick is then none of the hands' drums. A held note is a crash with the kick,
+///     ringing, as is the release every phrase ends on; a pause is the hands silent; a quote is the section's own groove.
+///     It leaves its last bar to the fill into the section after, so that the band comes back in on its landing.
 /// </summary>
 internal static class DrumSolos
 {
@@ -31,11 +31,21 @@ internal static class DrumSolos
     public const double KickUnderAccents = 0.5;
 
     /// <summary>
+    ///     The chance the feet keep time under a drum solo, the section's kick under the hands' line, which then leave the
+    ///     kick out of their kit and stack none under their accents.
+    /// </summary>
+    public const double FeetKeepTime = 0.7;
+
+    /// <summary>How loud the feet are under the hands' line, softer than its calmest.</summary>
+    public const double FeetLoudness = Loudness - IntensityVelocity / 2 - 0.05;
+
+    /// <summary>
     ///     The song with every drum solo played, each from a sequence of its own by its appearance's place; the drums that
     ///     play in the section are its kit.
     /// </summary>
     /// <param name="drummer">The drummer's solo vocabulary; none where the song has no drum solo.</param>
     /// <param name="stacks">A solo's draw of whether it stacks the kick under its accents, by its appearance's place.</param>
+    /// <param name="feet">A solo's draw of whether the feet keep time under it, by its appearance's place.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
         IEnumerable<PercussionInstrumentDefinition> songDrums,
@@ -44,6 +54,7 @@ internal static class DrumSolos
         Soloist? drummer,
         Func<int, IGenerationContext> streams,
         Func<int, IGenerationContext> stacks,
+        Func<int, IGenerationContext> feet,
         Meter meter
     )
     {
@@ -59,8 +70,13 @@ internal static class DrumSolos
             bool Plays(RunSound sound) => song.TrackTimelineMap.TryGetValue(sound.Track, out var track) &&
                                           track.EventTimeline.Any(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9);
             RunSound[] Of(FillDrumRole role) => sounds.TryGetValue(role, out var all) ? [..all.Where(Plays).DistinctBy(x => x.Track)] : [];
-            // the kit from its highest to its lowest: the snare, the toms by their notes, the kick
-            RunSound[] kit = [..Of(FillDrumRole.Snare).Take(1), ..Of(FillDrumRole.Toms).OrderByDescending(x => x.Code), ..Of(FillDrumRole.Kick).Take(1)];
+            // the hands' kit from its highest to its lowest: the snare, the toms by their notes, and the kick unless the
+            // feet keep time on it
+            RunSound[] hands = [..Of(FillDrumRole.Snare).Take(1), ..Of(FillDrumRole.Toms).OrderByDescending(x => x.Code)];
+            var kicks = Of(FillDrumRole.Kick);
+            var kick = kicks.FirstOrDefault();
+            var feetKeepTime = feet(index).TestProbability(FeetKeepTime) && kick is not null && hands.Length > 0;
+            RunSound[] kit = feetKeepTime ? hands : [..hands, ..kicks.Take(1)];
             if (kit.Length == 0)
                 continue;
 
@@ -68,8 +84,8 @@ internal static class DrumSolos
             var crash = sounds.TryGetValue(FillDrumRole.Cymbal, out var cymbals) ? cymbals.FirstOrDefault() : null;
             var tracks = song.TrackTimelineMap.Keys.Where(x => x >= DrumGroups.FirstTrackNumber).ToArray();
             var context = streams(index);
-            var kick = Of(FillDrumRole.Kick).FirstOrDefault();
-            var stacksKick = stacks(index).TestProbability(KickUnderAccents) && kick is not null;
+            var stacksKick = stacks(index).TestProbability(KickUnderAccents) && kick is not null && !feetKeepTime;
+            var feetTracks = feetKeepTime ? kicks.Select(x => x.Track).ToHashSet() : [];
             var common = song.CommonStateTimelineMap;
             var plan = SoloLines.Plan(
                 context,
@@ -79,7 +95,7 @@ internal static class DrumSolos
                 (_, _) => 1,
                 position => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60
             );
-            StateTrace.Record(TracePoints.DrumSolo, FillGenerator.DrumsTrace, whole.SectionId, 0, StateMap.Default, 0, $"{plan.Length} segments", (index, plan));
+            StateTrace.Record(TracePoints.DrumSolo, FillGenerator.DrumsTrace, whole.SectionId, 0, StateMap.Default, 0, $"{plan.Length} segments{(feetKeepTime ? ", the feet keeping time" : "")}", (index, plan, feetKeepTime));
 
             var edits = new TimelineEdits(context, meter, map);
             var indices = Enumerable.Range(0, kit.Length).ToArray();
@@ -90,8 +106,12 @@ internal static class DrumSolos
                 // the groove quoted as it plays, and anything else in place of it
                 if (gesture == SoloGesture.Quote)
                     continue;
-                foreach (var track in tracks)
+                foreach (var track in tracks.Where(x => !feetTracks.Contains(x)))
                     edits.Clear(track, start, end);
+                // the feet keeping the section's kick, softer
+                foreach (var track in feetTracks)
+                foreach (var hit in song.TrackTimelineMap[track].EventTimeline.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9))
+                    edits.Hit(track, hit.Position, FeetLoudness, 0, whole.SectionId, "Drum solo's feet");
 
                 var loudness = Loudness + IntensityVelocity * (level - 0.5);
                 switch (gesture)
@@ -99,7 +119,8 @@ internal static class DrumSolos
                     case SoloGesture.Held:
                         if (crash is not null)
                             edits.Hit(crash.Track, start, loudness + CellAccent, crash.Articulation, whole.SectionId, "Drum solo");
-                        edits.Hit(kit[^1].Track, start, loudness + CellAccent, kit[^1].Articulation, whole.SectionId, "Drum solo");
+                        var low = kick ?? kit[^1];
+                        edits.Hit(low.Track, start, loudness + CellAccent, low.Articulation, whole.SectionId, "Drum solo");
                         break;
                     case SoloGesture.Run:
                     case SoloGesture.Lick:
