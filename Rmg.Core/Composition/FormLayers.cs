@@ -74,6 +74,15 @@ internal static class FormLayers
     /// </summary>
     public static ByConvention HookIntro { get; } = new(0.25, 0.25, 0);
 
+    /// <summary>
+    ///     The chance a lift the drums announce (<see cref="LiftCues" />) is built to and dropped at: the band growing
+    ///     louder over the phrase before it and out for its last bar, a genre's that the songs never play.
+    /// </summary>
+    public static ByConvention Drop { get; } = new(0, 0, 0);
+
+    /// <summary>How many bars a build grows louder over, the phrase before its drop, its section's at most.</summary>
+    public const int BuildBars = 4;
+
     public static ImmutableArray<Weighted<IntroKind>> Intros { get; } =
     [
         new(0.3, IntroKind.Cold),

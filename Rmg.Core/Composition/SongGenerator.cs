@@ -194,6 +194,7 @@ public static class SongGenerator
             Stream(SongStream.Form),
             Stream(SongStream.Intro),
             Stream(SongStream.HookIntro),
+            Stream(SongStream.Drops),
             genre,
             Of(Facet.Form),
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
@@ -527,5 +528,6 @@ internal enum SongStream
     GenreLength = 67,
     SectionPhrases = 68,
     HookIntro = 69,
-    Strum = 70
+    Strum = 70,
+    Drops = 71
 }

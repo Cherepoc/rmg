@@ -21,6 +21,7 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
     private readonly Dictionary<int, List<(double From, double To)>> _cleared = [];
     private readonly Dictionary<int, List<TimelineItem<StateMap>>> _hits = [];
     private readonly Dictionary<int, List<double>> _cuts = [];
+    private readonly Dictionary<int, List<(double From, double To)>> _silences = [];
 
     /// <summary>Takes a track's notes out from one position up to another; the fills' own hits stay.</summary>
     public void Clear(int track, double from, double to)
@@ -36,6 +37,18 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
         if (!_cuts.TryGetValue(track, out var cuts))
             _cuts[track] = cuts = [];
         cuts.Add(position);
+    }
+
+    /// <summary>
+    ///     Makes a track rest from one position up to another once its notes are decided, whatever the stages after the
+    ///     form put there, as the band does before a drop: cut there, its notes in it taken out.
+    /// </summary>
+    public void Silence(int track, double from, double to)
+    {
+        Cut(track, from);
+        if (!_silences.TryGetValue(track, out var spans))
+            _silences[track] = spans = [];
+        spans.Add((from, to));
     }
 
     /// <summary>A hit of a track, in place of any it or a fill has there.</summary>
@@ -98,6 +111,9 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
         {
             if (!notes.TryGetValue(track, out var timeline))
                 continue;
+
+            foreach (var (from, to) in _silences.GetValueOrDefault(track) ?? [])
+                timeline = EventTimeline.Create(timeline.Duration, timeline.Where(x => x.Position < from - Epsilon || x.Position >= to - Epsilon));
 
             foreach (var cut in cuts)
             {

@@ -90,6 +90,7 @@ public sealed class GenreIdiomsReportTest
             ["riff sections in power chords"] = song.Trace.Where(x => x.Point == TracePoints.RiffPowerChords).Select(x => (bool)x.Value!).DefaultIfEmpty().Average(x => x ? 1.0 : 0),
             ["guitars' notes palm-muted"] = notes.Where(x => x.Key is SongTracks.RiffTrack or SongTracks.RhythmTrack).SelectMany(x => x.Value).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["solo appearances"] = song.Solos.Count / (double)map.Sections.Length,
+            ["lifts dropped"] = song.Trace.Count(x => x.Point == TracePoints.LiftCue) is var lifts and > 0 ? song.Trace.Count(x => x.Point == TracePoints.Drop) / (double)lifts : double.NaN,
             ["ending a fade"] = map.Ending.Kind == EndingKind.Fade ? 1 : 0,
             ["ending a button or a stop"] = map.Ending.Kind is EndingKind.Button or EndingKind.Stop ? 1 : 0,
             ["intro part by part"] = map.Intro.Kind == IntroKind.Entries ? 1 : 0,
@@ -108,7 +109,7 @@ public sealed class GenreIdiomsReportTest
         ["electronic"] =
         [
             ("chords in 4 bars", 0, 2), ("sections sharing a progression", 0.6, 1), ("fills a minute", 0, 2), ("drums over the melody", 5, 127),
-            ("kick on every beat", 0.85, 1), ("melody bars repeated", 0.5, 1), ("tempo", 117, 135)
+            ("kick on every beat", 0.85, 1), ("melody bars repeated", 0.5, 1), ("lifts dropped", 0.5, 1), ("tempo", 117, 135)
         ],
         ["rock"] = [("kick on 1", 0.85, 1), ("snare on 2 and 4", 0.85, 1), ("chords in 4 bars", 2, 4), ("melody pentatonic or blues", 0.5, 1)],
         ["blues"] = [("melody pentatonic or blues", 0.6, 1), ("snare on 2 and 4", 0.8, 1)],

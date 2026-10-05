@@ -12,7 +12,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 **Later** (P2), in this order: an idiom report a genre; the melody's character and the
 bass's style by genre; the harmonic rhythm by genre; a loop, a genre's levels, its fills and a melody written as a hook
 (genres that sound like themselves, see *Genres*); sidechain pumping; a riff in power chords and its chugs, the
-articulation's seam; solos, soloists, endings and intros by genre; builds and drops; turnarounds, then passing chords (see *Scales and chords*); a solo's
+articulation's seam; solos, soloists, endings and intros by genre; turnarounds, then passing chords (see *Scales and chords*); a solo's
 loudness by its phrase. The ratings report (see *Listening data*) once the dashboard shows songs rated enough, and
 listening to the presets and to what October 2026 gained, alongside.
 
@@ -480,8 +480,11 @@ a link carries. What is left:
      Electronic's songs 61%. On the beat, where a four on the floor's kick is (Electronic's in 78% of its bars), rather
      than on the kick itself, which the rendering of a part does not see: on the kick wherever it falls, should a
      pumping genre's kick leave the beat.
-  6. Builds and drops: a section before a bigger one building (the snare and the hats thickening, the sweep rising),
-     the band out a beat or a bar before the drop; the lift cues', the runs' and a stopped ending's pieces, placed anew.
+  6. Done: builds and drops (`GenreChoices.Drop`, `FormLayers.Drop`): a lift the drums announce, now and then, the
+     band growing louder over the phrase before it and out for its last bar (`TimelineEdits.Silence`, the lines that
+     walk into the section with it), the drums' fill alone in it and landing on the drop; a genre's, the songs never.
+     Lifts dropped: Electronic 64%, Hip-hop 32%, Funk 22%. Not done: the build thickening, a snare roll doubling its
+     rate and a riser sweeping up over the phrase (P3), should the drop sound unprepared.
   7. Electronic split into House, Techno and Synthwave (P3), once the steps above tell them apart.
   The melody as a looped hook: done, a melody written as a hook (see *Form and sections*), by a section's role and a
   genre's value.

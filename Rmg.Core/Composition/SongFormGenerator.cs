@@ -23,6 +23,9 @@ internal sealed class SongFormGenerator
     // the sequence whether the song opens on its hook is drawn from (FormLayers.HookIntro)
     private readonly IGenerationContext _hookContext;
 
+    // the sequence whether a lift is built to and dropped at is drawn from (FormLayers.Drop)
+    private readonly IGenerationContext _dropContext;
+
     // the genre whose intros and endings the song's are drawn among, where it names them
     private readonly Genre _genre;
 
@@ -41,6 +44,7 @@ internal sealed class SongFormGenerator
         IGenerationContext context,
         IGenerationContext introContext,
         IGenerationContext hookContext,
+        IGenerationContext dropContext,
         Genre genre,
         RhythmicUnconventionality songRhythm,
         IReadOnlyDictionary<int, TrackRole> roles,
@@ -51,6 +55,7 @@ internal sealed class SongFormGenerator
         _context = context;
         _introContext = introContext;
         _hookContext = hookContext;
+        _dropContext = dropContext;
         _genre = genre;
         _songRhythm = songRhythm;
         _roles = roles;
@@ -282,8 +287,37 @@ internal sealed class SongFormGenerator
         }
 
         StateTrace.Record(TracePoints.SongEnding, FillGenerator.DrumsTrace, sectionIds[^1], 0, StateMap.Default, 0, description);
-        // the band grows louder into a louder section
-        songState = songState.MergeWith(CreateLifts(lines, end));
+        // a lift the drums announce built to and dropped at, now and then, a genre's: the band out for the bar before it, the
+        // lines that walk into the section with it, but for the drums' fill into it, and the drums landing on it
+        var drop = FormLayers.Drop.At(_songRhythm.Value, _genre.Chance(GenreChoices.Drop, "lifts"));
+        var tracks = sections.SelectMany(x => x.Timeline.TrackTimelineMap.Keys).ToHashSet();
+        var drops = new HashSet<double>();
+        for (var i = 0; i < lines.Count; i++)
+        {
+            var line = lines[i];
+            if (line.Ending == line.Next || line.Position >= end || (line.Next.Energy - line.Ending.Energy) * line.Ending.Rhythm.Coupling <= LiftCues.Threshold
+                || !_dropContext.TestProbability(drop))
+                continue;
+            var gap = line.Position - line.Ending.Meter.BarDuration;
+            // the drums' hits kept for their fill, every other part, a soloist's too, kept out of it once the lines walk
+            // into the section
+            foreach (var (track, role) in _roles)
+            {
+                if (tracks.Contains(track))
+                    edits.Clear(track, gap, line.Position);
+                if (role == TrackRole.Drum)
+                    edits.Cut(track, gap);
+                else
+                    edits.Silence(track, gap, line.Position);
+            }
+
+            lines[i] = line with { IsLandingForced = true };
+            drops.Add(line.Position);
+            StateTrace.Record(TracePoints.Drop, FillGenerator.DrumsTrace, line.Next.SectionId, 0, StateMap.Default, 0, $"into {line.Position}", line.Position);
+        }
+
+        // the band grows louder into a louder section, over the phrase before a drop
+        songState = songState.MergeWith(CreateLifts(lines, end, drops));
 
         return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, songState);
     }
@@ -463,20 +497,23 @@ internal sealed class SongFormGenerator
     ///     as loud as it plays to louder by how much more energy the next section has, as far as the ending section's rhythm
     ///     follows its energy, a step every <see cref="FormLayers.FadeStep" />, the next section then as loud as it plays.
     /// </summary>
-    private static StateTimelineMap CreateLifts(IEnumerable<FillLine> lines, double end)
+    private static StateTimelineMap CreateLifts(IReadOnlyList<FillLine> lines, double end, IReadOnlySet<double> drops)
     {
         var items = new List<TimelineItem<double>>();
-        foreach (var line in lines.Where(x => x.Ending != x.Next && x.Position < end))
+        for (var i = 0; i < lines.Count; i++)
         {
+            var line = lines[i];
+            if (line.Ending == line.Next || line.Position >= end)
+                continue;
             var lift = (line.Next.Energy - line.Ending.Energy) * line.Ending.Rhythm.Coupling;
             if (lift <= 0)
                 continue;
 
-            // over the last bar of the section it ends
-            var bar = line.Ending.Meter.BarDuration;
-            var count = (int)Math.Round(bar / FormLayers.FadeStep);
-            var start = line.Position - bar;
-            items.AddRange(Enumerable.Range(1, count).Select(i => (FormLayers.LiftVelocity * lift * i / count).ToTimelineItem(start + i * FormLayers.FadeStep - FormLayers.FadeStep)));
+            // over the last bar of the section it ends, or the phrase before a drop, within the section
+            var length = line.Ending.Meter.BarDuration * (drops.Contains(line.Position) ? FormLayers.BuildBars : 1);
+            var start = Math.Max(line.Position - length, i > 0 ? lines[i - 1].Position : 0);
+            var count = (int)Math.Round((line.Position - start) / FormLayers.FadeStep);
+            items.AddRange(Enumerable.Range(1, count).Select(j => (FormLayers.LiftVelocity * lift * j / count).ToTimelineItem(start + j * FormLayers.FadeStep - FormLayers.FadeStep)));
             items.Add(0.0.ToTimelineItem(line.Position));
         }
 
