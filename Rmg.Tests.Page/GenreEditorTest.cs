@@ -469,6 +469,8 @@ public sealed class GenreEditorTest(Site site)
         // the effects, a vibrato and the rest, as the songs have them
         await Assert.That(await Tile(await Section(dialog, "Sound"), "effects").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
         await Assert.That(await Tile(dialog, "pan").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: default");
+        // the forms, the plainest songs always in one of them
+        await Assert.That(await Tile(await Section(dialog, "Form"), "formChances").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: One of the forms 100%");
         // the root motions, each as the songs have it
         await Assert.That(await Tile(await Section(dialog, "Harmony"), "rootMotion").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: default");
         await Assert.That(await Tile(time, "feelValues").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: default");

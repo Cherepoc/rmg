@@ -59,6 +59,7 @@
     "name": "Electronic",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, bass and pads, a TR-808 or electronic kit, straight and fast, minor, sus and add9 chords.",
     "choices": {
+      "formChances": { "forms": [90, 50, 10] },
       "pan": { "pad": 80 },
       "strongEffect": { "none": [100, 70, 30], "sweep": [20, 40, 100], "echo": [10, 20, 40] },
       "tempo": { "from": [117, 117, 100], "to": [130, 130, 175] },
@@ -185,6 +186,8 @@
     "name": "Folk",
     "description": "Steel and nylon guitars strummed, a fiddle, a banjo, a harmonica, an acoustic bass, plain triads, major and Mixolydian, 3/4 and 6/8 as likely as not, a tambourine and a shaker on a room kit.",
     "choices": {
+      "form": { "vcvc": 100, "vcvcbc": 70, "vcvcbvc": 40 },
+      "formChances": { "forms": [100, 95, 70] },
       "tempo": { "from": [79, 79, 65], "to": [130, 130, 150] },
       "meter": { "4/4": [100, 100, 70], "3/4": [60, 65, 60], "6/8": [60, 65, 60], "5/4": [0, 0, 20], "7/8": [0, 0, 15] },
       "scale": { "major": [100, 100, 60], "mixolydian": [50, 65, 70], "naturalMinor": [45, 45, 50], "dorian": [30, 40, 60] },

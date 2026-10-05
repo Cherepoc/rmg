@@ -49,6 +49,25 @@ public sealed class GenrePresetsReportTest
         await Task.CompletedTask;
     }
 
+    /// <summary>The share of songs in one of the forms, and the three commonest forms: none's and every preset's.</summary>
+    [Test]
+    [Explicit]
+    public async Task EveryPreset_Forms()
+    {
+        void Print(string name, IReadOnlyList<CorpusSong> songs)
+        {
+            var forms = songs.Select(x => (Rmg.Core.Composition.SongStructure)x.Trace.First(t => t.Point == Rmg.Core.Composition.TracePoints.SongForm).Value!)
+                .Select(x => x.Roles.Values.Any(r => r == Rmg.Core.Composition.SectionRole.Free) ? "own" : string.Concat(x.SectionIds.Select(id => x.Roles[id].ToString()[0])))
+                .ToArray();
+            Console.WriteLine($"{name}: " + string.Join(", ", forms.GroupBy(x => x).OrderByDescending(x => x.Count()).Take(4).Select(x => $"{x.Key} {100.0 * x.Count() / forms.Length:0}%")));
+        }
+
+        Print("none", TestCorpus.Range(Count));
+        foreach (var preset in GenrePresets.All)
+            Print(preset.Name, TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset)))));
+        await Task.CompletedTask;
+    }
+
     /// <summary>How far each pitched part sits from the middle on the average, from 0, the middle, to 1, a side: none's and every preset's.</summary>
     [Test]
     [Explicit]

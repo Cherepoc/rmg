@@ -82,11 +82,16 @@ internal static class SongForms
     /// </param>
     /// <param name="ends">The sequence the intro and the outro are drawn from.</param>
     /// <param name="length">The song's length given, which the forms lean to by how near theirs come; none for none.</param>
-    public static SongStructure Generate(IGenerationContext context, IGenerationContext freeContext, IGenerationContext ends, double unconventionality, SongLength? length)
+    /// <param name="genre">The genre, whose chance of one of the forms and whose pool of them are the song's where it names them.</param>
+    public static SongStructure Generate(IGenerationContext context, IGenerationContext freeContext, IGenerationContext ends, double unconventionality, SongLength? length, Genre genre)
     {
-        var formChance = RhythmicUnconventionality.Ends(FormChance, -1).At(unconventionality);
+        var formChance = OwnFormChance.At(unconventionality, genre.Chance(GenreChoices.FormChances, "forms"));
         var isConventional = context.TestProbability(length is null ? formChance : length.FormChance(formChance, Forms.Select(x => (IEnumerable<SectionRole>)x.Value)));
-        var form = context.Pick(length is null ? Forms : [..Forms.Select(x => x with { Weight = x.Weight * length.Closeness(x.Value.Sum(length.AppearanceSeconds)) })]);
+        // the forms as the genre weighs them where it names them, its plainest at the plain end and its wildest at the wild
+        var forms = genre.Pool<ImmutableArray<SectionRole>>(GenreChoices.Form, NameOf) is { } pool
+            ? ByConvention.Weigh(Forms.Select(x => (x.Value, new ByConvention(x.Weight, x.Weight, x.Weight))), unconventionality, pool)
+            : Forms;
+        var form = context.Pick(length is null ? forms : [..forms.Select(x => x with { Weight = x.Weight * length.Closeness(x.Value.Sum(length.AppearanceSeconds)) })]);
         SongStructure structure;
         if (!isConventional)
         {
@@ -108,6 +113,26 @@ internal static class SongForms
             [..(intro ? [introId] : Array.Empty<int>()), ..structure.SectionIds, ..(outro ? [outroId] : Array.Empty<int>())],
             structure.Roles.AddRange(new[] { (intro, introId, SectionRole.Intro), (outro, outroId, SectionRole.Outro) }.Where(x => x.Item1).Select(x => new KeyValuePair<int, SectionRole>(x.Item2, x.Item3)))
         );
+    }
+
+    /// <summary>The chance a song takes one of the forms, by its form facet: the plainest always, the wildest never.</summary>
+    public static ByConvention OwnFormChance { get; } = RhythmicUnconventionality.Ends(FormChance, -1);
+
+    /// <summary>A form's name, as a genre gives it: its roles' letters, "vcvcbc".</summary>
+    public static string NameOf(ImmutableArray<SectionRole> form) => string.Concat(form.Select(x => x switch
+    {
+        SectionRole.Verse => 'v',
+        SectionRole.PreChorus => 'p',
+        SectionRole.Chorus => 'c',
+        SectionRole.Bridge => 'b',
+        _ => throw new ArgumentOutOfRangeException(nameof(form), x, "A form is of verses, pre-choruses, choruses and bridges.")
+    }));
+
+    /// <summary>A form as a page shows it: its roles in words, "Verse, chorus, verse, chorus, bridge, chorus".</summary>
+    public static string LabelOf(ImmutableArray<SectionRole> form)
+    {
+        var words = string.Join(", ", form.Select(x => x == SectionRole.PreChorus ? "pre-chorus" : x.ToString().ToLowerInvariant()));
+        return char.ToUpperInvariant(words[0]) + words[1..];
     }
 
     private static ImmutableArray<SectionRole> Parse(string roles)

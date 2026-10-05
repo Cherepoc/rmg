@@ -101,6 +101,12 @@ public static class GenreChoices
     public static GenreChoice Pan { get; } = Values("pan", "Pan",
         [("melody", "Melody"), ("chords", "Chords"), ("bass", "Bass"), ("pad", "Pad"), ("counterMelody", "Counter-melody"), ("riff", "Riff"), ("rhythm", "Rhythm")]);
 
+    /// <summary>Whether a song takes one of the forms songs are written in, or one of its own (<see cref="SongForms" />).</summary>
+    public static GenreChoice FormChances { get; } = Chances("formChances", "Form or its own", [("forms", "One of the forms", SongForms.OwnFormChance)]);
+
+    /// <summary>The forms songs are written in, a verse and a chorus coming back, with a pre-chorus or a bridge (<see cref="SongForms.Forms" />).</summary>
+    public static GenreChoice Form { get; } = Pool("form", "Form", SongForms.Forms.Select(x => (SongForms.NameOf(x.Value), SongForms.LabelOf(x.Value), new ByConvention(x.Weight, x.Weight, x.Weight))));
+
     /// <summary>The feel the song plays in, straight, a tuplet or a grouping (<see cref="Feels" />).</summary>
     public static GenreChoice Feel { get; } = Pool("feel", "Feel", Feels.Weights.Select(x => (Feels.NameOf(x.Feel), Capitalised(Feels.Label(x.Feel)), x.Weight)));
 
@@ -241,7 +247,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, Effects, StrongEffect, Pan,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, Effects, StrongEffect, Pan, FormChances, Form,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,
