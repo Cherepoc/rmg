@@ -804,6 +804,7 @@ function aboutSong(measurements = {}) {
         seed: songSeed,
         version: songVersion,
         settings: songSeed === null ? null : formatSettings(settings),
+        genre: songSeed === null ? null : songGenreKey,
         ...measurements,
     };
 }

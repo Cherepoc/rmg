@@ -27,6 +27,11 @@ public sealed class GenreTest(Site site)
     public async Task APresetChosen_IsAskedFor_ByItsChoices_AndNoneLetsItGo()
     {
         await using var page = await SongPage.Open(site, "?song=1");
+        var tallies = new System.Collections.Concurrent.ConcurrentBag<string>();
+        page.Page.Request += (_, request) =>
+        {
+            if (request.Url.Contains("/api/tally")) tallies.Add(request.PostData ?? "");
+        };
         await page.FirstSong();
         await page.Settled();
 
@@ -45,6 +50,9 @@ public sealed class GenreTest(Site site)
         await Assert.That(page.Page.Url).Contains("settings=B");
         // a preset named in the link by its id, which reads as it is
         await Assert.That(page.Page.Url).Contains("genre=jazz");
+        // and in every event about the song, as the ratings by genre read it
+        await page.Page.Locator("#like").ClickAsync();
+        await page.Until(() => Task.FromResult(tallies.Any(x => x.Contains("\"name\":\"rated\"") && x.Contains("\"genre\":\"jazz\""))), "the rating told with its genre");
         await Assert.That(await genre.InputValueAsync()).IsEqualTo("preset:jazz");
         await page.Page.GotoAsync("/");
         await page.Until(() => page.Requests.Count > count + 1 && page.Requests[^1].Body.TryGetProperty("genre", out var kept) && kept.TryGetProperty("kit", out _),

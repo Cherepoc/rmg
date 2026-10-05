@@ -59,6 +59,10 @@ public static class EventNames
 ///     What the song was heard with (<see cref="SongSettings" />): its unconventionality, which a given one names the
 ///     song by, and its mix. Anything that does not read as settings is dropped, and the event kept.
 /// </param>
+/// <param name="Genre">
+///     The genre the song was made in: a preset's id, such as "rock", or the key the server keeps another genre by
+///     (<see cref="Genres.GenreStore" />), letters and digits both; none for a song in no genre. Anything else is dropped.
+/// </param>
 public sealed record EventRequest(
     string? Name,
     long? Ms = null,
@@ -67,7 +71,8 @@ public sealed record EventRequest(
     string? Seed = null,
     string? Detail = null,
     string? Version = null,
-    string? Settings = null
+    string? Settings = null,
+    string? Genre = null
 );
 
 /// <summary>An event as it is kept: the request, with the day and the visitor it came from, the seed as its 64 bits.</summary>
@@ -82,5 +87,6 @@ public sealed record StoredEvent(
     long? Seed,
     string? Detail,
     string? Version,
-    SongSettings? Settings
+    SongSettings? Settings,
+    string? Genre
 );

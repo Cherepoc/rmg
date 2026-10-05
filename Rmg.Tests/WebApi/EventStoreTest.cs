@@ -21,10 +21,10 @@ public sealed class EventStoreTest : IDisposable
     }
 
     private bool Write(string name, string visitor = "someone", DateTimeOffset? at = null,
-        long? ms = null, double? seconds = null, long? seed = null, string? detail = null, string? version = null, SongSettings? settings = null)
+        long? ms = null, double? seconds = null, long? seed = null, string? detail = null, string? version = null, SongSettings? settings = null, string? genre = null)
     {
         var when = at ?? Now;
-        return _store.Write(new StoredEvent(when, EventStore.Day(when), visitor, name, ms, null, seconds, seed, detail, version, settings));
+        return _store.Write(new StoredEvent(when, EventStore.Day(when), visitor, name, ms, null, seconds, seed, detail, version, settings, genre));
     }
 
     [Test]
@@ -45,6 +45,37 @@ public sealed class EventStoreTest : IDisposable
         await Assert.That(rows.GetBoolean(2)).IsEqualTo(settings.Unconventionality.IsGiven);
         await Assert.That(rows.Read()).IsTrue();
         await Assert.That(rows.IsDBNull(0) && rows.IsDBNull(1) && rows.IsDBNull(2)).IsTrue();
+    }
+
+    [Test]
+    public async Task ASongsGenre_IsKept_EvenInAFileFromBeforeGenres()
+    {
+        // a file whose events' table has every column but the genre, as the server's before genres made it
+        var directory = Path.Combine(_directory, "before");
+        Directory.CreateDirectory(directory);
+        using (var connection = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={Path.Combine(directory, EventStore.FileName)}"))
+        {
+            connection.Open();
+            using var making = connection.CreateCommand();
+            making.CommandText = """
+                CREATE TABLE events (id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL, day TEXT NOT NULL, visitor TEXT NOT NULL,
+                    name TEXT NOT NULL, ms INTEGER NULL, bytes INTEGER NULL, seconds REAL NULL, seed INTEGER NULL, detail TEXT NULL,
+                    version TEXT NULL, settings TEXT NULL, unconventionality INTEGER NULL, given INTEGER NULL, identity TEXT NULL)
+                """;
+            making.ExecuteNonQuery();
+        }
+
+        var store = EventStore.Create(directory);
+        await Assert.That(store.Write(new StoredEvent(Now, EventStore.Day(Now), "someone", EventNames.Rated, null, null, null, 5, "none>up", "0.7.004", null, "rock"))).IsTrue();
+        Write(EventNames.Rated, seed: 6, detail: "none>up", genre: "AbC123xyz09");
+
+        foreach (var (kept, genre) in new[] { (store, "rock"), (_store, "AbC123xyz09") })
+        {
+            using var connection = kept.OpenForReading();
+            using var reading = connection.CreateCommand();
+            reading.CommandText = "SELECT genre FROM events";
+            await Assert.That(reading.ExecuteScalar()).IsEqualTo(genre);
+        }
     }
 
     [Test]
@@ -222,8 +253,8 @@ public sealed class EventStoreTest : IDisposable
         try
         {
             var store = EventStore.Create(directory, 7);
-            store.Write(new StoredEvent(Now.AddDays(-8), EventStore.Day(Now.AddDays(-8)), "old", EventNames.PageOpen, null, null, null, null, null, null, null));
-            store.Write(new StoredEvent(Now.AddDays(-6), EventStore.Day(Now.AddDays(-6)), "recent", EventNames.PageOpen, null, null, null, null, null, null, null));
+            store.Write(new StoredEvent(Now.AddDays(-8), EventStore.Day(Now.AddDays(-8)), "old", EventNames.PageOpen, null, null, null, null, null, null, null, null));
+            store.Write(new StoredEvent(Now.AddDays(-6), EventStore.Day(Now.AddDays(-6)), "recent", EventNames.PageOpen, null, null, null, null, null, null, null, null));
 
             await Assert.That(store.RetentionDays).IsEqualTo(7);
             await Assert.That(store.Prune(Now)).IsEqualTo(1);

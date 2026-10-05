@@ -104,7 +104,8 @@ public sealed class EventStore
                 settings          TEXT    NULL,
                 unconventionality INTEGER NULL,
                 given             INTEGER NULL,
-                identity          TEXT    NULL
+                identity          TEXT    NULL,
+                genre             TEXT    NULL
             );
 
             CREATE INDEX IF NOT EXISTS events_day ON events (day);
@@ -114,6 +115,19 @@ public sealed class EventStore
             """;
 
         command.ExecuteNonQuery();
+
+        // the columns that came later than the table, which a file from before them is given: the song's genre
+        foreach (var (column, type) in new[] { ("genre", "TEXT") })
+        {
+            using var columns = connection.CreateCommand();
+            columns.CommandText = "SELECT COUNT(*) FROM pragma_table_info('events') WHERE name = $column";
+            columns.Parameters.AddWithValue("$column", column);
+            if (Convert.ToInt64(columns.ExecuteScalar()) != 0) continue;
+
+            using var adding = connection.CreateCommand();
+            adding.CommandText = $"ALTER TABLE events ADD COLUMN {column} {type} NULL";
+            adding.ExecuteNonQuery();
+        }
 
         // what the server measured of every song asked of it, which is nothing about who asked
         using var songs = connection.CreateCommand();
@@ -161,8 +175,8 @@ public sealed class EventStore
 
             using var writing = connection.CreateCommand();
             writing.CommandText = """
-                INSERT INTO events (at, day, visitor, name, ms, bytes, seconds, seed, detail, version, settings, unconventionality, given, identity)
-                VALUES ($at, $day, $visitor, $name, $ms, $bytes, $seconds, $seed, $detail, $version, $settings, $unconventionality, $given, $identity)
+                INSERT INTO events (at, day, visitor, name, ms, bytes, seconds, seed, detail, version, settings, unconventionality, given, identity, genre)
+                VALUES ($at, $day, $visitor, $name, $ms, $bytes, $seconds, $seed, $detail, $version, $settings, $unconventionality, $given, $identity, $genre)
                 """;
 
             writing.Parameters.AddWithValue("$at", stored.At.UtcDateTime.ToString("O"));
@@ -179,6 +193,7 @@ public sealed class EventStore
             writing.Parameters.AddWithValue("$unconventionality", (object?)stored.Settings?.Unconventionality.Value ?? DBNull.Value);
             writing.Parameters.AddWithValue("$given", (object?)stored.Settings?.Unconventionality.IsGiven ?? DBNull.Value);
             writing.Parameters.AddWithValue("$identity", (object?)stored.Settings?.Identity ?? DBNull.Value);
+            writing.Parameters.AddWithValue("$genre", (object?)stored.Genre ?? DBNull.Value);
 
             writing.ExecuteNonQuery();
             return true;

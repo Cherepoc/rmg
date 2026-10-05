@@ -40,7 +40,8 @@ public static class AnalyticsEndpoints
                 request.Seed is null ? null : Base62.ToSeed(request.Seed) is { } seed ? unchecked((long)seed) : null,
                 Shorten(request.Detail),
                 SongsVersion.IsNumber(request.Version) ? request.Version : null,
-                SongSettings.Parse(request.Settings)
+                SongSettings.Parse(request.Settings),
+                request.Genre is { Length: > 0 and <= Genres.GenreStore.KeyLength } genre && genre.All(Base62.Digits.Contains) ? genre : null
             ));
 
             // always the same answer, whether it was kept or not: a caller has no business knowing
