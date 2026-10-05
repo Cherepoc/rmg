@@ -274,10 +274,6 @@ a picker and an editor on the page, every choice a graph of what the songs draw 
 (`genre-tune.js`); a genre kept on the server by an 11-character key of its canonical form (`GenreStore`), which
 a link carries. What is left:
 
-- **A genre's effects** (P2, small): the chances of a vibrato, bends, a chorus, a swell, a tremolo, an echo and a sweep
-  (Expression), a song's drawn by its sound facet, a genre's to lean, as the swing's chances are.
-  Its own report of the effects' shares by preset, and the presets' (reggae's echo, the blues' bends, ambient's swell)
-  tuned by it.
 - **Sections of several phrases: the 12-bar blues and its kin** (P2, a plan in steps). A section's pattern is a
   phrase of four bars now (Progressions.BarCount, Meter.PatternBarCount), its harmony a four-bar cycle. The rule: a
   section's progression is P phrases of four bars, P drawn, one as now, two (an 8-bar), three (the 12-bar), four (a
