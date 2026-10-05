@@ -23,8 +23,13 @@ export function presetById(id) {
 
 /** Whether a name is a preset's, whatever its case and spacing, which no genre of one's own is saved under. */
 export function isPresetName(name) {
+    return PRESETS.some((preset) => sameName(preset.name, name));
+}
+
+/** Whether two genres' names are one, whatever their case and spacing, as no two genres are named. */
+export function sameName(first, second) {
     const plain = (x) => x.trim().replace(/\s+/g, " ").toLowerCase();
-    return PRESETS.some((preset) => plain(preset.name) === plain(name));
+    return plain(first) === plain(second);
 }
 
 /** A genre as the settings carry it, a copy of the one given. */

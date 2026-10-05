@@ -339,6 +339,49 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task OnesOwnGenre_IsRenamedInItsPlace_ADeletionAsked_AndNamesOneWhateverTheirCase()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var accept = true;
+        var asked = new List<string>();
+        page.Page.Dialog += (_, prompt) =>
+        {
+            asked.Add(prompt.Message);
+            _ = prompt.Type == "prompt" ? prompt.AcceptAsync("Other") : accept ? prompt.AcceptAsync() : prompt.DismissAsync();
+        };
+        var name = dialog.Locator("input[aria-label='Genre name']");
+        var save = dialog.GetByRole(AriaRole.Button, new() { Name = "Save", Exact = true });
+        var yours = page.Page.Locator("select[aria-label='Genre'] optgroup[label='Yours'] option");
+        await name.FillAsync("First");
+        await save.ClickAsync();
+        await name.FillAsync("Second");
+        await save.ClickAsync();
+        await page.Until(async () => await yours.CountAsync() == 1, "the second saved");
+
+        // renamed in its place, the first let go of, nothing asked
+        await name.FillAsync("Third");
+        await save.ClickAsync();
+        await page.Until(async () => (await yours.AllTextContentsAsync()).SequenceEqual(["Third"]), "renamed in its place");
+        await Assert.That(asked).IsEmpty();
+
+        // another saved as "Other", then this one renamed to "other": one of one's own, whatever its case, asked about
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Save as…" }).ClickAsync();
+        await page.Until(() => Task.FromResult(asked.Count == 1), "the name asked for");
+        await page.Until(async () => await yours.CountAsync() == 2, "the copy saved");
+        accept = false;
+        await name.FillAsync("third");
+        await save.ClickAsync();
+        await Assert.That(asked.Last()).IsEqualTo("Replace your genre third?");
+
+        // a deletion asked about, and declined, nothing let go of
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Delete" }).ClickAsync();
+        await Assert.That(asked.Last()).StartsWith("Delete your genre ");
+        await Assert.That(await yours.CountAsync()).IsEqualTo(2);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task TheEditor_AndTheWindowOverIt_NeverScrollSideways()
     {
         await using var page = await SongPage.Open(site, "?song=1");

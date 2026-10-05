@@ -1,6 +1,6 @@
 import { MAX_GENRE_NAME_BYTES } from "./settings.js";
 import { isShowingGenrePrinciples, setShowingGenrePrinciples } from "./storage.js";
-import { endsOf, isPresetName, ownOf } from "./genres.js";
+import { endsOf, isPresetName, ownOf, sameName } from "./genres.js";
 import { createGenreTune } from "./genre-tune.js";
 import { byMiddle, COLOURS, drawBand, drawLines, drawShares, endsInWords, labelOf, rangeOf, svg } from "./genre-charts.js";
 
@@ -42,6 +42,9 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     let waiting = null;
     // the draft as it was opened, played or saved last, which closing the editor loses nothing of
     let kept = "";
+    // the name of one's own genre the draft is, which Save keeps it in place of and Delete lets go of; none for a draft of
+    // none, a preset or a song's
+    let origin = null;
 
     const dialog = document.createElement("dialog");
     dialog.className = "genre-dialog";
@@ -439,7 +442,15 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     const imported = button("Import JSON", "Open a genre saved as a JSON file", () => file.click());
 
     const play = button("Play", "Ask for the song again in this genre", () => keep(onPlay), "primary");
-    const save = button("Save", "Keep this genre among yours, and play it", () => keep(onSave));
+    // in place of the genre the draft was opened from, renamed as it now is; another of one's own under its new name
+    // replaced only once that is confirmed
+    const save = button("Save", "Keep this genre among yours, and play it", () => {
+        const named = draft.name.trim();
+        if (isOwn(named) && !(origin !== null && sameName(origin, named)) && !confirm(`Replace your genre ${named}?`)) return;
+        keep((genre) => onSave(genre, origin));
+        origin = named;
+        showProblem();
+    });
 
     /** The draft played or saved, as the page says, and kept so. */
     function keep(action) {
@@ -456,11 +467,15 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         name.value = asked;
         showProblem();
         if (isPresetName(asked) || (isOwn(asked) && !confirm(`Replace your genre ${asked}?`))) return;
-        keep(onSave);
+        keep((genre) => onSave(genre, null));
+        origin = asked;
         showProblem();
     });
 
-    const remove = button("Delete", "Let go of this genre of yours", () => onDelete(draft.name.trim()));
+    // the genre the draft was opened from, which nothing brings back, once that is confirmed
+    const remove = button("Delete", "Let go of this genre of yours", () => {
+        if (confirm(`Delete your genre ${origin}? Nothing brings it back.`)) onDelete(origin);
+    });
     const footer = document.createElement("footer");
     footer.append(problem, file, imported, exported, remove, saveAs, save, play);
     dialog.append(header, body, footer, tune.element);
@@ -537,7 +552,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         problem.hidden = said === null;
         play.disabled = saveAs.disabled = text !== null;
         save.disabled = said !== null || draft.name.trim() === "";
-        remove.disabled = !isOwn(draft.name.trim());
+        remove.disabled = origin === null;
     }
 
     return {
@@ -545,6 +560,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         /** Opens the editor on a genre, a copy of it the draft, by the choices the server lists; its sections open where it names a choice. */
         open(genre, choiceList) {
             choices = new Map(choiceList.map((x) => [x.name, x]));
+            origin = isOwn(genre.name) ? genre.name.trim() : null;
             load(genre);
             kept = asKept();
             dialog.showModal();

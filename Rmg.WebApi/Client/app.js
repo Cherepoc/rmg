@@ -46,7 +46,7 @@ import {
     toStep,
 } from "./settings.js";
 import { applyReport, defaultSettings, givenOnly, isEveryPartOff, noGenre, requestFor } from "./song-settings.js";
-import { asGenre, hasAGenre, isSameGenre, presetById, presetOf, PRESETS } from "./genres.js";
+import { asGenre, hasAGenre, isSameGenre, presetById, presetOf, PRESETS, sameName } from "./genres.js";
 import { createGenreEditor } from "./genre-editor.js";
 import { since, tell, track } from "./tally.js";
 
@@ -1625,18 +1625,24 @@ let genreChoices = null;
 /** The editor of a genre of one's own (genre-editor.js), its draft played, kept here or let go of. */
 const genreEditor = createGenreEditor({
     onPlay: (genre) => genre !== null && useGenre(genre),
-    onSave: (genre) => {
+    // in place of the genre it was opened from, renamed or not, so that the list keeps its order; any other of its name
+    // let go of, which the editor has asked about; one opened from none added at the end
+    onSave: (genre, replacing) => {
         if (genre === null) return;
-        const own = recallGenres().filter((x) => x.name !== genre.name);
-        keepGenres([...own, genre]);
+        const own = recallGenres();
+        const at = replacing === null ? -1 : own.findIndex((x) => sameName(x.name, replacing));
+        const kept = own.filter((x, i) => i !== at && !sameName(x.name, genre.name));
+        const place = at === -1 ? kept.length : own.slice(0, at).filter((x) => !sameName(x.name, genre.name)).length;
+        kept.splice(place, 0, genre);
+        keepGenres(kept);
         useGenre(genre);
     },
     onDelete: (name) => {
-        keepGenres(recallGenres().filter((x) => x.name !== name));
+        keepGenres(recallGenres().filter((x) => !sameName(x.name, name)));
         genreEditor.close();
         showGenre();
     },
-    isOwn: (name) => recallGenres().some((x) => x.name === name),
+    isOwn: (name) => recallGenres().some((x) => sameName(x.name, name)),
 });
 document.body.append(genreEditor.element);
 
