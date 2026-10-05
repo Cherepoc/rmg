@@ -511,7 +511,8 @@ public static class SongGenerator
             energies,
             soloists,
             track => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.PartSound), track)),
-            (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Expression), section), track))
+            (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Expression), section), track)),
+            genre
         );
 
         // the drum kit's sound, the standard kit's, or one of a genre's pool of them, from a stream of its own

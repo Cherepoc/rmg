@@ -258,6 +258,7 @@ internal static class Expression
     /// <param name="soloists">Every part's soloist, whose leans its solos' notes play by, as intense as the solo is there.</param>
     /// <param name="partStreams">A part's sequence for the whole song, by its track.</param>
     /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
+    /// <param name="genre">The genre, whose chances of the gentle effects and pool of the strong ones are the song's where it names them.</param>
     public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Apply(
         ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> notes,
         ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
@@ -268,15 +269,18 @@ internal static class Expression
         IReadOnlyList<double> energies,
         IReadOnlyDictionary<TrackRole, Soloist> soloists,
         Func<int, IGenerationContext> partStreams,
-        Func<int, int, IGenerationContext> streams
+        Func<int, int, IGenerationContext> streams,
+        Genre genre
     )
     {
-        // which effects the song plays at all
-        var songVibrato = songStream.TestProbability(SongVibratoChance.At(songSound));
-        var songChorus = songStream.TestProbability(SongChorusChance.At(songSound));
-        var songSwell = songStream.TestProbability(SongSwellChance.At(songSound));
-        var songBends = songStream.TestProbability(SongBendChance.At(songSound));
-        var strong = songStream.Pick(ByConvention.Weigh(StrongEffects, songSound));
+        // which effects the song plays at all, as a genre has them where it names them
+        double Chance(ByConvention own, string option) => own.At(songSound, genre.Chance(GenreChoices.Effects, option));
+        var songVibrato = songStream.TestProbability(Chance(SongVibratoChance, "vibrato"));
+        var songChorus = songStream.TestProbability(Chance(SongChorusChance, "chorus"));
+        var songSwell = songStream.TestProbability(Chance(SongSwellChance, "swell"));
+        var songBends = songStream.TestProbability(Chance(SongBendChance, "bends"));
+        var strong = songStream.Pick(ByConvention.Weigh(StrongEffects, songSound, genre.Pool<StrongEffect>(GenreChoices.StrongEffect, x => GenreChoices.Name(x.ToString()))));
+        StateTrace.Record(TracePoints.SongEffects, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{strong}", new SongEffects(songVibrato, songChorus, songSwell, songBends, strong));
 
         // and the one part that plays the strong effect, the likelier one it suits, if any part may
         var mayCarry = notes
@@ -423,3 +427,6 @@ internal static class Expression
         return result.ToImmutable();
     }
 }
+
+/// <summary>The effects a song plays at all: the gentle ones, each its own, and the strong one, or none.</summary>
+internal sealed record SongEffects(bool Vibrato, bool Chorus, bool Swell, bool Bends, StrongEffect Strong);

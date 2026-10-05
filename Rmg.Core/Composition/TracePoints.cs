@@ -3,6 +3,9 @@ namespace Rmg.Core.Composition;
 /// <summary>The points of a song's generation that a <see cref="Events.StateTrace" /> records, by name.</summary>
 internal static class TracePoints
 {
+    /// <summary>The effects a song plays at all (a <see cref="SongEffects" />).</summary>
+    public const string SongEffects = "Song effects";
+
     /// <summary>A section's energy, with its pull (<see cref="SectionEnergyTrace" />).</summary>
     public const string SectionEnergy = "Section energy";
 

@@ -72,6 +72,28 @@ public static class GenreChoices
     /// </summary>
     public static GenreChoice RootMotions { get; } = Values("rootMotion", "Root motions", Progressions.Motions);
 
+    /// <summary>
+    ///     The gentle effects a song plays at all, each its chance as the songs have it by their sound (<see cref="Expression" />):
+    ///     a vibrato, a chorus, a held chord's swell and a line's bends.
+    /// </summary>
+    public static GenreChoice Effects { get; } = Chances("effects", "Effects",
+    [
+        ("vibrato", "A vibrato", Expression.SongVibratoChance),
+        ("chorus", "A chorus", Expression.SongChorusChance),
+        ("swell", "A swell", Expression.SongSwellChance),
+        ("bends", "Bends", Expression.SongBendChance)
+    ]);
+
+    /// <summary>The strong effect a song plays on one part, or none: an echo, a tremolo or a sweep (<see cref="Expression.StrongEffects" />).</summary>
+    public static GenreChoice StrongEffect { get; } = Pool("strongEffect", "Strong effect",
+        Expression.StrongEffects.Select(x => (Name(x.Effect.ToString()), x.Effect switch
+        {
+            Composition.StrongEffect.Tremolo => "A tremolo",
+            Composition.StrongEffect.Echo => "An echo",
+            Composition.StrongEffect.Sweep => "A sweep",
+            _ => "None"
+        }, x.Weight)));
+
     /// <summary>The feel the song plays in, straight, a tuplet or a grouping (<see cref="Feels" />).</summary>
     public static GenreChoice Feel { get; } = Pool("feel", "Feel", Feels.Weights.Select(x => (Feels.NameOf(x.Feel), Capitalised(Feels.Label(x.Feel)), x.Weight)));
 
@@ -212,7 +234,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, Effects, StrongEffect,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

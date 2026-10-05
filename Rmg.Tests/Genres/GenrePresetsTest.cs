@@ -48,6 +48,25 @@ public sealed class GenrePresetsReportTest
         await Task.CompletedTask;
     }
 
+    /// <summary>The share of songs playing each effect at all, the gentle ones and the strong: none's and every preset's.</summary>
+    [Test]
+    [Explicit]
+    public async Task EveryPreset_Effects()
+    {
+        void Print(string name, IReadOnlyList<CorpusSong> songs)
+        {
+            var effects = songs.Select(x => (Rmg.Core.Composition.SongEffects)x.Trace.Single(t => t.Point == Rmg.Core.Composition.TracePoints.SongEffects).Value!).ToArray();
+            string Share(Func<Rmg.Core.Composition.SongEffects, bool> plays) => $"{100.0 * effects.Count(plays) / effects.Length:0}%";
+            Console.WriteLine($"{name}: vibrato {Share(x => x.Vibrato)}, chorus {Share(x => x.Chorus)}, swell {Share(x => x.Swell)}, bends {Share(x => x.Bends)}; "
+                              + string.Join(", ", effects.GroupBy(x => x.Strong).OrderBy(x => x.Key).Select(x => $"{x.Key} {100.0 * x.Count() / effects.Length:0}%")));
+        }
+
+        Print("none", TestCorpus.Range(Count));
+        foreach (var preset in GenrePresets.All)
+            Print(preset.Name, TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset)))));
+        await Task.CompletedTask;
+    }
+
     /// <summary>How the chord roots move, of every move between a section's chords: none's and every preset's, the four commonest.</summary>
     [Test]
     [Explicit]
