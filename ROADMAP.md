@@ -9,10 +9,9 @@ is removed once it is built.
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
 ratings by conventionality once enough are in, alongside, continuously and never as a gate.
 
-**Later** (P2), roughly in this order: a chord's own scale, in steps (see *Scales and chords*); the hook quoted
-(see *Form and sections*), alongside it; the chorus's
-melody above the verse's; the blues' restated line (see *Genres*); the ratings report (see *Listening data*), once the
-dashboard shows songs rated enough; listening to the genres' presets (see *Genres*).
+**Later** (P2), roughly in this order: the chorus's melody above the verse's (see *Form and sections*); the blues'
+restated line (see *Genres*); the ratings report (see *Listening data*), once the dashboard shows songs rated enough;
+listening to the genres' presets (see *Genres*).
 
 **When the need shows** (P3), each by what listening says, roughly in this order: timing by role, then a genre's
 pocket; the tempo leaning by the energy; scales of other sizes; legato slides; a motif developed further; the
