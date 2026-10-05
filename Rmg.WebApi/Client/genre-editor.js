@@ -367,6 +367,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         "Click a graph to change its choice: the options the genre keeps, and each one's amounts in the plainest, middling and experimental songs.",
         "An option left out never plays. At 0 in the plainest and middling songs it plays only in the experimental ones. A chance at 100% everywhere, or the only option kept, plays in every song.",
         "A weight is a share among the options kept; a chance is out of 100 songs.",
+        "A part the lineup leaves out, or keeps at 0 everywhere, never plays, so it has no tab under Parts.",
     ].map((text) => {
         const item = document.createElement("li");
         item.textContent = text;
