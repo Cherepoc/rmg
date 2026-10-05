@@ -100,16 +100,20 @@ internal static class ExpressionRender
             }
 
 
-            // a swell and a tremolo, as the note's expression, back to full where it ends
+            // a swell, a tremolo and a pump, as the note's expression, back to full where it ends
             var swells = state.GetStateValue(CompositionStateKinds.Swell) == 1;
             var tremolo = state.GetStateValue(CompositionStateKinds.Tremolo);
-            if (swells || tremolo > 0)
+            var pump = state.GetStateValue(CompositionStateKinds.Pump);
+            if (swells || tremolo > 0 || pump > 0)
             {
                 for (var t = 0.0; t < duration - 1e-9; t += Step / 2)
                 {
                     var swell = swells ? Math.Min(1, 0.25 + 0.75 * t / Math.Min(1, duration / 2)) : 1;
                     var shake = 1 - tremolo / 100.0 * (0.5 + 0.5 * Math.Sin(2 * Math.PI * t / 0.25));
-                    expression.Add((start + t, swell * shake));
+                    // ducked on the beat and swelling back over it
+                    var beat = (start + t) % 1;
+                    var duck = 1 - pump / 100.0 * Math.Pow(1 - beat, 2);
+                    expression.Add((start + t, swell * shake * duck));
                 }
 
                 expression.Add((end, 1));

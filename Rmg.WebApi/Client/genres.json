@@ -96,7 +96,7 @@
       "loop": { "sections": [80, 80, 60] },
       "bass": { "leading": 15 },
       "bassLanding": { "root": 100, "free": [0, 10, 40] },
-      "strongEffect": { "none": [100, 70, 30], "sweep": [20, 40, 100], "echo": [10, 20, 40] },
+      "strongEffect": { "none": [60, 40, 20], "pump": [100, 100, 80], "sweep": [20, 40, 100], "echo": [10, 20, 40] },
       "pan": { "pad": 80 },
       "formChances": { "forms": [90, 50, 10] },
       "instrument": {

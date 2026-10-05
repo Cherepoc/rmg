@@ -162,13 +162,14 @@ public static class GenreChoices
         ("bends", "Bends", Expression.SongBendChance)
     ]);
 
-    /// <summary>The strong effect a song plays on one part, or none: an echo, a tremolo or a sweep (<see cref="Expression.StrongEffects" />).</summary>
+    /// <summary>The strong effect a song plays on one part, or none: an echo, a tremolo or a sweep, or a pump on its pads, chords and bass (<see cref="Expression.StrongEffects" />).</summary>
     public static GenreChoice StrongEffect { get; } = Pool("strongEffect", "Strong effect",
         Expression.StrongEffects.Select(x => (Name(x.Effect.ToString()), x.Effect switch
         {
             Composition.StrongEffect.Tremolo => "A tremolo",
             Composition.StrongEffect.Echo => "An echo",
             Composition.StrongEffect.Sweep => "A sweep",
+            Composition.StrongEffect.Pump => "A pump",
             _ => "None"
         }, x.Weight)));
 

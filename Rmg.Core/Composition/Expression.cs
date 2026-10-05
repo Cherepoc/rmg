@@ -38,7 +38,10 @@ public enum StrongEffect
     None,
     Tremolo,
     Echo,
-    Sweep
+    Sweep,
+
+    /// <summary>The pads, the chords and the bass ducking on every beat and swelling back, as a kick four on the floor pumps them.</summary>
+    Pump
 }
 
 /// <summary>
@@ -72,6 +75,7 @@ internal static class Expression
         StrongEffect.Echo => role == TrackRole.Melody,
         StrongEffect.Tremolo => program is 4 or 5 or >= 16 and <= 20 or >= 24 and <= 31,
         StrongEffect.Sweep => role == TrackRole.Pad || program is >= 16 and <= 20 or >= 80 and <= 95,
+        StrongEffect.Pump => role is TrackRole.Pad or TrackRole.Chords or TrackRole.Bass or TrackRole.Rhythm,
         _ => false
     };
 
@@ -93,8 +97,13 @@ internal static class Expression
         (StrongEffect.None, new ByConvention(1, 0.75, 0)),
         (StrongEffect.Echo, new ByConvention(0, 0.12, 1)),
         (StrongEffect.Tremolo, new ByConvention(0, 0.08, 0.8)),
-        (StrongEffect.Sweep, new ByConvention(0, 0.05, 0.6))
+        (StrongEffect.Sweep, new ByConvention(0, 0.05, 0.6)),
+        // a genre's, an electronic one's, which the songs never play
+        (StrongEffect.Pump, new ByConvention(0, 0, 0))
     ];
+
+    /// <summary>How deep a pump ducks a part on the beat, in percent of its expression, swelling back over the beat.</summary>
+    public const int PumpDepth = 60;
 
     /// <summary>
     ///     How much likelier a part the song's strong effect suits is to be the one that plays it than any other that may:
@@ -324,6 +333,8 @@ internal static class Expression
             var tremolo = carries && strong == StrongEffect.Tremolo ? tremoloDepth : 0;
             var sweeps = carries && strong == StrongEffect.Sweep ? sweepDepth : 0;
             var echoes = carries && strong == StrongEffect.Echo;
+            // a pump every part's it suits, not one's, as a kick ducks the whole of a mix under it
+            var pumps = strong == StrongEffect.Pump && Suits(strong, role, program);
             // an echo repeats the notes as they are played, so a bent or wavering one would smear: the part that echoes plays
             // them straight
             vibrates &= !echoes;
@@ -412,6 +423,8 @@ internal static class Expression
                         state = state.With(CompositionStateKinds.Swell, 1);
                     if (role != TrackRole.Drum)
                         state = state.With(CompositionStateKinds.Tremolo, tremolo).With(CompositionStateKinds.AutoPan, sweeps);
+                    if (pumps)
+                        state = state.With(CompositionStateKinds.Pump, PumpDepth);
                     if (echoes && isLine)
                         state = state.With(CompositionStateKinds.Echo, (int)Math.Round(delay * 4));
                     states[i] = state;

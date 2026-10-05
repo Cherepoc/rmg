@@ -66,6 +66,9 @@ internal static class CompositionStateKinds
     public static StateKind<int> BendDepth { get; } = StateKinds.CreateAdditive<int>(Prefix + "BendDepth", StateScope.Render);
     public static StateKind<int> Swell { get; } = StateKinds.CreateAdditive<int>(Prefix + "Swell", StateScope.Render);
     public static StateKind<int> Tremolo { get; } = StateKinds.CreateAdditive<int>(Prefix + "Tremolo", StateScope.Render);
+
+    // how deep a pump ducks the note on every beat, in percent of its expression, 0 for none (Expression.PumpDepth)
+    public static StateKind<int> Pump { get; } = StateKinds.CreateAdditive<int>(Prefix + "Pump", StateScope.Render);
     public static StateKind<int> AutoPan { get; } = StateKinds.CreateAdditive<int>(Prefix + "AutoPan", StateScope.Render);
     public static StateKind<int> Echo { get; } = StateKinds.CreateAdditive<int>(Prefix + "Echo", StateScope.Render);
     public static StateKind<int> Reverb { get; } = StateKinds.CreateAdditive<int>(Prefix + "Reverb", StateScope.Render);

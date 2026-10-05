@@ -482,8 +482,11 @@ a link carries. What is left:
   4. Done: the drums' fills by genre (`GenreChoices.Fills`), their spans leaning to longer ones or to none as a line's
      weight leans them, by up to six times the odds: fills a minute Hip-hop 1.4 (2.3), Electronic 1.9 (3.3), Ambient
      0.4, Rock 3.9 (3.3), Funk 3.3 (2.9).
-  5. Sidechain pumping: the pads, the chords and the bass dipping on every kick, a strong effect beside the tremolo,
-     the echo and the sweep, played as expression; Electronic's pool much; on the kick wherever it falls.
+  5. Done: a pump (`StrongEffect.Pump`), the pads, the chords, the bass and the rhythm part ducked 60% on every beat
+     and swelling back over it as their expression, every part it suits rather than one; a genre's, the songs never;
+     Electronic's songs 61%. On the beat, where a four on the floor's kick is (Electronic's in 78% of its bars), rather
+     than on the kick itself, which the rendering of a part does not see: on the kick wherever it falls, should a
+     pumping genre's kick leave the beat.
   6. Builds and drops: a section before a bigger one building (the snare and the hats thickening, the sweep rising),
      the band out a beat or a bar before the drop; the lift cues', the runs' and a stopped ending's pieces, placed anew.
   7. Electronic split into House, Techno and Synthwave (P3), once the steps above tell them apart.
