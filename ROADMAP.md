@@ -13,7 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: an octave bass; a push by the
+**When the need shows** (P3), each by what listening says, in this order: a push by the
 whole band; legato as an articulation; stretched voicings; the melody's range by genre; the fills' sounds by
 convention; a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
 and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
@@ -510,8 +510,11 @@ a link carries. What is left:
      (`GenreChoices.Bass`), and a pool of its landings (`GenreChoices.BassLanding`). A half step into a change: Jazz
      36% (30% unleaned), Blues 28% (24%), Reggae 12% (20%), Hip-hop 8% (11%); most of a bass's steps are its line's,
      so the lean moves a few points. Its landings on the root firmer for Electronic, Reggae and Hip-hop; a walking
-     bass lands on the root, so Jazz keeps its own. Not done: a root and fifth figure within the bar, a figure of its own
-     with the octave bass (P3), and Jazz's walking quarters, as its rhythm settings have them.
+     bass lands on the root, so Jazz keeps its own. Not done: a root and fifth figure within the bar, and Jazz's walking
+     quarters, as its rhythm settings have them. The octave bass done since (`GenreChoices.OctaveBass`, the Articulation
+     stage): a section's bass off the beat playing the note before an octave away, up or down as its range allows, but a
+     note leading into a chord and a chugging section; songs (0, 0.05, 0.05) by the groove facet; bass notes an octave
+     from the one before House 13%, Synthwave 11%, Funk 4% (its chugs muting instead), 1-3% elsewhere.
   2b. Done: a riff in power chords (`GenreChoices.Riff`, `CompositionStateKinds.PowerChord`): a section's riff playing
      every note with its perfect fifth over it whatever the scale and its octave where the range has it (`Realizer`),
      and no twin; a genre's, the songs never: Rock's riff sections 71%, Blues' 29%. 86% of such a riff's notes carry

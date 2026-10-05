@@ -77,6 +77,9 @@ internal sealed class SectionGenerator
     /// <summary>The chance a section's guitars and picked bass chug, their repeats palm-muted, a genre's that the songs never play (<see cref="GenreChoices.Riff" />).</summary>
     public static Probabilities.ByConvention ChugChance { get; } = new(0, 0, 0);
 
+    /// <summary>The chance a section's bass plays in octaves, its notes off the beat the note before an octave up, as a disco or funk bass does, by the groove facet: rare in the songs.</summary>
+    public static Probabilities.ByConvention OctaveBassChance { get; } = new(0, 0.05, 0.05);
+
     /// <summary>The chance a section's riff plays in power chords, a genre's that the songs never play (<see cref="GenreChoices.Riff" />).</summary>
     public static Probabilities.ByConvention PowerChordChance { get; } = new(0, 0, 0);
 
@@ -291,6 +294,9 @@ internal sealed class SectionGenerator
         // its guitars' and its picked bass's repeats palm-muted, a genre's, which the songs never play, from a sequence of its own
         var chugs = Stream(sectionId, SectionStream.Chugs).TestProbability(ChugChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "chugs")));
         StateTrace.Record(TracePoints.Chugs, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{chugs}", chugs);
+        // the bass in octaves now and then, a genre's the more, from a sequence of its own
+        var octaveBass = Stream(sectionId, SectionStream.OctaveBass).TestProbability(OctaveBassChance.At(facets[Facet.Groove], _genre.Chance(GenreChoices.OctaveBass, "sections")));
+        StateTrace.Record(TracePoints.OctaveBass, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{octaveBass}", octaveBass);
         // its melody on a hook now and then, a chorus by its role or every section by a genre's, from a sequence of its own
         var hooks = Stream(sectionId, SectionStream.Hook).TestProbability(MelodyLayers.HookChanceOf(plan.Role).At(facets[Facet.Melody], _genre.Chance(GenreChoices.Hook, "sections")));
         StateTrace.Record(TracePoints.MelodyHook, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{hooks}", hooks);
@@ -324,6 +330,7 @@ internal sealed class SectionGenerator
             meter,
             powerChords,
             chugs,
+            octaveBass,
             _genre
         );
         // every part, which each appearance leaves out of it what it rests
@@ -860,6 +867,7 @@ internal sealed record GeneratedSection(
     Meter Meter,
     bool RiffPowerChords,
     bool Chugs,
+    bool OctaveBass,
     Genre Genre
 )
 {
@@ -1027,5 +1035,6 @@ internal enum SectionStream
     Chugs = 36,
     Turnaround = 37,
     PassingChords = 38,
-    Planing = 39
+    Planing = 39,
+    OctaveBass = 40
 }

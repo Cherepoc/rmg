@@ -403,7 +403,8 @@ internal static class SongStages
     ///     The notes' articulations: in a section that chugs, a guitar's or a picked bass's note that repeats the one before
     ///     on a weak beat palm-muted, its accents and its moves ringing, as a chug riff mutes its eighths on the root and
     ///     rings its accent; the riff's, the rhythm part's and the bass's, by their instruments. And every chord a guitar
-    ///     plays strummed, down on a beat's first half and up on its second, as quickly as the song strums.
+    ///     plays strummed, down on a beat's first half and up on its second, as quickly as the song strums; and a bass in
+    ///     octaves, its notes off the beat the note before an octave away.
     /// </summary>
     internal static SongDraft Articulation(SongDecisions song, SongDraft draft)
     {
@@ -417,6 +418,7 @@ internal static class SongStages
             if (song.Tracks.Definitions[track] is not PitchInstrumentTrack part)
                 continue;
             var chugs = Chugs(part.Role, part.InstrumentCode);
+            var (bottom, top) = Realizer.GetRange(part);
             result[track] = EventTimeline.Create(timeline.Duration, timeline.Select((note, i) =>
             {
                 var state = note.Value.State;
@@ -425,6 +427,14 @@ internal static class SongStages
                 var weak = state.GetStateValue(CompositionStateKinds.BeatRank) > 0;
                 if (chugs && section >= 0 && song.Sections[section].Chugs && repeats && weak)
                     state = state.With(CompositionStateKinds.PalmMute, 1);
+                // a bass in octaves, a note off the beat the note before it an octave away, up where its range has it and down
+                // where not, as a disco or a funk bass alternates them; but one leading into the next chord, and a section that
+                // chugs, which mutes its repeats instead
+                var pitches = note.Value.Pitches;
+                var leads = i + 1 < timeline.Count && timeline[i + 1].Value.State.GetStateValue(StateKinds.ChordChange) != note.Value.State.GetStateValue(StateKinds.ChordChange);
+                if (part.Role == TrackRole.Bass && section >= 0 && song.Sections[section].OctaveBass && !song.Sections[section].Chugs && i > 0 && weak && !leads
+                    && timeline[i - 1].Value.Pitches is var before && (before.All(x => x + 12 <= top) || before.All(x => x - 12 >= bottom)))
+                    pitches = [..before.Select(x => before.All(y => y + 12 <= top) ? x + 12 : x - 12)];
                 var program = state.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : part.InstrumentCode;
                 if (note.Value.Pitches.Length > 1 && program is >= 24 and <= 31)
                 {
@@ -433,7 +443,7 @@ internal static class SongStages
                     state = state.With(CompositionStateKinds.Strum, note.Position % 1 < 0.5 - 1e-9 ? beats : -beats);
                 }
 
-                return state == note.Value.State ? note : (note.Value with { State = state }).ToTimelineItem(note.Position);
+                return state == note.Value.State && pitches == note.Value.Pitches ? note : (note.Value with { State = state, Pitches = pitches }).ToTimelineItem(note.Position);
             }));
         }
 

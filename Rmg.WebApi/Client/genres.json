@@ -100,6 +100,7 @@
     "name": "House",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, a pumping bass and pads, piano and electric piano chords now and then, a TR-808 or electronic kit, straight, 117 to 130, minor, sus and add9 chords, a drop into the chorus.",
     "choices": {
+      "octaveBass": { "sections": [25, 30, 30] },
       "keyChanges": {},
       "rests": { "drum": 70, "melody": 65, "pad": 35 },
       "tempo": { "from": [117, 117, 100], "to": [130, 130, 175] },
@@ -200,6 +201,7 @@
     "name": "Synthwave",
     "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
     "choices": {
+      "octaveBass": { "sections": [15, 20, 25] },
       "keyChanges": { "lastSection": [0, 20, 100], "sections": [0, 5, 100], "patterns": [0, 0, 100] },
       "rests": { "pad": 30 },
       "tempo": { "from": [85, 85, 70], "to": [118, 118, 150] },
@@ -360,6 +362,7 @@
     "name": "Funk",
     "description": "The hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and a muted guitar comping in 16ths, brass, sevenths and ninths, Dorian and Mixolydian, everything repeating.",
     "choices": {
+      "octaveBass": { "sections": [30, 40, 40] },
       "tempo": { "from": [95, 95, 85], "to": [120, 120, 135] },
       "meter": { "4/4": 100 },
       "scale": { "dorian": [100, 100, 70], "mixolydian": [100, 100, 70], "naturalMinor": [40, 40, 40], "phrygian": [0, 0, 20], "melodicMinor": [0, 0, 15] },

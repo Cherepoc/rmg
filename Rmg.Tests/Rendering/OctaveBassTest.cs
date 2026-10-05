@@ -1,0 +1,25 @@
+using Rmg.Core.Composition;
+using Rmg.Core.Songs;
+using Rmg.Tests.Genres;
+
+namespace Rmg.Tests.Rendering;
+
+/// <summary>An octave bass: a section's bass off the beat the note before an octave away, a genre's the more.</summary>
+public sealed class OctaveBassTest
+{
+    /// <summary>The share of a bass's notes an octave from the note before, in the songs given.</summary>
+    private static double Octaves(IEnumerable<CorpusSong> songs)
+    {
+        var notes = songs.Select(x => x.Song.Notes![SongTracks.BassTrack].ToArray()).ToArray();
+        return notes.Sum(bass => bass.Skip(1).Where((x, i) => Math.Abs(x.Value.Pitches[0] - bass[i].Value.Pitches[0]) == 12).Count()) / (double)notes.Sum(x => x.Length);
+    }
+
+    [Test]
+    public async Task AFunkBass_JumpsAnOctave_OftenerThanTheSongs()
+    {
+        var funk = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("funk")))).ToArray();
+        var songs = TestCorpus.Range(16).ToArray();
+
+        await Assert.That(Octaves(funk)).IsGreaterThan(Octaves(songs) * 2);
+    }
+}

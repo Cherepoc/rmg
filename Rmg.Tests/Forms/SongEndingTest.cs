@@ -166,6 +166,7 @@ public sealed class SongEndingTest
             Meter.FourFour,
             false,
             false,
+            false,
             Genre.None
         );
 

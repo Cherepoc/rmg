@@ -100,6 +100,7 @@ public sealed class GenreIdiomsReportTest
             ["sections the drums rest"] = Rests(TrackRole.Drum),
             ["sections the pad rests"] = Rests(TrackRole.Pad),
             ["changing key"] = ((ImmutableArray<KeyChange>)song.Trace.Single(x => x.Point == TracePoints.KeyChange).Value!).IsEmpty ? 0 : 1,
+            ["bass notes an octave from the one before"] = bass.Length > 1 ? bass.Skip(1).Select((x, i) => Math.Abs(x.Value.Pitches.Min() - bass[i].Value.Pitches.Min()) == 12 ? 1.0 : 0).Average() : double.NaN,
             ["lifts dropped"] = song.Trace.Count(x => x.Point == TracePoints.LiftCue) is var lifts and > 0 ? song.Trace.Count(x => x.Point == TracePoints.Drop) / (double)lifts : double.NaN,
             ["ending a fade"] = map.Ending.Kind == EndingKind.Fade ? 1 : 0,
             ["ending a button or a stop"] = map.Ending.Kind is EndingKind.Button or EndingKind.Stop ? 1 : 0,
