@@ -284,9 +284,8 @@ a link carries. What is left:
   a fill and a solo's turn keep their place; only the harmony and the section's length grow. Steps:
   1. Done: a phrase (Meter.PhraseBarCount) and a section's pattern (Meter.Phrases of them, one everywhere) told apart.
      A line's question and its answer are two plays of the pattern (LinePattern), which step 4 takes up.
-  2. **A progression over P phrases** (Progressions.Generate), the place rules above as weights on the roots a
-     phrase starts and ends on, leaning as the cadence's do, by the progression facet's strictness; P one drawing
-     exactly as now, so that the fingerprint holds.
+  2. Done: a progression over P phrases (Progressions.Generate, its place rules data); the phrases' ends home about 60%
+     of the time, the chord before an ending free, which the genre's lean of an ending may press, should listening ask.
   3. **P a genre's** (a pool, "Phrases a progression": 4, 8, 12, 16 bars), drawn a section from a stream of its own;
      the songs' own one alone, so that a song in no genre is as it was; a section's plays counted in phrases, so that
      a 12-bar plays once or twice where a 4-bar plays four times, and its length as near (SectionLength, SongLength).
