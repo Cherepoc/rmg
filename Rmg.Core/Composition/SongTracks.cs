@@ -121,7 +121,8 @@ internal sealed class SongTracks
                 [ChordsTrack] = TrackRole.Chords, [MelodyTrack] = TrackRole.Melody, [BassTrack] = TrackRole.Bass, [PadTrack] = TrackRole.Pad,
                 [CounterMelodyTrack] = TrackRole.CounterMelody, [RiffTrack] = TrackRole.Riff,
                 [RhythmTrack] = TrackRole.Rhythm
-            }
+            },
+            genre
         );
         // a riff and its twin all the way to either side, the riff on the side it drew; the twin draws no pan, so that a
         // song without it pans as it would

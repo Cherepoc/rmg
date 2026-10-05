@@ -94,6 +94,13 @@ public static class GenreChoices
             _ => "None"
         }, x.Weight)));
 
+    /// <summary>
+    ///     How far each pitched part sits from the middle, its role's spread moved wider or narrower (<see cref="Panning.SpreadOf" />),
+    ///     as it is where a genre does not say.
+    /// </summary>
+    public static GenreChoice Pan { get; } = Values("pan", "Pan",
+        [("melody", "Melody"), ("chords", "Chords"), ("bass", "Bass"), ("pad", "Pad"), ("counterMelody", "Counter-melody"), ("riff", "Riff"), ("rhythm", "Rhythm")]);
+
     /// <summary>The feel the song plays in, straight, a tuplet or a grouping (<see cref="Feels" />).</summary>
     public static GenreChoice Feel { get; } = Pool("feel", "Feel", Feels.Weights.Select(x => (Feels.NameOf(x.Feel), Capitalised(Feels.Label(x.Feel)), x.Weight)));
 
@@ -234,7 +241,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, Effects, StrongEffect,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, Effects, StrongEffect, Pan,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

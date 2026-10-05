@@ -29,16 +29,28 @@ internal static class Panning
     }
 
     /// <summary>
-    ///     Every pitched track's pan, by its number, from -1, left, to 1, right: a half to all of its role's spread, the
-    ///     tracks that spread taking sides in turn, the widest first, from a side drawn, so that the widest stand apart.
+    ///     A role's spread as a genre moves it (<see cref="GenreChoices.Pan" />): toward all the way to a side by as much of
+    ///     the rest as its value is above as it is, toward the middle by as much as it is below, as it is otherwise.
     /// </summary>
-    public static ImmutableDictionary<int, double> Draw(IGenerationContext context, IReadOnlyDictionary<int, TrackRole> roles)
+    public static double SpreadOf(TrackRole role, Genre genre)
+    {
+        var spread = GetSpread(role);
+        var shift = genre.Shift(GenreChoices.Pan, GenreChoices.Name(role.ToString()));
+        return shift >= 0 ? spread + shift * (1 - spread) : spread * (1 + shift);
+    }
+
+    /// <summary>
+    ///     Every pitched track's pan, by its number, from -1, left, to 1, right: a half to all of its role's spread, as the
+    ///     genre moves it, the tracks that spread taking sides in turn, the widest first, from a side drawn, so that the
+    ///     widest stand apart.
+    /// </summary>
+    public static ImmutableDictionary<int, double> Draw(IGenerationContext context, IReadOnlyDictionary<int, TrackRole> roles, Genre genre)
     {
         var side = context.TestProbability(0.5) ? 1 : -1;
         var pans = ImmutableDictionary.CreateBuilder<int, double>();
-        foreach (var (track, role) in roles.OrderByDescending(x => GetSpread(x.Value)).ThenBy(x => x.Key))
+        foreach (var (track, role) in roles.OrderByDescending(x => SpreadOf(x.Value, genre)).ThenBy(x => x.Key))
         {
-            var spread = GetSpread(role);
+            var spread = SpreadOf(role, genre);
             // ReSharper disable once CompareOfFloatsByEqualityOperator
             if (spread == 0)
             {

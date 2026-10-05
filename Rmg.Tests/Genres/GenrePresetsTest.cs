@@ -1,3 +1,4 @@
+using Rmg.Core.Songs;
 using Rmg.Core.Composition;
 
 namespace Rmg.Tests.Genres;
@@ -43,6 +44,24 @@ public sealed class GenrePresetsReportTest
         }
 
         Print("none", none);
+        foreach (var preset in GenrePresets.All)
+            Print(preset.Name, TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset)))));
+        await Task.CompletedTask;
+    }
+
+    /// <summary>How far each pitched part sits from the middle on the average, from 0, the middle, to 1, a side: none's and every preset's.</summary>
+    [Test]
+    [Explicit]
+    public async Task EveryPreset_Pans()
+    {
+        TrackRole[] roles = [TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm];
+        void Print(string name, IReadOnlyList<CorpusSong> songs)
+        {
+            var tracks = songs.SelectMany(x => x.Rendered.Tracks).Where(x => !x.IsPercussionInstrument).ToArray();
+            Console.WriteLine($"{name}: " + string.Join(", ", roles.Select(role => $"{role} {tracks.Where(x => x.Role == role).Select(x => Math.Abs(x.Pan)).DefaultIfEmpty(0).Average():0.00}")));
+        }
+
+        Print("none", TestCorpus.Range(Count));
         foreach (var preset in GenrePresets.All)
             Print(preset.Name, TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset)))));
         await Task.CompletedTask;

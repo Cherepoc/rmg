@@ -4,6 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
+      "pan": { "rhythm": 85, "riff": 75 },
       "effects": { "bends": [30, 60, 90], "chorus": [20, 40, 80], "vibrato": [20, 70, 100], "swell": [0, 20, 80] },
       "rootMotion": { "fourthDown": 90 },
       "tempo": { "from": [110, 110, 85], "to": [150, 150, 190] },
@@ -30,6 +31,7 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
+      "pan": { "bass": 65, "chords": 65 },
       "effects": { "vibrato": [30, 60, 90], "bends": [0, 15, 50], "chorus": [0, 20, 60], "swell": [0, 35, 100] },
       "rootMotion": { "fifthDown": 85, "stepUp": 60 },
       "tempo": { "from": [110, 110, 70], "to": [180, 180, 240] },
@@ -57,6 +59,7 @@
     "name": "Electronic",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, bass and pads, a TR-808 or electronic kit, straight and fast, minor, sus and add9 chords.",
     "choices": {
+      "pan": { "pad": 80 },
       "strongEffect": { "none": [100, 70, 30], "sweep": [20, 40, 100], "echo": [10, 20, 40] },
       "tempo": { "from": [117, 117, 100], "to": [130, 130, 175] },
       "meter": { "4/4": [100, 100, 85], "7/8": [0, 0, 10], "5/4": [0, 0, 8] },
@@ -228,6 +231,7 @@
     "name": "Ambient",
     "description": "Slow, pads, strings, a choir, a harp and a celesta, chords held long, sus and add9 chords, Lydian and major, the drums rare and sparse.",
     "choices": {
+      "pan": { "pad": 90, "chords": 75, "counterMelody": 70 },
       "effects": { "swell": [60, 85, 100], "chorus": [50, 80, 100], "vibrato": [0, 50, 90], "bends": [0, 10, 40] },
       "strongEffect": { "none": [100, 60, 30], "sweep": [30, 50, 100], "echo": [20, 40, 60] },
       "tempo": { "from": [60, 60, 60], "to": [85, 85, 90] },
