@@ -303,11 +303,34 @@ a link carries. What is left:
 - **A genre's song forms** (P2): the forms songs are written in (SongForms.Forms), verse-chorus, with a pre-chorus,
   with a bridge, a pool a genre weighs, and a form of its own as a chance, so that folk keeps verses and choruses and
   jazz plays AABA once it is among them; AABA and a head with solos, the forms to add.
-- **A section's progression across its patterns** (P2, a spike first): the 12-bar blues and its kin, which a 4-bar
-  pattern played over cannot be (Progressions.BarCount, Meter.PatternBarCount, BarStateGenerator's four bars, the
-  section's timeline repeated whole). Generalised as a progression drawn over several of a section's plays, each its
-  own, home, away and the cadence in the last, a genre weighing how many (one as now, two, three), the 12-bar three
-  with the root motions blues leans to; first a spike: whether a section's timeline can take a progression a play.
+- **Sections of several phrases: the 12-bar blues and its kin** (P2, a plan in steps). A section's pattern is a
+  phrase of four bars now (Progressions.BarCount, Meter.PatternBarCount), its harmony a four-bar cycle. The rule: a
+  section's progression is P phrases of four bars, P drawn, one as now, two (an 8-bar), three (the 12-bar), four (a
+  16-bar); each phrase starts from a degree by its place and ends by its place, the first from home, a middle one
+  leaning to the subdominant, the last to the dominant, every phrase but the last ending home or on a half close and
+  the last on the cadence, so that the blues' I–I–I–I / IV–IV–I–I / V–IV–I–V comes of the place rules and its root
+  motions, and a pop 8-bar's half close of the same rules. Phrases stay four bars, so a line's question and answer,
+  a fill and a solo's turn keep their place; only the harmony and the section's length grow. Steps:
+  1. **Phrase and pattern told apart** (a refactor, the fingerprint kept): Progressions.BarCount becomes the phrase's
+     four bars, and a section's pattern P of them, its meter's PatternDuration P phrases, P one everywhere; each of the
+     uses (SectionGenerator, BarStateGenerator, PatternGenerator, LinePattern, MelodyLayers, KeyChange, Solos,
+     FillGenerator, SongMap.PatternBarAt, Polymeter, FormLayers, SongFormGenerator, SongLength) read as phrase or
+     pattern by what it means.
+  2. **A progression over P phrases** (Progressions.Generate), the place rules above as weights on the roots a
+     phrase starts and ends on, leaning as the cadence's do, by the progression facet's strictness; P one drawing
+     exactly as now, so that the fingerprint holds.
+  3. **P a genre's** (a pool, "Phrases a progression": 4, 8, 12, 16 bars), drawn a section from a stream of its own;
+     the songs' own one alone, so that a song in no genre is as it was; a section's plays counted in phrases, so that
+     a 12-bar plays once or twice where a 4-bar plays four times, and its length as near (SectionLength, SongLength).
+  4. **The melody across phrases:** the first phrase states, a middle one restates it, the last answers (AAB), the
+     blues' lyric form, as a line's answer bars are now (MelodyLayers.AnswerBars) but by the phrase's place.
+  5. **Fills and solos by the pattern:** a fill's largest at the pattern's end, its smaller at a phrase's; a solo's
+     chorus a pattern (Solos), so that a blues solo takes 12-bar choruses.
+  6. **Presets and listening:** Blues three phrases most, Jazz two (an 8-bar A), Folk two, Rock one or two; a report
+     of the roots at each phrase's start and end by preset (the blues' IV at bar 5 and V at bar 9 most of the time)
+     and of sections' lengths; then whether the songs' own should play two phrases now and then.
+  Later: phrases of other than four bars (a 3-bar phrase, a 6-bar section), which the line's question and answer
+  and the fills assume, once P phrases sound right.
 - **A genre's effects** (P2): the chances of a vibrato, bends, a chorus, a swell, a tremolo, an echo and a sweep
   (Expression), a song's drawn by its sound facet, a genre's to lean, as the swing's chances are.
 - **A genre's dynamics** (P3): how loud and how busy its songs and the contrast between their sections, values leaning
