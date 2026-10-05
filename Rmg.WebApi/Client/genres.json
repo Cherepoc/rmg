@@ -30,6 +30,7 @@
       "drumSetup": { "kit": 100, "kitAndPercussion": [0, 12, 62] },
       "levels": { "riff": 65, "drum": 60 },
       "grooveHold": { "held": 80 },
+      "fills": { "amount": 65 },
       "rhythm": {
         "riff": { "repetition": 82 },
         "ground": { "repetition": 69 },
@@ -113,6 +114,7 @@
       "drumPieces": { "kick": [100, 100, 83], "electricSnare": [100, 100, 77], "clap": [100, 100, 77], "hiHat": [100, 100, 83], "tambourine": [25, 25, 19], "maracas": [25, 25, 19], "tom": [30, 30, 100], "cymbal": [65, 65, 92] },
       "levels": { "melody": 30, "bass": 70, "pad": 35, "drum": 90 },
       "grooveHold": { "held": 90 },
+      "fills": { "amount": 10 },
       "rhythm": {
         "chords": { "repetition": 82 },
         "bass": { "repetition": 92, "fullness": 69 },
@@ -150,6 +152,7 @@
       "drumPieces": { "kick": [100, 100, 89], "acousticSnare": [45, 45, 96], "electricSnare": [65, 65, 58], "clap": [100, 100, 89], "hiHat": [100, 100, 89], "cymbal": [30, 30, 100] },
       "levels": { "melody": 25, "chords": 35, "bass": 70, "drum": 95 },
       "grooveHold": { "held": 85 },
+      "fills": { "amount": 15 },
       "rhythm": {
         "melody": { "busyness": 38 },
         "bass": { "repetition": 100, "fullness": 38 },
@@ -183,6 +186,7 @@
       "drumSetup": { "kit": [100, 100, 99], "kitAndPercussion": [0, 56, 100] },
       "levels": { "bass": 75, "drum": 60 },
       "grooveHold": { "held": 75 },
+      "fills": { "amount": 35 },
       "rhythm": {
         "chords": { "speed": 100, "offbeat": 76, "fineness": 0 },
         "bass": { "repetition": 100, "fullness": 31 },
@@ -245,6 +249,7 @@
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 80, "counterMelody": 60, "drum": 95, "riff": [80, 80, 56], "riffTwin": [0, 15, 15], "rhythm": 100, "solo": [0, 20, 80] },
       "levels": { "bass": 65, "drum": 65 },
       "grooveHold": { "held": 75 },
+      "fills": { "amount": 65 },
       "rhythm": {
         "chords": { "syncopation": 69, "repetition": 82 },
         "bass": { "speed": 100, "syncopation": 100, "fullness": 76, "repetition": 82 },
@@ -345,6 +350,7 @@
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 100, "counterMelody": 60, "drum": [35, 35, 74], "riff": [6, 6, 47], "riffTwin": [0, 15, 15], "rhythm": [5, 5, 38], "solo": [0, 10, 68] },
       "drumSetup": { "kit": [100, 100, 68], "percussion": [0, 69, 100] },
       "levels": { "pad": 65, "drum": 30 },
+      "fills": { "amount": 25 },
       "rhythm": {
         "melody": { "busyness": 12, "speed": 31 },
         "chords": { "speed": 0, "fullness": 19 },

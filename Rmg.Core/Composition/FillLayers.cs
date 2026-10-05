@@ -97,6 +97,12 @@ internal static class FillLayers
     /// </summary>
     public const double InnerPhraseWeight = 2 * PhraseWeight;
 
+    /// <summary>
+    ///     How far a genre's fills lean to longer ones and to none at their most and least (<see cref="GenreChoices.Fills" />),
+    ///     as the odds of a span's loudness: a beat's few fills, a rock drummer's many.
+    /// </summary>
+    public const double GenreAmountOdds = 6;
+
     /// <summary>How long a fill is, in beats before a line of no weight, and how likely each is; 0 is none.</summary>
     public static ImmutableArray<Weighted<double>> Spans { get; } =
     [

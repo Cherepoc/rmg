@@ -233,7 +233,9 @@ internal sealed class FillGenerator
     )
     {
         var (rhythm, grooves) = (section.Fills, section.Groove);
-        var span = _context.Pick(tilt.Weigh(drummer.WeighSpans(FillLayers.Spans), FillLayers.GetSpanLoudness));
+        // a genre's drums filling more or less, its spans leaning as the line's weight leans them
+        var amount = Tilt.Of(FillLayers.GenreAmountOdds, _genre.Shift(GenreChoices.Fills, "amount"));
+        var span = _context.Pick(amount.Weigh(tilt.Weigh(drummer.WeighSpans(FillLayers.Spans), FillLayers.GetSpanLoudness), FillLayers.GetSpanLoudness));
         if (span <= 0)
             return FillPlay.None;
 

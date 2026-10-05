@@ -476,7 +476,9 @@ a link carries. What is left:
   3. Done: a genre's levels (`GenreChoices.Levels`), a part's level louder or quieter by up to 0.4 of the velocity's
      units (`VelocityLayers.GenreLevel`), the mix's volumes over them: the drums over the melody Hip-hop +14 velocity
      steps (-10), Electronic +7 (-13). A genre's arrangement, its parts resting by a section's role, after (P3).
-  4. The drums' fills by genre (step 5 of what a genre cannot reach, brought here): Hip-hop and Electronic sparse.
+  4. Done: the drums' fills by genre (`GenreChoices.Fills`), their spans leaning to longer ones or to none as a line's
+     weight leans them, by up to six times the odds: fills a minute Hip-hop 1.4 (2.3), Electronic 1.9 (3.3), Ambient
+     0.4, Rock 3.9 (3.3), Funk 3.3 (2.9).
   5. Sidechain pumping: the pads, the chords and the bass dipping on every kick, a strong effect beside the tremolo,
      the echo and the sweep, played as expression; Electronic's pool much; on the kick wherever it falls.
   6. Builds and drops: a section before a bigger one building (the snare and the hats thickening, the sweep rising),
@@ -525,8 +527,7 @@ a link carries. What is left:
   4. The form's devices: a genre's chance of a solo and its soloists, its key changes' chances, and pools of its
      intros and endings, the intros given ends of their own first (a table now, which moves the corpus). Jazz soloing
      often and ending on a button or a ring, Rock on a stop or a button, Electronic and Ambient fading.
-  5. The fills' amount, a value: Rock and Funk busier, Ambient and Electronic sparse (done as step 4 of genres that
-     sound like themselves).
+  5. Done as step 4 of genres that sound like themselves: the fills' amount.
   Then (P3): a genre's arrangement and levels, its parts resting by a section's role (a dub's breakdown) and how loud
   each plays (the levels below), one item, a tile a part, should listening ask. Every step a tile in the editor and a page test that it shows; a genre kept before
   keeps its key, its new choice absent.
