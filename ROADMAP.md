@@ -510,9 +510,11 @@ a link carries. What is left:
      Ahead: for a plugin rather than General MIDI, the articulation played as a keyswitch note or a CC, the one
      rendering function the seam; and the instruments' variants over time (`InstrumentsOverTime`, a muted clean guitar,
      a slapped bass) articulations of their notes too, once an output plays them otherwise. No output profiles before.
-  3. The harmonic rhythm: a pool of how long a chord lasts, leaning the draw its energy leans. Jazz half a bar or a
-     bar, Folk, Ambient and Electronic two bars, Funk two and longer, Blues a bar; the cadence's rules checked where a
-     phrase holds two chords.
+  3. Done: the harmonic rhythm a genre's pool (`GenreChoices.HarmonicRhythm`), the energy leaning it still: chords in
+     four bars Hip-hop 2.5, Ambient 2.6, Electronic 2.8, Funk 2.9, Folk and Reggae 3.4, Jazz 5.9 (4.3 to 5.2 every
+     preset before). Not done: a chord a phrase, one chord over four bars, which the progressions' two chords a phrase
+     at least (home and cadence) do not allow: a vamp of one chord is a progression of its own kind, should the loop's
+     report ask for it.
   4. The form's devices: a genre's chance of a solo and its soloists, its key changes' chances, and pools of its
      intros and endings, the intros given ends of their own first (a table now, which moves the corpus). Jazz soloing
      often and ending on a button or a ring, Rock on a stop or a button, Electronic and Ambient fading.

@@ -114,7 +114,7 @@ internal sealed class SectionGenerator
         if (plan.HasTonicHome)
             home = 0;
         // how often its chords change, from a sequence of its own, faster the more energy it has
-        var harmonicRhythm = HarmonicRhythm.Draw(Stream(sectionId, SectionStream.HarmonicRhythm), tilt, meter);
+        var harmonicRhythm = HarmonicRhythm.Draw(Stream(sectionId, SectionStream.HarmonicRhythm), tilt, meter, facets[Facet.Progression], _genre);
         StateTrace.Record(TracePoints.HarmonicRhythm, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{harmonicRhythm.Span}", harmonicRhythm);
         var progression = Progressions.Generate(context, scale, home, Progressions.Strictness.At(facets[Facet.Progression]), harmonicRhythm.Count, meter.Phrases,
             motion => _genre.Shift(GenreChoices.RootMotions, Progressions.Motions[motion].Name));

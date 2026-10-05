@@ -479,6 +479,7 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(await lineScale.Locator(".genre-ends > span").First.TextContentAsync()).StartsWith("Plainest: Pentatonic");
         // the bass's leading and its landing, the plainest songs' on the root
         await Assert.That(await Tile(await Section(dialog, "Harmony"), "bass").IsVisibleAsync()).IsTrue();
+        await Assert.That(await Tile(await Section(dialog, "Harmony"), "harmonicRhythm").IsVisibleAsync()).IsTrue();
         var landing = Tile(await Section(dialog, "Harmony"), "bassLanding");
         await page.Until(async () => await landing.Locator(".genre-ends > span").CountAsync() == 3, "the bass's landing said");
         await Assert.That(await landing.Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: The root 100%");

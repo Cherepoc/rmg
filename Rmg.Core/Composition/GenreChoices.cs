@@ -84,6 +84,15 @@ public static class GenreChoices
         ("dominant", "Every chord its dominant", Composition.ChordScales.Dominant)
     ]);
 
+    /// <summary>How long a section's chords last (<see cref="Composition.HarmonicRhythm.Spans" />): half a bar, a bar or two bars, the faster the more energy.</summary>
+    public static GenreChoice HarmonicRhythm { get; } = Pool("harmonicRhythm", "Chords' pace",
+        Composition.HarmonicRhythm.Spans.Select(x => (Composition.HarmonicRhythm.NameOf(x.Span.Value), x.Span.Value switch
+        {
+            0.5 => "Two a bar",
+            1 => "One a bar",
+            _ => "One every two bars"
+        }, new ByConvention(x.Span.Weight, x.Span.Weight, x.Span.Weight))));
+
     /// <summary>How much the bass leads into a new chord, from 0, never, through 50, as its instrument has it, to 100, walking (<see cref="BassLeadingLayers.GenreLeadOdds" />).</summary>
     public static GenreChoice Bass { get; } = Values("bass", "Bass", [("leading", "Leading into a chord")]);
 
@@ -317,7 +326,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, LineScale, Bass, BassLanding, Effects, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, LineScale, Bass, BassLanding, Effects, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

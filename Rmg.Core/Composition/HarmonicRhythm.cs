@@ -26,11 +26,25 @@ internal sealed record HarmonicRhythm(double Bars, Meter Meter)
         (new Weighted<double>(0.15, 0.5), 1)
     ];
 
-    /// <summary>A section's harmonic rhythm in its meter, leaned by its energy's pull.</summary>
-    public static HarmonicRhythm Draw(IGenerationContext context, Tilt energy, Meter meter)
+    /// <summary>A span's name, as a genre names it: "halfBar", "oneBar", "twoBars".</summary>
+    public static string NameOf(double bars) => bars switch
+    {
+        0.5 => "halfBar",
+        1 => "oneBar",
+        2 => "twoBars",
+        _ => throw new ArgumentOutOfRangeException(nameof(bars), bars, null)
+    };
+
+    /// <summary>
+    ///     A section's harmonic rhythm in its meter, leaned by its energy's pull, among a genre's pool of the spans where it
+    ///     names one; the songs' spans alike at every end, so that a genre's alone leans by its conventionality.
+    /// </summary>
+    public static HarmonicRhythm Draw(IGenerationContext context, Tilt energy, Meter meter, double unconventionality, Genre genre)
     {
         var leans = Spans.ToDictionary(x => x.Span.Value, x => x.Lean);
-        return new HarmonicRhythm(context.Pick(energy.Weigh(Spans.Select(x => x.Span), span => leans[span])), meter);
+        var spans = ByConvention.Weigh(Spans.Select(x => (x.Span.Value, new ByConvention(x.Span.Weight, x.Span.Weight, x.Span.Weight))), unconventionality,
+            genre.Pool<double>(GenreChoices.HarmonicRhythm, NameOf));
+        return new HarmonicRhythm(context.Pick(energy.Weigh(spans, span => leans[span])), meter);
     }
 
     /// <summary>How many chords the pattern has.</summary>
