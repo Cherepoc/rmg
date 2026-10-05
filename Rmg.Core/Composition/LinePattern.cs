@@ -126,8 +126,39 @@ internal sealed class LinePattern
             notes[i] = last with { Pitch = line.Approach(approach, last.Note.Chord, last.Note.Classes, last.Rank, last.Pitch, next.Note.Chord, next.Pitch) };
         }
 
-        var placed = LinePlacement.Store(track.EventTimeline.Duration, notes.Select(x => (x.Note, x.Pitch)));
+        var loudness = PhraseArc(notes.Select(x => (x.Note.State, x.Pitch)).ToArray(), profile.PhraseArc);
+        var placed = LinePlacement.Store(track.EventTimeline.Duration, notes.Select((x, i) => (
+            loudness[i] == 0 ? x.Note : x.Note with { Note = x.Note.Note.Value.With(StateKinds.Velocity, x.Note.Note.Value.GetStateValue(StateKinds.Velocity) + loudness[i]).ToTimelineItem(x.Note.Position) },
+            x.Pitch)));
         return song.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [trackNumber] = _ => placed });
+    }
+
+    /// <summary>
+    ///     How much louder each note of a line plays for its height in its phrase, a phrase ending on its held note or where
+    ///     the next starts: by the arc given from its lowest note, half of it softer, to its highest, half of it louder, as a
+    ///     player leans into a phrase's peak and lets its close fall away; none in a phrase of one pitch.
+    /// </summary>
+    internal static double[] PhraseArc(IReadOnlyList<(StateMap State, int Pitch)> notes, double arc)
+    {
+        var loudness = new double[notes.Count];
+        if (arc == 0)
+            return loudness;
+        var start = 0;
+        for (var i = 0; i < notes.Count; i++)
+        {
+            var ends = notes[i].State.GetStateValue(StateKinds.HeldDuration) > 0
+                       || i + 1 == notes.Count
+                       || notes[i + 1].State.GetStateValue(CompositionStateKinds.LinePhraseStart) != (int)PhraseStart.None;
+            if (!ends)
+                continue;
+            var (low, high) = (notes.Skip(start).Take(i - start + 1).Min(x => x.Pitch), notes.Skip(start).Take(i - start + 1).Max(x => x.Pitch));
+            if (high > low)
+                for (var j = start; j <= i; j++)
+                    loudness[j] = arc * ((notes[j].Pitch - low) / (double)(high - low) - 0.5);
+            start = i + 1;
+        }
+
+        return loudness;
     }
 
     /// <summary>

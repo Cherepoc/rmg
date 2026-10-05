@@ -68,7 +68,8 @@ internal static class BassLeadingLayers
         RegisterFreedom: 0,
         RegisterFreedomSpread: 0,
         ContourShare: 0,
-        ImprovisationShare: 0.5
+        ImprovisationShare: 0.5,
+        PhraseArc: 0
     );
 
     /// <summary>How much the bass moves by step rather than by leap, from 0 to 1 (<see cref="CompositionStateKinds.LineStepwiseness" />).</summary>

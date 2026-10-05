@@ -9,8 +9,8 @@ is removed once it is built.
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
 ratings by conventionality once enough are in, alongside, continuously and never as a gate.
 
-**Later** (P2), roughly in this order: a chord's own scale, in steps (see *Scales and chords*); a line's loudness by
-its phrase and the hook quoted (see *Instruments and expression*, *Form and sections*), alongside it; the chorus's
+**Later** (P2), roughly in this order: a chord's own scale, in steps (see *Scales and chords*); the hook quoted
+(see *Form and sections*), alongside it; the chorus's
 melody above the verse's; the blues' restated line (see *Genres*); the ratings report (see *Listening data*), once the
 dashboard shows songs rated enough; listening to the genres' presets (see *Genres*).
 
@@ -222,10 +222,9 @@ Each item with its plan, and what it waits for.
 
 - **The playing following the articulation** (P3, after genres): octaves popped in slap, short notes muted, without
   which an articulation is only another sound.
-- **A line's loudness by its phrase** (P2): a pitched line's velocity tilted by where a note sits in its phrase's arc,
-  louder toward its highest note and softer at its last, a few steps of velocity at most, so that the beat's accents
-  still lead; one velocity layer for every line, leaned by `Tilt`, drawing nothing, so that the corpus's other draws
-  stay. Today a line's loudness is its beat, the energy and a random layer, its pitch alone rising and falling.
+- **A solo's loudness by its phrase** (P3): the melody's, counter-melody's and riff's lines lean louder at a phrase's
+  highest note and softer at its lowest (`LinePattern.PhraseArc`), a phrase running to its held note; a solo's lines
+  are placed apart (`SoloLines`) and play without it, which they could take by the same rule should they sound flat.
 - **Plain doubling,** a part doubling another in unison, which waits for timing by role.
 - **A motif developed further** (P3), inverted or stretched, should the solos' sequences sound mechanical.
 - **Modulation** (P3, when a soundfont maps it): CC1, which none of the soundfonts offered maps to tone. The rule to
