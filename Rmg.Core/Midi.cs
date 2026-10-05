@@ -204,8 +204,8 @@ public static class Midi
     {
         return noteTimeline
             .Select(x => new MidiNote(
-                AbsoluteDelta(x.Position),
-                Math.Min(AbsoluteDelta(x.Position + x.Value.Duration), durationDelta),
+                AbsoluteDelta(Math.Max(0, x.Position + x.Value.Shift)),
+                Math.Min(AbsoluteDelta(Math.Max(0, x.Position + x.Value.Shift) + x.Value.Duration), durationDelta),
                 (byte)x.Value.Offset,
                 x.Value.Velocity
             ))

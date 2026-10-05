@@ -67,6 +67,9 @@ internal static class CompositionStateKinds
     public static StateKind<int> Swell { get; } = StateKinds.CreateAdditive<int>(Prefix + "Swell", StateScope.Render);
     public static StateKind<int> Tremolo { get; } = StateKinds.CreateAdditive<int>(Prefix + "Tremolo", StateScope.Render);
 
+    // how far a note is played off its place, in beats, late above 0, by its part's role (SongStages.Timing)
+    public static StateKind<double> TimingOffset { get; } = StateKinds.CreateAdditive<double>(Prefix + "TimingOffset", StateScope.Render);
+
     // 1 for a note palm-muted, its articulation, which it keeps its duration through: the rendering plays it, for General
     // MIDI short and a touch softer, for a plugin as a keyswitch or a controller ahead (Render)
     public static StateKind<int> PalmMute { get; } = StateKinds.CreateAdditive<int>(Prefix + "PalmMute", StateScope.Render);

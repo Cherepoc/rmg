@@ -12,7 +12,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 **Later** (P2), in this order: an idiom report a genre; the melody's character and the
 bass's style by genre; the harmonic rhythm by genre; a loop, a genre's levels, its fills and a melody written as a hook
 (genres that sound like themselves, see *Genres*); sidechain pumping; a riff in power chords and its chugs, the
-articulation's seam; solos, soloists, endings and intros by genre; timing by role, then a genre's pocket, and a
+articulation's seam; solos, soloists, endings and intros by genre; a
 guitar's strum (see *Groove*); builds and drops; turnarounds, then passing chords (see *Scales and chords*); a solo's
 loudness by its phrase. The ratings report (see *Listening data*) once the dashboard shows songs rated enough, and
 listening to the presets and to what October 2026 gained, alongside.
@@ -240,7 +240,7 @@ Each item with its plan, and what it waits for.
 - **A solo's loudness by its phrase** (P2, small): the melody's, counter-melody's and riff's lines lean louder at a phrase's
   highest note and softer at its lowest (`LinePattern.PhraseArc`), a phrase running to its held note; a solo's lines
   are placed apart (`SoloLines`) and play without it, which they could take by the same rule should they sound flat.
-- **Plain doubling,** a part doubling another in unison, which waits for timing by role.
+- **Plain doubling,** a part doubling another in unison, now that the parts play by their pocket (`SongStages.Timing`).
 - **A motif developed further** (P3), inverted or stretched, should the solos' sequences sound mechanical.
 - **Legato as an articulation** (P3, after the palm mute's seam): a line's notes slurred into each other, a note's
   articulation as the palm mute is, General MIDI playing it as notes joined with no gap and the slurred one's attack
@@ -255,11 +255,9 @@ Each item with its plan, and what it waits for.
 
 ### Groove
 
-- **Timing by role** (P2): the backbeat a little late, the hi-hat on top, should swing alone sound stiff; plain
-  doubling needs it. Then **a genre's pocket**: the offsets a genre's values, a laid-back backbeat or a pushed bass.
-  Offsets a role each only, never a random jitter, which would be playing a player rather than a rule; never in the
-  plainest songs, which keep to the click.
-- **A guitar's strum** (P2, after timing by role): every chord a guitar plays struck as a stroke, its direction its
+- **A drum's pocket by its section's role** (P3, if a section's change of role is heard): the timing takes a drum's
+  offset by its role in the song's groove (`SongStages.OffsetOf`), not a section's, which may move a ride to the time.
+- **A guitar's strum** (P2): every chord a guitar plays struck as a stroke, its direction its
   state, down from the low string on a beat's first half and up on its second, the rendering spreading its notes a few
   milliseconds apart, 10 to 30 a stroke, in time rather than beats, the up stroke a touch softer and thinner; the same
   seam as the timing by role and the palm mute, a plugin's strum engine taking the direction as a keyswitch ahead. How

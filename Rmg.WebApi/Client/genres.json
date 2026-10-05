@@ -48,6 +48,7 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
+      "pocket": { "laidBack": 65 },
       "tempo": { "from": [110, 110, 70], "to": [180, 180, 240] },
       "meter": { "4/4": [100, 100, 60], "3/4": [10, 12, 25], "5/4": [0, 0, 30], "7/4": [0, 0, 15] },
       "feelChances": { "swing": [95, 80, 50], "halfTime": 8, "doubleTime": 5 },
@@ -121,6 +122,7 @@
       "drumPieces": { "kick": [100, 100, 83], "electricSnare": [100, 100, 77], "clap": [100, 100, 77], "hiHat": [100, 100, 83], "tambourine": [25, 25, 19], "maracas": [25, 25, 19], "tom": [30, 30, 100], "cymbal": [65, 65, 92] },
       "levels": { "melody": 30, "bass": 70, "pad": 35, "drum": 90 },
       "grooveHold": { "held": 90 },
+      "pocket": { "laidBack": 10 },
       "fills": { "amount": 10 },
       "hook": { "sections": [70, 70, 50] },
       "intro": { "entries": 100, "cold": [20, 20, 40] },
@@ -162,6 +164,7 @@
       "drumPieces": { "kick": [100, 100, 89], "acousticSnare": [45, 45, 96], "electricSnare": [65, 65, 58], "clap": [100, 100, 89], "hiHat": [100, 100, 89], "cymbal": [30, 30, 100] },
       "levels": { "melody": 25, "chords": 35, "bass": 70, "drum": 95 },
       "grooveHold": { "held": 85 },
+      "pocket": { "laidBack": 85 },
       "fills": { "amount": 15 },
       "hook": { "sections": [80, 80, 60] },
       "intro": { "entries": 100, "cold": [30, 30, 40] },
@@ -199,6 +202,7 @@
       "drumSetup": { "kit": [100, 100, 99], "kitAndPercussion": [0, 56, 100] },
       "levels": { "bass": 75, "drum": 60 },
       "grooveHold": { "held": 75 },
+      "pocket": { "laidBack": 80 },
       "fills": { "amount": 35 },
       "rhythm": {
         "chords": { "speed": 100, "offbeat": 76, "fineness": 0 },
@@ -234,6 +238,7 @@
         "colour": { "fullness": 69 }
       },
       "grooveHold": { "held": 65 },
+      "pocket": { "laidBack": 35 },
       "feel": {
         "time": { "straight": [100, 45, 100], "grouped3": [0, 100, 49] }
       }
@@ -262,6 +267,7 @@
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 80, "counterMelody": 60, "drum": 95, "riff": [80, 80, 56], "riffTwin": [0, 15, 15], "rhythm": 100, "solo": [0, 20, 80] },
       "levels": { "bass": 65, "drum": 65 },
       "grooveHold": { "held": 75 },
+      "pocket": { "laidBack": 35 },
       "fills": { "amount": 65 },
       "riff": { "chugs": [40, 40, 40] },
       "ending": { "button": 100, "stop": [80, 80, 80], "fade": [40, 40, 40] },
@@ -335,6 +341,7 @@
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [55, 55, 66], "counterMelody": 60, "drum": 95, "riff": 50, "riffTwin": [0, 15, 15], "rhythm": [60, 60, 48], "solo": [0, 40, 73] },
       "drumSetup": { "kit": 100 },
       "grooveHold": { "held": 75 },
+      "pocket": { "laidBack": 70 },
       "riff": { "powerChords": [15, 25, 30] },
       "solos": { "sections": [20, 25, 35] },
       "soloists": { "solo": 100, "melody": [40, 40, 50], "chords": [10, 20, 30] },

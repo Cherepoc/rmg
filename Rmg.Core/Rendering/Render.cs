@@ -68,7 +68,7 @@ public static class Render
                     // softer; the one place a plugin's output would play it as its keyswitch or controller instead
                     if (note.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0)
                         (duration, velocity) = (Math.Max(MutedFloor, duration * MutedShare), velocity * MutedVelocity);
-                    return note.Value.Pitches.Select(pitch => new RenderedNote(pitch, velocity, duration).ToTimelineItem(position));
+                    return note.Value.Pitches.Select(pitch => new RenderedNote(pitch, velocity, duration, note.Value.State.GetStateValue(CompositionStateKinds.TimingOffset)).ToTimelineItem(position));
                 }
             );
             if (song.TrackDefinitions[trackNumber] is PitchInstrumentTrack pitchInstrumentTrack)

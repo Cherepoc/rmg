@@ -8,13 +8,15 @@ namespace Rmg.Tests.Rendering;
 
 public sealed class RealizedNoteTest
 {
-    // the song as written, but for its changes of instrument, which the song puts on its notes once they are decided
+    // the song as written, but for its changes of instrument and its parts' timing, which the song puts on its notes once
+    // they are decided
     private static byte[] Midi(Song song)
     {
         using var stream = new MemoryStream();
         var rendered = Render.RenderSong(song);
         new RenderedSong(rendered.Duration, rendered.Meters, rendered.TempoTimeline, rendered.FadeTimeline,
-            [..rendered.Tracks.Select(x => new RenderedTrack(x.IsPercussionInstrument, x.Role, x.PitchInstrumentCode, x.NoteTimeline, x.Pan, x.Volume))]).Write(stream, null);
+            [..rendered.Tracks.Select(x => new RenderedTrack(x.IsPercussionInstrument, x.Role, x.PitchInstrumentCode,
+                EventTimeline.Create(x.NoteTimeline.Duration, x.NoteTimeline.Select(n => (n.Value with { Shift = 0 }).ToTimelineItem(n.Position))), x.Pan, x.Volume))]).Write(stream, null);
         return stream.ToArray();
     }
 

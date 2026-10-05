@@ -483,6 +483,7 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(await Tile(await Section(dialog, "Form"), "loop").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
         await Assert.That(await Tile(await Section(dialog, "Sound"), "levels").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: default");
         await Assert.That(await Tile(time, "grooveHold").IsVisibleAsync()).IsTrue();
+        await Assert.That(await Tile(time, "pocket").IsVisibleAsync()).IsTrue();
         await Assert.That(await Tile(time, "fills").IsVisibleAsync()).IsTrue();
         var landing = Tile(await Section(dialog, "Harmony"), "bassLanding");
         await page.Until(async () => await landing.Locator(".genre-ends > span").CountAsync() == 3, "the bass's landing said");

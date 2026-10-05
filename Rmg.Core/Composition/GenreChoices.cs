@@ -144,6 +144,9 @@ public static class GenreChoices
     /// <summary>How much the drums fill, from 0, seldom and short, through 50, as the songs have it, to 100, often and long (<see cref="FillLayers.GenreAmountOdds" />).</summary>
     public static GenreChoice Fills { get; } = Values("fills", "Fills", [("amount", "Amount")]);
 
+    /// <summary>How far the parts play off the beat, from 0, tight, through 50, as the songs have it, to 100, laid back (<see cref="SongStages.GenrePocketReach" />).</summary>
+    public static GenreChoice Pocket { get; } = Values("pocket", "Pocket", [("laidBack", "Laid back")]);
+
     /// <summary>How steady the groove is, from 0, moving more, through 50, as the songs move it, to 100, held, its backbeat on 2 and 4 (<see cref="RhythmicUnconventionality.GrooveHold" />).</summary>
     public static GenreChoice GrooveHold { get; } = Values("grooveHold", "Groove held", [("held", "Held")]);
 
@@ -394,7 +397,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Loop, LineScale, Bass, BassLanding, Effects, Levels, GrooveHold, Fills, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Loop, LineScale, Bass, BassLanding, Effects, Levels, GrooveHold, Pocket, Fills, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,
