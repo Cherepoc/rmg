@@ -85,6 +85,32 @@ internal sealed class SongFormGenerator
     }
 
     /// <summary>
+    ///     The chorus a hook intro quotes: the song's first, in the first section's bar, where neither a chorus nor an
+    ///     intro opens the song; none where it has no such chorus, and the song starts cold.
+    /// </summary>
+    internal static int? HookOf(IReadOnlyList<int> sectionIds, IReadOnlyDictionary<int, SectionRole> roles, IReadOnlyDictionary<int, Meter> meters)
+    {
+        if (roles[sectionIds[0]] is SectionRole.Chorus or SectionRole.Intro)
+            return null;
+        var chorus = sectionIds.Cast<int?>().FirstOrDefault(x => roles[x!.Value] == SectionRole.Chorus);
+        return chorus is { } id && meters[id].HasSameBar(meters[sectionIds[0]]) ? id : null;
+    }
+
+    /// <summary>
+    ///     How long the intro planned plays before the first section, in beats, which a length given takes in: an intro of
+    ///     entries in bars of its own, a count-in's bar, or the chorus's first phrase; none for one that starts with it.
+    /// </summary>
+    /// <param name="first">The first section's meter.</param>
+    /// <param name="hook">The meter of the chorus a hook intro quotes; none for another intro.</param>
+    internal static double IntroDuration(FormPlan plan, Meter first, Meter? hook) => plan.Intro switch
+    {
+        IntroKind.Entries when plan.Window.IsBefore => plan.Window.Bars * first.BarDuration,
+        IntroKind.CountIn => first.BarDuration,
+        IntroKind.Hook => Meter.PhraseBarCount * (hook ?? throw new ArgumentNullException(nameof(hook))).BarDuration,
+        _ => 0
+    };
+
+    /// <summary>
     ///     A line with the notes of a hook intro at the pitches the chorus it quotes plays them at, as its line placed over
     ///     the song has them afresh, but its last, which leads into the first section; as it is in a song of another intro.
     /// </summary>
@@ -116,11 +142,10 @@ internal sealed class SongFormGenerator
         var meter = sections[0].Meter;
         var last = sections[^1].Meter;
         var first = sections[0];
-        // the hook a chorus's first phrase in the first section's bar, which does not open the song; none, and the song
-        // starts cold, where there is no such chorus
+        // the chorus a hook intro quotes, its first appearance (HookOf)
         var hook = sections.Select((x, i) => (Section: x, Index: i)).FirstOrDefault(x => x.Section.Role == SectionRole.Chorus);
-        if (plan.Intro == IntroKind.Hook && (hook.Section is null || hook.Index == 0 || first.Role == SectionRole.Intro || !hook.Section.Meter.HasSameBar(first.Meter)))
-            plan = plan with { Intro = IntroKind.Cold };
+        if (plan.Intro == IntroKind.Hook && hook.Section is null)
+            throw new InvalidOperationException("A hook intro was planned for a song without a chorus to quote.");
         // an intro of entries before the first section plays its first bars, the parts cleared until they come in
         var windowDuration = plan.Window.Bars * meter.BarDuration;
         var introBlock = plan.Intro switch

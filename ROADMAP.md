@@ -164,9 +164,10 @@ Each item with its plan, and what it waits for.
 
 ### Conventionality
 
-- **A song's length, the rest:** a short length runs long, a quarter of the songs given a minute past 1:09 and a
-  fifth of those given two past 2:18 (`SongLengthReportTest`), as an intro, an outro or a fade adds a section the
-  length leans no draw of; their chances leaned by the length as the form's are, should it matter. Long songs, ten
+- **A song's length, the rest:** a short length runs long, 16% of the songs given a minute and 19% of those given two
+  past 15% over (`SongLengthReportTest`), the intro's bars taken in (`SongFormGenerator.IntroDuration`) but an intro
+  section, an outro or the ending's bars adding what the length leans no draw of; their chances leaned by the length
+  as the form's are, should it matter. Long songs, ten
   minutes, are free forms seven times in ten, as no form reaches them: heard as rambling? Solos filling a long length
   rather than more parts, if so.
 - **Listening to the drum solos' players:** a soloist is drawn evenly among the kit's drummer and the percussion

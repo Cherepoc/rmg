@@ -63,6 +63,10 @@ public sealed class SongLengthReportTest
             Console.WriteLine($"{Minutes(target)}: {Spread([..songs.Select(x => x.Rendered.Seconds)])}; error middle {100 * sorted[sorted.Length / 2]:0}%, within 15% {100.0 * sorted.Count(x => x <= 0.15) / Count:0}%, "
                               + $"short {100.0 * errors.Count(x => x < -0.15) / Count:0}%, long {100.0 * errors.Count(x => x > 0.15) / Count:0}%; sections {songs.Average(x => x.Map.Sections.Length):0.0}, "
                               + $"longest run {songs.Max(Run)}, of a form {100.0 * songs.Count(x => x.Trace.Any(t => t.Point == Rmg.Core.Composition.TracePoints.SongForm && ((SongStructure)t.Value!).Roles.Values.Any(r => r != SectionRole.Free))) / Count:0}%");
+            // an intro of the hook, the chorus's first phrase before the first section, against the others
+            var hooks = errors.Where((_, i) => songs[i].Map.Intro.Kind == Rmg.Core.Composition.IntroKind.Hook).ToArray();
+            var others = errors.Where((_, i) => songs[i].Map.Intro.Kind != Rmg.Core.Composition.IntroKind.Hook).ToArray();
+            Console.WriteLine($"    {hooks.Length} hook intros {100 * hooks.DefaultIfEmpty().Average():+0;-0}% on the average, the others {100 * others.Average():+0;-0}%");
         }
 
         await Task.CompletedTask;

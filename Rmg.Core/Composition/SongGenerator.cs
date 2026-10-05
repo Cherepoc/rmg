@@ -209,6 +209,10 @@ public static class SongGenerator
                     .Pick(ByConvention.Weigh(GenreChoices.PhraseCounts.Select(p => (p, p == 1 ? new ByConvention(1, 1, 1) : default)), songUnconventionality[Facet.Form], phrasePool))
             });
         StateTrace.Record(TracePoints.SectionMeter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", sectionMeters.Select(x => $"{x.Key} {x.Value}")), sectionMeters);
+        // a hook intro where the song has a chorus to quote, and a cold start where it has none
+        var hook = SongFormGenerator.HookOf(sectionIds, structure.Roles, sectionMeters);
+        if (plan.Intro == IntroKind.Hook && hook is null)
+            plan = plan with { Intro = IntroKind.Cold };
 
         // every section's drums, drawn before the sections are made, every drum of the song's groove in one of them at
         // least, from a stream of its own, where the song plays drums
@@ -233,8 +237,10 @@ public static class SongGenerator
             var plays = sectionIds.Distinct().ToDictionary(id => id, id => sectionGenerator.DrawPlays(id, structure.Roles[id], lean, sectionMeters[id].Phrases));
             var fades = Fading(plan.Ending, plays[sectionIds[^1]]);
             var appearances = sectionIds.Length + (Repeats(lastRepeatDrawn, fades) ? 1 : 0);
+            // and the intro's bars before the first section
             return SecondsOf(sectionIds.Sum(id => plays[id] * sectionMeters[id].PatternDuration)
-                             + (appearances - sectionIds.Length + fades) * plays[sectionIds[^1]] * sectionMeters[sectionIds[^1]].PatternDuration);
+                             + (appearances - sectionIds.Length + fades) * plays[sectionIds[^1]] * sectionMeters[sectionIds[^1]].PatternDuration
+                             + SongFormGenerator.IntroDuration(plan, sectionMeters[sectionIds[0]], hook is { } quoted ? sectionMeters[quoted] : null));
         }) ?? 0;
         // every section is generated once, where it first plays
         var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(
