@@ -125,6 +125,9 @@ internal static class SoloLines
         _ => throw new ArgumentOutOfRangeException(nameof(shape), shape, null)
     };
 
+    /// <summary>How much louder a solo's phrase plays at its highest note than at its lowest, as the melody's does (<see cref="MelodyLayers" />).</summary>
+    public const double PhraseArc = 0.2;
+
     /// <summary>How much louder a solo plays at its most intense than at its calmest, about the melody's loudness there.</summary>
     public const double IntensityVelocity = 0.15;
 
@@ -210,9 +213,14 @@ internal static class SoloLines
         // the louder the more intense
         var loudness = melody.Average(x => x.Value.GetStateValue(StateKinds.Velocity));
 
+        // every note's phrase and pitch, in the line's order, which its loudness arcs over
+        var marks = new List<(int Phrase, int Pitch)>();
+        var placing = 0;
+
         // a note of the line at its place, as a line's note: the step above the chord there nearest it, on the scale there
         TimelineItem<StateMap> Place(double position, int pitch, double intensity, double held = 0, bool accented = false, bool release = false, bool stacked = false, bool octave = false)
         {
+            marks.Add((placing, pitch));
             var melodyNote = MelodyAt(position).Value;
             // in octaves as the soloist plays them, not as the melody it takes over did
             var state = melodyNote.Except([StateKinds.HeldDuration, CompositionStateKinds.LinePickup, StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed, CompositionStateKinds.Octave])
@@ -248,6 +256,7 @@ internal static class SoloLines
         var (motifPhrase, motifShape) = (-1, SoloShape.Scale);
         foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn, phrase, isRelease) in plan)
         {
+            placing = phrase;
             // whether the soloist stacks the gesture, the likelier the more it leans to it and the more intense
             var stacks = voicing.TestProbability(new Tilt(Tilt.Of(ChordOdds, ChordLeans[gesture]).LogOdds + Tilt.Of(ChordOdds, 2 * level - 1).LogOdds).Chance(soloist.ChordRate, 1));
             // a run going on from the segment before keeps where it is in its cells
@@ -309,7 +318,9 @@ internal static class SoloLines
         }
 
         int FoldTowards(int pitch, int towards) => pitch + 12 * (int)Math.Round((towards - pitch) / 12.0);
-        return ([..line], plan);
+        // each phrase louder at its highest note and softer at its lowest, as a line's (LinePattern.PhraseArc)
+        var arc = LinePattern.PhraseArc([..marks.Select(x => x.Phrase)], [..marks.Select(x => x.Pitch)], PhraseArc);
+        return ([..line.Select((x, i) => x.Value.With(StateKinds.Velocity, x.Value.GetStateValue(StateKinds.Velocity) + arc[i]).ToTimelineItem(x.Position))], plan);
     }
 
     /// <summary>Where a run is in its cells: on which cell, on which note of it, from which note the cell starts and which way it goes.</summary>

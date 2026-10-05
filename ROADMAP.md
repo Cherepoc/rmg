@@ -9,12 +9,9 @@ is removed once it is built.
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
 ratings by conventionality once enough are in, alongside, continuously and never as a gate.
 
-**Later** (P2), in this order: an idiom report a genre; the melody's character and the
-bass's style by genre; the harmonic rhythm by genre; a loop, a genre's levels, its fills and a melody written as a hook
-(genres that sound like themselves, see *Genres*); sidechain pumping; a riff in power chords and its chugs, the
-articulation's seam; solos, soloists, endings and intros by genre; a solo's
-loudness by its phrase. The ratings report (see *Listening data*) once the dashboard shows songs rated enough, and
-listening to the presets and to what October 2026 gained, alongside.
+**Later** (P2): the ratings report (see *Listening data*) once the dashboard shows songs rated enough, and listening
+to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
+drops, turnarounds and passing chords), alongside.
 
 **When the need shows** (P3), each by what listening says, in this order: stop-time breaks; a chord moved by
 semitones, then choosing free chords by their voices (see *Scales and chords*); a chord solo's approaches and a later
@@ -236,9 +233,6 @@ Each item with its plan, and what it waits for.
 
 - **The playing following the articulation** (P3, after genres; palm-muted chugs in *Genres*, step 2c): octaves popped in slap, short notes muted, without
   which an articulation is only another sound.
-- **A solo's loudness by its phrase** (P2, small): the melody's, counter-melody's and riff's lines lean louder at a phrase's
-  highest note and softer at its lowest (`LinePattern.PhraseArc`), a phrase running to its held note; a solo's lines
-  are placed apart (`SoloLines`) and play without it, which they could take by the same rule should they sound flat.
 - **Plain doubling,** a part doubling another in unison, now that the parts play by their pocket (`SongStages.Timing`).
 - **A motif developed further** (P3), inverted or stretched, should the solos' sequences sound mechanical.
 - **Legato as an articulation** (P3, after the palm mute's seam): a line's notes slurred into each other, a note's

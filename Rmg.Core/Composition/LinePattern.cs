@@ -216,22 +216,26 @@ internal sealed class LinePattern
     /// </summary>
     internal static double[] PhraseArc(IReadOnlyList<(StateMap State, int Pitch)> notes, double arc)
     {
-        var loudness = new double[notes.Count];
+        var phrases = new int[notes.Count];
+        for (var i = 1; i < notes.Count; i++)
+            phrases[i] = phrases[i - 1] + (notes[i - 1].State.GetStateValue(StateKinds.HeldDuration) > 0
+                                           || notes[i].State.GetStateValue(CompositionStateKinds.LinePhraseStart) != (int)PhraseStart.None ? 1 : 0);
+        return PhraseArc(phrases, [..notes.Select(x => x.Pitch)], arc);
+    }
+
+    /// <summary>How much louder each note plays for its height in its phrase, as <see cref="PhraseArc(IReadOnlyList{ValueTuple{StateMap, int}}, double)" />, the phrases given.</summary>
+    /// <param name="phrases">The phrase each note is of, by its number.</param>
+    internal static double[] PhraseArc(IReadOnlyList<int> phrases, IReadOnlyList<int> pitches, double arc)
+    {
+        var loudness = new double[pitches.Count];
         if (arc == 0)
             return loudness;
-        var start = 0;
-        for (var i = 0; i < notes.Count; i++)
+        foreach (var phrase in Enumerable.Range(0, pitches.Count).GroupBy(i => phrases[i]))
         {
-            var ends = notes[i].State.GetStateValue(StateKinds.HeldDuration) > 0
-                       || i + 1 == notes.Count
-                       || notes[i + 1].State.GetStateValue(CompositionStateKinds.LinePhraseStart) != (int)PhraseStart.None;
-            if (!ends)
-                continue;
-            var (low, high) = (notes.Skip(start).Take(i - start + 1).Min(x => x.Pitch), notes.Skip(start).Take(i - start + 1).Max(x => x.Pitch));
+            var (low, high) = (phrase.Min(i => pitches[i]), phrase.Max(i => pitches[i]));
             if (high > low)
-                for (var j = start; j <= i; j++)
-                    loudness[j] = arc * ((notes[j].Pitch - low) / (double)(high - low) - 0.5);
-            start = i + 1;
+                foreach (var i in phrase)
+                    loudness[i] = arc * ((pitches[i] - low) / (double)(high - low) - 0.5);
         }
 
         return loudness;
