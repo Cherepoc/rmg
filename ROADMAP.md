@@ -399,6 +399,14 @@ a link carries. What is left:
      fifth, Reggae and Electronic the root, Funk between. A walking bass wants quarters too: the preset's rhythm
      checked. An octave bass, a root alternating its octaves on the off-beats, disco's and funk's, a figure of its own
      (P3).
+  2b. A riff in power chords: rock's riff a moving line of fifths, E5, G5, A5 over an E, where ours is a line of single
+     notes stacked only on a section's first (`LineChords.Riff`); the chords' part plays the Power chord shape already.
+     A riff note's state played as the octave doubling is (`Realizer`): its note, a perfect fifth over it, 7 semitones
+     whatever the scale, as a power chord is never diminished, and its octave where the range has it. Drawn a section
+     by the sound facet from a stream of its own, a genre's value: Rock much, Blues some, Funk, Jazz and Ambient none.
+     A riff in power chords plays no twin, whose thirds over a distorted fifth are mud. The scale's rule excepts the
+     fifth as it does a bass's chromatic approach. Measured by the presets' share of riff sections in power chords.
+     Not it: palm-muted chugs, an articulation (see *Instruments and expression*), and the blues' boogie figure.
   3. The harmonic rhythm: a pool of how long a chord lasts, leaning the draw its energy leans. Jazz half a bar or a
      bar, Folk, Ambient and Electronic two bars, Funk two and longer, Blues a bar; the cadence's rules checked where a
      phrase holds two chords.
