@@ -9,9 +9,10 @@ is removed once it is built.
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
 ratings by conventionality once enough are in, alongside, continuously and never as a gate.
 
-**Later** (P2), roughly in this order: what a genre cannot reach yet, the melody's character and the bass's style
-first, then the harmonic rhythm and the form's devices (see *Genres*); a chorus written as a hook (see *Form and
-sections*); timing by role, then a genre's pocket, the largest gap in how the songs are played (see *Groove*), and a
+**Later** (P2), roughly in this order: the presets' file in families, then what a genre cannot reach yet, the
+melody's character and the bass's style first, a riff in power chords and its chugs; genres that sound like
+themselves, an idiom report first, then the loop, the levels, the fills and the pumping; the harmonic rhythm and the
+form's devices (see *Genres*); a melody written as a hook (see *Form and sections*); builds and drops; timing by role, then a genre's pocket, the largest gap in how the songs are played (see *Groove*), and a
 guitar's strum after it (see *Groove*); turnarounds, then passing chords (approach chords, see *Scales and chords*); a
 solo's loudness by its phrase, as the other lines' (see *Instruments and expression*); the ratings report (see
 *Listening data*), once the dashboard shows songs rated enough; listening to the genres' presets (see *Genres*), and to
@@ -196,9 +197,9 @@ Each item with its plan, and what it waits for.
 - **The chords and the bass,** which follow the energy weakly, should choruses not sound fuller; the melody sings a
   section's energy over the song's in its range's place (`MelodyLayers.EnergyRegister`, `CompositionStateKinds.LineLift`),
   the chorus 2.6 semitones over the verse, higher in 61% of the songs; a bigger lift leaps into the section more.
-- **A chorus written as a hook** (P2): its melody leaning by its role to a shorter motif repeated and a plainer
-  rhythm, through the echo and rhythm layers it has; measured by the chorus's repeated notes against the verse's, too
-  much of it mechanical.
+- **A melody written as a hook** (P2): a melody leaning to a shorter motif repeated and a plainer rhythm, through the
+  echo and rhythm layers it has, by a section's role (a chorus) and by a genre's value (a beat's whole song, its sample);
+  measured by its repeated notes against a verse's, too much of it mechanical.
 - **The band's devices** (P3, each an edit after assembly among the stages): stop-time breaks first, the band hitting
   once a bar under a line that goes on, the blues' and rock's; then a push or anticipation the whole band plays, call and
   response between parts, a backing figure that recurs through the song.
@@ -419,6 +420,38 @@ a link carries. What is left:
      should play eight bars now and then.
   Later: phrases of other than four bars (a 3-bar phrase, a 6-bar section), which the line's question and answer
   and the fills assume, once P phrases sound right.
+- **The presets' file in families** (P2, first among the genre items, which all edit it): `genres.json` writes a
+  family's choices as names with a dot (`instrument.melody`, `rhythm.ground`, `feel.time`, `drumRole.kick`), and its
+  choices in no order. A choice `a.b` written `{ "a": { "b": ... } }` and read back so, by one rule with no family
+  named; only in the files people see, the shipped presets and the editor's export and import, which reads the flat
+  form too, an old export's; the page's model, what it keeps and what it asks the server keep the flat names, so that
+  the server's choices, the genres kept by their keys and every link stay as they are. Written in the editor's order of
+  its sections, so that an export diffs; the tests' reader (`GenrePresets`) by the same rule; a test that no choice has
+  a dot outside its family's. Not done: the three amounts named, three times the text for what the editor shows.
+- **Genres that sound like themselves** (P2, a plan in steps). A genre leans the surface (its instruments, scale,
+  tempo, rhythm, shapes, effects, form); under it every song is a band playing verses and choruses, a melody that goes
+  on, a chord a bar, a fill at every phrase, every part as loud. Hip-hop's preset plays as a lounge track: a beat is a
+  loop of two to four bars on one or two chords, the drums leading, a short hook repeated with room for a voice, few
+  fills, the drums a little late. Electronic's frame is the house and trance of the late nineties and two-thousands
+  (four on the floor, 117 to 130, offbeat hats) and plays as eighties synth-pop: it lacks builds and drops over long
+  sections, the pads and bass ducking under the kick, a figure looping for minutes, the drums and bass loudest. Steps:
+  1. An idiom report a genre: its idioms as measured targets written from its description (Hip-hop: chords in four
+     bars, the sections sharing one progression, fills a minute, the drums' loudness against the melody's, the kick
+     and the snare where its beats are, the melody's motif repeated), so that a target no setting reaches names the
+     mechanism it lacks. Before the steps after it.
+  2. A loop: a section taking the song's first progression rather than drawing its own, the arrangement and the
+     energy telling the sections apart; a genre's value the songs never play, Hip-hop's and Electronic's. The figures
+     (the bass's, the riff's) shared too, should the report ask; flatness the risk where the arrangement does not carry it.
+  3. A genre's levels, a velocity layer a role (the drums leading a beat), its arrangement after (see the levels and
+     the arrangement below), the user's mix the channels' over them.
+  4. The drums' fills by genre (step 5 of what a genre cannot reach, brought here): Hip-hop and Electronic sparse.
+  5. Sidechain pumping: the pads, the chords and the bass dipping on every kick, a strong effect beside the tremolo,
+     the echo and the sweep, played as expression; Electronic's pool much; on the kick wherever it falls.
+  6. Builds and drops: a section before a bigger one building (the snare and the hats thickening, the sweep rising),
+     the band out a beat or a bar before the drop; the lift cues', the runs' and a stopped ending's pieces, placed anew.
+  7. Electronic split into House, Techno and Synthwave (P3), once the steps above tell them apart.
+  The melody as a looped hook is a chorus written as a hook generalised (see *Form and sections*): one mechanism, by a
+  section's role and by a genre's value.
 - **What a genre cannot reach yet** (P2, a plan in steps): most of it a table the songs already draw by `ByConvention`,
   which a genre overrides as it does the scale, a choice, its lookup at the draw, the presets and a report each.
   1. The melody's character: a pool of its line scales (`LineScales.Weights`) and a value of stepwise or leaping,
