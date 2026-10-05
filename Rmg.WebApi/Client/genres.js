@@ -8,6 +8,25 @@ import PRESETS from "./genres.json";
  */
 export { PRESETS };
 
+/**
+ *     The preset a genre is, as a link names it by its id, such as "rock", in place of the server's key; none for a genre
+ *     that is no preset, or one changed from it. An id is letters alone and shorter than a key, so that it is never one.
+ */
+export function presetOf(genre) {
+    return PRESETS.find((preset) => isSameGenre(asGenre(preset), genre)) ?? null;
+}
+
+/** The preset a link names by its id, none for anything else. */
+export function presetById(id) {
+    return PRESETS.find((preset) => preset.id === id) ?? null;
+}
+
+/** Whether a name is a preset's, whatever its case and spacing, which no genre of one's own is saved under. */
+export function isPresetName(name) {
+    const plain = (x) => x.trim().replace(/\s+/g, " ").toLowerCase();
+    return PRESETS.some((preset) => plain(preset.name) === plain(name));
+}
+
 /** A genre as the settings carry it, a copy of the one given. */
 export function asGenre(genre) {
     return { name: genre.name, choices: structuredClone(genre.choices) };

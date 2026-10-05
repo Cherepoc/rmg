@@ -1,6 +1,6 @@
 import { MAX_GENRE_NAME_BYTES } from "./settings.js";
 import { isShowingGenrePrinciples, setShowingGenrePrinciples } from "./storage.js";
-import { endsOf, ownOf } from "./genres.js";
+import { endsOf, isPresetName, ownOf } from "./genres.js";
 import { createGenreTune } from "./genre-tune.js";
 import { byMiddle, COLOURS, drawBand, drawLines, drawShares, endsInWords, labelOf, rangeOf, svg } from "./genre-charts.js";
 
@@ -496,10 +496,12 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     }
 
     function showProblem(text = problemOf(draft)) {
-        problem.textContent = text ?? "";
-        problem.hidden = text === null;
-        play.disabled = save.disabled = text !== null;
-        save.disabled ||= draft.name.trim() === "";
+        // a preset's name kept for the preset, the draft played under it but saved under another
+        const said = text ?? (isPresetName(draft.name) ? `${draft.name.trim()} is a preset's name: save yours under another.` : null);
+        problem.textContent = said ?? "";
+        problem.hidden = said === null;
+        play.disabled = text !== null;
+        save.disabled = said !== null || draft.name.trim() === "";
         remove.disabled = !isOwn(draft.name.trim());
     }
 

@@ -175,6 +175,26 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task APresetsName_IsTheDrafts_ToPlay_ButNeverToSaveAsOnesOwn()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var name = dialog.Locator("input[aria-label='Genre name']");
+        var save = dialog.Locator("footer button", new() { HasTextString = "Save" });
+        var play = dialog.Locator("footer button", new() { HasTextString = "Play" });
+
+        // whatever its case and spacing
+        await name.FillAsync("  hip-HOP ");
+        await Assert.That(await save.IsDisabledAsync()).IsTrue();
+        await Assert.That(await play.IsDisabledAsync()).IsFalse();
+        await Assert.That(await dialog.Locator("footer .warning").TextContentAsync()).IsEqualTo("hip-HOP is a preset's name: save yours under another.");
+        await name.FillAsync("Hip-hop of mine");
+        await Assert.That(await save.IsDisabledAsync()).IsFalse();
+        await Assert.That(await dialog.Locator("footer .warning").IsHiddenAsync()).IsTrue();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task TheEditor_AndTheWindowOverIt_NeverScrollSideways()
     {
         await using var page = await SongPage.Open(site, "?song=1");

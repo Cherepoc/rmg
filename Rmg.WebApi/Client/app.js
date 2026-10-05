@@ -46,7 +46,7 @@ import {
     toStep,
 } from "./settings.js";
 import { applyReport, defaultSettings, givenOnly, isEveryPartOff, noGenre, requestFor } from "./song-settings.js";
-import { asGenre, hasAGenre, isSameGenre, PRESETS } from "./genres.js";
+import { asGenre, hasAGenre, isSameGenre, presetById, presetOf, PRESETS } from "./genres.js";
 import { createGenreEditor } from "./genre-editor.js";
 import { since, tell, track } from "./tally.js";
 
@@ -921,7 +921,8 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         drumGroupsPresent = made.drumGroups;
         drumPiecesPlayed = made.drumPieces;
         songSeed = response.headers.get("X-Song-Seed") ?? seed;
-        songGenreKey = response.headers.get("X-Genre-Key");
+        // a preset by its id, which a link reads as it is, another genre by the key the server keeps it by
+        songGenreKey = presetOf(settings.genre)?.id ?? response.headers.get("X-Genre-Key");
         songVersion = response.headers.get("X-Song-Version");
         elements.seed.value = songSeed;
 
@@ -1214,10 +1215,15 @@ function keepGenreCopy(key, genre) {
     keepGenreCopies(copies);
 }
 
-/** The genre kept by a key, as this browser kept a copy of it or as the server keeps it; null where neither has it. */
+/**
+ *     The genre kept by a key, as this browser kept a copy of it, as the preset of that id or as the server keeps it;
+ *     null where none has it.
+ */
 async function genreOf(key) {
     const copy = recallGenreCopies()[key];
     if (copy !== undefined) return copy;
+    const preset = presetById(key);
+    if (preset !== null) return asGenre(preset);
     try {
         const response = await fetch(new URL(`api/genres/${encodeURIComponent(key)}`, location.href));
         if (!response.ok) return null;

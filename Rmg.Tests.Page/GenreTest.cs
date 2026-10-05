@@ -5,6 +5,25 @@ namespace Rmg.Tests.Page;
 public sealed class GenreTest(Site site)
 {
     [Test]
+    public async Task ALinksPreset_IsTheOneOfItsId_AskedOfNoServer_AndEveryIdIsNeverAKey()
+    {
+        await using var page = await SongPage.Open(site, $"?song=1&settings=B{new string('0', 70)}&genre=reggae");
+        var asked = new List<string>();
+        page.Page.Request += (_, request) => asked.Add(request.Url);
+        await page.FirstSong();
+        await page.Settled();
+
+        await Assert.That(page.Requests[0].Body.GetProperty("genre").TryGetProperty("kit", out _)).IsTrue();
+        await Assert.That(asked.Any(x => x.Contains("/api/genres/reggae"))).IsFalse();
+        await Assert.That(await page.Page.Locator("select[aria-label='Genre']").InputValueAsync()).IsEqualTo("preset:reggae");
+        // letters alone, and shorter than a key's 11, so that no key is ever an id
+        var ids = await page.Page.EvaluateAsync<string[]>("() => [...document.querySelectorAll(\"select[aria-label='Genre'] option[value^='preset:']\")].map(x => x.value.slice(7))");
+        await Assert.That(ids.Length).IsEqualTo(10);
+        await Assert.That(ids.All(x => x.All(char.IsAsciiLetter) && x.Length < 11)).IsTrue();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task APresetChosen_IsAskedFor_ByItsChoices_AndNoneLetsItGo()
     {
         await using var page = await SongPage.Open(site, "?song=1");
@@ -24,6 +43,8 @@ public sealed class GenreTest(Site site)
         await Assert.That(await page.Given()).IsEqualTo("1 given");
         // the list shows it chosen, and the next visit asks for it again, kept in this browser, not the link
         await Assert.That(page.Page.Url).Contains("settings=B");
+        // a preset named in the link by its id, which reads as it is
+        await Assert.That(page.Page.Url).Contains("genre=jazz");
         await Assert.That(await genre.InputValueAsync()).IsEqualTo("preset:jazz");
         await page.Page.GotoAsync("/");
         await page.Until(() => page.Requests.Count > count + 1 && page.Requests[^1].Body.TryGetProperty("genre", out var kept) && kept.TryGetProperty("kit", out _),
