@@ -473,6 +473,10 @@ public sealed class GenreEditorTest(Site site)
         await page.Until(async () => await offTheScale.Locator(".genre-ends > span").CountAsync() == 3, "the chords off the scale said");
         await Assert.That(await offTheScale.Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
         await Assert.That(await offTheScale.Locator(".genre-ends > span").Nth(1).TextContentAsync()).IsEqualTo("Middling: Applied dominants 35%");
+        // the lines' scales, the plainest songs' pentatonic the commonest
+        var lineScale = Tile(await Section(dialog, "Harmony"), "lineScale");
+        await page.Until(async () => await lineScale.Locator(".genre-ends > span").CountAsync() == 3, "the lines' scales said");
+        await Assert.That(await lineScale.Locator(".genre-ends > span").First.TextContentAsync()).StartsWith("Plainest: Pentatonic");
         await Assert.That(await Tile(dialog, "pan").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: default");
         // the forms, the plainest songs always in one of them
         await Assert.That(await Tile(await Section(dialog, "Form"), "formChances").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: One of the forms 100%");

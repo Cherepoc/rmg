@@ -479,12 +479,12 @@ a link carries. What is left:
   section's role and by a genre's value.
 - **What a genre cannot reach yet** (P2, a plan in steps): most of it a table the songs already draw by `ByConvention`,
   which a genre overrides as it does the scale, a choice, its lookup at the draw, the presets and a report each.
-  1. The melody's character: a pool of its line scales (`LineScales.Weights`) and a value of stepwise or leaping,
-     leaning its stepwiseness (`CompositionStateKinds.LineStepwiseness`) by `Tilt`. Blues the blues scale and the
-     pentatonic, Rock the pentatonic, Folk the section's and stepwise, Jazz the section's and melodic minor and
-     leaping more, Ambient stepwise. Measured by the presets' line scales and their melodies' moves and leaps. The
-     range a genre's later (P3): its width a profile's constant, passed to `Line` as its lift is, once the line scales
-     and the steps are heard.
+  1. Done: the lines' scales a genre's pool (`GenreChoices.LineScale`), the melody's and the riff's: pentatonic or
+     blues 75% of Rock's melody's sections (38% before), Blues 84%, Funk 77%, Hip-hop 68%, Jazz the section's and melodic
+     minor. Not done: a value of stepwise or leaping. Leaning the stepwiseness, at any odds, moved the mean move by a
+     tenth of a semitone and the leaps not at all: a melody's leaps come of a phrase starting afresh in another register,
+     its echoes and its landings, not of its steps. A melody's leaping by genre (P3), a lean of its register's freedom
+     and its leap's size, should listening ask.
   2. The bass's style: values of how much it leads into the next chord, walking at its most, and where it lands on a
      chord, root, third or fifth (the leading drawn a song and a section, its landings). Jazz walking, Folk root and
      fifth, Reggae and Electronic the root, Funk between. A walking bass wants quarters too: the preset's rhythm

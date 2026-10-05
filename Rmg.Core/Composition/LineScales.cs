@@ -58,10 +58,10 @@ internal static class LineScales
         [LineScale.Chromatic] = [..Enumerable.Range(0, OctaveNoteCount)]
     }.ToImmutableDictionary();
 
-    /// <summary>A section's line's scale, by the scale facet of its unconventionality.</summary>
-    public static LineScale Draw(IGenerationContext context, double unconventionality)
+    /// <summary>A section's line's scale, by the scale facet of its unconventionality, among a genre's pool where it names one.</summary>
+    public static LineScale Draw(IGenerationContext context, double unconventionality, Genre genre)
     {
-        return context.Pick(ByConvention.Weigh(Weights, unconventionality));
+        return context.Pick(ByConvention.Weigh(Weights, unconventionality, genre.Pool<LineScale>(GenreChoices.LineScale, x => GenreChoices.Name(x.ToString()))));
     }
 
     /// <summary>

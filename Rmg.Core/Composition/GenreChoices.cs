@@ -85,6 +85,24 @@ public static class GenreChoices
     ]);
 
     /// <summary>
+    ///     The scales a melody's and a riff's passing notes take, each weighed as the songs weigh them
+    ///     (<see cref="Composition.LineScales.Weights" />): the section's, its pentatonic, the blues', and the wilder ones on each
+    ///     chord's root.
+    /// </summary>
+    public static GenreChoice LineScale { get; } = Pool("lineScale", "Lines' scale",
+        Composition.LineScales.Weights.Select(x => (Name(x.Scale.ToString()), x.Scale switch
+        {
+            Composition.LineScale.Section => "The section's",
+            Composition.LineScale.Pentatonic => "Pentatonic",
+            Composition.LineScale.Blues => "Blues",
+            Composition.LineScale.MelodicMinor => "Melodic minor",
+            Composition.LineScale.WholeTone => "Whole-tone",
+            Composition.LineScale.Octatonic => "Octatonic",
+            Composition.LineScale.Chromatic => "Chromatic",
+            _ => throw new ArgumentOutOfRangeException(nameof(x.Scale), x.Scale, null)
+        }, x.Weight)));
+
+    /// <summary>
     ///     The gentle effects a song plays at all, each its chance as the songs have it by their sound (<see cref="Expression" />):
     ///     a vibrato, a chorus, a held chord's swell and a line's bends.
     /// </summary>
@@ -285,7 +303,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, Effects, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, LineScale, Effects, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

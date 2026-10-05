@@ -32,8 +32,8 @@ public sealed class LineScaleTest
     public async Task ThePlainestLines_TakeTheSectionsScale_OrItsPentatonic_AndTheWildestMostlyAScaleOfTheirOwn()
     {
         var context = new GenerationContext(5);
-        var plain = Enumerable.Range(0, 2000).Select(_ => LineScales.Draw(context, 0)).ToHashSet();
-        var wild = Enumerable.Range(0, 2000).Select(_ => LineScales.Draw(context, 1)).ToArray();
+        var plain = Enumerable.Range(0, 2000).Select(_ => LineScales.Draw(context, 0, Genre.None)).ToHashSet();
+        var wild = Enumerable.Range(0, 2000).Select(_ => LineScales.Draw(context, 1, Genre.None)).ToArray();
 
         await Assert.That(plain.SetEquals([LineScale.Section, LineScale.Pentatonic])).IsTrue();
         await Assert.That(wild.Contains(LineScale.Pentatonic)).IsFalse();
