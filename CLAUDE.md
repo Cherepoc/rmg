@@ -37,6 +37,10 @@
 - **Measure.** Measure a change in behaviour on the corpus before and after it (`TestCorpus`, explicit report
   tests), and tune it against the numbers. Tests read the trace's typed values (`StateTraceEntry.Value`,
   `TracePoints`), never its descriptions.
+- **Rules and calibrations.** A test asserts a rule, what must hold of every song, such as every note in its chord's
+  scale. A measured share is a calibration: its test keeps a wide bound against the mechanism breaking, prints what
+  it measures, and its target lives in an explicit report, so that a musical change moves numbers rather than fails
+  tests.
 - **Drawn or given.** A value the song draws, such as its unconventionality, follows the generator's taste, which may
   keep songs away from the ends; a value supplied in its place (`SongOverrides`) is used as given, a facet set outright
   as it is and a base as the centre its facets and sections stray around, so that a supplied 0 or 1 is the plainest or

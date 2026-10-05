@@ -306,9 +306,8 @@ Each item with its plan, and what it waits for.
      (`SongStagesTest`, the song observed as each stage ends). The rules a finished song keeps stay with their parts
      (every note in its chord's scale in `ScalesTest`, the bass's landings in `MelodyRepetitionTest`, a length given
      in `SongLengthTest`), one file of them moving tests for no gain.
-  4. Tests as rules or calibrations: a rule asserts what must hold; a calibration keeps a wide bound against the
-     catastrophic and its target in an explicit report, written into CLAUDE.md; the floors this round moved converted
-     first, the rest as they move.
+  4. Done: tests as rules or calibrations, written into CLAUDE.md; the floors this round moved, the melody's moves
+     and leaps and the solo's motifs, kept as wide bounds that print what they measure. The rest as they move.
   5. A hook intro takes the rests of the chorus it quotes, rather than the intro made an appearance of its own,
      which every reader of the map's sections would have to learn.
   Deferred: `SectionGenerator.Generate` (188 lines) split likewise, its draws already apart by their streams, should

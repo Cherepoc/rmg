@@ -252,10 +252,13 @@ public sealed class LineTest
             }
         }
 
-        await Assert.That(moves.Average()).IsLessThan(3.5);
-        await Assert.That(moves.Count(x => x > 7) / (double)moves.Count).IsLessThan(0.05);
-        // 0.71 over 64 songs, where the 16 it was set on gave 0.82 (October 2026): the line scales' and the wild harmony's notes
-        await Assert.That(onBeatChordNotes / (double)onBeat).IsGreaterThan(0.65);
+        // calibrations, their bounds against the line falling apart, the line's moves and chord notes reported in
+        // MelodyRepetitionTest.Report: a move of 2.7 semitones, a leap past a fifth 4.9% of the moves, 70% of the beats
+        // on a chord's notes (October 2026)
+        Console.WriteLine($"mean move {moves.Average():F2}, leaps past a fifth {moves.Count(x => x > 7) / (double)moves.Count:P1}, chord notes on the beat {onBeatChordNotes / (double)onBeat:P0}");
+        await Assert.That(moves.Average()).IsLessThan(4.5);
+        await Assert.That(moves.Count(x => x > 7) / (double)moves.Count).IsLessThan(0.1);
+        await Assert.That(onBeatChordNotes / (double)onBeat).IsGreaterThan(0.55);
     }
 
     [Test]
