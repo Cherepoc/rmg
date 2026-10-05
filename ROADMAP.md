@@ -9,11 +9,13 @@ is removed once it is built.
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
 ratings by conventionality once enough are in, alongside, continuously and never as a gate.
 
-**Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs rated
-enough; listening to the genres' presets (see *Genres*).
+**Later** (P2), roughly in this order: a chord's own scale, in steps (see *Scales and chords*); a line's loudness by
+its phrase and the hook quoted (see *Instruments and expression*, *Form and sections*), alongside it; the chorus's
+melody above the verse's; the blues' restated line (see *Genres*); the ratings report (see *Listening data*), once the
+dashboard shows songs rated enough; listening to the genres' presets (see *Genres*).
 
-**When the need shows** (P3), each by what listening says, roughly in this order: timing by role; the tempo leaning by
-the energy; a line scale by the chord and chord tones off the scale; legato slides; a motif developed further; the
+**When the need shows** (P3), each by what listening says, roughly in this order: timing by role, then a genre's
+pocket; the tempo leaning by the energy; scales of other sizes; legato slides; a motif developed further; the
 page's wait for a remake; a key change's common tone; the fills' loudness and sounds by convention; modulation, when a
 soundfont maps it, and a ping-pong echo (see *Open work*).
 
@@ -185,8 +187,17 @@ Each item with its plan, and what it waits for.
 - **The energy's recurrence** counts a section's appearances, not its plays: should long sections sound too quiet.
 - **A bar of two beats before a section,** which would make the bars of a section unlike each other; and swing by a
   section's own meter, which the song's meter decides now.
-- **The melody's register by the energy,** which a shift of the contour did not move, as the line follows its aim only
-  weakly; and **the chords and the bass,** which follow the energy weakly, should choruses not sound fuller.
+- **The chorus's melody above the verse's** (P2): the melody's register leaned by an appearance's energy, which a
+  shift of the contour did not move, as the line follows its aim only weakly; so a stronger pull of the aim, or the
+  line's notes moved by whole steps of the scale after it is placed, rather than a mechanism of its own. Measured by
+  the melody's median pitch in the loudest appearances against the quietest, a few semitones apart; held within the
+  instrument's range, which a high verse moved up would leave. **The chords and the bass,** which follow the energy
+  weakly, should choruses not sound fuller.
+- **The hook quoted** (P2): an intro, an outro or a fade playing the chorus's first phrase, its melody on the lead part
+  over its chords, as a song opens and closes on its hook; an edit after assembly, of the line as the song last plays
+  it, so that a key change on the way is kept. Today an intro only brings the band in (cold, a count-in, or its parts
+  one by one) and nothing quotes a section elsewhere. Its chance leans plain, a convention; a song without a chorus
+  quotes its most played section, or nothing.
 - **A section's parts chosen as its drum kit is** (`DrumKitGenerator.SelectKit`), leading and colouring roles, where
   now each part rests on its own (`Arrangement`).
 - **The drums' changes by an appearance's energy** (their colour, a drum's stroke), which are the section's as it was
@@ -211,6 +222,10 @@ Each item with its plan, and what it waits for.
 
 - **The playing following the articulation** (P3, after genres): octaves popped in slap, short notes muted, without
   which an articulation is only another sound.
+- **A line's loudness by its phrase** (P2): a pitched line's velocity tilted by where a note sits in its phrase's arc,
+  louder toward its highest note and softer at its last, a few steps of velocity at most, so that the beat's accents
+  still lead; one velocity layer for every line, leaned by `Tilt`, drawing nothing, so that the corpus's other draws
+  stay. Today a line's loudness is its beat, the energy and a random layer, its pitch alone rising and falling.
 - **Plain doubling,** a part doubling another in unison, which waits for timing by role.
 - **A motif developed further** (P3), inverted or stretched, should the solos' sequences sound mechanical.
 - **Modulation** (P3, when a soundfont maps it): CC1, which none of the soundfonts offered maps to tone. The rule to
@@ -225,14 +240,44 @@ Each item with its plan, and what it waits for.
 ### Groove
 
 - **Timing by role** (P3): the backbeat a little late, the hi-hat on top, should swing alone sound stiff; plain
-  doubling needs it.
+  doubling needs it. Then **a genre's pocket**: the offsets a genre's values, a laid-back backbeat or a pushed bass.
+  Offsets a role each only, never a random jitter, which would be playing a player rather than a rule; never in the
+  plainest songs, which keep to the click.
 
 ### Scales and chords
 
-- **A line scale by the chord** (P3): at the wild end, a line changing its scale from chord to chord, as a player does
-  over changes, rather than one scale on every chord's root through a section.
-- **Chord tones off the scale** (P3): an altered or split chord sounding as itself in any scale needs a chord's notes
-  altered as the bass's approach notes are (`StateKinds.Alteration`), rather than snapped.
+- **A chord's own scale** (P2, a plan in steps). Every chord's notes are snapped to the section's scale
+  (`Realizer.SnapChordToScale`), so a blues cannot play I7, IV7 and V7 (IV is IVmaj7 in major, and even Mixolydian gives
+  only I7), a minor key has no major V but at its cadence, and there are no secondary dominants (V/V, V/ii) and no
+  borrowed ♭VII, ♭VI or iv in major: the commonest chromatic sounds of every genre but the plainest. The rule: a chord
+  sounds in a scale, the section's own, or the section's with some steps a semitone up or down. Its alterations come
+  from one of two places: a mode on the home, borrowed (Aeolian in a major song gives ♭VI, ♭VII and iv of the roots it
+  already draws), or a mode on the chord's own root, applied (Mixolydian on a root a fifth above the next makes it that
+  chord's dominant; on every chord, the blues). Every note over the chord takes it, the chord's, the bass's, the
+  melody's, the counter-melody's and the solo's, as `Realizer.GetChord` gives them the cadence's raised seventh now
+  (`StateKinds.RaisedScaleSteps`), which is the first case of it: harmonic minor borrowed at the cadence. It takes in
+  a line scale by the chord, a line's passing notes taking its chord's scale, and chord tones off the scale. Steps:
+  1. The cadence's raised seventh as the general state: a chord's alterations, a signed semitone a step
+     (`RaisedScaleSteps` become them), the line scales' pitch classes altered as the chord's are. A refactor: the
+     fingerprint kept.
+  2. Borrowed and applied chords drawn, a chance each by the harmony facet, never at the plain end; applied only on a
+     root whose next falls a fifth, and its shape a seventh; borrowed by a mode drawn from the home's parallels. From a
+     stream of its own. Measured by the share of chords altered by the harmony's fifths, and by the clashes: a line's
+     note a semitone from a chord's on a strong beat, which should not rise.
+  3. A genre's: a value of borrowing and of applied chords, and "every chord its dominant", the blues; Blues every
+     chord Mixolydian, Jazz applied dominants, Rock ♭VII and ♭VI; reported by the presets' shares of each.
+  Musicality to listen for: a melody holding the section's note over a borrowed chord (the step's measure of clashes
+  stands for it), and an applied dominant whose resolution the next chord's shape spoils.
+
+- **Scales of other sizes** (P3, taken from *Parked*): whole scales of more or fewer than seven notes, pentatonic,
+  hexatonic (whole-tone, the blues' six) or octatonic, for a section's harmony as well as its lines, at the wild end
+  of the scale facet alone. The progressions move by scale steps and their rules count a fifth as three steps, the
+  chord shapes' heights sit between the qualities a seven-note scale gives, and the scales measure their brightness
+  and their distance against others of as many notes (`Scales`): a fifth as the step nearest seven semitones, a
+  chord's height snapped as now (`SnapChordToScale` takes any length), and a scale's distance only among its own
+  size. Steps: the engine's assumptions of seven found by a trial forcing every wild section into a pentatonic, as the
+  12-bar's trial found the phrases'; then the scales drawn. The line scales give pentatonic, whole-tone, octatonic and
+  blues lines already; this is their harmony, a narrow sound, so it waits on listening to the wild end.
 
 ### Rhythm engine
 
@@ -298,7 +343,8 @@ a link carries. What is left:
   2c. Done: a pattern's last phrase answers (LinePattern.Answers). Measured in twelve bars: the second phrase keeps 98%
      of the first's rhythm, the third 86%; but the second keeps 36% of its contour (the step to the next note), the
      notes drawn afresh over each phrase's chords, so the blues' restatement is the rhythm alone. Next, should
-     listening ask: a restating phrase's notes as the first phrase's steps moved to its chords, its line again.
+     listening ask: a restating phrase's notes as the first phrase's steps moved to its chords, its line again (P2,
+     after a chord's own scale, which the restated line over IV7 needs to sound as a blues).
   6. Done: the presets' patterns (Blues twelve bars 81% of its sections, Jazz and Folk eight, Rock four and eight),
      reported by EveryPreset_Phrases. Left to listening: Blues' V at bar 9 43% of its twelve-bar sections and home at
      bar 4 48% (IV at 5 63%, home at 8 61%), the middling and wild songs keeping the place rules less, by the
@@ -343,10 +389,6 @@ a link carries. What is left:
 
 Ideas with a reason, not planned: none has shown a need. Taken up only when listening or another item asks for one.
 
-- **Scales of other sizes:** whole scales of more or fewer than seven notes, where the progressions' rules would need
-  their steps as fractions of the octave. The line scales give the melodies and riffs pentatonic, whole-tone,
-  octatonic, chromatic and blues notes already, and harmony in such scales is a narrow sound for the largest change the
-  engine could take.
 - **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do: readable, but
   nothing needs them read.
 - **The drummer as one player:** the fills' `Drummer` and the drum solo's `Soloist` one record, a refactor with no
