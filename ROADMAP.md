@@ -199,28 +199,6 @@ Each item with its plan, and what it waits for.
 - **A chorus written as a hook** (P2): its melody leaning by its role to a shorter motif repeated and a plainer
   rhythm, through the echo and rhythm layers it has; measured by the chorus's repeated notes against the verse's, too
   much of it mechanical.
-- **Approach chords** (P2 for its first steps, a plan in steps): a chord leading into the next one that the
-  progression does not have, by its kind (the target's dominant, a passing diminished between roots a whole step
-  apart, the target's shape a semitone above or below, the tritone substitute), its length (a beat, half a bar or a bar,
-  taken from the chord before) and its beat: never at the plain end, a weak beat about the middle, and the strong beats
-  too and chained at the wild end. One chord in the bar state, a change of its own, which every part takes: the lines
-  land on it, the bass approaches it, the chords voice it; the uses differ in where it goes and who plays it. A
-  dominant or diminished approach is a root and a chord's own scale, as an applied dominant is; a chromatic one is not
-  (the scale's root, third and fifth raised together run its steps onto each other, which `AlterScaleSteps` refuses),
-  and wants a state of its own, the whole chord moved a semitone, the lines over it keeping the target's scale. Steps:
-  1. Turnarounds: a pattern's last bar before it plays again or its section ends, a dominant or a ii–V into its
-     start; a genre's lean, Jazz and Blues much. Before assembly, a section's decision.
-  2. Passing chords in the progression, dominant and diminished, by the progression facet and the energy, every part
-     playing them; the 12-bar's place rules kept, and the melody's note there fitting or the approach going elsewhere.
-  3. A chord solo's: a chord soloist's stacked note leading into the next chord playing an approach, step 2's chord,
-     on a weak beat, and on the strong ones too at the wild end, against the comping under it. A stage after the lines.
-  4. Chromatic approaches: the chord moved a semitone, then its kind among steps 2 and 3.
-  5. A later appearance reharmonised, a last chorus over substitutes (vi or iii for I, ii for IV, the tritone
-     substitute for V7) chosen by the notes they share with the chord they replace, decided before the lines are
-     placed, so that the melody placed over them fits as it does.
-  6. A melody in block harmony (P3), the counter-melody or the pad voicing its long notes, approaches on its passing
-     ones, as a horn section's soli.
-  Today a chord solo stacks the band's chord or planes its shape, never another chord; the bass approaches any change.
 - **The band's devices** (P3, each an edit after assembly among the stages): stop-time breaks first, the band hitting
   once a bar under a line that goes on, the blues' and rock's; then a push or anticipation the whole band plays, call and
   response between parts, a backing figure that recurs through the song.
@@ -280,6 +258,28 @@ Each item with its plan, and what it waits for.
 
 ### Scales and chords
 
+- **Approach chords** (P2 for its first steps, a plan in steps): a chord leading into the next one that the
+  progression does not have, by its kind (the target's dominant, a passing diminished between roots a whole step
+  apart, the target's shape a semitone above or below, the tritone substitute), its length (a beat, half a bar or a bar,
+  taken from the chord before) and its beat: never at the plain end, a weak beat about the middle, and the strong beats
+  too and chained at the wild end. One chord in the bar state, a change of its own, which every part takes: the lines
+  land on it, the bass approaches it, the chords voice it; the uses differ in where it goes and who plays it. A
+  dominant or diminished approach is a root and a chord's own scale, as an applied dominant is; a chromatic one is not
+  (the scale's root, third and fifth raised together run its steps onto each other, which `AlterScaleSteps` refuses),
+  and wants a state of its own, the whole chord moved a semitone, the lines over it keeping the target's scale. Steps:
+  1. Turnarounds: a pattern's last bar before it plays again or its section ends, a dominant or a ii–V into its
+     start; a genre's lean, Jazz and Blues much. Before assembly, a section's decision.
+  2. Passing chords in the progression, dominant and diminished, by the progression facet and the energy, every part
+     playing them; the 12-bar's place rules kept, and the melody's note there fitting or the approach going elsewhere.
+  3. A chord solo's: a chord soloist's stacked note leading into the next chord playing an approach, step 2's chord,
+     on a weak beat, and on the strong ones too at the wild end, against the comping under it. A stage after the lines.
+  4. Chromatic approaches: the chord moved a semitone, then its kind among steps 2 and 3.
+  5. A later appearance reharmonised, a last chorus over substitutes (vi or iii for I, ii for IV, the tritone
+     substitute for V7) chosen by the notes they share with the chord they replace, decided before the lines are
+     placed, so that the melody placed over them fits as it does.
+  6. A melody in block harmony (P3), the counter-melody or the pad voicing its long notes, approaches on its passing
+     ones, as a horn section's soli.
+  Today a chord solo stacks the band's chord or planes its shape, never another chord; the bass approaches any change.
 - **A chord's own scale** (P2, a plan in steps). Every chord's notes are snapped to the section's scale
   (`Realizer.SnapChordToScale`), so a blues cannot play I7, IV7 and V7 (IV is IVmaj7 in major, and even Mixolydian gives
   only I7), a minor key has no major V but at its cadence, and there are no secondary dominants (V/V, V/ii) and no
