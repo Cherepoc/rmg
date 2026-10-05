@@ -36,7 +36,13 @@ public enum IntroKind
     ///     The band coming in part by part, in an order drawn, over bars of the first section's before it or over its
     ///     first phrase, and the parts left coming in together at its end, with a fill and a landing.
     /// </summary>
-    Entries
+    Entries,
+
+    /// <summary>
+    ///     The chorus's first phrase before the first section, the whole band playing its hook, as a song opens on it, with a
+    ///     fill into the first section.
+    /// </summary>
+    Hook
 }
 
 /// <summary>
@@ -61,6 +67,13 @@ public readonly record struct IntroWindow(int Bars, bool IsBefore);
 /// </summary>
 internal static class FormLayers
 {
+    /// <summary>
+    ///     The chance a song opens on its chorus's hook, by its form facet: a convention, and no aptest in the plainest
+    ///     songs, as often in them as in a middling one and never at the wild end; drawn after its other intro, which it
+    ///     replaces, and played where the song has a chorus to quote that does not open it.
+    /// </summary>
+    public static ByConvention HookIntro { get; } = new(0.25, 0.25, 0);
+
     public static ImmutableArray<Weighted<IntroKind>> Intros { get; } =
     [
         new(0.3, IntroKind.Cold),

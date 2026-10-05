@@ -193,11 +193,10 @@ Each item with its plan, and what it waits for.
   the melody's median pitch in the loudest appearances against the quietest, a few semitones apart; held within the
   instrument's range, which a high verse moved up would leave. **The chords and the bass,** which follow the energy
   weakly, should choruses not sound fuller.
-- **The hook quoted** (P2): an intro, an outro or a fade playing the chorus's first phrase, its melody on the lead part
-  over its chords, as a song opens and closes on its hook; an edit after assembly, of the line as the song last plays
-  it, so that a key change on the way is kept. Today an intro only brings the band in (cold, a count-in, or its parts
-  one by one) and nothing quotes a section elsewhere. Its chance leans plain, a convention; a song without a chorus
-  quotes its most played section, or nothing.
+- **The hook at the end** (P3): a song opens on its chorus's first phrase now and then (`IntroKind.Hook`); an outro
+  quoting it too, should endings sound unrelated to the song, though the last section is most often the chorus already
+  and a fade replays it. The hook intro plays the whole band, a chorus's rests and its solo being the song's later
+  edits by section; should a full band before a sparse verse jar, the intro could take the first chorus's rests.
 - **A section's parts chosen as its drum kit is** (`DrumKitGenerator.SelectKit`), leading and colouring roles, where
   now each part rests on its own (`Arrangement`).
 - **The drums' changes by an appearance's energy** (their colour, a drum's stroke), which are the section's as it was

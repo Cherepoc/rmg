@@ -287,6 +287,7 @@ public static class SongDescriptions
     {
         IntroKind.CountIn => "a count-in on the hi-hat",
         IntroKind.Entries => $"the band coming in part by part over {intro.Window.Bars} bars",
+        IntroKind.Hook => "the chorus's hook",
         _ => "the whole band at once"
     };
 

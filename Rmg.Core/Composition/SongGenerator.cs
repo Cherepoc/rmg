@@ -185,6 +185,7 @@ public static class SongGenerator
         var formGenerator = new SongFormGenerator(
             Stream(SongStream.Form),
             Stream(SongStream.Intro),
+            Stream(SongStream.HookIntro),
             Of(Facet.Form),
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
             !absent.Contains(TrackRole.Drum),
@@ -409,21 +410,25 @@ public static class SongGenerator
 
         // the lines placed over the whole song, as they go on from section to section and lead into the next: the melody,
         // and the bass
+        // a hook intro's notes of each as its chorus plays them, before what leads into the first section
+        var hookChorus = form.Map.Sections.FirstOrDefault(x => structure.Roles[x.SectionId] == SectionRole.Chorus)?.Start ?? 0;
+        TrackEventStateTimelineMap<StateMap> PlaceLine(TrackEventStateTimelineMap<StateMap> song, KeyValuePair<int, IInstrumentTrack> track, LineProfile profile) =>
+            SongFormGenerator.QuoteHook(LinePattern.Place(song, track.Key, (PitchInstrumentTrack)track.Value, profile), track.Key, form.Map, hookChorus);
         var melodyTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Melody);
-        songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, melodyTrack.Key, (PitchInstrumentTrack)melodyTrack.Value, MelodyLayers.Line);
+        songTrackNoteTimelineMap = PlaceLine(songTrackNoteTimelineMap, melodyTrack, MelodyLayers.Line);
         var bassTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Bass);
-        songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, BassLeadingLayers.Line);
+        songTrackNoteTimelineMap = PlaceLine(songTrackNoteTimelineMap, bassTrack, BassLeadingLayers.Line);
         // and the bass walking with the drums' runs into a new section now and then, from where it is placed, and the
         // melody leading into it where it rests, each from a sequence of its own
         (songTrackNoteTimelineMap, _) = LineFills.Apply(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, fills.Runs, Stream(SongStream.BassFills), form.Map.MeterAt, LineFills.Bass, ImmutableHashSet<double>.Empty);
         (songTrackNoteTimelineMap, var melodyWalks) = LineFills.Apply(songTrackNoteTimelineMap, melodyTrack.Key, (PitchInstrumentTrack)melodyTrack.Value, fills.Runs, Stream(SongStream.MelodyFills), form.Map.MeterAt, LineFills.Melody, ImmutableHashSet<double>.Empty);
         var counterTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.CounterMelody);
-        songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, counterTrack.Key, (PitchInstrumentTrack)counterTrack.Value, CounterLayers.Line);
+        songTrackNoteTimelineMap = PlaceLine(songTrackNoteTimelineMap, counterTrack, CounterLayers.Line);
         // and the counter-melody leading into a section where the melody does not
         if (songTrackNoteTimelineMap.TrackTimelineMap.ContainsKey(counterTrack.Key))
             (songTrackNoteTimelineMap, _) = LineFills.Apply(songTrackNoteTimelineMap, counterTrack.Key, (PitchInstrumentTrack)counterTrack.Value, fills.Runs, Stream(SongStream.CounterFills), form.Map.MeterAt, LineFills.CounterMelody, melodyWalks);
         var riffTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Riff);
-        songTrackNoteTimelineMap = LinePattern.Place(songTrackNoteTimelineMap, riffTrack.Key, (PitchInstrumentTrack)riffTrack.Value, RiffLayers.Line);
+        songTrackNoteTimelineMap = PlaceLine(songTrackNoteTimelineMap, riffTrack, RiffLayers.Line);
         // and a line doubled in a section now and then, by another part or by its own an octave apart, each pair and
         // section from a sequence of its own
         songTrackNoteTimelineMap = LineDoubling.Apply(
@@ -696,5 +701,6 @@ internal enum SongStream
     DrumSoloFeet = 65,
     DrumSoloPlayers = 66,
     GenreLength = 67,
-    SectionPhrases = 68
+    SectionPhrases = 68,
+    HookIntro = 69
 }

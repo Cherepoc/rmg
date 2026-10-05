@@ -20,6 +20,9 @@ internal sealed class SongFormGenerator
     // the sequence an intro's entries are drawn from, apart from the rest of the form
     private readonly IGenerationContext _introContext;
 
+    // the sequence whether the song opens on its hook is drawn from (FormLayers.HookIntro)
+    private readonly IGenerationContext _hookContext;
+
     private readonly RhythmicUnconventionality _songRhythm;
 
     // what every track plays, by its number, so that the form can bring in or leave out the drums or the bass
@@ -34,6 +37,7 @@ internal sealed class SongFormGenerator
     public SongFormGenerator(
         IGenerationContext context,
         IGenerationContext introContext,
+        IGenerationContext hookContext,
         RhythmicUnconventionality songRhythm,
         IReadOnlyDictionary<int, TrackRole> roles,
         bool hasDrums,
@@ -42,6 +46,7 @@ internal sealed class SongFormGenerator
     {
         _context = context;
         _introContext = introContext;
+        _hookContext = hookContext;
         _songRhythm = songRhythm;
         _roles = roles;
         _hasDrums = hasDrums;
@@ -62,6 +67,9 @@ internal sealed class SongFormGenerator
         // a song without drums has nobody to count it in, so it starts cold, drawn as it would be all the same
         if (intro == IntroKind.CountIn && !_hasDrums)
             (intro, halfCountIn) = (IntroKind.Cold, false);
+        // the hook in its place now and then, the other's draws made all the same
+        if (_hookContext.TestProbability(FormLayers.HookIntro.At(_songRhythm.Value)))
+            (intro, window, halfCountIn) = (IntroKind.Hook, default, false);
 
         double held = 0, stop = 0;
         var slowsDown = false;
@@ -77,6 +85,26 @@ internal sealed class SongFormGenerator
     }
 
     /// <summary>
+    ///     A line with the notes of a hook intro at the pitches the chorus it quotes plays them at, as its line placed over
+    ///     the song has them afresh, but its last, which leads into the first section; as it is in a song of another intro.
+    /// </summary>
+    /// <param name="chorus">Where the chorus the intro quotes starts.</param>
+    internal static TrackEventStateTimelineMap<StateMap> QuoteHook(TrackEventStateTimelineMap<StateMap> song, int track, SongMap map, double chorus)
+    {
+        if (map.Intro.Kind != IntroKind.Hook || !song.TrackTimelineMap.TryGetValue(track, out var line))
+            return song;
+        var notes = line.EventTimeline;
+        var origin = map.Origin;
+        var heard = notes.Where(x => x.Position > chorus - 1e-9 && x.Position < chorus + origin - 1e-9).ToDictionary(x => Math.Round(x.Position - chorus, 6), x => x.Value);
+        var last = notes.Where(x => x.Position < origin - 1e-9).Select(x => x.Position).DefaultIfEmpty(0).Max();
+        var quoted = EventTimeline.Create(notes.Duration, notes.Select(x =>
+            x.Position < last - 1e-9 && heard.TryGetValue(Math.Round(x.Position, 6), out var played)
+                ? x.Value.With(StateKinds.ScaleStep, played.GetStateValue(StateKinds.ScaleStep)).With(StateKinds.Alteration, played.GetStateValue(StateKinds.Alteration)).ToTimelineItem(x.Position)
+                : x));
+        return song.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [track] = _ => quoted });
+    }
+
+    /// <summary>
     ///     The song put together as planned: the intro's bars, the sections and the ending's bars one after another,
     ///     where each is, what the form changes once they are, the tempo, and the lines the fills mark.
     /// </summary>
@@ -88,12 +116,18 @@ internal sealed class SongFormGenerator
         var meter = sections[0].Meter;
         var last = sections[^1].Meter;
         var first = sections[0];
+        // the hook a chorus's first phrase in the first section's bar, which does not open the song; none, and the song
+        // starts cold, where there is no such chorus
+        var hook = sections.Select((x, i) => (Section: x, Index: i)).FirstOrDefault(x => x.Section.Role == SectionRole.Chorus);
+        if (plan.Intro == IntroKind.Hook && (hook.Section is null || hook.Index == 0 || first.Role == SectionRole.Intro || !hook.Section.Meter.HasSameBar(first.Meter)))
+            plan = plan with { Intro = IntroKind.Cold };
         // an intro of entries before the first section plays its first bars, the parts cleared until they come in
         var windowDuration = plan.Window.Bars * meter.BarDuration;
         var introBlock = plan.Intro switch
         {
             IntroKind.Entries when plan.Window.IsBefore => first.Timeline.Trim(windowDuration),
             IntroKind.CountIn => CreateCountIn(first, plan.HalfCountIn, _roles),
+            IntroKind.Hook => hook.Section.Timeline.Trim(Meter.PhraseBarCount * hook.Section.Meter.BarDuration),
             _ => null
         };
         ImmutableArray<IntroEntry> entries = plan.Intro == IntroKind.Entries ? DrawEntries(first, plan.Window) : [];
@@ -141,6 +175,11 @@ internal sealed class SongFormGenerator
             // the drums land where the first section starts, but in a first section whose drums rest
             case IntroKind.CountIn when fillSections[0].HasDrums && fillSections[0].DrumsFrom == 0:
                 lines.Insert(0, new FillLine(origin, fillSections[0], fillSections[0], 0, HasFill: false));
+                break;
+            // the hook's drums fill into the first section, as the chorus's would into the section after it
+            case IntroKind.Hook when fillSections[0].HasDrums && fillSections[0].DrumsFrom == 0:
+                lines.Insert(0, new FillLine(origin, fillSections[hook.Index], fillSections[0], 0));
+                introDescription += $", the chorus's first phrase, section {hook.Index}";
                 break;
             case IntroKind.Entries:
             {
