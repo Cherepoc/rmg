@@ -274,12 +274,6 @@ a picker and an editor on the page, every choice a graph of what the songs draw 
 (`genre-tune.js`); a genre kept on the server by an 11-character key of its canonical form (`GenreStore`), which
 a link carries. What is left:
 
-- **One's own genres kept straight** (P1, small):
-  1. **Renaming:** Save keeps the draft in place of the genre it was opened from, under its name as it now is; Save
-     as alone adds one; a name another of one's own has asks before replacing it.
-  2. **Delete asks**, as closing with changes does: nothing undoes it.
-  3. **Names one whatever their case and spacing:** saving, finding one's own (isOwn) and the list compare them so,
-     as Duplicate's numbering already does.
 - **Keeping and backing up one's own genres** (P1, small):
   1. **Keep a genre a link brought:** its button Keep, among one's own under its name, or its name and the first
      number free, then Edit; a song's genre played unsaved stays Edit.
