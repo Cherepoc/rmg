@@ -196,9 +196,11 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
             }
             // the most of each end alone, on one line
             const words = endsInWords(choice, preview, 1);
+            // the words cut short where the three do not fit, the number never
             ends.append(...["Plainest", "Middling", "Experimental"].map((end, i) => {
-                const said = words[i].length > 0 ? words[i].join(", ") : choice.kind === "values" ? "default" : "none";
-                const span = html("span", "", `${end}: ${said}`);
+                const told = words[i][0] ?? { words: choice.kind === "values" ? "default" : "none", number: "" };
+                const span = html("span", "");
+                span.append(html("span", "genre-end-words", `${end}: ${told.words}`), html("span", "genre-end-number", told.number === "" ? "" : ` ${told.number}`));
                 span.title = span.textContent;
                 return span;
             }));

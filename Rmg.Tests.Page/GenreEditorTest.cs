@@ -168,9 +168,13 @@ public sealed class GenreEditorTest(Site site)
 
         // a part's instruments, whose names are long, said at each end on a line
         var instruments = Tile(dialog, "instrument.melody");
-        await page.Until(async () => await instruments.Locator(".genre-ends span").CountAsync() == 3, "the instruments' ends said");
-        var heights = await instruments.Locator(".genre-ends span").EvaluateAllAsync<double[]>("spans => spans.map(x => x.getBoundingClientRect().height)");
+        await page.Until(async () => await instruments.Locator(".genre-ends > span").CountAsync() == 3, "the instruments' ends said");
+        var heights = await instruments.Locator(".genre-ends > span").EvaluateAllAsync<double[]>("spans => spans.map(x => x.getBoundingClientRect().height)");
         await Assert.That(heights.All(x => x <= 18)).IsTrue();
+        // and where the words are cut short, the number is whole, within its end
+        var numbersWhole = await instruments.Locator(".genre-ends > span").EvaluateAllAsync<bool[]>("spans => spans.map(x => { const n = x.querySelector('.genre-end-number');"
+            + " const r = n.getBoundingClientRect(), e = x.getBoundingClientRect(); return n.textContent.trim() !== '' && r.width > 0 && r.right <= e.right + 1 && n.scrollWidth <= n.clientWidth + 1; })");
+        await Assert.That(numbersWhole.All(x => x)).IsTrue();
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -226,7 +230,7 @@ public sealed class GenreEditorTest(Site site)
         var time = await Section(dialog, "Time and feel");
         await Section(dialog, "Parts");
         var instruments = Tile(dialog, "instrument.melody");
-        await page.Until(async () => await instruments.Locator(".genre-ends span").CountAsync() == 3, "the instruments' ends said");
+        await page.Until(async () => await instruments.Locator(".genre-ends > span").CountAsync() == 3, "the instruments' ends said");
 
         const string sideways = "x => [...x.querySelectorAll('*')].filter(e => e.scrollWidth > e.clientWidth + 1"
             + " && ['auto', 'scroll'].includes(getComputedStyle(e).overflowX)).map(e => e.className)";
@@ -248,20 +252,20 @@ public sealed class GenreEditorTest(Site site)
         var meter = Tile(time, "meter");
         await page.Until(async () => await meter.Locator(".genre-graph path").CountAsync() > 1, "the meter's graph drawn");
         await Assert.That(await meter.GetAttributeAsync("class")).Contains("own");
-        await Assert.That(await meter.Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: 4/4 100%");
+        await Assert.That(await meter.Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: 4/4 100%");
         // every option's share named where it is pointed at, by its label
         await Assert.That(await meter.Locator(".genre-graph path title").AllTextContentsAsync()).Contains("4/4");
         await Assert.That(await Tile(time, "feelChances").Locator(".genre-graph path title").AllTextContentsAsync()).Contains("Swings");
         // every part plays in the plainest songs of no genre, said as one with how many more, not as the only one
         var parts = Tile(await Section(dialog, "Parts"), "parts");
-        await page.Until(async () => await parts.Locator(".genre-ends span").CountAsync() == 3, "the parts' ends said");
-        await Assert.That(await parts.Locator(".genre-ends span").First.TextContentAsync()).Matches(@"^Plainest: .+ and \d+ more 100%$");
-        await Assert.That(await Tile(time, "tempo").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: 90–175 bpm");
+        await page.Until(async () => await parts.Locator(".genre-ends > span").CountAsync() == 3, "the parts' ends said");
+        await Assert.That(await parts.Locator(".genre-ends > span").First.TextContentAsync()).Matches(@"^Plainest: .+ and \d+ more 100%$");
+        await Assert.That(await Tile(time, "tempo").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: 90–175 bpm");
         // a length's range in minutes and seconds, the shortest tenth of the plainest songs to the longest
-        await Assert.That(await Tile(time, "length").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: 1:33–3:28");
+        await Assert.That(await Tile(time, "length").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: 1:33–3:28");
         // the root motions, each as the songs have it
-        await Assert.That(await Tile(await Section(dialog, "Harmony"), "rootMotion").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: default");
-        await Assert.That(await Tile(time, "feelValues").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: default");
+        await Assert.That(await Tile(await Section(dialog, "Harmony"), "rootMotion").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: default");
+        await Assert.That(await Tile(time, "feelValues").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: default");
 
         // overridden, its own, and how many options it keeps
         await Override(time, "meter").CheckAsync();

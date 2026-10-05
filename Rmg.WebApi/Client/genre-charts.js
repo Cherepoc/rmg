@@ -93,13 +93,14 @@ export function drawBand(element, from, to, [least, most], width, height) {
 /**
  *     What each end of the songs draws, in words: a pool's options by their shares, a chance's by its chance and a value
  *     by how far it is from as it is, at 50, the greatest first, none at 0 or as it is, at most as many as given, the last
- *     with how many more are as much; a range its ends by its unit.
+ *     with how many more are as much; a range its ends by its unit. Each as its words and its number apart, "" for a
+ *     range's, so that a page short of room cuts the words and never the number.
  */
 export function endsInWords(choice, preview, count = Infinity) {
     const label = labelOf(choice);
     if (choice.kind === "range") {
         const { from, to } = preview.curves;
-        return [0, 1, 2].map((end) => [rangeInWords(choice, atEnds(from)[end], atEnds(to)[end])]);
+        return [0, 1, 2].map((end) => [{ words: rangeInWords(choice, atEnds(from)[end], atEnds(to)[end]), number: "" }]);
     }
 
     const amounts = choice.kind === "pool" ? preview.shares : preview.curves;
@@ -114,7 +115,7 @@ export function endsInWords(choice, preview, count = Infinity) {
         // the last one said with those left out that are said as it is, so that none seems the only one so
         return told.slice(0, count).map((x, i) => {
             const tied = i === count - 1 ? told.slice(count).filter((y) => said(y.amount) === said(x.amount)).length : 0;
-            return `${label(x.name)}${tied > 0 ? ` and ${tied} more` : ""} ${said(x.amount)}`;
+            return { words: `${label(x.name)}${tied > 0 ? ` and ${tied} more` : ""}`, number: said(x.amount) };
         });
     });
 }

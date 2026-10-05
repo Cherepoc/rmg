@@ -941,20 +941,29 @@ html:has(dialog:modal) {
     color: var(--muted);
 }
 
-/* each end on one line, cut short where the three do not fit, its whole in its title */
-.genre-ends span {
+/* each end on one line, its words cut short where the three do not fit and its number never, its whole in its title */
+.genre-ends > span {
+    display: flex;
+    min-width: 0;
+    white-space: pre;
+}
+
+.genre-ends > span:nth-child(2) {
+    justify-content: center;
+}
+
+.genre-ends > span:last-child {
+    justify-content: flex-end;
+}
+
+.genre-end-words {
     min-width: 0;
     overflow: hidden;
-    white-space: nowrap;
     text-overflow: ellipsis;
 }
 
-.genre-ends span:nth-child(2) {
-    text-align: center;
-}
-
-.genre-ends span:last-child {
-    text-align: right;
+.genre-end-number {
+    flex-shrink: 0;
 }
 
 /* how a genre works, above the sections, closed once read */
@@ -1019,8 +1028,8 @@ html:has(dialog:modal) {
         gap: 0;
     }
 
-    .genre-ends span:nth-child(n) {
-        text-align: left;
+    .genre-ends > span:nth-child(n) {
+        display: block;
         white-space: normal;
     }
 
