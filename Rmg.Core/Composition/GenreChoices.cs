@@ -300,6 +300,19 @@ public static class GenreChoices
                 : default))),
         ChordShapes.All.Select(x => $"{x.Description} {NotesOnC(x.Targets)}"));
 
+    /// <summary>
+    ///     How often each part rests in a section, from 0, never more than the songs' least, through 50, as the songs have it,
+    ///     to 100, the most (<see cref="Arrangement.GenreRestOdds" />): a dub's drums and bass dropping out, a beat's pad
+    ///     left out.
+    /// </summary>
+    public static GenreChoice Rests { get; } = Values("rests", "Parts resting",
+        [..Arrangement.Rests.Select(x => (Name(x.Part.ToString()), x.Part switch
+        {
+            TrackRole.CounterMelody => "Counter-melody",
+            TrackRole.Drum => "Drums",
+            _ => x.Part.ToString()
+        }))]);
+
     // the pitched parts' pools, in the order the page shows them
     private static readonly (TrackRole Role, string Label, InstrumentRole Pool)[] InstrumentPools =
     [
@@ -412,7 +425,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, Loop, LineScale, Bass, BassLanding, Effects, Levels, GrooveHold, Pocket, Fills, Drop, StopTime, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, Loop, LineScale, Bass, BassLanding, Effects, Levels, Rests, GrooveHold, Pocket, Fills, Drop, StopTime, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

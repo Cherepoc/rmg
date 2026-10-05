@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
@@ -67,6 +68,10 @@ public sealed class GenreIdiomsReportTest
             return bars.Length > 0 ? bars.Count(x => BarOf(x.Start, x.BarDuration) == BarOf(x.Start - x.BarDuration, x.BarDuration)) / (double)bars.Length : double.NaN;
         }
 
+        // the share of the appearances a part the song plays rests in
+        double Rests(TrackRole part) => song.Song.TrackDefinitions.Values.Any(x => x.Role == part)
+            ? song.Trace.Where(x => x.Point == TracePoints.Arrangement).Select(x => ((ImmutableHashSet<TrackRole>)x.Value!).Contains(part) ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average()
+            : double.NaN;
         return new Dictionary<string, double>
         {
             ["chorus phrases of two bars at most"] = Repeating(SectionRole.Chorus),
@@ -92,6 +97,8 @@ public sealed class GenreIdiomsReportTest
             ["guitars' notes palm-muted"] = notes.Where(x => x.Key is SongTracks.RiffTrack or SongTracks.RhythmTrack).SelectMany(x => x.Value).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["solo appearances"] = song.Solos.Count / (double)map.Sections.Length,
             ["sections in stop time"] = song.Trace.Where(x => x.Point == TracePoints.StopTime).Select(x => (bool)x.Value! ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
+            ["sections the drums rest"] = Rests(TrackRole.Drum),
+            ["sections the pad rests"] = Rests(TrackRole.Pad),
             ["lifts dropped"] = song.Trace.Count(x => x.Point == TracePoints.LiftCue) is var lifts and > 0 ? song.Trace.Count(x => x.Point == TracePoints.Drop) / (double)lifts : double.NaN,
             ["ending a fade"] = map.Ending.Kind == EndingKind.Fade ? 1 : 0,
             ["ending a button or a stop"] = map.Ending.Kind is EndingKind.Button or EndingKind.Stop ? 1 : 0,

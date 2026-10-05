@@ -303,7 +303,7 @@ internal sealed class SectionGenerator
         // the parts the section leaves out the first time it plays, from a sequence of its own, the likelier the less energy
         // it has; a later appearance draws them again (Appear)
         var arrangementSeed = StreamSeed(sectionId, SectionStream.Arrangement);
-        var resting = Arrangement.DrawRests(new GenerationContext(arrangementSeed), tilt, plan.Role, _absent);
+        var resting = Arrangement.DrawRests(new GenerationContext(arrangementSeed), tilt, plan.Role, _absent, _genre);
         ImmutableArray<SectionLine> lines = [..pitched.Select(x => x.Line).OfType<SectionLine>()];
         var section = new GeneratedSection(
             timeline,
@@ -323,7 +323,8 @@ internal sealed class SectionGenerator
             _tracks.Definitions.ToImmutableDictionary(x => x.Key, x => x.Value.Role),
             meter,
             powerChords,
-            chugs
+            chugs,
+            _genre
         );
         // every part, which each appearance leaves out of it what it rests
         return section;
@@ -347,7 +348,7 @@ internal sealed class SectionGenerator
                                                   (_tracks.DrumSetup == DrumSetup.KitAndPercussion &&
                                                    PercussionSections.Draw(Stream(sectionId, SectionStream.Percussion), _songPercussion, rhythm.Value, tilt, songPercussion)));
         // whether its drums play where it first plays, as its arrangement draws them there (Generate)
-        var playsDrums = !Arrangement.DrawRests(new GenerationContext(StreamSeed(sectionId, SectionStream.Arrangement)), tilt, role, _absent).Contains(TrackRole.Drum);
+        var playsDrums = !Arrangement.DrawRests(new GenerationContext(StreamSeed(sectionId, SectionStream.Arrangement)), tilt, role, _absent, _genre).Contains(TrackRole.Drum);
         return new SectionDrums(percussionOnly, DrumKitGenerator.SelectKit(Stream(sectionId, SectionStream.Kit), _tracks.SongDrums, tilt, percussionOnly), playsDrums);
     }
 
@@ -858,7 +859,8 @@ internal sealed record GeneratedSection(
     ImmutableDictionary<int, TrackRole> Roles,
     Meter Meter,
     bool RiffPowerChords,
-    bool Chugs
+    bool Chugs,
+    Genre Genre
 )
 {
     /// <summary>Whether the drums play in the section, rather than rest for a breakdown.</summary>
@@ -904,7 +906,7 @@ internal sealed record GeneratedSection(
     {
         var drawn = appearance == 0
             ? Resting
-            : Arrangement.DrawRests(new GenerationContext(Seeds.Derive(ArrangementSeed, appearance)), SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), Role, Absent)
+            : Arrangement.DrawRests(new GenerationContext(Seeds.Derive(ArrangementSeed, appearance)), SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), Role, Absent, Genre)
                 .Intersect(before);
         var resting = drawn.Union(held).Except(entering);
         if (!Roles.Values.Distinct().Any(x => !resting.Contains(x) && HasNotes(x)))

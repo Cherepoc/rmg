@@ -30,11 +30,16 @@ internal static class Arrangement
     /// <summary>How far a role that a tune carries keeps its melody, as the odds against it resting.</summary>
     public const double TuneOdds = 8;
 
+    /// <summary>How far a genre leans a part's rests at its most and its least (<see cref="GenreChoices.Rests" />), as the odds of its chance.</summary>
+    public const double GenreRestOdds = 6;
+
     /// <summary>The parts the section leaves out, the song's absent ones among them.</summary>
     /// <param name="energy">How the section's energy leans the draws: the more, the fewer parts rest.</param>
     /// <param name="absent">The parts the song leaves out (<see cref="SongParts" />), which rest whatever the draws.</param>
-    public static ImmutableHashSet<TrackRole> DrawRests(IGenerationContext context, Tilt energy, SectionRole role, ImmutableHashSet<TrackRole> absent)
+    /// <param name="genre">The genre whose parts rest more or less, a dub's drums and bass dropping out, where it names them.</param>
+    public static ImmutableHashSet<TrackRole> DrawRests(IGenerationContext context, Tilt energy, SectionRole role, ImmutableHashSet<TrackRole> absent, Genre genre)
     {
+        Tilt Genre(TrackRole part) => Tilt.Of(GenreRestOdds, genre.Shift(GenreChoices.Rests, GenreChoices.Name(part.ToString())));
         // a tune's roles keeping their melody, and an intro and an outro, mostly the band's, leaving it out the oftener
         var tune = Tilt.Of(TuneOdds, role switch
         {
@@ -43,7 +48,7 @@ internal static class Arrangement
             _ => 0
         });
         var resting = Rests
-            .Where(x => context.TestProbability((x.Part == TrackRole.Melody ? tune : Tilt.None).Chance(energy.Chance(x.Chance, -1), 1)))
+            .Where(x => context.TestProbability(Genre(x.Part).Chance((x.Part == TrackRole.Melody ? tune : Tilt.None).Chance(energy.Chance(x.Chance, -1), 1), 1)))
             .Select(x => x.Part)
             .Union(absent)
             .ToHashSet();

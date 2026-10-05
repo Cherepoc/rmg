@@ -49,6 +49,7 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
+      "rests": { "pad": 90 },
       "pocket": { "laidBack": 65 },
       "turnaround": { "sections": [0, 80, 80] },
       "passingChords": { "chords": [0, 50, 60] },
@@ -97,6 +98,7 @@
     "name": "Electronic",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, bass and pads, a TR-808 or electronic kit, straight and fast, minor, sus and add9 chords.",
     "choices": {
+      "rests": { "drum": 70, "melody": 65, "pad": 35 },
       "tempo": { "from": [117, 117, 100], "to": [130, 130, 175] },
       "meter": { "4/4": [100, 100, 85], "7/8": [0, 0, 10], "5/4": [0, 0, 8] },
       "feel": { "straight": [100, 100, 70], "grouped3": [0, 0, 20], "tuplets3": [0, 0, 15] },
@@ -187,6 +189,7 @@
     "name": "Reggae",
     "description": "Slow, the one drop with the kick and snare on beat 3, the chords and a rhythm guitar skanking on the offbeats, a sparse repeating bass, organ, major and minor.",
     "choices": {
+      "rests": { "drum": 75, "bass": 70 },
       "tempo": { "from": [68, 68, 62], "to": [91, 91, 105] },
       "meter": { "4/4": 100 },
       "scale": { "major": [100, 100, 60], "naturalMinor": [80, 80, 60], "dorian": [20, 30, 50], "mixolydian": [15, 25, 40] },
@@ -365,6 +368,7 @@
     "name": "Ambient",
     "description": "Slow, pads, strings, a choir, a harp and a celesta, chords held long, sus and add9 chords, Lydian and major, the drums rare and sparse.",
     "choices": {
+      "rests": { "drum": 85, "pad": 15 },
       "tempo": { "from": [60, 60, 60], "to": [85, 85, 90] },
       "meter": { "4/4": [100, 100, 60], "3/4": [30, 30, 40], "6/8": [25, 25, 40], "5/4": [0, 0, 20], "7/8": [0, 0, 15] },
       "scale": { "lydian": [80, 100, 100], "major": [100, 80, 50], "naturalMinor": [50, 45, 40], "dorian": [30, 45, 40], "mixolydian": [20, 25, 20] },

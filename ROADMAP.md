@@ -13,7 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: a genre's arrangement; key changes by genre; Electronic split; an octave bass; a push by the
+**When the need shows** (P3), each by what listening says, in this order: key changes by genre; Electronic split; an octave bass; a push by the
 whole band; legato as an articulation; stretched voicings; the melody's range by genre; the fills' sounds by
 convention; a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
 and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
@@ -478,7 +478,7 @@ a link carries. What is left:
      the figures shared (the bass's, the riff's), should the report or listening ask.
   3. Done: a genre's levels (`GenreChoices.Levels`), a part's level louder or quieter by up to 0.4 of the velocity's
      units (`VelocityLayers.GenreLevel`), the mix's volumes over them: the drums over the melody Hip-hop +14 velocity
-     steps (-10), Electronic +7 (-13). A genre's arrangement, its parts resting by a section's role, after (P3).
+     steps (-10), Electronic +7 (-13). A genre's arrangement after: done (`GenreChoices.Rests`).
   4. Done: the drums' fills by genre (`GenreChoices.Fills`), their spans leaning to longer ones or to none as a line's
      weight leans them, by up to six times the odds: fills a minute Hip-hop 1.4 (2.3), Electronic 1.9 (3.3), Ambient
      0.4, Rock 3.9 (3.3), Funk 3.3 (2.9).
@@ -530,8 +530,10 @@ a link carries. What is left:
      Blues 30%, Rock 18% (5% others); fades Electronic 72%, Hip-hop 69%, Ambient 59%; a button or a stop Funk 78%, Rock
      and Jazz 59%. Key changes by genre left for P3.
   5. Done as step 4 of genres that sound like themselves: the fills' amount.
-  Then (P3): a genre's arrangement and levels, its parts resting by a section's role (a dub's breakdown) and how loud
-  each plays (the levels below), one item, a tile a part, should listening ask. Every step a tile in the editor and a page test that it shows; a genre kept before
+  Done (P3): a genre's arrangement (`GenreChoices.Rests`), how often each part rests, leaning its chance by up to six
+  times the odds (`Arrangement.GenreRestOdds`): the pad resting in Jazz's sections 94% (69% in Rock's), Ambient's 26%;
+  the drums Reggae's 19%, Electronic's 16% (13%). Not done: a part resting by the section's role (a dub's breakdown
+  section), with *A genre's sections differing*. Every step a tile in the editor and a page test that it shows; a genre kept before
   keeps its key, its new choice absent.
 - **A head with solos** (to review after the form's devices by genre, which with AABA may make it, and then go): a jazz tune's head, choruses of solos over its form, and the head again, which AABA
   (SongForms.Forms) and the solos' sections (Solos) come near already; a form of its own only should listening ask.
