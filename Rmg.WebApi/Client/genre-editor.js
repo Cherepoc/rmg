@@ -32,7 +32,7 @@ const GRAPH_HEIGHT = 120;
 const PITCHED = [["melody", "Melody"], ["chords", "Chords"], ["bass", "Bass"], ["pad", "Pad"], ["counterMelody", "Counter-melody"], ["riff", "Riff"], ["rhythm", "Rhythm"], ["solo", "Soloist"]];
 const ROLES = [["ground", "Ground (kick)"], ["backbeat", "Backbeat (snare)"], ["time", "Time (hi-hat)"], ["colour", "Colour (toms)"]];
 
-export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
+export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll, allOwn }) {
     let choices = new Map();
     let draft = { name: "", description: "", choices: {} };
     // every choice as it was before its override was unchecked, for it to come back to, by its name
@@ -431,15 +431,34 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         if (!chosen) return;
         try {
             const parsed = JSON.parse(await chosen.text());
-            const isGenre = typeof parsed?.name === "string" && typeof parsed?.choices === "object" && parsed.choices !== null
-                && Object.keys(parsed.choices).every((x) => choices.has(x)) && (parsed.description === undefined || typeof parsed.description === "string");
-            if (!isGenre) throw new Error();
-            load(parsed);
+            const isGenre = (x) => typeof x?.name === "string" && typeof x?.choices === "object" && x.choices !== null
+                && Object.keys(x.choices).every((y) => choices.has(y)) && (x.description === undefined || typeof x.description === "string");
+            // a list of genres, every one of them, kept among one's own; one genre opened as the draft
+            if (Array.isArray(parsed) && parsed.length > 0 && parsed.every(isGenre)) {
+                told.textContent = `${onKeepAll(parsed)} kept among yours.`;
+                told.hidden = false;
+            } else if (isGenre(parsed)) load(parsed);
+            else throw new Error();
         } catch {
-            showProblem("That file is not a genre: a name and the choices the editor knows.");
+            showProblem("That file is not a genre: a name and the choices the editor knows, or a list of them.");
         }
     });
-    const imported = button("Import JSON", "Open a genre saved as a JSON file", () => file.click());
+    const imported = button("Import JSON", "Open a genre saved as a JSON file, or keep every one of a list of them", () => file.click());
+
+    // every genre of one's own as one file, so that they outlive this browser
+    const exportedAll = button("Export all", "Save every genre of yours as one JSON file", () => {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(new Blob([JSON.stringify(allOwn(), null, 1)], { type: "application/json" }));
+        link.download = "genres.json";
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(link.href));
+    });
+
+    // what was done that is no problem, such as genres imported
+    const told = document.createElement("p");
+    told.className = "genre-told";
+    told.setAttribute("role", "status");
+    told.hidden = true;
 
     const play = button("Play", "Ask for the song again in this genre", () => keep(onPlay), "primary");
     // in place of the genre the draft was opened from, renamed as it now is; another of one's own under its new name
@@ -477,7 +496,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         if (confirm(`Delete your genre ${origin}? Nothing brings it back.`)) onDelete(origin);
     });
     const footer = document.createElement("footer");
-    footer.append(problem, file, imported, exported, remove, saveAs, save, play);
+    footer.append(problem, told, file, imported, exported, exportedAll, remove, saveAs, save, play);
     dialog.append(header, body, footer, tune.element);
 
     // --- the draft ------------------------------------------------------------------------------------------------------------
@@ -561,6 +580,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         open(genre, choiceList) {
             choices = new Map(choiceList.map((x) => [x.name, x]));
             origin = isOwn(genre.name) ? genre.name.trim() : null;
+            told.hidden = true;
             load(genre);
             kept = asKept();
             dialog.showModal();

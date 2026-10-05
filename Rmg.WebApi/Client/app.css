@@ -759,6 +759,14 @@ html:has(dialog:modal) {
     margin: 0;
 }
 
+/* what was done that is no problem, such as genres imported, a line of its own and quiet */
+.genre-told {
+    flex: 1 1 100%;
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+}
+
 /* a genre of one's own's sentence, above its choices, as wide as they are */
 .genre-description {
     width: 100%;

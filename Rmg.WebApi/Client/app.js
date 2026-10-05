@@ -1617,6 +1617,8 @@ const KEY_NAMES = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A",
 
 /** The list of genres and its editor's button, which wait for the choices a genre is written by, and the choices. */
 let genreSelect = null;
+/** Whether the genre in the settings is a link's, as it brought it, which its button keeps; a draft played is edited. */
+let isLinksGenre = false;
 /** The chosen genre's sentence, under the list: a preset's, or one of one's own's description. */
 let genreAbout = null;
 let genreEdit = null;
@@ -1643,6 +1645,13 @@ const genreEditor = createGenreEditor({
         showGenre();
     },
     isOwn: (name) => recallGenres().some((x) => sameName(x.name, name)),
+    // every genre of a list kept, each under its name or the first number free after it; how many, in words
+    onKeepAll: (genres) => {
+        for (const genre of genres) keepGenres([...recallGenres(), { ...genre, name: nameFree(genre.name.trim() || "Untitled") }]);
+        showGenre();
+        return genres.length === 1 ? "One genre" : `${genres.length} genres`;
+    },
+    allOwn: () => recallGenres(),
 });
 document.body.append(genreEditor.element);
 
@@ -1803,13 +1812,28 @@ function createGenreRow() {
  */
 function actOnGenre() {
     const preset = presetOf(settings.genre);
+    const own = recallGenres().find((x) => isSameGenre(x, settings.genre));
     if (!hasAGenre(settings.genre)) genreEditor.open(noGenre(), genreChoices);
     else if (preset !== null) {
         const copy = { name: freeName(preset.name), choices: structuredClone(preset.choices) };
         keepGenres([...recallGenres(), copy]);
         showGenre();
         genreEditor.open(copy, genreChoices);
-    } else genreEditor.open(recallGenres().find((x) => isSameGenre(x, settings.genre)) ?? settings.genre, genreChoices);
+    } else if (own !== undefined || !isLinksGenre) genreEditor.open(own ?? settings.genre, genreChoices);
+    else {
+        // a link's genre kept among one's own and chosen, the song as it is
+        const kept = { name: nameFree(settings.genre.name.trim() || "Untitled"), choices: structuredClone(settings.genre.choices) };
+        keepGenres([...recallGenres(), kept]);
+        settings.genre = asGenre(kept);
+        isLinksGenre = false;
+        keepCurrentSettings();
+        showGenre();
+    }
+}
+
+/** A name as it is where no genre of one's own nor a preset has it, else with the first number free after it. */
+function nameFree(name) {
+    return [...recallGenres(), ...PRESETS].some((x) => sameName(x.name, name)) ? freeName(name) : name;
 }
 
 /** A name and the first number after it that no genre of one's own nor a preset has, whatever its case: "Rock 1", "Rock 2". */
@@ -1831,6 +1855,7 @@ function emptyValue() {
 /** Asks for the song again in a genre the editor made. */
 function useGenre(genre) {
     settings.genre = asGenre(genre);
+    isLinksGenre = false;
     track("genre_chosen", { detail: "own" });
     showGenre();
     settingsChanged(true);
@@ -1863,11 +1888,14 @@ function showGenre() {
     if (hasAGenre(settings.genre) && chosen === undefined) options.splice(1, 0, createOption("song", settings.genre.name || "This song's genre"));
     genreSelect.replaceChildren(...options);
     genreSelect.value = !hasAGenre(settings.genre) ? "none" : chosen?.value ?? "song";
-    // the button as the genre chosen has it: none made new, a preset duplicated, another edited
     const isPreset = presetOf(settings.genre) !== null;
-    genreEdit.textContent = !hasAGenre(settings.genre) ? "New" : isPreset ? "Duplicate" : "Edit";
+    // the button as the genre chosen has it: none made new, a preset duplicated, a link's kept, any other edited
+    const isOwn = recallGenres().some((x) => isSameGenre(x, settings.genre));
+    const isKept = !isOwn && isLinksGenre;
+    genreEdit.textContent = !hasAGenre(settings.genre) ? "New" : isPreset ? "Duplicate" : isKept ? "Keep" : "Edit";
     genreEdit.title = !hasAGenre(settings.genre) ? "Make a genre of your own"
-        : isPreset ? "Make a genre of your own from this one, under its name and a number" : "Change this genre";
+        : isPreset ? "Make a genre of your own from this one, under its name and a number"
+            : isKept ? "Keep the genre the link brought among yours" : "Change this genre";
     genreAbout.textContent = chosen?.description ?? "";
     genreAbout.hidden = genreAbout.textContent === "";
 }
@@ -1876,6 +1904,7 @@ function showGenre() {
 function chooseGenre(value) {
     if (value === "song") return;
     settings.genre = value === "none" ? noGenre() : asGenre(listedGenres().find((x) => x.value === value).genre);
+    isLinksGenre = false;
     track("genre_chosen", { detail: value.startsWith("preset:") ? value.slice("preset:".length) : value.startsWith("own:") ? "own" : "none" });
     showGenre();
     settingsChanged(true);
@@ -2595,6 +2624,7 @@ async function start() {
     // with the settings this browser kept
     if (linked.settings !== null) {
         settings = givenOnly(await withGenre(linked.settings, linked.genreKey));
+        isLinksGenre = hasAGenre(settings.genre);
         keepCurrentSettings();
         showSettings();
     }

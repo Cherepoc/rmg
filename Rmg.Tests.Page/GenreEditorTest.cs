@@ -382,6 +382,50 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task ALinksGenre_IsKept_AndEveryGenreOfOnesOwn_IsExportedAndImportedAsOneFile()
+    {
+        // a draft played, unsaved: the link to its song carries its genre by the server's key, its button Edit here
+        await using var maker = await SongPage.Open(site, "?song=1");
+        var made = await OpenEditor(maker);
+        await made.Locator("input[aria-label='Genre name']").FillAsync("Played");
+        await Override(await Section(made, "Time and feel"), "meter").CheckAsync();
+        await Played(maker, made);
+        await maker.Settled();
+        maker.Page.Dialog += (_, prompt) => _ = prompt.AcceptAsync();
+        await made.Locator("> header .genre-close").ClickAsync();
+        await Assert.That(await maker.Page.Locator("button.genre-edit").TextContentAsync()).IsEqualTo("Edit");
+        var link = maker.Page.Url;
+
+        // opened elsewhere: the link's genre kept by its button under its name among one's own, the song as it was
+        await using var page = await SongPage.Open(site, link[link.IndexOf('?')..]);
+        await page.FirstSong();
+        await page.Settled();
+        await page.Page.Locator("#settings-panel summary").ClickAsync();
+        var action = page.Page.Locator("button.genre-edit");
+        var yours = page.Page.Locator("select[aria-label='Genre'] optgroup[label='Yours'] option");
+        await page.Until(async () => await action.IsEnabledAsync() && await action.TextContentAsync() == "Keep", "a link's genre kept by its button");
+        var count = page.Requests.Count;
+        await action.ClickAsync();
+        await Assert.That((await yours.AllTextContentsAsync()).ToArray()).IsEquivalentTo(["Played"]);
+        await Assert.That(await action.TextContentAsync()).IsEqualTo("Edit");
+        await Assert.That(page.Requests.Count).IsEqualTo(count);
+
+        // every one of one's own as one file
+        await action.ClickAsync();
+        var dialog = page.Page.Locator("dialog.genre-dialog");
+        var download = await page.Page.RunAndWaitForDownloadAsync(() => dialog.GetByRole(AriaRole.Button, new() { Name = "Export all" }).ClickAsync());
+        var exported = await File.ReadAllTextAsync((await download.PathAsync())!);
+        await Assert.That(System.Text.Json.JsonDocument.Parse(exported).RootElement.GetArrayLength()).IsEqualTo(1);
+
+        // and read back as a list: every one kept, under its name or the first number free
+        await dialog.Locator("input[type=file]").SetInputFilesAsync(new FilePayload { Name = "genres.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes(exported) });
+        await page.Until(async () => await dialog.Locator(".genre-told").TextContentAsync() == "One genre kept among yours.", "the list kept");
+        await Assert.That((await yours.AllTextContentsAsync()).ToArray()).IsEquivalentTo(["Played", "Played 1"]);
+        await Assert.That(maker.Errors).IsEmpty();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task TheEditor_AndTheWindowOverIt_NeverScrollSideways()
     {
         await using var page = await SongPage.Open(site, "?song=1");
@@ -614,7 +658,7 @@ public sealed class GenreEditorTest(Site site)
 
         await file.SetInputFilesAsync(new FilePayload { Name = "other.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes("""{ "name": "Other", "choices": { "nothing": {} } }""") });
         // read as the file is, after the choosing
-        await page.Until(async () => await dialog.Locator("footer .warning").TextContentAsync() == "That file is not a genre: a name and the choices the editor knows.", "the file refused");
+        await page.Until(async () => await dialog.Locator("footer .warning").TextContentAsync() == "That file is not a genre: a name and the choices the editor knows, or a list of them.", "the file refused");
         await Assert.That(await dialog.Locator("input[aria-label='Genre name']").InputValueAsync()).IsEqualTo("Waltzes");
         await Assert.That(page.Errors).IsEmpty();
     }
