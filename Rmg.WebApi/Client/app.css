@@ -682,6 +682,13 @@ input[type="range"] {
     font-size: 13px;
 }
 
+/* the chosen genre's sentence, under its list, as quiet as a setting's ends */
+.genre-about {
+    margin: 0 0 4px;
+    font-size: 12px;
+    color: var(--muted);
+}
+
 /* the genre's editor, a popup over the page, its name and closing on top and what to do with it at the bottom, every
    choice between, scrolling; the whole screen on a phone */
 .genre-dialog {
@@ -739,6 +746,19 @@ html:has(dialog:modal) {
 .genre-dialog > footer .warning {
     flex: 1 1 100%;
     margin: 0;
+}
+
+/* a genre of one's own's sentence, above its choices, as wide as they are */
+.genre-description {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    resize: vertical;
+    font: inherit;
+    font-size: 13px;
 }
 
 .genre-dialog > header input {

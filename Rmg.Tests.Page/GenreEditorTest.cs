@@ -195,6 +195,30 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task AGenresDescription_IsOnesOwn_ShownUnderItChosen_AndAPresetsSentenceUnderThePreset()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var about = page.Page.Locator(".genre-about");
+        var genre = page.Page.Locator("select[aria-label='Genre']");
+        var dialog = await OpenEditor(page);
+        var description = dialog.Locator("textarea[aria-label='Genre description']");
+
+        // made from none, described, saved and chosen: its sentence under the list
+        await dialog.Locator("input[aria-label='Genre name']").FillAsync("Slow rain");
+        await description.FillAsync("Long, quiet songs for a wet afternoon.");
+        await dialog.Locator("footer button", new() { HasTextString = "Save" }).ClickAsync();
+        await page.Until(async () => await about.TextContentAsync() == "Long, quiet songs for a wet afternoon.", "its description shown");
+        await dialog.Locator("> header .genre-close").ClickAsync();
+
+        // a preset chosen: its own sentence; edited, the draft takes none of it
+        await genre.EvaluateAsync("select => { select.value = 'preset:jazz'; select.dispatchEvent(new Event('change')); }");
+        await page.Until(async () => (await about.TextContentAsync() ?? "").Length > 20 && await about.TextContentAsync() != "Long, quiet songs for a wet afternoon.", "the preset's sentence shown");
+        await page.Page.Locator("button.genre-edit").ClickAsync();
+        await Assert.That(await description.InputValueAsync()).IsEqualTo("");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task TheEditor_AndTheWindowOverIt_NeverScrollSideways()
     {
         await using var page = await SongPage.Open(site, "?song=1");

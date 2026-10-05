@@ -19,6 +19,9 @@ import { byMiddle, COLOURS, drawBand, drawLines, drawShares, endsInWords, labelO
 /** A pool's weight from which an instrument is among the commonest, which a part's instruments start from. */
 const COMMON_WEIGHT = 50;
 
+/** A genre's description's longest, in characters. */
+const MAX_GENRE_DESCRIPTION = 200;
+
 /** How long the editor waits after a change before it asks for the graphs again. */
 const PREVIEW_WAIT_MS = 150;
 
@@ -31,7 +34,7 @@ const ROLES = [["ground", "Ground (kick)"], ["backbeat", "Backbeat (snare)"], ["
 
 export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     let choices = new Map();
-    let draft = { name: "", choices: {} };
+    let draft = { name: "", description: "", choices: {} };
     // every choice as it was before its override was unchecked, for it to come back to, by its name
     let unchecked = new Map();
     // what the songs draw of every choice, as the server last said (/api/genres/previews)
@@ -58,6 +61,15 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         draft.name = name.value;
         showProblem();
     });
+    // what a genre of one's own is, shown under it when it is chosen; never a preset's, which says what the preset sets
+    // and would no longer once the draft changes it
+    const description = document.createElement("textarea");
+    description.className = "genre-description";
+    description.rows = 2;
+    description.maxLength = MAX_GENRE_DESCRIPTION;
+    description.placeholder = "What it is, in a sentence, shown under it when it is chosen";
+    description.setAttribute("aria-label", "Genre description");
+    description.addEventListener("input", () => (draft.description = description.value));
     const header = document.createElement("header");
     header.append(name, button("×", "Close the editor", () => {
         if (mayLeave()) dialog.close();
@@ -72,7 +84,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         return asKept() === kept || confirm("Close the editor and lose the changes not played or saved?");
     }
 
-    const asKept = () => JSON.stringify({ name: draft.name, choices: draft.choices });
+    const asKept = () => JSON.stringify({ name: draft.name, description: draft.description, choices: draft.choices });
 
     // --- the parts --------------------------------------------------------------------------------------------------------
 
@@ -380,6 +392,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     const partNames = [...PITCHED.flatMap(([part]) => [`instrument.${part}`, `rhythm.${part}`, `feel.${part}`]), "kit", "drumPieces", "drumSetup",
         ...ROLES.flatMap(([role]) => [`drumRole.${role}`, `rhythm.${role}`, `feel.${role}`])];
     body.append(
+        description,
         principles,
         section("Time and feel", ["tempo", "length", "meter", "feel", "feelChances", "feelValues"],
             single(tile(), "tempo"), single(tile(), "length"), single(tile(), "meter"), single(tile(), "feel"), single(tile(), "feelChances"), single(tile(), "feelValues")),
@@ -396,7 +409,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
 
     const exported = button("Export JSON", "Save this genre as a JSON file", () => {
         const link = document.createElement("a");
-        link.href = URL.createObjectURL(new Blob([JSON.stringify({ name: draft.name.trim(), choices: draft.choices }, null, 1)], { type: "application/json" }));
+        link.href = URL.createObjectURL(new Blob([JSON.stringify(finishedOrDraft(), null, 1)], { type: "application/json" }));
         link.download = `${draft.name.trim() || "genre"}.json`;
         link.click();
         setTimeout(() => URL.revokeObjectURL(link.href));
@@ -414,7 +427,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         try {
             const parsed = JSON.parse(await chosen.text());
             const isGenre = typeof parsed?.name === "string" && typeof parsed?.choices === "object" && parsed.choices !== null
-                && Object.keys(parsed.choices).every((x) => choices.has(x));
+                && Object.keys(parsed.choices).every((x) => choices.has(x)) && (parsed.description === undefined || typeof parsed.description === "string");
             if (!isGenre) throw new Error();
             load(parsed);
         } catch {
@@ -441,7 +454,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
 
     /** A genre as the draft, its sections open where it names a choice. */
     function load(genre) {
-        draft = { name: genre.name, choices: structuredClone(genre.choices) };
+        draft = { name: genre.name, description: genre.description ?? "", choices: structuredClone(genre.choices) };
         unchecked = new Map();
         previews = null;
         for (const { element, names } of sections) element.open = names.some((x) => x in draft.choices);
@@ -451,6 +464,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     function changed() {
         prune();
         name.value = draft.name;
+        description.value = draft.description;
         for (const show of shows) show();
         showProblem();
         clearTimeout(waiting);
@@ -478,8 +492,14 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
 
     /** The draft as it is played or kept; none if it is not a genre. */
     function finished() {
-        const result = { name: draft.name.trim(), choices: structuredClone(draft.choices) };
+        const result = finishedOrDraft();
         return problemOf(result) === null ? result : null;
+    }
+
+    /** The draft as it is kept and exported: its name and description trimmed, the latter only where it says something. */
+    function finishedOrDraft() {
+        const said = draft.description.trim();
+        return { name: draft.name.trim(), ...(said === "" ? {} : { description: said }), choices: structuredClone(draft.choices) };
     }
 
     /** A pool as the problem names it: a part's by its part and what it chooses, such as "Melody's feel". */

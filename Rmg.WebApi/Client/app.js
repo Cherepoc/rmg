@@ -1617,6 +1617,8 @@ const KEY_NAMES = ["C", "C♯", "D", "E♭", "E", "F", "F♯", "G", "A♭", "A",
 
 /** The list of genres and its editor's button, which wait for the choices a genre is written by, and the choices. */
 let genreSelect = null;
+/** The chosen genre's sentence, under the list: a preset's, or one of one's own's description. */
+let genreAbout = null;
 let genreEdit = null;
 let genreChoices = null;
 
@@ -1671,7 +1673,7 @@ buildSettings();
 function buildSettings() {
     // the genre first, then in the order they are named, the key, the mode and the meter chosen from a
     // list and every other on a slider
-    elements.songSettings.append(createGenreRow(), ...Object.keys(SETTING_NAMES).map((key) => (CHOICES.includes(key) ? createChoiceRow(key) : createSettingRow(key))));
+    elements.songSettings.append(createGenreRow(), genreAbout, ...Object.keys(SETTING_NAMES).map((key) => (CHOICES.includes(key) ? createChoiceRow(key) : createSettingRow(key))));
     // the drums last, their groups under them, each with its pieces
     elements.mixer.append(...PARTS.filter((part) => part !== "drum").map(createPartRow), createPartRow("drum"), ...DRUM_GROUPS.map(createDrumGroupRow));
 
@@ -1771,12 +1773,17 @@ function createGenreRow() {
     genreEdit.textContent = "Edit";
     genreEdit.title = "Make a genre of your own, from this one or from none";
     genreEdit.disabled = true;
-    genreEdit.addEventListener("click", () => genreEditor.open(hasAGenre(settings.genre) ? settings.genre : noGenre(), genreChoices));
+    // one's own genre with its description, which the settings do not carry; a preset without its sentence
+    genreEdit.addEventListener("click", () => genreEditor.open(
+        hasAGenre(settings.genre) ? recallGenres().find((x) => isSameGenre(x, settings.genre)) ?? settings.genre : noGenre(), genreChoices));
     place.append(end, genreSelect, genreEdit);
     const row = document.createElement("div");
     row.className = "setting";
     row.title = GENRE_DESCRIPTION;
     row.append(none, label, place);
+    genreAbout = document.createElement("p");
+    genreAbout.className = "genre-about";
+    genreAbout.hidden = true;
     return row;
 }
 
@@ -1791,8 +1798,8 @@ function useGenre(genre) {
 /** Every genre the list offers, by its value in it: the presets, then the genres made here. */
 function listedGenres() {
     return [
-        ...PRESETS.map((preset) => ({ value: `preset:${preset.id}`, genre: asGenre(preset), group: "Presets" })),
-        ...recallGenres().map((genre, i) => ({ value: `own:${i}`, genre: asGenre(genre), group: "Yours" })),
+        ...PRESETS.map((preset) => ({ value: `preset:${preset.id}`, genre: asGenre(preset), group: "Presets", description: preset.description })),
+        ...recallGenres().map((genre, i) => ({ value: `own:${i}`, genre: asGenre(genre), group: "Yours", description: genre.description ?? "" })),
     ];
 }
 
@@ -1815,6 +1822,8 @@ function showGenre() {
     if (hasAGenre(settings.genre) && chosen === undefined) options.splice(1, 0, createOption("song", settings.genre.name || "This song's genre"));
     genreSelect.replaceChildren(...options);
     genreSelect.value = !hasAGenre(settings.genre) ? "none" : chosen?.value ?? "song";
+    genreAbout.textContent = chosen?.description ?? "";
+    genreAbout.hidden = genreAbout.textContent === "";
 }
 
 /** Asks for the song again in the genre chosen, or in none. */
