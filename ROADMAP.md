@@ -299,8 +299,6 @@ a link carries. What is left:
      of the first's rhythm, the third 86%; but the second keeps 36% of its contour (the step to the next note), the
      notes drawn afresh over each phrase's chords, so the blues' restatement is the rhythm alone. Next, should
      listening ask: a restating phrase's notes as the first phrase's steps moved to its chords, its line again.
-  5. **Fills and solos by the pattern:** a fill's largest at the pattern's end, its smaller at a phrase's; a solo's
-     chorus a pattern (Solos), so that a blues solo takes 12-bar choruses.
   6. **Presets and listening:** Blues three phrases most, Jazz two (an 8-bar A), Folk two, Rock one or two; a report
      of the roots at each phrase's start and end by preset (the blues' IV at bar 5 and V at bar 9 most of the time)
      and of sections' lengths; then whether the songs' own should play two phrases now and then.
