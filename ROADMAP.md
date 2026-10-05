@@ -9,12 +9,14 @@ is removed once it is built.
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
 ratings by conventionality once enough are in, alongside, continuously and never as a gate.
 
-**Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs rated
+**Later** (P2), roughly in this order: what a genre cannot reach yet, the melody's character and the bass's style
+first, then the harmonic rhythm and the form's devices (see *Genres*); a chorus written as a hook (see *Form and
+sections*); the ratings report (see *Listening data*), once the dashboard shows songs rated
 enough; listening to the genres' presets (see *Genres*), and to what the harmony, the melody and the form gained in
 October 2026: chords off the scale, a phrase's loudness, the hook intro, the chorus's lift and the restated phrase.
 
 **When the need shows** (P3), each by what listening says, roughly in this order: timing by role, then a genre's
-pocket; the tempo leaning by the energy; scales of other sizes; legato slides; a motif developed further; the
+pocket, the largest gap in how the songs are played; the tempo leaning by the energy; scales of other sizes; legato slides; a motif developed further; the
 page's wait for a remake; a key change's common tone; the fills' loudness and sounds by convention; modulation, when a
 soundfont maps it, and a ping-pong echo (see *Open work*).
 
@@ -190,6 +192,13 @@ Each item with its plan, and what it waits for.
 - **The chords and the bass,** which follow the energy weakly, should choruses not sound fuller; the melody sings a
   section's energy over the song's in its range's place (`MelodyLayers.EnergyRegister`, `CompositionStateKinds.LineLift`),
   the chorus 2.6 semitones over the verse, higher in 61% of the songs; a bigger lift leaps into the section more.
+- **A chorus written as a hook** (P2): its melody leaning by its role to a shorter motif repeated and a plainer
+  rhythm, through the echo and rhythm layers it has; measured by the chorus's repeated notes against the verse's, too
+  much of it mechanical.
+- **The band's devices** (P3, each an edit after assembly among the stages): a push or anticipation the whole band
+  plays, stop-time breaks, call and response between parts, a backing figure that recurs through the song.
+- **Harmony's devices** (P3): a chromatic line inside a held chord, a pedal held under a section, a ii–V into a chord
+  but the home, which a chord's own scale makes part of.
 - **The hook at the end** (P3): a song opens on its chorus's first phrase now and then (`IntroKind.Hook`); an outro
   quoting it too, should endings sound unrelated to the song, though the last section is most often the chorus already
   and a fade replays it. The hook intro plays the parts its chorus plays, its rests and texture its
@@ -378,6 +387,27 @@ a link carries. What is left:
      should play eight bars now and then.
   Later: phrases of other than four bars (a 3-bar phrase, a 6-bar section), which the line's question and answer
   and the fills assume, once P phrases sound right.
+- **What a genre cannot reach yet** (P2, a plan in steps): most of it a table the songs already draw by `ByConvention`,
+  which a genre overrides as it does the scale, a choice, its lookup at the draw, the presets and a report each.
+  1. The melody's character: a pool of its line scales (`LineScales.Weights`) and a value of stepwise or leaping,
+     leaning its stepwiseness (`CompositionStateKinds.LineStepwiseness`) by `Tilt`. Blues the blues scale and the
+     pentatonic, Rock the pentatonic, Folk the section's and stepwise, Jazz the section's and melodic minor and
+     leaping more, Ambient stepwise. Measured by the presets' line scales and their melodies' moves and leaps. The
+     range, a profile's constant, a genre's only should listening ask.
+  2. The bass's style: values of how much it leads into the next chord, walking at its most, and where it lands on a
+     chord, root, third or fifth (the leading drawn a song and a section, its landings). Jazz walking, Folk root and
+     fifth, Reggae and Electronic the root, Funk between. A walking bass wants quarters too: the preset's rhythm
+     checked. An octave bass is a figure of its own, put off.
+  3. The harmonic rhythm: a pool of how long a chord lasts, leaning the draw its energy leans. Jazz half a bar or a
+     bar, Folk, Ambient and Electronic two bars, Funk two and longer, Blues a bar; the cadence's rules checked where a
+     phrase holds two chords.
+  4. The form's devices: a genre's chance of a solo and its soloists, its key changes' chances, and pools of its
+     intros and endings, the intros given ends of their own first (a table now, which moves the corpus). Jazz soloing
+     often and ending on a button or a ring, Rock on a stop or a button, Electronic and Ambient fading.
+  5. The fills' amount, a value: Rock and Funk busier, Ambient and Electronic sparse.
+  Put off: a genre's arrangement, its parts resting by a section's role (a dub's breakdown), a wide surface for an
+  idiom, should listening ask. Every step a tile in the editor and a page test that it shows; a genre kept before
+  keeps its key, its new choice absent.
 - **A head with solos** (P3): a jazz tune's head, choruses of solos over its form, and the head again, which AABA
   (SongForms.Forms) and the solos' sections (Solos) come near already; a form of its own only should listening ask.
 - **A genre's levels** (P3): how loud each part plays against the others, values a part each, applied where the mix
