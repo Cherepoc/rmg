@@ -455,10 +455,15 @@ a link carries. What is left:
   fills, the drums a little late. Electronic's frame is the house and trance of the late nineties and two-thousands
   (four on the floor, 117 to 130, offbeat hats) and plays as eighties synth-pop: it lacks builds and drops over long
   sections, the pads and bass ducking under the kick, a figure looping for minutes, the drums and bass loudest. Steps:
-  1. An idiom report a genre: its idioms as measured targets written from its description (Hip-hop: chords in four
-     bars, the sections sharing one progression, fills a minute, the drums' loudness against the melody's, the kick
-     and the snare where its beats are, the melody's motif repeated), so that a target no setting reaches names the
-     mechanism it lacks. Before the steps after it.
+  1. Done: an idiom report a genre (`GenreIdiomsReportTest`), its targets from its description. What it found, every
+     preset alike: 4.3 to 5.2 chords in four bars (Hip-hop's and Ambient's as Jazz's), the drums 6 to 13 velocity steps
+     under the melody, 0 to 4% of the sections sharing a progression, 1 to 5% of the melody's bars as the bar before,
+     2 to 3.6 fills a minute; the snare on 2 and 4 in 37% of Rock's groove bars (but a phrase's last and where the drums
+     rest), 62% in its plainest songs, the drums' own layers moving it in a middling one, and Electronic's kick on
+     every beat in 52%.
+  1b. A genre's backbeat held: the layers that move the backbeat in a middling song found (its role drawn again a
+     section, its phase and fullness drawn), and a genre's lever on them, Rock's, Blues', Funk's and Hip-hop's held to 2
+     and 4, Reggae's on 3; measured by the report's snare on 2 and 4.
   2. A loop: a section taking the song's first progression rather than drawing its own, the arrangement and the
      energy telling the sections apart; a genre's value the songs never play, Hip-hop's and Electronic's. The figures
      (the bass's, the riff's) shared too, should the report ask; flatness the risk where the arrangement does not carry it.
