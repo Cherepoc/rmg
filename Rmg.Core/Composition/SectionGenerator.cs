@@ -74,6 +74,12 @@ internal sealed class SectionGenerator
             .CacheGeneratedValues();
     }
 
+    /// <summary>The chance a section plays the song's first section's harmony, a loop, a genre's that the songs never play.</summary>
+    public static Probabilities.ByConvention Loop { get; } = new(0, 0, 0);
+
+    // the song's first section's harmony, which a section of a loop plays
+    private (Scale Scale, int Home, HarmonicRhythm Rhythm, ImmutableArray<int> Progression, int? Raisable, int? Raised, ImmutableArray<ChordScale> ChordScales, Meter Meter)? _firstHarmony;
+
     /// <summary>The random sequence a decision of a section draws from, apart from its own and every other decision's.</summary>
     private IGenerationContext Stream(int sectionId, SectionStream stream)
     {
@@ -106,7 +112,6 @@ internal sealed class SectionGenerator
         var (songStateMap, energy) = GetEnergy(sectionId, rhythm);
         var tilt = SectionEnergy.Tilt(energy, rhythm.Coupling);
         var scale = plan.KeepsSongScale ? _songScale : PickScale(sectionId, facets[Facet.Scale], energy, plan.Role);
-        StateTrace.Record(TracePoints.SectionScale, SectionTrace, sectionId, 0, StateMap.Default, 0, scale.Name, scale);
 
         // the section's chords move around its home, which every track's root starts from; the song's last section
         // leads home to its tonic, where the song ends
@@ -115,23 +120,31 @@ internal sealed class SectionGenerator
             home = 0;
         // how often its chords change, from a sequence of its own, faster the more energy it has
         var harmonicRhythm = HarmonicRhythm.Draw(Stream(sectionId, SectionStream.HarmonicRhythm), tilt, meter, facets[Facet.Progression], _genre);
-        StateTrace.Record(TracePoints.HarmonicRhythm, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{harmonicRhythm.Span}", harmonicRhythm);
         var progression = Progressions.Generate(context, scale, home, Progressions.Strictness.At(facets[Facet.Progression]), harmonicRhythm.Count, meter.Phrases,
             motion => _genre.Shift(GenreChoices.RootMotions, Progressions.Motions[motion].Name));
-        StateTrace.Record(TracePoints.Progression, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", progression), progression);
         // the cadence raising the seventh for a major chord on the fifth, where the scale allows it, by the progression
         // facet, from a sequence of its own
         var raisable = Progressions.GetCadenceRaisedStep(scale.Offsets, home, progression[^1]);
         var raisedStep = raisable is not null && Stream(sectionId, SectionStream.CadenceRaise).TestProbability(Progressions.CadenceRaise.At(facets[Facet.Progression]))
             ? raisable
             : null;
-        StateTrace.Record(TracePoints.CadenceRaise, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{raisable} {raisedStep is not null}", (raisable, raisedStep is not null));
         // every chord's scale: the cadence's raise, and the others' applied or borrowed now and then, from a sequence of
         // their own
         // a section of dominants, a genre's, from a sequence of its own, so that a song in none draws as it did
         var dominants = Stream(sectionId, SectionStream.DominantChords)
             .TestProbability(ChordScales.Dominant.At(facets[Facet.Progression], _genre.Chance(GenreChoices.ChordScales, "dominant")));
         var chordScales = ChordScales.Draw(Stream(sectionId, SectionStream.ChordScales), scale, home, progression, raisedStep, dominants, facets[Facet.Progression], _genre);
+        // a section of a loop plays the first section's harmony where its meter is the first's, its own drawn all the same
+        // so that its other draws stay, a genre's, from a sequence of its own (GenreChoices.Loop)
+        var loops = Stream(sectionId, SectionStream.Loop).TestProbability(Loop.At(facets[Facet.Form], _genre.Chance(GenreChoices.Loop, "sections")));
+        if (plan.KeepsSongScale)
+            _firstHarmony = (scale, home, harmonicRhythm, progression, raisable, raisedStep, chordScales, meter);
+        else if (loops && (_firstHarmony ?? throw new InvalidOperationException("A section loops before the song's first is made.")).Meter.Equals(meter))
+            (scale, home, harmonicRhythm, progression, raisable, raisedStep, chordScales, _) = _firstHarmony.Value;
+        StateTrace.Record(TracePoints.SectionScale, SectionTrace, sectionId, 0, StateMap.Default, 0, scale.Name, scale);
+        StateTrace.Record(TracePoints.HarmonicRhythm, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{harmonicRhythm.Span}", harmonicRhythm);
+        StateTrace.Record(TracePoints.Progression, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", progression), progression);
+        StateTrace.Record(TracePoints.CadenceRaise, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{raisable} {raisedStep is not null}", (raisable, raisedStep is not null));
         StateTrace.Record(TracePoints.ChordScales, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", chordScales.Select(x => x.Kind)), chordScales);
 
         // the section's change of the song's feel, now and then, from a sequence of its own, by its feel facet
@@ -957,5 +970,6 @@ internal enum SectionStream
     RhythmArpeggio = 29,
     Drums = 30,
     ChordScales = 31,
-    DominantChords = 32
+    DominantChords = 32,
+    Loop = 33
 }

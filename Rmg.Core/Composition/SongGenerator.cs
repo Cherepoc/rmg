@@ -254,6 +254,9 @@ public static class SongGenerator
         var generateSection = ((Func<int, GeneratedSection>)(id => sectionGenerator.Generate(
                 new SectionPlan(id, id == plan.TonicHomeSectionId, id == sectionIds[0], structure.Roles[id], sectionMeters[id], sectionDrums[id], playsLean))))
             .CacheGeneratedValues();
+        // the first made first, whose harmony a section of a loop plays (SectionGenerator.Loop); every section draws from
+        // sequences of its own, so the order they are made in changes none of them
+        generateSection(sectionIds[0]);
         // and its melody placed afresh every time it plays, varied from the first as far as the song improvises
         var improvisation = MelodyLayers.GenerateImprovisation(Stream(SongStream.MelodyImprovisation), songUnconventionality[Facet.Melody]);
         StateTrace.Record(TracePoints.MelodyImprovisation, SongTracks.MelodyTrack, 0, 0, StateMap.Default, 0, $"{improvisation:F2}", improvisation);

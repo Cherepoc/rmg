@@ -464,9 +464,11 @@ a link carries. What is left:
   1b. A genre's backbeat held: the layers that move the backbeat in a middling song found (its role drawn again a
      section, its phase and fullness drawn), and a genre's lever on them, Rock's, Blues', Funk's and Hip-hop's held to 2
      and 4, Reggae's on 3; measured by the report's snare on 2 and 4.
-  2. A loop: a section taking the song's first progression rather than drawing its own, the arrangement and the
-     energy telling the sections apart; a genre's value the songs never play, Hip-hop's and Electronic's. The figures
-     (the bass's, the riff's) shared too, should the report ask; flatness the risk where the arrangement does not carry it.
+  2. Done: a loop (`GenreChoices.Loop`, `SectionGenerator.Loop`): a section plays the first section's harmony (its
+     scale, home, chords' pace, progression and chords' own scales) where its meter is the first's, its own drawn all
+     the same so that its other draws stay; a genre's, the songs never. Hip-hop's sections sharing a progression 96%
+     (4%), its chords in four bars 2.3; Electronic's 82%. The first section made first, its harmony the loop's. Not done:
+     the figures shared (the bass's, the riff's), should the report or listening ask.
   3. A genre's levels, a velocity layer a role (the drums leading a beat), its arrangement after (see the levels and
      the arrangement below), the user's mix the channels' over them.
   4. The drums' fills by genre (step 5 of what a genre cannot reach, brought here): Hip-hop and Electronic sparse.
