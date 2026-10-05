@@ -751,6 +751,9 @@ html:has(dialog:modal) {
 /* a genre of one's own's sentence, above its choices, as wide as they are */
 .genre-description {
     width: 100%;
+    /* two lines at least, which the editor's scrolling grid would otherwise squeeze to nothing */
+    min-height: calc(3em + 14px);
+    line-height: 1.5;
     padding: 6px 10px;
     border: 1px solid var(--border);
     border-radius: 8px;

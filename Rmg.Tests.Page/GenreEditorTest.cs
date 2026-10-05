@@ -206,6 +206,9 @@ public sealed class GenreEditorTest(Site site)
         var genre = page.Page.Locator("select[aria-label='Genre']");
         var dialog = await OpenEditor(page);
         var description = dialog.Locator("textarea[aria-label='Genre description']");
+        // two lines tall at least, however full the editor, every section open
+        await dialog.EvaluateAsync("d => d.querySelectorAll('details').forEach(x => x.open = true)");
+        await Assert.That((await description.BoundingBoxAsync())!.Height).IsGreaterThanOrEqualTo(48);
 
         // made from none, described, saved and chosen: its sentence under the list
         await dialog.Locator("input[aria-label='Genre name']").FillAsync("Slow rain");
