@@ -141,12 +141,16 @@ internal sealed class FillGenerator
 
             // a section marks its phrases, but a drum solo, which plays its own (DrumSolos), and those before its drums
             // come in, the line they come in at with a fill
-            var every = sections[i].Meter.PatternDuration;
-            for (var (line, phrase) = (start + every, 1);
-                 sections[i].HasDrums && !sections[i].IsDrumSolo && line < start + sections[i].Duration;
-                 line += every, phrase++)
-                if (phrase >= sections[i].DrumsFrom)
-                    lines.Add(new FillLine(line, sections[i], sections[i], FillLayers.PhraseWeight));
+            // every phrase's end, a pattern's the heavier, the drums coming in at a pattern
+            var (every, pattern) = (Meter.PhraseBarCount * sections[i].Meter.BarDuration, sections[i].Meter.PatternDuration);
+            for (var line = start + every; sections[i].HasDrums && !sections[i].IsDrumSolo && line < start + sections[i].Duration; line += every)
+            {
+                // the pattern the line is in, or at the start of, which the drums have come in by or not
+                var patterns = (line - start) / pattern;
+                var endsPattern = Math.Abs(patterns - Math.Round(patterns)) < 1e-9;
+                if ((int)Math.Floor(patterns + 1e-9) >= sections[i].DrumsFrom)
+                    lines.Add(new FillLine(line, sections[i], sections[i], endsPattern ? FillLayers.PhraseWeight : FillLayers.InnerPhraseWeight));
+            }
 
             start += sections[i].Duration;
         }

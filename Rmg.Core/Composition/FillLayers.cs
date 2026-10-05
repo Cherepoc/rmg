@@ -90,6 +90,13 @@ internal static class FillLayers
     /// </summary>
     public const double PhraseWeight = -0.55;
 
+    /// <summary>
+    ///     How much a line between the phrases of a longer pattern weighs, which ends a phrase but not the pattern's cycle:
+    ///     lighter than a pattern's, so that a twelve-bar's fills at its fourth and eighth bars are rarer and shorter than
+    ///     its turnaround's.
+    /// </summary>
+    public const double InnerPhraseWeight = 2 * PhraseWeight;
+
     /// <summary>How long a fill is, in beats before a line of no weight, and how likely each is; 0 is none.</summary>
     public static ImmutableArray<Weighted<double>> Spans { get; } =
     [

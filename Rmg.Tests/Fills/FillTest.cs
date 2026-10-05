@@ -96,6 +96,29 @@ public sealed class FillTest
         }
     }
 
+    /// <summary>In twelve bars, the fills at a phrase's end within the pattern against those at the pattern's: how many fill, and how long.</summary>
+    [Test]
+    [Explicit]
+    public async Task Fills_InTwelveBars_ByLine()
+    {
+        var (inner, outer) = (new List<FillDecision>(), new List<FillDecision>());
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(3)))))
+        {
+            var decisions = song.Trace.Where(x => x.Point == TracePoints.FillDecision).Select(x => (FillDecision)x.Value!).ToArray();
+            var lines = song.FillLines();
+            for (var i = 0; i < lines.Length && i < decisions.Length; i++)
+            {
+                var span = song.Map.Sections.LastOrDefault(x => x.Start < lines[i] - 1e-9);
+                var endsPattern = span is null || Math.Abs((lines[i] - span.Start) / span.Meter.PatternDuration - Math.Round((lines[i] - span.Start) / span.Meter.PatternDuration)) < 1e-9;
+                (endsPattern ? outer : inner).Add(decisions[i]);
+            }
+        }
+
+        string Said(List<FillDecision> x) => $"{x.Count} lines, {100.0 * x.Count(d => d.Span > 0) / x.Count:0}% fill, {x.Where(d => d.Span > 0).Select(d => d.Span).DefaultIfEmpty(0).Average():0.00} beats long";
+        Console.WriteLine($"a phrase's end within the pattern: {Said(inner)}; a pattern's end or a section's: {Said(outer)}");
+        await Task.CompletedTask;
+    }
+
     [Test]
     public async Task EarlyLandings_ComeBeforeTheLine()
     {
