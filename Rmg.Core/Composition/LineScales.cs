@@ -31,9 +31,8 @@ public enum LineScale
 /// <summary>
 ///     A line's scale: the notes a melody's or a riff's passing notes take, its strong beats taking its chord's notes as
 ///     they do, where the line takes them. The plainest lines take the section's scale, or most often its pentatonic;
-///     the wildest a scale of their own over every chord, measured from its root rather than the key, as a player such as
-///     Allan Holdsworth thinks of them: melodic minor, whole-tone, octatonic or chromatic, now and then the blues or the
-///     section's own.
+///     the wildest a scale of their own over every chord, measured from its root rather than the key, as a fusion player
+///     thinks of them: melodic minor, whole-tone, octatonic or chromatic, now and then the blues or the section's own.
 /// </summary>
 internal static class LineScales
 {
