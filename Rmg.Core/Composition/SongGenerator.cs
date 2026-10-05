@@ -76,10 +76,14 @@ public static class SongGenerator
     /// <param name="overrides">What a test sets in place of the song's own draws.</param>
     /// <param name="cancellation">Gives the song up between its stages, which draw nothing to check it.</param>
     internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings, SongOverrides overrides, CancellationToken cancellation) =>
-        GenerateSong(seed, progressionSettings, overrides, ImmutableHashSet<string>.Empty, cancellation);
+        GenerateSong(seed, progressionSettings, overrides, ImmutableHashSet<string>.Empty, (_, _) => { }, cancellation);
 
-    /// <summary>The song of the seed, the stages given left out (<see cref="SongStages" />), as a test measures what one does.</summary>
-    internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings, SongOverrides overrides, IReadOnlySet<string> skipped, CancellationToken cancellation)
+    /// <summary>
+    ///     The song of the seed, the stages given left out (<see cref="SongStages" />), as a test measures what one does, and
+    ///     the song after each stage observed, as a test checks it.
+    /// </summary>
+    internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings, SongOverrides overrides, IReadOnlySet<string> skipped,
+        Action<string, SongDraft> observe, CancellationToken cancellation)
     {
         // every stage draws from its own random sequence, derived from the seed by the stage, so a change to what one
         // stage draws leaves what the others draw as it was
@@ -340,7 +344,7 @@ public static class SongGenerator
         var decisions = new SongDecisions(
             seed, genre, tracks, absent, songUnconventionality, meter, structure, sectionIds, played, sectionMeters, generateSection, sections, energies,
             solos, soloists, form, repeats, commonStateMap, swing, grooveContext);
-        var song = SongStages.Run(decisions, new SongDraft(form.Edits.ApplyTo(form.Blocks.Unroll()), null, [], [], []), skipped, cancellation);
+        var song = SongStages.Run(decisions, new SongDraft(form.Edits.ApplyTo(form.Blocks.Unroll()), null, [], [], []), skipped, observe, cancellation);
         var (songTrackNoteTimelineMap, notes) = (song.Timeline, song.Notes!);
 
         // the drum kit's sound, the standard kit's, or one of a genre's pool of them, from a stream of its own

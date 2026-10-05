@@ -12,7 +12,7 @@ public sealed class SongStagesTest
     private static (Song Song, (string Name, ImmutableSortedDictionary<int, int> Counts)[] Stages) Generate(int seed, params string[] skipped)
     {
         using var trace = StateTrace.Start(explains: false);
-        var song = SongGenerator.GenerateSong((ulong)seed, ProgressionSettings.Default, SongOverrides.None, skipped.ToImmutableHashSet(), CancellationToken.None);
+        var song = SongGenerator.GenerateSong((ulong)seed, ProgressionSettings.Default, SongOverrides.None, skipped.ToImmutableHashSet(), (_, _) => { }, CancellationToken.None);
         return (song, [..trace.Entries.Where(x => x.Point == TracePoints.SongStage).Select(x => ((string, ImmutableSortedDictionary<int, int>))x.Value!)]);
     }
 
@@ -37,6 +37,33 @@ public sealed class SongStagesTest
             await Assert.That(melodyWithout.Select(x => (x.Position, x.Value.Pitches[0])))
                 .IsEquivalentTo(melodyWith.Select(x => (x.Position, x.Value.Pitches[0])), TUnit.Assertions.Enums.CollectionOrdering.Matching);
         }
+    }
+
+    [Test]
+    public async Task EveryStage_LeavesTheSongWhole_ItsEventsWithinIt_InOrder_ItsNotesPlayable()
+    {
+        var problems = TestCorpus.InParallel(Enumerable.Range(0, 32), seed =>
+        {
+            var found = new List<string>();
+            SongGenerator.GenerateSong((ulong)seed, ProgressionSettings.Default, SongOverrides.None, ImmutableHashSet<string>.Empty, (stage, draft) =>
+            {
+                var duration = draft.Timeline.Duration;
+                foreach (var (track, events) in draft.Timeline.TrackTimelineMap)
+                {
+                    var positions = events.EventTimeline.Select(x => x.Position).ToArray();
+                    if (positions.Any(x => x < -1e-9 || x > duration + 1e-9))
+                        found.Add($"seed {seed}, after {stage}: track {track} has an event outside the song");
+                    if (positions.Zip(positions.Skip(1)).Any(x => x.Second < x.First - 1e-9))
+                        found.Add($"seed {seed}, after {stage}: track {track} has its events out of order");
+                }
+                foreach (var (track, notes) in draft.Notes ?? ImmutableSortedDictionary<int, EventTimeline<RealizedNote>>.Empty)
+                    if (notes.Any(x => x.Value.Duration <= 0 || x.Value.Pitches.Any(p => p is < 0 or > 127)))
+                        found.Add($"seed {seed}, after {stage}: track {track} has a note no MIDI plays");
+            }, CancellationToken.None);
+            return found;
+        }).SelectMany(x => x).ToArray();
+
+        await Assert.That(problems).IsEmpty();
     }
 
     [Test]

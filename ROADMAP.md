@@ -302,9 +302,10 @@ Each item with its plan, and what it waits for.
      (`SongDecisions`) and handing on a draft (`SongDraft`), each recorded with its tracks' counts after it, one that
      only edits left out for a test; the fingerprint kept. The counts tell a stage that adds or takes away notes, not
      one that moves them, as the lines' restatement does; a stage's changes in place, should a report need them.
-  3. The rules a song keeps in one suite run on finished songs (every note in its chord's scale, landings on the
-     root, a length within bounds, nothing in a part's rest), structural checks between stages (positions within the
-     song, notes in order), and the stage report to tell which stage moved what.
+  3. Done: the song checked after every stage, its events within it and in order and its notes playable
+     (`SongStagesTest`, the song observed as each stage ends). The rules a finished song keeps stay with their parts
+     (every note in its chord's scale in `ScalesTest`, the bass's landings in `MelodyRepetitionTest`, a length given
+     in `SongLengthTest`), one file of them moving tests for no gain.
   4. Tests as rules or calibrations: a rule asserts what must hold; a calibration keeps a wide bound against the
      catastrophic and its target in an explicit report, written into CLAUDE.md; the floors this round moved converted
      first, the rest as they move.

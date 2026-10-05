@@ -353,7 +353,8 @@ internal static class SongStages
     ///     stage given left out where it may be, and the song's cancellation asked between them.
     /// </summary>
     /// <param name="skipped">The stages a test leaves out, by their names; each one that may be.</param>
-    internal static SongDraft Run(SongDecisions song, SongDraft draft, IReadOnlySet<string> skipped, CancellationToken cancellation)
+    /// <param name="observe">What is done with the song after each stage, by its name, such as a test's checks of it.</param>
+    internal static SongDraft Run(SongDecisions song, SongDraft draft, IReadOnlySet<string> skipped, Action<string, SongDraft> observe, CancellationToken cancellation)
     {
         foreach (var name in skipped)
             if (All.SingleOrDefault(x => x.Name == name) is not { CanSkip: true })
@@ -363,6 +364,7 @@ internal static class SongStages
         {
             cancellation.ThrowIfCancellationRequested();
             draft = stage.Apply(song, draft);
+            observe(stage.Name, draft);
             if (StateTrace.IsRunning)
             {
                 ImmutableSortedDictionary<int, int> counts = draft.Notes is { } notes
