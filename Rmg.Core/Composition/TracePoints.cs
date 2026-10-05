@@ -30,6 +30,9 @@ internal static class TracePoints
     /// <summary>A section's planed chords' moves from its home, in semitones, none where it does not plane (an <c>ImmutableArray&lt;int&gt;?</c>).</summary>
     public const string Planing = "Planing";
 
+    /// <summary>The song's later appearance reharmonised and where its substitutes start, none where it reharmonises none (a <c>(int, ImmutableArray&lt;double&gt;)?</c>).</summary>
+    public const string Reharmonisation = "Reharmonisation";
+
     /// <summary>Whether a section turns its pattern around, its last bar a V or a ii–V into its start (a <c>bool</c>).</summary>
     public const string Turnaround = "Turnaround";
 

@@ -13,7 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: a later appearance reharmonised; a genre's arrangement; key changes by genre; Electronic split; an octave bass; a push by the
+**When the need shows** (P3), each by what listening says, in this order: a genre's arrangement; key changes by genre; Electronic split; an octave bass; a push by the
 whole band; legato as an articulation; stretched voicings; the melody's range by genre; the fills' sounds by
 convention; a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
 and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
@@ -308,9 +308,10 @@ Each item with its plan, and what it waits for.
      wild one's. Not done: on the strong beats at the wild end, and the dominant as the approach.
   4. Chromatic approaches: done from above as a passing chord (see *A chord free of the section's scale*); from below,
      and a chord solo's (step 3), should listening ask.
-  5. A later appearance reharmonised, a last chorus over substitutes (vi or iii for I, ii for IV, the tritone
-     substitute for V7) chosen by the notes they share with the chord they replace, decided before the lines are
-     placed, so that the melody placed over them fits as it does.
+  5. Done: a later appearance reharmonised (`Reharmonisation`, a stage before the lines): the song's last appearance
+     of a section heard before, by the progression facet (0, 0.25, 0.25), half its chords a third below (vi for I, ii
+     for IV) or above (iii for I), sharing two notes, in the section's own scale; a key change's chords, a moved chord and
+     the chord it slides into kept. 20% of the songs, 9.5 chords each. Not done: the tritone substitute for V7.
   6. A melody in block harmony (P4, parked), the counter-melody or the pad voicing its long notes, approaches on its passing
      ones, as a horn section's soli.
   Today a chord solo stacks the band's chord or planes its shape, never another chord; the bass approaches any change.

@@ -91,6 +91,7 @@ internal static class SongStages
     public static ImmutableArray<SongStage> All { get; } =
     [
         new("Key changes", KeyChanges, CanSkip: false),
+        new("Reharmonisation", Reharmonise, CanSkip: true),
         new("Polymeter", Polymeter, CanSkip: true),
         new("Fills", Fills, CanSkip: false),
         new("Lift cues", LiftCues, CanSkip: true),
@@ -148,6 +149,14 @@ internal static class SongStages
             .MergeStateMap(Groove.ToStateMap(song.Swing, song.GrooveContext));
         return draft with { Timeline = timeline, Chains = chains };
     }
+
+    /// <summary>A later appearance's chords now and then substituted, from a stream of its own, before the lines are placed over them (<see cref="Reharmonisation" />).</summary>
+    internal static SongDraft Reharmonise(SongDecisions song, SongDraft draft) =>
+        draft with
+        {
+            Timeline = draft.Timeline.MergeStateTimelineMap(Reharmonisation.Apply(song.Stream(SongStream.Reharmonisation), song.Facets[Facet.Progression], song.Form.Map,
+                draft.Timeline.CommonStateTimelineMap, draft.Chains.SelectMany(x => x.Chords.Append(x.Change))))
+        };
 
     /// <summary>
     ///     A section's figure of its own length run across the bar lines now and then, from a stream of its own for each

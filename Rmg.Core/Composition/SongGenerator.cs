@@ -530,5 +530,6 @@ internal enum SongStream
     HookIntro = 69,
     Strum = 70,
     Drops = 71,
-    StopTime = 72
+    StopTime = 72,
+    Reharmonisation = 73
 }
