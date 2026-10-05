@@ -37,6 +37,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     // what the songs draw of every choice, as the server last said (/api/genres/previews)
     let previews = null;
     let waiting = null;
+    // the draft as it was opened, played or saved last, which closing the editor loses nothing of
+    let kept = "";
 
     const dialog = document.createElement("dialog");
     dialog.className = "genre-dialog";
@@ -57,7 +59,20 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         showProblem();
     });
     const header = document.createElement("header");
-    header.append(name, button("×", "Close the editor", () => dialog.close(), "genre-close"));
+    header.append(name, button("×", "Close the editor", () => {
+        if (mayLeave()) dialog.close();
+    }, "genre-close"));
+    // Escape as the × is, the window over the editor's own Escape left to it
+    dialog.addEventListener("cancel", (event) => {
+        if (event.target === dialog && !mayLeave()) event.preventDefault();
+    });
+
+    /** Whether the editor may close: nothing changed since the draft was opened, played or saved, or its loss confirmed. */
+    function mayLeave() {
+        return asKept() === kept || confirm("Close the editor and lose the changes not played or saved?");
+    }
+
+    const asKept = () => JSON.stringify({ name: draft.name, choices: draft.choices });
 
     // --- the parts --------------------------------------------------------------------------------------------------------
 
@@ -392,8 +407,15 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     });
     const imported = button("Import JSON", "Open a genre saved as a JSON file", () => file.click());
 
-    const play = button("Play", "Ask for the song again in this genre", () => onPlay(finished()), "primary");
-    const save = button("Save", "Keep this genre among yours, and play it", () => onSave(finished()));
+    const play = button("Play", "Ask for the song again in this genre", () => keep(onPlay), "primary");
+    const save = button("Save", "Keep this genre among yours, and play it", () => keep(onSave));
+
+    /** The draft played or saved, as the page says, and kept so. */
+    function keep(action) {
+        action(finished());
+        kept = asKept();
+    }
+
     const remove = button("Delete", "Let go of this genre of yours", () => onDelete(draft.name.trim()));
     const footer = document.createElement("footer");
     footer.append(problem, file, imported, exported, remove, save, play);
@@ -471,6 +493,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         open(genre, choiceList) {
             choices = new Map(choiceList.map((x) => [x.name, x]));
             load(genre);
+            kept = asKept();
             dialog.showModal();
         },
         close() {

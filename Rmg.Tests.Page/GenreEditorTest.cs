@@ -109,6 +109,48 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task TheEditorClosed_AsksBeforeLosingAChange_ButNotOneAlreadyPlayed()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var asked = 0;
+        var accept = false;
+        page.Page.Dialog += (_, prompt) =>
+        {
+            asked++;
+            _ = accept ? prompt.AcceptAsync() : prompt.DismissAsync();
+        };
+        var close = dialog.Locator("> header .genre-close");
+
+        // nothing changed: closed, nothing asked
+        await close.ClickAsync();
+        await Assert.That(await dialog.IsVisibleAsync()).IsFalse();
+        await Assert.That(asked).IsEqualTo(0);
+
+        // a change: the × and Escape ask, and declined, the editor stays open as it was
+        await page.Page.Locator("button.genre-edit").ClickAsync();
+        await Override(await Section(dialog, "Time and feel"), "meter").CheckAsync();
+        await close.ClickAsync();
+        await page.Page.Keyboard.PressAsync("Escape");
+        await Assert.That(asked).IsEqualTo(2);
+        await Assert.That(await dialog.IsVisibleAsync()).IsTrue();
+        await Assert.That(await Override(dialog, "meter").IsCheckedAsync()).IsTrue();
+
+        // played, it is kept and closing asks nothing; changed again and the loss confirmed, it closes
+        await Played(page, dialog);
+        await close.ClickAsync();
+        await Assert.That(asked).IsEqualTo(2);
+        await Assert.That(await dialog.IsVisibleAsync()).IsFalse();
+        await page.Page.Locator("button.genre-edit").ClickAsync();
+        await Override(await Section(dialog, "Time and feel"), "meter").UncheckAsync();
+        accept = true;
+        await close.ClickAsync();
+        await Assert.That(asked).IsEqualTo(3);
+        await Assert.That(await dialog.IsVisibleAsync()).IsFalse();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task AChoicesGraph_DrawsWhatTheSongsDraw_AndSaysWhatEachEndDraws()
     {
         await using var page = await SongPage.Open(site, "?song=1");
