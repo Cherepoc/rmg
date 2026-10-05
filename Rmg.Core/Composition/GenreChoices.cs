@@ -88,7 +88,11 @@ public static class GenreChoices
     public static GenreChoice Loop { get; } = Chances("loop", "Loop", [("sections", "Sections on the first's chords", SectionGenerator.Loop)]);
 
     /// <summary>The chance a section's riff plays in power chords, a perfect fifth over every note, as rock's riffs are (<see cref="SectionGenerator.PowerChordChance" />).</summary>
-    public static GenreChoice Riff { get; } = Chances("riff", "Riff", [("powerChords", "In power chords", SectionGenerator.PowerChordChance)]);
+    public static GenreChoice Riff { get; } = Chances("riff", "Riff",
+    [
+        ("powerChords", "In power chords", SectionGenerator.PowerChordChance),
+        ("chugs", "Palm-muted chugs", SectionGenerator.ChugChance)
+    ]);
 
     /// <summary>The chance a section's melody is on a hook, every section's, as a beat's sample is; the songs' a chorus's alone (<see cref="MelodyLayers.HookChanceOf" />).</summary>
     public static GenreChoice Hook { get; } = Chances("hook", "Hook", [("sections", "Sections on a hook", new Probabilities.ByConvention(0, 0, 0))]);

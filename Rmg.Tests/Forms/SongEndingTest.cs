@@ -164,6 +164,7 @@ public sealed class SongEndingTest
             0,
             new Dictionary<int, TrackRole> { [MelodyTrack] = TrackRole.Melody, [BassTrack] = TrackRole.Bass, [drum] = TrackRole.Drum }.ToImmutableDictionary(),
             Meter.FourFour,
+            false,
             false
         );
 

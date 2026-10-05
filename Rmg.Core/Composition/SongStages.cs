@@ -103,6 +103,7 @@ internal static class SongStages
         new("Solo answers", SoloAnswers, CanSkip: true),
         new("Notes", RealizeNotes, CanSkip: false),
         new("Instruments", Instruments, CanSkip: true),
+        new("Articulation", Articulation, CanSkip: true),
         new("Expression", ExpressionStage, CanSkip: true)
     ];
 
@@ -326,6 +327,37 @@ internal static class SongStages
                 song.Genre
             )
         };
+
+    /// <summary>
+    ///     The notes' articulations: in a section that chugs, a guitar's or a picked bass's note that repeats the one before
+    ///     on a weak beat palm-muted, its accents and its moves ringing, as a chug riff mutes its eighths on the root and
+    ///     rings its accent; the riff's, the rhythm part's and the bass's, by their instruments.
+    /// </summary>
+    internal static SongDraft Articulation(SongDecisions song, SongDraft draft)
+    {
+        var notes = NotesOf(draft);
+        var sections = song.Form.Map.Sections;
+        var result = notes.ToBuilder();
+        foreach (var (track, timeline) in notes)
+        {
+            if (song.Tracks.Definitions[track] is not PitchInstrumentTrack part || !Chugs(part.Role, part.InstrumentCode))
+                continue;
+            result[track] = EventTimeline.Create(timeline.Duration, timeline.Select((note, i) =>
+            {
+                var section = sections.IndexOf(song.Form.Map.SectionAt(note.Position)!);
+                var repeats = i > 0 && timeline[i - 1].Value.Pitches.SequenceEqual(note.Value.Pitches);
+                var weak = note.Value.State.GetStateValue(CompositionStateKinds.BeatRank) > 0;
+                return section >= 0 && song.Sections[section].Chugs && repeats && weak
+                    ? (note.Value with { State = note.Value.State.With(CompositionStateKinds.PalmMute, 1) }).ToTimelineItem(note.Position)
+                    : note;
+            }));
+        }
+
+        return draft with { Notes = result.ToImmutable() };
+    }
+
+    /// <summary>Whether a part chugs: the riff, the rhythm part or the bass, on a guitar or a picked bass.</summary>
+    private static bool Chugs(TrackRole role, int program) => role is TrackRole.Riff or TrackRole.Rhythm or TrackRole.Bass && program is >= 24 and <= 31 or 34;
 
     /// <summary>How the parts are played beyond their notes, by every section's sound facet.</summary>
     internal static SongDraft ExpressionStage(SongDecisions song, SongDraft draft) =>

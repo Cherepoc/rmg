@@ -67,6 +67,10 @@ internal static class CompositionStateKinds
     public static StateKind<int> Swell { get; } = StateKinds.CreateAdditive<int>(Prefix + "Swell", StateScope.Render);
     public static StateKind<int> Tremolo { get; } = StateKinds.CreateAdditive<int>(Prefix + "Tremolo", StateScope.Render);
 
+    // 1 for a note palm-muted, its articulation, which it keeps its duration through: the rendering plays it, for General
+    // MIDI short and a touch softer, for a plugin as a keyswitch or a controller ahead (Render)
+    public static StateKind<int> PalmMute { get; } = StateKinds.CreateAdditive<int>(Prefix + "PalmMute", StateScope.Render);
+
     // 1 for a riff's note played as a power chord, its perfect fifth over it and its octave where the range has it
     public static StateKind<int> PowerChord { get; } = StateKinds.CreateAdditive<int>(Prefix + "PowerChord", StateScope.Render);
 

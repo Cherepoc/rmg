@@ -31,7 +31,7 @@
       "levels": { "riff": 65, "drum": 60 },
       "grooveHold": { "held": 80 },
       "fills": { "amount": 65 },
-      "riff": { "powerChords": [70, 70, 50] },
+      "riff": { "powerChords": [70, 70, 50], "chugs": [60, 60, 50] },
       "rhythm": {
         "riff": { "repetition": 82 },
         "ground": { "repetition": 69 },
@@ -253,6 +253,7 @@
       "levels": { "bass": 65, "drum": 65 },
       "grooveHold": { "held": 75 },
       "fills": { "amount": 65 },
+      "riff": { "chugs": [40, 40, 40] },
       "rhythm": {
         "chords": { "syncopation": 69, "repetition": 82 },
         "bass": { "speed": 100, "syncopation": 100, "fullness": 76, "repetition": 82 },

@@ -11,6 +11,13 @@ public static class Render
     // or an evenly played bass is heard as such: the sum at the centre plays at the middle velocity, and the further
     // from it, the less it moves, towards the quietest and the loudest velocities
     internal const double VelocityCentre = 0.2;
+
+    /// <summary>How much of its length a palm-muted note sounds, and the least, in beats, and how loud against its own.</summary>
+    internal const double MutedShare = 0.35;
+
+    internal const double MutedFloor = 0.12;
+
+    internal const double MutedVelocity = 0.9;
     internal const double VelocityScale = 1.03;
     private const double MiddleVelocity = 0.6;
     private const double VelocityReach = 0.4;
@@ -57,6 +64,10 @@ public static class Render
                     // swung, its end as its start, so that it still reaches the note it reached
                     var position = swing.Apply(note.Position);
                     var duration = swing.Apply(note.Position + note.Value.Duration) - position;
+                    // a palm-muted note as General MIDI can play it, which has no mute for a driven guitar: short and a touch
+                    // softer; the one place a plugin's output would play it as its keyswitch or controller instead
+                    if (note.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0)
+                        (duration, velocity) = (Math.Max(MutedFloor, duration * MutedShare), velocity * MutedVelocity);
                     return note.Value.Pitches.Select(pitch => new RenderedNote(pitch, velocity, duration).ToTimelineItem(position));
                 }
             );

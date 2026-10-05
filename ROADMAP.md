@@ -510,17 +510,12 @@ a link carries. What is left:
      every note with its perfect fifth over it whatever the scale and its octave where the range has it (`Realizer`),
      and no twin; a genre's, the songs never: Rock's riff sections 71%, Blues' 29%. 86% of such a riff's notes carry
      their fifth, a section's landing stacking the band's chord the rest.
-  2c. Palm-muted chugs: a note's articulation, palm-muted, its state, decided at generation, its duration as written;
-     the rendering plays it, for General MIDI as a shorter note, a third of its length or so with a floor, a touch
-     softer, General MIDI's muted guitar being clean and a driven guitar having no mute of its own. In a section that
-     chugs, a part's repeats on a weak beat muted and its accents and moves ringing, as a chug riff mutes its eighths on
-     the root and rings the accent; the riff and the rhythm part where their instrument is a guitar, and a picked bass,
-     data on the instrument as its variants are. A section's draw from a stream of its own, a genre's value the songs
-     never play: Rock much, Funk some, for its muted scratches. A riff in power chords mutes its whole chord. Measured
-     by the presets' share of muted notes, and a test that a muted note keeps its duration in the state.
-     Ahead: for a plugin rather than General MIDI, the articulation played as a keyswitch note or a CC, the one
-     rendering function the seam; and the instruments' variants over time (`InstrumentsOverTime`, a muted clean guitar,
-     a slapped bass) articulations of their notes too, once an output plays them otherwise. No output profiles before.
+  2c. Done: palm-muted chugs (`CompositionStateKinds.PalmMute`, the Articulation stage): in a section that chugs, a
+     guitar's or a picked bass's note repeating the one before on a weak beat palm-muted, its state, its length kept,
+     General MIDI playing it a third as long, a beat's eighth at least, and a tenth softer (`Render`); the riff's, the
+     rhythm part's and the bass's, by their instruments' programs; a genre's, the songs never (`GenreChoices.Riff`):
+     Rock's guitars' notes 21% muted, Funk's 15%. Ahead: a plugin's output playing it as a keyswitch or a controller, the
+     one place in `Render` the seam; the instruments' variants over time articulations too, once an output differs.
   3. Done: the harmonic rhythm a genre's pool (`GenreChoices.HarmonicRhythm`), the energy leaning it still: chords in
      four bars Hip-hop 2.5, Ambient 2.6, Electronic 2.8, Funk 2.9, Folk and Reggae 3.4, Jazz 5.9 (4.3 to 5.2 every
      preset before). Not done: a chord a phrase, one chord over four bars, which the progressions' two chords a phrase

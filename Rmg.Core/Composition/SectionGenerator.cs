@@ -74,6 +74,9 @@ internal sealed class SectionGenerator
             .CacheGeneratedValues();
     }
 
+    /// <summary>The chance a section's guitars and picked bass chug, their repeats palm-muted, a genre's that the songs never play (<see cref="GenreChoices.Riff" />).</summary>
+    public static Probabilities.ByConvention ChugChance { get; } = new(0, 0, 0);
+
     /// <summary>The chance a section's riff plays in power chords, a genre's that the songs never play (<see cref="GenreChoices.Riff" />).</summary>
     public static Probabilities.ByConvention PowerChordChance { get; } = new(0, 0, 0);
 
@@ -265,6 +268,9 @@ internal sealed class SectionGenerator
         // its riff in power chords, a genre's, which the songs never play, from a sequence of its own
         var powerChords = Stream(sectionId, SectionStream.PowerChords).TestProbability(PowerChordChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "powerChords")));
         StateTrace.Record(TracePoints.RiffPowerChords, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{powerChords}", powerChords);
+        // its guitars' and its picked bass's repeats palm-muted, a genre's, which the songs never play, from a sequence of its own
+        var chugs = Stream(sectionId, SectionStream.Chugs).TestProbability(ChugChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "chugs")));
+        StateTrace.Record(TracePoints.Chugs, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{chugs}", chugs);
         // its melody on a hook now and then, a chorus by its role or every section by a genre's, from a sequence of its own
         var hooks = Stream(sectionId, SectionStream.Hook).TestProbability(MelodyLayers.HookChanceOf(plan.Role).At(facets[Facet.Melody], _genre.Chance(GenreChoices.Hook, "sections")));
         StateTrace.Record(TracePoints.MelodyHook, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{hooks}", hooks);
@@ -296,7 +302,8 @@ internal sealed class SectionGenerator
             arrangementSeed,
             _tracks.Definitions.ToImmutableDictionary(x => x.Key, x => x.Value.Role),
             meter,
-            powerChords
+            powerChords,
+            chugs
         );
         // every part, which each appearance leaves out of it what it rests
         return section;
@@ -830,7 +837,8 @@ internal sealed record GeneratedSection(
     ulong ArrangementSeed,
     ImmutableDictionary<int, TrackRole> Roles,
     Meter Meter,
-    bool RiffPowerChords
+    bool RiffPowerChords,
+    bool Chugs
 )
 {
     /// <summary>Whether the drums play in the section, rather than rest for a breakdown.</summary>
@@ -993,5 +1001,6 @@ internal enum SectionStream
     DominantChords = 32,
     Loop = 33,
     Hook = 34,
-    PowerChords = 35
+    PowerChords = 35,
+    Chugs = 36
 }

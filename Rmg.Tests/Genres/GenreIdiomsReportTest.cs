@@ -88,6 +88,7 @@ public sealed class GenreIdiomsReportTest
             ["bass a half step into a change"] = arrivals.Length > 0 ? arrivals.Count(x => Math.Abs(bass[x.Index].Value.Pitches.Min() - bass[x.Index - 1].Value.Pitches.Min()) == 1) / (double)arrivals.Length : double.NaN,
             ["bass on the root at a change"] = arrivals.Length > 0 ? arrivals.Count(x => OnRoot(x.Index, x.Change)) / (double)arrivals.Length : double.NaN,
             ["riff sections in power chords"] = song.Trace.Where(x => x.Point == TracePoints.RiffPowerChords).Select(x => (bool)x.Value!).DefaultIfEmpty().Average(x => x ? 1.0 : 0),
+            ["guitars' notes palm-muted"] = notes.Where(x => x.Key is SongTracks.RiffTrack or SongTracks.RhythmTrack).SelectMany(x => x.Value).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["tempo"] = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(map.Origin).GetStateValue(Rmg.Core.Events.StateKinds.Tempo) * Meter.BaseTempo
         };
     }
