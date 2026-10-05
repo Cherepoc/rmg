@@ -12,13 +12,14 @@ ratings by conventionality once enough are in, alongside, continuously and never
 **Later** (P2), roughly in this order: what a genre cannot reach yet, the melody's character and the bass's style
 first, then the harmonic rhythm and the form's devices (see *Genres*); a chorus written as a hook (see *Form and
 sections*); timing by role, then a genre's pocket, the largest gap in how the songs are played (see *Groove*), and a
-guitar's strum after it (see *Groove*); a solo's loudness by its phrase, as the other lines' (see *Instruments and expression*); the ratings report (see
+guitar's strum after it (see *Groove*); turnarounds, then passing chords (approach chords, see *Scales and chords*); a
+solo's loudness by its phrase, as the other lines' (see *Instruments and expression*); the ratings report (see
 *Listening data*), once the dashboard shows songs rated enough; listening to the genres' presets (see *Genres*), and to
 what the harmony, the melody and the form gained in October 2026: chords off the scale, a phrase's loudness, the hook
 intro, the chorus's lift and the restated phrase.
 
 **When the need shows** (P3), each by what listening says, roughly in this order: stop-time breaks, then the band's
-other devices, and a chord solo reharmonised (see *Form and sections*); a genre's arrangement and levels, its fills' amount, its melody's range and an
+other devices, and approach chords' later steps (see *Form and sections*); a genre's arrangement and levels, its fills' amount, its melody's range and an
 octave bass (see *Genres*); the fills' sounds by convention, then their loudness; harmony's devices; a motif developed
 further; legato slides; a hook at the end; the tempo leaning by the energy; a key change's common tone; the page's wait
 for a remake and the sections on the seek bar; scales of other sizes (see *Open work*).
@@ -198,12 +199,28 @@ Each item with its plan, and what it waits for.
 - **A chorus written as a hook** (P2): its melody leaning by its role to a shorter motif repeated and a plainer
   rhythm, through the echo and rhythm layers it has; measured by the chorus's repeated notes against the verse's, too
   much of it mechanical.
-- **Reharmonising a chord solo** (P3, after the form's devices by genre make Jazz solo more): a chord soloist's
-  stacked note on a weak beat, leading into the next chord's first, playing an approach chord in place of the band's:
-  the next chord's shape a semitone above or below, a chromatic approach, which is planing (`LinePlanes`) aimed at it,
-  or now and then its dominant, a chord's own scale on the stacked note. By the melody facet from the solo's stream, a
-  jazz genre's lean. Today a chord solo stacks the band's chord or planes its shape, never another chord. Measured by
-  the share of a chord soloist's stacks that approach; on a weak beat only, against the comping under it.
+- **Approach chords** (P2 for its first steps, a plan in steps): a chord leading into the next one that the
+  progression does not have, by its kind (the target's dominant, a passing diminished between roots a whole step
+  apart, the target's shape a semitone above or below, the tritone substitute), its length (a beat, half a bar or a bar,
+  taken from the chord before) and its beat: never at the plain end, a weak beat about the middle, and the strong beats
+  too and chained at the wild end. One chord in the bar state, a change of its own, which every part takes: the lines
+  land on it, the bass approaches it, the chords voice it; the uses differ in where it goes and who plays it. A
+  dominant or diminished approach is a root and a chord's own scale, as an applied dominant is; a chromatic one is not
+  (the scale's root, third and fifth raised together run its steps onto each other, which `AlterScaleSteps` refuses),
+  and wants a state of its own, the whole chord moved a semitone, the lines over it keeping the target's scale. Steps:
+  1. Turnarounds: a pattern's last bar before it plays again or its section ends, a dominant or a ii–V into its
+     start; a genre's lean, Jazz and Blues much. Before assembly, a section's decision.
+  2. Passing chords in the progression, dominant and diminished, by the progression facet and the energy, every part
+     playing them; the 12-bar's place rules kept, and the melody's note there fitting or the approach going elsewhere.
+  3. A chord solo's: a chord soloist's stacked note leading into the next chord playing an approach, step 2's chord,
+     on a weak beat, and on the strong ones too at the wild end, against the comping under it. A stage after the lines.
+  4. Chromatic approaches: the chord moved a semitone, then its kind among steps 2 and 3.
+  5. A later appearance reharmonised, a last chorus over substitutes (vi or iii for I, ii for IV, the tritone
+     substitute for V7) chosen by the notes they share with the chord they replace, decided before the lines are
+     placed, so that the melody placed over them fits as it does.
+  6. A melody in block harmony (P3), the counter-melody or the pad voicing its long notes, approaches on its passing
+     ones, as a horn section's soli.
+  Today a chord solo stacks the band's chord or planes its shape, never another chord; the bass approaches any change.
 - **The band's devices** (P3, each an edit after assembly among the stages): stop-time breaks first, the band hitting
   once a bar under a line that goes on, the blues' and rock's; then a push or anticipation the whole band plays, call and
   response between parts, a backing figure that recurs through the song.
