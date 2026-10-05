@@ -68,6 +68,7 @@ internal static class LineDoubling
     /// <param name="melody">The song's melody facet, which the steps lean by.</param>
     /// <param name="sound">The song's sound facet, which the octaves lean by.</param>
     /// <param name="energies">Every appearance's energy, by its place, which the octaves lean by too.</param>
+    /// <param name="riffPowerChords">Whether an appearance's riff plays in power chords, by its place, which plays no twin.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
         IReadOnlyDictionary<int, TrackRole> roles,
@@ -76,7 +77,8 @@ internal static class LineDoubling
         double sound,
         IReadOnlyList<double> energies,
         Func<int, int, IGenerationContext> streams,
-        Func<int, IGenerationContext> timbres
+        Func<int, IGenerationContext> timbres,
+        Func<int, bool> riffPowerChords
     )
     {
         var trackOf = roles.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.First().Key);
@@ -101,7 +103,8 @@ internal static class LineDoubling
                 var step = context.Pick(ByConvention.Weigh(steps, melody));
                 var events = song.TrackTimelineMap;
                 bool Plays(int track) => events[track].EventTimeline.Any(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9);
-                if (!isDoubled || !Plays(sourceTrack) || !isTwin && !Plays(targetTrack))
+                // a riff in power chords plays no twin, whose third over a distorted fifth is mud
+                if (!isDoubled || !Plays(sourceTrack) || !isTwin && !Plays(targetTrack) || isTwin && riffPowerChords(index))
                     continue;
 
                 StateTrace.Record(TracePoints.LineDoubling, targetTrack, span.SectionId, 0, StateMap.Default, 0, $"{source} {step}", (index, source, target, step));

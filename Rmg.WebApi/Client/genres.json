@@ -31,6 +31,7 @@
       "levels": { "riff": 65, "drum": 60 },
       "grooveHold": { "held": 80 },
       "fills": { "amount": 65 },
+      "riff": { "powerChords": [70, 70, 50] },
       "rhythm": {
         "riff": { "repetition": 82 },
         "ground": { "repetition": 69 },
@@ -321,6 +322,7 @@
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [55, 55, 66], "counterMelody": 60, "drum": 95, "riff": 50, "riffTwin": [0, 15, 15], "rhythm": [60, 60, 48], "solo": [0, 40, 73] },
       "drumSetup": { "kit": 100 },
       "grooveHold": { "held": 75 },
+      "riff": { "powerChords": [15, 25, 30] },
       "rhythm": {
         "bass": { "speed": 76, "fineness": 25, "fullness": 82, "repetition": 82 }
       }

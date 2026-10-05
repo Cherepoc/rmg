@@ -14,6 +14,9 @@ namespace Rmg.Core.Composition;
 internal static class Realizer
 {
     internal const int OctaveNoteCount = 12;
+
+    /// <summary>A perfect fifth, in semitones, a power chord's.</summary>
+    private const int PerfectFifth = 7;
     private const int ZeroOctaveOffset = 5;
 
     // drum sounds are mostly one-shots that play out whatever the note length, so every drum note is a sixteenth
@@ -311,6 +314,10 @@ internal static class Realizer
         var voices = stateMap.GetStateValue(CompositionStateKinds.LineVoices);
         if (isLine && voices > 1)
             notes = [notes[0], ..Stack(notes[0], voices - 1, stateMap).Where(x => x >= range.Low)];
+        // a riff in power chords plays its note, the perfect fifth over it whatever the scale, as a power chord is never
+        // diminished, and its octave where the range has it
+        else if (isLine && stateMap.GetStateValue(CompositionStateKinds.PowerChord) > 0)
+            notes = [notes[0], ..new[] { notes[0] + PerfectFifth, notes[0] + OctaveNoteCount }.Where(x => x <= range.High)];
         // a line in octaves plays its note and the note an octave above, or below where above would leave the range, its
         // own first
         else if (isLine && stateMap.GetStateValue(CompositionStateKinds.Octave) > 0)

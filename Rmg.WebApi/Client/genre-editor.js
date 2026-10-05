@@ -403,7 +403,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll, 
             single(tile(), "tempo"), single(tile(), "length"), single(tile(), "meter"), single(tile(), "feel"), single(tile(), "feelChances"), single(tile(), "feelValues"), single(tile(), "grooveHold"), single(tile(), "fills")),
         section("Form", ["formChances", "form", "phrases", "loop", "hook"], single(tile(), "formChances"), single(tile(), "form"), single(tile(), "phrases"), single(tile(), "loop"), single(tile(), "hook")),
         section("Harmony", ["scale", "chordShape", "rootMotion", "chordScales", "harmonicRhythm", "lineScale", "bass", "bassLanding"], single(tile(), "scale"), single(tile(), "chordShape"), single(tile(), "rootMotion"), single(tile(), "chordScales"), single(tile(), "harmonicRhythm"), single(tile(), "lineScale"), single(tile(), "bass"), single(tile(), "bassLanding")),
-        section("Sound", ["effects", "strongEffect", "pan", "levels", "dynamics"], single(tile(), "effects"), single(tile(), "strongEffect"), single(tile(), "pan"), single(tile(), "levels"), single(tile(), "dynamics")),
+        section("Sound", ["effects", "strongEffect", "riff", "pan", "levels", "dynamics"], single(tile(), "effects"), single(tile(), "strongEffect"), single(tile(), "riff"), single(tile(), "pan"), single(tile(), "levels"), single(tile(), "dynamics")),
         section("Parts", ["parts", ...partNames], single(tile(), "parts"), parts.element),
     );
 

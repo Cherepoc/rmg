@@ -506,14 +506,10 @@ a link carries. What is left:
      so the lean moves a few points. Its landings on the root firmer for Electronic, Reggae and Hip-hop; a walking
      bass lands on the root, so Jazz keeps its own. Not done: a root and fifth figure within the bar, a figure of its own
      with the octave bass (P3), and Jazz's walking quarters, as its rhythm settings have them.
-  2b. A riff in power chords: rock's riff a moving line of fifths, E5, G5, A5 over an E, where ours is a line of single
-     notes stacked only on a section's first (`LineChords.Riff`); the chords' part plays the Power chord shape already.
-     A riff note's state played as the octave doubling is (`Realizer`): its note, a perfect fifth over it, 7 semitones
-     whatever the scale, as a power chord is never diminished, and its octave where the range has it. Drawn a section
-     by the sound facet from a stream of its own, a genre's value: Rock much, Blues some, Funk, Jazz and Ambient none.
-     A riff in power chords plays no twin, whose thirds over a distorted fifth are mud. The scale's rule excepts the
-     fifth as it does a bass's chromatic approach. Measured by the presets' share of riff sections in power chords.
-     Not it: palm-muted chugs, an articulation (see *Instruments and expression*), and the blues' boogie figure.
+  2b. Done: a riff in power chords (`GenreChoices.Riff`, `CompositionStateKinds.PowerChord`): a section's riff playing
+     every note with its perfect fifth over it whatever the scale and its octave where the range has it (`Realizer`),
+     and no twin; a genre's, the songs never: Rock's riff sections 71%, Blues' 29%. 86% of such a riff's notes carry
+     their fifth, a section's landing stacking the band's chord the rest.
   2c. Palm-muted chugs: a note's articulation, palm-muted, its state, decided at generation, its duration as written;
      the rendering plays it, for General MIDI as a shorter note, a third of its length or so with a floor, a touch
      softer, General MIDI's muted guitar being clean and a driven guitar having no mute of its own. In a section that

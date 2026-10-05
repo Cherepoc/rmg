@@ -67,6 +67,9 @@ internal static class CompositionStateKinds
     public static StateKind<int> Swell { get; } = StateKinds.CreateAdditive<int>(Prefix + "Swell", StateScope.Render);
     public static StateKind<int> Tremolo { get; } = StateKinds.CreateAdditive<int>(Prefix + "Tremolo", StateScope.Render);
 
+    // 1 for a riff's note played as a power chord, its perfect fifth over it and its octave where the range has it
+    public static StateKind<int> PowerChord { get; } = StateKinds.CreateAdditive<int>(Prefix + "PowerChord", StateScope.Render);
+
     // how deep a pump ducks the note on every beat, in percent of its expression, 0 for none (Expression.PumpDepth)
     public static StateKind<int> Pump { get; } = StateKinds.CreateAdditive<int>(Prefix + "Pump", StateScope.Render);
     public static StateKind<int> AutoPan { get; } = StateKinds.CreateAdditive<int>(Prefix + "AutoPan", StateScope.Render);

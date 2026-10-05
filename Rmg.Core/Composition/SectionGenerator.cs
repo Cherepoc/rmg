@@ -74,6 +74,9 @@ internal sealed class SectionGenerator
             .CacheGeneratedValues();
     }
 
+    /// <summary>The chance a section's riff plays in power chords, a genre's that the songs never play (<see cref="GenreChoices.Riff" />).</summary>
+    public static Probabilities.ByConvention PowerChordChance { get; } = new(0, 0, 0);
+
     /// <summary>The chance a section plays the song's first section's harmony, a loop, a genre's that the songs never play.</summary>
     public static Probabilities.ByConvention Loop { get; } = new(0, 0, 0);
 
@@ -259,10 +262,13 @@ internal sealed class SectionGenerator
         StateTrace.Record(TracePoints.TimeFeel, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{timeFeel}", timeFeel);
         // the drums from a sequence of their own, so that the pitched tracks are the same whichever drums the song plays
         var drums = GenerateDrums(Stream(sectionId, SectionStream.Drums), sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads.ToImmutable(), sectionRoles, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm, timeFeel, meter).ToArray();
+        // its riff in power chords, a genre's, which the songs never play, from a sequence of its own
+        var powerChords = Stream(sectionId, SectionStream.PowerChords).TestProbability(PowerChordChance.At(facets[Facet.Sound], _genre.Chance(GenreChoices.Riff, "powerChords")));
+        StateTrace.Record(TracePoints.RiffPowerChords, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{powerChords}", powerChords);
         // its melody on a hook now and then, a chorus by its role or every section by a genre's, from a sequence of its own
         var hooks = Stream(sectionId, SectionStream.Hook).TestProbability(MelodyLayers.HookChanceOf(plan.Role).At(facets[Facet.Melody], _genre.Chance(GenreChoices.Hook, "sections")));
         StateTrace.Record(TracePoints.MelodyHook, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{hooks}", hooks);
-        var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks).ToArray();
+        var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
         var plays = DrawPlays(sectionId, plan.Role, plan.PlaysLean, meter.Phrases);
@@ -289,7 +295,8 @@ internal sealed class SectionGenerator
             plan.Role,
             arrangementSeed,
             _tracks.Definitions.ToImmutableDictionary(x => x.Key, x => x.Value.Role),
-            meter
+            meter,
+            powerChords
         );
         // every part, which each appearance leaves out of it what it rests
         return section;
@@ -516,7 +523,8 @@ internal sealed class SectionGenerator
         HarmonicRhythm harmonicRhythm,
         SectionRhythm sectionRhythm,
         Meter meter,
-        bool hooks
+        bool hooks,
+        bool powerChords
     )
     {
         foreach (var trackNumber in _tracks.NonGroupedTrackNumbers)
@@ -552,6 +560,8 @@ internal sealed class SectionGenerator
                 var lineScale = LineScales.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Scale], _genre);
                 StateTrace.Record(TracePoints.LineScale, trackNumber, sectionId, 0, StateMap.Default, 0, $"{lineScale}", lineScale);
                 sectionTrackLayer.Add(CompositionStateKinds.LineScale, (int)lineScale);
+                if (powerChords && _tracks.Definitions[trackNumber].Role == TrackRole.Riff)
+                    sectionTrackLayer.Add(CompositionStateKinds.PowerChord, 1);
             }
             // the chords broken now and then, each part that plays them from a sequence of its own, by the section's chords facet
             if (_tracks.Definitions[trackNumber].Role.PlaysChords())
@@ -819,7 +829,8 @@ internal sealed record GeneratedSection(
     SectionRole Role,
     ulong ArrangementSeed,
     ImmutableDictionary<int, TrackRole> Roles,
-    Meter Meter
+    Meter Meter,
+    bool RiffPowerChords
 )
 {
     /// <summary>Whether the drums play in the section, rather than rest for a breakdown.</summary>
@@ -981,5 +992,6 @@ internal enum SectionStream
     ChordScales = 31,
     DominantChords = 32,
     Loop = 33,
-    Hook = 34
+    Hook = 34,
+    PowerChords = 35
 }

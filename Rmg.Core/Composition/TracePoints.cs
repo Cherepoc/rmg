@@ -135,6 +135,9 @@ internal static class TracePoints
     /// </summary>
     public const string SongStage = "Song stage";
 
+    /// <summary>Whether a section's riff plays in power chords (a <c>bool</c>).</summary>
+    public const string RiffPowerChords = "Riff power chords";
+
     /// <summary>Whether a section's melody is on a hook, its repeated bars singing their first's notes (a <c>bool</c>).</summary>
     public const string MelodyHook = "Melody hook";
 

@@ -163,7 +163,8 @@ public sealed class SongEndingTest
             SectionRole.Free,
             0,
             new Dictionary<int, TrackRole> { [MelodyTrack] = TrackRole.Melody, [BassTrack] = TrackRole.Bass, [drum] = TrackRole.Drum }.ToImmutableDictionary(),
-            Meter.FourFour
+            Meter.FourFour,
+            false
         );
 
         var ending = SongFormGenerator.CreateEnding(

@@ -242,7 +242,8 @@ internal static class SongStages
                 song.Facets[Facet.Sound],
                 song.Energies,
                 (pair, section) => song.Stream(SongStream.LineDoubling, pair, section),
-                section => song.Stream(SongStream.TwinTimbres, section)
+                section => song.Stream(SongStream.TwinTimbres, section),
+                index => song.Sections[index].RiffPowerChords
             )
         };
 
