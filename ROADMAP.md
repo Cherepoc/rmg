@@ -241,9 +241,11 @@ Each item with its plan, and what it waits for.
 - **Plain doubling,** a part doubling another in unison, which waits for timing by role.
 - **A motif developed further** (P3), inverted or stretched, should the solos' sequences sound mechanical.
 - **Legato as an articulation** (P3, after the palm mute's seam): a line's notes slurred into each other, a note's
-  articulation as the palm mute is, General MIDI playing it as notes overlapping and a plugin as a legato keyswitch;
-  the legato slides below one of its cases. And to check: whether a solo's runs group in fives and sevens, a fusion
-  player's, which the feels give a whole part but perhaps not a run.
+  articulation as the palm mute is, General MIDI playing it as notes joined with no gap and the slurred one's attack
+  softer (notes overlapping on its guitars and pianos ring together and blur), a plugin as a legato keyswitch; the
+  legato slides below one of its cases. And to check: whether a solo's runs group in fives and sevens, a fusion
+  player's, which the feels give a whole part but perhaps not a run; if not, a case of segments in any pattern (see
+  *Parked*), not a mechanism of its own.
 - **Legato slides** (P3): a slide strikes its note anew, where a player's note before goes on sounding into the next;
   holding the note before into the slide and leaving the next unstruck edits two notes at render. Built if the struck
   slide sounds like a stutter.
@@ -265,18 +267,26 @@ Each item with its plan, and what it waits for.
 
 ### Scales and chords
 
-- **A chord free of the section's scale** (P3): every chord's root is a step of the section's seven-note scale and
-  its own scale the section's a semitone a step at most (`ChordScales`), so a chord cannot move to an unrelated key, its
-  root cannot move by a semitone or a minor third, and it cannot take a scale of its own. A chord of its own kind: its
-  root in semitones from the home and its scale drawn on that root (Lydian, melodic minor, diminished, the
-  section's), its lines taking its scale as they take a chord's own now; never a replacement for the scale-step chords,
-  whose progressions, cadences and key changes count roots in steps. Its uses: a chromatic approach chord (approach
-  chords, step 4), a progression that does not function, roots moving by thirds or a semitone, a constant structure
-  planed through keys, a fusion's or a film score's genre leaning to it. Then a fusion genre, a long-lined guitar
-  player's, is a genre's data: free chords and their root motions, the line scales of melodic minor, the octatonic and
-  the whole-tone from each chord's root, leaping, stretched voicings and swells, odd meters, long legato solos.
+- **A chord free of the section's scale** (P3, in steps): every chord's root is a step of the section's seven-note
+  scale and its own scale the section's a semitone a step at most (`ChordScales`), so a chord cannot move to an
+  unrelated key, its root cannot move by a semitone or a minor third, and it cannot take a scale of its own. A chord of
+  its own kind, answering `Realizer.GetChord` as the others do, so that the lines and the chords read it unchanged;
+  never a replacement for the scale-step chords, whose progressions, cadences, key changes and bass landings count
+  roots in steps; the scale's test excepting it as it does a bass's approach. Steps:
+  1. A chord moved by semitones, its shape and its own scale with it: a chromatic approach chord (approach chords,
+     step 4) and a constant structure planed through keys, most of the use.
+  2. Choosing them: by a constant structure, one voicing moved by an interval drawn, or by voice leading, the next
+     chord the one its voicing moves least to (`VoiceLeader` the measure). The hard part: free chords drawn freely
+     sound random, where in the style they drift by their voices.
+  3. A chord's own scale drawn on its root (Lydian, melodic minor, diminished), should step 1 sound narrow.
+  Its uses past an approach: a progression that does not function, planing in pop and film scores, modern jazz. A
+  fusion genre, a long-lined guitar player's, then has its harmony and its lines as a genre's data (free chords, the
+  line scales of melodic minor, the octatonic and the whole-tone from each chord's root, leaping, stretched voicings,
+  swells, odd meters); not its tone, which General MIDI has not, its long legato soloing, which the solo's gestures
+  (licks, runs, held notes) are not built for, its drumming and its melodic bass, gaps of their own.
 - **Stretched voicings** (P3): a chord spread over two octaves and more, a guitarist's wide stretch and a pianist's
-  spread voicing, beside the close shapes and the clusters; data on the voicings.
+  spread voicing, beside the close shapes and the clusters; data on the voicings, a section holding its spacing
+  rather than the voice leader drawing it anew a chord, a wide voicing giving it room to jump.
 - **Approach chords** (P2 for its first steps, a plan in steps): a chord leading into the next one that the
   progression does not have, by its kind (the target's dominant, a passing diminished between roots a whole step
   apart, the target's shape a semitone above or below, the tritone substitute), its length (a beat, half a bar or a bar,
@@ -295,8 +305,8 @@ Each item with its plan, and what it waits for.
      playing them; the 12-bar's place rules kept, and the melody's note there fitting or the approach going elsewhere.
   3. A chord solo's: a chord soloist's stacked note leading into the next chord playing an approach, step 2's chord,
      on a weak beat, and on the strong ones too at the wild end, against the comping under it. A stage after the lines.
-  4. Chromatic approaches: a chord free of the section's scale (below), a semitone from its target, then its kind
-     among steps 2 and 3.
+  4. Chromatic approaches: a chord moved by semitones (a chord free of the section's scale, its step 1), a semitone
+     from its target, then its kind among steps 2 and 3.
   5. A later appearance reharmonised, a last chorus over substitutes (vi or iii for I, ii for IV, the tritone
      substitute for V7) chosen by the notes they share with the chord they replace, decided before the lines are
      placed, so that the melody placed over them fits as it does.
