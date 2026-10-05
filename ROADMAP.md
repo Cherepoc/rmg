@@ -13,7 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: Electronic split; an octave bass; a push by the
+**When the need shows** (P3), each by what listening says, in this order: an octave bass; a push by the
 whole band; legato as an articulation; stretched voicings; the melody's range by genre; the fills' sounds by
 convention; a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
 and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
@@ -492,7 +492,10 @@ a link carries. What is left:
      walk into the section with it), the drums' fill alone in it and landing on the drop; a genre's, the songs never.
      Lifts dropped: Electronic 64%, Hip-hop 32%, Funk 22%. Not done: the build thickening, a snare roll doubling its
      rate and a riser sweeping up over the phrase (P3), should the drop sound unprepared.
-  7. Electronic split into House, Techno and Synthwave (P3), once the steps above tell them apart.
+  7. Done: Electronic split: its preset House (its key `electronic` kept, for the links that name it), Techno (a kick on
+     every beat 82% of bars, 93% of sections on one progression, 2 chords in 4 bars, 133 bpm, little melody) and
+     Synthwave (a backbeat, the kick on every beat 13%, a verse and a chorus, major or minor, 102 bpm, a lead's echo).
+     Synthwave's snare on 2 and 4 58% (target 80%), as Rock's, the drums' own layers moving it.
   The melody as a looped hook: done, a melody written as a hook (see *Form and sections*), by a section's role and a
   genre's value.
 - **What a genre cannot reach yet** (P2, a plan in steps): most of it a table the songs already draw by `ByConvention`,

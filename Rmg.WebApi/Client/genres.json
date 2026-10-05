@@ -97,8 +97,8 @@
   },
   {
     "id": "electronic",
-    "name": "Electronic",
-    "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, bass and pads, a TR-808 or electronic kit, straight and fast, minor, sus and add9 chords.",
+    "name": "House",
+    "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, a pumping bass and pads, piano and electric piano chords now and then, a TR-808 or electronic kit, straight, 117 to 130, minor, sus and add9 chords, a drop into the chorus.",
     "choices": {
       "keyChanges": {},
       "rests": { "drum": 70, "melody": 65, "pad": 35 },
@@ -117,7 +117,7 @@
       "formChances": { "forms": [90, 50, 10] },
       "instrument": {
         "melody": { "lead1Square": 100, "lead2Sawtooth": 100, "lead5Charang": [30, 30, 36] },
-        "chords": { "electricPiano2": [30, 30, 76], "synthStrings1": 65, "pad2Warm": [45, 45, 72], "pad3Polysynth": 100 },
+        "chords": { "electricPiano2": [30, 30, 76], "acousticGrandPiano": [40, 40, 40], "electricPiano1": [40, 40, 40], "synthStrings1": 65, "pad2Warm": [45, 45, 72], "pad3Polysynth": 100 },
         "bass": { "synthBass1": 100, "synthBass2": [100, 100, 89] },
         "pad": { "synthStrings1": [56, 56, 78], "pad2Warm": 100, "pad3Polysynth": [100, 100, 71], "pad7Halo": [81, 81, 57], "pad8Sweep": [81, 81, 57] },
         "counterMelody": { "lead2Sawtooth": 100 },
@@ -142,6 +142,104 @@
         "riff": { "repetition": 100 },
         "ground": { "speed": 100, "fineness": 0, "fullness": 100, "repetition": 100 },
         "time": { "speed": 76, "offbeat": 76, "fineness": 0, "fullness": 100, "repetition": 100 }
+      }
+    }
+  },
+  {
+    "id": "techno",
+    "name": "Techno",
+    "description": "A kick on every beat, driving and dark, the hi-hat on the offbeats, one figure looping for minutes over a chord or two, a square or sawtooth riff, little melody, a minor or Phrygian key, a TR-808 or electronic kit, 125 to 140, the pads and bass pumping.",
+    "choices": {
+      "keyChanges": {},
+      "rests": { "drum": 60, "melody": 85, "pad": 50 },
+      "tempo": { "from": [125, 125, 110], "to": [140, 140, 175] },
+      "meter": { "4/4": [100, 100, 85], "7/8": [0, 0, 10], "5/4": [0, 0, 8] },
+      "feel": { "straight": [100, 100, 70], "grouped3": [0, 0, 20], "tuplets3": [0, 0, 15] },
+      "feelChances": { "swing": [0, 0, 10], "halfTime": 5, "doubleTime": 5 },
+      "scale": { "naturalMinor": [100, 100, 60], "phrygian": [40, 60, 80], "dorian": [20, 30, 40] },
+      "chordShape": { "triad": [100, 60, 40], "sus2": [50, 80, 50], "quartalTriad": [0, 40, 70], "denseCluster": [0, 10, 40] },
+      "harmonicRhythm": { "twoBars": 100 },
+      "loop": { "sections": [90, 90, 70] },
+      "bass": { "leading": 10 },
+      "bassLanding": { "root": 100, "free": [0, 10, 40] },
+      "strongEffect": { "none": [30, 20, 10], "pump": 100, "sweep": [40, 60, 100], "echo": [20, 30, 50] },
+      "pan": { "pad": 80 },
+      "formChances": { "forms": [80, 40, 10] },
+      "instrument": {
+        "melody": { "lead1Square": 100, "lead2Sawtooth": 100 },
+        "chords": { "synthStrings1": 40, "pad3Polysynth": 100 },
+        "bass": { "synthBass1": 100, "synthBass2": 100 },
+        "pad": { "pad2Warm": 100, "pad8Sweep": 100, "pad7Halo": [50, 50, 70] },
+        "counterMelody": { "lead2Sawtooth": 100 },
+        "riff": { "lead1Square": 100, "lead2Sawtooth": 100 },
+        "solo": { "lead2Sawtooth": 100, "lead1Square": 100 }
+      },
+      "kit": { "electronic": 100, "tr808": 100 },
+      "parts": { "melody": [60, 60, 50], "chords": [70, 70, 70], "bass": 100, "pad": [60, 60, 60], "counterMelody": 30, "drum": 100, "riff": 100, "riffTwin": [0, 10, 15], "rhythm": [10, 10, 30], "solo": [0, 10, 50] },
+      "drumSetup": { "kit": 100 },
+      "drumPieces": { "kick": 100, "electricSnare": [60, 60, 60], "clap": 100, "hiHat": 100, "tom": [10, 10, 60], "cymbal": [50, 50, 80] },
+      "levels": { "melody": 25, "bass": 70, "pad": 35, "drum": 95 },
+      "grooveHold": { "held": 95 },
+      "pocket": { "laidBack": 5 },
+      "drop": { "lifts": [60, 60, 60] },
+      "fills": { "amount": 5 },
+      "hook": { "sections": [80, 80, 60] },
+      "intro": { "entries": 100, "cold": [10, 10, 30] },
+      "ending": { "fade": 100, "open": [20, 30, 40] },
+      "rhythm": {
+        "chords": { "repetition": 92 },
+        "bass": { "repetition": 100, "fullness": 76 },
+        "riff": { "repetition": 100 },
+        "ground": { "speed": 100, "fineness": 0, "fullness": 100, "repetition": 100 },
+        "time": { "speed": 76, "offbeat": 82, "fineness": 0, "fullness": 100, "repetition": 100 }
+      }
+    }
+  },
+  {
+    "id": "synthwave",
+    "name": "Synthwave",
+    "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
+    "choices": {
+      "keyChanges": { "lastSection": [0, 20, 100], "sections": [0, 5, 100], "patterns": [0, 0, 100] },
+      "rests": { "pad": 30 },
+      "tempo": { "from": [85, 85, 70], "to": [118, 118, 150] },
+      "meter": { "4/4": [100, 100, 90], "3/4": [0, 0, 10] },
+      "feel": { "straight": [100, 100, 80], "tuplets3": [0, 0, 15] },
+      "feelChances": { "swing": [0, 0, 10], "halfTime": 10, "doubleTime": 5 },
+      "scale": { "major": [100, 100, 60], "naturalMinor": [80, 80, 60], "dorian": [20, 30, 40], "mixolydian": [10, 20, 30] },
+      "chordShape": { "triad": 100, "add9": [30, 60, 50], "sus2": [30, 50, 40], "sus4": [20, 40, 40], "seventh": [20, 40, 40] },
+      "harmonicRhythm": { "oneBar": 100, "twoBars": [40, 40, 40] },
+      "bass": { "leading": 20 },
+      "strongEffect": { "none": [60, 60, 40], "echo": [30, 40, 60], "sweep": [20, 30, 60] },
+      "effects": { "chorus": [40, 60, 80], "vibrato": [20, 40, 70] },
+      "pan": { "pad": 80 },
+      "formChances": { "forms": [100, 90, 50] },
+      "instrument": {
+        "melody": { "lead2Sawtooth": 100, "lead1Square": [60, 60, 60], "lead5Charang": [30, 30, 40] },
+        "chords": { "pad3Polysynth": 100, "synthStrings1": 80, "electricPiano2": [50, 50, 50] },
+        "bass": { "synthBass2": 100, "synthBass1": [60, 60, 60] },
+        "pad": { "pad2Warm": 100, "pad3Polysynth": [80, 80, 80], "synthStrings1": [60, 60, 60], "pad7Halo": [40, 40, 60] },
+        "counterMelody": { "lead2Sawtooth": 100 },
+        "riff": { "lead2Sawtooth": 100, "lead1Square": [60, 60, 60] },
+        "solo": { "lead2Sawtooth": 100, "lead5Charang": [40, 40, 60] }
+      },
+      "kit": { "electronic": 100, "tr808": [50, 50, 50] },
+      "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [95, 95, 85], "counterMelody": 60, "drum": 100, "riff": [50, 50, 50], "riffTwin": [0, 10, 15], "rhythm": [20, 20, 40], "solo": [0, 20, 60] },
+      "drumSetup": { "kit": 100 },
+      "drumPieces": { "kick": 100, "electricSnare": 100, "clap": [40, 40, 40], "hiHat": 100, "tom": [50, 50, 100], "cymbal": 100 },
+      "levels": { "melody": 55, "drum": 70 },
+      "grooveHold": { "held": 85 },
+      "pocket": { "laidBack": 30 },
+      "drop": { "lifts": [10, 10, 20] },
+      "fills": { "amount": 50 },
+      "hook": { "sections": [40, 40, 30] },
+      "intro": { "entries": 100, "cold": [20, 20, 40] },
+      "ending": { "fade": 100, "button": [20, 30, 40] },
+      "rhythm": {
+        "bass": { "speed": 76, "repetition": 92, "fullness": 82 },
+        "backbeat": { "repetition": 82 },
+        "ground": { "repetition": 82 },
+        "time": { "speed": 76, "fullness": 82, "repetition": 82 }
       }
     }
   },
