@@ -336,9 +336,8 @@ a link carries. What is left:
   so that the next song goes on in them; keeping one's own and offering a way back to them is the other way, should
   listening to shared songs ask for it.
 - **Later:** the playing following the articulation (see *Open work*), and a genre's own after it; instruments outside a
-  role's pool, with their leading drawn from their family; ratings by genre on the dashboard, which the events carry (a
-  preset's id or a genre's key, with the version).; phrases of other than four bars, once the phrases
-  sound right.
+  role's pool, with their leading drawn from their family; phrases of other than four bars, once the phrases sound
+  right.
 
 ## Parked
 

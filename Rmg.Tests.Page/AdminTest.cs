@@ -36,6 +36,29 @@ public sealed class AdminTest(Site site)
     }
 
     [Test]
+    public async Task TheDashboard_TellsTheRatingsByGenre_AndARatedSongsGenre()
+    {
+        await using var page = await SongPage.Open(site, "admin/", admin: true);
+        // the server's summary with songs rated in genres
+        await page.Page.RouteAsync("**/api/summary**", async route =>
+        {
+            var summary = System.Text.Json.Nodes.JsonNode.Parse(await (await route.FetchAsync()).TextAsync())!;
+            summary["ratedVersion"] = "0.7.000";
+            summary["rated"] = System.Text.Json.Nodes.JsonNode.Parse("""[{"seed":"1","identity":"","genre":"rock","likes":0,"dislikes":1}]""");
+            summary["ratedGenres"] = System.Text.Json.Nodes.JsonNode.Parse(
+                """[{"genre":"own","songs":2,"likes":2,"dislikes":0},{"genre":"rock","songs":1,"likes":0,"dislikes":1},{"genre":"","songs":1,"likes":1,"dislikes":0}]""");
+            await route.FulfillAsync(new RouteFulfillOptions { ContentType = "application/json", Body = summary.ToJsonString() });
+        });
+        await page.Page.GotoAsync(new Uri(site.Address, "admin/dashboard.html").ToString());
+
+        var genres = page.Page.Locator("#genres-panel");
+        await Assertions.Expect(genres).ToBeVisibleAsync();
+        await Assert.That(await genres.Locator("tbody tr td:first-child").AllTextContentsAsync()).IsEquivalentTo(["made on the page", "rock", "none"]);
+        await Assert.That(await page.Page.Locator("#rated tbody tr td").AllTextContentsAsync()).IsEquivalentTo(["1", "drawn", "rock", "0", "1"]);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task ASongsLink_IsDescribed_AsTextToCopy()
     {
         await using var page = await SongPage.Open(site, "admin/", admin: true);

@@ -334,7 +334,7 @@ public sealed class EventStoreTest : IDisposable
         await Assert.That(version.Likes).IsEqualTo(2);
         await Assert.That(version.Dislikes).IsEqualTo(1);
         await Assert.That(summary.RatedVersion).IsEqualTo("0.5.000");
-        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed("3", "", 2, 0), new RatedSeed("1", "", 0, 1) });
+        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed("3", "", "", 2, 0), new RatedSeed("1", "", "", 0, 1) });
     }
 
     [Test]
@@ -361,8 +361,27 @@ public sealed class EventStoreTest : IDisposable
 
         var summary = _store.Summarise(Now, 30);
 
-        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed("1", "", 1, 0), new RatedSeed("2", "", 1, 0), new RatedSeed("3", "", 1, 0), new RatedSeed("1", Heard(60, true).Identity, 0, 1) });
+        await Assert.That(summary.Rated).IsEquivalentTo(new[] { new RatedSeed("1", "", "", 1, 0), new RatedSeed("2", "", "", 1, 0), new RatedSeed("3", "", "", 1, 0), new RatedSeed("1", Heard(60, true).Identity, "", 0, 1) });
         await Assert.That(summary.RatedFifths).IsEquivalentTo(new[] { new RatedFifth(false, 0, 2, 2, 0), new RatedFifth(true, 4, 1, 0, 1) });
+    }
+
+    [Test]
+    public async Task ASeedInAGenre_IsAnotherSong_AndSongsAreRatedByGenre_TheGenresMadeOnThePageTogether()
+    {
+        // seed 1 in no genre, liked, and in Rock, disliked; seed 2 in Rock, liked; two genres made on the page, liked
+        Write(EventNames.Rated, seed: 1, detail: "none>up", version: "0.5.000");
+        Write(EventNames.Rated, seed: 1, detail: "none>down", version: "0.5.000", genre: "rock");
+        Write(EventNames.Rated, seed: 2, detail: "none>up", version: "0.5.000", genre: "rock");
+        Write(EventNames.Rated, seed: 3, detail: "none>up", version: "0.5.000", genre: "AbC123xyz09");
+        Write(EventNames.Rated, seed: 4, detail: "none>up", version: "0.5.000", genre: "ZyX987abc12");
+
+        var summary = _store.Summarise(Now, 30);
+
+        await Assert.That(summary.Rated.Where(x => x.Seed == "1")).IsEquivalentTo(new[] { new RatedSeed("1", "", "", 1, 0), new RatedSeed("1", "", "rock", 0, 1) });
+        await Assert.That(summary.RatedGenres).IsEquivalentTo(new[]
+        {
+            new RatedGenre("own", 2, 2, 0), new RatedGenre("rock", 2, 1, 1), new RatedGenre("", 1, 1, 0)
+        });
     }
 
     [Test]

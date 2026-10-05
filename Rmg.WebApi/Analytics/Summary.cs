@@ -40,9 +40,10 @@ public sealed record VersionListening(
 
 /// <param name="Seed">The song, in <see cref="AnalyticsSummary.RatedVersion" />.</param>
 /// <param name="Identity">What of its settings names it with its seed (<see cref="Songs.SongSettings.Identity" />); empty for none.</param>
+/// <param name="Genre">The genre it was made in, which names it too: a preset's id or a genre's key; empty for none.</param>
 /// <param name="Likes">Its likes as they stand now: the changes to a like less the changes from one.</param>
 /// <param name="Dislikes">Its dislikes, likewise.</param>
-public sealed record RatedSeed(string Seed, string Identity, int Likes, int Dislikes);
+public sealed record RatedSeed(string Seed, string Identity, string Genre, int Likes, int Dislikes);
 
 /// <param name="IsGiven">Whether the songs were asked for at their unconventionality, or drew it.</param>
 /// <param name="Fifth">Which fifth of the unconventionality, from 0 for the plainest to 4 for the wildest.</param>
@@ -50,6 +51,12 @@ public sealed record RatedSeed(string Seed, string Identity, int Likes, int Disl
 /// <param name="Likes">Their likes as they stand now.</param>
 /// <param name="Dislikes">Their dislikes.</param>
 public sealed record RatedFifth(bool IsGiven, int Fifth, int Songs, int Likes, int Dislikes);
+
+/// <param name="Genre">A preset's id, such as "rock"; "own" for every genre made on the page; empty for songs in none.</param>
+/// <param name="Songs">How many songs in it were rated.</param>
+/// <param name="Likes">Their likes as they stand now.</param>
+/// <param name="Dislikes">Their dislikes.</param>
+public sealed record RatedGenre(string Genre, int Songs, int Likes, int Dislikes);
 
 /// <param name="Name">What failed.</param>
 /// <param name="Detail">Why, as far as the page could say.</param>
@@ -108,6 +115,7 @@ public sealed record ServerSummary(
 /// <param name="RatedVersion">The latest songs' version any song was rated in, which <paramref name="Rated" /> is of.</param>
 /// <param name="Rated">The songs of it rated, the most liked first and the most disliked last.</param>
 /// <param name="RatedFifths">Its songs' ratings by how plain or wild they are, given apart from drawn.</param>
+/// <param name="RatedGenres">Its songs' ratings by their genre.</param>
 /// <param name="Failures">What went wrong, and how often.</param>
 /// <param name="Server">What the server measured of the songs asked of it.</param>
 public sealed record AnalyticsSummary(
@@ -124,6 +132,7 @@ public sealed record AnalyticsSummary(
     string? RatedVersion,
     IReadOnlyList<RatedSeed> Rated,
     IReadOnlyList<RatedFifth> RatedFifths,
+    IReadOnlyList<RatedGenre> RatedGenres,
     IReadOnlyList<Failure> Failures,
     int Events,
     ServerSummary Server

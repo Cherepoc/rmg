@@ -31,6 +31,8 @@ const elements = {
     rated: document.getElementById("rated"),
     fifthsPanel: document.getElementById("fifths-panel"),
     fifths: document.getElementById("fifths"),
+    genresPanel: document.getElementById("genres-panel"),
+    genres: document.getElementById("genres"),
     failuresPanel: document.getElementById("failures-panel"),
     failures: document.getElementById("failures"),
     serverPanel: document.getElementById("server-panel"),
@@ -64,7 +66,7 @@ function setStatus(message, isError = false) {
 
 function showPanels(isShown) {
     for (const panel of [elements.headline, elements.timings, elements.funnelPanel,
-        elements.dailyPanel, elements.seedsPanel, elements.versionsPanel, elements.ratedPanel, elements.fifthsPanel, elements.failuresPanel, elements.serverPanel])
+        elements.dailyPanel, elements.seedsPanel, elements.versionsPanel, elements.ratedPanel, elements.fifthsPanel, elements.genresPanel, elements.failuresPanel, elements.serverPanel])
         panel.hidden = !isShown;
 
     elements.controls.hidden = !isShown;
@@ -157,6 +159,7 @@ function draw() {
     drawVersions();
     drawRated();
     drawFifths();
+    drawGenres();
     drawFailures();
     drawServer();
 }
@@ -510,8 +513,8 @@ function drawRated() {
 
     elements.ratedHint.textContent = `The songs of ${summary.ratedVersion} rated, the most liked first. A seed is this song only in this version.`;
     elements.rated.replaceChildren(table(
-        ["Song", "Settings given", "Liked", "Disliked"],
-        summary.rated.map((seed) => [seed.seed, seed.identity === "" ? "drawn" : seed.identity, String(seed.likes), String(seed.dislikes)])
+        ["Song", "Settings given", "Genre", "Liked", "Disliked"],
+        summary.rated.map((seed) => [seed.seed, seed.identity === "" ? "drawn" : seed.identity, seed.genre === "" ? "none" : seed.genre, String(seed.likes), String(seed.dislikes)])
     ));
 }
 
@@ -533,6 +536,25 @@ function drawFifths() {
             String(fifth.likes),
             String(fifth.dislikes),
             percent(fifth.likes, fifth.likes + fifth.dislikes),
+        ])
+    ));
+}
+
+/** Ratings by genre, every genre made on the page together, with how many songs each is of. */
+function drawGenres() {
+    if (summary.ratedGenres.length === 0) {
+        elements.genres.replaceChildren(empty("No song has been rated yet."));
+        return;
+    }
+
+    elements.genres.replaceChildren(table(
+        ["Genre", "Rated", "Liked", "Disliked", "Share liked"],
+        summary.ratedGenres.map((genre) => [
+            genre.genre === "" ? "none" : genre.genre === "own" ? "made on the page" : genre.genre,
+            String(genre.songs),
+            String(genre.likes),
+            String(genre.dislikes),
+            percent(genre.likes, genre.likes + genre.dislikes),
         ])
     ));
 }
