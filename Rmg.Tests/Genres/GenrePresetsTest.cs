@@ -6,6 +6,18 @@ namespace Rmg.Tests.Genres;
 public sealed class GenrePresetsTest
 {
     [Test]
+    public async Task EveryChoice_IsAFamilysMemberAtMost_SoThatAFileWritesItInFamilies()
+    {
+        // a family's choice one dot deep, its family no choice's option, so that a file's entry holds both apart
+        foreach (var choice in GenreChoices.All)
+            await Assert.That(choice.Name.Count(x => x == '.')).IsLessThanOrEqualTo(1).Because(choice.Name);
+        foreach (var family in GenreChoices.All.Where(x => x.Name.Contains('.')).Select(x => x.Name.Split('.')[0]).Distinct())
+        foreach (var own in GenreChoices.All.Where(x => x.Name == family))
+            await Assert.That(own.Options.Any(o => GenreChoices.All.Any(c => c.Name == $"{family}.{o.Name}"))).IsFalse().Because(family);
+        await Assert.That(GenrePresets.All.SelectMany(x => x.Choices.Keys).All(x => GenreChoices.All.Any(c => c.Name == x))).IsTrue();
+    }
+
+    [Test]
     public async Task EveryPreset_IsAGenre_AsARequestReadsIt()
     {
         foreach (var preset in GenrePresets.All)

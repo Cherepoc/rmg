@@ -19,7 +19,30 @@ internal static class GenrePresets
             throw new FileNotFoundException("The page's genres.json is not above the tests.");
 
         var text = File.ReadAllText(Path.Combine(directory.FullName, "Rmg.WebApi", "Client", "genres.json"));
-        return JsonSerializer.Deserialize<List<Preset>>(text, new JsonSerializerOptions(JsonSerializerDefaults.Web))!;
+        var file = JsonSerializer.Deserialize<List<Preset>>(text, new JsonSerializerOptions(JsonSerializerDefaults.Web))!;
+        return [..file.Select(x => x with { Choices = Flat(x.Choices) })];
+    }
+
+    /// <summary>
+    ///     A preset's choices as the page sends them, from the file's families (<c>genres.js</c>' flatChoices): an entry's
+    ///     member that is itself options a family's choice, "rhythm": { "ground": ... } the choice "rhythm.ground", any other an
+    ///     option of the entry's own.
+    /// </summary>
+    internal static Dictionary<string, Dictionary<string, JsonElement>> Flat(Dictionary<string, Dictionary<string, JsonElement>> choices)
+    {
+        var flat = new Dictionary<string, Dictionary<string, JsonElement>>();
+        foreach (var (name, members) in choices)
+        {
+            if (members.Count == 0)
+                flat[name] = [];
+            foreach (var (member, value) in members)
+                if (value.ValueKind == JsonValueKind.Object)
+                    flat[$"{name}.{member}"] = value.EnumerateObject().ToDictionary(x => x.Name, x => x.Value);
+                else
+                    (flat.TryGetValue(name, out var own) ? own : flat[name] = [])[member] = value;
+        }
+
+        return flat;
     }
 
     /// <summary>A preset's genre, as a request reads it (<see cref="Rmg.WebApi.Songs.GenerateSongRequest.Genre" />); what is wrong with it fails.</summary>

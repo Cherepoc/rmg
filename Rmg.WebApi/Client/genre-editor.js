@@ -1,6 +1,6 @@
 import { MAX_GENRE_NAME_BYTES } from "./settings.js";
 import { isShowingGenrePrinciples, setShowingGenrePrinciples } from "./storage.js";
-import { endsOf, isPresetName, ownOf, sameName } from "./genres.js";
+import { endsOf, flatChoices, isPresetName, nestedChoices, ownOf, sameName } from "./genres.js";
 import { createGenreTune } from "./genre-tune.js";
 import { byMiddle, COLOURS, drawBand, drawLines, drawShares, endsInWords, labelOf, svg } from "./genre-charts.js";
 
@@ -416,7 +416,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll, 
 
     const exported = button("Export JSON", "Save this genre as a JSON file", () => {
         const link = document.createElement("a");
-        link.href = URL.createObjectURL(new Blob([JSON.stringify(finishedOrDraft(), null, 1)], { type: "application/json" }));
+        link.href = URL.createObjectURL(new Blob([JSON.stringify(asFile(finishedOrDraft()), null, 1)], { type: "application/json" }));
         link.download = `${draft.name.trim() || "genre"}.json`;
         link.click();
         setTimeout(() => URL.revokeObjectURL(link.href));
@@ -432,7 +432,10 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll, 
         file.value = "";
         if (!chosen) return;
         try {
-            const parsed = JSON.parse(await chosen.text());
+            // in families, or flat as an older export writes them
+            const read = JSON.parse(await chosen.text());
+            const fromFile = (x) => (typeof x?.choices === "object" && x.choices !== null ? { ...x, choices: flatChoices(x.choices) } : x);
+            const parsed = Array.isArray(read) ? read.map(fromFile) : fromFile(read);
             const isGenre = (x) => typeof x?.name === "string" && typeof x?.choices === "object" && x.choices !== null
                 && Object.keys(x.choices).every((y) => choices.has(y)) && (x.description === undefined || typeof x.description === "string");
             // a list of genres, every one of them, kept among one's own; one genre opened as the draft
@@ -450,11 +453,14 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll, 
     // every genre of one's own as one file, so that they outlive this browser
     const exportedAll = button("Export all", "Save every genre of yours as one JSON file", () => {
         const link = document.createElement("a");
-        link.href = URL.createObjectURL(new Blob([JSON.stringify(allOwn(), null, 1)], { type: "application/json" }));
+        link.href = URL.createObjectURL(new Blob([JSON.stringify(allOwn().map(asFile), null, 1)], { type: "application/json" }));
         link.download = "genres.json";
         link.click();
         setTimeout(() => URL.revokeObjectURL(link.href));
     });
+
+    /** A genre as a file writes it, its choices in families, in the editor's order. */
+    const asFile = (genre) => ({ ...genre, choices: nestedChoices(genre.choices, [...choices.keys()]) });
 
     // what was done that is no problem, such as genres imported
     const told = document.createElement("p");

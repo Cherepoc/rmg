@@ -9,7 +9,7 @@ is removed once it is built.
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
 ratings by conventionality once enough are in, alongside, continuously and never as a gate.
 
-**Later** (P2), in this order: the presets' file in families; an idiom report a genre; the melody's character and the
+**Later** (P2), in this order: an idiom report a genre; the melody's character and the
 bass's style by genre; the harmonic rhythm by genre; a loop, a genre's levels, its fills and a melody written as a hook
 (genres that sound like themselves, see *Genres*); sidechain pumping; a riff in power chords and its chugs, the
 articulation's seam; solos, soloists, endings and intros by genre; timing by role, then a genre's pocket, and a
@@ -448,14 +448,6 @@ a link carries. What is left:
      should play eight bars now and then.
   Later: phrases of other than four bars (a 3-bar phrase, a 6-bar section), which the line's question and answer
   and the fills assume, once P phrases sound right.
-- **The presets' file in families** (P2, first among the genre items, which all edit it): `genres.json` writes a
-  family's choices as names with a dot (`instrument.melody`, `rhythm.ground`, `feel.time`, `drumRole.kick`), and its
-  choices in no order. A choice `a.b` written `{ "a": { "b": ... } }` and read back so, by one rule with no family
-  named; only in the files people see, the shipped presets and the editor's export and import, which reads the flat
-  form too, an old export's; the page's model, what it keeps and what it asks the server keep the flat names, so that
-  the server's choices, the genres kept by their keys and every link stay as they are. Written in the editor's order of
-  its sections, so that an export diffs; the tests' reader (`GenrePresets`) by the same rule; a test that no choice has
-  a dot outside its family's. Not done: the three amounts named, three times the text for what the editor shows.
 - **Genres that sound like themselves** (P2, a plan in steps). A genre leans the surface (its instruments, scale,
   tempo, rhythm, shapes, effects, form); under it every song is a band playing verses and choruses, a melody that goes
   on, a chord a bar, a fill at every phrase, every part as loud. Hip-hop's preset plays as a lounge track: a beat is a

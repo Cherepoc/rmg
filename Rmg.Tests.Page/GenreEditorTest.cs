@@ -652,6 +652,37 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task AGenre_IsExportedInFamilies_AndAFileInThemImportedAsItWas()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        await page.FirstSong();
+        await page.Settled();
+        await page.Page.Locator("#settings-panel summary").ClickAsync();
+        var action = page.Page.Locator("button.genre-edit");
+        await page.Until(() => action.IsEnabledAsync(), "the editor ready");
+        await page.Page.Locator("select[aria-label='Genre']").EvaluateAsync("select => { select.value = 'preset:rock'; select.dispatchEvent(new Event('change')); }");
+        await page.Until(async () => await action.TextContentAsync() == "Duplicate", "a preset's button");
+        await action.ClickAsync();
+        var dialog = page.Page.Locator("dialog.genre-dialog");
+
+        // a family's choices one object of its members, no name with a dot
+        var download = await page.Page.RunAndWaitForDownloadAsync(() => dialog.Locator("footer button", new() { HasTextString = "Export JSON" }).ClickAsync());
+        var text = await File.ReadAllTextAsync(await download.PathAsync());
+        using var json = System.Text.Json.JsonDocument.Parse(text);
+        var choices = json.RootElement.GetProperty("choices");
+        await Assert.That(choices.EnumerateObject().Select(x => x.Name)).DoesNotContain(x => x.Contains('.'));
+        await Assert.That(choices.GetProperty("instrument").GetProperty("riff").TryGetProperty("overdrivenGuitar", out _)).IsTrue();
+
+        // read back as it was written: exported again, the same file
+        await dialog.Locator("input[aria-label='Genre name']").FillAsync("Elsewhere");
+        await dialog.Locator("input[type=file]").SetInputFilesAsync(new FilePayload { Name = "rock.json", MimeType = "application/json", Buffer = System.Text.Encoding.UTF8.GetBytes(text) });
+        await page.Until(async () => await dialog.Locator("input[aria-label='Genre name']").InputValueAsync() == "Rock 1", "the file read");
+        var again = await page.Page.RunAndWaitForDownloadAsync(() => dialog.Locator("footer button", new() { HasTextString = "Export JSON" }).ClickAsync());
+        await Assert.That(await File.ReadAllTextAsync(await again.PathAsync())).IsEqualTo(text);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task AGenreFile_IsImported_AndOneThatIsNotAGenre_IsAProblem()
     {
         await using var page = await SongPage.Open(site, "?song=1");

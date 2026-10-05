@@ -1,4 +1,4 @@
-import PRESETS from "./genres.json";
+import PRESET_FILE from "./genres.json";
 
 /**
  *     Genres as the page has them: the presets it ships (genres.json), and those made here, which this browser keeps. A
@@ -6,7 +6,40 @@ import PRESETS from "./genres.json";
  *     percents, one alike at every end or three, at the plain end, in the middle and at the wild; the server knows the
  *     choices, never a genre.
  */
-export { PRESETS };
+const isFamily = (x) => typeof x === "object" && x !== null && !Array.isArray(x);
+
+export const PRESETS = PRESET_FILE.map((preset) => ({ ...preset, choices: flatChoices(preset.choices) }));
+
+/**
+ *     A genre's choices as the page and the server name them, from those a file writes in families: an entry's member
+ *     that is itself options is a family's choice, "rhythm": { "ground": { ... } } the choice "rhythm.ground", and any
+ *     other member an option of the entry's own choice, so that "feel" holds the song's feel and the parts' feels both;
+ *     a file's choices already flat, as an older export writes them, as they are.
+ */
+export function flatChoices(choices) {
+    const flat = {};
+    for (const [name, members] of Object.entries(choices)) {
+        // a choice keeping none of its options, which is no genre's, kept as it is to be told so
+        if (Object.keys(members).length === 0) flat[name] = {};
+        for (const [member, value] of Object.entries(members)) {
+            if (isFamily(value)) flat[`${name}.${member}`] = value;
+            else (flat[name] ??= {})[member] = value;
+        }
+    }
+    return flat;
+}
+
+/** A genre's choices as a file writes them, in families (flatChoices), in the order given, the editor's. */
+export function nestedChoices(choices, order) {
+    const nested = {};
+    for (const name of [...order.filter((x) => x in choices), ...Object.keys(choices).filter((x) => !order.includes(x))]) {
+        const [family, member] = name.split(".");
+        const entry = (nested[family] ??= {});
+        if (member === undefined) Object.assign(entry, choices[name]);
+        else entry[member] = choices[name];
+    }
+    return nested;
+}
 
 /**
  *     The preset a genre is, as a link names it by its id, such as "rock", in place of the server's key; none for a genre
