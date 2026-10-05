@@ -50,6 +50,7 @@
     "choices": {
       "pocket": { "laidBack": 65 },
       "turnaround": { "sections": [0, 80, 80] },
+      "passingChords": { "chords": [0, 50, 60] },
       "tempo": { "from": [110, 110, 70], "to": [180, 180, 240] },
       "meter": { "4/4": [100, 100, 60], "3/4": [10, 12, 25], "5/4": [0, 0, 30], "7/4": [0, 0, 15] },
       "feelChances": { "swing": [95, 80, 50], "halfTime": 8, "doubleTime": 5 },

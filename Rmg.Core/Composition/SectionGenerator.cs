@@ -146,6 +146,10 @@ internal sealed class SectionGenerator
         var dominants = Stream(sectionId, SectionStream.DominantChords)
             .TestProbability(ChordScales.Dominant.At(facets[Facet.Progression], _genre.Chance(GenreChoices.ChordScales, "dominant")));
         var chordScales = ChordScales.Draw(Stream(sectionId, SectionStream.ChordScales), scale, home, progression, raisedStep, dominants, facets[Facet.Progression], _genre);
+        // passing chords now and then, the next chord's dominant, by the progression facet, the energy and a genre's, from a
+        // sequence of their own
+        var passingChance = tilt.Chance(PassingChords.Chance.At(facets[Facet.Progression], _genre.Chance(GenreChoices.PassingChords, "chords")), PassingChords.EnergyLean);
+        (harmonicRhythm, progression, chordScales) = PassingChords.Draw(Stream(sectionId, SectionStream.PassingChords), passingChance, harmonicRhythm, progression, chordScales, scale, home);
         // a section of a loop plays the first section's harmony where its meter is the first's, its own drawn all the same
         // so that its other draws stay, a genre's, from a sequence of its own (GenreChoices.Loop)
         var loops = Stream(sectionId, SectionStream.Loop).TestProbability(Loop.At(facets[Facet.Form], _genre.Chance(GenreChoices.Loop, "sections")));
@@ -1009,5 +1013,6 @@ internal enum SectionStream
     Hook = 34,
     PowerChords = 35,
     Chugs = 36,
-    Turnaround = 37
+    Turnaround = 37,
+    PassingChords = 38
 }

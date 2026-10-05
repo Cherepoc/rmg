@@ -47,20 +47,33 @@ internal sealed record HarmonicRhythm(double Bars, Meter Meter)
         return new HarmonicRhythm(context.Pick(energy.Weigh(spans, span => leans[span])), meter);
     }
 
-    /// <summary>How many chords the pattern has.</summary>
-    public int Count => (int)Math.Round(Meter.PatternDuration / Span);
+    /// <summary>Where a passing chord starts in the pattern, between the drawn chords, in beats (<see cref="PassingChords" />); none for most.</summary>
+    public ImmutableArray<double> Passing
+    {
+        get => _passing;
+        // a copy with passing chords changes elsewhere than the one it was made from
+        init => (_passing, _changes) = (value, null);
+    }
+
+    private readonly ImmutableArray<double> _passing = [];
+
+    /// <summary>How many chords the pattern has, its passing chords among them.</summary>
+    public int Count => Changes.Length;
 
     /// <summary>
     ///     Where every chord starts in the pattern, in beats: every span on from the pattern's start, on the start of the
-    ///     group nearest it, so that two chords a bar change at 4/4's and 6/8's middle and on 3/4's third beat.
+    ///     group nearest it, so that two chords a bar change at 4/4's and 6/8's middle and on 3/4's third beat; and its
+    ///     passing chords between.
     /// </summary>
-    public ImmutableArray<double> Changes => _changes ??= [..Enumerable.Range(0, Count).Select(x => Meter.NearestGroupStart(x * Span))];
+    public ImmutableArray<double> Changes => _changes ??= [
+        ..Enumerable.Range(0, (int)Math.Round(Meter.PatternDuration / Span)).Select(x => Meter.NearestGroupStart(x * Span)).Concat(Passing).Order()
+    ];
 
     private ImmutableArray<double>? _changes;
 
-    public bool Equals(HarmonicRhythm? other) => other is not null && Bars.Equals(other.Bars) && Meter.Equals(other.Meter);
+    public bool Equals(HarmonicRhythm? other) => other is not null && Bars.Equals(other.Bars) && Meter.Equals(other.Meter) && Passing.SequenceEqual(other.Passing);
 
-    public override int GetHashCode() => HashCode.Combine(Bars, Meter);
+    public override int GetHashCode() => HashCode.Combine(Bars, Meter, Passing.Length);
 
     /// <summary>How long a chord of the pattern lasts, in beats, up to the next chord's start.</summary>
     public double LengthOf(int index)

@@ -72,6 +72,7 @@ public sealed class GenreIdiomsReportTest
             ["chorus phrases of two bars at most"] = Repeating(SectionRole.Chorus),
             ["verse phrases of two bars at most"] = Repeating(SectionRole.Verse),
             ["chords in 4 bars"] = phrases > 0 ? changes / phrases : double.NaN,
+            ["sections with a passing chord"] = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).Select(x => ((HarmonicRhythm)x.Value!).Passing.Length > 0 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["sections sharing a progression"] = progressions.Length > 1 ? progressions.Skip(1).Count(x => x == progressions[0]) / (double)(progressions.Length - 1) : double.NaN,
             ["fills a minute"] = song.Trace.Count(x => x.Point == TracePoints.FillDecision && ((FillDecision)x.Value!).Span > 0) / minutes,
             ["drums over the melody"] = drumVelocities.Length > 0 && melodyVelocities.Length > 0 ? drumVelocities.Average() - melodyVelocities.Average() : double.NaN,

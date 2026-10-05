@@ -12,7 +12,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 **Later** (P2), in this order: an idiom report a genre; the melody's character and the
 bass's style by genre; the harmonic rhythm by genre; a loop, a genre's levels, its fills and a melody written as a hook
 (genres that sound like themselves, see *Genres*); sidechain pumping; a riff in power chords and its chugs, the
-articulation's seam; solos, soloists, endings and intros by genre; turnarounds, then passing chords (see *Scales and chords*); a solo's
+articulation's seam; solos, soloists, endings and intros by genre; a solo's
 loudness by its phrase. The ratings report (see *Listening data*) once the dashboard shows songs rated enough, and
 listening to the presets and to what October 2026 gained, alongside.
 
@@ -298,8 +298,11 @@ Each item with its plan, and what it waits for.
      its start, a ii–V where the bar has two chords, by the progression facet (0, 0.1, 0.1) and a genre's, no genre's
      at the plain end (`GenreOption.HasPlainEnd`). Sections ending on V: Jazz 74% (39%), Blues 69% (29%), songs 36%
      (32%); on a ii–V Jazz 47% (25%). The V's seventh raised as a cadence's is, so modal at the wild end.
-  2. Passing chords in the progression, dominant and diminished, by the progression facet and the energy, every part
-     playing them; the 12-bar's place rules kept, and the melody's note there fitting or the approach going elsewhere.
+  2. Done: passing chords (`PassingChords`, `GenreChoices.PassingChords`): a chord a bar long or longer passing into
+     the next by the next's dominant, Mixolydian on its root where the scale lets it, over its second half, by the
+     progression facet (0, 0.1, 0.1), the energy and a genre's, never at the plain end; a change of the harmonic rhythm
+     (`HarmonicRhythm.Passing`) that every part takes. Sections with one: Jazz 29% (its chords mostly shorter than a
+     bar), Blues 24%, Folk 20%, Rock 13%. Not done: the passing diminished, a chromatic root, with step 4.
   3. A chord solo's: a chord soloist's stacked note leading into the next chord playing an approach, step 2's chord,
      on a weak beat, and on the strong ones too at the wild end, against the comping under it. A stage after the lines.
   4. Chromatic approaches: a chord moved by semitones (a chord free of the section's scale, its step 1), a semitone

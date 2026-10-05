@@ -132,6 +132,9 @@ public static class GenreChoices
     /// <summary>The chance a section's pattern turns around in its last bar, a V or a ii–V into its start, a reharmonisation, which no genre plays at the plain end (<see cref="Progressions.Turnaround" />).</summary>
     public static GenreChoice Turnaround { get; } = Chances("turnaround", "Turnaround", [("sections", "Sections turned around", Progressions.Turnaround)], plainEnd: false);
 
+    /// <summary>The chance a chord a bar long passes into the next by its dominant, a reharmonisation, which no genre plays at the plain end (<see cref="Composition.PassingChords" />).</summary>
+    public static GenreChoice PassingChords { get; } = Chances("passingChords", "Passing chords", [("chords", "Chords passing into the next", Composition.PassingChords.Chance)], plainEnd: false);
+
     /// <summary>The chance a lift the drums announce is built to and dropped at, the band out for the bar before it; the songs never (<see cref="FormLayers.Drop" />).</summary>
     public static GenreChoice Drop { get; } = Chances("drop", "Builds and drops", [("lifts", "Lifts built to a drop", FormLayers.Drop)]);
 
@@ -403,7 +406,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Turnaround, Loop, LineScale, Bass, BassLanding, Effects, Levels, GrooveHold, Pocket, Fills, Drop, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Loop, LineScale, Bass, BassLanding, Effects, Levels, GrooveHold, Pocket, Fills, Drop, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,
