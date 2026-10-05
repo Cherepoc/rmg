@@ -329,28 +329,44 @@ internal static class SongStages
             )
         };
 
+    /// <summary>How long a guitar's stroke takes across its strings at its quickest and its slowest, in seconds.</summary>
+    public const double StrokeFrom = 0.01, StrokeTo = 0.03;
+
     /// <summary>
     ///     The notes' articulations: in a section that chugs, a guitar's or a picked bass's note that repeats the one before
     ///     on a weak beat palm-muted, its accents and its moves ringing, as a chug riff mutes its eighths on the root and
-    ///     rings its accent; the riff's, the rhythm part's and the bass's, by their instruments.
+    ///     rings its accent; the riff's, the rhythm part's and the bass's, by their instruments. And every chord a guitar
+    ///     plays strummed, down on a beat's first half and up on its second, as quickly as the song strums.
     /// </summary>
     internal static SongDraft Articulation(SongDecisions song, SongDraft draft)
     {
         var notes = NotesOf(draft);
         var sections = song.Form.Map.Sections;
+        var stroke = StrokeFrom + (StrokeTo - StrokeFrom) * song.Stream(SongStream.Strum).GenerateDouble();
+        var tempo = draft.Timeline.CommonStateTimelineMap;
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
         {
-            if (song.Tracks.Definitions[track] is not PitchInstrumentTrack part || !Chugs(part.Role, part.InstrumentCode))
+            if (song.Tracks.Definitions[track] is not PitchInstrumentTrack part)
                 continue;
+            var chugs = Chugs(part.Role, part.InstrumentCode);
             result[track] = EventTimeline.Create(timeline.Duration, timeline.Select((note, i) =>
             {
+                var state = note.Value.State;
                 var section = sections.IndexOf(song.Form.Map.SectionAt(note.Position)!);
                 var repeats = i > 0 && timeline[i - 1].Value.Pitches.SequenceEqual(note.Value.Pitches);
-                var weak = note.Value.State.GetStateValue(CompositionStateKinds.BeatRank) > 0;
-                return section >= 0 && song.Sections[section].Chugs && repeats && weak
-                    ? (note.Value with { State = note.Value.State.With(CompositionStateKinds.PalmMute, 1) }).ToTimelineItem(note.Position)
-                    : note;
+                var weak = state.GetStateValue(CompositionStateKinds.BeatRank) > 0;
+                if (chugs && section >= 0 && song.Sections[section].Chugs && repeats && weak)
+                    state = state.With(CompositionStateKinds.PalmMute, 1);
+                var program = state.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : part.InstrumentCode;
+                if (note.Value.Pitches.Length > 1 && program is >= 24 and <= 31)
+                {
+                    // the stroke in beats at the tempo there, down on the beat and up off it
+                    var beats = stroke * tempo.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60;
+                    state = state.With(CompositionStateKinds.Strum, note.Position % 1 < 0.5 - 1e-9 ? beats : -beats);
+                }
+
+                return state == note.Value.State ? note : (note.Value with { State = state }).ToTimelineItem(note.Position);
             }));
         }
 

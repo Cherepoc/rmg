@@ -526,5 +526,6 @@ internal enum SongStream
     DrumSoloPlayers = 66,
     GenreLength = 67,
     SectionPhrases = 68,
-    HookIntro = 69
+    HookIntro = 69,
+    Strum = 70
 }

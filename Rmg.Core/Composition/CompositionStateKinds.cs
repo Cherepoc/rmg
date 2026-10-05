@@ -74,6 +74,10 @@ internal static class CompositionStateKinds
     // MIDI short and a touch softer, for a plugin as a keyswitch or a controller ahead (Render)
     public static StateKind<int> PalmMute { get; } = StateKinds.CreateAdditive<int>(Prefix + "PalmMute", StateScope.Render);
 
+    // how far apart in beats a guitar's chord strikes its strings, its stroke, down from the lowest above 0 and up from the
+    // highest below, the rendering spreading its notes (SongStages.Articulation)
+    public static StateKind<double> Strum { get; } = StateKinds.CreateAdditive<double>(Prefix + "Strum", StateScope.Render);
+
     // 1 for a riff's note played as a power chord, its perfect fifth over it and its octave where the range has it
     public static StateKind<int> PowerChord { get; } = StateKinds.CreateAdditive<int>(Prefix + "PowerChord", StateScope.Render);
 

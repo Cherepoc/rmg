@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
@@ -8,15 +9,13 @@ namespace Rmg.Tests.Rendering;
 
 public sealed class RealizedNoteTest
 {
-    // the song as written, but for its changes of instrument and its parts' timing, which the song puts on its notes once
-    // they are decided
+    // the song as written, but for its changes of instrument, which the song puts on its notes once they are decided
     private static byte[] Midi(Song song)
     {
         using var stream = new MemoryStream();
         var rendered = Render.RenderSong(song);
         new RenderedSong(rendered.Duration, rendered.Meters, rendered.TempoTimeline, rendered.FadeTimeline,
-            [..rendered.Tracks.Select(x => new RenderedTrack(x.IsPercussionInstrument, x.Role, x.PitchInstrumentCode,
-                EventTimeline.Create(x.NoteTimeline.Duration, x.NoteTimeline.Select(n => (n.Value with { Shift = 0 }).ToTimelineItem(n.Position))), x.Pan, x.Volume))]).Write(stream, null);
+            [..rendered.Tracks.Select(x => new RenderedTrack(x.IsPercussionInstrument, x.Role, x.PitchInstrumentCode, x.NoteTimeline, x.Pan, x.Volume))]).Write(stream, null);
         return stream.ToArray();
     }
 
@@ -25,8 +24,9 @@ public sealed class RealizedNoteTest
     {
         for (var seed = 0; seed < 16; seed++)
         {
-            // a stopped ending cuts the notes that sound into its stop, which only the song put together knows
-            var song = TestCorpus.Get(seed).Song;
+            // a stopped ending cuts the notes that sound into its stop, which only the song put together knows; and the
+            // notes' articulation and timing are the song's performance of them, made once they are decided
+            var song = SongGenerator.GenerateSong((ulong)seed, ProgressionSettings.Default, SongOverrides.None, ImmutableHashSet.Create("Articulation", "Timing"), (_, _) => { }, CancellationToken.None);
             if (song.Map!.Ending.Kind == EndingKind.Stop)
                 continue;
 

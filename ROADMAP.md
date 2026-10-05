@@ -12,8 +12,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 **Later** (P2), in this order: an idiom report a genre; the melody's character and the
 bass's style by genre; the harmonic rhythm by genre; a loop, a genre's levels, its fills and a melody written as a hook
 (genres that sound like themselves, see *Genres*); sidechain pumping; a riff in power chords and its chugs, the
-articulation's seam; solos, soloists, endings and intros by genre; a
-guitar's strum (see *Groove*); builds and drops; turnarounds, then passing chords (see *Scales and chords*); a solo's
+articulation's seam; solos, soloists, endings and intros by genre; builds and drops; turnarounds, then passing chords (see *Scales and chords*); a solo's
 loudness by its phrase. The ratings report (see *Listening data*) once the dashboard shows songs rated enough, and
 listening to the presets and to what October 2026 gained, alongside.
 
@@ -257,13 +256,9 @@ Each item with its plan, and what it waits for.
 
 - **A drum's pocket by its section's role** (P3, if a section's change of role is heard): the timing takes a drum's
   offset by its role in the song's groove (`SongStages.OffsetOf`), not a section's, which may move a ride to the time.
-- **A guitar's strum** (P2): every chord a guitar plays struck as a stroke, its direction its
-  state, down from the low string on a beat's first half and up on its second, the rendering spreading its notes a few
-  milliseconds apart, 10 to 30 a stroke, in time rather than beats, the up stroke a touch softer and thinner; the same
-  seam as the timing by role and the palm mute, a plugin's strum engine taking the direction as a keyswitch ahead. How
-  a guitar plays a chord, not a convention, so nothing drawn but a song's stroke speed, from a stream of its own; the
-  guitars by their instruments' data. Measured by the guitar chords' spread of onsets, and the swing pairs as they
-  were. A piano's rolled chord the same, slower and upward, for a ballad, after it.
+- **A piano's rolled chord** (P3): a chord rolled upward, slower than a guitar's strum, for a ballad, on the strum's
+  seam (`CompositionStateKinds.Strum`, spread at render). A strum's thinner up stroke, its lowest strings left out, if
+  the up strokes sound as full as the down.
 
 ### Scales and chords
 

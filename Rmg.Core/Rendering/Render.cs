@@ -18,6 +18,9 @@ public static class Render
     internal const double MutedFloor = 0.12;
 
     internal const double MutedVelocity = 0.9;
+
+    /// <summary>How loud an up stroke plays against a down stroke.</summary>
+    internal const double UpStrokeVelocity = 0.9;
     internal const double VelocityScale = 1.03;
     private const double MiddleVelocity = 0.6;
     private const double VelocityReach = 0.4;
@@ -68,7 +71,17 @@ public static class Render
                     // softer; the one place a plugin's output would play it as its keyswitch or controller instead
                     if (note.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0)
                         (duration, velocity) = (Math.Max(MutedFloor, duration * MutedShare), velocity * MutedVelocity);
-                    return note.Value.Pitches.Select(pitch => new RenderedNote(pitch, velocity, duration, note.Value.State.GetStateValue(CompositionStateKinds.TimingOffset)).ToTimelineItem(position));
+                    // a strummed chord's strings struck one after another, down from the lowest or up from the highest, the up
+                    // stroke a touch softer
+                    var shift = note.Value.State.GetStateValue(CompositionStateKinds.TimingOffset);
+                    var strum = note.Value.State.GetStateValue(CompositionStateKinds.Strum);
+                    var order = note.Value.Pitches.Order().ToArray();
+                    return note.Value.Pitches.Select(pitch =>
+                    {
+                        var rank = strum > 0 ? Array.IndexOf(order, pitch) : order.Length - 1 - Array.IndexOf(order, pitch);
+                        var spread = order.Length > 1 ? Math.Abs(strum) * rank / (order.Length - 1) : 0;
+                        return new RenderedNote(pitch, strum < 0 ? velocity * UpStrokeVelocity : velocity, duration, shift + spread).ToTimelineItem(position);
+                    });
                 }
             );
             if (song.TrackDefinitions[trackNumber] is PitchInstrumentTrack pitchInstrumentTrack)
