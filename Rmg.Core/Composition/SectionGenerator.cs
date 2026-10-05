@@ -126,6 +126,10 @@ internal sealed class SectionGenerator
             ? raisable
             : null;
         StateTrace.Record(TracePoints.CadenceRaise, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{raisable} {raisedStep is not null}", (raisable, raisedStep is not null));
+        // every chord's scale: the cadence's raise, and the others' applied or borrowed now and then, from a sequence of
+        // their own
+        var chordScales = ChordScales.Draw(Stream(sectionId, SectionStream.ChordScales), scale, home, progression, raisedStep, facets[Facet.Progression]);
+        StateTrace.Record(TracePoints.ChordScales, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", chordScales.Select(x => x.Kind)), chordScales);
 
         // the section's change of the song's feel, now and then, from a sequence of its own, by its feel facet
         var feelChange = Feels.DrawChange(Stream(sectionId, SectionStream.Feel), Feels.Of(songStateMap), Feels.SectionChange, facets[Facet.Feel], _genre);
@@ -205,7 +209,7 @@ internal sealed class SectionGenerator
             0,
             1
         );
-        var barStateTimelineMap = _generators(meter).Bars.Generate(context, scale, progression, harmonicRhythm, home, raisedStep, unconventionality, bassLeading, facets);
+        var barStateTimelineMap = _generators(meter).Bars.Generate(context, scale, progression, harmonicRhythm, home, chordScales, unconventionality, bassLeading, facets);
         var contour = barStateTimelineMap.GetStateTimeline(CompositionStateKinds.LineRegister).Select(x => x.Value).ToImmutableArray();
         StateTrace.Record(TracePoints.MelodyContour, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", contour), contour);
 
@@ -946,5 +950,6 @@ internal enum SectionStream
     Arpeggio = 27,
     RiffLineScale = 28,
     RhythmArpeggio = 29,
-    Drums = 30
+    Drums = 30,
+    ChordScales = 31
 }

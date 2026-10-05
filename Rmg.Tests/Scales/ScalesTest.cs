@@ -120,6 +120,7 @@ public sealed class ScalesTest
         var offsets = common.GetStateTimeline(StateKinds.ScaleOffsets);
         var keys = common.GetStateTimeline(StateKinds.KeyOffset);
         var raisedSteps = common.GetStateTimeline(StateKinds.RaisedScaleSteps);
+        var loweredSteps = common.GetStateTimeline(StateKinds.LoweredScaleSteps);
         var approaches = common.GetStateTimeline(StateKinds.ChordApproach);
         // a bass note leads into a change of chord in the beat before it
         var changes = TestCorpus.Get(seed).ChordChanges;
@@ -151,16 +152,17 @@ public sealed class ScalesTest
             if (isChromaticApproach || isPedal || ownLineScales.Any(x => note.Position >= x.Start && note.Position < x.End))
                 continue;
 
-            var scale = Rmg.Core.Composition.Realizer.RaiseScaleSteps(
+            var scale = Rmg.Core.Composition.Realizer.AlterScaleSteps(
                 offsets.GetEffectiveValueAt(note.Position),
-                raisedSteps.GetEffectiveValueAt(note.Position)
+                raisedSteps.GetEffectiveValueAt(note.Position),
+                loweredSteps.GetEffectiveValueAt(note.Position)
             );
             var key = keys.GetEffectiveValueAt(note.Position);
             var pitchClasses = scale.Select(x => ((x + key) % 12 + 12) % 12).ToHashSet();
             // a track's last note before a change leads into the next chord from its scale, which a key change moves
             if (nextChange < double.MaxValue && !track.NoteTimeline.Any(x => x.Position > note.Position + 1e-9 && x.Position < nextChange - 1e-9))
             {
-                var nextScale = Rmg.Core.Composition.Realizer.RaiseScaleSteps(offsets.GetEffectiveValueAt(nextChange), raisedSteps.GetEffectiveValueAt(nextChange));
+                var nextScale = Rmg.Core.Composition.Realizer.AlterScaleSteps(offsets.GetEffectiveValueAt(nextChange), raisedSteps.GetEffectiveValueAt(nextChange), loweredSteps.GetEffectiveValueAt(nextChange));
                 pitchClasses.UnionWith(nextScale.Select(x => ((x + keys.GetEffectiveValueAt(nextChange)) % 12 + 12) % 12));
             }
             await Assert.That(pitchClasses).Contains(note.Value.Offset % 12).Because($"position {note.Position}");

@@ -33,7 +33,7 @@ public sealed class SongGeneratorScaleTest
             foreach (var note in song.Song.Notes![SongTracks.ChordsTrack].Where(x => x.Position >= span.Start && x.Position < span.End))
             {
                 var state = note.Value.State;
-                var scale = Realizer.RaiseScaleSteps(scales[span.SectionId].Offsets, state.GetStateValue(StateKinds.RaisedScaleSteps));
+                var scale = Realizer.AlterScaleSteps(scales[span.SectionId].Offsets, state.GetStateValue(StateKinds.RaisedScaleSteps), state.GetStateValue(StateKinds.LoweredScaleSteps));
                 foreach (var pitch in note.Value.Pitches)
                     await Assert.That(scale.Contains((pitch - state.GetStateValue(StateKinds.KeyOffset)).Mod(12))).IsTrue();
             }

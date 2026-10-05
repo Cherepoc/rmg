@@ -129,6 +129,9 @@ internal static class TracePoints
     /// </summary>
     public const string CadenceRaise = "Cadence raise";
 
+    /// <summary>A section's chords' own scales, in the progression's order (<see cref="ChordScale" />).</summary>
+    public const string ChordScales = "Chord scales";
+
     /// <summary>How far a song's harmony strays from convention (a <see cref="HarmonicUnconventionality" />), and its scale.</summary>
     public const string SongHarmony = "Song harmony";
 

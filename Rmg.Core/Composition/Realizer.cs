@@ -357,7 +357,7 @@ internal static class Realizer
         var scaleOffsets = stateMap.GetStateValue(StateKinds.ScaleOffsets);
         if (scaleOffsets.IsEmpty)
             scaleOffsets = ChromaticScaleOffsets;
-        scaleOffsets = RaiseScaleSteps(scaleOffsets, stateMap.GetStateValue(StateKinds.RaisedScaleSteps));
+        scaleOffsets = AlterScaleSteps(scaleOffsets, stateMap.GetStateValue(StateKinds.RaisedScaleSteps), stateMap.GetStateValue(StateKinds.LoweredScaleSteps));
 
         // the chord root, in scale steps
         var rootIndex = stateMap.GetStateValue(StateKinds.ChordRoot);
@@ -366,24 +366,31 @@ internal static class Realizer
     }
 
     /// <summary>
-    ///     The scale with every listed step raised a semitone, as many times as it is listed. The scale must stay in
-    ///     order within the octave: a step cannot be raised onto the next one.
+    ///     The scale with every listed step raised or lowered a semitone, as many times as it is listed (<see cref="ChordScale" />).
+    ///     The scale must stay in order within the octave: a step cannot be moved onto the next one.
     /// </summary>
-    internal static ImmutableArray<int> RaiseScaleSteps(ImmutableArray<int> scaleOffsets, ImmutableArray<int> raisedSteps)
+    internal static ImmutableArray<int> AlterScaleSteps(ImmutableArray<int> scaleOffsets, ImmutableArray<int> raisedSteps, ImmutableArray<int> loweredSteps) =>
+        TryAlterScaleSteps(scaleOffsets, raisedSteps, loweredSteps)
+        ?? throw new ArgumentException(
+            $"Raising steps {string.Join(", ", raisedSteps)} and lowering {string.Join(", ", loweredSteps)} of the scale {string.Join(", ", scaleOffsets)} puts it out of order.",
+            nameof(raisedSteps)
+        );
+
+    /// <summary>The scale with the steps raised and lowered (<see cref="AlterScaleSteps" />); none where it falls out of order.</summary>
+    internal static ImmutableArray<int>? TryAlterScaleSteps(ImmutableArray<int> scaleOffsets, ImmutableArray<int> raisedSteps, ImmutableArray<int> loweredSteps)
     {
-        if (raisedSteps.IsEmpty)
+        if (raisedSteps.IsEmpty && loweredSteps.IsEmpty)
             return scaleOffsets;
 
         var offsets = scaleOffsets.ToArray();
         foreach (var step in raisedSteps)
             offsets[step.Mod(offsets.Length)]++;
+        foreach (var step in loweredSteps)
+            offsets[step.Mod(offsets.Length)]--;
 
         for (var i = 0; i < offsets.Length; i++)
-            if (offsets[i] >= OctaveNoteCount || i > 0 && offsets[i] <= offsets[i - 1])
-                throw new ArgumentException(
-                    $"Raising steps {string.Join(", ", raisedSteps)} of the scale {string.Join(", ", scaleOffsets)} puts it out of order.",
-                    nameof(raisedSteps)
-                );
+            if (offsets[i] < 0 || offsets[i] >= OctaveNoteCount || i > 0 && offsets[i] <= offsets[i - 1])
+                return null;
 
         return [..offsets];
     }

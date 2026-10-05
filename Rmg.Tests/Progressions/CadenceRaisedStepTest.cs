@@ -53,9 +53,9 @@ public sealed class CadenceRaisedStepTest
     {
         ImmutableArray<int> minor = [0, 2, 3, 5, 7, 8, 10];
 
-        await Assert.That(Realizer.RaiseScaleSteps(minor, [6]).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 8, 11]);
-        await Assert.That(Realizer.RaiseScaleSteps(minor, [5, 6]).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 9, 11]);
-        await Assert.That(Realizer.RaiseScaleSteps(minor, [])).IsEqualTo(minor);
+        await Assert.That(Realizer.AlterScaleSteps(minor, [6], []).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 8, 11]);
+        await Assert.That(Realizer.AlterScaleSteps(minor, [5, 6], []).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 9, 11]);
+        await Assert.That(Realizer.AlterScaleSteps(minor, [], [])).IsEqualTo(minor);
     }
 
     [Test]
@@ -65,34 +65,32 @@ public sealed class CadenceRaisedStepTest
     {
         ImmutableArray<int> minor = [0, 2, 3, 5, 7, 8, 10];
 
-        await Assert.That(() => Realizer.RaiseScaleSteps(minor, [..steps])).Throws<ArgumentException>();
+        await Assert.That(() => Realizer.AlterScaleSteps(minor, [..steps], [])).Throws<ArgumentException>();
     }
 
     [Test]
-    public async Task Songs_RaiseSteps_OnlyInTheCadenceChord()
+    public async Task Songs_AlterSteps_OnlyWhereTheChordsChange_RaisingAndLoweringThem()
     {
-        var raising = 0;
+        int raising = 0, lowering = 0;
         for (var seed = 0; seed < 64; seed++)
         {
             var corpusSong = TestCorpus.Get(seed);
-            var (song, origin) = corpusSong;
-            var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
+            var common = corpusSong.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
             var changes = corpusSong.ChordChanges;
 
-            foreach (var item in common.GetStateTimeline(StateKinds.RaisedScaleSteps).Where(x => !x.Value.IsEmpty))
+            // a chord in its own scale from its start to the next's (ChordScales): the cadence's raise, an applied
+            // dominant's and a borrowed mode's
+            foreach (var (kind, counted) in new[] { (StateKinds.RaisedScaleSteps, 0), (StateKinds.LoweredScaleSteps, 1) })
+            foreach (var item in common.GetStateTimeline(kind).Where(x => !x.Value.IsEmpty))
             {
-                raising++;
-                // the last chord of a 4-bar pattern, where the chords change and the next change starts a pattern;
-                // whether it raises depends on the section's home, not the song's scale: even harmonic minor has a minor
-                // fifth seen from its fourth step
+                if (counted == 0) raising++;
+                else lowering++;
                 await Assert.That(changes).Contains(item.Position).Because($"seed {seed}");
-                var next = changes.FirstOrDefault(x => x > item.Position, song.Map!.Sections.Max(x => x.End));
-                var section = song.Map.SectionAt(item.Position)!;
-                await Assert.That((next - section.Start) % section.Meter.PatternDuration).IsEqualTo(0).Because($"seed {seed}");
             }
         }
 
         await Assert.That(raising).IsGreaterThan(0);
+        await Assert.That(lowering).IsGreaterThan(0);
     }
 
     [Test]

@@ -257,14 +257,14 @@ Each item with its plan, and what it waits for.
   melody's, the counter-melody's and the solo's, as `Realizer.GetChord` gives them the cadence's raised seventh now
   (`StateKinds.RaisedScaleSteps`), which is the first case of it: harmonic minor borrowed at the cadence. It takes in
   a line scale by the chord, a line's passing notes taking its chord's scale, and chord tones off the scale. Steps:
-  1. The cadence's raised seventh as the general state: a chord's alterations, a signed semitone a step
-     (`RaisedScaleSteps` become them), the line scales' pitch classes altered as the chord's are. A refactor: the
-     fingerprint kept.
-  2. Borrowed and applied chords drawn, a chance each by the harmony facet, never at the plain end; applied only on a
-     root whose next falls a fifth, and its shape a seventh; borrowed by a mode drawn from the home's parallels. From a
-     stream of its own. Measured by the share of chords altered by the harmony's fifths, and by the clashes: a line's
-     note a semitone from a chord's on a strong beat, which should not rise.
-  3. A genre's: a value of borrowing and of applied chords, and "every chord its dominant", the blues; Blues every
+  1. Done: a chord's alterations (`ChordScales`, `RaisedScaleSteps` and `LoweredScaleSteps`), applied and borrowed
+     chords drawn by the progression facet, never at the plain end and as often at the wild end as the middle; 7% to 12%
+     of the chords but the cadence altered, two or three borrowed for every applied (`ChordScalesReportTest`); the
+     melody's notes on a beat a semitone from the chords 7.5% before, 7.2% after. A key change's chain and pivot chords
+     play the section's own scale in their keys, which the cadence's raise used to leave under them. The chances are a
+     guess to tune by listening, the borrowed mode mostly Mixolydian (♭VII) in a middling major song and the minor's in
+     a plain one.
+  2. A genre's: a value of borrowing and of applied chords, and "every chord its dominant", the blues; Blues every
      chord Mixolydian, Jazz applied dominants, Rock ♭VII and ♭VI; reported by the presets' shares of each.
   Musicality to listen for: a melody holding the section's note over a borrowed chord (the step's measure of clashes
   stands for it), and an applied dominant whose resolution the next chord's shape spoils.

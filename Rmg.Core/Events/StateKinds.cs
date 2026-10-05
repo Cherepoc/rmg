@@ -53,6 +53,8 @@ public static class StateKinds
     public static readonly StateKind<ImmutableArray<int>> ScaleOffsets = CreateCollection<int>("ScaleOffsets", StateScope.Render, isShared: true);
     // scale steps raised a semitone each time they are listed, such as the seventh on a cadence
     public static readonly StateKind<ImmutableArray<int>> RaisedScaleSteps = CreateCollection<int>("RaisedScaleSteps", StateScope.Render, isShared: true);
+    // scale steps lowered a semitone each time they are listed, such as the seventh of a chord borrowed from the minor
+    public static readonly StateKind<ImmutableArray<int>> LoweredScaleSteps = CreateCollection<int>("LoweredScaleSteps", StateScope.Render, isShared: true);
     public static readonly StateKind<double> Tempo = CreateMultiplicative<double>("Tempo", StateScope.Render, isShared: true);
 
     // how far the whole band is faded in, from 1, as loud as it plays, to 0, silent, which the song's MIDI plays as every

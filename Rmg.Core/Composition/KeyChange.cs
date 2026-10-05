@@ -187,12 +187,26 @@ public sealed record KeyChange(double Position, int Semitones)
         var chordStarts = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         var keys = changes.ToList();
         var roots = new List<TimelineItem<int>>();
+        // a chord the change puts in a key of its own plays the section's scale there, any of its chord's own scale's
+        // steps (ChordScales) undone, by listing them the other way, as far as the next chord
+        var raised = new List<TimelineItem<ImmutableArray<int>>>();
+        var lowered = new List<TimelineItem<ImmutableArray<int>>>();
+        void Plain(double from, double to)
+        {
+            var state = common.GetEffectiveStateMapAt(from);
+            raised.Add(state.GetStateValue(StateKinds.LoweredScaleSteps).ToTimelineItem(from));
+            lowered.Add(state.GetStateValue(StateKinds.RaisedScaleSteps).ToTimelineItem(from));
+            raised.Add(ImmutableArray<int>.Empty.ToTimelineItem(to));
+            lowered.Add(ImmutableArray<int>.Empty.ToTimelineItem(to));
+        }
         var chains = ImmutableArray.CreateBuilder<(double, ImmutableArray<double>, Device)>();
         int Root(double position) => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
-        int RootPitch(double position, int key, int step) => (key + Realizer.GetChord(common.GetEffectiveStateMapAt(position).With(StateKinds.ChordRoot, step)).Chord.GetPitch(0)).Mod(12);
+        // the state where a chord the change moves plays, in the section's scale, as it will (Plain)
+        StateMap Moved(double position) => common.GetEffectiveStateMapAt(position).With(StateKinds.RaisedScaleSteps, []).With(StateKinds.LoweredScaleSteps, []);
+        int RootPitch(StateMap state, int key, int step) => (key + Realizer.GetChord(state.With(StateKinds.ChordRoot, step)).Chord.GetPitch(0)).Mod(12);
         // a triad's pitch classes on a step of the scale there, in a key, and the scale's
-        int[] Triad(double position, int key, int step) => [..new[] { 0, 2, 4 }.Select(x => (key + Realizer.GetChord(common.GetEffectiveStateMapAt(position).With(StateKinds.ChordRoot, step)).Chord.GetPitch(x)).Mod(12))];
-        HashSet<int> Scale(double position, int key) => [..Enumerable.Range(0, Scales.StepCount).Select(x => RootPitch(position, key, x))];
+        int[] Triad(double position, int key, int step) => [..new[] { 0, 2, 4 }.Select(x => (key + Realizer.GetChord(Moved(position).With(StateKinds.ChordRoot, step)).Chord.GetPitch(x)).Mod(12))];
+        HashSet<int> Scale(double position, int key) => [..Enumerable.Range(0, Scales.StepCount).Select(x => RootPitch(Moved(position), key, x))];
         for (var i = 0; i < changes.Length; i++)
         {
             var context = streams(i);
@@ -249,19 +263,22 @@ public sealed record KeyChange(double Position, int Semitones)
                 keys.Add(new KeyChange(chords[^1], target));
                 roots.Add((pivot - Root(chords[^1])).ToTimelineItem(chords[^1]));
                 roots.Add(0.ToTimelineItem(change));
+                Plain(chords[^1], change);
                 chains.Add((change, [chords[^1]], Device.Pivot));
                 continue;
             }
 
             // from the new key's first chord back, every chord the one leading to the one after it
-            var next = RootPitch(change, target, Root(change));
+            // the new key's first chord as it plays, in its own scale
+            var next = RootPitch(common.GetEffectiveStateMapAt(change), target, Root(change));
             for (var j = chords.Length - 1; j >= 0; j--)
             {
                 var key = (next + keyFromNext + 5).Mod(12) - 5;
                 keys.Add(new KeyChange(chords[j], key));
                 roots.Add((rootStep - Root(chords[j])).ToTimelineItem(chords[j]));
                 roots.Add(0.ToTimelineItem(j + 1 < chords.Length ? chords[j + 1] : change));
-                next = RootPitch(chords[j], key, rootStep);
+                Plain(chords[j], j + 1 < chords.Length ? chords[j + 1] : change);
+                next = RootPitch(Moved(chords[j]), key, rootStep);
             }
 
             chains.Add((change, [..chords], Device.Chain));
@@ -270,7 +287,17 @@ public sealed record KeyChange(double Position, int Semitones)
         var duration = common.Duration;
         var moved = roots.Count == 0
             ? StateTimelineMap.Create(duration)
-            : StateTimelineMap.Create(duration, [StateTimeline.Create(duration, StateKinds.ChordRoot, [..roots.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change")]);
+            : StateTimelineMap.Create(duration,
+            [
+                StateTimeline.Create(duration, StateKinds.ChordRoot, [..roots.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change"),
+                ..raised.Any(x => !x.Value.IsEmpty) || lowered.Any(x => !x.Value.IsEmpty)
+                    ? new[]
+                    {
+                        StateTimeline.Create(duration, StateKinds.RaisedScaleSteps, [..raised.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change"),
+                        StateTimeline.Create(duration, StateKinds.LoweredScaleSteps, [..lowered.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change")
+                    }
+                    : []
+            ]);
         return ([..keys.OrderBy(x => x.Position)], moved, chains.ToImmutable());
     }
 
