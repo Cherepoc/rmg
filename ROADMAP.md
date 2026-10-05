@@ -323,9 +323,6 @@ a link carries. What is left:
   the line for the lean, the lean's own chart gone; the tile drawing the same, its fill a gradient.
   Drawn on the amounts' own scale, as a length's and a tempo's are spaced, so that a song's few minutes no longer sit
   low on a chart to fifteen; a centre line without the shading, should the slices prove fiddly.
-- **A genre's dynamics** (P3): how loud and how busy its songs and the contrast between their sections, values leaning
-  the energies drawn (SectionEnergy), so that ambient stays level and rock's choruses lift. Leaning, never set, so that no
-  song comes out flat; its sections' contrast is a chorus louder, which the sections differing need not be for.
 - **A genre's sections differing** (P3, perhaps never): a value given a section role, such as a solo swung harder
   or a chorus louder, the genre's for the song otherwise; the generator asking the genre with the section's role,
   every choice's tile a role's override beside it.
