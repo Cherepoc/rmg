@@ -306,9 +306,8 @@ a link carries. What is left:
      should play eight bars now and then.
   Later: phrases of other than four bars (a 3-bar phrase, a 6-bar section), which the line's question and answer
   and the fills assume, once P phrases sound right.
-- **AABA and a head with solos** (P2, after the phrases): the forms to add, at no weight but a genre's, once a
-  section can be eight bars (an AABA's or a head's A); the forms a genre's pool already (GenreChoices.Form,
-  FormChances).
+- **A head with solos** (P3): a jazz tune's head, choruses of solos over its form, and the head again, which AABA
+  (SongForms.Forms) and the solos' sections (Solos) come near already; a form of its own only should listening ask.
 - **A genre's levels** (P3): how loud each part plays against the others, values a part each, applied where the mix
   gives none, a mechanism of its own that a mix given may fight; the pan is a genre's (GenreChoices.Pan), the levels
   only should listening ask for them.
