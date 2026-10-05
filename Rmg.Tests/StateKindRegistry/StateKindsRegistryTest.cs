@@ -25,13 +25,13 @@ public sealed class StateKindsRegistryTest
     }
 
     [Test]
-    public async Task KeyScaleTempoFadeAndSwing_AreTheOnlySharedDeclaredKinds_WithTheScalesRaisedAndLoweredSteps()
+    public async Task KeyScaleTempoFadeAndSwing_AreTheOnlySharedDeclaredKinds_WithAChordsAlterationsOfTheScale()
     {
         var shared = DeclaredKinds()
             .Where(x => x.IsShared)
             .ToArray();
 
-        await Assert.That(shared).IsEquivalentTo(new IStateKind[] { StateKinds.KeyOffset, StateKinds.ScaleOffsets, StateKinds.RaisedScaleSteps, StateKinds.LoweredScaleSteps, StateKinds.Tempo, StateKinds.Fade, StateKinds.SwingDelay, StateKinds.SwingPeriod });
+        await Assert.That(shared).IsEquivalentTo(new IStateKind[] { StateKinds.KeyOffset, StateKinds.ScaleOffsets, StateKinds.ScaleAlterations, StateKinds.Tempo, StateKinds.Fade, StateKinds.SwingDelay, StateKinds.SwingPeriod });
     }
 
     [Test]

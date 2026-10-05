@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
@@ -23,14 +24,13 @@ public enum ChordScaleKind
 }
 
 /// <summary>
-///     The scale a chord sounds in: the section's, with the steps listed raised or lowered a semitone each, which every
-///     note over the chord takes, the chord's own, the bass's and the lines' (<see cref="Realizer.GetChord" />).
+///     The scale a chord sounds in: the section's, with its steps raised or lowered a semitone, which every note over the
+///     chord takes, the chord's own, the bass's and the lines' (<see cref="Realizer.GetChord" />).
 /// </summary>
-/// <param name="Raised">The scale's steps, from its first note, raised a semitone.</param>
-/// <param name="Lowered">The scale's steps, from its first note, lowered a semitone.</param>
-public sealed record ChordScale(ChordScaleKind Kind, ImmutableArray<int> Raised, ImmutableArray<int> Lowered)
+/// <param name="Steps">The scale's steps, from its first note, raised or lowered.</param>
+public sealed record ChordScale(ChordScaleKind Kind, StepAlterations Steps)
 {
-    public static ChordScale Section { get; } = new(ChordScaleKind.Section, [], []);
+    public static ChordScale Section { get; } = new(ChordScaleKind.Section, StepAlterations.None);
 }
 
 /// <summary>
@@ -94,7 +94,7 @@ public static class ChordScales
                 if (dominants && Heard(Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Dominant), home + root) is { } dominant)
                     return dominant;
                 if (chord == progression.Length - 1 && cadenceRaised is { } raised)
-                    return new ChordScale(ChordScaleKind.Cadence, [raised], []);
+                    return new ChordScale(ChordScaleKind.Cadence, StepAlterations.Of([raised], []));
                 if (chord < progression.Length - 1 && Mod(progression[chord + 1] - root) == 3
                     && context.TestProbability(applied)
                     && Heard(Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Applied), home + root) is { } dominantOfNext)
@@ -128,8 +128,8 @@ public static class ChordScales
 
         if (raised.Count + lowered.Count == 0)
             return null;
-        var altered = Realizer.TryAlterScaleSteps(scaleOffsets, raised.ToImmutable(), lowered.ToImmutable());
-        return altered is null ? null : new ChordScale(kind, raised.ToImmutable(), lowered.ToImmutable());
+        var steps = StepAlterations.Of(raised, lowered);
+        return Realizer.TryAlterScaleSteps(scaleOffsets, steps) is null ? null : new ChordScale(kind, steps);
     }
 
     /// <summary>
@@ -140,7 +140,7 @@ public static class ChordScales
     private static ChordScale? Heard(ChordScale? scale, int root)
     {
         int[] tones = [..new[] { 0, 2, 4, 6 }.Select(x => Mod(root + x))];
-        return scale is not null && scale.Raised.Concat(scale.Lowered).Any(x => tones.Contains(Mod(x))) ? scale : null;
+        return scale is not null && tones.Any(scale.Steps.Moves) ? scale : null;
     }
 
     /// <summary>The scale from one of its steps, as the semitones of its notes above it.</summary>

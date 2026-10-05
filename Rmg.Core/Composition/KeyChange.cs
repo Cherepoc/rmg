@@ -187,22 +187,18 @@ public sealed record KeyChange(double Position, int Semitones)
         var chordStarts = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
         var keys = changes.ToList();
         var roots = new List<TimelineItem<int>>();
-        // a chord the change puts in a key of its own plays the section's scale there, any of its chord's own scale's
-        // steps (ChordScales) undone, by listing them the other way, as far as the next chord
-        var raised = new List<TimelineItem<ImmutableArray<int>>>();
-        var lowered = new List<TimelineItem<ImmutableArray<int>>>();
+        // a chord the change puts in a key of its own plays the section's scale there, set deeper than its chord's own
+        // scale (ChordScales), which it wins over, as far as the next chord, where the section's shows again
+        var scales = new List<TimelineItem<LayerValue<StepAlterations>>>();
         void Plain(double from, double to)
         {
-            var state = common.GetEffectiveStateMapAt(from);
-            raised.Add(state.GetStateValue(StateKinds.LoweredScaleSteps).ToTimelineItem(from));
-            lowered.Add(state.GetStateValue(StateKinds.RaisedScaleSteps).ToTimelineItem(from));
-            raised.Add(ImmutableArray<int>.Empty.ToTimelineItem(to));
-            lowered.Add(ImmutableArray<int>.Empty.ToTimelineItem(to));
+            scales.Add(KeysOwnScale.ToTimelineItem(from));
+            scales.Add(LayerValue<StepAlterations>.Unset.ToTimelineItem(to));
         }
         var chains = ImmutableArray.CreateBuilder<(double, ImmutableArray<double>, Device)>();
         int Root(double position) => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
         // the state where a chord the change moves plays, in the section's scale, as it will (Plain)
-        StateMap Moved(double position) => common.GetEffectiveStateMapAt(position).With(StateKinds.RaisedScaleSteps, []).With(StateKinds.LoweredScaleSteps, []);
+        StateMap Moved(double position) => common.GetEffectiveStateMapAt(position).With(StateKinds.ScaleAlterations, KeysOwnScale);
         int RootPitch(StateMap state, int key, int step) => (key + Realizer.GetChord(state.With(StateKinds.ChordRoot, step)).Chord.GetPitch(0)).Mod(12);
         // a triad's pitch classes on a step of the scale there, in a key, and the scale's
         int[] Triad(double position, int key, int step) => [..new[] { 0, 2, 4 }.Select(x => (key + Realizer.GetChord(Moved(position).With(StateKinds.ChordRoot, step)).Chord.GetPitch(x)).Mod(12))];
@@ -290,16 +286,15 @@ public sealed record KeyChange(double Position, int Semitones)
             : StateTimelineMap.Create(duration,
             [
                 StateTimeline.Create(duration, StateKinds.ChordRoot, [..roots.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change"),
-                ..raised.Any(x => !x.Value.IsEmpty) || lowered.Any(x => !x.Value.IsEmpty)
-                    ? new[]
-                    {
-                        StateTimeline.Create(duration, StateKinds.RaisedScaleSteps, [..raised.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change"),
-                        StateTimeline.Create(duration, StateKinds.LoweredScaleSteps, [..lowered.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change")
-                    }
+                ..scales.Count > 0
+                    ? new[] { StateTimeline.Create(duration, StateKinds.ScaleAlterations, [..scales.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change") }
                     : []
             ]);
         return ([..keys.OrderBy(x => x.Position)], moved, chains.ToImmutable());
     }
+
+    /// <summary>The section's own scale, at the depth of a chord the change puts in a key of its own, deeper than its chord's.</summary>
+    private static LayerValue<StepAlterations> KeysOwnScale { get; } = new(StateDepths.BarPattern, StepAlterations.None);
 
     /// <summary>
     ///     The song with the bass holding every pedal's note, the new key's dominant, in the octave nearest each of its notes

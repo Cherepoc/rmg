@@ -102,14 +102,16 @@ internal sealed class BarStateGenerator
             )
             .WithLayer("Progression");
 
-        // every chord in its own scale, each list of steps set where it differs from the chord's before, the first's
-        // from the section's, none
-        IEnumerable<TimelineItem<ImmutableArray<int>>> Changes(Func<ChordScale, ImmutableArray<int>> steps) =>
-            chordScales.Select((x, chord) => (Steps: steps(x), Position: changes[chord]))
-                .Where((x, chord) => !x.Steps.SequenceEqual(chord == 0 ? [] : steps(chordScales[chord - 1])))
-                .Select(x => x.Steps.ToTimelineItem(x.Position));
-        var raisedStepTimeline = StateTimeline.Create(_meter.PatternDuration, StateKinds.RaisedScaleSteps, Changes(x => x.Raised)).WithLayer("Progression");
-        var loweredStepTimeline = StateTimeline.Create(_meter.PatternDuration, StateKinds.LoweredScaleSteps, Changes(x => x.Lowered)).WithLayer("Progression");
+        // every chord in its own scale, set by the section where it differs from the chord's before, the first's from the
+        // section's, none
+        var scaleTimeline = StateTimeline.Create(
+                _meter.PatternDuration,
+                StateKinds.ScaleAlterations,
+                chordScales.Select((x, chord) => (x.Steps, Position: changes[chord]))
+                    .Where((x, chord) => x.Steps != (chord == 0 ? StepAlterations.None : chordScales[chord - 1].Steps))
+                    .Select(x => new LayerValue<StepAlterations>(StateDepths.Section, x.Steps).ToTimelineItem(x.Position))
+            )
+            .WithLayer("Progression");
 
         // the home chord plays a plain chord and the cadence one with pull; the chords between pick from the pool
         var homeChord = ImmutableArray.Create(unconventionality.GenerateHomeChord(context)).ToTimelineItem(0.0);
@@ -130,8 +132,7 @@ internal sealed class BarStateGenerator
                 StateTimeline.Create(_meter.PatternDuration, StateKinds.ScaleOffsets, [scale.Offsets.ToTimelineItem(0.0)]).WithLayer("Section"),
                 progressionTimeline,
                 changeTimeline,
-                raisedStepTimeline,
-                loweredStepTimeline,
+                scaleTimeline,
                 roleChordTimeline,
                 GenerateResets(context, facets[Facet.Chords]),
                 ..GenerateBassLeading(context.CreateContext((uint)Seeds.Derive(seed, BassLeadingStream)), changes, bassLeading, facets[Facet.Chords]),

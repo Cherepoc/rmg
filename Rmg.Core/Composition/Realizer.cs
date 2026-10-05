@@ -357,7 +357,8 @@ internal static class Realizer
         var scaleOffsets = stateMap.GetStateValue(StateKinds.ScaleOffsets);
         if (scaleOffsets.IsEmpty)
             scaleOffsets = ChromaticScaleOffsets;
-        scaleOffsets = AlterScaleSteps(scaleOffsets, stateMap.GetStateValue(StateKinds.RaisedScaleSteps), stateMap.GetStateValue(StateKinds.LoweredScaleSteps));
+        if (stateMap.GetStateValue(StateKinds.ScaleAlterations) is { IsSet: true } altered)
+            scaleOffsets = AlterScaleSteps(scaleOffsets, altered.Value);
 
         // the chord root, in scale steps
         var rootIndex = stateMap.GetStateValue(StateKinds.ChordRoot);
@@ -366,27 +367,20 @@ internal static class Realizer
     }
 
     /// <summary>
-    ///     The scale with every listed step raised or lowered a semitone, as many times as it is listed (<see cref="ChordScale" />).
-    ///     The scale must stay in order within the octave: a step cannot be moved onto the next one.
+    ///     The scale with its steps raised or lowered a semitone as given (<see cref="ChordScale" />). The scale must stay in
+    ///     order within the octave: a step cannot be moved onto the next one.
     /// </summary>
-    internal static ImmutableArray<int> AlterScaleSteps(ImmutableArray<int> scaleOffsets, ImmutableArray<int> raisedSteps, ImmutableArray<int> loweredSteps) =>
-        TryAlterScaleSteps(scaleOffsets, raisedSteps, loweredSteps)
-        ?? throw new ArgumentException(
-            $"Raising steps {string.Join(", ", raisedSteps)} and lowering {string.Join(", ", loweredSteps)} of the scale {string.Join(", ", scaleOffsets)} puts it out of order.",
-            nameof(raisedSteps)
-        );
+    internal static ImmutableArray<int> AlterScaleSteps(ImmutableArray<int> scaleOffsets, StepAlterations alterations) =>
+        TryAlterScaleSteps(scaleOffsets, alterations)
+        ?? throw new ArgumentException($"Moving the steps {alterations} of the scale {string.Join(", ", scaleOffsets)} puts it out of order.", nameof(alterations));
 
-    /// <summary>The scale with the steps raised and lowered (<see cref="AlterScaleSteps" />); none where it falls out of order.</summary>
-    internal static ImmutableArray<int>? TryAlterScaleSteps(ImmutableArray<int> scaleOffsets, ImmutableArray<int> raisedSteps, ImmutableArray<int> loweredSteps)
+    /// <summary>The scale with its steps raised and lowered (<see cref="AlterScaleSteps" />); none where it falls out of order.</summary>
+    internal static ImmutableArray<int>? TryAlterScaleSteps(ImmutableArray<int> scaleOffsets, StepAlterations alterations)
     {
-        if (raisedSteps.IsEmpty && loweredSteps.IsEmpty)
+        if (alterations == StepAlterations.None)
             return scaleOffsets;
 
-        var offsets = scaleOffsets.ToArray();
-        foreach (var step in raisedSteps)
-            offsets[step.Mod(offsets.Length)]++;
-        foreach (var step in loweredSteps)
-            offsets[step.Mod(offsets.Length)]--;
+        var offsets = scaleOffsets.Select((x, step) => x + alterations.By(step)).ToArray();
 
         for (var i = 0; i < offsets.Length; i++)
             if (offsets[i] < 0 || offsets[i] >= OctaveNoteCount || i > 0 && offsets[i] <= offsets[i - 1])

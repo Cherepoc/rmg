@@ -57,9 +57,10 @@ public sealed class LineScaleTest
                 var off = notes.Count(n =>
                 {
                     var key = common.GetStateTimeline(StateKinds.KeyOffset).GetEffectiveValueAt(n.Position);
-                    var raised = common.GetStateTimeline(StateKinds.RaisedScaleSteps).GetEffectiveValueAt(n.Position);
+                    var altered = common.GetStateTimeline(StateKinds.ScaleAlterations).GetEffectiveValueAt(n.Position);
                     var scale = common.GetStateTimeline(StateKinds.ScaleOffsets).GetEffectiveValueAt(n.Position);
-                    return !scale.Select((o, i) => (o + key + (raised.Contains(i) ? 1 : 0)).Mod(12)).Contains(n.Value.Offset.Mod(12));
+                    var by = altered.IsSet ? altered.Value : StepAlterations.None;
+                    return !scale.Select((o, i) => (o + key + by.By(i)).Mod(12)).Contains(n.Value.Offset.Mod(12));
                 });
                 return (Scale: (LineScale)x.Value!, Facet: facet, Notes: notes.Length, Off: off);
             }).ToArray();

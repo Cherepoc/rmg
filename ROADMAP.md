@@ -250,9 +250,9 @@ Each item with its plan, and what it waits for.
   already draws), or a mode on the chord's own root, applied (Mixolydian on a root a fifth above the next makes it that
   chord's dominant; on every chord, the blues). Every note over the chord takes it, the chord's, the bass's, the
   melody's, the counter-melody's and the solo's, as `Realizer.GetChord` gives them the cadence's raised seventh now
-  (`StateKinds.RaisedScaleSteps`), which is the first case of it: harmonic minor borrowed at the cadence. It takes in
+  (`StateKinds.ScaleAlterations`), which is the first case of it: harmonic minor borrowed at the cadence. It takes in
   a line scale by the chord, a line's passing notes taking its chord's scale, and chord tones off the scale. Steps:
-  1. Done: a chord's alterations (`ChordScales`, `RaisedScaleSteps` and `LoweredScaleSteps`), applied and borrowed
+  1. Done: a chord's alterations (`ChordScales`, `StateKinds.ScaleAlterations`), applied and borrowed
      chords drawn by the progression facet, never at the plain end and as often at the wild end as the middle; 7% to 12%
      of the chords but the cadence altered, two or three borrowed for every applied (`ChordScalesReportTest`); the
      melody's notes on a beat a semitone from the chords 7.5% before, 7.2% after. A key change's chain and pivot chords
@@ -294,9 +294,9 @@ Each item with its plan, and what it waits for.
   sequence of edits whose order is their correctness and is said nowhere (`SongGenerator.GenerateSong`, 464 lines, 69
   streams): October 2026's bugs were all an edit not knowing another's (a key change keeping the old chord's scale,
   the restatement overriding the bass's landings, a length not taking in the intro). Steps:
-  1. A chord's scale one kind its lowest layer decides (`StateKinds.CreateLowestLayerWins`), its alteration a step,
-     in place of the raised and lowered lists, which a key change's chords undo by listing them the other way: its
-     chords set it deeper and win. A refactor: the fingerprint kept.
+  1. Done: a chord's scale one kind its lowest layer decides (`StateKinds.ScaleAlterations`, `StepAlterations`), the
+     section's chords setting it and a key change's chain and pivot chords setting the key's own deeper, which wins;
+     the fingerprint kept.
   2. Named stages: what the song decides before assembly (its plan, structure, meters, hook, energies, parts,
      facets, genre, streams) one record it reads, and the song after it a draft of its timeline and what stages hand
      on (the fill runs, the melody's walks, the key changes, the drum solos), each field with who sets and reads it;

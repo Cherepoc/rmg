@@ -49,23 +49,26 @@ public sealed class CadenceRaisedStepTest
     }
 
     [Test]
-    public async Task RaiseScaleSteps_RaisesEachListedStep()
+    public async Task AlterScaleSteps_RaisesAndLowersTheStepsGiven()
     {
         ImmutableArray<int> minor = [0, 2, 3, 5, 7, 8, 10];
 
-        await Assert.That(Realizer.AlterScaleSteps(minor, [6], []).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 8, 11]);
-        await Assert.That(Realizer.AlterScaleSteps(minor, [5, 6], []).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 9, 11]);
-        await Assert.That(Realizer.AlterScaleSteps(minor, [], [])).IsEqualTo(minor);
+        await Assert.That(Realizer.AlterScaleSteps(minor, StepAlterations.Of([6], [])).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 8, 11]);
+        await Assert.That(Realizer.AlterScaleSteps(minor, StepAlterations.Of([5, 6], [])).ToArray()).IsEquivalentTo([0, 2, 3, 5, 7, 9, 11]);
+        await Assert.That(Realizer.AlterScaleSteps(minor, StepAlterations.Of([2], [1])).ToArray()).IsEquivalentTo([0, 1, 4, 5, 7, 8, 10]);
+        await Assert.That(Realizer.AlterScaleSteps(minor, StepAlterations.None)).IsEqualTo(minor);
     }
 
     [Test]
-    [Arguments(new[] { 6, 6 })]
-    [Arguments(new[] { 1, 1 })]
-    public async Task RaiseScaleSteps_OutOfOrder_ResultsIn_ArgumentException(int[] steps)
+    [Arguments(new[] { 6 }, new int[0])]
+    [Arguments(new[] { 2 }, new int[0])]
+    [Arguments(new int[0], new[] { 0 })]
+    public async Task AlterScaleSteps_OutOfOrder_ResultsIn_ArgumentException(int[] raised, int[] lowered)
     {
-        ImmutableArray<int> minor = [0, 2, 3, 5, 7, 8, 10];
+        // past the octave, onto the next step, and below the first note
+        ImmutableArray<int> major = [0, 2, 4, 5, 7, 9, 11];
 
-        await Assert.That(() => Realizer.AlterScaleSteps(minor, [..steps], [])).Throws<ArgumentException>();
+        await Assert.That(() => Realizer.AlterScaleSteps(major, StepAlterations.Of(raised, lowered))).Throws<ArgumentException>();
     }
 
     [Test]
@@ -80,11 +83,10 @@ public sealed class CadenceRaisedStepTest
 
             // a chord in its own scale from its start to the next's (ChordScales): the cadence's raise, an applied
             // dominant's and a borrowed mode's
-            foreach (var (kind, counted) in new[] { (StateKinds.RaisedScaleSteps, 0), (StateKinds.LoweredScaleSteps, 1) })
-            foreach (var item in common.GetStateTimeline(kind).Where(x => !x.Value.IsEmpty))
+            foreach (var item in common.GetStateTimeline(StateKinds.ScaleAlterations).Where(x => x.Value.IsSet && x.Value.Value != StepAlterations.None))
             {
-                if (counted == 0) raising++;
-                else lowering++;
+                raising += item.Value.Value.Raised != 0 ? 1 : 0;
+                lowering += item.Value.Value.Lowered != 0 ? 1 : 0;
                 await Assert.That(changes).Contains(item.Position).Because($"seed {seed}");
             }
         }

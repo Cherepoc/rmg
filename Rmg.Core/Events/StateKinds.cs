@@ -51,10 +51,9 @@ public static class StateKinds
     // the scale, as its notes' semitones above its root: one value, set by one layer, a section's, whose kind would join
     // two layers' scales into one of fourteen notes (SingleValuedListsTest)
     public static readonly StateKind<ImmutableArray<int>> ScaleOffsets = CreateCollection<int>("ScaleOffsets", StateScope.Render, isShared: true);
-    // scale steps raised a semitone each time they are listed, such as the seventh on a cadence
-    public static readonly StateKind<ImmutableArray<int>> RaisedScaleSteps = CreateCollection<int>("RaisedScaleSteps", StateScope.Render, isShared: true);
-    // scale steps lowered a semitone each time they are listed, such as the seventh of a chord borrowed from the minor
-    public static readonly StateKind<ImmutableArray<int>> LoweredScaleSteps = CreateCollection<int>("LoweredScaleSteps", StateScope.Render, isShared: true);
+    // the scale's steps a chord raises or lowers a semitone, such as the seventh on a cadence or a borrowed chord's,
+    // its own chord's layer's, or a deeper one's that puts it in a key of its own, which wins
+    public static readonly StateKind<LayerValue<StepAlterations>> ScaleAlterations = CreateLowestLayerWins<StepAlterations>("ScaleAlterations", StateScope.Render, isShared: true);
     public static readonly StateKind<double> Tempo = CreateMultiplicative<double>("Tempo", StateScope.Render, isShared: true);
 
     // how far the whole band is faded in, from 1, as loud as it plays, to 0, silent, which the song's MIDI plays as every
@@ -187,6 +186,24 @@ public static class StateDepths
     public const int Section = 2;
     public const int BarPattern = 3;
     public const int Note = 4;
+}
+
+/// <summary>
+///     The steps of a scale raised or lowered a semitone, counted from its first note, each a bit: a chord's own scale
+///     (<see cref="StateKinds.ScaleAlterations" />).
+/// </summary>
+public readonly record struct StepAlterations(int Raised, int Lowered)
+{
+    public static StepAlterations None { get; } = new(0, 0);
+
+    public static StepAlterations Of(IEnumerable<int> raised, IEnumerable<int> lowered) =>
+        new(raised.Aggregate(0, (bits, step) => bits | 1 << step), lowered.Aggregate(0, (bits, step) => bits | 1 << step));
+
+    /// <summary>Whether a step is raised or lowered.</summary>
+    public bool Moves(int step) => ((Raised | Lowered) >> step & 1) == 1;
+
+    /// <summary>How many semitones a step moves: 1 raised, -1 lowered, 0 as it is.</summary>
+    public int By(int step) => (Raised >> step & 1) - (Lowered >> step & 1);
 }
 
 /// <summary>A value as a layer sets it, with the layer's depth (<see cref="StateDepths" />); unset below 0.</summary>
