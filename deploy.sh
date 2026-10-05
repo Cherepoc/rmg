@@ -303,6 +303,8 @@ step "Sending the app to $HOST:$TARGET"
 # one the live pages point at is marked as retired now, and the prune below counts from that.
 remote "$TARGET" <<'REMOTE'
 target="$1"
+# a first deploy has no bundles' folder yet to send them into
+mkdir -p "$target/wwwroot/assets"
 if [[ -f $target/wwwroot/index.html ]]; then
     live="$(grep -o 'assets/[0-9a-f]\{8\}' "$target/wwwroot/index.html" | head -1 || true)"
     if [[ -n $live && -d $target/wwwroot/$live ]]; then touch "$target/wwwroot/$live"; fi
