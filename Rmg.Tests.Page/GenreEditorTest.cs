@@ -480,6 +480,8 @@ public sealed class GenreEditorTest(Site site)
         // the bass's leading and its landing, the plainest songs' on the root
         await Assert.That(await Tile(await Section(dialog, "Harmony"), "bass").IsVisibleAsync()).IsTrue();
         await Assert.That(await Tile(await Section(dialog, "Harmony"), "harmonicRhythm").IsVisibleAsync()).IsTrue();
+        // a turnaround, a reharmonisation, never at the plain end
+        await Assert.That(await Tile(await Section(dialog, "Harmony"), "turnaround").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
         await Assert.That(await Tile(await Section(dialog, "Form"), "loop").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
         await Assert.That(await Tile(await Section(dialog, "Sound"), "levels").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: default");
         await Assert.That(await Tile(time, "grooveHold").IsVisibleAsync()).IsTrue();

@@ -128,6 +128,12 @@ internal sealed class SectionGenerator
         var harmonicRhythm = HarmonicRhythm.Draw(Stream(sectionId, SectionStream.HarmonicRhythm), tilt, meter, facets[Facet.Progression], _genre);
         var progression = Progressions.Generate(context, scale, home, Progressions.Strictness.At(facets[Facet.Progression]), harmonicRhythm.Count, meter.Phrases,
             motion => _genre.Shift(GenreChoices.RootMotions, Progressions.Motions[motion].Name));
+        // a turnaround now and then, the pattern's last bar leading back to its start, by the progression facet and a genre's,
+        // from a sequence of its own
+        var turnaround = Stream(sectionId, SectionStream.Turnaround).TestProbability(Progressions.Turnaround.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Turnaround, "sections")));
+        if (turnaround)
+            progression = Progressions.TurnAround(progression, harmonicRhythm.Changes.Count(x => x >= meter.PatternDuration - meter.BarDuration - 1e-9));
+        StateTrace.Record(TracePoints.Turnaround, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{turnaround}", turnaround);
         // the cadence raising the seventh for a major chord on the fifth, where the scale allows it, by the progression
         // facet, from a sequence of its own
         var raisable = Progressions.GetCadenceRaisedStep(scale.Offsets, home, progression[^1]);
@@ -1002,5 +1008,6 @@ internal enum SectionStream
     Loop = 33,
     Hook = 34,
     PowerChords = 35,
-    Chugs = 36
+    Chugs = 36,
+    Turnaround = 37
 }

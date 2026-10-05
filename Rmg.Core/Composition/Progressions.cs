@@ -199,6 +199,27 @@ internal static class Progressions
     /// </summary>
     public static ByConvention CadenceRaise { get; } = new(1, 1, 0);
 
+    /// <summary>
+    ///     The chance a section turns its pattern around (<see cref="TurnAround" />), by the progression facet: never at the
+    ///     plain end, which is never reharmonised, and as often at the wild end as in the middle.
+    /// </summary>
+    public static ByConvention Turnaround { get; } = new(0, 0.1, 0.1);
+
+    /// <summary>
+    ///     The progression with its pattern's last bar leading back to its start, the home: a fifth above it, V, and where the
+    ///     bar has two chords or more, the one before a fifth above that, ii, as a ii–V does; the chords before kept.
+    /// </summary>
+    /// <param name="inLastBar">How many of its chords start in the pattern's last bar.</param>
+    public static ImmutableArray<int> TurnAround(ImmutableArray<int> progression, int inLastBar)
+    {
+        var turned = progression.ToBuilder();
+        turned[^1] = Normalize(4);
+        // the first chord stays home
+        if (inLastBar >= 2 && progression.Length > 2)
+            turned[^2] = Normalize(1);
+        return turned.ToImmutable();
+    }
+
     public static int? GetCadenceRaisedStep(ImmutableArray<int> scaleOffsets, int home, int cadenceRoot)
     {
         if (Mod(cadenceRoot) != 4 || GetQuality(scaleOffsets, home + 4) != TriadQuality.Minor)

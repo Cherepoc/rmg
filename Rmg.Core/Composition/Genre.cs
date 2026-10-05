@@ -51,6 +51,12 @@ public sealed record GenreOption(string Name, string Label, ByConvention Own)
     /// </summary>
     public ImmutableArray<string> Tags { get; init; } = [];
 
+    /// <summary>
+    ///     Whether a genre may play it at the plain end; a reharmonisation's chance may not, a plain song being never
+    ///     reharmonised, its amount there read as 0 whatever the genre says.
+    /// </summary>
+    public bool HasPlainEnd { get; init; } = true;
+
     /// <summary>What the page shows over its name, such as how a scale sounds and its notes; none for most.</summary>
     public string Description { get; init; } = "";
 }
@@ -195,7 +201,7 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
                 return null;
             }
 
-            read[name] = options.ToImmutableDictionary();
+            read[name] = options.ToImmutableDictionary(x => x.Key, x => choice[x.Key].HasPlainEnd ? x.Value : x.Value with { Plain = 0 });
         }
 
         return new Genre(read.ToImmutable());

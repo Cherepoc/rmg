@@ -49,6 +49,7 @@
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
       "pocket": { "laidBack": 65 },
+      "turnaround": { "sections": [0, 80, 80] },
       "tempo": { "from": [110, 110, 70], "to": [180, 180, 240] },
       "meter": { "4/4": [100, 100, 60], "3/4": [10, 12, 25], "5/4": [0, 0, 30], "7/4": [0, 0, 15] },
       "feelChances": { "swing": [95, 80, 50], "halfTime": 8, "doubleTime": 5 },
@@ -345,6 +346,7 @@
       "drumSetup": { "kit": 100 },
       "grooveHold": { "held": 75 },
       "pocket": { "laidBack": 70 },
+      "turnaround": { "sections": [0, 70, 70] },
       "riff": { "powerChords": [15, 25, 30] },
       "solos": { "sections": [20, 25, 35] },
       "soloists": { "solo": 100, "melody": [40, 40, 50], "chords": [10, 20, 30] },

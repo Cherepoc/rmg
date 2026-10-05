@@ -129,6 +129,9 @@ public static class GenreChoices
         ("chugs", "Palm-muted chugs", SectionGenerator.ChugChance)
     ]);
 
+    /// <summary>The chance a section's pattern turns around in its last bar, a V or a ii–V into its start, a reharmonisation, which no genre plays at the plain end (<see cref="Progressions.Turnaround" />).</summary>
+    public static GenreChoice Turnaround { get; } = Chances("turnaround", "Turnaround", [("sections", "Sections turned around", Progressions.Turnaround)], plainEnd: false);
+
     /// <summary>The chance a lift the drums announce is built to and dropped at, the band out for the bar before it; the songs never (<see cref="FormLayers.Drop" />).</summary>
     public static GenreChoice Drop { get; } = Chances("drop", "Builds and drops", [("lifts", "Lifts built to a drop", FormLayers.Drop)]);
 
@@ -400,7 +403,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Loop, LineScale, Bass, BassLanding, Effects, Levels, GrooveHold, Pocket, Fills, Drop, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Turnaround, Loop, LineScale, Bass, BassLanding, Effects, Levels, GrooveHold, Pocket, Fills, Drop, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,
@@ -438,8 +441,8 @@ public static class GenreChoices
     }
 
     /// <summary>A choice of chances, every one's own its chances as the songs have them.</summary>
-    private static GenreChoice Chances(string name, string label, IEnumerable<(string Name, string Label, ByConvention Chance)> options) =>
-        new(name, label, GenreChoiceKind.Chances, [..options.Select(x => new GenreOption(x.Name, x.Label, x.Chance))]);
+    private static GenreChoice Chances(string name, string label, IEnumerable<(string Name, string Label, ByConvention Chance)> options, bool plainEnd = true) =>
+        new(name, label, GenreChoiceKind.Chances, [..options.Select(x => new GenreOption(x.Name, x.Label, x.Chance) { HasPlainEnd = plainEnd })]);
 
     /// <summary>A choice of values, every one's own as it is.</summary>
     private static GenreChoice Values(string name, string label, IEnumerable<(string Name, string Label)> options) =>

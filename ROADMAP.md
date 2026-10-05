@@ -294,8 +294,10 @@ Each item with its plan, and what it waits for.
   dominant or diminished approach is a root and a chord's own scale, as an applied dominant is; a chromatic one is not
   (the scale's root, third and fifth raised together run its steps onto each other, which `AlterScaleSteps` refuses),
   and wants a state of its own, the whole chord moved a semitone, the lines over it keeping the target's scale. Steps:
-  1. Turnarounds: a pattern's last bar before it plays again or its section ends, a dominant or a ii–V into its
-     start; a genre's lean, Jazz and Blues much. Before assembly, a section's decision.
+  1. Done: turnarounds (`Progressions.TurnAround`, `GenreChoices.Turnaround`): a section's pattern's last bar a V into
+     its start, a ii–V where the bar has two chords, by the progression facet (0, 0.1, 0.1) and a genre's, no genre's
+     at the plain end (`GenreOption.HasPlainEnd`). Sections ending on V: Jazz 74% (39%), Blues 69% (29%), songs 36%
+     (32%); on a ii–V Jazz 47% (25%). The V's seventh raised as a cadence's is, so modal at the wild end.
   2. Passing chords in the progression, dominant and diminished, by the progression facet and the energy, every part
      playing them; the 12-bar's place rules kept, and the melody's note there fitting or the approach going elsewhere.
   3. A chord solo's: a chord soloist's stacked note leading into the next chord playing an approach, step 2's chord,
