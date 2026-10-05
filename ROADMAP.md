@@ -11,14 +11,14 @@ ratings by conventionality once enough are in, alongside, continuously and never
 
 **Later** (P2), roughly in this order: what a genre cannot reach yet, the melody's character and the bass's style
 first, then the harmonic rhythm and the form's devices (see *Genres*); a chorus written as a hook (see *Form and
-sections*); timing by role, then a genre's pocket, the largest gap in how the songs are played (see *Groove*); a
-solo's loudness by its phrase, as the other lines' (see *Instruments and expression*); the ratings report (see
+sections*); timing by role, then a genre's pocket, the largest gap in how the songs are played (see *Groove*), and a
+guitar's strum after it (see *Groove*); a solo's loudness by its phrase, as the other lines' (see *Instruments and expression*); the ratings report (see
 *Listening data*), once the dashboard shows songs rated enough; listening to the genres' presets (see *Genres*), and to
 what the harmony, the melody and the form gained in October 2026: chords off the scale, a phrase's loudness, the hook
 intro, the chorus's lift and the restated phrase.
 
 **When the need shows** (P3), each by what listening says, roughly in this order: stop-time breaks, then the band's
-other devices (see *Form and sections*); a genre's arrangement and levels, its fills' amount, its melody's range and an
+other devices, and a chord solo reharmonised (see *Form and sections*); a genre's arrangement and levels, its fills' amount, its melody's range and an
 octave bass (see *Genres*); the fills' sounds by convention, then their loudness; harmony's devices; a motif developed
 further; legato slides; a hook at the end; the tempo leaning by the energy; a key change's common tone; the page's wait
 for a remake and the sections on the seek bar; scales of other sizes (see *Open work*).
@@ -198,6 +198,12 @@ Each item with its plan, and what it waits for.
 - **A chorus written as a hook** (P2): its melody leaning by its role to a shorter motif repeated and a plainer
   rhythm, through the echo and rhythm layers it has; measured by the chorus's repeated notes against the verse's, too
   much of it mechanical.
+- **Reharmonising a chord solo** (P3, after the form's devices by genre make Jazz solo more): a chord soloist's
+  stacked note on a weak beat, leading into the next chord's first, playing an approach chord in place of the band's:
+  the next chord's shape a semitone above or below, a chromatic approach, which is planing (`LinePlanes`) aimed at it,
+  or now and then its dominant, a chord's own scale on the stacked note. By the melody facet from the solo's stream, a
+  jazz genre's lean. Today a chord solo stacks the band's chord or planes its shape, never another chord. Measured by
+  the share of a chord soloist's stacks that approach; on a weak beat only, against the comping under it.
 - **The band's devices** (P3, each an edit after assembly among the stages): stop-time breaks first, the band hitting
   once a bar under a line that goes on, the blues' and rock's; then a push or anticipation the whole band plays, call and
   response between parts, a backing figure that recurs through the song.
@@ -247,6 +253,13 @@ Each item with its plan, and what it waits for.
   doubling needs it. Then **a genre's pocket**: the offsets a genre's values, a laid-back backbeat or a pushed bass.
   Offsets a role each only, never a random jitter, which would be playing a player rather than a rule; never in the
   plainest songs, which keep to the click.
+- **A guitar's strum** (P2, after timing by role): every chord a guitar plays struck as a stroke, its direction its
+  state, down from the low string on a beat's first half and up on its second, the rendering spreading its notes a few
+  milliseconds apart, 10 to 30 a stroke, in time rather than beats, the up stroke a touch softer and thinner; the same
+  seam as the timing by role and the palm mute, a plugin's strum engine taking the direction as a keyswitch ahead. How
+  a guitar plays a chord, not a convention, so nothing drawn but a song's stroke speed, from a stream of its own; the
+  guitars by their instruments' data. Measured by the guitar chords' spread of onsets, and the swing pairs as they
+  were. A piano's rolled chord the same, slower and upward, for a ballad, after it.
 
 ### Scales and chords
 
