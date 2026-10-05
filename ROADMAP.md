@@ -21,7 +21,8 @@ what the harmony, the melody and the form gained in October 2026: chords off the
 intro, the chorus's lift and the restated phrase.
 
 **When the need shows** (P3), each by what listening says, roughly in this order: stop-time breaks, then the band's
-other devices, and approach chords' later steps (see *Form and sections*); a genre's arrangement and levels, its fills' amount, its melody's range and an
+other devices, and approach chords' later steps, a chord free of the section's scale among them, stretched voicings
+and legato as an articulation (see *Form and sections*); a genre's arrangement and levels, its fills' amount, its melody's range and an
 octave bass (see *Genres*); the fills' sounds by convention, then their loudness; harmony's devices; a motif developed
 further; legato slides; a hook at the end; the tempo leaning by the energy; a key change's common tone; the page's wait
 for a remake and the sections on the seek bar; scales of other sizes (see *Open work*).
@@ -239,6 +240,10 @@ Each item with its plan, and what it waits for.
   are placed apart (`SoloLines`) and play without it, which they could take by the same rule should they sound flat.
 - **Plain doubling,** a part doubling another in unison, which waits for timing by role.
 - **A motif developed further** (P3), inverted or stretched, should the solos' sequences sound mechanical.
+- **Legato as an articulation** (P3, after the palm mute's seam): a line's notes slurred into each other, a note's
+  articulation as the palm mute is, General MIDI playing it as notes overlapping and a plugin as a legato keyswitch;
+  the legato slides below one of its cases. And to check: whether a solo's runs group in fives and sevens, a fusion
+  player's, which the feels give a whole part but perhaps not a run.
 - **Legato slides** (P3): a slide strikes its note anew, where a player's note before goes on sounding into the next;
   holding the note before into the slide and leaving the next unstruck edits two notes at render. Built if the struck
   slide sounds like a stutter.
@@ -260,6 +265,18 @@ Each item with its plan, and what it waits for.
 
 ### Scales and chords
 
+- **A chord free of the section's scale** (P3): every chord's root is a step of the section's seven-note scale and
+  its own scale the section's a semitone a step at most (`ChordScales`), so a chord cannot move to an unrelated key, its
+  root cannot move by a semitone or a minor third, and it cannot take a scale of its own. A chord of its own kind: its
+  root in semitones from the home and its scale drawn on that root (Lydian, melodic minor, diminished, the
+  section's), its lines taking its scale as they take a chord's own now; never a replacement for the scale-step chords,
+  whose progressions, cadences and key changes count roots in steps. Its uses: a chromatic approach chord (approach
+  chords, step 4), a progression that does not function, roots moving by thirds or a semitone, a constant structure
+  planed through keys, a fusion's or a film score's genre leaning to it. Then a fusion genre, a long-lined guitar
+  player's, is a genre's data: free chords and their root motions, the line scales of melodic minor, the octatonic and
+  the whole-tone from each chord's root, leaping, stretched voicings and swells, odd meters, long legato solos.
+- **Stretched voicings** (P3): a chord spread over two octaves and more, a guitarist's wide stretch and a pianist's
+  spread voicing, beside the close shapes and the clusters; data on the voicings.
 - **Approach chords** (P2 for its first steps, a plan in steps): a chord leading into the next one that the
   progression does not have, by its kind (the target's dominant, a passing diminished between roots a whole step
   apart, the target's shape a semitone above or below, the tritone substitute), its length (a beat, half a bar or a bar,
@@ -278,7 +295,8 @@ Each item with its plan, and what it waits for.
      playing them; the 12-bar's place rules kept, and the melody's note there fitting or the approach going elsewhere.
   3. A chord solo's: a chord soloist's stacked note leading into the next chord playing an approach, step 2's chord,
      on a weak beat, and on the strong ones too at the wild end, against the comping under it. A stage after the lines.
-  4. Chromatic approaches: the chord moved a semitone, then its kind among steps 2 and 3.
+  4. Chromatic approaches: a chord free of the section's scale (below), a semitone from its target, then its kind
+     among steps 2 and 3.
   5. A later appearance reharmonised, a last chorus over substitutes (vi or iii for I, ii for IV, the tritone
      substitute for V7) chosen by the notes they share with the chord they replace, decided before the lines are
      placed, so that the melody placed over them fits as it does.
