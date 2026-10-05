@@ -11,14 +11,17 @@ ratings by conventionality once enough are in, alongside, continuously and never
 
 **Later** (P2), roughly in this order: what a genre cannot reach yet, the melody's character and the bass's style
 first, then the harmonic rhythm and the form's devices (see *Genres*); a chorus written as a hook (see *Form and
-sections*); the ratings report (see *Listening data*), once the dashboard shows songs rated
-enough; listening to the genres' presets (see *Genres*), and to what the harmony, the melody and the form gained in
-October 2026: chords off the scale, a phrase's loudness, the hook intro, the chorus's lift and the restated phrase.
+sections*); timing by role, then a genre's pocket, the largest gap in how the songs are played (see *Groove*); a
+solo's loudness by its phrase, as the other lines' (see *Instruments and expression*); the ratings report (see
+*Listening data*), once the dashboard shows songs rated enough; listening to the genres' presets (see *Genres*), and to
+what the harmony, the melody and the form gained in October 2026: chords off the scale, a phrase's loudness, the hook
+intro, the chorus's lift and the restated phrase.
 
-**When the need shows** (P3), each by what listening says, roughly in this order: timing by role, then a genre's
-pocket, the largest gap in how the songs are played; the tempo leaning by the energy; scales of other sizes; legato slides; a motif developed further; the
-page's wait for a remake; a key change's common tone; the fills' loudness and sounds by convention; modulation, when a
-soundfont maps it, and a ping-pong echo (see *Open work*).
+**When the need shows** (P3), each by what listening says, roughly in this order: stop-time breaks, then the band's
+other devices (see *Form and sections*); a genre's arrangement and levels, its fills' amount, its melody's range and an
+octave bass (see *Genres*); the fills' sounds by convention, then their loudness; harmony's devices; a motif developed
+further; legato slides; a hook at the end; the tempo leaning by the energy; a key change's common tone; the page's wait
+for a remake and the sections on the seek bar; scales of other sizes (see *Open work*).
 
 **Put off** until their uses ask for them: long cycles and a tag (see *Open work*, *Rhythm engine*).
 
@@ -195,8 +198,9 @@ Each item with its plan, and what it waits for.
 - **A chorus written as a hook** (P2): its melody leaning by its role to a shorter motif repeated and a plainer
   rhythm, through the echo and rhythm layers it has; measured by the chorus's repeated notes against the verse's, too
   much of it mechanical.
-- **The band's devices** (P3, each an edit after assembly among the stages): a push or anticipation the whole band
-  plays, stop-time breaks, call and response between parts, a backing figure that recurs through the song.
+- **The band's devices** (P3, each an edit after assembly among the stages): stop-time breaks first, the band hitting
+  once a bar under a line that goes on, the blues' and rock's; then a push or anticipation the whole band plays, call and
+  response between parts, a backing figure that recurs through the song.
 - **Harmony's devices** (P3): a chromatic line inside a held chord, a pedal held under a section, a ii–V into a chord
   but the home, which a chord's own scale makes part of.
 - **The hook at the end** (P3): a song opens on its chorus's first phrase now and then (`IntroKind.Hook`); an outro
@@ -220,30 +224,26 @@ Each item with its plan, and what it waits for.
   crescendo and the drums' cues not lift.
 - **The fills' loudness** (P3): a run's swell, its accents and a landing's hit are constants, where the groove's
   loudness is layers; a fill's velocity layer would make them cumulative with the section's.
-- **The fills' sounds by convention** (P3): runs and landings weigh a drum's sounds the same in a plain section as in a
+- **The fills' sounds by convention** (P3, before their loudness): runs and landings weigh a drum's sounds the same in a plain section as in a
   wild one; the weights could lean so that plain sections crash and wild ones reach for the china and the splash.
 
 ### Instruments and expression
 
 - **The playing following the articulation** (P3, after genres): octaves popped in slap, short notes muted, without
   which an articulation is only another sound.
-- **A solo's loudness by its phrase** (P3): the melody's, counter-melody's and riff's lines lean louder at a phrase's
+- **A solo's loudness by its phrase** (P2, small): the melody's, counter-melody's and riff's lines lean louder at a phrase's
   highest note and softer at its lowest (`LinePattern.PhraseArc`), a phrase running to its held note; a solo's lines
   are placed apart (`SoloLines`) and play without it, which they could take by the same rule should they sound flat.
 - **Plain doubling,** a part doubling another in unison, which waits for timing by role.
 - **A motif developed further** (P3), inverted or stretched, should the solos' sequences sound mechanical.
-- **Modulation** (P3, when a soundfont maps it): CC1, which none of the soundfonts offered maps to tone. The rule to
-  keep: modulation and a vibrato never at once, modulation and bends together.
 - **Legato slides** (P3): a slide strikes its note anew, where a player's note before goes on sounding into the next;
   holding the note before into the slide and leaving the next unstruck edits two notes at render. Built if the struck
   slide sounds like a stutter.
-- **Ping-pong echo** (P3): an echo alternating sides, from the part's pan to its mirror, where a part's echo now
-  repeats in place.
 - **Long fall-offs** (P4): a fall of an octave into nothing at a note's end, a slide's kind of its own, if missed.
 
 ### Groove
 
-- **Timing by role** (P3): the backbeat a little late, the hi-hat on top, should swing alone sound stiff; plain
+- **Timing by role** (P2): the backbeat a little late, the hi-hat on top, should swing alone sound stiff; plain
   doubling needs it. Then **a genre's pocket**: the offsets a genre's values, a laid-back backbeat or a pushed bass.
   Offsets a role each only, never a random jitter, which would be playing a player rather than a rule; never in the
   plainest songs, which keep to the click.
@@ -320,8 +320,7 @@ Each item with its plan, and what it waits for.
   5. Found done: a hook intro copies the chorus's appearance, its rests and texture applied (`GeneratedSection.Appear`),
      so it plays what the chorus plays: of 821 parts in hook intros, 5 play where the chorus does not, 4 of them a
      chorus played as a solo, which the intro quotes the tune of.
-  Deferred: `SectionGenerator.Generate` (188 lines) split likewise, its draws already apart by their streams, should
-  the song's stages show a gain there.
+  Parked: `SectionGenerator.Generate` split likewise, and a stage report of notes moved in place (see *Parked*).
 
 - **The page's wait for a remake** (P3): a song is asked for again 400 ms after the settings last changed; a remake let
   go of frees its core on the server, so the wait could be 200 ms. To shorten if the wait is noticed.
@@ -393,11 +392,13 @@ a link carries. What is left:
      leaning its stepwiseness (`CompositionStateKinds.LineStepwiseness`) by `Tilt`. Blues the blues scale and the
      pentatonic, Rock the pentatonic, Folk the section's and stepwise, Jazz the section's and melodic minor and
      leaping more, Ambient stepwise. Measured by the presets' line scales and their melodies' moves and leaps. The
-     range, a profile's constant, a genre's only should listening ask.
+     range a genre's later (P3): its width a profile's constant, passed to `Line` as its lift is, once the line scales
+     and the steps are heard.
   2. The bass's style: values of how much it leads into the next chord, walking at its most, and where it lands on a
      chord, root, third or fifth (the leading drawn a song and a section, its landings). Jazz walking, Folk root and
      fifth, Reggae and Electronic the root, Funk between. A walking bass wants quarters too: the preset's rhythm
-     checked. An octave bass is a figure of its own, put off.
+     checked. An octave bass, a root alternating its octaves on the off-beats, disco's and funk's, a figure of its own
+     (P3).
   3. The harmonic rhythm: a pool of how long a chord lasts, leaning the draw its energy leans. Jazz half a bar or a
      bar, Folk, Ambient and Electronic two bars, Funk two and longer, Blues a bar; the cadence's rules checked where a
      phrase holds two chords.
@@ -405,12 +406,12 @@ a link carries. What is left:
      intros and endings, the intros given ends of their own first (a table now, which moves the corpus). Jazz soloing
      often and ending on a button or a ring, Rock on a stop or a button, Electronic and Ambient fading.
   5. The fills' amount, a value: Rock and Funk busier, Ambient and Electronic sparse.
-  Put off: a genre's arrangement, its parts resting by a section's role (a dub's breakdown), a wide surface for an
-  idiom, should listening ask. Every step a tile in the editor and a page test that it shows; a genre kept before
+  Then (P3): a genre's arrangement and levels, its parts resting by a section's role (a dub's breakdown) and how loud
+  each plays (the levels below), one item, a tile a part, should listening ask. Every step a tile in the editor and a page test that it shows; a genre kept before
   keeps its key, its new choice absent.
-- **A head with solos** (P3): a jazz tune's head, choruses of solos over its form, and the head again, which AABA
+- **A head with solos** (to review after the form's devices by genre, which with AABA may make it, and then go): a jazz tune's head, choruses of solos over its form, and the head again, which AABA
   (SongForms.Forms) and the solos' sections (Solos) come near already; a form of its own only should listening ask.
-- **A genre's levels** (P3): how loud each part plays against the others, values a part each, applied where the mix
+- **A genre's levels** (P3, with a genre's arrangement): how loud each part plays against the others, values a part each, applied where the mix
   gives none, a mechanism of its own that a mix given may fight; the pan is a genre's (GenreChoices.Pan), the levels
   only should listening ask for them.
 - **A genre's sections differing** (P3, perhaps never): a value given a section role, such as a solo swung harder
@@ -445,6 +446,14 @@ a link carries. What is left:
 
 Ideas with a reason, not planned: none has shown a need. Taken up only when listening or another item asks for one.
 
+- **Ping-pong echo** (P4): an echo alternating sides, from the part's pan to its mirror, where a part's echo now
+  repeats in place.
+- **Modulation** (blocked until a soundfont maps it): CC1, which none of the soundfonts offered maps to tone. The rule to
+  keep: modulation and a vibrato never at once, modulation and bends together.
+- **`SectionGenerator.Generate` split** into stages as the song's are: its draws are apart by their streams already,
+  and no bug has come of its order.
+- **A stage report of notes moved in place:** the stages' counts tell notes added and taken away; a diff of every
+  timeline after every stage, should a report need what a stage moves.
 - **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do: readable, but
   nothing needs them read.
 - **The drummer as one player:** the fills' `Drummer` and the drum solo's `Soloist` one record, a refactor with no
