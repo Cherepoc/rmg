@@ -274,40 +274,26 @@ a picker and an editor on the page, every choice a graph of what the songs draw 
 (`genre-tune.js`); a genre kept on the server by an 11-character key of its canonical form (`GenreStore`), which
 a link carries. What is left:
 
-- **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
-  half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
-  alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.
-- **A link replacing the settings kept** (a decision): opening a shared song makes its settings this browser's own,
-  so that the next song goes on in them; keeping one's own and offering a way back to them is the other way, should
-  listening to shared songs ask for it.
-- **A range's axis by its scale** (P3): the window's chart of a range is linear in its numbers, so that a length's
-  from half a minute to fifteen keeps a song's few minutes low on it; its scale's own spacing, as the amounts have it,
-  should the editing ask for it.
 - **One's own genres kept straight** (P1, small):
   1. **Renaming:** Save keeps the draft in place of the genre it was opened from, under its name as it now is; Save
      as alone adds one; a name another of one's own has asks before replacing it.
   2. **Delete asks**, as closing with changes does: nothing undoes it.
   3. **Names one whatever their case and spacing:** saving, finding one's own (isOwn) and the list compare them so,
      as Duplicate's numbering already does.
-  4. **Keep a genre a link brought:** its button Keep, among one's own under its name, or its name and the first
+- **Keeping and backing up one's own genres** (P1, small):
+  1. **Keep a genre a link brought:** its button Keep, among one's own under its name, or its name and the first
      number free, then Edit; a song's genre played unsaved stays Edit.
-  5. **Every genre of one's own as one file:** Import reads a genre or a list of them, each kept under its name or
+  2. **Every genre of one's own as one file:** Import reads a genre or a list of them, each kept under its name or
      the first number free; Export all beside Export, the list as JSON, so that a browser's genres survive it.
-- **A range's chart as one band** (P2): its ends and its lean on one chart, the band between the from and the to along
-  the songs, a line where its draws centre (the lean's median, (1/2)^(e^-lean) across it) and the band shaded by
-  how likely each height is, a vertical gradient a slice, a few dozen slices; handles on its edges for the ends and on
-  the line for the lean, the lean's own chart gone; the tile drawing the same, its fill a gradient.
-- **A genre's mix** (P2): how far each part sits from the middle, a lean of its role's spread (Panning.GetSpread), and
-  how loud each plays against the others, values a part each, applied where the mix gives none, so that a given pan
-  or volume stays as given; reggae's bass up, a jazz trio's piano and bass apart, ambient's pads wide.
-- **A genre's song forms** (P2): the forms songs are written in (SongForms.Forms), verse-chorus, with a pre-chorus,
-  with a bridge, a pool a genre weighs, and a form of its own as a chance, so that folk keeps verses and choruses and
-  jazz plays AABA once it is among them; AABA and a head with solos, the forms to add.
+- **A genre's effects** (P2, small): the chances of a vibrato, bends, a chorus, a swell, a tremolo, an echo and a sweep
+  (Expression), a song's drawn by its sound facet, a genre's to lean, as the swing's chances are.
+  Its own report of the effects' shares by preset, and the presets' (reggae's echo, the blues' bends, ambient's swell)
+  tuned by it.
 - **Sections of several phrases: the 12-bar blues and its kin** (P2, a plan in steps). A section's pattern is a
   phrase of four bars now (Progressions.BarCount, Meter.PatternBarCount), its harmony a four-bar cycle. The rule: a
   section's progression is P phrases of four bars, P drawn, one as now, two (an 8-bar), three (the 12-bar), four (a
   16-bar); each phrase starts from a degree by its place and ends by its place, the first from home, a middle one
-  leaning to the subdominant, the last to the dominant, every phrase but the last ending home or on a half close and
+  leaning to the subdominant, the last to the dominant, every phrase but the last ending home or on a half close, as the genre leans it, and
   the last on the cadence, so that the blues' I–I–I–I / IV–IV–I–I / V–IV–I–V comes of the place rules and its root
   motions, and a pop 8-bar's half close of the same rules. Phrases stay four bars, so a line's question and answer,
   a fill and a solo's turn keep their place; only the harmony and the section's length grow. Steps:
@@ -331,13 +317,32 @@ a link carries. What is left:
      and of sections' lengths; then whether the songs' own should play two phrases now and then.
   Later: phrases of other than four bars (a 3-bar phrase, a 6-bar section), which the line's question and answer
   and the fills assume, once P phrases sound right.
-- **A genre's effects** (P2): the chances of a vibrato, bends, a chorus, a swell, a tremolo, an echo and a sweep
-  (Expression), a song's drawn by its sound facet, a genre's to lean, as the swing's chances are.
+- **A genre's song forms** (P2, after the phrases): the forms songs are written in (SongForms.Forms), verse-chorus, with a pre-chorus,
+  with a bridge, a pool a genre weighs, and a form of its own as a chance, so that folk keeps verses and choruses and
+  jazz plays AABA once it is among them; AABA and a head with solos, the forms to add.
+  After the phrases: an AABA's or a head's A is eight bars, which a section of one phrase cannot be.
+- **A genre's mix** (P2, the pan first): how far each part sits from the middle, a lean of its role's spread (Panning.GetSpread), and
+  how loud each plays against the others, values a part each, applied where the mix gives none, so that a given pan
+  or volume stays as given; reggae's bass up, a jazz trio's piano and bass apart, ambient's pads wide.
+  The pan first, a lean of the spread there is; the levels, a mechanism of their own that a mix given may fight,
+  only should listening ask.
+- **A range's chart as one band** (P2): its ends and its lean on one chart, the band between the from and the to along
+  the songs, a line where its draws centre (the lean's median, (1/2)^(e^-lean) across it) and the band shaded by
+  how likely each height is, a vertical gradient a slice, a few dozen slices; handles on its edges for the ends and on
+  the line for the lean, the lean's own chart gone; the tile drawing the same, its fill a gradient.
+  Drawn on the amounts' own scale, as a length's and a tempo's are spaced, so that a song's few minutes no longer sit
+  low on a chart to fifteen; a centre line without the shading, should the slices prove fiddly.
 - **A genre's dynamics** (P3): how loud and how busy its songs and the contrast between their sections, values leaning
-  the energies drawn (SectionEnergy), so that ambient stays level and rock's choruses lift.
-- **A genre's sections differing** (P3, after the rest): a value given a section role, such as a solo swung harder
+  the energies drawn (SectionEnergy), so that ambient stays level and rock's choruses lift. Leaning, never set, so that no
+  song comes out flat; its sections' contrast is a chorus louder, which the sections differing need not be for.
+- **A genre's sections differing** (P3, perhaps never): a value given a section role, such as a solo swung harder
   or a chorus louder, the genre's for the song otherwise; the generator asking the genre with the section's role,
   every choice's tile a role's override beside it.
+  The dynamics' contrast and the phrases' AAB give most of it; what is left, a solo swung harder, weighed against a
+  role's override on every tile once 3 to 8 are heard.
+- **Listening to the presets** (after effects, the phrases, the forms and the mix, which change them): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
+  half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
+  alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.
 - **Listening to the genres' wild ends:** the presets' wild ends keep their idioms most and stray by what each names
   experimental (`EveryPreset_ChoicesByEnd`): the wildest Rock 34% in 4/4, its chords 7% quartal or tritone stacks; the
   wildest Jazz 56% swung, 50% sevenths, about a fifth So What, quartal, altered or eleventh; Electronic 11% quartal
@@ -351,9 +356,13 @@ a link carries. What is left:
 - **The rhythm's values against the part's own:** a value moves a setting by steps from where the part rests, so that
   one part's "faster" is another's "as fast as can be"; a value set outright, where it lands, would read the same for
   every part, should listening ask for it.
+- **A link replacing the settings kept** (a decision): opening a shared song makes its settings this browser's own,
+  so that the next song goes on in them; keeping one's own and offering a way back to them is the other way, should
+  listening to shared songs ask for it.
 - **Later:** the playing following the articulation (see *Open work*), and a genre's own after it; instruments outside a
   role's pool, with their leading drawn from their family; ratings by genre on the dashboard, which the events carry (a
-  preset's id or a genre's key, with the version).
+  preset's id or a genre's key, with the version).; phrases of other than four bars, once the phrases
+  sound right.
 
 ## Parked
 
