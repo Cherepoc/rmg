@@ -43,7 +43,11 @@ public sealed record ChordScale(ChordScaleKind Kind, ImmutableArray<int> Raised,
 public static class ChordScales
 {
 
-    /// <summary>The chance a chord before a root a fifth below it is that root's dominant.</summary>
+    /// <summary>
+    ///     The chance a chord before a root a fifth below it is that root's dominant: its shape as drawn, in Mixolydian on
+    ///     its root, so that a triad is major, a seventh a dominant seventh and a suspended one a suspended dominant, and only
+    ///     a wild song's stranger shapes, wild already, lose its pull.
+    /// </summary>
     public static ByConvention Applied { get; } = new(0, 0.35, 0.35);
 
     /// <summary>The chance a chord but the home is in the section's borrowed mode.</summary>

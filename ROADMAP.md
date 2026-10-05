@@ -263,6 +263,8 @@ Each item with its plan, and what it waits for.
   2. Done: a genre's (`GenreChoices.ChordScales`): applied and borrowed chords' chances, and every chord but the home
      its own dominant, which the songs never play; Blues 67% of its chords dominants (the rest its homes), Jazz 17%
      applied and 5% borrowed, Rock 11% borrowed (`EveryPreset_ChordScales`).
+  Decided: an applied dominant keeps the shape drawn for it, which its Mixolydian makes a major triad, a dominant
+  seventh or a suspended dominant; forcing a seventh would override the shape's draw for the stranger shapes alone.
   Musicality to listen for: a melody holding the section's note over a borrowed chord (the step's measure of clashes
   stands for it), and an applied dominant whose resolution the next chord's shape spoils.
 
