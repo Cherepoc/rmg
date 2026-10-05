@@ -91,6 +91,7 @@ public sealed class GenreIdiomsReportTest
             ["riff sections in power chords"] = song.Trace.Where(x => x.Point == TracePoints.RiffPowerChords).Select(x => (bool)x.Value!).DefaultIfEmpty().Average(x => x ? 1.0 : 0),
             ["guitars' notes palm-muted"] = notes.Where(x => x.Key is SongTracks.RiffTrack or SongTracks.RhythmTrack).SelectMany(x => x.Value).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["solo appearances"] = song.Solos.Count / (double)map.Sections.Length,
+            ["sections in stop time"] = song.Trace.Where(x => x.Point == TracePoints.StopTime).Select(x => (bool)x.Value! ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["lifts dropped"] = song.Trace.Count(x => x.Point == TracePoints.LiftCue) is var lifts and > 0 ? song.Trace.Count(x => x.Point == TracePoints.Drop) / (double)lifts : double.NaN,
             ["ending a fade"] = map.Ending.Kind == EndingKind.Fade ? 1 : 0,
             ["ending a button or a stop"] = map.Ending.Kind is EndingKind.Button or EndingKind.Stop ? 1 : 0,

@@ -529,5 +529,6 @@ internal enum SongStream
     SectionPhrases = 68,
     HookIntro = 69,
     Strum = 70,
-    Drops = 71
+    Drops = 71,
+    StopTime = 72
 }

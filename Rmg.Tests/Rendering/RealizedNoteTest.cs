@@ -25,8 +25,8 @@ public sealed class RealizedNoteTest
         for (var seed = 0; seed < 16; seed++)
         {
             // a stopped ending cuts the notes that sound into its stop, which only the song put together knows; and the
-            // notes' articulation and timing are the song's performance of them, made once they are decided
-            var song = SongGenerator.GenerateSong((ulong)seed, ProgressionSettings.Default, SongOverrides.None, ImmutableHashSet.Create("Articulation", "Timing"), (_, _) => { }, CancellationToken.None);
+            // notes' stop time, articulation and timing are edits of them, made once they are decided
+            var song = SongGenerator.GenerateSong((ulong)seed, ProgressionSettings.Default, SongOverrides.None, ImmutableHashSet.Create("Stop time", "Articulation", "Timing"), (_, _) => { }, CancellationToken.None);
             if (song.Map!.Ending.Kind == EndingKind.Stop)
                 continue;
 

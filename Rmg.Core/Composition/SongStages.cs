@@ -102,6 +102,7 @@ internal static class SongStages
         new("Pedal", Pedal, CanSkip: true),
         new("Solo answers", SoloAnswers, CanSkip: true),
         new("Notes", RealizeNotes, CanSkip: false),
+        new("Stop time", StopTime, CanSkip: true),
         new("Instruments", Instruments, CanSkip: true),
         new("Articulation", Articulation, CanSkip: true),
         new("Timing", Timing, CanSkip: true),
@@ -313,6 +314,62 @@ internal static class SongStages
     /// <summary>The notes, decided from the state of the whole song, in its order, none sounding into a stop.</summary>
     internal static SongDraft RealizeNotes(SongDecisions song, SongDraft draft) =>
         draft with { Notes = song.Form.Edits.CutNotes(Realizer.Realize(song.Tracks.Definitions, draft.Timeline, song.Form.Map.MeterAt), song.Roles) };
+
+    /// <summary>
+    ///     The chance a section plays its appearances' first phrase in stop time, by its form facet: never in the plainest
+    ///     songs, now and then past them; a genre's where it names it, the blues' and rock's.
+    /// </summary>
+    public static ByConvention StopTimeChance { get; } = new(0, 0.03, 0.03);
+
+    /// <summary>How a section's energy leans the chance, through its odds: a quiet section the likelier, a verse more than a chorus.</summary>
+    public const double StopTimeEnergyLean = -1;
+
+    /// <summary>How long a stop-time hit is held at most, in beats.</summary>
+    public const double StopTimeHit = 1;
+
+    /// <summary>
+    ///     Stop time: a section's appearances' first phrase, now and then, its band hitting the bar's first beat and resting
+    ///     the rest of the bar, a hit held a beat at most, under the lines, the melody's, the counter-melody's and a solo's,
+    ///     which go on. A section's decision, from a sequence of its own.
+    /// </summary>
+    internal static SongDraft StopTime(SongDecisions song, SongDraft draft)
+    {
+        var stops = song.SectionIds.Distinct().ToDictionary(id => id, id =>
+        {
+            var section = song.SectionOf(id);
+            var chance = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling)
+                .Chance(StopTimeChance.At(section.Facets[Facet.Form], song.Genre.Chance(GenreChoices.StopTime, "sections")), StopTimeEnergyLean);
+            var stops = song.Stream(SongStream.StopTime, id).TestProbability(chance);
+            StateTrace.Record(TracePoints.StopTime, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, $"{stops}", stops);
+            return stops;
+        });
+        var phrases = song.Form.Map.Sections.Where(x => stops[x.SectionId])
+            .Select(x => (x.Start, End: Math.Min(x.End, x.Start + Meter.PhraseBarCount * x.Meter.BarDuration), x.Meter.BarDuration)).ToArray();
+        if (phrases.Length == 0)
+            return draft;
+
+        // where a note falls in stop time: off the bar's first beat, or on it, a hit
+        (bool In, bool OnTheBar) Place(double position)
+        {
+            foreach (var (start, end, bar) in phrases)
+                if (position >= start - 1e-9 && position < end - 1e-9)
+                    return (true, (position - start + 1e-6) % bar < 2e-6);
+            return (false, false);
+        }
+
+        var notes = NotesOf(draft);
+        var result = notes.ToBuilder();
+        foreach (var (track, timeline) in notes)
+        {
+            if (song.Tracks.Definitions[track].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo)
+                continue;
+            result[track] = EventTimeline.Create(timeline.Duration, timeline
+                .Where(note => Place(note.Position) is not (true, false))
+                .Select(note => Place(note.Position).In ? (note.Value with { Duration = Math.Min(note.Value.Duration, StopTimeHit) }).ToTimelineItem(note.Position) : note));
+        }
+
+        return draft with { Notes = result.ToImmutable() };
+    }
 
     /// <summary>The parts' instruments over the song, switched and articulated by every section's sound facet.</summary>
     internal static SongDraft Instruments(SongDecisions song, SongDraft draft) =>

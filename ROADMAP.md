@@ -13,7 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: stop-time breaks; a chord moved by
+**When the need shows** (P3), each by what listening says, in this order: a chord moved by
 semitones, then choosing free chords by their voices (see *Scales and chords*); a chord solo's approaches and a later
 appearance reharmonised; a genre's arrangement; key changes by genre; Electronic split; an octave bass; a push by the
 whole band; legato as an articulation; stretched voicings; the melody's range by genre; the fills' sounds by
@@ -200,9 +200,12 @@ Each item with its plan, and what it waits for.
   (`GenreChoices.Hook`, Hip-hop 80%, Electronic 70%). Of a hooked section's repeated bars' notes at their first bar's
   places, 50% sung as it (13% unhooked); whole bars alike 7% (0), a strong beat's note changing with its chord. Its
   phrase schemes were not the lack: 82 to 100% of the phrases repeat their bars already.
-- **The band's devices** (P3, each an edit after assembly among the stages): stop-time breaks first, the band hitting
-  once a bar under a line that goes on, the blues' and rock's; then a push or anticipation the whole band plays, call and
-  response between parts, a backing figure that recurs through the song.
+- **The band's devices** (P3, each an edit after assembly among the stages): stop-time breaks done (`SongStages.StopTime`,
+  `GenreChoices.StopTime`), a section's appearances' first phrase, the band hitting the bar's first beat under the
+  lines, a quiet section the likelier; sections in it Blues 35%, Funk 22%, Rock 19%, others 5%. Its hits are the
+  band's own downbeats, none added where a part rests on one, and a phrase's last bar keeps no fill; both should
+  listening ask. Then a push or anticipation the whole band plays, call and response between parts, a backing figure
+  that recurs through the song.
 - **Harmony's devices** (P3): a chromatic line inside a held chord, a pedal held under a section, a ii–V into a chord
   but the home, which a chord's own scale makes part of.
 - **The hook at the end** (P4, parked): a song opens on its chorus's first phrase now and then (`IntroKind.Hook`); an outro
