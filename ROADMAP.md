@@ -7,7 +7,8 @@ is removed once it is built.
 ## Priorities
 
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
-ratings by conventionality once enough are in, alongside, continuously and never as a gate.
+ratings by conventionality once enough are in, alongside, continuously and never as a gate; the shared link playing
+another song, the events carrying the genre and the presets by their ids (see *Genres*).
 
 **Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs rated
 enough; listening to the genres' presets (see *Genres*).
@@ -277,8 +278,29 @@ a link carries. What is left:
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
   half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
   alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.
-- **The events carry no genre:** since a link stopped writing one; its key beside them, should the ratings by genre
-  ask for it.
+- **A shared link playing another song** (P1, a bug on the live site): opening a song someone shared with settings of
+  its own plays it with the settings this browser kept. The page as it is, and as deployed (7e5e076), takes a link's
+  settings over the kept ones, which a link opened on this machine confirms; so first reproduce it on the live site
+  and find the path: the seed pasted into Play a seed, which plays with the settings as they are; the soundfont, which
+  no link carries; a version deployed between the sharing and the opening. Then, whatever the cause: a link plays as
+  it was heard, and opening one leaves this browser's kept settings as they were, rather than replacing them as it does
+  now, the song's own settings shown with a way back to one's own.
+- **The events carry the genre** (P1): every event about a song carries its genre, a preset by its id and one's own by
+  its key (`GenreStore`), so that the ratings by genre can be read.
+- **The presets by their ids** (P1): a link names a preset by its id, `?genre=rock`, and one's own by its key; a key
+  that is a preset's id never made. A preset's name is reserved: no genre of one's own saved under it, whatever its
+  case and spacing, the editor saying so as it says a name too long.
+- **The length** (P2): a genre's length as the tempo's, a range in minutes, so that punk runs short and ambient long;
+  a range kind already.
+- **The progressions and the forms** (P2): a genre's root motions (ii–V, ♭VII–IV–I) and forms of its own, such as the
+  12-bar blues, the most a genre is known by that it cannot say yet; the root motions first.
+- **A genre's description** (P2): the editor keeps a preset's sentence and lets one's own have one, exported and
+  imported with it, shown under the genre picked.
+- **The graphs' ends cut before their numbers** (P2): a tile's end cut short in its name, its share always shown, as
+  "Electric Guitar (cl… 30%", rather than in the share.
+- **The options told apart without colour** (P2): the options' shares outlined rather than filled greys, the one
+  chosen in the window outlined in the accent and the one pointed at outlined and named, so that an option is found
+  by its edge and the greys need not be told apart; tried on a mockup before it is built.
 - **Listening to the genres' wild ends:** the presets' wild ends keep their idioms most and stray by what each names
   experimental (`EveryPreset_ChoicesByEnd`): the wildest Rock 34% in 4/4, its chords 7% quartal or tritone stacks; the
   wildest Jazz 56% swung, 50% sevenths, about a fifth So What, quartal, altered or eleventh; Electronic 11% quartal
@@ -292,9 +314,9 @@ a link carries. What is left:
 - **The rhythm's values against the part's own:** a value moves a setting by steps from where the part rests, so that
   one part's "faster" is another's "as fast as can be"; a value set outright, where it lands, would read the same for
   every part, should listening ask for it.
-- **Later:** the progressions' root motions (ii–V, ♭VII); instruments outside a role's pool, with their leading drawn
-  from their family; forms of a genre's own, such as the 12-bar blues; a genre's sections differing, such as a jazz
-  song's solos swung harder; ratings by genre on the dashboard.
+- **Later:** the playing following the articulation (see *Open work*), and a genre's own after it; instruments outside a
+  role's pool, with their leading drawn from their family; a genre's sections differing, such as a jazz song's solos
+  swung harder; ratings by genre on the dashboard, once the events carry it.
 
 ## Parked
 
