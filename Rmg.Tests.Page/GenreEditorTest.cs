@@ -802,6 +802,30 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task ARangeNamedByItsEndsAlone_IsDrawnLeaningToTheMiddle_AndTheGraphsAfterItToo()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        await page.FirstSong();
+        await page.Settled();
+        await page.Page.Locator("#settings-panel summary").ClickAsync();
+        var action = page.Page.Locator("button.genre-edit");
+        await page.Until(() => action.IsEnabledAsync(), "the editor ready");
+        // Rock names its tempo's ends and no lean, the editor's first range
+        await page.Page.Locator("select[aria-label='Genre']").EvaluateAsync("select => { select.value = 'preset:rock'; select.dispatchEvent(new Event('change')); }");
+        await page.Until(async () => await action.TextContentAsync() == "Duplicate", "a preset's button");
+        await action.ClickAsync();
+        var time = await Section(page.Page.Locator("dialog.genre-dialog"), "Time and feel");
+        await page.Until(async () => await Tile(time, "meter").Locator(".genre-graph path").CountAsync() > 0, "the graphs drawn");
+        await Assert.That(await Tile(time, "length").Locator(".genre-band-centre").CountAsync()).IsEqualTo(1);
+        await Assert.That(await Tile(time, "tempo").Locator(".genre-band-centre").CountAsync()).IsEqualTo(1);
+        // its window's lean as the songs have it, its handles on the band all the same
+        var tune = await Change(time, "tempo");
+        await Assert.That(await tune.Locator(".tune-row[data-option='lean'] .tune-values").TextContentAsync()).IsEqualTo("0 · 0 · 0");
+        await Assert.That(await tune.Locator(".tune-handle").CountAsync()).IsEqualTo(9);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task ARange_IsOneBand_ItsEndsAndLeanHandlesOnIt_ALeansHandleMovingWhereItsSongsCentre()
     {
         await using var page = await SongPage.Open(site, "?song=1");
