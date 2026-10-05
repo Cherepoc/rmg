@@ -90,6 +90,7 @@ public sealed record KeyChange(double Position, int Semitones)
     /// <param name="sectionIds">The song's sections in its order, before any it plays again to fade out.</param>
     /// <param name="roles">What each section does in the song's form, by its id.</param>
     /// <param name="liftAt">The appearance, by its place, a last section's lift may come at: the last section, its repeat, or the one before an outro.</param>
+    /// <param name="genre">The genre whose lifts and sections' own keys the song takes, where it names them (<see cref="GenreChoices.KeyChanges" />).</param>
     internal static ImmutableArray<KeyChange> Generate(
         IGenerationContext context,
         Func<int, IGenerationContext> places,
@@ -98,15 +99,18 @@ public sealed record KeyChange(double Position, int Semitones)
         SongMap map,
         IReadOnlyList<int> sectionIds,
         IReadOnlyDictionary<int, SectionRole> roles,
-        int liftAt
+        int liftAt,
+        Genre genre
     )
     {
+        var (lastSection, ownKey, elsewhere) = (genre.Chance(GenreChoices.KeyChanges, "lastSection"), genre.Chance(GenreChoices.KeyChanges, "sections"),
+            genre.Chance(GenreChoices.KeyChanges, "patterns"));
         // the section the lift may come at having played before
         var cameBack = map.Sections.Take(liftAt).Any(x => x.SectionId == map.Sections[liftAt].SectionId);
         var ownKeys = sectionIds.Distinct().ToDictionary(id => id, id =>
         {
             var drawing = sections(id);
-            var hasOwn = drawing.TestProbability(SectionContrast.Of(roles[id]).Chance(SectionChance.At(unconventionality), 1));
+            var hasOwn = drawing.TestProbability(SectionContrast.Of(roles[id]).Chance(SectionChance.At(unconventionality, ownKey), 1));
             var step = drawing.Pick(ByConvention.Weigh(SectionSteps, unconventionality));
             // the first section sets the song's key
             return hasOwn && id != sectionIds[0] ? step : 0;
@@ -124,8 +128,8 @@ public sealed record KeyChange(double Position, int Semitones)
 
             var isLastSection = index == liftAt && start == section.Start;
             var drawing = isLastSection ? context : places(place);
-            var chance = isLastSection && cameBack ? LastSectionChance : ElsewhereChance;
-            var isChanging = drawing.TestProbability(chance.At(unconventionality));
+            var chance = isLastSection && cameBack ? LastSectionChance.At(unconventionality, lastSection) : ElsewhereChance.At(unconventionality, elsewhere);
+            var isChanging = drawing.TestProbability(chance);
             var step = drawing.Pick(ByConvention.Weigh(Steps, unconventionality));
             if (isChanging)
                 lift += step;

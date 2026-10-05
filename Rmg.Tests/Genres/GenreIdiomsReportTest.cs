@@ -99,6 +99,7 @@ public sealed class GenreIdiomsReportTest
             ["sections in stop time"] = song.Trace.Where(x => x.Point == TracePoints.StopTime).Select(x => (bool)x.Value! ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["sections the drums rest"] = Rests(TrackRole.Drum),
             ["sections the pad rests"] = Rests(TrackRole.Pad),
+            ["changing key"] = ((ImmutableArray<KeyChange>)song.Trace.Single(x => x.Point == TracePoints.KeyChange).Value!).IsEmpty ? 0 : 1,
             ["lifts dropped"] = song.Trace.Count(x => x.Point == TracePoints.LiftCue) is var lifts and > 0 ? song.Trace.Count(x => x.Point == TracePoints.Drop) / (double)lifts : double.NaN,
             ["ending a fade"] = map.Ending.Kind == EndingKind.Fade ? 1 : 0,
             ["ending a button or a stop"] = map.Ending.Kind is EndingKind.Button or EndingKind.Stop ? 1 : 0,

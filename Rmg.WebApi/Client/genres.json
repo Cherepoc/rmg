@@ -4,6 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
+      "keyChanges": { "lastSection": [0, 20, 100], "sections": [0, 8, 100], "patterns": [0, 0, 100] },
       "tempo": { "from": [110, 110, 85], "to": [150, 150, 190] },
       "meter": { "4/4": [100, 100, 60], "6/8": [5, 8, 20], "7/8": [0, 0, 25], "5/4": [0, 0, 15], "7/4": [0, 0, 10] },
       "scale": { "naturalMinor": [100, 100, 60], "mixolydian": [50, 65, 60], "major": [45, 45, 30], "dorian": [10, 25, 30], "phrygian": [0, 10, 40] },
@@ -49,6 +50,7 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
+      "keyChanges": { "lastSection": [0, 8, 100], "sections": [0, 25, 100], "patterns": [0, 0, 100] },
       "rests": { "pad": 90 },
       "pocket": { "laidBack": 65 },
       "turnaround": { "sections": [0, 80, 80] },
@@ -98,6 +100,7 @@
     "name": "Electronic",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, bass and pads, a TR-808 or electronic kit, straight and fast, minor, sus and add9 chords.",
     "choices": {
+      "keyChanges": {},
       "rests": { "drum": 70, "melody": 65, "pad": 35 },
       "tempo": { "from": [117, 117, 100], "to": [130, 130, 175] },
       "meter": { "4/4": [100, 100, 85], "7/8": [0, 0, 10], "5/4": [0, 0, 8] },
@@ -147,6 +150,7 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano and pads, minor and Dorian.",
     "choices": {
+      "keyChanges": {},
       "tempo": { "from": [79, 79, 70], "to": [99, 99, 115] },
       "meter": { "4/4": 100 },
       "feelChances": { "swing": [60, 75, 45], "halfTime": 8, "doubleTime": 5 },
@@ -189,6 +193,7 @@
     "name": "Reggae",
     "description": "Slow, the one drop with the kick and snare on beat 3, the chords and a rhythm guitar skanking on the offbeats, a sparse repeating bass, organ, major and minor.",
     "choices": {
+      "keyChanges": {},
       "rests": { "drum": 75, "bass": 70 },
       "tempo": { "from": [68, 68, 62], "to": [91, 91, 105] },
       "meter": { "4/4": 100 },
@@ -328,6 +333,7 @@
     "name": "Blues",
     "description": "A shuffle, sevenths over Mixolydian, a harmonica, an overdriven guitar and an organ, slow to mid.",
     "choices": {
+      "keyChanges": {},
       "tempo": { "from": [65, 65, 60], "to": [115, 115, 140] },
       "meter": { "4/4": [100, 100, 70], "6/8": [25, 25, 30], "5/4": [0, 0, 10] },
       "feelChances": { "swing": [85, 85, 60], "halfTime": 8, "doubleTime": 5 },
@@ -368,6 +374,7 @@
     "name": "Ambient",
     "description": "Slow, pads, strings, a choir, a harp and a celesta, chords held long, sus and add9 chords, Lydian and major, the drums rare and sparse.",
     "choices": {
+      "keyChanges": {},
       "rests": { "drum": 85, "pad": 15 },
       "tempo": { "from": [60, 60, 60], "to": [85, 85, 90] },
       "meter": { "4/4": [100, 100, 60], "3/4": [30, 30, 40], "6/8": [25, 25, 40], "5/4": [0, 0, 20], "7/8": [0, 0, 15] },

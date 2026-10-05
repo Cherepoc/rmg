@@ -141,6 +141,13 @@ public static class GenreChoices
     /// <summary>The chance a section planes, every chord the home's shape moved by semitones, a reharmonisation, which no genre plays at the plain end (<see cref="Composition.Planing" />).</summary>
     public static GenreChoice Planing { get; } = Chances("planing", "Planing", [("sections", "Sections planed", Composition.Planing.Chance)], plainEnd: false);
 
+    /// <summary>The chances a song's last section that came back lifts its key, a section plays in a key of its own, and any pattern's start changes it (<see cref="KeyChange" />): a ballad's last chorus up, a blues in one key.</summary>
+    public static GenreChoice KeyChanges { get; } = Chances("keyChanges", "Key changes",
+        [
+            ("lastSection", "A last section lifted", KeyChange.LastSectionChance), ("sections", "A section in a key of its own", KeyChange.SectionChance),
+            ("patterns", "Any pattern's start", KeyChange.ElsewhereChance)
+        ]);
+
     /// <summary>The chance a lift the drums announce is built to and dropped at, the band out for the bar before it; the songs never (<see cref="FormLayers.Drop" />).</summary>
     public static GenreChoice Drop { get; } = Chances("drop", "Builds and drops", [("lifts", "Lifts built to a drop", FormLayers.Drop)]);
 
@@ -425,7 +432,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, Loop, LineScale, Bass, BassLanding, Effects, Levels, Rests, GrooveHold, Pocket, Fills, Drop, StopTime, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, Loop, LineScale, Bass, BassLanding, Effects, Levels, Rests, GrooveHold, Pocket, Fills, Drop, StopTime, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

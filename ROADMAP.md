@@ -13,7 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: key changes by genre; Electronic split; an octave bass; a push by the
+**When the need shows** (P3), each by what listening says, in this order: Electronic split; an octave bass; a push by the
 whole band; legato as an articulation; stretched voicings; the melody's range by genre; the fills' sounds by
 convention; a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
 and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
@@ -528,7 +528,9 @@ a link carries. What is left:
      `GenreChoices.Soloists`), and pools of the intros and the endings (`GenreChoices.Intro`, `GenreChoices.Ending`), the
      intros given their ends first, alike at every end so that the songs draw as they did. Solo appearances Jazz 64%,
      Blues 30%, Rock 18% (5% others); fades Electronic 72%, Hip-hop 69%, Ambient 59%; a button or a stop Funk 78%, Rock
-     and Jazz 59%. Key changes by genre left for P3.
+     and Jazz 59%. Key changes by genre done since (`GenreChoices.KeyChanges`): a last section lifted, a section in a
+     key of its own and any pattern's start, a genre's chances; songs changing key Jazz 44%, Rock 34% (28% unnamed), the
+     blues, hip-hop, electronic, reggae and ambient none, however wild.
   5. Done as step 4 of genres that sound like themselves: the fills' amount.
   Done (P3): a genre's arrangement (`GenreChoices.Rests`), how often each part rests, leaning its chance by up to six
   times the odds (`Arrangement.GenreRestOdds`): the pad resting in Jazz's sections 94% (69% in Rock's), Ambient's 26%;
