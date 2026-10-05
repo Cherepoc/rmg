@@ -8,7 +8,7 @@ is removed once it is built.
 
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
 ratings by conventionality once enough are in, alongside, continuously and never as a gate; the events carrying the
-genre and the presets by their ids (see *Genres*).
+genre (see *Genres*).
 
 **Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs rated
 enough; listening to the genres' presets (see *Genres*).
@@ -283,9 +283,6 @@ a link carries. What is left:
   listening to shared songs ask for it.
 - **The events carry the genre** (P1): every event about a song carries its genre, a preset by its id and one's own by
   its key (`GenreStore`), so that the ratings by genre can be read.
-- **The presets by their ids** (P1): a link names a preset by its id, `?genre=rock`, and one's own by its key; a key
-  that is a preset's id never made. A preset's name is reserved: no genre of one's own saved under it, whatever its
-  case and spacing, the editor saying so as it says a name too long.
 - **The length** (P2): a genre's length as the tempo's, a range in minutes, so that punk runs short and ambient long;
   a range kind already.
 - **The progressions and the forms** (P2): a genre's root motions (ii–V, ♭VII–IV–I) and forms of its own, such as the
