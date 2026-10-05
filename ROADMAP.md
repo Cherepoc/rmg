@@ -299,9 +299,11 @@ a link carries. What is left:
      of the first's rhythm, the third 86%; but the second keeps 36% of its contour (the step to the next note), the
      notes drawn afresh over each phrase's chords, so the blues' restatement is the rhythm alone. Next, should
      listening ask: a restating phrase's notes as the first phrase's steps moved to its chords, its line again.
-  6. **Presets and listening:** Blues three phrases most, Jazz two (an 8-bar A), Folk two, Rock one or two; a report
-     of the roots at each phrase's start and end by preset (the blues' IV at bar 5 and V at bar 9 most of the time)
-     and of sections' lengths; then whether the songs' own should play two phrases now and then.
+  6. Done: the presets' patterns (Blues twelve bars 81% of its sections, Jazz and Folk eight, Rock four and eight),
+     reported by EveryPreset_Phrases. Left to listening: Blues' V at bar 9 43% of its twelve-bar sections and home at
+     bar 4 48% (IV at 5 63%, home at 8 61%), the middling and wild songs keeping the place rules less, by the
+     progression's strictness; a genre's lean of the place rules, should it press them, and whether the songs' own
+     should play eight bars now and then.
   Later: phrases of other than four bars (a 3-bar phrase, a 6-bar section), which the line's question and answer
   and the fills assume, once P phrases sound right.
 - **AABA and a head with solos** (P2, after the phrases): the forms to add, at no weight but a genre's, once a
