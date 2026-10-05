@@ -175,6 +175,25 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task TheEditor_AndTheWindowOverIt_NeverScrollSideways()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var time = await Section(dialog, "Time and feel");
+        await Section(dialog, "Parts");
+        var instruments = Tile(dialog, "instrument.melody");
+        await page.Until(async () => await instruments.Locator(".genre-ends span").CountAsync() == 3, "the instruments' ends said");
+
+        const string sideways = "x => [...x.querySelectorAll('*')].filter(e => e.scrollWidth > e.clientWidth + 1"
+            + " && ['auto', 'scroll'].includes(getComputedStyle(e).overflowX)).map(e => e.className)";
+        await Assert.That(await dialog.EvaluateAsync<string[]>(sideways)).IsEmpty();
+        // the tempo's, whose chart has no legend beside it, its handles at its edge
+        var tune = await Change(time, "tempo");
+        await Assert.That(await tune.EvaluateAsync<string[]>(sideways)).IsEmpty();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task AChoicesGraph_DrawsWhatTheSongsDraw_AndSaysWhatEachEndDraws()
     {
         await using var page = await SongPage.Open(site, "?song=1");

@@ -752,8 +752,10 @@ html:has(dialog:modal) {
     font: inherit;
 }
 
+/* its column, and a tile's, no wider than the editor, whatever a graph's ends say on their one line */
 .genre-body {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 14px;
     padding: 12px 16px;
     overflow-y: auto;
@@ -820,6 +822,7 @@ html:has(dialog:modal) {
 
 .genre-tile {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 6px;
     padding: 10px 12px;
     border: 1px solid var(--border);
@@ -1860,12 +1863,15 @@ footer a:hover {
     font-variant-numeric: tabular-nums;
 }
 
+/* room on either side for the chart's handles, which stand out of it, so that it never scrolls sideways */
 .tune-main {
     display: flex;
     flex: 1;
     flex-direction: column;
     gap: 10px;
     min-width: 0;
+    margin-inline: -12px;
+    padding-inline: 12px;
     overflow-y: auto;
 }
 
