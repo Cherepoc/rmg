@@ -147,6 +147,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         element.append(head, graph, ends);
         let choice = null;
         const start = startOf(allowed);
+        // a part's choice titled by the part and what of it it sets, as its window is
+        const titleOf = (x) => (what ? `${x.label} – ${what}` : x.label);
 
         input.addEventListener("change", () => {
             if (input.checked) draft.choices[choice.name] = unchecked.get(choice.name) ?? start(choice);
@@ -156,7 +158,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
             }
             changed();
         });
-        graph.addEventListener("click", () => tune.open(choice, draft.choices[choice.name] ?? null, { allowed, start, title: what ? `${choice.label} – ${what}` : choice.label }, (amounts) => {
+        graph.addEventListener("click", () => tune.open(choice, draft.choices[choice.name] ?? null, { allowed, start, title: titleOf(choice) }, (amounts) => {
             // values leaning none are as the songs have them
             if (amounts === null || (choice.kind === "values" && Object.keys(amounts).length === 0)) {
                 if (choice.name in draft.choices) unchecked.set(choice.name, draft.choices[choice.name]);
@@ -197,7 +199,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
             bind(bound) {
                 choice = bound;
                 element.dataset.choice = choice.name;
-                title.textContent = what ?? choice.label;
+                title.textContent = titleOf(choice);
                 input.checked = choice.name in draft.choices;
                 input.setAttribute("aria-label", `Override ${choice.label}`);
                 element.classList.toggle("own", !input.checked);

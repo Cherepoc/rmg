@@ -302,8 +302,8 @@ public sealed class GenreEditorTest(Site site)
         var parts = await Section(dialog, "Parts");
         await parts.GetByRole(AriaRole.Tab, new() { Name = "Bass", Exact = true }).ClickAsync();
 
-        // a part's tile titled by what of it it sets, its window by the part and that
-        await Assert.That(await Tile(parts, "instrument.bass").Locator("h4").TextContentAsync()).IsEqualTo("Instruments");
+        // a part's tile and its window titled by the part and what of it it sets
+        await Assert.That(await Tile(parts, "instrument.bass").Locator("h4").TextContentAsync()).IsEqualTo("Bass – Instruments");
         var tune = await Change(parts, "instrument.bass");
         await Assert.That(await tune.Locator("h2").TextContentAsync()).IsEqualTo("Bass – Instruments");
         await tune.Locator(".tune-pick-open").ClickAsync();
