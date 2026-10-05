@@ -48,6 +48,8 @@ public static class StateKinds
     public static readonly StateKind<double> HeldDuration = CreateAdditive<double>("HeldDuration", StateScope.Render);
     // the chord's root, in scale steps above the key's tonic: the section's home and the progression's step from it
     public static readonly StateKind<int> ChordRoot = CreateAdditive<int>("ChordRoot", StateScope.Render);
+    // the chord moved by semitones, its shape and its scale with it, free of the section's scale: a chromatic approach's
+    public static readonly StateKind<int> ChordShift = CreateAdditive<int>("ChordShift", StateScope.Render);
     // the scale, as its notes' semitones above its root: one value, set by one layer, a section's, whose kind would join
     // two layers' scales into one of fourteen notes (SingleValuedListsTest)
     public static readonly StateKind<ImmutableArray<int>> ScaleOffsets = CreateCollection<int>("ScaleOffsets", StateScope.Render, isShared: true);

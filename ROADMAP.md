@@ -13,8 +13,8 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: a chord moved by
-semitones, then choosing free chords by their voices (see *Scales and chords*); a chord solo's approaches and a later
+**When the need shows** (P3), each by what listening says, in this order: choosing free chords by their voices
+(see *Scales and chords*); a chord solo's approaches and a later
 appearance reharmonised; a genre's arrangement; key changes by genre; Electronic split; an octave bass; a push by the
 whole band; legato as an articulation; stretched voicings; the melody's range by genre; the fills' sounds by
 convention; a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
@@ -265,8 +265,11 @@ Each item with its plan, and what it waits for.
   its own kind, answering `Realizer.GetChord` as the others do, so that the lines and the chords read it unchanged;
   never a replacement for the scale-step chords, whose progressions, cadences, key changes and bass landings count
   roots in steps; the scale's test excepting it as it does a bass's approach. Steps:
-  1. A chord moved by semitones, its shape and its own scale with it: a chromatic approach chord (approach chords,
-     step 4) and a constant structure planed through keys, most of the use.
+  1. Done: a chord moved by semitones (`StateKinds.ChordShift`, applied where `Realizer.GetChord` builds it), its shape,
+     its scale and every note over it moved with it; a key change's chain playing its chords unmoved. Its first use a
+     chromatic passing chord, the next chord a semitone above (`PassingKind.Chromatic`), by the progression facet, a
+     fifth of the passing chords in the middle, every one at the wild end but a third. Not done: a constant structure
+     planed through keys.
   2. Choosing them: by a constant structure, one voicing moved by an interval drawn, or by voice leading, the next
      chord the one its voicing moves least to (`VoiceLeader` the measure). The hard part: free chords drawn freely
      sound random, where in the style they drift by their voices.
@@ -302,8 +305,8 @@ Each item with its plan, and what it waits for.
      bar), Blues 24%, Folk 20%, Rock 13%. Not done: the passing diminished, a chromatic root, with step 4.
   3. A chord solo's: a chord soloist's stacked note leading into the next chord playing an approach, step 2's chord,
      on a weak beat, and on the strong ones too at the wild end, against the comping under it. A stage after the lines.
-  4. Chromatic approaches: a chord moved by semitones (a chord free of the section's scale, its step 1), a semitone
-     from its target, then its kind among steps 2 and 3.
+  4. Chromatic approaches: done from above as a passing chord (see *A chord free of the section's scale*); from below,
+     and a chord solo's (step 3), should listening ask.
   5. A later appearance reharmonised, a last chorus over substitutes (vi or iii for I, ii for IV, the tritone
      substitute for V7) chosen by the notes they share with the chord they replace, decided before the lines are
      placed, so that the melody placed over them fits as it does.

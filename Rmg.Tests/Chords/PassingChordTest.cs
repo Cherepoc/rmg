@@ -5,7 +5,7 @@ using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Chords;
 
-/// <summary>A passing chord: the next chord's dominant over the second half of a chord a bar long, never in a plain song.</summary>
+/// <summary>A passing chord: the next chord's dominant, or the next a semitone above, over the second half of a chord a bar long, never in a plain song.</summary>
 public sealed class PassingChordTest
 {
     /// <summary>Every section's chords as it records them: where they start, their roots, and which of them pass.</summary>
@@ -14,7 +14,7 @@ public sealed class PassingChordTest
             .Zip(song.Trace.Where(x => x.Point == TracePoints.Progression).Select(x => (ImmutableArray<int>)x.Value!));
 
     [Test]
-    public async Task APassingChord_IsTheNextsDominant_HalfwayThroughAChordABarLong()
+    public async Task APassingChord_IsTheNextsDominant_OrTheNextASemitoneAbove_HalfwayThroughAChordABarLong()
     {
         var passing = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("jazz")))))
@@ -25,12 +25,34 @@ public sealed class PassingChordTest
             {
                 passing++;
                 var chord = rhythm.Changes.IndexOf(at);
-                await Assert.That(((progression[chord] - progression[chord + 1] - 4) % 7 + 7) % 7).IsEqualTo(0);
+                await Assert.That(((progression[chord] - progression[chord + 1] - 4) % 7 + 7) % 7 == 0 || progression[chord] == progression[chord + 1]).IsTrue();
                 await Assert.That(rhythm.LengthOf(chord - 1) + rhythm.LengthOf(chord)).IsGreaterThanOrEqualTo(rhythm.Meter.BarDuration - 1e-9);
             }
         }
 
         await Assert.That(passing).IsGreaterThan(10);
+    }
+
+    [Test]
+    public async Task AChromaticPassingChord_SoundsTheNextASemitoneAbove()
+    {
+        var wild = new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Progression, 0.9), Genre: GenrePresets.Genre("jazz"));
+        var chromatic = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, wild)))
+        {
+            var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
+            int Root(double position) => Rmg.Core.Composition.Realizer.GetChord(common.GetEffectiveStateMapAt(position)).Chord.GetPitch(0);
+            var changes = song.ChordChanges;
+            for (var i = 0; i + 1 < changes.Length; i++)
+            {
+                if (common.GetEffectiveStateMapAt(changes[i]).GetStateValue(Rmg.Core.Events.StateKinds.ChordShift) != 1)
+                    continue;
+                chromatic++;
+                await Assert.That(((Root(changes[i]) - Root(changes[i + 1])) % 12 + 12) % 12).IsEqualTo(1);
+            }
+        }
+
+        await Assert.That(chromatic).IsGreaterThan(5);
     }
 
     [Test]

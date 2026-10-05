@@ -84,7 +84,7 @@ internal sealed class SectionGenerator
     public static Probabilities.ByConvention Loop { get; } = new(0, 0, 0);
 
     // the song's first section's harmony, which a section of a loop plays
-    private (Scale Scale, int Home, HarmonicRhythm Rhythm, ImmutableArray<int> Progression, int? Raisable, int? Raised, ImmutableArray<ChordScale> ChordScales, Meter Meter)? _firstHarmony;
+    private (Scale Scale, int Home, HarmonicRhythm Rhythm, ImmutableArray<int> Progression, int? Raisable, int? Raised, ImmutableArray<ChordScale> ChordScales, ImmutableArray<int> Shifts, Meter Meter)? _firstHarmony;
 
     /// <summary>The random sequence a decision of a section draws from, apart from its own and every other decision's.</summary>
     private IGenerationContext Stream(int sectionId, SectionStream stream)
@@ -149,14 +149,16 @@ internal sealed class SectionGenerator
         // passing chords now and then, the next chord's dominant, by the progression facet, the energy and a genre's, from a
         // sequence of their own
         var passingChance = tilt.Chance(PassingChords.Chance.At(facets[Facet.Progression], _genre.Chance(GenreChoices.PassingChords, "chords")), PassingChords.EnergyLean);
-        (harmonicRhythm, progression, chordScales) = PassingChords.Draw(Stream(sectionId, SectionStream.PassingChords), passingChance, harmonicRhythm, progression, chordScales, scale, home);
+        var (passingRhythm, passingProgression, passingScales, shifts) = PassingChords.Draw(Stream(sectionId, SectionStream.PassingChords), passingChance, facets[Facet.Progression],
+            harmonicRhythm, progression, chordScales, scale, home);
+        (harmonicRhythm, progression, chordScales) = (passingRhythm, passingProgression, passingScales);
         // a section of a loop plays the first section's harmony where its meter is the first's, its own drawn all the same
         // so that its other draws stay, a genre's, from a sequence of its own (GenreChoices.Loop)
         var loops = Stream(sectionId, SectionStream.Loop).TestProbability(Loop.At(facets[Facet.Form], _genre.Chance(GenreChoices.Loop, "sections")));
         if (plan.KeepsSongScale)
-            _firstHarmony = (scale, home, harmonicRhythm, progression, raisable, raisedStep, chordScales, meter);
+            _firstHarmony = (scale, home, harmonicRhythm, progression, raisable, raisedStep, chordScales, shifts, meter);
         else if (loops && (_firstHarmony ?? throw new InvalidOperationException("A section loops before the song's first is made.")).Meter.Equals(meter))
-            (scale, home, harmonicRhythm, progression, raisable, raisedStep, chordScales, _) = _firstHarmony.Value;
+            (scale, home, harmonicRhythm, progression, raisable, raisedStep, chordScales, shifts, _) = _firstHarmony.Value;
         StateTrace.Record(TracePoints.SectionScale, SectionTrace, sectionId, 0, StateMap.Default, 0, scale.Name, scale);
         StateTrace.Record(TracePoints.HarmonicRhythm, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{harmonicRhythm.Span}", harmonicRhythm);
         StateTrace.Record(TracePoints.Progression, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", progression), progression);
@@ -243,7 +245,7 @@ internal sealed class SectionGenerator
             0,
             1
         );
-        var barStateTimelineMap = _generators(meter).Bars.Generate(context, scale, progression, harmonicRhythm, home, chordScales, unconventionality, bassLeading, facets);
+        var barStateTimelineMap = _generators(meter).Bars.Generate(context, scale, progression, harmonicRhythm, home, chordScales, shifts, unconventionality, bassLeading, facets);
         var contour = barStateTimelineMap.GetStateTimeline(CompositionStateKinds.LineRegister).Select(x => x.Value).ToImmutableArray();
         StateTrace.Record(TracePoints.MelodyContour, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", contour), contour);
 

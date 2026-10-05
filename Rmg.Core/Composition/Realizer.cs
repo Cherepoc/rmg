@@ -369,7 +369,9 @@ internal static class Realizer
 
         // the chord root, in scale steps
         var rootIndex = stateMap.GetStateValue(StateKinds.ChordRoot);
-        var basePitch = stateMap.GetStateValue(StateKinds.KeyOffset) + stateMap.GetStateValue(StateKinds.OctaveOffset) * OctaveNoteCount;
+        // a chord moved by semitones, every note over it with it
+        var basePitch = stateMap.GetStateValue(StateKinds.KeyOffset) + stateMap.GetStateValue(StateKinds.ChordShift)
+                        + stateMap.GetStateValue(StateKinds.OctaveOffset) * OctaveNoteCount;
         return (scaleOffsets, rootIndex, new ChordContext(step => basePitch + GetScalePitch(scaleOffsets, rootIndex + step)));
     }
 

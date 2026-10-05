@@ -75,6 +75,7 @@ internal sealed class BarStateGenerator
     /// <param name="harmonicRhythm">Where the chords change.</param>
     /// <param name="home">The step of the section's home above the song's tonic.</param>
     /// <param name="chordScales">Every chord's own scale, the section's with steps raised or lowered (<see cref="ChordScales" />).</param>
+    /// <param name="shifts">Every chord moved by semitones, a chromatic passing chord's (<see cref="PassingChords" />), most none.</param>
     /// <param name="bassLeading">How much the section's bass leads into the chords, from 0 to 1.</param>
     /// <param name="context">The section's random sequence.</param>
     /// <param name="facets">How far the section strays from convention: its melody facet leans the melody's contour, its chords facet the bass's arrivals.</param>
@@ -85,6 +86,7 @@ internal sealed class BarStateGenerator
         HarmonicRhythm harmonicRhythm,
         int home,
         ImmutableArray<ChordScale> chordScales,
+        ImmutableArray<int> shifts,
         HarmonicUnconventionality unconventionality,
         double bassLeading,
         Unconventionality facets
@@ -106,6 +108,11 @@ internal sealed class BarStateGenerator
                 changes.Select((position, chord) => (chord + 1).ToTimelineItem(position))
             )
             .WithLayer("Progression");
+
+        // a chord moved by semitones, set where any is, so that a section with none has no such state
+        IStateTimeline[] shiftTimeline = shifts.Any(x => x != 0)
+            ? [StateTimeline.Create(_meter.PatternDuration, StateKinds.ChordShift, shifts.Select((x, chord) => x.ToTimelineItem(changes[chord]))).WithLayer("Progression")]
+            : [];
 
         // every chord in its own scale, set by the section where it differs from the chord's before, the first's from the
         // section's, none
@@ -138,6 +145,7 @@ internal sealed class BarStateGenerator
                 progressionTimeline,
                 changeTimeline,
                 scaleTimeline,
+                ..shiftTimeline,
                 roleChordTimeline,
                 GenerateResets(context, facets[Facet.Chords]),
                 ..GenerateBassLeading(context.CreateContext((uint)Seeds.Derive(seed, BassLeadingStream)), changes, bassLeading, facets[Facet.Chords]),

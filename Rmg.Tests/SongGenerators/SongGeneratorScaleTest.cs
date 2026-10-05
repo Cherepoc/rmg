@@ -35,7 +35,7 @@ public sealed class SongGeneratorScaleTest
                 var state = note.Value.State;
                 var scale = Realizer.AlterScaleSteps(scales[span.SectionId].Offsets, state.GetStateValue(StateKinds.ScaleAlterations) is { IsSet: true } altered ? altered.Value : StepAlterations.None);
                 foreach (var pitch in note.Value.Pitches)
-                    await Assert.That(scale.Contains((pitch - state.GetStateValue(StateKinds.KeyOffset)).Mod(12))).IsTrue();
+                    await Assert.That(scale.Contains((pitch - state.GetStateValue(StateKinds.KeyOffset) - state.GetStateValue(StateKinds.ChordShift)).Mod(12))).IsTrue();
             }
         }
     }

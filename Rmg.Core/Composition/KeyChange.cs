@@ -190,15 +190,19 @@ public sealed record KeyChange(double Position, int Semitones)
         // a chord the change puts in a key of its own plays the section's scale there, set deeper than its chord's own
         // scale (ChordScales), which it wins over, as far as the next chord, where the section's shows again
         var scales = new List<TimelineItem<LayerValue<StepAlterations>>>();
+        // and unmoved by semitones, as a chromatic passing chord was
+        var shifts = new List<TimelineItem<int>>();
         void Plain(double from, double to)
         {
             scales.Add(KeysOwnScale.ToTimelineItem(from));
             scales.Add(LayerValue<StepAlterations>.Unset.ToTimelineItem(to));
+            shifts.Add((-common.GetEffectiveStateMapAt(from).GetStateValue(StateKinds.ChordShift)).ToTimelineItem(from));
+            shifts.Add(0.ToTimelineItem(to));
         }
         var chains = ImmutableArray.CreateBuilder<(double, ImmutableArray<double>, Device)>();
         int Root(double position) => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordRoot);
         // the state where a chord the change moves plays, in the section's scale, as it will (Plain)
-        StateMap Moved(double position) => common.GetEffectiveStateMapAt(position).With(StateKinds.ScaleAlterations, KeysOwnScale);
+        StateMap Moved(double position) => common.GetEffectiveStateMapAt(position).With(StateKinds.ScaleAlterations, KeysOwnScale).With(StateKinds.ChordShift, 0);
         int RootPitch(StateMap state, int key, int step) => (key + Realizer.GetChord(state.With(StateKinds.ChordRoot, step)).Chord.GetPitch(0)).Mod(12);
         // a triad's pitch classes on a step of the scale there, in a key, and the scale's
         int[] Triad(double position, int key, int step) => [..new[] { 0, 2, 4 }.Select(x => (key + Realizer.GetChord(Moved(position).With(StateKinds.ChordRoot, step)).Chord.GetPitch(x)).Mod(12))];
@@ -287,7 +291,11 @@ public sealed record KeyChange(double Position, int Semitones)
             [
                 StateTimeline.Create(duration, StateKinds.ChordRoot, [..roots.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change"),
                 ..scales.Count > 0
-                    ? new[] { StateTimeline.Create(duration, StateKinds.ScaleAlterations, [..scales.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change") }
+                    ? new IStateTimeline[]
+                    {
+                        StateTimeline.Create(duration, StateKinds.ScaleAlterations, [..scales.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change"),
+                        StateTimeline.Create(duration, StateKinds.ChordShift, [..shifts.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position)]).WithLayer("Key change")
+                    }
                     : []
             ]);
         return ([..keys.OrderBy(x => x.Position)], moved, chains.ToImmutable());
