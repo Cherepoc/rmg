@@ -106,7 +106,7 @@ internal sealed class SectionGenerator
         var unconventionality = new HarmonicUnconventionality(facets[Facet.Chords], _genre);
         StateTrace.Record(TracePoints.SectionHarmony, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{unconventionality.Chords:F2}", unconventionality);
         // the section's rhythm strays as its groove does
-        var rhythm = new RhythmicUnconventionality(facets[Facet.Groove]);
+        var rhythm = new RhythmicUnconventionality(facets[Facet.Groove]) { GrooveHold = RhythmicUnconventionality.HoldOf(_genre) };
         var chords = LayerStates.CreateChordPool(unconventionality)(context);
 
         var (songStateMap, energy) = GetEnergy(sectionId, rhythm);

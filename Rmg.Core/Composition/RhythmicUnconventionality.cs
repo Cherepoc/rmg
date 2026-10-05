@@ -56,6 +56,18 @@ public sealed record RhythmicUnconventionality(double Value)
     /// <summary>The layer by the unconventionality's ends (<see cref="RhythmLayer.Lean" />).</summary>
     public RhythmLayer Lean(RhythmLayer layer)
     {
-        return layer.Lean(Value, Tilt);
+        return layer.Lean(Value, Tilt).LeanGroove(GrooveHold, -1);
     }
+
+    /// <summary>
+    ///     How a genre holds the groove, every layer's chance of moving its speed and its phase leaned the less by it, a
+    ///     steady beat's (<see cref="GenreChoices.GrooveHold" />); none for a groove as the songs move it.
+    /// </summary>
+    public Tilt GrooveHold { get; init; } = Tilt.None;
+
+    /// <summary>How far a genre's held groove leans its moves at its most, as odds: a sixteenth as likely.</summary>
+    public const double GenreHoldOdds = 16;
+
+    /// <summary>The hold a genre gives its groove.</summary>
+    public static Tilt HoldOf(Genre genre) => Tilt.Of(GenreHoldOdds, genre.Shift(GenreChoices.GrooveHold, "held"));
 }

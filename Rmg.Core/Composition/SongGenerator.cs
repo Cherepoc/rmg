@@ -98,7 +98,7 @@ public static class SongGenerator
         if (overrides.Facets is { } facets)
             songUnconventionality = songUnconventionality with { Facets = songUnconventionality.Facets.SetItems(facets) };
         StateTrace.Record(TracePoints.SongUnconventionality, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{songUnconventionality.Base:F2}", songUnconventionality);
-        var rhythmicUnconventionality = new RhythmicUnconventionality(songUnconventionality[Facet.Groove]);
+        var rhythmicUnconventionality = new RhythmicUnconventionality(songUnconventionality[Facet.Groove]) { GrooveHold = RhythmicUnconventionality.HoldOf(genre) };
         // a facet's value as the rhythm's unconventionality, for a choice that leans by it
         RhythmicUnconventionality Of(Facet facet) => new(songUnconventionality[facet]);
         StateTrace.Record(TracePoints.SongRhythm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{rhythmicUnconventionality.Value:F2}", rhythmicUnconventionality);

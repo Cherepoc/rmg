@@ -461,9 +461,13 @@ a link carries. What is left:
      2 to 3.6 fills a minute; the snare on 2 and 4 in 37% of Rock's groove bars (but a phrase's last and where the drums
      rest), 62% in its plainest songs, the drums' own layers moving it in a middling one, and Electronic's kick on
      every beat in 52%.
-  1b. A genre's backbeat held: the layers that move the backbeat in a middling song found (its role drawn again a
-     section, its phase and fullness drawn), and a genre's lever on them, Rock's, Blues', Funk's and Hip-hop's held to 2
-     and 4, Reggae's on 3; measured by the report's snare on 2 and 4.
+  1b. Done: a genre's groove held (`GenreChoices.GrooveHold`, `RhythmicUnconventionality.GrooveHold`): every rhythm
+     layer's chance of moving its speed and phase leaned the less, up to a sixteenth, a steady beat's. The layers that
+     moved the backbeat in a middling song were the groove's moves, of every layer together (all of them off, 58% on 2
+     and 4 against 35%; the drum group's alone 36%, the song's and the section's alone 47%), not a section's role drawn
+     again nor the density. The snare on 2 and 4: Rock 66% (42 unheld), Hip-hop 66% (46), Funk 64% (47), Blues 58% (46),
+     Electronic 62% (49), its kick on every beat 78% (65). Left: Hip-hop's kick on 1 42%, its preset weighting it to
+     weaker beats; Reggae's one drop, the snare on 3, which its preset does not ask for.
   2. Done: a loop (`GenreChoices.Loop`, `SectionGenerator.Loop`): a section plays the first section's harmony (its
      scale, home, chords' pace, progression and chords' own scales) where its meter is the first's, its own drawn all
      the same so that its other draws stay; a genre's, the songs never. Hip-hop's sections sharing a progression 96%

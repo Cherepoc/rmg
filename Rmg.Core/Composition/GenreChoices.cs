@@ -96,6 +96,9 @@ public static class GenreChoices
             _ => "One every two bars"
         }, new ByConvention(x.Span.Weight, x.Span.Weight, x.Span.Weight))));
 
+    /// <summary>How steady the groove is, from 0, moving more, through 50, as the songs move it, to 100, held, its backbeat on 2 and 4 (<see cref="RhythmicUnconventionality.GrooveHold" />).</summary>
+    public static GenreChoice GrooveHold { get; } = Values("grooveHold", "Groove held", [("held", "Held")]);
+
     /// <summary>
     ///     How loud each part plays against the others, from 0, quietest, through 50, as the songs have it, to 100, loudest
     ///     (<see cref="VelocityLayers.GenreLevel" />): a beat's drums leading it, a dub's bass; the mix's volumes over them.
@@ -342,7 +345,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Loop, LineScale, Bass, BassLanding, Effects, Levels, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Loop, LineScale, Bass, BassLanding, Effects, Levels, GrooveHold, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

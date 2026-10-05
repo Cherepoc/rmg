@@ -29,6 +29,7 @@
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [65, 65, 70], "counterMelody": 60, "drum": 95, "riff": [80, 80, 56], "riffTwin": [0, 15, 15], "rhythm": [60, 60, 48], "solo": [0, 30, 79] },
       "drumSetup": { "kit": 100, "kitAndPercussion": [0, 12, 62] },
       "levels": { "riff": 65, "drum": 60 },
+      "grooveHold": { "held": 80 },
       "rhythm": {
         "riff": { "repetition": 82 },
         "ground": { "repetition": 69 },
@@ -111,6 +112,7 @@
       "drumSetup": { "kit": 100 },
       "drumPieces": { "kick": [100, 100, 83], "electricSnare": [100, 100, 77], "clap": [100, 100, 77], "hiHat": [100, 100, 83], "tambourine": [25, 25, 19], "maracas": [25, 25, 19], "tom": [30, 30, 100], "cymbal": [65, 65, 92] },
       "levels": { "melody": 30, "bass": 70, "pad": 35, "drum": 90 },
+      "grooveHold": { "held": 90 },
       "rhythm": {
         "chords": { "repetition": 82 },
         "bass": { "repetition": 92, "fullness": 69 },
@@ -147,6 +149,7 @@
       "drumSetup": { "kit": 100 },
       "drumPieces": { "kick": [100, 100, 89], "acousticSnare": [45, 45, 96], "electricSnare": [65, 65, 58], "clap": [100, 100, 89], "hiHat": [100, 100, 89], "cymbal": [30, 30, 100] },
       "levels": { "melody": 25, "chords": 35, "bass": 70, "drum": 95 },
+      "grooveHold": { "held": 85 },
       "rhythm": {
         "melody": { "busyness": 38 },
         "bass": { "repetition": 100, "fullness": 38 },
@@ -179,6 +182,7 @@
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [95, 95, 81], "counterMelody": 60, "drum": 95, "riff": [15, 15, 45], "riffTwin": [0, 15, 15], "rhythm": [90, 90, 45], "solo": [0, 20, 80] },
       "drumSetup": { "kit": [100, 100, 99], "kitAndPercussion": [0, 56, 100] },
       "levels": { "bass": 75, "drum": 60 },
+      "grooveHold": { "held": 75 },
       "rhythm": {
         "chords": { "speed": 100, "offbeat": 76, "fineness": 0 },
         "bass": { "repetition": 100, "fullness": 31 },
@@ -212,6 +216,7 @@
         "bass": { "syncopation": 100, "repetition": 82 },
         "colour": { "fullness": 69 }
       },
+      "grooveHold": { "held": 65 },
       "feel": {
         "time": { "straight": [100, 45, 100], "grouped3": [0, 100, 49] }
       }
@@ -239,6 +244,7 @@
       "kit": { "standard": 100, "room": [65, 65, 31] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 80, "counterMelody": 60, "drum": 95, "riff": [80, 80, 56], "riffTwin": [0, 15, 15], "rhythm": 100, "solo": [0, 20, 80] },
       "levels": { "bass": 65, "drum": 65 },
+      "grooveHold": { "held": 75 },
       "rhythm": {
         "chords": { "syncopation": 69, "repetition": 82 },
         "bass": { "speed": 100, "syncopation": 100, "fullness": 76, "repetition": 82 },
@@ -274,6 +280,7 @@
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [55, 55, 66], "counterMelody": 60, "drum": 95, "riff": [10, 10, 46], "riffTwin": [0, 15, 15], "rhythm": [70, 70, 49], "solo": [0, 20, 80] },
       "drumSetup": { "kit": [100, 65, 81], "kitAndPercussion": [0, 100, 100] },
       "drumPieces": { "kick": [100, 100, 77], "acousticSnare": [100, 100, 77], "hiHat": [65, 65, 88], "ride": [30, 30, 45], "tambourine": [100, 100, 72], "cabasa": [45, 45, 32], "maracas": [80, 80, 57], "tom": [30, 30, 100], "cymbal": [45, 45, 95], "woodBlock": [25, 25, 18], "triangle": [30, 30, 21] },
+      "grooveHold": { "held": 60 },
       "rhythm": {
         "rhythm": { "speed": 69, "fullness": 82 }
       }
@@ -306,6 +313,7 @@
       "kit": { "standard": 100, "room": [65, 65, 23], "brush": [30, 30, 11] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [55, 55, 66], "counterMelody": 60, "drum": 95, "riff": 50, "riffTwin": [0, 15, 15], "rhythm": [60, 60, 48], "solo": [0, 40, 73] },
       "drumSetup": { "kit": 100 },
+      "grooveHold": { "held": 75 },
       "rhythm": {
         "bass": { "speed": 76, "fineness": 25, "fullness": 82, "repetition": 82 }
       }
