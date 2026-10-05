@@ -28,6 +28,12 @@ internal static class VelocityLayers
         _ => 0
     };
 
+    /// <summary>
+    ///     How much louder or quieter a genre plays a part at its most or its least (<see cref="GenreChoices.Levels" />), in the
+    ///     velocity's units, about 20 MIDI steps, as a beat's drums lead it.
+    /// </summary>
+    public const double GenreLevel = 0.4;
+
     /// <summary>How much louder a drum plays for how loud it leans, such as the crash louder and the cross-stick quieter.</summary>
     public const double DrumLevel = 0.15;
 

@@ -469,8 +469,9 @@ a link carries. What is left:
      the same so that its other draws stay; a genre's, the songs never. Hip-hop's sections sharing a progression 96%
      (4%), its chords in four bars 2.3; Electronic's 82%. The first section made first, its harmony the loop's. Not done:
      the figures shared (the bass's, the riff's), should the report or listening ask.
-  3. A genre's levels, a velocity layer a role (the drums leading a beat), its arrangement after (see the levels and
-     the arrangement below), the user's mix the channels' over them.
+  3. Done: a genre's levels (`GenreChoices.Levels`), a part's level louder or quieter by up to 0.4 of the velocity's
+     units (`VelocityLayers.GenreLevel`), the mix's volumes over them: the drums over the melody Hip-hop +14 velocity
+     steps (-10), Electronic +7 (-13). A genre's arrangement, its parts resting by a section's role, after (P3).
   4. The drums' fills by genre (step 5 of what a genre cannot reach, brought here): Hip-hop and Electronic sparse.
   5. Sidechain pumping: the pads, the chords and the bass dipping on every kick, a strong effect beside the tremolo,
      the echo and the sweep, played as expression; Electronic's pool much; on the kick wherever it falls.
@@ -527,7 +528,7 @@ a link carries. What is left:
   keeps its key, its new choice absent.
 - **A head with solos** (to review after the form's devices by genre, which with AABA may make it, and then go): a jazz tune's head, choruses of solos over its form, and the head again, which AABA
   (SongForms.Forms) and the solos' sections (Solos) come near already; a form of its own only should listening ask.
-- **A genre's levels** (P2, step 3 of genres that sound like themselves; its arrangement after): how loud each part plays against the others, values a part each, applied where the mix
+- **A genre's levels** (done, step 3 of genres that sound like themselves; its arrangement after, P3): how loud each part plays against the others, values a part each, applied where the mix
   gives none, a mechanism of its own that a mix given may fight; the pan is a genre's (GenreChoices.Pan), the levels
   only should listening ask for them.
 - **A genre's sections differing** (P3, perhaps never): a value given a section role, such as a solo swung harder

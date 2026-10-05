@@ -96,6 +96,19 @@ public static class GenreChoices
             _ => "One every two bars"
         }, new ByConvention(x.Span.Weight, x.Span.Weight, x.Span.Weight))));
 
+    /// <summary>
+    ///     How loud each part plays against the others, from 0, quietest, through 50, as the songs have it, to 100, loudest
+    ///     (<see cref="VelocityLayers.GenreLevel" />): a beat's drums leading it, a dub's bass; the mix's volumes over them.
+    /// </summary>
+    public static GenreChoice Levels { get; } = Values("levels", "Levels",
+        [..new[] { TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Solo, TrackRole.Drum }
+            .Select(x => (Name(x.ToString()), x switch
+            {
+                TrackRole.CounterMelody => "Counter-melody",
+                TrackRole.Drum => "Drums",
+                _ => x.ToString()
+            }))]);
+
     /// <summary>How much the bass leads into a new chord, from 0, never, through 50, as its instrument has it, to 100, walking (<see cref="BassLeadingLayers.GenreLeadOdds" />).</summary>
     public static GenreChoice Bass { get; } = Values("bass", "Bass", [("leading", "Leading into a chord")]);
 
@@ -329,7 +342,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Loop, LineScale, Bass, BassLanding, Effects, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Loop, LineScale, Bass, BassLanding, Effects, Levels, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

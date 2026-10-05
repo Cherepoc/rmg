@@ -93,6 +93,8 @@ internal sealed class SongTracks
         double sound
     )
     {
+        // a part's level, louder or quieter by the genre's (GenreChoices.Levels)
+        double Level(TrackRole role) => VelocityLayers.GetLevel(role) + VelocityLayers.GenreLevel * genre.Shift(GenreChoices.Levels, GenreChoices.Name(role.ToString()));
         // a part's own feel over the song's, drawn once from its own sequence where the genre names it
         var partFeels = new Dictionary<RhythmPart, StateMap>();
         StateMap FeelOf(RhythmPart part) => genre.Names(GenreChoices.PartFeels[part])
@@ -151,7 +153,7 @@ internal sealed class SongTracks
                 .Add(CompositionStateKinds.LineStepwiseness, RiffLayers.Stepwiseness)
                 .Add(CompositionStateKinds.Rhythm.Fullness, RiffLayers.Fullness)
                 .ToStateMap(riffContext),
-            _ => VelocityLayers.GetLevel(TrackRole.Riff),
+            _ => Level(TrackRole.Riff),
             trackRhythmLayer
         );
         var definitions = new Dictionary<int, IInstrumentTrack>
@@ -165,7 +167,7 @@ internal sealed class SongTracks
                     new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Solo))
                         .ToStateMap(soloContext),
-                    _ => VelocityLayers.GetLevel(TrackRole.Solo),
+                    _ => Level(TrackRole.Solo),
                     trackRhythmLayer
                 ),
                 soloInstrument.Program,
@@ -186,7 +188,7 @@ internal sealed class SongTracks
                         .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(x => rhythmInstrument.Leading + x))
                         .Add(CompositionStateKinds.Rhythm.Fullness, RhythmPartFullness)
                         .ToStateMap(rhythmContext),
-                    _ => VelocityLayers.GetLevel(TrackRole.Rhythm),
+                    _ => Level(TrackRole.Rhythm),
                     trackRhythmLayer
                 ),
                 rhythmInstrument.Program,
@@ -213,7 +215,7 @@ internal sealed class SongTracks
                         .Add(CompositionStateKinds.Rhythm.Period.Power, CounterLayers.SlowerBy)
                         .Add(CompositionStateKinds.Rhythm.Fullness, CounterLayers.Fullness)
                         .ToStateMap(counterContext),
-                    _ => VelocityLayers.GetLevel(TrackRole.CounterMelody),
+                    _ => Level(TrackRole.CounterMelody),
                     trackRhythmLayer
                 ),
                 counterInstrument.Program,
@@ -230,7 +232,7 @@ internal sealed class SongTracks
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Pad))
                         .Add(StateKinds.VoiceLeading, padInstrument.Leading)
                         .ToStateMap(padContext),
-                    _ => VelocityLayers.GetLevel(TrackRole.Pad),
+                    _ => Level(TrackRole.Pad),
                     trackRhythmLayer
                 ),
                 padInstrument.Program,
@@ -248,7 +250,7 @@ internal sealed class SongTracks
                         // the chord instrument sets how smoothly the chords move, and the song moves it a little
                         .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(x => chordsInstrument.Leading + x))
                         .ToStateMap(context),
-                    _ => VelocityLayers.GetLevel(TrackRole.Chords),
+                    _ => Level(TrackRole.Chords),
                     trackRhythmLayer
                 ),
                 chordsInstrument.Program,
@@ -268,7 +270,7 @@ internal sealed class SongTracks
                         // a melody repeats its cycles more than the other tracks, as riffs
                         .Add(CompositionStateKinds.Rhythm.Variation, MelodyLayers.RhythmVariation)
                         .ToStateMap(context),
-                    _ => VelocityLayers.GetLevel(TrackRole.Melody),
+                    _ => Level(TrackRole.Melody),
                     trackRhythmLayer
                 ),
                 melodyInstrument.Program,
@@ -285,7 +287,7 @@ internal sealed class SongTracks
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Bass))
                         .Add(CompositionStateKinds.LineStepwiseness, BassLeadingLayers.Stepwiseness)
                         .ToStateMap(context),
-                    _ => VelocityLayers.GetLevel(TrackRole.Bass),
+                    _ => Level(TrackRole.Bass),
                     trackRhythmLayer
                 ),
                 bassInstrument.Program,
@@ -357,7 +359,7 @@ internal sealed class SongTracks
                     context,
                     "Drum group",
                     StateMap.Default,
-                    _ => VelocityLayers.GetLevel(TrackRole.Drum),
+                    _ => Level(TrackRole.Drum),
                     rhythmicUnconventionality.Lean(RhythmLayers.DrumGroup)
                 )
             )
