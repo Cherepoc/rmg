@@ -291,19 +291,12 @@ a link carries. What is left:
   tracks' chord shapes apart past the first phrase ("PitchedTracks_ShareTheChordShapeAtTheSameTime", at beat 72) and the
   melody 1.8 notes a bar where 3 at least are (its question and answer each a pattern, LinePattern, its notes a
   pattern's first phrase): a track's bars are made a phrase at a time. So before P is drawn:
-  2b. Done: a track's bars made across every phrase (PhraseScheme.Across), the answer after the whole pattern. Tried
-     again with every section three phrases: 18 tests failing, of which the real ones are the key changes'
-     (KeyChange steps by the pattern, its preparation's chords placed by it): a part's shape changing within a bar
-     and a chord (DefaultSteps_ChangeTheShapeOnlyAtBarLinesAndChordChanges) and a chain of two links
-     (EveryChordOfAChain_LeadsToTheNext_ByItsLink_OneLinkAChain); the rest tests counting four bars a pattern (a fill's
-     decision at bar 3, a trace's bar under 4, the role chords' and a doubling's bars) or measuring what longer
-     patterns change (lengths, solos' turns, a drum solo's feet). Next: the key changes by the pattern, then the
-     four-bar tests by the section's pattern, then P drawn.
-  2c. **The line across phrases** (step 4 below, brought forward): a line's question and answer within the pattern,
-     its first phrase stating, a middle one restating, the last answering, rather than two plays of it.
-  3. **P a genre's** (a pool, "Phrases a progression": 4, 8, 12, 16 bars), drawn a section from a stream of its own;
-     the songs' own one alone, so that a song in no genre is as it was; a section's plays counted in phrases, so that
-     a 12-bar plays once or twice where a 4-bar plays four times, and its length as near (SectionLength, SongLength).
+  2b. Done: a track's bars across every phrase; P a genre's (GenreChoices.Phrases), a section's plays drawn in
+     phrases; the tests of a pattern's bars by the section's own. With every song's sections twelve bars only what
+     fewer, longer patterns change fails: a length given less near, no sequence or late drums (each wants a second
+     pattern), the answer measured nowhere (it waits on 2c), fewer phrase lines.
+  2c. **The line across phrases:** a line's question and answer within the pattern, its first phrase stating, a
+     middle one restating, the last answering (AAB), rather than two plays of it.
   5. **Fills and solos by the pattern:** a fill's largest at the pattern's end, its smaller at a phrase's; a solo's
      chorus a pattern (Solos), so that a blues solo takes 12-bar choruses.
   6. **Presets and listening:** Blues three phrases most, Jazz two (an 8-bar A), Folk two, Rock one or two; a report
