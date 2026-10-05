@@ -311,10 +311,9 @@ a link carries. What is left:
      and of sections' lengths; then whether the songs' own should play two phrases now and then.
   Later: phrases of other than four bars (a 3-bar phrase, a 6-bar section), which the line's question and answer
   and the fills assume, once P phrases sound right.
-- **A genre's song forms** (P2, after the phrases): the forms songs are written in (SongForms.Forms), verse-chorus, with a pre-chorus,
-  with a bridge, a pool a genre weighs, and a form of its own as a chance, so that folk keeps verses and choruses and
-  jazz plays AABA once it is among them; AABA and a head with solos, the forms to add.
-  After the phrases: an AABA's or a head's A is eight bars, which a section of one phrase cannot be.
+- **AABA and a head with solos** (P2, after the phrases): the forms to add, at no weight but a genre's, once a
+  section can be eight bars (an AABA's or a head's A); the forms a genre's pool already (GenreChoices.Form,
+  FormChances).
 - **A genre's levels** (P3): how loud each part plays against the others, values a part each, applied where the mix
   gives none, a mechanism of its own that a mix given may fight; the pan is a genre's (GenreChoices.Pan), the levels
   only should listening ask for them.
