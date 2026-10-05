@@ -283,8 +283,10 @@ a link carries. What is left:
 - **A range's axis by its scale** (P3): the window's chart of a range is linear in its numbers, so that a length's
   from half a minute to fifteen keeps a song's few minutes low on it; its scale's own spacing, as the amounts have it,
   should the editing ask for it.
-- **The progressions and the forms** (P2): a genre's root motions (ii–V, ♭VII–IV–I) and forms of its own, such as the
-  12-bar blues, the most a genre is known by that it cannot say yet; the root motions first.
+- **Forms of a genre's own** (P2, a plan of its own): the 12-bar blues and its kin, a genre's most known shape, which
+  root motions alone cannot make (I–IV–I–I–IV–IV–I–I–V–IV–I–V); a fixed table goes against drawing, so first find what
+  it generalises to: a section's harmonic rhythm and its progression's length (12 bars where a pattern is 4), with
+  the roots it reaches by its bar, as a pool of patterns a genre weighs, the songs' own the one 4-bar pattern.
 - **A genre's description** (P2): the editor keeps a preset's sentence and lets one's own have one, exported and
   imported with it, shown under the genre picked.
 - **The graphs' ends cut before their numbers** (P2): a tile's end cut short in its name, its share always shown, as
