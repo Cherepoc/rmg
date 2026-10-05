@@ -290,6 +290,30 @@ Each item with its plan, and what it waits for.
 
 ### Architecture
 
+- **The song's edits as named stages, and what they share** (P2, a plan in steps). The song after assembly is a
+  sequence of edits whose order is their correctness and is said nowhere (`SongGenerator.GenerateSong`, 464 lines, 69
+  streams): October 2026's bugs were all an edit not knowing another's (a key change keeping the old chord's scale,
+  the restatement overriding the bass's landings, a length not taking in the intro). Steps:
+  1. A chord's scale one kind its lowest layer decides (`StateKinds.CreateLowestLayerWins`), its alteration a step,
+     in place of the raised and lowered lists, which a key change's chords undo by listing them the other way: its
+     chords set it deeper and win. A refactor: the fingerprint kept.
+  2. Named stages: what the song decides before assembly (its plan, structure, meters, hook, energies, parts,
+     facets, genre, streams) one record it reads, and the song after it a draft of its timeline and what stages hand
+     on (the fill runs, the melody's walks, the key changes, the drum solos), each field with who sets and reads it;
+     a fixed list of about fifteen stages, each traced by name with how many notes it changed; one turned off for a
+     test where it only edits the timeline. No order to configure, no graph of dependencies: the order is the music's.
+     A refactor: the fingerprint kept; a report of what each stage changes.
+  3. The rules a song keeps in one suite run on finished songs (every note in its chord's scale, landings on the
+     root, a length within bounds, nothing in a part's rest), structural checks between stages (positions within the
+     song, notes in order), and the stage report to tell which stage moved what.
+  4. Tests as rules or calibrations: a rule asserts what must hold; a calibration keeps a wide bound against the
+     catastrophic and its target in an explicit report, written into CLAUDE.md; the floors this round moved converted
+     first, the rest as they move.
+  5. A hook intro takes the rests of the chorus it quotes, rather than the intro made an appearance of its own,
+     which every reader of the map's sections would have to learn.
+  Deferred: `SectionGenerator.Generate` (188 lines) split likewise, its draws already apart by their streams, should
+  the song's stages show a gain there.
+
 - **The page's wait for a remake** (P3): a song is asked for again 400 ms after the settings last changed; a remake let
   go of frees its core on the server, so the wait could be 200 ms. To shorten if the wait is noticed.
 - **The sections on the seek bar** (P3): the report gives where each section starts, in seconds, with its role and any
