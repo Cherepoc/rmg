@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
+using Rmg.Core.Songs;
 
 namespace Rmg.Tests.SongGenerators;
 
@@ -98,7 +99,9 @@ public sealed class BassLeadInTest
                 .MergeWith(StateTimelineMap.Create(8, [StateTimeline.Create(8, StateKinds.ChordChange, [1.ToTimelineItem(0.0), 2.ToTimelineItem(4.0)])]))
         );
 
-        var placed = LinePattern.Place(song, 0, bass, BassLeadingLayers.Line);
+        // one section of a pattern of one phrase, which restates nothing
+        var map = new SongMap(Meter.FourFour, new IntroSpan(IntroKind.Cold, 0), [new SectionSpan(0, 0, 8, Meter.FourFour)], new EndingSpan(EndingKind.Open, 8, 0, 0));
+        var placed = LinePattern.Place(song, 0, bass, BassLeadingLayers.Line, map);
 
         await Assert.That(placed.TrackTimelineMap[0].EventTimeline.Count).IsEqualTo(expectedNotes);
     }

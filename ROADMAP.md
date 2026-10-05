@@ -9,8 +9,9 @@ is removed once it is built.
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
 ratings by conventionality once enough are in, alongside, continuously and never as a gate.
 
-**Later** (P2), roughly in this order: the blues' restated line (see *Genres*); the ratings report (see *Listening
-data*), once the dashboard shows songs rated enough; listening to the genres' presets (see *Genres*).
+**Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs rated
+enough; listening to the genres' presets (see *Genres*), and to what the harmony, the melody and the form gained in
+October 2026: chords off the scale, a phrase's loudness, the hook intro, the chorus's lift and the restated phrase.
 
 **When the need shows** (P3), each by what listening says, roughly in this order: timing by role, then a genre's
 pocket; the tempo leaning by the energy; scales of other sizes; legato slides; a motif developed further; the
@@ -336,9 +337,9 @@ a link carries. What is left:
      pattern), the answer measured nowhere (it waits on 2c), fewer phrase lines.
   2c. Done: a pattern's last phrase answers (LinePattern.Answers). Measured in twelve bars: the second phrase keeps 98%
      of the first's rhythm, the third 86%; but the second keeps 36% of its contour (the step to the next note), the
-     notes drawn afresh over each phrase's chords, so the blues' restatement is the rhythm alone. Next, should
-     listening ask: a restating phrase's notes as the first phrase's steps moved to its chords, its line again (P2,
-     after a chord's own scale, which the restated line over IV7 needs to sound as a blues).
+     notes drawn afresh over each phrase's chords. Done since: a middle phrase sings the first's notes where they fit
+     its chords, a chord's note on a strong beat and its scale's on another, its own where not (`LinePattern.Restate`),
+     every line alike: 60% of the second phrase's notes the first's (19% before), its contour 52% (36%).
   6. Done: the presets' patterns (Blues twelve bars 81% of its sections, Jazz and Folk eight, Rock four and eight),
      reported by EveryPreset_Phrases. Left to listening: Blues' V at bar 9 43% of its twelve-bar sections and home at
      bar 4 48% (IV at 5 63%, home at 8 61%), the middling and wild songs keeping the place rules less, by the

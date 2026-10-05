@@ -67,7 +67,8 @@ internal sealed class LinePattern
         TrackEventStateTimelineMap<StateMap> song,
         int trackNumber,
         PitchInstrumentTrack definition,
-        LineProfile profile
+        LineProfile profile,
+        SongMap map
     )
     {
         var (low, high) = Realizer.GetRange(definition);
@@ -111,6 +112,7 @@ internal sealed class LinePattern
                 }
             )
             .ToArray();
+        Restate(notes, map, profile);
 
         for (var i = 0; i + 1 < notes.Length; i++)
         {
@@ -132,6 +134,39 @@ internal sealed class LinePattern
             loudness[i] == 0 ? x.Note : x.Note with { Note = x.Note.Note.Value.With(StateKinds.Velocity, x.Note.Note.Value.GetStateValue(StateKinds.Velocity) + loudness[i]).ToTimelineItem(x.Note.Position) },
             x.Pitch)));
         return song.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [trackNumber] = _ => placed });
+    }
+
+    /// <summary>
+    ///     A long pattern's middle phrases, between the first, which states, and the last, which answers
+    ///     (<see cref="Answers" />), singing the first's notes again, each where the first played it, where it fits the
+    ///     chord there, one of its notes on a strong beat and of its scale on another, and the line's own where it does not,
+    ///     so that a blues' second line restates its first over the IV, its notes the same, as a singer's are.
+    /// </summary>
+    private static void Restate((LineNote Note, int Rank, int Pitch)[] notes, SongMap map, LineProfile profile)
+    {
+        var at = notes.Select((x, i) => (Position: Math.Round(x.Note.Position, 6), i)).GroupBy(x => x.Position).ToDictionary(x => x.Key, x => x.First().i);
+        bool Fits((LineNote Note, int Rank, int Pitch) note, int pitch)
+        {
+            var isStrong = note.Rank <= profile.StrongestWeakRank && note.Note.Classes.Count > 0;
+            return isStrong
+                ? note.Note.Classes.Contains(pitch.Mod(12))
+                : Enumerable.Range(0, note.Note.ScaleLength).Any(x => note.Note.Chord.GetPitch(x).Mod(12) == pitch.Mod(12));
+        }
+
+        foreach (var span in map.Sections.Where(x => x.Meter.Phrases > 2))
+        {
+            var phrase = Meter.PhraseBarCount * span.Meter.BarDuration;
+            for (var start = span.Start; start < span.End - 1e-9; start += span.Meter.PatternDuration)
+            for (var restating = 1; restating < span.Meter.Phrases - 1; restating++)
+                for (var i = 0; i < notes.Length; i++)
+                {
+                    var position = notes[i].Note.Position;
+                    if (position < start + restating * phrase - 1e-9 || position >= start + (restating + 1) * phrase - 1e-9)
+                        continue;
+                    if (at.TryGetValue(Math.Round(position - restating * phrase, 6), out var first) && Fits(notes[i], notes[first].Pitch))
+                        notes[i] = notes[i] with { Pitch = notes[first].Pitch };
+                }
+        }
     }
 
     /// <summary>

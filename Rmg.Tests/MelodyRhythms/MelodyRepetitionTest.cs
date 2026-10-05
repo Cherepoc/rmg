@@ -139,7 +139,7 @@ public sealed class MelodyRepetitionTest
     {
         // of the first phrase's onsets in a section's first play, the share the second phrase keeps and the third, and of
         // those kept, the share whose step to the next note is the first phrase's, its contour
-        int onsets = 0, keptSecond = 0, keptThird = 0, contourSecond = 0, contourThird = 0;
+        int onsets = 0, keptSecond = 0, keptThird = 0, contourSecond = 0, contourThird = 0, sameSecond = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(3)))))
         {
             var notes = song.Notes(SongTracks.MelodyTrack).OrderBy(x => x.Position).ToArray();
@@ -155,6 +155,7 @@ public sealed class MelodyRepetitionTest
                     {
                         keptSecond++;
                         contourSecond += Step(second) == Step(i) ? 1 : 0;
+                        sameSecond += notes[second].Value.Offset == notes[i].Value.Offset ? 1 : 0;
                     }
                     if (at.TryGetValue(Math.Round(onset + 2 * phrase, 6), out var third))
                     {
@@ -165,7 +166,7 @@ public sealed class MelodyRepetitionTest
             }
         }
 
-        Console.WriteLine($"{onsets} onsets: the second phrase keeps {keptSecond / (double)onsets:P0}, its contour {contourSecond / (double)keptSecond:P0}; "
+        Console.WriteLine($"{onsets} onsets: the second phrase keeps {keptSecond / (double)onsets:P0}, its contour {contourSecond / (double)keptSecond:P0}, its very notes {sameSecond / (double)keptSecond:P0}; "
                           + $"the third {keptThird / (double)onsets:P0}, its contour {contourThird / (double)keptThird:P0}");
         await Assert.That(onsets).IsGreaterThan(100);
         await Assert.That(keptSecond).IsGreaterThan(keptThird);

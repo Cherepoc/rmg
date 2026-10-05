@@ -413,7 +413,7 @@ public static class SongGenerator
         // a hook intro's notes of each as its chorus plays them, before what leads into the first section
         var hookChorus = form.Map.Sections.FirstOrDefault(x => structure.Roles[x.SectionId] == SectionRole.Chorus)?.Start ?? 0;
         TrackEventStateTimelineMap<StateMap> PlaceLine(TrackEventStateTimelineMap<StateMap> song, KeyValuePair<int, IInstrumentTrack> track, LineProfile profile) =>
-            SongFormGenerator.QuoteHook(LinePattern.Place(song, track.Key, (PitchInstrumentTrack)track.Value, profile), track.Key, form.Map, hookChorus);
+            SongFormGenerator.QuoteHook(LinePattern.Place(song, track.Key, (PitchInstrumentTrack)track.Value, profile, form.Map), track.Key, form.Map, hookChorus);
         var melodyTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Melody);
         songTrackNoteTimelineMap = PlaceLine(songTrackNoteTimelineMap, melodyTrack, MelodyLayers.Line);
         var bassTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Bass);
