@@ -223,6 +223,33 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task TheChosenOption_KeepsItsGreyOutlined_AndTheOnePointedAt_IsNamedWithItsShare()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var tune = await Change(await Section(dialog, "Time and feel"), "meter");
+        var chart = tune.Locator(".tune-shares");
+        await page.Until(async () => await chart.Locator(".share-chosen").CountAsync() == 1, "the chances drawn");
+
+        // the chosen, 4/4, its own grey as every option has, and an outline in the accent over all
+        await Assert.That(await chart.Locator("path[data-option='4/4']").GetAttributeAsync("fill")).StartsWith("#");
+        await Assert.That(await chart.Locator("path").Last.GetAttributeAsync("class")).IsEqualTo("share-chosen");
+        await Assert.That(await tune.Locator(".tune-legend > span.chosen").TextContentAsync()).IsEqualTo("4/4");
+
+        // pointed at, low at the plainest end: 4/4, named at once with its share there, and lit in the legend
+        var box = (await chart.BoundingBoxAsync())!;
+        await page.Page.Mouse.MoveAsync(box.X + 2, box.Y + box.Height - 4);
+        await Assert.That(await tune.Locator(".tune-pointed").TextContentAsync()).IsEqualTo("4/4 · 100% at the plainest end");
+        await Assert.That(await chart.Locator(".share-pointed").CountAsync()).IsEqualTo(1);
+        await Assert.That(await tune.Locator(".tune-legend > span.pointed").TextContentAsync()).IsEqualTo("4/4");
+        // and let go of off the chart
+        await page.Page.Mouse.MoveAsync(box.X + box.Width / 2, box.Y - 60);
+        await Assert.That(await tune.Locator(".tune-pointed").IsHiddenAsync()).IsTrue();
+        await Assert.That(await chart.Locator(".share-pointed").CountAsync()).IsEqualTo(0);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task TheEditor_AndTheWindowOverIt_NeverScrollSideways()
     {
         await using var page = await SongPage.Open(site, "?song=1");

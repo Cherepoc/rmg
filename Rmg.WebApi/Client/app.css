@@ -1970,6 +1970,20 @@ footer a:hover {
     display: flex;
     gap: 6px;
     align-items: center;
+    color: var(--muted);
+}
+
+/* the one chosen in the accent, its swatch its grey in an accent outline, as its share is; the one pointed at lit */
+.tune-legend > span.chosen {
+    color: var(--accent);
+}
+
+.tune-legend > span.chosen .tune-swatch {
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
+.tune-legend > span.pointed {
+    color: var(--text);
 }
 
 .tune-swatch {
@@ -2046,6 +2060,44 @@ footer a:hover {
     display: block;
     width: 100%;
     height: 150px;
+    overflow: visible;
+}
+
+/* the chances and the name of the option pointed at, over them */
+.tune-shares-box {
+    position: relative;
+}
+
+/* the one chosen keeps its grey, outlined in the accent; the one pointed at, outlined in dashes */
+.share-chosen,
+.share-pointed {
+    fill: none;
+    pointer-events: none;
+    vector-effect: non-scaling-stroke;
+    stroke-linejoin: round;
+}
+
+.share-chosen {
+    stroke: var(--accent);
+    stroke-width: 3;
+}
+
+.share-pointed {
+    stroke: var(--text);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+}
+
+.tune-pointed {
+    position: absolute;
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
 }
 
 /* what each end of the songs draws, the greatest first, under the chart's left edge, its middle and its right edge */

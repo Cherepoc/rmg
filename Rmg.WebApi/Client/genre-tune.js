@@ -84,8 +84,12 @@ export function createGenreTune() {
     const sharesHeading = html("h3", { class: "tune-shares-heading", text: "The chance a song draws each" });
     const sharesAxis = html("div", { class: "tune-axis tune-shares-axis", "aria-hidden": "true" }, html("span", { text: "100%" }), html("span", { text: "0%" }));
     const shares = svg("svg", { class: "tune-shares", role: "img", preserveAspectRatio: "none" });
+    // the option pointed at in the chances, named at once with its share where the pointer is
+    const pointed = html("div", { class: "tune-pointed", "aria-hidden": "true" });
+    pointed.hidden = true;
+    const sharesBox = html("div", { class: "tune-shares-box" }, shares, pointed);
     const lists = html("div", { class: "tune-lists" });
-    const grid = html("div", { class: "tune-grid" }, axis, plot, legend, fieldsRow, sharesHeading, sharesAxis, shares, lists);
+    const grid = html("div", { class: "tune-grid" }, axis, plot, legend, fieldsRow, sharesHeading, sharesAxis, sharesBox, lists);
     const empty = html("p", { class: "tune-empty", text: "The genre keeps none of these: pick some under Options." });
     const main = html("div", { class: "tune-main" }, heading, grid, empty);
     const body = html("div", { class: "tune-body" }, list, main);
@@ -131,6 +135,9 @@ export function createGenreTune() {
         return asOpened() === opened || confirm("Close the window and lose its changes to this choice?");
     }
 
+    shares.addEventListener("pointermove", (event) => showPointed(pointAt(event), event));
+    shares.addEventListener("pointerleave", () => showPointed(null));
+
     // the charts drawn again to the window's width as it changes
     new ResizeObserver(() => {
         if (dialog.open && choice) renderCharts();
@@ -145,7 +152,8 @@ export function createGenreTune() {
     const order = () => (isPool() && preview?.shares && kept().every((x) => preview.shares[x.name])
         ? byMiddle(preview.shares).filter((x) => x in amounts)
         : kept().map((x) => x.name));
-    const colourOf = (name) => (name === selected ? "var(--accent)" : COLOURS[order().indexOf(name) % COLOURS.length]);
+    // every option its grey, the one chosen too, which an outline in the accent marks instead
+    const greyOf = (name) => COLOURS[order().indexOf(name) % COLOURS.length];
 
     /** The window's choice changed: overridden from now, drawn again, and the lines asked for again. */
     function edited() {
@@ -308,7 +316,7 @@ export function createGenreTune() {
             input.setAttribute("aria-label", `${option.label}, ${ENDS[end].toLowerCase()}`);
         });
         // an attribute, which an svg has no property of
-        for (const element of [sharesHeading, sharesAxis, shares, lists]) element.toggleAttribute("hidden", !isPool());
+        for (const element of [sharesHeading, sharesAxis, sharesBox, lists]) element.toggleAttribute("hidden", !isPool());
         legend.hidden = choice.kind === "range";
         renderCharts();
     }
@@ -341,7 +349,7 @@ export function createGenreTune() {
                 class: other.name === selected ? "tune-line chosen" : "tune-line",
                 "data-option": other.name,
             }, optionOf(other.name).label);
-            if (other.name !== selected) line.style.stroke = colourOf(other.name);
+            if (other.name !== selected) line.style.stroke = greyOf(other.name);
             chart.append(line);
         }
         points.forEach((value, end) => chart.append(handle(end, value, least, most, width)));
@@ -355,9 +363,53 @@ export function createGenreTune() {
     function renderLegend() {
         legend.replaceChildren(...order().reverse().map((name) => {
             const swatch = html("span", { class: "tune-swatch" });
-            swatch.style.background = colourOf(name);
-            return html("span", {}, swatch, optionOf(name).label);
+            swatch.style.background = greyOf(name);
+            return html("span", { class: name === selected ? "chosen" : "", "data-option": name }, swatch, optionOf(name).label);
         }));
+    }
+
+    /** An option's share outlined, over the chances, by the class given: the one chosen or the one pointed at. */
+    function outlineOf(name, className) {
+        const outline = shares.querySelector(`path[data-option="${CSS.escape(name)}"]`).cloneNode(false);
+        outline.removeAttribute("data-option");
+        outline.removeAttribute("fill");
+        outline.setAttribute("class", className);
+        return outline;
+    }
+
+    /** The option whose share the pointer is over, and the point along the songs it is at; none off them. */
+    function pointAt(event) {
+        const share = preview?.shares;
+        if (!share || selected === null || kept().some((x) => !share[x.name])) return null;
+        const box = shares.getBoundingClientRect();
+        const points = share[kept()[0].name].length;
+        const j = Math.round(Math.min(1, Math.max(0, (event.clientX - box.left) / box.width)) * (points - 1));
+        const at = 100 * (1 - (event.clientY - box.top) / box.height);
+        let below = 0;
+        for (const name of order()) {
+            const above = below + share[name][j];
+            if (at >= below && at <= above) return { name, j, points, amount: share[name][j] };
+            below = above;
+        }
+        return null;
+    }
+
+    /** The option pointed at outlined and named, its share where the pointer is and, at an end, which; none shown for none. */
+    function showPointed(at, event) {
+        shares.querySelector(".share-pointed")?.remove();
+        for (const entry of legend.children) entry.classList.toggle("pointed", entry.dataset.option === at?.name);
+        pointed.hidden = at === null;
+        if (at === null) return;
+        shares.append(outlineOf(at.name, "share-pointed"));
+        const where = at.j === 0 ? " at the plainest end" : at.j === at.points - 1 ? " at the experimental end" : at.j === (at.points - 1) / 2 ? " in a middling song" : "";
+        pointed.textContent = `${optionOf(at.name).label} · ${Math.round(at.amount)}%${where}`;
+        // beside the pointer, on the side with room, so that it never runs past the chart
+        const box = sharesBox.getBoundingClientRect();
+        const x = event.clientX - box.left;
+        const isLeft = x > box.width / 2;
+        pointed.style.left = `${isLeft ? x - 12 : x + 12}px`;
+        pointed.style.top = `${Math.max(0, event.clientY - box.top - 30)}px`;
+        pointed.style.transform = isLeft ? "translateX(-100%)" : "";
     }
 
     /** A handle of the option chosen at an end: dragged up and down, or moved by the arrow keys, a whole number a step. */
@@ -408,7 +460,10 @@ export function createGenreTune() {
         lists.replaceChildren();
         shares.setAttribute("viewBox", `0 0 ${width} ${SHARES_HEIGHT}`);
 
-        drawShares(shares, share, order(), colourOf, (name) => optionOf(name).label, width, SHARES_HEIGHT);
+        drawShares(shares, share, order(), greyOf, (name) => optionOf(name).label, width, SHARES_HEIGHT);
+        // the one chosen outlined over the others, so that it is whole
+        shares.append(outlineOf(selected, "share-chosen"));
+        showPointed(null);
         const points = share[kept()[0].name].length;
         const told = [0, (points - 1) / 2, points - 1].map((j) => order()
             .map((name) => ({ name, amount: Math.round(share[name][j]) }))
