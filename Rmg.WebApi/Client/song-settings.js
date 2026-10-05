@@ -9,8 +9,8 @@ import { DRUM_GROUPS, FACETS, FORMAT_PARTS, LAST_STEP, MIDDLE_STEP, PARTS } from
 /** Nothing given, every value in the middle and every part and drum group at its fullest, as a first visit starts. */
 export function defaultSettings() {
     return {
-        unconventionality: { isGiven: false, value: 32 },
-        facets: Object.fromEntries(FACETS.map((facet) => [facet, { isGiven: false, value: 32 }])),
+        unconventionality: { isGiven: false, value: MIDDLE_STEP },
+        facets: Object.fromEntries(FACETS.map((facet) => [facet, { isGiven: false, value: MIDDLE_STEP }])),
         tempo: { isGiven: false, value: MIDDLE_STEP },
         key: { isGiven: false, value: 0 },
         meter: { isGiven: false, value: 0 },

@@ -24,10 +24,10 @@ public sealed class GenerateSongRequestTest
     {
         var request = new GenerateSongRequest(
             "g",
-            Unconventionality: 63,
+            Unconventionality: 61,
             Facets: new Dictionary<string, int> { ["chords"] = 0 },
-            Volume: 32,
-            Parts: new Dictionary<string, PartRequest> { ["bass"] = new(Plays: false, Instrument: 73, Volume: 63, Pan: 0), ["counterMelody"] = new(Plays: true, Pan: 63) },
+            Volume: 31,
+            Parts: new Dictionary<string, PartRequest> { ["bass"] = new(Plays: false, Instrument: 73, Volume: 61, Pan: 0), ["counterMelody"] = new(Plays: true, Pan: 61) },
             DrumGroups: new Dictionary<string, DrumGroupRequest> { ["kick"] = new(Volume: 0, IsOn: false) }
         );
 
@@ -43,8 +43,8 @@ public sealed class GenerateSongRequestTest
 
     [Test]
     [Arguments(0, -1.0)]
-    [Arguments(32, 0.0)]
-    [Arguments(63, 1.0)]
+    [Arguments(31, 0.0)]
+    [Arguments(61, 1.0)]
     public async Task APan_ReachesBothSides_AndTheMiddle(int step, double pan)
     {
         var request = new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["melody"] = new(Pan: step) });
@@ -64,8 +64,8 @@ public sealed class GenerateSongRequestTest
 
     [Test]
     [Arguments(0, 60.0)]
-    [Arguments(32, 120.0)]
-    [Arguments(63, 240.0)]
+    [Arguments(31, 120.0)]
+    [Arguments(61, 240.0)]
     public async Task ATempoStep_IsGivenAsItsTempo(int step, double beatsAMinute)
     {
         await Assert.That(new GenerateSongRequest(Tempo: step).TryRead(out _, out var overrides, out _, out _)).IsTrue();
@@ -129,7 +129,7 @@ public sealed class GenerateSongRequestTest
     {
         var request = what switch
         {
-            "unconventionality" => new GenerateSongRequest(Unconventionality: 64),
+            "unconventionality" => new GenerateSongRequest(Unconventionality: 62),
             "facet" => new GenerateSongRequest(Facets: new Dictionary<string, int> { ["feel"] = -1 }),
             "unknownFacet" => new GenerateSongRequest(Facets: new Dictionary<string, int> { ["tempo"] = 1 }),
             "part" => new GenerateSongRequest(Parts: new Dictionary<string, PartRequest> { ["kazoo"] = new() }),
@@ -138,11 +138,11 @@ public sealed class GenerateSongRequestTest
             "piece" => new GenerateSongRequest(DrumPieces: ["kick", "gong"]),
             "group" => new GenerateSongRequest(DrumGroups: new Dictionary<string, DrumGroupRequest> { ["gong"] = new() }),
             "seed" => new GenerateSongRequest("zzzzzzzzzzzz"),
-            "tempo" => new GenerateSongRequest(Tempo: 64),
+            "tempo" => new GenerateSongRequest(Tempo: 62),
             "key" => new GenerateSongRequest(Key: 12),
             "meter" => new GenerateSongRequest(Meter: -1),
             "mode" => new GenerateSongRequest(Mode: Core.Composition.Scales.All.Length),
-            "swing" => new GenerateSongRequest(Swing: 64),
+            "swing" => new GenerateSongRequest(Swing: 62),
             "genreChoice" => new GenerateSongRequest(Genre: Genre("kazoo", "3/4", 63)),
             "genreOption" => new GenerateSongRequest(Genre: Genre("meter", "1/1", 63)),
             "genreStep" => new GenerateSongRequest(Genre: Genre("meter", "3/4", 101)),

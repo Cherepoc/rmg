@@ -148,10 +148,10 @@ public sealed class EventStoreTest : IDisposable
 
         var seeds = _store.Summarise(Now, 30).Seeds;
 
-        await Assert.That(seeds[0].Seed).IsEqualTo("3U");
+        await Assert.That(seeds[0].Seed).IsEqualTo("3a");
         await Assert.That(seeds[0].Seconds).IsEqualTo(55);
         await Assert.That(seeds[0].Plays).IsEqualTo(2);
-        await Assert.That(seeds[1].Seed).IsEqualTo("1l");
+        await Assert.That(seeds[1].Seed).IsEqualTo("1n");
     }
 
     [Test]

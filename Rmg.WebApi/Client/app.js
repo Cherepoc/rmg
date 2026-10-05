@@ -41,6 +41,7 @@ import {
     parseSettings,
     PARTS,
     PLAYS,
+    readLinkedSeed,
     readSeed,
     toStep,
 } from "./settings.js";
@@ -758,7 +759,7 @@ function linkedSong() {
     const linked = parameters.get("settings");
     const parsed = linked === null ? null : parseSettings(linked.trim());
     return {
-        seed: readSeed(asked.trim()),
+        seed: readLinkedSeed(asked.trim(), linked?.trim() ?? null),
         wasAsked: true,
         wasRolled,
         settings: parsed,
@@ -794,9 +795,7 @@ function songLink() {
     if (songGenreKey === null) address.searchParams.delete("genre");
     else address.searchParams.set("genre", songGenreKey);
 
-    // every "_" of its seed and settings as %5F, which a chat's markdown cannot take for italics and delete, and which
-    // every browser reads back as "_"
-    return `${address.origin}${address.pathname}${address.search.replaceAll("_", "%5F")}${address.hash}`;
+    return address.toString();
 }
 
 /** What every event about the song on the page carries: which song it is, and what it was heard with. */
@@ -1846,7 +1845,6 @@ async function listChoices() {
     }
 }
 
-/** A pan's step, from 0 to 63, as MIDI's, from 0 to 127, the middles together. */
 /** A part's channels, its own and its twin's, and whether each sits on the other side of the part's pan. */
 function channelsOf(part) {
     return [
@@ -2161,7 +2159,7 @@ function createDrumPieceChip(piece) {
     return chip;
 }
 
-/** A fader from 0 to 63, saying where it is as a share, or where a pan sits. */
+/** A fader from 0 to 61, saying where it is as a share, or where a pan sits. */
 function createFader(label, onInput, isPan = false, onChange = null) {
     const input = document.createElement("input");
     input.type = "range";

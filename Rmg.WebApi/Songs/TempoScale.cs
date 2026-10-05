@@ -3,7 +3,7 @@ using Rmg.Core.Composition;
 namespace Rmg.WebApi.Songs;
 
 /// <summary>
-///     The tempos a song may be given, in the 64 steps of <see cref="StepScale" />, from half
+///     The tempos a song may be given, in the 62 steps of <see cref="StepScale" />, from half
 ///     <see cref="Meter.BaseTempo" /> to twice it, the base tempo at the middle step and each step a like ratio from the
 ///     next on either side of it: 60, 120 and 240 beats a minute.
 /// </summary>

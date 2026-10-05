@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -19,8 +20,8 @@ public sealed class GenreStore
     /// <summary>The longest name a genre has, in bytes of UTF-8.</summary>
     public const int MaxNameBytes = 63;
 
-    /// <summary>How many characters a key is: 66 bits of the canonical form's SHA-256, six to a character.</summary>
-    public const int KeyLength = 11;
+    /// <summary>How many characters a key is: the first 64 bits of the canonical form's SHA-256, in base 62.</summary>
+    public const int KeyLength = Base62.SeedLength;
 
     /// <summary>The canonical form's format, written into it, so that one written differently has another key.</summary>
     public const int Format = 1;
@@ -96,20 +97,9 @@ public sealed class GenreStore
         return Encoding.UTF8.GetString(stream.ToArray());
     }
 
-    /// <summary>The key of a canonical form: the first 66 bits of its SHA-256, in <see cref="Base64" />'s digits.</summary>
-    public static string KeyOf(string canonical)
-    {
-        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(canonical));
-        var key = new char[KeyLength];
-        for (var i = 0; i < KeyLength; i++)
-        {
-            var bit = 6 * i;
-            var value = ((hash[bit / 8] << 8 | hash[bit / 8 + 1]) >> (10 - bit % 8)) & 63;
-            key[i] = Base64.Digits[value];
-        }
-
-        return new string(key);
-    }
+    /// <summary>The key of a canonical form: the first 64 bits of its SHA-256, in <see cref="Base62" />'s digits, zeros in front.</summary>
+    public static string KeyOf(string canonical) =>
+        Base62.Write(BinaryPrimitives.ReadUInt64BigEndian(SHA256.HashData(Encoding.UTF8.GetBytes(canonical))), KeyLength);
 
     /// <summary>Keeps a genre's canonical form, once, and gives its key; none where another genre has the key already.</summary>
     public string? Keep(string canonical)
@@ -128,7 +118,7 @@ public sealed class GenreStore
     /// <summary>The canonical form of the genre of a key, none for a key it does not know.</summary>
     public string? Find(string key)
     {
-        if (key.Length != KeyLength || key.Any(x => !Base64.Digits.Contains(x)))
+        if (key.Length != KeyLength || key.Any(x => !Base62.Digits.Contains(x)))
             return null;
         using var connection = Open();
         using var select = connection.CreateCommand();

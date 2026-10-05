@@ -128,7 +128,7 @@ public sealed class GivingAPartTest(Site site)
         await Assert.That(await IsDisabled(page, "select")).IsTrue();
         // and its volume the song's own, the fullest, not to be moved
         await Assert.That(await IsDisabled(page, "input.fader")).IsTrue();
-        await Assert.That(released.GetProperty("volume").GetInt32()).IsEqualTo(63);
+        await Assert.That(released.GetProperty("volume").GetInt32()).IsEqualTo(61);
         await Assert.That(page.Errors).IsEmpty();
     }
 }

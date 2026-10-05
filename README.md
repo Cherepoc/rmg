@@ -73,7 +73,7 @@ Listens on every interface, on port 5000 by default. See [Settings](#settings).
 
 - `/` is a page that generates a song, plays it in the browser and lets you set and mix it.
 - `POST /api/songs/generate` returns a `.mid` file. Every field of the JSON body is optional; an amount is a step from
-  0 to 63, and anything left out is the song's own:
+  0 to 61, and anything left out is the song's own:
 
   ```json
   {
@@ -93,7 +93,7 @@ Listens on every interface, on port 5000 by default. See [Settings](#settings).
   may be given in or out (`plays`), an instrument (General MIDI 0-127), a volume and a pan, or left out of the file
   (`isOn: false`); `drumSetup` and `drumGroups` do the same for the drums, `drumPieces` gives the drum pieces the song
   plays, by name, which make its setup, and `key`, `tempo` and `meter` give those
-  (the tempo by its step from 0 to 63, 60 to 240 beats a minute with 120 at 32, and the meter by its place in
+  (the tempo by its step from 0 to 61, 60 to 240 beats a minute with 120 at 31, and the meter by its place in
   `GET /api/songs/options`). The response carries the seed (`X-Song-Seed`),
   the songs' version (`X-Song-Version`) and everything the song drew or was given, with every part's channel
   (`X-Song-Settings`). The file is named `song-<seed>.mid`. The server makes as many songs at once as it has cores;

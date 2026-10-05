@@ -10,30 +10,30 @@ namespace Rmg.WebApi.Songs;
 
 /// <summary>
 ///     A song to generate: its seed, what is given in place of what it draws, and how it is to be heard. Every amount is
-///     a step from 0 to 63 (<see cref="StepScale" />), a character of the page's settings each; anything left out is the song's own.
+///     a step from 0 to 61 (<see cref="StepScale" />), a character of the page's settings each; anything left out is the song's own.
 /// </summary>
 /// <param name="Seed">
-///     Seed of the song, in letters and digits (<see cref="Rmg.Core.Base64" />), all 64 of its bits, which a number in
+///     Seed of the song, in letters and digits (<see cref="Rmg.Core.Base62" />), all 64 of its bits, which a number in
 ///     JSON could not carry. None asks for a random one, which the response reports back, so a song heard once can be
 ///     asked for again.
 /// </param>
 /// <param name="Unconventionality">
-///     How far the song strays from convention, from 0 for the plainest to 63 for the most experimental, which its
+///     How far the song strays from convention, from 0 for the plainest to 61 for the most experimental, which its
 ///     facets stray around. None lets the song draw its own, which keeps well away from both ends.
 /// </param>
 /// <param name="Facets">A facet of the unconventionality given outright, by its name, such as "chords".</param>
-/// <param name="Volume">How loud the whole song plays, 63 as it is made. None is 63.</param>
+/// <param name="Volume">How loud the whole song plays, 61 as it is made. None is 61.</param>
 /// <param name="Parts">A part given, by its role's name: "melody", "chords", "bass", "pad", "counterMelody" or "drum".</param>
 /// <param name="DrumPieces">
 ///     The drum pieces the song plays, by their names (<c>/api/songs/options</c>), in place of those it draws, which make
 ///     its setup.
 /// </param>
 /// <param name="DrumGroups">A drum group's mix, by its name, such as "kick".</param>
-/// <param name="Tempo">The tempo, by its step from 0, 60 beats a minute, through 32, 120, to 63, 240 (<see cref="TempoScale" />).</param>
+/// <param name="Tempo">The tempo, by its step from 0, 60 beats a minute, through 31, 120, to 61, 240 (<see cref="TempoScale" />).</param>
 /// <param name="Key">The key, as semitones above C, from 0 to 11.</param>
 /// <param name="Meter">The meter, by its place among the meters a song may play in (<c>/api/songs/options</c>).</param>
 /// <param name="Mode">The scale the song starts in, on its key, by its place among the scales (<c>/api/songs/options</c>).</param>
-/// <param name="Swing">How much the song swings, from 0, straight, to 63, a triplet's swing, where its meter pairs its notes.</param>
+/// <param name="Swing">How much the song swings, from 0, straight, to 61, a triplet's swing, where its meter pairs its notes.</param>
 /// <param name="Length">How long the song is to play, by its step (<see cref="LengthScale" />), which its form comes as near as it can.</param>
 /// <param name="GenreName">The genre's name, which a link to the song shows, up to 63 bytes (<see cref="Genres.GenreStore" />).</param>
 /// <param name="Genre">
@@ -75,8 +75,8 @@ public sealed record GenerateSongRequest(
 
         if (Seed is not null)
         {
-            if (Core.Base64.ToSeed(Seed) is not { } read)
-                return Fail($"{Seed} is not a seed. A seed is up to {Core.Base64.SeedLength} letters and digits.", out error);
+            if (Core.Base62.ToSeed(Seed) is not { } read)
+                return Fail($"{Seed} is not a seed. A seed is up to {Core.Base62.SeedLength} letters and digits.", out error);
             seed = read;
         }
 
@@ -210,11 +210,11 @@ public sealed record GenerateSongRequest(
 
 /// <param name="Plays">Whether the part is in the song, given; none for the song to draw it.</param>
 /// <param name="Instrument">The General MIDI program it plays, the drums' kit; none for the song's own.</param>
-/// <param name="Volume">How loud it plays, 63 as it is made; none is 63.</param>
-/// <param name="Pan">Where it sits, from 0, left, through 32, the middle, to 63, right; none for the song's own.</param>
+/// <param name="Volume">How loud it plays, 61 as it is made; none is 61.</param>
+/// <param name="Pan">Where it sits, from 0, left, through 31, the middle, to 61, right; none for the song's own.</param>
 /// <param name="IsOn">Whether it is written in the file at all, which a part switched off is not.</param>
 public sealed record PartRequest(bool? Plays = null, int? Instrument = null, int? Volume = null, int? Pan = null, bool IsOn = true);
 
-/// <param name="Volume">How loud its drums play, 63 as they are made; none is 63.</param>
+/// <param name="Volume">How loud its drums play, 61 as they are made; none is 61.</param>
 /// <param name="IsOn">Whether its drums are written in the file at all.</param>
 public sealed record DrumGroupRequest(int? Volume = null, bool IsOn = true);

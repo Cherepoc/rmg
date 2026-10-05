@@ -20,10 +20,10 @@ public static class SongDescriptionEndpoints
     /// </summary>
     private static async Task<IResult> Describe(HttpContext context, SongQueue queue, string? song, string? settings)
     {
-        if (song is null || Base64.ToSeed(song.Trim()) is not { } seed)
-            return Results.BadRequest(new ErrorResponse($"'{song}' is not a seed. A seed is up to {Base64.SeedLength} letters and digits."));
+        if (song is null || Base62.ToSeed(song.Trim()) is not { } seed)
+            return Results.BadRequest(new ErrorResponse($"'{song}' is not a seed. A seed is up to {Base62.SeedLength} letters and digits."));
 
-        var text = Base64.FromSeed(seed);
+        var text = Base62.FromSeed(seed);
         SongSettings? given = null;
         if (settings is not null && (given = SongSettings.Parse(settings.Trim())) is null)
             return Results.BadRequest(new ErrorResponse($"'{settings}' are not settings this version reads."));

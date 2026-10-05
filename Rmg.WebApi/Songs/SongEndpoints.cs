@@ -113,7 +113,7 @@ public static class SongEndpoints
             catch (Exception ex)
             {
                 ended = SongOutcome.Failed;
-                result = Results.Problem($"Song {Base64.FromSeed(songSeed)}: {ex.Message}", statusCode: 500);
+                result = Results.Problem($"Song {Base62.FromSeed(songSeed)}: {ex.Message}", statusCode: 500);
             }
         }
 
@@ -127,7 +127,7 @@ public static class SongEndpoints
     private static IResult Respond(HttpContext context, ulong songSeed, SongReport report, MemoryStream stream, string? genreKey)
     {
         // lets the page show and reuse the seed it actually got when it asked for a random one
-        context.Response.Headers["X-Song-Seed"] = Base64.FromSeed(songSeed);
+        context.Response.Headers["X-Song-Seed"] = Base62.FromSeed(songSeed);
 
         // and which songs' version it is, which the page reports with what it tells of the song
         context.Response.Headers["X-Song-Version"] = SongsVersion.Number;

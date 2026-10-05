@@ -23,7 +23,7 @@ public sealed class GenreTest(Site site)
         await page.Settled();
         await Assert.That(await page.Given()).IsEqualTo("1 given");
         // the list shows it chosen, and the next visit asks for it again, kept in this browser, not the link
-        await Assert.That(page.Page.Url).Contains("settings=A");
+        await Assert.That(page.Page.Url).Contains("settings=B");
         await Assert.That(await genre.InputValueAsync()).IsEqualTo("preset:jazz");
         await page.Page.GotoAsync("/");
         await page.Until(() => page.Requests.Count > count + 1 && page.Requests[^1].Body.TryGetProperty("genre", out var kept) && kept.TryGetProperty("kit", out _),

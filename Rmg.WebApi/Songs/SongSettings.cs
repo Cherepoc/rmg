@@ -8,22 +8,23 @@ namespace Rmg.WebApi.Songs;
 /// <summary>
 ///     What a song was heard with, as the page had it: its unconventionality and facets, its tempo, key, meter, scale and
 ///     swing, its parts and their mix, its drum groups and drum pieces, and its volume, each value given, or as the song
-///     drew it. Written as a format's character, then a character for every value of 64 steps, in
-///     <see cref="Base64" />'s digits, each at a fixed place, then every other value as its bits, one after another, six to
-///     a character: short enough for a link, which the page writes and this reads. A link carries it to play the song as
+///     drew it. Written as a format's character, then a character for every value of <see cref="StepScale" />'s steps, in
+///     <see cref="Base62" />'s digits, each at a fixed place, then every other value as its bits, one after another, five to
+///     a character, from 0 to V, the last character's left over as zeros: short enough for a link, which the page writes
+///     and this reads, and in letters and digits alone, which a chat leaves as they are. A link carries it to play the song as
 ///     it was shared, and every event about a song carries it to say what was heard.
 /// </summary>
-/// <param name="Unconventionality">How far the song strays from convention, from 0 to 63.</param>
+/// <param name="Unconventionality">How far the song strays from convention, from 0 to 61.</param>
 /// <param name="Facets">Every facet's, in the order of <see cref="FacetOrder" />.</param>
 /// <param name="Tempo">Its tempo, by its step (<see cref="TempoScale" />).</param>
 /// <param name="Key">Its key, as semitones above C.</param>
 /// <param name="Meter">Its meter, by its place among <see cref="Core.Composition.Meter.Options" />.</param>
 /// <param name="Mode">The scale it starts in, by its place among <see cref="Scales.All" />.</param>
-/// <param name="Swing">How much it swings, from 0, straight, to 63, a triplet's swing.</param>
+/// <param name="Swing">How much it swings, from 0, straight, to 61, a triplet's swing.</param>
 /// <param name="Length">How long it plays, by its step (<see cref="LengthScale" />).</param>
 /// <param name="Parts">Every part's, in the order of <see cref="PartOrder" />.</param>
 /// <param name="DrumGroups">Every drum group's, in the order of <see cref="SongMix.DrumGroupNames" />.</param>
-/// <param name="Volume">How loud the whole song plays, from 0 to 63.</param>
+/// <param name="Volume">How loud the whole song plays, from 0 to 61.</param>
 /// <param name="DrumPieces">The drum pieces given, as a set, or not; every piece in or out, in the order of <see cref="Core.Composition.DrumPieces.All" />.</param>
 public sealed record SongSettings(
     Setting Unconventionality,
@@ -41,7 +42,7 @@ public sealed record SongSettings(
 )
 {
     /// <summary>The format this writes, as its first character; one that is read differently takes the next.</summary>
-    public const char FormatCharacter = 'A';
+    public const char FormatCharacter = 'B';
 
     public static ImmutableArray<Facet> FacetOrder { get; } =
         [Facet.Feel, Facet.Groove, Facet.Fills, Facet.Form, Facet.Chords, Facet.Progression, Facet.Scale, Facet.Melody, Facet.Sound];
@@ -59,7 +60,7 @@ public sealed record SongSettings(
     private const int PlaysBits = 2;
     private const int ProgramBits = 7;
 
-    // the values of 64 steps, a character each: the unconventionality, the facets, the tempo, the swing, the length,
+    // the values of the steps, a character each: the unconventionality, the facets, the tempo, the swing, the length,
     // the volume, every part's volume and pan, and every drum group's volume
     private static int CharacterCount => 1 + FacetOrder.Length + 1 + 1 + 1 + 1 + 2 * PartOrder.Length + SongMix.DrumGroupNames.Length;
 
@@ -69,11 +70,14 @@ public sealed record SongSettings(
                                    + 1 + Core.Composition.DrumPieces.All.Length;
 
     /// <summary>How many characters follow the format's.</summary>
-    public static int FixedLength => CharacterCount + (BitCount + 5) / 6;
+    public static int FixedLength => CharacterCount + (BitCount + BitsPerCharacter - 1) / BitsPerCharacter;
+
+    /// <summary>How many bits a character carries, from 0 to V, of the 62 digits the whole of those 32 values can be.</summary>
+    private const int BitsPerCharacter = 5;
 
     private IEnumerable<Setting> GivenValues => [Unconventionality, ..Facets, Tempo, Key, Meter, Mode, Swing, Length];
 
-    /// <summary>The settings as their format's character, a character for every value of 64 steps, and the rest's bits.</summary>
+    /// <summary>The settings as their format's character, a character for every value of the steps, and the rest's bits.</summary>
     public string Format()
     {
         if (Facets.Length != FacetOrder.Length || Parts.Length != PartOrder.Length || DrumGroups.Length != SongMix.DrumGroupNames.Length
@@ -84,7 +88,7 @@ public sealed record SongSettings(
         foreach (var part in Parts)
             characters.AddRange([part.Volume, part.Pan.Value]);
         characters.AddRange(DrumGroups.Select(x => x.Volume));
-        if (characters.Any(x => x is < 0 or > 63))
+        if (characters.Any(x => x is < 0 or > StepScale.Last))
             throw new InvalidOperationException("A value does not fit in a character.");
 
         var bits = new List<bool>();
@@ -108,14 +112,14 @@ public sealed record SongSettings(
 
         bits.AddRange([DrumPieces.IsGiven, ..DrumPieces.Pieces]);
         characters.AddRange(Pack(bits));
-        return FormatCharacter + new string([..characters.Select(x => Base64.Digits[x])]);
+        return FormatCharacter + new string([..characters.Select(x => Base62.Digits[x])]);
     }
 
-    /// <summary>Bits six to a character, the first the lowest, the last character's left over as zeros.</summary>
+    /// <summary>Bits five to a character, the first the lowest, the last character's left over as zeros.</summary>
     private static IEnumerable<int> Pack(IReadOnlyList<bool> bits)
     {
-        for (var i = 0; i < bits.Count; i += 6)
-            yield return bits.Skip(i).Take(6).Select((x, bit) => x ? 1 << bit : 0).Sum();
+        for (var i = 0; i < bits.Count; i += BitsPerCharacter)
+            yield return bits.Skip(i).Take(BitsPerCharacter).Select((x, bit) => x ? 1 << bit : 0).Sum();
     }
 
     /// <summary>Reads settings the page wrote, or none for anything that is not settings of this format.</summary>
@@ -124,8 +128,11 @@ public sealed record SongSettings(
         if (text is null || text.Length != 1 + FixedLength || text[0] != FormatCharacter)
             return null;
 
-        var values = text[1..(1 + FixedLength)].Select(x => Base64.Digits.IndexOf(x)).ToArray();
-        if (values.Any(x => x < 0))
+        var values = text[1..(1 + FixedLength)].Select(x => Base62.Digits.IndexOf(x)).ToArray();
+        // a value no more than the last step, and a character of bits no more than five of them, its padding zeros, so
+        // that settings are written one way only
+        if (values[..CharacterCount].Any(x => x is < 0 or > StepScale.Last) || values[CharacterCount..].Any(x => x is < 0 or >= 1 << BitsPerCharacter)
+            || values[^1] >> (BitCount - (FixedLength - CharacterCount - 1) * BitsPerCharacter) != 0)
             return null;
 
         var at = 0;
@@ -136,7 +143,7 @@ public sealed record SongSettings(
         var volume = Next();
         var mixes = PartOrder.Select(_ => (Volume: Next(), Pan: Next())).ToArray();
         var groups = SongMix.DrumGroupNames.Select(_ => new DrumGroupSettings(Next())).ToImmutableArray();
-        var bits = values[at..].SelectMany(x => Enumerable.Range(0, 6).Select(bit => (x >> bit & 1) == 1)).ToArray();
+        var bits = values[at..].SelectMany(x => Enumerable.Range(0, BitsPerCharacter).Select(bit => (x >> bit & 1) == 1)).ToArray();
 
         var b = 0;
         bool Bit() => bits[b++];
@@ -195,8 +202,8 @@ public sealed record SongSettings(
 
     /// <summary>
     ///     What of the settings names the song, as a seed does, whatever changes its notes: the switches of which of the
-    ///     unconventionality, the facets, the tempo, the key, the meter, the scale, the swing and the length are given, six to a
-    ///     character, the values of those given alone, every part's plays, the drum pieces given, six to a character behind
+    ///     unconventionality, the facets, the tempo, the key, the meter, the scale, the swing and the length are given, five to a
+    ///     character, the values of those given alone, every part's plays, the drum pieces given, five to a character behind
     ///     a 1, with the zeros at its end left off; empty where nothing is given, for a song its seed alone names. The switches say
     ///     how many values follow, and the parts are as many as ever, so that it reads one way only.
     /// </summary>
@@ -210,19 +217,19 @@ public sealed record SongSettings(
             if (DrumPieces.IsGiven)
                 values.AddRange([1, ..Pack(DrumPieces.Pieces)]);
 
-            return new string([..values.Select(x => Base64.Digits[x])]).TrimEnd('0');
+            return new string([..values.Select(x => Base62.Digits[x])]).TrimEnd('0');
         }
     }
 }
 
 /// <param name="IsGiven">Whether it was given, rather than drawn by the song.</param>
-/// <param name="Value">What it is, from 0 to 63 or the count of its options: as given, or as the song drew it.</param>
+/// <param name="Value">What it is, from 0 to 61 or the count of its options: as given, or as the song drew it.</param>
 public sealed record Setting(bool IsGiven, int Value);
 
 /// <param name="Plays">Whether the part is in the song: 0 as the song draws it, 1 given in, 2 given out.</param>
 /// <param name="Instrument">Its General MIDI program, the drums' kit, from 0 to 127.</param>
-/// <param name="Volume">How loud it plays, from 0 to 63.</param>
-/// <param name="Pan">Where it sits, from 0, left, through 32, the middle, to 63, right.</param>
+/// <param name="Volume">How loud it plays, from 0 to 61.</param>
+/// <param name="Pan">Where it sits, from 0, left, through 31, the middle, to 61, right.</param>
 public sealed record PartSettings(int Plays, Setting Instrument, int Volume, Setting Pan);
 
 /// <param name="IsGiven">Whether the drum pieces are given, in place of those the song draws.</param>
@@ -233,5 +240,5 @@ public sealed record DrumPieceSettings(bool IsGiven, ImmutableArray<bool> Pieces
     public static DrumPieceSettings Drawn { get; } = new(false, [..Core.Composition.DrumPieces.All.Select(_ => false)]);
 }
 
-/// <param name="Volume">How loud its drums play, from 0 to 63.</param>
+/// <param name="Volume">How loud its drums play, from 0 to 61.</param>
 public sealed record DrumGroupSettings(int Volume);

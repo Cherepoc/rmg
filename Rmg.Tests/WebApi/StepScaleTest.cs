@@ -6,7 +6,7 @@ public sealed class StepScaleTest
 {
     [Test]
     [Arguments(0, 0.0)]
-    [Arguments(16, 0.25)]
+    [Arguments(46, 0.75)]
     [Arguments(StepScale.Middle, 0.5)]
     [Arguments(StepScale.Last, 1.0)]
     public async Task AStep_IsItsAmount_TheMiddleStepExactlyAHalf(int step, double amount)

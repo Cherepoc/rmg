@@ -2,25 +2,31 @@
  *     What a song is heard with, written short enough for a link: its unconventionality and facets, its tempo, key, meter,
  *     scale, swing and length, its parts and their mix, its drum groups and drum pieces, and its volume, each value given,
  *     or as the song drew it; a genre is kept apart from them. The server reads the same format (SongSettings), which a
- *     link and every event about a song carry: a format's character, then a character for every value of 64 steps at a
- *     fixed place, then every other value as its bits, one after another, six to a character. Seeds are written in the
- *     same 64 digits.
+ *     link and every event about a song carry: a format's character, then a character for every value of 62 steps at a
+ *     fixed place, then every other value as its bits, one after another, five to a character. Seeds are written in the
+ *     same 62 digits, the letters and digits alone, which a chat's markdown leaves as they are.
  */
 
 /** The format this writes, as its first character; one that is read differently takes the next. */
-const FORMAT_CHARACTER = "A";
+const FORMAT_CHARACTER = "B";
 
-/** The 64 digits: the digits, the letters, "-" and "_", in base 62's order and on from it. */
-const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_";
+/** The 62 digits: the digits, the capitals and the small letters (the server's Base62). */
+const DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+/** The 64 digits seeds were written in before, which a link of an older format carries its seed in. */
+const OLD_DIGITS = `${DIGITS}-_`;
+
+/** How many bits a character of the settings carries, from 0 to V. */
+const BITS_PER_CHARACTER = 5;
 
 /** The last step of a value: the most experimental, the loudest, the right. */
-export const LAST_STEP = 63;
+export const LAST_STEP = 61;
 
 /**
- *     The middle step, 32 below it and 31 above, as MIDI's pan has, so that a value can be given at its middle: 50%, a pan
- *     in the middle, a tempo of 120 beats a minute (the server's StepScale).
+ *     The middle step, 31 below it and 30 above, as MIDI's pan has one more below, so that a value can be given at its
+ *     middle: 50%, a pan in the middle, a tempo of 120 beats a minute (the server's StepScale).
  */
-export const MIDDLE_STEP = 32;
+export const MIDDLE_STEP = 31;
 
 /** A step's amount, from 0 at the first through 0.5 at the middle to 1 at the last. */
 export function fromStep(step) {
@@ -66,7 +72,7 @@ const MODE_BITS = 4;
 const PLAYS_BITS = 2;
 const PROGRAM_BITS = 7;
 
-// the values of 64 steps, a character each: the unconventionality, the facets, the tempo, the swing, the length, the volume, every
+// the values of 62 steps, a character each: the unconventionality, the facets, the tempo, the swing, the length, the volume, every
 // part's volume and pan, and every drum group's volume; then the rest, bit by bit: whether each value is given, the key,
 // the meter and the scale, every part's plays, whether its pan and its instrument are given and its program, and whether
 // the drum pieces are given and every piece's being in
@@ -74,37 +80,49 @@ const CHARACTER_COUNT = 1 + FACETS.length + 1 + 1 + 1 + 1 + 2 * FORMAT_PARTS.len
 const BIT_COUNT = GIVEN.length + KEY_BITS + METER_BITS + MODE_BITS + FORMAT_PARTS.length * (PLAYS_BITS + 2 + PROGRAM_BITS) + 1 + DRUM_PIECES.length;
 
 // how many characters the fixed places take, behind the format's
-const FIXED_LENGTH = CHARACTER_COUNT + Math.ceil(BIT_COUNT / 6);
+const FIXED_LENGTH = CHARACTER_COUNT + Math.ceil(BIT_COUNT / BITS_PER_CHARACTER);
 
 const SEED_LENGTH = 11;
 
 function encode(number, length) {
     const digits = [];
     for (let i = 0; i < length; i++) {
-        digits.push(DIGITS[Number(number % 64n)]);
-        number /= 64n;
+        digits.push(DIGITS[Number(number % 62n)]);
+        number /= 62n;
     }
     return digits.reverse().join("");
 }
 
-function decode(text) {
+function decode(text, digits) {
     let number = 0n;
     for (const digit of text) {
-        const value = DIGITS.indexOf(digit);
+        const value = digits.indexOf(digit);
         if (value < 0) return null;
-        number = number * 64n + BigInt(value);
+        number = number * BigInt(digits.length) + BigInt(value);
     }
     return number;
 }
 
 /**
- *     A seed as the page keeps it: its 64 digits, all 64 of its bits, with no zeros in front, which is how the server
+ *     A seed as the page keeps it: its 62 digits, all 64 of its bits, with no zeros in front, which is how the server
  *     writes it; null for anything that is not a seed. A seed never becomes a JavaScript number, which holds 53 bits
  *     exactly and no more.
  */
 export function readSeed(text) {
+    return readSeedIn(text, DIGITS);
+}
+
+/**
+ *     The seed of a link: in the 64 digits seeds were written in before, where the link's settings are of an older
+ *     format, so that an old link plays its own song and never another; as readSeed otherwise.
+ */
+export function readLinkedSeed(text, settingsText) {
+    return readSeedIn(text, settingsText !== null && settingsText[0] !== FORMAT_CHARACTER ? OLD_DIGITS : DIGITS);
+}
+
+function readSeedIn(text, digits) {
     if (typeof text !== "string" || text.length === 0 || text.length > SEED_LENGTH) return null;
-    const number = decode(text);
+    const number = decode(text, digits);
     return number !== null && number <= 0xFFFFFFFFFFFFFFFFn ? encode(number, SEED_LENGTH).replace(/^0+(?=.)/, "") : null;
 }
 
@@ -112,11 +130,11 @@ function givenSetting(settings, name) {
     return FACETS.includes(name) ? settings.facets[name] : settings[name];
 }
 
-/** Six switches a character, the first the lowest bit. */
+/** Five switches a character, the first the lowest bit. */
 function packSwitches(switches) {
     const values = [];
-    for (let i = 0; i < switches.length; i += 6)
-        values.push(switches.slice(i, i + 6).reduce((sum, isOn, bit) => sum + (isOn ? 1 << bit : 0), 0));
+    for (let i = 0; i < switches.length; i += BITS_PER_CHARACTER)
+        values.push(switches.slice(i, i + BITS_PER_CHARACTER).reduce((sum, isOn, bit) => sum + (isOn ? 1 << bit : 0), 0));
     return values;
 }
 
@@ -128,7 +146,7 @@ export function formatSettings(settings) {
     const characters = [settings.unconventionality.value, ...FACETS.map((facet) => settings.facets[facet].value), settings.tempo.value, settings.swing.value, settings.length.value, settings.volume];
     for (const name of FORMAT_PARTS) characters.push(settings.parts[name].volume, settings.parts[name].pan.value);
     for (const group of DRUM_GROUPS) characters.push(settings.drumGroups[group].volume);
-    if (characters.some((x) => !Number.isInteger(x) || x < 0 || x > 63)) throw new RangeError("A value does not fit in a character.");
+    if (characters.some((x) => !Number.isInteger(x) || x < 0 || x > LAST_STEP)) throw new RangeError("A value does not fit in a character.");
 
     const bits = GIVEN.map((name) => givenSetting(settings, name).isGiven);
     const write = (value, count) => {
@@ -152,7 +170,11 @@ export function formatSettings(settings) {
 export function parseSettings(text) {
     if (typeof text !== "string" || text[0] !== FORMAT_CHARACTER || text.length !== 1 + FIXED_LENGTH) return null;
     const values = [...text.slice(1)].map((x) => DIGITS.indexOf(x));
-    if (values.some((x) => x < 0)) return null;
+    // a value no more than the last step, and a character of bits no more than five of them, its padding zeros, so that
+    // settings are written one way only, as the server reads them
+    const used = BIT_COUNT - (FIXED_LENGTH - CHARACTER_COUNT - 1) * BITS_PER_CHARACTER;
+    if (values.some((x, i) => x < 0 || x > (i < CHARACTER_COUNT ? LAST_STEP : (1 << BITS_PER_CHARACTER) - 1)) || values[values.length - 1] >> used !== 0)
+        return null;
 
     let at = 0;
     const next = () => values[at++];
@@ -164,7 +186,7 @@ export function parseSettings(text) {
     const volume = next();
     const mixes = FORMAT_PARTS.map(() => ({ volume: next(), pan: next() }));
     const groupVolumes = DRUM_GROUPS.map(() => next());
-    const bits = values.slice(at).flatMap((x) => [0, 1, 2, 3, 4, 5].map((bit) => ((x >> bit) & 1) === 1));
+    const bits = values.slice(at).flatMap((x) => [0, 1, 2, 3, 4].map((bit) => ((x >> bit) & 1) === 1));
 
     let b = 0;
     const bit = () => bits[b++];
@@ -204,7 +226,7 @@ export function parseSettings(text) {
 
 /**
  *     What of the settings names the song, as its seed does, whatever changes its notes: the switches of which values
- *     are given, six to a character, the values of those given alone, every part's plays, the drum pieces given, six
+ *     are given, five to a character, the values of those given alone, every part's plays, the drum pieces given, five
  *     to a character behind a 1, with the zeros at its end left off; "" where nothing is given.
  *     The server works it out the same way (SongSettings.Identity).
  */

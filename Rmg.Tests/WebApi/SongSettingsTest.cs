@@ -6,9 +6,12 @@ namespace Rmg.Tests.WebApi;
 
 public sealed class SongSettingsTest
 {
-    /// <summary>Settings with every field set apart from its neighbours, the ends among them.</summary>
+    /// <summary>
+    ///     Settings with every field set apart from its neighbours, the ends among them: the last step, the last program and
+    ///     the last drum piece, whose bit is the last character's.
+    /// </summary>
     public static SongSettings Mixed { get; } = new(
-        new Setting(true, 63),
+        new Setting(true, 61),
         [..SongSettings.FacetOrder.Select((_, i) => new Setting(i % 2 == 0, i * 7))],
         new Setting(true, 3),
         new Setting(false, 11),
@@ -17,12 +20,12 @@ public sealed class SongSettingsTest
         new Setting(false, 45),
         new Setting(true, 20),
         [
-            ..SongSettings.PartOrder.SkipLast(1).Select((_, i) => new PartSettings(i % 3, new Setting(i % 2 == 1, i * 18), 63 - i, new Setting(i == 0, i * 9))),
+            ..SongSettings.PartOrder.SkipLast(1).Select((_, i) => new PartSettings(i % 3, new Setting(i % 2 == 1, i == 7 ? 127 : i * 18), 61 - i, new Setting(i == 0, i * 8))),
             new PartSettings(1, new Setting(true, 65), 40, new Setting(true, 50))
         ],
         [..SongMix.DrumGroupNames.Select((_, i) => new DrumGroupSettings(i * 9))],
         50,
-        new DrumPieceSettings(true, [..DrumPieces.All.Select((_, i) => i % 3 == 0)])
+        new DrumPieceSettings(true, [..DrumPieces.All.Select((_, i) => i % 3 == 0 || i == DrumPieces.All.Length - 1)])
     );
 
     /// <summary>Nothing given, everything at nothing.</summary>
@@ -55,23 +58,24 @@ public sealed class SongSettingsTest
             var text = settings.Format();
 
             await Assert.That(text.Length).IsEqualTo(1 + SongSettings.FixedLength);
-            await Assert.That(text.All(x => char.IsAsciiLetterOrDigit(x) || x is '-' or '_')).IsTrue();
+            // letters and digits alone, which a link carries and a chat's markdown leaves as they are
+            await Assert.That(text.All(char.IsAsciiLetterOrDigit)).IsTrue();
             await Assert.That(AreSame(SongSettings.Parse(text)!, settings)).IsTrue();
         }
     }
 
     [Test]
-    public async Task EveryValueOf64Steps_IsACharacterAtAFixedPlace_AndTheRestBitsSixToACharacter()
+    public async Task EveryValueOf62Steps_IsACharacterAtAFixedPlace_AndTheRestBitsFiveToACharacter()
     {
         // the unconventionality first, then the facets, the tempo, the swing, the length and the volume, every part's
-        // volume and pan, and every drum group's volume, 39 characters; then the rest's 151 bits, 26 characters
+        // volume and pan, and every drum group's volume, 39 characters; then the rest's 151 bits, 31 characters
         var text = Mixed.Format();
-        await Assert.That(text[1]).IsEqualTo('_');
+        await Assert.That(text[1]).IsEqualTo('z');
         await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length]).IsEqualTo('3');
         await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 1]).IsEqualTo('j');
         await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 2]).IsEqualTo('K');
         await Assert.That(text[1 + 1 + SongSettings.FacetOrder.Length + 3]).IsEqualTo('o');
-        await Assert.That(SongSettings.FixedLength).IsEqualTo(39 + 26);
+        await Assert.That(SongSettings.FixedLength).IsEqualTo(39 + 31);
         // every meter and every scale fits its bits
         await Assert.That(Meter.Options.Length).IsLessThanOrEqualTo(1 << SongSettings.MeterBits);
         await Assert.That(Rmg.Core.Composition.Scales.All.Length).IsLessThanOrEqualTo(1 << SongSettings.ModeBits);
@@ -81,14 +85,14 @@ public sealed class SongSettingsTest
     public async Task TheFormat_IsFixed()
     {
         // the page writes the same, so a change to either side shows here and in the page's check against it
-        await Assert.That(Silent.Format()).IsEqualTo("A" + new string('0', SongSettings.FixedLength));
+        await Assert.That(Silent.Format()).IsEqualTo("B" + new string('0', SongSettings.FixedLength));
         await Assert.That(Mixed.Format()).IsEqualTo(MixedText);
         await Assert.That(Mixed.Identity).IsEqualTo(MixedIdentity);
     }
 
-    public const string MixedText = "A_07ELSZgnu3jKo_0-9zIyRxawjvsu_eo09IRajshQxAC18b8aGR1ILBmEzt1daaa0";
+    public const string MixedText = "Bz07ELSZgnu3jKoz0y8xGwOvWuetmsueo09IRajsBLDN261GK42IGM5GKAB0RPVR1EI49I1";
 
-    public const string MixedIdentity = "hQB_0ESgu32CK01201201119999";
+    public const string MixedIdentity = "BLD1z0ESgu32CK01201201119I496";
 
     [Test]
     public async Task ATempoStep_RunsFrom60Through120To240BeatsAMinute_EveryStepFasterByAboutTheSame()
@@ -110,6 +114,18 @@ public sealed class SongSettingsTest
         await Assert.That(SongSettings.Parse("9" + MixedText[1..])).IsNull();
         // and anything behind the fixed places
         await Assert.That(SongSettings.Parse(MixedText + "A")).IsNull();
+    }
+
+    [Test]
+    public async Task SettingsWrittenAnotherWay_ReadAsNone_SoThatASongHasOneIdentity()
+    {
+        // a character of bits past V, five bits' most, and the last character's padding, past its one bit, set
+        var bits = 1 + 39;
+        await Assert.That(SongSettings.Parse(MixedText[..bits] + "W" + MixedText[(bits + 1)..])).IsNull();
+        await Assert.That(SongSettings.Parse(MixedText[..^1] + "3")).IsNull();
+        // a value past the last step
+        await Assert.That(SongSettings.Parse(MixedText[..1] + "z" + MixedText[2..])).IsNotNull();
+        await Assert.That(SongSettings.Parse(MixedText[..1] + "_" + MixedText[2..])).IsNull();
     }
 
     [Test]

@@ -8,10 +8,10 @@ public sealed class SettingsLinkTest(Site site)
 {
     // settings with every field set apart from its neighbours, as the server writes them (Rmg.Tests'
     // SongSettingsTest.MixedText)
-    private const string MixedText = "A_07ELSZgnu3jKo_0-9zIyRxawjvsu_eo09IRajshQxAC18b8aGR1ILBmEzt1daaa0";
+    private const string MixedText = "Bz07ELSZgnu3jKoz0y8xGwOvWuetmsueo09IRajsBLDN261GK42IGM5GKAB0RPVR1EI49I1";
 
     // what of them names the song, as the server works it out (SongSettingsTest.MixedIdentity)
-    private const string MixedIdentity = "hQB_0ESgu32CK01201201119999";
+    private const string MixedIdentity = "BLD1z0ESgu32CK01201201119I496";
 
     private static JsonElement Part(SongRequest request, string part) => request.Body.GetProperty("parts").GetProperty(part);
 
@@ -33,9 +33,9 @@ public sealed class SettingsLinkTest(Site site)
         // the mode given, the last scale but one, and the swing drawn
         await Assert.That(asked.Body.GetProperty("mode").GetInt32()).IsEqualTo(12);
         await Assert.That(asked.Body.TryGetProperty("swing", out _)).IsFalse();
-        // every third drum piece, from the first, in the server's order, which the page keeps the same
+        // every third drum piece, from the first, and the last, in the server's order, which the page keeps the same
         await Assert.That(asked.Body.GetProperty("drumPieces").EnumerateArray().Select(x => x.GetString())).IsEquivalentTo(
-            ["kick", "clap", "tambourine", "tom", "bongo", "agogo", "woodBlock", "cuica"]);
+            ["kick", "clap", "tambourine", "tom", "bongo", "agogo", "woodBlock", "cuica", "whistle"]);
         // the counter-melody left out of the file, which the page no longer does, every part in it
         await Assert.That(Part(asked, "counterMelody").TryGetProperty("isOn", out _)).IsFalse();
         // and the solo part's, given in on its instrument
@@ -45,16 +45,15 @@ public sealed class SettingsLinkTest(Site site)
     }
 
     [Test]
-    public async Task ALinkMade_HasNoUnderscore_ForAChatToTakeForItalics_AndIsReadAsItWas()
+    public async Task ALinkMade_IsLettersAndDigitsAlone_ForAChatToLeaveAsTheyAre_AndIsReadAsItWas()
     {
         await using var page = await SongPage.Open(site, $"?song=1&settings={MixedText}");
         await page.FirstSong();
         await page.Settled();
 
-        // the address, as Share hands it on, its underscores %5F, which the page reads back as underscores
+        // the address, as Share hands it on: no "_" or "-", which a chat's markdown may take for its own
         var link = await page.Page.EvaluateAsync<string>("() => location.href");
-        await Assert.That(link).DoesNotContain("_");
-        await Assert.That(await page.Page.EvaluateAsync<string>("() => new URL(location.href).searchParams.get('settings')")).Contains("_");
+        await Assert.That(link[link.IndexOf('?')..]).Matches("^\\?[A-Za-z0-9=&]+$");
 
         // opened elsewhere, the song asked for as it was, with nothing said of its settings
         await using var other = await SongPage.Open(site, link[link.IndexOf('?')..]);
@@ -64,6 +63,19 @@ public sealed class SettingsLinkTest(Site site)
         await Assert.That(await other.Status()).DoesNotContain("could not be read");
         await Assert.That(page.Errors).IsEmpty();
         await Assert.That(other.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task ALinkOfAnOlderFormat_PlaysItsOwnSong_ItsSeedInTheDigitsOfThen()
+    {
+        // a seed of 127, as the 64 digits wrote it then, "1_", and as the 62 write it now, "23"
+        await using var page = await SongPage.Open(site, "?song=1_&settings=6VXcaCWOe6YTT_j_W_l_d_W_0_I_Y_10I0I2mWHGM8700y0QWWgv08");
+        await page.FirstSong();
+        await page.Settled();
+
+        await Assert.That(page.Requests[0].Body.GetProperty("seed").GetString()).IsEqualTo("23");
+        await Assert.That(await page.Status()).Contains("could not be read");
+        await Assert.That(page.Errors).IsEmpty();
     }
 
     [Test]

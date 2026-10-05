@@ -32,9 +32,9 @@ public sealed class DoubleClickTest(Site site)
 
         await Setting(page, "feel").DblClickAsync(NearItsStart);
 
-        await Assert.That(await Setting(page, "feel").InputValueAsync()).IsEqualTo("32");
+        await Assert.That(await Setting(page, "feel").InputValueAsync()).IsEqualTo("31");
         await Assert.That(await ValueOf(page, "feel").TextContentAsync()).IsEqualTo("50%");
-        await page.Until(() => page.Requests[^1].Facet("feel") == 32, "the song asked for with the feel at its middle");
+        await page.Until(() => page.Requests[^1].Facet("feel") == 31, "the song asked for with the feel at its middle");
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -47,7 +47,7 @@ public sealed class DoubleClickTest(Site site)
         await Setting(page, "tempo").DblClickAsync(NearItsStart);
 
         await Assert.That(await ValueOf(page, "tempo").TextContentAsync()).IsEqualTo("120 bpm");
-        await page.Until(() => page.Requests[^1].Body.TryGetProperty("tempo", out var tempo) && tempo.ValueKind == System.Text.Json.JsonValueKind.Number && tempo.GetInt32() == 32,
+        await page.Until(() => page.Requests[^1].Body.TryGetProperty("tempo", out var tempo) && tempo.ValueKind == System.Text.Json.JsonValueKind.Number && tempo.GetInt32() == 31,
             "the song asked for at 120 beats a minute");
         await Assert.That(page.Errors).IsEmpty();
     }
@@ -73,10 +73,10 @@ public sealed class DoubleClickTest(Site site)
         var (x, y) = await Place();
         await page.Page.Touchscreen.TapAsync(x, y);
         await page.Page.WaitForTimeoutAsync(500);
-        await Assert.That(await slider.InputValueAsync()).IsNotEqualTo("32");
+        await Assert.That(await slider.InputValueAsync()).IsNotEqualTo("31");
 
         // two taps soon after each other, again where a busy machine let more than a double-tap's time pass between them
-        for (var attempt = 0; attempt < 5 && await slider.InputValueAsync() != "32"; attempt++)
+        for (var attempt = 0; attempt < 5 && await slider.InputValueAsync() != "31"; attempt++)
         {
             (x, y) = await Place();
             await page.Page.Touchscreen.TapAsync(x, y);
@@ -84,7 +84,7 @@ public sealed class DoubleClickTest(Site site)
             await page.Page.WaitForTimeoutAsync(400);
         }
 
-        await page.Until(async () => await slider.InputValueAsync() == "32", "the feel back to its middle");
+        await page.Until(async () => await slider.InputValueAsync() == "31", "the feel back to its middle");
         await Assert.That(await ValueOf(page, "feel").TextContentAsync()).IsEqualTo("50%");
         await Assert.That(page.Errors).IsEmpty();
     }
@@ -115,9 +115,9 @@ public sealed class DoubleClickTest(Site site)
         await volume.DblClickAsync(NearItsStart);
         await pan.DblClickAsync(NearItsStart);
 
-        await Assert.That(await volume.InputValueAsync()).IsEqualTo("63");
+        await Assert.That(await volume.InputValueAsync()).IsEqualTo("61");
         await Assert.That(await melody.Locator(".volume output").TextContentAsync()).IsEqualTo("100%");
-        await Assert.That(await pan.InputValueAsync()).IsEqualTo("32");
+        await Assert.That(await pan.InputValueAsync()).IsEqualTo("31");
         await Assert.That(await melody.Locator(".pan output").TextContentAsync()).IsEqualTo("C");
         await Assert.That(page.Errors).IsEmpty();
     }
@@ -130,7 +130,7 @@ public sealed class DoubleClickTest(Site site)
         await page.Page.Locator("#song-volume").DblClickAsync(NearItsStart);
         await page.Page.Locator("#volume").DblClickAsync(NearItsStart);
 
-        await Assert.That(await page.Page.Locator("#song-volume").InputValueAsync()).IsEqualTo("63");
+        await Assert.That(await page.Page.Locator("#song-volume").InputValueAsync()).IsEqualTo("61");
         await Assert.That(await page.Page.Locator("#song-volume-value").TextContentAsync()).IsEqualTo("100%");
         await Assert.That(await page.Page.Locator("#volume").InputValueAsync()).IsEqualTo("1");
         await Assert.That(await page.Page.Locator("#volume-value").TextContentAsync()).IsEqualTo("100%");
