@@ -286,11 +286,19 @@ a link carries. What is left:
      A line's question and its answer are two plays of the pattern (LinePattern), which step 4 takes up.
   2. Done: a progression over P phrases (Progressions.Generate, its place rules data); the phrases' ends home about 60%
      of the time, the chord before an ending free, which the genre's lean of an ending may press, should listening ask.
+  Tried with every section three phrases: every song made, nothing thrown, the bar states and the progression twelve
+  bars long; but 27 tests fail, among them the measured ones a longer song changes and, what is wrong, the pitched
+  tracks' chord shapes apart past the first phrase ("PitchedTracks_ShareTheChordShapeAtTheSameTime", at beat 72) and the
+  melody 1.8 notes a bar where 3 at least are (its question and answer each a pattern, LinePattern, its notes a
+  pattern's first phrase): a track's bars are made a phrase at a time. So before P is drawn:
+  2b. **A track's bars across the pattern's phrases:** a pitched track's and a drum's bars made for every bar of the
+     pattern (PatternGenerator, the phrase scheme repeating a phrase's bars in each phrase), their chord shapes the
+     pattern's own; every test passing with every section three phrases, as the trial was, but the measured ones.
+  2c. **The line across phrases** (step 4 below, brought forward): a line's question and answer within the pattern,
+     its first phrase stating, a middle one restating, the last answering, rather than two plays of it.
   3. **P a genre's** (a pool, "Phrases a progression": 4, 8, 12, 16 bars), drawn a section from a stream of its own;
      the songs' own one alone, so that a song in no genre is as it was; a section's plays counted in phrases, so that
      a 12-bar plays once or twice where a 4-bar plays four times, and its length as near (SectionLength, SongLength).
-  4. **The melody across phrases:** the first phrase states, a middle one restates it, the last answers (AAB), the
-     blues' lyric form, as a line's answer bars are now (MelodyLayers.AnswerBars) but by the phrase's place.
   5. **Fills and solos by the pattern:** a fill's largest at the pattern's end, its smaller at a phrase's; a solo's
      chorus a pattern (Solos), so that a blues solo takes 12-bar choruses.
   6. **Presets and listening:** Blues three phrases most, Jazz two (an 8-bar A), Folk two, Rock one or two; a report
