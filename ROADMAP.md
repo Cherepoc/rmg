@@ -297,12 +297,11 @@ Each item with its plan, and what it waits for.
   1. Done: a chord's scale one kind its lowest layer decides (`StateKinds.ScaleAlterations`, `StepAlterations`), the
      section's chords setting it and a key change's chain and pivot chords setting the key's own deeper, which wins;
      the fingerprint kept.
-  2. Named stages: what the song decides before assembly (its plan, structure, meters, hook, energies, parts,
-     facets, genre, streams) one record it reads, and the song after it a draft of its timeline and what stages hand
-     on (the fill runs, the melody's walks, the key changes, the drum solos), each field with who sets and reads it;
-     a fixed list of about fifteen stages, each traced by name with how many notes it changed; one turned off for a
-     test where it only edits the timeline. No order to configure, no graph of dependencies: the order is the music's.
-     A refactor: the fingerprint kept; a report of what each stage changes.
+  2. Done: the stages after assembly (`SongStages`: key changes, polymeter, fills, lift cues, drum solos, lines,
+     doubling, line chords, solos, pedal, solo answers, notes, instruments, expression), reading what the song decided
+     (`SongDecisions`) and handing on a draft (`SongDraft`), each recorded with its tracks' counts after it, one that
+     only edits left out for a test; the fingerprint kept. The counts tell a stage that adds or takes away notes, not
+     one that moves them, as the lines' restatement does; a stage's changes in place, should a report need them.
   3. The rules a song keeps in one suite run on finished songs (every note in its chord's scale, landings on the
      root, a length within bounds, nothing in a part's rest), structural checks between stages (positions within the
      song, notes in order), and the stage report to tell which stage moved what.

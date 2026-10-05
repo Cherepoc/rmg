@@ -129,6 +129,12 @@ internal static class TracePoints
     /// </summary>
     public const string CadenceRaise = "Cadence raise";
 
+    /// <summary>
+    ///     A stage of the song after it is put together, as it ends: its name and how many events or notes every track has
+    ///     (a tuple of a <c>string</c> and an <c>ImmutableSortedDictionary</c> of tracks and counts; <see cref="SongStages" />).
+    /// </summary>
+    public const string SongStage = "Song stage";
+
     /// <summary>A section's chords' own scales, in the progression's order (<see cref="ChordScale" />).</summary>
     public const string ChordScales = "Chord scales";
 

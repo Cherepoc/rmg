@@ -75,7 +75,11 @@ public static class SongGenerator
 
     /// <param name="overrides">What a test sets in place of the song's own draws.</param>
     /// <param name="cancellation">Gives the song up between its stages, which draw nothing to check it.</param>
-    internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings, SongOverrides overrides, CancellationToken cancellation)
+    internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings, SongOverrides overrides, CancellationToken cancellation) =>
+        GenerateSong(seed, progressionSettings, overrides, ImmutableHashSet<string>.Empty, cancellation);
+
+    /// <summary>The song of the seed, the stages given left out (<see cref="SongStages" />), as a test measures what one does.</summary>
+    internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings, SongOverrides overrides, IReadOnlySet<string> skipped, CancellationToken cancellation)
     {
         // every stage draws from its own random sequence, derived from the seed by the stage, so a change to what one
         // stage draws leaves what the others draw as it was
@@ -330,208 +334,14 @@ public static class SongGenerator
         foreach (var (role, soloist) in soloists)
             StateTrace.Record(TracePoints.Soloist, SectionGenerator.SectionTrace, 0, 0, StateMap.Default, 0, $"{role}", (role, soloist));
 
-        // the song put together as planned, and the lines the drums mark
+        // the song put together as planned, and the lines the drums mark, then every stage after it in its order
         cancellation.ThrowIfCancellationRequested();
         var form = formGenerator.Assemble(plan, played, sections);
-        var songTrackNoteTimelineMap = form.Edits.ApplyTo(form.Blocks.Unroll());
-        // a song may change key at a pattern's start: a middling one now and then going up for a last section that came
-        // back before, as for a last chorus, or playing a section, a chorus the likelier, in a key of its own, and the
-        // wilder ones anywhere, each place and each section drawing from a stream of its own
-        var keyChanges = KeyChange.Generate(
-            Stream(SongStream.KeyChange),
-            place => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.KeyChange), place)),
-            id => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SectionKey), id)),
-            songUnconventionality[Facet.Scale],
-            form.Map,
-            sectionIds,
-            structure.Roles,
-            // the last section's lift, at its repeat where it plays twice, before the outro where there is one
-            sectionIds.Length - 1 + (repeats ? 1 : 0) - (structure.Roles[sectionIds[^1]] == SectionRole.Outro ? 1 : 0)
-        );
-        // and play a section at a tempo of its own, a chorus the likelier, each section drawing from a stream of its own
-        var sectionTempos = SectionTempo.Generate(
-            place => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SectionTempo), place)),
-            songUnconventionality[Facet.Feel],
-            played,
-            structure.Roles
-        );
-        StateTrace.Record(TracePoints.SectionTempo, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", sectionTempos.Select(x => $"{x:F2}")), sectionTempos);
-        StateTrace.Record(TracePoints.KeyChange, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, keyChanges.IsEmpty ? "none" : string.Join(", ", keyChanges), keyChanges);
-        // and a key change led into by a chain of chords now and then, each change from a stream of its own
-        var (preparedKeys, preparedRoots, chains) = KeyChange.Prepare(
-            keyChanges,
-            songTrackNoteTimelineMap.CommonStateTimelineMap,
-            form.Map,
-            songUnconventionality[Facet.Scale],
-            place => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.KeyPreparation), place))
-        );
-        StateTrace.Record(TracePoints.KeyPreparation, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", chains.Select(x => $"{x.Chords.Length} into {x.Change}")), chains);
-        songTrackNoteTimelineMap = songTrackNoteTimelineMap.MergeStateTimelineMap(form.SongState)
-            .MergeStateTimelineMap(KeyChange.ToStateTimelineMap(preparedKeys, form.Map.Duration))
-            .MergeStateTimelineMap(preparedRoots)
-            .MergeStateTimelineMap(SectionTempo.ToStateTimelineMap(sectionTempos, form.Map, form.Map.Duration, place => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.TempoRamps), place))))
-            .MergeStateMap(commonStateMap)
-            .MergeStateMap(Groove.ToStateMap(swing, grooveContext));
-
-        // a section's figure of its own length run across the bar lines now and then, from a stream of its own for each
-        // section, before the drums mark the lines and the lines are placed over it
-        var polymeters = Polymeter.Generate(
-            id => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Polymeter), id)),
-            id => generateSection(id).Facets[Facet.Feel],
-            sectionMeters,
-            sectionIds,
-            absent
-        );
-        StateTrace.Record(TracePoints.Polymeter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", polymeters.Select(x => $"{x.Key} {x.Value}")), polymeters);
-        songTrackNoteTimelineMap = Polymeter.Apply(
-            songTrackNoteTimelineMap,
-            tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).ToDictionary(x => x.Key, x => x.Value.Role),
-            DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber),
-            DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber),
-            form.Map,
-            polymeters,
-            id => generateSection(id).Bindings
-        );
-
-        // the drums mark the lines, now that the song is put together
-        cancellation.ThrowIfCancellationRequested();
-        var fills = new FillGenerator(Stream(SongStream.Fills), tracks, Of(Facet.Fills), meter, Stream(SongStream.UnheardLandings), genre);
-        songTrackNoteTimelineMap = fills.Generate(songTrackNoteTimelineMap, form.Lines, form.Map);
-        // and announce a bigger section, the hi-hat opening and the snare on its head before it
-        songTrackNoteTimelineMap = LiftCues.Apply(songTrackNoteTimelineMap, form.Lines);
-        // and the drum solos, the drummer's own, over the groove they quote
-        songTrackNoteTimelineMap = DrumSolos.Apply(
-            songTrackNoteTimelineMap,
-            tracks.SongDrums,
-            form.Map,
-            solos,
-            soloists.GetValueOrDefault(TrackRole.Drum),
-            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.DrumSolo), index)),
-            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.DrumSoloStacks), index)),
-            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.DrumSoloFeet), index)),
-            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.DrumSoloPlayers), index)),
-            index => generateSection(played[index]).Facets[Facet.Groove],
-            meter
-        );
-
-        // the lines placed over the whole song, as they go on from section to section and lead into the next: the melody,
-        // and the bass
-        // a hook intro's notes of each as its chorus plays them, before what leads into the first section
-        var hookChorus = form.Map.Sections.FirstOrDefault(x => structure.Roles[x.SectionId] == SectionRole.Chorus)?.Start ?? 0;
-        TrackEventStateTimelineMap<StateMap> PlaceLine(TrackEventStateTimelineMap<StateMap> song, KeyValuePair<int, IInstrumentTrack> track, LineProfile profile) =>
-            SongFormGenerator.QuoteHook(LinePattern.Place(song, track.Key, (PitchInstrumentTrack)track.Value, profile, form.Map), track.Key, form.Map, hookChorus);
-        var melodyTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Melody);
-        songTrackNoteTimelineMap = PlaceLine(songTrackNoteTimelineMap, melodyTrack, MelodyLayers.Line);
-        var bassTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Bass);
-        songTrackNoteTimelineMap = PlaceLine(songTrackNoteTimelineMap, bassTrack, BassLeadingLayers.Line);
-        // and the bass walking with the drums' runs into a new section now and then, from where it is placed, and the
-        // melody leading into it where it rests, each from a sequence of its own
-        (songTrackNoteTimelineMap, _) = LineFills.Apply(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value, fills.Runs, Stream(SongStream.BassFills), form.Map.MeterAt, LineFills.Bass, ImmutableHashSet<double>.Empty);
-        (songTrackNoteTimelineMap, var melodyWalks) = LineFills.Apply(songTrackNoteTimelineMap, melodyTrack.Key, (PitchInstrumentTrack)melodyTrack.Value, fills.Runs, Stream(SongStream.MelodyFills), form.Map.MeterAt, LineFills.Melody, ImmutableHashSet<double>.Empty);
-        var counterTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.CounterMelody);
-        songTrackNoteTimelineMap = PlaceLine(songTrackNoteTimelineMap, counterTrack, CounterLayers.Line);
-        // and the counter-melody leading into a section where the melody does not
-        if (songTrackNoteTimelineMap.TrackTimelineMap.ContainsKey(counterTrack.Key))
-            (songTrackNoteTimelineMap, _) = LineFills.Apply(songTrackNoteTimelineMap, counterTrack.Key, (PitchInstrumentTrack)counterTrack.Value, fills.Runs, Stream(SongStream.CounterFills), form.Map.MeterAt, LineFills.CounterMelody, melodyWalks);
-        var riffTrack = tracks.Definitions.Single(x => x.Value.Role == TrackRole.Riff);
-        songTrackNoteTimelineMap = PlaceLine(songTrackNoteTimelineMap, riffTrack, RiffLayers.Line);
-        // and a line doubled in a section now and then, by another part or by its own an octave apart, each pair and
-        // section from a sequence of its own
-        songTrackNoteTimelineMap = LineDoubling.Apply(
-            songTrackNoteTimelineMap,
-            // the parts the song has, which a twin left out is not
-            tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).ToDictionary(x => x.Key, x => x.Value.Role),
-            form.Map,
-            songUnconventionality[Facet.Melody],
-            songUnconventionality[Facet.Sound],
-            energies,
-            (pair, section) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.LineDoubling), pair), section)),
-            section => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.TwinTimbres), section))
-        );
-        // and the riff landing on a chord where a section starts now and then, its twin as it is
-        songTrackNoteTimelineMap = LineChords.Apply(
-            songTrackNoteTimelineMap,
-            riffTrack.Key,
-            (PitchInstrumentTrack)riffTrack.Value,
-            form.Map,
-            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.LineChords), index)),
-            LineChords.Riff
-        );
-        // and the melody leaning on double stops through a section now and then
-        songTrackNoteTimelineMap = LineChords.Apply(
-            songTrackNoteTimelineMap,
-            melodyTrack.Key,
-            (PitchInstrumentTrack)melodyTrack.Value,
-            form.Map,
-            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.MelodyChords), index)),
-            LineChords.Melody
-        );
-        // and every pitched solo's line played by its soloists
-        songTrackNoteTimelineMap = Solos.Apply(
-            songTrackNoteTimelineMap,
-            tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
-            tracks.Definitions,
-            form.Map,
-            soloists,
-            solos,
-            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloLines), index)),
-            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloChords), index)),
-            index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloMotifs), index))
-        );
-        // and the bass holding the new key's dominant under the bar before a key change led into by a pedal, over whatever
-        // it doubles or walks there
-        songTrackNoteTimelineMap = KeyChange.Pedal(songTrackNoteTimelineMap, bassTrack.Key, (PitchInstrumentTrack)bassTrack.Value,
-            chains.Where(x => x.Device == KeyChange.Device.Pedal).Select(x => (x.Chords[0], x.Change)));
-        // and the solo part answering the melody in its gaps now and then outside its solos, in its soloist's vocabulary,
-        // the one its solos are played in, drawn from the same sequence
-        var soloDefinition = tracks.Definitions.Values.OfType<PitchInstrumentTrack>().FirstOrDefault(x => x.Role == TrackRole.Solo);
-        if (soloDefinition is not null && !absent.Contains(TrackRole.Solo))
-            songTrackNoteTimelineMap = SoloAnswers.Apply(
-                songTrackNoteTimelineMap,
-                tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
-                tracks.Definitions,
-                form.Map,
-                solos,
-                soloists.GetValueOrDefault(TrackRole.Solo) ?? Soloist.Generate(
-                    new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Soloist), (int)TrackRole.Solo)),
-                    songUnconventionality[Facet.Melody],
-                    songUnconventionality[Facet.Sound],
-                    soloDefinition.InstrumentCode),
-                index => sections[index].Facets[Facet.Melody],
-                index => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloAnswers), index))
-            );
-
-        // and last the notes, decided from the state of the whole song, in its order, none sounding into a stop
-        cancellation.ThrowIfCancellationRequested();
-        var notes = form.Edits.CutNotes(
-            Realizer.Realize(tracks.Definitions, songTrackNoteTimelineMap, form.Map.MeterAt),
-            tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role)
-        );
-        // and the parts' instruments over the song, switched and articulated by every section's sound facet
-        notes = InstrumentsOverTime.Apply(
-            notes,
-            tracks.Definitions,
-            form.Map,
-            [..sections.Select(x => x.Facets[Facet.Sound])],
-            (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.InstrumentsOverTime), section), track)),
-            (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.InstrumentFamilies), section), track)),
-            genre
-        );
-        // and how the parts are played beyond their notes, by every section's sound facet
-        cancellation.ThrowIfCancellationRequested();
-        notes = Expression.Apply(
-            notes,
-            tracks.Definitions,
-            form.Map,
-            songUnconventionality[Facet.Sound],
-            Stream(SongStream.Effects),
-            [..sections.Select(x => x.Facets[Facet.Sound])],
-            energies,
-            soloists,
-            track => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.PartSound), track)),
-            (section, track) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Expression), section), track)),
-            genre
-        );
+        var decisions = new SongDecisions(
+            seed, genre, tracks, absent, songUnconventionality, meter, structure, sectionIds, played, sectionMeters, generateSection, sections, energies,
+            solos, soloists, form, repeats, commonStateMap, swing, grooveContext);
+        var song = SongStages.Run(decisions, new SongDraft(form.Edits.ApplyTo(form.Blocks.Unroll()), null, [], [], []), skipped, cancellation);
+        var (songTrackNoteTimelineMap, notes) = (song.Timeline, song.Notes!);
 
         // the drum kit's sound, the standard kit's, or one of a genre's pool of them, from a stream of its own
         var kit = genre.Pool<int>(GenreChoices.Kit, GenreChoices.KitNameOf) is { } kits
