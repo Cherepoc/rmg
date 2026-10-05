@@ -1,5 +1,5 @@
 import { endsOf, ownOf, written } from "./genres.js";
-import { byMiddle, COLOURS, drawShares, ENDS, rangeOf, svg } from "./genre-charts.js";
+import { byMiddle, COLOURS, drawShares, ENDS, mark, rangeOf, svg } from "./genre-charts.js";
 
 /**
  *     The genre editor's window over it for a choice, where the genre changes it: whether the genre overrides it, the
@@ -322,11 +322,11 @@ export function createGenreTune() {
             const along = curve
                 ? curve.map((value, i) => [(i / (curve.length - 1)) * width, yOf(value)])
                 : endsOf(amounts[other.name]).map((value, i) => [(i * width) / 2, yOf(value)]);
-            const line = svg("path", {
+            const line = mark({
                 d: `M${along.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" L")}`,
                 class: other.name === selected ? "tune-line chosen" : "tune-line",
                 "data-option": other.name,
-            });
+            }, optionOf(other.name).label);
             if (other.name !== selected) line.style.stroke = colourOf(other.name);
             chart.append(line);
         }
@@ -392,7 +392,7 @@ export function createGenreTune() {
         const share = preview?.shares;
         if (!share || kept().some((x) => !share[x.name])) return;
 
-        drawShares(shares, share, order(), colourOf, width, SHARES_HEIGHT);
+        drawShares(shares, share, order(), colourOf, (name) => optionOf(name).label, width, SHARES_HEIGHT);
         const points = share[kept()[0].name].length;
         const told = [0, (points - 1) / 2, points - 1].map((j) => order()
             .map((name) => ({ name, amount: Math.round(share[name][j]) }))

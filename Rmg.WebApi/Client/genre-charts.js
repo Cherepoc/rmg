@@ -33,8 +33,23 @@ export function byMiddle(shares) {
     return Object.keys(shares).sort((a, b) => atEnds(shares[b])[1] - atEnds(shares[a])[1]);
 }
 
-/** A pool's shares, in percent, stacked from the bottom in the order given, each its fill, in a chart of the size given. */
-export function drawShares(element, shares, names, fillOf, width, height) {
+/** An option's name as its choice labels it. */
+export const labelOf = (choice) => (name) => choice.options.find((x) => x.name === name)?.label ?? name;
+
+/** An option's mark in a chart, named by its title where it is pointed at. */
+export function mark(attributes, label) {
+    const element = svg("path", attributes);
+    const title = svg("title");
+    title.textContent = label;
+    element.append(title);
+    return element;
+}
+
+/**
+ *     A pool's shares, in percent, stacked from the bottom in the order given, each its fill and its label, in a chart of the
+ *     size given.
+ */
+export function drawShares(element, shares, names, fillOf, titleOf, width, height) {
     let below = null;
     for (const name of names) {
         const along = shares[name];
@@ -44,17 +59,17 @@ export function drawShares(element, shares, names, fillOf, width, height) {
         const yOf = (value) => (height - (value / 100) * height).toFixed(1);
         const top = above.map((y, j) => `${xOf(j)},${yOf(y)}`);
         const bottom = below.map((y, j) => `${xOf(j)},${yOf(y)}`).reverse();
-        element.append(svg("path", { d: `M${[...top, ...bottom].join(" L")} Z`, fill: fillOf(name), "data-option": name }));
+        element.append(mark({ d: `M${[...top, ...bottom].join(" L")} Z`, fill: fillOf(name), class: "share", "data-option": name }, titleOf(name)));
         below = above;
     }
 }
 
-/** Amounts along the songs as lines, between the least and the most, each its stroke. */
-export function drawLines(element, curves, names, [least, most], strokeOf, width, height) {
+/** Amounts along the songs as lines, between the least and the most, each its stroke and its label. */
+export function drawLines(element, curves, names, [least, most], strokeOf, titleOf, width, height) {
     for (const name of names) {
         const along = curves[name];
         const points = along.map((value, j) => `${((j / (along.length - 1)) * width).toFixed(1)},${(height - ((value - least) / (most - least)) * height).toFixed(1)}`);
-        element.append(svg("path", { d: `M${points.join(" L")}`, fill: "none", stroke: strokeOf(name), "stroke-width": 3, "data-option": name }));
+        element.append(mark({ d: `M${points.join(" L")}`, fill: "none", stroke: strokeOf(name), "stroke-width": 3, "data-option": name }, titleOf(name)));
     }
 }
 
@@ -75,7 +90,7 @@ export function drawBand(element, from, to, [least, most], width, height) {
  *     tempo its range.
  */
 export function endsInWords(choice, preview, count = Infinity) {
-    const labelOf = (name) => choice.options.find((x) => x.name === name)?.label ?? name;
+    const label = labelOf(choice);
     if (choice.kind === "range") {
         const { from, to } = preview.curves;
         return [0, 1, 2].map((end) => [`${Math.round(atEnds(from)[end])}–${Math.round(atEnds(to)[end])} bpm`]);
@@ -90,5 +105,5 @@ export function endsInWords(choice, preview, count = Infinity) {
         .filter((x) => Math.round(sizeOf(x.amount)) > 0)
         .sort((a, b) => sizeOf(b.amount) - sizeOf(a.amount))
         .slice(0, count)
-        .map((x) => `${labelOf(x.name)} ${said(x.amount)}`));
+        .map((x) => `${label(x.name)} ${said(x.amount)}`));
 }

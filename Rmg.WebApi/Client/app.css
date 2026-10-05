@@ -890,6 +890,13 @@ html:has(dialog:modal) {
     height: 72px;
 }
 
+/* a pool's options told apart where they meet, as thin lines of the panel between their shares */
+.share {
+    stroke: var(--panel);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
+
 .genre-graph:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;

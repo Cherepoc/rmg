@@ -186,6 +186,9 @@ public sealed class GenreEditorTest(Site site)
         await page.Until(async () => await meter.Locator(".genre-graph path").CountAsync() > 1, "the meter's graph drawn");
         await Assert.That(await meter.GetAttributeAsync("class")).Contains("own");
         await Assert.That(await meter.Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: 4/4 100%");
+        // every option's share named where it is pointed at, by its label
+        await Assert.That(await meter.Locator(".genre-graph path title").AllTextContentsAsync()).Contains("4/4");
+        await Assert.That(await Tile(time, "feelChances").Locator(".genre-graph path title").AllTextContentsAsync()).Contains("Swings");
         await Assert.That(await Tile(time, "tempo").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: 90–175 bpm");
         await Assert.That(await Tile(time, "feelValues").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: as is");
 
