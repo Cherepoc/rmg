@@ -229,7 +229,7 @@ Each item with its plan, and what it waits for.
 
 ### Instruments and expression
 
-- **The playing following the articulation** (P3, after genres): octaves popped in slap, short notes muted, without
+- **The playing following the articulation** (P3, after genres; palm-muted chugs in *Genres*, step 2c): octaves popped in slap, short notes muted, without
   which an articulation is only another sound.
 - **A solo's loudness by its phrase** (P2, small): the melody's, counter-melody's and riff's lines lean louder at a phrase's
   highest note and softer at its lowest (`LinePattern.PhraseArc`), a phrase running to its held note; a solo's lines
@@ -407,6 +407,17 @@ a link carries. What is left:
      A riff in power chords plays no twin, whose thirds over a distorted fifth are mud. The scale's rule excepts the
      fifth as it does a bass's chromatic approach. Measured by the presets' share of riff sections in power chords.
      Not it: palm-muted chugs, an articulation (see *Instruments and expression*), and the blues' boogie figure.
+  2c. Palm-muted chugs: a note's articulation, palm-muted, its state, decided at generation, its duration as written;
+     the rendering plays it, for General MIDI as a shorter note, a third of its length or so with a floor, a touch
+     softer, General MIDI's muted guitar being clean and a driven guitar having no mute of its own. In a section that
+     chugs, a part's repeats on a weak beat muted and its accents and moves ringing, as a chug riff mutes its eighths on
+     the root and rings the accent; the riff and the rhythm part where their instrument is a guitar, and a picked bass,
+     data on the instrument as its variants are. A section's draw from a stream of its own, a genre's value the songs
+     never play: Rock much, Funk some, for its muted scratches. A riff in power chords mutes its whole chord. Measured
+     by the presets' share of muted notes, and a test that a muted note keeps its duration in the state.
+     Ahead: for a plugin rather than General MIDI, the articulation played as a keyswitch note or a CC, the one
+     rendering function the seam; and the instruments' variants over time (`InstrumentsOverTime`, a muted clean guitar,
+     a slapped bass) articulations of their notes too, once an output plays them otherwise. No output profiles before.
   3. The harmonic rhythm: a pool of how long a chord lasts, leaning the draw its energy leans. Jazz half a bar or a
      bar, Folk, Ambient and Electronic two bars, Funk two and longer, Blues a bar; the cadence's rules checked where a
      phrase holds two chords.
