@@ -715,6 +715,19 @@ public sealed class SoloTest
         await Assert.That(planing).IsGreaterThan(0);
     }
 
+    [Test]
+    public async Task AChordSoloistsApproach_IsAStackedNoteOffTheBeat_PlanedIntoTheChange_NeverAPlainSoloists()
+    {
+        var notes = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => SoloistNotes(TestCorpus.Get(seed, Facets(1, 0.5)))).SelectMany(x => x).ToArray();
+        var plain = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => SoloistNotes(TestCorpus.Get(seed, Facets(1, 0)))).SelectMany(x => x).ToArray();
+
+        // a plain soloist neither approaches nor planes; a middling one that does not plane planes its approaches alone, off
+        // the beat (a note's line may be another soloist's, so the notes are counted, not their players)
+        await Assert.That(plain.All(x => !x.Soloist.Approaches && x.Note.State.GetStateValue(CompositionStateKinds.LinePlanes) == 0)).IsTrue();
+        var approaches = notes.Where(x => !x.Soloist.Planes && IsStacked(x.Note) && x.Note.State.GetStateValue(CompositionStateKinds.LinePlanes) > 0).ToArray();
+        await Assert.That(approaches.Length).IsGreaterThan(10);
+    }
+
     /// <summary>How a solo stacks its notes, by its facets: the soloists that can and that plane, and the share of their notes stacked by gesture and by voices.</summary>
     [Test]
     [Explicit]
@@ -729,7 +742,8 @@ public sealed class SoloTest
             string Share(double part, double whole) => $"{part / Math.Max(1, whole):P0}";
             Console.WriteLine($"  melody {value}: {soloists.Length} soloists, {Share(soloists.Count(x => x.ChordRate > 0), soloists.Length)} on chords, of those planing {Share(soloists.Count(x => x.ChordRate > 0 && x.Planes), soloists.Count(x => x.ChordRate > 0))}; " +
                               $"their notes stacked {Share(stacked.Length, chordal.Length)}, by gesture {string.Join(" ", chordal.GroupBy(x => x.Gesture).OrderBy(x => x.Key).Select(g => $"{g.Key}:{Share(g.Count(x => IsStacked(x.Note)), g.Count())}"))}; " +
-                              $"of {stacked.Length} stacked {string.Join(" ", stacked.GroupBy(x => x.Note.Pitches.Length).OrderBy(x => x.Key).Select(g => $"{g.Key} notes:{Share(g.Count(), stacked.Length)}"))}");
+                              $"of {stacked.Length} stacked {string.Join(" ", stacked.GroupBy(x => x.Note.Pitches.Length).OrderBy(x => x.Key).Select(g => $"{g.Key} notes:{Share(g.Count(), stacked.Length)}"))}, " +
+                              $"planed by a soloist that does not plane, an approach, {Share(stacked.Count(x => !x.Soloist.Planes && x.Note.State.GetStateValue(CompositionStateKinds.LinePlanes) > 0), stacked.Length)}");
         }
 
         await Task.CompletedTask;

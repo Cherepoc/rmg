@@ -57,9 +57,17 @@ internal sealed record Soloist(
     double ChordRate,
     int Voices,
     bool Planes,
-    bool Octaves
+    bool Octaves,
+    bool Approaches
 )
 {
+    /// <summary>
+    ///     The chance a soloist that stacks approaches a chord change by its chord: its stacked note off the beat before the
+    ///     change planed, its shape moved with the note against the band's chord, by the melody facet: never at the plain
+    ///     end, which is never reharmonised, and as often at the wild end as in the middle.
+    /// </summary>
+    public static ByConvention ApproachChance { get; } = new(0, 0.5, 0.5);
+
     /// <summary>The chance a soloist plays its held notes, licks and quotes in octaves, its runs alone, by the melody facet: never at the plain end.</summary>
     public static ByConvention OctaveChance { get; } = new(0, 0.1, 0.2);
 
@@ -219,8 +227,9 @@ internal sealed record Soloist(
         var voices = context.Pick(ByConvention.Weigh(VoiceOptions, melody));
         var planes = context.TestProbability(PlaneChance.At(melody));
         var octaves = context.TestProbability(OctaveChance.At(melody));
+        var approaches = context.TestProbability(ApproachChance.At(melody));
         return new Soloist([..speeds.Concat(fastest).Order()], sizes, groups && sizes.Length > 1, shapes, pauseRate, volatility, register, bendLean, slideLean, MaxNotesASeconds.At(melody), bends, vibrates, stamina,
-            phraseBars, OffBarChances.At(melody), BreathChances.At(melody), SoloLines.Gestures.ToImmutableDictionary(x => x.Gesture, x => x.Weight.At(melody)), BendRates.At(sound), chordRate, voices, planes, octaves);
+            phraseBars, OffBarChances.At(melody), BreathChances.At(melody), SoloLines.Gestures.ToImmutableDictionary(x => x.Gesture, x => x.Weight.At(melody)), BendRates.At(sound), chordRate, voices, planes, octaves, approaches);
     }
 
     /// <summary>The options a soloist favours, as many as it draws, each picked from those left.</summary>

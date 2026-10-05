@@ -318,9 +318,19 @@ internal static class SoloLines
         }
 
         int FoldTowards(int pitch, int towards) => pitch + 12 * (int)Math.Round((towards - pitch) / 12.0);
-        // each phrase louder at its highest note and softer at its lowest, as a line's (LinePattern.PhraseArc)
+        // each phrase louder at its highest note and softer at its lowest, as a line's (LinePattern.PhraseArc); and a stacked
+        // note off the beat that leads into a chord change planed into it, an approach, where the soloist approaches
         var arc = LinePattern.PhraseArc([..marks.Select(x => x.Phrase)], [..marks.Select(x => x.Pitch)], PhraseArc);
-        return ([..line.Select((x, i) => x.Value.With(StateKinds.Velocity, x.Value.GetStateValue(StateKinds.Velocity) + arc[i]).ToTimelineItem(x.Position))], plan);
+        int ChangeAt(double position) => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.ChordChange);
+        bool Approaches(int i) => soloist.Approaches && i + 1 < line.Count && line[i].Value.GetStateValue(CompositionStateKinds.LineVoices) > 1
+                                  && Math.Abs(line[i].Position - Math.Round(line[i].Position)) > 1e-6 && ChangeAt(line[i + 1].Position) != ChangeAt(line[i].Position);
+        return ([
+            ..line.Select((x, i) =>
+            {
+                var state = x.Value.With(StateKinds.Velocity, x.Value.GetStateValue(StateKinds.Velocity) + arc[i]);
+                return (Approaches(i) ? state.With(CompositionStateKinds.LinePlanes, 1) : state).ToTimelineItem(x.Position);
+            })
+        ], plan);
     }
 
     /// <summary>Where a run is in its cells: on which cell, on which note of it, from which note the cell starts and which way it goes.</summary>

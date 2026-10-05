@@ -13,8 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: a chord solo's approaches and a later
-appearance reharmonised; a genre's arrangement; key changes by genre; Electronic split; an octave bass; a push by the
+**When the need shows** (P3), each by what listening says, in this order: a later appearance reharmonised; a genre's arrangement; key changes by genre; Electronic split; an octave bass; a push by the
 whole band; legato as an articulation; stretched voicings; the melody's range by genre; the fills' sounds by
 convention; a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
 and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
@@ -303,8 +302,10 @@ Each item with its plan, and what it waits for.
      progression facet (0, 0.1, 0.1), the energy and a genre's, never at the plain end; a change of the harmonic rhythm
      (`HarmonicRhythm.Passing`) that every part takes. Sections with one: Jazz 29% (its chords mostly shorter than a
      bar), Blues 24%, Folk 20%, Rock 13%. Not done: the passing diminished, a chromatic root, with step 4.
-  3. A chord solo's: a chord soloist's stacked note leading into the next chord playing an approach, step 2's chord,
-     on a weak beat, and on the strong ones too at the wild end, against the comping under it. A stage after the lines.
+  3. Done: a chord solo's approach (`Soloist.Approaches`, by the melody facet (0, 0.5, 0.5)): a stacked note off the
+     beat leading into a chord change planed into it, its shape moved with its note against the band's chord, a
+     constant structure's approach rather than step 2's chord; 3% of a middling chord solo's stacked notes, 7% of a
+     wild one's. Not done: on the strong beats at the wild end, and the dominant as the approach.
   4. Chromatic approaches: done from above as a passing chord (see *A chord free of the section's scale*); from below,
      and a chord solo's (step 3), should listening ask.
   5. A later appearance reharmonised, a last chorus over substitutes (vi or iii for I, ii for IV, the tritone
