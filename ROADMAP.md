@@ -192,8 +192,8 @@ Each item with its plan, and what it waits for.
   the chorus 2.6 semitones over the verse, higher in 61% of the songs; a bigger lift leaps into the section more.
 - **The hook at the end** (P3): a song opens on its chorus's first phrase now and then (`IntroKind.Hook`); an outro
   quoting it too, should endings sound unrelated to the song, though the last section is most often the chorus already
-  and a fade replays it. The hook intro plays the whole band, a chorus's rests and its solo being the song's later
-  edits by section; should a full band before a sparse verse jar, the intro could take the first chorus's rests.
+  and a fade replays it. The hook intro plays the parts its chorus plays, its rests and texture its
+  appearance's; a chorus played as a solo is quoted by its tune.
 - **A section's parts chosen as its drum kit is** (`DrumKitGenerator.SelectKit`), leading and colouring roles, where
   now each part rests on its own (`Arrangement`).
 - **The drums' changes by an appearance's energy** (their colour, a drum's stroke), which are the section's as it was
@@ -308,8 +308,9 @@ Each item with its plan, and what it waits for.
      in `SongLengthTest`), one file of them moving tests for no gain.
   4. Done: tests as rules or calibrations, written into CLAUDE.md; the floors this round moved, the melody's moves
      and leaps and the solo's motifs, kept as wide bounds that print what they measure. The rest as they move.
-  5. A hook intro takes the rests of the chorus it quotes, rather than the intro made an appearance of its own,
-     which every reader of the map's sections would have to learn.
+  5. Found done: a hook intro copies the chorus's appearance, its rests and texture applied (`GeneratedSection.Appear`),
+     so it plays what the chorus plays: of 821 parts in hook intros, 5 play where the chorus does not, 4 of them a
+     chorus played as a solo, which the intro quotes the tune of.
   Deferred: `SectionGenerator.Generate` (188 lines) split likewise, its draws already apart by their streams, should
   the song's stages show a gain there.
 
