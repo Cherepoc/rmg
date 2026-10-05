@@ -101,6 +101,12 @@ public static class GenreChoices
     public static GenreChoice Pan { get; } = Values("pan", "Pan",
         [("melody", "Melody"), ("chords", "Chords"), ("bass", "Bass"), ("pad", "Pad"), ("counterMelody", "Counter-melody"), ("riff", "Riff"), ("rhythm", "Rhythm")]);
 
+    /// <summary>
+    ///     How loud and busy a song is, its energy leaning high or low, and how much its sections differ from it, as it is
+    ///     where a genre does not say (<see cref="SectionEnergy" />).
+    /// </summary>
+    public static GenreChoice Dynamics { get; } = Values("dynamics", "Dynamics", [("energy", "How loud and busy"), ("contrast", "How much its sections differ")]);
+
     /// <summary>Whether a song takes one of the forms songs are written in, or one of its own (<see cref="SongForms" />).</summary>
     public static GenreChoice FormChances { get; } = Chances("formChances", "Form or its own", [("forms", "One of the forms", SongForms.OwnFormChance)]);
 
@@ -247,7 +253,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, Effects, StrongEffect, Pan, FormChances, Form,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, Effects, StrongEffect, Pan, FormChances, Form, Dynamics,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

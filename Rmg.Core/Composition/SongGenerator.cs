@@ -157,8 +157,8 @@ public static class SongGenerator
 
         // how loud and busy each section is meant to be, from the song's and where and how often the section plays
         var dynamicsContext = Stream(SongStream.Dynamics);
-        songStateMap = songStateMap.MergeWith(SectionEnergy.GenerateSong(dynamicsContext));
-        var sectionEnergies = SectionEnergy.GenerateSections(dynamicsContext, sectionIds);
+        songStateMap = songStateMap.MergeWith(SectionEnergy.GenerateSong(dynamicsContext, genre));
+        var sectionEnergies = SectionEnergy.GenerateSections(dynamicsContext, sectionIds, SectionEnergy.ContrastOf(genre));
 
         // how the song swings, which its tempo sets the notes of
         var grooveContext = Stream(SongStream.Groove);
@@ -256,7 +256,7 @@ public static class SongGenerator
         var lateEntries = LateEntries.Generate(
             Stream(SongStream.LateEntries),
             played,
-            [..played.Select((id, index) => generateSection(id).Energy + SectionEnergy.AppearanceStep(Place(index), averagePlaces[id]))],
+            [..played.Select((id, index) => generateSection(id).Energy + SectionEnergy.AppearanceStep(Place(index), averagePlaces[id], SectionEnergy.ContrastOf(genre)))],
             songUnconventionality[Facet.Form],
             absent
         );
@@ -277,7 +277,7 @@ public static class SongGenerator
             cancellation.ThrowIfCancellationRequested();
             var id = played[index];
             var solo = drawnSolos[index];
-            var energyStep = SectionEnergy.AppearanceStep(Place(index), averagePlaces[id]);
+            var energyStep = SectionEnergy.AppearanceStep(Place(index), averagePlaces[id], SectionEnergy.ContrastOf(genre));
             energies.Add(generateSection(id).Energy + energyStep);
             var section = generateSection(id).Appear(
                 played.Take(index).Count(x => x == id),

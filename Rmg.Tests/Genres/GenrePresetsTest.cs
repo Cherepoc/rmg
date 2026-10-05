@@ -49,6 +49,25 @@ public sealed class GenrePresetsReportTest
         await Task.CompletedTask;
     }
 
+    /// <summary>The sections' energy on the average, and how far a song's sections spread from its own: none's and every preset's.</summary>
+    [Test]
+    [Explicit]
+    public async Task EveryPreset_Dynamics()
+    {
+        void Print(string name, IReadOnlyList<CorpusSong> songs)
+        {
+            var energies = songs.Select(x => x.Trace.Where(t => t.Point == Rmg.Core.Composition.TracePoints.SectionEnergy)
+                .Select(t => ((Rmg.Core.Composition.SectionEnergyTrace)t.Value!).Energy).ToArray()).Where(x => x.Length > 0).ToArray();
+            var spread = energies.Average(x => Math.Sqrt(x.Average(e => (e - x.Average()) * (e - x.Average()))));
+            Console.WriteLine($"{name}: energy {energies.Average(x => x.Average()):0.00}, sections' spread {spread:0.00}");
+        }
+
+        Print("none", TestCorpus.Range(Count));
+        foreach (var preset in GenrePresets.All)
+            Print(preset.Name, TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset)))));
+        await Task.CompletedTask;
+    }
+
     /// <summary>The share of songs in one of the forms, and the three commonest forms: none's and every preset's.</summary>
     [Test]
     [Explicit]

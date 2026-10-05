@@ -4,6 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
+      "dynamics": { "energy": 65, "contrast": 70 },
       "pan": { "rhythm": 85, "riff": 75 },
       "effects": { "bends": [30, 60, 90], "chorus": [20, 40, 80], "vibrato": [20, 70, 100], "swell": [0, 20, 80] },
       "rootMotion": { "fourthDown": 90 },
@@ -234,6 +235,7 @@
     "name": "Ambient",
     "description": "Slow, pads, strings, a choir, a harp and a celesta, chords held long, sus and add9 chords, Lydian and major, the drums rare and sparse.",
     "choices": {
+      "dynamics": { "energy": 25, "contrast": 25 },
       "pan": { "pad": 90, "chords": 75, "counterMelody": 70 },
       "effects": { "swell": [60, 85, 100], "chorus": [50, 80, 100], "vibrato": [0, 50, 90], "bends": [0, 10, 40] },
       "strongEffect": { "none": [100, 60, 30], "sweep": [30, 50, 100], "echo": [20, 40, 60] },

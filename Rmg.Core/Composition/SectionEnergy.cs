@@ -34,24 +34,35 @@ internal static class SectionEnergy
     ///     How far an appearance of a section is from the section's energy: the arc's step for how much later or earlier in
     ///     the song it plays than the section does on average, so that its last chorus plays bigger than its first.
     /// </summary>
-    public static double AppearanceStep(double place, double averagePlace)
+    /// <param name="contrast">How much the sections differ (<see cref="ContrastOf" />), which an appearance's step is times too.</param>
+    public static double AppearanceStep(double place, double averagePlace, double contrast)
     {
-        return Arc * 2 * (place - averagePlace);
+        return contrast * Arc * 2 * (place - averagePlace);
     }
 
-    /// <summary>The song's layer of the energy.</summary>
-    public static StateMap GenerateSong(IGenerationContext context)
+    /// <summary>The odds of the song's energy's high side at a genre's most (<see cref="GenreChoices.Dynamics" />), and its low side at its least.</summary>
+    public const double GenreEnergyOdds = 8;
+
+    /// <summary>The song's layer of the energy, leaning high or low as a genre's dynamics say, as it is where they say nothing.</summary>
+    public static StateMap GenerateSong(IGenerationContext context, Genre genre)
     {
+        var shift = genre.Shift(GenreChoices.Dynamics, "energy");
+        // ReSharper disable once CompareOfFloatsByEqualityOperator
+        var draw = shift == 0 ? Generators.SplineValue() : Probabilities.Tilt.Of(GenreEnergyOdds, shift).SplineValue();
         return new StateMapBuilder("Song")
-            .Add(CompositionStateKinds.Energy, Generators.SplineValue().Then(x => x * Song))
+            .Add(CompositionStateKinds.Energy, draw.Then(x => x * Song))
             .ToStateMap(context);
     }
+
+    /// <summary>How much a section's energy differs from the song's, by a genre's dynamics: half as much at its least, twice at its most.</summary>
+    public static double ContrastOf(Genre genre) => Math.Pow(2, genre.Shift(GenreChoices.Dynamics, "contrast"));
 
     /// <summary>
     ///     Every section's layers of the energy, by its id, from the sections in the song's order: its recurrence, its
     ///     arc and its own step, drawn in the order of the ids.
     /// </summary>
-    public static ImmutableDictionary<int, StateMap> GenerateSections(IGenerationContext context, IReadOnlyList<int> sectionIds)
+    /// <param name="contrast">How much the sections differ, their steps times it (<see cref="ContrastOf" />).</param>
+    public static ImmutableDictionary<int, StateMap> GenerateSections(IGenerationContext context, IReadOnlyList<int> sectionIds, double contrast)
     {
         var places = sectionIds
             .Select((id, i) => (id, place: sectionIds.Count > 1 ? i / (double)(sectionIds.Count - 1) : 0.5))
@@ -66,16 +77,16 @@ internal static class SectionEnergy
         return places.ToImmutableDictionary(
             x => x.Id,
             x => new StateMapBuilder("Section recurrence")
-                .Add(CompositionStateKinds.Energy, maxDeviation > 0 ? Recurrence * (x.Count - meanCount) / maxDeviation : 0)
+                .Add(CompositionStateKinds.Energy, maxDeviation > 0 ? contrast * Recurrence * (x.Count - meanCount) / maxDeviation : 0)
                 .ToStateMap(context)
                 .MergeWith(
                     new StateMapBuilder("Section arc")
-                        .Add(CompositionStateKinds.Energy, Arc * (2 * x.Place - 1))
+                        .Add(CompositionStateKinds.Energy, contrast * Arc * (2 * x.Place - 1))
                         .ToStateMap(context)
                 )
                 .MergeWith(
                     new StateMapBuilder("Section")
-                        .Add(CompositionStateKinds.Energy, own.Then(v => v * Section))
+                        .Add(CompositionStateKinds.Energy, own.Then(v => v * contrast * Section))
                         .ToStateMap(context)
                 )
         );

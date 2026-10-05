@@ -12,7 +12,7 @@ public sealed class SectionEnergyTest
     private static Dictionary<int, StateMap> Traced(params int[] sectionIds)
     {
         using var trace = StateTrace.Start();
-        return SectionEnergy.GenerateSections(new GenerationContext(1), sectionIds).ToDictionary();
+        return SectionEnergy.GenerateSections(new GenerationContext(1), sectionIds, 1).ToDictionary();
     }
 
     [Test]
