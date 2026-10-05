@@ -86,7 +86,7 @@ export function createGenreTune() {
     const main = html("div", { class: "tune-main" }, heading, grid, empty);
     const body = html("div", { class: "tune-body" }, list, main);
 
-    const reset = html("button", { type: "button", text: "Restore defaults", title: "The options and their amounts as the songs have them" });
+    const reset = html("button", { type: "button", text: "Restore defaults", title: "The options and their amounts by default, as with no genre" });
     const finish = html("button", { type: "button", class: "primary", text: "Done" });
     const footer = html("footer", {}, reset, html("span", { class: "tune-gap" }), finish);
     dialog.append(header, body, footer);

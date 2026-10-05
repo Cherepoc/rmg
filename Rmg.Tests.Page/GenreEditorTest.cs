@@ -181,7 +181,7 @@ public sealed class GenreEditorTest(Site site)
         var dialog = await OpenEditor(page);
         var time = await Section(dialog, "Time and feel");
 
-        // as the songs have it: greyed, its graph theirs, every song in the plainest in 4/4
+        // by default: greyed, its graph theirs, every song in the plainest in 4/4
         var meter = Tile(time, "meter");
         await page.Until(async () => await meter.Locator(".genre-graph path").CountAsync() > 1, "the meter's graph drawn");
         await Assert.That(await meter.GetAttributeAsync("class")).Contains("own");
@@ -194,7 +194,7 @@ public sealed class GenreEditorTest(Site site)
         await page.Until(async () => await parts.Locator(".genre-ends span").CountAsync() == 3, "the parts' ends said");
         await Assert.That(await parts.Locator(".genre-ends span").First.TextContentAsync()).Matches(@"^Plainest: .+ and \d+ more 100%$");
         await Assert.That(await Tile(time, "tempo").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: 90–175 bpm");
-        await Assert.That(await Tile(time, "feelValues").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: as is");
+        await Assert.That(await Tile(time, "feelValues").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: default");
 
         // overridden, its own, and how many options it keeps
         await Override(time, "meter").CheckAsync();

@@ -183,7 +183,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
             // the most of each end alone, on one line
             const words = endsInWords(choice, preview, 1);
             ends.append(...["Plainest", "Middling", "Experimental"].map((end, i) => {
-                const said = words[i].length > 0 ? words[i].join(", ") : choice.kind === "values" ? "as is" : "none";
+                const said = words[i].length > 0 ? words[i].join(", ") : choice.kind === "values" ? "default" : "none";
                 const span = html("span", "", `${end}: ${said}`);
                 span.title = span.textContent;
                 return span;
@@ -349,7 +349,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
     const principlesList = document.createElement("ul");
     principlesList.append(...[
         "A genre sets what a middling song does. Plainer songs keep to its commonest options; more experimental ones stray from it, towards what it makes rare.",
-        "A choice overridden is the genre's; one that is not is as the songs have it without a genre.",
+        "A choice overridden is the genre's; one that is not keeps its default, as with no genre.",
         "Click a graph to change its choice: the options the genre keeps, and each one's amounts in the plainest, middling and experimental songs.",
         "An option left out never plays. At 0 in the plainest and middling songs it plays only in the experimental ones. A chance at 100% everywhere, or the only option kept, plays in every song.",
         "A weight is a share among the options kept; a chance is out of 100 songs.",
