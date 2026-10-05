@@ -261,8 +261,11 @@ Each item with its plan, and what it waits for.
 - **Approach chords** (P2 for its first steps, a plan in steps): a chord leading into the next one that the
   progression does not have, by its kind (the target's dominant, a passing diminished between roots a whole step
   apart, the target's shape a semitone above or below, the tritone substitute), its length (a beat, half a bar or a bar,
-  taken from the chord before) and its beat: never at the plain end, a weak beat about the middle, and the strong beats
-  too and chained at the wild end. One chord in the bar state, a change of its own, which every part takes: the lines
+  taken from the chord before) and its beat: a weak beat about the middle, and the strong beats too and chained at the
+  wild end. A plain song is never reharmonised, by any step, a turnaround and a reharmonised repeat among them: the
+  songs' chance 0 at the plain end, and a genre's choice of them offering no plain end, its lean the middle's and the
+  wild end's alone, data on the choice rather than a cap on its chance. Not reharmonising: the chords off the scale a
+  genre plays at its plain end (`GenreChoices.ChordScales`), the blues' dominants being the plain blues. One chord in the bar state, a change of its own, which every part takes: the lines
   land on it, the bass approaches it, the chords voice it; the uses differ in where it goes and who plays it. A
   dominant or diminished approach is a root and a chord's own scale, as an applied dominant is; a chromatic one is not
   (the scale's root, third and fifth raised together run its steps onto each other, which `AlterScaleSteps` refuses),
