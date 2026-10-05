@@ -49,7 +49,7 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
         // sections are made of whole 4-bar patterns, so the bar of the pattern and the beat in it follow from the song's
         var bar = (int)Math.Floor(position / meter.BarDuration);
         var (patternBar, beat) = map is null
-            ? (bar.Mod(Meter.PatternBarCount), position - bar * meter.BarDuration)
+            ? (bar.Mod(meter.PatternBarCount), position - bar * meter.BarDuration)
             : (map.PatternBarAt(position), map.BeatInBar(position));
         StateTrace.Record(TracePoints.Fill, track, sectionId, patternBar, stateMap, beat, fill);
 

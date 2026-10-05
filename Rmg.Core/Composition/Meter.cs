@@ -83,8 +83,20 @@ public sealed record Meter(ImmutableArray<int> Groups)
             yield return [first, ..rest];
     }
 
+    /// <summary>
+    ///     How many bars a phrase has: a melody's arc and its question or answer, an intro's window; a section's pattern,
+    ///     its harmony's cycle, is one or more of them (<see cref="Phrases" />).
+    /// </summary>
+    public const int PhraseBarCount = 4;
+
+    /// <summary>
+    ///     How many phrases a section's pattern has, the cycle its chords go round: one, a four-bar pattern, as every song's
+    ///     sections play, unless a section's longer progression makes it more.
+    /// </summary>
+    public int Phrases { get; init; } = 1;
+
     /// <summary>How many bars a section's pattern has.</summary>
-    public const int PatternBarCount = Progressions.BarCount;
+    public int PatternBarCount => PhraseBarCount * Phrases;
 
     /// <summary>The tempo, in beats a minute, that a song's tempo state is a multiple of; a beat is a quarter note.</summary>
     public const double BaseTempo = 120;
@@ -315,9 +327,12 @@ public sealed record Meter(ImmutableArray<int> Groups)
         return isPowerOfTwo ? int.MaxValue : ResolvedRhythm.GridRankLimit(sixteenths / 4.0);
     }
 
-    public bool Equals(Meter? other) => other is not null && Groups.SequenceEqual(other.Groups);
+    public bool Equals(Meter? other) => other is not null && HasSameBar(other) && Phrases == other.Phrases;
 
-    public override int GetHashCode() => Groups.Aggregate(17, (hash, group) => hash * 31 + group);
+    public override int GetHashCode() => Groups.Aggregate(17 * 31 + Phrases, (hash, group) => hash * 31 + group);
+
+    /// <summary>Whether another's bar is this one's, its groups the same, which a time signature writes, however many phrases its pattern has.</summary>
+    public bool HasSameBar(Meter other) => Groups.SequenceEqual(other.Groups);
 
     public override string ToString() => $"{Sixteenths}/16 ({string.Join("+", Groups)})";
 }

@@ -251,7 +251,7 @@ internal sealed class SectionGenerator
             timeline,
             rhythm,
             facets,
-            GetGrooves(drums.SelectMany(x => x.Feels)),
+            GetGrooves(drums.SelectMany(x => x.Feels), meter),
             energy,
             isPercussionOnly,
             sectionRoles.Keys.ToImmutableDictionary(x => x, x => SectionRole(sectionRoles, x)),
@@ -397,10 +397,10 @@ internal sealed class SectionGenerator
     ///     state, which sets the notes of a run the drum plays, and the snare's, which the run's rhythm is, or where the
     ///     section plays no snare, that of the drum with the most notes there.
     /// </summary>
-    internal static FillGrooves GetGrooves(IEnumerable<BarFeel> feels)
+    internal static FillGrooves GetGrooves(IEnumerable<BarFeel> feels, Meter meter)
     {
         var snares = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
-        var lastBar = feels.Where(x => x.Bar == Progressions.BarCount - 1).ToArray();
+        var lastBar = feels.Where(x => x.Bar == meter.PatternBarCount - 1).ToArray();
         var source = lastBar
             .Where(x => x.NoteCount > 0)
             .OrderByDescending(x => snares.Contains(x.Track))
@@ -462,7 +462,7 @@ internal sealed class SectionGenerator
             ), [
                 ..idleTrackNumbers.Select(x => new BarFeel(
                         x,
-                        Progressions.BarCount - 1,
+                        meter.PatternBarCount - 1,
                         SongTracks.GetGenerationStateMap(_tracks.Definitions[x]).MergeWith(groupStateMap).MergeWith(sectionRoles[x]),
                         0
                     )

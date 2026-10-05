@@ -237,11 +237,11 @@ internal sealed class PatternGenerator
         // a track on another's feel plays its tuplet, all its layers' steps of it in place of its own
         if (leadFeel is not null)
             stateMap = stateMap.Except([FeelKind]).MergeWith(leadFeel.Subset([FeelKind]));
-        // an answer's bar is recorded at its place in the 4-bar pattern, as its question's is
-        StateTrace.Record(TracePoints.BarPattern, trackNumber, sectionId, barIndex % Progressions.BarCount, stateMap, phrase: scheme);
+        // an answer's bar is recorded at its place in the pattern, as its question's is
+        StateTrace.Record(TracePoints.BarPattern, trackNumber, sectionId, barIndex % _meter.PatternBarCount, stateMap, phrase: scheme);
 
-        // the bar's place in the 4-bar pattern, whose state an answer's bar plays over as its question's does
-        var patternBar = barIndex % Progressions.BarCount;
+        // the bar's place in the pattern, whose state an answer's bar plays over as its question's does
+        var patternBar = barIndex % _meter.PatternBarCount;
         var notes = isResting
             ? EventTimeline.Create<StateMap>(_meter.BarDuration)
             : GenerateNotes(stateMap, barStateTimelineMap, patternBar * _meter.BarDuration, trackNumber, sectionId, patternBar, energy).GeneratedTimeline;
@@ -260,7 +260,7 @@ internal sealed class PatternGenerator
         // a melody's phrase ends where its bar has it, or where its answer does
         var barEnd = barStateTimelineMap.GetEffectiveStateMapAt(patternBar * _meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
         if (_trackDefinitions[trackNumber].Role == TrackRole.Melody)
-            notes = LinePattern.EndPhrase(notes, patternBar == Progressions.BarCount - 1 && phraseEnd is { } answerEnd ? answerEnd : barEnd);
+            notes = LinePattern.EndPhrase(notes, patternBar == _meter.PatternBarCount - 1 && phraseEnd is { } answerEnd ? answerEnd : barEnd);
         feels.Add(new BarFeel(trackNumber, barIndex, stateMap, notes.Count));
         return notes.ToEventStateTimelineMap(stateMap.OfScope(StateScope.Render));
     }
@@ -347,7 +347,7 @@ internal sealed class PatternGenerator
         Meter meter
     )
     {
-        var patternBar = barIndex % Progressions.BarCount;
+        var patternBar = barIndex % meter.PatternBarCount;
         var start = patternBar * meter.BarDuration;
         var end = start + meter.BarDuration;
         // the changes of chord in the bar, and at its end where the next bar starts a chord or the pattern starts again

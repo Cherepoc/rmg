@@ -116,7 +116,7 @@ public static class Render
         // the meter the song starts in, and every section's that is another than the one before
         var meters = new List<(double Position, Meter Meter)> { (0, song.Meter) };
         foreach (var section in song.Map?.Sections ?? [])
-            if (!section.Meter.Equals(meters[^1].Meter))
+            if (!section.Meter.HasSameBar(meters[^1].Meter))
                 meters.Add((section.Start, section.Meter));
         return new RenderedSong(song.Duration, [..meters], common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..mixed]);
     }

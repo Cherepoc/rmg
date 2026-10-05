@@ -144,7 +144,7 @@ internal static class MelodyLayers
     ///     How many bars a phrase's shape takes before it starts again, and how likely each is: mostly the whole phrase,
     ///     and now and then half of it, a wave that rises and falls twice; the shorter leans unconventional.
     /// </summary>
-    public static ImmutableArray<Weighted<int>> Periods { get; } = [new(0.8, Progressions.BarCount), new(0.2, Progressions.BarCount / 2)];
+    public static ImmutableArray<Weighted<int>> Periods { get; } = [new(0.8, Meter.PhraseBarCount), new(0.2, Meter.PhraseBarCount / 2)];
 
     private static readonly Func<IGenerationContext, int> PeakBarGenerator = Generators.WeightedIndex(PeakBars);
 
@@ -162,9 +162,9 @@ internal static class MelodyLayers
     {
         var peak = PeakBars[PeakBarGenerator(context)].Value;
         var slope = SlopeGenerator(context);
-        var periods = ByConvention.Weigh(Periods.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value < Progressions.BarCount ? 1 : 0))), unconventionality);
+        var periods = ByConvention.Weigh(Periods.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value < Meter.PhraseBarCount ? 1 : 0))), unconventionality);
         var period = periodContext.Pick(periods);
-        return [..Enumerable.Range(0, Progressions.BarCount).Select(bar => PeakRegister - slope * Math.Abs(bar % period - peak % period))];
+        return [..Enumerable.Range(0, Meter.PhraseBarCount).Select(bar => PeakRegister - slope * Math.Abs(bar % period - peak % period))];
     }
 
     /// <summary>A layer's shift of the stepwiseness, up to the given size either way.</summary>

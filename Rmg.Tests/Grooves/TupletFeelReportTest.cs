@@ -49,7 +49,7 @@ public sealed class TupletFeelReportTest
         var rhythm = Math.Clamp((int)(((Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!)[Facet.Feel] * 5), 0, 4);
         // every drum's bars in the order the song plays its sections, each section's bars as it first made them
         var entries = song.Trace
-            .Where(x => x.Point == TracePoints.BarPattern && song.Song.TrackDefinitions[x.Track].Role == Rmg.Core.Songs.TrackRole.Drum && x.Bar % Meter.PatternBarCount != Meter.PatternBarCount - 1)
+            .Where(x => x.Point == TracePoints.BarPattern && song.Song.TrackDefinitions[x.Track].Role == Rmg.Core.Songs.TrackRole.Drum && x.Bar % Meter.PhraseBarCount != Meter.PhraseBarCount - 1)
             .ToLookup(x => (x.Section, x.Track));
         var tracks = entries.Select(x => x.Key.Track).Distinct();
         var primes = new List<int>();

@@ -43,7 +43,7 @@ public sealed record SongMap(Meter Meter, IntroSpan Intro, ImmutableArray<Sectio
     public int PatternBarAt(double position)
     {
         var meter = MeterAt(position);
-        return ((int)Math.Floor((position - (BarsAt(position)?.Start ?? Origin)) / meter.BarDuration)).Mod(Meter.PatternBarCount);
+        return ((int)Math.Floor((position - (BarsAt(position)?.Start ?? Origin)) / meter.BarDuration)).Mod(meter.PatternBarCount);
     }
 
     /// <summary>How far into its bar a position is, in beats, the bars counted from its section's start.</summary>

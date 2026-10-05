@@ -13,8 +13,6 @@ namespace Rmg.Core.Composition;
 /// </summary>
 internal static class Progressions
 {
-    public const int BarCount = 4;
-
     // the chord roots and the rules below are in steps of a 7-note scale, which every scale of Scales is
     private const int StepCount = 7;
 

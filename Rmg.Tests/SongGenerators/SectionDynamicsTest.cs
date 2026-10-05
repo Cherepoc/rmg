@@ -135,7 +135,7 @@ public sealed class SectionDynamicsTest
     private static IEnumerable<double> Bars(SectionSpan span, Meter meter)
     {
         for (var bar = 0; bar * meter.BarDuration < span.Duration; bar++)
-            if (bar % Meter.PatternBarCount != Meter.PatternBarCount - 1)
+            if (bar % Meter.PhraseBarCount != Meter.PhraseBarCount - 1)
                 yield return span.Start + bar * meter.BarDuration;
     }
 

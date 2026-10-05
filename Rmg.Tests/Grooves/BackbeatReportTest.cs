@@ -79,7 +79,7 @@ public sealed class BackbeatReportTest
             DrumRole RoleOf(int track) =>
                 changed.TryGetValue(track, out var role) ? role : (DrumRole)song.Song.TrackDefinitions[track].StateMap.GetStateValue(CompositionStateKinds.DrumRole).Value;
 
-            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.BarPattern && x.Section == span.SectionId && x.Bar % Meter.PatternBarCount != Meter.PatternBarCount - 1))
+            foreach (var entry in song.Trace.Where(x => x.Point == TracePoints.BarPattern && x.Section == span.SectionId && x.Bar % Meter.PhraseBarCount != Meter.PhraseBarCount - 1))
             {
                 var track = entry.Track;
                 if (song.Song.TrackDefinitions[track].Role != Rmg.Core.Songs.TrackRole.Drum || !song.Song.Notes!.ContainsKey(track) || RoleOf(track) != DrumRole.Backbeat)

@@ -207,7 +207,7 @@ internal sealed class FillGenerator
             _filled.UnionWith(landing.Select(x => x.Track));
         }
         // the bar of the pattern the fill plays in, the last before the line
-        var bar = map?.PatternBarAt(line.Position - meter.BarDuration) ?? ((int)Math.Floor(line.Position / meter.BarDuration) - 1).Mod(Meter.PatternBarCount);
+        var bar = map?.PatternBarAt(line.Position - meter.BarDuration) ?? ((int)Math.Floor(line.Position / meter.BarDuration) - 1).Mod(meter.PatternBarCount);
         RecordDecision(ending.SectionId, bar, meter, play, rhythm, span, landing, isEarly, lift);
     }
 

@@ -158,7 +158,7 @@ internal sealed class LinePattern
             profile,
             seed,
             barDuration,
-            bar => bar < Progressions.BarCount ? 0 : amount * MelodyLayers.AnswerBars[bar - Progressions.BarCount]
+            bar => bar < Meter.PhraseBarCount ? 0 : amount * MelodyLayers.AnswerBars[bar - Meter.PhraseBarCount]
         );
     }
 

@@ -122,7 +122,7 @@ public static class SongDescriptions
                 levels[id],
                 densities[index],
                 key == songKey ? null : key,
-                span.Meter == map.Meter ? null : TimeSignature(span.Meter),
+                span.Meter.HasSameBar(map.Meter) ? null : TimeSignature(span.Meter),
                 Math.Abs(bpm - songBpm) < 0.5 ? null : bpm,
                 feels.TryGetValue(id, out var feel) && feel != songFeel ? FeelName(feel) : null,
                 drums,

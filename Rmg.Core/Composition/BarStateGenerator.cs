@@ -139,7 +139,7 @@ internal sealed class BarStateGenerator
         );
     }
 
-    private double LastBarPosition => (Progressions.BarCount - 1) * _meter.BarDuration;
+    private double LastBarPosition => (_meter.PatternBarCount - 1) * _meter.BarDuration;
 
     /// <summary>
     ///     The bars whose first chord starts afresh in its own register, by the chords facet: never in the plainest
@@ -151,7 +151,7 @@ internal sealed class BarStateGenerator
         return StateTimeline.Create(
                 _meter.PatternDuration,
                 StateKinds.ChordVoicingReset,
-                Enumerable.Range(0, Progressions.BarCount)
+                Enumerable.Range(0, _meter.PatternBarCount)
                     .Select(bar =>
                         {
                             var chance = bar == 0 ? VoiceLeadingLayers.ResetAtPatternStart : VoiceLeadingLayers.ResetElsewhere;

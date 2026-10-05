@@ -55,7 +55,7 @@ public sealed class PercussionFeelReportTest
                     }
 
                     var tally = isFigure ? figures : follows_ ? following : crossing;
-                    for (var bar = 0; bar < Rmg.Core.Composition.Progressions.BarCount; bar++)
+                    for (var bar = 0; bar < Meter.PhraseBarCount; bar++)
                     {
                         if (!patterns.TryGetValue((entry.Section, DrumGroups.GetTrackNumber(drum), bar), out var own)
                             || !patterns.TryGetValue((entry.Section, DrumGroups.GetTrackNumber(lead), bar), out var led))
