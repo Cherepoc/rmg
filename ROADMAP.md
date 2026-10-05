@@ -278,13 +278,14 @@ a link carries. What is left:
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
   half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
   alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.
-- **A shared link playing another song** (P1, a bug on the live site): opening a song someone shared with settings of
-  its own plays it with the settings this browser kept. The page as it is, and as deployed (7e5e076), takes a link's
-  settings over the kept ones, which a link opened on this machine confirms; so first reproduce it on the live site
-  and find the path: the seed pasted into Play a seed, which plays with the settings as they are; the soundfont, which
-  no link carries; a version deployed between the sharing and the opening. Then, whatever the cause: a link plays as
-  it was heard, and opening one leaves this browser's kept settings as they were, rather than replacing them as it does
-  now, the song's own settings shown with a way back to one's own.
+- **A shared link playing another song** (P1, a bug on the live site): a link's settings and seeds are written in an
+  alphabet with "_", which a chat's markdown takes for italics and deletes in pairs; a link that lost its underscores
+  cannot be read, and the page plays the song with the settings this browser kept, saying so. Seen on a link whose
+  settings came 54 characters of 62, eight underscores gone (the drum groups at full volume are seven in a row), and
+  read again with them put back, every part's instrument a likely one. Fix: the page writes every "_" of a link it
+  makes, the address and Share alike, as "%5F", which no markdown touches and every browser reads back as "_", so
+  that links already shared still work and no format changes; a page test that a link made has no "_". Opening a link
+  replacing this browser's kept settings is a separate decision, kept as it is until then.
 - **The events carry the genre** (P1): every event about a song carries its genre, a preset by its id and one's own by
   its key (`GenreStore`), so that the ratings by genre can be read.
 - **The presets by their ids** (P1): a link names a preset by its id, `?genre=rock`, and one's own by its key; a key
