@@ -325,6 +325,22 @@ public sealed class GenreTest
         await Assert.That(tempos.Count(x => x is >= 85 and <= 170)).IsGreaterThan(tempos.Length / 2);
     }
 
+    [Test]
+    public async Task ALengthRange_IsWhereItsSongsEnd_AsAShortGenreAndALongOneHaveIt()
+    {
+        // a genre of songs from a minute and a half to two and a half, and one from six minutes to nine
+        Genre Lasting(double from, double to) => Of((GenreChoices.Length, [("from", GenreChoices.AmountOfLength(from)), ("to", GenreChoices.AmountOfLength(to))]));
+        double[] Seconds(Genre genre) => TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)).Rendered.Seconds);
+
+        var short_ = Seconds(Lasting(90, 150));
+        var long_ = Seconds(Lasting(360, 540));
+        // as near as a length given comes, within 15% of the range, most of them
+        await Assert.That(short_.Count(x => x is >= 90 * 0.85 and <= 150 * 1.15)).IsGreaterThanOrEqualTo(24);
+        await Assert.That(long_.Count(x => x is >= 360 * 0.85 and <= 540 * 1.15)).IsGreaterThanOrEqualTo(24);
+        // and a length given beats the genre's
+        await Assert.That(TestCorpus.Get(0, new SongOverrides(Genre: Lasting(360, 540), Length: 120)).Rendered.Seconds).IsLessThan(200);
+    }
+
     // the parts as the songs have them in a middling song, but those given, and those left out
     private static (GenreChoice, (string, double)[]) Parts(IReadOnlyDictionary<string, double> given, params string[] leftOut) =>
         (GenreChoices.Parts, [..GenreChoices.Parts.Options.Where(x => !leftOut.Contains(x.Name)).Select(x => (x.Name, given.GetValueOrDefault(x.Name, x.Default)))]);

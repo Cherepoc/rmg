@@ -233,6 +233,8 @@ public sealed class GenreEditorTest(Site site)
         await page.Until(async () => await parts.Locator(".genre-ends span").CountAsync() == 3, "the parts' ends said");
         await Assert.That(await parts.Locator(".genre-ends span").First.TextContentAsync()).Matches(@"^Plainest: .+ and \d+ more 100%$");
         await Assert.That(await Tile(time, "tempo").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: 90–175 bpm");
+        // a length's range in minutes and seconds, the shortest tenth of the plainest songs to the longest
+        await Assert.That(await Tile(time, "length").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: 1:33–3:28");
         await Assert.That(await Tile(time, "feelValues").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: default");
 
         // overridden, its own, and how many options it keeps

@@ -139,7 +139,7 @@ export function createGenreTune() {
     const optionOf = (name) => choice.options.find((x) => x.name === name);
     const kept = () => choice.options.filter((x) => x.name in amounts);
     const isPool = () => choice.kind === "pool";
-    // the options drawn on one chart with the one chosen: those of its range, the tempo's ends together and its lean apart
+    // the options drawn on one chart with the one chosen: those of its range, a range's ends together and its lean apart
     const alongside = () => kept().filter((x) => String(rangeOf(choice, x.name)) === String(rangeOf(choice, selected)));
     // the order the options are drawn and told in: a pool's commonest in a middling song first, at the bottom
     const order = () => (isPool() && preview?.shares && kept().every((x) => preview.shares[x.name])

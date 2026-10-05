@@ -145,8 +145,11 @@ public static class SongGenerator
         // a length given leans the form to it, by how long an appearance of each role plays on the average at the tempo
         var tempo = commonStateMap.GetStateValue(StateKinds.Tempo);
         double SecondsOf(double beats) => beats * 60 / (Meter.BaseTempo * tempo);
-        var length = overrides.Length is { } target
-            ? new SongLength(target, (role, lean) => SecondsOf(SectionLength.Expected(songUnconventionality[Facet.Form], role, lean) * meter.PatternDuration))
+        // a length given, or one in a genre's range at the song's form, drawn from a stream of its own
+        var target = overrides.Length
+                     ?? (genre.Range(GenreChoices.Length, songUnconventionality[Facet.Form]) is { } lengths ? LengthIn(Stream(SongStream.GenreLength), lengths) : null);
+        var length = target is { } seconds
+            ? new SongLength(seconds, (role, lean) => SecondsOf(SectionLength.Expected(songUnconventionality[Facet.Form], role, lean) * meter.PatternDuration))
             : null;
         var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), Stream(SongStream.SongEnds), songUnconventionality[Facet.Form], length);
         StateTrace.Record(TracePoints.SongForm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(" ", structure.SectionIds.Select(x => structure.Roles[x])), structure);
@@ -591,10 +594,16 @@ public static class SongGenerator
     /// </summary>
     internal static double TempoIn(IGenerationContext context, (double From, double To, double Lean) range)
     {
-        var across = Math.Pow((context.GenerateDouble() + context.GenerateDouble()) / 2, Math.Exp(-TempoLeanSkew * range.Lean));
-        var tempo = GenreChoices.TempoOf(range.From + (range.To - range.From) * across);
+        var tempo = GenreChoices.TempoOf(Across(context, range));
         return Math.Round(tempo * Meter.BaseTempo) / Meter.BaseTempo;
     }
+
+    /// <summary>A length in a range of amounts (<see cref="GenreChoices.LengthOf" />), in seconds, drawn as a tempo is in its range.</summary>
+    internal static double LengthIn(IGenerationContext context, (double From, double To, double Lean) range) => GenreChoices.LengthOf(Across(context, range));
+
+    /// <summary>An amount in a range, leaning to its middle, as the mean of two draws across it does, or to an end by its lean.</summary>
+    private static double Across(IGenerationContext context, (double From, double To, double Lean) range) =>
+        range.From + (range.To - range.From) * Math.Pow((context.GenerateDouble() + context.GenerateDouble()) / 2, Math.Exp(-TempoLeanSkew * range.Lean));
 }
 
 /// <summary>How the state along a section's 4-bar pattern changes. The steps are in bars.</summary>
@@ -677,5 +686,6 @@ internal enum SongStream
     PartFeel = 63,
     SoloistSolo = 64,
     DrumSoloFeet = 65,
-    DrumSoloPlayers = 66
+    DrumSoloPlayers = 66,
+    GenreLength = 67
 }

@@ -60,6 +60,9 @@ public sealed record GenreOption(string Name, string Label, ByConvention Own)
 /// <param name="Label">How the page shows it.</param>
 public sealed record GenreChoice(string Name, string Label, GenreChoiceKind Kind, ImmutableArray<GenreOption> Options)
 {
+    /// <summary>How a range's ends read as numbers, which every range has; none for another kind.</summary>
+    public RangeScale? Scale { get; init; }
+
     /// <summary>The option of the name; one the choice does not have is a mistake.</summary>
     public GenreOption this[string name] => Options.FirstOrDefault(x => x.Name == name)
                                             ?? throw new ArgumentOutOfRangeException(nameof(name), name, $"The choice {Name} has no option {name}.");
@@ -198,3 +201,10 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
         return new Genre(read.ToImmutable());
     }
 }
+
+/// <summary>
+///     How a range's ends read as numbers, as the page shows and gives them: their unit, the least and the most, and a
+///     number of an amount from 0 to 1 and back.
+/// </summary>
+/// <param name="Unit">What the numbers count, such as "bpm" or "seconds".</param>
+public sealed record RangeScale(string Unit, double Least, double Most, Func<double, double> NumberOf, Func<double, double> AmountOf);

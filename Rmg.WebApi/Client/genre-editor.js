@@ -381,8 +381,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         ...ROLES.flatMap(([role]) => [`drumRole.${role}`, `rhythm.${role}`, `feel.${role}`])];
     body.append(
         principles,
-        section("Time and feel", ["tempo", "meter", "feel", "feelChances", "feelValues"],
-            single(tile(), "tempo"), single(tile(), "meter"), single(tile(), "feel"), single(tile(), "feelChances"), single(tile(), "feelValues")),
+        section("Time and feel", ["tempo", "length", "meter", "feel", "feelChances", "feelValues"],
+            single(tile(), "tempo"), single(tile(), "length"), single(tile(), "meter"), single(tile(), "feel"), single(tile(), "feelChances"), single(tile(), "feelValues")),
         section("Harmony", ["scale", "chordShape"], single(tile(), "scale"), single(tile(), "chordShape")),
         section("Parts", ["parts", ...partNames], single(tile(), "parts"), parts.element),
     );

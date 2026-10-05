@@ -8,9 +8,9 @@ public static class LengthScale
 {
     public const int Steps = StepScale.Steps;
 
-    private const double Shortest = 30;
+    private const double Shortest = Core.Composition.GenreChoices.ShortestLength;
 
-    private const double Longest = 900;
+    private const double Longest = Core.Composition.GenreChoices.LongestLength;
 
     /// <summary>A step's length, in seconds.</summary>
     public static double Seconds(int step) => Shortest * Math.Pow(Longest / Shortest, step / (double)StepScale.Last);

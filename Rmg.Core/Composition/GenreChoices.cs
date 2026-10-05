@@ -22,6 +22,17 @@ public static class GenreChoices
     /// <summary>A tempo's amount, as a multiple of <see cref="Composition.Meter.BaseTempo" /> (<see cref="TempoOf" />).</summary>
     public static double AmountOfTempo(double tempo) => (Math.Log2(tempo) + 1) / 2;
 
+    /// <summary>The shortest and the longest a song's length is given or ranged, in seconds: half a minute and fifteen.</summary>
+    public const double ShortestLength = 30;
+
+    public const double LongestLength = 900;
+
+    /// <summary>A length, in seconds, by its amount from 0, the shortest, to 1, the longest, every like step a like ratio.</summary>
+    public static double LengthOf(double amount) => ShortestLength * Math.Pow(LongestLength / ShortestLength, amount);
+
+    /// <summary>A length's amount, of its seconds (<see cref="LengthOf" />).</summary>
+    public static double AmountOfLength(double seconds) => Math.Log(seconds / ShortestLength) / Math.Log(LongestLength / ShortestLength);
+
     /// <summary>
     ///     The song's tempo, a range of them from 60 to 240 beats a minute, as wide as a tempo given may be, starting from the
     ///     tempos the songs draw, from 90 to about 175, and how a song's leans within it, to the slow end or the fast.
@@ -31,7 +42,25 @@ public static class GenreChoices
         new("from", "From", Even(AmountOfTempo(SongGenerator.TempoOptions[0]))),
         new("to", "To", Even(AmountOfTempo(SongGenerator.TempoOptions[^1]))),
         new("lean", "Lean", Even(0.5))
-    ]);
+    ])
+    {
+        Scale = new RangeScale("bpm", 60, 240, x => TempoOf(x) * Composition.Meter.BaseTempo, x => AmountOfTempo(x / Composition.Meter.BaseTempo))
+    };
+
+    /// <summary>
+    ///     How long the song plays, a range of lengths from half a minute to fifteen, which its form comes as near as it can
+    ///     to (<see cref="SongLength" />), starting from how long the songs play as their forms make them, the shortest
+    ///     tenth to the longest at each end (<c>SongLengthReportTest</c>), and how a song's leans within it.
+    /// </summary>
+    public static GenreChoice Length { get; } = new("length", "Length", GenreChoiceKind.Range,
+    [
+        new("from", "From", new ByConvention(AmountOfLength(93), AmountOfLength(104), AmountOfLength(152))),
+        new("to", "To", new ByConvention(AmountOfLength(208), AmountOfLength(266), AmountOfLength(509))),
+        new("lean", "Lean", Even(0.5))
+    ])
+    {
+        Scale = new RangeScale("seconds", ShortestLength, LongestLength, LengthOf, AmountOfLength)
+    };
 
     /// <summary>The meter the song's bars are in (<see cref="Composition.Meter.Options" />).</summary>
     public static GenreChoice Meter { get; } = Pool("meter", "Meter",
@@ -177,7 +206,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

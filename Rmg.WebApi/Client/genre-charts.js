@@ -1,7 +1,7 @@
 /**
  *     The genre's charts, as the editor's graphs and its fine-tune window draw them, from what the songs draw of a choice
  *     (/api/genres/previews, /api/genres/preview): a pool's shares stacked, the commonest in a middling song at the
- *     bottom, another kind's amounts as lines, and the tempo's range as a band; and what each end of the songs draws, in
+ *     bottom, another kind's amounts as lines, and a range (the tempo, the length) as a band; and what each end of the songs draws, in
  *     words.
  */
 
@@ -22,7 +22,13 @@ export function svg(name, attributes = {}) {
 /** The least and the most of an option's amounts, by its choice's kind and its name (GenreAmounts). */
 export function rangeOf(choice, option) {
     if (choice.kind !== "range") return [0, 100];
-    return option === "lean" ? [-100, 100] : [60, 240];
+    return option === "lean" ? [-100, 100] : [choice.scale.least, choice.scale.most];
+}
+
+/** A range's ends in words by its unit: a length's as minutes and seconds, "1:33–3:28", another's as "110–150 bpm". */
+export function rangeInWords(choice, from, to) {
+    const time = (seconds) => `${Math.floor(Math.round(seconds) / 60)}:${String(Math.round(seconds) % 60).padStart(2, "0")}`;
+    return choice.scale.unit === "seconds" ? `${time(from)}–${time(to)}` : `${Math.round(from)}–${Math.round(to)} ${choice.scale.unit}`;
 }
 
 /** An option's amounts at the plainest point, the middle one and the last. */
@@ -73,7 +79,7 @@ export function drawLines(element, curves, names, [least, most], strokeOf, title
     }
 }
 
-/** The tempo's range as a band between its ends, in beats a minute. */
+/** A range as a band between its ends, in its scale's numbers. */
 export function drawBand(element, from, to, [least, most], width, height) {
     const xOf = (j) => ((j / (from.length - 1)) * width).toFixed(1);
     const yOf = (value) => (height - ((value - least) / (most - least)) * height).toFixed(1);
@@ -87,13 +93,13 @@ export function drawBand(element, from, to, [least, most], width, height) {
 /**
  *     What each end of the songs draws, in words: a pool's options by their shares, a chance's by its chance and a value
  *     by how far it is from as it is, at 50, the greatest first, none at 0 or as it is, at most as many as given, the last
- *     with how many more are as much; the tempo its range.
+ *     with how many more are as much; a range its ends by its unit.
  */
 export function endsInWords(choice, preview, count = Infinity) {
     const label = labelOf(choice);
     if (choice.kind === "range") {
         const { from, to } = preview.curves;
-        return [0, 1, 2].map((end) => [`${Math.round(atEnds(from)[end])}–${Math.round(atEnds(to)[end])} bpm`]);
+        return [0, 1, 2].map((end) => [rangeInWords(choice, atEnds(from)[end], atEnds(to)[end])]);
     }
 
     const amounts = choice.kind === "pool" ? preview.shares : preview.curves;

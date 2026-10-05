@@ -29,6 +29,25 @@ public sealed class SongLengthReportTest
         await Task.CompletedTask;
     }
 
+    /// <summary>Songs of a genre ranging their length: where they end, and how many within its range and 15% beyond.</summary>
+    [Test]
+    [Explicit]
+    public async Task Lengths_ByGenre()
+    {
+        foreach (var (from, to) in new[] { (90.0, 150.0), (150.0, 240.0), (360.0, 540.0) })
+        {
+            var genre = new Genre(System.Collections.Immutable.ImmutableDictionary<string, System.Collections.Immutable.ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
+                .Add(GenreChoices.Length.Name, System.Collections.Immutable.ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty
+                    .Add("from", new(GenreChoices.AmountOfLength(from), GenreChoices.AmountOfLength(from), GenreChoices.AmountOfLength(from)))
+                    .Add("to", new(GenreChoices.AmountOfLength(to), GenreChoices.AmountOfLength(to), GenreChoices.AmountOfLength(to)))));
+            var seconds = TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)).Rendered.Seconds);
+            Console.WriteLine($"{Minutes(from)}–{Minutes(to)}: {Spread(seconds)}; within {100.0 * seconds.Count(x => x >= from && x <= to) / Count:0}%, "
+                              + $"within 15% beyond {100.0 * seconds.Count(x => x >= from * 0.85 && x <= to * 1.15) / Count:0}%");
+        }
+
+        await Task.CompletedTask;
+    }
+
     /// <summary>Songs given a length: how far from it they come, how many within 15% of it, and how they get there.</summary>
     [Test]
     [Explicit]

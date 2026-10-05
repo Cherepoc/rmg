@@ -13,7 +13,7 @@ public static class GenreAmounts
     public static (int Least, int Most) RangeOf(GenreChoice choice, string option) => choice.Kind switch
     {
         GenreChoiceKind.Range when option == "lean" => (-100, 100),
-        GenreChoiceKind.Range => (60, 240),
+        GenreChoiceKind.Range => ((int)ScaleOf(choice).Least, (int)ScaleOf(choice).Most),
         _ => (0, 100)
     };
 
@@ -21,7 +21,7 @@ public static class GenreAmounts
     public static double ToAmount(GenreChoice choice, string option, int number) => choice.Kind switch
     {
         GenreChoiceKind.Range when option == "lean" => (number + 100) / 200.0,
-        GenreChoiceKind.Range => GenreChoices.AmountOfTempo(number / Meter.BaseTempo),
+        GenreChoiceKind.Range => ScaleOf(choice).AmountOf(number),
         _ => number / 100.0
     };
 
@@ -29,7 +29,9 @@ public static class GenreAmounts
     public static double ToNumber(GenreChoice choice, string option, double amount) => choice.Kind switch
     {
         GenreChoiceKind.Range when option == "lean" => 200 * amount - 100,
-        GenreChoiceKind.Range => GenreChoices.TempoOf(amount) * Meter.BaseTempo,
+        GenreChoiceKind.Range => ScaleOf(choice).NumberOf(amount),
         _ => 100 * amount
     };
+
+    private static RangeScale ScaleOf(GenreChoice choice) => choice.Scale ?? throw new InvalidOperationException($"The range {choice.Name} has no scale.");
 }
