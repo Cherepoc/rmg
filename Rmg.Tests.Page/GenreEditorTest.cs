@@ -451,6 +451,28 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task TheWindow_KeepsItsHeightAsAnOptionIsPicked_AndItsFirstTabIsWhole()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var tune = await Change(await Section(dialog, "Parts"), "instrument.melody");
+        await page.Until(async () => await tune.Locator(".tune-lists li").CountAsync() > 0, "the chances said");
+
+        // the first tab inside the list's edges, which clip it, its border and focus ring too
+        var clear = await tune.EvaluateAsync<double>("t => { const list = t.querySelector('.tune-list'), row = list.querySelector('.tune-row');"
+            + " return row.getBoundingClientRect().top - list.getBoundingClientRect().top; }");
+        await Assert.That(clear).IsGreaterThanOrEqualTo(2);
+
+        // an option picked: the chances under the chart stand until the server says them again, so what the window shows
+        // is no shorter, however tall the screen
+        await tune.Locator(".tune-pick-open").ClickAsync();
+        var shorter = await tune.EvaluateAsync<double>("t => { const main = t.querySelector('.tune-main'), before = main.scrollHeight;"
+            + " t.querySelector('.tune-picks label:not(:has(input:checked)) input').click(); return before - main.scrollHeight; }");
+        await Assert.That(shorter).IsLessThanOrEqualTo(0);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task TheRiffsTwin_IsLeftOutWithTheRiff_AndPickedOnlyWithIt()
     {
         await using var page = await SongPage.Open(site, "?song=1");
@@ -552,7 +574,7 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
-    public async Task AHandle_StepsByTheArrowKeys_AndClosingLetsItGo()
+    public async Task AHandle_StepsByTheArrowKeys_AndClosingAsksBeforeLettingItGo()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
@@ -567,8 +589,23 @@ public sealed class GenreEditorTest(Site site)
         await page.Page.Keyboard.PressAsync("ArrowDown");
         await Assert.That(int.Parse((await tune.Locator(".tune-handle[data-end='1']").GetAttributeAsync("aria-valuenow"))!)).IsEqualTo(before - 2);
 
-        // closed with the ×, the editor's as it was
+        // the × and Escape ask before losing the change, and declined, the window stays open
+        var prompts = 0;
+        var accept = false;
+        page.Page.Dialog += (_, prompt) =>
+        {
+            prompts++;
+            _ = accept ? prompt.AcceptAsync() : prompt.DismissAsync();
+        };
         await tune.Locator("button.genre-close").ClickAsync();
+        await page.Page.Keyboard.PressAsync("Escape");
+        await Assert.That(prompts).IsEqualTo(2);
+        await Assert.That(await tune.IsVisibleAsync()).IsTrue();
+
+        // the loss confirmed, closed, the editor's as it was
+        accept = true;
+        await tune.Locator("button.genre-close").ClickAsync();
+        await Assert.That(await tune.IsVisibleAsync()).IsFalse();
         var asked = (await Played(page, dialog)).GetProperty("genre").GetProperty("meter");
         await Assert.That(Ends(asked.GetProperty("4/4"))[1]).IsEqualTo(before);
         await Assert.That(page.Errors).IsEmpty();

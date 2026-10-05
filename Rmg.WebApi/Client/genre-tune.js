@@ -48,6 +48,8 @@ export function createGenreTune() {
     let start = null;
     // a handle being dragged, and its end
     let dragging = null;
+    // the choice as the window opened on it, which closing it without Done loses nothing of
+    let opened = "";
 
     const dialog = html("dialog", { class: "genre-tune" });
     const title = html("h2");
@@ -60,7 +62,9 @@ export function createGenreTune() {
     popup.hidden = true;
     const pick = html("span", { class: "tune-pick" }, pickOpen, popup);
     const close = html("button", { type: "button", "aria-label": "Close without keeping", class: "genre-close", text: "×" });
-    close.addEventListener("click", () => dialog.close());
+    close.addEventListener("click", () => {
+        if (mayLeave()) dialog.close();
+    });
     const header = html("header", {}, title, overrideLabel, pick, html("span", { class: "tune-gap" }), close);
 
     const list = html("div", { class: "tune-list", role: "group", "aria-label": "Options" });
@@ -111,11 +115,21 @@ export function createGenreTune() {
         if (!popup.hidden && !pick.contains(event.target)) showPicks(false);
     });
     dialog.addEventListener("cancel", (event) => {
-        if (popup.hidden) return;
+        if (popup.hidden) {
+            if (!mayLeave()) event.preventDefault();
+            return;
+        }
         event.preventDefault();
         showPicks(false);
         pickOpen.focus();
     });
+
+    const asOpened = () => JSON.stringify({ overridden, amounts });
+
+    /** Whether the window may close without Done: nothing changed since it opened, or its loss confirmed. */
+    function mayLeave() {
+        return asOpened() === opened || confirm("Close the window and lose its changes to this choice?");
+    }
 
     // the charts drawn again to the window's width as it changes
     new ResizeObserver(() => {
@@ -386,11 +400,13 @@ export function createGenreTune() {
 
     /** What the songs draw of every option, stacked from the bottom, the one chosen in the accent, and at each end in words. */
     function renderShares(width) {
+        const share = preview?.shares;
+        // until the server says what the songs draw of every option kept, the chart and its words as they were, so that
+        // the window keeps its height as an option is picked
+        if (!share || kept().some((x) => !share[x.name])) return;
         shares.replaceChildren();
         lists.replaceChildren();
         shares.setAttribute("viewBox", `0 0 ${width} ${SHARES_HEIGHT}`);
-        const share = preview?.shares;
-        if (!share || kept().some((x) => !share[x.name])) return;
 
         drawShares(shares, share, order(), colourOf, (name) => optionOf(name).label, width, SHARES_HEIGHT);
         const points = share[kept()[0].name].length;
@@ -421,9 +437,13 @@ export function createGenreTune() {
             amounts = structuredClone(given ?? start(choice));
             selected = kept()[0]?.name ?? null;
             preview = null;
+            // none of the last choice's chances meanwhile
+            shares.replaceChildren();
+            lists.replaceChildren();
             done = onDone;
             showPicks(false);
             renderList();
+            opened = asOpened();
             dialog.showModal();
             render();
             askPreview();

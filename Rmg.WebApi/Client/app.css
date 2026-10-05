@@ -1777,7 +1777,8 @@ footer a:hover {
     padding: 16px;
 }
 
-/* the options, scrolling on their own where there are many, the chart beside them where it is */
+/* the options, scrolling on their own where there are many, the chart beside them where it is; a tab's border and focus
+   ring clear of the edges the scrolling clips, the tabs where they would be without that room */
 .tune-list {
     display: flex;
     flex-direction: column;
@@ -1785,7 +1786,8 @@ footer a:hover {
     width: 220px;
     flex-shrink: 0;
     overflow-y: auto;
-    padding-right: 4px;
+    margin: -3px 0 -3px -3px;
+    padding: 3px 4px 3px 3px;
 }
 
 /* an option's tab, its numbers under its name, and a button leaving it out */
