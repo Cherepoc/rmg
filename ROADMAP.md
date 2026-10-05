@@ -7,8 +7,7 @@ is removed once it is built.
 ## Priorities
 
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
-ratings by conventionality once enough are in, alongside, continuously and never as a gate; the events carrying the
-genre (see *Genres*).
+ratings by conventionality once enough are in, alongside, continuously and never as a gate.
 
 **Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs rated
 enough; listening to the genres' presets (see *Genres*).
@@ -281,8 +280,6 @@ a link carries. What is left:
 - **A link replacing the settings kept** (a decision): opening a shared song makes its settings this browser's own,
   so that the next song goes on in them; keeping one's own and offering a way back to them is the other way, should
   listening to shared songs ask for it.
-- **The events carry the genre** (P1): every event about a song carries its genre, a preset by its id and one's own by
-  its key (`GenreStore`), so that the ratings by genre can be read.
 - **The length** (P2): a genre's length as the tempo's, a range in minutes, so that punk runs short and ambient long;
   a range kind already.
 - **The progressions and the forms** (P2): a genre's root motions (ii–V, ♭VII–IV–I) and forms of its own, such as the
@@ -309,7 +306,7 @@ a link carries. What is left:
   every part, should listening ask for it.
 - **Later:** the playing following the articulation (see *Open work*), and a genre's own after it; instruments outside a
   role's pool, with their leading drawn from their family; a genre's sections differing, such as a jazz song's solos
-  swung harder; ratings by genre on the dashboard, once the events carry it.
+  swung harder; ratings by genre on the dashboard, which the events carry (a preset's id or a genre's key, with the version).
 
 ## Parked
 
