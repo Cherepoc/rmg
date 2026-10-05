@@ -184,7 +184,9 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
             const words = endsInWords(choice, preview, 1);
             ends.append(...["Plainest", "Middling", "Experimental"].map((end, i) => {
                 const said = words[i].length > 0 ? words[i].join(", ") : choice.kind === "values" ? "as is" : "none";
-                return html("span", "", `${end}: ${said}`);
+                const span = html("span", "", `${end}: ${said}`);
+                span.title = span.textContent;
+                return span;
             }));
             graph.setAttribute("aria-label", `${input.checked ? "Change" : "Override"} ${choice.label}: ${[...ends.children].map((x) => x.textContent).join("; ")}`);
         }

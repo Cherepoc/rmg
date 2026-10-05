@@ -151,6 +151,30 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task UnderTheEditor_ThePageHoldsStill_AndEachEndOfAGraphIsOneLine()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        await Section(dialog, "Parts");
+
+        // the editor scrolled past its end, and the wheel over the backdrop: the page where it was
+        var before = await page.Page.EvaluateAsync<double>("() => scrollY");
+        await page.Page.Mouse.MoveAsync(640, 300);
+        for (var i = 0; i < 3; i++)
+            await page.Page.Mouse.WheelAsync(0, 2000);
+        await page.Page.Mouse.MoveAsync(5, 300);
+        await page.Page.Mouse.WheelAsync(0, 2000);
+        await Assert.That(await page.Page.EvaluateAsync<double>("() => scrollY")).IsEqualTo(before);
+
+        // a part's instruments, whose names are long, said at each end on a line
+        var instruments = Tile(dialog, "instrument.melody");
+        await page.Until(async () => await instruments.Locator(".genre-ends span").CountAsync() == 3, "the instruments' ends said");
+        var heights = await instruments.Locator(".genre-ends span").EvaluateAllAsync<double[]>("spans => spans.map(x => x.getBoundingClientRect().height)");
+        await Assert.That(heights.All(x => x <= 18)).IsTrue();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task AChoicesGraph_DrawsWhatTheSongsDraw_AndSaysWhatEachEndDraws()
     {
         await using var page = await SongPage.Open(site, "?song=1");

@@ -699,6 +699,16 @@ input[type="range"] {
     flex-direction: column;
 }
 
+/* the page held still under a window over it, which scrolls to its ends alone; its scrollbar's room kept, so that
+   nothing moves as it goes */
+html {
+    scrollbar-gutter: stable;
+}
+
+html:has(dialog:modal) {
+    overflow: hidden;
+}
+
 .genre-dialog::backdrop {
     background: rgb(0 0 0 / 0.5);
 }
@@ -905,6 +915,14 @@ input[type="range"] {
     color: var(--muted);
 }
 
+/* each end on one line, cut short where the three do not fit, its whole in its title */
+.genre-ends span {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 .genre-ends span:nth-child(2) {
     text-align: center;
 }
@@ -981,6 +999,7 @@ input[type="range"] {
 
     .genre-ends span:nth-child(n) {
         text-align: left;
+        white-space: normal;
     }
 
     .genre-override {
@@ -996,7 +1015,8 @@ input[type="range"] {
 }
 
 .setting .end:first-child {
-    width: 4ch;
+    width: 8ch;
+    text-align: right;
 }
 
 .setting .end:nth-child(3) {
