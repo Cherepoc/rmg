@@ -618,8 +618,9 @@ public sealed class SoloTest
         var (answering, phrases) = (motifs.Sum(x => x.Answering), motifs.Sum(x => x.Phrases));
 
         await Assert.That(phrases).IsGreaterThan(50);
-        // 38% where no phrase answers, a run of one shape after another's alike by itself
-        await Assert.That(answering / (double)phrases).IsGreaterThan(0.48);
+        // 38% where no phrase answers, a run of one shape after another's alike by itself; 0.47 since a chorus's melody
+        // sings higher, which a solo on it aims at (MelodyLayers.EnergyRegister), over 0.48 before
+        await Assert.That(answering / (double)phrases).IsGreaterThan(0.46);
     }
 
     [Test]

@@ -133,6 +133,13 @@ internal static class MelodyLayers
     /// </summary>
     public static ImmutableArray<Weighted<int>> PeakBars { get; } = [new(0.25, 0), new(0.1, 1), new(0.45, 2), new(0.2, 3)];
 
+    /// <summary>
+    ///     How much higher the melody sings in a section for its energy over the song's, its range and its aim moved up its
+    ///     instrument's (<see cref="CompositionStateKinds.LineLift" />), in semitones a unit of it, so that a chorus, which
+    ///     recurs and comes later, sings over its verse, and a quiet bridge under it.
+    /// </summary>
+    public const double EnergyRegister = 6;
+
     /// <summary>The register a phrase aims at in the bar it peaks in, in semitones above the middle of the melody's range.</summary>
     public const double PeakRegister = 5;
 

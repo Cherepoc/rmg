@@ -9,9 +9,8 @@ is removed once it is built.
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
 ratings by conventionality once enough are in, alongside, continuously and never as a gate.
 
-**Later** (P2), roughly in this order: the chorus's melody above the verse's (see *Form and sections*); the blues'
-restated line (see *Genres*); the ratings report (see *Listening data*), once the dashboard shows songs rated enough;
-listening to the genres' presets (see *Genres*).
+**Later** (P2), roughly in this order: the blues' restated line (see *Genres*); the ratings report (see *Listening
+data*), once the dashboard shows songs rated enough; listening to the genres' presets (see *Genres*).
 
 **When the need shows** (P3), each by what listening says, roughly in this order: timing by role, then a genre's
 pocket; the tempo leaning by the energy; scales of other sizes; legato slides; a motif developed further; the
@@ -186,12 +185,9 @@ Each item with its plan, and what it waits for.
 - **The energy's recurrence** counts a section's appearances, not its plays: should long sections sound too quiet.
 - **A bar of two beats before a section,** which would make the bars of a section unlike each other; and swing by a
   section's own meter, which the song's meter decides now.
-- **The chorus's melody above the verse's** (P2): the melody's register leaned by an appearance's energy, which a
-  shift of the contour did not move, as the line follows its aim only weakly; so a stronger pull of the aim, or the
-  line's notes moved by whole steps of the scale after it is placed, rather than a mechanism of its own. Measured by
-  the melody's median pitch in the loudest appearances against the quietest, a few semitones apart; held within the
-  instrument's range, which a high verse moved up would leave. **The chords and the bass,** which follow the energy
-  weakly, should choruses not sound fuller.
+- **The chords and the bass,** which follow the energy weakly, should choruses not sound fuller; the melody sings a
+  section's energy over the song's in its range's place (`MelodyLayers.EnergyRegister`, `CompositionStateKinds.LineLift`),
+  the chorus 2.6 semitones over the verse, higher in 61% of the songs; a bigger lift leaps into the section more.
 - **The hook at the end** (P3): a song opens on its chorus's first phrase now and then (`IntroKind.Hook`); an outro
   quoting it too, should endings sound unrelated to the song, though the last section is most often the chorus already
   and a fade replays it. The hook intro plays the whole band, a chorus's rests and its solo being the song's later

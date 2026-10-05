@@ -152,6 +152,8 @@ internal sealed class SectionGenerator
             new StateMapBuilder("Section")
                 .Add(CompositionStateKinds.ChordPool.Collection, chords)
                 .Add(StateKinds.ChordRoot, home)
+                // the melody higher the more energy the section has than the song, a chorus over its verse
+                .Add(CompositionStateKinds.LineLift, MelodyLayers.EnergyRegister * _sectionEnergies[sectionId].GetStateValue(CompositionStateKinds.Energy))
                 .ToStateMap(context)
         );
         // the roles the section draws again for the song's drums, as their parts in its grooves and its fills, from a

@@ -104,7 +104,8 @@ internal sealed class LinePattern
                         x.State.GetStateValue(CompositionStateKinds.NoteKey),
                         isFirstOfChord ? (ChordArrival)x.State.GetStateValue(CompositionStateKinds.LineLanding) : ChordArrival.Free,
                         (PhraseStart)x.State.GetStateValue(CompositionStateKinds.LinePhraseStart),
-                        (LineScale)x.State.GetStateValue(CompositionStateKinds.LineScale)
+                        (LineScale)x.State.GetStateValue(CompositionStateKinds.LineScale),
+                        x.State.GetStateValue(CompositionStateKinds.LineLift)
                     );
                     return (Note: x, Rank: rank, Pitch: pitch);
                 }

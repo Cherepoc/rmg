@@ -27,9 +27,13 @@ internal sealed class Line
 
     private const int ScaleStepCount = 7;
 
-    private readonly int _low;
-    private readonly int _high;
-    private readonly double _middle;
+    // the range the line sings in, moved up or down its instrument's by its section's lift, and its middle; and where it
+    // sits unmoved, and the instrument's, which bounds the move
+    private int _low;
+    private int _high;
+    private double _middle;
+    private readonly (int Low, int High) _unmoved;
+    private readonly (int Low, int High) _instrument;
 
     private int? _previous;
     private int _previousMove;
@@ -60,7 +64,16 @@ internal sealed class Line
         ArgumentOutOfRangeException.ThrowIfGreaterThan(minNote, maxNote);
 
         _profile = profile;
-        (_low, _high) = GetSingableRange(minNote, maxNote, profile.RangeWidth);
+        _unmoved = (_low, _high) = GetSingableRange(minNote, maxNote, profile.RangeWidth);
+        _instrument = (minNote, maxNote);
+        _middle = (_low + _high) / 2.0;
+    }
+
+    /// <summary>The line's range moved by a section's lift, as far as its share of it and the instrument's range let it.</summary>
+    private void Lift(double lift)
+    {
+        var by = Math.Clamp((int)Math.Round(lift * _profile.ContourShare), _instrument.Low - _unmoved.Low, _instrument.High - _unmoved.High);
+        (_low, _high) = (_unmoved.Low + by, _unmoved.High + by);
         _middle = (_low + _high) / 2.0;
     }
 
@@ -81,6 +94,7 @@ internal sealed class Line
     ///     How the note starts its phrase: afresh, as a first note does, at where the phrase aims, its echoes replayed where
     ///     they were heard; going on from the note before, its echoes replayed nearest it; none within a phrase.
     /// </param>
+    /// <param name="lift">How far the section moves the line's range and its aim up its instrument's, in semitones (<see cref="CompositionStateKinds.LineLift" />).</param>
     public int Place(
         ChordContext chord,
         IReadOnlyCollection<int> chordToneClasses,
@@ -91,9 +105,11 @@ internal sealed class Line
         int echo = 0,
         ChordArrival landing = ChordArrival.Free,
         PhraseStart phraseStart = PhraseStart.None,
-        LineScale lineScale = LineScale.Section
+        LineScale lineScale = LineScale.Section,
+        double lift = 0
     )
     {
+        Lift(lift);
         _classes = LineScales.Classes(lineScale, chord);
         var aim = register * _profile.ContourShare;
         if (phraseStart == PhraseStart.Afresh)
