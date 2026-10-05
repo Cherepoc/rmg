@@ -282,11 +282,8 @@ a link carries. What is left:
   the last on the cadence, so that the blues' I–I–I–I / IV–IV–I–I / V–IV–I–V comes of the place rules and its root
   motions, and a pop 8-bar's half close of the same rules. Phrases stay four bars, so a line's question and answer,
   a fill and a solo's turn keep their place; only the harmony and the section's length grow. Steps:
-  1. **Phrase and pattern told apart** (a refactor, the fingerprint kept): Progressions.BarCount becomes the phrase's
-     four bars, and a section's pattern P of them, its meter's PatternDuration P phrases, P one everywhere; each of the
-     uses (SectionGenerator, BarStateGenerator, PatternGenerator, LinePattern, MelodyLayers, KeyChange, Solos,
-     FillGenerator, SongMap.PatternBarAt, Polymeter, FormLayers, SongFormGenerator, SongLength) read as phrase or
-     pattern by what it means.
+  1. Done: a phrase (Meter.PhraseBarCount) and a section's pattern (Meter.Phrases of them, one everywhere) told apart.
+     A line's question and its answer are two plays of the pattern (LinePattern), which step 4 takes up.
   2. **A progression over P phrases** (Progressions.Generate), the place rules above as weights on the roots a
      phrase starts and ends on, leaning as the cadence's do, by the progression facet's strictness; P one drawing
      exactly as now, so that the fingerprint holds.
