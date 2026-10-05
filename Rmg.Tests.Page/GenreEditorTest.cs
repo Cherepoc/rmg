@@ -189,6 +189,10 @@ public sealed class GenreEditorTest(Site site)
         // every option's share named where it is pointed at, by its label
         await Assert.That(await meter.Locator(".genre-graph path title").AllTextContentsAsync()).Contains("4/4");
         await Assert.That(await Tile(time, "feelChances").Locator(".genre-graph path title").AllTextContentsAsync()).Contains("Swings");
+        // every part plays in the plainest songs of no genre, said as one with how many more, not as the only one
+        var parts = Tile(await Section(dialog, "Parts playing"), "parts");
+        await page.Until(async () => await parts.Locator(".genre-ends span").CountAsync() == 3, "the parts' ends said");
+        await Assert.That(await parts.Locator(".genre-ends span").First.TextContentAsync()).Matches(@"^Plainest: .+ and \d+ more 100%$");
         await Assert.That(await Tile(time, "tempo").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: 90–175 bpm");
         await Assert.That(await Tile(time, "feelValues").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: as is");
 

@@ -86,8 +86,8 @@ export function drawBand(element, from, to, [least, most], width, height) {
 
 /**
  *     What each end of the songs draws, in words: a pool's options by their shares, a chance's by its chance and a value
- *     by how far it is from as it is, at 50, the greatest first, none at 0 or as it is, at most as many as given; the
- *     tempo its range.
+ *     by how far it is from as it is, at 50, the greatest first, none at 0 or as it is, at most as many as given, the last
+ *     with how many more are as much; the tempo its range.
  */
 export function endsInWords(choice, preview, count = Infinity) {
     const label = labelOf(choice);
@@ -100,10 +100,15 @@ export function endsInWords(choice, preview, count = Infinity) {
     // a value by how far it is from as it is, at 50, in its own numbers, as the window shows them
     const sizeOf = (amount) => (choice.kind === "values" ? Math.abs(amount - 50) : amount);
     const said = (amount) => (choice.kind === "values" ? `${Math.round(amount)}` : `${Math.round(amount)}%`);
-    return [0, 1, 2].map((end) => Object.keys(amounts)
-        .map((name) => ({ name, amount: atEnds(amounts[name])[end] }))
-        .filter((x) => Math.round(sizeOf(x.amount)) > 0)
-        .sort((a, b) => sizeOf(b.amount) - sizeOf(a.amount))
-        .slice(0, count)
-        .map((x) => `${label(x.name)} ${said(x.amount)}`));
+    return [0, 1, 2].map((end) => {
+        const told = Object.keys(amounts)
+            .map((name) => ({ name, amount: atEnds(amounts[name])[end] }))
+            .filter((x) => Math.round(sizeOf(x.amount)) > 0)
+            .sort((a, b) => sizeOf(b.amount) - sizeOf(a.amount));
+        // the last one said with those left out that are said as it is, so that none seems the only one so
+        return told.slice(0, count).map((x, i) => {
+            const tied = i === count - 1 ? told.slice(count).filter((y) => said(y.amount) === said(x.amount)).length : 0;
+            return `${label(x.name)}${tied > 0 ? ` and ${tied} more` : ""} ${said(x.amount)}`;
+        });
+    });
 }
