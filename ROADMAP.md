@@ -287,9 +287,6 @@ a link carries. What is left:
   root motions alone cannot make (I–IV–I–I–IV–IV–I–I–V–IV–I–V); a fixed table goes against drawing, so first find what
   it generalises to: a section's harmonic rhythm and its progression's length (12 bars where a pattern is 4), with
   the roots it reaches by its bar, as a pool of patterns a genre weighs, the songs' own the one 4-bar pattern.
-- **The options told apart without colour** (P2): the options' shares outlined rather than filled greys, the one
-  chosen in the window outlined in the accent and the one pointed at outlined and named, so that an option is found
-  by its edge and the greys need not be told apart; tried on a mockup before it is built.
 - **Listening to the genres' wild ends:** the presets' wild ends keep their idioms most and stray by what each names
   experimental (`EveryPreset_ChoicesByEnd`): the wildest Rock 34% in 4/4, its chords 7% quartal or tritone stacks; the
   wildest Jazz 56% swung, 50% sevenths, about a fifth So What, quartal, altered or eleventh; Electronic 11% quartal
