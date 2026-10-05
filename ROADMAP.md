@@ -339,7 +339,9 @@ a link carries. What is left:
      of the first's rhythm, the third 86%; but the second keeps 36% of its contour (the step to the next note), the
      notes drawn afresh over each phrase's chords. Done since: a middle phrase sings the first's notes where they fit
      its chords, a chord's note on a strong beat and its scale's on another, its own where not (`LinePattern.Restate`),
-     every line alike: 60% of the second phrase's notes the first's (19% before), its contour 52% (36%).
+     every line alike but where a note lands on its chord, as the bass on the IV's root, which keeps its landing
+     (63% of the bass's changes on the root in a middle phrase, as elsewhere): 60% of the second phrase's notes
+     the first's (19% before), its contour 52% (36%).
   6. Done: the presets' patterns (Blues twelve bars 81% of its sections, Jazz and Folk eight, Rock four and eight),
      reported by EveryPreset_Phrases. Left to listening: Blues' V at bar 9 43% of its twelve-bar sections and home at
      bar 4 48% (IV at 5 63%, home at 8 61%), the middling and wild songs keeping the place rules less, by the

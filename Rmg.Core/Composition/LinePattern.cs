@@ -112,7 +112,9 @@ internal sealed class LinePattern
                 }
             )
             .ToArray();
-        Restate(notes, map, profile);
+        // a note that lands on its chord, as the bass's first of a chord on its root, landing as it does
+        Restate(notes, map, profile, i => (i == 0 || Chord(lineNotes[i - 1]) != Chord(lineNotes[i]))
+                                          && (ChordArrival)lineNotes[i].State.GetStateValue(CompositionStateKinds.LineLanding) != ChordArrival.Free);
 
         for (var i = 0; i + 1 < notes.Length; i++)
         {
@@ -140,9 +142,11 @@ internal sealed class LinePattern
     ///     A long pattern's middle phrases, between the first, which states, and the last, which answers
     ///     (<see cref="Answers" />), singing the first's notes again, each where the first played it, where it fits the
     ///     chord there, one of its notes on a strong beat and of its scale on another, and the line's own where it does not,
-    ///     so that a blues' second line restates its first over the IV, its notes the same, as a singer's are.
+    ///     so that a blues' second line restates its first over the IV, its notes the same, as a singer's are; but a note
+    ///     that lands on its chord, which keeps its landing, as a bass on the IV's root.
     /// </summary>
-    private static void Restate((LineNote Note, int Rank, int Pitch)[] notes, SongMap map, LineProfile profile)
+    /// <param name="lands">Whether a note lands on its chord, as its first asks (<see cref="CompositionStateKinds.LineLanding" />).</param>
+    private static void Restate((LineNote Note, int Rank, int Pitch)[] notes, SongMap map, LineProfile profile, Func<int, bool> lands)
     {
         var at = notes.Select((x, i) => (Position: Math.Round(x.Note.Position, 6), i)).GroupBy(x => x.Position).ToDictionary(x => x.Key, x => x.First().i);
         bool Fits((LineNote Note, int Rank, int Pitch) note, int pitch)
@@ -161,7 +165,7 @@ internal sealed class LinePattern
                 for (var i = 0; i < notes.Length; i++)
                 {
                     var position = notes[i].Note.Position;
-                    if (position < start + restating * phrase - 1e-9 || position >= start + (restating + 1) * phrase - 1e-9)
+                    if (position < start + restating * phrase - 1e-9 || position >= start + (restating + 1) * phrase - 1e-9 || lands(i))
                         continue;
                     if (at.TryGetValue(Math.Round(position - restating * phrase, 6), out var first) && Fits(notes[i], notes[first].Pitch))
                         notes[i] = notes[i] with { Pitch = notes[first].Pitch };

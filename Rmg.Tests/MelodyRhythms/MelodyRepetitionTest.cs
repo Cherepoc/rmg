@@ -172,6 +172,38 @@ public sealed class MelodyRepetitionTest
         await Assert.That(keptSecond).IsGreaterThan(keptThird);
     }
 
+    /// <summary>
+    ///     A 12-bar's middle phrase, which restates the first's notes, the bass landing on the chord's root where the chords
+    ///     change about as often as elsewhere, a landing kept rather than restated (<see cref="LinePattern" />).
+    /// </summary>
+    [Test]
+    public async Task ARestatedPhrase_KeepsTheBassLandingOnItsChordsRoots()
+    {
+        int changes = 0, roots = 0, middleChanges = 0, middleRoots = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(3)))))
+        {
+            if (song.Song.Notes!.GetValueOrDefault(SongTracks.BassTrack) is not { } bass)
+                continue;
+            var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
+            var at = bass.GroupBy(x => Math.Round(x.Position, 6)).ToDictionary(x => x.Key, x => x.First().Value);
+            foreach (var change in song.ChordChanges)
+            {
+                if (!at.TryGetValue(Math.Round(change, 6), out var note) || song.Map.SectionAt(change) is not { } span)
+                    continue;
+                var isRoot = note.Pitches.Min().Mod(12) == Realizer.GetChord(common.GetEffectiveStateMapAt(change)).Chord.GetPitch(0).Mod(12);
+                var phrase = Meter.PhraseBarCount * span.Meter.BarDuration;
+                var inPattern = (change - span.Start) % span.Meter.PatternDuration;
+                var isMiddle = span.Meter.Phrases == 3 && inPattern >= phrase - 1e-9 && inPattern < 2 * phrase - 1e-9;
+                (changes, roots) = isMiddle ? (changes, roots) : (changes + 1, roots + (isRoot ? 1 : 0));
+                (middleChanges, middleRoots) = isMiddle ? (middleChanges + 1, middleRoots + (isRoot ? 1 : 0)) : (middleChanges, middleRoots);
+            }
+        }
+
+        Console.WriteLine($"the bass on the root where the chords change: {roots / (double)changes:P0} of {changes}, in a middle phrase {middleRoots / (double)middleChanges:P0} of {middleChanges}");
+        await Assert.That(middleChanges).IsGreaterThan(500);
+        await Assert.That(middleRoots / (double)middleChanges).IsGreaterThan(roots / (double)changes - 0.05);
+    }
+
     internal static (double Fixed, double Improvised, double AnswerFirstHalf, double AnswerSecondHalf, double[] OnsetsKept, double[] ImprovisedByHalf, double FixedClass, double AnswerFirstHalfClass) MeasureRecurrence(IEnumerable<CorpusSong> songs)
     {
         // the same note, and the same note in any octave, as a tune an octave off
