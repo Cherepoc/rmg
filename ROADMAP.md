@@ -12,8 +12,9 @@ ratings by conventionality once enough are in, alongside, continuously and never
 **Later** (P2), roughly in this order: the presets' file in families, then what a genre cannot reach yet, the
 melody's character and the bass's style first, a riff in power chords and its chugs; genres that sound like
 themselves, an idiom report first, then the loop, the levels, the fills and the pumping; the harmonic rhythm and the
-form's devices (see *Genres*); a melody written as a hook (see *Form and sections*); builds and drops; timing by role, then a genre's pocket, the largest gap in how the songs are played (see *Groove*), and a
-guitar's strum after it (see *Groove*); turnarounds, then passing chords (approach chords, see *Scales and chords*); a
+form's devices (see *Genres*); a melody written as a hook (see *Form and sections*); builds and drops; timing by
+role, then a genre's pocket, the largest gap in how the songs are played, and a guitar's strum after it (see
+*Groove*); turnarounds, then passing chords (approach chords, see *Scales and chords*); a
 solo's loudness by its phrase, as the other lines' (see *Instruments and expression*); the ratings report (see
 *Listening data*), once the dashboard shows songs rated enough; listening to the genres' presets (see *Genres*), and to
 what the harmony, the melody and the form gained in October 2026: chords off the scale, a phrase's loudness, the hook
@@ -490,13 +491,14 @@ a link carries. What is left:
   4. The form's devices: a genre's chance of a solo and its soloists, its key changes' chances, and pools of its
      intros and endings, the intros given ends of their own first (a table now, which moves the corpus). Jazz soloing
      often and ending on a button or a ring, Rock on a stop or a button, Electronic and Ambient fading.
-  5. The fills' amount, a value: Rock and Funk busier, Ambient and Electronic sparse.
+  5. The fills' amount, a value: Rock and Funk busier, Ambient and Electronic sparse (done as step 4 of genres that
+     sound like themselves).
   Then (P3): a genre's arrangement and levels, its parts resting by a section's role (a dub's breakdown) and how loud
   each plays (the levels below), one item, a tile a part, should listening ask. Every step a tile in the editor and a page test that it shows; a genre kept before
   keeps its key, its new choice absent.
 - **A head with solos** (to review after the form's devices by genre, which with AABA may make it, and then go): a jazz tune's head, choruses of solos over its form, and the head again, which AABA
   (SongForms.Forms) and the solos' sections (Solos) come near already; a form of its own only should listening ask.
-- **A genre's levels** (P3, with a genre's arrangement): how loud each part plays against the others, values a part each, applied where the mix
+- **A genre's levels** (P2, step 3 of genres that sound like themselves; its arrangement after): how loud each part plays against the others, values a part each, applied where the mix
   gives none, a mechanism of its own that a mix given may fight; the pan is a genre's (GenreChoices.Pan), the levels
   only should listening ask for them.
 - **A genre's sections differing** (P3, perhaps never): a value given a section role, such as a solo swung harder
