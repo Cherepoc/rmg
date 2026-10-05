@@ -435,6 +435,22 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task ThePartsTilesAndTabs_StandApart()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var parts = await Section(dialog, "Parts");
+
+        // every tile and tab strip shown, top to bottom, at least a little apart from the one above it
+        const string gaps = "x => [...x.querySelectorAll('.genre-tile, .tab-strip')].filter(e => e.offsetParent).map(e => e.getBoundingClientRect())"
+            + ".sort((a, b) => a.top - b.top).flatMap((r, i, all) => i === 0 || r.top < all[i - 1].bottom - 1 ? [] : [r.top - all[i - 1].bottom])";
+        await Assert.That((await parts.EvaluateAsync<double[]>(gaps)).Min()).IsGreaterThanOrEqualTo(8);
+        await parts.GetByRole(AriaRole.Tab, new() { Name = "Drums", Exact = true }).ClickAsync();
+        await Assert.That((await parts.EvaluateAsync<double[]>(gaps)).Min()).IsGreaterThanOrEqualTo(8);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task TheRiffsTwin_IsLeftOutWithTheRiff_AndPickedOnlyWithIt()
     {
         await using var page = await SongPage.Open(site, "?song=1");

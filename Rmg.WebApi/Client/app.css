@@ -804,12 +804,8 @@ html:has(dialog:modal) {
     }
 }
 
-.genre-section > .genre-tile + .genre-tile {
-    margin-top: 10px;
-}
-
-/* the drums' roles, tabs inside the drums' tab */
-.tab-panel .genre-tabs {
+/* a section's tiles and tabs apart, as a panel's tiles are */
+.genre-section > :not(summary) + :not(summary) {
     margin-top: 10px;
 }
 
@@ -986,10 +982,6 @@ html:has(dialog:modal) {
 /* the mark seen, not read: a tab is named by its part alone */
 .tab-strip button.named::after {
     content: " •" / "";
-}
-
-.tab-panel {
-    display: block;
 }
 
 @media (max-width: 640px) {
