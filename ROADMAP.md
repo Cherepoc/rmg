@@ -291,9 +291,14 @@ a link carries. What is left:
   tracks' chord shapes apart past the first phrase ("PitchedTracks_ShareTheChordShapeAtTheSameTime", at beat 72) and the
   melody 1.8 notes a bar where 3 at least are (its question and answer each a pattern, LinePattern, its notes a
   pattern's first phrase): a track's bars are made a phrase at a time. So before P is drawn:
-  2b. **A track's bars across the pattern's phrases:** a pitched track's and a drum's bars made for every bar of the
-     pattern (PatternGenerator, the phrase scheme repeating a phrase's bars in each phrase), their chord shapes the
-     pattern's own; every test passing with every section three phrases, as the trial was, but the measured ones.
+  2b. Done: a track's bars made across every phrase (PhraseScheme.Across), the answer after the whole pattern. Tried
+     again with every section three phrases: 18 tests failing, of which the real ones are the key changes'
+     (KeyChange steps by the pattern, its preparation's chords placed by it): a part's shape changing within a bar
+     and a chord (DefaultSteps_ChangeTheShapeOnlyAtBarLinesAndChordChanges) and a chain of two links
+     (EveryChordOfAChain_LeadsToTheNext_ByItsLink_OneLinkAChain); the rest tests counting four bars a pattern (a fill's
+     decision at bar 3, a trace's bar under 4, the role chords' and a doubling's bars) or measuring what longer
+     patterns change (lengths, solos' turns, a drum solo's feet). Next: the key changes by the pattern, then the
+     four-bar tests by the section's pattern, then P drawn.
   2c. **The line across phrases** (step 4 below, brought forward): a line's question and answer within the pattern,
      its first phrase stating, a middle one restating, the last answering, rather than two plays of it.
   3. **P a genre's** (a pool, "Phrases a progression": 4, 8, 12, 16 bars), drawn a section from a stream of its own;
