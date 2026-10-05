@@ -287,8 +287,6 @@ a link carries. What is left:
   root motions alone cannot make (I–IV–I–I–IV–IV–I–I–V–IV–I–V); a fixed table goes against drawing, so first find what
   it generalises to: a section's harmonic rhythm and its progression's length (12 bars where a pattern is 4), with
   the roots it reaches by its bar, as a pool of patterns a genre weighs, the songs' own the one 4-bar pattern.
-- **A genre's description** (P2): the editor keeps a preset's sentence and lets one's own have one, exported and
-  imported with it, shown under the genre picked.
 - **The graphs' ends cut before their numbers** (P2): a tile's end cut short in its name, its share always shown, as
   "Electric Guitar (cl… 30%", rather than in the share.
 - **The options told apart without colour** (P2): the options' shares outlined rather than filled greys, the one
