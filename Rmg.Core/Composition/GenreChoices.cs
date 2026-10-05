@@ -133,7 +133,7 @@ public static class GenreChoices
         );
 
     /// <summary>The chances of the parts, every one a song may have or leave out, each as a middling song has it.</summary>
-    public static GenreChoice Parts { get; } = WithTwinsRiff(Chances("parts", "Parts playing",
+    public static GenreChoice Parts { get; } = WithTwinsRiff(Chances("parts", "Lineup",
     [
         ..new (TrackRole Role, string Label)[]
         {

@@ -209,7 +209,7 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(await meter.Locator(".genre-graph path title").AllTextContentsAsync()).Contains("4/4");
         await Assert.That(await Tile(time, "feelChances").Locator(".genre-graph path title").AllTextContentsAsync()).Contains("Swings");
         // every part plays in the plainest songs of no genre, said as one with how many more, not as the only one
-        var parts = Tile(await Section(dialog, "Parts playing"), "parts");
+        var parts = Tile(await Section(dialog, "Parts"), "parts");
         await page.Until(async () => await parts.Locator(".genre-ends span").CountAsync() == 3, "the parts' ends said");
         await Assert.That(await parts.Locator(".genre-ends span").First.TextContentAsync()).Matches(@"^Plainest: .+ and \d+ more 100%$");
         await Assert.That(await Tile(time, "tempo").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: 90–175 bpm");
@@ -409,11 +409,37 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task TheLineup_IsFirstAmongTheParts_AndAPartItNeverPlays_HasNoTab()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var parts = await Section(dialog, "Parts");
+        await Assert.That(await parts.Locator(".genre-tile").First.GetAttributeAsync("data-choice")).IsEqualTo("parts");
+        await Assert.That(await Tile(parts, "parts").Locator("h4").TextContentAsync()).IsEqualTo("Lineup");
+        var soloist = parts.GetByRole(AriaRole.Tab, new() { Name = "Soloist", Exact = true });
+        var riff = parts.GetByRole(AriaRole.Tab, new() { Name = "Riff", Exact = true });
+        await soloist.ClickAsync();
+
+        // the soloist left out and the riff at 0 everywhere: neither plays, so neither has a tab, the first shown in its place
+        var tune = await Change(parts, "parts");
+        await tune.Locator(".tune-row[data-option='solo'] .tune-remove").ClickAsync();
+        await tune.Locator(".tune-row[data-option='riff'] .tune-option").ClickAsync();
+        foreach (var end in new[] { "plainest", "middling", "experimental" })
+            await tune.Locator($"input[aria-label='Riff, {end}']").FillAsync("0");
+        await Done(tune);
+        await Assert.That(await soloist.IsVisibleAsync()).IsFalse();
+        await Assert.That(await riff.IsVisibleAsync()).IsFalse();
+        await Assert.That(await parts.Locator("[role=tab][aria-selected=true]").First.TextContentAsync()).IsEqualTo("Melody");
+        await Assert.That(await Tile(parts, "instrument.melody").IsVisibleAsync()).IsTrue();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task TheRiffsTwin_IsLeftOutWithTheRiff_AndPickedOnlyWithIt()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
-        var playing = await Section(dialog, "Parts playing");
+        var playing = await Section(dialog, "Parts");
         var tune = await Change(playing, "parts");
         await Assert.That(await Kept(tune)).Contains("riffTwin");
 

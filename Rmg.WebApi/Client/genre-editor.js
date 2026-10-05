@@ -229,7 +229,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
 
     /**
      *     Tabs, every tab a part, over panels of fields: tabs of the same panel share one set of fields, bound to the tab's
-     *     part, so that switching tabs keeps every field where it is. A tab marked where the draft names one of its choices.
+     *     part, so that switching tabs keeps every field where it is. A tab marked where the draft names one of its choices,
+     *     and shown only while its part may play, the first shown in place of one that no longer is.
      */
     function tabs(label, items) {
         const element = document.createElement("div");
@@ -256,9 +257,12 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         element.append(strip, ...panels.map((x) => x.element));
 
         function show() {
-            for (const panel of panels) panel.element.hidden = panel !== items[current].panel;
-            items[current].panel.show(items[current].part);
+            const shown = items.map((x) => x.isShown());
+            if (!shown[current]) current = shown.indexOf(true);
+            for (const panel of panels) panel.element.hidden = current < 0 || panel !== items[current].panel;
+            if (current >= 0) items[current].panel.show(items[current].part);
             buttons.forEach((tab, i) => {
+                tab.hidden = !shown[i];
                 tab.setAttribute("aria-selected", String(i === current));
                 tab.classList.toggle("named", items[i].names.some((x) => x in draft.choices));
             });
@@ -318,25 +322,33 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         bound(tile(undefined, "Rhythm"), (x) => `rhythm.${x}`),
         bound(tile(undefined, "Feel"), (x) => `feel.${x}`),
     );
-    const roles = tabs("Drums' roles", ROLES.map(([part, label]) => ({ label, part, names: [`drumRole.${part}`, `rhythm.${part}`, `feel.${part}`], panel: role })));
+    const roles = tabs("Drums' roles", ROLES.map(([part, label]) => ({ label, part, names: [`drumRole.${part}`, `rhythm.${part}`, `feel.${part}`], panel: role, isShown: () => true })));
     const drums = panel(
         bound(tile(), () => "kit"),
         bound(tile(), () => "drumPieces"),
         bound(tile(isSetupAllowed), () => "drumSetup"),
         { element: roles.element, show: () => roles.show() },
     );
+    /** Whether the lineup may play a part: every part where the genre leaves it as by default, else one it keeps above 0. */
+    function mayPlay(option) {
+        const lineup = draft.choices.parts;
+        return !lineup || (option in lineup && endsOf(lineup[option]).some((x) => x > 0));
+    }
+
     const parts = tabs("Parts", [
         ...PITCHED.map(([part, label]) => ({
             label,
             part,
             names: [`instrument.${part}`, `rhythm.${part}`, `feel.${part}`],
             panel: part === "solo" ? solo : pitched,
+            isShown: () => mayPlay(part),
         })),
         {
             label: "Drums",
             part: "drums",
             names: ["kit", "drumPieces", "drumSetup", ...ROLES.flatMap(([role]) => [`drumRole.${role}`, `rhythm.${role}`, `feel.${role}`])],
             panel: drums,
+            isShown: () => mayPlay("drum"),
         },
     ]);
     shows.push(parts.show);
@@ -371,8 +383,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         section("Time and feel", ["tempo", "meter", "feel", "feelChances", "feelValues"],
             single(tile(), "tempo"), single(tile(), "meter"), single(tile(), "feel"), single(tile(), "feelChances"), single(tile(), "feelValues")),
         section("Harmony", ["scale", "chordShape"], single(tile(), "scale"), single(tile(), "chordShape")),
-        section("Parts playing", ["parts"], single(tile(), "parts")),
-        section("Parts", partNames, parts.element),
+        section("Parts", ["parts", ...partNames], single(tile(), "parts"), parts.element),
     );
 
     // --- the footer: the problem, as JSON, and what to do with the draft -----------------------------------------------------
