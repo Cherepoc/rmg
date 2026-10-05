@@ -128,7 +128,10 @@ internal sealed class SectionGenerator
         StateTrace.Record(TracePoints.CadenceRaise, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{raisable} {raisedStep is not null}", (raisable, raisedStep is not null));
         // every chord's scale: the cadence's raise, and the others' applied or borrowed now and then, from a sequence of
         // their own
-        var chordScales = ChordScales.Draw(Stream(sectionId, SectionStream.ChordScales), scale, home, progression, raisedStep, facets[Facet.Progression]);
+        // a section of dominants, a genre's, from a sequence of its own, so that a song in none draws as it did
+        var dominants = Stream(sectionId, SectionStream.DominantChords)
+            .TestProbability(ChordScales.Dominant.At(facets[Facet.Progression], _genre.Chance(GenreChoices.ChordScales, "dominant")));
+        var chordScales = ChordScales.Draw(Stream(sectionId, SectionStream.ChordScales), scale, home, progression, raisedStep, dominants, facets[Facet.Progression], _genre);
         StateTrace.Record(TracePoints.ChordScales, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(" ", chordScales.Select(x => x.Kind)), chordScales);
 
         // the section's change of the song's feel, now and then, from a sequence of its own, by its feel facet
@@ -951,5 +954,6 @@ internal enum SectionStream
     RiffLineScale = 28,
     RhythmArpeggio = 29,
     Drums = 30,
-    ChordScales = 31
+    ChordScales = 31,
+    DominantChords = 32
 }

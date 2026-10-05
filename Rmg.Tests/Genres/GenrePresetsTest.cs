@@ -154,6 +154,25 @@ public sealed class GenrePresetsReportTest
         await Task.CompletedTask;
     }
 
+    /// <summary>The chords off the section's scale, of every chord: none's and every preset's, by where their scale comes from.</summary>
+    [Test]
+    [Explicit]
+    public async Task EveryPreset_ChordScales()
+    {
+        void Print(string name, IReadOnlyList<CorpusSong> songs)
+        {
+            var kinds = songs.SelectMany(x => x.Trace.Where(t => t.Point == Rmg.Core.Composition.TracePoints.ChordScales)
+                .SelectMany(t => (System.Collections.Immutable.ImmutableArray<Rmg.Core.Composition.ChordScale>)t.Value!)).ToArray();
+            Console.WriteLine($"{name}: " + string.Join(", ", Enum.GetValues<Rmg.Core.Composition.ChordScaleKind>()
+                .Select(k => $"{k} {100.0 * kinds.Count(x => x.Kind == k) / kinds.Length:0}%")));
+        }
+
+        Print("none", TestCorpus.Range(Count));
+        foreach (var preset in GenrePresets.All)
+            Print(preset.Name, TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset)))));
+        await Task.CompletedTask;
+    }
+
     /// <summary>How the chord roots move, of every move between a section's chords: none's and every preset's, the four commonest.</summary>
     [Test]
     [Explicit]

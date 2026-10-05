@@ -73,6 +73,18 @@ public static class GenreChoices
     public static GenreChoice RootMotions { get; } = Values("rootMotion", "Root motions", Progressions.Motions);
 
     /// <summary>
+    ///     The chords that leave the section's scale, each its chance as the songs have it (<see cref="Composition.ChordScales" />):
+    ///     a chord before a root a fifth below its dominant, a chord in a mode borrowed from the home's parallels, and a
+    ///     section's every chord but its home its own dominant, the blues', which the songs never play.
+    /// </summary>
+    public static GenreChoice ChordScales { get; } = Chances("chordScales", "Chords off the scale",
+    [
+        ("applied", "Applied dominants", Composition.ChordScales.Applied),
+        ("borrowed", "Borrowed chords", Composition.ChordScales.Borrowed),
+        ("dominant", "Every chord its dominant", Composition.ChordScales.Dominant)
+    ]);
+
+    /// <summary>
     ///     The gentle effects a song plays at all, each its chance as the songs have it by their sound (<see cref="Expression" />):
     ///     a vibrato, a chorus, a held chord's swell and a line's bends.
     /// </summary>
@@ -273,7 +285,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, Effects, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, Effects, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

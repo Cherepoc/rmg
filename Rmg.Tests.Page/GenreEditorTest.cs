@@ -468,6 +468,11 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(await Tile(time, "length").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: 1:33–3:28");
         // the effects, a vibrato and the rest, as the songs have them
         await Assert.That(await Tile(await Section(dialog, "Sound"), "effects").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
+        // the chords off the scale, none in the plainest songs, applied dominants the commonest in a middling one
+        var offTheScale = Tile(await Section(dialog, "Harmony"), "chordScales");
+        await page.Until(async () => await offTheScale.Locator(".genre-ends > span").CountAsync() == 3, "the chords off the scale said");
+        await Assert.That(await offTheScale.Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
+        await Assert.That(await offTheScale.Locator(".genre-ends > span").Nth(1).TextContentAsync()).IsEqualTo("Middling: Applied dominants 35%");
         await Assert.That(await Tile(dialog, "pan").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: default");
         // the forms, the plainest songs always in one of them
         await Assert.That(await Tile(await Section(dialog, "Form"), "formChances").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: One of the forms 100%");

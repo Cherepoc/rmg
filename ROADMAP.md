@@ -264,8 +264,9 @@ Each item with its plan, and what it waits for.
      play the section's own scale in their keys, which the cadence's raise used to leave under them. The chances are a
      guess to tune by listening, the borrowed mode mostly Mixolydian (♭VII) in a middling major song and the minor's in
      a plain one.
-  2. A genre's: a value of borrowing and of applied chords, and "every chord its dominant", the blues; Blues every
-     chord Mixolydian, Jazz applied dominants, Rock ♭VII and ♭VI; reported by the presets' shares of each.
+  2. Done: a genre's (`GenreChoices.ChordScales`): applied and borrowed chords' chances, and every chord but the home
+     its own dominant, which the songs never play; Blues 67% of its chords dominants (the rest its homes), Jazz 17%
+     applied and 7% borrowed, Rock 15% borrowed (`EveryPreset_ChordScales`).
   Musicality to listen for: a melody holding the section's note over a borrowed chord (the step's measure of clashes
   stands for it), and an applied dominant whose resolution the next chord's shape spoils.
 

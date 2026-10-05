@@ -402,7 +402,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll, 
         section("Time and feel", ["tempo", "length", "meter", "feel", "feelChances", "feelValues"],
             single(tile(), "tempo"), single(tile(), "length"), single(tile(), "meter"), single(tile(), "feel"), single(tile(), "feelChances"), single(tile(), "feelValues")),
         section("Form", ["formChances", "form", "phrases"], single(tile(), "formChances"), single(tile(), "form"), single(tile(), "phrases")),
-        section("Harmony", ["scale", "chordShape", "rootMotion"], single(tile(), "scale"), single(tile(), "chordShape"), single(tile(), "rootMotion")),
+        section("Harmony", ["scale", "chordShape", "rootMotion", "chordScales"], single(tile(), "scale"), single(tile(), "chordShape"), single(tile(), "rootMotion"), single(tile(), "chordScales")),
         section("Sound", ["effects", "strongEffect", "pan", "dynamics"], single(tile(), "effects"), single(tile(), "strongEffect"), single(tile(), "pan"), single(tile(), "dynamics")),
         section("Parts", ["parts", ...partNames], single(tile(), "parts"), parts.element),
     );

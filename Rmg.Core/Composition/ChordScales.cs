@@ -16,7 +16,10 @@ public enum ChordScaleKind
     Applied,
 
     /// <summary>A parallel mode on the section's home, such as Aeolian in a major song, which gives ♭VI, ♭VII and iv.</summary>
-    Borrowed
+    Borrowed,
+
+    /// <summary>Mixolydian on the chord's own root, as every chord but the home of a blues section is.</summary>
+    Dominant
 }
 
 /// <summary>
@@ -46,18 +49,29 @@ public static class ChordScales
     /// <summary>The chance a chord but the home is in the section's borrowed mode.</summary>
     public static ByConvention Borrowed { get; } = new(0, 0.12, 0.12);
 
+    /// <summary>
+    ///     The chance a section plays every chord but its home as its own dominant, the blues' I7, IV7 and V7, the home's
+    ///     its scale's, I7 in Mixolydian and i7 in Dorian: a genre's alone, which the songs never play.
+    /// </summary>
+    public static ByConvention Dominant { get; } = new(0, 0, 0);
+
     /// <summary>How many of its notes the most a mode borrowed differs from the section's scale on its home.</summary>
     public const int BorrowedDistance = 3;
 
     /// <summary>
     ///     Every chord's scale, in the progression's order: the cadence's raised seventh where it has one, and the others'
     ///     drawn by the progression facet, the borrowed mode drawn once for the section among the scales on its home
-    ///     close to its own, as likely as a song is in them, the closer the likelier.
+    ///     close to its own, as likely as a song is in them, the closer the likelier; a section of dominants every chord but
+    ///     the home Mixolydian, where its scale lets it; the chances a genre's where it names them.
     /// </summary>
+    /// <param name="dominants">Whether the section plays every chord but its home as its own dominant (<see cref="Dominant" />).</param>
     /// <param name="progression">The chords' roots, in steps above the home.</param>
     /// <param name="cadenceRaised">The step the cadence raises, none for a cadence that keeps the scale.</param>
-    internal static ImmutableArray<ChordScale> Draw(IGenerationContext context, Scale scale, int home, ImmutableArray<int> progression, int? cadenceRaised, double unconventionality)
+    internal static ImmutableArray<ChordScale> Draw(IGenerationContext context, Scale scale, int home, ImmutableArray<int> progression, int? cadenceRaised, bool dominants,
+        double unconventionality, Genre genre)
     {
+        var applied = Applied.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "applied"));
+        var borrowing = Borrowed.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "borrowed"));
         var onHome = Rotate(scale.Offsets, home);
         var parallels = Scales.All
             .Select(x => (Scale: x, Distance: x.Offsets.Zip(onHome).Count(y => y.First != y.Second)))
@@ -71,15 +85,17 @@ public static class ChordScales
         [
             ..progression.Select((root, chord) =>
             {
-                if (chord == progression.Length - 1 && cadenceRaised is { } raised)
-                    return new ChordScale(ChordScaleKind.Cadence, [raised], []);
                 if (Mod(root) == 0)
                     return ChordScale.Section;
+                if (dominants && Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Dominant) is { } dominant)
+                    return dominant;
+                if (chord == progression.Length - 1 && cadenceRaised is { } raised)
+                    return new ChordScale(ChordScaleKind.Cadence, [raised], []);
                 if (chord < progression.Length - 1 && Mod(progression[chord + 1] - root) == 3
-                    && context.TestProbability(Applied.At(unconventionality))
-                    && Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Applied) is { } applied)
-                    return applied;
-                if (borrowed is not null && context.TestProbability(Borrowed.At(unconventionality))
+                    && context.TestProbability(applied)
+                    && Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Applied) is { } dominantOfNext)
+                    return dominantOfNext;
+                if (borrowed is not null && context.TestProbability(borrowing)
                     && Toward(scale.Offsets, home, borrowed.Offsets, ChordScaleKind.Borrowed) is { } lent)
                     return lent;
                 return ChordScale.Section;
