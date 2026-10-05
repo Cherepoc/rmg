@@ -7,8 +7,8 @@ is removed once it is built.
 ## Priorities
 
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
-ratings by conventionality once enough are in, alongside, continuously and never as a gate; the events carrying the
-genre and the presets by their ids (see *Genres*).
+ratings by conventionality once enough are in, alongside, continuously and never as a gate; links in letters and
+digits, the events carrying the genre and the presets by their ids (see *Genres*).
 
 **Later** (P2), roughly in this order: the ratings report (see *Listening data*), once the dashboard shows songs rated
 enough; listening to the genres' presets (see *Genres*).
@@ -278,6 +278,15 @@ a link carries. What is left:
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
   half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
   alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall.
+- **Links in letters and digits** (P1, before the next deploy): a link's "_", as a chat's markdown deletes it, gone
+  rather than written as %5F (`4763cb3`, reverted by it). First the seeds and the genres' keys in base 62, the same
+  numbers spelt anew, so that every song is as it was (the fingerprint unchanged); a link or an entry of the list whose
+  settings are not the new format read with its seed in the old spelling, so that an old link never plays another
+  song. Then the settings, format B: every slider 0–61, its middle 31 (31 steps below, 30 above, as now), a letter each;
+  the rest, whether each value is given, the key, the meter, the mode, every part's plays and program and the drum
+  pieces, one run of bits in groups of five, a letter each from 0 to V, the last group padded with zeros, any letter
+  above V or a padding bit set refused, so that a settings has one spelling and a song one identity; the page, the
+  server and the song's identity alike, by one test value read and written by both. Format A, never deployed, not read.
 - **A link replacing the settings kept** (a decision): opening a shared song makes its settings this browser's own,
   so that the next song goes on in them; keeping one's own and offering a way back to them is the other way, should
   listening to shared songs ask for it.
