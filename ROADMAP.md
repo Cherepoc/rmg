@@ -257,10 +257,12 @@ Each item with its plan, and what it waits for.
      melody's notes on a beat a semitone from the chords 7.5% before, 7.2% after. A key change's chain and pivot chords
      play the section's own scale in their keys, which the cadence's raise used to leave under them. The chances are a
      guess to tune by listening, the borrowed mode mostly Mixolydian (♭VII) in a middling major song and the minor's in
-     a plain one.
+     a plain one. A chord leaves the scale only where one of its own notes moves, root, third, fifth or seventh, a
+     quarter of the borrowed chords having moved only the notes between them: 4% to 7% of the chords borrowed by the
+     progression facet's fifths, 3% to 5% applied.
   2. Done: a genre's (`GenreChoices.ChordScales`): applied and borrowed chords' chances, and every chord but the home
      its own dominant, which the songs never play; Blues 67% of its chords dominants (the rest its homes), Jazz 17%
-     applied and 7% borrowed, Rock 15% borrowed (`EveryPreset_ChordScales`).
+     applied and 5% borrowed, Rock 11% borrowed (`EveryPreset_ChordScales`).
   Musicality to listen for: a melody holding the section's note over a borrowed chord (the step's measure of clashes
   stands for it), and an applied dominant whose resolution the next chord's shape spoils.
 

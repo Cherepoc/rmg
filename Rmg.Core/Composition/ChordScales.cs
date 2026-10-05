@@ -87,16 +87,16 @@ public static class ChordScales
             {
                 if (Mod(root) == 0)
                     return ChordScale.Section;
-                if (dominants && Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Dominant) is { } dominant)
+                if (dominants && Heard(Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Dominant), home + root) is { } dominant)
                     return dominant;
                 if (chord == progression.Length - 1 && cadenceRaised is { } raised)
                     return new ChordScale(ChordScaleKind.Cadence, [raised], []);
                 if (chord < progression.Length - 1 && Mod(progression[chord + 1] - root) == 3
                     && context.TestProbability(applied)
-                    && Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Applied) is { } dominantOfNext)
+                    && Heard(Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Applied), home + root) is { } dominantOfNext)
                     return dominantOfNext;
                 if (borrowed is not null && context.TestProbability(borrowing)
-                    && Toward(scale.Offsets, home, borrowed.Offsets, ChordScaleKind.Borrowed) is { } lent)
+                    && Heard(Toward(scale.Offsets, home, borrowed.Offsets, ChordScaleKind.Borrowed), home + root) is { } lent)
                     return lent;
                 return ChordScale.Section;
             })
@@ -126,6 +126,17 @@ public static class ChordScales
             return null;
         var altered = Realizer.TryAlterScaleSteps(scaleOffsets, raised.ToImmutable(), lowered.ToImmutable());
         return altered is null ? null : new ChordScale(kind, raised.ToImmutable(), lowered.ToImmutable());
+    }
+
+    /// <summary>
+    ///     A chord's scale where it moves one of the chord's own notes, its root, third, fifth or seventh, as the IV7's of a
+    ///     blues; none where it moves only the notes between them, which the chord would not sound.
+    /// </summary>
+    /// <param name="root">The chord's root, in steps of the scale from its first note.</param>
+    private static ChordScale? Heard(ChordScale? scale, int root)
+    {
+        int[] tones = [..new[] { 0, 2, 4, 6 }.Select(x => Mod(root + x))];
+        return scale is not null && scale.Raised.Concat(scale.Lowered).Any(x => tones.Contains(Mod(x))) ? scale : null;
     }
 
     /// <summary>The scale from one of its steps, as the semitones of its notes above it.</summary>
