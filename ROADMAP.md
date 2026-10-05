@@ -521,9 +521,11 @@ a link carries. What is left:
      preset before). Not done: a chord a phrase, one chord over four bars, which the progressions' two chords a phrase
      at least (home and cadence) do not allow: a vamp of one chord is a progression of its own kind, should the loop's
      report ask for it.
-  4. The form's devices: a genre's chance of a solo and its soloists, its key changes' chances, and pools of its
-     intros and endings, the intros given ends of their own first (a table now, which moves the corpus). Jazz soloing
-     often and ending on a button or a ring, Rock on a stop or a button, Electronic and Ambient fading.
+  4. Done: the form's devices by genre: a later appearance's chance of a solo and its soloists (`GenreChoices.Solos`,
+     `GenreChoices.Soloists`), and pools of the intros and the endings (`GenreChoices.Intro`, `GenreChoices.Ending`), the
+     intros given their ends first, alike at every end so that the songs draw as they did. Solo appearances Jazz 64%,
+     Blues 30%, Rock 18% (5% others); fades Electronic 72%, Hip-hop 69%, Ambient 59%; a button or a stop Funk 78%, Rock
+     and Jazz 59%. Key changes by genre left for P3.
   5. Done as step 4 of genres that sound like themselves: the fills' amount.
   Then (P3): a genre's arrangement and levels, its parts resting by a section's role (a dub's breakdown) and how loud
   each plays (the levels below), one item, a tile a part, should listening ask. Every step a tile in the editor and a page test that it shows; a genre kept before

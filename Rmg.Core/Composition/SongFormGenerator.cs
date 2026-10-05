@@ -23,6 +23,9 @@ internal sealed class SongFormGenerator
     // the sequence whether the song opens on its hook is drawn from (FormLayers.HookIntro)
     private readonly IGenerationContext _hookContext;
 
+    // the genre whose intros and endings the song's are drawn among, where it names them
+    private readonly Genre _genre;
+
     private readonly RhythmicUnconventionality _songRhythm;
 
     // what every track plays, by its number, so that the form can bring in or leave out the drums or the bass
@@ -38,6 +41,7 @@ internal sealed class SongFormGenerator
         IGenerationContext context,
         IGenerationContext introContext,
         IGenerationContext hookContext,
+        Genre genre,
         RhythmicUnconventionality songRhythm,
         IReadOnlyDictionary<int, TrackRole> roles,
         bool hasDrums,
@@ -47,6 +51,7 @@ internal sealed class SongFormGenerator
         _context = context;
         _introContext = introContext;
         _hookContext = hookContext;
+        _genre = genre;
         _songRhythm = songRhythm;
         _roles = roles;
         _hasDrums = hasDrums;
@@ -60,8 +65,8 @@ internal sealed class SongFormGenerator
     /// <param name="sectionIds">The sections in the song's order.</param>
     public FormPlan Plan(IReadOnlyList<int> sectionIds)
     {
-        var intro = _context.Pick(FormLayers.Intros);
-        var ending = _context.Pick(FormLayers.WeighEndings(_songRhythm.Value));
+        var intro = _context.Pick(FormLayers.WeighIntros(_songRhythm.Value, _genre));
+        var ending = _context.Pick(FormLayers.WeighEndings(_songRhythm.Value, _genre));
         var window = intro == IntroKind.Entries ? _introContext.Pick(FormLayers.IntroWindows) : default;
         var halfCountIn = intro == IntroKind.CountIn && _context.TestProbability(FormLayers.HalfCountInChance);
         // a song without drums has nobody to count it in, so it starts cold, drawn as it would be all the same

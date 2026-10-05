@@ -127,18 +127,22 @@ internal static class Solos
     /// <param name="index">The appearance's place among the song's sections; the first is never a solo.</param>
     /// <param name="role">The section's role in the song's form, which leans it to a solo.</param>
     /// <param name="parts">The parts the song has.</param>
-    public static SoloPlan? Draw(IGenerationContext context, int index, SectionRole role, Unconventionality facets, IReadOnlyCollection<TrackRole> parts)
+    /// <param name="genre">The genre whose chance of a solo and whose soloists the solos take, where it names them.</param>
+    public static SoloPlan? Draw(IGenerationContext context, int index, SectionRole role, Unconventionality facets, IReadOnlyCollection<TrackRole> parts, Genre genre)
     {
-        var isSolo = context.TestProbability(Tilt.Of(RoleOdds, RoleLeans[role]).Chance(Chance.At(facets[Facet.Form]), 1));
+        var isSolo = context.TestProbability(Tilt.Of(RoleOdds, RoleLeans[role]).Chance(Chance.At(facets[Facet.Form], genre.Chance(GenreChoices.Solos, "sections")), 1));
+        var pool = genre.Pool<TrackRole>(GenreChoices.Soloists, x => GenreChoices.Name(x.ToString()));
         var melody = facets[Facet.Melody];
         var count = context.Pick(ByConvention.Weigh(Counts, melody));
         var mode = context.Pick(ByConvention.Weigh(Modes, melody));
         var step = Steps[context.GenerateInt(0, Steps.Length)];
         var candidates = Soloists.Where(x => parts.Contains(x.Part)).ToList();
         var soloists = new List<TrackRole>();
-        for (var i = 0; i < count && candidates.Count > 0 && candidates.Any(x => x.Weight.At(melody) > 0); i++)
+        // a part a genre's pool leaves out never solos, and a song with none of its soloists has no solo
+        bool MaySolo((TrackRole Part, ByConvention Weight) x) => (pool is null ? x.Weight : pool(x.Part))?.At(melody) > 0;
+        for (var i = 0; i < count && candidates.Any(MaySolo); i++)
         {
-            var soloist = context.Pick(ByConvention.Weigh(candidates, melody));
+            var soloist = context.Pick(ByConvention.Weigh(candidates, melody, pool));
             soloists.Add(soloist);
             candidates.RemoveAll(x => x.Part == soloist);
         }

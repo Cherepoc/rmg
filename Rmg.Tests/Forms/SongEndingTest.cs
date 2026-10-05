@@ -122,7 +122,7 @@ public sealed class SongEndingTest
     {
         double Share(double unconventionality)
         {
-            var weights = FormLayers.WeighEndings(unconventionality);
+            var weights = FormLayers.WeighEndings(unconventionality, Genre.None);
             return weights.Where(x => FormLayers.AdventurousEndings.Contains(x.Value)).Sum(x => x.Weight) / weights.Sum(x => x.Weight);
         }
 

@@ -156,10 +156,27 @@ internal static class FormLayers
     ///     The endings' weights by the form facet of the song's unconventionality: the plainest song ends with a button, a
     ///     ringing chord or a fade, the wildest in any way as likely.
     /// </summary>
-    public static ImmutableArray<Weighted<EndingKind>> WeighEndings(double unconventionality)
+    public static ImmutableArray<Weighted<EndingKind>> WeighEndings(double unconventionality, Genre genre)
     {
-        return ByConvention.Weigh(Endings.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, AdventurousEndings.Contains(x.Value) ? 1 : 0))), unconventionality);
+        return ByConvention.Weigh(EndingWeights, unconventionality, genre.Pool<EndingKind>(GenreChoices.Ending, x => GenreChoices.Name(x.ToString())));
     }
+
+    /// <summary>The endings' weights at the ends: the adventurous ones leaning unconventional.</summary>
+    public static ImmutableArray<(EndingKind Ending, ByConvention Weight)> EndingWeights { get; } =
+        [..Endings.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, AdventurousEndings.Contains(x.Value) ? 1 : 0)))];
+
+    /// <summary>
+    ///     The intros' weights by the form facet, alike at every end in the songs, among a genre's pool where it names one,
+    ///     whose own ends lean them.
+    /// </summary>
+    public static ImmutableArray<Weighted<IntroKind>> WeighIntros(double unconventionality, Genre genre)
+    {
+        return ByConvention.Weigh(IntroWeights, unconventionality, genre.Pool<IntroKind>(GenreChoices.Intro, x => GenreChoices.Name(x.ToString())));
+    }
+
+    /// <summary>The intros' weights at the ends, the songs' alike at every end.</summary>
+    public static ImmutableArray<(IntroKind Intro, ByConvention Weight)> IntroWeights { get; } =
+        [..Intros.Select(x => (x.Value, new ByConvention(x.Weight, x.Weight, x.Weight)))];
 
     /// <summary>How long a button's hit is, in beats, in the bar it has.</summary>
     public const double ButtonLength = 1;

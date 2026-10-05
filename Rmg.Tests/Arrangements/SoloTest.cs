@@ -18,11 +18,11 @@ public sealed class SoloTest
         var plain = Unconventionality.Generate(0, _ => context);
         var wild = Unconventionality.Generate(1, _ => context);
 
-        await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.Draw(context, 1, SectionRole.Free, plain, Band) is null)).IsTrue();
-        var solos = Enumerable.Range(0, 4000).Count(_ => Solos.Draw(context, 1, SectionRole.Free, wild, Band) is not null) / 4000.0;
+        await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.Draw(context, 1, SectionRole.Free, plain, Band, Genre.None) is null)).IsTrue();
+        var solos = Enumerable.Range(0, 4000).Count(_ => Solos.Draw(context, 1, SectionRole.Free, wild, Band, Genre.None) is not null) / 4000.0;
         await Assert.That(solos).IsEqualTo(0.5).Within(0.03);
         // and never the song's first section
-        await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.Draw(context, 0, SectionRole.Free, wild, Band) is null)).IsTrue();
+        await Assert.That(Enumerable.Range(0, 1000).All(_ => Solos.Draw(context, 0, SectionRole.Free, wild, Band, Genre.None) is null)).IsTrue();
     }
 
     [Test]
@@ -30,7 +30,7 @@ public sealed class SoloTest
     {
         var context = new GenerationContext(2);
         var middling = Unconventionality.Generate(0.5, _ => context);
-        double Rate(SectionRole role) => Enumerable.Range(0, 8000).Count(_ => Solos.Draw(context, 1, role, middling, Band) is not null) / 8000.0;
+        double Rate(SectionRole role) => Enumerable.Range(0, 8000).Count(_ => Solos.Draw(context, 1, role, middling, Band, Genre.None) is not null) / 8000.0;
 
         var (bridge, verse, chorus, preChorus) = (Rate(SectionRole.Bridge), Rate(SectionRole.Verse), Rate(SectionRole.Chorus), Rate(SectionRole.PreChorus));
         await Assert.That(bridge).IsGreaterThan(verse);

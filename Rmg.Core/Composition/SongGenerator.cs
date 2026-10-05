@@ -194,6 +194,7 @@ public static class SongGenerator
             Stream(SongStream.Form),
             Stream(SongStream.Intro),
             Stream(SongStream.HookIntro),
+            genre,
             Of(Facet.Form),
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
             !absent.Contains(TrackRole.Drum),
@@ -292,7 +293,7 @@ public static class SongGenerator
         // one the soloist's where the song has it
         var drawnSolos = Solos.WithSoloist(
             Stream(SongStream.SoloistSolo),
-            [..played.Select((id, index) => Solos.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Solos), index)), index, structure.Roles[id], generateSection(id).Facets, partsAt[index]))],
+            [..played.Select((id, index) => Solos.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Solos), index)), index, structure.Roles[id], generateSection(id).Facets, partsAt[index], genre))],
             [..played.Select(id => structure.Roles[id])],
             [..played.Select(id => generateSection(id).Facets[Facet.Melody])],
             [..SongParts.All.Except(absent)]

@@ -87,6 +87,41 @@ public static class GenreChoices
     /// <summary>The chance a section plays the song's first section's chords, the arrangement telling them apart, as a beat's loop does; the songs never.</summary>
     public static GenreChoice Loop { get; } = Chances("loop", "Loop", [("sections", "Sections on the first's chords", SectionGenerator.Loop)]);
 
+    /// <summary>The chance a later appearance is a solo, as the songs have it by its role (<see cref="Composition.Solos.Chance" />).</summary>
+    public static GenreChoice Solos { get; } = Chances("solos", "Solos", [("sections", "A section soloed", Composition.Solos.Chance)]);
+
+    /// <summary>Who solos (<see cref="Composition.Solos.Soloists" />).</summary>
+    public static GenreChoice Soloists { get; } = Pool("soloists", "Soloists",
+        Composition.Solos.Soloists.Select(x => (Name(x.Part.ToString()), x.Part switch
+        {
+            TrackRole.Solo => "The solo part",
+            TrackRole.CounterMelody => "Counter-melody",
+            TrackRole.Drum => "Drums",
+            _ => x.Part.ToString()
+        }, x.Weight)));
+
+    /// <summary>How the song starts before its first section (<see cref="FormLayers.Intros" />): the whole band, a count-in, or the parts one by one.</summary>
+    public static GenreChoice Intro { get; } = Pool("intro", "Intro",
+        FormLayers.IntroWeights.Select(x => (Name(x.Intro.ToString()), x.Intro switch
+        {
+            IntroKind.Cold => "The whole band",
+            IntroKind.CountIn => "A count-in",
+            IntroKind.Entries => "Part by part",
+            _ => x.Intro.ToString()
+        }, x.Weight)));
+
+    /// <summary>How the song ends (<see cref="FormLayers.Endings" />).</summary>
+    public static GenreChoice Ending { get; } = Pool("ending", "Ending",
+        FormLayers.EndingWeights.Select(x => (Name(x.Ending.ToString()), x.Ending switch
+        {
+            EndingKind.Button => "A button",
+            EndingKind.RingOut => "A ringing chord",
+            EndingKind.Open => "Open",
+            EndingKind.Stop => "A stop",
+            EndingKind.Fade => "A fade",
+            _ => x.Ending.ToString()
+        }, x.Weight)));
+
     /// <summary>The chance a section's riff plays in power chords, a perfect fifth over every note, as rock's riffs are (<see cref="SectionGenerator.PowerChordChance" />).</summary>
     public static GenreChoice Riff { get; } = Chances("riff", "Riff",
     [
@@ -359,7 +394,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Loop, LineScale, Bass, BassLanding, Effects, Levels, GrooveHold, Fills, Hook, Riff, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Loop, LineScale, Bass, BassLanding, Effects, Levels, GrooveHold, Fills, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,
