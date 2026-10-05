@@ -485,11 +485,12 @@ a link carries. What is left:
      tenth of a semitone and the leaps not at all: a melody's leaps come of a phrase starting afresh in another register,
      its echoes and its landings, not of its steps. A melody's leaping by genre (P3), a lean of its register's freedom
      and its leap's size, should listening ask.
-  2. The bass's style: values of how much it leads into the next chord, walking at its most, and where it lands on a
-     chord, root, third or fifth (the leading drawn a song and a section, its landings). Jazz walking, Folk root and
-     fifth, Reggae and Electronic the root, Funk between. A walking bass wants quarters too: the preset's rhythm
-     checked. An octave bass, a root alternating its octaves on the off-beats, disco's and funk's, a figure of its own
-     (P3).
+  2. Done: the bass's style, a genre's value of its leading into a chord, through the chance's odds
+     (`GenreChoices.Bass`), and a pool of its landings (`GenreChoices.BassLanding`). A half step into a change: Jazz
+     36% (30% unleaned), Blues 28% (24%), Reggae 12% (20%), Hip-hop 8% (11%); most of a bass's steps are its line's,
+     so the lean moves a few points. Its landings on the root firmer for Electronic, Reggae and Hip-hop; a walking
+     bass lands on the root, so Jazz keeps its own. Not done: a root and fifth figure within the bar, a figure of its own
+     with the octave bass (P3), and Jazz's walking quarters, as its rhythm settings have them.
   2b. A riff in power chords: rock's riff a moving line of fifths, E5, G5, A5 over an E, where ours is a line of single
      notes stacked only on a section's first (`LineChords.Riff`); the chords' part plays the Power chord shape already.
      A riff note's state played as the octave doubling is (`Realizer`): its note, a perfect fifth over it, 7 semitones

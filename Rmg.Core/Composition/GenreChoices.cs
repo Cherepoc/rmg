@@ -84,6 +84,20 @@ public static class GenreChoices
         ("dominant", "Every chord its dominant", Composition.ChordScales.Dominant)
     ]);
 
+    /// <summary>How much the bass leads into a new chord, from 0, never, through 50, as its instrument has it, to 100, walking (<see cref="BassLeadingLayers.GenreLeadOdds" />).</summary>
+    public static GenreChoice Bass { get; } = Values("bass", "Bass", [("leading", "Leading into a chord")]);
+
+    /// <summary>What the bass lands on in a new chord (<see cref="BassLeadingLayers.Arrivals" />): its root, its third, its fifth, or its figure's note.</summary>
+    public static GenreChoice BassLanding { get; } = Pool("bassLanding", "Bass's landing",
+        BassLeadingLayers.ArrivalWeights.Select(x => (Name(x.Arrival.ToString()), x.Arrival switch
+        {
+            ChordArrival.Root => "The root",
+            ChordArrival.Third => "The third",
+            ChordArrival.Fifth => "The fifth",
+            ChordArrival.Free => "Its figure's note",
+            _ => throw new ArgumentOutOfRangeException(nameof(x.Arrival), x.Arrival, null)
+        }, x.Weight)));
+
     /// <summary>
     ///     The scales a melody's and a riff's passing notes take, each weighed as the songs weigh them
     ///     (<see cref="Composition.LineScales.Weights" />): the section's, its pentatonic, the blues', and the wilder ones on each
@@ -303,7 +317,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, LineScale, Effects, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, LineScale, Bass, BassLanding, Effects, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

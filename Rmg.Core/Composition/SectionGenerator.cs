@@ -70,7 +70,7 @@ internal sealed class SectionGenerator
         _songPercussion = songPercussion;
         _key = key;
         _songRegisterFreedomShift = Generators.SplineValue()(context.CreateContext(Seeds.Derive(seed, SongRegisterFreedomStream)));
-        _generators = ((Func<Meter, (BarStateGenerator, PatternGenerator)>)(meter => (new BarStateGenerator(settings, meter), new PatternGenerator(context, tracks.Definitions, meter, genre))))
+        _generators = ((Func<Meter, (BarStateGenerator, PatternGenerator)>)(meter => (new BarStateGenerator(settings, meter, genre), new PatternGenerator(context, tracks.Definitions, meter, genre))))
             .CacheGeneratedValues();
     }
 

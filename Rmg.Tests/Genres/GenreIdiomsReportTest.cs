@@ -47,6 +47,11 @@ public sealed class GenreIdiomsReportTest
         var melodyBars = map.Sections.SelectMany(x => Enumerable.Range(1, (int)Math.Round(x.Duration / x.Meter.BarDuration) - 1).Select(b => (Start: x.Start + b * x.Meter.BarDuration, x.Meter.BarDuration))).ToArray();
         var played = melodyBars.Where(x => BarOf(x.Start, x.BarDuration).Length > 0).ToArray();
         var lineScales = song.Trace.Where(x => x.Point == TracePoints.LineScale && x.Track == SongTracks.MelodyTrack).Select(x => (LineScale)x.Value!).ToArray();
+        // the bass where a chord changes: its note there on the chord's root, and the one before a step or a half step from it
+        var bass = notes.GetValueOrDefault(SongTracks.BassTrack)?.ToArray() ?? [];
+        var stateMaps = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
+        var arrivals = song.ChordChanges.Select(c => (Change: c, Index: Array.FindIndex(bass, x => Math.Abs(x.Position - c) < 1e-6))).Where(x => x.Index > 0).ToArray();
+        bool OnRoot(int index, double change) => (bass[index].Value.Pitches.Min() - Realizer.GetChord(stateMaps.GetEffectiveStateMapAt(change)).Chord.GetPitch(0)) % 12 == 0;
 
         return new Dictionary<string, double>
         {
@@ -61,6 +66,9 @@ public sealed class GenreIdiomsReportTest
             ["melody pentatonic or blues"] = lineScales.Length > 0 ? lineScales.Count(x => x is LineScale.Pentatonic or LineScale.Blues) / (double)lineScales.Length : double.NaN,
             ["melody mean move"] = moves.Length > 0 ? moves.Average() : double.NaN,
             ["melody leaps past a fifth"] = moves.Length > 0 ? moves.Count(x => x > 7) / (double)moves.Length : double.NaN,
+            ["bass leads into a change"] = arrivals.Length > 0 ? arrivals.Count(x => Math.Abs(bass[x.Index].Value.Pitches.Min() - bass[x.Index - 1].Value.Pitches.Min()) is 1 or 2) / (double)arrivals.Length : double.NaN,
+            ["bass a half step into a change"] = arrivals.Length > 0 ? arrivals.Count(x => Math.Abs(bass[x.Index].Value.Pitches.Min() - bass[x.Index - 1].Value.Pitches.Min()) == 1) / (double)arrivals.Length : double.NaN,
+            ["bass on the root at a change"] = arrivals.Length > 0 ? arrivals.Count(x => OnRoot(x.Index, x.Change)) / (double)arrivals.Length : double.NaN,
             ["tempo"] = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetEffectiveStateMapAt(map.Origin).GetStateValue(Rmg.Core.Events.StateKinds.Tempo) * Meter.BaseTempo
         };
     }

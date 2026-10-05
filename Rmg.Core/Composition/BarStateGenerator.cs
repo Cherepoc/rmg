@@ -28,10 +28,15 @@ internal sealed class BarStateGenerator
 
     private readonly Meter _meter;
 
+    // the genre whose bass leads and lands as it has them
+    private readonly Genre _genre;
+
     /// <param name="meter">The meter the section's bars are in.</param>
-    public BarStateGenerator(ProgressionSettings settings, Meter meter)
+    /// <param name="genre">The genre whose bass leads into its chords and lands on them as it has them.</param>
+    public BarStateGenerator(ProgressionSettings settings, Meter meter, Genre genre)
     {
         _meter = meter;
+        _genre = genre;
         _timelineGenerators =
         [
             StateTimelineGenerator.Create(
@@ -197,6 +202,8 @@ internal sealed class BarStateGenerator
     private IEnumerable<IStateTimeline> GenerateBassLeading(IGenerationContext context, ImmutableArray<double> changes, double bassLeading, double unconventionality)
     {
         var approachGenerator = Generators.WeightedIndex(BassLeadingLayers.Approaches);
+        // a genre's bass leading more or less, through the chance's odds
+        var leaning = Tilt.Of(BassLeadingLayers.GenreLeadOdds, _genre.Shift(GenreChoices.Bass, "leading"));
         var approaches = StateTimeline.Create(
                 _meter.PatternDuration,
                 StateKinds.ChordApproach,
@@ -204,7 +211,7 @@ internal sealed class BarStateGenerator
                     .Select(position =>
                         {
                             // the way is drawn whether the chord leads or not, so that the draws are as many whatever the chance
-                            var leads = context.TestProbability(bassLeading * BassLeadingLayers.MaxApproachChance);
+                            var leads = context.TestProbability(leaning.Chance(bassLeading * BassLeadingLayers.MaxApproachChance, 1));
                             var way = BassLeadingLayers.Approaches[approachGenerator(context)].Value;
                             var approach = leads ? way : ChordApproach.None;
                             return ((int)approach).ToTimelineItem(position);
@@ -214,7 +221,7 @@ internal sealed class BarStateGenerator
             )
             .WithLayer("Bar");
 
-        var arrivalWeights = ByConvention.Weigh(BassLeadingLayers.Arrivals.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == ChordArrival.Root ? 0 : 1))), unconventionality);
+        var arrivalWeights = ByConvention.Weigh(BassLeadingLayers.ArrivalWeights, unconventionality, _genre.Pool<ChordArrival>(GenreChoices.BassLanding, x => GenreChoices.Name(x.ToString())));
         var arrivalGenerator = Generators.WeightedIndex(arrivalWeights);
         var arrivals = StateTimeline.Create(
                 _meter.PatternDuration,

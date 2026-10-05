@@ -41,6 +41,16 @@ internal static class BassLeadingLayers
         new(0.1, ChordArrival.Free)
     ];
 
+    /// <summary>The arrivals' weights at the ends: the root a plain song's, the others leaning unconventional.</summary>
+    public static ImmutableArray<(ChordArrival Arrival, ByConvention Weight)> ArrivalWeights { get; } =
+        [..Arrivals.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == ChordArrival.Root ? 0 : 1)))];
+
+    /// <summary>
+    ///     How far a genre's bass leads into its chords more or less (<see cref="GenreChoices.Bass" />), as the odds of
+    ///     leading at its most and their inverse at its least.
+    /// </summary>
+    public const double GenreLeadOdds = 8;
+
     /// <summary>How a bar leads into the next, and how likely each way is when it does.</summary>
     public static ImmutableArray<Weighted<ChordApproach>> Approaches { get; } =
     [
