@@ -315,11 +315,9 @@ a link carries. What is left:
   with a bridge, a pool a genre weighs, and a form of its own as a chance, so that folk keeps verses and choruses and
   jazz plays AABA once it is among them; AABA and a head with solos, the forms to add.
   After the phrases: an AABA's or a head's A is eight bars, which a section of one phrase cannot be.
-- **A genre's mix** (P2, the pan first): how far each part sits from the middle, a lean of its role's spread (Panning.GetSpread), and
-  how loud each plays against the others, values a part each, applied where the mix gives none, so that a given pan
-  or volume stays as given; reggae's bass up, a jazz trio's piano and bass apart, ambient's pads wide.
-  The pan first, a lean of the spread there is; the levels, a mechanism of their own that a mix given may fight,
-  only should listening ask.
+- **A genre's levels** (P3): how loud each part plays against the others, values a part each, applied where the mix
+  gives none, a mechanism of its own that a mix given may fight; the pan is a genre's (GenreChoices.Pan), the levels
+  only should listening ask for them.
 - **A range's chart as one band** (P2): its ends and its lean on one chart, the band between the from and the to along
   the songs, a line where its draws centre (the lean's median, (1/2)^(e^-lean) across it) and the band shaded by
   how likely each height is, a vertical gradient a slice, a few dozen slices; handles on its edges for the ends and on
