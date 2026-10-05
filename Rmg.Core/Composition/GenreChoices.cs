@@ -66,6 +66,12 @@ public static class GenreChoices
     public static GenreChoice Meter { get; } = Pool("meter", "Meter",
         Composition.Meter.Options.Select(x => (Composition.Meter.NameOf(x.Meter), Composition.Meter.NameOf(x.Meter), x.Weight)));
 
+    /// <summary>
+    ///     How a section's chord roots move, each motion leaned from as the songs have it, falling a fifth the most, to more
+    ///     or less (<see cref="Progressions.Motions" />): a genre's ii–V or its ♭VII–IV–I.
+    /// </summary>
+    public static GenreChoice RootMotions { get; } = Values("rootMotion", "Root motions", Progressions.Motions);
+
     /// <summary>The feel the song plays in, straight, a tuplet or a grouping (<see cref="Feels" />).</summary>
     public static GenreChoice Feel { get; } = Pool("feel", "Feel", Feels.Weights.Select(x => (Feels.NameOf(x.Feel), Capitalised(Feels.Label(x.Feel)), x.Weight)));
 
@@ -206,7 +212,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

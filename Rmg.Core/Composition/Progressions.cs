@@ -36,6 +36,24 @@ internal static class Progressions
         0.4 // a step down
     ];
 
+    /// <summary>
+    ///     The motions as a genre names them (<see cref="GenreChoices.RootMotions" />), by how many steps up the scale the
+    ///     next root is, as <see cref="MotionWeights" /> has them, and how a page shows them.
+    /// </summary>
+    public static ImmutableArray<(string Name, string Label)> Motions { get; } =
+    [
+        ("same", "The same root"),
+        ("stepUp", "Up a step"),
+        ("thirdUp", "Up a third"),
+        ("fifthDown", "Down a fifth, as ii–V or V–I"),
+        ("fourthDown", "Down a fourth, as IV–I or ♭VII–IV"),
+        ("thirdDown", "Down a third"),
+        ("stepDown", "Down a step")
+    ];
+
+    /// <summary>How far a genre's lean of a motion moves it, at its most or its least, as odds: four times as likely, or a quarter.</summary>
+    public const double MotionOdds = 4;
+
     /// <summary>The roots that prepare a cadence: ii and IV.</summary>
     private static readonly ImmutableHashSet<int> PreCadenceSteps = [1, 3];
 
@@ -76,13 +94,18 @@ internal static class Progressions
     ///     How closely the progression keeps to its rules, from 1, which follows them, to 0, which picks every root
     ///     as likely as any other.
     /// </param>
-    public static ImmutableArray<int> Generate(IGenerationContext context, Scale scale, int home, double strictness, int count)
+    /// <param name="motionLean">
+    ///     How a genre leans each motion, by its place in <see cref="Motions" />, from -1 to 1, 0 as the songs have it,
+    ///     beyond the strictness, so that a genre's motions are heard in its wildest songs too.
+    /// </param>
+    public static ImmutableArray<int> Generate(IGenerationContext context, Scale scale, int home, double strictness, int count, Func<int, double> motionLean)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(strictness);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(strictness, 1);
         ArgumentOutOfRangeException.ThrowIfLessThan(count, 2);
 
         var cadenceWeights = GetCadenceWeights(scale.Offsets, home);
+        var tilt = Tilt.Of(MotionOdds, 1);
         var roots = new int[count];
         for (var chord = 1; chord < count; chord++)
         {
@@ -95,8 +118,8 @@ internal static class Progressions
                 var roleWeight = isCadence ? cadenceWeights[step] > 0 ? cadenceWeights[step] : OutOfRoleWeight
                     : isPreparation ? PreCadenceSteps.Contains(step) ? 1 : OutOfRoleWeight
                     : 1;
-                var motionWeight = MotionWeights[Mod(step - previous)];
-                weights[step] = new Weighted<int>(Math.Pow(motionWeight * roleWeight, strictness), step);
+                var motion = Mod(step - previous);
+                weights[step] = new Weighted<int>(tilt.Weigh(Math.Pow(MotionWeights[motion] * roleWeight, strictness), motionLean(motion)), step);
             }
 
             roots[chord] = Normalize(context.Pick([..weights]));

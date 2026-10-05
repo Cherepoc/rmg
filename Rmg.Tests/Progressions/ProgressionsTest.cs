@@ -9,10 +9,29 @@ public sealed class ProgressionsTest
 {
     private const int PhraseCount = 20_000;
 
-    private static ImmutableArray<int>[] GeneratePhrases(Scale scale, int home, double strictness)
+    private static ImmutableArray<int>[] GeneratePhrases(Scale scale, int home, double strictness) => GeneratePhrases(scale, home, strictness, _ => 0);
+
+    private static ImmutableArray<int>[] GeneratePhrases(Scale scale, int home, double strictness, Func<int, double> motionLean)
     {
         var context = new GenerationContext(1);
-        return [..Enumerable.Range(0, PhraseCount).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, scale, home, strictness, 4))];
+        return [..Enumerable.Range(0, PhraseCount).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, scale, home, strictness, 4, motionLean))];
+    }
+
+    // how often the roots move by a motion, by its place in the motions, of every move between chords
+    private static double ShareOf(ImmutableArray<int>[] phrases, int motion) =>
+        (double)phrases.Sum(x => x.Zip(x.Skip(1)).Count(m => Mod7(m.Second - m.First) == motion)) / phrases.Sum(x => x.Length - 1);
+
+    [Test]
+    public async Task AMotionLeanedTo_IsHeardMore_AtEveryStrictness_AndLeanedFrom_Less()
+    {
+        var major = Rmg.Core.Composition.Scales.All.Single(x => x.Name == "Major");
+        var fourthDown = Rmg.Core.Composition.Progressions.Motions.Select(x => x.Name).ToList().IndexOf("fourthDown");
+        foreach (var strictness in new[] { 1.0, 0.85, 0 })
+        {
+            var asIs = ShareOf(GeneratePhrases(major, 0, strictness), fourthDown);
+            await Assert.That(ShareOf(GeneratePhrases(major, 0, strictness, x => x == fourthDown ? 1 : 0), fourthDown)).IsGreaterThan(asIs * 1.5);
+            await Assert.That(ShareOf(GeneratePhrases(major, 0, strictness, x => x == fourthDown ? -1 : 0), fourthDown)).IsLessThan(asIs / 1.5);
+        }
     }
 
     private static int Mod7(int x) => ((x % 7) + 7) % 7;

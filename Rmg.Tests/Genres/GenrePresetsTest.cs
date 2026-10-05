@@ -48,6 +48,26 @@ public sealed class GenrePresetsReportTest
         await Task.CompletedTask;
     }
 
+    /// <summary>How the chord roots move, of every move between a section's chords: none's and every preset's, the four commonest.</summary>
+    [Test]
+    [Explicit]
+    public async Task EveryPreset_RootMotions()
+    {
+        void Print(string name, IReadOnlyList<CorpusSong> songs)
+        {
+            var moves = songs.SelectMany(x => x.Trace.Where(t => t.Point == Rmg.Core.Composition.TracePoints.Progression))
+                .Select(t => (System.Collections.Immutable.ImmutableArray<int>)t.Value!)
+                .SelectMany(x => x.Zip(x.Skip(1)).Select(m => Rmg.Core.Composition.Progressions.Motions[((m.Second - m.First) % 7 + 7) % 7].Name))
+                .ToArray();
+            Console.WriteLine($"{name}: " + string.Join(", ", moves.GroupBy(x => x).OrderByDescending(x => x.Count()).Take(4).Select(x => $"{x.Key} {100.0 * x.Count() / moves.Length:0}%")));
+        }
+
+        Print("none", TestCorpus.Range(Count));
+        foreach (var preset in GenrePresets.All)
+            Print(preset.Name, TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset)))));
+        await Task.CompletedTask;
+    }
+
     /// <summary>
     ///     Every preset's choices at the plainest, a middling and the wildest base, the three commonest options of each
     ///     and their shares, so that what a genre's ends make of it is seen: an end collapsing onto one option, or one

@@ -235,6 +235,8 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(await Tile(time, "tempo").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: 90–175 bpm");
         // a length's range in minutes and seconds, the shortest tenth of the plainest songs to the longest
         await Assert.That(await Tile(time, "length").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: 1:33–3:28");
+        // the root motions, each as the songs have it
+        await Assert.That(await Tile(await Section(dialog, "Harmony"), "rootMotion").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: default");
         await Assert.That(await Tile(time, "feelValues").Locator(".genre-ends span").First.TextContentAsync()).IsEqualTo("Plainest: default");
 
         // overridden, its own, and how many options it keeps
