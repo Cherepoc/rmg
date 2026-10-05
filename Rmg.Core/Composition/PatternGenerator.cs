@@ -123,7 +123,7 @@ internal sealed class PatternGenerator
             .Select((letter, barIndex) =>
                 {
                     var patternBar = barIndex % scheme.Letters.Length;
-                    var inAnswer = barIndex >= scheme.Letters.Length;
+                    var inAnswer = answer is not null && LinePattern.Answers(barIndex, _meter);
                     var redrawsRhythm = inAnswer && answer!.RedrawsRhythm[barIndex % Meter.PhraseBarCount];
                     var rhythmKey = rhythmKeys.IsDefaultOrEmpty ? 0 : rhythmKeys[barIndex];
                     var phraseEnd = inAnswer ? answer!.PhraseEnd : null;

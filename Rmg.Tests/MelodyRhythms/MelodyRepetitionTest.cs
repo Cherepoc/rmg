@@ -134,6 +134,43 @@ public sealed class MelodyRepetitionTest
     ///     in songs that do not (<see cref="MelodyLayers.Improvisation" />), and how much of its answer the question's,
     ///     its first half and its second.
     /// </summary>
+    [Test]
+    public async Task ATwelveBarMelody_StatesRestatesAndAnswers_ItsThirdPhraseTheOneThatChanges()
+    {
+        // of the first phrase's onsets in a section's first play, the share the second phrase keeps and the third, and of
+        // those kept, the share whose step to the next note is the first phrase's, its contour
+        int onsets = 0, keptSecond = 0, keptThird = 0, contourSecond = 0, contourThird = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(3)))))
+        {
+            var notes = song.Notes(SongTracks.MelodyTrack).OrderBy(x => x.Position).ToArray();
+            var at = notes.Select((x, i) => (Position: Math.Round(x.Position, 6), i)).GroupBy(x => x.Position).ToDictionary(x => x.Key, x => x.First().i);
+            int? Step(int i) => i + 1 < notes.Length ? notes[i + 1].Value.Offset - notes[i].Value.Offset : null;
+            foreach (var span in song.Map.Sections.Where(x => x.Meter.Phrases == 3).DistinctBy(x => x.SectionId))
+            {
+                var phrase = Meter.PhraseBarCount * span.Meter.BarDuration;
+                foreach (var (onset, i) in at.Where(x => x.Key >= span.Start && x.Key < span.Start + phrase))
+                {
+                    onsets++;
+                    if (at.TryGetValue(Math.Round(onset + phrase, 6), out var second))
+                    {
+                        keptSecond++;
+                        contourSecond += Step(second) == Step(i) ? 1 : 0;
+                    }
+                    if (at.TryGetValue(Math.Round(onset + 2 * phrase, 6), out var third))
+                    {
+                        keptThird++;
+                        contourThird += Step(third) == Step(i) ? 1 : 0;
+                    }
+                }
+            }
+        }
+
+        Console.WriteLine($"{onsets} onsets: the second phrase keeps {keptSecond / (double)onsets:P0}, its contour {contourSecond / (double)keptSecond:P0}; "
+                          + $"the third {keptThird / (double)onsets:P0}, its contour {contourThird / (double)keptThird:P0}");
+        await Assert.That(onsets).IsGreaterThan(100);
+        await Assert.That(keptSecond).IsGreaterThan(keptThird);
+    }
+
     internal static (double Fixed, double Improvised, double AnswerFirstHalf, double AnswerSecondHalf, double[] OnsetsKept, double[] ImprovisedByHalf, double FixedClass, double AnswerFirstHalfClass) MeasureRecurrence(IEnumerable<CorpusSong> songs)
     {
         // the same note, and the same note in any octave, as a tune an octave off

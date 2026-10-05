@@ -158,8 +158,17 @@ internal sealed class LinePattern
             profile,
             seed,
             meter.BarDuration,
-            bar => bar < meter.PatternBarCount ? 0 : amount * MelodyLayers.AnswerBars[(bar - meter.PatternBarCount) % Meter.PhraseBarCount]
+            bar => Answers(bar, meter) ? amount * MelodyLayers.AnswerBars[bar % Meter.PhraseBarCount] : 0
         );
+    }
+
+    /// <summary>
+    ///     Whether a bar of a line answers its question: every bar of the pattern's second play, and, where the pattern is
+    ///     several phrases, its last phrase, which answers those before it, as the blues' third line answers its first two.
+    /// </summary>
+    public static bool Answers(int bar, Meter meter)
+    {
+        return bar >= meter.PatternBarCount || meter.Phrases > 1 && bar >= meter.PatternBarCount - Meter.PhraseBarCount;
     }
 
     /// <summary>
