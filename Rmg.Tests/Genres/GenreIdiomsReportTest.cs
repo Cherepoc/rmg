@@ -86,20 +86,6 @@ public sealed class GenreIdiomsReportTest
 
     [Test]
     [Explicit]
-    public async Task Probe()
-    {
-        foreach (var level in new[] { 0.0, 0.5 })
-        {
-            var measured = TestCorpus.InParallel(Enumerable.Range(0, Count), seed => Measure(TestCorpus.Get(seed, new SongOverrides(Base: level, Genre: GenrePresets.Genre("rock")))));
-            Console.WriteLine($"rock at {level}: snare 2&4 {measured.Select(x => x["snare on 2 and 4"]).Where(double.IsFinite).Average():0.00}, kick 1 {measured.Select(x => x["kick on 1"]).Where(double.IsFinite).Average():0.00}");
-            var none = TestCorpus.InParallel(Enumerable.Range(0, Count), seed => Measure(TestCorpus.Get(seed, new SongOverrides(Base: level))));
-            Console.WriteLine($"none at {level}: snare 2&4 {none.Select(x => x["snare on 2 and 4"]).Where(double.IsFinite).Average():0.00}, kick 1 {none.Select(x => x["kick on 1"]).Where(double.IsFinite).Average():0.00}");
-        }
-        await Task.CompletedTask;
-    }
-
-    [Test]
-    [Explicit]
     public async Task Report()
     {
         foreach (var preset in GenrePresets.All)
