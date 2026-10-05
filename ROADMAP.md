@@ -295,8 +295,10 @@ a link carries. What is left:
      phrases; the tests of a pattern's bars by the section's own. With every song's sections twelve bars only what
      fewer, longer patterns change fails: a length given less near, no sequence or late drums (each wants a second
      pattern), the answer measured nowhere (it waits on 2c), fewer phrase lines.
-  2c. **The line across phrases:** a line's question and answer within the pattern, its first phrase stating, a
-     middle one restating, the last answering (AAB), rather than two plays of it.
+  2c. Done: a pattern's last phrase answers (LinePattern.Answers). Measured in twelve bars: the second phrase keeps 98%
+     of the first's rhythm, the third 86%; but the second keeps 36% of its contour (the step to the next note), the
+     notes drawn afresh over each phrase's chords, so the blues' restatement is the rhythm alone. Next, should
+     listening ask: a restating phrase's notes as the first phrase's steps moved to its chords, its line again.
   5. **Fills and solos by the pattern:** a fill's largest at the pattern's end, its smaller at a phrase's; a solo's
      chorus a pattern (Solos), so that a blues solo takes 12-bar choruses.
   6. **Presets and listening:** Blues three phrases most, Jazz two (an 8-bar A), Folk two, Rock one or two; a report
