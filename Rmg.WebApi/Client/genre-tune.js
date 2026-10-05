@@ -1,11 +1,12 @@
 import { endsOf, ownOf, written } from "./genres.js";
-import { byMiddle, COLOURS, drawShares, ENDS, isTime, mark, numberInWords, numberOfWords, rangeOf, svg, unitInWords } from "./genre-charts.js";
+import { amountOf, byMiddle, centreOf, COLOURS, drawBand, drawShares, ENDS, isTime, leanOf, mark, numberInWords, numberOf, numberOfWords, rangeOf, svg, unitInWords } from "./genre-charts.js";
 
 /**
  *     The genre editor's window over it for a choice, where the genre changes it: whether the genre overrides it, the
  *     options it keeps, picked from a list or removed by their tabs, and each one's amounts in the plainest songs, the
  *     middling and the experimental, drawn on a chart of them across how experimental a song is, the one chosen moved by
- *     its three handles, up and down or by the arrow keys, or by its numbers; and, for a pool, what the songs draw of
+ *     its three handles, up and down or by the arrow keys, or by its numbers, a range's ends and lean on one band, every
+ *     handle of the three at once; and, for a pool, what the songs draw of
  *     each, the chance of a song drawing it, beside, and at each end in words. Every line is the server's, as the songs
  *     draw it (/api/genres/preview), the handles' straight between them until it comes. Done gives the choice back to the
  *     editor, overridden or not; closing lets it go.
@@ -151,6 +152,7 @@ export function createGenreTune() {
     const optionOf = (name) => choice.options.find((x) => x.name === name);
     const kept = () => choice.options.filter((x) => x.name in amounts);
     const isPool = () => choice.kind === "pool";
+    const isRange = () => choice.kind === "range";
     // the options drawn on one chart with the one chosen: those of its range, a range's ends together and its lean apart
     const alongside = () => kept().filter((x) => String(rangeOf(choice, x.name)) === String(rangeOf(choice, selected)));
     // the order the options are drawn and told in: a pool's commonest in a middling song first, at the bottom
@@ -184,12 +186,14 @@ export function createGenreTune() {
      */
     function follow(points) {
         const width = plot.clientWidth;
+        if (isRange()) chart.querySelector(".genre-band").replaceWith(band(width));
+        else chart.querySelector(".tune-line.chosen")?.setAttribute("d", `M${points.map((value, i) => `${(i * width) / 2},${yOf(selected, i, value).toFixed(1)}`).join(" L")}`);
+        // a range's lean's handles follow its ends'
         for (const handle of chart.querySelectorAll(".tune-handle")) {
-            const value = points[Number(handle.dataset.end)];
-            handle.setAttribute("cy", String(yOf(value)));
+            const value = endsOf(amounts[handle.dataset.option])[Number(handle.dataset.end)];
+            handle.setAttribute("cy", String(yOf(handle.dataset.option, Number(handle.dataset.end), value)));
             handle.setAttribute("aria-valuenow", String(value));
         }
-        chart.querySelector(".tune-line.chosen")?.setAttribute("d", `M${points.map((value, i) => `${(i * width) / 2},${yOf(value).toFixed(1)}`).join(" L")}`);
         fields.forEach(({ input }, end) => (input.value = numberInWords(choice, selected, points[end])));
     }
 
@@ -218,10 +222,48 @@ export function createGenreTune() {
         }
     }
 
-    /** The y of an amount on the chart, by the range of the option chosen. */
-    function yOf(value) {
-        const [least, most] = rangeOf(choice, selected);
-        return HEIGHT - ((value - least) / (most - least)) * HEIGHT;
+    /**
+     *     The y on the chart of an option's number at an end: by its range, or a range's end by its amount, as its scale
+     *     spaces it, and its lean where its draws centre between its ends.
+     */
+    function yOf(name, end, value) {
+        if (!isRange()) {
+            const [least, most] = rangeOf(choice, name);
+            return HEIGHT - ((value - least) / (most - least)) * HEIGHT;
+        }
+        if (name !== "lean") return HEIGHT - amountOf(choice, value) * HEIGHT;
+        const [low, high] = endsAt(end);
+        return HEIGHT - (low + (high - low) * centreOf(choice, value)) * HEIGHT;
+    }
+
+    /** An option's number at an end of a y on the chart, as yOf places it; a lean between ends that meet as it is. */
+    function valueAt(name, end, y) {
+        const amount = (HEIGHT - y) / HEIGHT;
+        if (!isRange()) {
+            const [least, most] = rangeOf(choice, name);
+            return least + amount * (most - least);
+        }
+        if (name !== "lean") return numberOf(choice, amount);
+        const [low, high] = endsAt(end);
+        return high - low < 1e-6 ? endsOf(amounts.lean)[end] : leanOf(choice, (amount - low) / (high - low));
+    }
+
+    /** A range's from and to at an end, as amounts from 0 to 1. */
+    const endsAt = (end) => ["from", "to"].map((x) => amountOf(choice, endsOf(amounts[x])[end]));
+
+    /**
+     *     A range's band: the songs' own as the server draws it, or, while a handle is dragged or until it comes, straight
+     *     between the handles.
+     */
+    function band(width) {
+        const ownCurves = dragging === null && kept().every((x) => preview?.curves?.[x.name]);
+        const straight = (points) => [...Array(21).keys()].map((j) => {
+            const at = (j / 20) * 2;
+            const i = Math.min(1, Math.floor(at));
+            return points[i] + (at - i) * (points[i + 1] - points[i]);
+        });
+        const curves = ownCurves ? preview.curves : Object.fromEntries(kept().map((x) => [x.name, straight(endsOf(amounts[x.name]))]));
+        return drawBand(svg("g"), choice, curves, width, HEIGHT);
     }
 
     /** The options' tabs, each its numbers and, but a range's, a button removing it; made again as the options kept change. */
@@ -295,7 +337,8 @@ export function createGenreTune() {
         edited();
     }
 
-    function render() {
+    /** The window drawn again, the charts too but where a handle of the chart chooses its option, which stays as it is. */
+    function render(charts = true) {
         pick.hidden = choice.kind === "range";
         renderPicks();
         for (const row of list.children) {
@@ -312,8 +355,11 @@ export function createGenreTune() {
         const option = optionOf(selected);
         const points = endsOf(amounts[selected]);
         heading.textContent = isPool() ? `${option.label}: how common it is, against the others` : `${choice.label}: ${option.label}${unitInWords(choice, selected)}`;
-        axisHigh.textContent = numberInWords(choice, selected, most);
-        axisLow.textContent = numberInWords(choice, selected, least);
+        // a range's lean drawn on its ends' scale
+        const scaled = isRange() ? "from" : selected;
+        const [lowest, highest] = rangeOf(choice, scaled);
+        axisHigh.textContent = numberInWords(choice, scaled, highest);
+        axisLow.textContent = numberInWords(choice, scaled, lowest);
         fields.forEach(({ input }, end) => {
             input.type = isTime(choice, selected) ? "text" : "number";
             input.min = String(least);
@@ -324,16 +370,14 @@ export function createGenreTune() {
         // an attribute, which an svg has no property of
         for (const element of [sharesHeading, sharesAxis, sharesBox, lists]) element.toggleAttribute("hidden", !isPool());
         legend.hidden = choice.kind === "range";
-        renderCharts();
+        if (charts) renderCharts();
     }
 
     /** The chart of the amounts, its handles, a pool's chances and the legend, the handle focused kept so. */
     function renderCharts() {
         if (selected === null) return;
         const width = plot.clientWidth;
-        const [least, most] = rangeOf(choice, selected);
-        const points = endsOf(amounts[selected]);
-        const focused = chart.contains(document.activeElement) ? document.activeElement.dataset.end : undefined;
+        const focused = chart.contains(document.activeElement) ? document.activeElement : null;
 
         // drawn in pixels, the handles standing out of it by the margin, so that it is as wide as the chances under it
         chart.setAttribute("viewBox", `${-MARGIN} ${-MARGIN} ${width + 2 * MARGIN} ${HEIGHT + 2 * MARGIN}`);
@@ -344,12 +388,25 @@ export function createGenreTune() {
             ...[0, width / 2, width].map((x) => svg("line", { x1: x, y1: 0, x2: x, y2: HEIGHT, class: "tune-gridline" })),
         );
         chart.setAttribute("aria-label", `${choice.label}: every option's amounts from the plainest songs to the experimental`);
+        // a range's ends and lean one band, every handle of the three on it
+        if (isRange()) {
+            chart.append(band(width));
+            for (const option of kept()) endsOf(amounts[option.name]).forEach((value, end) => chart.append(handle(option.name, end, value, width)));
+        } else drawLines(width);
+        if (focused !== null) chart.querySelector(`[data-option="${CSS.escape(focused.dataset.option)}"][data-end="${focused.dataset.end}"]`)?.focus();
+
+        renderLegend();
+        if (isPool()) renderShares(width);
+    }
+
+    /** The options alongside the one chosen as lines, and its handles. */
+    function drawLines(width) {
         // the one chosen drawn last, over the others
         for (const other of alongside().sort((a, b) => (a.name === selected) - (b.name === selected))) {
             const curve = dragging === null && preview?.curves?.[other.name];
             const along = curve
-                ? curve.map((value, i) => [(i / (curve.length - 1)) * width, yOf(value)])
-                : endsOf(amounts[other.name]).map((value, i) => [(i * width) / 2, yOf(value)]);
+                ? curve.map((value, i) => [(i / (curve.length - 1)) * width, yOf(other.name, 0, value)])
+                : endsOf(amounts[other.name]).map((value, i) => [(i * width) / 2, yOf(other.name, i, value)]);
             const line = mark({
                 d: `M${along.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" L")}`,
                 class: other.name === selected ? "tune-line chosen" : "tune-line",
@@ -358,11 +415,7 @@ export function createGenreTune() {
             if (other.name !== selected) line.style.stroke = greyOf(other.name);
             chart.append(line);
         }
-        points.forEach((value, end) => chart.append(handle(end, value, least, most, width)));
-        if (focused !== undefined) chart.querySelector(`[data-end="${focused}"]`)?.focus();
-
-        renderLegend();
-        if (isPool()) renderShares(width);
+        endsOf(amounts[selected]).forEach((value, end) => chart.append(handle(selected, end, value, width)));
     }
 
     /** The options' colours, the one at the top of the chances first, as they stack. */
@@ -418,36 +471,48 @@ export function createGenreTune() {
         pointed.style.transform = isLeft ? "translateX(-100%)" : "";
     }
 
-    /** A handle of the option chosen at an end: dragged up and down, or moved by the arrow keys, a whole number a step. */
-    function handle(end, value, least, most, width) {
+    /**
+     *     A handle of an option at an end: dragged up and down, or moved by the arrow keys, a whole number a step, its
+     *     option chosen as it is taken.
+     */
+    function handle(name, end, value, width) {
+        const [least, most] = rangeOf(choice, name);
         const element = svg("circle", {
             cx: (end * width) / 2,
-            cy: yOf(value),
+            cy: yOf(name, end, value),
             r: 9,
-            class: "tune-handle",
+            class: isRange() && name !== "lean" ? "tune-handle tune-handle-end" : "tune-handle",
             tabindex: 0,
             role: "slider",
-            "aria-label": `${optionOf(selected).label}, ${ENDS[end].toLowerCase()}`,
+            "aria-label": `${optionOf(name).label}, ${ENDS[end].toLowerCase()}`,
             "aria-valuemin": least,
             "aria-valuemax": most,
             "aria-valuenow": value,
+            "data-option": name,
             "data-end": end,
         });
+        const choose = () => {
+            if (selected === name) return;
+            selected = name;
+            render(false);
+        };
+        element.addEventListener("focus", choose);
         element.addEventListener("keydown", (event) => {
             const by = { ArrowUp: 1, ArrowRight: 1, ArrowDown: -1, ArrowLeft: -1, PageUp: 10, PageDown: -10 }[event.key];
             if (by === undefined) return;
             event.preventDefault();
-            setEnd(end, value + by);
-            chart.querySelector(`[data-end="${end}"]`)?.focus();
+            choose();
+            setEnd(end, endsOf(amounts[name])[end] + by);
+            chart.querySelector(`[data-option="${CSS.escape(name)}"][data-end="${end}"]`)?.focus();
         });
         element.addEventListener("pointerdown", (event) => {
+            choose();
             dragging = end;
             element.setPointerCapture(event.pointerId);
         });
         element.addEventListener("pointermove", (event) => {
-            if (dragging !== end) return;
-            const y = event.clientY - chart.getBoundingClientRect().top - MARGIN;
-            setEnd(end, least + ((HEIGHT - y) / HEIGHT) * (most - least));
+            if (dragging !== end || selected !== name) return;
+            setEnd(end, valueAt(name, end, event.clientY - chart.getBoundingClientRect().top - MARGIN));
         });
         element.addEventListener("pointerup", () => {
             dragging = null;
@@ -496,6 +561,8 @@ export function createGenreTune() {
             start = startOf;
             overridden = override.checked = given !== null;
             amounts = structuredClone(given ?? start(choice));
+            // a range named by its ends alone leans to the middle, its lean's handles on the band all the same
+            if (isRange()) amounts.lean ??= start(choice).lean;
             selected = kept()[0]?.name ?? null;
             preview = null;
             // none of the last choice's chances meanwhile

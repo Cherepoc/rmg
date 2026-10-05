@@ -943,12 +943,18 @@ html:has(dialog:modal) {
     outline-offset: 2px;
 }
 
-.genre-band {
+/* a range's band: shaded where its songs land, its ends in the text's colour and where they centre in the accent */
+.genre-band-shading {
     fill: var(--accent);
-    opacity: 0.18;
 }
 
 .genre-band-end {
+    fill: none;
+    stroke: var(--text);
+    stroke-width: 1.5;
+}
+
+.genre-band-centre {
     fill: none;
     stroke: var(--accent);
     stroke-width: 3;
@@ -2033,6 +2039,11 @@ footer a:hover {
     stroke: var(--accent);
     stroke-width: 3;
     cursor: ns-resize;
+}
+
+/* a range's ends' handles in the text's colour, as their lines, its lean's in the accent */
+.tune-handle-end {
+    stroke: var(--text);
 }
 
 .tune-handle:focus-visible {

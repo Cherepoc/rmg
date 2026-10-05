@@ -26,6 +26,9 @@ public static class GenreEndpoints
             : Results.NotFound(new ErrorResponse($"'{key}' is no genre kept here.")));
     }
 
+    /// <summary>How many numbers a range's scale is told by, evenly along its amounts, which the page draws it on.</summary>
+    private const int ScalePoints = 65;
+
     /// <summary>Every choice, in the order the page shows them and a link writes them.</summary>
     public static IReadOnlyList<GenreChoiceResponse> Choices { get; } =
     [
@@ -34,7 +37,9 @@ public static class GenreEndpoints
             x.Label,
             x.Kind.ToString().ToLowerInvariant(),
             [..x.Options.Select(o => new GenreOptionResponse(o.Name, o.Label, [..new[] { o.Own.Plain, o.Own.Tuned, o.Own.Wild }.Select(a => GenreAmounts.ToNumber(x, o.Name, a))], o.Tags, o.Description))],
-            x.Scale is { } scale ? new RangeScaleResponse(scale.Unit, scale.Least, scale.Most) : null
+            x.Scale is { } scale
+                ? new RangeScaleResponse(scale.Unit, scale.Least, scale.Most, [..Enumerable.Range(0, ScalePoints).Select(i => scale.NumberOf(i / (double)(ScalePoints - 1)))], SongGenerator.RangeLeanSkew)
+                : null
         ))
     ];
 }
@@ -49,7 +54,9 @@ public sealed record GenreChoiceResponse(string Name, string Label, string Kind,
 /// <param name="Unit">What a range's ends count, such as "bpm" or "seconds".</param>
 /// <param name="Least">The least an end is.</param>
 /// <param name="Most">The most an end is.</param>
-public sealed record RangeScaleResponse(string Unit, double Least, double Most);
+/// <param name="Numbers">The numbers at even steps of the amounts, from the least to the most, which the songs draw evenly across, such as a length's, every like step a like ratio.</param>
+/// <param name="LeanSkew">How far a lean of 100 skews a draw across the range: its place, from 0 at its from to 1 at its to, the mean of two evens, to the power of e to the minus this.</param>
+public sealed record RangeScaleResponse(string Unit, double Least, double Most, IReadOnlyList<double> Numbers, double LeanSkew);
 
 /// <param name="Name">How a genre names it.</param>
 /// <param name="Label">How the page shows it.</param>

@@ -1,8 +1,8 @@
 /**
  *     The genre's charts, as the editor's graphs and its fine-tune window draw them, from what the songs draw of a choice
  *     (/api/genres/previews, /api/genres/preview): a pool's shares stacked, the commonest in a middling song at the
- *     bottom, another kind's amounts as lines, and a range (the tempo, the length) as a band; and what each end of the songs draws, in
- *     words.
+ *     bottom, another kind's amounts as lines, and a range (the tempo, the length) as a band, shaded where its songs land;
+ *     and what each end of the songs draws, in words.
  */
 
 const SVG = "http://www.w3.org/2000/svg";
@@ -103,15 +103,93 @@ export function drawLines(element, curves, names, [least, most], strokeOf, title
     }
 }
 
-/** A range as a band between its ends, in its scale's numbers. */
-export function drawBand(element, from, to, [least, most], width, height) {
-    const xOf = (j) => ((j / (from.length - 1)) * width).toFixed(1);
-    const yOf = (value) => (height - ((value - least) / (most - least)) * height).toFixed(1);
-    const top = to.map((value, j) => `${xOf(j)},${yOf(value)}`);
-    const bottom = from.map((value, j) => `${xOf(j)},${yOf(value)}`).reverse();
-    element.append(svg("path", { d: `M${[...top, ...bottom].join(" L")} Z`, class: "genre-band" }));
-    for (const end of [top, from.map((value, j) => `${xOf(j)},${yOf(value)}`)])
-        element.append(svg("path", { d: `M${end.join(" L")}`, class: "genre-band-end" }));
+/** A range's number as its amount, from 0, its least, to 1, its most, between the numbers its scale is told by. */
+export function amountOf(choice, number) {
+    const numbers = choice.scale.numbers;
+    // the step it is in, the last for the most and beyond
+    const above = numbers.findIndex((x) => x > number);
+    const i = above === -1 ? numbers.length - 2 : Math.max(0, above - 1);
+    const at = (number - numbers[i]) / (numbers[i + 1] - numbers[i]);
+    return Math.max(0, Math.min(1, (i + at) / (numbers.length - 1)));
+}
+
+/** A range's amount, from 0 to 1, as its number (amountOf). */
+export function numberOf(choice, amount) {
+    const numbers = choice.scale.numbers;
+    const at = Math.max(0, Math.min(1, amount)) * (numbers.length - 1);
+    const i = Math.min(numbers.length - 2, Math.floor(at));
+    return numbers[i] + (at - i) * (numbers[i + 1] - numbers[i]);
+}
+
+/** The power a range's place is raised to at a lean, from -100 to 100, the place the mean of two evens (SongGenerator.Across). */
+const powerOf = (choice, lean) => Math.exp((-choice.scale.leanSkew * lean) / 100);
+
+/** Where a range's draws centre at a lean, from 0, its from, to 1, its to: the median, (1/2) to the power. */
+export const centreOf = (choice, lean) => 0.5 ** powerOf(choice, lean);
+
+/** The lean whose draws centre where given, from 0, the from, to 1, the to, as a whole number from -100 to 100. */
+export function leanOf(choice, centre) {
+    const lean = (-100 * Math.log(Math.log(Math.max(1e-6, Math.min(1 - 1e-6, centre))) / Math.log(0.5))) / choice.scale.leanSkew;
+    return Math.round(Math.max(-100, Math.min(100, lean)));
+}
+
+/** How likely a draw lands at a place in a range, from 0 to 1, at a power: the mean of two evens to the power. */
+function likelihood(place, power) {
+    const even = place ** (1 / power);
+    return (even < 0.5 ? 4 * even : 4 * (1 - even)) * even / (power * place);
+}
+
+// the masks' names, every band's its own, so that two on a page never take each other's
+let bands = 0;
+
+/**
+ *     A range as a band between its ends along the songs, on its amounts' own scale, such as a length's every like
+ *     ratio a like height: every column of it shaded by how likely a song lands at each height in it, the likeliest the
+ *     brightest, a line where its draws centre, and its ends. Its curves are its from's, its to's and its lean's numbers,
+ *     the lean's none where the genre names its ends alone.
+ */
+export function drawBand(element, choice, { from, to, lean: leaning }, width, height) {
+    // a genre naming its ends alone leans to the middle (Genre.Range)
+    const lean = leaning ?? from.map(() => 0);
+    const band = svg("g", { class: "genre-band" });
+    const xOf = (j) => (j / (from.length - 1)) * width;
+    const yOf = (amount) => height - amount * height;
+    const low = from.map((x) => amountOf(choice, x));
+    const high = to.map((x) => amountOf(choice, x));
+    const centre = lean.map((x, j) => low[j] + (high[j] - low[j]) * centreOf(choice, x));
+
+    // the shading a mask over the accent, a pixel a point, each column's likeliest the brightest
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(2, Math.round(width));
+    canvas.height = Math.max(1, Math.round(height));
+    const image = canvas.getContext("2d").createImageData(canvas.width, canvas.height);
+    for (let x = 0; x < canvas.width; x++) {
+        const at = (x / (canvas.width - 1)) * (from.length - 1);
+        const j = Math.min(from.length - 2, Math.floor(at));
+        const along = (values) => values[j] + (at - j) * (values[j + 1] - values[j]);
+        const top = yOf(along(high)) * (canvas.height / height);
+        const bottom = yOf(along(low)) * (canvas.height / height);
+        const power = powerOf(choice, along(lean));
+        const column = [];
+        for (let y = Math.max(0, Math.ceil(top)); y <= Math.min(canvas.height - 1, Math.floor(bottom)); y++)
+            column.push([y, bottom - top < 1 ? 1 : likelihood(Math.min(0.995, Math.max(0.005, (bottom - y) / (bottom - top))), power)]);
+        const most = Math.max(...column.map(([, likely]) => likely));
+        for (const [y, likely] of column) {
+            const i = 4 * (y * canvas.width + x);
+            image.data.fill(255, i, i + 3);
+            image.data[i + 3] = Math.round((255 * 0.85 * likely) / most);
+        }
+    }
+    canvas.getContext("2d").putImageData(image, 0, 0);
+    const id = `band${bands++}`;
+    const mask = svg("mask", { id, maskUnits: "userSpaceOnUse", x: 0, y: 0, width, height });
+    mask.append(svg("image", { href: canvas.toDataURL(), x: 0, y: 0, width, height, preserveAspectRatio: "none" }));
+    band.append(mask, svg("rect", { x: 0, y: 0, width, height, mask: `url(#${id})`, class: "genre-band-shading" }));
+
+    const line = (amounts, className) => svg("path", { d: `M${amounts.map((x, j) => `${xOf(j).toFixed(1)},${yOf(x).toFixed(1)}`).join(" L")}`, class: className });
+    band.append(line(high, "genre-band-end"), line(low, "genre-band-end"), line(centre, "genre-band-centre"));
+    element.append(band);
+    return band;
 }
 
 /**

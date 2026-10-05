@@ -2,7 +2,7 @@ import { MAX_GENRE_NAME_BYTES } from "./settings.js";
 import { isShowingGenrePrinciples, setShowingGenrePrinciples } from "./storage.js";
 import { endsOf, isPresetName, ownOf, sameName } from "./genres.js";
 import { createGenreTune } from "./genre-tune.js";
-import { byMiddle, COLOURS, drawBand, drawLines, drawShares, endsInWords, labelOf, rangeOf, svg } from "./genre-charts.js";
+import { byMiddle, COLOURS, drawBand, drawLines, drawShares, endsInWords, labelOf, svg } from "./genre-charts.js";
 
 /**
  *     The genre editor, a popup over the page: a draft genre, a name and what it says of the choices the songs draw
@@ -192,7 +192,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll, 
             if (choice.kind === "pool") {
                 const names = byMiddle(preview.shares);
                 drawShares(chart, preview.shares, names, (x) => COLOURS[names.indexOf(x) % COLOURS.length], labelOf(choice), GRAPH_WIDTH, GRAPH_HEIGHT);
-            } else if (choice.kind === "range") drawBand(chart, preview.curves.from, preview.curves.to, rangeOf(choice, "from"), GRAPH_WIDTH, GRAPH_HEIGHT);
+            } else if (choice.kind === "range") drawBand(chart, choice, preview.curves, GRAPH_WIDTH, GRAPH_HEIGHT);
             else {
                 const names = Object.keys(preview.curves);
                 drawLines(chart, preview.curves, names, [0, 100], (x) => COLOURS[names.indexOf(x) % COLOURS.length], labelOf(choice), GRAPH_WIDTH, GRAPH_HEIGHT);

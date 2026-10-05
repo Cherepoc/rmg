@@ -311,12 +311,6 @@ a link carries. What is left:
 - **A genre's levels** (P3): how loud each part plays against the others, values a part each, applied where the mix
   gives none, a mechanism of its own that a mix given may fight; the pan is a genre's (GenreChoices.Pan), the levels
   only should listening ask for them.
-- **A range's chart as one band** (P2): its ends and its lean on one chart, the band between the from and the to along
-  the songs, a line where its draws centre (the lean's median, (1/2)^(e^-lean) across it) and the band shaded by
-  how likely each height is, a vertical gradient a slice, a few dozen slices; handles on its edges for the ends and on
-  the line for the lean, the lean's own chart gone; the tile drawing the same, its fill a gradient.
-  Drawn on the amounts' own scale, as a length's and a tempo's are spaced, so that a song's few minutes no longer sit
-  low on a chart to fifteen; a centre line without the shading, should the slices prove fiddly.
 - **A genre's sections differing** (P3, perhaps never): a value given a section role, such as a solo swung harder
   or a chorus louder, the genre's for the song otherwise; the generator asking the genre with the section's role,
   every choice's tile a role's override beside it.

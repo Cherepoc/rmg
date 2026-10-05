@@ -594,7 +594,7 @@ public static class SongGenerator
     ];
 
     /// <summary>How far a range's lean of 1 skews a draw across it: its place to the power of e to the minus this.</summary>
-    public const double TempoLeanSkew = 1;
+    public const double RangeLeanSkew = 1;
 
     /// <summary>
     ///     A tempo in a range of amounts (<see cref="GenreChoices.TempoOf" />), leaning to its middle, as the mean of two
@@ -611,7 +611,7 @@ public static class SongGenerator
 
     /// <summary>An amount in a range, leaning to its middle, as the mean of two draws across it does, or to an end by its lean.</summary>
     private static double Across(IGenerationContext context, (double From, double To, double Lean) range) =>
-        range.From + (range.To - range.From) * Math.Pow((context.GenerateDouble() + context.GenerateDouble()) / 2, Math.Exp(-TempoLeanSkew * range.Lean));
+        range.From + (range.To - range.From) * Math.Pow((context.GenerateDouble() + context.GenerateDouble()) / 2, Math.Exp(-RangeLeanSkew * range.Lean));
 }
 
 /// <summary>How the state along a section's 4-bar pattern changes. The steps are in bars.</summary>

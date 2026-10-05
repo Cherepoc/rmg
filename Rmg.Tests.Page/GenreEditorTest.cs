@@ -802,6 +802,41 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task ARange_IsOneBand_ItsEndsAndLeanHandlesOnIt_ALeansHandleMovingWhereItsSongsCentre()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var time = await Section(dialog, "Time and feel");
+        // the tile's band shaded, with where its songs centre
+        await page.Until(async () => await Tile(time, "length").Locator(".genre-band-centre").CountAsync() == 1, "the length's band drawn");
+        await Assert.That(await Tile(time, "length").Locator(".genre-band mask image").CountAsync()).IsEqualTo(1);
+
+        var tune = await Change(time, "length");
+        await Assert.That(await tune.Locator(".tune-chart .genre-band-centre").CountAsync()).IsEqualTo(1);
+        await Assert.That(await tune.Locator(".tune-handle").CountAsync()).IsEqualTo(9);
+        var lean = tune.Locator(".tune-handle[data-option='lean'][data-end='1']");
+        var below = double.Parse(await lean.GetAttributeAsync("cy") ?? "");
+        // a lean's handle taken chooses its tab, and up leans longer, its handle higher
+        await lean.FocusAsync();
+        await Assert.That(await tune.Locator(".tune-row[data-option='lean']").GetAttributeAsync("aria-current")).IsEqualTo("true");
+        for (var i = 0; i < 3; i++) await lean.PressAsync("PageUp");
+        await Assert.That(await tune.Locator("input[aria-label='Lean, middling']").InputValueAsync()).IsEqualTo("30");
+        var above = double.Parse(await tune.Locator(".tune-handle[data-option='lean'][data-end='1']").GetAttributeAsync("cy") ?? "");
+        await Assert.That(above).IsLessThan(below - 5);
+        // the lean's handle follows its ends'
+        await tune.Locator(".tune-handle[data-option='to'][data-end='1']").PressAsync("PageUp");
+        await Assert.That(double.Parse(await tune.Locator(".tune-handle[data-option='lean'][data-end='1']").GetAttributeAsync("cy") ?? "")).IsLessThan(above);
+        // dragged down, toward the band's from, a lean's handle leans shorter
+        var box = (await tune.Locator(".tune-handle[data-option='lean'][data-end='2']").BoundingBoxAsync())!;
+        await page.Page.Mouse.MoveAsync(box.X + box.Width / 2, box.Y + box.Height / 2);
+        await page.Page.Mouse.DownAsync();
+        await page.Page.Mouse.MoveAsync(box.X + box.Width / 2, box.Y + box.Height / 2 + 15, new() { Steps = 5 });
+        await page.Page.Mouse.UpAsync();
+        await Assert.That(int.Parse(await tune.Locator("input[aria-label='Lean, experimental']").InputValueAsync())).IsLessThan(-20);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task AnOptionsAmounts_AreSetByTheirNumbers_ItsTabShowingThem_AndAPoolsSharesToldAtEachEnd()
     {
         await using var page = await SongPage.Open(site, "?song=1");
