@@ -52,6 +52,18 @@ internal static class Progressions
     /// <summary>How far a genre's lean of a motion moves it, at its most or its least, as odds: four times as likely, or a quarter.</summary>
     public const double MotionOdds = 4;
 
+    /// <summary>
+    ///     How a phrase of a longer progression starts and ends by its place, by the root's step above home, the others as
+    ///     a root out of its bar's role weighs: a middle phrase from IV, now and then from home; the last from V, now and
+    ///     then from IV; and every phrase but the last back home, or on V, a half close, so that three phrases make the
+    ///     blues' I / IV–I / V–I and two a song's 8-bar with its half close.
+    /// </summary>
+    private static readonly ImmutableDictionary<int, double> MiddlePhraseStarts = ImmutableDictionary<int, double>.Empty.Add(3, 1).Add(0, 0.15);
+
+    private static readonly ImmutableDictionary<int, double> LastPhraseStarts = ImmutableDictionary<int, double>.Empty.Add(4, 1).Add(3, 0.15);
+
+    private static readonly ImmutableDictionary<int, double> PhraseEnds = ImmutableDictionary<int, double>.Empty.Add(0, 1).Add(4, 0.25);
+
     /// <summary>The roots that prepare a cadence: ii and IV.</summary>
     private static readonly ImmutableHashSet<int> PreCadenceSteps = [1, 3];
 
@@ -92,15 +104,22 @@ internal static class Progressions
     ///     How closely the progression keeps to its rules, from 1, which follows them, to 0, which picks every root
     ///     as likely as any other.
     /// </param>
+    /// <param name="phrases">
+    ///     How many phrases the progression is, its chords shared among them alike: one, as a four-bar pattern is, its first
+    ///     chord home and its last the cadence; more, each starting and ending by its place, as a longer pattern's are.
+    /// </param>
     /// <param name="motionLean">
     ///     How a genre leans each motion, by its place in <see cref="Motions" />, from -1 to 1, 0 as the songs have it,
     ///     beyond the strictness, so that a genre's motions are heard in its wildest songs too.
     /// </param>
-    public static ImmutableArray<int> Generate(IGenerationContext context, Scale scale, int home, double strictness, int count, Func<int, double> motionLean)
+    public static ImmutableArray<int> Generate(IGenerationContext context, Scale scale, int home, double strictness, int count, int phrases, Func<int, double> motionLean)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(strictness);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(strictness, 1);
         ArgumentOutOfRangeException.ThrowIfLessThan(count, 2);
+        if (phrases < 1 || count % phrases != 0 || count / phrases < 2)
+            throw new ArgumentOutOfRangeException(nameof(phrases), phrases, $"{count} chords do not share alike among {phrases} phrases of two or more.");
+        var perPhrase = count / phrases;
 
         var cadenceWeights = GetCadenceWeights(scale.Offsets, home);
         var tilt = Tilt.Of(MotionOdds, 1);
@@ -113,8 +132,14 @@ internal static class Progressions
             var weights = new Weighted<int>[StepCount];
             for (var step = 0; step < StepCount; step++)
             {
+                // a longer progression's phrases, past the first, start by their place, and all but the last end home
+                var phrase = chord / perPhrase;
+                var placed = chord % perPhrase == 0 ? phrase == phrases - 1 ? LastPhraseStarts : MiddlePhraseStarts
+                    : chord % perPhrase == perPhrase - 1 && phrase < phrases - 1 ? PhraseEnds
+                    : null;
                 var roleWeight = isCadence ? cadenceWeights[step] > 0 ? cadenceWeights[step] : OutOfRoleWeight
                     : isPreparation ? PreCadenceSteps.Contains(step) ? 1 : OutOfRoleWeight
+                    : placed is not null ? placed.GetValueOrDefault(step, OutOfRoleWeight)
                     : 1;
                 var motion = Mod(step - previous);
                 weights[step] = new Weighted<int>(tilt.Weigh(Math.Pow(MotionWeights[motion] * roleWeight, strictness), motionLean(motion)), step);

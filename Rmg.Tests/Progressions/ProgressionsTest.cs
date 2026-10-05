@@ -14,12 +14,34 @@ public sealed class ProgressionsTest
     private static ImmutableArray<int>[] GeneratePhrases(Scale scale, int home, double strictness, Func<int, double> motionLean)
     {
         var context = new GenerationContext(1);
-        return [..Enumerable.Range(0, PhraseCount).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, scale, home, strictness, 4, motionLean))];
+        return [..Enumerable.Range(0, PhraseCount).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, scale, home, strictness, 4, 1, motionLean))];
     }
 
     // how often the roots move by a motion, by its place in the motions, of every move between chords
     private static double ShareOf(ImmutableArray<int>[] phrases, int motion) =>
         (double)phrases.Sum(x => x.Zip(x.Skip(1)).Count(m => Mod7(m.Second - m.First) == motion)) / phrases.Sum(x => x.Length - 1);
+
+    [Test]
+    public async Task ThreePhrases_StartFromHomeThenIVThenV_TheFirstTwoEndingHome_AsTheBluesDoes()
+    {
+        // twelve chords, a chord a bar, in three phrases of four, the blues' root motions leaned to (down a fourth, up a step)
+        var major = Rmg.Core.Composition.Scales.All.Single(x => x.Name == "Major");
+        var motions = Rmg.Core.Composition.Progressions.Motions.Select(x => x.Name).ToList();
+        var context = new GenerationContext(1);
+        var phrases = Enumerable.Range(0, 2000)
+            .Select(_ => Rmg.Core.Composition.Progressions.Generate(context, major, 0, 1, 12, 3, x => x == motions.IndexOf("fourthDown") ? 0.8 : x == motions.IndexOf("stepUp") ? 0.7 : 0))
+            .ToArray();
+        double Share(int chord, int root) => (double)phrases.Count(x => Mod7(x[chord]) == root) / phrases.Length;
+
+        Console.WriteLine($"bar 5 IV {Share(4, 3):P0}, bar 9 V {Share(8, 4):P0}, bar 4 I {Share(3, 0):P0}, bar 8 I {Share(7, 0):P0}, bar 12 V {Share(11, 4):P0}");
+        // the second phrase from IV, the last from V, the last on the cadence, V, most of the time; the first two ending
+        // home more often than not, the chord before an ending free
+        await Assert.That(Share(4, 3)).IsGreaterThan(0.6);
+        await Assert.That(Share(8, 4)).IsGreaterThan(0.6);
+        await Assert.That(Share(3, 0)).IsGreaterThan(0.55);
+        await Assert.That(Share(7, 0)).IsGreaterThan(0.55);
+        await Assert.That(Share(11, 4)).IsGreaterThan(0.6);
+    }
 
     [Test]
     public async Task AMotionLeanedTo_IsHeardMore_AtEveryStrictness_AndLeanedFrom_Less()
