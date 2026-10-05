@@ -274,11 +274,6 @@ a picker and an editor on the page, every choice a graph of what the songs draw 
 (`genre-tune.js`); a genre kept on the server by an 11-character key of its canonical form (`GenreStore`), which
 a link carries. What is left:
 
-- **Keeping and backing up one's own genres** (P1, small):
-  1. **Keep a genre a link brought:** its button Keep, among one's own under its name, or its name and the first
-     number free, then Edit; a song's genre played unsaved stays Edit.
-  2. **Every genre of one's own as one file:** Import reads a genre or a list of them, each kept under its name or
-     the first number free; Export all beside Export, the list as JSON, so that a browser's genres survive it.
 - **A genre's effects** (P2, small): the chances of a vibrato, bends, a chorus, a swell, a tremolo, an echo and a sweep
   (Expression), a song's drawn by its sound facet, a genre's to lean, as the swing's chances are.
   Its own report of the effects' shares by preset, and the presets' (reggae's echo, the blues' bends, ambient's swell)
