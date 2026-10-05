@@ -71,7 +71,11 @@ internal static class SongForms
         new(0.05, Parse("VPCVPC")),
         // and two longer, seldom drawn but where a song is to play long
         new(0.02, Parse("VCVCBCVC")),
-        new(0.02, Parse("VPCVPCBCVPC"))
+        new(0.02, Parse("VPCVPCBCVPC")),
+        // and AABA, once and twice, the A a verse and the B a bridge, which songs never take but a genre may, as a jazz
+        // standard of eight-bar sections is
+        new(0, Parse("VVBV")),
+        new(0, Parse("VVBVVVBV"))
     ];
 
     /// <param name="context">The sequence the form is drawn from.</param>
@@ -86,11 +90,12 @@ internal static class SongForms
     public static SongStructure Generate(IGenerationContext context, IGenerationContext freeContext, IGenerationContext ends, double unconventionality, SongLength? length, Genre genre)
     {
         var formChance = OwnFormChance.At(unconventionality, genre.Chance(GenreChoices.FormChances, "forms"));
-        var isConventional = context.TestProbability(length is null ? formChance : length.FormChance(formChance, Forms.Select(x => (IEnumerable<SectionRole>)x.Value)));
-        // the forms as the genre weighs them where it names them, its plainest at the plain end and its wildest at the wild
+        // the forms as the genre weighs them where it names them, its plainest at the plain end and its wildest at the wild;
+        // a length given weighs those that may be drawn
         var forms = genre.Pool<ImmutableArray<SectionRole>>(GenreChoices.Form, NameOf) is { } pool
             ? ByConvention.Weigh(Forms.Select(x => (x.Value, new ByConvention(x.Weight, x.Weight, x.Weight))), unconventionality, pool)
             : Forms;
+        var isConventional = context.TestProbability(length is null ? formChance : length.FormChance(formChance, forms.Where(x => x.Weight > 0).Select(x => (IEnumerable<SectionRole>)x.Value)));
         var form = context.Pick(length is null ? forms : [..forms.Select(x => x with { Weight = x.Weight * length.Closeness(x.Value.Sum(length.AppearanceSeconds)) })]);
         SongStructure structure;
         if (!isConventional)
