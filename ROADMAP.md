@@ -9,27 +9,26 @@ is removed once it is built.
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
 ratings by conventionality once enough are in, alongside, continuously and never as a gate.
 
-**Later** (P2), roughly in this order: the presets' file in families, then what a genre cannot reach yet, the
-melody's character and the bass's style first, a riff in power chords and its chugs; genres that sound like
-themselves, an idiom report first, then the loop, the levels, the fills and the pumping; the harmonic rhythm and the
-form's devices (see *Genres*); a melody written as a hook (see *Form and sections*); builds and drops; timing by
-role, then a genre's pocket, the largest gap in how the songs are played, and a guitar's strum after it (see
-*Groove*); turnarounds, then passing chords (approach chords, see *Scales and chords*); a
-solo's loudness by its phrase, as the other lines' (see *Instruments and expression*); the ratings report (see
-*Listening data*), once the dashboard shows songs rated enough; listening to the genres' presets (see *Genres*), and to
-what the harmony, the melody and the form gained in October 2026: chords off the scale, a phrase's loudness, the hook
-intro, the chorus's lift and the restated phrase.
+**Later** (P2), in this order: the presets' file in families; an idiom report a genre; the melody's character and the
+bass's style by genre; the harmonic rhythm by genre; a loop, a genre's levels, its fills and a melody written as a hook
+(genres that sound like themselves, see *Genres*); sidechain pumping; a riff in power chords and its chugs, the
+articulation's seam; solos, soloists, endings and intros by genre; timing by role, then a genre's pocket, and a
+guitar's strum (see *Groove*); builds and drops; turnarounds, then passing chords (see *Scales and chords*); a solo's
+loudness by its phrase. The ratings report (see *Listening data*) once the dashboard shows songs rated enough, and
+listening to the presets and to what October 2026 gained, alongside.
 
-**When the need shows** (P3), each by what listening says, roughly in this order: stop-time breaks, then the band's
-other devices, and approach chords' later steps, a chord free of the section's scale among them, stretched voicings
-and legato as an articulation (see *Form and sections*); a genre's arrangement and levels, its fills' amount, its melody's range and an
-octave bass (see *Genres*); the fills' sounds by convention, then their loudness; harmony's devices; a motif developed
-further; legato slides; a hook at the end; the tempo leaning by the energy; a key change's common tone; the page's wait
-for a remake and the sections on the seek bar; scales of other sizes (see *Open work*).
+**When the need shows** (P3), each by what listening says, in this order: stop-time breaks; a chord moved by
+semitones, then choosing free chords by their voices (see *Scales and chords*); a chord solo's approaches and a later
+appearance reharmonised; a genre's arrangement; key changes by genre; Electronic split; an octave bass; a push by the
+whole band; legato as an articulation; stretched voicings; the melody's range by genre; the fills' sounds by
+convention; a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
+and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
 
 **Put off** until their uses ask for them: long cycles and a tag (see *Open work*, *Rhythm engine*).
 
-**Parked** (P4): see *Parked*, kept for their reasons, not planned.
+**Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where they stand: scales of other
+sizes, a melody in block harmony, a hook at the end, the tempo leaning by the energy, a key change's common tone, the
+fills' loudness as layers, and a head with solos (which the form's devices by genre with AABA likely make).
 
 ## Listening
 
@@ -207,7 +206,7 @@ Each item with its plan, and what it waits for.
   response between parts, a backing figure that recurs through the song.
 - **Harmony's devices** (P3): a chromatic line inside a held chord, a pedal held under a section, a ii–V into a chord
   but the home, which a chord's own scale makes part of.
-- **The hook at the end** (P3): a song opens on its chorus's first phrase now and then (`IntroKind.Hook`); an outro
+- **The hook at the end** (P4, parked): a song opens on its chorus's first phrase now and then (`IntroKind.Hook`); an outro
   quoting it too, should endings sound unrelated to the song, though the last section is most often the chorus already
   and a fade replays it. The hook intro plays the parts its chorus plays, its rests and texture its
   appearance's; a chorus played as a solo is quoted by its tune.
@@ -215,9 +214,9 @@ Each item with its plan, and what it waits for.
   now each part rests on its own (`Arrangement`).
 - **The drums' changes by an appearance's energy** (their colour, a drum's stroke), which are the section's as it was
   made.
-- **The tempo leaning by the energy** (P3, should the songs sound metronomic): a section's tempo nudged a percent or two
+- **The tempo leaning by the energy** (P4, parked): a section's tempo nudged a percent or two
   by its energy through its tempo layer by `Tilt`, never in a plain song, which keeps to the click; no drift of its own.
-- **A key change's common tone** (P3): a line's note held over the change into the new key, which the lines' placement
+- **A key change's common tone** (P4, parked): a line's note held over the change into the new key, which the lines' placement
   does not make; the pad perhaps carrying it.
 
 ### Fills and lines
@@ -226,7 +225,7 @@ Each item with its plan, and what it waits for.
   answers.
 - **The lift beyond the cues:** the chords' rhythm doubling, a part of the next section coming in early, should the
   crescendo and the drums' cues not lift.
-- **The fills' loudness** (P3): a run's swell, its accents and a landing's hit are constants, where the groove's
+- **The fills' loudness** (P4, parked): a run's swell, its accents and a landing's hit are constants, where the groove's
   loudness is layers; a fill's velocity layer would make them cumulative with the section's.
 - **The fills' sounds by convention** (P3, before their loudness): runs and landings weigh a drum's sounds the same in a plain section as in a
   wild one; the weights could lean so that plain sections crash and wild ones reach for the china and the splash.
@@ -246,7 +245,7 @@ Each item with its plan, and what it waits for.
   legato slides below one of its cases. And to check: whether a solo's runs group in fives and sevens, a fusion
   player's, which the feels give a whole part but perhaps not a run; if not, a case of segments in any pattern (see
   *Parked*), not a mechanism of its own.
-- **Legato slides** (P3): a slide strikes its note anew, where a player's note before goes on sounding into the next;
+- **Legato slides** (P3, a case of legato as an articulation): a slide strikes its note anew, where a player's note before goes on sounding into the next;
   holding the note before into the slide and leaving the next unstruck edits two notes at render. Built if the struck
   slide sounds like a stutter.
 - **Long fall-offs** (P4): a fall of an octave into nothing at a note's end, a slide's kind of its own, if missed.
@@ -310,7 +309,7 @@ Each item with its plan, and what it waits for.
   5. A later appearance reharmonised, a last chorus over substitutes (vi or iii for I, ii for IV, the tritone
      substitute for V7) chosen by the notes they share with the chord they replace, decided before the lines are
      placed, so that the melody placed over them fits as it does.
-  6. A melody in block harmony (P3), the counter-melody or the pad voicing its long notes, approaches on its passing
+  6. A melody in block harmony (P4, parked), the counter-melody or the pad voicing its long notes, approaches on its passing
      ones, as a horn section's soli.
   Today a chord solo stacks the band's chord or planes its shape, never another chord; the bass approaches any change.
 - **A chord's own scale** (P2, a plan in steps). Every chord's notes are snapped to the section's scale
@@ -341,7 +340,7 @@ Each item with its plan, and what it waits for.
   Musicality to listen for: a melody holding the section's note over a borrowed chord (the step's measure of clashes
   stands for it), and an applied dominant whose resolution the next chord's shape spoils.
 
-- **Scales of other sizes** (P3, taken from *Parked*): whole scales of more or fewer than seven notes, pentatonic,
+- **Scales of other sizes** (P4, parked: the line scales give their sounds where they are heard): whole scales of more or fewer than seven notes, pentatonic,
   hexatonic (whole-tone, the blues' six) or octatonic, for a section's harmony as well as its lines, at the wild end
   of the scale facet alone. The progressions move by scale steps and their rules count a fifth as three steps, the
   chord shapes' heights sit between the qualities a seven-note scale gives, and the scales measure their brightness
