@@ -45,6 +45,28 @@ public sealed class SettingsLinkTest(Site site)
     }
 
     [Test]
+    public async Task ALinkMade_HasNoUnderscore_ForAChatToTakeForItalics_AndIsReadAsItWas()
+    {
+        await using var page = await SongPage.Open(site, $"?song=1&settings={MixedText}");
+        await page.FirstSong();
+        await page.Settled();
+
+        // the address, as Share hands it on, its underscores %5F, which the page reads back as underscores
+        var link = await page.Page.EvaluateAsync<string>("() => location.href");
+        await Assert.That(link).DoesNotContain("_");
+        await Assert.That(await page.Page.EvaluateAsync<string>("() => new URL(location.href).searchParams.get('settings')")).Contains("_");
+
+        // opened elsewhere, the song asked for as it was, with nothing said of its settings
+        await using var other = await SongPage.Open(site, link[link.IndexOf('?')..]);
+        await other.FirstSong();
+        await other.Settled();
+        await Assert.That(other.Requests[0].Body.GetRawText()).IsEqualTo(page.Requests[0].Body.GetRawText());
+        await Assert.That(await other.Status()).DoesNotContain("could not be read");
+        await Assert.That(page.Errors).IsEmpty();
+        await Assert.That(other.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task AModeChosen_AndASwingSet_AreAskedFor_AndKeptInTheLink()
     {
         await using var page = await SongPage.Open(site, "?song=1");

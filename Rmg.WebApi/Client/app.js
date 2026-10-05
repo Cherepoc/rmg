@@ -794,7 +794,9 @@ function songLink() {
     if (songGenreKey === null) address.searchParams.delete("genre");
     else address.searchParams.set("genre", songGenreKey);
 
-    return address.toString();
+    // every "_" of its seed and settings as %5F, which a chat's markdown cannot take for italics and delete, and which
+    // every browser reads back as "_"
+    return `${address.origin}${address.pathname}${address.search.replaceAll("_", "%5F")}${address.hash}`;
 }
 
 /** What every event about the song on the page carries: which song it is, and what it was heard with. */

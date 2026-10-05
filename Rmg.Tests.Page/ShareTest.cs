@@ -17,8 +17,9 @@ public sealed class ShareTest(Site site)
         await page.Page.Locator("#share").ClickAsync();
         await page.Until(async () => await page.Page.Locator("#share-label").TextContentAsync() == "Copied", "the link copied");
         var copied = await page.Page.EvaluateAsync<string>("() => navigator.clipboard.readText()");
-        await Assert.That(copied).Contains($"song={await page.Seed()}");
-        await Assert.That(copied).Contains("settings=");
+        var asked = new Uri(copied).Query.TrimStart('?').Split('&').Select(x => x.Split('=')).ToDictionary(x => x[0], x => Uri.UnescapeDataString(x[1]));
+        await Assert.That(asked["song"]).IsEqualTo(await page.Seed());
+        await Assert.That(asked.ContainsKey("settings")).IsTrue();
         await Assert.That(page.Errors).IsEmpty();
     }
 }
