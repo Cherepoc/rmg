@@ -6,7 +6,8 @@
 # very likely has the better uplink, and it is the one file that must survive a deploy, so the sync
 # leaves its directory alone.
 #
-# Settings come from deploy.env beside this script, from the environment, or from the flags below.
+# Settings come from deploy.env beside this script, or the file --env names, such as a test instance's, from the
+# environment, or from the flags below.
 
 set -euo pipefail
 
@@ -14,14 +15,28 @@ readonly ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 # --- settings --------------------------------------------------------------
 
+# the settings file, read before the other flags so that they override it
+ENV_FILE="$ROOT/deploy.env"
+for ((i = 1; i <= $#; i++)); do
+    if [[ ${!i} == --env ]]; then
+        next=$((i + 1))
+        ENV_FILE="${!next:?--env needs a file}"
+    fi
+done
+[[ $ENV_FILE == /* ]] || [[ -f $ENV_FILE ]] || ENV_FILE="$ROOT/$ENV_FILE"
+
 # shellcheck source=/dev/null
-[[ -f "$ROOT/deploy.env" ]] && source "$ROOT/deploy.env"
+[[ -f "$ENV_FILE" ]] && source "$ENV_FILE"
 
 HOST="${RMG_HOST:-}"                      # ssh target: an alias from ~/.ssh/config, or user@host
 TARGET="${RMG_PATH:-/opt/rmg}"            # where the published app lives on the VPS
 SERVICE="${RMG_SERVICE:-rmg}"             # name of the systemd unit
 SERVICE_USER="${RMG_SERVICE_USER:-rmg}"   # the account the app runs as, which owns nothing it can write
 RUNTIME="${RMG_RUNTIME:-linux-x64}"
+
+# whether the songs' version goes up when the songs changed: false for a test instance, whose songs are not rated
+# against the live ones', so that the next deploy to the live one raises it once for everything since
+BUMP_VERSION="${RMG_BUMP_VERSION:-true}"
 
 # passed to the service as RMG_PORT, and where the health check looks afterwards
 PORT="${RMG_PORT:-5000}"
@@ -65,6 +80,7 @@ Usage: ${0##*/} [options]
 Builds, tests, publishes and deploys RMG to a VPS.
 
 Options:
+  --env <file>         The settings file. Default: deploy.env beside this script.
   --host <user@host>   Where to deploy. Required, unless RMG_HOST is set.
   --path <dir>         Where the app goes on the VPS. Default: $TARGET
   --service <name>     Name of the systemd unit. Default: $SERVICE
@@ -81,12 +97,14 @@ Options:
 Settings come from deploy.env beside this script. Those named RMG_* are put on the server and
 override appsettings.json, which ships with the app and holds the defaults: RMG_PORT, RMG_ADDRESS,
 RMG_KNOWNPROXIES, RMG_DASHBOARDTOKEN, RMG_RETENTIONDAYS, RMG_DEFAULTSOUNDFONT and RMG_ANALYTICSENABLED. The rest say where to deploy: RMG_HOST,
-RMG_PATH, RMG_SERVICE, RMG_SERVICE_USER, RMG_RUNTIME and RMG_SOUNDFONTS.
+RMG_PATH, RMG_SERVICE, RMG_SERVICE_USER, RMG_RUNTIME, RMG_SOUNDFONTS and RMG_BUMP_VERSION, false to
+deploy changed songs under the version they had, as a test instance does.
 USAGE
 }
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        --env) shift 2 ;;
         --host) HOST="${2:?--host needs a value}"; shift 2 ;;
         --path) TARGET="${2:?--path needs a value}"; shift 2 ;;
         --service) SERVICE="${2:?--service needs a value}"; shift 2 ;;
@@ -148,6 +166,8 @@ fingerprint="$(dotnet "$ROOT/Rmg/bin/Release/net10.0/Rmg.dll" --fingerprint)" ||
 
 if [[ $fingerprint == "$recorded" ]]; then
     note "the songs are as they were: $version"
+elif [[ $BUMP_VERSION != true ]]; then
+    note "the songs changed, but kept at $version, as RMG_BUMP_VERSION asks"
 else
     bumped="$(printf '%d.%d.%03d' "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "$((10#${BASH_REMATCH[3]} + 1))")"
     sed -i -e "s/^version .*/version $bumped/" -e "s/^fingerprint .*/fingerprint $fingerprint/" "$VERSION_FILE"
