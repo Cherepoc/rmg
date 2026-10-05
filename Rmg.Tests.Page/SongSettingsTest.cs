@@ -30,6 +30,11 @@ public sealed class SongSettingsTest(Site site)
             "() => [...document.querySelectorAll('.setting')].filter(x => x.offsetParent).map(x => [x.querySelector('.setting-name').getBoundingClientRect().left, x.querySelector('.setting-slider').getBoundingClientRect().left])");
         await Assert.That(lefts.Select(x => Math.Round(x[0])).Distinct().Count()).IsEqualTo(1);
         await Assert.That(lefts.Select(x => Math.Round(x[1])).Distinct().Count()).IsEqualTo(1);
+        // and every list as wide as a slider: from where it starts to where a slider ends
+        var spans = await page.Page.EvaluateAsync<double[][]>(
+            "() => [...document.querySelectorAll('.setting')].filter(x => x.offsetParent).map(x => x.querySelector('.setting-slider select, .setting-slider input[type=range]')).map(x => [x.getBoundingClientRect().left, x.getBoundingClientRect().right])");
+        await Assert.That(spans.Select(x => Math.Round(x[0])).Distinct().Count()).IsEqualTo(1);
+        await Assert.That(spans.Select(x => Math.Round(x[1])).Distinct().Count()).IsEqualTo(1);
         await Assert.That(page.Errors).IsEmpty();
     }
 }

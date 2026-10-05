@@ -1719,13 +1719,16 @@ function createChoiceRow(key) {
     });
 
     select.setAttribute("aria-description", description);
-    // where a slider's row has its plain end, nothing, so that the list starts where the sliders do
+    // where a slider's row has its ends and its value, nothing, so that the list is as wide as a slider
     const place = document.createElement("span");
     place.className = "setting-slider";
-    const end = document.createElement("span");
-    end.className = "end";
-    end.setAttribute("aria-hidden", "true");
-    place.append(end, select);
+    const [end, otherEnd] = [0, 1].map(() => {
+        const element = document.createElement("span");
+        element.className = "end";
+        element.setAttribute("aria-hidden", "true");
+        return element;
+    });
+    place.append(end, select, otherEnd, emptyValue());
     const row = document.createElement("div");
     row.className = "setting";
     row.title = description;
@@ -1770,13 +1773,13 @@ function createGenreRow() {
     genreEdit = document.createElement("button");
     genreEdit.type = "button";
     genreEdit.className = "genre-edit";
-    genreEdit.textContent = "Edit";
-    genreEdit.title = "Make a genre of your own, from this one or from none";
     genreEdit.disabled = true;
-    // one's own genre with its description, which the settings do not carry; a preset without its sentence
-    genreEdit.addEventListener("click", () => genreEditor.open(
-        hasAGenre(settings.genre) ? recallGenres().find((x) => isSameGenre(x, settings.genre)) ?? settings.genre : noGenre(), genreChoices));
-    place.append(end, genreSelect, genreEdit);
+    genreEdit.addEventListener("click", actOnGenre);
+    // the button where a slider's other end is, so that the list is as wide as a slider
+    const action = document.createElement("span");
+    action.className = "genre-action";
+    action.append(genreEdit);
+    place.append(end, genreSelect, action, emptyValue());
     const row = document.createElement("div");
     row.className = "setting";
     row.title = GENRE_DESCRIPTION;
@@ -1785,6 +1788,38 @@ function createGenreRow() {
     genreAbout.className = "genre-about";
     genreAbout.hidden = true;
     return row;
+}
+
+/**
+ *     What the genre's button does, as the list has it: a genre made from none where there is none, a preset duplicated
+ *     among one's own under its name and the first number free, and any other genre edited, one's own with its
+ *     description, which the settings do not carry.
+ */
+function actOnGenre() {
+    const preset = presetOf(settings.genre);
+    if (!hasAGenre(settings.genre)) genreEditor.open(noGenre(), genreChoices);
+    else if (preset !== null) {
+        const copy = { name: freeName(preset.name), choices: structuredClone(preset.choices) };
+        keepGenres([...recallGenres(), copy]);
+        showGenre();
+        genreEditor.open(copy, genreChoices);
+    } else genreEditor.open(recallGenres().find((x) => isSameGenre(x, settings.genre)) ?? settings.genre, genreChoices);
+}
+
+/** A name and the first number after it that no genre of one's own nor a preset has, whatever its case: "Rock 1", "Rock 2". */
+function freeName(name) {
+    const taken = new Set([...recallGenres(), ...PRESETS].map((x) => x.name.trim().toLowerCase()));
+    let number = 1;
+    while (taken.has(`${name} ${number}`.toLowerCase())) number++;
+    return `${name} ${number}`;
+}
+
+/** Nothing where a slider's row shows its value, as wide, so that a list is as wide as a slider. */
+function emptyValue() {
+    const value = document.createElement("output");
+    value.className = "percent";
+    value.setAttribute("aria-hidden", "true");
+    return value;
 }
 
 /** Asks for the song again in a genre the editor made. */
@@ -1822,6 +1857,11 @@ function showGenre() {
     if (hasAGenre(settings.genre) && chosen === undefined) options.splice(1, 0, createOption("song", settings.genre.name || "This song's genre"));
     genreSelect.replaceChildren(...options);
     genreSelect.value = !hasAGenre(settings.genre) ? "none" : chosen?.value ?? "song";
+    // the button as the genre chosen has it: none made new, a preset duplicated, another edited
+    const isPreset = presetOf(settings.genre) !== null;
+    genreEdit.textContent = !hasAGenre(settings.genre) ? "New" : isPreset ? "Duplicate" : "Edit";
+    genreEdit.title = !hasAGenre(settings.genre) ? "Make a genre of your own"
+        : isPreset ? "Make a genre of your own from this one, under its name and a number" : "Change this genre";
     genreAbout.textContent = chosen?.description ?? "";
     genreAbout.hidden = genreAbout.textContent === "";
 }

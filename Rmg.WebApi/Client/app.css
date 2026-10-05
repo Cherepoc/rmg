@@ -664,7 +664,6 @@ input[type="range"] {
    taller than a slider's row, so that every row is as high */
 .setting select {
     justify-self: start;
-    max-width: 16em;
     height: 21px;
     padding: 0 6px;
     font-size: 13px;
@@ -672,9 +671,17 @@ input[type="range"] {
 
 /* a list where a slider is, as far in as a slider's own margin, and narrower than its longest option where the row is,
    as a scale's long name would make it on a phone */
+/* as wide as a slider, its margins a range's own */
 .setting-slider select {
+    flex: 1;
     min-width: 0;
-    margin-left: 2px;
+    margin: 0 2px;
+}
+
+/* the genre's button where a slider's other end is, as wide, on a phone too, where the ends are not shown */
+.genre-action {
+    width: 12ch;
+    font-size: 12px;
 }
 
 

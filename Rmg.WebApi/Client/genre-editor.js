@@ -447,9 +447,22 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         kept = asKept();
     }
 
+    // under a name asked for, one's own of that name replaced only once that is confirmed, a preset's never; the genre
+    // the draft came from kept as it was
+    const saveAs = button("Save as…", "Keep this genre among yours under another name, and play it", () => {
+        const asked = prompt("Save as", draft.name.trim())?.trim();
+        if (!asked) return;
+        draft.name = asked;
+        name.value = asked;
+        showProblem();
+        if (isPresetName(asked) || (isOwn(asked) && !confirm(`Replace your genre ${asked}?`))) return;
+        keep(onSave);
+        showProblem();
+    });
+
     const remove = button("Delete", "Let go of this genre of yours", () => onDelete(draft.name.trim()));
     const footer = document.createElement("footer");
-    footer.append(problem, file, imported, exported, remove, save, play);
+    footer.append(problem, file, imported, exported, remove, saveAs, save, play);
     dialog.append(header, body, footer, tune.element);
 
     // --- the draft ------------------------------------------------------------------------------------------------------------
@@ -522,7 +535,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn }) {
         const said = text ?? (isPresetName(draft.name) ? `${draft.name.trim()} is a preset's name: save yours under another.` : null);
         problem.textContent = said ?? "";
         problem.hidden = said === null;
-        play.disabled = text !== null;
+        play.disabled = saveAs.disabled = text !== null;
         save.disabled = said !== null || draft.name.trim() === "";
         remove.disabled = !isOwn(draft.name.trim());
     }

@@ -95,7 +95,7 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(await Override(time, "meter").IsCheckedAsync()).IsTrue();
         await dialog.Locator("input[aria-label='Genre name']").FillAsync("Waltzes");
         var count = page.Requests.Count;
-        await dialog.Locator("footer button", new() { HasTextString = "Save" }).ClickAsync();
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Save", Exact = true }).ClickAsync();
         await page.Until(() => page.Requests.Count > count, "the song asked for in the genre made");
         await Assert.That(page.Requests[^1].Body.GetProperty("genre").GetProperty("meter").EnumerateObject().Select(x => x.Name)).IsEquivalentTo(["3/4"]);
         await page.Settled();
@@ -184,7 +184,7 @@ public sealed class GenreEditorTest(Site site)
         await using var page = await SongPage.Open(site, "?song=1");
         var dialog = await OpenEditor(page);
         var name = dialog.Locator("input[aria-label='Genre name']");
-        var save = dialog.Locator("footer button", new() { HasTextString = "Save" });
+        var save = dialog.GetByRole(AriaRole.Button, new() { Name = "Save", Exact = true });
         var play = dialog.Locator("footer button", new() { HasTextString = "Play" });
 
         // whatever its case and spacing
@@ -213,7 +213,7 @@ public sealed class GenreEditorTest(Site site)
         // made from none, described, saved and chosen: its sentence under the list
         await dialog.Locator("input[aria-label='Genre name']").FillAsync("Slow rain");
         await description.FillAsync("Long, quiet songs for a wet afternoon.");
-        await dialog.Locator("footer button", new() { HasTextString = "Save" }).ClickAsync();
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Save", Exact = true }).ClickAsync();
         await page.Until(async () => await about.TextContentAsync() == "Long, quiet songs for a wet afternoon.", "its description shown");
         await dialog.Locator("> header .genre-close").ClickAsync();
 
@@ -278,6 +278,63 @@ public sealed class GenreEditorTest(Site site)
 
         tune = await Change(time, "tempo");
         await Assert.That(await tune.Locator("h3").First.TextContentAsync()).IsEqualTo("Tempo: From, in beats a minute");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task TheGenresButton_MakesNewFromNone_DuplicatesAPresetUnderTheNextNumber_AndEditsOnesOwn()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        await page.FirstSong();
+        await page.Settled();
+        await page.Page.Locator("#settings-panel summary").ClickAsync();
+        var genre = page.Page.Locator("select[aria-label='Genre']");
+        var action = page.Page.Locator("button.genre-edit");
+        var dialog = page.Page.Locator("dialog.genre-dialog");
+        var name = dialog.Locator("input[aria-label='Genre name']");
+        await page.Until(() => action.IsEnabledAsync(), "the editor ready");
+        await Assert.That(await action.TextContentAsync()).IsEqualTo("New");
+
+        // a preset duplicated among one's own, under its name and the first number free, twice
+        await genre.EvaluateAsync("select => { select.value = 'preset:rock'; select.dispatchEvent(new Event('change')); }");
+        await page.Until(async () => await action.TextContentAsync() == "Duplicate", "a preset's button");
+        await action.ClickAsync();
+        await Assert.That(await name.InputValueAsync()).IsEqualTo("Rock 1");
+        await dialog.Locator("> header .genre-close").ClickAsync();
+        await action.ClickAsync();
+        await Assert.That(await name.InputValueAsync()).IsEqualTo("Rock 2");
+        await dialog.Locator("> header .genre-close").ClickAsync();
+        await Assert.That(await genre.Locator("optgroup[label='Yours'] option").AllTextContentsAsync()).IsEquivalentTo(["Rock 1", "Rock 2"]);
+
+        // one's own chosen, edited
+        await genre.EvaluateAsync("select => { select.value = 'own:0'; select.dispatchEvent(new Event('change')); }");
+        await page.Until(async () => await action.TextContentAsync() == "Edit", "one's own button");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task SaveAs_KeepsTheDraftUnderANameAsked_TheOneItCameFromAsItWas()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var answer = "";
+        page.Page.Dialog += (_, prompt) => _ = prompt.Type == "prompt" ? prompt.AcceptAsync(answer) : prompt.AcceptAsync();
+        await dialog.Locator("input[aria-label='Genre name']").FillAsync("First");
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Save", Exact = true }).ClickAsync();
+
+        var count = page.Requests.Count;
+        answer = "Second";
+        await dialog.Locator("footer button", new() { HasTextString = "Save as" }).ClickAsync();
+        await page.Until(() => page.Requests.Count > count, "the song asked for in the genre saved");
+        var genre = page.Page.Locator("select[aria-label='Genre']");
+        await Assert.That(await genre.Locator("optgroup[label='Yours'] option").AllTextContentsAsync()).IsEquivalentTo(["First", "Second"]);
+        await Assert.That(await dialog.Locator("input[aria-label='Genre name']").InputValueAsync()).IsEqualTo("Second");
+
+        // a preset's name refused, nothing kept
+        answer = "jazz";
+        await dialog.Locator("footer button", new() { HasTextString = "Save as" }).ClickAsync();
+        await Assert.That(await genre.Locator("optgroup[label='Yours'] option").CountAsync()).IsEqualTo(2);
+        await Assert.That(await dialog.Locator("footer .warning").TextContentAsync()).IsEqualTo("jazz is a preset's name: save yours under another.");
         await Assert.That(page.Errors).IsEmpty();
     }
 
