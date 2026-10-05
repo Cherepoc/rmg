@@ -49,6 +49,36 @@ public sealed class GenrePresetsReportTest
         await Task.CompletedTask;
     }
 
+    /// <summary>
+    ///     How long the sections' patterns are, and in twelve bars where the phrases start and end: the second from IV, the
+    ///     last from V, the first two back home; none's and every preset's.
+    /// </summary>
+    [Test]
+    [Explicit]
+    public async Task EveryPreset_Phrases()
+    {
+        void Print(string name, IReadOnlyList<CorpusSong> songs)
+        {
+            var sections = songs.SelectMany(song =>
+            {
+                var meters = (System.Collections.Immutable.ImmutableDictionary<int, Rmg.Core.Composition.Meter>)song.Trace.First(t => t.Point == Rmg.Core.Composition.TracePoints.SectionMeter).Value!;
+                return song.Trace.Where(t => t.Point == Rmg.Core.Composition.TracePoints.Progression)
+                    .Select(t => (Phrases: meters[t.Section].Phrases, Roots: (System.Collections.Immutable.ImmutableArray<int>)t.Value!));
+            }).ToArray();
+            int Mod7(int x) => (x % 7 + 7) % 7;
+            var twelve = sections.Where(x => x.Phrases == 3).ToArray();
+            string At(int phrase, bool start, int root) => twelve.Length == 0 ? "-" :
+                $"{100.0 * twelve.Count(x => Mod7(x.Roots[start ? phrase * x.Roots.Length / 3 : (phrase + 1) * x.Roots.Length / 3 - 1]) == root) / twelve.Length:0}%";
+            Console.WriteLine($"{name}: " + string.Join(", ", sections.GroupBy(x => x.Phrases).OrderBy(x => x.Key).Select(x => $"{4 * x.Key} bars {100.0 * x.Count() / sections.Length:0}%"))
+                              + $"; twelve bars: IV at 5 {At(1, true, 3)}, V at 9 {At(2, true, 4)}, home at 4 {At(0, false, 0)}, at 8 {At(1, false, 0)}");
+        }
+
+        Print("none", TestCorpus.Range(Count));
+        foreach (var preset in GenrePresets.All)
+            Print(preset.Name, TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(preset)))));
+        await Task.CompletedTask;
+    }
+
     /// <summary>The sections' energy on the average, and how far a song's sections spread from its own: none's and every preset's.</summary>
     [Test]
     [Explicit]

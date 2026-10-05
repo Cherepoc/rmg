@@ -4,6 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
+      "phrases": { "fourBars": 100, "eightBars": [40, 40, 50] },
       "dynamics": { "energy": 65, "contrast": 70 },
       "pan": { "rhythm": 85, "riff": 75 },
       "effects": { "bends": [30, 60, 90], "chorus": [20, 40, 80], "vibrato": [20, 70, 100], "swell": [0, 20, 80] },
@@ -32,6 +33,7 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
+      "phrases": { "eightBars": [100, 100, 60], "fourBars": [30, 30, 40] },
       "pan": { "bass": 65, "chords": 65 },
       "effects": { "vibrato": [30, 60, 90], "bends": [0, 15, 50], "chorus": [0, 20, 60], "swell": [0, 35, 100] },
       "rootMotion": { "fifthDown": 85, "stepUp": 60 },
@@ -187,6 +189,7 @@
     "name": "Folk",
     "description": "Steel and nylon guitars strummed, a fiddle, a banjo, a harmonica, an acoustic bass, plain triads, major and Mixolydian, 3/4 and 6/8 as likely as not, a tambourine and a shaker on a room kit.",
     "choices": {
+      "phrases": { "eightBars": [100, 90, 60], "fourBars": [60, 60, 60] },
       "form": { "vcvc": 100, "vcvcbc": 70, "vcvcbvc": 40 },
       "formChances": { "forms": [100, 95, 70] },
       "tempo": { "from": [79, 79, 65], "to": [130, 130, 150] },
@@ -211,6 +214,7 @@
     "name": "Blues",
     "description": "A shuffle, sevenths over Mixolydian, a harmonica, an overdriven guitar and an organ, slow to mid.",
     "choices": {
+      "phrases": { "twelveBars": [100, 100, 70], "fourBars": [15, 20, 40] },
       "effects": { "bends": [60, 85, 100], "vibrato": [40, 75, 100], "chorus": [0, 30, 80], "swell": [0, 35, 100] },
       "rootMotion": { "fourthDown": 80, "stepUp": 70 },
       "tempo": { "from": [65, 65, 60], "to": [115, 115, 140] },
