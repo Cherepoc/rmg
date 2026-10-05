@@ -27,6 +27,9 @@ internal static class TracePoints
     /// <summary>A line the drums announce a bigger section at, opening the hi-hat and striking the snare's head (a <c>double</c>, the line's place).</summary>
     public const string LiftCue = "Lift cue";
 
+    /// <summary>A section's planed chords' moves from its home, in semitones, none where it does not plane (an <c>ImmutableArray&lt;int&gt;?</c>).</summary>
+    public const string Planing = "Planing";
+
     /// <summary>Whether a section turns its pattern around, its last bar a V or a ii–V into its start (a <c>bool</c>).</summary>
     public const string Turnaround = "Turnaround";
 

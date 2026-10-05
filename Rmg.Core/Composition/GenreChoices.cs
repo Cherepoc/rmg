@@ -138,6 +138,9 @@ public static class GenreChoices
     /// <summary>The chance a section plays its first phrase in stop time, the band hitting once a bar under the lines (<see cref="SongStages.StopTimeChance" />).</summary>
     public static GenreChoice StopTime { get; } = Chances("stopTime", "Stop time", [("sections", "Sections in stop time", SongStages.StopTimeChance)]);
 
+    /// <summary>The chance a section planes, every chord the home's shape moved by semitones, a reharmonisation, which no genre plays at the plain end (<see cref="Composition.Planing" />).</summary>
+    public static GenreChoice Planing { get; } = Chances("planing", "Planing", [("sections", "Sections planed", Composition.Planing.Chance)], plainEnd: false);
+
     /// <summary>The chance a lift the drums announce is built to and dropped at, the band out for the bar before it; the songs never (<see cref="FormLayers.Drop" />).</summary>
     public static GenreChoice Drop { get; } = Chances("drop", "Builds and drops", [("lifts", "Lifts built to a drop", FormLayers.Drop)]);
 
@@ -409,7 +412,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Loop, LineScale, Bass, BassLanding, Effects, Levels, GrooveHold, Pocket, Fills, Drop, StopTime, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, Loop, LineScale, Bass, BassLanding, Effects, Levels, GrooveHold, Pocket, Fills, Drop, StopTime, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

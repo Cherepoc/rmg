@@ -42,10 +42,13 @@ public sealed class PassingChordTest
         {
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
             int Root(double position) => Rmg.Core.Composition.Realizer.GetChord(common.GetEffectiveStateMapAt(position)).Chord.GetPitch(0);
+            // but where a section planes, its chords moved apart by semitones of their own
+            var planing = song.Trace.Where(x => x.Point == TracePoints.Planing && x.Value is not null).Select(x => x.Section).ToHashSet();
             var changes = song.ChordChanges;
             for (var i = 0; i + 1 < changes.Length; i++)
             {
-                if (common.GetEffectiveStateMapAt(changes[i]).GetStateValue(Rmg.Core.Events.StateKinds.ChordShift) != 1)
+                if (common.GetEffectiveStateMapAt(changes[i]).GetStateValue(Rmg.Core.Events.StateKinds.ChordShift) != 1
+                    || planing.Contains(song.Song.Map!.SectionAt(changes[i])?.SectionId ?? -1))
                     continue;
                 chromatic++;
                 await Assert.That(((Root(changes[i]) - Root(changes[i + 1])) % 12 + 12) % 12).IsEqualTo(1);

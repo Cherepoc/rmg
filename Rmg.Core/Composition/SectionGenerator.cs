@@ -152,6 +152,14 @@ internal sealed class SectionGenerator
         var (passingRhythm, passingProgression, passingScales, shifts) = PassingChords.Draw(Stream(sectionId, SectionStream.PassingChords), passingChance, facets[Facet.Progression],
             harmonicRhythm, progression, chordScales, scale, home);
         (harmonicRhythm, progression, chordScales) = (passingRhythm, passingProgression, passingScales);
+        // a wild section planing now and then, every chord the home's shape moved, by the progression facet and a genre's,
+        // from a sequence of its own; but the song's last, which leads home to its tonic
+        var planingContext = Stream(sectionId, SectionStream.Planing);
+        var planes = planingContext.TestProbability(Planing.Chance.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Planing, "sections"))) && !plan.HasTonicHome;
+        var planed = Planing.Draw(planingContext, progression.Length);
+        if (planes)
+            (progression, chordScales, shifts) = ([..progression.Select(_ => 0)], [..chordScales.Select(_ => ChordScale.Section)], planed);
+        StateTrace.Record(TracePoints.Planing, SectionTrace, sectionId, 0, StateMap.Default, 0, planes ? string.Join(" ", planed) : "none", planes ? planed : null);
         // a section of a loop plays the first section's harmony where its meter is the first's, its own drawn all the same
         // so that its other draws stay, a genre's, from a sequence of its own (GenreChoices.Loop)
         var loops = Stream(sectionId, SectionStream.Loop).TestProbability(Loop.At(facets[Facet.Form], _genre.Chance(GenreChoices.Loop, "sections")));
@@ -1016,5 +1024,6 @@ internal enum SectionStream
     PowerChords = 35,
     Chugs = 36,
     Turnaround = 37,
-    PassingChords = 38
+    PassingChords = 38,
+    Planing = 39
 }

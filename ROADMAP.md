@@ -13,8 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: choosing free chords by their voices
-(see *Scales and chords*); a chord solo's approaches and a later
+**When the need shows** (P3), each by what listening says, in this order: a chord solo's approaches and a later
 appearance reharmonised; a genre's arrangement; key changes by genre; Electronic split; an octave bass; a push by the
 whole band; legato as an articulation; stretched voicings; the melody's range by genre; the fills' sounds by
 convention; a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
@@ -270,9 +269,10 @@ Each item with its plan, and what it waits for.
      chromatic passing chord, the next chord a semitone above (`PassingKind.Chromatic`), by the progression facet, a
      fifth of the passing chords in the middle, every one at the wild end but a third. Not done: a constant structure
      planed through keys.
-  2. Choosing them: by a constant structure, one voicing moved by an interval drawn, or by voice leading, the next
-     chord the one its voicing moves least to (`VoiceLeader` the measure). The hard part: free chords drawn freely
-     sound random, where in the style they drift by their voices.
+  2. Done as a constant structure: a section planing (`Planing`, `GenreChoices.Planing`), every chord the home's shape
+     moved by a semitone, a whole step, a minor third or a fourth, within a tritone of home, a wild song's (0, 0, 0.25),
+     never the song's last section; 26% of a wild song's sections, 0.2% of the corpus's. Not done: choosing the next
+     chord by the voice leader's least move among free shapes, should planing sound mechanical.
   3. A chord's own scale drawn on its root (Lydian, melodic minor, diminished), should step 1 sound narrow.
   Its uses past an approach: a progression that does not function, planing in pop and film scores, modern jazz. A
   fusion genre, a long-lined guitar player's, then has its harmony and its lines as a genre's data (free chords, the
