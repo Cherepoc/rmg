@@ -24,7 +24,7 @@ public sealed class SongDescriptionsTest
                 await Assert.That(section.Name.StartsWith(role == SectionRole.Free ? "Section " : role == SectionRole.PreChorus ? "Pre-chorus" : role.ToString())).IsTrue();
                 await Assert.That(section.Bars).IsEqualTo((int)Math.Round(span.Duration / span.Meter.BarDuration));
                 await Assert.That(section.Energy).IsIn(["quiet", "medium", "loud"]);
-                await Assert.That(section.TimeSignature is null).IsEqualTo(span.Meter == song.Map.Meter);
+                await Assert.That(section.TimeSignature is null).IsEqualTo(span.Meter.HasSameBar(song.Map.Meter));
             }
 
             await Assert.That(description.Bars).IsEqualTo(description.Sections.Sum(x => x.Bars));

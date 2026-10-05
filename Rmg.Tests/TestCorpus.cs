@@ -140,6 +140,8 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
             .Where(x => Map.Intro.Duration > 0 || x > Origin + 1e-9)
             .Concat(FormLayers.HasFinalChord(Map.Ending.Kind) ? [Map.Sections[^1].End] : []);
         var windowEnd = Map.Intro.Kind == IntroKind.Entries && !Map.Intro.Window.IsBefore ? Origin + Map.Intro.Window.Bars * Map.Meter.BarDuration : double.NaN;
+        // the window's end a line of its own, a phrase in, though a longer pattern goes on past it
+        patterns = patterns.Concat(double.IsNaN(windowEnd) ? [] : [windowEnd]);
         var drumSolos = Solos.Where(x => x.Value.IsDrumSolo).Select(x => Map.Sections[x.Key]).ToArray();
         // a line at a phrase a build's drums have come in by, with the fill they come in on
         bool IsAfterDrumsComeIn(double line)

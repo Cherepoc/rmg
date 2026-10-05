@@ -14,6 +14,11 @@ public sealed record PhraseScheme(ImmutableArray<int> Letters, ImmutableArray<bo
 {
     public int PatternCount => Letters.Max() + 1;
 
+    /// <summary>The scheme over a section's pattern of several phrases, every phrase playing its bars as the first does, over its own chords.</summary>
+    public PhraseScheme Across(int phrases) => phrases == 1
+        ? this
+        : new PhraseScheme([..Enumerable.Repeat(Letters, phrases).SelectMany(x => x)], [..Enumerable.Repeat(IsVaried, phrases).SelectMany(x => x)]);
+
     /// <summary>The scheme as letters, such as AABA, a varied repeat marked with a prime.</summary>
     public override string ToString()
     {

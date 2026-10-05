@@ -37,7 +37,7 @@ public sealed class SectionMeterTest
     public async Task ThePlainestSongs_KeepTheirMeter()
     {
         foreach (var seed in Enumerable.Range(0, 8))
-            await Assert.That(Meters(TestCorpus.Get(seed, new SongOverrides(Base: 0))).Values.All(x => x.Equals(Meter.FourFour))).IsTrue();
+            await Assert.That(Meters(TestCorpus.Get(seed, new SongOverrides(Base: 0))).Values.All(x => x.HasSameBar(Meter.FourFour))).IsTrue();
     }
 
     [Test]

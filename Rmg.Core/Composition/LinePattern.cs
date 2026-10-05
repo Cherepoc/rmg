@@ -149,16 +149,16 @@ internal sealed class LinePattern
     /// <param name="bars">The section's bars, its 4-bar pattern's question and answer.</param>
     /// <param name="seed">The seed of the answer's mutations.</param>
     /// <param name="amount">The chance a note of the answer's later bars is mutated.</param>
-    /// <param name="barDuration">How long a bar is, in beats.</param>
-    public static TrackEventStateTimelineMap<StateMap> Answer(TrackEventStateTimelineMap<StateMap> bars, int trackNumber, LineProfile profile, ulong seed, double amount, double barDuration)
+    /// <param name="meter">The section's meter, whose pattern the question is, and every phrase of the answer after it.</param>
+    public static TrackEventStateTimelineMap<StateMap> Answer(TrackEventStateTimelineMap<StateMap> bars, int trackNumber, LineProfile profile, ulong seed, double amount, Meter meter)
     {
         return Mutate(
             bars,
             trackNumber,
             profile,
             seed,
-            barDuration,
-            bar => bar < Meter.PhraseBarCount ? 0 : amount * MelodyLayers.AnswerBars[bar - Meter.PhraseBarCount]
+            meter.BarDuration,
+            bar => bar < meter.PatternBarCount ? 0 : amount * MelodyLayers.AnswerBars[(bar - meter.PatternBarCount) % Meter.PhraseBarCount]
         );
     }
 
@@ -309,7 +309,7 @@ internal sealed record SectionLine(
             [
                 ..Enumerable.Range(0, 2 * Letters.Length).Select(bar =>
                     {
-                        var chance = amount * MelodyLayers.ImprovisedRhythm * MelodyLayers.AnswerBars[bar % Letters.Length];
+                        var chance = amount * MelodyLayers.ImprovisedRhythm * MelodyLayers.AnswerBars[bar % Meter.PhraseBarCount];
                         return draws[Letters[bar % Letters.Length]] < chance ? appearance : 0;
                     }
                 )

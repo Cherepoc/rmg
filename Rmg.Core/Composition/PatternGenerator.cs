@@ -114,7 +114,8 @@ internal sealed class PatternGenerator
             x => _trackDefinitions[x.Key].Role == TrackRole.Drum ? BarPatternLayer(DrumRoles.Hold(barPatternLayer, DrumRoles.Of(x.Value))) : BarPatternLayer(barPatternLayer)
         );
 
-        var scheme = sectionRhythm.Scheme;
+        // the phrase's scheme over every phrase of the pattern
+        var scheme = sectionRhythm.Scheme.Across(_meter.Phrases);
         var feels = new List<BarFeel>();
         // the question's letters, and the answer's, the same again
         var letters = answer is null ? scheme.Letters : [..scheme.Letters, ..scheme.Letters];
@@ -123,7 +124,7 @@ internal sealed class PatternGenerator
                 {
                     var patternBar = barIndex % scheme.Letters.Length;
                     var inAnswer = barIndex >= scheme.Letters.Length;
-                    var redrawsRhythm = inAnswer && answer!.RedrawsRhythm[patternBar];
+                    var redrawsRhythm = inAnswer && answer!.RedrawsRhythm[barIndex % Meter.PhraseBarCount];
                     var rhythmKey = rhythmKeys.IsDefaultOrEmpty ? 0 : rhythmKeys[barIndex];
                     var phraseEnd = inAnswer ? answer!.PhraseEnd : null;
                     // a drum that doubles or accents a lead plays its lead's bar patterns, and one that plays a figure of its
@@ -149,7 +150,7 @@ internal sealed class PatternGenerator
                                 phraseEnd,
                                 barDrums.Resting.Contains((x.Key, letter)),
                                 barDrums.Strokes.TryGetValue((x.Key, letter), out var stroke) ? stroke : null,
-                                scheme.ToString(),
+                                sectionRhythm.Scheme.ToString(),
                                 sectionRhythm.Energy,
                                 doubles.GetValueOrDefault(x.Key),
                                 feelLeads.TryGetValue(x.Key, out var feelLead) ? barFeels.Single(feel => feel.Track == feelLead).Rhythm : null,

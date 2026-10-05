@@ -583,7 +583,7 @@ internal sealed class SectionGenerator
                         using var pause = StateTrace.Pause();
                         return BuildBars(rhythmKeys).Timeline.Repeat(2);
                     },
-                    sectionRhythm.Scheme.Letters,
+                    sectionRhythm.Scheme.Across(meter.Phrases).Letters,
                     harmonicRhythm,
                     [..harmonicRhythm.Changes.Select(Approach)],
                     [..harmonicRhythm.Changes.Select(Landing)],
@@ -607,7 +607,7 @@ internal sealed class SectionGenerator
                         using var pause = StateTrace.Pause();
                         return BuildBars(rhythmKeys).Timeline.Repeat(2);
                     },
-                    trackRhythm.Scheme.Letters,
+                    trackRhythm.Scheme.Across(meter.Phrases).Letters,
                     harmonicRhythm,
                     LinePattern.DrawApproaches(Stream(sectionId, SectionStream.RiffLeading), RiffLayers.Leading, harmonicRhythm.Count),
                     [..Enumerable.Repeat(ChordArrival.Free, harmonicRhythm.Count)],
@@ -631,7 +631,7 @@ internal sealed class SectionGenerator
                         using var pause = StateTrace.Pause();
                         return BuildBars(rhythmKeys).Timeline.Repeat(2);
                     },
-                    sectionRhythm.Scheme.Letters,
+                    sectionRhythm.Scheme.Across(meter.Phrases).Letters,
                     harmonicRhythm,
                     LinePattern.DrawApproaches(Stream(sectionId, SectionStream.CounterLeading), CounterLayers.Leading, harmonicRhythm.Count),
                     [..Enumerable.Repeat(ChordArrival.Free, harmonicRhythm.Count)],
@@ -665,13 +665,13 @@ internal sealed class SectionGenerator
             var melody = new SectionLine(
                 trackNumber,
                 MelodyLayers.Line,
-                LinePattern.Answer(bars.Timeline, trackNumber, MelodyLayers.Line, answerSeed, amount, meter.BarDuration),
+                LinePattern.Answer(bars.Timeline, trackNumber, MelodyLayers.Line, answerSeed, amount, meter),
                 rhythmKeys =>
                 {
                     using var pause = StateTrace.Pause();
-                    return LinePattern.Answer(BuildBars(rhythmKeys).Timeline, trackNumber, MelodyLayers.Line, answerSeed, amount, meter.BarDuration);
+                    return LinePattern.Answer(BuildBars(rhythmKeys).Timeline, trackNumber, MelodyLayers.Line, answerSeed, amount, meter);
                 },
-                sectionRhythm.Scheme.Letters,
+                sectionRhythm.Scheme.Across(meter.Phrases).Letters,
                 harmonicRhythm,
                 LinePattern.DrawApproaches(leadingContext, leading, harmonicRhythm.Count),
                 [..Enumerable.Repeat(ChordArrival.Free, harmonicRhythm.Count)],
