@@ -16,4 +16,20 @@ public sealed class SongSettingsTest(Site site)
         await Assert.That(over).IsEmpty();
         await Assert.That(page.Errors).IsEmpty();
     }
+
+    [Test]
+    public async Task EveryRowsName_AndItsControl_LineUp_TheGenresToo()
+    {
+        await using var page = await SongPage.Open(site);
+        await page.FirstSong();
+        await page.Page.Locator("#settings-panel summary").ClickAsync();
+        await page.Until(async () => await page.Page.Locator("select[aria-label='Genre']").IsEnabledAsync(), "the genres listed");
+
+        // every row's name and control as far in as every other's, the genre's, which has no checkbox, among them
+        var lefts = await page.Page.EvaluateAsync<double[][]>(
+            "() => [...document.querySelectorAll('.setting')].filter(x => x.offsetParent).map(x => [x.querySelector('.setting-name').getBoundingClientRect().left, x.querySelector('.setting-slider').getBoundingClientRect().left])");
+        await Assert.That(lefts.Select(x => Math.Round(x[0])).Distinct().Count()).IsEqualTo(1);
+        await Assert.That(lefts.Select(x => Math.Round(x[1])).Distinct().Count()).IsEqualTo(1);
+        await Assert.That(page.Errors).IsEmpty();
+    }
 }

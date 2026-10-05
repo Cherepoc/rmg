@@ -1,5 +1,5 @@
 import { endsOf, ownOf, written } from "./genres.js";
-import { byMiddle, COLOURS, drawShares, ENDS, mark, rangeOf, svg } from "./genre-charts.js";
+import { byMiddle, COLOURS, drawShares, ENDS, isTime, mark, numberInWords, numberOfWords, rangeOf, svg, unitInWords } from "./genre-charts.js";
 
 /**
  *     The genre editor's window over it for a choice, where the genre changes it: whether the genre overrides it, the
@@ -110,7 +110,12 @@ export function createGenreTune() {
         done?.(overridden ? structuredClone(amounts) : null);
         dialog.close();
     });
-    fields.forEach(({ input }, end) => input.addEventListener("change", () => setEnd(end, Number(input.value))));
+    // a time typed as minutes and seconds, or minutes alone; what is no number put back as it was
+    fields.forEach(({ input }, end) => input.addEventListener("change", () => {
+        const value = numberOfWords(choice, selected, input.value);
+        if (Number.isFinite(value)) setEnd(end, value);
+        else render();
+    }));
 
     // the list of the options to pick, open under its button, closed by a click elsewhere or Escape, the window kept open
     pickOpen.addEventListener("click", () => showPicks(popup.hidden));
@@ -185,7 +190,7 @@ export function createGenreTune() {
             handle.setAttribute("aria-valuenow", String(value));
         }
         chart.querySelector(".tune-line.chosen")?.setAttribute("d", `M${points.map((value, i) => `${(i * width) / 2},${yOf(value).toFixed(1)}`).join(" L")}`);
-        fields.forEach(({ input }, end) => (input.value = String(points[end])));
+        fields.forEach(({ input }, end) => (input.value = numberInWords(choice, selected, points[end])));
     }
 
     function changed() {
@@ -294,7 +299,7 @@ export function createGenreTune() {
         pick.hidden = choice.kind === "range";
         renderPicks();
         for (const row of list.children) {
-            row.querySelector(".tune-values").textContent = endsOf(amounts[row.dataset.option]).join(" · ");
+            row.querySelector(".tune-values").textContent = endsOf(amounts[row.dataset.option]).map((x) => numberInWords(choice, row.dataset.option, x)).join(" · ");
             if (row.dataset.option === selected) row.setAttribute("aria-current", "true");
             else row.removeAttribute("aria-current");
         }
@@ -306,13 +311,14 @@ export function createGenreTune() {
         const [least, most] = rangeOf(choice, selected);
         const option = optionOf(selected);
         const points = endsOf(amounts[selected]);
-        heading.textContent = isPool() ? `${option.label}: how common it is, against the others` : `${choice.label}: ${option.label}`;
-        axisHigh.textContent = String(most);
-        axisLow.textContent = String(least);
+        heading.textContent = isPool() ? `${option.label}: how common it is, against the others` : `${choice.label}: ${option.label}${unitInWords(choice, selected)}`;
+        axisHigh.textContent = numberInWords(choice, selected, most);
+        axisLow.textContent = numberInWords(choice, selected, least);
         fields.forEach(({ input }, end) => {
+            input.type = isTime(choice, selected) ? "text" : "number";
             input.min = String(least);
             input.max = String(most);
-            input.value = String(points[end]);
+            input.value = numberInWords(choice, selected, points[end]);
             input.setAttribute("aria-label", `${option.label}, ${ENDS[end].toLowerCase()}`);
         });
         // an attribute, which an svg has no property of

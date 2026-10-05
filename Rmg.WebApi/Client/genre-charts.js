@@ -27,8 +27,32 @@ export function rangeOf(choice, option) {
 
 /** A range's ends in words by its unit: a length's as minutes and seconds, "1:33–3:28", another's as "110–150 bpm". */
 export function rangeInWords(choice, from, to) {
-    const time = (seconds) => `${Math.floor(Math.round(seconds) / 60)}:${String(Math.round(seconds) % 60).padStart(2, "0")}`;
     return choice.scale.unit === "seconds" ? `${time(from)}–${time(to)}` : `${Math.round(from)}–${Math.round(to)} ${choice.scale.unit}`;
+}
+
+/** Seconds as minutes and seconds, "3:30". */
+const time = (seconds) => `${Math.floor(Math.round(seconds) / 60)}:${String(Math.round(seconds) % 60).padStart(2, "0")}`;
+
+/** Whether an option's numbers are times, a length's ends, shown and given as minutes and seconds. */
+export const isTime = (choice, option) => choice.kind === "range" && option !== "lean" && choice.scale.unit === "seconds";
+
+/** An option's number as the page shows it: a time as minutes and seconds, "3:30", another as it is. */
+export function numberInWords(choice, option, number) {
+    return isTime(choice, option) ? time(number) : String(number);
+}
+
+/** An option's number of what was typed: a time as minutes and seconds, "3:30", or minutes alone, "3.5"; NaN for no number. */
+export function numberOfWords(choice, option, text) {
+    if (!isTime(choice, option)) return text.trim() === "" ? NaN : Number(text);
+    const [minutes, seconds, more] = text.trim().split(":");
+    if (more !== undefined || minutes === "") return NaN;
+    return seconds === undefined ? Number(minutes) * 60 : Number(minutes) * 60 + Number(seconds);
+}
+
+/** What a range's ends count, said after its name in a window's heading; nothing for a lean or another kind. */
+export function unitInWords(choice, option) {
+    if (choice.kind !== "range" || option === "lean") return "";
+    return choice.scale.unit === "seconds" ? ", in minutes and seconds" : choice.scale.unit === "bpm" ? ", in beats a minute" : `, in ${choice.scale.unit}`;
 }
 
 /** An option's amounts at the plainest point, the middle one and the last. */

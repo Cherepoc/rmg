@@ -253,6 +253,35 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task ALength_IsShownAndGivenInMinutesAndSeconds_ATempoInBeatsAMinute()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var time = await Section(dialog, "Time and feel");
+
+        var tune = await Change(time, "length");
+        await Assert.That(await tune.Locator("h3").First.TextContentAsync()).IsEqualTo("Length: From, in minutes and seconds");
+        await Assert.That(await tune.Locator(".tune-row[data-option='from'] .tune-values").TextContentAsync()).IsEqualTo("1:33 · 1:44 · 2:32");
+        var plainest = tune.Locator("input[aria-label='From, plainest']");
+        await Assert.That(await plainest.InputValueAsync()).IsEqualTo("1:33");
+        // typed as minutes and seconds, or minutes alone, and what is no time put back
+        await plainest.FillAsync("3:30");
+        await plainest.PressAsync("Tab");
+        await Assert.That(await tune.Locator(".tune-row[data-option='from'] .tune-values").TextContentAsync()).IsEqualTo("3:30 · 1:44 · 2:32");
+        await plainest.FillAsync("4");
+        await plainest.PressAsync("Tab");
+        await Assert.That(await plainest.InputValueAsync()).IsEqualTo("4:00");
+        await plainest.FillAsync("soon");
+        await plainest.PressAsync("Tab");
+        await Assert.That(await plainest.InputValueAsync()).IsEqualTo("4:00");
+        await Done(tune);
+
+        tune = await Change(time, "tempo");
+        await Assert.That(await tune.Locator("h3").First.TextContentAsync()).IsEqualTo("Tempo: From, in beats a minute");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task TheEditor_AndTheWindowOverIt_NeverScrollSideways()
     {
         await using var page = await SongPage.Open(site, "?song=1");
