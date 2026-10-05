@@ -107,6 +107,26 @@ public static class GenreChoices
     /// </summary>
     public static GenreChoice Dynamics { get; } = Values("dynamics", "Dynamics", [("energy", "How loud and busy"), ("contrast", "How much its sections differ")]);
 
+    /// <summary>How many phrases of four bars a section's pattern may have, its progression's cycle: one, as every song's has, to four.</summary>
+    public static ImmutableArray<int> PhraseCounts { get; } = [1, 2, 3, 4];
+
+    /// <summary>A count of phrases as a genre names it: by the bars they make, "eightBars".</summary>
+    public static string PhrasesName(int phrases) => phrases switch
+    {
+        1 => "fourBars",
+        2 => "eightBars",
+        3 => "twelveBars",
+        4 => "sixteenBars",
+        _ => throw new ArgumentOutOfRangeException(nameof(phrases), phrases, "A pattern has one to four phrases.")
+    };
+
+    /// <summary>
+    ///     How long a section's pattern is, its progression's cycle, in phrases of four bars: four bars, as the songs' are,
+    ///     eight, twelve, as the blues has, or sixteen (<see cref="Composition.Meter.Phrases" />).
+    /// </summary>
+    public static GenreChoice Phrases { get; } = Pool("phrases", "Section's pattern",
+        PhraseCounts.Select(x => (PhrasesName(x), $"{x * Composition.Meter.PhraseBarCount} bars", x == 1 ? new ByConvention(1, 1, 1) : default)));
+
     /// <summary>Whether a song takes one of the forms songs are written in, or one of its own (<see cref="SongForms" />).</summary>
     public static GenreChoice FormChances { get; } = Chances("formChances", "Form or its own", [("forms", "One of the forms", SongForms.OwnFormChance)]);
 
@@ -253,7 +273,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, Effects, StrongEffect, Pan, FormChances, Form, Dynamics,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, Effects, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

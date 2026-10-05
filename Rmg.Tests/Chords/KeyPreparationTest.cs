@@ -27,9 +27,12 @@ public sealed class KeyPreparationTest
     private static SongOverrides Scale(double scale) => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Scale, scale).Add(Facet.Form, 0.5));
 
     [Test]
-    public async Task EveryChordOfAChain_LeadsToTheNext_ByItsLink_OneLinkAChain()
+    [Arguments(1)]
+    [Arguments(3)]
+    public async Task EveryChordOfAChain_LeadsToTheNext_ByItsLink_OneLinkAChain(int phrases)
     {
-        var chains = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Links(TestCorpus.Get(seed, Scale(1)))).SelectMany(x => x).ToArray();
+        var overrides = phrases == 1 ? Scale(1) : Scale(1) with { Genre = TestCorpus.PhrasesOnly(phrases) };
+        var chains = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Links(TestCorpus.Get(seed, overrides))).SelectMany(x => x).ToArray();
 
         await Assert.That(chains.Length).IsGreaterThan(20);
         // one link a chain, its intervals as its section's scale has them: the leading tone's a whole step in a minor

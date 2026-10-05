@@ -239,7 +239,7 @@ internal sealed class SectionGenerator
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
-        var plays = DrawPlays(sectionId, plan.Role, plan.PlaysLean);
+        var plays = DrawPlays(sectionId, plan.Role, plan.PlaysLean, meter.Phrases);
         StateTrace.Record(TracePoints.SectionLength, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{plays}", plays);
         var timeline = KeepRenderState([..drums.Select(x => x.Timeline), ..pitched.Select(x => x.Bars.Timeline)], barStateTimelineMap, meter).Repeat(plays);
         // the parts the section leaves out the first time it plays, from a sequence of its own, the likelier the less energy
@@ -297,9 +297,14 @@ internal sealed class SectionGenerator
     ///     unconventionality, the same before the section is made as when it is (<see cref="SectionLength" />).
     /// </summary>
     /// <param name="lean">How far the song's length leans the plays (<see cref="SectionLength.Draw" />).</param>
-    public int DrawPlays(int sectionId, SectionRole role, double lean)
+    /// <param name="phrases">
+    ///     How many phrases the section's pattern has: its plays drawn in phrases, a four-bar pattern's, and played as
+    ///     near in its longer pattern, once at least, so that a longer pattern plays as long a section.
+    /// </param>
+    public int DrawPlays(int sectionId, SectionRole role, double lean, int phrases)
     {
-        return SectionLength.Draw(Stream(sectionId, SectionStream.Length), Facets(sectionId)[Facet.Form], role, lean);
+        var drawn = SectionLength.Draw(Stream(sectionId, SectionStream.Length), Facets(sectionId)[Facet.Form], role, lean);
+        return phrases == 1 ? drawn : Math.Max(1, (int)Math.Round(drawn / (double)phrases));
     }
 
     private Unconventionality Facets(int sectionId)

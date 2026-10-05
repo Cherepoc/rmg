@@ -88,7 +88,7 @@ public sealed class RoleChordTest
                 entries++;
                 // the note's place in the pattern: its bar's start and its place in the bar
                 var rhythm = rhythms[entry.Section];
-                var chord = rhythm.IndexAt(entry.Bar % Meter.PhraseBarCount * rhythm.Meter.BarDuration + entry.Position);
+                var chord = rhythm.IndexAt(entry.Bar % rhythm.Meter.PatternBarCount * rhythm.Meter.BarDuration + entry.Position);
                 var hasRoleChord = !entry.StateMap.GetStateValue(CompositionStateKinds.RoleChord).IsEmpty;
                 await Assert.That(hasRoleChord).IsEqualTo(chord == 0 || chord == rhythm.Count - 1).Because($"bar {entry.Bar}, chord {chord} of {rhythm.Count}");
             }

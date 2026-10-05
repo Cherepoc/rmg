@@ -27,11 +27,14 @@ public sealed class SongGeneratorChordProgressionTest
     }
 
     [Test]
-    public async Task PitchedTracks_ShareTheChordShapeAtTheSameTime()
+    [Arguments(1)]
+    [Arguments(3)]
+    public async Task PitchedTracks_ShareTheChordShapeAtTheSameTime(int phrases)
     {
         for (var seed = 0; seed < 8; seed++)
         {
-            var song = TestCorpus.Get(seed).Song;
+            // a section's pattern of a phrase, as every song's, or of three, the blues' twelve bars
+            var song = (phrases == 1 ? TestCorpus.Get(seed) : TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(phrases)))).Song;
             // a note with no shape, as a bass's walk into a section, plays its step, not a chord
             foreach (var notesAtPosition in GetPitchedNotes(song).Where(x => x.Shape != "").GroupBy(x => x.Position))
             {
@@ -76,14 +79,20 @@ public sealed class SongGeneratorChordProgressionTest
     }
 
     [Test]
-    public async Task DefaultSteps_ChangeTheShapeOnlyAtBarLinesAndChordChanges()
+    [Arguments(1)]
+    [Arguments(3)]
+    public async Task DefaultSteps_ChangeTheShapeOnlyAtBarLinesAndChordChanges(int phrases)
     {
         for (var seed = 0; seed < 8; seed++)
         {
-            var corpusSong = TestCorpus.Get(seed);
+            var corpusSong = phrases == 1 ? TestCorpus.Get(seed) : TestCorpus.Get(seed, new SongOverrides(Genre: TestCorpus.PhrasesOnly(phrases)));
             var changes = corpusSong.ChordChanges;
             int Chord(double position) => Array.FindLastIndex(changes, x => x <= position + 1e-9);
-            foreach (var bar in GetPitchedNotes(corpusSong.Song).Where(x => x.Shape != "").GroupBy(x => (x.TrackNumber, Bar: Math.Floor(x.Position / corpusSong.Map.Meter.BarDuration), Chord: Chord(x.Position))))
+            // counted in the bars of the note's section, whose meter may be its own
+            double BarOf(double position) => corpusSong.Map.SectionAt(position) is { } span
+                ? span.Start * 1000 + Math.Floor((position - span.Start) / span.Meter.BarDuration)
+                : Math.Floor(position / corpusSong.Map.Meter.BarDuration);
+            foreach (var bar in GetPitchedNotes(corpusSong.Song).Where(x => x.Shape != "").GroupBy(x => (x.TrackNumber, Bar: BarOf(x.Position), Chord: Chord(x.Position))))
             {
                 await Assert.That(bar.Select(x => x.Shape).Distinct().Count())
                     .IsEqualTo(1)

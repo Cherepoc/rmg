@@ -47,6 +47,10 @@ internal static class TestCorpus
     /// <summary>The song of the seed with what the overrides set in place of its own draws, made afresh every time.</summary>
     public static CorpusSong Get(int seed, SongOverrides overrides) => Generate(seed, overrides);
 
+    /// <summary>A genre of every section's pattern so many phrases long, and nothing else, as a long pattern's test asks songs in.</summary>
+    public static Genre PhrasesOnly(int phrases) => new(ImmutableDictionary<string, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
+        .Add(GenreChoices.Phrases.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add(GenreChoices.PhrasesName(phrases), new(1, 1, 1))));
+
     // a flow of execution with nothing of the caller's, no trace among it, captured on a thread of its own
     private static readonly ExecutionContext CleanContext = CaptureClean();
 

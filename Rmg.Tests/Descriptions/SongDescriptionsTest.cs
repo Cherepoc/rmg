@@ -137,7 +137,9 @@ public sealed class SongDescriptionsTest
 
                 bursts++;
                 await Assert.That(burst.Section).IsEqualTo(section.Place);
-                await Assert.That(burst.Parts.All(x => section.Parts.Contains(x))).IsTrue();
+                // its parts those that play, or the drums' fill out of a breakdown, whose drums rest, into the next section
+                await Assert.That(burst.Parts.All(x => section.Parts.Contains(x) || x == "drums" && section.Drums == "resting")).IsTrue()
+                    .Because($"seed {song.Seed}, section {section.Place}: burst {string.Join(", ", burst.Parts)}, playing {string.Join(", ", section.Parts)}");
                 await Assert.That(burst.NotesPerSecond).IsLessThanOrEqualTo(description.Fastest!.NotesPerSecond);
             }
         }

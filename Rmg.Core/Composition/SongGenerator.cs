@@ -200,6 +200,13 @@ public static class SongGenerator
             structure.Roles,
             genre
         );
+        // a section's pattern several phrases where a genre has longer progressions, each section's from a stream of its own
+        if (genre.Pool<int>(GenreChoices.Phrases, GenreChoices.PhrasesName) is { } phrasePool)
+            sectionMeters = sectionMeters.ToImmutableDictionary(x => x.Key, x => x.Value with
+            {
+                Phrases = new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SectionPhrases), x.Key))
+                    .Pick(ByConvention.Weigh(GenreChoices.PhraseCounts.Select(p => (p, p == 1 ? new ByConvention(1, 1, 1) : default)), songUnconventionality[Facet.Form], phrasePool))
+            });
         StateTrace.Record(TracePoints.SectionMeter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", sectionMeters.Select(x => $"{x.Key} {x.Value}")), sectionMeters);
 
         // every section's drums, drawn before the sections are made, every drum of the song's groove in one of them at
@@ -222,7 +229,7 @@ public static class SongGenerator
         // a length given leans every section's plays alike, the lean whose song comes nearest it, the ending's plays too
         var playsLean = length?.NearestLean(lean =>
         {
-            var plays = sectionIds.Distinct().ToDictionary(id => id, id => sectionGenerator.DrawPlays(id, structure.Roles[id], lean));
+            var plays = sectionIds.Distinct().ToDictionary(id => id, id => sectionGenerator.DrawPlays(id, structure.Roles[id], lean, sectionMeters[id].Phrases));
             var fades = Fading(plan.Ending, plays[sectionIds[^1]]);
             var appearances = sectionIds.Length + (Repeats(lastRepeatDrawn, fades) ? 1 : 0);
             return SecondsOf(sectionIds.Sum(id => plays[id] * sectionMeters[id].PatternDuration)
@@ -688,5 +695,6 @@ internal enum SongStream
     SoloistSolo = 64,
     DrumSoloFeet = 65,
     DrumSoloPlayers = 66,
-    GenreLength = 67
+    GenreLength = 67,
+    SectionPhrases = 68
 }
