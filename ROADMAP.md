@@ -198,9 +198,12 @@ Each item with its plan, and what it waits for.
 - **The chords and the bass,** which follow the energy weakly, should choruses not sound fuller; the melody sings a
   section's energy over the song's in its range's place (`MelodyLayers.EnergyRegister`, `CompositionStateKinds.LineLift`),
   the chorus 2.6 semitones over the verse, higher in 61% of the songs; a bigger lift leaps into the section more.
-- **A melody written as a hook** (P2): a melody leaning to a shorter motif repeated and a plainer rhythm, through the
-  echo and rhythm layers it has, by a section's role (a chorus) and by a genre's value (a beat's whole song, its sample);
-  measured by its repeated notes against a verse's, too much of it mechanical.
+- **A melody written as a hook** (done): a section's melody on a hook, its repeated bars singing their letter's first
+  bar's notes where they fit their chords, a landing as it lands (`LinePattern.Hook`), by its role (a chorus 60% at the
+  plain end and the middle, 30% at the wild, `MelodyLayers.HookChanceOf`) and every section's by a genre's
+  (`GenreChoices.Hook`, Hip-hop 80%, Electronic 70%). Of a hooked section's repeated bars' notes at their first bar's
+  places, 50% sung as it (13% unhooked); whole bars alike 7% (0), a strong beat's note changing with its chord. Its
+  phrase schemes were not the lack: 82 to 100% of the phrases repeat their bars already.
 - **The band's devices** (P3, each an edit after assembly among the stages): stop-time breaks first, the band hitting
   once a bar under a line that goes on, the blues' and rock's; then a push or anticipation the whole band plays, call and
   response between parts, a backing figure that recurs through the song.
@@ -484,8 +487,8 @@ a link carries. What is left:
   6. Builds and drops: a section before a bigger one building (the snare and the hats thickening, the sweep rising),
      the band out a beat or a bar before the drop; the lift cues', the runs' and a stopped ending's pieces, placed anew.
   7. Electronic split into House, Techno and Synthwave (P3), once the steps above tell them apart.
-  The melody as a looped hook is a chorus written as a hook generalised (see *Form and sections*): one mechanism, by a
-  section's role and by a genre's value.
+  The melody as a looped hook: done, a melody written as a hook (see *Form and sections*), by a section's role and a
+  genre's value.
 - **What a genre cannot reach yet** (P2, a plan in steps): most of it a table the songs already draw by `ByConvention`,
   which a genre overrides as it does the scale, a choice, its lookup at the draw, the presets and a report each.
   1. Done: the lines' scales a genre's pool (`GenreChoices.LineScale`), the melody's and the riff's: pentatonic or

@@ -53,8 +53,24 @@ public sealed class GenreIdiomsReportTest
         var arrivals = song.ChordChanges.Select(c => (Change: c, Index: Array.FindIndex(bass, x => Math.Abs(x.Position - c) < 1e-6))).Where(x => x.Index > 0).ToArray();
         bool OnRoot(int index, double change) => (bass[index].Value.Pitches.Min() - Realizer.GetChord(stateMaps.GetEffectiveStateMapAt(change)).Chord.GetPitch(0)) % 12 == 0;
 
+        // the sections' phrases of two different bars at most, a chorus's and a verse's
+        var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
+        double Repeating(SectionRole role)
+        {
+            var schemes = song.Trace.Where(x => x.Point == TracePoints.PhraseScheme && structure.Roles.GetValueOrDefault(x.Section) == role).Select(x => (PhraseScheme)x.Value!).ToArray();
+            return schemes.Length > 0 ? schemes.Count(x => x.PatternCount <= 2) / (double)schemes.Length : double.NaN;
+        }
+
+        double RepeatedIn(SectionRole role)
+        {
+            var bars = played.Where(x => map.SectionAt(x.Start) is { } span && structure.Roles.GetValueOrDefault(span.SectionId) == role).ToArray();
+            return bars.Length > 0 ? bars.Count(x => BarOf(x.Start, x.BarDuration) == BarOf(x.Start - x.BarDuration, x.BarDuration)) / (double)bars.Length : double.NaN;
+        }
+
         return new Dictionary<string, double>
         {
+            ["chorus phrases of two bars at most"] = Repeating(SectionRole.Chorus),
+            ["verse phrases of two bars at most"] = Repeating(SectionRole.Verse),
             ["chords in 4 bars"] = phrases > 0 ? changes / phrases : double.NaN,
             ["sections sharing a progression"] = progressions.Length > 1 ? progressions.Skip(1).Count(x => x == progressions[0]) / (double)(progressions.Length - 1) : double.NaN,
             ["fills a minute"] = song.Trace.Count(x => x.Point == TracePoints.FillDecision && ((FillDecision)x.Value!).Span > 0) / minutes,
@@ -62,6 +78,8 @@ public sealed class GenreIdiomsReportTest
             ["kick on 1"] = bars.Length > 0 ? bars.Count(x => HitsAt(kicks, x)) / (double)bars.Length : double.NaN,
             ["kick on every beat"] = bars.Length > 0 ? bars.Count(x => Enumerable.Range(0, 4).All(b => HitsAt(kicks, x + b))) / (double)bars.Length : double.NaN,
             ["snare on 2 and 4"] = bars.Length > 0 ? bars.Count(x => HitsAt(snares, x + 1) && HitsAt(snares, x + 3)) / (double)bars.Length : double.NaN,
+            ["chorus melody bars repeated"] = RepeatedIn(SectionRole.Chorus),
+            ["verse melody bars repeated"] = RepeatedIn(SectionRole.Verse),
             ["melody bars repeated"] = played.Length > 0 ? played.Count(x => BarOf(x.Start, x.BarDuration) == BarOf(x.Start - x.BarDuration, x.BarDuration)) / (double)played.Length : double.NaN,
             ["melody pentatonic or blues"] = lineScales.Length > 0 ? lineScales.Count(x => x is LineScale.Pentatonic or LineScale.Blues) / (double)lineScales.Length : double.NaN,
             ["melody mean move"] = moves.Length > 0 ? moves.Average() : double.NaN,

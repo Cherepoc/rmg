@@ -175,6 +175,13 @@ internal static class MelodyLayers
         return [..Enumerable.Range(0, Meter.PhraseBarCount).Select(bar => PeakRegister - slope * Math.Abs(bar % period - peak % period))];
     }
 
+    /// <summary>
+    ///     The chance a section's melody is on a hook, its repeated bars singing their first's notes (<c>LinePattern.Hook</c>),
+    ///     by its role: a chorus's, a convention, as likely in the plainest songs as in the middle and less at the wild
+    ///     end; another section's never, but by a genre's (<see cref="GenreChoices.Hook" />).
+    /// </summary>
+    public static ByConvention HookChanceOf(SectionRole role) => role == SectionRole.Chorus ? new ByConvention(0.6, 0.6, 0.3) : new ByConvention(0, 0, 0);
+
     /// <summary>A layer's shift of the stepwiseness, up to the given size either way.</summary>
     public static Func<IGenerationContext, double> CreateGenerator(double size)
     {

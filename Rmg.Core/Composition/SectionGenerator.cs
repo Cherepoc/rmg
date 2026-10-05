@@ -233,6 +233,7 @@ internal sealed class SectionGenerator
 
         // every track follows the section's phrase scheme, so they repeat their bars in the same places
         var scheme = PhraseSchemes.Pick(context, facets[Facet.Form]);
+        StateTrace.Record(TracePoints.PhraseScheme, SectionTrace, sectionId, 0, StateMap.Default, 0, scheme.ToString(), scheme);
         var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context, tilt), tilt, facets);
 
         // the strokes the section changes from the song's, and how its drums play its bars, each from a sequence of its own
@@ -258,7 +259,10 @@ internal sealed class SectionGenerator
         StateTrace.Record(TracePoints.TimeFeel, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{timeFeel}", timeFeel);
         // the drums from a sequence of their own, so that the pitched tracks are the same whichever drums the song plays
         var drums = GenerateDrums(Stream(sectionId, SectionStream.Drums), sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads.ToImmutable(), sectionRoles, sectionStrokes.ToImmutable(), barDrums, barStateTimelineMap, sectionRhythm, timeFeel, meter).ToArray();
-        var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter).ToArray();
+        // its melody on a hook now and then, a chorus by its role or every section by a genre's, from a sequence of its own
+        var hooks = Stream(sectionId, SectionStream.Hook).TestProbability(MelodyLayers.HookChanceOf(plan.Role).At(facets[Facet.Melody], _genre.Chance(GenreChoices.Hook, "sections")));
+        StateTrace.Record(TracePoints.MelodyHook, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{hooks}", hooks);
+        var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
         var plays = DrawPlays(sectionId, plan.Role, plan.PlaysLean, meter.Phrases);
@@ -511,7 +515,8 @@ internal sealed class SectionGenerator
         StateTimelineMap barStateTimelineMap,
         HarmonicRhythm harmonicRhythm,
         SectionRhythm sectionRhythm,
-        Meter meter
+        Meter meter,
+        bool hooks
     )
     {
         foreach (var trackNumber in _tracks.NonGroupedTrackNumbers)
@@ -615,7 +620,8 @@ internal sealed class SectionGenerator
                     [..harmonicRhythm.Changes.Select(Approach)],
                     [..harmonicRhythm.Changes.Select(Landing)],
                     BassLeadingLayers.Line.RegisterFreedom,
-                    StreamSeed(sectionId, SectionStream.BassImprovisation)
+                    StreamSeed(sectionId, SectionStream.BassImprovisation),
+                    false
                 );
                 yield return (trackNumber, bars with { Timeline = bass.Appear(0, 0).Trim(meter.PatternDuration) }, bass);
                 continue;
@@ -639,7 +645,8 @@ internal sealed class SectionGenerator
                     LinePattern.DrawApproaches(Stream(sectionId, SectionStream.RiffLeading), RiffLayers.Leading, harmonicRhythm.Count),
                     [..Enumerable.Repeat(ChordArrival.Free, harmonicRhythm.Count)],
                     RiffLayers.Line.RegisterFreedom,
-                    StreamSeed(sectionId, SectionStream.RiffImprovisation)
+                    StreamSeed(sectionId, SectionStream.RiffImprovisation),
+                    false
                 );
                 yield return (trackNumber, bars with { Timeline = riff.Appear(0, 0).Trim(meter.PatternDuration) }, riff);
                 continue;
@@ -663,7 +670,8 @@ internal sealed class SectionGenerator
                     LinePattern.DrawApproaches(Stream(sectionId, SectionStream.CounterLeading), CounterLayers.Leading, harmonicRhythm.Count),
                     [..Enumerable.Repeat(ChordArrival.Free, harmonicRhythm.Count)],
                     CounterLayers.Line.RegisterFreedom,
-                    StreamSeed(sectionId, SectionStream.CounterImprovisation)
+                    StreamSeed(sectionId, SectionStream.CounterImprovisation),
+                    false
                 );
                 yield return (trackNumber, bars with { Timeline = counter.Appear(0, 0).Trim(meter.PatternDuration) }, counter);
                 continue;
@@ -703,7 +711,8 @@ internal sealed class SectionGenerator
                 LinePattern.DrawApproaches(leadingContext, leading, harmonicRhythm.Count),
                 [..Enumerable.Repeat(ChordArrival.Free, harmonicRhythm.Count)],
                 freedom,
-                StreamSeed(sectionId, SectionStream.MelodyImprovisation)
+                StreamSeed(sectionId, SectionStream.MelodyImprovisation),
+                hooks
             );
             StateTrace.Record(TracePoints.MelodyAnswer, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{amount:F2}", amount);
             yield return (trackNumber, bars with { Timeline = melody.Appear(0, 0).Trim(meter.PatternDuration) }, melody);
@@ -971,5 +980,6 @@ internal enum SectionStream
     Drums = 30,
     ChordScales = 31,
     DominantChords = 32,
-    Loop = 33
+    Loop = 33,
+    Hook = 34
 }

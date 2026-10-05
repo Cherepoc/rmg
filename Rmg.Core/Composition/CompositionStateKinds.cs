@@ -38,6 +38,9 @@ internal static class CompositionStateKinds
     // how far above or below the middle of its range a line aims in a bar, in semitones, for the phrase's shape
     public static StateKind<double> LineRegister { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineRegister", StateScope.Render);
 
+    // a hooked line's bar's letter in its phrase's scheme, from 1, where its section hooks (LinePattern.Hook); 0 for none
+    public static StateKind<int> LineHookBar { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineHookBar", StateScope.Render);
+
     // how far a section moves a line's range up or down its instrument's, with where it aims, in semitones, such as a
     // chorus's melody over its verse's (MelodyLayers.EnergyRegister)
     public static StateKind<double> LineLift { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineLift", StateScope.Render);

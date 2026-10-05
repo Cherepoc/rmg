@@ -135,6 +135,12 @@ internal static class TracePoints
     /// </summary>
     public const string SongStage = "Song stage";
 
+    /// <summary>Whether a section's melody is on a hook, its repeated bars singing their first's notes (a <c>bool</c>).</summary>
+    public const string MelodyHook = "Melody hook";
+
+    /// <summary>A section's phrase scheme, which bars repeat which (a <see cref="Composition.PhraseScheme" />).</summary>
+    public const string PhraseScheme = "Phrase scheme";
+
     /// <summary>A section's chords' own scales, in the progression's order (<see cref="ChordScale" />).</summary>
     public const string ChordScales = "Chord scales";
 

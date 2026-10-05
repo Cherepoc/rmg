@@ -115,6 +115,7 @@
       "levels": { "melody": 30, "bass": 70, "pad": 35, "drum": 90 },
       "grooveHold": { "held": 90 },
       "fills": { "amount": 10 },
+      "hook": { "sections": [70, 70, 50] },
       "rhythm": {
         "chords": { "repetition": 82 },
         "bass": { "repetition": 92, "fullness": 69 },
@@ -153,6 +154,7 @@
       "levels": { "melody": 25, "chords": 35, "bass": 70, "drum": 95 },
       "grooveHold": { "held": 85 },
       "fills": { "amount": 15 },
+      "hook": { "sections": [80, 80, 60] },
       "rhythm": {
         "melody": { "busyness": 38 },
         "bass": { "repetition": 100, "fullness": 38 },

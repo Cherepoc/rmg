@@ -87,6 +87,9 @@ public static class GenreChoices
     /// <summary>The chance a section plays the song's first section's chords, the arrangement telling them apart, as a beat's loop does; the songs never.</summary>
     public static GenreChoice Loop { get; } = Chances("loop", "Loop", [("sections", "Sections on the first's chords", SectionGenerator.Loop)]);
 
+    /// <summary>The chance a section's melody is on a hook, every section's, as a beat's sample is; the songs' a chorus's alone (<see cref="MelodyLayers.HookChanceOf" />).</summary>
+    public static GenreChoice Hook { get; } = Chances("hook", "Hook", [("sections", "Sections on a hook", new Probabilities.ByConvention(0, 0, 0))]);
+
     /// <summary>How long a section's chords last (<see cref="Composition.HarmonicRhythm.Spans" />): half a bar, a bar or two bars, the faster the more energy.</summary>
     public static GenreChoice HarmonicRhythm { get; } = Pool("harmonicRhythm", "Chords' pace",
         Composition.HarmonicRhythm.Spans.Select(x => (Composition.HarmonicRhythm.NameOf(x.Span.Value), x.Span.Value switch
@@ -348,7 +351,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Loop, LineScale, Bass, BassLanding, Effects, Levels, GrooveHold, Fills, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Loop, LineScale, Bass, BassLanding, Effects, Levels, GrooveHold, Fills, Hook, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

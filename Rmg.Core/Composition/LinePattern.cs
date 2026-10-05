@@ -113,8 +113,11 @@ internal sealed class LinePattern
             )
             .ToArray();
         // a note that lands on its chord, as the bass's first of a chord on its root, landing as it does
-        Restate(notes, map, profile, i => (i == 0 || Chord(lineNotes[i - 1]) != Chord(lineNotes[i]))
-                                          && (ChordArrival)lineNotes[i].State.GetStateValue(CompositionStateKinds.LineLanding) != ChordArrival.Free);
+        // a note that lands on its chord, as the bass's first of a chord on its root, landing as it does
+        bool Lands(int i) => (i == 0 || Chord(lineNotes[i - 1]) != Chord(lineNotes[i]))
+                             && (ChordArrival)lineNotes[i].State.GetStateValue(CompositionStateKinds.LineLanding) != ChordArrival.Free;
+        Restate(notes, map, profile, Lands);
+        Hook(notes, map, profile, Lands);
 
         for (var i = 0; i + 1 < notes.Length; i++)
         {
@@ -149,13 +152,6 @@ internal sealed class LinePattern
     private static void Restate((LineNote Note, int Rank, int Pitch)[] notes, SongMap map, LineProfile profile, Func<int, bool> lands)
     {
         var at = notes.Select((x, i) => (Position: Math.Round(x.Note.Position, 6), i)).GroupBy(x => x.Position).ToDictionary(x => x.Key, x => x.First().i);
-        bool Fits((LineNote Note, int Rank, int Pitch) note, int pitch)
-        {
-            var isStrong = note.Rank <= profile.StrongestWeakRank && note.Note.Classes.Count > 0;
-            return isStrong
-                ? note.Note.Classes.Contains(pitch.Mod(12))
-                : Enumerable.Range(0, note.Note.ScaleLength).Any(x => note.Note.Chord.GetPitch(x).Mod(12) == pitch.Mod(12));
-        }
 
         foreach (var span in map.Sections.Where(x => x.Meter.Phrases > 2))
         {
@@ -167,10 +163,50 @@ internal sealed class LinePattern
                     var position = notes[i].Note.Position;
                     if (position < start + restating * phrase - 1e-9 || position >= start + (restating + 1) * phrase - 1e-9 || lands(i))
                         continue;
-                    if (at.TryGetValue(Math.Round(position - restating * phrase, 6), out var first) && Fits(notes[i], notes[first].Pitch))
+                    if (at.TryGetValue(Math.Round(position - restating * phrase, 6), out var first) && Fits(notes[i], notes[first].Pitch, profile))
                         notes[i] = notes[i] with { Pitch = notes[first].Pitch };
                 }
         }
+    }
+
+    /// <summary>
+    ///     A hooked section's repeated bars singing their letter's first bar's notes, each where the first played it in
+    ///     its pattern, where it fits the chord there as a restated phrase's does (<see cref="Restate" />), and a landing
+    ///     as it lands: a chorus's figure coming back as a tune, where a bar's figure otherwise comes back placed anew over
+    ///     its chord.
+    /// </summary>
+    private static void Hook((LineNote Note, int Rank, int Pitch)[] notes, SongMap map, LineProfile profile, Func<int, bool> lands)
+    {
+        var at = notes.Select((x, i) => (Position: Math.Round(x.Note.Position, 6), i)).GroupBy(x => x.Position).ToDictionary(x => x.Key, x => x.First().i);
+        // every pattern's first bar of each letter, by the pattern's start
+        var firsts = new Dictionary<(double Pattern, int Letter), int>();
+        for (var i = 0; i < notes.Length; i++)
+        {
+            var letter = notes[i].Note.State.GetStateValue(CompositionStateKinds.LineHookBar);
+            if (letter == 0 || map.SectionAt(notes[i].Note.Position) is not { } span)
+                continue;
+            var position = notes[i].Note.Position;
+            var pattern = span.Start + Math.Floor((position - span.Start) / span.Meter.PatternDuration + 1e-9) * span.Meter.PatternDuration;
+            var bar = (int)Math.Floor((position - pattern) / span.Meter.BarDuration + 1e-9);
+            if (!firsts.TryGetValue((pattern, letter), out var first))
+            {
+                firsts[(pattern, letter)] = bar;
+                continue;
+            }
+            if (bar == first || lands(i))
+                continue;
+            if (at.TryGetValue(Math.Round(position - (bar - first) * span.Meter.BarDuration, 6), out var source) && Fits(notes[i], notes[source].Pitch, profile))
+                notes[i] = notes[i] with { Pitch = notes[source].Pitch };
+        }
+    }
+
+    /// <summary>Whether a pitch fits a note's chord where it plays: one of its notes on a strong beat, of its scale on another.</summary>
+    private static bool Fits((LineNote Note, int Rank, int Pitch) note, int pitch, LineProfile profile)
+    {
+        var isStrong = note.Rank <= profile.StrongestWeakRank && note.Note.Classes.Count > 0;
+        return isStrong
+            ? note.Note.Classes.Contains(pitch.Mod(12))
+            : Enumerable.Range(0, note.Note.ScaleLength).Any(x => note.Note.Chord.GetPitch(x).Mod(12) == pitch.Mod(12));
     }
 
     /// <summary>
@@ -359,7 +395,8 @@ internal sealed record SectionLine(
     ImmutableArray<ChordApproach> Approaches,
     ImmutableArray<ChordArrival> Landings,
     double RegisterFreedom,
-    ulong Seed
+    ulong Seed,
+    bool Hooks
 )
 {
     // the streams of an appearance's rhythm and of where its phrases start afresh, apart from its notes'
@@ -413,6 +450,9 @@ internal sealed record SectionLine(
                 var value = note.Value
                     .With(CompositionStateKinds.LineApproach, (int)Approaches[chord])
                     .With(CompositionStateKinds.LineLanding, (int)Landings[chord]);
+                // a hooked section's bar carries its letter, for its repeats to sing its first's notes (Hook)
+                if (Hooks)
+                    value = value.With(CompositionStateKinds.LineHookBar, Letters[(int)Math.Floor(note.Position / HarmonicRhythm.Meter.BarDuration + 1e-9) % Letters.Length] + 1);
                 var start = resets[phrase] ? PhraseStart.Afresh : PhraseStart.GoesOn;
                 return (firsts[phrase] == note.Position ? value.With(CompositionStateKinds.LinePhraseStart, (int)start) : value)
                     .ToTimelineItem(note.Position);
