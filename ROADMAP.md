@@ -280,8 +280,9 @@ a link carries. What is left:
 - **A link replacing the settings kept** (a decision): opening a shared song makes its settings this browser's own,
   so that the next song goes on in them; keeping one's own and offering a way back to them is the other way, should
   listening to shared songs ask for it.
-- **The length** (P2): a genre's length as the tempo's, a range in minutes, so that punk runs short and ambient long;
-  a range kind already.
+- **A range's axis by its scale** (P3): the window's chart of a range is linear in its numbers, so that a length's
+  from half a minute to fifteen keeps a song's few minutes low on it; its scale's own spacing, as the amounts have it,
+  should the editing ask for it.
 - **The progressions and the forms** (P2): a genre's root motions (ii–V, ♭VII–IV–I) and forms of its own, such as the
   12-bar blues, the most a genre is known by that it cannot say yet; the root motions first.
 - **A genre's description** (P2): the editor keeps a preset's sentence and lets one's own have one, exported and
