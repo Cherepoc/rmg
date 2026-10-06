@@ -18,7 +18,7 @@ public sealed class GenreTest(Site site)
         await Assert.That(await page.Page.Locator("select[aria-label='Genre']").InputValueAsync()).IsEqualTo("preset:reggae");
         // letters alone, and shorter than a key's 11, so that no key is ever an id
         var ids = await page.Page.EvaluateAsync<string[]>("() => [...document.querySelectorAll(\"select[aria-label='Genre'] option[value^='preset:']\")].map(x => x.value.slice(7))");
-        await Assert.That(ids.Length).IsEqualTo(18);
+        await Assert.That(ids.Length).IsEqualTo(24);
         await Assert.That(ids.All(x => x.All(char.IsAsciiLetter) && x.Length < 11)).IsTrue();
         await Assert.That(page.Errors).IsEmpty();
     }
