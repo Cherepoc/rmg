@@ -59,6 +59,7 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
+      "room": { "room": 100, "hall": [0, 20, 30] },
       "louderForms": { "guitars": 0 },
       "drumSounds": { "pedalHiHat": 100, "closedHiHat": 0 },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 100, "tom": [60, 60, 80], "cymbal": 80 },
@@ -270,6 +271,7 @@
     "name": "Synthwave",
     "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
     "choices": {
+      "room": { "plate": 100, "hall": [0, 30, 50] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "rootMotion": { "thirdDown": 70, "stepUp": 70, "fourthDown": 60 },
       "arpeggio": { "none": 100, "up": [80, 80, 80], "upDown": [40, 40, 50], "pairs": [0, 10, 30], "upTwoOctaves": [0, 5, 30] },
@@ -333,6 +335,7 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano, piano and pads looping, minor and Dorian, now and then a darker Phrygian or harmonic minor loop.",
     "choices": {
+      "room": { "room": 100, "plate": [0, 20, 30] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "vamp": { "sections": [10, 20, 20] },
       "phraseScheme": { "aaaa": 100, "aaab": [25, 25, 40], "aaba": [15, 15, 30], "abab": [10, 10, 30] },
@@ -514,6 +517,7 @@
     "name": "Funk",
     "description": "The hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and a muted guitar comping in 16ths, brass, sevenths and ninths, Dorian and Mixolydian, everything repeating.",
     "choices": {
+      "room": { "room": 100 },
       "vamp": { "sections": [30, 40, 40] },
       "louderForms": { "guitars": 0 },
       "pins": { "backbeat": [70, 70, 40] },
@@ -665,6 +669,7 @@
     "name": "Ambient",
     "description": "Slow, pads, strings, a choir, a harp and a celesta, chords held long, sus and add9 chords, Lydian and major, the drums rare and sparse.",
     "choices": {
+      "room": { "hall": 100, "plate": [0, 20, 40] },
       "drumPieces": { "cymbal": 100, "tom": 70, "triangle": 60, "tambourine": [10, 10, 30], "kick": [0, 0, 40], "acousticSnare": [0, 0, 40], "hiHat": [0, 10, 60], "ride": [0, 10, 40] },
       "marks": { "often": 40, "swells": 75 },
       "drumJob": { "marks": [100, 100, 40], "groove": [0, 10, 60] },
@@ -817,6 +822,7 @@
     "name": "Medieval",
     "description": "Calm and modal: recorders, flutes and a fiddle over a lute and a harp, a choir and a drone, open fifths, a second voice in fourths and fifths, 3/4 and 6/8, slow, a tambourine, a triangle and a frame drum marking the form.",
     "choices": {
+      "room": { "hall": 100, "room": [0, 20, 30] },
       "ornaments": { "graces": [0, 60, 100], "turns": [0, 30, 80], "trills": [0, 40, 90] },
       "tempo": { "from": [60, 60, 60], "to": [100, 100, 120] },
       "meter": { "3/4": 100, "6/8": 100, "4/4": [60, 60, 50], "9/8": [0, 10, 30], "5/4": [0, 0, 15] },
@@ -872,6 +878,7 @@
     "name": "Dungeon synth",
     "description": "Dark and slow: a harpsichord's ostinato under a celesta or a horn, synth strings, choirs and brass, minor and harmonic minor triads, drones and a deep reverb, a timpani and a snare's roll marking the form.",
     "choices": {
+      "room": { "hall": 100 },
       "ornaments": { "graces": [0, 20, 50], "turns": [0, 5, 20], "trills": [0, 15, 40] },
       "tempo": { "from": [60, 60, 60], "to": [90, 90, 110] },
       "meter": { "4/4": 100, "3/4": 60, "6/8": 40 },
@@ -1159,6 +1166,7 @@
     "name": "Trance",
     "description": "The kick four on the floor, the hi-hat off the beat, sawtooth arpeggios and leads over pumping pads, a rolling bass, minor, 132 to 140, long sections building to a drop.",
     "choices": {
+      "room": { "hall": 100, "plate": 50 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [132, 132, 125], "to": [140, 140, 150] },
       "meter": { "4/4": 100 },
@@ -1213,6 +1221,7 @@
     "name": "Drum and bass",
     "description": "Liquid: breakbeats at 165 to 178, a syncopated kick and the snare on 2 and 4, the hi-hat in 16ths, a deep synth bass, electric piano, piano and pads in minor sevenths, moody rather than bright, long sections and drops.",
     "choices": {
+      "room": { "hall": 70, "plate": 50 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [165, 165, 160], "to": [178, 178, 180] },
       "meter": { "4/4": 100 },
@@ -1318,6 +1327,7 @@
     "name": "Punk",
     "description": "Fast and short, distorted power chords strummed in 8ths, a picked bass driving 8ths, the drums straight and loud, major and Mixolydian, a count-in and a stop.",
     "choices": {
+      "room": { "room": 100 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [160, 160, 150], "to": [200, 200, 230] },
       "meter": { "4/4": 100 },
@@ -1419,6 +1429,7 @@
     "name": "Soul",
     "description": "An organ, a piano and horns, sevenths and ninths passing through applied dominants, a laid-back backbeat, 4/4 or a swaying 6/8, a last chorus lifted, sax solos answering the tune.",
     "choices": {
+      "room": { "plate": 100, "room": 60 },
       "tempo": { "from": [65, 65, 60], "to": [105, 105, 125] },
       "meter": { "4/4": 100, "6/8": [60, 60, 50], "3/4": [10, 10, 20] },
       "feelChances": { "swing": [40, 50, 50] },
@@ -1574,6 +1585,7 @@
     "name": "Orchestral",
     "description": "Strings, horns and woodwinds over a contrabass, a harp's arpeggios, timpani and a cymbal marking the form, minor, major and harmonic minor, long crescendos into louder sections, parts entering one by one.",
     "choices": {
+      "room": { "hall": 100 },
       "ornaments": { "graces": [0, 30, 80], "turns": [0, 25, 70], "trills": [0, 30, 80] },
       "tempo": { "from": [60, 60, 60], "to": [130, 130, 160] },
       "meter": { "4/4": 100, "3/4": 60, "6/8": 50, "5/4": [0, 10, 20], "7/8": [0, 0, 15] },

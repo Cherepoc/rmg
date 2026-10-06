@@ -188,7 +188,10 @@ public static class Render
         foreach (var section in song.Map?.Sections ?? [])
             if (!section.Meter.HasSameBar(meters[^1].Meter))
                 meters.Add((section.Start, section.Meter));
-        return new RenderedSong(song.Duration, [..meters], common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..mixed]);
+        return new RenderedSong(song.Duration, [..meters], common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..mixed])
+        {
+            Room = song.Draws?.Room
+        };
     }
 
     /// <summary>Where a track's instrument changes, a note playing another than the one before it, swung as the note is.</summary>

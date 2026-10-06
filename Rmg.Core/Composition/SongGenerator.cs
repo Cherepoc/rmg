@@ -96,9 +96,13 @@ public static class SongGenerator
         var kit = genre.Pool<int>(GenreChoices.Kit, GenreChoices.KitNameOf) is { } kits
             ? Stream(SongStream.Kit).Pick(ByConvention.Weigh(GenreChoices.Kits.Select(x => (x.Program, x.Program == 0 ? new ByConvention(1, 1, 1) : default)), songUnconventionality[Facet.Sound], kits))
             : 0;
+        // and its reverb's room, one of a genre's pool of them, the player's own where it names none, from a stream of its own
+        var room = genre.Pool<int>(GenreChoices.Room, GenreChoices.RoomNameOf) is { } rooms
+            ? Stream(SongStream.Room).Pick(ByConvention.Weigh(GenreChoices.Rooms.Select(x => (x.Macro, default(ByConvention))), songUnconventionality[Facet.Sound], rooms))
+            : (int?)null;
 
         return new Song(songTrackNoteTimelineMap.Duration, song.Meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality,
-            [..SongParts.All.Except(song.Absent)], tracks.DrumSetup, [..tracks.SongDrums.Select(DrumPieces.NameOf)], song.Scale, song.Swing, kit,
+            [..SongParts.All.Except(song.Absent)], tracks.DrumSetup, [..tracks.SongDrums.Select(DrumPieces.NameOf)], song.Scale, song.Swing, kit, room,
             [..form.Map.Sections.Select((x, i) => (song.Structure.Roles[x.SectionId], song.Solos.TryGetValue(i, out var solo) ? solo.Soloists : []))]));
     }
 
@@ -243,5 +247,6 @@ internal enum SongStream
     Stabs = 81,
     DrumMarks = 82,
     LouderForms = 83,
-    Ornaments = 84
+    Ornaments = 84,
+    Room = 85
 }

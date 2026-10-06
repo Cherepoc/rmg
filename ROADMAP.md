@@ -162,6 +162,10 @@ each from the trace; the seeds named here are ones already found.
   Trap 21% to 18%, Hip-hop 17% to 13%; Trap's lead bright 78% to 56%, Dnb's 38% to 8%; Djent major 12% to 3%
   (`MoodReportTest`). Still happy? The major chords are a minor key's own ♭III, ♭VI and ♭VII, which no preset choice
   reaches: a progression's degrees leaned, if so.
+- **A genre's room:** the reverb a small room, a hall or a plate, one per song as a Roland GS message, named by twelve
+  presets, Ambient's, Orchestral's and the dungeon's halls, Funk's, Punk's and Hip-hop's rooms, Synthwave's and Soul's
+  plates; the player's own hall elsewhere. Heard in both soundfonts' players? Its time and pre-delay a genre's too, if
+  the rooms alone are too alike.
 - **The trance gate:** a pad, the chords or the rhythm part chopped in 16ths, sounding for 0.6 of each it lets through,
   every 16th or a pattern drawn for the song: Trance gates 17% of its songs, Electronic 8%, Synthwave 9%
   (`GateTest.Report`). A pad's slow attack barely opening in a 16th, the chop clicking in a soundfont? Short-attack synth
@@ -207,7 +211,6 @@ Each item with its plan, and what it waits for.
 
 ### The heavy band, the mood and the effects (in progress, in order)
 
-- **A genre's room:** the reverb's type, time and pre-delay, one per song, as GS messages.
 - **An insertion effect,** one a song: a wah, a phaser or a lo-fi EQ on the part it suits.
 - **Dub's echo** on the chords, the rhythm part and the snare, as notes.
 - **Features of one genre in others,** as preset data: the China cymbal in Metal and Nu metal, the open hi-hat in

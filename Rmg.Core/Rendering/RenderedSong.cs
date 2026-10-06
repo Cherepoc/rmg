@@ -29,6 +29,9 @@ public sealed class RenderedSong
         Tracks = tracks;
     }
 
+    /// <summary>The room its reverb is, as the Roland GS reverb macro that sets it, none for the player's own.</summary>
+    public int? Room { get; init; }
+
     public double Duration { get; }
 
     /// <summary>The meter the song starts in.</summary>
