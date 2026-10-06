@@ -98,6 +98,12 @@ internal static class TracePoints
     public const string LineDoubling = "Line doubling";
 
     /// <summary>
+    ///     The bass playing a driven riff's phrase it would rest in: the section's place in the song and the phrase's start
+    ///     (a tuple of an <c>int</c> and a <c>double</c>).
+    /// </summary>
+    public const string RiffBass = "Riff bass";
+
+    /// <summary>
     ///     Whether a section the solo part may answer the melody in does, outside its solos and where the counter-melody
     ///     rests: the section's place and whether it answers (a tuple of an <c>int</c> and a <c>bool</c>).
     /// </summary>

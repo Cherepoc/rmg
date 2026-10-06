@@ -10,7 +10,8 @@ namespace Rmg.Core.Composition;
 ///     way: the counter-melody a third or a sixth above or below the melody, as a second voice harmonises a tune, and the
 ///     bass with the riff, in its own register, as a band plays a riff together. A doubled note keeps its step above its
 ///     chord's root, moved by the interval, so that it stays in the scale over the same chords; a part plays it from its own
-///     first note in the section to its last, and a section where either part rests is not doubled. A twin, the riff's,
+///     first note in the section to its last, and a section where either part rests is not doubled; but under a riff on a
+///     driven guitar the bass plays every phrase of a section it plays in, the riff's where it would rest. A twin, the riff's,
 ///     plays the whole line wherever it plays, in every section, a third above or a sixth below, having no notes of its
 ///     own; or by its own part an octave apart, the melody's, the counter-melody's or the riff's, the likelier the louder
 ///     the section, and in a plain song as in a wild one, a part playing one doubling at a time. Neither plainer nor
@@ -93,6 +94,7 @@ internal static class LineDoubling
     /// <param name="sound">The song's sound facet, which the octaves lean by.</param>
     /// <param name="energies">Every appearance's energy, by its place, which the octaves lean by too.</param>
     /// <param name="riffPowerChords">Whether an appearance's riff plays in power chords, by its place, which plays no twin.</param>
+    /// <param name="drivenRiff">Whether the riff plays on a driven guitar, whose phrases the bass plays wherever it would rest in them.</param>
     /// <param name="genre">The genre whose chances of the doublings a section draws (<see cref="GenreChoices.Doubling" />).</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
@@ -104,6 +106,7 @@ internal static class LineDoubling
         Func<int, int, IGenerationContext> streams,
         Func<int, IGenerationContext> timbres,
         Func<int, bool> riffPowerChords,
+        bool drivenRiff,
         Genre genre
     )
     {
@@ -156,6 +159,35 @@ internal static class LineDoubling
                 });
             }
         }
+
+        // and the bass under a driven riff, as a band's plays under its guitars: in a section it plays in, every phrase the
+        // riff plays without it it plays with it, in unison, as the pair does; but in the song's opening, which a riff may
+        // start alone, and in a section it sits out whole, left to the guitars
+        if (drivenRiff && trackOf.TryGetValue(TrackRole.Riff, out var riffTrack) && trackOf.TryGetValue(TrackRole.Bass, out var bassTrack))
+            foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)).Skip(1))
+            {
+                var events = song.TrackTimelineMap;
+                TimelineItem<StateMap>[] In(int track, double start, double end) => [..events[track].EventTimeline.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9)];
+                if (In(bassTrack, span.Start, span.End).Length == 0)
+                    continue;
+
+                var filled = new List<TimelineItem<StateMap>>();
+                for (var start = span.Start; start < span.End - 1e-9; start += span.Meter.PatternDuration)
+                {
+                    var end = Math.Min(start + span.Meter.PatternDuration, span.End);
+                    if (In(bassTrack, start, end).Length > 0 || In(riffTrack, start, end) is not { Length: > 0 } riff)
+                        continue;
+
+                    StateTrace.Record(TracePoints.RiffBass, bassTrack, span.SectionId, 0, StateMap.Default, 0, $"{start}", (index, start));
+                    filled.AddRange(riff.Select(x => x.Value.With(StateKinds.Alteration, 0).With(CompositionStateKinds.SoundsAs, 0).ToTimelineItem(x.Position)));
+                }
+
+                if (filled.Count > 0)
+                    song = song.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>
+                    {
+                        [bassTrack] = notes => EventTimeline.Create(notes.Duration, notes.Concat(filled).OrderBy(x => x.Position))
+                    });
+            }
 
         // and a line in octaves by its own part, each part and section from a sequence of its own, after the pairs'
         foreach (var (role, place) in OctaveRoles.Select((x, i) => (x, Pairs.Length + i)))

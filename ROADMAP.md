@@ -182,10 +182,6 @@ Each item with its plan, and what it waits for.
 
 ### The heavy band, the mood and the effects (in progress, in order)
 
-- **The bass under a driven riff:** a part joining a polymeter whose own notes miss the cycle's first cell plays
-  nothing in the section (Djent's bass silent in 6.6% of its riff's bars); and a bass that plays in a section plays
-  every phrase of it a driven riff plays, but in the song's opening, a section the bass sits out whole left to the
-  guitars.
 - **Double-tracking:** every driven guitar's part, the riff, its twin, the rhythm part and the chords, played twice,
   hard left and right, the second take on the other driven guitar 8 ms late, each at 1/√2 of the part; the page mixing
   both takes as one part.

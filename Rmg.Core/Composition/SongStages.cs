@@ -212,6 +212,7 @@ internal static class SongStages
                 (pair, section) => song.Stream(SongStream.LineDoubling, pair, section),
                 section => song.Stream(SongStream.TwinTimbres, section),
                 index => song.Sections[index].RiffPowerChords,
+                song.Tracks.Definitions.Values.OfType<PitchInstrumentTrack>().Any(x => x.Role == TrackRole.Riff && InstrumentTraits.Has(x.InstrumentCode, InstrumentTrait.Driven)),
                 song.Genre
             )
         };
