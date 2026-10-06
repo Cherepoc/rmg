@@ -9,6 +9,8 @@ is removed once it is built.
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
 ratings by conventionality once enough are in, alongside, continuously and never as a gate.
 
+**Then** (P2): the genres' review (see *Genres*), in its steps' order, A's measures first.
+
 **Later** (P2): the ratings report (see *Listening data*) once the dashboard shows songs rated enough, and listening
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
@@ -304,6 +306,73 @@ A genre is the page's data (`Genre`, `GenreChoices`, `Client/genres.json`), ever
 end, the middle and the wild end; what each choice does is in the code and the numbers of each in its commit. What is
 left:
 
+- **The genres' review** (P2, a plan in steps, October 2026): a preset leaves most devices to the songs' own chances
+  (`ByConvention.At`'s pool or the chance itself), so that Folk plays sweeps and tremolo, Blues reharmonises its
+  dominants by thirds and Funk, "everything repeating", neither loops nor hooks; and some devices no genre reaches,
+  so that a wild House song still changes tempo. Each step measured by the preset reports before and after
+  (`GenrePresetsTest`, `GenreIdiomsReportTest`, `GenreDevicesReportTest`); the presets are not in the corpus, so the
+  fingerprint keeps through every step but A's and D's, which say so.
+  - **A. Measure first,** each a report deciding a later step:
+    1. What a preset plays that it does not name: a report per preset of the inherited devices' shares
+       (reharmonised appearances, inner lines, rolls, slurs, pedals, pushes, stop time, solos, key changes, strong
+       effects, polymeters, a section's tempo and meter, solo answers, octave doubling, a last chorus repeated,
+       instrument switches). Its numbers are the baseline of B and C.
+    2. The inner line's clashes: the melody's notes on a beat a semitone from a chord note, in sections with an inner
+       line against those without (`SongStages.InnerLines` edits notes after they are realized, which the melody does
+       not see). Decides D1.
+    3. Groove hold under pins: the idiom report with every preset's `grooveHold` taken out. Should the backbeat and
+       the kick move under 3 points where a role is pinned, D3 removes it.
+  - **B. Every device a genre's:**
+    1. A genre choice for each device no genre reaches, its options the chances as they are, so that the songs
+       keep: polymeter (`Polymeter.Chance`), a section's own tempo and meter (`SectionTempo.Chance`,
+       `SectionMeter.Chance`), the solo part's answers (`SoloAnswers.Chance`), a last chorus repeated
+       (`SongForms.LastRepeatChance`), a line in octaves (`LineDoubling.OctaveChance`) and instrument switches
+       (`InstrumentsOverTime.SwitchChance`); a tile and a page test each. The riff's twin is a genre's already
+       (`parts`'s `riffTwin`).
+    2. A rule: every preset names every device choice (a list of them in `GenreChoices`, a test in
+       `GenrePresetsTest`), each first set to what it inherits, so that no preset changes here and C changes them in
+       sight. Musicality: none yet; overengineering: a list and a test, no mechanism.
+  - **C. The presets retuned,** data only, a step a genre or two, each against its sentence and A1's baseline:
+    1. Funk: a loop and a hook (its sentence's "everything repeating"), stabs for the clavinet and the brass, a sax's
+       solos now and then; its drops out (a drop is no funk device; stop time is its break).
+    2. Latin, the least tuned: a two-chord vamp's pace (half a bar and a bar), a loop, applied dominants (V7 in minor),
+       a hook (the coro), solos (piano, trumpet, the timbales), a button or stop ending, levels, fills.
+    3. Reggae: stabs (the skank a chopped chord), a loop (the riddim), its intro and ending pools.
+    4. Folk: arpeggios (fingerpicking), a fiddle's or a banjo's breaks as solos, fewer fills, effects named (no strong
+       effect but a rare echo, no chorus).
+    5. Ambient: forms of its own over verse and chorus, sections of 16 and 32 bars, building and thinning textures,
+       slurred lines, rolled harp and piano chords.
+    6. Blues: reharmonisation and inner lines off over its dominants, the solo part answering the melody (B1).
+    7. Jazz: the ride pinned (`pins`'s time), stop time and pushes well over the songs' 3% and 8%, planing and
+       reharmonisation in the middle.
+    8. Hip-hop as boom-bap: its glide and hat rolls rare (a trap preset's, E3); Techno's polymeter (B1); a last chorus
+       repeated in Rock and Synthwave, which twin leads join; the electronic genres', Hip-hop's and Reggae's section
+       tempos and meters off at every end.
+  - **D. The engine:**
+    1. Should A2 find clashes: the inner line as state, a chord's voice moved as `StateKinds.ChordShift` moves the
+       chord, so that the lines over it take it; the corpus changes.
+    2. `SectionGenerator.Generate` (about 245 lines) and `GeneratePitchedTracks` (about 220) split into named steps as
+       the song's stages are, before the next feature that touches them; the fingerprint kept. (Taken from *Parked*.)
+    3. Should A3 find it idle: groove hold removed, its choice, its lean and the presets' entries; a genre kept naming
+       it reads as before, the name ignored, which is the user's to decide (a removed choice in a link).
+    4. The hook and the phrase scheme as one: a hooked section a scheme sung literally, should a trial keep the
+       report's repeats (50% of a hooked section's notes at their first bar's places); otherwise kept apart, with the
+       reason.
+  - **E. What is new:**
+    1. Any genre: a song asked for with no genre drawing a preset, by the form facet's stream of its own, the page
+       offering it beside the presets; the song's link carries the drawn genre. A decision first: whether a song with
+       no genre stays the songs' own (as now) or the page's default becomes any genre.
+    2. A Pop preset, the plainest songs' frame named (a verse, a pre-chorus and a chorus, a last chorus lifted and
+       repeated, hooks), and a Metal preset (chugs, power chords, half time, Phrygian and harmonic minor, the kick in
+       16ths, which the kick's rhythm settings must reach: checked first). Two now, as listening is P1; Soul or Gospel,
+       drum and bass, disco and trap (Hip-hop's glide and hat rolls) after them, should the first two sound right.
+  - **F. After it,** each its entry: snare ghost notes and drags (*What the genres cannot play yet*), two-bar patterns
+    (*Long cycles*, raised from put off by the idioms waiting on them: the clave, the montuno, a kick answered in its
+    second bar), the tritone substitute, the passing diminished and a ii–V elsewhere (*Approach chords*, *Harmony's
+    devices*), call and response (*The band's devices*), a part resting by its section's role.
+  - Not planned: the choices grouped into families (bass, harmony, form, drum devices), one choice of several chances
+    rather than fifteen of one, which would read better in the editor and break every genre link kept; P4, should the
+    editor grow hard to use.
 - **What the genres cannot play yet** (P3, each by what listening to the presets says; `GenreDevicesReportTest`,
   `GenreIdiomsReportTest` the measures):
   - The loop's figures shared, the bass's and the riff's, beside its harmony (`GenreChoices.Loop`).
@@ -368,8 +437,6 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
   repeats in place.
 - **Modulation** (blocked until a soundfont maps it): CC1, which none of the soundfonts offered maps to tone. The rule to
   keep: modulation and a vibrato never at once, modulation and bends together.
-- **`SectionGenerator.Generate` split** into stages as the song's are: its draws are apart by their streams already,
-  and no bug has come of its order.
 - **A stage report of notes moved in place:** the stages' counts tell notes added and taken away; a diff of every
   timeline after every stage, should a report need what a stage moves.
 - **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do: readable, but
