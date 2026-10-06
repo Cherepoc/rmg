@@ -50,6 +50,9 @@ public sealed class RenderedTrack
     /// <summary>The track's expression over the song, from 0 to 1, under the song's fade, full where none is said.</summary>
     public ImmutableArray<(double Position, double Value)> Expression { get; init; } = [];
 
+    /// <summary>Whether the track is its part's second take, which a mix doubles a driven guitar with on the other side (<see cref="Composition.DoubleTracking" />).</summary>
+    public bool IsDouble { get; init; }
+
     /// <summary>Where the track sits from left to right, from -1, left, through 0, the middle, to 1, right.</summary>
     public double Pan { get; }
 

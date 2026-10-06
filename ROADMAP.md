@@ -151,6 +151,11 @@ each from the trace; the seeds named here are ones already found.
   Synthwave's brass): are any too loud or too strange in either soundfont served? Their weights or traits, if so.
 - **The riser into a drop:** the reverse cymbal over the silent bar, its note a bar long; a soundfont's sample shorter
   than the bar peaks early and leaves a gap before the drop, a longer one is cut at it. Start it later, should one.
+- **Double-tracking:** every driven guitar's part twice, hard left and right, the second take on the other driven
+  guitar 8 ms late: Metal doubles 2.8 parts a song, its riff, chords and rhythm part all at the sides, Punk 2.3, the
+  drawn songs 28% of them (`DoubleTrackingTest.Report`). A wall, or mud? The overdriven take thinner than the
+  distortion's in a soundfont, the image leaning? The delay 5-12 ms by ear; the rhythm part or the chords left single
+  where three are doubled, if mud.
 - **A genre's reverb:** Ambient's mean send 76, Funk's 28, the songs' 47: wet enough, and the dry genres' room heard?
 - **Rock's rhythm guitar:** the riff and the rhythm part never take the chords' instrument, nor the rhythm part the
   riff's (`SongTracks`), so where the chords and the riff are both driven, Rock's rhythm part is clean (53%) or muted
@@ -182,9 +187,6 @@ Each item with its plan, and what it waits for.
 
 ### The heavy band, the mood and the effects (in progress, in order)
 
-- **Double-tracking:** every driven guitar's part, the riff, its twin, the rhythm part and the chords, played twice,
-  hard left and right, the second take on the other driven guitar 8 ms late, each at 1/√2 of the part; the page mixing
-  both takes as one part.
 - **The mood:** dark presets heard as happy: the pentatonic drops a mode's dark note (natural minor's ♭6, Phrygian's
   ♭2, Dorian's third), the melody's ♭2 and ♭6 1-9% in Trap, Hip-hop, Techno and Dnb; Trap's lead bells and music box
   82% at F♯5; Djent major or Lydian in 12% of songs. A mood report (♭2/♭6, major chords, the melody's register and

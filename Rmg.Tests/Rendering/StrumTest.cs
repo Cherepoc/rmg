@@ -16,7 +16,7 @@ public sealed class StrumTest
         {
             if (song.Song.TrackDefinitions[track] is not PitchInstrumentTrack part)
                 continue;
-            var rendered = song.Rendered.Tracks.Where(x => !x.IsPercussionInstrument && x.Role == part.Role).SelectMany(x => x.NoteTimeline).ToArray();
+            var rendered = song.Rendered.Tracks.Where(x => !x.IsPercussionInstrument && !x.IsDouble && x.Role == part.Role).SelectMany(x => x.NoteTimeline).ToArray();
             int Program(RealizedNote note) => note.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : part.InstrumentCode;
             foreach (var note in notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Strum) != 0))
             {

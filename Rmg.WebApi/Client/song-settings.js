@@ -120,14 +120,18 @@ export function applyReport(settings, report) {
         own[part] = { instrument: reported.instrument, pan: reported.pan };
     }
 
-    // a part's twin, the riff's, which plays on a channel of its own as its part is mixed, on the other side
+    // a part's other channels, mixed as it is: its second take, a doubled driven guitar's, on the other side, and the
+    // riff's twin, on the other side too, with its own second take back on the riff's
+    const seconds = (part) => (report.parts[part]?.double == null ? [] : [report.parts[part].double - 1]);
+    const others = Object.fromEntries(PARTS.map((part) => [part, seconds(part).map((channel) => ({ channel, mirrored: true }))]));
     const twin = report.parts.riffTwin?.channel;
-    const twins = { riff: twin == null ? null : twin - 1 };
+    if (twin != null)
+        others.riff.push({ channel: twin - 1, mirrored: true }, ...seconds("riffTwin").map((channel) => ({ channel, mirrored: false })));
 
     return {
         settings: next,
         channels,
-        twins,
+        others,
         plays,
         own,
         drumGroups: report.drumGroups.map((group) => group.toLowerCase()),

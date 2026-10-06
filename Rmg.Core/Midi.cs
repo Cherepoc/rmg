@@ -363,7 +363,13 @@ public static class Midi
     /// </summary>
     public static ImmutableSortedDictionary<TrackRole, byte> GetPartChannels(this RenderedSong song)
     {
-        return song.Tracks.ToChannels().Zip(song.Tracks).ToImmutableSortedDictionary(x => x.Second.Role, x => x.First);
+        return song.Tracks.ToChannels().Zip(song.Tracks).Where(x => !x.Second.IsDouble).ToImmutableSortedDictionary(x => x.Second.Role, x => x.First);
+    }
+
+    /// <summary>The channel a doubled part's second take is written to, by its role (<see cref="Composition.DoubleTracking" />).</summary>
+    public static ImmutableSortedDictionary<TrackRole, byte> GetDoubleChannels(this RenderedSong song)
+    {
+        return song.Tracks.ToChannels().Zip(song.Tracks).Where(x => x.Second.IsDouble).ToImmutableSortedDictionary(x => x.Second.Role, x => x.First);
     }
 
     /// <param name="label">

@@ -183,7 +183,7 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     {
         var program = ((PitchInstrumentTrack)Song.TrackDefinitions[track]).InstrumentCode;
         return Rendered.Tracks
-            .Where(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == program)
+            .Where(x => !x.IsPercussionInstrument && !x.IsDouble && x.PitchInstrumentCode == program)
             .SelectMany(x => x.NoteTimeline)
             .OrderBy(x => x.Position)
             .ToArray();

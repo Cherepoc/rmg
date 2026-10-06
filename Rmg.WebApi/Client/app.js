@@ -123,8 +123,8 @@ let songGenreKey = null;
 // what the song on the page is made of, as the server said: the channel every part plays on in the file the player
 // has, null where it is not written, whether each part is in the song, the drum groups it plays and its drum pieces
 let channels = {};
-// the channel of a part's twin, the riff's, which follows the part's mix on the other side
-let twins = {};
+// a part's other channels, its second take's and the riff's twin's, which follow its mix, each on its side
+let others = {};
 let partsInSong = {};
 let drumGroupsPresent = [];
 let drumPiecesPlayed = [];
@@ -929,7 +929,7 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
 
         // only once the whole song is here: a body that fails halfway leaves the old song as it was
         const made = applyReport(settings, report);
-        ({ settings, channels, twins, own } = made);
+        ({ settings, channels, others, own } = made);
         partsInSong = made.plays;
         drumGroupsPresent = made.drumGroups;
         drumPiecesPlayed = made.drumPieces;
@@ -1975,12 +1975,9 @@ async function listChoices() {
     }
 }
 
-/** A part's channels, its own and its twin's, and whether each sits on the other side of the part's pan. */
+/** A part's channels, its own and its others', and whether each sits on the other side of the part's pan. */
 function channelsOf(part) {
-    return [
-        ...(channels[part] == null ? [] : [{ channel: channels[part], mirrored: false }]),
-        ...(twins[part] == null ? [] : [{ channel: twins[part], mirrored: true }]),
-    ];
+    return [...(channels[part] == null ? [] : [{ channel: channels[part], mirrored: false }]), ...(others[part] ?? [])];
 }
 
 /** A pan step on the other side of the middle, as far from it. */

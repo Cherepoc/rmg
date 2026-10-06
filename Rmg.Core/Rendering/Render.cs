@@ -108,16 +108,40 @@ public static class Render
             {
                 // how the part is played beyond its notes, its echo among its notes
                 var expression = ExpressionRender.Render(trackNotes, swing, common.GetStateTimeline(StateKinds.Tempo), pitchInstrumentTrack.Pan, GetMidiVelocity);
+                var played = EventTimeline.Create(trackNotes.Duration, renderedNotes);
+                var programChanges = ProgramChanges(trackNotes, pitchInstrumentTrack.InstrumentCode, swing);
+                var doubles = DoubleTracking.Doubles(pitchInstrumentTrack.Role, mix.Of(pitchInstrumentTrack.Role)?.Instrument ?? pitchInstrumentTrack.InstrumentCode);
+                // a doubled part plays no sweep, its takes standing apart on either side
+                var controllers = doubles ? [..expression.Controllers.Where(x => x.Controller != 10)] : expression.Controllers;
                 renderedTracks.Add(
-                    new RenderedTrack(false, pitchInstrumentTrack.Role, pitchInstrumentTrack.InstrumentCode, EventTimeline.Create(trackNotes.Duration, renderedNotes), pitchInstrumentTrack.Pan)
+                    new RenderedTrack(false, pitchInstrumentTrack.Role, pitchInstrumentTrack.InstrumentCode, played, pitchInstrumentTrack.Pan, doubles ? DoubleTracking.Level : 1)
                     {
-                        ProgramChanges = ProgramChanges(trackNotes, pitchInstrumentTrack.InstrumentCode, swing),
+                        ProgramChanges = programChanges,
                         PitchBends = expression.Bends,
-                        Controllers = expression.Controllers,
+                        Controllers = controllers,
                         Expression = expression.Expression,
                         Echoes = expression.Echoes
                     }
                 );
+                // and its second take, on the other side and the other driven guitar, a little late
+                if (doubles)
+                {
+                    var tempo = common.GetStateTimeline(StateKinds.Tempo);
+                    TimelineItem<RenderedNote> Late(TimelineItem<RenderedNote> note) =>
+                        (note.Value with { Shift = note.Value.Shift + DoubleTracking.Delay * tempo.GetEffectiveValueAt(note.Position) * Meter.BaseTempo / 60 }).ToTimelineItem(note.Position);
+                    renderedTracks.Add(
+                        new RenderedTrack(false, pitchInstrumentTrack.Role, DoubleTracking.SecondTake(pitchInstrumentTrack.InstrumentCode), EventTimeline.Create(played.Duration, played.Select(Late)),
+                            -pitchInstrumentTrack.Pan, DoubleTracking.Level)
+                        {
+                            IsDouble = true,
+                            ProgramChanges = [..programChanges.Select(x => (x.Position, DoubleTracking.SecondTake(x.Program)))],
+                            PitchBends = expression.Bends,
+                            Controllers = controllers,
+                            Expression = expression.Expression,
+                            Echoes = [..expression.Echoes.Select(Late)]
+                        }
+                    );
+                }
             }
             else
             {
@@ -144,12 +168,14 @@ public static class Render
             .Select(x => new RenderedTrack(
                 x.Track.IsPercussionInstrument,
                 x.Track.Role,
-                x.Mix?.Instrument ?? x.Track.PitchInstrumentCode,
+                x.Mix?.Instrument is { } given ? x.Track.IsDouble ? DoubleTracking.SecondTake(given) : given : x.Track.PitchInstrumentCode,
                 x.Track.NoteTimeline,
-                x.Mix?.Pan ?? x.Track.Pan,
-                mix.Volume * (x.Mix?.Volume ?? 1)
+                // a second take on the other side of the pan given
+                x.Mix?.Pan is { } pan ? x.Track.IsDouble ? -pan : pan : x.Track.Pan,
+                x.Track.Volume * mix.Volume * (x.Mix?.Volume ?? 1)
             )
             {
+                IsDouble = x.Track.IsDouble,
                 ProgramChanges = x.Mix?.Instrument is null ? x.Track.ProgramChanges : [],
                 PitchBends = x.Track.PitchBends,
                 // a pan given holds throughout, its sweep let go of

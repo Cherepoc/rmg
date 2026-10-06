@@ -133,7 +133,6 @@ internal sealed class SongTracks
         // song without it pans as it would
         var riffSide = Math.Sign(pans[RiffTrack]) is 0 ? 1 : Math.Sign(pans[RiffTrack]);
         pans = hasTwin ? pans.SetItem(RiffTrack, riffSide).Add(RiffTwinTrack, -riffSide) : pans.Add(RiffTwinTrack, -pans[RiffTrack]);
-        StateTrace.Record(TracePoints.Panning, ChordsTrack, 0, 0, StateMap.Default, 0, string.Join(", ", pans.Select(x => $"{x.Key} {x.Value:F2}")), pans);
 
         // the pad holds chords in a sound of its own, apart from the chords', which it plays under
         var padInstrument = InstrumentRoles.Pad.Pick(padContext, sound, Pool(TrackRole.Pad), chordsInstrument.Program);
@@ -146,6 +145,13 @@ internal sealed class SongTracks
 
         // and the solo part a lead of its own, apart from the melody's, which it takes over from
         var soloInstrument = InstrumentRoles.Solo.Pick(soloContext, sound, Pool(TrackRole.Solo), melodyInstrument.Program);
+
+        // a driven guitar played twice all the way to the side it drew, its second take on the other (DoubleTracking)
+        pans = pans.SetItems(new[] { (ChordsTrack, TrackRole.Chords, chordsInstrument.Program), (RiffTrack, TrackRole.Riff, riffInstrument.Program),
+                (RiffTwinTrack, TrackRole.RiffTwin, riffInstrument.Program), (RhythmTrack, TrackRole.Rhythm, rhythmInstrument.Program) }
+            .Where(x => DoubleTracking.Doubles(x.Item2, x.Item3))
+            .Select(x => KeyValuePair.Create(x.Item1, Math.Sign(pans[x.Item1]) is 0 ? 1.0 : Math.Sign(pans[x.Item1]))));
+        StateTrace.Record(TracePoints.Panning, ChordsTrack, 0, 0, StateMap.Default, 0, string.Join(", ", pans.Select(x => $"{x.Key} {x.Value:F2}")), pans);
 
         // the riff's state, which its twin shares, so that the two play its notes alike
         var riffLayer = LayerStates.CreateTrackLayer(
