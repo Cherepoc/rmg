@@ -34,6 +34,13 @@ public sealed class ProgressionsTest
         double Share(int chord, int root) => (double)phrases.Count(x => Mod7(x[chord]) == root) / phrases.Length;
 
         Console.WriteLine($"bar 5 IV {Share(4, 3):P0}, bar 9 V {Share(8, 4):P0}, bar 4 I {Share(3, 0):P0}, bar 8 I {Share(7, 0):P0}, bar 12 V {Share(11, 4):P0}");
+        foreach (var strictness in new[] { 0.95, 0.9, 0.85 })
+        {
+            var some = Enumerable.Range(0, 2000).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, major, 0, strictness, 12, 3,
+                x => x == motions.IndexOf("fourthDown") ? 0.6 : x == motions.IndexOf("stepUp") ? 0.4 : 0)).ToArray();
+            double At(int chord, int root) => (double)some.Count(x => Mod7(x[chord]) == root) / some.Length;
+            Console.WriteLine($"at {strictness}: bar 5 IV {At(4, 3):P0}, bar 9 V {At(8, 4):P0}, bar 4 I {At(3, 0):P0}, bar 8 I {At(7, 0):P0}, bar 12 V {At(11, 4):P0}");
+        }
         // the second phrase from IV, the last from V, the last on the cadence, V, most of the time; the first two ending
         // home more often than not, the chord before an ending free
         await Assert.That(Share(4, 3)).IsGreaterThan(0.6);

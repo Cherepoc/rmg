@@ -315,11 +315,6 @@ Each item with its plan, and what it waits for.
 A review of the engine and the presets, in steps by priority, each built, measured and committed in turn and taken out
 of here once it is; the genres it adds are described under *More genres*.
 
-**P1, wrong now and cheap:**
-
-7. **The blues' twelve bars at the plain end:** V at bar 9 in 43% of its sections, IV at 5 in 63%; the phrases' place
-   rules kept by the plain end.
-
 **P2, the engine, for several genres each:**
 
 8. **A device a genre plays at its plain end** plays there with its own draws at their middle: the polymeter (its
@@ -452,8 +447,9 @@ left:
   of its own for the time (a ride's spang-a-lang), should it not swing. Solos in Latin's songs 66% and Metal's 91%: too
   many? Reggae's one drop is a kick half a bar off its cycle, which the report cannot tell from beat 1, and Latin's
   tresillo is the time keeper's grouping alone; the rhythm values mean what they make together, and a preset's are
-  tuned by where its notes fall. Blues' twelve bars: V at bar 9 in 43% of its twelve-bar sections, home at bar 4 48%,
-  IV at 5 63%, home at 8 61%, the middling and wild songs keeping the place rules less by the progression's strictness.
+  tuned by where its notes fall. Blues' twelve bars: the plainest keep them (IV at 5 98%, V at 9 84%, home at 4 and 8),
+  the drawn songs V at 9 56%, home at 4 54%, IV at 5 63%, the middling and wild songs keeping the place rules less by
+  the progression's strictness: loose enough to hear as the blues?
 - **Listening to the genres' wild ends:** the presets' wild ends keep their idioms most and stray by what each names
   experimental (`EveryPreset_ChoicesByEnd`): the wildest Rock 34% in 4/4, its chords 7% quartal or tritone stacks; the
   wildest Jazz 56% swung, 50% sevenths, about a fifth So What, quartal, altered or eleventh. A home and a cadence lean

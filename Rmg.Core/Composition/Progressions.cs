@@ -54,15 +54,29 @@ internal static class Progressions
 
     /// <summary>
     ///     How a phrase of a longer progression starts and ends by its place, by the root's step above home, the others as
-    ///     a root out of its bar's role weighs: a middle phrase from IV, now and then from home; the last from V, now and
-    ///     then from IV; and every phrase but the last back home, or on V, a half close, so that three phrases make the
-    ///     blues' I / IV–I / V–I and two a song's 8-bar with its half close.
+    ///     a root out of its place weighs (<see cref="OutOfPlaceWeight" />): a middle phrase from IV, now and then from home;
+    ///     the last from V, now and then from IV, but the second of two from home (<see cref="AnswerStarts" />); and every
+    ///     phrase but the last back home, the first of two on V now and then, a half close (<see cref="QuestionEnds" />), so
+    ///     that three phrases make the blues' I / IV–I / V–I and two a song's 8-bar, a question and its answer.
     /// </summary>
     private static readonly ImmutableDictionary<int, double> MiddlePhraseStarts = ImmutableDictionary<int, double>.Empty.Add(3, 1).Add(0, 0.15);
 
     private static readonly ImmutableDictionary<int, double> LastPhraseStarts = ImmutableDictionary<int, double>.Empty.Add(4, 1).Add(3, 0.15);
 
-    private static readonly ImmutableDictionary<int, double> PhraseEnds = ImmutableDictionary<int, double>.Empty.Add(0, 1).Add(4, 0.25);
+    /// <summary>The second of two phrases from home, as a period's answer starts as its question did, now and then from IV.</summary>
+    private static readonly ImmutableDictionary<int, double> AnswerStarts = ImmutableDictionary<int, double>.Empty.Add(0, 1).Add(3, 0.15);
+
+    /// <summary>
+    ///     How much a root out of its phrase's place weighs, by the progression's strictness: none at the plainest, which
+    ///     keeps a longer pattern's phrases as they go, as much as a root out of its bar's role at a middling song's
+    ///     strictness, and more the wilder, where the strictness then lets every root weigh alike.
+    /// </summary>
+    private static double OutOfPlaceWeight(double strictness) => OutOfRoleWeight * (1 - strictness) / (1 - Strictness.Tuned);
+
+    private static readonly ImmutableDictionary<int, double> PhraseEnds = ImmutableDictionary<int, double>.Empty.Add(0, 1);
+
+    /// <summary>A question's end, the first of two phrases: home, or V now and then, a half close.</summary>
+    private static readonly ImmutableDictionary<int, double> QuestionEnds = PhraseEnds.Add(4, 0.25);
 
     /// <summary>The roots that prepare a cadence: ii and IV.</summary>
     private static readonly ImmutableHashSet<int> PreCadenceSteps = [1, 3];
@@ -134,18 +148,21 @@ internal static class Progressions
             {
                 // a longer progression's phrases, past the first, start by their place, and all but the last end home
                 var phrase = chord / perPhrase;
-                var placed = chord % perPhrase == 0 ? phrase == phrases - 1 ? LastPhraseStarts : MiddlePhraseStarts
-                    : chord % perPhrase == perPhrase - 1 && phrase < phrases - 1 ? PhraseEnds
+                var placed = chord % perPhrase == 0 ? phrase == phrases - 1 ? phrases == 2 ? AnswerStarts : LastPhraseStarts : MiddlePhraseStarts
+                    : chord % perPhrase == perPhrase - 1 && phrase < phrases - 1 ? phrases == 2 ? QuestionEnds : PhraseEnds
                     : null;
+                // a phrase's place before the cadence's preparation, which a phrase of two chords starts on: the blues' V at
+                // bar 9 in chords of two bars
                 var roleWeight = isCadence ? cadenceWeights[step] > 0 ? cadenceWeights[step] : OutOfRoleWeight
+                    : placed is not null ? placed.GetValueOrDefault(step, OutOfPlaceWeight(strictness))
                     : isPreparation ? PreCadenceSteps.Contains(step) ? 1 : OutOfRoleWeight
-                    : placed is not null ? placed.GetValueOrDefault(step, OutOfRoleWeight)
                     : 1;
                 var motion = Mod(step - previous);
                 weights[step] = new Weighted<int>(tilt.Weigh(Math.Pow(MotionWeights[motion] * roleWeight, strictness), motionLean(motion)), step);
             }
 
-            roots[chord] = Normalize(context.Pick([..weights]));
+            // a root out of its phrase's place weighs nothing at the plainest
+            roots[chord] = Normalize(context.Pick([..weights.Where(x => x.Weight > 0)]));
         }
 
         return [..roots];

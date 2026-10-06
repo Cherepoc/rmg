@@ -100,7 +100,11 @@ public sealed class GenrePresetsReportTest
             string At(int phrase, bool start, int root) => twelve.Length == 0 ? "-" :
                 $"{100.0 * twelve.Count(x => Mod7(x.Roots[start ? phrase * x.Roots.Length / 3 : (phrase + 1) * x.Roots.Length / 3 - 1]) == root) / twelve.Length:0}%";
             Console.WriteLine($"{name}: " + string.Join(", ", sections.GroupBy(x => x.Phrases).OrderBy(x => x.Key).Select(x => $"{4 * x.Key} bars {100.0 * x.Count() / sections.Length:0}%"))
-                              + $"; twelve bars: IV at 5 {At(1, true, 3)}, V at 9 {At(2, true, 4)}, home at 4 {At(0, false, 0)}, at 8 {At(1, false, 0)}");
+                              + $"; twelve bars: IV at 5 {At(1, true, 3)}, V at 9 {At(2, true, 4)}, home at 4 {At(0, false, 0)}, at 8 {At(1, false, 0)}"
+                              + $"; eight bars: home at 5 {AtEight(0)}, V at 5 {AtEight(4)}");
+            string AtEight(int root) => sections.Where(x => x.Phrases == 2).ToArray() is { Length: > 0 } eight
+                ? $"{100.0 * eight.Count(x => Mod7(x.Roots[x.Roots.Length / 2]) == root) / eight.Length:0}%"
+                : "-";
         }
 
         Print("none", TestCorpus.Range(Count));
