@@ -151,6 +151,13 @@ each from the trace; the seeds named here are ones already found.
   Synthwave's brass): are any too loud or too strange in either soundfont served? Their weights or traits, if so.
 - **The riser into a drop:** the reverse cymbal over the silent bar, its note a bar long; a soundfont's sample shorter
   than the bar peaks early and leaves a gap before the drop, a longer one is cut at it. Start it later, should one.
+- **The dark presets' mood:** the melodies on the whole scale rather than the pentatonic in Trap, Techno and Dnb, and
+  the more in Hip-hop, its loops sparser, Phrygian and harmonic minor now and then; Trap's music box and celesta down and
+  piano in, no applied dominants; Dnb liquid and moody, Dorian and the triads down, piano in, the flute and the
+  vibraphone down; Djent major only at the wild end. The melody's ♭2 Techno 1% to 4%, Hip-hop 2% to 3%; the major chords
+  Trap 21% to 18%, Hip-hop 17% to 13%; Trap's lead bright 78% to 56%, Dnb's 38% to 8%; Djent major 12% to 3%
+  (`MoodReportTest`). Still happy? The major chords are a minor key's own ♭III, ♭VI and ♭VII, which no preset choice
+  reaches: a progression's degrees leaned, if so.
 - **Double-tracking:** every driven guitar's part twice, hard left and right, the second take on the other driven
   guitar 8 ms late: Metal doubles 2.8 parts a song, its riff, chords and rhythm part all at the sides, Punk 2.3, the
   drawn songs 28% of them (`DoubleTrackingTest.Report`). A wall, or mud? The overdriven take thinner than the
@@ -187,10 +194,6 @@ Each item with its plan, and what it waits for.
 
 ### The heavy band, the mood and the effects (in progress, in order)
 
-- **The mood:** dark presets heard as happy: the pentatonic drops a mode's dark note (natural minor's ♭6, Phrygian's
-  ♭2, Dorian's third), the melody's ♭2 and ♭6 1-9% in Trap, Hip-hop, Techno and Dnb; Trap's lead bells and music box
-  82% at F♯5; Djent major or Lydian in 12% of songs. A mood report (♭2/♭6, major chords, the melody's register and
-  sound), the presets tuned by it: Trap, Djent, Techno, Hip-hop with a dark side, Dnb liquid and moody.
 - **Riff scales for Metal and Nu metal:** the blues, chromatic and octatonic riffs Djent has.
 - **A filter,** a strong effect on the synths: a wobble, a squelch, an opening into a drop, as CC74 and CC71.
 - **A trance gate,** a strong effect: held chords chopped in 16ths, a pattern drawn per song.
