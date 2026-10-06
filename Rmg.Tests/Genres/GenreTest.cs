@@ -376,6 +376,33 @@ public sealed class GenreTest
     }
 
     [Test]
+    public async Task ASectionsOwnTime_Polymeters_Answers_ALastRepeat_Doublings_AndSwitches_AreAGenres_NeverAt0()
+    {
+        (GenreChoice, (string, double)[]) None(GenreChoice choice) => (choice, [..choice.Options.Select(x => (x.Name, 0.0))]);
+        var never = Of(None(GenreChoices.SectionChanges), None(GenreChoices.Polymeter), None(GenreChoices.SoloAnswers), None(GenreChoices.LastRepeat),
+            None(GenreChoices.Doubling), None(GenreChoices.InstrumentSwitches), (GenreChoices.Parts, [("solo", 1), ("counterMelody", 1), ("riff", 1)]));
+        var always = Of((GenreChoices.SoloAnswers, [("sections", 1)]), (GenreChoices.Doubling, [("octaves", 1), ("harmony", 0), ("riff", 0)]));
+        foreach (var seed in Enumerable.Range(0, 16))
+        {
+            // a wild song's, which plays them oftenest
+            var song = TestCorpus.Get(seed, new SongOverrides(Base: 0.9, Genre: never));
+            await Assert.That(((System.Collections.IDictionary)song.Trace.Single(x => x.Point == TracePoints.Polymeter).Value!).Count).IsEqualTo(0);
+            await Assert.That(((ImmutableArray<double>)song.Trace.Single(x => x.Point == TracePoints.SectionTempo).Value!).All(x => x == 1)).IsTrue();
+            await Assert.That(song.Map.Sections.All(x => x.Meter.HasSameBar(song.Map.Meter))).IsTrue();
+            await Assert.That(song.Trace.Where(x => x.Point == TracePoints.SoloAnswers).All(x => !(((int, bool Answers))x.Value!).Answers)).IsTrue();
+            await Assert.That((bool)song.Trace.Single(x => x.Point == TracePoints.LastRepeat).Value!).IsFalse();
+            await Assert.That(song.Trace.Any(x => x.Point == TracePoints.LineDoubling && (((int, TrackRole Source, TrackRole Target, int))x.Value!).Target != TrackRole.RiffTwin)).IsFalse();
+            await Assert.That(song.Trace.Where(x => x.Point == TracePoints.Octave).All(x => !(((int, TrackRole, double, bool InOctaves))x.Value!).InOctaves)).IsTrue();
+            await Assert.That(song.Trace.Any(x => x.Point == TracePoints.InstrumentOverTime && song.Song.TrackDefinitions[x.Track] is PitchInstrumentTrack part
+                && (((int, TrackRole, int Program, ArticulationMode, int))x.Value!).Program != part.InstrumentCode)).IsFalse();
+
+            var given = TestCorpus.Get(seed, new SongOverrides(Genre: always));
+            await Assert.That(given.Trace.Where(x => x.Point == TracePoints.SoloAnswers).All(x => (((int, bool Answers))x.Value!).Answers)).IsTrue();
+            await Assert.That(given.Trace.Where(x => x.Point == TracePoints.Octave).All(x => (((int, TrackRole, double, bool InOctaves))x.Value!).InOctaves)).IsTrue();
+        }
+    }
+
+    [Test]
     public async Task WhatIsGiven_WinsOverTheGenre()
     {
         var genre = Of((GenreChoices.Meter, [("3/4", 1)]), (GenreChoices.Scale, [("dorian", 1)]));

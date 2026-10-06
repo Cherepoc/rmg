@@ -244,7 +244,7 @@ public static class SongGenerator
         bool Repeats(bool drawn, int fades) =>
             drawn && fades == 0 && sectionIds.Take(sectionIds.Length - 1).Contains(sectionIds[^1]) && structure.Roles[sectionIds[^1]] != SectionRole.Outro;
         // a last section that came back before played once more now and then, drawn here, which the length takes in
-        var lastRepeatDrawn = Stream(SongStream.LastRepeat).TestProbability(SongForms.LastRepeatChance.At(songUnconventionality[Facet.Form]));
+        var lastRepeatDrawn = Stream(SongStream.LastRepeat).TestProbability(SongForms.LastRepeatChance.At(songUnconventionality[Facet.Form], genre.Chance(GenreChoices.LastRepeat, "songs")));
         // a length given leans every section's plays alike, the lean whose song comes nearest it, the ending's plays too
         var playsLean = length?.NearestLean(lean =>
         {

@@ -34,6 +34,7 @@ internal static class SoloAnswers
     /// <param name="answerer">The solo part's vocabulary, its soloist's.</param>
     /// <param name="melodyFacet">Every section's melody facet, by its place among the song's sections.</param>
     /// <param name="streams">A section's sequence, by its place.</param>
+    /// <param name="genre">The genre whose chance of answering a section draws (<see cref="GenreChoices.SoloAnswers" />).</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
         IReadOnlyDictionary<int, TrackRole> roles,
@@ -42,7 +43,8 @@ internal static class SoloAnswers
         IReadOnlyDictionary<int, SoloPlan> solos,
         Soloist answerer,
         Func<int, double> melodyFacet,
-        Func<int, IGenerationContext> streams
+        Func<int, IGenerationContext> streams,
+        Genre genre
     )
     {
         var trackOf = roles.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.First().Key);
@@ -57,7 +59,7 @@ internal static class SoloAnswers
         foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
         {
             var context = streams(index);
-            var answering = context.TestProbability(Chance.At(melodyFacet(index)));
+            var answering = context.TestProbability(Chance.At(melodyFacet(index), genre.Chance(GenreChoices.SoloAnswers, "sections")));
             bool IsIn(TimelineItem<StateMap> note) => note.Position >= span.Start - 1e-9 && note.Position < span.End - 1e-9;
             var counterRests = !trackOf.TryGetValue(TrackRole.CounterMelody, out var counter) || !song.TrackTimelineMap.TryGetValue(counter, out var counterTrack) || !counterTrack.EventTimeline.Any(IsIn);
             var melody = melodyTrack.EventTimeline.Where(IsIn).ToArray();

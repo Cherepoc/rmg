@@ -134,7 +134,7 @@ internal static class SongStages
             ids.Count - 1 + (song.Repeats ? 1 : 0) - (structure.Roles[ids[^1]] == SectionRole.Outro ? 1 : 0),
             song.Genre
         );
-        var sectionTempos = SectionTempo.Generate(place => song.Stream(SongStream.SectionTempo, place), song.Facets[Facet.Feel], [..song.Played], structure.Roles);
+        var sectionTempos = SectionTempo.Generate(place => song.Stream(SongStream.SectionTempo, place), song.Facets[Facet.Feel], [..song.Played], structure.Roles, song.Genre);
         StateTrace.Record(TracePoints.SectionTempo, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", sectionTempos.Select(x => $"{x:F2}")), sectionTempos);
         StateTrace.Record(TracePoints.KeyChange, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, keyChanges.IsEmpty ? "none" : string.Join(", ", keyChanges), keyChanges);
         var (preparedKeys, preparedRoots, chains) = KeyChange.Prepare(
@@ -173,7 +173,8 @@ internal static class SongStages
             id => song.SectionOf(id).Facets[Facet.Feel],
             song.SectionMeters,
             [..song.SectionIds],
-            song.Absent
+            song.Absent,
+            song.Genre
         );
         StateTrace.Record(TracePoints.Polymeter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", polymeters.Select(x => $"{x.Key} {x.Value}")), polymeters);
         return draft with
@@ -259,7 +260,8 @@ internal static class SongStages
                 song.Energies,
                 (pair, section) => song.Stream(SongStream.LineDoubling, pair, section),
                 section => song.Stream(SongStream.TwinTimbres, section),
-                index => song.Sections[index].RiffPowerChords
+                index => song.Sections[index].RiffPowerChords,
+                song.Genre
             )
         };
 
@@ -337,7 +339,8 @@ internal static class SongStages
                 song.Soloists.GetValueOrDefault(TrackRole.Solo)
                 ?? Soloist.Generate(song.Stream(SongStream.Soloist, (int)TrackRole.Solo), song.Facets[Facet.Melody], song.Facets[Facet.Sound], solo.InstrumentCode),
                 index => song.Sections[index].Facets[Facet.Melody],
-                index => song.Stream(SongStream.SoloAnswers, index)
+                index => song.Stream(SongStream.SoloAnswers, index),
+                song.Genre
             )
         };
     }

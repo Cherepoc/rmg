@@ -101,12 +101,14 @@ internal static class Polymeter
     /// <param name="feel">A section's feel facet, by its id.</param>
     /// <param name="meters">A section's meter, by its id, whose bar the cycle's length must not divide.</param>
     /// <param name="absent">The parts the song leaves out.</param>
+    /// <param name="genre">The genre whose chance of a polymeter a section draws (<see cref="GenreChoices.Polymeter" />).</param>
     public static ImmutableDictionary<int, Plan> Generate(
         Func<int, IGenerationContext> sections,
         Func<int, double> feel,
         IReadOnlyDictionary<int, Meter> meters,
         IEnumerable<int> sectionIds,
-        ImmutableHashSet<TrackRole> absent
+        ImmutableHashSet<TrackRole> absent,
+        Genre genre
     )
     {
         var plans = ImmutableDictionary.CreateBuilder<int, Plan>();
@@ -114,7 +116,7 @@ internal static class Polymeter
         {
             var context = sections(id);
             var unconventionality = feel(id);
-            if (!context.TestProbability(Chance.At(unconventionality)))
+            if (!context.TestProbability(Chance.At(unconventionality, genre.Chance(GenreChoices.Polymeter, "sections"))))
                 continue;
 
             var bar = meters[id].Groups.Sum();

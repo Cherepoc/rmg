@@ -53,11 +53,13 @@ internal static class SectionTempo
     /// <param name="unconventionality">The feel facet of the song's unconventionality.</param>
     /// <param name="played">The song's sections as it plays them, by their ids.</param>
     /// <param name="roles">What each section does in the song's form, by its id.</param>
+    /// <param name="genre">The genre whose chances of a section's own tempo and of one by a metric ratio an appearance draws (<see cref="GenreChoices.SectionChanges" />).</param>
     public static ImmutableArray<double> Generate(
         Func<int, IGenerationContext> appearances,
         double unconventionality,
         IReadOnlyList<int> played,
-        IReadOnlyDictionary<int, SectionRole> roles
+        IReadOnlyDictionary<int, SectionRole> roles,
+        Genre genre
     )
     {
         var tempos = new List<double>();
@@ -67,10 +69,10 @@ internal static class SectionTempo
         {
             var id = played[i];
             var drawing = appearances(i);
-            var hasOwn = drawing.TestProbability(SectionContrast.Of(roles[id]).Chance(Chance.At(unconventionality), 1));
+            var hasOwn = drawing.TestProbability(SectionContrast.Of(roles[id]).Chance(Chance.At(unconventionality, genre.Chance(GenreChoices.SectionChanges, "tempo")), 1));
             var factor = drawing.Pick(ByConvention.Weigh(Factors, unconventionality));
             var keeps = drawing.TestProbability(KeepChance.At(unconventionality));
-            var modulates = drawing.TestProbability(ModulationChance.At(unconventionality));
+            var modulates = drawing.TestProbability(ModulationChance.At(unconventionality, genre.Chance(GenreChoices.SectionChanges, "modulation")));
             var ratio = MetricRatios[drawing.GenerateInt(0, MetricRatios.Length)];
             var modulated = i > 0 ? tempos[i - 1] * ratio : 1;
             // the first section sets the song's tempo

@@ -34,16 +34,24 @@ internal static class LineDoubling
         (-6, new ByConvention(0, 0, 0.1))
     ];
 
+    /// <summary>The chance the counter-melody harmonises the melody in a section, a third or a sixth apart.</summary>
+    public static ByConvention HarmonyChance { get; } = new(0.25, 0.25, 0.25);
+
+    /// <summary>The chance the bass plays the riff with it in a section, as a band plays a riff together.</summary>
+    public static ByConvention RiffChance { get; } = new(0.35, 0.35, 0.35);
+
     /// <summary>
-    ///     Who doubles whom, by how many scale steps, weighed by the song's melody facet, the chance of a section, and whether
-    ///     the target is the source's twin.
+    ///     Who doubles whom, by how many scale steps, weighed by the song's melody facet, the chance of a section, alike at
+    ///     every end, the option of <see cref="GenreChoices.Doubling" /> it is a genre's by, none for a twin, which doubles
+    ///     wherever it plays, and whether the target is the source's twin.
     /// </summary>
-    public static ImmutableArray<(TrackRole Source, TrackRole Target, ImmutableArray<(int Step, ByConvention Weight)> Steps, double Chance, bool IsTwin)> Pairs { get; } =
+    public static ImmutableArray<(TrackRole Source, TrackRole Target, ImmutableArray<(int Step, ByConvention Weight)> Steps, ByConvention Chance, string? Option, bool IsTwin)> Pairs { get; } =
     [
-        (TrackRole.Melody, TrackRole.CounterMelody, [(2, Any), (-2, Any), (5, Any), (-5, Any)], 0.25, false),
-        (TrackRole.Riff, TrackRole.Bass, [(0, Any)], 0.35, false),
-        (TrackRole.Riff, TrackRole.RiffTwin, TwinSteps, 1, true)
+        (TrackRole.Melody, TrackRole.CounterMelody, [(2, Any), (-2, Any), (5, Any), (-5, Any)], HarmonyChance, "harmony", false),
+        (TrackRole.Riff, TrackRole.Bass, [(0, Any)], RiffChance, "riff", false),
+        (TrackRole.Riff, TrackRole.RiffTwin, TwinSteps, Any, null, true)
     ];
+
 
     /// <summary>The chance a counter-melody doubling the melody plays it in the melody's sound, twin leads a third apart.</summary>
     public const double TwinTimbreChance = 0.5;
@@ -69,6 +77,7 @@ internal static class LineDoubling
     /// <param name="sound">The song's sound facet, which the octaves lean by.</param>
     /// <param name="energies">Every appearance's energy, by its place, which the octaves lean by too.</param>
     /// <param name="riffPowerChords">Whether an appearance's riff plays in power chords, by its place, which plays no twin.</param>
+    /// <param name="genre">The genre whose chances of the doublings a section draws (<see cref="GenreChoices.Doubling" />).</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
         IReadOnlyDictionary<int, TrackRole> roles,
@@ -78,13 +87,14 @@ internal static class LineDoubling
         IReadOnlyList<double> energies,
         Func<int, int, IGenerationContext> streams,
         Func<int, IGenerationContext> timbres,
-        Func<int, bool> riffPowerChords
+        Func<int, bool> riffPowerChords,
+        Genre genre
     )
     {
         var trackOf = roles.GroupBy(x => x.Value).ToDictionary(x => x.Key, x => x.First().Key);
         // the parts that double or are doubled in a section, by its place, which play no other doubling there
         var doubling = new HashSet<(int Track, int Section)>();
-        foreach (var ((source, target, steps, chance, isTwin), pair) in Pairs.Select((x, i) => (x, i)))
+        foreach (var ((source, target, steps, chance, option, isTwin), pair) in Pairs.Select((x, i) => (x, i)))
         {
             if (!trackOf.TryGetValue(source, out var sourceTrack) || !trackOf.TryGetValue(target, out var targetTrack))
                 continue;
@@ -99,7 +109,7 @@ internal static class LineDoubling
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
                 var context = streams(pair, index);
-                var isDoubled = context.TestProbability(chance);
+                var isDoubled = context.TestProbability(chance.At(melody, option is null ? null : genre.Chance(GenreChoices.Doubling, option)));
                 var step = context.Pick(ByConvention.Weigh(steps, melody));
                 var events = song.TrackTimelineMap;
                 bool Plays(int track) => events[track].EventTimeline.Any(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9);
@@ -140,7 +150,7 @@ internal static class LineDoubling
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
                 var context = streams(place, index);
-                var inOctaves = context.TestProbability(SectionEnergy.Tilt(energies[index], OctaveCoupling).Chance(OctaveChance.At(sound), 1));
+                var inOctaves = context.TestProbability(SectionEnergy.Tilt(energies[index], OctaveCoupling).Chance(OctaveChance.At(sound, genre.Chance(GenreChoices.Doubling, "octaves")), 1));
                 bool Plays() => song.TrackTimelineMap[track].EventTimeline.Any(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9);
                 if (doubling.Contains((track, index)) || !Plays())
                     continue;

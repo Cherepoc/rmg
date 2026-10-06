@@ -300,6 +300,32 @@ public static class GenreChoices
         ("bends", "Bends", Expression.SongBendChance)
     ]);
 
+    /// <summary>A section's own tempo, one by a metric ratio and its own meter, beside the song's (<see cref="Composition.SectionTempo" />, <see cref="Composition.SectionMeter" />).</summary>
+    public static GenreChoice SectionChanges { get; } = Chances("sectionChanges", "A section's own time",
+        [
+            ("tempo", "A section at a tempo of its own", Composition.SectionTempo.Chance), ("modulation", "A tempo by a metric ratio", Composition.SectionTempo.ModulationChance),
+            ("meter", "A section in a meter of its own", Composition.SectionMeter.Chance)
+        ]);
+
+    /// <summary>A section's drums and bass in a cycle across the bar (<see cref="Composition.Polymeter" />).</summary>
+    public static GenreChoice Polymeter { get; } = Chances("polymeter", "Polymeter", [("sections", "Sections in a polymeter", Composition.Polymeter.Chance)]);
+
+    /// <summary>The solo part answering the melody in its gaps (<see cref="Composition.SoloAnswers" />).</summary>
+    public static GenreChoice SoloAnswers { get; } = Chances("soloAnswers", "Solo answers", [("sections", "Sections the solo part answers", Composition.SoloAnswers.Chance)]);
+
+    /// <summary>A last section that came back before played once more, as a last chorus (<see cref="SongForms.LastRepeatChance" />).</summary>
+    public static GenreChoice LastRepeat { get; } = Chances("lastRepeat", "Last repeat", [("songs", "A last chorus played twice", SongForms.LastRepeatChance)]);
+
+    /// <summary>A line doubled: in octaves by its own part, the melody harmonised by the counter-melody, the bass with the riff (<see cref="LineDoubling" />).</summary>
+    public static GenreChoice Doubling { get; } = Chances("doubling", "Doubling",
+    [
+        ("octaves", "Lines in octaves", LineDoubling.OctaveChance), ("harmony", "The melody harmonised", LineDoubling.HarmonyChance),
+        ("riff", "The bass with the riff", LineDoubling.RiffChance)
+    ]);
+
+    /// <summary>A part switching its instrument in a section (<see cref="InstrumentsOverTime" />).</summary>
+    public static GenreChoice InstrumentSwitches { get; } = Chances("instrumentSwitches", "Instrument switches", [("sections", "Sections switching an instrument", InstrumentsOverTime.SwitchChance)]);
+
     /// <summary>The strong effect a song plays on one part, or none: an echo, a tremolo or a sweep, or a pump on its pads, chords and bass (<see cref="Expression.StrongEffects" />).</summary>
     public static GenreChoice StrongEffect { get; } = Pool("strongEffect", "Strong effect",
         Expression.StrongEffects.Select(x => (Name(x.Effect.ToString()), x.Effect switch
@@ -504,6 +530,7 @@ public static class GenreChoices
     public static ImmutableArray<GenreChoice> All { get; } =
     [
         Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Dynamics, Phrases,
+        SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

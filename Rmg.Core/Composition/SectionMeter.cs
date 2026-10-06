@@ -36,7 +36,7 @@ internal static class SectionMeter
         return sectionIds.Distinct().ToImmutableDictionary(id => id, id =>
         {
             var drawing = sections(id);
-            var hasOwn = drawing.TestProbability(SectionContrast.Of(roles[id]).Chance(Chance.At(unconventionality), 1));
+            var hasOwn = drawing.TestProbability(SectionContrast.Of(roles[id]).Chance(Chance.At(unconventionality, genre.Chance(GenreChoices.SectionChanges, "meter")), 1));
             // the first section sets the song's meter
             if (!hasOwn || id == sectionIds[0] || options.Length == 0)
                 return song;

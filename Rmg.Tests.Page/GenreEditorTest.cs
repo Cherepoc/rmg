@@ -82,6 +82,22 @@ public sealed class GenreEditorTest(Site site)
         amount.ValueKind == System.Text.Json.JsonValueKind.Array ? [..amount.EnumerateArray().Select(x => x.GetInt32())] : [amount.GetInt32(), amount.GetInt32(), amount.GetInt32()];
 
     [Test]
+    public async Task EveryChoice_HasATile_ButAPartsOwn_WhichItsTabsHold()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var names = await page.Page.EvaluateAsync<string[]>("async () => (await (await fetch('api/genres/choices')).json()).map(x => x.name)");
+        // a part's instrument, rhythm, feel or drum role, and the kit's pieces, are its tabs'
+        string[] tabs = ["kit", "drumPieces", "drumSetup"];
+        var missing = new List<string>();
+        foreach (var name in names.Where(x => !x.Contains('.') && !tabs.Contains(x)))
+            if (await dialog.Locator($".genre-tile[data-choice='{name}']").CountAsync() == 0)
+                missing.Add(name);
+        await Assert.That(missing).IsEmpty();
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task AMeterChanged_IsTheGenres_SavedAmongOnesOwn_AndListedOnTheNextVisit()
     {
         await using var page = await SongPage.Open(site, "?song=1");

@@ -143,7 +143,7 @@ internal static class InstrumentsOverTime
             {
                 // a section plays as it did the time before, so that a chorus comes back in the instrument it switched to
                 var context = streams(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track);
-                var switches = context.TestProbability(SwitchChance.At(sound[index]));
+                var switches = context.TestProbability(SwitchChance.At(sound[index], genre.Chance(GenreChoices.InstrumentSwitches, "sections")));
                 var role = RoleOf(pitched.Role);
                 var pool = PoolOf(pitched.Role == TrackRole.RiffTwin ? TrackRole.Riff : pitched.Role, sound[index], genre);
                 double Weight(RoleInstrument instrument) => pool?.Invoke(instrument) ?? instrument.Weight;
