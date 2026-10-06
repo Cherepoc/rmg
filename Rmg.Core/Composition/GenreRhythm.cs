@@ -1,3 +1,4 @@
+using Rmg.Core.Songs;
 using Rmg.Core.Events;
 
 namespace Rmg.Core.Composition;
@@ -61,6 +62,19 @@ internal static class GenreRhythm
         ];
         return StateMap.FromStates([..states.Where(x => !x.IsDefault)]);
     }
+
+    /// <summary>The part of a pitched role whose rhythm a genre may move; none for one that has none of its own.</summary>
+    public static RhythmPart? PartOf(TrackRole role) => role switch
+    {
+        TrackRole.Melody => RhythmPart.Melody,
+        TrackRole.Chords => RhythmPart.Chords,
+        TrackRole.Bass => RhythmPart.Bass,
+        TrackRole.Pad => RhythmPart.Pad,
+        TrackRole.CounterMelody => RhythmPart.CounterMelody,
+        TrackRole.Riff or TrackRole.RiffTwin => RhythmPart.Riff,
+        TrackRole.Rhythm => RhythmPart.Rhythm,
+        _ => null
+    };
 
     /// <summary>The melody's busyness moved by the genre's.</summary>
     public static MelodyBusyness Of(Genre genre, MelodyBusyness busyness) =>

@@ -348,6 +348,7 @@
     "name": "Reggae",
     "description": "Slow, the one drop with the kick and snare on beat 3, the chords and a rhythm guitar skanking on the offbeats, a sparse repeating bass, organ, major and minor.",
     "choices": {
+      "pins": { "ground": [100, 100, 70], "backbeat": [100, 100, 70], "chords": [100, 100, 70], "rhythm": [100, 100, 70] },
       "solos": { "sections": [0, 2, 8] },
       "push": {},
       "stopTime": {},
@@ -385,7 +386,7 @@
         "bass": { "repetition": 100, "fullness": 31 },
         "rhythm": { "speed": 100, "offbeat": 76, "fineness": 0 },
         "ground": { "offbeat": 76, "fullness": 19, "repetition": 92 },
-        "backbeat": { "repetition": 92 }
+        "backbeat": { "speed": 25, "repetition": 92 }
       }
     }
   },

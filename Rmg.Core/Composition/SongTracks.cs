@@ -91,7 +91,7 @@ internal sealed class SongTracks
         Func<RhythmPart, IGenerationContext> feelStreams,
         double feel,
         double sound,
-        ImmutableHashSet<DrumRole> pinned
+        ImmutableHashSet<RhythmPart> pinned
     )
     {
         // a part's level, louder or quieter by the genre's (GenreChoices.Levels)
@@ -104,6 +104,8 @@ internal sealed class SongTracks
             : StateMap.Default;
 
         var trackRhythmLayer = rhythmicUnconventionality.Lean(RhythmLayers.Track);
+        // a pinned part's own layer moving none of its rhythm (PatternGenerator)
+        RhythmLayer RhythmLayerOf(TrackRole role) => GenreRhythm.PartOf(role) is { } part && pinned.Contains(part) ? RhythmLayers.Still : trackRhythmLayer;
         // an instrument's weight in the genre's pool of its role, at the sound facet
         Func<RoleInstrument, double>? Pool(TrackRole role) => InstrumentsOverTime.PoolOf(role, sound, genre);
 
@@ -155,7 +157,7 @@ internal sealed class SongTracks
                 .Add(CompositionStateKinds.Rhythm.Fullness, RiffLayers.Fullness)
                 .ToStateMap(riffContext),
             _ => Level(TrackRole.Riff),
-            trackRhythmLayer
+            RhythmLayerOf(TrackRole.Riff)
         );
         var definitions = new Dictionary<int, IInstrumentTrack>
         {
@@ -169,7 +171,7 @@ internal sealed class SongTracks
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Solo))
                         .ToStateMap(soloContext),
                     _ => Level(TrackRole.Solo),
-                    trackRhythmLayer
+                    RhythmLayerOf(TrackRole.Solo)
                 ),
                 soloInstrument.Program,
                 -1,
@@ -190,7 +192,7 @@ internal sealed class SongTracks
                         .Add(CompositionStateKinds.Rhythm.Fullness, RhythmPartFullness)
                         .ToStateMap(rhythmContext),
                     _ => Level(TrackRole.Rhythm),
-                    trackRhythmLayer
+                    RhythmLayerOf(TrackRole.Rhythm)
                 ),
                 rhythmInstrument.Program,
                 Generators.Int(-1, 1).WithContext(rhythmContext)(),
@@ -217,7 +219,7 @@ internal sealed class SongTracks
                         .Add(CompositionStateKinds.Rhythm.Fullness, CounterLayers.Fullness)
                         .ToStateMap(counterContext),
                     _ => Level(TrackRole.CounterMelody),
-                    trackRhythmLayer
+                    RhythmLayerOf(TrackRole.CounterMelody)
                 ),
                 counterInstrument.Program,
                 -1,
@@ -234,7 +236,7 @@ internal sealed class SongTracks
                         .Add(StateKinds.VoiceLeading, padInstrument.Leading)
                         .ToStateMap(padContext),
                     _ => Level(TrackRole.Pad),
-                    trackRhythmLayer
+                    RhythmLayerOf(TrackRole.Pad)
                 ),
                 padInstrument.Program,
                 -1,
@@ -252,7 +254,7 @@ internal sealed class SongTracks
                         .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Song).Then(x => chordsInstrument.Leading + x))
                         .ToStateMap(context),
                     _ => Level(TrackRole.Chords),
-                    trackRhythmLayer
+                    RhythmLayerOf(TrackRole.Chords)
                 ),
                 chordsInstrument.Program,
                 minOctaveOffsetGenerator(),
@@ -272,7 +274,7 @@ internal sealed class SongTracks
                         .Add(CompositionStateKinds.Rhythm.Variation, MelodyLayers.RhythmVariation)
                         .ToStateMap(context),
                     _ => Level(TrackRole.Melody),
-                    trackRhythmLayer
+                    RhythmLayerOf(TrackRole.Melody)
                 ),
                 melodyInstrument.Program,
                 minOctaveOffsetGenerator(),
@@ -289,7 +291,7 @@ internal sealed class SongTracks
                         .Add(CompositionStateKinds.LineStepwiseness, BassLeadingLayers.Stepwiseness)
                         .ToStateMap(context),
                     _ => Level(TrackRole.Bass),
-                    trackRhythmLayer
+                    RhythmLayerOf(TrackRole.Bass)
                 ),
                 bassInstrument.Program,
                 -3,
@@ -320,7 +322,7 @@ internal sealed class SongTracks
                     .MergeWith(DrumRoles.GenerateSong(roleContext, drum, rhythmicUnconventionality.Value, genre));
                 drumStateMap = drumStateMap.MergeWith(FeelOf(DrumRoles.PartOf(DrumRoles.Of(drumStateMap))));
                 // a drum of a pinned role plays its figure as given, its own layer moving none of it (PatternGenerator)
-                var pins = pinned.Contains(DrumRoles.Of(drumStateMap));
+                var pins = pinned.Contains(DrumRoles.PartOf(DrumRoles.Of(drumStateMap)));
                 if (pins)
                     drumStateMap = drumStateMap.MergeWith(StateMap.FromStates([CompositionStateKinds.Pinned.CreateState(1)]));
                 definitions[DrumGroups.GetTrackNumber(drum)] = new PercussionInstrumentTrack(
@@ -334,20 +336,12 @@ internal sealed class SongTracks
         // every pitched part's rhythm and feel as the genre gives them, a riff's twin's as the riff's
         foreach (var (track, pitched) in definitions.Where(x => x.Value is PitchInstrumentTrack).Select(x => (x.Key, (PitchInstrumentTrack)x.Value)).ToArray())
         {
-            RhythmPart? part = pitched.Role switch
-            {
-                TrackRole.Melody => RhythmPart.Melody,
-                TrackRole.Chords => RhythmPart.Chords,
-                TrackRole.Bass => RhythmPart.Bass,
-                TrackRole.Pad => RhythmPart.Pad,
-                TrackRole.CounterMelody => RhythmPart.CounterMelody,
-                TrackRole.Riff or TrackRole.RiffTwin => RhythmPart.Riff,
-                TrackRole.Rhythm => RhythmPart.Rhythm,
-                _ => null
-            };
-            if (part is { } moved && (genre.Names(GenreChoices.Rhythms[moved]) || genre.Names(GenreChoices.PartFeels[moved])))
+            var part = GenreRhythm.PartOf(pitched.Role);
+            // a pinned part plays its song's rhythm settings in every bar
+            var pin = part is { } held && pinned.Contains(held) ? StateMap.FromStates([CompositionStateKinds.Pinned.CreateState(1)]) : StateMap.Default;
+            if (part is { } moved && (genre.Names(GenreChoices.Rhythms[moved]) || genre.Names(GenreChoices.PartFeels[moved]) || pin != StateMap.Default))
                 definitions[track] = new PitchInstrumentTrack(
-                    pitched.StateMap.MergeWith(GenreRhythm.Of(genre, GenreChoices.Rhythms[moved])).MergeWith(FeelOf(moved)),
+                    pitched.StateMap.MergeWith(GenreRhythm.Of(genre, GenreChoices.Rhythms[moved])).MergeWith(FeelOf(moved)).MergeWith(pin),
                     pitched.InstrumentCode,
                     pitched.MinOctaveOffset,
                     pitched.MaxOctaveOffset,

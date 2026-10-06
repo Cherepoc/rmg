@@ -168,8 +168,14 @@ public static class GenreChoices
         [("legato", "Slurred steps", SongStages.LegatoChance), ("roll", "Rolled piano chords", SongStages.RollChance)]);
 
     /// <summary>The chance a song pins a drum role to its figure, every bar alike: the ground, the backbeat and the time (<see cref="DrumRoles.Pins" />).</summary>
-    public static GenreChoice Pins { get; } = Chances("pins", "Drums pinned",
-        [("ground", "The ground, as a kick", Composition.DrumRoles.Pins), ("backbeat", "The backbeat, as a snare", Composition.DrumRoles.Pins), ("time", "The time, as a hi-hat", Composition.DrumRoles.Pins)]);
+    public static GenreChoice Pins { get; } = Chances("pins", "Parts pinned", [..Composition.DrumRoles.PinnedParts.Select(x => (Name(x.ToString()), x switch
+    {
+        RhythmPart.Ground => "The ground, as a kick",
+        RhythmPart.Backbeat => "The backbeat, as a snare",
+        RhythmPart.Time => "The time, as a hi-hat",
+        RhythmPart.CounterMelody => "The counter-melody",
+        _ => $"The {x.ToString().ToLowerInvariant()}"
+    }, Composition.DrumRoles.Pins))]);
 
     /// <summary>How long a section plays, its pattern played over and over: four bars to thirty-two, a dance track's the longest, which the songs never play (<see cref="Composition.SectionLength" />).</summary>
     public static GenreChoice SectionLength { get; } = Pool("sectionLength", "Section's length",

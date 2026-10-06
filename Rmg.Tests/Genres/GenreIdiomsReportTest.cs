@@ -93,6 +93,10 @@ public sealed class GenreIdiomsReportTest
             ["drums over the melody"] = drumVelocities.Length > 0 && melodyVelocities.Length > 0 ? drumVelocities.Average() - melodyVelocities.Average() : double.NaN,
             ["kick on 1"] = bars.Length > 0 ? bars.Count(x => HitsAt(kicks, x)) / (double)bars.Length : double.NaN,
             ["kick on every beat"] = bars.Length > 0 ? bars.Count(x => Enumerable.Range(0, 4).All(b => HitsAt(kicks, x + b))) / (double)bars.Length : double.NaN,
+            ["one drop (kick and snare on 3 alone)"] = bars.Length > 0 ? bars.Count(x => HitsAt(kicks, x + 2) && HitsAt(snares, x + 2) && !HitsAt(kicks, x) && !HitsAt(snares, x + 1) && !HitsAt(snares, x + 3)) / (double)bars.Length : double.NaN,
+            ["chords on the offbeat 8ths"] = notes.GetValueOrDefault(SongTracks.ChordsTrack) is { Count: > 0 } chordNotes
+                ? chordNotes.Average(x => Math.Abs(x.Position % 1 - 0.5) < 0.05 ? 1.0 : 0)
+                : double.NaN,
             ["snare on 2 and 4"] = bars.Length > 0 ? bars.Count(x => HitsAt(snares, x + 1) && HitsAt(snares, x + 3)) / (double)bars.Length : double.NaN,
             ["chorus melody bars repeated"] = RepeatedIn(SectionRole.Chorus),
             ["verse melody bars repeated"] = RepeatedIn(SectionRole.Verse),
@@ -137,6 +141,7 @@ public sealed class GenreIdiomsReportTest
         ["techno"] = [("chords in 4 bars", 0, 2), ("kick on every beat", 0.85, 1), ("drums over the melody", 10, 127), ("tempo", 125, 140)],
         ["synthwave"] = [("snare on 2 and 4", 0.8, 1), ("kick on every beat", 0, 0.3), ("tempo", 85, 118), ("ending a fade", 0.5, 1)],
         ["rock"] = [("kick on 1", 0.85, 1), ("snare on 2 and 4", 0.85, 1), ("chords in 4 bars", 2, 4), ("melody pentatonic or blues", 0.5, 1)],
+        ["reggae"] = [("one drop (kick and snare on 3 alone)", 0.6, 1), ("chords on the offbeat 8ths", 0.7, 1), ("tempo", 60, 90)],
         ["blues"] = [("melody pentatonic or blues", 0.6, 1), ("snare on 2 and 4", 0.8, 1)],
         ["jazz"] = [("chords in 4 bars", 4, 8), ("melody leaps past a fifth", 0.06, 0.2)],
         ["folk"] = [("melody mean move", 0, 2.5), ("fills a minute", 0, 4)]

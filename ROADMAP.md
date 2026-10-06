@@ -411,6 +411,9 @@ Each item with its plan, and what it waits for.
   day and slow at the 200,000 a day the table keeps at most; then the spreads would be worked out a day at a time.
 - **The drum groups' pulses fading by their sounds** (P4): every group fades as fast as the parts' meters, a cymbal's
   wash as a click; a fade of each group's own would follow its sound, for little.
+- **A flaky page test** (P3): `GenreEditorTest.ALength_IsShownAndGivenInMinutesAndSeconds_ATempoInBeatsAMinute`
+  failed 2 of 6 full runs of the page tests in October 2026 and passed alone and on rerun, its message lost; a race in
+  the tune's values shown, to find should it fail again.
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them; playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
@@ -611,7 +614,9 @@ a link carries. What is left:
      drums keeping time rolled in 32nds or 16th triplets, louder as it goes, a genre's: 204 rolls in 16 Hip-hop songs,
      none in the songs. Not done: a snare's drag and its ghost notes, which want the backbeat's own figure, the pinned
      backbeat keeping its hits clean.
-  6. The one drop (the kick and snare on 3 alone, beat 1 empty), Reggae's, and its skank on the offbeats only.
+  6. Done: the one drop and the skank, by settings and pins (`GenreChoices.Pins` now any part's, a pitched part's
+     too): Reggae's kick and snare on 3 alone in 63% of its groove bars (2%), its kick off 1 in 88%, its chords on the
+     offbeat 8ths 71% (59%; the others' 3-25%).
   7. A clave the band keeps to, Latin's: the parts' rhythms aligned to the 3-2 or 2-3, and the piano's montuno.
   8. A rap's place: a hook sung and the verses left to a voice, the melody resting or a riff carrying them.
   9. A melody written as a hook in every section, not only its repeated bars (House's and Hip-hop's melody bars
