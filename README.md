@@ -15,6 +15,10 @@ counter-melody, a riff (with a twin that harmonises it), a rhythm part and a sol
 bring them in phrase by phrase, hold some back until a later section, double lines, play solos and fills, and change
 key or tempo, each by a chance of its own.
 
+A genre leans a song's choices towards its idioms: a pool of options or a chance for each choice, at the plain end, the
+middle and the wild end. Twelve presets come with the page (Rock, Jazz, House, Techno, Synthwave, Hip-hop, Reggae,
+Latin, Funk, Folk, Blues and Ambient), and the page's editor makes and changes genres of one's own.
+
 ## Requirements
 
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
@@ -85,7 +89,9 @@ Listens on every interface, on port 5000 by default. See [Settings](#settings).
       "melody": { "instrument": 40, "volume": 32 },
       "drum": { "isOn": false }
     },
-    "volume": 50
+    "volume": 50,
+    "genreName": "Rock",
+    "genre": { "meter": { "4/4": 100 } }
   }
   ```
 
@@ -94,16 +100,21 @@ Listens on every interface, on port 5000 by default. See [Settings](#settings).
   (`isOn: false`); `drumSetup` and `drumGroups` do the same for the drums, `drumPieces` gives the drum pieces the song
   plays, by name, which make its setup, and `key`, `tempo` and `meter` give those
   (the tempo by its step from 0 to 61, 60 to 240 beats a minute with 120 at 31, and the meter by its place in
-  `GET /api/songs/options`). The response carries the seed (`X-Song-Seed`),
-  the songs' version (`X-Song-Version`) and everything the song drew or was given, with every part's channel
-  (`X-Song-Settings`). The file is named `song-<seed>.mid`. The server makes as many songs at once as it has cores;
+  `GET /api/songs/options`). A genre (`genre`, by the names of `GET /api/genres/choices`) gives a choice's amounts in
+  whole numbers, one alike at every end or three, at the plain end, the middle and the wild end. The response carries
+  the seed (`X-Song-Seed`), the songs' version (`X-Song-Version`), the key the genre is kept by (`X-Genre-Key`) and
+  everything the song drew or was given, with every part's channel (`X-Song-Settings`). The file is named `song-<seed>.mid`. The server makes as many songs at once as it has cores;
   the rest wait their turn, a client at a time, and are turned away with 429 or 503 when too many wait.
 - `GET /api/songs/options` lists the tempos a song may be given, in beats a minute by their steps, the meters, and the
   drum pieces with their groups and notes.
+- `GET /api/genres/choices` lists the choices a genre may name, with their options and the songs' own amounts;
+  `POST /api/genres/preview` and `/api/genres/previews` say what a genre's choices make of their options from the
+  plainest songs to the wildest, for the editor's graphs; `GET /api/genres/{key}` returns a genre kept by its key.
 - `GET /api/version` returns the songs' version and commit.
 - `GET /api/soundfonts` lists the soundfonts the server offers, with their licence files.
-- `POST /api/tally` records one page event, and `GET /api/tally/summary` returns the analytics, with the dashboard
-  token. See [Analytics](#analytics).
+- `POST /api/tally` records one page event. See [Analytics](#analytics).
+- `/admin/` is the operator's area, behind a password: the analytics dashboard (`/admin/api/summary`) and a song's
+  description from its link or seed (`/admin/api/songs/describe`). See [The admin area](#the-admin-area).
 
 The player ([spessasynth](https://github.com/spessasus/spessasynth_lib)) is loaded from a CDN, so the page needs an
 internet connection.
@@ -117,9 +128,12 @@ internet connection.
   out) and the drums can be given or left to the song. Changing one remakes the song from the same seed, going on
   from the same place. What changes only how it sounds (a part's instrument, volume and pan, the drum groups, the
   volume) is heard at once. What each setting does is shown under the pointer.
+- **Genres.** A genre picked leans the songs to its idioms; the editor shows every choice as a graph of what the songs
+  draw of it from the plainest to the wildest, and changes it by its options and their amounts.
 - **Rating.** Like or dislike a song; the ratings go with the analytics, by the songs' version.
 - **So far** lists the last fifty songs, newest first, kept in the browser; a song walked to keeps its place.
-- **Sharing.** The address always follows the song and its settings, `?song=<seed>&settings=<settings>`, so it is
+- **Sharing.** The address always follows the song, its settings and its genre,
+  `?song=<seed>&settings=<settings>&genre=<key>`, so it is
   itself a link; **Share** opens the share sheet or copies it. Seeds are not kept stable across versions, so after
   an update an old link can play a different song.
 - **Downloads.** The `.mid` carries the mix. **Download .mp3** renders the song, at the bitrate beside it, with the mix and the soundfont in the
@@ -245,7 +259,7 @@ dotnet run --project Rmg.WebApi -- --port 8080
 | `DefaultSoundFont` | Soundfont the page loads first. Blank means the first one |
 | `AnalyticsEnabled` | Whether to collect analytics. Default `true` |
 | `StateDirectory` | Where the analytics are stored. Blank means beside the app |
-| `DashboardToken` | Token for the analytics dashboard. Blank turns the dashboard off |
+| `DashboardToken` | Password of the admin area, as the user `admin`. Blank turns the area off |
 | `RetentionDays` | How long events are kept. Default `180` |
 | `EventsPerVisitorPerDay` | Events accepted from one visitor per day. Default `300` |
 
@@ -273,12 +287,13 @@ The script is `tally.js` and the path `/api/tally` because blocklists block `ana
 
 Events older than `RetentionDays` are deleted on start. `AnalyticsEnabled: false` turns it all off.
 
-### The dashboard
+### The admin area
 
-`/dashboard.html` shows visitors, load times, how far people got, the songs listened to and rated by version
-and by how plain or wild they are, and the server: how long songs took to make and how many waited.
-It needs `DashboardToken` (`RMG_DASHBOARDTOKEN`) and sends it as `Authorization: Bearer <token>`;
-without a token the summary is not served.
+`/admin/` is served only with `DashboardToken` (`RMG_DASHBOARDTOKEN`) set: the browser asks for the user `admin` and
+that token as the password. Without a token nothing under `/admin` is served. Its dashboard
+(`/admin/dashboard.html`) shows visitors, load times, how far people got, the songs listened to and rated by version
+and by how plain or wild they are, and the server: how long songs took to make and how many waited. Its front page
+describes a song from its link or seed.
 
 ```
 RMG_DASHBOARDTOKEN=$(openssl rand -hex 24) ./deploy.sh --host your-vps
