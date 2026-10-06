@@ -11,6 +11,17 @@ namespace Rmg.Core.Composition;
 /// </summary>
 internal static class GenreRhythm
 {
+    /// <summary>A part as its rhythm's choice shows it, a drum role by the drum that most often plays it.</summary>
+    public static string LabelOf(RhythmPart part) => part switch
+    {
+        RhythmPart.CounterMelody => "Counter-melody",
+        RhythmPart.Ground => "Ground (kick)",
+        RhythmPart.Backbeat => "Backbeat (snare)",
+        RhythmPart.Time => "Time (hi-hat)",
+        RhythmPart.Colour => "Colour (toms)",
+        _ => part.ToString()
+    };
+
     /// <summary>
     ///     How many steps the most of a value moves a rhythm setting: two, so that a part of a bar's cycle can play a beat's,
     ///     one of a beat's cycle a 16th off it, and one down to 16ths play its cycle's beats alone. A setting moves only away

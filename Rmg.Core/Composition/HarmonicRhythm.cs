@@ -26,6 +26,14 @@ internal sealed record HarmonicRhythm(double Bars, Meter Meter)
         (new Weighted<double>(0.15, 0.5), 1)
     ];
 
+    /// <summary>A span as a genre's page shows it.</summary>
+    public static string LabelOf(double bars) => bars switch
+    {
+        0.5 => "Two a bar",
+        1 => "One a bar",
+        _ => "One every two bars"
+    };
+
     /// <summary>A span's name, as a genre names it: "halfBar", "oneBar", "twoBars".</summary>
     public static string NameOf(double bars) => bars switch
     {

@@ -20,6 +20,14 @@ public enum DrumSetup
 /// </summary>
 internal static class DrumSetups
 {
+    /// <summary>A setup as a genre's page shows it.</summary>
+    public static string LabelOf(DrumSetup setup) => setup switch
+    {
+        DrumSetup.Kit => "Kit",
+        DrumSetup.KitAndPercussion => "Both",
+        _ => "Percussion"
+    };
+
     /// <summary>How likely every setup is, with no lean, and how it leans to the unconventional.</summary>
     public static ImmutableArray<(DrumSetup Setup, double Weight, double Lean)> All { get; } =
     [

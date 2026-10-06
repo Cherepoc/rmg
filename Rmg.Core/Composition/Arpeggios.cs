@@ -59,6 +59,17 @@ internal static class Arpeggios
         (ArpeggioPattern.UpTwoOctaves, new ByConvention(0, 0.005, 1))
     ];
 
+    /// <summary>An arpeggio as a genre's page shows it.</summary>
+    public static string LabelOf(ArpeggioPattern pattern) => pattern switch
+    {
+        ArpeggioPattern.None => "The whole chord",
+        ArpeggioPattern.UpDown => "Up and down",
+        ArpeggioPattern.DownUp => "Down and up",
+        ArpeggioPattern.RootFifth => "Root and fifth",
+        ArpeggioPattern.UpTwoOctaves => "Up two octaves",
+        _ => pattern.ToString()
+    };
+
     /// <summary>A section's pattern, by the chords facet of its unconventionality, among a genre's pool where it names one.</summary>
     public static ArpeggioPattern Draw(IGenerationContext context, double unconventionality, Genre genre)
     {

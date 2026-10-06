@@ -93,35 +93,15 @@ public static class GenreChoices
 
     /// <summary>Who solos (<see cref="Composition.Solos.Soloists" />).</summary>
     public static GenreChoice Soloists { get; } = Pool("soloists", "Soloists",
-        Composition.Solos.Soloists.Select(x => (Name(x.Part.ToString()), x.Part switch
-        {
-            TrackRole.Solo => "The solo part",
-            TrackRole.CounterMelody => "Counter-melody",
-            TrackRole.Drum => "Drums",
-            _ => x.Part.ToString()
-        }, x.Weight)));
+        Composition.Solos.Soloists.Select(x => (Name(x.Part.ToString()), Composition.Solos.LabelOf(x.Part), x.Weight)));
 
     /// <summary>How the song starts before its first section (<see cref="FormLayers.Intros" />): the whole band, a count-in, or the parts one by one.</summary>
     public static GenreChoice Intro { get; } = Pool("intro", "Intro",
-        FormLayers.IntroWeights.Select(x => (Name(x.Intro.ToString()), x.Intro switch
-        {
-            IntroKind.Cold => "The whole band",
-            IntroKind.CountIn => "A count-in",
-            IntroKind.Entries => "Part by part",
-            _ => x.Intro.ToString()
-        }, x.Weight)));
+        FormLayers.IntroWeights.Select(x => (Name(x.Intro.ToString()), FormLayers.LabelOf(x.Intro), x.Weight)));
 
     /// <summary>How the song ends (<see cref="FormLayers.Endings" />).</summary>
     public static GenreChoice Ending { get; } = Pool("ending", "Ending",
-        FormLayers.EndingWeights.Select(x => (Name(x.Ending.ToString()), x.Ending switch
-        {
-            EndingKind.Button => "A button",
-            EndingKind.RingOut => "A ringing chord",
-            EndingKind.Open => "Open",
-            EndingKind.Stop => "A stop",
-            EndingKind.Fade => "A fade",
-            _ => x.Ending.ToString()
-        }, x.Weight)));
+        FormLayers.EndingWeights.Select(x => (Name(x.Ending.ToString()), FormLayers.LabelOf(x.Ending), x.Weight)));
 
     /// <summary>The chance a section sits on its home chord, every chord of its pattern the home, a vamp (<see cref="SectionGenerator.Vamp" />); the songs never.</summary>
     public static GenreChoice Vamp { get; } = Chances("vamp", "Vamp", [("sections", "Sections on one chord", SectionGenerator.Vamp)]);
@@ -171,38 +151,17 @@ public static class GenreChoices
         [("legato", "Slurred steps", Articulations.LegatoChance), ("roll", "Rolled piano chords", Articulations.RollChance), ("stabs", "Chords as stabs", Articulations.StabChance)]);
 
     /// <summary>The chance a song pins a drum role to its figure, every bar alike: the ground, the backbeat and the time (<see cref="DrumRoles.Pins" />).</summary>
-    public static GenreChoice Pins { get; } = Chances("pins", "Parts pinned", [..Composition.DrumRoles.PinnedParts.Select(x => (Name(x.ToString()), x switch
-    {
-        RhythmPart.Ground => "The ground, as a kick",
-        RhythmPart.Backbeat => "The backbeat, as a snare",
-        RhythmPart.Time => "The time, as a hi-hat",
-        RhythmPart.CounterMelody => "The counter-melody",
-        _ => $"The {x.ToString().ToLowerInvariant()}"
-    }, Composition.DrumRoles.Pins))]);
+    public static GenreChoice Pins { get; } = Chances("pins", "Parts pinned", [..Composition.DrumRoles.PinnedParts.Select(x => (Name(x.ToString()), Composition.DrumRoles.PinLabelOf(x), Composition.DrumRoles.Pins))]);
 
     /// <summary>How long a section plays, its pattern played over and over: four bars to thirty-two, a dance track's the longest, which the songs never play (<see cref="Composition.SectionLength" />).</summary>
     public static GenreChoice SectionLength { get; } = Pool("sectionLength", "Section's length",
         Composition.SectionLength.Options.Select(x => (Composition.SectionLength.NameOf(x.Plays), $"{x.Plays * Composition.Meter.PhraseBarCount} bars", x.Weight)));
 
     /// <summary>How an appearance brings its parts in over its phrases: steady, building, thinning or one part alone (<see cref="Composition.Texture" />).</summary>
-    public static GenreChoice Texture { get; } = Pool("texture", "Texture", Composition.Texture.Kinds.Select(x => (Name(x.Kind.ToString()), x.Kind switch
-    {
-        TextureKind.Steady => "Every part through",
-        TextureKind.Build => "Parts coming in",
-        TextureKind.Thin => "Parts dropping out",
-        _ => "One part alone"
-    }, x.Weight)));
+    public static GenreChoice Texture { get; } = Pool("texture", "Texture", Composition.Texture.Kinds.Select(x => (Name(x.Kind.ToString()), Composition.Texture.LabelOf(x.Kind), x.Weight)));
 
     /// <summary>How the chords and the rhythm part break their chords, or play them whole (<see cref="Arpeggios" />): an arpeggiator's up and down a synth genre's.</summary>
-    public static GenreChoice Arpeggio { get; } = Pool("arpeggio", "Arpeggios", Arpeggios.Patterns.Select(x => (Name(x.Pattern.ToString()), x.Pattern switch
-    {
-        ArpeggioPattern.None => "The whole chord",
-        ArpeggioPattern.UpDown => "Up and down",
-        ArpeggioPattern.DownUp => "Down and up",
-        ArpeggioPattern.RootFifth => "Root and fifth",
-        ArpeggioPattern.UpTwoOctaves => "Up two octaves",
-        _ => x.Pattern.ToString()
-    }, x.Weight)));
+    public static GenreChoice Arpeggio { get; } = Pool("arpeggio", "Arpeggios", Arpeggios.Patterns.Select(x => (Name(x.Pattern.ToString()), Arpeggios.LabelOf(x.Pattern), x.Weight)));
 
     /// <summary>The chance a bar's hi-hat rolls its last beat in 32nds or 16th triplets, the trap's (<see cref="HatRolls.Chance" />).</summary>
     public static GenreChoice HatRolls { get; } = Chances("hatRolls", "Hi-hat rolls", [("bars", "Bars ending on a roll", Composition.HatRolls.Chance)]);
@@ -259,12 +218,8 @@ public static class GenreChoices
 
     /// <summary>How long a section's chords last (<see cref="Composition.HarmonicRhythm.Spans" />): half a bar, a bar or two bars, the faster the more energy.</summary>
     public static GenreChoice HarmonicRhythm { get; } = Pool("harmonicRhythm", "Chords' pace",
-        Composition.HarmonicRhythm.Spans.Select(x => (Composition.HarmonicRhythm.NameOf(x.Span.Value), x.Span.Value switch
-        {
-            0.5 => "Two a bar",
-            1 => "One a bar",
-            _ => "One every two bars"
-        }, new ByConvention(x.Span.Weight, x.Span.Weight, x.Span.Weight))));
+        Composition.HarmonicRhythm.Spans.Select(x => (Composition.HarmonicRhythm.NameOf(x.Span.Value), Composition.HarmonicRhythm.LabelOf(x.Span.Value),
+            new ByConvention(x.Span.Weight, x.Span.Weight, x.Span.Weight))));
 
     /// <summary>How much the drums fill, from 0, seldom and short, through 50, as the songs have it, to 100, often and long (<see cref="FillLayers.GenreAmountOdds" />).</summary>
     public static GenreChoice Fills { get; } = Values("fills", "Fills", [("amount", "Amount")]);
@@ -281,12 +236,7 @@ public static class GenreChoices
     /// </summary>
     public static GenreChoice Levels { get; } = Values("levels", "Levels",
         [..new[] { TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Solo, TrackRole.Drum }
-            .Select(x => (Name(x.ToString()), x switch
-            {
-                TrackRole.CounterMelody => "Counter-melody",
-                TrackRole.Drum => "Drums",
-                _ => x.ToString()
-            }))]);
+            .Select(x => (Name(x.ToString()), TrackRoles.LabelOf(x)))]);
 
     /// <summary>
     ///     How much reverb each part plays with, from 0, dry, through 50, as the songs have it, to 100, as wet as can be
@@ -294,12 +244,7 @@ public static class GenreChoices
     /// </summary>
     public static GenreChoice Space { get; } = Values("space", "Space",
         [..new[] { TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Solo, TrackRole.Drum }
-            .Select(x => (Name(x.ToString()), x switch
-            {
-                TrackRole.CounterMelody => "Counter-melody",
-                TrackRole.Drum => "Drums",
-                _ => x.ToString()
-            }))]);
+            .Select(x => (Name(x.ToString()), TrackRoles.LabelOf(x)))]);
 
     /// <summary>How much the bass leads into a new chord, from 0, never, through 50, as its instrument has it, to 100, walking (<see cref="BassLeadingLayers.GenreLeadOdds" />).</summary>
     public static GenreChoice Bass { get; } = Values("bass", "Bass", [("leading", "Leading into a chord")]);
@@ -315,14 +260,7 @@ public static class GenreChoices
 
     /// <summary>What the bass lands on in a new chord (<see cref="BassLeadingLayers.Arrivals" />): its root, its third, its fifth, or its figure's note.</summary>
     public static GenreChoice BassLanding { get; } = Pool("bassLanding", "Bass's landing",
-        BassLeadingLayers.ArrivalWeights.Select(x => (Name(x.Arrival.ToString()), x.Arrival switch
-        {
-            ChordArrival.Root => "The root",
-            ChordArrival.Third => "The third",
-            ChordArrival.Fifth => "The fifth",
-            ChordArrival.Free => "Its figure's note",
-            _ => throw new ArgumentOutOfRangeException(nameof(x.Arrival), x.Arrival, null)
-        }, x.Weight)));
+        BassLeadingLayers.ArrivalWeights.Select(x => (Name(x.Arrival.ToString()), BassLeadingLayers.LabelOf(x.Arrival), x.Weight)));
 
     /// <summary>
     ///     The scales a melody's and a riff's passing notes take, each weighed as the songs weigh them
@@ -330,17 +268,7 @@ public static class GenreChoices
     ///     chord's root.
     /// </summary>
     public static GenreChoice LineScale { get; } = Pool("lineScale", "Lines' scale",
-        Composition.LineScales.Weights.Select(x => (Name(x.Scale.ToString()), x.Scale switch
-        {
-            Composition.LineScale.Section => "The section's",
-            Composition.LineScale.Pentatonic => "Pentatonic",
-            Composition.LineScale.Blues => "Blues",
-            Composition.LineScale.MelodicMinor => "Melodic minor",
-            Composition.LineScale.WholeTone => "Whole-tone",
-            Composition.LineScale.Octatonic => "Octatonic",
-            Composition.LineScale.Chromatic => "Chromatic",
-            _ => throw new ArgumentOutOfRangeException(nameof(x.Scale), x.Scale, null)
-        }, x.Weight)));
+        Composition.LineScales.Weights.Select(x => (Name(x.Scale.ToString()), Composition.LineScales.LabelOf(x.Scale), x.Weight)));
 
     /// <summary>
     ///     The gentle effects a song plays at all, each its chance as the songs have it by their sound (<see cref="Expression" />):
@@ -382,14 +310,7 @@ public static class GenreChoices
 
     /// <summary>The strong effect a song plays on one part, or none: an echo, a tremolo or a sweep, or a pump on its pads, chords and bass (<see cref="Expression.StrongEffects" />).</summary>
     public static GenreChoice StrongEffect { get; } = Pool("strongEffect", "Strong effect",
-        Expression.StrongEffects.Select(x => (Name(x.Effect.ToString()), x.Effect switch
-        {
-            Composition.StrongEffect.Tremolo => "A tremolo",
-            Composition.StrongEffect.Echo => "An echo",
-            Composition.StrongEffect.Sweep => "A sweep",
-            Composition.StrongEffect.Pump => "A pump",
-            _ => "None"
-        }, x.Weight)));
+        Expression.StrongEffects.Select(x => (Name(x.Effect.ToString()), Expression.LabelOf(x.Effect), x.Weight)));
 
     /// <summary>
     ///     How far each pitched part sits from the middle, its role's spread moved wider or narrower (<see cref="Panning.SpreadOf" />),
@@ -466,12 +387,7 @@ public static class GenreChoices
     ///     left out.
     /// </summary>
     public static GenreChoice Rests { get; } = Values("rests", "Parts resting",
-        [..Arrangement.Rests.Select(x => (Name(x.Part.ToString()), x.Part switch
-        {
-            TrackRole.CounterMelody => "Counter-melody",
-            TrackRole.Drum => "Drums",
-            _ => x.Part.ToString()
-        }))]);
+        [..Arrangement.Rests.Select(x => (Name(x.Part.ToString()), TrackRoles.LabelOf(x.Part)))]);
 
     // the pitched parts' pools, in the order the page shows them
     private static readonly (TrackRole Role, string Label, InstrumentRole Pool)[] InstrumentPools =
@@ -509,15 +425,7 @@ public static class GenreChoices
     /// </summary>
     public static ImmutableDictionary<RhythmPart, GenreChoice> Rhythms { get; } = Enum.GetValues<RhythmPart>().ToImmutableDictionary(
         x => x,
-        x => Values($"rhythm.{Name(x.ToString())}", x switch
-            {
-                RhythmPart.CounterMelody => "Counter-melody",
-                RhythmPart.Ground => "Ground (kick)",
-                RhythmPart.Backbeat => "Backbeat (snare)",
-                RhythmPart.Time => "Time (hi-hat)",
-                RhythmPart.Colour => "Colour (toms)",
-                _ => x.ToString()
-            },
+        x => Values($"rhythm.{Name(x.ToString())}", GenreRhythm.LabelOf(x),
             [..GenreRhythm.Settings, ..x == RhythmPart.Melody ? [("busyness", "Busyness")] : Array.Empty<(string, string)>()])
     );
 
@@ -557,12 +465,7 @@ public static class GenreChoices
 
     /// <summary>The drums the song plays: the kit, the kit and percussion, or percussion (<see cref="DrumSetups" />).</summary>
     public static GenreChoice DrumSetup { get; } = Pool("drumSetup", "Drum setup",
-        DrumSetups.All.Select(x => (NameOf(x.Setup), x.Setup switch
-        {
-            Composition.DrumSetup.Kit => "Kit",
-            Composition.DrumSetup.KitAndPercussion => "Both",
-            _ => "Percussion"
-        }, RhythmicUnconventionality.WeightEnds(x.Weight, x.Lean))));
+        DrumSetups.All.Select(x => (NameOf(x.Setup), DrumSetups.LabelOf(x.Setup), RhythmicUnconventionality.WeightEnds(x.Weight, x.Lean))));
 
     /// <summary>The drum pieces the song may draw (<see cref="DrumPieces" />).</summary>
     public static GenreChoice DrumPieces { get; } = WithFamilies(Pool("drumPieces", "Drum pieces",

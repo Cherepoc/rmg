@@ -39,4 +39,12 @@ public static class TrackRoles
     ///     the solo part, which plays only a solo's: the parts a section can play its texture with.
     /// </summary>
     public static bool HasNotesOfItsOwn(this TrackRole role) => role is not (TrackRole.RiffTwin or TrackRole.Solo);
+
+    /// <summary>A part's name as a genre's page shows it, where a part names an option of a choice, such as its level.</summary>
+    public static string LabelOf(TrackRole role) => role switch
+    {
+        TrackRole.CounterMelody => "Counter-melody",
+        TrackRole.Drum => "Drums",
+        _ => role.ToString()
+    };
 }

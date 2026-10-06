@@ -192,6 +192,17 @@ internal static class FormLayers
     public static ImmutableArray<(EndingKind Ending, ByConvention Weight)> EndingWeights { get; } =
         [..Endings.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, AdventurousEndings.Contains(x.Value) ? 1 : 0)))];
 
+    /// <summary>An ending as a genre's page shows it.</summary>
+    public static string LabelOf(EndingKind ending) => ending switch
+    {
+        EndingKind.Button => "A button",
+        EndingKind.RingOut => "A ringing chord",
+        EndingKind.Open => "Open",
+        EndingKind.Stop => "A stop",
+        EndingKind.Fade => "A fade",
+        _ => ending.ToString()
+    };
+
     /// <summary>
     ///     The intros' weights by the form facet, alike at every end in the songs, among a genre's pool where it names one,
     ///     whose own ends lean them.
@@ -204,6 +215,15 @@ internal static class FormLayers
     /// <summary>The intros' weights at the ends, the songs' alike at every end.</summary>
     public static ImmutableArray<(IntroKind Intro, ByConvention Weight)> IntroWeights { get; } =
         [..Intros.Select(x => (x.Value, new ByConvention(x.Weight, x.Weight, x.Weight)))];
+
+    /// <summary>An intro as a genre's page shows it.</summary>
+    public static string LabelOf(IntroKind intro) => intro switch
+    {
+        IntroKind.Cold => "The whole band",
+        IntroKind.CountIn => "A count-in",
+        IntroKind.Entries => "Part by part",
+        _ => intro.ToString()
+    };
 
     /// <summary>How long a button's hit is, in beats, in the bar it has.</summary>
     public const double ButtonLength = 1;

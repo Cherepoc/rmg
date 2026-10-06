@@ -81,6 +81,15 @@ internal static class Solos
         (TrackRole.Drum, new ByConvention(0, 0.05, 1))
     ];
 
+    /// <summary>A soloist as a genre's page shows it.</summary>
+    public static string LabelOf(TrackRole part) => part switch
+    {
+        TrackRole.Solo => "The solo part",
+        TrackRole.CounterMelody => "Counter-melody",
+        TrackRole.Drum => "Drums",
+        _ => part.ToString()
+    };
+
     public static ImmutableArray<(SoloMode Mode, ByConvention Weight)> Modes { get; } =
     [
         (SoloMode.Trading, new ByConvention(1, 0.6, 1)),

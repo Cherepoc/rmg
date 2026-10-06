@@ -102,6 +102,16 @@ internal static class Expression
         (StrongEffect.Pump, new ByConvention(0, 0, 0))
     ];
 
+    /// <summary>A strong effect as a genre's page shows it.</summary>
+    public static string LabelOf(StrongEffect effect) => effect switch
+    {
+        StrongEffect.Tremolo => "A tremolo",
+        StrongEffect.Echo => "An echo",
+        StrongEffect.Sweep => "A sweep",
+        StrongEffect.Pump => "A pump",
+        _ => "None"
+    };
+
     /// <summary>How deep a pump ducks a part on the beat, in percent of its expression, swelling back over the beat.</summary>
     public const int PumpDepth = 60;
 

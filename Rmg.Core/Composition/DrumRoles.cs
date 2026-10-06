@@ -111,6 +111,16 @@ internal static class DrumRoles
         ..PinnedParts.Where(part => streams(part).TestProbability(Pins.At(unconventionality, genre.Chance(GenreChoices.Pins, GenreChoices.Name(part.ToString())))))
     ];
 
+    /// <summary>A pinned part as a genre's page shows it.</summary>
+    public static string PinLabelOf(RhythmPart part) => part switch
+    {
+        RhythmPart.Ground => "The ground, as a kick",
+        RhythmPart.Backbeat => "The backbeat, as a snare",
+        RhythmPart.Time => "The time, as a hi-hat",
+        RhythmPart.CounterMelody => "The counter-melody",
+        _ => $"The {part.ToString().ToLowerInvariant()}"
+    };
+
     /// <summary>The parts a song may pin: every part a genre may move the rhythm of, but colour, which has no figure.</summary>
     public static ImmutableArray<RhythmPart> PinnedParts { get; } = [..Enum.GetValues<RhythmPart>().Where(x => x != RhythmPart.Colour)];
 

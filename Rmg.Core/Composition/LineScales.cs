@@ -47,6 +47,19 @@ internal static class LineScales
         (LineScale.Chromatic, new ByConvention(0, 0.005, 1))
     ];
 
+    /// <summary>A line's scale as a genre's page shows it.</summary>
+    public static string LabelOf(LineScale scale) => scale switch
+    {
+        LineScale.Section => "The section's",
+        LineScale.Pentatonic => "Pentatonic",
+        LineScale.Blues => "Blues",
+        LineScale.MelodicMinor => "Melodic minor",
+        LineScale.WholeTone => "Whole-tone",
+        LineScale.Octatonic => "Octatonic",
+        LineScale.Chromatic => "Chromatic",
+        _ => throw new ArgumentOutOfRangeException(nameof(scale), scale, null)
+    };
+
     private const int OctaveNoteCount = 12;
 
     private static readonly ImmutableDictionary<LineScale, ImmutableArray<int>> OffsetsFromRoot = new Dictionary<LineScale, ImmutableArray<int>>

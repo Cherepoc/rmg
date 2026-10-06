@@ -317,7 +317,7 @@ Each item with its plan, and what it waits for.
 
 A review of the engine and the presets, its P1 to P3 built in October 2026; what is left of it:
 
-**P4, after:** `GenreChoices`' labels beside their tables; ornaments, a grace note, a turn and a trill, should Medieval and Folk
+**P4, after:** ornaments, a grace note, a turn and a trill, should Medieval and Folk
 ask for them. Not done: a sustain pedal, a parallel CLI batch.
 
 ## Genres

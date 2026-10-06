@@ -38,6 +38,15 @@ internal static class Texture
         (TextureKind.Alone, new ByConvention(0, 0.04, 1))
     ];
 
+    /// <summary>A texture as a genre's page shows it.</summary>
+    public static string LabelOf(TextureKind kind) => kind switch
+    {
+        TextureKind.Steady => "Every part through",
+        TextureKind.Build => "Parts coming in",
+        TextureKind.Thin => "Parts dropping out",
+        _ => "One part alone"
+    };
+
     /// <summary>
     ///     An appearance's texture: the parts it leaves out throughout, over those it rests already, and those it leaves
     ///     out in each phrase; a texture that needs more phrases or parts than the appearance has plays steady.
