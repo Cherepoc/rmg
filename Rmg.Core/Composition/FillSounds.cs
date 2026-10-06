@@ -35,7 +35,8 @@ internal sealed class FillSounds
         _weightedSounds.Select(x => (x.Key, x.Value.Select(y => new Weighted<RunSound>(y.Weight.At(unconventionality), y.Sound)).Where(y => y.Weight > 0).ToImmutableArray()))
             .Where(x => x.Item2.Length > 0);
 
-    public FillSounds(IEnumerable<PercussionInstrumentDefinition> songDrums)
+    /// <param name="odds">How much likelier a genre has each sound, by its note number, one it leans up no longer a wild end's alone (<see cref="DrumSounds.OddsOf" />).</param>
+    public FillSounds(IEnumerable<PercussionInstrumentDefinition> songDrums, Func<int, double> odds)
     {
         var sounds = new SortedDictionary<FillDrumRole, List<RunSound>>();
         var weightedSounds = new SortedDictionary<FillDrumRole, List<(RunSound, ByConvention)>>();
@@ -51,8 +52,8 @@ internal sealed class FillSounds
             if (!weightedSounds.TryGetValue(role, out var weighted))
                 weightedSounds[role] = weighted = [];
             var soundWeight = drum.Sounds.Sum(x => x.Weight);
-            weighted.AddRange(drumSounds.Zip(drum.Sounds, (x, sound) => (x, drum.Weight * sound.Weight / soundWeight is var weight
-                ? new ByConvention(sound.Wildness > 0 ? 0 : weight, weight, weight * (1 + sound.Wildness))
+            weighted.AddRange(drumSounds.Zip(drum.Sounds, (x, sound) => (x, drum.Weight * sound.Weight / soundWeight * odds(sound.Code) is var weight
+                ? new ByConvention(sound.Wildness > 0 && odds(sound.Code) <= 1 ? 0 : weight, weight, weight * (1 + sound.Wildness))
                 : default)));
         }
 

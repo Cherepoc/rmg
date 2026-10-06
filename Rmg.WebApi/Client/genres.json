@@ -57,6 +57,8 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
+      "drumSounds": { "pedalHiHat": 100, "closedHiHat": 0 },
+      "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 100, "tom": [60, 60, 80], "cymbal": 80 },
       "melodyRange": { "wide": 75 },
       "keyChanges": { "lastSection": [0, 8, 100], "sections": [0, 25, 100], "patterns": [0, 0, 100] },
       "rests": { "pad": 90 },
@@ -102,7 +104,9 @@
       "soloists": { "solo": 100, "chords": [70, 80, 80], "melody": [30, 30, 40], "bass": [0, 10, 20], "drum": [0, 10, 20] },
       "ending": { "button": 100, "ringOut": [80, 80, 60], "fade": [10, 10, 30], "stop": [0, 10, 30] },
       "drumRole": {
-        "time": { "hiHat": [20, 20, 80], "ride": 100 }
+        "backbeat": { "hiHat": 100, "acousticSnare": [10, 10, 40] },
+        "time": { "hiHat": [0, 10, 80], "ride": 100 },
+        "colour": { "acousticSnare": 100, "tom": 100, "cymbal": [40, 40, 60] }
       },
       "arpeggio": { "none": 100, "up": [0, 3, 10], "upTwoOctaves": [0, 1, 10] },
       "planing": { "sections": [0, 10, 30] },
@@ -385,6 +389,7 @@
     "name": "Reggae",
     "description": "Slow, the one drop with the kick and snare on beat 3, the chords and a rhythm guitar skanking on the offbeats, a sparse repeating bass, organ, major and minor.",
     "choices": {
+      "drumSounds": { "crossStick": 85 },
       "rootMotion": { "fifthDown": 70, "fourthDown": 75 },
       "pins": { "ground": [100, 100, 70], "backbeat": [100, 100, 70], "chords": [100, 100, 70], "rhythm": [100, 100, 70] },
       "solos": { "sections": [0, 2, 8] },

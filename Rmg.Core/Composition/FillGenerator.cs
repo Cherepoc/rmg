@@ -57,7 +57,7 @@ internal sealed class FillGenerator
         _context = context;
         _songRhythm = songRhythm;
         _drumTracks = [..tracks.SongDrums.Select(DrumGroups.GetTrackNumber)];
-        _sounds = new FillSounds(tracks.SongDrums);
+        _sounds = new FillSounds(tracks.SongDrums, DrumSounds.OddsOf(genre));
         _songDrums = new FillGrooves(
             ResolvedRhythm.DefaultState,
             _drumTracks.ToImmutableDictionary(x => x, x => SongTracks.GetGenerationStateMap(tracks.Definitions[x]))

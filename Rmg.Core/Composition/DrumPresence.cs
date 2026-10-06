@@ -26,6 +26,7 @@ internal static class DrumPresence
     /// <param name="stroke">A drum's stroke in the section, by its track, for a drum that has strokes.</param>
     /// <param name="rhythm">How unconventional the section's rhythm is, which leans a drum to sit out or change.</param>
     /// <param name="energy">The section's pull of its energy, which leans a drum to keep playing and its strokes by loudness.</param>
+    /// <param name="odds">How much likelier a genre has each sound, by its note number (<see cref="DrumSounds.OddsOf" />).</param>
     public static BarDrums Draw(
         IGenerationContext context,
         IEnumerable<int> tracks,
@@ -33,7 +34,8 @@ internal static class DrumPresence
         IReadOnlySet<int> leads,
         Func<int, int> stroke,
         double unconventionality,
-        Tilt energy
+        Tilt energy,
+        Func<int, double> odds
     )
     {
         var sitOut = RhythmicUnconventionality.Ends(energy.Chance(SitOutChance, -1), 1).At(unconventionality);
@@ -50,7 +52,7 @@ internal static class DrumPresence
                     if (context.TestProbability(sitOut))
                         resting.Add((track, letter));
                 }
-                else if (drum.HasStrokes && DrumStrokes.DrawChange(context, drum, stroke(track), DrumStrokes.BarChangeChance, unconventionality, energy) is { } change)
+                else if (drum.HasStrokes && DrumStrokes.DrawChange(context, drum, stroke(track), DrumStrokes.BarChangeChance, unconventionality, energy, odds) is { } change)
                 {
                     strokes[(track, letter)] = change;
                 }

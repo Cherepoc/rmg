@@ -28,9 +28,10 @@ internal static class DrumStrokes
     }
 
     /// <summary>The song's stroke of a drum, by its sounds' weights; none for a drum without strokes.</summary>
-    public static StateMap GenerateSong(IGenerationContext context, PercussionInstrumentDefinition drum)
+    /// <param name="odds">How much likelier a genre has each sound, by its note number (<see cref="DrumSounds.OddsOf" />).</param>
+    public static StateMap GenerateSong(IGenerationContext context, PercussionInstrumentDefinition drum, Func<int, double> odds)
     {
-        return drum.HasStrokes ? At(StateDepths.Song, Pick(context, drum, Tilt.None, -1)) : StateMap.Default;
+        return drum.HasStrokes ? At(StateDepths.Song, Pick(context, drum, Tilt.None, -1, odds)) : StateMap.Default;
     }
 
     /// <summary>
@@ -45,22 +46,23 @@ internal static class DrumStrokes
         int current,
         double chance,
         double unconventionality,
-        Tilt energy
+        Tilt energy,
+        Func<int, double> odds
     )
     {
-        var candidate = Pick(context, drum, energy, current);
+        var candidate = Pick(context, drum, energy, current, odds);
         var (to, from) = (drum.Sounds[candidate], drum.Sounds[current]);
         var lean = Math.Clamp(to.Loudness - from.Loudness, -1, 1);
-        var weighed = new Tilt(Math.Log(to.Stroke / from.Stroke)).Chance(chance, 1);
+        var weighed = new Tilt(Math.Log(to.Stroke * odds(to.Code) / (from.Stroke * odds(from.Code)))).Chance(chance, 1);
         return context.TestProbability(RhythmicUnconventionality.Ends(energy.Chance(weighed, lean), 1).At(unconventionality)) ? candidate : null;
     }
 
-    private static int Pick(IGenerationContext context, PercussionInstrumentDefinition drum, Tilt energy, int except)
+    private static int Pick(IGenerationContext context, PercussionInstrumentDefinition drum, Tilt energy, int except, Func<int, double> odds)
     {
         ImmutableArray<Weighted<int>> weights =
         [
             ..drum.Sounds
-                .Select((x, i) => new Weighted<int>(i == except ? 0 : energy.Weigh(x.Stroke, x.Loudness), i))
+                .Select((x, i) => new Weighted<int>(i == except ? 0 : energy.Weigh(x.Stroke * odds(x.Code), x.Loudness), i))
                 .Where(x => x.Weight > 0)
         ];
         return context.Pick(weights);

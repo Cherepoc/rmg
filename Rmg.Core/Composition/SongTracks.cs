@@ -302,9 +302,12 @@ internal sealed class SongTracks
         };
 
         // the song has its own drums, and the drums picked by the section kit play in a section
+        // a genre's pieces weighed against its heaviest, which a drum the songs have now and then always is (SongDrumRule.Optional)
         var drawnDrums = DrumSetups.SelectSongDrums(context, drumSetup, genre.Pool<PercussionInstrumentDefinition>(GenreChoices.DrumPieces, DrumPieces.NameOf) is { } pieces
-            ? ByConvention.Within(DrumGroups.AllDrums, rhythmicUnconventionality.Value, pieces)
-            : null);
+            && ByConvention.Within(DrumGroups.AllDrums, rhythmicUnconventionality.Value, pieces) is var within
+            && DrumGroups.AllDrums.Max(within) is var heaviest
+                ? drum => within(drum) / heaviest
+                : null);
         var songDrums = givenDrums ?? drawnDrums;
         foreach (var drumGroup in DrumGroups.All)
         {
@@ -318,7 +321,7 @@ internal sealed class SongTracks
                 if (drumSetup == DrumSetup.Percussion)
                     builder.Add(CompositionStateKinds.Rhythm.Variation, DrumSetups.PercussionVariation);
                 var drumStateMap = builder.ToStateMap(context)
-                    .MergeWith(DrumStrokes.GenerateSong(strokeContext, drum))
+                    .MergeWith(DrumStrokes.GenerateSong(strokeContext, drum, DrumSounds.OddsOf(genre)))
                     .MergeWith(DrumRoles.GenerateSong(roleContext, drum, rhythmicUnconventionality.Value, genre));
                 drumStateMap = drumStateMap.MergeWith(FeelOf(DrumRoles.PartOf(DrumRoles.Of(drumStateMap))));
                 // a drum of a pinned role plays its figure as given, its own layer moving none of it (PatternGenerator)

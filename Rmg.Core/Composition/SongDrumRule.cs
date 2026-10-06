@@ -90,8 +90,9 @@ public sealed class SongDrumRule
     {
         return (context, selectedDrums, pool) =>
         {
-            // the probability is tested anyway to keep the random sequence independent of the selection
-            var isAvailable = context.TestProbability(probability);
+            // the probability is tested anyway to keep the random sequence independent of the selection; a pool weighing the
+            // drum at its heaviest, as a jazz genre its ride, always has it
+            var isAvailable = context.TestProbability(probability) || pool is not null && pool(drum) >= 1;
             if (isAvailable && (pool is null || pool(drum) > 0) && !selectedDrums.Contains(drum) && !selectedDrums.Intersect(unlessSelected).Any())
                 selectedDrums.Add(drum);
         };

@@ -322,8 +322,6 @@ of here once it is; the genres it adds are described under *More genres*.
 
 **P2, the engine, for several genres each:**
 
-12. **A drum's sounds a genre's pool:** the cross-stick, the hi-hat's foot (Jazz's 2 and 4), the china, the open
-    hi-hat, the ride's bell, each now the songs' fixed chance.
 13. **An instrument by its section's energy:** a part's quieter and louder form, the clean verse guitar distorted in the
     chorus, where `instrumentSwitches` switches by chance alone.
 14. **The feel:** the parts' pocket in milliseconds rather than beats (`Pocket.OffsetOf`, 20 ms at 60 bpm and 7 at
@@ -436,8 +434,8 @@ left:
   every choice's tile a role's override beside it. The dynamics' contrast and the phrases' AAB give most of it.
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Pop and Metal set no groove
   hold, their parts not pinned drifting as the songs' do (Pop's snare on 2 and 4 80%): Rock's (80) for them, should
-  their beat sound loose. Jazz's ride, pinned, plays the songs' own time figure, 7% of its bars a tresillo's: a rhythm
-  of its own for the time (a ride's spang-a-lang), should it not swing. Solos in Latin's songs 66% and Metal's 91%: too
+  their beat sound loose. Jazz's ride, pinned and now in every song, plays the songs' own time figure: a rhythm of its own
+  for the time (a ride's spang-a-lang), should it not swing; its hi-hat's foot on 2 and 4 in 27% of bars. Solos in Latin's songs 66% and Metal's 91%: too
   many? Reggae's one drop is a kick half a bar off its cycle, which the report cannot tell from beat 1, and Latin's
   tresillo is the time keeper's grouping alone; the rhythm values mean what they make together, and a preset's are
   tuned by where its notes fall. Blues' twelve bars: the plainest keep them (IV at 5 98%, V at 9 84%, home at 4 and 8),

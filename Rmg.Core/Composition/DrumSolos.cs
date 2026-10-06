@@ -86,13 +86,14 @@ internal static class DrumSolos
         Func<int, IGenerationContext> feet,
         Func<int, IGenerationContext> players,
         Func<int, double> groove,
-        Meter meter
+        Meter meter,
+        Func<int, double> odds
     )
     {
         if (drummer is null)
             return song;
 
-        var sounds = new FillSounds(songDrums).Sounds;
+        var sounds = new FillSounds(songDrums, odds).Sounds;
         foreach (var (index, _) in solos.Where(x => x.Value.IsDrumSolo).OrderBy(x => x.Key))
         {
             var whole = map.Sections[index];

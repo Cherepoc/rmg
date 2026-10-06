@@ -10,7 +10,7 @@ public sealed class DrumAccentsTest
     private static double Share(DrumSound[] sounds, int rank, Tilt energy)
     {
         var context = new GenerationContext(1);
-        return Enumerable.Range(0, 20_000).Count(_ => !DrumAccents.Draw(context, sounds, rank, energy).IsDefault) / 20_000.0;
+        return Enumerable.Range(0, 20_000).Count(_ => !DrumAccents.Draw(context, sounds, rank, energy, DrumSounds.OddsOf(Genre.None)).IsDefault) / 20_000.0;
     }
 
     [Test]
@@ -23,7 +23,7 @@ public sealed class DrumAccentsTest
         await Assert.That(Share(ride, 0, Tilt.None)).IsGreaterThan(Share(ride, 2, Tilt.None) * 4);
         // the open hi-hat, the third sound, as the note's own stroke
         var context = new GenerationContext(1);
-        var accent = Enumerable.Range(0, 1_000).Select(_ => DrumAccents.Draw(context, hiHat, 2, Tilt.None)).First(x => !x.IsDefault);
+        var accent = Enumerable.Range(0, 1_000).Select(_ => DrumAccents.Draw(context, hiHat, 2, Tilt.None, DrumSounds.OddsOf(Genre.None))).First(x => !x.IsDefault);
         await Assert.That(accent.GetStateValue(StateKinds.DrumStroke)).IsEqualTo(new LayerValue<int>(StateDepths.Note, 2));
     }
 

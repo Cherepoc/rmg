@@ -34,7 +34,8 @@ internal static class DrumAccents
     /// </summary>
     /// <param name="rank">How strong the note's beat is, 0 the strongest.</param>
     /// <param name="energy">The section's pull of its energy, which leans the louder accents.</param>
-    public static StateMap Draw(IGenerationContext context, IReadOnlyList<DrumSound> sounds, int rank, Tilt energy)
+    /// <param name="odds">How much likelier a genre has each sound, by its note number (<see cref="DrumSounds.OddsOf" />).</param>
+    public static StateMap Draw(IGenerationContext context, IReadOnlyList<DrumSound> sounds, int rank, Tilt energy, Func<int, double> odds)
     {
         StateMap accent = StateMap.Default;
         for (var i = 0; i < sounds.Count; i++)
@@ -44,7 +45,7 @@ internal static class DrumAccents
                 continue;
 
             // a weak beat leans to an accent that favours the weak ones, and the strongest to one that favours it
-            var chance = Tilt.Of(BeatOdds, sound.AccentLean * (rank > 0 ? 1 : -1)).Chance(sound.Accent, 1);
+            var chance = new Tilt(Math.Log(odds(sound.Code))).Chance(Tilt.Of(BeatOdds, sound.AccentLean * (rank > 0 ? 1 : -1)).Chance(sound.Accent, 1), 1);
             if (context.TestProbability(energy.Chance(chance, sound.Loudness)) && accent.IsDefault)
                 accent = DrumStrokes.At(StateDepths.Note, i);
         }
