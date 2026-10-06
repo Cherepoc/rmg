@@ -335,13 +335,6 @@ left:
   **P4:** the choices grouped into families (bass, harmony, form, drum devices), one choice of several chances rather
   than fifteen of one, which would read better in the editor and break every genre link kept; should the editor grow
   hard to use.
-- **The arpeggiator by genre** (P2, data only; "chords parts arpeggiated" in `GenreDevicesReportTest`): eight presets
-  play the songs' own pool, named for them (18-19% of their chord parts, and at the wild end every pattern as heavy as
-  none, nine in ten broken). More: Pop 25-30% (up, up and down, Alberti), Rock 15-20% (up, up and down, a picked
-  verse's, modest under a driven guitar), Hip-hop 10-15% (up, up and down); Blues its boogie, root and fifth 10-20% and
-  no other; Metal rare at the middle and its sweep, up two octaves, at the wild end. Less: Jazz 3-5%, no Alberti (its
-  comping block and shell chords), Funk and Reggae none (their chords the rhythm, stabbed). Every genre's wild end set
-  as its own experiment rather than every pattern at 100.
 - **Instruments and effects** (P2, a plan in steps, October 2026): 74 of the 128 programs play, the rest never; and no
   genre sets a part's reverb.
   1. A genre's reverb: a value a part (`space`, as `levels` are), over the role's send (`Expression.Reverb`) and its

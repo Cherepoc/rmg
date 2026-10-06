@@ -46,7 +46,7 @@
         "time": { "fullness": 69, "repetition": 69 }
       },
       "feelChances": { "swing": [0, 20, 20], "halfTime": 8, "doubleTime": 4 },
-      "arpeggio": { "none": 100, "up": [14, 6, 100], "upDown": [14, 5, 100], "alberti": [14, 4, 100], "down": [0, 3, 100], "downUp": [0, 2, 100], "pairs": [0, 3, 100], "rootFifth": [0, 2, 100], "random": [0, 1, 100], "upTwoOctaves": [0, 1, 100] },
+      "arpeggio": { "none": 100, "up": [15, 15, 25], "upDown": [12, 12, 20], "pairs": [0, 3, 15], "rootFifth": [0, 0, 15] },
       "turnaround": { "sections": [0, 10, 10] },
       "passingChords": { "chords": [0, 10, 10] },
       "planing": { "sections": [0, 0, 25] },
@@ -118,7 +118,7 @@
       "drumRole": {
         "time": { "hiHat": [20, 20, 80], "ride": 100 }
       },
-      "arpeggio": { "none": 100, "up": [14, 6, 100], "upDown": [14, 5, 100], "alberti": [14, 4, 100], "down": [0, 3, 100], "downUp": [0, 2, 100], "pairs": [0, 3, 100], "rootFifth": [0, 2, 100], "random": [0, 1, 100], "upTwoOctaves": [0, 1, 100] },
+      "arpeggio": { "none": 100, "up": [0, 3, 10], "upTwoOctaves": [0, 1, 10] },
       "planing": { "sections": [0, 10, 30] },
       "harmonyDevices": { "reharmonised": [0, 40, 40], "innerLine": [0, 15, 30], "pedal": [0, 6, 15] },
       "loop": {},
@@ -148,7 +148,7 @@
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, a pumping bass and pads, piano and electric piano chords now and then, a TR-808 or electronic kit, straight, 117 to 130, minor, sus and add9 chords, a drop into the chorus.",
     "choices": {
       "phraseScheme": { "aaaa": 100, "aaab": [25, 25, 40], "aaba": [15, 15, 30], "abab": [10, 10, 30] },
-      "arpeggio": { "none": 100, "up": [20, 25, 40], "upDown": [10, 15, 30] },
+      "arpeggio": { "none": 100, "up": [20, 25, 40], "upDown": [10, 15, 30], "random": [0, 0, 20], "upTwoOctaves": [0, 0, 20] },
       "texture": { "steady": [100, 70, 50], "build": [40, 60, 60], "thin": [10, 20, 30] },
       "sectionLength": { "bars8": [20, 20, 30], "bars16": 100, "bars32": [100, 100, 80] },
       "phrases": { "eightBars": 100, "fourBars": [20, 20, 30] },
@@ -226,7 +226,7 @@
     "choices": {
       "phraseScheme": { "aaaa": 100, "aaab": [25, 25, 40], "aaba": [15, 15, 30], "abab": [10, 10, 30] },
       "glide": { "bass": [20, 30, 50] },
-      "arpeggio": { "none": 100, "up": [15, 20, 40], "random": [0, 10, 30] },
+      "arpeggio": { "none": 100, "up": [15, 20, 40], "random": [0, 10, 30], "pairs": [0, 0, 20] },
       "texture": { "steady": [100, 70, 50], "build": [40, 60, 60], "thin": [10, 20, 30] },
       "sectionLength": { "bars8": [20, 20, 30], "bars16": 100, "bars32": [100, 100, 80] },
       "phrases": { "eightBars": 100, "fourBars": [20, 20, 30] },
@@ -301,7 +301,7 @@
     "name": "Synthwave",
     "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
     "choices": {
-      "arpeggio": { "none": 100, "up": [80, 80, 80], "upDown": [40, 40, 50], "pairs": [0, 10, 30] },
+      "arpeggio": { "none": 100, "up": [80, 80, 80], "upDown": [40, 40, 50], "pairs": [0, 10, 30], "upTwoOctaves": [0, 5, 30] },
       "pins": { "ground": [80, 80, 50], "backbeat": [100, 100, 80] },
       "turnaround": {},
       "solos": { "sections": [0, 6, 12] },
@@ -425,7 +425,7 @@
         "ground": { "syncopation": 100, "fullness": 31, "repetition": 92 },
         "time": { "speed": 76, "repetition": 82 }
       },
-      "arpeggio": { "none": 100, "up": [14, 6, 100], "upDown": [14, 5, 100], "alberti": [14, 4, 100], "down": [0, 3, 100], "downUp": [0, 2, 100], "pairs": [0, 3, 100], "rootFifth": [0, 2, 100], "random": [0, 1, 100], "upTwoOctaves": [0, 1, 100] },
+      "arpeggio": { "none": 100, "up": [10, 10, 20], "upDown": [8, 8, 15], "random": [0, 0, 15] },
       "planing": { "sections": [0, 0, 25] },
       "octaveBass": { "sections": [0, 5, 5] },
       "riff": {},
@@ -485,7 +485,7 @@
         "backbeat": { "speed": 25, "repetition": 92 }
       },
       "feelChances": { "swing": [0, 20, 20], "halfTime": 8, "doubleTime": 4 },
-      "arpeggio": { "none": 100, "up": [14, 6, 100], "upDown": [14, 5, 100], "alberti": [14, 4, 100], "down": [0, 3, 100], "downUp": [0, 2, 100], "pairs": [0, 3, 100], "rootFifth": [0, 2, 100], "random": [0, 1, 100], "upTwoOctaves": [0, 1, 100] },
+      "arpeggio": { "none": 100 },
       "planing": { "sections": [0, 0, 25] },
       "loop": { "sections": [50, 60, 50] },
       "octaveBass": { "sections": [0, 5, 5] },
@@ -540,7 +540,7 @@
         "time": { "straight": [40, 15, 60], "grouped3": [100, 100, 60] }
       },
       "feelChances": { "swing": [0, 0, 10], "halfTime": 8, "doubleTime": 4 },
-      "arpeggio": { "none": 100, "upDown": [20, 30, 40], "pairs": [10, 20, 30] },
+      "arpeggio": { "none": 100, "upDown": [20, 30, 40], "pairs": [10, 20, 30], "random": [0, 0, 15] },
       "chordScales": { "applied": [20, 40, 40], "borrowed": [0, 10, 10], "own": [0, 0, 30] },
       "turnaround": { "sections": [0, 10, 10] },
       "passingChords": { "chords": [0, 10, 10] },
@@ -615,7 +615,7 @@
         "time": { "speed": 76, "fullness": 82, "repetition": 82 }
       },
       "feelChances": { "swing": [0, 20, 20], "halfTime": 8, "doubleTime": 4 },
-      "arpeggio": { "none": 100, "up": [14, 6, 100], "upDown": [14, 5, 100], "alberti": [14, 4, 100], "down": [0, 3, 100], "downUp": [0, 2, 100], "pairs": [0, 3, 100], "rootFifth": [0, 2, 100], "random": [0, 1, 100], "upTwoOctaves": [0, 1, 100] },
+      "arpeggio": { "none": 100 },
       "chordScales": { "applied": [0, 15, 20], "borrowed": [0, 8, 12], "own": [0, 0, 30] },
       "turnaround": { "sections": [0, 5, 5] },
       "passingChords": { "chords": [0, 5, 5] },
@@ -674,7 +674,7 @@
         "rhythm": { "speed": 69, "fullness": 82 }
       },
       "feelChances": { "swing": [0, 20, 20], "halfTime": 8, "doubleTime": 4 },
-      "arpeggio": { "none": 100, "alberti": [40, 50, 50], "upDown": [30, 40, 40], "up": [20, 20, 30] },
+      "arpeggio": { "none": 100, "alberti": [40, 50, 50], "upDown": [30, 40, 40], "up": [20, 20, 30], "rootFifth": [0, 0, 20] },
       "chordScales": { "applied": [0, 35, 35], "borrowed": [0, 12, 12], "own": [0, 0, 30] },
       "turnaround": { "sections": [0, 10, 10] },
       "passingChords": { "chords": [0, 10, 10] },
@@ -747,7 +747,7 @@
       "rhythm": {
         "bass": { "speed": 76, "fineness": 25, "fullness": 82, "repetition": 82 }
       },
-      "arpeggio": { "none": 100, "up": [14, 6, 100], "upDown": [14, 5, 100], "alberti": [14, 4, 100], "down": [0, 3, 100], "downUp": [0, 2, 100], "pairs": [0, 3, 100], "rootFifth": [0, 2, 100], "random": [0, 1, 100], "upTwoOctaves": [0, 1, 100] },
+      "arpeggio": { "none": 100, "rootFifth": [12, 18, 25], "upDown": [0, 0, 15] },
       "passingChords": { "chords": [0, 10, 10] },
       "planing": { "sections": [0, 0, 25] },
       "harmonyDevices": { "pedal": [0, 5, 10] },
@@ -871,7 +871,7 @@
       "dynamics": { "energy": 60, "contrast": 70 },
       "phraseScheme": { "aaab": 100, "abab": [60, 60, 60], "aaaa": [40, 40, 30], "aaba": [40, 40, 40] },
       "feelChances": { "swing": [0, 20, 20], "halfTime": 8, "doubleTime": 4 },
-      "arpeggio": { "none": 100, "up": [14, 6, 100], "upDown": [14, 5, 100], "alberti": [14, 4, 100], "down": [0, 3, 100], "downUp": [0, 2, 100], "pairs": [0, 3, 100], "rootFifth": [0, 2, 100], "random": [0, 1, 100], "upTwoOctaves": [0, 1, 100] },
+      "arpeggio": { "none": 100, "up": [20, 20, 30], "upDown": [15, 15, 25], "alberti": [10, 10, 20], "upTwoOctaves": [0, 0, 15] },
       "chordScales": { "applied": [0, 35, 35], "borrowed": [0, 12, 12], "own": [0, 0, 30] },
       "turnaround": { "sections": [0, 10, 10] },
       "passingChords": { "chords": [0, 5, 5] },
@@ -939,7 +939,7 @@
         "backbeat": { "repetition": 76 },
         "riff": { "speed": 82, "repetition": 82 }
       },
-      "arpeggio": { "none": 100, "up": [14, 6, 100], "upDown": [14, 5, 100], "alberti": [14, 4, 100], "down": [0, 3, 100], "downUp": [0, 2, 100], "pairs": [0, 3, 100], "rootFifth": [0, 2, 100], "random": [0, 1, 100], "upTwoOctaves": [0, 1, 100] },
+      "arpeggio": { "none": 100, "up": [0, 2, 10], "upTwoOctaves": [0, 3, 30], "random": [0, 0, 15] },
       "chordScales": { "applied": [0, 35, 35], "borrowed": [0, 12, 12], "own": [0, 0, 30] },
       "turnaround": { "sections": [0, 10, 10] },
       "passingChords": { "chords": [0, 10, 10] },
