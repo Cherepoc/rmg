@@ -154,12 +154,14 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         check.append(input, "Override");
         const head = html("div", "genre-tile-head");
         head.append(title, count, check);
+        // what the choice does, under its name
+        const about = html("p", "genre-tile-about");
         const graph = html("button", "genre-graph");
         graph.type = "button";
         const chart = svg("svg", { viewBox: `0 0 ${GRAPH_WIDTH} ${GRAPH_HEIGHT}`, preserveAspectRatio: "none", "aria-hidden": "true" });
         graph.append(chart);
         const ends = html("div", "genre-ends");
-        element.append(head, graph, ends);
+        element.append(head, about, graph, ends);
         let choice = null;
         const start = startOf(allowed);
         // a part's choice titled by the part and what of it it sets, as its window is
@@ -217,6 +219,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
                 choice = bound;
                 element.dataset.choice = choice.name;
                 title.textContent = titleOf(choice);
+                about.textContent = choice.description;
                 input.checked = choice.name in draft.choices;
                 input.setAttribute("aria-label", `Override ${choice.label}`);
                 element.classList.toggle("own", !input.checked);

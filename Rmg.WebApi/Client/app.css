@@ -718,6 +718,14 @@ input[type="range"] {
     color: var(--muted);
 }
 
+/* what a choice does, under its name, as quiet as a setting's ends */
+.genre-tile-about {
+    margin: 2px 0 6px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--muted);
+}
+
 /* the window of every genre: a list of lines, a genre's name and sentence on the left and what may be done with it on
    the right, one's own first */
 .genre-manager h2 {

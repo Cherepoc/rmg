@@ -39,7 +39,8 @@ public static class GenreEndpoints
             [..x.Options.Select(o => new GenreOptionResponse(o.Name, o.Label, [..new[] { o.Own.Plain, o.Own.Tuned, o.Own.Wild }.Select(a => GenreAmounts.ToNumber(x, o.Name, a))], o.Tags, o.Description))],
             x.Scale is { } scale
                 ? new RangeScaleResponse(scale.Unit, scale.Least, scale.Most, [..Enumerable.Range(0, ScalePoints).Select(i => scale.NumberOf(i / (double)(ScalePoints - 1)))], SongGenerator.RangeLeanSkew)
-                : null
+                : null,
+            x.Description
         ))
     ];
 }
@@ -49,7 +50,8 @@ public static class GenreEndpoints
 /// <param name="Kind">"pool", its options a pool, each its weights at the ends, one left out never; "chances", each its chances at the ends, one left out never; "values", each from 0, its least, through 50, as it is, to 100, its most; or "range", its "from" and "to" its ends, the first no greater, and its "lean". A genre gives every amount in whole numbers (<see cref="GenreAmounts" />).</param>
 /// <param name="Options">Its options, in order.</param>
 /// <param name="Scale">A range's ends as numbers: their unit, such as "bpm" or "seconds", the least and the most; none for another kind.</param>
-public sealed record GenreChoiceResponse(string Name, string Label, string Kind, IReadOnlyList<GenreOptionResponse> Options, RangeScaleResponse? Scale);
+/// <param name="Description">What it does, in a sentence or two, as the page shows it under it.</param>
+public sealed record GenreChoiceResponse(string Name, string Label, string Kind, IReadOnlyList<GenreOptionResponse> Options, RangeScaleResponse? Scale, string Description);
 
 /// <param name="Unit">What a range's ends count, such as "bpm" or "seconds".</param>
 /// <param name="Least">The least an end is.</param>

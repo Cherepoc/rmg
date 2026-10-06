@@ -18,6 +18,13 @@ public sealed class GenrePresetsTest
     }
 
     [Test]
+    public async Task EveryChoice_HasADescription_ThatNamesNoFamilyLeftUnreplaced()
+    {
+        foreach (var choice in GenreChoices.All)
+            await Assert.That(choice.Description.Length).IsGreaterThan(20).Because(choice.Name);
+    }
+
+    [Test]
     public async Task EveryPreset_NamesTheInstrumentsOfEveryPartItMayPlay_SoThatNoneFallsOnTheSongsPool()
     {
         foreach (var preset in GenrePresets.All)

@@ -63,6 +63,9 @@ public sealed record GenreChoice(string Name, string Label, GenreChoiceKind Kind
     /// <summary>How a range's ends read as numbers, which every range has; none for another kind.</summary>
     public RangeScale? Scale { get; init; }
 
+    /// <summary>What it does, as the page shows it under it (<see cref="GenreChoiceDescriptions" />).</summary>
+    public string Description => GenreChoiceDescriptions.Of(Name, Label);
+
     /// <summary>The option of the name; one the choice does not have is a mistake.</summary>
     public GenreOption this[string name] => Options.FirstOrDefault(x => x.Name == name)
                                             ?? throw new ArgumentOutOfRangeException(nameof(name), name, $"The choice {Name} has no option {name}.");

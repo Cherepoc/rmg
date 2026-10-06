@@ -1,0 +1,99 @@
+namespace Rmg.Core.Composition;
+
+/// <summary>
+///     What every choice a genre may speak of does, in a sentence or two, as the genre editor shows it under the choice
+///     (<see cref="GenreChoice.Description" />): what the listener hears, and how its options lean. A choice of every part's
+///     or every drum role's own, such as its instruments, takes its family's, by the part.
+/// </summary>
+public static class GenreChoiceDescriptions
+{
+    private static readonly Dictionary<string, string> Own = new()
+    {
+        ["tempo"] = "How fast the song plays, in beats a minute: the range a song's tempo is drawn from, and whether it leans to the slow end or the fast.",
+        ["length"] = "How long the song plays: the range its form is stretched or cut to, and whether it leans to the short end or the long.",
+        ["meter"] = "How many beats a bar has and how they group: 4/4 for most songs, 3/4 and 6/8 for a waltz or a lilt, the odd meters for the wilder.",
+        ["feel"] = "The song's feel: straight 8ths and 16ths for most songs, or triplets, quintuplets and groupings such as the tresillo's 3+3+2 for the wilder.",
+        ["feelChances"] = "How often a song swings its 8ths or 16ths, and how often a section's drums go to half time, heavier, or double time, more urgent.",
+        ["feelValues"] = "How hard a swinging song swings, from lightly to a full triplet shuffle, and how fast a tempo may still swing its 16ths rather than its 8ths.",
+        ["scale"] = "The scale the song is in, which colours every chord and line: major and minor for most, the modes for a folk, jazz or modal sound, the rarer ones exotic.",
+        ["chordShape"] = "What the chords are built of: plain triads, power chords for rock, sevenths and ninths for jazz and soul, sus and quartal chords for an open, modern sound.",
+        ["arpeggio"] = "Whether the chords and the rhythm part play their notes together or one by one, up, down, back and forth, as a harp or a synth's arpeggiator does.",
+        ["rootMotion"] = "How the chords move from one to the next: by fifths for jazz's ii–V, by fourths for rock's IV–I, by steps and thirds for pop's loops. Above the middle a move is likelier, below rarer.",
+        ["chordScales"] = "Chords that borrow notes from outside the key: a dominant leading into a chord, a chord from the parallel minor or major, the blues' every chord a dominant.",
+        ["harmonicRhythm"] = "How often the chords change: two a bar for busy harmony, one a bar for most songs, one every two bars for a loop or a groove.",
+        ["vamp"] = "How often a section sits on one chord the whole way through, as a funk band or a techno track does.",
+        ["turnaround"] = "How often a section's last bar leads back to its start through V, or ii–V, as jazz and the blues do.",
+        ["passingChords"] = "How often a chord passes into the next through that chord's own dominant, a jazz and soul colour.",
+        ["planing"] = "How often a section slides its home chord's shape up and down by semitones, a modern, filmic colour.",
+        ["harmonyDevices"] = "Reharmonising a section when it comes back, a chromatic line moving inside a held chord, and a bass note held under a section's changing chords.",
+        ["loop"] = "How often a section plays the song's first section's chords again, as a beat loops one progression for the whole track.",
+        ["lineScale"] = "The scale the melody's and the riff's passing notes take: the key's, the pentatonic and blues scales for rock and blues, the jazz and symmetric ones for an outside sound.",
+        ["melodyRange"] = "How far the melody roams: narrow, as a chant or a hook, or wide, as a jazz tune.",
+        ["bass"] = "How much the bass leads into a new chord, walking its notes towards it, from never to as a walking jazz bass.",
+        ["octaveBass"] = "How often a section's bass bounces between a note and its octave, as disco and funk basses do.",
+        ["glide"] = "How often the song's bass slides from note to note, as an 808 or an acid line does.",
+        ["bassLanding"] = "What the bass lands on when the chord changes: the root, steadiest, the third or the fifth, lighter, or wherever its figure takes it.",
+        ["effects"] = "How often a song uses each gentle effect: a vibrato on held notes, a chorus shimmer, a swell into held chords, and bent notes.",
+        ["articulation"] = "How the notes are played: a line's steps slurred together, a piano's chords rolled from the bottom up, the chords struck short as stabs.",
+        ["levels"] = "How loud each part plays against the others: above the middle louder, below quieter, as a beat's drums lead it or a dub's bass does.",
+        ["rests"] = "How often each part sits out a section: above the middle the oftener, as a dub's drums and bass drop out.",
+        ["voice"] = "How often a verse leaves its melody out, the room a rapper's voice takes over the beat.",
+        ["grooveHold"] = "How steady the groove stays from section to section: above the middle the backbeat holds to 2 and 4 and the patterns barely move.",
+        ["pins"] = "How often each part keeps one figure every bar, unchanging, as a four-on-the-floor kick or a reggae skank does.",
+        ["hatRolls"] = "How often a bar ends with the hi-hat rolling in 32nds or triplets, as trap does.",
+        ["pocket"] = "How the parts sit around the beat: above the middle laid back, the backbeat and the lead behind it, below tight on the grid.",
+        ["fills"] = "How much the drums fill into a new section: above the middle oftener and longer, below seldom and short.",
+        ["drop"] = "How often the band builds to a louder section and drops out for the bar before it, as dance music does.",
+        ["stopTime"] = "How often a section's first phrase plays in stop time, the band hitting once a bar under the melody, as the blues and rock do.",
+        ["push"] = "How often a section plays its chord changes an 8th early, an anticipation that pushes the groove forward.",
+        ["keyChanges"] = "How often the last chorus lifts to a higher key, a section plays in a key of its own, or the key changes anywhere at all.",
+        ["hook"] = "How often a chorus, or any other section, is built on a short repeating melodic hook.",
+        ["riff"] = "How often a section's riff plays in power chords, and how often its guitars and picked bass chug, their repeated notes palm-muted.",
+        ["solos"] = "How often a section that comes back is played as a solo instead.",
+        ["soloists"] = "Which part takes the solos: the solo part, a lead such as a sax or a guitar, or another part, even the drums.",
+        ["intro"] = "How the song starts: the whole band at once, a count-in, or the parts coming in one by one.",
+        ["ending"] = "How the song ends: a short final hit, a ringing chord, a sudden stop, a fade, or left open.",
+        ["strongEffect"] = "The one bold effect a song may put on a part: an echo, a tremolo, a filter sweep, or the pads and bass pumping to the kick.",
+        ["pan"] = "How far each part sits from the middle: above the middle wider, below closer to the centre.",
+        ["formChances"] = "How often a song takes one of the classic song forms, with verses and choruses, rather than a form of its own.",
+        ["form"] = "Which classic forms a song may take: verse and chorus, with a pre-chorus or a bridge, or AABA's verses and bridge.",
+        ["sectionLength"] = "How long a section plays its pattern over and over: 8 bars for a song, 16 or 32 for a dance track.",
+        ["phraseScheme"] = "How a section's four bars repeat: AAAA for a loop, AAAB with a different last bar, ABAB, or every bar different for the wildest.",
+        ["texture"] = "How a section brings its parts in: all through, building up, thinning out, or one part alone.",
+        ["dynamics"] = "How loud and busy the song is, how much its sections differ, and how long the band swells into a louder section, from a beat to a whole phrase.",
+        ["phrases"] = "How long a section's chord pattern is before it repeats: 4 bars for most songs, 8 for a longer phrase, 12 for the blues, 16 for a tune.",
+        ["sectionChanges"] = "How often a section changes the song's tempo, by a jump or by a metric ratio, or plays in a meter of its own.",
+        ["polymeter"] = "How often a section's riff, bass and kick run in a cycle of a different length across the bar, as djent and math rock do.",
+        ["soloAnswers"] = "How often the solo part answers the melody in its gaps, as a guitarist fills between a singer's lines.",
+        ["lastRepeat"] = "How often the last chorus is played twice.",
+        ["doubling"] = "How often a line is doubled: in octaves by its own part, the melody harmonised by the counter-melody, the bass playing the riff with it.",
+        ["instrumentSwitches"] = "How often a section hands a part to another instrument, as a chorus's strings take over from a verse's piano.",
+        ["space"] = "How much reverb each part has: above the middle wetter, as an ambient wash, below drier, as a funk band's room.",
+        ["drumJob"] = "What the drums do: keep time, as a band's drums do, or mark the form now and then, as a calm piece's percussion does.",
+        ["marks"] = "How often drums marking the form strike: above the middle oftener.",
+        ["register"] = "How high each part sits: at the lowest quarter an octave down, as a guitar tuned down, at the highest an octave up, as a bass singing high.",
+        ["drumSounds"] = "How often each of a drum's own sounds plays, as its steady stroke, an accent and in fills: the cross-stick of a ballad, a jazz drummer's hi-hat foot, a metal china.",
+        ["louderForms"] = "How often a clean guitar turns distorted in the song's louder sections, as a band kicks in the distortion for the chorus.",
+        ["harmonyInterval"] = "The interval a harmonised line plays apart from it: thirds and sixths, sweetest, fourths and fifths, open and old, or seconds and sevenths, the harshest.",
+        ["kit"] = "The drum kit's sound: a standard or a room kit, a power kit for rock, electronic and TR-808 kits for dance and hip-hop, jazz and brush kits, or an orchestra's timpani.",
+        ["parts"] = "Which parts play: the chance of each in a song, above 0 at an end where it may play.",
+        ["drumSetup"] = "What kind of drums the song has: a drum kit, a kit with hand percussion, or hand percussion alone.",
+        ["drumPieces"] = "Which drums and percussion the song may have, and how likely each is."
+    };
+
+    /// <summary>
+    ///     A choice's description: its own, or for a part's or a drum role's choice its family's, by the part (Melody, Ground
+    ///     (kick)); none for a choice that has neither, which a test finds.
+    /// </summary>
+    /// <param name="label">How the page shows the choice, which a family's description names the part by.</param>
+    public static string Of(string name, string label) => Own.TryGetValue(name, out var own) ? own : name.Split('.') switch
+    {
+        ["instrument", _] => $"The instruments the {Lower(label)} part plays, and how likely each is.",
+        ["rhythm", _] => $"How the {Lower(label)} plays its rhythm: how fast, how far off the beat, how fine its notes, how much weight its weaker beats get, how full and how repetitive. Above the middle more, below less.",
+        ["feel", _] => $"The {Lower(label)}'s own feel over the song's: straight, or in triplets, quintuplets or groupings such as the tresillo's 3+3+2.",
+        ["drumRole", _] => $"Which drums play the {Lower(label)} role in the groove, and how likely each is.",
+        _ => ""
+    };
+
+    private static string Lower(string label) => label.Length > 1 && char.IsUpper(label[0]) && !char.IsUpper(label[1]) ? char.ToLowerInvariant(label[0]) + label[1..] : label;
+}
