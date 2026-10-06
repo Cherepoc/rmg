@@ -241,6 +241,9 @@ public static class GenreChoices
     /// <summary>How wide the melody's range is, from 0, narrow as a hook's, through 50, as the songs have it, to 100, wide as a jazz tune's (<see cref="MelodyLayers.GenreRangeReach" />).</summary>
     public static GenreChoice MelodyRange { get; } = Values("melodyRange", "Melody's range", [("wide", "Wide")]);
 
+    /// <summary>The chance a song's bass glides into its notes from the note before, an 808's or an acid line's (<see cref="Expression.GlideChance" />).</summary>
+    public static GenreChoice Glide { get; } = Chances("glide", "Glide", [("bass", "A gliding bass", Expression.GlideChance)]);
+
     /// <summary>What the bass lands on in a new chord (<see cref="BassLeadingLayers.Arrivals" />): its root, its third, its fifth, or its figure's note.</summary>
     public static GenreChoice BassLanding { get; } = Pool("bassLanding", "Bass's landing",
         BassLeadingLayers.ArrivalWeights.Select(x => (Name(x.Arrival.ToString()), x.Arrival switch
@@ -485,7 +488,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Bass, OctaveBass, BassLanding, Effects, Articulation, Levels, Rests, GrooveHold, Pins, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, SectionLength, Texture, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, GrooveHold, Pins, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, SectionLength, Texture, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

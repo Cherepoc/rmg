@@ -604,8 +604,9 @@ a link carries. What is left:
      silence, 8ths then 16ths, louder as it goes (every one of 28 builds). Left: a riser, a noise or a pad sweeping up.
   3. Done: an arpeggiator, the chords' and the rhythm part's broken chords (`Arpeggios`) a genre's pool
      (`GenreChoices.Arpeggio`): Synthwave's chord parts arpeggiated 52% (16% the songs'), Ambient's 34%, House's 22%.
-  4. A bass's glide and accent, the acid line's, and an 808's long slide between notes; the slides today are a
-     line's ornament, a percent of its notes.
+  4. Done: a gliding bass (`GenreChoices.Glide`, `Expression.GlideChance`), a genre's chance its bass slides into
+     half its changes of pitch from the note before, across a gap of a beat and into a 16th: the bass's changes slid
+     into Hip-hop 13%, Techno 9% (the songs' 0). Not done: an acid line's accent, which General MIDI has no 303 for.
   5. Hi-hat rolls in 32nds and triplets, the trap's, and a snare's drag and its ghost notes.
   6. The one drop (the kick and snare on 3 alone, beat 1 empty), Reggae's, and its skank on the offbeats only.
   7. A clave the band keeps to, Latin's: the parts' rhythms aligned to the 3-2 or 2-3, and the piano's montuno.

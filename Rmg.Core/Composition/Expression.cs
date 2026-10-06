@@ -146,6 +146,16 @@ internal static class Expression
 
     public static ByConvention SlideRate { get; } = new(0, 0.1, 0.3);
 
+    /// <summary>The chance a song's bass glides from note to note, a genre's that the songs never play, and the share of its notes it slides into (<see cref="GenreChoices.Glide" />).</summary>
+    public static ByConvention GlideChance { get; } = new(0, 0, 0);
+
+    public const double GlideRate = 0.5;
+
+    /// <summary>How far after the note before, in beats, a gliding bass still slides from it, and the shortest note it slides into.</summary>
+    public const double GlideGap = 1;
+
+    public const double GlideShortest = 0.25;
+
     /// <summary>How long a note must be for a bend or a slide on it to be heard, in beats: an 8th, a run's notes going by straight.</summary>
     public const double ShortestShaped = 0.5;
 
@@ -348,6 +358,13 @@ internal static class Expression
             // and whether it slides from note to note, and how often, but where it echoes, playing straight
             var slides = part.TestProbability(SlideChance.At(songSound)) & !echoes;
             var slideRate = SlideRate.At(songSound) * 2 * part.GenerateDouble();
+            // a bass that glides, a genre's, into most of its notes from the note before, as an 808's or an acid line's
+            // does; drawn last, so that the part's other draws stay
+            var glides = part.TestProbability(GlideChance.At(songSound, genre.Chance(GenreChoices.Glide, "bass"))) && role == TrackRole.Bass && !echoes;
+            if (glides)
+                (slides, slideRate) = (true, GlideRate);
+            // and from across a gap, into a short note too
+            var (slideGap, shortestSlide) = glides ? (GlideGap, GlideShortest) : (SlideGap, ShortestShaped);
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
                 var context = streams(span.SectionId, track);
@@ -392,7 +409,7 @@ internal static class Expression
                     // and its vibrato, a note at a time, the wide likelier the more intense
                     var noteVibrato = soloist is null ? vibrato : context.Pick(soloLean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u), Lean));
                     // from the note before, where it was heard up to a moment before, and no further than a pitch bend reaches
-                    var from = i > 0 && timeline[i - 1].Position + timeline[i - 1].Value.Duration >= note.Position - SlideGap
+                    var from = i > 0 && timeline[i - 1].Position + timeline[i - 1].Value.Duration >= note.Position - slideGap
                         ? timeline[i - 1].Value.Pitches[0] - note.Value.Pitches[0]
                         : 0;
                     var state = note.Value.State
@@ -409,7 +426,7 @@ internal static class Expression
                     }
                     // a note that slides in bends no other way
                     var shaped = note.Value.Duration >= ShortestShaped - 1e-9;
-                    if ((slides || soloist is not null && !echoes) && slidesNow && shaped && !isRelease && isLine && Bends(noteProgram) && Math.Abs(from) is >= 1 and <= Rendering.ExpressionRender.BendRange)
+                    if ((slides || soloist is not null && !echoes) && slidesNow && note.Value.Duration >= shortestSlide - 1e-9 && !isRelease && isLine && Bends(noteProgram) && Math.Abs(from) is >= 1 and <= Rendering.ExpressionRender.BendRange)
                         state = state.With(CompositionStateKinds.Bend, (int)BendKind.Slide).With(CompositionStateKinds.BendDepth, from);
                     else if (bends && bendsNow && shaped)
                         state = state.With(CompositionStateKinds.Bend, (int)kind).With(CompositionStateKinds.BendDepth, kind switch

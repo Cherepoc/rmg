@@ -169,6 +169,7 @@
     "name": "Techno",
     "description": "A kick on every beat, driving and dark, the hi-hat on the offbeats, one figure looping for minutes over a chord or two, a square or sawtooth riff, little melody, a minor or Phrygian key, a TR-808 or electronic kit, 125 to 140, the pads and bass pumping.",
     "choices": {
+      "glide": { "bass": [20, 30, 50] },
       "arpeggio": { "none": 100, "up": [15, 20, 40], "random": [0, 10, 30] },
       "texture": { "steady": [100, 70, 50], "build": [40, 60, 60], "thin": [10, 20, 30] },
       "sectionLength": { "bars8": [20, 20, 30], "bars16": 100, "bars32": [100, 100, 80] },
@@ -290,6 +291,7 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano and pads, minor and Dorian.",
     "choices": {
+      "glide": { "bass": [40, 50, 60] },
       "sectionLength": { "bars8": [40, 40, 40], "bars16": 100, "bars32": [20, 20, 20] },
       "pins": { "ground": [90, 90, 70], "backbeat": [100, 100, 80] },
       "articulation": { "roll": [0, 20, 30] },

@@ -48,6 +48,10 @@ public sealed class GenreDevicesReportTest
                 .Select(x => ((int, TextureKind Kind, ImmutableArray<ImmutableHashSet<TrackRole>>))x.Value!).Average(x => x.Kind is TextureKind.Build or TextureKind.Thin ? 1.0 : 0),
             ["songs with a solo"] = song.Solos.Count > 0 ? 1 : 0,
             ["line notes bent or slid"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.Bend) > 0),
+            ["bass's changes of pitch slid into"] = song.Song.Notes!.GetValueOrDefault(SongTracks.BassTrack)?.ToArray() is { Length: > 1 } bass
+                && bass.Skip(1).Where((x, i) => x.Value.Pitches[0] != bass[i].Value.Pitches[0]).ToArray() is { Length: > 0 } changes
+                ? changes.Count(x => x.Value.State.GetStateValue(CompositionStateKinds.Bend) == (int)BendKind.Slide) / (double)changes.Length
+                : double.NaN,
             ["line notes with a vibrato"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.Vibrato) > 0 || x.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0),
             ["line notes slurred"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.Legato) > 0),
             ["unconventionality"] = song.Song.Draws!.Unconventionality.Base
