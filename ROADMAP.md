@@ -7,8 +7,9 @@ is removed once it is built.
 ## Priorities
 
 **Next** (P1): listening to what is deployed and tuning by what it says (see *Listening*), the presets most as October
-2026 retuned them, Pop and Metal, the instruments and the riser added; and the ratings by conventionality once enough
-are in, alongside, continuously and never as a gate.
+2026 retuned them, Pop and Metal, the instruments and the riser added, and the heavy band, the dark presets' mood and
+the effects added on 7 October (see *Sound*); and the ratings by conventionality once enough are in, alongside,
+continuously and never as a gate.
 
 **Later** (P2): the ratings report (see *Listening data*) once the dashboard shows songs rated enough.
 
@@ -123,8 +124,8 @@ each from the trace; the seeds named here are ones already found.
   the snare group one of its snares, as its rule draws. A piece put in plays by its roles alone: do a whistle or congas
   given to a kit song sound placed?
 - **Every drum heard:** a drum no section's kit took joins one section (`DrumCoverage`), and a vibraslap or a tom the
-  song never sounded lands once, with a crash where it can: placed, or tacked on? At the wildest groove a song of the kit
-  and percussion plays percussion only in half its sections (`PercussionSections.WildShare`): the kit too seldom, or
+  song never sounded lands once, with a crash where it can: placed, or tacked on? At the wildest groove a song of the
+  kit and percussion plays percussion only in half its sections (`PercussionSections.WildShare`): the kit too seldom, or
   too often?
 - **The drums' marks** (`DrumMarks`, Ambient's): about a strike every three bars at the middle, a section's start the
   likeliest, and a roll into a section now and then, one or two drums of the genre's: heard as a calm piece's
@@ -140,8 +141,9 @@ each from the trace; the seeds named here are ones already found.
 ### Sound
 
 - **The velocity:** how even the bass and the chords play; the bar layers add 3 to 5 from bar to bar: jumps?
-- **The effects:** the middle fifth plays 1.4 gentle kinds a song and a strong one (tremolo, echo, sweep) in 28% of
-  songs, the plainest fifth in 16%, the wildest in 60%: too many or too few? Lean the song's weights.
+- **The effects:** the middle fifth plays 1.9 gentle kinds a song and a strong one (a tremolo, an echo, a sweep, a
+  filter or a gate) in 25% of songs, the plainest fifth in 20%, the fourth in 58% (`ExpressionTest.Report`): too many
+  or too few? Lean the song's weights.
 - **The bends, vibratos and slides:** bends of one or two scale steps, two in a third of a middling song's; wide
   vibratos on guitars and synth leads; slides on 13% of a middling song's parts. Do the wide vibratos sound like a
   guitar's, does a part bending two steps everywhere tire, and are slides heard as slides? Slides are 44% of the
@@ -156,8 +158,8 @@ each from the trace; the seeds named here are ones already found.
   as before, its riffs in power chords on their chord's notes, Djent's 9% (`GenreIdiomsReportTest`). Heard? Metal's
   passing notes more, should its riffs want the chromatic runs.
 - **The dark presets' mood:** the melodies on the whole scale rather than the pentatonic in Trap, Techno and Dnb, and
-  the more in Hip-hop, its loops sparser, Phrygian and harmonic minor now and then; Trap's music box and celesta down and
-  piano in, no applied dominants; Dnb liquid and moody, Dorian and the triads down, piano in, the flute and the
+  the more in Hip-hop, its loops sparser, Phrygian and harmonic minor now and then; Trap's music box and celesta down
+  and piano in, no applied dominants; Dnb liquid and moody, Dorian and the triads down, piano in, the flute and the
   vibraphone down; Djent major only at the wild end. The melody's ♭2 Techno 1% to 4%, Hip-hop 2% to 3%; the major chords
   Trap 21% to 18%, Hip-hop 17% to 13%; Trap's lead bright 78% to 56%, Dnb's 38% to 8%; Djent major 12% to 3%
   (`MoodReportTest`). Still happy? The major chords are a minor key's own ♭III, ♭VI and ♭VII, which no preset choice
@@ -177,14 +179,15 @@ each from the trace; the seeds named here are ones already found.
   the GS player's one effect: Funk wahs 34% of its songs, mostly the rhythm part, Disco phases 20% and wahs 14%,
   Synthwave phases 20%, the wild songs now and then (`InsertionTest.Report`). The effects' own settings, the player's
   defaults, by ear; the lo-fi EQ, Hip-hop's muffled loop, should the dark side want it.
-- **A genre's room:** the reverb a small room, a hall or a plate, one per song as a Roland GS message, named by twelve
-  presets, Ambient's, Orchestral's and the dungeon's halls, Funk's, Punk's and Hip-hop's rooms, Synthwave's and Soul's
-  plates; the player's own hall elsewhere. Heard in both soundfonts' players? Its time and pre-delay a genre's too, if
-  the rooms alone are too alike.
+- **A genre's room and reverb:** the reverb a small room, a hall or a plate, one per song as a Roland GS message, named
+  by twelve presets, Ambient's, Orchestral's and the dungeon's halls, Funk's, Punk's and Hip-hop's rooms, Synthwave's
+  and Soul's plates; the player's own hall elsewhere; and the parts' sends, Ambient's mean 76, Funk's 28, the songs' 47.
+  Wet enough, the dry genres' room heard, in both soundfonts? Its time and pre-delay a genre's too, if the rooms alone
+  are too alike.
 - **The trance gate:** a pad, the chords or the rhythm part chopped in 16ths, sounding for 0.6 of each it lets through,
   every 16th or a pattern drawn for the song: Trance gates 17% of its songs, Electronic 8%, Synthwave 9%
-  (`GateTest.Report`). A pad's slow attack barely opening in a 16th, the chop clicking in a soundfont? Short-attack synth
-  chords preferred, if so.
+  (`GateTest.Report`). A pad's slow attack barely opening in a 16th, the chop clicking in a soundfont? Short-attack
+  synth chords preferred, if so.
 - **The filter:** a synth's filter wobbling in time, squelching on every note or opening over a section's first phrase,
   as its brightness and resonance, which spessasynth plays and other players may not: Techno squelches in 11% of its
   songs, Trance opens or wobbles in 28%, Dnb in 26%, the wildest songs filter in 30% (`FilterTest.Report`,
@@ -195,7 +198,6 @@ each from the trace; the seeds named here are ones already found.
   drawn songs 28% of them (`DoubleTrackingTest.Report`). A wall, or mud? The overdriven take thinner than the
   distortion's in a soundfont, the image leaning? The delay 5-12 ms by ear; the rhythm part or the chords left single
   where three are doubled, if mud.
-- **A genre's reverb:** Ambient's mean send 76, Funk's 28, the songs' 47: wet enough, and the dry genres' room heard?
 - **Rock's rhythm guitar:** the riff and the rhythm part never take the chords' instrument, nor the rhythm part the
   riff's (`SongTracks`), so where the chords and the riff are both driven, Rock's rhythm part is clean (53%) or muted
   (20%): a third guitar's contrast, or wanted distorted too, the exclusion then leaned rather than kept?
@@ -293,6 +295,11 @@ Each item with its plan, and what it waits for.
   sounding into the next; holding the note before into the slide and leaving the next unstruck edits two notes at
   render. Built if the struck slide sounds like a stutter.
 - **Long fall-offs** (P4): a fall of an octave into nothing at a note's end, a slide's kind of its own, if missed.
+- **A slow filter sweep** (P3): the filter rising and falling over two to eight bars, or opening through a build into a
+  drop, a dance track's sweep; the filter's shapes now move in a beat (`StrongEffect.Wobble`), a note
+  (`StrongEffect.Squelch`) or a section's first phrase (`StrongEffect.Opening`). A fourth shape of a cycle in bars on
+  the same controllers and parts, or the opening's span stretched over a lift's build (`LiftCues`), should Trance's and
+  Electronic's builds want it.
 
 ### Groove
 
@@ -311,13 +318,13 @@ Each item with its plan, and what it waits for.
   gestures (licks, runs, held notes) are not built for, its drumming and its melodic bass, gaps of their own.
 - **A section holding its spacing** rather than the voice leader drawing it anew a chord, should a spread chord's
   (`ChordVoicing`, "Spread") neighbours sound close.
-- **Approach chords, the rest** (P3): turnarounds, passing chords, a chord solo's planed approaches, chromatic
-  passing chords from above and a later appearance reharmonised are built. A plain song is never reharmonised, by any
-  of them, the songs' chance 0 at the plain end; a preset's may be above it, as Soul's and Bossa nova's turnarounds. Left:
-  the passing diminished between roots a whole step apart, and chromatic approaches from below, a chromatic root
-  wanting the whole chord moved a semitone with the lines over it keeping the target's scale; a chord solo's approaches
-  on the strong beats at the wild end, and the dominant as its approach; the tritone substitute for V7 in a
-  reharmonised appearance. Today a chord solo stacks the band's chord or planes its shape, never another chord.
+- **Approach chords, the rest** (P3): turnarounds, passing chords, a chord solo's planed approaches, chromatic passing
+  chords from above and a later appearance reharmonised are built. A plain song is never reharmonised, by any of them,
+  the songs' chance 0 at the plain end; a preset's may be above it, as Soul's and Bossa nova's turnarounds. Left: the
+  passing diminished between roots a whole step apart, and chromatic approaches from below, a chromatic root wanting the
+  whole chord moved a semitone with the lines over it keeping the target's scale; a chord solo's approaches on the
+  strong beats at the wild end, and the dominant as its approach; the tritone substitute for V7 in a reharmonised
+  appearance. Today a chord solo stacks the band's chord or planes its shape, never another chord.
 - **A melody in block harmony** (P4, parked): the counter-melody or the pad voicing its long notes, approaches on its
   passing ones, as a horn section's soli.
 - **Scales of other sizes** (P4, parked: the line scales give their sounds where they are heard): whole scales of more
@@ -351,9 +358,6 @@ Each item with its plan, and what it waits for.
   day and slow at the 200,000 a day the table keeps at most; then the spreads would be worked out a day at a time.
 - **The drum groups' pulses fading by their sounds** (P4): every group fades as fast as the parts' meters, a cymbal's
   wash as a click; a fade of each group's own would follow its sound, for little.
-- **A flaky page test** (P3): `GenreEditorTest.ALength_IsShownAndGivenInMinutesAndSeconds_ATempoInBeatsAMinute`
-  failed 3 of 11 full runs of the page tests in October 2026, never with detailed output nor alone, its message lost;
-  a race in the tune's values shown, to find should it keep failing.
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them; playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
@@ -418,8 +422,8 @@ left:
     and then.
   - Articulations played by a plugin's output as a keyswitch or a controller, the one place in `Render` the seam, once
     an output differs from General MIDI.
-  - Beyond General MIDI, parked: the gated reverb (one reverb send for the whole drum channel, no gate) and an acid
-    line's accent (no 303).
+  - Beyond General MIDI, parked: the gated reverb (one reverb send for the whole drum channel, no gate); an acid
+    line's slides and accents past the filter's squelch (`StrongEffect.Squelch`), which has no 303.
 - **A head with solos** (P4, parked): a jazz tune's head, choruses of solos over its form, and the head
   again, which AABA (`SongForms.Forms`) and a genre's solos (`GenreChoices.Solos`) come near already; a form of its own
   only should listening ask.
@@ -427,22 +431,22 @@ left:
   or a chorus louder, the genre's for the song otherwise; the generator asking the genre with the section's role,
   every choice's tile a role's override beside it. The dynamics' contrast and the phrases' AAB give most of it.
 - **Listening to the new presets** (P1): Orchestral, its crescendos over a phrase into its louder sections and Pop's,
-  Ambient's and Medieval's over two bars (`dynamics.lift`); Fusion, Soul, Country and Bossa nova; Funk's, Techno's, House's and Djent's
-  vamps, 30%, 56%, 20% and 66% of sections on one chord; Disco, Trap, Trance, drum and bass, Ska and Punk;
-  Medieval, Dungeon synth, Djent and Nu metal against their sentences
-  (`GenreDevicesReportTest`, `GenreIdiomsReportTest`): Djent's sections 70% polymetric, its snare on 3 alone in 10%
-  of bars, in stop time 6%, its riff chromatic and chugging; Nu metal's guitar driven in its loud sections in 97% of
-  songs, swung lightly in 16ths in 47%; Medieval's and Dungeon synth's drums marking the form, resting in 61% and 71%
-  of sections, a pedal under half of them.
+  Ambient's and Medieval's over two bars (`dynamics.lift`); Fusion, Soul, Country and Bossa nova; Funk's, Techno's,
+  House's and Djent's vamps, 30%, 56%, 20% and 66% of sections on one chord; Disco, Trap, Trance, drum and bass, Ska and
+  Punk; Medieval, Dungeon synth, Djent and Nu metal against their sentences (`GenreDevicesReportTest`,
+  `GenreIdiomsReportTest`): Djent's sections 70% polymetric, its snare on 3 alone in 10% of bars, in stop time 6%, its
+  riff chromatic and chugging; Nu metal's guitar driven in its loud sections in 97% of songs, swung lightly in 16ths in
+  47%; Medieval's and Dungeon synth's drums marking the form, resting in 61% and 71% of sections, a pedal under half of
+  them.
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Pop and Metal set no groove
   hold, their parts not pinned drifting as the songs' do (Pop's snare on 2 and 4 80%): Rock's (80) for them, should
-  their beat sound loose. Jazz's ride, pinned and now in every song, plays the songs' own time figure: a rhythm of its own
-  for the time (a ride's spang-a-lang), should it not swing; its hi-hat's foot on 2 and 4 in 27% of bars. Solos in Latin's songs 66% and Metal's 91%: too
-  many? Reggae's one drop is a kick half a bar off its cycle, which the report cannot tell from beat 1, and Latin's
-  tresillo is the time keeper's grouping alone; the rhythm values mean what they make together, and a preset's are
-  tuned by where its notes fall. Blues' twelve bars: the plainest keep them (IV at 5 98%, V at 9 84%, home at 4 and 8),
-  the drawn songs V at 9 56%, home at 4 54%, IV at 5 63%, the middling and wild songs keeping the place rules less by
-  the progression's strictness: loose enough to hear as the blues?
+  their beat sound loose. Jazz's ride, pinned and now in every song, plays the songs' own time figure: a rhythm of its
+  own for the time (a ride's spang-a-lang), should it not swing; its hi-hat's foot on 2 and 4 in 27% of bars. Solos in
+  Latin's songs 66% and Metal's 91%: too many? Reggae's one drop is a kick half a bar off its cycle, which the report
+  cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping alone; the rhythm values mean what they
+  make together, and a preset's are tuned by where its notes fall. Blues' twelve bars: the plainest keep them (IV at 5
+  98%, V at 9 84%, home at 4 and 8), the drawn songs V at 9 56%, home at 4 54%, IV at 5 63%, the middling and wild songs
+  keeping the place rules less by the progression's strictness: loose enough to hear as the blues?
 - **Listening to the genres' wild ends:** the presets' wild ends keep their idioms most and stray by what each names
   experimental (`EveryPreset_ChoicesByEnd`): the wildest Rock 34% in 4/4, its chords 7% quartal or tritone stacks; the
   wildest Jazz 56% swung, 50% sevenths, about a fifth So What, quartal, altered or eleventh. A home and a cadence lean
@@ -481,8 +485,8 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
   under an Ambient intro or outro, a part of one held note and no harmony.
 - **Ping-pong echo** (P4): an echo alternating sides, from the part's pan to its mirror, where a part's echo now
   repeats in place.
-- **Modulation** (blocked until a soundfont maps it): CC1, which none of the soundfonts offered maps to tone. The rule to
-  keep: modulation and a vibrato never at once, modulation and bends together.
+- **Modulation** (blocked until a soundfont maps it): CC1, which none of the soundfonts offered maps to tone. The rule
+  to keep: modulation and a vibrato never at once, modulation and bends together.
 - **A stage report of notes moved in place:** the stages' counts tell notes added and taken away; a diff of every
   timeline after every stage, should a report need what a stage moves.
 - **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do: readable, but

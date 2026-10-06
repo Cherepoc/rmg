@@ -13,13 +13,15 @@ A song is a sequence of sections, most often verse, chorus and bridge with a pre
 intro and an outro of their own. Its parts are drums and up to eight pitched parts: chords, melody, bass, a pad, a
 counter-melody, a riff (with a twin that harmonises it), a rhythm part and a solo part. Sections leave parts out,
 bring them in phrase by phrase, hold some back until a later section, double lines, play solos and fills, and change
-key or tempo, each by a chance of its own.
+key or tempo, each by a chance of its own. A part plays with its effects (vibrato, bends, slides, a swell, a chorus) and
+a song with one strong effect at most (an echo, a tremolo, a sweep, a pump, a synth's filter or a trance gate); a
+driven guitar's part is double-tracked, hard left and right.
 
 A genre leans a song's choices towards its idioms: a pool of options or a chance for each choice, at the plain end, the
-middle and the wild end. Twenty-nine presets come with the page (Pop, Rock, Metal, Nu metal, Djent, Punk, Ska, Jazz,
-Fusion, Soul, Funk, Disco, House, Techno, Trance, Synthwave, Drum and bass, Hip-hop, Trap, Reggae, Latin, Bossa nova,
-Folk, Country, Blues, Ambient, Medieval, Dungeon synth and Orchestral), and the page's editor makes and changes genres
-of one's own.
+middle and the wild end, its reverb's room and an insertion effect among them. Twenty-nine presets come with the page
+(Pop, Rock, Metal, Nu metal, Djent, Punk, Ska, Jazz, Fusion, Soul, Funk, Disco, House, Techno, Trance, Synthwave, Drum
+and bass, Hip-hop, Trap, Reggae, Latin, Bossa nova, Folk, Country, Blues, Ambient, Medieval, Dungeon synth and
+Orchestral), and the page's editor makes and changes genres of one's own.
 
 ## Requirements
 
@@ -100,14 +102,13 @@ Listens on every interface, on port 5000 by default. See [Settings](#settings).
   The seed is in letters and digits, all 64 bits of it; without one a random song is made. A part, by its role's name,
   may be given in or out (`plays`), an instrument (General MIDI 0-127), a volume and a pan, or left out of the file
   (`isOn: false`); `drumSetup` and `drumGroups` do the same for the drums, `drumPieces` gives the drum pieces the song
-  plays, by name, which make its setup, and `key`, `tempo` and `meter` give those
-  (the tempo by its step from 0 to 61, 60 to 240 beats a minute with 120 at 31, and the meter by its place in
-  `GET /api/songs/options`). A genre (`genre`, by the names of `GET /api/genres/choices`) gives a choice's amounts in
-  whole numbers, one alike at every end or three, at the plain end, the middle and the wild end. The response carries the
-  seed (`X-Song-Seed`), the songs' version (`X-Song-Version`), the key the genre is kept by (`X-Genre-Key`) and
-  everything the song drew or was given, with every part's channel (`X-Song-Settings`). The file is named
-  `song-<seed>.mid`. The server makes as many songs at once as it has cores; the rest wait their turn, a client at a
-  time, and are turned away with 429 or 503 when too many wait.
+  plays, by name, which make its setup, and `key`, `tempo` and `meter` give those (the tempo by its step from 0 to 61,
+  60 to 240 beats a minute with 120 at 31, and the meter by its place in `GET /api/songs/options`). A genre (`genre`, by
+  the names of `GET /api/genres/choices`) gives a choice's amounts in whole numbers, one alike at every end or three, at
+  the plain end, the middle and the wild end. The response carries the seed (`X-Song-Seed`), the songs' version
+  (`X-Song-Version`), the key the genre is kept by (`X-Genre-Key`) and everything the song drew or was given, with every
+  part's channel (`X-Song-Settings`). The file is named `song-<seed>.mid`. The server makes as many songs at once as it
+  has cores; the rest wait their turn, a client at a time, and are turned away with 429 or 503 when too many wait.
 - `GET /api/songs/options` lists the tempos a song may be given, in beats a minute by their steps, the meters, and the
   drum pieces with their groups and notes.
 - `GET /api/genres/choices` lists the choices a genre may name, with their options and the songs' own amounts;
@@ -140,9 +141,10 @@ internet connection.
 - **Sharing.** The address always follows the song, its settings and its genre,
   `?song=<seed>&settings=<settings>&genre=<key>`, so it is itself a link; **Share** opens the share sheet or copies
   it. Seeds are not kept stable across versions, so after an update an old link can play a different song.
-- **Downloads.** The `.mid` carries the mix. **Download .mp3** renders the song, at the bitrate beside it, with the
-  mix and the soundfont in the browser, with [lamejs](https://www.npmjs.com/package/@breezystack/lamejs) (LGPL-3.0,
-  from a CDN); nothing is uploaded.
+- **Downloads.** The `.mid` carries the mix. A song's reverb room and its insertion effect (a wah or a phaser) are
+  Roland GS messages, and its filter the brightness and resonance controllers, which the page's player plays and another
+  may not. **Download .mp3** renders the song, at the bitrate beside it, with the mix and the soundfont in the browser,
+  with [lamejs](https://www.npmjs.com/package/@breezystack/lamejs) (LGPL-3.0, from a CDN); nothing is uploaded.
 
 ## Soundfonts
 
