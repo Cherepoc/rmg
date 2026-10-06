@@ -33,6 +33,8 @@ public sealed class GenreIdiomsReportTest
             .Where(DrumsPlay)
             .ToArray();
         var (kicks, snares) = (Tracks(DrumGroups.Kick), Tracks(DrumGroups.Snare).Concat(DrumGroups.AllDrums.Where(x => x.Name == "Clap").Select(DrumGroups.GetTrackNumber).Where(notes.ContainsKey)).ToArray());
+        // the drums keeping time, as their song gives them the role
+        var times = song.Song.TrackDefinitions.Where(x => x.Value is PercussionInstrumentTrack d && DrumRoles.Of(d.StateMap) == DrumRole.Time && notes.ContainsKey(x.Key)).Select(x => x.Key).ToArray();
 
         var progressions = song.Trace.Where(x => x.Point == TracePoints.Progression).GroupBy(x => x.Section).Select(x => string.Join(" ", (System.Collections.Immutable.ImmutableArray<int>)x.First().Value!)).ToArray();
         var changes = map.Sections.Sum(x => song.ChordChanges.Count(c => c >= x.Start - 1e-9 && c < x.End - 1e-9));
@@ -97,6 +99,7 @@ public sealed class GenreIdiomsReportTest
             ["chords on the offbeat 8ths"] = notes.GetValueOrDefault(SongTracks.ChordsTrack) is { Count: > 0 } chordNotes
                 ? chordNotes.Average(x => Math.Abs(x.Position % 1 - 0.5) < 0.05 ? 1.0 : 0)
                 : double.NaN,
+            ["time in the tresillo (1 and-of-2 4 alone)"] = bars.Length > 0 ? bars.Count(x => HitsAt(times, x) && HitsAt(times, x + 1.5) && HitsAt(times, x + 3) && !HitsAt(times, x + 1) && !HitsAt(times, x + 2)) / (double)bars.Length : double.NaN,
             ["snare on 2 and 4"] = bars.Length > 0 ? bars.Count(x => HitsAt(snares, x + 1) && HitsAt(snares, x + 3)) / (double)bars.Length : double.NaN,
             ["chorus melody bars repeated"] = RepeatedIn(SectionRole.Chorus),
             ["verse melody bars repeated"] = RepeatedIn(SectionRole.Verse),
@@ -141,6 +144,7 @@ public sealed class GenreIdiomsReportTest
         ["techno"] = [("chords in 4 bars", 0, 2), ("kick on every beat", 0.85, 1), ("drums over the melody", 10, 127), ("tempo", 125, 140)],
         ["synthwave"] = [("snare on 2 and 4", 0.8, 1), ("kick on every beat", 0, 0.3), ("tempo", 85, 118), ("ending a fade", 0.5, 1)],
         ["rock"] = [("kick on 1", 0.85, 1), ("snare on 2 and 4", 0.85, 1), ("chords in 4 bars", 2, 4), ("melody pentatonic or blues", 0.5, 1)],
+        ["latin"] = [("time in the tresillo (1 and-of-2 4 alone)", 0.5, 1)],
         ["reggae"] = [("one drop (kick and snare on 3 alone)", 0.6, 1), ("chords on the offbeat 8ths", 0.7, 1), ("tempo", 60, 90)],
         ["blues"] = [("melody pentatonic or blues", 0.6, 1), ("snare on 2 and 4", 0.8, 1)],
         ["jazz"] = [("chords in 4 bars", 4, 8), ("melody leaps past a fifth", 0.06, 0.2)],

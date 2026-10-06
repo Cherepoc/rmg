@@ -412,8 +412,8 @@ Each item with its plan, and what it waits for.
 - **The drum groups' pulses fading by their sounds** (P4): every group fades as fast as the parts' meters, a cymbal's
   wash as a click; a fade of each group's own would follow its sound, for little.
 - **A flaky page test** (P3): `GenreEditorTest.ALength_IsShownAndGivenInMinutesAndSeconds_ATempoInBeatsAMinute`
-  failed 2 of 6 full runs of the page tests in October 2026 and passed alone and on rerun, its message lost; a race in
-  the tune's values shown, to find should it fail again.
+  failed 3 of 11 full runs of the page tests in October 2026, never with detailed output nor alone, its message lost;
+  a race in the tune's values shown, to find should it keep failing.
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them; playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
@@ -617,7 +617,10 @@ a link carries. What is left:
   6. Done: the one drop and the skank, by settings and pins (`GenreChoices.Pins` now any part's, a pitched part's
      too): Reggae's kick and snare on 3 alone in 63% of its groove bars (2%), its kick off 1 in 88%, its chords on the
      offbeat 8ths 71% (59%; the others' 3-25%).
-  7. A clave the band keeps to, Latin's: the parts' rhythms aligned to the 3-2 or 2-3, and the piano's montuno.
+  7. Done in part: the tresillo held (`GenreChoices.Pins`, Latin's time, ground and bass pinned, its time keeper's
+     feel leaning to 3+3+2): the time in the tresillo alone, beats 2 and 3 empty, 52% of Latin's groove bars (1%). Not
+     done: the clave's two bars, 3-2 or 2-3, which a cycle and its shift cannot hold, a figure of two bars a part's own,
+     and the piano's montuno, a broken chord off the beat; and a second time keeper playing straight under the tresillo.
   8. A rap's place: a hook sung and the verses left to a voice, the melody resting or a riff carrying them.
   9. A melody written as a hook in every section, not only its repeated bars (House's and Hip-hop's melody bars
      repeated 13% and 18%, a target of 50%).
