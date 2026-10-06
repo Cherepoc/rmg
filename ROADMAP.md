@@ -13,7 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: call and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
+**When the need shows** (P3), each by what listening says, in this order: a chord's own scale drawn; the page's seek bar and its wait for a remake.
 
 **Put off** until their uses ask for them: long cycles and a tag (see *Open work*, *Rhythm engine*).
 
@@ -202,8 +202,11 @@ Each item with its plan, and what it waits for.
   listening ask. Pushes done (`SongStages.Pushes`, `GenreChoices.Push`): a pushing section's chord changes on the bar
   played an eighth early by the band's harmony, the drums keeping time and the lines going on, never in a solo, in
   stop time or at a part's entry; sections pushing Funk 39%, Latin 30%, Rock 12%, others 8-9%. The drums' push (a crash
-  and kick on the and of four) should listening ask. Then call and response between parts, a backing figure that recurs
-  through the song.
+  and kick on the and of four) should listening ask. Then a backing figure that recurs through the song. Call and
+  response between parts postponed (October 2026): an edit after the notes that keeps the counter-melody to the
+  melody's rests and held notes, note by note or bar by bar, kept 12% and 15% of its notes, the melody leaving no room;
+  the counter-melody's rhythm placed against the melody's gaps when it is drawn, as the solo part's answers are
+  (`SoloAnswers`), is the way, should listening ask.
 - **Harmony's devices** (P3): a ii–V into a chord but the home, which a chord's own scale makes part of. A chromatic
   line inside a held chord done (`SongStages.InnerLines`), the line cliché: over a chord two bars long or longer, the
   chords' root voice falling a semitone a quarter (root, major seventh, seventh, sixth), a section's by its chords facet
