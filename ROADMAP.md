@@ -13,7 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: a chromatic inner line; a motif developed further; call
+**When the need shows** (P3), each by what listening says, in this order: a motif developed further; call
 and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
 
 **Put off** until their uses ask for them: long cycles and a tag (see *Open work*, *Rhythm engine*).
@@ -205,8 +205,11 @@ Each item with its plan, and what it waits for.
   stop time or at a part's entry; sections pushing Funk 39%, Latin 30%, Rock 12%, others 8-9%. The drums' push (a crash
   and kick on the and of four) should listening ask. Then call and response between parts, a backing figure that recurs
   through the song.
-- **Harmony's devices** (P3): a chromatic line inside a held chord, and a ii–V into a chord but the home, which a
-  chord's own scale makes part of. A pedal under a section done (`SongStages.SectionPedalChance`, the key change's
+- **Harmony's devices** (P3): a ii–V into a chord but the home, which a chord's own scale makes part of. A chromatic
+  line inside a held chord done (`SongStages.InnerLines`), the line cliché: over a chord two bars long or longer, the
+  chords' root voice falling a semitone a quarter (root, major seventh, seventh, sixth), a section's by its chords facet
+  (0, 0.15, 0.3), never in a solo; 11% of the corpus's songs sound one (chords held two bars are a quarter of the
+  sections). Rising (the fifth, its sharp, the sixth) should listening ask. A pedal under a section done (`SongStages.SectionPedalChance`, the key change's
   pedal generalized, `KeyChange.Pedal`): a section's appearances' first phrase over its bass holding its home or its
   dominant, by its progression facet (0, 0.06, 0.15); 4.8% of the corpus's sections, 18% of its songs.
 - **The hook at the end** (P4, parked): a song opens on its chorus's first phrase now and then (`IntroKind.Hook`); an outro

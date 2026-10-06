@@ -82,6 +82,9 @@ internal static class CompositionStateKinds
     // its attack softer, for a plugin a legato keyswitch (Render)
     public static StateKind<int> Legato { get; } = StateKinds.CreateAdditive<int>(Prefix + "Legato", StateScope.Render);
 
+    // 1 for a chord whose root voice a chromatic line moves inside it, off the section's scale (SongStages.InnerLines)
+    public static StateKind<int> InnerLine { get; } = StateKinds.CreateAdditive<int>(Prefix + "InnerLine", StateScope.Render);
+
     // 1 for a riff's note played as a power chord, its perfect fifth over it and its octave where the range has it
     public static StateKind<int> PowerChord { get; } = StateKinds.CreateAdditive<int>(Prefix + "PowerChord", StateScope.Render);
 

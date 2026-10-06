@@ -105,6 +105,7 @@ internal static class SongStages
         new("Notes", RealizeNotes, CanSkip: false),
         new("Stop time", StopTime, CanSkip: true),
         new("Pushes", Pushes, CanSkip: true),
+        new("Inner lines", InnerLines, CanSkip: true),
         new("Instruments", Instruments, CanSkip: true),
         new("Articulation", Articulation, CanSkip: true),
         new("Timing", Timing, CanSkip: true),
@@ -468,6 +469,60 @@ internal static class SongStages
         }
 
         return draft with { Notes = result.ToImmutable() };
+    }
+
+    /// <summary>The chance a section moves a chromatic line inside its held chords, by its chords facet: never in the plainest songs.</summary>
+    public static ByConvention InnerLineChance { get; } = new(0, 0.15, 0.3);
+
+    /// <summary>How long a chord is held, in bars, before a line moves inside it.</summary>
+    public const int InnerLineBars = 2;
+
+    /// <summary>
+    ///     A chromatic line inside a held chord, the line cliché: in a section that takes it, over a chord two bars long or
+    ///     longer, the chords' root voice falling a semitone each quarter of the chord, the root, its major seventh, its
+    ///     seventh and its sixth, the rest of the chord held. A section's decision, from a sequence of its own.
+    /// </summary>
+    internal static SongDraft InnerLines(SongDecisions song, SongDraft draft)
+    {
+        var lining = song.SectionIds.Distinct().ToDictionary(id => id, id =>
+        {
+            var lines = song.Stream(SongStream.InnerLines, id).TestProbability(InnerLineChance.At(song.SectionOf(id).Facets[Facet.Chords]));
+            StateTrace.Record(TracePoints.InnerLine, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, $"{lines}", lines);
+            return lines;
+        });
+        var common = draft.Timeline.CommonStateTimelineMap;
+        var changes = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+        // every chord held long enough in a section that takes the line, but in a solo: where it starts and ends
+        var held = song.Form.Map.Sections.Where((x, i) => lining[x.SectionId] && !song.Solos.ContainsKey(i))
+            .SelectMany(span => changes.Where(x => x >= span.Start - 1e-9 && x < span.End - 1e-9)
+                .Select(x => (Start: x, End: changes.Where(c => c > x + 1e-9).DefaultIfEmpty(span.End).Min() is var next ? Math.Min(next, span.End) : span.End))
+                .Where(x => x.End - x.Start >= InnerLineBars * span.Meter.BarDuration - 1e-9))
+            .ToArray();
+        var chords = song.Track(TrackRole.Chords).Key;
+        if (held.Length == 0 || !NotesOf(draft).TryGetValue(chords, out var timeline))
+            return draft;
+
+        return draft with
+        {
+            Notes = NotesOf(draft).SetItem(chords, EventTimeline.Create(timeline.Duration, timeline.Select(note =>
+            {
+                var chord = held.FirstOrDefault(x => note.Position >= x.Start - 1e-9 && note.Position < x.End - 1e-9);
+                if (chord.End <= chord.Start)
+                    return note;
+                var quarter = (int)Math.Floor(4 * (note.Position - chord.Start) / (chord.End - chord.Start) + 1e-9);
+                var root = Realizer.GetChord(note.Value.State).Chord.Root.Mod(12);
+                var voice = note.Value.Pitches.Where(x => x.Mod(12) == root).DefaultIfEmpty(-1).Max();
+                if (quarter == 0 || voice < 0 || note.Value.Pitches.Contains(voice - quarter))
+                    return note;
+                return (note.Value with
+                {
+                    Pitches = [..note.Value.Pitches.Select(x => x == voice ? x - quarter : x)],
+                    // and held no further than its quarter, so that the next takes the line on
+                    Duration = Math.Min(note.Value.Duration, chord.Start + (quarter + 1) * (chord.End - chord.Start) / 4 - note.Position),
+                    State = note.Value.State.With(CompositionStateKinds.InnerLine, 1)
+                }).ToTimelineItem(note.Position);
+            })))
+        };
     }
 
     /// <summary>The parts' instruments over the song, switched and articulated by every section's sound facet.</summary>

@@ -39,6 +39,9 @@ internal static class TracePoints
     /// <summary>A section's pedal's root, in steps above its home, none where it holds none (an <c>int?</c>).</summary>
     public const string SectionPedal = "Section pedal";
 
+    /// <summary>Whether a section moves a chromatic line inside its held chords (a <c>bool</c>).</summary>
+    public const string InnerLine = "Inner line";
+
     /// <summary>Whether a section pushes its chord changes (a <c>bool</c>).</summary>
     public const string Push = "Push";
 

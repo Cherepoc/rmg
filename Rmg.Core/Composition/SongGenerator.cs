@@ -535,5 +535,6 @@ internal enum SongStream
     Pushes = 74,
     Legato = 75,
     Roll = 76,
-    SectionPedal = 77
+    SectionPedal = 77,
+    InnerLines = 78
 }
