@@ -22,6 +22,8 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Mode">The scale it starts in, by its place among the scales (<c>/api/songs/options</c>).</param>
 /// <param name="Swing">How much it swings, from 0, straight, to 63, a triplet's swing: 0 where its meter pairs no notes to swing.</param>
 /// <param name="Length">How long it plays, by its step (<see cref="LengthScale" />), the nearest to its length, given or not.</param>
+/// <param name="Seconds">How long it plays, in seconds.</param>
+/// <param name="Sections">Every section it plays, in its order: where it starts, its role and the parts that solo it.</param>
 public sealed record SongReport(
     Drawn<int> Unconventionality,
     ImmutableSortedDictionary<string, Drawn<int>> Facets,
@@ -33,7 +35,9 @@ public sealed record SongReport(
     Drawn<int> Meter,
     Drawn<int> Mode,
     Drawn<int> Swing,
-    Drawn<int> Length
+    Drawn<int> Length,
+    double Seconds,
+    ImmutableArray<SectionReport> Sections
 )
 {
     public static SongReport Of(Song song, RenderedSong rendered, SongOverrides overrides)
@@ -69,7 +73,12 @@ public sealed record SongReport(
             new Drawn<int>(Core.Composition.Meter.OptionOf(song.Meter), overrides.MeterOption is not null || overrides.Meter is not null),
             new Drawn<int>(Scales.All.IndexOf(draws.Scale), overrides.Scale is not null),
             new Drawn<int>(StepScale.ToStep(draws.SwingAmount), overrides.Swing is not null),
-            new Drawn<int>(LengthScale.StepOf(rendered.Seconds), overrides.Length is not null)
+            new Drawn<int>(LengthScale.StepOf(rendered.Seconds), overrides.Length is not null),
+            rendered.Seconds,
+            [
+                ..song.Map!.Sections.Zip(draws.Appearances, (span, appearance) =>
+                    new SectionReport(rendered.SecondsAt(span.Start), Name(appearance.Role), [..appearance.Soloists.Select(Name)]))
+            ]
         );
     }
 
@@ -80,6 +89,11 @@ public sealed record SongReport(
         return char.ToLowerInvariant(name[0]) + name[1..];
     }
 }
+
+/// <param name="Start">Where it starts, in seconds.</param>
+/// <param name="Role">What it does in the song's form, by its name: "verse", "chorus".</param>
+/// <param name="Soloists">The parts that solo it, by their roles' names; none for most.</param>
+public sealed record SectionReport(double Start, string Role, ImmutableArray<string> Soloists);
 
 /// <param name="Value">What the song has.</param>
 /// <param name="IsGiven">Whether it was given, rather than drawn.</param>

@@ -578,9 +578,36 @@ input[type="range"] {
     accent-color: var(--accent);
 }
 
-#seek {
+/* the seek bar, and over it a mark where each section starts, which lets the bar take every pointer, set in as far as
+   the thumb's middle travels (SEEK_INSET in app.js) */
+.seek {
     flex: 1;
     min-width: 80px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+#seek {
+    width: 100%;
+    margin: 0;
+}
+
+.seek-sections {
+    position: absolute;
+    inset: 0 8px;
+    pointer-events: none;
+}
+
+.seek-sections span {
+    position: absolute;
+    top: 50%;
+    width: 2px;
+    height: 12px;
+    border-radius: 1px;
+    background: var(--muted);
+    opacity: 0.7;
+    transform: translate(-50%, -50%);
 }
 
 .volume {
@@ -1478,7 +1505,7 @@ footer a:hover {
     }
 
     .transport time,
-    #seek,
+    .seek,
     .transport .volume {
         order: 5;
     }
@@ -1539,7 +1566,7 @@ footer a:hover {
         z-index: 1;
     }
 
-    #seek {
+    .seek {
         min-width: 60px;
     }
 

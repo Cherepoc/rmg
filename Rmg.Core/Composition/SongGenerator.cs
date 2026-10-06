@@ -357,7 +357,8 @@ public static class SongGenerator
             ? Stream(SongStream.Kit).Pick(ByConvention.Weigh(GenreChoices.Kits.Select(x => (x.Program, x.Program == 0 ? new ByConvention(1, 1, 1) : default)), songUnconventionality[Facet.Sound], kits))
             : 0;
 
-        return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality, [..SongParts.All.Except(absent)], tracks.DrumSetup, [..tracks.SongDrums.Select(DrumPieces.NameOf)], scale, swing, kit));
+        return new Song(songTrackNoteTimelineMap.Duration, meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality, [..SongParts.All.Except(absent)], tracks.DrumSetup, [..tracks.SongDrums.Select(DrumPieces.NameOf)], scale, swing, kit,
+            [..form.Map.Sections.Select((x, i) => (structure.Roles[x.SectionId], solos.TryGetValue(i, out var solo) ? solo.Soloists : []))]));
     }
 
     /// <summary>The random sequence a stage of the song of the given seed draws from.</summary>

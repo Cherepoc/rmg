@@ -87,6 +87,7 @@ const elements = {
     seek: document.getElementById("seek"),
     elapsed: document.getElementById("elapsed"),
     total: document.getElementById("total"),
+    sections: document.getElementById("seek-sections"),
     volume: document.getElementById("volume"),
     volumeValue: document.getElementById("volume-value"),
     autoplay: document.getElementById("autoplay"),
@@ -147,6 +148,9 @@ let startedListening = null;
 // the songs' version the song on the page was made by, which every event about the song carries: the same seed
 // is another song in another version, and a page open across a deploy still plays the song it got
 let songVersion = null;
+// the song's sections as its report gives them, where each starts in seconds, its role and its soloists, and its length
+let songSections = [];
+let songSeconds = 0;
 let isSeeking = false;
 let seekedFrom = null;
 let isExporting = false;
@@ -926,6 +930,7 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         songGenreKey = presetOf(settings.genre)?.id ?? response.headers.get("X-Genre-Key");
         songVersion = response.headers.get("X-Song-Version");
         elements.seed.value = songSeed;
+        showSections(report);
 
         // a new song is heard whole, a song made again as it was being heard
         if (!isRemade) {
@@ -2508,6 +2513,39 @@ async function refreshDownload() {
     }
 }
 
+// --- sections --------------------------------------------------------------
+
+/** A section's name as the seek bar tells it: its role in words, a solo said, and where it starts. */
+function sectionName(section) {
+    const role = section.role.replace(/[A-Z]/g, (x) => `-${x.toLowerCase()}`);
+    const solo = section.soloists.length > 0 ? `, a ${section.soloists.includes("drum") ? "drum " : ""}solo` : "";
+    return `${role[0].toUpperCase()}${role.slice(1)}${solo}, ${formatTime(section.start)}`;
+}
+
+/** The song's sections marked on the seek bar where each starts but the first, and its length shown before it plays, which playing keeps. */
+function showSections(report) {
+    songSections = report.sections;
+    songSeconds = report.seconds;
+    elements.sections.replaceChildren(...songSections.filter((x) => x.start > 0).map((section) => {
+        const mark = document.createElement("span");
+        mark.style.left = `${(100 * section.start) / songSeconds}%`;
+        mark.dataset.name = sectionName(section);
+        return mark;
+    }));
+    elements.total.textContent = formatTime(songSeconds);
+}
+
+// how far in from the bar's ends its thumb's middle travels, in pixels, as the marks are set in (app.css)
+const SEEK_INSET = 8;
+
+// the bar named by the section under the pointer, as a hover shows it
+elements.seek.addEventListener("pointermove", (event) => {
+    const box = elements.seek.getBoundingClientRect();
+    const at = Math.min(Math.max((event.clientX - box.left - SEEK_INSET) / (box.width - 2 * SEEK_INSET), 0), 1) * songSeconds;
+    const section = songSections.findLast((x) => x.start <= at + 1e-6);
+    elements.seek.title = section ? sectionName(section) : "";
+});
+
 // --- ticking ---------------------------------------------------------------
 
 /**
@@ -2516,7 +2554,7 @@ async function refreshDownload() {
  */
 function render(player, time = player.currentTime) {
     const duration = player.duration;
-    elements.total.textContent = formatTime(duration);
+    elements.total.textContent = formatTime(duration > 0 ? duration : songSeconds);
 
     // the bar and the time under it are the seek's own while it lasts
     if (!isSeeking) {
