@@ -30,9 +30,9 @@ internal static class Reharmonisation
     ///     substituted chord to the next change; none where the song does not reharmonise or has no section heard again.
     /// </summary>
     /// <param name="moved">Where a key change moves a chord or leads into one, which keeps it.</param>
-    public static StateTimelineMap Apply(IGenerationContext context, double unconventionality, SongMap map, StateTimelineMap common, IEnumerable<double> moved)
+    public static StateTimelineMap Apply(IGenerationContext context, double unconventionality, Genre genre, SongMap map, StateTimelineMap common, IEnumerable<double> moved)
     {
-        var reharmonises = context.TestProbability(Chance.At(unconventionality));
+        var reharmonises = context.TestProbability(Chance.At(unconventionality, genre.Chance(GenreChoices.HarmonyDevices, "reharmonised")));
         var sections = map.Sections;
         var later = Enumerable.Range(0, sections.Length).LastOrDefault(i => sections.Take(i).Any(x => x.SectionId == sections[i].SectionId), -1);
         var changes = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();

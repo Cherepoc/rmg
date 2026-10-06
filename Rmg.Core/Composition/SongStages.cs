@@ -157,7 +157,7 @@ internal static class SongStages
     internal static SongDraft Reharmonise(SongDecisions song, SongDraft draft) =>
         draft with
         {
-            Timeline = draft.Timeline.MergeStateTimelineMap(Reharmonisation.Apply(song.Stream(SongStream.Reharmonisation), song.Facets[Facet.Progression], song.Form.Map,
+            Timeline = draft.Timeline.MergeStateTimelineMap(Reharmonisation.Apply(song.Stream(SongStream.Reharmonisation), song.Facets[Facet.Progression], song.Genre, song.Form.Map,
                 draft.Timeline.CommonStateTimelineMap, draft.Chains.SelectMany(x => x.Chords.Append(x.Change))))
         };
 
@@ -298,7 +298,7 @@ internal static class SongStages
         var pedalling = song.SectionIds.Distinct().ToDictionary(id => id, id =>
         {
             var context = song.Stream(SongStream.SectionPedal, id);
-            var pedals = context.TestProbability(SectionPedalChance.At(song.SectionOf(id).Facets[Facet.Progression]));
+            var pedals = context.TestProbability(SectionPedalChance.At(song.SectionOf(id).Facets[Facet.Progression], song.Genre.Chance(GenreChoices.HarmonyDevices, "pedal")));
             var root = context.Pick(SectionPedalRoots);
             StateTrace.Record(TracePoints.SectionPedal, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, pedals ? $"{root}" : "none", pedals ? root : null);
             return pedals ? root : (int?)null;
@@ -486,7 +486,7 @@ internal static class SongStages
     {
         var lining = song.SectionIds.Distinct().ToDictionary(id => id, id =>
         {
-            var lines = song.Stream(SongStream.InnerLines, id).TestProbability(InnerLineChance.At(song.SectionOf(id).Facets[Facet.Chords]));
+            var lines = song.Stream(SongStream.InnerLines, id).TestProbability(InnerLineChance.At(song.SectionOf(id).Facets[Facet.Chords], song.Genre.Chance(GenreChoices.HarmonyDevices, "innerLine")));
             StateTrace.Record(TracePoints.InnerLine, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, $"{lines}", lines);
             return lines;
         });
@@ -569,7 +569,7 @@ internal static class SongStages
             if (song.Tracks.Definitions[track] is not PitchInstrumentTrack part)
                 continue;
             var chugs = Chugs(part.Role, part.InstrumentCode);
-            var rolls = song.Stream(SongStream.Roll, track).TestProbability(RollChance.At(song.Facets[Facet.Sound]));
+            var rolls = song.Stream(SongStream.Roll, track).TestProbability(RollChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "roll")));
             var (bottom, top) = Realizer.GetRange(part);
             result[track] = EventTimeline.Create(timeline.Duration, timeline.Select((note, i) =>
             {
@@ -604,7 +604,7 @@ internal static class SongStages
         // and a line's steps slurred where its part slurs
         foreach (var (track, timeline) in result.ToArray())
             if (song.Tracks.Definitions[track].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo or TrackRole.Riff
-                && song.Stream(SongStream.Legato, track).TestProbability(LegatoChance.At(song.Facets[Facet.Sound])))
+                && song.Stream(SongStream.Legato, track).TestProbability(LegatoChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "legato"))))
                 result[track] = Slur(timeline);
 
         return draft with { Notes = result.ToImmutable() };

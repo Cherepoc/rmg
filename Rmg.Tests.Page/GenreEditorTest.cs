@@ -482,6 +482,9 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(await Tile(await Section(dialog, "Harmony"), "harmonicRhythm").IsVisibleAsync()).IsTrue();
         // a turnaround, a reharmonisation, never at the plain end
         await Assert.That(await Tile(await Section(dialog, "Harmony"), "turnaround").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
+        await Assert.That(await Tile(await Section(dialog, "Harmony"), "planing").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
+        await Assert.That(await Tile(await Section(dialog, "Harmony"), "harmonyDevices").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
+        await Assert.That(await Tile(await Section(dialog, "Sound"), "articulation").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
         await Assert.That(await Tile(await Section(dialog, "Form"), "loop").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: none");
         await Assert.That(await Tile(await Section(dialog, "Sound"), "levels").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: default");
         await Assert.That(await Tile(await Section(dialog, "Sound"), "rests").Locator(".genre-ends > span").First.TextContentAsync()).IsEqualTo("Plainest: default");

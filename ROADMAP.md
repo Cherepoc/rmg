@@ -589,6 +589,28 @@ a link carries. What is left:
   role's pool, with their leading drawn from their family; phrases of other than four bars, once the phrases sound
   right.
 
+- **What the genres cannot play yet** (P2, a review of October 2026; `GenreDevicesReportTest` the measure): every
+  device is now a genre's choice (`GenreChoices.HarmonyDevices`, `GenreChoices.Articulation` the last), and the beat
+  genres name theirs off. What no setting reaches:
+  1. A drum pinned to its pattern: a four on the floor's kick on every beat in 77% of House's bars and 83% of
+     Techno's, Hip-hop's kick on 1 in 42%, Synthwave's snare on 2 and 4 in 59%, the groove's own layers still moving
+     them however held. A genre's drum role that never moves, its figure the genre's.
+  2. Long phrases: everything is built of four-bar patterns, where a dance track's sections run 16 or 32 bars with a
+     part coming in or going out at each 8, and a build that thickens (a snare roll, a riser) over them.
+  3. An arpeggiator: a chord played as a pattern of its notes in 16ths, a synth bass's and synthwave's and trance's
+     sound; today a part plays its chord or a line.
+  4. A bass's glide and accent, the acid line's, and an 808's long slide between notes; the slides today are a
+     line's ornament, a percent of its notes.
+  5. Hi-hat rolls in 32nds and triplets, the trap's, and a snare's drag and its ghost notes.
+  6. The one drop (the kick and snare on 3 alone, beat 1 empty), Reggae's, and its skank on the offbeats only.
+  7. A clave the band keeps to, Latin's: the parts' rhythms aligned to the 3-2 or 2-3, and the piano's montuno.
+  8. A rap's place: a hook sung and the verses left to a voice, the melody resting or a riff carrying them.
+  9. A melody written as a hook in every section, not only its repeated bars (House's and Hip-hop's melody bars
+     repeated 13% and 18%, a target of 50%).
+  10. A chord stab: a chord struck short on the offbeat, House's piano and Techno's dub chord, with an echo.
+  11. Gated reverb on the snare and a big tom fill, Synthwave's, which General MIDI cannot sound but a velocity and
+     length could suggest.
+
 ## Parked
 
 Ideas with a reason, not planned: none has shown a need. Taken up only when listening or another item asks for one.

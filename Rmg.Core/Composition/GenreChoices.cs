@@ -152,6 +152,21 @@ public static class GenreChoices
     /// <summary>The chance a section pushes its chord changes, the band an eighth early (<see cref="SongStages.PushChance" />).</summary>
     public static GenreChoice Push { get; } = Chances("push", "Pushes", [("sections", "Sections pushing their changes", SongStages.PushChance)]);
 
+    /// <summary>
+    ///     The chances of harmony's devices that no choice above reaches: a later appearance reharmonised, a chromatic line
+    ///     inside a held chord and a pedal under a section; reharmonisations, which no genre plays at the plain end.
+    /// </summary>
+    public static GenreChoice HarmonyDevices { get; } = Chances("harmonyDevices", "Harmony's devices",
+    [
+        ("reharmonised", "A later appearance reharmonised", Reharmonisation.Chance),
+        ("innerLine", "A chromatic inner line", SongStages.InnerLineChance),
+        ("pedal", "A pedal under a section", SongStages.SectionPedalChance)
+    ], plainEnd: false);
+
+    /// <summary>The chances a line's part slurs its steps, and a piano's part rolls its held chords (<see cref="SongStages.Articulation" />).</summary>
+    public static GenreChoice Articulation { get; } = Chances("articulation", "Articulation",
+        [("legato", "Slurred steps", SongStages.LegatoChance), ("roll", "Rolled piano chords", SongStages.RollChance)]);
+
     /// <summary>The chance a lift the drums announce is built to and dropped at, the band out for the bar before it; the songs never (<see cref="FormLayers.Drop" />).</summary>
     public static GenreChoice Drop { get; } = Chances("drop", "Builds and drops", [("lifts", "Lifts built to a drop", FormLayers.Drop)]);
 
@@ -442,7 +457,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, Loop, LineScale, MelodyRange, Bass, OctaveBass, BassLanding, Effects, Levels, Rests, GrooveHold, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Bass, OctaveBass, BassLanding, Effects, Articulation, Levels, Rests, GrooveHold, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,
