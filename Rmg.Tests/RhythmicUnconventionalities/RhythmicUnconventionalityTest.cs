@@ -29,16 +29,18 @@ public sealed class RhythmicUnconventionalityTest
     }
 
     [Test]
-    public async Task GeneratedSongs_GatherAboutTheirCentre_PlainerThanTheMiddle_EveryValuePossible_TheWildRarely()
+    public async Task GeneratedSongs_GatherAboutTheMiddle_EveryValuePossible_TheEndsRarely()
     {
         var context = new GenerationContext(1);
         var values = Enumerable.Range(0, 20_000).Select(_ => Unconventionality.DrawBase(context)).Order().ToArray();
 
         await Assert.That(values[values.Length / 2]).IsEqualTo(Unconventionality.BaseCentre).Within(0.01);
-        await Assert.That(values[values.Length / 4]).IsBetween(0.14, 0.2);
-        await Assert.That(values[values.Length * 3 / 4]).IsBetween(0.3, 0.37);
-        // above 0.75 in about one song in eighty, and now and then the wildest
-        await Assert.That(values.Count(x => x > 0.75) / (double)values.Length).IsBetween(0.005, 0.03);
+        await Assert.That(values[values.Length / 4]).IsBetween(0.33, 0.41);
+        await Assert.That(values[values.Length * 3 / 4]).IsBetween(0.59, 0.67);
+        // beyond a quarter of the way from either end in about one song in ten each, and now and then the plainest and the wildest
+        await Assert.That(values.Count(x => x > 0.75) / (double)values.Length).IsBetween(0.05, 0.15);
+        await Assert.That(values.Count(x => x < 0.25) / (double)values.Length).IsBetween(0.05, 0.15);
+        await Assert.That(values[0]).IsLessThan(0.1);
         await Assert.That(values[^1]).IsGreaterThan(0.9);
     }
 

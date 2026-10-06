@@ -62,8 +62,10 @@ internal static class Arrangement
         if (context.TestProbability(VoiceChance.At(form, genre.Chance(GenreChoices.Voice, "verses"))) && role == SectionRole.Verse)
             resting.Add(TrackRole.Melody);
 
-        // a section keeps its harmony, where the song has the chords
-        if (resting.Contains(TrackRole.Bass) && resting.Contains(TrackRole.Chords) && !absent.Contains(TrackRole.Chords))
+        // a section keeps its harmony, where the song has the chords, and more than its bass alone, which a quiet section's
+        // rhythm may leave without a note
+        var others = Rests.Any(x => x.Part is not (TrackRole.Bass or TrackRole.Chords) && !resting.Contains(x.Part));
+        if (resting.Contains(TrackRole.Chords) && (resting.Contains(TrackRole.Bass) || !others) && !absent.Contains(TrackRole.Chords))
             resting.Remove(TrackRole.Chords);
         var parts = Rests.Where(x => !absent.Contains(x.Part)).ToArray();
         if (parts.Length > 0 && parts.All(x => resting.Contains(x.Part)))

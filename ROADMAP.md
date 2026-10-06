@@ -28,14 +28,11 @@ each from the trace; the seeds named here are ones already found.
 
 ### The song and its sections
 
-- **How plain by default:** drawn songs gather about a base of 0.25 (`Unconventionality.BaseCentre`), every value
-  possible, above 0.75 in about one song in eighty (`BaseSpread`), the facets and sections drawn about it by the same
-  law, and the major and minor scales and one scale through a song weigh more at the middle; 52% of drawn songs are in
-  major or minor throughout, 61% straight, 70% in one key and 9% plain in every convention measured
-  (`ConventionalityLevelsReportTest`). Still too adventurous? Then lower the centre, or the ease of the conventions'
-  curves from 3 to 2, which makes a value below the middle plainer and one above it wilder, or retune the middles of the
-  feel's tuplets and the key changes.
-
+- **How plain by default:** drawn songs gather about the middle again (`Unconventionality.BaseCentre`, 0.5 since
+  October 2026, 0.25 before), every value possible, beyond a quarter from either end in about one song in ten each
+  (`BaseSpread`); 36% of drawn songs in major or minor throughout, 45% straight, 48% in one key and 5% plain in every
+  convention measured (`ConventionalityLevelsReportTest`), the presets playing their middles. Too adventurous for songs
+  with no genre? Then a centre of 0.375, or the ease of the conventions' curves.
 - **The forms:** do the songs of a form sound like verses and choruses, the chorus lifting? A song's sections take 80
   bars at the median: too short? Does an intro or an outro of its own material (about a third of middling songs and a
   seventh) sound like the same song? A last chorus played twice (17% of songs), lifted a key in a sixth of them: heard

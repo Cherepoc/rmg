@@ -30,9 +30,13 @@ internal static class StopTime
                 .Chance(Chance.At(section.Facets[Facet.Form], song.Genre.Chance(GenreChoices.StopTime, "sections")), EnergyLean);
             return song.Stream(SongStream.StopTime, id).TestProbability(chance);
         });
+        // but the first section where an intro brings the band in part by part over it, whose parts not in yet would leave
+        // its hits to none
+        var intro = song.Form.Map.Intro;
+        var built = intro.Kind == IntroKind.Entries && !intro.Window.IsBefore ? song.Form.Map.Sections[0] : null;
         return
         [
-            ..song.Form.Map.Sections.Where(x => stops[x.SectionId])
+            ..song.Form.Map.Sections.Where(x => stops[x.SectionId] && x != built)
                 .Select(x => (x.Start, Math.Min(x.End, x.Start + Meter.PhraseBarCount * x.Meter.BarDuration), x.Meter.BarDuration))
         ];
     }
@@ -63,15 +67,23 @@ internal static class StopTime
             return (false, false);
         }
 
+        // the drums' fills out of it, from a run's first note to its line, which go on as a drummer fills into the next
+        // section, a drum never heard otherwise landing there
+        var fills = draft.Runs.Where(x => !x.Positions.IsEmpty).Select(x => (From: x.Positions.Min(), To: x.Line)).ToArray();
+        bool InAFill(double position) => fills.Any(x => position >= x.From - 1e-9 && position < x.To - 1e-9);
+
         var notes = SongStages.NotesOf(draft);
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
         {
-            if (song.Tracks.Definitions[track].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo)
+            var role = song.Tracks.Definitions[track].Role;
+            if (role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo)
                 continue;
             result[track] = EventTimeline.Create(timeline.Duration, timeline
-                .Where(note => Place(note.Position) is not (true, false))
-                .Select(note => Place(note.Position).In ? (note.Value with { Duration = Math.Min(note.Value.Duration, Hit) }).ToTimelineItem(note.Position) : note));
+                .Where(note => Place(note.Position) is not (true, false) || role == TrackRole.Drum && InAFill(note.Position))
+                .Select(note => Place(note.Position).In && !(role == TrackRole.Drum && InAFill(note.Position))
+                    ? (note.Value with { Duration = Math.Min(note.Value.Duration, Hit) }).ToTimelineItem(note.Position)
+                    : note));
         }
 
         return draft with { Notes = result.ToImmutable() };

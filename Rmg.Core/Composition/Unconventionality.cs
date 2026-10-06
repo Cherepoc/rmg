@@ -46,15 +46,15 @@ public enum Facet
 public sealed record Unconventionality(double Base, ImmutableDictionary<Facet, double> Facets)
 {
     /// <summary>
-    ///     Where a generated song's base gathers: plainer than the middle, where every choice is tuned, as most songs keep
-    ///     to most conventions; a wilder song is one asked for.
+    ///     Where a generated song's base gathers: the middle, where every choice is tuned and a genre says what its songs do,
+    ///     plainer and wilder songs about as likely.
     /// </summary>
-    public const double BaseCentre = 0.25;
+    public const double BaseCentre = 0.5;
 
     /// <summary>
     ///     How far a generated song's base strays from its centre (<see cref="BaseCentre" />), as the scale of a logistic
-    ///     draw in log-odds: half the songs between about 0.17 and 0.35, and every value possible, ever rarer towards the
-    ///     ends, above 0.75 in about one song in eighty and above 0.9 in about one in seven hundred.
+    ///     draw in log-odds: half the songs between about 0.37 and 0.63, and every value possible, ever rarer towards the
+    ///     ends, above 0.75 or below 0.25 in about one song in ten each.
     /// </summary>
     public const double BaseSpread = 0.5;
 
