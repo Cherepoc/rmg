@@ -2,11 +2,12 @@ import { NOT_A_GENRE, readGenreFile } from "./genres.js";
 
 /**
  *     The window of every genre, a popup over the page: the presets, each to be duplicated, and one's own, each to be
- *     edited, duplicated or removed; a genre made new, genres imported from a JSON file and one's own exported as one. What
+ *     edited, duplicated or removed, and the song's own where it is neither, a link's or a draft played, to be edited or
+ *     kept among one's own; a genre made new, genres imported from a JSON file and one's own exported as one. What
  *     is done with a genre is the page's (app.js), the editor (genre-editor.js) opening over this window; the list shown
  *     again whenever the genres change (refresh).
  */
-export function createGenreManager({ presets, own, onNew, onDuplicate, onEdit, onRemove, onKeepAll, knows, asFile }) {
+export function createGenreManager({ presets, own, current, onKeep, onNew, onDuplicate, onEdit, onRemove, onKeepAll, knows, asFile }) {
     const dialog = document.createElement("dialog");
     dialog.className = "genre-manager";
     dialog.setAttribute("aria-label", "Genres");
@@ -114,7 +115,13 @@ export function createGenreManager({ presets, own, onNew, onDuplicate, onEdit, o
         const shipped = presets().map((preset) => line(preset, preset.description, [
             button("Duplicate", `Make a genre of your own from ${preset.name}`, () => onDuplicate(preset)),
         ]));
-        body.replaceChildren(...group("Yours", yours, "None yet: make one new, or duplicate any."), ...group("Presets", shipped, ""));
+        // the song's genre where it is no preset and none of one's own, a link's or a draft played
+        const song = current();
+        const songs = song === null ? [] : group("This song's", [line(song, "", [
+            button("Edit", `Change ${song.name || "this song's genre"}`, () => onEdit(song)),
+            button("Keep", `Keep ${song.name || "this song's genre"} among yours`, () => onKeep(song)),
+        ])], "");
+        body.replaceChildren(...songs, ...group("Yours", yours, "None yet: make one new, or duplicate any."), ...group("Presets", shipped, ""));
         exportedAll.disabled = yours.length === 0;
     }
 
@@ -124,6 +131,9 @@ export function createGenreManager({ presets, own, onNew, onDuplicate, onEdit, o
             told.hidden = true;
             refresh();
             dialog.showModal();
+        },
+        close() {
+            dialog.close();
         },
         /** The list as the genres now are, wherever it is open. */
         refresh() {

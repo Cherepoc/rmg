@@ -1556,9 +1556,10 @@ footer a:hover {
         margin-top: 16px;
     }
 
-    /* the list a line of its own, as wide as the panel, its buttons under it */
+    /* the list as wide as the line leaves it beside the window's button */
     .genre-field {
-        flex-basis: 100%;
+        flex: 1;
+        min-width: 0;
     }
 
     .genre-field select {

@@ -227,6 +227,41 @@ public sealed class SongPage : IAsyncDisposable
         "value => { const range = document.getElementById('song-volume'); range.value = String(value); range.dispatchEvent(new Event('input')); }",
         value);
 
+    /// <summary>The window of every genre, opened by its button once the genres are listed.</summary>
+    public async Task<ILocator> Manager()
+    {
+        var manage = Page.Locator("button.genre-manage");
+        await Until(() => manage.IsEnabledAsync(), "the genres listed");
+        await manage.ClickAsync();
+        var manager = Page.Locator("dialog.genre-manager");
+        await Until(() => manager.IsVisibleAsync(), "the window of every genre open");
+        return manager;
+    }
+
+    /// <summary>The editor, opened from the window of every genre by a button of a genre's line in a group, such as Duplicate of the preset Rock.</summary>
+    public async Task<ILocator> FromManager(string group, string genre, string action)
+    {
+        var manager = await Manager();
+        var line = manager.Locator($"ul[aria-label=\"{group}\"] li").Filter(new() { Has = Page.Locator(".genre-line-name", new() { HasTextRegex = new System.Text.RegularExpressions.Regex($"^{System.Text.RegularExpressions.Regex.Escape(genre)}$") }) });
+        await line.GetByRole(AriaRole.Button, new() { Name = action, Exact = true }).ClickAsync();
+        return await Editor();
+    }
+
+    /// <summary>The editor, opened on a genre made new, from the window of every genre.</summary>
+    public async Task<ILocator> NewGenre()
+    {
+        var manager = await Manager();
+        await manager.GetByRole(AriaRole.Button, new() { Name = "New genre", Exact = true }).ClickAsync();
+        return await Editor();
+    }
+
+    private async Task<ILocator> Editor()
+    {
+        var editor = Page.Locator("dialog.genre-dialog");
+        await Until(() => editor.IsVisibleAsync(), "the editor open");
+        return editor;
+    }
+
     /// <summary>How many of the settings are given, as the settings panel says.</summary>
     public async Task<string> Given() => await Page.Locator("#settings-state").TextContentAsync() ?? "";
 

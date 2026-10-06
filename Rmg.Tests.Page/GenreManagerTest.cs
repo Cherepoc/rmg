@@ -30,7 +30,8 @@ public sealed class GenreManagerTest(Site site)
 
         var genre = page.Page.Locator(".song-panel #genre-row select[aria-label='Genre']");
         await page.Until(() => genre.IsEnabledAsync(), "the genres listed");
-        // seen with the settings folded away
+        // the list and the window's button alone, seen with the settings folded away
+        await Assert.That(await page.Page.Locator("#genre-row button").CountAsync()).IsEqualTo(1);
         await Assert.That(await genre.IsVisibleAsync()).IsTrue();
         await Assert.That(await page.Page.Locator("#settings-panel select[aria-label='Genre']").CountAsync()).IsEqualTo(0);
         var under = await page.Page.EvaluateAsync<bool>("() => document.querySelector('.transport').getBoundingClientRect().bottom <= document.getElementById('genre-row').getBoundingClientRect().top");
@@ -50,26 +51,26 @@ public sealed class GenreManagerTest(Site site)
     {
         await using var page = await SongPage.Open(site, "?song=1");
         var manager = await OpenManager(page);
-        var yours = manager.Locator("ul[aria-label='Yours'] li");
+        var yours = page.Page.Locator("dialog.genre-manager ul[aria-label='Yours'] li");
         await Assert.That(await yours.CountAsync()).IsEqualTo(0);
         await Assert.That(await manager.Locator("ul[aria-label='Presets'] li").CountAsync()).IsGreaterThan(10);
 
-        // duplicated, it opens in the editor over the window, kept among one's own under its name and a number
+        // duplicated, it opens in the editor in place of the window, kept among one's own under its name and a number
         await manager.Locator("ul[aria-label='Presets'] li", new() { HasText = "Jazz" }).First.Locator("button", new() { HasText = "Duplicate" }).ClickAsync();
         var editor = page.Page.Locator("dialog.genre-dialog");
         await page.Until(() => editor.IsVisibleAsync(), "the editor open");
+        await Assert.That(await manager.IsVisibleAsync()).IsFalse();
         await Assert.That(await editor.Locator("input[aria-label='Genre name']").InputValueAsync()).IsEqualTo("Jazz 1");
         await editor.Locator(":scope > header > button.genre-close").ClickAsync();
         await page.Until(async () => !await editor.IsVisibleAsync(), "the editor closed");
-        await Assert.That(await manager.IsVisibleAsync()).IsTrue();
-        await Assert.That(await yours.CountAsync()).IsEqualTo(1);
         await Assert.That(await page.Page.Locator("select[aria-label='Genre'] optgroup[label='Yours'] option").TextContentAsync()).IsEqualTo("Jazz 1");
 
         // edited, the editor opens on it
-        await yours.First.Locator("button", new() { HasText = "Edit" }).ClickAsync();
-        await page.Until(() => editor.IsVisibleAsync(), "the editor open");
+        await page.FromManager("Yours", "Jazz 1", "Edit");
         await Assert.That(await editor.Locator("input[aria-label='Genre name']").InputValueAsync()).IsEqualTo("Jazz 1");
         await editor.Locator(":scope > header > button.genre-close").ClickAsync();
+        manager = await page.Manager();
+        await Assert.That(await yours.CountAsync()).IsEqualTo(1);
 
         // removed once that is confirmed, and gone from the list on the page too
         page.Page.Dialog += (_, prompt) => _ = prompt.AcceptAsync();

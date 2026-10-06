@@ -13,13 +13,7 @@ public sealed class GenreEditorTest(Site site)
     {
         await page.FirstSong();
         await page.Settled();
-        await page.Page.Locator("#settings-panel summary").ClickAsync();
-        var edit = page.Page.Locator("button.genre-edit");
-        await page.Until(() => edit.IsEnabledAsync(), "the editor ready");
-        await edit.ClickAsync();
-        var dialog = page.Page.Locator("dialog.genre-dialog");
-        await page.Until(() => dialog.IsVisibleAsync(), "the editor open");
-        return dialog;
+        return await page.NewGenre();
     }
 
     /// <summary>A section of the editor, opened.</summary>
@@ -144,7 +138,7 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(asked).IsEqualTo(0);
 
         // a change: the × and Escape ask, and declined, the editor stays open as it was
-        await page.Page.Locator("button.genre-edit").ClickAsync();
+        await page.NewGenre();
         await Override(await Section(dialog, "Time and feel"), "meter").CheckAsync();
         await close.ClickAsync();
         await page.Page.Keyboard.PressAsync("Escape");
@@ -157,7 +151,7 @@ public sealed class GenreEditorTest(Site site)
         await close.ClickAsync();
         await Assert.That(asked).IsEqualTo(2);
         await Assert.That(await dialog.IsVisibleAsync()).IsFalse();
-        await page.Page.Locator("button.genre-edit").ClickAsync();
+        await page.FromManager("This song's", "Unnamed", "Edit");
         await Override(await Section(dialog, "Time and feel"), "meter").UncheckAsync();
         accept = true;
         await close.ClickAsync();
@@ -236,7 +230,7 @@ public sealed class GenreEditorTest(Site site)
         // a preset chosen: its own sentence; edited, the draft takes none of it
         await genre.EvaluateAsync("select => { select.value = 'preset:jazz'; select.dispatchEvent(new Event('change')); }");
         await page.Until(async () => (await about.TextContentAsync() ?? "").Length > 20 && await about.TextContentAsync() != "Long, quiet songs for a wet afternoon.", "the preset's sentence shown");
-        await page.Page.Locator("button.genre-edit").ClickAsync();
+        await page.FromManager("Presets", "Jazz", "Duplicate");
         await Assert.That(await description.InputValueAsync()).IsEqualTo("");
         await Assert.That(page.Errors).IsEmpty();
     }
@@ -298,33 +292,23 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
-    public async Task TheGenresButton_MakesNewFromNone_DuplicatesAPresetUnderTheNextNumber_AndEditsOnesOwn()
+    public async Task APresetDuplicated_IsYours_UnderItsNameAndTheFirstNumberFree()
     {
         await using var page = await SongPage.Open(site, "?song=1");
         await page.FirstSong();
         await page.Settled();
-        await page.Page.Locator("#settings-panel summary").ClickAsync();
         var genre = page.Page.Locator("select[aria-label='Genre']");
-        var action = page.Page.Locator("button.genre-edit");
         var dialog = page.Page.Locator("dialog.genre-dialog");
         var name = dialog.Locator("input[aria-label='Genre name']");
-        await page.Until(() => action.IsEnabledAsync(), "the editor ready");
-        await Assert.That(await action.TextContentAsync()).IsEqualTo("New");
 
         // a preset duplicated among one's own, under its name and the first number free, twice
-        await genre.EvaluateAsync("select => { select.value = 'preset:rock'; select.dispatchEvent(new Event('change')); }");
-        await page.Until(async () => await action.TextContentAsync() == "Duplicate", "a preset's button");
-        await action.ClickAsync();
+        await page.FromManager("Presets", "Rock", "Duplicate");
         await Assert.That(await name.InputValueAsync()).IsEqualTo("Rock 1");
         await dialog.Locator("> header .genre-close").ClickAsync();
-        await action.ClickAsync();
+        await page.FromManager("Presets", "Rock", "Duplicate");
         await Assert.That(await name.InputValueAsync()).IsEqualTo("Rock 2");
         await dialog.Locator("> header .genre-close").ClickAsync();
         await Assert.That(await genre.Locator("optgroup[label='Yours'] option").AllTextContentsAsync()).IsEquivalentTo(["Rock 1", "Rock 2"]);
-
-        // one's own chosen, edited
-        await genre.EvaluateAsync("select => { select.value = 'own:0'; select.dispatchEvent(new Event('change')); }");
-        await page.Until(async () => await action.TextContentAsync() == "Edit", "one's own button");
         await Assert.That(page.Errors).IsEmpty();
     }
 
@@ -409,26 +393,22 @@ public sealed class GenreEditorTest(Site site)
         await maker.Settled();
         maker.Page.Dialog += (_, prompt) => _ = prompt.AcceptAsync();
         await made.Locator("> header .genre-close").ClickAsync();
-        await Assert.That(await maker.Page.Locator("button.genre-edit").TextContentAsync()).IsEqualTo("Edit");
         var link = maker.Page.Url;
 
-        // opened elsewhere: the link's genre kept by its button under its name among one's own, the song as it was
+        // opened elsewhere: the link's genre kept from the window of every genre under its name among one's own, the song
+        // as it was, and no longer the song's own there
         await using var page = await SongPage.Open(site, link[link.IndexOf('?')..]);
         await page.FirstSong();
         await page.Settled();
-        await page.Page.Locator("#settings-panel summary").ClickAsync();
-        var action = page.Page.Locator("button.genre-edit");
         var yours = page.Page.Locator("select[aria-label='Genre'] optgroup[label='Yours'] option");
-        await page.Until(async () => await action.IsEnabledAsync() && await action.TextContentAsync() == "Keep", "a link's genre kept by its button");
+        var dialog = await page.Manager();
         var count = page.Requests.Count;
-        await action.ClickAsync();
+        await dialog.Locator("ul[aria-label=\"This song's\"] li", new() { HasText = "Played" }).GetByRole(AriaRole.Button, new() { Name = "Keep", Exact = true }).ClickAsync();
         await Assert.That((await yours.AllTextContentsAsync()).ToArray()).IsEquivalentTo(["Played"]);
-        await Assert.That(await action.TextContentAsync()).IsEqualTo("Edit");
+        await Assert.That(await dialog.Locator("ul[aria-label=\"This song's\"]").CountAsync()).IsEqualTo(0);
         await Assert.That(page.Requests.Count).IsEqualTo(count);
 
         // every one of one's own as one file, from the window of every genre
-        await page.Page.Locator("button.genre-manage").ClickAsync();
-        var dialog = page.Page.Locator("dialog.genre-manager");
         var download = await page.Page.RunAndWaitForDownloadAsync(() => dialog.GetByRole(AriaRole.Button, new() { Name = "Export all" }).ClickAsync());
         var exported = await File.ReadAllTextAsync((await download.PathAsync())!);
         await Assert.That(System.Text.Json.JsonDocument.Parse(exported).RootElement.GetArrayLength()).IsEqualTo(1);
@@ -700,13 +680,7 @@ public sealed class GenreEditorTest(Site site)
         await using var page = await SongPage.Open(site, "?song=1");
         await page.FirstSong();
         await page.Settled();
-        await page.Page.Locator("#settings-panel summary").ClickAsync();
-        var action = page.Page.Locator("button.genre-edit");
-        await page.Until(() => action.IsEnabledAsync(), "the editor ready");
-        await page.Page.Locator("select[aria-label='Genre']").EvaluateAsync("select => { select.value = 'preset:rock'; select.dispatchEvent(new Event('change')); }");
-        await page.Until(async () => await action.TextContentAsync() == "Duplicate", "a preset's button");
-        await action.ClickAsync();
-        var dialog = page.Page.Locator("dialog.genre-dialog");
+        var dialog = await page.FromManager("Presets", "Rock", "Duplicate");
 
         // a family's choices one object of its members, no name with a dot
         var download = await page.Page.RunAndWaitForDownloadAsync(() => dialog.Locator("footer button", new() { HasTextString = "Export JSON" }).ClickAsync());
@@ -886,13 +860,8 @@ public sealed class GenreEditorTest(Site site)
         await using var page = await SongPage.Open(site, "?song=1");
         await page.FirstSong();
         await page.Settled();
-        await page.Page.Locator("#settings-panel summary").ClickAsync();
-        var action = page.Page.Locator("button.genre-edit");
-        await page.Until(() => action.IsEnabledAsync(), "the editor ready");
         // Rock names its tempo's ends and no lean, the editor's first range
-        await page.Page.Locator("select[aria-label='Genre']").EvaluateAsync("select => { select.value = 'preset:rock'; select.dispatchEvent(new Event('change')); }");
-        await page.Until(async () => await action.TextContentAsync() == "Duplicate", "a preset's button");
-        await action.ClickAsync();
+        await page.FromManager("Presets", "Rock", "Duplicate");
         var time = await Section(page.Page.Locator("dialog.genre-dialog"), "Time and feel");
         await page.Until(async () => await Tile(time, "meter").Locator(".genre-graph path").CountAsync() > 0, "the graphs drawn");
         await Assert.That(await Tile(time, "length").Locator(".genre-band-centre").CountAsync()).IsEqualTo(1);
@@ -1047,13 +1016,7 @@ public sealed class GenreEditorTest(Site site)
         await using var page = await SongPage.Open(site, "?song=1");
         await page.FirstSong();
         await page.Page.SetViewportSizeAsync(1280, 1000);
-        await page.Page.Locator("#settings-panel summary").ClickAsync();
-        var genre = page.Page.Locator("select[aria-label='Genre']");
-        await page.Until(() => genre.IsEnabledAsync(), "the genres listed");
-        await genre.EvaluateAsync("s => { s.value = 'preset:latin'; s.dispatchEvent(new Event('change')); }");
-        await page.Page.Locator("button.genre-edit").EvaluateAsync("b => b.click()");
-        var dialog = page.Page.Locator("dialog.genre-dialog");
-        await page.Until(() => dialog.IsVisibleAsync(), "the editor open");
+        var dialog = await page.FromManager("Presets", "Latin", "Duplicate");
         var time = await Section(dialog, "Time and feel");
         await page.Until(async () => await Tile(time, "meter").Locator(".genre-graph path").CountAsync() > 0, "the graphs drawn");
         await page.Page.ScreenshotAsync(new() { Path = Path.Combine(directory, "genre-editor-sections.png") });

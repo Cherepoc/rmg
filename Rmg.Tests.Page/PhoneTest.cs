@@ -85,13 +85,7 @@ public sealed class PhoneTest(Site site)
     {
         await using var page = await SongPage.Open(site, phone: true);
         await page.FirstSong();
-        await page.Page.EvaluateAsync("() => document.getElementById('settings-panel').open = true");
-        var genre = page.Page.Locator("select[aria-label='Genre']");
-        await page.Until(() => genre.IsEnabledAsync(), "the genres listed");
-        await genre.SelectOptionAsync("preset:reggae");
-        await page.Page.Locator("button.genre-edit").ClickAsync();
-        var dialog = page.Page.Locator("dialog.genre-dialog");
-        await page.Until(() => dialog.IsVisibleAsync(), "the editor open");
+        var dialog = await page.FromManager("Presets", "Reggae", "Duplicate");
 
         var box = await dialog.BoundingBoxAsync();
         await Assert.That(box!.Width).IsEqualTo(360).Within(1);
