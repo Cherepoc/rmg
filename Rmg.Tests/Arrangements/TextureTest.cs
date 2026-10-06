@@ -24,8 +24,8 @@ public sealed class TextureTest
     public async Task ThePlainestSections_PlaySteady_AndTheWildest_EveryTextureAlike()
     {
         var context = new GenerationContext(1);
-        var plain = Enumerable.Range(0, 2000).Select(_ => Texture.Draw(context, 0, 2, Band).Kind).ToArray();
-        var wild = Enumerable.Range(0, 4000).Select(_ => Texture.Draw(context, 1, 2, Band).Kind).ToArray();
+        var plain = Enumerable.Range(0, 2000).Select(_ => Texture.Draw(context, 0, 2, Band, Genre.None).Kind).ToArray();
+        var wild = Enumerable.Range(0, 4000).Select(_ => Texture.Draw(context, 1, 2, Band, Genre.None).Kind).ToArray();
 
         await Assert.That(plain.All(x => x == TextureKind.Steady)).IsTrue();
         foreach (var kind in Enum.GetValues<TextureKind>())
@@ -36,7 +36,7 @@ public sealed class TextureTest
     public async Task ABuild_BringsItsPartsIn_PhraseByPhrase_ItsDrumsNowAndThenLate_AndAThinTakesItsPitchedOnesOut()
     {
         var context = new GenerationContext(2);
-        var draws = Enumerable.Range(0, 400).Select(_ => Texture.Draw(context, 1, 4, Band)).ToArray();
+        var draws = Enumerable.Range(0, 400).Select(_ => Texture.Draw(context, 1, 4, Band, Genre.None)).ToArray();
         foreach (var (kind, resting, silent) in draws.Where(x => x.Kind is TextureKind.Build or TextureKind.Thin))
         {
             var counts = silent.Select(x => x.Count).ToArray();

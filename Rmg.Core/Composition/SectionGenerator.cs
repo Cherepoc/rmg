@@ -372,7 +372,7 @@ internal sealed class SectionGenerator
     /// </param>
     public int DrawPlays(int sectionId, SectionRole role, double lean, int phrases)
     {
-        var drawn = SectionLength.Draw(Stream(sectionId, SectionStream.Length), Facets(sectionId)[Facet.Form], role, lean);
+        var drawn = SectionLength.Draw(Stream(sectionId, SectionStream.Length), Facets(sectionId)[Facet.Form], role, lean, _genre);
         return phrases == 1 ? drawn : Math.Max(1, (int)Math.Round(drawn / (double)phrases));
     }
 
@@ -925,7 +925,7 @@ internal sealed record GeneratedSection(
         // twin, the solo part or a line whose patterns came out empty
         bool HasNotes(TrackRole role) => Roles.Any(x => x.Value == role && Timeline.TrackTimelineMap.TryGetValue(x.Key, out var track) && track.EventTimeline.Count > 0);
         var playing = Roles.Values.Distinct().Where(x => !resting.Contains(x) && HasNotes(x)).ToArray();
-        var texture = Composition.Texture.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(ArrangementSeed, appearance), TextureStream)), Facets[Facet.Form], Plays, playing);
+        var texture = Composition.Texture.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(ArrangementSeed, appearance), TextureStream)), Facets[Facet.Form], Plays, playing, Genre);
         ImmutableArray<ImmutableHashSet<TrackRole>> steady = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, Plays)];
         if (keepsTexture)
             texture = (TextureKind.Steady, ImmutableHashSet<TrackRole>.Empty, steady);
@@ -955,13 +955,10 @@ internal sealed record GeneratedSection(
         ));
         foreach (var line in Lines.Where(x => !silent.Contains(x.Track)))
         {
-            var bars = Plays switch
-            {
-                1 => line.Appear(appearance, improvisation).Trim(Meter.PatternDuration),
-                2 => line.Appear(appearance, improvisation),
-                4 => new[] { line.Appear(2 * appearance, improvisation), line.Appear(2 * appearance + 1, improvisation) }.Unroll(),
-                _ => throw new InvalidOperationException($"A section plays its pattern once, twice or four times, not {Plays} times.")
-            };
+            // a question and its answer every two plays, each pair a further appearance of the line
+            var bars = Plays == 1
+                ? line.Appear(appearance, improvisation).Trim(Meter.PatternDuration)
+                : Enumerable.Range(0, Plays / 2).Select(pair => line.Appear(Plays / 2 * appearance + pair, improvisation)).Unroll();
             var placed = bars.TrackTimelineMap[line.Track].EventTimeline.MapValues(x => x.OfScope(StateScope.Render));
             timeline = timeline.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [line.Track] = _ => placed });
         }

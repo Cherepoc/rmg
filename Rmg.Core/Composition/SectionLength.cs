@@ -12,13 +12,20 @@ namespace Rmg.Core.Composition;
 /// </summary>
 internal static class SectionLength
 {
-    /// <summary>The plays, how often, and how each leans: none, the roles holding the convention.</summary>
-    public static ImmutableArray<(Weighted<int> Plays, double Lean)> Options { get; } =
+    /// <summary>
+    ///     The plays and how likely each is at the ends, every one allowed at both, the roles holding the convention; and
+    ///     eight, thirty-two bars, a dance track's section, a genre's that the songs never play.
+    /// </summary>
+    public static ImmutableArray<(int Plays, ByConvention Weight)> Options { get; } =
     [
-        (new Weighted<int>(0.2, 1), 0),
-        (new Weighted<int>(0.65, 2), 0),
-        (new Weighted<int>(0.15, 4), 0)
+        (1, RhythmicUnconventionality.WeightEnds(0.2, 0)),
+        (2, RhythmicUnconventionality.WeightEnds(0.65, 0)),
+        (4, RhythmicUnconventionality.WeightEnds(0.15, 0)),
+        (8, default)
     ];
+
+    /// <summary>A length's name, as a genre names it: "bars16", the bars it plays.</summary>
+    public static string NameOf(int plays) => $"bars{plays * Meter.PhraseBarCount}";
 
     /// <summary>How far a role leans its section to the length it plays, as the odds of that length over the others.</summary>
     public const double RoleOdds = 8;
@@ -44,22 +51,23 @@ internal static class SectionLength
     public const double LengthOdds = 4;
 
     /// <param name="lean">How far the song's length leans the plays, from below 0, shorter, to above, longer; 0 for none.</param>
-    public static int Draw(IGenerationContext context, double unconventionality, SectionRole role, double lean)
+    /// <param name="genre">The genre whose pool of lengths the plays are drawn among, where it names one.</param>
+    public static int Draw(IGenerationContext context, double unconventionality, SectionRole role, double lean, Genre genre)
     {
-        return context.Pick(Weights(unconventionality, role, lean));
+        return context.Pick(Weights(unconventionality, role, lean, genre));
     }
 
     /// <summary>The plays a section of a role plays on the average, at a lean of the length (<see cref="Draw" />).</summary>
-    public static double Expected(double unconventionality, SectionRole role, double lean)
+    public static double Expected(double unconventionality, SectionRole role, double lean, Genre genre)
     {
-        var weights = Weights(unconventionality, role, lean);
+        var weights = Weights(unconventionality, role, lean, genre);
         return weights.Sum(x => x.Weight * x.Value) / weights.Sum(x => x.Weight);
     }
 
-    private static ImmutableArray<Weighted<int>> Weights(double unconventionality, SectionRole role, double lean)
+    private static ImmutableArray<Weighted<int>> Weights(double unconventionality, SectionRole role, double lean, Genre genre)
     {
         var rolePlays = GetRolePlays(role);
-        var weights = ByConvention.Weigh(Options.Select(x => (x.Plays.Value, RhythmicUnconventionality.WeightEnds(x.Plays.Weight, x.Lean))), unconventionality);
+        var weights = ByConvention.Weigh(Options, unconventionality, genre.Pool<int>(GenreChoices.SectionLength, NameOf));
         weights = Tilt.Of(RoleOdds, 1).Weigh(weights, plays => plays == rolePlays ? 1 : 0);
         return lean == 0 ? weights : Tilt.Of(LengthOdds, lean).Weigh(weights, plays => Math.Log2(plays) - 1);
     }

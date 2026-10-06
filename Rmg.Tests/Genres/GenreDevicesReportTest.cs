@@ -41,6 +41,10 @@ public sealed class GenreDevicesReportTest
             ["sections in stop time"] = Sections(TracePoints.StopTime, x => (bool)x!),
             ["sections pushing"] = Sections(TracePoints.Push, x => (bool)x!),
             ["lifts dropped"] = lifts > 0 ? song.Trace.Count(x => x.Point == TracePoints.Drop) / (double)lifts : double.NaN,
+            ["sections of 16 bars or more"] = song.Song.Map!.Sections.Average(x => x.Duration >= 16 * x.Meter.BarDuration - 1e-9 ? 1.0 : 0),
+            ["sections of 32 bars"] = song.Song.Map!.Sections.Average(x => x.Duration >= 32 * x.Meter.BarDuration - 1e-9 ? 1.0 : 0),
+            ["appearances building or thinning"] = song.Trace.Where(x => x.Point == TracePoints.Texture)
+                .Select(x => ((int, TextureKind Kind, ImmutableArray<ImmutableHashSet<TrackRole>>))x.Value!).Average(x => x.Kind is TextureKind.Build or TextureKind.Thin ? 1.0 : 0),
             ["songs with a solo"] = song.Solos.Count > 0 ? 1 : 0,
             ["line notes bent or slid"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.Bend) > 0),
             ["line notes with a vibrato"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.Vibrato) > 0 || x.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0),

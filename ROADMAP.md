@@ -597,8 +597,10 @@ a link carries. What is left:
      House 77% -> 85%, Techno 83% -> 90%; Hip-hop's kick on 1 42% -> 91%, its snare on 2 and 4 66% -> 86%; Synthwave's
      snare 59% -> 89%, Rock's 65% -> 77%. What is left: the bars a drop or an entry clears, and the wilder songs that
      leave a role free.
-  2. Long phrases: everything is built of four-bar patterns, where a dance track's sections run 16 or 32 bars with a
-     part coming in or going out at each 8, and a build that thickens (a snare roll, a riser) over them.
+  2. Long phrases: done in part (`GenreChoices.SectionLength`, `GenreChoices.Texture`): a genre's pool of section
+     lengths, thirty-two bars among them, which the songs never play, and of textures, a section building part by part;
+     House's and Techno's sections 16 bars or more 93%, 32 bars 28%, over 8-bar patterns, 43% of their appearances
+     building or thinning (9% of the songs'). Left: the build thickening before a drop, a snare roll and a riser.
   3. An arpeggiator: a chord played as a pattern of its notes in 16ths, a synth bass's and synthwave's and trance's
      sound; today a part plays its chord or a line.
   4. A bass's glide and accent, the acid line's, and an 808's long slide between notes; the slides today are a

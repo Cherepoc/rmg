@@ -161,7 +161,7 @@ public static class SongGenerator
         var target = overrides.Length
                      ?? (genre.Range(GenreChoices.Length, songUnconventionality[Facet.Form]) is { } lengths ? LengthIn(Stream(SongStream.GenreLength), lengths) : null);
         var length = target is { } seconds
-            ? new SongLength(seconds, (role, lean) => SecondsOf(SectionLength.Expected(songUnconventionality[Facet.Form], role, lean) * meter.PatternDuration))
+            ? new SongLength(seconds, (role, lean) => SecondsOf(SectionLength.Expected(songUnconventionality[Facet.Form], role, lean, genre) * meter.PatternDuration))
             : null;
         var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), Stream(SongStream.SongEnds), songUnconventionality[Facet.Form], length, genre);
         StateTrace.Record(TracePoints.SongForm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(" ", structure.SectionIds.Select(x => structure.Roles[x])), structure);

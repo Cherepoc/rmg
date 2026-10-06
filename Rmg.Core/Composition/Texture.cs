@@ -45,14 +45,16 @@ internal static class Texture
     /// <param name="form">The form facet of the section's unconventionality.</param>
     /// <param name="phrases">How many 4-bar patterns the appearance plays.</param>
     /// <param name="playing">The parts the appearance plays, of those the song has.</param>
+    /// <param name="genre">The genre whose pool of textures it is drawn among, where it names one.</param>
     public static (TextureKind Kind, ImmutableHashSet<TrackRole> Resting, ImmutableArray<ImmutableHashSet<TrackRole>> PhraseSilent) Draw(
         IGenerationContext context,
         double form,
         int phrases,
-        IReadOnlyCollection<TrackRole> playing
+        IReadOnlyCollection<TrackRole> playing,
+        Genre genre
     )
     {
-        var kind = context.Pick(ByConvention.Weigh(Kinds, form));
+        var kind = context.Pick(ByConvention.Weigh(Kinds, form, genre.Pool<TextureKind>(GenreChoices.Texture, x => GenreChoices.Name(x.ToString()))));
         TrackRole[] pitched = [..playing.Where(x => x != TrackRole.Drum).Order()];
         // the order the pitched parts come in, drawn whatever the texture, so that the draws stay as they are
         var order = pitched.OrderBy(_ => context.GenerateDouble()).ToArray();
