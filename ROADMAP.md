@@ -316,7 +316,6 @@ left:
   baseline of every retuning below.
 
   **P2**, in order, each measured as above:
-  11. **Reggae retuned:** stabs (the skank a chopped chord), a loop (the riddim), its intro and ending pools.
   12. **Jazz retuned:** the ride pinned (`pins`'s time), stop time and pushes well over the songs' 3% and 8%,
      planing and reharmonisation in the middle.
   13. **Hip-hop as boom-bap,** its glide and hat rolls rare (a trap preset's, 20); Techno's polymeter; a last chorus

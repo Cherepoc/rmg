@@ -487,11 +487,11 @@
       "feelChances": { "swing": [0, 20, 20], "halfTime": 8, "doubleTime": 4 },
       "arpeggio": { "none": 100, "up": [14, 6, 100], "upDown": [14, 5, 100], "alberti": [14, 4, 100], "down": [0, 3, 100], "downUp": [0, 2, 100], "pairs": [0, 3, 100], "rootFifth": [0, 2, 100], "random": [0, 1, 100], "upTwoOctaves": [0, 1, 100] },
       "planing": { "sections": [0, 0, 25] },
-      "loop": {},
+      "loop": { "sections": [50, 60, 50] },
       "octaveBass": { "sections": [0, 5, 5] },
       "glide": {},
       "effects": { "vibrato": [0, 70, 100], "chorus": [0, 50, 100], "swell": [0, 35, 100], "bends": [0, 50, 100] },
-      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50] },
+      "articulation": { "legato": [0, 30, 50], "stabs": [50, 60, 60] },
       "voice": {},
       "hatRolls": {},
       "drop": {},
@@ -503,7 +503,9 @@
       "soloAnswers": { "sections": [0, 30, 30] },
       "lastRepeat": { "songs": [0, 25, 25] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35 },
-      "instrumentSwitches": { "sections": [0, 2, 100] }
+      "instrumentSwitches": { "sections": [0, 2, 100] },
+      "intro": { "entries": 100, "cold": [30, 30, 40] },
+      "ending": { "fade": 100, "button": [40, 40, 40], "ringOut": [20, 20, 30] }
     }
   },
   {
