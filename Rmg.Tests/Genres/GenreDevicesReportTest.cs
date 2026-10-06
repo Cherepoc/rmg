@@ -64,6 +64,7 @@ public sealed class GenreDevicesReportTest
                 ? verses.Average(x => song.Resting(x.span).Contains(TrackRole.Melody) ? 1.0 : 0)
                 : double.NaN,
             ["songs with a solo"] = song.Solos.Count > 0 ? 1 : 0,
+            ["songs with a guitar driven when loud"] = song.Trace.Any(x => x.Point == TracePoints.LouderForm) ? 1 : 0,
             ["line notes bent or slid"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.Bend) > 0),
             ["bass's changes of pitch slid into"] = song.Song.Notes!.GetValueOrDefault(SongTracks.BassTrack)?.ToArray() is { Length: > 1 } bass
                 && bass.Skip(1).Where((x, i) => x.Value.Pitches[0] != bass[i].Value.Pitches[0]).ToArray() is { Length: > 0 } changes
@@ -98,7 +99,7 @@ public sealed class GenreDevicesReportTest
         ["sections over a pedal"] = "harmonyDevices", ["songs reharmonising"] = "harmonyDevices", ["songs changing key"] = "keyChanges",
         ["sections in stop time"] = "stopTime", ["sections pushing"] = "push", ["lifts dropped"] = "drop", ["sections of 16 bars or more"] = "sectionLength",
         ["sections of 32 bars"] = "sectionLength", ["appearances building or thinning"] = "texture", ["verses without a melody"] = "voice",
-        ["songs with a solo"] = "solos", ["line notes bent or slid"] = "effects", ["bass's changes of pitch slid into"] = "glide",
+        ["songs with a solo"] = "solos", ["songs with a guitar driven when loud"] = "louderForms", ["line notes bent or slid"] = "effects", ["bass's changes of pitch slid into"] = "glide",
         ["line notes with a vibrato"] = "effects", ["line notes slurred"] = "articulation", ["sections polymetric"] = "polymeter",
         ["appearances at a tempo of their own"] = "sectionChanges", ["sections in a meter of their own"] = "sectionChanges",
         ["sections the solo part answers"] = "soloAnswers", ["lines in octaves"] = "doubling", ["sections harmonising the melody"] = "doubling",

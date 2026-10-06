@@ -322,8 +322,6 @@ of here once it is; the genres it adds are described under *More genres*.
 
 **P2, the engine, for several genres each:**
 
-13. **An instrument by its section's energy:** a part's quieter and louder form, the clean verse guitar distorted in the
-    chorus, where `instrumentSwitches` switches by chance alone.
 14. **The feel:** the parts' pocket in milliseconds rather than beats (`Pocket.OffsetOf`, 20 ms at 60 bpm and 7 at
     180), and a genre's swing of 8ths or 16ths (16ths swing up to 107 bpm alone, `Groove.ShortestSwungNote`: House's).
 15. **The harmonising interval a genre's:** thirds and sixths, or fourths and fifths, an organum's parallels.

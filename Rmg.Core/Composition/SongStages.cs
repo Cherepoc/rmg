@@ -111,6 +111,7 @@ internal static class SongStages
         new("Hat rolls", Composition.HatRolls.Apply, CanSkip: true),
         new("Drum marks", DrumMarks.Apply, CanSkip: true),
         new("Instruments", Instruments, CanSkip: true),
+        new("Louder forms", LouderForms.Apply, CanSkip: true),
         new("Articulation", Articulations.Apply, CanSkip: true),
         new("Risers", Composition.Risers.Apply, CanSkip: true),
         new("Timing", Pocket.Apply, CanSkip: true),

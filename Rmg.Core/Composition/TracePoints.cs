@@ -48,6 +48,9 @@ internal static class TracePoints
     /// <summary>Whether a section pushes its chord changes (a <c>bool</c>).</summary>
     public const string Push = "Push";
 
+    /// <summary>The louder form a part plays in the song's louder appearances, its program, where it plays one (an <c>int</c>).</summary>
+    public const string LouderForm = "Louder form";
+
     /// <summary>What the song's drums do, keep time or mark its form (a <see cref="Composition.DrumJob" />).</summary>
     public const string DrumJob = "Drum job";
 
