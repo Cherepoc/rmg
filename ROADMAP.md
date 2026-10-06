@@ -6,6 +6,8 @@ is removed once it is built.
 
 ## Priorities
 
+**Now:** *The review of October 2026*, step by step.
+
 **Next** (P1): listening to what is deployed and tuning by what it says (see *Listening*), the presets most as October
 2026 retuned them, Pop and Metal, the instruments and the riser added; and the ratings by conventionality once enough
 are in, alongside, continuously and never as a gate.
@@ -305,6 +307,66 @@ Each item with its plan, and what it waits for.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
   cache them; a corpus song holds about 5 MB.
 
+## The review of October 2026
+
+A review of the engine and the presets, in steps by priority, each built, measured and committed in turn and taken out
+of here once it is; the genres it adds are described under *More genres*.
+
+**P1, wrong now and cheap:**
+
+1. **The genre on the song's panel:** its list in a row of its own under the transport, out of the settings; beside it
+   a Manage button opening a window of every genre, the presets and one's own, to add one, duplicate any, edit one's
+   own and remove it, its import and export there too; the editor (`genre-editor.js`) as it is, opened from it.
+2. **Chugs on driven guitars alone:** `InstrumentTrait.Chugs` on the overdriven and the distortion guitar and the
+   picked bass, not the whole family; a part chugging by the instrument playing it, a switched one's
+   (`SongStages.Chugs` reads the track's first). The muted guitar is a clean guitar's other form, apt wherever a clean
+   one is, never a chug.
+3. **Rock's and Metal's muted guitar:** 34-36% of their riffs' notes and 36% of Rock's rhythm part's, twice their pools'
+   share (`GenreInstrumentsReportTest`): why, then their weight to the driven guitars.
+4. **Every part's pool named:** a preset names the instruments of every part it may play (a rule test), where now a
+   riff, a rhythm part, a pad, a counter-melody or a solo falls back on the songs' pools: a distorted riff in Pop and
+   Folk, an acoustic guitar strumming in Techno, synth pads in Latin and Funk, a distorted solo in Funk.
+5. **The presets' copies of the songs' amounts let go of:** a device a preset leaves out plays as the songs do, its
+   report marking it (`GenreDevicesReportTest`'s *), in place of the rule that a preset names every device, its copies
+   already drifted (switches 2% for 1.5%).
+6. **The presets retuned:** the root motions of Pop (I-V-vi-IV), Rock, Metal and Synthwave (i-bVI-bVII), Reggae (I-IV)
+   and Folk; Jazz's tempo from 80 at the plain end and its pad rarer; Hip-hop's counter-melody 15-25% and its drop
+   rarer; Funk's and Latin's pads rarer; Folk's drums 50-60%; Latin's and Metal's solos fewer; every counter-melody's
+   chance its genre's, not the songs' 60 copied.
+7. **The blues' twelve bars at the plain end:** V at bar 9 in 43% of its sections, IV at 5 in 63%; the phrases' place
+   rules kept by the plain end.
+
+**P2, the engine, for several genres each:**
+
+8. **A device a genre plays at its plain end** plays there with its own draws at their middle: the polymeter (its
+   lengths all 0 at 0, `ByConvention.Weigh` throwing at a given 0, its kick and bass rarely joining near it), planing,
+   the pedal and the other reharmonisations (`HasPlainEnd: false`), a wild-end sound such as the china.
+9. **`SongStages` split:** every stage beside its device with its constants (stop time, pushes, hat rolls,
+   articulation, risers, inner lines), `SongStages` their order alone; the fingerprint kept.
+10. **The drums marking the form:** a genre's choice of the drums' job, a groove, as now, or marks: one or two of its
+    pieces struck now and then at a section's start, a phrase's, a chord change and the beat before a section, the
+    likelier the stronger the point and the louder the section, a roll among them, never keeping time; an edit after
+    assembly, from a stream of its own. Ambient's drums retuned to it.
+11. **A register plan:** the parts ordered by role, the bass under the chords under the melody, a part's register a
+    genre's value as its pan is, and an instrument's range by its family (as `InstrumentTraits`); the chords and the
+    melody drawn apart now (`SongTracks`, `Int(-2, 1)` and `Int(0, 3)` for both), the riff at C3 to B4 whatever plays it.
+12. **A drum's sounds a genre's pool:** the cross-stick, the hi-hat's foot (Jazz's 2 and 4), the china, the open
+    hi-hat, the ride's bell, each now the songs' fixed chance.
+13. **An instrument by its section's energy:** a part's quieter and louder form, the clean verse guitar distorted in the
+    chorus, where `instrumentSwitches` switches by chance alone.
+14. **The feel:** the parts' pocket in milliseconds rather than beats (`SongStages.OffsetOf`, 20 ms at 60 bpm and 7 at
+    180), and a genre's swing of 8ths or 16ths (16ths swing up to 107 bpm alone, `Groove.ShortestSwungNote`: House's).
+15. **The harmonising interval a genre's:** thirds and sixths, or fourths and fifths, an organum's parallels.
+
+**P3, the genres, in the order they are ready:** (16) Medieval and Dungeon synth, after 8, 10 and 15; Djent after 8,
+11 and 12; Nu metal after 11 and 13; (17) of what is built: disco, trap, trance, drum and bass, ska, punk, chiptune;
+(18) those waiting on items below: Fusion, Funk's vamp, Soul and Gospel, Country, Bossa nova; (19) the dynamics shaped,
+a crescendo into a lift, and then Orchestral.
+
+**P4, after:** `SongGenerator.GenerateSong` as `SongDecisions.Draw`; the drums of `SectionGenerator` a class of their
+own; `GenreChoices`' labels beside their tables; ornaments, a grace note, a turn and a trill, should Medieval and Folk
+ask for them. Not done: a sustain pedal, a parallel CLI batch.
+
 ## Genres
 
 A genre is the page's data (`Genre`, `GenreChoices`, `Client/genres.json`), every option three amounts, at the plain
@@ -323,8 +385,38 @@ left:
   4. The default (the songs' own, as now, or any genre) decided by the ratings by genre once a version has enough, and
      not before the retuned presets, Pop and Metal most, are heard.
   Not weighed by the presets nor leaned by conventionality: each preset spans the plainest songs to the wildest.
-- **More genres** (P3, should Pop and Metal sound right): Soul or Gospel, drum and bass, disco, trap (Hip-hop's glide
-  and hat rolls).
+- **More genres** (P3, in the order of *The review of October 2026*): Soul or Gospel, drum and bass, disco, trap
+  (Hip-hop's glide and hat rolls), trance, ska, punk, chiptune, country, bossa nova, orchestral; nu metal, medieval,
+  dungeon synth; and two at the wild end of their idioms, whose plain end is what the songs' wild end plays:
+  - **Fusion:** electric piano, synth leads, soprano sax, a fretless bass that sings, Lydian, Dorian and melodic
+    minor, ninths to thirteenths, quartal and So What shapes, a chord's own scale, planing, a section's own meter and
+    key, long solos, straight 16ths or Latin grooves, legato. Wants: roots off the scale (the progressions move by a
+    7-note scale's steps, so chromatic and constant-structure motion comes only of planing and a chord's own scale);
+    a lead's wide-interval legato lines (*A melody's leaping by genre*); the bass as a lead in a high register;
+    planing and the other reharmonisations allowed at a genre's plain end, which `HasPlainEnd: false` forbids.
+  - **Djent:** a low distorted riff, palm-muted, chugging a cycle of 16ths against a 4/4 snare on 3 and a
+    china or crash in quarters, the kick in unison with the riff, the bass doubling it, one chord or none, Phrygian,
+    Locrian and octatonic, clusters and tritone stacks, a clean or synth lead floating over, 100 to 130. Wants: the
+    polymeter's plain end, which is never now (its lengths are all 0 at 0 and `ByConvention.Weigh` throws at a given
+    0; its kick and bass rarely join near it), a genre able to switch it on with its kick and bass; the riff an
+    octave and more lower (its range is C3 to B4, a low string at B1 or F♯1); the china, a wild-end sound only;
+    the backbeat and the time pinned while the ground runs with the cycle, which the pins already allow; the vamp.
+  - **Nu metal:** a low, down-tuned distorted riff of one note chugged in a syncopated figure, a half step above it now and
+    then, the drums a hip-hop groove, half time and lightly swung, a clicking slap bass, quiet verses of a clean guitar
+    arpeggiated with an echo or a chorus against loud choruses, verses for a voice, squealing bends, no solos, natural
+    minor and Phrygian, 85 to 110. Mostly a preset of what is built (`voice`, `dynamics.contrast`, `texture`, slap
+    bass, `feelChances.swing`, Phrygian, bends); wants the riff an octave lower, as Djent does, and a part's
+    instrument by the section's energy (the clean verse guitar turning distorted in the chorus), which
+    `instrumentSwitches` draws only by chance. A turntable's scratches are beyond General MIDI.
+  - **Medieval:** calm, slow and modal, Dorian, Mixolydian, minor and Phrygian; recorders, flutes, pan flute, ocarina,
+    a shawm, a fiddle, a dulcimer, a lute (the nylon guitar), a harp, a reed or church organ, a choir; open fifths over
+    a drone, a second voice in parallel fourths or fifths, two bars a chord, 3/4, 6/8 and 4/4, a part alone at first;
+    the bass rare; the drums, a tambourine, a triangle, a frame drum (a low tom), marking the form. Hurdy-gurdy, lute
+    and frame drum are beyond General MIDI.
+  - **Dungeon synth:** dark, slow and lo-fi: minor, harmonic minor and Phrygian triads, i-bVI-bVII; synth strings, choir
+    and brass pads, an organ, a harpsichord arpeggiating an ostinato, a celesta or a music box over it; drones, a deep
+    reverb; the drums none or martial marks, a timpani or a low tom, a snare's roll into a section. Its tape and
+    detuning are beyond General MIDI; told from Ambient by its minor, its harpsichord and brass, and its martial marks.
 - **The hook and the phrase scheme as one** (P3): a hooked section a scheme sung literally, should a trial keep the
   report's repeats (50% of a hooked section's notes at their first bar's places); otherwise kept apart, with the reason.
 - **Harmony for Jazz and Soul** (P3): the tritone substitute, the passing diminished and a ii–V elsewhere (*Approach
