@@ -131,6 +131,9 @@ each from the trace; the seeds named here are ones already found.
   song never sounded lands once, with a crash where it can: placed, or tacked on? At the wildest groove a song of the kit
   and percussion plays percussion only in half its sections (`PercussionSections.WildShare`): the kit too seldom, or
   too often?
+- **The drums' marks** (`DrumMarks`, Ambient's): about a strike every three bars at the middle, a section's start the
+  likeliest, and a roll into a section now and then, one or two drums of the genre's: heard as a calm piece's
+  percussion, or as a groove gone missing? A roll on a cymbal or a triangle as on a tom?
 - **The polymeters:** the snare on every cell's start of a short cycle: too busy? The chords joining a cycle of short
   cells: mud? A cycle running on through a section or growing each time round: heard as a drift resolving?
 
@@ -317,10 +320,6 @@ of here once it is; the genres it adds are described under *More genres*.
 
 **P2, the engine, for several genres each:**
 
-10. **The drums marking the form:** a genre's choice of the drums' job, a groove, as now, or marks: one or two of its
-    pieces struck now and then at a section's start, a phrase's, a chord change and the beat before a section, the
-    likelier the stronger the point and the louder the section, a roll among them, never keeping time; an edit after
-    assembly, from a stream of its own. Ambient's drums retuned to it.
 11. **A register plan:** the parts ordered by role, the bass under the chords under the melody, a part's register a
     genre's value as its pan is, and an instrument's range by its family (as `InstrumentTraits`); the chords and the
     melody drawn apart now (`SongTracks`, `Int(-2, 1)` and `Int(0, 3)` for both), the riff at C3 to B4 whatever plays it.

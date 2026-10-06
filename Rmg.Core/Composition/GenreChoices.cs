@@ -204,6 +204,12 @@ public static class GenreChoices
     /// <summary>The chance a bar's hi-hat rolls its last beat in 32nds or 16th triplets, the trap's (<see cref="HatRolls.Chance" />).</summary>
     public static GenreChoice HatRolls { get; } = Chances("hatRolls", "Hi-hat rolls", [("bars", "Bars ending on a roll", Composition.HatRolls.Chance)]);
 
+    /// <summary>What the drums do: keep time, as the songs' always do, or mark the form, as a calm piece's percussion does (<see cref="DrumMarks" />).</summary>
+    public static GenreChoice DrumJob { get; } = Pool("drumJob", "Drums' job", DrumMarks.Jobs.Select(x => (DrumMarks.NameOf(x.Job), x.Job == Composition.DrumJob.Groove ? "Keeping time" : "Marking the form", x.Weight)));
+
+    /// <summary>How often drums marking the form strike, from 0, seldom, through 50, as they do, to 100, often (<see cref="DrumMarks.GenreOdds" />).</summary>
+    public static GenreChoice Marks { get; } = Values("marks", "Drums' marks", [("often", "How often")]);
+
     /// <summary>The chance a verse leaves its melody out, the room a rap's voice takes over the beat (<see cref="Arrangement.VoiceChance" />).</summary>
     public static GenreChoice Voice { get; } = Chances("voice", "Verses for a voice", [("verses", "Verses without a melody", Arrangement.VoiceChance)]);
 
@@ -547,7 +553,7 @@ public static class GenreChoices
     public static ImmutableArray<GenreChoice> All { get; } =
     [
         Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Dynamics, Phrases,
-        SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space,
+        SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

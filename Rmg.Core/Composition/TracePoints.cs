@@ -48,6 +48,12 @@ internal static class TracePoints
     /// <summary>Whether a section pushes its chord changes (a <c>bool</c>).</summary>
     public const string Push = "Push";
 
+    /// <summary>What the song's drums do, keep time or mark its form (a <see cref="Composition.DrumJob" />).</summary>
+    public const string DrumJob = "Drum job";
+
+    /// <summary>The drums marking the song's form, by their tracks, where its drums mark it (an <c>ImmutableArray</c> of <c>int</c>).</summary>
+    public const string DrumMarks = "Drum marks";
+
     /// <summary>Whether a section turns its pattern around, its last bar a V or a ii–V into its start (a <c>bool</c>).</summary>
     public const string Turnaround = "Turnaround";
 

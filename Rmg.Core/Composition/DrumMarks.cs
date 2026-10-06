@@ -1,0 +1,127 @@
+using System.Collections.Immutable;
+using Rmg.Core.Events;
+using Rmg.Core.Probabilities;
+using Rmg.Core.Songs;
+
+namespace Rmg.Core.Composition;
+
+/// <summary>What the drums do in a song: keep time, as a band's do, or mark its form, as a calm piece's percussion does.</summary>
+public enum DrumJob
+{
+    Groove,
+    Marks
+}
+
+/// <summary>
+///     The drums marking the form in place of keeping time: one or two of the song's drums, struck now and then where the
+///     form moves, a section's start, a phrase's, a chord's change and the song's ending, the likelier the stronger the
+///     place and the louder the section, and rolling into a section now and then on the beat before it; nothing between,
+///     so that they never keep time. A genre's, which the songs never play (<see cref="GenreChoices.DrumJob" />), an edit of
+///     the drums' notes after the song is put together, in the sections where the drums play, from a sequence of its own.
+/// </summary>
+internal static class DrumMarks
+{
+    /// <summary>The drums' jobs, and how likely: the songs' always a groove; marks a genre's alone.</summary>
+    public static ImmutableArray<(DrumJob Job, ByConvention Weight)> Jobs { get; } =
+    [
+        (DrumJob.Groove, new ByConvention(1, 1, 1)),
+        (DrumJob.Marks, new ByConvention(0, 0, 0))
+    ];
+
+    /// <summary>A job's name, as a genre names it.</summary>
+    public static string NameOf(DrumJob job) => job == DrumJob.Groove ? "groove" : "marks";
+
+    /// <summary>How many drums mark the form, and how likely: one, or two, a stronger and a lighter one.</summary>
+    public static ImmutableArray<Weighted<int>> Counts { get; } = [new(1, 1), new(1, 2)];
+
+    /// <summary>
+    ///     The chance a place is marked, by its strength, a section's start, a phrase's and a chord's change, and how loud the
+    ///     mark is against its drum's loudest note; a section's start the likeliest and the loudest, as the ending's is.
+    /// </summary>
+    public static ImmutableArray<(double Chance, double Loudness)> Places { get; } = [(0.8, 1), (0.35, 0.85), (0.05, 0.7)];
+
+    /// <summary>The chance a section is rolled into on the beat before it.</summary>
+    public const double RollChance = 0.15;
+
+    /// <summary>How many notes a beat of a roll plays, and how likely: 16ths and 32nds.</summary>
+    public static ImmutableArray<Weighted<int>> RollRates { get; } = [new(1, 4), new(1, 8)];
+
+    /// <summary>How loud a roll's first note plays against its last, the drum's loudest note.</summary>
+    public const double RollFrom = 0.3;
+
+    /// <summary>How far a genre's value moves the chances at its most and its least, as odds: four times, or a quarter (<see cref="GenreChoices.Marks" />).</summary>
+    public const double GenreOdds = 4;
+
+    /// <summary>The song's drums' job, a genre's, from a sequence of its own.</summary>
+    public static DrumJob Draw(IGenerationContext context, double unconventionality, Genre genre) =>
+        context.Pick(ByConvention.Weigh(Jobs, unconventionality, genre.Pool<DrumJob>(GenreChoices.DrumJob, NameOf)));
+
+    /// <summary>The song with its drums marking its form where its genre has them do so.</summary>
+    internal static SongDraft Apply(SongDecisions song, SongDraft draft)
+    {
+        var context = song.Stream(SongStream.DrumMarks);
+        var job = Draw(context, song.Facets[Facet.Groove], song.Genre);
+        StateTrace.Record(TracePoints.DrumJob, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, job.ToString(), job);
+        if (job == DrumJob.Groove)
+            return draft;
+
+        var notes = SongStages.NotesOf(draft);
+        var drums = notes.Where(x => song.Tracks.Definitions[x.Key] is PercussionInstrumentTrack && x.Value.Count > 0).Select(x => x.Key).ToArray();
+        if (drums.Length == 0)
+            return draft;
+        var count = Math.Min(context.Pick(Counts), drums.Length);
+        var marking = drums.OrderBy(_ => context.GenerateDouble()).Take(count).ToArray();
+        // every drum's loudest note, which its marks play as
+        var loudest = marking.ToDictionary(x => x, x => notes[x].MaxBy(n => n.Value.Velocity).Value);
+
+        var map = song.Form.Map;
+        var changes = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+        // where the drums play in a section, which they mark only there
+        bool Plays(SectionSpan span) => drums.Any(x => notes[x].Any(n => n.Position >= span.Start - 1e-9 && n.Position < span.End - 1e-9));
+        var often = Tilt.Of(GenreOdds, song.Genre.Shift(GenreChoices.Marks, "often"));
+        var marks = marking.ToDictionary(x => x, _ => new List<TimelineItem<RealizedNote>>());
+        foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
+        {
+            var section = song.SectionOf(span.SectionId);
+            var energy = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling);
+            var plays = Plays(span);
+            // the section's places, each at its strongest: its start, its phrases' and its chords' changes
+            var phrase = Meter.PhraseBarCount * span.Meter.BarDuration;
+            var places = new SortedDictionary<double, int> { [span.Start] = 0 };
+            for (var at = span.Start + phrase; at < span.End - 1e-9; at += phrase)
+                places.TryAdd(at, 1);
+            foreach (var at in changes.Where(x => x > span.Start + 1e-9 && x < span.End - 1e-9))
+                places.TryAdd(at, 2);
+            if (index == map.Sections.Length - 1 && map.Ending.Duration > 0)
+                places.TryAdd(map.Ending.Start, 0);
+
+            foreach (var (at, strength) in places)
+            {
+                // drawn for every place, so that the draws are as many
+                var (chance, loudness) = Places[strength];
+                var (hits, drum) = (context.TestProbability(often.Chance(energy.Chance(chance, 1), 1)), marking[context.GenerateInt(0, marking.Length)]);
+                if (hits && plays)
+                    marks[drum].Add((loudest[drum] with { Velocity = loudest[drum].Velocity * loudness }).ToTimelineItem(at));
+            }
+
+            // a roll into the section on the beat before it, where the drums play the section
+            var (rolls, rate, roller) = (context.TestProbability(often.Chance(energy.Chance(RollChance, 1), 1)), context.Pick(RollRates), marking[context.GenerateInt(0, marking.Length)]);
+            if (rolls && plays && span.Start >= 1)
+            {
+                var steps = rate;
+                marks[roller].AddRange(Enumerable.Range(0, steps).Select(k => (loudest[roller] with
+                {
+                    Velocity = loudest[roller].Velocity * (RollFrom + (1 - RollFrom) * k / Math.Max(1, steps - 1)),
+                    Duration = Math.Min(loudest[roller].Duration, 1.0 / rate)
+                }).ToTimelineItem(span.Start - 1 + k / (double)rate)));
+            }
+        }
+
+        var result = notes.ToBuilder();
+        foreach (var track in drums)
+            result[track] = EventTimeline.Create<RealizedNote>(notes[track].Duration,
+                marks.TryGetValue(track, out var own) ? own.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position) : []);
+        StateTrace.Record(TracePoints.DrumMarks, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", marking), marking.ToImmutableArray());
+        return draft with { Notes = result.ToImmutable() };
+    }
+}
