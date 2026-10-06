@@ -213,8 +213,12 @@ public static class GenreChoices
     /// <summary>The chance a lift the drums announce is built to and dropped at, the band out for the bar before it; the songs never (<see cref="FormLayers.Drop" />).</summary>
     public static GenreChoice Drop { get; } = Chances("drop", "Builds and drops", [("lifts", "Lifts built to a drop", FormLayers.Drop)]);
 
-    /// <summary>The chance a section's melody is on a hook, every section's, as a beat's sample is; the songs' a chorus's alone (<see cref="MelodyLayers.HookChanceOf" />).</summary>
-    public static GenreChoice Hook { get; } = Chances("hook", "Hook", [("sections", "Sections on a hook", new Probabilities.ByConvention(0, 0, 0))]);
+    /// <summary>
+    ///     The chance a section's melody is on a hook, a chorus's and another section's, as a beat's sample is; the songs' a
+    ///     chorus's alone (<see cref="MelodyLayers.HookChanceOf" />).
+    /// </summary>
+    public static GenreChoice Hook { get; } = Chances("hook", "Hook",
+        [("choruses", "Choruses on a hook", MelodyLayers.HookChanceOf(SectionRole.Chorus)), ("sections", "Other sections on a hook", MelodyLayers.HookChanceOf(SectionRole.Verse))]);
 
     /// <summary>How long a section's chords last (<see cref="Composition.HarmonicRhythm.Spans" />): half a bar, a bar or two bars, the faster the more energy.</summary>
     public static GenreChoice HarmonicRhythm { get; } = Pool("harmonicRhythm", "Chords' pace",

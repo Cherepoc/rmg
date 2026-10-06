@@ -298,8 +298,9 @@ internal sealed class SectionGenerator
         // the bass in octaves now and then, a genre's the more, from a sequence of its own
         var octaveBass = Stream(sectionId, SectionStream.OctaveBass).TestProbability(OctaveBassChance.At(facets[Facet.Groove], _genre.Chance(GenreChoices.OctaveBass, "sections")));
         StateTrace.Record(TracePoints.OctaveBass, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{octaveBass}", octaveBass);
-        // its melody on a hook now and then, a chorus by its role or every section by a genre's, from a sequence of its own
-        var hooks = Stream(sectionId, SectionStream.Hook).TestProbability(MelodyLayers.HookChanceOf(plan.Role).At(facets[Facet.Melody], _genre.Chance(GenreChoices.Hook, "sections")));
+        // its melody on a hook now and then, a chorus by its role or any section by a genre's, from a sequence of its own
+        var hooks = Stream(sectionId, SectionStream.Hook).TestProbability(MelodyLayers.HookChanceOf(plan.Role)
+            .At(facets[Facet.Melody], _genre.Chance(GenreChoices.Hook, plan.Role == Composition.SectionRole.Chorus ? "choruses" : "sections")));
         StateTrace.Record(TracePoints.MelodyHook, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{hooks}", hooks);
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
