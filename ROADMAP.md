@@ -180,6 +180,31 @@ plain or wild the songs are.
 
 Each item with its plan, and what it waits for.
 
+### The heavy band, the mood and the effects (in progress, in order)
+
+- **The bass under a driven riff:** a part joining a polymeter whose own notes miss the cycle's first cell plays
+  nothing in the section (Djent's bass silent in 6.6% of its riff's bars); and a bass that plays in a section plays
+  every phrase of it a driven riff plays, but in the song's opening, a section the bass sits out whole left to the
+  guitars.
+- **Double-tracking:** every driven guitar's part, the riff, its twin, the rhythm part and the chords, played twice,
+  hard left and right, the second take on the other driven guitar 8 ms late, each at 1/√2 of the part; the page mixing
+  both takes as one part.
+- **The mood:** dark presets heard as happy: the pentatonic drops a mode's dark note (natural minor's ♭6, Phrygian's
+  ♭2, Dorian's third), the melody's ♭2 and ♭6 1-9% in Trap, Hip-hop, Techno and Dnb; Trap's lead bells and music box
+  82% at F♯5; Djent major or Lydian in 12% of songs. A mood report (♭2/♭6, major chords, the melody's register and
+  sound), the presets tuned by it: Trap, Djent, Techno, Hip-hop with a dark side, Dnb liquid and moody.
+- **Riff scales for Metal and Nu metal:** the blues, chromatic and octatonic riffs Djent has.
+- **A filter,** a strong effect on the synths: a wobble, a squelch, an opening into a drop, as CC74 and CC71.
+- **A trance gate,** a strong effect: held chords chopped in 16ths, a pattern drawn per song.
+- **A genre's room:** the reverb's type, time and pre-delay, one per song, as GS messages.
+- **An insertion effect,** one a song: a wah, a phaser or a lo-fi EQ on the part it suits.
+- **Dub's echo** on the chords, the rhythm part and the snare, as notes.
+- **Features of one genre in others,** as preset data: the China cymbal in Metal and Nu metal, the open hi-hat in
+  Techno, Electronic, Trance and Funk, a drop in Djent, section changes in Djent, Metal and Orchestral, polymeter in
+  Metal and Fusion, twelve bars in Rock, Country and Jazz, stop time in Punk, Ska, Country and Soul, solo answers in
+  Country, Jazz and Funk, the pump in Synthwave, Disco and Pop, stabs and vamps in Disco, the count-in in Rock, the
+  dominant chord scales in Funk, the bass soloing in Funk, one chord held in Techno and Trap.
+
 ### Conventionality
 
 - **A song's length, the rest:** a short length runs long, 16% of the songs given a minute and 19% of those given two
@@ -421,6 +446,13 @@ left:
 
 Ideas with a reason, not planned: none has shown a need. Taken up only when listening or another item asks for one.
 
+- **The GS delay** (P4): the synthesizer's tempo-set delay with its feedback, a dub's long darkening repeats, which
+  only a GS player plays; echoes as notes play everywhere.
+- **The drums one by one** (P4): each drum's tuning, pan and sends as GS drum parameters, a dry kick under a wetter
+  snare, Trap's kick tuned down, the toms panned: a mix's realism.
+- **A flanger** (P4): the chorus's type set to a flanger, which every part sending to the chorus would take at once.
+- **A song's mood** (P4): a value drawn per song that a preset's options lean dark or bright by, so that one preset
+  spans liquid and dark drum and bass coherently; a preset of each until a third genre asks for a span.
 - **The percussive family but the steel drums and the reverse cymbal** (P4): the woodblock, the agogo, the melodic tom
   and the tinkle bell are the kit's own sounds again; the synth drum's 80s toms are fills, on the drums' channel; the
   taiko wants a cinematic genre none is.
