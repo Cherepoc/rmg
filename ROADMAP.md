@@ -315,10 +315,6 @@ left:
   (`GenreChoices.Devices`), first as the songs have them, rounded to whole percents; `GenreDevicesReportTest` the
   baseline of every retuning below.
 
-  **P1**, alongside listening:
-  5. **Blues retuned:** reharmonisation and inner lines off over its dominants, the solo part answering the melody.
-  6. **The electronic genres', Hip-hop's and Reggae's section tempos and meters off** at every end.
-
   **P2**, after P1's:
   7. **The inner line's clashes:** the melody's notes on a beat a semitone from a chord note, in sections with an
      inner line against those without (`SongStages.InnerLines` edits notes after they are realized, which the melody
