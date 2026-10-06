@@ -320,9 +320,10 @@ of here once it is; the genres it adds are described under *More genres*.
 
 **P2, the engine, for several genres each:**
 
-11. **A register plan:** the parts ordered by role, the bass under the chords under the melody, a part's register a
-    genre's value as its pan is, and an instrument's range by its family (as `InstrumentTraits`); the chords and the
-    melody drawn apart now (`SongTracks`, `Int(-2, 1)` and `Int(0, 3)` for both), the riff at C3 to B4 whatever plays it.
+11. **A part's register a genre's value,** as its pan is: its octaves and its instrument's range moved by an octave
+    either way, a down-tuned riff's (Djent, Nu metal) or a bass singing high (Fusion); the instruments' ranges and the
+    melody over the chords done (`Registers`). The bass's octaves start at C1, under the bass guitar's E1, 9% of its
+    notes: its range a note's rather than an octave's, should that be heard.
 12. **A drum's sounds a genre's pool:** the cross-stick, the hi-hat's foot (Jazz's 2 and 4), the china, the open
     hi-hat, the ride's bell, each now the songs' fixed chance.
 13. **An instrument by its section's energy:** a part's quieter and louder form, the clean verse guitar distorted in the

@@ -1,0 +1,72 @@
+using Rmg.Core.Songs;
+
+namespace Rmg.Core.Composition;
+
+/// <summary>
+///     Where the pitched parts sit: every part's octaves, as drawn, kept within its instrument's range
+///     (<see cref="InstrumentRanges" />), an octave counted where half of it or more is the instrument's, and the melody
+///     over the chords, its singable middle a fourth or more above theirs, the one further from where it sits best
+///     moved by an octave where its instrument has one, the other otherwise, as an arranger keeps the tune on top.
+/// </summary>
+public static class Registers
+{
+    /// <summary>The octave of a part's range note 0 sits in, as the octave offsets count from (<see cref="Realizer" />).</summary>
+    private const int ZeroOctave = 5;
+
+    /// <summary>How far the melody's middle sits above the chords' at least, in semitones: a fourth.</summary>
+    public const int MelodyOverChords = 5;
+
+    /// <summary>How many times the melody and the chords are moved apart by an octave at most.</summary>
+    private const int Moves = 2;
+
+    /// <summary>Where the melody's middle sits best, C5, and the chords', D4, which the one further from its own moves from first.</summary>
+    public const int MelodyCentre = 72, ChordsCentre = 62;
+
+    /// <summary>The octaves, as offsets, an instrument plays: those of which half or more is in its range.</summary>
+    public static (int Low, int High) OctavesOf(int program)
+    {
+        var (low, high) = InstrumentRanges.Of(program);
+        return ((int)Math.Round(low / 12.0) - ZeroOctave, (int)Math.Round((high + 1) / 12.0) - 1 - ZeroOctave);
+    }
+
+    /// <summary>A part's octaves, as drawn, moved within its instrument's, as many as it has room for.</summary>
+    public static PitchInstrumentTrack WithinInstrument(PitchInstrumentTrack part)
+    {
+        var (low, high) = OctavesOf(part.InstrumentCode);
+        var width = part.MaxOctaveOffset - part.MinOctaveOffset;
+        var min = Math.Clamp(part.MinOctaveOffset, low, high);
+        var max = Math.Clamp(min + width, min, high);
+        return Moved(part, Math.Max(low, max - width), max);
+    }
+
+    /// <summary>
+    ///     The melody and the chords placed apart, the melody's singable middle a fourth or more above the chords' middle, each
+    ///     moved by an octave within its instrument, the one further from where it sits best first; as they were where they
+    ///     are apart or cannot be.
+    /// </summary>
+    public static (PitchInstrumentTrack Melody, PitchInstrumentTrack Chords) Apart(PitchInstrumentTrack melody, PitchInstrumentTrack chords)
+    {
+        for (var move = 0; move < Moves && MiddleOfMelody(melody) < MiddleOf(chords) + MelodyOverChords; move++)
+        {
+            var (up, down) = (melody.MaxOctaveOffset < OctavesOf(melody.InstrumentCode).High, chords.MinOctaveOffset > OctavesOf(chords.InstrumentCode).Low);
+            // the one further below or above where it sits best, as far as its instrument lets it
+            if (up && (!down || MelodyCentre - MiddleOfMelody(melody) >= MiddleOf(chords) - ChordsCentre))
+                melody = Moved(melody, melody.MinOctaveOffset + 1, melody.MaxOctaveOffset + 1);
+            else if (down)
+                chords = Moved(chords, chords.MinOctaveOffset - 1, chords.MaxOctaveOffset - 1);
+            else
+                break;
+        }
+
+        return (melody, chords);
+    }
+
+    private static double MiddleOf(PitchInstrumentTrack part) => Realizer.GetRange(part) is var (low, high) ? (low + high) / 2.0 : 0;
+
+    private static double MiddleOfMelody(PitchInstrumentTrack melody) =>
+        Realizer.GetRange(melody) is var (low, high) && Line.GetSingableRange(low, high, MelodyLayers.Line.RangeWidth) is var (from, to) ? (from + to) / 2.0 : 0;
+
+    private static PitchInstrumentTrack Moved(PitchInstrumentTrack part, int min, int max) => min == part.MinOctaveOffset && max == part.MaxOctaveOffset
+        ? part
+        : new PitchInstrumentTrack(part.StateMap, part.InstrumentCode, min, max, part.Role, part.Pan);
+}
