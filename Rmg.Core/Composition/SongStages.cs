@@ -104,6 +104,7 @@ internal static class SongStages
         new("Solo answers", SoloAnswers, CanSkip: true),
         new("Notes", RealizeNotes, CanSkip: false),
         new("Stop time", StopTime, CanSkip: true),
+        new("Pushes", Pushes, CanSkip: true),
         new("Instruments", Instruments, CanSkip: true),
         new("Articulation", Articulation, CanSkip: true),
         new("Timing", Timing, CanSkip: true),
@@ -337,6 +338,23 @@ internal static class SongStages
     /// <summary>How long a stop-time hit is held at most, in beats.</summary>
     public const double StopTimeHit = 1;
 
+    /// <summary>Where the song plays in stop time: every stop-time section's appearances' first phrase, its start, end and bar.</summary>
+    private static (double Start, double End, double BarDuration)[] StopTimePhrases(SongDecisions song)
+    {
+        var stops = song.SectionIds.Distinct().ToDictionary(id => id, id =>
+        {
+            var section = song.SectionOf(id);
+            var chance = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling)
+                .Chance(StopTimeChance.At(section.Facets[Facet.Form], song.Genre.Chance(GenreChoices.StopTime, "sections")), StopTimeEnergyLean);
+            return song.Stream(SongStream.StopTime, id).TestProbability(chance);
+        });
+        return
+        [
+            ..song.Form.Map.Sections.Where(x => stops[x.SectionId])
+                .Select(x => (x.Start, Math.Min(x.End, x.Start + Meter.PhraseBarCount * x.Meter.BarDuration), x.Meter.BarDuration))
+        ];
+    }
+
     /// <summary>
     ///     Stop time: a section's appearances' first phrase, now and then, its band hitting the bar's first beat and resting
     ///     the rest of the bar, a hit held a beat at most, under the lines, the melody's, the counter-melody's and a solo's,
@@ -344,17 +362,13 @@ internal static class SongStages
     /// </summary>
     internal static SongDraft StopTime(SongDecisions song, SongDraft draft)
     {
-        var stops = song.SectionIds.Distinct().ToDictionary(id => id, id =>
+        var phrases = StopTimePhrases(song);
+        foreach (var id in song.SectionIds.Distinct())
         {
-            var section = song.SectionOf(id);
-            var chance = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling)
-                .Chance(StopTimeChance.At(section.Facets[Facet.Form], song.Genre.Chance(GenreChoices.StopTime, "sections")), StopTimeEnergyLean);
-            var stops = song.Stream(SongStream.StopTime, id).TestProbability(chance);
+            var stops = song.Form.Map.Sections.Any(x => x.SectionId == id && phrases.Any(p => Math.Abs(p.Start - x.Start) < 1e-9));
             StateTrace.Record(TracePoints.StopTime, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, $"{stops}", stops);
-            return stops;
-        });
-        var phrases = song.Form.Map.Sections.Where(x => stops[x.SectionId])
-            .Select(x => (x.Start, End: Math.Min(x.End, x.Start + Meter.PhraseBarCount * x.Meter.BarDuration), x.Meter.BarDuration)).ToArray();
+        }
+
         if (phrases.Length == 0)
             return draft;
 
@@ -376,6 +390,63 @@ internal static class SongStages
             result[track] = EventTimeline.Create(timeline.Duration, timeline
                 .Where(note => Place(note.Position) is not (true, false))
                 .Select(note => Place(note.Position).In ? (note.Value with { Duration = Math.Min(note.Value.Duration, StopTimeHit) }).ToTimelineItem(note.Position) : note));
+        }
+
+        return draft with { Notes = result.ToImmutable() };
+    }
+
+    /// <summary>The chance a section pushes its chord changes, by its groove facet: never in the plainest songs; a genre's where it names it.</summary>
+    public static ByConvention PushChance { get; } = new(0, 0.08, 0.15);
+
+    /// <summary>How early a push plays its change, in beats: an eighth.</summary>
+    public const double Push = 0.5;
+
+    /// <summary>
+    ///     Pushes: in a pushing section, every chord change on a bar's first beat but the section's first played an eighth
+    ///     early by the band's harmony, as an anticipation: a part's notes there moved ahead and held to where they ended, a
+    ///     bar at most, what they sound over in the eighth before taken out, where the part played the bar before; the
+    ///     drums keeping time under it and the lines going on; never in a solo or in stop time. A section's decision, from a
+    ///     sequence of its own.
+    /// </summary>
+    internal static SongDraft Pushes(SongDecisions song, SongDraft draft)
+    {
+        var pushing = song.SectionIds.Distinct().ToDictionary(id => id, id =>
+        {
+            var section = song.SectionOf(id);
+            var pushes = song.Stream(SongStream.Pushes, id).TestProbability(PushChance.At(section.Facets[Facet.Groove], song.Genre.Chance(GenreChoices.Push, "sections")));
+            StateTrace.Record(TracePoints.Push, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, $"{pushes}", pushes);
+            return pushes;
+        });
+        // but in a solo, and in stop time and out of it, whose hits stay on the bar
+        var changes = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
+        var stopTime = StopTimePhrases(song);
+        var pushes = song.Form.Map.Sections.Where((x, i) => pushing[x.SectionId] && !song.Solos.ContainsKey(i))
+            .SelectMany(span => changes.Where(x => x > span.Start + 1e-9 && x < span.End - 1e-9 && Math.Abs(Math.IEEERemainder(x - span.Start, span.Meter.BarDuration)) < 1e-6)
+                .Select(x => (At: x, span.Meter.BarDuration)))
+            .Where(x => !stopTime.Any(p => x.At >= p.Start - 1e-9 && x.At <= p.End + 1e-9))
+            .ToArray();
+        if (pushes.Length == 0)
+            return draft;
+
+        var notes = NotesOf(draft);
+        var result = notes.ToBuilder();
+        foreach (var (track, timeline) in notes)
+        {
+            // the drums keep time under the push, and the lines go on
+            if (song.Tracks.Definitions[track].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo or TrackRole.Drum)
+                continue;
+            // a part pushes a change where it played in the bar before, not where it comes in
+            var own = pushes.Where(x => timeline.Any(n => n.Position >= x.At - x.BarDuration - 1e-9 && n.Position < x.At - 1e-9)).Select(x => x.At).ToArray();
+            bool On(double position) => own.Any(x => Math.Abs(x - position) < 1e-6);
+            bool Before(double position) => own.Any(x => position > x - Push - 1e-6 && position < x - 1e-6);
+            var bar = pushes.Length > 0 ? pushes.Min(x => x.BarDuration) : 0;
+            result[track] = EventTimeline.Create(timeline.Duration, timeline
+                .Where(note => !Before(note.Position))
+                .Select(note => On(note.Position) ? (note.Value with { Duration = Math.Min(note.Value.Duration + Push, bar) }).ToTimelineItem(note.Position - Push) : note)
+                .Select(note => own.FirstOrDefault(x => note.Position < x - Push - 1e-6 && note.Position + note.Value.Duration > x - Push + 1e-6) is var cut && cut > 0
+                    ? (note.Value with { Duration = cut - Push - note.Position }).ToTimelineItem(note.Position)
+                    : note)
+                .OrderBy(x => x.Position));
         }
 
         return draft with { Notes = result.ToImmutable() };

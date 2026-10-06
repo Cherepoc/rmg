@@ -531,5 +531,6 @@ internal enum SongStream
     Strum = 70,
     Drops = 71,
     StopTime = 72,
-    Reharmonisation = 73
+    Reharmonisation = 73,
+    Pushes = 74
 }

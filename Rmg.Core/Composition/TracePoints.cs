@@ -36,6 +36,9 @@ internal static class TracePoints
     /// <summary>Whether a section's bass plays in octaves (a <c>bool</c>).</summary>
     public const string OctaveBass = "Octave bass";
 
+    /// <summary>Whether a section pushes its chord changes (a <c>bool</c>).</summary>
+    public const string Push = "Push";
+
     /// <summary>Whether a section turns its pattern around, its last bar a V or a ii–V into its start (a <c>bool</c>).</summary>
     public const string Turnaround = "Turnaround";
 

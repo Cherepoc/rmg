@@ -13,8 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: a push by the
-whole band; legato as an articulation; stretched voicings; the melody's range by genre; the fills' sounds by
+**When the need shows** (P3), each by what listening says, in this order: legato as an articulation; stretched voicings; the melody's range by genre; the fills' sounds by
 convention; a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
 and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
 
@@ -202,8 +201,11 @@ Each item with its plan, and what it waits for.
   `GenreChoices.StopTime`), a section's appearances' first phrase, the band hitting the bar's first beat under the
   lines, a quiet section the likelier; sections in it Blues 35%, Funk 22%, Rock 19%, others 5%. Its hits are the
   band's own downbeats, none added where a part rests on one, and a phrase's last bar keeps no fill; both should
-  listening ask. Then a push or anticipation the whole band plays, call and response between parts, a backing figure
-  that recurs through the song.
+  listening ask. Pushes done (`SongStages.Pushes`, `GenreChoices.Push`): a pushing section's chord changes on the bar
+  played an eighth early by the band's harmony, the drums keeping time and the lines going on, never in a solo, in
+  stop time or at a part's entry; sections pushing Funk 39%, Latin 30%, Rock 12%, others 8-9%. The drums' push (a crash
+  and kick on the and of four) should listening ask. Then call and response between parts, a backing figure that recurs
+  through the song.
 - **Harmony's devices** (P3): a chromatic line inside a held chord, a pedal held under a section, a ii–V into a chord
   but the home, which a chord's own scale makes part of.
 - **The hook at the end** (P4, parked): a song opens on its chorus's first phrase now and then (`IntroKind.Hook`); an outro
