@@ -285,7 +285,8 @@ public sealed class ExpressionTest
         ("vibrato", false, Has(CompositionStateKinds.Vibrato, CompositionStateKinds.WideVibrato)), ("chorus", false, Has(CompositionStateKinds.Chorus)),
         ("swell", false, Has(CompositionStateKinds.Swell)), ("bends", false, Has(CompositionStateKinds.Bend)),
         ("tremolo", true, Has(CompositionStateKinds.Tremolo)), ("echo", true, Has(CompositionStateKinds.Echo)),
-        ("sweep", true, Has(CompositionStateKinds.AutoPan)), ("filter", true, Has(CompositionStateKinds.Filter))
+        ("sweep", true, Has(CompositionStateKinds.AutoPan)), ("filter", true, Has(CompositionStateKinds.Filter)),
+        ("gate", true, Has(CompositionStateKinds.Gate))
     ];
 
     /// <summary>Which effects each pitched part of a song plays anywhere in it, in the order of <see cref="Effects" />.</summary>

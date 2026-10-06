@@ -36,6 +36,11 @@ internal static class ExpressionRender
     /// <summary>How far a filter closes at its deepest, in the brightness controller's steps below the middle, where it is the sound's own.</summary>
     private const int FilterReach = 48;
 
+    private const double Sixteenth = 0.25;
+
+    /// <summary>How much of a 16th a gate lets a note sound for.</summary>
+    private const double GateShare = 0.6;
+
     /// <summary>How long a squelch takes to close most of the way, in beats.</summary>
     private const double SquelchDecay = 0.25;
 
@@ -123,6 +128,22 @@ internal static class ExpressionRender
                     var beat = (start + t) % 1;
                     var duck = 1 - pump / 100.0 * Math.Pow(1 - beat, 2);
                     expression.Add((start + t, swell * shake * duck));
+                }
+
+                expression.Add((end, 1));
+            }
+
+            // a gate, the note sounding in the first part of each 16th it lets through and silent in the rest, and in those it
+            // does not, back to full where it ends
+            var gate = state.GetStateValue(CompositionStateKinds.Gate);
+            if (gate != 0)
+            {
+                for (var at = Math.Floor(start / Sixteenth + 1e-9) * Sixteenth; at < end - 1e-9; at += Sixteenth)
+                {
+                    var sounds = (gate >> ((int)Math.Round(at / Sixteenth)).Mod(16) & 1) == 1;
+                    expression.Add((Math.Max(at, start), sounds ? 1 : 0));
+                    if (sounds && at + GateShare * Sixteenth < end - 1e-9)
+                        expression.Add((at + GateShare * Sixteenth, 0));
                 }
 
                 expression.Add((end, 1));

@@ -50,7 +50,10 @@ public enum StrongEffect
     Squelch,
 
     /// <summary>A synth's filter opening over the first phrase of every section the part plays, as a track builds in.</summary>
-    Opening
+    Opening,
+
+    /// <summary>A held chord chopped in 16ths, sounding in some and silent between, as a trance gate chops a pad.</summary>
+    Gate
 }
 
 /// <summary>
@@ -87,11 +90,15 @@ internal static class Expression
         StrongEffect.Sweep => role == TrackRole.Pad || InstrumentTraits.Has(program, InstrumentTrait.Sweeps),
         StrongEffect.Pump => role is TrackRole.Pad or TrackRole.Chords or TrackRole.Bass or TrackRole.Rhythm,
         StrongEffect.Wobble or StrongEffect.Squelch or StrongEffect.Opening => InstrumentTraits.Has(program, InstrumentTrait.Filters),
+        StrongEffect.Gate => role is TrackRole.Pad or TrackRole.Chords or TrackRole.Rhythm,
         _ => false
     };
 
     /// <summary>Whether a strong effect is a filter's, which only a part it suits plays, a synth's.</summary>
     private static bool IsFilter(StrongEffect effect) => effect is StrongEffect.Wobble or StrongEffect.Squelch or StrongEffect.Opening;
+
+    /// <summary>Whether a strong effect is played only by a part it suits: a filter's, a synth's, and a gate's, held chords'.</summary>
+    private static bool OnlySuited(StrongEffect effect) => IsFilter(effect) || effect == StrongEffect.Gate;
 
     /// <summary>Whether a part plays lines, single notes one after another, rather than chords or drums.</summary>
     private static bool IsLineRole(TrackRole role) => !role.PlaysChords() && role is not (TrackRole.Pad or TrackRole.Drum);
@@ -117,7 +124,9 @@ internal static class Expression
         // a synth's filter moving, an electronic genre's, and a wild song's
         (StrongEffect.Wobble, new ByConvention(0, 0, 0.4)),
         (StrongEffect.Squelch, new ByConvention(0, 0, 0.3)),
-        (StrongEffect.Opening, new ByConvention(0, 0, 0.4))
+        (StrongEffect.Opening, new ByConvention(0, 0, 0.4)),
+        // a trance's, and a wild song's
+        (StrongEffect.Gate, new ByConvention(0, 0, 0.3))
     ];
 
     /// <summary>A strong effect as a genre's page shows it.</summary>
@@ -130,11 +139,20 @@ internal static class Expression
         StrongEffect.Wobble => "A filter's wobble",
         StrongEffect.Squelch => "A filter's squelch",
         StrongEffect.Opening => "A filter opening",
+        StrongEffect.Gate => "A trance gate",
         _ => "None"
     };
 
     /// <summary>How deep a pump ducks a part on the beat, in percent of its expression, swelling back over the beat.</summary>
     public const int PumpDepth = 60;
+
+    /// <summary>
+    ///     The chance a gate plays a pattern of its own, some of a bar's 16ths silent, drawn for the song, rather than every
+    ///     16th, by the sound facet; and the chance each 16th sounds in one.
+    /// </summary>
+    public static ByConvention GatePatternChance { get; } = new(0, 0.5, 1);
+
+    public const double GateStepChance = 0.6;
 
     /// <summary>How long a wobble's cycle is, in beats, as likely each: a quarter, an 8th, an 8th triplet, a 16th.</summary>
     public static ImmutableArray<double> WobbleCycles { get; } = [1, 0.5, 1 / 3.0, 0.25];
@@ -349,7 +367,7 @@ internal static class Expression
         // and the one part that plays the strong effect, the likelier one it suits, if any part may
         var mayCarry = notes
             .Where(x => x.Value.Count > 0 && definitions[x.Key] is PitchInstrumentTrack && (strong != StrongEffect.Echo || IsLineRole(definitions[x.Key].Role))
-                        && (!IsFilter(strong) || Suits(strong, definitions[x.Key].Role, ((PitchInstrumentTrack)definitions[x.Key]).InstrumentCode)))
+                        && (!OnlySuited(strong) || Suits(strong, definitions[x.Key].Role, ((PitchInstrumentTrack)definitions[x.Key]).InstrumentCode)))
             .Select(x => new Weighted<int>(Suits(strong, definitions[x.Key].Role, ((PitchInstrumentTrack)definitions[x.Key]).InstrumentCode) ? SuitedStrongWeight : 1, x.Key))
             .ToImmutableArray();
         var carrier = strong != StrongEffect.None && !mayCarry.IsEmpty ? songStream.Pick(mayCarry) : -1;
@@ -416,6 +434,10 @@ internal static class Expression
             var filterDepth = 40 + part.GenerateInt(0, 60);
             var wobbleCycle = WobbleCycles[part.GenerateInt(0, WobbleCycles.Length)];
             var filters = carries && IsFilter(strong);
+            // and a gate's 16ths, every one or a pattern's, its first always sounding, drawn whatever the song plays
+            var patterned = part.TestProbability(GatePatternChance.At(songSound));
+            var steps = Enumerable.Range(0, 16).Select(_ => part.TestProbability(GateStepChance)).ToArray();
+            var gate = carries && strong == StrongEffect.Gate ? steps.Select((x, i) => i == 0 || !patterned || x ? 1 << i : 0).Sum() : 0;
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
                 var context = streams(span.SectionId, track);
@@ -487,7 +509,7 @@ internal static class Expression
                             _ => 0
                         });
                     // a soloist attacks its notes rather than swell into them
-                    if (swells && !isSolo && note.Value.Duration >= 1)
+                    if (swells && !isSolo && note.Value.Duration >= 1 && gate == 0)
                         state = state.With(CompositionStateKinds.Swell, 1);
                     if (role != TrackRole.Drum)
                         state = state.With(CompositionStateKinds.Tremolo, tremolo).With(CompositionStateKinds.AutoPan, sweeps);
@@ -495,6 +517,8 @@ internal static class Expression
                         state = state.With(CompositionStateKinds.Pump, PumpDepth);
                     if (echoes && isLine)
                         state = state.With(CompositionStateKinds.Echo, (int)Math.Round(delay * 4));
+                    if (gate != 0)
+                        state = state.With(CompositionStateKinds.Gate, gate);
                     if (filters)
                         state = state.With(CompositionStateKinds.Filter, (int)strong).With(CompositionStateKinds.FilterDepth, filterDepth)
                             .With(CompositionStateKinds.FilterCycle, strong == StrongEffect.Opening ? span.Meter.PatternDuration : wobbleCycle)
