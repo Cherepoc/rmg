@@ -81,7 +81,8 @@ public static class GenreChoices
     [
         ("applied", "Applied dominants", Composition.ChordScales.Applied),
         ("borrowed", "Borrowed chords", Composition.ChordScales.Borrowed),
-        ("dominant", "Every chord its dominant", Composition.ChordScales.Dominant)
+        ("dominant", "Every chord its dominant", Composition.ChordScales.Dominant),
+        ("own", "A chord's own scale", Composition.ChordScales.Own)
     ]);
 
     /// <summary>The chance a section plays the song's first section's chords, the arrangement telling them apart, as a beat's loop does; the songs never.</summary>

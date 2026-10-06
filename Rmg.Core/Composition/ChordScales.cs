@@ -20,7 +20,10 @@ public enum ChordScaleKind
     Borrowed,
 
     /// <summary>Mixolydian on the chord's own root, as every chord but the home of a blues section is.</summary>
-    Dominant
+    Dominant,
+
+    /// <summary>A mode on the chord's own root that keeps its triad, such as Lydian over a major chord or melodic minor over a minor one.</summary>
+    Own
 }
 
 /// <summary>
@@ -59,6 +62,12 @@ public static class ChordScales
     /// </summary>
     public static ByConvention Dominant { get; } = new(0, 0, 0);
 
+    /// <summary>The chance a chord but the home sounds in a mode of its own on its root, by the progression facet: a wild song's alone.</summary>
+    public static ByConvention Own { get; } = new(0, 0, 0.3);
+
+    /// <summary>The modes a chord may take on its own root, each kept to the chords whose triad it keeps.</summary>
+    public static ImmutableArray<Scale> OwnModes { get; } = [Scales.Lydian, Scales.Mixolydian, Scales.Dorian, Scales.MelodicMinor, Scales.Phrygian];
+
     /// <summary>How many of its notes the most a mode borrowed differs from the section's scale on its home.</summary>
     public const int BorrowedDistance = 3;
 
@@ -71,9 +80,11 @@ public static class ChordScales
     /// <param name="dominants">Whether the section plays every chord but its home as its own dominant (<see cref="Dominant" />).</param>
     /// <param name="progression">The chords' roots, in steps above the home.</param>
     /// <param name="cadenceRaised">The step the cadence raises, none for a cadence that keeps the scale.</param>
-    internal static ImmutableArray<ChordScale> Draw(IGenerationContext context, Scale scale, int home, ImmutableArray<int> progression, int? cadenceRaised, bool dominants,
-        double unconventionality, Genre genre)
+    /// <param name="ownContext">The sequence a chord's own scale is drawn from, apart from the rest, so that a song that plays none draws as it did.</param>
+    internal static ImmutableArray<ChordScale> Draw(IGenerationContext context, IGenerationContext ownContext, Scale scale, int home, ImmutableArray<int> progression, int? cadenceRaised,
+        bool dominants, double unconventionality, Genre genre)
     {
+        var own = Own.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "own"));
         var applied = Applied.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "applied"));
         var borrowing = Borrowed.At(unconventionality, genre.Chance(GenreChoices.ChordScales, "borrowed"));
         var onHome = Rotate(scale.Offsets, home);
@@ -85,10 +96,22 @@ public static class ChordScales
             .ToArray();
         var borrowed = parallels.Length > 0 ? context.Pick([..parallels.Select(x => new Weighted<Scale>(x.Weight, x.Scale))]) : null;
 
+        // a mode on the chord's root that changes something but keeps its triad, the lines over it taking its colour
+        ChordScale? OwnScale(int root)
+        {
+            var modes = OwnModes.Select(x => Toward(scale.Offsets, home + root, x.Offsets, ChordScaleKind.Own)).OfType<ChordScale>()
+                .Where(x => !new[] { 0, 2, 4 }.Any(step => x.Steps.Moves(Mod(home + root + step)))).ToArray();
+            var pick = ownContext.GenerateInt(0, OwnModes.Length);
+            return modes.Length == 0 ? null : modes[pick % modes.Length];
+        }
+
         return
         [
             ..progression.Select((root, chord) =>
             {
+                // drawn for every chord, so that its draws are as many
+                var ownsScale = ownContext.TestProbability(own);
+                var ownScale = OwnScale(root);
                 if (Mod(root) == 0)
                     return ChordScale.Section;
                 if (dominants && Heard(Toward(scale.Offsets, home + root, Scales.Mixolydian.Offsets, ChordScaleKind.Dominant), home + root) is { } dominant)
@@ -102,7 +125,7 @@ public static class ChordScales
                 if (borrowed is not null && context.TestProbability(borrowing)
                     && Heard(Toward(scale.Offsets, home, borrowed.Offsets, ChordScaleKind.Borrowed), home + root) is { } lent)
                     return lent;
-                return ChordScale.Section;
+                return ownsScale && ownScale is not null ? ownScale : ChordScale.Section;
             })
         ];
     }

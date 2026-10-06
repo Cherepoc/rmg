@@ -13,7 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: a chord's own scale drawn; the page's seek bar and its wait for a remake.
+**When the need shows** (P3), each by what listening says, in this order: the page's seek bar and its wait for a remake.
 
 **Put off** until their uses ask for them: long cycles and a tag (see *Open work*, *Rhythm engine*).
 
@@ -284,7 +284,10 @@ Each item with its plan, and what it waits for.
      moved by a semitone, a whole step, a minor third or a fourth, within a tritone of home, a wild song's (0, 0, 0.25),
      never the song's last section; 26% of a wild song's sections, 0.2% of the corpus's. Not done: choosing the next
      chord by the voice leader's least move among free shapes, should planing sound mechanical.
-  3. A chord's own scale drawn on its root (Lydian, melodic minor, diminished), should step 1 sound narrow.
+  3. Done: a chord's own scale drawn on its root (`ChordScaleKind.Own`, `ChordScales.Own`): a mode that keeps its triad
+     (Lydian or Mixolydian over a major chord, Dorian, melodic minor or Phrygian over a minor one), the lines over it
+     taking its colour, a wild song's (0, 0, 0.3) on a stream of its own; 11% of a wild song's chords. Not done: the
+     diminished scale, of eight notes, which the seven-note scales cannot hold.
   Its uses past an approach: a progression that does not function, planing in pop and film scores, modern jazz. A
   fusion genre, a long-lined guitar player's, then has its harmony and its lines as a genre's data (free chords, the
   line scales of melodic minor, the octatonic and the whole-tone from each chord's root, leaping, stretched voicings,
