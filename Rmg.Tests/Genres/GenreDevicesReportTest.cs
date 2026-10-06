@@ -31,6 +31,7 @@ public sealed class GenreDevicesReportTest
             ["chords borrowed"] = Chords(ChordScaleKind.Borrowed),
             ["chords in a scale of their own"] = Chords(ChordScaleKind.Own),
             ["chords of four notes or more"] = chords.Length > 0 ? chords.Count(x => x.Value.Pitches.Select(p => p % 12).Distinct().Count() >= 4) / (double)chords.Length : double.NaN,
+            ["chords parts arpeggiated"] = Sections(TracePoints.Arpeggio, x => (ArpeggioPattern)x! != ArpeggioPattern.None),
             ["sections with a passing chord"] = Sections(TracePoints.HarmonicRhythm, x => ((HarmonicRhythm)x!).Passing.Length > 0),
             ["sections turned around"] = Sections(TracePoints.Turnaround, x => (bool)x!),
             ["sections planing"] = Sections(TracePoints.Planing, x => x is not null),

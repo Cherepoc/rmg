@@ -602,8 +602,8 @@ a link carries. What is left:
      House's and Techno's sections 16 bars or more 93%, 32 bars 28%, over 8-bar patterns, 43% of their appearances
      building or thinning (9% of the songs'), and a drop's build rolling its snare over the two bars before its
      silence, 8ths then 16ths, louder as it goes (every one of 28 builds). Left: a riser, a noise or a pad sweeping up.
-  3. An arpeggiator: a chord played as a pattern of its notes in 16ths, a synth bass's and synthwave's and trance's
-     sound; today a part plays its chord or a line.
+  3. Done: an arpeggiator, the chords' and the rhythm part's broken chords (`Arpeggios`) a genre's pool
+     (`GenreChoices.Arpeggio`): Synthwave's chord parts arpeggiated 52% (16% the songs'), Ambient's 34%, House's 22%.
   4. A bass's glide and accent, the acid line's, and an 808's long slide between notes; the slides today are a
      line's ornament, a percent of its notes.
   5. Hi-hat rolls in 32nds and triplets, the trap's, and a snare's drag and its ghost notes.

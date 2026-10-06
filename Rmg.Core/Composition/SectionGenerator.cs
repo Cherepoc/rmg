@@ -603,7 +603,7 @@ internal sealed class SectionGenerator
             if (_tracks.Definitions[trackNumber].Role.PlaysChords())
             {
                 var stream = _tracks.Definitions[trackNumber].Role == TrackRole.Chords ? SectionStream.Arpeggio : SectionStream.RhythmArpeggio;
-                var arpeggio = Arpeggios.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Chords]);
+                var arpeggio = Arpeggios.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Chords], _genre);
                 StateTrace.Record(TracePoints.Arpeggio, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{arpeggio}", arpeggio);
                 sectionTrackLayer.Add(CompositionStateKinds.Arpeggio, (int)arpeggio);
             }

@@ -24,10 +24,10 @@ public sealed class ArpeggioTest
     public async Task ThePlainestSections_BreakTheirChordsTheCommonWays_OrNot()
     {
         var context = new GenerationContext(3);
-        var plain = Enumerable.Range(0, 2000).Select(_ => Arpeggios.Draw(context, 0)).ToHashSet();
+        var plain = Enumerable.Range(0, 2000).Select(_ => Arpeggios.Draw(context, 0, Genre.None)).ToHashSet();
 
         await Assert.That(plain.SetEquals([ArpeggioPattern.None, ArpeggioPattern.Up, ArpeggioPattern.UpDown, ArpeggioPattern.Alberti])).IsTrue();
-        await Assert.That(Enumerable.Range(0, 4000).Select(_ => Arpeggios.Draw(context, 1)).Distinct().Count()).IsEqualTo(Enum.GetValues<ArpeggioPattern>().Length);
+        await Assert.That(Enumerable.Range(0, 4000).Select(_ => Arpeggios.Draw(context, 1, Genre.None)).Distinct().Count()).IsEqualTo(Enum.GetValues<ArpeggioPattern>().Length);
     }
 
     [Test]

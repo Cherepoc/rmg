@@ -59,10 +59,10 @@ internal static class Arpeggios
         (ArpeggioPattern.UpTwoOctaves, new ByConvention(0, 0.005, 1))
     ];
 
-    /// <summary>A section's pattern, by the chords facet of its unconventionality.</summary>
-    public static ArpeggioPattern Draw(IGenerationContext context, double unconventionality)
+    /// <summary>A section's pattern, by the chords facet of its unconventionality, among a genre's pool where it names one.</summary>
+    public static ArpeggioPattern Draw(IGenerationContext context, double unconventionality, Genre genre)
     {
-        return context.Pick(ByConvention.Weigh(Patterns, unconventionality));
+        return context.Pick(ByConvention.Weigh(Patterns, unconventionality, genre.Pool<ArpeggioPattern>(GenreChoices.Arpeggio, x => GenreChoices.Name(x.ToString()))));
     }
 
     /// <summary>The note of a voiced chord, low to high, that its note of the given place since the chord came in plays.</summary>
