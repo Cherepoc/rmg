@@ -26,13 +26,19 @@ internal sealed class FillSounds
 
     private readonly ImmutableSortedDictionary<FillDrumRole, ImmutableArray<RunSound>> _sounds;
 
-    // every role's sounds as a run or a landing weighs them: by their drum's weight, shared among its sounds by theirs
-    private readonly ImmutableSortedDictionary<FillDrumRole, ImmutableArray<Weighted<RunSound>>> _weightedSounds;
+    // every role's sounds as a run or a landing weighs them: by their drum's weight, shared among its sounds by theirs, at
+    // the ends their wildness gives them
+    private readonly ImmutableSortedDictionary<FillDrumRole, ImmutableArray<(RunSound Sound, ByConvention Weight)>> _weightedSounds;
+
+    /// <summary>Every role's sounds weighed at a section's fills facet: the plain sections crash, the wild ones reach for the china and the splash.</summary>
+    private IEnumerable<(FillDrumRole Role, ImmutableArray<Weighted<RunSound>> Candidates)> WeightedAt(double unconventionality) =>
+        _weightedSounds.Select(x => (x.Key, x.Value.Select(y => new Weighted<RunSound>(y.Weight.At(unconventionality), y.Sound)).Where(y => y.Weight > 0).ToImmutableArray()))
+            .Where(x => x.Item2.Length > 0);
 
     public FillSounds(IEnumerable<PercussionInstrumentDefinition> songDrums)
     {
         var sounds = new SortedDictionary<FillDrumRole, List<RunSound>>();
-        var weightedSounds = new SortedDictionary<FillDrumRole, List<Weighted<RunSound>>>();
+        var weightedSounds = new SortedDictionary<FillDrumRole, List<(RunSound, ByConvention)>>();
         foreach (var drum in songDrums)
         {
             var role = GroupRoles.Single(x => x.Key.Drums.Contains(drum)).Value;
@@ -45,7 +51,9 @@ internal sealed class FillSounds
             if (!weightedSounds.TryGetValue(role, out var weighted))
                 weightedSounds[role] = weighted = [];
             var soundWeight = drum.Sounds.Sum(x => x.Weight);
-            weighted.AddRange(drumSounds.Zip(drum.Sounds, (x, sound) => new Weighted<RunSound>(drum.Weight * sound.Weight / soundWeight, x)));
+            weighted.AddRange(drumSounds.Zip(drum.Sounds, (x, sound) => (x, drum.Weight * sound.Weight / soundWeight is var weight
+                ? new ByConvention(sound.Wildness > 0 ? 0 : weight, weight, weight * (1 + sound.Wildness))
+                : default)));
         }
 
         _sounds = sounds.ToImmutableSortedDictionary(x => x.Key, x => x.Value.ToImmutableArray());
@@ -61,7 +69,7 @@ internal sealed class FillSounds
     public FillRun Draw(IGenerationContext context, Drummer drummer, double unconventionality, Func<FillDrumRole, int, double> roleChance)
     {
         var sounds = new List<RunSound>();
-        foreach (var (role, candidates) in _weightedSounds)
+        foreach (var (role, candidates) in WeightedAt(unconventionality))
         {
             if (!context.TestProbability(roleChance(role, candidates[0].Value.Track)))
                 continue;
@@ -154,10 +162,11 @@ internal sealed class FillSounds
     ///     The sounds the drums land on at a line: a sound of each role the song has, by the role's chance, the heavier
     ///     drums' and sounds likelier, such as the cymbal's over the vibraslap and the crash over the china.
     /// </summary>
-    public ImmutableArray<RunSound> DrawLanding(IGenerationContext context, IReadOnlyDictionary<FillDrumRole, double> chances)
+    /// <param name="unconventionality">The fills facet of the section's unconventionality, which a sound's wildness leans by.</param>
+    public ImmutableArray<RunSound> DrawLanding(IGenerationContext context, IReadOnlyDictionary<FillDrumRole, double> chances, double unconventionality)
     {
         var sounds = ImmutableArray.CreateBuilder<RunSound>();
-        foreach (var (role, candidates) in _weightedSounds)
+        foreach (var (role, candidates) in WeightedAt(unconventionality))
             if (chances.TryGetValue(role, out var chance) && context.TestProbability(Math.Min(1, chance)))
                 sounds.Add(context.Pick(candidates));
         return sounds.ToImmutable();

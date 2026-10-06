@@ -199,7 +199,7 @@ internal sealed class FillGenerator
                 : span > 0 && play.Treatment == GrooveTreatment.Stop ? FillLayers.StopLandingChance
                 : tilt.Chance(x.Value, FillLayers.LandingLean)
         );
-        var landing = _sounds.DrawLanding(_context, landings);
+        var landing = _sounds.DrawLanding(_context, landings, fills);
         // a pushed landing comes a note of the fill's rhythm near an 8th early, after a fill, not where the band stops
         // or counts in and lands on the line together
         var isEarly = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.EarlyLandingChance, fills)) && line.HasFill;

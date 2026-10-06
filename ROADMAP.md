@@ -13,8 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: the fills' sounds by
-convention; a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
+**When the need shows** (P3), each by what listening says, in this order: a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
 and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
 
 **Put off** until their uses ask for them: long cycles and a tag (see *Open work*, *Rhythm engine*).
@@ -229,8 +228,9 @@ Each item with its plan, and what it waits for.
   crescendo and the drums' cues not lift.
 - **The fills' loudness** (P4, parked): a run's swell, its accents and a landing's hit are constants, where the groove's
   loudness is layers; a fill's velocity layer would make them cumulative with the section's.
-- **The fills' sounds by convention** (P3, before their loudness): runs and landings weigh a drum's sounds the same in a plain section as in a
-  wild one; the weights could lean so that plain sections crash and wild ones reach for the china and the splash.
+- **The fills' sounds by convention**: done (`DrumSound.Wildness`, `FillSounds`): runs and landings weigh a sound by
+  its ends, the china and the splash never at the plain end and twice their weight at the wild; of the cymbal's hits
+  0% china or splash in plain sections, 1.9% in middling ones, 4.3% in wild ones.
 
 ### Instruments and expression
 

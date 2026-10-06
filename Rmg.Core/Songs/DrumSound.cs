@@ -14,7 +14,11 @@ namespace Rmg.Core.Songs;
 ///     lean; 0 for never.
 /// </param>
 /// <param name="AccentLean">How the accent leans to the beats: 1 to the weak ones, as the open hi-hat's, -1 to the strong, as the ride bell's.</param>
-public sealed record DrumSound(int Code, double Weight = 1, double Loudness = 0, double Stroke = 1, double Accent = 0, double AccentLean = 0)
+/// <param name="Wildness">
+///     How far a run or a landing leans to the sound the wilder its section, from 0, alike everywhere: above 0 never at the
+///     plain end and its weight times one and that at the wild, as the china and the splash are.
+/// </param>
+public sealed record DrumSound(int Code, double Weight = 1, double Loudness = 0, double Stroke = 1, double Accent = 0, double AccentLean = 0, double Wildness = 0)
 {
     public static implicit operator DrumSound(int code) => new(code);
 }

@@ -75,8 +75,8 @@ internal static class DrumDefinitions
 
     public static PercussionInstrumentDefinition Cymbal { get; } = new(
         "Cymbal",
-        // the crashes, and the china and the splash, which mark a downbeat less, the splash quieter
-        [new DrumSound(49), new DrumSound(52, 0.25, 0.3, 0.2), new DrumSound(55, 0.25, -0.5, 0.05), new DrumSound(57, 1, 0, 0.8)],
+        // the crashes, and the china and the splash, which mark a downbeat less, the splash quieter, a wilder section's
+        [new DrumSound(49), new DrumSound(52, 0.25, 0.3, 0.2, Wildness: 1), new DrumSound(55, 0.25, -0.5, 0.05, Wildness: 1), new DrumSound(57, 1, 0, 0.8)],
         1.0,
         loudness: 1,
         roles: Plays(DrumRole.Colour, (DrumRole.Time, 0.05))
