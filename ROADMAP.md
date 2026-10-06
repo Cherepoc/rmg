@@ -320,10 +320,6 @@ Each item with its plan, and what it waits for.
 A review of the engine and the presets, in steps by priority, each built, measured and committed in turn and taken out
 of here once it is; the genres it adds are described under *More genres*.
 
-**P2, the engine, for several genres each:**
-
-15. **The harmonising interval a genre's:** thirds and sixths, or fourths and fifths, an organum's parallels.
-
 **P3, the genres, in the order they are ready:** (16) Medieval and Dungeon synth, after 8, 10 and 15; Djent after 8,
 11 and 12; Nu metal after 11 and 13; (17) of what is built: disco, trap, trance, drum and bass, ska, punk, chiptune;
 (18) those waiting on items below: Fusion, Funk's vamp, Soul and Gospel, Country, Bossa nova; (19) the dynamics shaped,

@@ -47,7 +47,7 @@ internal static class LineDoubling
     /// </summary>
     public static ImmutableArray<(TrackRole Source, TrackRole Target, ImmutableArray<(int Step, ByConvention Weight)> Steps, ByConvention Chance, string? Option, bool IsTwin)> Pairs { get; } =
     [
-        (TrackRole.Melody, TrackRole.CounterMelody, [(2, Any), (-2, Any), (5, Any), (-5, Any)], HarmonyChance, "harmony", false),
+        (TrackRole.Melody, TrackRole.CounterMelody, [(2, Any), (-2, Any), (5, Any), (-5, Any), (3, Never), (-3, Never), (4, Never), (-4, Never)], HarmonyChance, "harmony", false),
         (TrackRole.Riff, TrackRole.Bass, [(0, Any)], RiffChance, "riff", false),
         (TrackRole.Riff, TrackRole.RiffTwin, TwinSteps, Any, null, true)
     ];
@@ -58,6 +58,22 @@ internal static class LineDoubling
 
     /// <summary>A step a doubling plays whatever the song's melody facet.</summary>
     private static ByConvention Any => new(1, 1, 1);
+
+    /// <summary>A step the songs' doubling never plays, a genre's alone: the melody harmonised in fourths or fifths, an organum's.</summary>
+    private static ByConvention Never => new(0, 0, 0);
+
+    /// <summary>
+    ///     The kinds of interval a doubling plays, by how many scale steps apart, as a genre names them
+    ///     (<see cref="GenreChoices.HarmonyInterval" />): thirds and sixths, fourths and fifths, and seconds and sevenths, each
+    ///     with its inversion.
+    /// </summary>
+    public static string IntervalOf(int step) => step.Mod(7) switch
+    {
+        2 or 5 => "thirds",
+        3 or 4 => "fourths",
+        1 or 6 => "seconds",
+        _ => "unison"
+    };
 
     /// <summary>The parts that play their line in octaves now and then.</summary>
     public static ImmutableArray<TrackRole> OctaveRoles { get; } = [TrackRole.Melody, TrackRole.CounterMelody, TrackRole.Riff];
@@ -110,7 +126,8 @@ internal static class LineDoubling
             {
                 var context = streams(pair, index);
                 var isDoubled = context.TestProbability(chance.At(melody, option is null ? null : genre.Chance(GenreChoices.Doubling, option)));
-                var step = context.Pick(ByConvention.Weigh(steps, melody));
+                // the bass with the riff in unison, which no interval of a genre's moves
+                var step = context.Pick(ByConvention.Weigh(steps, melody, steps.Any(x => x.Step != 0) ? genre.Pool<int>(GenreChoices.HarmonyInterval, IntervalOf) : null));
                 var events = song.TrackTimelineMap;
                 bool Plays(int track) => events[track].EventTimeline.Any(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9);
                 // a riff in power chords plays no twin, whose third over a distorted fifth is mud

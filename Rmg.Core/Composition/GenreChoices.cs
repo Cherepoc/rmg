@@ -221,6 +221,17 @@ public static class GenreChoices
     /// <summary>The chance a part's guitar turns driven in the song's louder appearances, a clean verse's guitar distorted in the chorus (<see cref="LouderForms" />).</summary>
     public static GenreChoice LouderForms { get; } = Chances("louderForms", "Louder forms", [("guitars", "A guitar driven in the louder sections", Composition.LouderForms.Chance)]);
 
+    /// <summary>
+    ///     The interval a line harmonised plays apart from it, the melody's by the counter-melody and the riff's by its twin,
+    ///     with its inversion: thirds and sixths, the songs', fourths and fifths, an organum's or a riff's in parallel, and
+    ///     seconds and sevenths, the wildest twins' (<see cref="LineDoubling.IntervalOf" />).
+    /// </summary>
+    public static GenreChoice HarmonyInterval { get; } = Pool("harmonyInterval", "Harmony's interval",
+    [
+        ("thirds", "Thirds and sixths", new ByConvention(1, 1, 1)), ("fourths", "Fourths and fifths", new ByConvention(0, 0.05, 0.4)),
+        ("seconds", "Seconds and sevenths", new ByConvention(0, 0, 0.2))
+    ]);
+
     /// <summary>What the drums do: keep time, as the songs' always do, or mark the form, as a calm piece's percussion does (<see cref="DrumMarks" />).</summary>
     public static GenreChoice DrumJob { get; } = Pool("drumJob", "Drums' job", DrumMarks.Jobs.Select(x => (DrumMarks.NameOf(x.Job), x.Job == Composition.DrumJob.Groove ? "Keeping time" : "Marking the form", x.Weight)));
 
@@ -570,7 +581,7 @@ public static class GenreChoices
     public static ImmutableArray<GenreChoice> All { get; } =
     [
         Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Dynamics, Phrases,
-        SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms,
+        SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,
