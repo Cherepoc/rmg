@@ -13,8 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: a motif developed further; call
-and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
+**When the need shows** (P3), each by what listening says, in this order: call and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
 
 **Put off** until their uses ask for them: long cycles and a tag (see *Open work*, *Rhythm engine*).
 
@@ -242,7 +241,10 @@ Each item with its plan, and what it waits for.
 - **The playing following the articulation** (P3, after genres; palm-muted chugs in *Genres*, step 2c): octaves popped in slap, short notes muted, without
   which an articulation is only another sound.
 - **Plain doubling,** a part doubling another in unison, now that the parts play by their pocket (`SongStages.Timing`).
-- **A motif developed further** (P3), inverted or stretched, should the solos' sequences sound mechanical.
+- **A motif developed further**: inverted done (`Soloist.MotifInversion`, by the melody facet (0, 0.3, 0.5)): a phrase
+  answering the motif before mirrors its intervals about its first note now and then rather than moving it a step; a
+  middling solo's phrases opening on the motif before, moved or mirrored, 63%. Stretched (its rhythm doubled) should
+  listening ask.
 - **Legato as an articulation**: done (`CompositionStateKinds.Legato`, the Articulation stage): a line's part (the
   melody, counter-melody, solo or riff) slurring its steps, by the sound facet (0, 0.4, 0.6), never the plainest songs:
   a note two semitones or less from the note before, within its phrase and a sixteenth or less after it, marked slurred,

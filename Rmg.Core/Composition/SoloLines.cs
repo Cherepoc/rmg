@@ -284,16 +284,19 @@ internal static class SoloLines
                     {
                         var answers = motifs.TestProbability(MotifChance);
                         var step = motifs.GenerateInt(0, 2) * 2 - 1;
+                        var inverts = motifs.TestProbability(soloist.MotifInversion);
                         // in the motif's own figure, a scale's answered by a scale
                         if (answers && motif is not null && shape == motifShape && scale.Length > 0)
                         {
-                            // the motif in place of the first cell, and the rest moved with its last note, so that the
-                            // gesture goes on from it as it went on from its own
+                            // the motif in place of the first cell, a step away, or its intervals mirrored about its first
+                            // note, developed rather than moved; and the rest moved with its last note, so that the gesture
+                            // goes on from it as it went on from its own
                             int Index(int pitch) => Array.IndexOf(scale, Nearest(scale, pitch));
+                            int MotifAt(int i) => inverts ? 2 * Index(motif[0]) - Index(motif[i]) : Index(motif[i]);
                             var count = Math.Min(motif.Length, pitches.Length);
-                            var moved = Index(motif[count - 1]) + step - Index(pitches[count - 1]);
+                            var moved = MotifAt(count - 1) + step - Index(pitches[count - 1]);
                             for (var i = 0; i < pitches.Length; i++)
-                                pitches[i] = scale[Math.Clamp(i < count ? Index(motif[i]) + step : Index(pitches[i]) + moved, 0, scale.Length - 1)];
+                                pitches[i] = scale[Math.Clamp(i < count ? MotifAt(i) + step : Index(pitches[i]) + moved, 0, scale.Length - 1)];
                         }
                         motif = pitches[..Math.Min(cells.Length > 0 ? cells[0] : pitches.Length, pitches.Length)];
                         (motifPhrase, motifShape) = (phrase, shape);

@@ -600,7 +600,9 @@ public sealed class SoloTest
                 if (before is not null && intervals.Length > 0 && intervals.Length == before.Length)
                 {
                     phrases++;
-                    if (intervals.Zip(before).All(x => Math.Sign(x.First) == Math.Sign(x.Second) && Math.Abs(x.First - x.Second) <= 1))
+                    // moved a step, its intervals about the same, or inverted, about the same mirrored
+                    if (intervals.Zip(before).All(x => Math.Sign(x.First) == Math.Sign(x.Second) && Math.Abs(x.First - x.Second) <= 1)
+                        || intervals.Zip(before).All(x => Math.Sign(x.First) == -Math.Sign(x.Second) && Math.Abs(x.First + x.Second) <= 1))
                         answering++;
                 }
 
@@ -612,7 +614,7 @@ public sealed class SoloTest
     }
 
     [Test]
-    public async Task ASolosPhrase_OpensOnThePhraseBeforesMotif_MovedAStep_NowAndThen()
+    public async Task ASolosPhrase_OpensOnThePhraseBeforesMotif_MovedAStepOrInverted_NowAndThen()
     {
         var motifs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Motifs(TestCorpus.Get(seed, Facets(1, 0.5))));
         var (answering, phrases) = (motifs.Sum(x => x.Answering), motifs.Sum(x => x.Phrases));
