@@ -16,7 +16,9 @@ public sealed class DropTest
         {
             drops++;
             var from = at - song.Song.Map!.MeterAt(at - 1e-6).BarDuration;
-            var pitched = song.Rendered.Tracks.Where(x => !x.IsPercussionInstrument).SelectMany(x => x.NoteTimeline).ToArray();
+            // but the riser into it (SongStages.Risers)
+            var pitched = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack).SelectMany(x => x.Value)
+                .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) != SongStages.RiserProgram + 1).ToArray();
             await Assert.That(pitched.Where(x => x.Position < at - 1e-9 && x.Position + (x.Value.Duration > 0.25 ? x.Value.Duration : 0) > from + 1e-9)).IsEmpty();
             await Assert.That(pitched.Any(x => x.Position >= at - 1e-9 && x.Position < at + 1)).IsTrue();
         }

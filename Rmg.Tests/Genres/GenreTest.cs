@@ -416,6 +416,22 @@ public sealed class GenreTest
     }
 
     [Test]
+    public async Task EveryDrop_RisesIntoIt_TheReverseCymbalEndingOnItsFirstBeat()
+    {
+        var risers = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("electronic")))))
+        foreach (var drop in song.Trace.Where(x => x.Point == TracePoints.Drop).Select(x => (double)x.Value!))
+        {
+            var rising = song.Song.Notes!.Values.SelectMany(x => x)
+                .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) == SongStages.RiserProgram + 1 && Math.Abs(x.Position + x.Value.Duration - drop) < 0.3).ToArray();
+            await Assert.That(rising.Length).IsEqualTo(1).Because($"seed {song.Seed}, the drop at {drop}");
+            risers++;
+        }
+
+        await Assert.That(risers).IsGreaterThan(5);
+    }
+
+    [Test]
     public async Task WhatIsGiven_WinsOverTheGenre()
     {
         var genre = Of((GenreChoices.Meter, [("3/4", 1)]), (GenreChoices.Scale, [("dorian", 1)]));

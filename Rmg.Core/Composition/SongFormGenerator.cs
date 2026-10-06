@@ -337,7 +337,7 @@ internal sealed class SongFormGenerator
         // the band grows louder into a louder section, over the phrase before a drop
         songState = songState.MergeWith(CreateLifts(lines, end, drops));
 
-        return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, songState);
+        return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, songState, [..drops.Order()]);
     }
 
     /// <summary>
@@ -588,10 +588,12 @@ internal sealed record FormPlan(
 /// <param name="Lines">The lines the fills mark, in the song's order.</param>
 /// <param name="Edits">What the form changes once the blocks are put one after another, such as the bars an intro leaves out.</param>
 /// <param name="SongState">How the song's state changes over it, over its own, such as the tempo slowing before an ending, or the band fading out.</param>
+/// <param name="Drops">Where a lift drops, the band silent for the bar before it, in the song's order (<see cref="FormLayers.Drop" />).</param>
 internal sealed record SongAssembly(
     SongMap Map,
     ImmutableArray<TrackEventStateTimelineMap<StateMap>> Blocks,
     ImmutableArray<FillLine> Lines,
     TimelineEdits Edits,
-    StateTimelineMap SongState
+    StateTimelineMap SongState,
+    ImmutableArray<double> Drops
 );

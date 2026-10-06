@@ -338,19 +338,14 @@ left:
   **P4:** the choices grouped into families (bass, harmony, form, drum devices), one choice of several chances rather
   than fifteen of one, which would read better in the editor and break every genre link kept; should the editor grow
   hard to use.
-- **Instruments and effects** (P2, a plan in steps, October 2026; a genre's reverb done, `GenreChoices.Space`, an instrument's traits as one table, `InstrumentTraits`, and the unused instruments and the synth effects' pads in the roles and the presets, by convention, never in the plainest songs): 74 of
-  the 128 programs play, the rest never.
-  4. The reverse cymbal as the riser: a note ending on a drop, and on a louder section's first beat as a lift cue, an
-     edit after assembly on a free channel; the electronic genres' and Pop's most. (The drop's riser below.)
-  5. The world instruments (koto, shamisen, shakuhachi, shanai, bagpipe) at the genres' wild ends alone, Folk's bagpipe
-     too; a lead of their own would want a genre of its own.
-  Not planned: the percussive family's woodblock, agogo, melodic tom and tinkle bell, the kit's own sounds again; the
-  synth drum, whose 80s toms are fills on the drums' channel; the taiko, for a cinematic genre none is. The sound
-  effects, and the sound-effects kit, see *Parked*.
 - **What the genres cannot play yet** (P3, each by what listening to the presets says; `GenreDevicesReportTest`,
   `GenreIdiomsReportTest` the measures):
   - The loop's figures shared, the bass's and the riff's, beside its harmony (`GenreChoices.Loop`).
-  - A drop's build sweeping up, a riser, beside its snare roll: the reverse cymbal (*Instruments and effects*, 4).
+  - A riser as a lift cue, into a louder section where the band plays on, which the riser into a drop (`SongStages.Risers`)
+    plays on a channel its silence leaves free: a program change there would cut the part's chord, so a channel of its
+    own, should a lift want one. Not planned: the percussive family's woodblock, agogo, melodic tom and tinkle bell,
+    the kit's own sounds again; the synth drum, whose 80s toms are fills on the drums' channel; the taiko, for a
+    cinematic genre none is.
   - The pump on the kick wherever it falls, should a pumping genre's kick leave the beat; it ducks on the beat now.
   - The pinned drums (`GenreChoices.Pins`) in the bars a drop or an entry clears, and the wilder songs that leave a
     role free.

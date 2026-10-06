@@ -21,7 +21,7 @@
       "dynamics": { "energy": 65, "contrast": 70 },
       "phrases": { "fourBars": 100, "eightBars": [40, 40, 50] },
       "instrument": {
-        "melody": { "acousticGrandPiano": [46, 46, 80], "electricPiano1": [38, 38, 67], "harmonica": 38, "electricGuitarClean": 100, "lead2Sawtooth": [46, 46, 50] },
+        "melody": { "acousticGrandPiano": [46, 46, 80], "electricPiano1": [38, 38, 67], "harmonica": 38, "electricGuitarClean": 100, "lead2Sawtooth": [46, 46, 50], "sitar": [0, 0, 15] },
         "chords": { "rockOrgan": [30, 30, 33], "acousticGuitarSteel": [25, 25, 100], "electricGuitarClean": [45, 45, 74], "overdrivenGuitar": [100, 100, 64], "distortionGuitar": [80, 80, 51] },
         "bass": { "electricBassFinger": [65, 65, 100], "electricBassPick": [100, 100, 87] },
         "riff": { "overdrivenGuitar": 100, "distortionGuitar": 85, "electricGuitarMuted": [30, 30, 48] },
