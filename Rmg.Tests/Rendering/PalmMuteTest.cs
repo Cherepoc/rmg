@@ -8,7 +8,7 @@ namespace Rmg.Tests.Rendering;
 public sealed class PalmMuteTest
 {
     [Test]
-    public async Task APalmMutedNote_KeepsItsLength_AndIsPlayedShort_OnARepeatOnAWeakBeat()
+    public async Task APalmMutedNote_KeepsItsLength_AndIsPlayedShort_OnAWeakBeat_ARepeatOrOnItsPedal()
     {
         int muted = 0, shorter = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("rock")))))
@@ -23,8 +23,9 @@ public sealed class PalmMuteTest
                 if (items[i].Value.State.GetStateValue(CompositionStateKinds.PalmMute) == 0)
                     continue;
                 muted++;
-                // a repeat of the note before, on a weak beat
-                await Assert.That(items[i].Value.Pitches.SequenceEqual(items[i - 1].Value.Pitches)).IsTrue();
+                // on a weak beat, a repeat of the note before or a riff's note chugging on its pedal
+                var onPedal = items[i].Value.State.GetStateValue(CompositionStateKinds.LinePedal) > 0;
+                await Assert.That(onPedal || items[i].Value.Pitches.SequenceEqual(items[i - 1].Value.Pitches)).IsTrue();
                 await Assert.That(items[i].Value.State.GetStateValue(CompositionStateKinds.BeatRank)).IsGreaterThan(0);
                 shorter += rendered.Where(x => Math.Abs(x.Position - items[i].Position) < 0.05).Any(x => x.Value.Duration < items[i].Value.Duration - 1e-6) ? 1 : 0;
             }

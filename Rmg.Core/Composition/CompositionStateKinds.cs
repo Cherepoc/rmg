@@ -89,6 +89,10 @@ internal static class CompositionStateKinds
     // 1 for a drum a song pins to its figure, which plays its song's rhythm settings in every bar (DrumRoles.Pins)
     public static StateKind<int> Pinned { get; } = StateKinds.CreateAdditive<int>(Prefix + "Pinned");
 
+    // 1 for a line chugging on a pedal, its weak notes mostly on its chord's root at the bottom of its range and its accents
+    // free to take any note of its scale, as a chugging riff's (Chugs)
+    public static StateKind<int> LinePedal { get; } = StateKinds.CreateAdditive<int>(Prefix + "LinePedal", StateScope.Render);
+
     // 1 for a riff's note played as a power chord, its perfect fifth over it and its octave where the range has it
     public static StateKind<int> PowerChord { get; } = StateKinds.CreateAdditive<int>(Prefix + "PowerChord", StateScope.Render);
 

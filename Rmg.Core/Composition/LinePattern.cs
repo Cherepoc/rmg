@@ -19,6 +19,9 @@ internal sealed class LinePattern
     // the bar pattern's seed, which names its notes for the echoes
     private readonly int _motif;
 
+    /// <summary>The stream a chugging note's draw of its pedal derives from its key (<see cref="Line.PedalShare" />).</summary>
+    private const int PedalStream = 7;
+
     /// <param name="barPattern">The bar pattern's state, over the melody track's.</param>
     /// <param name="profile">How the line moves (<see cref="LineProfile" />).</param>
     public LinePattern(StateMap barPattern, LineProfile profile)
@@ -106,7 +109,9 @@ internal sealed class LinePattern
                         isFirstOfChord ? (ChordArrival)x.State.GetStateValue(CompositionStateKinds.LineLanding) : ChordArrival.Free,
                         (PhraseStart)x.State.GetStateValue(CompositionStateKinds.LinePhraseStart),
                         (LineScale)x.State.GetStateValue(CompositionStateKinds.LineScale),
-                        x.State.GetStateValue(CompositionStateKinds.LineLift)
+                        x.State.GetStateValue(CompositionStateKinds.LineLift),
+                        // a chugging riff's note's own draw of its pedal, by its key, which draws nothing else
+                        x.State.GetStateValue(CompositionStateKinds.LinePedal) > 0 ? new GenerationContext(Seeds.Derive((ulong)x.State.GetStateValue(CompositionStateKinds.NoteKey), PedalStream)).GenerateDouble() : 1
                     );
                     return (Note: x, Rank: rank, Pitch: pitch);
                 }

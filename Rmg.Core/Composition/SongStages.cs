@@ -44,6 +44,7 @@ internal static class SongStages
         new("Lines", Lines, CanSkip: false),
         new("Doubling", Doubling, CanSkip: true),
         new("Line chords", LineChordsStage, CanSkip: true),
+        new("Chugs", Chugs.Apply, CanSkip: true),
         new("Solos", Solos, CanSkip: true),
         new("Pedal", SectionPedals.Apply, CanSkip: true),
         new("Solo answers", SoloAnswers, CanSkip: true),

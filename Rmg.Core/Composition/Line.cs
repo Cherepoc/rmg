@@ -106,7 +106,8 @@ internal sealed class Line
         ChordArrival landing = ChordArrival.Free,
         PhraseStart phraseStart = PhraseStart.None,
         LineScale lineScale = LineScale.Section,
-        double lift = 0
+        double lift = 0,
+        double pedal = 1
     )
     {
         Lift(lift);
@@ -151,7 +152,8 @@ internal sealed class Line
         else
         {
             _echoRun = null;
-            note = PlaceByRule(chord, chordToneClasses, beatRank, step, turn, register);
+            note = pedal < 1 ? PlaceOnPedal(chord, beatRank, pedal) ?? PlaceByRule(chord, [], beatRank, step, turn, register)
+                : PlaceByRule(chord, chordToneClasses, beatRank, step, turn, register);
         }
 
         // the first time a note is heard it is remembered, as the step from its chord's root it has
@@ -258,6 +260,25 @@ internal sealed class Line
             .Where(x => IsStep(x, next) && Math.Abs(x - note) <= 4)
             .ToArray();
         return candidates.Length == 0 ? note : GetNearest(candidates, note);
+    }
+
+    /// <summary>
+    ///     How many of a chugging line's notes off its accents sit on the pedal, its chord's root at the bottom of its range,
+    ///     the rest and the accents moving as its scale lets them, a chromatic stab among them where its scale is chromatic.
+    /// </summary>
+    public const double PedalShare = 0.7;
+
+    /// <summary>
+    ///     A chugging line's note: off its accents, its beats, the pedal, its chord's root the lowest in its range, where the
+    ///     note's draw falls under the share; none for an accent or a note off it, which moves by its scale alone.
+    /// </summary>
+    /// <param name="draw">The note's own draw, from 0 to 1, as its key gives it.</param>
+    private int? PlaceOnPedal(ChordContext chord, int beatRank, double draw)
+    {
+        if (beatRank == 0 || draw >= PedalShare)
+            return null;
+        var root = chord.Root.Mod(OctaveNoteCount);
+        return Enumerable.Range(_low, _high - _low + 1).FirstOrDefault(x => x.Mod(OctaveNoteCount) == root, _low);
     }
 
     private int PlaceByRule(ChordContext chord, IReadOnlyCollection<int> chordToneClasses, int beatRank, int step, double turn, double register)

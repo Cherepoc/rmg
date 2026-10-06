@@ -183,7 +183,7 @@ internal sealed class SectionGenerator
         // the drums from a sequence of their own, so that the pitched tracks are the same whichever drums the song plays
         var drums = _drums.GenerateDrums(Stream(sectionId, SectionStream.Drums), sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads, sectionRoles, sectionStrokes, barDrums, barStateTimelineMap, sectionRhythm, timeFeel, meter).ToArray();
         var (powerChords, chugs, octaveBass, hooks) = DrawDevices(sectionId, plan.Role, facets);
-        var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords).ToArray();
+        var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
         var plays = DrawPlays(sectionId, plan.Role, plan.PlaysLean, meter.Phrases);
@@ -431,7 +431,8 @@ internal sealed class SectionGenerator
         SectionRhythm sectionRhythm,
         Meter meter,
         bool hooks,
-        bool powerChords
+        bool powerChords,
+        bool chugs
     )
     {
         foreach (var trackNumber in _tracks.NonGroupedTrackNumbers)
@@ -449,7 +450,7 @@ internal sealed class SectionGenerator
                 continue;
             }
 
-            var trackStateMap = TrackStateMap(context, trackNumber, sectionId, sectionStateMap, sectionRhythm, powerChords);
+            var trackStateMap = TrackStateMap(context, trackNumber, sectionId, sectionStateMap, sectionRhythm, powerChords, chugs);
             if (_tracks.Definitions[trackNumber].Role == TrackRole.Pad)
             {
                 yield return (trackNumber, GeneratePad(trackNumber, trackStateMap, barStateTimelineMap, harmonicRhythm, meter), null);
@@ -565,7 +566,7 @@ internal sealed class SectionGenerator
     ///     busyness, the melody's and the riff's line scales, the riff in power chords, the chords broken now and then, and
     ///     its fullness by the section's energy, over the section's state.
     /// </summary>
-    private StateMap TrackStateMap(IGenerationContext context, int trackNumber, int sectionId, StateMap sectionStateMap, SectionRhythm sectionRhythm, bool powerChords)
+    private StateMap TrackStateMap(IGenerationContext context, int trackNumber, int sectionId, StateMap sectionStateMap, SectionRhythm sectionRhythm, bool powerChords, bool chugs)
     {
         // a section's chords move more smoothly or more in blocks than the song's, and its melody more or less by step,
         // and is as busy as the section has it
@@ -585,7 +586,10 @@ internal sealed class SectionGenerator
             var lineScale = LineScales.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Scale], _genre);
             StateTrace.Record(TracePoints.LineScale, trackNumber, sectionId, 0, StateMap.Default, 0, $"{lineScale}", lineScale);
             sectionTrackLayer.Add(CompositionStateKinds.LineScale, (int)lineScale);
-            if (powerChords && _tracks.Definitions[trackNumber].Role == TrackRole.Riff)
+            // a riff that chugs on a pedal, its power chords by its notes (Chugs); one that does not in power chords throughout
+            if (chugs && _tracks.Definitions[trackNumber].Role == TrackRole.Riff)
+                sectionTrackLayer.Add(CompositionStateKinds.LinePedal, 1);
+            else if (powerChords && _tracks.Definitions[trackNumber].Role == TrackRole.Riff)
                 sectionTrackLayer.Add(CompositionStateKinds.PowerChord, 1);
         }
         // the chords broken now and then, each part that plays them from a sequence of its own, by the section's chords facet
