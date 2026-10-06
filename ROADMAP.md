@@ -269,7 +269,7 @@ Each item with its plan, and what it waits for.
   (`ChordVoicing`, "Spread") neighbours sound close.
 - **Approach chords, the rest** (P3): turnarounds, passing chords, a chord solo's planed approaches, chromatic
   passing chords from above and a later appearance reharmonised are built. A plain song is never reharmonised, by any
-  of them: the songs' chance 0 at the plain end, and a genre's offering no plain end (`GenreOption.HasPlainEnd`). Left:
+  of them, the songs' chance 0 at the plain end; a preset's may be above it, as Soul's and Bossa nova's turnarounds. Left:
   the passing diminished between roots a whole step apart, and chromatic approaches from below, a chromatic root
   wanting the whole chord moved a semitone with the lines over it keeping the target's scale; a chord solo's approaches
   on the strong beats at the wild end, and the dominant as its approach; the tritone substitute for V7 in a
@@ -315,12 +315,6 @@ Each item with its plan, and what it waits for.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
   cache them; a corpus song holds about 5 MB.
 
-## The review of October 2026
-
-A review of the engine and the presets, its P1 to P3 built in October 2026; what is left of it:
-
-Not done: a sustain pedal, a parallel CLI batch.
-
 ## Genres
 
 A genre is the page's data (`Genre`, `GenreChoices`, `Client/genres.json`), every option three amounts, at the plain
@@ -335,11 +329,12 @@ left:
   2. The server drawing one when asked for any, from a stream of its own, so that the rest of the song stays as the
      seed made it; the preset drawn in the response, the song's link and every analytics event about it, as its version
      and settings are.
-  3. The page's Any genre (built October 2026, its preset drawn by the page for every new song) drawn by the server instead.
+  3. The page's Any genre, its preset drawn by the page for every new song, drawn by the server instead.
   4. The default (the songs' own, as now, or any genre) decided by the ratings by genre once a version has enough, and
      not before the retuned presets, Pop and Metal most, are heard.
   Not weighed by the presets nor leaned by conventionality: each preset spans the plainest songs to the wildest.
-- **More genres** (P3): chiptune, once a square wave may play the chords (*Instruments outside a role's pool*). What the genres made in October 2026 still want: Fusion's
+- **More genres** (P3): chiptune, once a square wave may play the chords (*Instruments outside a role's pool*).
+  What the genres made in October 2026 still want: Fusion's
   roots off the scale (the progressions move by a 7-note scale's steps, chromatic and constant-structure motion
   coming only of planing and a chord's own scale) and a lead's wide-interval legato lines (*A melody's leaping by
   genre*); Soul's tritone substitute and passing diminished (*Harmony for Jazz and Soul*); Country's bass on the root
@@ -389,11 +384,12 @@ left:
   every choice's tile a role's override beside it. The dynamics' contrast and the phrases' AAB give most of it.
 - **Listening to the new presets** (P1): Orchestral, its crescendos over a phrase into its louder sections and Pop's,
   Ambient's and Medieval's over two bars (`dynamics.lift`); Fusion, Soul, Country and Bossa nova; Funk's, Techno's, House's and Djent's
-  vamps, 30%, 52%, 17% and 40% of sections on one chord; Disco, Trap, Trance, drum and bass, Ska and Punk;
+  vamps, 30%, 56%, 20% and 66% of sections on one chord; Disco, Trap, Trance, drum and bass, Ska and Punk;
   Medieval, Dungeon synth, Djent and Nu metal against their sentences
-  (`GenreDevicesReportTest`, `GenreIdiomsReportTest`): Djent's sections 68% polymetric, its snare on 3; Nu metal's
-  guitar driven in its loud sections in 97% of songs, swung lightly in 16ths in 44%, its toms 25 hits a minute, many;
-  Medieval's and Dungeon synth's drums marking the form, resting in 64% and 72% of sections, a pedal under half of them.
+  (`GenreDevicesReportTest`, `GenreIdiomsReportTest`): Djent's sections 70% polymetric, its snare on 3 alone in 10%
+  of bars, in stop time 6%, its riff chromatic and chugging; Nu metal's guitar driven in its loud sections in 97% of
+  songs, swung lightly in 16ths in 47%; Medieval's and Dungeon synth's drums marking the form, resting in 61% and 71%
+  of sections, a pedal under half of them.
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Pop and Metal set no groove
   hold, their parts not pinned drifting as the songs' do (Pop's snare on 2 and 4 80%): Rock's (80) for them, should
   their beat sound loose. Jazz's ride, pinned and now in every song, plays the songs' own time figure: a rhythm of its own
@@ -457,6 +453,9 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
   obstacle: an hour's song asked of the generator is made in one to two seconds, but plays 33 to 45 minutes at 120
   bpm, its form's parts running out (`SongLength`'s free form of up to 32), and the page's length stops at fifteen
   minutes (`LengthScale`); an hour and more is the endless song's, not the length's.
+- **A sustain pedal** (P4): a piano's or a harp's notes held by the pedal (CC64) across a chord, left from the
+  review of October 2026; the notes are held to the next already.
+- **A parallel CLI batch** (P4): `--count` making its songs in parallel; a song takes about a second.
 - **Memory:** every `RealizedNote` keeps the state it was decided from, about 1.7 MB a song: nothing to do.
 
 ## Decided, and kept

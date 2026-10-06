@@ -16,8 +16,10 @@ bring them in phrase by phrase, hold some back until a later section, double lin
 key or tempo, each by a chance of its own.
 
 A genre leans a song's choices towards its idioms: a pool of options or a chance for each choice, at the plain end, the
-middle and the wild end. Fourteen presets come with the page (Pop, Rock, Metal, Jazz, House, Techno, Synthwave,
-Hip-hop, Reggae, Latin, Funk, Folk, Blues and Ambient), and the page's editor makes and changes genres of one's own.
+middle and the wild end. Twenty-nine presets come with the page (Pop, Rock, Metal, Nu metal, Djent, Punk, Ska, Jazz,
+Fusion, Soul, Funk, Disco, House, Techno, Trance, Synthwave, Drum and bass, Hip-hop, Trap, Reggae, Latin, Bossa nova,
+Folk, Country, Blues, Ambient, Medieval, Dungeon synth and Orchestral), and the page's editor makes and changes genres
+of one's own.
 
 ## Requirements
 
@@ -129,8 +131,10 @@ internet connection.
   out) and the drums can be given or left to the song. Changing one remakes the song from the same seed, going on
   from the same place. What changes only how it sounds (a part's instrument, volume and pan, the drum groups, the
   volume) is heard at once. What each setting does is shown under the pointer.
-- **Genres.** A genre picked leans the songs to its idioms; the editor shows every choice as a graph of what the songs
-  draw of it from the plainest to the wildest, and changes it by its options and their amounts.
+- **Genres.** A genre picked leans the songs to its idioms, and Any genre draws a preset for every new song, named
+  under the list. The editor shows every choice as a graph of what the songs draw of it from the plainest to the
+  wildest, with what it does, and changes it by its options and their amounts; **Manage** duplicates, adds, imports,
+  exports and removes one's own genres.
 - **Rating.** Like or dislike a song; the ratings go with the analytics, by the songs' version.
 - **So far** lists the last fifty songs, newest first, kept in the browser; a song walked to keeps its place.
 - **Sharing.** The address always follows the song, its settings and its genre,
@@ -235,7 +239,7 @@ dotnet run --project Rmg.Tests -c Release -- --treenode-filter "/*/*/SoloTest/*"
 The page is tested as it is used: `Rmg.Tests.Page` starts the server as it is built, on a port and with analytics of
 its own, and drives its pages in Playwright's headless Chromium, which its first run installs into
 `~/.cache/ms-playwright`. The page loads its synthesizer from the CDN, so the tests want the network. They take about
-15 s:
+30 s:
 
 ```
 dotnet run --project Rmg.Tests.Page -c Release
