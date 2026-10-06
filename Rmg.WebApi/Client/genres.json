@@ -816,20 +816,23 @@
       "loop": {},
       "octaveBass": { "sections": [0, 5, 5] },
       "glide": {},
-      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50] },
+      "articulation": { "legato": [40, 60, 70], "roll": [40, 50, 60] },
       "voice": {},
       "pins": {},
       "hatRolls": {},
       "drop": {},
       "hook": {},
       "riff": {},
-      "formChances": { "forms": [100, 70, 0] },
+      "formChances": { "forms": [50, 30, 0] },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100] },
       "polymeter": { "sections": [0, 1, 50] },
       "soloAnswers": { "sections": [0, 30, 30] },
       "lastRepeat": { "songs": [0, 25, 25] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35 },
-      "instrumentSwitches": { "sections": [0, 2, 100] }
+      "instrumentSwitches": { "sections": [0, 2, 100] },
+      "sectionLength": { "bars16": 100, "bars8": [60, 60, 60], "bars32": [30, 40, 50] },
+      "texture": { "steady": [100, 70, 50], "build": [50, 60, 60], "thin": [30, 40, 50], "alone": [0, 10, 30] },
+      "phrases": { "fourBars": 100, "eightBars": [50, 50, 60] }
     }
   }
 ]

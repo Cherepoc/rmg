@@ -316,8 +316,6 @@ left:
   baseline of every retuning below.
 
   **P2**, in order, each measured as above:
-  9. **Ambient retuned:** forms of its own over verse and chorus, sections of 16 and 32 bars, building and thinning
-     textures, slurred lines, rolled harp and piano chords.
   10. **Folk retuned:** arpeggios (fingerpicking), a fiddle's or a banjo's breaks as solos, fewer fills, effects
      named (no strong effect but a rare echo, no chorus).
   11. **Reggae retuned:** stabs (the skank a chopped chord), a loop (the riddim), its intro and ending pools.
