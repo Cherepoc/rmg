@@ -624,8 +624,11 @@ a link carries. What is left:
   8. Done: verses for a voice (`GenreChoices.Voice`, `Arrangement.VoiceChance`), a genre's chance a verse leaves its
      melody out for a rap over the beat, by the form facet: Hip-hop's verses without a melody 45% (5% the songs'), its
      choruses keeping their hook.
-  9. A melody written as a hook in every section, not only its repeated bars (House's and Hip-hop's melody bars
-     repeated 13% and 18%, a target of 50%).
+  9. Done in part: a hook that repeats (`GenreChoices.PhraseScheme`, a genre's pool of phrase schemes; a hooked
+     section's answer its question again, none of its repeats varied; a hook's note fitting a new chord where it is of
+     the scale and a semitone from none of the chord's notes): melody bars repeated House 13% -> 20%, Hip-hop 18% ->
+     23%, Techno 21% -> 31%. Its ceiling is about half: a phrase's last bar ends on its held note, and builds bring
+     parts in. Left: a hook of one or two bars sung through a whole section, its phrase ends let go of.
   10. A chord stab: a chord struck short on the offbeat, House's piano and Techno's dub chord, with an echo.
   11. Gated reverb on the snare and a big tom fill, Synthwave's, which General MIDI cannot sound but a velocity and
      length could suggest.

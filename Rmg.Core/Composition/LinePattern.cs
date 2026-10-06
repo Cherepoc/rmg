@@ -195,10 +195,19 @@ internal sealed class LinePattern
             }
             if (bar == first || lands(i))
                 continue;
-            if (at.TryGetValue(Math.Round(position - (bar - first) * span.Meter.BarDuration, 6), out var source) && Fits(notes[i], notes[source].Pitch, profile))
+            if (at.TryGetValue(Math.Round(position - (bar - first) * span.Meter.BarDuration, 6), out var source) && FitsHook(notes[i], notes[source].Pitch))
                 notes[i] = notes[i] with { Pitch = notes[source].Pitch };
         }
     }
+
+    /// <summary>
+    ///     Whether a hook's note fits the chord its repeat plays over: of its scale, and, on any beat, no note of the chord a
+    ///     semitone from it, so that a strong beat's note becomes the chord's ninth, eleventh or sus note rather than a clash,
+    ///     as a hook repeated over its loop's chords sings.
+    /// </summary>
+    private static bool FitsHook((LineNote Note, int Rank, int Pitch) note, int pitch) =>
+        Enumerable.Range(0, note.Note.ScaleLength).Any(x => note.Note.Chord.GetPitch(x).Mod(12) == pitch.Mod(12))
+        && !note.Note.Classes.Any(x => (x - pitch).Mod(12) is 1 or 11);
 
     /// <summary>Whether a pitch fits a note's chord where it plays: one of its notes on a strong beat, of its scale on another.</summary>
     private static bool Fits((LineNote Note, int Rank, int Pitch) note, int pitch, LineProfile profile)

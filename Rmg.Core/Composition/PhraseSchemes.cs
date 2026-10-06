@@ -19,6 +19,9 @@ public sealed record PhraseScheme(ImmutableArray<int> Letters, ImmutableArray<bo
         ? this
         : new PhraseScheme([..Enumerable.Repeat(Letters, phrases).SelectMany(x => x)], [..Enumerable.Repeat(IsVaried, phrases).SelectMany(x => x)]);
 
+    /// <summary>The scheme with every repeat played as it was first, none varied.</summary>
+    public PhraseScheme Unvaried() => this with { IsVaried = [..IsVaried.Select(_ => false)] };
+
     /// <summary>The scheme as letters, such as AABA, a varied repeat marked with a prime.</summary>
     public override string ToString()
     {
@@ -49,6 +52,10 @@ internal static class PhraseSchemes
         ("ABCD", 0.05)
     ];
 
+    /// <summary>Every scheme's weights at the ends, by how unconventional it is.</summary>
+    public static ImmutableArray<(string Scheme, ByConvention Weight)> Weights { get; } =
+        [..All.Select(x => (x.Scheme, RhythmicUnconventionality.WeightEnds(x.Weight, GetUnconventionality(x.Scheme))))];
+
     /// <summary>
     ///     How unconventional a scheme is, by how many different bars it brings: -0.5 for one bar four times, 0 for two,
     ///     and 1 for four different bars.
@@ -63,9 +70,10 @@ internal static class PhraseSchemes
     ///     a bar played throughout or two bars, the wildest never one; and some of its repeats varied.
     /// </summary>
     /// <param name="unconventionality">The form facet of the section's unconventionality.</param>
-    public static PhraseScheme Pick(IGenerationContext context, double unconventionality)
+    /// <param name="genre">The genre whose pool of schemes it is drawn among, where it names one.</param>
+    public static PhraseScheme Pick(IGenerationContext context, double unconventionality, Genre genre)
     {
-        var scheme = context.Pick(ByConvention.Weigh(All.Select(x => (x.Scheme, RhythmicUnconventionality.WeightEnds(x.Weight, GetUnconventionality(x.Scheme)))), unconventionality));
+        var scheme = context.Pick(ByConvention.Weigh(Weights, unconventionality, genre.Pool<string>(GenreChoices.PhraseScheme, x => x.ToLowerInvariant())));
 
         var letters = scheme.Select(x => x - 'A').ToImmutableArray();
         var isVaried = letters

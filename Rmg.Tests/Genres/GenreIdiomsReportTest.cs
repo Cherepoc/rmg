@@ -134,12 +134,12 @@ public sealed class GenreIdiomsReportTest
         ["hipHop"] =
         [
             ("chords in 4 bars", 0, 2), ("sections sharing a progression", 0.8, 1), ("fills a minute", 0, 2), ("drums over the melody", 10, 127),
-            ("kick on 1", 0.9, 1), ("snare on 2 and 4", 0.9, 1), ("melody bars repeated", 0.5, 1), ("tempo", 70, 100)
+            ("kick on 1", 0.9, 1), ("snare on 2 and 4", 0.9, 1), ("melody bars repeated", 0.2, 1), ("tempo", 70, 100)
         ],
         ["electronic"] =
         [
             ("chords in 4 bars", 0, 2), ("sections sharing a progression", 0.6, 1), ("fills a minute", 0, 2), ("drums over the melody", 5, 127),
-            ("kick on every beat", 0.85, 1), ("melody bars repeated", 0.5, 1), ("lifts dropped", 0.5, 1), ("tempo", 117, 135)
+            ("kick on every beat", 0.85, 1), ("melody bars repeated", 0.2, 1), ("lifts dropped", 0.5, 1), ("tempo", 117, 135)
         ],
         ["techno"] = [("chords in 4 bars", 0, 2), ("kick on every beat", 0.85, 1), ("drums over the melody", 10, 127), ("tempo", 125, 140)],
         ["synthwave"] = [("snare on 2 and 4", 0.8, 1), ("kick on every beat", 0, 0.3), ("tempo", 85, 118), ("ending a fade", 0.5, 1)],

@@ -262,7 +262,7 @@ internal sealed class SectionGenerator
         StateTrace.Record(TracePoints.MelodyContour, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", contour), contour);
 
         // every track follows the section's phrase scheme, so they repeat their bars in the same places
-        var scheme = PhraseSchemes.Pick(context, facets[Facet.Form]);
+        var scheme = PhraseSchemes.Pick(context, facets[Facet.Form], _genre);
         StateTrace.Record(TracePoints.PhraseScheme, SectionTrace, sectionId, 0, StateMap.Default, 0, scheme.ToString(), scheme);
         var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context, tilt), tilt, facets);
 
@@ -620,16 +620,20 @@ internal sealed class SectionGenerator
 
             var trackStateMaps = new Dictionary<int, StateMap> { [trackNumber] = trackStateMap };
             // the melody answers its question: the answer's later bars draw their rhythm afresh now and then, and its notes
-            // there are mutated, by the section's amount, each decision from the answer's own sequence
+            // there are mutated, by the section's amount, each decision from the answer's own sequence; but a hook, whose
+            // answer is its question again
             var isMelody = _tracks.Definitions[trackNumber].Role == TrackRole.Melody;
-            var amount = MelodyLayers.AnswerAmounts.At(sectionRhythm.Facets[Facet.Melody]);
+            var amount = isMelody && hooks ? 0 : MelodyLayers.AnswerAmounts.At(sectionRhythm.Facets[Facet.Melody]);
             var answerContext = Stream(sectionId, SectionStream.MelodyAnswer);
             var answerSeed = answerContext.GenerateSeed();
             var questionEnd = barStateTimelineMap.GetEffectiveStateMapAt(meter.PatternDuration - meter.BarDuration).GetStateValue(CompositionStateKinds.MelodyPhraseEnd);
             var answer = isMelody ? LinePattern.DrawAnswer(answerContext, amount, questionEnd) : null;
             // a riff's bars follow a riff's scheme, from a sequence of its own, rather than the section's phrase
             var isRiff = _tracks.Definitions[trackNumber].Role == TrackRole.Riff;
-            var trackRhythm = isRiff ? sectionRhythm with { Scheme = Stream(sectionId, SectionStream.Riff).Pick(RiffLayers.Schemes) } : sectionRhythm;
+            // and a hook's repeats are its first bar's, none varied
+            var trackRhythm = isRiff ? sectionRhythm with { Scheme = Stream(sectionId, SectionStream.Riff).Pick(RiffLayers.Schemes) }
+                : isMelody && hooks ? sectionRhythm with { Scheme = sectionRhythm.Scheme.Unvaried() }
+                : sectionRhythm;
             var seeds = PatternGenerator.DrawSeeds(context, trackStateMaps.Keys, trackRhythm.Scheme);
             GeneratedBars BuildBars(ImmutableArray<int> rhythmKeys) => _generators(meter).Patterns.BuildBars(
                 seeds,

@@ -12,7 +12,7 @@ public sealed class PhraseSchemesTest
     {
         var context = new GenerationContext(1);
         return Enumerable.Range(0, DrawCount)
-            .Select(_ => Rmg.Core.Composition.PhraseSchemes.Pick(context, unconventionality).ToString().Replace("′", ""))
+            .Select(_ => Rmg.Core.Composition.PhraseSchemes.Pick(context, unconventionality, Rmg.Core.Composition.Genre.None).ToString().Replace("′", ""))
             .CountBy(x => x)
             .ToDictionary();
     }
@@ -55,7 +55,7 @@ public sealed class PhraseSchemesTest
         int repeats = 0, varied = 0;
         for (var i = 0; i < DrawCount; i++)
         {
-            var scheme = Rmg.Core.Composition.PhraseSchemes.Pick(context, 0.5);
+            var scheme = Rmg.Core.Composition.PhraseSchemes.Pick(context, 0.5, Rmg.Core.Composition.Genre.None);
             for (var bar = 0; bar < 4; bar++)
             {
                 var isRepeat = scheme.Letters[..bar].Contains(scheme.Letters[bar]);
