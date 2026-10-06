@@ -331,12 +331,25 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
 
     // --- the body ----------------------------------------------------------------------------------------------------------
 
-    const pitched = panel(
+    // the choices about one part alone, which its tab shows after its instruments, rhythm and feel
+    const PART_CHOICES = {
+        melody: ["melodyRange", "hook", "voice"],
+        bass: ["bass", "octaveBass", "glide", "bassLanding"],
+        riff: ["riff"],
+        solo: ["soloAnswers"],
+        drums: ["fills", "hatRolls", "drumJob", "marks", "drumSounds"],
+    };
+    /** A part's own choice's tile in its tab, bound as the draft changes whatever the part. */
+    const own = (name) => ({ element: single(tile(), name), show: () => {} });
+    const pitchedTiles = () => [
         bound(tile(undefined, "Instruments"), (part) => `instrument.${part}`),
         bound(tile(undefined, "Rhythm"), (part) => `rhythm.${part}`),
         bound(tile(undefined, "Feel"), (part) => `feel.${part}`),
-    );
-    const solo = panel(bound(tile(undefined, "Instruments"), () => "instrument.solo"));
+    ];
+    const pitched = panel(...pitchedTiles());
+    // a part with choices of its own a panel of its own, the others sharing one
+    const panels = Object.fromEntries(["melody", "bass", "riff"].map((part) => [part, panel(...pitchedTiles(), ...PART_CHOICES[part].map(own))]));
+    const solo = panel(bound(tile(undefined, "Instruments"), () => "instrument.solo"), ...PART_CHOICES.solo.map(own));
     const role = panel(
         bound(tile(isPieceAllowed, "Drums"), (x) => `drumRole.${x}`),
         bound(tile(undefined, "Rhythm"), (x) => `rhythm.${x}`),
@@ -347,6 +360,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         bound(tile(), () => "kit"),
         bound(tile(), () => "drumPieces"),
         bound(tile(isSetupAllowed), () => "drumSetup"),
+        ...PART_CHOICES.drums.map(own),
         { element: roles.element, show: () => roles.show() },
     );
     /** Whether the lineup may play a part: every part where the genre leaves it as by default, else one it keeps above 0. */
@@ -359,14 +373,14 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         ...PITCHED.map(([part, label]) => ({
             label,
             part,
-            names: [`instrument.${part}`, `rhythm.${part}`, `feel.${part}`],
-            panel: part === "solo" ? solo : pitched,
+            names: [`instrument.${part}`, `rhythm.${part}`, `feel.${part}`, ...(PART_CHOICES[part] ?? [])],
+            panel: part === "solo" ? solo : panels[part] ?? pitched,
             isShown: () => mayPlay(part),
         })),
         {
             label: "Drums",
             part: "drums",
-            names: ["kit", "drumPieces", "drumSetup", ...ROLES.flatMap(([role]) => [`drumRole.${role}`, `rhythm.${role}`, `feel.${role}`])],
+            names: ["kit", "drumPieces", "drumSetup", ...PART_CHOICES.drums, ...ROLES.flatMap(([role]) => [`drumRole.${role}`, `rhythm.${role}`, `feel.${role}`])],
             panel: drums,
             isShown: () => mayPlay("drum"),
         },
@@ -397,16 +411,16 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
 
     const body = document.createElement("div");
     body.className = "genre-body";
-    const partNames = [...PITCHED.flatMap(([part]) => [`instrument.${part}`, `rhythm.${part}`, `feel.${part}`]), "kit", "drumPieces", "drumSetup",
+    const partNames = [...PITCHED.flatMap(([part]) => [`instrument.${part}`, `rhythm.${part}`, `feel.${part}`]), ...Object.values(PART_CHOICES).flat(), "kit", "drumPieces", "drumSetup",
         ...ROLES.flatMap(([role]) => [`drumRole.${role}`, `rhythm.${role}`, `feel.${role}`])];
     body.append(
         description,
         principles,
-        section("Time and feel", ["tempo", "length", "meter", "feel", "feelChances", "feelValues", "grooveHold", "pocket", "fills", "drumJob", "marks", "drumSounds", "sectionChanges", "polymeter"],
-            single(tile(), "tempo"), single(tile(), "length"), single(tile(), "meter"), single(tile(), "feel"), single(tile(), "feelChances"), single(tile(), "feelValues"), single(tile(), "grooveHold"), single(tile(), "pins"), single(tile(), "hatRolls"), single(tile(), "pocket"), single(tile(), "fills"), single(tile(), "drumJob"), single(tile(), "marks"), single(tile(), "drumSounds"), single(tile(), "sectionChanges"), single(tile(), "polymeter")),
-        section("Form", ["formChances", "form", "phrases", "sectionLength", "phraseScheme", "texture", "loop", "hook", "drop", "stopTime", "push", "keyChanges", "intro", "ending", "lastRepeat", "solos", "soloists", "soloAnswers"], single(tile(), "formChances"), single(tile(), "form"), single(tile(), "phrases"), single(tile(), "sectionLength"), single(tile(), "phraseScheme"), single(tile(), "texture"), single(tile(), "loop"), single(tile(), "hook"), single(tile(), "drop"), single(tile(), "stopTime"), single(tile(), "push"), single(tile(), "keyChanges"), single(tile(), "intro"), single(tile(), "ending"), single(tile(), "lastRepeat"), single(tile(), "solos"), single(tile(), "soloists"), single(tile(), "soloAnswers")),
-        section("Harmony", ["scale", "chordShape", "arpeggio", "rootMotion", "chordScales", "harmonicRhythm", "vamp", "turnaround", "passingChords", "planing", "harmonyDevices", "lineScale", "melodyRange", "bass", "octaveBass", "glide", "bassLanding"], single(tile(), "scale"), single(tile(), "chordShape"), single(tile(), "arpeggio"), single(tile(), "rootMotion"), single(tile(), "chordScales"), single(tile(), "harmonicRhythm"), single(tile(), "vamp"), single(tile(), "turnaround"), single(tile(), "passingChords"), single(tile(), "planing"), single(tile(), "harmonyDevices"), single(tile(), "lineScale"), single(tile(), "melodyRange"), single(tile(), "bass"), single(tile(), "octaveBass"), single(tile(), "glide"), single(tile(), "bassLanding")),
-        section("Sound", ["effects", "articulation", "strongEffect", "riff", "pan", "register", "levels", "rests", "voice", "doubling", "harmonyInterval", "instrumentSwitches", "louderForms", "space", "dynamics"], single(tile(), "effects"), single(tile(), "articulation"), single(tile(), "strongEffect"), single(tile(), "riff"), single(tile(), "pan"), single(tile(), "register"), single(tile(), "levels"), single(tile(), "rests"), single(tile(), "voice"), single(tile(), "doubling"), single(tile(), "harmonyInterval"), single(tile(), "instrumentSwitches"), single(tile(), "louderForms"), single(tile(), "space"), single(tile(), "dynamics")),
+        section("Time and feel", ["tempo", "length", "meter", "feel", "feelChances", "feelValues", "grooveHold", "pins", "pocket", "sectionChanges", "polymeter"],
+            single(tile(), "tempo"), single(tile(), "length"), single(tile(), "meter"), single(tile(), "feel"), single(tile(), "feelChances"), single(tile(), "feelValues"), single(tile(), "grooveHold"), single(tile(), "pins"), single(tile(), "pocket"), single(tile(), "sectionChanges"), single(tile(), "polymeter")),
+        section("Form", ["formChances", "form", "phrases", "sectionLength", "phraseScheme", "texture", "loop", "drop", "stopTime", "push", "keyChanges", "intro", "ending", "lastRepeat", "solos", "soloists"], single(tile(), "formChances"), single(tile(), "form"), single(tile(), "phrases"), single(tile(), "sectionLength"), single(tile(), "phraseScheme"), single(tile(), "texture"), single(tile(), "loop"), single(tile(), "drop"), single(tile(), "stopTime"), single(tile(), "push"), single(tile(), "keyChanges"), single(tile(), "intro"), single(tile(), "ending"), single(tile(), "lastRepeat"), single(tile(), "solos"), single(tile(), "soloists")),
+        section("Harmony", ["scale", "chordShape", "arpeggio", "rootMotion", "chordScales", "harmonicRhythm", "vamp", "turnaround", "passingChords", "planing", "harmonyDevices", "lineScale"], single(tile(), "scale"), single(tile(), "chordShape"), single(tile(), "arpeggio"), single(tile(), "rootMotion"), single(tile(), "chordScales"), single(tile(), "harmonicRhythm"), single(tile(), "vamp"), single(tile(), "turnaround"), single(tile(), "passingChords"), single(tile(), "planing"), single(tile(), "harmonyDevices"), single(tile(), "lineScale")),
+        section("Sound", ["effects", "articulation", "strongEffect", "pan", "register", "levels", "rests", "doubling", "harmonyInterval", "instrumentSwitches", "louderForms", "space", "dynamics"], single(tile(), "effects"), single(tile(), "articulation"), single(tile(), "strongEffect"), single(tile(), "pan"), single(tile(), "register"), single(tile(), "levels"), single(tile(), "rests"), single(tile(), "doubling"), single(tile(), "harmonyInterval"), single(tile(), "instrumentSwitches"), single(tile(), "louderForms"), single(tile(), "space"), single(tile(), "dynamics")),
         section("Parts", ["parts", ...partNames], single(tile(), "parts"), parts.element),
     );
 
