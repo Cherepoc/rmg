@@ -317,9 +317,6 @@ of here once it is; the genres it adds are described under *More genres*.
 
 **P1, wrong now and cheap:**
 
-5. **The presets' copies of the songs' amounts let go of:** a device a preset leaves out plays as the songs do, its
-   report marking it (`GenreDevicesReportTest`'s *), in place of the rule that a preset names every device, its copies
-   already drifted (switches 2% for 1.5%).
 6. **The presets retuned:** the root motions of Pop (I-V-vi-IV), Rock, Metal and Synthwave (i-bVI-bVII), Reggae (I-IV)
    and Folk; Jazz's tempo from 80 at the plain end and its pad rarer; Hip-hop's counter-melody 15-25% and its drop
    rarer; Funk's and Latin's pads rarer; Folk's drums 50-60%; Latin's and Metal's solos fewer; every counter-melody's

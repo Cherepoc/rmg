@@ -18,13 +18,6 @@ public sealed class GenrePresetsTest
     }
 
     [Test]
-    public async Task EveryPreset_NamesEveryDevice_SoThatItSaysWhatItPlays()
-    {
-        foreach (var preset in GenrePresets.All)
-            await Assert.That(GenreChoices.Devices.Select(x => x.Name).Where(x => !preset.Choices.ContainsKey(x))).IsEmpty().Because(preset.Name);
-    }
-
-    [Test]
     public async Task EveryPreset_NamesTheInstrumentsOfEveryPartItMayPlay_SoThatNoneFallsOnTheSongsPool()
     {
         foreach (var preset in GenrePresets.All)
