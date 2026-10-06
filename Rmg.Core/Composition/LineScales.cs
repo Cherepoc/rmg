@@ -72,9 +72,11 @@ internal static class LineScales
     }.ToImmutableDictionary();
 
     /// <summary>A section's line's scale, by the scale facet of its unconventionality, among a genre's pool where it names one.</summary>
-    public static LineScale Draw(IGenerationContext context, double unconventionality, Genre genre)
+    /// <param name="riff">Whether the line is a riff's, which takes a genre's riff's scale where it names one, the lines' otherwise.</param>
+    public static LineScale Draw(IGenerationContext context, double unconventionality, Genre genre, bool riff)
     {
-        return context.Pick(ByConvention.Weigh(Weights, unconventionality, genre.Pool<LineScale>(GenreChoices.LineScale, x => GenreChoices.Name(x.ToString()))));
+        var choice = riff && genre.Names(GenreChoices.RiffScale) ? GenreChoices.RiffScale : GenreChoices.LineScale;
+        return context.Pick(ByConvention.Weigh(Weights, unconventionality, genre.Pool<LineScale>(choice, x => GenreChoices.Name(x.ToString()))));
     }
 
     /// <summary>

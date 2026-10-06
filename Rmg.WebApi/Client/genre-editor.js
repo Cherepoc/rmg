@@ -335,7 +335,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
     const PART_CHOICES = {
         melody: ["melodyRange", "hook", "voice"],
         bass: ["bass", "octaveBass", "glide", "bassLanding"],
-        riff: ["riff"],
+        riff: ["riff", "riffScale"],
         solo: ["soloAnswers"],
         drums: ["fills", "hatRolls", "drumJob", "marks", "drumSounds"],
     };

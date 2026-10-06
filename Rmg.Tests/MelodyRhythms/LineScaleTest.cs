@@ -32,8 +32,8 @@ public sealed class LineScaleTest
     public async Task ThePlainestLines_TakeTheSectionsScale_OrItsPentatonic_AndTheWildestMostlyAScaleOfTheirOwn()
     {
         var context = new GenerationContext(5);
-        var plain = Enumerable.Range(0, 2000).Select(_ => LineScales.Draw(context, 0, Genre.None)).ToHashSet();
-        var wild = Enumerable.Range(0, 2000).Select(_ => LineScales.Draw(context, 1, Genre.None)).ToArray();
+        var plain = Enumerable.Range(0, 2000).Select(_ => LineScales.Draw(context, 0, Genre.None, riff: false)).ToHashSet();
+        var wild = Enumerable.Range(0, 2000).Select(_ => LineScales.Draw(context, 1, Genre.None, riff: false)).ToArray();
 
         await Assert.That(plain.SetEquals([LineScale.Section, LineScale.Pentatonic])).IsTrue();
         await Assert.That(wild.Contains(LineScale.Pentatonic)).IsFalse();
@@ -71,5 +71,19 @@ public sealed class LineScaleTest
         foreach (var scale in sections.GroupBy(x => x.Scale).OrderBy(x => x.Key))
             Console.WriteLine($"  {scale.Key}: {scale.Count()} sections, notes off the section's scale {scale.Sum(x => x.Off) / (double)Math.Max(1, scale.Sum(x => x.Notes)):P1}");
         await Task.CompletedTask;
+    }
+
+    [Test]
+    public async Task AGenresRiffScale_IsTheRiffsAlone_TheMelodyKeepingTheLines()
+    {
+        var genre = new Genre(System.Collections.Immutable.ImmutableDictionary<string, System.Collections.Immutable.ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
+            .Add("lineScale", System.Collections.Immutable.ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("section", new(1, 1, 1)))
+            .Add("riffScale", System.Collections.Immutable.ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("chromatic", new(1, 1, 1))));
+        var scales = TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)))
+            .SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.LineScale).Select(x => (x.Track, Scale: (LineScale)x.Value!))).ToArray();
+
+        await Assert.That(scales.Where(x => x.Track == Rmg.Core.Composition.SongTracks.RiffTrack).All(x => x.Scale == LineScale.Chromatic)).IsTrue();
+        await Assert.That(scales.Where(x => x.Track == Rmg.Core.Composition.SongTracks.MelodyTrack).All(x => x.Scale == LineScale.Section)).IsTrue();
+        await Assert.That(scales.Count(x => x.Track == Rmg.Core.Composition.SongTracks.RiffTrack)).IsGreaterThan(0);
     }
 }

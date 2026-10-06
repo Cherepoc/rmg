@@ -583,7 +583,7 @@ internal sealed class SectionGenerator
         if (_tracks.Definitions[trackNumber].Role is TrackRole.Melody or TrackRole.Riff)
         {
             var stream = _tracks.Definitions[trackNumber].Role == TrackRole.Melody ? SectionStream.LineScale : SectionStream.RiffLineScale;
-            var lineScale = LineScales.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Scale], _genre);
+            var lineScale = LineScales.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Scale], _genre, _tracks.Definitions[trackNumber].Role == TrackRole.Riff);
             StateTrace.Record(TracePoints.LineScale, trackNumber, sectionId, 0, StateMap.Default, 0, $"{lineScale}", lineScale);
             sectionTrackLayer.Add(CompositionStateKinds.LineScale, (int)lineScale);
             // a riff that chugs on a pedal, its power chords by its notes (Chugs); one that does not in power chords throughout

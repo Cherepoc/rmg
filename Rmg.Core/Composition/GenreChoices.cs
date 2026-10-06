@@ -270,6 +270,10 @@ public static class GenreChoices
     public static GenreChoice LineScale { get; } = Pool("lineScale", "Lines' scale",
         Composition.LineScales.Weights.Select(x => (Name(x.Scale.ToString()), Composition.LineScales.LabelOf(x.Scale), x.Weight)));
 
+    /// <summary>The scale a riff's passing notes take where a genre gives it one of its own, the lines' otherwise (<see cref="LineScale" />).</summary>
+    public static GenreChoice RiffScale { get; } = Pool("riffScale", "Riff's scale",
+        Composition.LineScales.Weights.Select(x => (Name(x.Scale.ToString()), Composition.LineScales.LabelOf(x.Scale), x.Weight)));
+
     /// <summary>
     ///     The gentle effects a song plays at all, each its chance as the songs have it by their sound (<see cref="Expression" />):
     ///     a vibrato, a chorus, a held chord's swell and a line's bends.
@@ -489,7 +493,7 @@ public static class GenreChoices
     public static ImmutableArray<GenreChoice> All { get; } =
     [
         Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Dynamics, Phrases,
-        SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval, Vamp,
+        SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,
