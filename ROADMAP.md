@@ -316,8 +316,6 @@ left:
   baseline of every retuning below.
 
   **P2**, in order, each measured as above:
-  8. **Latin retuned,** the least tuned: a two-chord vamp's pace (half a bar and a bar), a loop, applied dominants (V7
-     in minor), a hook (the coro), solos (piano, trumpet, the timbales), a button or stop ending, levels, fills.
   9. **Ambient retuned:** forms of its own over verse and chorus, sections of 16 and 32 bars, building and thinning
      textures, slurred lines, rolled harp and piano chords.
   10. **Folk retuned:** arpeggios (fingerpicking), a fiddle's or a banjo's breaks as solos, fewer fills, effects
