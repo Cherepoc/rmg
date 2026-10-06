@@ -600,7 +600,8 @@ a link carries. What is left:
   2. Long phrases: done in part (`GenreChoices.SectionLength`, `GenreChoices.Texture`): a genre's pool of section
      lengths, thirty-two bars among them, which the songs never play, and of textures, a section building part by part;
      House's and Techno's sections 16 bars or more 93%, 32 bars 28%, over 8-bar patterns, 43% of their appearances
-     building or thinning (9% of the songs'). Left: the build thickening before a drop, a snare roll and a riser.
+     building or thinning (9% of the songs'), and a drop's build rolling its snare over the two bars before its
+     silence, 8ths then 16ths, louder as it goes (every one of 28 builds). Left: a riser, a noise or a pad sweeping up.
   3. An arpeggiator: a chord played as a pattern of its notes in 16ths, a synth bass's and synthwave's and trance's
      sound; today a part plays its chord or a line.
   4. A bass's glide and accent, the acid line's, and an 808's long slide between notes; the slides today are a

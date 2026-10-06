@@ -291,6 +291,8 @@ internal sealed class SongFormGenerator
         // lines that walk into the section with it, but for the drums' fill into it, and the drums landing on it
         var drop = FormLayers.Drop.At(_songRhythm.Value, _genre.Chance(GenreChoices.Drop, "lifts"));
         var tracks = sections.SelectMany(x => x.Timeline.TrackTimelineMap.Keys).ToHashSet();
+        // the snare a build rolls on: the song's electric or acoustic snare, or its clap
+        var snare = FormLayers.BuildRollDrums.Select(DrumGroups.GetTrackNumber).FirstOrDefault(tracks.Contains, -1);
         var drops = new HashSet<double>();
         for (var i = 0; i < lines.Count; i++)
         {
@@ -310,6 +312,22 @@ internal sealed class SongFormGenerator
                 else
                     edits.Silence(track, gap, line.Position);
             }
+
+            // the build: the song's snare rolling over the bars before the silent one, its notes twice as fast each bar and
+            // louder as it goes, within the section
+            var bar = line.Ending.Meter.BarDuration;
+            var rollFrom = Math.Max(gap - FormLayers.BuildRollBars * bar, i > 0 ? lines[i - 1].Position : 0);
+            // each bar of the roll at its own rate, every hit counted
+            if (snare >= 0)
+                for (var (barStart, step) = (gap - FormLayers.BuildRollBars * bar, FormLayers.BuildRollStart); barStart < gap - 1e-9; barStart += bar, step /= 2)
+                for (var hit = 0; hit < (int)Math.Round(bar / step); hit++)
+                {
+                    var position = barStart + hit * step;
+                    if (position < rollFrom - 1e-9)
+                        continue;
+                    var share = (position - rollFrom) / (gap - rollFrom);
+                    edits.Hit(snare, position, FormLayers.BuildRollFrom + (FormLayers.BuildRollTo - FormLayers.BuildRollFrom) * share, 0, line.Ending.SectionId, "Build");
+                }
 
             lines[i] = line with { IsLandingForced = true };
             drops.Add(line.Position);

@@ -83,6 +83,18 @@ internal static class FormLayers
     /// <summary>How many bars a build grows louder over, the phrase before its drop, its section's at most.</summary>
     public const int BuildBars = 4;
 
+    /// <summary>How many bars a build's snare rolls before its silent one, twice as fast each bar from 8ths, and how loud it starts and ends, as a fill's run does.</summary>
+    public const int BuildRollBars = 2;
+
+    public const double BuildRollStart = 0.5;
+
+    public const double BuildRollFrom = FillLayers.RunStartVelocity;
+
+    public const double BuildRollTo = FillLayers.RunEndVelocity;
+
+    /// <summary>The drums a build's roll is played on, the first the song has.</summary>
+    public static ImmutableArray<PercussionInstrumentDefinition> BuildRollDrums { get; } = [DrumDefinitions.ElectricSnare, DrumDefinitions.AcousticSnare, DrumDefinitions.Clap];
+
     public static ImmutableArray<Weighted<IntroKind>> Intros { get; } =
     [
         new(0.3, IntroKind.Cold),
