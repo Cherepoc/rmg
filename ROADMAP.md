@@ -128,7 +128,12 @@ each from the trace; the seeds named here are ones already found.
   too often?
 - **The drums' marks** (`DrumMarks`, Ambient's): about a strike every three bars at the middle, a section's start the
   likeliest, and a roll into a section now and then, one or two drums of the genre's: heard as a calm piece's
-  percussion, or as a groove gone missing? A roll on a cymbal or a triangle as on a tom?
+  percussion, or as a groove gone missing? A roll on a cymbal or a triangle as on a tom? A swell through a section's
+  start, two beats each way, in 16ths or 32nds at its peak: 16ths at a slow tempo heard as a pulse rather than a roll,
+  and the swell too short for an ambient piece?
+- **The ornaments** (`Ornaments`): about one in eight to ten of the notes long enough ornamented, where the song plays
+  them, 2.5% of the lines' notes in Folk and Medieval: too seldom for a fiddle tune? A trill of up to 1.5 s at 12 a
+  second on a pad or a sung synth lead: heard as a trill, or as a warble?
 - **The polymeters:** the snare on every cell's start of a short cycle: too busy? The chords joining a cycle of short
   cells: mud? A cycle running on through a section or growing each time round: heard as a drift resolving?
 

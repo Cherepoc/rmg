@@ -72,7 +72,7 @@ public static class GenreChoiceDescriptions
         ["instrumentSwitches"] = "How often a section hands a part to another instrument, as a chorus's strings take over from a verse's piano.",
         ["space"] = "How much reverb each part has: above the middle wetter, as an ambient wash, below drier, as a funk band's room.",
         ["drumJob"] = "What the drums do: keep time, as a band's drums do, or mark the form now and then, as a calm piece's percussion does.",
-        ["marks"] = "How often drums marking the form strike: above the middle oftener.",
+        ["marks"] = "How often drums marking the form strike, and how often they swell through a section's start, a roll growing to it and fading after: above the middle oftener.",
         ["register"] = "How high each part sits: at the lowest quarter an octave down, as a guitar tuned down, at the highest an octave up, as a bass singing high.",
         ["drumSounds"] = "How often each of a drum's own sounds plays, as its steady stroke, an accent and in fills: the cross-stick of a ballad, a jazz drummer's hi-hat foot, a metal china.",
         ["louderForms"] = "How often a clean guitar turns distorted in the song's louder sections, as a band kicks in the distortion for the chorus.",

@@ -15,8 +15,10 @@ public enum DrumJob
 /// <summary>
 ///     The drums marking the form in place of keeping time: one or two of the song's drums, struck now and then where the
 ///     form moves, a section's start, a phrase's, a chord's change and the song's ending, the likelier the stronger the
-///     place and the louder the section, and rolling into a section now and then on the beat before it; nothing between,
-///     so that they never keep time. A genre's, which the songs never play (<see cref="GenreChoices.DrumJob" />), an edit of
+///     place and the louder the section, and rolling now and then: into a section on the beat before it, or swelling
+///     through a section's start or the ending, a roll quickening and growing to its peak there and slowing and fading
+///     after it, as a calm piece's cymbal or timpani does (<see cref="Roll" />); nothing between, so that they never keep
+///     time. A genre's, which the songs never play (<see cref="GenreChoices.DrumJob" />), an edit of
 ///     the drums' notes after the song is put together, in the sections where the drums play, from a sequence of its own.
 /// </summary>
 internal static class DrumMarks
@@ -46,8 +48,14 @@ internal static class DrumMarks
     /// <summary>How many notes a beat of a roll plays, and how likely: 16ths and 32nds.</summary>
     public static ImmutableArray<Weighted<int>> RollRates { get; } = [new(1, 4), new(1, 8)];
 
-    /// <summary>How loud a roll's first note plays against its last, the drum's loudest note.</summary>
+    /// <summary>How loud a roll's first and last notes play against its peak, the drum's loudest note, and how fast, against its rate there.</summary>
     public const double RollFrom = 0.3;
+
+    /// <summary>The chance a section's start or the ending, where it is marked, swells instead of being struck once.</summary>
+    public const double SwellChance = 0.25;
+
+    /// <summary>How long a swell grows to its peak, and how long it fades after it, in beats.</summary>
+    public const double SwellBeats = 2;
 
     /// <summary>How far a genre's value moves the chances at its most and its least, as odds: four times, or a quarter (<see cref="GenreChoices.Marks" />).</summary>
     public const double GenreOdds = 4;
@@ -79,6 +87,7 @@ internal static class DrumMarks
         // where the drums play in a section, which they mark only there
         bool Plays(SectionSpan span) => drums.Any(x => notes[x].Any(n => n.Position >= span.Start - 1e-9 && n.Position < span.End - 1e-9));
         var often = Tilt.Of(GenreOdds, song.Genre.Shift(GenreChoices.Marks, "often"));
+        var swells = Tilt.Of(GenreOdds, song.Genre.Shift(GenreChoices.Marks, "swells"));
         var marks = marking.ToDictionary(x => x, _ => new List<TimelineItem<RealizedNote>>());
         foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
         {
@@ -95,26 +104,24 @@ internal static class DrumMarks
             if (index == map.Sections.Length - 1 && map.Ending.Duration > 0)
                 places.TryAdd(map.Ending.Start, 0);
 
+            // a section's start and the ending swelling, from a sequence of the section's own, so that the strikes' draws stay
+            var swelling = song.Stream(SongStream.DrumMarks, index);
             foreach (var (at, strength) in places)
             {
                 // drawn for every place, so that the draws are as many
                 var (chance, loudness) = Places[strength];
                 var (hits, drum) = (context.TestProbability(often.Chance(energy.Chance(chance, 1), 1)), marking[context.GenerateInt(0, marking.Length)]);
-                if (hits && plays)
+                var (swell, swellRate) = (swelling.TestProbability(swells.Chance(SwellChance, 1)), swelling.Pick(RollRates));
+                if (hits && plays && strength == 0 && swell && at >= SwellBeats)
+                    marks[drum].AddRange(Roll(loudest[drum], at, SwellBeats, SwellBeats, swellRate));
+                else if (hits && plays)
                     marks[drum].Add((loudest[drum] with { Velocity = loudest[drum].Velocity * loudness }).ToTimelineItem(at));
             }
 
             // a roll into the section on the beat before it, where the drums play the section
             var (rolls, rate, roller) = (context.TestProbability(often.Chance(energy.Chance(RollChance, 1), 1)), context.Pick(RollRates), marking[context.GenerateInt(0, marking.Length)]);
             if (rolls && plays && span.Start >= 1)
-            {
-                var steps = rate;
-                marks[roller].AddRange(Enumerable.Range(0, steps).Select(k => (loudest[roller] with
-                {
-                    Velocity = loudest[roller].Velocity * (RollFrom + (1 - RollFrom) * k / Math.Max(1, steps - 1)),
-                    Duration = Math.Min(loudest[roller].Duration, 1.0 / rate)
-                }).ToTimelineItem(span.Start - 1 + k / (double)rate)));
-            }
+                marks[roller].AddRange(Roll(loudest[roller], span.Start, 1, 0, rate));
         }
 
         var result = notes.ToBuilder();
@@ -123,5 +130,20 @@ internal static class DrumMarks
                 marks.TryGetValue(track, out var own) ? own.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position) : []);
         StateTrace.Record(TracePoints.DrumMarks, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", marking), marking.ToImmutableArray());
         return draft with { Notes = result.ToImmutable() };
+    }
+
+    /// <summary>
+    ///     A roll peaking at a place: growing from <see cref="RollFrom" /> of its drum's note to the whole of it over the
+    ///     beats before, and fading as far over the beats after, its notes the quicker the louder, at its rate at the peak;
+    ///     a roll into a section all growth, a swell both.
+    /// </summary>
+    internal static IEnumerable<TimelineItem<RealizedNote>> Roll(RealizedNote note, double peak, double before, double after, int rate)
+    {
+        double Loudness(double at) => at <= peak
+            ? RollFrom + (1 - RollFrom) * (before > 0 ? (at - (peak - before)) / before : 1)
+            : 1 - (1 - RollFrom) * (at - peak) / after;
+        // a roll with nothing after its peak ending before it, on the section's first strike
+        for (var at = peak - before; at < peak + after + 1e-9 && (after > 0 || at < peak - 1e-9); at += 1 / (rate * Loudness(at)))
+            yield return (note with { Velocity = note.Velocity * Loudness(at), Duration = Math.Min(note.Duration, 1.0 / rate) }).ToTimelineItem(at);
     }
 }

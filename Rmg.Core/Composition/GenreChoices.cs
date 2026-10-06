@@ -201,8 +201,11 @@ public static class GenreChoices
     /// <summary>What the drums do: keep time, as the songs' always do, or mark the form, as a calm piece's percussion does (<see cref="DrumMarks" />).</summary>
     public static GenreChoice DrumJob { get; } = Pool("drumJob", "Drums' job", DrumMarks.Jobs.Select(x => (DrumMarks.NameOf(x.Job), x.Job == Composition.DrumJob.Groove ? "Keeping time" : "Marking the form", x.Weight)));
 
-    /// <summary>How often drums marking the form strike, from 0, seldom, through 50, as they do, to 100, often (<see cref="DrumMarks.GenreOdds" />).</summary>
-    public static GenreChoice Marks { get; } = Values("marks", "Drums' marks", [("often", "How often")]);
+    /// <summary>
+    ///     How often drums marking the form strike, and how often a section's start swells, from 0, seldom, through 50, as
+    ///     they do, to 100, often (<see cref="DrumMarks.GenreOdds" />).
+    /// </summary>
+    public static GenreChoice Marks { get; } = Values("marks", "Drums' marks", [("often", "How often"), ("swells", "How often swelling")]);
 
     /// <summary>The chance a verse leaves its melody out, the room a rap's voice takes over the beat (<see cref="Arrangement.VoiceChance" />).</summary>
     public static GenreChoice Voice { get; } = Chances("voice", "Verses for a voice", [("verses", "Verses without a melody", Arrangement.VoiceChance)]);
