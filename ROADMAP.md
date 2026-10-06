@@ -155,6 +155,8 @@ each from the trace; the seeds named here are ones already found.
 - **Rock's rhythm guitar:** the riff and the rhythm part never take the chords' instrument, nor the rhythm part the
   riff's (`SongTracks`), so where the chords and the riff are both driven, Rock's rhythm part is clean (53%) or muted
   (20%): a third guitar's contrast, or wanted distorted too, the exclusion then leaned rather than kept?
+- **The bass under E1:** the bass's octaves start at C1, under the bass guitar's lowest, 9% of its notes
+  (`RegisterReportTest`): its range a note's rather than an octave's, should that be heard.
 - **The instruments:** a switch keeping to the part's family, 58% of a middling song's: welcome, or does a song want
   more handovers? An articulation on the same rig, a driven guitar's harmonics, a clean one muted: heard as the same
   player?
@@ -320,10 +322,6 @@ of here once it is; the genres it adds are described under *More genres*.
 
 **P2, the engine, for several genres each:**
 
-11. **A part's register a genre's value,** as its pan is: its octaves and its instrument's range moved by an octave
-    either way, a down-tuned riff's (Djent, Nu metal) or a bass singing high (Fusion); the instruments' ranges and the
-    melody over the chords done (`Registers`). The bass's octaves start at C1, under the bass guitar's E1, 9% of its
-    notes: its range a note's rather than an octave's, should that be heard.
 12. **A drum's sounds a genre's pool:** the cross-stick, the hi-hat's foot (Jazz's 2 and 4), the china, the open
     hi-hat, the ride's bell, each now the songs' fixed chance.
 13. **An instrument by its section's energy:** a part's quieter and louder form, the clean verse guitar distorted in the

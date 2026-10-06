@@ -29,15 +29,26 @@ public static class Registers
         return ((int)Math.Round(low / 12.0) - ZeroOctave, (int)Math.Round((high + 1) / 12.0) - 1 - ZeroOctave);
     }
 
-    /// <summary>A part's octaves, as drawn, moved within its instrument's, as many as it has room for.</summary>
-    public static PitchInstrumentTrack WithinInstrument(PitchInstrumentTrack part)
+    /// <summary>
+    ///     A part's octaves, as drawn, moved within its instrument's, as many as it has room for; both moved an octave where a
+    ///     genre's register for the part is at its lowest quarter or its highest (<see cref="GenreChoices.Register" />), as
+    ///     a guitar tuned down plays, or a bass up high.
+    /// </summary>
+    public static PitchInstrumentTrack WithinInstrument(PitchInstrumentTrack part, Genre genre)
     {
-        var (low, high) = OctavesOf(part.InstrumentCode);
+        var moved = OctavesOf(genre, part.Role);
+        var (low, high) = OctavesOf(part.InstrumentCode) is var (l, h) ? (l + moved, h + moved) : default;
         var width = part.MaxOctaveOffset - part.MinOctaveOffset;
-        var min = Math.Clamp(part.MinOctaveOffset, low, high);
+        var min = Math.Clamp(part.MinOctaveOffset + moved, low, high);
         var max = Math.Clamp(min + width, min, high);
         return Moved(part, Math.Max(low, max - width), max);
     }
+
+    /// <summary>How many octaves a genre moves a part, the riff's twin as the riff: -1, 0 or 1, by its register's shift.</summary>
+    public static int OctavesOf(Genre genre, TrackRole role) =>
+        GenreChoices.Name((role == TrackRole.RiffTwin ? TrackRole.Riff : role).ToString()) is var name && GenreChoices.Register.Options.Any(x => x.Name == name)
+            ? genre.Shift(GenreChoices.Register, name) switch { <= -0.5 => -1, >= 0.5 => 1, _ => 0 }
+            : 0;
 
     /// <summary>
     ///     The melody and the chords placed apart, the melody's singable middle a fourth or more above the chords' middle, each
