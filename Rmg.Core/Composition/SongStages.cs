@@ -14,6 +14,7 @@ namespace Rmg.Core.Composition;
 /// <param name="Sections">Every appearance, in the song's order.</param>
 /// <param name="Energies">How loud and busy each appearance is meant to be.</param>
 /// <param name="Solos">The appearances played as solos, by their places.</param>
+/// <param name="Pinned">The parts the song pins to their figures, a genre's (<see cref="DrumRoles.DrawPinned" />).</param>
 /// <param name="Repeats">Whether the last section plays once more, as a last chorus.</param>
 /// <param name="GrooveContext">The groove's stream, its swing's draws made before, the rest of them here.</param>
 internal sealed record SongDecisions(
@@ -32,6 +33,7 @@ internal sealed record SongDecisions(
     IReadOnlyList<double> Energies,
     IReadOnlyDictionary<int, SoloPlan> Solos,
     IReadOnlyDictionary<TrackRole, Soloist> Soloists,
+    ImmutableHashSet<RhythmPart> Pinned,
     SongAssembly Form,
     bool Repeats,
     StateMap CommonStateMap,
@@ -174,7 +176,8 @@ internal static class SongStages
             song.SectionMeters,
             [..song.SectionIds],
             song.Absent,
-            song.Genre
+            song.Genre,
+            song.Pinned
         );
         StateTrace.Record(TracePoints.Polymeter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", polymeters.Select(x => $"{x.Key} {x.Value}")), polymeters);
         return draft with

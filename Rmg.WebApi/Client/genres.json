@@ -64,8 +64,8 @@
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100] },
       "polymeter": { "sections": [0, 1, 50] },
       "soloAnswers": { "sections": [0, 30, 30] },
-      "lastRepeat": { "songs": [0, 25, 25] },
-      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35 },
+      "lastRepeat": { "songs": [20, 40, 40] },
+      "doubling": { "octaves": [7, 11, 15], "harmony": [25, 35, 35], "riff": [50, 50, 50] },
       "instrumentSwitches": { "sections": [0, 2, 100] }
     }
   },
@@ -289,7 +289,7 @@
       "hatRolls": {},
       "riff": {},
       "sectionChanges": {},
-      "polymeter": { "sections": [0, 1, 50] },
+      "polymeter": { "sections": [0, 20, 40] },
       "soloAnswers": { "sections": [0, 30, 30] },
       "lastRepeat": { "songs": [0, 25, 25] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35 },
@@ -363,8 +363,8 @@
       "sectionChanges": {},
       "polymeter": { "sections": [0, 1, 50] },
       "soloAnswers": { "sections": [0, 30, 30] },
-      "lastRepeat": { "songs": [0, 25, 25] },
-      "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35 },
+      "lastRepeat": { "songs": [20, 40, 40] },
+      "doubling": { "octaves": [7, 11, 15], "harmony": [30, 40, 40], "riff": 35 },
       "instrumentSwitches": { "sections": [0, 2, 100] }
     }
   },
@@ -375,8 +375,8 @@
     "choices": {
       "phraseScheme": { "aaaa": 100, "aaab": [25, 25, 40], "aaba": [15, 15, 30], "abab": [10, 10, 30] },
       "voice": { "verses": [60, 70, 70] },
-      "hatRolls": { "bars": [10, 15, 25] },
-      "glide": { "bass": [40, 50, 60] },
+      "hatRolls": { "bars": [0, 3, 10] },
+      "glide": { "bass": [5, 10, 20] },
       "sectionLength": { "bars8": [40, 40, 40], "bars16": 100, "bars32": [20, 20, 20] },
       "pins": { "ground": [90, 90, 70], "backbeat": [100, 100, 80] },
       "articulation": { "roll": [0, 20, 30] },

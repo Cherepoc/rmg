@@ -352,7 +352,7 @@ public static class SongGenerator
         var form = formGenerator.Assemble(plan, played, sections);
         var decisions = new SongDecisions(
             seed, genre, tracks, absent, songUnconventionality, meter, structure, sectionIds, played, sectionMeters, generateSection, sections, energies,
-            solos, soloists, form, repeats, commonStateMap, swing, grooveContext);
+            solos, soloists, pinned, form, repeats, commonStateMap, swing, grooveContext);
         var song = SongStages.Run(decisions, new SongDraft(form.Edits.ApplyTo(form.Blocks.Unroll()), null, [], [], []), skipped, observe, cancellation);
         var (songTrackNoteTimelineMap, notes) = (song.Timeline, song.Notes!);
 

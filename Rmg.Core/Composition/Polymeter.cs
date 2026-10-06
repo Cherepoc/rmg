@@ -102,13 +102,15 @@ internal static class Polymeter
     /// <param name="meters">A section's meter, by its id, whose bar the cycle's length must not divide.</param>
     /// <param name="absent">The parts the song leaves out.</param>
     /// <param name="genre">The genre whose chance of a polymeter a section draws (<see cref="GenreChoices.Polymeter" />).</param>
+    /// <param name="pinned">The parts the song pins to their figures, which play them every bar and join no cycle.</param>
     public static ImmutableDictionary<int, Plan> Generate(
         Func<int, IGenerationContext> sections,
         Func<int, double> feel,
         IReadOnlyDictionary<int, Meter> meters,
         IEnumerable<int> sectionIds,
         ImmutableHashSet<TrackRole> absent,
-        Genre genre
+        Genre genre,
+        ImmutableHashSet<RhythmPart> pinned
     )
     {
         var plans = ImmutableDictionary.CreateBuilder<int, Plan>();
@@ -140,7 +142,12 @@ internal static class Polymeter
                 parts = [..parts, TrackRole.Chords];
             var runsOn = context.TestProbability(RunsOnChance.At(unconventionality));
             var grows = context.TestProbability(GrowChance.At(unconventionality)) && cells.Length == 1;
-            plans[id] = new Plan(cells, parts, kick, runsOn ? Plan.Section : frame, snare, grows);
+            // but a part the song pins, which keeps its figure, drawn for all the same so that the draws are as many
+            parts = [..parts.Where(x => GenreRhythm.PartOf(x) is not { } part || !pinned.Contains(part))];
+            if (parts.IsEmpty)
+                continue;
+            var cycleKick = kick && !pinned.Contains(RhythmPart.Ground);
+            plans[id] = new Plan(cells, parts, cycleKick, runsOn ? Plan.Section : frame, snare && cycleKick && !pinned.Contains(RhythmPart.Backbeat), grows);
         }
 
         return plans.ToImmutable();

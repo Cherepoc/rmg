@@ -316,8 +316,6 @@ left:
   baseline of every retuning below.
 
   **P2**, in order, each measured as above:
-  13. **Hip-hop as boom-bap,** its glide and hat rolls rare (a trap preset's, 20); Techno's polymeter; a last chorus
-     repeated in Rock and Synthwave, which twin leads join.
   14. **`SectionGenerator.Generate` split** (about 245 lines) and `GeneratePitchedTracks` (about 220) into named
      steps as the song's stages are, before the next feature that touches them; the fingerprint kept.
   15. **A Pop preset,** the plainest songs' frame named: a verse, a pre-chorus and a chorus, a last chorus lifted and
