@@ -6,64 +6,6 @@ using Rmg.Core.Songs;
 namespace Rmg.Core.Composition;
 
 /// <summary>
-///     What the song decided before it was put together, which every stage after reads and none changes: its seed and
-///     streams, its genre, parts, facets and form, its sections as they appear, their energies, solos and soloists, and
-///     the song assembled.
-/// </summary>
-/// <param name="SectionOf">A section as generated, by its id, made once where it first plays.</param>
-/// <param name="Sections">Every appearance, in the song's order.</param>
-/// <param name="Energies">How loud and busy each appearance is meant to be.</param>
-/// <param name="Solos">The appearances played as solos, by their places.</param>
-/// <param name="Pinned">The parts the song pins to their figures, a genre's (<see cref="DrumRoles.DrawPinned" />).</param>
-/// <param name="Repeats">Whether the last section plays once more, as a last chorus.</param>
-/// <param name="GrooveContext">The groove's stream, its swing's draws made before, the rest of them here.</param>
-internal sealed record SongDecisions(
-    ulong Seed,
-    Genre Genre,
-    SongTracks Tracks,
-    ImmutableHashSet<TrackRole> Absent,
-    Unconventionality Facets,
-    Meter Meter,
-    SongStructure Structure,
-    IReadOnlyList<int> SectionIds,
-    IReadOnlyList<int> Played,
-    IReadOnlyDictionary<int, Meter> SectionMeters,
-    Func<int, GeneratedSection> SectionOf,
-    IReadOnlyList<GeneratedSection> Sections,
-    IReadOnlyList<double> Energies,
-    IReadOnlyDictionary<int, SoloPlan> Solos,
-    IReadOnlyDictionary<TrackRole, Soloist> Soloists,
-    ImmutableHashSet<RhythmPart> Pinned,
-    SongAssembly Form,
-    bool Repeats,
-    StateMap CommonStateMap,
-    Swing Swing,
-    IGenerationContext GrooveContext
-)
-{
-    /// <summary>A stage's own stream.</summary>
-    public IGenerationContext Stream(SongStream stream) => SongGenerator.CreateStream(Seed, stream);
-
-    /// <summary>A stage's own stream for each place, such as an appearance or a section.</summary>
-    public IGenerationContext Stream(SongStream stream, int place) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seed, (int)stream), place));
-
-    /// <summary>A stage's own stream for each pair of places, such as a section and a track.</summary>
-    public IGenerationContext Stream(SongStream stream, int place, int other) => new GenerationContext(Seeds.Derive(Seeds.Derive(Seeds.Derive(Seed, (int)stream), place), other));
-
-    /// <summary>A facet's value as the rhythm's unconventionality, for a choice that leans by it.</summary>
-    public RhythmicUnconventionality Of(Facet facet) => new(Facets[facet]);
-
-    /// <summary>The parts the song plays, by their tracks.</summary>
-    public IReadOnlyDictionary<int, TrackRole> Playing => Tracks.Definitions.Where(x => !Absent.Contains(x.Value.Role)).ToDictionary(x => x.Key, x => x.Value.Role);
-
-    /// <summary>Every part, by its track.</summary>
-    public IReadOnlyDictionary<int, TrackRole> Roles => Tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role);
-
-    /// <summary>A part's track, by its role.</summary>
-    public KeyValuePair<int, IInstrumentTrack> Track(TrackRole role) => Tracks.Definitions.Single(x => x.Value.Role == role);
-}
-
-/// <summary>
 ///     The song as the stages make it after it is put together: its state and events, then its notes, and what a stage
 ///     hands on to another.
 /// </summary>
