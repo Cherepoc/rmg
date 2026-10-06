@@ -194,6 +194,9 @@ public static class GenreChoices
     /// <summary>The chance a section's bass plays in octaves, its notes off the beat the note before an octave up (<see cref="SectionGenerator.OctaveBassChance" />).</summary>
     public static GenreChoice OctaveBass { get; } = Chances("octaveBass", "Octave bass", [("sections", "Sections in octaves", SectionGenerator.OctaveBassChance)]);
 
+    /// <summary>How wide the melody's range is, from 0, narrow as a hook's, through 50, as the songs have it, to 100, wide as a jazz tune's (<see cref="MelodyLayers.GenreRangeReach" />).</summary>
+    public static GenreChoice MelodyRange { get; } = Values("melodyRange", "Melody's range", [("wide", "Wide")]);
+
     /// <summary>What the bass lands on in a new chord (<see cref="BassLeadingLayers.Arrivals" />): its root, its third, its fifth, or its figure's note.</summary>
     public static GenreChoice BassLanding { get; } = Pool("bassLanding", "Bass's landing",
         BassLeadingLayers.ArrivalWeights.Select(x => (Name(x.Arrival.ToString()), x.Arrival switch
@@ -438,7 +441,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, Loop, LineScale, Bass, OctaveBass, BassLanding, Effects, Levels, Rests, GrooveHold, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, Loop, LineScale, MelodyRange, Bass, OctaveBass, BassLanding, Effects, Levels, Rests, GrooveHold, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

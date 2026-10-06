@@ -140,6 +140,13 @@ internal static class MelodyLayers
     /// </summary>
     public const double EnergyRegister = 6;
 
+    /// <summary>How far a genre widens or narrows the melody's range at its most, as a factor (<see cref="GenreChoices.MelodyRange" />).</summary>
+    public const double GenreRangeReach = 1.5;
+
+    /// <summary>The melody's line as a genre has it: its range narrowed, as a hook's, or widened, as a jazz tune's, by the genre's value.</summary>
+    public static LineProfile LineOf(Genre genre) =>
+        Line with { RangeWidth = (int)Math.Round(Line.RangeWidth * Math.Pow(GenreRangeReach, genre.Shift(GenreChoices.MelodyRange, "wide"))) };
+
     /// <summary>The register a phrase aims at in the bar it peaks in, in semitones above the middle of the melody's range.</summary>
     public const double PeakRegister = 5;
 

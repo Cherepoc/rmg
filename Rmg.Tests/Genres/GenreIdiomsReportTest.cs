@@ -68,6 +68,16 @@ public sealed class GenreIdiomsReportTest
             return bars.Length > 0 ? bars.Count(x => BarOf(x.Start, x.BarDuration) == BarOf(x.Start - x.BarDuration, x.BarDuration)) / (double)bars.Length : double.NaN;
         }
 
+        // the melody's span in each section's appearance, its tenth highest note over its tenth lowest, on average
+        double MelodyRange()
+        {
+            if (!notes.TryGetValue(SongTracks.MelodyTrack, out var melodyNotes))
+                return double.NaN;
+            var spans = map.Sections.Select(span => melodyNotes.Where(x => x.Position >= span.Start && x.Position < span.End).Select(x => x.Value.Pitches[0]).Order().ToArray())
+                .Where(x => x.Length >= 10).Select(x => x[^(x.Length / 10 + 1)] - x[x.Length / 10]).ToArray();
+            return spans.Length > 0 ? spans.Average() : double.NaN;
+        }
+
         // the share of the appearances a part the song plays rests in
         double Rests(TrackRole part) => song.Song.TrackDefinitions.Values.Any(x => x.Role == part)
             ? song.Trace.Where(x => x.Point == TracePoints.Arrangement).Select(x => ((ImmutableHashSet<TrackRole>)x.Value!).Contains(part) ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average()
@@ -88,6 +98,7 @@ public sealed class GenreIdiomsReportTest
             ["verse melody bars repeated"] = RepeatedIn(SectionRole.Verse),
             ["melody bars repeated"] = played.Length > 0 ? played.Count(x => BarOf(x.Start, x.BarDuration) == BarOf(x.Start - x.BarDuration, x.BarDuration)) / (double)played.Length : double.NaN,
             ["melody pentatonic or blues"] = lineScales.Length > 0 ? lineScales.Count(x => x is LineScale.Pentatonic or LineScale.Blues) / (double)lineScales.Length : double.NaN,
+            ["melody's range a section"] = MelodyRange(),
             ["melody mean move"] = moves.Length > 0 ? moves.Average() : double.NaN,
             ["melody leaps past a fifth"] = moves.Length > 0 ? moves.Count(x => x > 7) / (double)moves.Length : double.NaN,
             ["bass leads into a change"] = arrivals.Length > 0 ? arrivals.Count(x => Math.Abs(bass[x.Index].Value.Pitches.Min() - bass[x.Index - 1].Value.Pitches.Min()) is 1 or 2) / (double)arrivals.Length : double.NaN,

@@ -13,7 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: the melody's range by genre; the fills' sounds by
+**When the need shows** (P3), each by what listening says, in this order: the fills' sounds by
 convention; a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
 and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
 
@@ -508,7 +508,9 @@ a link carries. What is left:
      minor. Not done: a value of stepwise or leaping. Leaning the stepwiseness, at any odds, moved the mean move by a
      tenth of a semitone and the leaps not at all: a melody's leaps come of a phrase starting afresh in another register,
      its echoes and its landings, not of its steps. A melody's leaping by genre (P3), a lean of its register's freedom
-     and its leap's size, should listening ask.
+     and its leap's size, should listening ask. Its range by genre done (`GenreChoices.MelodyRange`, the melody's line's
+     range width times up to 1.5 either way): a section's melody spanning Hip-hop 7.4 semitones, Jazz 12.5, the rest 8.6
+     to 10.6.
   2. Done: the bass's style, a genre's value of its leading into a chord, through the chance's odds
      (`GenreChoices.Bass`), and a pool of its landings (`GenreChoices.BassLanding`). A half step into a change: Jazz
      36% (30% unleaned), Blues 28% (24%), Reggae 12% (20%), Hip-hop 8% (11%); most of a bass's steps are its line's,
