@@ -335,10 +335,40 @@ left:
   **P4:** the choices grouped into families (bass, harmony, form, drum devices), one choice of several chances rather
   than fifteen of one, which would read better in the editor and break every genre link kept; should the editor grow
   hard to use.
+- **The arpeggiator by genre** (P2, data only; "chords parts arpeggiated" in `GenreDevicesReportTest`): eight presets
+  play the songs' own pool, named for them (18-19% of their chord parts, and at the wild end every pattern as heavy as
+  none, nine in ten broken). More: Pop 25-30% (up, up and down, Alberti), Rock 15-20% (up, up and down, a picked
+  verse's, modest under a driven guitar), Hip-hop 10-15% (up, up and down); Blues its boogie, root and fifth 10-20% and
+  no other; Metal rare at the middle and its sweep, up two octaves, at the wild end. Less: Jazz 3-5%, no Alberti (its
+  comping block and shell chords), Funk and Reggae none (their chords the rhythm, stabbed). Every genre's wild end set
+  as its own experiment rather than every pattern at 100.
+- **Instruments and effects** (P2, a plan in steps, October 2026): 74 of the 128 programs play, the rest never; and no
+  genre sets a part's reverb.
+  1. A genre's reverb: a value a part (`space`, as `levels` are), over the role's send (`Expression.Reverb`) and its
+     spread; Ambient wet, Funk, Hip-hop and Metal's chugs dry.
+  2. An instrument's traits as data, one table (its family, sustaining or decaying, strumming, rolling, bending, its
+     vibrato, the effects that suit it), read where program ranges decide them now (`Expression.Bends`, `Choruses`,
+     `ChorusesClassically`, the strong effects, `VibratesWide`, the strum, the roll and the chugs in `SongStages`,
+     `Soloist.BendSuit`); a refactor, the fingerprint kept. Before any instrument is added, which would otherwise take
+     the traits of the numbers around it (a piccolo bending, synth brass swept).
+  3. The unused melodic instruments in the roles' pools and the presets': honky-tonk piano (Blues, Folk), tango
+     accordion (Latin), reed organ and dulcimer (Folk), synth brass (Synthwave, Pop, Funk), the orchestra hit as stabs
+     (House, Hip-hop, Synthwave), pizzicato and tremolo strings as instruments (Pop, Ambient), steel drums (Latin,
+     Reggae, Pop), music box and tubular bells (Ambient), synth voice and the calliope, chiff, voice and bass-and-lead
+     leads (Synthwave, House, Techno), piccolo, recorder and whistle (Folk), English horn (Ambient); and the synth
+     effects as pads (atmosphere, soundtrack, crystal, brightness, echoes; rain for Ambient; goblins and sci-fi at the
+     wild end). Their loudness heard in both soundfonts served.
+  4. The reverse cymbal as the riser: a note ending on a drop, and on a louder section's first beat as a lift cue, an
+     edit after assembly on a free channel; the electronic genres' and Pop's most. (The drop's riser below.)
+  5. The world instruments (koto, shamisen, shakuhachi, shanai, bagpipe) at the genres' wild ends alone, Folk's bagpipe
+     too; a lead of their own would want a genre of its own.
+  Not planned: the percussive family's woodblock, agogo, melodic tom and tinkle bell, the kit's own sounds again; the
+  synth drum, whose 80s toms are fills on the drums' channel; the taiko, for a cinematic genre none is. The sound
+  effects, and the sound-effects kit, see *Parked*.
 - **What the genres cannot play yet** (P3, each by what listening to the presets says; `GenreDevicesReportTest`,
   `GenreIdiomsReportTest` the measures):
   - The loop's figures shared, the bass's and the riff's, beside its harmony (`GenreChoices.Loop`).
-  - A drop's build sweeping up, a riser, a noise or a pad, beside its snare roll.
+  - A drop's build sweeping up, a riser, beside its snare roll: the reverse cymbal (*Instruments and effects*, 4).
   - The pump on the kick wherever it falls, should a pumping genre's kick leave the beat; it ducks on the beat now.
   - The pinned drums (`GenreChoices.Pins`) in the bars a drop or an entry clears, and the wilder songs that leave a
     role free.
@@ -403,6 +433,10 @@ left:
 
 Ideas with a reason, not planned: none has shown a need. Taken up only when listening or another item asks for one.
 
+- **Sound effects** (P4): General MIDI's 120-127 and the drums' sound-effects kit sound unlike in each soundfont and at
+  each pitch, and read as a mistake rather than as meant; a gunshot, a telephone or a helicopter never, applause a
+  gimmick, breath and fret noise realism. One experiment, should listening ask: a bed of the sea, birds or rain held
+  under an Ambient intro or outro, a part of one held note and no harmony.
 - **Ping-pong echo** (P4): an echo alternating sides, from the part's pan to its mirror, where a part's echo now
   repeats in place.
 - **Modulation** (blocked until a soundfont maps it): CC1, which none of the soundfonts offered maps to tone. The rule to
