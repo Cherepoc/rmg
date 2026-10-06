@@ -19,11 +19,14 @@ internal static class Polymeter
 {
     public static ByConvention Chance { get; } = new(0, 0.01, 0.5);
 
-    /// <summary>The figure's length in 16ths, three against four, a dotted 8th's, the most common, and any other wilder.</summary>
+    /// <summary>
+    ///     The figure's length in 16ths, three against four, a dotted 8th's, and a dotted quarter's, the most common and the
+    ///     plainest, which a genre playing a polymeter at its plain end plays, and any other wilder.
+    /// </summary>
     public static ImmutableArray<(int Sixteenths, ByConvention Weight)> Lengths { get; } =
     [
-        (3, new ByConvention(0, 0.3, 1)),
-        (6, new ByConvention(0, 0.3, 1)),
+        (3, new ByConvention(1, 0.3, 1)),
+        (6, new ByConvention(1, 0.3, 1)),
         (5, new ByConvention(0, 0.1, 1)),
         (7, new ByConvention(0, 0.1, 1)),
         (9, new ByConvention(0, 0.04, 1)),
@@ -34,8 +37,11 @@ internal static class Polymeter
         (23, new ByConvention(0, 0.03, 1))
     ];
 
-    /// <summary>The chance the bass, with a riff, plays the cycle with it, in unison: the wilder, the oftener.</summary>
-    public static ByConvention BassChance { get; } = new(0, 0.75, 1);
+    /// <summary>
+    ///     The chance the bass, with a riff, plays the cycle with it, in unison: always at the plain end, which only a genre
+    ///     playing a polymeter there reaches, as a band built on such cycles does, and the wilder, the oftener.
+    /// </summary>
+    public static ByConvention BassChance { get; } = new(1, 0.75, 1);
 
     /// <summary>
     ///     The chance the snare, where the kick plays the cycle, strikes every cell's start in place of its own beats, the
@@ -43,8 +49,11 @@ internal static class Polymeter
     /// </summary>
     public static ByConvention SnareChance { get; } = new(0, 0.5, 1);
 
-    /// <summary>The chance the kick plays the cycle with the part that leads it, as it would always in a band built on such cycles: the wilder, the oftener.</summary>
-    public static ByConvention KickChance { get; } = new(0, 0.85, 1);
+    /// <summary>
+    ///     The chance the kick plays the cycle with the part that leads it, as it would always in a band built on such cycles:
+    ///     always at the plain end, which only a genre playing a polymeter there reaches, and the wilder, the oftener.
+    /// </summary>
+    public static ByConvention KickChance { get; } = new(1, 0.85, 1);
 
     /// <summary>
     ///     The chance the chords join the cycle, by their rhythm, their voicing kept, leaned to longer cells by
@@ -133,7 +142,8 @@ internal static class Polymeter
             var frame = context.TestProbability(FrameChance.At(unconventionality)) ? 2 : 1;
             var tails = context.TestProbability(TailChance.At(unconventionality));
             var repeats = context.Pick(Repeats.Select(x => new Weighted<int>(1, x)).ToImmutableArray());
-            var closing = Lengths.Where(x => x.Sixteenths != length && Drifts(length * repeats + x.Sixteenths, bar)).ToArray();
+            // the lengths the section's end allows, none at the plain end but the plainest
+            var closing = Lengths.Where(x => x.Sixteenths != length && Drifts(length * repeats + x.Sixteenths, bar) && x.Weight.At(unconventionality) > 0).ToArray();
             var tail = closing.Length > 0 ? context.Pick(ByConvention.Weigh(closing, unconventionality)) : 0;
             ImmutableArray<int> cells = tails && tail > 0 ? [..Enumerable.Repeat(length, repeats), tail] : [length];
             var snare = context.TestProbability(SnareChance.At(unconventionality)) && kick;

@@ -130,17 +130,17 @@ public static class GenreChoices
         ("chugs", "Palm-muted chugs", SectionGenerator.ChugChance)
     ]);
 
-    /// <summary>The chance a section's pattern turns around in its last bar, a V or a ii–V into its start, a reharmonisation, which no genre plays at the plain end (<see cref="Progressions.Turnaround" />).</summary>
-    public static GenreChoice Turnaround { get; } = Chances("turnaround", "Turnaround", [("sections", "Sections turned around", Progressions.Turnaround)], plainEnd: false);
+    /// <summary>The chance a section's pattern turns around in its last bar, a V or a ii–V into its start, a reharmonisation, which the songs never play at the plain end and a genre may (<see cref="Progressions.Turnaround" />).</summary>
+    public static GenreChoice Turnaround { get; } = Chances("turnaround", "Turnaround", [("sections", "Sections turned around", Progressions.Turnaround)]);
 
-    /// <summary>The chance a chord a bar long passes into the next by its dominant, a reharmonisation, which no genre plays at the plain end (<see cref="Composition.PassingChords" />).</summary>
-    public static GenreChoice PassingChords { get; } = Chances("passingChords", "Passing chords", [("chords", "Chords passing into the next", Composition.PassingChords.Chance)], plainEnd: false);
+    /// <summary>The chance a chord a bar long passes into the next by its dominant, a reharmonisation, which the songs never play at the plain end and a genre may (<see cref="Composition.PassingChords" />).</summary>
+    public static GenreChoice PassingChords { get; } = Chances("passingChords", "Passing chords", [("chords", "Chords passing into the next", Composition.PassingChords.Chance)]);
 
     /// <summary>The chance a section plays its first phrase in stop time, the band hitting once a bar under the lines (<see cref="SongStages.StopTimeChance" />).</summary>
     public static GenreChoice StopTime { get; } = Chances("stopTime", "Stop time", [("sections", "Sections in stop time", SongStages.StopTimeChance)]);
 
-    /// <summary>The chance a section planes, every chord the home's shape moved by semitones, a reharmonisation, which no genre plays at the plain end (<see cref="Composition.Planing" />).</summary>
-    public static GenreChoice Planing { get; } = Chances("planing", "Planing", [("sections", "Sections planed", Composition.Planing.Chance)], plainEnd: false);
+    /// <summary>The chance a section planes, every chord the home's shape moved by semitones, a reharmonisation, which the songs never play at the plain end and a genre may (<see cref="Composition.Planing" />).</summary>
+    public static GenreChoice Planing { get; } = Chances("planing", "Planing", [("sections", "Sections planed", Composition.Planing.Chance)]);
 
     /// <summary>The chances a song's last section that came back lifts its key, a section plays in a key of its own, and any pattern's start changes it (<see cref="KeyChange" />): a ballad's last chorus up, a blues in one key.</summary>
     public static GenreChoice KeyChanges { get; } = Chances("keyChanges", "Key changes",
@@ -154,14 +154,14 @@ public static class GenreChoices
 
     /// <summary>
     ///     The chances of harmony's devices that no choice above reaches: a later appearance reharmonised, a chromatic line
-    ///     inside a held chord and a pedal under a section; reharmonisations, which no genre plays at the plain end.
+    ///     inside a held chord and a pedal under a section; reharmonisations, which the songs never play at the plain end and a genre may.
     /// </summary>
     public static GenreChoice HarmonyDevices { get; } = Chances("harmonyDevices", "Harmony's devices",
     [
         ("reharmonised", "A later appearance reharmonised", Reharmonisation.Chance),
         ("innerLine", "A chromatic inner line", SongStages.InnerLineChance),
         ("pedal", "A pedal under a section", SongStages.SectionPedalChance)
-    ], plainEnd: false);
+    ]);
 
     /// <summary>The chances a line's part slurs its steps, a piano's part rolls its held chords, and the chords are struck short (<see cref="SongStages.Articulation" />).</summary>
     public static GenreChoice Articulation { get; } = Chances("articulation", "Articulation",
@@ -593,8 +593,8 @@ public static class GenreChoices
     }
 
     /// <summary>A choice of chances, every one's own its chances as the songs have them.</summary>
-    private static GenreChoice Chances(string name, string label, IEnumerable<(string Name, string Label, ByConvention Chance)> options, bool plainEnd = true) =>
-        new(name, label, GenreChoiceKind.Chances, [..options.Select(x => new GenreOption(x.Name, x.Label, x.Chance) { HasPlainEnd = plainEnd })]);
+    private static GenreChoice Chances(string name, string label, IEnumerable<(string Name, string Label, ByConvention Chance)> options) =>
+        new(name, label, GenreChoiceKind.Chances, [..options.Select(x => new GenreOption(x.Name, x.Label, x.Chance))]);
 
     /// <summary>A choice of values, every one's own as it is.</summary>
     private static GenreChoice Values(string name, string label, IEnumerable<(string Name, string Label)> options) =>

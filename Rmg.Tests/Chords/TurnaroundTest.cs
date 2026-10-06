@@ -33,11 +33,11 @@ public sealed class TurnaroundTest
     }
 
     [Test]
-    public async Task AGenresTurnaround_IsNeverPlayedAtThePlainEnd()
+    public async Task TheSongsTurnaround_IsNeverPlayedAtThePlainEnd_AndAGenresIs_AsItSays()
     {
         var genre = Genre.Read(new Dictionary<string, IReadOnlyDictionary<string, ByConvention>> { ["turnaround"] = new Dictionary<string, ByConvention> { ["sections"] = new(1, 1, 1) } }, out _)!;
 
-        await Assert.That(genre.Chance(GenreChoices.Turnaround, "sections")!.Value.Plain).IsEqualTo(0);
+        await Assert.That(genre.Chance(GenreChoices.Turnaround, "sections")!.Value.Plain).IsEqualTo(1);
         await Assert.That(Rmg.Core.Composition.Progressions.Turnaround.At(0)).IsEqualTo(0);
     }
 }

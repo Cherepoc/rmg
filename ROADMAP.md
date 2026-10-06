@@ -317,9 +317,6 @@ of here once it is; the genres it adds are described under *More genres*.
 
 **P2, the engine, for several genres each:**
 
-8. **A device a genre plays at its plain end** plays there with its own draws at their middle: the polymeter (its
-   lengths all 0 at 0, `ByConvention.Weigh` throwing at a given 0, its kick and bass rarely joining near it), planing,
-   the pedal and the other reharmonisations (`HasPlainEnd: false`), a wild-end sound such as the china.
 9. **`SongStages` split:** every stage beside its device with its constants (stop time, pushes, hat rolls,
    articulation, risers, inner lines), `SongStages` their order alone; the fingerprint kept.
 10. **The drums marking the form:** a genre's choice of the drums' job, a groove, as now, or marks: one or two of its

@@ -126,6 +126,22 @@ public sealed class PolymeterTest
     }
 
     [Test]
+    public async Task AGenrePlayingAPolymeter_PlaysItInItsPlainestSongs_ThePlainestCells_TheKickAndTheBassWithIt()
+    {
+        var genre = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
+            .Add("polymeter", ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add("sections", new(1, 1, 1))));
+        var plans = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => Plans(TestCorpus.Get(seed, new SongOverrides(Base: 0, Genre: genre))))
+            .SelectMany(x => x.Values).ToArray();
+        await Assert.That(plans.Length).IsGreaterThan(0);
+        foreach (var plan in plans)
+        {
+            await Assert.That(plan.Cells.All(x => x is 3 or 6)).IsTrue().Because(string.Join("+", plan.Cells));
+            await Assert.That(plan.Kick || !plan.Parts.Contains(TrackRole.Riff)).IsTrue();
+            await Assert.That(plan.Grows || plan.Snare).IsFalse();
+        }
+    }
+
+    [Test]
     public async Task ThePlainestSongs_PlayNoPolymeter()
     {
         foreach (var seed in Enumerable.Range(0, 8))
