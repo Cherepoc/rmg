@@ -25,6 +25,24 @@ public sealed class GenrePresetsTest
     }
 
     [Test]
+    public async Task EveryPreset_NamesTheInstrumentsOfEveryPartItMayPlay_SoThatNoneFallsOnTheSongsPool()
+    {
+        foreach (var preset in GenrePresets.All)
+        {
+            var genre = GenrePresets.Genre(preset);
+            foreach (var (role, pool) in GenreChoices.Instruments)
+            {
+                // the riff's twin plays the riff's instrument
+                var plays = (role == TrackRole.Riff ? [role, TrackRole.RiffTwin] : new[] { role }).Any(part =>
+                    (genre.Chance(GenreChoices.Parts, GenreChoices.Name(part.ToString())) ?? SongParts.ChanceOf(part)) is var chance
+                    && (chance.Plain > 0 || chance.Tuned > 0 || chance.Wild > 0));
+                if (plays)
+                    await Assert.That(genre.Names(pool)).IsTrue().Because($"{preset.Name} may play the {role} but names none of its instruments");
+            }
+        }
+    }
+
+    [Test]
     public async Task EveryPreset_IsAGenre_AsARequestReadsIt()
     {
         foreach (var preset in GenrePresets.All)

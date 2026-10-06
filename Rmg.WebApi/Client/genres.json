@@ -26,7 +26,9 @@
         "bass": { "electricBassFinger": [65, 65, 100], "electricBassPick": [100, 100, 87] },
         "riff": { "overdrivenGuitar": 100, "distortionGuitar": 85, "electricGuitarMuted": [5, 5, 15] },
         "rhythm": { "electricGuitarClean": [30, 30, 100], "electricGuitarMuted": [10, 10, 20], "overdrivenGuitar": [100, 100, 71], "distortionGuitar": [80, 80, 57] },
-        "solo": { "overdrivenGuitar": 100, "distortionGuitar": 100, "harmonica": [15, 15, 25], "lead2Sawtooth": [15, 15, 52] }
+        "solo": { "overdrivenGuitar": 100, "distortionGuitar": 100, "harmonica": [15, 15, 25], "lead2Sawtooth": [15, 15, 52] },
+        "pad": { "drawbarOrgan": 100, "stringEnsemble1": 60, "synthStrings1": [20, 20, 40], "choirAahs": [10, 10, 30] },
+        "counterMelody": { "electricGuitarClean": 100, "rockOrgan": 60, "stringEnsemble1": [20, 20, 40], "cello": [10, 10, 30], "lead2Sawtooth": [10, 10, 40] }
       },
       "kit": { "standard": [65, 65, 100], "room": [30, 30, 7], "power": [100, 100, 22] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [65, 65, 70], "counterMelody": 60, "drum": 95, "riff": [80, 80, 56], "riffTwin": [0, 15, 15], "rhythm": [60, 60, 48], "solo": [0, 30, 79] },
@@ -101,7 +103,10 @@
         "chords": { "acousticGrandPiano": 100, "electricPiano1": [40, 40, 99], "vibraphone": [25, 25, 27], "electricGuitarJazz": 80 },
         "bass": { "acousticBass": 100, "contrabass": [30, 30, 36] },
         "counterMelody": { "frenchHorn": [56, 56, 100], "trombone": [100, 100, 92], "clarinet": [81, 81, 75], "flute": [50, 50, 82] },
-        "solo": { "electricGuitarJazz": 40, "altoSax": [85, 85, 100], "tenorSax": [100, 100, 97], "trumpet": [80, 80, 79] }
+        "solo": { "electricGuitarJazz": 40, "altoSax": [85, 85, 100], "tenorSax": [100, 100, 97], "trumpet": [80, 80, 79] },
+        "pad": { "stringEnsemble1": 100, "stringEnsemble2": 60, "voiceOohs": [20, 20, 40], "pad2Warm": [0, 10, 40] },
+        "riff": { "brassSection": 100, "baritoneSax": 80, "electricGuitarClean": 30 },
+        "rhythm": { "electricGuitarJazz": 100, "electricPiano1": 40, "acousticGuitarNylon": [20, 20, 40] }
       },
       "kit": { "jazz": 100, "brush": 80 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [40, 40, 64], "counterMelody": 60, "drum": 95, "riff": [6, 6, 47], "riffTwin": [0, 15, 15], "rhythm": [10, 10, 37], "solo": [0, 60, 58] },
@@ -187,7 +192,8 @@
         "pad": { "synthStrings1": [56, 56, 78], "pad2Warm": 100, "pad3Polysynth": [100, 100, 71], "pad7Halo": [81, 81, 57], "pad8Sweep": [81, 81, 57], "atmosphereFX4": [10, 15, 25], "pad6Metallic": [5, 10, 25] },
         "counterMelody": { "lead2Sawtooth": 100 },
         "riff": { "lead1Square": 100, "lead2Sawtooth": 100 },
-        "solo": { "lead1Square": [100, 100, 98], "lead2Sawtooth": 100, "lead5Charang": [30, 30, 52] }
+        "solo": { "lead1Square": [100, 100, 98], "lead2Sawtooth": 100, "lead5Charang": [30, 30, 52] },
+        "rhythm": { "electricPiano1": 100, "electricGuitarMuted": 50, "clavinet": 40, "electricGuitarClean": 30 }
       },
       "kit": { "electronic": 100, "tr808": 100 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [95, 95, 81], "counterMelody": 60, "drum": 95, "riff": [70, 70, 56], "riffTwin": [0, 15, 15], "rhythm": [10, 10, 37], "solo": [0, 20, 80] },
@@ -264,7 +270,8 @@
         "pad": { "pad2Warm": 100, "pad8Sweep": 100, "pad7Halo": [50, 50, 70], "pad6Metallic": [10, 20, 30], "echoesFX7": [5, 10, 25], "sciFiFX8": [0, 0, 20] },
         "counterMelody": { "lead2Sawtooth": 100 },
         "riff": { "lead1Square": 100, "lead2Sawtooth": 100 },
-        "solo": { "lead2Sawtooth": 100, "lead1Square": 100 }
+        "solo": { "lead2Sawtooth": 100, "lead1Square": 100 },
+        "rhythm": { "clavinet": 100, "electricPiano1": 60, "electricGuitarMuted": [20, 20, 40] }
       },
       "kit": { "electronic": 100, "tr808": 100 },
       "parts": { "melody": [60, 60, 50], "chords": [70, 70, 70], "bass": 100, "pad": [60, 60, 60], "counterMelody": 30, "drum": 100, "riff": 100, "riffTwin": [0, 10, 15], "rhythm": [10, 10, 30], "solo": [0, 10, 50] },
@@ -331,7 +338,8 @@
         "pad": { "pad2Warm": 100, "pad3Polysynth": [80, 80, 80], "synthStrings1": [60, 60, 60], "pad7Halo": [40, 40, 60], "synthVoice": [20, 25, 30], "atmosphereFX4": [10, 15, 30], "soundtrackFX2": [5, 10, 25], "pad6Metallic": [0, 10, 25] },
         "counterMelody": { "lead2Sawtooth": 100 },
         "riff": { "lead2Sawtooth": 100, "lead1Square": [60, 60, 60], "synthBrass1": [30, 30, 40] },
-        "solo": { "lead2Sawtooth": 100, "lead5Charang": [40, 40, 60] }
+        "solo": { "lead2Sawtooth": 100, "lead5Charang": [40, 40, 60] },
+        "rhythm": { "electricGuitarClean": 100, "electricGuitarMuted": 60, "electricPiano1": [30, 30, 50] }
       },
       "kit": { "electronic": 100, "tr808": [50, 50, 50] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [95, 95, 85], "counterMelody": 60, "drum": 100, "riff": [50, 50, 50], "riffTwin": [0, 10, 15], "rhythm": [20, 20, 40], "solo": [0, 20, 60] },
@@ -407,7 +415,11 @@
         "melody": { "acousticGrandPiano": [40, 40, 60], "electricPiano1": 100, "vibraphone": [45, 45, 47], "flute": [40, 40, 72], "lead1Square": [25, 25, 40] },
         "chords": { "electricPiano1": 100, "electricPiano2": 65, "stringEnsemble1": [30, 30, 70], "pad2Warm": [45, 45, 49], "orchestraHit": [0, 5, 15] },
         "bass": { "electricBassFinger": [45, 45, 100], "synthBass1": [100, 100, 71], "synthBass2": [65, 65, 46] },
-        "pad": { "stringEnsemble1": [45, 45, 89], "choirAahs": [30, 30, 32], "pad2Warm": 100 }
+        "pad": { "stringEnsemble1": [45, 45, 89], "choirAahs": [30, 30, 32], "pad2Warm": 100 },
+        "counterMelody": { "stringEnsemble1": 100, "flute": 60, "violin": 40, "cello": 40, "pizzicatoStrings": [20, 20, 40] },
+        "riff": { "brassSection": 100, "baritoneSax": 40, "lead1Square": 40, "electricGuitarClean": 30, "synthBrass1": [20, 20, 40], "orchestraHit": [0, 10, 30] },
+        "rhythm": { "electricPiano1": 100, "electricGuitarClean": 50, "electricGuitarMuted": 50 },
+        "solo": { "altoSax": 60, "tenorSax": 60, "flute": 60, "trumpet": 50, "electricGuitarClean": 40, "lead1Square": 40, "lead2Sawtooth": 30 }
       },
       "kit": { "electronic": 40, "tr808": 100 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [90, 90, 81], "counterMelody": 60, "drum": 95, "riff": [25, 25, 44], "riffTwin": [0, 15, 15], "rhythm": [10, 10, 37], "solo": [0, 20, 80] },
@@ -471,7 +483,10 @@
         "chords": { "acousticGrandPiano": [45, 45, 100], "percussiveOrgan": [40, 40, 37], "electricGuitarClean": [100, 100, 92] },
         "bass": { "electricBassFinger": 100, "synthBass1": [25, 25, 44] },
         "pad": { "stringEnsemble1": [25, 25, 100], "drawbarOrgan": [100, 100, 53] },
-        "rhythm": { "electricGuitarClean": 100, "electricGuitarMuted": [80, 80, 68], "rockOrgan": [30, 30, 25] }
+        "rhythm": { "electricGuitarClean": 100, "electricGuitarMuted": [80, 80, 68], "rockOrgan": [30, 30, 25] },
+        "counterMelody": { "trombone": 100, "electricGuitarClean": 60, "rockOrgan": 40, "flute": 40, "frenchHorn": 30 },
+        "riff": { "brassSection": 100, "electricGuitarClean": 50, "percussiveOrgan": 50, "electricGuitarMuted": 40 },
+        "solo": { "electricGuitarClean": 100, "trumpet": 80, "altoSax": 60, "harmonica": 40, "flute": 40 }
       },
       "kit": { "standard": 100, "room": [45, 45, 27] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [95, 95, 81], "counterMelody": 60, "drum": 95, "riff": [15, 15, 45], "riffTwin": [0, 15, 15], "rhythm": [90, 90, 45], "solo": [0, 20, 80] },
@@ -528,7 +543,10 @@
         "chords": { "acousticGrandPiano": 100, "brightAcousticPiano": [40, 40, 51], "acousticGuitarNylon": [80, 80, 76], "tangoAccordion": [10, 15, 25] },
         "bass": { "acousticBass": [65, 65, 74], "electricBassFinger": 100 },
         "riff": { "brassSection": 100 },
-        "rhythm": { "acousticGuitarSteel": [45, 45, 100], "acousticGuitarNylon": [100, 100, 80] }
+        "rhythm": { "acousticGuitarSteel": [45, 45, 100], "acousticGuitarNylon": [100, 100, 80] },
+        "pad": { "stringEnsemble1": 100, "stringEnsemble2": 50, "drawbarOrgan": 30 },
+        "counterMelody": { "trombone": 100, "flute": 80, "violin": 60, "clarinet": 40, "frenchHorn": 20 },
+        "solo": { "trumpet": 100, "flute": 70, "altoSax": 60, "tenorSax": 50, "electricGuitarJazz": 30 }
       },
       "kit": { "standard": 100, "room": [45, 45, 27] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 80, "counterMelody": 60, "drum": 95, "riff": 50, "riffTwin": [0, 15, 15], "rhythm": [70, 70, 49], "solo": [0, 20, 80] },
@@ -600,7 +618,10 @@
         "chords": { "electricPiano1": 100, "electricPiano2": [30, 30, 53], "drawbarOrgan": [40, 40, 52], "electricGuitarClean": 65 },
         "bass": { "electricBassFinger": [80, 80, 100], "slapBass1": [100, 100, 39], "slapBass2": [65, 65, 26] },
         "riff": { "electricGuitarMuted": [45, 45, 100], "clavinet": [65, 65, 70], "brassSection": [100, 100, 86], "synthBrass1": [10, 15, 25] },
-        "rhythm": { "electricGuitarClean": [65, 65, 100], "electricGuitarMuted": [100, 100, 66], "clavinet": [80, 80, 53] }
+        "rhythm": { "electricGuitarClean": [65, 65, 100], "electricGuitarMuted": [100, 100, 66], "clavinet": [80, 80, 53] },
+        "pad": { "stringEnsemble1": 100, "synthStrings1": 60, "drawbarOrgan": 40 },
+        "counterMelody": { "trombone": 100, "electricGuitarClean": 50, "flute": 30, "synthBrass1": [30, 30, 50] },
+        "solo": { "altoSax": 100, "tenorSax": 100, "trumpet": 80, "electricGuitarClean": 50, "lead1Square": [30, 30, 60] }
       },
       "kit": { "standard": 100, "room": [65, 65, 31] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 80, "counterMelody": 60, "drum": 95, "riff": [80, 80, 56], "riffTwin": [0, 15, 15], "rhythm": 100, "solo": [0, 20, 80] },
@@ -667,7 +688,9 @@
         "bass": { "acousticBass": 100 },
         "counterMelody": { "violin": [100, 100, 89], "cello": 100, "clarinet": [38, 38, 51], "flute": [81, 81, 73] },
         "rhythm": { "acousticGuitarSteel": 100, "acousticGuitarNylon": [45, 45, 51], "banjo": [80, 80, 51] },
-        "solo": { "violin": [80, 80, 100], "flute": 65, "harmonica": [100, 100, 92] }
+        "solo": { "violin": [80, 80, 100], "flute": 65, "harmonica": [100, 100, 92] },
+        "pad": { "stringEnsemble1": 100, "voiceOohs": 40, "choirAahs": 30, "drawbarOrgan": 20 },
+        "riff": { "electricGuitarClean": 100, "percussiveOrgan": 20 }
       },
       "kit": { "standard": [45, 45, 100], "room": [100, 100, 18], "brush": [30, 30, 5] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [55, 55, 66], "counterMelody": 60, "drum": 95, "riff": [10, 10, 46], "riffTwin": [0, 15, 15], "rhythm": [70, 70, 49], "solo": [0, 20, 80] },
@@ -736,7 +759,10 @@
         "chords": { "acousticGrandPiano": 100, "drawbarOrgan": [100, 100, 72], "rockOrgan": [56, 56, 40], "electricGuitarClean": [81, 81, 58], "honkyTonkPiano": [20, 30, 30] },
         "bass": { "acousticBass": [65, 65, 74], "electricBassFinger": 100 },
         "rhythm": { "electricGuitarClean": 100, "overdrivenGuitar": [100, 100, 71] },
-        "solo": { "overdrivenGuitar": 100, "tenorSax": [45, 45, 60], "harmonica": [80, 80, 63] }
+        "solo": { "overdrivenGuitar": 100, "tenorSax": [45, 45, 60], "harmonica": [80, 80, 63] },
+        "pad": { "drawbarOrgan": 100, "stringEnsemble1": 30, "voiceOohs": 20 },
+        "counterMelody": { "electricGuitarClean": 100, "rockOrgan": 80, "trombone": 60, "clarinet": 40 },
+        "riff": { "overdrivenGuitar": 100, "electricGuitarClean": 80, "baritoneSax": 30, "brassSection": 30, "percussiveOrgan": 30 }
       },
       "kit": { "standard": 100, "room": [65, 65, 23], "brush": [30, 30, 11] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [55, 55, 66], "counterMelody": 60, "drum": 95, "riff": 50, "riffTwin": [0, 15, 15], "rhythm": [60, 60, 48], "solo": [0, 40, 73] },
@@ -805,7 +831,10 @@
         "chords": { "orchestralHarp": [45, 45, 30], "stringEnsemble1": [65, 65, 100], "choirAahs": [45, 45, 30], "pad1NewAge": [100, 100, 66], "pad2Warm": [80, 80, 69], "pad7Halo": [80, 80, 53] },
         "bass": { "acousticBass": [46, 46, 100], "fretlessBass": [100, 100, 74], "synthBass2": [69, 69, 51], "contrabass": [69, 69, 51] },
         "pad": { "stringEnsemble1": [65, 65, 100], "choirAahs": [65, 65, 48], "voiceOohs": [45, 45, 33], "pad2Warm": [100, 100, 74], "pad5Bowed": [45, 45, 33], "pad7Halo": [80, 80, 59], "atmosphereFX4": [30, 40, 50], "soundtrackFX2": [20, 30, 40], "crystalFX3": [10, 20, 30], "echoesFX7": [10, 20, 30], "brightnessFX5": [5, 10, 25], "rainFX1": [0, 10, 25], "goblinsFX6": [0, 0, 10] },
-        "counterMelody": { "cello": 100, "stringEnsemble1": 100, "frenchHorn": [56, 56, 70], "flute": [56, 56, 58], "englishHorn": [15, 20, 25] }
+        "counterMelody": { "cello": 100, "stringEnsemble1": 100, "frenchHorn": [56, 56, 70], "flute": [56, 56, 58], "englishHorn": [15, 20, 25] },
+        "riff": { "electricGuitarClean": 100, "lead1Square": 30, "steelDrums": [0, 10, 30] },
+        "rhythm": { "acousticGuitarNylon": 100, "electricGuitarClean": 60, "acousticGuitarSteel": 40 },
+        "solo": { "flute": 100, "violin": 60, "electricGuitarClean": 50, "sopranoSax": 50, "lead2Sawtooth": [0, 20, 50] }
       },
       "kit": { "room": 69, "brush": 100, "orchestra": 100 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 100, "counterMelody": 60, "drum": [35, 35, 74], "riff": [6, 6, 47], "riffTwin": [0, 15, 15], "rhythm": [5, 5, 38], "solo": [0, 10, 68] },
@@ -869,7 +898,11 @@
         "melody": { "electricPiano1": 60, "lead1Square": [40, 40, 60], "lead2Sawtooth": [40, 40, 60], "electricGuitarClean": 60, "acousticGrandPiano": 100, "steelDrums": [0, 5, 15], "lead6Voice": [0, 10, 20] },
         "chords": { "acousticGrandPiano": 100, "electricPiano1": 60, "acousticGuitarSteel": 70, "electricGuitarClean": 60, "pad3Polysynth": [40, 40, 60], "pizzicatoStrings": [10, 15, 20], "synthBrass1": [5, 10, 20] },
         "bass": { "electricBassFinger": 100, "synthBass1": [50, 50, 70], "electricBassPick": 40 },
-        "pad": { "stringEnsemble1": 100, "pad2Warm": 80, "synthStrings1": 60, "pad3Polysynth": 50, "tremoloStrings": [10, 15, 20], "synthVoice": [5, 10, 20] }
+        "pad": { "stringEnsemble1": 100, "pad2Warm": 80, "synthStrings1": 60, "pad3Polysynth": 50, "tremoloStrings": [10, 15, 20], "synthVoice": [5, 10, 20] },
+        "counterMelody": { "stringEnsemble1": 100, "violin": 60, "electricGuitarClean": 60, "cello": 50, "flute": 30, "lead2Sawtooth": [20, 20, 40] },
+        "riff": { "electricGuitarClean": 100, "electricGuitarMuted": 60, "overdrivenGuitar": 40, "lead1Square": 30, "lead2Sawtooth": 30, "brassSection": 20, "synthBrass1": [10, 20, 30] },
+        "rhythm": { "acousticGuitarSteel": 100, "electricGuitarClean": 80, "electricGuitarMuted": 50, "electricPiano1": 30 },
+        "solo": { "overdrivenGuitar": 100, "electricGuitarClean": 60, "altoSax": 50, "lead2Sawtooth": 40, "sopranoSax": 20 }
       },
       "kit": { "standard": 100, "power": [20, 20, 30], "electronic": [20, 20, 40] },
       "drumSetup": { "kit": 100, "kitAndPercussion": [10, 20, 40] },
@@ -935,7 +968,8 @@
         "pad": { "choirAahs": 100, "stringEnsemble1": 80, "synthStrings1": [30, 30, 50] },
         "riff": { "distortionGuitar": 100, "overdrivenGuitar": 60, "electricGuitarMuted": [0, 0, 10] },
         "rhythm": { "distortionGuitar": 100, "overdrivenGuitar": 70 },
-        "solo": { "distortionGuitar": 100, "overdrivenGuitar": 100, "lead2Sawtooth": [10, 10, 30] }
+        "solo": { "distortionGuitar": 100, "overdrivenGuitar": 100, "lead2Sawtooth": [10, 10, 30] },
+        "counterMelody": { "stringEnsemble1": 100, "cello": 80, "violin": 60, "electricGuitarClean": 40 }
       },
       "kit": { "power": 100, "standard": 60 },
       "drumSetup": { "kit": 100 },

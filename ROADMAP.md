@@ -317,9 +317,6 @@ of here once it is; the genres it adds are described under *More genres*.
 
 **P1, wrong now and cheap:**
 
-4. **Every part's pool named:** a preset names the instruments of every part it may play (a rule test), where now a
-   riff, a rhythm part, a pad, a counter-melody or a solo falls back on the songs' pools: a distorted riff in Pop and
-   Folk, an acoustic guitar strumming in Techno, synth pads in Latin and Funk, a distorted solo in Funk.
 5. **The presets' copies of the songs' amounts let go of:** a device a preset leaves out plays as the songs do, its
    report marking it (`GenreDevicesReportTest`'s *), in place of the rule that a preset names every device, its copies
    already drifted (switches 2% for 1.5%).
