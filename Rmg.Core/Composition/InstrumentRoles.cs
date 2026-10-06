@@ -69,7 +69,8 @@ public sealed class InstrumentRole
 
 /// <summary>
 ///     The roles of the pitched tracks. The common instruments of a role weigh the most, and ones with more character
-///     less, so most songs sound familiar and some unusual; none is a sound effect or a drum.
+///     less and never in the plainest songs, so most songs sound familiar and some unusual: the world's instruments, the
+///     synth effects' pads and the orchestra hit the most at the wild end; none is a sound effect or a drum.
 /// </summary>
 internal static class InstrumentRoles
 {
@@ -107,7 +108,17 @@ internal static class InstrumentRoles
             new(90, "Pad 3 (polysynth)", 0.5, VoiceLeadingLayers.Sustained),
             new(91, "Pad 4 (choir)", 0.2, VoiceLeadingLayers.Sustained),
             new(94, "Pad 7 (halo)", 0.3, VoiceLeadingLayers.Sustained),
-            new(95, "Pad 8 (sweep)", 0.2, VoiceLeadingLayers.Sustained)
+            new(95, "Pad 8 (sweep)", 0.2, VoiceLeadingLayers.Sustained),
+            new(3, "Honky-tonk Piano", new ByConvention(0, 0.15, 0.3)),
+            new(15, "Dulcimer", new ByConvention(0, 0.05, 0.2)),
+            new(20, "Reed Organ", new ByConvention(0, 0.08, 0.2), VoiceLeadingLayers.Sustained),
+            new(23, "Tango Accordion", new ByConvention(0, 0.05, 0.2), VoiceLeadingLayers.Sustained),
+            new(44, "Tremolo Strings", new ByConvention(0, 0.1, 0.3), VoiceLeadingLayers.Sustained),
+            new(45, "Pizzicato Strings", new ByConvention(0, 0.1, 0.3)),
+            new(54, "Synth Voice", new ByConvention(0, 0.08, 0.3), VoiceLeadingLayers.Sustained),
+            new(55, "Orchestra Hit", new ByConvention(0, 0.02, 0.2)),
+            new(62, "Synth Brass 1", new ByConvention(0, 0.15, 0.3), VoiceLeadingLayers.Sustained),
+            new(63, "Synth Brass 2", new ByConvention(0, 0.1, 0.3), VoiceLeadingLayers.Sustained)
         ]
     );
 
@@ -128,7 +139,18 @@ internal static class InstrumentRoles
             new(91, "Pad 4 (choir)", 0.3, VoiceLeadingLayers.Sustained),
             new(92, "Pad 5 (bowed)", 0.3, VoiceLeadingLayers.Sustained),
             new(94, "Pad 7 (halo)", 0.4, VoiceLeadingLayers.Sustained),
-            new(95, "Pad 8 (sweep)", 0.2, VoiceLeadingLayers.Sustained)
+            new(95, "Pad 8 (sweep)", 0.2, VoiceLeadingLayers.Sustained),
+            new(44, "Tremolo Strings", new ByConvention(0, 0.15, 0.3), VoiceLeadingLayers.Sustained),
+            new(54, "Synth Voice", new ByConvention(0, 0.15, 0.3), VoiceLeadingLayers.Sustained),
+            new(93, "Pad 6 (metallic)", new ByConvention(0, 0.1, 0.4), VoiceLeadingLayers.Sustained),
+            new(96, "Rain (FX 1)", new ByConvention(0, 0.02, 0.3), VoiceLeadingLayers.Sustained),
+            new(97, "Soundtrack (FX 2)", new ByConvention(0, 0.08, 0.4), VoiceLeadingLayers.Sustained),
+            new(98, "Crystal (FX 3)", new ByConvention(0, 0.05, 0.4), VoiceLeadingLayers.Sustained),
+            new(99, "Atmosphere (FX 4)", new ByConvention(0, 0.1, 0.4), VoiceLeadingLayers.Sustained),
+            new(100, "Brightness (FX 5)", new ByConvention(0, 0.05, 0.4), VoiceLeadingLayers.Sustained),
+            new(101, "Goblins (FX 6)", new ByConvention(0, 0, 0.2), VoiceLeadingLayers.Sustained),
+            new(102, "Echoes (FX 7)", new ByConvention(0, 0.05, 0.4), VoiceLeadingLayers.Sustained),
+            new(103, "Sci-fi (FX 8)", new ByConvention(0, 0, 0.2), VoiceLeadingLayers.Sustained)
         ]
     );
 
@@ -146,7 +168,9 @@ internal static class InstrumentRoles
             new(7, "Clavinet", 0.3),
             new(4, "Electric Piano 1", 0.3),
             new(18, "Rock Organ", 0.2, VoiceLeadingLayers.Sustained),
-            new(105, "Banjo", 0.1, VoiceLeadingLayers.Guitar)
+            new(105, "Banjo", 0.1, VoiceLeadingLayers.Guitar),
+            new(3, "Honky-tonk Piano", new ByConvention(0, 0.08, 0.2)),
+            new(23, "Tango Accordion", new ByConvention(0, 0.03, 0.15), VoiceLeadingLayers.Sustained)
         ]
     );
 
@@ -187,7 +211,12 @@ internal static class InstrumentRoles
             new(81, "Lead 2 (sawtooth)", 0.3),
             new(67, "Baritone Sax", 0.2),
             new(17, "Percussive Organ", 0.2),
-            new(61, "Brass Section", 0.2)
+            new(61, "Brass Section", 0.2),
+            new(62, "Synth Brass 1", new ByConvention(0, 0.15, 0.3)),
+            new(63, "Synth Brass 2", new ByConvention(0, 0.08, 0.3)),
+            new(55, "Orchestra Hit", new ByConvention(0, 0.03, 0.2)),
+            new(87, "Lead 8 (bass and lead)", new ByConvention(0, 0.05, 0.2)),
+            new(114, "Steel Drums", new ByConvention(0, 0.03, 0.2))
         ]
     );
 
@@ -206,7 +235,12 @@ internal static class InstrumentRoles
             new(68, "Oboe", 0.3),
             new(27, "Electric Guitar (clean)", 0.4),
             new(18, "Rock Organ", 0.2),
-            new(81, "Lead 2 (sawtooth)", 0.2)
+            new(81, "Lead 2 (sawtooth)", 0.2),
+            new(69, "English Horn", new ByConvention(0, 0.2, 0.3)),
+            new(72, "Piccolo", new ByConvention(0, 0.05, 0.2)),
+            new(45, "Pizzicato Strings", new ByConvention(0, 0.1, 0.3)),
+            new(62, "Synth Brass 1", new ByConvention(0, 0.1, 0.3)),
+            new(85, "Lead 6 (voice)", new ByConvention(0, 0.05, 0.2))
         ]
     );
 
@@ -243,7 +277,25 @@ internal static class InstrumentRoles
             new(104, "Sitar", 0.1, MelodyLayers.Mixed),
             new(105, "Banjo", 0.1, MelodyLayers.Mixed),
             new(108, "Kalimba", 0.2, MelodyLayers.Leaping),
-            new(110, "Fiddle", 0.1, MelodyLayers.Stepwise)
+            new(110, "Fiddle", 0.1, MelodyLayers.Stepwise),
+            new(10, "Music Box", new ByConvention(0, 0.05, 0.2), MelodyLayers.Leaping),
+            new(14, "Tubular Bells", new ByConvention(0, 0.02, 0.15), MelodyLayers.Leaping),
+            new(15, "Dulcimer", new ByConvention(0, 0.03, 0.15), MelodyLayers.Mixed),
+            new(62, "Synth Brass 1", new ByConvention(0, 0.05, 0.2), MelodyLayers.Stepwise),
+            new(69, "English Horn", new ByConvention(0, 0.1, 0.2), MelodyLayers.Stepwise),
+            new(72, "Piccolo", new ByConvention(0, 0.05, 0.2), MelodyLayers.Stepwise),
+            new(74, "Recorder", new ByConvention(0, 0.08, 0.2), MelodyLayers.Stepwise),
+            new(77, "Shakuhachi", new ByConvention(0, 0, 0.15), MelodyLayers.Stepwise),
+            new(78, "Whistle", new ByConvention(0, 0.05, 0.2), MelodyLayers.Stepwise),
+            new(82, "Lead 3 (calliope)", new ByConvention(0, 0.05, 0.2), MelodyLayers.Mixed),
+            new(83, "Lead 4 (chiff)", new ByConvention(0, 0.05, 0.2), MelodyLayers.Mixed),
+            new(85, "Lead 6 (voice)", new ByConvention(0, 0.08, 0.2), MelodyLayers.Stepwise),
+            new(87, "Lead 8 (bass and lead)", new ByConvention(0, 0.05, 0.2), MelodyLayers.Mixed),
+            new(106, "Shamisen", new ByConvention(0, 0, 0.15), MelodyLayers.Mixed),
+            new(107, "Koto", new ByConvention(0, 0, 0.15), MelodyLayers.Mixed),
+            new(109, "Bagpipe", new ByConvention(0, 0, 0.1), MelodyLayers.Stepwise),
+            new(111, "Shanai", new ByConvention(0, 0, 0.1), MelodyLayers.Stepwise),
+            new(114, "Steel Drums", new ByConvention(0, 0.05, 0.2), MelodyLayers.Leaping)
         ]
     );
 

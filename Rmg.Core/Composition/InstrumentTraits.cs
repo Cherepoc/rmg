@@ -65,7 +65,7 @@ public static class InstrumentTraits
         (72, InstrumentTrait.Bends),
         (80, Lead),
         (88, InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Sweeps),
-        (96, InstrumentTrait.None),
+        (96, InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Sweeps),
         (104, InstrumentTrait.None),
         (112, InstrumentTrait.None),
         (120, InstrumentTrait.None)
@@ -94,6 +94,18 @@ public static class InstrumentTraits
         [45] = InstrumentTrait.None,
         [46] = InstrumentTrait.None,
         [47] = InstrumentTrait.None,
+        // the voices bend, but the orchestra hit, a sample struck
+        [55] = InstrumentTrait.None,
+        // the synth brass chorused and swept
+        [62] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Sweeps,
+        [63] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Sweeps,
+        // the sitar, the koto, the shamisen, the fiddle, the bagpipe and the shanai bend, their players' way
+        [104] = InstrumentTrait.Bends,
+        [106] = InstrumentTrait.Bends,
+        [107] = InstrumentTrait.Bends,
+        [109] = InstrumentTrait.Bends,
+        [110] = InstrumentTrait.Bends,
+        [111] = InstrumentTrait.Bends,
         // the string ensembles chorused
         [48] = InstrumentTrait.Bends | InstrumentTrait.Choruses,
         [49] = InstrumentTrait.Bends | InstrumentTrait.Choruses,

@@ -22,6 +22,54 @@ public sealed class InstrumentRolesTest
         }
     }
 
+    /// <summary>A role's instruments, by a pitched track's role, the twin's its riff's.</summary>
+    private static InstrumentRole? RoleOf(TrackRole role) => role switch
+    {
+        TrackRole.Melody => Rmg.Core.Composition.InstrumentRoles.Melody,
+        TrackRole.Chords => Rmg.Core.Composition.InstrumentRoles.Chords,
+        TrackRole.Bass => Rmg.Core.Composition.InstrumentRoles.Bass,
+        TrackRole.Pad => Rmg.Core.Composition.InstrumentRoles.Pad,
+        TrackRole.CounterMelody => Rmg.Core.Composition.InstrumentRoles.CounterMelody,
+        TrackRole.Riff or TrackRole.RiffTwin => Rmg.Core.Composition.InstrumentRoles.Riff,
+        TrackRole.Rhythm => Rmg.Core.Composition.InstrumentRoles.Rhythm,
+        TrackRole.Solo => Rmg.Core.Composition.InstrumentRoles.Solo,
+        _ => null
+    };
+
+    [Test]
+    public async Task APlainSoundsSong_PlaysNoInstrumentWithCharacter()
+    {
+        // the plainest sound, its instruments those its plain end weighs, a switch's too
+        var plain = new SongOverrides(Facets: System.Collections.Immutable.ImmutableDictionary<Facet, double>.Empty.Add(Facet.Sound, 0));
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, plain)))
+        foreach (var (track, definition) in song.Song.TrackDefinitions)
+        {
+            if (definition is not PitchInstrumentTrack part || RoleOf(part.Role) is not { } role)
+                continue;
+            var programs = song.Song.Notes!.GetValueOrDefault(track)?.Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) is var p and > 0 ? p - 1 : part.InstrumentCode).Distinct() ?? [];
+            // but an articulation's variant, the same player's (InstrumentsOverTime.Variants)
+            foreach (var program in programs.Append(part.InstrumentCode).Where(x => role.Instruments.Any(i => i.Program == x)))
+                await Assert.That(role.Instruments.Single(x => x.Program == program).Weight.Plain).IsGreaterThan(0).Because($"seed {song.Seed}, {part.Role} {program}");
+        }
+    }
+
+    [Test]
+    [Explicit]
+    public async Task Report()
+    {
+        // the parts on an instrument that has character, never the plainest songs', by fifths of the sound facet
+        var parts = TestCorpus.Measure(256, song => song.Song.TrackDefinitions.Values.OfType<PitchInstrumentTrack>().Where(x => RoleOf(x.Role) is not null)
+            .Select(x => (Fifth: Math.Min(4, (int)(song.Song.Draws!.Unconventionality[Facet.Sound] * 5)), x.InstrumentCode, Character: RoleOf(x.Role)!.Instruments.Single(i => i.Program == x.InstrumentCode).Weight.Plain == 0))
+            .ToArray()).SelectMany(x => x).ToArray();
+        foreach (var fifth in Enumerable.Range(0, 5))
+        {
+            var of = parts.Where(x => x.Fifth == fifth).ToArray();
+            Console.WriteLine($"sound fifth {fifth}: {of.Length} parts, {100.0 * of.Count(x => x.Character) / Math.Max(1, of.Length):F1}% on an instrument with character");
+        }
+        Console.WriteLine("most played: " + string.Join(", ", parts.Where(x => x.Character).GroupBy(x => GeneralMidi.Programs[x.InstrumentCode]).OrderByDescending(x => x.Count()).Take(12).Select(x => $"{x.Key} {x.Count()}")));
+        await Task.CompletedTask;
+    }
+
     [Test]
     public async Task Bass_IsPlayedByLowInstruments()
     {

@@ -142,6 +142,9 @@ each from the trace; the seeds named here are ones already found.
   vibratos on guitars and synth leads; slides on 13% of a middling song's parts. Do the wide vibratos sound like a
   guitar's, does a part bending two steps everywhere tire, and are slides heard as slides? Slides are 44% of the
   corpus's pitch shapes: too many?
+- **The instruments added in October 2026:** the synth effects' pads, the orchestra hit, the synth brass, the voice and
+  calliope leads and the rest, about 4% of the songs' parts and more in the presets that name them (Ambient's pads,
+  Synthwave's brass): are any too loud or too strange in either soundfont served? Their weights or traits, if so.
 - **The instruments:** a switch keeping to the part's family, 58% of a middling song's: welcome, or does a song want
   more handovers? An articulation on the same rig, a driven guitar's harmonics, a clean one muted: heard as the same
   player?
@@ -335,15 +338,8 @@ left:
   **P4:** the choices grouped into families (bass, harmony, form, drum devices), one choice of several chances rather
   than fifteen of one, which would read better in the editor and break every genre link kept; should the editor grow
   hard to use.
-- **Instruments and effects** (P2, a plan in steps, October 2026; a genre's reverb done, `GenreChoices.Space`, and an instrument's traits as one table, `InstrumentTraits`): 74 of
+- **Instruments and effects** (P2, a plan in steps, October 2026; a genre's reverb done, `GenreChoices.Space`, an instrument's traits as one table, `InstrumentTraits`, and the unused instruments and the synth effects' pads in the roles and the presets, by convention, never in the plainest songs): 74 of
   the 128 programs play, the rest never.
-  3. The unused melodic instruments in the roles' pools and the presets': honky-tonk piano (Blues, Folk), tango
-     accordion (Latin), reed organ and dulcimer (Folk), synth brass (Synthwave, Pop, Funk), the orchestra hit as stabs
-     (House, Hip-hop, Synthwave), pizzicato and tremolo strings as instruments (Pop, Ambient), steel drums (Latin,
-     Reggae, Pop), music box and tubular bells (Ambient), synth voice and the calliope, chiff, voice and bass-and-lead
-     leads (Synthwave, House, Techno), piccolo, recorder and whistle (Folk), English horn (Ambient); and the synth
-     effects as pads (atmosphere, soundtrack, crystal, brightness, echoes; rain for Ambient; goblins and sci-fi at the
-     wild end). Their loudness heard in both soundfonts served.
   4. The reverse cymbal as the riser: a note ending on a drop, and on a louder section's first beat as a lift cue, an
      edit after assembly on a free channel; the electronic genres' and Pop's most. (The drop's riser below.)
   5. The world instruments (koto, shamisen, shakuhachi, shanai, bagpipe) at the genres' wild ends alone, Folk's bagpipe
