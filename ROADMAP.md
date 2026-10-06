@@ -632,8 +632,9 @@ a link carries. What is left:
   10. Done: chord stabs (`GenreChoices.Articulation`'s "stabs", `SongStages.StabChance`), a song's chords struck a
      16th long, a genre's, on the offbeat 8ths where the genre's rhythm and a pin put them: House's chord notes stabbed
      41%, on the offbeat 64% (13%); Techno's 58% and 73% (10%), its echo likelier.
-  11. Gated reverb on the snare and a big tom fill, Synthwave's, which General MIDI cannot sound but a velocity and
-     length could suggest.
+  11. Synthwave's fills: more of them (fills a minute 2.7 -> 3.4) and toms in every song's kit, tom hits 12.7 a minute.
+     Not done: the gated reverb, which General MIDI cannot sound (one reverb send for the whole drum channel, no gate);
+     and a fill's drums leaning to the toms by genre, which the drum groups' state draws, not a genre's choice.
 
 ## Parked
 

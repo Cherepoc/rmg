@@ -103,6 +103,7 @@ public sealed class GenreIdiomsReportTest
             ["chords stabbed (a 16th or shorter)"] = notes.GetValueOrDefault(SongTracks.ChordsTrack) is { Count: > 0 } chordStabs
                 ? chordStabs.Average(x => x.Value.Duration <= 0.25 + 1e-9 ? 1.0 : 0)
                 : double.NaN,
+            ["tom hits a minute"] = Tracks(DrumGroups.Toms).Sum(t => notes[t].Count) / minutes,
             ["snare on 2 and 4"] = bars.Length > 0 ? bars.Count(x => HitsAt(snares, x + 1) && HitsAt(snares, x + 3)) / (double)bars.Length : double.NaN,
             ["chorus melody bars repeated"] = RepeatedIn(SectionRole.Chorus),
             ["verse melody bars repeated"] = RepeatedIn(SectionRole.Verse),
