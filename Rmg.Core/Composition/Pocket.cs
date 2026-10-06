@@ -9,17 +9,18 @@ namespace Rmg.Core.Composition;
 internal static class Pocket
 {
     /// <summary>
-    ///     How far each part plays off the beat, in beats at its middle, late above 0, as a band's pocket: the backbeat a
-    ///     little behind, the time on it, the bass a touch ahead, a lead laid back; a rule a role, never a jitter.
+    ///     How far each part plays off the beat, in seconds at its middle, late above 0, as a band's pocket, alike at every
+    ///     tempo: the backbeat a little behind, the time on it, the bass a touch ahead, a lead laid back; a rule a role,
+    ///     never a jitter.
     /// </summary>
     public static double OffsetOf(TrackRole role, DrumRole? drum) => (role, drum) switch
     {
-        (TrackRole.Drum, DrumRole.Backbeat) => 0.02,
-        (TrackRole.Drum, DrumRole.Time) => -0.005,
+        (TrackRole.Drum, DrumRole.Backbeat) => 0.01,
+        (TrackRole.Drum, DrumRole.Time) => -0.0025,
         (TrackRole.Drum, _) => 0,
-        (TrackRole.Bass, _) => -0.01,
-        (TrackRole.Melody or TrackRole.Solo, _) => 0.015,
-        (TrackRole.CounterMelody, _) => 0.01,
+        (TrackRole.Bass, _) => -0.005,
+        (TrackRole.Melody or TrackRole.Solo, _) => 0.0075,
+        (TrackRole.CounterMelody, _) => 0.005,
         _ => 0
     };
 
@@ -39,15 +40,18 @@ internal static class Pocket
         if (amount == 0)
             return draft;
         var notes = SongStages.NotesOf(draft);
+        var tempo = draft.Timeline.CommonStateTimelineMap;
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
         {
             // a drum by its role in the song's groove, whatever a section makes of it
             var definition = song.Tracks.Definitions[track];
             var offset = amount * OffsetOf(definition.Role, definition.Role == TrackRole.Drum ? DrumRoles.Of(definition.StateMap) : null);
+            // in beats at the tempo where the note plays
+            double Beats(double position) => offset * tempo.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60;
             result[track] = EventTimeline.Create(timeline.Duration, timeline.Select(note => offset == 0
                 ? note
-                : (note.Value with { State = note.Value.State.With(CompositionStateKinds.TimingOffset, offset) }).ToTimelineItem(note.Position)));
+                : (note.Value with { State = note.Value.State.With(CompositionStateKinds.TimingOffset, Beats(note.Position)) }).ToTimelineItem(note.Position)));
         }
 
         return draft with { Notes = result.ToImmutable() };
