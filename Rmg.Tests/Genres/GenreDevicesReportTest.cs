@@ -46,6 +46,10 @@ public sealed class GenreDevicesReportTest
             ["sections of 32 bars"] = song.Song.Map!.Sections.Average(x => x.Duration >= 32 * x.Meter.BarDuration - 1e-9 ? 1.0 : 0),
             ["appearances building or thinning"] = song.Trace.Where(x => x.Point == TracePoints.Texture)
                 .Select(x => ((int, TextureKind Kind, ImmutableArray<ImmutableHashSet<TrackRole>>))x.Value!).Average(x => x.Kind is TextureKind.Build or TextureKind.Thin ? 1.0 : 0),
+            ["verses without a melody"] = song.Trace.Where(x => x.Point == TracePoints.SongForm).Select(x => (SongStructure)x.Value!).Single() is var structure
+                && song.Song.Map!.Sections.Select((span, i) => (span, i)).Where(x => structure.Roles.GetValueOrDefault(x.span.SectionId) == SectionRole.Verse).ToArray() is { Length: > 0 } verses
+                ? verses.Average(x => song.Resting(x.span).Contains(TrackRole.Melody) ? 1.0 : 0)
+                : double.NaN,
             ["songs with a solo"] = song.Solos.Count > 0 ? 1 : 0,
             ["line notes bent or slid"] = Lines(x => x.State.GetStateValue(CompositionStateKinds.Bend) > 0),
             ["bass's changes of pitch slid into"] = song.Song.Notes!.GetValueOrDefault(SongTracks.BassTrack)?.ToArray() is { Length: > 1 } bass

@@ -30,6 +30,9 @@ internal static class Arrangement
     /// <summary>How far a role that a tune carries keeps its melody, as the odds against it resting.</summary>
     public const double TuneOdds = 8;
 
+    /// <summary>The chance a verse leaves its melody out for a voice, a genre's that the songs never play (<see cref="GenreChoices.Voice" />).</summary>
+    public static ByConvention VoiceChance { get; } = new(0, 0, 0);
+
     /// <summary>How far a genre leans a part's rests at its most and its least (<see cref="GenreChoices.Rests" />), as the odds of its chance.</summary>
     public const double GenreRestOdds = 6;
 
@@ -37,7 +40,8 @@ internal static class Arrangement
     /// <param name="energy">How the section's energy leans the draws: the more, the fewer parts rest.</param>
     /// <param name="absent">The parts the song leaves out (<see cref="SongParts" />), which rest whatever the draws.</param>
     /// <param name="genre">The genre whose parts rest more or less, a dub's drums and bass dropping out, where it names them.</param>
-    public static ImmutableHashSet<TrackRole> DrawRests(IGenerationContext context, Tilt energy, SectionRole role, ImmutableHashSet<TrackRole> absent, Genre genre)
+    /// <param name="form">The form facet of the section's unconventionality, which a verse left to a voice leans by.</param>
+    public static ImmutableHashSet<TrackRole> DrawRests(IGenerationContext context, Tilt energy, SectionRole role, ImmutableHashSet<TrackRole> absent, Genre genre, double form)
     {
         Tilt Genre(TrackRole part) => Tilt.Of(GenreRestOdds, genre.Shift(GenreChoices.Rests, GenreChoices.Name(part.ToString())));
         // a tune's roles keeping their melody, and an intro and an outro, mostly the band's, leaving it out the oftener
@@ -52,6 +56,11 @@ internal static class Arrangement
             .Select(x => x.Part)
             .Union(absent)
             .ToHashSet();
+
+        // a verse left to a voice now and then, its melody out, as a rap's verse is over its beat, a genre's; drawn last,
+        // so that the draws above stay as they were
+        if (context.TestProbability(VoiceChance.At(form, genre.Chance(GenreChoices.Voice, "verses"))) && role == SectionRole.Verse)
+            resting.Add(TrackRole.Melody);
 
         // a section keeps its harmony, where the song has the chords
         if (resting.Contains(TrackRole.Bass) && resting.Contains(TrackRole.Chords) && !absent.Contains(TrackRole.Chords))

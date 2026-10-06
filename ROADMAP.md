@@ -621,7 +621,9 @@ a link carries. What is left:
      feel leaning to 3+3+2): the time in the tresillo alone, beats 2 and 3 empty, 52% of Latin's groove bars (1%). Not
      done: the clave's two bars, 3-2 or 2-3, which a cycle and its shift cannot hold, a figure of two bars a part's own,
      and the piano's montuno, a broken chord off the beat; and a second time keeper playing straight under the tresillo.
-  8. A rap's place: a hook sung and the verses left to a voice, the melody resting or a riff carrying them.
+  8. Done: verses for a voice (`GenreChoices.Voice`, `Arrangement.VoiceChance`), a genre's chance a verse leaves its
+     melody out for a rap over the beat, by the form facet: Hip-hop's verses without a melody 45% (5% the songs'), its
+     choruses keeping their hook.
   9. A melody written as a hook in every section, not only its repeated bars (House's and Hip-hop's melody bars
      repeated 13% and 18%, a target of 50%).
   10. A chord stab: a chord struck short on the offbeat, House's piano and Techno's dub chord, with an echo.

@@ -9,7 +9,7 @@ namespace Rmg.Tests.SongStructures;
 public sealed class GenreRestsTest
 {
     private static double DrumsRest(Genre genre) => Enumerable.Range(0, 2000)
-        .Count(seed => Arrangement.DrawRests(new GenerationContext((ulong)seed), Tilt.None, SectionRole.Verse, ImmutableHashSet<TrackRole>.Empty, genre).Contains(TrackRole.Drum)) / 2000.0;
+        .Count(seed => Arrangement.DrawRests(new GenerationContext((ulong)seed), Tilt.None, SectionRole.Verse, ImmutableHashSet<TrackRole>.Empty, genre, 0.5).Contains(TrackRole.Drum)) / 2000.0;
 
     private static Genre Drums(double value) =>
         Genre.Read(new Dictionary<string, IReadOnlyDictionary<string, ByConvention>> { ["rests"] = new Dictionary<string, ByConvention> { ["drum"] = new(value, value, value) } }, out _)!;
