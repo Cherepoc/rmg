@@ -705,31 +705,85 @@ input[type="range"] {
     margin: 0 2px;
 }
 
-/* the genre's button where a slider's other end is, as wide, on a phone too, where the ends are not shown */
-.genre-action {
-    width: 12ch;
-    font-size: 12px;
+/* the genre's row on the song's panel: its list as wide as a seed's field and more, its buttons beside it, and the chosen
+   genre's sentence a line of its own under them */
+.genre-field select {
+    min-width: 18ch;
 }
 
-
-/* the genre's editor's button beside its list, as small as the list */
-.genre-edit {
-    height: 21px;
-    padding: 0 8px;
-    font-size: 13px;
-}
-
-/* the chosen genre's sentence, under its list, as quiet as a setting's ends */
 .genre-about {
-    /* under the names, past the checkboxes' column and its gap */
-    margin: 0 0 4px 24px;
+    flex-basis: 100%;
+    margin: -4px 0 0;
     font-size: 12px;
     color: var(--muted);
 }
 
+/* the window of every genre: a list of lines, a genre's name and sentence on the left and what may be done with it on
+   the right, one's own first */
+.genre-manager h2 {
+    flex: 1;
+    margin: 0;
+    font-size: 16px;
+}
+
+.genre-list {
+    padding: 4px 16px 12px;
+    overflow-y: auto;
+}
+
+.genre-list h3 {
+    margin: 12px 0 6px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.genre-list ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.genre-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid var(--border);
+}
+
+.genre-line-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.genre-line-name {
+    font-weight: 600;
+}
+
+.genre-line-about {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.genre-line-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.genre-line-actions button {
+    padding: 4px 10px;
+    font-size: 13px;
+}
+
 /* the genre's editor, a popup over the page, its name and closing on top and what to do with it at the bottom, every
    choice between, scrolling; the whole screen on a phone */
-.genre-dialog {
+.genre-dialog,
+.genre-manager {
     width: min(720px, 100vw - 32px);
     max-height: min(90vh, 100dvh - 32px);
     padding: 0;
@@ -739,7 +793,8 @@ input[type="range"] {
     color: var(--text);
 }
 
-.genre-dialog[open] {
+.genre-dialog[open],
+.genre-manager[open] {
     display: flex;
     flex-direction: column;
 }
@@ -754,30 +809,36 @@ html:has(dialog:modal) {
     overflow: hidden;
 }
 
-.genre-dialog::backdrop {
+.genre-dialog::backdrop,
+.genre-manager::backdrop {
     background: rgb(0 0 0 / 0.5);
 }
 
 .genre-dialog > header,
-.genre-dialog > footer {
+.genre-dialog > footer,
+.genre-manager > header,
+.genre-manager > footer {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 12px 16px;
 }
 
-.genre-dialog > header {
+.genre-dialog > header,
+.genre-manager > header {
     border-bottom: 1px solid var(--border);
 }
 
-.genre-dialog > footer {
+.genre-dialog > footer,
+.genre-manager > footer {
     flex-wrap: wrap;
     justify-content: flex-end;
     border-top: 1px solid var(--border);
 }
 
 /* importing and exporting apart from what is done with the genre on the page */
-.genre-dialog > footer .genre-export {
+.genre-dialog > footer .genre-export,
+.genre-manager > footer .genre-export {
     margin-right: auto;
 }
 
@@ -1069,7 +1130,8 @@ html:has(dialog:modal) {
 }
 
 @media (max-width: 640px) {
-    .genre-dialog {
+    .genre-dialog,
+    .genre-manager {
         width: 100vw;
         max-width: 100vw;
         height: 100dvh;
@@ -1475,10 +1537,30 @@ footer a:hover {
         display: contents;
     }
 
+    .genre-row,
     .downloads,
     .seed-row {
         flex-basis: 100%;
         order: 6;
+    }
+
+    .genre-row {
+        margin-top: 16px;
+    }
+
+    /* the list a line of its own, as wide as the panel, its buttons under it */
+    .genre-field {
+        flex-basis: 100%;
+    }
+
+    .genre-field select {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .genre-list li {
+        flex-direction: column;
+        align-items: stretch;
     }
 
     /* a line of its own that only breaks */

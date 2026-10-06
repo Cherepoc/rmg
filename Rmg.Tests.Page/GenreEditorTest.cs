@@ -426,9 +426,9 @@ public sealed class GenreEditorTest(Site site)
         await Assert.That(await action.TextContentAsync()).IsEqualTo("Edit");
         await Assert.That(page.Requests.Count).IsEqualTo(count);
 
-        // every one of one's own as one file
-        await action.ClickAsync();
-        var dialog = page.Page.Locator("dialog.genre-dialog");
+        // every one of one's own as one file, from the window of every genre
+        await page.Page.Locator("button.genre-manage").ClickAsync();
+        var dialog = page.Page.Locator("dialog.genre-manager");
         var download = await page.Page.RunAndWaitForDownloadAsync(() => dialog.GetByRole(AriaRole.Button, new() { Name = "Export all" }).ClickAsync());
         var exported = await File.ReadAllTextAsync((await download.PathAsync())!);
         await Assert.That(System.Text.Json.JsonDocument.Parse(exported).RootElement.GetArrayLength()).IsEqualTo(1);

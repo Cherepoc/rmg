@@ -46,8 +46,9 @@ import {
     toStep,
 } from "./settings.js";
 import { applyReport, defaultSettings, givenOnly, isEveryPartOff, noGenre, requestFor } from "./song-settings.js";
-import { asGenre, hasAGenre, isSameGenre, presetById, presetOf, PRESETS, sameName } from "./genres.js";
+import { asGenre, hasAGenre, isSameGenre, nestedChoices, presetById, presetOf, PRESETS, sameName } from "./genres.js";
 import { createGenreEditor } from "./genre-editor.js";
+import { createGenreManager } from "./genre-manager.js";
 import { since, tell, track } from "./tally.js";
 
 const PLAY_ICON = "M8 5v14l11-7z";
@@ -71,6 +72,7 @@ const elements = {
     settingsState: document.getElementById("settings-state"),
     allOff: document.getElementById("all-off"),
     songSettings: document.getElementById("song-settings"),
+    genreRow: document.getElementById("genre-row"),
     seedInput: document.getElementById("seed-input"),
     generateSeeded: document.getElementById("generate-seeded"),
     history: document.getElementById("history"),
@@ -1096,8 +1098,7 @@ function keepCurrentSettings() {
     keepGenre(hasAGenre(settings.genre) ? settings.genre : null);
     const given = [settings.unconventionality, settings.tempo, settings.key, settings.mode, settings.meter, settings.swing, settings.length, ...FACETS.map((facet) => settings.facets[facet])].filter((x) => x.isGiven).length
         + PARTS.filter((part) => settings.parts[part].plays !== "random").length
-        + (settings.drumPieces.isGiven ? 1 : 0)
-        + (hasAGenre(settings.genre) ? 1 : 0);
+        + (settings.drumPieces.isGiven ? 1 : 0);
     elements.settingsState.textContent = given === 0 ? "All drawn" : `${given} given`;
 }
 
@@ -1631,6 +1632,7 @@ let isLinksGenre = false;
 /** The chosen genre's sentence, under the list: a preset's, or one of one's own's description. */
 let genreAbout = null;
 let genreEdit = null;
+let genreManage = null;
 let genreChoices = null;
 
 /** The editor of a genre of one's own (genre-editor.js), its draft played, kept here or let go of. */
@@ -1655,14 +1657,31 @@ const genreEditor = createGenreEditor({
     },
     isOwn: (name) => recallGenres().some((x) => sameName(x.name, name)),
     // every genre of a list kept, each under its name or the first number free after it; how many, in words
-    onKeepAll: (genres) => {
-        for (const genre of genres) keepGenres([...recallGenres(), { ...genre, name: nameFree(genre.name.trim() || "Untitled") }]);
-        showGenre();
-        return genres.length === 1 ? "One genre" : `${genres.length} genres`;
-    },
-    allOwn: () => recallGenres(),
+    onKeepAll: keepAllGenres,
 });
 document.body.append(genreEditor.element);
+
+/** The window of every genre (genre-manager.js): one's own edited, duplicated or removed, a preset duplicated, one made new. */
+const genreManager = createGenreManager({
+    presets: () => PRESETS,
+    own: () => recallGenres(),
+    onNew: () => genreEditor.open(noGenre(), genreChoices),
+    onDuplicate: (genre) => {
+        const copy = { name: freeName(genre.name), ...(genre.description ? { description: genre.description } : {}), choices: structuredClone(genre.choices) };
+        keepGenres([...recallGenres(), copy]);
+        showGenre();
+        genreEditor.open(copy, genreChoices);
+    },
+    onEdit: (genre) => genreEditor.open(genre, genreChoices),
+    onRemove: (name) => {
+        keepGenres(recallGenres().filter((x) => !sameName(x.name, name)));
+        showGenre();
+    },
+    onKeepAll: keepAllGenres,
+    knows: (name) => genreChoices.some((x) => x.name === name),
+    asFile: (genre) => ({ ...genre, choices: nestedChoices(genre.choices, genreChoices.map((x) => x.name)) }),
+});
+document.body.append(genreManager.element);
 
 // every choice's row, by its key: the key, the mode and the meter, listed as the server lists them
 const choiceRows = new Map();
@@ -1697,7 +1716,8 @@ buildSettings();
 function buildSettings() {
     // the genre first, then in the order they are named, the key, the mode and the meter chosen from a
     // list and every other on a slider
-    elements.songSettings.append(createGenreRow(), genreAbout, ...Object.keys(SETTING_NAMES).map((key) => (CHOICES.includes(key) ? createChoiceRow(key) : createSettingRow(key))));
+    elements.genreRow.append(...createGenreRow(), createGenreAbout());
+    elements.songSettings.append(...Object.keys(SETTING_NAMES).map((key) => (CHOICES.includes(key) ? createChoiceRow(key) : createSettingRow(key))));
     // the drums last, their groups under them, each with its pieces
     elements.mixer.append(...PARTS.filter((part) => part !== "drum").map(createPartRow), createPartRow("drum"), ...DRUM_GROUPS.map(createDrumGroupRow));
 
@@ -1775,43 +1795,46 @@ function showChoice(key) {
 const GENRE_DESCRIPTION = "What the song's draws keep to: its tempo and feel, its harmony, its instruments, its drums and its rhythm. "
     + "A preset, or one of your own; none for the songs as they are.";
 
-/** The genre's row: a list of none, the presets and the genres made here, and the song's own where it is none of them. */
+/**
+ *     The genre's row, on the song's panel under the transport: a list of none, the presets and the genres made here, and
+ *     the song's own where it is none of them; the button acting on the genre chosen, and the window of every genre.
+ */
 function createGenreRow() {
-    const label = document.createElement("span");
-    label.className = "setting-name";
-    label.textContent = "Genre";
+    const label = document.createElement("label");
+    label.className = "field genre-field";
+    const name = document.createElement("span");
+    name.textContent = "Genre";
 
     genreSelect = document.createElement("select");
     genreSelect.setAttribute("aria-label", "Genre");
     genreSelect.setAttribute("aria-description", GENRE_DESCRIPTION);
+    genreSelect.title = GENRE_DESCRIPTION;
     genreSelect.disabled = true;
     genreSelect.addEventListener("change", () => chooseGenre(genreSelect.value));
+    label.append(name, genreSelect);
 
-    // where a given value's checkbox is, nothing, as a genre is chosen or none
-    const none = document.createElement("span");
-    const place = document.createElement("span");
-    place.className = "setting-slider";
-    const end = document.createElement("span");
-    end.className = "end";
-    end.setAttribute("aria-hidden", "true");
     genreEdit = document.createElement("button");
     genreEdit.type = "button";
-    genreEdit.className = "genre-edit";
+    genreEdit.className = "secondary genre-edit";
     genreEdit.disabled = true;
     genreEdit.addEventListener("click", actOnGenre);
-    // the button where a slider's other end is, so that the list is as wide as a slider
-    const action = document.createElement("span");
-    action.className = "genre-action";
-    action.append(genreEdit);
-    place.append(end, genreSelect, action, emptyValue());
-    const row = document.createElement("div");
-    row.className = "setting";
-    row.title = GENRE_DESCRIPTION;
-    row.append(none, label, place);
+
+    genreManage = document.createElement("button");
+    genreManage.type = "button";
+    genreManage.className = "secondary genre-manage";
+    genreManage.textContent = "Manage";
+    genreManage.title = "Every genre: make one, duplicate any, edit or remove your own, import and export them";
+    genreManage.disabled = true;
+    genreManage.addEventListener("click", () => genreManager.open());
+    return [label, genreEdit, genreManage];
+}
+
+/** The chosen genre's sentence, a line of its row's own under it: a preset's, or one of one's own's description. */
+function createGenreAbout() {
     genreAbout = document.createElement("p");
     genreAbout.className = "genre-about";
     genreAbout.hidden = true;
-    return row;
+    return genreAbout;
 }
 
 /**
@@ -1838,6 +1861,13 @@ function actOnGenre() {
         keepCurrentSettings();
         showGenre();
     }
+}
+
+/** Every genre of a list kept among one's own, each under its name or the first number free after it; how many, in words. */
+function keepAllGenres(genres) {
+    for (const genre of genres) keepGenres([...recallGenres(), { ...genre, name: nameFree(genre.name.trim() || "Untitled") }]);
+    showGenre();
+    return genres.length === 1 ? "One genre" : `${genres.length} genres`;
 }
 
 /** A name as it is where no genre of one's own nor a preset has it, else with the first number free after it. */
@@ -1907,6 +1937,7 @@ function showGenre() {
             : isKept ? "Keep the genre the link brought among yours" : "Change this genre";
     genreAbout.textContent = chosen?.description ?? "";
     genreAbout.hidden = genreAbout.textContent === "";
+    genreManager.refresh();
 }
 
 /** Asks for the song again in the genre chosen, or in none. */
@@ -2715,7 +2746,7 @@ async function listGenreChoices() {
         if (!response.ok) return null;
         const choices = await response.json();
         genreChoices = choices;
-        genreSelect.disabled = genreEdit.disabled = false;
+        genreSelect.disabled = genreEdit.disabled = genreManage.disabled = false;
         return choices;
     } catch {
         return null;

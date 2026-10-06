@@ -1,6 +1,6 @@
 import { MAX_GENRE_NAME_BYTES } from "./settings.js";
 import { isShowingGenrePrinciples, setShowingGenrePrinciples } from "./storage.js";
-import { endsOf, flatChoices, isPresetName, nestedChoices, ownOf, sameName } from "./genres.js";
+import { endsOf, isPresetName, nestedChoices, NOT_A_GENRE, ownOf, readGenreFile, sameName } from "./genres.js";
 import { createGenreTune } from "./genre-tune.js";
 import { byMiddle, COLOURS, drawBand, drawLines, drawShares, endsInWords, labelOf, svg } from "./genre-charts.js";
 
@@ -32,7 +32,7 @@ const GRAPH_HEIGHT = 120;
 const PITCHED = [["melody", "Melody"], ["chords", "Chords"], ["bass", "Bass"], ["pad", "Pad"], ["counterMelody", "Counter-melody"], ["riff", "Riff"], ["rhythm", "Rhythm"], ["solo", "Soloist"]];
 const ROLES = [["ground", "Ground (kick)"], ["backbeat", "Backbeat (snare)"], ["time", "Time (hi-hat)"], ["colour", "Colour (toms)"]];
 
-export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll, allOwn }) {
+export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }) {
     let choices = new Map();
     let draft = { name: "", description: "", choices: {} };
     // every choice as it was before its override was unchecked, for it to come back to, by its name
@@ -431,33 +431,15 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll, 
         const chosen = file.files[0];
         file.value = "";
         if (!chosen) return;
-        try {
-            // in families, or flat as an older export writes them
-            const read = JSON.parse(await chosen.text());
-            const fromFile = (x) => (typeof x?.choices === "object" && x.choices !== null ? { ...x, choices: flatChoices(x.choices) } : x);
-            const parsed = Array.isArray(read) ? read.map(fromFile) : fromFile(read);
-            const isGenre = (x) => typeof x?.name === "string" && typeof x?.choices === "object" && x.choices !== null
-                && Object.keys(x.choices).every((y) => choices.has(y)) && (x.description === undefined || typeof x.description === "string");
-            // a list of genres, every one of them, kept among one's own; one genre opened as the draft
-            if (Array.isArray(parsed) && parsed.length > 0 && parsed.every(isGenre)) {
-                told.textContent = `${onKeepAll(parsed)} kept among yours.`;
-                told.hidden = false;
-            } else if (isGenre(parsed)) load(parsed);
-            else throw new Error();
-        } catch {
-            showProblem("That file is not a genre: a name and the choices the editor knows, or a list of them.");
-        }
+        const read = readGenreFile(await chosen.text(), (x) => choices.has(x));
+        // a list of genres, every one of them, kept among one's own; one genre opened as the draft
+        if (read?.genres) {
+            told.textContent = `${onKeepAll(read.genres)} kept among yours.`;
+            told.hidden = false;
+        } else if (read?.genre) load(read.genre);
+        else showProblem(NOT_A_GENRE);
     });
     const imported = button("Import JSON", "Open a genre saved as a JSON file, or keep every one of a list of them", () => file.click());
-
-    // every genre of one's own as one file, so that they outlive this browser
-    const exportedAll = button("Export all", "Save every genre of yours as one JSON file", () => {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(new Blob([JSON.stringify(allOwn().map(asFile), null, 1)], { type: "application/json" }));
-        link.download = "genres.json";
-        link.click();
-        setTimeout(() => URL.revokeObjectURL(link.href));
-    });
 
     /** A genre as a file writes it, its choices in families, in the editor's order. */
     const asFile = (genre) => ({ ...genre, choices: nestedChoices(genre.choices, [...choices.keys()]) });
@@ -504,7 +486,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll, 
         if (confirm(`Delete your genre ${origin}? Nothing brings it back.`)) onDelete(origin);
     });
     const footer = document.createElement("footer");
-    footer.append(problem, told, file, imported, exported, exportedAll, remove, saveAs, save, play);
+    footer.append(problem, told, file, imported, exported, remove, saveAs, save, play);
     dialog.append(header, body, footer, tune.element);
 
     // --- the draft ------------------------------------------------------------------------------------------------------------

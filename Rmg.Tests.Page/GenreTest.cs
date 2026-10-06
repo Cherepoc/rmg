@@ -45,7 +45,7 @@ public sealed class GenreTest(Site site)
         await Assert.That(asked.GetProperty("kit").GetProperty("jazz").GetInt32()).IsEqualTo(100);
         await Assert.That(asked.GetProperty("drumRole.time").GetProperty("ride").GetInt32()).IsEqualTo(100);
         await page.Settled();
-        await Assert.That(await page.Given()).IsEqualTo("1 given");
+        await Assert.That(await page.Given()).IsEqualTo("All drawn");
         // the list shows it chosen, and the next visit asks for it again, kept in this browser, not the link
         await Assert.That(page.Page.Url).Contains("settings=B");
         // a preset named in the link by its id, which reads as it is

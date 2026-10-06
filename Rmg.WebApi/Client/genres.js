@@ -98,3 +98,26 @@ export const written = ([plain, middle, wild]) => (plain === middle && middle ==
 
 /** An option's amounts as the songs have them (/api/genres/choices), in the whole numbers a genre gives. */
 export const ownOf = (option) => written(option.own.map((x) => Math.round(x)));
+
+/** What a file that holds no genre is told. */
+export const NOT_A_GENRE = "That file is not a genre: a name and the choices the editor knows, or a list of them.";
+
+/**
+ *     The genres a JSON file holds, a list of them or one, every one a name, choices the server knows (by `knows`, a
+ *     choice's name) and a description if any, its choices in families or flat as an older export writes them; null for a
+ *     file that is no genre nor a list of them.
+ */
+export function readGenreFile(text, knows) {
+    let read;
+    try {
+        read = JSON.parse(text);
+    } catch {
+        return null;
+    }
+    const fromFile = (x) => (typeof x?.choices === "object" && x.choices !== null ? { ...x, choices: flatChoices(x.choices) } : x);
+    const isGenre = (x) => typeof x?.name === "string" && typeof x?.choices === "object" && x.choices !== null
+        && Object.keys(x.choices).every(knows) && (x.description === undefined || typeof x.description === "string");
+    const parsed = Array.isArray(read) ? read.map(fromFile) : fromFile(read);
+    if (Array.isArray(parsed)) return parsed.length > 0 && parsed.every(isGenre) ? { genres: parsed } : null;
+    return isGenre(parsed) ? { genre: parsed } : null;
+}

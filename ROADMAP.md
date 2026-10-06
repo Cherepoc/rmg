@@ -314,9 +314,6 @@ of here once it is; the genres it adds are described under *More genres*.
 
 **P1, wrong now and cheap:**
 
-1. **The genre on the song's panel:** its list in a row of its own under the transport, out of the settings; beside it
-   a Manage button opening a window of every genre, the presets and one's own, to add one, duplicate any, edit one's
-   own and remove it, its import and export there too; the editor (`genre-editor.js`) as it is, opened from it.
 2. **Chugs on driven guitars alone:** `InstrumentTrait.Chugs` on the overdriven and the distortion guitar and the
    picked bass, not the whole family; a part chugging by the instrument playing it, a switched one's
    (`SongStages.Chugs` reads the track's first). The muted guitar is a clean guitar's other form, apt wherever a clean
