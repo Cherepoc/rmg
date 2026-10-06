@@ -36,6 +36,9 @@ internal static class TracePoints
     /// <summary>Whether a section's bass plays in octaves (a <c>bool</c>).</summary>
     public const string OctaveBass = "Octave bass";
 
+    /// <summary>A section's pedal's root, in steps above its home, none where it holds none (an <c>int?</c>).</summary>
+    public const string SectionPedal = "Section pedal";
+
     /// <summary>Whether a section pushes its chord changes (a <c>bool</c>).</summary>
     public const string Push = "Push";
 

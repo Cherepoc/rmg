@@ -534,5 +534,6 @@ internal enum SongStream
     Reharmonisation = 73,
     Pushes = 74,
     Legato = 75,
-    Roll = 76
+    Roll = 76,
+    SectionPedal = 77
 }

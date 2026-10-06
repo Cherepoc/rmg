@@ -309,11 +309,13 @@ public sealed record KeyChange(double Position, int Semitones)
     private static LayerValue<StepAlterations> KeysOwnScale { get; } = new(StateDepths.BarPattern, StepAlterations.None);
 
     /// <summary>
-    ///     The song with the bass holding every pedal's note, the new key's dominant, in the octave nearest each of its notes
-    ///     there, its rhythm as it was; made once the bass's line and walks are placed.
+    ///     The song with the bass holding every pedal's note, a chord's root as a place has it (a key change's, the new key's
+    ///     dominant; a section's, its home or its dominant), in the octave nearest each of its notes there, its rhythm as it
+    ///     was; made once the bass's line and walks are placed.
     /// </summary>
-    /// <param name="pedals">Every pedal: where it starts, and the change it leads to.</param>
-    internal static TrackEventStateTimelineMap<StateMap> Pedal(TrackEventStateTimelineMap<StateMap> song, int bassTrack, PitchInstrumentTrack definition, IEnumerable<(double From, double Change)> pedals)
+    /// <param name="pedals">Every pedal: where it starts and ends, the place whose scale and key it is in, and its root there, in the scale's steps above the key's tonic.</param>
+    internal static TrackEventStateTimelineMap<StateMap> Pedal(TrackEventStateTimelineMap<StateMap> song, int bassTrack, PitchInstrumentTrack definition,
+        IEnumerable<(double From, double To, double At, int Root)> pedals)
     {
         if (!song.TrackTimelineMap.TryGetValue(bassTrack, out var track))
             return song;
@@ -326,10 +328,10 @@ public sealed record KeyChange(double Position, int Semitones)
             common.GetEffectiveStateMapAt(position)
         ])).Chord;
         var events = track.EventTimeline.ToArray();
-        foreach (var (from, change) in pedals)
+        foreach (var (from, change, at, root) in pedals)
         {
-            // the new key's dominant, as the chord on its fifth step there has it
-            var dominant = Realizer.GetChord(common.GetEffectiveStateMapAt(change).With(StateKinds.ChordRoot, 4)).Chord.GetPitch(0).Mod(12);
+            // the root, as the chord on its step there has it
+            var dominant = Realizer.GetChord(common.GetEffectiveStateMapAt(at).With(StateKinds.ChordRoot, root)).Chord.GetPitch(0).Mod(12);
             for (var i = 0; i < events.Length; i++)
             {
                 var (position, note) = (events[i].Position, events[i].Value);
