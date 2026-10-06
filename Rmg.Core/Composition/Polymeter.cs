@@ -11,8 +11,10 @@ namespace Rmg.Core.Composition;
 ///     again where every 4-bar pattern, or every second at the wilder, starts it afresh. A cycle is a cell, or a cell
 ///     played again and then a closing one of another length, as 7, 7 and 9 make 23; each cell plays the same motif, cut
 ///     to its length. The riff plays it, or the bass where the song has no riff, the bass with the riff now and then, and
-///     the kick with them, the oftener the wilder, and the snare on its cells' starts against the hi-hat's pulse; each part repeats its own first notes of the cycle's start, so that its
-///     line, placed after, follows the chords where they land. By the feel facet of the section's unconventionality:
+///     the kick with them, the oftener the wilder, and the snare on its cells' starts against the hi-hat's pulse; each
+///     part repeats its own first notes of the cycle's start, or its first note after it on every cell's start where it
+///     has none there, so that its line, placed after, follows the chords where they land. By the feel facet of the
+///     section's unconventionality:
 ///     never at the plain end, rarely at the middle, and at the wild end in half the sections, of any length as likely.
 /// </summary>
 internal static class Polymeter
@@ -203,7 +205,11 @@ internal static class Polymeter
                 for (var start = span.Start; start < span.End - 1e-9; start += frame)
                 {
                     var end = Math.Min(start + frame, span.End);
+                    // a part with no note of its own in the first cell, a bass under a busy riff, starts every cell with its
+                    // first note in the frame, so that it plays the cycle rather than nothing
                     var first = notes.Where(x => x.Position >= start - 1e-9 && x.Position < start + longest - 1e-9).ToArray();
+                    if (first.Length == 0)
+                        first = [..notes.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9).Take(1).Select(x => x.Value.ToTimelineItem(start))];
                     var cell = 0;
                     for (var repeat = start; repeat < end - 1e-9; repeat += plan.CellAt(cell++) * Sixteenth)
                     {

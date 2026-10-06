@@ -36,7 +36,10 @@ public enum InstrumentTrait
     Rolls = 256,
 
     /// <summary>Its repeats palm-muted where its part chugs, a driven guitar's or a picked bass's.</summary>
-    Chugs = 512
+    Chugs = 512,
+
+    /// <summary>A driven guitar's distortion, which a band's bass plays under and a mix doubles from side to side.</summary>
+    Driven = 1024
 }
 
 /// <summary>
@@ -86,8 +89,8 @@ public static class InstrumentTraits
         // the clean guitar's chorus its classic sound
         [27] = Guitar | InstrumentTrait.ChorusesClassically,
         // the driven guitars chugging; the muted guitar is a clean one muted, which never does
-        [29] = Guitar | InstrumentTrait.Chugs,
-        [30] = Guitar | InstrumentTrait.Chugs,
+        [29] = Guitar | InstrumentTrait.Chugs | InstrumentTrait.Driven,
+        [30] = Guitar | InstrumentTrait.Chugs | InstrumentTrait.Driven,
         // the picked bass chugging; the fretless and the synth basses bending
         [34] = InstrumentTrait.Chugs,
         [35] = InstrumentTrait.Bends,

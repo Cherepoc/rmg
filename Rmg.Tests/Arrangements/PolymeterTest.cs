@@ -39,6 +39,9 @@ public sealed class PolymeterTest
                         continue;
 
                     var motif = onsets.Where(x => x >= longest.At - 1e-6 && x < longest.At + longest.Length - 1e-6).Select(x => Math.Round(x - longest.At, 6)).ToHashSet();
+                    // a part silent there, coming in later in the frame, its first note on every cell's start
+                    if (motif.Count == 0)
+                        motif = [0];
                     // every cell's notes the motif's, cut to its length
                     foreach (var (at, cellLength) in cells)
                         await Assert.That(onsets.Where(x => x >= at - 1e-6 && x < at + cellLength - 1e-6).All(x => motif.Contains(Math.Round(x - at, 6))))
@@ -87,6 +90,8 @@ public sealed class PolymeterTest
                 if (longest == default)
                     continue;
                 var first = events.Where(x => x >= longest.At - 1e-9 && x < longest.At + longest.Length - 1e-9).Select(x => Math.Round(x - longest.At, 6)).ToHashSet();
+                if (first.Count == 0)
+                    first = [0];
                 foreach (var onset in events.Where(x => x >= start - 1e-9 && x < Math.Min(start + frame, span.End) - 1e-9))
                 {
                     var from = cells.Last(x => x.At <= onset + 1e-9).At;
