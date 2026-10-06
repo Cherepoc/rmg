@@ -13,7 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: legato as an articulation; stretched voicings; the melody's range by genre; the fills' sounds by
+**When the need shows** (P3), each by what listening says, in this order: stretched voicings; the melody's range by genre; the fills' sounds by
 convention; a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
 and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
 
@@ -238,13 +238,13 @@ Each item with its plan, and what it waits for.
   which an articulation is only another sound.
 - **Plain doubling,** a part doubling another in unison, now that the parts play by their pocket (`SongStages.Timing`).
 - **A motif developed further** (P3), inverted or stretched, should the solos' sequences sound mechanical.
-- **Legato as an articulation** (P3, after the palm mute's seam): a line's notes slurred into each other, a note's
-  articulation as the palm mute is, General MIDI playing it as notes joined with no gap and the slurred one's attack
-  softer (notes overlapping on its guitars and pianos ring together and blur), a plugin as a legato keyswitch; the
-  legato slides below one of its cases. And to check: whether a solo's runs group in fives and sevens, a fusion
-  player's, which the feels give a whole part but perhaps not a run; if not, a case of segments in any pattern (see
-  *Parked*), not a mechanism of its own.
-- **Legato slides** (P3, a case of legato as an articulation): a slide strikes its note anew, where a player's note before goes on sounding into the next;
+- **Legato as an articulation**: done (`CompositionStateKinds.Legato`, the Articulation stage): a line's part (the
+  melody, counter-melody, solo or riff) slurring its steps, by the sound facet (0, 0.4, 0.6), never the plainest songs:
+  a note two semitones or less from the note before, within its phrase and a sixteenth or less after it, marked slurred,
+  the note before held into it, General MIDI striking it 15% softer; 16% of a middling song's line notes. Left to check:
+  whether a solo's runs group in fives and sevens, a fusion player's, which the feels give a whole part but perhaps not
+  a run; if not, a case of segments in any pattern (see *Parked*), not a mechanism of its own.
+- **Legato slides** (P3, a case of legato, now done): a slide strikes its note anew, where a player's note before goes on sounding into the next;
   holding the note before into the slide and leaving the next unstruck edits two notes at render. Built if the struck
   slide sounds like a stutter.
 - **Long fall-offs** (P4): a fall of an octave into nothing at a note's end, a slide's kind of its own, if missed.

@@ -532,5 +532,6 @@ internal enum SongStream
     Drops = 71,
     StopTime = 72,
     Reharmonisation = 73,
-    Pushes = 74
+    Pushes = 74,
+    Legato = 75
 }

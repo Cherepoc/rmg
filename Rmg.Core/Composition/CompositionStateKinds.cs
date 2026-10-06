@@ -78,6 +78,10 @@ internal static class CompositionStateKinds
     // highest below, the rendering spreading its notes (SongStages.Articulation)
     public static StateKind<double> Strum { get; } = StateKinds.CreateAdditive<double>(Prefix + "Strum", StateScope.Render);
 
+    // 1 for a note slurred into from the note before, its articulation: the note before held into it, and for General MIDI
+    // its attack softer, for a plugin a legato keyswitch (Render)
+    public static StateKind<int> Legato { get; } = StateKinds.CreateAdditive<int>(Prefix + "Legato", StateScope.Render);
+
     // 1 for a riff's note played as a power chord, its perfect fifth over it and its octave where the range has it
     public static StateKind<int> PowerChord { get; } = StateKinds.CreateAdditive<int>(Prefix + "PowerChord", StateScope.Render);
 

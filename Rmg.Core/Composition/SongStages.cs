@@ -518,7 +518,42 @@ internal static class SongStages
             }));
         }
 
+        // and a line's steps slurred where its part slurs
+        foreach (var (track, timeline) in result.ToArray())
+            if (song.Tracks.Definitions[track].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo or TrackRole.Riff
+                && song.Stream(SongStream.Legato, track).TestProbability(LegatoChance.At(song.Facets[Facet.Sound])))
+                result[track] = Slur(timeline);
+
         return draft with { Notes = result.ToImmutable() };
+    }
+
+    /// <summary>The chance a line's part slurs its steps, by the sound facet: never in the plainest songs, which play every note as struck.</summary>
+    public static ByConvention LegatoChance { get; } = new(0, 0.4, 0.6);
+
+    /// <summary>How far a note may step from the note before and be slurred into, in semitones, and the gap it may leave, in beats.</summary>
+    public const int SlurStep = 2;
+
+    public const double SlurGap = 0.25;
+
+    /// <summary>
+    ///     A line with its steps slurred: a note a step or less from the one before, within its phrase and close after it,
+    ///     marked as slurred, its articulation, and the note before held into it with no gap.
+    /// </summary>
+    internal static EventTimeline<RealizedNote> Slur(EventTimeline<RealizedNote> timeline)
+    {
+        var items = timeline.ToArray();
+        for (var i = 1; i < items.Length; i++)
+        {
+            var (before, note) = (items[i - 1], items[i]);
+            var gap = note.Position - (before.Position + before.Value.Duration);
+            if (Math.Abs(note.Value.Pitches[0] - before.Value.Pitches[0]) is 0 or > SlurStep || gap > SlurGap + 1e-9 || note.Position <= before.Position + 1e-9
+                || before.Value.State.GetStateValue(StateKinds.HeldDuration) > 0 || note.Value.State.GetStateValue(CompositionStateKinds.LinePhraseStart) != (int)PhraseStart.None)
+                continue;
+            items[i - 1] = (before.Value with { Duration = note.Position - before.Position }).ToTimelineItem(before.Position);
+            items[i] = (note.Value with { State = note.Value.State.With(CompositionStateKinds.Legato, 1) }).ToTimelineItem(note.Position);
+        }
+
+        return EventTimeline.Create(timeline.Duration, items);
     }
 
     /// <summary>

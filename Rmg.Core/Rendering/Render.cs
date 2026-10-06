@@ -19,6 +19,9 @@ public static class Render
 
     internal const double MutedVelocity = 0.9;
 
+    /// <summary>How loud a slurred note plays against a struck one.</summary>
+    internal const double SlurredVelocity = 0.85;
+
     /// <summary>How loud an up stroke plays against a down stroke.</summary>
     internal const double UpStrokeVelocity = 0.9;
     internal const double VelocityScale = 1.03;
@@ -71,6 +74,9 @@ public static class Render
                     // softer; the one place a plugin's output would play it as its keyswitch or controller instead
                     if (note.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0)
                         (duration, velocity) = (Math.Max(MutedFloor, duration * MutedShare), velocity * MutedVelocity);
+                    // a slurred note as General MIDI can play it, which has no legato: struck softer, the note before reaching it
+                    if (note.Value.State.GetStateValue(CompositionStateKinds.Legato) > 0)
+                        velocity *= SlurredVelocity;
                     // a strummed chord's strings struck one after another, down from the lowest or up from the highest, the up
                     // stroke a touch softer
                     var shift = note.Value.State.GetStateValue(CompositionStateKinds.TimingOffset);
