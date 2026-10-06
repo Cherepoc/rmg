@@ -162,6 +162,11 @@ each from the trace; the seeds named here are ones already found.
   Trap 21% to 18%, Hip-hop 17% to 13%; Trap's lead bright 78% to 56%, Dnb's 38% to 8%; Djent major 12% to 3%
   (`MoodReportTest`). Still happy? The major chords are a minor key's own ♭III, ♭VI and ♭VII, which no preset choice
   reaches: a progression's degrees leaned, if so.
+- **The filter:** a synth's filter wobbling in time, squelching on every note or opening over a section's first phrase,
+  as its brightness and resonance, which spessasynth plays and other players may not: Techno squelches in 11% of its
+  songs, Trance opens or wobbles in 28%, Dnb in 26%, the wildest songs filter in 30% (`FilterTest.Report`,
+  `ExpressionTest.Report`). Its depth, down to 48 steps of the brightness, and the resonance by ear, in both soundfonts;
+  a General MIDI synth bass may wobble thin rather than heavy.
 - **Double-tracking:** every driven guitar's part twice, hard left and right, the second take on the other driven
   guitar 8 ms late: Metal doubles 2.8 parts a song, its riff, chords and rhythm part all at the sides, Punk 2.3, the
   drawn songs 28% of them (`DoubleTrackingTest.Report`). A wall, or mud? The overdriven take thinner than the
@@ -198,7 +203,6 @@ Each item with its plan, and what it waits for.
 
 ### The heavy band, the mood and the effects (in progress, in order)
 
-- **A filter,** a strong effect on the synths: a wobble, a squelch, an opening into a drop, as CC74 and CC71.
 - **A trance gate,** a strong effect: held chords chopped in 16ths, a pattern drawn per song.
 - **A genre's room:** the reverb's type, time and pre-delay, one per song, as GS messages.
 - **An insertion effect,** one a song: a wah, a phaser or a lo-fi EQ on the part it suits.

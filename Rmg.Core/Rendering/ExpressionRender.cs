@@ -8,7 +8,8 @@ namespace Rmg.Core.Rendering;
 /// <summary>
 ///     A part's expression written as MIDI plays it (<see cref="Composition.Expression" />): its notes' vibrato and bends
 ///     as pitch bend, a whole-channel control that a single line alone can take; a swell and a tremolo as a curve of its
-///     expression; a sweep as a curve of its pan; its reverb and chorus wherever they change; and an echo as its notes
+///     expression; a sweep as a curve of its pan; a filter's movement as curves of its brightness and its resonance, which
+///     a player that knows them filters by; its reverb and chorus wherever they change; and an echo as its notes
 ///     repeated quieter after them, as a delay pedal plays.
 /// </summary>
 internal static class ExpressionRender
@@ -29,6 +30,14 @@ internal static class ExpressionRender
 
     public const int ReverbController = 91;
     public const int ChorusController = 93;
+    public const int BrightnessController = 74;
+    public const int ResonanceController = 71;
+
+    /// <summary>How far a filter closes at its deepest, in the brightness controller's steps below the middle, where it is the sound's own.</summary>
+    private const int FilterReach = 48;
+
+    /// <summary>How long a squelch takes to close most of the way, in beats.</summary>
+    private const double SquelchDecay = 0.25;
 
     /// <summary>The track's expression, from its notes, as they are swung, at the song's tempo.</summary>
     public static (ImmutableArray<(double Position, int Value)> Bends, ImmutableArray<(double Position, int Controller, int Value)> Controllers,
@@ -124,6 +133,32 @@ internal static class ExpressionRender
             if (sweep > 0)
                 for (var t = start; t < end - 1e-9; t += Step * 4)
                     controllers.Add((t, 10, (int)Math.Round(64 + 63 * Math.Clamp(pan + sweep / 100.0 * Math.Sin(2 * Math.PI * t / 8), -1, 1))));
+
+            // a filter, closing below the sound's own and opening back, ringing as it does: a wobble in time, a squelch on
+            // every note, an opening over a section's first phrase
+            var filter = (StrongEffect)state.GetStateValue(CompositionStateKinds.Filter);
+            if (filter != StrongEffect.None)
+            {
+                var closes = state.GetStateValue(CompositionStateKinds.FilterDepth) / 100.0;
+                var cycle = state.GetStateValue(CompositionStateKinds.FilterCycle);
+                var from = swing.Apply(state.GetStateValue(CompositionStateKinds.FilterFrom));
+                controllers.Add((start, ResonanceController, filter == StrongEffect.Squelch ? 104 : 84));
+                var step = filter == StrongEffect.Wobble ? cycle / 8 : Step / 2;
+                int? last = null;
+                for (var t = 0.0; t < duration - 1e-9; t += step)
+                {
+                    var closed = filter switch
+                    {
+                        StrongEffect.Wobble => 0.5 - 0.5 * Math.Cos(2 * Math.PI * (start + t - from) / cycle),
+                        StrongEffect.Squelch => 1 - Math.Exp(-t / SquelchDecay),
+                        _ => 1 - Math.Clamp((start + t - from) / cycle, 0, 1)
+                    };
+                    var value = (int)Math.Round(64 - closes * FilterReach * closed);
+                    if (value != last)
+                        controllers.Add((start + t, BrightnessController, value));
+                    last = value;
+                }
+            }
 
             // an echo, the note repeated quieter after it
             var echo = state.GetStateValue(CompositionStateKinds.Echo) / 4.0;

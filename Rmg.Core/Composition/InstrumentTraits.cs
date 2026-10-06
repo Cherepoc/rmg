@@ -39,7 +39,10 @@ public enum InstrumentTrait
     Chugs = 512,
 
     /// <summary>A driven guitar's distortion, which a band's bass plays under and a mix doubles from side to side.</summary>
-    Driven = 1024
+    Driven = 1024,
+
+    /// <summary>A filter's opening and closing suits it, a synth's: a lead's, a pad's, a synth bass's, strings' or brass's.</summary>
+    Filters = 2048
 }
 
 /// <summary>
@@ -51,7 +54,8 @@ public static class InstrumentTraits
     private const InstrumentTrait Guitar = InstrumentTrait.Bends | InstrumentTrait.VibratesWide | InstrumentTrait.SoloBends | InstrumentTrait.Choruses
                                            | InstrumentTrait.Tremolo | InstrumentTrait.Strums;
 
-    private const InstrumentTrait Lead = InstrumentTrait.Bends | InstrumentTrait.VibratesWide | InstrumentTrait.SoloBends | InstrumentTrait.Choruses | InstrumentTrait.Sweeps;
+    private const InstrumentTrait Lead = InstrumentTrait.Bends | InstrumentTrait.VibratesWide | InstrumentTrait.SoloBends | InstrumentTrait.Choruses | InstrumentTrait.Sweeps
+                                         | InstrumentTrait.Filters;
 
     /// <summary>A family's traits, by its first program.</summary>
     private static readonly (int First, InstrumentTrait Traits)[] Families =
@@ -67,7 +71,7 @@ public static class InstrumentTraits
         (64, InstrumentTrait.Bends),
         (72, InstrumentTrait.Bends),
         (80, Lead),
-        (88, InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Sweeps),
+        (88, InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Sweeps | InstrumentTrait.Filters),
         (96, InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Sweeps),
         (104, InstrumentTrait.None),
         (112, InstrumentTrait.None),
@@ -94,17 +98,17 @@ public static class InstrumentTraits
         // the picked bass chugging; the fretless and the synth basses bending
         [34] = InstrumentTrait.Chugs,
         [35] = InstrumentTrait.Bends,
-        [38] = InstrumentTrait.Bends,
-        [39] = InstrumentTrait.Bends,
+        [38] = InstrumentTrait.Bends | InstrumentTrait.Filters,
+        [39] = InstrumentTrait.Bends | InstrumentTrait.Filters,
         // the strings bowed bend, but the harp and the timpani
         [45] = InstrumentTrait.None,
         [46] = InstrumentTrait.None,
         [47] = InstrumentTrait.None,
         // the voices bend, but the orchestra hit, a sample struck
         [55] = InstrumentTrait.None,
-        // the synth brass chorused and swept
-        [62] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Sweeps,
-        [63] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Sweeps,
+        // the synth brass chorused, swept and filtered
+        [62] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Sweeps | InstrumentTrait.Filters,
+        [63] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Sweeps | InstrumentTrait.Filters,
         // the sitar, the koto, the shamisen, the fiddle, the bagpipe and the shanai bend, their players' way
         [104] = InstrumentTrait.Bends,
         [106] = InstrumentTrait.Bends,
@@ -115,8 +119,8 @@ public static class InstrumentTraits
         // the string ensembles chorused
         [48] = InstrumentTrait.Bends | InstrumentTrait.Choruses,
         [49] = InstrumentTrait.Bends | InstrumentTrait.Choruses,
-        [50] = InstrumentTrait.Bends | InstrumentTrait.Choruses,
-        [51] = InstrumentTrait.Bends | InstrumentTrait.Choruses
+        [50] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Filters,
+        [51] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Filters
     };
 
     private static readonly ImmutableArray<InstrumentTrait> Table =

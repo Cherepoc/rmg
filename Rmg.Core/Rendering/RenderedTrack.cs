@@ -41,7 +41,7 @@ public sealed class RenderedTrack
     /// <summary>The track's pitch bend over the song, 8192 in the middle, reaching <see cref="ExpressionRender.BendRange" /> semitones either way.</summary>
     public ImmutableArray<(double Position, int Value)> PitchBends { get; init; } = [];
 
-    /// <summary>The track's controllers over the song, such as its reverb, its chorus and its pan's sweep.</summary>
+    /// <summary>The track's controllers over the song, such as its reverb, its chorus, its pan's sweep and its filter's movement.</summary>
     public ImmutableArray<(double Position, int Controller, int Value)> Controllers { get; init; } = [];
 
     /// <summary>The track's echoes, its notes repeated quieter after them, which sound with its notes but are not of its line.</summary>

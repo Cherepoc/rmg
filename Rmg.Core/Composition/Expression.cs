@@ -41,18 +41,28 @@ public enum StrongEffect
     Sweep,
 
     /// <summary>The pads, the chords and the bass ducking on every beat and swelling back, as a kick four on the floor pumps them.</summary>
-    Pump
+    Pump,
+
+    /// <summary>A synth's filter closing and opening again and again, in time, as a wobbling bass's.</summary>
+    Wobble,
+
+    /// <summary>A synth's filter opening on every note, ringing, and closing over it, as an acid line's squelches.</summary>
+    Squelch,
+
+    /// <summary>A synth's filter opening over the first phrase of every section the part plays, as a track builds in.</summary>
+    Opening
 }
 
 /// <summary>
 ///     How the parts are played, beyond their notes: a line's vibrato and bends, as pitch bend, where its instrument can
 ///     bend, a single line at a time; a held chord's swell and an instrument's tremolo, as its expression; a pad's sweep
-///     from side to side; a lead's echo, its notes repeated quieter after it, as a delay pedal plays; and every part's
-///     reverb and chorus. Decided once a song's notes are, by the song's sound facet: first which effects the song plays
-///     at all, the gentle ones, a vibrato, a chorus, a swell and bends, each of its own, and of the strong ones, a tremolo,
-///     an echo and a sweep, one at most, and the one part that plays it, the likelier one it suits, an echo's playing no
-///     vibrato or bends, from a sequence of the song's; then which of the gentle ones each part plays, together as they come, from a sequence of the part's; and a
-///     note's bend from its section's, by the section's. The plainest songs play a reverb alone, and the wildest every
+///     from side to side; a synth's filter wobbling, squelching or opening; a lead's echo, its notes repeated quieter after
+///     it, as a delay pedal plays; and every part's reverb and chorus. Decided once a song's notes are, by the song's sound
+///     facet: first which effects the song plays at all, the gentle ones, a vibrato, a chorus, a swell and bends, each of
+///     its own, and of the strong ones, a tremolo, an echo, a sweep, a pump or a filter's, one at most, and the one part
+///     that plays it, the likelier one it suits, a filter's only one it suits, an echo's playing no vibrato or bends, from
+///     a sequence of the song's; then which of the gentle ones each part plays, together as they come, from a sequence of
+///     the part's; and a note's bend from its section's, by the section's. The plainest songs play a reverb alone, and the wildest every
 ///     gentle effect on some of their parts, and one strong one on one.
 /// </summary>
 internal static class Expression
@@ -76,8 +86,12 @@ internal static class Expression
         StrongEffect.Tremolo => InstrumentTraits.Has(program, InstrumentTrait.Tremolo),
         StrongEffect.Sweep => role == TrackRole.Pad || InstrumentTraits.Has(program, InstrumentTrait.Sweeps),
         StrongEffect.Pump => role is TrackRole.Pad or TrackRole.Chords or TrackRole.Bass or TrackRole.Rhythm,
+        StrongEffect.Wobble or StrongEffect.Squelch or StrongEffect.Opening => InstrumentTraits.Has(program, InstrumentTrait.Filters),
         _ => false
     };
+
+    /// <summary>Whether a strong effect is a filter's, which only a part it suits plays, a synth's.</summary>
+    private static bool IsFilter(StrongEffect effect) => effect is StrongEffect.Wobble or StrongEffect.Squelch or StrongEffect.Opening;
 
     /// <summary>Whether a part plays lines, single notes one after another, rather than chords or drums.</summary>
     private static bool IsLineRole(TrackRole role) => !role.PlaysChords() && role is not (TrackRole.Pad or TrackRole.Drum);
@@ -99,7 +113,11 @@ internal static class Expression
         (StrongEffect.Tremolo, new ByConvention(0, 0.08, 0.8)),
         (StrongEffect.Sweep, new ByConvention(0, 0.05, 0.6)),
         // a genre's, an electronic one's, which the songs never play
-        (StrongEffect.Pump, new ByConvention(0, 0, 0))
+        (StrongEffect.Pump, new ByConvention(0, 0, 0)),
+        // a synth's filter moving, an electronic genre's, and a wild song's
+        (StrongEffect.Wobble, new ByConvention(0, 0, 0.4)),
+        (StrongEffect.Squelch, new ByConvention(0, 0, 0.3)),
+        (StrongEffect.Opening, new ByConvention(0, 0, 0.4))
     ];
 
     /// <summary>A strong effect as a genre's page shows it.</summary>
@@ -109,11 +127,17 @@ internal static class Expression
         StrongEffect.Echo => "An echo",
         StrongEffect.Sweep => "A sweep",
         StrongEffect.Pump => "A pump",
+        StrongEffect.Wobble => "A filter's wobble",
+        StrongEffect.Squelch => "A filter's squelch",
+        StrongEffect.Opening => "A filter opening",
         _ => "None"
     };
 
     /// <summary>How deep a pump ducks a part on the beat, in percent of its expression, swelling back over the beat.</summary>
     public const int PumpDepth = 60;
+
+    /// <summary>How long a wobble's cycle is, in beats, as likely each: a quarter, an 8th, an 8th triplet, a 16th.</summary>
+    public static ImmutableArray<double> WobbleCycles { get; } = [1, 0.5, 1 / 3.0, 0.25];
 
     /// <summary>
     ///     How much likelier a part the song's strong effect suits is to be the one that plays it than any other that may:
@@ -324,7 +348,8 @@ internal static class Expression
 
         // and the one part that plays the strong effect, the likelier one it suits, if any part may
         var mayCarry = notes
-            .Where(x => x.Value.Count > 0 && definitions[x.Key] is PitchInstrumentTrack && (strong != StrongEffect.Echo || IsLineRole(definitions[x.Key].Role)))
+            .Where(x => x.Value.Count > 0 && definitions[x.Key] is PitchInstrumentTrack && (strong != StrongEffect.Echo || IsLineRole(definitions[x.Key].Role))
+                        && (!IsFilter(strong) || Suits(strong, definitions[x.Key].Role, ((PitchInstrumentTrack)definitions[x.Key]).InstrumentCode)))
             .Select(x => new Weighted<int>(Suits(strong, definitions[x.Key].Role, ((PitchInstrumentTrack)definitions[x.Key]).InstrumentCode) ? SuitedStrongWeight : 1, x.Key))
             .ToImmutableArray();
         var carrier = strong != StrongEffect.None && !mayCarry.IsEmpty ? songStream.Pick(mayCarry) : -1;
@@ -387,6 +412,10 @@ internal static class Expression
                 (slides, slideRate) = (true, GlideRate);
             // and from across a gap, into a short note too
             var (slideGap, shortestSlide) = glides ? (GlideGap, GlideShortest) : (SlideGap, ShortestShaped);
+            // and how far its filter closes, and a wobble's cycle, drawn last, so that the part's other draws stay
+            var filterDepth = 40 + part.GenerateInt(0, 60);
+            var wobbleCycle = WobbleCycles[part.GenerateInt(0, WobbleCycles.Length)];
+            var filters = carries && IsFilter(strong);
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
                 var context = streams(span.SectionId, track);
@@ -466,6 +495,10 @@ internal static class Expression
                         state = state.With(CompositionStateKinds.Pump, PumpDepth);
                     if (echoes && isLine)
                         state = state.With(CompositionStateKinds.Echo, (int)Math.Round(delay * 4));
+                    if (filters)
+                        state = state.With(CompositionStateKinds.Filter, (int)strong).With(CompositionStateKinds.FilterDepth, filterDepth)
+                            .With(CompositionStateKinds.FilterCycle, strong == StrongEffect.Opening ? span.Meter.PatternDuration : wobbleCycle)
+                            .With(CompositionStateKinds.FilterFrom, span.Start);
                     states[i] = state;
                 }
             }
