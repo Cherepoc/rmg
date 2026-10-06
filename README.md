@@ -16,8 +16,8 @@ bring them in phrase by phrase, hold some back until a later section, double lin
 key or tempo, each by a chance of its own.
 
 A genre leans a song's choices towards its idioms: a pool of options or a chance for each choice, at the plain end, the
-middle and the wild end. Twelve presets come with the page (Rock, Jazz, House, Techno, Synthwave, Hip-hop, Reggae,
-Latin, Funk, Folk, Blues and Ambient), and the page's editor makes and changes genres of one's own.
+middle and the wild end. Fourteen presets come with the page (Pop, Rock, Metal, Jazz, House, Techno, Synthwave,
+Hip-hop, Reggae, Latin, Funk, Folk, Blues and Ambient), and the page's editor makes and changes genres of one's own.
 
 ## Requirements
 

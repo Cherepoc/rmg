@@ -99,6 +99,7 @@ public sealed class GenreIdiomsReportTest
             ["fills a minute"] = song.Trace.Count(x => x.Point == TracePoints.FillDecision && ((FillDecision)x.Value!).Span > 0) / minutes,
             ["drums over the melody"] = drumVelocities.Length > 0 && melodyVelocities.Length > 0 ? drumVelocities.Average() - melodyVelocities.Average() : double.NaN,
             ["kick on 1"] = bars.Length > 0 ? bars.Count(x => HitsAt(kicks, x)) / (double)bars.Length : double.NaN,
+            ["kick hits a bar"] = bars.Length > 0 ? bars.Average(x => kicks.Sum(t => notes[t].Count(n => n.Position >= x - 1e-9 && n.Position < x + 4 - 1e-9))) : double.NaN,
             ["kick on every beat"] = bars.Length > 0 ? bars.Count(x => Enumerable.Range(0, 4).All(b => HitsAt(kicks, x + b))) / (double)bars.Length : double.NaN,
             ["one drop (kick and snare on 3 alone)"] = bars.Length > 0 ? bars.Count(x => HitsAt(kicks, x + 2) && HitsAt(snares, x + 2) && !HitsAt(kicks, x) && !HitsAt(snares, x + 1) && !HitsAt(snares, x + 3)) / (double)bars.Length : double.NaN,
             ["chords on the offbeat 8ths"] = notes.GetValueOrDefault(SongTracks.ChordsTrack) is { Count: > 0 } chordNotes
@@ -161,6 +162,8 @@ public sealed class GenreIdiomsReportTest
         ["blues"] = [("melody pentatonic or blues", 0.6, 1), ("snare on 2 and 4", 0.8, 1)],
         ["jazz"] = [("chords in 4 bars", 4, 8), ("melody leaps past a fifth", 0.06, 0.2), ("time as the bar before", 0.8, 1)],
         ["folk"] = [("melody mean move", 0, 2.5), ("fills a minute", 0, 4)],
+        ["pop"] = [("snare on 2 and 4", 0.75, 1), ("chords in 4 bars", 2, 5), ("changing key", 0.2, 0.6), ("tempo", 95, 125)],
+        ["metal"] = [("kick hits a bar", 4, 16), ("riff sections in power chords", 0.7, 1), ("guitars' notes palm-muted", 0.15, 1), ("tempo", 120, 180)],
         ["funk"] = [("sections sharing a progression", 0.4, 1), ("melody bars repeated", 0.1, 1), ("chords stabbed (a 16th or shorter)", 0.15, 1), ("lifts dropped", 0, 0)]
     };
 

@@ -7,9 +7,8 @@ is removed once it is built.
 ## Priorities
 
 **Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
-ratings by conventionality once enough are in, alongside, continuously and never as a gate; and alongside it the
-genres' review's P1 items (see *Genres*), its measure of what the presets inherit first, then its P2 items, and its P3
-ones as the measures and listening say.
+ratings by conventionality once enough are in, alongside, continuously and never as a gate; listening to the
+presets as the genres' review retuned them, and Pop and Metal, among it (see *Genres*).
 
 **Later** (P2): the ratings report (see *Listening data*) once the dashboard shows songs rated enough, and listening
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
@@ -306,20 +305,9 @@ A genre is the page's data (`Genre`, `GenreChoices`, `Client/genres.json`), ever
 end, the middle and the wild end; what each choice does is in the code and the numbers of each in its commit. What is
 left:
 
-- **The genres' review** (October 2026), its items by priority, an item after those it names: a preset leaves most
-  devices to the songs' own chances (`ByConvention.At`'s pool or the chance itself), so that Folk plays sweeps and
-  tremolo, Blues reharmonises its dominants by thirds and Funk, "everything repeating", neither loops nor hooks; and
-  some devices no genre reaches, so that a wild House song still changes tempo. Each measured by the preset reports
-  before and after (`GenrePresetsTest`, `GenreIdiomsReportTest`, `GenreDevicesReportTest`); the presets are not in the
-  corpus, so the fingerprint keeps but where an item says so. Every preset names every device
-  (`GenreChoices.Devices`), first as the songs have them, rounded to whole percents; `GenreDevicesReportTest` the
-  baseline of every retuning below.
-
-  **P2**, in order, each measured as above:
-  15. **A Pop preset,** the plainest songs' frame named: a verse, a pre-chorus and a chorus, a last chorus lifted and
-     repeated, hooks.
-  16. **A Metal preset:** chugs, power chords, half time, Phrygian and harmonic minor, the kick in 16ths, which the
-     kick's rhythm settings must reach, checked first.
+- **The genres' review, the rest** (October 2026; its P1 and P2 items done, every device a genre's and every preset
+  naming every device, the presets retuned, Pop and Metal added), each measured by the preset reports before and after
+  (`GenrePresetsTest`, `GenreIdiomsReportTest`, `GenreDevicesReportTest`).
 
   **P3**, by what the measures and listening say:
   17. **Groove hold under pins:** the idiom report with every preset's `grooveHold` taken out; should the backbeat
@@ -354,6 +342,10 @@ left:
     keeper playing straight under the tresillo.
   - A hook of one or two bars sung through a whole section, its phrase ends let go of; a hooked melody's bars repeat
     about half at most now, a phrase's last bar ending on its held note.
+  - Metal's double kick, the kick in 16ths: the ground's rhythm settings at their most play 4.5 hits a bar, a value
+    moving a setting by steps from where the role rests, and a genre giving the kick the time role leans the songs'
+    own weight of it there (1) by its own, too little to take. A kick keeping time by a genre's role, or a value set
+    outright (see *The rhythm's values against the part's own*).
   - A fill's drums leaning to the toms by genre, which the drum groups' state draws, not a genre's choice.
   - A melody's leaping by genre, a lean of its register's freedom and its leap's size: leaning its stepwiseness moved
     the mean move by a tenth of a semitone and the leaps not at all, a melody's leaps coming of a phrase starting
