@@ -317,10 +317,6 @@ of here once it is; the genres it adds are described under *More genres*.
 
 **P1, wrong now and cheap:**
 
-6. **The presets retuned:** the root motions of Pop (I-V-vi-IV), Rock, Metal and Synthwave (i-bVI-bVII), Reggae (I-IV)
-   and Folk; Jazz's tempo from 80 at the plain end and its pad rarer; Hip-hop's counter-melody 15-25% and its drop
-   rarer; Funk's and Latin's pads rarer; Folk's drums 50-60%; Latin's and Metal's solos fewer; every counter-melody's
-   chance its genre's, not the songs' 60 copied.
 7. **The blues' twelve bars at the plain end:** V at bar 9 in 43% of its sections, IV at 5 in 63%; the phrases' place
    rules kept by the plain end.
 

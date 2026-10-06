@@ -42,6 +42,10 @@ public sealed class GenreIdiomsReportTest
         var timeBars = bars.Where(x => bars.Contains(x - 4) && TimeOf(x).Length > 0).ToArray();
 
         var progressions = song.Trace.Where(x => x.Point == TracePoints.Progression).GroupBy(x => x.Section).Select(x => string.Join(" ", (System.Collections.Immutable.ImmutableArray<int>)x.First().Value!)).ToArray();
+        // every move of a section's chord roots, in scale steps up, 0 to 6, as the root motions name them (Progressions.Motions)
+        var motions = song.Trace.Where(x => x.Point == TracePoints.Progression).GroupBy(x => x.Section).Select(x => (System.Collections.Immutable.ImmutableArray<int>)x.First().Value!)
+            .SelectMany(x => x.Zip(x.Skip(1), (a, b) => ((b - a) % 7 + 7) % 7)).ToArray();
+        double Motion(int steps) => motions.Length > 0 ? motions.Count(x => x == steps) / (double)motions.Length : double.NaN;
         var changes = map.Sections.Sum(x => song.ChordChanges.Count(c => c >= x.Start - 1e-9 && c < x.End - 1e-9));
         var phrases = map.Sections.Sum(x => x.Duration / (Meter.PhraseBarCount * x.Meter.BarDuration));
 
@@ -94,6 +98,11 @@ public sealed class GenreIdiomsReportTest
             ["chorus phrases of two bars at most"] = Repeating(SectionRole.Chorus),
             ["verse phrases of two bars at most"] = Repeating(SectionRole.Verse),
             ["chords in 4 bars"] = phrases > 0 ? changes / phrases : double.NaN,
+            ["roots down a fifth (ii-V, V-I)"] = Motion(3),
+            ["roots down a fourth (I-V, IV-I)"] = Motion(4),
+            ["roots down a third (vi-IV, i-bVI)"] = Motion(5),
+            ["roots up a step (V-vi, bVI-bVII)"] = Motion(1),
+            ["roots down a step (bVII-bVI)"] = Motion(6),
             ["sections with a passing chord"] = song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm).Select(x => ((HarmonicRhythm)x.Value!).Passing.Length > 0 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["sections sharing a progression"] = progressions.Length > 1 ? progressions.Skip(1).Count(x => x == progressions[0]) / (double)(progressions.Length - 1) : double.NaN,
             ["fills a minute"] = song.Trace.Count(x => x.Point == TracePoints.FillDecision && ((FillDecision)x.Value!).Span > 0) / minutes,
