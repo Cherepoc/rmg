@@ -4,6 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
+      "intro": { "entries": 60, "cold": 30, "countIn": [15, 20, 25] },
       "insertion": { "none": 100, "phaser": [5, 10, 20], "wah": [5, 10, 20] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "louderForms": { "guitars": [20, 50, 60] },
@@ -22,7 +23,7 @@
       "effects": { "bends": [30, 60, 90], "chorus": [20, 40, 80], "vibrato": [20, 70, 100], "swell": [0, 20, 80] },
       "pan": { "rhythm": 85, "riff": 75 },
       "dynamics": { "energy": 65, "contrast": 70 },
-      "phrases": { "fourBars": 100, "eightBars": [40, 40, 50] },
+      "phrases": { "fourBars": 100, "eightBars": [40, 40, 50], "twelveBars": [5, 10, 10] },
       "instrument": {
         "melody": { "acousticGrandPiano": [46, 46, 80], "electricPiano1": [38, 38, 67], "harmonica": 38, "electricGuitarClean": 100, "lead2Sawtooth": [46, 46, 50], "sitar": [0, 0, 15] },
         "chords": { "rockOrgan": [30, 30, 33], "acousticGuitarSteel": [25, 25, 100], "electricGuitarClean": [45, 45, 74], "overdrivenGuitar": [100, 100, 64], "distortionGuitar": [80, 80, 51] },
@@ -85,7 +86,7 @@
       "pan": { "bass": 65, "chords": 65 },
       "formChances": { "forms": [100, 90, 60] },
       "form": { "vvbv": 100, "vvbvvvbv": 50, "vcvcbc": 20 },
-      "phrases": { "eightBars": [100, 100, 60], "fourBars": [30, 30, 40] },
+      "phrases": { "eightBars": [100, 100, 60], "fourBars": [30, 30, 40], "twelveBars": [10, 15, 20] },
       "instrument": {
         "melody": { "vibraphone": [45, 45, 63], "electricGuitarJazz": [40, 40, 49], "trumpet": [80, 80, 77], "mutedTrumpet": [55, 55, 53], "altoSax": [85, 85, 81], "tenorSax": [100, 100, 96], "clarinet": [30, 30, 68], "flute": [25, 25, 100] },
         "chords": { "acousticGrandPiano": 100, "electricPiano1": [40, 40, 99], "vibraphone": [25, 25, 27], "electricGuitarJazz": 80 },
@@ -127,6 +128,7 @@
     "name": "House",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, a pumping bass and pads, piano and electric piano chords now and then, a TR-808 or electronic kit, straight, 117 to 130, minor, sus and add9 chords, a drop into the chorus.",
     "choices": {
+      "drumSounds": { "openHiHat": 70 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "vamp": { "sections": [10, 20, 20] },
       "feelValues": { "swing": 30, "sixteenths": 100 },
@@ -199,6 +201,8 @@
     "name": "Techno",
     "description": "A kick on every beat, driving and dark, the hi-hat on the offbeats, one figure looping for minutes over a chord or two, a square or sawtooth riff, little melody, a minor or Phrygian key, a TR-808 or electronic kit, 125 to 140, the pads and bass pumping.",
     "choices": {
+      "rootMotion": { "same": 75 },
+      "drumSounds": { "openHiHat": 75 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "vamp": { "sections": [40, 50, 40] },
       "phraseScheme": { "aaaa": 100, "aaab": [25, 25, 40], "aaba": [15, 15, 30], "abab": [10, 10, 30] },
@@ -294,7 +298,7 @@
       "chordShape": { "triad": 100, "add9": [30, 60, 50], "sus2": [30, 50, 40], "sus4": [20, 40, 40], "seventh": [20, 40, 40] },
       "harmonicRhythm": { "oneBar": 100, "twoBars": [40, 40, 40] },
       "bass": { "leading": 20 },
-      "strongEffect": { "none": [60, 60, 40], "echo": [30, 40, 60], "opening": [20, 30, 40], "gate": [0, 10, 20], "sweep": [20, 30, 60] },
+      "strongEffect": { "none": [60, 60, 40], "echo": [30, 40, 60], "opening": [20, 30, 40], "gate": [0, 10, 20], "sweep": [20, 30, 60], "pump": [10, 20, 30] },
       "effects": { "chorus": [40, 60, 80], "vibrato": [20, 40, 70] },
       "pan": { "pad": 80 },
       "formChances": { "forms": [100, 90, 50] },
@@ -519,6 +523,8 @@
     "name": "Funk",
     "description": "The hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and a muted guitar comping in 16ths, brass, sevenths and ninths, Dorian and Mixolydian, everything repeating.",
     "choices": {
+      "soloists": { "solo": 100, "melody": [25, 45, 25], "chords": [25, 30, 25], "riff": [25, 20, 25], "rhythm": [25, 15, 25], "counterMelody": [0, 18, 25], "bass": [0, 25, 40], "drum": [0, 11, 25] },
+      "drumSounds": { "openHiHat": 65 },
       "insertion": { "none": 100, "wah": [40, 50, 60], "phaser": [10, 20, 30] },
       "room": { "room": 100 },
       "vamp": { "sections": [30, 40, 40] },
@@ -559,7 +565,7 @@
         "time": { "speed": 76, "fullness": 82, "repetition": 82 }
       },
       "arpeggio": { "none": 100 },
-      "chordScales": { "applied": [0, 15, 20], "borrowed": [0, 8, 12], "own": [0, 0, 30] },
+      "chordScales": { "applied": [0, 15, 20], "borrowed": [0, 8, 12], "own": [0, 0, 30], "dominant": [10, 20, 30] },
       "turnaround": { "sections": [0, 5, 5] },
       "passingChords": { "chords": [0, 5, 5] },
       "harmonyDevices": { "pedal": [0, 15, 25] },
@@ -732,6 +738,7 @@
     "name": "Pop",
     "description": "A verse, a pre-chorus and a chorus on a hook, the last chorus lifted a key and played twice, piano, synths and clean guitars, the kick and snare on the beat, plain triads and add9 chords, major, 95 to 125.",
     "choices": {
+      "strongEffect": { "none": [100, 80, 30], "pump": [0, 5, 20], "echo": [0, 10, 30], "tremolo": [0, 5, 20], "sweep": [0, 3, 20] },
       "louderForms": { "guitars": [10, 30, 40] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 80, "counterMelody": 45, "drum": 95, "riff": 50, "riffTwin": [0, 15, 15], "rhythm": 40, "solo": [0, 20, 80] },
       "rootMotion": { "fourthDown": 85, "stepUp": 80, "thirdDown": 80 },
@@ -774,6 +781,7 @@
     "name": "Metal",
     "description": "Distorted guitars chugging a riff in power chords, a double kick in 16ths, the snare on 2 and 4 or in half time, breaks and stops, guitar solos, natural minor, Phrygian and harmonic minor, fast.",
     "choices": {
+      "drumSounds": { "china": 70 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "louderForms": { "guitars": [30, 50, 60] },
       "rootMotion": { "thirdDown": 70, "stepUp": 70, "stepDown": 60 },
@@ -929,6 +937,8 @@
     "name": "Djent",
     "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, a clean lead floating over.",
     "choices": {
+      "sectionChanges": { "meter": [10, 20, 100], "tempo": [0, 4, 100], "modulation": [0, 5, 50] },
+      "drop": { "lifts": [20, 30, 40] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "arpeggio": { "none": 100, "up": [10, 30, 40], "upTwoOctaves": [10, 20, 40], "upDown": [0, 10, 30] },
       "grooveHold": { "held": 90 },
@@ -997,6 +1007,7 @@
     "name": "Nu metal",
     "description": "A low distorted riff of one note chugged in a syncopated hip-hop groove, a clicking slap bass, quiet clean verses with room for a voice and loud distorted choruses, squealing bends, natural minor and Phrygian.",
     "choices": {
+      "drumSounds": { "china": 70 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "harmonyDevices": {},
       "planing": {},
@@ -1060,6 +1071,9 @@
     "name": "Disco",
     "description": "The kick four on the floor, the open hi-hat off the beat, a bass in octaves, strings and horns, a clean guitar scratching 16ths, electric piano sevenths and ninths, minor and Dorian, 110 to 130.",
     "choices": {
+      "vamp": { "sections": [20, 30, 40] },
+      "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": [20, 30, 40] },
+      "strongEffect": { "none": [100, 70, 30], "pump": [0, 25, 40], "echo": [0, 5, 20], "sweep": [0, 5, 20] },
       "insertion": { "none": 100, "phaser": [30, 40, 50], "wah": [10, 20, 30] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [110, 110, 100], "to": [130, 130, 140] },
@@ -1114,6 +1128,7 @@
     "name": "Trap",
     "description": "A TR-808 in half time, the hi-hat in 16ths rolling into 32nds and triplets, a long gliding bass, dark bells and pads looping, minor and Phrygian, verses left to a voice.",
     "choices": {
+      "rootMotion": { "same": 75 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [130, 130, 120], "to": [150, 150, 170] },
       "meter": { "4/4": 100 },
@@ -1170,6 +1185,7 @@
     "name": "Trance",
     "description": "The kick four on the floor, the hi-hat off the beat, sawtooth arpeggios and leads over pumping pads, a rolling bass, minor, 132 to 140, long sections building to a drop.",
     "choices": {
+      "drumSounds": { "openHiHat": 75 },
       "room": { "hall": 100, "plate": 50 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [132, 132, 125], "to": [140, 140, 150] },
@@ -1280,6 +1296,7 @@
     "name": "Ska",
     "description": "Fast, the guitar and the piano skanking on the offbeats, a walking bass, horns on a riff and in solos, trumpet and sax leads, major and Mixolydian.",
     "choices": {
+      "stopTime": { "sections": [5, 10, 15] },
       "tempo": { "from": [140, 140, 130], "to": [170, 170, 190] },
       "meter": { "4/4": 100 },
       "feelChances": { "swing": [0, 10, 20] },
@@ -1331,6 +1348,7 @@
     "name": "Punk",
     "description": "Fast and short, distorted power chords strummed in 8ths, a picked bass driving 8ths, the drums straight and loud, major and Mixolydian, a count-in and a stop.",
     "choices": {
+      "stopTime": { "sections": [10, 15, 20] },
       "room": { "room": 100 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [160, 160, 150], "to": [200, 200, 230] },
@@ -1385,6 +1403,7 @@
     "name": "Fusion",
     "description": "Electric piano and a soprano sax over a fretless bass singing high, Lydian, Dorian and melodic minor, ninths to thirteenths and quartal chords, chords in scales of their own and planed, odd meters, long solos.",
     "choices": {
+      "polymeter": { "sections": [0, 10, 30] },
       "tempo": { "from": [90, 90, 80], "to": [140, 140, 180] },
       "meter": { "4/4": 100, "7/8": [10, 20, 40], "5/4": [10, 20, 30], "7/4": [0, 10, 20], "6/8": [10, 10, 20] },
       "feelChances": { "swing": [10, 20, 30] },
@@ -1433,6 +1452,7 @@
     "name": "Soul",
     "description": "An organ, a piano and horns, sevenths and ninths passing through applied dominants, a laid-back backbeat, 4/4 or a swaying 6/8, a last chorus lifted, sax solos answering the tune.",
     "choices": {
+      "stopTime": { "sections": [5, 10, 15] },
       "insertion": { "none": 100, "wah": [10, 20, 30], "phaser": [10, 20, 30] },
       "room": { "plate": 100, "room": 60 },
       "tempo": { "from": [65, 65, 60], "to": [105, 105, 125] },
@@ -1486,6 +1506,9 @@
     "name": "Country",
     "description": "A fiddle, a steel-string guitar strummed, a banjo and a honky-tonk piano, plain triads moving by fourths and fifths, the bass on the root and the fifth, the snare on 2 and 4, major and Mixolydian.",
     "choices": {
+      "soloAnswers": { "sections": [20, 30, 40] },
+      "stopTime": { "sections": [5, 10, 15] },
+      "phrases": { "fourBars": 100, "eightBars": [40, 40, 50], "twelveBars": [5, 10, 15] },
       "ornaments": { "graces": [0, 40, 90], "turns": [0, 5, 30], "trills": [0, 5, 30] },
       "tempo": { "from": [90, 90, 80], "to": [140, 140, 160] },
       "meter": { "4/4": 100, "3/4": [30, 30, 30] },
@@ -1590,6 +1613,7 @@
     "name": "Orchestral",
     "description": "Strings, horns and woodwinds over a contrabass, a harp's arpeggios, timpani and a cymbal marking the form, minor, major and harmonic minor, long crescendos into louder sections, parts entering one by one.",
     "choices": {
+      "sectionChanges": { "tempo": [10, 20, 100], "modulation": [10, 20, 50], "meter": [0, 2, 100] },
       "room": { "hall": 100 },
       "ornaments": { "graces": [0, 30, 80], "turns": [0, 25, 70], "trills": [0, 30, 80] },
       "tempo": { "from": [60, 60, 60], "to": [130, 130, 160] },

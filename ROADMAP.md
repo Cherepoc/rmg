@@ -162,6 +162,14 @@ each from the trace; the seeds named here are ones already found.
   Trap 21% to 18%, Hip-hop 17% to 13%; Trap's lead bright 78% to 56%, Dnb's 38% to 8%; Djent major 12% to 3%
   (`MoodReportTest`). Still happy? The major chords are a minor key's own ♭III, ♭VI and ♭VII, which no preset choice
   reaches: a progression's degrees leaned, if so.
+- **Features of one genre in others:** the China cymbal in Metal and Nu metal, the open hi-hat in Techno, Electronic,
+  Trance and Funk, a drop in Djent (32% of its lifts), its own meters in Djent (9% to 23% of sections) and its own
+  tempos in Orchestral (11% to 31%), polymeter in Fusion (4% to 8%), twelve bars now and then in Rock, Country and Jazz,
+  stop time in Punk, Ska, Country and Soul (1-7% to 16-20%), solo answers in Country (25% to 33%), a pump in Synthwave,
+  Disco and Pop, Disco's strong effects 28% to 38%, its stabs and vamps, the count-in in Rock, dominant chord scales and
+  the bass soloing in Funk, one chord held longer in Techno and Trap (`GenreDevicesReportTest`). Metal's section
+  changes and polymeter, Jazz's and Funk's solo answers left as the songs have them, already as often. Heard as the
+  genres'?
 - **Dub's echo:** an echo on the rhythm part's chords as well as a lead's, and the snare's backbeat with it at its
   delay: Reggae's skank and snare echo in 23% of its songs (`DubEchoTest`). The echoes' repeats as notes, three, each
   quieter: dub's long darkening tail wants the GS delay (*Parked*), should these sound thin.
@@ -215,14 +223,6 @@ plain or wild the songs are.
 ## Open work
 
 Each item with its plan, and what it waits for.
-
-### The heavy band, the mood and the effects (in progress, in order)
-
-- **Features of one genre in others,** as preset data: the China cymbal in Metal and Nu metal, the open hi-hat in
-  Techno, Electronic, Trance and Funk, a drop in Djent, section changes in Djent, Metal and Orchestral, polymeter in
-  Metal and Fusion, twelve bars in Rock, Country and Jazz, stop time in Punk, Ska, Country and Soul, solo answers in
-  Country, Jazz and Funk, the pump in Synthwave, Disco and Pop, stabs and vamps in Disco, the count-in in Rock, the
-  dominant chord scales in Funk, the bass soloing in Funk, one chord held in Techno and Trap.
 
 ### Conventionality
 
