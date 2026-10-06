@@ -672,7 +672,7 @@
         "rhythm": { "speed": 69, "fullness": 82 }
       },
       "feelChances": { "swing": [0, 20, 20], "halfTime": 8, "doubleTime": 4 },
-      "arpeggio": { "none": 100, "up": [14, 6, 100], "upDown": [14, 5, 100], "alberti": [14, 4, 100], "down": [0, 3, 100], "downUp": [0, 2, 100], "pairs": [0, 3, 100], "rootFifth": [0, 2, 100], "random": [0, 1, 100], "upTwoOctaves": [0, 1, 100] },
+      "arpeggio": { "none": 100, "alberti": [40, 50, 50], "upDown": [30, 40, 40], "up": [20, 20, 30] },
       "chordScales": { "applied": [0, 35, 35], "borrowed": [0, 12, 12], "own": [0, 0, 30] },
       "turnaround": { "sections": [0, 10, 10] },
       "passingChords": { "chords": [0, 10, 10] },
@@ -681,7 +681,7 @@
       "loop": {},
       "octaveBass": { "sections": [0, 5, 5] },
       "glide": {},
-      "effects": { "vibrato": [0, 70, 100], "chorus": [0, 50, 100], "swell": [0, 35, 100], "bends": [0, 50, 100] },
+      "effects": { "vibrato": [20, 50, 80], "bends": [0, 15, 40], "swell": [0, 10, 40] },
       "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50] },
       "voice": {},
       "pins": {},
@@ -692,14 +692,16 @@
       "keyChanges": { "lastSection": [0, 8, 100], "sections": [0, 8, 100], "patterns": [0, 0, 100] },
       "hook": {},
       "riff": {},
-      "solos": { "sections": [0, 4, 50] },
-      "strongEffect": { "none": [100, 100, 0], "echo": [0, 16, 100], "tremolo": [0, 11, 80], "sweep": [0, 7, 60] },
+      "solos": { "sections": [5, 10, 25] },
+      "strongEffect": { "none": [100, 100, 60], "echo": [0, 5, 25] },
       "sectionChanges": { "tempo": [0, 4, 100], "modulation": [0, 5, 50], "meter": [0, 2, 100] },
       "polymeter": { "sections": [0, 1, 50] },
       "soloAnswers": { "sections": [0, 30, 30] },
       "lastRepeat": { "songs": [0, 25, 25] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35 },
-      "instrumentSwitches": { "sections": [0, 2, 100] }
+      "instrumentSwitches": { "sections": [0, 2, 100] },
+      "soloists": { "solo": 100, "melody": [50, 50, 50], "rhythm": [30, 40, 40] },
+      "fills": { "amount": 35 }
     }
   },
   {

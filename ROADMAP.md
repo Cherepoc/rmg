@@ -316,8 +316,6 @@ left:
   baseline of every retuning below.
 
   **P2**, in order, each measured as above:
-  10. **Folk retuned:** arpeggios (fingerpicking), a fiddle's or a banjo's breaks as solos, fewer fills, effects
-     named (no strong effect but a rare echo, no chorus).
   11. **Reggae retuned:** stabs (the skank a chopped chord), a loop (the riddim), its intro and ending pools.
   12. **Jazz retuned:** the ride pinned (`pins`'s time), stop time and pushes well over the songs' 3% and 8%,
      planing and reharmonisation in the middle.
