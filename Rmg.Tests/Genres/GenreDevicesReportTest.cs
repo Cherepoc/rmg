@@ -84,6 +84,7 @@ public sealed class GenreDevicesReportTest
                 : double.NaN,
             ["songs with a strong effect"] = ((SongEffects)song.Trace.Single(x => x.Point == TracePoints.SongEffects).Value!).Strong != StrongEffect.None ? 1 : 0,
             ["held piano chords rolled"] = held.Length > 0 ? held.Count(x => x.Value.State.GetStateValue(CompositionStateKinds.Strum) > 0) / (double)held.Length : double.NaN,
+            ["reverb sent"] = song.Song.Notes!.Values.SelectMany(x => x).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Reverb) - 1.0).Where(x => x >= 0).DefaultIfEmpty(double.NaN).Average(),
             ["unconventionality"] = song.Song.Draws!.Unconventionality.Base
         };
     }
@@ -102,8 +103,11 @@ public sealed class GenreDevicesReportTest
         ["appearances at a tempo of their own"] = "sectionChanges", ["sections in a meter of their own"] = "sectionChanges",
         ["sections the solo part answers"] = "soloAnswers", ["lines in octaves"] = "doubling", ["sections harmonising the melody"] = "doubling",
         ["songs repeating the last section"] = "lastRepeat", ["parts' sections switched"] = "instrumentSwitches", ["songs with a strong effect"] = "strongEffect",
-        ["held piano chords rolled"] = "articulation"
+        ["held piano chords rolled"] = "articulation", ["reverb sent"] = "space"
     };
+
+    /// <summary>The measures that are numbers rather than shares.</summary>
+    private static readonly HashSet<string> Numbers = ["reverb sent", "unconventionality"];
 
     [Test]
     [Explicit]
@@ -121,7 +125,7 @@ public sealed class GenreDevicesReportTest
         Console.WriteLine($"{"",-36}" + string.Join("", columns.Select(x => $"{x.Name.Split('|')[0],11}")));
         foreach (var measure in columns[0].Songs[0].Keys)
             Console.WriteLine($"{measure,-36}" + string.Join("", columns.Select(c =>
-                (c.Songs.Select(x => x[measure]).Where(double.IsFinite).DefaultIfEmpty(double.NaN).Average() is var value && measure == "unconventionality"
+                (c.Songs.Select(x => x[measure]).Where(double.IsFinite).DefaultIfEmpty(double.NaN).Average() is var value && Numbers.Contains(measure)
                     ? $"{value:0.00}"
                     : $"{value:P0}") + (Inherits(c.Name, measure) ? "*" : " ") is var cell ? $"{cell,11}" : "")));
 

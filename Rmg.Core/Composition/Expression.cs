@@ -258,6 +258,17 @@ internal static class Expression
         _ => 60
     };
 
+    /// <summary>
+    ///     A part's reverb as a genre has it (<see cref="GenreChoices.Space" />): the role's moved towards none or the most by
+    ///     the genre's lean, a dub's wet and a funk band's dry; the role's where the genre does not name it. A twin's its
+    ///     riff's.
+    /// </summary>
+    public static double Reverb(TrackRole role, Genre genre)
+    {
+        var lean = genre.Shift(GenreChoices.Space, GenreChoices.Name((role == TrackRole.RiffTwin ? TrackRole.Riff : role).ToString()));
+        return Reverb(role) + lean * (lean > 0 ? 127 - Reverb(role) : Reverb(role));
+    }
+
     public static ByConvention ReverbSpread { get; } = new(0, 0.1, 1);
 
     /// <summary>The chance a part plays with a chorus where the song does, the classic ones the likelier.</summary>
@@ -350,7 +361,8 @@ internal static class Expression
             vibrates &= !echoes;
             bendsHere &= !echoes;
             var delay = EchoDelays[part.GenerateInt(0, EchoDelays.Length)];
-            var reverb = (int)Math.Round(Reverb(role) + ReverbSpread.At(songSound) * (part.GenerateDouble() * 127 - Reverb(role)));
+            var room = Reverb(role, genre);
+            var reverb = (int)Math.Round(room + ReverbSpread.At(songSound) * (part.GenerateDouble() * 127 - room));
             var choruses = part.TestProbability((ChorusesClassically(program) ? ClassicChorusChance : ChorusChance).At(songSound)) & songChorus;
             var chorus = 40 + part.GenerateInt(0, 60);
             // how much the part leans to the bigger sizes, around 0

@@ -335,10 +335,8 @@ left:
   **P4:** the choices grouped into families (bass, harmony, form, drum devices), one choice of several chances rather
   than fifteen of one, which would read better in the editor and break every genre link kept; should the editor grow
   hard to use.
-- **Instruments and effects** (P2, a plan in steps, October 2026): 74 of the 128 programs play, the rest never; and no
-  genre sets a part's reverb.
-  1. A genre's reverb: a value a part (`space`, as `levels` are), over the role's send (`Expression.Reverb`) and its
-     spread; Ambient wet, Funk, Hip-hop and Metal's chugs dry.
+- **Instruments and effects** (P2, a plan in steps, October 2026; a genre's reverb done, `GenreChoices.Space`): 74 of
+  the 128 programs play, the rest never.
   2. An instrument's traits as data, one table (its family, sustaining or decaying, strumming, rolling, bending, its
      vibrato, the effects that suit it), read where program ranges decide them now (`Expression.Bends`, `Choruses`,
      `ChorusesClassically`, the strong effects, `VibratesWide`, the strum, the roll and the chugs in `SongStages`,

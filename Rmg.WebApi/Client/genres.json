@@ -139,7 +139,8 @@
       "soloAnswers": { "sections": [0, 30, 30] },
       "lastRepeat": { "songs": [0, 25, 25] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35 },
-      "instrumentSwitches": { "sections": [0, 2, 100] }
+      "instrumentSwitches": { "sections": [0, 2, 100] },
+      "space": { "melody": 60, "solo": 60, "chords": 55 }
     }
   },
   {
@@ -365,7 +366,8 @@
       "soloAnswers": { "sections": [0, 30, 30] },
       "lastRepeat": { "songs": [20, 40, 40] },
       "doubling": { "octaves": [7, 11, 15], "harmony": [30, 40, 40], "riff": 35 },
-      "instrumentSwitches": { "sections": [0, 2, 100] }
+      "instrumentSwitches": { "sections": [0, 2, 100] },
+      "space": { "melody": 70, "pad": 70, "drum": 65, "chords": 60 }
     }
   },
   {
@@ -436,7 +438,8 @@
       "soloAnswers": { "sections": [0, 30, 30] },
       "lastRepeat": { "songs": [0, 25, 25] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35 },
-      "instrumentSwitches": { "sections": [0, 2, 100] }
+      "instrumentSwitches": { "sections": [0, 2, 100] },
+      "space": { "drum": 25, "bass": 30, "chords": 40, "melody": 40 }
     }
   },
   {
@@ -505,7 +508,8 @@
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35 },
       "instrumentSwitches": { "sections": [0, 2, 100] },
       "intro": { "entries": 100, "cold": [30, 30, 40] },
-      "ending": { "fade": 100, "button": [40, 40, 40], "ringOut": [20, 20, 30] }
+      "ending": { "fade": 100, "button": [40, 40, 40], "ringOut": [20, 20, 30] },
+      "space": { "drum": 60, "melody": 65, "chords": 55 }
     }
   },
   {
@@ -638,7 +642,8 @@
       "lastRepeat": { "songs": [0, 25, 25] },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": 35 },
       "instrumentSwitches": { "sections": [0, 2, 100] },
-      "phraseScheme": { "aaab": 100, "aaaa": [80, 80, 50], "abab": [30, 30, 40], "aaba": [20, 20, 30] }
+      "phraseScheme": { "aaab": 100, "aaaa": [80, 80, 50], "abab": [30, 30, 40], "aaba": [20, 20, 30] },
+      "space": { "drum": 25, "bass": 30, "chords": 30, "rhythm": 25, "riff": 30, "melody": 40 }
     }
   },
   {
@@ -836,7 +841,8 @@
       "instrumentSwitches": { "sections": [0, 2, 100] },
       "sectionLength": { "bars16": 100, "bars8": [60, 60, 60], "bars32": [30, 40, 50] },
       "texture": { "steady": [100, 70, 50], "build": [50, 60, 60], "thin": [30, 40, 50], "alone": [0, 10, 30] },
-      "phrases": { "fourBars": 100, "eightBars": [50, 50, 60] }
+      "phrases": { "fourBars": 100, "eightBars": [50, 50, 60] },
+      "space": { "pad": 85, "chords": 80, "melody": 80, "counterMelody": 80, "solo": 75, "drum": 70 }
     }
   },
   {
@@ -959,7 +965,8 @@
       "soloAnswers": { "sections": [0, 30, 30] },
       "lastRepeat": { "songs": [0, 25, 25] },
       "instrumentSwitches": { "sections": [0, 2, 100] },
-      "hook": { "choruses": [60, 60, 30] }
+      "hook": { "choruses": [60, 60, 30] },
+      "space": { "riff": 25, "rhythm": 25, "bass": 30, "drum": 40 }
     }
   }
 ]

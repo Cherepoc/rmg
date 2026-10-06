@@ -251,6 +251,19 @@ public static class GenreChoices
                 _ => x.ToString()
             }))]);
 
+    /// <summary>
+    ///     How much reverb each part plays with, from 0, dry, through 50, as the songs have it, to 100, as wet as can be
+    ///     (<see cref="Expression.Reverb(TrackRole, Genre)" />): an ambient wash, a funk band's dry room.
+    /// </summary>
+    public static GenreChoice Space { get; } = Values("space", "Space",
+        [..new[] { TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Solo, TrackRole.Drum }
+            .Select(x => (Name(x.ToString()), x switch
+            {
+                TrackRole.CounterMelody => "Counter-melody",
+                TrackRole.Drum => "Drums",
+                _ => x.ToString()
+            }))]);
+
     /// <summary>How much the bass leads into a new chord, from 0, never, through 50, as its instrument has it, to 100, walking (<see cref="BassLeadingLayers.GenreLeadOdds" />).</summary>
     public static GenreChoice Bass { get; } = Values("bass", "Bass", [("leading", "Leading into a chord")]);
 
@@ -534,7 +547,7 @@ public static class GenreChoices
     public static ImmutableArray<GenreChoice> All { get; } =
     [
         Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Dynamics, Phrases,
-        SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches,
+        SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,
