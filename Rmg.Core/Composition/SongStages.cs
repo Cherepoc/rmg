@@ -726,7 +726,6 @@ internal static class SongStages
         {
             if (song.Tracks.Definitions[track] is not PitchInstrumentTrack part)
                 continue;
-            var chugs = Chugs(part.Role, part.InstrumentCode);
             var rolls = song.Stream(SongStream.Roll, track).TestProbability(RollChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "roll")));
             // the chords struck short, stabs, a genre's
             var stabs = part.Role == TrackRole.Chords
@@ -738,7 +737,9 @@ internal static class SongStages
                 var section = sections.IndexOf(song.Form.Map.SectionAt(note.Position)!);
                 var repeats = i > 0 && timeline[i - 1].Value.Pitches.SequenceEqual(note.Value.Pitches);
                 var weak = state.GetStateValue(CompositionStateKinds.BeatRank) > 0;
-                if (chugs && section >= 0 && song.Sections[section].Chugs && repeats && weak)
+                // by the instrument playing the note, a switched one's
+                var program = state.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : part.InstrumentCode;
+                if (Chugs(part.Role, program) && section >= 0 && song.Sections[section].Chugs && repeats && weak)
                     state = state.With(CompositionStateKinds.PalmMute, 1);
                 // a bass in octaves, a note off the beat the note before it an octave away, up where its range has it and down
                 // where not, as a disco or a funk bass alternates them; but one leading into the next chord, and a section that
@@ -748,7 +749,6 @@ internal static class SongStages
                 if (part.Role == TrackRole.Bass && section >= 0 && song.Sections[section].OctaveBass && !song.Sections[section].Chugs && i > 0 && weak && !leads
                     && timeline[i - 1].Value.Pitches is var before && (before.All(x => x + 12 <= top) || before.All(x => x - 12 >= bottom)))
                     pitches = [..before.Select(x => before.All(y => y + 12 <= top) ? x + 12 : x - 12)];
-                var program = state.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : part.InstrumentCode;
                 // the stroke in beats at the tempo there
                 double Beats(double seconds) => seconds * tempo.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60;
                 if (note.Value.Pitches.Length > 1 && InstrumentTraits.Has(program, InstrumentTrait.Strums))

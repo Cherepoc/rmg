@@ -314,10 +314,6 @@ of here once it is; the genres it adds are described under *More genres*.
 
 **P1, wrong now and cheap:**
 
-2. **Chugs on driven guitars alone:** `InstrumentTrait.Chugs` on the overdriven and the distortion guitar and the
-   picked bass, not the whole family; a part chugging by the instrument playing it, a switched one's
-   (`SongStages.Chugs` reads the track's first). The muted guitar is a clean guitar's other form, apt wherever a clean
-   one is, never a chug.
 3. **Rock's and Metal's muted guitar:** 34-36% of their riffs' notes and 36% of Rock's rhythm part's, twice their pools'
    share (`GenreInstrumentsReportTest`): why, then their weight to the driven guitars.
 4. **Every part's pool named:** a preset names the instruments of every part it may play (a rule test), where now a

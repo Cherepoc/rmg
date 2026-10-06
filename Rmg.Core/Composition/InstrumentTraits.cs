@@ -35,7 +35,7 @@ public enum InstrumentTrait
     /// <summary>Its held chords rolled, a piano's.</summary>
     Rolls = 256,
 
-    /// <summary>Its repeats palm-muted where its part chugs, a guitar's or a picked bass's.</summary>
+    /// <summary>Its repeats palm-muted where its part chugs, a driven guitar's or a picked bass's.</summary>
     Chugs = 512
 }
 
@@ -46,7 +46,7 @@ public enum InstrumentTrait
 public static class InstrumentTraits
 {
     private const InstrumentTrait Guitar = InstrumentTrait.Bends | InstrumentTrait.VibratesWide | InstrumentTrait.SoloBends | InstrumentTrait.Choruses
-                                           | InstrumentTrait.Tremolo | InstrumentTrait.Strums | InstrumentTrait.Chugs;
+                                           | InstrumentTrait.Tremolo | InstrumentTrait.Strums;
 
     private const InstrumentTrait Lead = InstrumentTrait.Bends | InstrumentTrait.VibratesWide | InstrumentTrait.SoloBends | InstrumentTrait.Choruses | InstrumentTrait.Sweeps;
 
@@ -85,6 +85,9 @@ public static class InstrumentTraits
         [20] = InstrumentTrait.Tremolo | InstrumentTrait.Sweeps,
         // the clean guitar's chorus its classic sound
         [27] = Guitar | InstrumentTrait.ChorusesClassically,
+        // the driven guitars chugging; the muted guitar is a clean one muted, which never does
+        [29] = Guitar | InstrumentTrait.Chugs,
+        [30] = Guitar | InstrumentTrait.Chugs,
         // the picked bass chugging; the fretless and the synth basses bending
         [34] = InstrumentTrait.Chugs,
         [35] = InstrumentTrait.Bends,
