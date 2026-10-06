@@ -4,6 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
+      "pins": { "ground": [40, 40, 20], "backbeat": [80, 80, 50] },
       "push": { "sections": [5, 15, 20] },
       "keyChanges": { "lastSection": [0, 20, 100], "sections": [0, 8, 100], "patterns": [0, 0, 100] },
       "tempo": { "from": [110, 110, 85], "to": [150, 150, 190] },
@@ -102,6 +103,7 @@
     "name": "House",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, a pumping bass and pads, piano and electric piano chords now and then, a TR-808 or electronic kit, straight, 117 to 130, minor, sus and add9 chords, a drop into the chorus.",
     "choices": {
+      "pins": { "ground": [100, 100, 80], "time": [100, 100, 70] },
       "articulation": { "legato": [0, 10, 20] },
       "effects": { "chorus": [0, 40, 70], "swell": [0, 40, 70], "vibrato": [0, 15, 30] },
       "solos": { "sections": [0, 1, 5] },
@@ -163,6 +165,7 @@
     "name": "Techno",
     "description": "A kick on every beat, driving and dark, the hi-hat on the offbeats, one figure looping for minutes over a chord or two, a square or sawtooth riff, little melody, a minor or Phrygian key, a TR-808 or electronic kit, 125 to 140, the pads and bass pumping.",
     "choices": {
+      "pins": { "ground": [100, 100, 90], "time": [80, 80, 60] },
       "articulation": {},
       "effects": { "swell": [0, 30, 60], "vibrato": [0, 0, 20] },
       "solos": { "sections": [0, 0, 10] },
@@ -223,6 +226,7 @@
     "name": "Synthwave",
     "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
     "choices": {
+      "pins": { "ground": [80, 80, 50], "backbeat": [100, 100, 80] },
       "turnaround": {},
       "solos": { "sections": [0, 6, 12] },
       "push": {},
@@ -277,6 +281,7 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano and pads, minor and Dorian.",
     "choices": {
+      "pins": { "ground": [90, 90, 70], "backbeat": [100, 100, 80] },
       "articulation": { "roll": [0, 20, 30] },
       "effects": { "chorus": [0, 30, 50], "swell": [0, 30, 50], "vibrato": [0, 20, 40] },
       "solos": { "sections": [0, 1, 4] },
@@ -408,6 +413,7 @@
     "name": "Funk",
     "description": "The hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and a muted guitar comping in 16ths, brass, sevenths and ninths, Dorian and Mixolydian, everything repeating.",
     "choices": {
+      "pins": { "backbeat": [70, 70, 40] },
       "push": { "sections": [10, 40, 50] },
       "octaveBass": { "sections": [30, 40, 40] },
       "tempo": { "from": [95, 95, 85], "to": [120, 120, 135] },
@@ -481,6 +487,7 @@
     "name": "Blues",
     "description": "A shuffle, sevenths over Mixolydian, a harmonica, an overdriven guitar and an organ, slow to mid.",
     "choices": {
+      "pins": { "backbeat": [70, 70, 40] },
       "melodyRange": { "wide": 30 },
       "keyChanges": {},
       "tempo": { "from": [65, 65, 60], "to": [115, 115, 140] },

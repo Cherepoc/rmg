@@ -235,6 +235,9 @@ internal sealed class PatternGenerator
         // by the bar pattern's seed, so that a drum playing its lead's bar patterns changes as its lead does
         if (Feels.DrawChange(new GenerationContext((uint)Seeds.Derive(seed, FeelStream)), Feels.Of(stateMap), Feels.BarChange, feelUnconventionality, _genre) is { } barFeel)
             stateMap = stateMap.MergeWith(Feels.At(StateDepths.BarPattern, barFeel));
+        // a pinned drum plays its rhythm as its song gives it, every layer's moves of it let go of
+        if (trackStateMap.GetStateValue(CompositionStateKinds.Pinned) > 0)
+            stateMap = stateMap.Except(DrumRoles.PinnedKinds).MergeWith(_trackDefinitions[trackNumber].StateMap.Subset(DrumRoles.PinnedKinds));
         // a track on another's feel plays its tuplet, all its layers' steps of it in place of its own
         if (leadFeel is not null)
             stateMap = stateMap.Except([FeelKind]).MergeWith(leadFeel.Subset([FeelKind]));

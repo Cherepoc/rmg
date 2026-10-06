@@ -75,7 +75,7 @@ public sealed class DrummerTest
     public async Task ARarerChoice_IsTheBase_AtTheFillsFacet_ItsOddsTimesTheSignature()
     {
         var context = new GenerationContext(1);
-        var generator = new FillGenerator(context, SongTracks.Create(context, context, context, context, context, context, context, true, new RhythmicUnconventionality(0.5), context, context, DrumSetup.KitAndPercussion, null, Genre.None, _ => context, 0.5, 0.5), new RhythmicUnconventionality(0.5), Meter.FourFour, context, Genre.None);
+        var generator = new FillGenerator(context, SongTracks.Create(context, context, context, context, context, context, context, true, new RhythmicUnconventionality(0.5), context, context, DrumSetup.KitAndPercussion, null, Genre.None, _ => context, 0.5, 0.5, []), new RhythmicUnconventionality(0.5), Meter.FourFour, context, Genre.None);
         var fade = CompositionStateKinds.Fill.FadeChance;
         var signature = new Drummer(0.5, FillPath.OneWay, StateMap.FromStates([fade.CreateState(FillLayers.SignatureWeight)]));
         var baseChance = FillLayers.Chances.Single(x => x.Kind == fade).Chance;

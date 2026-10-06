@@ -592,9 +592,11 @@ a link carries. What is left:
 - **What the genres cannot play yet** (P2, a review of October 2026; `GenreDevicesReportTest` the measure): every
   device is now a genre's choice (`GenreChoices.HarmonyDevices`, `GenreChoices.Articulation` the last), and the beat
   genres name theirs off. What no setting reaches:
-  1. A drum pinned to its pattern: a four on the floor's kick on every beat in 77% of House's bars and 83% of
-     Techno's, Hip-hop's kick on 1 in 42%, Synthwave's snare on 2 and 4 in 59%, the groove's own layers still moving
-     them however held. A genre's drum role that never moves, its figure the genre's.
+  1. Done: a drum pinned to its figure (`GenreChoices.Pins`, `DrumRoles.Pins`): a genre's chance a song pins a role,
+     its drums playing their song's rhythm settings in every bar, every layer's moves let go of. Kick on every beat
+     House 77% -> 85%, Techno 83% -> 90%; Hip-hop's kick on 1 42% -> 91%, its snare on 2 and 4 66% -> 86%; Synthwave's
+     snare 59% -> 89%, Rock's 65% -> 77%. What is left: the bars a drop or an entry clears, and the wilder songs that
+     leave a role free.
   2. Long phrases: everything is built of four-bar patterns, where a dance track's sections run 16 or 32 bars with a
      part coming in or going out at each 8, and a build that thickens (a snare roll, a riser) over them.
   3. An arpeggiator: a chord played as a pattern of its notes in 16ths, a synth bass's and synthwave's and trance's

@@ -33,6 +33,9 @@ internal static class TracePoints
     /// <summary>The song's later appearance reharmonised and where its substitutes start, none where it reharmonises none (a <c>(int, ImmutableArray&lt;double&gt;)?</c>).</summary>
     public const string Reharmonisation = "Reharmonisation";
 
+    /// <summary>The drum roles a song pins to their figures (an <c>ImmutableHashSet</c> of <see cref="DrumRole" />s).</summary>
+    public const string PinnedDrums = "Pinned drums";
+
     /// <summary>Whether a section's bass plays in octaves (a <c>bool</c>).</summary>
     public const string OctaveBass = "Octave bass";
 

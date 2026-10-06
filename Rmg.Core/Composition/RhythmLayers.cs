@@ -116,6 +116,9 @@ internal static class RhythmLayers
     /// <summary>A track's own rhythm for the whole song.</summary>
     public static RhythmLayer Track { get; } = new(0.025, 0.05, 0.05, 0.1);
 
+    /// <summary>A layer that moves nothing, a pinned drum's own (<see cref="DrumRoles.Pins" />).</summary>
+    public static RhythmLayer Still { get; } = new(0, 0) { Speed = 0 };
+
     /// <summary>How a track's rhythm differs in a section from the song.</summary>
     public static RhythmLayer SectionTrack { get; } = new(0.025, 0.05, 0.05, 0.1);
 

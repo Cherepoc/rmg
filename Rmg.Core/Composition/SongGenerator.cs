@@ -106,6 +106,9 @@ public static class SongGenerator
         // of its own, and any given in or out
         var absent = SongParts.DrawAbsent(part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Parts), (int)part)), overrides.Parts, songUnconventionality, genre);
         StateTrace.Record(TracePoints.SongParts, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", absent.Order()), absent);
+        // the drum roles the song pins to their figures, a genre's, each from a sequence of its own
+        var pinned = DrumRoles.DrawPinned(role => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Pins), (int)role)), songUnconventionality[Facet.Groove], genre);
+        StateTrace.Record(TracePoints.PinnedDrums, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", pinned.Order()), pinned);
         var tracks = SongTracks.Create(
             Stream(SongStream.Tracks),
             Stream(SongStream.Panning),
@@ -124,7 +127,8 @@ public static class SongGenerator
             genre,
             part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.PartFeel), (int)part)),
             songUnconventionality[Facet.Feel],
-            songUnconventionality[Facet.Sound]
+            songUnconventionality[Facet.Sound],
+            pinned
         );
         StateTrace.Record(TracePoints.DrumSetup, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, tracks.DrumSetup.ToString(), tracks.DrumSetup);
 
@@ -537,5 +541,6 @@ internal enum SongStream
     Legato = 75,
     Roll = 76,
     SectionPedal = 77,
-    InnerLines = 78
+    InnerLines = 78,
+    Pins = 79
 }

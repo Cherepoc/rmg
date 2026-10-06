@@ -26,7 +26,7 @@ public sealed class FillArchetypeTest
     private static Setup Create(int seed)
     {
         var context = new GenerationContext((ulong)seed);
-        var tracks = SongTracks.Create(context, context, context, context, context, context, context, true, new RhythmicUnconventionality(0.5), context, context, DrumSetup.KitAndPercussion, null, Genre.None, _ => context, 0.5, 0.5);
+        var tracks = SongTracks.Create(context, context, context, context, context, context, context, true, new RhythmicUnconventionality(0.5), context, context, DrumSetup.KitAndPercussion, null, Genre.None, _ => context, 0.5, 0.5, []);
         // the fills play the snare itself, when the song has a sidestick too
         var snare = new[] { DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare, DrumDefinitions.Clap }
             .Where(tracks.SongDrums.Contains)

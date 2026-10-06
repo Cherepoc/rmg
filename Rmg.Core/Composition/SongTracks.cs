@@ -90,7 +90,8 @@ internal sealed class SongTracks
         Genre genre,
         Func<RhythmPart, IGenerationContext> feelStreams,
         double feel,
-        double sound
+        double sound,
+        ImmutableHashSet<DrumRole> pinned
     )
     {
         // a part's level, louder or quieter by the genre's (GenreChoices.Levels)
@@ -318,8 +319,13 @@ internal sealed class SongTracks
                     .MergeWith(DrumStrokes.GenerateSong(strokeContext, drum))
                     .MergeWith(DrumRoles.GenerateSong(roleContext, drum, rhythmicUnconventionality.Value, genre));
                 drumStateMap = drumStateMap.MergeWith(FeelOf(DrumRoles.PartOf(DrumRoles.Of(drumStateMap))));
+                // a drum of a pinned role plays its figure as given, its own layer moving none of it (PatternGenerator)
+                var pins = pinned.Contains(DrumRoles.Of(drumStateMap));
+                if (pins)
+                    drumStateMap = drumStateMap.MergeWith(StateMap.FromStates([CompositionStateKinds.Pinned.CreateState(1)]));
                 definitions[DrumGroups.GetTrackNumber(drum)] = new PercussionInstrumentTrack(
-                    LayerStates.CreateTrackLayer(context, "Track", drumStateMap, _ => VelocityLayers.GetLevel(drum), DrumRoles.Hold(trackRhythmLayer, DrumRoles.Of(drumStateMap))),
+                    LayerStates.CreateTrackLayer(context, "Track", drumStateMap, _ => VelocityLayers.GetLevel(drum),
+                        pins ? RhythmLayers.Still : DrumRoles.Hold(trackRhythmLayer, DrumRoles.Of(drumStateMap))),
                     drum.Sounds
                 );
             }

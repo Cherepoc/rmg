@@ -95,6 +95,26 @@ internal static class DrumRoles
     /// </summary>
     public static Tilt GrooveHold { get; } = Tilt.Of(8, 1);
 
+    /// <summary>
+    ///     The chance a song pins a role's drums to their figure, the role's part as the genre's rhythm moves it, every bar
+    ///     of every section, as a four on the floor's kick or a backbeat's snare: a genre's, by its role, which the songs
+    ///     never do, their layers varying every drum.
+    /// </summary>
+    public static ByConvention Pins { get; } = new(0, 0, 0);
+
+    /// <summary>The roles a song pins, each from a sequence of its own, by the groove facet and the genre's chance of each.</summary>
+    public static ImmutableHashSet<DrumRole> DrawPinned(Func<DrumRole, IGenerationContext> streams, double unconventionality, Genre genre) =>
+    [
+        ..new[] { DrumRole.Ground, DrumRole.Backbeat, DrumRole.Time }
+            .Where(role => streams(role).TestProbability(Pins.At(unconventionality, genre.Chance(GenreChoices.Pins, GenreChoices.Name(role.ToString())))))
+    ];
+
+    /// <summary>The rhythm settings a pinned drum plays as its song gives them, whatever its section, group and bar layers make of them.</summary>
+    public static ImmutableArray<IStateKind> PinnedKinds { get; } =
+    [
+        ..CompositionStateKinds.Rhythm.All.Where(x => x != CompositionStateKinds.Rhythm.Seed && x != CompositionStateKinds.Rhythm.Feel)
+    ];
+
     /// <summary>A drum's own rhythm layer, its groove held as its role holds it (<see cref="Part.GrooveLean" />).</summary>
     public static RhythmLayer Hold(RhythmLayer layer, DrumRole role) => layer.LeanGroove(GrooveHold, Parts[role].GrooveLean);
 

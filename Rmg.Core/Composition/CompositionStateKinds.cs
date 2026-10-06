@@ -85,6 +85,9 @@ internal static class CompositionStateKinds
     // 1 for a chord whose root voice a chromatic line moves inside it, off the section's scale (SongStages.InnerLines)
     public static StateKind<int> InnerLine { get; } = StateKinds.CreateAdditive<int>(Prefix + "InnerLine", StateScope.Render);
 
+    // 1 for a drum a song pins to its figure, which plays its song's rhythm settings in every bar (DrumRoles.Pins)
+    public static StateKind<int> Pinned { get; } = StateKinds.CreateAdditive<int>(Prefix + "Pinned");
+
     // 1 for a riff's note played as a power chord, its perfect fifth over it and its octave where the range has it
     public static StateKind<int> PowerChord { get; } = StateKinds.CreateAdditive<int>(Prefix + "PowerChord", StateScope.Render);
 
