@@ -331,7 +331,7 @@ left:
   2. The server drawing one when asked for any, from a stream of its own, so that the rest of the song stays as the
      seed made it; the preset drawn in the response, the song's link and every analytics event about it, as its version
      and settings are.
-  3. The page offering any genre beside the presets.
+  3. The page's Any genre (built October 2026, its preset drawn by the page for every new song) drawn by the server instead.
   4. The default (the songs' own, as now, or any genre) decided by the ratings by genre once a version has enough, and
      not before the retuned presets, Pop and Metal most, are heard.
   Not weighed by the presets nor leaned by conventionality: each preset spans the plainest songs to the wildest.

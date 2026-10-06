@@ -8,6 +8,7 @@ const RATINGS = "rmg.song-ratings";
 const SETTINGS = "rmg.settings";
 const GENRES = "rmg.genres";
 const GENRE = "rmg.genre";
+const ANY_GENRE = "rmg.anyGenre";
 const GENRE_COPIES = "rmg.genre-copies";
 const GENRE_PRINCIPLES = "rmg.genre-principles";
 
@@ -112,6 +113,25 @@ export function keepGenreCopies(copies) {
         else localStorage.setItem(GENRE_COPIES, JSON.stringify(copies));
     } catch {
         // a browser that will not remember them asks the server for a song's genre when the song is played again
+    }
+}
+
+/** Whether every new song is asked for in a preset drawn for it, as the list's Any genre has them. */
+export function recallAnyGenre() {
+    try {
+        return localStorage.getItem(ANY_GENRE) === "true";
+    } catch {
+        return false;
+    }
+}
+
+/** Keeps whether every new song is asked for in a preset drawn for it. */
+export function keepAnyGenre(any) {
+    try {
+        if (any) localStorage.setItem(ANY_GENRE, "true");
+        else localStorage.removeItem(ANY_GENRE);
+    } catch {
+        // a browser that will not remember it asks the next visit's songs in the genre kept
     }
 }
 

@@ -91,4 +91,41 @@ public sealed class GenreTest(Site site)
         await Assert.That(asked.GetProperty("genreName").GetString()).IsEqualTo("Jazz");
         await Assert.That(page.Errors).IsEmpty();
     }
+
+    [Test]
+    public async Task AnyGenre_DrawsAPresetForEveryNewSong_NamedInItsLink_AndIsKept()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        await page.FirstSong();
+        await page.Settled();
+        var genre = page.Page.Locator("select[aria-label='Genre']");
+        await page.Until(() => genre.IsEnabledAsync(), "the genres listed");
+
+        var count = page.Requests.Count;
+        await genre.SelectOptionAsync("any");
+        await page.Until(() => page.Requests.Count > count, "the song asked for in a preset drawn");
+        await page.Settled();
+        await Assert.That(page.Requests[^1].Body.TryGetProperty("genre", out _)).IsTrue();
+        await Assert.That(await genre.InputValueAsync()).IsEqualTo("any");
+        await Assert.That(await page.Page.Locator(".genre-about").TextContentAsync()).StartsWith("This song: ");
+        await Assert.That(page.Page.Url).Contains("genre=");
+
+        // every new song a preset of its own, the one before never drawn again at once
+        var names = new List<string>();
+        for (var i = 0; i < 3; i++)
+        {
+            count = page.Requests.Count;
+            await page.Generate();
+            await page.Until(() => page.Requests.Count > count, "the next song asked for");
+            await page.Settled();
+            names.Add(page.Requests[^1].Body.GetProperty("genreName").GetString()!);
+        }
+        await Assert.That(names.Zip(names.Skip(1)).All(x => x.First != x.Second)).IsTrue();
+
+        // and kept for the next visit
+        await page.Page.GotoAsync("/");
+        genre = page.Page.Locator("select[aria-label='Genre']");
+        await page.Until(async () => await genre.InputValueAsync() == "any", "Any genre kept");
+        await Assert.That(page.Errors).IsEmpty();
+    }
 }

@@ -15,6 +15,8 @@ import {
     keep,
     keepHistory,
     keepGenre,
+    keepAnyGenre,
+    recallAnyGenre,
     keepGenreCopies,
     keepGenres,
     keepRating,
@@ -110,6 +112,8 @@ const rows = new Map();
 // the settings every song is asked for with, and the one on the page heard with (song-settings.js): every value given,
 // or as the song on the page drew it; kept in this browser for the next visit
 let settings = restoreSettings();
+/** Whether every new song is asked for in a preset drawn for it, the list's Any genre, which this browser keeps. */
+let isAnyGenre = recallAnyGenre();
 
 // the song on the page, as its seed, in letters and digits: null before the first
 let songSeed = null;
@@ -304,6 +308,8 @@ function advance() {
  *     with the settings given, which become the page's, and the latest ask is the one that plays.
  */
 async function playNew(seed, origin, asked = settings, { keepsPlace = false } = {}) {
+    // a new song of Any genre in a preset drawn for it
+    if (seed === null && asked === settings && isAnyGenre) drawAnyGenre();
     // the same song asked for again is the one already on its way: asking anew would only cancel it for nothing
     if (arrival !== null && arrival.wanted === wantedOf(seed, asked)) return;
 
@@ -1881,10 +1887,20 @@ function emptyValue() {
 
 /** Asks for the song again in a genre the editor made. */
 function useGenre(genre) {
+    isAnyGenre = false;
+    keepAnyGenre(false);
     settings.genre = asGenre(genre);
     track("genre_chosen", { detail: "own" });
     showGenre();
     settingsChanged(true);
+}
+
+/** A preset drawn for the next song, of Any genre, other than the song's where there is another. */
+function drawAnyGenre() {
+    const others = PRESETS.filter((x) => !isSameGenre(asGenre(x), settings.genre));
+    settings.genre = asGenre(others[Math.floor(Math.random() * others.length)]);
+    keepCurrentSettings();
+    showGenre();
 }
 
 /** Every genre the list offers, by its value in it: the presets, then the genres made here. */
@@ -1910,11 +1926,13 @@ function showGenre() {
         }
         groups.get(item.group).append(createOption(item.value, item.genre.name || "Unnamed"));
     }
-    const options = [createOption("none", "None"), ...groups.values()];
-    if (hasAGenre(settings.genre) && chosen === undefined) options.splice(1, 0, createOption("song", settings.genre.name || "This song's genre"));
+    const options = [createOption("none", "None"), createOption("any", "Any genre"), ...groups.values()];
+    if (hasAGenre(settings.genre) && chosen === undefined) options.splice(2, 0, createOption("song", settings.genre.name || "This song's genre"));
     genreSelect.replaceChildren(...options);
-    genreSelect.value = !hasAGenre(settings.genre) ? "none" : chosen?.value ?? "song";
-    genreAbout.textContent = chosen?.description ?? "";
+    genreSelect.value = isAnyGenre ? "any" : !hasAGenre(settings.genre) ? "none" : chosen?.value ?? "song";
+    // of Any genre, the preset this song plays
+    const about = chosen?.description ?? "";
+    genreAbout.textContent = isAnyGenre && hasAGenre(settings.genre) ? `This song: ${settings.genre.name}. ${about}` : about;
     genreAbout.hidden = genreAbout.textContent === "";
     genreManager.refresh();
 }
@@ -1922,8 +1940,11 @@ function showGenre() {
 /** Asks for the song again in the genre chosen, or in none. */
 function chooseGenre(value) {
     if (value === "song") return;
-    settings.genre = value === "none" ? noGenre() : asGenre(listedGenres().find((x) => x.value === value).genre);
-    track("genre_chosen", { detail: value.startsWith("preset:") ? value.slice("preset:".length) : value.startsWith("own:") ? "own" : "none" });
+    isAnyGenre = value === "any";
+    keepAnyGenre(isAnyGenre);
+    if (isAnyGenre) drawAnyGenre();
+    else settings.genre = value === "none" ? noGenre() : asGenre(listedGenres().find((x) => x.value === value).genre);
+    track("genre_chosen", { detail: value.startsWith("preset:") ? value.slice("preset:".length) : value.startsWith("own:") ? "own" : value });
     showGenre();
     settingsChanged(true);
 }
