@@ -1,3 +1,5 @@
+using Rmg.Core;
+using Rmg.Core.Events;
 using System.Collections.Immutable;
 using Rmg.Core.Composition;
 using Rmg.Core.Rendering;
@@ -135,6 +137,15 @@ public sealed class GenreIdiomsReportTest
             ["bass leads into a change"] = arrivals.Length > 0 ? arrivals.Count(x => Math.Abs(bass[x.Index].Value.Pitches.Min() - bass[x.Index - 1].Value.Pitches.Min()) is 1 or 2) / (double)arrivals.Length : double.NaN,
             ["bass a half step into a change"] = arrivals.Length > 0 ? arrivals.Count(x => Math.Abs(bass[x.Index].Value.Pitches.Min() - bass[x.Index - 1].Value.Pitches.Min()) == 1) / (double)arrivals.Length : double.NaN,
             ["bass on the root at a change"] = arrivals.Length > 0 ? arrivals.Count(x => OnRoot(x.Index, x.Change)) / (double)arrivals.Length : double.NaN,
+            ["riff notes off the scale"] = notes.GetValueOrDefault(SongTracks.RiffTrack) is { Count: > 0 } riffNotes
+                ? riffNotes.Average(x =>
+                {
+                    var state = stateMaps.GetEffectiveStateMapAt(x.Position);
+                    var (offsets, _, _) = Realizer.GetChord(state);
+                    var key = state.GetStateValue(StateKinds.KeyOffset);
+                    return offsets.Any(o => (x.Value.Pitches.Min() - key - o).Mod(12) == 0) ? 0.0 : 1;
+                })
+                : double.NaN,
             ["riff sections in power chords"] = song.Trace.Where(x => x.Point == TracePoints.RiffPowerChords).Select(x => (bool)x.Value!).DefaultIfEmpty().Average(x => x ? 1.0 : 0),
             ["guitars' notes palm-muted"] = notes.Where(x => x.Key is SongTracks.RiffTrack or SongTracks.RhythmTrack).SelectMany(x => x.Value).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0 ? 1.0 : 0).DefaultIfEmpty(double.NaN).Average(),
             ["solo appearances"] = song.Solos.Count / (double)map.Sections.Length,

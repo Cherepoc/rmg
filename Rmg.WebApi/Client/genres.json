@@ -775,6 +775,7 @@
       "chordShape": { "powerChord": 100, "triad": [20, 20, 20], "sus2": [10, 10, 15], "tritoneStack": [0, 5, 20], "smallCluster": [0, 0, 10] },
       "harmonicRhythm": { "oneBar": 100, "halfBar": [40, 40, 50], "twoBars": [30, 30, 30] },
       "lineScale": { "section": 100, "pentatonic": [40, 40, 40], "blues": [20, 20, 30], "octatonic": [0, 5, 20] },
+      "riffScale": { "section": 100, "pentatonic": [40, 40, 40], "blues": [20, 20, 30], "chromatic": [10, 50, 70], "octatonic": [0, 10, 20] },
       "riff": { "powerChords": [90, 90, 80], "chugs": [80, 80, 70] },
       "feelChances": { "swing": 0, "halfTime": [20, 30, 30], "doubleTime": [10, 15, 20] },
       "pins": { "ground": [80, 80, 50], "backbeat": [70, 70, 40] },
@@ -1040,6 +1041,7 @@
       "formChances": { "forms": [100, 90, 60] },
       "form": { "vpcvpcbc": 100, "vcvcbc": 80 },
       "lineScale": { "section": 100, "pentatonic": 80, "blues": [20, 30, 40] },
+      "riffScale": { "section": 100, "pentatonic": 50, "blues": [20, 30, 40], "chromatic": [40, 70, 90] },
       "keyChanges": {}
     }
   },

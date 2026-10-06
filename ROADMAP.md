@@ -151,6 +151,10 @@ each from the trace; the seeds named here are ones already found.
   Synthwave's brass): are any too loud or too strange in either soundfont served? Their weights or traits, if so.
 - **The riser into a drop:** the reverse cymbal over the silent bar, its note a bar long; a soundfont's sample shorter
   than the bar peaks early and leaves a gap before the drop, a longer one is cut at it. Start it later, should one.
+- **Chromatic riffs in Metal and Nu metal:** a riff scale of their own, chromatic in a quarter of Metal's riff sections
+  and a third of Nu metal's, octatonic toward the wild end: Nu metal's riff notes off the scale 0% to 3%, Metal's 1%
+  as before, its riffs in power chords on their chord's notes, Djent's 9% (`GenreIdiomsReportTest`). Heard? Metal's
+  passing notes more, should its riffs want the chromatic runs.
 - **The dark presets' mood:** the melodies on the whole scale rather than the pentatonic in Trap, Techno and Dnb, and
   the more in Hip-hop, its loops sparser, Phrygian and harmonic minor now and then; Trap's music box and celesta down and
   piano in, no applied dominants; Dnb liquid and moody, Dorian and the triads down, piano in, the flute and the
@@ -194,7 +198,6 @@ Each item with its plan, and what it waits for.
 
 ### The heavy band, the mood and the effects (in progress, in order)
 
-- **Riff scales for Metal and Nu metal:** the blues, chromatic and octatonic riffs Djent has.
 - **A filter,** a strong effect on the synths: a wobble, a squelch, an opening into a drop, as CC74 and CC71.
 - **A trance gate,** a strong effect: held chords chopped in 16ths, a pattern drawn per song.
 - **A genre's room:** the reverb's type, time and pre-delay, one per song, as GS messages.
