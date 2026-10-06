@@ -163,9 +163,9 @@ public static class GenreChoices
         ("pedal", "A pedal under a section", SongStages.SectionPedalChance)
     ], plainEnd: false);
 
-    /// <summary>The chances a line's part slurs its steps, and a piano's part rolls its held chords (<see cref="SongStages.Articulation" />).</summary>
+    /// <summary>The chances a line's part slurs its steps, a piano's part rolls its held chords, and the chords are struck short (<see cref="SongStages.Articulation" />).</summary>
     public static GenreChoice Articulation { get; } = Chances("articulation", "Articulation",
-        [("legato", "Slurred steps", SongStages.LegatoChance), ("roll", "Rolled piano chords", SongStages.RollChance)]);
+        [("legato", "Slurred steps", SongStages.LegatoChance), ("roll", "Rolled piano chords", SongStages.RollChance), ("stabs", "Chords as stabs", SongStages.StabChance)]);
 
     /// <summary>The chance a song pins a drum role to its figure, every bar alike: the ground, the backbeat and the time (<see cref="DrumRoles.Pins" />).</summary>
     public static GenreChoice Pins { get; } = Chances("pins", "Parts pinned", [..Composition.DrumRoles.PinnedParts.Select(x => (Name(x.ToString()), x switch

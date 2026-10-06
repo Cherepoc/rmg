@@ -543,5 +543,6 @@ internal enum SongStream
     SectionPedal = 77,
     InnerLines = 78,
     Pins = 79,
-    HatRolls = 80
+    HatRolls = 80,
+    Stabs = 81
 }

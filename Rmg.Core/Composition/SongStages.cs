@@ -606,6 +606,11 @@ internal static class SongStages
             )
         };
 
+    /// <summary>The chance a song's chords are struck short, stabs, a genre's that the songs never play, and how long a stab sounds, in beats: a 16th.</summary>
+    public static ByConvention StabChance { get; } = new(0, 0, 0);
+
+    public const double StabLength = 0.25;
+
     /// <summary>The chance a part on a piano rolls its held chords, by the sound facet: never in the plainest songs.</summary>
     public static ByConvention RollChance { get; } = new(0, 0.3, 0.5);
 
@@ -620,7 +625,7 @@ internal static class SongStages
     ///     on a weak beat palm-muted, its accents and its moves ringing, as a chug riff mutes its eighths on the root and
     ///     rings its accent; the riff's, the rhythm part's and the bass's, by their instruments. And every chord a guitar
     ///     plays strummed, down on a beat's first half and up on its second, as quickly as the song strums, and a piano's held
-    ///     chord rolled upward where its part rolls; and a bass in
+    ///     chord rolled upward where its part rolls, and the chords struck short where they stab; and a bass in
     ///     octaves, its notes off the beat the note before an octave away.
     /// </summary>
     internal static SongDraft Articulation(SongDecisions song, SongDraft draft)
@@ -636,6 +641,9 @@ internal static class SongStages
                 continue;
             var chugs = Chugs(part.Role, part.InstrumentCode);
             var rolls = song.Stream(SongStream.Roll, track).TestProbability(RollChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "roll")));
+            // the chords struck short, stabs, a genre's
+            var stabs = part.Role == TrackRole.Chords
+                        && song.Stream(SongStream.Stabs, track).TestProbability(StabChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "stabs")));
             var (bottom, top) = Realizer.GetRange(part);
             result[track] = EventTimeline.Create(timeline.Duration, timeline.Select((note, i) =>
             {
@@ -663,7 +671,10 @@ internal static class SongStages
                 else if (rolls && note.Value.Pitches.Length >= 3 && note.Value.Duration >= 1 - 1e-9 && program is >= 0 and <= 7)
                     state = state.With(CompositionStateKinds.Strum, Beats(Roll));
 
-                return state == note.Value.State && pitches == note.Value.Pitches ? note : (note.Value with { State = state, Pitches = pitches }).ToTimelineItem(note.Position);
+                var duration = stabs ? Math.Min(note.Value.Duration, StabLength) : note.Value.Duration;
+                return state == note.Value.State && pitches == note.Value.Pitches && duration == note.Value.Duration
+                    ? note
+                    : (note.Value with { State = state, Pitches = pitches, Duration = duration }).ToTimelineItem(note.Position);
             }));
         }
 

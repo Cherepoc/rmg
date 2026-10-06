@@ -629,7 +629,9 @@ a link carries. What is left:
      the scale and a semitone from none of the chord's notes): melody bars repeated House 13% -> 20%, Hip-hop 18% ->
      23%, Techno 21% -> 31%. Its ceiling is about half: a phrase's last bar ends on its held note, and builds bring
      parts in. Left: a hook of one or two bars sung through a whole section, its phrase ends let go of.
-  10. A chord stab: a chord struck short on the offbeat, House's piano and Techno's dub chord, with an echo.
+  10. Done: chord stabs (`GenreChoices.Articulation`'s "stabs", `SongStages.StabChance`), a song's chords struck a
+     16th long, a genre's, on the offbeat 8ths where the genre's rhythm and a pin put them: House's chord notes stabbed
+     41%, on the offbeat 64% (13%); Techno's 58% and 73% (10%), its echo likelier.
   11. Gated reverb on the snare and a big tom fill, Synthwave's, which General MIDI cannot sound but a velocity and
      length could suggest.
 
