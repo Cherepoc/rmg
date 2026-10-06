@@ -13,7 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
+**When the need shows** (P3), each by what listening says, in this order: a pedal under a section; a chromatic inner line; a motif developed further; call
 and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
 
 **Put off** until their uses ask for them: long cycles and a tag (see *Open work*, *Rhythm engine*).
@@ -253,9 +253,9 @@ Each item with its plan, and what it waits for.
 
 - **A drum's pocket by its section's role** (P3, if a section's change of role is heard): the timing takes a drum's
   offset by its role in the song's groove (`SongStages.OffsetOf`), not a section's, which may move a ride to the time.
-- **A piano's rolled chord** (P3): a chord rolled upward, slower than a guitar's strum, for a ballad, on the strum's
-  seam (`CompositionStateKinds.Strum`, spread at render). A strum's thinner up stroke, its lowest strings left out, if
-  the up strokes sound as full as the down.
+- **A piano's rolled chord**: done (`SongStages.RollChance`, the strum's seam): a part on a piano rolling its chords
+  held a beat or longer upward over 60 ms, a part's trait by the sound facet (0, 0.3, 0.5); 11% of a corpus's held
+  piano chords. A strum's thinner up stroke, its lowest strings left out, if the up strokes sound as full as the down.
 
 ### Scales and chords
 

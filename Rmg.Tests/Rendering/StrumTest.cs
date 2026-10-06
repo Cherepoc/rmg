@@ -3,13 +3,13 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Rendering;
 
-/// <summary>A guitar's strum: its chords' strings struck one after another, down on the beat and up off it, in a stroke's time.</summary>
+/// <summary>A guitar's strum: its chords' strings struck one after another, down on the beat and up off it, in a stroke's time; and a piano's roll, upward.</summary>
 public sealed class StrumTest
 {
     [Test]
     public async Task AGuitarsChord_IsStruckString_ByString_DownOnTheBeat_UpOffIt()
     {
-        int strummed = 0, down = 0;
+        int strummed = 0, down = 0, rolled = 0;
         var strokes = new List<double>();
         foreach (var song in TestCorpus.Range(32))
         foreach (var (track, notes) in song.Song.Notes!)
@@ -17,8 +17,18 @@ public sealed class StrumTest
             if (song.Song.TrackDefinitions[track] is not PitchInstrumentTrack part)
                 continue;
             var rendered = song.Rendered.Tracks.Where(x => !x.IsPercussionInstrument && x.Role == part.Role).SelectMany(x => x.NoteTimeline).ToArray();
+            int Program(RealizedNote note) => note.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : part.InstrumentCode;
             foreach (var note in notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Strum) != 0))
             {
+                // a piano's roll, upward, on a held chord
+                if (Program(note.Value) is >= 0 and <= 7)
+                {
+                    rolled++;
+                    await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Strum)).IsGreaterThan(0);
+                    await Assert.That(note.Value.Duration).IsGreaterThanOrEqualTo(1 - 1e-9);
+                    continue;
+                }
+
                 var strum = note.Value.State.GetStateValue(CompositionStateKinds.Strum);
                 strummed++;
                 down += strum > 0 ? 1 : 0;
@@ -36,6 +46,7 @@ public sealed class StrumTest
         }
 
         await Assert.That(strummed).IsGreaterThan(500);
+        await Assert.That(rolled).IsGreaterThan(20);
         await Assert.That(down / (double)strummed).IsBetween(0.3, 0.95);
         await Assert.That(strokes.All(x => x is > 0 and < 0.2)).IsTrue();
     }

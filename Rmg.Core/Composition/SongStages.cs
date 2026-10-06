@@ -467,6 +467,12 @@ internal static class SongStages
             )
         };
 
+    /// <summary>The chance a part on a piano rolls its held chords, by the sound facet: never in the plainest songs.</summary>
+    public static ByConvention RollChance { get; } = new(0, 0.3, 0.5);
+
+    /// <summary>How long a piano's rolled chord takes from its lowest note to its highest, in seconds: slower than a strum.</summary>
+    public const double Roll = 0.06;
+
     /// <summary>How long a guitar's stroke takes across its strings at its quickest and its slowest, in seconds.</summary>
     public const double StrokeFrom = 0.01, StrokeTo = 0.03;
 
@@ -474,7 +480,8 @@ internal static class SongStages
     ///     The notes' articulations: in a section that chugs, a guitar's or a picked bass's note that repeats the one before
     ///     on a weak beat palm-muted, its accents and its moves ringing, as a chug riff mutes its eighths on the root and
     ///     rings its accent; the riff's, the rhythm part's and the bass's, by their instruments. And every chord a guitar
-    ///     plays strummed, down on a beat's first half and up on its second, as quickly as the song strums; and a bass in
+    ///     plays strummed, down on a beat's first half and up on its second, as quickly as the song strums, and a piano's held
+    ///     chord rolled upward where its part rolls; and a bass in
     ///     octaves, its notes off the beat the note before an octave away.
     /// </summary>
     internal static SongDraft Articulation(SongDecisions song, SongDraft draft)
@@ -489,6 +496,7 @@ internal static class SongStages
             if (song.Tracks.Definitions[track] is not PitchInstrumentTrack part)
                 continue;
             var chugs = Chugs(part.Role, part.InstrumentCode);
+            var rolls = song.Stream(SongStream.Roll, track).TestProbability(RollChance.At(song.Facets[Facet.Sound]));
             var (bottom, top) = Realizer.GetRange(part);
             result[track] = EventTimeline.Create(timeline.Duration, timeline.Select((note, i) =>
             {
@@ -507,12 +515,14 @@ internal static class SongStages
                     && timeline[i - 1].Value.Pitches is var before && (before.All(x => x + 12 <= top) || before.All(x => x - 12 >= bottom)))
                     pitches = [..before.Select(x => before.All(y => y + 12 <= top) ? x + 12 : x - 12)];
                 var program = state.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : part.InstrumentCode;
+                // the stroke in beats at the tempo there
+                double Beats(double seconds) => seconds * tempo.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60;
                 if (note.Value.Pitches.Length > 1 && program is >= 24 and <= 31)
-                {
-                    // the stroke in beats at the tempo there, down on the beat and up off it
-                    var beats = stroke * tempo.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60;
-                    state = state.With(CompositionStateKinds.Strum, note.Position % 1 < 0.5 - 1e-9 ? beats : -beats);
-                }
+                    // down on the beat and up off it
+                    state = state.With(CompositionStateKinds.Strum, note.Position % 1 < 0.5 - 1e-9 ? Beats(stroke) : -Beats(stroke));
+                // a piano's chord held a beat or longer rolled upward, slower, where its part rolls
+                else if (rolls && note.Value.Pitches.Length >= 3 && note.Value.Duration >= 1 - 1e-9 && program is >= 0 and <= 7)
+                    state = state.With(CompositionStateKinds.Strum, Beats(Roll));
 
                 return state == note.Value.State && pitches == note.Value.Pitches ? note : (note.Value with { State = state, Pitches = pitches }).ToTimelineItem(note.Position);
             }));
