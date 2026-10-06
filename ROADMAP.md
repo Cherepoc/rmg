@@ -209,7 +209,7 @@ Each item with its plan, and what it waits for.
   15% of its notes, the melody leaving no room; the counter-melody's rhythm placed against the melody's gaps when it is
   drawn, as the solo part's answers are (`SoloAnswers`), is the way, should listening ask.
 - **Harmony's devices, the rest** (P3): a ii–V into a chord but the home, which a chord's own scale makes part of; the
-  line cliché rising (the fifth, its sharp, the sixth) beside its falling one (`SongStages.InnerLines`), should
+  line cliché rising (the fifth, its sharp, the sixth) beside its falling one (`InnerLines`), should
   listening ask.
 - **The hook at the end** (P4, parked): a song opens on its chorus's first phrase now and then (`IntroKind.Hook`); an
   outro quoting it too, should endings sound unrelated to the song, though the last section is most often the chorus
@@ -236,7 +236,7 @@ Each item with its plan, and what it waits for.
 
 - **The playing following the articulation** (P3; palm-muted chugs done): octaves popped in slap, short notes muted,
   without which an articulation is only another sound.
-- **Plain doubling,** a part doubling another in unison, now that the parts play by their pocket (`SongStages.Timing`).
+- **Plain doubling,** a part doubling another in unison, now that the parts play by their pocket (`Pocket`).
 - **A motif stretched,** its rhythm doubled, beside moved and inverted (`Soloist.MotifInversion`), should listening ask.
 - **A solo's runs in fives and sevens,** a fusion player's grouping, which the feels give a whole part but perhaps not
   a run; if not, a case of segments in any pattern (see *Parked*), not a mechanism of its own.
@@ -248,7 +248,7 @@ Each item with its plan, and what it waits for.
 ### Groove
 
 - **A drum's pocket by its section's role** (P3, if a section's change of role is heard): the timing takes a drum's
-  offset by its role in the song's groove (`SongStages.OffsetOf`), not a section's, which may move a ride to the time.
+  offset by its role in the song's groove (`Pocket.OffsetOf`), not a section's, which may move a ride to the time.
 - **A strum's thinner up stroke,** its lowest strings left out, if the up strokes sound as full as the down.
 
 ### Scales and chords
@@ -317,8 +317,6 @@ of here once it is; the genres it adds are described under *More genres*.
 
 **P2, the engine, for several genres each:**
 
-9. **`SongStages` split:** every stage beside its device with its constants (stop time, pushes, hat rolls,
-   articulation, risers, inner lines), `SongStages` their order alone; the fingerprint kept.
 10. **The drums marking the form:** a genre's choice of the drums' job, a groove, as now, or marks: one or two of its
     pieces struck now and then at a section's start, a phrase's, a chord change and the beat before a section, the
     likelier the stronger the point and the louder the section, a roll among them, never keeping time; an edit after
@@ -330,7 +328,7 @@ of here once it is; the genres it adds are described under *More genres*.
     hi-hat, the ride's bell, each now the songs' fixed chance.
 13. **An instrument by its section's energy:** a part's quieter and louder form, the clean verse guitar distorted in the
     chorus, where `instrumentSwitches` switches by chance alone.
-14. **The feel:** the parts' pocket in milliseconds rather than beats (`SongStages.OffsetOf`, 20 ms at 60 bpm and 7 at
+14. **The feel:** the parts' pocket in milliseconds rather than beats (`Pocket.OffsetOf`, 20 ms at 60 bpm and 7 at
     180), and a genre's swing of 8ths or 16ths (16ths swing up to 107 bpm alone, `Groove.ShortestSwungNote`: House's).
 15. **The harmonising interval a genre's:** thirds and sixths, or fourths and fifths, an organum's parallels.
 
@@ -403,7 +401,7 @@ left:
   `GenreIdiomsReportTest` the measures):
   - The loop's figures shared, the bass's and the riff's, beside its harmony (`GenreChoices.Loop`).
   - A riser as a lift cue, into a louder section where the band plays on, which the riser into a drop
-    (`SongStages.Risers`) plays on a channel its silence leaves free: a program change there would cut the part's
+    (`Risers`) plays on a channel its silence leaves free: a program change there would cut the part's
     chord, so a channel of its own, should a lift want one.
   - The pump on the kick wherever it falls, should a pumping genre's kick leave the beat; it ducks on the beat now.
   - The pinned drums (`GenreChoices.Pins`) in the bars a drop or an entry clears, and the wilder songs that leave a

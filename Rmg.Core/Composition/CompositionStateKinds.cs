@@ -67,7 +67,7 @@ internal static class CompositionStateKinds
     public static StateKind<int> Swell { get; } = StateKinds.CreateAdditive<int>(Prefix + "Swell", StateScope.Render);
     public static StateKind<int> Tremolo { get; } = StateKinds.CreateAdditive<int>(Prefix + "Tremolo", StateScope.Render);
 
-    // how far a note is played off its place, in beats, late above 0, by its part's role (SongStages.Timing)
+    // how far a note is played off its place, in beats, late above 0, by its part's role (Pocket.Apply)
     public static StateKind<double> TimingOffset { get; } = StateKinds.CreateAdditive<double>(Prefix + "TimingOffset", StateScope.Render);
 
     // 1 for a note palm-muted, its articulation, which it keeps its duration through: the rendering plays it, for General
@@ -75,7 +75,7 @@ internal static class CompositionStateKinds
     public static StateKind<int> PalmMute { get; } = StateKinds.CreateAdditive<int>(Prefix + "PalmMute", StateScope.Render);
 
     // how far apart in beats a guitar's chord strikes its strings, its stroke, down from the lowest above 0 and up from the
-    // highest below, the rendering spreading its notes (SongStages.Articulation)
+    // highest below, the rendering spreading its notes (Articulations.Apply)
     public static StateKind<double> Strum { get; } = StateKinds.CreateAdditive<double>(Prefix + "Strum", StateScope.Render);
 
     // 1 for a note slurred into from the note before, its articulation: the note before held into it, and for General MIDI
@@ -83,7 +83,7 @@ internal static class CompositionStateKinds
     public static StateKind<int> Legato { get; } = StateKinds.CreateAdditive<int>(Prefix + "Legato", StateScope.Render);
 
     // how many semitones a chord's root voice falls inside it, a chromatic line's, 1 to 3 a quarter of the chord, its scale
-    // altered to hold it where it has it not; 0 for none (SongStages.InnerLines)
+    // altered to hold it where it has it not; 0 for none (InnerLines.Apply)
     public static StateKind<int> InnerLine { get; } = StateKinds.CreateAdditive<int>(Prefix + "InnerLine", StateScope.Render);
 
     // 1 for a drum a song pins to its figure, which plays its song's rhythm settings in every bar (DrumRoles.Pins)

@@ -27,7 +27,7 @@ public sealed class StopTimeTest
                         continue;
                     }
 
-                    await Assert.That(inPhrase.All(x => Math.Abs(Math.IEEERemainder(x.Position - start, bar)) < 1e-6 && x.Value.Duration <= SongStages.StopTimeHit + 1e-9)).IsTrue();
+                    await Assert.That(inPhrase.All(x => Math.Abs(Math.IEEERemainder(x.Position - start, bar)) < 1e-6 && x.Value.Duration <= StopTime.Hit + 1e-9)).IsTrue();
                 }
             }
         }

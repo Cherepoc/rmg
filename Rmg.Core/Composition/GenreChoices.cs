@@ -136,8 +136,8 @@ public static class GenreChoices
     /// <summary>The chance a chord a bar long passes into the next by its dominant, a reharmonisation, which the songs never play at the plain end and a genre may (<see cref="Composition.PassingChords" />).</summary>
     public static GenreChoice PassingChords { get; } = Chances("passingChords", "Passing chords", [("chords", "Chords passing into the next", Composition.PassingChords.Chance)]);
 
-    /// <summary>The chance a section plays its first phrase in stop time, the band hitting once a bar under the lines (<see cref="SongStages.StopTimeChance" />).</summary>
-    public static GenreChoice StopTime { get; } = Chances("stopTime", "Stop time", [("sections", "Sections in stop time", SongStages.StopTimeChance)]);
+    /// <summary>The chance a section plays its first phrase in stop time, the band hitting once a bar under the lines (<see cref="StopTime.Chance" />).</summary>
+    public static GenreChoice StopTime { get; } = Chances("stopTime", "Stop time", [("sections", "Sections in stop time", Composition.StopTime.Chance)]);
 
     /// <summary>The chance a section planes, every chord the home's shape moved by semitones, a reharmonisation, which the songs never play at the plain end and a genre may (<see cref="Composition.Planing" />).</summary>
     public static GenreChoice Planing { get; } = Chances("planing", "Planing", [("sections", "Sections planed", Composition.Planing.Chance)]);
@@ -149,8 +149,8 @@ public static class GenreChoices
             ("patterns", "Any pattern's start", KeyChange.ElsewhereChance)
         ]);
 
-    /// <summary>The chance a section pushes its chord changes, the band an eighth early (<see cref="SongStages.PushChance" />).</summary>
-    public static GenreChoice Push { get; } = Chances("push", "Pushes", [("sections", "Sections pushing their changes", SongStages.PushChance)]);
+    /// <summary>The chance a section pushes its chord changes, the band an eighth early (<see cref="Pushes.Chance" />).</summary>
+    public static GenreChoice Push { get; } = Chances("push", "Pushes", [("sections", "Sections pushing their changes", Pushes.Chance)]);
 
     /// <summary>
     ///     The chances of harmony's devices that no choice above reaches: a later appearance reharmonised, a chromatic line
@@ -159,13 +159,13 @@ public static class GenreChoices
     public static GenreChoice HarmonyDevices { get; } = Chances("harmonyDevices", "Harmony's devices",
     [
         ("reharmonised", "A later appearance reharmonised", Reharmonisation.Chance),
-        ("innerLine", "A chromatic inner line", SongStages.InnerLineChance),
-        ("pedal", "A pedal under a section", SongStages.SectionPedalChance)
+        ("innerLine", "A chromatic inner line", InnerLines.Chance),
+        ("pedal", "A pedal under a section", SectionPedals.Chance)
     ]);
 
-    /// <summary>The chances a line's part slurs its steps, a piano's part rolls its held chords, and the chords are struck short (<see cref="SongStages.Articulation" />).</summary>
+    /// <summary>The chances a line's part slurs its steps, a piano's part rolls its held chords, and the chords are struck short (<see cref="Articulations.Apply" />).</summary>
     public static GenreChoice Articulation { get; } = Chances("articulation", "Articulation",
-        [("legato", "Slurred steps", SongStages.LegatoChance), ("roll", "Rolled piano chords", SongStages.RollChance), ("stabs", "Chords as stabs", SongStages.StabChance)]);
+        [("legato", "Slurred steps", Articulations.LegatoChance), ("roll", "Rolled piano chords", Articulations.RollChance), ("stabs", "Chords as stabs", Articulations.StabChance)]);
 
     /// <summary>The chance a song pins a drum role to its figure, every bar alike: the ground, the backbeat and the time (<see cref="DrumRoles.Pins" />).</summary>
     public static GenreChoice Pins { get; } = Chances("pins", "Parts pinned", [..Composition.DrumRoles.PinnedParts.Select(x => (Name(x.ToString()), x switch
@@ -201,8 +201,8 @@ public static class GenreChoices
         _ => x.Pattern.ToString()
     }, x.Weight)));
 
-    /// <summary>The chance a bar's hi-hat rolls its last beat in 32nds or 16th triplets, the trap's (<see cref="SongStages.HatRollChance" />).</summary>
-    public static GenreChoice HatRolls { get; } = Chances("hatRolls", "Hi-hat rolls", [("bars", "Bars ending on a roll", SongStages.HatRollChance)]);
+    /// <summary>The chance a bar's hi-hat rolls its last beat in 32nds or 16th triplets, the trap's (<see cref="HatRolls.Chance" />).</summary>
+    public static GenreChoice HatRolls { get; } = Chances("hatRolls", "Hi-hat rolls", [("bars", "Bars ending on a roll", Composition.HatRolls.Chance)]);
 
     /// <summary>The chance a verse leaves its melody out, the room a rap's voice takes over the beat (<see cref="Arrangement.VoiceChance" />).</summary>
     public static GenreChoice Voice { get; } = Chances("voice", "Verses for a voice", [("verses", "Verses without a melody", Arrangement.VoiceChance)]);
@@ -232,7 +232,7 @@ public static class GenreChoices
     /// <summary>How much the drums fill, from 0, seldom and short, through 50, as the songs have it, to 100, often and long (<see cref="FillLayers.GenreAmountOdds" />).</summary>
     public static GenreChoice Fills { get; } = Values("fills", "Fills", [("amount", "Amount")]);
 
-    /// <summary>How far the parts play off the beat, from 0, tight, through 50, as the songs have it, to 100, laid back (<see cref="SongStages.GenrePocketReach" />).</summary>
+    /// <summary>How far the parts play off the beat, from 0, tight, through 50, as the songs have it, to 100, laid back (<see cref="Pocket.GenreReach" />).</summary>
     public static GenreChoice Pocket { get; } = Values("pocket", "Pocket", [("laidBack", "Laid back")]);
 
     /// <summary>How steady the groove is, from 0, moving more, through 50, as the songs move it, to 100, held, its backbeat on 2 and 4 (<see cref="RhythmicUnconventionality.GrooveHold" />).</summary>

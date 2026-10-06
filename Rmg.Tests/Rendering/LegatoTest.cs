@@ -25,7 +25,7 @@ public sealed class LegatoTest
                 if (items[i].Value.State.GetStateValue(CompositionStateKinds.Legato) == 0)
                     continue;
                 slurred++;
-                await Assert.That(Math.Abs(items[i].Value.Pitches[0] - items[i - 1].Value.Pitches[0])).IsBetween(1, SongStages.SlurStep);
+                await Assert.That(Math.Abs(items[i].Value.Pitches[0] - items[i - 1].Value.Pitches[0])).IsBetween(1, Articulations.SlurStep);
                 await Assert.That(items[i - 1].Position + items[i - 1].Value.Duration).IsEqualTo(items[i].Position).Within(1e-6);
             }
         }

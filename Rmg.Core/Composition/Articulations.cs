@@ -1,0 +1,124 @@
+using System.Collections.Immutable;
+using Rmg.Core.Events;
+using Rmg.Core.Probabilities;
+using Rmg.Core.Songs;
+
+namespace Rmg.Core.Composition;
+
+/// <summary>The notes' articulations, a stage of the song after it is put together (<see cref="SongStages" />).</summary>
+internal static class Articulations
+{
+    /// <summary>The chance a song's chords are struck short, stabs, a genre's that the songs never play, and how long a stab sounds, in beats: a 16th.</summary>
+    public static ByConvention StabChance { get; } = new(0, 0, 0);
+
+    public const double StabLength = 0.25;
+
+    /// <summary>The chance a part on a piano rolls its held chords, by the sound facet: never in the plainest songs.</summary>
+    public static ByConvention RollChance { get; } = new(0, 0.3, 0.5);
+
+    /// <summary>How long a piano's rolled chord takes from its lowest note to its highest, in seconds: slower than a strum.</summary>
+    public const double Roll = 0.06;
+
+    /// <summary>How long a guitar's stroke takes across its strings at its quickest and its slowest, in seconds.</summary>
+    public const double StrokeFrom = 0.01, StrokeTo = 0.03;
+
+    /// <summary>
+    ///     The notes' articulations: in a section that chugs, a guitar's or a picked bass's note that repeats the one before
+    ///     on a weak beat palm-muted, its accents and its moves ringing, as a chug riff mutes its eighths on the root and
+    ///     rings its accent; the riff's, the rhythm part's and the bass's, by their instruments. And every chord a guitar
+    ///     plays strummed, down on a beat's first half and up on its second, as quickly as the song strums, and a piano's held
+    ///     chord rolled upward where its part rolls, and the chords struck short where they stab; and a bass in
+    ///     octaves, its notes off the beat the note before an octave away.
+    /// </summary>
+    internal static SongDraft Apply(SongDecisions song, SongDraft draft)
+    {
+        var notes = SongStages.NotesOf(draft);
+        var sections = song.Form.Map.Sections;
+        var stroke = StrokeFrom + (StrokeTo - StrokeFrom) * song.Stream(SongStream.Strum).GenerateDouble();
+        var tempo = draft.Timeline.CommonStateTimelineMap;
+        var result = notes.ToBuilder();
+        foreach (var (track, timeline) in notes)
+        {
+            if (song.Tracks.Definitions[track] is not PitchInstrumentTrack part)
+                continue;
+            var rolls = song.Stream(SongStream.Roll, track).TestProbability(RollChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "roll")));
+            // the chords struck short, stabs, a genre's
+            var stabs = part.Role == TrackRole.Chords
+                        && song.Stream(SongStream.Stabs, track).TestProbability(StabChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "stabs")));
+            var (bottom, top) = Realizer.GetRange(part);
+            result[track] = EventTimeline.Create(timeline.Duration, timeline.Select((note, i) =>
+            {
+                var state = note.Value.State;
+                var section = sections.IndexOf(song.Form.Map.SectionAt(note.Position)!);
+                var repeats = i > 0 && timeline[i - 1].Value.Pitches.SequenceEqual(note.Value.Pitches);
+                var weak = state.GetStateValue(CompositionStateKinds.BeatRank) > 0;
+                // by the instrument playing the note, a switched one's
+                var program = state.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : part.InstrumentCode;
+                if (Chugs(part.Role, program) && section >= 0 && song.Sections[section].Chugs && repeats && weak)
+                    state = state.With(CompositionStateKinds.PalmMute, 1);
+                // a bass in octaves, a note off the beat the note before it an octave away, up where its range has it and down
+                // where not, as a disco or a funk bass alternates them; but one leading into the next chord, and a section that
+                // chugs, which mutes its repeats instead
+                var pitches = note.Value.Pitches;
+                var leads = i + 1 < timeline.Count && timeline[i + 1].Value.State.GetStateValue(StateKinds.ChordChange) != note.Value.State.GetStateValue(StateKinds.ChordChange);
+                if (part.Role == TrackRole.Bass && section >= 0 && song.Sections[section].OctaveBass && !song.Sections[section].Chugs && i > 0 && weak && !leads
+                    && timeline[i - 1].Value.Pitches is var before && (before.All(x => x + 12 <= top) || before.All(x => x - 12 >= bottom)))
+                    pitches = [..before.Select(x => before.All(y => y + 12 <= top) ? x + 12 : x - 12)];
+                // the stroke in beats at the tempo there
+                double Beats(double seconds) => seconds * tempo.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60;
+                if (note.Value.Pitches.Length > 1 && InstrumentTraits.Has(program, InstrumentTrait.Strums))
+                    // down on the beat and up off it
+                    state = state.With(CompositionStateKinds.Strum, note.Position % 1 < 0.5 - 1e-9 ? Beats(stroke) : -Beats(stroke));
+                // a piano's chord held a beat or longer rolled upward, slower, where its part rolls
+                else if (rolls && note.Value.Pitches.Length >= 3 && note.Value.Duration >= 1 - 1e-9 && InstrumentTraits.Has(program, InstrumentTrait.Rolls))
+                    state = state.With(CompositionStateKinds.Strum, Beats(Roll));
+
+                var duration = stabs ? Math.Min(note.Value.Duration, StabLength) : note.Value.Duration;
+                return state == note.Value.State && pitches == note.Value.Pitches && duration == note.Value.Duration
+                    ? note
+                    : (note.Value with { State = state, Pitches = pitches, Duration = duration }).ToTimelineItem(note.Position);
+            }));
+        }
+
+        // and a line's steps slurred where its part slurs
+        foreach (var (track, timeline) in result.ToArray())
+            if (song.Tracks.Definitions[track].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo or TrackRole.Riff
+                && song.Stream(SongStream.Legato, track).TestProbability(LegatoChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "legato"))))
+                result[track] = Slur(timeline);
+
+        return draft with { Notes = result.ToImmutable() };
+    }
+
+    /// <summary>The chance a line's part slurs its steps, by the sound facet: never in the plainest songs, which play every note as struck.</summary>
+    public static ByConvention LegatoChance { get; } = new(0, 0.4, 0.6);
+
+    /// <summary>How far a note may step from the note before and be slurred into, in semitones, and the gap it may leave, in beats.</summary>
+    public const int SlurStep = 2;
+
+    public const double SlurGap = 0.25;
+
+    /// <summary>
+    ///     A line with its steps slurred: a note a step or less from the one before, within its phrase and close after it,
+    ///     marked as slurred, its articulation, and the note before held into it with no gap.
+    /// </summary>
+    internal static EventTimeline<RealizedNote> Slur(EventTimeline<RealizedNote> timeline)
+    {
+        var items = timeline.ToArray();
+        for (var i = 1; i < items.Length; i++)
+        {
+            var (before, note) = (items[i - 1], items[i]);
+            var gap = note.Position - (before.Position + before.Value.Duration);
+            if (Math.Abs(note.Value.Pitches[0] - before.Value.Pitches[0]) is 0 or > SlurStep || gap > SlurGap + 1e-9 || note.Position <= before.Position + 1e-9
+                || before.Value.State.GetStateValue(StateKinds.HeldDuration) > 0 || note.Value.State.GetStateValue(CompositionStateKinds.LinePhraseStart) != (int)PhraseStart.None)
+                continue;
+            items[i - 1] = (before.Value with { Duration = note.Position - before.Position }).ToTimelineItem(before.Position);
+            items[i] = (note.Value with { State = note.Value.State.With(CompositionStateKinds.Legato, 1) }).ToTimelineItem(note.Position);
+        }
+
+        return EventTimeline.Create(timeline.Duration, items);
+    }
+
+
+    /// <summary>Whether a part chugs: the riff, the rhythm part or the bass, on a guitar or a picked bass.</summary>
+    internal static bool Chugs(TrackRole role, int program) => role is TrackRole.Riff or TrackRole.Rhythm or TrackRole.Bass && InstrumentTraits.Has(program, InstrumentTrait.Chugs);
+}

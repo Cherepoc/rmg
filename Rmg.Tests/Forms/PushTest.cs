@@ -21,7 +21,7 @@ public sealed class PushTest
             foreach (var change in changes.Where(x => x > span.Start + 1e-9 && x < span.End - 1e-9 && Math.Abs(Math.IEEERemainder(x - span.Start, span.Meter.BarDuration)) < 1e-6))
             {
                 pushed++;
-                if (chords.Any(x => Math.Abs(x.Position - (change - SongStages.Push)) < 1e-6) && !chords.Any(x => Math.Abs(x.Position - change) < 1e-6))
+                if (chords.Any(x => Math.Abs(x.Position - (change - Pushes.Early)) < 1e-6) && !chords.Any(x => Math.Abs(x.Position - change) < 1e-6))
                     early++;
             }
         }

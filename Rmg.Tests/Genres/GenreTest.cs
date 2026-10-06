@@ -423,7 +423,7 @@ public sealed class GenreTest
         foreach (var drop in song.Trace.Where(x => x.Point == TracePoints.Drop).Select(x => (double)x.Value!))
         {
             var rising = song.Song.Notes!.Values.SelectMany(x => x)
-                .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) == SongStages.RiserProgram + 1 && Math.Abs(x.Position + x.Value.Duration - drop) < 0.3).ToArray();
+                .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) == Risers.Program + 1 && Math.Abs(x.Position + x.Value.Duration - drop) < 0.3).ToArray();
             await Assert.That(rising.Length).IsEqualTo(1).Because($"seed {song.Seed}, the drop at {drop}");
             risers++;
         }
