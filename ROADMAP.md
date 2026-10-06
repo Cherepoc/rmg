@@ -6,15 +6,14 @@ is removed once it is built.
 
 ## Priorities
 
-**Next** (P1): listening to what is deployed, 0.6 and on, and tuning by what it says (see *Listening*), and the
-ratings by conventionality once enough are in, alongside, continuously and never as a gate; listening to the
-presets as the genres' review retuned them, and Pop and Metal, among it (see *Genres*).
+**Next** (P1): listening to what is deployed and tuning by what it says (see *Listening*), the presets most as October
+2026 retuned them, Pop and Metal, the instruments and the riser added; and the ratings by conventionality once enough
+are in, alongside, continuously and never as a gate.
 
-**Later** (P2): the ratings report (see *Listening data*) once the dashboard shows songs rated enough, and listening
-to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
-drops, turnarounds and passing chords), alongside.
+**Later** (P2): the ratings report (see *Listening data*) once the dashboard shows songs rated enough.
 
-**When the need shows** (P3), each by what listening says: the items left in the sections below, each marked P3.
+**When the need shows** (P3), each by what listening says: the items left in the sections below, each marked P3, any
+genre first (see *Genres*).
 
 **Put off** until its uses ask for it: a tag (see *Form and sections*).
 
@@ -145,6 +144,9 @@ each from the trace; the seeds named here are ones already found.
 - **The instruments added in October 2026:** the synth effects' pads, the orchestra hit, the synth brass, the voice and
   calliope leads and the rest, about 4% of the songs' parts and more in the presets that name them (Ambient's pads,
   Synthwave's brass): are any too loud or too strange in either soundfont served? Their weights or traits, if so.
+- **The riser into a drop:** the reverse cymbal over the silent bar, its note a bar long; a soundfont's sample shorter
+  than the bar peaks early and leaves a gap before the drop, a longer one is cut at it. Start it later, should one.
+- **A genre's reverb:** Ambient's mean send 76, Funk's 28, the songs' 47: wet enough, and the dry genres' room heard?
 - **The instruments:** a switch keeping to the part's family, 58% of a middling song's: welcome, or does a song want
   more handovers? An articulation on the same rig, a driven guitar's harmonics, a clean one muted: heard as the same
   player?
@@ -275,8 +277,9 @@ Each item with its plan, and what it waits for.
 
 ### Rhythm engine
 
-- **Long cycles** (P3, the genres' review's 19; put off in October 2026 as an engine's change): a bar pattern is one bar long, so a slower cycle, such as the kick's slowed
-  to two bars, plays its first half and starts again at every bar line. Patterns as long as their cycle would let slow
+- **Long cycles** (P3, the idioms waiting on them: the clave, the montuno, a kick answered in its second bar): a bar
+  pattern is one bar long, so a slower cycle, such as the kick's slowed to two bars, plays its first half and starts
+  again at every bar line. Patterns as long as their cycle would let slow
   figures run whole, a crash every two bars, a kick figure answered in the second bar, a chord of two bars, a clave's
   3-2. Put off as an engine's change: the bar is the unit of the scheme's letters, the state's layers, the melody's
   question and answer, the drums' presence, the fills' lines and the feels. A crash every two bars, should it be
@@ -308,44 +311,32 @@ A genre is the page's data (`Genre`, `GenreChoices`, `Client/genres.json`), ever
 end, the middle and the wild end; what each choice does is in the code and the numbers of each in its commit. What is
 left:
 
-- **The genres' review, the rest** (October 2026; its P1 and P2 items done, every device a genre's and every preset
-  naming every device, the presets retuned, Pop and Metal added), each measured by the preset reports before and after
-  (`GenrePresetsTest`, `GenreIdiomsReportTest`, `GenreDevicesReportTest`).
-
-  **P3**, by what the measures and listening say:
-  18. **Any genre** (a plan in steps): a song asked for with no genre drawing a preset, or the songs' own as one of
-     its outcomes, evenly, so that the plain band stays among them; the seed alone making the song again, the CLI's
-     and the API's too, and the ratings telling which genres are liked. Steps:
-     1. The presets the server's data rather than the page's alone (`Client/genres.json`), served to the page, which the
-        tests and the CLI read too (`--genre`).
-     2. The server drawing one when asked for any, from a stream of its own, so that the rest of the song stays as the
-        seed made it; the preset drawn in the response, the song's link and every analytics event about it, as its
-        version and settings are.
-     3. The page offering any genre beside the presets.
-     4. The default (the songs' own, as now, or any genre) decided by the ratings by genre once a version has enough,
-        and not before the retuned presets, Pop and Metal most, are heard.
-     Not weighed by the presets nor leaned by conventionality: each preset spans the plainest songs to the wildest.
-  19. **Two-bar patterns** (*Long cycles*, raised from put off by the idioms waiting on them: the clave, the montuno,
-     a kick answered in its second bar), and snare ghost notes and drags (*What the genres cannot play yet*).
-  20. **More genres,** should Pop and Metal sound right: Soul or Gospel, drum and bass, disco, trap (Hip-hop's glide
-     and hat rolls).
-  21. **The hook and the phrase scheme as one:** a hooked section a scheme sung literally, should a trial keep the
-     report's repeats (50% of a hooked section's notes at their first bar's places); otherwise kept apart, with the
-     reason.
-  22. **Harmony for Jazz and Soul:** the tritone substitute, the passing diminished and a ii–V elsewhere (*Approach
-     chords*, *Harmony's devices*); call and response (*The band's devices*); a part resting by its section's role.
-
-  **P4:** the choices grouped into families (bass, harmony, form, drum devices), one choice of several chances rather
-  than fifteen of one, which would read better in the editor and break every genre link kept; should the editor grow
-  hard to use.
+- **Any genre** (P3, a plan in steps): a song asked for with no genre drawing a preset, or the songs' own as one of its
+  outcomes, evenly, so that the plain band stays among them; the seed alone making the song again, the CLI's and the
+  API's too, and the ratings telling which genres are liked. Steps:
+  1. The presets the server's data rather than the page's alone (`Client/genres.json`), served to the page, which the
+     tests and the CLI read too (`--genre`).
+  2. The server drawing one when asked for any, from a stream of its own, so that the rest of the song stays as the
+     seed made it; the preset drawn in the response, the song's link and every analytics event about it, as its version
+     and settings are.
+  3. The page offering any genre beside the presets.
+  4. The default (the songs' own, as now, or any genre) decided by the ratings by genre once a version has enough, and
+     not before the retuned presets, Pop and Metal most, are heard.
+  Not weighed by the presets nor leaned by conventionality: each preset spans the plainest songs to the wildest.
+- **More genres** (P3, should Pop and Metal sound right): Soul or Gospel, drum and bass, disco, trap (Hip-hop's glide
+  and hat rolls).
+- **The hook and the phrase scheme as one** (P3): a hooked section a scheme sung literally, should a trial keep the
+  report's repeats (50% of a hooked section's notes at their first bar's places); otherwise kept apart, with the reason.
+- **Harmony for Jazz and Soul** (P3): the tritone substitute, the passing diminished and a ii–V elsewhere (*Approach
+  chords*, *Harmony's devices*); call and response (*The band's devices*); a part resting by its section's role.
+- **The choices grouped into families** (P4): bass, harmony, form, drum devices, one choice of several chances rather
+  than fifteen of one, which would read better in the editor; should the editor grow hard to use.
 - **What the genres cannot play yet** (P3, each by what listening to the presets says; `GenreDevicesReportTest`,
   `GenreIdiomsReportTest` the measures):
   - The loop's figures shared, the bass's and the riff's, beside its harmony (`GenreChoices.Loop`).
-  - A riser as a lift cue, into a louder section where the band plays on, which the riser into a drop (`SongStages.Risers`)
-    plays on a channel its silence leaves free: a program change there would cut the part's chord, so a channel of its
-    own, should a lift want one. Not planned: the percussive family's woodblock, agogo, melodic tom and tinkle bell,
-    the kit's own sounds again; the synth drum, whose 80s toms are fills on the drums' channel; the taiko, for a
-    cinematic genre none is.
+  - A riser as a lift cue, into a louder section where the band plays on, which the riser into a drop
+    (`SongStages.Risers`) plays on a channel its silence leaves free: a program change there would cut the part's
+    chord, so a channel of its own, should a lift want one.
   - The pump on the kick wherever it falls, should a pumping genre's kick leave the beat; it ducks on the beat now.
   - The pinned drums (`GenreChoices.Pins`) in the bars a drop or an entry clears, and the wilder songs that leave a
     role free.
@@ -373,21 +364,20 @@ left:
     an output differs from General MIDI.
   - Beyond General MIDI, parked: the gated reverb (one reverb send for the whole drum channel, no gate) and an acid
     line's accent (no 303).
-- **A head with solos** (to review, and then go): a jazz tune's head, choruses of solos over its form, and the head
+- **A head with solos** (P4, parked): a jazz tune's head, choruses of solos over its form, and the head
   again, which AABA (`SongForms.Forms`) and a genre's solos (`GenreChoices.Solos`) come near already; a form of its own
   only should listening ask.
 - **A genre's sections differing** (P3, perhaps never): a value given a section role, such as a solo swung harder
   or a chorus louder, the genre's for the song otherwise; the generator asking the genre with the section's role,
   every choice's tile a role's override beside it. The dynamics' contrast and the phrases' AAB give most of it.
-- **Listening to the presets** (P2): each against its sentence (`GenrePresetsReportTest`). Pop and Metal set no groove
+- **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Pop and Metal set no groove
   hold, their parts not pinned drifting as the songs' do (Pop's snare on 2 and 4 80%): Rock's (80) for them, should
-  their beat sound loose. Jazz's ride, pinned, plays the
-  songs' own time figure, 7% of its bars a tresillo's: a rhythm of its own for the time (a ride's spang-a-lang), should it
-  not swing. Reggae's one drop is a kick
-  half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
-  alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall. Blues' twelve
-  bars: V at bar 9 in 43% of its twelve-bar sections, home at bar 4 48%, IV at 5 63%, home at 8 61%, the middling and
-  wild songs keeping the place rules less by the progression's strictness.
+  their beat sound loose. Jazz's ride, pinned, plays the songs' own time figure, 7% of its bars a tresillo's: a rhythm
+  of its own for the time (a ride's spang-a-lang), should it not swing. Solos in Latin's songs 66% and Metal's 91%: too
+  many? Reggae's one drop is a kick half a bar off its cycle, which the report cannot tell from beat 1, and Latin's
+  tresillo is the time keeper's grouping alone; the rhythm values mean what they make together, and a preset's are
+  tuned by where its notes fall. Blues' twelve bars: V at bar 9 in 43% of its twelve-bar sections, home at bar 4 48%,
+  IV at 5 63%, home at 8 61%, the middling and wild songs keeping the place rules less by the progression's strictness.
 - **Listening to the genres' wild ends:** the presets' wild ends keep their idioms most and stray by what each names
   experimental (`EveryPreset_ChoicesByEnd`): the wildest Rock 34% in 4/4, its chords 7% quartal or tritone stacks; the
   wildest Jazz 56% swung, 50% sevenths, about a fifth So What, quartal, altered or eleventh. A home and a cadence lean
@@ -410,6 +400,9 @@ left:
 
 Ideas with a reason, not planned: none has shown a need. Taken up only when listening or another item asks for one.
 
+- **The percussive family but the steel drums and the reverse cymbal** (P4): the woodblock, the agogo, the melodic tom
+  and the tinkle bell are the kit's own sounds again; the synth drum's 80s toms are fills, on the drums' channel; the
+  taiko wants a cinematic genre none is.
 - **Sound effects** (P4): General MIDI's 120-127 and the drums' sound-effects kit sound unlike in each soundfont and at
   each pitch, and read as a mistake rather than as meant; a gunshot, a telephone or a helicopter never, applause a
   gimmick, breath and fret noise realism. One experiment, should listening ask: a bed of the sea, birds or rain held

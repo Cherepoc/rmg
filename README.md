@@ -101,10 +101,11 @@ Listens on every interface, on port 5000 by default. See [Settings](#settings).
   plays, by name, which make its setup, and `key`, `tempo` and `meter` give those
   (the tempo by its step from 0 to 61, 60 to 240 beats a minute with 120 at 31, and the meter by its place in
   `GET /api/songs/options`). A genre (`genre`, by the names of `GET /api/genres/choices`) gives a choice's amounts in
-  whole numbers, one alike at every end or three, at the plain end, the middle and the wild end. The response carries
-  the seed (`X-Song-Seed`), the songs' version (`X-Song-Version`), the key the genre is kept by (`X-Genre-Key`) and
-  everything the song drew or was given, with every part's channel (`X-Song-Settings`). The file is named `song-<seed>.mid`. The server makes as many songs at once as it has cores;
-  the rest wait their turn, a client at a time, and are turned away with 429 or 503 when too many wait.
+  whole numbers, one alike at every end or three, at the plain end, the middle and the wild end. The response carries the
+  seed (`X-Song-Seed`), the songs' version (`X-Song-Version`), the key the genre is kept by (`X-Genre-Key`) and
+  everything the song drew or was given, with every part's channel (`X-Song-Settings`). The file is named
+  `song-<seed>.mid`. The server makes as many songs at once as it has cores; the rest wait their turn, a client at a
+  time, and are turned away with 429 or 503 when too many wait.
 - `GET /api/songs/options` lists the tempos a song may be given, in beats a minute by their steps, the meters, and the
   drum pieces with their groups and notes.
 - `GET /api/genres/choices` lists the choices a genre may name, with their options and the songs' own amounts;
@@ -133,11 +134,11 @@ internet connection.
 - **Rating.** Like or dislike a song; the ratings go with the analytics, by the songs' version.
 - **So far** lists the last fifty songs, newest first, kept in the browser; a song walked to keeps its place.
 - **Sharing.** The address always follows the song, its settings and its genre,
-  `?song=<seed>&settings=<settings>&genre=<key>`, so it is
-  itself a link; **Share** opens the share sheet or copies it. Seeds are not kept stable across versions, so after
-  an update an old link can play a different song.
-- **Downloads.** The `.mid` carries the mix. **Download .mp3** renders the song, at the bitrate beside it, with the mix and the soundfont in the
-  browser, with [lamejs](https://www.npmjs.com/package/@breezystack/lamejs) (LGPL-3.0, from a CDN); nothing is uploaded.
+  `?song=<seed>&settings=<settings>&genre=<key>`, so it is itself a link; **Share** opens the share sheet or copies
+  it. Seeds are not kept stable across versions, so after an update an old link can play a different song.
+- **Downloads.** The `.mid` carries the mix. **Download .mp3** renders the song, at the bitrate beside it, with the
+  mix and the soundfont in the browser, with [lamejs](https://www.npmjs.com/package/@breezystack/lamejs) (LGPL-3.0,
+  from a CDN); nothing is uploaded.
 
 ## Soundfonts
 
