@@ -58,13 +58,13 @@ public enum StrongEffect
 internal static class Expression
 {
     /// <summary>Whether an instrument bends and sings a vibrato: guitars, strings, voices, brass, reeds, pipes, synth leads, a fretless or synth bass.</summary>
-    public static bool Bends(int program) => program is >= 24 and <= 31 or >= 40 and <= 44 or >= 48 and <= 87 or 35 or 38 or 39;
+    public static bool Bends(int program) => InstrumentTraits.Has(program, InstrumentTrait.Bends);
 
     /// <summary>Whether an instrument sounds with a chorus the classic way: an electric piano, a clean guitar, a synth pad.</summary>
-    private static bool ChorusesClassically(int program) => program is 4 or 5 or 27 or >= 88 and <= 95;
+    private static bool ChorusesClassically(int program) => InstrumentTraits.Has(program, InstrumentTrait.ChorusesClassically);
 
     /// <summary>Whether an instrument may take a chorus: pianos, guitars, strings, leads and pads.</summary>
-    private static bool Choruses(int program) => program is >= 0 and <= 7 or >= 24 and <= 31 or >= 48 and <= 51 or >= 80 and <= 95;
+    private static bool Choruses(int program) => InstrumentTraits.Has(program, InstrumentTrait.Choruses);
 
     /// <summary>
     ///     Whether a strong effect suits a part, which plays it the likelier: an echo a lead's, a tremolo a guitar's, an
@@ -73,8 +73,8 @@ internal static class Expression
     private static bool Suits(StrongEffect effect, TrackRole role, int program) => effect switch
     {
         StrongEffect.Echo => role == TrackRole.Melody,
-        StrongEffect.Tremolo => program is 4 or 5 or >= 16 and <= 20 or >= 24 and <= 31,
-        StrongEffect.Sweep => role == TrackRole.Pad || program is >= 16 and <= 20 or >= 80 and <= 95,
+        StrongEffect.Tremolo => InstrumentTraits.Has(program, InstrumentTrait.Tremolo),
+        StrongEffect.Sweep => role == TrackRole.Pad || InstrumentTraits.Has(program, InstrumentTrait.Sweeps),
         StrongEffect.Pump => role is TrackRole.Pad or TrackRole.Chords or TrackRole.Bass or TrackRole.Rhythm,
         _ => false
     };
@@ -136,7 +136,7 @@ internal static class Expression
     private static Vibrato WidestNarrow => new(60, 0);
 
     /// <summary>Whether a wide vibrato suits an instrument: a guitar's or a synth lead's.</summary>
-    private static bool VibratesWide(int program) => program is >= 24 and <= 31 or >= 80 and <= 87;
+    private static bool VibratesWide(int program) => InstrumentTraits.Has(program, InstrumentTrait.VibratesWide);
 
     /// <summary>
     ///     The chance a part slides from note to note at all, never in a plain song and not every part in a wild one, and

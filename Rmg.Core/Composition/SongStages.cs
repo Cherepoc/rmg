@@ -709,11 +709,11 @@ internal static class SongStages
                 var program = state.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : part.InstrumentCode;
                 // the stroke in beats at the tempo there
                 double Beats(double seconds) => seconds * tempo.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60;
-                if (note.Value.Pitches.Length > 1 && program is >= 24 and <= 31)
+                if (note.Value.Pitches.Length > 1 && InstrumentTraits.Has(program, InstrumentTrait.Strums))
                     // down on the beat and up off it
                     state = state.With(CompositionStateKinds.Strum, note.Position % 1 < 0.5 - 1e-9 ? Beats(stroke) : -Beats(stroke));
                 // a piano's chord held a beat or longer rolled upward, slower, where its part rolls
-                else if (rolls && note.Value.Pitches.Length >= 3 && note.Value.Duration >= 1 - 1e-9 && program is >= 0 and <= 7)
+                else if (rolls && note.Value.Pitches.Length >= 3 && note.Value.Duration >= 1 - 1e-9 && InstrumentTraits.Has(program, InstrumentTrait.Rolls))
                     state = state.With(CompositionStateKinds.Strum, Beats(Roll));
 
                 var duration = stabs ? Math.Min(note.Value.Duration, StabLength) : note.Value.Duration;
@@ -807,7 +807,7 @@ internal static class SongStages
     }
 
     /// <summary>Whether a part chugs: the riff, the rhythm part or the bass, on a guitar or a picked bass.</summary>
-    private static bool Chugs(TrackRole role, int program) => role is TrackRole.Riff or TrackRole.Rhythm or TrackRole.Bass && program is >= 24 and <= 31 or 34;
+    private static bool Chugs(TrackRole role, int program) => role is TrackRole.Riff or TrackRole.Rhythm or TrackRole.Bass && InstrumentTraits.Has(program, InstrumentTrait.Chugs);
 
     /// <summary>How the parts are played beyond their notes, by every section's sound facet.</summary>
     internal static SongDraft ExpressionStage(SongDecisions song, SongDraft draft) =>

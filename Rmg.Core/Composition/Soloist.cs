@@ -207,7 +207,7 @@ internal sealed record Soloist(
     public const double BendSuitOdds = 4;
 
     /// <summary>How far an instrument leans to bending: a guitar's and a synth lead's the most, as their players do.</summary>
-    private static double BendSuit(int program) => program is >= 24 and <= 31 or >= 80 and <= 87 ? 1 : 0;
+    private static double BendSuit(int program) => InstrumentTraits.Has(program, InstrumentTrait.SoloBends) ? 1 : 0;
 
     /// <param name="program">The instrument the soloing part plays, which leans whether it bends.</param>
     public static Soloist Generate(IGenerationContext context, double melody, double sound, int program)

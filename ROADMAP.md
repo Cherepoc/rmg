@@ -335,13 +335,8 @@ left:
   **P4:** the choices grouped into families (bass, harmony, form, drum devices), one choice of several chances rather
   than fifteen of one, which would read better in the editor and break every genre link kept; should the editor grow
   hard to use.
-- **Instruments and effects** (P2, a plan in steps, October 2026; a genre's reverb done, `GenreChoices.Space`): 74 of
+- **Instruments and effects** (P2, a plan in steps, October 2026; a genre's reverb done, `GenreChoices.Space`, and an instrument's traits as one table, `InstrumentTraits`): 74 of
   the 128 programs play, the rest never.
-  2. An instrument's traits as data, one table (its family, sustaining or decaying, strumming, rolling, bending, its
-     vibrato, the effects that suit it), read where program ranges decide them now (`Expression.Bends`, `Choruses`,
-     `ChorusesClassically`, the strong effects, `VibratesWide`, the strum, the roll and the chugs in `SongStages`,
-     `Soloist.BendSuit`); a refactor, the fingerprint kept. Before any instrument is added, which would otherwise take
-     the traits of the numbers around it (a piccolo bending, synth brass swept).
   3. The unused melodic instruments in the roles' pools and the presets': honky-tonk piano (Blues, Folk), tango
      accordion (Latin), reed organ and dulcimer (Folk), synth brass (Synthwave, Pop, Funk), the orchestra hit as stabs
      (House, Hip-hop, Synthwave), pizzicato and tremolo strings as instruments (Pop, Ambient), steel drums (Latin,
