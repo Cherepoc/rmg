@@ -8,6 +8,8 @@ namespace Rmg.Tests.Page;
 [ClassDataSource<Site>(Shared = SharedType.PerTestSession)]
 public sealed class DoubledPartTest(Site site)
 {
+    private const string Seed = "1";
+
     [Test]
     public async Task ADoubledPart_MutedHere_MutesEveryTakeOfIt()
     {
@@ -26,6 +28,8 @@ public sealed class DoubledPartTest(Site site)
         await page.Page.RouteAsync("**/api/songs/generate", async route =>
         {
             var body = JsonNode.Parse(route.Request.PostData ?? "{}")!.AsObject();
+            // a song whose twin plays, which a riff in power chords throughout would leave out
+            body["seed"] = Seed;
             var parts = body["parts"]!.AsObject();
             foreach (var part in new[] { "riff", "chords" })
             {
@@ -33,7 +37,7 @@ public sealed class DoubledPartTest(Site site)
                 parts[part]!["instrument"] = 30;
             }
 
-            parts["riffTwin"] = new JsonObject { ["plays"] = true, ["volume"] = parts["riff"]!["volume"]!.DeepClone() };
+            parts["riffTwin"] = new JsonObject { ["plays"] = true, ["instrument"] = 30, ["volume"] = parts["riff"]!["volume"]!.DeepClone() };
             var response = await route.FetchAsync(new RouteFetchOptions { PostData = System.Text.Encoding.UTF8.GetBytes(body.ToJsonString()) });
             report = response.Headers["x-song-settings"];
             await route.FulfillAsync(new RouteFulfillOptions { Response = response });
@@ -48,7 +52,7 @@ public sealed class DoubledPartTest(Site site)
             ..new[] { "channel", "double" }.Select(x => parts.GetProperty(part).GetProperty(x)).Where(x => x.ValueKind == JsonValueKind.Number).Select(x => x.GetInt32() - 1)
         ];
         var riff = Takes("riff").Concat(Takes("riffTwin")).ToArray();
-        await Assert.That(riff.Length).IsEqualTo(4);
+        await Assert.That(riff.Length).IsEqualTo(4).Because(report!);
 
         // the riff muted: every one of its four channels, its own, its second take's, its twin's and the twin's second
         var before = await page.Page.EvaluateAsync<int>("() => window.posted.length");
