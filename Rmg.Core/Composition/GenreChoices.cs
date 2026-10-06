@@ -426,8 +426,8 @@ public static class GenreChoices
         ("doubleTime", "A section's drums in double time", Even(Groove.DoubleTimeChance))
     ]);
 
-    /// <summary>The values of the feel's: how much a song that swings swings.</summary>
-    public static GenreChoice FeelValues { get; } = Values("feelValues", "Swing amount", [("swing", "How much it swings")]);
+    /// <summary>The values of the feel's: how much a song that swings swings, and how fast a tempo still swings its 16ths rather than its 8ths.</summary>
+    public static GenreChoice FeelValues { get; } = Values("feelValues", "Swing", [("swing", "How much it swings"), ("sixteenths", "16ths swung at faster tempos")]);
 
     /// <summary>The scale the song starts in (<see cref="Scales" />).</summary>
     public static GenreChoice Scale { get; } = Described(Pool("scale", "Scale", Scales.All.Select(x => (Name(x.Name), x.Name, x.Weight))),

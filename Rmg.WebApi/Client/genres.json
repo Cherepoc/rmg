@@ -124,6 +124,7 @@
     "name": "House",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, a pumping bass and pads, piano and electric piano chords now and then, a TR-808 or electronic kit, straight, 117 to 130, minor, sus and add9 chords, a drop into the chorus.",
     "choices": {
+      "feelValues": { "swing": 30, "sixteenths": 100 },
       "phraseScheme": { "aaaa": 100, "aaab": [25, 25, 40], "aaba": [15, 15, 30], "abab": [10, 10, 30] },
       "arpeggio": { "none": 100, "up": [20, 25, 40], "upDown": [10, 15, 30], "random": [0, 0, 20], "upTwoOctaves": [0, 0, 20] },
       "texture": { "steady": [100, 70, 50], "build": [40, 60, 60], "thin": [10, 20, 30] },
@@ -146,7 +147,7 @@
       "tempo": { "from": [120, 120, 100], "to": [128, 128, 175] },
       "meter": { "4/4": [100, 100, 85], "7/8": [0, 0, 10], "5/4": [0, 0, 8] },
       "feel": { "straight": [100, 100, 70], "grouped3": [0, 0, 20], "tuplets3": [0, 0, 15] },
-      "feelChances": { "swing": [0, 5, 19], "halfTime": 8, "doubleTime": 5 },
+      "feelChances": { "swing": [10, 30, 40], "halfTime": 8, "doubleTime": 5 },
       "scale": { "naturalMinor": [100, 100, 60], "phrygian": [10, 25, 50], "dorian": [20, 45, 40], "major": [25, 25, 20] },
       "chordShape": { "triad": [100, 81, 50], "sus2": [60, 100, 50], "sus4": [40, 56, 40], "add9": [60, 100, 50], "seventh": [20, 37, 20], "quartalTriad": [0, 31, 60], "denseCluster": [0, 0, 20] },
       "harmonicRhythm": { "twoBars": 100, "oneBar": [30, 30, 50] },

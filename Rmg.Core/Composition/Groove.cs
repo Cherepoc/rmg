@@ -57,6 +57,12 @@ internal static class Groove
     /// <summary>The shortest note swung, in seconds: 16ths are swung where they are at least this long, 8ths otherwise.</summary>
     public const double ShortestSwungNote = 0.14;
 
+    /// <summary>
+    ///     How far a genre moves the shortest note swung at its most and its least, as a factor: half as long, 16ths swung up
+    ///     to 214 beats a minute, as a house track's shuffle, or twice, 8ths swung down to 53 (<see cref="GenreChoices.FeelValues" />).
+    /// </summary>
+    public const double GenreSwungNoteReach = 2;
+
     /// <param name="meter">The meter the song's bars are in, whose groups a pair must divide to swing, as 6/8's 8ths do not.</param>
     /// <param name="unconventionality">The feel facet of the song's unconventionality.</param>
     /// <param name="given">How much the song swings where it is given, as a part of the triplet's, 0 for straight.</param>
@@ -70,7 +76,7 @@ internal static class Groove
             (swings, amount) = (amountGiven > 0, amountGiven);
 
         var sixteenth = 60 / (Meter.BaseTempo * tempo) / 4;
-        var period = sixteenth >= ShortestSwungNote ? 0.5 : 1;
+        var period = sixteenth >= ShortestSwungNote * Math.Pow(GenreSwungNoteReach, -genre.Shift(GenreChoices.FeelValues, "sixteenths")) ? 0.5 : 1;
         // a triplet's swing plays the pair's second note a third of the pair late of its middle, at two thirds
         return swings && meter.Pairs(period) ? new Swing(amount * period / 6, period) : Swing.None;
     }
