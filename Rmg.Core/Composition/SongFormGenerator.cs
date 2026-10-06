@@ -335,7 +335,7 @@ internal sealed class SongFormGenerator
         }
 
         // the band grows louder into a louder section, over the phrase before a drop
-        songState = songState.MergeWith(CreateLifts(lines, end, drops));
+        songState = songState.MergeWith(CreateLifts(lines, end, drops, Math.Pow(FormLayers.GenreLiftReach, _genre.Shift(GenreChoices.Dynamics, "lift"))));
 
         return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, songState, [..drops.Order()]);
     }
@@ -515,7 +515,8 @@ internal sealed class SongFormGenerator
     ///     as loud as it plays to louder by how much more energy the next section has, as far as the ending section's rhythm
     ///     follows its energy, a step every <see cref="FormLayers.FadeStep" />, the next section then as loud as it plays.
     /// </summary>
-    private static StateTimelineMap CreateLifts(IReadOnlyList<FillLine> lines, double end, IReadOnlySet<double> drops)
+    /// <param name="bars">How many bars a lift swells over, a genre's, where no drop builds to it.</param>
+    private static StateTimelineMap CreateLifts(IReadOnlyList<FillLine> lines, double end, IReadOnlySet<double> drops, double bars)
     {
         var items = new List<TimelineItem<double>>();
         for (var i = 0; i < lines.Count; i++)
@@ -528,7 +529,7 @@ internal sealed class SongFormGenerator
                 continue;
 
             // over the last bar of the section it ends, or the phrase before a drop, within the section
-            var length = line.Ending.Meter.BarDuration * (drops.Contains(line.Position) ? FormLayers.BuildBars : 1);
+            var length = line.Ending.Meter.BarDuration * (drops.Contains(line.Position) ? FormLayers.BuildBars : bars);
             var start = Math.Max(line.Position - length, i > 0 ? lines[i - 1].Position : 0);
             var count = (int)Math.Round((line.Position - start) / FormLayers.FadeStep);
             items.AddRange(Enumerable.Range(1, count).Select(j => (FormLayers.LiftVelocity * lift * j / count).ToTimelineItem(start + j * FormLayers.FadeStep - FormLayers.FadeStep)));

@@ -170,6 +170,12 @@ internal static class FormLayers
     /// <summary>How much louder the band plays at the end of a lift into a section of an energy more by 1, in velocity's layers.</summary>
     public const double LiftVelocity = 0.6;
 
+    /// <summary>
+    ///     How far a genre stretches a lift's swell at its most and its least, as a factor of its bar: over a phrase, four
+    ///     bars, as an orchestra's crescendo, or a beat (<see cref="GenreChoices.Dynamics" />).
+    /// </summary>
+    public const double GenreLiftReach = 4;
+
     /// <summary>The endings that lean unconventional, likelier the further the song's rhythm strays.</summary>
     public static ImmutableHashSet<EndingKind> AdventurousEndings { get; } = [EndingKind.Open, EndingKind.Stop];
 

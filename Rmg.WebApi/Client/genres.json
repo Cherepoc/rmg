@@ -680,7 +680,7 @@
       "effects": { "swell": [60, 85, 100], "chorus": [50, 80, 100], "vibrato": [0, 50, 90], "bends": [0, 10, 40] },
       "strongEffect": { "none": [100, 60, 30], "sweep": [30, 50, 100], "echo": [20, 40, 60] },
       "pan": { "pad": 90, "chords": 75, "counterMelody": 70 },
-      "dynamics": { "energy": 25, "contrast": 25 },
+      "dynamics": { "energy": 25, "contrast": 25, "lift": 75 },
       "instrument": {
         "melody": { "acousticGrandPiano": [81, 81, 84], "celesta": [100, 100, 79], "glockenspiel": [50, 50, 39], "vibraphone": [56, 56, 72], "flute": [81, 81, 100], "panFlute": [50, 50, 40], "kalimba": [37, 37, 30], "musicBox": [10, 15, 20], "tubularBells": [5, 10, 15], "englishHorn": [10, 15, 20], "shakuhachi": [0, 5, 15], "koto": [0, 0, 10] },
         "chords": { "orchestralHarp": [45, 45, 30], "stringEnsemble1": [65, 65, 100], "choirAahs": [45, 45, 30], "pad1NewAge": [100, 100, 66], "pad2Warm": [80, 80, 69], "pad7Halo": [80, 80, 53] },
@@ -748,7 +748,7 @@
       "kit": { "standard": 100, "power": [20, 20, 30], "electronic": [20, 20, 40] },
       "drumSetup": { "kit": 100, "kitAndPercussion": [10, 20, 40] },
       "fills": { "amount": 50 },
-      "dynamics": { "energy": 60, "contrast": 70 },
+      "dynamics": { "energy": 60, "contrast": 70, "lift": 70 },
       "phraseScheme": { "aaab": 100, "abab": [60, 60, 60], "aaaa": [40, 40, 30], "aaba": [40, 40, 40] },
       "arpeggio": { "none": 100, "up": [20, 20, 30], "upDown": [15, 15, 25], "alberti": [10, 10, 20], "upTwoOctaves": [0, 0, 15] },
       "passingChords": { "chords": [0, 5, 5] }
@@ -846,7 +846,7 @@
       "drumJob": { "marks": [100, 100, 60], "groove": [0, 10, 40] },
       "marks": { "often": 45 },
       "fills": { "amount": 20 },
-      "dynamics": { "energy": 30, "contrast": 35 },
+      "dynamics": { "energy": 30, "contrast": 35, "lift": 75 },
       "texture": { "build": 100, "steady": 60, "alone": 40 },
       "intro": { "entries": 100, "cold": 30 },
       "ending": { "ringOut": 100, "fade": 40 },
@@ -1536,6 +1536,55 @@
       "form": { "vvbv": 100, "vcvcbc": 40 },
       "formChances": { "forms": [100, 90, 60] },
       "strongEffect": { "none": 100 }
+    }
+  },
+  {
+    "id": "orchestral",
+    "name": "Orchestral",
+    "description": "Strings, horns and woodwinds over a contrabass, a harp's arpeggios, timpani and a cymbal marking the form, minor, major and harmonic minor, long crescendos into louder sections, parts entering one by one.",
+    "choices": {
+      "tempo": { "from": [60, 60, 60], "to": [130, 130, 160] },
+      "meter": { "4/4": 100, "3/4": 60, "6/8": 50, "5/4": [0, 10, 20], "7/8": [0, 0, 15] },
+      "feelChances": {},
+      "scale": { "naturalMinor": 100, "major": 90, "harmonicMinor": 60, "dorian": 40, "lydian": [20, 30, 40], "phrygian": [10, 20, 30] },
+      "chordShape": { "triad": 100, "sus4": 40, "sus2": 40, "add9": 40, "seventh": 30, "powerChord": [20, 20, 20], "minorMajorSeventh": [0, 10, 20], "augmented": [0, 10, 20], "polychord": [0, 0, 15] },
+      "rootMotion": { "fifthDown": 70, "thirdDown": 70, "stepUp": 60 },
+      "chordScales": { "applied": [30, 40, 40], "borrowed": [30, 40, 50] },
+      "passingChords": { "chords": [10, 20, 30] },
+      "harmonicRhythm": { "oneBar": 100, "twoBars": 70, "halfBar": 30 },
+      "keyChanges": { "lastSection": [15, 25, 40], "sections": [0, 5, 30] },
+      "harmonyDevices": { "pedal": [30, 40, 50], "innerLine": [10, 20, 30] },
+      "arpeggio": { "none": 100, "alberti": 50, "up": 40, "upDown": 40, "upTwoOctaves": [10, 20, 30] },
+      "articulation": { "legato": [60, 70, 80], "roll": [30, 40, 50] },
+      "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 100, "counterMelody": [80, 80, 80], "drum": [70, 70, 70], "riff": [20, 20, 40], "riffTwin": 0, "rhythm": 0, "solo": [0, 10, 30] },
+      "instrument": {
+        "melody": { "violin": 100, "flute": 70, "oboe": 60, "frenchHorn": 60, "clarinet": 50, "trumpet": 40, "cello": 40 },
+        "chords": { "stringEnsemble1": 100, "orchestralHarp": 60, "stringEnsemble2": 60, "pizzicatoStrings": 40, "tremoloStrings": 30, "choirAahs": 30 },
+        "bass": { "contrabass": 100, "tuba": 40, "bassoon": 40 },
+        "pad": { "stringEnsemble1": 100, "stringEnsemble2": 80, "choirAahs": 60, "tremoloStrings": 40, "voiceOohs": 30 },
+        "counterMelody": { "frenchHorn": 100, "cello": 90, "viola": 70, "trombone": 40, "oboe": 40, "clarinet": 40, "englishHorn": 30 },
+        "riff": { "brassSection": 100, "orchestraHit": [0, 10, 30] },
+        "solo": { "violin": 100, "flute": 60, "trumpet": 40 }
+      },
+      "kit": { "orchestra": 100 },
+      "drumSetup": { "kitAndPercussion": 100 },
+      "drumPieces": { "tom": 100, "cymbal": 80, "acousticSnare": 50, "kick": [0, 20, 40], "triangle": 40 },
+      "drumJob": { "marks": [80, 80, 50], "groove": [20, 20, 50] },
+      "marks": { "often": 55 },
+      "doubling": { "octaves": [20, 30, 40], "harmony": [20, 30, 30] },
+      "dynamics": { "energy": 50, "contrast": 90, "lift": 100 },
+      "texture": { "build": 100, "steady": 60, "thin": 40, "alone": [20, 30, 40] },
+      "effects": { "vibrato": [40, 60, 80], "swell": [30, 50, 70], "bends": [0, 0, 10] },
+      "strongEffect": { "none": 100 },
+      "space": { "melody": 75, "chords": 75, "pad": 80, "counterMelody": 75, "bass": 60, "drum": 75 },
+      "levels": { "drum": 50, "pad": 55 },
+      "intro": { "entries": 100, "cold": 40 },
+      "ending": { "ringOut": 100, "stop": 40, "fade": 30 },
+      "formChances": { "forms": [60, 40, 10] },
+      "solos": { "sections": [0, 5, 15] },
+      "fills": { "amount": 30 },
+      "melodyRange": { "wide": 75 },
+      "hook": { "choruses": [40, 40, 30] }
     }
   }
 ]
