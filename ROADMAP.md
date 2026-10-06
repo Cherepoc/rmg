@@ -162,6 +162,9 @@ each from the trace; the seeds named here are ones already found.
   Trap 21% to 18%, Hip-hop 17% to 13%; Trap's lead bright 78% to 56%, Dnb's 38% to 8%; Djent major 12% to 3%
   (`MoodReportTest`). Still happy? The major chords are a minor key's own ♭III, ♭VI and ♭VII, which no preset choice
   reaches: a progression's degrees leaned, if so.
+- **Dub's echo:** an echo on the rhythm part's chords as well as a lead's, and the snare's backbeat with it at its
+  delay: Reggae's skank and snare echo in 23% of its songs (`DubEchoTest`). The echoes' repeats as notes, three, each
+  quieter: dub's long darkening tail wants the GS delay (*Parked*), should these sound thin.
 - **The insertion effect:** a wah on a guitar or a clavinet comping, or a phaser on held chords, one part a song through
   the GS player's one effect: Funk wahs 34% of its songs, mostly the rhythm part, Disco phases 20% and wahs 14%,
   Synthwave phases 20%, the wild songs now and then (`InsertionTest.Report`). The effects' own settings, the player's
@@ -215,7 +218,6 @@ Each item with its plan, and what it waits for.
 
 ### The heavy band, the mood and the effects (in progress, in order)
 
-- **Dub's echo** on the chords, the rhythm part and the snare, as notes.
 - **Features of one genre in others,** as preset data: the China cymbal in Metal and Nu metal, the open hi-hat in
   Techno, Electronic, Trance and Funk, a drop in Djent, section changes in Djent, Metal and Orchestral, polymeter in
   Metal and Fusion, twelve bars in Rock, Country and Jazz, stop time in Punk, Ska, Country and Soul, solo answers in

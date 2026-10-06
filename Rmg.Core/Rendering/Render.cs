@@ -146,6 +146,9 @@ public static class Render
             else
             {
                 percussionTrackNotes.Add(renderedNotes);
+                // a drum's echo, a dub's snare's, among the drums' notes
+                if (trackNotes.Any(x => x.Value.State.GetStateValue(CompositionStateKinds.Echo) > 0))
+                    percussionTrackNotes.Add(ExpressionRender.Render(trackNotes, swing, common.GetStateTimeline(StateKinds.Tempo), 0, GetMidiVelocity).Echoes.Where(x => x.Position < song.Duration));
                 // the drums' reverb and chorus, as their first note has them
                 if (percussionSends.IsEmpty && trackNotes.Count > 0)
                     percussionSends = ExpressionRender.Render(EventTimeline.Create(trackNotes.Duration, [trackNotes[0]]), swing, common.GetStateTimeline(StateKinds.Tempo), 0, GetMidiVelocity).Controllers;

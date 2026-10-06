@@ -80,12 +80,13 @@ internal static class Expression
     private static bool Choruses(int program) => InstrumentTraits.Has(program, InstrumentTrait.Choruses);
 
     /// <summary>
-    ///     Whether a strong effect suits a part, which plays it the likelier: an echo a lead's, a tremolo a guitar's, an
+    ///     Whether a strong effect suits a part, which plays it the likelier: an echo a lead's or a comping part's, a dub's
+    ///     skank's, a tremolo a guitar's, an
     ///     electric piano's or an organ's, a sweep a pad's, a synth's or an organ's.
     /// </summary>
     private static bool Suits(StrongEffect effect, TrackRole role, int program) => effect switch
     {
-        StrongEffect.Echo => role == TrackRole.Melody,
+        StrongEffect.Echo => role is TrackRole.Melody or TrackRole.Rhythm,
         StrongEffect.Tremolo => InstrumentTraits.Has(program, InstrumentTrait.Tremolo),
         StrongEffect.Sweep => role == TrackRole.Pad || InstrumentTraits.Has(program, InstrumentTrait.Sweeps),
         StrongEffect.Pump => role is TrackRole.Pad or TrackRole.Chords or TrackRole.Bass or TrackRole.Rhythm,
@@ -99,6 +100,9 @@ internal static class Expression
 
     /// <summary>Whether a strong effect is played only by a part it suits: a filter's, a synth's, and a gate's, held chords'.</summary>
     private static bool OnlySuited(StrongEffect effect) => IsFilter(effect) || effect == StrongEffect.Gate;
+
+    /// <summary>Whether a part may echo: one that plays lines, or the rhythm part, whose stabs a dub echoes.</summary>
+    private static bool EchoesFrom(TrackRole role) => IsLineRole(role) || role == TrackRole.Rhythm;
 
     /// <summary>Whether a part plays lines, single notes one after another, rather than chords or drums.</summary>
     private static bool IsLineRole(TrackRole role) => !role.PlaysChords() && role is not (TrackRole.Pad or TrackRole.Drum);
@@ -366,11 +370,15 @@ internal static class Expression
 
         // and the one part that plays the strong effect, the likelier one it suits, if any part may
         var mayCarry = notes
-            .Where(x => x.Value.Count > 0 && definitions[x.Key] is PitchInstrumentTrack && (strong != StrongEffect.Echo || IsLineRole(definitions[x.Key].Role))
+            .Where(x => x.Value.Count > 0 && definitions[x.Key] is PitchInstrumentTrack && (strong != StrongEffect.Echo || EchoesFrom(definitions[x.Key].Role))
                         && (!OnlySuited(strong) || Suits(strong, definitions[x.Key].Role, ((PitchInstrumentTrack)definitions[x.Key]).InstrumentCode)))
             .Select(x => new Weighted<int>(Suits(strong, definitions[x.Key].Role, ((PitchInstrumentTrack)definitions[x.Key]).InstrumentCode) ? SuitedStrongWeight : 1, x.Key))
             .ToImmutableArray();
         var carrier = strong != StrongEffect.None && !mayCarry.IsEmpty ? songStream.Pick(mayCarry) : -1;
+
+        // the snares, which echo with a comping part's echo, at its delay, the drums' tracks coming after the pitched parts'
+        var backbeat = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
+        double? carrierDelay = null;
 
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
@@ -402,6 +410,8 @@ internal static class Expression
             var swells = part.TestProbability((role == TrackRole.Pad ? PadSwellChance : SwellChance).At(songSound)) & songSwell;
             var bendsHere = part.TestProbability(PartBendChance.At(songSound)) & songBends;
             var carries = track == carrier;
+            // and a backbeat drum, a snare's, where the rhythm part echoes, as a dub echoes its skank and its snare
+            var echoesBackbeat = strong == StrongEffect.Echo && carrier >= 0 && definitions[carrier].Role == TrackRole.Rhythm && backbeat.Contains(track);
             var tremoloDepth = 30 + part.GenerateInt(0, 40);
             var sweepDepth = 40 + part.GenerateInt(0, 60);
             var tremolo = carries && strong == StrongEffect.Tremolo ? tremoloDepth : 0;
@@ -414,6 +424,8 @@ internal static class Expression
             vibrates &= !echoes;
             bendsHere &= !echoes;
             var delay = EchoDelays[part.GenerateInt(0, EchoDelays.Length)];
+            if (carries)
+                carrierDelay = delay;
             var room = Reverb(role, genre);
             var reverb = (int)Math.Round(room + ReverbSpread.At(songSound) * (part.GenerateDouble() * 127 - room));
             var choruses = part.TestProbability((ChorusesClassically(program) ? ClassicChorusChance : ChorusChance).At(songSound)) & songChorus;
@@ -515,8 +527,8 @@ internal static class Expression
                         state = state.With(CompositionStateKinds.Tremolo, tremolo).With(CompositionStateKinds.AutoPan, sweeps);
                     if (pumps)
                         state = state.With(CompositionStateKinds.Pump, PumpDepth);
-                    if (echoes && isLine)
-                        state = state.With(CompositionStateKinds.Echo, (int)Math.Round(delay * 4));
+                    if (echoes && (isLine || role == TrackRole.Rhythm) || echoesBackbeat && Math.Abs(note.Position - Math.Round(note.Position)) < 1e-9)
+                        state = state.With(CompositionStateKinds.Echo, (int)Math.Round((echoesBackbeat ? carrierDelay ?? throw new InvalidOperationException("A snare echoes before its part does.") : delay) * 4));
                     if (gate != 0)
                         state = state.With(CompositionStateKinds.Gate, gate);
                     if (filters)
