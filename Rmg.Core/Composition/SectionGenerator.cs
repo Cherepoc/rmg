@@ -86,6 +86,12 @@ internal sealed class SectionGenerator
     /// <summary>The chance a section plays the song's first section's harmony, a loop, a genre's that the songs never play.</summary>
     public static Probabilities.ByConvention Loop { get; } = new(0, 0, 0);
 
+    /// <summary>
+    ///     The chance a section vamps on its home chord, every chord of its pattern the home, the cadence's raise let go of,
+    ///     as a funk band or a techno track sits on one chord; a genre's, which the songs never play (<see cref="GenreChoices.Vamp" />).
+    /// </summary>
+    public static Probabilities.ByConvention Vamp { get; } = new(0, 0, 0);
+
     // the song's first section's harmony, which a section of a loop plays, and its meter
     private (SectionHarmony Harmony, Meter Meter)? _firstHarmony;
 
@@ -256,6 +262,10 @@ internal sealed class SectionGenerator
         (harmonicRhythm, progression, chordScales) = (passingRhythm, passingProgression, passingScales);
         // a wild section planing now and then, every chord the home's shape moved, by the progression facet and a genre's,
         // from a sequence of its own; but the song's last, which leads home to its tonic
+        // a section vamping on its home, a genre's, from a sequence of its own, as planing does without its moves, the
+        // cadence's raise with it, the progression's other draws made all the same
+        if (Stream(sectionId, SectionStream.Vamp).TestProbability(Vamp.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Vamp, "sections"))) && !plan.HasTonicHome)
+            (progression, chordScales, shifts, raisable, raisedStep) = ([..progression.Select(_ => 0)], [..chordScales.Select(_ => ChordScale.Section)], [..shifts.Select(_ => 0)], null, null);
         var planingContext = Stream(sectionId, SectionStream.Planing);
         var planes = planingContext.TestProbability(Planing.Chance.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Planing, "sections"))) && !plan.HasTonicHome;
         var planed = Planing.Draw(planingContext, progression.Length);
@@ -1063,5 +1073,6 @@ internal enum SectionStream
     PassingChords = 38,
     Planing = 39,
     OctaveBass = 40,
-    ChordOwnScales = 41
+    ChordOwnScales = 41,
+    Vamp = 42
 }

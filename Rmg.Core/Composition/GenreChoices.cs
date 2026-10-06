@@ -123,6 +123,9 @@ public static class GenreChoices
             _ => x.Ending.ToString()
         }, x.Weight)));
 
+    /// <summary>The chance a section sits on its home chord, every chord of its pattern the home, a vamp (<see cref="SectionGenerator.Vamp" />); the songs never.</summary>
+    public static GenreChoice Vamp { get; } = Chances("vamp", "Vamp", [("sections", "Sections on one chord", SectionGenerator.Vamp)]);
+
     /// <summary>The chance a section's riff plays in power chords, a perfect fifth over every note, as rock's riffs are (<see cref="SectionGenerator.PowerChordChance" />).</summary>
     public static GenreChoice Riff { get; } = Chances("riff", "Riff",
     [
@@ -581,7 +584,7 @@ public static class GenreChoices
     public static ImmutableArray<GenreChoice> All { get; } =
     [
         Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Dynamics, Phrases,
-        SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval,
+        SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval, Vamp,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

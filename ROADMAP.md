@@ -320,8 +320,8 @@ Each item with its plan, and what it waits for.
 A review of the engine and the presets, in steps by priority, each built, measured and committed in turn and taken out
 of here once it is; the genres it adds are described under *More genres*.
 
-**P3, the genres, in the order they are ready:** (18) those waiting on items below: Fusion, Funk's vamp, Soul and Gospel, Country, Bossa nova; (19) the dynamics shaped,
-a crescendo into a lift, and then Orchestral.
+**P3, the genres, in the order they are ready:** (19) the dynamics shaped, a crescendo into a lift, and then
+Orchestral.
 
 **P4, after:** `SongGenerator.GenerateSong` as `SongDecisions.Draw`; the drums of `SectionGenerator` a class of their
 own; `GenreChoices`' labels beside their tables; ornaments, a grace note, a turn and a trill, should Medieval and Folk
@@ -345,15 +345,12 @@ left:
   4. The default (the songs' own, as now, or any genre) decided by the ratings by genre once a version has enough, and
      not before the retuned presets, Pop and Metal most, are heard.
   Not weighed by the presets nor leaned by conventionality: each preset spans the plainest songs to the wildest.
-- **More genres** (P3, in the order of *The review of October 2026*): Soul or Gospel, country, bossa nova,
-  orchestral; chiptune, once a square wave may play the chords (*Instruments outside a role's pool*); and one at the
-  wild end of its idiom, whose plain end is what the songs' wild end plays:
-  - **Fusion:** electric piano, synth leads, soprano sax, a fretless bass that sings, Lydian, Dorian and melodic
-    minor, ninths to thirteenths, quartal and So What shapes, a chord's own scale, planing, a section's own meter and
-    key, long solos, straight 16ths or Latin grooves, legato. Wants: roots off the scale (the progressions move by a
-    7-note scale's steps, so chromatic and constant-structure motion comes only of planing and a chord's own scale);
-    a lead's wide-interval legato lines (*A melody's leaping by genre*); its bass up an octave (`Registers`) and its
-    reharmonisations at the plain end are there.
+- **More genres** (P3, in the order of *The review of October 2026*): orchestral; chiptune, once a square wave may
+  play the chords (*Instruments outside a role's pool*). What the genres made in October 2026 still want: Fusion's
+  roots off the scale (the progressions move by a 7-note scale's steps, chromatic and constant-structure motion
+  coming only of planing and a chord's own scale) and a lead's wide-interval legato lines (*A melody's leaping by
+  genre*); Soul's tritone substitute and passing diminished (*Harmony for Jazz and Soul*); Country's bass on the root
+  and the fifth within the bar and Bossa nova's two-bar clave (below and *Long cycles*).
 - **The hook and the phrase scheme as one** (P3): a hooked section a scheme sung literally, should a trial keep the
   report's repeats (50% of a hooked section's notes at their first bar's places); otherwise kept apart, with the reason.
 - **Harmony for Jazz and Soul** (P3): the tritone substitute, the passing diminished and a ii–V elsewhere (*Approach
@@ -384,8 +381,6 @@ left:
     the mean move by a tenth of a semitone and the leaps not at all, a melody's leaps coming of a phrase starting
     afresh in another register, its echoes and its landings.
   - The bass's root and fifth figure within the bar, and Jazz's walking quarters, as its rhythm settings have them.
-  - A vamp of one chord over four bars, a progression of its own kind, which the progressions' two chords a phrase
-    (home and cadence) do not allow, should the loop's report ask for it.
   - A part resting by the section's role (a dub's breakdown), with *A genre's sections differing*.
   - A genre's lean of the phrases' place rules, should it press them, and the songs' own sections of eight bars now
     and then.
@@ -399,7 +394,8 @@ left:
 - **A genre's sections differing** (P3, perhaps never): a value given a section role, such as a solo swung harder
   or a chorus louder, the genre's for the song otherwise; the generator asking the genre with the section's role,
   every choice's tile a role's override beside it. The dynamics' contrast and the phrases' AAB give most of it.
-- **Listening to the new presets** (P1): Disco, Trap, Trance, drum and bass, Ska and Punk, of the engine as it was;
+- **Listening to the new presets** (P1): Fusion, Soul, Country and Bossa nova; Funk's, Techno's, House's and Djent's
+  vamps, 30%, 52%, 17% and 40% of sections on one chord; Disco, Trap, Trance, drum and bass, Ska and Punk;
   Medieval, Dungeon synth, Djent and Nu metal against their sentences
   (`GenreDevicesReportTest`, `GenreIdiomsReportTest`): Djent's sections 68% polymetric, its snare on 3; Nu metal's
   guitar driven in its loud sections in 97% of songs, swung lightly in 16ths in 44%, its toms 25 hits a minute, many;
