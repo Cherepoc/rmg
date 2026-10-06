@@ -14,9 +14,10 @@ public sealed class InstrumentRolesTest
     {
         foreach (var role in Roles)
         {
-            // 112 and up are percussive instruments and sound effects
-            await Assert.That(role.Instruments.All(x => x.Program is >= 0 and < 112)).IsTrue().Because(role.Name);
-            await Assert.That(role.Instruments.All(x => x.Weight > 0)).IsTrue().Because(role.Name);
+            // 112 and up are percussive instruments and sound effects, but the steel drums, which play a tune
+            await Assert.That(role.Instruments.All(x => x.Program is >= 0 and < 112 or 114)).IsTrue().Because(role.Name);
+            // every instrument played somewhere, the wildest songs at least
+            await Assert.That(role.Instruments.All(x => x.Weight.Wild > 0)).IsTrue().Because(role.Name);
             await Assert.That(role.Instruments.Select(x => x.Program).Distinct().Count()).IsEqualTo(role.Instruments.Length).Because(role.Name);
         }
     }
@@ -36,13 +37,13 @@ public sealed class InstrumentRolesTest
         const int drawCount = 50_000;
         var role = Rmg.Core.Composition.InstrumentRoles.Bass;
         var context = new GenerationContext(1);
-        var counts = Enumerable.Range(0, drawCount).Select(_ => role.Pick(context, null, 33).Program).CountBy(x => x).ToDictionary();
-        var weightSum = role.Instruments.Where(x => x.Program != 33).Sum(x => x.Weight);
+        var counts = Enumerable.Range(0, drawCount).Select(_ => role.Pick(context, 0.5, null, 33).Program).CountBy(x => x).ToDictionary();
+        var weightSum = role.Instruments.Where(x => x.Program != 33).Sum(x => x.Weight.Tuned);
 
         await Assert.That(counts.ContainsKey(33)).IsFalse();
         foreach (var instrument in role.Instruments.Where(x => x.Program != 33))
             await Assert.That(counts.GetValueOrDefault(instrument.Program) / (double)drawCount)
-                .IsEqualTo(instrument.Weight / weightSum)
+                .IsEqualTo(instrument.Weight.Tuned / weightSum)
                 .Within(0.01)
                 .Because(instrument.Name);
     }
@@ -52,7 +53,7 @@ public sealed class InstrumentRolesTest
     {
         var role = new InstrumentRole("Solo", [new RoleInstrument(0, "Piano", 1)]);
 
-        await Assert.That(() => role.Pick(new GenerationContext(0), null, 0)).Throws<InvalidOperationException>();
+        await Assert.That(() => role.Pick(new GenerationContext(0), 0.5, null, 0)).Throws<InvalidOperationException>();
     }
 
     [Test]

@@ -146,14 +146,14 @@ internal static class InstrumentsOverTime
                 var switches = context.TestProbability(SwitchChance.At(sound[index], genre.Chance(GenreChoices.InstrumentSwitches, "sections")));
                 var role = RoleOf(pitched.Role);
                 var pool = PoolOf(pitched.Role == TrackRole.RiffTwin ? TrackRole.Riff : pitched.Role, sound[index], genre);
-                double Weight(RoleInstrument instrument) => pool?.Invoke(instrument) ?? instrument.Weight;
+                double Weight(RoleInstrument instrument) => pool?.Invoke(instrument) ?? instrument.Weight.At(sound[index]);
                 // within the family where it keeps to it and the role has another of it, or to any other of the role's
                 var keeps = families(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track).TestProbability(FamilyChance.At(sound[index]));
                 var family = FamilyOf(pitched.InstrumentCode);
                 var kin = role?.Instruments.Where(x => x.Program != pitched.InstrumentCode && family.Contains(x.Program) && Weight(x) > 0).ToArray() ?? [];
                 var switched = role is null ? pitched.InstrumentCode
                     : keeps && kin.Length > 0 ? context.Pick([..kin.Select(x => new Weighted<RoleInstrument>(Weight(x), x))]).Program
-                    : role.Pick(context, pool, pitched.InstrumentCode).Program;
+                    : role.Pick(context, sound[index], pool, pitched.InstrumentCode).Program;
                 var program = switches ? switched : pitched.InstrumentCode;
                 var mode = context.Pick(ByConvention.Weigh(Modes, sound[index]));
                 var variants = Variants.GetValueOrDefault(program, []);

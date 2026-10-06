@@ -5,7 +5,11 @@ using Rmg.Core.Probabilities;
 
 namespace Rmg.Core.Composition;
 
-/// <summary>A General MIDI instrument a role can be played with, and how likely it is among the role's others.</summary>
+/// <summary>
+///     A General MIDI instrument a role can be played with, and how likely it is among the role's others, in the plainest
+///     songs, the middling and the wildest, by their sound facet: a common instrument as likely in all of them, one with
+///     more character never in the plainest.
+/// </summary>
 /// <param name="Program">The General MIDI program, from 0.</param>
 /// <param name="Leading">
 ///     How the instrument moves from chord to chord. For a chord instrument it is how smoothly its chords move (see
@@ -15,7 +19,13 @@ namespace Rmg.Core.Composition;
 ///     the roots. For a melody instrument it is how stepwise its melody is (see <see cref="MelodyLayers" />): winds
 ///     and strings sing by step, mallets leap.
 /// </param>
-public sealed record RoleInstrument(int Program, string Name, double Weight, double Leading = VoiceLeadingLayers.Piano);
+public sealed record RoleInstrument(int Program, string Name, ByConvention Weight, double Leading = VoiceLeadingLayers.Piano)
+{
+    /// <summary>An instrument as likely in every song.</summary>
+    public RoleInstrument(int program, string name, double weight, double leading = VoiceLeadingLayers.Piano) : this(program, name, new ByConvention(weight, weight, weight), leading)
+    {
+    }
+}
 
 /// <summary>
 ///     What a pitched track does in the song, and the instruments that suit it: ones that sustain chords, ones that
@@ -38,14 +48,15 @@ public sealed class InstrumentRole
     public ImmutableArray<RoleInstrument> Instruments { get; }
 
     /// <summary>
-    ///     An instrument of the role, the heavier ones being more likely, by their weights or a pool's, such as a genre's,
-    ///     other than the ones given, which a pool that keeps nothing else lets play.
+    ///     An instrument of the role, the heavier ones being more likely, by their weights at the song's sound facet or a
+    ///     pool's, such as a genre's, other than the ones given, which a pool that keeps nothing else lets play.
     /// </summary>
+    /// <param name="sound">The sound facet, which the role's own weights lean by.</param>
     /// <param name="pool">An instrument's weight in the pool, in place of its own, from 0, out of it, to 1; none for the role's own.</param>
-    public RoleInstrument Pick(IGenerationContext context, Func<RoleInstrument, double>? pool, params IEnumerable<int> excludedPrograms)
+    public RoleInstrument Pick(IGenerationContext context, double sound, Func<RoleInstrument, double>? pool, params IEnumerable<int> excludedPrograms)
     {
         var excluded = excludedPrograms.ToHashSet();
-        var kept = Instruments.Select(x => (Instrument: x, Weight: pool?.Invoke(x) ?? x.Weight)).Where(x => x.Weight > 0).ToArray();
+        var kept = Instruments.Select(x => (Instrument: x, Weight: pool?.Invoke(x) ?? x.Weight.At(sound))).Where(x => x.Weight > 0).ToArray();
         var candidates = kept.Where(x => !excluded.Contains(x.Instrument.Program)).ToArray();
         if (candidates.Length == 0 && pool is not null)
             candidates = kept;

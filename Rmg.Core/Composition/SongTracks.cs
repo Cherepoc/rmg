@@ -110,9 +110,9 @@ internal sealed class SongTracks
         Func<RoleInstrument, double>? Pool(TrackRole role) => InstrumentsOverTime.PoolOf(role, sound, genre);
 
         // the melody plays something other than the chords, so the two can be told apart
-        var chordsInstrument = InstrumentRoles.Chords.Pick(context, Pool(TrackRole.Chords));
-        var melodyInstrument = InstrumentRoles.Melody.Pick(context, Pool(TrackRole.Melody), chordsInstrument.Program);
-        var bassInstrument = InstrumentRoles.Bass.Pick(context, Pool(TrackRole.Bass));
+        var chordsInstrument = InstrumentRoles.Chords.Pick(context, sound, Pool(TrackRole.Chords));
+        var melodyInstrument = InstrumentRoles.Melody.Pick(context, sound, Pool(TrackRole.Melody), chordsInstrument.Program);
+        var bassInstrument = InstrumentRoles.Bass.Pick(context, sound, Pool(TrackRole.Bass));
 
         // how much the bass leads into the chords: its instrument sets where the song starts, a section moves it
         var bassLeading = bassInstrument.Leading + BassLeadingLayers.CreateGenerator(BassLeadingLayers.Song)(context);
@@ -136,16 +136,16 @@ internal sealed class SongTracks
         StateTrace.Record(TracePoints.Panning, ChordsTrack, 0, 0, StateMap.Default, 0, string.Join(", ", pans.Select(x => $"{x.Key} {x.Value:F2}")), pans);
 
         // the pad holds chords in a sound of its own, apart from the chords', which it plays under
-        var padInstrument = InstrumentRoles.Pad.Pick(padContext, Pool(TrackRole.Pad), chordsInstrument.Program);
+        var padInstrument = InstrumentRoles.Pad.Pick(padContext, sound, Pool(TrackRole.Pad), chordsInstrument.Program);
         // and the counter-melody a line in a sound of its own, apart from the melody's and the chords'
-        var counterInstrument = InstrumentRoles.CounterMelody.Pick(counterContext, Pool(TrackRole.CounterMelody), melodyInstrument.Program, chordsInstrument.Program);
+        var counterInstrument = InstrumentRoles.CounterMelody.Pick(counterContext, sound, Pool(TrackRole.CounterMelody), melodyInstrument.Program, chordsInstrument.Program);
         // and the riff one of its own, apart from the melody's and the chords'
-        var riffInstrument = InstrumentRoles.Riff.Pick(riffContext, Pool(TrackRole.Riff), melodyInstrument.Program, chordsInstrument.Program);
+        var riffInstrument = InstrumentRoles.Riff.Pick(riffContext, sound, Pool(TrackRole.Riff), melodyInstrument.Program, chordsInstrument.Program);
         // and the rhythm part comps in a sound of its own, apart from the chords' and the riff's, in a register of its own
-        var rhythmInstrument = InstrumentRoles.Rhythm.Pick(rhythmContext, Pool(TrackRole.Rhythm), chordsInstrument.Program, riffInstrument.Program);
+        var rhythmInstrument = InstrumentRoles.Rhythm.Pick(rhythmContext, sound, Pool(TrackRole.Rhythm), chordsInstrument.Program, riffInstrument.Program);
 
         // and the solo part a lead of its own, apart from the melody's, which it takes over from
-        var soloInstrument = InstrumentRoles.Solo.Pick(soloContext, Pool(TrackRole.Solo), melodyInstrument.Program);
+        var soloInstrument = InstrumentRoles.Solo.Pick(soloContext, sound, Pool(TrackRole.Solo), melodyInstrument.Program);
 
         // the riff's state, which its twin shares, so that the two play its notes alike
         var riffLayer = LayerStates.CreateTrackLayer(
