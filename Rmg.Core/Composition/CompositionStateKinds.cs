@@ -82,6 +82,13 @@ internal static class CompositionStateKinds
     // its attack softer, for a plugin a legato keyswitch (Render)
     public static StateKind<int> Legato { get; } = StateKinds.CreateAdditive<int>(Prefix + "Legato", StateScope.Render);
 
+    // a note's ornament, a grace note's, a turn's or a trill's quick notes before it, each in semitones from it, 0 the note
+    // itself, and how long each lasts in beats, the rendering playing them from the note's start and the note after them
+    // (Ornaments.Apply); none for none
+    public static StateKind<ImmutableArray<int>> Ornament { get; } = StateKinds.CreateCollection<int>(Prefix + "Ornament", StateScope.Render);
+
+    public static StateKind<double> OrnamentStep { get; } = StateKinds.CreateAdditive<double>(Prefix + "OrnamentStep", StateScope.Render);
+
     // how many semitones a chord's root voice falls inside it, a chromatic line's, 1 to 3 a quarter of the chord, its scale
     // altered to hold it where it has it not; 0 for none (InnerLines.Apply)
     public static StateKind<int> InnerLine { get; } = StateKinds.CreateAdditive<int>(Prefix + "InnerLine", StateScope.Render);

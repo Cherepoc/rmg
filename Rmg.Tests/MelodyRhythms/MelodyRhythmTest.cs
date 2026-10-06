@@ -88,7 +88,7 @@ public sealed class MelodyRhythmTest
     {
         var (song, origin) = TestCorpus.Get(seed);
         var program = ((PitchInstrumentTrack)song.TrackDefinitions[MelodyTrackNumber]).InstrumentCode;
-        return (Render.RenderSong(song)
+        return (Render.RenderSong(TestCorpus.Unornamented(song))
             .Tracks.First(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == program)
             .NoteTimeline.GroupBy(x => x.Position).Select(x => x.First()).ToArray(), origin);
     }

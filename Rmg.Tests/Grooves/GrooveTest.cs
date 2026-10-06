@@ -37,7 +37,11 @@ public sealed class GrooveTest
             var drawn = song.Trace.Single(x => x.Point == TracePoints.Swing).Value;
             await Assert.That(drawn).IsEqualTo(swing);
 
-            var generated = song.Song.Notes!.Values.SelectMany(x => x).Select(x => Math.Round(swing.Apply(x.Position), 6)).ToHashSet();
+            // a note's own place, and its ornament's every step
+            var generated = song.Song.Notes!.Values.SelectMany(x => x).SelectMany(x =>
+                    Enumerable.Range(0, x.Value.State.GetStateValue(CompositionStateKinds.Ornament) is { IsDefault: false } ornament ? ornament.Length + 1 : 1)
+                        .Select(i => Math.Round(swing.Apply(x.Position + i * x.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep)), 6)))
+                .ToHashSet();
             var rendered = song.Rendered.Tracks.SelectMany(x => x.NoteTimeline).Select(x => Math.Round(x.Position, 6));
             await Assert.That(rendered.All(generated.Contains)).IsTrue();
         }

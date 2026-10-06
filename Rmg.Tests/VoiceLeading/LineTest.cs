@@ -227,7 +227,7 @@ public sealed class LineTest
         for (var seed = 0; seed < 64; seed++)
         {
             var song = TestCorpus.Get(seed).Song;
-            var rendered = Render.RenderSong(song);
+            var rendered = Render.RenderSong(TestCorpus.Unornamented(song));
             RenderedTrack TrackOf(int number) =>
                 rendered.Tracks.First(x => !x.IsPercussionInstrument && x.PitchInstrumentCode == ((PitchInstrumentTrack)song.TrackDefinitions[number]).InstrumentCode);
             // a note in octaves once, by its own pitch, which comes first, and none of a solo, whose line is its own; the

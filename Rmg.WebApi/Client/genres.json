@@ -4,6 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
+      "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "louderForms": { "guitars": [20, 50, 60] },
       "pins": { "ground": [40, 40, 20], "backbeat": [80, 80, 50] },
       "push": { "sections": [5, 15, 20] },
@@ -124,6 +125,7 @@
     "name": "House",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, a pumping bass and pads, piano and electric piano chords now and then, a TR-808 or electronic kit, straight, 117 to 130, minor, sus and add9 chords, a drop into the chorus.",
     "choices": {
+      "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "vamp": { "sections": [10, 20, 20] },
       "feelValues": { "swing": 30, "sixteenths": 100 },
       "phraseScheme": { "aaaa": 100, "aaab": [25, 25, 40], "aaba": [15, 15, 30], "abab": [10, 10, 30] },
@@ -195,6 +197,7 @@
     "name": "Techno",
     "description": "A kick on every beat, driving and dark, the hi-hat on the offbeats, one figure looping for minutes over a chord or two, a square or sawtooth riff, little melody, a minor or Phrygian key, a TR-808 or electronic kit, 125 to 140, the pads and bass pumping.",
     "choices": {
+      "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "vamp": { "sections": [40, 50, 40] },
       "phraseScheme": { "aaaa": 100, "aaab": [25, 25, 40], "aaba": [15, 15, 30], "abab": [10, 10, 30] },
       "glide": { "bass": [20, 30, 50] },
@@ -266,6 +269,7 @@
     "name": "Synthwave",
     "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
     "choices": {
+      "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "rootMotion": { "thirdDown": 70, "stepUp": 70, "fourthDown": 60 },
       "arpeggio": { "none": 100, "up": [80, 80, 80], "upDown": [40, 40, 50], "pairs": [0, 10, 30], "upTwoOctaves": [0, 5, 30] },
       "pins": { "ground": [80, 80, 50], "backbeat": [100, 100, 80] },
@@ -328,6 +332,7 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano and pads, minor and Dorian.",
     "choices": {
+      "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "vamp": { "sections": [10, 20, 20] },
       "phraseScheme": { "aaaa": 100, "aaab": [25, 25, 40], "aaba": [15, 15, 30], "abab": [10, 10, 30] },
       "voice": { "verses": [60, 70, 70] },
@@ -564,6 +569,7 @@
     "name": "Folk",
     "description": "Steel and nylon guitars strummed, a fiddle, a banjo, a harmonica, an acoustic bass, plain triads, major and Mixolydian, 3/4 and 6/8 as likely as not, a tambourine and a shaker on a room kit.",
     "choices": {
+      "ornaments": { "graces": [0, 50, 100], "turns": [0, 20, 60], "trills": [0, 25, 70] },
       "rootMotion": { "fifthDown": 70, "stepUp": 65, "fourthDown": 60 },
       "tempo": { "from": [79, 79, 65], "to": [130, 130, 150] },
       "meter": { "4/4": [100, 100, 70], "3/4": [60, 65, 60], "6/8": [60, 65, 60], "5/4": [0, 0, 20], "7/8": [0, 0, 15] },
@@ -759,6 +765,7 @@
     "name": "Metal",
     "description": "Distorted guitars chugging a riff in power chords, a double kick in 16ths, the snare on 2 and 4 or in half time, breaks and stops, guitar solos, natural minor, Phrygian and harmonic minor, fast.",
     "choices": {
+      "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "louderForms": { "guitars": [30, 50, 60] },
       "rootMotion": { "thirdDown": 70, "stepUp": 70, "stepDown": 60 },
       "tempo": { "from": [120, 120, 90], "to": [180, 180, 220] },
@@ -808,6 +815,7 @@
     "name": "Medieval",
     "description": "Calm and modal: recorders, flutes and a fiddle over a lute and a harp, a choir and a drone, open fifths, a second voice in fourths and fifths, 3/4 and 6/8, slow, a tambourine, a triangle and a frame drum marking the form.",
     "choices": {
+      "ornaments": { "graces": [0, 60, 100], "turns": [0, 30, 80], "trills": [0, 40, 90] },
       "tempo": { "from": [60, 60, 60], "to": [100, 100, 120] },
       "meter": { "3/4": 100, "6/8": 100, "4/4": [60, 60, 50], "9/8": [0, 10, 30], "5/4": [0, 0, 15] },
       "feelChances": {},
@@ -862,6 +870,7 @@
     "name": "Dungeon synth",
     "description": "Dark and slow: a harpsichord's ostinato under a celesta or a horn, synth strings, choirs and brass, minor and harmonic minor triads, drones and a deep reverb, a timpani and a snare's roll marking the form.",
     "choices": {
+      "ornaments": { "graces": [0, 20, 50], "turns": [0, 5, 20], "trills": [0, 15, 40] },
       "tempo": { "from": [60, 60, 60], "to": [90, 90, 110] },
       "meter": { "4/4": 100, "3/4": 60, "6/8": 40 },
       "feelChances": {},
@@ -908,6 +917,7 @@
     "name": "Djent",
     "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, a clean lead floating over.",
     "choices": {
+      "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "arpeggio": { "none": 100, "up": [10, 30, 40], "upTwoOctaves": [10, 20, 40], "upDown": [0, 10, 30] },
       "grooveHold": { "held": 90 },
       "pocket": { "laidBack": 10 },
@@ -975,6 +985,7 @@
     "name": "Nu metal",
     "description": "A low distorted riff of one note chugged in a syncopated hip-hop groove, a clicking slap bass, quiet clean verses with room for a voice and loud distorted choruses, squealing bends, natural minor and Phrygian.",
     "choices": {
+      "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "harmonyDevices": {},
       "planing": {},
       "instrumentSwitches": {},
@@ -1036,6 +1047,7 @@
     "name": "Disco",
     "description": "The kick four on the floor, the open hi-hat off the beat, a bass in octaves, strings and horns, a clean guitar scratching 16ths, electric piano sevenths and ninths, minor and Dorian, 110 to 130.",
     "choices": {
+      "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [110, 110, 100], "to": [130, 130, 140] },
       "meter": { "4/4": 100 },
       "feelChances": { "swing": [0, 5, 10] },
@@ -1088,6 +1100,7 @@
     "name": "Trap",
     "description": "A TR-808 in half time, the hi-hat in 16ths rolling into 32nds and triplets, a long gliding bass, dark bells and pads looping, minor and Phrygian, verses left to a voice.",
     "choices": {
+      "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [130, 130, 120], "to": [150, 150, 170] },
       "meter": { "4/4": 100 },
       "feelChances": { "doubleTime": [0, 0, 10] },
@@ -1141,6 +1154,7 @@
     "name": "Trance",
     "description": "The kick four on the floor, the hi-hat off the beat, sawtooth arpeggios and leads over pumping pads, a rolling bass, minor, 132 to 140, long sections building to a drop.",
     "choices": {
+      "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [132, 132, 125], "to": [140, 140, 150] },
       "meter": { "4/4": 100 },
       "feelChances": {},
@@ -1194,6 +1208,7 @@
     "name": "Drum and bass",
     "description": "Breakbeats at 165 to 178, a syncopated kick and the snare on 2 and 4, the hi-hat in 16ths, a deep synth bass, electric piano and pads, minor and Dorian, long sections and drops.",
     "choices": {
+      "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [165, 165, 160], "to": [178, 178, 180] },
       "meter": { "4/4": 100 },
       "feelChances": { "halfTime": [10, 15, 20] },
@@ -1295,6 +1310,7 @@
     "name": "Punk",
     "description": "Fast and short, distorted power chords strummed in 8ths, a picked bass driving 8ths, the drums straight and loud, major and Mixolydian, a count-in and a stop.",
     "choices": {
+      "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [160, 160, 150], "to": [200, 200, 230] },
       "meter": { "4/4": 100 },
       "feelChances": {},
@@ -1446,6 +1462,7 @@
     "name": "Country",
     "description": "A fiddle, a steel-string guitar strummed, a banjo and a honky-tonk piano, plain triads moving by fourths and fifths, the bass on the root and the fifth, the snare on 2 and 4, major and Mixolydian.",
     "choices": {
+      "ornaments": { "graces": [0, 40, 90], "turns": [0, 5, 30], "trills": [0, 5, 30] },
       "tempo": { "from": [90, 90, 80], "to": [140, 140, 160] },
       "meter": { "4/4": 100, "3/4": [30, 30, 30] },
       "feelChances": { "swing": [10, 20, 30] },
@@ -1549,6 +1566,7 @@
     "name": "Orchestral",
     "description": "Strings, horns and woodwinds over a contrabass, a harp's arpeggios, timpani and a cymbal marking the form, minor, major and harmonic minor, long crescendos into louder sections, parts entering one by one.",
     "choices": {
+      "ornaments": { "graces": [0, 30, 80], "turns": [0, 25, 70], "trills": [0, 30, 80] },
       "tempo": { "from": [60, 60, 60], "to": [130, 130, 160] },
       "meter": { "4/4": 100, "3/4": 60, "6/8": 50, "5/4": [0, 10, 20], "7/8": [0, 0, 15] },
       "feelChances": {},

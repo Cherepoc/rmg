@@ -57,6 +57,9 @@ internal static class TracePoints
     /// <summary>The drums marking the song's form, by their tracks, where its drums mark it (an <c>ImmutableArray</c> of <c>int</c>).</summary>
     public const string DrumMarks = "Drum marks";
 
+    /// <summary>The ornaments the song's lines play (an <c>ImmutableArray</c> of <see cref="Composition.Ornament" />).</summary>
+    public const string Ornaments = "Ornaments";
+
     /// <summary>Whether a section turns its pattern around, its last bar a V or a ii–V into its start (a <c>bool</c>).</summary>
     public const string Turnaround = "Turnaround";
 

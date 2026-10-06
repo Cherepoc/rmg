@@ -146,6 +146,10 @@ public static class GenreChoices
         ("pedal", "A pedal under a section", SectionPedals.Chance)
     ]);
 
+    /// <summary>The chances a song's lines play each ornament, a grace note, a turn and a trill (<see cref="Composition.Ornaments" />).</summary>
+    public static GenreChoice Ornaments { get; } = Chances("ornaments", "Ornaments",
+        [..Composition.Ornaments.All.Select(x => (Composition.Ornaments.NameOf(x.Ornament), Composition.Ornaments.LabelOf(x.Ornament), x.Chance))]);
+
     /// <summary>The chances a line's part slurs its steps, a piano's part rolls its held chords, and the chords are struck short (<see cref="Articulations.Apply" />).</summary>
     public static GenreChoice Articulation { get; } = Chances("articulation", "Articulation",
         [("legato", "Slurred steps", Articulations.LegatoChance), ("roll", "Rolled piano chords", Articulations.RollChance), ("stabs", "Chords as stabs", Articulations.StabChance)]);
@@ -492,7 +496,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Dynamics, Phrases,
         SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

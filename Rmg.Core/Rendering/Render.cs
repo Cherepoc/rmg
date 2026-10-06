@@ -22,6 +22,9 @@ public static class Render
     /// <summary>How loud a slurred note plays against a struck one.</summary>
     internal const double SlurredVelocity = 0.85;
 
+    /// <summary>How loud an ornament's quick note plays against its note.</summary>
+    internal const double OrnamentVelocity = 0.8;
+
     /// <summary>How loud an up stroke plays against a down stroke.</summary>
     internal const double UpStrokeVelocity = 0.9;
     internal const double VelocityScale = 1.03;
@@ -82,6 +85,17 @@ public static class Render
                     var shift = note.Value.State.GetStateValue(CompositionStateKinds.TimingOffset);
                     var strum = note.Value.State.GetStateValue(CompositionStateKinds.Strum);
                     var order = note.Value.Pitches.Order().ToArray();
+                    // an ornament's quick notes, lighter, from the note's start, and the note after them
+                    var ornament = note.Value.State.GetStateValue(CompositionStateKinds.Ornament);
+                    if (!ornament.IsDefaultOrEmpty)
+                    {
+                        var step = note.Value.State.GetStateValue(CompositionStateKinds.OrnamentStep);
+                        double At(int i) => swing.Apply(note.Position + i * step);
+                        var start = At(ornament.Length);
+                        return ornament.Select((x, i) => new RenderedNote(note.Value.Pitches[0] + x, velocity * OrnamentVelocity, At(i + 1) - At(i), shift).ToTimelineItem(At(i)))
+                            .Append(new RenderedNote(note.Value.Pitches[0], velocity, position + duration - start, shift).ToTimelineItem(start));
+                    }
+
                     return note.Value.Pitches.Select(pitch =>
                     {
                         var rank = strum > 0 ? Array.IndexOf(order, pitch) : order.Length - 1 - Array.IndexOf(order, pitch);

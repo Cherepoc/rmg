@@ -242,5 +242,6 @@ internal enum SongStream
     HatRolls = 80,
     Stabs = 81,
     DrumMarks = 82,
-    LouderForms = 83
+    LouderForms = 83,
+    Ornaments = 84
 }

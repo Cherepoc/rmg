@@ -51,6 +51,14 @@ internal static class TestCorpus
     public static Genre PhrasesOnly(int phrases) => new(ImmutableDictionary<string, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
         .Add(GenreChoices.Phrases.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add(GenreChoices.PhrasesName(phrases), new(1, 1, 1))));
 
+    /// <summary>
+    ///     The song with its lines' ornaments left off, as a test of a line's own notes renders it: an ornament's quick
+    ///     notes are played over the line, not of it (<see cref="Ornaments" />).
+    /// </summary>
+    public static Song Unornamented(Song song) => new(song.Duration, song.Meter, song.TrackDefinitions, song.TrackEventStateTimelineMap, song.Map,
+        song.Notes?.ToImmutableSortedDictionary(x => x.Key, x => EventTimeline.Create(x.Value.Duration,
+            x.Value.Select(n => (n.Value with { State = n.Value.State.With(CompositionStateKinds.Ornament, []) }).ToTimelineItem(n.Position)))), song.Draws);
+
     // a flow of execution with nothing of the caller's, no trace among it, captured on a thread of its own
     private static readonly ExecutionContext CleanContext = CaptureClean();
 
