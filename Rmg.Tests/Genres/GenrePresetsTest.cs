@@ -42,7 +42,7 @@ public sealed class GenrePresetsTest
             _ = GenrePresets.Genre(preset);
 
         await Assert.That(GenrePresets.All.Select(x => x.Id).Distinct().Count()).IsEqualTo(GenrePresets.All.Count);
-        await Assert.That(GenrePresets.All.Count).IsEqualTo(14);
+        await Assert.That(GenrePresets.All.Count).IsEqualTo(18);
     }
 
     [Test]

@@ -320,8 +320,7 @@ Each item with its plan, and what it waits for.
 A review of the engine and the presets, in steps by priority, each built, measured and committed in turn and taken out
 of here once it is; the genres it adds are described under *More genres*.
 
-**P3, the genres, in the order they are ready:** (16) Medieval and Dungeon synth, after 8, 10 and 15; Djent after 8,
-11 and 12; Nu metal after 11 and 13; (17) of what is built: disco, trap, trance, drum and bass, ska, punk, chiptune;
+**P3, the genres, in the order they are ready:** (17) of what is built: disco, trap, trance, drum and bass, ska, punk, chiptune;
 (18) those waiting on items below: Fusion, Funk's vamp, Soul and Gospel, Country, Bossa nova; (19) the dynamics shaped,
 a crescendo into a lift, and then Orchestral.
 
@@ -348,37 +347,13 @@ left:
      not before the retuned presets, Pop and Metal most, are heard.
   Not weighed by the presets nor leaned by conventionality: each preset spans the plainest songs to the wildest.
 - **More genres** (P3, in the order of *The review of October 2026*): Soul or Gospel, drum and bass, disco, trap
-  (Hip-hop's glide and hat rolls), trance, ska, punk, chiptune, country, bossa nova, orchestral; nu metal, medieval,
-  dungeon synth; and two at the wild end of their idioms, whose plain end is what the songs' wild end plays:
+  (Hip-hop's glide and hat rolls), trance, ska, punk, chiptune, country, bossa nova, orchestral; and one at the wild end of their idioms, whose plain end is what the songs' wild end plays:
   - **Fusion:** electric piano, synth leads, soprano sax, a fretless bass that sings, Lydian, Dorian and melodic
     minor, ninths to thirteenths, quartal and So What shapes, a chord's own scale, planing, a section's own meter and
     key, long solos, straight 16ths or Latin grooves, legato. Wants: roots off the scale (the progressions move by a
     7-note scale's steps, so chromatic and constant-structure motion comes only of planing and a chord's own scale);
     a lead's wide-interval legato lines (*A melody's leaping by genre*); the bass as a lead in a high register;
     planing and the other reharmonisations allowed at a genre's plain end, which `HasPlainEnd: false` forbids.
-  - **Djent:** a low distorted riff, palm-muted, chugging a cycle of 16ths against a 4/4 snare on 3 and a
-    china or crash in quarters, the kick in unison with the riff, the bass doubling it, one chord or none, Phrygian,
-    Locrian and octatonic, clusters and tritone stacks, a clean or synth lead floating over, 100 to 130. Wants: the
-    polymeter's plain end, which is never now (its lengths are all 0 at 0 and `ByConvention.Weigh` throws at a given
-    0; its kick and bass rarely join near it), a genre able to switch it on with its kick and bass; the riff an
-    octave and more lower (its range is C3 to B4, a low string at B1 or F♯1); the china, a wild-end sound only;
-    the backbeat and the time pinned while the ground runs with the cycle, which the pins already allow; the vamp.
-  - **Nu metal:** a low, down-tuned distorted riff of one note chugged in a syncopated figure, a half step above it now and
-    then, the drums a hip-hop groove, half time and lightly swung, a clicking slap bass, quiet verses of a clean guitar
-    arpeggiated with an echo or a chorus against loud choruses, verses for a voice, squealing bends, no solos, natural
-    minor and Phrygian, 85 to 110. Mostly a preset of what is built (`voice`, `dynamics.contrast`, `texture`, slap
-    bass, `feelChances.swing`, Phrygian, bends); wants the riff an octave lower, as Djent does, and a part's
-    instrument by the section's energy (the clean verse guitar turning distorted in the chorus), which
-    `instrumentSwitches` draws only by chance. A turntable's scratches are beyond General MIDI.
-  - **Medieval:** calm, slow and modal, Dorian, Mixolydian, minor and Phrygian; recorders, flutes, pan flute, ocarina,
-    a shawm, a fiddle, a dulcimer, a lute (the nylon guitar), a harp, a reed or church organ, a choir; open fifths over
-    a drone, a second voice in parallel fourths or fifths, two bars a chord, 3/4, 6/8 and 4/4, a part alone at first;
-    the bass rare; the drums, a tambourine, a triangle, a frame drum (a low tom), marking the form. Hurdy-gurdy, lute
-    and frame drum are beyond General MIDI.
-  - **Dungeon synth:** dark, slow and lo-fi: minor, harmonic minor and Phrygian triads, i-bVI-bVII; synth strings, choir
-    and brass pads, an organ, a harpsichord arpeggiating an ostinato, a celesta or a music box over it; drones, a deep
-    reverb; the drums none or martial marks, a timpani or a low tom, a snare's roll into a section. Its tape and
-    detuning are beyond General MIDI; told from Ambient by its minor, its harpsichord and brass, and its martial marks.
 - **The hook and the phrase scheme as one** (P3): a hooked section a scheme sung literally, should a trial keep the
   report's repeats (50% of a hooked section's notes at their first bar's places); otherwise kept apart, with the reason.
 - **Harmony for Jazz and Soul** (P3): the tritone substitute, the passing diminished and a ii–V elsewhere (*Approach
@@ -424,6 +399,10 @@ left:
 - **A genre's sections differing** (P3, perhaps never): a value given a section role, such as a solo swung harder
   or a chorus louder, the genre's for the song otherwise; the generator asking the genre with the section's role,
   every choice's tile a role's override beside it. The dynamics' contrast and the phrases' AAB give most of it.
+- **Listening to the new presets** (P1): Medieval, Dungeon synth, Djent and Nu metal against their sentences
+  (`GenreDevicesReportTest`, `GenreIdiomsReportTest`): Djent's sections 68% polymetric, its snare on 3; Nu metal's
+  guitar driven in its loud sections in 97% of songs, swung lightly in 16ths in 44%, its toms 25 hits a minute, many;
+  Medieval's and Dungeon synth's drums marking the form, resting in 64% and 72% of sections, a pedal under half of them.
 - **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Pop and Metal set no groove
   hold, their parts not pinned drifting as the songs' do (Pop's snare on 2 and 4 80%): Rock's (80) for them, should
   their beat sound loose. Jazz's ride, pinned and now in every song, plays the songs' own time figure: a rhythm of its own
