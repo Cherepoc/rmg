@@ -36,6 +36,11 @@ public sealed class GenreIdiomsReportTest
         // the drums keeping time, as their song gives them the role
         var times = song.Song.TrackDefinitions.Where(x => x.Value is PercussionInstrumentTrack d && DrumRoles.Of(d.StateMap) == DrumRole.Time && notes.ContainsKey(x.Key)).Select(x => x.Key).ToArray();
 
+        // the time drums' hits in a bar, where they fall in it, which a steady time plays alike bar after bar
+        string TimeOf(double start) => string.Join(" ", times.SelectMany(t => notes[t].Where(x => x.Position >= start - 1e-9 && x.Position < start + 4 - 1e-9))
+            .Select(x => Math.Round((x.Position - start) * 4) / 4).Distinct().Order());
+        var timeBars = bars.Where(x => bars.Contains(x - 4) && TimeOf(x).Length > 0).ToArray();
+
         var progressions = song.Trace.Where(x => x.Point == TracePoints.Progression).GroupBy(x => x.Section).Select(x => string.Join(" ", (System.Collections.Immutable.ImmutableArray<int>)x.First().Value!)).ToArray();
         var changes = map.Sections.Sum(x => song.ChordChanges.Count(c => c >= x.Start - 1e-9 && c < x.End - 1e-9));
         var phrases = map.Sections.Sum(x => x.Duration / (Meter.PhraseBarCount * x.Meter.BarDuration));
@@ -104,6 +109,7 @@ public sealed class GenreIdiomsReportTest
                 ? chordStabs.Average(x => x.Value.Duration <= 0.25 + 1e-9 ? 1.0 : 0)
                 : double.NaN,
             ["tom hits a minute"] = Tracks(DrumGroups.Toms).Sum(t => notes[t].Count) / minutes,
+            ["time as the bar before"] = timeBars.Length > 0 ? timeBars.Count(x => TimeOf(x) == TimeOf(x - 4)) / (double)timeBars.Length : double.NaN,
             ["snare on 2 and 4"] = bars.Length > 0 ? bars.Count(x => HitsAt(snares, x + 1) && HitsAt(snares, x + 3)) / (double)bars.Length : double.NaN,
             ["chorus melody bars repeated"] = RepeatedIn(SectionRole.Chorus),
             ["verse melody bars repeated"] = RepeatedIn(SectionRole.Verse),
@@ -153,7 +159,7 @@ public sealed class GenreIdiomsReportTest
         ["reggae"] = [("one drop (kick and snare on 3 alone)", 0.6, 1), ("chords on the offbeat 8ths", 0.7, 1), ("tempo", 60, 90), ("sections sharing a progression", 0.4, 1),
             ("chords stabbed (a 16th or shorter)", 0.3, 1), ("ending a fade", 0.4, 1)],
         ["blues"] = [("melody pentatonic or blues", 0.6, 1), ("snare on 2 and 4", 0.8, 1)],
-        ["jazz"] = [("chords in 4 bars", 4, 8), ("melody leaps past a fifth", 0.06, 0.2)],
+        ["jazz"] = [("chords in 4 bars", 4, 8), ("melody leaps past a fifth", 0.06, 0.2), ("time as the bar before", 0.8, 1)],
         ["folk"] = [("melody mean move", 0, 2.5), ("fills a minute", 0, 4)],
         ["funk"] = [("sections sharing a progression", 0.4, 1), ("melody bars repeated", 0.1, 1), ("chords stabbed (a 16th or shorter)", 0.15, 1), ("lifts dropped", 0, 0)]
     };

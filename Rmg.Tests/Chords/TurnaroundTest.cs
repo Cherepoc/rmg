@@ -22,8 +22,11 @@ public sealed class TurnaroundTest
     public async Task ASectionTurnedAround_EndsOnV_AndAJazzSongsSectionsMostly()
     {
         var songs = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("jazz"))));
+        // but a section that planes, its chords the home's shape moved rather than its progression's
         var sections = songs.SelectMany(song => song.Trace.Where(x => x.Point == TracePoints.Turnaround)
-            .Zip(song.Trace.Where(x => x.Point == TracePoints.Progression), (turn, progression) => ((bool)turn.Value!, (ImmutableArray<int>)progression.Value!))).ToArray();
+            .Zip(song.Trace.Where(x => x.Point == TracePoints.Progression), (turn, progression) => (Turns: (bool)turn.Value!, Progression: (ImmutableArray<int>)progression.Value!, turn.Section))
+            .Where(x => song.Trace.Where(p => p.Point == TracePoints.Planing && p.Section == x.Section).All(p => p.Value is null))
+            .Select(x => (x.Turns, x.Progression))).ToArray();
 
         await Assert.That(sections.Where(x => x.Item1).All(x => x.Item2[^1] == -3)).IsTrue();
         await Assert.That(sections.Count(x => x.Item1) / (double)sections.Length).IsGreaterThan(0.6);

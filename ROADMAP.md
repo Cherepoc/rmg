@@ -316,8 +316,6 @@ left:
   baseline of every retuning below.
 
   **P2**, in order, each measured as above:
-  12. **Jazz retuned:** the ride pinned (`pins`'s time), stop time and pushes well over the songs' 3% and 8%,
-     planing and reharmonisation in the middle.
   13. **Hip-hop as boom-bap,** its glide and hat rolls rare (a trap preset's, 20); Techno's polymeter; a last chorus
      repeated in Rock and Synthwave, which twin leads join.
   14. **`SectionGenerator.Generate` split** (about 245 lines) and `GeneratePitchedTracks` (about 220) into named
@@ -380,7 +378,9 @@ left:
 - **A genre's sections differing** (P3, perhaps never): a value given a section role, such as a solo swung harder
   or a chorus louder, the genre's for the song otherwise; the generator asking the genre with the section's role,
   every choice's tile a role's override beside it. The dynamics' contrast and the phrases' AAB give most of it.
-- **Listening to the presets** (P2): each against its sentence (`GenrePresetsReportTest`). Reggae's one drop is a kick
+- **Listening to the presets** (P2): each against its sentence (`GenrePresetsReportTest`). Jazz's ride, pinned, plays the
+  songs' own time figure, 7% of its bars a tresillo's: a rhythm of its own for the time (a ride's spang-a-lang), should it
+  not swing. Reggae's one drop is a kick
   half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
   alone; the rhythm values mean what they make together, and a preset's are tuned by where its notes fall. Blues' twelve
   bars: V at bar 9 in 43% of its twelve-bar sections, home at bar 4 48%, IV at 5 63%, home at 8 61%, the middling and
