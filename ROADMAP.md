@@ -13,7 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: the page's seek bar and its wait for a remake.
+**When the need shows** (P3), each by what listening says, in this order: the page's seek bar.
 
 **Put off** until their uses ask for them: long cycles and a tag (see *Open work*, *Rhythm engine*).
 
@@ -403,8 +403,6 @@ Each item with its plan, and what it waits for.
      chorus played as a solo, which the intro quotes the tune of.
   Parked: `SectionGenerator.Generate` split likewise, and a stage report of notes moved in place (see *Parked*).
 
-- **The page's wait for a remake** (P3): a song is asked for again 400 ms after the settings last changed; a remake let
-  go of frees its core on the server, so the wait could be 200 ms. To shorten if the wait is noticed.
 - **The sections on the seek bar** (P3): the report gives where each section starts, in seconds, with its role and any
   solo, and the song's length; the page marks the starts on the seek bar, named on hover, and shows the length before
   Play, where it now shows 0:00. Put off from the UI round of October 2026.

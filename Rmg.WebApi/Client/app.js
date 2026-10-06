@@ -980,6 +980,10 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
     }
 }
 
+// how long the settings stay as they are, in milliseconds, before the song is asked for again with them: short, as a
+// remake let go of frees the server at once
+const REMAKE_WAIT = 200;
+
 /**
  *     The song on the page asked for again, once the settings have stopped changing for a moment, with them, to replace
  *     it where it plays; one on its way is let go of for the newer change.
@@ -1003,7 +1007,7 @@ function scheduleRegeneration() {
         generate(songSeed, { isRemade: true, signal }).finally(() => {
             if (regeneration?.signal === signal) regeneration = null;
         });
-    }, 400);
+    }, REMAKE_WAIT);
 }
 
 function cancelRegeneration() {
