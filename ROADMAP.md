@@ -316,8 +316,6 @@ left:
   baseline of every retuning below.
 
   **P1**, alongside listening:
-  4. **Funk retuned:** a loop and a hook (its sentence's "everything repeating"), stabs for the clavinet and the
-     brass, a sax's solos now and then; its drops out (a drop is no funk device; stop time is its break).
   5. **Blues retuned:** reharmonisation and inner lines off over its dominants, the solo part answering the melody.
   6. **The electronic genres', Hip-hop's and Reggae's section tempos and meters off** at every end.
 

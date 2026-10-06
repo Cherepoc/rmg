@@ -152,7 +152,8 @@ public sealed class GenreIdiomsReportTest
         ["reggae"] = [("one drop (kick and snare on 3 alone)", 0.6, 1), ("chords on the offbeat 8ths", 0.7, 1), ("tempo", 60, 90)],
         ["blues"] = [("melody pentatonic or blues", 0.6, 1), ("snare on 2 and 4", 0.8, 1)],
         ["jazz"] = [("chords in 4 bars", 4, 8), ("melody leaps past a fifth", 0.06, 0.2)],
-        ["folk"] = [("melody mean move", 0, 2.5), ("fills a minute", 0, 4)]
+        ["folk"] = [("melody mean move", 0, 2.5), ("fills a minute", 0, 4)],
+        ["funk"] = [("sections sharing a progression", 0.4, 1), ("melody bars repeated", 0.1, 1), ("chords stabbed (a 16th or shorter)", 0.15, 1), ("lifts dropped", 0, 0)]
     };
 
     [Test]
