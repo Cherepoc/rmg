@@ -310,12 +310,18 @@ left:
   (`GenrePresetsTest`, `GenreIdiomsReportTest`, `GenreDevicesReportTest`).
 
   **P3**, by what the measures and listening say:
-  17. **Groove hold under pins:** the idiom report with every preset's `grooveHold` taken out; should the backbeat
-     and the kick move under 3 points where a role is pinned, groove hold removed, its choice, its lean and the
-     presets' entries. A decision first: a genre link naming a removed choice ignoring it, or failing.
-  18. **Any genre:** a song asked for with no genre drawing a preset, by a stream of its own, the page offering it
-     beside the presets, the song's link carrying the drawn genre. A decision first: whether the page's default
-     becomes any genre or stays the songs' own.
+  18. **Any genre** (a plan in steps): a song asked for with no genre drawing a preset, or the songs' own as one of
+     its outcomes, evenly, so that the plain band stays among them; the seed alone making the song again, the CLI's
+     and the API's too, and the ratings telling which genres are liked. Steps:
+     1. The presets the server's data rather than the page's alone (`Client/genres.json`), served to the page, which the
+        tests and the CLI read too (`--genre`).
+     2. The server drawing one when asked for any, from a stream of its own, so that the rest of the song stays as the
+        seed made it; the preset drawn in the response, the song's link and every analytics event about it, as its
+        version and settings are.
+     3. The page offering any genre beside the presets.
+     4. The default (the songs' own, as now, or any genre) decided by the ratings by genre once a version has enough,
+        and not before the retuned presets, Pop and Metal most, are heard.
+     Not weighed by the presets nor leaned by conventionality: each preset spans the plainest songs to the wildest.
   19. **Two-bar patterns** (*Long cycles*, raised from put off by the idioms waiting on them: the clave, the montuno,
      a kick answered in its second bar), and snare ghost notes and drags (*What the genres cannot play yet*).
   20. **More genres,** should Pop and Metal sound right: Soul or Gospel, drum and bass, disco, trap (Hip-hop's glide
@@ -366,7 +372,9 @@ left:
 - **A genre's sections differing** (P3, perhaps never): a value given a section role, such as a solo swung harder
   or a chorus louder, the genre's for the song otherwise; the generator asking the genre with the section's role,
   every choice's tile a role's override beside it. The dynamics' contrast and the phrases' AAB give most of it.
-- **Listening to the presets** (P2): each against its sentence (`GenrePresetsReportTest`). Jazz's ride, pinned, plays the
+- **Listening to the presets** (P2): each against its sentence (`GenrePresetsReportTest`). Pop and Metal set no groove
+  hold, their parts not pinned drifting as the songs' do (Pop's snare on 2 and 4 80%): Rock's (80) for them, should
+  their beat sound loose. Jazz's ride, pinned, plays the
   songs' own time figure, 7% of its bars a tresillo's: a rhythm of its own for the time (a ride's spang-a-lang), should it
   not swing. Reggae's one drop is a kick
   half a bar off its cycle, which the report cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping
@@ -443,4 +451,8 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
   built once (`StateTimelineMap`), which is how the state is designed rather than a hot spot to fix.
 - **An applied dominant keeps the shape drawn for it,** which its Mixolydian makes a major triad, a dominant seventh
   or a suspended dominant; forcing a seventh would override the shape's draw for the stranger shapes alone.
+- **Groove hold stays beside pins** (measured October 2026): a pin decides a part's figure, groove hold leans every
+  part steadier, which the principles ask for over pinning more. With it taken out of every preset the pinned measures
+  moved 2 points or less, but the unpinned backbeat fell: House's snare on 2 and 4 0.67 -> 0.45, Techno's 0.61 -> 0.47,
+  Funk's 0.77 -> 0.68, Blues' 0.71 -> 0.63, where a snare pinned 70% of the time is held by it the rest.
 - **Seeds are not stable across versions;** the version labels what was heard (see *Listening data*).
