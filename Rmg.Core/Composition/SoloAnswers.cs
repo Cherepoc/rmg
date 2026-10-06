@@ -62,7 +62,10 @@ internal static class SoloAnswers
             var counterRests = !trackOf.TryGetValue(TrackRole.CounterMelody, out var counter) || !song.TrackTimelineMap.TryGetValue(counter, out var counterTrack) || !counterTrack.EventTimeline.Any(IsIn);
             var melody = melodyTrack.EventTimeline.Where(IsIn).ToArray();
             var band = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
-            if (!answering || solos.ContainsKey(index) || !counterRests || melody.Length == 0)
+            if (solos.ContainsKey(index) || !counterRests || melody.Length == 0)
+                continue;
+            StateTrace.Record(TracePoints.SoloAnswers, soloTrack, span.SectionId, 0, StateMap.Default, 0, $"{answering}", (index, answering));
+            if (!answering)
                 continue;
 
             // the gaps between the melody's notes, and the last to the section's end, each answered from a beat in, under the

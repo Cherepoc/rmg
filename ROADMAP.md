@@ -311,20 +311,17 @@ left:
   tremolo, Blues reharmonises its dominants by thirds and Funk, "everything repeating", neither loops nor hooks; and
   some devices no genre reaches, so that a wild House song still changes tempo. Each measured by the preset reports
   before and after (`GenrePresetsTest`, `GenreIdiomsReportTest`, `GenreDevicesReportTest`); the presets are not in the
-  corpus, so the fingerprint keeps but where an item says so.
+  corpus, so the fingerprint keeps but where an item says so. What a preset inherits is marked * in
+  `GenreDevicesReportTest`, the baseline of every retuning below.
 
   **P1**, alongside listening:
-  1. **What a preset plays that it does not name:** a report per preset of the inherited devices' shares
-     (reharmonised appearances, inner lines, rolls, slurs, pedals, pushes, stop time, solos, key changes, strong
-     effects, polymeters, a section's tempo and meter, solo answers, octave doubling, a last chorus repeated,
-     instrument switches); the baseline of every retuning below.
   2. **Every device a genre's:** a genre choice for each device no genre reaches, its options the chances as they
      are, so that the songs keep: polymeter (`Polymeter.Chance`), a section's own tempo and meter
      (`SectionTempo.Chance`, `SectionMeter.Chance`), the solo part's answers (`SoloAnswers.Chance`), a last chorus
      repeated (`SongForms.LastRepeatChance`), a line in octaves (`LineDoubling.OctaveChance`) and instrument switches
      (`InstrumentsOverTime.SwitchChance`); a tile and a page test each. The riff's twin is a genre's already
      (`parts`'s `riffTwin`).
-  3. **Every preset names every device** (after 1 and 2): a list of the device choices in `GenreChoices` and a rule in
+  3. **Every preset names every device** (after 2): a list of the device choices in `GenreChoices` and a rule in
      `GenrePresetsTest`, each first set to what it inherits, so that no preset changes here and the retunings change
      them in sight.
   4. **Funk retuned:** a loop and a hook (its sentence's "everything repeating"), stabs for the clavinet and the

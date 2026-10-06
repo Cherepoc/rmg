@@ -85,6 +85,12 @@ internal static class TracePoints
     /// </summary>
     public const string LineDoubling = "Line doubling";
 
+    /// <summary>
+    ///     Whether a section the solo part may answer the melody in does, outside its solos and where the counter-melody
+    ///     rests: the section's place and whether it answers (a tuple of an <c>int</c> and a <c>bool</c>).
+    /// </summary>
+    public const string SoloAnswers = "Solo answers";
+
     /// <summary>A part that solos in the song, and the soloist it is (a tuple of a <see cref="Songs.TrackRole" /> and a <see cref="Soloist" />).</summary>
     public const string Soloist = "Soloist";
 
