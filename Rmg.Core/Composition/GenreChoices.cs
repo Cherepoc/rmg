@@ -195,6 +195,9 @@ public static class GenreChoices
         _ => x.Pattern.ToString()
     }, x.Weight)));
 
+    /// <summary>The chance a bar's hi-hat rolls its last beat in 32nds or 16th triplets, the trap's (<see cref="SongStages.HatRollChance" />).</summary>
+    public static GenreChoice HatRolls { get; } = Chances("hatRolls", "Hi-hat rolls", [("bars", "Bars ending on a roll", SongStages.HatRollChance)]);
+
     /// <summary>The chance a lift the drums announce is built to and dropped at, the band out for the bar before it; the songs never (<see cref="FormLayers.Drop" />).</summary>
     public static GenreChoice Drop { get; } = Chances("drop", "Builds and drops", [("lifts", "Lifts built to a drop", FormLayers.Drop)]);
 
@@ -488,7 +491,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, GrooveHold, Pins, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, SectionLength, Texture, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Pan, FormChances, Form, SectionLength, Texture, Dynamics, Phrases,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,

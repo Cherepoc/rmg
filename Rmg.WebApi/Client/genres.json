@@ -291,6 +291,7 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano and pads, minor and Dorian.",
     "choices": {
+      "hatRolls": { "bars": [10, 15, 25] },
       "glide": { "bass": [40, 50, 60] },
       "sectionLength": { "bars8": [40, 40, 40], "bars16": 100, "bars32": [20, 20, 20] },
       "pins": { "ground": [90, 90, 70], "backbeat": [100, 100, 80] },

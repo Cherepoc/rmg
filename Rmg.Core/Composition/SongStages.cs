@@ -106,6 +106,7 @@ internal static class SongStages
         new("Stop time", StopTime, CanSkip: true),
         new("Pushes", Pushes, CanSkip: true),
         new("Inner lines", InnerLines, CanSkip: true),
+        new("Hat rolls", HatRolls, CanSkip: true),
         new("Instruments", Instruments, CanSkip: true),
         new("Articulation", Articulation, CanSkip: true),
         new("Timing", Timing, CanSkip: true),
@@ -523,6 +524,71 @@ internal static class SongStages
                 }).ToTimelineItem(note.Position);
             })))
         };
+    }
+
+    /// <summary>The chance a bar's time drum rolls its last beat, a genre's that the songs never play (<see cref="GenreChoices.HatRolls" />).</summary>
+    public static ByConvention HatRollChance { get; } = new(0, 0, 0);
+
+    /// <summary>How fast a roll's notes come, a beat's worth of them, and how likely: 32nds, and 16th triplets the trap's other.</summary>
+    public static ImmutableArray<Weighted<int>> HatRollRates { get; } = [new(1, 8), new(1, 6)];
+
+    /// <summary>How long a roll lasts, in beats, at the bar's end, and how likely: its last beat, or the half of it.</summary>
+    public static ImmutableArray<Weighted<double>> HatRollLengths { get; } = [new(1, 1), new(1, 0.5)];
+
+    /// <summary>How loud a roll's first note plays against its last, which is the hat's own.</summary>
+    public const double HatRollFrom = 0.6;
+
+    /// <summary>
+    ///     Hi-hat rolls, the trap's: now and then a bar's last beat, or its half, on the drums keeping time played as a roll of
+    ///     32nds or 16th triplets growing louder, each note the drum's own note there, where it plays and no fill does. A
+    ///     bar's decision, a genre's, from a sequence of its own for each appearance.
+    /// </summary>
+    internal static SongDraft HatRolls(SongDecisions song, SongDraft draft)
+    {
+        var notes = NotesOf(draft);
+        var times = notes.Keys.Where(x => song.Tracks.Definitions[x] is PercussionInstrumentTrack definition && DrumRoles.Of(definition.StateMap) == DrumRole.Time).ToArray();
+        if (times.Length == 0)
+            return draft;
+
+        var rolls = new List<(double From, double To, int Rate)>();
+        foreach (var (span, index) in song.Form.Map.Sections.Select((x, i) => (x, i)))
+        {
+            var context = song.Stream(SongStream.HatRolls, index);
+            var chance = HatRollChance.At(song.SectionOf(span.SectionId).Facets[Facet.Groove], song.Genre.Chance(GenreChoices.HatRolls, "bars"));
+            var bar = span.Meter.BarDuration;
+            for (var end = span.Start + bar; end <= span.End + 1e-9; end += bar)
+            {
+                // drawn for every bar, so that the draws are as many
+                var (rolls1, rate, length) = (context.TestProbability(chance), context.Pick(HatRollRates), context.Pick(HatRollLengths));
+                if (rolls1)
+                    rolls.Add((end - length, end, rate));
+            }
+        }
+
+        var result = notes.ToBuilder();
+        foreach (var track in times)
+        {
+            var timeline = notes[track];
+            var rolled = timeline.ToList();
+            foreach (var (from, to, rate) in rolls)
+            {
+                // the drum's note where the roll starts, which every note of it plays, where it plays there
+                var own = timeline.FirstOrDefault(x => x.Position >= from - 1e-9 && x.Position < to - 1e-9);
+                if (own.Value is null)
+                    continue;
+                rolled.RemoveAll(x => x.Position >= from - 1e-9 && x.Position < to - 1e-9);
+                var count = (int)Math.Round((to - from) * rate);
+                rolled.AddRange(Enumerable.Range(0, count).Select(k => (own.Value with
+                {
+                    Velocity = own.Value.Velocity * (HatRollFrom + (1 - HatRollFrom) * k / Math.Max(1, count - 1)),
+                    Duration = Math.Min(own.Value.Duration, 1.0 / rate)
+                }).ToTimelineItem(from + k / (double)rate)));
+            }
+
+            result[track] = EventTimeline.Create(timeline.Duration, rolled.OrderBy(x => x.Position));
+        }
+
+        return draft with { Notes = result.ToImmutable() };
     }
 
     /// <summary>The parts' instruments over the song, switched and articulated by every section's sound facet.</summary>

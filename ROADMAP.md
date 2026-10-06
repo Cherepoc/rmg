@@ -607,7 +607,10 @@ a link carries. What is left:
   4. Done: a gliding bass (`GenreChoices.Glide`, `Expression.GlideChance`), a genre's chance its bass slides into
      half its changes of pitch from the note before, across a gap of a beat and into a 16th: the bass's changes slid
      into Hip-hop 13%, Techno 9% (the songs' 0). Not done: an acid line's accent, which General MIDI has no 303 for.
-  5. Hi-hat rolls in 32nds and triplets, the trap's, and a snare's drag and its ghost notes.
+  5. Done in part: hi-hat rolls (`SongStages.HatRolls`, `GenreChoices.HatRolls`), a bar's last beat or its half on the
+     drums keeping time rolled in 32nds or 16th triplets, louder as it goes, a genre's: 204 rolls in 16 Hip-hop songs,
+     none in the songs. Not done: a snare's drag and its ghost notes, which want the backbeat's own figure, the pinned
+     backbeat keeping its hits clean.
   6. The one drop (the kick and snare on 3 alone, beat 1 empty), Reggae's, and its skank on the offbeats only.
   7. A clave the band keeps to, Latin's: the parts' rhythms aligned to the 3-2 or 2-3, and the piano's montuno.
   8. A rap's place: a hook sung and the verses left to a voice, the melody resting or a riff carrying them.
