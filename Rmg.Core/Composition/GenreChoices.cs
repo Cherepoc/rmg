@@ -539,6 +539,13 @@ public static class GenreChoices
         ..RolesInOrder.Select(x => DrumRoles[x])
     ];
 
+    /// <summary>
+    ///     The choices of a device a song plays or not: every choice of chances, and every pool with an option of none, such as
+    ///     the arpeggios; a genre that leaves one out plays it as the songs do, which a preset never does, saying what it plays.
+    /// </summary>
+    public static ImmutableArray<GenreChoice> Devices { get; } =
+        [..All.Where(x => x.Kind == GenreChoiceKind.Chances || x.Kind == GenreChoiceKind.Pool && x.Options.Any(o => o.Name == "none"))];
+
     /// <summary>A pool's choice, every option's own weights against every end's heaviest, 0 at an end that allows none.</summary>
     private static GenreChoice Pool(string name, string label, IEnumerable<(string Name, string Label, ByConvention Weight)> options)
     {

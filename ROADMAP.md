@@ -311,13 +311,11 @@ left:
   tremolo, Blues reharmonises its dominants by thirds and Funk, "everything repeating", neither loops nor hooks; and
   some devices no genre reaches, so that a wild House song still changes tempo. Each measured by the preset reports
   before and after (`GenrePresetsTest`, `GenreIdiomsReportTest`, `GenreDevicesReportTest`); the presets are not in the
-  corpus, so the fingerprint keeps but where an item says so. What a preset inherits is marked * in
-  `GenreDevicesReportTest`, the baseline of every retuning below.
+  corpus, so the fingerprint keeps but where an item says so. Every preset names every device
+  (`GenreChoices.Devices`), first as the songs have them, rounded to whole percents; `GenreDevicesReportTest` the
+  baseline of every retuning below.
 
   **P1**, alongside listening:
-  3. **Every preset names every device:** a list of the device choices in `GenreChoices` and a rule in
-     `GenrePresetsTest`, each first set to what it inherits, so that no preset changes here and the retunings change
-     them in sight.
   4. **Funk retuned:** a loop and a hook (its sentence's "everything repeating"), stabs for the clavinet and the
      brass, a sax's solos now and then; its drops out (a drop is no funk device; stop time is its break).
   5. **Blues retuned:** reharmonisation and inner lines off over its dominants, the solo part answering the melody.
