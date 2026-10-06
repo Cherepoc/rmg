@@ -190,7 +190,8 @@ public static class Render
                 meters.Add((section.Start, section.Meter));
         return new RenderedSong(song.Duration, [..meters], common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..mixed])
         {
-            Room = song.Draws?.Room
+            Room = song.Draws?.Room,
+            Insertion = song.Draws?.Insertion
         };
     }
 

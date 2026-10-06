@@ -56,6 +56,7 @@ public static class GenreChoiceDescriptions
         ["intro"] = "How the song starts: the whole band at once, a count-in, or the parts coming in one by one.",
         ["ending"] = "How the song ends: a short final hit, a ringing chord, a sudden stop, a fade, or left open.",
         ["strongEffect"] = "The one bold effect a song may put on a part: an echo, a tremolo, a sweep from side to side, the pads and bass pumping to the kick, a synth's filter wobbling, squelching or opening, or a trance gate chopping a pad.",
+        ["insertion"] = "An effect one part plays through, the one a song may have: a wah on a guitar or a clavinet comping, as funk's, or a phaser swirling held chords, as disco's strings or a synth pad.",
         ["room"] = "The room the reverb is: a small room for a dry, close band, a hall for a big, open space, a plate for the bright, smooth studio reverb of the 80s; the player's own where a genre names none.",
         ["pan"] = "How far each part sits from the middle: above the middle wider, below closer to the centre.",
         ["formChances"] = "How often a song takes one of the classic song forms, with verses and choruses, rather than a form of its own.",

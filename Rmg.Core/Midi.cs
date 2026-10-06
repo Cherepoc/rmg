@@ -152,16 +152,24 @@ public static class Midi
     }
 
     /// <summary>
-    ///     A Roland GS message setting the reverb's macro, its room, as a system exclusive event: to the GS model, its
-    ///     reverb macro's address and the macro, with the address's and the data's checksum.
+    ///     A Roland GS message setting the data at an address, such as the reverb's macro, its room, as a system exclusive
+    ///     event: to the GS model, the address and the data, with their checksum.
     /// </summary>
-    private static byte[] ReverbMacro(byte macro)
+    private static byte[] GsMessage(byte[] address, byte[] data)
     {
-        byte[] body = [0x40, 0x01, 0x30, macro];
+        byte[] body = [..address, ..data];
         var checksum = (byte)((128 - body.Sum(x => x) % 128) % 128);
         byte[] message = [0x41, 0x10, 0x42, 0x12, ..body, checksum, 0xf7];
         return [0xf0, ..IntToBytesVariable((uint)message.Length), ..message];
     }
+
+    /// <summary>A channel's part, as a Roland GS address numbers it: the drums' first, the channels before them after it.</summary>
+    private static int GsPart(byte channel) => channel switch
+    {
+        PercussionChannel => 0,
+        < PercussionChannel => channel + 1,
+        _ => channel
+    };
 
     private static byte[] Text(string text)
     {
@@ -280,8 +288,8 @@ public static class Midi
         stream.Write(allEvents, 0, allEvents.Length);
     }
 
-    private static void WriteSystemTrack(StateTimeline<double> tempoTimeline, ImmutableArray<(double Position, Meter Meter)> meters, int? room, string? label, uint durationDelta,
-        Stream stream)
+    private static void WriteSystemTrack(StateTimeline<double> tempoTimeline, ImmutableArray<(double Position, Meter Meter)> meters, int? room,
+        (InsertionKind Kind, ImmutableArray<byte> Channels)? insertion, string? label, uint durationDelta, Stream stream)
     {
         var events = tempoTimeline.Select(x => new MidiEvent(AbsoluteDelta(x.Position), Tempo(x.Value)));
         if (tempoTimeline.Count == 0 || tempoTimeline[0].Position > 0)
@@ -291,9 +299,17 @@ public static class Midi
         events = meters
             .Select(x => new MidiEvent(AbsoluteDelta(x.Position), TimeSignature((byte)x.Meter.TimeSignature.Numerator, (byte)x.Meter.TimeSignature.Denominator, (byte)(x.Meter.PulseSixteenths * 6))))
             .Concat(events);
-        // the reverb's room, where the song has one of its own, as a Roland GS player takes it
+        // the reverb's room, where the song has one of its own, and its insertion effect, its type and then every channel
+        // that plays through it, as a Roland GS player takes them
+        if (insertion is { } effect)
+        {
+            var (msb, lsb) = Insertions.TypeOf(effect.Kind);
+            events = effect.Channels.Select(x => new MidiEvent(0, GsMessage([0x40, (byte)(0x40 | GsPart(x)), 0x22], [1]))).Concat(events)
+                .Prepend(new MidiEvent(0, GsMessage([0x40, 0x03, 0x00], [msb, lsb])));
+        }
+
         if (room is { } macro)
-            events = events.Prepend(new MidiEvent(0, ReverbMacro((byte)macro)));
+            events = events.Prepend(new MidiEvent(0, GsMessage([0x40, 0x01, 0x30], [(byte)macro])));
         if (label is not null)
             events = events.Prepend(new MidiEvent(0, Text(label)));
 
@@ -413,7 +429,11 @@ public static class Midi
         var ticksPerQuarterNoteBytes = IntToBytesFixed(TicksPerQuarterNote, 2);
         stream.Write(ticksPerQuarterNoteBytes, 0, ticksPerQuarterNoteBytes.Length);
 
-        WriteSystemTrack(song.TempoTimeline, song.Meters, song.Room, label, songDurationDelta, stream);
+        // the insertion effect, and every channel its part plays on through it, its second take's too
+        var insertion = song.Insertion is { } effect
+            ? (effect.Kind, Channels: song.Tracks.ToChannels().Zip(song.Tracks).Where(x => x.Second.Role == effect.Part).Select(x => x.First).ToImmutableArray())
+            : ((InsertionKind, ImmutableArray<byte>)?)null;
+        WriteSystemTrack(song.TempoTimeline, song.Meters, song.Room, insertion, label, songDurationDelta, stream);
 
         var indexedTracks = song.Tracks.ToIndexedTracks();
         foreach (var (channel, track) in indexedTracks) WriteNoteTrack(track, channel, song.FadeTimeline, songDurationDelta, stream);

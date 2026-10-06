@@ -162,6 +162,10 @@ each from the trace; the seeds named here are ones already found.
   Trap 21% to 18%, Hip-hop 17% to 13%; Trap's lead bright 78% to 56%, Dnb's 38% to 8%; Djent major 12% to 3%
   (`MoodReportTest`). Still happy? The major chords are a minor key's own ♭III, ♭VI and ♭VII, which no preset choice
   reaches: a progression's degrees leaned, if so.
+- **The insertion effect:** a wah on a guitar or a clavinet comping, or a phaser on held chords, one part a song through
+  the GS player's one effect: Funk wahs 34% of its songs, mostly the rhythm part, Disco phases 20% and wahs 14%,
+  Synthwave phases 20%, the wild songs now and then (`InsertionTest.Report`). The effects' own settings, the player's
+  defaults, by ear; the lo-fi EQ, Hip-hop's muffled loop, should the dark side want it.
 - **A genre's room:** the reverb a small room, a hall or a plate, one per song as a Roland GS message, named by twelve
   presets, Ambient's, Orchestral's and the dungeon's halls, Funk's, Punk's and Hip-hop's rooms, Synthwave's and Soul's
   plates; the player's own hall elsewhere. Heard in both soundfonts' players? Its time and pre-delay a genre's too, if
@@ -211,7 +215,6 @@ Each item with its plan, and what it waits for.
 
 ### The heavy band, the mood and the effects (in progress, in order)
 
-- **An insertion effect,** one a song: a wah, a phaser or a lo-fi EQ on the part it suits.
 - **Dub's echo** on the chords, the rhythm part and the snare, as notes.
 - **Features of one genre in others,** as preset data: the China cymbal in Metal and Nu metal, the open hi-hat in
   Techno, Electronic, Trance and Funk, a drop in Djent, section changes in Djent, Metal and Orchestral, polymeter in

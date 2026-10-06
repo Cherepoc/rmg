@@ -32,6 +32,9 @@ public sealed class RenderedSong
     /// <summary>The room its reverb is, as the Roland GS reverb macro that sets it, none for the player's own.</summary>
     public int? Room { get; init; }
 
+    /// <summary>The effect one part plays through, and the part, written as Roland GS messages; none for none.</summary>
+    public Insertion? Insertion { get; init; }
+
     public double Duration { get; }
 
     /// <summary>The meter the song starts in.</summary>

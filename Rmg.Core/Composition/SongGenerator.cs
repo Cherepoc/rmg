@@ -100,9 +100,12 @@ public static class SongGenerator
         var room = genre.Pool<int>(GenreChoices.Room, GenreChoices.RoomNameOf) is { } rooms
             ? Stream(SongStream.Room).Pick(ByConvention.Weigh(GenreChoices.Rooms.Select(x => (x.Macro, default(ByConvention))), songUnconventionality[Facet.Sound], rooms))
             : (int?)null;
+        // and the effect it plays one part through, if any, from a stream of its own
+        var insertion = Insertions.Draw(Stream(SongStream.Insertion), songUnconventionality[Facet.Sound], genre,
+            tracks.Definitions.Values.OfType<PitchInstrumentTrack>().Where(x => !song.Absent.Contains(x.Role)).Select(x => (x.Role, x.InstrumentCode)));
 
         return new Song(songTrackNoteTimelineMap.Duration, song.Meter, tracks.Definitions, songTrackNoteTimelineMap, form.Map, notes, new SongDraws(songUnconventionality,
-            [..SongParts.All.Except(song.Absent)], tracks.DrumSetup, [..tracks.SongDrums.Select(DrumPieces.NameOf)], song.Scale, song.Swing, kit, room,
+            [..SongParts.All.Except(song.Absent)], tracks.DrumSetup, [..tracks.SongDrums.Select(DrumPieces.NameOf)], song.Scale, song.Swing, kit, room, insertion,
             [..form.Map.Sections.Select((x, i) => (song.Structure.Roles[x.SectionId], song.Solos.TryGetValue(i, out var solo) ? solo.Soloists : []))]));
     }
 
@@ -248,5 +251,6 @@ internal enum SongStream
     DrumMarks = 82,
     LouderForms = 83,
     Ornaments = 84,
-    Room = 85
+    Room = 85,
+    Insertion = 86
 }

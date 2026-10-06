@@ -4,6 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
+      "insertion": { "none": 100, "phaser": [5, 10, 20], "wah": [5, 10, 20] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "louderForms": { "guitars": [20, 50, 60] },
       "pins": { "ground": [40, 40, 20], "backbeat": [80, 80, 50] },
@@ -271,6 +272,7 @@
     "name": "Synthwave",
     "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
     "choices": {
+      "insertion": { "none": 100, "phaser": [20, 30, 40] },
       "room": { "plate": 100, "hall": [0, 30, 50] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "rootMotion": { "thirdDown": 70, "stepUp": 70, "fourthDown": 60 },
@@ -517,6 +519,7 @@
     "name": "Funk",
     "description": "The hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and a muted guitar comping in 16ths, brass, sevenths and ninths, Dorian and Mixolydian, everything repeating.",
     "choices": {
+      "insertion": { "none": 100, "wah": [40, 50, 60], "phaser": [10, 20, 30] },
       "room": { "room": 100 },
       "vamp": { "sections": [30, 40, 40] },
       "louderForms": { "guitars": 0 },
@@ -1057,6 +1060,7 @@
     "name": "Disco",
     "description": "The kick four on the floor, the open hi-hat off the beat, a bass in octaves, strings and horns, a clean guitar scratching 16ths, electric piano sevenths and ninths, minor and Dorian, 110 to 130.",
     "choices": {
+      "insertion": { "none": 100, "phaser": [30, 40, 50], "wah": [10, 20, 30] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [110, 110, 100], "to": [130, 130, 140] },
       "meter": { "4/4": 100 },
@@ -1429,6 +1433,7 @@
     "name": "Soul",
     "description": "An organ, a piano and horns, sevenths and ninths passing through applied dominants, a laid-back backbeat, 4/4 or a swaying 6/8, a last chorus lifted, sax solos answering the tune.",
     "choices": {
+      "insertion": { "none": 100, "wah": [10, 20, 30], "phaser": [10, 20, 30] },
       "room": { "plate": 100, "room": 60 },
       "tempo": { "from": [65, 65, 60], "to": [105, 105, 125] },
       "meter": { "4/4": 100, "6/8": [60, 60, 50], "3/4": [10, 10, 20] },

@@ -42,7 +42,10 @@ public enum InstrumentTrait
     Driven = 1024,
 
     /// <summary>A filter's opening and closing suits it, a synth's: a lead's, a pad's, a synth bass's, strings' or brass's.</summary>
-    Filters = 2048
+    Filters = 2048,
+
+    /// <summary>A wah pedal suits it, a guitar's or a clavinet's.</summary>
+    Wahs = 4096
 }
 
 /// <summary>
@@ -52,7 +55,7 @@ public enum InstrumentTrait
 public static class InstrumentTraits
 {
     private const InstrumentTrait Guitar = InstrumentTrait.Bends | InstrumentTrait.VibratesWide | InstrumentTrait.SoloBends | InstrumentTrait.Choruses
-                                           | InstrumentTrait.Tremolo | InstrumentTrait.Strums;
+                                           | InstrumentTrait.Tremolo | InstrumentTrait.Strums | InstrumentTrait.Wahs;
 
     private const InstrumentTrait Lead = InstrumentTrait.Bends | InstrumentTrait.VibratesWide | InstrumentTrait.SoloBends | InstrumentTrait.Choruses | InstrumentTrait.Sweeps
                                          | InstrumentTrait.Filters;
@@ -81,6 +84,8 @@ public static class InstrumentTraits
     /// <summary>An instrument's traits where they are not its family's.</summary>
     private static readonly Dictionary<int, InstrumentTrait> Own = new()
     {
+        // the clavinet, a funk player's wah
+        [7] = InstrumentTrait.Choruses | InstrumentTrait.Rolls | InstrumentTrait.Wahs,
         // the electric pianos, chorused and trembling
         [4] = InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Rolls | InstrumentTrait.Tremolo,
         [5] = InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Rolls | InstrumentTrait.Tremolo,
