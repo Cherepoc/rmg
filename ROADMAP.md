@@ -13,7 +13,7 @@ ratings by conventionality once enough are in, alongside, continuously and never
 to the presets and to what October 2026 gained (genres that sound like themselves, the pocket and the strum, builds and
 drops, turnarounds and passing chords), alongside.
 
-**When the need shows** (P3), each by what listening says, in this order: stretched voicings; the melody's range by genre; the fills' sounds by
+**When the need shows** (P3), each by what listening says, in this order: the melody's range by genre; the fills' sounds by
 convention; a piano's rolled chord; a pedal under a section; a chromatic inner line; a motif developed further; call
 and response; a chord's own scale drawn; the page's seek bar and its wait for a remake.
 
@@ -280,9 +280,10 @@ Each item with its plan, and what it waits for.
   line scales of melodic minor, the octatonic and the whole-tone from each chord's root, leaping, stretched voicings,
   swells, odd meters); not its tone, which General MIDI has not, its long legato soloing, which the solo's gestures
   (licks, runs, held notes) are not built for, its drumming and its melodic bass, gaps of their own.
-- **Stretched voicings** (P3): a chord spread over two octaves and more, a guitarist's wide stretch and a pianist's
-  spread voicing, beside the close shapes and the clusters; data on the voicings, a section holding its spacing
-  rather than the voice leader drawing it anew a chord, a wide voicing giving it room to jump.
+- **Stretched voicings**: done as a voicing among the others (`ChordVoicing`, "Spread"): the lowest note kept, the
+  second lowest two octaves up and the rest one, by the chords facet (0, 0.05, 0.5); chords over an octave 7.4% of a
+  middling song's (0.4%), over two octaves 9% at 0.75 of the chords facet (0). Not done: a section holding its spacing
+  rather than the voice leader drawing it anew a chord, should a spread chord's neighbours sound close.
 - **Approach chords** (P2 for its first steps, a plan in steps): a chord leading into the next one that the
   progression does not have, by its kind (the target's dominant, a passing diminished between roots a whole step
   apart, the target's shape a semitone above or below, the tritone substitute), its length (a beat, half a bar or a bar,
