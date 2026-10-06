@@ -403,6 +403,19 @@ public sealed class GenreTest
     }
 
     [Test]
+    public async Task EveryDevice_NamedAsTheSongsHaveIt_PlaysAsNoGenre()
+    {
+        // a device's own amounts the songs', so that a preset that names it as they have it plays it as they do
+        var genre = new Genre(GenreChoices.Devices.ToImmutableDictionary(x => x.Name, x => x.Options.ToImmutableDictionary(o => o.Name, o => o.Own)));
+        foreach (var seed in Enumerable.Range(0, 8))
+        {
+            static string[] Notes(CorpusSong song) =>
+                [..song.Song.Notes!.SelectMany(x => x.Value.Select(n => $"{x.Key} {n.Position:F4} {string.Join(",", n.Value.Pitches)} {n.Value.Duration:F4}"))];
+            await Assert.That(Notes(TestCorpus.Get(seed, new SongOverrides(Genre: genre)))).IsEquivalentTo(Notes(TestCorpus.Get(seed))).Because($"seed {seed}");
+        }
+    }
+
+    [Test]
     public async Task WhatIsGiven_WinsOverTheGenre()
     {
         var genre = Of((GenreChoices.Meter, [("3/4", 1)]), (GenreChoices.Scale, [("dorian", 1)]));
