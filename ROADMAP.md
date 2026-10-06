@@ -149,6 +149,9 @@ each from the trace; the seeds named here are ones already found.
 - **The riser into a drop:** the reverse cymbal over the silent bar, its note a bar long; a soundfont's sample shorter
   than the bar peaks early and leaves a gap before the drop, a longer one is cut at it. Start it later, should one.
 - **A genre's reverb:** Ambient's mean send 76, Funk's 28, the songs' 47: wet enough, and the dry genres' room heard?
+- **Rock's rhythm guitar:** the riff and the rhythm part never take the chords' instrument, nor the rhythm part the
+  riff's (`SongTracks`), so where the chords and the riff are both driven, Rock's rhythm part is clean (53%) or muted
+  (20%): a third guitar's contrast, or wanted distorted too, the exclusion then leaned rather than kept?
 - **The instruments:** a switch keeping to the part's family, 58% of a middling song's: welcome, or does a song want
   more handovers? An articulation on the same rig, a driven guitar's harmonics, a clean one muted: heard as the same
   player?
@@ -314,8 +317,6 @@ of here once it is; the genres it adds are described under *More genres*.
 
 **P1, wrong now and cheap:**
 
-3. **Rock's and Metal's muted guitar:** 34-36% of their riffs' notes and 36% of Rock's rhythm part's, twice their pools'
-   share (`GenreInstrumentsReportTest`): why, then their weight to the driven guitars.
 4. **Every part's pool named:** a preset names the instruments of every part it may play (a rule test), where now a
    riff, a rhythm part, a pad, a counter-melody or a solo falls back on the songs' pools: a distorted riff in Pop and
    Folk, an acoustic guitar strumming in Techno, synth pads in Latin and Funk, a distorted solo in Funk.

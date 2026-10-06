@@ -24,8 +24,8 @@
         "melody": { "acousticGrandPiano": [46, 46, 80], "electricPiano1": [38, 38, 67], "harmonica": 38, "electricGuitarClean": 100, "lead2Sawtooth": [46, 46, 50], "sitar": [0, 0, 15] },
         "chords": { "rockOrgan": [30, 30, 33], "acousticGuitarSteel": [25, 25, 100], "electricGuitarClean": [45, 45, 74], "overdrivenGuitar": [100, 100, 64], "distortionGuitar": [80, 80, 51] },
         "bass": { "electricBassFinger": [65, 65, 100], "electricBassPick": [100, 100, 87] },
-        "riff": { "overdrivenGuitar": 100, "distortionGuitar": 85, "electricGuitarMuted": [30, 30, 48] },
-        "rhythm": { "electricGuitarClean": [30, 30, 100], "electricGuitarMuted": [45, 45, 50], "overdrivenGuitar": [100, 100, 71], "distortionGuitar": [80, 80, 57] },
+        "riff": { "overdrivenGuitar": 100, "distortionGuitar": 85, "electricGuitarMuted": [5, 5, 15] },
+        "rhythm": { "electricGuitarClean": [30, 30, 100], "electricGuitarMuted": [10, 10, 20], "overdrivenGuitar": [100, 100, 71], "distortionGuitar": [80, 80, 57] },
         "solo": { "overdrivenGuitar": 100, "distortionGuitar": 100, "harmonica": [15, 15, 25], "lead2Sawtooth": [15, 15, 52] }
       },
       "kit": { "standard": [65, 65, 100], "room": [30, 30, 7], "power": [100, 100, 22] },
@@ -933,7 +933,7 @@
         "chords": { "distortionGuitar": 100, "overdrivenGuitar": 80, "churchOrgan": [10, 10, 30] },
         "bass": { "electricBassPick": 100, "electricBassFinger": 60 },
         "pad": { "choirAahs": 100, "stringEnsemble1": 80, "synthStrings1": [30, 30, 50] },
-        "riff": { "distortionGuitar": 100, "overdrivenGuitar": 60, "electricGuitarMuted": [30, 30, 40] },
+        "riff": { "distortionGuitar": 100, "overdrivenGuitar": 60, "electricGuitarMuted": [0, 0, 10] },
         "rhythm": { "distortionGuitar": 100, "overdrivenGuitar": 70 },
         "solo": { "distortionGuitar": 100, "overdrivenGuitar": 100, "lead2Sawtooth": [10, 10, 30] }
       },
