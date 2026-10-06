@@ -38,6 +38,9 @@ internal sealed class SectionGenerator
     // the song's shift of its lines' freedom to change register, before a section's, in spreads (LineProfile.RegisterFreedomSpread)
     private readonly double _songRegisterFreedomShift;
 
+    // the drum half of making a section
+    private readonly SectionDrumGenerator _drums;
+
 
     /// <param name="seed">The seed of the sections' random sequences, from which every section derives its own by its id.</param>
     /// <param name="songPercussion">How far the song leans to sections of percussion only (<see cref="PercussionSections" />).</param>
@@ -72,6 +75,8 @@ internal sealed class SectionGenerator
         _songRegisterFreedomShift = Generators.SplineValue()(context.CreateContext(Seeds.Derive(seed, SongRegisterFreedomStream)));
         _generators = ((Func<Meter, (BarStateGenerator, PatternGenerator)>)(meter => (new BarStateGenerator(settings, meter, genre), new PatternGenerator(context, tracks.Definitions, meter, genre))))
             .CacheGeneratedValues();
+        _drums = new SectionDrumGenerator(tracks, genre, songStateMap, sectionEnergies, songPercussion, absent, Stream, StreamSeed, Facets, CreateSectionTrackLayer,
+            meter => _generators(meter).Patterns);
     }
 
     /// <summary>The chance a section's guitars and picked bass chug, their repeats palm-muted, a genre's that the songs never play (<see cref="GenreChoices.Riff" />).</summary>
@@ -151,7 +156,7 @@ internal sealed class SectionGenerator
                 .Add(CompositionStateKinds.LineLift, MelodyLayers.EnergyRegister * _sectionEnergies[sectionId].GetStateValue(CompositionStateKinds.Energy))
                 .ToStateMap(context)
         );
-        var (sectionRoles, kit, isPercussionOnly, doubles, feelLeads) = DrawDrumParts(sectionId, plan.Drums, rhythm);
+        var (sectionRoles, kit, isPercussionOnly, doubles, feelLeads) = _drums.DrawDrumParts(sectionId, plan.Drums, rhythm);
         var activeDrumTrackNumbers = kit.Drums.Select(DrumGroups.GetTrackNumber).ToImmutableHashSet();
 
         // the section state reaches the notes through the track state maps, so the bar state holds only the state
@@ -170,13 +175,13 @@ internal sealed class SectionGenerator
         StateTrace.Record(TracePoints.PhraseScheme, SectionTrace, sectionId, 0, StateMap.Default, 0, scheme.ToString(), scheme);
         var sectionRhythm = new SectionRhythm(rhythm, scheme, _songMelodyBusyness.GenerateSection(context, tilt), tilt, facets);
 
-        var (sectionStrokes, barDrums) = DrawDrumBars(sectionId, activeDrumTrackNumbers, kit, scheme, rhythm, tilt);
+        var (sectionStrokes, barDrums) = _drums.DrawDrumBars(sectionId, activeDrumTrackNumbers, kit, scheme, rhythm, tilt);
 
         // the drums in half time now and then, in the quieter sections, or double time, in the louder, from a sequence of its own
         var timeFeel = Groove.DrawTimeFeel(Stream(sectionId, SectionStream.TimeFeel), tilt, sectionRhythm.Facets[Facet.Groove], _genre);
         StateTrace.Record(TracePoints.TimeFeel, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{timeFeel}", timeFeel);
         // the drums from a sequence of their own, so that the pitched tracks are the same whichever drums the song plays
-        var drums = GenerateDrums(Stream(sectionId, SectionStream.Drums), sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads, sectionRoles, sectionStrokes, barDrums, barStateTimelineMap, sectionRhythm, timeFeel, meter).ToArray();
+        var drums = _drums.GenerateDrums(Stream(sectionId, SectionStream.Drums), sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads, sectionRoles, sectionStrokes, barDrums, barStateTimelineMap, sectionRhythm, timeFeel, meter).ToArray();
         var (powerChords, chugs, octaveBass, hooks) = DrawDevices(sectionId, plan.Role, facets);
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
@@ -196,7 +201,7 @@ internal sealed class SectionGenerator
             GetGrooves(drums.SelectMany(x => x.Feels), meter),
             energy,
             isPercussionOnly,
-            sectionRoles.Keys.ToImmutableDictionary(x => x, x => SectionRole(sectionRoles, x)),
+            sectionRoles.Keys.ToImmutableDictionary(x => x, x => _drums.SectionRole(sectionRoles, x)),
             lines,
             plays,
             doubles.ToImmutableDictionary(x => x.Key, x => x.Value.Lead),
@@ -290,90 +295,6 @@ internal sealed class SectionGenerator
     }
 
     /// <summary>
-    ///     The section's drums as parts: the roles it draws again for the song's drums, the kit it plays, the drums that
-    ///     double a lead and how, and the leads whose feel the others play on, each from a sequence of its own.
-    /// </summary>
-    private (ImmutableDictionary<int, StateMap> Roles, SectionKit Kit, bool IsPercussionOnly, ImmutableDictionary<int, Doubling> Doubles, ImmutableDictionary<int, int> FeelLeads)
-        DrawDrumParts(int sectionId, SectionDrums planned, RhythmicUnconventionality rhythm)
-    {
-        // the roles the section draws again for the song's drums, as their parts in its grooves and its fills, from a
-        // sequence of its own
-        var roleContext = Stream(sectionId, SectionStream.DrumRoles);
-        var sectionRoles = _tracks.SongDrums.Select(DrumGroups.GetTrackNumber).Order()
-            .ToImmutableDictionary(x => x, x => DrumRoles.DrawSection(roleContext, DrumGroups.GetDrum(x), SongRole(x), rhythm.Value, _genre));
-        StateTrace.Record(
-            TracePoints.DrumRoles,
-            SectionTrace,
-            sectionId,
-            0,
-            StateMap.Default,
-            0,
-            string.Join(", ", sectionRoles.Where(x => !x.Value.IsDefault).Select(x => $"{x.Key} {(DrumRole)x.Value.GetStateValue(CompositionStateKinds.DrumRole).Value}")),
-            sectionRoles.Where(x => !x.Value.IsDefault).ToImmutableDictionary(x => x.Key, x => (DrumRole)x.Value.GetStateValue(CompositionStateKinds.DrumRole).Value)
-        );
-
-        // the drums: the kit's or, now and then, the percussion's alone, by the roles they play, as the song drew them
-        // (DrawDrums)
-        var (isPercussionOnly, kit, _) = planned;
-        StateTrace.Record(TracePoints.PercussionOnly, SectionTrace, sectionId, 0, StateMap.Default, 0, isPercussionOnly ? "percussion only" : "drum kit", isPercussionOnly);
-        StateTrace.Record(TracePoints.Kit, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", kit.Drums.Select(x => x.Name)), kit);
-        // a drum that doubles a lead plays its lead's beats up to the rank its role doubles, all of them, a share, or a
-        // figure of its own on the lead's feel, as it is bound to it, drawn from a sequence of its own, leaning to its own
-        // figure the less conventional the section
-        var bindingContext = Stream(sectionId, SectionStream.DrumBindings);
-        var doubles = kit.Doubles.OrderBy(x => DrumGroups.GetTrackNumber(x.Key)).ToImmutableDictionary(
-            x => DrumGroups.GetTrackNumber(x.Key),
-            x => new Doubling(
-                DrumGroups.GetTrackNumber(x.Value),
-                DrumRoles.DoublingRanks[x.Value.MainRole],
-                bindingContext.Pick(ByConvention.Weigh(x.Key.Bindings.Select(b => (b.Value, RhythmicUnconventionality.WeightEnds(b.Weight, b.Value == DrumBinding.Figure ? 1 : 0))), rhythm.Value)),
-                DrumKitGenerator.AccentShare
-            )
-        );
-        StateTrace.Record(TracePoints.Doubles, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", kit.Doubles.Select(x => $"{x.Key.Name} on {x.Value.Name}")), doubles);
-        // a drum that does not lead plays on its lead's feel: one bound to it always, one that colours the section on the
-        // lead of its main role's by a chance, drawn from a sequence of its own, crossing it the less conventional the section
-        var feelContext = Stream(sectionId, SectionStream.DrumFeels);
-        var feelLeads = ImmutableDictionary.CreateBuilder<int, int>();
-        foreach (var drum in kit.Drums.Except(kit.Leads).OrderBy(DrumGroups.GetTrackNumber))
-        {
-            var track = DrumGroups.GetTrackNumber(drum);
-            if (doubles.TryGetValue(track, out var doubling))
-                feelLeads[track] = doubling.Lead;
-            else if (kit.Leads.FirstOrDefault(x => x.MainRole == drum.MainRole) is { } lead && feelContext.TestProbability(RhythmicUnconventionality.Ends(DrumKitGenerator.FeelChance, -1).At(rhythm.Value)))
-                feelLeads[track] = DrumGroups.GetTrackNumber(lead);
-        }
-
-        StateTrace.Record(TracePoints.FeelLeads, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", feelLeads.Select(x => $"{DrumGroups.GetDrum(x.Key).Name} on {DrumGroups.GetDrum(x.Value).Name}")), feelLeads.ToImmutable());
-        return (sectionRoles, kit, isPercussionOnly, doubles, feelLeads.ToImmutable());
-    }
-
-    /// <summary>The strokes the section's drums change from the song's, and how they play its bars, each from a sequence of its own.</summary>
-    private (ImmutableDictionary<int, int> Strokes, BarDrums Bars) DrawDrumBars(int sectionId, ImmutableHashSet<int> activeDrumTrackNumbers, SectionKit kit, PhraseScheme scheme,
-        RhythmicUnconventionality rhythm, Tilt tilt)
-    {
-        // the strokes the section changes from the song's, and how its drums play its bars, each from a sequence of its own
-        var strokeContext =Stream(sectionId, SectionStream.DrumStrokes);
-        var sectionStrokes = ImmutableDictionary.CreateBuilder<int, int>();
-        foreach (var track in activeDrumTrackNumbers.Order().Where(x => DrumGroups.GetDrum(x).HasStrokes))
-            if (DrumStrokes.DrawChange(strokeContext, DrumGroups.GetDrum(track), SongStroke(track), DrumStrokes.SectionChangeChance, rhythm.Value, tilt, DrumSounds.OddsOf(_genre)) is { } change)
-                sectionStrokes[track] = change;
-        StateTrace.Record(TracePoints.DrumStrokes, SectionTrace, sectionId, 0, StateMap.Default, 0, string.Join(", ", sectionStrokes), sectionStrokes.ToImmutable());
-        var barDrums = DrumPresence.Draw(
-            Stream(sectionId, SectionStream.DrumPresence),
-            activeDrumTrackNumbers,
-            scheme,
-            kit.Leads.Select(DrumGroups.GetTrackNumber).ToHashSet(),
-            track => sectionStrokes.TryGetValue(track, out var stroke) ? stroke : SongStroke(track),
-            rhythm.Value,
-            tilt,
-            DrumSounds.OddsOf(_genre)
-        );
-        StateTrace.Record(TracePoints.DrumPresence, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{string.Join(", ", barDrums.Resting)}; {string.Join(", ", barDrums.Strokes)}", barDrums);
-        return (sectionStrokes.ToImmutable(), barDrums);
-    }
-
-    /// <summary>
     ///     The section's devices, each a genre's the more and from a sequence of its own: its riff in power chords, its guitars'
     ///     repeats palm-muted, its bass in octaves and its melody on a hook.
     /// </summary>
@@ -396,28 +317,11 @@ internal sealed class SectionGenerator
     }
 
     /// <summary>
-    ///     How loud and busy the section is meant to be: the song's state with the section's layers of the energy, and
-    ///     their sum, which leans the section's draws as far as its rhythm follows it.
-    /// </summary>
-    /// <summary>
     ///     A section's drums, drawn before the sections are made, so that the song sees them all (<see cref="DrumCoverage" />):
-    ///     whether it plays percussion only, a percussion song's every section and now and then a section of a song of the
-    ///     kit and percussion, unless the song says, and its kit, each from a sequence of its own.
+    ///     whether it plays percussion only and its kit (<see cref="SectionDrumGenerator.DrawDrums" />).
     /// </summary>
-    public SectionDrums DrawDrums(int sectionId, SectionRole role, bool? isPercussionOnly = null)
-    {
-        var rhythm = new RhythmicUnconventionality(Facets(sectionId)[Facet.Groove]);
-        var tilt = SectionEnergy.Tilt(_songStateMap.MergeWith(_sectionEnergies[sectionId]).GetStateValue(CompositionStateKinds.Energy), rhythm.Coupling);
-        var songPercussion = _tracks.SongDrums.Count(DrumGroups.Percussion.Drums.Contains);
-        var percussionOnly = isPercussionOnly ?? (_tracks.DrumSetup == DrumSetup.Percussion ||
-                                                  (_tracks.DrumSetup == DrumSetup.KitAndPercussion &&
-                                                   PercussionSections.Draw(Stream(sectionId, SectionStream.Percussion), _songPercussion, rhythm.Value, tilt, songPercussion)));
-        // whether its drums play where it first plays, as its arrangement draws them there (Generate)
-        var playsDrums = !Arrangement.DrawRests(new GenerationContext(StreamSeed(sectionId, SectionStream.Arrangement)), tilt, role, _absent, _genre, Facets(sectionId)[Facet.Form]).Contains(TrackRole.Drum);
-        return new SectionDrums(percussionOnly, DrumKitGenerator.SelectKit(Stream(sectionId, SectionStream.Kit), _tracks.SongDrums, tilt, percussionOnly), playsDrums);
-    }
+    public SectionDrums DrawDrums(int sectionId, SectionRole role, bool? isPercussionOnly = null) => _drums.DrawDrums(sectionId, role, isPercussionOnly);
 
-    /// <summary>How far a section strays from convention, facet by facet, each from a sequence of its own.</summary>
     /// <summary>
     ///     How many times a section plays its pattern, from a sequence of its own, by the form facet of the section's
     ///     unconventionality, the same before the section is made as when it is (<see cref="SectionLength" />).
@@ -433,11 +337,16 @@ internal sealed class SectionGenerator
         return phrases == 1 ? drawn : Math.Max(1, (int)Math.Round(drawn / (double)phrases));
     }
 
+    /// <summary>How far a section strays from convention, facet by facet, each from a sequence of its own.</summary>
     private Unconventionality Facets(int sectionId)
     {
         return _songFacets.GenerateSection(facet => _context.CreateContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Unconventionality), (int)facet)));
     }
 
+    /// <summary>
+    ///     How loud and busy the section is meant to be: the song's state with the section's layers of the energy, and
+    ///     their sum, which leans the section's draws as far as its rhythm follows it.
+    /// </summary>
     private (StateMap SongStateMap, double Energy) GetEnergy(int sectionId, RhythmicUnconventionality rhythm)
     {
         var songStateMap = _songStateMap.MergeWith(_sectionEnergies[sectionId]);
@@ -453,36 +362,6 @@ internal sealed class SectionGenerator
             new SectionEnergyTrace(energy, energy * rhythm.Coupling)
         );
         return (songStateMap, energy);
-    }
-
-    /// <summary>The role a drum plays in the section: its own, where it draws the drum's again, or the song's.</summary>
-    private DrumRole SectionRole(ImmutableDictionary<int, StateMap> sectionRoles, int track)
-    {
-        return sectionRoles[track].IsDefault ? SongRole(track) : (DrumRole)sectionRoles[track].GetStateValue(CompositionStateKinds.DrumRole).Value;
-    }
-
-    /// <summary>Every drum's state, a drum that doubles a lead with the lead's rhythm in place of its own.</summary>
-    private static ImmutableDictionary<int, StateMap> DoubleLeads(Dictionary<int, StateMap> trackStateMaps, ImmutableDictionary<int, Doubling> doubles)
-    {
-        var rhythm = CompositionStateKinds.Rhythm.All;
-        return trackStateMaps.ToImmutableDictionary(
-            x => x.Key,
-            x => doubles.TryGetValue(x.Key, out var doubling)
-                ? x.Value.Except(rhythm).MergeWith(trackStateMaps[doubling.Lead].Subset(rhythm))
-                : x.Value
-        );
-    }
-
-    /// <summary>The role a drum plays in the song, before a section draws it again.</summary>
-    private DrumRole SongRole(int track)
-    {
-        return (DrumRole)_tracks.Definitions[track].StateMap.GetStateValue(CompositionStateKinds.DrumRole).Value;
-    }
-
-    /// <summary>The stroke a drum that has strokes plays in the song, before a section changes it.</summary>
-    private int SongStroke(int track)
-    {
-        return _tracks.Definitions[track].StateMap.GetStateValue(StateKinds.DrumStroke).Value;
     }
 
     /// <summary>
@@ -540,71 +419,6 @@ internal sealed class SectionGenerator
             .Select(x => x.Rhythm)
             .FirstOrDefault() ?? ResolvedRhythm.DefaultState;
         return new FillGrooves(source, lastBar.ToImmutableDictionary(x => x.Track, x => x.Rhythm));
-    }
-
-    /// <summary>The drums the section plays, which make their patterns together, over the drums' shared state.</summary>
-    private IEnumerable<GeneratedBars> GenerateDrums(
-        IGenerationContext context,
-        int sectionId,
-        StateMap sectionStateMap,
-        ImmutableHashSet<int> activeDrumTrackNumbers,
-        ImmutableDictionary<int, Doubling> doubles,
-        ImmutableDictionary<int, int> feelLeads,
-        ImmutableDictionary<int, StateMap> sectionRoles,
-        ImmutableDictionary<int, int> sectionStrokes,
-        BarDrums barDrums,
-        StateTimelineMap barStateTimelineMap,
-        SectionRhythm sectionRhythm,
-        int timeFeel,
-        Meter meter
-    )
-    {
-        foreach (var group in _tracks.Groups)
-        {
-            // the section's time, as a step of every drum's period: half time twice as long, double time half
-            var groupStateMap = new StateMapBuilder("Section drum group", perTrack: true)
-                .AddRhythmLayer(sectionRhythm.Unconventionality.Lean(RhythmLayers.SectionDrumGroup).Tilted(sectionRhythm.Energy))
-                .AddNoteWalkLayer()
-                .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.SectionDrumGroup))
-                .AddNoteDurationLayer()
-                .ToStateMap(context)
-                .MergeWith(new StateMapBuilder("Section time").Add(CompositionStateKinds.Rhythm.Period.Power, timeFeel).ToStateMap(context))
-                .MergeWith(group.StateMap)
-                .MergeWith(sectionStateMap);
-            var trackStateMaps = new Dictionary<int, StateMap>();
-            foreach (var trackNumber in group.TrackNumbers.Where(activeDrumTrackNumbers.Contains))
-                trackStateMaps[trackNumber] = CreateSectionTrackLayer(context, trackNumber, sectionRhythm, sectionRhythm.Energy, SectionRole(sectionRoles, trackNumber))
-                    .MergeWith(groupStateMap)
-                    .MergeWith(sectionRoles[trackNumber])
-                    .MergeWith(sectionStrokes.TryGetValue(trackNumber, out var stroke) ? DrumStrokes.At(StateDepths.Section, stroke) : StateMap.Default);
-
-            // a drum out of the groove still has the state the drums share, with no notes, so that a note added
-            // later, such as in a fill, plays as loud as the section, and its own rhythm's state, which a fill plays it by
-            var idleStateMap = groupStateMap.OfScope(StateScope.Render);
-            var idleTrackNumbers = group.TrackNumbers.Where(x => !trackStateMaps.ContainsKey(x)).ToArray();
-            yield return new GeneratedBars(TrackEventStateTimelineMap.Create(
-                meter.PatternDuration,
-                idleTrackNumbers.Select(x => new KeyValuePair<int, EventStateTimelineMap<StateMap>>(
-                        x,
-                        EventTimeline.Create<StateMap>(meter.PatternDuration).ToEventStateTimelineMap(idleStateMap)
-                    )
-                ),
-                StateTimelineMap.Create(meter.PatternDuration)
-            ), [
-                ..idleTrackNumbers.Select(x => new BarFeel(
-                        x,
-                        meter.PatternBarCount - 1,
-                        SongTracks.GetGenerationStateMap(_tracks.Definitions[x]).MergeWith(groupStateMap).MergeWith(sectionRoles[x]),
-                        0
-                    )
-                )
-            ]);
-
-            if (trackStateMaps.Count == 0)
-                continue;
-
-            yield return _generators(meter).Patterns.GenerateBars(context, sectionId, DoubleLeads(trackStateMaps, doubles), barDrums, doubles, feelLeads, barStateTimelineMap, sectionRhythm, null);
-        }
     }
 
     /// <summary>The pitched tracks, each making its patterns on its own, over the section's state.</summary>
