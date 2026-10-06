@@ -5,7 +5,7 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Chords;
 
-/// <summary>A chromatic line inside a held chord: its root voice falling a semitone a quarter, the root, the major seventh, the seventh, the sixth.</summary>
+/// <summary>A chromatic line inside a held chord: its root voice falling a semitone a quarter, the root, the major seventh, the seventh, the sixth, as the song's state.</summary>
 public sealed class InnerLineTest
 {
     [Test]
@@ -18,8 +18,12 @@ public sealed class InnerLineTest
         {
             lined++;
             var root = Realizer.GetChord(note.Value.State).Chord.Root.Mod(12);
-            // one voice of the chord 1 to 3 semitones under its root, where the root was
-            await Assert.That(note.Value.Pitches.Any(x => (root - x).Mod(12) is 1 or 2 or 3)).IsTrue();
+            var falls = note.Value.State.GetStateValue(CompositionStateKinds.InnerLine);
+            // the chord's notes the fallen one, 1 to 3 semitones under its root, where the root was, and the root no more
+            var classes = Realizer.GetChordNotes(note.Value.State).Classes;
+            await Assert.That(falls is >= 1 and <= 3).IsTrue();
+            await Assert.That(classes.Contains((root - falls).Mod(12)) && !classes.Contains(root)).IsTrue();
+            await Assert.That(note.Value.Pitches.All(x => classes.Contains(x.Mod(12)))).IsTrue();
         }
 
         Console.WriteLine($"{lined} chords with a line inside");

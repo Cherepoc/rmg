@@ -315,11 +315,7 @@ left:
   (`GenreChoices.Devices`), first as the songs have them, rounded to whole percents; `GenreDevicesReportTest` the
   baseline of every retuning below.
 
-  **P2**, after P1's:
-  7. **The inner line's clashes:** the melody's notes on a beat a semitone from a chord note, in sections with an
-     inner line against those without (`SongStages.InnerLines` edits notes after they are realized, which the melody
-     does not see). Should they be more: the inner line as state, a chord's voice moved as `StateKinds.ChordShift`
-     moves the chord, so that the lines over it take it; the corpus changes.
+  **P2**, in order, each measured as above:
   8. **Latin retuned,** the least tuned: a two-chord vamp's pace (half a bar and a bar), a loop, applied dominants (V7
      in minor), a hook (the coro), solos (piano, trumpet, the timbales), a button or stop ending, levels, fills.
   9. **Ambient retuned:** forms of its own over verse and chorus, sections of 16 and 32 bars, building and thinning

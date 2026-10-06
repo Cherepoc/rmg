@@ -30,8 +30,7 @@ public sealed class SongGeneratorScaleTest
             var scales = SectionScales(song);
             // but where the chords solo, their notes a solo's line in a line scale of its own (LineScales)
             foreach (var span in song.Map.Sections.Where(x => !(song.Solos.TryGetValue(song.Map.Sections.IndexOf(x), out var solo) && solo.Soloists.Contains(TrackRole.Chords))))
-            // and a chromatic line inside a held chord, off the scale on purpose
-            foreach (var note in song.Song.Notes![SongTracks.ChordsTrack].Where(x => x.Position >= span.Start && x.Position < span.End && x.Value.State.GetStateValue(CompositionStateKinds.InnerLine) == 0))
+            foreach (var note in song.Song.Notes![SongTracks.ChordsTrack].Where(x => x.Position >= span.Start && x.Position < span.End))
             {
                 var state = note.Value.State;
                 var scale = Realizer.AlterScaleSteps(scales[span.SectionId].Offsets, state.GetStateValue(StateKinds.ScaleAlterations) is { IsSet: true } altered ? altered.Value : StepAlterations.None);

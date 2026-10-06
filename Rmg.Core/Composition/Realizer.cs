@@ -90,13 +90,20 @@ internal static class Realizer
     internal static (ChordContext Chord, ImmutableArray<int> Steps, IReadOnlySet<int> Classes) GetChordNotes(StateMap stateMap)
     {
         var (scaleOffsets, chordRootNoteIndex, chord) = GetChord(stateMap);
-        var chordPitchOffsets = stateMap.GetStateValue(StateKinds.ChordNotePitchOffsets);
-        var chordSteps = SnapChordToScale(
-            scaleOffsets,
-            chordRootNoteIndex,
-            chordPitchOffsets.IsEmpty ? [0] : chordPitchOffsets.Select(x => x * OctaveNoteCount)
-        );
+        var chordSteps = SnapChordToScale(scaleOffsets, chordRootNoteIndex, ChordTargets(stateMap));
         return (chord, chordSteps, chordSteps.Select(x => chord.GetPitch(x).Mod(OctaveNoteCount)).ToHashSet());
+    }
+
+    /// <summary>
+    ///     A chord's notes as targets, in semitones above its root: its shape's, its root's in every octave fallen where a
+    ///     chromatic line moves it inside the chord (<see cref="CompositionStateKinds.InnerLine" />); a note without a chord
+    ///     its root alone, unmoved.
+    /// </summary>
+    internal static IEnumerable<double> ChordTargets(StateMap stateMap)
+    {
+        var heights = stateMap.GetStateValue(StateKinds.ChordNotePitchOffsets);
+        var falls = stateMap.GetStateValue(CompositionStateKinds.InnerLine);
+        return heights.IsEmpty ? [0] : heights.Select(x => x * OctaveNoteCount - (Math.Abs(x - Math.Round(x)) < 1e-9 ? falls : 0));
     }
 
     /// <summary>
@@ -253,13 +260,8 @@ internal static class Realizer
 
         var (scaleOffsets, chordRootNoteIndex, chord) = GetChord(stateMap);
 
-        // the chord notes, in scale steps above the root; a note without a chord plays its root alone
-        var chordPitchOffsets = stateMap.GetStateValue(StateKinds.ChordNotePitchOffsets);
-        var chordSteps = SnapChordToScale(
-            scaleOffsets,
-            chordRootNoteIndex,
-            chordPitchOffsets.IsEmpty ? [0] : chordPitchOffsets.Select(x => x * OctaveNoteCount)
-        );
+        // the chord notes, in scale steps above the root
+        var chordSteps = SnapChordToScale(scaleOffsets, chordRootNoteIndex, ChordTargets(stateMap));
 
         var noteVelocity = stateMap.GetStateValue(StateKinds.Velocity);
         var quarterNoteDuration = stateMap.GetStateValue(StateKinds.QuarterNoteDurationPower)

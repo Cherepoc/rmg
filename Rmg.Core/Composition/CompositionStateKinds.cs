@@ -82,7 +82,8 @@ internal static class CompositionStateKinds
     // its attack softer, for a plugin a legato keyswitch (Render)
     public static StateKind<int> Legato { get; } = StateKinds.CreateAdditive<int>(Prefix + "Legato", StateScope.Render);
 
-    // 1 for a chord whose root voice a chromatic line moves inside it, off the section's scale (SongStages.InnerLines)
+    // how many semitones a chord's root voice falls inside it, a chromatic line's, 1 to 3 a quarter of the chord, its scale
+    // altered to hold it where it has it not; 0 for none (SongStages.InnerLines)
     public static StateKind<int> InnerLine { get; } = StateKinds.CreateAdditive<int>(Prefix + "InnerLine", StateScope.Render);
 
     // 1 for a drum a song pins to its figure, which plays its song's rhythm settings in every bar (DrumRoles.Pins)
