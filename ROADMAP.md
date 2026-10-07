@@ -405,7 +405,8 @@ left:
     figures' grid in 32nds, should IDM's wildest want more than its hi-hat rolls and fills give.
   - A riff on an open string's drone, its notes alternating with the pedal, black metal's and folk metal's (P3, by
     listening): the riff's pedal (`Line.PedalShare`) leaned by a genre.
-  - Black metal's interludes, an acoustic guitar or a synth alone between the storms (`GenreChoices.Alone`, Black metal's pad and rhythm part).
+  - Black metal's interludes: its pad alone now (`GenreChoices.Alone`); an acoustic guitar alone between the storms
+    (P3), the part alone switching to a quiet instrument of its family in a quiet section.
   - Field recordings, a prepared piano, glitch edits (*Parked*, beyond General MIDI).
 - **Metal's arpeggios** (P1, step 5): a guitar breaking its chord, slowly or at a walking pace, an 8th at a middling
   tempo, a 16th in a slow section, never fast, in shapes of their own, in an intro or a quiet section where the heavy
@@ -413,8 +414,8 @@ left:
   then, a minor chord's major seventh, a ♭2, a ♯4; dissonant more often in Nu metal's creeping clean parts and most
   often in Djent's. Built of what there is, three pieces added:
   - the rhythm part breaking its chord (`Arpeggios`), at its genre's pace (`rhythm.rhythm`), resting less where the
-    heavy guitars rest (`rests`), the part alone a genre's (`GenreChoices.Alone`); clean, or driven where its genre gives it a driven
-    guitar;
+    heavy guitars rest (`rests`), the part alone a genre's (`GenreChoices.Alone`); clean, or driven where its genre
+    gives it a driven guitar;
   - a pedal-point arpeggio (added): the chord's lowest note in turn with each of the others upwards, 1–3–1–5–1–8,
     metal's commonest broken chord, beside up, up and down, two octaves, Alberti and pairs;
   - a part's colour (added): one tone laid on its chord's notes for that part alone, a ninth, a major seventh, a ♭2 or a
