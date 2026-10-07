@@ -23,6 +23,9 @@ internal static class ExpressionRender
     /// <summary>How finely a curve is written, in beats: a 32nd.</summary>
     private const double Step = 0.125;
 
+    /// <summary>The two cycles a tape's wow drifts in, in beats from the song's start, apart so that it never repeats as a vibrato does.</summary>
+    private const double WowCycle = 2, SlowWowCycle = 3.3;
+
     public const int ReverbController = 91;
 
     /// <summary>A part's send to the synthesizer's delay, which plays its echo (<see cref="Midi" />).</summary>
@@ -67,7 +70,7 @@ internal static class ExpressionRender
         var bends = ImmutableArray.CreateBuilder<(double, int)>();
         var controllers = ImmutableArray.CreateBuilder<(double, int, int)>();
         var expression = ImmutableArray.CreateBuilder<(double, double)>();
-        int? reverb = null, chorus = null, delay = null, brightness = null;
+        int? reverb = null, chorus = null, delay = null, brightness = null, pitch = null;
 
         foreach (var note in notes)
         {
@@ -96,10 +99,15 @@ internal static class ExpressionRender
             var depth = state.GetStateValue(CompositionStateKinds.BendDepth);
             var vibrato = state.GetStateValue(CompositionStateKinds.Vibrato);
             var wide = state.GetStateValue(CompositionStateKinds.WideVibrato);
-            if (bend != BendKind.None || vibrato > 0 || wide > 0)
+            // and the tape's drift and the part's detune under them, in semitones, the drift by the time since the song's start
+            var wow = state.GetStateValue(CompositionStateKinds.Wow);
+            var detune = state.GetStateValue(CompositionStateKinds.Detune);
+            double Offset(double at) => (detune + wow * (0.6 * Math.Sin(2 * Math.PI * at / WowCycle) + 0.4 * Math.Sin(2 * Math.PI * at / SlowWowCycle))) / 100.0;
+            var shaped = bend != BendKind.None || vibrato > 0 || wide > 0;
+            if (shaped || wow > 0)
             {
                 var cyclesPerBeat = VibratoRate * 60 / (tempo.GetEffectiveValueAt(note.Position) * Meter.BaseTempo);
-                for (var t = 0.0; t < duration - 1e-9; t += Step / 4)
+                for (var t = 0.0; t < duration - 1e-9; t += shaped ? Step / 4 : Step)
                 {
                     var share = t / duration;
                     var semitones = bend switch
@@ -116,10 +124,16 @@ internal static class ExpressionRender
                     semitones += vibrato / 100.0 * growth * Math.Sin(2 * Math.PI * cyclesPerBeat * t);
                     // a wide one bends up from the note to its top and back, as a guitar's does, never below it
                     semitones += wide * growth * (0.5 - 0.5 * Math.Cos(2 * Math.PI * cyclesPerBeat * t));
-                    bends.Add((start + t, ToBend(semitones)));
+                    bends.Add((start + t, ToBend(semitones + Offset(start + t))));
                 }
 
-                bends.Add((end, ToBend(0)));
+                pitch = ToBend(Offset(end));
+                bends.Add((end, pitch.Value));
+            }
+            else if (ToBend(Offset(start)) != (pitch ?? ToBend(0)))
+            {
+                pitch = ToBend(Offset(start));
+                bends.Add((start, pitch.Value));
             }
 
 

@@ -38,7 +38,7 @@ public static class GenreChoiceDescriptions
         ["octaveBass"] = "How often a section's bass bounces between a note and its octave, as disco and funk basses do.",
         ["glide"] = "How often the song's bass slides from note to note, as an 808 or an acid line does.",
         ["bassLanding"] = "What the bass lands on when the chord changes: the root, steadiest, the third or the fifth, lighter, or wherever its figure takes it.",
-        ["effects"] = "How often a song uses each gentle effect: a vibrato on held notes, a chorus shimmer, a swell into held chords, bent notes, and a darker tone on some parts, a mellow guitar or a dull bass, darker still in the quiet sections.",
+        ["effects"] = "How often a song uses each gentle effect: a vibrato on held notes, a chorus shimmer, a swell into held chords, bent notes, and a darker tone on some parts, a mellow guitar or a dull bass, darker still in the quiet sections, and a worn tape's wow, the pitch drifting by a few cents, some parts held a little off.",
         ["articulation"] = "How the notes are played: a line's steps slurred together, a piano's chords rolled from the bottom up, the chords struck short as stabs.",
         ["levels"] = "How loud each part plays against the others: above the middle louder, below quieter, as a beat's drums lead it or a dub's bass does.",
         ["rests"] = "How often each part sits out a section: above the middle the oftener, as a dub's drums and bass drop out.",

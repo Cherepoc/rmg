@@ -122,6 +122,11 @@ internal static class CompositionStateKinds
     // steps, 0 for its own, which a filter's movement closes further from (Expression.Tone)
     public static StateKind<int> Tone { get; } = StateKinds.CreateAdditive<int>(Prefix + "Tone", StateScope.Render);
 
+    // a tape's wow, how far the song's pitch drifts either way, and a part's detune, how far it is held off, in cents
+    // (Expression.TapeChance)
+    public static StateKind<int> Wow { get; } = StateKinds.CreateAdditive<int>(Prefix + "Wow", StateScope.Render);
+    public static StateKind<int> Detune { get; } = StateKinds.CreateAdditive<int>(Prefix + "Detune", StateScope.Render);
+
     // the 16ths a trance gate lets a held note sound in, a bar's sixteen as bits from its first, 0 for none (Expression.Gate)
     public static StateKind<int> Gate { get; } = StateKinds.CreateAdditive<int>(Prefix + "Gate", StateScope.Render);
 

@@ -17,7 +17,7 @@ is removed once it is built.
 7. Done: the brightness measured in both soundfonts, the filter's floor raised to 40.
 8. Done, with 9: one brightness a part, its tone and a filter's closing added, never below the filter's floor.
 9. Done: a part's darker tone, a gentle effect, darker in the quiet sections; a swell brightening left (P3).
-10. Tape's wow and flutter, and a part detuned (*Genres*).
+10. Done: a tape's wow, the parts drifting together, some detuned, IDM's and a lo-fi genre's.
 11. The mix's filter opening a song.
 12. The mix's filter dipping before a section or a drop, and closing a song as an ending.
 13. Trance as it is produced: its effects stacked, its rolling bass, its build, its degrees (*Genres*).
@@ -394,8 +394,6 @@ left:
 - **Black metal and IDM, the rest** (October 2026, `NewGenresReportTest`): Black metal tremolo-picks 51% of its
   sections, blasts 20%, double-kicks 20%; IDM, warm and swung at its plainest, an acid line, odd meters (47% of its
   wildest songs), polymeters and rolls at its wildest, breaks 24% of its sections. Left:
-  - Tape's wow and flutter, and a part detuned (*Tape's wow and flutter*, below).
-  - A dull, warm tone for IDM's keys and pads (with *The filter as tone*).
   - Rolls splintering into 32nds, a breakbeat chopped and drilled, figures finer than a 16th (P3, by listening): the
     figures' grid in 32nds, should IDM's wildest want more than its hi-hat rolls and fills give.
   - A riff on an open string's drone, its notes alternating with the pedal, black metal's and folk metal's (P3, by
@@ -405,9 +403,6 @@ left:
   - Field recordings, a prepared piano, glitch edits (*Parked*, beyond General MIDI).
 - **A line's tensions beyond Djent** (P3, by listening to `?listen=djent-tension`): jazz's and IDM's melodies and
   counter-melodies on a tension now and then (`GenreChoices.Tension`).
-- **Tape's wow and flutter, and a part detuned** (P2, step 10): a slow drift of a few cents on the pads and keys, or a
-  part held a few cents off, as pitch bend, which a part's bends and vibrato share, a pitch effect beside the volume's,
-  the pan's and the filter's (the strong effects stacked); IDM's warmth, a lo-fi genre's.
 - **More genres** (P3): chiptune, once a square wave may play the chords (*Instruments outside a role's pool*).
   What the genres made in October 2026 still want: Fusion's
   roots off the scale (the progressions move by a 7-note scale's steps, chromatic and constant-structure motion

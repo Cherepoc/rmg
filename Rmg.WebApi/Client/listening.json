@@ -431,6 +431,28 @@
     ]
   },
   {
+    "id": "tape",
+    "question": "IDM off a worn tape, its parts' pitch drifting together by a few cents, some held a few cents off: warm, or out of tune?",
+    "decides": "The tape's chances in IDM, Hip hop, Ambient and Synthwave, and its wow's depth.",
+    "genre": "idm",
+    "without": {
+      "skip": [],
+      "genre": {
+        "effects": {
+          "tape": 0
+        }
+      }
+    },
+    "seeds": [
+      "2",
+      "3",
+      "6",
+      "9",
+      "E",
+      "G"
+    ]
+  },
+  {
     "id": "gate",
     "question": "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
     "decides": "Its weight in Trance, and the parts it chops.",

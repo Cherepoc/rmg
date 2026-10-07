@@ -128,6 +128,19 @@ internal static class Expression
     /// </summary>
     public static ByConvention ToneChance { get; } = new(0, 0.35, 0.5);
 
+    /// <summary>
+    ///     The chance a song plays as off a worn tape, its pitched parts' pitch drifting together by a few cents, slowly
+    ///     and never quite in a cycle, and some of them held a few cents off the rest, a lo-fi record's warmth; no likelier
+    ///     in a wild song than a middling one.
+    /// </summary>
+    public static ByConvention TapeChance { get; } = new(0, 0.05, 0.05);
+
+    /// <summary>The chance a pitched part of a song off a tape is held off the rest (<see cref="TapeChance" />).</summary>
+    private const double DetuneChance = 0.35;
+
+    /// <summary>How far a tape's pitch drifts either way, and a part is held off at most, in cents.</summary>
+    private const int WowLeast = 4, WowMost = 14, DetuneMost = 8;
+
     /// <summary>How far a part's tone closes at its deepest, in its quietest section, in the brightness controller's steps, short of a filter's reach.</summary>
     private const int ToneReach = 16;
 
@@ -414,6 +427,7 @@ internal static class Expression
     /// <param name="partStreams">A part's sequence for the whole song, by its track.</param>
     /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
     /// <param name="toneStream">The song's sequence of its parts' tones, whether the song plays them and each part's, in order.</param>
+    /// <param name="tapeStream">The song's sequence of its tape's wow, whether it plays one, how deep, and each part's detune, in order.</param>
     /// <param name="genre">The genre, whose chances of the gentle effects and pool of the strong ones are the song's where it names them.</param>
     /// <param name="changes">Where the chords change, in order, which a gated part's held chords change at.</param>
     /// <param name="cuts">Where a part's notes end as the band stops, by its track, which a gated part's held chords end by.</param>
@@ -430,6 +444,7 @@ internal static class Expression
         Func<int, IGenerationContext> partStreams,
         Func<int, int, IGenerationContext> streams,
         IGenerationContext toneStream,
+        IGenerationContext tapeStream,
         Genre genre,
         IReadOnlyList<double> changes,
         Func<int, IReadOnlyList<double>> cuts,
@@ -446,6 +461,9 @@ internal static class Expression
         double? carrierDelay = null;
         // whether the song gives its parts tones at all, the genre's where it names it
         var songTone = toneStream.TestProbability(SongToneChance.At(songSound, genre.Chance(GenreChoices.Effects, "tone")));
+        // and whether it plays off a tape, and how far its pitch drifts
+        var tape = tapeStream.TestProbability(TapeChance.At(songSound, genre.Chance(GenreChoices.Effects, "tape")));
+        var wow = tapeStream.GenerateInt(WowLeast, WowMost + 1);
 
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
@@ -521,6 +539,9 @@ internal static class Expression
             // and its tone, from a sequence of its own, every part drawing whatever it plays
             var toned = toneStream.TestProbability(ToneChance.At(songSound)) & songTone && role != TrackRole.Drum;
             var toneDepth = 0.3 + 0.7 * toneStream.GenerateDouble();
+            // and its detune, either way, every part drawing whatever it plays; a drum's kit is left in tune
+            var detuned = tapeStream.TestProbability(DetuneChance) && tape && role != TrackRole.Drum;
+            var detune = (tapeStream.TestProbability(0.5) ? 1 : -1) * tapeStream.GenerateInt(2, DetuneMost + 1);
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
                 var context = streams(span.SectionId, track);
@@ -607,6 +628,8 @@ internal static class Expression
                         state = state.With(CompositionStateKinds.Gate, gate);
                     if (tone != 0)
                         state = state.With(CompositionStateKinds.Tone, tone);
+                    if (tape && role != TrackRole.Drum)
+                        state = state.With(CompositionStateKinds.Wow, wow).With(CompositionStateKinds.Detune, detuned ? detune : 0);
                     if (filter != StrongEffect.None)
                         state = state.With(CompositionStateKinds.Filter, (int)filter).With(CompositionStateKinds.FilterDepth, filterDepth)
                             .With(CompositionStateKinds.FilterCycle, filter == StrongEffect.Opening ? span.Meter.PatternDuration : wobbleCycle);
