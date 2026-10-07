@@ -201,6 +201,7 @@ internal sealed record SongDecisions(
             Stream(SongStream.Intro),
             Stream(SongStream.HookIntro),
             Stream(SongStream.Drops),
+            Stream(SongStream.DropKind),
             genre,
             Of(Facet.Form),
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),

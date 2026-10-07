@@ -57,6 +57,7 @@ public static class GenreChoiceDescriptions
         ["mutation"] = "How often a drum bar takes an edit that the bars after it keep, a hit moved, dropped, doubled or ratcheted, two 8ths swapped, the kick and snare traded, so that the groove strays further as a section goes on, as a programmed break evolves.",
         ["drumSoloFeet"] = "What a drum solo's feet keep time with while the hands solo: the groove's kick, the hi-hat's pedal on 2 and 4 as a jazz drummer's, a double kick in 16ths as a metal drummer's, or the bossa's kick.",
         ["sticking"] = "The stickings a drum solo's runs are played in: single and double strokes, paradiddles, six-stroke rolls, or hands and foot in triplets, the right hand moving round the toms and the left on the snare.",
+        ["dropKind"] = "How a drop takes the bar before it: the band silent, or the band playing on through the whole mix closing to muffled and bursting open on the drop's downbeat.",
         ["mixFilter"] = "How often the whole mix is filtered, every part muffled together: a song opening up from muffled over its intro, a section's last bar or two closing before the next bursts in open, and the song closing as it ends.",
         ["stopTime"] = "How often a section's first phrase plays in stop time, the band hitting once a bar under the melody, as the blues and rock do.",
         ["push"] = "How often a section plays its chord changes an 8th early, an anticipation that pushes the groove forward.",

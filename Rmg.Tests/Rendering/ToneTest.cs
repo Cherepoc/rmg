@@ -34,7 +34,7 @@ public sealed class ToneTest
         {
             var values = track.Controllers.Where(c => c.Controller == ExpressionRender.BrightnessController).Select(c => c.Value).ToArray();
             // a drum's only where the whole mix is filtered
-            if (track.IsPercussionInstrument && song.Trace.Single(x => x.Point == TracePoints.MixFilter).Value is MixFilterPlan { Opening: false, Dips.IsEmpty: true, Closing: false })
+            if (track.IsPercussionInstrument && song.Trace.Single(x => x.Point == TracePoints.MixFilter).Value is MixFilterPlan { Opening: false, Dips.IsEmpty: true, Closing: false, Drops.IsEmpty: true })
                 await Assert.That(values).IsEmpty();
             await Assert.That(values.All(x => x is >= 40 and <= 64)).IsTrue().Because($"seed {song.Seed}");
         }

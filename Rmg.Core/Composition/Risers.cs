@@ -30,7 +30,8 @@ internal static class Risers
         var parts = song.Playing.Where(x => x.Value != TrackRole.Drum && song.Tracks.Definitions[x.Key] is PitchInstrumentTrack && notes.ContainsKey(x.Key))
             .OrderBy(x => Array.IndexOf(order, x.Value) is var i and >= 0 ? i : order.Length).ThenBy(x => x.Key).Select(x => x.Key).ToArray();
         var result = notes.ToBuilder();
-        foreach (var drop in song.Form.Drops)
+        // into a silent drop alone, a filtered one's band playing on its channel
+        foreach (var drop in song.Form.Drops.Except(song.Form.FilteredDrops))
         {
             var gap = drop - song.Form.Map.SectionAt(drop - 1e-6)!.Meter.BarDuration;
             // the first that has played before the silence, whose last note there the riser takes its state and loudness from

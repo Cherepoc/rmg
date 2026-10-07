@@ -72,6 +72,9 @@ internal static class TracePoints
     /// <summary>A line a section builds to and drops at, the band out for the bar before it (a <c>double</c>, the line's place).</summary>
     public const string Drop = "Drop";
 
+    /// <summary>Where a lift drops with the band playing on, filtered, over the bar before it (a <c>double</c>, its position).</summary>
+    public const string FilteredDrop = "Filtered drop";
+
     /// <summary>Whether a song plays its last section once more (a <c>bool</c>).</summary>
     public const string LastRepeat = "Last repeat";
 

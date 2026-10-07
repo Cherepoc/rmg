@@ -133,6 +133,7 @@
     "name": "House",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, a pumping bass and pads, piano and electric piano chords now and then, a TR-808 or electronic kit, straight, 117 to 130, minor, sus and add9 chords, a drop into the chorus.",
     "choices": {
+      "dropKind": { "silent": 100, "filtered": 50 },
       "mixFilter": { "opening": [10, 30, 50], "dips": [3, 6, 10], "closing": [10, 15, 25] },
       "drumSounds": { "openHiHat": 70 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
@@ -207,6 +208,7 @@
     "name": "Techno",
     "description": "A kick on every beat, driving and dark, the hi-hat on the offbeats, one figure looping for minutes over a chord or two, a square or sawtooth riff, little melody, a minor or Phrygian key, a TR-808 or electronic kit, 125 to 140, the pads and bass pumping.",
     "choices": {
+      "dropKind": { "silent": 60, "filtered": 100 },
       "mutation": { "bars": [0, 5, 15] },
       "mixFilter": { "opening": [20, 40, 60], "dips": [3, 8, 12], "closing": [10, 20, 30] },
       "rootMotion": { "same": 75 },
@@ -972,6 +974,7 @@
     "name": "Djent",
     "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, a clean lead floating over.",
     "choices": {
+      "dropKind": { "silent": 30, "filtered": 100 },
       "drumSoloFeet": { "doubleKick": 80, "groove": 60 },
       "cadenceRaise": { "sections": 0 },
       "cadenceDegree": { "fifth": 20, "second": 75, "seventh": 60 },
@@ -1243,6 +1246,7 @@
     "name": "Trance",
     "description": "The kick four on the floor, the hi-hat off the beat, sawtooth arpeggios and leads over pumping pads, a rolling bass, minor, 132 to 140, long sections building to a drop.",
     "choices": {
+      "dropKind": { "silent": 100, "filtered": 60 },
       "rootDegree": { "sixth": 80, "third": 85, "seventh": 75 },
       "mixFilter": { "opening": [20, 50, 70], "dips": [5, 10, 15], "closing": [10, 20, 30] },
       "figure": { "chords": { "own": [60, 50, 40], "sixteenths": 100 }, "bass": { "own": [40, 30, 30], "rolling": 100, "offbeat": [60, 60, 40] } },
@@ -1302,6 +1306,7 @@
     "name": "Drum and bass",
     "description": "Liquid: breakbeats at 165 to 178, a syncopated kick and the snare on 2 and 4, the hi-hat in 16ths, a deep synth bass, electric piano, piano and pads in minor sevenths, moody rather than bright, long sections and drops.",
     "choices": {
+      "dropKind": { "silent": 100, "filtered": 40 },
       "mutation": { "bars": [5, 15, 25] },
       "mixFilter": { "opening": [10, 30, 50], "dips": [5, 10, 15] },
       "room": { "hall": 70, "plate": 50 },

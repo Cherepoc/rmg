@@ -6,7 +6,7 @@ using Rmg.Core.Songs;
 namespace Rmg.Core.Composition;
 
 /// <summary>Where a song's whole mix is filtered: whether it opens up, the sections it dips before, by their starts, and whether it closes.</summary>
-public sealed record MixFilterPlan(bool Opening, ImmutableArray<double> Dips, bool Closing);
+public sealed record MixFilterPlan(bool Opening, ImmutableArray<double> Dips, bool Closing, ImmutableArray<double> Drops);
 
 /// <summary>
 ///     The whole mix filtered, every part's brightness and the drums' closed together, a form device: the song opening up
@@ -61,6 +61,10 @@ internal static class MixFilter
             ramps.Add((next.Start - Math.Min(span.Duration, bars * span.Meter.BarDuration), next.Start, 0, depth));
         }
 
+        // a filtered drop's bar before it closing all the way, opening on its downbeat (FormLayers.DropKinds)
+        foreach (var drop in song.Form.FilteredDrops)
+            ramps.Add((drop - song.Form.Map.MeterAt(drop - 1e-6).BarDuration, drop, 0, 1));
+
         var closes = stream.TestProbability(Chance(ClosingChance, "closing"));
         var closingDepth = 0.6 + 0.4 * stream.GenerateDouble();
         if (closes)
@@ -71,7 +75,7 @@ internal static class MixFilter
             ramps.Add((last.End, map.Duration, closingDepth, closingDepth));
         }
 
-        var plan = new MixFilterPlan(opens, dips.ToImmutable(), closes);
+        var plan = new MixFilterPlan(opens, dips.ToImmutable(), closes, song.Form.FilteredDrops);
         StateTrace.Record(TracePoints.MixFilter, SectionGenerator.SectionTrace, 0, 0, StateMap.Default, 0, $"{plan}", plan);
         if (ramps.Count == 0)
             return draft;

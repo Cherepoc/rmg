@@ -26,6 +26,9 @@ internal sealed class SongFormGenerator
     // the sequence whether a lift is built to and dropped at is drawn from (FormLayers.Drop)
     private readonly IGenerationContext _dropContext;
 
+    // a drop's kind, silent or filtered, from a sequence of its own
+    private readonly IGenerationContext _dropKindContext;
+
     // the genre whose intros and endings the song's are drawn among, where it names them
     private readonly Genre _genre;
 
@@ -49,6 +52,7 @@ internal sealed class SongFormGenerator
         IGenerationContext introContext,
         IGenerationContext hookContext,
         IGenerationContext dropContext,
+        IGenerationContext dropKindContext,
         Genre genre,
         RhythmicUnconventionality songRhythm,
         IReadOnlyDictionary<int, TrackRole> roles,
@@ -61,6 +65,7 @@ internal sealed class SongFormGenerator
         _introContext = introContext;
         _hookContext = hookContext;
         _dropContext = dropContext;
+        _dropKindContext = dropKindContext;
         _genre = genre;
         _songRhythm = songRhythm;
         _roles = roles;
@@ -300,6 +305,8 @@ internal sealed class SongFormGenerator
         // the snare a build rolls on: the song's electric or acoustic snare, or its clap
         var snare = FormLayers.BuildRollDrums.Select(DrumGroups.GetTrackNumber).FirstOrDefault(tracks.Contains, -1);
         var drops = new HashSet<double>();
+        var filtered = new HashSet<double>();
+        var kinds = ByConvention.Weigh(FormLayers.DropKinds, _songRhythm.Value, _genre.Pool<DropKind>(GenreChoices.DropKind, x => GenreChoices.Name(x.ToString())));
         for (var i = 0; i < lines.Count; i++)
         {
             var line = lines[i];
@@ -307,9 +314,11 @@ internal sealed class SongFormGenerator
                 || !_dropContext.TestProbability(drop))
                 continue;
             var gap = line.Position - line.Ending.Meter.BarDuration;
+            // the band silent over the bar before it, or playing on, filtered (MixFilter)
+            var kind = _dropKindContext.Pick(kinds);
             // the drums' hits kept for their fill, every other part, a soloist's too, kept out of it once the lines walk
             // into the section
-            foreach (var (track, role) in _roles)
+            foreach (var (track, role) in _roles.Where(_ => kind == DropKind.Silent))
             {
                 if (tracks.Contains(track))
                     edits.Clear(track, gap, line.Position);
@@ -337,13 +346,16 @@ internal sealed class SongFormGenerator
 
             lines[i] = line with { IsLandingForced = true };
             drops.Add(line.Position);
-            StateTrace.Record(TracePoints.Drop, FillGenerator.DrumsTrace, line.Next.SectionId, 0, StateMap.Default, 0, $"into {line.Position}", line.Position);
+            if (kind == DropKind.Filtered)
+                filtered.Add(line.Position);
+            StateTrace.Record(kind == DropKind.Silent ? TracePoints.Drop : TracePoints.FilteredDrop, FillGenerator.DrumsTrace, line.Next.SectionId, 0, StateMap.Default, 0,
+                $"into {line.Position}", line.Position);
         }
 
         // the band grows louder into a louder section, over the phrase before a drop
         songState = songState.MergeWith(CreateLifts(lines, end, drops, Math.Pow(FormLayers.GenreLiftReach, _genre.Shift(GenreChoices.Dynamics, "lift"))));
 
-        return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, songState, [..drops.Order()]);
+        return new SongAssembly(map, blocks.ToImmutable(), lines.ToImmutable(), edits, songState, [..drops.Order()], [..filtered.Order()]);
     }
 
     /// <summary>
@@ -597,11 +609,13 @@ internal sealed record FormPlan(
 /// <param name="Edits">What the form changes once the blocks are put one after another, such as the bars an intro leaves out.</param>
 /// <param name="SongState">How the song's state changes over it, over its own, such as the tempo slowing before an ending, or the band fading out.</param>
 /// <param name="Drops">Where a lift drops, the band silent for the bar before it, in the song's order (<see cref="FormLayers.Drop" />).</param>
+/// <param name="FilteredDrops">The drops whose bar before the band plays on through the whole mix filtered, rather than silent (<see cref="FormLayers.DropKinds" />).</param>
 internal sealed record SongAssembly(
     SongMap Map,
     ImmutableArray<TrackEventStateTimelineMap<StateMap>> Blocks,
     ImmutableArray<FillLine> Lines,
     TimelineEdits Edits,
     StateTimelineMap SongState,
-    ImmutableArray<double> Drops
+    ImmutableArray<double> Drops,
+    ImmutableArray<double> FilteredDrops
 );

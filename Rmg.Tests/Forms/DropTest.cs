@@ -50,4 +50,24 @@ public sealed class DropTest
         await Assert.That(builds).IsGreaterThan(8);
         await Assert.That(rolled / (double)builds).IsGreaterThan(0.8);
     }
+
+    [Test]
+    public async Task AFilteredDrop_KeepsTheBandPlaying_TheMixClosingOverTheBarBefore_AndOpeningOnIt()
+    {
+        var drops = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("techno")))))
+        foreach (var at in song.Trace.Where(x => x.Point == TracePoints.FilteredDrop).Select(x => (double)x.Value!))
+        {
+            drops++;
+            var bar = song.Song.Map!.MeterAt(at - 1e-6).BarDuration;
+            // the band playing on there, the drums at least, where a section of drums alone drops into the next
+            var played = song.Song.Notes!.Values.SelectMany(x => x).ToArray();
+            await Assert.That(played.Count(x => x.Position >= at - bar - 1e-9 && x.Position < at - 1e-9)).IsGreaterThan(2).Because($"seed {song.Seed} at {at}");
+            var mix = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(CompositionStateKinds.MixClosed);
+            await Assert.That(mix.GetEffectiveValueAt(at - 0.25)).IsGreaterThan(0.8).Because($"seed {song.Seed} at {at}");
+            await Assert.That(mix.GetEffectiveValueAt(at)).IsLessThan(0.05).Because($"seed {song.Seed} at {at}");
+        }
+
+        await Assert.That(drops).IsGreaterThan(5);
+    }
 }

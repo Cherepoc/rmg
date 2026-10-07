@@ -4,6 +4,13 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
+/// <summary>How a drop takes the bar before it (<see cref="FormLayers.DropKinds" />).</summary>
+public enum DropKind
+{
+    Silent,
+    Filtered
+}
+
 /// <summary>How a song ends after its last section.</summary>
 public enum EndingKind
 {
@@ -79,6 +86,16 @@ internal static class FormLayers
     ///     louder over the phrase before it and out for its last bar, a genre's that the songs never play.
     /// </summary>
     public static ByConvention Drop { get; } = new(0, 0, 0);
+
+    /// <summary>
+    ///     How a drop takes the bar before it: the band silent, the songs' always, or playing on through the whole mix
+    ///     closing to muffled and opening on the drop's downbeat, a dance track's (<see cref="MixFilter" />).
+    /// </summary>
+    public static ImmutableArray<(DropKind Kind, ByConvention Weight)> DropKinds { get; } =
+    [
+        (DropKind.Silent, new ByConvention(1, 1, 1)),
+        (DropKind.Filtered, new ByConvention(0, 0, 0))
+    ];
 
     /// <summary>How many bars a build grows louder over, the phrase before its drop, its section's at most.</summary>
     public const int BuildBars = 4;

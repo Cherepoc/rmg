@@ -272,5 +272,6 @@ internal enum SongStream
     Pinch = 93,
     Mutations = 94,
     DrumSoloOstinato = 95,
-    DrumSoloStickings = 96
+    DrumSoloStickings = 96,
+    DropKind = 97
 }
