@@ -24,18 +24,22 @@ public sealed class GateTest
                 continue;
             gated++;
             await Assert.That(chopped[0].Role is TrackRole.Pad or TrackRole.Chords or TrackRole.Rhythm).IsTrue();
-            // silent from 0.6 of a 16th, or from its start where it lets none through, as the song swings them
+            // silent from 0.6 of a 16th, or from its start where it lets none through, as the song swings them, or from an
+            // arpeggio's note's start, which falls where its rhythm puts it, in a 16th the gate lets none through
+            var starts = song.Song.Notes!.Values.First(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0))
+                .Select(x => song.Swing.Apply(x.Position)).ToArray();
             foreach (var (position, _) in chopped[0].Expression.Where(x => x.Value == 0))
             {
                 var step = Math.Floor(position / 0.25);
-                await Assert.That(new[] { step - 1, step, step + 1 }.Any(k => new[] { 0, 0.15 }.Any(x => Math.Abs(song.Swing.Apply(k * 0.25 + x) - position) < 1e-6)))
+                await Assert.That(new[] { step - 1, step, step + 1 }.Any(k => new[] { 0, 0.15 }.Any(x => Math.Abs(song.Swing.Apply(k * 0.25 + x) - position) < 1e-6))
+                                  || starts.Any(x => Math.Abs(x - position) < 1e-6))
                     .IsTrue().Because($"seed {song.Seed} at {position}");
             }
 
             // sounding on every bar's first 16th it holds a note over
             var timeline = song.Song.Notes!.Values.First(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0));
             foreach (var section in song.Map.Sections)
-            foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9))
+            foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0))
             for (var bar = section.Start + Math.Ceiling((note.Position - section.Start - 1e-9) / section.Meter.BarDuration) * section.Meter.BarDuration;
                  bar < note.Position + note.Value.Duration - 1e-9;
                  bar += section.Meter.BarDuration)
@@ -47,13 +51,13 @@ public sealed class GateTest
     }
 
     [Test]
-    public async Task AGatedPart_ChangesItsChords_OnlyOnTheBarsBeats()
+    public async Task AGatedPart_ChangesItsHeldChords_OnlyOnTheBarsBeats_AnArpeggioPlayingAsItFalls()
     {
         var gated = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
         foreach (var timeline in song.Song.Notes!.Values.Where(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)))
         foreach (var section in song.Map.Sections)
-        foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9))
+        foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0))
         {
             gated++;
             var inBar = (note.Position - section.Start) % section.Meter.BarDuration;
@@ -74,6 +78,8 @@ public sealed class GateTest
             // in every section a gated part plays, from its first note to the section's end: how much of it sounds, and its
             // notes off the bar's beats, after a gap, ending inside a 16th's sounding part, single, and with a semitone in them
             var (span, sounding, notes, offBeat, gaps, cut, single, second) = (0.0, 0.0, 0, 0, 0, 0, 0, 0);
+            // and its arpeggios' notes apart, how many of them a 16th after the one before
+            var (arpeggiated, sixteenths) = (0, 0);
             foreach (var song in gated)
             foreach (var timeline in song.Song.Notes!.Values.Where(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)))
             foreach (var section in song.Map.Sections)
@@ -83,7 +89,10 @@ public sealed class GateTest
                     continue;
                 span += section.End - inSection[0].Position;
                 var reached = inSection[0].Position;
-                foreach (var note in inSection)
+                var arpeggio = inSection.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0).ToArray();
+                arpeggiated += arpeggio.Length;
+                sixteenths += arpeggio.Skip(1).Where((x, i) => Math.Abs(x.Position - arpeggio[i].Position - 0.25) < 1e-6).Count();
+                foreach (var note in inSection.Except(arpeggio))
                 {
                     var end = Math.Min(note.Position + note.Value.Duration, section.End);
                     sounding += Math.Max(0, end - Math.Max(note.Position, reached));
@@ -135,7 +144,8 @@ public sealed class GateTest
 
             Console.WriteLine($"{name}: of a held note's bars' first 16ths {silent / (double)downbeats:P0} silent; of the 16ths it sounds from {offGrid / (double)openings:P0} off the swung 16ths");
             Console.WriteLine($"{name}: gated {gated.Length / (double)songs.Length:P0}; of a gated part's section from its first note sounding {sounding / span:P0}, " +
-                              $"of its {notes} notes {offBeat / (double)notes:P0} off the beat, {gaps / (double)notes:P0} after a gap, {cut / (double)notes:P0} ending inside a 16th's sound, {single / (double)notes:P0} a single note, {second / (double)notes:P0} a chord with a semitone");
+                              $"of its {notes} notes {offBeat / (double)notes:P0} off the beat, {gaps / (double)notes:P0} after a gap, {cut / (double)notes:P0} ending inside a 16th's sound, {single / (double)notes:P0} a single note, {second / (double)notes:P0} a chord with a semitone; " +
+                              $"arpeggio notes {arpeggiated}, a 16th after the one before {sixteenths / (double)Math.Max(1, arpeggiated):P0}");
         }
 
         await Task.CompletedTask;

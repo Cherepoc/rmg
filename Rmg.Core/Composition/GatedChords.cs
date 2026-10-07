@@ -17,7 +17,8 @@ internal static class GatedChords
     ///     after, every note it plays over the chord as one, the first's, of the notes it sounds longest there, held until the
     ///     next chord, the section's end or the band's next stop, whichever comes first; a note pushed ahead of a chord, as
     ///     it reaches the chord's beat, the chord's, and a chord the same as the one before it part of it. Stop time's notes
-    ///     as they are, its hits.
+    ///     as they are, its hits, and an arpeggio's, a broken chord being a rhythm of its own, which the gate chops as it
+    ///     plays, as trance gates a pluck.
     /// </summary>
     /// <param name="changes">Where the chords change, in order.</param>
     /// <param name="cuts">Where the band stops, as at a drop, which a held chord ends by.</param>
@@ -35,7 +36,8 @@ internal static class GatedChords
         double NextStop(double position) => stops.FirstOrDefault(x => x > position + Epsilon, double.PositiveInfinity);
 
         // every section's; an intro's and an ending's notes, which play no gate, as they are
-        var held = timeline.Where(x => InStopTime(x.Position) || x.Position < map.Sections[0].Start - Epsilon || x.Position >= map.Sections[^1].End - Epsilon).ToList();
+        bool Arpeggiated(RealizedNote note) => note.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0;
+        var held = timeline.Where(x => InStopTime(x.Position) || Arpeggiated(x.Value) || x.Position < map.Sections[0].Start - Epsilon || x.Position >= map.Sections[^1].End - Epsilon).ToList();
         foreach (var section in map.Sections)
         {
             var bar = section.Meter.BarDuration;
@@ -51,7 +53,7 @@ internal static class GatedChords
             var chords = new List<(double Start, double End, RealizedNote Note)>();
             // over a chord, the notes before a stop apart from those after it
             foreach (var group in timeline
-                         .Where(x => x.Position >= section.Start - Epsilon && x.Position < section.End - Epsilon && !InStopTime(x.Position))
+                         .Where(x => x.Position >= section.Start - Epsilon && x.Position < section.End - Epsilon && !InStopTime(x.Position) && !Arpeggiated(x.Value))
                          .Select(x => (Beat: Beat(x.Position), x.Value, Stop: NextStop(x.Position)))
                          .Where(x => x.Beat < Math.Min(section.End, x.Stop) - Epsilon)
                          .GroupBy(x => (Chord: starts.Last(s => s <= x.Beat + Epsilon), x.Stop)))

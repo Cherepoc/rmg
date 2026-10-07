@@ -336,6 +336,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         melody: ["melodyRange", "hook", "voice", "ornaments"],
         bass: ["bass", "octaveBass", "glide", "bassLanding"],
         riff: ["riff", "riffScale", "figure.riff"],
+        chords: ["figure.chords"],
         solo: ["soloAnswers"],
         drums: ["fills", "hatRolls", "drumJob", "marks", "drumSounds", "figure.ground", "figure.backbeat", "figure.claves"],
     };
@@ -348,7 +349,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
     ];
     const pitched = panel(...pitchedTiles());
     // a part with choices of its own a panel of its own, the others sharing one
-    const panels = Object.fromEntries(["melody", "bass", "riff"].map((part) => [part, panel(...pitchedTiles(), ...PART_CHOICES[part].map(own))]));
+    const panels = Object.fromEntries(["melody", "bass", "riff", "chords"].map((part) => [part, panel(...pitchedTiles(), ...PART_CHOICES[part].map(own))]));
     const solo = panel(bound(tile(undefined, "Instruments"), () => "instrument.solo"), ...PART_CHOICES.solo.map(own));
     const role = panel(
         bound(tile(isPieceAllowed, "Drums"), (x) => `drumRole.${x}`),
