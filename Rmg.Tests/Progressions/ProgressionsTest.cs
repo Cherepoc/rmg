@@ -189,7 +189,7 @@ public sealed class ProgressionsTest
         var scale = Rmg.Core.Composition.Scales.All.Single(x => x.Name == scaleName);
         var context = new GenerationContext(1);
         var homes = Enumerable.Range(0, PhraseCount)
-            .Select(_ => Rmg.Core.Composition.Progressions.GenerateHome(context, scale, Rmg.Core.Composition.SectionRole.Free))
+            .Select(_ => Rmg.Core.Composition.Progressions.GenerateHome(context, scale, Rmg.Core.Composition.SectionRole.Free, Rmg.Core.Composition.Genre.None, 0.5))
             .CountBy(x => x)
             .ToDictionary();
 

@@ -98,19 +98,31 @@ internal static class Progressions
     private static readonly ImmutableHashSet<int> PreCadenceSteps = [1, 3];
 
     /// <summary>
-    ///     The step of a section's home above the song's tonic, from -3 to 3: the tonic itself most often, the relative
-    ///     key (the third degree of a minor scale, the sixth of a major one) sometimes, and IV or V now and then.
+    ///     The homes a section may have, as a genre names them, and how likely each is: the tonic itself most often, the
+    ///     relative key (the third degree of a minor scale, the sixth of a major one) sometimes, and IV or V now and then.
+    /// </summary>
+    public static ImmutableArray<(string Name, string Label, double Weight)> Homes { get; } =
+    [
+        ("tonic", "The tonic", 0.6),
+        ("relative", "The relative key, a minor scale's third, a major one's sixth", 0.2),
+        ("fourth", "The fourth", 0.1),
+        ("fifth", "The fifth", 0.1)
+    ];
+
+    /// <summary>
+    ///     The step of a section's home above the song's tonic, from -3 to 3, one of <see cref="Homes" />, as likely as the
+    ///     genre weighs it where it names them, a black metal band's on its minor tonic and never its relative major.
     /// </summary>
     /// <param name="role">What the section does in the song's form: a bridge leans away from the tonic, to another key.</param>
-    public static int GenerateHome(IGenerationContext context, Scale scale, SectionRole role)
+    /// <param name="progression">The section's progression facet, which a genre's weights are taken at.</param>
+    public static int GenerateHome(IGenerationContext context, Scale scale, SectionRole role, Genre genre, double progression)
     {
         var relativeStep = GetQuality(scale.Offsets, 0) == TriadQuality.Minor ? 2 : 5;
+        int[] steps = [0, Normalize(relativeStep), Normalize(3), Normalize(4)];
+        var pool = genre.Pool<string>(GenreChoices.SectionHome, x => x);
         ImmutableArray<Weighted<int>> homes =
         [
-            new(0.6, 0),
-            new(0.2, Normalize(relativeStep)),
-            new(0.1, Normalize(3)),
-            new(0.1, Normalize(4))
+            ..Homes.Select((x, i) => new Weighted<int>(pool is null ? x.Weight : pool(x.Name)?.At(progression) ?? 0, steps[i])).Where(x => x.Weight > 0)
         ];
         var away = Tilt.Of(BridgeAwayOdds, role == SectionRole.Bridge ? 1 : 0);
         return context.Pick(away.Weigh(homes, home => home == 0 ? 0 : 1));

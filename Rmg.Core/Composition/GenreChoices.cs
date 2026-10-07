@@ -75,6 +75,9 @@ public static class GenreChoices
     /// <summary>The degrees a chord's root leans to, by its steps above the section's home, as rock's ♭VII and ♭VI (<see cref="Progressions.Degrees" />).</summary>
     public static GenreChoice RootDegrees { get; } = Values("rootDegree", "Chord degrees", Progressions.Degrees);
 
+    /// <summary>The homes a section's chords move around, the tonic, the relative key, the fourth or the fifth (<see cref="Progressions.Homes" />).</summary>
+    public static GenreChoice SectionHome { get; } = Pool("sectionHome", "A section's home", Progressions.Homes.Select(x => (x.Name, x.Label, new ByConvention(x.Weight, x.Weight, x.Weight))));
+
     /// <summary>
     ///     The chords that leave the section's scale, each its chance as the songs have it (<see cref="Composition.ChordScales" />):
     ///     a chord before a root a fifth below its dominant, a chord in a mode borrowed from the home's parallels, and a
@@ -556,7 +559,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Bass, OctaveBass, Glide, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, MixFilter, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Bass, OctaveBass, Glide, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, MixFilter, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
         SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

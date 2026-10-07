@@ -237,7 +237,7 @@ internal sealed class SectionGenerator
         var scale = plan.KeepsSongScale ? _songScale : PickScale(sectionId, facets[Facet.Scale], energy, plan.Role);
         // the section's chords move around its home, which every track's root starts from; the song's last section
         // leads home to its tonic, where the song ends
-        var home = Progressions.GenerateHome(context, scale, plan.Role);
+        var home = Progressions.GenerateHome(context, scale, plan.Role, _genre, facets[Facet.Progression]);
         if (plan.HasTonicHome)
             home = 0;
         // how often its chords change, from a sequence of its own, faster the more energy it has

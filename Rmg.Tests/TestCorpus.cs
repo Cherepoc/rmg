@@ -81,15 +81,21 @@ internal static class TestCorpus
 
     private static CorpusSong Generate(int seed) => Generate(seed, SongOverrides.None);
 
-    private static CorpusSong Generate(int seed, SongOverrides overrides)
+    private static CorpusSong Generate(int seed, SongOverrides overrides) => Generate((ulong)seed, overrides);
+
+    /// <summary>The song of a seed as the page writes it, such as one heard on the site, with what the overrides set; its <see cref="CorpusSong.Seed" /> the seed's low bits.</summary>
+    public static CorpusSong Get(string seed, SongOverrides overrides) =>
+        Generate(Rmg.Core.Base62.ToSeed(seed) ?? throw new ArgumentException($"{seed} is no seed.", nameof(seed)), overrides);
+
+    private static CorpusSong Generate(ulong seed, SongOverrides overrides)
     {
         return Isolated(() =>
             {
                 // the entries and their values, not what every layer contributed, which would make the songs several
                 // times slower to generate: a test that explains a state traces a song of its own
                 using var trace = StateTrace.Start(explains: false);
-                var song = SongGenerator.GenerateSong((ulong)seed, ProgressionSettings.Default, overrides, CancellationToken.None);
-                return new CorpusSong(seed, song, Render.RenderSong(song), [..trace.Entries]);
+                var song = SongGenerator.GenerateSong(seed, ProgressionSettings.Default, overrides, CancellationToken.None);
+                return new CorpusSong((int)seed, song, Render.RenderSong(song), [..trace.Entries]);
             }
         );
     }

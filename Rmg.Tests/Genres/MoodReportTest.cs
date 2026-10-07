@@ -1,63 +1,45 @@
-using Rmg.Core;
+using System.Collections.Immutable;
 using Rmg.Core.Composition;
-using Rmg.Core.Events;
 using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Genres;
 
-/// <summary>
-///     How dark or bright a preset's songs sound, by what a listener hears as such: the melody on a minor key's dark notes,
-///     its flat second and flat sixth, or on its major third; the time on major chords; the songs in a major mode; the
-///     melody's register and its share on a bright, high sound, bells, a music box, a celesta, a vibraphone or a flute.
-/// </summary>
+/// <summary>A genre's mood as its harmony makes it: its sections' scales, its chords' degrees, and how long its chords sound major or minor.</summary>
 public sealed class MoodReportTest
 {
-    private static readonly int[] Bright = [8, 9, 10, 11, 73];
-
-    private sealed record Mood(bool MajorMode, double Melody, double Flat2, double Flat6, double Major3, int ChordBeats, int MajorChords, double Pitches, int Notes, bool BrightLead);
-
-    private static Mood Measure(CorpusSong song)
+    /// <summary>A chord's quality by its pitch classes: major or minor where a triad of either is in it, the major first, else other.</summary>
+    private static string Quality(IEnumerable<int> pitches)
     {
-        var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
-        var notes = song.Song.Notes!;
-        var melody = notes.GetValueOrDefault(SongTracks.MelodyTrack)?.ToArray() ?? [];
-        double Time(int degree) => melody
-            .Where(x => (x.Value.Pitches[0] - common.GetEffectiveStateMapAt(x.Position).GetStateValue(StateKinds.KeyOffset)).Mod(12) == degree)
-            .Sum(x => x.Value.Duration);
+        var classes = pitches.Select(x => x % 12).ToHashSet();
+        if (classes.Count < 3)
+            return "two notes or fewer";
+        bool Has(int root, int third) => classes.Contains(root) && classes.Contains((root + third) % 12) && classes.Contains((root + 7) % 12);
+        if (Enumerable.Range(0, 12).Any(r => Has(r, 3)) && Enumerable.Range(0, 12).Any(r => Has(r, 4)))
+            return "both";
+        return Enumerable.Range(0, 12).Any(r => Has(r, 4)) ? "major" : Enumerable.Range(0, 12).Any(r => Has(r, 3)) ? "minor" : "other";
+    }
 
-        // every beat a chord sounds on, its notes those of the chords, the pad and the rhythm part sounding there
-        var (beats, major) = (0, 0);
-        foreach (var span in song.Map.Sections)
-            for (var t = span.Start; t < span.End - 1e-9; t += 1)
-            {
-                var classes = new[] { SongTracks.ChordsTrack, SongTracks.PadTrack, SongTracks.RhythmTrack }
-                    .SelectMany(x => notes.GetValueOrDefault(x)?.Where(n => n.Position <= t + 1e-6 && n.Position + n.Value.Duration > t + 1e-6).SelectMany(n => n.Value.Pitches) ?? [])
-                    .Select(x => x.Mod(12)).ToHashSet();
-                if (classes.Count == 0)
-                    continue;
-                var root = Realizer.GetChord(common.GetEffectiveStateMapAt(t)).Chord.Root.Mod(12);
-                beats++;
-                major += classes.Contains((root + 4) % 12) && !classes.Contains((root + 3) % 12) ? 1 : 0;
-            }
-
-        var scale = song.Song.Draws!.Scale.Offsets;
-        var lead = ((PitchInstrumentTrack)song.Song.TrackDefinitions[SongTracks.MelodyTrack]).InstrumentCode;
-        return new Mood(scale.Contains(4) && !scale.Contains(3), melody.Sum(x => x.Value.Duration), Time(1), Time(8), Time(4), beats, major,
-            melody.Sum(x => x.Value.Pitches[0]), melody.Length, melody.Length > 0 && Bright.Contains(lead));
+    private static void Describe(string label, IReadOnlyList<CorpusSong> songs)
+    {
+        var scales = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.SectionScale).Select(t => ((Scale)t.Value!).Name)).ToArray();
+        var drawn = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.Progression).Select(t => (ImmutableArray<int>)t.Value!)).SelectMany(x => x.Select(r => (r % 7 + 7) % 7)).ToArray();
+        var chords = songs.SelectMany(x => x.Song.Notes!.Where(n => x.Song.TrackDefinitions[n.Key].Role is TrackRole.Chords or TrackRole.Pad).SelectMany(n => n.Value))
+            .Where(x => x.Value.Pitches.Length >= 3).Select(x => (Quality: Quality(x.Value.Pitches), x.Value.Duration)).ToArray();
+        var total = chords.Sum(x => x.Duration);
+        Console.WriteLine($"{label}: scales {string.Join(", ", scales.GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count() / (double)scales.Length:P0}"))}");
+        Console.WriteLine($"{label}: degrees {string.Join(", ", drawn.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key + 1}: {x.Count() / (double)drawn.Length:P0}"))}");
+        var kinds = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.ChordScales).SelectMany(t => (IEnumerable<ChordScale>)t.Value!)).Select(x => x.Kind).ToArray();
+        Console.WriteLine($"{label}: chords' scales {string.Join(", ", kinds.GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count() / (double)kinds.Length:P0}"))}");
+        Console.WriteLine($"{label}: chords sounding {string.Join(", ", chords.GroupBy(x => x.Quality).OrderByDescending(x => x.Sum(c => c.Duration)).Select(x => $"{x.Key} {x.Sum(c => c.Duration) / total:P0}"))}");
     }
 
     [Test]
     [Explicit]
     public async Task Report()
     {
-        foreach (var genre in new[] { "", "trap", "hipHop", "techno", "dnb", "djent", "metal", "nuMetal", "trance", "pop" })
+        foreach (var name in new[] { "blackMetal", "idm", "metal", "ambient", "pop" })
         {
-            var moods = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => Measure(genre == "" ? TestCorpus.Get(seed) : TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre)))));
-            var melody = moods.Sum(x => x.Melody);
-            Console.WriteLine($"{(genre == "" ? "drawn" : genre),-8} major mode {moods.Count(x => x.MajorMode) / (double)moods.Length:P0}; " +
-                              $"melody on ♭2 {moods.Sum(x => x.Flat2) / melody:P0}, ♭6 {moods.Sum(x => x.Flat6) / melody:P0}, 3 {moods.Sum(x => x.Major3) / melody:P0}; " +
-                              $"major chords {moods.Sum(x => x.MajorChords) / (double)moods.Sum(x => x.ChordBeats):P0}; " +
-                              $"melody's pitch {moods.Sum(x => x.Pitches) / moods.Sum(x => x.Notes):F0}, on a bright sound {moods.Count(x => x.BrightLead) / (double)moods.Count(x => x.Notes > 0):P0}");
+            Describe(name, TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name)))));
         }
 
         await Task.CompletedTask;
