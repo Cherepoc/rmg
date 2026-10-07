@@ -55,12 +55,18 @@ public sealed class GenreManagerTest(Site site)
         await Assert.That(await yours.CountAsync()).IsEqualTo(0);
         await Assert.That(await manager.Locator("ul[aria-label='Presets'] li").CountAsync()).IsGreaterThan(10);
 
-        // duplicated, it opens in the editor in place of the window, kept among one's own under its name and a number
+        // duplicated, it opens in the editor in place of the window under its name and a number, kept among one's own only
+        // once it is saved
         await manager.Locator("ul[aria-label='Presets'] li", new() { HasText = "Jazz" }).First.Locator("button", new() { HasText = "Duplicate" }).ClickAsync();
         var editor = page.Page.Locator("dialog.genre-dialog");
         await page.Until(() => editor.IsVisibleAsync(), "the editor open");
         await Assert.That(await manager.IsVisibleAsync()).IsFalse();
         await Assert.That(await editor.Locator("input[aria-label='Genre name']").InputValueAsync()).IsEqualTo("Jazz 1");
+        await editor.Locator(":scope > header > button.genre-close").ClickAsync();
+        await page.Until(async () => !await editor.IsVisibleAsync(), "the editor closed");
+        await Assert.That(await page.Page.Locator("select[aria-label='Genre'] optgroup[label='Yours'] option").CountAsync()).IsEqualTo(0);
+        await page.FromManager("Presets", "Jazz", "Duplicate");
+        await editor.GetByRole(AriaRole.Button, new() { Name = "Save", Exact = true }).ClickAsync();
         await editor.Locator(":scope > header > button.genre-close").ClickAsync();
         await page.Until(async () => !await editor.IsVisibleAsync(), "the editor closed");
         await Assert.That(await page.Page.Locator("select[aria-label='Genre'] optgroup[label='Yours'] option").TextContentAsync()).IsEqualTo("Jazz 1");

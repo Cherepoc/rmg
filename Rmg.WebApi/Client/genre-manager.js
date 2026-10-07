@@ -107,13 +107,13 @@ export function createGenreManager({ presets, own, current, onKeep, onNew, onDup
     function refresh() {
         const yours = own().map((genre) => line(genre, genre.description ?? "", [
             button("Edit", `Change ${genre.name}`, () => onEdit(genre)),
-            button("Duplicate", `Make a genre of your own from ${genre.name}`, () => onDuplicate(genre)),
+            button("Duplicate", `Open a copy of ${genre.name} in the editor, yours once you save it`, () => onDuplicate(genre)),
             button("Remove", `Let go of ${genre.name}`, () => {
                 if (confirm(`Remove your genre ${genre.name}? Nothing brings it back.`)) onRemove(genre.name);
             }),
         ]));
         const shipped = presets().map((preset) => line(preset, preset.description, [
-            button("Duplicate", `Make a genre of your own from ${preset.name}`, () => onDuplicate(preset)),
+            button("Duplicate", `Open a copy of ${preset.name} in the editor, yours once you save it`, () => onDuplicate(preset)),
         ]));
         // the song's genre where it is no preset and none of one's own, a link's or a draft played
         const song = current();

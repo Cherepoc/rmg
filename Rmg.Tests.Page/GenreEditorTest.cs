@@ -301,12 +301,18 @@ public sealed class GenreEditorTest(Site site)
         var dialog = page.Page.Locator("dialog.genre-dialog");
         var name = dialog.Locator("input[aria-label='Genre name']");
 
-        // a preset duplicated among one's own, under its name and the first number free, twice
+        // a preset duplicated under its name and the first number free, kept among one's own only once it is saved
         await page.FromManager("Presets", "Rock", "Duplicate");
         await Assert.That(await name.InputValueAsync()).IsEqualTo("Rock 1");
         await dialog.Locator("> header .genre-close").ClickAsync();
+        await Assert.That(await genre.Locator("optgroup[label='Yours'] option").CountAsync()).IsEqualTo(0);
+        await page.FromManager("Presets", "Rock", "Duplicate");
+        await Assert.That(await name.InputValueAsync()).IsEqualTo("Rock 1");
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Save", Exact = true }).ClickAsync();
+        await dialog.Locator("> header .genre-close").ClickAsync();
         await page.FromManager("Presets", "Rock", "Duplicate");
         await Assert.That(await name.InputValueAsync()).IsEqualTo("Rock 2");
+        await dialog.GetByRole(AriaRole.Button, new() { Name = "Save", Exact = true }).ClickAsync();
         await dialog.Locator("> header .genre-close").ClickAsync();
         await Assert.That(await genre.Locator("optgroup[label='Yours'] option").AllTextContentsAsync()).IsEquivalentTo(["Rock 1", "Rock 2"]);
         await Assert.That(page.Errors).IsEmpty();

@@ -1676,12 +1676,11 @@ const genreManager = createGenreManager({
         genreManager.close();
         genreEditor.open(noGenre(), genreChoices);
     },
-    // a preset's copy without its sentence, which says what the preset sets and would no longer once the copy changes it
+    // a copy in the editor, kept only once it is saved; a preset's without its sentence, which says what the preset sets
+    // and would no longer once the copy changes it
     onDuplicate: (genre) => {
         const isPreset = PRESETS.includes(genre);
         const copy = { name: freeName(genre.name), ...(genre.description && !isPreset ? { description: genre.description } : {}), choices: structuredClone(genre.choices) };
-        keepGenres([...recallGenres(), copy]);
-        showGenre();
         genreManager.close();
         genreEditor.open(copy, genreChoices);
     },
