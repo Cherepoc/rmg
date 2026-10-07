@@ -9,15 +9,16 @@ is removed once it is built.
 **In order** (P1, the plan of 8 October 2026, each step through the implementation loop):
 
 1. Done: the genres sorted by name.
-2. Rock and metal measured against their sound, and their presets tuned where a choice reaches it (*Genres*).
-3. The listening tool, with the *Listening* section cut to its questions (*Listening data*).
-4. The double kick (*Genres*, *What the genres cannot play yet*).
-5. A progression's degrees leaned by a genre (*Genres*).
-6. The kick locked to the riff, a polymeter's figure as long as the bar (*Genres*).
-7. The render reading the song's map, and stop time and the pushes kept as decisions (*Architecture*).
-8. The song's sound decided before its notes, the gate's chords then voiced (*Architecture*).
-9. Figures as a genre's data: the gallop, the clave, the montuno (*Genres*).
-10. The rest of rock's and metal's (*Genres*), and long cycles only should listening ask (*Rhythm engine*).
+2. Done: rock and metal measured, their presets tuned.
+3. A section left to drums that only mark the form (*Form and sections*).
+4. The listening tool, with the *Listening* section cut to its questions (*Listening data*).
+5. The double kick (*Genres*, *What the genres cannot play yet*).
+6. A progression's degrees leaned by a genre (*Genres*).
+7. The kick locked to the riff, a polymeter's figure as long as the bar (*Genres*).
+8. The render reading the song's map, and stop time and the pushes kept as decisions (*Architecture*).
+9. The song's sound decided before its notes, the gate's chords then voiced (*Architecture*).
+10. Figures as a genre's data: the gallop, the clave, the montuno (*Genres*).
+11. The rest of rock's and metal's (*Genres*), and long cycles only should listening ask (*Rhythm engine*).
 
 **Next** (P1, alongside): listening to what is deployed and tuning by what it says (see *Listening*), the presets
 most as October 2026 retuned them, Pop and Metal, the instruments and the riser added, and the heavy band, the dark
@@ -271,6 +272,16 @@ Each item with its plan, and what it waits for.
 
 ### Form and sections
 
+- **A section left to drums that only mark the form** (P1, found on the test instance, seed BgSGnRm1zvT in Medieval):
+  its chorus, the song's loudest section, plays one part alone in all three appearances, twice the drums, whose job
+  there is marking the form, three strikes in twelve bars: near silence. Two causes: the part alone is drawn evenly
+  among the parts playing, the drums too, though drums marking the form carry neither time nor tune, and the drums' job
+  is drawn by its stage after the notes (`DrumMarks`), too late for the texture to know it; and a texture is drawn by
+  the form facet alone, so a chorus thins to one part as often as a verse. Medieval plays one part alone in 20% of its
+  appearances, Orchestral and Dungeon synth up to 20%. Plan: the drums' job a song decision (`SongDecisions`, its
+  draw as now, the fingerprint kept); the part alone never the drums where they mark the form; and the textures of
+  fewer parts, one alone and parts dropping out, leaned against a section's energy (`Tilt`, as stop time is).
+  Measured by the appearances alone by energy and the drums alone where they mark.
 - **A tag** (put off): half a pattern before a section changes, which breaks the pattern's grid for the fills' lines and
   the phrases; with the meter as state, an engine's change for a rare idiom.
 - **The energy's recurrence** counts a section's appearances, not its plays: should long sections sound too quiet.
@@ -422,14 +433,11 @@ left:
   4. The default (the songs' own, as now, or any genre) decided by the ratings by genre once a version has enough, and
      not before the retuned presets, Pop and Metal most, are heard.
   Not weighed by the presets nor leaned by conventionality: each preset spans the plainest songs to the wildest.
-- **Rock and metal as their bands play them** (P1, measured first, 8 October 2026): what each lacks against the
-  sound of a riff-driven hard rock band, a blues-rock band's shuffle, a twin-guitar heavy metal band, thrash and groove
-  metal. Measured first (`GenrePresetsReportTest`, a report of their own): Rock's songs with a solo, its swung songs,
-  how often its progressions play I–♭VII–IV and ♭VI–♭VII–I and Metal's i–♭VI–♭VII and i–♭II, the riff's
-  bar-repeating schemes, the kick's hits a bar. Then:
-  - Presets (P1), where the measure says so: Rock's light shuffle, a solo in most of its songs, the organ soloing;
-    Metal's and Rock's riffs leaning to AAAB and ABAB, two- and four-bar riffs turning in their last bar; Metal's
-    intro of its own material clean before the band, its louder forms turning it driven.
+- **Rock and metal as their bands play them** (P1, 8 October 2026): what each lacks against the sound of a riff-driven
+  hard rock band, a blues-rock band's shuffle, a twin-guitar heavy metal band, thrash and groove metal
+  (`RockAndMetalReportTest`). Their solos (73% and 78% of songs) and their riffs of two and four bars (AAAB and ABAB a
+  third of their sections) were there already; the organ's solo, Rock's shuffle at its plain end and Metal's clean
+  quiet sections are presets now. Left:
   - A progression's degrees leaned by a genre (P1): a genre leans root motions now, never a chord's degree, so rock's
     ♭VII and ♭VI and metal's ♭II and ♭VI come by chance; a lean of the progression's draw by the degree reached,
     `Tilt` data on the options as the root motions are. The dark presets' mood wants the same (*Sound*).
