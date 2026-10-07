@@ -16,7 +16,7 @@ is removed once it is built.
 6. Done: a progression's degrees leaned by a genre.
 7. Done: the kick locked to the riff.
 8. Done: the render reading the song's map, and stop time decided once.
-9. The song's sound decided before its notes, the gate's chords then voiced (*Architecture*).
+9. Done: the song's sound decided before its notes; the gate's chords voiced put off (*Architecture*).
 10. Figures as a genre's data: the double kick, the gallop, the clave, the montuno (*Genres*).
 11. The rest of rock's and metal's (*Genres*), and long cycles only should listening ask (*Rhythm engine*).
 
@@ -305,12 +305,12 @@ Each item with its plan, and what it waits for.
 
 ### Architecture
 
-- **The song's sound decided before its notes** (P1): the gentle effects' song draws, the strong effect and the part
-  carrying it, the room and the insertion drawn in `SongDecisions` from their streams as now, the carrier among the
-  parts rather than the parts with notes (the songs whose carrier changes counted first, a few at most); `Expression`
-  then applies what is decided and edits no notes. Then the gate's held chords a stage before the notes
-  (`GatedChords`), so that the `Realizer` voices an arpeggiating part's chord whole (Trance's held notes 34% single
-  now), and the pushes leaving the gated part on the beat. `Expression.Apply` takes 16 arguments today.
+- **A gated arpeggio voiced as a chord** (P3, put off October 2026, should listening find the single held note thin):
+  the song's strong effect and its carrier are decided with the song now (`SongSound`), so a stage before the notes
+  knows the gated part; but the `Realizer` plays a chords part's notes by the pattern's state, an arpeggio's one note
+  and a note's length to the next capped at a bar, both from layers that add up, which a stage would have to set
+  through them. A trial: the gated part's patterns one held event a bar on every chord, their arpeggio none. The pushes
+  need no part of it: the held chords move a pushed note to its beat already (`GatedChords`).
 - **The ratings in the history** (P4): the list of songs so far does not show which were liked or disliked.
 - **A mix written by the page** (P4): a change of the mix asks the server for the file again only for the download;
   writing the mix into the file in the page would leave the server out of it, at the cost of MIDI writing in
