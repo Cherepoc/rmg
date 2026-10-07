@@ -68,6 +68,7 @@ public static class GenreChoiceDescriptions
         ["dynamics"] = "How loud and busy the song is, how much its sections differ, and how long the band swells into a louder section, from a beat to a whole phrase.",
         ["phrases"] = "How long a section's chord pattern is before it repeats: 4 bars for most songs, 8 for a longer phrase, 12 for the blues, 16 for a tune.",
         ["sectionChanges"] = "How often a section changes the song's tempo, by a jump or by a metric ratio, or plays in a meter of its own.",
+        ["alone"] = "Which part plays a section alone, where its texture leaves one: a clean guitar's arpeggio in a metal intro, a pad in an ambient piece, a piano in a ballad.",
         ["polymeter"] = "How often a section's riff, bass and kick run in a cycle of a different length across the bar, as djent and math rock do.",
         ["soloAnswers"] = "How often the solo part answers the melody in its gaps, as a guitarist fills between a singer's lines.",
         ["lastRepeat"] = "How often the last chorus is played twice.",

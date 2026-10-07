@@ -167,6 +167,14 @@ public static class GenreChoices
     /// <summary>How an appearance brings its parts in over its phrases: steady, building, thinning or one part alone (<see cref="Composition.Texture" />).</summary>
     public static GenreChoice Texture { get; } = Pool("texture", "Texture", Composition.Texture.Kinds.Select(x => (Name(x.Kind.ToString()), Composition.Texture.LabelOf(x.Kind), x.Weight)));
 
+    /// <summary>Which part plays a section alone, where its texture leaves one, each as likely in the songs (<see cref="Composition.Texture" />).</summary>
+    public static GenreChoice Alone { get; } = Pool("alone", "The part alone",
+        new (TrackRole Role, string Label)[]
+        {
+            (TrackRole.Melody, "Melody"), (TrackRole.Chords, "Chords"), (TrackRole.Bass, "Bass"), (TrackRole.Pad, "Pad"),
+            (TrackRole.CounterMelody, "Counter-melody"), (TrackRole.Drum, "Drums"), (TrackRole.Riff, "Riff"), (TrackRole.Rhythm, "Rhythm")
+        }.Select(x => (Name(x.Role.ToString()), x.Label, Even(1))));
+
     /// <summary>How the chords and the rhythm part break their chords, or play them whole (<see cref="Arpeggios" />): an arpeggiator's up and down a synth genre's.</summary>
     public static GenreChoice Arpeggio { get; } = Pool("arpeggio", "Arpeggios", Arpeggios.Patterns.Select(x => (Name(x.Pattern.ToString()), Arpeggios.LabelOf(x.Pattern), x.Weight)));
 
@@ -521,7 +529,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, RootDegrees, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, RootDegrees, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
         SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

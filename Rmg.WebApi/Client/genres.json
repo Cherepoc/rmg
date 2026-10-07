@@ -681,6 +681,7 @@
     "name": "Ambient",
     "description": "Slow, pads, strings, a choir, a harp and a celesta, chords held long, sus and add9 chords, Lydian and major, the drums rare and sparse.",
     "choices": {
+      "alone": { "pad": 100, "melody": 40, "chords": 30, "counterMelody": 20 },
       "room": { "hall": 100, "plate": [0, 20, 40] },
       "drumPieces": { "cymbal": 100, "tom": 70, "triangle": 60, "tambourine": [10, 10, 30], "kick": [0, 0, 40], "acousticSnare": [0, 0, 40], "hiHat": [0, 10, 60], "ride": [0, 10, 40] },
       "marks": { "often": 40, "swells": 75 },
@@ -784,6 +785,8 @@
     "name": "Metal",
     "description": "Distorted guitars chugging a riff in power chords, a double kick in 16ths, the snare on 2 and 4 or in half time, breaks and stops, guitar solos, natural minor, Phrygian and harmonic minor, fast.",
     "choices": {
+      "alone": { "rhythm": 100, "riff": 60, "chords": 30, "bass": 20, "pad": 20 },
+      "texture": { "steady": 100, "build": [20, 30, 40], "alone": [5, 10, 20] },
       "figure": { "ground": { "own": 100, "withRiff": 40, "doubleKick": [10, 25, 30] }, "riff": { "own": 100, "gallop": [10, 15, 25] } },
       "drumSounds": { "china": 70 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
@@ -942,6 +945,8 @@
     "name": "Djent",
     "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, a clean lead floating over.",
     "choices": {
+      "alone": { "rhythm": 100, "riff": 50, "pad": 40 },
+      "texture": { "steady": 100, "build": [20, 30, 40], "alone": [5, 10, 20] },
       "figure": { "ground": { "own": 100, "withRiff": 70 } },
       "sectionChanges": { "meter": [10, 20, 100], "tempo": [0, 4, 100], "modulation": [0, 5, 50] },
       "drop": { "lifts": [20, 30, 40] },
@@ -1013,6 +1018,7 @@
     "name": "Nu metal",
     "description": "A low distorted riff of one note chugged in a syncopated hip-hop groove, a clicking slap bass, quiet clean verses with room for a voice and loud distorted choruses, squealing bends, natural minor and Phrygian.",
     "choices": {
+      "alone": { "rhythm": 100, "riff": 50, "bass": 40, "drum": 20 },
       "figure": { "ground": { "own": 100, "withRiff": 70 } },
       "drumSounds": { "china": 70 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
@@ -1034,7 +1040,7 @@
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [30, 30, 50], "counterMelody": [20, 20, 30], "drum": 100, "riff": 100, "riffTwin": [0, 10, 15], "rhythm": [70, 70, 60], "solo": [0, 5, 20] },
       "voice": { "verses": [50, 60, 60] },
       "dynamics": { "energy": 70, "contrast": 85 },
-      "texture": { "steady": 100, "build": 80, "thin": 40 },
+      "texture": { "steady": 100, "build": 80, "thin": 40, "alone": [5, 10, 20] },
       "louderForms": { "guitars": [80, 90, 90] },
       "instrument": {
         "melody": { "electricGuitarClean": 100, "lead2Sawtooth": 30, "lead6Voice": [10, 20, 30] },
@@ -1673,6 +1679,7 @@
     "name": "Black metal",
     "description": "Fast, cold and raw: tremolo-picked minor riffs over blast beats and a double kick, triads rather than power chords, a choir or synth strings behind, natural minor, Phrygian and harmonic minor, long repeating sections, a deep reverb, few solos.",
     "choices": {
+      "alone": { "pad": 100, "rhythm": 60, "melody": 30, "chords": 20 },
       "tempo": { "from": [150, 150, 130], "to": [210, 210, 230] },
       "meter": { "4/4": 100, "3/4": [10, 15, 25], "6/8": [5, 10, 20] },
       "feelChances": { "swing": 0, "halfTime": [15, 20, 25], "doubleTime": [5, 10, 15] },

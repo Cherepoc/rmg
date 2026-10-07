@@ -169,4 +169,26 @@ public sealed class TextureTest
 
         await Task.CompletedTask;
     }
+
+    /// <summary>Which part plays a section alone, by genre, where its texture leaves one.</summary>
+    [Test]
+    [Explicit]
+    public async Task ReportAlone()
+    {
+        foreach (var name in new[] { "metal", "nuMetal", "djent", "blackMetal", "ambient", "" })
+        {
+            var genre = name == "" ? null : Genres.GenrePresets.Genre(name);
+            var songs = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
+            var alone = songs.SelectMany(song => song.Map.Sections.Select((span, i) => (span, i))
+                    .Where(x => song.Texture(x.span).Kind == TextureKind.Alone && !(song.Solos.TryGetValue(x.i, out var solo) && solo.IsDrumSolo))
+                    // the part playing the most of it, past a fill's landing and the drums' fill into the next
+                    .Select(x => song.Song.Notes!.Where(n => song.Song.TrackDefinitions[n.Key].Role != TrackRole.RiffTwin)
+                        .MaxBy(n => n.Value.Count(v => v.Position >= x.span.Start - 1e-9 && v.Position < x.span.End - 1e-9)))
+                    .Select(n => song.Song.TrackDefinitions[n.Key].Role))
+                .ToArray();
+            Console.WriteLine($"{(name == "" ? "no genre" : name)}: {alone.Length} appearances alone, {string.Join(", ", alone.GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count() / (double)alone.Length:P0}"))}");
+        }
+
+        await Task.CompletedTask;
+    }
 }
