@@ -127,6 +127,9 @@ internal static class CompositionStateKinds
     // how closed the whole mix is, from 0, open, to 1, as far as a filter closes, stepped as a fade is (MixFilter)
     public static StateKind<double> MixClosed { get; } = StateKinds.CreateAdditive<double>(Prefix + "MixClosed", StateScope.Render, isShared: true);
 
+    // a driven guitar's note pinched into a harmonic's squeal, 1 (Expression.Pinches)
+    public static StateKind<int> Pinch { get; } = StateKinds.CreateAdditive<int>(Prefix + "Pinch", StateScope.Render);
+
     public static StateKind<int> Wow { get; } = StateKinds.CreateAdditive<int>(Prefix + "Wow", StateScope.Render);
     public static StateKind<int> Detune { get; } = StateKinds.CreateAdditive<int>(Prefix + "Detune", StateScope.Render);
 

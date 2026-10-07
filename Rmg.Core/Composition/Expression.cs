@@ -56,6 +56,16 @@ public enum StrongEffect
     Gate
 }
 
+/// <summary>How a pinch harmonic sounds (<see cref="Expression.Pinches" />).</summary>
+public enum PinchSound
+{
+    /// <summary>General MIDI's guitar harmonics, a clean bell, at the note's pitch.</summary>
+    Harmonics,
+
+    /// <summary>The driven guitar itself at the harmonic's pitch, an octave and a fifth or two octaves up, a squeal.</summary>
+    Squeal
+}
+
 /// <summary>
 ///     How the parts are played, beyond their notes: a line's vibrato and bends, as pitch bend, where its instrument can
 ///     bend, a single line at a time; a held chord's swell and an instrument's tremolo, as its expression; a pad's sweep
@@ -151,6 +161,54 @@ internal static class Expression
 
     /// <summary>How far a tape's pitch drifts either way, and a part is held off at most, in cents.</summary>
     private const int WowLeast = 4, WowMost = 14, DetuneMost = 8;
+
+    /// <summary>
+    ///     The chance a song's driven guitars pinch now and then, a held note's harmonic squealing over it, its highlight: a
+    ///     metal band's, seldom the songs'.
+    /// </summary>
+    public static ByConvention SongPinchChance { get; } = new(0, 0.1, 0.1);
+
+    /// <summary>
+    ///     Whether a note may be pinched, and how likely: a driven guitar's single note in a line, the riff's, the melody's,
+    ///     the counter-melody's or a solo's, held a while by the clock and the longest of its bar, never within a run, one a
+    ///     part a phrase at most; a riff's the likelier after palm-muted chugs, its contrast, and at its phrase's end, a
+    ///     solo's the more intense it is. Its sound a genre's (<see cref="PinchSounds" />), and always wavering, often bent.
+    /// </summary>
+    public const double PinchChance = 0.12;
+
+    /// <summary>The shortest note a pinch takes, in seconds, and the most notes a beat around it.</summary>
+    public const double PinchShortest = 0.4, PinchBusiest = 2.5;
+
+    /// <summary>How much likelier a riff's pinch is after a palm-muted note, and on its phrase's last bar, as odds.</summary>
+    public const double PinchAfterChugOdds = 4, PinchPhraseEndOdds = 2;
+
+    /// <summary>How wide a pinch's vibrato is, in cents, and the chance it is bent up to the next scale note and back.</summary>
+    public const int PinchVibrato = 40;
+
+    public const double PinchBendChance = 0.5;
+
+    /// <summary>A pinch's sound, as the songs have it, General MIDI's harmonics, the squeal a genre's.</summary>
+    public static ImmutableArray<(PinchSound Sound, ByConvention Weight)> PinchSounds { get; } =
+    [
+        (PinchSound.Harmonics, new ByConvention(1, 1, 1)),
+        (PinchSound.Squeal, new ByConvention(0, 0, 0))
+    ];
+
+    /// <summary>The semitones above its note a squealing pinch sounds at, an octave and a fifth or two octaves.</summary>
+    private static readonly int[] PinchIntervals = [19, 24];
+
+    /// <summary>General MIDI's guitar harmonics, which a pinch sounds on where it rings as a bell.</summary>
+    private const int GuitarHarmonics = 31;
+
+    /// <summary>Whether a note is the longest of its bar, a held one among the part's, which a pinch takes.</summary>
+    private static bool LongestOfBar(EventTimeline<RealizedNote> notes, int index, SectionSpan span)
+    {
+        var bar = span.Start + Math.Floor((notes[index].Position - span.Start) / span.Meter.BarDuration + 1e-9) * span.Meter.BarDuration;
+        return notes.Where(x => x.Position >= bar - 1e-9 && x.Position < bar + span.Meter.BarDuration - 1e-9).All(x => x.Value.Duration <= notes[index].Value.Duration + 1e-9);
+    }
+
+    /// <summary>Whether a program is a driven guitar, which pinches.</summary>
+    private static bool Pinches(int program) => program is 29 or 30;
 
     /// <summary>How far a part's tone closes at its deepest, in its quietest section, in the brightness controller's steps, short of a filter's reach.</summary>
     private const int ToneReach = 16;
@@ -442,6 +500,9 @@ internal static class Expression
     /// <param name="partStreams">A part's sequence for the whole song, by its track.</param>
     /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
     /// <param name="toneStream">The song's sequence of its parts' tones, whether the song plays them and each part's, in order.</param>
+    /// <param name="pinchStream">The song's sequence of whether its guitars pinch and how it sounds.</param>
+    /// <param name="pinchStreams">A part's sequence of its pinches, by its track.</param>
+    /// <param name="beatSeconds">How long a beat lasts at a position, in seconds, which a pinched note's length is held to.</param>
     /// <param name="tapeStream">The song's sequence of its tape's wow, whether it plays one, how deep, and each part's detune, in order.</param>
     /// <param name="genre">The genre, whose chances of the gentle effects and pool of the strong ones are the song's where it names them.</param>
     /// <param name="changes">Where the chords change, in order, which a gated part's held chords change at.</param>
@@ -460,6 +521,9 @@ internal static class Expression
         Func<int, int, IGenerationContext> streams,
         IGenerationContext toneStream,
         IGenerationContext tapeStream,
+        IGenerationContext pinchStream,
+        Func<int, IGenerationContext> pinchStreams,
+        Func<double, double> beatSeconds,
         Genre genre,
         IReadOnlyList<double> changes,
         Func<int, IReadOnlyList<double>> cuts,
@@ -479,6 +543,9 @@ internal static class Expression
         // and whether it plays off a tape, and how far its pitch drifts
         var tape = tapeStream.TestProbability(TapeChance.At(songSound, genre.Chance(GenreChoices.Effects, "tape")));
         var wow = tapeStream.GenerateInt(WowLeast, WowMost + 1);
+        // and whether its guitars pinch, and how a pinch sounds
+        var songPinches = pinchStream.TestProbability(SongPinchChance.At(songSound, genre.Chance(GenreChoices.Effects, "pinch")));
+        var pinchSound = pinchStream.Pick(ByConvention.Weigh(PinchSounds, songSound, genre.Pool<PinchSound>(GenreChoices.PinchSound, x => GenreChoices.Name(x.ToString()))));
 
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
@@ -487,6 +554,7 @@ internal static class Expression
             var role = definition.Role;
             var program = definition is PitchInstrumentTrack pitched ? pitched.InstrumentCode : -1;
             var states = new StateMap?[timeline.Count];
+            var raised = new int[timeline.Count];
             // the first note at or after a position
             int first(double position)
             {
@@ -557,6 +625,9 @@ internal static class Expression
             // and its detune, either way, every part drawing whatever it plays; a drum's kit is left in tune
             var detuned = tapeStream.TestProbability(DetuneChance) && tape && role != TrackRole.Drum;
             var detune = (tapeStream.TestProbability(0.5) ? 1 : -1) * tapeStream.GenerateInt(2, DetuneMost + 1);
+            // and its pinches, from a sequence of its own, one a phrase at most
+            var pinching = pinchStreams(track);
+            var pinchedPhrases = new HashSet<(int, int)>();
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
                 var context = streams(span.SectionId, track);
@@ -648,13 +719,47 @@ internal static class Expression
                     if (filter != StrongEffect.None)
                         state = state.With(CompositionStateKinds.Filter, (int)filter).With(CompositionStateKinds.FilterDepth, filterDepth)
                             .With(CompositionStateKinds.FilterCycle, filter == StrongEffect.Opening ? span.Meter.PatternDuration : wobbleCycle);
+                    // a pinch, a held note's harmonic, where the song pinches
+                    var phrase = (index, (int)Math.Floor((note.Position - span.Start) / (Meter.PhraseBarCount * span.Meter.BarDuration) + 1e-9));
+                    if (songPinches && Pinches(noteProgram) && note.Value.Pitches.Length == 1 && state.GetStateValue(CompositionStateKinds.Octave) == 0
+                        && role is TrackRole.Riff or TrackRole.RiffTwin or TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo
+                        && state.GetStateValue(CompositionStateKinds.PalmMute) == 0 && !pinchedPhrases.Contains(phrase)
+                        && note.Value.Duration * beatSeconds(note.Position) >= PinchShortest
+                        && timeline.Count(x => Math.Abs(x.Position - note.Position) < 1 - 1e-9) / 2.0 <= PinchBusiest
+                        && LongestOfBar(timeline, i, span))
+                    {
+                        var bar = Math.Floor((note.Position - span.Start) / span.Meter.BarDuration + 1e-9);
+                        var afterChug = i > 0 && timeline[i - 1].Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0;
+                        var phraseEnd = (bar + 1) % Meter.PhraseBarCount == 0;
+                        var pinchLean = role is TrackRole.Riff or TrackRole.RiffTwin
+                            ? Math.Log(afterChug ? PinchAfterChugOdds : 1) + Math.Log(phraseEnd ? PinchPhraseEndOdds : 1)
+                            : isSolo ? intensity.LogOdds : 0;
+                        var pinched = pinching.TestProbability(new Tilt(pinchLean).Chance(PinchChance, 1));
+                        var bent = pinching.TestProbability(PinchBendChance);
+                        var interval = PinchIntervals[pinching.GenerateInt(0, PinchIntervals.Length)];
+                        if (pinched)
+                        {
+                            pinchedPhrases.Add(phrase);
+                            state = state.With(CompositionStateKinds.Pinch, 1).With(CompositionStateKinds.Vibrato, PinchVibrato).With(CompositionStateKinds.WideVibrato, 0);
+                            state = bent
+                                ? state.With(CompositionStateKinds.Bend, (int)BendKind.BendAndRelease).With(CompositionStateKinds.BendDepth, ScaleDistance(note.Value, 1))
+                                : state.With(CompositionStateKinds.Bend, (int)BendKind.None).With(CompositionStateKinds.BendDepth, 0);
+                            if (pinchSound == PinchSound.Harmonics)
+                                state = state.With(CompositionStateKinds.Program, GuitarHarmonics + 1);
+                            else if (note.Value.Pitches[0] + interval <= 127)
+                                raised[i] = interval;
+                        }
+                    }
+
                     states[i] = state;
                 }
             }
 
             result[track] = EventTimeline.Create(
                 timeline.Duration,
-                timeline.Select((x, i) => states[i] is { } state ? (x.Value with { State = state }).ToTimelineItem(x.Position) : x)
+                timeline.Select((x, i) => states[i] is { } state
+                    ? (x.Value with { State = state, Pitches = raised[i] == 0 ? x.Value.Pitches : [..x.Value.Pitches.Select(p => p + raised[i])] }).ToTimelineItem(x.Position)
+                    : x)
             );
         }
 

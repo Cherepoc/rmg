@@ -68,8 +68,9 @@ internal static class InstrumentsOverTime
 
     /// <summary>
     ///     The variants of an instrument, as General MIDI has them, each one the same player's on the same rig: a finger or
-    ///     picked bass slapped or picked, a clean guitar muted and a muted one clean, a driven one in pinch harmonics but
-    ///     never muted, General MIDI's muted guitar being clean, strings in tremolo or pizzicato, a muted trumpet.
+    ///     picked bass slapped or picked, a clean guitar muted and a muted one clean, strings in tremolo or pizzicato, a muted
+    ///     trumpet; a driven guitar none, its pinch harmonics a held note's highlight (<see cref="Expression.Pinches" />)
+    ///     and General MIDI's muted guitar a clean one's.
     /// </summary>
     public static ImmutableDictionary<int, ImmutableArray<int>> Variants { get; } = new Dictionary<int, ImmutableArray<int>>
     {
@@ -78,8 +79,6 @@ internal static class InstrumentsOverTime
         [26] = [28],
         [27] = [28],
         [28] = [27],
-        [29] = [31],
-        [30] = [31],
         [40] = [44, 45],
         [41] = [44, 45],
         [42] = [44, 45],
@@ -87,12 +86,6 @@ internal static class InstrumentsOverTime
         [49] = [44, 45],
         [56] = [59]
     }.ToImmutableDictionary();
-
-    /// <summary>
-    ///     The shortest note a variant plays, in beats, by its program, a note shorter as the instrument it varies:
-    ///     pinch harmonics a squeal on a held or an accented note, never in a run of 16ths, as a tremolo-picked riff's.
-    /// </summary>
-    public static ImmutableDictionary<int, double> VariantShortest { get; } = new Dictionary<int, double> { [31] = 0.5 }.ToImmutableDictionary();
 
     /// <summary>The instruments of a role, which a section switches a part among.</summary>
     private static InstrumentRole? RoleOf(TrackRole role) => role switch
@@ -177,7 +170,7 @@ internal static class InstrumentsOverTime
                 foreach (var (note, i) in inSpan)
                 {
                     var bar = Math.Min(bars.Length - 1, (int)Math.Floor((note.Position - span.Start) / span.Meter.BarDuration + 1e-9));
-                    var articulated = !variants.IsEmpty && note.Value.Duration >= VariantShortest.GetValueOrDefault(variant) - 1e-9 && mode switch
+                    var articulated = !variants.IsEmpty && mode switch
                     {
                         ArticulationMode.Bars => bars[bar],
                         ArticulationMode.Accents => note.Value.Velocity > accent,

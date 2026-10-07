@@ -8,7 +8,7 @@ is removed once it is built.
 
 **In order** (P1, the plan of 7 October 2026, each step through the implementation loop):
 
-1. Pinch harmonics as a highlight rather than a variant (*Pinch harmonics*, below), both sounds for listening.
+1. Done: pinch harmonics a held note's highlight, rare, wavering, in two sounds for listening.
 2. An ending in the song's own harmony (*An ending in the song's own harmony*, below).
 3. Any General MIDI instrument in any role, then every genre's instruments retuned (*Any instrument in any role*,
    *Genres*).
@@ -214,25 +214,8 @@ Each item with its plan, and what it waits for.
     Black metal and IDM);
   - measured: the last section's devices against the others', the approaches by genre; `?listen=` a question of a
     dissonant song's ending.
-- **Pinch harmonics** (P1, step 1): measured October 2026 (`HarmonicsReportTest`), in Rock, Metal, Black metal,
-  Djent, Nu metal and Punk alike they break every rule a player keeps: 63% to 82% of them on a chord, the chords part's
-  as often as the riff's; up to 43% shorter than a quarter of a second, an 8th counted in beats at 200 a minute; 40% of
-  Djent's in playing of three notes a beat or more; 1% or 2% bent or wavering; five a phrase where a phrase has any,
-  up to 35. A variant switched on by the section, accents or whole bars, is the wrong mechanism. Instead:
-  - the driven guitars' variant (`InstrumentsOverTime.Variants`, 29 and 30 to 31) gone;
-  - a pinch a note's highlight, decided in `Expression` from a stream of its own: a single note, never a chord, of a
-    driven guitar, the riff's, the melody's, the counter-melody's or a solo's; held, a quarter of a second and more by
-    the clock and the longest of its bar, never within a run;
-  - in a riff anywhere it is held and accented, a phrase's last note, the first after a rest, a release after a run,
-    the likelier after palm-muted chugs, its contrast; in a line or a solo a note picked and then its harmonic, a solo's
-    the likelier the more intense;
-  - rare thrice over: a song pinches at all by a genre's chance (Metal, Nu metal and Djent some; Black metal and Rock
-    few; Punk almost none), a note held enough now and then, one a part a phrase at most;
-  - always with a wide vibrato, often bent up or scooped;
-  - its sound two ways for listening: General MIDI's guitar harmonics (31), a clean bell, or the driven guitar itself
-    at the harmonic's pitch, two octaves or an octave and a fifth above, the squeal a pinch makes;
-  - rules: never a chord, never under a quarter of a second, never among three notes a beat, one a part a phrase,
-    always wavering; calibrated by genre; `?listen=` a question of the two sounds.
+- **Pinch harmonics, by listening** (`?listen=pinch`, `?listen=pinch-sound`): General MIDI's harmonics or the squeal;
+  their chances by genre, Nu metal's 79 in 64 songs, Metal's 32; a riff's twin pinching apart from its riff.
 - **A sparse song's silent start** (P2): an Ambient or a Dungeon song now and then silent for its first 16 beats or
   more, its parts resting through their first phrase's start and its drums out of its first section (Ambient seed 37,
   Dungeon seed 54 of the corpus); a song's first part to sound coming in on its first beat, or the intro left out.

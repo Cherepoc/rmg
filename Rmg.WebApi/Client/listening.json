@@ -519,6 +519,51 @@
     ]
   },
   {
+    "id": "pinch",
+    "question": "A pinch harmonic now and then on a held note of Nu metal's riff or lead, bent and wavering: a highlight, or a squeak?",
+    "decides": "The pinch's chances by genre.",
+    "genre": "nuMetal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "effects": {
+          "pinch": 0
+        }
+      }
+    },
+    "seeds": [
+      "1",
+      "3",
+      "4",
+      "8",
+      "B",
+      "D"
+    ]
+  },
+  {
+    "id": "pinch-sound",
+    "question": "A pinch harmonic's sound: General MIDI's guitar harmonics, a clean bell (with), or the driven guitar squealing at the harmonic's pitch (without)?",
+    "decides": "Which sound a pinch makes.",
+    "genre": "nuMetal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "pinchSound": {
+          "harmonics": 0,
+          "squeal": 100
+        }
+      }
+    },
+    "seeds": [
+      "1",
+      "3",
+      "4",
+      "8",
+      "B",
+      "D"
+    ]
+  },
+  {
     "id": "gate",
     "question": "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
     "decides": "Its weight in Trance, and the parts it chops.",

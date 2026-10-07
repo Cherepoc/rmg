@@ -322,7 +322,7 @@ public static class GenreChoices
 
     /// <summary>
     ///     The gentle effects a song plays at all, each its chance as the songs have it by their sound (<see cref="Expression" />):
-    ///     a vibrato, a chorus, a held chord's swell, a line's bends, a part's darker tone and a tape's wow.
+    ///     a vibrato, a chorus, a held chord's swell, a line's bends, a part's darker tone, a tape's wow and a guitar's pinch harmonics.
     /// </summary>
     public static GenreChoice Effects { get; } = Chances("effects", "Effects",
     [
@@ -331,8 +331,13 @@ public static class GenreChoices
         ("swell", "A swell", Expression.SongSwellChance),
         ("bends", "Bends", Expression.SongBendChance),
         ("tone", "A part's darker tone", Expression.SongToneChance),
-        ("tape", "A tape's wow", Expression.TapeChance)
+        ("tape", "A tape's wow", Expression.TapeChance),
+        ("pinch", "A guitar's pinch harmonics", Expression.SongPinchChance)
     ]);
+
+    /// <summary>How a pinch harmonic sounds: General MIDI's guitar harmonics, or the driven guitar at the harmonic's pitch (<see cref="Expression.PinchSounds" />).</summary>
+    public static GenreChoice PinchSound { get; } = Pool("pinchSound", "A pinch harmonic's sound",
+        Expression.PinchSounds.Select(x => (Name(x.Sound.ToString()), x.Sound == Composition.PinchSound.Harmonics ? "General MIDI's guitar harmonics" : "The guitar's squeal, at the harmonic", x.Weight)));
 
     /// <summary>A section's own tempo, one by a metric ratio and its own meter, beside the song's (<see cref="Composition.SectionTempo" />, <see cref="Composition.SectionMeter" />).</summary>
     public static GenreChoice SectionChanges { get; } = Chances("sectionChanges", "A section's own time",
@@ -559,7 +564,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Bass, OctaveBass, Glide, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, MixFilter, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Bass, OctaveBass, Glide, BassLanding, Effects, PinchSound, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, MixFilter, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
         SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

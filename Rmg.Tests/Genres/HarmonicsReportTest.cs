@@ -5,7 +5,7 @@ using Rmg.Core.Songs;
 namespace Rmg.Tests.Genres;
 
 /// <summary>
-///     The driven guitars' pinch harmonics as the songs play them (General MIDI's 31, a variant of 29 and 30): which parts,
+///     The driven guitars' pinch harmonics as the songs play them (<see cref="Expression.Pinches" />): which parts,
 ///     how long, how fast the playing around them, whether bent or wavering, how many a phrase.
 /// </summary>
 public sealed class HarmonicsReportTest
@@ -19,7 +19,7 @@ public sealed class HarmonicsReportTest
             var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name))));
             var harmonics = songs.SelectMany(song => song.Song.Notes!.Where(n => song.Song.TrackDefinitions[n.Key] is PitchInstrumentTrack)
                 .SelectMany(n => n.Value.Select((x, i) => (Song: song, Role: song.Song.TrackDefinitions[n.Key].Role, Notes: n.Value, Index: i, Note: x)))
-                .Where(x => x.Note.Value.State.GetStateValue(CompositionStateKinds.Program) == 32)).ToArray();
+                .Where(x => x.Note.Value.State.GetStateValue(CompositionStateKinds.Pinch) == 1)).ToArray();
             if (harmonics.Length == 0)
             {
                 Console.WriteLine($"{name}: none");
