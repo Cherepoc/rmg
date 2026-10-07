@@ -17,7 +17,8 @@ is removed once it is built.
 7. Done: drum solos' feet a genre's ostinato and their runs in stickings; their motif, arc and trading left (*Groove*).
 8. Done: a filtered drop, a genre's; a swell brightening; a riff's whammy dive into a louder section.
 9. A line's tensions beyond Djent, after `?listen=djent-tension` is answered.
-10. The gate's riff by listening: Djent's stutter gone, a rock band's held riff restruck (*A held guitar restruck*).
+10. The gate's and the tremolo's parts by listening: Djent's stutter gone, the tremolo kept to held notes as the gate is,
+    a rock band's held riff restruck (*A held guitar restruck*).
 11. The dive by listening: held longer, slow at its bottom, the tempo easing into the next section (*The dive heard*).
 12. Techno's drops both kinds, the silent one with its riser as likely as the filtered (*The drops heard*).
 
@@ -280,6 +281,9 @@ Each item with its plan, and what it waits for.
   (`gateParts`), a riff gated in Rock and the like instead; and a held chord on a decaying instrument, a guitar's, a
   piano's, struck again now and then while it is held, every bar or every beat a chord change leaves, rather than one
   stroke ringing into silence (`GatedChords.Hold`), its restrikes the softer.
+  The tremolo on a riff sounds as the gate does, a stutter: the tremolo's parts as the gate's, a genre's
+  (`tremoloParts` beside `gateParts`, the songs' the held chords' and the pad's and the lines' held notes), and its
+  volume moving on held notes alone, a note too short for a cycle of it left still, never chopping a riff's run.
 - **The dive heard** (P1, step 11; `?listen=dive`, October 2026): a riff's whammy dive into a louder section is good, in
   Nu metal and in Metal and Djent too, but not heard: the note too short, the dive too quick. Its note held longer,
   through the bar before the section where the riff allows; its curve falling fast and then slowly at its bottom, rather
