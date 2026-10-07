@@ -1,0 +1,133 @@
+using System.Collections.Immutable;
+using Rmg.Core.Events;
+using Rmg.Core.Probabilities;
+using Rmg.Core.Songs;
+
+namespace Rmg.Core.Composition;
+
+/// <summary>Who plays a figure: the kick, the riff or the claves.</summary>
+public enum FigurePlayer
+{
+    Ground,
+    Riff,
+    Claves
+}
+
+/// <summary>
+///     A figure a player plays in place of its own rhythm: where its notes start, in 16ths, over as many bars as it lasts,
+///     or the riff's, wherever the riff's notes start; and how a section's energy leans it, a loud section the likelier
+///     above 0.
+/// </summary>
+/// <param name="Sixteenths">How many 16ths it lasts, a bar of four's or two; none for the riff's, which lasts as the riff does.</param>
+public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, bool FollowsRiff, double EnergyLean);
+
+/// <summary>
+///     The figures a genre gives its players in its sections: a groove or thrash band's kick with the riff, or in 16ths, a
+///     double kick; a heavy band's galloping riff; a clave's three and two. A section draws each player's, its own rhythm
+///     or one of its figures, from a sequence of its own, by the feel facet and the genre's pool, leaned by its energy;
+///     the songs play their own rhythms always. The player plays the figure in every bar it plays in, its own notes
+///     there given up, each struck as its own was at or before it. A stage of the song before its fills, which play over
+///     it (<see cref="SongStages" />), in a meter of four for a figure of 16ths.
+/// </summary>
+internal static class Figures
+{
+    /// <summary>A player's own rhythm, as its pool names it.</summary>
+    public const string Own = "own";
+
+    /// <summary>Every figure, by its player.</summary>
+    public static ImmutableArray<Figure> All { get; } =
+    [
+        new("withRiff", "With the riff, wherever it plays", FigurePlayer.Ground, [], 0, true, 1),
+        new("doubleKick", "A double kick, every 16th", FigurePlayer.Ground, [..Enumerable.Range(0, 16)], 16, false, 1),
+        new("gallop", "A gallop, an 8th and two 16ths a beat", FigurePlayer.Riff, [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15], 16, false, 0),
+        new("clave32", "The clave's 3-2", FigurePlayer.Claves, [0, 6, 12, 20, 24], 32, false, 0),
+        new("clave23", "The clave's 2-3", FigurePlayer.Claves, [4, 8, 16, 22, 28], 32, false, 0)
+    ];
+
+    /// <summary>A player's options, its own rhythm first, as its pool shows them, the songs' weight of each: their own always.</summary>
+    public static IEnumerable<(string Name, string Label, ByConvention Weight)> OptionsOf(FigurePlayer player) =>
+    [
+        (Own, "Its own rhythm", new ByConvention(1, 1, 1)),
+        ..All.Where(x => x.Player == player).Select(x => (x.Name, x.Label, new ByConvention(0, 0, 0)))
+    ];
+
+    /// <summary>A player as its pool's page shows it.</summary>
+    public static string LabelOf(FigurePlayer player) => player switch
+    {
+        FigurePlayer.Ground => "Kick's figure",
+        FigurePlayer.Riff => "Riff's figure",
+        _ => "Claves' figure"
+    };
+
+    internal static SongDraft Apply(SongDecisions song, SongDraft draft)
+    {
+        var players = Enum.GetValues<FigurePlayer>();
+        // every section's figure of each player, none for its own rhythm, each player drawn in turn
+        var drawn = song.SectionIds.Distinct().ToDictionary(id => id, id =>
+        {
+            var section = song.SectionOf(id);
+            var context = song.Stream(SongStream.Figures, id);
+            // a figure of 16ths in a bar of them alone
+            var isFour = song.SectionMeters[id].Sixteenths == 16;
+            var energy = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling);
+            var figures = players.ToDictionary(player => player, player =>
+            {
+                var options = ByConvention.Weigh(OptionsOf(player).Select(x => (x.Name, x.Weight)), section.Facets[Facet.Feel],
+                    song.Genre.Pool<string>(GenreChoices.Figures[player], x => x)).Where(x => isFour || All.FirstOrDefault(f => f.Name == x.Value) is not { FollowsRiff: false });
+                var name = context.Pick(energy.Weigh(options, x => All.FirstOrDefault(f => f.Name == x)?.EnergyLean ?? 0));
+                return All.FirstOrDefault(x => x.Name == name);
+            });
+            var played = figures.Where(x => x.Value is not null).ToImmutableDictionary(x => x.Key, x => x.Value!.Name);
+            StateTrace.Record(TracePoints.Figures, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, string.Join(", ", played.Select(x => $"{x.Key} {x.Value}")), played);
+            return figures;
+        });
+        if (drawn.Values.All(x => x.Values.All(f => f is null)))
+            return draft;
+
+        var timelines = draft.Timeline.TrackTimelineMap;
+        int? TrackOf(TrackRole role) => song.Playing.Where(x => x.Value == role).Select(x => (int?)x.Key).FirstOrDefault(x => timelines.ContainsKey(x!.Value));
+        var riff = TrackOf(TrackRole.Riff) ?? TrackOf(TrackRole.Bass);
+        var tracks = new Dictionary<FigurePlayer, int[]>
+        {
+            [FigurePlayer.Ground] = [..DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).Where(timelines.ContainsKey)],
+            [FigurePlayer.Riff] = TrackOf(TrackRole.Riff) is { } own ? [own] : [],
+            [FigurePlayer.Claves] = [..new[] { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) }.Where(timelines.ContainsKey)]
+        };
+
+        var edits = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>();
+        foreach (var player in players)
+        foreach (var track in tracks[player])
+            edits[track] = notes =>
+            {
+                var played = notes.ToList();
+                foreach (var span in song.Form.Map.Sections)
+                {
+                    if (drawn[span.SectionId][player] is not { } figure)
+                        continue;
+                    // the riff's where the song has a riff or a bass
+                    if (figure.FollowsRiff && riff is null)
+                        continue;
+                    var bars = (int)Math.Round(span.Duration / span.Meter.BarDuration);
+                    for (var index = 0; index < bars; index++)
+                    {
+                        var bar = span.Start + index * span.Meter.BarDuration;
+                        var end = bar + span.Meter.BarDuration;
+                        bool In(double position) => position >= bar - 1e-9 && position < end - 1e-9;
+                        var own = played.Where(x => In(x.Position)).ToArray();
+                        double[] onsets = figure.FollowsRiff
+                            ? [..timelines[riff!.Value].EventTimeline.Where(x => In(x.Position)).Select(x => x.Position).Distinct()]
+                            : [..figure.Onsets.Select(x => x - index % (figure.Sixteenths / 16) * 16).Where(x => x is >= 0 and < 16).Select(x => bar + x * 0.25)];
+                        // in a bar both play, each struck as the player's own note at or before it was
+                        if (own.Length == 0 || onsets.Length == 0)
+                            continue;
+                        played.RemoveAll(x => In(x.Position));
+                        played.AddRange(onsets.Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));
+                    }
+                }
+
+                return EventTimeline.Create(notes.Duration, played.OrderBy(x => x.Position));
+            };
+
+        return draft with { Timeline = draft.Timeline.MapTrackEvents(edits) };
+    }
+}

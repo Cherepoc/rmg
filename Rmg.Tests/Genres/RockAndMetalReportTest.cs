@@ -71,9 +71,10 @@ public sealed class RockAndMetalReportTest
             Console.WriteLine($"{name}: sections playing ♭VII–IV–I {Share([6, 3, 0]):P0}, ♭VI–♭VII–I {Share([5, 6, 0]):P0}, i–♭VI–♭VII {Share([0, 5, 6]):P0}, " +
                               $"♭VII–I {Share([6, 0]):P0}; the chords drawn on IV {Degree(3)}, ♭VI {Degree(5)}, ♭VII {Degree(6)}");
             Console.WriteLine($"{name}: schemes {Scheme("AAAA")}, {Scheme("AAAB")}, {Scheme("ABAB")}, {Scheme("AABA")}, {Scheme("AABB")}, others {schemes.Count(x => x is not ("AAAA" or "AAAB" or "ABAB" or "AABA" or "AABB")) / (double)schemes.Length:P0}");
-            var locked = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.KickLock).Select(t => (bool)t.Value!)).ToArray();
+            var figures = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.Figures).Select(t => (ImmutableDictionary<FigurePlayer, string>)t.Value!)).ToArray();
+            string Figure(string figure) => $"{figure} {figures.Count(x => x.Values.Contains(figure)) / (double)Math.Max(1, figures.Length):P0}";
             Console.WriteLine($"{name}: the kick's hits a bar {every.Average():0.0}, in the loudest section {loudest.Average():0.0}, at most {loudest.DefaultIfEmpty(0).Max():0.0}; " +
-                              $"sections with the kick on the riff {locked.Count(x => x) / (double)Math.Max(1, locked.Length):P0}");
+                              $"sections playing {Figure("withRiff")}, {Figure("doubleKick")}, {Figure("gallop")}");
             Console.WriteLine($"{name}: songs opening on an intro section {structures.Average(x => x.Roles.Values.Contains(SectionRole.Intro) ? 1.0 : 0):P0}, " +
                               $"its chords clean in its quietest section and driven in its loudest {cleanThenDriven / (double)songs.Count():P0}");
         }

@@ -306,8 +306,11 @@ public static class GenreChoices
     /// <summary>A section's drums and bass in a cycle across the bar (<see cref="Composition.Polymeter" />).</summary>
     public static GenreChoice Polymeter { get; } = Chances("polymeter", "Polymeter", [("sections", "Sections in a polymeter", Composition.Polymeter.Chance)]);
 
-    /// <summary>The kick striking with the riff, a section's, the louder the likelier (<see cref="Composition.KickLock" />).</summary>
-    public static GenreChoice KickLock { get; } = Chances("kickLock", "Kick with the riff", [("sections", "Sections whose kick plays with the riff", Composition.KickLock.Chance)]);
+    /// <summary>The figures a player plays in place of its own rhythm, by the player, a genre's alone (<see cref="Composition.Figures" />).</summary>
+    public static ImmutableDictionary<FigurePlayer, GenreChoice> Figures { get; } = Enum.GetValues<FigurePlayer>().ToImmutableDictionary(
+        x => x,
+        x => Pool($"figure.{Name(x.ToString())}", Composition.Figures.LabelOf(x), Composition.Figures.OptionsOf(x))
+    );
 
     /// <summary>The solo part answering the melody in its gaps (<see cref="Composition.SoloAnswers" />).</summary>
     public static GenreChoice SoloAnswers { get; } = Chances("soloAnswers", "Solo answers", [("sections", "Sections the solo part answers", Composition.SoloAnswers.Chance)]);
@@ -519,11 +522,12 @@ public static class GenreChoices
     public static ImmutableArray<GenreChoice> All { get; } =
     [
         Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, RootDegrees, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Dynamics, Phrases,
-        SectionChanges, Polymeter, KickLock, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval, Vamp, RiffScale,
+        SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,
         Parts, DrumSetup, DrumPieces,
         ..Enum.GetValues<RhythmPart>().Select(x => Rhythms[x]),
+        ..Enum.GetValues<FigurePlayer>().Select(x => Figures[x]),
         ..Enum.GetValues<RhythmPart>().Select(x => PartFeels[x]),
         ..RolesInOrder.Select(x => DrumRoles[x])
     ];

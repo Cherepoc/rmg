@@ -36,6 +36,9 @@ public sealed class ListeningQuestionsTest
 
     private static bool Any(CorpusSong song, string point, Func<object?, bool> plays) => song.Trace.Any(x => x.Point == point && plays(x.Value));
 
+    private static bool Plays(CorpusSong song, FigurePlayer player, string figure) =>
+        Any(song, TracePoints.Figures, v => ((ImmutableDictionary<FigurePlayer, string>)v!).GetValueOrDefault(player) == figure);
+
     private static readonly Question[] Questions =
     [
         new("stop-time", "Stop time, the band hitting once a bar under the tune: a band's device, or a hole?",
@@ -58,7 +61,13 @@ public sealed class ListeningQuestionsTest
         new("doubling", "A line doubled, in octaves, harmonised, the bass with the riff: fuller, or muddy?",
             "Its chances.", "rock", ["Doubling"], null, x => Any(x, TracePoints.LineDoubling, _ => true)),
         new("kick-lock", "The kick striking with the riff, a riff in 16ths a double kick: a groove band's break, or a machine gun?",
-            "Its chance by genre, and whether it follows the riff's every note.", "nuMetal", ["Kick lock"], null, x => Any(x, TracePoints.KickLock, v => (bool)v!)),
+            "Its weight by genre, and whether it follows the riff's every note.", "nuMetal", ["Figures"], null, x => Plays(x, FigurePlayer.Ground, "withRiff")),
+        new("double-kick", "A double kick in the loud sections, the kick in 16ths: thrash, or a drum machine?",
+            "Its weight, and its lean to the loud sections.", "metal", ["Figures"], null, x => Plays(x, FigurePlayer.Ground, "doubleKick")),
+        new("gallop", "The riff's gallop, an 8th and two 16ths a beat: a heavy band's, or a stumble?",
+            "Its weight in Metal.", "metal", ["Figures"], null, x => Plays(x, FigurePlayer.Riff, "gallop")),
+        new("clave", "The claves on the clave's three and two: Latin's, or the claves' own rhythm better?",
+            "Its weight in Latin.", "latin", ["Figures"], null, x => Plays(x, FigurePlayer.Claves, "clave32") || Plays(x, FigurePlayer.Claves, "clave23")),
         new("gate", "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
             "Its weight in Trance, and the parts it chops.", "trance", [],
             new() { ["strongEffect"] = new() { ["none"] = 100 } },

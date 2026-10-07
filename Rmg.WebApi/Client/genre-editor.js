@@ -335,9 +335,9 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
     const PART_CHOICES = {
         melody: ["melodyRange", "hook", "voice", "ornaments"],
         bass: ["bass", "octaveBass", "glide", "bassLanding"],
-        riff: ["riff", "riffScale"],
+        riff: ["riff", "riffScale", "figure.riff"],
         solo: ["soloAnswers"],
-        drums: ["fills", "hatRolls", "drumJob", "marks", "drumSounds"],
+        drums: ["fills", "hatRolls", "drumJob", "marks", "drumSounds", "figure.ground", "figure.claves"],
     };
     /** A part's own choice's tile in its tab, bound as the draft changes whatever the part. */
     const own = (name) => ({ element: single(tile(), name), show: () => {} });
@@ -416,8 +416,8 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
     body.append(
         description,
         principles,
-        section("Time and feel", ["tempo", "length", "meter", "feel", "feelChances", "feelValues", "grooveHold", "pins", "pocket", "sectionChanges", "polymeter", "kickLock"],
-            single(tile(), "tempo"), single(tile(), "length"), single(tile(), "meter"), single(tile(), "feel"), single(tile(), "feelChances"), single(tile(), "feelValues"), single(tile(), "grooveHold"), single(tile(), "pins"), single(tile(), "pocket"), single(tile(), "sectionChanges"), single(tile(), "polymeter"), single(tile(), "kickLock")),
+        section("Time and feel", ["tempo", "length", "meter", "feel", "feelChances", "feelValues", "grooveHold", "pins", "pocket", "sectionChanges", "polymeter"],
+            single(tile(), "tempo"), single(tile(), "length"), single(tile(), "meter"), single(tile(), "feel"), single(tile(), "feelChances"), single(tile(), "feelValues"), single(tile(), "grooveHold"), single(tile(), "pins"), single(tile(), "pocket"), single(tile(), "sectionChanges"), single(tile(), "polymeter")),
         section("Form", ["formChances", "form", "phrases", "sectionLength", "phraseScheme", "texture", "loop", "drop", "stopTime", "push", "keyChanges", "intro", "ending", "lastRepeat", "solos", "soloists"], single(tile(), "formChances"), single(tile(), "form"), single(tile(), "phrases"), single(tile(), "sectionLength"), single(tile(), "phraseScheme"), single(tile(), "texture"), single(tile(), "loop"), single(tile(), "drop"), single(tile(), "stopTime"), single(tile(), "push"), single(tile(), "keyChanges"), single(tile(), "intro"), single(tile(), "ending"), single(tile(), "lastRepeat"), single(tile(), "solos"), single(tile(), "soloists")),
         section("Harmony", ["scale", "chordShape", "arpeggio", "rootMotion", "rootDegree", "chordScales", "harmonicRhythm", "vamp", "turnaround", "passingChords", "planing", "harmonyDevices", "lineScale"], single(tile(), "scale"), single(tile(), "chordShape"), single(tile(), "arpeggio"), single(tile(), "rootMotion"), single(tile(), "rootDegree"), single(tile(), "chordScales"), single(tile(), "harmonicRhythm"), single(tile(), "vamp"), single(tile(), "turnaround"), single(tile(), "passingChords"), single(tile(), "planing"), single(tile(), "harmonyDevices"), single(tile(), "lineScale")),
         section("Sound", ["effects", "articulation", "strongEffect", "room", "insertion", "pan", "register", "levels", "rests", "doubling", "harmonyInterval", "instrumentSwitches", "louderForms", "space", "dynamics"], single(tile(), "effects"), single(tile(), "articulation"), single(tile(), "strongEffect"), single(tile(), "room"), single(tile(), "insertion"), single(tile(), "pan"), single(tile(), "register"), single(tile(), "levels"), single(tile(), "rests"), single(tile(), "doubling"), single(tile(), "harmonyInterval"), single(tile(), "instrumentSwitches"), single(tile(), "louderForms"), single(tile(), "space"), single(tile(), "dynamics")),
@@ -561,7 +561,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
     /** A pool as the problem names it: a part's by its part and what it chooses, such as "Melody's feel". */
     function poolName(choiceName) {
         const label = choices.get(choiceName).label;
-        const of = { instrument: "instruments", feel: "feel", drumRole: "drums" }[choiceName.split(".")[0]];
+        const of = { instrument: "instruments", feel: "feel", drumRole: "drums", figure: "figures" }[choiceName.split(".")[0]];
         return choiceName.includes(".") ? `${label}'s ${of}` : label;
     }
 

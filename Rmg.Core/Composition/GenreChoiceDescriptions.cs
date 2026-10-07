@@ -68,7 +68,6 @@ public static class GenreChoiceDescriptions
         ["dynamics"] = "How loud and busy the song is, how much its sections differ, and how long the band swells into a louder section, from a beat to a whole phrase.",
         ["phrases"] = "How long a section's chord pattern is before it repeats: 4 bars for most songs, 8 for a longer phrase, 12 for the blues, 16 for a tune.",
         ["sectionChanges"] = "How often a section changes the song's tempo, by a jump or by a metric ratio, or plays in a meter of its own.",
-        ["kickLock"] = "How often a section's kick strikes with the riff, wherever its notes start, as a groove or thrash band's kick follows the guitar: a riff chugging in 16ths a double kick. The louder the section, the likelier.",
         ["polymeter"] = "How often a section's riff, bass and kick run in a cycle of a different length across the bar, as djent and math rock do.",
         ["soloAnswers"] = "How often the solo part answers the melody in its gaps, as a guitarist fills between a singer's lines.",
         ["lastRepeat"] = "How often the last chorus is played twice.",
@@ -98,6 +97,7 @@ public static class GenreChoiceDescriptions
         ["rhythm", _] => $"How the {Lower(label)} plays its rhythm: how fast, how far off the beat, how fine its notes, how much weight its weaker beats get, how full and how repetitive. Above the middle more, below less.",
         ["feel", _] => $"The {Lower(label)}'s own feel over the song's: straight, or in triplets, quintuplets or groupings such as the tresillo's 3+3+2.",
         ["drumRole", _] => $"Which drums play the {Lower(label)} role in the groove, and how likely each is.",
+        ["figure", _] => $"The {Lower(label)}s a section plays in place of its own rhythm, and how likely each is: the kick with the riff or a double kick, the louder the section the likelier, a riff's gallop, a clave's three and two.",
         _ => ""
     };
 

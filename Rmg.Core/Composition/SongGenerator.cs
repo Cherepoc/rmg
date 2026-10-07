@@ -264,5 +264,5 @@ internal enum SongStream
     Room = 85,
     Insertion = 86,
     DrumJob = 87,
-    KickLock = 88
+    Figures = 88
 }

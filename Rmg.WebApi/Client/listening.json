@@ -182,11 +182,11 @@
   {
     "id": "kick-lock",
     "question": "The kick striking with the riff, a riff in 16ths a double kick: a groove band's break, or a machine gun?",
-    "decides": "Its chance by genre, and whether it follows the riff's every note.",
+    "decides": "Its weight by genre, and whether it follows the riff's every note.",
     "genre": "nuMetal",
     "without": {
       "skip": [
-        "Kick lock"
+        "Figures"
       ],
       "genre": {}
     },
@@ -197,6 +197,66 @@
       "3",
       "4",
       "5"
+    ]
+  },
+  {
+    "id": "double-kick",
+    "question": "A double kick in the loud sections, the kick in 16ths: thrash, or a drum machine?",
+    "decides": "Its weight, and its lean to the loud sections.",
+    "genre": "metal",
+    "without": {
+      "skip": [
+        "Figures"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      "0",
+      "2",
+      "5",
+      "7",
+      "B",
+      "C"
+    ]
+  },
+  {
+    "id": "gallop",
+    "question": "The riff's gallop, an 8th and two 16ths a beat: a heavy band's, or a stumble?",
+    "decides": "Its weight in Metal.",
+    "genre": "metal",
+    "without": {
+      "skip": [
+        "Figures"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      "0",
+      "1",
+      "2",
+      "6",
+      "7",
+      "B"
+    ]
+  },
+  {
+    "id": "clave",
+    "question": "The claves on the clave's three and two: Latin's, or the claves' own rhythm better?",
+    "decides": "Its weight in Latin.",
+    "genre": "latin",
+    "without": {
+      "skip": [
+        "Figures"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      "0",
+      "1",
+      "3",
+      "5",
+      "6",
+      "7"
     ]
   },
   {

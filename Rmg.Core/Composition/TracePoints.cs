@@ -45,8 +45,8 @@ internal static class TracePoints
     /// <summary>Whether a section moves a chromatic line inside its held chords (a <c>bool</c>).</summary>
     public const string InnerLine = "Inner line";
 
-    /// <summary>Whether a section's kick strikes with the riff (a <c>bool</c>, <see cref="Composition.KickLock" />).</summary>
-    public const string KickLock = "Kick lock";
+    /// <summary>The figures a section's players play in place of their own rhythms, by their players (an <c>ImmutableDictionary</c> of <see cref="FigurePlayer" /> and the figure's name, <see cref="Composition.Figures" />).</summary>
+    public const string Figures = "Figures";
 
     /// <summary>Whether a section pushes its chord changes (a <c>bool</c>).</summary>
     public const string Push = "Push";
