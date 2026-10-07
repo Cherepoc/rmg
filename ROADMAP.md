@@ -11,7 +11,7 @@ is removed once it is built.
 1. Done: the genres sorted by name.
 2. Done: rock and metal measured, their presets tuned.
 3. Done: a section left to drums that only mark the form.
-4. The listening tool, with the *Listening* section cut to its questions (*Listening data*).
+4. Done: the listening tool, and *Listening* cut to its questions.
 5. The double kick (*Genres*, *What the genres cannot play yet*).
 6. A progression's degrees leaned by a genre (*Genres*).
 7. The kick locked to the riff, a polymeter's figure as long as the bar (*Genres*).
@@ -20,10 +20,9 @@ is removed once it is built.
 10. Figures as a genre's data: the gallop, the clave, the montuno (*Genres*).
 11. The rest of rock's and metal's (*Genres*), and long cycles only should listening ask (*Rhythm engine*).
 
-**Next** (P1, alongside): listening to what is deployed and tuning by what it says (see *Listening*), the presets
-most as October 2026 retuned them, Pop and Metal, the instruments and the riser added, and the heavy band, the dark
-presets' mood and the effects added on 7 October (see *Sound*); and the ratings by conventionality once enough are in,
-continuously and never as a gate.
+**Next** (P1, alongside): listening to what is deployed and tuning by what it says (see *Listening*, the page's
+listening mode for the questions it asks), done for a version when every question is answered or let go of; and the
+ratings by conventionality once enough are in, continuously and never as a gate.
 
 **Later** (P2): the ratings report (see *Listening data*) once the dashboard shows songs rated enough.
 
@@ -38,192 +37,122 @@ fills' loudness as layers, and a head with solos (which the form's devices by ge
 
 ## Listening
 
-What listening is to settle, each a question and what it decides. A report test picks the corpus seeds to hear for
-each from the trace; the seeds named here are ones already found.
+What listening is to settle: each a question, its measure, what it decides, and where the page's listening mode asks
+it, `?listen=` its id on the test instance (`ListeningQuestionsTest` writes them, the dashboard tables the verdicts).
+Done for a version when every question is answered or let go of.
 
 ### The song and its sections
 
-- **How plain by default:** drawn songs gather about the middle again (`Unconventionality.BaseCentre`, 0.5 since
-  October 2026, 0.25 before), every value possible, beyond a quarter from either end in about one song in ten each
-  (`BaseSpread`); 36% of drawn songs in major or minor throughout, 45% straight, 48% in one key and 5% plain in every
-  convention measured (`ConventionalityLevelsReportTest`), the presets playing their middles. Too adventurous for songs
-  with no genre? Then a centre of 0.375, or the ease of the conventions' curves.
-- **The forms:** do the songs of a form sound like verses and choruses, the chorus lifting? A song's sections take 80
-  bars at the median: too short? Does an intro or an outro of its own material (about a third of middling songs and a
-  seventh) sound like the same song? A last chorus played twice (17% of songs), lifted a key in a sixth of them: heard
-  as a lift?
-- **The sections' energy,** tuned by measurement only: do quieter sections sound as sections, and louder ones lift? A
-  section's last appearance plays 0.10 of velocity louder than its first: heard, or too much with the lift's crescendo?
-  The fills land into a quieter section 54% of the time: too often?
-- **The rests and entries:** do breakdowns and sections without a melody sound like an arrangement or like parts gone
-  missing; is a drumless section before a chorus a lift? Parts held back at the start (15 to 18% of songs) and a build
-  bringing the drums in at a phrase: arrivals, or thin openings?
-- **The lift:** is a crescendo of about 8 of 127 over the bar before a louder section heard as one? Do the drums' cues
-  into a bigger section, the hi-hat opening and the snare on its head, about 2.6 a song, sound like a drummer's or
-  predictable?
-- **Key changes:** the fourth fifth's, about two a song: too many for a song only fairly wild? Prepared ones, half of
-  them: does a minor section's chain, minor but at the cadence, lead; does the melody over a passing key turn well; are
-  the pivots heard at all, the pedals as tension, the sequences as a climb?
-- **Tempo:** a section's own tempo eased into half the time over the bar before, a metric one taken at once, a third of
-  the wildest's appearances by a metric ratio from the one before: heard as a pulse taken over, or as a lurch? Does 6/8
-  drag, its tempo counted in quarters, and is 13/16 too busy?
-- **Half time and double time:** does double time, 22 drum notes a bar, sound like a lift or a scramble?
-- **The fade-outs:** a ritardando into the fade, the drums fading first, or a tag after it, if asked for.
-- **The settings panel:** does a song made again with changed settings, going on from the same share of its length,
-  sound like the same song moved or a jump? Do the pad in 80% of songs, the counter-melody in 60% and the drums in 95%
-  leave songs too thin?
+- **How plain by default:** drawn songs centred at 0.5 (`Unconventionality.BaseCentre`), 5% plain in every convention
+  (`ConventionalityLevelsReportTest`): too adventurous for songs of no genre? Decides a centre of 0.375, or not.
+- **The forms:** verses and choruses heard as such, the chorus lifting; sections of 80 bars at the median; an intro or
+  outro of its own material (a third and a seventh of middling songs) the same song; a last chorus twice (17%). Decides
+  the forms' weights and the last repeat's chance.
+- **The sections' energy:** quieter sections heard as sections, louder ones lifting; a last appearance 0.10 louder
+  than the first; fills into a quieter section 54% of the time. Decides the energy's contrast and the fills' landings.
+- **Rests, entries and textures:** breakdowns and melody-less sections as arrangement or parts gone missing; parts held
+  back at the start (15-18%); one part alone or parts dropping out, leaned to the quieter sections (`TextureTest`).
+  Decides the textures' weights and their lean.
+- **The lift** (`?listen=lift-cues`): a crescendo of 8 of 127 into a louder section, and the drums' cues, 2.6 a song.
+  Decides whether the cues stay, and how often.
+- **Key changes:** two a song in the fourth fifth; prepared ones, pivots, pedals, sequences heard. Decides their
+  chances and devices.
+- **Tempo:** a section's own tempo eased in or taken at once; 6/8 counted in quarters; 13/16 too busy? Decides the
+  easing and the odd meters' weights.
+- **Half and double time:** double time's 22 drum notes a bar a lift or a scramble? Decides its weight.
+- **The fade-outs:** a ritardando into the fade, the drums fading first, a tag after it? Decides whether to build one.
+- **The settings panel:** a song made again with changed settings sounding moved rather than jumped; the pad in 80% of
+  songs, the counter-melody in 60%, the drums in 95%. Decides the parts' chances.
 
 ### Harmony and lines
 
-- **The section modes:** does the cadence into a change prepare it? The parallel major or minor and the harmonic minor
-  sound clearly (corpus seeds 196, 10, 36 and 171), the one-note modes more faintly.
-- **Harmonic rhythm,** set by measurement only: do sections of a chord every half bar sound busy, and of one every two
-  bars static? Is a chord every half bar at 175 BPM, 0.7 s, hurried, or one every two bars at 90, 5.3 s, static? Then
-  lean the span by its length in seconds.
-- **The melody's question and answer, and the improvised appearances:** then a bar of a later letter within the
-  phrase.
-- **Varied repeats (A′):** a repeated bar is varied by a flat chance of 0.25 (`PhraseSchemes.VariedRepeatChance`).
-  Should plain sections sound too varied or wild ones too literal, lean its chance alone, gently: a varied repeat is
-  as conventional in songwriting as a literal loop is in electronic music, and the scheme already leans to more
-  distinct bars in wild sections.
-- **Where the melody leaps:** at a phrase's or a section's start, about a third of the time, mostly after a rest: a new
-  phrase, or a break? Two rules to close a phrase onto its start were tried and dropped.
-- **The sequences:** a figure repeated where the phrase rises rises with it: a tune going somewhere, or figures
-  drifting? A melody's notes on the beat are the chord's 71% of the time over 64 songs.
-- **The gaps before chord changes:** half the changes have no melody note in their last beat. Empty, now that the solo
-  part answers in the melody's gaps?
-- **The walks into a section:** the melody walks in at 15% of the changes, three notes most often, the counter-melody
-  where the melody does not, the bass at half of the runs: too often?
-- **The melody's double stops** on a chord instrument's downbeats in a quarter of its sections, and the riff's chords
-  where a section starts: idiomatic, or muddy?
-- **Borrowed and applied chords:** 7% to 12% of the chords but the cadence's leave the section's scale, two or three
-  borrowed for every applied (`ChordScalesReportTest`), the chances a guess: does a melody holding the section's note
-  over a borrowed chord clash, and does the next chord's shape spoil an applied dominant's resolution?
-- **The bass's pickup** always falls on the beat: the 8th before the bar line, leaned by convention, if square.
-- **The octaves and the twins:** a line in octaves in 10 to 20% of appearances, by the sound facet and the loudness:
-  too often? Does a counter-melody an octave up cross the melody? The riff's twin in 15% of riff songs, its fourths and
-  fifths at the wild end: too sour? Twin leads, the counter-melody in the melody's sound a third apart: clear, or one
-  smeared voice?
+- **The section modes:** a mode change prepared by its cadence; the parallel and harmonic minor heard (seeds 196, 10,
+  36, 171). Decides the modes' weights.
+- **Harmonic rhythm:** a chord every half bar busy at 175 bpm, one every two bars static at 90? Decides leaning the
+  span by its length in seconds.
+- **Phrases:** question and answer, varied repeats (A′ at 0.25, `PhraseSchemes.VariedRepeatChance`), the melody's
+  leaps at a phrase's start (a third), the sequences rising with the phrase. Decides their chances.
+- **The gaps before chord changes:** half the changes with no melody in their last beat, the solo part answering now
+  (`?listen=solo-answers`). Decides filling them.
+- **The walks into a section:** the melody at 15% of changes, the bass at half of the runs. Decides their chances.
+- **Double stops and the riff's chords:** the melody's on a chord instrument's downbeats in a quarter of sections.
+  Decides their chance.
+- **Borrowed and applied chords:** 7-12% of chords leaving the scale (`ChordScalesReportTest`); a held melody note
+  clashing, an applied dominant's resolution spoiled? Decides their chances.
+- **The bass's pickup** always on the beat: square? Decides an 8th before the bar line, leaned by convention.
+- **Octaves and twins** (`?listen=doubling`): a line in octaves in 10-20% of appearances, the riff's twin in 15% of riff
+  songs, twin leads a third apart. Decides their chances and intervals.
 
 ### Solos
 
-- **Runs and phrases:** do the runs sound like a player's or a scale exercise, a cell of five or seven a grouping or a
-  stumble? Is the intensity's arc heard, its climax at 70%; the phrases as sentences, each landing, half of them
-  opening on the last's motif a step away? A pause 17 to 20% of the segments: too many breaths? A middling solo 2.1
-  notes a beat, two thirds of its runs at 16ths or faster: busy enough? Long 64th runs under 16th swing: rubato, or
-  smeared?
-- **Expression:** of a middling solo's notes of an 8th or longer 59% with a vibrato, 16% bent, 3% a wide vibrato: too
-  few wide ones? 85% of guitar and synth lead solos bend: a straight band under a bending lead heard as meant?
-- **Loudness:** a soloist plays 0.06 of velocity over the band's loudest part: heard over it, a flute too?
-- **Chords in solos:** a chord soloist stacks 41% of its held notes, and planes 17% of the time at the middle and 59%
-  at the wild end: block chords heard as a pianist's, the planing as meant?
-- **The solo part's answers** in the melody's gaps, in 59% of songs: a guitarist filling between a singer's phrases,
-  or clutter?
-- **Drum solos:** a drummer's stickings round the kit, or a pitched run on drums; a crash with the kick held 23% of the
-  segments, the kick under the accents half the time, a crash on the climax: too much?
+- **Runs and phrases:** a player's or a scale exercise; cells of five or seven; the intensity's arc; pauses in 17-20%
+  of segments; 2.1 notes a beat at the middle. Decides the runs' cells and the solo's density.
+- **Expression:** 59% of a middling solo's longer notes with a vibrato, 16% bent, 3% wide; 85% of guitar and synth
+  solos bending. Decides the soloists' leans.
+- **Loudness:** a soloist 0.06 of velocity over the band's loudest part, a flute too? Decides the margin.
+- **Chords in solos:** 41% of a chord soloist's held notes stacked, planing 17% at the middle and 59% wild. Decides
+  their rates.
+- **Drum solos:** stickings round the kit; a crash with the kick in 23% of segments. Decides the drum solo's gestures.
 
 ### Drums and groove
 
-- **The drums:** the percussion songs; the wild end, where the kick or the snare in a role not theirs may sound broken
-  rather than bold; bound drums, too rare to hear at a doubling chance of 0.15?; the clap's ghost notes, soft hits
-  around the backbeat, built only if missed.
-- **The fills:** wild songs play about 1.8 times the tuplet notes of plain ones: too straight? Then read the tuplet the
-  drums play most. Three runs in ten play quarters or slower: weak? Then aim a run's finest rank at the finest the
-  tempo allows.
-- **Repeated cycles** replay their beats' accents: mechanical? Then a small fresh loudness draw over the replayed
-  accent.
-- **Swing and panning,** set by measurement only: is a triplet's swing too heavy at 16ths, and do wild songs' tuplets,
-  swung, sound played or broken? Are the chords too far out, or the melody too near the middle?
-- **Drum pieces given:** both snares given double the backbeat, which the song never draws: heard as wrong? Then give
-  the snare group one of its snares, as its rule draws. A piece put in plays by its roles alone: do a whistle or congas
-  given to a kit song sound placed?
-- **Every drum heard:** a drum no section's kit took joins one section (`DrumCoverage`), and a vibraslap or a tom the
-  song never sounded lands once, with a crash where it can: placed, or tacked on? At the wildest groove a song of the
-  kit and percussion plays percussion only in half its sections (`PercussionSections.WildShare`): the kit too seldom, or
-  too often?
-- **The drums' marks** (`DrumMarks`, Ambient's): about a strike every three bars at the middle, a section's start the
-  likeliest, and a roll into a section now and then, one or two drums of the genre's: heard as a calm piece's
-  percussion, or as a groove gone missing? A roll on a cymbal or a triangle as on a tom? A swell through a section's
-  start, two beats each way, in 16ths or 32nds at its peak: 16ths at a slow tempo heard as a pulse rather than a roll,
-  and the swell too short for an ambient piece?
-- **The ornaments** (`Ornaments`): about one in eight to ten of the notes long enough ornamented, where the song plays
-  them, 2.5% of the lines' notes in Folk and Medieval: too seldom for a fiddle tune? A trill of up to 1.5 s at 12 a
-  second on a pad or a sung synth lead: heard as a trill, or as a warble?
-- **The polymeters:** the snare on every cell's start of a short cycle: too busy? The chords joining a cycle of short
-  cells: mud? A cycle running on through a section or growing each time round: heard as a drift resolving?
+- **The drums:** the percussion songs; the wild end's kick or snare in a role not theirs; bound drums at 0.15.
+  Decides the roles' wild weights and the binding chance.
+- **The fills:** wild songs' 1.8 times the tuplets; three runs in ten at quarters or slower. Decides aiming a run's
+  finest rank at the tempo's finest.
+- **Repeated cycles** replaying their accents: mechanical? Decides a fresh loudness draw over them.
+- **Swing and panning:** a triplet's swing at 16ths; wild tuplets swung; the chords' pan. Decides the swing's amounts
+  and the pans.
+- **Drum pieces given:** both snares doubling the backbeat; a piece put in by its roles alone. Decides giving the
+  snare group one snare.
+- **Every drum heard** (`DrumCoverage`): a drum landing once, placed or tacked on? Decides its landing.
+- **The drums' marks** (`?listen=drum-marks`): a strike every three bars and a swell into a section. Decides the marks'
+  rate and the swell's length.
+- **The ornaments** (`?listen=ornaments`): one in eight to ten long notes, 2.5% of Folk's and Medieval's lines; a trill
+  up to 1.5 s. Decides their rate and the trill's length.
+- **The polymeters:** the snare on every cell's start; the chords joining a cycle. Decides who joins a cycle.
+- **The pocket** (`?listen=pocket`): the backbeat a little late, the bass a touch ahead, the lead laid back. Decides
+  the offsets.
+- **Pushes and stop time** (`?listen=pushes`, `?listen=stop-time`): the band's changes an eighth early; the band
+  hitting once a bar. Decides their chances by genre.
 
 ### Sound
 
-- **The velocity:** how even the bass and the chords play; the bar layers add 3 to 5 from bar to bar: jumps?
-- **The effects:** the middle fifth plays 1.9 gentle kinds a song and a strong one (a tremolo, an echo, a sweep, a
-  filter or a gate) in 25% of songs, the plainest fifth in 20%, the fourth in 58% (`ExpressionTest.Report`): too many
-  or too few? Lean the song's weights.
-- **The bends, vibratos and slides:** bends of one or two scale steps, two in a third of a middling song's; wide
-  vibratos on guitars and synth leads; slides on 13% of a middling song's parts. Do the wide vibratos sound like a
-  guitar's, does a part bending two steps everywhere tire, and are slides heard as slides? Slides are 44% of the
-  corpus's pitch shapes: too many?
-- **The instruments added in October 2026:** the synth effects' pads, the orchestra hit, the synth brass, the voice and
-  calliope leads and the rest, about 4% of the songs' parts and more in the presets that name them (Ambient's pads,
-  Synthwave's brass): are any too loud or too strange in either soundfont served? Their weights or traits, if so.
-- **The riser into a drop:** the reverse cymbal over the silent bar, its note a bar long; a soundfont's sample shorter
-  than the bar peaks early and leaves a gap before the drop, a longer one is cut at it. Start it later, should one.
-- **Chromatic riffs in Metal and Nu metal:** a riff scale of their own, chromatic in a quarter of Metal's riff sections
-  and a third of Nu metal's, octatonic toward the wild end: Nu metal's riff notes off the scale 0% to 3%, Metal's 1%
-  as before, its riffs in power chords on their chord's notes, Djent's 9% (`GenreIdiomsReportTest`). Heard? Metal's
-  passing notes more, should its riffs want the chromatic runs.
-- **The dark presets' mood:** the melodies on the whole scale rather than the pentatonic in Trap, Techno and Dnb, and
-  the more in Hip-hop, its loops sparser, Phrygian and harmonic minor now and then; Trap's music box and celesta down
-  and piano in, no applied dominants; Dnb liquid and moody, Dorian and the triads down, piano in, the flute and the
-  vibraphone down; Djent major only at the wild end. The melody's ♭2 Techno 1% to 4%, Hip-hop 2% to 3%; the major chords
-  Trap 21% to 18%, Hip-hop 17% to 13%; Trap's lead bright 78% to 56%, Dnb's 38% to 8%; Djent major 12% to 3%
-  (`MoodReportTest`). Still happy? The major chords are a minor key's own ♭III, ♭VI and ♭VII, which no preset choice
-  reaches: a progression's degrees leaned, if so.
-- **Features of one genre in others:** the China cymbal in Metal and Nu metal, the open hi-hat in Techno, Electronic,
-  Trance and Funk, a drop in Djent (32% of its lifts), its own meters in Djent (9% to 23% of sections) and its own
-  tempos in Orchestral (11% to 31%), polymeter in Fusion (4% to 8%), twelve bars now and then in Rock, Country and Jazz,
-  stop time in Punk, Ska, Country and Soul (1-7% to 16-20%), solo answers in Country (25% to 33%), a pump in Synthwave,
-  Disco and Pop, Disco's strong effects 28% to 38%, its stabs and vamps, the count-in in Rock, dominant chord scales and
-  the bass soloing in Funk, one chord held longer in Techno and Trap (`GenreDevicesReportTest`). Metal's section
-  changes and polymeter, Jazz's and Funk's solo answers left as the songs have them, already as often. Heard as the
-  genres'?
-- **Dub's echo:** an echo on the rhythm part's chords as well as a lead's, and the snare's backbeat with it at its
-  delay: Reggae's skank and snare echo in 23% of its songs (`DubEchoTest`). The echoes' repeats as notes, three, each
-  quieter: dub's long darkening tail wants the GS delay (*Parked*), should these sound thin.
-- **The insertion effect:** a wah on a guitar or a clavinet comping, or a phaser on held chords, one part a song through
-  the GS player's one effect: Funk wahs 34% of its songs, mostly the rhythm part, Disco phases 20% and wahs 14%,
-  Synthwave phases 20%, the wild songs now and then (`InsertionTest.Report`). The effects' own settings, the player's
-  defaults, by ear; the lo-fi EQ, Hip-hop's muffled loop, should the dark side want it.
-- **A genre's room and reverb:** the reverb a small room, a hall or a plate, one per song as a Roland GS message, named
-  by twelve presets, Ambient's, Orchestral's and the dungeon's halls, Funk's, Punk's and Hip-hop's rooms, Synthwave's
-  and Soul's plates; the player's own hall elsewhere; and the parts' sends, Ambient's mean 76, Funk's 28, the songs' 47.
-  Wet enough, the dry genres' room heard, in both soundfonts? Its time and pre-delay a genre's too, if the rooms alone
-  are too alike.
-- **The trance gate:** a pad, the chords or the rhythm part chopped in 16ths, sounding for 0.6 of each it lets through,
-  every 16th or a pattern drawn for the song, counted from every bar's first and swung: Trance gates 17% of its songs,
-  Electronic 8%, Synthwave 9% (`GateTest.Report`). The gated part holds its chords, the notes it sounds longest over
-  each chord, from a beat to the next chord, a section's end or a stop: Trance's gated sections sound 93% from the
-  part's first note. An arpeggiating part holds a single note (Trance's held notes 34% single): its chord voiced by the
-  `Realizer` would need the gate decided before the notes, the strong effect's draw moved out of `Expression`. A pad's
-  slow attack barely opening in a 16th, the chop clicking in a soundfont? Short-attack synth chords preferred, if so. An
-  intro plays no expression, its gated part's notes ungated.
-- **The filter:** a synth's filter wobbling in time, squelching on every note or opening over a section's first phrase,
-  as its brightness and resonance, which spessasynth plays and other players may not: Techno squelches in 11% of its
-  songs, Trance opens or wobbles in 28%, Dnb in 26%, the wildest songs filter in 30% (`FilterTest.Report`,
-  `ExpressionTest.Report`). Its depth, down to 48 steps of the brightness, and the resonance by ear, in both soundfonts;
-  a General MIDI synth bass may wobble thin rather than heavy.
-- **Double-tracking:** every driven guitar's part twice, hard left and right, the second take on the other driven
-  guitar 8 ms late: Metal doubles 2.8 parts a song, its riff, chords and rhythm part all at the sides, Punk 2.3, the
-  drawn songs 28% of them (`DoubleTrackingTest.Report`). A wall, or mud? The overdriven take thinner than the
-  distortion's in a soundfont, the image leaning? The delay 5-12 ms by ear; the rhythm part or the chords left single
-  where three are doubled, if mud.
-- **Rock's rhythm guitar:** the riff and the rhythm part never take the chords' instrument, nor the rhythm part the
-  riff's (`SongTracks`), so where the chords and the riff are both driven, Rock's rhythm part is clean (53%) or muted
-  (20%): a third guitar's contrast, or wanted distorted too, the exclusion then leaned rather than kept?
-- **The bass under E1:** the bass's octaves start at C1, under the bass guitar's lowest, 9% of its notes
-  (`RegisterReportTest`): its range a note's rather than an octave's, should that be heard.
-- **The instruments:** a switch keeping to the part's family, 58% of a middling song's: welcome, or does a song want
-  more handovers? An articulation on the same rig, a driven guitar's harmonics, a clean one muted: heard as the same
-  player?
+- **The velocity:** the bass's and the chords' evenness; bar layers adding 3 to 5. Decides the layers' spread.
+- **The effects:** 1.9 gentle kinds a song at the middle, a strong one in 25% (`ExpressionTest.Report`). Decides the
+  song's weights.
+- **Bends, vibratos and slides:** slides 44% of the pitch shapes. Decides their rates.
+- **The instruments added in October 2026** (about 4% of parts): any too loud or strange in either soundfont? Decides
+  their weights and traits.
+- **The riser into a drop:** a soundfont's sample shorter or longer than the bar. Decides starting it later.
+- **The trance gate** (`?listen=gate`): a held chord chopped in 16ths, Trance 17% of its songs (`GateTest.Report`);
+  a pad's slow attack, the chop clicking? Decides its weight and the instruments it chops.
+- **The filter:** wobble, squelch and opening, Techno 11%, Trance 28%, Dnb 26% (`FilterTest.Report`); a General MIDI
+  synth bass wobbling thin? Decides its depth and resonance.
+- **Double-tracking:** Metal 2.8 parts a song at the sides (`DoubleTrackingTest.Report`): a wall, or mud? Decides the
+  delay and which parts stay single.
+- **The dub echo, the insertion effect and the rooms** (`DubEchoTest`, `InsertionTest.Report`): echoes as notes thin,
+  the wah's and phaser's settings, the rooms wet enough? Decides the GS delay and the effects' settings.
+- **Louder forms** (`?listen=louder-forms`): a clean guitar turned driven when loud. Decides its chance by genre.
+- **Rock's rhythm guitar** clean (53%) or muted (20%) beside driven chords and riff: a contrast, or wanted driven?
+  Decides the exclusion's lean.
+- **The bass under E1** (9% of its notes, `RegisterReportTest`). Decides the bass's range.
+- **Instrument switches** within the family, 58% of a middling song's. Decides their families.
+
+### Genres
+
+- **The presets against their sentences** (`GenrePresetsReportTest`, `GenreDevicesReportTest`,
+  `GenreIdiomsReportTest`): Pop's and Metal's beat without groove hold; Jazz's ride's time figure; Latin's and
+  Metal's solos (66%, 91%); Blues' twelve bars loose enough. Decides each preset's choices.
+- **The presets made in October 2026:** Orchestral's and Pop's crescendos; Funk's, Techno's, House's and Djent's vamps
+  (30-66% of sections); Djent 70% polymetric; Nu metal's loud sections driven (97%); Medieval's and Dungeon synth's
+  drums marking the form. Decides each preset's choices.
+- **The dark presets' mood** (`MoodReportTest`): still happy? Decides a progression's degrees leaned.
+- **Rock and metal against their bands** (`RockAndMetalReportTest`): the organ's solos, the shuffle, Metal's clean
+  quiet sections. Decides the presets' weights.
+- **The wild ends** (`EveryPreset_ChoicesByEnd`): the wildest Rock 34% in 4/4, the wildest Jazz 56% swung; a wild
+  song's homes plainer than its chords. Decides raising the experimental shapes' amounts.
+- **How the wild end swings:** as often as a middling song (`Groove.Generate`). Decides a heavier swing at the wild end.
 
 ## Listening data
 
@@ -237,15 +166,6 @@ plain or wild the songs are.
   ratings against its values (`StateTraceEntry.Value`): which endings, intros, drum setups, modes, tempos, energies or
   improvisations are liked or skipped, with their counts, so that a small sample shows itself. Measured by: ratings
   per version, enough to tell two versions apart.
-- **The listening tool** (P1, on the test instance only): a song asked for in a variant, its stages left out (as the
-  tests skip them) or a genre's choices laid over its own, which the server takes only where a setting allows it; an
-  explicit report test writing the questions of *Listening* as data, each with its two variants and four to eight
-  corpus seeds where the trace finds the device playing; the page's listening mode, `?listen=` a question, playing A
-  and B, swapped by the seed so that neither is always first, and a verdict (A, B, the same, can't tell) kept as an
-  analytics event with its version; the dashboard a table of the verdicts by question. Before it, *Listening* cut to
-  its questions: each the question, its measure, its seeds and what it decides, what is built described where it is
-  built, and the presets' listening under *Genres* moved there; P1 done when a version's questions are answered or let
-  go of.
 - **Targets from outside** (P3): a few measures (the notes a bar by role, the intervals, the syncopation, the chord
   changes a bar) of a corpus of real MIDI songs to tune towards.
 
@@ -496,33 +416,6 @@ left:
 - **A genre's sections differing** (P3, perhaps never): a value given a section role, such as a solo swung harder
   or a chorus louder, the genre's for the song otherwise; the generator asking the genre with the section's role,
   every choice's tile a role's override beside it. The dynamics' contrast and the phrases' AAB give most of it.
-- **Listening to the new presets** (P1): Orchestral, its crescendos over a phrase into its louder sections and Pop's,
-  Ambient's and Medieval's over two bars (`dynamics.lift`); Fusion, Soul, Country and Bossa nova; Funk's, Techno's,
-  House's and Djent's vamps, 30%, 56%, 20% and 66% of sections on one chord; Disco, Trap, Trance, drum and bass, Ska and
-  Punk; Medieval, Dungeon synth, Djent and Nu metal against their sentences (`GenreDevicesReportTest`,
-  `GenreIdiomsReportTest`): Djent's sections 70% polymetric, its snare on 3 alone in 10% of bars, in stop time 6%, its
-  riff chromatic and chugging; Nu metal's guitar driven in its loud sections in 97% of songs, swung lightly in 16ths in
-  47%; Medieval's and Dungeon synth's drums marking the form, resting in 61% and 71% of sections, a pedal under half of
-  them.
-- **Listening to the presets** (P1): each against its sentence (`GenrePresetsReportTest`). Pop and Metal set no groove
-  hold, their parts not pinned drifting as the songs' do (Pop's snare on 2 and 4 80%): Rock's (80) for them, should
-  their beat sound loose. Jazz's ride, pinned and now in every song, plays the songs' own time figure: a rhythm of its
-  own for the time (a ride's spang-a-lang), should it not swing; its hi-hat's foot on 2 and 4 in 27% of bars. Solos in
-  Latin's songs 66% and Metal's 91%: too many? Reggae's one drop is a kick half a bar off its cycle, which the report
-  cannot tell from beat 1, and Latin's tresillo is the time keeper's grouping alone; the rhythm values mean what they
-  make together, and a preset's are tuned by where its notes fall. Blues' twelve bars: the plainest keep them (IV at 5
-  98%, V at 9 84%, home at 4 and 8), the drawn songs V at 9 56%, home at 4 54%, IV at 5 63%, the middling and wild songs
-  keeping the place rules less by the progression's strictness: loose enough to hear as the blues?
-- **Listening to the genres' wild ends:** the presets' wild ends keep their idioms most and stray by what each names
-  experimental (`EveryPreset_ChoicesByEnd`): the wildest Rock 34% in 4/4, its chords 7% quartal or tritone stacks; the
-  wildest Jazz 56% swung, 50% sevenths, about a fifth So What, quartal, altered or eleventh. A home and a cadence lean
-  the genre's shapes by their own over the songs', and where the songs never play a shape at an end the genre's weight
-  alone (`ByConvention.Lean`), so that at the wild end a home is a genre's plain shape or one of its strangest, never a
-  level-2 one (a ninth, a thirteenth): a wild song's homes plainer than its other chords, which the experimental
-  shapes' amounts may be raised against, should listening ask.
-- **How the wild end swings:** a swing is as likely in the wildest songs as in a middling one, and the principle has
-  the wild end choose how it is played instead, such as a heavier swing or one past the triplet's; the amount is drawn
-  alike at every conventionality now (`Groove.Generate`).
 - **The rhythm's values against the part's own:** a value moves a setting by steps from where the part rests, so that
   one part's "faster" is another's "as fast as can be"; a value set outright, where it lands, would read the same for
   every part, should listening ask for it.
