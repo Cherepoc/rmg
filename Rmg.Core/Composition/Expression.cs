@@ -333,12 +333,39 @@ internal static class Expression
     public static ByConvention ChorusChance { get; } = new(0, 0.2, 0.5);
 
     /// <summary>
+    ///     The effects the song plays at all, as a genre has them where it names them, and the one part that plays its strong
+    ///     one, the likelier one it suits, of the parts the song plays, if any may: decided before the notes, so that a stage
+    ///     before them knows, as the gate's held chords do.
+    /// </summary>
+    /// <param name="songStream">The song's sequence, which the effects are drawn from.</param>
+    /// <param name="songSound">The song's sound facet, which they lean by.</param>
+    /// <param name="playing">The parts the song plays, by their tracks.</param>
+    public static SongSound DrawSound(IGenerationContext songStream, double songSound, Genre genre, ImmutableSortedDictionary<int, IInstrumentTrack> definitions, IReadOnlySet<int> playing)
+    {
+        double Chance(ByConvention own, string option) => own.At(songSound, genre.Chance(GenreChoices.Effects, option));
+        var songVibrato = songStream.TestProbability(Chance(SongVibratoChance, "vibrato"));
+        var songChorus = songStream.TestProbability(Chance(SongChorusChance, "chorus"));
+        var songSwell = songStream.TestProbability(Chance(SongSwellChance, "swell"));
+        var songBends = songStream.TestProbability(Chance(SongBendChance, "bends"));
+        var strong = songStream.Pick(ByConvention.Weigh(StrongEffects, songSound, genre.Pool<StrongEffect>(GenreChoices.StrongEffect, x => GenreChoices.Name(x.ToString()))));
+        var effects = new SongEffects(songVibrato, songChorus, songSwell, songBends, strong);
+        StateTrace.Record(TracePoints.SongEffects, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{strong}", effects);
+
+        var mayCarry = definitions
+            .Where(x => playing.Contains(x.Key) && x.Value is PitchInstrumentTrack && (strong != StrongEffect.Echo || EchoesFrom(x.Value.Role))
+                        && (!OnlySuited(strong) || Suits(strong, x.Value.Role, ((PitchInstrumentTrack)x.Value).InstrumentCode)))
+            .Select(x => new Weighted<int>(Suits(strong, x.Value.Role, ((PitchInstrumentTrack)x.Value).InstrumentCode) ? SuitedStrongWeight : 1, x.Key))
+            .ToImmutableArray();
+        return new SongSound(effects, strong != StrongEffect.None && !mayCarry.IsEmpty ? songStream.Pick(mayCarry) : -1);
+    }
+
+    /// <summary>
     ///     The song's notes with every part's expression on them (<see cref="CompositionStateKinds.Vibrato" /> and the
     ///     rest), each part in a section drawing from a sequence of its own, by the section, so that a section plays as it
     ///     did before.
     /// </summary>
-    /// <param name="songSound">The song's sound facet, which the song's effects and a part's lean by.</param>
-    /// <param name="songStream">The song's sequence, which the effects it plays at all are drawn from.</param>
+    /// <param name="songSound">The song's sound facet, which a part's effects lean by.</param>
+    /// <param name="songEffects">The effects the song plays at all, and the part that plays its strong one, decided before its notes (<see cref="DrawSound" />).</param>
     /// <param name="sound">Every section's sound facet, by its place among the song's sections.</param>
     /// <param name="energies">Every section's energy, by its place, which leans its bends' sizes.</param>
     /// <param name="soloists">Every part's soloist, whose leans its solos' notes play by, as intense as the solo is there.</param>
@@ -353,7 +380,7 @@ internal static class Expression
         ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
         SongMap map,
         double songSound,
-        IGenerationContext songStream,
+        SongSound songEffects,
         IReadOnlyList<double> sound,
         IReadOnlyList<double> energies,
         IReadOnlyDictionary<TrackRole, Soloist> soloists,
@@ -365,22 +392,7 @@ internal static class Expression
         IReadOnlyList<(double Start, double End)> stopTime
     )
     {
-        // which effects the song plays at all, as a genre has them where it names them
-        double Chance(ByConvention own, string option) => own.At(songSound, genre.Chance(GenreChoices.Effects, option));
-        var songVibrato = songStream.TestProbability(Chance(SongVibratoChance, "vibrato"));
-        var songChorus = songStream.TestProbability(Chance(SongChorusChance, "chorus"));
-        var songSwell = songStream.TestProbability(Chance(SongSwellChance, "swell"));
-        var songBends = songStream.TestProbability(Chance(SongBendChance, "bends"));
-        var strong = songStream.Pick(ByConvention.Weigh(StrongEffects, songSound, genre.Pool<StrongEffect>(GenreChoices.StrongEffect, x => GenreChoices.Name(x.ToString()))));
-        StateTrace.Record(TracePoints.SongEffects, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{strong}", new SongEffects(songVibrato, songChorus, songSwell, songBends, strong));
-
-        // and the one part that plays the strong effect, the likelier one it suits, if any part may
-        var mayCarry = notes
-            .Where(x => x.Value.Count > 0 && definitions[x.Key] is PitchInstrumentTrack && (strong != StrongEffect.Echo || EchoesFrom(definitions[x.Key].Role))
-                        && (!OnlySuited(strong) || Suits(strong, definitions[x.Key].Role, ((PitchInstrumentTrack)definitions[x.Key]).InstrumentCode)))
-            .Select(x => new Weighted<int>(Suits(strong, definitions[x.Key].Role, ((PitchInstrumentTrack)definitions[x.Key]).InstrumentCode) ? SuitedStrongWeight : 1, x.Key))
-            .ToImmutableArray();
-        var carrier = strong != StrongEffect.None && !mayCarry.IsEmpty ? songStream.Pick(mayCarry) : -1;
+        var ((songVibrato, songChorus, songSwell, songBends, strong), carrier) = songEffects;
         // a gated part holding its chords, which the gate chops in time
         if (strong == StrongEffect.Gate && carrier >= 0)
             notes = notes.SetItem(carrier, GatedChords.Hold(notes[carrier], map, changes, cuts(carrier), stopTime));
@@ -559,3 +571,6 @@ internal static class Expression
 
 /// <summary>The effects a song plays at all: the gentle ones, each its own, and the strong one, or none.</summary>
 internal sealed record SongEffects(bool Vibrato, bool Chorus, bool Swell, bool Bends, StrongEffect Strong);
+
+/// <summary>The effects a song plays at all, and the part that plays its strong one, by its track, -1 for none (<see cref="Expression.DrawSound" />).</summary>
+internal sealed record SongSound(SongEffects Effects, int Carrier);

@@ -18,6 +18,7 @@ namespace Rmg.Core.Composition;
 /// <param name="Repeats">Whether the last section plays once more, as a last chorus.</param>
 /// <param name="GrooveContext">The groove's stream, its swing's draws made before, the rest of them here.</param>
 /// <param name="Scale">The scale the song starts in.</param>
+/// <param name="Sound">The effects the song plays at all, and the part playing its strong one (<see cref="Expression.DrawSound" />).</param>
 /// <param name="DrumJob">What the song's drums do, keep time or mark its form, a genre's (<see cref="DrumMarks" />).</param>
 internal sealed record SongDecisions(
     ulong Seed,
@@ -42,7 +43,8 @@ internal sealed record SongDecisions(
     Swing Swing,
     IGenerationContext GrooveContext,
     Scale Scale,
-    DrumJob DrumJob
+    DrumJob DrumJob,
+    SongSound Sound
 )
 {
     /// <summary>Where the song plays in stop time, its phrases' start, end and bar, decided once for the stages that keep to it (<see cref="Composition.StopTime" />).</summary>
@@ -352,7 +354,10 @@ internal sealed record SongDecisions(
         var form = formGenerator.Assemble(plan, played, sections);
         return new SongDecisions(
             seed, genre, tracks, absent, songUnconventionality, meter, structure, sectionIds, played, sectionMeters, generateSection, sections, energies,
-            solos, soloists, pinned, form, repeats, commonStateMap, swing, grooveContext, scale, drumJob);
+            solos, soloists, pinned, form, repeats, commonStateMap, swing, grooveContext, scale, drumJob,
+            // the song's effects, decided before its notes, the part playing its strong one among those it plays
+            Expression.DrawSound(Stream(SongStream.Effects), songUnconventionality[Facet.Sound], genre, tracks.Definitions,
+                tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).Select(x => x.Key).ToHashSet()));
     }
 
     /// <summary>

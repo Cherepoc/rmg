@@ -298,7 +298,7 @@ internal static class SongStages
                 song.Tracks.Definitions,
                 song.Form.Map,
                 song.Facets[Facet.Sound],
-                song.Stream(SongStream.Effects),
+                song.Sound,
                 [..song.Sections.Select(x => x.Facets[Facet.Sound])],
                 song.Energies,
                 song.Soloists,
