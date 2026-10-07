@@ -12,7 +12,7 @@ is removed once it is built.
 2. The strong effects each a chance of its own, one a controller on a part, the volume curves multiplied.
 3. The gate holding whole chords only, an arpeggio gated as it plays; Trance's arpeggios' rhythm measured.
 4. The part alone a genre's (*Genres*).
-5. Metal's arpeggios: a pedal-point pattern, a part's colour, a clean arpeggio staying clean; Metal's, Nu metal's, Djent's.
+5. Metal's arpeggios: a pedal point, a part's colour, a clean arpeggio staying clean; Metal's, Nu metal's, Djent's.
 6. Djent's synth over the guitars: a line's tensions on its strong beats.
 7. The brightness heard: how far it moves each family of instruments in both soundfonts served.
 8. One filter curve a part, its shapes combined, drawn over time, the filter's movements moved onto it.
@@ -448,8 +448,8 @@ left:
     ♯4, a pool by part of the genre's, the songs' none, consonant or dissonant by the genre's weights; the chord the
     band plays stays as it was, as a cluster on distorted guitars is mud, and the colour sounds in the part that breaks
     the chord, where it rings clear;
-  - a clean arpeggio stays clean (added): the louder forms turn the strummed clean guitars driven, never the one breaking
-    its chord (`LouderForms`).
+  - a clean arpeggio stays clean (added): the louder forms turn the strummed clean guitars driven, never the one
+    breaking its chord (`LouderForms`).
   Measured by the songs and sections with the arpeggio by genre, its notes a beat, its patterns' and its colours'
   shares, the dissonant ones by genre; `?listen=` a question of it.
 - **Djent's synth over the guitars** (P1, step 6): a synth or a pad holding long notes over the riff, melodic or
