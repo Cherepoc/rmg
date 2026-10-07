@@ -414,6 +414,21 @@ left:
   First heard: whether General MIDI's distortion guitar moves with the brightness at all in the soundfonts served; if
   not, the gesture is the gate's and the drop's alone. A pitch-bend dive at a section's end (P3); bit-crushing, tape
   stops and glitches are beyond General MIDI (*Parked*).
+- **Black metal and IDM, the rest** (October 2026, `NewGenresReportTest`): Black metal tremolo-picks 51% of its
+  sections, blasts 20%, double-kicks 20%; IDM, warm and swung at its plainest, an acid line, odd meters (47% of its
+  wildest songs), polymeters and rolls at its wildest, breaks 24% of its sections. Left:
+  - Tape's wow and flutter, and a part detuned (P2, after *The strong effects each a chance of its own*, IDM's
+    warmth): a slow drift of a few cents on the pads and keys, or a part held a few cents off, as pitch bend, which
+    a part's bends and vibrato share, a pitch effect beside the volume's, the pan's and the filter's.
+  - A dull, warm tone for IDM's keys and pads (with *The filter as tone*), and Black metal's thin, trebly one, which a
+    low-pass alone cannot make (*Sound design beyond General MIDI*).
+  - Rolls splintering into 32nds, a breakbeat chopped and drilled, figures finer than a 16th (P3): the figures' grid
+    in 32nds, should IDM's wildest want more than its hi-hat rolls and fills give.
+  - A riff on an open string's drone, its notes alternating with the pedal, black metal's and folk metal's (P3): the
+    riff's pedal (`Line.PedalShare`) leaned by a genre.
+  - Black metal's interludes, an acoustic guitar or a synth alone between the storms (P3): one part alone a texture
+    already (`TextureKind.Alone`), its instrument a quiet one by the section's energy.
+  - Field recordings, a prepared piano, glitch edits (*Parked*, beyond General MIDI).
 - **More genres** (P3): chiptune, once a square wave may play the chords (*Instruments outside a role's pool*).
   What the genres made in October 2026 still want: Fusion's
   roots off the scale (the progressions move by a 7-note scale's steps, chromatic and constant-structure motion
