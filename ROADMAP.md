@@ -282,9 +282,9 @@ Each item with its plan, and what it waits for.
   steady 16ths, an arpeggio following the chords part's own rhythm; if not, a 16th arpeggio a figure of the chords
   part's (`Figures`).
 - **The brightness heard** (P1, step 4): how far the brightness (CC74) and the resonance (CC71) move each family of
-  instruments, the pianos, the guitars, the distorted guitar most, the basses, the strings, the brass, the synths and the
-  drums, in both soundfonts served, by ear: some presets have no filter of their own and may barely move. The depths of
-  everything below follow from it.
+  instruments, the pianos, the guitars, the distorted guitar most, the basses, the strings, the brass, the synths and
+  the drums, in both soundfonts served, by ear: some presets have no filter of their own and may barely move. The
+  depths of everything below follow from it.
 - **One filter curve a part** (P1, step 5): the filter's shapes a vocabulary as data, each anchored where it means
   something rather than drawn freely, a part's curve the closings of those acting on it added, with a floor short of
   silence, and drawn over time rather than while its notes sound, so that a curve moves through a rest; a note's (a
