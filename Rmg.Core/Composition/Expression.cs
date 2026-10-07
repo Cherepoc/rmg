@@ -539,11 +539,10 @@ internal static class Expression
                     if (echoes && (isLine || role == TrackRole.Rhythm) || echoesBackbeat && Math.Abs(note.Position - Math.Round(note.Position)) < 1e-9)
                         state = state.With(CompositionStateKinds.Echo, (int)Math.Round((echoesBackbeat ? carrierDelay ?? throw new InvalidOperationException("A snare echoes before its part does.") : delay) * 4));
                     if (gate != 0)
-                        state = state.With(CompositionStateKinds.Gate, gate).With(CompositionStateKinds.GateFrom, span.Start).With(CompositionStateKinds.GateBar, span.Meter.Sixteenths);
+                        state = state.With(CompositionStateKinds.Gate, gate);
                     if (filters)
                         state = state.With(CompositionStateKinds.Filter, (int)strong).With(CompositionStateKinds.FilterDepth, filterDepth)
-                            .With(CompositionStateKinds.FilterCycle, strong == StrongEffect.Opening ? span.Meter.PatternDuration : wobbleCycle)
-                            .With(CompositionStateKinds.FilterFrom, span.Start);
+                            .With(CompositionStateKinds.FilterCycle, strong == StrongEffect.Opening ? span.Meter.PatternDuration : wobbleCycle);
                     states[i] = state;
                 }
             }

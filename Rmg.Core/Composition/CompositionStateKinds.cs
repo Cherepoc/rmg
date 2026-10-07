@@ -108,20 +108,14 @@ internal static class CompositionStateKinds
     public static StateKind<int> AutoPan { get; } = StateKinds.CreateAdditive<int>(Prefix + "AutoPan", StateScope.Render);
     public static StateKind<int> Echo { get; } = StateKinds.CreateAdditive<int>(Prefix + "Echo", StateScope.Render);
 
-    // a filter's movement (the StrongEffect it is), how far it closes, in percent, its cycle or its opening's length, in beats, and
-    // where it counts them from, in beats
+    // a filter's movement (the StrongEffect it is), how far it closes, in percent, and its cycle or its opening's length, in
+    // beats, counted from its section's start (ExpressionRender)
     public static StateKind<int> Filter { get; } = StateKinds.CreateAdditive<int>(Prefix + "Filter", StateScope.Render);
     public static StateKind<int> FilterDepth { get; } = StateKinds.CreateAdditive<int>(Prefix + "FilterDepth", StateScope.Render);
     public static StateKind<double> FilterCycle { get; } = StateKinds.CreateAdditive<double>(Prefix + "FilterCycle", StateScope.Render);
-    public static StateKind<double> FilterFrom { get; } = StateKinds.CreateAdditive<double>(Prefix + "FilterFrom", StateScope.Render);
 
     // the 16ths a trance gate lets a held note sound in, a bar's sixteen as bits from its first, 0 for none (Expression.Gate)
     public static StateKind<int> Gate { get; } = StateKinds.CreateAdditive<int>(Prefix + "Gate", StateScope.Render);
-
-    // where a gate's bars are counted from, its section's start, and how many 16ths a bar there has, which its pattern's
-    // 16ths are counted in from every bar's first
-    public static StateKind<double> GateFrom { get; } = StateKinds.CreateAdditive<double>(Prefix + "GateFrom", StateScope.Render);
-    public static StateKind<int> GateBar { get; } = StateKinds.CreateAdditive<int>(Prefix + "GateBar", StateScope.Render);
 
     public static StateKind<int> Reverb { get; } = StateKinds.CreateAdditive<int>(Prefix + "Reverb", StateScope.Render);
     public static StateKind<int> Chorus { get; } = StateKinds.CreateAdditive<int>(Prefix + "Chorus", StateScope.Render);

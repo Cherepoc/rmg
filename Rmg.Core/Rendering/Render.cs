@@ -107,7 +107,7 @@ public static class Render
             if (song.TrackDefinitions[trackNumber] is PitchInstrumentTrack pitchInstrumentTrack)
             {
                 // how the part is played beyond its notes, its echo among its notes
-                var expression = ExpressionRender.Render(trackNotes, swing, common.GetStateTimeline(StateKinds.Tempo), pitchInstrumentTrack.Pan, GetMidiVelocity);
+                var expression = ExpressionRender.Render(trackNotes, song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), pitchInstrumentTrack.Pan, GetMidiVelocity);
                 var played = EventTimeline.Create(trackNotes.Duration, renderedNotes);
                 var programChanges = ProgramChanges(trackNotes, pitchInstrumentTrack.InstrumentCode, swing);
                 var doubles = DoubleTracking.Doubles(pitchInstrumentTrack.Role, mix.Of(pitchInstrumentTrack.Role)?.Instrument ?? pitchInstrumentTrack.InstrumentCode);
@@ -148,10 +148,10 @@ public static class Render
                 percussionTrackNotes.Add(renderedNotes);
                 // a drum's echo, a dub's snare's, among the drums' notes
                 if (trackNotes.Any(x => x.Value.State.GetStateValue(CompositionStateKinds.Echo) > 0))
-                    percussionTrackNotes.Add(ExpressionRender.Render(trackNotes, swing, common.GetStateTimeline(StateKinds.Tempo), 0, GetMidiVelocity).Echoes.Where(x => x.Position < song.Duration));
+                    percussionTrackNotes.Add(ExpressionRender.Render(trackNotes, song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), 0, GetMidiVelocity).Echoes.Where(x => x.Position < song.Duration));
                 // the drums' reverb and chorus, as their first note has them
                 if (percussionSends.IsEmpty && trackNotes.Count > 0)
-                    percussionSends = ExpressionRender.Render(EventTimeline.Create(trackNotes.Duration, [trackNotes[0]]), swing, common.GetStateTimeline(StateKinds.Tempo), 0, GetMidiVelocity).Controllers;
+                    percussionSends = ExpressionRender.Render(EventTimeline.Create(trackNotes.Duration, [trackNotes[0]]), song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), 0, GetMidiVelocity).Controllers;
             }
         }
 

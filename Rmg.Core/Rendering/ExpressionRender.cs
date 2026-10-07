@@ -44,10 +44,15 @@ internal static class ExpressionRender
     /// <summary>How long a squelch takes to close most of the way, in beats.</summary>
     private const double SquelchDecay = 0.25;
 
-    /// <summary>The track's expression, from its notes, as they are swung, at the song's tempo.</summary>
+    /// <summary>The section a note plays in, which a gate's bars and a filter's opening count from; a note outside every section is a mistake.</summary>
+    private static SectionSpan SectionAt(SongMap? map, double position) =>
+        map?.Sections.LastOrDefault(x => x.Start <= position + 1e-9) ?? throw new InvalidOperationException($"No section of the song plays at {position}, which a gate or a filter counts from.");
+
+    /// <summary>The track's expression, from its notes, as they are swung, at the song's tempo, a gate's and a filter's by the sections of the map.</summary>
     public static (ImmutableArray<(double Position, int Value)> Bends, ImmutableArray<(double Position, int Controller, int Value)> Controllers,
         ImmutableArray<(double Position, double Value)> Expression, ImmutableArray<TimelineItem<RenderedNote>> Echoes) Render(
             EventTimeline<RealizedNote> notes,
+            SongMap? map,
             Swing swing,
             StateTimeline<double> tempo,
             double pan,
@@ -138,8 +143,8 @@ internal static class ExpressionRender
             var gate = state.GetStateValue(CompositionStateKinds.Gate);
             if (gate != 0)
             {
-                var from = state.GetStateValue(CompositionStateKinds.GateFrom);
-                var bar = state.GetStateValue(CompositionStateKinds.GateBar);
+                var section = SectionAt(map, note.Position);
+                var (from, bar) = (section.Start, section.Meter.Sixteenths);
                 for (var at = Math.Floor(note.Position / Sixteenth + 1e-9) * Sixteenth; swing.Apply(at) < end - 1e-9; at += Sixteenth)
                 {
                     var sounds = (gate >> ((int)Math.Round((at - from) / Sixteenth)).Mod(bar).Mod(16) & 1) == 1;
@@ -165,7 +170,7 @@ internal static class ExpressionRender
             {
                 var closes = state.GetStateValue(CompositionStateKinds.FilterDepth) / 100.0;
                 var cycle = state.GetStateValue(CompositionStateKinds.FilterCycle);
-                var from = swing.Apply(state.GetStateValue(CompositionStateKinds.FilterFrom));
+                var from = swing.Apply(SectionAt(map, note.Position).Start);
                 controllers.Add((start, ResonanceController, filter == StrongEffect.Squelch ? 104 : 84));
                 var step = filter == StrongEffect.Wobble ? cycle / 8 : Step / 2;
                 int? last = null;
