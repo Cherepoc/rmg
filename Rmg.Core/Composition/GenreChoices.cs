@@ -366,7 +366,8 @@ public static class GenreChoices
         ("bends", "Bends", Expression.SongBendChance),
         ("tone", "A part's darker tone", Expression.SongToneChance),
         ("tape", "A tape's wow", Expression.TapeChance),
-        ("pinch", "A guitar's pinch harmonics", Expression.SongPinchChance)
+        ("pinch", "A guitar's pinch harmonics", Expression.SongPinchChance),
+        ("dive", "A riff's dive into a louder section", Expression.SongDiveChance)
     ]);
 
     /// <summary>How a pinch harmonic sounds: General MIDI's guitar harmonics, or the driven guitar at the harmonic's pitch (<see cref="Expression.PinchSounds" />).</summary>

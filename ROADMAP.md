@@ -15,7 +15,7 @@ is removed once it is built.
 5. Done: a sparse song's silent start, its earliest part's first note held from the first beat.
 6. Done: a groove that mutates, its edits kept, IDM's and DnB's the most.
 7. Done: drum solos' feet a genre's ostinato and their runs in stickings; their motif, arc and trading left (*Groove*).
-8. A filtered bar in place of a drop's silence; a swell brightening; a whammy dive at a section's end.
+8. Done: a filtered drop, a genre's; a swell brightening; a riff's whammy dive into a louder section.
 9. A line's tensions beyond Djent, after `?listen=djent-tension` is answered.
 
 Done in the plan of 9 October 2026: the echo as the synthesizer's delay; the strong effects stacked; the gate holding
@@ -280,13 +280,6 @@ Each item with its plan, and what it waits for.
 - **A filter drawn over time** (P3, if a wobble's restart on every note is heard): a part's brightness drawn through
   its rests rather than while its notes sound, and the filter's shapes a vocabulary as data anchored where they mean
   something; the part's one curve now adds its tone and a filter's closing note by note (`ExpressionRender`).
-- **A swell brightening** (P3, by listening to `?listen=tone`): brass and strings brightening as they swell, back up
-  to their sound's own, never past it on an acoustic instrument (*The brightness's range*).
-- **A dip in place of a drop** (P3, by listening to `?listen=mix-filter`): the band filtered over the bar before a
-  drop rather than silent, as a genre chooses; a dip skips a drop's bar now (`MixFilter`).
-
-### Groove
-
 - **A mutating groove, by listening** (`?listen=mutation`): IDM 90% of its sections, 5.4 edits an appearance, its hits
   unlike the first bar's 11% at the second bar to 34% at the fourteenth; the edits' weights, the ratchet's and the
   trade's above all; the snap back at a phrase.
@@ -399,8 +392,6 @@ left:
   - Tremolo picking (P3, measured first): fast repeated notes unmuted, the riff's speed perhaps enough already.
   - A melody sung rather than played (P3, a listening question first): no singer in General MIDI; the melody's
     rhythms word-like, its breaths and held ends, should it sound like a lead guitar playing a tune.
-- **A pitch-bend dive at a section's end** (P3, by listening to `?listen=djent-stutter`): Djent's riff diving before
-  the heavy section; bit-crushing, tape stops and glitches are beyond General MIDI (*Parked*).
 - **Black metal and IDM, the rest** (October 2026, `NewGenresReportTest`): Black metal tremolo-picks 51% of its
   sections, blasts 20%, double-kicks 20%; IDM, warm and swung at its plainest, an acid line, odd meters (47% of its
   wildest songs), polymeters and rolls at its wildest, breaks 24% of its sections. Left:

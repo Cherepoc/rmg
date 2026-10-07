@@ -26,7 +26,10 @@ public enum BendKind
     ReleaseAndBend,
 
     /// <summary>Struck bent up a step, sounding it, and released down onto the note.</summary>
-    PrebendRelease
+    PrebendRelease,
+
+    /// <summary>A whammy bar's dive, the note falling away as it rings, faster as it goes, up to an octave.</summary>
+    Dive
 }
 
 /// <summary>A vibrato's width: in cents either side of the note, or in scale steps up from it, the wide sort.</summary>
@@ -196,6 +199,17 @@ internal static class Expression
 
     /// <summary>The semitones above its note a squealing pinch sounds at, an octave and a fifth or two octaves.</summary>
     private static readonly int[] PinchIntervals = [19, 24];
+
+    /// <summary>
+    ///     The chance a song's riff dives on the whammy bar into a louder section, its last held note there falling away,
+    ///     a metal band's, seldom the songs' (<see cref="BendKind.Dive" />); and the chance a section it may dive into does.
+    /// </summary>
+    public static ByConvention SongDiveChance { get; } = new(0, 0.05, 0.05);
+
+    public const double DiveChance = 0.5;
+
+    /// <summary>How far a dive falls, in semitones: an octave.</summary>
+    public const int DiveDepth = 12;
 
     /// <summary>General MIDI's guitar harmonics, which a pinch sounds on where it rings as a bell.</summary>
     private const int GuitarHarmonics = 31;
@@ -543,6 +557,8 @@ internal static class Expression
         // and whether it plays off a tape, and how far its pitch drifts
         var tape = tapeStream.TestProbability(TapeChance.At(songSound, genre.Chance(GenreChoices.Effects, "tape")));
         var wow = tapeStream.GenerateInt(WowLeast, WowMost + 1);
+        // and whether its riff dives into a louder section
+        var songDives = pinchStream.TestProbability(SongDiveChance.At(songSound, genre.Chance(GenreChoices.Effects, "dive")));
         // and whether its guitars pinch, and how a pinch sounds
         var songPinches = pinchStream.TestProbability(SongPinchChance.At(songSound, genre.Chance(GenreChoices.Effects, "pinch")));
         var pinchSound = pinchStream.Pick(ByConvention.Weigh(PinchSounds, songSound, genre.Pool<PinchSound>(GenreChoices.PinchSound, x => GenreChoices.Name(x.ToString()))));
@@ -750,6 +766,15 @@ internal static class Expression
                                 raised[i] = interval;
                         }
                     }
+
+                    // the riff's last held note before a louder section diving into it, where the song dives
+                    if (songDives && role is TrackRole.Riff && !isSolo && Pinches(noteProgram) && note.Value.Pitches.Length <= 2
+                        && (i + 1 >= timeline.Count || timeline[i + 1].Position >= span.End - 1e-9)
+                        && index + 1 < energies.Count && energies[index + 1] > energies[index]
+                        && note.Value.Duration >= 1 && note.Value.Duration * beatSeconds(note.Position) >= PinchShortest
+                        && state.GetStateValue(CompositionStateKinds.Pinch) == 0 && pinching.TestProbability(DiveChance))
+                        state = state.With(CompositionStateKinds.Bend, (int)BendKind.Dive).With(CompositionStateKinds.BendDepth, -DiveDepth)
+                            .With(CompositionStateKinds.Vibrato, 0).With(CompositionStateKinds.WideVibrato, 0);
 
                     states[i] = state;
                 }

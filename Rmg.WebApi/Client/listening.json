@@ -532,12 +532,12 @@
       }
     },
     "seeds": [
-      "1",
       "3",
-      "4",
-      "8",
+      "7",
       "B",
-      "C"
+      "D",
+      "F",
+      "I"
     ]
   },
   {
@@ -555,12 +555,12 @@
       }
     },
     "seeds": [
-      "1",
       "3",
-      "4",
-      "8",
+      "7",
       "B",
-      "C"
+      "D",
+      "F",
+      "I"
     ]
   },
   {
@@ -632,6 +632,51 @@
       "H",
       "V",
       "Z"
+    ]
+  },
+  {
+    "id": "dive",
+    "question": "Nu metal's riff diving on the whammy bar into a louder section, its last held note falling an octave: a launch, or a gimmick?",
+    "decides": "The dive's chances by genre.",
+    "genre": "nuMetal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "effects": {
+          "dive": 0
+        }
+      }
+    },
+    "seeds": [
+      "8",
+      "G",
+      "J",
+      "S",
+      "d",
+      "i"
+    ]
+  },
+  {
+    "id": "filtered-drop",
+    "question": "Techno's drop with the band playing on through the bar before it, the mix closing to muffled and bursting open on the drop (with), or the band silent there (without)?",
+    "decides": "A drop's kind by genre.",
+    "genre": "techno",
+    "without": {
+      "skip": [],
+      "genre": {
+        "dropKind": {
+          "filtered": 0,
+          "silent": 100
+        }
+      }
+    },
+    "seeds": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
     ]
   },
   {
