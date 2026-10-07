@@ -5,10 +5,11 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
-/// <summary>Who plays a figure: the kick, the riff or the claves.</summary>
+/// <summary>Who plays a figure: the kick, the snare, the riff or the claves, in the order a section draws them.</summary>
 public enum FigurePlayer
 {
     Ground,
+    Backbeat,
     Riff,
     Claves
 }
@@ -23,9 +24,11 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 
 /// <summary>
 ///     The figures a genre gives its players in its sections: a groove or thrash band's kick with the riff, or in 16ths, a
-///     double kick; a heavy band's galloping riff; a clave's three and two. A section draws each player's, its own rhythm
-///     or one of its figures, from a sequence of its own, by the feel facet and the genre's pool, leaned by its energy;
-///     the songs play their own rhythms always. The player plays the figure in every bar it plays in, its own notes
+///     double kick; a black metal band's blast beat and its tremolo-picked riff; a breakbeat's kick and snare; a heavy
+///     band's galloping riff; a clave's three and two. A section draws each player's, its own rhythm or one of its
+///     figures, from a sequence of its own, by the feel facet and the genre's pool, leaned by its energy, a figure two
+///     players play, a blast's or a breakbeat's, drawn by the first and played by both; the songs play their own rhythms
+///     always. The player plays the figure in every bar it plays in, its own notes
 ///     there given up, each struck as its own was at or before it. A stage of the song before its fills, which play over
 ///     it (<see cref="SongStages" />), in a meter of four for a figure of 16ths.
 /// </summary>
@@ -39,7 +42,12 @@ internal static class Figures
     [
         new("withRiff", "With the riff, wherever it plays", FigurePlayer.Ground, [], 0, true, 1),
         new("doubleKick", "A double kick, every 16th", FigurePlayer.Ground, [..Enumerable.Range(0, 16)], 16, false, 1),
+        new("blast", "A blast beat, with the snare on every 8th", FigurePlayer.Ground, [0, 2, 4, 6, 8, 10, 12, 14], 16, false, 1),
+        new("blast", "A blast beat, with the kick on every 8th", FigurePlayer.Backbeat, [0, 2, 4, 6, 8, 10, 12, 14], 16, false, 1),
+        new("breakbeat", "A breakbeat, with the snare broken around 2 and 4", FigurePlayer.Ground, [0, 2, 10, 11], 16, false, 0),
+        new("breakbeat", "A breakbeat, with the kick broken around 1 and 3", FigurePlayer.Backbeat, [4, 7, 9, 12, 15], 16, false, 0),
         new("gallop", "A gallop, an 8th and two 16ths a beat", FigurePlayer.Riff, [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15], 16, false, 0),
+        new("tremolo", "Tremolo-picked, every 16th", FigurePlayer.Riff, [..Enumerable.Range(0, 16)], 16, false, 0),
         new("clave32", "The clave's 3-2", FigurePlayer.Claves, [0, 6, 12, 20, 24], 32, false, 0),
         new("clave23", "The clave's 2-3", FigurePlayer.Claves, [4, 8, 16, 22, 28], 32, false, 0)
     ];
@@ -55,9 +63,13 @@ internal static class Figures
     public static string LabelOf(FigurePlayer player) => player switch
     {
         FigurePlayer.Ground => "Kick's figure",
+        FigurePlayer.Backbeat => "Snare's figure",
         FigurePlayer.Riff => "Riff's figure",
         _ => "Claves' figure"
     };
+
+    /// <summary>A player's figure of the name, none for its own rhythm or one it does not play.</summary>
+    private static Figure? Of(FigurePlayer player, string name) => All.FirstOrDefault(x => x.Player == player && x.Name == name);
 
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
@@ -70,13 +82,17 @@ internal static class Figures
             // a figure of 16ths in a bar of them alone
             var isFour = song.SectionMeters[id].Sixteenths == 16;
             var energy = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling);
-            var figures = players.ToDictionary(player => player, player =>
+            var figures = new Dictionary<FigurePlayer, Figure?>();
+            foreach (var player in players)
             {
                 var options = ByConvention.Weigh(OptionsOf(player).Select(x => (x.Name, x.Weight)), section.Facets[Facet.Feel],
-                    song.Genre.Pool<string>(GenreChoices.Figures[player], x => x)).Where(x => isFour || All.FirstOrDefault(f => f.Name == x.Value) is not { FollowsRiff: false });
-                var name = context.Pick(energy.Weigh(options, x => All.FirstOrDefault(f => f.Name == x)?.EnergyLean ?? 0));
-                return All.FirstOrDefault(x => x.Name == name);
-            });
+                    song.Genre.Pool<string>(GenreChoices.Figures[player], x => x)).Where(x => isFour || Of(player, x.Value) is not { FollowsRiff: false });
+                var name = context.Pick(energy.Weigh(options, x => Of(player, x)?.EnergyLean ?? 0));
+                // a figure an earlier player drew that this one plays too, a blast's snare with its kick, drawn all the same
+                // so that the draws are as many
+                var shared = figures.Values.FirstOrDefault(x => x is not null && Of(player, x.Name) is not null);
+                figures[player] = shared is not null && isFour ? Of(player, shared.Name) : Of(player, name);
+            }
             var played = figures.Where(x => x.Value is not null).ToImmutableDictionary(x => x.Key, x => x.Value!.Name);
             StateTrace.Record(TracePoints.Figures, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, string.Join(", ", played.Select(x => $"{x.Key} {x.Value}")), played);
             return figures;
@@ -90,6 +106,7 @@ internal static class Figures
         var tracks = new Dictionary<FigurePlayer, int[]>
         {
             [FigurePlayer.Ground] = [..DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).Where(timelines.ContainsKey)],
+            [FigurePlayer.Backbeat] = [..DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).Where(timelines.ContainsKey)],
             [FigurePlayer.Riff] = TrackOf(TrackRole.Riff) is { } own ? [own] : [],
             [FigurePlayer.Claves] = [..new[] { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) }.Where(timelines.ContainsKey)]
         };

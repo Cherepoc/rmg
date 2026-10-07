@@ -94,4 +94,19 @@ public sealed class FiguresTest
 
         await Assert.That(hits).IsGreaterThan(30);
     }
+
+    [Test]
+    public async Task AFigureTwoPlayersPlay_IsPlayedByBoth_ABlastsKickWithItsSnare()
+    {
+        var blasts = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blackMetal")))))
+        foreach (var figures in song.Trace.Where(t => t.Point == TracePoints.Figures).Select(t => (ImmutableDictionary<FigurePlayer, string>)t.Value!))
+            if (figures.GetValueOrDefault(FigurePlayer.Ground) == "blast")
+            {
+                blasts++;
+                await Assert.That(figures.GetValueOrDefault(FigurePlayer.Backbeat)).IsEqualTo("blast").Because($"seed {song.Seed}");
+            }
+
+        await Assert.That(blasts).IsGreaterThan(5);
+    }
 }

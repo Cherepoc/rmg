@@ -337,7 +337,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
         bass: ["bass", "octaveBass", "glide", "bassLanding"],
         riff: ["riff", "riffScale", "figure.riff"],
         solo: ["soloAnswers"],
-        drums: ["fills", "hatRolls", "drumJob", "marks", "drumSounds", "figure.ground", "figure.claves"],
+        drums: ["fills", "hatRolls", "drumJob", "marks", "drumSounds", "figure.ground", "figure.backbeat", "figure.claves"],
     };
     /** A part's own choice's tile in its tab, bound as the draft changes whatever the part. */
     const own = (name) => ({ element: single(tile(), name), show: () => {} });
