@@ -33,6 +33,23 @@ public sealed class GateTest
     }
 
     [Test]
+    public async Task AGatedPart_ChangesItsChords_OnlyOnTheBarsBeats_InAnIntroToo()
+    {
+        var gated = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
+        foreach (var timeline in song.Song.Notes!.Values.Where(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)))
+        foreach (var section in song.Map.Sections.Prepend(new SectionSpan(-1, 0, song.Map.Sections[0].Start, song.Map.Sections[0].Meter)))
+        foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9))
+        {
+            gated++;
+            var inBar = (note.Position - section.Start) % section.Meter.BarDuration;
+            await Assert.That(section.Meter.Pulses.Any(x => Math.Abs(x - inBar) < 1e-6)).IsTrue().Because($"seed {song.Seed} at {note.Position}");
+        }
+
+        await Assert.That(gated).IsGreaterThan(100);
+    }
+
+    [Test]
     [Explicit]
     public async Task Report()
     {
@@ -41,8 +58,8 @@ public sealed class GateTest
             var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
             var gated = songs.Where(x => x.Song.Notes!.Values.Any(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0))).ToArray();
             // in every section a gated part plays, from its first note to the section's end: how much of it sounds, and its
-            // notes off the bar's beats, after a gap, and ending inside a 16th's sounding part
-            var (span, sounding, notes, offBeat, gaps, cut) = (0.0, 0.0, 0, 0, 0, 0);
+            // notes off the bar's beats, after a gap, ending inside a 16th's sounding part, single, and with a semitone in them
+            var (span, sounding, notes, offBeat, gaps, cut, single, second) = (0.0, 0.0, 0, 0, 0, 0, 0, 0);
             foreach (var song in gated)
             foreach (var timeline in song.Song.Notes!.Values.Where(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)))
             foreach (var section in song.Map.Sections)
@@ -65,12 +82,17 @@ public sealed class GateTest
                     var inStep = (note.Position + note.Value.Duration) / 0.25 % 1 * 0.25;
                     if (inStep is > 1e-6 and < 0.15 - 1e-6)
                         cut++;
+                    if (note.Value.Pitches.Length == 1)
+                        single++;
+                    var classes = note.Value.Pitches.Select(x => x % 12).ToHashSet();
+                    if (classes.Any(x => classes.Contains((x + 1) % 12)))
+                        second++;
                     notes++;
                 }
             }
 
             Console.WriteLine($"{name}: gated {gated.Length / (double)songs.Length:P0}; of a gated part's section from its first note sounding {sounding / span:P0}, " +
-                              $"of its {notes} notes {offBeat / (double)notes:P0} off the beat, {gaps / (double)notes:P0} after a gap, {cut / (double)notes:P0} ending inside a 16th's sound");
+                              $"of its {notes} notes {offBeat / (double)notes:P0} off the beat, {gaps / (double)notes:P0} after a gap, {cut / (double)notes:P0} ending inside a 16th's sound, {single / (double)notes:P0} a single note, {second / (double)notes:P0} a chord with a semitone");
         }
 
         await Task.CompletedTask;

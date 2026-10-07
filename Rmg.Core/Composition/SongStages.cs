@@ -303,7 +303,10 @@ internal static class SongStages
                 song.Soloists,
                 track => song.Stream(SongStream.PartSound, track),
                 (section, track) => song.Stream(SongStream.Expression, section, track),
-                song.Genre
+                song.Genre,
+                [..draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)],
+                song.Form.Edits.CutsOf,
+                [..StopTime.Phrases(song).Select(x => (x.Start, x.End))]
             )
         };
 

@@ -51,6 +51,9 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
         spans.Add((from, to));
     }
 
+    /// <summary>Where a track's notes end as the band stops, in no order; none where it never does.</summary>
+    public IReadOnlyList<double> CutsOf(int track) => _cuts.GetValueOrDefault(track) ?? [];
+
     /// <summary>A hit of a track, in place of any it or a fill has there.</summary>
     /// <param name="articulation">The drum's sound, counted from 1; 0 for the groove's.</param>
     public void Hit(int track, double position, double velocity, int articulation, int sectionId, string fill)

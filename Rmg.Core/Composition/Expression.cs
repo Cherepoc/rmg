@@ -345,6 +345,9 @@ internal static class Expression
     /// <param name="partStreams">A part's sequence for the whole song, by its track.</param>
     /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
     /// <param name="genre">The genre, whose chances of the gentle effects and pool of the strong ones are the song's where it names them.</param>
+    /// <param name="changes">Where the chords change, in order, which a gated part's held chords change at.</param>
+    /// <param name="cuts">Where a part's notes end as the band stops, by its track, which a gated part's held chords end by.</param>
+    /// <param name="stopTime">The spans played in stop time, whose hits a gated part plays as they are.</param>
     public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Apply(
         ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> notes,
         ImmutableSortedDictionary<int, IInstrumentTrack> definitions,
@@ -356,7 +359,10 @@ internal static class Expression
         IReadOnlyDictionary<TrackRole, Soloist> soloists,
         Func<int, IGenerationContext> partStreams,
         Func<int, int, IGenerationContext> streams,
-        Genre genre
+        Genre genre,
+        IReadOnlyList<double> changes,
+        Func<int, IReadOnlyList<double>> cuts,
+        IReadOnlyList<(double Start, double End)> stopTime
     )
     {
         // which effects the song plays at all, as a genre has them where it names them
@@ -375,6 +381,9 @@ internal static class Expression
             .Select(x => new Weighted<int>(Suits(strong, definitions[x.Key].Role, ((PitchInstrumentTrack)definitions[x.Key]).InstrumentCode) ? SuitedStrongWeight : 1, x.Key))
             .ToImmutableArray();
         var carrier = strong != StrongEffect.None && !mayCarry.IsEmpty ? songStream.Pick(mayCarry) : -1;
+        // a gated part holding its chords, which the gate chops in time
+        if (strong == StrongEffect.Gate && carrier >= 0)
+            notes = notes.SetItem(carrier, GatedChords.Hold(notes[carrier], map, changes, cuts(carrier), stopTime));
 
         // the snares, which echo with a comping part's echo, at its delay, the drums' tracks coming after the pitched parts'
         var backbeat = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
