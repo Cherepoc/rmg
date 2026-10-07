@@ -8,6 +8,7 @@
       "insertion": { "none": 100, "phaser": [5, 10, 20], "wah": [5, 10, 20] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "louderForms": { "guitars": [20, 50, 60] },
+      "feelChances": { "swing": [5, 20, 25] },
       "pins": { "ground": [40, 40, 20], "backbeat": [80, 80, 50] },
       "push": { "sections": [5, 15, 20] },
       "keyChanges": { "lastSection": [0, 20, 100], "sections": [0, 8, 100], "patterns": [0, 0, 100] },
@@ -30,7 +31,7 @@
         "bass": { "electricBassFinger": [65, 65, 100], "electricBassPick": [100, 100, 87] },
         "riff": { "overdrivenGuitar": 100, "distortionGuitar": 85, "electricGuitarMuted": [5, 5, 15] },
         "rhythm": { "electricGuitarClean": [30, 30, 100], "electricGuitarMuted": [10, 10, 20], "overdrivenGuitar": [100, 100, 71], "distortionGuitar": [80, 80, 57] },
-        "solo": { "overdrivenGuitar": 100, "distortionGuitar": 100, "harmonica": [15, 15, 25], "lead2Sawtooth": [15, 15, 52] },
+        "solo": { "overdrivenGuitar": 100, "distortionGuitar": 100, "harmonica": [15, 15, 25], "lead2Sawtooth": [15, 15, 52], "rockOrgan": [10, 15, 20] },
         "pad": { "drawbarOrgan": 100, "stringEnsemble1": 60, "synthStrings1": [20, 20, 40], "choirAahs": [10, 10, 30] },
         "counterMelody": { "electricGuitarClean": 100, "rockOrgan": 60, "stringEnsemble1": [20, 20, 40], "cello": [10, 10, 30], "lead2Sawtooth": [10, 10, 40] }
       },
@@ -783,7 +784,7 @@
     "choices": {
       "drumSounds": { "china": 70 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
-      "louderForms": { "guitars": [30, 50, 60] },
+      "louderForms": { "guitars": 80 },
       "rootMotion": { "thirdDown": 70, "stepUp": 70, "stepDown": 60 },
       "tempo": { "from": [120, 120, 90], "to": [180, 180, 220] },
       "meter": { "4/4": 100, "6/8": [5, 5, 15], "7/8": [0, 0, 20], "5/4": [0, 0, 10] },
@@ -808,7 +809,7 @@
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [70, 70, 60] },
       "instrument": {
         "melody": { "electricGuitarClean": [40, 40, 60], "lead2Sawtooth": [30, 30, 50], "violin": [20, 20, 30], "lead5Charang": 100 },
-        "chords": { "distortionGuitar": 100, "overdrivenGuitar": 80, "churchOrgan": [10, 10, 30] },
+        "chords": { "distortionGuitar": 100, "overdrivenGuitar": 80, "electricGuitarClean": [10, 20, 20], "churchOrgan": [10, 10, 30] },
         "bass": { "electricBassPick": 100, "electricBassFinger": 60 },
         "pad": { "choirAahs": 100, "stringEnsemble1": 80, "synthStrings1": [30, 30, 50] },
         "riff": { "distortionGuitar": 100, "overdrivenGuitar": 60, "electricGuitarMuted": [0, 0, 10] },

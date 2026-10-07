@@ -176,7 +176,7 @@ internal static class InstrumentRoles
 
     /// <summary>
     ///     The instruments that take a solo: a lead guitar, overdriven or distorted most often, a sax, a trumpet, a violin, a
-    ///     flute, a harmonica or a synth lead.
+    ///     flute, a harmonica or a synth lead; an organ where a genre names it.
     /// </summary>
     public static InstrumentRole Solo { get; } = new(
         nameof(Solo),
@@ -194,7 +194,9 @@ internal static class InstrumentRoles
             new(22, "Harmonica", 0.2, MelodyLayers.Stepwise),
             new(80, "Lead 1 (square)", 0.3, MelodyLayers.Mixed),
             new(81, "Lead 2 (sawtooth)", 0.4, MelodyLayers.Mixed),
-            new(84, "Lead 5 (charang)", 0.2, MelodyLayers.Mixed)
+            new(84, "Lead 5 (charang)", 0.2, MelodyLayers.Mixed),
+            // an organ's solo, a hard rock band's, which only a genre plays
+            new(18, "Rock Organ", 0, MelodyLayers.Mixed)
         ]
     );
 
