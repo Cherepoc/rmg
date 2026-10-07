@@ -8,7 +8,7 @@ is removed once it is built.
 
 **In order** (P1, the plan of 8 October 2026, each step through the implementation loop):
 
-1. The genres sorted by name (*Architecture*).
+1. Done: the genres sorted by name.
 2. Rock and metal measured against their sound, and their presets tuned where a choice reaches it (*Genres*).
 3. The listening tool, with the *Listening* section cut to its questions (*Listening data*).
 4. The double kick (*Genres*, *What the genres cannot play yet*).
@@ -379,10 +379,6 @@ Each item with its plan, and what it waits for.
 
 ### Architecture
 
-- **The genres sorted by name** (P1): the page's list and the Manage window sort the presets and one's own genres
-  alike, by name, ignoring case, numbers as numbers ("Rock 2" before "Rock 10"), where they are shown; one's own keep
-  the order they are kept in, which their place in the list reads, so that saving one need no longer keep its place;
-  "Export all" writes them sorted.
 - **The render reading the song's map** (P1, a refactor keeping the fingerprint): `ExpressionRender.Render` is given the
   map, so that the filter and the gate count from a section's start and a bar's meter there, and the state kinds that
   copy them onto every note (`FilterFrom`, `GateFrom`, `GateBar`) go.
