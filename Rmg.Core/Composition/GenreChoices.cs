@@ -72,6 +72,9 @@ public static class GenreChoices
     /// </summary>
     public static GenreChoice RootMotions { get; } = Values("rootMotion", "Root motions", Progressions.Motions);
 
+    /// <summary>The degrees a chord's root leans to, by its steps above the section's home, as rock's ♭VII and ♭VI (<see cref="Progressions.Degrees" />).</summary>
+    public static GenreChoice RootDegrees { get; } = Values("rootDegree", "Chord degrees", Progressions.Degrees);
+
     /// <summary>
     ///     The chords that leave the section's scale, each its chance as the songs have it (<see cref="Composition.ChordScales" />):
     ///     a chord before a root a fifth below its dominant, a chord in a mode borrowed from the home's parallels, and a
@@ -512,7 +515,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, RootMotions, RootDegrees, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Dynamics, Phrases,
         SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

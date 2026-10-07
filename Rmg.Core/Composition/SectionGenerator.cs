@@ -243,7 +243,7 @@ internal sealed class SectionGenerator
         // how often its chords change, from a sequence of its own, faster the more energy it has
         var harmonicRhythm = HarmonicRhythm.Draw(Stream(sectionId, SectionStream.HarmonicRhythm), tilt, meter, facets[Facet.Progression], _genre);
         var progression = Progressions.Generate(context, scale, home, Progressions.Strictness.At(facets[Facet.Progression]), harmonicRhythm.Count, meter.Phrases,
-            motion => _genre.Shift(GenreChoices.RootMotions, Progressions.Motions[motion].Name));
+            motion => _genre.Shift(GenreChoices.RootMotions, Progressions.Motions[motion].Name), step => _genre.Shift(GenreChoices.RootDegrees, Progressions.Degrees[step].Name));
         // a turnaround now and then, the pattern's last bar leading back to its start, by the progression facet and a genre's,
         // from a sequence of its own
         var turnaround = Stream(sectionId, SectionStream.Turnaround).TestProbability(Progressions.Turnaround.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Turnaround, "sections")));

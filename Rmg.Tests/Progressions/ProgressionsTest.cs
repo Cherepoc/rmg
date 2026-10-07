@@ -14,12 +14,30 @@ public sealed class ProgressionsTest
     private static ImmutableArray<int>[] GeneratePhrases(Scale scale, int home, double strictness, Func<int, double> motionLean)
     {
         var context = new GenerationContext(1);
-        return [..Enumerable.Range(0, PhraseCount).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, scale, home, strictness, 4, 1, motionLean))];
+        return [..Enumerable.Range(0, PhraseCount).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, scale, home, strictness, 4, 1, motionLean, _ => 0))];
     }
 
     // how often the roots move by a motion, by its place in the motions, of every move between chords
     private static double ShareOf(ImmutableArray<int>[] phrases, int motion) =>
         (double)phrases.Sum(x => x.Zip(x.Skip(1)).Count(m => Mod7(m.Second - m.First) == motion)) / phrases.Sum(x => x.Length - 1);
+
+    [Test]
+    public async Task ADegreeLeanedTo_IsLikelierAmongTheChordsDrawn_AndOneLeanedFrom_Rarer()
+    {
+        var minor = Rmg.Core.Composition.Scales.All.Single(x => x.Name == "Natural minor");
+        double Share(Func<int, double> degreeLean, int degree)
+        {
+            var context = new GenerationContext(1);
+            var phrases = Enumerable.Range(0, 4000).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, minor, 0, 0.85, 4, 1, _ => 0, degreeLean)).ToArray();
+            // the chords drawn, the first, home, not among them
+            return (double)phrases.Sum(x => x.Skip(1).Count(r => Mod7(r) == degree)) / phrases.Sum(x => x.Length - 1);
+        }
+
+        var seventh = Share(_ => 0, 6);
+        Console.WriteLine($"the seventh {seventh:P0}, leaned to {Share(x => x == 6 ? 1 : 0, 6):P0}, from {Share(x => x == 6 ? -1 : 0, 6):P0}");
+        await Assert.That(Share(x => x == 6 ? 1 : 0, 6)).IsGreaterThan(seventh * 1.3);
+        await Assert.That(Share(x => x == 6 ? -1 : 0, 6)).IsLessThan(seventh / 1.3);
+    }
 
     [Test]
     public async Task ThreePhrases_StartFromHomeThenIVThenV_TheFirstTwoEndingHome_AsTheBluesDoes()
@@ -29,7 +47,7 @@ public sealed class ProgressionsTest
         var motions = Rmg.Core.Composition.Progressions.Motions.Select(x => x.Name).ToList();
         var context = new GenerationContext(1);
         var phrases = Enumerable.Range(0, 2000)
-            .Select(_ => Rmg.Core.Composition.Progressions.Generate(context, major, 0, 1, 12, 3, x => x == motions.IndexOf("fourthDown") ? 0.8 : x == motions.IndexOf("stepUp") ? 0.7 : 0))
+            .Select(_ => Rmg.Core.Composition.Progressions.Generate(context, major, 0, 1, 12, 3, x => x == motions.IndexOf("fourthDown") ? 0.8 : x == motions.IndexOf("stepUp") ? 0.7 : 0, _ => 0))
             .ToArray();
         double Share(int chord, int root) => (double)phrases.Count(x => Mod7(x[chord]) == root) / phrases.Length;
 
@@ -37,7 +55,7 @@ public sealed class ProgressionsTest
         foreach (var strictness in new[] { 0.95, 0.9, 0.85 })
         {
             var some = Enumerable.Range(0, 2000).Select(_ => Rmg.Core.Composition.Progressions.Generate(context, major, 0, strictness, 12, 3,
-                x => x == motions.IndexOf("fourthDown") ? 0.6 : x == motions.IndexOf("stepUp") ? 0.4 : 0)).ToArray();
+                x => x == motions.IndexOf("fourthDown") ? 0.6 : x == motions.IndexOf("stepUp") ? 0.4 : 0, _ => 0)).ToArray();
             double At(int chord, int root) => (double)some.Count(x => Mod7(x[chord]) == root) / some.Length;
             Console.WriteLine($"at {strictness}: bar 5 IV {At(4, 3):P0}, bar 9 V {At(8, 4):P0}, bar 4 I {At(3, 0):P0}, bar 8 I {At(7, 0):P0}, bar 12 V {At(11, 4):P0}");
         }

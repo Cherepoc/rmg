@@ -53,6 +53,22 @@ internal static class Progressions
     public const double MotionOdds = 4;
 
     /// <summary>
+    ///     The degrees a genre leans a root to (<see cref="GenreChoices.RootDegrees" />), by its steps above the section's
+    ///     home, as its mode makes them, and how a page shows them: rock's ♭VII and ♭VI, which the motions alone reach by
+    ///     chance. A degree leans as a motion does, by <see cref="MotionOdds" />.
+    /// </summary>
+    public static ImmutableArray<(string Name, string Label)> Degrees { get; } =
+    [
+        ("home", "Home, I or i"),
+        ("second", "The second, ii, ii° or Phrygian's ♭II"),
+        ("third", "The third, iii or ♭III"),
+        ("fourth", "The fourth, IV or iv"),
+        ("fifth", "The fifth, V or v"),
+        ("sixth", "The sixth, vi or ♭VI"),
+        ("seventh", "The seventh, vii° or ♭VII")
+    ];
+
+    /// <summary>
     ///     How a phrase of a longer progression starts and ends by its place, by the root's step above home, the others as
     ///     a root out of its place weighs (<see cref="OutOfPlaceWeight" />): a middle phrase from IV, now and then from home;
     ///     the last from V, now and then from IV, but the second of two from home (<see cref="AnswerStarts" />); and every
@@ -126,7 +142,12 @@ internal static class Progressions
     ///     How a genre leans each motion, by its place in <see cref="Motions" />, from -1 to 1, 0 as the songs have it,
     ///     beyond the strictness, so that a genre's motions are heard in its wildest songs too.
     /// </param>
-    public static ImmutableArray<int> Generate(IGenerationContext context, Scale scale, int home, double strictness, int count, int phrases, Func<int, double> motionLean)
+    /// <param name="degreeLean">
+    ///     How a genre leans each root, by its steps above home, its place in <see cref="Degrees" />, as the motions are
+    ///     leaned.
+    /// </param>
+    public static ImmutableArray<int> Generate(IGenerationContext context, Scale scale, int home, double strictness, int count, int phrases, Func<int, double> motionLean,
+        Func<int, double> degreeLean)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(strictness);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(strictness, 1);
@@ -158,7 +179,7 @@ internal static class Progressions
                     : isPreparation ? PreCadenceSteps.Contains(step) ? 1 : OutOfRoleWeight
                     : 1;
                 var motion = Mod(step - previous);
-                weights[step] = new Weighted<int>(tilt.Weigh(Math.Pow(MotionWeights[motion] * roleWeight, strictness), motionLean(motion)), step);
+                weights[step] = new Weighted<int>(tilt.Weigh(tilt.Weigh(Math.Pow(MotionWeights[motion] * roleWeight, strictness), motionLean(motion)), degreeLean(step)), step);
             }
 
             // a root out of its phrase's place weighs nothing at the plainest

@@ -65,8 +65,11 @@ public sealed class RockAndMetalReportTest
 
             Console.WriteLine($"{name}: songs with a solo {solos.Length / (double)songs.Length:P0}, an organ soloing {organs / (double)Math.Max(1, solos.Length):P0} of them; " +
                               $"swung {songs.Average(x => x.Swing.Delay > 0 ? 1.0 : 0):P0}");
+            // the chords drawn, every one but a progression's first, home, on each degree
+            var drawn = progressions.SelectMany(x => x.Skip(1).Select(r => (r % 7 + 7) % 7)).ToArray();
+            string Degree(int step) => $"{drawn.Count(x => x == step) / (double)drawn.Length:P0}";
             Console.WriteLine($"{name}: sections playing ♭VII–IV–I {Share([6, 3, 0]):P0}, ♭VI–♭VII–I {Share([5, 6, 0]):P0}, i–♭VI–♭VII {Share([0, 5, 6]):P0}, " +
-                              $"i–♭II {Share([0, 1]):P0}, ♭II–i {Share([1, 0]):P0}");
+                              $"♭VII–I {Share([6, 0]):P0}; the chords drawn on IV {Degree(3)}, ♭VI {Degree(5)}, ♭VII {Degree(6)}");
             Console.WriteLine($"{name}: schemes {Scheme("AAAA")}, {Scheme("AAAB")}, {Scheme("ABAB")}, {Scheme("AABA")}, {Scheme("AABB")}, others {schemes.Count(x => x is not ("AAAA" or "AAAB" or "ABAB" or "AABA" or "AABB")) / (double)schemes.Length:P0}");
             Console.WriteLine($"{name}: the kick's hits a bar {every.Average():0.0}, in the loudest section {loudest.Average():0.0}, at most {loudest.DefaultIfEmpty(0).Max():0.0}");
             Console.WriteLine($"{name}: songs opening on an intro section {structures.Average(x => x.Roles.Values.Contains(SectionRole.Intro) ? 1.0 : 0):P0}, " +
