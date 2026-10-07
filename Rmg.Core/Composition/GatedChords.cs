@@ -34,10 +34,9 @@ internal static class GatedChords
         var stops = cuts.Concat(stopTime.Select(x => x.Start)).Order().ToArray();
         double NextStop(double position) => stops.FirstOrDefault(x => x > position + Epsilon, double.PositiveInfinity);
 
-        // every section, and an intro before the first in its meter; an ending's chord as it is
-        var spans = map.Sections[0].Start > Epsilon ? map.Sections.Prepend(new SectionSpan(-1, 0, map.Sections[0].Start, map.Sections[0].Meter)) : map.Sections;
-        var held = timeline.Where(x => InStopTime(x.Position) || x.Position >= map.Sections[^1].End - Epsilon).ToList();
-        foreach (var section in spans)
+        // every section's; an intro's and an ending's notes, which play no gate, as they are
+        var held = timeline.Where(x => InStopTime(x.Position) || x.Position < map.Sections[0].Start - Epsilon || x.Position >= map.Sections[^1].End - Epsilon).ToList();
+        foreach (var section in map.Sections)
         {
             var bar = section.Meter.BarDuration;
             // the next beat of the bar at or after a position

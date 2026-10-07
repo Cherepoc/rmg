@@ -134,16 +134,19 @@ internal static class ExpressionRender
             }
 
             // a gate, the note sounding in the first part of each 16th it lets through and silent in the rest, and in those it
-            // does not, back to full where it ends
+            // does not, its 16ths counted from every bar's first and swung as the notes are; back to full where it ends
             var gate = state.GetStateValue(CompositionStateKinds.Gate);
             if (gate != 0)
             {
-                for (var at = Math.Floor(start / Sixteenth + 1e-9) * Sixteenth; at < end - 1e-9; at += Sixteenth)
+                var from = state.GetStateValue(CompositionStateKinds.GateFrom);
+                var bar = state.GetStateValue(CompositionStateKinds.GateBar);
+                for (var at = Math.Floor(note.Position / Sixteenth + 1e-9) * Sixteenth; swing.Apply(at) < end - 1e-9; at += Sixteenth)
                 {
-                    var sounds = (gate >> ((int)Math.Round(at / Sixteenth)).Mod(16) & 1) == 1;
-                    expression.Add((Math.Max(at, start), sounds ? 1 : 0));
-                    if (sounds && at + GateShare * Sixteenth < end - 1e-9)
-                        expression.Add((at + GateShare * Sixteenth, 0));
+                    var sounds = (gate >> ((int)Math.Round((at - from) / Sixteenth)).Mod(bar).Mod(16) & 1) == 1;
+                    expression.Add((Math.Max(swing.Apply(at), start), sounds ? 1 : 0));
+                    var closes = swing.Apply(at + GateShare * Sixteenth);
+                    if (sounds && closes < end - 1e-9)
+                        expression.Add((closes, 0));
                 }
 
                 expression.Add((end, 1));

@@ -118,6 +118,11 @@ internal static class CompositionStateKinds
     // the 16ths a trance gate lets a held note sound in, a bar's sixteen as bits from its first, 0 for none (Expression.Gate)
     public static StateKind<int> Gate { get; } = StateKinds.CreateAdditive<int>(Prefix + "Gate", StateScope.Render);
 
+    // where a gate's bars are counted from, its section's start, and how many 16ths a bar there has, which its pattern's
+    // 16ths are counted in from every bar's first
+    public static StateKind<double> GateFrom { get; } = StateKinds.CreateAdditive<double>(Prefix + "GateFrom", StateScope.Render);
+    public static StateKind<int> GateBar { get; } = StateKinds.CreateAdditive<int>(Prefix + "GateBar", StateScope.Render);
+
     public static StateKind<int> Reverb { get; } = StateKinds.CreateAdditive<int>(Prefix + "Reverb", StateScope.Render);
     public static StateKind<int> Chorus { get; } = StateKinds.CreateAdditive<int>(Prefix + "Chorus", StateScope.Render);
 

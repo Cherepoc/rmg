@@ -13,7 +13,7 @@ public sealed class GateTest
         .Add(GenreChoices.StrongEffect.Name, ImmutableDictionary<string, ByConvention>.Empty.Add(GenreChoices.Name(nameof(StrongEffect.Gate)), new ByConvention(1, 1, 1))));
 
     [Test]
-    public async Task AGatedPart_HoldsChords_AndSoundsAndFallsSilentOnlyOnTheGrid()
+    public async Task AGatedPart_SoundsAndFallsSilentOnlyOnTheSwungGrid_AndSoundsOnEveryBarsFirst16th()
     {
         var gated = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
@@ -24,21 +24,34 @@ public sealed class GateTest
                 continue;
             gated++;
             await Assert.That(chopped[0].Role is TrackRole.Pad or TrackRole.Chords or TrackRole.Rhythm).IsTrue();
-            // silent from 0.6 of a 16th, or from its start where it lets none through
+            // silent from 0.6 of a 16th, or from its start where it lets none through, as the song swings them
             foreach (var (position, _) in chopped[0].Expression.Where(x => x.Value == 0))
-                await Assert.That(new[] { 0, 0.15 }.Any(x => Math.Abs((position - x) / 0.25 - Math.Round((position - x) / 0.25)) < 1e-6)).IsTrue().Because($"seed {song.Seed} at {position}");
+            {
+                var step = Math.Floor(position / 0.25);
+                await Assert.That(new[] { step - 1, step, step + 1 }.Any(k => new[] { 0, 0.15 }.Any(x => Math.Abs(song.Swing.Apply(k * 0.25 + x) - position) < 1e-6)))
+                    .IsTrue().Because($"seed {song.Seed} at {position}");
+            }
+
+            // sounding on every bar's first 16th it holds a note over
+            var timeline = song.Song.Notes!.Values.First(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0));
+            foreach (var section in song.Map.Sections)
+            foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9))
+            for (var bar = section.Start + Math.Ceiling((note.Position - section.Start - 1e-9) / section.Meter.BarDuration) * section.Meter.BarDuration;
+                 bar < note.Position + note.Value.Duration - 1e-9;
+                 bar += section.Meter.BarDuration)
+                await Assert.That(chopped[0].Expression.Last(x => x.Position <= song.Swing.Apply(bar) + 1e-6).Value).IsEqualTo(1).Because($"seed {song.Seed} at {bar}");
         }
 
         await Assert.That(gated).IsGreaterThan(10);
     }
 
     [Test]
-    public async Task AGatedPart_ChangesItsChords_OnlyOnTheBarsBeats_InAnIntroToo()
+    public async Task AGatedPart_ChangesItsChords_OnlyOnTheBarsBeats()
     {
         var gated = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
         foreach (var timeline in song.Song.Notes!.Values.Where(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)))
-        foreach (var section in song.Map.Sections.Prepend(new SectionSpan(-1, 0, song.Map.Sections[0].Start, song.Map.Sections[0].Meter)))
+        foreach (var section in song.Map.Sections)
         foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9))
         {
             gated++;
@@ -91,6 +104,35 @@ public sealed class GateTest
                 }
             }
 
+            // as it is rendered: the bars' first 16ths a held note falls silent on, and the 16ths it sounds from off the song's
+            // swung 16ths
+            var (downbeats, silent, openings, offGrid) = (0, 0, 0, 0);
+            foreach (var song in gated)
+            {
+                var track = song.Rendered.Tracks.First(x => !x.IsDouble && x.Expression.Any(e => e.Value == 0));
+                var timeline = song.Song.Notes!.Values.First(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0));
+                foreach (var section in song.Map.Sections)
+                foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9))
+                for (var bar = section.Start + Math.Ceiling((note.Position - section.Start - 1e-9) / section.Meter.BarDuration) * section.Meter.BarDuration;
+                     bar < note.Position + note.Value.Duration - 1e-9;
+                     bar += section.Meter.BarDuration)
+                {
+                    var at = song.Swing.Apply(bar);
+                    downbeats++;
+                    if (track.Expression.LastOrDefault(x => x.Position <= at + 1e-6).Value == 0)
+                        silent++;
+                }
+
+                foreach (var (position, _) in track.Expression.Where(x => x.Value == 1))
+                {
+                    openings++;
+                    var step = Math.Floor(position / 0.25);
+                    if (!new[] { step - 1, step, step + 1 }.Any(k => Math.Abs(song.Swing.Apply(k * 0.25) - position) < 1e-6))
+                        offGrid++;
+                }
+            }
+
+            Console.WriteLine($"{name}: of a held note's bars' first 16ths {silent / (double)downbeats:P0} silent; of the 16ths it sounds from {offGrid / (double)openings:P0} off the swung 16ths");
             Console.WriteLine($"{name}: gated {gated.Length / (double)songs.Length:P0}; of a gated part's section from its first note sounding {sounding / span:P0}, " +
                               $"of its {notes} notes {offBeat / (double)notes:P0} off the beat, {gaps / (double)notes:P0} after a gap, {cut / (double)notes:P0} ending inside a 16th's sound, {single / (double)notes:P0} a single note, {second / (double)notes:P0} a chord with a semitone");
         }
