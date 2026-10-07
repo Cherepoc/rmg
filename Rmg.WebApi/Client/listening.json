@@ -386,6 +386,29 @@
     ]
   },
   {
+    "id": "djent-tension",
+    "question": "Djent's slow synth line over the guitars, its strong beats on a tension against the chord: a menacing glow, or a wrong note?",
+    "decides": "Its tension chances in Djent, the counter-melody's and the melody's.",
+    "genre": "djent",
+    "without": {
+      "skip": [],
+      "genre": {
+        "tension": {
+          "counterMelody": 0,
+          "melody": 0
+        }
+      }
+    },
+    "seeds": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ]
+  },
+  {
     "id": "gate",
     "question": "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
     "decides": "Its weight in Trance, and the parts it chops.",

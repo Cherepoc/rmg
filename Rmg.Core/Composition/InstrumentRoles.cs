@@ -222,7 +222,7 @@ internal static class InstrumentRoles
         ]
     );
 
-    /// <summary>The instruments that play a line under the melody: strings, horns, reeds, a clean guitar, an organ.</summary>
+    /// <summary>The instruments that play a line under the melody: strings, horns, reeds, a clean guitar, an organ, a synth.</summary>
     public static InstrumentRole CounterMelody { get; } = new(
         nameof(CounterMelody),
         [
@@ -242,7 +242,9 @@ internal static class InstrumentRoles
             new(72, "Piccolo", new ByConvention(0, 0.05, 0.2)),
             new(45, "Pizzicato Strings", new ByConvention(0, 0.1, 0.3)),
             new(62, "Synth Brass 1", new ByConvention(0, 0.1, 0.3)),
-            new(85, "Lead 6 (voice)", new ByConvention(0, 0.05, 0.2))
+            new(85, "Lead 6 (voice)", new ByConvention(0, 0.05, 0.2)),
+            // a slow synth over a heavy band's guitars, a genre's, the songs' never
+            new(50, "Synth Strings 1", 0)
         ]
     );
 

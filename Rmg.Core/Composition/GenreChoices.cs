@@ -153,6 +153,10 @@ public static class GenreChoices
     public static GenreChoice Ornaments { get; } = Chances("ornaments", "Ornaments",
         [..Composition.Ornaments.All.Select(x => (Composition.Ornaments.NameOf(x.Ornament), Composition.Ornaments.LabelOf(x.Ornament), x.Chance))]);
 
+    /// <summary>The chance a line's note on a strong beat lands on a tension, the melody's and the counter-melody's (<see cref="LinePattern.Tensions" />).</summary>
+    public static GenreChoice Tension { get; } = Chances("tension", "Strong beats on a tension",
+        [..LinePattern.Tensions.Select(x => (Name(x.Role.ToString()), x.Role == TrackRole.Melody ? "The melody's" : "The counter-melody's", x.Chance))]);
+
     /// <summary>The chances a line's part slurs its steps, a piano's part rolls its held chords, and the chords are struck short (<see cref="Articulations.Apply" />).</summary>
     public static GenreChoice Articulation { get; } = Chances("articulation", "Articulation",
         [("legato", "Slurred steps", Articulations.LegatoChance), ("roll", "Rolled piano chords", Articulations.RollChance), ("stabs", "Chords as stabs", Articulations.StabChance)]);
@@ -532,7 +536,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
         SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

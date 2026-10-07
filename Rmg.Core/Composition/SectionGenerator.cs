@@ -596,6 +596,13 @@ internal sealed class SectionGenerator
             else if (powerChords && _tracks.Definitions[trackNumber].Role == TrackRole.Riff)
                 sectionTrackLayer.Add(CompositionStateKinds.PowerChord, 1);
         }
+        // a line's strong beats on a tension now and then, as the genre has its part, by the section's melody facet
+        if (LinePattern.Tensions.Where(x => x.Role == _tracks.Definitions[trackNumber].Role).Select(x => (ByConvention?)x.Chance).FirstOrDefault() is { } tension)
+        {
+            var chance = tension.At(sectionRhythm.Facets[Facet.Melody], _genre.Chance(GenreChoices.Tension, GenreChoices.Name(_tracks.Definitions[trackNumber].Role.ToString())));
+            if (chance > 0)
+                sectionTrackLayer.Add(CompositionStateKinds.LineTension, chance);
+        }
         // the chords broken now and then, each part that plays them from a sequence of its own, by the section's chords facet
         if (_tracks.Definitions[trackNumber].Role.PlaysChords())
         {

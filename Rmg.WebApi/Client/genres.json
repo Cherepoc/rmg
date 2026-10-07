@@ -957,6 +957,7 @@
       },
       "sectionChanges": { "meter": [10, 20, 100], "tempo": [0, 4, 100], "modulation": [0, 5, 50] },
       "drop": { "lifts": [20, 30, 40] },
+      "tension": { "counterMelody": [30, 40, 60], "melody": [5, 10, 20] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "arpeggio": { "none": 100, "up": [10, 30, 40], "upTwoOctaves": [10, 20, 40], "upDown": [0, 10, 30], "pedal": [20, 30, 30] },
       "colour": { "none": [60, 50, 40], "majorSeventh": 100, "flatSecond": 80, "sharpFourth": 80, "ninth": 50 },
@@ -965,7 +966,7 @@
       "chordScales": { "own": [20, 30, 40] },
       "vamp": { "sections": [60, 70, 60] },
       "rhythm": {
-        "backbeat": { "speed": 25 },
+        "backbeat": { "speed": 25 }, "counterMelody": { "speed": 15 },
         "riff": { "speed": 100, "fullness": 82, "repetition": 82, "syncopation": 76 },
         "rhythm": { "speed": 70 }
       },
@@ -987,13 +988,13 @@
       "rootMotion": { "same": 75, "stepUp": 60 },
       "riff": { "powerChords": [60, 60, 50], "chugs": [90, 90, 80] },
       "register": { "riff": 0 },
-      "parts": { "melody": [40, 40, 50], "chords": [60, 60, 60], "bass": 100, "pad": [50, 50, 60], "counterMelody": [20, 20, 30], "drum": 100, "riff": 100, "riffTwin": [0, 10, 20], "rhythm": [50, 50, 50], "solo": [20, 40, 60] },
+      "parts": { "melody": [40, 40, 50], "chords": [60, 60, 60], "bass": 100, "pad": [50, 50, 60], "counterMelody": [40, 45, 55], "drum": 100, "riff": 100, "riffTwin": [0, 10, 20], "rhythm": [50, 50, 50], "solo": [20, 40, 60] },
       "instrument": {
         "melody": { "electricGuitarClean": 100, "lead2Sawtooth": 60, "lead5Charang": 40 },
         "chords": { "distortionGuitar": 100, "overdrivenGuitar": 40, "electricGuitarClean": [40, 50, 60], "pad7Halo": [10, 20, 40] },
         "bass": { "electricBassPick": 100, "electricBassFinger": 40 },
         "pad": { "pad7Halo": 100, "pad2Warm": 80, "synthStrings1": 60, "choirAahs": 40, "pad8Sweep": 40 },
-        "counterMelody": { "electricGuitarClean": 100, "lead2Sawtooth": 50 },
+        "counterMelody": { "lead2Sawtooth": 100, "synthStrings1": 60, "electricGuitarClean": 40 },
         "riff": { "distortionGuitar": 100, "overdrivenGuitar": 30 },
         "rhythm": { "distortionGuitar": 100, "overdrivenGuitar": 40, "electricGuitarClean": 100 },
         "solo": { "distortionGuitar": 60, "overdrivenGuitar": 60, "electricGuitarClean": 50, "lead2Sawtooth": 40 }

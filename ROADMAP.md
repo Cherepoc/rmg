@@ -13,7 +13,7 @@ is removed once it is built.
 3. Done: the gate holding whole chords only, an arpeggio gated as it plays, Trance's arpeggios in 16ths.
 4. Done: the part alone a genre's.
 5. Done: metal's arpeggios, a pedal point, a part's colour, a clean arpeggio staying clean.
-6. Djent's synth over the guitars: a line's tensions on its strong beats.
+6. Done: Djent's synth over the guitars, a line's strong beats on a tension, a genre's by part.
 7. The brightness heard: how far it moves each family of instruments in both soundfonts served.
 8. One filter curve a part, its shapes combined, drawn over time, the filter's movements moved onto it.
 9. The filter as tone: a part's constant tone, its tone by a section's energy, a swell brightening.
@@ -200,6 +200,8 @@ Each item with its plan, and what it waits for.
 
 ### Conventionality
 
+- **A flaky page test** (P2): `GenreEditorTest.ALength_IsShownAndGivenInMinutesAndSeconds_ATempoInBeatsAMinute`
+  fails now and then on a request answered 400, master's too; find which request and why.
 - **A song's length, the rest:** a short length runs long, 16% of the songs given a minute and 19% of those given two
   past 15% over (`SongLengthReportTest`), the intro's bars taken in (`SongFormGenerator.IntroDuration`) but an intro
   section, an outro or the ending's bars adding what the length leans no draw of; their chances leaned by the length
@@ -412,13 +414,8 @@ left:
   - Black metal's interludes: its pad alone now (`GenreChoices.Alone`); an acoustic guitar alone between the storms
     (P3), the part alone switching to a quiet instrument of its family in a quiet section.
   - Field recordings, a prepared piano, glitch edits (*Parked*, beyond General MIDI).
-- **Djent's synth over the guitars** (P1, step 6): a synth or a pad holding long notes over the riff, melodic or
-  dissonant, the counter-melody or the pad slow (its rhythm's speed a genre's) in a synth's sound, built of what
-  there is but one piece: a line's tensions (added), its strong beats landing now and then on the chord's tensions,
-  the scale's ninth, eleventh or thirteenth, rather than always on its notes (`Line`), a lean by part of the genre's,
-  the songs' none; dissonant where the scale is, a Phrygian's ♭2, a Locrian's ♭5. Of use beyond Djent: jazz's and
-  IDM's lines.
-  Measured by the strong beats on a tension by part and genre; `?listen=` a question of it.
+- **A line's tensions beyond Djent** (P3, by listening to `?listen=djent-tension`): jazz's and IDM's melodies and
+  counter-melodies on a tension now and then (`GenreChoices.Tension`).
 - **Tape's wow and flutter, and a part detuned** (P2, step 10): a slow drift of a few cents on the pads and keys, or a
   part held a few cents off, as pitch bend, which a part's bends and vibrato share, a pitch effect beside the volume's,
   the pan's and the filter's (the strong effects stacked); IDM's warmth, a lo-fi genre's.

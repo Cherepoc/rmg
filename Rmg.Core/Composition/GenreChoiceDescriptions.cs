@@ -32,6 +32,7 @@ public static class GenreChoiceDescriptions
         ["lineScale"] = "The scale the melody's and the riff's passing notes take: the key's, the pentatonic and blues scales for rock and blues, the jazz and symmetric ones for an outside sound.",
         ["riffScale"] = "The scale the riff's passing notes and accents take where it differs from the melody's: chromatic and octatonic for a dissonant metal riff under a melodic lead.",
         ["ornaments"] = "How often a song's melody and counter-melody ornament their notes: a quick grace note before a note, a turn around a held one, a trill on a long one, as a flute or a fiddle does.",
+        ["tension"] = "How often the melody's and the counter-melody's notes on a strong beat land on a tension, a note of the scale outside the chord, its ninth, eleventh or thirteenth, or a mode's flat second, rather than on the chord's, as a synth over a heavy band holds a note against it; the songs land on the chord always.",
         ["melodyRange"] = "How far the melody roams: narrow, as a chant or a hook, or wide, as a jazz tune.",
         ["bass"] = "How much the bass leads into a new chord, walking its notes towards it, from never to as a walking jazz bass.",
         ["octaveBass"] = "How often a section's bass bounces between a note and its octave, as disco and funk basses do.",

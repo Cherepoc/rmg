@@ -22,6 +22,20 @@ internal sealed class LinePattern
     /// <summary>The stream a chugging note's draw of its pedal derives from its key (<see cref="Line.PedalShare" />).</summary>
     private const int PedalStream = 7;
 
+    /// <summary>The stream a strong beat's note's draw of a tension derives from its key (<see cref="Tensions" />).</summary>
+    private const int TensionStream = 8;
+
+    /// <summary>
+    ///     The chance a line's note on a strong beat lands on a tension, a note of the scale outside its chord, its ninth,
+    ///     eleventh or thirteenth, or a mode's flat second, rather than one of the chord's, as a synth over a heavy band
+    ///     holds a note against the chord; by the part, the songs' never.
+    /// </summary>
+    public static ImmutableArray<(TrackRole Role, ByConvention Chance)> Tensions { get; } =
+    [
+        (TrackRole.Melody, new ByConvention(0, 0, 0)),
+        (TrackRole.CounterMelody, new ByConvention(0, 0, 0))
+    ];
+
     /// <param name="barPattern">The bar pattern's state, over the melody track's.</param>
     /// <param name="profile">How the line moves (<see cref="LineProfile" />).</param>
     public LinePattern(StateMap barPattern, LineProfile profile)
@@ -100,7 +114,7 @@ internal sealed class LinePattern
                     var rank = x.State.GetStateValue(StateKinds.HeldDuration) > 0 ? 0 : x.State.GetStateValue(CompositionStateKinds.BeatRank);
                     var pitch = line.Place(
                         x.Chord,
-                        x.Classes,
+                        IsTense(x, rank, profile) ? TensionsOf(x) : x.Classes,
                         rank,
                         x.State.GetStateValue(CompositionStateKinds.LineStep),
                         x.State.GetStateValue(CompositionStateKinds.LineTurn),
@@ -204,6 +218,17 @@ internal sealed class LinePattern
                 notes[i] = notes[i] with { Pitch = notes[source].Pitch };
         }
     }
+
+    /// <summary>Whether a note on a strong beat lands on a tension, by its own draw, from its key, which draws nothing else.</summary>
+    private static bool IsTense(LineNote note, int rank, LineProfile profile) =>
+        note.State.GetStateValue(CompositionStateKinds.LineTension) is var chance and > 0
+        && rank <= profile.StrongestWeakRank
+        && TensionsOf(note).Count > 0
+        && new GenerationContext(Seeds.Derive((ulong)note.State.GetStateValue(CompositionStateKinds.NoteKey), TensionStream)).GenerateDouble() < chance;
+
+    /// <summary>A note's tensions: its scale's notes outside its chord, as pitch classes.</summary>
+    private static IReadOnlySet<int> TensionsOf(LineNote note) =>
+        Enumerable.Range(0, note.ScaleLength).Select(x => note.Chord.GetPitch(x).Mod(12)).Where(x => !note.Classes.Contains(x)).ToHashSet();
 
     /// <summary>
     ///     Whether a hook's note fits the chord its repeat plays over: of its scale, and, on any beat, no note of the chord a
