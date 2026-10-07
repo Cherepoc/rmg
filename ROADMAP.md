@@ -11,7 +11,7 @@ is removed once it is built.
 1. Done: the echo as the synthesizer's delay rather than notes; heard on the test instance (`?listen=echo`).
 2. Done: the strong effects stacked, the first as before, the others beside it by their shares, the volume multiplied.
 3. Done: the gate holding whole chords only, an arpeggio gated as it plays, Trance's arpeggios in 16ths.
-4. The part alone a genre's (*Genres*).
+4. Done: the part alone a genre's.
 5. Metal's arpeggios: a pedal point, a part's colour, a clean arpeggio staying clean; Metal's, Nu metal's, Djent's.
 6. Djent's synth over the guitars: a line's tensions on its strong beats.
 7. The brightness heard: how far it moves each family of instruments in both soundfonts served.
@@ -405,20 +405,15 @@ left:
     figures' grid in 32nds, should IDM's wildest want more than its hi-hat rolls and fills give.
   - A riff on an open string's drone, its notes alternating with the pedal, black metal's and folk metal's (P3, by
     listening): the riff's pedal (`Line.PedalShare`) leaned by a genre.
-  - Black metal's interludes, an acoustic guitar or a synth alone between the storms (*The part alone a genre's*).
+  - Black metal's interludes, an acoustic guitar or a synth alone between the storms (`GenreChoices.Alone`, Black metal's pad and rhythm part).
   - Field recordings, a prepared piano, glitch edits (*Parked*, beyond General MIDI).
-- **The part alone a genre's** (P1, step 4): one part alone is a texture (`TextureKind.Alone`), the part drawn evenly
-  among those playing; a genre names which part, and how likely each, plays alone: a clean guitar's arpeggio in metal's
-  quiet sections and intros, an acoustic guitar or a synth between black metal's storms, a pad in an ambient piece. A
-  pool by part, the songs' own evenly as now, the drums only where they keep time as now. Measured by the parts alone
-  by genre.
 - **Metal's arpeggios** (P1, step 5): a guitar breaking its chord, slowly or at a walking pace, an 8th at a middling
   tempo, a 16th in a slow section, never fast, in shapes of their own, in an intro or a quiet section where the heavy
   guitars rest, or ringing over them; consonant most often in Metal, a ninth's or a suspended colour, dissonant now and
   then, a minor chord's major seventh, a ♭2, a ♯4; dissonant more often in Nu metal's creeping clean parts and most
   often in Djent's. Built of what there is, three pieces added:
   - the rhythm part breaking its chord (`Arpeggios`), at its genre's pace (`rhythm.rhythm`), resting less where the
-    heavy guitars rest (`rests`), the part alone a genre's (above); clean, or driven where its genre gives it a driven
+    heavy guitars rest (`rests`), the part alone a genre's (`GenreChoices.Alone`); clean, or driven where its genre gives it a driven
     guitar;
   - a pedal-point arpeggio (added): the chord's lowest note in turn with each of the others upwards, 1–3–1–5–1–8,
     metal's commonest broken chord, beside up, up and down, two octaves, Alberti and pairs;
