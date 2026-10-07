@@ -11,14 +11,18 @@ is removed once it is built.
 1. The echo as the synthesizer's delay rather than notes (*Instruments and expression*).
 2. The strong effects each a chance of its own, one a controller on a part, the volume curves multiplied.
 3. The gate holding whole chords only, an arpeggio gated as it plays; Trance's arpeggios' rhythm measured.
-4. The brightness heard: how far it moves each family of instruments in both soundfonts served.
-5. One filter curve a part, its shapes combined, drawn over time, the filter's movements moved onto it.
-6. The filter as tone: a part's constant tone, its tone by a section's energy, a swell brightening.
-7. The mix's filter opening a song.
-8. The mix's filter dipping before a section or a drop, and closing a song as an ending.
-9. Trance as it is produced: its effects stacked, its rolling bass, its build, its degrees (*Genres*).
-10. Djent's filtered riff opening and its stuttering riff (*Genres*).
-11. Waiting on listening: the rest of rock's and metal's (*Genres*), long cycles (*Rhythm engine*), more figures.
+4. The part alone a genre's (*Genres*).
+5. Metal's slow, dissonant arpeggios: a part's colour, an arpeggio staying clean, Metal's, Nu metal's and Djent's.
+6. Djent's synth over the guitars: a line's tensions on its strong beats.
+7. The brightness heard: how far it moves each family of instruments in both soundfonts served.
+8. One filter curve a part, its shapes combined, drawn over time, the filter's movements moved onto it.
+9. The filter as tone: a part's constant tone, its tone by a section's energy, a swell brightening.
+10. Tape's wow and flutter, and a part detuned (*Genres*).
+11. The mix's filter opening a song.
+12. The mix's filter dipping before a section or a drop, and closing a song as an ending.
+13. Trance as it is produced: its effects stacked, its rolling bass, its build, its degrees (*Genres*).
+14. Djent's filtered riff opening and its stuttering riff (*Genres*).
+15. Waiting on listening: the rest of rock's and metal's, long cycles, more figures, rolls in 32nds, a riff's drone.
 
 Done in the plan of 8 October 2026: the genres sorted by name; rock and metal measured and their presets tuned; a
 section left to drums that only mark the form; the listening tool, *Listening* cut to its questions; a progression's
@@ -417,18 +421,41 @@ left:
 - **Black metal and IDM, the rest** (October 2026, `NewGenresReportTest`): Black metal tremolo-picks 51% of its
   sections, blasts 20%, double-kicks 20%; IDM, warm and swung at its plainest, an acid line, odd meters (47% of its
   wildest songs), polymeters and rolls at its wildest, breaks 24% of its sections. Left:
-  - Tape's wow and flutter, and a part detuned (P2, after *The strong effects each a chance of its own*, IDM's
-    warmth): a slow drift of a few cents on the pads and keys, or a part held a few cents off, as pitch bend, which
-    a part's bends and vibrato share, a pitch effect beside the volume's, the pan's and the filter's.
-  - A dull, warm tone for IDM's keys and pads (with *The filter as tone*), and Black metal's thin, trebly one, which a
-    low-pass alone cannot make (*Sound design beyond General MIDI*).
-  - Rolls splintering into 32nds, a breakbeat chopped and drilled, figures finer than a 16th (P3): the figures' grid
-    in 32nds, should IDM's wildest want more than its hi-hat rolls and fills give.
-  - A riff on an open string's drone, its notes alternating with the pedal, black metal's and folk metal's (P3): the
-    riff's pedal (`Line.PedalShare`) leaned by a genre.
-  - Black metal's interludes, an acoustic guitar or a synth alone between the storms (P3): one part alone a texture
-    already (`TextureKind.Alone`), its instrument a quiet one by the section's energy.
+  - Tape's wow and flutter, and a part detuned (*Tape's wow and flutter*, below).
+  - A dull, warm tone for IDM's keys and pads (with *The filter as tone*).
+  - Rolls splintering into 32nds, a breakbeat chopped and drilled, figures finer than a 16th (P3, by listening): the
+    figures' grid in 32nds, should IDM's wildest want more than its hi-hat rolls and fills give.
+  - A riff on an open string's drone, its notes alternating with the pedal, black metal's and folk metal's (P3, by
+    listening): the riff's pedal (`Line.PedalShare`) leaned by a genre.
+  - Black metal's interludes, an acoustic guitar or a synth alone between the storms (*The part alone a genre's*).
   - Field recordings, a prepared piano, glitch edits (*Parked*, beyond General MIDI).
+- **The part alone a genre's** (P1, step 4): one part alone is a texture (`TextureKind.Alone`), the part drawn evenly
+  among those playing; a genre names which part, and how likely each, plays alone: a clean guitar's arpeggio in metal's
+  quiet sections and intros, an acoustic guitar or a synth between black metal's storms, a pad in an ambient piece. A
+  pool by part, the songs' own evenly as now, the drums only where they keep time as now. Measured by the parts alone
+  by genre.
+- **Metal's slow, dissonant arpeggios** (P1, step 5): a clean guitar breaking a dissonant chord slowly, a minor chord
+  with its major seventh, a flat second, a sharp fourth, in an intro or a quiet section where the heavy guitars rest,
+  or ringing over them; Metal's, Nu metal's and Djent's. Built of what there is, one piece added:
+  - the rhythm part a clean guitar arpeggiating (`Arpeggios`), slowly, its rhythm's speed a genre's
+    (`rhythm.rhythm`), resting less where the heavy guitars rest (`rests`), its part alone a genre's (above);
+  - a part's colour (added): one tension laid on its chord's notes for that part alone, the arpeggio's ♭2, ♯4 or
+    major seventh, a pool by part of the genre's, the songs' none; the chord the band plays stays as it was, as a
+    cluster on distorted guitars is mud, and the colour sounds in the part that breaks the chord, where it rings
+    clear;
+  - an arpeggio stays clean: a part breaking its chord keeps its clean guitar in the louder sections, the louder forms
+    turning the strummed ones driven alone (`LouderForms`).
+  Measured by the songs and sections with the clean arpeggio by genre, its notes a beat, its colour's share;
+  `?listen=` a question of it.
+- **Djent's synth over the guitars** (P1, step 6): a synth or a pad holding long notes over the riff, melodic or
+  dissonant, the counter-melody or the pad slow (its rhythm's speed a genre's) in a synth's sound, built of what there
+  is but one piece: a line's tensions (added), its strong beats landing now and then on the chord's tensions, the scale's
+  ninth, eleventh or thirteenth, rather than always on its notes (`Line`), a lean by part of the genre's, the songs'
+  none; dissonant where the scale is, a Phrygian's ♭2, a Locrian's ♭5. Of use beyond Djent: jazz's and IDM's lines.
+  Measured by the strong beats on a tension by part and genre; `?listen=` a question of it.
+- **Tape's wow and flutter, and a part detuned** (P2, step 10): a slow drift of a few cents on the pads and keys, or a
+  part held a few cents off, as pitch bend, which a part's bends and vibrato share, a pitch effect beside the volume's,
+  the pan's and the filter's (*The strong effects each a chance of its own*); IDM's warmth, a lo-fi genre's.
 - **More genres** (P3): chiptune, once a square wave may play the chords (*Instruments outside a role's pool*).
   What the genres made in October 2026 still want: Fusion's
   roots off the scale (the progressions move by a 7-note scale's steps, chromatic and constant-structure motion
