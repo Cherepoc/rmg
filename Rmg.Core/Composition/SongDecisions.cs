@@ -205,6 +205,7 @@ internal sealed record SongDecisions(
             Of(Facet.Form),
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
             !absent.Contains(TrackRole.Drum),
+            drumJob == DrumJob.Groove,
             meter
         );
         var plan = formGenerator.Plan(sectionIds);

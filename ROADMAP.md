@@ -200,6 +200,9 @@ Each item with its plan, and what it waits for.
 
 ### Conventionality
 
+- **A sparse song's silent start** (P2): an Ambient or a Dungeon song now and then silent for its first 16 beats or
+  more, its parts resting through their first phrase's start and its drums out of its first section (Ambient seed 37,
+  Dungeon seed 54 of the corpus); a song's first part to sound coming in on its first beat, or the intro left out.
 - **A flaky page test** (P2): `GenreEditorTest.ALength_IsShownAndGivenInMinutesAndSeconds_ATempoInBeatsAMinute`
   fails now and then on a request answered 400, master's too; find which request and why.
 - **A song's length, the rest:** a short length runs long, 16% of the songs given a minute and 19% of those given two

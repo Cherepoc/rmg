@@ -27,7 +27,7 @@ public enum TextureKind
 ///     does, the wildest take every texture as likely; those of fewer parts leaned to the quieter sections, as a band
 ///     thins out in a verse rather than in a chorus. The drums play through a phrase or rest the whole appearance, but
 ///     where a section builds, which brings them in at a phrase now and then with a fill, as a band builds; and they play
-///     alone only where they keep time, never where they only mark the form.
+///     alone, or first in a build, only where they keep time, never where they only mark the form.
 /// </summary>
 internal static class Texture
 {
@@ -94,8 +94,11 @@ internal static class Texture
             alone = carrying.Length == 0 ? null : carrying[aloneIndex % carrying.Length];
         }
 
-        // and where the drums come in a build, among the pitched parts, drawn after the rest so that they stay as they were
+        // and where the drums come in a build, among the pitched parts, drawn after the rest so that they stay as they were;
+        // never first where they only mark the form, which would leave the first phrase silent but for its marks
         var drumsAt = context.GenerateInt(0, order.Length + 1);
+        if (drumsMark)
+            drumsAt = Math.Max(1, drumsAt);
         ImmutableArray<ImmutableHashSet<TrackRole>> none = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, phrases)];
 
         switch (kind)

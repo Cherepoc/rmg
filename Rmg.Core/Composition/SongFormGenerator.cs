@@ -37,8 +37,12 @@ internal sealed class SongFormGenerator
     // the meter the song's bars are in, which an ending's lengths are counted in
     private readonly Meter _meter;
 
-    // whether the song has drums, which a count-in and a landing on the final chord play
+    // whether the song has drums, which a landing on the final chord plays
     private readonly bool _hasDrums;
+
+    // whether its drums keep time, which a count-in and an intro's entries need, drums that only mark the form playing
+    // in its sections alone (DrumMarks)
+    private readonly bool _drumsKeepTime;
 
     public SongFormGenerator(
         IGenerationContext context,
@@ -49,6 +53,7 @@ internal sealed class SongFormGenerator
         RhythmicUnconventionality songRhythm,
         IReadOnlyDictionary<int, TrackRole> roles,
         bool hasDrums,
+        bool drumsKeepTime,
         Meter meter
     )
     {
@@ -60,6 +65,7 @@ internal sealed class SongFormGenerator
         _songRhythm = songRhythm;
         _roles = roles;
         _hasDrums = hasDrums;
+        _drumsKeepTime = hasDrums && drumsKeepTime;
         _meter = meter;
     }
 
@@ -74,8 +80,8 @@ internal sealed class SongFormGenerator
         var ending = _context.Pick(FormLayers.WeighEndings(_songRhythm.Value, _genre));
         var window = intro == IntroKind.Entries ? _introContext.Pick(FormLayers.IntroWindows) : default;
         var halfCountIn = intro == IntroKind.CountIn && _context.TestProbability(FormLayers.HalfCountInChance);
-        // a song without drums has nobody to count it in, so it starts cold, drawn as it would be all the same
-        if (intro == IntroKind.CountIn && !_hasDrums)
+        // a song without drums that keep time has nobody to count it in, so it starts cold, drawn as it would be all the same
+        if (intro == IntroKind.CountIn && !_drumsKeepTime)
             (intro, halfCountIn) = (IntroKind.Cold, false);
         // the hook in its place now and then, the other's draws made all the same
         if (_hookContext.TestProbability(FormLayers.HookIntro.At(_songRhythm.Value)))
@@ -349,8 +355,9 @@ internal sealed class SongFormGenerator
     internal ImmutableArray<IntroEntry> DrawEntries(GeneratedSection first, IntroWindow window)
     {
         var windowDuration = window.Bars * first.Meter.BarDuration;
+        // but drums that only mark the form, which play in the sections alone
         var parts = first.Timeline.TrackTimelineMap
-            .Where(x => x.Value.EventTimeline.Any(note => note.Position < windowDuration))
+            .Where(x => x.Value.EventTimeline.Any(note => note.Position < windowDuration) && (_drumsKeepTime || _roles[x.Key] != TrackRole.Drum))
             .GroupBy(x => GetPart(x.Key, first))
             .ToDictionary(x => x.Key, x => x.Select(y => y.Key).Order().ToImmutableArray());
         var listed = FormLayers.IntroParts.ToDictionary(x => x.Part);

@@ -3,6 +3,7 @@ using Rmg.Core;
 using Rmg.Core.Composition;
 using Rmg.Core.Events;
 using Rmg.Core.Rendering;
+using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Forms;
 
@@ -26,6 +27,24 @@ public sealed class SongIntroTest
 
     // where an intro's window starts: at the song's start for bars of its own, or at the first section's
     private static double WindowStart(CorpusSong song) => song.Map.Intro.Window.IsBefore ? 0 : song.Origin;
+
+    /// <summary>
+    ///     A song sounds from its first bar, its intro too, where its drums only mark the form and play in its sections
+    ///     alone (<see cref="DrumMarks" />): a Medieval song once came in on its drums alone, which the marks then cleared,
+    ///     and sat silent for four bars. Ambient's and Dungeon's sparse parts may rest through a first bar or more of their
+    ///     own, which their genres leave them.
+    /// </summary>
+    [Test]
+    [Arguments(null)]
+    [Arguments("medieval")]
+    public async Task ASong_SoundsFromItsFirstBar(string? genre)
+    {
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(genre)))))
+        {
+            var first = song.Song.Notes!.Values.SelectMany(x => x).Select(x => x.Position).DefaultIfEmpty(double.MaxValue).Min();
+            await Assert.That(first).IsLessThan(song.Song.Meter.BarDuration).Because($"seed {song.Seed}");
+        }
+    }
 
     [Test]
     public async Task AnIntrosParts_ComeInFromItsStart_InTheirOrder_AndSomeAtItsEnd()
