@@ -19,7 +19,7 @@ a sweep, a pump, a synth's filter or a trance gate); a
 driven guitar's part is double-tracked, hard left and right.
 
 A genre leans a song's choices towards its idioms: a pool of options or a chance for each choice, at the plain end, the
-middle and the wild end, its reverb's room and an insertion effect among them. Thirty-one presets come with the page
+middle and the wild end, its reverb's room and an insertion effect among them. Thirty-two presets come with the page
 (Pop, Rock, Metal, Black metal, Nu metal, Djent, Punk, Ska, Jazz, Fusion, Soul, Funk, Disco, House, Techno, Trance,
 Synthwave, IDM, Drum and bass, Hip-hop, Trap, Reggae, Latin, Bossa nova, Folk, Country, Blues, Ambient, Medieval,
 Dungeon synth and Orchestral), and the page's editor makes and changes genres of one's own.

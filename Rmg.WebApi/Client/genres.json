@@ -93,7 +93,7 @@
       "instrument": {
         "melody": { "vibraphone": [45, 45, 63], "electricGuitarJazz": [40, 40, 49], "trumpet": [80, 80, 77], "mutedTrumpet": [55, 55, 53], "altoSax": [85, 85, 81], "tenorSax": [100, 100, 96], "clarinet": [30, 30, 68], "flute": [25, 25, 100] },
         "chords": { "acousticGrandPiano": 100, "electricPiano1": [40, 40, 99], "vibraphone": [25, 25, 27], "electricGuitarJazz": 80 },
-        "bass": { "acousticBass": 100, "contrabass": [30, 30, 36] },
+        "bass": { "acousticBass": 100, "contrabass": [30, 30, 36], "drawbarOrgan": [0, 10, 20] },
         "counterMelody": { "frenchHorn": [56, 56, 100], "trombone": [100, 100, 92], "clarinet": [81, 81, 75], "flute": [50, 50, 82] },
         "solo": { "electricGuitarJazz": 40, "altoSax": [85, 85, 100], "tenorSax": [100, 100, 97], "trumpet": [80, 80, 79] },
         "pad": { "stringEnsemble1": 100, "stringEnsemble2": 60, "voiceOohs": [20, 20, 40], "pad2Warm": [0, 10, 40] },
@@ -379,7 +379,7 @@
       "bass": { "leading": 25 },
       "bassLanding": { "root": 100, "free": [10, 20, 40] },
       "instrument": {
-        "melody": { "acousticGrandPiano": [60, 60, 60], "electricPiano1": 100, "vibraphone": [30, 30, 40], "flute": [30, 30, 60], "lead1Square": [25, 25, 40] },
+        "melody": { "acousticGrandPiano": [60, 60, 60], "electricPiano1": 100, "vibraphone": [30, 30, 40], "flute": [30, 30, 60], "lead1Square": [25, 25, 40], "musicBox": [0, 10, 15] },
         "chords": { "electricPiano1": 100, "electricPiano2": 65, "acousticGrandPiano": [30, 30, 40], "stringEnsemble1": [30, 30, 70], "pad2Warm": [45, 45, 49], "orchestraHit": [0, 5, 15] },
         "bass": { "electricBassFinger": [45, 45, 100], "synthBass1": [100, 100, 71], "synthBass2": [65, 65, 46] },
         "pad": { "stringEnsemble1": [45, 45, 89], "choirAahs": [30, 30, 32], "pad2Warm": 100 },
@@ -836,7 +836,7 @@
         "melody": { "electricGuitarClean": [40, 40, 60], "lead2Sawtooth": [30, 30, 50], "violin": [20, 20, 30], "lead5Charang": 100 },
         "chords": { "distortionGuitar": 100, "overdrivenGuitar": 80, "electricGuitarClean": [10, 20, 20], "churchOrgan": [10, 10, 30] },
         "bass": { "electricBassPick": 100, "electricBassFinger": 60 },
-        "pad": { "choirAahs": 100, "stringEnsemble1": 80, "synthStrings1": [30, 30, 50] },
+        "pad": { "choirAahs": 100, "stringEnsemble1": 80, "synthStrings1": [30, 30, 50], "churchOrgan": [0, 10, 20] },
         "riff": { "distortionGuitar": 100, "overdrivenGuitar": 60, "electricGuitarMuted": [0, 0, 10] },
         "rhythm": { "distortionGuitar": 100, "overdrivenGuitar": 70, "electricGuitarClean": 80 },
         "solo": { "distortionGuitar": 100, "overdrivenGuitar": 100, "lead2Sawtooth": [10, 10, 30] },
@@ -891,7 +891,7 @@
         "melody": { "recorder": 100, "flute": 80, "fiddle": 70, "panFlute": 50, "dulcimer": 40, "ocarina": 30, "oboe": 20, "shanai": [20, 20, 30], "bagpipe": [0, 10, 30] },
         "chords": { "acousticGuitarNylon": 100, "orchestralHarp": 90, "harpsichord": 50, "dulcimer": 40, "reedOrgan": [20, 20, 30], "churchOrgan": [10, 10, 30] },
         "bass": { "contrabass": 60, "bassoon": 50, "acousticBass": 40 },
-        "pad": { "choirAahs": 100, "voiceOohs": 70, "drawbarOrgan": [20, 20, 40] },
+        "pad": { "choirAahs": 100, "voiceOohs": 70, "drawbarOrgan": [20, 20, 40], "bagpipe": [0, 10, 20] },
         "counterMelody": { "cello": 100, "viola": 80, "flute": 50, "oboe": 40, "englishHorn": 40 },
         "solo": { "flute": 100, "violin": 80 }
       },
@@ -936,8 +936,8 @@
       "instrument": {
         "melody": { "celesta": 80, "musicBox": 60, "flute": 60, "frenchHorn": 60, "synthBrass1": 50, "lead4Chiff": 40, "glockenspiel": 30, "oboe": 30, "lead2Sawtooth": [30, 30, 40], "tubularBells": [10, 10, 30] },
         "chords": { "harpsichord": 100, "synthStrings1": 80, "churchOrgan": 60, "choirAahs": 50, "synthBrass1": 50, "synthBrass2": 40, "pad4Choir": 40, "stringEnsemble1": 40 },
-        "bass": { "synthBass2": 60, "contrabass": 60, "tuba": 40, "bassoon": 30 },
-        "pad": { "synthStrings1": 100, "synthStrings2": 80, "choirAahs": 80, "pad4Choir": 60, "synthVoice": 50, "voiceOohs": 40, "drawbarOrgan": 40, "pad5Bowed": 40, "atmosphereFX4": [0, 20, 40], "goblinsFX6": [0, 0, 20] },
+        "bass": { "synthBass2": 60, "contrabass": 60, "tuba": 40, "bassoon": 30, "timpani": [10, 15, 30] },
+        "pad": { "synthStrings1": 100, "synthStrings2": 80, "choirAahs": 80, "pad4Choir": 60, "synthVoice": 50, "voiceOohs": 40, "drawbarOrgan": 40, "pad5Bowed": 40, "atmosphereFX4": [0, 20, 40], "goblinsFX6": [0, 0, 20], "churchOrgan": 40 },
         "counterMelody": { "frenchHorn": 100, "cello": 80, "synthBrass1": 60, "flute": 40 },
         "solo": { "flute": 60, "lead2Sawtooth": 60, "violin": 40 }
       },
@@ -1196,7 +1196,7 @@
       "voice": { "verses": [60, 70, 70] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [70, 70, 70], "counterMelody": [10, 10, 30], "drum": 100, "riff": [10, 10, 30], "riffTwin": 0, "rhythm": 0, "solo": [0, 0, 20] },
       "instrument": {
-        "melody": { "glockenspiel": 60, "acousticGrandPiano": 60, "flute": 50, "lead1Square": 40, "musicBox": [20, 15, 20], "celesta": [15, 10, 20], "lead6Voice": [10, 20, 30] },
+        "melody": { "glockenspiel": 60, "acousticGrandPiano": 60, "flute": 50, "lead1Square": 40, "musicBox": [20, 15, 20], "celesta": [15, 10, 20], "lead6Voice": [10, 20, 30], "tubularBells": [0, 10, 20] },
         "chords": { "pad2Warm": 100, "electricPiano1": 60, "stringEnsemble1": 60, "choirAahs": 50, "orchestraHit": [0, 10, 20] },
         "bass": { "synthBass1": 100, "synthBass2": 70 },
         "pad": { "pad2Warm": 100, "choirAahs": 60, "stringEnsemble1": 50, "pad7Halo": 40 },
@@ -1530,7 +1530,7 @@
       "instrument": {
         "melody": { "tenorSax": 80, "altoSax": 70, "electricPiano1": 60, "acousticGrandPiano": 60, "trumpet": 50, "electricGuitarClean": 40 },
         "chords": { "acousticGrandPiano": 100, "drawbarOrgan": 90, "electricPiano1": 80, "electricGuitarClean": 30 },
-        "bass": { "electricBassFinger": 100, "acousticBass": 30 },
+        "bass": { "electricBassFinger": 100, "acousticBass": 30, "drawbarOrgan": [10, 15, 20] },
         "pad": { "drawbarOrgan": 100, "stringEnsemble1": 80, "choirAahs": 70, "voiceOohs": 50 },
         "counterMelody": { "trombone": 70, "stringEnsemble1": 100, "violin": 60 },
         "riff": { "brassSection": 100, "baritoneSax": 40 },
@@ -1689,7 +1689,7 @@
       "instrument": {
         "melody": { "violin": 100, "flute": 70, "oboe": 60, "frenchHorn": 60, "clarinet": 50, "trumpet": 40, "cello": 40 },
         "chords": { "stringEnsemble1": 100, "orchestralHarp": 60, "stringEnsemble2": 60, "pizzicatoStrings": 40, "tremoloStrings": 30, "choirAahs": 30 },
-        "bass": { "contrabass": 100, "tuba": 40, "bassoon": 40 },
+        "bass": { "contrabass": 100, "tuba": 40, "bassoon": 40, "timpani": [10, 20, 30] },
         "pad": { "stringEnsemble1": 100, "stringEnsemble2": 80, "choirAahs": 60, "tremoloStrings": 40, "voiceOohs": 30 },
         "counterMelody": { "frenchHorn": 100, "cello": 90, "viola": 70, "trombone": 40, "oboe": 40, "clarinet": 40, "englishHorn": 30 },
         "riff": { "brassSection": 100, "orchestraHit": [0, 10, 30] },
@@ -1761,7 +1761,7 @@
         "melody": { "distortionGuitar": 80, "lead5Charang": 50, "lead6Voice": 40, "frenchHorn": 20, "lead2Sawtooth": 20 },
         "chords": { "distortionGuitar": 100, "overdrivenGuitar": 50, "synthStrings1": [10, 10, 20], "churchOrgan": [10, 10, 20] },
         "bass": { "electricBassPick": 100, "electricBassFinger": 50 },
-        "pad": { "choirAahs": 100, "synthStrings1": 80, "pad4Choir": 60, "stringEnsemble1": 40, "pad7Halo": 30 },
+        "pad": { "choirAahs": 100, "synthStrings1": 80, "pad4Choir": 60, "stringEnsemble1": 40, "pad7Halo": 30, "churchOrgan": [20, 30, 40] },
         "counterMelody": { "stringEnsemble1": 60, "cello": 40, "frenchHorn": 30, "lead2Sawtooth": 30 },
         "riff": { "distortionGuitar": 100, "overdrivenGuitar": 40 },
         "rhythm": { "distortionGuitar": 100, "overdrivenGuitar": 50 },
@@ -1813,8 +1813,39 @@
         "bass": { "synthBass1": 100, "synthBass2": 60, "electricBassFinger": 40 },
         "pad": { "pad2Warm": 100, "pad8Sweep": 70, "pad7Halo": 60, "synthStrings2": 50, "atmosphereFX4": 40, "crystalFX3": 30, "pad5Bowed": 30 },
         "counterMelody": { "lead6Voice": 60, "lead2Sawtooth": 40, "flute": 30 },
-        "riff": { "lead1Square": 100, "lead2Sawtooth": 80, "lead8BassAndLead": 40 },
+        "riff": { "lead1Square": 100, "lead2Sawtooth": 80, "lead8BassAndLead": 40, "musicBox": 40, "kalimba": 30 },
         "solo": { "lead1Square": 100, "lead2Sawtooth": 80 }
+      }
+    }
+  },
+  {
+    "id": "chiptune",
+    "name": "Chiptune",
+    "description": "Square and saw waves on every part, as an old games console's sound chip plays them: chords broken into fast arpeggios, a pulse bass, a catchy hook repeated, a small electronic kit, straight, 120 to 160, major or minor.",
+    "choices": {
+      "tempo": { "from": [120, 120, 110], "to": [160, 160, 190] },
+      "meter": { "4/4": 100 },
+      "scale": { "major": 100, "naturalMinor": 70, "dorian": 30, "mixolydian": 20 },
+      "chordShape": { "triad": 100, "sus2": [10, 20, 30] },
+      "arpeggio": { "none": [20, 10, 0], "up": 100, "upDown": 60, "upTwoOctaves": 40 },
+      "figure": { "chords": { "own": [60, 50, 40], "sixteenths": 100 } },
+      "ornaments": { "graces": [10, 20, 30], "turns": [0, 5, 10], "trills": [0, 10, 20] },
+      "effects": { "vibrato": [30, 40, 50] },
+      "strongEffect": { "none": 100, "echo": [10, 20, 30] },
+      "hook": { "choruses": [80, 80, 60], "sections": [50, 50, 50] },
+      "phraseScheme": { "aaab": 100, "abab": 60, "aaaa": 40 },
+      "ending": { "button": 100, "ringOut": 40 },
+      "kit": { "electronic": 100, "tr808": 40 },
+      "drumSetup": { "kit": 100 },
+      "drumPieces": { "kick": 100, "electricSnare": 100, "hiHat": 100, "tom": [10, 20, 30], "cymbal": [20, 30, 40] },
+      "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 0, "counterMelody": [20, 30, 40], "drum": 95, "riff": [30, 30, 40], "riffTwin": 0, "rhythm": 0, "solo": [0, 10, 30] },
+      "instrument": {
+        "melody": { "lead1Square": 100, "lead2Sawtooth": 50, "lead3Calliope": 20 },
+        "chords": { "lead1Square": 100, "lead2Sawtooth": 60 },
+        "bass": { "lead8BassAndLead": 60, "lead1Square": 60, "synthBass1": 30 },
+        "counterMelody": { "lead2Sawtooth": 100, "lead1Square": 60 },
+        "riff": { "lead1Square": 100, "lead2Sawtooth": 60 },
+        "solo": { "lead1Square": 100, "lead2Sawtooth": 70 }
       }
     }
   }
