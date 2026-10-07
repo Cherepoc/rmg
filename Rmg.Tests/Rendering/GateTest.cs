@@ -36,11 +36,41 @@ public sealed class GateTest
     [Explicit]
     public async Task Report()
     {
-        foreach (var genre in new[] { "trance", "electronic", "synthwave" })
+        foreach (var (name, genre) in new[] { "trance", "electronic", "synthwave" }.Select(x => (x, GenrePresets.Genre(x))).Append(("every song gating", Gating)))
         {
-            var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(genre))));
+            var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
             var gated = songs.Where(x => x.Song.Notes!.Values.Any(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0))).ToArray();
-            Console.WriteLine($"{genre}: gated {gated.Length / (double)songs.Length:P0}");
+            // in every section a gated part plays, from its first note to the section's end: how much of it sounds, and its
+            // notes off the bar's beats, after a gap, and ending inside a 16th's sounding part
+            var (span, sounding, notes, offBeat, gaps, cut) = (0.0, 0.0, 0, 0, 0, 0);
+            foreach (var song in gated)
+            foreach (var timeline in song.Song.Notes!.Values.Where(n => n.Any(y => y.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)))
+            foreach (var section in song.Map.Sections)
+            {
+                var inSection = timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9).ToArray();
+                if (inSection.Length == 0)
+                    continue;
+                span += section.End - inSection[0].Position;
+                var reached = inSection[0].Position;
+                foreach (var note in inSection)
+                {
+                    var end = Math.Min(note.Position + note.Value.Duration, section.End);
+                    sounding += Math.Max(0, end - Math.Max(note.Position, reached));
+                    if (note.Position > reached + 1e-6)
+                        gaps++;
+                    reached = Math.Max(reached, end);
+                    var inBar = (note.Position - section.Start) % section.Meter.BarDuration;
+                    if (!section.Meter.Pulses.Any(x => Math.Abs(x - inBar) < 1e-6))
+                        offBeat++;
+                    var inStep = (note.Position + note.Value.Duration) / 0.25 % 1 * 0.25;
+                    if (inStep is > 1e-6 and < 0.15 - 1e-6)
+                        cut++;
+                    notes++;
+                }
+            }
+
+            Console.WriteLine($"{name}: gated {gated.Length / (double)songs.Length:P0}; of a gated part's section from its first note sounding {sounding / span:P0}, " +
+                              $"of its {notes} notes {offBeat / (double)notes:P0} off the beat, {gaps / (double)notes:P0} after a gap, {cut / (double)notes:P0} ending inside a 16th's sound");
         }
 
         await Task.CompletedTask;
