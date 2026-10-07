@@ -12,7 +12,7 @@ is removed once it is built.
 2. The strong effects each a chance of its own, one a controller on a part, the volume curves multiplied.
 3. The gate holding whole chords only, an arpeggio gated as it plays; Trance's arpeggios' rhythm measured.
 4. The part alone a genre's (*Genres*).
-5. Metal's slow, dissonant arpeggios: a part's colour, an arpeggio staying clean, Metal's, Nu metal's and Djent's.
+5. Metal's arpeggios: a pedal-point pattern, a part's colour, a clean arpeggio staying clean; Metal's, Nu metal's, Djent's.
 6. Djent's synth over the guitars: a line's tensions on its strong beats.
 7. The brightness heard: how far it moves each family of instruments in both soundfonts served.
 8. One filter curve a part, its shapes combined, drawn over time, the filter's movements moved onto it.
@@ -434,19 +434,24 @@ left:
   quiet sections and intros, an acoustic guitar or a synth between black metal's storms, a pad in an ambient piece. A
   pool by part, the songs' own evenly as now, the drums only where they keep time as now. Measured by the parts alone
   by genre.
-- **Metal's slow, dissonant arpeggios** (P1, step 5): a clean guitar breaking a dissonant chord slowly, a minor chord
-  with its major seventh, a flat second, a sharp fourth, in an intro or a quiet section where the heavy guitars rest,
-  or ringing over them; Metal's, Nu metal's and Djent's. Built of what there is, one piece added:
-  - the rhythm part a clean guitar arpeggiating (`Arpeggios`), slowly, its rhythm's speed a genre's
-    (`rhythm.rhythm`), resting less where the heavy guitars rest (`rests`), its part alone a genre's (above);
-  - a part's colour (added): one tension laid on its chord's notes for that part alone, the arpeggio's ♭2, ♯4 or
-    major seventh, a pool by part of the genre's, the songs' none; the chord the band plays stays as it was, as a
-    cluster on distorted guitars is mud, and the colour sounds in the part that breaks the chord, where it rings
-    clear;
-  - an arpeggio stays clean: a part breaking its chord keeps its clean guitar in the louder sections, the louder forms
-    turning the strummed ones driven alone (`LouderForms`).
-  Measured by the songs and sections with the clean arpeggio by genre, its notes a beat, its colour's share;
-  `?listen=` a question of it.
+- **Metal's arpeggios** (P1, step 5): a guitar breaking its chord, slowly or at a walking pace, an 8th at a middling
+  tempo, a 16th in a slow section, never fast, in shapes of their own, in an intro or a quiet section where the heavy
+  guitars rest, or ringing over them; consonant most often in Metal, a ninth's or a suspended colour, dissonant now and
+  then, a minor chord's major seventh, a ♭2, a ♯4; dissonant more often in Nu metal's creeping clean parts and most
+  often in Djent's. Built of what there is, three pieces added:
+  - the rhythm part breaking its chord (`Arpeggios`), at its genre's pace (`rhythm.rhythm`), resting less where the
+    heavy guitars rest (`rests`), the part alone a genre's (above); clean, or driven where its genre gives it a driven
+    guitar;
+  - a pedal-point arpeggio (added): the chord's lowest note in turn with each of the others upwards, 1–3–1–5–1–8,
+    metal's commonest broken chord, beside up, up and down, two octaves, Alberti and pairs;
+  - a part's colour (added): one tone laid on its chord's notes for that part alone, a ninth, a major seventh, a ♭2 or a
+    ♯4, a pool by part of the genre's, the songs' none, consonant or dissonant by the genre's weights; the chord the
+    band plays stays as it was, as a cluster on distorted guitars is mud, and the colour sounds in the part that breaks
+    the chord, where it rings clear;
+  - a clean arpeggio stays clean (added): the louder forms turn the strummed clean guitars driven, never the one breaking
+    its chord (`LouderForms`).
+  Measured by the songs and sections with the arpeggio by genre, its notes a beat, its patterns' and its colours'
+  shares, the dissonant ones by genre; `?listen=` a question of it.
 - **Djent's synth over the guitars** (P1, step 6): a synth or a pad holding long notes over the riff, melodic or
   dissonant, the counter-melody or the pad slow (its rhythm's speed a genre's) in a synth's sound, built of what
   there is but one piece: a line's tensions (added), its strong beats landing now and then on the chord's tensions,
