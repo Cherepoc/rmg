@@ -45,6 +45,11 @@ internal sealed record SongDecisions(
     DrumJob DrumJob
 )
 {
+    /// <summary>Where the song plays in stop time, its phrases' start, end and bar, decided once for the stages that keep to it (<see cref="Composition.StopTime" />).</summary>
+    public ImmutableArray<(double Start, double End, double BarDuration)> StopTime => _stopTime ??= [..Composition.StopTime.Phrases(this)];
+
+    private ImmutableArray<(double Start, double End, double BarDuration)>? _stopTime;
+
     /// <summary>A stage's own stream.</summary>
     public IGenerationContext Stream(SongStream stream) => SongGenerator.CreateStream(Seed, stream);
 

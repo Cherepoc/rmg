@@ -49,7 +49,7 @@ internal static class StopTime
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
-        var phrases = Phrases(song);
+        var phrases = song.StopTime;
         foreach (var id in song.SectionIds.Distinct())
         {
             var stops = song.Form.Map.Sections.Any(x => x.SectionId == id && phrases.Any(p => Math.Abs(p.Start - x.Start) < 1e-9));

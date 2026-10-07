@@ -32,7 +32,7 @@ internal static class Pushes
         });
         // but in a solo, and in stop time and out of it, whose hits stay on the bar
         var changes = draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
-        var stopTime = StopTime.Phrases(song);
+        var stopTime = song.StopTime;
         var pushes = song.Form.Map.Sections.Where((x, i) => pushing[x.SectionId] && !song.Solos.ContainsKey(i))
             .SelectMany(span => changes.Where(x => x > span.Start + 1e-9 && x < span.End - 1e-9 && Math.Abs(Math.IEEERemainder(x - span.Start, span.Meter.BarDuration)) < 1e-6)
                 .Select(x => (At: x, span.Meter.BarDuration)))

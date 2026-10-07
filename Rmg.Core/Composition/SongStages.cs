@@ -307,7 +307,7 @@ internal static class SongStages
                 song.Genre,
                 [..draft.Timeline.CommonStateTimelineMap.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position)],
                 song.Form.Edits.CutsOf,
-                [..StopTime.Phrases(song).Select(x => (x.Start, x.End))]
+                [..song.StopTime.Select(x => (x.Start, x.End))]
             )
         };
 
