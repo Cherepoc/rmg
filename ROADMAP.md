@@ -185,9 +185,13 @@ each from the trace; the seeds named here are ones already found.
   Wet enough, the dry genres' room heard, in both soundfonts? Its time and pre-delay a genre's too, if the rooms alone
   are too alike.
 - **The trance gate:** a pad, the chords or the rhythm part chopped in 16ths, sounding for 0.6 of each it lets through,
-  every 16th or a pattern drawn for the song: Trance gates 17% of its songs, Electronic 8%, Synthwave 9%
-  (`GateTest.Report`). A pad's slow attack barely opening in a 16th, the chop clicking in a soundfont? Short-attack
-  synth chords preferred, if so.
+  every 16th or a pattern drawn for the song, counted from every bar's first and swung: Trance gates 17% of its songs,
+  Electronic 8%, Synthwave 9% (`GateTest.Report`). The gated part holds its chords, the notes it sounds longest over
+  each chord, from a beat to the next chord, a section's end or a stop: Trance's gated sections sound 93% from the
+  part's first note. An arpeggiating part holds a single note (Trance's held notes 34% single): its chord voiced by the
+  `Realizer` would need the gate decided before the notes, the strong effect's draw moved out of `Expression`. A pad's
+  slow attack barely opening in a 16th, the chop clicking in a soundfont? Short-attack synth chords preferred, if so. An
+  intro plays no expression, its gated part's notes ungated.
 - **The filter:** a synth's filter wobbling in time, squelching on every note or opening over a section's first phrase,
   as its brightness and resonance, which spessasynth plays and other players may not: Techno squelches in 11% of its
   songs, Trance opens or wobbles in 28%, Dnb in 26%, the wildest songs filter in 30% (`FilterTest.Report`,
