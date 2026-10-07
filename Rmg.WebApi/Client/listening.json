@@ -320,6 +320,28 @@
     ]
   },
   {
+    "id": "echo",
+    "question": "The echo, the synthesizer's delay repeating the rhythm part and the snare: dub's, or a smear?",
+    "decides": "The delay's level, feedback and darkness, and the echo's weight by genre.",
+    "genre": "reggae",
+    "without": {
+      "skip": [],
+      "genre": {
+        "strongEffect": {
+          "none": 100
+        }
+      }
+    },
+    "seeds": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+    ]
+  },
+  {
     "id": "gate",
     "question": "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
     "decides": "Its weight in Trance, and the parts it chops.",
