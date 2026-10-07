@@ -448,10 +448,11 @@ left:
   Measured by the songs and sections with the clean arpeggio by genre, its notes a beat, its colour's share;
   `?listen=` a question of it.
 - **Djent's synth over the guitars** (P1, step 6): a synth or a pad holding long notes over the riff, melodic or
-  dissonant, the counter-melody or the pad slow (its rhythm's speed a genre's) in a synth's sound, built of what there
-  is but one piece: a line's tensions (added), its strong beats landing now and then on the chord's tensions, the scale's
-  ninth, eleventh or thirteenth, rather than always on its notes (`Line`), a lean by part of the genre's, the songs'
-  none; dissonant where the scale is, a Phrygian's ♭2, a Locrian's ♭5. Of use beyond Djent: jazz's and IDM's lines.
+  dissonant, the counter-melody or the pad slow (its rhythm's speed a genre's) in a synth's sound, built of what
+  there is but one piece: a line's tensions (added), its strong beats landing now and then on the chord's tensions,
+  the scale's ninth, eleventh or thirteenth, rather than always on its notes (`Line`), a lean by part of the genre's,
+  the songs' none; dissonant where the scale is, a Phrygian's ♭2, a Locrian's ♭5. Of use beyond Djent: jazz's and
+  IDM's lines.
   Measured by the strong beats on a tension by part and genre; `?listen=` a question of it.
 - **Tape's wow and flutter, and a part detuned** (P2, step 10): a slow drift of a few cents on the pads and keys, or a
   part held a few cents off, as pitch bend, which a part's bends and vibrato share, a pitch effect beside the volume's,
