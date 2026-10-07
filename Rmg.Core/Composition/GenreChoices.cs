@@ -362,7 +362,8 @@ public static class GenreChoices
     public static GenreChoice FormChances { get; } = Chances("formChances", "Form or its own", [("forms", "One of the forms", SongForms.OwnFormChance)]);
 
     /// <summary>The forms songs are written in, a verse and a chorus coming back, with a pre-chorus or a bridge (<see cref="SongForms.Forms" />).</summary>
-    public static GenreChoice Form { get; } = Pool("form", "Form", SongForms.Forms.Select(x => (SongForms.NameOf(x.Value), SongForms.LabelOf(x.Value), new ByConvention(x.Weight, x.Weight, x.Weight))));
+    public static GenreChoice Form { get; } = Shortened(Pool("form", "Form", SongForms.Forms.Select(x => (SongForms.NameOf(x.Value), SongForms.LabelOf(x.Value), new ByConvention(x.Weight, x.Weight, x.Weight)))),
+        SongForms.Forms.Select(x => SongForms.ShortOf(x.Value)));
 
     /// <summary>The feel the song plays in, straight, a tuplet or a grouping (<see cref="Feels" />).</summary>
     public static GenreChoice Feel { get; } = Pool("feel", "Feel", Feels.Weights.Select(x => (Feels.NameOf(x.Feel), Capitalised(Feels.Label(x.Feel)), x.Weight)));
@@ -545,6 +546,10 @@ public static class GenreChoices
     /// <summary>A choice with its options described, in their order.</summary>
     private static GenreChoice Described(GenreChoice choice, IEnumerable<string> descriptions) =>
         choice with { Options = [..choice.Options.Zip(descriptions, (option, description) => option with { Description = description })] };
+
+    /// <summary>A choice with its options' short labels, in their order.</summary>
+    private static GenreChoice Shortened(GenreChoice choice, IEnumerable<string> shorts) =>
+        choice with { Options = [..choice.Options.Zip(shorts, (option, @short) => option with { Short = @short })] };
 
     /// <summary>
     ///     Heights in semitones as notes on C, "On C: C E♭ G.", a height between two notes both, "E♭/E", as the scale

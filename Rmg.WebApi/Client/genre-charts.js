@@ -66,6 +66,9 @@ export function byMiddle(shares) {
 /** An option's name as its choice labels it. */
 export const labelOf = (choice) => (name) => choice.options.find((x) => x.name === name)?.label ?? name;
 
+/** An option's name where room is short, such as a form's letters, "VCVCBC". */
+export const shortOf = (choice) => (name) => choice.options.find((x) => x.name === name)?.short ?? name;
+
 /** An option's mark in a chart, named by its title where it is pointed at. */
 export function mark(attributes, label) {
     const element = svg("path", attributes);
@@ -199,7 +202,7 @@ export function drawBand(element, choice, { from, to, lean: leaning }, width, he
  *     range's, so that a page short of room cuts the words and never the number.
  */
 export function endsInWords(choice, preview, count = Infinity) {
-    const label = labelOf(choice);
+    const label = shortOf(choice);
     if (choice.kind === "range") {
         const { from, to } = preview.curves;
         return [0, 1, 2].map((end) => [{ words: rangeInWords(choice, atEnds(from)[end], atEnds(to)[end]), number: "" }]);

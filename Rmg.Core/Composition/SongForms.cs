@@ -133,6 +133,9 @@ internal static class SongForms
         _ => throw new ArgumentOutOfRangeException(nameof(form), x, "A form is of verses, pre-choruses, choruses and bridges.")
     }));
 
+    /// <summary>A form as a page shows it where room is short: its roles' letters, "VCVCBC".</summary>
+    public static string ShortOf(ImmutableArray<SectionRole> form) => NameOf(form).ToUpperInvariant();
+
     /// <summary>A form as a page shows it: its roles in words, "Verse, chorus, verse, chorus, bridge, chorus".</summary>
     public static string LabelOf(ImmutableArray<SectionRole> form)
     {

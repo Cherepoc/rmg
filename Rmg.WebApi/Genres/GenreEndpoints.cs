@@ -36,7 +36,7 @@ public static class GenreEndpoints
             x.Name,
             x.Label,
             x.Kind.ToString().ToLowerInvariant(),
-            [..x.Options.Select(o => new GenreOptionResponse(o.Name, o.Label, [..new[] { o.Own.Plain, o.Own.Tuned, o.Own.Wild }.Select(a => GenreAmounts.ToNumber(x, o.Name, a))], o.Tags, o.Description))],
+            [..x.Options.Select(o => new GenreOptionResponse(o.Name, o.Label, o.Short, [..new[] { o.Own.Plain, o.Own.Tuned, o.Own.Wild }.Select(a => GenreAmounts.ToNumber(x, o.Name, a))], o.Tags, o.Description))],
             x.Scale is { } scale
                 ? new RangeScaleResponse(scale.Unit, scale.Least, scale.Most, [..Enumerable.Range(0, ScalePoints).Select(i => scale.NumberOf(i / (double)(ScalePoints - 1)))], SongGenerator.RangeLeanSkew)
                 : null,
@@ -62,6 +62,7 @@ public sealed record RangeScaleResponse(string Unit, double Least, double Most, 
 
 /// <param name="Name">How a genre names it.</param>
 /// <param name="Label">How the page shows it.</param>
+/// <param name="Short">How the page shows it where room is short, such as a form's letters, "VCVCBC"; its label for most.</param>
 /// <param name="Own">
 ///     Its amounts as the songs have them, at the plain end, in the middle and at the wild, as a request gives them, not
 ///     rounded (<see cref="GenreAmounts" />), which a genre naming its choice starts from: a pool's option's weights, every
@@ -70,4 +71,4 @@ public sealed record RangeScaleResponse(string Unit, double Least, double Most, 
 /// </param>
 /// <param name="Tags">What the page needs to know of it besides, such as a drum piece's families, "kit" and "percussion", or another option it plays only with, "with:riff".</param>
 /// <param name="Description">What the page shows over its name, such as how a scale sounds and its notes; empty for most.</param>
-public sealed record GenreOptionResponse(string Name, string Label, IReadOnlyList<double> Own, IReadOnlyList<string> Tags, string Description);
+public sealed record GenreOptionResponse(string Name, string Label, string Short, IReadOnlyList<double> Own, IReadOnlyList<string> Tags, string Description);

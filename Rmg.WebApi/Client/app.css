@@ -2109,6 +2109,7 @@ footer a:hover {
     justify-content: center;
     gap: 6px;
     min-width: 90px;
+    max-width: 160px;
     font-size: 12px;
 }
 
@@ -2117,6 +2118,15 @@ footer a:hover {
     gap: 6px;
     align-items: center;
     color: var(--muted);
+}
+
+/* a name too long for the room cut short, whole over it, so that it never narrows the charts */
+.tune-legend > span > span:last-child,
+.tune-lists li > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* the one chosen in the accent, its swatch its grey in an accent outline, as its share is; the one pointed at lit */
@@ -2133,6 +2143,7 @@ footer a:hover {
 }
 
 .tune-swatch {
+    flex-shrink: 0;
     width: 10px;
     height: 10px;
     border-radius: 2px;
@@ -2282,6 +2293,20 @@ footer a:hover {
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+/* an option's name and its share on one line, the share kept whole */
+.tune-lists li {
+    display: flex;
+    white-space: pre;
+}
+
+.tune-lists > div:nth-child(2) li {
+    justify-content: center;
+}
+
+.tune-lists > div:last-child li {
+    justify-content: flex-end;
 }
 
 @media (max-width: 640px) {

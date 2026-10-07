@@ -915,6 +915,30 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task AFormsOptions_AreToldByTheirLetters_WhereRoomIsShort_TheChartsKeepingTheirWidth()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var tune = await Change(await Section(dialog, "Form"), "form");
+        await page.Until(async () => await tune.Locator(".tune-lists li").CountAsync() > 0, "the chances said");
+
+        // the legend and the lists in letters, the words over them; the tabs in words
+        var legend = await tune.Locator(".tune-legend > span").AllTextContentsAsync();
+        await Assert.That(legend).Contains("VCVCBC");
+        await Assert.That(legend.All(x => x.All(c => "VPCB".Contains(c)))).IsTrue();
+        await Assert.That(await tune.Locator(".tune-legend > span[data-option='vcvcbc']").GetAttributeAsync("title")).IsEqualTo("Verse, chorus, verse, chorus, bridge, chorus");
+        await Assert.That(await tune.Locator(".tune-lists li").First.TextContentAsync()).Matches("^[VPCB]+ \\d+%$");
+        await Assert.That(await tune.Locator(".tune-option[data-option='vcvcbc'] span").First.TextContentAsync()).IsEqualTo("Verse, chorus, verse, chorus, bridge, chorus");
+        // the charts most of the window's width, nothing scrolling sideways
+        var widths = await tune.EvaluateAsync<double[]>(
+            "t => { const m = t.querySelector('.tune-main'); return [t.querySelector('.tune-shares').getBoundingClientRect().width, m.clientWidth, m.scrollWidth]; }");
+        Console.WriteLine($"the chances {widths[0]:F0} of {widths[1]:F0}");
+        await Assert.That(widths[0]).IsGreaterThan(widths[1] / 2);
+        await Assert.That(widths[2]).IsLessThanOrEqualTo(widths[1]);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task AnOptionsAmounts_AreSetByTheirNumbers_ItsTabShowingThem_AndAPoolsSharesToldAtEachEnd()
     {
         await using var page = await SongPage.Open(site, "?song=1");

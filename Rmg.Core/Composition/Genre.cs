@@ -53,6 +53,13 @@ public sealed record GenreOption(string Name, string Label, ByConvention Own)
 
     /// <summary>What the page shows over its name, such as how a scale sounds and its notes; none for most.</summary>
     public string Description { get; init; } = "";
+
+    /// <summary>How the page shows it where room is short, such as a form's letters, "VCVCBC"; its label where it has none shorter.</summary>
+    public string Short
+    {
+        get => field ?? Label;
+        init;
+    }
 }
 
 /// <summary>A choice a genre may speak of: one the songs draw already, with its options by stable names.</summary>

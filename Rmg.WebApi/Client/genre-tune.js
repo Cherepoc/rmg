@@ -423,7 +423,7 @@ export function createGenreTune() {
         legend.replaceChildren(...order().reverse().map((name) => {
             const swatch = html("span", { class: "tune-swatch" });
             swatch.style.background = greyOf(name);
-            return html("span", { class: name === selected ? "chosen" : "", "data-option": name }, swatch, optionOf(name).label);
+            return html("span", { class: name === selected ? "chosen" : "", "data-option": name, title: optionOf(name).label }, swatch, html("span", { text: optionOf(name).short }));
         }));
     }
 
@@ -461,7 +461,7 @@ export function createGenreTune() {
         if (at === null) return;
         shares.append(outlineOf(at.name, "share-pointed"));
         const where = at.j === 0 ? " at the plainest end" : at.j === at.points - 1 ? " at the experimental end" : at.j === (at.points - 1) / 2 ? " in a middling song" : "";
-        pointed.textContent = `${optionOf(at.name).label} · ${Math.round(at.amount)}%${where}`;
+        pointed.textContent = `${optionOf(at.name).short} · ${Math.round(at.amount)}%${where}`;
         // beside the pointer, on the side with room, so that it never runs past the chart
         const box = sharesBox.getBoundingClientRect();
         const x = event.clientX - box.left;
@@ -542,7 +542,7 @@ export function createGenreTune() {
             .sort((a, b) => b.amount - a.amount));
         lists.append(...told.map((items, end) => html("div", {},
             html("h4", { text: ENDS[end] }),
-            html("ul", {}, ...items.map((x) => html("li", { text: `${optionOf(x.name).label} ${x.amount}%` }))))));
+            html("ul", {}, ...items.map((x) => html("li", { title: optionOf(x.name).label }, html("span", { text: optionOf(x.name).short }), ` ${x.amount}%`))))));
         const said = (end) => told[end].map((x) => `${optionOf(x.name).label} ${x.amount}%`).join(", ");
         shares.setAttribute("aria-label", `The chance a song draws each: in a middling song ${said(1)}; in the experimental ${said(2)}`);
     }
