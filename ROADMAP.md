@@ -6,9 +6,22 @@ is removed once it is built.
 
 ## Priorities
 
-**Next** (P1): listening to what is deployed and tuning by what it says (see *Listening*), the presets most as October
-2026 retuned them, Pop and Metal, the instruments and the riser added, and the heavy band, the dark presets' mood and
-the effects added on 7 October (see *Sound*); and the ratings by conventionality once enough are in, alongside,
+**In order** (P1, the plan of 8 October 2026, each step through the implementation loop):
+
+1. The genres sorted by name (*Architecture*).
+2. Rock and metal measured against their sound, and their presets tuned where a choice reaches it (*Genres*).
+3. The listening tool, with the *Listening* section cut to its questions (*Listening data*).
+4. The double kick (*Genres*, *What the genres cannot play yet*).
+5. A progression's degrees leaned by a genre (*Genres*).
+6. The kick locked to the riff, a polymeter's figure as long as the bar (*Genres*).
+7. The render reading the song's map, and stop time and the pushes kept as decisions (*Architecture*).
+8. The song's sound decided before its notes, the gate's chords then voiced (*Architecture*).
+9. Figures as a genre's data: the gallop, the clave, the montuno (*Genres*).
+10. The rest of rock's and metal's (*Genres*), and long cycles only should listening ask (*Rhythm engine*).
+
+**Next** (P1, alongside): listening to what is deployed and tuning by what it says (see *Listening*), the presets
+most as October 2026 retuned them, Pop and Metal, the instruments and the riser added, and the heavy band, the dark
+presets' mood and the effects added on 7 October (see *Sound*); and the ratings by conventionality once enough are in,
 continuously and never as a gate.
 
 **Later** (P2): the ratings report (see *Listening data*) once the dashboard shows songs rated enough.
@@ -223,6 +236,15 @@ plain or wild the songs are.
   ratings against its values (`StateTraceEntry.Value`): which endings, intros, drum setups, modes, tempos, energies or
   improvisations are liked or skipped, with their counts, so that a small sample shows itself. Measured by: ratings
   per version, enough to tell two versions apart.
+- **The listening tool** (P1, on the test instance only): a song asked for in a variant, its stages left out (as the
+  tests skip them) or a genre's choices laid over its own, which the server takes only where a setting allows it; an
+  explicit report test writing the questions of *Listening* as data, each with its two variants and four to eight
+  corpus seeds where the trace finds the device playing; the page's listening mode, `?listen=` a question, playing A
+  and B, swapped by the seed so that neither is always first, and a verdict (A, B, the same, can't tell) kept as an
+  analytics event with its version; the dashboard a table of the verdicts by question. Before it, *Listening* cut to
+  its questions: each the question, its measure, its seeds and what it decides, what is built described where it is
+  built, and the presets' listening under *Genres* moved there; P1 done when a version's questions are answered or let
+  go of.
 - **Targets from outside** (P3): a few measures (the notes a bar by role, the intervals, the syncopation, the chord
   changes a bar) of a corpus of real MIDI songs to tune towards.
 
@@ -342,7 +364,10 @@ Each item with its plan, and what it waits for.
 
 ### Rhythm engine
 
-- **Long cycles** (P3, the idioms waiting on them: the clave, the montuno, a kick answered in its second bar): a bar
+- **Long cycles** (P4 since October 2026: a section's bars repeating, AABA to ABCD, already give every part, the drums
+  too, figures of two and four bars, a varied repeat (A′) starting as its bar did and then changing, near an answer;
+  the clave and the montuno are figures, *Figures as a genre's data*; built only should listening find the second bar
+  no answer, or a figure want a note across the bar line): a bar
   pattern is one bar long, so a slower cycle, such as the kick's slowed to two bars, plays its first half and starts
   again at every bar line. Patterns as long as their cycle would let slow
   figures run whole, a crash every two bars, a kick figure answered in the second bar, a chord of two bars, a clave's
@@ -354,6 +379,22 @@ Each item with its plan, and what it waits for.
 
 ### Architecture
 
+- **The genres sorted by name** (P1): the page's list and the Manage window sort the presets and one's own genres
+  alike, by name, ignoring case, numbers as numbers ("Rock 2" before "Rock 10"), where they are shown; one's own keep
+  the order they are kept in, which their place in the list reads, so that saving one need no longer keep its place;
+  "Export all" writes them sorted.
+- **The render reading the song's map** (P1, a refactor keeping the fingerprint): `ExpressionRender.Render` is given the
+  map, so that the filter and the gate count from a section's start and a bar's meter there, and the state kinds that
+  copy them onto every note (`FilterFrom`, `GateFrom`, `GateBar`) go.
+- **Stop time and the pushes as decisions** (P1, a refactor keeping the fingerprint): `StopTime.Phrases` is worked out
+  by three stages; the phrases and the pushes kept with the form's other decisions, as the drops are (`Form.Edits`),
+  and read where they are needed.
+- **The song's sound decided before its notes** (P1): the gentle effects' song draws, the strong effect and the part
+  carrying it, the room and the insertion drawn in `SongDecisions` from their streams as now, the carrier among the
+  parts rather than the parts with notes (the songs whose carrier changes counted first, a few at most); `Expression`
+  then applies what is decided and edits no notes. Then the gate's held chords a stage before the notes
+  (`GatedChords`), so that the `Realizer` voices an arpeggiating part's chord whole (Trance's held notes 34% single
+  now), and the pushes leaving the gated part on the beat. `Expression.Apply` takes 16 arguments today.
 - **The ratings in the history** (P4): the list of songs so far does not show which were liked or disliked.
 - **A mix written by the page** (P4): a change of the mix asks the server for the file again only for the download;
   writing the mix into the file in the page would leave the server out of it, at the cost of MIDI writing in
@@ -385,6 +426,32 @@ left:
   4. The default (the songs' own, as now, or any genre) decided by the ratings by genre once a version has enough, and
      not before the retuned presets, Pop and Metal most, are heard.
   Not weighed by the presets nor leaned by conventionality: each preset spans the plainest songs to the wildest.
+- **Rock and metal as their bands play them** (P1, measured first, 8 October 2026): what each lacks against the
+  sound of a riff-driven hard rock band, a blues-rock band's shuffle, a twin-guitar heavy metal band, thrash and groove
+  metal. Measured first (`GenrePresetsReportTest`, a report of their own): Rock's songs with a solo, its swung songs,
+  how often its progressions play I–♭VII–IV and ♭VI–♭VII–I and Metal's i–♭VI–♭VII and i–♭II, the riff's
+  bar-repeating schemes, the kick's hits a bar. Then:
+  - Presets (P1), where the measure says so: Rock's light shuffle, a solo in most of its songs, the organ soloing;
+    Metal's and Rock's riffs leaning to AAAB and ABAB, two- and four-bar riffs turning in their last bar; Metal's
+    intro of its own material clean before the band, its louder forms turning it driven.
+  - A progression's degrees leaned by a genre (P1): a genre leans root motions now, never a chord's degree, so rock's
+    ♭VII and ♭VI and metal's ♭II and ♭VI come by chance; a lean of the progression's draw by the degree reached,
+    `Tilt` data on the options as the root motions are. The dark presets' mood wants the same (*Sound*).
+  - The kick locked to the riff (P1): the kick plays with the riff only in a polymeter's cycle (`Polymeter`); a
+    figure as long as the bar, or two, played by the riff, the bass and the kick together, a groove band's breaks, as
+    a polymeter whose cycle divides the bar, by a genre's chance.
+  - The double kick (P1, below).
+  - Figures as a genre's data (P2): a riff's gallop, an 8th and two 16ths, a clave's 3-2 over two bars, a montuno's
+    broken chord off the beat, each a figure a part plays where its genre names it, its options' weights at the ends
+    as every choice's; drawn rhythms elsewhere, as now.
+  - The solo harmonised (P3): a second guitar a third under the solo, as the riff's twin plays the riff
+    (`TrackRole.RiffTwin`); a twin-guitar break.
+  - The riff as the song's signature (P3): the riff alone opening the song and between its sections; one part alone
+    is a texture already (`TextureKind.Alone`), the part not chosen as the riff, nor placed as an interlude.
+  - A breakdown (P3): a section slower and sparser, the riff at its lowest, half time leaning, beyond half time alone.
+  - Tremolo picking (P3, measured first): fast repeated notes unmuted, the riff's speed perhaps enough already.
+  - A melody sung rather than played (P3, a listening question first): no singer in General MIDI; the melody's
+    rhythms word-like, its breaths and held ends, should it sound like a lead guitar playing a tune.
 - **More genres** (P3): chiptune, once a square wave may play the chords (*Instruments outside a role's pool*).
   What the genres made in October 2026 still want: Fusion's
   roots off the scale (the progressions move by a 7-note scale's steps, chromatic and constant-structure motion
@@ -408,14 +475,15 @@ left:
     role free.
   - A snare's drag and its ghost notes, which want the backbeat's own figure, the pinned backbeat keeping its hits
     clean.
-  - Latin's clave, of two bars (see *Long cycles*); the piano's montuno, a broken chord off the beat; a second time
-    keeper playing straight under the tresillo.
+  - Latin's clave, of two bars, and the piano's montuno, a broken chord off the beat (*Figures as a genre's data*,
+    under *Rock and metal*); a second time keeper playing straight under the tresillo.
   - A hook of one or two bars sung through a whole section, its phrase ends let go of; a hooked melody's bars repeat
     about half at most now, a phrase's last bar ending on its held note.
-  - Metal's double kick, the kick in 16ths: the ground's rhythm settings at their most play 4.5 hits a bar, a value
-    moving a setting by steps from where the role rests, and a genre giving the kick the time role leans the songs'
-    own weight of it there (1) by its own, too little to take. A kick keeping time by a genre's role, or a value set
-    outright (see *The rhythm's values against the part's own*).
+  - Metal's double kick (P1), the kick in 16ths under the riff, a thrash or groove band's: the ground's rhythm settings
+    at their most play 4.5 hits a bar, a value moving a setting by steps from where the role rests, and a genre giving
+    the kick the time role leans the songs' own weight of it there (1) by its own, too little to take. A kick keeping
+    time by a genre's role, or a value set outright (see *The rhythm's values against the part's own*). Measured by
+    the kick's hits a bar in Metal's loud sections.
   - A fill's drums leaning to the toms by genre, which the drum groups' state draws, not a genre's choice.
   - A melody's leaping by genre, a lean of its register's freedom and its leap's size: leaning its stepwiseness moved
     the mean move by a tenth of a semitone and the leaps not at all, a melody's leaps coming of a phrase starting
