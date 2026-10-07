@@ -52,6 +52,7 @@ import { asGenre, byName, hasAGenre, isSameGenre, nestedChoices, presetById, pre
 import { createGenreEditor } from "./genre-editor.js";
 import { createGenreManager } from "./genre-manager.js";
 import { since, tell, track } from "./tally.js";
+import { createListeningStrip, listeningQuestion } from "./listening.js";
 
 const PLAY_ICON = "M8 5v14l11-7z";
 const PAUSE_ICON = "M7 5h3.5v14H7zM13.5 5H17v14h-3.5z";
@@ -154,6 +155,8 @@ let startedListening = null;
 // the songs' version the song on the page was made by, which every event about the song carries: the same seed
 // is another song in another version, and a page open across a deploy still plays the song it got
 let songVersion = null;
+// the stages the song asked for next leaves out, as the listening mode hears one without a device; none otherwise
+let skipped = [];
 // the song's sections as its report gives them, where each starts in seconds, its role and its soloists, and its length
 let songSections = [];
 let songSeconds = 0;
@@ -907,7 +910,7 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
     songsComing++;
     showWork(elements.nowPlaying, "Making the song");
     try {
-        const response = await requestSong(requestFor(seed, settings), signal);
+        const response = await requestSong({ ...requestFor(seed, settings), ...(skipped.length > 0 ? { skip: skipped } : {}) }, signal);
         if (!response.ok) {
             if (signal?.aborted) return false;
             setStatus(`Could not generate a song: ${await describeFailure(response)}`, true);
@@ -2672,6 +2675,29 @@ setPlayIcon(false);
 start();
 
 /**
+ *     The listening mode where the address asks a question (listening.js): each of its songs in its genre, made with its
+ *     device or without, the stages and the genre's choices the one without leaves out, and a verdict on it told.
+ */
+function startListening() {
+    const question = listeningQuestion(new URL(location.href).searchParams.get("listen"));
+    if (question === null) return;
+
+    const strip = createListeningStrip(question, {
+        play: (seed, isWithout) => {
+            const preset = question.genre === null ? null : presetById(question.genre);
+            const genre = preset === null ? noGenre() : asGenre(preset);
+            skipped = isWithout ? question.without.skip : [];
+            const choices = isWithout ? { ...genre.choices, ...question.without.genre } : genre.choices;
+            // read as the song is asked for, before generate waits on anything
+            generate(seed, { isRolled: false, asked: { ...settings, genre: { name: genre.name, choices } } });
+            skipped = [];
+        },
+        verdict: (seed, choice) => tell("verdict", { seed, version: songVersion, detail: `${question.id}:${choice}` }),
+    });
+    document.querySelector("main").prepend(strip);
+}
+
+/**
  *     The page is worth something the moment it opens: a song and a soundfont are both fetched straight
  *     away and at the same time, since neither waits on the other. Playing them is all that needs a
  *     gesture, and pressing play is one.
@@ -2679,6 +2705,7 @@ start();
 async function start() {
     // the choices a genre may name, which its editor needs and nothing else waits for
     listGenreChoices();
+    startListening();
 
     const linked = linkedSong();
     track("page_open", { detail: linked.wasAsked ? "link" : "fresh" });

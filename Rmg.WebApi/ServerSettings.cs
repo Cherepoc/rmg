@@ -36,6 +36,10 @@ public enum Interfaces
 /// <param name="DashboardToken">The admin area's password (<see cref="Admin.AdminArea" />), or null to not serve it at all.</param>
 /// <param name="RetentionDays">How long an event is kept before it is thrown away.</param>
 /// <param name="EventsPerVisitorPerDay">How much one visitor may write in a day before being ignored.</param>
+/// <param name="IsListening">
+///     Whether a song may be asked for with stages of it left out, as the page's listening mode compares a song with and
+///     without a device: a test instance's, never the live one's.
+/// </param>
 public sealed record ServerSettings(
     int Port,
     Interfaces Interfaces,
@@ -47,7 +51,8 @@ public sealed record ServerSettings(
     bool IsCounting,
     string? DashboardToken,
     int RetentionDays,
-    int EventsPerVisitorPerDay
+    int EventsPerVisitorPerDay,
+    bool IsListening
 )
 {
     public const int DefaultPort = 5000;
@@ -74,7 +79,8 @@ public sealed record ServerSettings(
                 DefaultRetentionDays, out var retention, out error)) return false;
         if (!TryReadWhole(Value(configuration, "EventsPerVisitorPerDay"), "EventsPerVisitorPerDay",
                 "events for one visitor in a day", DefaultEventsPerVisitorPerDay, out var perVisitor, out error)) return false;
-        if (!TryReadCounting(Value(configuration, "AnalyticsEnabled"), out var isCounting, out error)) return false;
+        if (!TryReadYesOrNo(Value(configuration, "AnalyticsEnabled"), "AnalyticsEnabled", true, out var isCounting, out error)) return false;
+        if (!TryReadYesOrNo(Value(configuration, "Listening"), "Listening", false, out var isListening, out error)) return false;
 
         settings = new ServerSettings(
             port,
@@ -87,7 +93,8 @@ public sealed record ServerSettings(
             isCounting,
             Value(configuration, "DashboardToken"),
             retention,
-            perVisitor
+            perVisitor,
+            isListening
         );
 
         return true;
@@ -171,14 +178,14 @@ public sealed record ServerSettings(
         return false;
     }
 
-    private static bool TryReadCounting(string? value, out bool isCounting, out string? error)
+    private static bool TryReadYesOrNo(string? value, string key, bool fallback, out bool read, out string? error)
     {
-        isCounting = true;
+        read = fallback;
         error = null;
 
-        if (value is null || bool.TryParse(value, out isCounting)) return true;
+        if (value is null || bool.TryParse(value, out read)) return true;
 
-        error = $"\"{value}\" is not a yes or a no. AnalyticsEnabled is true or false.";
+        error = $"\"{value}\" is not a yes or a no. {key} is true or false.";
         return false;
     }
 }

@@ -47,8 +47,18 @@ public static class SongGenerator
     ///     Generates a song as <see cref="GenerateSong(ulong, SongOverrides)" /> does, given up at the next stage once
     ///     nobody waits for it any more.
     /// </summary>
-    public static Song GenerateSong(ulong seed, SongOverrides overrides, CancellationToken cancellation)
+    public static Song GenerateSong(ulong seed, SongOverrides overrides, CancellationToken cancellation) =>
+        GenerateSong(seed, overrides, ImmutableHashSet<string>.Empty, cancellation);
+
+    /// <summary>The stages a song may be made without, by their names (<see cref="SongStages" />), as a listening test hears one with and without.</summary>
+    public static ImmutableArray<string> SkippableStages { get; } = [..SongStages.All.Where(x => x.CanSkip).Select(x => x.Name)];
+
+    /// <summary>The song of the seed as <see cref="GenerateSong(ulong, SongOverrides, CancellationToken)" /> makes it, the stages named left out.</summary>
+    /// <param name="skipped">Stages of <see cref="SkippableStages" /> to leave out, as a listening test compares a song with and without one.</param>
+    public static Song GenerateSong(ulong seed, SongOverrides overrides, IReadOnlySet<string> skipped, CancellationToken cancellation)
     {
+        if (skipped.FirstOrDefault(x => !SkippableStages.Contains(x)) is { } unknown)
+            throw new ArgumentOutOfRangeException(nameof(skipped), unknown, $"A stage left out is one of {string.Join(", ", SkippableStages)}.");
         if (overrides.Base is < 0 or > 1 or double.NaN)
             throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Base, "An unconventionality is from 0 to 1.");
         if (overrides.Facets?.Values.Any(x => x is < 0 or > 1 or double.NaN) == true)
@@ -68,7 +78,7 @@ public static class SongGenerator
         if (overrides.DrumPieces is { } pieces && (pieces.IsEmpty || !pieces.All(DrumPieces.IsPiece)))
             throw new ArgumentOutOfRangeException(nameof(overrides), "Drums given are one or more of the drum pieces.");
 
-        return GenerateSong(seed, ProgressionSettings.Default, overrides, cancellation);
+        return GenerateSong(seed, ProgressionSettings.Default, overrides, skipped, (_, _) => { }, cancellation);
     }
 
     internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings) => GenerateSong(seed, progressionSettings, SongOverrides.None, CancellationToken.None);

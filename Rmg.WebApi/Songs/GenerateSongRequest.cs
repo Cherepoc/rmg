@@ -36,6 +36,10 @@ namespace Rmg.WebApi.Songs;
 /// <param name="Swing">How much the song swings, from 0, straight, to 61, a triplet's swing, where its meter pairs its notes.</param>
 /// <param name="Length">How long the song is to play, by its step (<see cref="LengthScale" />), which its form comes as near as it can.</param>
 /// <param name="GenreName">The genre's name, which a link to the song shows, up to 63 bytes (<see cref="Genres.GenreStore" />).</param>
+/// <param name="Skip">
+///     Stages of the song left out, by their names (<see cref="SongGenerator.SkippableStages" />), as the page's listening
+///     mode hears a song with and without a device; a server that listens only (<see cref="ServerSettings.IsListening" />).
+/// </param>
 /// <param name="Genre">
 ///     The genre the song's draws keep to: every choice it names (<c>/api/genres/choices</c>), and its options' amounts in
 ///     whole numbers (<see cref="Genres.GenreAmounts" />), each one, alike at every end, or three, at the plain end, in the
@@ -57,13 +61,24 @@ public sealed record GenerateSongRequest(
     int? Swing = null,
     IReadOnlyDictionary<string, IReadOnlyDictionary<string, JsonElement>>? Genre = null,
     int? Length = null,
-    string? GenreName = null
+    string? GenreName = null,
+    IReadOnlyList<string>? Skip = null
 )
 {
     /// <summary>A pan from -1, left, to 1, right, as its nearest step, the middle step in the middle.</summary>
     public static int ToPanStep(double pan) => StepScale.ToStep((pan + 1) / 2);
 
     private static double FromPanStep(int step) => 2 * StepScale.ToAmount(step) - 1;
+
+    /// <summary>The stages the request leaves out, or says which is no stage that may be.</summary>
+    public bool TryReadSkip(out ImmutableHashSet<string> skipped, out string? error)
+    {
+        skipped = [..Skip ?? []];
+        if (skipped.FirstOrDefault(x => !SongGenerator.SkippableStages.Contains(x)) is { } unknown)
+            return Fail($"{unknown} is not a stage a song may leave out. Those are {string.Join(", ", SongGenerator.SkippableStages)}.", out error);
+        error = null;
+        return true;
+    }
 
     /// <summary>
     ///     Reads the request into what is given in place of the song's draws and how it is to be heard, or says what

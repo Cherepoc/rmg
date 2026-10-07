@@ -126,6 +126,27 @@ header p {
     padding: 18px 20px;
 }
 
+/* the listening mode's question, above the song, its songs heard A and B and a verdict on each */
+.listening p {
+    margin: 0 0 8px;
+}
+
+.listening-question {
+    font-weight: 600;
+}
+
+.listening-where,
+.listening-heard {
+    color: var(--muted);
+}
+
+.listening-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
 .panel h2 {
     margin: 0 0 12px;
     font-size: 13px;

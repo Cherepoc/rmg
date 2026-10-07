@@ -84,6 +84,10 @@ public sealed class Site : IAsyncInitializer, IAsyncDisposable
                 ["RMG_PORT"] = port.ToString(),
                 ["RMG_STATEDIRECTORY"] = _state,
                 ["RMG_ANALYTICSENABLED"] = "true",
+                // as the test instance, whose songs the listening mode asks for with stages left out
+                ["RMG_LISTENING"] = "true",
+                // every page of the tests one visitor, whose events a day of them would run past the day's few
+                ["RMG_EVENTSPERVISITORPERDAY"] = "100000",
                 ["RMG_DASHBOARDTOKEN"] = Token,
                 // a sixth of the size of the one the page offers first, as every test's page fetches it
                 ["RMG_DEFAULTSOUNDFONT"] = "TimGM6mb.sf2"

@@ -58,6 +58,13 @@ public sealed record RatedFifth(bool IsGiven, int Fifth, int Songs, int Likes, i
 /// <param name="Dislikes">Their dislikes.</param>
 public sealed record RatedGenre(string Genre, int Songs, int Likes, int Dislikes);
 
+/// <param name="Question">The listening mode's question (<c>listening.json</c>).</param>
+/// <param name="With">How often the song with the device was the better.</param>
+/// <param name="Without">How often the song without it was.</param>
+/// <param name="Same">How often the two were the same.</param>
+/// <param name="Unsure">How often the listener could not tell.</param>
+public sealed record QuestionVerdicts(string Question, int With, int Without, int Same, int Unsure);
+
 /// <param name="Name">What failed.</param>
 /// <param name="Detail">Why, as far as the page could say.</param>
 public sealed record Failure(string Name, string Detail, int Count);
@@ -116,6 +123,8 @@ public sealed record ServerSummary(
 /// <param name="Rated">The songs of it rated, the most liked first and the most disliked last.</param>
 /// <param name="RatedFifths">Its songs' ratings by how plain or wild they are, given apart from drawn.</param>
 /// <param name="RatedGenres">Its songs' ratings by their genre.</param>
+/// <param name="VerdictVersion">The latest songs' version a verdict was given in, which <paramref name="Verdicts" /> are of.</param>
+/// <param name="Verdicts">The listening mode's verdicts, by question.</param>
 /// <param name="Failures">What went wrong, and how often.</param>
 /// <param name="Server">What the server measured of the songs asked of it.</param>
 public sealed record AnalyticsSummary(
@@ -133,6 +142,8 @@ public sealed record AnalyticsSummary(
     IReadOnlyList<RatedSeed> Rated,
     IReadOnlyList<RatedFifth> RatedFifths,
     IReadOnlyList<RatedGenre> RatedGenres,
+    string? VerdictVersion,
+    IReadOnlyList<QuestionVerdicts> Verdicts,
     IReadOnlyList<Failure> Failures,
     int Events,
     ServerSummary Server

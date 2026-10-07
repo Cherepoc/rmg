@@ -1,0 +1,204 @@
+[
+  {
+    "id": "stop-time",
+    "question": "Stop time, the band hitting once a bar under the tune: a band's device, or a hole?",
+    "decides": "Its chance and where it plays.",
+    "genre": "blues",
+    "without": {
+      "skip": [
+        "Stop time"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      "0",
+      "2",
+      "3",
+      "5",
+      "6",
+      "7"
+    ]
+  },
+  {
+    "id": "pushes",
+    "question": "Pushes, the band's chord changes an eighth early: a lift, or a stumble?",
+    "decides": "Its chance by genre.",
+    "genre": "rock",
+    "without": {
+      "skip": [
+        "Pushes"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      "0",
+      "4",
+      "5",
+      "B",
+      "D",
+      "E"
+    ]
+  },
+  {
+    "id": "drum-marks",
+    "question": "The drums marking the form, a strike every few bars and a swell into a section: a calm piece's percussion, or a groove gone missing?",
+    "decides": "How often the marks strike.",
+    "genre": "ambient",
+    "without": {
+      "skip": [
+        "Drum marks"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      "0",
+      "1",
+      "2",
+      "4",
+      "5",
+      "7"
+    ]
+  },
+  {
+    "id": "louder-forms",
+    "question": "A clean guitar turning distorted in the loud sections: a band kicking in, or a jump?",
+    "decides": "Its chance by genre.",
+    "genre": "rock",
+    "without": {
+      "skip": [
+        "Louder forms"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      "0",
+      "2",
+      "4",
+      "5",
+      "7",
+      "A"
+    ]
+  },
+  {
+    "id": "ornaments",
+    "question": "The lines' ornaments, graces, turns and trills: a folk player's, or a warble?",
+    "decides": "How often a line is ornamented.",
+    "genre": "medieval",
+    "without": {
+      "skip": [
+        "Ornaments"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      "0",
+      "4",
+      "5",
+      "8",
+      "D",
+      "E"
+    ]
+  },
+  {
+    "id": "pocket",
+    "question": "The band's pocket, the backbeat a little late, the bass a touch ahead: played, or sloppy?",
+    "decides": "How far the parts play off the beat.",
+    "genre": null,
+    "without": {
+      "skip": [
+        "Timing"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ]
+  },
+  {
+    "id": "solo-answers",
+    "question": "The solo part answering in the melody's gaps: a guitarist between a singer's phrases, or clutter?",
+    "decides": "Its chance.",
+    "genre": null,
+    "without": {
+      "skip": [
+        "Solo answers"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      "1",
+      "2",
+      "J",
+      "K",
+      "R",
+      "V"
+    ]
+  },
+  {
+    "id": "lift-cues",
+    "question": "The drums' cues into a bigger section, the hi-hat opening and the snare on its head: a drummer's, or predictable?",
+    "decides": "Whether the cues stay, and how often.",
+    "genre": null,
+    "without": {
+      "skip": [
+        "Lift cues"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ]
+  },
+  {
+    "id": "doubling",
+    "question": "A line doubled, in octaves, harmonised, the bass with the riff: fuller, or muddy?",
+    "decides": "Its chances.",
+    "genre": "rock",
+    "without": {
+      "skip": [
+        "Doubling"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      "0",
+      "2",
+      "3",
+      "5",
+      "6",
+      "7"
+    ]
+  },
+  {
+    "id": "gate",
+    "question": "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
+    "decides": "Its weight in Trance, and the parts it chops.",
+    "genre": "trance",
+    "without": {
+      "skip": [],
+      "genre": {
+        "strongEffect": {
+          "none": 100
+        }
+      }
+    },
+    "seeds": [
+      "2",
+      "5",
+      "8",
+      "A",
+      "J",
+      "L"
+    ]
+  }
+]

@@ -55,6 +55,8 @@ DASHBOARD_TOKEN="${RMG_DASHBOARDTOKEN:-}"
 RETENTION_DAYS="${RMG_RETENTIONDAYS:-}"
 DEFAULT_SOUNDFONT="${RMG_DEFAULTSOUNDFONT:-}"
 ANALYTICS_ENABLED="${RMG_ANALYTICSENABLED:-}"
+# true on a test instance only: songs asked for with stages left out, as the page's listening mode compares them
+LISTENING="${RMG_LISTENING:-}"
 
 # What the VPS fetches for itself, one per line, as "url" or "url|what to call it". A .tar.gz is
 # unpacked and the soundfont inside is what gets the name. A licence has to be named so that it lands
@@ -96,7 +98,7 @@ Options:
 
 Settings come from deploy.env beside this script. Those named RMG_* are put on the server and
 override appsettings.json, which ships with the app and holds the defaults: RMG_PORT, RMG_ADDRESS,
-RMG_KNOWNPROXIES, RMG_DASHBOARDTOKEN, RMG_RETENTIONDAYS, RMG_DEFAULTSOUNDFONT and RMG_ANALYTICSENABLED. The rest say where to deploy: RMG_HOST,
+RMG_KNOWNPROXIES, RMG_DASHBOARDTOKEN, RMG_RETENTIONDAYS, RMG_DEFAULTSOUNDFONT, RMG_ANALYTICSENABLED and RMG_LISTENING. The rest say where to deploy: RMG_HOST,
 RMG_PATH, RMG_SERVICE, RMG_SERVICE_USER, RMG_RUNTIME, RMG_SOUNDFONTS and RMG_BUMP_VERSION, false to
 deploy changed songs under the version they had, as a test instance does.
 USAGE
@@ -432,9 +434,9 @@ fi
 
 step "Writing the settings on $HOST"
 remote "$SERVICE" "$ADDRESS" "$PORT" "$KNOWN_PROXIES" "$DASHBOARD_TOKEN" "$RETENTION_DAYS" \
-       "$DEFAULT_SOUNDFONT" "$ANALYTICS_ENABLED" <<'REMOTE'
+       "$DEFAULT_SOUNDFONT" "$ANALYTICS_ENABLED" "$LISTENING" <<'REMOTE'
 service="$1"; address="$2"; port="$3"; proxies="$4"; dashboard="$5"; retention="$6"
-soundfont="$7"; counting="$8"
+soundfont="$7"; counting="$8"; listening="$9"
 sudo=""; [[ $EUID -eq 0 ]] || sudo="sudo"
 
 $sudo install -d -m 700 -o root -g root "/etc/$service"
@@ -461,6 +463,7 @@ $sudo install -d -m 700 -o root -g root "/etc/$service"
     if [[ -n $retention ]]; then echo "RMG_RETENTIONDAYS=$retention"; fi
     if [[ -n $soundfont ]]; then echo "RMG_DEFAULTSOUNDFONT=$soundfont"; fi
     if [[ -n $counting ]]; then echo "RMG_ANALYTICSENABLED=$counting"; fi
+    if [[ -n $listening ]]; then echo "RMG_LISTENING=$listening"; fi
 } | $sudo tee "/etc/$service/$service.env.new" >/dev/null
 
 $sudo chown root:root "/etc/$service/$service.env.new"

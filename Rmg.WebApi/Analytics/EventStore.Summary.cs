@@ -16,6 +16,8 @@ public static class EventStoreSummary
         using var connection = store.OpenForReading();
         var ratings = Ratings(connection);
         var ratedVersion = ratings.Where(x => x.Likes + x.Dislikes > 0).Select(x => x.Version).Distinct().OrderByDescending(x => x, VersionOrder).FirstOrDefault();
+        var verdicts = Verdicts(connection);
+        var verdictVersion = verdicts.Select(x => x.Version).Distinct().OrderByDescending(x => x, VersionOrder).FirstOrDefault();
 
         return new AnalyticsSummary(
             days,
@@ -32,6 +34,12 @@ public static class EventStoreSummary
             RatedSeeds(ratings, ratedVersion),
             RatedFifths(ratings, ratedVersion),
             RatedGenres(ratings, ratedVersion),
+            verdictVersion,
+            [
+                ..verdicts.Where(x => x.Version == verdictVersion).GroupBy(x => x.Question).OrderBy(x => x.Key).Select(x => new QuestionVerdicts(x.Key,
+                    x.Where(v => v.Choice == "with").Sum(v => v.Count), x.Where(v => v.Choice == "without").Sum(v => v.Count),
+                    x.Where(v => v.Choice == "same").Sum(v => v.Count), x.Where(v => v.Choice == "unsure").Sum(v => v.Count)))
+            ],
             Failures(connection, since),
             Count(connection, "SELECT COUNT(*) FROM events WHERE day >= $since", since),
             Server(connection, since)
@@ -418,6 +426,29 @@ public static class EventStoreSummary
             fifths,
             daily
         );
+    }
+
+    /// <summary>Every verdict of the listening mode, whenever given, by its version, question and choice, which its detail says as "question:choice".</summary>
+    private static List<(string Version, string Question, string Choice, int Count)> Verdicts(SqliteConnection connection)
+    {
+        using var command = connection.CreateCommand();
+        command.CommandText = $"""
+            SELECT version, detail, COUNT(*)
+            FROM events
+            WHERE name = '{EventNames.Verdict}' AND version IS NOT NULL AND detail LIKE '%:%'
+            GROUP BY version, detail
+            """;
+
+        var verdicts = new List<(string, string, string, int)>();
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            var detail = reader.GetString(1);
+            var colon = detail.LastIndexOf(':');
+            verdicts.Add((reader.GetString(0), detail[..colon], detail[(colon + 1)..], reader.GetInt32(2)));
+        }
+
+        return verdicts;
     }
 
     private static List<Failure> Failures(SqliteConnection connection, string since)

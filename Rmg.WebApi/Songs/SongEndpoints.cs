@@ -13,9 +13,11 @@ namespace Rmg.WebApi.Songs;
 
 public static class SongEndpoints
 {
-    public static void MapSongs(this IEndpointRouteBuilder routes)
+    /// <param name="isListening">Whether a song may be asked for with stages left out (<see cref="ServerSettings.IsListening" />).</param>
+    public static void MapSongs(this IEndpointRouteBuilder routes, bool isListening)
     {
-        routes.MapPost("/api/songs/generate", GenerateSong);
+        routes.MapPost("/api/songs/generate", (HttpContext context, SongQueue queue, SongLog log, Genres.GenreStore genres, GenerateSongRequest? request) =>
+            GenerateSong(context, queue, log, genres, request, isListening));
 
         // what a song may be given: its tempos, in beats a minute, and its lengths, in seconds, by their steps, its meters,
         // its drum pieces and its scales, in the order a request names them by
@@ -39,12 +41,14 @@ public static class SongEndpoints
     ///     How long it waited and took, and how it ended, is kept (<see cref="SongLog" />) once its turn is given back, so
     ///     that no core waits on the disk.
     /// </summary>
-    private static async Task<IResult> GenerateSong(HttpContext context, SongQueue queue, SongLog log, Genres.GenreStore genres, GenerateSongRequest? request)
+    private static async Task<IResult> GenerateSong(HttpContext context, SongQueue queue, SongLog log, Genres.GenreStore genres, GenerateSongRequest? request, bool isListening)
     {
         request ??= new GenerateSongRequest();
 
-        if (!request.TryRead(out var seed, out var overrides, out var mix, out var error))
+        if (!request.TryRead(out var seed, out var overrides, out var mix, out var error) || !request.TryReadSkip(out var skipped, out error))
             return Results.BadRequest(new ErrorResponse(error!));
+        if (!skipped.IsEmpty && !isListening)
+            return Results.BadRequest(new ErrorResponse("This server makes songs whole: stages are left out only where it listens."));
 
         // the genre kept, so that a link to the song carries it by its key, before the song waits its turn
         var genreKey = request.Genre is { } genre ? genres.Keep(Genres.GenreStore.Canonical(request.GenreName?.Trim() ?? "", genre)) : null;
@@ -89,7 +93,7 @@ public static class SongEndpoints
             {
                 // a song nobody waits for any more is given up, its core going to the next
                 var started = Stopwatch.GetTimestamp();
-                var song = SongGenerator.GenerateSong(songSeed, overrides, context.RequestAborted);
+                var song = SongGenerator.GenerateSong(songSeed, overrides, skipped, context.RequestAborted);
                 made = Milliseconds(started);
                 notes = song.Notes?.Values.Sum(x => x.Count);
 

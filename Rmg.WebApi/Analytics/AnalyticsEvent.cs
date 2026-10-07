@@ -30,10 +30,16 @@ public static class EventNames
     /// </summary>
     public const string Rated = "rated";
 
+    /// <summary>
+    ///     A verdict of the listening mode on a song heard with a device and without, its detail the question's id and
+    ///     the verdict, "gate:with", the song with it better, "without", "same" or "unsure".
+    /// </summary>
+    public const string Verdict = "verdict";
+
     private static readonly HashSet<string> Known =
     [
         PageOpen, SongGenerated, SongFailed, SoundFontReady, SoundFontFailed, AudioReady,
-        Played, Listened, MixChanged, DownloadedMidi, ExportedMp3, Shared, Rated, GenreChosen
+        Played, Listened, MixChanged, DownloadedMidi, ExportedMp3, Shared, Rated, GenreChosen, Verdict
     ];
 
     public static bool IsKnown(string? name)

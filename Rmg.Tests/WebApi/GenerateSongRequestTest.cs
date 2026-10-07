@@ -20,6 +20,19 @@ public sealed class GenerateSongRequestTest
     }
 
     [Test]
+    public async Task StagesLeftOut_AreThoseASongMayBeMadeWithout_AnyOtherRefused()
+    {
+        await Assert.That(new GenerateSongRequest("g", Skip: ["Pushes", "Stop time"]).TryReadSkip(out var skipped, out _)).IsTrue();
+        await Assert.That(skipped.SetEquals(["Pushes", "Stop time"])).IsTrue();
+        await Assert.That(new GenerateSongRequest("g").TryReadSkip(out skipped, out _)).IsTrue();
+        await Assert.That(skipped).IsEmpty();
+        // the notes are a stage every song plays
+        await Assert.That(new GenerateSongRequest("g", Skip: ["Notes"]).TryReadSkip(out _, out var error)).IsFalse();
+        await Assert.That(error).Contains("Notes");
+        await Assert.That(() => SongGenerator.GenerateSong(1, SongOverrides.None, new HashSet<string> { "Notes" }, CancellationToken.None)).Throws<ArgumentOutOfRangeException>();
+    }
+
+    [Test]
     public async Task EveryStep_ReadsAsItsAmount_TheMiddleStepAHalf()
     {
         var request = new GenerateSongRequest(

@@ -33,6 +33,8 @@ const elements = {
     fifths: document.getElementById("fifths"),
     genresPanel: document.getElementById("genres-panel"),
     genres: document.getElementById("genres"),
+    verdictsPanel: document.getElementById("verdicts-panel"),
+    verdicts: document.getElementById("verdicts"),
     failuresPanel: document.getElementById("failures-panel"),
     failures: document.getElementById("failures"),
     serverPanel: document.getElementById("server-panel"),
@@ -66,7 +68,7 @@ function setStatus(message, isError = false) {
 
 function showPanels(isShown) {
     for (const panel of [elements.headline, elements.timings, elements.funnelPanel,
-        elements.dailyPanel, elements.seedsPanel, elements.versionsPanel, elements.ratedPanel, elements.fifthsPanel, elements.genresPanel, elements.failuresPanel, elements.serverPanel])
+        elements.dailyPanel, elements.seedsPanel, elements.versionsPanel, elements.ratedPanel, elements.fifthsPanel, elements.genresPanel, elements.verdictsPanel, elements.failuresPanel, elements.serverPanel])
         panel.hidden = !isShown;
 
     elements.controls.hidden = !isShown;
@@ -160,6 +162,7 @@ function draw() {
     drawRated();
     drawFifths();
     drawGenres();
+    drawVerdicts();
     drawFailures();
     drawServer();
 }
@@ -556,6 +559,19 @@ function drawGenres() {
             String(genre.dislikes),
             percent(genre.likes, genre.likes + genre.dislikes),
         ])
+    ));
+}
+
+/** The listening mode's verdicts by question, of the latest version given any. */
+function drawVerdicts() {
+    if (summary.verdicts.length === 0) {
+        elements.verdicts.replaceChildren(empty("No verdict has been given yet."));
+        return;
+    }
+
+    elements.verdicts.replaceChildren(table(
+        [`Question (${summary.verdictVersion})`, "With better", "Without better", "The same", "Can't tell"],
+        summary.verdicts.map((x) => [x.question, String(x.with), String(x.without), String(x.same), String(x.unsure)])
     ));
 }
 

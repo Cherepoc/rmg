@@ -135,7 +135,7 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.MapSoundFonts(soundFonts);
-app.MapSongs();
+app.MapSongs(settings.IsListening);
 app.MapSongDescriptions();
 app.MapGenres();
 
