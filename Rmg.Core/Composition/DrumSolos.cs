@@ -5,6 +5,34 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
+/// <summary>What a drum solo's feet keep time with, where they keep it (<see cref="DrumSolos.Feet" />).</summary>
+public enum SoloFeet
+{
+    /// <summary>The section's kick, as its groove played it.</summary>
+    Groove,
+
+    /// <summary>The hi-hat's pedal on 2 and 4, a jazz drummer's.</summary>
+    HatFoot,
+
+    /// <summary>A double kick in 16ths, a metal drummer's.</summary>
+    DoubleKick,
+
+    /// <summary>The bossa's kick, a dotted quarter and an 8th, twice a bar.</summary>
+    Bossa
+}
+
+/// <summary>A sticking a drum solo's run or lick plays, its limbs in turn (<see cref="DrumSolos.Stickings" />).</summary>
+public enum Sticking
+{
+    Singles,
+    Doubles,
+    Paradiddle,
+    SixStroke,
+
+    /// <summary>Two hands and the kick, a triplet round the kit.</summary>
+    HandFoot
+}
+
 /// <summary>
 ///     A drum solo played as a pitched solo is (<see cref="SoloLines" />), gesture by gesture by the drummer's solo
 ///     vocabulary (<see cref="Soloist" />), the kit its scale: the section's snare, its toms from the highest to the
@@ -45,6 +73,48 @@ internal static class DrumSolos
     /// </summary>
     public static ByConvention KeepTime { get; } = new(1, 0.6, 0);
 
+    /// <summary>What the feet keep time with, and how likely: the groove's kick the songs', the others a genre's.</summary>
+    public static ImmutableArray<(SoloFeet Feet, ByConvention Weight)> Feet { get; } =
+    [
+        (SoloFeet.Groove, new ByConvention(1, 1, 1)),
+        (SoloFeet.HatFoot, new ByConvention(0, 0, 0)),
+        (SoloFeet.DoubleKick, new ByConvention(0, 0, 0)),
+        (SoloFeet.Bossa, new ByConvention(0, 0, 0))
+    ];
+
+    /// <summary>A feet's pattern, its 16ths in a bar of four beats; the groove's its own.</summary>
+    private static int[] OnsetsOf(SoloFeet feet) => feet switch
+    {
+        SoloFeet.HatFoot => [4, 12],
+        SoloFeet.DoubleKick => [..Enumerable.Range(0, 16)],
+        SoloFeet.Bossa => [0, 6, 8, 14],
+        _ => []
+    };
+
+    /// <summary>
+    ///     The stickings the kit's runs and licks play, as hands play them rather than a scale: the right hand round the
+    ///     toms, the left on the snare, the foot on the kick, each sticking's first stroke the accent; and how likely each
+    ///     is, the plainest the singles and doubles, the wilder the six-stroke roll and the hands with the foot.
+    /// </summary>
+    public static ImmutableArray<(Sticking Sticking, ByConvention Weight)> Stickings { get; } =
+    [
+        (Sticking.Singles, new ByConvention(1, 1, 1)),
+        (Sticking.Doubles, new ByConvention(0.4, 0.5, 0.6)),
+        (Sticking.Paradiddle, new ByConvention(0.2, 0.4, 0.6)),
+        (Sticking.SixStroke, new ByConvention(0, 0.2, 0.5)),
+        (Sticking.HandFoot, new ByConvention(0, 0.3, 0.6))
+    ];
+
+    /// <summary>A sticking's limbs, R and L the hands, K the foot.</summary>
+    public static string LimbsOf(Sticking sticking) => sticking switch
+    {
+        Sticking.Doubles => "RRLL",
+        Sticking.Paradiddle => "RLRRLRLL",
+        Sticking.SixStroke => "RLLRRL",
+        Sticking.HandFoot => "RLK",
+        _ => "RL"
+    };
+
     /// <summary>How loud the drums keeping time under a solo are, softer than its calmest.</summary>
     public const double TimeLoudness = Loudness - IntensityVelocity / 2 - 0.05;
 
@@ -74,6 +144,9 @@ internal static class DrumSolos
     /// <param name="stacks">A solo's draw of whether it stacks the kick under its accents, by its appearance's place.</param>
     /// <param name="feet">A solo's draw of whether the feet keep time under it, by its appearance's place.</param>
     /// <param name="players">A solo's draw of its soloists among the players and of whether the others keep time, by its appearance's place.</param>
+    /// <param name="ostinatos">A solo's draw of what its feet keep time with, by its appearance's place.</param>
+    /// <param name="stickings">A solo's draws of its runs' and licks' stickings, by its appearance's place.</param>
+    /// <param name="genre">The genre, whose pools of the feet's patterns and the stickings are the solo's where it names them.</param>
     /// <param name="groove">An appearance's groove facet, by its place, which leans how many solo and whether the others keep time.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
         TrackEventStateTimelineMap<StateMap> song,
@@ -85,7 +158,10 @@ internal static class DrumSolos
         Func<int, IGenerationContext> stacks,
         Func<int, IGenerationContext> feet,
         Func<int, IGenerationContext> players,
+        Func<int, IGenerationContext> ostinatos,
+        Func<int, IGenerationContext> stickings,
         Func<int, double> groove,
+        Genre genre,
         Meter meter,
         Func<int, double> odds
     )
@@ -108,6 +184,11 @@ internal static class DrumSolos
             var kicks = Of(FillDrumRole.Kick);
             var kick = kicks.FirstOrDefault();
             var feetKeepTime = feet(index).TestProbability(FeetKeepTime) && kick is not null && hands.Length > 0;
+            // and what they keep it with, a genre's pattern in a bar of four, the hi-hat's pedal where the song has the hi-hat
+            var hat = DrumGroups.GetTrackNumber(DrumDefinitions.HiHat);
+            var feetPattern = ostinatos(index).Pick(ByConvention.Weigh(Feet, groove(index), genre.Pool<SoloFeet>(GenreChoices.DrumSoloFeet, x => GenreChoices.Name(x.ToString()))));
+            if (whole.Meter.Sixteenths != 16 || feetPattern == SoloFeet.HatFoot && !song.TrackTimelineMap.ContainsKey(hat))
+                feetPattern = SoloFeet.Groove;
             var tracks = song.TrackTimelineMap.Keys.Where(x => x >= DrumGroups.FirstTrackNumber).ToArray();
             // every percussion drum a player of its own, its sounds from the highest, and the kit's drummer playing the rest
             var percussion = sounds.TryGetValue(FillDrumRole.Percussion, out var all) ? all.Where(Plays).GroupBy(x => x.Track)
@@ -142,7 +223,11 @@ internal static class DrumSolos
             var kitSolos = soloists.Contains(kit);
             var stacksKick = stacks(index).TestProbability(KickUnderAccents) && kick is not null && !feetKeepTime;
             // the feet keep time while the kit solos, its turns and the others'
-            var feetTracks = kitSolos && feetKeepTime ? kicks.Select(x => x.Track).ToHashSet() : [];
+            var feetTracks = !kitSolos || !feetKeepTime ? []
+                : feetPattern == SoloFeet.HatFoot ? new HashSet<int> { hat }
+                : kicks.Select(x => x.Track).ToHashSet();
+            var sticks = stickings(index);
+            var stickingWeights = ByConvention.Weigh(Stickings, groove(index), genre.Pool<Sticking>(GenreChoices.Stickings, x => GenreChoices.Name(x.ToString())));
             var common = song.CommonStateTimelineMap;
             var plan = SoloLines.Plan(
                 context,
@@ -163,12 +248,23 @@ internal static class DrumSolos
                 if (gesture == SoloGesture.Quote)
                     continue;
                 bool IsIn(TimelineItem<StateMap> note) => note.Position >= start - 1e-9 && note.Position < end - 1e-9;
-                foreach (var track in tracks.Where(x => !feetTracks.Contains(x)))
+                // every drum cleared but the feet's where they replay the groove's kick
+                foreach (var track in tracks.Where(x => !feetTracks.Contains(x) || feetPattern != SoloFeet.Groove))
                     edits.Clear(track, start, end);
-                // the feet and the players keeping time, softer
-                foreach (var track in feetTracks.Concat(keepers.SelectMany(x => x.Tracks)))
+                // the feet and the players keeping time, softer, the feet by their pattern where it is not the groove's
+                foreach (var track in (feetPattern == SoloFeet.Groove ? feetTracks : []).Concat(keepers.SelectMany(x => x.Tracks)))
                 foreach (var note in song.TrackTimelineMap[track].EventTimeline.Where(IsIn))
                     edits.Replay(track, note, TimeLoudness);
+                if (feetPattern != SoloFeet.Groove && feetTracks.Count > 0)
+                {
+                    var (footTrack, footSound) = feetPattern == SoloFeet.HatFoot
+                        ? (hat, DrumDefinitions.HiHat.GetArticulationIndex(DrumSounds.PedalHiHat))
+                        : (kick!.Track, kick.Articulation);
+                    var bar = whole.Meter.BarDuration;
+                    for (var at = whole.Start + Math.Floor((start - whole.Start) / bar + 1e-9) * bar; at < end - 1e-9; at += bar)
+                    foreach (var onset in OnsetsOf(feetPattern).Select(x => at + x * 0.25).Where(x => x >= start - 1e-9 && x < end - 1e-9))
+                        edits.Hit(footTrack, onset, TimeLoudness, footSound, whole.SectionId, "Drum solo");
+                }
 
                 var loudness = Loudness + IntensityVelocity * (level - 0.5);
                 // the soloists in turn by phrase, or together
@@ -183,6 +279,53 @@ internal static class DrumSolos
                             var low = player.IsKit ? kick ?? scale[^1] : scale[^1];
                             edits.Hit(low.Track, start, loudness + CellAccent, low.Articulation, whole.SectionId, "Drum solo");
                             break;
+                        case SoloGesture.Run or SoloGesture.Lick when player.IsKit:
+                        {
+                            // a sticking, the right hand round the toms, the left on the snare, the foot on the kick, but where the
+                            // feet keep time on it
+                            var kickFree = kick is not null && !feetTracks.Contains(kick.Track);
+                            var sticking = sticks.Pick(kickFree ? stickingWeights : [..stickingWeights.Where(x => x.Value != Sticking.HandFoot)]);
+                            var limbs = LimbsOf(sticking);
+                            var snare = scale[0];
+                            RunSound[] toms = [..scale.Skip(1).Where(x => kick is null || x.Track != kick.Track)];
+                            var positions = SoloLines.Positions(start, end, gesture, speed);
+                            // a run walks the toms to their other end, a lick rocks between two of them
+                            var at = Math.Clamp(player.At, 0, Math.Max(0, toms.Length - 1));
+                            var step = at < toms.Length / 2 ? 1 : -1;
+                            var rights = 0;
+                            for (var i = 0; i < positions.Length; i++)
+                            {
+                                var limb = limbs[i % limbs.Length];
+                                RunSound sound;
+                                if (limb == 'K' && kick is not null)
+                                    sound = kick;
+                                else if (limb == 'R' && toms.Length > 0)
+                                {
+                                    sound = toms[gesture == SoloGesture.Lick ? Math.Clamp(at + rights % 2, 0, toms.Length - 1) : at];
+                                    if (gesture == SoloGesture.Run)
+                                    {
+                                        if (at + step < 0 || at + step >= toms.Length)
+                                            step = -step;
+                                        at = Math.Clamp(at + step, 0, toms.Length - 1);
+                                    }
+
+                                    rights++;
+                                }
+                                else
+                                    sound = snare;
+                                var accent = i % limbs.Length == 0;
+                                edits.Hit(sound.Track, positions[i], loudness + (accent ? CellAccent : 0), sound.Articulation, whole.SectionId, "Drum solo");
+                                // a climax's gesture starting on a crash
+                                if (i == 0 && level >= ClimaxIntensity && crash is not null)
+                                    edits.Hit(crash.Track, positions[i], loudness + CellAccent, crash.Articulation, whole.SectionId, "Drum solo");
+                                // and the kick under an accent, but where the accent is the kick's own
+                                if (stacksKick && accent && sound.Track != kick!.Track)
+                                    edits.Hit(kick.Track, positions[i], loudness + CellAccent, kick.Articulation, whole.SectionId, "Drum solo");
+                            }
+
+                            player.At = at;
+                            break;
+                        }
                         case SoloGesture.Run:
                         case SoloGesture.Lick:
                         {

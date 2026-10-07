@@ -270,5 +270,7 @@ internal enum SongStream
     Tape = 91,
     MixFilter = 92,
     Pinch = 93,
-    Mutations = 94
+    Mutations = 94,
+    DrumSoloOstinato = 95,
+    DrumSoloStickings = 96
 }

@@ -64,6 +64,8 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
+      "sticking": { "singles": 100, "doubles": 60, "paradiddle": 60, "sixStroke": [10, 30, 40] },
+      "drumSoloFeet": { "hatFoot": 100, "groove": 40 },
       "room": { "room": 100, "hall": [0, 20, 30] },
       "louderForms": { "guitars": 0 },
       "drumSounds": { "pedalHiHat": 100, "closedHiHat": 0 },
@@ -795,6 +797,8 @@
     "name": "Metal",
     "description": "Distorted guitars chugging a riff in power chords, a double kick in 16ths, the snare on 2 and 4 or in half time, breaks and stops, guitar solos, natural minor, Phrygian and harmonic minor, fast.",
     "choices": {
+      "sticking": { "singles": 100, "doubles": 50, "handFoot": 70, "sixStroke": [10, 30, 40] },
+      "drumSoloFeet": { "doubleKick": 100, "groove": 50 },
       "cadenceRaise": { "sections": [20, 30, 30] },
       "cadenceDegree": { "fifth": 40, "sixth": 65, "seventh": 65 },
       "sectionHome": { "tonic": 100, "relative": 15, "fourth": 20, "fifth": 20 },
@@ -968,6 +972,7 @@
     "name": "Djent",
     "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, a clean lead floating over.",
     "choices": {
+      "drumSoloFeet": { "doubleKick": 80, "groove": 60 },
       "cadenceRaise": { "sections": 0 },
       "cadenceDegree": { "fifth": 20, "second": 75, "seventh": 60 },
       "mixFilter": { "opening": [10, 20, 40], "dips": [3, 6, 10] },
@@ -1462,6 +1467,7 @@
     "name": "Fusion",
     "description": "Electric piano and a soprano sax over a fretless bass singing high, Lydian, Dorian and melodic minor, ninths to thirteenths and quartal chords, chords in scales of their own and planed, odd meters, long solos.",
     "choices": {
+      "drumSoloFeet": { "hatFoot": 60, "groove": 100 },
       "polymeter": { "sections": [0, 10, 30] },
       "tempo": { "from": [90, 90, 80], "to": [140, 140, 180] },
       "meter": { "4/4": 100, "7/8": [10, 20, 40], "5/4": [10, 20, 30], "7/4": [0, 10, 20], "6/8": [10, 10, 20] },
@@ -1620,6 +1626,7 @@
     "name": "Bossa nova",
     "description": "A nylon guitar's syncopated chords, a flute or a sax, major sevenths and ninths moving by ii-V, the snare's cross-stick on a brush kit, a shaker, soft and straight, 100 to 140.",
     "choices": {
+      "drumSoloFeet": { "bossa": 100, "groove": 30 },
       "tempo": { "from": [100, 100, 90], "to": [140, 140, 150] },
       "meter": { "4/4": 100 },
       "feelChances": {},
@@ -1724,6 +1731,7 @@
     "name": "Black metal",
     "description": "Fast, cold and raw: tremolo-picked minor riffs over blast beats and a double kick, triads rather than power chords, a choir or synth strings behind, natural minor, Phrygian and harmonic minor, long repeating sections, a deep reverb, few solos.",
     "choices": {
+      "drumSoloFeet": { "doubleKick": 100 },
       "cadenceRaise": { "sections": [10, 20, 20] },
       "cadenceDegree": { "fifth": 25, "second": 75, "sixth": 70, "seventh": 65 },
       "passingChords": {},

@@ -110,6 +110,27 @@ public static class GenreChoices
     /// <summary>The chance a drum bar adds an edit to a mutating groove, an IDM or a drum and bass track's (<see cref="Composition.Mutations" />).</summary>
     public static GenreChoice Mutation { get; } = Chances("mutation", "A groove that mutates", [("bars", "Bars adding an edit", Composition.Mutations.Chance)]);
 
+    /// <summary>What a drum solo's feet keep time with: the groove's kick, the hi-hat's pedal on 2 and 4, a double kick, a bossa's kick (<see cref="DrumSolos.Feet" />).</summary>
+    public static GenreChoice DrumSoloFeet { get; } = Pool("drumSoloFeet", "A drum solo's feet",
+        DrumSolos.Feet.Select(x => (Name(x.Feet.ToString()), x.Feet switch
+        {
+            SoloFeet.Groove => "The groove's kick",
+            SoloFeet.HatFoot => "The hi-hat's pedal on 2 and 4",
+            SoloFeet.DoubleKick => "A double kick in 16ths",
+            _ => "The bossa's kick"
+        }, x.Weight)));
+
+    /// <summary>The stickings a drum solo's runs play (<see cref="DrumSolos.Stickings" />).</summary>
+    public static GenreChoice Stickings { get; } = Pool("sticking", "A drum solo's stickings",
+        DrumSolos.Stickings.Select(x => (Name(x.Sticking.ToString()), x.Sticking switch
+        {
+            Sticking.Singles => "Single strokes",
+            Sticking.Doubles => "Double strokes",
+            Sticking.Paradiddle => "Paradiddles",
+            Sticking.SixStroke => "Six-stroke rolls",
+            _ => "Hands and foot in triplets"
+        }, x.Weight)));
+
     /// <summary>The chances the whole mix is filtered: opening up a song, dipping before a section, closing as it ends (<see cref="Composition.MixFilter" />).</summary>
     public static GenreChoice MixFilter { get; } = Chances("mixFilter", "The mix filtered",
     [
@@ -573,7 +594,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Bass, OctaveBass, Glide, BassLanding, Effects, PinchSound, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, Mutation, MixFilter, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, SectionHome, CadenceDegrees, CadenceRaise, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Bass, OctaveBass, Glide, BassLanding, Effects, PinchSound, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, Mutation, MixFilter, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, DrumSoloFeet, Stickings, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
         SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

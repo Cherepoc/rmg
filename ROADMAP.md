@@ -14,7 +14,7 @@ is removed once it is built.
 4. Done: the flaky page test's 400, a range's from typed above its to, the other end now following.
 5. Done: a sparse song's silent start, its earliest part's first note held from the first beat.
 6. Done: a groove that mutates, its edits kept, IDM's and DnB's the most.
-7. Drum solos rethought, their feet's ostinato and their stickings first (*Groove*).
+7. Done: drum solos' feet a genre's ostinato and their runs in stickings; their motif, arc and trading left (*Groove*).
 8. A filtered bar in place of a drop's silence; a swell brightening; a whammy dive at a section's end.
 9. A line's tensions beyond Djent, after `?listen=djent-tension` is answered.
 
@@ -290,14 +290,13 @@ Each item with its plan, and what it waits for.
 - **A mutating groove, by listening** (`?listen=mutation`): IDM 90% of its sections, 5.4 edits an appearance, its hits
   unlike the first bar's 11% at the second bar to 34% at the fourteenth; the edits' weights, the ratchet's and the
   trade's above all; the snap back at a phrase.
-- **Drum solos rethought** (P1, planned October 2026): a solo now plays the pitched solos' gestures with the kit as a
+- **Drum solos rethought, the rest** (P2, planned October 2026; `?listen=drum-solo`): a solo now plays the pitched solos' gestures with the kit as a
   scale, a run round the toms, a lick, a crash held, a pause, a quote of the groove, the kick keeping time under it.
   A drummer thinks otherwise; in order of what it would add:
-  1. Its feet's ostinato, a genre's: jazz's hi-hat foot on 2 and 4, a samba's or a baião's kick, metal's double kick
-     in 16ths, a timbales player's cascara and clave by the other hand, rather than the kick alone.
-  2. Its vocabulary in stickings rather than scale runs: singles, doubles, paradiddles, flams, drags, a six-stroke
-     roll, a hand-and-foot triplet, as data, each limb voiced on the kit by a rule, the right hand moving round the
-     toms, the left on the snare, the foot on the kick, so that a run sounds as hands play it.
+  1. Done October 2026: its feet a genre's ostinato, the groove's kick, the hi-hat's pedal on 2 and 4, a double kick, a
+     bossa's kick (`DrumSolos.Feet`); a samba's or a baião's kick and a timbales player's cascara left, by listening.
+  2. Done October 2026: its runs and licks in stickings, singles, doubles, paradiddles, six-stroke rolls, hands and foot
+     in triplets, the right hand round the toms, the left on the snare (`DrumSolos.Stickings`); flams and drags left.
   3. A motif developed: a short rhythm from the section's groove or the hook stated, then repeated, displaced by a
      16th, augmented or diminished, moved round the kit, the solo's form rather than a string of gestures.
   4. Its arc measured first: space and quiet at its start, density and loudness growing to a climax, a release; the

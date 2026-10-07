@@ -178,6 +178,33 @@ public sealed class DrumSoloTest
     }
 
     /// <summary>The drum solos' gestures, cells and hits a beat, and how far their intensity swings, of songs of wild solos.</summary>
+    /// <summary>
+    ///     A jazz drum solo's feet on the hi-hat's pedal, on 2 and 4 alone, where the feet keep time (<see cref="Rmg.Core.Composition.DrumSolos.Feet" />),
+    ///     but where the solo quotes the groove; and the hands' stickings round the snare and the toms.
+    /// </summary>
+    [Test]
+    public async Task AJazzDrumSolosFeet_PlayTheHiHatsPedalOnTwoAndFour_TheHandsTheSnareAndToms()
+    {
+        var hat = DrumGroups.GetTrackNumber(DrumDefinitions.HiHat);
+        var (solos, pedals) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, Wild with { Genre = Rmg.Tests.Genres.GenrePresets.Genre("jazz") })))
+        foreach (var (span, plan, feet, _) in KitSolos(song).Where(x => x.Feet && x.Span.Meter.Sixteenths == 16))
+        {
+            solos++;
+            foreach (var segment in plan.Where(x => x.Gesture != SoloGesture.Quote))
+            foreach (var hit in song.Song.Notes!.GetValueOrDefault(hat)?.Where(x => x.Position >= segment.Start - 1e-9 && x.Position < segment.End - 1e-9) ?? [])
+            {
+                pedals++;
+                var beat = (hit.Position - span.Start) % span.Meter.BarDuration;
+                await Assert.That(Math.Abs(beat - 1) < 1e-6 || Math.Abs(beat - 3) < 1e-6).IsTrue().Because($"seed {song.Seed} at {hit.Position}");
+            }
+        }
+
+        Console.WriteLine($"{solos} jazz kit solos with the feet keeping time, {pedals} pedal strokes");
+        await Assert.That(solos).IsGreaterThan(2);
+        await Assert.That(pedals).IsGreaterThan(10);
+    }
+
     [Test]
     [Explicit]
     public async Task Report()

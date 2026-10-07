@@ -612,6 +612,29 @@
     ]
   },
   {
+    "id": "drum-solo",
+    "question": "Jazz's drum solo, its hands in stickings round the snare and toms over the hi-hat's pedal on 2 and 4 (with), or over the groove's kick (without): a drummer, or a pattern?",
+    "decides": "The drum solo's feet by genre.",
+    "genre": "jazz",
+    "without": {
+      "skip": [],
+      "genre": {
+        "drumSoloFeet": {
+          "hatFoot": 0,
+          "groove": 100
+        }
+      }
+    },
+    "seeds": [
+      "0",
+      "C",
+      "F",
+      "H",
+      "V",
+      "Z"
+    ]
+  },
+  {
     "id": "gate",
     "question": "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
     "decides": "Its weight in Trance, and the parts it chops.",
