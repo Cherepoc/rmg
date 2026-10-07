@@ -88,6 +88,12 @@ internal static class InstrumentsOverTime
         [56] = [59]
     }.ToImmutableDictionary();
 
+    /// <summary>
+    ///     The shortest note a variant plays, in beats, by its program, a note shorter as the instrument it varies:
+    ///     pinch harmonics a squeal on a held or an accented note, never in a run of 16ths, as a tremolo-picked riff's.
+    /// </summary>
+    public static ImmutableDictionary<int, double> VariantShortest { get; } = new Dictionary<int, double> { [31] = 0.5 }.ToImmutableDictionary();
+
     /// <summary>The instruments of a role, which a section switches a part among.</summary>
     private static InstrumentRole? RoleOf(TrackRole role) => role switch
     {
@@ -167,7 +173,7 @@ internal static class InstrumentsOverTime
                 foreach (var (note, i) in inSpan)
                 {
                     var bar = Math.Min(bars.Length - 1, (int)Math.Floor((note.Position - span.Start) / span.Meter.BarDuration + 1e-9));
-                    var articulated = !variants.IsEmpty && mode switch
+                    var articulated = !variants.IsEmpty && note.Value.Duration >= VariantShortest.GetValueOrDefault(variant) - 1e-9 && mode switch
                     {
                         ArticulationMode.Bars => bars[bar],
                         ArticulationMode.Accents => note.Value.Velocity > accent,
