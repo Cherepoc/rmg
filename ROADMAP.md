@@ -8,7 +8,7 @@ is removed once it is built.
 
 **In order** (P1, the plan of 9 October 2026, each step through the implementation loop):
 
-1. The echo as the synthesizer's delay rather than notes (*Instruments and expression*).
+1. Done: the echo as the synthesizer's delay rather than notes; heard on the test instance (`?listen=echo`).
 2. The strong effects each a chance of its own, one a controller on a part, the volume curves multiplied.
 3. The gate holding whole chords only, an arpeggio gated as it plays; Trance's arpeggios' rhythm measured.
 4. The part alone a genre's (*Genres*).
@@ -131,6 +131,9 @@ Done for a version when every question is answered or let go of.
 ### Sound
 
 - **The velocity:** the bass's and the chords' evenness; bar layers adding 3 to 5. Decides the layers' spread.
+- **The echo as the synthesizer's delay** (`?listen=echo`): the Roland GS delay's tone in the player, its feedback
+  (100, about half), its darkness (2 of 7), the send (100), and a dub snare's quiet strokes echoing with its backbeat,
+  the delay's send being a drum's, not a stroke's. Decides those settings, or the echo's notes back.
 - **The effects:** 1.9 gentle kinds a song at the middle, a strong one in 25% (`ExpressionTest.Report`). Decides the
   song's weights.
 - **Bends, vibratos and slides:** slides 44% of the pitch shapes. Decides their rates.
@@ -257,16 +260,6 @@ Each item with its plan, and what it waits for.
   sounding into the next; holding the note before into the slide and leaving the next unstruck edits two notes at
   render. Built if the struck slide sounds like a stutter.
 - **Long fall-offs** (P4): a fall of an octave into nothing at a note's end, a slide's kind of its own, if missed.
-- **The echo as the synthesizer's delay** (P1, step 1): an echo is three quieter copies of a part's notes now
-  (`ExpressionRender`, `RenderedTrack.Echoes`), a workaround that adds notes and repeats without a delay's tail. The
-  Roland GS delay plays it instead, which the page's player has (spessasynth_core 4.3.22: a delay with its time and
-  feedback, a part's send on CC94, and a send for each drum): the delay's time from the tempo, a dotted 8th or as drawn,
-  sent again where a section takes a tempo of its own, a second at most, halved past it; its feedback for dub's long
-  darkening tail; the echoing part's send, and dub's snare alone by its drum's send. One delay a song, every echoing
-  part sharing its time, as a band's tempo delay is. Players without the GS delay, a DAW's or FluidSynth's, play no
-  echo from the file, as with the insertion effect; the MP3 export renders through the same synthesizer and keeps it.
-  First heard: the player's delay's tone, its stereo, any click. Then the echo's notes, their rendering and their
-  tests (`DubEchoTest`) go. Measured by the songs echoing by genre, as now, and `?listen=` a question of it.
 - **The strong effects each a chance of its own** (P1, step 2): one strong effect a song at most is a blunt rule, put
   in against the tremolo's overuse and its clash with the echo; trance plays its pump, its gate and its filter at
   once. Every strong effect a chance of its own, as the gentle ones are, by the sound facet and a genre's chance of
