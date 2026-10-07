@@ -12,7 +12,7 @@ is removed once it is built.
 2. Done: an ending in the song's own harmony, the last section planing and vamping, the chord into home a genre's.
 3. Done: any General MIDI instrument in any role a genre's; instruments added where they belong; Chiptune.
 4. Done: the flaky page test's 400, a range's from typed above its to, the other end now following.
-5. A sparse song's silent start (*Open work*).
+5. Done: a sparse song's silent start, its earliest part's first note held from the first beat.
 6. A groove that mutates (*Groove*).
 7. Drum solos rethought, their feet's ostinato and their stickings first (*Groove*).
 8. A filtered bar in place of a drop's silence; a swell brightening; a whammy dive at a section's end.
@@ -206,9 +206,6 @@ Each item with its plan, and what it waits for.
   raise and the chord into home left as they were.
 - **Pinch harmonics, by listening** (`?listen=pinch`, `?listen=pinch-sound`): General MIDI's harmonics or the squeal;
   their chances by genre, Nu metal's 79 in 64 songs, Metal's 32; a riff's twin pinching apart from its riff.
-- **A sparse song's silent start** (P2): an Ambient or a Dungeon song now and then silent for its first 16 beats or
-  more, its parts resting through their first phrase's start and its drums out of its first section (Ambient seed 37,
-  Dungeon seed 54 of the corpus); a song's first part to sound coming in on its first beat, or the intro left out.
 - **Page tests timing out** (P2): two of fourteen runs of the whole page suite, a test each, past its 30 seconds
   (`ThePage_OpensWithASong_AndNoErrors`, `TheWindowsOverride_IsCheckedByAChange_AndUncheckedLeavesTheChoiceToTheSongs`),
   the suite's tests in parallel against one site; which wait, and whether the songs' queue or the browser is the

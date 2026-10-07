@@ -31,18 +31,17 @@ public sealed class SongIntroTest
     /// <summary>
     ///     A song sounds from its first bar, its intro too, where its drums only mark the form and play in its sections
     ///     alone (<see cref="DrumMarks" />): a Medieval song once came in on its drums alone, which the marks then cleared,
-    ///     and sat silent for four bars. Ambient's and Dungeon's sparse parts may rest through a first bar or more of their
-    ///     own, which their genres leave them.
+    ///     and sat silent for four bars; a sparse song's parts resting through their first bar, its earliest coming in on
+    ///     its first beat (<see cref="SilentStart" />).
     /// </summary>
     [Test]
-    [Arguments(null)]
-    [Arguments("medieval")]
-    public async Task ASong_SoundsFromItsFirstBar(string? genre)
+    public async Task ASong_SoundsFromItsFirstBar_InEveryGenre()
     {
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(genre)))))
+        foreach (var genre in GenrePresets.All.Select(x => x.Id).Prepend(null))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(genre)))))
         {
             var first = song.Song.Notes!.Values.SelectMany(x => x).Select(x => x.Position).DefaultIfEmpty(double.MaxValue).Min();
-            await Assert.That(first).IsLessThan(song.Song.Meter.BarDuration).Because($"seed {song.Seed}");
+            await Assert.That(first).IsLessThan(song.Song.Meter.BarDuration).Because($"{genre ?? "the songs"} seed {song.Seed}");
         }
     }
 
