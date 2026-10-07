@@ -496,6 +496,29 @@
     ]
   },
   {
+    "id": "djent-stutter",
+    "question": "Djent's riff held and chopped by the gate in 16ths, a stutter, in place of its riff throughout: the sound, or the riff lost?",
+    "decides": "Whether the gate chops Djent's riff, and its weight there.",
+    "genre": "djent",
+    "without": {
+      "skip": [],
+      "genre": {
+        "gateParts": {
+          "riff": 0,
+          "pad": 100
+        }
+      }
+    },
+    "seeds": [
+      "9",
+      "A",
+      "E",
+      "b",
+      "10",
+      "11"
+    ]
+  },
+  {
     "id": "gate",
     "question": "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
     "decides": "Its weight in Trance, and the parts it chops.",

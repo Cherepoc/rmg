@@ -67,6 +67,25 @@ public sealed class GateTest
         await Assert.That(gated).IsGreaterThan(100);
     }
 
+    /// <summary>
+    ///     A gate chops the parts its genre has it chop alone (<see cref="Expression.GateParts" />): Djent's riff, its held
+    ///     chord stuttering, never its chords; the songs' held chords, never a riff.
+    /// </summary>
+    [Test]
+    public async Task AGate_ChopsOnlyThePartsItsGenreNames_DjentsRiff()
+    {
+        var gated = new List<TrackRole>();
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("djent")))))
+            gated.AddRange(song.Song.Notes!.Where(x => x.Value.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)).Select(x => song.Song.TrackDefinitions[x.Key].Role));
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
+        foreach (var (track, _) in song.Song.Notes!.Where(x => x.Value.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)))
+            await Assert.That(song.Song.TrackDefinitions[track].Role).IsNotEqualTo(TrackRole.Riff);
+
+        Console.WriteLine($"of 64 Djent songs, {gated.Count} stuttering their riff");
+        await Assert.That(gated).IsNotEmpty();
+        await Assert.That(gated.All(x => x is TrackRole.Riff or TrackRole.RiffTwin)).IsTrue();
+    }
+
     [Test]
     [Explicit]
     public async Task Report()

@@ -92,9 +92,20 @@ internal static class Expression
         StrongEffect.Sweep => role == TrackRole.Pad || InstrumentTraits.Has(program, InstrumentTrait.Sweeps),
         StrongEffect.Pump => role is TrackRole.Pad or TrackRole.Chords or TrackRole.Bass or TrackRole.Rhythm,
         StrongEffect.Wobble or StrongEffect.Squelch or StrongEffect.Opening => InstrumentTraits.Has(program, InstrumentTrait.Filters),
-        StrongEffect.Gate => role is TrackRole.Pad or TrackRole.Chords or TrackRole.Rhythm,
         _ => false
     };
+
+    /// <summary>
+    ///     The parts a gate chops, held chords', and the riff a genre's, a djent band's held chord stuttering; each its
+    ///     weight, above 0 where the gate suits it.
+    /// </summary>
+    public static ImmutableArray<(TrackRole Role, ByConvention Weight)> GateParts { get; } =
+    [
+        (TrackRole.Pad, new ByConvention(1, 1, 1)),
+        (TrackRole.Chords, new ByConvention(1, 1, 1)),
+        (TrackRole.Rhythm, new ByConvention(1, 1, 1)),
+        (TrackRole.Riff, new ByConvention(0, 0, 0))
+    ];
 
     /// <summary>Whether a strong effect is a filter's, which only a part it suits plays, a synth's.</summary>
     private static bool IsFilter(StrongEffect effect) => effect is StrongEffect.Wobble or StrongEffect.Squelch or StrongEffect.Opening;
@@ -380,15 +391,19 @@ internal static class Expression
         var weights = ByConvention.Weigh(StrongEffects, songSound, genre.Pool<StrongEffect>(GenreChoices.StrongEffect, x => GenreChoices.Name(x.ToString())));
         var strong = songStream.Pick(weights);
 
-        // the parts that may play an effect, the likelier one it suits, but one that plays another filter's already
+        // the parts that may play an effect, the likelier one it suits, but one that plays another filter's already; a gate
+        // the parts the genre has it chop
+        var gates = ByConvention.Weigh(GateParts, songSound, genre.Pool<TrackRole>(GenreChoices.GateParts, x => GenreChoices.Name(x.ToString())))
+            .Where(x => x.Weight > 0).Select(x => x.Value).ToHashSet();
+        bool Fits(StrongEffect effect, TrackRole role, int program) => effect == StrongEffect.Gate ? gates.Contains(role) : Suits(effect, role, program);
         var carriers = ImmutableDictionary.CreateBuilder<StrongEffect, int>();
         ImmutableArray<Weighted<int>> MayCarry(StrongEffect effect) =>
         [
             ..definitions
                 .Where(x => playing.Contains(x.Key) && x.Value is PitchInstrumentTrack && (effect != StrongEffect.Echo || EchoesFrom(x.Value.Role))
-                            && (!OnlySuited(effect) || Suits(effect, x.Value.Role, ((PitchInstrumentTrack)x.Value).InstrumentCode))
+                            && (!OnlySuited(effect) || Fits(effect, x.Value.Role, ((PitchInstrumentTrack)x.Value).InstrumentCode))
                             && !(IsFilter(effect) && carriers.Any(c => IsFilter(c.Key) && c.Value == x.Key)))
-                .Select(x => new Weighted<int>(Suits(effect, x.Value.Role, ((PitchInstrumentTrack)x.Value).InstrumentCode) ? SuitedStrongWeight : 1, x.Key))
+                .Select(x => new Weighted<int>(Fits(effect, x.Value.Role, ((PitchInstrumentTrack)x.Value).InstrumentCode) ? SuitedStrongWeight : 1, x.Key))
         ];
         var first = MayCarry(strong);
         if (strong != StrongEffect.None && !first.IsEmpty)

@@ -88,6 +88,16 @@ public static class GenreChoices
         ("own", "A chord's own scale", Composition.ChordScales.Own)
     ]);
 
+    /// <summary>The parts a trance gate chops, held chords' and, a genre's, the riff (<see cref="Expression.GateParts" />).</summary>
+    public static GenreChoice GateParts { get; } = Pool("gateParts", "Parts the gate chops",
+        Expression.GateParts.Select(x => (Name(x.Role.ToString()), x.Role switch
+        {
+            TrackRole.Pad => "The pad",
+            TrackRole.Chords => "The chords",
+            TrackRole.Rhythm => "The rhythm part",
+            _ => "The riff, a stutter"
+        }, x.Weight)));
+
     /// <summary>The chances the whole mix is filtered: opening up a song, dipping before a section, closing as it ends (<see cref="Composition.MixFilter" />).</summary>
     public static GenreChoice MixFilter { get; } = Chances("mixFilter", "The mix filtered",
     [
@@ -546,7 +556,7 @@ public static class GenreChoices
     /// <summary>Every choice, in the order a link writes them.</summary>
     public static ImmutableArray<GenreChoice> All { get; } =
     [
-        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Bass, OctaveBass, Glide, BassLanding, Effects, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, MixFilter, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
+        Tempo, Length, Meter, Feel, FeelChances, FeelValues, Scale, ChordShape, Arpeggio, Colour, RootMotions, RootDegrees, ChordScales, HarmonicRhythm, Turnaround, PassingChords, Planing, HarmonyDevices, Loop, LineScale, MelodyRange, Ornaments, Tension, Bass, OctaveBass, Glide, BassLanding, Effects, GateParts, Articulation, Levels, Rests, Voice, GrooveHold, Pins, HatRolls, Pocket, Fills, Drop, MixFilter, StopTime, Push, KeyChanges, Hook, Riff, Solos, Soloists, Intro, Ending, StrongEffect, Room, Insertion, Pan, FormChances, Form, SectionLength, PhraseScheme, Texture, Alone, Dynamics, Phrases,
         SectionChanges, Polymeter, SoloAnswers, LastRepeat, Doubling, InstrumentSwitches, Space, DrumJob, Marks, Register, DrumSounds, LouderForms, HarmonyInterval, Vamp, RiffScale,
         ..InstrumentPools.Select(x => Instruments[x.Role]),
         Kit,

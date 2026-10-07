@@ -21,7 +21,7 @@ is removed once it is built.
 11. Done, with 12: the whole mix filtered, a song opening up, a section dipping before the next, a song closing.
 12. Done with 11.
 13. Done: Trance's rolling bass, its build rolling to 32nds, its ♭VI, ♭III and ♭VII, its mix filtered.
-14. Djent's filtered riff opening and its stuttering riff (*Genres*).
+14. Done: Djent's mix dipping before its heavy sections, its riff stuttering under the gate.
 15. Waiting on listening: the rest of rock's and metal's, long cycles, more figures, rolls in 32nds, a riff's drone.
 
 Done in the plan of 8 October 2026: the genres sorted by name; rock and metal measured and their presets tuned; a
@@ -376,13 +376,8 @@ left:
   - Tremolo picking (P3, measured first): fast repeated notes unmuted, the riff's speed perhaps enough already.
   - A melody sung rather than played (P3, a listening question first): no singer in General MIDI; the melody's
     rhythms word-like, its breaths and held ends, should it sound like a lead guitar playing a tune.
-- **Djent's filtered riff and its stutter** (P1, step 10, after the mix's filter): a modern industrial metal sound, the
-  down-tuned riff low-passed, under water, for a bar or a phrase, then open on the downbeat of the heavy section, a dip
-  of the mix's filter in place of a drop's silence rather than beside it, two gestures at once being too many; the riff
-  chopped by the gate in time with the kick, a stutter, the riff a carrier the gate suits in Djent as the genre's data.
-  First heard: whether General MIDI's distortion guitar moves with the brightness at all in the soundfonts served; if
-  not, the gesture is the gate's and the drop's alone. A pitch-bend dive at a section's end (P3); bit-crushing, tape
-  stops and glitches are beyond General MIDI (*Parked*).
+- **A pitch-bend dive at a section's end** (P3, by listening to `?listen=djent-stutter`): Djent's riff diving before
+  the heavy section; bit-crushing, tape stops and glitches are beyond General MIDI (*Parked*).
 - **Black metal and IDM, the rest** (October 2026, `NewGenresReportTest`): Black metal tremolo-picks 51% of its
   sections, blasts 20%, double-kicks 20%; IDM, warm and swung at its plainest, an acid line, odd meters (47% of its
   wildest songs), polymeters and rolls at its wildest, breaks 24% of its sections. Left:

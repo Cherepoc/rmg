@@ -954,7 +954,8 @@
     "name": "Djent",
     "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, a clean lead floating over.",
     "choices": {
-      "mixFilter": { "opening": [10, 20, 40] },
+      "mixFilter": { "opening": [10, 20, 40], "dips": [3, 6, 10] },
+      "gateParts": { "riff": 100 },
       "alone": { "rhythm": 100, "riff": 50, "pad": 40 },
       "texture": { "steady": 100, "build": [20, 30, 40], "alone": [5, 10, 20] },
       "figure": {
@@ -1015,7 +1016,7 @@
       "stopTime": { "sections": [0, 5, 10] },
       "dynamics": { "energy": 80, "contrast": 60 },
       "effects": { "bends": [20, 30, 50], "vibrato": [30, 50, 70], "swell": [0, 10, 30] },
-      "strongEffect": { "none": 100, "echo": [10, 30, 50], "sweep": [0, 0, 20] },
+      "strongEffect": { "none": 100, "echo": [10, 30, 50], "sweep": [0, 0, 20], "gate": [5, 15, 25] },
       "space": { "riff": 25, "rhythm": 25, "bass": 30, "drum": 40, "melody": 80, "pad": 80 },
       "levels": { "riff": 70, "drum": 70 },
       "solos": { "sections": [5, 15, 30] },
