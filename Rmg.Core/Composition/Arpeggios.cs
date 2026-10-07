@@ -34,7 +34,20 @@ public enum ArpeggioPattern
     Random,
 
     /// <summary>From the lowest note up over two octaves, the chord again an octave higher.</summary>
-    UpTwoOctaves
+    UpTwoOctaves,
+
+    /// <summary>The lowest note in turn with each of the others upwards, 1–3–1–5–1–8, a metal guitar's broken chord.</summary>
+    Pedal
+}
+
+/// <summary>A tone laid on a broken chord's notes for the part breaking it alone, which the band's chord leaves out.</summary>
+public enum ChordColour
+{
+    None,
+    Ninth,
+    MajorSeventh,
+    FlatSecond,
+    SharpFourth
 }
 
 /// <summary>
@@ -56,8 +69,53 @@ internal static class Arpeggios
         (ArpeggioPattern.Pairs, new ByConvention(0, 0.02, 1)),
         (ArpeggioPattern.RootFifth, new ByConvention(0, 0.015, 1)),
         (ArpeggioPattern.Random, new ByConvention(0, 0.005, 1)),
-        (ArpeggioPattern.UpTwoOctaves, new ByConvention(0, 0.005, 1))
+        (ArpeggioPattern.UpTwoOctaves, new ByConvention(0, 0.005, 1)),
+        (ArpeggioPattern.Pedal, new ByConvention(0, 0.01, 1))
     ];
+
+    /// <summary>The colours a part breaking its chord lays on it, a genre's, which the songs never lay.</summary>
+    public static ImmutableArray<(ChordColour Colour, ByConvention Weight)> Colours { get; } =
+    [
+        (ChordColour.None, new ByConvention(1, 1, 1)),
+        (ChordColour.Ninth, new ByConvention(0, 0, 0)),
+        (ChordColour.MajorSeventh, new ByConvention(0, 0, 0)),
+        (ChordColour.FlatSecond, new ByConvention(0, 0, 0)),
+        (ChordColour.SharpFourth, new ByConvention(0, 0, 0))
+    ];
+
+    /// <summary>A colour as a genre's page shows it.</summary>
+    public static string LabelOf(ChordColour colour) => colour switch
+    {
+        ChordColour.None => "None",
+        ChordColour.Ninth => "A ninth",
+        ChordColour.MajorSeventh => "A major seventh",
+        ChordColour.FlatSecond => "A flat second",
+        _ => "A sharp fourth"
+    };
+
+    /// <summary>A colour's semitones above the chord's root.</summary>
+    public static int SemitonesOf(ChordColour colour) => colour switch
+    {
+        ChordColour.Ninth => 2,
+        ChordColour.MajorSeventh => 11,
+        ChordColour.FlatSecond => 1,
+        ChordColour.SharpFourth => 6,
+        _ => throw new ArgumentOutOfRangeException(nameof(colour), colour, "No colour has no semitones.")
+    };
+
+    /// <summary>A section's colour of a part breaking its chord, by the chords facet, among a genre's pool where it names one.</summary>
+    public static ChordColour DrawColour(IGenerationContext context, double unconventionality, Genre genre) =>
+        context.Pick(ByConvention.Weigh(Colours, unconventionality, genre.Pool<ChordColour>(GenreChoices.Colour, x => GenreChoices.Name(x.ToString()))));
+
+    /// <summary>A voiced chord with its colour laid on it, the colour's tone the nearest above its lowest note.</summary>
+    public static ImmutableArray<int> Coloured(ImmutableArray<int> voiced, int root, ChordColour colour)
+    {
+        if (colour == ChordColour.None || voiced.IsEmpty)
+            return voiced;
+        var lowest = voiced.Min();
+        var tone = lowest + ((root + SemitonesOf(colour) - lowest) % 12 + 12) % 12;
+        return voiced.Contains(tone) ? voiced : [..voiced, tone == lowest ? tone + 12 : tone];
+    }
 
     /// <summary>An arpeggio as a genre's page shows it.</summary>
     public static string LabelOf(ArpeggioPattern pattern) => pattern switch
@@ -67,6 +125,7 @@ internal static class Arpeggios
         ArpeggioPattern.DownUp => "Down and up",
         ArpeggioPattern.RootFifth => "Root and fifth",
         ArpeggioPattern.UpTwoOctaves => "Up two octaves",
+        ArpeggioPattern.Pedal => "Pedal point",
         _ => pattern.ToString()
     };
 
@@ -97,6 +156,7 @@ internal static class Arpeggios
             // an order of no pattern, the same for the same place, as a hash of it
             ArpeggioPattern.Random => notes[(int)(Probabilities.Seeds.Mix((ulong)(position * 1000) + (ulong)place) % (ulong)count)],
             ArpeggioPattern.UpTwoOctaves => notes[place % count] + 12 * (place / count % 2),
+            ArpeggioPattern.Pedal => notes[place % 2 == 0 ? 0 : 1 + place / 2 % (count - 1)],
             _ => throw new ArgumentOutOfRangeException(nameof(pattern), pattern, null)
         };
     }

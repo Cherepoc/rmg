@@ -342,6 +342,50 @@
     ]
   },
   {
+    "id": "metal-arpeggio",
+    "question": "A guitar breaking its chord, a pedal point or upwards, a ninth or a menacing tone laid on it: metal's, or out of place?",
+    "decides": "Its patterns, its pace and its colours in Metal.",
+    "genre": "metal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "arpeggio": {
+          "none": 100
+        }
+      }
+    },
+    "seeds": [
+      "0",
+      "1",
+      "2",
+      "5",
+      "6",
+      "9"
+    ]
+  },
+  {
+    "id": "djent-arpeggio",
+    "question": "Djent's clean arpeggios, mostly dissonant, over and between the riffs: atmosphere, or wrong notes?",
+    "decides": "Its colours' weights in Djent.",
+    "genre": "djent",
+    "without": {
+      "skip": [],
+      "genre": {
+        "colour": {
+          "none": 100
+        }
+      }
+    },
+    "seeds": [
+      "2",
+      "3",
+      "5",
+      "7",
+      "8",
+      "A"
+    ]
+  },
+  {
     "id": "gate",
     "question": "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
     "decides": "Its weight in Trance, and the parts it chops.",

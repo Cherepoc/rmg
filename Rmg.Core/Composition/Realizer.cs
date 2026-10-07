@@ -327,10 +327,11 @@ internal static class Realizer
                 : notes[0] - OctaveNoteCount >= range.Low ? [notes[0], notes[0] - OctaveNoteCount]
                 : notes;
 
-        // a broken chord plays one of its notes, by its pattern and its place since the chord came in
+        // a broken chord plays one of its notes, by its pattern and its place since the chord came in, the colour its part
+        // lays on it among them
         var arpeggio = (ArpeggioPattern)stateMap.GetStateValue(CompositionStateKinds.Arpeggio);
         if (role.PlaysChords() && !isLine && arpeggio != ArpeggioPattern.None)
-            notes = [Arpeggios.Pick(arpeggio, notes, place, position)];
+            notes = [Arpeggios.Pick(arpeggio, Arpeggios.Coloured(notes, ToNote(0), (ChordColour)stateMap.GetStateValue(CompositionStateKinds.Colour)), place, position)];
 
         return new RealizedNote(notes, noteVelocity, duration, stateMap).ToTimelineItem(position);
     }

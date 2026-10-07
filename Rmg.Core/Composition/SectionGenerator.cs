@@ -603,6 +603,10 @@ internal sealed class SectionGenerator
             var arpeggio = Arpeggios.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Chords], _genre);
             StateTrace.Record(TracePoints.Arpeggio, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{arpeggio}", arpeggio);
             sectionTrackLayer.Add(CompositionStateKinds.Arpeggio, (int)arpeggio);
+            // and the colour it lays on its broken chord, from a sequence of its own
+            var colour = Arpeggios.DrawColour(new GenerationContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Colour), trackNumber)), sectionRhythm.Facets[Facet.Chords], _genre);
+            if (arpeggio != ArpeggioPattern.None && colour != ChordColour.None)
+                sectionTrackLayer.Add(CompositionStateKinds.Colour, (int)colour);
         }
         // fuller and busier the more energy the section has, as its drums are
         return CreateSectionTrackLayer(context, trackNumber, sectionRhythm, sectionRhythm.Energy, null)
@@ -899,5 +903,6 @@ internal enum SectionStream
     Planing = 39,
     OctaveBass = 40,
     ChordOwnScales = 41,
-    Vamp = 42
+    Vamp = 42,
+    Colour = 43
 }
