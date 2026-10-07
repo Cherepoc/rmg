@@ -9,7 +9,7 @@ is removed once it is built.
 **In order** (P1, the plan of 9 October 2026, each step through the implementation loop):
 
 1. Done: the echo as the synthesizer's delay rather than notes; heard on the test instance (`?listen=echo`).
-2. The strong effects each a chance of its own, one a controller on a part, the volume curves multiplied.
+2. Done: the strong effects stacked, the first as before, the others beside it by their shares, the volume multiplied.
 3. The gate holding whole chords only, an arpeggio gated as it plays; Trance's arpeggios' rhythm measured.
 4. The part alone a genre's (*Genres*).
 5. Metal's arpeggios: a pedal point, a part's colour, a clean arpeggio staying clean; Metal's, Nu metal's, Djent's.
@@ -134,6 +134,9 @@ Done for a version when every question is answered or let go of.
 - **The echo as the synthesizer's delay** (`?listen=echo`): the Roland GS delay's tone in the player, its feedback
   (100, about half), its darkness (2 of 7), the send (100), and a dub snare's quiet strokes echoing with its backbeat,
   the delay's send being a drum's, not a stroke's. Decides those settings, or the echo's notes back.
+- **The strong effects stacked** (`ExpressionTest.ReportStacked`): Trance 56% of its songs with two or more, a pump
+  and a gate or an opening; the drawn songs 5%. A wall of effects, or a produced track? Decides the shares beside the
+  first, and a genre's weights.
 - **The effects:** 1.9 gentle kinds a song at the middle, a strong one in 25% (`ExpressionTest.Report`). Decides the
   song's weights.
 - **Bends, vibratos and slides:** slides 44% of the pitch shapes. Decides their rates.
@@ -260,16 +263,6 @@ Each item with its plan, and what it waits for.
   sounding into the next; holding the note before into the slide and leaving the next unstruck edits two notes at
   render. Built if the struck slide sounds like a stutter.
 - **Long fall-offs** (P4): a fall of an octave into nothing at a note's end, a slide's kind of its own, if missed.
-- **The strong effects each a chance of its own** (P1, step 2): one strong effect a song at most is a blunt rule, put
-  in against the tremolo's overuse and its clash with the echo; trance plays its pump, its gate and its filter at
-  once. Every strong effect a chance of its own, as the gentle ones are, by the sound facet and a genre's chance of
-  each, from a stream of its own, and a carrier of its own; what each moves as data on it, the volume (tremolo, pump,
-  gate), the pan (sweep), the filter (wobble, squelch, opening) or the notes (echo), a part carrying one of each at
-  most; the volume's curves multiplied, the gate's joining the swell's, the tremolo's and the pump's
-  (`ExpressionRender`), so that a gated part pumps too. The tremolo kept rare by its own chance; with the echo the
-  synthesizer's, the two allowed together and listened to. A genre's `strongEffect` a chance of each rather than a
-  pool. Measured against now: 25% of middling songs with a strong effect (`ExpressionTest.Report`), the share with any
-  and the mean a song as targets, the plainest none.
 - **The gate holding whole chords only** (P1, step 3): Trance's chords part arpeggiates in about 87% of its sections,
   and a gated arpeggio is held as its longest note (34% of Trance's held notes single), neither an arpeggio nor a gated
   chord; in trance the two are layers of their own. `GatedChords` holds the notes played as whole chords, and leaves an
@@ -400,7 +393,7 @@ left:
     rhythms word-like, its breaths and held ends, should it sound like a lead guitar playing a tune.
 - **Trance as it is produced** (P1, step 9, after the effects and the filter): the kick pumping the mix, the gate on
   the chords where they play whole, the filter opening a synth and the mix, dips into the drops, all at once rather
-  than one of them (*The strong effects each a chance of its own*); a rolling bass, 8ths or 16ths off the beat under the
+  than one of them (the strong effects stacked); a rolling bass, 8ths or 16ths off the beat under the
   kick, a figure of the bass's (`Figures`); the build into a drop, a snare roll speeding up from 8ths to 32nds, measured
   first against the hi-hat rolls and the lift's cues; minor, its ♭VI, ♭III and ♭VII leaned (`rootDegree`). Measured by
   Trance's songs with each, `?listen=gate` and the build's question.
@@ -454,7 +447,7 @@ left:
   Measured by the strong beats on a tension by part and genre; `?listen=` a question of it.
 - **Tape's wow and flutter, and a part detuned** (P2, step 10): a slow drift of a few cents on the pads and keys, or a
   part held a few cents off, as pitch bend, which a part's bends and vibrato share, a pitch effect beside the volume's,
-  the pan's and the filter's (*The strong effects each a chance of its own*); IDM's warmth, a lo-fi genre's.
+  the pan's and the filter's (the strong effects stacked); IDM's warmth, a lo-fi genre's.
 - **More genres** (P3): chiptune, once a square wave may play the chords (*Instruments outside a role's pool*).
   What the genres made in October 2026 still want: Fusion's
   roots off the scale (the progressions move by a 7-note scale's steps, chromatic and constant-structure motion
