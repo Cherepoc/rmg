@@ -17,6 +17,9 @@ is removed once it is built.
 7. Done: drum solos' feet a genre's ostinato and their runs in stickings; their motif, arc and trading left (*Groove*).
 8. Done: a filtered drop, a genre's; a swell brightening; a riff's whammy dive into a louder section.
 9. A line's tensions beyond Djent, after `?listen=djent-tension` is answered.
+10. The gate's riff by listening: Djent's stutter gone, a rock band's held riff restruck (*A held guitar restruck*).
+11. The dive by listening: held longer, slow at its bottom, the tempo easing into the next section (*The dive heard*).
+12. Techno's drops both kinds, the silent one with its riser as likely as the filtered (*The drops heard*).
 
 Done in the plan of 9 October 2026: the echo as the synthesizer's delay; the strong effects stacked; the gate holding
 whole chords; the part alone a genre's; metal's arpeggios and a part's colour; a line's tensions, Djent's synth over
@@ -227,6 +230,10 @@ Each item with its plan, and what it waits for.
 
 ### Form and sections
 
+- **The drops heard** (P1, step 12; `?listen=filtered-drop`, October 2026): Techno's filtered drop is good, but the
+  silent one, the whole band stopping with the reverse cymbal rising into it, is often better; both belong. Techno's
+  `dropKind` as likely each way, and the filtered one's riser considered too, a reverse cymbal swelling over the muffled
+  bar.
 - **A tag** (put off): half a pattern before a section changes, which breaks the pattern's grid for the fills' lines and
   the phrases; with the meter as state, an engine's change for a rare idiom.
 - **The energy's recurrence** counts a section's appearances, not its plays: should long sections sound too quiet.
@@ -267,6 +274,18 @@ Each item with its plan, and what it waits for.
 
 ### Instruments and expression
 
+- **A held guitar restruck** (P1, step 10; heard on test, `?listen=djent-stutter`, October 2026): the gate on a riff, its
+  chord held and chopped in 16ths, is not Djent's sound, but a rock band's held riff is; a guitar's held chord fades away
+  as it rings, so that a gated or held guitar chord dies out under the gate. Djent's riff taken out of the gate's parts
+  (`gateParts`), a riff gated in Rock and the like instead; and a held chord on a decaying instrument, a guitar's, a
+  piano's, struck again now and then while it is held, every bar or every beat a chord change leaves, rather than one
+  stroke ringing into silence (`GatedChords.Hold`), its restrikes the softer.
+- **The dive heard** (P1, step 11; `?listen=dive`, October 2026): a riff's whammy dive into a louder section is good, in
+  Nu metal and in Metal and Djent too, but not heard: the note too short, the dive too quick. Its note held longer,
+  through the bar before the section where the riff allows; its curve falling fast and then slowly at its bottom, rather
+  than speeding up as it falls (`BendKind.Dive`, an ease out); and the tempo easing a little over the last bar before
+  the section now and then, as a band leans into a big entrance, a ritardando back to tempo on its downbeat. The dive's
+  chances in Metal and Djent as Nu metal's.
 - **The playing following the articulation** (P3; palm-muted chugs done): octaves popped in slap, short notes muted,
   without which an articulation is only another sound.
 - **Plain doubling,** a part doubling another in unison, now that the parts play by their pocket (`Pocket`).
