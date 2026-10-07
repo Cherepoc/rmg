@@ -10,12 +10,14 @@ is removed once it is built.
 
 1. Pinch harmonics as a highlight rather than a variant (*Pinch harmonics*, below), both sounds for listening.
 2. An ending in the song's own harmony (*An ending in the song's own harmony*, below).
-3. A flaky page test's 400 found and fixed (*Open work*).
-4. A sparse song's silent start (*Open work*).
-5. A groove that mutates (*Groove*).
-6. Drum solos rethought, their feet's ostinato and their stickings first (*Groove*).
-7. A filtered bar in place of a drop's silence; a swell brightening; a whammy dive at a section's end.
-8. A line's tensions beyond Djent, after `?listen=djent-tension` is answered.
+3. Any General MIDI instrument in any role, then every genre's instruments retuned (*Any instrument in any role*,
+   *Genres*).
+4. A flaky page test's 400 found and fixed (*Open work*).
+5. A sparse song's silent start (*Open work*).
+6. A groove that mutates (*Groove*).
+7. Drum solos rethought, their feet's ostinato and their stickings first (*Groove*).
+8. A filtered bar in place of a drop's silence; a swell brightening; a whammy dive at a section's end.
+9. A line's tensions beyond Djent, after `?listen=djent-tension` is answered.
 
 Done in the plan of 9 October 2026: the echo as the synthesizer's delay; the strong effects stacked; the gate holding
 whole chords; the part alone a genre's; metal's arpeggios and a part's colour; a line's tensions, Djent's synth over
@@ -501,7 +503,25 @@ left:
 - **A link replacing the settings kept** (a decision): opening a shared song makes its settings this browser's own,
   so that the next song goes on in them; keeping one's own and offering a way back to them is the other way, should
   listening to shared songs ask for it.
-- **Instruments outside a role's pool,** with their leading drawn from their family.
+- **Any instrument in any role** (P1, step 3): a role's instruments are a list the songs draw from (`InstrumentRoles`),
+  and a genre may name only what is on it, so that Djent's synth strings, Punk's and Black metal's driven lead
+  guitars had to be added to their roles by hand, the guitars weighed in at the songs' wild end to keep every listed
+  instrument played. Instead:
+  - a role's list the songs' own pool, its weights as they are, the songs unchanged; a genre naming any of General
+    MIDI's 128 programs for any part, a chiptune's square wave on the chords, a choir on the riff, an organ's bass;
+  - what a part needs of an instrument it does not list taken from the instrument's family, by General MIDI's groups
+    as `InstrumentsOverTime.Families` splits them: the melody's way of moving (`MelodyLayers`), its range, its traits
+    (filters, sweeps, tremolo, bends, a wide vibrato), its articulations; one table by family, an instrument's own row
+    only where it differs, so that a new instrument needs no code;
+  - the hand-added genre-only instruments taken back out of the roles' lists, the songs' pools as they were;
+  - the genre editor offering every program for a part, the role's own first;
+  - then every genre's parts gone through and retuned, instruments added where they belong and taken out where not:
+    a chiptune genre's square and saw leads on every part; Medieval's krummhorn-like reeds, a hurdy-gurdy's fiddle
+    and drone; Dungeon's and Black metal's church organ and choir; Ambient's and IDM's kalimba, music box, glass
+    pads; Latin's and Reggae's steel drums and organ; Jazz's and Soul's organs on the bass; Trap's and Hip hop's
+    orchestra hits and bells; measured by the instruments report (`InstrumentsReportTest`) before and after.
+  Rules: every program a genre names plays in its songs; an instrument outside a role's list never in a song of no
+  genre.
 
 ## Parked
 
