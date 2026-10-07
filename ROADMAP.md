@@ -18,7 +18,7 @@ is removed once it is built.
 8. Done: the render reading the song's map, and stop time decided once.
 9. Done: the song's sound decided before its notes; the gate's chords voiced put off (*Architecture*).
 10. Done: figures as a genre's data, the double kick, the gallop and the clave among them.
-11. The rest of rock's and metal's (*Genres*), and long cycles only should listening ask (*Rhythm engine*).
+11. Waiting on listening: the rest of rock's and metal's (*Genres*), and long cycles (*Rhythm engine*).
 
 **Next** (P1, alongside): listening to what is deployed and tuning by what it says (see *Listening*, the page's
 listening mode for the questions it asks), done for a version when every question is answered or let go of; and the
