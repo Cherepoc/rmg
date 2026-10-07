@@ -3,8 +3,9 @@ import QUESTIONS from "./listening.json";
 /**
  *     The page's listening mode, `?listen=` a question's id, on a server that listens (a test instance): a device heard
  *     with and without over a few songs, A and B swapped from song to song so that neither is always the one with, and a
- *     verdict on each. The questions are written by the tests (`ListeningQuestionsTest`), each its songs, the genre they
- *     are made in, and what the song without leaves out: stages of it and choices of its genre.
+ *     verdict on each. The questions are written by the tests (`ListeningQuestionsTest`), each its songs and where in each
+ *     the device first plays, the genre they are made in, and what the song without leaves out: stages of it and choices
+ *     of its genre.
  */
 
 /** The question of the id, none for none or one not asked. */
@@ -49,6 +50,12 @@ export function createListeningIndex(verdicts, genreName) {
     return index;
 }
 
+/** How long before where a device plays a song starts, so that what leads into it is heard, in seconds. */
+const LEAD_SECONDS = 2;
+
+/** Seconds as minutes and seconds, 1:05. */
+const clock = (seconds) => `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
+
 /** What a verdict says, as the server keeps it, by the button's choice. */
 const CHOICES = [
     ["A", "A is better"],
@@ -59,8 +66,8 @@ const CHOICES = [
 
 /**
  *     The strip asking the question: a song at a time, A and B played on asking, and a verdict, which goes on to the
- *     next song. `play` is given the song's seed and whether it is the one without; `verdict` the seed and the choice,
- *     "with", "without", "same" or "unsure".
+ *     next song, each started a moment before where its device plays. `play` is given the song's seed, whether it is the
+ *     one without and the second it starts at; `verdict` the seed and the choice, "with", "without", "same" or "unsure".
  */
 export function createListeningStrip(question, { play, verdict }) {
     let at = 0;
@@ -89,10 +96,10 @@ export function createListeningStrip(question, { play, verdict }) {
     const isWithout = (letter) => (letter === "B") === (at % 2 === 0);
     const plays = ["A", "B"].map((letter) => button(`Play ${letter}`, () => {
         heard.textContent = `Playing ${letter}`;
-        play(question.seeds[at], isWithout(letter));
+        play(question.seeds[at].seed, isWithout(letter), Math.max(0, question.seeds[at].at - LEAD_SECONDS));
     }, "primary"));
     const verdicts = CHOICES.map(([choice, text]) => button(text, () => {
-        verdict(question.seeds[at], choice === "A" || choice === "B" ? (isWithout(choice) ? "without" : "with") : choice);
+        verdict(question.seeds[at].seed, choice === "A" || choice === "B" ? (isWithout(choice) ? "without" : "with") : choice);
         at++;
         show();
     }));
@@ -104,7 +111,9 @@ export function createListeningStrip(question, { play, verdict }) {
 
     function show() {
         const done = at >= question.seeds.length;
-        where.textContent = done ? `Done: ${question.seeds.length} songs heard. Thank you.` : `Song ${at + 1} of ${question.seeds.length}`;
+        where.textContent = done
+            ? `Done: ${question.seeds.length} songs heard. Thank you.`
+            : `Song ${at + 1} of ${question.seeds.length} · listen at ${clock(question.seeds[at].at)}, A and B starting just before`;
         heard.textContent = "";
         for (const element of [...plays, ...verdicts]) element.disabled = done;
     }

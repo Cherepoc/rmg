@@ -155,6 +155,8 @@ let startedListening = null;
 // the songs' version the song on the page was made by, which every event about the song carries: the same seed
 // is another song in another version, and a page open across a deploy still plays the song it got
 let songVersion = null;
+// where the next song made starts playing, in seconds, a listening song's; none for its start
+let startAt = null;
 // the stages the song asked for next leaves out, as the listening mode hears one without a device; none otherwise
 let skipped = [];
 // the song's sections as its report gives them, where each starts in seconds, its role and its soloists, and its length
@@ -503,6 +505,9 @@ async function deliverPending() {
             // a song made again with changed settings goes on from the same share of its length, playing if it was
             const swap = pendingSwap ? { share: player.duration > 0 ? player.currentTime / player.duration : 0, wasPlaying: !player.paused } : null;
             pendingSwap = false;
+            // a listening song started where its question says to listen
+            const from = startAt;
+            startAt = null;
             const loaded = player.nextSong();
             player.loadSong(song);
             applyMuting(player);
@@ -511,6 +516,12 @@ async function deliverPending() {
                 player.currentTime = swap.share * player.duration;
                 if (swap.wasPlaying && player.paused) await player.play();
                 else if (!swap.wasPlaying && !player.paused) player.pause();
+                render(player);
+                showMedia(player);
+            }
+            if (from !== null) {
+                await loaded;
+                player.currentTime = Math.min(from, player.duration);
                 render(player);
                 showMedia(player);
             }
@@ -2689,15 +2700,18 @@ function startListening() {
     }
 
     const strip = createListeningStrip(question, {
-        play: (seed, isWithout) => {
+        play: (seed, isWithout, from) => {
             const preset = question.genre === null ? null : presetById(question.genre);
             const genre = preset === null ? noGenre() : asGenre(preset);
             skipped = isWithout ? question.without.skip : [];
             const choices = isWithout ? { ...genre.choices, ...question.without.genre } : genre.choices;
             // the song as the question picked it, of the settings as by default but its genre, the volume as heard; read as
             // the song is asked for, before generate waits on anything
-            generate(seed, { isRolled: false, asked: { ...defaultSettings(), volume: settings.volume, genre: { name: genre.name, choices } } });
+            startAt = from;
+            const arrived = generate(seed, { isRolled: false, asked: { ...defaultSettings(), volume: settings.volume, genre: { name: genre.name, choices } } });
             skipped = [];
+            // and played at once, from where to listen, the button pressed the gesture the player waits for
+            arrived.then((isThere) => isThere && playOrPause(true));
         },
         verdict: (seed, choice) => tell("verdict", { seed, version: songVersion, detail: `${question.id}:${choice}` }),
     });

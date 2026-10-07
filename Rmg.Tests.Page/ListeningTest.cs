@@ -15,7 +15,8 @@ public sealed class ListeningTest(Site site)
         var strip = page.Page.Locator("section.listening");
         await page.Until(() => strip.IsVisibleAsync(), "the question asked");
         await Assert.That(await strip.Locator(".listening-question").TextContentAsync()).Contains("Pushes");
-        await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).IsEqualTo("Song 1 of 6");
+        // where to listen, the time its device first plays
+        await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).StartsWith("Song 1 of 6 · listen at ");
         // no song rolled as the page opens, the question asking for its own; a tempo given here none of them
         await Task.Delay(500);
         await Assert.That(page.Requests).IsEmpty();
@@ -30,6 +31,11 @@ public sealed class ListeningTest(Site site)
         await Assert.That(with.TryGetProperty("tempo", out var tempo) && tempo.ValueKind != JsonValueKind.Null).IsFalse();
         await Assert.That(with.GetProperty("genreName").GetString()).IsEqualTo("Rock");
         await page.Settled();
+        // the song started just before where to listen rather than at its start
+        var listenAt = (await strip.Locator(".listening-where").TextContentAsync())!.Split("listen at ")[1].Split(",")[0].Split(":").Select(int.Parse).ToArray();
+        var seconds = listenAt[0] * 60 + listenAt[1];
+        await page.Until(async () => (await page.Page.Locator("#elapsed").TextContentAsync())!.Split(":").Select(int.Parse).ToArray() is var shown
+                                     && shown[0] * 60 + shown[1] >= Math.Max(0, seconds - 3), "the song started where to listen");
 
         count = page.Requests.Count;
         await strip.GetByRole(AriaRole.Button, new() { Name = "Play B" }).ClickAsync();
@@ -42,7 +48,7 @@ public sealed class ListeningTest(Site site)
 
         // A better on the first song, the one with: kept as such, and on to the next song, whose A is the one without
         await strip.GetByRole(AriaRole.Button, new() { Name = "A is better" }).ClickAsync();
-        await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).IsEqualTo("Song 2 of 6");
+        await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).StartsWith("Song 2 of 6 · listen at ");
         count = page.Requests.Count;
         await strip.GetByRole(AriaRole.Button, new() { Name = "Play A" }).ClickAsync();
         await page.Until(() => page.Requests.Count > count, "the next A asked for");
