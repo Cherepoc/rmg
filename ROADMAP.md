@@ -13,7 +13,7 @@ is removed once it is built.
 3. Done: a section left to drums that only mark the form.
 4. Done: the listening tool, and *Listening* cut to its questions.
 5. Merged into 10: the double kick, a figure of the kick's in a genre's loud sections.
-6. A progression's degrees leaned by a genre (*Genres*).
+6. Done: a progression's degrees leaned by a genre.
 7. The kick locked to the riff, a polymeter's figure as long as the bar (*Genres*).
 8. The render reading the song's map, and stop time and the pushes kept as decisions (*Architecture*).
 9. The song's sound decided before its notes, the gate's chords then voiced (*Architecture*).
@@ -147,7 +147,10 @@ Done for a version when every question is answered or let go of.
 - **The presets made in October 2026:** Orchestral's and Pop's crescendos; Funk's, Techno's, House's and Djent's vamps
   (30-66% of sections); Djent 70% polymetric; Nu metal's loud sections driven (97%); Medieval's and Dungeon synth's
   drums marking the form. Decides each preset's choices.
-- **The dark presets' mood** (`MoodReportTest`): still happy? Decides a progression's degrees leaned.
+- **The dark presets' mood** (`MoodReportTest`): still happy? Decides their degrees leaned (`rootDegree`).
+- **Rock's and Metal's degrees** (`RockAndMetalReportTest`): Rock's ♭VII–I in 45% of sections, Metal's ♭VI in 19% of its
+  chords; a rock song's I–♭VII–IV loop, which the progression's home, away, preparation and cadence come near only
+  through the cadence? Decides a loop's template of its own.
 - **Rock and metal against their bands** (`RockAndMetalReportTest`): the organ's solos, the shuffle, Metal's clean
   quiet sections. Decides the presets' weights.
 - **The wild ends** (`EveryPreset_ChoicesByEnd`): the wildest Rock 34% in 4/4, the wildest Jazz 56% swung; a wild
@@ -348,9 +351,6 @@ left:
   (`RockAndMetalReportTest`). Their solos (73% and 78% of songs) and their riffs of two and four bars (AAAB and ABAB a
   third of their sections) were there already; the organ's solo, Rock's shuffle at its plain end and Metal's clean
   quiet sections are presets now. Left:
-  - A progression's degrees leaned by a genre (P1): a genre leans root motions now, never a chord's degree, so rock's
-    ♭VII and ♭VI and metal's ♭II and ♭VI come by chance; a lean of the progression's draw by the degree reached,
-    `Tilt` data on the options as the root motions are. The dark presets' mood wants the same (*Sound*).
   - The kick locked to the riff (P1): the kick plays with the riff only in a polymeter's cycle (`Polymeter`); a
     figure as long as the bar, or two, played by the riff, the bass and the kick together, a groove band's breaks, as
     a polymeter whose cycle divides the bar, by a genre's chance.
