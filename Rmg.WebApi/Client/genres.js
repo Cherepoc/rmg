@@ -59,6 +59,9 @@ export function isPresetName(name) {
     return PRESETS.some((preset) => sameName(preset.name, name));
 }
 
+/** Genres in the order they are listed: by name, whatever its case, a number in it as a number, "Rock 2" before "Rock 10". */
+export const byName = (first, second) => first.name.localeCompare(second.name, undefined, { sensitivity: "base", numeric: true });
+
 /** Whether two genres' names are one, whatever their case and spacing, as no two genres are named. */
 export function sameName(first, second) {
     const plain = (x) => x.trim().replace(/\s+/g, " ").toLowerCase();

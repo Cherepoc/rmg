@@ -319,6 +319,48 @@ public sealed class GenreEditorTest(Site site)
     }
 
     [Test]
+    public async Task TheGenres_AreListedByName_TheListAndTheWindow_AndOneChosenPlaysAsNamed()
+    {
+        await using var page = await SongPage.Open(site, "?song=1");
+        var dialog = await OpenEditor(page);
+        var name = dialog.Locator("input[aria-label='Genre name']");
+        var save = dialog.GetByRole(AriaRole.Button, new() { Name = "Save", Exact = true });
+        // three of one's own, kept in an order other than their names'
+        var answer = "";
+        page.Page.Dialog += (_, prompt) => _ = prompt.Type == "prompt" ? prompt.AcceptAsync(answer) : prompt.AcceptAsync();
+        await name.FillAsync("beta");
+        await save.ClickAsync();
+        foreach (var other in new[] { "Alpha 10", "Alpha 2" })
+        {
+            answer = other;
+            await dialog.Locator("footer button", new() { HasTextString = "Save as" }).ClickAsync();
+            await page.Until(async () => await page.Page.Locator("select[aria-label='Genre'] optgroup[label='Yours'] option", new() { HasTextString = other }).CountAsync() == 1, $"{other} kept");
+        }
+
+        await dialog.Locator("> header .genre-close").ClickAsync();
+
+        var genre = page.Page.Locator("select[aria-label='Genre']");
+        var presets = await genre.Locator("optgroup[label='Presets'] option").AllTextContentsAsync();
+        await Assert.That(string.Join("|", presets)).IsEqualTo(string.Join("|", presets.Order(StringComparer.OrdinalIgnoreCase)));
+        await Assert.That(string.Join("|", await genre.Locator("optgroup[label='Yours'] option").AllTextContentsAsync())).IsEqualTo("Alpha 2|Alpha 10|beta");
+
+        // the window as the list
+        var manager = await page.Manager();
+        await Assert.That(string.Join("|", await manager.Locator("ul[aria-label='Yours'] .genre-line-name").AllTextContentsAsync())).IsEqualTo("Alpha 2|Alpha 10|beta");
+        var listed = await manager.Locator("ul[aria-label='Presets'] .genre-line-name").AllTextContentsAsync();
+        await Assert.That(string.Join("|", listed)).IsEqualTo(string.Join("|", presets));
+        await page.Page.Keyboard.PressAsync("Escape");
+
+        // one chosen by its place in the list, the one of its name
+        var count = page.Requests.Count;
+        var value = await genre.Locator("optgroup[label='Yours'] option", new() { HasTextString = "beta" }).GetAttributeAsync("value");
+        await genre.SelectOptionAsync(value!);
+        await page.Until(() => page.Requests.Count > count, "the song asked for in the genre chosen");
+        await Assert.That(await genre.Locator("option:checked").TextContentAsync()).IsEqualTo("beta");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
     public async Task SaveAs_KeepsTheDraftUnderANameAsked_TheOneItCameFromAsItWas()
     {
         await using var page = await SongPage.Open(site, "?song=1");

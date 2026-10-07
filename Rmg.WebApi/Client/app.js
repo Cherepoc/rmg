@@ -48,7 +48,7 @@ import {
     toStep,
 } from "./settings.js";
 import { applyReport, defaultSettings, givenOnly, isEveryPartOff, noGenre, requestFor } from "./song-settings.js";
-import { asGenre, hasAGenre, isSameGenre, nestedChoices, presetById, presetOf, PRESETS, sameName } from "./genres.js";
+import { asGenre, byName, hasAGenre, isSameGenre, nestedChoices, presetById, presetOf, PRESETS, sameName } from "./genres.js";
 import { createGenreEditor } from "./genre-editor.js";
 import { createGenreManager } from "./genre-manager.js";
 import { since, tell, track } from "./tally.js";
@@ -1641,16 +1641,11 @@ let genreChoices = null;
 /** The editor of a genre of one's own (genre-editor.js), its draft played, kept here or let go of. */
 const genreEditor = createGenreEditor({
     onPlay: (genre) => genre !== null && useGenre(genre),
-    // in place of the genre it was opened from, renamed or not, so that the list keeps its order; any other of its name
-    // let go of, which the editor has asked about; one opened from none added at the end
+    // in place of the genre it was opened from, renamed or not, and of any other of its name, which the editor has
+    // asked about; the lists show them by name
     onSave: (genre, replacing) => {
         if (genre === null) return;
-        const own = recallGenres();
-        const at = replacing === null ? -1 : own.findIndex((x) => sameName(x.name, replacing));
-        const kept = own.filter((x, i) => i !== at && !sameName(x.name, genre.name));
-        const place = at === -1 ? kept.length : own.slice(0, at).filter((x) => !sameName(x.name, genre.name)).length;
-        kept.splice(place, 0, genre);
-        keepGenres(kept);
+        keepGenres([...recallGenres().filter((x) => !(replacing !== null && sameName(x.name, replacing)) && !sameName(x.name, genre.name)), genre]);
         useGenre(genre);
     },
     onDelete: (name) => {
@@ -1902,11 +1897,12 @@ function drawAnyGenre() {
     showGenre();
 }
 
-/** Every genre the list offers, by its value in it: the presets, then the genres made here. */
+/** Every genre the list offers, by its value in it: the presets, then the genres made here, each by name; one's own by its place as kept. */
 function listedGenres() {
+    const byItsName = (first, second) => byName(first.genre, second.genre);
     return [
-        ...PRESETS.map((preset) => ({ value: `preset:${preset.id}`, genre: asGenre(preset), group: "Presets", description: preset.description })),
-        ...recallGenres().map((genre, i) => ({ value: `own:${i}`, genre: asGenre(genre), group: "Yours", description: genre.description ?? "" })),
+        ...PRESETS.map((preset) => ({ value: `preset:${preset.id}`, genre: asGenre(preset), group: "Presets", description: preset.description })).sort(byItsName),
+        ...recallGenres().map((genre, i) => ({ value: `own:${i}`, genre: asGenre(genre), group: "Yours", description: genre.description ?? "" })).sort(byItsName),
     ];
 }
 

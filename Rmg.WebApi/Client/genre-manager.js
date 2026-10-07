@@ -1,4 +1,4 @@
-import { NOT_A_GENRE, readGenreFile } from "./genres.js";
+import { byName, NOT_A_GENRE, readGenreFile } from "./genres.js";
 
 /**
  *     The window of every genre, a popup over the page: the presets, each to be duplicated, and one's own, each to be
@@ -57,7 +57,7 @@ export function createGenreManager({ presets, own, current, onKeep, onNew, onDup
     // every genre of one's own as one file, so that they outlive this browser
     const exportedAll = button("Export all", "Save every genre of yours as one JSON file", () => {
         const link = document.createElement("a");
-        link.href = URL.createObjectURL(new Blob([JSON.stringify(own().map(asFile), null, 1)], { type: "application/json" }));
+        link.href = URL.createObjectURL(new Blob([JSON.stringify([...own()].sort(byName).map(asFile), null, 1)], { type: "application/json" }));
         link.download = "genres.json";
         link.click();
         setTimeout(() => URL.revokeObjectURL(link.href));
@@ -105,14 +105,14 @@ export function createGenreManager({ presets, own, current, onKeep, onNew, onDup
     }
 
     function refresh() {
-        const yours = own().map((genre) => line(genre, genre.description ?? "", [
+        const yours = [...own()].sort(byName).map((genre) => line(genre, genre.description ?? "", [
             button("Edit", `Change ${genre.name}`, () => onEdit(genre)),
             button("Duplicate", `Open a copy of ${genre.name} in the editor, yours once you save it`, () => onDuplicate(genre)),
             button("Remove", `Let go of ${genre.name}`, () => {
                 if (confirm(`Remove your genre ${genre.name}? Nothing brings it back.`)) onRemove(genre.name);
             }),
         ]));
-        const shipped = presets().map((preset) => line(preset, preset.description, [
+        const shipped = [...presets()].sort(byName).map((preset) => line(preset, preset.description, [
             button("Duplicate", `Open a copy of ${preset.name} in the editor, yours once you save it`, () => onDuplicate(preset)),
         ]));
         // the song's genre where it is no preset and none of one's own, a link's or a draft played
