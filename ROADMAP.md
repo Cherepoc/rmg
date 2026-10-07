@@ -6,23 +6,23 @@ is removed once it is built.
 
 ## Priorities
 
-**In order** (P1, the plan of 9 October 2026, each step through the implementation loop):
+**In order** (P1, the plan of 7 October 2026, each step through the implementation loop):
 
-1. Done: the echo as the synthesizer's delay rather than notes; heard on the test instance (`?listen=echo`).
-2. Done: the strong effects stacked, the first as before, the others beside it by their shares, the volume multiplied.
-3. Done: the gate holding whole chords only, an arpeggio gated as it plays, Trance's arpeggios in 16ths.
-4. Done: the part alone a genre's.
-5. Done: metal's arpeggios, a pedal point, a part's colour, a clean arpeggio staying clean.
-6. Done: Djent's synth over the guitars, a line's strong beats on a tension, a genre's by part.
-7. Done: the brightness measured in both soundfonts, the filter's floor raised to 40.
-8. Done, with 9: one brightness a part, its tone and a filter's closing added, never below the filter's floor.
-9. Done: a part's darker tone, a gentle effect, darker in the quiet sections; a swell brightening left (P3).
-10. Done: a tape's wow, the parts drifting together, some detuned, IDM's and a lo-fi genre's.
-11. Done, with 12: the whole mix filtered, a song opening up, a section dipping before the next, a song closing.
-12. Done with 11.
-13. Done: Trance's rolling bass, its build rolling to 32nds, its ♭VI, ♭III and ♭VII, its mix filtered.
-14. Done: Djent's mix dipping before its heavy sections, its riff stuttering under the gate.
-15. Waiting on listening: the rest of rock's and metal's, long cycles, more figures, rolls in 32nds, a riff's drone.
+1. Pinch harmonics as a highlight rather than a variant (*Pinch harmonics*, below), both sounds for listening.
+2. An ending in the song's own harmony (*An ending in the song's own harmony*, below).
+3. A flaky page test's 400 found and fixed (*Open work*).
+4. A sparse song's silent start (*Open work*).
+5. A groove that mutates (*Groove*).
+6. Drum solos rethought, their feet's ostinato and their stickings first (*Groove*).
+7. A filtered bar in place of a drop's silence; a swell brightening; a whammy dive at a section's end.
+8. A line's tensions beyond Djent, after `?listen=djent-tension` is answered.
+
+Done in the plan of 9 October 2026: the echo as the synthesizer's delay; the strong effects stacked; the gate holding
+whole chords; the part alone a genre's; metal's arpeggios and a part's colour; a line's tensions, Djent's synth over
+its guitars; the brightness measured, the filter's floor raised; a part's tone; a tape's wow; the mix filtered; Trance
+as it is produced; Djent's dips and stutter. After it: a Medieval intro silent on drums that only mark the form; the
+mood of Black metal and IDM, a section's home a genre's; every genre's kit and articulations checked. Waiting on
+listening: the rest of rock's and metal's, long cycles, more figures, rolls in 32nds, a riff's drone.
 
 Done in the plan of 8 October 2026: the genres sorted by name; rock and metal measured and their presets tuned; a
 section left to drums that only mark the form; the listening tool, *Listening* cut to its questions; a progression's
@@ -200,12 +200,37 @@ Each item with its plan, and what it waits for.
 
 ### Conventionality
 
-- **Black metal's pinch harmonics too many** (P1, heard on test): measured over 64 songs, 44% of them play
-  harmonics, in 8% of the driven guitars' sections, and there a third of the notes, 17 a section, every loud note (the
-  accents mode) or whole bars (the bars mode), and on the chords part's chords as often as on the riff. A player squeals
-  one or two a phrase, on a held, accented note, and never a chord: the harmonics variant (`InstrumentsOverTime.Variants`,
-  29 and 30 to 31) on single notes alone, the phrase's loudest held note or two rather than a quarter of the section's,
-  never in bars, and leaned by a genre; measured by the harmonics a phrase.
+- **An ending in the song's own harmony** (P1, step 2): measured October 2026 (`EndingMoodReportTest`), a song's
+  final chord is as plain or as dissonant as the song was, but its last section leaves its language for a classical
+  close: it never planes or vamps, by rule, though Djent planes 33% of its other sections and vamps most, Black metal
+  planes 39%, the wildest songs 15%; and it ends on V or IV to the tonic, the leading tone raised in a third of Black
+  metal's and IDM's, a perfect cadence after a song that never cadenced. Instead:
+  - the last section planing and vamping as the others do, but leading home: a planed progression's last move back to
+    the tonic's shape on the tonic (a Phrygian ♭II to i, a semitone's slide), a vamp home already;
+  - its last approach to the tonic a genre's and the progression facet's, as data: V to I, IV to I, ♭VII to I, ♭VI and
+    ♭VII to i, ♭II to i, or none, the home held; the raised leading tone a genre's chance (none in Djent, few in
+    Black metal and IDM);
+  - measured: the last section's devices against the others', the approaches by genre; `?listen=` a question of a
+    dissonant song's ending.
+- **Pinch harmonics** (P1, step 1): measured October 2026 (`HarmonicsReportTest`), in Rock, Metal, Black metal,
+  Djent, Nu metal and Punk alike they break every rule a player keeps: 63% to 82% of them on a chord, the chords part's
+  as often as the riff's; up to 43% shorter than a quarter of a second, an 8th counted in beats at 200 a minute; 40% of
+  Djent's in playing of three notes a beat or more; 1% or 2% bent or wavering; five a phrase where a phrase has any,
+  up to 35. A variant switched on by the section, accents or whole bars, is the wrong mechanism. Instead:
+  - the driven guitars' variant (`InstrumentsOverTime.Variants`, 29 and 30 to 31) gone;
+  - a pinch a note's highlight, decided in `Expression` from a stream of its own: a single note, never a chord, of a
+    driven guitar, the riff's, the melody's, the counter-melody's or a solo's; held, a quarter of a second and more by
+    the clock and the longest of its bar, never within a run;
+  - in a riff anywhere it is held and accented, a phrase's last note, the first after a rest, a release after a run,
+    the likelier after palm-muted chugs, its contrast; in a line or a solo a note picked and then its harmonic, a solo's
+    the likelier the more intense;
+  - rare thrice over: a song pinches at all by a genre's chance (Metal, Nu metal and Djent some; Black metal and Rock
+    few; Punk almost none), a note held enough now and then, one a part a phrase at most;
+  - always with a wide vibrato, often bent up or scooped;
+  - its sound two ways for listening: General MIDI's guitar harmonics (31), a clean bell, or the driven guitar itself
+    at the harmonic's pitch, two octaves or an octave and a fifth above, the squeal a pinch makes;
+  - rules: never a chord, never under a quarter of a second, never among three notes a beat, one a part a phrase,
+    always wavering; calibrated by genre; `?listen=` a question of the two sounds.
 - **A sparse song's silent start** (P2): an Ambient or a Dungeon song now and then silent for its first 16 beats or
   more, its parts resting through their first phrase's start and its drums out of its first section (Ambient seed 37,
   Dungeon seed 54 of the corpus); a song's first part to sound coming in on its first beat, or the intro left out.
