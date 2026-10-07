@@ -18,14 +18,45 @@ public sealed class TextureTest
         await Assert.That(silent).IsEmpty().Because(string.Join("; ", silent.Take(5)));
     }
 
+    [Test]
+    public async Task DrumsMarkingTheForm_NeverPlayASectionAlone_APitchedPartPlayingWithThem()
+    {
+        var alone = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Genres.GenrePresets.Genre("medieval")))))
+        {
+            if ((DrumJob)song.Trace.Single(t => t.Point == TracePoints.DrumJob).Value! != DrumJob.Marks)
+                continue;
+            // but a drum solo's, which is the drums alone
+            foreach (var (span, _) in song.Map.Sections.Select((x, i) => (x, i)).Where(x => song.Texture(x.x).Kind == TextureKind.Alone && !(song.Solos.TryGetValue(x.i, out var solo) && solo.IsDrumSolo)))
+            {
+                alone++;
+                var pitched = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack)
+                    .Sum(x => x.Value.Count(n => n.Position >= span.Start - 1e-9 && n.Position < span.End - 1e-9));
+                await Assert.That(pitched).IsGreaterThan(0).Because($"seed {song.Seed} at {span.Start}");
+            }
+        }
+
+        await Assert.That(alone).IsGreaterThan(10);
+    }
+
+    [Test]
+    public async Task TheTexturesOfFewerParts_LeanToTheQuieterSections()
+    {
+        var context = new GenerationContext(3);
+        int Fewer(double energy) => Enumerable.Range(0, 4000).Count(_ => Texture.Draw(context, 1, 2, Band, Genre.None, SectionEnergy.Tilt(energy, 1), false).Kind is TextureKind.Alone or TextureKind.Thin);
+
+        await Assert.That(Fewer(0.5)).IsLessThan(Fewer(0)).And.IsLessThan(Fewer(-0.5));
+        await Assert.That(Fewer(0)).IsLessThan(Fewer(-0.5));
+    }
+
     private static readonly TrackRole[] Band = [TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.Drum];
 
     [Test]
     public async Task ThePlainestSections_PlaySteady_AndTheWildest_EveryTextureAlike()
     {
         var context = new GenerationContext(1);
-        var plain = Enumerable.Range(0, 2000).Select(_ => Texture.Draw(context, 0, 2, Band, Genre.None).Kind).ToArray();
-        var wild = Enumerable.Range(0, 4000).Select(_ => Texture.Draw(context, 1, 2, Band, Genre.None).Kind).ToArray();
+        var plain = Enumerable.Range(0, 2000).Select(_ => Texture.Draw(context, 0, 2, Band, Genre.None, default, false).Kind).ToArray();
+        var wild = Enumerable.Range(0, 4000).Select(_ => Texture.Draw(context, 1, 2, Band, Genre.None, default, false).Kind).ToArray();
 
         await Assert.That(plain.All(x => x == TextureKind.Steady)).IsTrue();
         foreach (var kind in Enum.GetValues<TextureKind>())
@@ -36,7 +67,7 @@ public sealed class TextureTest
     public async Task ABuild_BringsItsPartsIn_PhraseByPhrase_ItsDrumsNowAndThenLate_AndAThinTakesItsPitchedOnesOut()
     {
         var context = new GenerationContext(2);
-        var draws = Enumerable.Range(0, 400).Select(_ => Texture.Draw(context, 1, 4, Band, Genre.None)).ToArray();
+        var draws = Enumerable.Range(0, 400).Select(_ => Texture.Draw(context, 1, 4, Band, Genre.None, default, false)).ToArray();
         foreach (var (kind, resting, silent) in draws.Where(x => x.Kind is TextureKind.Build or TextureKind.Thin))
         {
             var counts = silent.Select(x => x.Count).ToArray();
@@ -70,10 +101,11 @@ public sealed class TextureTest
             if (from == 0 || !song.HasDrums(span))
                 continue;
 
-            // the drums' notes before the phrase they come in at, but in its last bar before, the fill's
+            // the drums' notes before the phrase they come in at, but in its last bar before, the fill's, and on its first
+            // beat, where the section before's fill lands before they drop out
             var entry = span.Start + from * span.Meter.PatternDuration;
             var before = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.Drum).SelectMany(x => x.Value)
-                .Count(x => x.Position >= span.Start - 1e-9 && x.Position < entry - span.Meter.BarDuration - 1e-9);
+                .Count(x => x.Position > span.Start + 1e-9 && x.Position < entry - span.Meter.BarDuration - 1e-9);
             await Assert.That(before).IsEqualTo(0).Because($"seed {song.Seed} at {span.Start}");
             late++;
         }
@@ -92,6 +124,49 @@ public sealed class TextureTest
             Console.WriteLine($"  {band.Key}/5, {band.Count()} appearances: " + string.Join(", ", Enum.GetValues<TextureKind>().Select(k => $"{k} {band.Count(x => x.Texture.Kind == k) / (double)band.Count():P0}")));
         var alone = rows.Where(x => x.Texture.Kind == TextureKind.Alone).Select(x => x.Song.Song.TrackDefinitions.Values.Select(d => d.Role).Distinct().Single(r => !x.Resting.Contains(r) && r != TrackRole.Drum || r == TrackRole.Drum && !x.Resting.Contains(r))).GroupBy(x => x);
         Console.WriteLine($"alone: {string.Join(", ", alone.Select(x => $"{x.Key} {x.Count()}"))}");
+        await Task.CompletedTask;
+    }
+
+    /// <summary>A section's appearances of fewer parts, one alone or parts dropping out, by its energy, and its drums alone where they mark the form.</summary>
+    [Test]
+    [Explicit]
+    public async Task ReportByEnergy()
+    {
+        foreach (var name in new[] { "medieval", "orchestral", "dungeon", "ambient", "" })
+        {
+            var genre = name == "" ? null : Genres.GenrePresets.Genre(name);
+            var songs = TestCorpus.InParallel(Enumerable.Range(0, 128), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
+            var (quiet, loud, quietFewer, loudFewer, choruses, chorusesAlone, marking, drumsAlone) = (0, 0, 0, 0, 0, 0, 0, 0);
+            foreach (var song in songs)
+            {
+                var energies = song.Trace.Where(t => t.Point == TracePoints.SectionEnergy).GroupBy(t => t.Section).ToDictionary(g => g.Key, g => ((SectionEnergyTrace)g.First().Value!).Energy);
+                var mean = song.Map.Sections.Average(x => energies.GetValueOrDefault(x.SectionId));
+                var structure = (SongStructure)song.Trace.Single(t => t.Point == TracePoints.SongForm).Value!;
+                var marks = (DrumJob)song.Trace.Single(t => t.Point == TracePoints.DrumJob).Value! == DrumJob.Marks;
+                foreach (var span in song.Map.Sections)
+                {
+                    var kind = song.Texture(span).Kind;
+                    var fewer = kind is TextureKind.Alone or TextureKind.Thin;
+                    if (energies.GetValueOrDefault(span.SectionId) > mean + 1e-9)
+                        (loud, loudFewer) = (loud + 1, loudFewer + (fewer ? 1 : 0));
+                    else
+                        (quiet, quietFewer) = (quiet + 1, quietFewer + (fewer ? 1 : 0));
+                    if (structure.Roles.GetValueOrDefault(span.SectionId) == SectionRole.Chorus)
+                        (choruses, chorusesAlone) = (choruses + 1, chorusesAlone + (kind == TextureKind.Alone ? 1 : 0));
+                    if (marks && kind == TextureKind.Alone)
+                    {
+                        marking++;
+                        if (!song.Resting(span).Contains(TrackRole.Drum))
+                            drumsAlone++;
+                    }
+                }
+            }
+
+            Console.WriteLine($"{(name == "" ? "no genre" : name)}: one part alone or parts dropping out in {quietFewer / (double)Math.Max(1, quiet):P0} of the quieter appearances, " +
+                              $"{loudFewer / (double)Math.Max(1, loud):P0} of the louder; choruses alone {chorusesAlone / (double)Math.Max(1, choruses):P0}; " +
+                              $"of the appearances alone where the drums mark the form, the drums {drumsAlone} of {marking}");
+        }
+
         await Task.CompletedTask;
     }
 }

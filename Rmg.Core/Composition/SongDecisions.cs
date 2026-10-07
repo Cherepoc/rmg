@@ -18,6 +18,7 @@ namespace Rmg.Core.Composition;
 /// <param name="Repeats">Whether the last section plays once more, as a last chorus.</param>
 /// <param name="GrooveContext">The groove's stream, its swing's draws made before, the rest of them here.</param>
 /// <param name="Scale">The scale the song starts in.</param>
+/// <param name="DrumJob">What the song's drums do, keep time or mark its form, a genre's (<see cref="DrumMarks" />).</param>
 internal sealed record SongDecisions(
     ulong Seed,
     Genre Genre,
@@ -40,7 +41,8 @@ internal sealed record SongDecisions(
     StateMap CommonStateMap,
     Swing Swing,
     IGenerationContext GrooveContext,
-    Scale Scale
+    Scale Scale,
+    DrumJob DrumJob
 )
 {
     /// <summary>A stage's own stream.</summary>
@@ -165,6 +167,10 @@ internal sealed record SongDecisions(
         var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), songUnconventionality[Facet.Feel], meter, overrides.Swing, genre);
         StateTrace.Record(TracePoints.Swing, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{swing.Delay:F3} of {swing.Period}", swing);
 
+        // what the drums do, decided before the sections, whose texture leaves no section to drums that only mark the form
+        var drumJob = DrumMarks.Draw(Stream(SongStream.DrumJob), songUnconventionality[Facet.Groove], genre);
+        StateTrace.Record(TracePoints.DrumJob, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, drumJob.ToString(), drumJob);
+
         var sectionGenerator = new SectionGenerator(
             root,
             Seeds.Derive(seed, (int)SongStream.Sections),
@@ -178,6 +184,7 @@ internal sealed record SongDecisions(
             PercussionSections.GenerateSong(Stream(SongStream.Percussion)),
             commonStateMap.GetStateValue(StateKinds.KeyOffset),
             absent,
+            drumJob,
             genre
         );
         // how the song starts and ends around its sections, decided before them: the one the song ends with leads home
@@ -340,7 +347,7 @@ internal sealed record SongDecisions(
         var form = formGenerator.Assemble(plan, played, sections);
         return new SongDecisions(
             seed, genre, tracks, absent, songUnconventionality, meter, structure, sectionIds, played, sectionMeters, generateSection, sections, energies,
-            solos, soloists, pinned, form, repeats, commonStateMap, swing, grooveContext, scale);
+            solos, soloists, pinned, form, repeats, commonStateMap, swing, grooveContext, scale, drumJob);
     }
 
     /// <summary>

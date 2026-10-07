@@ -31,6 +31,7 @@ internal sealed class SectionGenerator
     private readonly Tilt _songPercussion;
     private readonly int _key;
     private readonly ImmutableHashSet<TrackRole> _absent;
+    private readonly DrumJob _drumJob;
     private readonly Genre _genre;
     // the generators of a section's bar state and patterns, one for every meter a section is in
     private readonly Func<Meter, (BarStateGenerator Bars, PatternGenerator Patterns)> _generators;
@@ -57,10 +58,12 @@ internal sealed class SectionGenerator
         Tilt songPercussion,
         int key,
         ImmutableHashSet<TrackRole> absent,
+        DrumJob drumJob,
         Genre genre
     )
     {
         _absent = absent;
+        _drumJob = drumJob;
         _genre = genre;
         _context = context;
         _seed = seed;
@@ -214,6 +217,7 @@ internal sealed class SectionGenerator
             powerChords,
             chugs,
             octaveBass,
+            _drumJob,
             _genre
         );
         // every part, which each appearance leaves out of it what it rests
@@ -705,6 +709,7 @@ internal sealed record SectionDrums(bool IsPercussionOnly, SectionKit Kit, bool 
 /// <param name="ArrangementSeed">The seed of the sequences a later appearance draws its parts from.</param>
 /// <param name="Roles">What every track plays, by its number.</param>
 /// <param name="Meter">The meter the section's bars are in.</param>
+/// <param name="DrumJob">What the song's drums do, which a part left alone must carry.</param>
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
     RhythmicUnconventionality Rhythm,
@@ -725,6 +730,7 @@ internal sealed record GeneratedSection(
     bool RiffPowerChords,
     bool Chugs,
     bool OctaveBass,
+    DrumJob DrumJob,
     Genre Genre
 )
 {
@@ -781,7 +787,8 @@ internal sealed record GeneratedSection(
         // twin, the solo part or a line whose patterns came out empty
         bool HasNotes(TrackRole role) => Roles.Any(x => x.Value == role && Timeline.TrackTimelineMap.TryGetValue(x.Key, out var track) && track.EventTimeline.Count > 0);
         var playing = Roles.Values.Distinct().Where(x => !resting.Contains(x) && HasNotes(x)).ToArray();
-        var texture = Composition.Texture.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(ArrangementSeed, appearance), TextureStream)), Facets[Facet.Form], Plays, playing, Genre);
+        var texture = Composition.Texture.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(ArrangementSeed, appearance), TextureStream)), Facets[Facet.Form], Plays, playing, Genre,
+            SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), DrumJob == DrumJob.Marks);
         ImmutableArray<ImmutableHashSet<TrackRole>> steady = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, Plays)];
         if (keepsTexture)
             texture = (TextureKind.Steady, ImmutableHashSet<TrackRole>.Empty, steady);

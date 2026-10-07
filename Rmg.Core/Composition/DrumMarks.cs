@@ -67,11 +67,10 @@ internal static class DrumMarks
     /// <summary>The song with its drums marking its form where its genre has them do so.</summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
-        var context = song.Stream(SongStream.DrumMarks);
-        var job = Draw(context, song.Facets[Facet.Groove], song.Genre);
-        StateTrace.Record(TracePoints.DrumJob, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, job.ToString(), job);
-        if (job == DrumJob.Groove)
+        if (song.DrumJob == DrumJob.Groove)
             return draft;
+
+        var context = song.Stream(SongStream.DrumMarks);
 
         var notes = SongStages.NotesOf(draft);
         var drums = notes.Where(x => song.Tracks.Definitions[x.Key] is PercussionInstrumentTrack && x.Value.Count > 0).Select(x => x.Key).ToArray();

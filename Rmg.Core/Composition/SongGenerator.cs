@@ -252,5 +252,6 @@ internal enum SongStream
     LouderForms = 83,
     Ornaments = 84,
     Room = 85,
-    Insertion = 86
+    Insertion = 86,
+    DrumJob = 87
 }

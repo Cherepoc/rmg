@@ -14,10 +14,11 @@ public sealed class StopTimeTest
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("blues")))))
         {
             var stopping = song.Trace.Where(x => x.Point == TracePoints.StopTime && (bool)x.Value!).Select(x => x.Section).ToHashSet();
-            // but a first section an intro of entries builds, which plays as the band comes in
+            // but a first section an intro of entries builds, which plays as the band comes in, and a solo, which a push
+            // leaves be too
             var intro = song.Map.Intro;
             var built = intro.Kind == IntroKind.Entries && !intro.Window.IsBefore ? song.Map.Sections[0] : null;
-            foreach (var span in song.Song.Map!.Sections.Where(x => stopping.Contains(x.SectionId) && x != built))
+            foreach (var span in song.Song.Map!.Sections.Where((x, i) => stopping.Contains(x.SectionId) && x != built && !song.Solos.ContainsKey(i)))
             {
                 phrases++;
                 var (start, end, bar) = (span.Start, Math.Min(span.End, span.Start + Meter.PhraseBarCount * span.Meter.BarDuration), span.Meter.BarDuration);

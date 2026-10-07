@@ -20,7 +20,7 @@ internal static class StopTime
     /// <summary>How long a stop-time hit is held at most, in beats.</summary>
     public const double Hit = 1;
 
-    /// <summary>Where the song plays in stop time: every stop-time section's appearances' first phrase, its start, end and bar.</summary>
+    /// <summary>Where the song plays in stop time: every stop-time section's appearances' first phrase, but a solo's, its start, end and bar.</summary>
     internal static (double Start, double End, double BarDuration)[] Phrases(SongDecisions song)
     {
         var stops = song.SectionIds.Distinct().ToDictionary(id => id, id =>
@@ -34,9 +34,10 @@ internal static class StopTime
         // its hits to none
         var intro = song.Form.Map.Intro;
         var built = intro.Kind == IntroKind.Entries && !intro.Window.IsBefore ? song.Form.Map.Sections[0] : null;
+        // and but in a solo, whose soloists play over the band as loud as it was measured, as a push leaves a solo be
         return
         [
-            ..song.Form.Map.Sections.Where(x => stops[x.SectionId] && x != built)
+            ..song.Form.Map.Sections.Where((x, i) => stops[x.SectionId] && x != built && !song.Solos.ContainsKey(i))
                 .Select(x => (x.Start, Math.Min(x.End, x.Start + Meter.PhraseBarCount * x.Meter.BarDuration), x.Meter.BarDuration))
         ];
     }

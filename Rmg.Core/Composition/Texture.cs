@@ -24,18 +24,23 @@ public enum TextureKind
 ///     The texture of an appearance of a section: which of the parts that play play in each of its phrases, its 4-bar
 ///     patterns, so that a section can build up as an intro does, thin out, or play one instrument alone; by the form
 ///     facet: the plainest songs play every part through each section, their textures changing only where a section
-///     does, the wildest take every texture as likely. The drums play through a phrase or rest the whole appearance, but
-///     where a section builds, which brings them in at a phrase now and then with a fill, as a band builds.
+///     does, the wildest take every texture as likely; those of fewer parts leaned to the quieter sections, as a band
+///     thins out in a verse rather than in a chorus. The drums play through a phrase or rest the whole appearance, but
+///     where a section builds, which brings them in at a phrase now and then with a fill, as a band builds; and they play
+///     alone only where they keep time, never where they only mark the form.
 /// </summary>
 internal static class Texture
 {
-    /// <summary>How likely each texture is, at the plain end, the middle and the wild end.</summary>
-    public static ImmutableArray<(TextureKind Kind, ByConvention Weight)> Kinds { get; } =
+    /// <summary>
+    ///     How likely each texture is, at the plain end, the middle and the wild end, and how it leans by the section's
+    ///     energy: those of fewer parts against it.
+    /// </summary>
+    public static ImmutableArray<(TextureKind Kind, ByConvention Weight, double EnergyLean)> Kinds { get; } =
     [
-        (TextureKind.Steady, new ByConvention(1, 0.82, 1)),
-        (TextureKind.Build, new ByConvention(0, 0.1, 1)),
-        (TextureKind.Thin, new ByConvention(0, 0.04, 1)),
-        (TextureKind.Alone, new ByConvention(0, 0.04, 1))
+        (TextureKind.Steady, new ByConvention(1, 0.82, 1), 0),
+        (TextureKind.Build, new ByConvention(0, 0.1, 1), 0),
+        (TextureKind.Thin, new ByConvention(0, 0.04, 1), -1),
+        (TextureKind.Alone, new ByConvention(0, 0.04, 1), -1)
     ];
 
     /// <summary>A texture as a genre's page shows it.</summary>
@@ -55,23 +60,32 @@ internal static class Texture
     /// <param name="phrases">How many 4-bar patterns the appearance plays.</param>
     /// <param name="playing">The parts the appearance plays, of those the song has.</param>
     /// <param name="genre">The genre whose pool of textures it is drawn among, where it names one.</param>
+    /// <param name="energy">The appearance's energy, which the textures of fewer parts lean against.</param>
+    /// <param name="drumsMark">Whether the song's drums only mark its form, which leaves them no part to play alone.</param>
     public static (TextureKind Kind, ImmutableHashSet<TrackRole> Resting, ImmutableArray<ImmutableHashSet<TrackRole>> PhraseSilent) Draw(
         IGenerationContext context,
         double form,
         int phrases,
         IReadOnlyCollection<TrackRole> playing,
-        Genre genre
+        Genre genre,
+        Tilt energy,
+        bool drumsMark
     )
     {
-        var kind = context.Pick(ByConvention.Weigh(Kinds, form, genre.Pool<TextureKind>(GenreChoices.Texture, x => GenreChoices.Name(x.ToString()))));
+        var leans = Kinds.ToDictionary(x => x.Kind, x => x.EnergyLean);
+        var kind = context.Pick(energy.Weigh(
+            ByConvention.Weigh(Kinds.Select(x => (x.Kind, x.Weight)), form, genre.Pool<TextureKind>(GenreChoices.Texture, x => GenreChoices.Name(x.ToString()))),
+            x => leans[x]));
         TrackRole[] pitched = [..playing.Where(x => x != TrackRole.Drum).Order()];
         // the order the pitched parts come in, drawn whatever the texture, so that the draws stay as they are
         var order = pitched.OrderBy(_ => context.GenerateDouble()).ToArray();
-        // drawn whether any part plays or not, so that the draws stay as they are
-        var aloneIndex = context.GenerateInt(0, Math.Max(1, playing.Count));
+        // drawn whether any part plays or not, so that the draws stay as they are; among the parts that carry a section
+        // alone, the drums only where they keep time
+        TrackRole[] carrying = [..playing.Where(x => x != TrackRole.Drum || !drumsMark).Order()];
+        var aloneIndex = context.GenerateInt(0, Math.Max(1, carrying.Length));
         // and where the drums come in a build, among the pitched parts, drawn after the rest so that they stay as they were
         var drumsAt = context.GenerateInt(0, order.Length + 1);
-        var alone = playing.Count == 0 ? (TrackRole?)null : playing.Order().ElementAt(aloneIndex % playing.Count);
+        var alone = carrying.Length == 0 ? (TrackRole?)null : carrying[aloneIndex % carrying.Length];
         ImmutableArray<ImmutableHashSet<TrackRole>> none = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, phrases)];
 
         switch (kind)
@@ -88,7 +102,7 @@ internal static class Texture
                     Array.Reverse(silent);
                 return (kind, ImmutableHashSet<TrackRole>.Empty, [..silent]);
             }
-            case TextureKind.Alone when playing.Count >= 2:
+            case TextureKind.Alone when playing.Count >= 2 && alone is not null:
                 return (kind, [..playing.Where(x => x != alone)], none);
             default:
                 return (TextureKind.Steady, ImmutableHashSet<TrackRole>.Empty, none);
