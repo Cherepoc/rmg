@@ -10,7 +10,7 @@ is removed once it is built.
 
 1. Done: the genres sorted by name.
 2. Done: rock and metal measured, their presets tuned.
-3. A section left to drums that only mark the form (*Form and sections*).
+3. Done: a section left to drums that only mark the form.
 4. The listening tool, with the *Listening* section cut to its questions (*Listening data*).
 5. The double kick (*Genres*, *What the genres cannot play yet*).
 6. A progression's degrees leaned by a genre (*Genres*).
@@ -272,16 +272,6 @@ Each item with its plan, and what it waits for.
 
 ### Form and sections
 
-- **A section left to drums that only mark the form** (P1, found on the test instance, seed BgSGnRm1zvT in Medieval):
-  its chorus, the song's loudest section, plays one part alone in all three appearances, twice the drums, whose job
-  there is marking the form, three strikes in twelve bars: near silence. Two causes: the part alone is drawn evenly
-  among the parts playing, the drums too, though drums marking the form carry neither time nor tune, and the drums' job
-  is drawn by its stage after the notes (`DrumMarks`), too late for the texture to know it; and a texture is drawn by
-  the form facet alone, so a chorus thins to one part as often as a verse. Medieval plays one part alone in 20% of its
-  appearances, Orchestral and Dungeon synth up to 20%. Plan: the drums' job a song decision (`SongDecisions`, its
-  draw as now, the fingerprint kept); the part alone never the drums where they mark the form; and the textures of
-  fewer parts, one alone and parts dropping out, leaned against a section's energy (`Tilt`, as stop time is).
-  Measured by the appearances alone by energy and the drums alone where they mark.
 - **A tag** (put off): half a pattern before a section changes, which breaks the pattern's grid for the fills' lines and
   the phrases; with the meter as state, an engine's change for a rare idiom.
 - **The energy's recurrence** counts a section's appearances, not its plays: should long sections sound too quiet.
