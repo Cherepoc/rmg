@@ -453,6 +453,26 @@
     ]
   },
   {
+    "id": "mix-filter",
+    "question": "Trance's whole mix filtered, opening up from muffled over its intro, dipping before a louder section, closing at the end: a build, or a muffled mix?",
+    "decides": "The mix filter's chances in the dance genres, and its depths.",
+    "genre": "trance",
+    "without": {
+      "skip": [
+        "Mix filter"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "5",
+      "6"
+    ]
+  },
+  {
     "id": "gate",
     "question": "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
     "decides": "Its weight in Trance, and the parts it chops.",

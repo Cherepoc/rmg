@@ -124,6 +124,9 @@ internal static class CompositionStateKinds
 
     // a tape's wow, how far the song's pitch drifts either way, and a part's detune, how far it is held off, in cents
     // (Expression.TapeChance)
+    // how closed the whole mix is, from 0, open, to 1, as far as a filter closes, stepped as a fade is (MixFilter)
+    public static StateKind<double> MixClosed { get; } = StateKinds.CreateAdditive<double>(Prefix + "MixClosed", StateScope.Render, isShared: true);
+
     public static StateKind<int> Wow { get; } = StateKinds.CreateAdditive<int>(Prefix + "Wow", StateScope.Render);
     public static StateKind<int> Detune { get; } = StateKinds.CreateAdditive<int>(Prefix + "Detune", StateScope.Render);
 

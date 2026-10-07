@@ -59,6 +59,7 @@ internal static class SongStages
         new("Ornaments", Composition.Ornaments.Apply, CanSkip: true),
         new("Articulation", Articulations.Apply, CanSkip: true),
         new("Risers", Composition.Risers.Apply, CanSkip: true),
+        new("Mix filter", Composition.MixFilter.Apply, CanSkip: true),
         new("Timing", Pocket.Apply, CanSkip: true),
         new("Expression", ExpressionStage, CanSkip: true)
     ];

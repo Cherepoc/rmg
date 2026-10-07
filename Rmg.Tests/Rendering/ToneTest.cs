@@ -27,13 +27,14 @@ public sealed class ToneTest
     }
 
     [Test]
-    public async Task APartsBrightness_NeverFallsBelowTheFiltersReach_AndADrumsNeverMoves()
+    public async Task APartsBrightness_NeverFallsBelowTheFiltersReach_AndADrumsMovesOnlyWithTheMix()
     {
         foreach (var song in TestCorpus.Range(64))
         foreach (var track in song.Rendered.Tracks)
         {
             var values = track.Controllers.Where(c => c.Controller == ExpressionRender.BrightnessController).Select(c => c.Value).ToArray();
-            if (track.IsPercussionInstrument)
+            // a drum's only where the whole mix is filtered
+            if (track.IsPercussionInstrument && song.Trace.Single(x => x.Point == TracePoints.MixFilter).Value is MixFilterPlan { Opening: false, Dips.IsEmpty: true, Closing: false })
                 await Assert.That(values).IsEmpty();
             await Assert.That(values.All(x => x is >= 40 and <= 64)).IsTrue().Because($"seed {song.Seed}");
         }

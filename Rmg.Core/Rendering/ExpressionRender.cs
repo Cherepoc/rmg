@@ -57,14 +57,25 @@ internal static class ExpressionRender
     private static SectionSpan SectionAt(SongMap? map, double position) =>
         map?.Sections.LastOrDefault(x => x.Start <= position + 1e-9) ?? throw new InvalidOperationException($"No section of the song plays at {position}, which a gate or a filter counts from.");
 
-    /// <summary>The track's expression, from its notes, as they are swung, at the song's tempo, a gate's and a filter's by the sections of the map.</summary>
+    /// <summary>Where the whole mix's closing changes, swung, and how closed it is from there, in the brightness controller's steps (<see cref="CompositionStateKinds.MixClosed" />).</summary>
+    public static ImmutableArray<(double At, double Steps)> MixSteps(StateTimeline<double> mix, Swing swing) => [..mix.Select(x => (swing.Apply(x.Position), x.Value * FilterReach))];
+
+    /// <summary>How far the mix is closed at a time, swung, in the brightness controller's steps.</summary>
+    private static double MixAt(ImmutableArray<(double At, double Steps)> mix, double at) => mix.LastOrDefault(x => x.At <= at + 1e-9).Steps;
+
+    /// <summary>The drums' brightness wherever the mix's closing changes, the drums sharing a channel and no tone of their own.</summary>
+    public static IEnumerable<(double Position, int Controller, int Value)> MixBrightness(ImmutableArray<(double At, double Steps)> mix) =>
+        mix.Select(x => (x.At, BrightnessController, Math.Max(64 - FilterReach, (int)Math.Round(64 - x.Steps))));
+
+    /// <summary>The track's expression, from its notes, as they are swung, at the song's tempo, a gate's and a filter's by the sections of the map, under the whole mix's closing.</summary>
     public static (ImmutableArray<(double Position, int Value)> Bends, ImmutableArray<(double Position, int Controller, int Value)> Controllers,
         ImmutableArray<(double Position, double Value)> Expression) Render(
             EventTimeline<RealizedNote> notes,
             SongMap? map,
             Swing swing,
             StateTimeline<double> tempo,
-            double pan
+            double pan,
+            ImmutableArray<(double At, double Steps)> mix
         )
     {
         var bends = ImmutableArray.CreateBuilder<(double, int)>();
@@ -194,37 +205,35 @@ internal static class ExpressionRender
                 for (var t = start; t < end - 1e-9; t += Step * 4)
                     controllers.Add((t, 10, (int)Math.Round(64 + 63 * Math.Clamp(pan + sweep / 100.0 * Math.Sin(2 * Math.PI * t / 8), -1, 1))));
 
-            // the part's brightness, one curve: its tone, below the sound's own, and a filter closing further from it and opening
+            // the part's brightness, one curve: its tone, below the sound's own, a filter closing further from it and opening
             // back, ringing as it does: a wobble in time, a squelch on every note, an opening over a section's first phrase;
-            // never below the filter's reach
+            // and the whole mix's closing; never below the filter's reach
             var tone = state.GetStateValue(CompositionStateKinds.Tone);
             var filter = (StrongEffect)state.GetStateValue(CompositionStateKinds.Filter);
-            if (filter == StrongEffect.None && 64 - tone != (brightness ?? 64))
+            var filterCloses = state.GetStateValue(CompositionStateKinds.FilterDepth) / 100.0;
+            var cycle = state.GetStateValue(CompositionStateKinds.FilterCycle);
+            var filterFrom = filter != StrongEffect.None ? swing.Apply(SectionAt(map, note.Position).Start) : 0;
+            double Filtered(double t) => filter switch
             {
-                brightness = 64 - tone;
-                controllers.Add((start, BrightnessController, brightness.Value));
-            }
+                StrongEffect.None => 0,
+                StrongEffect.Wobble => 0.5 - 0.5 * Math.Cos(2 * Math.PI * (start + t - filterFrom) / cycle),
+                StrongEffect.Squelch => 1 - Math.Exp(-t / SquelchDecay),
+                _ => 1 - Math.Clamp((start + t - filterFrom) / cycle, 0, 1)
+            };
             if (filter != StrongEffect.None)
-            {
-                var closes = state.GetStateValue(CompositionStateKinds.FilterDepth) / 100.0;
-                var cycle = state.GetStateValue(CompositionStateKinds.FilterCycle);
-                var from = swing.Apply(SectionAt(map, note.Position).Start);
                 controllers.Add((start, ResonanceController, filter == StrongEffect.Squelch ? 104 : 84));
-                var step = filter == StrongEffect.Wobble ? cycle / 8 : Step / 2;
-                int? last = null;
-                for (var t = 0.0; t < duration - 1e-9; t += step)
-                {
-                    var closed = filter switch
-                    {
-                        StrongEffect.Wobble => 0.5 - 0.5 * Math.Cos(2 * Math.PI * (start + t - from) / cycle),
-                        StrongEffect.Squelch => 1 - Math.Exp(-t / SquelchDecay),
-                        _ => 1 - Math.Clamp((start + t - from) / cycle, 0, 1)
-                    };
-                    var value = Math.Max(64 - FilterReach, (int)Math.Round(64 - tone - closes * FilterReach * closed));
-                    if (value != last)
-                        controllers.Add((start + t, BrightnessController, value));
-                    last = brightness = value;
-                }
+            var step = filter == StrongEffect.Wobble ? cycle / 8 : Step / 2;
+            // a filter's steps, from the note's start, and wherever the mix's closing changes while it sounds
+            var brightnessTimes = (filter != StrongEffect.None ? Enumerable.Range(0, (int)Math.Ceiling((duration - 1e-9) / step)).Select(i => i * step) : [0.0])
+                .Concat(mix.Where(x => x.At > start + 1e-9 && x.At < end - 1e-9).Select(x => x.At - start)).Order();
+            // a filter's curve written whole on every note, the rest where the brightness changes
+            int? last = filter != StrongEffect.None ? null : brightness ?? 64;
+            foreach (var t in brightnessTimes)
+            {
+                var value = Math.Max(64 - FilterReach, (int)Math.Round(64 - tone - filterCloses * FilterReach * Filtered(t) - MixAt(mix, start + t)));
+                if (value != last)
+                    controllers.Add((start + t, BrightnessController, value));
+                last = brightness = value;
             }
 
             // an echo, the note sent to the delay, and none sent where the notes stop echoing

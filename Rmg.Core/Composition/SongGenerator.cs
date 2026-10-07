@@ -267,5 +267,6 @@ internal enum SongStream
     Figures = 88,
     StrongEffects = 89,
     Tone = 90,
-    Tape = 91
+    Tape = 91,
+    MixFilter = 92
 }

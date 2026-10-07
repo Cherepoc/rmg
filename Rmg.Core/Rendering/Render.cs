@@ -54,6 +54,8 @@ public static class Render
         var notes = song.Notes ?? Realizer.Realize(song.TrackDefinitions, song.TrackEventStateTimelineMap, song.MeterAt);
         var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap.OfScope(StateScope.Render);
         var swing = GetSwing(song);
+        // how closed the whole mix is, wherever it changes, every part's brightness under it
+        var mixClosed = ExpressionRender.MixSteps(common.GetStateTimeline(CompositionStateKinds.MixClosed), swing);
         var renderedTracks = new List<RenderedTrack>();
         var percussionTrackNotes = new List<IEnumerable<TimelineItem<RenderedNote>>>();
         ImmutableArray<(double Position, int Controller, int Value)> percussionSends = [];
@@ -108,7 +110,7 @@ public static class Render
             if (song.TrackDefinitions[trackNumber] is PitchInstrumentTrack pitchInstrumentTrack)
             {
                 // how the part is played beyond its notes, its send to the delay that echoes it among them
-                var expression = ExpressionRender.Render(trackNotes, song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), pitchInstrumentTrack.Pan);
+                var expression = ExpressionRender.Render(trackNotes, song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), pitchInstrumentTrack.Pan, mixClosed);
                 var played = EventTimeline.Create(trackNotes.Duration, renderedNotes);
                 var programChanges = ProgramChanges(trackNotes, pitchInstrumentTrack.InstrumentCode, swing);
                 var doubles = DoubleTracking.Doubles(pitchInstrumentTrack.Role, mix.Of(pitchInstrumentTrack.Role)?.Instrument ?? pitchInstrumentTrack.InstrumentCode);
@@ -150,8 +152,8 @@ public static class Render
                     echoingDrums.UnionWith(renderedNotes.Select(x => x.Value.Offset));
                 // the drums' reverb and chorus, as their first note has them
                 if (percussionSends.IsEmpty && trackNotes.Count > 0)
-                    percussionSends = [..ExpressionRender.Render(EventTimeline.Create(trackNotes.Duration, [trackNotes[0]]), song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), 0).Controllers
-                        .Where(x => x.Controller != ExpressionRender.DelayController)];
+                    percussionSends = [..ExpressionRender.Render(EventTimeline.Create(trackNotes.Duration, [trackNotes[0]]), song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), 0, [])
+                        .Controllers.Where(x => x.Controller is not (ExpressionRender.DelayController or ExpressionRender.BrightnessController))];
             }
         }
 
@@ -164,7 +166,7 @@ public static class Render
                 ? []
                 : [(ExpressionRender.DelayController, ExpressionRender.DelaySend), ..echoingDrums.Order().SelectMany(key => new[] { (99, 31), (98, key), (6, 127) })];
             var percussionTrack = new RenderedTrack(true, TrackRole.Drum, song.Draws?.Kit ?? 0, percussionEventTimeline, 0)
-                { Controllers = [..percussionSends.Select(x => (0.0, x.Controller, x.Value)), ..delaySends.Select(x => (0.0, x.Item1, x.Item2))] };
+                { Controllers = [..percussionSends.Select(x => (0.0, x.Controller, x.Value)), ..delaySends.Select(x => (0.0, x.Item1, x.Item2)), ..ExpressionRender.MixBrightness(mixClosed)] };
             renderedTracks.Add(percussionTrack);
         }
 

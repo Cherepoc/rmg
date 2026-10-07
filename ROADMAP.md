@@ -18,8 +18,8 @@ is removed once it is built.
 8. Done, with 9: one brightness a part, its tone and a filter's closing added, never below the filter's floor.
 9. Done: a part's darker tone, a gentle effect, darker in the quiet sections; a swell brightening left (P3).
 10. Done: a tape's wow, the parts drifting together, some detuned, IDM's and a lo-fi genre's.
-11. The mix's filter opening a song.
-12. The mix's filter dipping before a section or a drop, and closing a song as an ending.
+11. Done, with 12: the whole mix filtered, a song opening up, a section dipping before the next, a song closing.
+12. Done with 11.
 13. Trance as it is produced: its effects stacked, its rolling bass, its build, its degrees (*Genres*).
 14. Djent's filtered riff opening and its stuttering riff (*Genres*).
 15. Waiting on listening: the rest of rock's and metal's, long cycles, more figures, rolls in 32nds, a riff's drone.
@@ -274,13 +274,8 @@ Each item with its plan, and what it waits for.
   something; the part's one curve now adds its tone and a filter's closing note by note (`ExpressionRender`).
 - **A swell brightening** (P3, by listening to `?listen=tone`): brass and strings brightening as they swell, back up
   to their sound's own, never past it on an acoustic instrument (*The brightness's range*).
-- **The mix's filter** (P1, steps 7 and 8): the whole mix filtered, every channel, the drums' among them, a form
-  device decided as the song is put together, as a drop is: the song opening up from muffled over its first phrase or
-  its intro (step 7); a section's last bars closing and opening at the next, the likeliest into a drop or a lift, and
-  the last section sinking as an ending beside the fade (step 8); each placement's chance by the form facet and a
-  genre's, its depth and its length drawn. A dip into a drop takes the drop's place, the band filtered rather than
-  silent, as a genre chooses. General MIDI's brightness closes; a build thinning out as a high-pass filter does is
-  beyond it. Measured by the placements' shares by genre, and `?listen=` a question of each.
+- **A dip in place of a drop** (P3, by listening to `?listen=mix-filter`): the band filtered over the bar before a
+  drop rather than silent, as a genre chooses; a dip skips a drop's bar now (`MixFilter`).
 
 ### Groove
 
