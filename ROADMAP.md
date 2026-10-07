@@ -6,19 +6,24 @@ is removed once it is built.
 
 ## Priorities
 
-**In order** (P1, the plan of 8 October 2026, each step through the implementation loop):
+**In order** (P1, the plan of 9 October 2026, each step through the implementation loop):
 
-1. Done: the genres sorted by name.
-2. Done: rock and metal measured, their presets tuned.
-3. Done: a section left to drums that only mark the form.
-4. Done: the listening tool, and *Listening* cut to its questions.
-5. Merged into 10: the double kick, a figure of the kick's in a genre's loud sections.
-6. Done: a progression's degrees leaned by a genre.
-7. Done: the kick locked to the riff.
-8. Done: the render reading the song's map, and stop time decided once.
-9. Done: the song's sound decided before its notes; the gate's chords voiced put off (*Architecture*).
-10. Done: figures as a genre's data, the double kick, the gallop and the clave among them.
-11. Waiting on listening: the rest of rock's and metal's (*Genres*), and long cycles (*Rhythm engine*).
+1. The echo as the synthesizer's delay rather than notes (*Instruments and expression*).
+2. The strong effects each a chance of its own, one a controller on a part, the volume curves multiplied.
+3. The gate holding whole chords only, an arpeggio gated as it plays; Trance's arpeggios' rhythm measured.
+4. The brightness heard: how far it moves each family of instruments in both soundfonts served.
+5. One filter curve a part, its shapes combined, drawn over time, the filter's movements moved onto it.
+6. The filter as tone: a part's constant tone, its tone by a section's energy, a swell brightening.
+7. The mix's filter opening a song.
+8. The mix's filter dipping before a section or a drop, and closing a song as an ending.
+9. Trance as it is produced: its effects stacked, its rolling bass, its build, its degrees (*Genres*).
+10. Djent's filtered riff opening and its stuttering riff (*Genres*).
+11. Waiting on listening: the rest of rock's and metal's (*Genres*), long cycles (*Rhythm engine*), more figures.
+
+Done in the plan of 8 October 2026: the genres sorted by name; rock and metal measured and their presets tuned; a
+section left to drums that only mark the form; the listening tool, *Listening* cut to its questions; a progression's
+degrees leaned by a genre; the render reading the song's map, stop time decided once; the song's sound decided before
+its notes; figures as a genre's data, the kick with the riff, the double kick, the gallop and the clave.
 
 **Next** (P1, alongside): listening to what is deployed and tuning by what it says (see *Listening*, the page's
 listening mode for the questions it asks), done for a version when every question is answered or let go of; and the
@@ -248,11 +253,57 @@ Each item with its plan, and what it waits for.
   sounding into the next; holding the note before into the slide and leaving the next unstruck edits two notes at
   render. Built if the struck slide sounds like a stutter.
 - **Long fall-offs** (P4): a fall of an octave into nothing at a note's end, a slide's kind of its own, if missed.
-- **A slow filter sweep** (P3): the filter rising and falling over two to eight bars, or opening through a build into a
-  drop, a dance track's sweep; the filter's shapes now move in a beat (`StrongEffect.Wobble`), a note
-  (`StrongEffect.Squelch`) or a section's first phrase (`StrongEffect.Opening`). A fourth shape of a cycle in bars on
-  the same controllers and parts, or the opening's span stretched over a lift's build (`LiftCues`), should Trance's and
-  Electronic's builds want it.
+- **The echo as the synthesizer's delay** (P1, step 1): an echo is three quieter copies of a part's notes now
+  (`ExpressionRender`, `RenderedTrack.Echoes`), a workaround that adds notes and repeats without a delay's tail. The
+  Roland GS delay plays it instead, which the page's player has (spessasynth_core 4.3.22: a delay with its time and
+  feedback, a part's send on CC94, and a send for each drum): the delay's time from the tempo, a dotted 8th or as drawn,
+  sent again where a section takes a tempo of its own, a second at most, halved past it; its feedback for dub's long
+  darkening tail; the echoing part's send, and dub's snare alone by its drum's send. One delay a song, every echoing
+  part sharing its time, as a band's tempo delay is. Players without the GS delay, a DAW's or FluidSynth's, play no
+  echo from the file, as with the insertion effect; the MP3 export renders through the same synthesizer and keeps it.
+  First heard: the player's delay's tone, its stereo, any click. Then the echo's notes, their rendering and their
+  tests (`DubEchoTest`) go. Measured by the songs echoing by genre, as now, and `?listen=` a question of it.
+- **The strong effects each a chance of its own** (P1, step 2): one strong effect a song at most is a blunt rule, put
+  in against the tremolo's overuse and its clash with the echo; trance plays its pump, its gate and its filter at
+  once. Every strong effect a chance of its own, as the gentle ones are, by the sound facet and a genre's chance of
+  each, from a stream of its own, and a carrier of its own; what each moves as data on it, the volume (tremolo, pump,
+  gate), the pan (sweep), the filter (wobble, squelch, opening) or the notes (echo), a part carrying one of each at
+  most; the volume's curves multiplied, the gate's joining the swell's, the tremolo's and the pump's
+  (`ExpressionRender`), so that a gated part pumps too. The tremolo kept rare by its own chance; with the echo the
+  synthesizer's, the two allowed together and listened to. A genre's `strongEffect` a chance of each rather than a
+  pool. Measured against now: 25% of middling songs with a strong effect (`ExpressionTest.Report`), the share with any
+  and the mean a song as targets, the plainest none.
+- **The gate holding whole chords only** (P1, step 3): Trance's chords part arpeggiates in about 87% of its sections,
+  and a gated arpeggio is held as its longest note (34% of Trance's held notes single), neither an arpeggio nor a gated
+  chord; in trance the two are layers of their own. `GatedChords` holds the notes played as whole chords, and leaves an
+  arpeggio's notes as they play, the gate chopping them on its grid, a gated pluck. This replaces voicing a gated
+  arpeggio as a chord, which would lose Trance's arpeggio, its hook. Measured: the held notes single (34% to about 0),
+  the gated part's notes left an arpeggio's, `?listen=gate`. And measured first: whether Trance's arpeggios run in
+  steady 16ths, an arpeggio following the chords part's own rhythm; if not, a 16th arpeggio a figure of the chords
+  part's (`Figures`).
+- **The brightness heard** (P1, step 4): how far the brightness (CC74) and the resonance (CC71) move each family of
+  instruments, the pianos, the guitars, the distorted guitar most, the basses, the strings, the brass, the synths and the
+  drums, in both soundfonts served, by ear: some presets have no filter of their own and may barely move. The depths of
+  everything below follow from it.
+- **One filter curve a part** (P1, step 5): the filter's shapes a vocabulary as data, each anchored where it means
+  something rather than drawn freely, a part's curve the closings of those acting on it added, with a floor short of
+  silence, and drawn over time rather than while its notes sound, so that a curve moves through a rest; a note's (a
+  squelch, a pluck's attack), a beat's (a wobble), a phrase's (a part opening, a slow sweep over two to eight bars), a
+  section's (its tone by its energy, the mix's dip) and the song's (a part's tone, the mix opening or closing). The
+  filter's movements now (`StrongEffect.Wobble`, `Squelch`, `Opening`) moved onto it, the fingerprint kept.
+- **The filter as tone** (P1, step 6): a part's constant tone, a dark piano in a ballad, a dull fingered bass, a mellow
+  jazz guitar, drawn by its part and leaned by a genre; its tone by its section's energy, a rhythm guitar darker in the
+  verse and brighter in the chorus, as a player rolls the tone knob, a lean by the energy as every other; a swell
+  brightening as it grows, brass and strings swelling rather than a fader. A channel has one brightness, so a chords
+  part's tone is the part's or the section's, never a note's; velocity darkens soft notes already in a soundfont, so
+  the tone comes of intent, never of the velocity. For every genre, not the dance ones alone.
+- **The mix's filter** (P1, steps 7 and 8): the whole mix filtered, every channel, the drums' among them, a form
+  device decided as the song is put together, as a drop is: the song opening up from muffled over its first phrase or
+  its intro (step 7); a section's last bars closing and opening at the next, the likeliest into a drop or a lift, and
+  the last section sinking as an ending beside the fade (step 8); each placement's chance by the form facet and a
+  genre's, its depth and its length drawn. A dip into a drop takes the drop's place, the band filtered rather than
+  silent, as a genre chooses. General MIDI's brightness closes; a build thinning out as a high-pass filter does is
+  beyond it. Measured by the placements' shares by genre, and `?listen=` a question of each.
 
 ### Groove
 
@@ -306,12 +357,6 @@ Each item with its plan, and what it waits for.
 
 ### Architecture
 
-- **A gated arpeggio voiced as a chord** (P3, put off October 2026, should listening find the single held note thin):
-  the song's strong effect and its carrier are decided with the song now (`SongSound`), so a stage before the notes
-  knows the gated part; but the `Realizer` plays a chords part's notes by the pattern's state, an arpeggio's one note
-  and a note's length to the next capped at a bar, both from layers that add up, which a stage would have to set
-  through them. A trial: the gated part's patterns one held event a bar on every chord, their arpeggio none. The pushes
-  need no part of it: the held chords move a pushed note to its beat already (`GatedChords`).
 - **The ratings in the history** (P4): the list of songs so far does not show which were liked or disliked.
 - **A mix written by the page** (P4): a change of the mix asks the server for the file again only for the download;
   writing the mix into the file in the page would leave the server out of it, at the cost of MIDI writing in
@@ -356,6 +401,19 @@ left:
   - Tremolo picking (P3, measured first): fast repeated notes unmuted, the riff's speed perhaps enough already.
   - A melody sung rather than played (P3, a listening question first): no singer in General MIDI; the melody's
     rhythms word-like, its breaths and held ends, should it sound like a lead guitar playing a tune.
+- **Trance as it is produced** (P1, step 9, after the effects and the filter): the kick pumping the mix, the gate on
+  the chords where they play whole, the filter opening a synth and the mix, dips into the drops, all at once rather
+  than one of them (*The strong effects each a chance of its own*); a rolling bass, 8ths or 16ths off the beat under the
+  kick, a figure of the bass's (`Figures`); the build into a drop, a snare roll speeding up from 8ths to 32nds, measured
+  first against the hi-hat rolls and the lift's cues; minor, its ♭VI, ♭III and ♭VII leaned (`rootDegree`). Measured by
+  Trance's songs with each, `?listen=gate` and the build's question.
+- **Djent's filtered riff and its stutter** (P1, step 10, after the mix's filter): a modern industrial metal sound, the
+  down-tuned riff low-passed, under water, for a bar or a phrase, then open on the downbeat of the heavy section, a dip
+  of the mix's filter in place of a drop's silence rather than beside it, two gestures at once being too many; the riff
+  chopped by the gate in time with the kick, a stutter, the riff a carrier the gate suits in Djent as the genre's data.
+  First heard: whether General MIDI's distortion guitar moves with the brightness at all in the soundfonts served; if
+  not, the gesture is the gate's and the drop's alone. A pitch-bend dive at a section's end (P3); bit-crushing, tape
+  stops and glitches are beyond General MIDI (*Parked*).
 - **More genres** (P3): chiptune, once a square wave may play the chords (*Instruments outside a role's pool*).
   What the genres made in October 2026 still want: Fusion's
   roots off the scale (the progressions move by a 7-note scale's steps, chromatic and constant-structure motion
@@ -415,8 +473,6 @@ left:
 
 Ideas with a reason, not planned: none has shown a need. Taken up only when listening or another item asks for one.
 
-- **The GS delay** (P4): the synthesizer's tempo-set delay with its feedback, a dub's long darkening repeats, which
-  only a GS player plays; echoes as notes play everywhere.
 - **The drums one by one** (P4): each drum's tuning, pan and sends as GS drum parameters, a dry kick under a wetter
   snare, Trap's kick tuned down, the toms panned: a mix's realism.
 - **A flanger** (P4): the chorus's type set to a flanger, which every part sending to the chorus would take at once.
@@ -429,8 +485,10 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
   each pitch, and read as a mistake rather than as meant; a gunshot, a telephone or a helicopter never, applause a
   gimmick, breath and fret noise realism. One experiment, should listening ask: a bed of the sea, birds or rain held
   under an Ambient intro or outro, a part of one held note and no harmony.
-- **Ping-pong echo** (P4): an echo alternating sides, from the part's pan to its mirror, where a part's echo now
-  repeats in place.
+- **Sound design beyond General MIDI** (P4): bit-crushing, tape stops, glitch edits and a high-pass filter, a modern
+  metal or electronic producer's, which no General MIDI controller moves; a pitch-bend dive the one near it.
+- **Ping-pong echo** (P4): an echo alternating sides, from the part's pan to its mirror, which the GS delay's left and
+  right times may make once the echo is the synthesizer's.
 - **Modulation** (blocked until a soundfont maps it): CC1, which none of the soundfonts offered maps to tone. The rule
   to keep: modulation and a vibrato never at once, modulation and bends together.
 - **A stage report of notes moved in place:** the stages' counts tell notes added and taken away; a diff of every
