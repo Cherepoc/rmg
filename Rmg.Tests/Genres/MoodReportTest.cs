@@ -37,7 +37,7 @@ public sealed class MoodReportTest
     [Explicit]
     public async Task Report()
     {
-        foreach (var name in new[] { "blackMetal", "idm", "metal", "ambient", "pop" })
+        foreach (var name in new[] { "blackMetal", "idm", "metal", "djent", "nuMetal", "dungeon", "trap", "dnb", "techno", "medieval", "blues", "pop" })
         {
             Describe(name, TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name)))));
         }

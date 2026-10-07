@@ -299,7 +299,10 @@ internal static class InstrumentRoles
             new(107, "Koto", new ByConvention(0, 0, 0.15), MelodyLayers.Mixed),
             new(109, "Bagpipe", new ByConvention(0, 0, 0.1), MelodyLayers.Stepwise),
             new(111, "Shanai", new ByConvention(0, 0, 0.1), MelodyLayers.Stepwise),
-            new(114, "Steel Drums", new ByConvention(0, 0.05, 0.2), MelodyLayers.Leaping)
+            new(114, "Steel Drums", new ByConvention(0, 0.05, 0.2), MelodyLayers.Leaping),
+            // a lead guitar driven, a punk or a black metal band's, the songs' at their wildest alone
+            new(29, "Overdriven Guitar", new ByConvention(0, 0, 0.1), MelodyLayers.Mixed),
+            new(30, "Distortion Guitar", new ByConvention(0, 0, 0.1), MelodyLayers.Mixed)
         ]
     );
 

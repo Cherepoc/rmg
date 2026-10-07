@@ -200,6 +200,10 @@ Each item with its plan, and what it waits for.
 
 ### Conventionality
 
+- **Black metal's pinch harmonics too many** (P1, heard on test): its riffs squeal in pinch harmonics too often;
+  the driven guitars' harmonics variant (`InstrumentsOverTime.Variants`, 29 and 30 to 31) leaned down by a genre, a
+  tremolo-picked or a blasting section's riff without them, and their share measured by genre
+  (`NewGenresReportTest`'s harmonics count).
 - **A sparse song's silent start** (P2): an Ambient or a Dungeon song now and then silent for its first 16 beats or
   more, its parts resting through their first phrase's start and its drums out of its first section (Ambient seed 37,
   Dungeon seed 54 of the corpus); a song's first part to sound coming in on its first beat, or the intro left out.

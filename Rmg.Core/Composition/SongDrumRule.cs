@@ -79,6 +79,22 @@ public sealed class SongDrumRule
     }
 
     /// <summary>
+    ///     Extra drums beside a group's own, as <see cref="Pool" /> picks them for the songs; a genre's each kept as often as
+    ///     it weighs it against its heaviest, so that a tambourine it names lightly plays now and then rather than in every
+    ///     song, and one it names not at all never.
+    /// </summary>
+    public static SongDrumStep Extras(int min, int max, params PercussionInstrumentDefinition[] drums)
+    {
+        var picks = Pool(min, max, drums);
+        return (context, selectedDrums, pool) =>
+        {
+            var picked = new List<PercussionInstrumentDefinition>();
+            picks(context, picked, pool);
+            selectedDrums.AddRange(pool is null ? picked : picked.Where(x => context.TestProbability(Math.Min(1, pool(x)))));
+        };
+    }
+
+    /// <summary>
     ///     The drum is available with the given probability, unless one of <paramref name="unlessSelected" /> has
     ///     already been selected by the earlier steps.
     /// </summary>

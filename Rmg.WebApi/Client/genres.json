@@ -28,7 +28,7 @@
       "dynamics": { "energy": 65, "contrast": 70 },
       "phrases": { "fourBars": 100, "eightBars": [40, 40, 50], "twelveBars": [5, 10, 10] },
       "instrument": {
-        "melody": { "acousticGrandPiano": [46, 46, 80], "electricPiano1": [38, 38, 67], "harmonica": 38, "electricGuitarClean": 100, "lead2Sawtooth": [46, 46, 50], "sitar": [0, 0, 15] },
+        "melody": { "acousticGrandPiano": [46, 46, 80], "electricPiano1": [38, 38, 67], "harmonica": 38, "electricGuitarClean": 100, "lead2Sawtooth": [0, 10, 30], "sitar": [0, 0, 15] },
         "chords": { "rockOrgan": [30, 30, 33], "acousticGuitarSteel": [25, 25, 100], "electricGuitarClean": [45, 45, 74], "overdrivenGuitar": [100, 100, 64], "distortionGuitar": [80, 80, 51] },
         "bass": { "electricBassFinger": [65, 65, 100], "electricBassPick": [100, 100, 87] },
         "riff": { "overdrivenGuitar": 100, "distortionGuitar": 85, "electricGuitarMuted": [5, 5, 15] },
@@ -416,6 +416,7 @@
     "name": "Reggae",
     "description": "Slow, the one drop with the kick and snare on beat 3, the chords and a rhythm guitar skanking on the offbeats, a sparse repeating bass, organ, major and minor.",
     "choices": {
+      "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 40, "tom": 50, "cymbal": 60, "conga": [10, 20, 30] },
       "louderForms": { "guitars": 0 },
       "drumSounds": { "crossStick": 85 },
       "rootMotion": { "fifthDown": 70, "fourthDown": 75 },
@@ -530,6 +531,7 @@
     "name": "Funk",
     "description": "The hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and a muted guitar comping in 16ths, brass, sevenths and ninths, Dorian and Mixolydian, everything repeating.",
     "choices": {
+      "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 40, "tom": 50, "cymbal": 70, "tambourine": [30, 40, 50], "cowbell": [10, 20, 30], "conga": [10, 20, 30] },
       "soloists": { "solo": 100, "melody": [25, 45, 25], "chords": [25, 30, 25], "riff": [25, 20, 25], "rhythm": [25, 15, 25], "counterMelody": [0, 18, 25], "bass": [0, 25, 40], "drum": [0, 11, 25] },
       "drumSounds": { "openHiHat": 65 },
       "insertion": { "none": 100, "wah": [40, 50, 60], "phaser": [10, 20, 30] },
@@ -634,6 +636,7 @@
     "name": "Blues",
     "description": "A shuffle, sevenths over Mixolydian, a harmonica, an overdriven guitar and an organ, slow to mid.",
     "choices": {
+      "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 60, "tom": 50, "cymbal": 70, "tambourine": [20, 30, 40] },
       "louderForms": { "guitars": [0, 15, 30] },
       "pins": { "backbeat": [70, 70, 40] },
       "melodyRange": { "wide": 30 },
@@ -747,6 +750,7 @@
     "name": "Pop",
     "description": "A verse, a pre-chorus and a chorus on a hook, the last chorus lifted a key and played twice, piano, synths and clean guitars, the kick and snare on the beat, plain triads and add9 chords, major, 95 to 125.",
     "choices": {
+      "drumPieces": { "kick": 100, "acousticSnare": 100, "electricSnare": 30, "clap": 40, "hiHat": 100, "ride": 30, "tom": 60, "cymbal": 80, "tambourine": [30, 40, 50], "maracas": [20, 30, 40] },
       "strongEffect": { "none": [100, 80, 30], "pump": [0, 5, 20], "echo": [0, 10, 30], "tremolo": [0, 5, 20], "sweep": [0, 3, 20] },
       "louderForms": { "guitars": [10, 30, 40] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 80, "counterMelody": 45, "drum": 95, "riff": 50, "riffTwin": [0, 15, 15], "rhythm": 40, "solo": [0, 20, 80] },
@@ -790,6 +794,9 @@
     "name": "Metal",
     "description": "Distorted guitars chugging a riff in power chords, a double kick in 16ths, the snare on 2 and 4 or in half time, breaks and stops, guitar solos, natural minor, Phrygian and harmonic minor, fast.",
     "choices": {
+      "sectionHome": { "tonic": 100, "relative": 15, "fourth": 20, "fifth": 20 },
+      "passingChords": {},
+      "chordScales": { "borrowed": [0, 5, 10] },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 70, "tom": 80, "cymbal": 100 },
       "alone": { "rhythm": 100, "riff": 60, "chords": 30, "bass": 20, "pad": 20 },
       "texture": { "steady": 100, "build": [20, 30, 40], "alone": [5, 10, 20] },
@@ -908,6 +915,8 @@
     "name": "Dungeon synth",
     "description": "Dark and slow: a harpsichord's ostinato under a celesta or a horn, synth strings, choirs and brass, minor and harmonic minor triads, drones and a deep reverb, a timpani and a snare's roll marking the form.",
     "choices": {
+      "sectionHome": { "tonic": 100, "fourth": 25, "fifth": 20 },
+      "passingChords": {},
       "room": { "hall": 100 },
       "ornaments": { "graces": [0, 20, 50], "turns": [0, 5, 20], "trills": [0, 15, 40] },
       "tempo": { "from": [60, 60, 60], "to": [90, 90, 110] },
@@ -916,7 +925,7 @@
       "scale": { "naturalMinor": 100, "harmonicMinor": 70, "phrygian": 50, "dorian": [20, 30, 40], "locrian": [0, 0, 20] },
       "chordShape": { "triad": 100, "powerChord": 40, "sus2": 30, "sus4": 30, "add9": [10, 20, 30], "minorMajorSeventh": [0, 5, 20], "augmented": [0, 0, 15] },
       "rootMotion": { "thirdDown": 75, "stepUp": 70, "stepDown": 60 },
-      "chordScales": { "borrowed": [10, 15, 20] },
+      "chordScales": {},
       "harmonicRhythm": { "twoBars": 100, "oneBar": 60 },
       "harmonyDevices": { "pedal": [40, 40, 50] },
       "arpeggio": { "none": 100, "up": 70, "upDown": 60, "alberti": 40, "downUp": 30 },
@@ -1162,6 +1171,8 @@
     "name": "Trap",
     "description": "A TR-808 in half time, the hi-hat in 16ths rolling into 32nds and triplets, a long gliding bass, dark bells and pads looping, minor and Phrygian, verses left to a voice.",
     "choices": {
+      "rootDegree": { "third": 30, "seventh": 40, "sixth": 60, "fourth": 65 },
+      "sectionHome": { "tonic": 100, "fourth": 20, "relative": 10 },
       "rootMotion": { "same": 75 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "tempo": { "from": [130, 130, 120], "to": [150, 150, 170] },
@@ -1334,6 +1345,7 @@
     "name": "Ska",
     "description": "Fast, the guitar and the piano skanking on the offbeats, a walking bass, horns on a riff and in solos, trumpet and sax leads, major and Mixolydian.",
     "choices": {
+      "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 50, "tom": 50, "cymbal": 70 },
       "stopTime": { "sections": [5, 10, 15] },
       "tempo": { "from": [140, 140, 130], "to": [170, 170, 190] },
       "meter": { "4/4": 100 },
@@ -1400,7 +1412,7 @@
       "riff": { "powerChords": [90, 90, 80], "chugs": [20, 20, 30] },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 0, "counterMelody": 0, "drum": 100, "riff": [50, 50, 60], "riffTwin": 0, "rhythm": [80, 80, 70], "solo": [0, 10, 30] },
       "instrument": {
-        "melody": { "electricGuitarClean": 60, "lead2Sawtooth": 30, "harmonica": 20 },
+        "melody": { "overdrivenGuitar": 100, "electricGuitarClean": 60, "harmonica": [0, 10, 20] },
         "chords": { "distortionGuitar": 100, "overdrivenGuitar": 80 },
         "bass": { "electricBassPick": 100 },
         "riff": { "distortionGuitar": 100, "overdrivenGuitar": 80 },
@@ -1738,7 +1750,7 @@
       "drumSetup": { "kit": 100 },
       "parts": { "melody": [40, 40, 50], "chords": 100, "bass": 100, "pad": [50, 50, 60], "counterMelody": [20, 20, 30], "drum": 100, "riff": 100, "riffTwin": [0, 15, 20], "rhythm": [40, 40, 40], "solo": [0, 5, 20] },
       "instrument": {
-        "melody": { "lead5Charang": 60, "lead2Sawtooth": 40, "lead6Voice": 40, "frenchHorn": 20 },
+        "melody": { "distortionGuitar": 80, "lead5Charang": 50, "lead6Voice": 40, "frenchHorn": 20, "lead2Sawtooth": 20 },
         "chords": { "distortionGuitar": 100, "overdrivenGuitar": 50, "synthStrings1": [10, 10, 20], "churchOrgan": [10, 10, 20] },
         "bass": { "electricBassPick": 100, "electricBassFinger": 50 },
         "pad": { "choirAahs": 100, "synthStrings1": 80, "pad4Choir": 60, "stringEnsemble1": 40, "pad7Halo": 30 },
@@ -1754,6 +1766,7 @@
     "name": "IDM",
     "description": "Warm and warped at its plainest, a slow swung breakbeat under detuned pads, an electric piano and a music box, sevenths and Dorian; wilder, an acid bass squelching and gliding, odd meters, tuplets and polymeters, and drums splintering into rolls.",
     "choices": {
+      "drumPieces": { "kick": 100, "electricSnare": 80, "acousticSnare": 50, "clap": 40, "hiHat": 100, "ride": 30, "tom": 50, "cymbal": 50 },
       "sectionHome": { "tonic": 100, "fourth": 20, "relative": 10 },
       "rootDegree": { "third": 25, "seventh": 30, "fourth": 70, "sixth": 65 },
       "passingChords": {},

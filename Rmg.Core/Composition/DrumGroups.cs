@@ -90,7 +90,7 @@ internal static class DrumGroups
             [
                 SongDrumRule.Always(DrumDefinitions.HiHat),
                 SongDrumRule.Optional(DrumDefinitions.Ride, RideChance),
-                SongDrumRule.Pool(1, 2, DrumDefinitions.Tambourine, DrumDefinitions.Cabasa, DrumDefinitions.Maracas)
+                SongDrumRule.Extras(1, 2, DrumDefinitions.Tambourine, DrumDefinitions.Cabasa, DrumDefinitions.Maracas)
             ]
         ),
         holdsARole: true

@@ -125,8 +125,8 @@ internal static class InstrumentsOverTime
     /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
     /// <param name="families">A part's draw of whether a switch keeps to its family, by the section and the part's track.</param>
     /// <param name="genre">
-    ///     The genre whose pools of the roles' instruments a switch keeps to; an instrument's articulations, its variants,
-    ///     are its own.
+    ///     The genre whose pools of the roles' instruments a switch keeps to, and an articulation too, a variant, where the
+    ///     pool leaves it out; one the role never lists is the instrument's own.
     /// </param>
     public static ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> Apply(
         ImmutableSortedDictionary<int, EventTimeline<RealizedNote>> notes,
@@ -162,8 +162,12 @@ internal static class InstrumentsOverTime
                     : role.Pick(context, sound[index], pool, pitched.InstrumentCode).Program;
                 var program = switches ? switched : pitched.InstrumentCode;
                 var mode = context.Pick(ByConvention.Weigh(Modes, sound[index]));
-                var variants = Variants.GetValueOrDefault(program, []);
-                var variant = variants.IsEmpty ? program : variants[context.GenerateInt(0, variants.Length)];
+                // a variant the genre's pool of the part leaves out, a slapped bass in a metal band's, never plays, drawn all the
+                // same; one the role never lists, a driven guitar's pinch harmonics, is the player's own
+                var drawnVariants = Variants.GetValueOrDefault(program, []);
+                var drawnVariant = drawnVariants.IsEmpty ? program : drawnVariants[context.GenerateInt(0, drawnVariants.Length)];
+                var leftOut = pool is not null && role?.Instruments.FirstOrDefault(x => x.Program == drawnVariant) is { } listed && !(Weight(listed) > 0);
+                var (variants, variant) = leftOut ? (ImmutableArray<int>.Empty, program) : (drawnVariants, drawnVariant);
                 var bars = Enumerable.Range(0, (int)Math.Round(span.Duration / span.Meter.BarDuration)).Select(_ => context.TestProbability(BarChance)).ToArray();
 
                 var inSpan = notes[track].Select((x, i) => (Note: x, Index: i)).Where(x => x.Note.Position >= span.Start - 1e-9 && x.Note.Position < span.End - 1e-9).ToArray();
