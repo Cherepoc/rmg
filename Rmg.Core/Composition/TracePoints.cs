@@ -303,6 +303,9 @@ internal static class TracePoints
     /// <summary>How the song starts, in words.</summary>
     public const string SongIntro = "Song intro";
 
+    /// <summary>A section's appearance's drum edits, its place and how many (a <c>(int, int)</c>; <see cref="Composition.Mutations" />).</summary>
+    public const string Mutations = "Mutations";
+
     /// <summary>Where the song's whole mix is filtered (<see cref="Composition.MixFilterPlan" />).</summary>
     public const string MixFilter = "Mix filter";
 

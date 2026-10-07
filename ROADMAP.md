@@ -13,7 +13,7 @@ is removed once it is built.
 3. Done: any General MIDI instrument in any role a genre's; instruments added where they belong; Chiptune.
 4. Done: the flaky page test's 400, a range's from typed above its to, the other end now following.
 5. Done: a sparse song's silent start, its earliest part's first note held from the first beat.
-6. A groove that mutates (*Groove*).
+6. Done: a groove that mutates, its edits kept, IDM's and DnB's the most.
 7. Drum solos rethought, their feet's ostinato and their stickings first (*Groove*).
 8. A filtered bar in place of a drop's silence; a swell brightening; a whammy dive at a section's end.
 9. A line's tensions beyond Djent, after `?listen=djent-tension` is answered.
@@ -287,17 +287,9 @@ Each item with its plan, and what it waits for.
 
 ### Groove
 
-- **A groove that mutates** (P1, IDM and DnB first, planned October 2026): a section's drums now repeat their pattern
-  as written, varied only by a varied repeat, the fills and the hat rolls. An edit after the figures and before the
-  fills, from a stream of its own: every bar after a section's first takes a few edits by a vocabulary as data, a hit
-  moved a 16th, a hit dropped, a ghost added, a hit ratcheted into 32nds or 64ths, two 8th slices of the bar swapped (a
-  break chopped and resequenced), the kick and the snare traded on a beat; each edit kept by the bars after it, so that
-  the groove strays further as the section goes on, as a programmed break evolves, and snapping back to the section's
-  own pattern at a phrase's start now and then, the likelier the plainer. The downbeat's kick and the backbeat's snare
-  kept but at the wild end; the chance an edit a bar by the groove facet, its plain end none, leaned by a genre (IDM's
-  and DnB's high, a band's low) and by the energy. Measured by each bar's hits differing from the section's first,
-  growing through it, by genre; `?listen=` a question of it. Risk: edits heard as mistakes; kept edits and the snap
-  back are what make them a development rather than noise.
+- **A mutating groove, by listening** (`?listen=mutation`): IDM 90% of its sections, 5.4 edits an appearance, its hits
+  unlike the first bar's 11% at the second bar to 34% at the fourteenth; the edits' weights, the ratchet's and the
+  trade's above all; the snap back at a phrase.
 - **Drum solos rethought** (P1, planned October 2026): a solo now plays the pitched solos' gestures with the kit as a
   scale, a run round the toms, a lick, a crash held, a pause, a quote of the groove, the kick keeping time under it.
   A drummer thinks otherwise; in order of what it would add:

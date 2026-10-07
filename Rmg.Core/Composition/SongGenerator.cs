@@ -99,7 +99,7 @@ public static class SongGenerator
         var (genre, tracks, form, songUnconventionality) = (song.Genre, song.Tracks, song.Form, song.Facets);
         IGenerationContext Stream(SongStream stream) => CreateStream(seed, stream);
         // the song put together as planned, then every stage after it in its order
-        var staged = SongStages.Run(song, new SongDraft(form.Edits.ApplyTo(form.Blocks.Unroll()), null, [], [], []), skipped, observe, cancellation);
+        var staged = SongStages.Run(song, new SongDraft(form.Edits.ApplyTo(form.Blocks.Unroll()), null, [], [], [], ImmutableDictionary<int, ImmutableDictionary<FigurePlayer, string>>.Empty, []), skipped, observe, cancellation);
         var (songTrackNoteTimelineMap, notes) = (staged.Timeline, staged.Notes!);
 
         // the drum kit's sound, the standard kit's, or one of a genre's pool of them, from a stream of its own
@@ -269,5 +269,6 @@ internal enum SongStream
     Tone = 90,
     Tape = 91,
     MixFilter = 92,
-    Pinch = 93
+    Pinch = 93,
+    Mutations = 94
 }

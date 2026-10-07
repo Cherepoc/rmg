@@ -105,6 +105,7 @@ internal static class Figures
             StateTrace.Record(TracePoints.Figures, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, string.Join(", ", played.Select(x => $"{x.Key} {x.Value}")), played);
             return figures;
         });
+        draft = draft with { Figures = drawn.ToImmutableDictionary(x => x.Key, x => x.Value.Where(f => f.Value is not null).ToImmutableDictionary(f => f.Key, f => f.Value!.Name)) };
         if (drawn.Values.All(x => x.Values.All(f => f is null)))
             return draft;
 

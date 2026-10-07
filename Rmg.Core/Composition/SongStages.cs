@@ -13,12 +13,16 @@ namespace Rmg.Core.Composition;
 /// <param name="Runs">The drums' runs, which the fills play and the lines walk with (<see cref="SongStages.Fills" />).</param>
 /// <param name="MelodyWalks">Where the melody leads into a section, which the counter-melody leaves to it (<see cref="SongStages.Lines" />).</param>
 /// <param name="Chains">How each key change is led into, which the bass's pedal holds under (<see cref="SongStages.KeyChanges" />).</param>
+/// <param name="Figures">Every section's figures, by its id and the player, which a mutating groove leaves as they are (<see cref="Composition.Figures" />).</param>
+/// <param name="Polymeters">The sections a figure runs across the bar lines in, which a mutating groove leaves as they are (<see cref="SongStages.Polymeter" />).</param>
 internal sealed record SongDraft(
     TrackEventStateTimelineMap<StateMap> Timeline,
     ImmutableSortedDictionary<int, EventTimeline<RealizedNote>>? Notes,
     IReadOnlyList<PlayedRun> Runs,
     ImmutableHashSet<double> MelodyWalks,
-    ImmutableArray<(double Change, ImmutableArray<double> Chords, KeyChange.Device Device)> Chains
+    ImmutableArray<(double Change, ImmutableArray<double> Chords, KeyChange.Device Device)> Chains,
+    ImmutableDictionary<int, ImmutableDictionary<FigurePlayer, string>> Figures,
+    ImmutableHashSet<int> Polymeters
 );
 
 /// <summary>A stage of the song after it is put together: its name, what it does, and whether a test may leave it out.</summary>
@@ -39,6 +43,7 @@ internal static class SongStages
         new("Inner lines", Composition.InnerLines.Apply, CanSkip: true),
         new("Polymeter", Polymeter, CanSkip: true),
         new("Figures", Figures.Apply, CanSkip: true),
+        new("Mutations", Composition.Mutations.Apply, CanSkip: true),
         new("Fills", Fills, CanSkip: false),
         new("Lift cues", LiftCues, CanSkip: true),
         new("Drum solos", DrumSolos, CanSkip: true),
@@ -132,6 +137,7 @@ internal static class SongStages
         StateTrace.Record(TracePoints.Polymeter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", polymeters.Select(x => $"{x.Key} {x.Value}")), polymeters);
         return draft with
         {
+            Polymeters = [..polymeters.Keys],
             Timeline = Composition.Polymeter.Apply(
                 draft.Timeline,
                 song.Playing,
