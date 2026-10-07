@@ -265,5 +265,6 @@ internal enum SongStream
     Insertion = 86,
     DrumJob = 87,
     Figures = 88,
-    StrongEffects = 89
+    StrongEffects = 89,
+    Tone = 90
 }

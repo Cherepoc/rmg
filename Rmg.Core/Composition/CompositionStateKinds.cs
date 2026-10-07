@@ -118,6 +118,10 @@ internal static class CompositionStateKinds
     public static StateKind<int> FilterDepth { get; } = StateKinds.CreateAdditive<int>(Prefix + "FilterDepth", StateScope.Render);
     public static StateKind<double> FilterCycle { get; } = StateKinds.CreateAdditive<double>(Prefix + "FilterCycle", StateScope.Render);
 
+    // a part's tone, how far below its sound's own its brightness sits in its section, in the brightness controller's
+    // steps, 0 for its own, which a filter's movement closes further from (Expression.Tone)
+    public static StateKind<int> Tone { get; } = StateKinds.CreateAdditive<int>(Prefix + "Tone", StateScope.Render);
+
     // the 16ths a trance gate lets a held note sound in, a bar's sixteen as bits from its first, 0 for none (Expression.Gate)
     public static StateKind<int> Gate { get; } = StateKinds.CreateAdditive<int>(Prefix + "Gate", StateScope.Render);
 

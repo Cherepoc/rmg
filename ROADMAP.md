@@ -15,8 +15,8 @@ is removed once it is built.
 5. Done: metal's arpeggios, a pedal point, a part's colour, a clean arpeggio staying clean.
 6. Done: Djent's synth over the guitars, a line's strong beats on a tension, a genre's by part.
 7. Done: the brightness measured in both soundfonts, the filter's floor raised to 40.
-8. One filter curve a part, its shapes combined, drawn over time, the filter's movements moved onto it.
-9. The filter as tone: a part's constant tone, its tone by a section's energy, a swell brightening.
+8. Done, with 9: one brightness a part, its tone and a filter's closing added, never below the filter's floor.
+9. Done: a part's darker tone, a gentle effect, darker in the quiet sections; a swell brightening left (P3).
 10. Tape's wow and flutter, and a part detuned (*Genres*).
 11. The mix's filter opening a song.
 12. The mix's filter dipping before a section or a drop, and closing a song as an ending.
@@ -269,18 +269,11 @@ Each item with its plan, and what it waits for.
   sounding into the next; holding the note before into the slide and leaving the next unstruck edits two notes at
   render. Built if the struck slide sounds like a stutter.
 - **Long fall-offs** (P4): a fall of an octave into nothing at a note's end, a slide's kind of its own, if missed.
-- **One filter curve a part** (P1, step 5): the filter's shapes a vocabulary as data, each anchored where it means
-  something rather than drawn freely, a part's curve the closings of those acting on it added, with a floor short of
-  silence, and drawn over time rather than while its notes sound, so that a curve moves through a rest; a note's (a
-  squelch, a pluck's attack), a beat's (a wobble), a phrase's (a part opening, a slow sweep over two to eight bars), a
-  section's (its tone by its energy, the mix's dip) and the song's (a part's tone, the mix opening or closing). The
-  filter's movements now (`StrongEffect.Wobble`, `Squelch`, `Opening`) moved onto it, the fingerprint kept.
-- **The filter as tone** (P1, step 6): a part's constant tone, a dark piano in a ballad, a dull fingered bass, a mellow
-  jazz guitar, drawn by its part and leaned by a genre; its tone by its section's energy, a rhythm guitar darker in the
-  verse and brighter in the chorus, as a player rolls the tone knob, a lean by the energy as every other; a swell
-  brightening as it grows, brass and strings swelling rather than a fader. A channel has one brightness, so a chords
-  part's tone is the part's or the section's, never a note's; velocity darkens soft notes already in a soundfont, so
-  the tone comes of intent, never of the velocity. For every genre, not the dance ones alone.
+- **A filter drawn over time** (P3, if a wobble's restart on every note is heard): a part's brightness drawn through
+  its rests rather than while its notes sound, and the filter's shapes a vocabulary as data anchored where they mean
+  something; the part's one curve now adds its tone and a filter's closing note by note (`ExpressionRender`).
+- **A swell brightening** (P3, by listening to `?listen=tone`): brass and strings brightening as they swell, back up
+  to their sound's own, never past it on an acoustic instrument (*The brightness's range*).
 - **The mix's filter** (P1, steps 7 and 8): the whole mix filtered, every channel, the drums' among them, a form
   device decided as the song is put together, as a drop is: the song opening up from muffled over its first phrase or
   its intro (step 7); a section's last bars closing and opening at the next, the likeliest into a drop or a lift, and

@@ -117,6 +117,20 @@ internal static class Expression
 
     public static ByConvention SongBendChance { get; } = new(0, 0.5, 1);
 
+    /// <summary>The chance a song gives some of its parts a darker tone (<see cref="ToneChance" />), no likelier in a wild song than a middling one.</summary>
+    public static ByConvention SongToneChance { get; } = new(0, 0.5, 0.5);
+
+    /// <summary>
+    ///     The chance a part plays in a darker tone of its own where the song's do, a dark piano, a dull bass, a mellow
+    ///     guitar, its brightness below its sound's own for the whole song, as far as its depth, drawn, takes it, and
+    ///     the further the quieter its section, as a player rolls back the tone knob in a verse and opens it in the
+    ///     chorus; never a drum's, whose kit shares the brightness.
+    /// </summary>
+    public static ByConvention ToneChance { get; } = new(0, 0.35, 0.5);
+
+    /// <summary>How far a part's tone closes at its deepest, in its quietest section, in the brightness controller's steps, short of a filter's reach.</summary>
+    private const int ToneReach = 16;
+
     /// <summary>The strong effect a song plays, if any, an echo the likeliest: none in a plain song, one in the wildest.</summary>
     public static ImmutableArray<(StrongEffect Effect, ByConvention Weight)> StrongEffects { get; } =
     [
@@ -399,6 +413,7 @@ internal static class Expression
     /// <param name="soloists">Every part's soloist, whose leans its solos' notes play by, as intense as the solo is there.</param>
     /// <param name="partStreams">A part's sequence for the whole song, by its track.</param>
     /// <param name="streams">A part's sequence in a section, by the section and the part's track.</param>
+    /// <param name="toneStream">The song's sequence of its parts' tones, whether the song plays them and each part's, in order.</param>
     /// <param name="genre">The genre, whose chances of the gentle effects and pool of the strong ones are the song's where it names them.</param>
     /// <param name="changes">Where the chords change, in order, which a gated part's held chords change at.</param>
     /// <param name="cuts">Where a part's notes end as the band stops, by its track, which a gated part's held chords end by.</param>
@@ -414,6 +429,7 @@ internal static class Expression
         IReadOnlyDictionary<TrackRole, Soloist> soloists,
         Func<int, IGenerationContext> partStreams,
         Func<int, int, IGenerationContext> streams,
+        IGenerationContext toneStream,
         Genre genre,
         IReadOnlyList<double> changes,
         Func<int, IReadOnlyList<double>> cuts,
@@ -428,6 +444,8 @@ internal static class Expression
         // the snares, which echo with a comping part's echo, at its delay, the drums' tracks coming after the pitched parts'
         var backbeat = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
         double? carrierDelay = null;
+        // whether the song gives its parts tones at all, the genre's where it names it
+        var songTone = toneStream.TestProbability(SongToneChance.At(songSound, genre.Chance(GenreChoices.Effects, "tone")));
 
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
@@ -500,6 +518,9 @@ internal static class Expression
             var patterned = part.TestProbability(GatePatternChance.At(songSound));
             var steps = Enumerable.Range(0, 16).Select(_ => part.TestProbability(GateStepChance)).ToArray();
             var gate = Carries(StrongEffect.Gate) ? steps.Select((x, i) => i == 0 || !patterned || x ? 1 << i : 0).Sum() : 0;
+            // and its tone, from a sequence of its own, every part drawing whatever it plays
+            var toned = toneStream.TestProbability(ToneChance.At(songSound)) & songTone && role != TrackRole.Drum;
+            var toneDepth = 0.3 + 0.7 * toneStream.GenerateDouble();
             foreach (var (span, index) in map.Sections.Select((x, i) => (x, i)))
             {
                 var context = streams(span.SectionId, track);
@@ -511,6 +532,9 @@ internal static class Expression
                 var lean = new Tilt(Tilt.Of(StrengthOdds, strength).LogOdds + SectionEnergy.Tilt(energies[index], SizeCoupling).LogOdds);
                 var sizes = lean.Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1);
                 var vibrato = context.Pick(lean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u), Lean));
+                // the part's tone here, darker the quieter the section, as dark as it goes at an energy of -1 and below, half as
+                // dark at 1 and above
+                var tone = toned ? (int)Math.Round(ToneReach * toneDepth * (3 - Math.Clamp(energies[index], -1, 1)) / 4) : 0;
 
                 // the notes in the section, in order, the timeline's being
                 for (var i = first(span.Start); i < timeline.Count && timeline[i].Position < span.End - 1e-9; i++)
@@ -581,6 +605,8 @@ internal static class Expression
                         state = state.With(CompositionStateKinds.Echo, (int)Math.Round((echoesBackbeat ? carrierDelay ?? throw new InvalidOperationException("A snare echoes before its part does.") : delay) * 4));
                     if (gate != 0)
                         state = state.With(CompositionStateKinds.Gate, gate);
+                    if (tone != 0)
+                        state = state.With(CompositionStateKinds.Tone, tone);
                     if (filter != StrongEffect.None)
                         state = state.With(CompositionStateKinds.Filter, (int)filter).With(CompositionStateKinds.FilterDepth, filterDepth)
                             .With(CompositionStateKinds.FilterCycle, filter == StrongEffect.Opening ? span.Meter.PatternDuration : wobbleCycle);

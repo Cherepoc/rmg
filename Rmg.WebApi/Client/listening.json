@@ -409,6 +409,28 @@
     ]
   },
   {
+    "id": "tone",
+    "question": "Jazz with some parts in a darker tone, a mellow guitar, a dull bass, darker in the quiet sections: warmer, or muffled?",
+    "decides": "The tone's chances in the presets that give it.",
+    "genre": "jazz",
+    "without": {
+      "skip": [],
+      "genre": {
+        "effects": {
+          "tone": 0
+        }
+      }
+    },
+    "seeds": [
+      "0",
+      "2",
+      "3",
+      "4",
+      "B",
+      "E"
+    ]
+  },
+  {
     "id": "gate",
     "question": "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
     "decides": "Its weight in Trance, and the parts it chops.",

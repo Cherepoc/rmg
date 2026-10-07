@@ -9,9 +9,10 @@ namespace Rmg.Tests.Rendering;
 /// <summary>A synth's filter moving (<see cref="StrongEffect.Wobble" />, <see cref="StrongEffect.Squelch" />, <see cref="StrongEffect.Opening" />).</summary>
 public sealed class FilterTest
 {
-    /// <summary>A genre whose songs play the one strong effect given, and synths on every part that may play one.</summary>
+    /// <summary>A genre whose songs play the one strong effect given, and no part's tone, which would move the brightness of the others.</summary>
     private static Genre Playing(StrongEffect effect) => new(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty
-        .Add(GenreChoices.StrongEffect.Name, ImmutableDictionary<string, ByConvention>.Empty.Add(GenreChoices.Name(effect.ToString()), new ByConvention(1, 1, 1))));
+        .Add(GenreChoices.StrongEffect.Name, ImmutableDictionary<string, ByConvention>.Empty.Add(GenreChoices.Name(effect.ToString()), new ByConvention(1, 1, 1)))
+        .Add(GenreChoices.Effects.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("tone", new ByConvention(0, 0, 0))));
 
     private static CorpusSong[] Songs(StrongEffect effect) => TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Playing(effect))));
 

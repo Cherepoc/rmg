@@ -67,7 +67,7 @@ internal static class ExpressionRender
         var bends = ImmutableArray.CreateBuilder<(double, int)>();
         var controllers = ImmutableArray.CreateBuilder<(double, int, int)>();
         var expression = ImmutableArray.CreateBuilder<(double, double)>();
-        int? reverb = null, chorus = null, delay = null;
+        int? reverb = null, chorus = null, delay = null, brightness = null;
 
         foreach (var note in notes)
         {
@@ -180,9 +180,16 @@ internal static class ExpressionRender
                 for (var t = start; t < end - 1e-9; t += Step * 4)
                     controllers.Add((t, 10, (int)Math.Round(64 + 63 * Math.Clamp(pan + sweep / 100.0 * Math.Sin(2 * Math.PI * t / 8), -1, 1))));
 
-            // a filter, closing below the sound's own and opening back, ringing as it does: a wobble in time, a squelch on
-            // every note, an opening over a section's first phrase
+            // the part's brightness, one curve: its tone, below the sound's own, and a filter closing further from it and opening
+            // back, ringing as it does: a wobble in time, a squelch on every note, an opening over a section's first phrase;
+            // never below the filter's reach
+            var tone = state.GetStateValue(CompositionStateKinds.Tone);
             var filter = (StrongEffect)state.GetStateValue(CompositionStateKinds.Filter);
+            if (filter == StrongEffect.None && 64 - tone != (brightness ?? 64))
+            {
+                brightness = 64 - tone;
+                controllers.Add((start, BrightnessController, brightness.Value));
+            }
             if (filter != StrongEffect.None)
             {
                 var closes = state.GetStateValue(CompositionStateKinds.FilterDepth) / 100.0;
@@ -199,10 +206,10 @@ internal static class ExpressionRender
                         StrongEffect.Squelch => 1 - Math.Exp(-t / SquelchDecay),
                         _ => 1 - Math.Clamp((start + t - from) / cycle, 0, 1)
                     };
-                    var value = (int)Math.Round(64 - closes * FilterReach * closed);
+                    var value = Math.Max(64 - FilterReach, (int)Math.Round(64 - tone - closes * FilterReach * closed));
                     if (value != last)
                         controllers.Add((start + t, BrightnessController, value));
-                    last = value;
+                    last = brightness = value;
                 }
             }
 

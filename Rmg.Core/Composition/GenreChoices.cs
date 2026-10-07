@@ -301,14 +301,15 @@ public static class GenreChoices
 
     /// <summary>
     ///     The gentle effects a song plays at all, each its chance as the songs have it by their sound (<see cref="Expression" />):
-    ///     a vibrato, a chorus, a held chord's swell and a line's bends.
+    ///     a vibrato, a chorus, a held chord's swell, a line's bends and a part's darker tone.
     /// </summary>
     public static GenreChoice Effects { get; } = Chances("effects", "Effects",
     [
         ("vibrato", "A vibrato", Expression.SongVibratoChance),
         ("chorus", "A chorus", Expression.SongChorusChance),
         ("swell", "A swell", Expression.SongSwellChance),
-        ("bends", "Bends", Expression.SongBendChance)
+        ("bends", "Bends", Expression.SongBendChance),
+        ("tone", "A part's darker tone", Expression.SongToneChance)
     ]);
 
     /// <summary>A section's own tempo, one by a metric ratio and its own meter, beside the song's (<see cref="Composition.SectionTempo" />, <see cref="Composition.SectionMeter" />).</summary>
