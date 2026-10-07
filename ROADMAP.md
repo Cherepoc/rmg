@@ -11,7 +11,7 @@ is removed once it is built.
 1. Done: pinch harmonics a held note's highlight, rare, wavering, in two sounds for listening.
 2. Done: an ending in the song's own harmony, the last section planing and vamping, the chord into home a genre's.
 3. Done: any General MIDI instrument in any role a genre's; instruments added where they belong; Chiptune.
-4. A flaky page test's 400 found and fixed (*Open work*).
+4. Done: the flaky page test's 400, a range's from typed above its to, the other end now following.
 5. A sparse song's silent start (*Open work*).
 6. A groove that mutates (*Groove*).
 7. Drum solos rethought, their feet's ostinato and their stickings first (*Groove*).
@@ -209,8 +209,10 @@ Each item with its plan, and what it waits for.
 - **A sparse song's silent start** (P2): an Ambient or a Dungeon song now and then silent for its first 16 beats or
   more, its parts resting through their first phrase's start and its drums out of its first section (Ambient seed 37,
   Dungeon seed 54 of the corpus); a song's first part to sound coming in on its first beat, or the intro left out.
-- **A flaky page test** (P2): `GenreEditorTest.ALength_IsShownAndGivenInMinutesAndSeconds_ATempoInBeatsAMinute`
-  fails now and then on a request answered 400, master's too; find which request and why.
+- **Page tests timing out** (P2): two of fourteen runs of the whole page suite, a test each, past its 30 seconds
+  (`ThePage_OpensWithASong_AndNoErrors`, `TheWindowsOverride_IsCheckedByAChange_AndUncheckedLeavesTheChoiceToTheSongs`),
+  the suite's tests in parallel against one site; which wait, and whether the songs' queue or the browser is the
+  bottleneck.
 - **A song's length, the rest:** a short length runs long, 16% of the songs given a minute and 19% of those given two
   past 15% over (`SongLengthReportTest`), the intro's bars taken in (`SongFormGenerator.IntroDuration`) but an intro
   section, an outro or the ending's bars adding what the length leans no draw of; their chances leaned by the length

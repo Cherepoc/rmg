@@ -102,7 +102,8 @@ public sealed class SongPage : IAsyncDisposable
 
         page.Console += (_, message) =>
         {
-            if (message.Type == "error") lock (songPage._errors) songPage._errors.Add(message.Text);
+            // a resource that failed to load named by where it is, which its message leaves out
+            if (message.Type == "error") lock (songPage._errors) songPage._errors.Add(message.Location is { Length: > 0 } where && message.Text.StartsWith("Failed to load resource") ? $"{message.Text} ({where})" : message.Text);
         };
         page.PageError += (_, error) =>
         {

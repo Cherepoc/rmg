@@ -173,6 +173,15 @@ export function createGenreTune() {
         const points = [...endsOf(amounts[selected])];
         points[end] = Math.max(least, Math.min(most, Math.round(value)));
         amounts[selected] = written(points);
+        // a range's other end following one set past it, so that its from is never above its to, which no genre may be
+        const other = isRange() ? { from: "to", to: "from" }[selected] : undefined;
+        if (other !== undefined && amounts[other] !== undefined) {
+            const others = [...endsOf(amounts[other])];
+            if (selected === "from" ? others[end] < points[end] : others[end] > points[end]) {
+                others[end] = points[end];
+                amounts[other] = written(others);
+            }
+        }
         if (dragging === null) edited();
         else {
             overridden = override.checked = true;

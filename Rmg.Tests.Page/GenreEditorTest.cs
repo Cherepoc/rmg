@@ -278,6 +278,8 @@ public sealed class GenreEditorTest(Site site)
         await plainest.FillAsync("3:30");
         await plainest.PressAsync("Tab");
         await Assert.That(await tune.Locator(".tune-row[data-option='from'] .tune-values").TextContentAsync()).IsEqualTo("3:30 · 1:44 · 2:32");
+        // and its to, below it, following it up, so that no draft is a range the server refuses
+        await Assert.That((await tune.Locator(".tune-row[data-option='to'] .tune-values").TextContentAsync())!.Split(" · ")[0]).IsEqualTo("3:30");
         await plainest.FillAsync("4");
         await plainest.PressAsync("Tab");
         await Assert.That(await plainest.InputValueAsync()).IsEqualTo("4:00");
