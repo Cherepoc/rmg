@@ -45,6 +45,12 @@ internal static class ExpressionRender
     /// </summary>
     private const int FilterReach = 24;
 
+    /// <summary>
+    ///     How much darker a swelling note starts, in the brightness controller's steps, opening back to the part's own as
+    ///     it grows, as brass and strings brighten as they swell; never past the sound's own.
+    /// </summary>
+    private const int SwellClosing = 12;
+
     private const double Sixteenth = 0.25;
 
     /// <summary>How much of a 16th a gate lets a note sound for.</summary>
@@ -223,14 +229,18 @@ internal static class ExpressionRender
             if (filter != StrongEffect.None)
                 controllers.Add((start, ResonanceController, filter == StrongEffect.Squelch ? 104 : 84));
             var step = filter == StrongEffect.Wobble ? cycle / 8 : Step / 2;
-            // a filter's steps, from the note's start, and wherever the mix's closing changes while it sounds
+            // a swell opening the note as it grows, over the swell's length
+            var swellLength = Math.Min(1, duration / 2);
+            double Swelled(double t) => swells ? SwellClosing * (1 - Math.Clamp(t / swellLength, 0, 1)) : 0;
+            // a filter's steps, from the note's start, a swell's while it grows, and wherever the mix's closing changes while it sounds
             var brightnessTimes = (filter != StrongEffect.None ? Enumerable.Range(0, (int)Math.Ceiling((duration - 1e-9) / step)).Select(i => i * step) : [0.0])
-                .Concat(mix.Where(x => x.At > start + 1e-9 && x.At < end - 1e-9).Select(x => x.At - start)).Order();
+                .Concat(swells ? Enumerable.Range(1, (int)Math.Ceiling(swellLength / (Step / 2))).Select(i => Math.Min(swellLength, i * Step / 2)) : [])
+                .Concat(mix.Where(x => x.At > start + 1e-9 && x.At < end - 1e-9).Select(x => x.At - start)).Distinct().Order();
             // a filter's curve written whole on every note, the rest where the brightness changes
             int? last = filter != StrongEffect.None ? null : brightness ?? 64;
             foreach (var t in brightnessTimes)
             {
-                var value = Math.Max(64 - FilterReach, (int)Math.Round(64 - tone - filterCloses * FilterReach * Filtered(t) - MixAt(mix, start + t)));
+                var value = Math.Max(64 - FilterReach, (int)Math.Round(64 - tone - filterCloses * FilterReach * Filtered(t) - MixAt(mix, start + t) - Swelled(t)));
                 if (value != last)
                     controllers.Add((start + t, BrightnessController, value));
                 last = brightness = value;

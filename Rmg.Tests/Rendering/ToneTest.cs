@@ -40,6 +40,28 @@ public sealed class ToneTest
         }
     }
 
+    /// <summary>A swelling note brightening as it grows: its part's brightness below its own at the swell's start and back by its end.</summary>
+    [Test]
+    public async Task ASwell_BrightensAsItGrows()
+    {
+        var swelled = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("ambient")))))
+        foreach (var (track, notes) in song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack { Role: TrackRole.Pad }))
+        {
+            var rendered = song.Rendered.Tracks.First(x => !x.IsPercussionInstrument && x.Role == TrackRole.Pad);
+            int At(double position) => rendered.Controllers.Where(c => c.Controller == ExpressionRender.BrightnessController && c.Position <= position + 1e-6).Select(c => c.Value).DefaultIfEmpty(64).Last();
+            foreach (var note in notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Swell) == 1 && x.Value.Duration >= 2
+                                                 && x.Value.State.GetStateValue(CompositionStateKinds.Filter) == 0))
+            {
+                swelled++;
+                var (start, grown) = (song.Swing.Apply(note.Position), song.Swing.Apply(note.Position + 1));
+                await Assert.That(At(start)).IsLessThan(At(grown)).Because($"seed {song.Seed} at {note.Position}");
+            }
+        }
+
+        await Assert.That(swelled).IsGreaterThan(10);
+    }
+
     [Test]
     [Explicit]
     public async Task Report()
