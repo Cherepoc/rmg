@@ -147,7 +147,7 @@ if (events is not null)
         "Keeping analytics in {Directory} for {Days} days; {Pruned} older events and songs were dropped",
         settings.StateDirectory, settings.RetentionDays, pruned);
 
-    app.MapAnalytics(events, VisitorHasher.Create(settings.StateDirectory));
+    app.MapAnalytics(events, VisitorHasher.Create(settings.StateDirectory), settings.IsListening);
 }
 else
 {

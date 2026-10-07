@@ -12,6 +12,43 @@ export function listeningQuestion(id) {
     return id === null ? null : QUESTIONS.find((x) => x.id === id) ?? null;
 }
 
+/**
+ *     The index of every question, `?listen` with no question or one not asked: each its question, its genre, a link
+ *     asking it, and its verdicts so far, as the server that listens counts them (`/api/listening/verdicts`), the latest
+ *     version's; `verdicts` none where it does not listen, which the index says.
+ */
+export function createListeningIndex(verdicts, genreName) {
+    const index = document.createElement("section");
+    index.className = "panel listening listening-index";
+    index.setAttribute("aria-label", "Listening");
+    const heading = document.createElement("h2");
+    heading.textContent = "Listening";
+    const hint = document.createElement("p");
+    hint.className = "listening-where";
+    hint.textContent = verdicts === null
+        ? "This server makes songs whole: the listening mode is the test instance's."
+        : `A device heard with and without over six songs. Verdicts of version ${verdicts.version ?? "none yet"}.`;
+    const list = document.createElement("ul");
+    list.className = "listening-questions";
+    const counted = new Map((verdicts?.verdicts ?? []).map((x) => [x.question, x]));
+    list.append(...QUESTIONS.map((question) => {
+        const item = document.createElement("li");
+        item.dataset.question = question.id;
+        const link = document.createElement("a");
+        link.href = `?listen=${encodeURIComponent(question.id)}`;
+        link.textContent = question.question;
+        const about = document.createElement("span");
+        about.className = "listening-where";
+        const count = counted.get(question.id);
+        const said = count === undefined ? "no verdicts yet" : `with better ${count.with}, without ${count.without}, the same ${count.same}, can't tell ${count.unsure}`;
+        about.textContent = `${question.genre === null ? "No genre" : genreName(question.genre)} · ${said}`;
+        item.append(link, about);
+        return item;
+    }));
+    index.append(heading, hint, list);
+    return index;
+}
+
 /** What a verdict says, as the server keeps it, by the button's choice. */
 const CHOICES = [
     ["A", "A is better"],

@@ -65,6 +65,10 @@ public sealed record RatedGenre(string Genre, int Songs, int Likes, int Dislikes
 /// <param name="Unsure">How often the listener could not tell.</param>
 public sealed record QuestionVerdicts(string Question, int With, int Without, int Same, int Unsure);
 
+/// <param name="Version">The latest songs' version a verdict was given in, which the verdicts are of; none for none.</param>
+/// <param name="Verdicts">The verdicts, by question.</param>
+public sealed record ListeningVerdicts(string? Version, IReadOnlyList<QuestionVerdicts> Verdicts);
+
 /// <param name="Name">What failed.</param>
 /// <param name="Detail">Why, as far as the page could say.</param>
 public sealed record Failure(string Name, string Detail, int Count);

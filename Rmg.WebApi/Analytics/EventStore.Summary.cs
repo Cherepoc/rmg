@@ -16,8 +16,7 @@ public static class EventStoreSummary
         using var connection = store.OpenForReading();
         var ratings = Ratings(connection);
         var ratedVersion = ratings.Where(x => x.Likes + x.Dislikes > 0).Select(x => x.Version).Distinct().OrderByDescending(x => x, VersionOrder).FirstOrDefault();
-        var verdicts = Verdicts(connection);
-        var verdictVersion = verdicts.Select(x => x.Version).Distinct().OrderByDescending(x => x, VersionOrder).FirstOrDefault();
+        var (verdictVersion, verdicts) = LatestVerdicts(connection);
 
         return new AnalyticsSummary(
             days,
@@ -35,11 +34,7 @@ public static class EventStoreSummary
             RatedFifths(ratings, ratedVersion),
             RatedGenres(ratings, ratedVersion),
             verdictVersion,
-            [
-                ..verdicts.Where(x => x.Version == verdictVersion).GroupBy(x => x.Question).OrderBy(x => x.Key).Select(x => new QuestionVerdicts(x.Key,
-                    x.Where(v => v.Choice == "with").Sum(v => v.Count), x.Where(v => v.Choice == "without").Sum(v => v.Count),
-                    x.Where(v => v.Choice == "same").Sum(v => v.Count), x.Where(v => v.Choice == "unsure").Sum(v => v.Count)))
-            ],
+            verdicts,
             Failures(connection, since),
             Count(connection, "SELECT COUNT(*) FROM events WHERE day >= $since", since),
             Server(connection, since)
@@ -426,6 +421,26 @@ public static class EventStoreSummary
             fifths,
             daily
         );
+    }
+
+    /// <summary>The listening mode's verdicts by question, of the latest version given any, and that version; none for none.</summary>
+    public static ListeningVerdicts LatestVerdicts(this EventStore store)
+    {
+        using var connection = store.OpenForReading();
+        var (version, verdicts) = LatestVerdicts(connection);
+        return new ListeningVerdicts(version, verdicts);
+    }
+
+    private static (string? Version, List<QuestionVerdicts> Verdicts) LatestVerdicts(SqliteConnection connection)
+    {
+        var verdicts = Verdicts(connection);
+        var version = verdicts.Select(x => x.Version).Distinct().OrderByDescending(x => x, VersionOrder).FirstOrDefault();
+        return (version,
+        [
+            ..verdicts.Where(x => x.Version == version).GroupBy(x => x.Question).OrderBy(x => x.Key).Select(x => new QuestionVerdicts(x.Key,
+                x.Where(v => v.Choice == "with").Sum(v => v.Count), x.Where(v => v.Choice == "without").Sum(v => v.Count),
+                x.Where(v => v.Choice == "same").Sum(v => v.Count), x.Where(v => v.Choice == "unsure").Sum(v => v.Count)))
+        ]);
     }
 
     /// <summary>Every verdict of the listening mode, whenever given, by its version, question and choice, which its detail says as "question:choice".</summary>

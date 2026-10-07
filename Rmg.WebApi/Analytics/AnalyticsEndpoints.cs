@@ -13,8 +13,15 @@ public static class AnalyticsEndpoints
     ///     The events the pages send, and the summary of them, which is the operator's, served in the admin area only
     ///     (<see cref="Admin.AdminArea" />).
     /// </summary>
-    public static void MapAnalytics(this IEndpointRouteBuilder routes, EventStore store, VisitorHasher hasher)
+    /// <param name="isListening">
+    ///     Whether the server listens (<see cref="ServerSettings.IsListening" />), a test instance, whose listening mode's
+    ///     verdicts the page's index of questions shows, to anyone, as nothing in them is anyone's.
+    /// </param>
+    public static void MapAnalytics(this IEndpointRouteBuilder routes, EventStore store, VisitorHasher hasher, bool isListening)
     {
+        if (isListening)
+            routes.MapGet("/api/listening/verdicts", () => Results.Ok(store.LatestVerdicts()));
+
         routes.MapPost("/api/tally", (HttpContext context, EventRequest? request) =>
         {
             if (!EventNames.IsKnown(request?.Name)) return Results.NoContent();

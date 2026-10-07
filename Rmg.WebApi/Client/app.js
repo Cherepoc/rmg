@@ -52,7 +52,7 @@ import { asGenre, byName, hasAGenre, isSameGenre, nestedChoices, presetById, pre
 import { createGenreEditor } from "./genre-editor.js";
 import { createGenreManager } from "./genre-manager.js";
 import { since, tell, track } from "./tally.js";
-import { createListeningStrip, listeningQuestion } from "./listening.js";
+import { createListeningIndex, createListeningStrip, listeningQuestion } from "./listening.js";
 
 const PLAY_ICON = "M8 5v14l11-7z";
 const PAUSE_ICON = "M7 5h3.5v14H7zM13.5 5H17v14h-3.5z";
@@ -2676,11 +2676,17 @@ start();
 
 /**
  *     The listening mode where the address asks a question (listening.js): each of its songs in its genre, made with its
- *     device or without, the stages and the genre's choices the one without leaves out, and a verdict on it told.
+ *     device or without, the stages and the genre's choices the one without leaves out, and a verdict on it told; the
+ *     index of the questions where it asks none, or one not asked. Whether the address asks for the listening mode.
  */
 function startListening() {
-    const question = listeningQuestion(new URL(location.href).searchParams.get("listen"));
-    if (question === null) return;
+    const asked = new URL(location.href).searchParams.get("listen");
+    if (asked === null) return false;
+    const question = listeningQuestion(asked);
+    if (question === null) {
+        showListeningIndex();
+        return true;
+    }
 
     const strip = createListeningStrip(question, {
         play: (seed, isWithout) => {
@@ -2688,13 +2694,27 @@ function startListening() {
             const genre = preset === null ? noGenre() : asGenre(preset);
             skipped = isWithout ? question.without.skip : [];
             const choices = isWithout ? { ...genre.choices, ...question.without.genre } : genre.choices;
-            // read as the song is asked for, before generate waits on anything
-            generate(seed, { isRolled: false, asked: { ...settings, genre: { name: genre.name, choices } } });
+            // the song as the question picked it, of the settings as by default but its genre, the volume as heard; read as
+            // the song is asked for, before generate waits on anything
+            generate(seed, { isRolled: false, asked: { ...defaultSettings(), volume: settings.volume, genre: { name: genre.name, choices } } });
             skipped = [];
         },
         verdict: (seed, choice) => tell("verdict", { seed, version: songVersion, detail: `${question.id}:${choice}` }),
     });
     document.querySelector("main").prepend(strip);
+    return true;
+}
+
+/** The index of the questions, with their verdicts as the server that listens counts them, none where it does not. */
+async function showListeningIndex() {
+    let verdicts = null;
+    try {
+        const response = await fetch(new URL("api/listening/verdicts", location.href));
+        if (response.ok) verdicts = await response.json();
+    } catch {
+        // the index as a server that does not listen shows it
+    }
+    document.querySelector("main").prepend(createListeningIndex(verdicts, (id) => presetById(id)?.name ?? id));
 }
 
 /**
@@ -2705,7 +2725,8 @@ function startListening() {
 async function start() {
     // the choices a genre may name, which its editor needs and nothing else waits for
     listGenreChoices();
-    startListening();
+    // the listening mode asks for its own songs, none rolled as the page opens
+    const isListening = startListening();
 
     const linked = linkedSong();
     track("page_open", { detail: linked.wasAsked ? "link" : "fresh" });
@@ -2721,7 +2742,7 @@ async function start() {
 
     // said afterwards, since the generating itself has the status line until it is done with it, and
     // only once a song has arrived: a failure has the status line to itself
-    const generating = generate(linked.seed, { isRolled: linked.seed === null || linked.wasRolled });
+    const generating = isListening ? Promise.resolve(false) : generate(linked.seed, { isRolled: linked.seed === null || linked.wasRolled });
     const complaint = linked.wasAsked && linked.seed === null
         ? "That link has no valid song, so here is a random one."
         : linked.isSettingsBad

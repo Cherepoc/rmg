@@ -16,7 +16,10 @@ public sealed class ListeningTest(Site site)
         await page.Until(() => strip.IsVisibleAsync(), "the question asked");
         await Assert.That(await strip.Locator(".listening-question").TextContentAsync()).Contains("Pushes");
         await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).IsEqualTo("Song 1 of 6");
-        await page.Settled();
+        // no song rolled as the page opens, the question asking for its own; a tempo given here none of them
+        await Task.Delay(500);
+        await Assert.That(page.Requests).IsEmpty();
+        await page.SetSetting("tempo", 40);
 
         // the first song's A with the pushes, its B without them, both in Rock
         var count = page.Requests.Count;
@@ -24,6 +27,7 @@ public sealed class ListeningTest(Site site)
         await page.Until(() => page.Requests.Count > count, "A asked for");
         var with = page.Requests[^1].Body;
         await Assert.That(with.TryGetProperty("skip", out _)).IsFalse();
+        await Assert.That(with.TryGetProperty("tempo", out var tempo) && tempo.ValueKind != JsonValueKind.Null).IsFalse();
         await Assert.That(with.GetProperty("genreName").GetString()).IsEqualTo("Rock");
         await page.Settled();
 
@@ -54,6 +58,26 @@ public sealed class ListeningTest(Site site)
             return pushes.ValueKind == JsonValueKind.Object;
         }, "the verdict kept");
         await Assert.That(pushes.GetProperty("with").GetInt32()).IsGreaterThanOrEqualTo(1);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
+    [Test]
+    public async Task NoQuestion_ListsEveryQuestion_WithItsLink_AndAsksForNoSong()
+    {
+        await using var page = await SongPage.Open(site, "?listen");
+        var index = page.Page.Locator("section.listening-index");
+        await page.Until(() => index.IsVisibleAsync(), "the questions listed");
+        var questions = index.Locator("li[data-question]");
+        await Assert.That(await questions.CountAsync()).IsGreaterThanOrEqualTo(10);
+        var pushes = index.Locator("li[data-question='pushes']");
+        await Assert.That(await pushes.Locator("a").GetAttributeAsync("href")).IsEqualTo("?listen=pushes");
+        await Assert.That(await pushes.Locator(".listening-where").TextContentAsync()).StartsWith("Rock · ");
+        await Task.Delay(500);
+        await Assert.That(page.Requests).IsEmpty();
+
+        // a link asks its question
+        await pushes.Locator("a").ClickAsync();
+        await page.Until(() => page.Page.Locator("section.listening:not(.listening-index)").IsVisibleAsync(), "the question asked");
         await Assert.That(page.Errors).IsEmpty();
     }
 }

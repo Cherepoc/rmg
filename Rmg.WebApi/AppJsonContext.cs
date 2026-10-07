@@ -16,6 +16,7 @@ namespace Rmg.WebApi;
 [JsonSerializable(typeof(EventRequest))]
 [JsonSerializable(typeof(IEnumerable<SoundFont>))]
 [JsonSerializable(typeof(AnalyticsSummary))]
+[JsonSerializable(typeof(ListeningVerdicts))]
 [JsonSerializable(typeof(ErrorResponse))]
 [JsonSerializable(typeof(VersionResponse))]
 [JsonSerializable(typeof(Admin.SongDescriptionResponse))]
