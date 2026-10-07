@@ -14,7 +14,7 @@ is removed once it is built.
 4. Done: the part alone a genre's.
 5. Done: metal's arpeggios, a pedal point, a part's colour, a clean arpeggio staying clean.
 6. Done: Djent's synth over the guitars, a line's strong beats on a tension, a genre's by part.
-7. The brightness heard: how far it moves each family of instruments in both soundfonts served.
+7. Done: the brightness measured in both soundfonts, the filter's floor raised to 40.
 8. One filter curve a part, its shapes combined, drawn over time, the filter's movements moved onto it.
 9. The filter as tone: a part's constant tone, its tone by a section's energy, a swell brightening.
 10. Tape's wow and flutter, and a part detuned (*Genres*).
@@ -269,10 +269,6 @@ Each item with its plan, and what it waits for.
   sounding into the next; holding the note before into the slide and leaving the next unstruck edits two notes at
   render. Built if the struck slide sounds like a stutter.
 - **Long fall-offs** (P4): a fall of an octave into nothing at a note's end, a slide's kind of its own, if missed.
-- **The brightness heard** (P1, step 4): how far the brightness (CC74) and the resonance (CC71) move each family of
-  instruments, the pianos, the guitars, the distorted guitar most, the basses, the strings, the brass, the synths and
-  the drums, in both soundfonts served, by ear: some presets have no filter of their own and may barely move. The
-  depths of everything below follow from it.
 - **One filter curve a part** (P1, step 5): the filter's shapes a vocabulary as data, each anchored where it means
   something rather than drawn freely, a part's curve the closings of those acting on it added, with a floor short of
   silence, and drawn over time rather than while its notes sound, so that a curve moves through a rest; a note's (a
@@ -524,6 +520,12 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
 
 ## Decided, and kept
 
+- **The brightness's range** (measured October 2026, spessasynth rendering one note of each family in both soundfonts
+  served): closing the brightness (CC74) below the middle darkens every family, the distorted guitar too, to half its
+  brightness or less by 48 for a few dB; below 40 most lose 10 to 40 dB, the pads first, so a filter's floor is 40.
+  Above the middle only the synths brighten (two to ten times), the acoustic instruments open already, so a tone
+  darkens from the sound's own and brightens back to it, never past it but on a synth. The resonance (CC71) adds up to
+  8 dB at 84.
 - **The tables** that are how often musicians do a thing (the fills' spans and treatments, the landings, the intros
   and endings, the progressions' homes and root motions, the cadences, the scales, the bass's approaches and arrivals,
   the drums' weights, the phrase ends) are convention the draws are pulled towards, and stay tables.

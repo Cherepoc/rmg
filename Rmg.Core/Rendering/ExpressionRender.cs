@@ -34,8 +34,13 @@ internal static class ExpressionRender
     public const int BrightnessController = 74;
     public const int ResonanceController = 71;
 
-    /// <summary>How far a filter closes at its deepest, in the brightness controller's steps below the middle, where it is the sound's own.</summary>
-    private const int FilterReach = 48;
+    /// <summary>
+    ///     How far a filter closes at its deepest, in the brightness controller's steps below the middle, where it is the
+    ///     sound's own: to 40, where both soundfonts served have most instruments at half their brightness or less and
+    ///     a few dB quieter, the pads the most, and below which many fall nearly silent (October 2026). Above the middle
+    ///     only the synths brighten, the rest open already.
+    /// </summary>
+    private const int FilterReach = 24;
 
     private const double Sixteenth = 0.25;
 

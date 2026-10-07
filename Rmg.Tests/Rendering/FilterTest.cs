@@ -32,7 +32,7 @@ public sealed class FilterTest
             var track = moved[0];
             await Assert.That(InstrumentTraits.Has(track.PitchInstrumentCode, InstrumentTrait.Filters)).IsTrue();
             var values = track.Controllers.Where(c => c.Controller == ExpressionRender.BrightnessController).Select(c => c.Value).ToArray();
-            await Assert.That(values.All(x => x is >= 16 and <= 64)).IsTrue();
+            await Assert.That(values.All(x => x is >= 40 and <= 64)).IsTrue();
             // closed where it plays, but where an opening's part comes in after it has opened
             closing += values.Min() < 52 ? 1 : 0;
         }
@@ -61,7 +61,7 @@ public sealed class FilterTest
                 foreach (var note in notes.Where(x => x.Value.Duration >= 1))
                 {
                     var within = curve.Where(c => c.Position >= note.Position - 1e-9 && c.Position < note.Position + 1).Select(c => c.Value).ToArray();
-                    await Assert.That(within.Max() - within.Min()).IsGreaterThan(10);
+                    await Assert.That(within.Max() - within.Min()).IsGreaterThan(6);
                 }
         }
     }
