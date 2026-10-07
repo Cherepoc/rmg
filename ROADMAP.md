@@ -200,10 +200,12 @@ Each item with its plan, and what it waits for.
 
 ### Conventionality
 
-- **Black metal's pinch harmonics too many** (P1, heard on test): its riffs squeal in pinch harmonics too often;
-  the driven guitars' harmonics variant (`InstrumentsOverTime.Variants`, 29 and 30 to 31) leaned down by a genre, a
-  tremolo-picked or a blasting section's riff without them, and their share measured by genre
-  (`NewGenresReportTest`'s harmonics count).
+- **Black metal's pinch harmonics too many** (P1, heard on test): measured over 64 songs, 44% of them play
+  harmonics, in 8% of the driven guitars' sections, and there a third of the notes, 17 a section, every loud note (the
+  accents mode) or whole bars (the bars mode), and on the chords part's chords as often as on the riff. A player squeals
+  one or two a phrase, on a held, accented note, and never a chord: the harmonics variant (`InstrumentsOverTime.Variants`,
+  29 and 30 to 31) on single notes alone, the phrase's loudest held note or two rather than a quarter of the section's,
+  never in bars, and leaned by a genre; measured by the harmonics a phrase.
 - **A sparse song's silent start** (P2): an Ambient or a Dungeon song now and then silent for its first 16 beats or
   more, its parts resting through their first phrase's start and its drums out of its first section (Ambient seed 37,
   Dungeon seed 54 of the corpus); a song's first part to sound coming in on its first beat, or the intro left out.
@@ -286,6 +288,33 @@ Each item with its plan, and what it waits for.
 
 ### Groove
 
+- **A groove that mutates** (P1, IDM and DnB first, planned October 2026): a section's drums now repeat their pattern
+  as written, varied only by a varied repeat, the fills and the hat rolls. An edit after the figures and before the
+  fills, from a stream of its own: every bar after a section's first takes a few edits by a vocabulary as data, a hit
+  moved a 16th, a hit dropped, a ghost added, a hit ratcheted into 32nds or 64ths, two 8th slices of the bar swapped (a
+  break chopped and resequenced), the kick and the snare traded on a beat; each edit kept by the bars after it, so that
+  the groove strays further as the section goes on, as a programmed break evolves, and snapping back to the section's
+  own pattern at a phrase's start now and then, the likelier the plainer. The downbeat's kick and the backbeat's snare
+  kept but at the wild end; the chance an edit a bar by the groove facet, its plain end none, leaned by a genre (IDM's
+  and DnB's high, a band's low) and by the energy. Measured by each bar's hits differing from the section's first,
+  growing through it, by genre; `?listen=` a question of it. Risk: edits heard as mistakes; kept edits and the snap
+  back are what make them a development rather than noise.
+- **Drum solos rethought** (P1, planned October 2026): a solo now plays the pitched solos' gestures with the kit as a
+  scale, a run round the toms, a lick, a crash held, a pause, a quote of the groove, the kick keeping time under it.
+  A drummer thinks otherwise; in order of what it would add:
+  1. Its feet's ostinato, a genre's: jazz's hi-hat foot on 2 and 4, a samba's or a baião's kick, metal's double kick
+     in 16ths, a timbales player's cascara and clave by the other hand, rather than the kick alone.
+  2. Its vocabulary in stickings rather than scale runs: singles, doubles, paradiddles, flams, drags, a six-stroke
+     roll, a hand-and-foot triplet, as data, each limb voiced on the kit by a rule, the right hand moving round the
+     toms, the left on the snare, the foot on the kick, so that a run sounds as hands play it.
+  3. A motif developed: a short rhythm from the section's groove or the hook stated, then repeated, displaced by a
+     16th, augmented or diminished, moved round the kit, the solo's form rather than a string of gestures.
+  4. Its arc measured first: space and quiet at its start, density and loudness growing to a climax, a release; the
+     intensity is there, whether the notes a beat and the velocity follow it is not yet measured.
+  5. Trading with the band, jazz's fours: the drums and a pitched soloist alternating four or eight bars.
+  6. A genre's idioms as data: metal's double-kick runs and tom cascades, a timbales' abanico, funk's ghosted groove
+     solo, an IDM's drill of ratchets (the mutating groove at its wildest).
+  Measured by the solos' notes a beat over their arc, the limbs' share, the stickings drawn; `?listen=` questions.
 - **A drum's pocket by its section's role** (P3, if a section's change of role is heard): the timing takes a drum's
   offset by its role in the song's groove (`Pocket.OffsetOf`), not a section's, which may move a ride to the time.
 - **A strum's thinner up stroke,** its lowest strings left out, if the up strokes sound as full as the down.
