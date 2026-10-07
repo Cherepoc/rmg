@@ -23,19 +23,14 @@ public sealed class ExpressionTest
     }
 
     [Test]
-    public async Task TheWildestSongs_PlayOneStrongEffect_OnOnePart_AndTheGentleOnes_Together()
+    public async Task TheWildestSongs_PlayAStrongEffect_OthersBesideItNowAndThen_AndTheGentleOnesTogether()
     {
         var wild = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => PartEffects(TestCorpus.Get(seed, Sound(1))));
         var strong = Effects.Select((e, i) => (e, i)).Where(x => x.e.IsStrong).Select(x => x.i).ToArray();
         var gentle = Effects.Select((e, i) => (e, i)).Where(x => !x.e.IsStrong).Select(x => x.i).ToArray();
 
-        foreach (var song in wild)
-        {
-            await Assert.That(strong.Count(i => song.Any(p => p[i]))).IsLessThanOrEqualTo(1);
-            await Assert.That(song.Count(p => strong.Any(i => p[i]))).IsLessThanOrEqualTo(1);
-        }
-
         await Assert.That(wild.Count(song => strong.Any(i => song.Any(p => p[i])))).IsGreaterThan(wild.Length * 3 / 4);
+        await Assert.That(wild.Any(song => strong.Count(i => song.Any(p => p[i])) >= 2)).IsTrue();
         await Assert.That(wild.SelectMany(x => x).Any(p => gentle.Count(i => p[i]) >= 2)).IsTrue();
     }
 
@@ -319,6 +314,24 @@ public sealed class ExpressionTest
             Console.WriteLine($"  {band.Key}, {songs.Length} songs: {string.Join(", ", shares)}; kinds a song: gentle {songs.Average(x => Kinds(x, false)):F1}, " +
                               $"strong {songs.Average(x => Kinds(x, true)):F2}, at most {songs.Max(x => Kinds(x, true))}; strong a part {parts.Average(p => Effects.Select((e, i) => (e, i)).Count(x => x.e.IsStrong && p[x.i])):F2}; " +
                               $"parts with a strong one a song {songs.Average(StrongParts):F2}, at most {songs.Max(StrongParts)}");
+        }
+
+        await Task.CompletedTask;
+    }
+
+    /// <summary>How many strong effects a song plays by genre, the first and those beside it, and which.</summary>
+    [Test]
+    [Explicit]
+    public async Task ReportStacked()
+    {
+        foreach (var name in new[] { "trance", "techno", "idm", "reggae", "" })
+        {
+            var genre = name == "" ? null : Rmg.Tests.Genres.GenrePresets.Genre(name);
+            var effects = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)))
+                .Select(x => (SongEffects)x.Trace.Single(t => t.Point == TracePoints.SongEffects).Value!)
+                .Select(x => x.Strong == StrongEffect.None ? x.Others : x.Others.Add(x.Strong)).ToArray();
+            Console.WriteLine($"{(name == "" ? "no genre" : name)}: any {effects.Average(x => x.Length > 0 ? 1.0 : 0):P0}, two or more {effects.Average(x => x.Length > 1 ? 1.0 : 0):P0}, " +
+                              $"a song {effects.Average(x => x.Length):F2}; {string.Join(", ", effects.SelectMany(x => x).GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count()}"))}");
         }
 
         await Task.CompletedTask;

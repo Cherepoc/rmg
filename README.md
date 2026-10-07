@@ -14,7 +14,8 @@ intro and an outro of their own. Its parts are drums and up to eight pitched par
 counter-melody, a riff (with a twin that harmonises it), a rhythm part and a solo part. Sections leave parts out,
 bring them in phrase by phrase, hold some back until a later section, double lines, play solos and fills, and change
 key or tempo, each by a chance of its own. A part plays with its effects (vibrato, bends, slides, a swell, a chorus) and
-a song with one strong effect at most (an echo, a tremolo, a sweep, a pump, a synth's filter or a trance gate); a
+a song with strong effects, one first and others beside it now and then (an echo by the synthesizer's delay, a tremolo,
+a sweep, a pump, a synth's filter or a trance gate); a
 driven guitar's part is double-tracked, hard left and right.
 
 A genre leans a song's choices towards its idioms: a pool of options or a chance for each choice, at the plain end, the

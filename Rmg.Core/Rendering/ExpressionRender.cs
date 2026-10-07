@@ -118,28 +118,14 @@ internal static class ExpressionRender
             }
 
 
-            // a swell, a tremolo and a pump, as the note's expression, back to full where it ends
+            // a swell, a tremolo, a pump and a gate, as the note's expression, the one curve of them all multiplied, back to
+            // full where it ends: a gate's 16ths sounding in the first part of each it lets through and silent in the rest,
+            // and in those it does not, counted from every bar's first and swung as the notes are
             var swells = state.GetStateValue(CompositionStateKinds.Swell) == 1;
             var tremolo = state.GetStateValue(CompositionStateKinds.Tremolo);
             var pump = state.GetStateValue(CompositionStateKinds.Pump);
-            if (swells || tremolo > 0 || pump > 0)
-            {
-                for (var t = 0.0; t < duration - 1e-9; t += Step / 2)
-                {
-                    var swell = swells ? Math.Min(1, 0.25 + 0.75 * t / Math.Min(1, duration / 2)) : 1;
-                    var shake = 1 - tremolo / 100.0 * (0.5 + 0.5 * Math.Sin(2 * Math.PI * t / 0.25));
-                    // ducked on the beat and swelling back over it
-                    var beat = (start + t) % 1;
-                    var duck = 1 - pump / 100.0 * Math.Pow(1 - beat, 2);
-                    expression.Add((start + t, swell * shake * duck));
-                }
-
-                expression.Add((end, 1));
-            }
-
-            // a gate, the note sounding in the first part of each 16th it lets through and silent in the rest, and in those it
-            // does not, its 16ths counted from every bar's first and swung as the notes are; back to full where it ends
             var gate = state.GetStateValue(CompositionStateKinds.Gate);
+            var gateEdges = new List<(double At, double Open)>();
             if (gate != 0)
             {
                 var section = SectionAt(map, note.Position);
@@ -147,12 +133,39 @@ internal static class ExpressionRender
                 for (var at = Math.Floor(note.Position / Sixteenth + 1e-9) * Sixteenth; swing.Apply(at) < end - 1e-9; at += Sixteenth)
                 {
                     var sounds = (gate >> ((int)Math.Round((at - from) / Sixteenth)).Mod(bar).Mod(16) & 1) == 1;
-                    expression.Add((Math.Max(swing.Apply(at), start), sounds ? 1 : 0));
+                    gateEdges.Add((Math.Max(swing.Apply(at), start), sounds ? 1 : 0));
                     var closes = swing.Apply(at + GateShare * Sixteenth);
                     if (sounds && closes < end - 1e-9)
-                        expression.Add((closes, 0));
+                        gateEdges.Add((closes, 0));
+                }
+            }
+
+            var moves = swells || tremolo > 0 || pump > 0;
+            if (moves || gateEdges.Count > 0)
+            {
+                double Moved(double at)
+                {
+                    var t = at - start;
+                    var swell = swells ? Math.Min(1, 0.25 + 0.75 * t / Math.Min(1, duration / 2)) : 1;
+                    var shake = 1 - tremolo / 100.0 * (0.5 + 0.5 * Math.Sin(2 * Math.PI * t / 0.25));
+                    // ducked on the beat and swelling back over it
+                    var duck = 1 - pump / 100.0 * Math.Pow(1 - at % 1, 2);
+                    return swell * shake * duck;
                 }
 
+                double Gated(double at)
+                {
+                    var open = 1.0;
+                    foreach (var edge in gateEdges)
+                        if (edge.At <= at + 1e-9)
+                            open = edge.Open;
+                    return open;
+                }
+
+                var times = (moves ? Enumerable.Range(0, (int)Math.Ceiling((duration - 1e-9) / (Step / 2))).Select(i => start + i * Step / 2) : [])
+                    .Concat(gateEdges.Select(x => x.At)).Where(x => x < end - 1e-9).Distinct().Order();
+                foreach (var at in times)
+                    expression.Add((at, Moved(at) * Gated(at)));
                 expression.Add((end, 1));
             }
 

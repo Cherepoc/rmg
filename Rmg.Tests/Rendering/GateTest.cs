@@ -39,7 +39,8 @@ public sealed class GateTest
             for (var bar = section.Start + Math.Ceiling((note.Position - section.Start - 1e-9) / section.Meter.BarDuration) * section.Meter.BarDuration;
                  bar < note.Position + note.Value.Duration - 1e-9;
                  bar += section.Meter.BarDuration)
-                await Assert.That(chopped[0].Expression.Last(x => x.Position <= song.Swing.Apply(bar) + 1e-6).Value).IsEqualTo(1).Because($"seed {song.Seed} at {bar}");
+                // sounding, a pump ducking it a little
+                await Assert.That(chopped[0].Expression.Last(x => x.Position <= song.Swing.Apply(bar) + 1e-6).Value).IsGreaterThan(0).Because($"seed {song.Seed} at {bar}");
         }
 
         await Assert.That(gated).IsGreaterThan(10);

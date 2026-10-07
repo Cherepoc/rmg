@@ -357,7 +357,8 @@ internal sealed record SongDecisions(
             solos, soloists, pinned, form, repeats, commonStateMap, swing, grooveContext, scale, drumJob,
             // the song's effects, decided before its notes, the part playing its strong one among those it plays
             Expression.DrawSound(Stream(SongStream.Effects), songUnconventionality[Facet.Sound], genre, tracks.Definitions,
-                tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).Select(x => x.Key).ToHashSet()));
+                tracks.Definitions.Where(x => !absent.Contains(x.Value.Role)).Select(x => x.Key).ToHashSet(),
+                effect => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.StrongEffects), (int)effect))));
     }
 
     /// <summary>
