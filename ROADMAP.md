@@ -10,7 +10,7 @@ is removed once it is built.
 
 1. Done: the echo as the synthesizer's delay rather than notes; heard on the test instance (`?listen=echo`).
 2. Done: the strong effects stacked, the first as before, the others beside it by their shares, the volume multiplied.
-3. The gate holding whole chords only, an arpeggio gated as it plays; Trance's arpeggios' rhythm measured.
+3. Done: the gate holding whole chords only, an arpeggio gated as it plays, Trance's arpeggios in 16ths.
 4. The part alone a genre's (*Genres*).
 5. Metal's arpeggios: a pedal point, a part's colour, a clean arpeggio staying clean; Metal's, Nu metal's, Djent's.
 6. Djent's synth over the guitars: a line's tensions on its strong beats.
@@ -263,14 +263,6 @@ Each item with its plan, and what it waits for.
   sounding into the next; holding the note before into the slide and leaving the next unstruck edits two notes at
   render. Built if the struck slide sounds like a stutter.
 - **Long fall-offs** (P4): a fall of an octave into nothing at a note's end, a slide's kind of its own, if missed.
-- **The gate holding whole chords only** (P1, step 3): Trance's chords part arpeggiates in about 87% of its sections,
-  and a gated arpeggio is held as its longest note (34% of Trance's held notes single), neither an arpeggio nor a gated
-  chord; in trance the two are layers of their own. `GatedChords` holds the notes played as whole chords, and leaves an
-  arpeggio's notes as they play, the gate chopping them on its grid, a gated pluck. This replaces voicing a gated
-  arpeggio as a chord, which would lose Trance's arpeggio, its hook. Measured: the held notes single (34% to about 0),
-  the gated part's notes left an arpeggio's, `?listen=gate`. And measured first: whether Trance's arpeggios run in
-  steady 16ths, an arpeggio following the chords part's own rhythm; if not, a 16th arpeggio a figure of the chords
-  part's (`Figures`).
 - **The brightness heard** (P1, step 4): how far the brightness (CC74) and the resonance (CC71) move each family of
   instruments, the pianos, the guitars, the distorted guitar most, the basses, the strings, the brass, the synths and
   the drums, in both soundfonts served, by ear: some presets have no filter of their own and may barely move. The
