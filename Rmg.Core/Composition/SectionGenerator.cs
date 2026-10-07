@@ -795,8 +795,13 @@ internal sealed record GeneratedSection(
             : Arrangement.DrawRests(new GenerationContext(Seeds.Derive(ArrangementSeed, appearance)), SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), Role, Absent, Genre, Facets[Facet.Form])
                 .Intersect(before);
         var resting = drawn.Union(held).Except(entering);
-        if (!Roles.Values.Distinct().Any(x => !resting.Contains(x) && HasNotes(x)))
+        // never silent: the parts held back playing where nothing else would, and every part the song has where its rests
+        // alone leave none
+        bool Silent() => !Roles.Values.Distinct().Any(x => !resting.Contains(x) && HasNotes(x));
+        if (Silent())
             resting = resting.Except(held);
+        if (Silent())
+            resting = resting.Intersect(Absent);
         // how the parts come in over its phrases, from a sequence of its own, by the form facet
         // of the parts that have notes in the section, so that a part alone is never one that has none, such as the riff's
         // twin, the solo part or a line whose patterns came out empty

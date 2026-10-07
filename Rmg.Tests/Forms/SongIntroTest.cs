@@ -34,6 +34,22 @@ public sealed class SongIntroTest
     ///     and sat silent for four bars; a sparse song's parts resting through their first bar, its earliest coming in on
     ///     its first beat (<see cref="SilentStart" />).
     /// </summary>
+    /// <summary>
+    ///     No section's appearance silent, in every genre: an IDM song's second section once rested every part it had,
+    ///     its rests drawn alone covering them all (<see cref="GeneratedSection" />).
+    /// </summary>
+    [Test]
+    public async Task NoSection_IsSilent_InEveryGenre()
+    {
+        foreach (var genre in GenrePresets.All.Select(x => x.Id).Prepend(null))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre is null ? null : GenrePresets.Genre(genre)))))
+        {
+            var notes = song.Song.Notes!.Values.SelectMany(x => x).Select(x => x.Position).Order().ToArray();
+            foreach (var span in song.Map.Sections)
+                await Assert.That(notes.Any(x => x >= span.Start - 1e-9 && x < span.End - 1e-9)).IsTrue().Because($"{genre ?? "the songs"} seed {song.Seed} at {span.Start}");
+        }
+    }
+
     [Test]
     public async Task ASong_SoundsFromItsFirstBar_InEveryGenre()
     {
