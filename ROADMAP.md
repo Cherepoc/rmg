@@ -12,7 +12,7 @@ is removed once it is built.
 2. Done: the strong effects stacked, the first as before, the others beside it by their shares, the volume multiplied.
 3. Done: the gate holding whole chords only, an arpeggio gated as it plays, Trance's arpeggios in 16ths.
 4. Done: the part alone a genre's.
-5. Metal's arpeggios: a pedal point, a part's colour, a clean arpeggio staying clean; Metal's, Nu metal's, Djent's.
+5. Done: metal's arpeggios, a pedal point, a part's colour, a clean arpeggio staying clean.
 6. Djent's synth over the guitars: a line's tensions on its strong beats.
 7. The brightness heard: how far it moves each family of instruments in both soundfonts served.
 8. One filter curve a part, its shapes combined, drawn over time, the filter's movements moved onto it.
@@ -134,6 +134,10 @@ Done for a version when every question is answered or let go of.
 - **The echo as the synthesizer's delay** (`?listen=echo`): the Roland GS delay's tone in the player, its feedback
   (100, about half), its darkness (2 of 7), the send (100), and a dub snare's quiet strokes echoing with its backbeat,
   the delay's send being a drum's, not a stroke's. Decides those settings, or the echo's notes back.
+- **Metal's arpeggios** (`?listen=metal-arpeggio`, `?listen=djent-arpeggio`, `MetalArpeggiosReportTest`): a third
+  of Metal's chord parts' sections broken, the pedal point the commonest, 1.7 notes a beat, its colours dissonant 17%;
+  Djent's 79%. Ringing over the riff or muddying it; the rhythm part resting less where the heavy guitars rest, should
+  the arpeggio be lost under them. Decides the colours' and the patterns' weights.
 - **The strong effects stacked** (`ExpressionTest.ReportStacked`): Trance 56% of its songs with two or more, a pump
   and a gate or an opening; the drawn songs 5%. A wall of effects, or a produced track? Decides the shares beside the
   first, and a genre's weights.
@@ -408,24 +412,6 @@ left:
   - Black metal's interludes: its pad alone now (`GenreChoices.Alone`); an acoustic guitar alone between the storms
     (P3), the part alone switching to a quiet instrument of its family in a quiet section.
   - Field recordings, a prepared piano, glitch edits (*Parked*, beyond General MIDI).
-- **Metal's arpeggios** (P1, step 5): a guitar breaking its chord, slowly or at a walking pace, an 8th at a middling
-  tempo, a 16th in a slow section, never fast, in shapes of their own, in an intro or a quiet section where the heavy
-  guitars rest, or ringing over them; consonant most often in Metal, a ninth's or a suspended colour, dissonant now and
-  then, a minor chord's major seventh, a ♭2, a ♯4; dissonant more often in Nu metal's creeping clean parts and most
-  often in Djent's. Built of what there is, three pieces added:
-  - the rhythm part breaking its chord (`Arpeggios`), at its genre's pace (`rhythm.rhythm`), resting less where the
-    heavy guitars rest (`rests`), the part alone a genre's (`GenreChoices.Alone`); clean, or driven where its genre
-    gives it a driven guitar;
-  - a pedal-point arpeggio (added): the chord's lowest note in turn with each of the others upwards, 1–3–1–5–1–8,
-    metal's commonest broken chord, beside up, up and down, two octaves, Alberti and pairs;
-  - a part's colour (added): one tone laid on its chord's notes for that part alone, a ninth, a major seventh, a ♭2 or a
-    ♯4, a pool by part of the genre's, the songs' none, consonant or dissonant by the genre's weights; the chord the
-    band plays stays as it was, as a cluster on distorted guitars is mud, and the colour sounds in the part that breaks
-    the chord, where it rings clear;
-  - a clean arpeggio stays clean (added): the louder forms turn the strummed clean guitars driven, never the one
-    breaking its chord (`LouderForms`).
-  Measured by the songs and sections with the arpeggio by genre, its notes a beat, its patterns' and its colours'
-  shares, the dissonant ones by genre; `?listen=` a question of it.
 - **Djent's synth over the guitars** (P1, step 6): a synth or a pad holding long notes over the riff, melodic or
   dissonant, the counter-melody or the pad slow (its rhythm's speed a genre's) in a synth's sound, built of what
   there is but one piece: a line's tensions (added), its strong beats landing now and then on the chord's tensions,
