@@ -20,6 +20,8 @@ public static class GenreChoiceDescriptions
         ["arpeggio"] = "Whether the chords and the rhythm part play their notes together or one by one, up, down, back and forth, as a harp or a synth's arpeggiator does.",
         ["colour"] = "A tone a part breaking its chord lays on it, its own, the band's chord as it was: a ninth's or a major seventh's shimmer, a flat second's or a sharp fourth's menace, as a metal guitar's clean arpeggio rings over the riff.",
         ["rootDegree"] = "Which chords the progressions lean to, by their degree above the section's home: rock's ♭VII and ♭VI in a minor or Mixolydian key, a metal riff's ♭VI. Above the middle a chord is likelier, below rarer.",
+        ["cadenceDegree"] = "Which chord leads home at a progression's end, by its degree: a classical V, or a modal band's ♭II, ♭VI or ♭VII. Above the middle a chord is likelier, below rarer.",
+        ["cadenceRaise"] = "How often a minor key's cadence raises its seventh, its chord on the fifth turned major to lead home as classical music does; a modal band's never.",
         ["sectionHome"] = "The key a section's chords move around: the song's tonic, its relative key (a minor song's major third, as a chorus lifts into it), or its fourth or fifth. A dark genre stays on its minor tonic.",
         ["rootMotion"] = "How the chords move from one to the next: by fifths for jazz's ii–V, by fourths for rock's IV–I, by steps and thirds for pop's loops. Above the middle a move is likelier, below rarer.",
         ["chordScales"] = "Chords that borrow notes from outside the key: a dominant leading into a chord, a chord from the parallel minor or major, the blues' every chord a dominant.",

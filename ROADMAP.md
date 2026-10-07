@@ -9,7 +9,7 @@ is removed once it is built.
 **In order** (P1, the plan of 7 October 2026, each step through the implementation loop):
 
 1. Done: pinch harmonics a held note's highlight, rare, wavering, in two sounds for listening.
-2. An ending in the song's own harmony (*An ending in the song's own harmony*, below).
+2. Done: an ending in the song's own harmony, the last section planing and vamping, the chord into home a genre's.
 3. Any General MIDI instrument in any role, then every genre's instruments retuned (*Any instrument in any role*,
    *Genres*).
 4. A flaky page test's 400 found and fixed (*Open work*).
@@ -202,18 +202,9 @@ Each item with its plan, and what it waits for.
 
 ### Conventionality
 
-- **An ending in the song's own harmony** (P1, step 2): measured October 2026 (`EndingMoodReportTest`), a song's
-  final chord is as plain or as dissonant as the song was, but its last section leaves its language for a classical
-  close: it never planes or vamps, by rule, though Djent planes 33% of its other sections and vamps most, Black metal
-  planes 39%, the wildest songs 15%; and it ends on V or IV to the tonic, the leading tone raised in a third of Black
-  metal's and IDM's, a perfect cadence after a song that never cadenced. Instead:
-  - the last section planing and vamping as the others do, but leading home: a planed progression's last move back to
-    the tonic's shape on the tonic (a Phrygian ♭II to i, a semitone's slide), a vamp home already;
-  - its last approach to the tonic a genre's and the progression facet's, as data: V to I, IV to I, ♭VII to I, ♭VI and
-    ♭VII to i, ♭II to i, or none, the home held; the raised leading tone a genre's chance (none in Djent, few in
-    Black metal and IDM);
-  - measured: the last section's devices against the others', the approaches by genre; `?listen=` a question of a
-    dissonant song's ending.
+- **An ending's chord into home, by listening** (`?listen=ending`): a modal band's ♭II, ♭VI or ♭VII against a classical
+  V–i; Black metal's last chord V 52% to 22%, raised 33% to 5%, its last section planed 42%; the songs' chances of the
+  raise and the chord into home left as they were.
 - **Pinch harmonics, by listening** (`?listen=pinch`, `?listen=pinch-sound`): General MIDI's harmonics or the squeal;
   their chances by genre, Nu metal's 79 in 64 songs, Metal's 32; a riff's twin pinching apart from its riff.
 - **A sparse song's silent start** (P2): an Ambient or a Dungeon song now and then silent for its first 16 beats or

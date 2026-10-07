@@ -243,7 +243,8 @@ internal sealed class SectionGenerator
         // how often its chords change, from a sequence of its own, faster the more energy it has
         var harmonicRhythm = HarmonicRhythm.Draw(Stream(sectionId, SectionStream.HarmonicRhythm), tilt, meter, facets[Facet.Progression], _genre);
         var progression = Progressions.Generate(context, scale, home, Progressions.Strictness.At(facets[Facet.Progression]), harmonicRhythm.Count, meter.Phrases,
-            motion => _genre.Shift(GenreChoices.RootMotions, Progressions.Motions[motion].Name), step => _genre.Shift(GenreChoices.RootDegrees, Progressions.Degrees[step].Name));
+            motion => _genre.Shift(GenreChoices.RootMotions, Progressions.Motions[motion].Name), step => _genre.Shift(GenreChoices.RootDegrees, Progressions.Degrees[step].Name),
+            step => _genre.Shift(GenreChoices.CadenceDegrees, Progressions.Degrees[step].Name));
         // a turnaround now and then, the pattern's last bar leading back to its start, by the progression facet and a genre's,
         // from a sequence of its own
         var turnaround = Stream(sectionId, SectionStream.Turnaround).TestProbability(Progressions.Turnaround.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Turnaround, "sections")));
@@ -253,7 +254,7 @@ internal sealed class SectionGenerator
         // the cadence raising the seventh for a major chord on the fifth, where the scale allows it, by the progression
         // facet, from a sequence of its own
         var raisable = Progressions.GetCadenceRaisedStep(scale.Offsets, home, progression[^1]);
-        var raisedStep = raisable is not null && Stream(sectionId, SectionStream.CadenceRaise).TestProbability(Progressions.CadenceRaise.At(facets[Facet.Progression]))
+        var raisedStep = raisable is not null && Stream(sectionId, SectionStream.CadenceRaise).TestProbability(Progressions.CadenceRaise.At(facets[Facet.Progression], _genre.Chance(GenreChoices.CadenceRaise, "sections")))
             ? raisable
             : null;
         // every chord's scale: the cadence's raise, and the others' applied or borrowed now and then, from a sequence of
@@ -270,14 +271,17 @@ internal sealed class SectionGenerator
             harmonicRhythm, progression, chordScales, scale, home);
         (harmonicRhythm, progression, chordScales) = (passingRhythm, passingProgression, passingScales);
         // a wild section planing now and then, every chord the home's shape moved, by the progression facet and a genre's,
-        // from a sequence of its own; but the song's last, which leads home to its tonic
+        // from a sequence of its own, the song's last too, which ends in the language the song spoke, sliding home at its end
         // a section vamping on its home, a genre's, from a sequence of its own, as planing does without its moves, the
         // cadence's raise with it, the progression's other draws made all the same
-        if (Stream(sectionId, SectionStream.Vamp).TestProbability(Vamp.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Vamp, "sections"))) && !plan.HasTonicHome)
+        if (Stream(sectionId, SectionStream.Vamp).TestProbability(Vamp.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Vamp, "sections"))))
             (progression, chordScales, shifts, raisable, raisedStep) = ([..progression.Select(_ => 0)], [..chordScales.Select(_ => ChordScale.Section)], [..shifts.Select(_ => 0)], null, null);
         var planingContext = Stream(sectionId, SectionStream.Planing);
-        var planes = planingContext.TestProbability(Planing.Chance.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Planing, "sections"))) && !plan.HasTonicHome;
-        var planed = Planing.Draw(planingContext, progression.Length);
+        // the song's last section planing back home, its last move a slide onto the tonic's shape on the tonic, but one of
+        // two chords, which has no move to slide by
+        var planes = planingContext.TestProbability(Planing.Chance.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Planing, "sections")))
+                     && (!plan.HasTonicHome || progression.Length >= 3);
+        var planed = Planing.Draw(planingContext, progression.Length, plan.HasTonicHome);
         if (planes)
             (progression, chordScales, shifts) = ([..progression.Select(_ => 0)], [..chordScales.Select(_ => ChordScale.Section)], planed);
         StateTrace.Record(TracePoints.Planing, SectionTrace, sectionId, 0, StateMap.Default, 0, planes ? string.Join(" ", planed) : "none", planes ? planed : null);

@@ -564,6 +564,34 @@
     ]
   },
   {
+    "id": "ending",
+    "question": "Black metal ending as it played, planed or sliding home by ♭II, ♭VI or ♭VII (with), or by a classical V–i, its leading tone raised (without)?",
+    "decides": "The chord into home and the raised leading tone, by genre.",
+    "genre": "blackMetal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "cadenceDegree": {
+          "fifth": 100,
+          "second": 50,
+          "sixth": 50,
+          "seventh": 50
+        },
+        "cadenceRaise": {
+          "sections": 100
+        }
+      }
+    },
+    "seeds": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ]
+  },
+  {
     "id": "gate",
     "question": "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
     "decides": "Its weight in Trance, and the parts it chops.",

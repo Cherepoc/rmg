@@ -159,7 +159,14 @@ internal static class Progressions
     ///     leaned.
     /// </param>
     public static ImmutableArray<int> Generate(IGenerationContext context, Scale scale, int home, double strictness, int count, int phrases, Func<int, double> motionLean,
-        Func<int, double> degreeLean)
+        Func<int, double> degreeLean) => Generate(context, scale, home, strictness, count, phrases, motionLean, degreeLean, _ => 0);
+
+    /// <param name="cadenceLean">
+    ///     How a genre leans the chord that leads home, by its steps above home, its place in <see cref="Degrees" />: a black
+    ///     metal band's ♭II or ♭VI rather than V, as the degrees are leaned.
+    /// </param>
+    public static ImmutableArray<int> Generate(IGenerationContext context, Scale scale, int home, double strictness, int count, int phrases, Func<int, double> motionLean,
+        Func<int, double> degreeLean, Func<int, double> cadenceLean)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(strictness);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(strictness, 1);
@@ -191,7 +198,8 @@ internal static class Progressions
                     : isPreparation ? PreCadenceSteps.Contains(step) ? 1 : OutOfRoleWeight
                     : 1;
                 var motion = Mod(step - previous);
-                weights[step] = new Weighted<int>(tilt.Weigh(tilt.Weigh(Math.Pow(MotionWeights[motion] * roleWeight, strictness), motionLean(motion)), degreeLean(step)), step);
+                weights[step] = new Weighted<int>(tilt.Weigh(tilt.Weigh(tilt.Weigh(Math.Pow(MotionWeights[motion] * roleWeight, strictness), motionLean(motion)), degreeLean(step)),
+                    isCadence ? cadenceLean(step) : 0), step);
             }
 
             // a root out of its phrase's place weighs nothing at the plainest
@@ -245,7 +253,7 @@ internal static class Progressions
     /// <summary>
     ///     The chance a cadence raises the seventh where the scale allows it, by the progression facet: every time at the
     ///     plain end and the middle, as a minor key leads home, and never at the wild end, whose chord on the fifth stays
-    ///     modal.
+    ///     modal; a genre's where it names it, a modal band's never (<see cref="GenreChoices.CadenceRaise" />).
     /// </summary>
     public static ByConvention CadenceRaise { get; } = new(1, 1, 0);
 

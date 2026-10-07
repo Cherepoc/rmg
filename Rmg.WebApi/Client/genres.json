@@ -794,6 +794,8 @@
     "name": "Metal",
     "description": "Distorted guitars chugging a riff in power chords, a double kick in 16ths, the snare on 2 and 4 or in half time, breaks and stops, guitar solos, natural minor, Phrygian and harmonic minor, fast.",
     "choices": {
+      "cadenceRaise": { "sections": [20, 30, 30] },
+      "cadenceDegree": { "fifth": 40, "sixth": 65, "seventh": 65 },
       "sectionHome": { "tonic": 100, "relative": 15, "fourth": 20, "fifth": 20 },
       "passingChords": {},
       "chordScales": { "borrowed": [0, 5, 10] },
@@ -965,6 +967,8 @@
     "name": "Djent",
     "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, a clean lead floating over.",
     "choices": {
+      "cadenceRaise": { "sections": 0 },
+      "cadenceDegree": { "fifth": 20, "second": 75, "seventh": 60 },
       "mixFilter": { "opening": [10, 20, 40], "dips": [3, 6, 10] },
       "gateParts": { "riff": 100 },
       "alone": { "rhythm": 100, "riff": 50, "pad": 40 },
@@ -1043,6 +1047,7 @@
     "name": "Nu metal",
     "description": "A low distorted riff of one note chugged in a syncopated hip-hop groove, a clicking slap bass, quiet clean verses with room for a voice and loud distorted choruses, squealing bends, natural minor and Phrygian.",
     "choices": {
+      "cadenceRaise": { "sections": 0 },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 50, "tom": 60, "cymbal": 100 },
       "alone": { "rhythm": 100, "riff": 50, "bass": 40, "drum": 20 },
       "figure": {
@@ -1171,6 +1176,7 @@
     "name": "Trap",
     "description": "A TR-808 in half time, the hi-hat in 16ths rolling into 32nds and triplets, a long gliding bass, dark bells and pads looping, minor and Phrygian, verses left to a voice.",
     "choices": {
+      "cadenceRaise": { "sections": [10, 20, 20] },
       "rootDegree": { "third": 30, "seventh": 40, "sixth": 60, "fourth": 65 },
       "sectionHome": { "tonic": 100, "fourth": 20, "relative": 10 },
       "rootMotion": { "same": 75 },
@@ -1715,6 +1721,8 @@
     "name": "Black metal",
     "description": "Fast, cold and raw: tremolo-picked minor riffs over blast beats and a double kick, triads rather than power chords, a choir or synth strings behind, natural minor, Phrygian and harmonic minor, long repeating sections, a deep reverb, few solos.",
     "choices": {
+      "cadenceRaise": { "sections": [10, 20, 20] },
+      "cadenceDegree": { "fifth": 25, "second": 75, "sixth": 70, "seventh": 65 },
       "passingChords": {},
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 80, "ride": 70, "tom": 70, "cymbal": 100 },
       "sectionHome": { "tonic": 100, "fourth": 20, "fifth": 15 },
@@ -1766,6 +1774,8 @@
     "name": "IDM",
     "description": "Warm and warped at its plainest, a slow swung breakbeat under detuned pads, an electric piano and a music box, sevenths and Dorian; wilder, an acid bass squelching and gliding, odd meters, tuplets and polymeters, and drums splintering into rolls.",
     "choices": {
+      "cadenceRaise": { "sections": 0 },
+      "cadenceDegree": { "fifth": 25, "fourth": 70, "sixth": 65, "seventh": 60 },
       "drumPieces": { "kick": 100, "electricSnare": 80, "acousticSnare": 50, "clap": 40, "hiHat": 100, "ride": 30, "tom": 50, "cymbal": 50 },
       "sectionHome": { "tonic": 100, "fourth": 20, "relative": 10 },
       "rootDegree": { "third": 25, "seventh": 30, "fourth": 70, "sixth": 65 },

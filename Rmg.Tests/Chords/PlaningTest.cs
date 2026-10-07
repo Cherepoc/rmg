@@ -11,9 +11,9 @@ public sealed class PlaningTest
     private static SongOverrides Progression(double value) => new(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Progression, value));
 
     [Test]
-    public async Task APlanedSectionsChords_AreItsHomesShape_MovedBySmallStepsOrAFourth_NeverFarFromHome()
+    public async Task APlanedSectionsChords_AreItsHomesShape_MovedBySmallStepsOrAFourth_NeverFarFromHome_TheLastEndingHome()
     {
-        var planed = 0;
+        var (planed, lastPlaned) = (0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, Progression(1))))
         {
             var progressions = song.Trace.Where(x => x.Point == TracePoints.Progression).Select(x => (x.Section, Roots: (ImmutableArray<int>)x.Value!)).ToArray();
@@ -25,10 +25,17 @@ public sealed class PlaningTest
                 await Assert.That(shifts.All(x => Math.Abs(x) <= Planing.Reach)).IsTrue();
                 await Assert.That(shifts.Zip(shifts.Skip(1), (a, b) => Math.Abs(b - a)).All(x => x is 1 or 2 or 3 or 5)).IsTrue();
                 await Assert.That(progressions.Last(x => x.Section == entry.Section).Roots.All(x => x == 0)).IsTrue();
+                // the song's last section, which ends the song, sliding home at its end
+                if (entry.Section == song.Map.Sections[^1].SectionId)
+                {
+                    lastPlaned++;
+                    await Assert.That(shifts[^1]).IsEqualTo(0).Because($"seed {song.Seed}");
+                }
             }
         }
 
         await Assert.That(planed).IsGreaterThan(5);
+        await Assert.That(lastPlaned).IsGreaterThan(0);
     }
 
     [Test]

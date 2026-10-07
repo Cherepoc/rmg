@@ -21,13 +21,14 @@ public sealed class EndingMoodReportTest
         foreach (var (label, base_, genre) in new (string, double?, string?)[] { ("wildest songs", 0.9, null), ("middling songs", null, null), ("djent", null, "djent"), ("blackMetal", null, "blackMetal"), ("idm", null, "idm"), ("metal", null, "metal") })
         {
             var songs = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Base: base_, Genre: genre is null ? null : GenrePresets.Genre(genre))));
-            int planedOthers = 0, others = 0, raised = 0, plainEnd = 0, ended = 0;
+            int planedOthers = 0, others = 0, planedLast = 0, raised = 0, plainEnd = 0, ended = 0;
             double plainShare = 0;
             foreach (var song in songs)
             {
                 var last = song.Map.Sections[^1].SectionId;
                 var planing = song.Trace.Where(t => t.Point == TracePoints.Planing).GroupBy(t => t.Section).ToDictionary(x => x.Key, x => x.First().Value is ImmutableArray<int>);
                 foreach (var (id, planes) in planing.Where(x => x.Key != last)) { others++; planedOthers += planes ? 1 : 0; }
+                planedLast += planing.GetValueOrDefault(last) ? 1 : 0;
                 raised += song.Trace.Where(t => t.Point == TracePoints.CadenceRaise && t.Section == last).Select(t => (((int?, bool))t.Value!).Item2).FirstOrDefault() ? 1 : 0;
                 if (!song.Song.Notes!.TryGetValue(SongTracks.ChordsTrack, out var chords) || chords.Count == 0)
                     continue;
@@ -39,7 +40,10 @@ public sealed class EndingMoodReportTest
                 plainShare += body.Length == 0 ? 0 : body.Sum(x => Plain(x.Value.Pitches) ? x.Value.Duration : 0) / body.Sum(x => x.Value.Duration);
             }
 
-            Console.WriteLine($"{label}: sections planed but the last {planedOthers / (double)Math.Max(1, others):P0}, the last 0 by rule; last cadence raised {raised / (double)songs.Length:P0}; " +
+            var approaches = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.Progression && t.Section == x.Map.Sections[^1].SectionId).Take(1)
+                .Select(t => ((((ImmutableArray<int>)t.Value!)[^1] % 7) + 7) % 7)).ToArray();
+            Console.WriteLine($"{label}: the last section's last chord, by degree, {string.Join(", ", approaches.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key + 1}: {x.Count() / (double)approaches.Length:P0}"))}");
+            Console.WriteLine($"{label}: sections planed but the last {planedOthers / (double)Math.Max(1, others):P0}, the last {planedLast / (double)songs.Length:P0}; last cadence raised {raised / (double)songs.Length:P0}; " +
                               $"final chord a plain triad {plainEnd / (double)Math.Max(1, ended):P0}, the songs' chords before the last section plain triads {plainShare / Math.Max(1, ended):P0} of their time");
         }
 
