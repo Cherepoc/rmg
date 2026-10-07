@@ -163,6 +163,26 @@ public static class Midi
         return [0xf0, ..IntToBytesVariable((uint)message.Length), ..message];
     }
 
+    /// <summary>How much an echo's repeat keeps of the one before, as the Roland GS delay's feedback: 64 none, 127 the most, 100 about a half.</summary>
+    private const byte DelayFeedback = 100;
+
+    /// <summary>How dark an echo's repeats are, as the Roland GS delay's low-pass before it, from 0, as they were, to 7.</summary>
+    private const byte DelayDarkness = 2;
+
+    /// <summary>
+    ///     A Roland GS delay's time, as its data steps it, from 0.1 ms to a second, in segments of a finer step the shorter;
+    ///     a time past a second halved until it fits, as an echo a half's beat later sounds the same pulse.
+    /// </summary>
+    internal static byte DelayTime(double milliseconds)
+    {
+        while (milliseconds > 1000)
+            milliseconds /= 2;
+        (int Start, int End, double From, double Step)[] segments =
+            [(1, 20, 0.1, 0.1), (20, 35, 2, 0.2), (35, 45, 5, 0.5), (45, 55, 10, 1), (55, 70, 20, 2), (70, 80, 50, 5), (80, 90, 100, 10), (90, 105, 200, 20), (105, 116, 500, 50)];
+        var (start, end, from, step) = segments.Last(x => x.From <= milliseconds + 1e-9);
+        return (byte)Math.Min(end - 1, start + (int)Math.Round((milliseconds - from) / step));
+    }
+
     /// <summary>A channel's part, as a Roland GS address numbers it: the drums' first, the channels before them after it.</summary>
     private static int GsPart(byte channel) => channel switch
     {
@@ -289,7 +309,7 @@ public static class Midi
     }
 
     private static void WriteSystemTrack(StateTimeline<double> tempoTimeline, ImmutableArray<(double Position, Meter Meter)> meters, int? room,
-        (InsertionKind Kind, ImmutableArray<byte> Channels)? insertion, string? label, uint durationDelta, Stream stream)
+        (InsertionKind Kind, ImmutableArray<byte> Channels)? insertion, double? echo, string? label, uint durationDelta, Stream stream)
     {
         var events = tempoTimeline.Select(x => new MidiEvent(AbsoluteDelta(x.Position), Tempo(x.Value)));
         if (tempoTimeline.Count == 0 || tempoTimeline[0].Position > 0)
@@ -310,6 +330,16 @@ public static class Midi
 
         if (room is { } macro)
             events = events.Prepend(new MidiEvent(0, GsMessage([0x40, 0x01, 0x30], [(byte)macro])));
+        // the echo, the delay's time as long as the echo waits at every tempo the song takes, and how it plays: its repeats
+        // each quieter by its feedback, a little darker, from the middle alone
+        if (echo is { } beats)
+        {
+            var tempos = tempoTimeline.Count == 0 || tempoTimeline[0].Position > 0 ? tempoTimeline.Select(x => (x.Position, x.Value)).Prepend((0, 1)) : tempoTimeline.Select(x => (x.Position, x.Value));
+            events = tempos.Select(x => new MidiEvent(AbsoluteDelta(x.Position), GsMessage([0x40, 0x01, 0x52], [DelayTime(beats * 60_000 / (x.Value * Meter.BaseTempo))])))
+                .Concat(events)
+                .Prepend(new MidiEvent(0, GsMessage([0x40, 0x01, 0x51], [DelayDarkness])))
+                .Prepend(new MidiEvent(0, GsMessage([0x40, 0x01, 0x55], [127, 0, 0, 127, DelayFeedback])));
+        }
         if (label is not null)
             events = events.Prepend(new MidiEvent(0, Text(label)));
 
@@ -358,9 +388,7 @@ public static class Midi
         var programs = track.ProgramChanges.Select(x => new MidiEvent(AbsoluteDelta(x.Position), ProgramChange(channel, (byte)x.Program)));
         var controllers = track.Controllers.Select(x => new MidiEvent(AbsoluteDelta(x.Position), ControlChange(channel, (byte)x.Controller, (byte)x.Value)));
         var bends = track.PitchBends.Select(x => new MidiEvent(AbsoluteDelta(x.Position), PitchBend(channel, x.Value)));
-        // the notes and their echoes, within the song
-        var notes = track.Echoes.IsEmpty ? track.NoteTimeline : EventTimeline.Create(track.NoteTimeline.Duration, track.NoteTimeline.Concat(track.Echoes.Where(x => x.Position < track.NoteTimeline.Duration)));
-        var events = settings.Concat(fade).Concat(programs).Concat(controllers).Concat(bends).Concat(notes.ToMidiNotes(durationDelta).SelectMany(x => x.ToEvents(channel)));
+        var events = settings.Concat(fade).Concat(programs).Concat(controllers).Concat(bends).Concat(track.NoteTimeline.ToMidiNotes(durationDelta).SelectMany(x => x.ToEvents(channel)));
         WriteTrack(events, durationDelta, stream);
     }
 
@@ -433,7 +461,7 @@ public static class Midi
         var insertion = song.Insertion is { } effect
             ? (effect.Kind, Channels: song.Tracks.ToChannels().Zip(song.Tracks).Where(x => x.Second.Role == effect.Part).Select(x => x.First).ToImmutableArray())
             : ((InsertionKind, ImmutableArray<byte>)?)null;
-        WriteSystemTrack(song.TempoTimeline, song.Meters, song.Room, insertion, label, songDurationDelta, stream);
+        WriteSystemTrack(song.TempoTimeline, song.Meters, song.Room, insertion, song.Echo, label, songDurationDelta, stream);
 
         var indexedTracks = song.Tracks.ToIndexedTracks();
         foreach (var (channel, track) in indexedTracks) WriteNoteTrack(track, channel, song.FadeTimeline, songDurationDelta, stream);

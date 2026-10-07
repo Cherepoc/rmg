@@ -44,8 +44,6 @@ public sealed class RenderedTrack
     /// <summary>The track's controllers over the song, such as its reverb, its chorus, its pan's sweep and its filter's movement.</summary>
     public ImmutableArray<(double Position, int Controller, int Value)> Controllers { get; init; } = [];
 
-    /// <summary>The track's echoes, its notes repeated quieter after them, which sound with its notes but are not of its line.</summary>
-    public ImmutableArray<TimelineItem<RenderedNote>> Echoes { get; init; } = [];
 
     /// <summary>The track's expression over the song, from 0 to 1, under the song's fade, full where none is said.</summary>
     public ImmutableArray<(double Position, double Value)> Expression { get; init; } = [];

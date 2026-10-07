@@ -52,9 +52,9 @@ public sealed class InsertionTest
         }
 
         await Assert.That(played).IsGreaterThan(8);
-        // and a drawn song in the middle plays none
+        // and a drawn song in the middle plays none, its type unset and no part assigned
         foreach (var seed in Enumerable.Range(0, 8))
-            await Assert.That(GsMessages(TestCorpus.Get(seed).Rendered)).IsEmpty();
+            await Assert.That(GsMessages(TestCorpus.Get(seed).Rendered).Where(x => x is [0x40, 0x03, 0x00, ..] or [0x40, _, 0x22, ..])).IsEmpty();
     }
 
     [Test]

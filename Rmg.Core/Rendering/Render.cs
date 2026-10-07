@@ -57,6 +57,7 @@ public static class Render
         var renderedTracks = new List<RenderedTrack>();
         var percussionTrackNotes = new List<IEnumerable<TimelineItem<RenderedNote>>>();
         ImmutableArray<(double Position, int Controller, int Value)> percussionSends = [];
+        var echoingDrums = new HashSet<int>();
         foreach (var (trackNumber, trackNotes) in notes)
         {
             cancellation.ThrowIfCancellationRequested();
@@ -106,8 +107,8 @@ public static class Render
             );
             if (song.TrackDefinitions[trackNumber] is PitchInstrumentTrack pitchInstrumentTrack)
             {
-                // how the part is played beyond its notes, its echo among its notes
-                var expression = ExpressionRender.Render(trackNotes, song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), pitchInstrumentTrack.Pan, GetMidiVelocity);
+                // how the part is played beyond its notes, its send to the delay that echoes it among them
+                var expression = ExpressionRender.Render(trackNotes, song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), pitchInstrumentTrack.Pan);
                 var played = EventTimeline.Create(trackNotes.Duration, renderedNotes);
                 var programChanges = ProgramChanges(trackNotes, pitchInstrumentTrack.InstrumentCode, swing);
                 var doubles = DoubleTracking.Doubles(pitchInstrumentTrack.Role, mix.Of(pitchInstrumentTrack.Role)?.Instrument ?? pitchInstrumentTrack.InstrumentCode);
@@ -119,8 +120,7 @@ public static class Render
                         ProgramChanges = programChanges,
                         PitchBends = expression.Bends,
                         Controllers = controllers,
-                        Expression = expression.Expression,
-                        Echoes = expression.Echoes
+                        Expression = expression.Expression
                     }
                 );
                 // and its second take, on the other side and the other driven guitar, a little late
@@ -137,8 +137,7 @@ public static class Render
                             ProgramChanges = [..programChanges.Select(x => (x.Position, DoubleTracking.SecondTake(x.Program)))],
                             PitchBends = expression.Bends,
                             Controllers = controllers,
-                            Expression = expression.Expression,
-                            Echoes = [..expression.Echoes.Select(Late)]
+                            Expression = expression.Expression
                         }
                     );
                 }
@@ -146,12 +145,13 @@ public static class Render
             else
             {
                 percussionTrackNotes.Add(renderedNotes);
-                // a drum's echo, a dub's snare's, among the drums' notes
+                // a drum that echoes, a dub's snare, sent to the delay by its key, every stroke of it
                 if (trackNotes.Any(x => x.Value.State.GetStateValue(CompositionStateKinds.Echo) > 0))
-                    percussionTrackNotes.Add(ExpressionRender.Render(trackNotes, song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), 0, GetMidiVelocity).Echoes.Where(x => x.Position < song.Duration));
+                    echoingDrums.UnionWith(renderedNotes.Select(x => x.Value.Offset));
                 // the drums' reverb and chorus, as their first note has them
                 if (percussionSends.IsEmpty && trackNotes.Count > 0)
-                    percussionSends = ExpressionRender.Render(EventTimeline.Create(trackNotes.Duration, [trackNotes[0]]), song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), 0, GetMidiVelocity).Controllers;
+                    percussionSends = [..ExpressionRender.Render(EventTimeline.Create(trackNotes.Duration, [trackNotes[0]]), song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), 0).Controllers
+                        .Where(x => x.Controller != ExpressionRender.DelayController)];
             }
         }
 
@@ -159,7 +159,12 @@ public static class Render
         if (percussionEventTimeline.Count > 0)
         {
             // the drums share their channel, where the soundfont places each drum as a kit stands, in the kit's sound
-            var percussionTrack = new RenderedTrack(true, TrackRole.Drum, song.Draws?.Kit ?? 0, percussionEventTimeline, 0) { Controllers = [..percussionSends.Select(x => (0.0, x.Controller, x.Value))] };
+            // and to the delay, the channel's send and every echoing drum's of its own, as a Roland GS drum's (NRPN 31)
+            (int, int)[] delaySends = echoingDrums.Count == 0
+                ? []
+                : [(ExpressionRender.DelayController, ExpressionRender.DelaySend), ..echoingDrums.Order().SelectMany(key => new[] { (99, 31), (98, key), (6, 127) })];
+            var percussionTrack = new RenderedTrack(true, TrackRole.Drum, song.Draws?.Kit ?? 0, percussionEventTimeline, 0)
+                { Controllers = [..percussionSends.Select(x => (0.0, x.Controller, x.Value)), ..delaySends.Select(x => (0.0, x.Item1, x.Item2))] };
             renderedTracks.Add(percussionTrack);
         }
 
@@ -183,8 +188,7 @@ public static class Render
                 PitchBends = x.Track.PitchBends,
                 // a pan given holds throughout, its sweep let go of
                 Controllers = [..x.Track.Controllers.Where(c => c.Controller != 10 || x.Mix?.Pan is null)],
-                Expression = x.Track.Expression,
-                Echoes = x.Track.Echoes
+                Expression = x.Track.Expression
             });
         // the meter the song starts in, and every section's that is another than the one before
         var meters = new List<(double Position, Meter Meter)> { (0, song.Meter) };
@@ -194,7 +198,9 @@ public static class Render
         return new RenderedSong(song.Duration, [..meters], common.GetStateTimeline(StateKinds.Tempo), common.GetStateTimeline(StateKinds.Fade), [..mixed])
         {
             Room = song.Draws?.Room,
-            Insertion = song.Draws?.Insertion
+            Insertion = song.Draws?.Insertion,
+            // the echo's length, the carrier's, every echoing part's and drum's alike
+            Echo = song.Notes?.Values.SelectMany(x => x).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Echo)).FirstOrDefault(x => x > 0) is > 0 and var echo ? echo / 4.0 : null
         };
     }
 

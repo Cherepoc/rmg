@@ -23,12 +23,13 @@ internal static class ExpressionRender
     /// <summary>How finely a curve is written, in beats: a 32nd.</summary>
     private const double Step = 0.125;
 
-    /// <summary>How many times an echo repeats a note, and how much quieter each time.</summary>
-    private const int EchoRepeats = 3;
-
-    private const double EchoDecay = 0.55;
-
     public const int ReverbController = 91;
+
+    /// <summary>A part's send to the synthesizer's delay, which plays its echo (<see cref="Midi" />).</summary>
+    public const int DelayController = 94;
+
+    /// <summary>How much of an echoing part the delay takes.</summary>
+    public const int DelaySend = 100;
     public const int ChorusController = 93;
     public const int BrightnessController = 74;
     public const int ResonanceController = 71;
@@ -50,20 +51,18 @@ internal static class ExpressionRender
 
     /// <summary>The track's expression, from its notes, as they are swung, at the song's tempo, a gate's and a filter's by the sections of the map.</summary>
     public static (ImmutableArray<(double Position, int Value)> Bends, ImmutableArray<(double Position, int Controller, int Value)> Controllers,
-        ImmutableArray<(double Position, double Value)> Expression, ImmutableArray<TimelineItem<RenderedNote>> Echoes) Render(
+        ImmutableArray<(double Position, double Value)> Expression) Render(
             EventTimeline<RealizedNote> notes,
             SongMap? map,
             Swing swing,
             StateTimeline<double> tempo,
-            double pan,
-            Func<RealizedNote, double> velocity
+            double pan
         )
     {
         var bends = ImmutableArray.CreateBuilder<(double, int)>();
         var controllers = ImmutableArray.CreateBuilder<(double, int, int)>();
         var expression = ImmutableArray.CreateBuilder<(double, double)>();
-        var echoes = ImmutableArray.CreateBuilder<TimelineItem<RenderedNote>>();
-        int? reverb = null, chorus = null;
+        int? reverb = null, chorus = null, delay = null;
 
         foreach (var note in notes)
         {
@@ -189,14 +188,16 @@ internal static class ExpressionRender
                 }
             }
 
-            // an echo, the note repeated quieter after it
-            var echo = state.GetStateValue(CompositionStateKinds.Echo) / 4.0;
-            if (echo > 0)
-                for (var repeat = 1; repeat <= EchoRepeats; repeat++)
-                    echoes.AddRange(note.Value.Pitches.Select(x => new RenderedNote(x, velocity(note.Value) * Math.Pow(EchoDecay, repeat), Math.Min(duration, echo)).ToTimelineItem(start + repeat * echo)));
+            // an echo, the note sent to the delay, and none sent where the notes stop echoing
+            var sentDelay = state.GetStateValue(CompositionStateKinds.Echo) > 0 ? DelaySend : 0;
+            if (sentDelay != (delay ?? 0))
+            {
+                delay = sentDelay;
+                controllers.Add((start, DelayController, sentDelay));
+            }
         }
 
-        return (bends.ToImmutable(), controllers.ToImmutable(), expression.ToImmutable(), echoes.ToImmutable());
+        return (bends.ToImmutable(), controllers.ToImmutable(), expression.ToImmutable());
     }
 
     /// <summary>A bend of the semitones given, as pitch bend's 14 bits, 8192 in the middle.</summary>

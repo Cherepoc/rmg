@@ -35,6 +35,9 @@ public sealed class RenderedSong
     /// <summary>The effect one part plays through, and the part, written as Roland GS messages; none for none.</summary>
     public Insertion? Insertion { get; init; }
 
+    /// <summary>How long the echo waits, in beats, which the Roland GS delay plays at the song's tempo; none for a song that does not echo.</summary>
+    public double? Echo { get; init; }
+
     public double Duration { get; }
 
     /// <summary>The meter the song starts in.</summary>
