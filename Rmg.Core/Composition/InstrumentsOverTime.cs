@@ -107,7 +107,7 @@ internal static class InstrumentsOverTime
     /// </summary>
     public static Func<RoleInstrument, double>? PoolOf(TrackRole part, double sound, Genre genre) =>
         genre.Pool<RoleInstrument>(GenreChoices.Instruments[part], x => GenreChoices.Name(x.Name)) is { } pool && RoleOf(part) is { } role
-            ? ByConvention.Within(role.Instruments, sound, pool)
+            ? ByConvention.Within(role.Everything, sound, pool)
             : null;
 
     /// <summary>
@@ -149,7 +149,7 @@ internal static class InstrumentsOverTime
                 // within the family where it keeps to it and the role has another of it, or to any other of the role's
                 var keeps = families(span.SectionId, pitched.Role == TrackRole.RiffTwin ? riffTrack : track).TestProbability(FamilyChance.At(sound[index]));
                 var family = FamilyOf(pitched.InstrumentCode);
-                var kin = role?.Instruments.Where(x => x.Program != pitched.InstrumentCode && family.Contains(x.Program) && Weight(x) > 0).ToArray() ?? [];
+                var kin = role?.Of(pool).Where(x => x.Program != pitched.InstrumentCode && family.Contains(x.Program) && Weight(x) > 0).ToArray() ?? [];
                 var switched = role is null ? pitched.InstrumentCode
                     : keeps && kin.Length > 0 ? context.Pick([..kin.Select(x => new Weighted<RoleInstrument>(Weight(x), x))]).Program
                     : role.Pick(context, sound[index], pool, pitched.InstrumentCode).Program;
@@ -159,7 +159,7 @@ internal static class InstrumentsOverTime
                 // same; one the role never lists, a driven guitar's pinch harmonics, is the player's own
                 var drawnVariants = Variants.GetValueOrDefault(program, []);
                 var drawnVariant = drawnVariants.IsEmpty ? program : drawnVariants[context.GenerateInt(0, drawnVariants.Length)];
-                var leftOut = pool is not null && role?.Instruments.FirstOrDefault(x => x.Program == drawnVariant) is { } listed && !(Weight(listed) > 0);
+                var leftOut = pool is not null && role?.Of(pool).FirstOrDefault(x => x.Program == drawnVariant) is { } listed && !(Weight(listed) > 0);
                 var (variants, variant) = leftOut ? (ImmutableArray<int>.Empty, program) : (drawnVariants, drawnVariant);
                 var bars = Enumerable.Range(0, (int)Math.Round(span.Duration / span.Meter.BarDuration)).Select(_ => context.TestProbability(BarChance)).ToArray();
 

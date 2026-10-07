@@ -645,7 +645,7 @@ public sealed class GenreEditorTest(Site site)
         var tune = await Change(parts, "instrument.bass");
         await Assert.That(await tune.Locator("h2").TextContentAsync()).IsEqualTo("Bass – Instruments");
         await tune.Locator(".tune-pick-open").ClickAsync();
-        await tune.Locator(".tune-popup input[type=search]").FillAsync("tub");
+        await tune.Locator(".tune-popup input[type=search]").FillAsync("tuba");
         await Assert.That(await tune.Locator(".tune-picks label:visible").AllTextContentsAsync()).IsEquivalentTo(["Tuba"]);
         await tune.Locator(".tune-picks label[data-option='tuba'] input").CheckAsync();
         await Assert.That(await Kept(tune)).Contains("tuba");

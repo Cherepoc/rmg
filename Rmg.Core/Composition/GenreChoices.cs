@@ -475,7 +475,7 @@ public static class GenreChoices
     /// <summary>Every pitched part's instruments, by its role, its pool's (<see cref="InstrumentRoles" />).</summary>
     public static ImmutableDictionary<TrackRole, GenreChoice> Instruments { get; } = InstrumentPools.ToImmutableDictionary(
         x => x.Role,
-        x => Pool($"instrument.{Name(x.Role.ToString())}", x.Label, x.Pool.Instruments.Select(i => (Name(i.Name), i.Name, i.Weight)))
+        x => Pool($"instrument.{Name(x.Role.ToString())}", x.Label, x.Pool.Everything.Select(i => (Name(i.Name), i.Name, i.Weight)))
     );
 
     /// <summary>The drum kits' sounds, by their General MIDI programs, the standard one every song's with no genre.</summary>

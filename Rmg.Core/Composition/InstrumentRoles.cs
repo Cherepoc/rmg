@@ -1,3 +1,4 @@
+using Rmg.Core.Songs;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using Rmg.Core.Events;
@@ -34,18 +35,40 @@ public sealed record RoleInstrument(int Program, string Name, ByConvention Weigh
 [DebuggerDisplay("InstrumentRole {Name}")]
 public sealed class InstrumentRole
 {
-    public InstrumentRole(string name, ImmutableArray<RoleInstrument> instruments)
+    /// <param name="leading">
+    ///     How an instrument the role does not list moves its part, its <see cref="RoleInstrument.Leading" />, where none
+    ///     of its family is listed either.
+    /// </param>
+    public InstrumentRole(string name, ImmutableArray<RoleInstrument> instruments, double leading = VoiceLeadingLayers.Piano)
     {
         if (instruments.IsDefaultOrEmpty)
             throw new ArgumentException("A role needs instruments.", nameof(instruments));
 
         Name = name;
         Instruments = instruments;
+        // every other of General MIDI's programs after the role's own, none of the songs', moving as the role's of its
+        // family does, or as the role's instruments most often do
+        Everything =
+        [
+            ..instruments,
+            ..Enumerable.Range(0, GeneralMidi.Programs.Length).Where(x => instruments.All(i => i.Program != x)).Select(x => new RoleInstrument(x, GeneralMidi.Programs[x],
+                new ByConvention(0, 0, 0), instruments.FirstOrDefault(i => InstrumentsOverTime.FamilyOf(x).Contains(i.Program))?.Leading ?? leading))
+        ];
     }
 
     public string Name { get; }
 
+    /// <summary>The instruments the songs draw the role's part from, by their weights.</summary>
     public ImmutableArray<RoleInstrument> Instruments { get; }
+
+    /// <summary>
+    ///     Every General MIDI instrument, which a genre may give the part: the role's own first, then the rest, which the
+    ///     songs never play, each moving as the role's own of its family does.
+    /// </summary>
+    public ImmutableArray<RoleInstrument> Everything { get; }
+
+    /// <summary>The instruments a pick weighs: every one where a pool, a genre's, weighs them, the role's own where none does.</summary>
+    public ImmutableArray<RoleInstrument> Of(Func<RoleInstrument, double>? pool) => pool is null ? Instruments : Everything;
 
     /// <summary>
     ///     An instrument of the role, the heavier ones being more likely, by their weights at the song's sound facet or a
@@ -56,7 +79,7 @@ public sealed class InstrumentRole
     public RoleInstrument Pick(IGenerationContext context, double sound, Func<RoleInstrument, double>? pool, params IEnumerable<int> excludedPrograms)
     {
         var excluded = excludedPrograms.ToHashSet();
-        var kept = Instruments.Select(x => (Instrument: x, Weight: pool?.Invoke(x) ?? x.Weight.At(sound))).Where(x => x.Weight > 0).ToArray();
+        var kept = Of(pool).Select(x => (Instrument: x, Weight: pool?.Invoke(x) ?? x.Weight.At(sound))).Where(x => x.Weight > 0).ToArray();
         var candidates = kept.Where(x => !excluded.Contains(x.Instrument.Program)).ToArray();
         if (candidates.Length == 0 && pool is not null)
             candidates = kept;
@@ -194,10 +217,9 @@ internal static class InstrumentRoles
             new(22, "Harmonica", 0.2, MelodyLayers.Stepwise),
             new(80, "Lead 1 (square)", 0.3, MelodyLayers.Mixed),
             new(81, "Lead 2 (sawtooth)", 0.4, MelodyLayers.Mixed),
-            new(84, "Lead 5 (charang)", 0.2, MelodyLayers.Mixed),
-            // an organ's solo, a hard rock band's, which only a genre plays
-            new(18, "Rock Organ", 0, MelodyLayers.Mixed)
-        ]
+            new(84, "Lead 5 (charang)", 0.2, MelodyLayers.Mixed)
+        ],
+        MelodyLayers.Mixed
     );
 
     /// <summary>The instruments that play a riff: guitars, overdriven or clean, a clavinet, synth leads, a baritone sax, brass.</summary>
@@ -242,9 +264,7 @@ internal static class InstrumentRoles
             new(72, "Piccolo", new ByConvention(0, 0.05, 0.2)),
             new(45, "Pizzicato Strings", new ByConvention(0, 0.1, 0.3)),
             new(62, "Synth Brass 1", new ByConvention(0, 0.1, 0.3)),
-            new(85, "Lead 6 (voice)", new ByConvention(0, 0.05, 0.2)),
-            // a slow synth over a heavy band's guitars, a genre's, the songs' never
-            new(50, "Synth Strings 1", 0)
+            new(85, "Lead 6 (voice)", new ByConvention(0, 0.05, 0.2))
         ]
     );
 
@@ -299,11 +319,9 @@ internal static class InstrumentRoles
             new(107, "Koto", new ByConvention(0, 0, 0.15), MelodyLayers.Mixed),
             new(109, "Bagpipe", new ByConvention(0, 0, 0.1), MelodyLayers.Stepwise),
             new(111, "Shanai", new ByConvention(0, 0, 0.1), MelodyLayers.Stepwise),
-            new(114, "Steel Drums", new ByConvention(0, 0.05, 0.2), MelodyLayers.Leaping),
-            // a lead guitar driven, a punk or a black metal band's, the songs' at their wildest alone
-            new(29, "Overdriven Guitar", new ByConvention(0, 0, 0.1), MelodyLayers.Mixed),
-            new(30, "Distortion Guitar", new ByConvention(0, 0, 0.1), MelodyLayers.Mixed)
-        ]
+            new(114, "Steel Drums", new ByConvention(0, 0.05, 0.2), MelodyLayers.Leaping)
+        ],
+        MelodyLayers.Mixed
     );
 
     public static InstrumentRole Bass { get; } = new(
