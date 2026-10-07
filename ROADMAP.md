@@ -12,12 +12,12 @@ is removed once it is built.
 2. Done: rock and metal measured, their presets tuned.
 3. Done: a section left to drums that only mark the form.
 4. Done: the listening tool, and *Listening* cut to its questions.
-5. The double kick (*Genres*, *What the genres cannot play yet*).
+5. Merged into 10: the double kick, a figure of the kick's in a genre's loud sections.
 6. A progression's degrees leaned by a genre (*Genres*).
 7. The kick locked to the riff, a polymeter's figure as long as the bar (*Genres*).
 8. The render reading the song's map, and stop time and the pushes kept as decisions (*Architecture*).
 9. The song's sound decided before its notes, the gate's chords then voiced (*Architecture*).
-10. Figures as a genre's data: the gallop, the clave, the montuno (*Genres*).
+10. Figures as a genre's data: the double kick, the gallop, the clave, the montuno (*Genres*).
 11. The rest of rock's and metal's (*Genres*), and long cycles only should listening ask (*Rhythm engine*).
 
 **Next** (P1, alongside): listening to what is deployed and tuning by what it says (see *Listening*, the page's
@@ -354,7 +354,7 @@ left:
   - The kick locked to the riff (P1): the kick plays with the riff only in a polymeter's cycle (`Polymeter`); a
     figure as long as the bar, or two, played by the riff, the bass and the kick together, a groove band's breaks, as
     a polymeter whose cycle divides the bar, by a genre's chance.
-  - The double kick (P1, below).
+  - The double kick (P1, a figure, below).
   - Figures as a genre's data (P2): a riff's gallop, an 8th and two 16ths, a clave's 3-2 over two bars, a montuno's
     broken chord off the beat, each a figure a part plays where its genre names it, its options' weights at the ends
     as every choice's; drawn rhythms elsewhere, as now.
@@ -393,11 +393,12 @@ left:
     under *Rock and metal*); a second time keeper playing straight under the tresillo.
   - A hook of one or two bars sung through a whole section, its phrase ends let go of; a hooked melody's bars repeat
     about half at most now, a phrase's last bar ending on its held note.
-  - Metal's double kick (P1), the kick in 16ths under the riff, a thrash or groove band's: the ground's rhythm settings
-    at their most play 4.5 hits a bar, a value moving a setting by steps from where the role rests, and a genre giving
-    the kick the time role leans the songs' own weight of it there (1) by its own, too little to take. A kick keeping
-    time by a genre's role, or a value set outright (see *The rhythm's values against the part's own*). Measured by
-    the kick's hits a bar in Metal's loud sections.
+  - Metal's double kick (P1, a figure, *Figures as a genre's data*): the kick in 16ths under the riff in a thrash or
+    groove band's loud sections, 4.0 hits a bar in Metal's loudest now (`RockAndMetalReportTest`). A genre's speed takes
+    the ground's cycle down to a beat at most (`ResolvedRhythm`, its period's power from -2) and its fineness only
+    coarser, so the kick plays a beat's cycle once; a role (the kick keeping time) would play it in every section, quiet
+    ones too, and the doubling of a lead takes drums outside the kit. A figure the genre names, leaned to the loud
+    sections by energy, is the gallop's and the clave's mechanism too.
   - A fill's drums leaning to the toms by genre, which the drum groups' state draws, not a genre's choice.
   - A melody's leaping by genre, a lean of its register's freedom and its leap's size: leaning its stepwiseness moved
     the mean move by a tenth of a semitone and the leaps not at all, a melody's leaps coming of a phrase starting
