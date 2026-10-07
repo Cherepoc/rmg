@@ -14,7 +14,7 @@ is removed once it is built.
 4. Done: the listening tool, and *Listening* cut to its questions.
 5. Merged into 10: the double kick, a figure of the kick's in a genre's loud sections.
 6. Done: a progression's degrees leaned by a genre.
-7. The kick locked to the riff, a polymeter's figure as long as the bar (*Genres*).
+7. Done: the kick locked to the riff.
 8. The render reading the song's map, and stop time and the pushes kept as decisions (*Architecture*).
 9. The song's sound decided before its notes, the gate's chords then voiced (*Architecture*).
 10. Figures as a genre's data: the double kick, the gallop, the clave, the montuno (*Genres*).
@@ -113,6 +113,8 @@ Done for a version when every question is answered or let go of.
 - **The polymeters:** the snare on every cell's start; the chords joining a cycle. Decides who joins a cycle.
 - **The pocket** (`?listen=pocket`): the backbeat a little late, the bass a touch ahead, the lead laid back. Decides
   the offsets.
+- **The kick with the riff** (`?listen=kick-lock`): Metal's sections 36%, Nu metal's 46%, the kick on every riff note,
+  16ths a double kick (`RockAndMetalReportTest`). Decides its chance, and following the riff's accents alone.
 - **Pushes and stop time** (`?listen=pushes`, `?listen=stop-time`): the band's changes an eighth early; the band
   hitting once a bar. Decides their chances by genre.
 
@@ -351,9 +353,6 @@ left:
   (`RockAndMetalReportTest`). Their solos (73% and 78% of songs) and their riffs of two and four bars (AAAB and ABAB a
   third of their sections) were there already; the organ's solo, Rock's shuffle at its plain end and Metal's clean
   quiet sections are presets now. Left:
-  - The kick locked to the riff (P1): the kick plays with the riff only in a polymeter's cycle (`Polymeter`); a
-    figure as long as the bar, or two, played by the riff, the bass and the kick together, a groove band's breaks, as
-    a polymeter whose cycle divides the bar, by a genre's chance.
   - The double kick (P1, a figure, below).
   - Figures as a genre's data (P2): a riff's gallop, an 8th and two 16ths, a clave's 3-2 over two bars, a montuno's
     broken chord off the beat, each a figure a part plays where its genre names it, its options' weights at the ends
