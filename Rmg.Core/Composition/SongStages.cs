@@ -38,6 +38,7 @@ internal static class SongStages
         new("Reharmonisation", Reharmonise, CanSkip: true),
         new("Inner lines", Composition.InnerLines.Apply, CanSkip: true),
         new("Polymeter", Polymeter, CanSkip: true),
+        new("Kick lock", KickLock.Apply, CanSkip: true),
         new("Fills", Fills, CanSkip: false),
         new("Lift cues", LiftCues, CanSkip: true),
         new("Drum solos", DrumSolos, CanSkip: true),

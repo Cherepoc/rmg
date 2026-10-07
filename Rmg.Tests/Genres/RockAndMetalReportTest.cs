@@ -24,7 +24,7 @@ public sealed class RockAndMetalReportTest
     [Explicit]
     public async Task Report()
     {
-        foreach (var (name, genre) in new (string, Genre?)[] { ("rock", GenrePresets.Genre("rock")), ("metal", GenrePresets.Genre("metal")), ("no genre", null) })
+        foreach (var (name, genre) in new (string, Genre?)[] { ("rock", GenrePresets.Genre("rock")), ("metal", GenrePresets.Genre("metal")), ("nu metal", GenrePresets.Genre("nuMetal")), ("no genre", null) })
         {
             var songs = TestCorpus.InParallel(Enumerable.Range(0, Count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)));
             var progressions = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.Progression).Select(t => (ImmutableArray<int>)t.Value!)).ToArray();
@@ -71,7 +71,9 @@ public sealed class RockAndMetalReportTest
             Console.WriteLine($"{name}: sections playing ♭VII–IV–I {Share([6, 3, 0]):P0}, ♭VI–♭VII–I {Share([5, 6, 0]):P0}, i–♭VI–♭VII {Share([0, 5, 6]):P0}, " +
                               $"♭VII–I {Share([6, 0]):P0}; the chords drawn on IV {Degree(3)}, ♭VI {Degree(5)}, ♭VII {Degree(6)}");
             Console.WriteLine($"{name}: schemes {Scheme("AAAA")}, {Scheme("AAAB")}, {Scheme("ABAB")}, {Scheme("AABA")}, {Scheme("AABB")}, others {schemes.Count(x => x is not ("AAAA" or "AAAB" or "ABAB" or "AABA" or "AABB")) / (double)schemes.Length:P0}");
-            Console.WriteLine($"{name}: the kick's hits a bar {every.Average():0.0}, in the loudest section {loudest.Average():0.0}, at most {loudest.DefaultIfEmpty(0).Max():0.0}");
+            var locked = songs.SelectMany(x => x.Trace.Where(t => t.Point == TracePoints.KickLock).Select(t => (bool)t.Value!)).ToArray();
+            Console.WriteLine($"{name}: the kick's hits a bar {every.Average():0.0}, in the loudest section {loudest.Average():0.0}, at most {loudest.DefaultIfEmpty(0).Max():0.0}; " +
+                              $"sections with the kick on the riff {locked.Count(x => x) / (double)Math.Max(1, locked.Length):P0}");
             Console.WriteLine($"{name}: songs opening on an intro section {structures.Average(x => x.Roles.Values.Contains(SectionRole.Intro) ? 1.0 : 0):P0}, " +
                               $"its chords clean in its quietest section and driven in its loudest {cleanThenDriven / (double)songs.Count():P0}");
         }

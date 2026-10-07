@@ -180,6 +180,26 @@
     ]
   },
   {
+    "id": "kick-lock",
+    "question": "The kick striking with the riff, a riff in 16ths a double kick: a groove band's break, or a machine gun?",
+    "decides": "Its chance by genre, and whether it follows the riff's every note.",
+    "genre": "nuMetal",
+    "without": {
+      "skip": [
+        "Kick lock"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ]
+  },
+  {
     "id": "gate",
     "question": "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
     "decides": "Its weight in Trance, and the parts it chops.",

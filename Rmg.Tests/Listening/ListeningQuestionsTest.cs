@@ -57,6 +57,8 @@ public sealed class ListeningQuestionsTest
             "Whether the cues stay, and how often.", null, ["Lift cues"], null, x => Any(x, TracePoints.LiftCue, _ => true)),
         new("doubling", "A line doubled, in octaves, harmonised, the bass with the riff: fuller, or muddy?",
             "Its chances.", "rock", ["Doubling"], null, x => Any(x, TracePoints.LineDoubling, _ => true)),
+        new("kick-lock", "The kick striking with the riff, a riff in 16ths a double kick: a groove band's break, or a machine gun?",
+            "Its chance by genre, and whether it follows the riff's every note.", "nuMetal", ["Kick lock"], null, x => Any(x, TracePoints.KickLock, v => (bool)v!)),
         new("gate", "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
             "Its weight in Trance, and the parts it chops.", "trance", [],
             new() { ["strongEffect"] = new() { ["none"] = 100 } },

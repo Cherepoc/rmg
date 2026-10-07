@@ -783,6 +783,7 @@
     "name": "Metal",
     "description": "Distorted guitars chugging a riff in power chords, a double kick in 16ths, the snare on 2 and 4 or in half time, breaks and stops, guitar solos, natural minor, Phrygian and harmonic minor, fast.",
     "choices": {
+      "kickLock": { "sections": [20, 30, 30] },
       "drumSounds": { "china": 70 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "louderForms": { "guitars": 80 },
@@ -940,6 +941,7 @@
     "name": "Djent",
     "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, a clean lead floating over.",
     "choices": {
+      "kickLock": { "sections": [30, 40, 40] },
       "sectionChanges": { "meter": [10, 20, 100], "tempo": [0, 4, 100], "modulation": [0, 5, 50] },
       "drop": { "lifts": [20, 30, 40] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
@@ -1010,6 +1012,7 @@
     "name": "Nu metal",
     "description": "A low distorted riff of one note chugged in a syncopated hip-hop groove, a clicking slap bass, quiet clean verses with room for a voice and loud distorted choruses, squealing bends, natural minor and Phrygian.",
     "choices": {
+      "kickLock": { "sections": [30, 40, 40] },
       "drumSounds": { "china": 70 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "harmonyDevices": {},
