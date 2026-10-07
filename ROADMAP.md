@@ -17,7 +17,7 @@ is removed once it is built.
 7. Done: the kick locked to the riff.
 8. Done: the render reading the song's map, and stop time decided once.
 9. Done: the song's sound decided before its notes; the gate's chords voiced put off (*Architecture*).
-10. Figures as a genre's data: the double kick, the gallop, the clave, the montuno (*Genres*).
+10. Done: figures as a genre's data, the double kick, the gallop and the clave among them.
 11. The rest of rock's and metal's (*Genres*), and long cycles only should listening ask (*Rhythm engine*).
 
 **Next** (P1, alongside): listening to what is deployed and tuning by what it says (see *Listening*, the page's
@@ -113,8 +113,9 @@ Done for a version when every question is answered or let go of.
 - **The polymeters:** the snare on every cell's start; the chords joining a cycle. Decides who joins a cycle.
 - **The pocket** (`?listen=pocket`): the backbeat a little late, the bass a touch ahead, the lead laid back. Decides
   the offsets.
-- **The kick with the riff** (`?listen=kick-lock`): Metal's sections 36%, Nu metal's 46%, the kick on every riff note,
-  16ths a double kick (`RockAndMetalReportTest`). Decides its chance, and following the riff's accents alone.
+- **The figures** (`?listen=kick-lock`, `double-kick`, `gallop`, `clave`): Metal's sections 27% with the riff, 14% a
+  double kick, 15% galloping, Nu metal's 42% with the riff (`RockAndMetalReportTest`), Latin's claves on the clave.
+  Decides their weights and leans.
 - **Pushes and stop time** (`?listen=pushes`, `?listen=stop-time`): the band's changes an eighth early; the band
   hitting once a bar. Decides their chances by genre.
 
@@ -347,10 +348,6 @@ left:
   (`RockAndMetalReportTest`). Their solos (73% and 78% of songs) and their riffs of two and four bars (AAAB and ABAB a
   third of their sections) were there already; the organ's solo, Rock's shuffle at its plain end and Metal's clean
   quiet sections are presets now. Left:
-  - The double kick (P1, a figure, below).
-  - Figures as a genre's data (P2): a riff's gallop, an 8th and two 16ths, a clave's 3-2 over two bars, a montuno's
-    broken chord off the beat, each a figure a part plays where its genre names it, its options' weights at the ends
-    as every choice's; drawn rhythms elsewhere, as now.
   - The solo harmonised (P3): a second guitar a third under the solo, as the riff's twin plays the riff
     (`TrackRole.RiffTwin`); a twin-guitar break.
   - The riff as the song's signature (P3): the riff alone opening the song and between its sections; one part alone
@@ -382,16 +379,12 @@ left:
     role free.
   - A snare's drag and its ghost notes, which want the backbeat's own figure, the pinned backbeat keeping its hits
     clean.
-  - Latin's clave, of two bars, and the piano's montuno, a broken chord off the beat (*Figures as a genre's data*,
-    under *Rock and metal*); a second time keeper playing straight under the tresillo.
+  - The piano's montuno, a broken chord off the beat, an arpeggio's pattern of its own (`Arpeggios`) rather than a
+    figure, the figures striking a player's chord or note; a second time keeper playing straight under the tresillo.
+  - More figures (P3, by listening): Bossa nova's clave, a figure for the hi-hat or the snare, a figure of more than
+    two bars; the double kick following the riff's accents alone, should every 16th sound a machine.
   - A hook of one or two bars sung through a whole section, its phrase ends let go of; a hooked melody's bars repeat
     about half at most now, a phrase's last bar ending on its held note.
-  - Metal's double kick (P1, a figure, *Figures as a genre's data*): the kick in 16ths under the riff in a thrash or
-    groove band's loud sections, 4.0 hits a bar in Metal's loudest now (`RockAndMetalReportTest`). A genre's speed takes
-    the ground's cycle down to a beat at most (`ResolvedRhythm`, its period's power from -2) and its fineness only
-    coarser, so the kick plays a beat's cycle once; a role (the kick keeping time) would play it in every section, quiet
-    ones too, and the doubling of a lead takes drums outside the kit. A figure the genre names, leaned to the loud
-    sections by energy, is the gallop's and the clave's mechanism too.
   - A fill's drums leaning to the toms by genre, which the drum groups' state draws, not a genre's choice.
   - A melody's leaping by genre, a lean of its register's freedom and its leap's size: leaning its stepwiseness moved
     the mean move by a tenth of a semitone and the leaps not at all, a melody's leaps coming of a phrase starting
