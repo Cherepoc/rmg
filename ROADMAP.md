@@ -15,7 +15,7 @@ is removed once it is built.
 5. Merged into 10: the double kick, a figure of the kick's in a genre's loud sections.
 6. Done: a progression's degrees leaned by a genre.
 7. Done: the kick locked to the riff.
-8. The render reading the song's map, and stop time and the pushes kept as decisions (*Architecture*).
+8. Done: the render reading the song's map, and stop time decided once.
 9. The song's sound decided before its notes, the gate's chords then voiced (*Architecture*).
 10. Figures as a genre's data: the double kick, the gallop, the clave, the montuno (*Genres*).
 11. The rest of rock's and metal's (*Genres*), and long cycles only should listening ask (*Rhythm engine*).
@@ -305,12 +305,6 @@ Each item with its plan, and what it waits for.
 
 ### Architecture
 
-- **The render reading the song's map** (P1, a refactor keeping the fingerprint): `ExpressionRender.Render` is given the
-  map, so that the filter and the gate count from a section's start and a bar's meter there, and the state kinds that
-  copy them onto every note (`FilterFrom`, `GateFrom`, `GateBar`) go.
-- **Stop time and the pushes as decisions** (P1, a refactor keeping the fingerprint): `StopTime.Phrases` is worked out
-  by three stages; the phrases and the pushes kept with the form's other decisions, as the drops are (`Form.Edits`),
-  and read where they are needed.
 - **The song's sound decided before its notes** (P1): the gentle effects' song draws, the strong effect and the part
   carrying it, the room and the insertion drawn in `SongDecisions` from their streams as now, the carrier among the
   parts rather than the parts with notes (the songs whose carrier changes counted first, a few at most); `Expression`
