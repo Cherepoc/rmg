@@ -20,7 +20,7 @@ is removed once it is built.
 10. Done: a tape's wow, the parts drifting together, some detuned, IDM's and a lo-fi genre's.
 11. Done, with 12: the whole mix filtered, a song opening up, a section dipping before the next, a song closing.
 12. Done with 11.
-13. Trance as it is produced: its effects stacked, its rolling bass, its build, its degrees (*Genres*).
+13. Done: Trance's rolling bass, its build rolling to 32nds, its ♭VI, ♭III and ♭VII, its mix filtered.
 14. Djent's filtered riff opening and its stuttering riff (*Genres*).
 15. Waiting on listening: the rest of rock's and metal's, long cycles, more figures, rolls in 32nds, a riff's drone.
 
@@ -373,12 +373,6 @@ left:
   - Tremolo picking (P3, measured first): fast repeated notes unmuted, the riff's speed perhaps enough already.
   - A melody sung rather than played (P3, a listening question first): no singer in General MIDI; the melody's
     rhythms word-like, its breaths and held ends, should it sound like a lead guitar playing a tune.
-- **Trance as it is produced** (P1, step 9, after the effects and the filter): the kick pumping the mix, the gate on
-  the chords where they play whole, the filter opening a synth and the mix, dips into the drops, all at once rather
-  than one of them (the strong effects stacked); a rolling bass, 8ths or 16ths off the beat under the
-  kick, a figure of the bass's (`Figures`); the build into a drop, a snare roll speeding up from 8ths to 32nds, measured
-  first against the hi-hat rolls and the lift's cues; minor, its ♭VI, ♭III and ♭VII leaned (`rootDegree`). Measured by
-  Trance's songs with each, `?listen=gate` and the build's question.
 - **Djent's filtered riff and its stutter** (P1, step 10, after the mix's filter): a modern industrial metal sound, the
   down-tuned riff low-passed, under water, for a bar or a phrase, then open on the downbeat of the heavy section, a dip
   of the mix's filter in place of a drop's silence rather than beside it, two gestures at once being too many; the riff

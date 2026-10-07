@@ -84,7 +84,7 @@ internal static class FormLayers
     public const int BuildBars = 4;
 
     /// <summary>How many bars a build's snare rolls before its silent one, twice as fast each bar from 8ths, and how loud it starts and ends, as a fill's run does.</summary>
-    public const int BuildRollBars = 2;
+    public const int BuildRollBars = 3;
 
     public const double BuildRollStart = 0.5;
 

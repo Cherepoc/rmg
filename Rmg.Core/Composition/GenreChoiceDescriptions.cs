@@ -101,7 +101,7 @@ public static class GenreChoiceDescriptions
         ["rhythm", _] => $"How the {Lower(label)} plays its rhythm: how fast, how far off the beat, how fine its notes, how much weight its weaker beats get, how full and how repetitive. Above the middle more, below less.",
         ["feel", _] => $"The {Lower(label)}'s own feel over the song's: straight, or in triplets, quintuplets or groupings such as the tresillo's 3+3+2.",
         ["drumRole", _] => $"Which drums play the {Lower(label)} role in the groove, and how likely each is.",
-        ["figure", _] => $"The {Lower(label)}s a section plays in place of its own rhythm, and how likely each is: the kick with the riff or a double kick, the louder the section the likelier, a riff's gallop, a clave's three and two.",
+        ["figure", _] => $"The {Lower(label)}s a section plays in place of its own rhythm, and how likely each is: the kick with the riff or a double kick, the louder the section the likelier, a riff's gallop, a clave's three and two, a bass rolling after the kick.",
         _ => ""
     };
 

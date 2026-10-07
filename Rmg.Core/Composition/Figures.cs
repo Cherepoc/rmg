@@ -5,14 +5,15 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
 
-/// <summary>Who plays a figure: the kick, the snare, the riff, the chords or the claves, in the order a section draws them.</summary>
+/// <summary>Who plays a figure: the kick, the snare, the riff, the chords, the claves or the bass, in the order a section draws them.</summary>
 public enum FigurePlayer
 {
     Ground,
     Backbeat,
     Riff,
     Claves,
-    Chords
+    Chords,
+    Bass
 }
 
 /// <summary>
@@ -26,7 +27,8 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 /// <summary>
 ///     The figures a genre gives its players in its sections: a groove or thrash band's kick with the riff, or in 16ths, a
 ///     double kick; a black metal band's blast beat and its tremolo-picked riff; a breakbeat's kick and snare; a heavy
-///     band's galloping riff; a clave's three and two; a trance's chords in 16ths, its arpeggio's steady run. A section draws each player's, its own rhythm or one of its
+///     band's galloping riff; a clave's three and two; a trance's chords in 16ths, its arpeggio's steady run, and its bass
+///     rolling in the 16ths after the kick or on the offbeats. A section draws each player's, its own rhythm or one of its
 ///     figures, from a sequence of its own, by the feel facet and the genre's pool, leaned by its energy, a figure two
 ///     players play, a blast's or a breakbeat's, drawn by the first and played by both; the songs play their own rhythms
 ///     always. The player plays the figure in every bar it plays in, its own notes
@@ -50,6 +52,8 @@ internal static class Figures
         new("gallop", "A gallop, an 8th and two 16ths a beat", FigurePlayer.Riff, [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15], 16, false, 0),
         new("tremolo", "Tremolo-picked, every 16th", FigurePlayer.Riff, [..Enumerable.Range(0, 16)], 16, false, 0),
         new("sixteenths", "Every 16th, an arpeggio's steady run or stabs", FigurePlayer.Chords, [..Enumerable.Range(0, 16)], 16, false, 0),
+        new("rolling", "Rolling, the three 16ths after every beat's kick", FigurePlayer.Bass, [1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15], 16, false, 0),
+        new("offbeat", "On the offbeats, the 8th between the kicks", FigurePlayer.Bass, [2, 6, 10, 14], 16, false, 0),
         new("clave32", "The clave's 3-2", FigurePlayer.Claves, [0, 6, 12, 20, 24], 32, false, 0),
         new("clave23", "The clave's 2-3", FigurePlayer.Claves, [4, 8, 16, 22, 28], 32, false, 0)
     ];
@@ -68,6 +72,7 @@ internal static class Figures
         FigurePlayer.Backbeat => "Snare's figure",
         FigurePlayer.Riff => "Riff's figure",
         FigurePlayer.Chords => "Chords' figure",
+        FigurePlayer.Bass => "Bass's figure",
         _ => "Claves' figure"
     };
 
@@ -112,7 +117,8 @@ internal static class Figures
             [FigurePlayer.Backbeat] = [..DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).Where(timelines.ContainsKey)],
             [FigurePlayer.Riff] = TrackOf(TrackRole.Riff) is { } own ? [own] : [],
             [FigurePlayer.Claves] = [..new[] { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) }.Where(timelines.ContainsKey)],
-            [FigurePlayer.Chords] = TrackOf(TrackRole.Chords) is { } chords ? [chords] : []
+            [FigurePlayer.Chords] = TrackOf(TrackRole.Chords) is { } chords ? [chords] : [],
+            [FigurePlayer.Bass] = TrackOf(TrackRole.Bass) is { } bass ? [bass] : []
         };
 
         var edits = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>();

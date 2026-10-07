@@ -95,6 +95,31 @@ public sealed class FiguresTest
         await Assert.That(hits).IsGreaterThan(30);
     }
 
+    /// <summary>
+    ///     A calibration: a rolling bass plays the 16ths after the kick, off the beat, but for the notes the stages after
+    ///     the figures place, a line's pickup or a push: 92% of its notes (October 2026).
+    /// </summary>
+    [Test]
+    public async Task ARollingBass_PlaysOffTheBeat()
+    {
+        var (notes, off) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("trance")))))
+        {
+            var bass = song.Song.TrackDefinitions.First(x => x.Value.Role == TrackRole.Bass).Key;
+            var rolling = Playing(song, FigurePlayer.Bass, "rolling");
+            foreach (var span in song.Map.Sections.Where(x => rolling.Contains(x.SectionId)))
+            foreach (var note in song.Song.Notes!.GetValueOrDefault(bass)?.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9) ?? [])
+            {
+                notes++;
+                off += Math.Abs(note.Position - Math.Round(note.Position)) > 1e-6 ? 1 : 0;
+            }
+        }
+
+        Console.WriteLine($"of {notes} notes of a rolling bass, {off / (double)notes:P1} off the beat");
+        await Assert.That(notes).IsGreaterThan(200);
+        await Assert.That(off / (double)notes).IsGreaterThan(0.8);
+    }
+
     [Test]
     public async Task AFigureTwoPlayersPlay_IsPlayedByBoth_ABlastsKickWithItsSnare()
     {

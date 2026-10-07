@@ -473,6 +473,29 @@
     ]
   },
   {
+    "id": "rolling-bass",
+    "question": "Trance's bass rolling in the 16ths after the kick, or on the offbeats: the drive, or a machine gun?",
+    "decides": "The bass's figures' weights in Trance.",
+    "genre": "trance",
+    "without": {
+      "skip": [],
+      "genre": {
+        "figure.bass": {
+          "rolling": 0,
+          "offbeat": 0
+        }
+      }
+    },
+    "seeds": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+    ]
+  },
+  {
     "id": "gate",
     "question": "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
     "decides": "Its weight in Trance, and the parts it chops.",

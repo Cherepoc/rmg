@@ -1215,8 +1215,9 @@
     "name": "Trance",
     "description": "The kick four on the floor, the hi-hat off the beat, sawtooth arpeggios and leads over pumping pads, a rolling bass, minor, 132 to 140, long sections building to a drop.",
     "choices": {
+      "rootDegree": { "sixth": 80, "third": 85, "seventh": 75 },
       "mixFilter": { "opening": [20, 50, 70], "dips": [5, 10, 15], "closing": [10, 20, 30] },
-      "figure": { "chords": { "own": [60, 50, 40], "sixteenths": 100 } },
+      "figure": { "chords": { "own": [60, 50, 40], "sixteenths": 100 }, "bass": { "own": [40, 30, 30], "rolling": 100, "offbeat": [60, 60, 40] } },
       "drumSounds": { "openHiHat": 75 },
       "room": { "hall": 100, "plate": 50 },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
