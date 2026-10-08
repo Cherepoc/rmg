@@ -281,7 +281,7 @@ internal sealed class SectionGenerator
         // sequence of their own
         var passingChance = tilt.Chance(PassingChords.Chance.At(facets[Facet.Progression], _genre.Chance(GenreChoices.PassingChords, "chords")), PassingChords.EnergyLean);
         var (passingRhythm, passingProgression, passingScales, shifts) = PassingChords.Draw(Stream(sectionId, SectionStream.PassingChords), passingChance, facets[Facet.Progression],
-            harmonicRhythm, progression, chordScales, scale, home);
+            harmonicRhythm, progression, chordScales, scale, home, _genre);
         (harmonicRhythm, progression, chordScales) = (passingRhythm, passingProgression, passingScales);
         // a wild section planing now and then, every chord the home's shape moved, by the progression facet and a genre's,
         // from a sequence of its own, the song's last too, which ends in the language the song spoke, sliding home at its end

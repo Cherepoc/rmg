@@ -5,7 +5,10 @@ using Rmg.Tests.Genres;
 
 namespace Rmg.Tests.Chords;
 
-/// <summary>A passing chord: the next chord's dominant, or the next a semitone above, over the second half of a chord a bar long, never in a plain song.</summary>
+/// <summary>
+///     A passing chord: the next chord's dominant, the next a semitone above or below, its tritone substitute or a
+///     half-diminished chord a semitone below it, over the second half of a chord a bar long, never in a plain song.
+/// </summary>
 public sealed class PassingChordTest
 {
     /// <summary>Every section's chords as it records them: where they start, their roots, and which of them pass.</summary>
@@ -34,28 +37,38 @@ public sealed class PassingChordTest
     }
 
     [Test]
-    public async Task AChromaticPassingChord_SoundsTheNextASemitoneAbove()
+    public async Task AChromaticPassingChord_SoundsTheNextASemitoneAboveOrBelow_AHalfDiminishedOneOnlyBelow()
     {
         var wild = new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Progression, 0.9), Genre: GenrePresets.Genre("jazz"));
-        var chromatic = 0;
+        var (above, below) = (0, 0);
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, wild)))
         {
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;
-            int Root(double position) => Rmg.Core.Composition.Realizer.GetChord(common.GetEffectiveStateMapAt(position)).Chord.GetPitch(0);
+            // a chord as a pitched note struck where it starts has it, its section's home among its state; none where none is
+            var struck = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack).SelectMany(x => x.Value)
+                .GroupBy(x => Math.Round(x.Position, 6)).ToDictionary(x => x.Key, x => x.First().Value.State);
+            ChordContext? Chord(double position) => struck.TryGetValue(Math.Round(position, 6), out var state) ? Rmg.Core.Composition.Realizer.GetChord(state).Chord : null;
             // but where a section planes, its chords moved apart by semitones of their own
             var planing = song.Trace.Where(x => x.Point == TracePoints.Planing && x.Value is not null).Select(x => x.Section).ToHashSet();
             var changes = song.ChordChanges;
             for (var i = 0; i + 1 < changes.Length; i++)
             {
-                if (common.GetEffectiveStateMapAt(changes[i]).GetStateValue(Rmg.Core.Events.StateKinds.ChordShift) != 1
-                    || planing.Contains(song.Song.Map!.SectionAt(changes[i])?.SectionId ?? -1))
+                var shift = common.GetEffectiveStateMapAt(changes[i]).GetStateValue(Rmg.Core.Events.StateKinds.ChordShift);
+                if (shift is not (1 or -1) || planing.Contains(song.Song.Map!.SectionAt(changes[i])?.SectionId ?? -1))
                     continue;
-                chromatic++;
-                await Assert.That(((Root(changes[i]) - Root(changes[i + 1])) % 12 + 12) % 12).IsEqualTo(1);
+                if (Chord(changes[i]) is not { } chord || Chord(changes[i + 1]) is not { } next)
+                    continue;
+                (above, below) = shift == 1 ? (above + 1, below) : (above, below + 1);
+                await Assert.That(((chord.GetPitch(0) - next.GetPitch(0)) % 12 + 12) % 12).IsEqualTo((shift % 12 + 12) % 12).Because($"seed {song.Seed} at {changes[i]}");
+                // a diminished fifth over its root a semitone below alone
+                if (((chord.GetPitch(4) - chord.GetPitch(0)) % 12 + 12) % 12 == 6)
+                    await Assert.That(shift).IsEqualTo(-1).Because($"seed {song.Seed} at {changes[i]}");
             }
         }
 
-        await Assert.That(chromatic).IsGreaterThan(5);
+        Console.WriteLine($"passing a semitone above {above}, below {below}");
+        await Assert.That(above).IsGreaterThan(5);
+        await Assert.That(below).IsGreaterThan(5);
     }
 
     [Test]

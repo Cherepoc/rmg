@@ -18,8 +18,10 @@ percent everywhere, and a listening question once deployed):
    Soul's 0.9, Rock's 0.5 (`?listen=ghosts`). Its drags left (*What the genres cannot play yet*).
 4. Done: the solo harmonised, two parts together a third apart, the second on the first's notes of an 8th and longer,
    as every solo played together now; Metal's 39% of its solos, Rock's 16% (`?listen=twin-solo`).
-5. Harmony for Jazz and Soul: the passing diminished, the tritone substitute in a reharmonised appearance, chromatic
-   approaches from below, a ii–V into a chord but the home.
+5. Done: passing chords of a genre's kinds, the tritone substitute, a half-diminished chord a semitone below the next
+   between roots a whole step apart, the next chord a semitone below, beside its dominant and a semitone above; Jazz's,
+   Soul's, Bossa nova's and Orchestral's pools (`?listen=jazz-passing`). A ii–V into a chord but the home left
+   (*Approach chords*).
 6. The bass's root and fifth within the bar, Country's, and Jazz's walking quarters.
 7. The drums' push, a crash and kick on the and of four; a fill in a stop-time phrase's last bar.
 8. Data on mechanisms there already: the piano's montuno, a riff's drone, Black metal's acoustic interlude.
@@ -352,10 +354,10 @@ Each item with its plan, and what it waits for.
   (`ChordVoicing`, "Spread") neighbours sound close.
 - **Approach chords, the rest** (P3): turnarounds, passing chords, a chord solo's planed approaches, chromatic passing
   chords from above and a later appearance reharmonised are built. A plain song is never reharmonised, by any of them,
-  the songs' chance 0 at the plain end; a preset's may be above it, as Soul's and Bossa nova's turnarounds. Left: the
-  passing diminished between roots a whole step apart, and chromatic approaches from below, a chromatic root wanting the
-  whole chord moved a semitone with the lines over it keeping the target's scale; a chord solo's approaches on the
-  strong beats at the wild end, and the dominant as its approach; the tritone substitute for V7 in a reharmonised
+  the songs' chance 0 at the plain end; a preset's may be above it, as Soul's and Bossa nova's turnarounds. Passing chords of a genre's kinds are built too (`PassingChords.Kinds`): the
+  tritone substitute, a half-diminished chord a semitone below, the next a semitone above or below. Left: a ii–V into a
+  chord but the home, two chords passing where one does now; a chord solo's approaches on the strong beats at the wild
+  end, and the dominant as its approach; the tritone substitute for a progression's own V7 in a reharmonised
   appearance. Today a chord solo stacks the band's chord or planes its shape, never another chord.
 - **A melody in block harmony** (P4, parked): the counter-melody or the pad voicing its long notes, approaches on its
   passing ones, as a horn section's soli.
@@ -442,12 +444,12 @@ left:
 - **More genres** (P3). What the genres made in October 2026 still want: Fusion's
   roots off the scale (the progressions move by a 7-note scale's steps, chromatic and constant-structure motion
   coming only of planing and a chord's own scale) and a lead's wide-interval legato lines (*A melody's leaping by
-  genre*); Soul's tritone substitute and passing diminished (*Harmony for Jazz and Soul*); Country's bass on the root
+  genre*); Country's bass on the root
   and the fifth within the bar and Bossa nova's two-bar clave (below and *Long cycles*).
 - **The hook and the phrase scheme as one** (P3): a hooked section a scheme sung literally, should a trial keep the
   report's repeats (50% of a hooked section's notes at their first bar's places); otherwise kept apart, with the reason.
-- **Harmony for Jazz and Soul** (P3): the tritone substitute, the passing diminished and a ii–V elsewhere (*Approach
-  chords*, *Harmony's devices*); call and response (*The band's devices*); a part resting by its section's role.
+- **Harmony for Jazz and Soul** (P3): a ii–V elsewhere (*Approach chords*, *Harmony's devices*); call and response
+  (*The band's devices*); a part resting by its section's role.
 - **The choices grouped into families** (P4): bass, harmony, form, drum devices, one choice of several chances rather
   than fifteen of one, which would read better in the editor; should the editor grow hard to use.
 - **What the genres cannot play yet** (P3, each by what listening to the presets says; `GenreDevicesReportTest`,

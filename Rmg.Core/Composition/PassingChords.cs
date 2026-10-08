@@ -10,13 +10,26 @@ public enum PassingKind
     Dominant,
 
     /// <summary>The next chord itself a semitone above, its shape and its scale moved with it, sliding down into it.</summary>
-    Chromatic
+    Chromatic,
+
+    /// <summary>The next chord itself a semitone below, sliding up into it.</summary>
+    ChromaticBelow,
+
+    /// <summary>The tritone substitute for the next chord's dominant: a dominant a semitone above the next chord, falling into it.</summary>
+    Tritone,
+
+    /// <summary>
+    ///     A half-diminished chord a semitone below the next, between roots a whole step apart, as ♯Iø7 passes from I to
+    ///     ii: the next chord's root lowered, in Locrian.
+    /// </summary>
+    Diminished
 }
 
 /// <summary>
 ///     Chords the progression does not have, passing into the next (<see cref="PassingKind" />), over the second half of
 ///     the chord before, a weak beat about its middle. One chord in the bar state, a change of its own, which every part
-///     takes.
+///     takes. A chord moved by semitones moves its shape and its scale with it, so that the lines over it keep the
+///     scale it is moved from.
 /// </summary>
 internal static class PassingChords
 {
@@ -24,8 +37,21 @@ internal static class PassingChords
     public static ImmutableArray<(PassingKind Kind, ByConvention Weight)> Kinds { get; } =
     [
         (PassingKind.Dominant, new ByConvention(1, 1, 0.5)),
-        (PassingKind.Chromatic, new ByConvention(0, 0.25, 1))
+        (PassingKind.Chromatic, new ByConvention(0, 0.25, 1)),
+        (PassingKind.ChromaticBelow, new ByConvention(0, 0.1, 1)),
+        (PassingKind.Tritone, new ByConvention(0, 0.05, 0.5)),
+        (PassingKind.Diminished, new ByConvention(0, 0.05, 0.5))
     ];
+
+    /// <summary>A kind as a genre's page shows it.</summary>
+    public static string LabelOf(PassingKind kind) => kind switch
+    {
+        PassingKind.Dominant => "The next chord's dominant",
+        PassingKind.Chromatic => "The next chord a semitone above",
+        PassingKind.ChromaticBelow => "The next chord a semitone below",
+        PassingKind.Tritone => "The tritone substitute",
+        _ => "A half-diminished chord a semitone below"
+    };
 
     /// <summary>
     ///     The chance a chord a bar long or longer passes into the next by its dominant, by the progression facet: never at
@@ -43,12 +69,13 @@ internal static class PassingChords
     /// </summary>
     /// <param name="progression">The chords' roots, in steps above the home.</param>
     /// <param name="chordScales">Every chord's own scale.</param>
+    /// <param name="genre">The genre whose pool of kinds the passing chords are drawn among, where it names one.</param>
     public static (HarmonicRhythm Rhythm, ImmutableArray<int> Progression, ImmutableArray<ChordScale> ChordScales, ImmutableArray<int> Shifts) Draw(
         IGenerationContext context, double chance, double unconventionality, HarmonicRhythm rhythm, ImmutableArray<int> progression, ImmutableArray<ChordScale> chordScales,
-        Scale scale, int home)
+        Scale scale, int home, Genre genre)
     {
         var changes = rhythm.Changes;
-        var kinds = ByConvention.Weigh(Kinds, unconventionality);
+        var kinds = ByConvention.Weigh(Kinds, unconventionality, genre.Pool<PassingKind>(GenreChoices.PassingKinds, x => GenreChoices.Name(x.ToString())));
         var passing = ImmutableArray.CreateBuilder<double>();
         var (roots, scales, shifts) = (new List<int>(), new List<ChordScale>(), new List<int>());
         for (var chord = 0; chord < progression.Length; chord++)
@@ -66,13 +93,28 @@ internal static class PassingChords
             var dominant = Normalize(next + 4);
             if (kind == PassingKind.Dominant && Mod(dominant - progression[chord]) == 0)
                 continue;
+            // a mode on the next chord's root, the tritone's and the diminished's, where its scale leaves its root as the
+            // section's has it; and a diminished chord between roots a whole step apart alone, up to the next
+            if (kind is PassingKind.Tritone or PassingKind.Diminished && chordScales[chord + 1].Steps.Moves(Mod(home + next)))
+                continue;
+            if (kind == PassingKind.Diminished && (RootOf(scale, home, next, chordScales[chord + 1]) - RootOf(scale, home, progression[chord], chordScales[chord])).Mod(12) != 2)
+                continue;
 
             passing.Add(rhythm.Meter.NearestGroupStart(changes[chord] + length / 2));
             roots.Add(kind == PassingKind.Dominant ? dominant : next);
-            scales.Add(kind == PassingKind.Dominant
-                ? ChordScales.Toward(scale.Offsets, home + dominant, Scales.Mixolydian.Offsets, ChordScaleKind.Applied) ?? ChordScale.Section
-                : chordScales[chord + 1]);
-            shifts.Add(kind == PassingKind.Chromatic ? 1 : 0);
+            scales.Add(kind switch
+            {
+                PassingKind.Dominant => ChordScales.Toward(scale.Offsets, home + dominant, Scales.Mixolydian.Offsets, ChordScaleKind.Applied) ?? ChordScale.Section,
+                PassingKind.Tritone => ChordScales.Toward(scale.Offsets, home + next, Scales.Mixolydian.Offsets, ChordScaleKind.Applied) ?? ChordScale.Section,
+                PassingKind.Diminished => ChordScales.Toward(scale.Offsets, home + next, Scales.Locrian.Offsets, ChordScaleKind.Applied) ?? ChordScale.Section,
+                _ => chordScales[chord + 1]
+            });
+            shifts.Add(kind switch
+            {
+                PassingKind.Chromatic or PassingKind.Tritone => 1,
+                PassingKind.ChromaticBelow or PassingKind.Diminished => -1,
+                _ => 0
+            });
         }
 
         return passing.Count == 0
@@ -81,6 +123,9 @@ internal static class PassingChords
     }
 
     private static int Mod(int step) => step.Mod(Scales.StepCount);
+
+    /// <summary>A chord's root in semitones above the scale's first note, as its own scale has it.</summary>
+    private static int RootOf(Scale scale, int home, int root, ChordScale chordScale) => scale.Offsets[Mod(home + root)] + chordScale.Steps.By(Mod(home + root));
 
     private static int Normalize(int step) => Mod(step + 3) - 3;
 }

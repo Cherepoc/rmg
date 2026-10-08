@@ -28,6 +28,7 @@ public static class GenreChoiceDescriptions
         ["harmonicRhythm"] = "How often the chords change: two a bar for busy harmony, one a bar for most songs, one every two bars for a loop or a groove.",
         ["vamp"] = "How often a section sits on one chord the whole way through, as a funk band or a techno track does.",
         ["turnaround"] = "How often a section's last bar leads back to its start through V, or ii–V, as jazz and the blues do.",
+        ["passingKind"] = "How a passing chord leads into the next: by the next chord's dominant, the next chord sliding into it from a semitone above or below, the tritone substitute for its dominant, or a half-diminished chord a semitone below it between roots a whole step apart.",
         ["passingChords"] = "How often a chord passes into the next through that chord's own dominant, a jazz and soul colour.",
         ["planing"] = "How often a section slides its home chord's shape up and down by semitones, a modern, filmic colour.",
         ["harmonyDevices"] = "Reharmonising a section when it comes back, a chromatic line moving inside a held chord, and a bass note held under a section's changing chords.",

@@ -143,7 +143,11 @@ public sealed class ListeningQuestionsTest
             "The ghost notes' chances by genre, how many and how soft.", "funk", ["Ghosts"], null, x => FirstSection(x, TracePoints.Ghosts, v => (bool)v!)),
         new("twin-solo", "Metal's solo played by two guitars together a third apart, the second on the held notes: a twin-guitar break, or a smear?",
             "The twins' chances by genre, and the second's notes.", "metal", [], new() { ["solos"] = new() { ["twins"] = 0 } },
-            x => x.Solos.Where(s => s.Value is { Mode: SoloMode.Together, Soloists.Length: > 1 }).Select(s => (double?)x.Map.Sections[s.Key].Start).Min())
+            x => x.Solos.Where(s => s.Value is { Mode: SoloMode.Together, Soloists.Length: > 1 }).Select(s => (double?)x.Map.Sections[s.Key].Start).Min()),
+        new("jazz-passing", "Jazz passing into its chords by the tritone substitute, a half-diminished chord a semitone below or a chromatic slide (with), or by their dominants alone (without): richer, or wrong?",
+            "The passing chords' kinds by genre.", "jazz", [],
+            new() { ["passingKind"] = new() { ["dominant"] = 100, ["tritone"] = 0, ["diminished"] = 0, ["chromatic"] = 0, ["chromaticBelow"] = 0 } },
+            x => FirstSection(x, TracePoints.HarmonicRhythm, v => !((HarmonicRhythm)v!).Passing.IsEmpty))
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

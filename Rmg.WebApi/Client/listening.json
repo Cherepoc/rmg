@@ -147,7 +147,7 @@
       },
       {
         "seed": "d",
-        "at": 175.3
+        "at": 333.3
       }
     ]
   },
@@ -891,12 +891,12 @@
     },
     "seeds": [
       {
-        "seed": "9",
-        "at": 65.1
+        "seed": "3",
+        "at": 74.3
       },
       {
-        "seed": "C",
-        "at": 29.6
+        "seed": "9",
+        "at": 49.1
       },
       {
         "seed": "F",
@@ -971,12 +971,16 @@
     },
     "seeds": [
       {
+        "seed": "1",
+        "at": 156
+      },
+      {
         "seed": "3",
         "at": 52
       },
       {
         "seed": "A",
-        "at": 86
+        "at": 12
       },
       {
         "seed": "D",
@@ -985,10 +989,6 @@
       {
         "seed": "F",
         "at": 77.2
-      },
-      {
-        "seed": "I",
-        "at": 132
       },
       {
         "seed": "L",
@@ -1151,6 +1151,50 @@
       {
         "seed": "17",
         "at": 87.6
+      }
+    ]
+  },
+  {
+    "id": "jazz-passing",
+    "question": "Jazz passing into its chords by the tritone substitute, a half-diminished chord a semitone below or a chromatic slide (with), or by their dominants alone (without): richer, or wrong?",
+    "decides": "The passing chords' kinds by genre.",
+    "genre": "jazz",
+    "without": {
+      "skip": [],
+      "genre": {
+        "passingKind": {
+          "dominant": 100,
+          "tritone": 0,
+          "diminished": 0,
+          "chromatic": 0,
+          "chromaticBelow": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 39.4
+      },
+      {
+        "seed": "5",
+        "at": 8
+      },
+      {
+        "seed": "8",
+        "at": 14
+      },
+      {
+        "seed": "C",
+        "at": 0
+      },
+      {
+        "seed": "S",
+        "at": 88
+      },
+      {
+        "seed": "W",
+        "at": 48
       }
     ]
   }
