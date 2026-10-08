@@ -201,11 +201,13 @@ internal sealed record SongDecisions(
             Stream(SongStream.HookIntro),
             Stream(SongStream.Drops),
             Stream(SongStream.DropKind),
+            Stream(SongStream.RiffIntro),
             genre,
             Of(Facet.Form),
             tracks.Definitions.ToDictionary(x => x.Key, x => x.Value.Role),
             !absent.Contains(TrackRole.Drum),
             drumJob == DrumJob.Groove,
+            !absent.Contains(TrackRole.Riff),
             meter
         );
         var plan = formGenerator.Plan(sectionIds);
@@ -325,7 +327,8 @@ internal sealed record SongDecisions(
                 index == 0 && plan.Intro == IntroKind.Entries,
                 solo,
                 [..lateEntries.Where(x => index < x.Value).Select(x => x.Key)],
-                [..lateEntries.Where(x => index == x.Value).Select(x => x.Key)]
+                // and the riff in the first where the song opens on it
+                [..lateEntries.Where(x => index == x.Value).Select(x => x.Key), ..index == 0 && plan.RiffFirst ? [TrackRole.Riff] : Array.Empty<TrackRole>()]
             );
             // as loud as its energy's step from the section's, by the lift's measure of loudness, so that its last chorus
             // plays the louder

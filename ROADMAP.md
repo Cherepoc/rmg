@@ -12,7 +12,8 @@ percent everywhere, and a listening question once deployed):
 
 1. Done: a breakdown, a bridge or a free form's section in half time, the kick with the chugging riff, the lines and the
    pad out; Djent's 55% of songs, Metal's 42%, Nu metal's 41% (`?listen=breakdown`).
-2. The riff as the song's signature: the riff alone opening the song and between its sections.
+2. Done: the riff as the song's signature, a song opening on its riff alone, the band coming in after it; Rock's 33%,
+   Metal's 42% (`?listen=riff-intro`). Between its sections, the part alone already (`GenreChoices.Alone`).
 3. A snare's ghost notes and drags on the backbeat's own figure, Funk's, Soul's and Rock's.
 4. The solo harmonised: a second guitar a third under the solo's notes of an 8th and longer, a twin-guitar break.
 5. Harmony for Jazz and Soul: the passing diminished, the tritone substitute in a reharmonised appearance, chromatic
@@ -423,8 +424,8 @@ left:
   quiet sections are presets now. Left:
   - The solo harmonised (P3): a second guitar a third under the solo, as the riff's twin plays the riff
     (`TrackRole.RiffTwin`); a twin-guitar break.
-  - The riff as the song's signature (P3): the riff alone opening the song and between its sections; one part alone
-    is a texture already (`TextureKind.Alone`), the part not chosen as the riff, nor placed as an interlude.
+  - The riff between the sections (P3): one part alone is a texture already (`TextureKind.Alone`), the riff a genre's
+    weight of it, but not placed as an interlude of its own.
   - Tremolo picking (P3, measured first): fast repeated notes unmuted, the riff's speed perhaps enough already.
   - A melody sung rather than played (P3, a listening question first): no singer in General MIDI; the melody's
     rhythms word-like, its breaths and held ends, should it sound like a lead guitar playing a tune.

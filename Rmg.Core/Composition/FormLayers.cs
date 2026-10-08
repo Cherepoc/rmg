@@ -82,6 +82,12 @@ internal static class FormLayers
     public static ByConvention HookIntro { get; } = new(0.25, 0.25, 0);
 
     /// <summary>
+    ///     The chance a song opens on its riff alone, the band coming in part by part after it, as a riff-driven band's
+    ///     song does, by its form facet: the songs' never; a genre's where it names it, in place of its other intro.
+    /// </summary>
+    public static ByConvention RiffIntro { get; } = new(0, 0, 0);
+
+    /// <summary>
     ///     The chance a lift the drums announce (<see cref="LiftCues" />) is built to and dropped at: the band growing
     ///     louder over the phrase before it and out for its last bar, a genre's that the songs never play.
     /// </summary>

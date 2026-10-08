@@ -135,7 +135,10 @@ public sealed class ListeningQuestionsTest
             x => FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.LineInversion) > 0, role => role == TrackRole.Melody)),
         new("breakdown", "Djent's bridge as a breakdown, the drums in half time, the kick with the chugging riff, the melody and the pad out: heavy, or a hole?",
             "The breakdown's chances in the heavy genres.", "djent", [], new() { ["breakdown"] = new() { ["sections"] = 0 } },
-            x => Before(x, FirstSection(x, TracePoints.Breakdown, v => (bool)v!), 2))
+            x => Before(x, FirstSection(x, TracePoints.Breakdown, v => (bool)v!), 2)),
+        new("riff-intro", "Rock opening on its riff alone, the band coming in after it: a song's signature, or a thin start?",
+            "The riff intro's chances in the riff-driven genres.", "rock", [], new() { ["riffIntro"] = new() { ["songs"] = 0 } },
+            x => x.Map.Intro is { Kind: IntroKind.Entries, Entries: [{ Part.Role: TrackRole.Riff, Entry: 0 }, ..] } ? 0 : null)
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

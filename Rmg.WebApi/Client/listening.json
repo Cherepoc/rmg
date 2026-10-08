@@ -59,7 +59,7 @@
       },
       {
         "seed": "J",
-        "at": 161.2
+        "at": 162.8
       },
       {
         "seed": "O",
@@ -405,7 +405,7 @@
       },
       {
         "seed": "q",
-        "at": 0
+        "at": 1.8
       },
       {
         "seed": "u",
@@ -511,11 +511,11 @@
       },
       {
         "seed": "3",
-        "at": 42
+        "at": 1.5
       },
       {
         "seed": "6",
-        "at": 88
+        "at": 0
       },
       {
         "seed": "7",
@@ -643,7 +643,7 @@
     "seeds": [
       {
         "seed": "A",
-        "at": 59.9
+        "at": 61.1
       },
       {
         "seed": "F",
@@ -663,7 +663,7 @@
       },
       {
         "seed": "S",
-        "at": 97.7
+        "at": 96.6
       }
     ]
   },
@@ -686,10 +686,6 @@
     },
     "seeds": [
       {
-        "seed": "3",
-        "at": 2.3
-      },
-      {
         "seed": "8",
         "at": 9.2
       },
@@ -700,6 +696,10 @@
       {
         "seed": "H",
         "at": 188.6
+      },
+      {
+        "seed": "I",
+        "at": 133
       },
       {
         "seed": "S",
@@ -855,16 +855,16 @@
         "at": 86.2
       },
       {
-        "seed": "6",
-        "at": 226.5
-      },
-      {
         "seed": "8",
         "at": 112.2
       },
       {
         "seed": "F",
         "at": 196.2
+      },
+      {
+        "seed": "I",
+        "at": 311.2
       },
       {
         "seed": "K",
@@ -1033,6 +1033,46 @@
       {
         "seed": "a",
         "at": 141.3
+      }
+    ]
+  },
+  {
+    "id": "riff-intro",
+    "question": "Rock opening on its riff alone, the band coming in after it: a song's signature, or a thin start?",
+    "decides": "The riff intro's chances in the riff-driven genres.",
+    "genre": "rock",
+    "without": {
+      "skip": [],
+      "genre": {
+        "riffIntro": {
+          "songs": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "J",
+        "at": 0
+      },
+      {
+        "seed": "g",
+        "at": 0
+      },
+      {
+        "seed": "h",
+        "at": 2
+      },
+      {
+        "seed": "m",
+        "at": 0
+      },
+      {
+        "seed": "11",
+        "at": 0
+      },
+      {
+        "seed": "17",
+        "at": 0
       }
     ]
   }
