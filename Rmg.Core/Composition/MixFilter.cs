@@ -76,7 +76,7 @@ internal static class MixFilter
         }
 
         var plan = new MixFilterPlan(opens, dips.ToImmutable(), closes, song.Form.FilteredDrops);
-        StateTrace.Record(TracePoints.MixFilter, SectionGenerator.SectionTrace, 0, 0, StateMap.Default, 0, $"{plan}", plan);
+        StateTrace.RecordSong(TracePoints.MixFilter, $"{plan}", plan);
         if (ramps.Count == 0)
             return draft;
 

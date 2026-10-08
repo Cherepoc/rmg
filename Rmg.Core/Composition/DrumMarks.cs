@@ -127,7 +127,7 @@ internal static class DrumMarks
         foreach (var track in drums)
             result[track] = EventTimeline.Create<RealizedNote>(notes[track].Duration,
                 marks.TryGetValue(track, out var own) ? own.GroupBy(x => x.Position).Select(x => x.First()).OrderBy(x => x.Position) : []);
-        StateTrace.Record(TracePoints.DrumMarks, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", marking), marking.ToImmutableArray());
+        StateTrace.RecordSong(TracePoints.DrumMarks, string.Join(", ", marking), marking.ToImmutableArray());
         return draft with { Notes = result.ToImmutable() };
     }
 

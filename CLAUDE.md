@@ -19,7 +19,9 @@
   everywhere; and a thing that is no more apt in a wild song than in a middling one, such as a riff harmonised, may stop
   short at the song too, never at 0 and as often at 1 as at 0.5, the wild end choosing how it is played instead. The
   facets reach the ends only together, as the song's value does; songs are spread well away from both, and whatever an
-  end makes, however wild, is meant.
+  end makes, however wild, is meant. A genre's pool keeps to the options it names: where it allows none at an end, that end
+  plays the nearer end's (`ByConvention.Filled`), so that a song of the genre plays one of its options at every
+  conventionality.
 
 # Architecture
 

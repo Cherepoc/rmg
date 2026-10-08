@@ -152,4 +152,27 @@ public sealed record SongOverrides(
 )
 {
     public static SongOverrides None { get; } = new();
+
+    /// <summary>Fails where a value given is outside what it may be.</summary>
+    public void Check()
+    {
+        if (Base is < 0 or > 1 or double.NaN)
+            throw new ArgumentOutOfRangeException(nameof(Base), Base, "An unconventionality is from 0 to 1.");
+        if (Facets?.Values.Any(x => x is < 0 or > 1 or double.NaN) == true)
+            throw new ArgumentOutOfRangeException(nameof(Facets), "A facet is from 0 to 1.");
+        if (MeterOption is < 0 || MeterOption >= Composition.Meter.Options.Length)
+            throw new ArgumentOutOfRangeException(nameof(MeterOption), MeterOption, $"A meter is one of the {Composition.Meter.Options.Length} options.");
+        if (Tempo is <= 0 or double.NaN or double.PositiveInfinity)
+            throw new ArgumentOutOfRangeException(nameof(Tempo), Tempo, "A tempo is a positive multiple of the base tempo.");
+        if (Key is < 0 or > 11)
+            throw new ArgumentOutOfRangeException(nameof(Key), Key, "A key is from 0 to 11.");
+        if (Swing is < 0 or > 1 or double.NaN)
+            throw new ArgumentOutOfRangeException(nameof(Swing), Swing, "A swing is from 0 to 1.");
+        if (Scale is { } given && !Scales.All.Contains(given))
+            throw new ArgumentOutOfRangeException(nameof(Scale), given.Name, "A scale is one of the scales.");
+        if (Genre?.Choices.Any(x => x.Value.Values.Any(v => new[] { v.Plain, v.Tuned, v.Wild }.Any(a => a is < 0 or > 1 or double.NaN))) == true)
+            throw new ArgumentOutOfRangeException(nameof(Genre), "A genre's amounts are from 0 to 1.");
+        if (DrumPieces is { } pieces && (pieces.IsEmpty || !pieces.All(Composition.DrumPieces.IsPiece)))
+            throw new ArgumentOutOfRangeException(nameof(DrumPieces), "Drums given are one or more of the drum pieces.");
+    }
 }

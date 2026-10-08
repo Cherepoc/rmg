@@ -50,8 +50,8 @@ genre first (see *Genres*).
 **Put off** until its uses ask for it: a tag (see *Form and sections*).
 
 **From the review of 8 October 2026** (P2, to be ordered into the next plan): the architecture's items (see
-*Architecture*: named streams, the song's decisions passed whole, the song's trace, the stages' reads
-and writes, `ProgressionSettings`, a genre's one rule, a genre resolved once, plainer prose); and the music's: the
+*Architecture*: named streams, the song's decisions passed whole, the stages' reads
+and writes, a genre's one rule, a genre resolved once, plainer prose); and the music's: the
 melody's goal tones and motifs, the songs' own appoggiaturas (*Fills and lines*), phrases of other than four bars
 (*Rhythm engine*), scales of other sizes and an uneven harmonic rhythm (*Scales and chords*); and targets from outside (*Listening data*).
 
@@ -406,19 +406,13 @@ From the review of October 2026 (P2), each measured by the fingerprint, unchange
   index)`), each module owning its names, takes the enum and its rule away; the seeds move once.
 - **The song's decisions passed whole:** the stages unpack `SongDecisions` into long argument lists (`Expression.Apply`
   about twenty, `DrumSolos.Apply` sixteen); a module taking the song and reading what it needs, with the named streams.
-- **The song's trace:** nineteen records of the song's decisions pass `FillGenerator.DrumsTrace, 0, 0,
-  StateMap.Default` for a track and a bar they have not; a record of the song's own (`StateTrace.RecordSong`), and
-  trace points typed by their value (`TracePoint<T>`), so that the tests read values without casting.
 - **The stages' reads and writes:** a stage's order is its correctness (`SongStages.All`), its hand-offs fields of
   `SongDraft` (`Runs`, `MelodyWalks`, `Chains`, `Polymeters`, `Notes`); every stage naming what it reads and writes, and
   a test that every read comes after its write. The stages after `Realizer` (thirteen of thirty) edit notes rather than
   state, a phase of its own: CLAUDE.md to say so.
-- **`ProgressionSettings`:** never other than its default, threaded through three of `GenerateSong`'s seven overloads
-  and `SectionGenerator`; taken out, the overloads fewer, the overrides' checks on `SongOverrides`.
 - **A genre's one rule:** a genre combines with the songs' weights by six entry points of `ByConvention` (`Weigh`,
   `Weigh` with a pool, `Lean`, `Within`, `WeighFilled`, `At` with a pool), replacing, leaning or filling them. One rule
-  written down, `Lean` apart where a choice draws in roles. And a decision: `Filled` plays a pool's wild options alone
-  at 0, against the principle that at 0 only the plain end's options play; kept and said in CLAUDE.md, or failing.
+  written down, `Lean` apart where a choice draws in roles.
 - **A genre resolved once:** a genre's choices are looked up by name inside the draws (`choice[name]` failing mid-song);
   resolved against `GenreChoices` when the genre is read, a misnamed option failing there, the page's format as it is.
 - **Plainer prose:** comments that say in a plain sentence what the code cannot, and commits' lines of about a hundred

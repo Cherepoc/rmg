@@ -151,7 +151,7 @@ internal sealed class SongTracks
                 (RiffTwinTrack, TrackRole.RiffTwin, riffInstrument.Program), (RhythmTrack, TrackRole.Rhythm, rhythmInstrument.Program) }
             .Where(x => DoubleTracking.Doubles(x.Item2, x.Item3))
             .Select(x => KeyValuePair.Create(x.Item1, Math.Sign(pans[x.Item1]) is 0 ? 1.0 : Math.Sign(pans[x.Item1]))));
-        StateTrace.Record(TracePoints.Panning, ChordsTrack, 0, 0, StateMap.Default, 0, string.Join(", ", pans.Select(x => $"{x.Key} {x.Value:F2}")), pans);
+        StateTrace.RecordSong(TracePoints.Panning, string.Join(", ", pans.Select(x => $"{x.Key} {x.Value:F2}")), pans);
 
         // the riff's state, which its twin shares, so that the two play its notes alike
         var riffLayer = LayerStates.CreateTrackLayer(

@@ -31,14 +31,11 @@ public static class SongGenerator
     ///     Generates a song. The same seed always results in the same song in this version; changes to the generator
     ///     may turn a seed into a different song, which is accepted to keep the generator simple.
     /// </summary>
-    public static Song GenerateSong(ulong seed)
-    {
-        return GenerateSong(seed, ProgressionSettings.Default);
-    }
+    public static Song GenerateSong(ulong seed) => GenerateSong(seed, SongOverrides.None);
 
     /// <summary>
     ///     Generates a song with what is given used as given, such as its unconventionality's base, from 0 for the
-    ///     plainest to 1 for the wildest, or the parts it has, and the rest drawn as <see cref="GenerateSong(int)" />
+    ///     plainest to 1 for the wildest, or the parts it has, and the rest drawn as <see cref="GenerateSong(ulong)" />
     ///     draws it.
     /// </summary>
     public static Song GenerateSong(ulong seed, SongOverrides overrides) => GenerateSong(seed, overrides, CancellationToken.None);
@@ -55,47 +52,22 @@ public static class SongGenerator
 
     /// <summary>The song of the seed as <see cref="GenerateSong(ulong, SongOverrides, CancellationToken)" /> makes it, the stages named left out.</summary>
     /// <param name="skipped">Stages of <see cref="SkippableStages" /> to leave out, as a listening test compares a song with and without one.</param>
-    public static Song GenerateSong(ulong seed, SongOverrides overrides, IReadOnlySet<string> skipped, CancellationToken cancellation)
-    {
-        if (skipped.FirstOrDefault(x => !SkippableStages.Contains(x)) is { } unknown)
-            throw new ArgumentOutOfRangeException(nameof(skipped), unknown, $"A stage left out is one of {string.Join(", ", SkippableStages)}.");
-        if (overrides.Base is < 0 or > 1 or double.NaN)
-            throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Base, "An unconventionality is from 0 to 1.");
-        if (overrides.Facets?.Values.Any(x => x is < 0 or > 1 or double.NaN) == true)
-            throw new ArgumentOutOfRangeException(nameof(overrides), "A facet is from 0 to 1.");
-        if (overrides.MeterOption is < 0 || overrides.MeterOption >= Meter.Options.Length)
-            throw new ArgumentOutOfRangeException(nameof(overrides), overrides.MeterOption, $"A meter is one of the {Meter.Options.Length} options.");
-        if (overrides.Tempo is <= 0 or double.NaN or double.PositiveInfinity)
-            throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Tempo, "A tempo is a positive multiple of the base tempo.");
-        if (overrides.Key is < 0 or > 11)
-            throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Key, "A key is from 0 to 11.");
-        if (overrides.Swing is < 0 or > 1 or double.NaN)
-            throw new ArgumentOutOfRangeException(nameof(overrides), overrides.Swing, "A swing is from 0 to 1.");
-        if (overrides.Scale is { } given && !Scales.All.Contains(given))
-            throw new ArgumentOutOfRangeException(nameof(overrides), given.Name, "A scale is one of the scales.");
-        if (overrides.Genre?.Choices.Any(x => x.Value.Values.Any(v => new[] { v.Plain, v.Tuned, v.Wild }.Any(a => a is < 0 or > 1 or double.NaN))) == true)
-            throw new ArgumentOutOfRangeException(nameof(overrides), "A genre's amounts are from 0 to 1.");
-        if (overrides.DrumPieces is { } pieces && (pieces.IsEmpty || !pieces.All(DrumPieces.IsPiece)))
-            throw new ArgumentOutOfRangeException(nameof(overrides), "Drums given are one or more of the drum pieces.");
-
-        return GenerateSong(seed, ProgressionSettings.Default, overrides, skipped, (_, _) => { }, cancellation);
-    }
-
-    internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings) => GenerateSong(seed, progressionSettings, SongOverrides.None, CancellationToken.None);
-
-    /// <param name="overrides">What a test sets in place of the song's own draws.</param>
-    /// <param name="cancellation">Gives the song up between its stages, which draw nothing to check it.</param>
-    internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings, SongOverrides overrides, CancellationToken cancellation) =>
-        GenerateSong(seed, progressionSettings, overrides, ImmutableHashSet<string>.Empty, (_, _) => { }, cancellation);
+    public static Song GenerateSong(ulong seed, SongOverrides overrides, IReadOnlySet<string> skipped, CancellationToken cancellation) =>
+        GenerateSong(seed, overrides, skipped, (_, _) => { }, cancellation);
 
     /// <summary>
     ///     The song of the seed, the stages given left out (<see cref="SongStages" />), as a test measures what one does, and
     ///     the song after each stage observed, as a test checks it.
     /// </summary>
-    internal static Song GenerateSong(ulong seed, ProgressionSettings progressionSettings, SongOverrides overrides, IReadOnlySet<string> skipped,
-        Action<string, SongDraft> observe, CancellationToken cancellation)
+    /// <param name="overrides">What is set in place of the song's own draws, each checked (<see cref="SongOverrides.Check" />).</param>
+    /// <param name="cancellation">Gives the song up between its stages, which draw nothing to check it.</param>
+    internal static Song GenerateSong(ulong seed, SongOverrides overrides, IReadOnlySet<string> skipped, Action<string, SongDraft> observe, CancellationToken cancellation)
     {
-        var song = SongDecisions.Draw(seed, progressionSettings, overrides, cancellation);
+        if (skipped.FirstOrDefault(x => !SkippableStages.Contains(x)) is { } unknown)
+            throw new ArgumentOutOfRangeException(nameof(skipped), unknown, $"A stage left out is one of {string.Join(", ", SkippableStages)}.");
+        overrides.Check();
+
+        var song = SongDecisions.Draw(seed, overrides, cancellation);
         var (genre, tracks, form, songUnconventionality) = (song.Genre, song.Tracks, song.Form, song.Facets);
         IGenerationContext Stream(SongStream stream) => CreateStream(seed, stream);
         // the song put together as planned, then every stage after it in its order
@@ -160,15 +132,6 @@ public static class SongGenerator
     /// <summary>An amount in a range, leaning to its middle, as the mean of two draws across it does, or to an end by its lean.</summary>
     private static double Across(IGenerationContext context, (double From, double To, double Lean) range) =>
         range.From + (range.To - range.From) * Math.Pow((context.GenerateDouble() + context.GenerateDouble()) / 2, Math.Exp(-RangeLeanSkew * range.Lean));
-}
-
-/// <summary>How the state along a section's 4-bar pattern changes. The steps are in bars.</summary>
-/// <param name="ChordShapeStep">How often the chord shape of the progression can change.</param>
-/// <param name="NoteStateStep">How often the velocity and note duration of the progression can change.</param>
-/// <param name="PoolSize">How many values each state picks from along the pattern; 0 draws a new value every step.</param>
-internal sealed record ProgressionSettings(double ChordShapeStep, double NoteStateStep, int PoolSize)
-{
-    public static ProgressionSettings Default { get; } = new(1, 1, 4);
 }
 
 /// <summary>

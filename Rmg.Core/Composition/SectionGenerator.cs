@@ -48,7 +48,6 @@ internal sealed class SectionGenerator
     public SectionGenerator(
         IGenerationContext context,
         ulong seed,
-        ProgressionSettings settings,
         SongTracks tracks,
         Unconventionality songFacets,
         MelodyBusyness songMelodyBusyness,
@@ -76,7 +75,7 @@ internal sealed class SectionGenerator
         _songPercussion = songPercussion;
         _key = key;
         _songRegisterFreedomShift = Generators.SplineValue()(context.CreateContext(Seeds.Derive(seed, SongRegisterFreedomStream)));
-        _generators = ((Func<Meter, (BarStateGenerator, PatternGenerator)>)(meter => (new BarStateGenerator(settings, meter, genre), new PatternGenerator(context, tracks.Definitions, meter, genre))))
+        _generators = ((Func<Meter, (BarStateGenerator, PatternGenerator)>)(meter => (new BarStateGenerator(meter, genre), new PatternGenerator(context, tracks.Definitions, meter, genre))))
             .CacheGeneratedValues();
         _drums = new SectionDrumGenerator(tracks, genre, songStateMap, sectionEnergies, songPercussion, absent, Stream, StreamSeed, Facets, CreateSectionTrackLayer,
             meter => _generators(meter).Patterns);

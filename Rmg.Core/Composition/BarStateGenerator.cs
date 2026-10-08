@@ -16,6 +16,9 @@ internal sealed class BarStateGenerator
 
     private static readonly Func<IGenerationContext, int> SeedGenerator = Generators.Int();
 
+    // how many values each state that changes by bar picks from along the pattern, so that bars repeat theirs
+    private const int PoolSize = 4;
+
     // the stream of the melody contour's period, apart from the timeline generators'
     private const int ContourPeriodStream = 100;
 
@@ -33,7 +36,7 @@ internal sealed class BarStateGenerator
 
     /// <param name="meter">The meter the section's bars are in.</param>
     /// <param name="genre">The genre whose bass leads into its chords and lands on them as it has them.</param>
-    public BarStateGenerator(ProgressionSettings settings, Meter meter, Genre genre)
+    public BarStateGenerator(Meter meter, Genre genre)
     {
         _meter = meter;
         _genre = genre;
@@ -41,30 +44,30 @@ internal sealed class BarStateGenerator
         [
             StateTimelineGenerator.Create(
                 StateKinds.Velocity,
-                settings.NoteStateStep * meter.BarDuration,
+                meter.BarDuration,
                 VelocityLayers.CreateGenerator(VelocityLayers.Bar),
-                settings.PoolSize,
+                PoolSize,
                 "Bar"
             ),
             StateTimelineGenerator.Create(
                 StateKinds.QuarterNoteDurationPower,
-                settings.NoteStateStep * meter.BarDuration,
+                meter.BarDuration,
                 LayerStates.QuarterNoteDurationPower,
-                settings.PoolSize,
+                PoolSize,
                 "Bar"
             ),
             StateTimelineGenerator.Create(
                 StateKinds.NextNoteDurationFactor,
-                settings.NoteStateStep * meter.BarDuration,
+                meter.BarDuration,
                 LayerStates.NextNoteDurationFactor,
-                settings.PoolSize,
+                PoolSize,
                 "Bar"
             ),
             StateTimelineGenerator.Create(
                 CompositionStateKinds.ChordPool.Index,
-                settings.ChordShapeStep * meter.BarDuration,
+                meter.BarDuration,
                 LayerStates.ChordPoolIndex,
-                settings.PoolSize,
+                PoolSize,
                 "Bar"
             )
         ];

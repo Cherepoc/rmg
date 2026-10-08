@@ -92,8 +92,8 @@ internal static class SongStages
             song.Genre
         );
         var sectionTempos = SectionTempo.Generate(place => song.Stream(SongStream.SectionTempo, place), song.Facets[Facet.Feel], [..song.Played], structure.Roles, song.Genre);
-        StateTrace.Record(TracePoints.SectionTempo, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", sectionTempos.Select(x => $"{x:F2}")), sectionTempos);
-        StateTrace.Record(TracePoints.KeyChange, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, keyChanges.IsEmpty ? "none" : string.Join(", ", keyChanges), keyChanges);
+        StateTrace.RecordSong(TracePoints.SectionTempo, string.Join(", ", sectionTempos.Select(x => $"{x:F2}")), sectionTempos);
+        StateTrace.RecordSong(TracePoints.KeyChange, keyChanges.IsEmpty ? "none" : string.Join(", ", keyChanges), keyChanges);
         var (preparedKeys, preparedRoots, chains) = KeyChange.Prepare(
             keyChanges,
             draft.Timeline.CommonStateTimelineMap,
@@ -101,7 +101,7 @@ internal static class SongStages
             song.Facets[Facet.Scale],
             place => song.Stream(SongStream.KeyPreparation, place)
         );
-        StateTrace.Record(TracePoints.KeyPreparation, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", chains.Select(x => $"{x.Chords.Length} into {x.Change}")), chains);
+        StateTrace.RecordSong(TracePoints.KeyPreparation, string.Join(", ", chains.Select(x => $"{x.Chords.Length} into {x.Change}")), chains);
         var timeline = draft.Timeline.MergeStateTimelineMap(form.SongState)
             .MergeStateTimelineMap(KeyChange.ToStateTimelineMap(preparedKeys, form.Map.Duration))
             .MergeStateTimelineMap(preparedRoots)
@@ -134,7 +134,7 @@ internal static class SongStages
             song.Genre,
             song.Pinned
         );
-        StateTrace.Record(TracePoints.Polymeter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", polymeters.Select(x => $"{x.Key} {x.Value}")), polymeters);
+        StateTrace.RecordSong(TracePoints.Polymeter, string.Join(", ", polymeters.Select(x => $"{x.Key} {x.Value}")), polymeters);
         return draft with
         {
             Polymeters = [..polymeters.Keys],
@@ -352,7 +352,7 @@ internal static class SongStages
                 ImmutableSortedDictionary<int, int> counts = draft.Notes is { } notes
                     ? notes.ToImmutableSortedDictionary(x => x.Key, x => x.Value.Count)
                     : draft.Timeline.TrackTimelineMap.ToImmutableSortedDictionary(x => x.Key, x => x.Value.EventTimeline.Count);
-                StateTrace.Record(TracePoints.SongStage, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, stage.Name, (stage.Name, counts));
+                StateTrace.RecordSong(TracePoints.SongStage, stage.Name, (stage.Name, counts));
             }
         }
 

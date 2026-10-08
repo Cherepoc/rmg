@@ -500,7 +500,7 @@ internal static class Expression
         }
 
         var effects = new SongEffects(songVibrato, songChorus, songSwell, songBends, strong, [..carriers.Keys.Where(x => x != strong).Order()]);
-        StateTrace.Record(TracePoints.SongEffects, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", carriers.Keys.Prepend(strong).Distinct()), effects);
+        StateTrace.RecordSong(TracePoints.SongEffects, string.Join(", ", carriers.Keys.Prepend(strong).Distinct()), effects);
         return new SongSound(effects, carriers.ToImmutable());
     }
 

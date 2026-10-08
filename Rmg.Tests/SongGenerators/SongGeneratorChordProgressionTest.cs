@@ -101,50 +101,6 @@ public sealed class SongGeneratorChordProgressionTest
         }
     }
 
-    [Test]
-    public async Task HalfBarShapeSteps_ChangeTheShapeWithinABar()
-    {
-        var settings = ProgressionSettings.Default with { ChordShapeStep = 0.5 };
-        var changesWithinABar = 0;
-        for (var seed = 0; seed < 8; seed++)
-        {
-            var song = SongGenerator.GenerateSong((ulong)seed, settings);
-            var bar = song.Map!.Meter.BarDuration;
-            var notes = GetPitchedNotes(song).Where(x => x.Shape != "").ToList();
-
-            // the shape still only changes at half-bar lines
-            // counted in the bars of the note's section
-            double HalfBarOf(double position) => song.Map.SectionAt(position) is { } span ? span.Start * 1000 + Math.Floor((position - span.Start) / (span.Meter.BarDuration / 2)) : Math.Floor(position / (bar / 2));
-            foreach (var halfBar in notes.GroupBy(x => (x.TrackNumber, HalfBar: HalfBarOf(x.Position))))
-            {
-                await Assert.That(halfBar.Select(x => x.Shape).Distinct().Count())
-                    .IsEqualTo(1)
-                    .Because($"seed {seed}, track {halfBar.Key.TrackNumber}, half bar {halfBar.Key.HalfBar}");
-            }
-
-            changesWithinABar += notes
-                .GroupBy(x => (x.TrackNumber, Bar: Math.Floor(x.Position / bar)))
-                .Count(x => x.Select(note => note.Shape).Distinct().Count() > 1);
-        }
-
-        await Assert.That(changesWithinABar).IsGreaterThan(0);
-    }
-
-    [Test]
-    public async Task HalfBarShapeSteps_PitchedTracksShareTheChordShapeAtTheSameTime()
-    {
-        var settings = ProgressionSettings.Default with { ChordShapeStep = 0.5 };
-        for (var seed = 0; seed < 8; seed++)
-        {
-            foreach (var notesAtPosition in GetPitchedNotes(SongGenerator.GenerateSong((ulong)seed, settings)).Where(x => x.Shape != "").GroupBy(x => x.Position))
-            {
-                await Assert.That(notesAtPosition.Select(x => x.Shape).Distinct().Count())
-                    .IsEqualTo(1)
-                    .Because($"seed {seed}, position {notesAtPosition.Key}");
-            }
-        }
-    }
-
     private static IEnumerable<(int TrackNumber, double Position, string Shape)> GetPitchedNotes(Song song)
     {
         var commonStateTimelineMap = song.TrackEventStateTimelineMap.CommonStateTimelineMap;

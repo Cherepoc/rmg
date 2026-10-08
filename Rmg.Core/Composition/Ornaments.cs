@@ -55,7 +55,7 @@ internal static class Ornaments
         var melody = song.Facets[Facet.Melody];
         // drawn for every ornament, so that the draws are as many
         var plays = All.Where(x => context.TestProbability(x.Chance.At(melody, song.Genre.Chance(GenreChoices.Ornaments, NameOf(x.Ornament))))).ToArray();
-        StateTrace.Record(TracePoints.Ornaments, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", plays.Select(x => x.Ornament)),
+        StateTrace.RecordSong(TracePoints.Ornaments, string.Join(", ", plays.Select(x => x.Ornament)),
             plays.Select(x => x.Ornament).ToImmutableArray());
         if (plays.Length == 0)
             return draft;

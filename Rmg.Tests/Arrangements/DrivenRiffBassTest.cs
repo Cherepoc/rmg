@@ -35,7 +35,7 @@ public sealed class DrivenRiffBassTest
                     continue;
 
                 // the song with its sections in their bars, where the bass plays what it plays without the cycle
-                var unrolled = SongGenerator.GenerateSong((ulong)song.Seed, ProgressionSettings.Default, new SongOverrides(Genre: GenrePresets.Genre(genre)),
+                var unrolled = SongGenerator.GenerateSong((ulong)song.Seed, new SongOverrides(Genre: GenrePresets.Genre(genre)),
                     new HashSet<string> { "Polymeter" }, (_, _) => { }, CancellationToken.None);
                 foreach (var span in spans.Where(x => unrolled.Notes![SongTracks.BassTrack].Any(n => n.Position >= x.Start && n.Position < x.End)))
                 {

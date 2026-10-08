@@ -80,7 +80,7 @@ internal sealed record SongDecisions(
     /// </summary>
     /// <param name="overrides">What a test or a request sets in place of the song's own draws.</param>
     /// <param name="cancellation">Gives the song up between its sections, which draw nothing to check it.</param>
-    internal static SongDecisions Draw(ulong seed, ProgressionSettings progressionSettings, SongOverrides overrides, CancellationToken cancellation)
+    internal static SongDecisions Draw(ulong seed, SongOverrides overrides, CancellationToken cancellation)
     {
         // every stage draws from its own random sequence, derived from the seed by the stage, so a change to what one
         // stage draws leaves what the others draw as it was
@@ -94,18 +94,18 @@ internal sealed record SongDecisions(
         var songUnconventionality = Unconventionality.Generate(unconventionalityBase, facet => SongGenerator.CreateStream(seed, SongStream.Unconventionality, facet));
         if (overrides.Facets is { } facets)
             songUnconventionality = songUnconventionality with { Facets = songUnconventionality.Facets.SetItems(facets) };
-        StateTrace.Record(TracePoints.SongUnconventionality, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{songUnconventionality.Base:F2}", songUnconventionality);
+        StateTrace.RecordSong(TracePoints.SongUnconventionality, $"{songUnconventionality.Base:F2}", songUnconventionality);
         var rhythmicUnconventionality = new RhythmicUnconventionality(songUnconventionality[Facet.Groove]) { GrooveHold = RhythmicUnconventionality.HoldOf(genre) };
         // a facet's value as the rhythm's unconventionality, for a choice that leans by it
         RhythmicUnconventionality Of(Facet facet) => new(songUnconventionality[facet]);
-        StateTrace.Record(TracePoints.SongRhythm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{rhythmicUnconventionality.Value:F2}", rhythmicUnconventionality);
+        StateTrace.RecordSong(TracePoints.SongRhythm, $"{rhythmicUnconventionality.Value:F2}", rhythmicUnconventionality);
         // the parts the song leaves out, the pad, the counter-melody and the drums now and then, each from a sequence
         // of its own, and any given in or out
         var absent = SongParts.DrawAbsent(part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Parts), (int)part)), overrides.Parts, songUnconventionality, genre);
-        StateTrace.Record(TracePoints.SongParts, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", absent.Order()), absent);
+        StateTrace.RecordSong(TracePoints.SongParts, string.Join(", ", absent.Order()), absent);
         // the parts the song pins to their figures, a genre's, each from a sequence of its own
         var pinned = DrumRoles.DrawPinned(part => new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.Pins), (int)part)), songUnconventionality[Facet.Groove], genre);
-        StateTrace.Record(TracePoints.PinnedDrums, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", pinned.Order()), pinned);
+        StateTrace.RecordSong(TracePoints.PinnedDrums, string.Join(", ", pinned.Order()), pinned);
         var tracks = SongTracks.Create(
             Stream(SongStream.Tracks),
             Stream(SongStream.Panning),
@@ -127,7 +127,7 @@ internal sealed record SongDecisions(
             songUnconventionality[Facet.Sound],
             pinned
         );
-        StateTrace.Record(TracePoints.DrumSetup, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, tracks.DrumSetup.ToString(), tracks.DrumSetup);
+        StateTrace.RecordSong(TracePoints.DrumSetup, tracks.DrumSetup.ToString(), tracks.DrumSetup);
 
         // the song's chords gather around its unconventionality, and a section's around its own shift of it
         var harmonyContext = Stream(SongStream.Harmony);
@@ -135,10 +135,10 @@ internal sealed record SongDecisions(
         // drawn when it is given too, so that the rest is as it was
         var scale = Scales.Pick(harmonyContext, songUnconventionality[Facet.Scale], genre);
         scale = overrides.Scale ?? scale;
-        StateTrace.Record(TracePoints.SongHarmony, SongTracks.ChordsTrack, 0, 0, StateMap.Default, 0, $"{unconventionality.Chords:F2} {scale.Name}", (unconventionality, scale));
+        StateTrace.RecordSong(TracePoints.SongHarmony, $"{unconventionality.Chords:F2} {scale.Name}", (unconventionality, scale));
         // the feel the song plays in, straight or a tuplet, from a sequence of its own, by its feel facet
         var feel = Feels.DrawSong(Stream(SongStream.Feel), songUnconventionality[Facet.Feel], genre);
-        StateTrace.Record(TracePoints.Feel, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{feel}", feel);
+        StateTrace.RecordSong(TracePoints.Feel, $"{feel}", feel);
         var songStateMap = CreateSongStateMap(Stream(SongStream.SongState), unconventionality, rhythmicUnconventionality)
             .MergeWith(Feels.At(StateDepths.Song, feel));
         // how busy the melody is, which a section moves
@@ -147,7 +147,7 @@ internal sealed record SongDecisions(
         // the song's form: one of the forms songs are written in, its sections playing their roles, or one of its own
         // the meter the song's bars are in
         var meter = overrides.Meter ?? Meter.Draw(Stream(SongStream.Meter), songUnconventionality[Facet.Feel], overrides.MeterOption, genre);
-        StateTrace.Record(TracePoints.Meter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, meter.ToString(), meter);
+        StateTrace.RecordSong(TracePoints.Meter, meter.ToString(), meter);
 
         // the song's key and tempo, drawn before its form, which how long the song plays takes after
         var commonStateMap = CreateCommonStateMap(Stream(SongStream.Common), songUnconventionality[Facet.Feel], overrides, genre);
@@ -161,7 +161,7 @@ internal sealed record SongDecisions(
             ? new SongLength(seconds, (role, lean) => SecondsOf(SectionLength.Expected(songUnconventionality[Facet.Form], role, lean, genre) * meter.PatternDuration))
             : null;
         var structure = SongForms.Generate(Stream(SongStream.SongForm), Stream(SongStream.Structure), Stream(SongStream.SongEnds), songUnconventionality[Facet.Form], length, genre);
-        StateTrace.Record(TracePoints.SongForm, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(" ", structure.SectionIds.Select(x => structure.Roles[x])), structure);
+        StateTrace.RecordSong(TracePoints.SongForm, string.Join(" ", structure.SectionIds.Select(x => structure.Roles[x])), structure);
         var sectionIds = structure.SectionIds.ToArray();
 
         // how loud and busy each section is meant to be, from the song's and where and how often the section plays
@@ -172,16 +172,15 @@ internal sealed record SongDecisions(
         // how the song swings, which its tempo sets the notes of
         var grooveContext = Stream(SongStream.Groove);
         var swing = Groove.Generate(grooveContext, commonStateMap.GetStateValue(StateKinds.Tempo), songUnconventionality[Facet.Feel], meter, overrides.Swing, genre);
-        StateTrace.Record(TracePoints.Swing, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, $"{swing.Delay:F3} of {swing.Period}", swing);
+        StateTrace.RecordSong(TracePoints.Swing, $"{swing.Delay:F3} of {swing.Period}", swing);
 
         // what the drums do, decided before the sections, whose texture leaves no section to drums that only mark the form
         var drumJob = DrumMarks.Draw(Stream(SongStream.DrumJob), songUnconventionality[Facet.Groove], genre);
-        StateTrace.Record(TracePoints.DrumJob, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, drumJob.ToString(), drumJob);
+        StateTrace.RecordSong(TracePoints.DrumJob, drumJob.ToString(), drumJob);
 
         var sectionGenerator = new SectionGenerator(
             root,
             Seeds.Derive(seed, (int)SongStream.Sections),
-            progressionSettings,
             tracks,
             songUnconventionality,
             melodyBusyness,
@@ -226,7 +225,7 @@ internal sealed record SongDecisions(
                 Phrases = new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SectionPhrases), x.Key))
                     .Pick(ByConvention.Weigh(GenreChoices.PhraseCounts.Select(p => (p, p == 1 ? new ByConvention(1, 1, 1) : default)), songUnconventionality[Facet.Form], phrasePool))
             });
-        StateTrace.Record(TracePoints.SectionMeter, FillGenerator.DrumsTrace, 0, 0, StateMap.Default, 0, string.Join(", ", sectionMeters.Select(x => $"{x.Key} {x.Value}")), sectionMeters);
+        StateTrace.RecordSong(TracePoints.SectionMeter, string.Join(", ", sectionMeters.Select(x => $"{x.Key} {x.Value}")), sectionMeters);
         // a hook intro where the song has a chorus to quote, and a cold start where it has none
         var hook = SongFormGenerator.HookOf(sectionIds, structure.Roles, sectionMeters);
         if (plan.Intro == IntroKind.Hook && hook is null)
@@ -277,7 +276,7 @@ internal sealed record SongDecisions(
         // fade, from a stream of its own, the last section's lift moving to it
         var repeats = Repeats(lastRepeatDrawn, fading);
         int[] played = [..sectionIds, ..(repeats ? [sectionIds[^1]] : Array.Empty<int>()), ..Enumerable.Repeat(sectionIds[^1], fading)];
-        StateTrace.Record(TracePoints.LastRepeat, SectionGenerator.SectionTrace, 0, 0, StateMap.Default, 0, $"{repeats}", repeats);
+        StateTrace.RecordSong(TracePoints.LastRepeat, $"{repeats}", repeats);
         // the later in the song, the more, and with the energy of its own place in the song against the section's average,
         // its parts only joining as it comes back
         double Place(int index) => played.Length > 1 ? index / (double)(played.Length - 1) : 0.5;
@@ -295,7 +294,7 @@ internal sealed record SongDecisions(
             songUnconventionality[Facet.Form],
             absent
         );
-        StateTrace.Record(TracePoints.LateEntries, SectionGenerator.SectionTrace, 0, 0, StateMap.Default, 0, string.Join(", ", lateEntries.Select(x => $"{x.Key} at {x.Value}")), lateEntries);
+        StateTrace.RecordSong(TracePoints.LateEntries, string.Join(", ", lateEntries.Select(x => $"{x.Key} at {x.Value}")), lateEntries);
         // every appearance's parts, a part held back yet soloing no sooner than it comes in
         IReadOnlyCollection<TrackRole>[] partsAt = [..played.Select((_, index) => SongParts.All.Except(absent).Except(lateEntries.Where(x => index < x.Value).Select(x => x.Key)).ToArray())];
         // a later appearance played as a solo now and then, each from a sequence of its own, by the section's facets, and
@@ -349,7 +348,7 @@ internal sealed record SongDecisions(
                 songUnconventionality[Facet.Sound],
                 tracks.Definitions.Values.OfType<PitchInstrumentTrack>().FirstOrDefault(x => x.Role == role)?.InstrumentCode ?? -1));
         foreach (var (role, soloist) in soloists)
-            StateTrace.Record(TracePoints.Soloist, SectionGenerator.SectionTrace, 0, 0, StateMap.Default, 0, $"{role}", (role, soloist));
+            StateTrace.RecordSong(TracePoints.Soloist, $"{role}", (role, soloist));
 
         // the song put together as planned, and the lines the drums mark, then every stage after it in its order
         cancellation.ThrowIfCancellationRequested();

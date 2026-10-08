@@ -125,6 +125,12 @@ public sealed class StateTrace : IDisposable
         return trace;
     }
 
+    /// <summary>The track a decision of the whole song is recorded on, which no track or section has.</summary>
+    public const int SongTrack = -3;
+
+    /// <summary>Records a decision of the whole song, such as its form or its effects, on <see cref="SongTrack" />.</summary>
+    internal static void RecordSong(string point, string description, object? value) => Record(point, SongTrack, 0, 0, StateMap.Default, 0, description, value);
+
     internal static void Record(
         string point,
         int track,
