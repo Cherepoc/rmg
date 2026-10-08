@@ -198,18 +198,27 @@ public sealed class ListeningQuestionsTest
         return GenrePresets.Genre(preset with { Choices = choices });
     }
 
+    /// <summary>How many parts a song names to listen to at most, and how much of the most different's difference one makes at least to be named.</summary>
+    private const int Listened = 3;
+
+    private const double ListenedShare = 0.25;
+
     /// <summary>
     ///     A song of a question heard with its device and without, from where the device first plays: how much the two differ
-    ///     where they differ the most, at the earliest place nearly as different, and that place, in seconds.
+    ///     where they differ the most, at the earliest place nearly as different, that place, in seconds, and the parts that
+    ///     differ the most there, to listen to.
     /// </summary>
-    private static (double Difference, double At) Measure(Question question, int seed, CorpusSong with, double first)
+    private static (double Difference, double At, string[] Listen) Measure(Question question, int seed, CorpusSong with, double first)
     {
         var without = SongGenerator.GenerateSong((ulong)seed, new SongOverrides(Genre: GenreOf(question, true)), question.Skip.ToImmutableHashSet(), CancellationToken.None);
         var difference = new HeardDifference(with.Rendered, Rmg.Core.Rendering.Render.RenderSong(without));
         var places = Enumerable.Range(0, (int)Math.Max(1, Math.Ceiling((with.Rendered.Seconds - Heard - first) / Step)))
             .Select(k => first + k * Step).Select(at => (Difference: difference.Between(at, at + Heard), At: at)).ToArray();
         var best = places.Max(x => x.Difference);
-        return places.First(x => x.Difference >= best * NearBest - 1e-9);
+        var (most, at) = places.First(x => x.Difference >= best * NearBest - 1e-9);
+        var parts = difference.Parts(at, at + Heard).OrderByDescending(x => x.Value).ToArray();
+        // a part once, at its largest share, which its second take or its other instrument would name again
+        return (most, at, [..parts.Where(x => x.Value >= parts.FirstOrDefault().Value * ListenedShare).DistinctBy(x => x.Key.Split(" (")[0]).Take(Listened).Select(x => x.Key)]);
     }
 
     /// <summary>
@@ -229,9 +238,9 @@ public sealed class ListeningQuestionsTest
             var measured = TestCorpus.InParallel(Enumerable.Range(0, 128), seed =>
                 {
                     var song = TestCorpus.Get(seed, new SongOverrides(Genre: genre));
-                    return question.At(song) is { } at ? (Seed: seed, Measure: (ValueTuple<double, double>?)Measure(question, seed, song, Seconds(song, at))) : (seed, null);
+                    return question.At(song) is { } at ? (Seed: seed, Measure: (ValueTuple<double, double, string[]>?)Measure(question, seed, song, Seconds(song, at))) : (seed, null);
                 })
-                .Where(x => x.Measure is not null).Take(Candidates).Select(x => (x.Seed, Difference: x.Measure!.Value.Item1, At: x.Measure.Value.Item2)).ToArray();
+                .Where(x => x.Measure is not null).Take(Candidates).Select(x => (x.Seed, Difference: x.Measure!.Value.Item1, At: x.Measure.Value.Item2, Listen: x.Measure.Value.Item3)).ToArray();
             var asked = measured.OrderByDescending(x => x.Difference).Take(Seeds).OrderBy(x => x.Seed).ToArray();
             Console.WriteLine($"{question.Id}: {measured.Length} songs measured, the first {Seeds} differing {measured.Take(Seeds).Select(x => x.Difference).DefaultIfEmpty().Average():F2} on the average, " +
                               $"those asked {asked.Select(x => x.Difference).DefaultIfEmpty().Average():F2}, from {asked.Select(x => x.Difference).DefaultIfEmpty().Min():F2}");
@@ -244,7 +253,7 @@ public sealed class ListeningQuestionsTest
                 decides = question.Decides,
                 genre = question.Genre,
                 without = new { skip = question.Skip, genre = question.GenrePatch ?? [] },
-                seeds = asked.Select(x => new { seed = Base62.FromSeed((ulong)x.Seed), at = Math.Round(x.At, 1) }).ToArray()
+                seeds = asked.Select(x => new { seed = Base62.FromSeed((ulong)x.Seed), at = Math.Round(x.At, 1), listen = x.Listen }).ToArray()
             });
         }
 

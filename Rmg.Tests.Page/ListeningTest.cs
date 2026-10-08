@@ -17,6 +17,8 @@ public sealed class ListeningTest(Site site)
         await Assert.That(await strip.Locator(".listening-question").TextContentAsync()).Contains("Pushes");
         // where to listen, the time its device first plays
         await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).StartsWith("Song 1 of 6 · listen at ");
+        // and the parts to listen to, those that differ the most there
+        await Assert.That(await strip.Locator(".listening-focus").TextContentAsync()).StartsWith("Listen to: ");
         // no song rolled as the page opens, the question asking for its own; a tempo given here none of them
         await Task.Delay(500);
         await Assert.That(page.Requests).IsEmpty();

@@ -1,3 +1,4 @@
+using Rmg.Core.Composition;
 using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
 
@@ -29,14 +30,23 @@ internal sealed class HeardDifference
     }
 
     /// <summary>How much the two differ from one second to another: the notes' share and the effects', each from 0 to 1, added.</summary>
-    public double Between(double from, double to)
-    {
-        var (with, without) = (_with.NotesBetween(from, to), _without.NotesBetween(from, to));
-        var all = with.Sum(x => x.Value) + without.Sum(x => x.Value);
-        var differing = with.Where(x => !without.ContainsKey(x.Key)).Sum(x => x.Value) + without.Where(x => !with.ContainsKey(x.Key)).Sum(x => x.Value);
-        var notes = all > 0 ? differing / all : 0;
+    public double Between(double from, double to) => Parts(from, to).Values.Sum();
 
-        var (moments, differ) = (0, 0);
+    /// <summary>
+    ///     How much each part makes of the difference from one second to another, by its name as a listener knows it, a
+    ///     pitched part's role and instrument, a drum's own: its notes' share of all the notes' loudness that differs and
+    ///     its share of the moments the effects differ, added, so that the parts' shares add up to <see cref="Between" />.
+    /// </summary>
+    public Dictionary<string, double> Parts(double from, double to)
+    {
+        var parts = new Dictionary<string, double>();
+        var (with, without) = (_with.NotesBetween(from, to), _without.NotesBetween(from, to));
+        var all = with.Sum(x => x.Value.Loudness) + without.Sum(x => x.Value.Loudness);
+        foreach (var (key, (part, loudness)) in with.Where(x => !without.ContainsKey(x.Key)).Concat(without.Where(x => !with.ContainsKey(x.Key))))
+            parts[part] = parts.GetValueOrDefault(part) + loudness / all;
+
+        var moments = 0;
+        var differ = new Dictionary<string, int>();
         foreach (var track in _with.Tracks.Keys.Intersect(_without.Tracks.Keys))
         {
             var (a, b) = (_with.Tracks[track], _without.Tracks[track]);
@@ -46,27 +56,39 @@ internal sealed class HeardDifference
                 if (!a.Sounds(k) && !b.Sounds(k))
                     continue;
                 moments++;
-                differ += Math.Abs(a.BendAt(at) - b.BendAt(at)) > BendDifference || Math.Abs(a.ExpressionAt(at) - b.ExpressionAt(at)) > ExpressionDifference
-                                                                                  || a.Controllers.Keys.Union(b.Controllers.Keys).Any(c => Math.Abs(a.ControllerAt(c, at) - b.ControllerAt(c, at)) > ControllerDifference)
-                    ? 1
-                    : 0;
+                if (Math.Abs(a.BendAt(at) - b.BendAt(at)) > BendDifference || Math.Abs(a.ExpressionAt(at) - b.ExpressionAt(at)) > ExpressionDifference
+                                                                         || a.Controllers.Keys.Union(b.Controllers.Keys).Any(c => Math.Abs(a.ControllerAt(c, at) - b.ControllerAt(c, at)) > ControllerDifference))
+                    differ[a.Name] = differ.GetValueOrDefault(a.Name) + 1;
             }
         }
 
-        return notes + (moments > 0 ? differ / (double)moments : 0);
+        foreach (var (part, count) in differ)
+            parts[part] = parts.GetValueOrDefault(part) + count / (double)moments;
+        return parts;
     }
+
+    /// <summary>A part as a listener knows it: a pitched part's role and the instrument it plays there, a drum by its name.</summary>
+    private static string NameOf(TrackRole role, bool isPercussion, int code) => isPercussion
+        ? DrumGroups.AllDrums.FirstOrDefault(x => x.ArticulationCodes.Contains(code))?.Name ?? "Drums"
+        : $"{role switch
+        {
+            TrackRole.CounterMelody => "Counter-melody",
+            TrackRole.RiffTwin => "Riff's twin",
+            TrackRole.Rhythm => "Rhythm part",
+            _ => role.ToString()
+        }} ({GeneralMidi.Programs[code]})";
 
     /// <summary>A rendering in seconds: its notes as heard, and every track's effects over time.</summary>
     private sealed class Rendering
     {
-        // every note by its track, its second, its pitch and its loudness, with its loudness
-        private readonly (string Key, double Seconds, double Loudness)[] _notes;
+        // every note by its track, its second, its pitch, its loudness and its instrument, with its part's name and its loudness
+        private readonly (string Key, string Part, double Seconds, double Loudness)[] _notes;
 
         public Dictionary<string, Track> Tracks { get; }
 
         public Rendering(RenderedSong song)
         {
-            var notes = new List<(string, double, double)>();
+            var notes = new List<(string, string, double, double)>();
             Tracks = [];
             foreach (var (track, i) in song.Tracks.Select((x, i) => (x, i)))
             {
@@ -78,7 +100,8 @@ internal sealed class HeardDifference
                     // where it is heard, its part's pocket moving it off its place, and on which instrument
                     var seconds = song.SecondsAt(note.Position + note.Value.Shift);
                     var program = track.ProgramChanges.LastOrDefault(x => x.Position <= note.Position + 1e-9, (0, track.PitchInstrumentCode)).Program;
-                    notes.Add(($"{name} {Math.Round(seconds, 2)} {note.Value.Offset} {Math.Round(note.Value.Velocity, 2)} {program}", seconds, note.Value.Velocity * track.Volume));
+                    notes.Add(($"{name} {Math.Round(seconds, 2)} {note.Value.Offset} {Math.Round(note.Value.Velocity, 2)} {program}",
+                        NameOf(track.Role, track.IsPercussionInstrument, track.IsPercussionInstrument ? note.Value.Offset : program), seconds, note.Value.Velocity * track.Volume));
                     sounding.Add((seconds, song.SecondsAt(note.Position + note.Value.Shift + note.Value.Duration)));
                 }
 
@@ -88,6 +111,7 @@ internal sealed class HeardDifference
                     for (var k = (int)Math.Ceiling(start / Sample); k < grid.Length && k * Sample < end; k++)
                         grid[k] = true;
                 Tracks[name] = new Track(
+                    NameOf(track.Role, track.IsPercussionInstrument, track.PitchInstrumentCode),
                     grid,
                     [..track.PitchBends.Select(x => (song.SecondsAt(x.Position), (x.Value - 8192) / 8191.0 * ExpressionRender.BendRange))],
                     [..track.Expression.Select(x => (song.SecondsAt(x.Position), x.Value))],
@@ -95,22 +119,23 @@ internal sealed class HeardDifference
                 );
             }
 
-            _notes = [..notes.OrderBy(x => x.Item2)];
+            _notes = [..notes.OrderBy(x => x.Item3)];
         }
 
-        /// <summary>The notes starting from one second to another, by their keys, each its loudness.</summary>
-        public Dictionary<string, double> NotesBetween(double from, double to)
+        /// <summary>The notes starting from one second to another, by their keys, each its part's name and its loudness.</summary>
+        public Dictionary<string, (string Part, double Loudness)> NotesBetween(double from, double to)
         {
-            var result = new Dictionary<string, double>();
-            foreach (var (key, seconds, loudness) in _notes)
+            var result = new Dictionary<string, (string Part, double Loudness)>();
+            foreach (var (key, part, seconds, loudness) in _notes)
                 if (seconds >= from && seconds < to)
-                    result[key] = result.GetValueOrDefault(key) + loudness;
+                    result[key] = (part, result.GetValueOrDefault(key).Loudness + loudness);
             return result;
         }
     }
 
-    /// <summary>Whether a track sounds at every sample, and its bend in semitones, its expression and its controllers over time, in seconds.</summary>
+    /// <summary>A track's part's name, whether it sounds at every sample, and its bend in semitones, its expression and its controllers over time, in seconds.</summary>
     private sealed record Track(
+        string Name,
         bool[] Sounding,
         (double Seconds, double Value)[] Bends,
         (double Seconds, double Value)[] Expressions,

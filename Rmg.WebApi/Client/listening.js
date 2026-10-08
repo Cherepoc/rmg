@@ -76,7 +76,7 @@ const CHOICES = [
 ];
 
 /**
- *     The strip asking the question: a song at a time, A and B played on asking, an answer chosen, shown pressed and
+ *     The strip asking the question: a song at a time, the parts to listen to named, A and B played on asking, an answer chosen, shown pressed and
  *     changed at will, and Next, which tells it and goes on to the next song, each started a moment before where its device
  *     plays; and back to the song before, its answer pressed, to change it, which the server counts in place of the
  *     first. `play` is given the song's seed, whether it is the one without and the second it starts at; `verdict` the
@@ -96,6 +96,9 @@ export function createListeningStrip(question, { play, verdict }) {
     asked.textContent = question.question;
     const where = document.createElement("p");
     where.className = "listening-where";
+    // the parts that differ the most where to listen, as the questions' measure found them
+    const focus = document.createElement("p");
+    focus.className = "listening-focus";
     const heard = document.createElement("p");
     heard.className = "listening-heard";
     heard.setAttribute("role", "status");
@@ -146,13 +149,14 @@ export function createListeningStrip(question, { play, verdict }) {
     const choices = row(...answers);
     choices.setAttribute("role", "group");
     choices.setAttribute("aria-label", "Your answer");
-    strip.append(asked, where, row(...plays), choices, row(back, next), heard);
+    strip.append(asked, where, focus, row(...plays), choices, row(back, next), heard);
 
     function show() {
         const done = at >= question.seeds.length;
         where.textContent = done
             ? `Done: ${question.seeds.length} songs heard. Thank you.`
             : `Song ${at + 1} of ${question.seeds.length} · listen at ${clock(question.seeds[at].at)}, A and B starting just before`;
+        focus.textContent = done || !question.seeds[at].listen?.length ? "" : `Listen to: ${question.seeds[at].listen.join(", ")}`;
         heard.textContent = "";
         for (const element of [...plays, ...answers]) element.disabled = done;
         for (const element of answers) element.setAttribute("aria-pressed", String(!done && chosen[at] === element.dataset.choice));
