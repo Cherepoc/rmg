@@ -87,6 +87,12 @@ its song without lays its patch over the genre's options, the others kept (`with
 melody's figures inverted (Pop), and `trade`. The least heard by their nature, short devices in a long song:
 `lift-cues`, under 0.1.
 
+Answered on 8 October 2026, late, and let go of: the clave, stop time and the ghost notes, heard as great; the tape and
+the tone, barely heard, so a tape's wow now drifts by the sound facet, 5 cents at the plain end to 26 at the wild, and a
+part's tone closes 24 steps at its deepest rather than 16; the rolling bass, whose sections were heard without a kick,
+so a figure around the kick plays only in a bar the kick plays in; Black metal's endings, kept as they are; and a wah
+heard in Black metal, its mix filtered by the songs' chances, which it names none of now.
+
 Answered on 8 October 2026, the evening, and let go of, each heard better in 4 to 6 of its 6 songs: pushes, the drums'
 marks, louder forms, ornaments, the pocket, the solo's answers, the lift's cues (as often the same), doubling, the kick
 with the riff, the double kick, the gallop, the tremolo, the blast, the echo, metal's and Djent's arpeggios, the mix
@@ -297,6 +303,9 @@ Each item with its plan, and what it waits for.
   the snare joining for its second half, on the backbeat or the riff's accents, as a thrash drummer brings it in; and
   the snare's own sound there, never the cross-stick, as in a breakdown (*A breakdown's snare*): a heavy figure's
   backbeat the snare's head (`DrumSounds`, `Figures`). Measured by the bars a double kick plays without a snare struck.
+- **Ghost notes in more genres** (P2, suggested 8 October 2026, the ghosts heard as great): Funk, Soul, Fusion, Blues,
+  Hip hop, Rock and Disco ghost now (`GenreChoices.Ghosts`); Drum and bass's breaks, Reggae's one drop, Ska, R&B, a
+  jazz drummer's comping on the snare and Latin's timbales would too, each its chance by listening to the preset.
 - **A riff's drone, reworked** (P2, heard 8 October 2026: a good idea for metal, but the songs sounded better without
   it, so no preset plays it now; `GenreChoices.Riff` "drone" kept): the riff's weak notes all on its chord's root at the
   bottom of its range, 69% of them, is a pedal, not a drone riff; a black metal or a folk metal riff alternates its

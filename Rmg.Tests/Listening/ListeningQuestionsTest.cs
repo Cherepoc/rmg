@@ -71,26 +71,6 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("stop-time", "Stop time, the band hitting once a bar under the tune, the hi-hat going on where the tune rests: a band's device, or a hole?",
-            "Its chance and where it plays.", "blues", ["Stop time"], null, x => FirstSection(x, TracePoints.StopTime, v => (bool)v!)),
-        new("clave", "The claves on the clave's three and two: Latin's, or the claves' own rhythm better?",
-            "Its weight in Latin.", "latin", ["Figures"], null, x => Plays(x, FigurePlayer.Claves, "clave32") ?? Plays(x, FigurePlayer.Claves, "clave23")),
-        new("tone", "Jazz with some parts in a darker tone, a mellow guitar, a dull bass, darker in the quiet sections: warmer, or muffled?",
-            "The tone's chances in the presets that give it.", "jazz", [], new() { ["effects"] = new() { ["tone"] = 0 } },
-            x => FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Tone) > 0)),
-        new("rolling-bass", "Trance's bass rolling in the 16ths after the kick, or on the offbeats: the drive, or a machine gun?",
-            "The bass's figures' weights in Trance.", "trance", [], new() { ["figure.bass"] = new() { ["rolling"] = 0, ["offbeat"] = 0 } },
-            x => Plays(x, FigurePlayer.Bass, "rolling") ?? Plays(x, FigurePlayer.Bass, "offbeat"), [0, 3, 6, 15, 18, 19]),
-        new("ending", "Black metal ending as it played, planed or sliding home by ♭II, ♭VI or ♭VII (with), or by a classical V–i, its leading tone raised (without)?",
-            "The chord into home and the raised leading tone, by genre.", "blackMetal", [],
-            new() { ["cadenceDegree"] = new() { ["fifth"] = 100, ["second"] = 50, ["sixth"] = 50, ["seventh"] = 50 }, ["cadenceRaise"] = new() { ["sections"] = 100 } },
-            // but a song fading out or closing its mix at its end, whose last bars are not heard
-            x => x.Map.Ending.Kind != EndingKind.Fade && !((MixFilterPlan)x.Trace.Single(t => t.Point == TracePoints.MixFilter).Value!).Closing ? Before(x, x.Map.Sections[^1].End, 4) : null),
-        new("tape", "IDM off a worn tape, its parts' pitch drifting together by a few cents, its lines held a few cents off: warm, or out of tune?",
-            "The tape's chances in IDM, Hip hop, Ambient and Synthwave, and its wow's depth.", "idm", [], new() { ["effects"] = new() { ["tape"] = 0 } },
-            x => FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Wow) > 0)),
-        new("ghosts", "Funk's snare playing ghost notes, soft 16ths around its backbeat: a funk drummer's, or clutter?",
-            "The ghost notes' chances by genre, how many and how soft.", "funk", ["Ghosts"], null, x => FirstSection(x, TracePoints.Ghosts, v => (bool)v!)),
         new("quieter-form", "Black metal's distorted guitar turning acoustic or clean in its quieter sections: a calm between the storms, or a jump?",
             "The quieter form's chances by genre.", "blackMetal", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
             x => x.Trace.Where(t => t.Point == TracePoints.QuieterForm).Select(t => x.Song.Notes!.GetValueOrDefault(t.Track)?

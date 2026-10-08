@@ -169,8 +169,14 @@ internal static class Expression
     /// </summary>
     private const double DetuneChance = 0.35;
 
-    /// <summary>How far a tape's pitch drifts either way, and a part is held off at most, in cents.</summary>
-    private const int WowLeast = 4, WowMost = 14, DetuneMost = 8;
+    /// <summary>
+    ///     How far a tape's pitch drifts either way at the middle of its range, in cents, by the sound facet: a plain song's
+    ///     barely, a wild one's a worn cassette's; drawn from half again under it to half again over it.
+    /// </summary>
+    public static ByConvention Wow { get; } = new(5, 12, 26);
+
+    /// <summary>How far a part of a song off a tape is held off the rest at most, in cents.</summary>
+    private const int DetuneMost = 8;
 
     /// <summary>
     ///     The chance a song's driven guitars pinch now and then, a held note's harmonic squealing over it, its highlight: a
@@ -236,7 +242,7 @@ internal static class Expression
     private static bool Pinches(int program) => program is 29 or 30;
 
     /// <summary>How far a part's tone closes at its deepest, in its quietest section, in the brightness controller's steps, short of a filter's reach.</summary>
-    private const int ToneReach = 16;
+    internal const int ToneReach = 24;
 
     /// <summary>The strong effect a song plays, if any, an echo the likeliest: none in a plain song, one in the wildest.</summary>
     public static ImmutableArray<(StrongEffect Effect, ByConvention Weight)> StrongEffects { get; } =
@@ -568,7 +574,7 @@ internal static class Expression
         var songTone = toneStream.TestProbability(SongToneChance.At(songSound, genre.Chance(GenreChoices.Effects, "tone")));
         // and whether it plays off a tape, and how far its pitch drifts
         var tape = tapeStream.TestProbability(TapeChance.At(songSound, genre.Chance(GenreChoices.Effects, "tape")));
-        var wow = tapeStream.GenerateInt(WowLeast, WowMost + 1);
+        var wow = (int)Math.Round(Wow.At(songSound) * (0.5 + tapeStream.GenerateDouble()));
         // and whether its riff dives into a louder section
         var songDives = pinchStream.TestProbability(SongDiveChance.At(songSound, genre.Chance(GenreChoices.Effects, "dive")));
         // and whether its guitars pinch, and how a pinch sounds

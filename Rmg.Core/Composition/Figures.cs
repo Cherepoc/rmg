@@ -22,7 +22,8 @@ public enum FigurePlayer
 ///     above 0.
 /// </summary>
 /// <param name="Sixteenths">How many 16ths it lasts, a bar of four's or two; none for the riff's, which lasts as the riff does.</param>
-public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, bool FollowsRiff, double EnergyLean);
+/// <param name="AnswersKick">Whether it plays around the kick, between its beats, and so only in a bar the kick plays in, as a rolling bass does.</param>
+public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, bool FollowsRiff, double EnergyLean, bool AnswersKick);
 
 /// <summary>
 ///     The figures a genre gives its players in its sections: a groove or thrash band's kick with the riff, or in 16ths, a
@@ -43,19 +44,19 @@ internal static class Figures
     /// <summary>Every figure, by its player.</summary>
     public static ImmutableArray<Figure> All { get; } =
     [
-        new("withRiff", "With the riff, wherever it plays", FigurePlayer.Ground, [], 0, true, 1),
-        new("doubleKick", "A double kick, every 16th", FigurePlayer.Ground, [..Enumerable.Range(0, 16)], 16, false, 1),
-        new("blast", "A blast beat, with the snare on every 8th", FigurePlayer.Ground, [0, 2, 4, 6, 8, 10, 12, 14], 16, false, 1),
-        new("blast", "A blast beat, with the kick on every 8th", FigurePlayer.Backbeat, [0, 2, 4, 6, 8, 10, 12, 14], 16, false, 1),
-        new("breakbeat", "A breakbeat, with the snare broken around 2 and 4", FigurePlayer.Ground, [0, 2, 10, 11], 16, false, 0),
-        new("breakbeat", "A breakbeat, with the kick broken around 1 and 3", FigurePlayer.Backbeat, [4, 7, 9, 12, 15], 16, false, 0),
-        new("gallop", "A gallop, an 8th and two 16ths a beat", FigurePlayer.Riff, [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15], 16, false, 0),
-        new("tremolo", "Tremolo-picked, every 16th", FigurePlayer.Riff, [..Enumerable.Range(0, 16)], 16, false, 0),
-        new("sixteenths", "Every 16th, an arpeggio's steady run or stabs", FigurePlayer.Chords, [..Enumerable.Range(0, 16)], 16, false, 0),
-        new("rolling", "Rolling, the three 16ths after every beat's kick", FigurePlayer.Bass, [1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15], 16, false, 0),
-        new("offbeat", "On the offbeats, the 8th between the kicks", FigurePlayer.Bass, [2, 6, 10, 14], 16, false, 0),
-        new("clave32", "The clave's 3-2", FigurePlayer.Claves, [0, 6, 12, 20, 24], 32, false, 0),
-        new("clave23", "The clave's 2-3", FigurePlayer.Claves, [4, 8, 16, 22, 28], 32, false, 0)
+        new("withRiff", "With the riff, wherever it plays", FigurePlayer.Ground, [], 0, true, 1, false),
+        new("doubleKick", "A double kick, every 16th", FigurePlayer.Ground, [..Enumerable.Range(0, 16)], 16, false, 1, false),
+        new("blast", "A blast beat, with the snare on every 8th", FigurePlayer.Ground, [0, 2, 4, 6, 8, 10, 12, 14], 16, false, 1, false),
+        new("blast", "A blast beat, with the kick on every 8th", FigurePlayer.Backbeat, [0, 2, 4, 6, 8, 10, 12, 14], 16, false, 1, false),
+        new("breakbeat", "A breakbeat, with the snare broken around 2 and 4", FigurePlayer.Ground, [0, 2, 10, 11], 16, false, 0, false),
+        new("breakbeat", "A breakbeat, with the kick broken around 1 and 3", FigurePlayer.Backbeat, [4, 7, 9, 12, 15], 16, false, 0, false),
+        new("gallop", "A gallop, an 8th and two 16ths a beat", FigurePlayer.Riff, [0, 2, 3, 4, 6, 7, 8, 10, 11, 12, 14, 15], 16, false, 0, false),
+        new("tremolo", "Tremolo-picked, every 16th", FigurePlayer.Riff, [..Enumerable.Range(0, 16)], 16, false, 0, false),
+        new("sixteenths", "Every 16th, an arpeggio's steady run or stabs", FigurePlayer.Chords, [..Enumerable.Range(0, 16)], 16, false, 0, false),
+        new("rolling", "Rolling, the three 16ths after every beat's kick", FigurePlayer.Bass, [1, 2, 3, 5, 6, 7, 9, 10, 11, 13, 14, 15], 16, false, 0, true),
+        new("offbeat", "On the offbeats, the 8th between the kicks", FigurePlayer.Bass, [2, 6, 10, 14], 16, false, 0, true),
+        new("clave32", "The clave's 3-2", FigurePlayer.Claves, [0, 6, 12, 20, 24], 32, false, 0, false),
+        new("clave23", "The clave's 2-3", FigurePlayer.Claves, [4, 8, 16, 22, 28], 32, false, 0, false)
     ];
 
     /// <summary>A player's options, its own rhythm first, as its pool shows them, the songs' weight of each: their own always.</summary>
@@ -148,8 +149,9 @@ internal static class Figures
                         double[] onsets = figure.FollowsRiff
                             ? [..timelines[riff!.Value].EventTimeline.Where(x => In(x.Position)).Select(x => x.Position).Distinct()]
                             : [..figure.Onsets.Select(x => x - index % (figure.Sixteenths / 16) * 16).Where(x => x is >= 0 and < 16).Select(x => bar + x * 0.25)];
-                        // in a bar both play, each struck as the player's own note at or before it was
-                        if (own.Length == 0 || onsets.Length == 0)
+                        // in a bar both play, each struck as the player's own note at or before it was; one around the kick
+                        // where the kick plays, the player's own rhythm where it rests
+                        if (own.Length == 0 || onsets.Length == 0 || figure.AnswersKick && !tracks[FigurePlayer.Ground].Any(t => timelines[t].EventTimeline.Any(x => In(x.Position))))
                             continue;
                         played.RemoveAll(x => In(x.Position));
                         played.AddRange(onsets.Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));

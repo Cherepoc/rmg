@@ -20,7 +20,7 @@ public sealed class ToneTest
         {
             toned++;
             await Assert.That(role).IsNotEqualTo(TrackRole.Drum);
-            await Assert.That(note.State.GetStateValue(CompositionStateKinds.Tone)).IsBetween(1, 16);
+            await Assert.That(note.State.GetStateValue(CompositionStateKinds.Tone)).IsBetween(1, Expression.ToneReach);
         }
 
         await Assert.That(toned).IsGreaterThan(100);

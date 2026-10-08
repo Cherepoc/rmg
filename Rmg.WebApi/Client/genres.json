@@ -1756,6 +1756,7 @@
     "name": "Black metal",
     "description": "Fast, cold and raw: tremolo-picked minor riffs over blast beats and a double kick, triads rather than power chords, a choir or synth strings behind, natural minor, Phrygian and harmonic minor, long repeating sections, a deep reverb, few solos.",
     "choices": {
+      "mixFilter": {},
       "louderForms": { "quieter": [10, 15, 25] },
       "riffIntro": { "songs": [20, 30, 40] },
       "drumSoloFeet": { "doubleKick": 100 },
