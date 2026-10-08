@@ -813,6 +813,7 @@
     "name": "Metal",
     "description": "Distorted guitars chugging a riff in power chords, a double kick in 16ths, the snare on 2 and 4 or in half time, breaks and stops, guitar solos, natural minor, Phrygian and harmonic minor, fast.",
     "choices": {
+      "pocket": { "laidBack": 10 },
       "riffIntro": { "songs": [30, 40, 50] },
       "breakdown": { "sections": [20, 30, 40] },
       "sticking": { "singles": 100, "doubles": 50, "handFoot": 70, "sixStroke": [10, 30, 40] },
@@ -1775,6 +1776,7 @@
     "name": "Black metal",
     "description": "Fast, cold and raw: tremolo-picked minor riffs over blast beats and a double kick, triads rather than power chords, a choir or synth strings behind, natural minor, Phrygian and harmonic minor, long repeating sections, a deep reverb, few solos.",
     "choices": {
+      "pocket": { "laidBack": 10 },
       "space": { "riff": 70, "chords": 70, "pad": 80, "melody": 70, "drum": 60 },
       "mixFilter": {},
       "louderForms": { "quieter": [10, 15, 25], "guitars": 0 },

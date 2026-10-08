@@ -195,14 +195,15 @@ internal sealed class FillGenerator
         // such as where the band comes in; on the drum kit, or on the percussion into a section of percussion only
         var landings = FillLayers.Landings.Where(x => x.Key == FillDrumRole.Percussion == line.Next.IsPercussionOnly).ToImmutableDictionary(
             x => x.Key,
-            x => line.IsLandingForced ? 1
+            // a forced landing on the kit and the percussion, a call as often as ever, never on every last chord
+            x => line.IsLandingForced && x.Key != FillDrumRole.Calls ? 1
                 : span > 0 && play.Treatment == GrooveTreatment.Stop ? FillLayers.StopLandingChance
                 : tilt.Chance(x.Value, FillLayers.LandingLean)
         );
         var landing = _sounds.DrawLanding(_context, landings, fills);
         // a pushed landing comes a note of the fill's rhythm near an 8th early, after a fill, not where the band stops
         // or counts in and lands on the line together
-        var isEarly = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.EarlyLandingChance, fills)) && line.HasFill;
+        var isEarly = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.EarlyLandingChance, fills)) && line.HasFill && span > 0 && !line.IsLandingForced;
         var landingPosition = isEarly ? line.Position - rhythm.Push : line.Position;
         Land(song, edits, landingPosition, line.Next.SectionId, landing);
         if (!landing.IsEmpty)

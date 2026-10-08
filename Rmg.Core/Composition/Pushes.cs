@@ -54,8 +54,11 @@ internal static class Pushes
             bool On(double position) => own.Any(x => Math.Abs(x - position) < 1e-6);
             result[track] = EventTimeline.Create(timeline.Duration, timeline
                 .Where(note => !(On(note.Position) && timeline.Any(n => Math.Abs(n.Position - (note.Position - Early)) < 1e-6)))
+                // the kick struck as its bar before sounds, the crash as itself
                 .Select(note => On(note.Position)
-                    ? (note.Value with { Pitches = timeline.Last(n => n.Position < note.Position - 1e-6).Value.Pitches }).ToTimelineItem(note.Position - Early)
+                    ? (DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).Contains(track)
+                        ? note.Value with { Pitches = timeline.Last(n => n.Position < note.Position - 1e-6).Value.Pitches }
+                        : note.Value).ToTimelineItem(note.Position - Early)
                     : note)
                 .OrderBy(x => x.Position));
         }

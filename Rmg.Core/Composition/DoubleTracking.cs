@@ -13,8 +13,11 @@ internal static class DoubleTracking
     /// <summary>How late the second take plays, in seconds: close enough not to flam a chug, apart enough to widen.</summary>
     public const double Delay = 0.008;
 
-    /// <summary>How loud each take plays, as a part of the part's volume, so that the two sound as loud as the part.</summary>
-    public static readonly double Level = Math.Sqrt(0.5);
+    /// <summary>
+    ///     How loud each take plays, as its channel volume, so that the two sound as loud as the part: half its power each,
+    ///     a channel volume's loudness going with 40·log10 of it, and two takes apart adding in power.
+    /// </summary>
+    public static readonly double Level = Math.Pow(0.5, 0.25);
 
     /// <summary>Whether a part on the program given is played twice.</summary>
     public static bool Doubles(TrackRole role, int program) =>

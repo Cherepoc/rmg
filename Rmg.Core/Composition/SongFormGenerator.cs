@@ -299,7 +299,7 @@ internal sealed class SongFormGenerator
             description += $", at beat {end}, held {plan.Held} beats";
             if (plan.SlowsDown)
             {
-                songState = songState.MergeWith(CreateRitardando(end, end + plan.Held));
+                songState = songState.MergeWith(CreateRitardando(end, end + plan.Held, last.BarDuration));
                 description += ", slowing down";
             }
         }
@@ -349,6 +349,8 @@ internal sealed class SongFormGenerator
             var bar = line.Ending.Meter.BarDuration;
             var rollFrom = Math.Max(gap - FormLayers.BuildRollBars * bar, i > 0 ? lines[i - 1].Position : 0);
             // each bar of the roll at its own rate, every hit counted
+            // the snare rolling into the drop whether the drums played the bars before it or not, as a dance track's build
+            // brings the drums back over a breakdown
             if (snare >= 0)
                 for (var (barStart, step) = (gap - FormLayers.BuildRollBars * bar, FormLayers.BuildRollStart); barStart < gap - 1e-9; barStart += bar, step /= 2)
                 for (var hit = 0; hit < (int)Math.Round(bar / step); hit++)
@@ -593,14 +595,14 @@ internal sealed class SongFormGenerator
         return new[] { fade }.ToStateTimelineMap(end);
     }
 
-    /// <summary>The tempo slowing over the bar before the ending, beat by beat, and staying slow to the end.</summary>
-    private static StateTimelineMap CreateRitardando(double line, double end)
+    /// <summary>The tempo slowing over the bar before the ending, in its steps over the bar whatever its meter, and staying slow to the end.</summary>
+    private static StateTimelineMap CreateRitardando(double line, double end, double bar)
     {
         var steps = FormLayers.Ritardando;
         IStateTimeline ritardando = StateTimeline.Create(
                 end,
                 StateKinds.Tempo,
-                steps.Select((x, i) => x.ToTimelineItem(line - steps.Length + i))
+                steps.Select((x, i) => x.ToTimelineItem(line - bar + i * bar / steps.Length))
             )
             .WithLayer("Ending");
         return new[] { ritardando }.ToStateTimelineMap(end);

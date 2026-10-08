@@ -43,8 +43,10 @@ internal static class MixFilter
         if (opens)
         {
             var first = map.Sections[0];
-            var end = map.Intro.Duration > 0 ? map.Origin : first.Start + Math.Min(first.Duration, Meter.PhraseBarCount * first.Meter.BarDuration);
-            ramps.Add((map.Intro.Duration > 0 ? 0 : first.Start, end, openingDepth, 0));
+            // over the intro, or the first phrase where there is none or only a count-in's clicks
+            var overIntro = map.Intro.Duration > 0 && map.Intro.Kind != IntroKind.CountIn;
+            var end = overIntro ? map.Origin : first.Start + Math.Min(first.Duration, Meter.PhraseBarCount * first.Meter.BarDuration);
+            ramps.Add((overIntro ? 0 : first.Start, end, openingDepth, 0));
         }
 
         // a section's end, but where the band falls silent for a drop, and the last's

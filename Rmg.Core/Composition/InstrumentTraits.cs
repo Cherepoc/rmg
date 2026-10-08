@@ -98,6 +98,8 @@ public static class InstrumentTraits
         [18] = InstrumentTrait.Tremolo | InstrumentTrait.Sweeps,
         [19] = InstrumentTrait.Tremolo | InstrumentTrait.Sweeps,
         [20] = InstrumentTrait.Tremolo | InstrumentTrait.Sweeps,
+        // the harmonica, bent as its notes are blown
+        [22] = InstrumentTrait.Bends,
         // the clean guitar's chorus its classic sound
         [27] = Guitar | InstrumentTrait.ChorusesClassically,
         // the driven guitars chugging; the muted guitar is a clean one muted, which never does
