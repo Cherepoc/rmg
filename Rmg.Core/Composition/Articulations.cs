@@ -104,10 +104,11 @@ internal static class Articulations
             }));
         }
 
-        // and a line's steps slurred where its part slurs
+        // and a line's steps slurred where its part slurs, the riff's twin as its riff does
         foreach (var (track, timeline) in result.ToArray())
-            if (song.Tracks.Definitions[track].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo or TrackRole.Riff
-                && song.Stream(SongStream.Legato, track).TestProbability(LegatoChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "legato"))))
+            if (song.Tracks.Definitions[track].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo or TrackRole.Riff or TrackRole.RiffTwin
+                && song.Stream(SongStream.Legato, song.Tracks.Definitions[track].Role == TrackRole.RiffTwin ? song.Track(TrackRole.Riff).Key : track)
+                    .TestProbability(LegatoChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "legato"))))
                 result[track] = Slur(timeline);
 
         return draft with { Notes = result.ToImmutable() };
@@ -143,6 +144,6 @@ internal static class Articulations
     }
 
 
-    /// <summary>Whether a part chugs: the riff, the rhythm part or the bass, on a guitar or a picked bass.</summary>
-    internal static bool Chugs(TrackRole role, int program) => role is TrackRole.Riff or TrackRole.Rhythm or TrackRole.Bass && InstrumentTraits.Has(program, InstrumentTrait.Chugs);
+    /// <summary>Whether a part chugs: the riff and its twin, the rhythm part or the bass, on a guitar or a picked bass.</summary>
+    internal static bool Chugs(TrackRole role, int program) => role is TrackRole.Riff or TrackRole.RiffTwin or TrackRole.Rhythm or TrackRole.Bass && InstrumentTraits.Has(program, InstrumentTrait.Chugs);
 }

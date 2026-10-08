@@ -51,9 +51,11 @@ internal static class LouderForms
         {
             var part = (PitchInstrumentTrack)definition;
             // drawn for every part, so that the draws are as many, the quieter form from a sequence of its own
-            var context = song.Stream(SongStream.LouderForms, track);
+            // the riff's twin as its riff plays, from the riff's sequences
+            var keyed = definition.Role == TrackRole.RiffTwin ? song.Track(TrackRole.Riff).Key : track;
+            var context = song.Stream(SongStream.LouderForms, keyed);
             var (plays, form) = (context.TestProbability(Chance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.LouderForms, "guitars"))), context.GenerateDouble());
-            var quieterContext = song.Stream(SongStream.QuieterForms, track);
+            var quieterContext = song.Stream(SongStream.QuieterForms, keyed);
             var (playsQuieter, quieterForm) = (quieterContext.TestProbability(QuieterChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.LouderForms, "quieter"))),
                 quieterContext.GenerateDouble());
             foreach (var (spans, program, trace) in new[]

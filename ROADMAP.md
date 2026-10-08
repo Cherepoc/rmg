@@ -23,7 +23,13 @@ fixed; the review and the plan are kept outside the repository):
    the band devices out of Orchestral, Medieval and Dungeon; Chiptune straight and drier; Ambient's drums rarer;
    louder forms and a raised cadence no longer leaking into Disco, Soul, Ska, Ambient, Hip hop, House, Reggae and
    Synthwave. Left: a dance track's ending stripping back to the drums, an ending of its own (*Form and sections*).
-4. Stage interactions: figures over polymeters, the riff's twin with its riff, hat rolls under fills, drum marks.
+4. Done: stage interactions. Figures played in turn by what they follow, the kick with the riff as its figure plays
+   it, the bass around the kick as its figure plays it, and none in a section running a polymeter, nor a polymeter in
+   a breakdown; the riff's twin palm-muting, slurring and taking its louder or quieter form with its riff, and resting
+   where the riff chugs; hat rolls never under a fill nor in stop time; drum marks before the drum stages, which push
+   only drums keeping time; louder forms before the instruments, so a part sounding as another takes its form; stop
+   time skipped steering no stage; the bass's walk out of stop time kept; a solo note taking no double stop of the
+   melody's; a riser taking no articulation.
 5. Musicality in the code: the blues' last four bars, meters other than 4/4, the bass, stabs, solos' trading turns.
 6. Generator correctness: the corners, each with a test.
 7. Stream robustness, with a fingerprint over genre songs.

@@ -108,7 +108,7 @@ internal static class StopTime
         }
 
         // the drums' fills out of it, from a run's first note to its line, which go on as a drummer fills into the next
-        // section, a drum never heard otherwise landing there
+        // section, a drum never heard otherwise landing there, and the bass walking with them in a phrase's last half bar
         var fills = draft.Runs.Where(x => !x.Positions.IsEmpty).Select(x => (From: x.Positions.Min(), To: x.Line))
             // and the last half bar of every phrase, the drums leading the band back in, with the fill its line draws there
             .Concat(phrases.Select(x => (From: x.End - x.BarDuration / 2, To: x.End))).ToArray();
@@ -120,9 +120,10 @@ internal static class StopTime
             var role = song.Tracks.Definitions[track].Role;
             if (role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo)
                 continue;
+            bool Fills(double position) => role is TrackRole.Drum or TrackRole.Bass && InAFill(position);
             result[track] = EventTimeline.Create(timeline.Duration, timeline
-                .Where(note => Place(note.Position, track) is not (true, false) || role == TrackRole.Drum && InAFill(note.Position))
-                .Select(note => Place(note.Position, track).In && !(role == TrackRole.Drum && InAFill(note.Position))
+                .Where(note => Place(note.Position, track) is not (true, false) || Fills(note.Position))
+                .Select(note => Place(note.Position, track).In && !Fills(note.Position)
                     ? (note.Value with { Duration = Math.Min(note.Value.Duration, Hit) }).ToTimelineItem(note.Position)
                     : note));
         }

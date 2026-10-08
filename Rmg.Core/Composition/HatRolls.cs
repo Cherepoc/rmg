@@ -48,6 +48,11 @@ internal static class HatRolls
             }
         }
 
+        // but where a fill plays, from its first note to its line, and in stop time, after the draws so that they are as many
+        var fills = draft.Runs.Where(x => !x.Positions.IsEmpty).Select(x => (From: x.Positions.Min(), To: x.Line)).ToArray();
+        var stops = song.StopTime;
+        rolls.RemoveAll(r => fills.Any(x => x.From < r.To - 1e-9 && x.To > r.From + 1e-9) || stops.Any(x => x.Start < r.To - 1e-9 && x.End > r.From + 1e-9));
+
         var result = notes.ToBuilder();
         foreach (var track in times)
         {

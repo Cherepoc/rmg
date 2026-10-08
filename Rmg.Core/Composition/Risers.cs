@@ -42,7 +42,9 @@ internal static class Risers
             {
                 Pitches = [Pitch],
                 Duration = drop - gap,
-                State = before.Value.State.With(CompositionStateKinds.Program, Program + 1)
+                // a reverse cymbal, none of its carrier's articulation
+                State = before.Value.State.With(CompositionStateKinds.Program, Program + 1).With(CompositionStateKinds.Ornament, []).With(CompositionStateKinds.PalmMute, 0)
+                    .With(CompositionStateKinds.Legato, 0).With(CompositionStateKinds.Strum, 0)
             }).ToTimelineItem(gap));
             result[track] = EventTimeline.Create(result[track].Duration, risen.OrderBy(x => x.Position));
         }

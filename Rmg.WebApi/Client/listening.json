@@ -14,10 +14,11 @@
     },
     "seeds": [
       {
-        "seed": "N",
-        "at": 188.7,
+        "seed": "D",
+        "at": 99.8,
         "listen": [
-          "Rhythm part (Electric Guitar (clean))"
+          "Riff (Acoustic Guitar (steel))",
+          "Riff's twin (Acoustic Guitar (steel))"
         ]
       },
       {

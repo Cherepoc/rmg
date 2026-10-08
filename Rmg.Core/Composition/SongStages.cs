@@ -32,7 +32,8 @@ internal sealed record SongStage(string Name, Func<SongDecisions, SongDraft, Son
 /// <summary>
 ///     The song's stages after it is put together, in their order, which is their correctness: a stage that reads
 ///     another's work comes after it, such as the lines after the fills they walk with, and a stage that keeps another's
-///     intent before it would undo it, such as a hook's quote before the lines lead into the first section.
+///     intent before it would undo it, such as a hook's quote before the lines lead into the first section. A stage after
+///     the notes edits them, but for state only the render reads, as the mix filter's, which no note keeps.
 /// </summary>
 internal static class SongStages
 {
@@ -55,13 +56,13 @@ internal static class SongStages
         new("Pedal", SectionPedals.Apply, CanSkip: true),
         new("Solo answers", SoloAnswers, CanSkip: true),
         new("Notes", RealizeNotes, CanSkip: false),
+        new("Drum marks", DrumMarks.Apply, CanSkip: true),
         new("Stop time", Composition.StopTime.Apply, CanSkip: true),
         new("Pushes", Composition.Pushes.Apply, CanSkip: true),
         new("Hat rolls", Composition.HatRolls.Apply, CanSkip: true),
         new("Ghosts", Composition.Ghosts.Apply, CanSkip: true),
-        new("Drum marks", DrumMarks.Apply, CanSkip: true),
-        new("Instruments", Instruments, CanSkip: true),
         new("Louder forms", LouderForms.Apply, CanSkip: true),
+        new("Instruments", Instruments, CanSkip: true),
         new("Ornaments", Composition.Ornaments.Apply, CanSkip: true),
         new("Articulation", Articulations.Apply, CanSkip: true),
         new("Risers", Composition.Risers.Apply, CanSkip: true),
@@ -134,7 +135,8 @@ internal static class SongStages
             song.Absent,
             song.Genre,
             song.Pinned
-        );
+        ).Where(x => !song.SectionOf(x.Key).Breakdown).ToImmutableDictionary();
+        // but a breakdown, its kick locked to the riff, drawn all the same
         StateTrace.RecordSong(TracePoints.Polymeter, string.Join(", ", polymeters.Select(x => $"{x.Key} {x.Value}")), polymeters);
         return draft with
         {
@@ -228,7 +230,7 @@ internal static class SongStages
                 song.Energies,
                 (pair, section) => song.Stream(SongStream.LineDoubling, pair, section),
                 section => song.Stream(SongStream.TwinTimbres, section),
-                index => song.Sections[index].RiffPowerChords,
+                index => song.Sections[index].RiffPowerChords || song.Sections[index].Chugs,
                 song.Tracks.Definitions.Values.OfType<PitchInstrumentTrack>().Any(x => x.Role == TrackRole.Riff && InstrumentTraits.Has(x.InstrumentCode, InstrumentTrait.Driven)),
                 song.Genre
             )

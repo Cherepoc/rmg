@@ -103,4 +103,26 @@ public sealed class RiffTwinTest
 
         await Task.CompletedTask;
     }
+
+    /// <summary>
+    ///     The twin rests in a section that chugs, which may play its riff in power chords, a third against a power chord
+    ///     being mud, as it rests under a riff in power chords.
+    /// </summary>
+    [Test]
+    public async Task TheTwin_RestsInASectionThatChugs()
+    {
+        var checkedSections = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("metal")))))
+        {
+            var chugs = song.Trace.Where(x => x.Point == TracePoints.Chugs && (bool)x.Value!).Select(x => x.Section).ToHashSet();
+            var twin = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.RiffTwin).SelectMany(x => x.Value).ToArray();
+            foreach (var span in song.Map.Sections.Where(x => chugs.Contains(x.SectionId) && !song.IsSolo(x)))
+            {
+                checkedSections++;
+                await Assert.That(twin.Count(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9)).IsEqualTo(0).Because($"seed {song.Seed} at {span.Start}");
+            }
+        }
+
+        await Assert.That(checkedSections).IsGreaterThan(10);
+    }
 }

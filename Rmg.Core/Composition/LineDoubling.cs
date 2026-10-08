@@ -93,7 +93,7 @@ internal static class LineDoubling
     /// <param name="melody">The song's melody facet, which the steps lean by.</param>
     /// <param name="sound">The song's sound facet, which the octaves lean by.</param>
     /// <param name="energies">Every appearance's energy, by its place, which the octaves lean by too.</param>
-    /// <param name="riffPowerChords">Whether an appearance's riff plays in power chords, by its place, which plays no twin.</param>
+    /// <param name="riffPowerChords">Whether an appearance's riff plays in power chords or chugs, which may make it power chords, by its place, which plays no twin.</param>
     /// <param name="drivenRiff">Whether the riff plays on a driven guitar, whose phrases the bass plays wherever it would rest in them.</param>
     /// <param name="genre">The genre whose chances of the doublings a section draws (<see cref="GenreChoices.Doubling" />).</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(

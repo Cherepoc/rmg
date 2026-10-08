@@ -38,6 +38,9 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 /// </summary>
 internal static class Figures
 {
+    /// <summary>The players in the turns they play their figures in, each turn after what it follows.</summary>
+    private static readonly FigurePlayer[][] Turns = [[FigurePlayer.Riff, FigurePlayer.Backbeat, FigurePlayer.Claves, FigurePlayer.Chords], [FigurePlayer.Ground], [FigurePlayer.Bass]];
+
     /// <summary>A player's own rhythm, as its pool names it.</summary>
     public const string Own = "own";
 
@@ -112,6 +115,11 @@ internal static class Figures
         if (drawn.Values.Select(x => x[FigurePlayer.Claves]).FirstOrDefault(x => x is not null) is { } clave)
             foreach (var figures in drawn.Values.Where(x => x[FigurePlayer.Claves] is not null))
                 figures[FigurePlayer.Claves] = clave;
+        // but a section running a figure across its bar lines, its cycle kept, as a mutating groove keeps it, its figures
+        // drawn all the same
+        foreach (var id in drawn.Keys.Where(draft.Polymeters.Contains))
+            foreach (var player in players)
+                drawn[id][player] = null;
         foreach (var (id, figures) in drawn)
         {
             var played = figures.Where(x => x.Value is not null).ToImmutableDictionary(x => x.Key, x => x.Value!.Name);
@@ -122,54 +130,61 @@ internal static class Figures
         if (drawn.Values.All(x => x.Values.All(f => f is null)))
             return draft;
 
-        var timelines = draft.Timeline.TrackTimelineMap;
-        int? TrackOf(TrackRole role) => song.Playing.Where(x => x.Value == role).Select(x => (int?)x.Key).FirstOrDefault(x => timelines.ContainsKey(x!.Value));
+        int? TrackOf(TrackRole role) => song.Playing.Where(x => x.Value == role).Select(x => (int?)x.Key).FirstOrDefault(x => draft.Timeline.TrackTimelineMap.ContainsKey(x!.Value));
         var riff = TrackOf(TrackRole.Riff) ?? TrackOf(TrackRole.Bass);
+        var all = draft.Timeline.TrackTimelineMap;
         var tracks = new Dictionary<FigurePlayer, int[]>
         {
-            [FigurePlayer.Ground] = [..DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).Where(timelines.ContainsKey)],
-            [FigurePlayer.Backbeat] = [..DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).Where(timelines.ContainsKey)],
+            [FigurePlayer.Ground] = [..DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).Where(all.ContainsKey)],
+            [FigurePlayer.Backbeat] = [..DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).Where(all.ContainsKey)],
             [FigurePlayer.Riff] = TrackOf(TrackRole.Riff) is { } own ? [own] : [],
-            [FigurePlayer.Claves] = [..new[] { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) }.Where(timelines.ContainsKey)],
+            [FigurePlayer.Claves] = [..new[] { DrumGroups.GetTrackNumber(DrumDefinitions.Claves) }.Where(all.ContainsKey)],
             [FigurePlayer.Chords] = TrackOf(TrackRole.Chords) is { } chords ? [chords] : [],
             [FigurePlayer.Bass] = TrackOf(TrackRole.Bass) is { } bass ? [bass] : []
         };
 
-        var edits = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>();
-        foreach (var player in players)
-        foreach (var track in tracks[player])
-            edits[track] = notes =>
-            {
-                var played = notes.ToList();
-                foreach (var span in song.Form.Map.Sections)
+        // the players in turn by what they follow: the kick with the riff as its figure plays it, the bass around the kick
+        // as its figure plays it
+        foreach (var turn in Turns)
+        {
+            var timelines = draft.Timeline.TrackTimelineMap;
+            var edits = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>();
+            foreach (var player in turn)
+            foreach (var track in tracks[player])
+                edits[track] = notes =>
                 {
-                    if (drawn[span.SectionId][player] is not { } figure)
-                        continue;
-                    // the riff's where the song has a riff or a bass
-                    if (figure.FollowsRiff && riff is null)
-                        continue;
-                    var bars = (int)Math.Round(span.Duration / span.Meter.BarDuration);
-                    for (var index = 0; index < bars; index++)
+                    var played = notes.ToList();
+                    foreach (var span in song.Form.Map.Sections)
                     {
-                        var bar = span.Start + index * span.Meter.BarDuration;
-                        var end = bar + span.Meter.BarDuration;
-                        bool In(double position) => position >= bar - 1e-9 && position < end - 1e-9;
-                        var own = played.Where(x => In(x.Position)).ToArray();
-                        double[] onsets = figure.FollowsRiff
-                            ? [..timelines[riff!.Value].EventTimeline.Where(x => In(x.Position)).Select(x => x.Position).Distinct()]
-                            : [..figure.Onsets.Select(x => x - index % (figure.Sixteenths / 16) * 16).Where(x => x is >= 0 and < 16).Select(x => bar + x * 0.25)];
-                        // in a bar both play, each struck as the player's own note at or before it was; one around the kick
-                        // where the kick plays, the player's own rhythm where it rests
-                        if (own.Length == 0 || onsets.Length == 0 || figure.AnswersKick && !tracks[FigurePlayer.Ground].Any(t => timelines[t].EventTimeline.Any(x => In(x.Position))))
+                        if (drawn[span.SectionId][player] is not { } figure)
                             continue;
-                        played.RemoveAll(x => In(x.Position));
-                        played.AddRange(onsets.Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));
+                        // the riff's where the song has a riff or a bass
+                        if (figure.FollowsRiff && riff is null)
+                            continue;
+                        var bars = (int)Math.Round(span.Duration / span.Meter.BarDuration);
+                        for (var index = 0; index < bars; index++)
+                        {
+                            var bar = span.Start + index * span.Meter.BarDuration;
+                            var end = bar + span.Meter.BarDuration;
+                            bool In(double position) => position >= bar - 1e-9 && position < end - 1e-9;
+                            var own = played.Where(x => In(x.Position)).ToArray();
+                            double[] onsets = figure.FollowsRiff
+                                ? [..timelines[riff!.Value].EventTimeline.Where(x => In(x.Position)).Select(x => x.Position).Distinct()]
+                                : [..figure.Onsets.Select(x => x - index % (figure.Sixteenths / 16) * 16).Where(x => x is >= 0 and < 16).Select(x => bar + x * 0.25)];
+                            // in a bar both play, each struck as the player's own note at or before it was; one around the kick
+                            // where the kick plays, the player's own rhythm where it rests
+                            if (own.Length == 0 || onsets.Length == 0 || figure.AnswersKick && !tracks[FigurePlayer.Ground].Any(t => timelines[t].EventTimeline.Any(x => In(x.Position))))
+                                continue;
+                            played.RemoveAll(x => In(x.Position));
+                            played.AddRange(onsets.Select(at => own.Where(x => x.Position <= at + 1e-9).DefaultIfEmpty(own[0]).Last().Value.ToTimelineItem(at)));
+                        }
                     }
-                }
 
-                return EventTimeline.Create(notes.Duration, played.OrderBy(x => x.Position));
-            };
+                    return EventTimeline.Create(notes.Duration, played.OrderBy(x => x.Position));
+                };
+            draft = draft with { Timeline = draft.Timeline.MapTrackEvents(edits) };
+        }
 
-        return draft with { Timeline = draft.Timeline.MapTrackEvents(edits) };
+        return draft;
     }
 }

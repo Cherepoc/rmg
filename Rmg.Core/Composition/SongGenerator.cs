@@ -67,7 +67,7 @@ public static class SongGenerator
             throw new ArgumentOutOfRangeException(nameof(skipped), unknown, $"A stage left out is one of {string.Join(", ", SkippableStages)}.");
         overrides.Check();
 
-        var song = SongDecisions.Draw(seed, overrides, cancellation);
+        var song = SongDecisions.Draw(seed, overrides, cancellation) with { StopTimeSkipped = skipped.Contains("Stop time") };
         var (genre, tracks, form, songUnconventionality) = (song.Genre, song.Tracks, song.Form, song.Facets);
         IGenerationContext Stream(SongStream stream) => CreateStream(seed, stream);
         // the song put together as planned, then every stage after it in its order

@@ -223,7 +223,8 @@ internal static class SoloLines
             marks.Add((placing, pitch));
             var melodyNote = MelodyAt(position).Value;
             // in octaves as the soloist plays them, not as the melody it takes over did
-            var state = melodyNote.Except([StateKinds.HeldDuration, CompositionStateKinds.LinePickup, StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed, CompositionStateKinds.Octave])
+            var state = melodyNote.Except([StateKinds.HeldDuration, CompositionStateKinds.LinePickup, StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed, CompositionStateKinds.Octave,
+                    CompositionStateKinds.LineVoices, CompositionStateKinds.LinePlanes])
                 .With(CompositionStateKinds.Octave, octave && soloist.Octaves ? 1 : 0);
             state = state.With(StateKinds.Velocity, loudness + IntensityVelocity * (intensity - 0.5) + (accented ? CellAccent : 0));
             state = state.With(StateKinds.ScaleStep, LinePlacement.GetScaleStep(Chord(state, position), pitch))

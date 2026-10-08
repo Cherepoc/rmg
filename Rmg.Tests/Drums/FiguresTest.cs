@@ -135,4 +135,23 @@ public sealed class FiguresTest
 
         await Assert.That(blasts).IsGreaterThan(5);
     }
+
+    /// <summary>A section running a figure across its bar lines plays no figure, its cycle kept.</summary>
+    [Test]
+    public async Task APolymeterSection_PlaysNoFigure()
+    {
+        var polymeters = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("idm")))))
+        {
+            var plans = (ImmutableDictionary<int, Polymeter.Plan>)song.Trace.Single(x => x.Point == TracePoints.Polymeter).Value!;
+            foreach (var id in plans.Keys)
+            {
+                polymeters++;
+                var figures = (ImmutableDictionary<FigurePlayer, string>)song.Trace.Single(x => x.Point == TracePoints.Figures && x.Section == id).Value!;
+                await Assert.That(figures).IsEmpty().Because($"seed {song.Seed} section {id}");
+            }
+        }
+
+        await Assert.That(polymeters).IsGreaterThan(3);
+    }
 }

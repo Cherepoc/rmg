@@ -45,7 +45,8 @@ internal static class Pushes
         var result = notes.ToBuilder();
         // the kick and the crash push with the band where they played the bar before, their notes on a pushed change struck
         // an eighth early as their notes in that bar sound, where none strikes there already
-        var pushers = DrumGroups.Kick.Drums.Append(DrumDefinitions.Cymbal).Select(DrumGroups.GetTrackNumber).ToHashSet();
+        // where the drums keep time: drums that only mark the form mark it where it moves
+        var pushers = song.DrumJob == DrumJob.Groove ? DrumGroups.Kick.Drums.Append(DrumDefinitions.Cymbal).Select(DrumGroups.GetTrackNumber).ToHashSet() : [];
         foreach (var track in pushers.Where(notes.ContainsKey))
         {
             var timeline = notes[track];
