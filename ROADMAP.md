@@ -330,7 +330,8 @@ Each item with its plan, and what it waits for.
 
 ### Fills and lines
 
-- **The melody's motif developed, the rest** (P3, by listening, `?listen=inversion`): a run of echoes plays its figure
+- **The melody's motif developed, the rest** (P3; the inversion kept, heard 8 October 2026 as hard to notice, worse in 5
+  of 6 Pop songs, a device of development rather than one to be heard at once): a run of echoes plays its figure
   inverted now and then (`LinePattern.Inversions`, 15% in the middle, 40% at the wild end); a figure displaced by an 8th or its rhythm
   stretched, should the inverted ones be heard as development rather than wrong notes.
 - **The songs' own appoggiaturas** (P2): a line's note on a strong beat a tension

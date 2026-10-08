@@ -1520,64 +1520,6 @@
     ]
   },
   {
-    "id": "inversion",
-    "question": "Pop's melody playing a figure it repeats upside down now and then, its steps mirrored: a tune developed, or wrong notes?",
-    "decides": "The inversion's chances, and a motif displaced or stretched beside it.",
-    "genre": "pop",
-    "without": {
-      "skip": [],
-      "genre": {
-        "inversion": {
-          "melody": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "1",
-        "at": 152.9,
-        "listen": [
-          "Solo (Lead 2 (sawtooth))"
-        ]
-      },
-      {
-        "seed": "3",
-        "at": 48,
-        "listen": [
-          "Melody (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "A",
-        "at": 8.8,
-        "listen": [
-          "Melody (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "D",
-        "at": 144.7,
-        "listen": [
-          "Chords (Electric Piano 1)"
-        ]
-      },
-      {
-        "seed": "F",
-        "at": 73.4,
-        "listen": [
-          "Melody (Lead 2 (sawtooth))"
-        ]
-      },
-      {
-        "seed": "L",
-        "at": 253.8,
-        "listen": [
-          "Melody (Lead 1 (square))"
-        ]
-      }
-    ]
-  },
-  {
     "id": "breakdown",
     "question": "Djent's bridge as a breakdown, the drums in half time, the kick with the chugging riff, the melody and the pad out: heavy, or a hole?",
     "decides": "The breakdown's chances in the heavy genres.",
