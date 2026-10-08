@@ -21,6 +21,7 @@ is removed once it is built.
     a rock band's held riff restruck (*A held guitar restruck*).
 11. The dive by listening: held longer, slow at its bottom, the tempo easing into the next section (*The dive heard*).
 12. Techno's drops both kinds, the silent one with its riser as likely as the filtered (*The drops heard*).
+13. Stop time carried, a line or the drum keeping time going on through every stopped bar (*Stop time carried*).
 
 Done in the plan of 9 October 2026: the echo as the synthesizer's delay; the strong effects stacked; the gate holding
 whole chords; the part alone a genre's; metal's arpeggios and a part's colour; a line's tensions, Djent's synth over
@@ -45,8 +46,14 @@ genre first (see *Genres*).
 
 **Put off** until its uses ask for it: a tag (see *Form and sections*).
 
-**Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where they stand: scales of other
-sizes, a melody in block harmony, a hook at the end, the tempo leaning by the energy, a key change's common tone, the
+**From the review of 8 October 2026** (P2, to be ordered into the next plan): the architecture's items (see
+*Architecture*: chances by hand, named streams, the song's decisions passed whole, the song's trace, the stages' reads
+and writes, `ProgressionSettings`, a genre's one rule, a genre resolved once, plainer prose); and the music's: the
+melody's goal tones and motifs, the songs' own appoggiaturas (*Fills and lines*), phrases of other than four bars
+(*Rhythm engine*), scales of other sizes and an uneven harmonic rhythm (*Scales and chords*); the roadmap and the
+README brought up to date (*Architecture*), and targets from outside (*Listening data*).
+
+**Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where they stand: a melody in block harmony, a hook at the end, the tempo leaning by the energy, a key change's common tone, the
 fills' loudness as layers, and a head with solos (which the form's devices by genre with AABA likely make).
 
 ## Listening
@@ -130,8 +137,7 @@ Done for a version when every question is answered or let go of.
 - **The figures** (`?listen=kick-lock`, `double-kick`, `gallop`, `clave`): Metal's sections 27% with the riff, 14% a
   double kick, 15% galloping, Nu metal's 42% with the riff (`RockAndMetalReportTest`), Latin's claves on the clave.
   Decides their weights and leans.
-- **Pushes and stop time** (`?listen=pushes`, `?listen=stop-time`): the band's changes an eighth early; the band
-  hitting once a bar. Decides their chances by genre.
+- **Pushes** (`?listen=pushes`): the band's changes an eighth early. Decides their chances by genre.
 
 ### Sound
 
@@ -152,8 +158,6 @@ Done for a version when every question is answered or let go of.
 - **The instruments added in October 2026** (about 4% of parts): any too loud or strange in either soundfont? Decides
   their weights and traits.
 - **The riser into a drop:** a soundfont's sample shorter or longer than the bar. Decides starting it later.
-- **The trance gate** (`?listen=gate`): a held chord chopped in 16ths, Trance 17% of its songs (`GateTest.Report`);
-  a pad's slow attack, the chop clicking? Decides its weight and the instruments it chops.
 - **The filter:** wobble, squelch and opening, Techno 11%, Trance 28%, Dnb 26% (`FilterTest.Report`); a General MIDI
   synth bass wobbling thin? Decides its depth and resonance.
 - **Double-tracking:** Metal 2.8 parts a song at the sides (`DoubleTrackingTest.Report`): a wall, or mud? Decides the
@@ -196,8 +200,9 @@ plain or wild the songs are.
   ratings against its values (`StateTraceEntry.Value`): which endings, intros, drum setups, modes, tempos, energies or
   improvisations are liked or skipped, with their counts, so that a small sample shows itself. Measured by: ratings
   per version, enough to tell two versions apart.
-- **Targets from outside** (P3): a few measures (the notes a bar by role, the intervals, the syncopation, the chord
-  changes a bar) of a corpus of real MIDI songs to tune towards.
+- **Targets from outside** (P2, raised by the review of October 2026, as listening is one listener's and slow): a few
+  measures (the notes a bar by role, the intervals, the syncopation, the chord changes a bar) of a corpus of real MIDI
+  songs to tune towards.
 
 ## Open work
 
@@ -208,8 +213,11 @@ Each item with its plan, and what it waits for.
 - **An ending's chord into home, by listening** (`?listen=ending`): a modal band's ♭II, ♭VI or ♭VII against a classical
   V–i; Black metal's last chord V 52% to 22%, raised 33% to 5%, its last section planed 42%; the songs' chances of the
   raise and the chord into home left as they were.
-- **Pinch harmonics, by listening** (`?listen=pinch`, `?listen=pinch-sound`): General MIDI's harmonics or the squeal;
-  their chances by genre, Nu metal's 79 in 64 songs, Metal's 32; a riff's twin pinching apart from its riff.
+- **Pinch harmonics, by listening** (`?listen=pinch`): their chances by genre, Nu metal's 79 in 64 songs, Metal's 32; a
+  riff's twin pinching apart from its riff. Their sound heard on test (`pinch-sound`, October 2026): the squeal 2,
+  the harmonics 1, unsure 3 of 6 songs, so the two are hard to tell apart and a pinch is hard to hear at all, as the
+  dive was. A pinch made easier to hear, held longer and a little louder, before its sound is decided; until then the
+  squeal the likelier of the two in a genre that names neither.
 - **Page tests timing out** (P2): two of fourteen runs of the whole page suite, a test each, past its 30 seconds
   (`ThePage_OpensWithASong_AndNoErrors`, `TheWindowsOverride_IsCheckedByAChange_AndUncheckedLeavesTheChoiceToTheSongs`),
   the suite's tests in parallel against one site; which wait, and whether the songs' queue or the browser is the
@@ -231,10 +239,20 @@ Each item with its plan, and what it waits for.
 
 ### Form and sections
 
-- **The drops heard** (P1, step 12; `?listen=filtered-drop`, October 2026): Techno's filtered drop is good, but the
+- **The drops heard** (P1, step 12; `?listen=filtered-drop`, October 2026, filtered 3, silent 3 of 6 songs): Techno's filtered drop is good, but the
   silent one, the whole band stopping with the reverse cymbal rising into it, is often better; both belong. Techno's
   `dropKind` as likely each way, and the filtered one's riser considered too, a reverse cymbal swelling over the muffled
   bar.
+- **Stop time carried** (P1, step 13; heard on test, `?listen=stop-time`, October 2026, with 4, without 3 of 6 Blues
+  songs, a device in seeds 0, 3 and 7, a hole in 2, 5 and 6): the band hits the bar's first beat and rests to the next
+  bar, and only the melody, the counter-melody and a solo play on (`StopTime.Apply`), so that where the melody rests,
+  between its phrases or in a section without one, nothing sounds for most of the bar, too often. Stop time is played
+  under a part that goes on through it. One rule: a stop-time bar keeps a carrier, the first of the lines that plays
+  through the bar's rest (the melody, the counter-melody, a solo), and where none does, the drum keeping time
+  (`DrumRole.Time`, a hi-hat's or a ride's) plays on through the stop while the rest of the band hits and rests; a
+  section with no line and no drum keeping time is not played in stop time, its draw made all the same. Measured
+  before and after by the share of a stop-time bar's rest where nothing sounds (a report over the corpus with Blues and
+  Rock), and a rule: no stop-time bar silent past its hit. Its chance as it is; the six songs heard again.
 - **A tag** (put off): half a pattern before a section changes, which breaks the pattern's grid for the fills' lines and
   the phrases; with the meter as state, an engine's change for a rare idiom.
 - **The energy's recurrence** counts a section's appearances, not its plays: should long sections sound too quiet.
@@ -266,6 +284,19 @@ Each item with its plan, and what it waits for.
 
 ### Fills and lines
 
+- **The melody's goal tones** (P2, the review of October 2026): a phrase's contour peaks and its echoes make sequences,
+  but its last note is wherever the walk lands. A phrase's end aiming at a degree by its cadence: the tonic or its
+  third where the progression closes home, the second or the fifth at a half close, leaned by the melody facet, the
+  wild end free. Measured by the degrees of phrase ends against their cadences (a report), and the songs' intervals
+  unchanged elsewhere.
+- **The melody's motif developed** (P3, after the goal tones): the bar is the unit of repetition (the scheme's letters,
+  the echoes), so a motif is a bar's. Within a phrase, a cell of a beat or two stated and then answered: displaced by
+  an 8th, its rhythm stretched, inverted, as the soloist's motifs are (`Soloist.MotifInversion`, *A motif stretched*),
+  drawn as data on the echoes rather than as a mechanism of its own. Measured by how often cells shorter than a bar
+  recur in a phrase.
+- **The songs' own appoggiaturas** (P2, with step 9 of the plan of 7 October): a line's note on a strong beat a tension
+  that resolves by step to the chord, the songs' chance 0 at the plain end and low in the middle (`LinePattern.Tensions`
+  is a genre's alone now, 0 for the songs); a genre's tension (`GenreChoices.Tension`) stays as it is.
 - **Filling the melody's gaps before a chord change within a phrase,** should they sound empty now that the solo part
   answers.
 - **The lift beyond the cues:** the chords' rhythm doubling, a part of the next section coming in early, should the
@@ -275,7 +306,7 @@ Each item with its plan, and what it waits for.
 
 ### Instruments and expression
 
-- **A held guitar restruck** (P1, step 10; heard on test, `?listen=djent-stutter`, October 2026): the gate on a riff, its
+- **A held guitar restruck** (P1, step 10; heard on test, `?listen=djent-stutter`, October 2026, the riff 5, the stutter 1 of 6 songs): the gate on a riff, its
   chord held and chopped in 16ths, is not Djent's sound, but a rock band's held riff is; a guitar's held chord fades away
   as it rings, so that a gated or held guitar chord dies out under the gate. Djent's riff taken out of the gate's parts
   (`gateParts`), a riff gated in Rock and the like instead; and a held chord on a decaying instrument, a guitar's, a
@@ -284,12 +315,19 @@ Each item with its plan, and what it waits for.
   The tremolo on a riff sounds as the gate does, a stutter: the tremolo's parts as the gate's, a genre's
   (`tremoloParts` beside `gateParts`, the songs' the held chords' and the pad's and the lines' held notes), and its
   volume moving on held notes alone, a note too short for a cycle of it left still, never chopping a riff's run.
-- **The dive heard** (P1, step 11; `?listen=dive`, October 2026): a riff's whammy dive into a louder section is good, in
+- **The dive heard** (P1, step 11; `?listen=dive`, October 2026, with 3, unsure 3 of 6 songs): a riff's whammy dive into a louder section is good, in
   Nu metal and in Metal and Djent too, but not heard: the note too short, the dive too quick. Its note held longer,
   through the bar before the section where the riff allows; its curve falling fast and then slowly at its bottom, rather
   than speeding up as it falls (`BendKind.Dive`, an ease out); and the tempo easing a little over the last bar before
   the section now and then, as a band leans into a big entrance, a ritardando back to tempo on its downbeat. The dive's
   chances in Metal and Djent as Nu metal's.
+- **The trance gate kept** (heard on test, `?listen=gate`, October 2026, with 6 of 6 Trance songs): the trance sound.
+  Trance's gate weight raised a little (17% of its songs, `GateTest.Report`), its parts as they are; the pad's slow
+  attack and a click not heard.
+- **The tape, by listening** (P2; heard on test, `?listen=tape`, October 2026, with 3, without 2, unsure 1 of 6 IDM
+  songs; out of tune in seeds E and G): the tape's chances as they are; its parts held a few cents off (40% of the
+  parts, by 5) against the drift they share (9 cents) checked in those two songs, and the parts held off fewer or
+  nearer, should they be what sounds out of tune.
 - **The playing following the articulation** (P3; palm-muted chugs done): octaves popped in slap, short notes muted,
   without which an articulation is only another sound.
 - **Plain doubling,** a part doubling another in unison, now that the parts play by their pocket (`Pocket`).
@@ -345,14 +383,22 @@ Each item with its plan, and what it waits for.
   appearance. Today a chord solo stacks the band's chord or planes its shape, never another chord.
 - **A melody in block harmony** (P4, parked): the counter-melody or the pad voicing its long notes, approaches on its
   passing ones, as a horn section's soli.
-- **Scales of other sizes** (P4, parked: the line scales give their sounds where they are heard): whole scales of more
+- **An uneven harmonic rhythm** (P2, the review of October 2026): a section's chords last alike (`HarmonicRhythm`,
+  half a bar, a bar or two), with passing chords and pushes between. Spans differing within a pattern: the cadence's
+  bar split in two as a progression speeds into its close, a home chord held over two bars and the rest a bar each,
+  drawn per section as data on the spans and leaned by the progression facet, the plain end keeping the even spans it
+  has. Measured by the spans' spread within a pattern, and the harmonic rhythm's listening question (*Harmony and
+  lines*).
+- **Scales of other sizes** (P2, reopened by the review of October 2026; parked before as the line scales give their
+  sounds where they are heard): whole scales of more
   or fewer than seven notes, pentatonic, hexatonic (whole-tone, the blues' six) or octatonic, for a section's harmony as
   well as its lines, at the wild end of the scale facet alone. The progressions move by scale steps and their rules
   count a fifth as three steps, the chord shapes' heights sit between the qualities a seven-note scale gives, and the
   scales measure their brightness and their distance against others of as many notes (`Scales`): a fifth as the step
   nearest seven semitones, a chord's height snapped as now (`SnapChordToScale` takes any length), and a scale's
   distance only among its own size. Steps: the engine's assumptions of seven found by a trial forcing every wild
-  section into a pentatonic, as the 12-bar's trial found the phrases'; then the scales drawn.
+  section into a pentatonic, as the 12-bar's trial found the phrases'; then the scales drawn. Its first use the
+  blues' harmony beside its lines: a pentatonic or the blues' six-note home under dominant sevenths on any degree.
 
 ### Rhythm engine
 
@@ -366,11 +412,45 @@ Each item with its plan, and what it waits for.
   3-2. Put off as an engine's change: the bar is the unit of the scheme's letters, the state's layers, the melody's
   question and answer, the drums' presence, the fills' lines and the feels. A crash every two bars, should it be
   missed, an edit after assembly as the lift's cues are.
-- **Phrases of other than four bars** (a 3-bar phrase, a 6-bar section), which the line's question and answer and the
-  fills assume, once the sections of several phrases sound right.
+- **Phrases of other than four bars** (P2, the review of October 2026; a 3-bar phrase, a 6-bar section), which the
+  line's question and answer and the fills assume. A section is 4, 8, 16 or 32 bars now (`SectionLength`). The
+  cheapest first, as edits after assembly: a phrase extended before its cadence (4 + 2, the cadence's bars played
+  again), then a 2-bar tag closing a section (*A tag*); a phrase of three or six bars after them, as an engine's
+  change. Leaned by the form facet, the plain end keeping four.
 
 ### Architecture
 
+From the review of October 2026 (P2), each measured by the fingerprint, unchanged unless said:
+
+- **The roadmap and the README brought up to date** (P2): the plan "of 9 October" was written on the 7th; a line's
+  tensions beyond Djent both P1 step 9 and P3 under *Genres*; *Rock and metal as their bands play them* P1 with only P3
+  left in it; *More genres* still waiting on Chiptune, a preset now; the README's thirty-two presets naming 31.
+- **Chances by hand:** `Expression.cs` (a solo note's bend chance times 3 and capped, a branch no soloing part
+  reaches, as every soloing part has a `Soloist`; a slide's rate times 2) and `FillSounds.DrawLanding` (a landing's
+  chance capped at 1) multiply or cap a chance by hand. The dead branch failing, the slide's rate a `Tilt`, a chance
+  above 1 failing rather than capped.
+- **Named streams:** `SongStream` has 97 numbers that must never change, and the stages pass streams to the modules
+  as lambdas, six to `DrumSolos.Apply`. A stream derived from a name and its places (`song.Stream("drumSolo.feet",
+  index)`), each module owning its names, takes the enum and its rule away; the seeds move once.
+- **The song's decisions passed whole:** the stages unpack `SongDecisions` into long argument lists (`Expression.Apply`
+  about twenty, `DrumSolos.Apply` sixteen); a module taking the song and reading what it needs, with the named streams.
+- **The song's trace:** nineteen records of the song's decisions pass `FillGenerator.DrumsTrace, 0, 0,
+  StateMap.Default` for a track and a bar they have not; a record of the song's own (`StateTrace.RecordSong`), and
+  trace points typed by their value (`TracePoint<T>`), so that the tests read values without casting.
+- **The stages' reads and writes:** a stage's order is its correctness (`SongStages.All`), its hand-offs fields of
+  `SongDraft` (`Runs`, `MelodyWalks`, `Chains`, `Polymeters`, `Notes`); every stage naming what it reads and writes, and
+  a test that every read comes after its write. The stages after `Realizer` (thirteen of thirty) edit notes rather than
+  state, a phase of its own: CLAUDE.md to say so.
+- **`ProgressionSettings`:** never other than its default, threaded through three of `GenerateSong`'s seven overloads
+  and `SectionGenerator`; taken out, the overloads fewer, the overrides' checks on `SongOverrides`.
+- **A genre's one rule:** a genre combines with the songs' weights by six entry points of `ByConvention` (`Weigh`,
+  `Weigh` with a pool, `Lean`, `Within`, `WeighFilled`, `At` with a pool), replacing, leaning or filling them. One rule
+  written down, `Lean` apart where a choice draws in roles. And a decision: `Filled` plays a pool's wild options alone
+  at 0, against the principle that at 0 only the plain end's options play; kept and said in CLAUDE.md, or failing.
+- **A genre resolved once:** a genre's choices are looked up by name inside the draws (`choice[name]` failing mid-song);
+  resolved against `GenreChoices` when the genre is read, a misnamed option failing there, the page's format as it is.
+- **Plainer prose:** comments that say in a plain sentence what the code cannot, and commits' lines of about a hundred
+  characters; CLAUDE.md's paragraph on conventionality as rules a test can check.
 - **The ratings in the history** (P4): the list of songs so far does not show which were liked or disliked.
 - **A mix written by the page** (P4): a change of the mix asks the server for the file again only for the download;
   writing the mix into the file in the page would leave the server out of it, at the cost of MIDI writing in
@@ -529,6 +609,12 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
 - **A sustain pedal** (P4): a piano's or a harp's notes held by the pedal (CC64) across a chord, left from the
   review of October 2026; the notes are held to the next already.
 - **A parallel CLI batch** (P4): `--count` making its songs in parallel; a song takes about a second.
+- **The rare devices pruned** (P4, the review of October 2026): a device that plays in under about 1% of songs, with
+  and without genres, and was never heard as good, taken out or folded into another, the options at
+  `ByConvention(0, 0, 0)` that genres alone reach first; should the stages grow too many to keep.
+- **The wild end's one device** (P4, the review of October 2026): a wild song stacks key and tempo changes,
+  polymeters, every gentle effect and a strong one; one or two devices a song as its signature, leaned by its facets,
+  should the ratings fall at the wild end (the ratings by conventionality).
 - **Memory:** every `RealizedNote` keeps the state it was decided from, about 1.7 MB a song: nothing to do.
 
 ## Decided, and kept

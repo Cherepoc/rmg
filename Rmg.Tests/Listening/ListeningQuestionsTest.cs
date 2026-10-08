@@ -66,8 +66,6 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
-        new("stop-time", "Stop time, the band hitting once a bar under the tune: a band's device, or a hole?",
-            "Its chance and where it plays.", "blues", ["Stop time"], null, x => FirstSection(x, TracePoints.StopTime, v => (bool)v!)),
         new("pushes", "Pushes, the band's chord changes an eighth early: a lift, or a stumble?",
             "Its chance by genre.", "rock", ["Pushes"], null, x => FirstSection(x, TracePoints.Push, v => (bool)v!)),
         new("drum-marks", "The drums marking the form, a strike every few bars and a swell into a section: a calm piece's percussion, or a groove gone missing?",
@@ -116,23 +114,14 @@ public sealed class ListeningQuestionsTest
         new("tone", "Jazz with some parts in a darker tone, a mellow guitar, a dull bass, darker in the quiet sections: warmer, or muffled?",
             "The tone's chances in the presets that give it.", "jazz", [], new() { ["effects"] = new() { ["tone"] = 0 } },
             x => FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Tone) > 0)),
-        new("tape", "IDM off a worn tape, its parts' pitch drifting together by a few cents, some held a few cents off: warm, or out of tune?",
-            "The tape's chances in IDM, Hip hop, Ambient and Synthwave, and its wow's depth.", "idm", [], new() { ["effects"] = new() { ["tape"] = 0 } },
-            x => FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Wow) > 0)),
         new("mix-filter", "Trance's whole mix filtered, opening up from muffled over its intro, dipping before a louder section, closing at the end: a build, or a muffled mix?",
             "The mix filter's chances in the dance genres, and its depths.", "trance", ["Mix filter"], null,
             x => (MixFilterPlan)x.Trace.Single(t => t.Point == TracePoints.MixFilter).Value! switch { { Opening: true } => 0, { Dips.IsEmpty: false } and var plan => Before(x, plan.Dips[0], 3), _ => null }),
         new("rolling-bass", "Trance's bass rolling in the 16ths after the kick, or on the offbeats: the drive, or a machine gun?",
             "The bass's figures' weights in Trance.", "trance", [], new() { ["figure.bass"] = new() { ["rolling"] = 0, ["offbeat"] = 0 } },
             x => Plays(x, FigurePlayer.Bass, "rolling") ?? Plays(x, FigurePlayer.Bass, "offbeat")),
-        new("djent-stutter", "Djent's riff held and chopped by the gate in 16ths, a stutter, in place of its riff throughout: the sound, or the riff lost?",
-            "Whether the gate chops Djent's riff, and its weight there.", "djent", [], new() { ["gateParts"] = new() { ["riff"] = 0, ["pad"] = 100 } },
-            x => FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Gate) != 0, role => role == TrackRole.Riff)),
         new("pinch", "A pinch harmonic now and then on a held note of Nu metal's riff or lead, bent and wavering: a highlight, or a squeak?",
             "The pinch's chances by genre.", "nuMetal", [], new() { ["effects"] = new() { ["pinch"] = 0 } },
-            x => Before(x, FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Pinch) == 1), 1)),
-        new("pinch-sound", "A pinch harmonic's sound: General MIDI's guitar harmonics, a clean bell (with), or the driven guitar squealing at the harmonic's pitch (without)?",
-            "Which sound a pinch makes.", "nuMetal", [], new() { ["pinchSound"] = new() { ["harmonics"] = 0, ["squeal"] = 100 } },
             x => Before(x, FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Pinch) == 1), 1)),
         new("ending", "Black metal ending as it played, planed or sliding home by ♭II, ♭VI or ♭VII (with), or by a classical V–i, its leading tone raised (without)?",
             "The chord into home and the raised leading tone, by genre.", "blackMetal", [],
@@ -143,17 +132,7 @@ public sealed class ListeningQuestionsTest
             x => x.Trace.Where(t => t.Point == TracePoints.Mutations && (((int, int))t.Value!).Item2 > 2).Select(t => (double?)x.Map.Sections[(((int, int))t.Value!).Item1].Start).Min() is { } start ? start + 4 * x.Song.MeterAt(start).BarDuration : null),
         new("drum-solo", "Jazz's drum solo, its hands in stickings round the snare and toms over the hi-hat's pedal on 2 and 4 (with), or over the groove's kick (without): a drummer, or a pattern?",
             "The drum solo's feet by genre.", "jazz", [], new() { ["drumSoloFeet"] = new() { ["hatFoot"] = 0, ["groove"] = 100 } },
-            x => x.Trace.Where(t => t.Point == TracePoints.DrumSolo && ((DrumSolo)t.Value!).Feet).Select(t => (double?)x.Map.Sections[((DrumSolo)t.Value!).Index].Start).Min()),
-        new("dive", "Nu metal's riff diving on the whammy bar into a louder section, its last held note falling an octave: a launch, or a gimmick?",
-            "The dive's chances by genre.", "nuMetal", [], new() { ["effects"] = new() { ["dive"] = 0 } },
-            x => Before(x, FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Bend) == (int)BendKind.Dive), 2)),
-        new("filtered-drop", "Techno's drop with the band playing on through the bar before it, the mix closing to muffled and bursting open on the drop (with), or the band silent there (without)?",
-            "A drop's kind by genre.", "techno", [], new() { ["dropKind"] = new() { ["filtered"] = 0, ["silent"] = 100 } },
-            x => Before(x, x.Trace.Where(t => t.Point == TracePoints.FilteredDrop).Select(t => (double?)(double)t.Value!).Min(), 3)),
-        new("gate", "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
-            "Its weight in Trance, and the parts it chops.", "trance", [],
-            new() { ["strongEffect"] = new() { ["none"] = 100 } },
-            x => ((SongEffects)x.Trace.Single(t => t.Point == TracePoints.SongEffects).Value!).Strong == StrongEffect.Gate ? FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Gate) != 0) : null)
+            x => x.Trace.Where(t => t.Point == TracePoints.DrumSolo && ((DrumSolo)t.Value!).Feet).Select(t => (double?)x.Map.Sections[((DrumSolo)t.Value!).Index].Start).Min())
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

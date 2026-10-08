@@ -1,43 +1,5 @@
 [
   {
-    "id": "stop-time",
-    "question": "Stop time, the band hitting once a bar under the tune: a band's device, or a hole?",
-    "decides": "Its chance and where it plays.",
-    "genre": "blues",
-    "without": {
-      "skip": [
-        "Stop time"
-      ],
-      "genre": {}
-    },
-    "seeds": [
-      {
-        "seed": "0",
-        "at": 37.3
-      },
-      {
-        "seed": "2",
-        "at": 7.9
-      },
-      {
-        "seed": "3",
-        "at": 133.3
-      },
-      {
-        "seed": "5",
-        "at": 0
-      },
-      {
-        "seed": "6",
-        "at": 0
-      },
-      {
-        "seed": "7",
-        "at": 32.4
-      }
-    ]
-  },
-  {
     "id": "pushes",
     "question": "Pushes, the band's chord changes an eighth early: a lift, or a stumble?",
     "decides": "Its chance by genre.",
@@ -809,46 +771,6 @@
     ]
   },
   {
-    "id": "tape",
-    "question": "IDM off a worn tape, its parts' pitch drifting together by a few cents, some held a few cents off: warm, or out of tune?",
-    "decides": "The tape's chances in IDM, Hip hop, Ambient and Synthwave, and its wow's depth.",
-    "genre": "idm",
-    "without": {
-      "skip": [],
-      "genre": {
-        "effects": {
-          "tape": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "2",
-        "at": 7.3
-      },
-      {
-        "seed": "3",
-        "at": 1.9
-      },
-      {
-        "seed": "6",
-        "at": 0
-      },
-      {
-        "seed": "9",
-        "at": 0
-      },
-      {
-        "seed": "E",
-        "at": 0.4
-      },
-      {
-        "seed": "G",
-        "at": 9.9
-      }
-    ]
-  },
-  {
     "id": "mix-filter",
     "question": "Trance's whole mix filtered, opening up from muffled over its intro, dipping before a louder section, closing at the end: a build, or a muffled mix?",
     "decides": "The mix filter's chances in the dance genres, and its depths.",
@@ -928,47 +850,6 @@
     ]
   },
   {
-    "id": "djent-stutter",
-    "question": "Djent's riff held and chopped by the gate in 16ths, a stutter, in place of its riff throughout: the sound, or the riff lost?",
-    "decides": "Whether the gate chops Djent's riff, and its weight there.",
-    "genre": "djent",
-    "without": {
-      "skip": [],
-      "genre": {
-        "gateParts": {
-          "riff": 0,
-          "pad": 100
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "9",
-        "at": 0
-      },
-      {
-        "seed": "A",
-        "at": 22.9
-      },
-      {
-        "seed": "E",
-        "at": 4.1
-      },
-      {
-        "seed": "b",
-        "at": 9.8
-      },
-      {
-        "seed": "10",
-        "at": 0
-      },
-      {
-        "seed": "11",
-        "at": 42
-      }
-    ]
-  },
-  {
     "id": "pinch",
     "question": "A pinch harmonic now and then on a held note of Nu metal's riff or lead, bent and wavering: a highlight, or a squeak?",
     "decides": "The pinch's chances by genre.",
@@ -978,47 +859,6 @@
       "genre": {
         "effects": {
           "pinch": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "3",
-        "at": 147.4
-      },
-      {
-        "seed": "7",
-        "at": 63.7
-      },
-      {
-        "seed": "B",
-        "at": 127.1
-      },
-      {
-        "seed": "D",
-        "at": 29.7
-      },
-      {
-        "seed": "F",
-        "at": 115.3
-      },
-      {
-        "seed": "I",
-        "at": 43.1
-      }
-    ]
-  },
-  {
-    "id": "pinch-sound",
-    "question": "A pinch harmonic's sound: General MIDI's guitar harmonics, a clean bell (with), or the driven guitar squealing at the harmonic's pitch (without)?",
-    "decides": "Which sound a pinch makes.",
-    "genre": "nuMetal",
-    "without": {
-      "skip": [],
-      "genre": {
-        "pinchSound": {
-          "harmonics": 0,
-          "squeal": 100
         }
       }
     },
@@ -1171,127 +1011,6 @@
       {
         "seed": "Z",
         "at": 51.9
-      }
-    ]
-  },
-  {
-    "id": "dive",
-    "question": "Nu metal's riff diving on the whammy bar into a louder section, its last held note falling an octave: a launch, or a gimmick?",
-    "decides": "The dive's chances by genre.",
-    "genre": "nuMetal",
-    "without": {
-      "skip": [],
-      "genre": {
-        "effects": {
-          "dive": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "8",
-        "at": 101.9
-      },
-      {
-        "seed": "G",
-        "at": 45.5
-      },
-      {
-        "seed": "J",
-        "at": 90.9
-      },
-      {
-        "seed": "S",
-        "at": 148.3
-      },
-      {
-        "seed": "d",
-        "at": 296.4
-      },
-      {
-        "seed": "i",
-        "at": 131
-      }
-    ]
-  },
-  {
-    "id": "filtered-drop",
-    "question": "Techno's drop with the band playing on through the bar before it, the mix closing to muffled and bursting open on the drop (with), or the band silent there (without)?",
-    "decides": "A drop's kind by genre.",
-    "genre": "techno",
-    "without": {
-      "skip": [],
-      "genre": {
-        "dropKind": {
-          "filtered": 0,
-          "silent": 100
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "0",
-        "at": 53.9
-      },
-      {
-        "seed": "1",
-        "at": 182.9
-      },
-      {
-        "seed": "2",
-        "at": 29.4
-      },
-      {
-        "seed": "3",
-        "at": 500.5
-      },
-      {
-        "seed": "5",
-        "at": 478.2
-      },
-      {
-        "seed": "6",
-        "at": 471.2
-      }
-    ]
-  },
-  {
-    "id": "gate",
-    "question": "The trance gate, a held chord chopped in 16ths: the trance sound, or a stutter?",
-    "decides": "Its weight in Trance, and the parts it chops.",
-    "genre": "trance",
-    "without": {
-      "skip": [],
-      "genre": {
-        "strongEffect": {
-          "none": 100
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "2",
-        "at": 77.1
-      },
-      {
-        "seed": "5",
-        "at": 7.1
-      },
-      {
-        "seed": "8",
-        "at": 41.4
-      },
-      {
-        "seed": "A",
-        "at": 29.8
-      },
-      {
-        "seed": "J",
-        "at": 7
-      },
-      {
-        "seed": "L",
-        "at": 63.9
       }
     ]
   }
