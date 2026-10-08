@@ -251,4 +251,11 @@ public static class Render
     {
         return MiddleVelocity + VelocityReach * Math.Tanh((sum - VelocityCentre) / VelocityScale);
     }
+
+    /// <summary>The velocity sum a velocity on the fixed scale is rendered from (<see cref="ToMidiVelocity" />), the scale's ends kept just inside.</summary>
+    internal static double FromMidiVelocity(double velocity)
+    {
+        var reach = Math.Clamp((velocity - MiddleVelocity) / VelocityReach, -0.999, 0.999);
+        return VelocityCentre + VelocityScale * Math.Atanh(reach);
+    }
 }

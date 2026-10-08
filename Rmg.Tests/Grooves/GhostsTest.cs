@@ -35,7 +35,7 @@ public sealed class GhostsTest
         return [..added];
     }
 
-    /// <summary>A ghost note falls on a 16th off the beat, softer than its bar's backbeat by far.</summary>
+    /// <summary>A ghost note falls on a 16th off the beat, as heard softer than its bar's backbeat by far, or as soft as a note is.</summary>
     [Test]
     public async Task AGhostNote_IsASoft16thOffTheBeat()
     {
@@ -48,7 +48,8 @@ public sealed class GhostsTest
                 count++;
                 await Assert.That(Math.Abs(position / Ghosts.Length - Math.Round(position / Ghosts.Length))).IsLessThan(1e-6).Because($"seed {seed} at {position}");
                 await Assert.That(Math.Abs(position - Math.Round(position))).IsGreaterThan(1e-6).Because($"seed {seed} at {position}");
-                await Assert.That(velocity).IsLessThanOrEqualTo(loudest * Ghosts.Loudness + 1e-6).Because($"seed {seed} at {position}");
+                await Assert.That(Rmg.Core.Rendering.Render.ToMidiVelocity(velocity)).IsLessThanOrEqualTo(Math.Max(Rmg.Core.Rendering.Render.ToMidiVelocity(loudest) * Ghosts.Loudness, 0.2) + 1e-3)
+                    .Because($"seed {seed} at {position}");
             }
         }
 
@@ -66,7 +67,19 @@ public sealed class GhostsTest
             var ghosting = pairs.Select(x => x.Item1.Trace.Where(t => t.Point == TracePoints.Ghosts).Average(t => (bool)t.Value! ? 1.0 : 0)).Average();
             var added = pairs.Sum(x => Added(x.Item1, x.Item2).Length);
             var bars = pairs.Sum(x => x.Item1.Map.Sections.Sum(s => s.Duration / s.Meter.BarDuration));
-            Console.WriteLine($"{name}: sections ghosting {ghosting:P0}, ghost notes {added / bars:0.00} a bar of the songs'");
+            // as rendered, in MIDI's velocities: the ghosts' against the snare's other notes
+            var snares = new[] { DrumDefinitions.AcousticSnare, DrumDefinitions.ElectricSnare }.Select(DrumGroups.GetTrackNumber).ToHashSet();
+            var (ghosts, others) = (new List<double>(), new List<double>());
+            foreach (var (with, without) in pairs)
+            {
+                var before = without.Song.Notes!.Where(x => snares.Contains(x.Key)).SelectMany(x => x.Value).Select(x => Math.Round(x.Position, 6)).ToHashSet();
+                foreach (var note in with.Rendered.Tracks.Where(x => x.IsPercussionInstrument).SelectMany(x => x.NoteTimeline)
+                             .Where(x => with.Song.Notes!.Where(n => snares.Contains(n.Key)).Any(n => n.Value.Any(m => Math.Abs(m.Position - x.Position) < 1e-6 && m.Value.Pitches.Contains(x.Value.Offset)))))
+                    (before.Contains(Math.Round(note.Position, 6)) ? others : ghosts).Add(note.Value.Velocity * 127);
+            }
+
+            Console.WriteLine($"{name}: sections ghosting {ghosting:P0}, ghost notes {added / bars:0.00} a bar of the songs', as loud as {ghosts.DefaultIfEmpty(0).Average():0} " +
+                              $"against the snare's other notes' {others.DefaultIfEmpty(0).Average():0}");
         }
 
         await Task.CompletedTask;

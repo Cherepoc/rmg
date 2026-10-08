@@ -15,7 +15,9 @@ percent everywhere, and a listening question once deployed):
 2. Done: the riff as the song's signature, a song opening on its riff alone, the band coming in after it; Rock's 33%,
    Metal's 42% (`?listen=riff-intro`). Between its sections, the part alone already (`GenreChoices.Alone`).
 3. Done: a snare's ghost notes, soft 16ths around its backbeat, the same in a section's bars; Funk's 1.2 a bar,
-   Soul's 0.9, Rock's 0.5 (`?listen=ghosts`). Its drags left (*What the genres cannot play yet*).
+   Soul's 0.9, Rock's 0.5 (`?listen=ghosts`), heard too loud at first and now 40% of the snare's velocity as rendered,
+   about 40 against 85. Its drags left (*What the genres cannot play yet*). The hi-hat rolls ramp their loudness by
+   scaling a velocity sum, as the ghosts first did, which the render's curve flattens: to check (`HatRolls.From`).
 4. Done: the solo harmonised, two parts together a third apart, the second on the first's notes of an 8th and longer,
    as every solo played together now; Metal's 39% of its solos, Rock's 16% (`?listen=twin-solo`).
 5. Done: passing chords of a genre's kinds, the tritone substitute, a half-diminished chord a semitone below the next
@@ -267,6 +269,10 @@ Each item with its plan, and what it waits for.
   following the chugs, heard as great): Metal's and Nu metal's already break down (42% and 41% of their songs); more of
   Nu metal's, and the other heavy genres', Punk's hardcore end and Black metal's slower passages, each a genre's
   `breakdown` chance, and a breakdown in a verse or before the last chorus beside the bridge, should more be wanted.
+- **A breakdown's snare** (P2, suggested 8 October 2026 after listening): Djent's breakdown plays its backbeat on the
+  cross-stick, where a breakdown wants the snare itself, struck on the riff's accents with the kick or on the song's
+  backbeat in half time, its 3 or its 2 and 4; the snare's sound in a breakdown the full one (`DrumSounds`), and its
+  hits a figure of the section's, either on the accents or the backbeat.
 - **A riser over a filtered drop** (P3, by listening, October 2026): a reverse cymbal swelling over the muffled bar
   before a filtered drop, as the silent one has, which wants a channel of its own as the band plays on there (*A riser as
   a lift cue*, under *Genres*).

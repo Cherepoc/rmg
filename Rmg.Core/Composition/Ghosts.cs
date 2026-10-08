@@ -1,5 +1,6 @@
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
+using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
@@ -13,8 +14,8 @@ internal static class Ghosts
     /// <summary>How likely a 16th off the beat is ghosted next to a backbeat, before or after it, and elsewhere in the bar.</summary>
     public const double NearChance = 0.5, FarChance = 0.15;
 
-    /// <summary>How loud a ghost note plays against the bar's loudest snare note: under it, felt more than heard.</summary>
-    public const double Loudness = 0.45;
+    /// <summary>How loud a ghost note is heard against the bar's loudest snare note, as a share of its velocity: well under it, felt more than heard.</summary>
+    public const double Loudness = 0.4;
 
     /// <summary>How long a ghost note is held at most, in beats: a 16th.</summary>
     public const double Length = 0.25;
@@ -74,7 +75,11 @@ internal static class Ghosts
                             continue;
                         var near = own.Any(x => Math.Abs(x.Position - at) < 2 * Length - 1e-9);
                         if (draws[k] < (near ? NearChance : FarChance))
-                            played.Add((loudest.Value with { Velocity = loudest.Value.Velocity * Loudness, Duration = Math.Min(loudest.Value.Duration, Length) }).ToTimelineItem(at));
+                            played.Add((loudest.Value with
+                            {
+                                Velocity = Render.FromMidiVelocity(Render.ToMidiVelocity(loudest.Value.Velocity) * Loudness),
+                                Duration = Math.Min(loudest.Value.Duration, Length)
+                            }).ToTimelineItem(at));
                     }
                 }
             }
