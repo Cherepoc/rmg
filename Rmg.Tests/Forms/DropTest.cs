@@ -68,6 +68,9 @@ public sealed class DropTest
             await Assert.That(mix.GetEffectiveValueAt(at)).IsLessThan(0.05).Because($"seed {song.Seed} at {at}");
         }
 
+        var silent = TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("techno"))))
+            .Sum(x => x.Trace.Count(t => t.Point == TracePoints.Drop));
+        Console.WriteLine($"of 32 Techno songs' drops, {drops} filtered and {silent} silent");
         await Assert.That(drops).IsGreaterThan(5);
     }
 }

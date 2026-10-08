@@ -22,7 +22,7 @@ is removed once it is built.
 11. Done: a dive on the riff's longest note of its last bar, the notes after it let go of, held to the louder
     section and slowing at its bottom; Metal's and Djent's as often as Nu metal's. Its ritardando deferred (*A band leaning
     into a big entrance*).
-12. Techno's drops both kinds, the silent one with its riser as likely as the filtered (*The drops heard*).
+12. Done: Techno's silent drop, with its riser, as likely as its filtered one.
 13. Stop time carried, a line or the drum keeping time going on through every stopped bar (*Stop time carried*).
 
 Done in the plan of 9 October 2026: the echo as the synthesizer's delay; the strong effects stacked; the gate holding
@@ -241,10 +241,9 @@ Each item with its plan, and what it waits for.
 
 ### Form and sections
 
-- **The drops heard** (P1, step 12; `?listen=filtered-drop`, October 2026, filtered 3, silent 3 of 6 songs): Techno's filtered drop is good, but the
-  silent one, the whole band stopping with the reverse cymbal rising into it, is often better; both belong. Techno's
-  `dropKind` as likely each way, and the filtered one's riser considered too, a reverse cymbal swelling over the muffled
-  bar.
+- **A riser over a filtered drop** (P3, by listening, October 2026): a reverse cymbal swelling over the muffled bar
+  before a filtered drop, as the silent one has, which wants a channel of its own as the band plays on there (*A riser as
+  a lift cue*, under *Genres*).
 - **Stop time carried** (P1, step 13; heard on test, `?listen=stop-time`, October 2026, with 4, without 3 of 6 Blues
   songs, a device in seeds 0, 3 and 7, a hole in 2, 5 and 6): the band hits the bar's first beat and rests to the next
   bar, and only the melody, the counter-melody and a solo play on (`StopTime.Apply`), so that where the melody rests,

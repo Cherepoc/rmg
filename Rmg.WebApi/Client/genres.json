@@ -208,7 +208,7 @@
     "name": "Techno",
     "description": "A kick on every beat, driving and dark, the hi-hat on the offbeats, one figure looping for minutes over a chord or two, a square or sawtooth riff, little melody, a minor or Phrygian key, a TR-808 or electronic kit, 125 to 140, the pads and bass pumping.",
     "choices": {
-      "dropKind": { "silent": 60, "filtered": 100 },
+      "dropKind": { "silent": 100, "filtered": 100 },
       "mutation": { "bars": [0, 5, 15] },
       "mixFilter": { "opening": [20, 40, 60], "dips": [3, 8, 12], "closing": [10, 20, 30] },
       "rootMotion": { "same": 75 },
