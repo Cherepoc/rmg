@@ -34,6 +34,23 @@ public sealed class ExpressionTest
         await Assert.That(wild.SelectMany(x => x).Any(p => gentle.Count(i => p[i]) >= 2)).IsTrue();
     }
 
+    /// <summary>A tremolo moves a held note alone, a beat or longer, as a gate chops a held chord, never a run's notes.</summary>
+    [Test]
+    public async Task ATremolo_MovesHeldNotesAlone()
+    {
+        var trembling = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>>.Empty
+            .Add(GenreChoices.StrongEffect.Name, ImmutableDictionary<string, Rmg.Core.Probabilities.ByConvention>.Empty.Add(GenreChoices.Name(nameof(StrongEffect.Tremolo)), new(1, 1, 1))));
+        var held = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: trembling))))
+        foreach (var note in song.Song.Notes!.Values.SelectMany(x => x).Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Tremolo) > 0))
+        {
+            await Assert.That(note.Value.Duration).IsGreaterThanOrEqualTo(1 - 1e-9).Because($"seed {song.Seed} at {note.Position}");
+            held++;
+        }
+
+        await Assert.That(held).IsGreaterThan(0);
+    }
+
     [Test]
     public async Task ThePartThatEchoes_NeitherSingsAVibrato_NorBends()
     {

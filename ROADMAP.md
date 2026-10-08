@@ -17,8 +17,8 @@ is removed once it is built.
 7. Done: drum solos' feet a genre's ostinato and their runs in stickings; their motif, arc and trading left (*Groove*).
 8. Done: a filtered drop, a genre's; a swell brightening; a riff's whammy dive into a louder section.
 9. A line's tensions beyond Djent, after `?listen=djent-tension` is answered.
-10. The gate's and the tremolo's parts by listening: Djent's stutter gone, the tremolo kept to held notes as the gate is,
-    a rock band's held riff restruck (*A held guitar restruck*).
+10. Done: Djent's gate on its pad, not its riff; a tremolo moving held notes alone; a gated chord on a decaying
+    instrument struck again on every bar line.
 11. The dive by listening: held longer, slow at its bottom, the tempo easing into the next section (*The dive heard*).
 12. Techno's drops both kinds, the silent one with its riser as likely as the filtered (*The drops heard*).
 13. Stop time carried, a line or the drum keeping time going on through every stopped bar (*Stop time carried*).
@@ -306,15 +306,9 @@ Each item with its plan, and what it waits for.
 
 ### Instruments and expression
 
-- **A held guitar restruck** (P1, step 10; heard on test, `?listen=djent-stutter`, October 2026, the riff 5, the stutter 1 of 6 songs): the gate on a riff, its
-  chord held and chopped in 16ths, is not Djent's sound, but a rock band's held riff is; a guitar's held chord fades away
-  as it rings, so that a gated or held guitar chord dies out under the gate. Djent's riff taken out of the gate's parts
-  (`gateParts`), a riff gated in Rock and the like instead; and a held chord on a decaying instrument, a guitar's, a
-  piano's, struck again now and then while it is held, every bar or every beat a chord change leaves, rather than one
-  stroke ringing into silence (`GatedChords.Hold`), its restrikes the softer.
-  The tremolo on a riff sounds as the gate does, a stutter: the tremolo's parts as the gate's, a genre's
-  (`tremoloParts` beside `gateParts`, the songs' the held chords' and the pad's and the lines' held notes), and its
-  volume moving on held notes alone, a note too short for a cycle of it left still, never chopping a riff's run.
+- **A held riff restruck outside a gate** (P3, by listening): a decaying chord is struck again on its bar lines only
+  where the gate holds it (`GatedChords.Hold`); a rock band's riff held over a bar restruck the same way, should a held
+  guitar chord dying out be heard elsewhere.
 - **The dive heard** (P1, step 11; `?listen=dive`, October 2026, with 3, unsure 3 of 6 songs): a riff's whammy dive into a louder section is good, in
   Nu metal and in Metal and Djent too, but not heard: the note too short, the dive too quick. Its note held longer,
   through the bar before the section where the riff allows; its curve falling fast and then slowly at its bottom, rather

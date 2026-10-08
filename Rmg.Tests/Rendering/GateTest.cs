@@ -68,22 +68,55 @@ public sealed class GateTest
     }
 
     /// <summary>
-    ///     A gate chops the parts its genre has it chop alone (<see cref="Expression.GateParts" />): Djent's riff, its held
-    ///     chord stuttering, never its chords; the songs' held chords, never a riff.
+    ///     A gate chops the parts its genre has it chop alone (<see cref="Expression.GateParts" />): a genre's riff, its held
+    ///     chord stuttering, never its chords; Djent's pad, never its riff; the songs' held chords, never a riff.
     /// </summary>
     [Test]
-    public async Task AGate_ChopsOnlyThePartsItsGenreNames_DjentsRiff()
+    public async Task AGate_ChopsOnlyThePartsItsGenreNames()
     {
-        var gated = new List<TrackRole>();
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("djent")))))
-            gated.AddRange(song.Song.Notes!.Where(x => x.Value.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)).Select(x => song.Song.TrackDefinitions[x.Key].Role));
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
-        foreach (var (track, _) in song.Song.Notes!.Where(x => x.Value.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)))
-            await Assert.That(song.Song.TrackDefinitions[track].Role).IsNotEqualTo(TrackRole.Riff);
+        var riffGating = Gating.Choices.Add(GenreChoices.GateParts.Name, ImmutableDictionary<string, ByConvention>.Empty.Add(GenreChoices.Name(nameof(TrackRole.Riff)), new ByConvention(1, 1, 1)));
+        IEnumerable<TrackRole> Gated(Genre genre, int count) => TestCorpus.InParallel(Enumerable.Range(0, count), seed => TestCorpus.Get(seed, new SongOverrides(Genre: genre)))
+            .SelectMany(song => song.Song.Notes!.Where(x => x.Value.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)).Select(x => song.Song.TrackDefinitions[x.Key].Role));
 
-        Console.WriteLine($"of 64 Djent songs, {gated.Count} stuttering their riff");
-        await Assert.That(gated).IsNotEmpty();
-        await Assert.That(gated.All(x => x is TrackRole.Riff or TrackRole.RiffTwin)).IsTrue();
+        var riffs = Gated(new Genre(riffGating), 16).ToArray();
+        var djent = Gated(GenrePresets.Genre("djent"), 64).ToArray();
+        var songs = Gated(Gating, 16).ToArray();
+        Console.WriteLine($"of 16 songs gating the riff, {riffs.Length} gated; of 64 Djent songs, {djent.Length} gating their pad");
+        await Assert.That(riffs).IsNotEmpty();
+        await Assert.That(riffs.All(x => x is TrackRole.Riff or TrackRole.RiffTwin)).IsTrue();
+        await Assert.That(djent.All(x => x == TrackRole.Pad)).IsTrue();
+        await Assert.That(songs.All(x => x is TrackRole.Pad or TrackRole.Chords or TrackRole.Rhythm)).IsTrue();
+    }
+
+    /// <summary>
+    ///     A gated chord on an instrument that dies away as it rings is struck again, softer, on every bar line it holds
+    ///     across, and one that sustains, a pad's, is held: no held chord of a decaying instrument sounds across a bar line.
+    /// </summary>
+    [Test]
+    public async Task AGatedChord_OnADecayingInstrument_IsStruckAgainOnEveryBarLine()
+    {
+        var (restruck, held) = (0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Gating))))
+        foreach (var (track, timeline) in song.Song.Notes!.Where(x => x.Value.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Gate) != 0)))
+        foreach (var section in song.Map.Sections)
+        foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0))
+        {
+            var program = note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
+            var bar = section.Meter.BarDuration;
+            var crosses = Math.Floor((note.Position - section.Start + 1e-6) / bar) != Math.Floor((note.Position + note.Value.Duration - section.Start - 1e-6) / bar);
+            if (!InstrumentTraits.Has(program, InstrumentTrait.Decays))
+            {
+                held += crosses ? 1 : 0;
+                continue;
+            }
+
+            await Assert.That(crosses).IsFalse().Because($"seed {song.Seed} at {note.Position}");
+            restruck += Math.Abs((note.Position - section.Start) % bar) < 1e-6 && timeline.Any(x => Math.Abs(x.Position + x.Value.Duration - note.Position) < 1e-6
+                                                                                                && x.Value.Pitches.SequenceEqual(note.Value.Pitches)) ? 1 : 0;
+        }
+
+        Console.WriteLine($"{restruck} chords struck again on a bar line, {held} sustained chords held across one");
+        await Assert.That(restruck).IsGreaterThan(0);
     }
 
     [Test]

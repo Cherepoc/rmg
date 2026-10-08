@@ -979,7 +979,7 @@
       "cadenceRaise": { "sections": 0 },
       "cadenceDegree": { "fifth": 20, "second": 75, "seventh": 60 },
       "mixFilter": { "opening": [10, 20, 40], "dips": [3, 6, 10] },
-      "gateParts": { "riff": 100 },
+      "gateParts": { "pad": 100 },
       "alone": { "rhythm": 100, "riff": 50, "pad": 40 },
       "texture": { "steady": 100, "build": [20, 30, 40], "alone": [5, 10, 20] },
       "figure": {

@@ -45,7 +45,10 @@ public enum InstrumentTrait
     Filters = 2048,
 
     /// <summary>A wah pedal suits it, a guitar's or a clavinet's.</summary>
-    Wahs = 4096
+    Wahs = 4096,
+
+    /// <summary>Its note dies away as it rings, a struck or plucked string's or a bar's, so that a chord held long is struck again.</summary>
+    Decays = 8192
 }
 
 /// <summary>
@@ -55,7 +58,7 @@ public enum InstrumentTrait
 public static class InstrumentTraits
 {
     private const InstrumentTrait Guitar = InstrumentTrait.Bends | InstrumentTrait.VibratesWide | InstrumentTrait.SoloBends | InstrumentTrait.Choruses
-                                           | InstrumentTrait.Tremolo | InstrumentTrait.Strums | InstrumentTrait.Wahs;
+                                           | InstrumentTrait.Tremolo | InstrumentTrait.Strums | InstrumentTrait.Wahs | InstrumentTrait.Decays;
 
     private const InstrumentTrait Lead = InstrumentTrait.Bends | InstrumentTrait.VibratesWide | InstrumentTrait.SoloBends | InstrumentTrait.Choruses | InstrumentTrait.Sweeps
                                          | InstrumentTrait.Filters;
@@ -63,11 +66,11 @@ public static class InstrumentTraits
     /// <summary>A family's traits, by its first program.</summary>
     private static readonly (int First, InstrumentTrait Traits)[] Families =
     [
-        (0, InstrumentTrait.Choruses | InstrumentTrait.Rolls),
-        (8, InstrumentTrait.None),
+        (0, InstrumentTrait.Choruses | InstrumentTrait.Rolls | InstrumentTrait.Decays),
+        (8, InstrumentTrait.Decays),
         (16, InstrumentTrait.None),
         (24, Guitar),
-        (32, InstrumentTrait.None),
+        (32, InstrumentTrait.Decays),
         (40, InstrumentTrait.Bends),
         (48, InstrumentTrait.Bends),
         (56, InstrumentTrait.Bends),
@@ -76,8 +79,8 @@ public static class InstrumentTraits
         (80, Lead),
         (88, InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Sweeps | InstrumentTrait.Filters),
         (96, InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Sweeps),
-        (104, InstrumentTrait.None),
-        (112, InstrumentTrait.None),
+        (104, InstrumentTrait.Decays),
+        (112, InstrumentTrait.Decays),
         (120, InstrumentTrait.None)
     ];
 
@@ -85,10 +88,10 @@ public static class InstrumentTraits
     private static readonly Dictionary<int, InstrumentTrait> Own = new()
     {
         // the clavinet, a funk player's wah
-        [7] = InstrumentTrait.Choruses | InstrumentTrait.Rolls | InstrumentTrait.Wahs,
+        [7] = InstrumentTrait.Choruses | InstrumentTrait.Rolls | InstrumentTrait.Wahs | InstrumentTrait.Decays,
         // the electric pianos, chorused and trembling
-        [4] = InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Rolls | InstrumentTrait.Tremolo,
-        [5] = InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Rolls | InstrumentTrait.Tremolo,
+        [4] = InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Rolls | InstrumentTrait.Tremolo | InstrumentTrait.Decays,
+        [5] = InstrumentTrait.Choruses | InstrumentTrait.ChorusesClassically | InstrumentTrait.Rolls | InstrumentTrait.Tremolo | InstrumentTrait.Decays,
         // the organs but the accordions and the harmonica, trembling and swept
         [16] = InstrumentTrait.Tremolo | InstrumentTrait.Sweeps,
         [17] = InstrumentTrait.Tremolo | InstrumentTrait.Sweeps,
@@ -101,23 +104,23 @@ public static class InstrumentTraits
         [29] = Guitar | InstrumentTrait.Chugs | InstrumentTrait.Driven,
         [30] = Guitar | InstrumentTrait.Chugs | InstrumentTrait.Driven,
         // the picked bass chugging; the fretless and the synth basses bending
-        [34] = InstrumentTrait.Chugs,
-        [35] = InstrumentTrait.Bends,
-        [38] = InstrumentTrait.Bends | InstrumentTrait.Filters,
-        [39] = InstrumentTrait.Bends | InstrumentTrait.Filters,
-        // the strings bowed bend, but the harp and the timpani
-        [45] = InstrumentTrait.None,
-        [46] = InstrumentTrait.None,
-        [47] = InstrumentTrait.None,
+        [34] = InstrumentTrait.Chugs | InstrumentTrait.Decays,
+        [35] = InstrumentTrait.Bends | InstrumentTrait.Decays,
+        [38] = InstrumentTrait.Bends | InstrumentTrait.Filters | InstrumentTrait.Decays,
+        [39] = InstrumentTrait.Bends | InstrumentTrait.Filters | InstrumentTrait.Decays,
+        // the strings bowed bend, but the plucked strings and the timpani, which die away
+        [45] = InstrumentTrait.Decays,
+        [46] = InstrumentTrait.Decays,
+        [47] = InstrumentTrait.Decays,
         // the voices bend, but the orchestra hit, a sample struck
         [55] = InstrumentTrait.None,
         // the synth brass chorused, swept and filtered
         [62] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Sweeps | InstrumentTrait.Filters,
         [63] = InstrumentTrait.Bends | InstrumentTrait.Choruses | InstrumentTrait.Sweeps | InstrumentTrait.Filters,
         // the sitar, the koto, the shamisen, the fiddle, the bagpipe and the shanai bend, their players' way
-        [104] = InstrumentTrait.Bends,
-        [106] = InstrumentTrait.Bends,
-        [107] = InstrumentTrait.Bends,
+        [104] = InstrumentTrait.Bends | InstrumentTrait.Decays,
+        [106] = InstrumentTrait.Bends | InstrumentTrait.Decays,
+        [107] = InstrumentTrait.Bends | InstrumentTrait.Decays,
         [109] = InstrumentTrait.Bends,
         [110] = InstrumentTrait.Bends,
         [111] = InstrumentTrait.Bends,

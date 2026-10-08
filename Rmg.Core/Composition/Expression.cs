@@ -84,6 +84,9 @@ public enum PinchSound
 /// </summary>
 internal static class Expression
 {
+    /// <summary>The program a note plays on: its own where a section switched the part's instrument, the part's otherwise.</summary>
+    private static int ProgramOf(RealizedNote note, int program) => note.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : program;
+
     /// <summary>Whether an instrument bends and sings a vibrato: guitars, strings, voices, brass, reeds, pipes, synth leads, a fretless or synth bass.</summary>
     public static bool Bends(int program) => InstrumentTraits.Has(program, InstrumentTrait.Bends);
 
@@ -109,7 +112,7 @@ internal static class Expression
     };
 
     /// <summary>
-    ///     The parts a gate chops, held chords', and the riff a genre's, a djent band's held chord stuttering; each its
+    ///     The parts a gate chops, held chords', and the riff a genre's, its held chord stuttering; each its
     ///     weight, above 0 where the gate suits it.
     /// </summary>
     public static ImmutableArray<(TrackRole Role, ByConvention Weight)> GateParts { get; } =
@@ -547,7 +550,8 @@ internal static class Expression
         var ((songVibrato, songChorus, songSwell, songBends, _, _), carriers) = songEffects;
         // a gated part holding its chords, which the gate chops in time
         if (carriers.TryGetValue(StrongEffect.Gate, out var gated))
-            notes = notes.SetItem(gated, GatedChords.Hold(notes[gated], map, changes, cuts(gated), stopTime));
+            notes = notes.SetItem(gated, GatedChords.Hold(notes[gated], map, changes, cuts(gated), stopTime,
+                note => InstrumentTraits.Has(ProgramOf(note, ((PitchInstrumentTrack)definitions[gated]).InstrumentCode), InstrumentTrait.Decays)));
 
         // the snares, which echo with a comping part's echo, at its delay, the drums' tracks coming after the pitched parts'
         var backbeat = DrumGroups.Snare.Drums.Select(DrumGroups.GetTrackNumber).ToHashSet();
@@ -664,7 +668,7 @@ internal static class Expression
                 {
                     var note = timeline[i];
 
-                    var noteProgram = note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : program;
+                    var noteProgram = ProgramOf(note.Value, program);
                     // one note at a time, or in octaves, which bend and echo together
                     var isLine = (note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0)
                                  && (IsLineRole(role) || note.Value.State.GetStateValue(CompositionStateKinds.LineSolo) == 1);
@@ -720,8 +724,9 @@ internal static class Expression
                     // a soloist attacks its notes rather than swell into them
                     if (swells && !isSolo && note.Value.Duration >= 1 && gate == 0)
                         state = state.With(CompositionStateKinds.Swell, 1);
+                    // a tremolo moving a held note alone, as a gate chops a held chord, never a run's
                     if (role != TrackRole.Drum)
-                        state = state.With(CompositionStateKinds.Tremolo, tremolo).With(CompositionStateKinds.AutoPan, sweeps);
+                        state = state.With(CompositionStateKinds.Tremolo, note.Value.Duration >= 1 - 1e-9 ? tremolo : 0).With(CompositionStateKinds.AutoPan, sweeps);
                     if (pumps)
                         state = state.With(CompositionStateKinds.Pump, PumpDepth);
                     if (echoes && (isLine || role == TrackRole.Rhythm) || echoesBackbeat && Math.Abs(note.Position - Math.Round(note.Position)) < 1e-9)

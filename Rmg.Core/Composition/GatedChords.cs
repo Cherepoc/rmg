@@ -12,23 +12,29 @@ internal static class GatedChords
 {
     private const double Epsilon = 1e-6;
 
+    /// <summary>How loud a held chord struck again at a bar line plays, of its first stroke's velocity.</summary>
+    public const double RestrikeVelocity = 0.8;
+
     /// <summary>
     ///     A part's notes as held chords: for every chord of the song, from the first beat of the bar the part plays at or
     ///     after, every note it plays over the chord as one, the first's, of the notes it sounds longest there, held until the
     ///     next chord, the section's end or the band's next stop, whichever comes first; a note pushed ahead of a chord, as
     ///     it reaches the chord's beat, the chord's, and a chord the same as the one before it part of it. Stop time's notes
     ///     as they are, its hits, and an arpeggio's, a broken chord being a rhythm of its own, which the gate chops as it
-    ///     plays, as trance gates a pluck.
+    ///     plays, as trance gates a pluck. A chord on an instrument that dies away as it rings, a guitar's or a piano's, is
+    ///     struck again, softer, on every bar line it holds across, so that the gate has a sound to chop.
     /// </summary>
     /// <param name="changes">Where the chords change, in order.</param>
     /// <param name="cuts">Where the band stops, as at a drop, which a held chord ends by.</param>
     /// <param name="stopTime">The spans played in stop time, whose notes stay as they are and which a held chord ends by.</param>
+    /// <param name="decays">Whether a note's instrument dies away as it rings (<see cref="InstrumentTrait.Decays" />).</param>
     public static EventTimeline<RealizedNote> Hold(
         EventTimeline<RealizedNote> timeline,
         SongMap map,
         IReadOnlyList<double> changes,
         IReadOnlyList<double> cuts,
-        IReadOnlyList<(double Start, double End)> stopTime
+        IReadOnlyList<(double Start, double End)> stopTime,
+        Func<RealizedNote, bool> decays
     )
     {
         bool InStopTime(double position) => stopTime.Any(x => position >= x.Start - Epsilon && position < x.End - Epsilon);
@@ -68,7 +74,18 @@ internal static class GatedChords
                     chords.Add((start, end, group.First().Value with { Pitches = pitches }));
             }
 
-            held.AddRange(chords.Select(x => (x.Note with { Duration = x.End - x.Start }).ToTimelineItem(x.Start)));
+            foreach (var (start, end, note) in chords)
+            {
+                // struck again on every bar line it holds across, where it dies away
+                var strokes = decays(note)
+                    ? Enumerable.Range(1, (int)Math.Ceiling((end - section.Start) / bar)).Select(x => section.Start + x * bar).Where(x => x > start + Epsilon && x < end - Epsilon).Prepend(start).ToArray()
+                    : [start];
+                held.AddRange(strokes.Select((x, i) => (note with
+                {
+                    Duration = (i + 1 < strokes.Length ? strokes[i + 1] : end) - x,
+                    Velocity = i == 0 ? note.Velocity : note.Velocity * RestrikeVelocity
+                }).ToTimelineItem(x)));
+            }
         }
 
         return EventTimeline.Create(timeline.Duration, held.OrderBy(x => x.Position));
