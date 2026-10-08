@@ -21,7 +21,16 @@ internal sealed class FillGenerator
 
     private static readonly Func<IGenerationContext, int> SeedGenerator = Generators.Int();
 
+    /// <summary>How finely a line's place keys its stream: a 96th of a beat.</summary>
+    private const int LinePlacesPerBeat = 96;
+
     private readonly IGenerationContext _context;
+
+    /// <summary>
+    ///     The stream of the line being marked, a line's own by its place, so that a change before it leaves its fill as it
+    ///     was; the generator's own until a line is marked, as the tests play one.
+    /// </summary>
+    private IGenerationContext _line;
     private readonly RhythmicUnconventionality _songRhythm;
     private readonly ImmutableArray<int> _drumTracks;
 
@@ -55,6 +64,7 @@ internal sealed class FillGenerator
         _genre = genre;
         _unheard = unheard;
         _context = context;
+        _line = context;
         _songRhythm = songRhythm;
         _drumTracks = [..tracks.SongDrums.Select(DrumGroups.GetTrackNumber)];
         _sounds = new FillSounds(tracks.SongDrums, DrumSounds.OddsOf(genre));
@@ -88,8 +98,14 @@ internal sealed class FillGenerator
 
         var drummer = Drummer.Generate(_context, _songRhythm.Value);
         var edits = new TimelineEdits(_context, _meter, map);
+        // every line's fill from a stream of its own, by where it is
+        var lineSeed = _context.GenerateSeed();
         foreach (var line in lines)
+        {
+            _line = new GenerationContext(Seeds.Derive(lineSeed, (long)Math.Round(line.Position * LinePlacesPerBeat)));
             MarkLine(song, edits, line, MinNote(line.Position), drummer, map);
+        }
+
         LandTheUnheard(song, edits);
 
         return edits.ApplyTo(song);
@@ -200,10 +216,10 @@ internal sealed class FillGenerator
                 : span > 0 && play.Treatment == GrooveTreatment.Stop ? FillLayers.StopLandingChance
                 : tilt.Chance(x.Value, FillLayers.LandingLean)
         );
-        var landing = _sounds.DrawLanding(_context, landings, fills);
+        var landing = _sounds.DrawLanding(_line, landings, fills);
         // a pushed landing comes a note of the fill's rhythm near an 8th early, after a fill, not where the band stops
         // or counts in and lands on the line together
-        var isEarly = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.EarlyLandingChance, fills)) && line.HasFill && span > 0 && !line.IsLandingForced;
+        var isEarly = _line.TestProbability(GetChance(chances, CompositionStateKinds.Fill.EarlyLandingChance, fills)) && line.HasFill && span > 0 && !line.IsLandingForced;
         var landingPosition = isEarly ? line.Position - rhythm.Push : line.Position;
         Land(song, edits, landingPosition, line.Next.SectionId, landing);
         if (!landing.IsEmpty)
@@ -236,31 +252,31 @@ internal sealed class FillGenerator
         var (rhythm, grooves) = (section.Fills, section.Groove);
         // a genre's drums filling more or less, its spans leaning as the line's weight leans them
         var amount = Tilt.Of(FillLayers.GenreAmountOdds, _genre.Shift(GenreChoices.Fills, "amount"));
-        var span = _context.Pick(amount.Weigh(tilt.Weigh(drummer.WeighSpans(FillLayers.Spans), FillLayers.GetSpanLoudness), FillLayers.GetSpanLoudness));
+        var span = _line.Pick(amount.Weigh(tilt.Weigh(drummer.WeighSpans(FillLayers.Spans), FillLayers.GetSpanLoudness), FillLayers.GetSpanLoudness));
         if (span <= 0)
             return FillPlay.None;
 
         // stopping is the unconventional treatment, and the quiet one
         var treatments = ByConvention.Weigh(FillLayers.Treatments.Select(x => (x.Value, RhythmicUnconventionality.WeightEnds(x.Weight, x.Value == GrooveTreatment.Stop ? 1 : 0))), rhythm.Value);
-        var treatment = _context.Pick(direction.Weigh(treatments, x => FillLayers.TreatmentLoudness[x]));
+        var treatment = _line.Pick(direction.Weigh(treatments, x => FillLayers.TreatmentLoudness[x]));
         var fullness = FillLayers.Fullness + FillLayers.FullnessPerWeight * weight + FillLayers.TreatmentFullness[treatment];
         var layer = CreateLayer(drummer, rhythm, fullness, Feels.Of(grooves.Source), section.Facets[Facet.Feel]);
         // where the drums stop, they rest half the time: a break
         // a run plays the percussion alone in a section of percussion only, and now and then in one of the drum kit
         var isPercussion = section.IsPercussionOnly ||
-                           (_sounds.Sounds.ContainsKey(FillDrumRole.Percussion) && _context.TestProbability(RhythmicUnconventionality.Ends(FillLayers.PercussionRunChance, 1).At(rhythm.Value)));
-        var run = treatment == GrooveTreatment.Stop && _context.TestProbability(direction.Chance(FillLayers.StopRestChance, -1))
+                           (_sounds.Sounds.ContainsKey(FillDrumRole.Percussion) && _line.TestProbability(RhythmicUnconventionality.Ends(FillLayers.PercussionRunChance, 1).At(rhythm.Value)));
+        var run = treatment == GrooveTreatment.Stop && _line.TestProbability(direction.Chance(FillLayers.StopRestChance, -1))
             ? FillRun.Rest
             : _sounds.Draw(
-                _context,
+                _line,
                 drummer,
                 rhythm.Value,
                 (role, track) => !isPercussion ? GetRunChance(grooves.Of(track), rhythm.Value) : role == FillDrumRole.Percussion ? 1 : 0
             );
-        var spanShift = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.OffBeatChance, rhythm.Value))
-            ? _context.TestProbability(0.5) ? 1 : -1
+        var spanShift = _line.TestProbability(GetChance(chances, CompositionStateKinds.Fill.OffBeatChance, rhythm.Value))
+            ? _line.TestProbability(0.5) ? 1 : -1
             : 0;
-        var fades = _context.TestProbability(GetChance(chances, CompositionStateKinds.Fill.FadeChance, rhythm.Value));
+        var fades = _line.TestProbability(GetChance(chances, CompositionStateKinds.Fill.FadeChance, rhythm.Value));
         return new FillPlay(span, treatment, run, layer, spanShift, fades);
     }
 
@@ -277,13 +293,13 @@ internal sealed class FillGenerator
         var density = layer.CreateDensityGenerator();
         var spread = layer.CreateFullnessGenerator();
         // the fill's change of feel from a sequence of its own, a single draw of the fill's
-        var feelChange = Feels.DrawChange(new GenerationContext((uint)SeedGenerator(_context)), feel, Feels.FillChange, feelUnconventionality, _genre);
+        var feelChange = Feels.DrawChange(new GenerationContext((uint)SeedGenerator(_line)), feel, Feels.FillChange, feelUnconventionality, _genre);
         return new StateMapBuilder("Fill", perTrack: true)
             .Add(CompositionStateKinds.Rhythm.MaxRank, context => FillLayers.FinerRanks + density(context))
             .Add(CompositionStateKinds.Rhythm.RankOffset, density)
             .Add(CompositionStateKinds.Rhythm.Fullness, context => fullness + drummer.FullnessOffset + spread(context))
             .Add(CompositionStateKinds.Rhythm.Variation, -1.0)
-            .ToStateMap(_context)
+            .ToStateMap(_line)
             .MergeWith(feelChange is { } changed ? Feels.At(StateDepths.Note, changed) : StateMap.Default);
     }
 
@@ -296,7 +312,7 @@ internal sealed class FillGenerator
         double minNote
     )
     {
-        var edits = new TimelineEdits(_context, _meter);
+        var edits = new TimelineEdits(_line, _meter);
         Fill(edits, play, line, groove, FillRhythm.Of(groove.Source, play.Layer, minNote, _meter), minNote, 0, _meter);
         return edits.ApplyTo(song);
     }
@@ -336,7 +352,7 @@ internal sealed class FillGenerator
     /// <summary>A run as drawn over the song's own drum states at a fills facet, for the tests to play.</summary>
     internal FillRun DrawRun(Drummer drummer, double unconventionality)
     {
-        return _sounds.Draw(_context, drummer, unconventionality, (_, track) => GetRunChance(_songDrums.Of(track), unconventionality));
+        return _sounds.Draw(_line, drummer, unconventionality, (_, track) => GetRunChance(_songDrums.Of(track), unconventionality));
     }
 
     /// <summary>What was decided at a line, recorded in the last bar before it, where its fill is.</summary>
@@ -448,7 +464,7 @@ internal sealed class FillGenerator
             ? (FillLayers.RunEndVelocity, FillLayers.RunStartVelocity)
             : (FillLayers.RunStartVelocity, FillLayers.RunEndVelocity);
 
-        var seed = SeedGenerator(_context);
+        var seed = SeedGenerator(_line);
         var notes = new List<(double Position, int Rank, int MaxRank)>();
         if (run.Speed != FillSpeed.Steady)
         {
@@ -458,20 +474,20 @@ internal sealed class FillGenerator
             var (first, second) = run.Speed == FillSpeed.SpeedsUp ? (coarser, rhythm.MaxRank) : (rhythm.MaxRank, coarser);
             var note = rhythm.Period / Math.Pow(2, Math.Min(first, second));
             var middle = from + Math.Round((line - from) / 2 / note) * note;
-            notes.AddRange(rhythm.Play(_context, seed, line, from, middle, first));
-            notes.AddRange(rhythm.Play(_context, seed + 1, line, middle, line, second));
+            notes.AddRange(rhythm.Play(_line, seed, line, from, middle, first));
+            notes.AddRange(rhythm.Play(_line, seed + 1, line, middle, line, second));
         }
         else
-            notes.AddRange(rhythm.Play(_context, seed, line, from, line, rhythm.MaxRank));
+            notes.AddRange(rhythm.Play(_line, seed, line, from, line, rhythm.MaxRank));
 
         var drums = run.Sounds.Select(x => x.Track).Distinct().ToDictionary(x => x, x => FillRhythm.Of(groove.Of(x), play.Layer, minNote, meter));
-        var places = FillSounds.Walk(_context, run.Path, run.Sounds.Length, notes.Count);
+        var places = FillSounds.Walk(_line, run.Path, run.Sounds.Length, notes.Count);
         var span = line - from;
         for (var k = 0; k < notes.Count; k++)
         {
             var (position, rank, maxRank) = notes[k];
             var loudness = startVelocity + (endVelocity - startVelocity) * (position - from) / span
-                           + FillLayers.AccentWeight * BeatAccent.CreateVelocityGenerator(rank, maxRank)(_context);
+                           + FillLayers.AccentWeight * BeatAccent.CreateVelocityGenerator(rank, maxRank)(_line);
             foreach (var sound in FillSounds.GetNoteSounds(run, places[k], x => drums[x].Has(position, line)))
             {
                 edits.Hit(sound.Track, position, loudness, sound.Articulation, sectionId, "Fill");

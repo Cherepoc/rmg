@@ -21,8 +21,8 @@ public sealed class MelodyFillTest
             var melody = song.Song.Notes![SongTracks.MelodyTrack].OrderBy(x => x.Position).ToArray();
             foreach (var (line, positions) in Walks(song))
             {
-                // a solo's melody rests, its walk with it
-                if (song.IsSolo(song.Map.Sections.Last(x => x.Start <= positions[0] + 1e-9)))
+                // a solo's melody rests, its walk with it; a walk in the intro, into the first section, none's
+                if (song.Map.Sections.LastOrDefault(x => x.Start <= positions[0] + 1e-9) is { } from && song.IsSolo(from))
                     continue;
 
                 // its notes the walk's alone from its first to the line, three at most, and the note it leads into a step away
