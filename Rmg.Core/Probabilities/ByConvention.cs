@@ -9,6 +9,12 @@ namespace Rmg.Core.Probabilities;
 ///     an end leaves the option out there, and a chance of 1 has it happen every time. Between, the value eases from
 ///     the tuned middle towards either end (<see cref="Ease" />), so that it only rises or only falls between two of
 ///     them, never leaves the range between them, and is never below 0.
+///     A genre speaks by one rule: its amounts are the choice's in place of the songs', an option it leaves out never
+///     playing and an end it leaves empty playing the nearer end's (<see cref="Filled{T}" />), whether the choice is a
+///     pick (<see cref="Weigh{T}(IEnumerable{ValueTuple{T, ByConvention}}, double, Func{T, ByConvention?})" />), a weight
+///     read by option (<see cref="Within{T}" />) or a chance (<see cref="At(double, ByConvention?)" />); a choice drawn in
+///     roles of its own weights alone, such as a cadence's chord, leans them by the genre's over the songs' instead
+///     (<see cref="Lean{T}" />).
 /// </summary>
 public readonly record struct ByConvention(double Plain, double Tuned, double Wild)
 {

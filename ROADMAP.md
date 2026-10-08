@@ -50,7 +50,7 @@ genre first (see *Genres*).
 **Put off** until its uses ask for it: a tag (see *Form and sections*).
 
 **From the review of 8 October 2026** (P2, to be ordered into the next plan): the architecture's items (see
-*Architecture*: a genre's one rule, a genre resolved once, plainer prose); and the music's: the
+*Architecture*: plainer prose); and the music's: the
 melody's motifs, the songs' own appoggiaturas (*Fills and lines*); and targets from outside (*Listening data*).
 
 **Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where they stand: scales of other sizes, a melody in block harmony, a hook at the end, the tempo leaning by the energy, a key change's common tone, the
@@ -328,8 +328,9 @@ Each item with its plan, and what it waits for.
      hits a beat at 0.37, 0.44 and 0.55 by its thirds, and the intensity grows over the solo, 0.53, 0.61, 0.64.
   5. Done October 2026: a pitched solo trading with the drums turn by turn, the band laying out for the drums' turns
      (`Solos.Trade`), Jazz's 30% to 60% of its solos, 112 trades in 64 Jazz songs.
-  6. A genre's idioms as data: metal's double-kick runs and tom cascades, a timbales' abanico, funk's ghosted groove
-     solo, an IDM's drill of ratchets (the mutating groove at its wildest).
+  6. Postponed October 2026, by listening to `?listen=drum-solo`: a genre's idioms as data, metal's double-kick runs
+     and tom cascades, a timbales' abanico, funk's ghosted groove solo, an IDM's drill of ratchets, each a vocabulary of
+     its own over the feet's patterns and the stickings, which are a genre's already.
   Measured by the solos' notes a beat over their arc, the limbs' share, the stickings drawn; `?listen=` questions.
 - **A drum's pocket by its section's role** (P3, if a section's change of role is heard): the timing takes a drum's
   offset by its role in the song's groove (`Pocket.OffsetOf`), not a section's, which may move a ride to the time.
@@ -377,16 +378,13 @@ Each item with its plan, and what it waits for.
   would count as its pattern's first, not its last): a phrase extended before its cadence (4 + 2, the cadence's bars
   played again), a 2-bar tag closing a section (*A tag*), a phrase of three or six bars, once the pattern is no longer
   the unit (*Long cycles*). Leaned by the form facet, the plain end keeping four.
-- **Decided in the review of October 2026, not built:** streams by name (they would move every seed and so lose the
+- **Decided in the review of October 2026, not built:** a genre's one rule, which it keeps already, its amounts in
+  place of the songs' but a choice drawn in roles, written down on `ByConvention`; a genre resolved once, which the
+  request does already (`GenerateSongRequest` checks every choice and option); streams by name (they would move every seed and so lose the
   fingerprint as a refactor's check, for one line saved a stream); a stage's module taking the song's decisions whole
   (it moves the unpacking from `SongStages` into the module, and a module's parameters say what it reads); a stage
   declaring what it reads and writes (`SongDraft`'s fields say who makes them, and CLAUDE.md the two phases). A new
   stage takes `(SongDecisions, SongDraft)`, as fifteen do.
-- **A genre's one rule:** a genre combines with the songs' weights by six entry points of `ByConvention` (`Weigh`,
-  `Weigh` with a pool, `Lean`, `Within`, `WeighFilled`, `At` with a pool), replacing, leaning or filling them. One rule
-  written down, `Lean` apart where a choice draws in roles.
-- **A genre resolved once:** a genre's choices are looked up by name inside the draws (`choice[name]` failing mid-song);
-  resolved against `GenreChoices` when the genre is read, a misnamed option failing there, the page's format as it is.
 - **Plainer prose:** comments that say in a plain sentence what the code cannot, and commits' lines of about a hundred
   characters; CLAUDE.md's paragraph on conventionality as rules a test can check.
 - **The ratings in the history** (P4): the list of songs so far does not show which were liked or disliked.
