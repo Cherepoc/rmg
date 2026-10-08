@@ -26,7 +26,9 @@ percent everywhere, and a listening question once deployed):
    38% (`?listen=root-fifth`); Jazz's walking quarters there already, its bass's rhythm in quarters leading into its chords.
 7. Done: the kick and the crash pushing with the band, an eighth early; the drums playing a stop-time phrase's last
    half bar, a fill there as heavy as a section's, 1% to 21% of the phrases filled out of.
-8. Data on mechanisms there already: the piano's montuno, a riff's drone, Black metal's acoustic interlude.
+8. Done: a riff's weak notes on an open string's drone, the chugging riff's pedal without its chugs, Black metal's 38%
+   of its sections; a driven guitar's quieter form, acoustic or clean in the quieter appearances, Black metal's
+   (`?listen=drone`, `?listen=quieter-form`). The montuno left, a pattern of its own (*What the genres cannot play yet*).
 9. Instruments by listening (*Genres*).
 10. Smaller: legato slides, a strum's thinner up stroke, a fill's toms by genre, a band leaning into a big entrance, a
     riser over a filtered drop.
@@ -261,6 +263,10 @@ Each item with its plan, and what it waits for.
 
 ### Form and sections
 
+- **Breakdowns beyond Djent** (P2, suggested 8 October 2026 after listening: Djent's bridge in half time, the kick
+  following the chugs, heard as great): Metal's and Nu metal's already break down (42% and 41% of their songs); more of
+  Nu metal's, and the other heavy genres', Punk's hardcore end and Black metal's slower passages, each a genre's
+  `breakdown` chance, and a breakdown in a verse or before the last chorus beside the bridge, should more be wanted.
 - **A riser over a filtered drop** (P3, by listening, October 2026): a reverse cymbal swelling over the muffled bar
   before a filtered drop, as the silent one has, which wants a channel of its own as the band plays on there (*A riser as
   a lift cue*, under *Genres*).
@@ -437,10 +443,6 @@ left:
   wildest songs), polymeters and rolls at its wildest, breaks 24% of its sections. Left:
   - Rolls splintering into 32nds, a breakbeat chopped and drilled, figures finer than a 16th (P3, by listening): the
     figures' grid in 32nds, should IDM's wildest want more than its hi-hat rolls and fills give.
-  - A riff on an open string's drone, its notes alternating with the pedal, black metal's and folk metal's (P3, by
-    listening): the riff's pedal (`Line.PedalShare`) leaned by a genre.
-  - Black metal's interludes: its pad alone now (`GenreChoices.Alone`); an acoustic guitar alone between the storms
-    (P3), the part alone switching to a quiet instrument of its family in a quiet section.
   - Field recordings, a prepared piano, glitch edits (*Parked*, beyond General MIDI).
 - **More genres** (P3). What the genres made in October 2026 still want: Fusion's
   roots off the scale (the progressions move by a 7-note scale's steps, chromatic and constant-structure motion

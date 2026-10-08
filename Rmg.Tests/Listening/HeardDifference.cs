@@ -6,7 +6,7 @@ namespace Rmg.Tests.Listening;
 /// <summary>
 ///     How much two renderings of a song differ as heard over a stretch of seconds, a listening question's song with its
 ///     device and without: the share of its notes' loudness that differs, notes added, taken away or played at another
-///     pitch or loudness, weighted by their loudness so that a change in a quiet part counts little; and the share of the
+///     pitch, loudness or instrument, weighted by their loudness so that a change in a quiet part counts little; and the share of the
 ///     moments its sounding tracks' bend, expression or controllers differ, which a device that plays no notes of its own
 ///     changes, a tape's wow or a filter's sweep.
 /// </summary>
@@ -75,9 +75,10 @@ internal sealed class HeardDifference
                 var sounding = new List<(double From, double To)>();
                 foreach (var note in track.NoteTimeline)
                 {
-                    // where it is heard, its part's pocket moving it off its place
+                    // where it is heard, its part's pocket moving it off its place, and on which instrument
                     var seconds = song.SecondsAt(note.Position + note.Value.Shift);
-                    notes.Add(($"{name} {Math.Round(seconds, 2)} {note.Value.Offset} {Math.Round(note.Value.Velocity, 2)}", seconds, note.Value.Velocity * track.Volume));
+                    var program = track.ProgramChanges.LastOrDefault(x => x.Position <= note.Position + 1e-9, (0, track.PitchInstrumentCode)).Program;
+                    notes.Add(($"{name} {Math.Round(seconds, 2)} {note.Value.Offset} {Math.Round(note.Value.Velocity, 2)} {program}", seconds, note.Value.Velocity * track.Volume));
                     sounding.Add((seconds, song.SecondsAt(note.Position + note.Value.Shift + note.Value.Duration)));
                 }
 

@@ -169,7 +169,8 @@ public static class GenreChoices
     public static GenreChoice Riff { get; } = Chances("riff", "Riff",
     [
         ("powerChords", "In power chords", SectionGenerator.PowerChordChance),
-        ("chugs", "Palm-muted chugs", SectionGenerator.ChugChance)
+        ("chugs", "Palm-muted chugs", SectionGenerator.ChugChance),
+        ("drone", "Its weak notes on a drone", SectionGenerator.DroneChance)
     ]);
 
     /// <summary>The chance a section's pattern turns around in its last bar, a V or a ii–V into its start, a reharmonisation, which the songs never play at the plain end and a genre may (<see cref="Progressions.Turnaround" />).</summary>
@@ -273,7 +274,8 @@ public static class GenreChoices
     public static GenreChoice DrumSounds { get; } = Values("drumSounds", "Drum sounds", Composition.DrumSounds.Leaned.Select(x => (x.Name, x.Label)));
 
     /// <summary>The chance a part's guitar turns driven in the song's louder appearances, a clean verse's guitar distorted in the chorus (<see cref="LouderForms" />).</summary>
-    public static GenreChoice LouderForms { get; } = Chances("louderForms", "Louder forms", [("guitars", "A guitar driven in the louder sections", Composition.LouderForms.Chance)]);
+    public static GenreChoice LouderForms { get; } = Chances("louderForms", "Louder forms",
+        [("guitars", "A guitar driven in the louder sections", Composition.LouderForms.Chance), ("quieter", "A driven guitar acoustic or clean in the quieter sections", Composition.LouderForms.QuieterChance)]);
 
     /// <summary>
     ///     The interval a line harmonised plays apart from it, the melody's by the counter-melody and the riff's by its twin,

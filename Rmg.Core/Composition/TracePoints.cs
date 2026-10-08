@@ -318,6 +318,12 @@ internal static class TracePoints
     /// <summary>Whether a section is a heavy band's breakdown (a <c>bool</c>; <see cref="Composition.Breakdowns" />).</summary>
     public const string Breakdown = "Breakdown";
 
+    /// <summary>Whether a section's riff plays its weak notes on a drone (a <c>bool</c>; <see cref="Composition.SectionGenerator.DroneChance" />).</summary>
+    public const string Drone = "Drone";
+
+    /// <summary>The program a part plays in the song's quieter appearances (an <c>int</c>; <see cref="Composition.LouderForms" />).</summary>
+    public const string QuieterForm = "Quieter form";
+
     /// <summary>Whether a section's snare plays ghost notes (a <c>bool</c>; <see cref="Composition.Ghosts" />).</summary>
     public const string Ghosts = "Ghosts";
 

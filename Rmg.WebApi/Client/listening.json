@@ -127,27 +127,27 @@
     "seeds": [
       {
         "seed": "4",
-        "at": 54.4
+        "at": 42.4
       },
       {
         "seed": "A",
-        "at": 60.1
+        "at": 58.1
       },
       {
-        "seed": "L",
-        "at": 187.6
+        "seed": "J",
+        "at": 228.5
       },
       {
-        "seed": "O",
-        "at": 57.8
+        "seed": "V",
+        "at": 182.2
       },
       {
-        "seed": "Y",
-        "at": 98.4
+        "seed": "Z",
+        "at": 91.7
       },
       {
-        "seed": "d",
-        "at": 333.3
+        "seed": "a",
+        "at": 194.1
       }
     ]
   },
@@ -523,7 +523,7 @@
       },
       {
         "seed": "J",
-        "at": 120.1
+        "at": 174.1
       },
       {
         "seed": "Q",
@@ -545,7 +545,7 @@
     "seeds": [
       {
         "seed": "6",
-        "at": 127.1
+        "at": 87.1
       },
       {
         "seed": "7",
@@ -556,12 +556,12 @@
         "at": 38.4
       },
       {
-        "seed": "a",
-        "at": 58
-      },
-      {
         "seed": "b",
         "at": 249.2
+      },
+      {
+        "seed": "d",
+        "at": 214.6
       },
       {
         "seed": "i",
@@ -1235,6 +1235,86 @@
       {
         "seed": "K",
         "at": 93.3
+      }
+    ]
+  },
+  {
+    "id": "drone",
+    "question": "Black metal's riff playing its weak notes on an open string's drone: a black metal riff, or a monotone?",
+    "decides": "The drone's chances by genre.",
+    "genre": "blackMetal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "riff": {
+          "drone": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 110.8
+      },
+      {
+        "seed": "3",
+        "at": 3.5
+      },
+      {
+        "seed": "6",
+        "at": 84
+      },
+      {
+        "seed": "9",
+        "at": 226.6
+      },
+      {
+        "seed": "D",
+        "at": 202.5
+      },
+      {
+        "seed": "J",
+        "at": 118
+      }
+    ]
+  },
+  {
+    "id": "quieter-form",
+    "question": "Black metal's distorted guitar turning acoustic or clean in its quieter sections: a calm between the storms, or a jump?",
+    "decides": "The quieter form's chances by genre.",
+    "genre": "blackMetal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "louderForms": {
+          "quieter": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "N",
+        "at": 192.6
+      },
+      {
+        "seed": "S",
+        "at": 105.3
+      },
+      {
+        "seed": "c",
+        "at": 42.7
+      },
+      {
+        "seed": "j",
+        "at": 20
+      },
+      {
+        "seed": "12",
+        "at": 108.4
+      },
+      {
+        "seed": "15",
+        "at": 69.4
       }
     ]
   }

@@ -241,5 +241,6 @@ internal enum SongStream
     SoloTrades = 99,
     RiffIntro = 100,
     Ghosts = 101,
-    SoloTwins = 102
+    SoloTwins = 102,
+    QuieterForms = 103
 }
