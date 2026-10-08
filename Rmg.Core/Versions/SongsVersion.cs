@@ -26,10 +26,26 @@ public static partial class SongsVersion
         return Commit is null ? $"RMG {Number}, seed {name}" : $"RMG {Number} ({Commit[..Math.Min(7, Commit.Length)]}), seed {name}";
     }
 
-    /// <summary>Whether a text is a number of the version's form, which is all the analytics accept as one.</summary>
+    /// <summary>Whether a text is a number of the version's form, in ASCII digits and nine at most a part.</summary>
     public static bool IsNumber(string? text)
     {
         return text is not null && NumberPattern().IsMatch(text);
+    }
+
+    /// <summary>
+    ///     Whether a text is a version the analytics accept: a number of the form, and none after this one, which no page
+    ///     this server served can have heard.
+    /// </summary>
+    public static bool IsHeard(string? text) => IsNumber(text) && Compare(text!, Number) <= 0;
+
+    /// <summary>Two numbers by their parts, so that 0.5.1000 comes after 0.5.999, where text would put it before; a text not of the form first.</summary>
+    public static int Compare(string first, string second)
+    {
+        static long[] Parts(string text) => IsNumber(text) ? [..text.Split('.').Select(long.Parse)] : [];
+        var (a, b) = (Parts(first), Parts(second));
+        if (a.Length == 0 || b.Length == 0)
+            return a.Length.CompareTo(b.Length);
+        return a.Zip(b, (x, y) => x.CompareTo(y)).FirstOrDefault(x => x != 0);
     }
 
     private static string ReadNumber()
@@ -48,6 +64,6 @@ public static partial class SongsVersion
         return plus < 0 ? null : informational![(plus + 1)..];
     }
 
-    [GeneratedRegex(@"^\d+\.\d+\.\d{3,}$")]
+    [GeneratedRegex(@"^[0-9]{1,9}\.[0-9]{1,9}\.[0-9]{3,9}$")]
     private static partial Regex NumberPattern();
 }

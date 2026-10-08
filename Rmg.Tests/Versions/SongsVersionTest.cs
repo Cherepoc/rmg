@@ -23,9 +23,22 @@ public sealed class SongsVersionTest
     [Arguments("0.5", false)]
     [Arguments("0.5.000-dirty", false)]
     [Arguments("", false)]
+    [Arguments("0.5.\u0663\u0664\u0665", false)]
+    [Arguments("0.5.0000000000000000000000", false)]
     public async Task IsNumber_TakesMajorMinorAndAPatchOfThreeDigits(string text, bool expected)
     {
         await Assert.That(SongsVersion.IsNumber(text)).IsEqualTo(expected);
+    }
+
+    [Test]
+    public async Task AVersionIsHeard_OnlyUpToThisOne()
+    {
+        await Assert.That(SongsVersion.IsHeard(SongsVersion.Number)).IsTrue();
+        await Assert.That(SongsVersion.IsHeard("0.0.000")).IsTrue();
+        await Assert.That(SongsVersion.IsHeard("999.0.000")).IsFalse();
+        await Assert.That(SongsVersion.IsHeard("not a version")).IsFalse();
+        await Assert.That(SongsVersion.Compare("0.5.1000", "0.5.999")).IsGreaterThan(0);
+        await Assert.That(SongsVersion.Compare("garbage", "0.5.000")).IsLessThan(0);
     }
 
     [Test]

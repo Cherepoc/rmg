@@ -22,12 +22,16 @@ public sealed class EventStore
     // so that a server that runs for weeks keeps no more than one started today would
     private string? _prunedDay;
 
-    private EventStore(string connectionString, int retentionDays, int dailyEventsPerVisitor)
+    private EventStore(string connectionString, int retentionDays, int dailyEventsPerVisitor, int dailyEvents)
     {
         _connectionString = connectionString;
         RetentionDays = retentionDays;
         DailyEventsPerVisitor = dailyEventsPerVisitor;
+        DailyEventsOfAll = dailyEvents;
     }
+
+    /// <summary>How many events everyone together can write in one day (<see cref="DailyEvents" />).</summary>
+    public int DailyEventsOfAll { get; }
 
     /// <summary>How long events are kept before they are thrown away, in days.</summary>
     public int RetentionDays { get; }
@@ -41,10 +45,20 @@ public sealed class EventStore
     /// </summary>
     public const int DailySongs = 200_000;
 
+    /// <summary>
+    ///     How many events are kept in one day from everyone together, well above honest use, so that clients posing as
+    ///     new visitors on every request cannot fill the disk.
+    /// </summary>
+    public const int DailyEvents = 200_000;
+
+    // how many events today's day has kept, counted once from the file and then as they are written
+    private (string Day, long Count)? _today;
+
     public static EventStore Create(
         string directory,
         int retentionDays = ServerSettings.DefaultRetentionDays,
-        int dailyEventsPerVisitor = ServerSettings.DefaultEventsPerVisitorPerDay)
+        int dailyEventsPerVisitor = ServerSettings.DefaultEventsPerVisitorPerDay,
+        int dailyEvents = DailyEvents)
     {
         Directory.CreateDirectory(directory);
 
@@ -52,7 +66,7 @@ public sealed class EventStore
         {
             DataSource = Path.Combine(directory, FileName),
             Mode = SqliteOpenMode.ReadWriteCreate
-        }.ToString(), retentionDays, dailyEventsPerVisitor);
+        }.ToString(), retentionDays, dailyEventsPerVisitor, dailyEvents);
 
         store.Migrate();
         return store;
@@ -154,7 +168,7 @@ public sealed class EventStore
 
     /// <summary>
     ///     Writes one event, unless this visitor has already written more today than anybody honestly
-    ///     would. Answers whether it was kept, which the endpoint does not pass on: a caller being
+    ///     would, or everyone together more than the day keeps (<see cref="DailyEvents" />). Answers whether it was kept, which the endpoint does not pass on: a caller being
     ///     quietly ignored is not something worth telling it.
     /// </summary>
     public bool Write(StoredEvent stored)
@@ -172,6 +186,17 @@ public sealed class EventStore
             counting.Parameters.AddWithValue("$day", stored.Day);
 
             if (Convert.ToInt64(counting.ExecuteScalar()) >= DailyEventsPerVisitor) return false;
+
+            if (_today?.Day != stored.Day)
+            {
+                using var all = connection.CreateCommand();
+                all.CommandText = "SELECT COUNT(*) FROM events WHERE day = $day";
+                all.Parameters.AddWithValue("$day", stored.Day);
+                _today = (stored.Day, Convert.ToInt64(all.ExecuteScalar()));
+            }
+
+            if (_today.Value.Count >= DailyEventsOfAll) return false;
+            _today = (stored.Day, _today.Value.Count + 1);
 
             using var writing = connection.CreateCommand();
             writing.CommandText = """

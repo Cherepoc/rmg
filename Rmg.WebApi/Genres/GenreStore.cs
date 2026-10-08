@@ -10,7 +10,7 @@ namespace Rmg.WebApi.Genres;
 /// <summary>
 ///     The genres songs were asked for in, kept so that a link can carry one by a short key: every genre by the key of its
 ///     canonical form (<see cref="Canonical" />), written once, never changed, and never let go of, as a link may name it
-///     for as long as it is kept. Beside the analytics, in a file of its own, and kept whether anything is counted or not,
+///     for as long as it is kept; as many new ones a day as honest use asks at most (<see cref="DailyNew" />). Beside the analytics, in a file of its own, and kept whether anything is counted or not,
 ///     as it is what makes a link play: it knows a genre, never who asked for it.
 /// </summary>
 public sealed class GenreStore
@@ -26,17 +26,27 @@ public sealed class GenreStore
     /// <summary>The canonical form's format, written into it, so that one written differently has another key.</summary>
     public const int Format = 1;
 
-    private readonly string _connectionString;
+    /// <summary>How many genres not kept before are kept in one day, well above honest use, so that the file cannot be grown without bound.</summary>
+    public const int DailyNew = 10_000;
 
-    private GenreStore(string connectionString)
+    private readonly string _connectionString;
+    private readonly Lock _keeping = new();
+
+    // how many new genres today's day has kept, counted once from the file and then as they are kept
+    private (string Day, long Count)? _today;
+
+    private readonly int _dailyNew;
+
+    private GenreStore(string connectionString, int dailyNew)
     {
         _connectionString = connectionString;
+        _dailyNew = dailyNew;
     }
 
-    public static GenreStore Create(string directory)
+    public static GenreStore Create(string directory, int dailyNew = DailyNew)
     {
         Directory.CreateDirectory(directory);
-        var store = new GenreStore(new SqliteConnectionStringBuilder { DataSource = Path.Combine(directory, FileName), Mode = SqliteOpenMode.ReadWriteCreate }.ToString());
+        var store = new GenreStore(new SqliteConnectionStringBuilder { DataSource = Path.Combine(directory, FileName), Mode = SqliteOpenMode.ReadWriteCreate }.ToString(), dailyNew);
         using var connection = store.Open();
         using var command = connection.CreateCommand();
         command.CommandText = """
@@ -101,17 +111,40 @@ public sealed class GenreStore
     public static string KeyOf(string canonical) =>
         Base62.Write(BinaryPrimitives.ReadUInt64BigEndian(SHA256.HashData(Encoding.UTF8.GetBytes(canonical))), KeyLength);
 
-    /// <summary>Keeps a genre's canonical form, once, and gives its key; none where another genre has the key already.</summary>
+    /// <summary>
+    ///     Keeps a genre's canonical form, once, and gives its key; none where another genre has the key already, or where
+    ///     the day has kept as many new genres as it keeps (<see cref="DailyNew" />) and this one is new.
+    /// </summary>
     public string? Keep(string canonical)
     {
         var key = KeyOf(canonical);
-        using var connection = Open();
-        using var insert = connection.CreateCommand();
-        insert.CommandText = "INSERT OR IGNORE INTO genres (key, body, created) VALUES ($key, $body, $created)";
-        insert.Parameters.AddWithValue("$key", key);
-        insert.Parameters.AddWithValue("$body", canonical);
-        insert.Parameters.AddWithValue("$created", DateTimeOffset.UtcNow.ToString("O"));
-        insert.ExecuteNonQuery();
+        if (Find(key) is { } known)
+            return known == canonical ? key : null;
+
+        var now = DateTimeOffset.UtcNow;
+        var day = now.ToString("yyyy-MM-dd");
+        lock (_keeping)
+        {
+            using var connection = Open();
+            if (_today?.Day != day)
+            {
+                using var counting = connection.CreateCommand();
+                counting.CommandText = "SELECT COUNT(*) FROM genres WHERE created >= $day";
+                counting.Parameters.AddWithValue("$day", day);
+                _today = (day, Convert.ToInt64(counting.ExecuteScalar()));
+            }
+
+            if (_today.Value.Count >= _dailyNew)
+                return null;
+
+            using var insert = connection.CreateCommand();
+            insert.CommandText = "INSERT OR IGNORE INTO genres (key, body, created) VALUES ($key, $body, $created)";
+            insert.Parameters.AddWithValue("$key", key);
+            insert.Parameters.AddWithValue("$body", canonical);
+            insert.Parameters.AddWithValue("$created", now.ToString("O"));
+            _today = (day, _today.Value.Count + insert.ExecuteNonQuery());
+        }
+
         return Find(key) == canonical ? key : null;
     }
 

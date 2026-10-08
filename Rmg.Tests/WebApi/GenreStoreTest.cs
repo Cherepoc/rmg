@@ -37,4 +37,24 @@ public sealed class GenreStoreTest
             directory.Delete(true);
         }
     }
+
+    [Test]
+    public async Task ADay_KeepsNoMoreNewGenresThanItsCap_ButFindsTheKnownOnes()
+    {
+        var directory = Directory.CreateTempSubdirectory("rmg-genres");
+        try
+        {
+            var store = GenreStore.Create(directory.FullName, dailyNew: 2);
+            string Genre(int i) => GenreStore.Canonical($"Genre {i}", Choices("""{ "meter": { "4/4": 80 } }"""));
+            await Assert.That(store.Keep(Genre(1))).IsNotNull();
+            await Assert.That(store.Keep(Genre(2))).IsNotNull();
+            await Assert.That(store.Keep(Genre(3))).IsNull();
+            // one kept already is found whatever the cap
+            await Assert.That(store.Keep(Genre(1))).IsEqualTo(GenreStore.KeyOf(Genre(1)));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
 }

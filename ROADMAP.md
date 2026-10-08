@@ -6,7 +6,27 @@ is removed once it is built.
 
 ## Priorities
 
-**In order** (P1, the plan of 8 October 2026 from the review of P3 and P4, each step through the implementation loop,
+**In order** (P1, the plan of 9 October 2026, from the full review of that day, every one of its 525 findings in one
+of sixteen packages, each through the implementation loop, its low findings checked against the code before they are
+fixed; the review and the plan are kept outside the repository):
+
+1. Done: the four high findings: a shuffle genre's 8ths swung at every tempo (blues, jazz, country); the events of a
+   day and the new genres of a day capped for everyone together; a version accepted only as this server's or older.
+2. Loudness on the heard scale: hi-hat rolls, drum marks and gated chords scaled through the render's curve.
+3. Genre data and validation: partial chances choices, Rock's half time, Funk, the blues' form, Latin's clave, defaults
+   leaking into presets, a genre value's three ends, a pool that weighs nothing.
+4. Stage interactions: figures over polymeters, the riff's twin with its riff, hat rolls under fills, drum marks.
+5. Musicality in the code: the blues' last four bars, meters other than 4/4, the bass, stabs, solos' trading turns.
+6. Generator correctness: the corners, each with a test.
+7. Stream robustness, with a fingerprint over genre songs.
+8. The server's robustness: failing songs logged, malformed requests answered 400, ratings outside the telemetry's cap.
+9. The page: the genre editor never losing a genre, a mix change during a request, Any genre after a Stop.
+10. Tests that cannot fail made to fail when their rule breaks.
+11. Duplication removed, the fingerprint kept.
+12. Performance, behind a profile, the fingerprint kept.
+13. Test speed. 14. Page test reliability. 15. Test structure: roles, not numbers. 16. Dead code and stale docs.
+
+**Done before it** (the plan of 8 October 2026 from the review of P3 and P4, each step through the implementation loop,
 each device a genre's data on a mechanism there already where it can be, strong in its genres rather than a few
 percent everywhere, and a listening question once deployed):
 

@@ -1,3 +1,4 @@
+using Rmg.Core.Versions;
 using Rmg.Core;
 using Microsoft.Data.Sqlite;
 
@@ -333,12 +334,7 @@ public static class EventStoreSummary
     public const string OwnGenres = "own";
 
     /// <summary>Versions by their numbers, so that 0.5.1000 comes after 0.5.999, where text would put it before.</summary>
-    private static readonly Comparer<string> VersionOrder = Comparer<string>.Create((first, second) =>
-    {
-        var firstParts = first.Split('.').Select(long.Parse).ToArray();
-        var secondParts = second.Split('.').Select(long.Parse).ToArray();
-        return firstParts.Zip(secondParts, (x, y) => x.CompareTo(y)).FirstOrDefault(x => x != 0);
-    });
+    private static readonly Comparer<string> VersionOrder = Comparer<string>.Create(SongsVersion.Compare);
 
     /// <summary>
     ///     What the server measured of the songs asked of it: the songs made read out in full, as the spreads want, and

@@ -324,7 +324,34 @@ public sealed class EventStoreTest : IDisposable
 
         var versions = _store.Summarise(Now, 30).Versions.Select(x => x.Version).ToArray();
 
-        await Assert.That(versions).IsEquivalentTo(new[] { "0.6.000", "0.5.1000", "0.5.999" });
+        await Assert.That(versions).IsEquivalentTo(new[] { "0.6.000", "0.5.1000", "0.5.999" }, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+    }
+
+    [Test]
+    public async Task AVersionNotOfTheForm_NeverBreaksTheSummary()
+    {
+        Write(EventNames.Played, version: "0.5.\u0663\u0664\u0665");
+        Write(EventNames.Verdict, seed: 3, detail: "pushes:with", version: "9999999999999999999999.0.000");
+        Write(EventNames.Played, version: "0.5.000");
+
+        await Assert.That(_store.Summarise(Now, 30).Versions.First().Version).IsEqualTo("0.5.000");
+        await Assert.That(_store.LatestVerdicts().Verdicts).IsNotNull();
+    }
+
+    [Test]
+    public async Task TheStore_KeepsNoMoreEventsADayThanItsCap_FromEveryoneTogether()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        var store = EventStore.Create(directory, dailyEvents: 5);
+        try
+        {
+            var kept = Enumerable.Range(0, 7).Count(i => store.Write(new StoredEvent(Now, EventStore.Day(Now), $"visitor {i}", EventNames.Played, null, null, null, null, null, null, null, null)));
+            await Assert.That(kept).IsEqualTo(5);
+        }
+        finally
+        {
+            Directory.Delete(directory, true);
+        }
     }
 
     [Test]

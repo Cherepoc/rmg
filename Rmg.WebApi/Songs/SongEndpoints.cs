@@ -50,9 +50,6 @@ public static class SongEndpoints
         if (!skipped.IsEmpty && !isListening)
             return Results.BadRequest(new ErrorResponse("This server makes songs whole: stages are left out only where it listens."));
 
-        // the genre kept, so that a link to the song carries it by its key, before the song waits its turn
-        var genreKey = request.Genre is { } genre ? genres.Keep(Genres.GenreStore.Canonical(request.GenreName?.Trim() ?? "", genre)) : null;
-
         var arrived = Stopwatch.GetTimestamp();
         var (running, waiting) = queue.Load;
         long waited;
@@ -84,6 +81,8 @@ public static class SongEndpoints
         }
 
         var songSeed = seed ?? Seeds.Random();
+        // the genre kept, so that a link to the song carries it by its key, once the song has its turn
+        var genreKey = request.Genre is { } genre ? genres.Keep(Genres.GenreStore.Canonical(request.GenreName?.Trim() ?? "", genre)) : null;
 
         IResult result;
         SongOutcome ended;
