@@ -16,7 +16,8 @@ is removed once it is built.
 6. Done: a groove that mutates, its edits kept, IDM's and DnB's the most.
 7. Done: drum solos' feet a genre's ostinato and their runs in stickings; their motif, arc and trading left (*Groove*).
 8. Done: a filtered drop, a genre's; a swell brightening; a riff's whammy dive into a louder section.
-9. A line's tensions beyond Djent, after `?listen=djent-tension` is answered.
+9. A line's tensions beyond Djent, Jazz's and IDM's melodies and counter-melodies on a tension now and then
+   (`GenreChoices.Tension`), with the songs' own appoggiaturas, after `?listen=djent-tension` is answered.
 10. Done: Djent's gate on its pad, not its riff; a tremolo moving held notes alone; a gated chord on a decaying
     instrument struck again on every bar line.
 11. Done: a dive on the riff's longest note of its last bar, the notes after it let go of, held to the louder
@@ -25,7 +26,7 @@ is removed once it is built.
 12. Done: Techno's silent drop, with its riser, as likely as its filtered one.
 13. Done: stop time carried, the lines or the drums keeping time going on through every stopped bar.
 
-Done in the plan of 9 October 2026: the echo as the synthesizer's delay; the strong effects stacked; the gate holding
+Done in the plan before it (written 7 October 2026): the echo as the synthesizer's delay; the strong effects stacked; the gate holding
 whole chords; the part alone a genre's; metal's arpeggios and a part's colour; a line's tensions, Djent's synth over
 its guitars; the brightness measured, the filter's floor raised; a part's tone; a tape's wow; the mix filtered; Trance
 as it is produced; Djent's dips and stutter. After it: a Medieval intro silent on drums that only mark the form; the
@@ -52,8 +53,7 @@ genre first (see *Genres*).
 *Architecture*: chances by hand, named streams, the song's decisions passed whole, the song's trace, the stages' reads
 and writes, `ProgressionSettings`, a genre's one rule, a genre resolved once, plainer prose); and the music's: the
 melody's goal tones and motifs, the songs' own appoggiaturas (*Fills and lines*), phrases of other than four bars
-(*Rhythm engine*), scales of other sizes and an uneven harmonic rhythm (*Scales and chords*); the roadmap and the
-README brought up to date (*Architecture*), and targets from outside (*Listening data*).
+(*Rhythm engine*), scales of other sizes and an uneven harmonic rhythm (*Scales and chords*); and targets from outside (*Listening data*).
 
 **Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where they stand: a melody in block harmony, a hook at the end, the tempo leaning by the energy, a key change's common tone, the
 fills' loudness as layers, and a head with solos (which the form's devices by genre with AABA likely make).
@@ -401,9 +401,6 @@ Each item with its plan, and what it waits for.
 
 From the review of October 2026 (P2), each measured by the fingerprint, unchanged unless said:
 
-- **The roadmap and the README brought up to date** (P2): the plan "of 9 October" was written on the 7th; a line's
-  tensions beyond Djent both P1 step 9 and P3 under *Genres*; *Rock and metal as their bands play them* P1 with only P3
-  left in it; *More genres* still waiting on Chiptune, a preset now; the README's thirty-two presets naming 31.
 - **Chances by hand:** `Expression.cs` (a solo note's bend chance times 3 and capped, a branch no soloing part
   reaches, as every soloing part has a `Soloist`; a slide's rate times 2) and `FillSounds.DrawLanding` (a landing's
   chance capped at 1) multiply or cap a chance by hand. The dead branch failing, the slide's rate a `Tilt`, a chance
@@ -461,7 +458,7 @@ left:
   4. The default (the songs' own, as now, or any genre) decided by the ratings by genre once a version has enough, and
      not before the retuned presets, Pop and Metal most, are heard.
   Not weighed by the presets nor leaned by conventionality: each preset spans the plainest songs to the wildest.
-- **Rock and metal as their bands play them** (P1, 8 October 2026): what each lacks against the sound of a riff-driven
+- **Rock and metal as their bands play them** (P3, from 8 October 2026): what each lacks against the sound of a riff-driven
   hard rock band, a blues-rock band's shuffle, a twin-guitar heavy metal band, thrash and groove metal
   (`RockAndMetalReportTest`). Their solos (73% and 78% of songs) and their riffs of two and four bars (AAAB and ABAB a
   third of their sections) were there already; the organ's solo, Rock's shuffle at its plain end and Metal's clean
@@ -484,10 +481,7 @@ left:
   - Black metal's interludes: its pad alone now (`GenreChoices.Alone`); an acoustic guitar alone between the storms
     (P3), the part alone switching to a quiet instrument of its family in a quiet section.
   - Field recordings, a prepared piano, glitch edits (*Parked*, beyond General MIDI).
-- **A line's tensions beyond Djent** (P3, by listening to `?listen=djent-tension`): jazz's and IDM's melodies and
-  counter-melodies on a tension now and then (`GenreChoices.Tension`).
-- **More genres** (P3): chiptune, once a square wave may play the chords (*Instruments outside a role's pool*).
-  What the genres made in October 2026 still want: Fusion's
+- **More genres** (P3). What the genres made in October 2026 still want: Fusion's
   roots off the scale (the progressions move by a 7-note scale's steps, chromatic and constant-structure motion
   coming only of planing and a chord's own scale) and a lead's wide-interval legato lines (*A melody's leaping by
   genre*); Soul's tritone substitute and passing diminished (*Harmony for Jazz and Soul*); Country's bass on the root
