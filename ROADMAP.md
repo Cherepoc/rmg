@@ -261,9 +261,6 @@ Each item with its plan, and what it waits for.
 
 ### Conventionality
 
-- **An ending's chord into home, by listening** (`?listen=ending`): a modal band's ♭II, ♭VI or ♭VII against a classical
-  V–i; Black metal's last chord V 52% to 22%, raised 33% to 5%, its last section planed 42%; the songs' chances of the
-  raise and the chord into home left as they were.
 - **A song's length, the rest:** a short length runs long, 16% of the songs given a minute and 19% of those given two
   past 15% over (`SongLengthReportTest`), the intro's bars taken in (`SongFormGenerator.IntroDuration`) but an intro
   section, an outro or the ending's bars adding what the length leans no draw of; their chances leaned by the length
@@ -571,6 +568,10 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
 
 ## Decided, and kept
 
+- **Black metal ends both ways** (heard 8 October 2026, 2 better, 3 worse, 1 not told apart): a raw band's modal ending,
+  ♭II, ♭VI or ♭VII into i, the most often, and a symphonic band's classical V–i now and then, its last chord V 22%, its
+  leading tone raised 5% (`cadenceDegree`, `cadenceRaise`); the songs' chances of the raise and the chord into home as
+  they were.
 - **Decided against** (8 October 2026, the review of P3 and P4), each for little heard at its cost or a sound General
   MIDI has not: the drums one by one (GS drum parameters), a flanger, the percussive family's other sounds, sound effects,
   sound design beyond General MIDI, ping-pong echo, modulation (no soundfont maps it), a sustain pedal (notes are held to
