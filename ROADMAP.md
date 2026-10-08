@@ -285,6 +285,11 @@ Each item with its plan, and what it waits for.
   And the kit that marks the form (suggested the same day): never the standard, room or power kit, a band's, but the
   orchestral kit, its timpani and its bass drum, or the percussion, perhaps the brush or the electronic kit too; the
   kit a drum job's choice (`DrumMarks.Jobs`, `GenreChoices` "kit"), Ambient's and Dungeon's marks on the orchestra.
+- **A double kick with a backbeat** (P2, heard 8 October 2026 on `?listen=double-kick`): a double kick under no snare
+  is heard as a drum machine where it goes on long; a section's double kick without a backbeat for a phrase at most,
+  the snare joining for its second half, on the backbeat or the riff's accents, as a thrash drummer brings it in; and
+  the snare's own sound there, never the cross-stick, as in a breakdown (*A breakdown's snare*): a heavy figure's
+  backbeat the snare's head (`DrumSounds`, `Figures`). Measured by the bars a double kick plays without a snare struck.
 - **A riff's drone, reworked** (P2, heard 8 October 2026: a good idea for metal, but the songs sounded better without
   it, so no preset plays it now; `GenreChoices.Riff` "drone" kept): the riff's weak notes all on its chord's root at the
   bottom of its range, 69% of them, is a pedal, not a drone riff; a black metal or a folk metal riff alternates its
