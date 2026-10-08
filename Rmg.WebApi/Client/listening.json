@@ -29,6 +29,13 @@
         ]
       },
       {
+        "seed": "b",
+        "at": 221.1,
+        "listen": [
+          "Riff (Acoustic Guitar (steel))"
+        ]
+      },
+      {
         "seed": "c",
         "at": 38.7,
         "listen": [
@@ -47,13 +54,6 @@
         "at": 104.4,
         "listen": [
           "Riff (Acoustic Guitar (steel))"
-        ]
-      },
-      {
-        "seed": "15",
-        "at": 65.4,
-        "listen": [
-          "Riff (Electric Guitar (clean))"
         ]
       }
     ]
