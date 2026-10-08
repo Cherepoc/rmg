@@ -66,6 +66,8 @@ public sealed class ListeningQuestionsTest
 
     private static readonly Question[] Questions =
     [
+        new("stop-time", "Stop time, the band hitting once a bar under the tune, the hi-hat going on where the tune rests: a band's device, or a hole?",
+            "Its chance and where it plays.", "blues", ["Stop time"], null, x => FirstSection(x, TracePoints.StopTime, v => (bool)v!)),
         new("pushes", "Pushes, the band's chord changes an eighth early: a lift, or a stumble?",
             "Its chance by genre.", "rock", ["Pushes"], null, x => FirstSection(x, TracePoints.Push, v => (bool)v!)),
         new("drum-marks", "The drums marking the form, a strike every few bars and a swell into a section: a calm piece's percussion, or a groove gone missing?",

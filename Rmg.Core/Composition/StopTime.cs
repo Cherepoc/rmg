@@ -20,6 +20,12 @@ internal static class StopTime
     /// <summary>How long a stop-time hit is held at most, in beats.</summary>
     public const double Hit = 1;
 
+    /// <summary>
+    ///     How much of a stopped bar's rest, after its hit, the lines must sound through to carry it alone; less, and the
+    ///     drum keeping time plays on through the bar.
+    /// </summary>
+    public const double CarriedShare = 0.5;
+
     /// <summary>Where the song plays in stop time: every stop-time section's appearances' first phrase, but a solo's, its start, end and bar.</summary>
     internal static (double Start, double End, double BarDuration)[] Phrases(SongDecisions song)
     {
@@ -45,7 +51,9 @@ internal static class StopTime
     /// <summary>
     ///     Stop time: a section's appearances' first phrase, now and then, its band hitting the bar's first beat and resting
     ///     the rest of the bar, a hit held a beat at most, under the lines, the melody's, the counter-melody's and a solo's,
-    ///     which go on. A section's decision, from a sequence of its own.
+    ///     which go on. A section's decision, from a sequence of its own. A stopped bar is always carried by a part that
+    ///     goes on through it: the lines, where they sound through half its rest at least; else the drums keeping time,
+    ///     which play on through it; a phrase with a bar neither carries is not stopped, the band playing it as it was.
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
@@ -59,12 +67,42 @@ internal static class StopTime
         if (phrases.Length == 0)
             return draft;
 
-        // where a note falls in stop time: off the bar's first beat, or on it, a hit
-        (bool In, bool OnTheBar) Place(double position)
+        var notes = SongStages.NotesOf(draft);
+        var lines = notes.Where(x => song.Tracks.Definitions[x.Key].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo).SelectMany(x => x.Value).ToArray();
+        var times = notes.Keys.Where(x => song.Tracks.Definitions[x] is PercussionInstrumentTrack definition && DrumRoles.Of(definition.StateMap) == DrumRole.Time).ToHashSet();
+        // every stopped bar's carrier: the lines, or the drums keeping time; a phrase with a bar neither carries played as it
+        // was, stop time being the phrase's device
+        var carriers = new Dictionary<double, Carrier>();
+        foreach (var (start, end, bar) in phrases)
+        {
+            var bars = new List<(double At, Carrier Carrier)>();
+            for (var at = start; at < end - 1e-9; at += bar)
+            {
+                var (from, to) = (at + Hit, Math.Min(end, at + bar));
+                bars.Add((at, Covered(lines.Where(x => x.Position < to - 1e-9 && x.Position + x.Value.Duration > from + 1e-9)
+                                   .Select(x => (Math.Max(from, x.Position), Math.Min(to, x.Position + x.Value.Duration)))) >= CarriedShare * (to - from) - 1e-9
+                    ? Carrier.Lines
+                    : times.Any(t => notes[t].Any(x => x.Position > at + 1e-6 && x.Position < to - 1e-9)) ? Carrier.Time : Carrier.None));
+            }
+
+            var carried = bars.All(x => x.Carrier != Carrier.None);
+            foreach (var (at, carrier) in bars)
+                carriers[Math.Round(at, 6)] = carried ? carrier : Carrier.None;
+        }
+
+        // where a note falls in stop time, a bar a part plays through left out: off the bar's first beat, or on it, a hit
+        (bool In, bool OnTheBar) Place(double position, int track)
         {
             foreach (var (start, end, bar) in phrases)
                 if (position >= start - 1e-9 && position < end - 1e-9)
+                {
+                    var at = start + Math.Floor((position - start + 1e-6) / bar) * bar;
+                    var carrier = carriers[Math.Round(at, 6)];
+                    if (carrier == Carrier.None || carrier == Carrier.Time && times.Contains(track))
+                        return (false, false);
                     return (true, (position - start + 1e-6) % bar < 2e-6);
+                }
+
             return (false, false);
         }
 
@@ -73,7 +111,6 @@ internal static class StopTime
         var fills = draft.Runs.Where(x => !x.Positions.IsEmpty).Select(x => (From: x.Positions.Min(), To: x.Line)).ToArray();
         bool InAFill(double position) => fills.Any(x => position >= x.From - 1e-9 && position < x.To - 1e-9);
 
-        var notes = SongStages.NotesOf(draft);
         var result = notes.ToBuilder();
         foreach (var (track, timeline) in notes)
         {
@@ -81,12 +118,38 @@ internal static class StopTime
             if (role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo)
                 continue;
             result[track] = EventTimeline.Create(timeline.Duration, timeline
-                .Where(note => Place(note.Position) is not (true, false) || role == TrackRole.Drum && InAFill(note.Position))
-                .Select(note => Place(note.Position).In && !(role == TrackRole.Drum && InAFill(note.Position))
+                .Where(note => Place(note.Position, track) is not (true, false) || role == TrackRole.Drum && InAFill(note.Position))
+                .Select(note => Place(note.Position, track).In && !(role == TrackRole.Drum && InAFill(note.Position))
                     ? (note.Value with { Duration = Math.Min(note.Value.Duration, Hit) }).ToTimelineItem(note.Position)
                     : note));
         }
 
         return draft with { Notes = result.ToImmutable() };
+    }
+
+    /// <summary>What goes on through a stopped bar.</summary>
+    private enum Carrier
+    {
+        /// <summary>Nothing, so the phrase is not stopped.</summary>
+        None,
+
+        /// <summary>The lines, sounding through half its rest at least.</summary>
+        Lines,
+
+        /// <summary>The drums keeping time, playing on through it.</summary>
+        Time
+    }
+
+    /// <summary>How long a set of spans covers, their overlaps once.</summary>
+    private static double Covered(IEnumerable<(double From, double To)> spans)
+    {
+        var (total, reached) = (0.0, double.NegativeInfinity);
+        foreach (var (from, to) in spans.OrderBy(x => x.Item1))
+        {
+            total += Math.Max(0, to - Math.Max(from, reached));
+            reached = Math.Max(reached, to);
+        }
+
+        return total;
     }
 }

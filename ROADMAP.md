@@ -23,7 +23,7 @@ is removed once it is built.
     section and slowing at its bottom; Metal's and Djent's as often as Nu metal's. Its ritardando deferred (*A band leaning
     into a big entrance*).
 12. Done: Techno's silent drop, with its riser, as likely as its filtered one.
-13. Stop time carried, a line or the drum keeping time going on through every stopped bar (*Stop time carried*).
+13. Done: stop time carried, the lines or the drums keeping time going on through every stopped bar.
 
 Done in the plan of 9 October 2026: the echo as the synthesizer's delay; the strong effects stacked; the gate holding
 whole chords; the part alone a genre's; metal's arpeggios and a part's colour; a line's tensions, Djent's synth over
@@ -140,6 +140,9 @@ Done for a version when every question is answered or let go of.
   double kick, 15% galloping, Nu metal's 42% with the riff (`RockAndMetalReportTest`), Latin's claves on the clave.
   Decides their weights and leans.
 - **Pushes** (`?listen=pushes`): the band's changes an eighth early. Decides their chances by genre.
+- **Stop time carried** (`?listen=stop-time`): the band hitting once a bar under the lines, the drums keeping time
+  going on where the lines rest (Blues and Rock, none of 700 stopped bars silent past its hit, from 16%). Decides its
+  chance, and whether the drums keeping time is the band's device or the band should stop with them.
 
 ### Sound
 
@@ -244,16 +247,6 @@ Each item with its plan, and what it waits for.
 - **A riser over a filtered drop** (P3, by listening, October 2026): a reverse cymbal swelling over the muffled bar
   before a filtered drop, as the silent one has, which wants a channel of its own as the band plays on there (*A riser as
   a lift cue*, under *Genres*).
-- **Stop time carried** (P1, step 13; heard on test, `?listen=stop-time`, October 2026, with 4, without 3 of 6 Blues
-  songs, a device in seeds 0, 3 and 7, a hole in 2, 5 and 6): the band hits the bar's first beat and rests to the next
-  bar, and only the melody, the counter-melody and a solo play on (`StopTime.Apply`), so that where the melody rests,
-  between its phrases or in a section without one, nothing sounds for most of the bar, too often. Stop time is played
-  under a part that goes on through it. One rule: a stop-time bar keeps a carrier, the first of the lines that plays
-  through the bar's rest (the melody, the counter-melody, a solo), and where none does, the drum keeping time
-  (`DrumRole.Time`, a hi-hat's or a ride's) plays on through the stop while the rest of the band hits and rests; a
-  section with no line and no drum keeping time is not played in stop time, its draw made all the same. Measured
-  before and after by the share of a stop-time bar's rest where nothing sounds (a report over the corpus with Blues and
-  Rock), and a rule: no stop-time bar silent past its hit. Its chance as it is; the six songs heard again.
 - **A tag** (put off): half a pattern before a section changes, which breaks the pattern's grid for the fills' lines and
   the phrases; with the meter as state, an engine's change for a rare idiom.
 - **The energy's recurrence** counts a section's appearances, not its plays: should long sections sound too quiet.

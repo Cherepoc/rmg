@@ -1,5 +1,43 @@
 [
   {
+    "id": "stop-time",
+    "question": "Stop time, the band hitting once a bar under the tune, the hi-hat going on where the tune rests: a band's device, or a hole?",
+    "decides": "Its chance and where it plays.",
+    "genre": "blues",
+    "without": {
+      "skip": [
+        "Stop time"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      {
+        "seed": "0",
+        "at": 37.3
+      },
+      {
+        "seed": "2",
+        "at": 7.9
+      },
+      {
+        "seed": "3",
+        "at": 133.3
+      },
+      {
+        "seed": "5",
+        "at": 0
+      },
+      {
+        "seed": "6",
+        "at": 0
+      },
+      {
+        "seed": "7",
+        "at": 32.4
+      }
+    ]
+  },
+  {
     "id": "pushes",
     "question": "Pushes, the band's chord changes an eighth early: a lift, or a stumble?",
     "decides": "Its chance by genre.",
