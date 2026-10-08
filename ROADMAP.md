@@ -22,8 +22,8 @@ is removed once it is built.
 10. Done: Djent's gate on its pad, not its riff; a tremolo moving held notes alone; a gated chord on a decaying
     instrument struck again on every bar line.
 11. Done: a dive on the riff's longest note of its last bar, the notes after it let go of, held to the louder
-    section and slowing at its bottom; Metal's and Djent's as often as Nu metal's. Its ritardando let go, the dive heard as a
-    launch.
+    section and slowing at its bottom; Metal's and Djent's as often as Nu metal's. Its ritardando deferred (*A band leaning
+    into a big entrance*).
 12. Done: Techno's silent drop, with its riser, as likely as its filtered one.
 13. Done: stop time carried, the lines or the drums keeping time going on through every stopped bar.
 
@@ -71,7 +71,7 @@ melody's figures inverted (Pop), and `trade`. The least heard by their nature, s
 
 Answered on 8 October 2026, with the songs picked by how much they differ, and let go of: `pinch`, a highlight in 6 of
 6; `pinch-sound`, General MIDI's harmonics over the squeal in 6 of 6, 8 of 12 in all, so the harmonics are the songs'
-sound and the squeal a genre's alone; `dive`, a launch in 5 of 6, 8 of 12 in all; `drum-solo`, the hi-hat's pedal
+sound and the squeal a genre's alone; `dive`, a launch in 5 of 6, 8 of 12 in all, its ritardando still to be considered; `drum-solo`, the hi-hat's pedal
 under the stickings in 6 of 6; `mutation`, an evolving break in 4 of 6; `breakbeat`, a dusty break in 9 of 12; and
 `djent-tension`, 3 better, 4 worse and 5 not told apart of 12, its tension kept to Djent. Verdicts are counted by
 version and the test instance keeps the live one, so a question asked again counts its earlier verdicts too until a
@@ -302,6 +302,10 @@ Each item with its plan, and what it waits for.
 - **A held riff restruck outside a gate** (P3, by listening): a decaying chord is struck again on its bar lines only
   where the gate holds it (`GatedChords.Hold`); a rock band's riff held over a bar restruck the same way, should a held
   guitar chord dying out be heard elsewhere.
+- **A band leaning into a big entrance** (P3, deferred from the dive, October 2026; the dive itself heard as a launch):
+  the tempo easing a little over the last bar before a louder section now and then, a ritardando back to tempo on its
+  downbeat, where a riff dives into it. The tempo is decided before the notes (`SectionTempo`) and the dive after them
+  (`Expression`), so the dive's section would be decided with the tempo.
 - **The playing following the articulation** (P3; palm-muted chugs done): octaves popped in slap, short notes muted,
   without which an articulation is only another sound.
 - **Plain doubling,** a part doubling another in unison, now that the parts play by their pocket (`Pocket`).
