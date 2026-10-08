@@ -277,6 +277,11 @@ Each item with its plan, and what it waits for.
   band's bass plays the riff with it always and a wild one's goes its own way, so the chance from 1 at the plain end,
   through about 0.5, to near 0 at the wild, by the melody or the groove facet, a genre's `doubling` "riff" still above
   it where named; measured by the sections with a riff whose bass doubles it, by fifths of conventionality.
+- **Quiet drums in calm genres** (P2, heard 8 October 2026 on `?listen=drum-marks`): the drums marking the form strike
+  too loud for a calm piece, and any drum in Ambient or Dungeon should stay soft. The marks' strikes and swells well
+  under the parts they colour (`DrumMarks`), and a genre's drums' loudness as its data, a level of the drum kit's
+  against the band's, Ambient's and Dungeon's low, set through the render's velocity curve (`Render.FromMidiVelocity`)
+  rather than by scaling a velocity's sum; measured by the drums' velocities as rendered against the pitched parts'.
 - **A riff's drone, reworked** (P2, heard 8 October 2026: a good idea for metal, but the songs sounded better without
   it, so no preset plays it now; `GenreChoices.Riff` "drone" kept): the riff's weak notes all on its chord's root at the
   bottom of its range, 69% of them, is a pedal, not a drone riff; a black metal or a folk metal riff alternates its
