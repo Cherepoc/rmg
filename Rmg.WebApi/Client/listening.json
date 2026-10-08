@@ -907,11 +907,11 @@
       },
       {
         "seed": "7",
-        "at": 63.7
+        "at": 151.8
       },
       {
         "seed": "B",
-        "at": 127.1
+        "at": 143.5
       },
       {
         "seed": "D",
@@ -919,11 +919,52 @@
       },
       {
         "seed": "F",
-        "at": 115.3
+        "at": 116.3
       },
       {
         "seed": "I",
         "at": 43.1
+      }
+    ]
+  },
+  {
+    "id": "pinch-sound",
+    "question": "A pinch harmonic, held longer and louder now: the driven guitar squealing at the harmonic's pitch (with), or General MIDI's guitar harmonics, a clean bell (without)?",
+    "decides": "Which sound a pinch makes.",
+    "genre": "nuMetal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "pinchSound": {
+          "harmonics": 100,
+          "squeal": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "B",
+        "at": 143.5
+      },
+      {
+        "seed": "D",
+        "at": 29.7
+      },
+      {
+        "seed": "F",
+        "at": 116.3
+      },
+      {
+        "seed": "I",
+        "at": 43.1
+      },
+      {
+        "seed": "N",
+        "at": 113.9
+      },
+      {
+        "seed": "S",
+        "at": 151.7
       }
     ]
   },
