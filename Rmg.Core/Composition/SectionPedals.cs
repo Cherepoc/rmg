@@ -13,8 +13,8 @@ internal static class SectionPedals
     {
         var bass = song.Track(TrackRole.Bass);
         var common = draft.Timeline.CommonStateTimelineMap;
-        // a section's pedal now and then, its home or its dominant under its appearances' first phrase, by its progression
-        // facet, from a sequence of its own
+        // a section's pedal now and then, by its progression facet, from a sequence of its own: its home under its
+        // appearances' first phrase, or its dominant under their last, building into what follows
         var pedalling = song.SectionIds.Distinct().ToDictionary(id => id, id =>
         {
             var context = song.Stream(SongStream.SectionPedal, id);
@@ -24,15 +24,16 @@ internal static class SectionPedals
             return pedals ? root : (int?)null;
         });
         var sections = song.Form.Map.Sections.Where(x => pedalling[x.SectionId] is not null)
-            .Select(x => (x.Start, Math.Min(x.End, x.Start + Meter.PhraseBarCount * x.Meter.BarDuration), x.Start,
-                common.GetEffectiveStateMapAt(x.Start).GetStateValue(StateKinds.ChordRoot) + pedalling[x.SectionId]!.Value));
+            .Select(x => (Phrase: Meter.PhraseBarCount * x.Meter.BarDuration, Root: pedalling[x.SectionId]!.Value, Span: x))
+            .Select(x => (x.Root == 0 ? x.Span.Start : Math.Max(x.Span.Start, x.Span.End - x.Phrase), x.Root == 0 ? Math.Min(x.Span.End, x.Span.Start + x.Phrase) : x.Span.End,
+                x.Span.Start, common.GetEffectiveStateMapAt(x.Span.Start).GetStateValue(StateKinds.ChordRoot) + x.Root));
         var changes = draft.Chains.Where(x => x.Device == KeyChange.Device.Pedal).Select(x => (x.Chords[0], x.Change, x.Change, 4));
         return draft with { Timeline = KeyChange.Pedal(draft.Timeline, bass.Key, (PitchInstrumentTrack)bass.Value, changes.Concat(sections)) };
     }
 
-    /// <summary>The chance a section holds a pedal under its appearances' first phrase, by its progression facet: never in the plainest songs.</summary>
+    /// <summary>The chance a section holds a pedal under a phrase of its appearances, by its progression facet: never in the plainest songs.</summary>
     public static ByConvention Chance { get; } = new(0, 0.06, 0.15);
 
-    /// <summary>A section's pedal's root, in steps above its home, and how likely: the home, a tonic pedal, the likelier, and the dominant.</summary>
+    /// <summary>A section's pedal's root, in steps above its home, and how likely: the home, a tonic pedal under its first phrase, the likelier, and the dominant under its last.</summary>
     public static ImmutableArray<Weighted<int>> Roots { get; } = [new(1, 0), new(0.6, 4)];
 }

@@ -226,8 +226,9 @@ internal static class Solos
 
     /// <summary>
     ///     The song with every pitched solo's line (<see cref="SoloLines" />) played by its soloists instead of the melody:
-    ///     in turn by phrase, or together, the others a step away with some of its notes left out, each note a line's,
-    ///     whatever its part plays otherwise, and every soloist a margin over the loudest part playing under it.
+    ///     in turns, no phrase running over its turn's end, or together, the others a step away with some of its notes left
+    ///     out, each note a line's, whatever its part plays otherwise, an accompanist that trades back on its own part
+    ///     between its turns, and every soloist a margin over the loudest part playing under it.
     /// </summary>
     /// <param name="definitions">Every track's definition, the soloists' ranges.</param>
     /// <param name="soloists">Every part's soloist, whose vocabulary its solos are played in.</param>
@@ -267,7 +268,7 @@ internal static class Solos
             // the solo's line, in the first soloist's vocabulary and range
             var first = trackOf[solo.Soloists[0]];
             var chordsHeld = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
-            var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), span, soloists[solo.Soloists[0]], solo.IsOwn, melody, chordsHeld, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
+            var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), span, solo.Mode == SoloMode.Trading && solo.Soloists.Length > 1 ? SoloPlan.TurnOf(span) : span.Duration, soloists[solo.Soloists[0]], solo.IsOwn, melody, chordsHeld, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
             StateTrace.Record(TracePoints.SoloGestures, first, span.SectionId, 0, StateMap.Default, 0, $"{(solo.IsOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, solo.IsOwn, segments));
 
             // as loud as the band's loudest part there and a margin over it, the melody resting and the drums apart
@@ -304,7 +305,10 @@ internal static class Solos
                         .With(StateKinds.Velocity, x.Value.GetStateValue(StateKinds.Velocity) + lift)
                         .ToTimelineItem(x.Position))
                 ];
-                moves[trackOf[soloist]] = own => EventTimeline.Create(own.Duration, own.Where(x => !IsIn(x)).Concat(played).OrderBy(x => x.Position));
+                // an accompanist that trades going back to its own part between its turns, a lead resting
+                var comps = solo.Mode == SoloMode.Trading && soloist is not (TrackRole.Melody or TrackRole.Solo);
+                moves[trackOf[soloist]] = own => EventTimeline.Create(own.Duration,
+                    own.Where(x => !IsIn(x) || comps && solo.TurnAt(span, x.Position) != place).Concat(played).OrderBy(x => x.Position));
             }
 
             // the melody rests where it is not a soloist

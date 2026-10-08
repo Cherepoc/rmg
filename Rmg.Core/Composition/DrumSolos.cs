@@ -251,7 +251,8 @@ internal static class DrumSolos
                 drummer,
                 // the groove is there to quote throughout
                 (_, _) => 1,
-                position => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60
+                position => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60,
+                solo.TradesWithDrums ? SoloPlan.TurnOf(whole) : span.Duration
             );
             var turn = SoloPlan.TurnOf(whole);
             // its segments in the drums' turns, a segment across a turn's end cut there
@@ -286,10 +287,11 @@ internal static class DrumSolos
                 // every drum cleared but the feet's where they replay the groove's kick
                 foreach (var track in tracks.Where(x => !feetTracks.Contains(x) || feetPattern != SoloFeet.Groove))
                     edits.Clear(track, start, end);
-                // the feet and the players keeping time, softer, the feet by their pattern where it is not the groove's
+                // the feet and the players keeping time, softer, their accents kept under it, the feet by their pattern where it
+                // is not the groove's
                 foreach (var track in (feetPattern == SoloFeet.Groove ? feetTracks : []).Concat(keepers.SelectMany(x => x.Tracks)))
                 foreach (var note in song.TrackTimelineMap[track].EventTimeline.Where(IsIn))
-                    edits.Replay(track, note, note.Value.GetStateValue(StateKinds.Velocity) + TimeLoudness);
+                    edits.Replay(track, note, note.Value.GetStateValue(StateKinds.Velocity) - BeatAccent.StrongestAccent + TimeLoudness);
                 if (feetPattern != SoloFeet.Groove && feetTracks.Count > 0)
                 {
                     var (footTrack, footSound) = feetPattern == SoloFeet.HatFoot

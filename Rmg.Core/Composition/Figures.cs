@@ -23,7 +23,13 @@ public enum FigurePlayer
 /// </summary>
 /// <param name="Sixteenths">How many 16ths it lasts, a bar of four's or two; none for the riff's, which lasts as the riff does.</param>
 /// <param name="AnswersKick">Whether it plays around the kick, between its beats, and so only in a bar the kick plays in, as a rolling bass does.</param>
-public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, bool FollowsRiff, double EnergyLean, bool AnswersKick);
+public sealed record Figure(string Name, string Label, FigurePlayer Player, ImmutableArray<int> Onsets, int Sixteenths, bool FollowsRiff, double EnergyLean, bool AnswersKick)
+{
+    /// <summary>The 16ths between its notes where it strikes at a steady step from the bar's start, every 16th or 8th, so that it plays in any meter; 0 for one of its own shape.</summary>
+    public int Step { get; } = Sixteenths == 16 && Onsets.Length > 0 && 16 % Onsets.Length == 0 && Onsets.Select((x, i) => x == i * (16 / Onsets.Length)).All(x => x)
+        ? 16 / Onsets.Length
+        : 0;
+}
 
 /// <summary>
 ///     The figures a genre gives its players in its sections: a groove or thrash band's kick with the riff, or in 16ths, a
@@ -91,19 +97,19 @@ internal static class Figures
         {
             var section = song.SectionOf(id);
             var context = song.Stream(SongStream.Figures, id);
-            // a figure of 16ths in a bar of them alone
+            // a figure of its own shape in a bar of 16 16ths alone, a steady one in any
             var isFour = song.SectionMeters[id].Sixteenths == 16;
             var energy = SectionEnergy.Tilt(section.Energy, section.Rhythm.Coupling);
             var figures = new Dictionary<FigurePlayer, Figure?>();
             foreach (var player in players)
             {
                 var options = ByConvention.Weigh(OptionsOf(player).Select(x => (x.Name, x.Weight)), section.Facets[Facet.Feel],
-                    song.Genre.Pool<string>(GenreChoices.Figures[player], x => x)).Where(x => isFour || Of(player, x.Value) is not { FollowsRiff: false });
+                    song.Genre.Pool<string>(GenreChoices.Figures[player], x => x)).Where(x => isFour || Of(player, x.Value) is not { FollowsRiff: false, Step: 0 });
                 var name = context.Pick(energy.Weigh(options, x => Of(player, x)?.EnergyLean ?? 0));
                 // a figure an earlier player drew that this one plays too, a blast's snare with its kick, drawn all the same
                 // so that the draws are as many
                 var shared = figures.Values.FirstOrDefault(x => x is not null && Of(player, x.Name) is not null);
-                figures[player] = shared is not null && isFour ? Of(player, shared.Name) : Of(player, name);
+                figures[player] = shared is not null && (isFour || shared.Step > 0) ? Of(player, shared.Name) : Of(player, name);
                 // a breakdown's kick with its riff, drawn all the same
                 if (player == FigurePlayer.Ground && section.Breakdown)
                     figures[player] = Of(player, "withRiff");
@@ -170,7 +176,9 @@ internal static class Figures
                             var own = played.Where(x => In(x.Position)).ToArray();
                             double[] onsets = figure.FollowsRiff
                                 ? [..timelines[riff!.Value].EventTimeline.Where(x => In(x.Position)).Select(x => x.Position).Distinct()]
-                                : [..figure.Onsets.Select(x => x - index % (figure.Sixteenths / 16) * 16).Where(x => x is >= 0 and < 16).Select(x => bar + x * 0.25)];
+                                : figure.Step > 0
+                                    ? [..Enumerable.Range(0, span.Meter.Sixteenths).Where(x => x % figure.Step == 0).Select(x => bar + x * 0.25)]
+                                    : [..figure.Onsets.Select(x => x - index % (figure.Sixteenths / 16) * 16).Where(x => x is >= 0 and < 16).Select(x => bar + x * 0.25)];
                             // in a bar both play, each struck as the player's own note at or before it was; one around the kick
                             // where the kick plays, the player's own rhythm where it rests
                             if (own.Length == 0 || onsets.Length == 0 || figure.AnswersKick && !tracks[FigurePlayer.Ground].Any(t => timelines[t].EventTimeline.Any(x => In(x.Position))))

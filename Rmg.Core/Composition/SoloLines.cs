@@ -42,9 +42,9 @@ public enum SoloGesture
 ///     peaks building to the solo's climax and easing after, each ending on a release, a note of the chord held from a
 ///     strong beat; within a phrase gestures of lengths of their own, picked by its intensity there, a run the likelier the
 ///     more intense, a held note or a pause the less, from the soloist's vocabulary (<see cref="Soloist" />), a run going
-///     on over the bar lines in the phrase. Each gesture heads for where the
-///     next starts: a note of the chord there, higher the more intense, in a solo of its own, or the melody's note there in
-///     one on the melody, which quotes it the more. Every note is a scale note in the soloist's range, as its chord there
+///     on over the bar lines in the phrase. A new run sets out the way to where the gesture ends, without aiming to land
+///     there: a note of the chord there, higher the more intense, in a solo of its own, or the melody's note there in one
+///     on the melody, which quotes it the more. Every note is a scale note in the soloist's range, as its chord there
 ///     has it, kept as its scale step over that chord, so that a run crossing a change of chord stays on the scale.
 /// </summary>
 internal static class SoloLines
@@ -113,7 +113,8 @@ internal static class SoloLines
     /// <summary>
     ///     A shape's cell, as the scale steps its notes are from the cell's first, its figure going round for as many notes as
     ///     the cell has, and how far the next cell starts on, the way the run goes: a scale's straight on, a sequence's and a
-    ///     turn's a step, an arpeggio's a third, a pedal's under its moving notes a step.
+    ///     turn's a step, an arpeggio's, the scale's thirds stacked from wherever it is, a third, a pedal's under its moving
+    ///     notes a step.
     /// </summary>
     public static (int[] Figure, int Advance, bool Continues) Shape(SoloShape shape) => shape switch
     {
@@ -162,6 +163,7 @@ internal static class SoloLines
     /// <summary>A solo's line, and every segment's intensity and gesture, by its start.</summary>
     /// <param name="melody">The melody's notes in the solo, which a solo on the melody aims at and quotes, and every note takes its state from.</param>
     /// <param name="band">The chords' notes in the solo, the band's chord a stacked note stacks; the melody's where they rest.</param>
+    /// <param name="turn">How long a soloist's turn is where several trade, which no phrase runs over; the span's length where none do.</param>
     /// <param name="track">The soloist's track, whose state its notes are realized over.</param>
     /// <param name="definition">The soloist's definition, its range.</param>
     /// <param name="voicing">The sequence that draws which gestures the soloist stacks, a stream of its own.</param>
@@ -171,6 +173,7 @@ internal static class SoloLines
         IGenerationContext voicing,
         IGenerationContext motifs,
         SectionSpan span,
+        double turn,
         Soloist soloist,
         bool isOwn,
         IReadOnlyList<TimelineItem<StateMap>> melody,
@@ -247,7 +250,8 @@ internal static class SoloLines
             soloist,
             // a quote wants the melody's notes there
             (start, end) => !melody.Any(n => n.Position >= start - 1e-9 && n.Position < end - 1e-9) ? 0 : isOwn ? OwnQuoteWeight : MelodyQuoteWeight,
-            position => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60
+            position => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60,
+            turn
         );
         var line = new List<TimelineItem<StateMap>>();
         var current = Nearest(ChordNotes(span.Start), middle);
@@ -262,7 +266,8 @@ internal static class SoloLines
             var stacks = voicing.TestProbability(new Tilt(Tilt.Of(ChordOdds, ChordLeans[gesture]).LogOdds + Tilt.Of(ChordOdds, 2 * level - 1).LogOdds).Chance(soloist.ChordRate, 1));
             // a run going on from the segment before keeps where it is in its cells
             cursor = goesOn && cursor is not null ? cursor : new CellCursor(current);
-            // and where the gesture heads: a note of the chord there, higher the more intense, or the melody's there
+            // and the way a new run sets out: towards a note of the chord where the gesture ends, higher the more intense, or
+            // the melody's there
             var heading = isOwn
                 ? Nearest(ChordNotes(Math.Min(end, span.End - 1e-6)), (current + bottom + (int)Math.Round(level * (top - bottom))) / 2)
                 : Nearest(ScaleNotes(end - 1e-6), FoldTowards(MelodyPitch(MelodyAt(Math.Min(end, span.End - 1e-6))), current));
@@ -365,7 +370,9 @@ internal static class SoloLines
     /// </summary>
     /// <param name="quoteWeight">How much a quote weighs from a segment's start to its end: what there is to quote there.</param>
     /// <param name="beatsASecond">The tempo at a position, in beats a second, which the speeds keep under the soloist's fastest.</param>
-    internal static Segment[] Plan(IGenerationContext context, SectionSpan span, Soloist soloist, Func<double, double, double> quoteWeight, Func<double, double> beatsASecond)
+    /// <param name="turn">How long a soloist's turn is where several trade, which no phrase runs over; the span's length where none do.</param>
+    internal static Segment[] Plan(IGenerationContext context, SectionSpan span, Soloist soloist, Func<double, double, double> quoteWeight, Func<double, double> beatsASecond,
+        double turn)
     {
         var bar = span.Meter.BarDuration;
         var strong = bar >= 4 ? bar / 2 : bar;
@@ -374,9 +381,9 @@ internal static class SoloLines
         var played = new Dictionary<int, double>();
         for (var (from, phrase) = (span.Start, 0); from < span.End - 1e-9; phrase++)
         {
-            // the phrase, to the solo's end rather than leave a scrap of less than a bar
+            // the phrase, to its turn's end at the latest, and to the solo's end rather than leave a scrap of less than a bar
             var bars = context.Pick(soloist.PhraseBars.Select(x => new Weighted<int>(1, x)).ToImmutableArray());
-            var to = Math.Min(span.End, from + bars * bar);
+            var to = Math.Min(Math.Min(span.End, from + bars * bar), span.Start + (Math.Floor((from - span.Start) / turn + 1e-9) + 1) * turn);
             if (span.End - to < bar - 1e-9)
                 to = span.End;
 

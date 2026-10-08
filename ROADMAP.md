@@ -30,7 +30,17 @@ fixed; the review and the plan are kept outside the repository):
    only drums keeping time; louder forms before the instruments, so a part sounding as another takes its form; stop
    time skipped steering no stage; the bass's walk out of stop time kept; a solo note taking no double stop of the
    melody's; a riser taking no articulation.
-5. Musicality in the code: the blues' last four bars, meters other than 4/4, the bass, stabs, solos' trading turns.
+5. Done: musicality in the code. The blues' turnaround, V–IV–I–V in its last four bars (bar 10 on IV 8% → 71%, bar 11
+   on I 2% → 77%); the meters other than 4/4: a phrase's end resting in a short bar, the line cliché on the meter's
+   groups, a mutating groove keeping its backbeat in any meter, a steady figure (a double kick, a blast, tremolo,
+   16ths) in any meter, Black metal's pinches 13 → 4 in 64 songs as its 3/4 riffs tremolo; stabs on the rhythm part, an
+   octave bass alternating, strums down and up in turn, the bass one note at a time; ghosts on the snare's head; a
+   vamp without passing changes; reharmonisation keeping chords in a scale of their own; a genre's drums kept by their
+   weight once, the kicks pushing together; a forced landing never on the calls; the harmonica bending; Metal's snare
+   tight on its kick; the ritardando over the last bar in any meter; a line's approach in its own scale; an open hat
+   leaning to the offbeat by rank; a dominant pedal under a section's last phrase; soloists trading whole phrases, an
+   accompanist comping between its turns; a drum solo's time keeping under the hands again. Left: the walking bass,
+   measured first (*Harmony and lines*).
 6. Generator correctness: the corners, each with a test.
 7. Stream robustness, with a fingerprint over genre songs.
 8. The server's robustness: failing songs logged, malformed requests answered 400, ratings outside the telemetry's cap.
@@ -181,6 +191,10 @@ live deploy.
 - **Borrowed and applied chords:** 7-12% of chords leaving the scale (`ChordScalesReportTest`); a held melody note
   clashing, an applied dominant's resolution spoiled? Decides their chances.
 - **The bass's pickup** always on the beat: square? Decides an 8th before the bar line, leaned by convention.
+- **A walking bass** (from the review of 9 October 2026): its weak quarters keep to the chord's notes, so a ii–V may
+  walk arpeggios rather than a line. A report of the share of Jazz's bass notes on beats 2 and 4 outside the chord
+  (about 30-50% in a walk) decides letting them take scale steps and chromatic passing notes where a genre leans its
+  leading high.
 - **Octaves and twins** (`doubling` heard better, 8 October 2026): a line in octaves in 10-20% of appearances, the riff's twin in 15% of riff
   songs, twin leads a third apart. Decides their chances and intervals.
 

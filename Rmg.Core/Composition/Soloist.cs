@@ -12,7 +12,7 @@ public enum SoloShape
     /// <summary>A short figure played again a step on, and again, as a sequence climbs.</summary>
     Sequence,
 
-    /// <summary>The chord's notes, broken.</summary>
+    /// <summary>The scale's thirds stacked from the note it is on, broken, a sequence of the scale's own chords as it moves a third on.</summary>
     Arpeggio,
 
     /// <summary>Around a note, a step above it and below and back.</summary>

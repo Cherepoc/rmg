@@ -212,13 +212,14 @@ internal sealed class Line
     ///     The note that leads into the next, where a chord changes, as the approach has it, aimed at where the next note
     ///     was placed, so that it never leaps an octave: by a scale step, the note as it is, if it is a step (one or two
     ///     semitones) from the next already, or the note nearest it that is, a step from it at most, so that it bends
-    ///     rather than jumps, a note of its scale on a weak beat and of its chord on a strong one, where it would sound
+    ///     rather than jumps, a note of its line's scale on a weak beat and of its chord on a strong one, where it would sound
     ///     against its own chord, or the note as it is, where no note is; a semitone below or above the next chord's root
     ///     nearest the next note, its fifth nearest that root, or the root itself, a little early.
     /// </summary>
     /// <param name="chordToneClasses">The pitch classes of the note's own chord's notes.</param>
     /// <param name="beatRank">How strong the note's beat is, 0 the strongest.</param>
     /// <param name="nextChord">The chord of the next note.</param>
+    /// <param name="lineScale">The scale the note's line keeps to.</param>
     public int Approach(
         ChordApproach approach,
         ChordContext chord,
@@ -226,9 +227,11 @@ internal sealed class Line
         int beatRank,
         int note,
         ChordContext nextChord,
-        int next
+        int next,
+        LineScale lineScale
     )
     {
+        _classes = LineScales.Classes(lineScale, chord);
         var root = NearestOfClass(nextChord.Root, next);
         var approached = approach switch
         {
@@ -262,7 +265,7 @@ internal sealed class Line
             return note;
 
         var isStrong = beatRank <= _profile.StrongestWeakRank && chordToneClasses.Count > 0;
-        var candidates = (isStrong ? GetChordTones(chordToneClasses) : GetScaleNotes(chord))
+        var candidates = (isStrong ? GetChordTones(chordToneClasses) : GetLineNotes(chord))
             .Where(x => IsStep(x, next) && Math.Abs(x - note) <= 4)
             .ToArray();
         return candidates.Length == 0 ? note : GetNearest(candidates, note);

@@ -79,7 +79,7 @@ internal static class Progressions
     ///     a root out of its place weighs (<see cref="OutOfPlaceWeight" />): a middle phrase from IV, now and then from home;
     ///     the last from V, now and then from IV, but the second of two from home (<see cref="AnswerStarts" />); and every
     ///     phrase but the last back home, the first of two on V now and then, a half close (<see cref="QuestionEnds" />), so
-    ///     that three phrases make the blues' I / IV–I / V–I and two a song's 8-bar, a question and its answer.
+    ///     that three phrases make the blues' I / IV–I / V–IV–I (<see cref="TurnaroundSeconds" />) and two a song's 8-bar, a question and its answer.
     /// </summary>
     private static readonly ImmutableDictionary<int, double> MiddlePhraseStarts = ImmutableDictionary<int, double>.Empty.Add(3, 1).Add(0, 0.15);
 
@@ -102,6 +102,14 @@ internal static class Progressions
 
     /// <summary>The roots that prepare a cadence: ii and IV.</summary>
     private static readonly ImmutableHashSet<int> PreCadenceSteps = [1, 3];
+
+    /// <summary>
+    ///     The last of three phrases, the blues' turnaround, V–IV–I–V: its second chord down a step to IV, now and then
+    ///     ii, and the cadence prepared from home rather than ii or IV.
+    /// </summary>
+    private static readonly ImmutableDictionary<int, double> TurnaroundSeconds = ImmutableDictionary<int, double>.Empty.Add(3, 1).Add(1, 0.15);
+
+    private static readonly ImmutableHashSet<int> TurnaroundPreparations = [0];
 
     /// <summary>
     ///     The homes a section may have, as a genre names them, and how likely each is: the tonic itself most often, the
@@ -194,14 +202,16 @@ internal static class Progressions
             {
                 // a longer progression's phrases, past the first, start by their place, and all but the last end home
                 var phrase = chord / perPhrase;
+                var turnaround = phrases == 3 && phrase == 2;
                 var placed = chord % perPhrase == 0 ? phrase == phrases - 1 ? phrases == 2 ? AnswerStarts : LastPhraseStarts : MiddlePhraseStarts
                     : chord % perPhrase == perPhrase - 1 && phrase < phrases - 1 ? phrases == 2 ? QuestionEnds : PhraseEnds
+                    : turnaround && chord % perPhrase == 1 && !isPreparation && !isCadence ? TurnaroundSeconds
                     : null;
                 // a phrase's place before the cadence's preparation, which a phrase of two chords starts on: the blues' V at
                 // bar 9 in chords of two bars
                 var roleWeight = isCadence ? cadenceWeights[step] > 0 ? cadenceWeights[step] : OutOfRoleWeight
                     : placed is not null ? placed.GetValueOrDefault(step, OutOfPlaceWeight(strictness))
-                    : isPreparation ? PreCadenceSteps.Contains(step) ? 1 : OutOfRoleWeight
+                    : isPreparation ? (turnaround ? TurnaroundPreparations : PreCadenceSteps).Contains(step) ? 1 : OutOfRoleWeight
                     : 1;
                 var motion = Mod(step - previous);
                 weights[step] = new Weighted<int>(tilt.Weigh(tilt.Weigh(tilt.Weigh(Math.Pow(MotionWeights[motion] * roleWeight, strictness), motionLean(motion)), degreeLean(step)),

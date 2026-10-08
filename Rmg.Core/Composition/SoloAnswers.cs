@@ -83,7 +83,7 @@ internal static class SoloAnswers
                     continue;
 
                 var gap = span with { Start = start, Duration = end - start };
-                var (line, _) = SoloLines.Generate(context, context, context, gap, answerer, true, melody, band, track, (PitchInstrumentTrack)definitions[soloTrack], song.CommonStateTimelineMap);
+                var (line, _) = SoloLines.Generate(context, context, context, gap, gap.Duration, answerer, true, melody, band, track, (PitchInstrumentTrack)definitions[soloTrack], song.CommonStateTimelineMap);
                 var lift = Solos.Lift(
                     Realizer.GetNoteStates(EventStateTimelineMap.Create(song.Duration, EventTimeline.Create(song.Duration, line), track.StateTimelineMap), definitions[soloTrack], song.CommonStateTimelineMap).ToArray(),
                     heard - Quieter);

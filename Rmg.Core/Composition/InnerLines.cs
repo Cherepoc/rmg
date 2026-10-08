@@ -16,7 +16,7 @@ internal static class InnerLines
 
     /// <summary>
     ///     A chromatic line inside a held chord, the line cliché: in a section that takes it, over a chord two bars long or
-    ///     longer, the chord's root voice falling a semitone each quarter of the chord, the root, its major seventh, its
+    ///     longer, the chord's root voice falling a semitone each quarter of the chord, on the meter's group nearest it, the root, its major seventh, its
     ///     seventh and its sixth, as the chords Cmaj7, C7 and C6 over C, each quarter a change of chord, the rest of the chord
     ///     held; decided as the song's state before the lines are placed, so that the melody placed over it fits it as it fits
     ///     any chord, the chord's scale altered to hold the fallen note where it has it not (a C7's B♭ in C major). A
@@ -45,16 +45,21 @@ internal static class InnerLines
         // every chord held long enough in a section that takes the line, but in a solo: where it starts and ends
         var held = song.Form.Map.Sections.Where((x, i) => lining[x.SectionId] && !song.Solos.ContainsKey(i))
             .SelectMany(span => changes.Where(x => x >= span.Start - 1e-9 && x < span.End - 1e-9)
-                .Select(x => (Start: x, End: changes.Where(c => c > x + 1e-9).DefaultIfEmpty(span.End).Min() is var next ? Math.Min(next, span.End) : span.End))
-                .Where(x => x.End - x.Start >= Bars * span.Meter.BarDuration - 1e-9))
-            .Where(x => !kept.Contains(x.Start) && common.GetEffectiveStateMapAt(x.Start).GetStateValue(StateKinds.ChordShift) == 0 && Lines(x))
+                .Select(x => (Start: x, End: Math.Min(changes.FirstOrDefault(c => c > x + 1e-9, span.End), span.End), span.Meter))
+                .Where(x => x.End - x.Start >= Bars * x.Meter.BarDuration - 1e-9))
+            .Where(x => !kept.Contains(x.Start) && common.GetEffectiveStateMapAt(x.Start).GetStateValue(StateKinds.ChordShift) == 0 && Lines((x.Start, x.End)))
             .ToArray();
         var (falls, marks, scales) = (new List<TimelineItem<int>>(), new List<TimelineItem<int>>(), new List<TimelineItem<LayerValue<StepAlterations>>>());
-        foreach (var (start, end) in held)
+        foreach (var (start, end, meter) in held)
         {
+            var before = start;
             for (var quarter = 1; quarter < 4; quarter++)
             {
-                var at = start + quarter * (end - start) / 4;
+                // on the meter's nearest group, never on the step before it
+                var at = meter.NearestGroupStart(start + quarter * (end - start) / 4);
+                if (at <= before + 1e-9 || at >= end - 1e-9)
+                    break;
+                before = at;
                 var state = common.GetEffectiveStateMapAt(at);
                 var (offsets, root, chord) = Realizer.GetChord(state);
                 // the fallen note a step or two under the root, the step nearest it raised or lowered onto it where the scale

@@ -99,7 +99,7 @@ internal static class Mutations
                 var start = span.Start + bar * barLength;
                 var count = context.TestProbability(chance) ? context.TestProbability(SecondEdit) ? 2 : 1 : 0;
                 for (var edit = 0; edit < count; edit++)
-                    if (Draw(context, played, own, start, barLength, kicks, snares, anchored) is { } mutation)
+                    if (Draw(context, played, own, start, span.Meter, kicks, snares, anchored) is { } mutation)
                         edits.Add(mutation);
                 made += count;
                 if (edits.Count > 0)
@@ -126,14 +126,15 @@ internal static class Mutations
     private static IEnumerable<double> HitsIn(List<TimelineItem<StateMap>> notes, double start, double length) =>
         notes.Where(x => x.Position >= start - 1e-9 && x.Position < start + length - 1e-9).Select(x => x.Position - start);
 
-    /// <summary>Whether a hit is an anchor: the downbeat's kick, a backbeat's snare.</summary>
-    private static bool IsAnchor(int track, double at, double length, IReadOnlySet<int> kicks, IReadOnlySet<int> snares) =>
-        kicks.Contains(track) && at < 1e-9 || snares.Contains(track) && length >= 4 - 1e-9 && (Math.Abs(at - 1) < 1e-9 || Math.Abs(at - 3) < 1e-9);
+    /// <summary>Whether a hit is an anchor: the downbeat's kick, a snare on a later group of the meter, its backbeat in any meter.</summary>
+    private static bool IsAnchor(int track, double at, Meter meter, IReadOnlySet<int> kicks, IReadOnlySet<int> snares) =>
+        kicks.Contains(track) && at < 1e-9 || snares.Contains(track) && at > 1e-9 && meter.Levels[1].Any(x => Math.Abs(x.Start / 4.0 - at) < 1e-9);
 
     /// <summary>An edit drawn on the bar as it is, none where it finds nothing to edit; every draw made whatever it finds.</summary>
-    private static Mutation? Draw(IGenerationContext context, Dictionary<int, List<TimelineItem<StateMap>>> played, int[] drums, double start, double length,
+    private static Mutation? Draw(IGenerationContext context, Dictionary<int, List<TimelineItem<StateMap>>> played, int[] drums, double start, Meter meter,
         IReadOnlySet<int> kicks, IReadOnlySet<int> snares, bool anchored)
     {
+        var length = meter.BarDuration;
         var kind = context.Pick(Kinds);
         var track = drums.Length == 0 ? -1 : drums[context.GenerateInt(0, drums.Length)];
         var pick = context.GenerateDouble();
@@ -143,7 +144,7 @@ internal static class Mutations
         var times = 2 + context.GenerateInt(0, 3);
         if (track < 0)
             return null;
-        var hits = HitsIn(played[track], start, length).Where(x => !anchored || !IsAnchor(track, x, length, kicks, snares)).Distinct().ToArray();
+        var hits = HitsIn(played[track], start, length).Where(x => !anchored || !IsAnchor(track, x, meter, kicks, snares)).Distinct().ToArray();
         return kind switch
         {
             MutationKind.Swap when from != to => new Mutation(kind, track, from * 2 * Sixteenth, to * 2 * Sixteenth),

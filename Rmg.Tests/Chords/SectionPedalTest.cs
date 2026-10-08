@@ -5,7 +5,7 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Chords;
 
-/// <summary>A pedal under a section: the bass holding one note, its home or its dominant, under the first phrase's changing chords.</summary>
+/// <summary>A pedal under a section: the bass holding one note, its home or its dominant, under the changing chords of its first phrase, or of its last for the dominant.</summary>
 public sealed class SectionPedalTest
 {
     [Test]
@@ -15,12 +15,13 @@ public sealed class SectionPedalTest
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed,
                      new SongOverrides(Facets: ImmutableDictionary<Facet, double>.Empty.Add(Facet.Progression, 0.9)))))
         {
-            var pedalling = song.Trace.Where(x => x.Point == TracePoints.SectionPedal && x.Value is not null).Select(x => x.Section).ToHashSet();
+            var pedalling = song.Trace.Where(x => x.Point == TracePoints.SectionPedal && x.Value is not null).ToDictionary(x => x.Section, x => (int)x.Value!);
             var bass = song.Song.Notes![SongTracks.BassTrack];
-            foreach (var span in song.Song.Map!.Sections.Where(x => pedalling.Contains(x.SectionId)))
+            foreach (var span in song.Song.Map!.Sections.Where(x => pedalling.ContainsKey(x.SectionId)))
             {
-                var end = Math.Min(span.End, span.Start + Meter.PhraseBarCount * span.Meter.BarDuration);
-                var classes = bass.Where(x => x.Position >= span.Start - 1e-9 && x.Position < end - 1e-9).Select(x => x.Value.Pitches[0].Mod(12)).ToArray();
+                var phrase = Meter.PhraseBarCount * span.Meter.BarDuration;
+                var (start, end) = pedalling[span.SectionId] == 0 ? (span.Start, Math.Min(span.End, span.Start + phrase)) : (Math.Max(span.Start, span.End - phrase), span.End);
+                var classes = bass.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9).Select(x => x.Value.Pitches[0].Mod(12)).ToArray();
                 if (classes.Length == 0)
                     continue;
                 phrases++;

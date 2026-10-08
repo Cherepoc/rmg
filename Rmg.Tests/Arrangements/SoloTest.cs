@@ -83,6 +83,28 @@ public sealed class SoloTest
     private static (int Index, bool IsOwn, SoloLines.Segment[] Plan)[] Plans(CorpusSong song) =>
         [..song.Trace.Where(x => x.Point == TracePoints.SoloGestures).Select(x => ((int, bool, SoloLines.Segment[]))x.Value!)];
 
+    /// <summary>Soloists trading take whole phrases in turn: no phrase of the line runs over a turn's end.</summary>
+    [Test]
+    public async Task TradingSoloists_TakeWholePhrases_NoneRunningOverItsTurn()
+    {
+        var trading = 0;
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, Facets(1, 1))))
+        foreach (var (index, _, plan) in Plans(song))
+        {
+            if (song.Solos[index] is not { Mode: SoloMode.Trading, Soloists.Length: > 1 })
+                continue;
+            trading++;
+            var span = song.Map.Sections[index];
+            var turn = SoloPlan.TurnOf(span);
+            int TurnOf(double position) => (int)Math.Floor((position - span.Start) / turn + 1e-9);
+            foreach (var phrase in plan.GroupBy(x => x.Phrase))
+                await Assert.That(TurnOf(phrase.Max(x => x.End) - 1e-6)).IsEqualTo(TurnOf(phrase.Min(x => x.Start))).Because($"seed {song.Seed}, phrase {phrase.Key}");
+        }
+
+        Console.WriteLine($"{trading} solos trading");
+        await Assert.That(trading).IsGreaterThan(0);
+    }
+
     [Test]
     public async Task APlainSolo_IsOnTheMelody_AndAWildOne_ItsOwn()
     {

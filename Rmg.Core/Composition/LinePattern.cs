@@ -183,7 +183,8 @@ internal sealed class LinePattern
             if (!isChange || isHeld || approach == ChordApproach.None || last.Note.Classes.SetEquals(next.Note.Classes) || !next.Note.Classes.Contains(next.Pitch.Mod(12)))
                 continue;
 
-            notes[i] = last with { Pitch = line.Approach(approach, last.Note.Chord, last.Note.Classes, last.Rank, last.Pitch, next.Note.Chord, next.Pitch) };
+            notes[i] = last with { Pitch = line.Approach(approach, last.Note.Chord, last.Note.Classes, last.Rank, last.Pitch, next.Note.Chord, next.Pitch,
+                (LineScale)last.Note.State.GetStateValue(CompositionStateKinds.LineScale)) };
         }
 
         var loudness = PhraseArc(notes.Select(x => (x.Note.State, x.Pitch)).ToArray(), profile.PhraseArc);
@@ -454,7 +455,8 @@ internal sealed class LinePattern
 
         // the bar's timeline lasts the bar
         var holdEnd = notes.Duration - MelodyLayers.PhraseEndRest;
-        var kept = notes.Where(x => x.Position < end).ToList();
+        // in a short bar, the end before the rest whatever beat was drawn
+        var kept = notes.Where(x => x.Position < Math.Min(end, holdEnd)).ToList();
         if (kept.Count == 0 && notes.Count > 0 && notes[0].Position < holdEnd)
             kept.Add(notes[0]);
         if (kept.Count == 0)
