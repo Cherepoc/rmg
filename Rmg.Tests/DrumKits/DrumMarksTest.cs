@@ -50,10 +50,13 @@ public sealed class DrumMarksTest
     [Test]
     public async Task ASwell_QuickensAndGrowsToItsPeak_ThenSlowsAndFades()
     {
-        var notes = DrumMarks.Roll(new RealizedNote([49], 1, 1, StateMap.Default), 8, DrumMarks.SwellBeats, DrumMarks.SwellBeats, 8).ToArray();
+        // a note at the middle of the velocity scale, where a sum scaled by a factor would not swell at all
+        var notes = DrumMarks.Roll(new RealizedNote([49], 0, 1, StateMap.Default), 8, DrumMarks.SwellBeats, DrumMarks.SwellBeats, 8).ToArray();
         var peak = notes.MaxBy(x => x.Value.Velocity)!;
         await Assert.That(peak.Position).IsEqualTo(8).Within(0.2);
-        await Assert.That(notes.First().Value.Velocity).IsEqualTo(DrumMarks.RollFrom).Within(1e-9);
+        // as heard, the first stroke the share of the peak's it is meant to be, or the scale's softest
+        double Heard(TimelineItem<RealizedNote> x) => Rmg.Core.Rendering.Render.ToMidiVelocity(x.Value.Velocity);
+        await Assert.That(Heard(notes.First())).IsEqualTo(Math.Max(Heard(peak) * DrumMarks.RollFrom, 0.2)).Within(1e-3);
         await Assert.That(notes.All(x => Math.Abs(x.Position - 8) <= DrumMarks.SwellBeats + 1e-9)).IsTrue();
         var (rise, fall) = (notes.TakeWhile(x => x.Position <= peak.Position).ToArray(), notes.SkipWhile(x => x.Position < peak.Position).ToArray());
         // louder and closer up to the peak, softer and further apart after it

@@ -77,7 +77,7 @@ internal static class Ghosts
                         if (draws[k] < (near ? NearChance : FarChance))
                             played.Add((loudest.Value with
                             {
-                                Velocity = Render.FromMidiVelocity(Render.ToMidiVelocity(loudest.Value.Velocity) * Loudness),
+                                Velocity = Render.ScaleLoudness(loudest.Value.Velocity, Loudness),
                                 Duration = Math.Min(loudest.Value.Duration, Length)
                             }).ToTimelineItem(at));
                     }

@@ -289,7 +289,7 @@ internal static class DrumSolos
                 // the feet and the players keeping time, softer, the feet by their pattern where it is not the groove's
                 foreach (var track in (feetPattern == SoloFeet.Groove ? feetTracks : []).Concat(keepers.SelectMany(x => x.Tracks)))
                 foreach (var note in song.TrackTimelineMap[track].EventTimeline.Where(IsIn))
-                    edits.Replay(track, note, TimeLoudness);
+                    edits.Replay(track, note, note.Value.GetStateValue(StateKinds.Velocity) + TimeLoudness);
                 if (feetPattern != SoloFeet.Groove && feetTracks.Count > 0)
                 {
                     var (footTrack, footSound) = feetPattern == SoloFeet.HatFoot

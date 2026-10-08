@@ -255,6 +255,13 @@ public static class Render
         return MiddleVelocity + VelocityReach * Math.Tanh((sum - VelocityCentre) / VelocityScale);
     }
 
+    /// <summary>
+    ///     A velocity sum made a share as loud as heard: its velocity on the fixed scale times the factor, and the sum it is
+    ///     rendered from, as a roll growing from 60% of a note or a stroke struck again at 80% of it; a sum scaled by the
+    ///     factor itself would barely change near the scale's middle and grow louder where it is negative.
+    /// </summary>
+    internal static double ScaleLoudness(double sum, double factor) => FromMidiVelocity(ToMidiVelocity(sum) * factor);
+
     /// <summary>The velocity sum a velocity on the fixed scale is rendered from (<see cref="ToMidiVelocity" />), the scale's ends kept just inside.</summary>
     internal static double FromMidiVelocity(double velocity)
     {

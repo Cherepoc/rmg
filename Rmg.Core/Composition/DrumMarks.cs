@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
+using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
@@ -114,7 +115,7 @@ internal static class DrumMarks
                 if (hits && plays && strength == 0 && swell && at >= SwellBeats)
                     marks[drum].AddRange(Roll(loudest[drum], at, SwellBeats, SwellBeats, swellRate));
                 else if (hits && plays)
-                    marks[drum].Add((loudest[drum] with { Velocity = loudest[drum].Velocity * loudness }).ToTimelineItem(at));
+                    marks[drum].Add((loudest[drum] with { Velocity = Render.ScaleLoudness(loudest[drum].Velocity, loudness) }).ToTimelineItem(at));
             }
 
             // a roll into the section on the beat before it, where the drums play the section
@@ -143,6 +144,6 @@ internal static class DrumMarks
             : 1 - (1 - RollFrom) * (at - peak) / after;
         // a roll with nothing after its peak ending before it, on the section's first strike
         for (var at = peak - before; at < peak + after + 1e-9 && (after > 0 || at < peak - 1e-9); at += 1 / (rate * Loudness(at)))
-            yield return (note with { Velocity = note.Velocity * Loudness(at), Duration = Math.Min(note.Duration, 1.0 / rate) }).ToTimelineItem(at);
+            yield return (note with { Velocity = Render.ScaleLoudness(note.Velocity, Loudness(at)), Duration = Math.Min(note.Duration, 1.0 / rate) }).ToTimelineItem(at);
     }
 }

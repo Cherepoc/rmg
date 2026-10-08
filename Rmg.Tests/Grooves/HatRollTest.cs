@@ -25,7 +25,8 @@ public sealed class HatRollTest
                     if (gap > 1 / 6.0 + 1e-6 || Enumerable.Range(i + 1, 2).Any(j => Math.Abs(on[j + 1].Position - on[j].Position - gap) > 1e-6))
                         continue;
                     rolls++;
-                    louder += on[i + 3].Value.Velocity > on[i].Value.Velocity ? 1 : 0;
+                    // louder as heard, its first a share of its fourth no greater than a roll's start
+                    louder += Rmg.Core.Rendering.Render.ToMidiVelocity(on[i].Value.Velocity) <= Rmg.Core.Rendering.Render.ToMidiVelocity(on[i + 3].Value.Velocity) * (HatRolls.From + (1 - HatRolls.From) * 3 / 4.0) + 1e-6 ? 1 : 0;
                     i += 3;
                 }
             }

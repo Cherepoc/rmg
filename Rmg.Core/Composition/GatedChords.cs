@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using Rmg.Core.Events;
+using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
@@ -83,7 +84,7 @@ internal static class GatedChords
                 held.AddRange(strokes.Select((x, i) => (note with
                 {
                     Duration = (i + 1 < strokes.Length ? strokes[i + 1] : end) - x,
-                    Velocity = i == 0 ? note.Velocity : note.Velocity * RestrikeVelocity
+                    Velocity = i == 0 ? note.Velocity : Render.ScaleLoudness(note.Velocity, RestrikeVelocity)
                 }).ToTimelineItem(x)));
             }
         }

@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
+using Rmg.Core.Rendering;
 using Rmg.Core.Songs;
 
 namespace Rmg.Core.Composition;
@@ -62,7 +63,7 @@ internal static class HatRolls
                 var count = (int)Math.Round((to - from) * rate);
                 rolled.AddRange(Enumerable.Range(0, count).Select(k => (own.Value with
                 {
-                    Velocity = own.Value.Velocity * (From + (1 - From) * k / Math.Max(1, count - 1)),
+                    Velocity = Render.ScaleLoudness(own.Value.Velocity, From + (1 - From) * k / Math.Max(1, count - 1)),
                     Duration = Math.Min(own.Value.Duration, 1.0 / rate)
                 }).ToTimelineItem(from + k / (double)rate)));
             }

@@ -12,7 +12,9 @@ fixed; the review and the plan are kept outside the repository):
 
 1. Done: the four high findings: a shuffle genre's 8ths swung at every tempo (blues, jazz, country); the events of a
    day and the new genres of a day capped for everyone together; a version accepted only as this server's or older.
-2. Loudness on the heard scale: hi-hat rolls, drum marks and gated chords scaled through the render's curve.
+2. Done: loudness on the heard scale, a share of a velocity taken through the render's curve (`Render.ScaleLoudness`):
+   hi-hat rolls growing from 60% of the hat as heard, drum marks' rolls, swells and strengths, gated chords' restrikes;
+   a drum solo's time keeping keeping its accents.
 3. Genre data and validation: partial chances choices, Rock's half time, Funk, the blues' form, Latin's clave, defaults
    leaking into presets, a genre value's three ends, a pool that weighs nothing.
 4. Stage interactions: figures over polymeters, the riff's twin with its riff, hat rolls under fills, drum marks.
