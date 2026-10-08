@@ -11,21 +11,21 @@ each device a genre's data on a mechanism there already where it can be, strong 
 percent everywhere, and a listening question once deployed):
 
 1. Done: a breakdown, a bridge or a free form's section in half time, the kick with the chugging riff, the lines and the
-   pad out; Djent's 55% of songs, Metal's 42%, Nu metal's 41% (`?listen=breakdown`).
+   pad out; Djent's 55% of songs, Metal's 42%, Nu metal's 41% (`breakdown` heard better, 8 October 2026).
 2. Done: the riff as the song's signature, a song opening on its riff alone, the band coming in after it; Rock's 33%,
-   Metal's 42% (`?listen=riff-intro`). Between its sections, the part alone already (`GenreChoices.Alone`).
+   Metal's 42% (`riff-intro` heard better, 8 October 2026). Between its sections, the part alone already (`GenreChoices.Alone`).
 3. Done: a snare's ghost notes, soft 16ths around its backbeat, the same in a section's bars; Funk's 1.2 a bar,
    Soul's 0.9, Rock's 0.5 (`?listen=ghosts`), heard too loud at first and now 40% of the snare's velocity as rendered,
    about 40 against 85. Its drags left (*What the genres cannot play yet*). The hi-hat rolls ramp their loudness by
    scaling a velocity sum, as the ghosts first did, which the render's curve flattens: to check (`HatRolls.From`).
 4. Done: the solo harmonised, two parts together a third apart, the second on the first's notes of an 8th and longer,
-   as every solo played together now; Metal's 39% of its solos, Rock's 16% (`?listen=twin-solo`).
+   as every solo played together now; Metal's 39% of its solos, Rock's 16% (`twin-solo` heard better, 8 October 2026).
 5. Done: passing chords of a genre's kinds, the tritone substitute, a half-diminished chord a semitone below the next
    between roots a whole step apart, the next chord a semitone below, beside its dominant and a semitone above; Jazz's,
    Soul's, Bossa nova's and Orchestral's pools (`?listen=jazz-passing`). A ii–V into a chord but the home left
    (*Approach chords*).
 6. Done: the bass alternating its chord's root and fifth on its strong beats, Country's 73% of its sections, Folk's
-   38% (`?listen=root-fifth`); Jazz's walking quarters there already, its bass's rhythm in quarters leading into its chords.
+   38% (`root-fifth` heard better, 8 October 2026); Jazz's walking quarters there already, its bass's rhythm in quarters leading into its chords.
 7. Done: the kick and the crash pushing with the band, an eighth early; the drums playing a stop-time phrase's last
    half bar, a fill there as heavy as a section's, 1% to 21% of the phrases filled out of.
 8. Done: a riff's weak notes on an open string's drone, the chugging riff's pedal without its chugs, heard worse and
@@ -87,6 +87,13 @@ its song without lays its patch over the genre's options, the others kept (`with
 melody's figures inverted (Pop), and `trade`. The least heard by their nature, short devices in a long song:
 `lift-cues`, under 0.1.
 
+Answered on 8 October 2026, the evening, and let go of, each heard better in 4 to 6 of its 6 songs: pushes, the drums'
+marks, louder forms, ornaments, the pocket, the solo's answers, the lift's cues (as often the same), doubling, the kick
+with the riff, the double kick, the gallop, the tremolo, the blast, the echo, metal's and Djent's arpeggios, the mix
+filter, the trade, the breakdown, the riff intro, the twin solo and the bass's root and fifth. Asked again: the rolling
+bass, heard worse in 5 of 6, over six other songs; kept: the clave, the tone, Black metal's ending and Jazz's passing
+chords, split.
+
 Answered on 8 October 2026, with the songs picked by how much they differ, and let go of: `pinch`, a highlight in 6 of
 6; `pinch-sound`, General MIDI's harmonics over the squeal in 6 of 6, 8 of 12 in all, so the harmonics are the songs'
 sound and the squeal a genre's alone; `dive`, a launch in 5 of 6, 8 of 12 in all, its ritardando still to be considered; `drum-solo`, the hi-hat's pedal
@@ -107,7 +114,7 @@ live deploy.
 - **Rests, entries and textures:** breakdowns and melody-less sections as arrangement or parts gone missing; parts held
   back at the start (15-18%); one part alone or parts dropping out, leaned to the quieter sections (`TextureTest`).
   Decides the textures' weights and their lean.
-- **The lift** (`?listen=lift-cues`): a crescendo of 8 of 127 into a louder section, and the drums' cues, 2.6 a song.
+- **The lift** (`lift-cues` heard better, 8 October 2026): a crescendo of 8 of 127 into a louder section, and the drums' cues, 2.6 a song.
   Decides whether the cues stay, and how often.
 - **Key changes:** two a song in the fourth fifth; prepared ones, pivots, pedals, sequences heard. Decides their
   chances and devices.
@@ -127,14 +134,14 @@ live deploy.
 - **Phrases:** question and answer, varied repeats (A′ at 0.25, `PhraseSchemes.VariedRepeatChance`), the melody's
   leaps at a phrase's start (a third), the sequences rising with the phrase. Decides their chances.
 - **The gaps before chord changes:** half the changes with no melody in their last beat, the solo part answering now
-  (`?listen=solo-answers`). Decides filling them.
+  (`solo-answers` heard better, 8 October 2026). Decides filling them.
 - **The walks into a section:** the melody at 15% of changes, the bass at half of the runs. Decides their chances.
 - **Double stops and the riff's chords:** the melody's on a chord instrument's downbeats in a quarter of sections.
   Decides their chance.
 - **Borrowed and applied chords:** 7-12% of chords leaving the scale (`ChordScalesReportTest`); a held melody note
   clashing, an applied dominant's resolution spoiled? Decides their chances.
 - **The bass's pickup** always on the beat: square? Decides an 8th before the bar line, leaned by convention.
-- **Octaves and twins** (`?listen=doubling`): a line in octaves in 10-20% of appearances, the riff's twin in 15% of riff
+- **Octaves and twins** (`doubling` heard better, 8 October 2026): a line in octaves in 10-20% of appearances, the riff's twin in 15% of riff
   songs, twin leads a third apart. Decides their chances and intervals.
 
 ### Solos
@@ -147,7 +154,7 @@ live deploy.
 - **Chords in solos:** 41% of a chord soloist's held notes stacked, planing 17% at the middle and 59% wild. Decides
   their rates.
 - **Drum solos:** stickings round the kit; a crash with the kick in 23% of segments. Decides the drum solo's gestures.
-- **Trading with the drums** (`?listen=trade`): Jazz's solos trading with the drums by turns, the band laying out. Decides
+- **Trading with the drums** (`trade` heard better, 8 October 2026): Jazz's solos trading with the drums by turns, the band laying out. Decides
   the trade's chance by genre, and whether the band keeps time under the drums' turns instead.
 
 ### Drums and groove
@@ -162,17 +169,17 @@ live deploy.
 - **Drum pieces given:** both snares doubling the backbeat; a piece put in by its roles alone. Decides giving the
   snare group one snare.
 - **Every drum heard** (`DrumCoverage`): a drum landing once, placed or tacked on? Decides its landing.
-- **The drums' marks** (`?listen=drum-marks`): a strike every three bars and a swell into a section. Decides the marks'
+- **The drums' marks** (`drum-marks` heard better, 8 October 2026): a strike every three bars and a swell into a section. Decides the marks'
   rate and the swell's length.
-- **The ornaments** (`?listen=ornaments`): one in eight to ten long notes, 2.5% of Folk's and Medieval's lines; a trill
+- **The ornaments** (`ornaments` heard better, 8 October 2026): one in eight to ten long notes, 2.5% of Folk's and Medieval's lines; a trill
   up to 1.5 s. Decides their rate and the trill's length.
 - **The polymeters:** the snare on every cell's start; the chords joining a cycle. Decides who joins a cycle.
-- **The pocket** (`?listen=pocket`): the backbeat a little late, the bass a touch ahead, the lead laid back. Decides
+- **The pocket** (`pocket` heard better, 8 October 2026): the backbeat a little late, the bass a touch ahead, the lead laid back. Decides
   the offsets.
-- **The figures** (`?listen=kick-lock`, `double-kick`, `gallop`, `clave`): Metal's sections 27% with the riff, 14% a
+- **The figures** (`kick-lock`, `double-kick` and `gallop` heard better, 8 October 2026; `?listen=clave`): Metal's sections 27% with the riff, 14% a
   double kick, 15% galloping, Nu metal's 42% with the riff (`RockAndMetalReportTest`), Latin's claves on the clave.
   Decides their weights and leans.
-- **Pushes** (`?listen=pushes`): the band's changes an eighth early. Decides their chances by genre.
+- **Pushes** (`pushes` heard better, 8 October 2026): the band's changes an eighth early. Decides their chances by genre.
 - **Stop time carried** (`?listen=stop-time`): the band hitting once a bar under the lines, the drums keeping time
   going on where the lines rest (Blues and Rock, none of 700 stopped bars silent past its hit, from 16%). Decides its
   chance, and whether the drums keeping time is the band's device or the band should stop with them.
@@ -180,10 +187,10 @@ live deploy.
 ### Sound
 
 - **The velocity:** the bass's and the chords' evenness; bar layers adding 3 to 5. Decides the layers' spread.
-- **The echo as the synthesizer's delay** (`?listen=echo`): the Roland GS delay's tone in the player, its feedback
+- **The echo as the synthesizer's delay** (`echo` heard better, 8 October 2026): the Roland GS delay's tone in the player, its feedback
   (100, about half), its darkness (2 of 7), the send (100), and a dub snare's quiet strokes echoing with its backbeat,
   the delay's send being a drum's, not a stroke's. Decides those settings, or the echo's notes back.
-- **Metal's arpeggios** (`?listen=metal-arpeggio`, `?listen=djent-arpeggio`, `MetalArpeggiosReportTest`): a third
+- **Metal's arpeggios** (`metal-arpeggio` and `djent-arpeggio` heard better, 8 October 2026, `MetalArpeggiosReportTest`): a third
   of Metal's chord parts' sections broken, the pedal point the commonest, 1.7 notes a beat, its colours dissonant 17%;
   Djent's 79%. Ringing over the riff or muddying it; the rhythm part resting less where the heavy guitars rest, should
   the arpeggio be lost under them. Decides the colours' and the patterns' weights.
@@ -202,7 +209,7 @@ live deploy.
   delay and which parts stay single.
 - **The dub echo, the insertion effect and the rooms** (`DubEchoTest`, `InsertionTest.Report`): echoes as notes thin,
   the wah's and phaser's settings, the rooms wet enough? Decides the GS delay and the effects' settings.
-- **Louder forms** (`?listen=louder-forms`): a clean guitar turned driven when loud. Decides its chance by genre.
+- **Louder forms** (`louder-forms` heard better, 8 October 2026): a clean guitar turned driven when loud. Decides its chance by genre.
 - **Rock's rhythm guitar** clean (53%) or muted (20%) beside driven chords and riff: a contrast, or wanted driven?
   Decides the exclusion's lean.
 - **The bass under E1** (9% of its notes, `RegisterReportTest`). Decides the bass's range.
@@ -277,7 +284,7 @@ Each item with its plan, and what it waits for.
   band's bass plays the riff with it always and a wild one's goes its own way, so the chance from 1 at the plain end,
   through about 0.5, to near 0 at the wild, by the melody or the groove facet, a genre's `doubling` "riff" still above
   it where named; measured by the sections with a riff whose bass doubles it, by fifths of conventionality.
-- **Quiet drums in calm genres** (P2, heard 8 October 2026 on `?listen=drum-marks`): the drums marking the form strike
+- **Quiet drums in calm genres** (P2, heard 8 October 2026 on `drum-marks`): the drums marking the form strike
   too loud for a calm piece, and any drum in Ambient or Dungeon should stay soft. The marks' strikes and swells well
   under the parts they colour (`DrumMarks`), and a genre's drums' loudness as its data, a level of the drum kit's
   against the band's, Ambient's and Dungeon's low, set through the render's velocity curve (`Render.FromMidiVelocity`)
@@ -285,7 +292,7 @@ Each item with its plan, and what it waits for.
   And the kit that marks the form (suggested the same day): never the standard, room or power kit, a band's, but the
   orchestral kit, its timpani and its bass drum, or the percussion, perhaps the brush or the electronic kit too; the
   kit a drum job's choice (`DrumMarks.Jobs`, `GenreChoices` "kit"), Ambient's and Dungeon's marks on the orchestra.
-- **A double kick with a backbeat** (P2, heard 8 October 2026 on `?listen=double-kick`): a double kick under no snare
+- **A double kick with a backbeat** (P2, heard 8 October 2026 on `double-kick`): a double kick under no snare
   is heard as a drum machine where it goes on long; a section's double kick without a backbeat for a phrase at most,
   the snare joining for its second half, on the backbeat or the riff's accents, as a thrash drummer brings it in; and
   the snare's own sound there, never the cross-stick, as in a breakdown (*A breakdown's snare*): a heavy figure's
@@ -363,7 +370,7 @@ Each item with its plan, and what it waits for.
 - **A filter drawn over time** (P3, if a wobble's restart on every note is heard): a part's brightness drawn through
   its rests rather than while its notes sound, and the filter's shapes a vocabulary as data anchored where they mean
   something; the part's one curve now adds its tone and a filter's closing note by note (`ExpressionRender`).
-- **Drum solos rethought, the rest** (P2, planned October 2026; `?listen=drum-solo`): a solo now plays the pitched solos' gestures with the kit as a
+- **Drum solos rethought, the rest** (P2, planned October 2026; `drum-solo` heard better): a solo now plays the pitched solos' gestures with the kit as a
   scale, a run round the toms, a lick, a crash held, a pause, a quote of the groove, the kick keeping time under it.
   A drummer thinks otherwise; in order of what it would add:
   1. Done October 2026: its feet a genre's ostinato, the groove's kick, the hi-hat's pedal on 2 and 4, a double kick, a
