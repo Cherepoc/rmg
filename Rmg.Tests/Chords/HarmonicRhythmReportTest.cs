@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Composition;
 
 namespace Rmg.Tests.Chords;
@@ -49,6 +50,8 @@ public sealed class HarmonicRhythmReportTest
     public async Task Report()
     {
         var sections = new List<(double Span, double Energy)>();
+        // the progressions of four chords or more, and those holding their home over the first two
+        var (longer, heldHome) = (0, 0);
         var notes = new Dictionary<int, (int All, int Crossing)>();
         var struckChanges = new Dictionary<int, (int All, int Struck)>();
         foreach (var song in TestCorpus.Range(256))
@@ -57,6 +60,12 @@ public sealed class HarmonicRhythmReportTest
                 .ToDictionary(x => x.Section, x => ((SectionEnergyTrace)x.Value!).Energy);
             sections.AddRange(song.Trace.Where(x => x.Point == TracePoints.HarmonicRhythm)
                 .Select(x => (((HarmonicRhythm)x.Value!).Bars, energies[x.Section])));
+
+            foreach (var progression in song.Trace.Where(x => x.Point == TracePoints.Progression).Select(x => (ImmutableArray<int>)x.Value!).Where(x => x.Length >= 4))
+            {
+                longer++;
+                heldHome += progression[1] == progression[0] ? 1 : 0;
+            }
 
             var changes = song.ChordChanges;
             foreach (var track in new[] { SongTracks.ChordsTrack, SongTracks.BassTrack })
@@ -78,6 +87,7 @@ public sealed class HarmonicRhythmReportTest
 
         foreach (var span in sections.GroupBy(x => x.Span).OrderBy(x => x.Key))
             Console.WriteLine($"span {span.Key}: {span.Count()} sections ({span.Count() / (double)sections.Count:P0}), energy {span.Average(x => x.Energy):F2} on average");
+        Console.WriteLine($"of {longer} progressions of four chords or more, {heldHome / (double)longer:P1} holding the home over the first two");
         foreach (var (track, (all, struck)) in struckChanges)
             Console.WriteLine($"track {track} strikes {struck / (double)all:P1} of {all} changes of chord it plays through");
         foreach (var (track, (all, crossing)) in notes)

@@ -263,6 +263,10 @@ internal sealed class SectionGenerator
             .TestProbability(ChordScales.Dominant.At(facets[Facet.Progression], _genre.Chance(GenreChoices.ChordScales, "dominant")));
         var chordScales = ChordScales.Draw(Stream(sectionId, SectionStream.ChordScales), Stream(sectionId, SectionStream.ChordOwnScales), scale, home, progression, raisedStep,
             dominants, facets[Facet.Progression], _genre);
+        // the home held over the first two chords now and then, a slower start, the rest changing as they were, from a
+        // sequence of its own
+        if (progression.Length >= 4 && Stream(sectionId, SectionStream.HeldHome).TestProbability(Progressions.HeldHome.At(facets[Facet.Progression])))
+            (progression, chordScales) = (progression.SetItem(1, progression[0]), chordScales.SetItem(1, chordScales[0]));
         // passing chords now and then, the next chord's dominant, by the progression facet, the energy and a genre's, from a
         // sequence of their own
         var passingChance = tilt.Chance(PassingChords.Chance.At(facets[Facet.Progression], _genre.Chance(GenreChoices.PassingChords, "chords")), PassingChords.EnergyLean);
@@ -923,5 +927,6 @@ internal enum SectionStream
     OctaveBass = 40,
     ChordOwnScales = 41,
     Vamp = 42,
-    Colour = 43
+    Colour = 43,
+    HeldHome = 44
 }

@@ -16,6 +16,12 @@ internal static class Progressions
     // the chord roots and the rules below are in steps of a 7-note scale, which every scale of Scales is
     private const int StepCount = 7;
 
+    /// <summary>
+    ///     The chance a progression of four chords or more holds its home over its first two, a slower start, I for two bars
+    ///     before the rest move, as often in a plain song as a wild one, a little more in the wilder.
+    /// </summary>
+    public static ByConvention HeldHome { get; } = new(0.1, 0.15, 0.25);
+
     /// <summary>How much a root that does not suit its bar weighs against one that does.</summary>
     private const double OutOfRoleWeight = 0.05;
 

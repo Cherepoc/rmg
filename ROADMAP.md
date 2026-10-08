@@ -53,7 +53,7 @@ genre first (see *Genres*).
 *Architecture*: named streams, the song's decisions passed whole, the stages' reads
 and writes, a genre's one rule, a genre resolved once, plainer prose); and the music's: the
 melody's motifs, the songs' own appoggiaturas (*Fills and lines*), phrases of other than four bars
-(*Rhythm engine*), scales of other sizes and an uneven harmonic rhythm (*Scales and chords*); and targets from outside (*Listening data*).
+(*Rhythm engine*), scales of other sizes (*Scales and chords*); and targets from outside (*Listening data*).
 
 **Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where they stand: a melody in block harmony, a hook at the end, the tempo leaning by the energy, a key change's common tone, the
 fills' loudness as layers, and a head with solos (which the form's devices by genre with AABA likely make).
@@ -353,12 +353,6 @@ Each item with its plan, and what it waits for.
   appearance. Today a chord solo stacks the band's chord or planes its shape, never another chord.
 - **A melody in block harmony** (P4, parked): the counter-melody or the pad voicing its long notes, approaches on its
   passing ones, as a horn section's soli.
-- **An uneven harmonic rhythm** (P2, the review of October 2026): a section's chords last alike (`HarmonicRhythm`,
-  half a bar, a bar or two), with passing chords and pushes between. Spans differing within a pattern: the cadence's
-  bar split in two as a progression speeds into its close, a home chord held over two bars and the rest a bar each,
-  drawn per section as data on the spans and leaned by the progression facet, the plain end keeping the even spans it
-  has. Measured by the spans' spread within a pattern, and the harmonic rhythm's listening question (*Harmony and
-  lines*).
 - **Scales of other sizes** (P2, reopened by the review of October 2026; parked before as the line scales give their
   sounds where they are heard): whole scales of more
   or fewer than seven notes, pentatonic, hexatonic (whole-tone, the blues' six) or octatonic, for a section's harmony as
