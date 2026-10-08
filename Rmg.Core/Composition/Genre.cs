@@ -70,6 +70,9 @@ public sealed record GenreChoice(string Name, string Label, GenreChoiceKind Kind
     /// <summary>How a range's ends read as numbers, which every range has; none for another kind.</summary>
     public RangeScale? Scale { get; init; }
 
+    /// <summary>The facet a choice of values is read at, its plain, middle and wild ends by it (<see cref="Genre.AtSong" />); none for another kind.</summary>
+    public Facet? Follows { get; init; }
+
     /// <summary>What it does, as the page shows it under it (<see cref="GenreChoiceDescriptions" />).</summary>
     public string Description => GenreChoiceDescriptions.Of(Name, Label);
 
@@ -149,6 +152,17 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
     }
 
     /// <summary>A value's shift, from -1, its least, through 0, as it is, to 1, its most.</summary>
+    /// <summary>
+    ///     The genre as a song takes it: every value read at the song's facet its choice follows, so that its plain and
+    ///     wild ends lean a plain and a wild song, alike at every end after.
+    /// </summary>
+    public Genre AtSong(Unconventionality facets) => this with
+    {
+        Choices = Choices.ToImmutableDictionary(x => x.Key, x => GenreChoices.All.FirstOrDefault(c => c.Name == x.Key) is { Kind: GenreChoiceKind.Values, Follows: { } facet }
+            ? x.Value.ToImmutableDictionary(o => o.Key, o => o.Value.At(facets[facet]) is var at ? new ByConvention(at, at, at) : default)
+            : x.Value)
+    };
+
     public double Shift(GenreChoice choice, string option)
     {
         Check(choice, GenreChoiceKind.Values, option);
@@ -192,7 +206,8 @@ public sealed record Genre(ImmutableDictionary<string, ImmutableDictionary<strin
                 return null;
             }
 
-            if (choice.Kind == GenreChoiceKind.Pool && options.Count == 0)
+            // a pool keeping options that weigh nothing at every end keeps none either, which no song can draw from
+            if (choice.Kind == GenreChoiceKind.Pool && options.Values.All(x => x is { Plain: 0, Tuned: 0, Wild: 0 }))
             {
                 error = $"The pool of {name} keeps none of its options.";
                 return null;

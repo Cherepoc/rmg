@@ -440,4 +440,26 @@ public sealed class GenreTest
         await Assert.That(Meter.NameOf(song.Map.Meter)).IsEqualTo("4/4");
         await Assert.That(song.Song.Draws!.Scale).IsEqualTo(Rmg.Core.Composition.Scales.Major);
     }
+
+    /// <summary>A value's plain and wild ends lean a plain and a wild song: read at the song's facet its choice follows.</summary>
+    [Test]
+    public async Task AValue_IsReadAtTheSongsFacet_ItsPlainEndInAPlainSong_ItsWildInAWild()
+    {
+        var genre = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty
+            .Add(GenreChoices.Fills.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("amount", new ByConvention(0, 0.5, 1))));
+        Unconventionality At(double fills) => Unconventionality.Generate(0.5, _ => new GenerationContext(0)) is var u ? u with { Facets = u.Facets.SetItem(Facet.Fills, fills) } : null!;
+        await Assert.That(genre.AtSong(At(0)).Shift(GenreChoices.Fills, "amount")).IsEqualTo(-1).Within(1e-9);
+        await Assert.That(genre.AtSong(At(0.5)).Shift(GenreChoices.Fills, "amount")).IsEqualTo(0).Within(1e-9);
+        await Assert.That(genre.AtSong(At(1)).Shift(GenreChoices.Fills, "amount")).IsEqualTo(1).Within(1e-9);
+        await Assert.That(GenreChoices.All.Where(x => x.Kind == GenreChoiceKind.Values).All(x => x.Follows is not null)).IsTrue();
+    }
+
+    /// <summary>A pool keeping options that weigh nothing at every end keeps none, and is refused as a pool keeping none is.</summary>
+    [Test]
+    public async Task APoolWeighingNothing_IsRefused()
+    {
+        var pool = new Dictionary<string, IReadOnlyDictionary<string, ByConvention>> { ["meter"] = new Dictionary<string, ByConvention> { ["4/4"] = new(0, 0, 0) } };
+        await Assert.That(Genre.Read(pool, out var error)).IsNull();
+        await Assert.That(error).Contains("keeps none");
+    }
 }

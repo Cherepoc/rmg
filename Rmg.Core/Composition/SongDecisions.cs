@@ -94,6 +94,8 @@ internal sealed record SongDecisions(
         var songUnconventionality = Unconventionality.Generate(unconventionalityBase, facet => SongGenerator.CreateStream(seed, SongStream.Unconventionality, facet));
         if (overrides.Facets is { } facets)
             songUnconventionality = songUnconventionality with { Facets = songUnconventionality.Facets.SetItems(facets) };
+        // its values read at its facets, a value's plain and wild ends leaning a plain and a wild song
+        genre = genre.AtSong(songUnconventionality);
         StateTrace.RecordSong(TracePoints.SongUnconventionality, $"{songUnconventionality.Base:F2}", songUnconventionality);
         var rhythmicUnconventionality = new RhythmicUnconventionality(songUnconventionality[Facet.Groove]) { GrooveHold = RhythmicUnconventionality.HoldOf(genre) };
         // a facet's value as the rhythm's unconventionality, for a choice that leans by it

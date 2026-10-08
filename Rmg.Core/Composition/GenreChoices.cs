@@ -70,13 +70,13 @@ public static class GenreChoices
     ///     How a section's chord roots move, each motion leaned from as the songs have it, falling a fifth the most, to more
     ///     or less (<see cref="Progressions.Motions" />): a genre's ii–V or its ♭VII–IV–I.
     /// </summary>
-    public static GenreChoice RootMotions { get; } = Values("rootMotion", "Root motions", Progressions.Motions);
+    public static GenreChoice RootMotions { get; } = Values("rootMotion", "Root motions", Progressions.Motions, Facet.Progression);
 
     /// <summary>The degrees a chord's root leans to, by its steps above the section's home, as rock's ♭VII and ♭VI (<see cref="Progressions.Degrees" />).</summary>
-    public static GenreChoice RootDegrees { get; } = Values("rootDegree", "Chord degrees", Progressions.Degrees);
+    public static GenreChoice RootDegrees { get; } = Values("rootDegree", "Chord degrees", Progressions.Degrees, Facet.Progression);
 
     /// <summary>How a genre leans the chord that leads home, by its degree, a modal band's ♭II, ♭VI or ♭VII rather than V (<see cref="Progressions.Generate(IGenerationContext, Scale, int, double, int, int, Func{int, double}, Func{int, double}, Func{int, double})" />).</summary>
-    public static GenreChoice CadenceDegrees { get; } = Values("cadenceDegree", "The chord into home", Progressions.Degrees);
+    public static GenreChoice CadenceDegrees { get; } = Values("cadenceDegree", "The chord into home", Progressions.Degrees, Facet.Progression);
 
     /// <summary>The chance a section's cadence raises its seventh, a minor key's major V leading home (<see cref="Progressions.CadenceRaise" />).</summary>
     public static GenreChoice CadenceRaise { get; } = Chances("cadenceRaise", "The leading tone raised", [("sections", "Sections whose cadence raises it", Progressions.CadenceRaise)]);
@@ -264,14 +264,14 @@ public static class GenreChoices
     ///     to 100, an octave higher, a quarter's way from either end moving it (<see cref="Registers" />).
     /// </summary>
     public static GenreChoice Register { get; } = Values("register", "Register",
-        [("melody", "Melody"), ("chords", "Chords"), ("bass", "Bass"), ("pad", "Pad"), ("counterMelody", "Counter-melody"), ("riff", "Riff"), ("rhythm", "Rhythm"), ("solo", "Soloist")]);
+        [("melody", "Melody"), ("chords", "Chords"), ("bass", "Bass"), ("pad", "Pad"), ("counterMelody", "Counter-melody"), ("riff", "Riff"), ("rhythm", "Rhythm"), ("solo", "Soloist")], Facet.Sound);
 
     /// <summary>
     ///     How often each of a drum's own sounds plays, from 0, an eighth as often, through 50, as the songs have it, to 100,
     ///     eight times as often, as its steady stroke, an accent and in a fill, one a wild song's alone played at the plain end
     ///     where a genre leans it up: the cross-stick of a reggae or a ballad, a jazz drummer's hi-hat foot (<see cref="DrumSounds.OddsOf" />).
     /// </summary>
-    public static GenreChoice DrumSounds { get; } = Values("drumSounds", "Drum sounds", Composition.DrumSounds.Leaned.Select(x => (x.Name, x.Label)));
+    public static GenreChoice DrumSounds { get; } = Values("drumSounds", "Drum sounds", Composition.DrumSounds.Leaned.Select(x => (x.Name, x.Label)), Facet.Sound);
 
     /// <summary>The chance a part's guitar turns driven in the song's louder appearances, a clean verse's guitar distorted in the chorus (<see cref="LouderForms" />).</summary>
     public static GenreChoice LouderForms { get; } = Chances("louderForms", "Louder forms",
@@ -295,7 +295,7 @@ public static class GenreChoices
     ///     How often drums marking the form strike, and how often a section's start swells, from 0, seldom, through 50, as
     ///     they do, to 100, often (<see cref="DrumMarks.GenreOdds" />).
     /// </summary>
-    public static GenreChoice Marks { get; } = Values("marks", "Drums' marks", [("often", "How often"), ("swells", "How often swelling")]);
+    public static GenreChoice Marks { get; } = Values("marks", "Drums' marks", [("often", "How often"), ("swells", "How often swelling")], Facet.Fills);
 
     /// <summary>The chance a verse leaves its melody out, the room a rap's voice takes over the beat (<see cref="Arrangement.VoiceChance" />).</summary>
     public static GenreChoice Voice { get; } = Chances("voice", "Verses for a voice", [("verses", "Verses without a melody", Arrangement.VoiceChance)]);
@@ -323,13 +323,13 @@ public static class GenreChoices
             new ByConvention(x.Span.Weight, x.Span.Weight, x.Span.Weight))));
 
     /// <summary>How much the drums fill, from 0, seldom and short, through 50, as the songs have it, to 100, often and long (<see cref="FillLayers.GenreAmountOdds" />).</summary>
-    public static GenreChoice Fills { get; } = Values("fills", "Fills", [("amount", "Amount")]);
+    public static GenreChoice Fills { get; } = Values("fills", "Fills", [("amount", "Amount")], Facet.Fills);
 
     /// <summary>How far the parts play off the beat, from 0, tight, through 50, as the songs have it, to 100, laid back (<see cref="Pocket.GenreReach" />).</summary>
-    public static GenreChoice Pocket { get; } = Values("pocket", "Pocket", [("laidBack", "Laid back")]);
+    public static GenreChoice Pocket { get; } = Values("pocket", "Pocket", [("laidBack", "Laid back")], Facet.Feel);
 
     /// <summary>How steady the groove is, from 0, moving more, through 50, as the songs move it, to 100, held, its backbeat on 2 and 4 (<see cref="RhythmicUnconventionality.GrooveHold" />).</summary>
-    public static GenreChoice GrooveHold { get; } = Values("grooveHold", "Groove held", [("held", "Held")]);
+    public static GenreChoice GrooveHold { get; } = Values("grooveHold", "Groove held", [("held", "Held")], Facet.Groove);
 
     /// <summary>
     ///     How loud each part plays against the others, from 0, quietest, through 50, as the songs have it, to 100, loudest
@@ -337,7 +337,7 @@ public static class GenreChoices
     /// </summary>
     public static GenreChoice Levels { get; } = Values("levels", "Levels",
         [..new[] { TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Solo, TrackRole.Drum }
-            .Select(x => (Name(x.ToString()), TrackRoles.LabelOf(x)))]);
+            .Select(x => (Name(x.ToString()), TrackRoles.LabelOf(x)))], Facet.Sound);
 
     /// <summary>
     ///     How much reverb each part plays with, from 0, dry, through 50, as the songs have it, to 100, as wet as can be
@@ -345,10 +345,10 @@ public static class GenreChoices
     /// </summary>
     public static GenreChoice Space { get; } = Values("space", "Space",
         [..new[] { TrackRole.Melody, TrackRole.Chords, TrackRole.Bass, TrackRole.Pad, TrackRole.CounterMelody, TrackRole.Riff, TrackRole.Rhythm, TrackRole.Solo, TrackRole.Drum }
-            .Select(x => (Name(x.ToString()), TrackRoles.LabelOf(x)))]);
+            .Select(x => (Name(x.ToString()), TrackRoles.LabelOf(x)))], Facet.Sound);
 
     /// <summary>How much the bass leads into a new chord, from 0, never, through 50, as its instrument has it, to 100, walking (<see cref="BassLeadingLayers.GenreLeadOdds" />).</summary>
-    public static GenreChoice Bass { get; } = Values("bass", "Bass", [("leading", "Leading into a chord")]);
+    public static GenreChoice Bass { get; } = Values("bass", "Bass", [("leading", "Leading into a chord")], Facet.Melody);
 
     /// <summary>The chance a section's bass plays in octaves, its notes off the beat the note before an octave up (<see cref="SectionGenerator.OctaveBassChance" />).</summary>
     public static GenreChoice OctaveBass { get; } = Chances("octaveBass", "Octave bass", [("sections", "Sections in octaves", SectionGenerator.OctaveBassChance)]);
@@ -357,7 +357,7 @@ public static class GenreChoices
     public static GenreChoice AlternatingBass { get; } = Chances("alternatingBass", "Root and fifth", [("sections", "Sections alternating root and fifth", SectionGenerator.AlternatingBassChance)]);
 
     /// <summary>How wide the melody's range is, from 0, narrow as a hook's, through 50, as the songs have it, to 100, wide as a jazz tune's (<see cref="MelodyLayers.GenreRangeReach" />).</summary>
-    public static GenreChoice MelodyRange { get; } = Values("melodyRange", "Melody's range", [("wide", "Wide")]);
+    public static GenreChoice MelodyRange { get; } = Values("melodyRange", "Melody's range", [("wide", "Wide")], Facet.Melody);
 
     /// <summary>The chance a song's bass glides into its notes from the note before, an 808's or an acid line's (<see cref="Expression.GlideChance" />).</summary>
     public static GenreChoice Glide { get; } = Chances("glide", "Glide", [("bass", "A gliding bass", Expression.GlideChance)]);
@@ -439,7 +439,7 @@ public static class GenreChoices
     ///     as it is where a genre does not say.
     /// </summary>
     public static GenreChoice Pan { get; } = Values("pan", "Pan",
-        [("melody", "Melody"), ("chords", "Chords"), ("bass", "Bass"), ("pad", "Pad"), ("counterMelody", "Counter-melody"), ("riff", "Riff"), ("rhythm", "Rhythm")]);
+        [("melody", "Melody"), ("chords", "Chords"), ("bass", "Bass"), ("pad", "Pad"), ("counterMelody", "Counter-melody"), ("riff", "Riff"), ("rhythm", "Rhythm")], Facet.Sound);
 
     /// <summary>
     ///     How loud and busy a song is, its energy leaning high or low, how much its sections differ from it
@@ -447,7 +447,7 @@ public static class GenreChoices
     ///     (<see cref="FormLayers.GenreLiftReach" />), as it is where a genre does not say.
     /// </summary>
     public static GenreChoice Dynamics { get; } = Values("dynamics", "Dynamics",
-        [("energy", "How loud and busy"), ("contrast", "How much its sections differ"), ("lift", "How long a lift swells")]);
+        [("energy", "How loud and busy"), ("contrast", "How much its sections differ"), ("lift", "How long a lift swells")], Facet.Form);
 
     /// <summary>How many phrases of four bars a section's pattern may have, its progression's cycle: one, as every song's has, to four.</summary>
     public static ImmutableArray<int> PhraseCounts { get; } = [1, 2, 3, 4];
@@ -487,7 +487,7 @@ public static class GenreChoices
     ]);
 
     /// <summary>The values of the feel's: how much a song that swings swings, and how fast a tempo still swings its 16ths rather than its 8ths.</summary>
-    public static GenreChoice FeelValues { get; } = Values("feelValues", "Swing", [("swing", "How much it swings"), ("sixteenths", "16ths swung at faster tempos")]);
+    public static GenreChoice FeelValues { get; } = Values("feelValues", "Swing", [("swing", "How much it swings"), ("sixteenths", "16ths swung at faster tempos")], Facet.Feel);
 
     /// <summary>The scale the song starts in (<see cref="Scales" />).</summary>
     public static GenreChoice Scale { get; } = Described(Pool("scale", "Scale", Scales.All.Select(x => (Name(x.Name), x.Name, x.Weight))),
@@ -510,7 +510,7 @@ public static class GenreChoices
     ///     left out.
     /// </summary>
     public static GenreChoice Rests { get; } = Values("rests", "Parts resting",
-        [..Arrangement.Rests.Select(x => (Name(x.Part.ToString()), TrackRoles.LabelOf(x.Part)))]);
+        [..Arrangement.Rests.Select(x => (Name(x.Part.ToString()), TrackRoles.LabelOf(x.Part)))], Facet.Form);
 
     // the pitched parts' pools, in the order the page shows them
     private static readonly (TrackRole Role, string Label, InstrumentRole Pool)[] InstrumentPools =
@@ -561,7 +561,7 @@ public static class GenreChoices
     public static ImmutableDictionary<RhythmPart, GenreChoice> Rhythms { get; } = Enum.GetValues<RhythmPart>().ToImmutableDictionary(
         x => x,
         x => Values($"rhythm.{Name(x.ToString())}", GenreRhythm.LabelOf(x),
-            [..GenreRhythm.Settings, ..x == RhythmPart.Melody ? [("busyness", "Busyness")] : Array.Empty<(string, string)>()])
+            [..GenreRhythm.Settings, ..x == RhythmPart.Melody ? [("busyness", "Busyness")] : Array.Empty<(string, string)>()], Facet.Groove)
     );
 
     /// <summary>
@@ -679,8 +679,9 @@ public static class GenreChoices
         new(name, label, GenreChoiceKind.Chances, [..options.Select(x => new GenreOption(x.Name, x.Label, x.Chance))]);
 
     /// <summary>A choice of values, every one's own as it is.</summary>
-    private static GenreChoice Values(string name, string label, IEnumerable<(string Name, string Label)> options) =>
-        new(name, label, GenreChoiceKind.Values, [..options.Select(x => new GenreOption(x.Name, x.Label, Even(0.5)))]);
+    /// <summary>A choice of values, each a lean from the songs' own, read at the song's facet it follows (<see cref="Genre.AtSong" />).</summary>
+    private static GenreChoice Values(string name, string label, IEnumerable<(string Name, string Label)> options, Facet follows) =>
+        new(name, label, GenreChoiceKind.Values, [..options.Select(x => new GenreOption(x.Name, x.Label, Even(0.5)))]) { Follows = follows };
 
     /// <summary>
     ///     A name as a genre gives it: in camel case, its words run together, "harmonicMinor", "electricBassFinger",

@@ -105,10 +105,19 @@ internal static class Figures
                 if (player == FigurePlayer.Ground && section.Breakdown)
                     figures[player] = Of(player, "withRiff");
             }
-            var played = figures.Where(x => x.Value is not null).ToImmutableDictionary(x => x.Key, x => x.Value!.Name);
-            StateTrace.Record(TracePoints.Figures, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, string.Join(", ", played.Select(x => $"{x.Key} {x.Value}")), played);
             return figures;
         });
+        // the claves keeping the song's clave, the first section's that plays one, as a clave's direction runs through a
+        // song, every section drawn all the same
+        if (drawn.Values.Select(x => x[FigurePlayer.Claves]).FirstOrDefault(x => x is not null) is { } clave)
+            foreach (var figures in drawn.Values.Where(x => x[FigurePlayer.Claves] is not null))
+                figures[FigurePlayer.Claves] = clave;
+        foreach (var (id, figures) in drawn)
+        {
+            var played = figures.Where(x => x.Value is not null).ToImmutableDictionary(x => x.Key, x => x.Value!.Name);
+            StateTrace.Record(TracePoints.Figures, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, string.Join(", ", played.Select(x => $"{x.Key} {x.Value}")), played);
+        }
+
         draft = draft with { Figures = drawn.ToImmutableDictionary(x => x.Key, x => x.Value.Where(f => f.Value is not null).ToImmutableDictionary(f => f.Key, f => f.Value!.Name)) };
         if (drawn.Values.All(x => x.Values.All(f => f is null)))
             return draft;

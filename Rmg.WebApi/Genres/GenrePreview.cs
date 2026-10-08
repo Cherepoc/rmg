@@ -21,6 +21,12 @@ public static class GenrePreview
     /// <summary>The choice's options' amounts at every point, as a request gives them (<see cref="GenreAmounts" />); or what is wrong with them.</summary>
     public static GenrePreviewResponse? Of(GenrePreviewRequest request, out string? error)
     {
+        if (request.Choice is null || request.Options is null)
+        {
+            error = "A preview names a choice and its options.";
+            return null;
+        }
+
         if (!new GenerateSongRequest(Genre: new Dictionary<string, IReadOnlyDictionary<string, JsonElement>> { [request.Choice] = request.Options })
                 .TryRead(out _, out var overrides, out _, out error))
             return null;
@@ -76,7 +82,7 @@ public static class GenrePreview
 
 /// <param name="Choice">The choice's name (<c>/api/genres/choices</c>).</param>
 /// <param name="Options">Its options' amounts, as a song's request gives them (<see cref="GenerateSongRequest.Genre" />).</param>
-public sealed record GenrePreviewRequest(string Choice, IReadOnlyDictionary<string, JsonElement> Options);
+public sealed record GenrePreviewRequest(string? Choice, IReadOnlyDictionary<string, JsonElement>? Options);
 
 /// <param name="Conventionality">The points, from 0, the plainest, to 1, the wildest.</param>
 /// <param name="Curves">

@@ -61,4 +61,13 @@ public sealed class GenrePreviewTest
         var pad = GenreChoices.Parts["pad"];
         await Assert.That(parts.Curves!["pad"][0]).IsEqualTo(GenreAmounts.ToNumber(GenreChoices.Parts, "pad", pad.Own.Plain)).Within(1e-9);
     }
+
+    [Test]
+    public async Task APreviewWithoutAChoiceOrItsOptions_SaysSo()
+    {
+        await Assert.That(GenrePreview.Of(new GenrePreviewRequest(null, null), out var error)).IsNull();
+        await Assert.That(error).IsNotNull();
+        await Assert.That(GenrePreview.Of(new GenrePreviewRequest("meter", null), out error)).IsNull();
+        await Assert.That(error).IsNotNull();
+    }
 }

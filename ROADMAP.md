@@ -15,8 +15,14 @@ fixed; the review and the plan are kept outside the repository):
 2. Done: loudness on the heard scale, a share of a velocity taken through the render's curve (`Render.ScaleLoudness`):
    hi-hat rolls growing from 60% of the hat as heard, drum marks' rolls, swells and strengths, gated chords' restrikes;
    a drum solo's time keeping keeping its accents.
-3. Genre data and validation: partial chances choices, Rock's half time, Funk, the blues' form, Latin's clave, defaults
-   leaking into presets, a genre value's three ends, a pool that weighs nothing.
+3. Done: genre data and validation. A preset names every option of a chances choice the songs play (209 written,
+   16 given back: half and double time in Rock, Country, Disco, Fusion, Ska and Soul, Soul's legato and key changes,
+   Country's key changes, Fusion's trades); a value read at the song's facet it follows, its plain and wild ends
+   heard; a pool weighing nothing refused; Funk's stale chugs out and a kit in; Latin's claves on the clave, one
+   direction a song; the blues looping one 12-bar chorus; Drum and bass's breakbeat; Djent's kick with its riff;
+   the band devices out of Orchestral, Medieval and Dungeon; Chiptune straight and drier; Ambient's drums rarer;
+   louder forms and a raised cadence no longer leaking into Disco, Soul, Ska, Ambient, Hip hop, House, Reggae and
+   Synthwave. Left: a dance track's ending stripping back to the drums, an ending of its own (*Form and sections*).
 4. Stage interactions: figures over polymeters, the riff's twin with its riff, hat rolls under fills, drum marks.
 5. Musicality in the code: the blues' last four bars, meters other than 4/4, the bass, stabs, solos' trading turns.
 6. Generator correctness: the corners, each with a test.
@@ -339,6 +345,9 @@ Each item with its plan, and what it waits for.
   cross-stick, where a breakdown wants the snare itself, struck on the riff's accents with the kick or on the song's
   backbeat in half time, its 3 or its 2 and 4; the snare's sound in a breakdown the full one (`DrumSounds`), and its
   hits a figure of the section's, either on the accents or the backbeat.
+- **A dance track's ending stripped back** (P3, from the review of 9 October 2026): House, Techno and Trance end
+  by fading, opening or stopping; a DJ's ending drops the parts out one by one to the drums alone, an ending of its own
+  beside the fade, the reverse of an intro of entries.
 - **A riser over a filtered drop** (P3, by listening, October 2026): a reverse cymbal swelling over the muffled bar
   before a filtered drop, as the silent one has, which wants a channel of its own as the band plays on there (*A riser as
   a lift cue*, under *Genres*).

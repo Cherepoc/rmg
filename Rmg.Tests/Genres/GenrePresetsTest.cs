@@ -17,6 +17,24 @@ public sealed class GenrePresetsTest
         await Assert.That(GenrePresets.All.SelectMany(x => x.Choices.Keys).All(x => GenreChoices.All.Any(c => c.Name == x))).IsTrue();
     }
 
+    /// <summary>
+    ///     A preset that names a chances choice names every option of it the songs play, as naming some switches the others
+    ///     off, which a reader takes for the songs' own: an option meant off is written as 0; one the songs never play may be
+    ///     left out; a choice named empty, every option off, is written so.
+    /// </summary>
+    [Test]
+    public async Task APreset_NamingAChancesChoice_NamesEveryOptionOfItTheSongsPlay()
+    {
+        var partial = (from preset in GenrePresets.All
+            from named in preset.Choices
+            let choice = GenreChoices.All.Single(x => x.Name == named.Key)
+            where choice.Kind == GenreChoiceKind.Chances && named.Value.Count > 0
+            from option in choice.Options.Where(x => !named.Value.ContainsKey(x.Name) && (x.Own.Plain > 0 || x.Own.Tuned > 0 || x.Own.Wild > 0))
+            select $"{preset.Id} {named.Key}.{option.Name}").ToArray();
+        Console.WriteLine(string.Join("\n", partial));
+        await Assert.That(partial).IsEmpty();
+    }
+
     [Test]
     public async Task EveryChoice_HasADescription_ThatNamesNoFamilyLeftUnreplaced()
     {
