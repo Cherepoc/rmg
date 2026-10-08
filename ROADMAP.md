@@ -51,9 +51,9 @@ genre first (see *Genres*).
 
 **From the review of 8 October 2026** (P2, to be ordered into the next plan): the architecture's items (see
 *Architecture*: a genre's one rule, a genre resolved once, plainer prose); and the music's: the
-melody's motifs, the songs' own appoggiaturas (*Fills and lines*), scales of other sizes (*Scales and chords*); and targets from outside (*Listening data*).
+melody's motifs, the songs' own appoggiaturas (*Fills and lines*); and targets from outside (*Listening data*).
 
-**Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where they stand: a melody in block harmony, a hook at the end, the tempo leaning by the energy, a key change's common tone, the
+**Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where they stand: scales of other sizes, a melody in block harmony, a hook at the end, the tempo leaning by the energy, a key change's common tone, the
 fills' loudness as layers, and a head with solos (which the form's devices by genre with AABA likely make).
 
 ## Listening
@@ -351,19 +351,13 @@ Each item with its plan, and what it waits for.
   appearance. Today a chord solo stacks the band's chord or planes its shape, never another chord.
 - **A melody in block harmony** (P4, parked): the counter-melody or the pad voicing its long notes, approaches on its
   passing ones, as a horn section's soli.
-- **Scales of other sizes** (P2, reopened by the review of October 2026; parked before as the line scales give their
-  sounds where they are heard): whole scales of more
-  or fewer than seven notes, pentatonic, hexatonic (whole-tone, the blues' six) or octatonic, for a section's harmony as
-  well as its lines, at the wild end of the scale facet alone. The progressions move by scale steps and their rules
-  count a fifth as three steps, the chord shapes' heights sit between the qualities a seven-note scale gives, and the
-  scales measure their brightness and their distance against others of as many notes (`Scales`): a fifth as the step
-  nearest seven semitones, a chord's height snapped as now (`SnapChordToScale` takes any length), and a scale's
-  distance only among its own size. Steps: the engine's assumptions of seven found by a trial forcing every wild
-  section into a pentatonic, as the 12-bar's trial found the phrases'; then the scales drawn. Its first use the
-  blues' harmony beside its lines: a pentatonic or the blues' six-note home under dominant sevenths on any degree.
-
-### Rhythm engine
-
+- **Scales of other sizes** (P4, parked again after a trial, 8 October 2026): a minor pentatonic forced on 64 songs
+  fails at once (`Progressions.GetCadenceWeights`); seven steps are assumed in 13 files, 28 places, and the
+  progressions' motions, degrees and cadences, which genres name, are tables of seven steps. The blues' harmony it was
+  reopened for is there already: Blues plays every chord its dominant (`chordScales`), in sevenths and ninths, under
+  blues and pentatonic lines. What it would add is harmony inside a pentatonic or a whole-tone scale, quartal chords at
+  the wild end, for a redesign of the progressions in semitones. The plan when taken up: the steps counted by the
+  scale's length, a fifth the step nearest seven semitones, the motions and degrees by their semitones.
 - **Long cycles** (P4 since October 2026: a section's bars repeating, AABA to ABCD, already give every part, the drums
   too, figures of two and four bars, a varied repeat (A′) starting as its bar did and then changing, near an answer;
   the clave and the montuno are figures, *Figures as a genre's data*; built only should listening find the second bar
