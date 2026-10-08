@@ -84,16 +84,13 @@ public sealed class ListeningQuestionsTest
         new("ending", "Black metal ending as it played, planed or sliding home by ♭II, ♭VI or ♭VII (with), or by a classical V–i, its leading tone raised (without)?",
             "The chord into home and the raised leading tone, by genre.", "blackMetal", [],
             new() { ["cadenceDegree"] = new() { ["fifth"] = 100, ["second"] = 50, ["sixth"] = 50, ["seventh"] = 50 }, ["cadenceRaise"] = new() { ["sections"] = 100 } },
-            x => Before(x, x.Map.Sections[^1].End, 4)),
+            // but a song fading out or closing its mix at its end, whose last bars are not heard
+            x => x.Map.Ending.Kind != EndingKind.Fade && !((MixFilterPlan)x.Trace.Single(t => t.Point == TracePoints.MixFilter).Value!).Closing ? Before(x, x.Map.Sections[^1].End, 4) : null),
         new("tape", "IDM off a worn tape, its parts' pitch drifting together by a few cents, its lines held a few cents off: warm, or out of tune?",
             "The tape's chances in IDM, Hip hop, Ambient and Synthwave, and its wow's depth.", "idm", [], new() { ["effects"] = new() { ["tape"] = 0 } },
             x => FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Wow) > 0)),
         new("ghosts", "Funk's snare playing ghost notes, soft 16ths around its backbeat: a funk drummer's, or clutter?",
             "The ghost notes' chances by genre, how many and how soft.", "funk", ["Ghosts"], null, x => FirstSection(x, TracePoints.Ghosts, v => (bool)v!)),
-        new("jazz-passing", "Jazz passing into its chords by the tritone substitute, a half-diminished chord a semitone below or a chromatic slide (with), or by their dominants alone (without): richer, or wrong?",
-            "The passing chords' kinds by genre.", "jazz", [],
-            new() { ["passingKind"] = new() { ["dominant"] = 100, ["tritone"] = 0, ["diminished"] = 0, ["chromatic"] = 0, ["chromaticBelow"] = 0 } },
-            x => FirstSection(x, TracePoints.HarmonicRhythm, v => !((HarmonicRhythm)v!).Passing.IsEmpty)),
         new("quieter-form", "Black metal's distorted guitar turning acoustic or clean in its quieter sections: a calm between the storms, or a jump?",
             "The quieter form's chances by genre.", "blackMetal", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
             x => x.Trace.Where(t => t.Point == TracePoints.QuieterForm).Select(t => x.Song.Notes!.GetValueOrDefault(t.Track)?

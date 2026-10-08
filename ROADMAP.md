@@ -22,7 +22,7 @@ percent everywhere, and a listening question once deployed):
    as every solo played together now; Metal's 39% of its solos, Rock's 16% (`twin-solo` heard better, 8 October 2026).
 5. Done: passing chords of a genre's kinds, the tritone substitute, a half-diminished chord a semitone below the next
    between roots a whole step apart, the next chord a semitone below, beside its dominant and a semitone above; Jazz's,
-   Soul's, Bossa nova's and Orchestral's pools (`?listen=jazz-passing`). A ii–V into a chord but the home left
+   Soul's, Bossa nova's and Orchestral's pools, kept though hard to tell apart by listening (3 better, 3 worse). A ii–V into a chord but the home left
    (*Approach chords*).
 6. Done: the bass alternating its chord's root and fifth on its strong beats, Country's 73% of its sections, Folk's
    38% (`root-fifth` heard better, 8 October 2026); Jazz's walking quarters there already, its bass's rhythm in quarters leading into its chords.

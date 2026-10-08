@@ -265,12 +265,12 @@
     },
     "seeds": [
       {
-        "seed": "4",
-        "at": 82.2,
+        "seed": "6",
+        "at": 226.6,
         "listen": [
           "Riff (Overdriven Guitar)",
-          "Chords (Distortion Guitar)",
-          "Rhythm part (Distortion Guitar)"
+          "Bass (Electric Bass (pick))",
+          "Chords (Distortion Guitar)"
         ]
       },
       {
@@ -292,15 +292,6 @@
         ]
       },
       {
-        "seed": "I",
-        "at": 310.1,
-        "listen": [
-          "Riff (Distortion Guitar)",
-          "Riff's twin (Distortion Guitar)",
-          "Chords (Overdriven Guitar)"
-        ]
-      },
-      {
         "seed": "K",
         "at": 139.2,
         "listen": [
@@ -316,6 +307,13 @@
           "Riff (Overdriven Guitar)",
           "Rhythm part (Overdriven Guitar)",
           "Chords (Church Organ)"
+        ]
+      },
+      {
+        "seed": "R",
+        "at": 165.9,
+        "listen": [
+          "Riff (Overdriven Guitar)"
         ]
       }
     ]
@@ -439,75 +437,6 @@
         "at": 99.3,
         "listen": [
           "Acoustic Snare"
-        ]
-      }
-    ]
-  },
-  {
-    "id": "jazz-passing",
-    "question": "Jazz passing into its chords by the tritone substitute, a half-diminished chord a semitone below or a chromatic slide (with), or by their dominants alone (without): richer, or wrong?",
-    "decides": "The passing chords' kinds by genre.",
-    "genre": "jazz",
-    "without": {
-      "skip": [],
-      "genre": {
-        "passingKind": {
-          "dominant": 100,
-          "tritone": 0,
-          "diminished": 0,
-          "chromatic": 0,
-          "chromaticBelow": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "0",
-        "at": 35.9,
-        "listen": [
-          "Chords (Electric Guitar (jazz))",
-          "Melody (Trumpet)",
-          "Bass (Acoustic Bass)"
-        ]
-      },
-      {
-        "seed": "5",
-        "at": 5.5,
-        "listen": [
-          "Chords (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "8",
-        "at": 10.2,
-        "listen": [
-          "Solo (Trumpet)",
-          "Bass (Acoustic Bass)",
-          "Chords (Acoustic Grand Piano)"
-        ]
-      },
-      {
-        "seed": "C",
-        "at": 0,
-        "listen": [
-          "Chords (Electric Guitar (jazz))",
-          "Melody (Flute)"
-        ]
-      },
-      {
-        "seed": "S",
-        "at": 84.1,
-        "listen": [
-          "Bass (Contrabass)",
-          "Solo (Electric Guitar (jazz))"
-        ]
-      },
-      {
-        "seed": "W",
-        "at": 44.1,
-        "listen": [
-          "Chords (Electric Piano 1)",
-          "Bass (Acoustic Bass)"
         ]
       }
     ]
