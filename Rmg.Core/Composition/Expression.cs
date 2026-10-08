@@ -691,14 +691,16 @@ internal static class Expression
                     // a release bends into it now and then, the likelier the more intense, and slides into it never
                     var isRelease = note.Value.State.GetStateValue(CompositionStateKinds.SoloRelease) == 1;
                     // a soloist's note bends as often as it bends a note, leaned by its lean to bends as well as by the intensity
-                    var bendsNow = context.TestProbability(soloist is null ? Math.Min(1, bendChance * (isSolo ? 3 : 1))
+                    if (isSolo && soloist is null)
+                        throw new InvalidOperationException($"Track {track} solos with no soloist.");
+                    var bendsNow = context.TestProbability(soloist is null ? bendChance
                         : isRelease ? intensity.Chance(ReleaseBendChance, 1)
                         : new Tilt(intensity.LogOdds + Tilt.Of(StrengthOdds, soloist.BendLean - Soloist.ExpressionLean).LogOdds).Chance(soloist.BendRate, 1));
                     var kind = context.Pick(bendKinds);
                     if (isRelease)
                         kind = context.Pick(ReleaseBends);
                     var size = context.Pick(soloist is null ? sizes : soloLean.Weigh(ByConvention.Weigh(BendSizes, u), steps => steps > 1 ? 1 : -1));
-                    var slidesNow = context.TestProbability(soloist is null ? slideRate : intensity.Chance(SlideRate.At(songSound) * 2 * Math.Clamp(soloist.SlideLean, 0, 1), 1));
+                    var slidesNow = context.TestProbability(soloist is null ? slideRate : new Tilt(intensity.LogOdds + Tilt.Of(StrengthOdds, soloist.SlideLean - Soloist.ExpressionLean).LogOdds).Chance(SlideRate.At(songSound), 1));
                     // and its vibrato, a note at a time, the wide likelier the more intense
                     var noteVibrato = soloist is null ? vibrato : context.Pick(soloLean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u), Lean));
                     // from the note before, where it was heard up to a moment before, and no further than a pitch bend reaches

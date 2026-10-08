@@ -168,7 +168,7 @@ internal sealed class FillSounds
     {
         var sounds = ImmutableArray.CreateBuilder<RunSound>();
         foreach (var (role, candidates) in WeightedAt(unconventionality))
-            if (chances.TryGetValue(role, out var chance) && context.TestProbability(Math.Min(1, chance)))
+            if (chances.TryGetValue(role, out var chance) && context.TestProbability(chance))
                 sounds.Add(context.Pick(candidates));
         return sounds.ToImmutable();
     }

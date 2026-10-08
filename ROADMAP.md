@@ -50,7 +50,7 @@ genre first (see *Genres*).
 **Put off** until its uses ask for it: a tag (see *Form and sections*).
 
 **From the review of 8 October 2026** (P2, to be ordered into the next plan): the architecture's items (see
-*Architecture*: chances by hand, named streams, the song's decisions passed whole, the song's trace, the stages' reads
+*Architecture*: named streams, the song's decisions passed whole, the song's trace, the stages' reads
 and writes, `ProgressionSettings`, a genre's one rule, a genre resolved once, plainer prose); and the music's: the
 melody's goal tones and motifs, the songs' own appoggiaturas (*Fills and lines*), phrases of other than four bars
 (*Rhythm engine*), scales of other sizes and an uneven harmonic rhythm (*Scales and chords*); and targets from outside (*Listening data*).
@@ -401,10 +401,6 @@ Each item with its plan, and what it waits for.
 
 From the review of October 2026 (P2), each measured by the fingerprint, unchanged unless said:
 
-- **Chances by hand:** `Expression.cs` (a solo note's bend chance times 3 and capped, a branch no soloing part
-  reaches, as every soloing part has a `Soloist`; a slide's rate times 2) and `FillSounds.DrawLanding` (a landing's
-  chance capped at 1) multiply or cap a chance by hand. The dead branch failing, the slide's rate a `Tilt`, a chance
-  above 1 failing rather than capped.
 - **Named streams:** `SongStream` has 97 numbers that must never change, and the stages pass streams to the modules
   as lambdas, six to `DrumSolos.Apply`. A stream derived from a name and its places (`song.Stream("drumSolo.feet",
   index)`), each module owning its names, takes the enum and its rule away; the seeds move once.
