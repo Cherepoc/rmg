@@ -304,6 +304,18 @@ public sealed class EventStoreTest : IDisposable
     }
 
     [Test]
+    public async Task AVerdictGivenAgain_CountsAsItStandsNow_TheVisitorsOthersAsTheyAre()
+    {
+        Write(EventNames.Verdict, seed: 3, detail: "pushes:with", version: "0.7.003");
+        Write(EventNames.Verdict, seed: 3, detail: "pushes:without", version: "0.7.003", at: Now.AddMinutes(1));
+        Write(EventNames.Verdict, seed: 4, detail: "pushes:same", version: "0.7.003");
+        Write(EventNames.Verdict, visitor: "another", seed: 3, detail: "pushes:with", version: "0.7.003");
+
+        var pushes = _store.LatestVerdicts().Verdicts.Single(x => x.Question == "pushes");
+        await Assert.That((pushes.With, pushes.Without, pushes.Same)).IsEqualTo((1, 1, 1));
+    }
+
+    [Test]
     public async Task VersionsAreOrderedByTheirNumbers()
     {
         Write(EventNames.Played, version: "0.5.999");

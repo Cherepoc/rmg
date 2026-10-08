@@ -77,11 +77,14 @@ const CHOICES = [
 
 /**
  *     The strip asking the question: a song at a time, A and B played on asking, and a verdict, which goes on to the
- *     next song, each started a moment before where its device plays. `play` is given the song's seed, whether it is the
+ *     next song, each started a moment before where its device plays; and back to the song before, its verdict shown, to
+ *     give it again, which the server counts in place of the first. `play` is given the song's seed, whether it is the
  *     one without and the second it starts at; `verdict` the seed and the choice, "with", "without", "same" or "unsure".
  */
 export function createListeningStrip(question, { play, verdict }) {
     let at = 0;
+    // the verdict given on each song, as its button said it
+    const given = [];
     const strip = document.createElement("section");
     strip.className = "panel listening";
     strip.setAttribute("aria-label", "Listening");
@@ -111,22 +114,29 @@ export function createListeningStrip(question, { play, verdict }) {
     }, "primary"));
     const verdicts = CHOICES.map(([choice, text]) => button(text, () => {
         verdict(question.seeds[at].seed, choice === "A" || choice === "B" ? (isWithout(choice) ? "without" : "with") : choice);
+        given[at] = text;
         at++;
         show();
     }));
+    const back = button("Back", () => {
+        at--;
+        show();
+    });
 
     const controls = document.createElement("div");
     controls.className = "listening-controls";
-    controls.append(...plays, ...verdicts);
+    controls.append(...plays, ...verdicts, back);
     strip.append(asked, where, controls, heard);
 
     function show() {
         const done = at >= question.seeds.length;
         where.textContent = done
             ? `Done: ${question.seeds.length} songs heard. Thank you.`
-            : `Song ${at + 1} of ${question.seeds.length} · listen at ${clock(question.seeds[at].at)}, A and B starting just before`;
+            : `Song ${at + 1} of ${question.seeds.length} · listen at ${clock(question.seeds[at].at)}, A and B starting just before`
+              + (given[at] === undefined ? "" : ` · your verdict: ${given[at]}`);
         heard.textContent = "";
         for (const element of [...plays, ...verdicts]) element.disabled = done;
+        back.disabled = at === 0;
     }
 
     show();

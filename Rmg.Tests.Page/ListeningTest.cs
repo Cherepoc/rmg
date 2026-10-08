@@ -67,6 +67,42 @@ public sealed class ListeningTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>Back goes to the song before, its verdict shown, and a verdict given again counts in place of the first.</summary>
+    [Test]
+    public async Task Back_GoesToTheSongBefore_AndAVerdictGivenAgainReplacesTheFirst()
+    {
+        await using var page = await SongPage.Open(site, "?listen=echo");
+        var strip = page.Page.Locator("section.listening");
+        await page.Until(() => strip.IsVisibleAsync(), "the question asked");
+        var back = strip.GetByRole(AriaRole.Button, new() { Name = "Back" });
+        await Assert.That(await back.IsDisabledAsync()).IsTrue();
+        // a song heard, whose version the verdicts are kept by
+        var count = page.Requests.Count;
+        await strip.GetByRole(AriaRole.Button, new() { Name = "Play A" }).ClickAsync();
+        await page.Until(() => page.Requests.Count > count, "A asked for");
+        await page.Settled();
+
+        await strip.GetByRole(AriaRole.Button, new() { Name = "The same" }).ClickAsync();
+        await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).StartsWith("Song 2 of 6");
+        await back.ClickAsync();
+        await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).StartsWith("Song 1 of 6");
+        await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).EndsWith("your verdict: The same");
+        await Assert.That(await back.IsDisabledAsync()).IsTrue();
+        await strip.GetByRole(AriaRole.Button, new() { Name = "Can't tell" }).ClickAsync();
+        await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).StartsWith("Song 2 of 6");
+
+        using var client = new HttpClient { BaseAddress = site.Address };
+        JsonElement echo = default;
+        await page.Until(async () =>
+        {
+            var verdicts = await client.GetFromJsonAsync<JsonElement>("api/listening/verdicts");
+            echo = verdicts.GetProperty("verdicts").EnumerateArray().FirstOrDefault(x => x.GetProperty("question").GetString() == "echo");
+            return echo.ValueKind == JsonValueKind.Object && echo.GetProperty("unsure").GetInt32() >= 1;
+        }, "the verdict given again kept");
+        await Assert.That(echo.GetProperty("same").GetInt32()).IsEqualTo(0);
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     /// <summary>A question's song without its device keeps the genre's other options of the choice it patches, differing by the device alone.</summary>
     [Test]
     public async Task AQuestionsSongWithout_KeepsTheGenresOtherOptions()

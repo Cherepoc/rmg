@@ -443,14 +443,21 @@ public static class EventStoreSummary
         ]);
     }
 
-    /// <summary>Every verdict of the listening mode, whenever given, by its version, question and choice, which its detail says as "question:choice".</summary>
+    /// <summary>
+    ///     Every verdict of the listening mode, whenever given, by its version, question and choice, which its detail says as
+    ///     "question:choice": a visitor's latest on a question's song alone, as one goes back and gives it again.
+    /// </summary>
     private static List<(string Version, string Question, string Choice, int Count)> Verdicts(SqliteConnection connection)
     {
         using var command = connection.CreateCommand();
         command.CommandText = $"""
             SELECT version, detail, COUNT(*)
-            FROM events
-            WHERE name = '{EventNames.Verdict}' AND version IS NOT NULL AND detail LIKE '%:%'
+            FROM (
+                SELECT version, detail,
+                       ROW_NUMBER() OVER (PARTITION BY version, visitor, seed, substr(detail, 1, instr(detail, ':') - 1) ORDER BY id DESC) AS latest
+                FROM events
+                WHERE name = '{EventNames.Verdict}' AND version IS NOT NULL AND detail LIKE '%:%')
+            WHERE latest = 1
             GROUP BY version, detail
             """;
 
