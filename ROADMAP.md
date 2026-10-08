@@ -6,26 +6,29 @@ is removed once it is built.
 
 ## Priorities
 
-**In order** (P1, the plan of 7 October 2026, each step through the implementation loop):
+**In order** (P1, the plan of 8 October 2026 from the review of P3 and P4, each step through the implementation loop,
+each device a genre's data on a mechanism there already where it can be, strong in its genres rather than a few
+percent everywhere, and a listening question once deployed):
 
-1. Done: pinch harmonics a held note's highlight, rare, wavering, in two sounds for listening.
-2. Done: an ending in the song's own harmony, the last section planing and vamping, the chord into home a genre's.
-3. Done: any General MIDI instrument in any role a genre's; instruments added where they belong; Chiptune.
-4. Done: the flaky page test's 400, a range's from typed above its to, the other end now following.
-5. Done: a sparse song's silent start, its earliest part's first note held from the first beat.
-6. Done: a groove that mutates, its edits kept, IDM's and DnB's the most.
-7. Done: drum solos' feet a genre's ostinato and their runs in stickings; their motif, arc and trading left (*Groove*).
-8. Done: a filtered drop, a genre's; a swell brightening; a riff's whammy dive into a louder section.
-9. Let go by listening: a line's tensions beyond Djent. Djent's held tension was heard better in 3 of 12 songs, worse in
-   4, and could not be told in 5, so no genre but Djent holds one; the songs' own appoggiaturas, a tension resolved, go
-   on (*Fills and lines*).
-10. Done: Djent's gate on its pad, not its riff; a tremolo moving held notes alone; a gated chord on a decaying
-    instrument struck again on every bar line.
-11. Done: a dive on the riff's longest note of its last bar, the notes after it let go of, held to the louder
-    section and slowing at its bottom; Metal's and Djent's as often as Nu metal's. Its ritardando deferred (*A band leaning
-    into a big entrance*).
-12. Done: Techno's silent drop, with its riser, as likely as its filtered one.
-13. Done: stop time carried, the lines or the drums keeping time going on through every stopped bar.
+1. A breakdown: a section in half time, sparser, the riff at its lowest and chugging, Metal's, Djent's and Nu metal's.
+2. The riff as the song's signature: the riff alone opening the song and between its sections.
+3. A snare's ghost notes and drags on the backbeat's own figure, Funk's, Soul's and Rock's.
+4. The solo harmonised: a second guitar a third under the solo's notes of an 8th and longer, a twin-guitar break.
+5. Harmony for Jazz and Soul: the passing diminished, the tritone substitute in a reharmonised appearance, chromatic
+   approaches from below, a ii–V into a chord but the home.
+6. The bass's root and fifth within the bar, Country's, and Jazz's walking quarters.
+7. The drums' push, a crash and kick on the and of four; a fill in a stop-time phrase's last bar.
+8. Data on mechanisms there already: the piano's montuno, a riff's drone, Black metal's acoustic interlude.
+9. Instruments by listening (*Genres*).
+10. Smaller: legato slides, a strum's thinner up stroke, a fill's toms by genre, a band leaning into a big entrance, a
+    riser over a filtered drop.
+11. A phrase extended before its cadence, 4 + 2, as an edit after assembly; let go of should it want the 4-bar grid
+    rewritten (*Phrases of other than four bars*).
+
+Done in the plan of 7 October 2026: pinch harmonics; an ending in the song's own harmony; any General MIDI instrument
+in any role; a sparse song's silent start; a groove that mutates; drum solos' feet and stickings; a filtered drop and a
+whammy dive; Djent's gate on its pad; Techno's silent drop; stop time carried. A line's tensions beyond Djent let go of
+by listening; a dive's ritardando deferred (*A band leaning into a big entrance*).
 
 Done in the plan before it (written 7 October 2026): the echo as the synthesizer's delay; the strong effects stacked; the gate holding
 whole chords; the part alone a genre's; metal's arpeggios and a part's colour; a line's tensions, Djent's synth over
@@ -54,8 +57,8 @@ genre first (see *Genres*).
 *Architecture*: plainer prose); and the music's: the
 songs' own appoggiaturas (*Fills and lines*); and targets from outside (*Listening data*).
 
-**Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where they stand: scales of other sizes, a melody in block harmony, a hook at the end, the tempo leaning by the energy, a key change's common tone, the
-fills' loudness as layers, and a head with solos (which the form's devices by genre with AABA likely make).
+**Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where they stand: scales of other
+sizes and a melody in block harmony.
 
 ## Listening
 
@@ -270,17 +273,10 @@ Each item with its plan, and what it waits for.
 - **Harmony's devices, the rest** (P3): a ii–V into a chord but the home, which a chord's own scale makes part of; the
   line cliché rising (the fifth, its sharp, the sixth) beside its falling one (`InnerLines`), should
   listening ask.
-- **The hook at the end** (P4, parked): a song opens on its chorus's first phrase now and then (`IntroKind.Hook`); an
-  outro quoting it too, should endings sound unrelated to the song, though the last section is most often the chorus
-  already and a fade replays it.
 - **A section's parts chosen as its drum kit is** (`DrumKitGenerator.SelectKit`), leading and colouring roles, where
   now each part rests on its own (`Arrangement`).
 - **The drums' changes by an appearance's energy** (their colour, a drum's stroke), which are the section's as it was
   made.
-- **The tempo leaning by the energy** (P4, parked): a section's tempo nudged a percent or two by its energy through its
-  tempo layer by `Tilt`, never in a plain song, which keeps to the click; no drift of its own.
-- **A key change's common tone** (P4, parked): a line's note held over the change into the new key, which the lines'
-  placement does not make; the pad perhaps carrying it.
 
 ### Fills and lines
 
@@ -294,8 +290,6 @@ Each item with its plan, and what it waits for.
   answers.
 - **The lift beyond the cues:** the chords' rhythm doubling, a part of the next section coming in early, should the
   crescendo and the drums' cues not lift.
-- **The fills' loudness** (P4, parked): a run's swell, its accents and a landing's hit are constants, where the groove's
-  loudness is layers; a fill's velocity layer would make them cumulative with the section's.
 
 ### Instruments and expression
 
@@ -315,7 +309,6 @@ Each item with its plan, and what it waits for.
 - **Legato slides** (P3, a case of legato): a slide strikes its note anew, where a player's note before goes on
   sounding into the next; holding the note before into the slide and leaving the next unstruck edits two notes at
   render. Built if the struck slide sounds like a stutter.
-- **Long fall-offs** (P4): a fall of an octave into nothing at a note's end, a slide's kind of its own, if missed.
 - **A filter drawn over time** (P3, if a wobble's restart on every note is heard): a part's brightness drawn through
   its rests rather than while its notes sound, and the filter's shapes a vocabulary as data anchored where they mean
   something; the part's one curve now adds its tone and a filter's closing note by note (`ExpressionRender`).
@@ -399,8 +392,6 @@ Each item with its plan, and what it waits for.
   JavaScript.
 - **The server's figures read in full** (P4): the dashboard reads every song made in its window, nothing at hundreds a
   day and slow at the 200,000 a day the table keeps at most; then the spreads would be worked out a day at a time.
-- **The drum groups' pulses fading by their sounds** (P4): every group fades as fast as the parts' meters, a cymbal's
-  wash as a click; a fade of each group's own would follow its sound, for little.
 - **The page's tests of sound** (P4): the page tests drive asking for songs, not hearing them; playing, seeking, the
   MP3 export and the lock screen's controls are tried by hand, as are Safari and phones.
 - **A report of thousands of songs** would make, measure and let go of its seeds past the shared corpus rather than
@@ -487,12 +478,6 @@ left:
     an output differs from General MIDI.
   - Beyond General MIDI, parked: the gated reverb (one reverb send for the whole drum channel, no gate); an acid
     line's slides and accents past the filter's squelch (`StrongEffect.Squelch`), which has no 303.
-- **A head with solos** (P4, parked): a jazz tune's head, choruses of solos over its form, and the head
-  again, which AABA (`SongForms.Forms`) and a genre's solos (`GenreChoices.Solos`) come near already; a form of its own
-  only should listening ask.
-- **A genre's sections differing** (P3, perhaps never): a value given a section role, such as a solo swung harder
-  or a chorus louder, the genre's for the song otherwise; the generator asking the genre with the section's role,
-  every choice's tile a role's override beside it. The dynamics' contrast and the phrases' AAB give most of it.
 - **The rhythm's values against the part's own:** a value moves a setting by steps from where the part rests, so that
   one part's "faster" is another's "as fast as can be"; a value set outright, where it lands, would read the same for
   every part, should listening ask for it.
@@ -506,37 +491,12 @@ left:
 
 Ideas with a reason, not planned: none has shown a need. Taken up only when listening or another item asks for one.
 
-- **The drums one by one** (P4): each drum's tuning, pan and sends as GS drum parameters, a dry kick under a wetter
-  snare, Trap's kick tuned down, the toms panned: a mix's realism.
-- **A flanger** (P4): the chorus's type set to a flanger, which every part sending to the chorus would take at once.
 - **A song's mood** (P4): a value drawn per song that a preset's options lean dark or bright by, so that one preset
   spans liquid and dark drum and bass coherently; a preset of each until a third genre asks for a span.
-- **The percussive family but the steel drums and the reverse cymbal** (P4): the woodblock, the agogo, the melodic tom
-  and the tinkle bell are the kit's own sounds again; the synth drum's 80s toms are fills, on the drums' channel; the
-  taiko wants a cinematic genre none is.
-- **Sound effects** (P4): General MIDI's 120-127 and the drums' sound-effects kit sound unlike in each soundfont and at
-  each pitch, and read as a mistake rather than as meant; a gunshot, a telephone or a helicopter never, applause a
-  gimmick, breath and fret noise realism. One experiment, should listening ask: a bed of the sea, birds or rain held
-  under an Ambient intro or outro, a part of one held note and no harmony.
-- **Sound design beyond General MIDI** (P4): bit-crushing, tape stops, glitch edits and a high-pass filter, a modern
-  metal or electronic producer's, which no General MIDI controller moves; a pitch-bend dive the one near it.
-- **Ping-pong echo** (P4): an echo alternating sides, from the part's pan to its mirror, which the GS delay's left and
-  right times may make once the echo is the synthesizer's.
-- **Modulation** (blocked until a soundfont maps it): CC1, which none of the soundfonts offered maps to tone. The rule
-  to keep: modulation and a vibrato never at once, modulation and bends together.
-- **A stage report of notes moved in place:** the stages' counts tell notes added and taken away; a diff of every
-  timeline after every stage, should a report need what a stage moves.
-- **Note keys** are hashed seeds where a plain key of the bar pattern, the cycle and the place would do: readable, but
-  nothing needs them read.
-- **The drummer as one player:** the fills' `Drummer` and the drum solo's `Soloist` one record, a refactor with no
-  sound of its own, until the two drift apart.
 - **Segments in any pattern:** bars that mix feels, such as three straight beats and a quintuplet beat; a fill's speed
   change, a rank more for one half of its span, would be a case of it.
-- **The drummer as state:** the favourite walk as a pool like the chord pool's, and busyness as a fullness and a span
-  length that the energy adds to.
 - **A drum's sounds together:** a drum is one track, whose note plays one sound, so a run never plays two toms
   together; notes of several sounds on one track would allow it.
-- **The vibraslap's pickup,** the last beat before a landing.
 - **Patterns by measured features** (syncopation, evenness) as a family, should a target prove out of reach of the
   dyadic engine; euclidean patterns that fit no cycle; a library of idioms such as clave and bossa, which genres may
   take up; and drums generated together, the snare avoiding the kick and the hi-hat filling the gaps.
@@ -545,8 +505,6 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
   obstacle: an hour's song asked of the generator is made in one to two seconds, but plays 33 to 45 minutes at 120
   bpm, its form's parts running out (`SongLength`'s free form of up to 32), and the page's length stops at fifteen
   minutes (`LengthScale`); an hour and more is the endless song's, not the length's.
-- **A sustain pedal** (P4): a piano's or a harp's notes held by the pedal (CC64) across a chord, left from the
-  review of October 2026; the notes are held to the next already.
 - **A parallel CLI batch** (P4): `--count` making its songs in parallel; a song takes about a second.
 - **The rare devices pruned** (P4, the review of October 2026): a device that plays in under about 1% of songs, with
   and without genres, and was never heard as good, taken out or folded into another, the options at
@@ -554,10 +512,17 @@ Ideas with a reason, not planned: none has shown a need. Taken up only when list
 - **The wild end's one device** (P4, the review of October 2026): a wild song stacks key and tempo changes,
   polymeters, every gentle effect and a strong one; one or two devices a song as its signature, leaned by its facets,
   should the ratings fall at the wild end (the ratings by conventionality).
-- **Memory:** every `RealizedNote` keeps the state it was decided from, about 1.7 MB a song: nothing to do.
 
 ## Decided, and kept
 
+- **Decided against** (8 October 2026, the review of P3 and P4), each for little heard at its cost or a sound General
+  MIDI has not: the drums one by one (GS drum parameters), a flanger, the percussive family's other sounds, sound effects,
+  sound design beyond General MIDI, ping-pong echo, modulation (no soundfont maps it), a sustain pedal (notes are held to
+  the next already), long fall-offs, the vibraslap's pickup and the drum groups' pulses fading by their sounds; the hook
+  at the end (the last section is the chorus most often), a head with solos (AABA and a genre's solos come near it), a
+  genre's sections differing (the dynamics' contrast and the phrases' AAB give most of it), the tempo leaning by the
+  energy, a key change's common tone and the fills' loudness as layers; and as refactors with no sound, note keys read
+  plainly, the drummer as one player or as state, a stage report of notes moved and the notes' memory.
 - **The brightness's range** (measured October 2026, spessasynth rendering one note of each family in both soundfonts
   served): closing the brightness (CC74) below the middle darkens every family, the distorted guitar too, to half its
   brightness or less by 48 for a few dB; below 40 most lose 10 to 40 dB, the pads first, so a filter's floor is 40.
