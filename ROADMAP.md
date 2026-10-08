@@ -52,7 +52,7 @@ genre first (see *Genres*).
 **From the review of 8 October 2026** (P2, to be ordered into the next plan): the architecture's items (see
 *Architecture*: named streams, the song's decisions passed whole, the stages' reads
 and writes, a genre's one rule, a genre resolved once, plainer prose); and the music's: the
-melody's goal tones and motifs, the songs' own appoggiaturas (*Fills and lines*), phrases of other than four bars
+melody's motifs, the songs' own appoggiaturas (*Fills and lines*), phrases of other than four bars
 (*Rhythm engine*), scales of other sizes and an uneven harmonic rhythm (*Scales and chords*); and targets from outside (*Listening data*).
 
 **Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where they stand: a melody in block harmony, a hook at the end, the tempo leaning by the energy, a key change's common tone, the
@@ -274,12 +274,7 @@ Each item with its plan, and what it waits for.
 
 ### Fills and lines
 
-- **The melody's goal tones** (P2, the review of October 2026): a phrase's contour peaks and its echoes make sequences,
-  but its last note is wherever the walk lands. A phrase's end aiming at a degree by its cadence: the tonic or its
-  third where the progression closes home, the second or the fifth at a half close, leaned by the melody facet, the
-  wild end free. Measured by the degrees of phrase ends against their cadences (a report), and the songs' intervals
-  unchanged elsewhere.
-- **The melody's motif developed** (P3, after the goal tones): the bar is the unit of repetition (the scheme's letters,
+- **The melody's motif developed** (P3): the bar is the unit of repetition (the scheme's letters,
   the echoes), so a motif is a bar's. Within a phrase, a cell of a beat or two stated and then answered: displaced by
   an 8th, its rhythm stretched, inverted, as the soloist's motifs are (`Soloist.MotifInversion`, *A motif stretched*),
   drawn as data on the echoes rather than as a mechanism of its own. Measured by how often cells shorter than a bar

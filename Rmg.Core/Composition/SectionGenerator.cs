@@ -606,6 +606,10 @@ internal sealed class SectionGenerator
             if (chance > 0)
                 sectionTrackLayer.Add(CompositionStateKinds.LineTension, chance);
         }
+        // a line's phrases ending on a goal, as the part has it, by the section's melody facet
+        if (LinePattern.Goals.Where(x => x.Role == _tracks.Definitions[trackNumber].Role).Select(x => (ByConvention?)x.Chance).FirstOrDefault() is { } goals
+            && goals.At(sectionRhythm.Facets[Facet.Melody]) is var goal and > 0)
+            sectionTrackLayer.Add(CompositionStateKinds.LineGoal, goal);
         // the chords broken now and then, each part that plays them from a sequence of its own, by the section's chords facet
         if (_tracks.Definitions[trackNumber].Role.PlaysChords())
         {

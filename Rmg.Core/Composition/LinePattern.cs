@@ -25,6 +25,22 @@ internal sealed class LinePattern
     /// <summary>The stream a strong beat's note's draw of a tension derives from its key (<see cref="Tensions" />).</summary>
     private const int TensionStream = 8;
 
+    /// <summary>The stream a phrase's held last note's draw of its goal derives from its key (<see cref="Goals" />).</summary>
+    private const int GoalStream = 9;
+
+    /// <summary>
+    ///     The chance a line's phrase ends on a goal, its held last note on its chord's root or third, as a sung phrase
+    ///     closes, rather than wherever its walk lands, by the part: the melody's every phrase at the plain end, most in the
+    ///     middle, and none at the wild end, which ends its phrases freely.
+    /// </summary>
+    public static ImmutableArray<(TrackRole Role, ByConvention Chance)> Goals { get; } =
+    [
+        (TrackRole.Melody, new ByConvention(1, 0.7, 0))
+    ];
+
+    /// <summary>How likely a goal is its chord's root rather than its third.</summary>
+    public const double GoalRootShare = 0.6;
+
     /// <summary>
     ///     The chance a line's note on a strong beat lands on a tension, a note of the scale outside its chord, its ninth,
     ///     eleventh or thirteenth, or a mode's flat second, rather than one of the chord's, as a synth over a heavy band
@@ -120,7 +136,10 @@ internal sealed class LinePattern
                         x.State.GetStateValue(CompositionStateKinds.LineTurn),
                         x.State.GetStateValue(CompositionStateKinds.LineRegister),
                         x.State.GetStateValue(CompositionStateKinds.NoteKey),
-                        isFirstOfChord ? (ChordArrival)x.State.GetStateValue(CompositionStateKinds.LineLanding) : ChordArrival.Free,
+                        // a landing its chord asks for, such as the ending's on its root, over a phrase's goal
+                        isFirstOfChord && (ChordArrival)x.State.GetStateValue(CompositionStateKinds.LineLanding) is var landing and not ChordArrival.Free
+                            ? landing
+                            : GoalOf(x) ?? ChordArrival.Free,
                         (PhraseStart)x.State.GetStateValue(CompositionStateKinds.LinePhraseStart),
                         (LineScale)x.State.GetStateValue(CompositionStateKinds.LineScale),
                         x.State.GetStateValue(CompositionStateKinds.LineLift),
@@ -131,9 +150,9 @@ internal sealed class LinePattern
                 }
             )
             .ToArray();
-        // a note that lands on its chord, as the bass's first of a chord on its root, landing as it does
-        // a note that lands on its chord, as the bass's first of a chord on its root, landing as it does
-        bool Lands(int i) => (i == 0 || Chord(lineNotes[i - 1]) != Chord(lineNotes[i]))
+        // a note that lands on its chord, as the bass's first of a chord on its root, or a phrase's goal, landing as it does
+        bool Lands(int i) => GoalOf(lineNotes[i]) is not null
+                             || (i == 0 || Chord(lineNotes[i - 1]) != Chord(lineNotes[i]))
                              && (ChordArrival)lineNotes[i].State.GetStateValue(CompositionStateKinds.LineLanding) != ChordArrival.Free;
         Restate(notes, map, profile, Lands);
         Hook(notes, map, profile, Lands);
@@ -217,6 +236,20 @@ internal sealed class LinePattern
             if (at.TryGetValue(Math.Round(position - (bar - first) * span.Meter.BarDuration, 6), out var source) && FitsHook(notes[i], notes[source].Pitch))
                 notes[i] = notes[i] with { Pitch = notes[source].Pitch };
         }
+    }
+
+    /// <summary>
+    ///     A phrase's held last note's goal, its chord's root or third, where it ends on one, by its own draws, from its key,
+    ///     which draw nothing else; none for another note, or a phrase ending freely.
+    /// </summary>
+    private static ChordArrival? GoalOf(LineNote note)
+    {
+        if (note.State.GetStateValue(CompositionStateKinds.LineGoal) is not (var chance and > 0) || note.State.GetStateValue(StateKinds.HeldDuration) <= 0)
+            return null;
+        var context = new GenerationContext(Seeds.Derive((ulong)note.State.GetStateValue(CompositionStateKinds.NoteKey), GoalStream));
+        var (goal, root) = (context.GenerateDouble(), context.GenerateDouble());
+        // its third where its chord has one, a suspended chord's root
+        return goal < chance ? root < GoalRootShare || !note.Classes.Contains(note.Chord.GetPitch(2).Mod(12)) ? ChordArrival.Root : ChordArrival.Third : null;
     }
 
     /// <summary>Whether a note on a strong beat lands on a tension, by its own draw, from its key, which draws nothing else.</summary>
