@@ -124,6 +124,7 @@ public sealed class SongPage : IAsyncDisposable
             }
         };
 
+        await page.RouteAsync(Cdn.Pattern, Cdn.Serve);
         await page.RouteAsync("**/api/songs/generate", songPage.Answer);
         await page.GotoAsync(path);
         return songPage;

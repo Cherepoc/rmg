@@ -223,10 +223,6 @@ Each item with its plan, and what it waits for.
   the harmonics 1, unsure 3 of 6 songs, so the two are hard to tell apart and a pinch is hard to hear at all, as the
   dive was. Since then a pinch is held 0.6 s at least and played a little louder, and the squeal is twice as likely
   as the harmonics; both questions to be asked again.
-- **Page tests timing out** (P2): two of fourteen runs of the whole page suite, a test each, past its 30 seconds
-  (`ThePage_OpensWithASong_AndNoErrors`, `TheWindowsOverride_IsCheckedByAChange_AndUncheckedLeavesTheChoiceToTheSongs`),
-  the suite's tests in parallel against one site; which wait, and whether the songs' queue or the browser is the
-  bottleneck.
 - **A song's length, the rest:** a short length runs long, 16% of the songs given a minute and 19% of those given two
   past 15% over (`SongLengthReportTest`), the intro's bars taken in (`SongFormGenerator.IntroDuration`) but an intro
   section, an outro or the ending's bars adding what the length leans no draw of; their chances leaned by the length
