@@ -140,7 +140,10 @@ public sealed class ListeningQuestionsTest
             "The riff intro's chances in the riff-driven genres.", "rock", [], new() { ["riffIntro"] = new() { ["songs"] = 0 } },
             x => x.Map.Intro is { Kind: IntroKind.Entries, Entries: [{ Part.Role: TrackRole.Riff, Entry: 0 }, ..] } ? 0 : null),
         new("ghosts", "Funk's snare playing ghost notes, soft 16ths around its backbeat: a funk drummer's, or clutter?",
-            "The ghost notes' chances by genre, how many and how soft.", "funk", ["Ghosts"], null, x => FirstSection(x, TracePoints.Ghosts, v => (bool)v!))
+            "The ghost notes' chances by genre, how many and how soft.", "funk", ["Ghosts"], null, x => FirstSection(x, TracePoints.Ghosts, v => (bool)v!)),
+        new("twin-solo", "Metal's solo played by two guitars together a third apart, the second on the held notes: a twin-guitar break, or a smear?",
+            "The twins' chances by genre, and the second's notes.", "metal", [], new() { ["solos"] = new() { ["twins"] = 0 } },
+            x => x.Solos.Where(s => s.Value is { Mode: SoloMode.Together, Soloists.Length: > 1 }).Select(s => (double?)x.Map.Sections[s.Key].Start).Min())
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

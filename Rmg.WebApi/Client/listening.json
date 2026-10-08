@@ -316,8 +316,8 @@
     },
     "seeds": [
       {
-        "seed": "5",
-        "at": 27.9
+        "seed": "2",
+        "at": 96.5
       },
       {
         "seed": "D",
@@ -438,16 +438,16 @@
         "at": 106.8
       },
       {
-        "seed": "N",
-        "at": 55.9
-      },
-      {
         "seed": "O",
         "at": 36
       },
       {
         "seed": "d",
         "at": 83.1
+      },
+      {
+        "seed": "i",
+        "at": 123.8
       },
       {
         "seed": "j",
@@ -642,12 +642,12 @@
     },
     "seeds": [
       {
-        "seed": "A",
-        "at": 61.1
-      },
-      {
         "seed": "F",
         "at": 90
+      },
+      {
+        "seed": "H",
+        "at": 6.7
       },
       {
         "seed": "I",
@@ -1111,6 +1111,46 @@
       {
         "seed": "O",
         "at": 102.9
+      }
+    ]
+  },
+  {
+    "id": "twin-solo",
+    "question": "Metal's solo played by two guitars together a third apart, the second on the held notes: a twin-guitar break, or a smear?",
+    "decides": "The twins' chances by genre, and the second's notes.",
+    "genre": "metal",
+    "without": {
+      "skip": [],
+      "genre": {
+        "solos": {
+          "twins": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "S",
+        "at": 138.9
+      },
+      {
+        "seed": "V",
+        "at": 85.8
+      },
+      {
+        "seed": "b",
+        "at": 7.4
+      },
+      {
+        "seed": "i",
+        "at": 187.3
+      },
+      {
+        "seed": "14",
+        "at": 45.2
+      },
+      {
+        "seed": "17",
+        "at": 87.6
       }
     ]
   }

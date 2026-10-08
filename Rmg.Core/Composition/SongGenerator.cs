@@ -240,5 +240,6 @@ internal enum SongStream
     DrumSoloMotifs = 98,
     SoloTrades = 99,
     RiffIntro = 100,
-    Ghosts = 101
+    Ghosts = 101,
+    SoloTwins = 102
 }

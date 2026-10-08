@@ -16,7 +16,8 @@ percent everywhere, and a listening question once deployed):
    Metal's 42% (`?listen=riff-intro`). Between its sections, the part alone already (`GenreChoices.Alone`).
 3. Done: a snare's ghost notes, soft 16ths around its backbeat, the same in a section's bars; Funk's 1.2 a bar,
    Soul's 0.9, Rock's 0.5 (`?listen=ghosts`). Its drags left (*What the genres cannot play yet*).
-4. The solo harmonised: a second guitar a third under the solo's notes of an 8th and longer, a twin-guitar break.
+4. Done: the solo harmonised, two parts together a third apart, the second on the first's notes of an 8th and longer,
+   as every solo played together now; Metal's 39% of its solos, Rock's 16% (`?listen=twin-solo`).
 5. Harmony for Jazz and Soul: the passing diminished, the tritone substitute in a reharmonised appearance, chromatic
    approaches from below, a ii–V into a chord but the home.
 6. The bass's root and fifth within the bar, Country's, and Jazz's walking quarters.
@@ -423,8 +424,6 @@ left:
   (`RockAndMetalReportTest`). Their solos (73% and 78% of songs) and their riffs of two and four bars (AAAB and ABAB a
   third of their sections) were there already; the organ's solo, Rock's shuffle at its plain end and Metal's clean
   quiet sections are presets now. Left:
-  - The solo harmonised (P3): a second guitar a third under the solo, as the riff's twin plays the riff
-    (`TrackRole.RiffTwin`); a twin-guitar break.
   - The riff between the sections (P3): one part alone is a texture already (`TextureKind.Alone`), the riff a genre's
     weight of it, but not placed as an interlude of its own.
   - Tremolo picking (P3, measured first): fast repeated notes unmuted, the riff's speed perhaps enough already.

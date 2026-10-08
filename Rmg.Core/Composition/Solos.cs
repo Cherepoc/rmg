@@ -64,6 +64,32 @@ internal static class Solos
             : solo;
     }
 
+    /// <summary>
+    ///     The chance a pitched solo is played by two parts together a third apart, a twin-guitar break, by the melody facet:
+    ///     the songs' never; a genre's where it names it.
+    /// </summary>
+    public static ByConvention Twin { get; } = new(0, 0, 0);
+
+    /// <summary>The parts that join a soloist as its twin, the first the song has that does not solo already.</summary>
+    public static ImmutableArray<TrackRole> TwinParts { get; } = [TrackRole.Riff, TrackRole.Rhythm, TrackRole.Chords];
+
+    /// <summary>
+    ///     A pitched solo played by two parts together a third above or below now and then, a second joining a soloist
+    ///     alone, from a sequence of its own; the solo as it is otherwise, and where it trades with the drums or has no
+    ///     part to join it.
+    /// </summary>
+    public static SoloPlan? WithTwin(IGenerationContext context, SoloPlan? solo, double melody, IReadOnlyCollection<TrackRole> parts, Genre genre)
+    {
+        var (twins, step) = (context.TestProbability(Twin.At(melody, genre.Chance(GenreChoices.Solos, "twins"))), context.Pick([new Weighted<int>(1, 2), new Weighted<int>(1, -2)]));
+        if (!twins || solo is null || solo.IsDrumSolo || solo.TradesWithDrums)
+            return solo;
+        if (solo.Soloists.Length >= 2)
+            return solo with { Mode = SoloMode.Together, Step = step };
+        return TwinParts.Where(x => parts.Contains(x) && !solo.Soloists.Contains(x)).Select(x => (TrackRole?)x).FirstOrDefault() is { } second
+            ? solo with { Soloists = [..solo.Soloists, second], Mode = SoloMode.Together, Step = step }
+            : solo;
+    }
+
     /// <summary>The chance a later appearance is a solo, by the form facet.</summary>
     public static ByConvention Chance { get; } = new(0, 0.035, 0.5);
 
@@ -131,6 +157,12 @@ internal static class Solos
 
     /// <summary>The chance a note of a soloist playing together with the first is left out, which tells their lines apart.</summary>
     public const double LeftOutChance = 0.2;
+
+    /// <summary>
+    ///     How long a note the others play together with the first lasts at least, to its next, in beats: an 8th, a run's
+    ///     quick notes left to the first, as a second guitar harmonises a lead's held notes.
+    /// </summary>
+    public const double TogetherShortest = 0.5;
 
     /// <summary>How much louder a soloist plays than the loudest part under it, on the average of their velocities as rendered.</summary>
     public const double Margin = 0.06;
@@ -253,8 +285,9 @@ internal static class Solos
                     ? [..line.Where(x => solo.TurnAt(span, x.Position) == place)]
                     : place == 0
                         ? line
-                        : [..line.Where(_ => !context.TestProbability(LeftOutChance))
-                            .Select(x => x.Value.With(StateKinds.ScaleStep, x.Value.GetStateValue(StateKinds.ScaleStep) + solo.Step).With(StateKinds.Alteration, 0).ToTimelineItem(x.Position))];
+                        : [..line.Select((x, i) => (x, Kept: !context.TestProbability(LeftOutChance)))
+                            .Where((x, i) => x.Kept && (i + 1 >= line.Length || line[i + 1].Position - x.x.Position >= TogetherShortest - 1e-9))
+                            .Select(x => x.x.Value.With(StateKinds.ScaleStep, x.x.Value.GetStateValue(StateKinds.ScaleStep) + solo.Step).With(StateKinds.Alteration, 0).ToTimelineItem(x.x.Position))];
                 // over the band, however loud its part and its draws there, as a pad that solos is not comping any more
                 var track = song.TrackTimelineMap[trackOf[soloist]];
                 var heard = Realizer.GetNoteStates(

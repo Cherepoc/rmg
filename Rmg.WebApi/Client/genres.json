@@ -47,7 +47,7 @@
       "stopTime": { "sections": [5, 12, 15] },
       "fills": { "amount": 65 },
       "riff": { "powerChords": [70, 70, 50], "chugs": [60, 60, 50] },
-      "solos": { "sections": [5, 10, 25] },
+      "solos": { "sections": [5, 10, 25], "twins": [10, 15, 25] },
       "soloists": { "solo": 100, "riff": [30, 40, 50], "drum": [0, 5, 15] },
       "ending": { "button": 100, "stop": [60, 60, 60], "ringOut": [60, 60, 40], "fade": [30, 30, 30] },
       "rhythm": {
@@ -837,7 +837,7 @@
       "pins": { "ground": [80, 80, 50], "backbeat": [70, 70, 40] },
       "fills": { "amount": 70 },
       "stopTime": { "sections": [10, 20, 20] },
-      "solos": { "sections": [5, 12, 30] },
+      "solos": { "sections": [5, 12, 30], "twins": [30, 40, 50] },
       "soloists": { "solo": 100, "riff": [30, 40, 50], "drum": [0, 5, 15] },
       "keyChanges": { "lastSection": [0, 5, 30], "sections": [0, 5, 50], "patterns": [0, 0, 50] },
       "effects": { "bends": [40, 70, 90], "vibrato": [40, 70, 100], "swell": [0, 10, 40], "pinch": [20, 40, 50], "dive": [20, 35, 50] },
