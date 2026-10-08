@@ -201,11 +201,11 @@ internal static class Expression
 
     public const double PinchBendChance = 0.5;
 
-    /// <summary>A pinch's sound, as the songs have it, the driven guitar's squeal twice as likely as General MIDI's harmonics.</summary>
+    /// <summary>A pinch's sound, as the songs have it: General MIDI's harmonics, which listening preferred; the driven guitar's squeal a genre's alone.</summary>
     public static ImmutableArray<(PinchSound Sound, ByConvention Weight)> PinchSounds { get; } =
     [
-        (PinchSound.Harmonics, new ByConvention(0.5, 0.5, 0.5)),
-        (PinchSound.Squeal, new ByConvention(1, 1, 1))
+        (PinchSound.Harmonics, new ByConvention(1, 1, 1)),
+        (PinchSound.Squeal, new ByConvention(0, 0, 0))
     ];
 
     /// <summary>The semitones above its note a squealing pinch sounds at, an octave and a fifth or two octaves.</summary>

@@ -570,44 +570,6 @@
     ]
   },
   {
-    "id": "breakbeat",
-    "question": "A breakbeat's broken kick and snare: an electronica's dusty break, or a stumble?",
-    "decides": "Its weight in IDM, and a genre's breakbeats elsewhere.",
-    "genre": "idm",
-    "without": {
-      "skip": [
-        "Figures"
-      ],
-      "genre": {}
-    },
-    "seeds": [
-      {
-        "seed": "7",
-        "at": 116
-      },
-      {
-        "seed": "S",
-        "at": 116
-      },
-      {
-        "seed": "V",
-        "at": 74
-      },
-      {
-        "seed": "X",
-        "at": 210.3
-      },
-      {
-        "seed": "a",
-        "at": 252
-      },
-      {
-        "seed": "b",
-        "at": 28.3
-      }
-    ]
-  },
-  {
     "id": "echo",
     "question": "The echo, the synthesizer's delay repeating the rhythm part and the snare: dub's, or a smear?",
     "decides": "The delay's level, feedback and darkness, and the echo's weight by genre.",
@@ -750,47 +712,6 @@
     ]
   },
   {
-    "id": "djent-tension",
-    "question": "Djent's slow synth line over the guitars, its strong beats on a tension against the chord: a menacing glow, or a wrong note?",
-    "decides": "Its tension chances in Djent, the counter-melody's and the melody's.",
-    "genre": "djent",
-    "without": {
-      "skip": [],
-      "genre": {
-        "tension": {
-          "counterMelody": 0,
-          "melody": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "5",
-        "at": 95.2
-      },
-      {
-        "seed": "B",
-        "at": 88
-      },
-      {
-        "seed": "W",
-        "at": 116.7
-      },
-      {
-        "seed": "b",
-        "at": 58
-      },
-      {
-        "seed": "g",
-        "at": 99.4
-      },
-      {
-        "seed": "p",
-        "at": 42
-      }
-    ]
-  },
-  {
     "id": "tone",
     "question": "Jazz with some parts in a darker tone, a mellow guitar, a dull bass, darker in the quiet sections: warmer, or muffled?",
     "decides": "The tone's chances in the presets that give it.",
@@ -910,87 +831,6 @@
     ]
   },
   {
-    "id": "pinch",
-    "question": "A pinch harmonic now and then on a held note of Nu metal's riff or lead, bent and wavering: a highlight, or a squeak?",
-    "decides": "The pinch's chances by genre.",
-    "genre": "nuMetal",
-    "without": {
-      "skip": [],
-      "genre": {
-        "effects": {
-          "pinch": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "I",
-        "at": 45.1
-      },
-      {
-        "seed": "Z",
-        "at": 102.3
-      },
-      {
-        "seed": "g",
-        "at": 11.9
-      },
-      {
-        "seed": "s",
-        "at": 6.6
-      },
-      {
-        "seed": "1G",
-        "at": 187.8
-      },
-      {
-        "seed": "1a",
-        "at": 4.5
-      }
-    ]
-  },
-  {
-    "id": "pinch-sound",
-    "question": "A pinch harmonic, held longer and louder now: the driven guitar squealing at the harmonic's pitch (with), or General MIDI's guitar harmonics, a clean bell (without)?",
-    "decides": "Which sound a pinch makes.",
-    "genre": "nuMetal",
-    "without": {
-      "skip": [],
-      "genre": {
-        "pinchSound": {
-          "harmonics": 100,
-          "squeal": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "B",
-        "at": 143.5
-      },
-      {
-        "seed": "N",
-        "at": 195.9
-      },
-      {
-        "seed": "s",
-        "at": 6.6
-      },
-      {
-        "seed": "1V",
-        "at": 42.8
-      },
-      {
-        "seed": "1h",
-        "at": 126.3
-      },
-      {
-        "seed": "1w",
-        "at": 83.2
-      }
-    ]
-  },
-  {
     "id": "ending",
     "question": "Black metal ending as it played, planed or sliding home by ♭II, ♭VI or ♭VII (with), or by a classical V–i, its leading tone raised (without)?",
     "decides": "The chord into home and the raised leading tone, by genre.",
@@ -1033,44 +873,6 @@
       {
         "seed": "M",
         "at": 219.2
-      }
-    ]
-  },
-  {
-    "id": "mutation",
-    "question": "IDM's drums mutating, a hit moved, dropped, ratcheted, two 8ths swapped, the edits kept and the groove straying as a section goes on: an evolving break, or mistakes?",
-    "decides": "The mutation's chance by genre and its edits.",
-    "genre": "idm",
-    "without": {
-      "skip": [
-        "Mutations"
-      ],
-      "genre": {}
-    },
-    "seeds": [
-      {
-        "seed": "1",
-        "at": 155.3
-      },
-      {
-        "seed": "A",
-        "at": 142.4
-      },
-      {
-        "seed": "B",
-        "at": 67.6
-      },
-      {
-        "seed": "F",
-        "at": 63.4
-      },
-      {
-        "seed": "I",
-        "at": 131.1
-      },
-      {
-        "seed": "M",
-        "at": 60.2
       }
     ]
   },
@@ -1155,83 +957,42 @@
     ]
   },
   {
-    "id": "dive",
-    "question": "Nu metal's riff diving on the whammy bar into a louder section, held into it: a launch, or a gimmick?",
-    "decides": "The dive's chances by genre.",
-    "genre": "nuMetal",
+    "id": "inversion",
+    "question": "Pop's melody playing a figure it repeats upside down now and then, its steps mirrored: a tune developed, or wrong notes?",
+    "decides": "The inversion's chances, and a motif displaced or stretched beside it.",
+    "genre": "pop",
     "without": {
       "skip": [],
       "genre": {
-        "effects": {
-          "dive": 0
+        "inversion": {
+          "melody": 0
         }
       }
     },
     "seeds": [
       {
-        "seed": "8",
-        "at": 120
+        "seed": "3",
+        "at": 52
       },
       {
-        "seed": "S",
-        "at": 146.2
+        "seed": "A",
+        "at": 86
       },
       {
-        "seed": "f",
-        "at": 147.2
+        "seed": "D",
+        "at": 148.3
       },
       {
-        "seed": "i",
-        "at": 129.8
+        "seed": "F",
+        "at": 77.2
       },
       {
-        "seed": "q",
-        "at": 224.8
+        "seed": "I",
+        "at": 132
       },
       {
-        "seed": "1h",
-        "at": 125.3
-      }
-    ]
-  },
-  {
-    "id": "drum-solo",
-    "question": "Jazz's drum solo, its hands in stickings round the snare and toms over the hi-hat's pedal on 2 and 4 (with), or over the groove's kick (without): a drummer, or a pattern?",
-    "decides": "The drum solo's feet by genre.",
-    "genre": "jazz",
-    "without": {
-      "skip": [],
-      "genre": {
-        "drumSoloFeet": {
-          "hatFoot": 0,
-          "groove": 100
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "7",
-        "at": 43.3
-      },
-      {
-        "seed": "9",
-        "at": 49.1
-      },
-      {
-        "seed": "C",
-        "at": 71.6
-      },
-      {
-        "seed": "H",
-        "at": 77.9
-      },
-      {
-        "seed": "Q",
-        "at": 87.1
-      },
-      {
-        "seed": "T",
-        "at": 189.3
+        "seed": "L",
+        "at": 249.8
       }
     ]
   }

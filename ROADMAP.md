@@ -16,13 +16,14 @@ is removed once it is built.
 6. Done: a groove that mutates, its edits kept, IDM's and DnB's the most.
 7. Done: drum solos' feet a genre's ostinato and their runs in stickings; their motif, arc and trading left (*Groove*).
 8. Done: a filtered drop, a genre's; a swell brightening; a riff's whammy dive into a louder section.
-9. A line's tensions beyond Djent, Jazz's and IDM's melodies and counter-melodies on a tension now and then
-   (`GenreChoices.Tension`), with the songs' own appoggiaturas, after `?listen=djent-tension` is answered.
+9. Let go by listening: a line's tensions beyond Djent. Djent's held tension was heard better in 3 of 12 songs, worse in
+   4, and could not be told in 5, so no genre but Djent holds one; the songs' own appoggiaturas, a tension resolved, go
+   on (*Fills and lines*).
 10. Done: Djent's gate on its pad, not its riff; a tremolo moving held notes alone; a gated chord on a decaying
     instrument struck again on every bar line.
 11. Done: a dive on the riff's longest note of its last bar, the notes after it let go of, held to the louder
-    section and slowing at its bottom; Metal's and Djent's as often as Nu metal's. Its ritardando deferred (*A band leaning
-    into a big entrance*).
+    section and slowing at its bottom; Metal's and Djent's as often as Nu metal's. Its ritardando let go, the dive heard as a
+    launch.
 12. Done: Techno's silent drop, with its riser, as likely as its filtered one.
 13. Done: stop time carried, the lines or the drums keeping time going on through every stopped bar.
 
@@ -64,8 +65,17 @@ Done for a version when every question is answered or let go of. A question's so
 device where it is heard the most, by how much its song with the device and without differ as heard
 (`HeardDifference`, the notes' loudness that differs and the moments its effects do), from where they differ the most;
 its song without lays its patch over the genre's options, the others kept (`withoutDevice`). Asked again since:
-`tape` and `dive`, whose songs without had lost every other effect of their genre's, and `pinch-sound` and `stop-time`.
-The least heard by their nature, short devices in a long song: `lift-cues`, `pinch-sound`, `dive`, under 0.1.
+`tape`, whose song without had lost every other effect of its genre's, and `stop-time`; asked anew, `inversion`, the
+melody's figures inverted (Pop), and `trade`. The least heard by their nature, short devices in a long song:
+`lift-cues`, under 0.1.
+
+Answered on 8 October 2026, with the songs picked by how much they differ, and let go of: `pinch`, a highlight in 6 of
+6; `pinch-sound`, General MIDI's harmonics over the squeal in 6 of 6, 8 of 12 in all, so the harmonics are the songs'
+sound and the squeal a genre's alone; `dive`, a launch in 5 of 6, 8 of 12 in all; `drum-solo`, the hi-hat's pedal
+under the stickings in 6 of 6; `mutation`, an evolving break in 4 of 6; `breakbeat`, a dusty break in 9 of 12; and
+`djent-tension`, 3 better, 4 worse and 5 not told apart of 12, its tension kept to Djent. Verdicts are counted by
+version and the test instance keeps the live one, so a question asked again counts its earlier verdicts too until a
+live deploy.
 
 ### The song and its sections
 
@@ -223,11 +233,6 @@ Each item with its plan, and what it waits for.
 - **An ending's chord into home, by listening** (`?listen=ending`): a modal band's ♭II, ♭VI or ♭VII against a classical
   V–i; Black metal's last chord V 52% to 22%, raised 33% to 5%, its last section planed 42%; the songs' chances of the
   raise and the chord into home left as they were.
-- **Pinch harmonics, by listening** (`?listen=pinch`): their chances by genre, Nu metal's 79 in 64 songs, Metal's 32; a
-  riff's twin pinching apart from its riff. Their sound heard on test (`pinch-sound`, October 2026): the squeal 2,
-  the harmonics 1, unsure 3 of 6 songs, so the two are hard to tell apart and a pinch is hard to hear at all, as the
-  dive was. Since then a pinch is held 0.6 s at least and played a little louder, and the squeal is twice as likely
-  as the harmonics; both questions to be asked again.
 - **A song's length, the rest:** a short length runs long, 16% of the songs given a minute and 19% of those given two
   past 15% over (`SongLengthReportTest`), the intro's bars taken in (`SongFormGenerator.IntroDuration`) but an intro
   section, an outro or the ending's bars adding what the length leans no draw of; their chances leaned by the length
@@ -279,10 +284,10 @@ Each item with its plan, and what it waits for.
 
 ### Fills and lines
 
-- **The melody's motif developed, the rest** (P3, by listening): a run of echoes plays its figure inverted now and
-  then (`LinePattern.Inversions`, 15% in the middle, 40% at the wild end); a figure displaced by an 8th or its rhythm
+- **The melody's motif developed, the rest** (P3, by listening, `?listen=inversion`): a run of echoes plays its figure
+  inverted now and then (`LinePattern.Inversions`, 15% in the middle, 40% at the wild end); a figure displaced by an 8th or its rhythm
   stretched, should the inverted ones be heard as development rather than wrong notes.
-- **The songs' own appoggiaturas** (P2, with step 9 of the plan of 7 October): a line's note on a strong beat a tension
+- **The songs' own appoggiaturas** (P2): a line's note on a strong beat a tension
   that resolves by step to the chord, the songs' chance 0 at the plain end and low in the middle (`LinePattern.Tensions`
   is a genre's alone now, 0 for the songs); a genre's tension (`GenreChoices.Tension`) stays as it is.
 - **Filling the melody's gaps before a chord change within a phrase,** should they sound empty now that the solo part
@@ -297,10 +302,6 @@ Each item with its plan, and what it waits for.
 - **A held riff restruck outside a gate** (P3, by listening): a decaying chord is struck again on its bar lines only
   where the gate holds it (`GatedChords.Hold`); a rock band's riff held over a bar restruck the same way, should a held
   guitar chord dying out be heard elsewhere.
-- **A band leaning into a big entrance** (P3, deferred from the dive, October 2026): the tempo easing a little over the
-  last bar before a louder section now and then, a ritardando back to tempo on its downbeat, where a riff dives into it.
-  The tempo is decided before the notes (`SectionTempo`) and the dive after them (`Expression`), so the dive's section
-  would be decided with the tempo; should the dive, held to the section now, still sound rushed.
 - **The playing following the articulation** (P3; palm-muted chugs done): octaves popped in slap, short notes muted,
   without which an articulation is only another sound.
 - **Plain doubling,** a part doubling another in unison, now that the parts play by their pocket (`Pocket`).
@@ -314,9 +315,6 @@ Each item with its plan, and what it waits for.
 - **A filter drawn over time** (P3, if a wobble's restart on every note is heard): a part's brightness drawn through
   its rests rather than while its notes sound, and the filter's shapes a vocabulary as data anchored where they mean
   something; the part's one curve now adds its tone and a filter's closing note by note (`ExpressionRender`).
-- **A mutating groove, by listening** (`?listen=mutation`): IDM 90% of its sections, 5.4 edits an appearance, its hits
-  unlike the first bar's 11% at the second bar to 34% at the fourteenth; the edits' weights, the ratchet's and the
-  trade's above all; the snap back at a phrase.
 - **Drum solos rethought, the rest** (P2, planned October 2026; `?listen=drum-solo`): a solo now plays the pitched solos' gestures with the kit as a
   scale, a run round the toms, a lick, a crash held, a pause, a quote of the groove, the kick keeping time under it.
   A drummer thinks otherwise; in order of what it would add:
@@ -331,9 +329,10 @@ Each item with its plan, and what it waits for.
      hits a beat at 0.37, 0.44 and 0.55 by its thirds, and the intensity grows over the solo, 0.53, 0.61, 0.64.
   5. Done October 2026: a pitched solo trading with the drums turn by turn, the band laying out for the drums' turns
      (`Solos.Trade`), Jazz's 30% to 60% of its solos, 112 trades in 64 Jazz songs.
-  6. Postponed October 2026, by listening to `?listen=drum-solo`: a genre's idioms as data, metal's double-kick runs
-     and tom cascades, a timbales' abanico, funk's ghosted groove solo, an IDM's drill of ratchets, each a vocabulary of
-     its own over the feet's patterns and the stickings, which are a genre's already.
+  6. Next, the hi-hat's pedal under Jazz's stickings heard as a drummer in 8 of 12 songs and never worse: a genre's
+     idioms as data, metal's double-kick runs and tom cascades, a timbales' abanico, funk's ghosted groove solo, an
+     IDM's drill of ratchets, each a vocabulary of its own over the feet's patterns and the stickings, which are a
+     genre's already.
   Measured by the solos' notes a beat over their arc, the limbs' share, the stickings drawn; `?listen=` questions.
 - **A drum's pocket by its section's role** (P3, if a section's change of role is heard): the timing takes a drum's
   offset by its role in the song's groove (`Pocket.OffsetOf`), not a section's, which may move a ride to the time.

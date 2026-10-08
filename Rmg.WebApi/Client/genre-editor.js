@@ -333,7 +333,7 @@ export function createGenreEditor({ onPlay, onSave, onDelete, isOwn, onKeepAll }
 
     // the choices about one part alone, which its tab shows after its instruments, rhythm and feel
     const PART_CHOICES = {
-        melody: ["melodyRange", "hook", "voice", "ornaments", "tension"],
+        melody: ["melodyRange", "hook", "voice", "ornaments", "tension", "inversion"],
         bass: ["bass", "octaveBass", "glide", "bassLanding", "figure.bass"],
         riff: ["riff", "riffScale", "figure.riff"],
         chords: ["figure.chords"],
