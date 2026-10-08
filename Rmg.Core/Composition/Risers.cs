@@ -33,7 +33,7 @@ internal static class Risers
         // into a silent drop alone, a filtered one's band playing on its channel
         foreach (var drop in song.Form.Drops.Except(song.Form.FilteredDrops))
         {
-            var gap = drop - song.Form.Map.SectionAt(drop - 1e-6)!.Meter.BarDuration;
+            var gap = drop - song.Form.Map.MeterAt(drop - 1e-6).BarDuration;
             // the first that has played before the silence, whose last note there the riser takes its state and loudness from
             var (track, before) = parts.Select(x => (Track: x, Before: result[x].LastOrDefault(n => n.Position < gap - 1e-9))).FirstOrDefault(x => x.Before.Value is not null);
             if (before.Value is null)

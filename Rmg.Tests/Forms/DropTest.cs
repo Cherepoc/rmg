@@ -73,4 +73,12 @@ public sealed class DropTest
         Console.WriteLine($"of 32 Techno songs' drops, {drops} filtered and {silent} silent");
         await Assert.That(drops).IsGreaterThan(5);
     }
+
+    /// <summary>A drop whose bar before it is no section's, an intro's, still takes its riser by the meter there.</summary>
+    [Test]
+    public async Task ADrop_AfterAnIntro_TakesItsRiser()
+    {
+        var song = SongGenerator.GenerateSong(5730926807999, new SongOverrides(Genre: GenrePresets.Genre("trap")));
+        await Assert.That(song.Notes!.Values.SelectMany(x => x).Any(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) == Risers.Program + 1)).IsTrue();
+    }
 }
