@@ -24,7 +24,8 @@ percent everywhere, and a listening question once deployed):
    (*Approach chords*).
 6. Done: the bass alternating its chord's root and fifth on its strong beats, Country's 73% of its sections, Folk's
    38% (`?listen=root-fifth`); Jazz's walking quarters there already, its bass's rhythm in quarters leading into its chords.
-7. The drums' push, a crash and kick on the and of four; a fill in a stop-time phrase's last bar.
+7. Done: the kick and the crash pushing with the band, an eighth early; the drums playing a stop-time phrase's last
+   half bar, a fill there as heavy as a section's, 1% to 21% of the phrases filled out of.
 8. Data on mechanisms there already: the piano's montuno, a riff's drone, Black metal's acoustic interlude.
 9. Instruments by listening (*Genres*).
 10. Smaller: legato slides, a strum's thinner up stroke, a fill's toms by genre, a band leaning into a big entrance, a
@@ -272,8 +273,7 @@ Each item with its plan, and what it waits for.
   section's energy over the song's in its range's place (`MelodyLayers.EnergyRegister`), the chorus 2.6 semitones over
   the verse, higher in 61% of the songs.
 - **The band's devices, the rest** (P3, each an edit after assembly among the stages, as stop time and pushes are):
-  stop time's hits added where a part rests on the downbeat, and a fill in a stop-time phrase's last bar; the drums'
-  push, a crash and kick on the and of four; a backing figure that recurs through the song. Call and response between
+  stop time's hits added where a part rests on the downbeat; a backing figure that recurs through the song. Call and response between
   parts (postponed October 2026): an edit after the notes keeping the counter-melody to the melody's rests kept 12% to
   15% of its notes, the melody leaving no room; the counter-melody's rhythm placed against the melody's gaps when it is
   drawn, as the solo part's answers are (`SoloAnswers`), is the way, should listening ask.

@@ -53,7 +53,8 @@ internal static class StopTime
     ///     the rest of the bar, a hit held a beat at most, under the lines, the melody's, the counter-melody's and a solo's,
     ///     which go on. A section's decision, from a sequence of its own. A stopped bar is always carried by a part that
     ///     goes on through it: the lines, where they sound through half its rest at least; else the drums keeping time,
-    ///     which play on through it; a phrase with a bar neither carries is not stopped, the band playing it as it was.
+    ///     which play on through it; a phrase with a bar neither carries is not stopped, the band playing it as it was. The
+    ///     drums play the phrase's last half bar as they have it, a fill there as heavy as a section's leading the band back.
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
@@ -108,7 +109,9 @@ internal static class StopTime
 
         // the drums' fills out of it, from a run's first note to its line, which go on as a drummer fills into the next
         // section, a drum never heard otherwise landing there
-        var fills = draft.Runs.Where(x => !x.Positions.IsEmpty).Select(x => (From: x.Positions.Min(), To: x.Line)).ToArray();
+        var fills = draft.Runs.Where(x => !x.Positions.IsEmpty).Select(x => (From: x.Positions.Min(), To: x.Line))
+            // and the last half bar of every phrase, the drums leading the band back in, with the fill its line draws there
+            .Concat(phrases.Select(x => (From: x.End - x.BarDuration / 2, To: x.End))).ToArray();
         bool InAFill(double position) => fills.Any(x => position >= x.From - 1e-9 && position < x.To - 1e-9);
 
         var result = notes.ToBuilder();

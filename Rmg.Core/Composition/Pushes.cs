@@ -17,8 +17,8 @@ internal static class Pushes
     /// <summary>
     ///     Pushes: in a pushing section, every chord change on a bar's first beat but the section's first played an eighth
     ///     early by the band's harmony, as an anticipation: a part's notes there moved ahead and held to where they ended, a
-    ///     bar at most, what they sound over in the eighth before taken out, where the part played the bar before; the
-    ///     drums keeping time under it and the lines going on; never in a solo or in stop time. A section's decision, from a
+    ///     bar at most, what they sound over in the eighth before taken out, where the part played the bar before; the kick
+    ///     and the crash pushing with it, the other drums keeping time under it and the lines going on; never in a solo or in stop time. A section's decision, from a
     ///     sequence of its own.
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
@@ -43,9 +43,25 @@ internal static class Pushes
 
         var notes = SongStages.NotesOf(draft);
         var result = notes.ToBuilder();
+        // the kick and the crash push with the band where they played the bar before, their notes on a pushed change struck
+        // an eighth early as their notes in that bar sound, where none strikes there already
+        var pushers = DrumGroups.Kick.Drums.Append(DrumDefinitions.Cymbal).Select(DrumGroups.GetTrackNumber).ToHashSet();
+        foreach (var track in pushers.Where(notes.ContainsKey))
+        {
+            var timeline = notes[track];
+            var own = pushes.Where(x => timeline.Any(n => n.Position >= x.At - x.BarDuration - 1e-9 && n.Position < x.At - 1e-9)).Select(x => x.At).ToArray();
+            bool On(double position) => own.Any(x => Math.Abs(x - position) < 1e-6);
+            result[track] = EventTimeline.Create(timeline.Duration, timeline
+                .Where(note => !(On(note.Position) && timeline.Any(n => Math.Abs(n.Position - (note.Position - Early)) < 1e-6)))
+                .Select(note => On(note.Position)
+                    ? (note.Value with { Pitches = timeline.Last(n => n.Position < note.Position - 1e-6).Value.Pitches }).ToTimelineItem(note.Position - Early)
+                    : note)
+                .OrderBy(x => x.Position));
+        }
+
         foreach (var (track, timeline) in notes)
         {
-            // the drums keep time under the push, and the lines go on
+            // the other drums keep time under the push, and the lines go on
             if (song.Tracks.Definitions[track].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo or TrackRole.Drum)
                 continue;
             // a part pushes a change where it played in the bar before, not where it comes in

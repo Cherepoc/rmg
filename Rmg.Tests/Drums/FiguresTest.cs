@@ -16,13 +16,14 @@ public sealed class FiguresTest
 
     /// <summary>
     ///     Every hit of the tracks given in the sections given, but a phrase's last bar, where a fill may take the drums, and
-    ///     the section's first beat, where the fill into it lands, with its section and its bar's start.
+    ///     a phrase's first beat, where the fill into it lands, with its section and its bar's start.
     /// </summary>
     private static IEnumerable<(SectionSpan Span, double Bar, double Position)> Hits(CorpusSong song, IReadOnlySet<int> tracks, IReadOnlySet<int> sections) =>
         song.Map.Sections.Where(x => sections.Contains(x.SectionId)).SelectMany(span => song.Song.Notes!.Where(x => tracks.Contains(x.Key)).SelectMany(x => x.Value)
-            .Where(x => x.Position > span.Start + 1e-9 && x.Position < span.End - 1e-9)
+            .Where(x => x.Position > span.Start + 1e-9 && x.Position < span.End - 1e-9
+                        && Math.Abs(Math.IEEERemainder(x.Position - span.Start, Meter.PhraseBarCount * span.Meter.BarDuration)) > 1e-6)
             .Select(x => (span, Bar: span.Start + Math.Floor((x.Position - span.Start) / span.Meter.BarDuration + 1e-9) * span.Meter.BarDuration, x.Position))
-            .Where(x => Math.Abs(Math.IEEERemainder(x.Bar + span.Meter.BarDuration - span.Start, span.Meter.PatternDuration)) > 1e-6));
+            .Where(x => Math.Abs(Math.IEEERemainder(x.Bar + span.Meter.BarDuration - span.Start, Meter.PhraseBarCount * span.Meter.BarDuration)) > 1e-6));
 
     /// <summary>
     ///     A calibration: the kick follows the riff's pattern before the lines are placed, which leave a few of the riff's

@@ -104,4 +104,24 @@ public sealed class StopTimeTest
 
         return total;
     }
+
+    /// <summary>How often the drums fill the band back in where a stop-time phrase ends within its section, a tom or a snare struck in its last beat.</summary>
+    [Test]
+    [Explicit]
+    public async Task FillsOutOfStopTime()
+    {
+        var fills = new[] { DrumGroups.Toms, DrumGroups.Snare }.SelectMany(x => x.Drums).Select(DrumGroups.GetTrackNumber).ToHashSet();
+        var (ends, filled) = (0, 0);
+        foreach (var name in new[] { "blues", "rock" })
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre(name)))))
+        foreach (var (_, end, _) in StopTimeSpans(song).Where(x => song.Song.Map!.Sections.Any(s => x.End > s.Start + 1e-9 && x.End < s.End - 1e-9)))
+        {
+            ends++;
+            var struck = song.Song.Notes!.Where(x => fills.Contains(x.Key)).SelectMany(x => x.Value).Count(x => x.Position >= end - 1 - 1e-9 && x.Position < end - 1e-9);
+            filled += struck >= 2 ? 1 : 0;
+        }
+
+        Console.WriteLine($"stop-time phrases ending within their section {ends}, filled out of {filled / (double)Math.Max(1, ends):P0}");
+        await Task.CompletedTask;
+    }
 }
