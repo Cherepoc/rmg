@@ -6,6 +6,9 @@ namespace Rmg.Tests.DrumKits;
 
 public sealed class DoublingTest
 {
+    /// <summary>The bars before a line a fill may play in, in beats: a fill's four beats at the most, in as many bars as they take.</summary>
+    private static double FillBars(Meter meter) => Math.Ceiling(4 / meter.BarDuration - 1e-9) * meter.BarDuration;
+
     [Test]
     public async Task ADrumThatDoublesOrAccentsALead_PlaysOnlyBeatsTheLeadPlays_AnAccentFewerOfThem()
     {
@@ -23,7 +26,7 @@ public sealed class DoublingTest
             {
                 var phrase = Meter.PhraseBarCount * span.Meter.BarDuration;
                 var inPhrase = (position - span.Start) % phrase;
-                return inPhrase >= phrase - span.Meter.BarDuration || inPhrase < 0.5;
+                return inPhrase >= phrase - FillBars(span.Meter) || inPhrase < 0.5;
             }
             // a drum the song never plays has no notes
             double[] Groove(int t) => [..song.Song.Notes!.GetValueOrDefault(t, EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0))
@@ -63,7 +66,7 @@ public sealed class DoublingTest
             bool InGroove(double position)
             {
                 var inPattern = (position - span.Start) % span.Meter.PatternDuration;
-                return inPattern < span.Meter.PatternDuration - span.Meter.BarDuration && inPattern >= 0.5;
+                return inPattern < span.Meter.PatternDuration - FillBars(span.Meter) && inPattern >= 0.5;
             }
             var strong = notes.GetValueOrDefault(doubling.Lead, EventTimeline.Create<Rmg.Core.Songs.RealizedNote>(0))
                 .Any(x => x.Position >= span.Start && x.Position < span.End && InGroove(x.Position) && x.Value.State.GetStateValue(CompositionStateKinds.BeatRank) <= doubling.MaxRank);

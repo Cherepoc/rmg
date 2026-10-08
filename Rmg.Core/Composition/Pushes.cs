@@ -43,12 +43,15 @@ internal static class Pushes
 
         var notes = SongStages.NotesOf(draft);
         var result = notes.ToBuilder();
-        // the kicks together and the crash push with the band where they played the bar before, their notes on a pushed
-        // change struck an eighth early, the kick as its notes in that bar sound, the crash as itself, where none strikes
-        // there already; only drums keeping time, as drums that only mark the form mark it where it moves
+        // the kicks together, and the drums doubling them in a pushing section, and the crash push with the band where they
+        // played the bar before, their notes on a pushed change struck an eighth early, the kick as its notes in that bar
+        // sound, the others as themselves, where none strikes there already; only drums keeping time, as drums that only
+        // mark the form mark it where it moves
         var kicks = DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).Where(notes.ContainsKey).ToArray();
+        var onKick = song.SectionIds.Distinct().Where(id => pushing[id]).SelectMany(id => song.SectionOf(id).Bindings.Where(x => kicks.Contains(x.Value)).Select(x => x.Key));
+        int[] withKicks = [..kicks, ..onKick.Distinct().Except(kicks).Where(notes.ContainsKey)];
         var crash = DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal);
-        foreach (var group in song.DrumJob == DrumJob.Groove ? new[] { kicks, notes.ContainsKey(crash) ? [crash] : Array.Empty<int>() } : [])
+        foreach (var group in song.DrumJob == DrumJob.Groove ? new[] { withKicks, notes.ContainsKey(crash) ? [crash] : Array.Empty<int>() } : [])
         {
             var own = pushes.Where(x => group.Any(t => notes[t].Any(n => n.Position >= x.At - x.BarDuration - 1e-9 && n.Position < x.At - 1e-9))).Select(x => x.At).ToArray();
             bool On(double position) => own.Any(x => Math.Abs(x - position) < 1e-6);

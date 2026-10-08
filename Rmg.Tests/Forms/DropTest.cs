@@ -8,7 +8,7 @@ namespace Rmg.Tests.Forms;
 public sealed class DropTest
 {
     [Test]
-    public async Task ADrop_SilencesTheBand_ForTheBarBeforeIt_AndTheBandComesBackOnIt()
+    public async Task ADrop_SilencesTheBand_ForTheBarBeforeIt_AndTheBandComesBackInItsFirstBar()
     {
         var drops = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("electronic")))))
@@ -20,7 +20,8 @@ public sealed class DropTest
             var pitched = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack).SelectMany(x => x.Value)
                 .Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) != Risers.Program + 1).ToArray();
             await Assert.That(pitched.Where(x => x.Position < at - 1e-9 && x.Position + (x.Value.Duration > 0.25 ? x.Value.Duration : 0) > from + 1e-9)).IsEmpty();
-            await Assert.That(pitched.Any(x => x.Position >= at - 1e-9 && x.Position < at + 1)).IsTrue();
+            // back in the drop's first bar, a part whose pattern rests on the downbeat on its next beat, the drums on it
+            await Assert.That(pitched.Any(x => x.Position >= at - 1e-9 && x.Position < at + song.Song.Map!.MeterAt(at).BarDuration - 1e-9)).IsTrue().Because($"seed {song.Seed} at {at}");
         }
 
         await Assert.That(drops).IsGreaterThan(8);

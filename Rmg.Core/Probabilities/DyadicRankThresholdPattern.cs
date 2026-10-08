@@ -49,7 +49,7 @@ public sealed class DyadicRankThresholdPattern
             {
                 cycle = slot.Cycle;
                 // the first cycle is always drawn; a later one by the variation, which at 1 draws without a draw
-                isRedrawn = cycle == 0 || seededGenerationContext.TestProbability(variation);
+                isRedrawn = cycle == 0 || variation >= 1 || seededGenerationContext.TestProbability(variation);
             }
 
             if (isRedrawn || !decisions.TryGetValue((slot.Slot, slot.Rank), out var decision))

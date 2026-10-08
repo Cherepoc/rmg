@@ -192,11 +192,11 @@ internal static class Polymeter
             if (!plans.TryGetValue(span.SectionId, out var plan))
                 continue;
 
-            var bound = bindings(span.SectionId).Where(x => kicks.Contains(x.Value)).Select(x => x.Key);
+            var bound = bindings(span.SectionId).Where(x => kicks.Contains(x.Value)).Select(x => x.Key).ToHashSet();
             var tracks = plan.Parts.Where(trackOf.ContainsKey).Select(x => trackOf[x]).Concat(plan.Kick ? kicks.Concat(bound) : []).Distinct().Where(song.TrackTimelineMap.ContainsKey);
             var longest = plan.Longest * Sixteenth;
             var frame = plan.Patterns == Plan.Section ? span.Duration : span.Meter.PatternDuration * plan.Patterns;
-            song = song.MapTrackEvents(tracks.ToDictionary(x => x, _ => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
+            song = song.MapTrackEvents(tracks.ToDictionary(x => x, x => (Func<EventTimeline<StateMap>, EventTimeline<StateMap>>)(notes =>
             {
                 // in the bars the part plays, none where it sits out
                 int Bar(double position) => (int)Math.Floor((position - span.Start) / span.Meter.BarDuration + 1e-9);
@@ -206,9 +206,10 @@ internal static class Polymeter
                 {
                     var end = Math.Min(start + frame, span.End);
                     // a part with no note of its own in the first cell, a bass under a busy riff, starts every cell with its
-                    // first note in the frame, so that it plays the cycle rather than nothing
+                    // first note in the frame, so that it plays the cycle rather than nothing; but a drum doubling the kick,
+                    // which plays only where the kick does
                     var first = notes.Where(x => x.Position >= start - 1e-9 && x.Position < start + longest - 1e-9).ToArray();
-                    if (first.Length == 0)
+                    if (first.Length == 0 && !bound.Contains(x))
                         first = [..notes.Where(x => x.Position >= start - 1e-9 && x.Position < end - 1e-9).Take(1).Select(x => x.Value.ToTimelineItem(start))];
                     var cell = 0;
                     for (var repeat = start; repeat < end - 1e-9; repeat += plan.CellAt(cell++) * Sixteenth)

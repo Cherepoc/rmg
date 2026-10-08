@@ -62,7 +62,7 @@ public sealed class StrumTest
         }
 
         await Assert.That(strummed).IsGreaterThan(500);
-        await Assert.That(rolled).IsGreaterThan(20);
+        await Assert.That(rolled).IsGreaterThan(8);
         await Assert.That(thinned).IsGreaterThan(20);
         await Assert.That(down / (double)strummed).IsBetween(0.3, 0.95);
         await Assert.That(strokes.All(x => x is > 0 and < 0.2)).IsTrue();

@@ -83,8 +83,10 @@ internal static class Articulations
                 // chugs, which mutes its repeats instead
                 var pitches = note.Value.Pitches;
                 var leads = i + 1 < timeline.Count && timeline[i + 1].Value.State.GetStateValue(StateKinds.ChordChange) != note.Value.State.GetStateValue(StateKinds.ChordChange);
+                // a bass's own line, never a solo's
+                var ownLine = state.GetStateValue(CompositionStateKinds.LineSolo) == 0;
                 // a weak note after one played an octave away turning back to the note before's own, so that a run alternates
-                if (part.Role == TrackRole.Bass && section >= 0 && song.Sections[section].OctaveBass && !song.Sections[section].Chugs && i > 0 && weak && !leads
+                if (part.Role == TrackRole.Bass && ownLine && section >= 0 && song.Sections[section].OctaveBass && !song.Sections[section].Chugs && i > 0 && weak && !leads
                     && timeline[i - 1].Value.Pitches is var before && (octaved[i - 1] || before.All(x => x + 12 <= top) || before.All(x => x - 12 >= bottom)))
                 {
                     pitches = octaved[i - 1] ? before : [..before.Select(x => before.All(y => y + 12 <= top) ? x + 12 : x - 12)];
@@ -92,7 +94,7 @@ internal static class Articulations
                 }
                 // a bass alternating the root and the fifth, every other strong note of a chord its fifth, below the note
                 // before where its range has it and above where not, as a country bass plays
-                if (part.Role == TrackRole.Bass && section >= 0 && song.Sections[section].AlternatingBass && strongPlaces[i] % 2 == 1 && pitches.Length == 1)
+                if (part.Role == TrackRole.Bass && ownLine && section >= 0 && song.Sections[section].AlternatingBass && strongPlaces[i] % 2 == 1 && pitches.Length == 1)
                 {
                     var fifth = Realizer.GetChord(note.Value.State).Chord.GetPitch(4);
                     var below = timeline[Array.LastIndexOf(strongPlaces, strongPlaces[i] - 1, i)].Value.Pitches.Min() - 1;

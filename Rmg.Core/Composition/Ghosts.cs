@@ -69,6 +69,8 @@ internal static class Ghosts
                     if (own.Length == 0 || Busy(start, end))
                         continue;
                     var loudest = own.MaxBy(x => x.Value.Velocity);
+                    // a ghost weaker than any beat of the bar
+                    var weakest = own.Max(x => x.Value.State.GetStateValue(CompositionStateKinds.BeatRank)) + 1;
                     for (var k = 0; k < draws.Length; k++)
                     {
                         var at = start + k * Length;
@@ -82,7 +84,8 @@ internal static class Ghosts
                                 Velocity = Render.ScaleLoudness(loudest.Value.Velocity, Loudness),
                                 // on the drum's head, never a cross-stick's click
                                 Pitches = [DrumGroups.GetDrum(track).Sounds[0].Code],
-                                Duration = Math.Min(loudest.Value.Duration, Length)
+                                Duration = Math.Min(loudest.Value.Duration, Length),
+                                State = loudest.Value.State.With(CompositionStateKinds.BeatRank, weakest)
                             }).ToTimelineItem(at));
                     }
                 }

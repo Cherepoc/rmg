@@ -32,19 +32,18 @@ public sealed class GenerationContext : IGenerationContext
         return _random.Next();
     }
 
+    /// <summary>
+    ///     Whether a thing of the chance happens: a draw under it, made whatever the chance, so that a chance at an end, as a
+    ///     facet supplied at 0 or 1 makes it, leaves the draws after it as they were; never within a thousandth of 0 and
+    ///     always within one of 1, as a chance a curve or a lean brings next to an end is meant to be there.
+    /// </summary>
     public bool TestProbability(double probability)
     {
-        if (probability is < 0 or > 1)
+        if (probability is < 0 or > 1 or double.NaN)
             throw new ArgumentOutOfRangeException(nameof(probability), "Probability must be between 0 and 1");
 
-        if (probability.IsEqualToByEpsilon(1))
-            return true;
-
-        // ReSharper disable once CompareOfFloatsByEqualityOperator
-        if (probability.IsEqualToByEpsilon(0))
-            return false;
-
-        return GenerateDouble() < probability;
+        var draw = GenerateDouble();
+        return probability.IsEqualToByEpsilon(1) || !probability.IsEqualToByEpsilon(0) && draw < probability;
     }
 
     public IGenerationContext CreateContext(ulong seed)

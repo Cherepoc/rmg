@@ -72,9 +72,9 @@ public sealed class ExpressionTest
         int? SectionOf(double position) => song.Map.Sections.Select((x, i) => (x, i)).Where(x => position >= x.x.Start - 1e-9 && position < x.x.End - 1e-9).Select(x => (int?)x.i).FirstOrDefault();
         return song.Song.Notes!
             .SelectMany(track => track.Value.Select(note => (track.Key, note)))
-            // a slide is as far as the note before, not a size
+            // a slide is as far as the note before, and a dive an octave, not a size
             .Where(x => x.note.Value.State.GetStateValue(CompositionStateKinds.BendDepth) != 0
-                        && (BendKind)x.note.Value.State.GetStateValue(CompositionStateKinds.Bend) != BendKind.Slide)
+                        && (BendKind)x.note.Value.State.GetStateValue(CompositionStateKinds.Bend) is not (BendKind.Slide or BendKind.Dive))
             .Select(x =>
             {
                 var depth = x.note.Value.State.GetStateValue(CompositionStateKinds.BendDepth);
