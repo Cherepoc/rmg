@@ -11,7 +11,7 @@ public sealed class TapeTest
         [..song.Song.Notes!.SelectMany(x => x.Value).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Wow)).Where(x => x > 0).Distinct()];
 
     [Test]
-    public async Task ATapesSong_DriftsEveryPitchedPartAlike_AndNoDrum_ADetuneAFewCents()
+    public async Task ATapesSong_DriftsEveryPitchedPartAlike_AndNoDrum_ALineADetuneAFewCents()
     {
         var taped = 0;
         foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 32), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("idm")))))
@@ -30,6 +30,10 @@ public sealed class TapeTest
                     await Assert.That(note.Value.State.GetStateValue(CompositionStateKinds.Wow) > 0).IsEqualTo(!isDrum).Because($"seed {song.Seed}, track {track}");
                     await Assert.That(Math.Abs(note.Value.State.GetStateValue(CompositionStateKinds.Detune))).IsLessThanOrEqualTo(8);
                 }
+                // a part holding chords in tune with the band, its wow alone
+                var role = song.Song.TrackDefinitions[track].Role;
+                if (role == TrackRole.Pad || role.PlaysChords())
+                    await Assert.That(played.All(x => x.Value.State.GetStateValue(CompositionStateKinds.Detune) == 0)).IsTrue().Because($"seed {song.Seed}, track {track}");
                 // a part's detune the same throughout
                 await Assert.That(played.Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Detune)).Distinct().Count()).IsLessThanOrEqualTo(1);
             }

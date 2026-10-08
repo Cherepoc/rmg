@@ -1262,7 +1262,7 @@
       "harmonicRhythm": { "twoBars": 100, "oneBar": 60 },
       "arpeggio": { "none": 30, "up": 100, "upDown": 60, "upTwoOctaves": 40, "random": [0, 10, 30] },
       "drop": { "lifts": [70, 80, 80] },
-      "strongEffect": { "pump": 100, "gate": [40, 50, 60], "opening": [40, 50, 60], "sweep": [30, 40, 60], "wobble": [0, 10, 30], "none": [20, 10, 0] },
+      "strongEffect": { "pump": 100, "gate": [50, 60, 70], "opening": [40, 50, 60], "sweep": [30, 40, 60], "wobble": [0, 10, 30], "none": [20, 10, 0] },
       "sectionLength": { "bars16": 100, "bars32": 80, "bars8": 20 },
       "texture": { "build": 100, "steady": 60, "thin": 30 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": 100, "counterMelody": [30, 30, 40], "drum": 100, "riff": [60, 60, 60], "riffTwin": [0, 10, 15], "rhythm": 0, "solo": [0, 10, 30] },

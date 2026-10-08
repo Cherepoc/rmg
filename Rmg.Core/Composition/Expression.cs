@@ -162,7 +162,11 @@ internal static class Expression
     /// </summary>
     public static ByConvention TapeChance { get; } = new(0, 0.05, 0.05);
 
-    /// <summary>The chance a pitched part of a song off a tape is held off the rest (<see cref="TapeChance" />).</summary>
+    /// <summary>
+    ///     The chance a line or the bass of a song off a tape is held off the rest (<see cref="TapeChance" />); a part holding
+    ///     chords, the pad's, the chords' or the rhythm part's, never, as a held chord off the band's pitch sounds out of
+    ///     tune rather than worn.
+    /// </summary>
     private const double DetuneChance = 0.35;
 
     /// <summary>How far a tape's pitch drifts either way, and a part is held off at most, in cents.</summary>
@@ -176,14 +180,18 @@ internal static class Expression
 
     /// <summary>
     ///     Whether a note may be pinched, and how likely: a driven guitar's single note in a line, the riff's, the melody's,
-    ///     the counter-melody's or a solo's, held a while by the clock and the longest of its bar, never within a run, one a
+    ///     the counter-melody's or a solo's but its release, which bends its own way, held a while by the clock and the
+    ///     longest of its bar, never within a run, one a
     ///     part a phrase at most; a riff's the likelier after palm-muted chugs, its contrast, and at its phrase's end, a
     ///     solo's the more intense it is. Its sound a genre's (<see cref="PinchSounds" />), and always wavering, often bent.
     /// </summary>
-    public const double PinchChance = 0.12;
+    public const double PinchChance = 0.18;
 
-    /// <summary>The shortest note a pinch takes, in seconds, and the most notes a beat around it.</summary>
-    public const double PinchShortest = 0.4, PinchBusiest = 2.5;
+    /// <summary>The shortest note a pinch takes, in seconds, long enough to be heard, and the most notes a beat around it.</summary>
+    public const double PinchShortest = 0.6, PinchBusiest = 2.5;
+
+    /// <summary>How much louder a pinched note plays, added to its velocity, as a player digs in to make it squeal.</summary>
+    public const double PinchAccent = 0.1;
 
     /// <summary>How much likelier a riff's pinch is after a palm-muted note, and on its phrase's last bar, as odds.</summary>
     public const double PinchAfterChugOdds = 4, PinchPhraseEndOdds = 2;
@@ -193,11 +201,11 @@ internal static class Expression
 
     public const double PinchBendChance = 0.5;
 
-    /// <summary>A pinch's sound, as the songs have it, General MIDI's harmonics, the squeal a genre's.</summary>
+    /// <summary>A pinch's sound, as the songs have it, the driven guitar's squeal twice as likely as General MIDI's harmonics.</summary>
     public static ImmutableArray<(PinchSound Sound, ByConvention Weight)> PinchSounds { get; } =
     [
-        (PinchSound.Harmonics, new ByConvention(1, 1, 1)),
-        (PinchSound.Squeal, new ByConvention(0, 0, 0))
+        (PinchSound.Harmonics, new ByConvention(0.5, 0.5, 0.5)),
+        (PinchSound.Squeal, new ByConvention(1, 1, 1))
     ];
 
     /// <summary>The semitones above its note a squealing pinch sounds at, an octave and a fifth or two octaves.</summary>
@@ -575,6 +583,8 @@ internal static class Expression
             var program = definition is PitchInstrumentTrack pitched ? pitched.InstrumentCode : -1;
             var states = new StateMap?[timeline.Count];
             var raised = new int[timeline.Count];
+            // a pinched note's accent
+            var accents = new double[timeline.Count];
             // a dived note's length, held to the section it dives into, and the notes it lets go of after it
             var held = new double?[timeline.Count];
             var dropped = new bool[timeline.Count];
@@ -646,8 +656,8 @@ internal static class Expression
             // and its tone, from a sequence of its own, every part drawing whatever it plays
             var toned = toneStream.TestProbability(ToneChance.At(songSound)) & songTone && role != TrackRole.Drum;
             var toneDepth = 0.3 + 0.7 * toneStream.GenerateDouble();
-            // and its detune, either way, every part drawing whatever it plays; a drum's kit is left in tune
-            var detuned = tapeStream.TestProbability(DetuneChance) && tape && role != TrackRole.Drum;
+            // and its detune, either way, every part drawing whatever it plays; a drum's kit and a part holding chords left in tune
+            var detuned = tapeStream.TestProbability(DetuneChance) && tape && role is not (TrackRole.Drum or TrackRole.Pad) && !role.PlaysChords();
             var detune = (tapeStream.TestProbability(0.5) ? 1 : -1) * tapeStream.GenerateInt(2, DetuneMost + 1);
             // and its pinches, from a sequence of its own, one a phrase at most
             var pinching = pinchStreams(track);
@@ -753,7 +763,7 @@ internal static class Expression
                     var phrase = (index, (int)Math.Floor((note.Position - span.Start) / (Meter.PhraseBarCount * span.Meter.BarDuration) + 1e-9));
                     if (songPinches && Pinches(noteProgram) && note.Value.Pitches.Length == 1 && state.GetStateValue(CompositionStateKinds.Octave) == 0
                         && role is TrackRole.Riff or TrackRole.RiffTwin or TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo
-                        && state.GetStateValue(CompositionStateKinds.PalmMute) == 0 && !pinchedPhrases.Contains(phrase)
+                        && state.GetStateValue(CompositionStateKinds.PalmMute) == 0 && !pinchedPhrases.Contains(phrase) && !isRelease
                         && note.Value.Duration * beatSeconds(note.Position) >= PinchShortest
                         && timeline.Count(x => Math.Abs(x.Position - note.Position) < 1 - 1e-9) / 2.0 <= PinchBusiest
                         && LongestOfBar(timeline, i, span))
@@ -770,6 +780,7 @@ internal static class Expression
                         if (pinched)
                         {
                             pinchedPhrases.Add(phrase);
+                            accents[i] = PinchAccent;
                             state = state.With(CompositionStateKinds.Pinch, 1).With(CompositionStateKinds.Vibrato, PinchVibrato).With(CompositionStateKinds.WideVibrato, 0);
                             state = bent
                                 ? state.With(CompositionStateKinds.Bend, (int)BendKind.BendAndRelease).With(CompositionStateKinds.BendDepth, ScaleDistance(note.Value, 1))
@@ -808,7 +819,8 @@ internal static class Expression
                     {
                         State = state,
                         Pitches = raised[i] == 0 ? x.Value.Pitches : [..x.Value.Pitches.Select(p => p + raised[i])],
-                        Duration = held[i] ?? x.Value.Duration
+                        Duration = held[i] ?? x.Value.Duration,
+                        Velocity = x.Value.Velocity + accents[i]
                     }).ToTimelineItem(x.Position)
                     : x).Where((_, i) => !dropped[i])
             );
