@@ -115,6 +115,12 @@ internal static class DrumSolos
         _ => "RL"
     };
 
+    /// <summary>
+    ///     The chance a phrase's first run or lick of the kit's restates the phrase before's, its motif, the same sticking at
+    ///     the same speed, moved a drum round the kit; and the chance it is displaced by a 16th besides.
+    /// </summary>
+    public const double MotifChance = SoloLines.MotifChance, DisplaceChance = 0.3;
+
     /// <summary>How loud the drums keeping time under a solo are, softer than its calmest.</summary>
     public const double TimeLoudness = Loudness - IntensityVelocity / 2 - 0.05;
 
@@ -134,6 +140,9 @@ internal static class DrumSolos
         public int At { get; set; }
 
         public SoloLines.CellCursor? Cursor { get; set; }
+
+        // its last phrase's first run or lick, its motif: the phrase, the gesture, the speed, the sticking and the drum it started on
+        public (int Phrase, SoloGesture Gesture, int Speed, Sticking Sticking, int At)? Motif { get; set; }
     }
 
     /// <summary>
@@ -146,6 +155,7 @@ internal static class DrumSolos
     /// <param name="players">A solo's draw of its soloists among the players and of whether the others keep time, by its appearance's place.</param>
     /// <param name="ostinatos">A solo's draw of what its feet keep time with, by its appearance's place.</param>
     /// <param name="stickings">A solo's draws of its runs' and licks' stickings, by its appearance's place.</param>
+    /// <param name="motifs">A solo's draws of which phrases restate the phrase before's motif, by its appearance's place.</param>
     /// <param name="genre">The genre, whose pools of the feet's patterns and the stickings are the solo's where it names them.</param>
     /// <param name="groove">An appearance's groove facet, by its place, which leans how many solo and whether the others keep time.</param>
     public static TrackEventStateTimelineMap<StateMap> Apply(
@@ -160,6 +170,7 @@ internal static class DrumSolos
         Func<int, IGenerationContext> players,
         Func<int, IGenerationContext> ostinatos,
         Func<int, IGenerationContext> stickings,
+        Func<int, IGenerationContext> motifs,
         Func<int, double> groove,
         Genre genre,
         Meter meter,
@@ -227,6 +238,8 @@ internal static class DrumSolos
                 : feetPattern == SoloFeet.HatFoot ? new HashSet<int> { hat }
                 : kicks.Select(x => x.Track).ToHashSet();
             var sticks = stickings(index);
+            var motifDraws = motifs(index);
+            var answered = new List<int>();
             var stickingWeights = ByConvention.Weigh(Stickings, groove(index), genre.Pool<Sticking>(GenreChoices.Stickings, x => GenreChoices.Name(x.ToString())));
             var common = song.CommonStateTimelineMap;
             var plan = SoloLines.Plan(
@@ -239,7 +252,7 @@ internal static class DrumSolos
             );
             StateTrace.Record(TracePoints.DrumSolo, FillGenerator.DrumsTrace, whole.SectionId, 0, StateMap.Default, 0,
                 $"{plan.Length} segments, {soloists.Count} soloists {mode}{(feetTracks.Count > 0 ? ", the feet keeping time" : "")}",
-                new DrumSolo(index, plan, feetTracks.Count > 0, [..soloists.Select(x => Array.IndexOf(band, x))], mode, [..keepers.Select(x => Array.IndexOf(band, x))], [..band.Select(x => x.Tracks.Order().ToArray())]));
+                new DrumSolo(index, plan, feetTracks.Count > 0, [..soloists.Select(x => Array.IndexOf(band, x))], mode, [..keepers.Select(x => Array.IndexOf(band, x))], [..band.Select(x => x.Tracks.Order().ToArray())], answered));
 
             var edits = new TimelineEdits(context, meter, map);
             foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn, phrase, _) in plan)
@@ -285,12 +298,29 @@ internal static class DrumSolos
                             // feet keep time on it
                             var kickFree = kick is not null && !feetTracks.Contains(kick.Track);
                             var sticking = sticks.Pick(kickFree ? stickingWeights : [..stickingWeights.Where(x => x.Value != Sticking.HandFoot)]);
-                            var limbs = LimbsOf(sticking);
                             var snare = scale[0];
                             RunSound[] toms = [..scale.Skip(1).Where(x => kick is null || x.Track != kick.Track)];
-                            var positions = SoloLines.Positions(start, end, gesture, speed);
-                            // a run walks the toms to their other end, a lick rocks between two of them
                             var at = Math.Clamp(player.At, 0, Math.Max(0, toms.Length - 1));
+                            var (rhythm, speedOf) = (gesture, speed);
+                            var displaced = false;
+                            // a phrase's first restating the phrase before's motif now and then, a drum round the kit, displaced
+                            // by a 16th now and then, its draws made whatever it plays
+                            if (player.Motif?.Phrase != phrase)
+                            {
+                                var (answers, displaces) = (motifDraws.TestProbability(MotifChance), motifDraws.TestProbability(DisplaceChance));
+                                if (answers && player.Motif is { } motif && (motif.Sticking != Sticking.HandFoot || kickFree))
+                                {
+                                    (rhythm, speedOf, sticking, displaced) = (motif.Gesture, motif.Speed, motif.Sticking, displaces);
+                                    at = toms.Length > 0 ? (motif.At + 1) % toms.Length : 0;
+                                    answered.Add(phrase);
+                                }
+
+                                player.Motif = (phrase, rhythm, speedOf, sticking, at);
+                            }
+
+                            var limbs = LimbsOf(sticking);
+                            var positions = SoloLines.Positions(start, end, rhythm, speedOf).Select(x => x + (displaced ? 0.25 : 0)).Where(x => x < end - 1e-9).ToArray();
+                            // a run walks the toms to their other end, a lick rocks between two of them
                             var step = at < toms.Length / 2 ? 1 : -1;
                             var rights = 0;
                             for (var i = 0; i < positions.Length; i++)
@@ -362,4 +392,5 @@ internal static class DrumSolos
 /// <summary>A drum solo as the trace records it: its appearance's place, its gestures, whether the feet keep time, its
 /// soloists and how they share it, the players keeping time, by their places among the players, and every player's
 /// tracks, the kit's drummer first.</summary>
-internal sealed record DrumSolo(int Index, SoloLines.Segment[] Plan, bool Feet, int[] Soloists, SoloMode Mode, int[] Keepers, int[][] Tracks);
+/// <param name="Answered">The phrases whose first run or lick restates the phrase before's motif.</param>
+internal sealed record DrumSolo(int Index, SoloLines.Segment[] Plan, bool Feet, int[] Soloists, SoloMode Mode, int[] Keepers, int[][] Tracks, IReadOnlyList<int> Answered);

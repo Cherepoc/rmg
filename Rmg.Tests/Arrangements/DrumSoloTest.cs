@@ -120,8 +120,9 @@ public sealed class DrumSoloTest
 
                     await Assert.That(drummer.Shapes).Contains(segment.Shape);
                     await Assert.That(segment.Sizes.All(drummer.CellSizes.Contains)).IsTrue();
-                    // and a climax's gesture its crash on its first hit
-                    foreach (var (track, _) in hits.Where(x => !(segment.Intensity >= Rmg.Core.Composition.DrumSolos.ClimaxIntensity && Math.Abs(x.Note.Position - segment.Start) < 1e-9 && x.Track == DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal))))
+                    // and a climax's gesture its crash on its first hit, a displaced motif's a 16th after the segment's start
+                    bool OnFirst(double position) => Math.Abs(position - segment.Start) < 1e-9 || Math.Abs(position - segment.Start - 0.25) < 1e-9;
+                    foreach (var (track, _) in hits.Where(x => !(segment.Intensity >= Rmg.Core.Composition.DrumSolos.ClimaxIntensity && OnFirst(x.Note.Position) && x.Track == DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal))))
                         await Assert.That(DrumGroups.GroupOf(DrumGroups.GetDrum(track)) is var group && (group == DrumGroups.Snare || group == DrumGroups.Toms || group == DrumGroups.Kick)).IsTrue()
                             .Because($"seed {song.Seed}, {DrumGroups.GetDrum(track).Name} at {segment.Start}");
                     // a lick's cell on every note's place: the first of every cell the louder
@@ -205,6 +206,19 @@ public sealed class DrumSoloTest
         await Assert.That(pedals).IsGreaterThan(10);
     }
 
+    /// <summary>A kit's solo's phrase restating the phrase before's motif now and then, as the pitched solos' phrases do.</summary>
+    [Test]
+    public async Task ADrumSolosPhrases_RestateThePhraseBeforesMotif_NowAndThen()
+    {
+        var solos = Songs.SelectMany(KitSolos).ToArray();
+        var phrases = solos.Sum(x => x.Plan.Select(p => p.Phrase).Distinct().Count() - 1);
+        var answered = solos.Sum(x => x.Solo.Answered.Count);
+        Console.WriteLine($"of {phrases} kit solos' phrases after their first, {answered} restating the motif before");
+        await Assert.That(answered).IsGreaterThan(0);
+        await Assert.That(answered).IsLessThan(phrases);
+        await Assert.That(solos.All(x => x.Solo.Answered.All(p => p > 0))).IsTrue();
+    }
+
     [Test]
     [Explicit]
     public async Task Report()
@@ -237,6 +251,15 @@ public sealed class DrumSoloTest
                                   .GroupBy(x => x).OrderByDescending(x => x.Count()).Take(10).Select(x => $"{x.Key} {x.Count()}")));
         Console.WriteLine($"  the kick {kicks.Select((x, i) => x.Length / bars[i]).Average():F2} hits a bar, velocity {kicks.SelectMany(x => x).Select(x => (double)x.Value.Velocity).DefaultIfEmpty().Average():F2}; " +
                           $"under a pause in {pausing.Count(x => x) / (double)solos.Length:P0} of the solos; the hands {handsABeat.Average():F2} hits a beat");
+        // its arc, its runs and licks: the hands' hits a beat and their loudness by the intensity's third, and the intensity by the solo's third
+        var arc = solos.SelectMany(x => x.Plan.Where(p => p.Gesture is SoloGesture.Run or SoloGesture.Lick).Select(p =>
+        {
+            var hits = x.Song.Song.Notes!.Where(n => n.Key >= DrumGroups.FirstTrackNumber && n.Key != kick).SelectMany(n => n.Value).Where(h => h.Position >= p.Start - 1e-9 && h.Position < p.End - 1e-9).ToArray();
+            return (p.Intensity, Place: (p.Start - x.Span.Start) / (x.Plan[^1].End - x.Span.Start), ABeat: hits.Length / (p.End - p.Start), Velocity: hits.Select(h => h.Value.Velocity).DefaultIfEmpty().Average());
+        })).ToArray();
+        Console.WriteLine($"  the arc: by intensity, " + string.Join(", ", arc.GroupBy(x => Math.Min(2, (int)(x.Intensity * 3))).OrderBy(x => x.Key)
+            .Select(x => $"third {x.Key + 1} {x.Average(y => y.ABeat):F2} hits a beat at {x.Average(y => y.Velocity):F2}")) + "; by place, intensity " +
+            string.Join(", ", arc.GroupBy(x => Math.Min(2, (int)(x.Place * 3))).OrderBy(x => x.Key).Select(x => $"{x.Average(y => y.Intensity):F2}")));
         await Task.CompletedTask;
     }
 }

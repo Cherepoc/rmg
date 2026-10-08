@@ -177,6 +177,7 @@ internal static class SongStages
                 index => song.Stream(SongStream.DrumSoloPlayers, index),
                 index => song.Stream(SongStream.DrumSoloOstinato, index),
                 index => song.Stream(SongStream.DrumSoloStickings, index),
+                index => song.Stream(SongStream.DrumSoloMotifs, index),
                 index => song.SectionOf(song.Played[index]).Facets[Facet.Groove],
                 song.Genre,
                 song.Meter,
