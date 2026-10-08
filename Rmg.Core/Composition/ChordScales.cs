@@ -101,8 +101,8 @@ public static class ChordScales
         {
             var modes = OwnModes.Select(x => Toward(scale.Offsets, home + root, x.Offsets, ChordScaleKind.Own)).OfType<ChordScale>()
                 .Where(x => !new[] { 0, 2, 4 }.Any(step => x.Steps.Moves(Mod(home + root + step)))).ToArray();
-            var pick = ownContext.GenerateInt(0, OwnModes.Length);
-            return modes.Length == 0 ? null : modes[pick % modes.Length];
+            var pick = ownContext.GenerateDouble();
+            return modes.Length == 0 ? null : modes[(int)(pick * modes.Length)];
         }
 
         return

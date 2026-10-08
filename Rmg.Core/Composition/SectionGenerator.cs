@@ -658,7 +658,7 @@ internal sealed class SectionGenerator
         {
             var stream = _tracks.Definitions[trackNumber].Role == TrackRole.Chords ? SectionStream.Arpeggio : SectionStream.RhythmArpeggio;
             var arpeggio = Arpeggios.Draw(Stream(sectionId, stream), sectionRhythm.Facets[Facet.Chords], _genre);
-            StateTrace.Record(TracePoints.Arpeggio, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{arpeggio}", arpeggio);
+            StateTrace.Record(TracePoints.Arpeggio, trackNumber, sectionId, 0, StateMap.Default, 0, $"{arpeggio}", arpeggio);
             sectionTrackLayer.Add(CompositionStateKinds.Arpeggio, (int)arpeggio);
             // and the colour it lays on its broken chord, from a sequence of its own
             var colour = Arpeggios.DrawColour(new GenerationContext(Seeds.Derive(StreamSeed(sectionId, SectionStream.Colour), trackNumber)), sectionRhythm.Facets[Facet.Chords], _genre);
@@ -890,10 +890,12 @@ internal sealed record GeneratedSection(
         ));
         foreach (var line in Lines.Where(x => !silent.Contains(x.Track)))
         {
-            // a question and its answer every two plays, each pair a further appearance of the line
+            // a question and its answer every two plays, each pair a further appearance of the line, an odd play the
+            // question of one more
+            var pairs = (Plays + 1) / 2;
             var bars = Plays == 1
                 ? line.Appear(appearance, improvisation).Trim(Meter.PatternDuration)
-                : Enumerable.Range(0, Plays / 2).Select(pair => line.Appear(Plays / 2 * appearance + pair, improvisation)).Unroll();
+                : Enumerable.Range(0, pairs).Select(pair => line.Appear(pairs * appearance + pair, improvisation)).Unroll().Trim(Plays * Meter.PatternDuration);
             var placed = bars.TrackTimelineMap[line.Track].EventTimeline.MapValues(x => x.OfScope(StateScope.Render));
             timeline = timeline.MapTrackEvents(new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>> { [line.Track] = _ => placed });
         }

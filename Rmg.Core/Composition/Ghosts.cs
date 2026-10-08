@@ -25,6 +25,8 @@ internal static class Ghosts
     ///     16ths off the beat between their backbeats, the likelier next to one, each on the snare's head, as soft as heard
     ///     against its bar's loudest note. A section's decision, the 16ths it ghosts the same in each of its bars, as a
     ///     drummer keeps a groove, from a sequence of its own; never in a bar a fill or stop time plays in, nor in a drum solo.
+    ///     The snares keeping the backbeat are the song's, as their roles are drawn for it, a wild section's redrawn roles
+    ///     aside.
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {

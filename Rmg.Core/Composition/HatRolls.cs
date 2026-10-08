@@ -24,7 +24,8 @@ internal static class HatRolls
     /// <summary>
     ///     Hi-hat rolls, the trap's: now and then a bar's last beat, or its half, on the drums keeping time played as a roll of
     ///     32nds or 16th triplets growing louder, each note the drum's own note there, where it plays and no fill does. A
-    ///     bar's decision, a genre's, from a sequence of its own for each appearance.
+    ///     bar's decision, a genre's, from a sequence of its own for each appearance. The drums keeping time are the song's,
+    ///     as their roles are drawn for it, a wild section's redrawn roles aside.
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {

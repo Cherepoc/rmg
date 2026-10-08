@@ -84,14 +84,16 @@ internal static class Texture
         // alone, the drums only where they keep time, as likely each, or as a genre weighs them (GenreChoices.Alone), a
         // metal's clean arpeggio, an ambient piece's pad
         TrackRole[] carrying = [..playing.Where(x => x != TrackRole.Drum || !drumsMark).Order()];
-        var weighed = genre.Pool<TrackRole>(GenreChoices.Alone, x => GenreChoices.Name(x.ToString())) is { } pool
-            ? carrying.Select(x => new Weighted<TrackRole>(pool(x)?.At(form) ?? 0, x)).Where(x => x.Weight > 0).ToImmutableArray()
+        var pool = genre.Pool<TrackRole>(GenreChoices.Alone, x => GenreChoices.Name(x.ToString()));
+        ImmutableArray<Weighted<TrackRole>> weighed = pool is not null
+            ? [..carrying.Select(x => new Weighted<TrackRole>(pool(x)?.At(form) ?? 0, x)).Where(x => x.Weight > 0)]
             : [];
         TrackRole? alone = weighed.IsEmpty ? null : context.Pick(weighed);
+        // and none of a genre's that names none that plays, the section steady
         if (weighed.IsEmpty)
         {
             var aloneIndex = context.GenerateInt(0, Math.Max(1, carrying.Length));
-            alone = carrying.Length == 0 ? null : carrying[aloneIndex % carrying.Length];
+            alone = carrying.Length == 0 || pool is not null ? null : carrying[aloneIndex % carrying.Length];
         }
 
         // and where the drums come in a build, among the pitched parts, drawn after the rest so that they stay as they were;

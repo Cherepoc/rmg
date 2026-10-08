@@ -488,7 +488,7 @@ internal sealed class FillGenerator
     /// <summary>The runs the drums played into a change of section, for the pitched tracks to fill with (<see cref="LineFills" />).</summary>
     public List<PlayedRun> Runs { get; } = [];
 
-    /// <summary>The hits the drums land on at a line; a drum that already plays there keeps its note.</summary>
+    /// <summary>The hits the drums land on at a line; a drum that plays there still, the edits made, keeps its note.</summary>
     private static void Land(
         TrackEventStateTimelineMap<StateMap> song,
         TimelineEdits edits,
@@ -497,14 +497,8 @@ internal sealed class FillGenerator
         ImmutableArray<RunSound> landing
     )
     {
-        foreach (var sound in landing.Where(x => !HasHitAt(song, x.Track, position)))
+        foreach (var sound in landing.Where(x => !edits.Strikes(song, x.Track, position)))
             edits.Hit(sound.Track, position, FillLayers.LandingVelocity, sound.Articulation, sectionId, "Landing");
-    }
-
-    private static bool HasHitAt(TrackEventStateTimelineMap<StateMap> song, int track, double position)
-    {
-        return song.TrackTimelineMap.TryGetValue(track, out var timeline)
-               && timeline.EventTimeline.Any(x => x.Position.IsEqualToByEpsilon(position));
     }
 }
 

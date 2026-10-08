@@ -18,13 +18,14 @@ public readonly struct ProbabilityThreshold<T>
 
 public static class ProbabilityThreshold
 {
+    /// <summary>A threshold from 0, a first option weighing nothing, up to 1.</summary>
     public static void ValidateProbabilityThreshold(double value)
     {
-        if (value is <= 0 or > 1)
+        if (value is < 0 or > 1)
             throw new ArgumentOutOfRangeException(
                 nameof(value),
                 value,
-                "Value must be greater than 0 and lesser or equal to 1."
+                "Value must be greater than or equal to 0 and lesser or equal to 1."
             );
     }
 
@@ -48,7 +49,8 @@ public static class ProbabilityThreshold
         double probability
     )
     {
-        // the lowest such index, so a threshold repeated by a zero weight is never picked
+        // the lowest such index, so a threshold repeated by a zero weight is never picked, nor a first of 0 but by a draw
+        // of 0 exactly
         var low = 0;
         var high = probabilityThresholds.Length;
         while (low < high)

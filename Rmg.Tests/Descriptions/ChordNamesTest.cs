@@ -17,6 +17,7 @@ public sealed class ChordNamesTest
     [Arguments(new[] { 0, 2, 7 }, "sus2")]
     [Arguments(new[] { 0, 5, 7 }, "sus4")]
     [Arguments(new[] { 0, 5, 7, 10 }, "7sus4")]
+    [Arguments(new[] { 0, 7, 10 }, "7(no3)")]
     [Arguments(new[] { 0, 4, 7, 10 }, "7")]
     [Arguments(new[] { 0, 4, 7, 11 }, "maj7")]
     [Arguments(new[] { 0, 3, 7, 10 }, "m7")]

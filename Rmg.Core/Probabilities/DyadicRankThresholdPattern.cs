@@ -37,8 +37,9 @@ public sealed class DyadicRankThresholdPattern
         ArgumentOutOfRangeException.ThrowIfGreaterThan(variation, 1);
 
         var seededGenerationContext = generationContext.CreateContext((uint)generationSeed);
-        // every slot's last draw, and the cycle it was drawn in
-        var decisions = new Dictionary<int, (bool IsKept, int Cycle)>();
+        // every slot's last draw, and the cycle it was drawn in, by its rank too, so that a cycle of another shape, an
+        // uneven meter's longer group, repeats no draw made for another place
+        var decisions = new Dictionary<(int Slot, int Rank), (bool IsKept, int Cycle)>();
         var kept = new List<TimelineItem<KeptBeat>>();
         var cycle = -1;
         var isRedrawn = true;
@@ -51,10 +52,10 @@ public sealed class DyadicRankThresholdPattern
                 isRedrawn = cycle == 0 || seededGenerationContext.TestProbability(variation);
             }
 
-            if (isRedrawn || !decisions.TryGetValue(slot.Slot, out var decision))
+            if (isRedrawn || !decisions.TryGetValue((slot.Slot, slot.Rank), out var decision))
             {
                 decision = (seededGenerationContext.TestProbability(rankWeightFunc(slot.Rank)), cycle);
-                decisions[slot.Slot] = decision;
+                decisions[(slot.Slot, slot.Rank)] = decision;
             }
 
             if (decision.IsKept)

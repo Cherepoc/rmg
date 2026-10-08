@@ -87,7 +87,7 @@ internal static class SoloLines
     /// <summary>How far the soloist's volatility moves a phrase's peak and a gesture's intensity about.</summary>
     public const double Drift = 0.4;
 
-    /// <summary>The chance a gesture's intensity is thrown anywhere, times the soloist's volatility.</summary>
+    /// <summary>The chance a gesture's intensity is thrown anywhere, times the soloist's volatility, about 0.7 at the most.</summary>
     public const double JumpRate = 0.5;
 
     /// <summary>The shape a phrase's intensity takes, up to its peak and down, how likely each is.</summary>
@@ -184,10 +184,11 @@ internal static class SoloLines
     )
     {
         var (low, high) = Realizer.GetRange(definition);
-        // the soloist's register, its range in scale steps about the middle of the part's
+        // the soloist's register, its range in scale steps about the middle of the part's, a whole step inside the part's
+        // edges, as a note kept as its scale step moves by a step or so over the next chord and would fold an octave past one
         var middle = (low + high) / 2;
         var reach = (int)Math.Round(soloist.RegisterSteps * 12 / 14.0);
-        var (bottom, top) = (Math.Max(low, middle - reach), Math.Min(high, middle + reach));
+        var (bottom, top) = (Math.Max(low + 2, middle - reach), Math.Min(high - 2, middle + reach));
 
         // the chord a note plays over, as Realizer reads its state there
         ChordContext Chord(StateMap note, double position) => Realizer.GetChord(StateMap.Aggregate([
@@ -408,7 +409,7 @@ internal static class SoloLines
             {
                 // the intensity there, as the contour has it, moved about, or thrown somewhere else
                 var target = peak * Contour(contour, (at - from) / (to - from));
-                var jumps = context.TestProbability(Math.Min(1, soloist.Volatility * JumpRate));
+                var jumps = context.TestProbability(soloist.Volatility * JumpRate);
                 var thrown = context.GenerateDouble();
                 var drift = Generators.SplineValue()(context);
                 var level = Math.Clamp(jumps ? thrown : target + soloist.Volatility * Drift * drift, 0, 1);

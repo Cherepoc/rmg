@@ -174,5 +174,9 @@ public sealed record SongOverrides(
             throw new ArgumentOutOfRangeException(nameof(Genre), "A genre's amounts are from 0 to 1.");
         if (DrumPieces is { } pieces && (pieces.IsEmpty || !pieces.All(Composition.DrumPieces.IsPiece)))
             throw new ArgumentOutOfRangeException(nameof(DrumPieces), "Drums given are one or more of the drum pieces.");
+        if (Length is <= 0 or double.NaN or double.PositiveInfinity)
+            throw new ArgumentOutOfRangeException(nameof(Length), Length, "A length is a positive number of seconds.");
+        if (DrumSetup is { } setup && !Enum.IsDefined(setup))
+            throw new ArgumentOutOfRangeException(nameof(DrumSetup), setup, "A drum setup is one of the setups.");
     }
 }

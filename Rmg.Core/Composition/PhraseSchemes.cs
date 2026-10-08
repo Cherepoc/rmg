@@ -31,8 +31,8 @@ public sealed record PhraseScheme(ImmutableArray<int> Letters, ImmutableArray<bo
 
 internal static class PhraseSchemes
 {
-    /// <summary>The chance of a repeat being varied.</summary>
-    public const double VariedRepeatChance = 0.25;
+    /// <summary>The chance of a repeat being varied, by the form facet: never at the plain end, a repeat played as it was, and every one at the wild.</summary>
+    public static ByConvention VariedRepeatChance { get; } = new(0, 0.25, 1);
 
     /// <summary>How much more often a varied repeat draws its cycles afresh.</summary>
     public const double VariedRepeatVariation = 0.5;
@@ -77,7 +77,7 @@ internal static class PhraseSchemes
 
         var letters = scheme.Select(x => x - 'A').ToImmutableArray();
         var isVaried = letters
-            .Select((letter, bar) => letters[..bar].Contains(letter) && context.TestProbability(VariedRepeatChance))
+            .Select((letter, bar) => letters[..bar].Contains(letter) && context.TestProbability(VariedRepeatChance.At(unconventionality)))
             .ToImmutableArray();
         return new PhraseScheme(letters, isVaried);
     }

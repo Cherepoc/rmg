@@ -82,13 +82,14 @@ internal static class MixFilter
         if (ramps.Count == 0)
             return draft;
 
-        // stepped as a fade is, every step the sum of the ramps over it, where it changes
+        // stepped as a fade is, every step the sum of the ramps over it, where it changes, a ramp's first step at its start
+        // and its last at its end
         var duration = draft.Timeline.Duration;
         var items = new List<TimelineItem<double>>();
         var closed = 0.0;
         for (var at = 0.0; at < duration - 1e-9; at += FormLayers.FadeStep)
         {
-            var value = Math.Min(1, ramps.Where(x => at >= x.From - 1e-9 && at < x.To - 1e-9).Sum(x => x.Start + (x.End - x.Start) * (at - x.From) / (x.To - x.From)));
+            var value = Math.Min(1, ramps.Where(x => at >= x.From - 1e-9 && at < x.To - 1e-9).Sum(x => x.Start + (x.End - x.Start) * Math.Min(1, (at - x.From) / Math.Max(FormLayers.FadeStep, x.To - x.From - FormLayers.FadeStep))));
             value = Math.Round(value, 3);
             if (value != closed)
                 items.Add(value.ToTimelineItem(at));

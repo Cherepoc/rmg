@@ -37,6 +37,9 @@ internal static class ExpressionRender
     public const int BrightnessController = 74;
     public const int ResonanceController = 71;
 
+    /// <summary>A synth's resonance before any is sent, the controller's middle.</summary>
+    private const int DefaultResonance = 64;
+
     /// <summary>
     ///     How far a filter closes at its deepest, in the brightness controller's steps below the middle, where it is the
     ///     sound's own: to 40, where both soundfonts served have most instruments at half their brightness or less and
@@ -87,7 +90,8 @@ internal static class ExpressionRender
         var bends = ImmutableArray.CreateBuilder<(double, int)>();
         var controllers = ImmutableArray.CreateBuilder<(double, int, int)>();
         var expression = ImmutableArray.CreateBuilder<(double, double)>();
-        int? reverb = null, chorus = null, delay = null, brightness = null, pitch = null;
+        int? reverb = null, chorus = null, delay = null, brightness = null, pitch = null, resonance = null;
+        var swept = false;
 
         foreach (var note in notes)
         {
@@ -207,11 +211,14 @@ internal static class ExpressionRender
                 expression.Add((end, 1));
             }
 
-            // a sweep from side to side over two bars of four, while the part plays
+            // a sweep from side to side over two bars of four, while the part plays, and the part back in its place after it
             var sweep = state.GetStateValue(CompositionStateKinds.AutoPan);
             if (sweep > 0)
                 for (var t = start; t < end - 1e-9; t += Step * 4)
                     controllers.Add((t, 10, (int)Math.Round(64 + 63 * Math.Clamp(pan + sweep / 100.0 * Math.Sin(2 * Math.PI * t / 8), -1, 1))));
+            else if (swept)
+                controllers.Add((start, 10, (int)Math.Round(64 + 63 * pan)));
+            swept = sweep > 0;
 
             // the part's brightness, one curve: its tone, below the sound's own, a filter closing further from it and opening
             // back, ringing as it does: a wobble in time, a squelch on every note, an opening over a section's first phrase;
@@ -228,8 +235,11 @@ internal static class ExpressionRender
                 StrongEffect.Squelch => 1 - Math.Exp(-t / SquelchDecay),
                 _ => 1 - Math.Clamp((start + t - filterFrom) / cycle, 0, 1)
             };
-            if (filter != StrongEffect.None)
-                controllers.Add((start, ResonanceController, filter == StrongEffect.Squelch ? 104 : 84));
+            // the filter's resonance where it changes, and back at the synth's own where a filtered part plays unfiltered
+            var resonant = filter == StrongEffect.None ? DefaultResonance : filter == StrongEffect.Squelch ? 104 : 84;
+            if (resonant != (resonance ?? DefaultResonance))
+                controllers.Add((start, ResonanceController, resonant));
+            resonance = resonant;
             var step = filter == StrongEffect.Wobble ? cycle / 8 : Step / 2;
             // a swell opening the note as it grows, over the swell's length
             var swellLength = Math.Min(1, duration / 2);

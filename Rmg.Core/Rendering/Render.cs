@@ -205,7 +205,7 @@ public static class Render
             Room = song.Draws?.Room,
             Insertion = song.Draws?.Insertion,
             // the echo's length, the carrier's, every echoing part's and drum's alike
-            Echo = song.Notes?.Values.SelectMany(x => x).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Echo)).FirstOrDefault(x => x > 0) is > 0 and var echo ? echo / 4.0 : null
+            Echo = notes.Values.SelectMany(x => x).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Echo)).FirstOrDefault(x => x > 0) is > 0 and var echo ? echo / 4.0 : null
         };
     }
 

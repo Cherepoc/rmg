@@ -251,12 +251,14 @@ internal sealed class PatternGenerator
             : GenerateNotes(stateMap, barStateTimelineMap, patternBar * _meter.BarDuration, trackNumber, sectionId, patternBar, energy).GeneratedTimeline;
         // a drum bound to a lead plays its strong beats, and one that accents it a share of them, the same ones wherever
         // its bar pattern plays, by a draw keyed by the drum and the beat's place, and the last of them where the draw
-        // picks none, as a tambourine on the snare's 4, so that a bar a plain section plays over and over is not silent
+        // picks none, as a tambourine on the snare's 4, so that a bar a plain section plays over and over is not silent;
+        // the last of its strongest where it has none so strong
         if (doubling is not null)
         {
             var strong = notes.Where(x => x.Value.GetStateValue(CompositionStateKinds.BeatRank) <= doubling.MaxRank).ToArray();
             var played = doubling.Binding != DrumBinding.Accent ? strong : strong.Where(x => IsAccented(seed, trackNumber, x.Position, doubling.Share)).ToArray();
-            notes = EventTimeline.Create(notes.Duration, played.Length > 0 || strong.Length == 0 ? played : [strong[^1]]);
+            var strongest = notes.Count == 0 ? [] : notes.Where(x => x.Value.GetStateValue(CompositionStateKinds.BeatRank) == notes.Min(n => n.Value.GetStateValue(CompositionStateKinds.BeatRank))).ToArray();
+            notes = EventTimeline.Create(notes.Duration, played.Length > 0 ? played : strong.Length > 0 ? [strong[^1]] : strongest.Length > 0 ? [strongest[^1]] : []);
         }
         // a bass bar that leads into the next chord plays a note in its last beat, for its approach to play on
         if (_trackDefinitions[trackNumber].Role == TrackRole.Bass)

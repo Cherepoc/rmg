@@ -26,7 +26,8 @@ public static class Registers
     public static (int Low, int High) OctavesOf(int program)
     {
         var (low, high) = InstrumentRanges.Of(program);
-        return ((int)Math.Round(low / 12.0) - ZeroOctave, (int)Math.Round((high + 1) / 12.0) - 1 - ZeroOctave);
+        // the lowest whose top six notes are in its range, and the highest whose bottom six are
+        return ((int)Math.Ceiling((low - 6) / 12.0) - ZeroOctave, (int)Math.Floor((high - 5) / 12.0) - ZeroOctave);
     }
 
     /// <summary>

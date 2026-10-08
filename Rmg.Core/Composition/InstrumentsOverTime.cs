@@ -63,7 +63,10 @@ internal static class InstrumentsOverTime
     /// <summary>The chance a bar plays the variant, where a section articulates by bars.</summary>
     public const double BarChance = 0.5;
 
-    /// <summary>The share of a part's notes in a section, the loudest, that count as its accents.</summary>
+    /// <summary>
+    ///     The share of a part's notes in a section, the loudest, that count as its accents: those louder than the note at
+    ///     that share, so that a part playing every note alike, a chug, has none.
+    /// </summary>
     public const double AccentShare = 0.25;
 
     /// <summary>

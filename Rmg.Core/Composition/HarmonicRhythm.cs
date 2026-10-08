@@ -11,6 +11,20 @@ namespace Rmg.Core.Composition;
 /// <param name="Bars">How long a chord lasts, in bars.</param>
 internal sealed record HarmonicRhythm(double Bars, Meter Meter)
 {
+    /// <summary>How long a chord lasts, in bars; a copy of another span changes elsewhere than the one it was made from.</summary>
+    public double Bars
+    {
+        get;
+        init => (field, _changes) = (value, null);
+    } = Bars;
+
+    /// <summary>The meter the pattern is in; a copy in another changes elsewhere than the one it was made from.</summary>
+    public Meter Meter
+    {
+        get;
+        init => (field, _changes) = (value, null);
+    } = Meter;
+
     /// <summary>How long a chord lasts, in beats.</summary>
     public double Span => Bars * Meter.BarDuration;
 

@@ -31,6 +31,12 @@ internal sealed class TimelineEdits(IGenerationContext context, Meter meter, Son
         spans.Add((from, to));
     }
 
+    /// <summary>Whether a track strikes at a position once the edits are made: a hit of its own there, or the song's not cleared.</summary>
+    public bool Strikes(TrackEventStateTimelineMap<StateMap> song, int track, double position) =>
+        _hits.GetValueOrDefault(track)?.Any(x => x.Position.IsEqualToByEpsilon(position)) == true
+        || song.TrackTimelineMap.TryGetValue(track, out var timeline) && timeline.EventTimeline.Any(x => x.Position.IsEqualToByEpsilon(position))
+                                                                   && !(_cleared.GetValueOrDefault(track)?.Any(x => position >= x.From && position < x.To) ?? false);
+
     /// <summary>Makes a track's notes end by a position, its last one before it held until there, as the band stops.</summary>
     public void Cut(int track, double position)
     {

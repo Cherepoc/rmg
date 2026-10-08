@@ -20,6 +20,7 @@ public sealed class GenerationContext : IGenerationContext
         return (int)(_random.Next() >> 33);
     }
 
+    /// <summary>A number from min up to max, max not among them; min where they are the same, a draw spent all the same, so that the draws are as many.</summary>
     public int GenerateInt(int min, int max)
     {
         ArgumentOutOfRangeException.ThrowIfGreaterThan(min, max);

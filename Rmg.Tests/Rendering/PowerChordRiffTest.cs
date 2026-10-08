@@ -40,7 +40,7 @@ public sealed class PowerChordRiffTest
     public async Task AChuggingRiff_SitsOnItsPedal_ItsAccentsFree_InChordsWhereItIsSlow_AndOnItsAccentsWhereItIsFast()
     {
         int pedal = 0, weak = 0, slowNotes = 0, slowChords = 0, fastOffAccents = 0, fastChordsOffAccents = 0;
-        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("djent")))))
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: GenrePresets.Genre("djent")))))
         {
             var chugs = song.Trace.Where(x => x.Point == TracePoints.Chugs && (bool)x.Value!).Select(x => x.Section).ToHashSet();
             var common = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap;

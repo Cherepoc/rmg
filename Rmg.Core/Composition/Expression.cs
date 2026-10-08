@@ -494,9 +494,12 @@ internal static class Expression
                             && !(IsFilter(effect) && carriers.Any(c => IsFilter(c.Key) && c.Value == x.Key)))
                 .Select(x => new Weighted<int>(Fits(effect, x.Value.Role, ((PitchInstrumentTrack)x.Value).InstrumentCode) ? SuitedStrongWeight : 1, x.Key))
         ];
+        // none where no part may carry it
         var first = MayCarry(strong);
         if (strong != StrongEffect.None && !first.IsEmpty)
             carriers[strong] = songStream.Pick(first);
+        else
+            strong = StrongEffect.None;
         // and each other effect beside it now and then, by its share of the effects times the song's chance of any, from a
         // sequence of its own, as a trance pumps, gates and opens its filter at once and a song that seldom plays one
         // seldom plays two
@@ -719,9 +722,13 @@ internal static class Expression
                     var slidesNow = context.TestProbability(soloist is null ? slideRate : new Tilt(intensity.LogOdds + Tilt.Of(StrengthOdds, soloist.SlideLean - Soloist.ExpressionLean).LogOdds).Chance(SlideRate.At(songSound), 1));
                     // and its vibrato, a note at a time, the wide likelier the more intense
                     var noteVibrato = soloist is null ? vibrato : context.Pick(soloLean.Weigh(ByConvention.Weigh(Vibratos.Where(x => x.Width.Steps == 0 || VibratesWide(program)), u), Lean));
-                    // from the note before, where it was heard up to a moment before, and no further than a pitch bend reaches
-                    var from = i > 0 && timeline[i - 1].Position + timeline[i - 1].Value.Duration >= note.Position - slideGap
-                        ? timeline[i - 1].Value.Pitches[0] - note.Value.Pitches[0]
+                    // from the note before, where it was heard up to a moment before, and no further than a pitch bend reaches;
+                    // the note before that a dive let go of unheard, and none from a dive, fallen away
+                    var before = i - 1;
+                    while (before >= 0 && dropped[before])
+                        before--;
+                    var from = before >= 0 && held[before] is null && timeline[before].Position + timeline[before].Value.Duration >= note.Position - slideGap
+                        ? timeline[before].Value.Pitches[0] - note.Value.Pitches[0]
                         : 0;
                     var state = note.Value.State
                         .With(CompositionStateKinds.Reverb, reverb + 1)

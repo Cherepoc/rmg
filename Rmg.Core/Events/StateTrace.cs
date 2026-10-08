@@ -71,8 +71,11 @@ public sealed class StateTrace : IDisposable
 
     internal static bool IsRunning => Volatile.Read(ref _runningCount) > 0 && Current.Value is { _isDisposed: false, _pauseCount: 0 };
 
-    /// <summary>Whether a trace runs here that keeps what every layer contributed to a state (<see cref="StateMap.Explain" />).</summary>
-    internal static bool IsExplaining => Volatile.Read(ref _runningCount) > 0 && Current.Value is { _isDisposed: false, _pauseCount: 0, _explains: true };
+    /// <summary>
+    ///     Whether a trace runs here that keeps what every layer contributed to a state (<see cref="StateMap.Explain" />),
+    ///     under a pause too, as the work done again ends up in the song.
+    /// </summary>
+    internal static bool IsExplaining => Volatile.Read(ref _runningCount) > 0 && Current.Value is { _isDisposed: false, _explains: true };
 
     /// <summary>
     ///     Stops recording in this flow of execution until the pause is disposed, for work done again that was recorded

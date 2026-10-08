@@ -174,7 +174,7 @@ public static class SongDescriptions
                     [..DrumGroups.AllDrums.Where(x => song.Notes!.TryGetValue(DrumGroups.GetTrackNumber(x), out var n) && n.Count > 0).Select(x => x.Name)]
                 )
                 : null,
-            IntroName(map.Intro, map.Meter),
+            IntroName(map.Intro),
             EndingName(map.Ending),
             sections,
             MelodyOf(song, trace),
@@ -283,9 +283,9 @@ public static class SongDescriptions
         _ => "steady"
     };
 
-    private static string IntroName(IntroSpan intro, Meter meter) => intro.Kind switch
+    private static string IntroName(IntroSpan intro) => intro.Kind switch
     {
-        IntroKind.CountIn => "a count-in on the hi-hat",
+        IntroKind.CountIn => "a count-in",
         IntroKind.Entries => $"the band coming in part by part over {intro.Window.Bars} bars",
         IntroKind.Hook => "the chorus's hook",
         _ => "the whole band at once"
@@ -311,7 +311,9 @@ public static class SongDescriptions
             return null;
 
         var pitches = notes.SelectMany(x => x.Value.Pitches).ToArray();
-        var bars = notes.Select(x => (int)Math.Floor(x.Position / song.MeterAt(x.Position).BarDuration + 1e-9)).Distinct().Count();
+        // the bars it plays in, each by where it starts, counted from its section's start in its section's meter
+        var bars = notes.Select(x => song.Map is { } map ? Math.Round(x.Position - map.BeatInBar(x.Position), 6) : Math.Floor(x.Position / song.MeterAt(x.Position).BarDuration + 1e-9))
+            .Distinct().Count();
         var improvisation = (double)trace.First(x => x.Point == TracePoints.MelodyImprovisation).Value!;
         return new MelodyDescription(
             NoteName(pitches.Min()),

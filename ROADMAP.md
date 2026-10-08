@@ -41,7 +41,14 @@ fixed; the review and the plan are kept outside the repository):
    leaning to the offbeat by rank; a dominant pedal under a section's last phrase; soloists trading whole phrases, an
    accompanist comping between its turns; a drum solo's time keeping under the hands again. Left: the walking bass,
    measured first (*Harmony and lines*).
-6. Generator correctness: the corners, each with a test.
+6. Done: generator correctness. A swing's pairs counted from each section, one in a meter that does not pair them
+   straight; a line's approach in its own section's range; a mutating groove's swaps and trades keeping its anchors;
+   a push only by the parts striking the change; a solo run going on from its motif; the drums' sends from their first
+   note sent; a strong effect no part may carry not played; a slide from a note heard; an early landing where the fill
+   cleared the groove; a varied repeat by the form facet, none in the plainest and every one in the wildest; a free
+   form reusing its sections by the form facet; an odd play of a pattern placing its line; a genre's alone parts kept
+   to; a percussion section counting the percussion it draws from; a doubling drum never silent; a solo's register a
+   step inside its range; a third-less seventh named 7(no3); a filter's resonance and a sweep's pan restored after.
 7. Stream robustness, with a fingerprint over genre songs.
 8. The server's robustness: failing songs logged, malformed requests answered 400, ratings outside the telemetry's cap.
 9. The page: the genre editor never losing a genre, a mix change during a request, Any genre after a Stop.
@@ -181,7 +188,7 @@ live deploy.
   36, 171). Decides the modes' weights.
 - **Harmonic rhythm:** a chord every half bar busy at 175 bpm, one every two bars static at 90? Decides leaning the
   span by its length in seconds.
-- **Phrases:** question and answer, varied repeats (A′ at 0.25, `PhraseSchemes.VariedRepeatChance`), the melody's
+- **Phrases:** question and answer, varied repeats (A′ at 0.25 in a middling form, none in the plainest and every one in the wildest, `PhraseSchemes.VariedRepeatChance`), the melody's
   leaps at a phrase's start (a third), the sequences rising with the phrase. Decides their chances.
 - **The gaps before chord changes:** half the changes with no melody in their last beat, the solo part answering now
   (`solo-answers` heard better, 8 October 2026). Decides filling them.

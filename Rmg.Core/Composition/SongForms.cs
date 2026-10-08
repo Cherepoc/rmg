@@ -100,7 +100,7 @@ internal static class SongForms
         SongStructure structure;
         if (!isConventional)
         {
-            var free = SongStructureGenerator.Generate(freeContext, length).SelectMany(part => part.SectionIds).ToImmutableArray();
+            var free = SongStructureGenerator.Generate(freeContext, length, unconventionality).SelectMany(part => part.SectionIds).ToImmutableArray();
             structure = new SongStructure(free, free.Distinct().ToImmutableDictionary(x => x, _ => SectionRole.Free));
         }
         else

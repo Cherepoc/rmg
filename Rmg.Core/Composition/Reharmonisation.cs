@@ -60,7 +60,7 @@ internal static class Reharmonisation
             }
         }
 
-        StateTrace.Record(TracePoints.Reharmonisation, FillGenerator.DrumsTrace, later >= 0 ? sections[later].SectionId : 0, 0, StateMap.Default, 0,
+        StateTrace.Record(TracePoints.Reharmonisation, SectionGenerator.SectionTrace, later >= 0 ? sections[later].SectionId : 0, 0, StateMap.Default, 0,
             $"{roots.Count / 2} chords", roots.Count == 0 ? null : (later, roots.Where((_, j) => j % 2 == 0).Select(x => x.Position).ToImmutableArray()));
         if (roots.Count == 0)
             return StateTimelineMap.Create(common.Duration);

@@ -140,7 +140,8 @@ internal sealed class SectionDrumGenerator
     {
         var rhythm = new RhythmicUnconventionality(_facets(sectionId)[Facet.Groove]);
         var tilt = SectionEnergy.Tilt(_songStateMap.MergeWith(_sectionEnergies[sectionId]).GetStateValue(CompositionStateKinds.Energy), rhythm.Coupling);
-        var songPercussion = _tracks.SongDrums.Count(DrumGroups.Percussion.Drums.Contains);
+        // the drums a percussion section draws its kit from (DrumKitGenerator.SelectKit)
+        var songPercussion = _tracks.SongDrums.Count(x => x.Family.HasFlag(DrumFamily.Percussion));
         var percussionOnly = isPercussionOnly ?? (_tracks.DrumSetup == DrumSetup.Percussion ||
                                                   (_tracks.DrumSetup == DrumSetup.KitAndPercussion &&
                                                    PercussionSections.Draw(_stream(sectionId, SectionStream.Percussion), _songPercussion, rhythm.Value, tilt, songPercussion)));

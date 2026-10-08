@@ -179,8 +179,9 @@ public static class Midi
             milliseconds /= 2;
         (int Start, int End, double From, double Step)[] segments =
             [(1, 20, 0.1, 0.1), (20, 35, 2, 0.2), (35, 45, 5, 0.5), (45, 55, 10, 1), (55, 70, 20, 2), (70, 80, 50, 5), (80, 90, 100, 10), (90, 105, 200, 20), (105, 116, 500, 50)];
-        var (start, end, from, step) = segments.Last(x => x.From <= milliseconds + 1e-9);
-        return (byte)Math.Min(end - 1, start + (int)Math.Round((milliseconds - from) / step));
+        var (start, _, from, step) = segments.Last(x => x.From <= milliseconds + 1e-9);
+        // a time rounding up past its segment the next segment's first, which the segments run on into
+        return (byte)Math.Min(segments[^1].End - 1, start + (int)Math.Round((milliseconds - from) / step));
     }
 
     /// <summary>A channel's part, as a Roland GS address numbers it: the drums' first, the channels before them after it.</summary>

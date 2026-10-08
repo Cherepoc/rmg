@@ -152,11 +152,12 @@ public static class StateKinds
         return new StateKind<ImmutableArray<T>>(
             name,
             [],
-            (v1, v2) => v1.SequenceEqual(v2),
+            // a default array as empty, as the hash and the check of aggregation have it
+            (v1, v2) => (v1.IsDefault ? [] : v1).SequenceEqual(v2.IsDefault ? [] : v2),
             values =>
             {
                 // duplicates are kept: each layer contributes its own values, such as offsets that are summed later
-                var preprocessedValues = values.SelectMany(x => x);
+                var preprocessedValues = values.SelectMany(x => x.IsDefault ? [] : x);
                 if (isComparable)
                     preprocessedValues = preprocessedValues.Order();
                 return [..preprocessedValues];

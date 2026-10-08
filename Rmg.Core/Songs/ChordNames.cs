@@ -30,7 +30,7 @@ public static class ChordNames
 
         var suffix = (major, minor, diminished, seventh) switch
         {
-            (false, false, _, _) => (seventh switch { 11 => "maj7", 10 => "7", _ => "" }) + (Has(5) ? "sus4" : Has(2) ? "sus2" : "5"),
+            (false, false, _, _) => (seventh switch { 11 => "maj7", 10 => "7", _ => "" }) + (Has(5) ? "sus4" : Has(2) ? "sus2" : seventh == 0 ? "5" : "(no3)"),
             (_, _, true, 10) => "m7♭5",
             (_, _, true, 9) => "dim7",
             (_, _, true, _) => "dim",

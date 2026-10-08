@@ -514,10 +514,12 @@ internal sealed class SongFormGenerator
     {
         var homeBar = lastSection.Timeline.Trim(lastSection.Meter.BarDuration);
         var final = StateMap.FromStates([StateKinds.HeldDuration.CreateState(length)]);
-        // every track plays the home bar's chord, whichever note it takes its own state from
+        // every track plays the home bar's chord as its earliest note has it, the downbeat's, whichever note it takes its
+        // own state from
         IStateKind[] shapeKinds = [StateKinds.ChordNotePitchOffsets, StateKinds.ChordVoicingFixed];
         var homeShape = homeBar.TrackTimelineMap
             .Where(x => roles[x.Key] != TrackRole.Drum && x.Value.EventTimeline.Count > 0)
+            .OrderBy(x => x.Value.EventTimeline[0].Position)
             .Select(x => x.Value.EventTimeline[0].Value.Subset(shapeKinds))
             .FirstOrDefault();
         var tracks = homeBar.TrackTimelineMap.Select(x =>

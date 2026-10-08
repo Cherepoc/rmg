@@ -16,7 +16,6 @@ public sealed class ProbabilityThresholdTest
     ];
 
     [Test]
-    [Arguments(0)]
     [Arguments(-0.1)]
     [Arguments(1.1)]
     public async Task Constructor_InvalidThreshold_ResultsIn_ThrownException(double threshold)
@@ -26,6 +25,7 @@ public sealed class ProbabilityThresholdTest
     }
 
     [Test]
+    [Arguments(0)]
     [Arguments(0.0001)]
     [Arguments(1)]
     public async Task Constructor_ValidThreshold_KeepsValues(double threshold)

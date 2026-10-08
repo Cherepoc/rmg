@@ -71,7 +71,7 @@ public sealed class PhraseSchemesTest
             }
         }
 
-        await Assert.That(varied / (double)repeats).IsEqualTo(Rmg.Core.Composition.PhraseSchemes.VariedRepeatChance).Within(0.02);
+        await Assert.That(varied / (double)repeats).IsEqualTo(Rmg.Core.Composition.PhraseSchemes.VariedRepeatChance.At(0.5)).Within(0.02);
     }
 
     [Test]

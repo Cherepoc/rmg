@@ -11,7 +11,11 @@ internal static class SongStructureGenerator
     public const int MaxPartLength = 4;
     public const int MaxDistinctSectionsInPart = 3;
 
-    private const double ReuseSectionProbability = 0.4;
+    /// <summary>
+    ///     The chance a part takes a section of an earlier part rather than a new one, by the form facet: every time it may at
+    ///     the plain end, a free form of few sections coming back, and never at the wild, every section new.
+    /// </summary>
+    public static ByConvention ReuseSection { get; } = new(1, 0.4, 0);
 
     private static readonly Func<IGenerationContext, int> PartCountGenerator =
         Generators.Int(MinPartCount, MaxPartCount + 1);
@@ -29,8 +33,10 @@ internal static class SongStructureGenerator
     ///     The song's length given: the parts drawn on to the most there may be, and as many of them kept, the first, as
     ///     come nearest it; none for the parts as many as drawn.
     /// </param>
-    public static ImmutableArray<SongPart> Generate(IGenerationContext context, SongLength? songLength)
+    /// <param name="unconventionality">The form facet of the song's unconventionality, by which it reuses its sections.</param>
+    public static ImmutableArray<SongPart> Generate(IGenerationContext context, SongLength? songLength, double unconventionality)
     {
+        var reuse = ReuseSection.At(unconventionality);
         var drawnCount = PartCountGenerator(context);
         var partCount = songLength is null ? drawnCount : MaxPartCountForLength;
         var parts = ImmutableArray.CreateBuilder<SongPart>(partCount);
@@ -54,7 +60,7 @@ internal static class SongStructureGenerator
                 var reusable = Enumerable.Range(0, sectionCount)
                     .Where(x => !partSectionIds.Contains(x) && (distinctCount > 1 || x != previousSectionId))
                     .ToArray();
-                if (reusable.Length > 0 && context.TestProbability(ReuseSectionProbability))
+                if (reusable.Length > 0 && context.TestProbability(reuse))
                 {
                     partSectionIds.Add(reusable[context.GenerateInt(0, reusable.Length)]);
                 }
