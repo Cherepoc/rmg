@@ -283,8 +283,8 @@ internal static class Realizer
             duration = Math.Min(duration, nextNoteDuration);
         else
             // a note that plays the chord, the chords' or the bass's, ends where the chord changes, rather than sound the
-            // old chord over the new; a melody's may, as a suspension does
-            duration = Math.Min(duration, UntilChange(changes, position));
+            // old chord over the new; a melody's may, as a suspension does; the bass's by its next note too, one at a time
+            duration = Math.Min(role == TrackRole.Bass ? Math.Min(duration, nextNoteDuration) : duration, UntilChange(changes, position));
 
         int ToNote(int stepAboveRoot) => chord.GetPitch(stepAboveRoot);
 

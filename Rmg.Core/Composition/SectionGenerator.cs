@@ -303,13 +303,16 @@ internal sealed class SectionGenerator
         var passingChance = tilt.Chance(PassingChords.Chance.At(facets[Facet.Progression], _genre.Chance(GenreChoices.PassingChords, "chords")), PassingChords.EnergyLean);
         var (passingRhythm, passingProgression, passingScales, shifts) = PassingChords.Draw(Stream(sectionId, SectionStream.PassingChords), passingChance, facets[Facet.Progression],
             harmonicRhythm, progression, chordScales, scale, home, _genre);
+        var drawnRhythm = harmonicRhythm;
         (harmonicRhythm, progression, chordScales) = (passingRhythm, passingProgression, passingScales);
         // a wild section planing now and then, every chord the home's shape moved, by the progression facet and a genre's,
         // from a sequence of its own, the song's last too, which ends in the language the song spoke, sliding home at its end
         // a section vamping on its home, a genre's, from a sequence of its own, as planing does without its moves, the
         // cadence's raise with it, the progression's other draws made all the same
         if (Stream(sectionId, SectionStream.Vamp).TestProbability(Vamp.At(facets[Facet.Progression], _genre.Chance(GenreChoices.Vamp, "sections"))))
-            (progression, chordScales, shifts, raisable, raisedStep) = ([..progression.Select(_ => 0)], [..chordScales.Select(_ => ChordScale.Section)], [..shifts.Select(_ => 0)], null, null);
+            // the changes as drawn, without the passing chords', which a vamp on one chord has none of
+            (harmonicRhythm, progression, chordScales, shifts, raisable, raisedStep) = (drawnRhythm, [..Enumerable.Repeat(0, drawnRhythm.Count)],
+                [..Enumerable.Repeat(ChordScale.Section, drawnRhythm.Count)], [..Enumerable.Repeat(0, drawnRhythm.Count)], null, null);
         var planingContext = Stream(sectionId, SectionStream.Planing);
         // the song's last section planing back home, its last move a slide onto the tonic's shape on the tonic, but one of
         // two chords, which has no move to slide by

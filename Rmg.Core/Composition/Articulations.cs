@@ -42,8 +42,8 @@ internal static class Articulations
             if (song.Tracks.Definitions[track] is not PitchInstrumentTrack part)
                 continue;
             var rolls = song.Stream(SongStream.Roll, track).TestProbability(RollChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "roll")));
-            // the chords struck short, stabs, a genre's
-            var stabs = part.Role == TrackRole.Chords
+            // the chords struck short, stabs, a genre's, the chords' and the rhythm part's, a skank's chop
+            var stabs = part.Role.PlaysChords()
                         && song.Stream(SongStream.Stabs, track).TestProbability(StabChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "stabs")));
             var (bottom, top) = Realizer.GetRange(part);
             // every strong note's place among the strong notes of its chord in its section, from 0, a weak note's -1
@@ -58,6 +58,13 @@ internal static class Articulations
                 strongPlaces[k] = sameChord ? strongPlaces[last] + 1 : 0;
                 last = k;
             }
+
+            // whether each note was played an octave from its own, which the next of a run of weak notes turns back from
+            var octaved = new bool[timeline.Count];
+            // the strumming grid, the shortest step between the part's chords, an 8th at the finest, a strum down on its
+            // even steps and up on its odd
+            var strummed = timeline.Where(x => x.Value.Pitches.Length > 1).Select(x => x.Position).ToArray();
+            var grid = Math.Max(0.25, strummed.Zip(strummed.Skip(1), (a, b) => b - a).Where(x => x > 1e-6).DefaultIfEmpty(0.5).Min());
 
             result[track] = EventTimeline.Create(timeline.Duration, timeline.Select((note, i) =>
             {
@@ -76,9 +83,13 @@ internal static class Articulations
                 // chugs, which mutes its repeats instead
                 var pitches = note.Value.Pitches;
                 var leads = i + 1 < timeline.Count && timeline[i + 1].Value.State.GetStateValue(StateKinds.ChordChange) != note.Value.State.GetStateValue(StateKinds.ChordChange);
+                // a weak note after one played an octave away turning back to the note before's own, so that a run alternates
                 if (part.Role == TrackRole.Bass && section >= 0 && song.Sections[section].OctaveBass && !song.Sections[section].Chugs && i > 0 && weak && !leads
-                    && timeline[i - 1].Value.Pitches is var before && (before.All(x => x + 12 <= top) || before.All(x => x - 12 >= bottom)))
-                    pitches = [..before.Select(x => before.All(y => y + 12 <= top) ? x + 12 : x - 12)];
+                    && timeline[i - 1].Value.Pitches is var before && (octaved[i - 1] || before.All(x => x + 12 <= top) || before.All(x => x - 12 >= bottom)))
+                {
+                    pitches = octaved[i - 1] ? before : [..before.Select(x => before.All(y => y + 12 <= top) ? x + 12 : x - 12)];
+                    octaved[i] = !octaved[i - 1];
+                }
                 // a bass alternating the root and the fifth, every other strong note of a chord its fifth, below the note
                 // before where its range has it and above where not, as a country bass plays
                 if (part.Role == TrackRole.Bass && section >= 0 && song.Sections[section].AlternatingBass && strongPlaces[i] % 2 == 1 && pitches.Length == 1)
@@ -91,8 +102,8 @@ internal static class Articulations
                 // the stroke in beats at the tempo there
                 double Beats(double seconds) => seconds * tempo.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60;
                 if (note.Value.Pitches.Length > 1 && InstrumentTraits.Has(program, InstrumentTrait.Strums))
-                    // down on the beat and up off it
-                    state = state.With(CompositionStateKinds.Strum, note.Position % 1 < 0.5 - 1e-9 ? Beats(stroke) : -Beats(stroke));
+                    // down on the grid's even steps and up on its odd, as the hand swings
+                    state = state.With(CompositionStateKinds.Strum, (long)Math.Round(note.Position / grid) % 2 == 0 ? Beats(stroke) : -Beats(stroke));
                 // a piano's chord held a beat or longer rolled upward, slower, where its part rolls
                 else if (rolls && note.Value.Pitches.Length >= 3 && note.Value.Duration >= 1 - 1e-9 && InstrumentTraits.Has(program, InstrumentTrait.Rolls))
                     state = state.With(CompositionStateKinds.Strum, Beats(Roll));

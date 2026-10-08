@@ -22,9 +22,9 @@ internal static class Ghosts
 
     /// <summary>
     ///     A snare's ghost notes, a funk or soul drummer's: in a ghosting section, its snares keeping the backbeat play soft
-    ///     16ths off the beat between their backbeats, the likelier next to one, each its bar's snare note played softly. A
-    ///     section's decision, the 16ths it ghosts the same in each of its bars, as a drummer keeps a groove, from a sequence
-    ///     of its own; never in a bar a fill or stop time plays in, nor in a drum solo.
+    ///     16ths off the beat between their backbeats, the likelier next to one, each on the snare's head, as soft as heard
+    ///     against its bar's loudest note. A section's decision, the 16ths it ghosts the same in each of its bars, as a
+    ///     drummer keeps a groove, from a sequence of its own; never in a bar a fill or stop time plays in, nor in a drum solo.
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
@@ -78,6 +78,8 @@ internal static class Ghosts
                             played.Add((loudest.Value with
                             {
                                 Velocity = Render.ScaleLoudness(loudest.Value.Velocity, Loudness),
+                                // on the drum's head, never a cross-stick's click
+                                Pitches = [DrumGroups.GetDrum(track).Sounds[0].Code],
                                 Duration = Math.Min(loudest.Value.Duration, Length)
                             }).ToTimelineItem(at));
                     }

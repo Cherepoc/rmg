@@ -36,9 +36,11 @@ internal static class Reharmonisation
         var sections = map.Sections;
         var later = Enumerable.Range(0, sections.Length).LastOrDefault(i => sections.Take(i).Any(x => x.SectionId == sections[i].SectionId), -1);
         var changes = common.GetStateTimeline(StateKinds.ChordChange).Select(x => x.Position).ToArray();
-        // and a chord moved by semitones, and the chord it slides into, kept
+        // and a chord moved by semitones, and the chord it slides into, kept, and a chord in a scale of its own, an applied
+        // dominant's, a borrowed chord's or the cadence's raised fifth, whose colour a substitute would lose
         var kept = moved.Concat(changes.Where((x, i) => common.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ChordShift) != 0
-                                                       || i > 0 && common.GetEffectiveStateMapAt(changes[i - 1]).GetStateValue(StateKinds.ChordShift) != 0)).ToHashSet();
+                                                       || i > 0 && common.GetEffectiveStateMapAt(changes[i - 1]).GetStateValue(StateKinds.ChordShift) != 0
+                                                       || common.GetEffectiveStateMapAt(x).GetStateValue(StateKinds.ScaleAlterations) is { IsSet: true } own && own.Value != StepAlterations.None)).ToHashSet();
         var (roots, scales, shifts) = (new List<TimelineItem<int>>(), new List<TimelineItem<LayerValue<StepAlterations>>>(), new List<TimelineItem<int>>());
         if (later >= 0)
         {

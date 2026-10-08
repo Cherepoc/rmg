@@ -21,6 +21,10 @@ public sealed class StrumTest
                 continue;
             var rendered = song.Rendered.Tracks.Where(x => !x.IsPercussionInstrument && !x.IsDouble && x.Role == part.Role).SelectMany(x => x.NoteTimeline).ToArray();
             int Program(RealizedNote note) => note.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : part.InstrumentCode;
+            // the strumming grid, the shortest step between the part's chords, an 8th at the finest
+            var chords = notes.Where(x => x.Value.Pitches.Length > 1).Select(x => x.Position).ToArray();
+            var grid = Math.Max(0.25, chords.Zip(chords.Skip(1), (a, b) => b - a).Where(x => x > 1e-6).DefaultIfEmpty(0.5).Min());
+            (double Position, double Strum)? previous = null;
             foreach (var note in notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.Strum) != 0))
             {
                 // a piano's roll, upward, on a held chord
@@ -35,8 +39,10 @@ public sealed class StrumTest
                 var strum = note.Value.State.GetStateValue(CompositionStateKinds.Strum);
                 strummed++;
                 down += strum > 0 ? 1 : 0;
-                // down on a beat's first half, up on its second
-                await Assert.That(strum > 0).IsEqualTo(note.Position % 1 < 0.5 - 1e-9);
+                // down and up in turn on the strumming grid: a chord a step after another the other way
+                if (previous is { } last && Math.Abs(note.Position - last.Position - grid) < 1e-6)
+                    await Assert.That(strum > 0).IsNotEqualTo(last.Strum > 0);
+                previous = (note.Position, strum);
                 // its strings in order from the stroke's first, the last a whole stroke after it
                 var strings = rendered.Where(x => Math.Abs(x.Position - Swing(song.Song).Apply(note.Position)) < 1e-6 && note.Value.Pitches.Contains(x.Value.Offset))
                     .OrderBy(x => x.Value.Shift).Select(x => x.Value).ToArray();

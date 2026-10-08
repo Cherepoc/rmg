@@ -43,24 +43,28 @@ internal static class Pushes
 
         var notes = SongStages.NotesOf(draft);
         var result = notes.ToBuilder();
-        // the kick and the crash push with the band where they played the bar before, their notes on a pushed change struck
-        // an eighth early as their notes in that bar sound, where none strikes there already
-        // where the drums keep time: drums that only mark the form mark it where it moves
-        var pushers = song.DrumJob == DrumJob.Groove ? DrumGroups.Kick.Drums.Append(DrumDefinitions.Cymbal).Select(DrumGroups.GetTrackNumber).ToHashSet() : [];
-        foreach (var track in pushers.Where(notes.ContainsKey))
+        // the kicks together and the crash push with the band where they played the bar before, their notes on a pushed
+        // change struck an eighth early, the kick as its notes in that bar sound, the crash as itself, where none strikes
+        // there already; only drums keeping time, as drums that only mark the form mark it where it moves
+        var kicks = DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).Where(notes.ContainsKey).ToArray();
+        var crash = DrumGroups.GetTrackNumber(DrumDefinitions.Cymbal);
+        foreach (var group in song.DrumJob == DrumJob.Groove ? new[] { kicks, notes.ContainsKey(crash) ? [crash] : Array.Empty<int>() } : [])
         {
-            var timeline = notes[track];
-            var own = pushes.Where(x => timeline.Any(n => n.Position >= x.At - x.BarDuration - 1e-9 && n.Position < x.At - 1e-9)).Select(x => x.At).ToArray();
+            var own = pushes.Where(x => group.Any(t => notes[t].Any(n => n.Position >= x.At - x.BarDuration - 1e-9 && n.Position < x.At - 1e-9))).Select(x => x.At).ToArray();
             bool On(double position) => own.Any(x => Math.Abs(x - position) < 1e-6);
-            result[track] = EventTimeline.Create(timeline.Duration, timeline
-                .Where(note => !(On(note.Position) && timeline.Any(n => Math.Abs(n.Position - (note.Position - Early)) < 1e-6)))
-                // the kick struck as its bar before sounds, the crash as itself
-                .Select(note => On(note.Position)
-                    ? (DrumGroups.Kick.Drums.Select(DrumGroups.GetTrackNumber).Contains(track)
-                        ? note.Value with { Pitches = timeline.Last(n => n.Position < note.Position - 1e-6).Value.Pitches }
-                        : note.Value).ToTimelineItem(note.Position - Early)
-                    : note)
-                .OrderBy(x => x.Position));
+            bool Early(double position) => group.Any(t => notes[t].Any(n => Math.Abs(n.Position - (position - Pushes.Early)) < 1e-6));
+            foreach (var track in group)
+            {
+                var timeline = notes[track];
+                var isKick = kicks.Contains(track);
+                result[track] = EventTimeline.Create(timeline.Duration, timeline
+                    .Where(note => !(On(note.Position) && Early(note.Position)))
+                    .Select(note => On(note.Position)
+                        ? (isKick && timeline.LastOrDefault(n => n.Position < note.Position - 1e-6).Value is { } before ? note.Value with { Pitches = before.Pitches } : note.Value)
+                            .ToTimelineItem(note.Position - Pushes.Early)
+                        : note)
+                    .OrderBy(x => x.Position));
+            }
         }
 
         foreach (var (track, timeline) in notes)
