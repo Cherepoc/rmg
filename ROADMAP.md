@@ -272,6 +272,11 @@ Each item with its plan, and what it waits for.
   following the chugs, heard as great): Metal's and Nu metal's already break down (42% and 41% of their songs); more of
   Nu metal's, and the other heavy genres', Punk's hardcore end and Black metal's slower passages, each a genre's
   `breakdown` chance, and a breakdown in a verse or before the last chorus beside the bridge, should more be wanted.
+- **The bass with the riff, by convention** (P2, suggested 8 October 2026): the bass doubling the riff in 35% of
+  sections whatever the song (`LineDoubling.RiffChance`, alike at every end, as neither plainer nor stranger); a plain
+  band's bass plays the riff with it always and a wild one's goes its own way, so the chance from 1 at the plain end,
+  through about 0.5, to near 0 at the wild, by the melody or the groove facet, a genre's `doubling` "riff" still above
+  it where named; measured by the sections with a riff whose bass doubles it, by fifths of conventionality.
 - **A riff's drone, reworked** (P2, heard 8 October 2026: a good idea for metal, but the songs sounded better without
   it, so no preset plays it now; `GenreChoices.Riff` "drone" kept): the riff's weak notes all on its chord's root at the
   bottom of its range, 69% of them, is a pedal, not a drone riff; a black metal or a folk metal riff alternates its
