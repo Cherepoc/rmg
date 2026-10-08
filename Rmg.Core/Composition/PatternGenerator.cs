@@ -171,7 +171,7 @@ internal sealed class PatternGenerator
     /// <summary>Whether a drum that accents its lead plays the lead's beat at the place given, as the bar pattern's seed has it.</summary>
     private static bool IsAccented(int seed, int trackNumber, double position, double share)
     {
-        var key = Seeds.Derive(Seeds.Derive(seed, trackNumber), (int)Math.Round(position * AccentPlacesPerBeat));
+        var key = Seeds.Key(Seeds.Key(seed, trackNumber), (int)Math.Round(position * AccentPlacesPerBeat));
         return new GenerationContext((uint)key).TestProbability(share);
     }
 
@@ -188,8 +188,8 @@ internal sealed class PatternGenerator
     /// <summary>The seed of a bar's rhythm: its bar pattern's, drawn afresh for an answer, and again by its own key.</summary>
     private static int GetRhythmSeed(int seed, bool redrawsRhythm, int rhythmKey)
     {
-        var answered = redrawsRhythm ? Seeds.Derive(seed, AnswerRhythmKey) : seed;
-        return rhythmKey == 0 ? answered : Seeds.Derive(answered, rhythmKey);
+        var answered = redrawsRhythm ? Seeds.Key(seed, AnswerRhythmKey) : seed;
+        return rhythmKey == 0 ? answered : Seeds.Key(answered, rhythmKey);
     }
 
     /// <summary>A track's bar: its bar pattern's state over the track's, and the notes of its rhythm.</summary>
@@ -233,7 +233,7 @@ internal sealed class PatternGenerator
             .MergeWith(trackStateMap);
         // the bar's change of the feel it comes to, now and then, a passage in another feel, from a sequence of its own
         // by the bar pattern's seed, so that a drum playing its lead's bar patterns changes as its lead does
-        if (Feels.DrawChange(new GenerationContext((uint)Seeds.Derive(seed, FeelStream)), Feels.Of(stateMap), Feels.BarChange, feelUnconventionality, _genre) is { } barFeel)
+        if (Feels.DrawChange(new GenerationContext((uint)Seeds.Key(seed, FeelStream)), Feels.Of(stateMap), Feels.BarChange, feelUnconventionality, _genre) is { } barFeel)
             stateMap = stateMap.MergeWith(Feels.At(StateDepths.BarPattern, barFeel));
         // a pinned drum plays its rhythm as its song gives it, every layer's moves of it let go of
         if (trackStateMap.GetStateValue(CompositionStateKinds.Pinned) > 0)
@@ -497,10 +497,10 @@ internal sealed class PatternGenerator
     internal static PatternSeeds CreatePatternSeeds(int seed)
     {
         return new PatternSeeds(
-            Seeds.Derive(seed, 0),
-            Seeds.Derive(seed, 1),
-            Seeds.Derive(seed, 2),
-            Seeds.Derive(seed, 3)
+            Seeds.Key(seed, 0),
+            Seeds.Key(seed, 1),
+            Seeds.Key(seed, 2),
+            Seeds.Key(seed, 3)
         );
     }
 }

@@ -157,7 +157,7 @@ note "clean, at $(git -C "$ROOT" rev-parse --short HEAD)"
 step "Building"
 dotnet build "$ROOT/Rmg.slnx" -c Release --nologo -v quiet || die "the build failed."
 
-# The songs' version goes up when the songs change: the fingerprint of the corpus's songs against the one VERSION
+# The songs' version goes up when the songs change: the fingerprint of the corpus's songs and the page's genres against the one VERSION
 # was last bumped for. A bump is a commit of its own, and the build is done again to stamp the new number.
 step "Checking the songs' version"
 readonly VERSION_FILE="$ROOT/VERSION"
@@ -165,6 +165,8 @@ version="$(sed -n 's/^version //p' "$VERSION_FILE")"
 recorded="$(sed -n 's/^fingerprint //p' "$VERSION_FILE")"
 [[ $version =~ ^([0-9]+)\.([0-9]+)\.([0-9]{3,})$ ]] || die "VERSION has no line 'version 0.5.000', but '$version'."
 fingerprint="$(dotnet "$ROOT/Rmg/bin/Release/net10.0/Rmg.dll" --fingerprint)" || die "the songs' fingerprint failed."
+# and the page's genres, whose songs the corpus does not play
+fingerprint="$fingerprint-$(sha256sum "$ROOT/Rmg.WebApi/Client/genres.json" | cut -c1-8)"
 
 if [[ $fingerprint == "$recorded" ]]; then
     note "the songs are as they were: $version"

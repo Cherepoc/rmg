@@ -16,6 +16,22 @@ public sealed class CorpusFingerprintTest
         await Task.CompletedTask;
     }
 
+    /// <summary>The songs of every preset of the page's, a few seeds each, which the corpus does not play, to show that a refactor leaves them as they were.</summary>
+    [Test]
+    [Explicit]
+    public async Task ReportGenres()
+    {
+        var text = new StringBuilder();
+        foreach (var preset in Genres.GenrePresets.All)
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 4), seed => TestCorpus.Get(seed, new Rmg.Core.Composition.SongOverrides(Genre: Genres.GenrePresets.Genre(preset.Id)))))
+        foreach (var (track, notes) in song.Song.Notes!)
+        foreach (var note in notes)
+            text.Append($"{preset.Id} {track} {note.Position:R} {note.Value.Velocity:R} {note.Value.Duration:R} {string.Join(",", note.Value.Pitches)};");
+
+        Console.WriteLine($"Genres' fingerprint: {Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(text.ToString())))[..16]}");
+        await Task.CompletedTask;
+    }
+
     /// <summary>The corpus's notes but the melody's, to show that a change to the melody alone leaves the rest.</summary>
     [Test]
     [Explicit]

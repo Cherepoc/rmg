@@ -405,7 +405,7 @@ internal sealed class LinePattern
                     return note;
 
                 var (step, turn) = profile.GenerateStep(context, note.Value.GetStateValue(CompositionStateKinds.LineStepwiseness));
-                var key = Seeds.Derive(noteKey, unchecked((int)seed));
+                var key = Seeds.Key(noteKey, unchecked((int)seed));
                 return note.Value
                     .With(CompositionStateKinds.LineStep, step)
                     .With(CompositionStateKinds.LineTurn, turn)
@@ -438,7 +438,7 @@ internal sealed class LinePattern
     /// </summary>
     internal static int GetNoteKey(int barPattern, KeptBeat beat)
     {
-        var key = Seeds.Derive(Seeds.Derive(barPattern, beat.Source), beat.Slot);
+        var key = Seeds.Key(Seeds.Key(barPattern, beat.Source), beat.Slot);
         return key == 0 ? 1 : key;
     }
 

@@ -14,9 +14,10 @@ public static class Seeds
 
     /// <summary>
     ///     Derives a key, such as a note's in its figure (<c>NoteKey</c>), from another and a place, the same on every run
-    ///     and platform: a name within a song, rather than a seed of its randomness.
+    ///     and platform: a name within a song, rather than a seed of its randomness, and so named apart from
+    ///     <see cref="Derive" />, which a seed's int would otherwise fall to without a word.
     /// </summary>
-    public static int Derive(int key, int place)
+    public static int Key(int key, int place)
     {
         return unchecked((int)Mix(((ulong)(uint)place << 32) | (uint)key));
     }

@@ -116,6 +116,9 @@ public sealed class SongGeneratorChordProgressionTest
                 .ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
             foreach (var note in notes)
             {
+                // but a solo's, whose stacked notes the soloist voices as it stacks them, an octave on a power chord
+                if (note.Value.GetStateValue(CompositionStateKinds.LineSolo) == 1)
+                    continue;
                 var shape = string.Join(",", note.Value.GetStateValue(StateKinds.ChordNotePitchOffsets));
                 yield return (trackNumber, note.Position, shape);
             }

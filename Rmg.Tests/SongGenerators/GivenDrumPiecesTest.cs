@@ -96,8 +96,9 @@ public sealed class GivenDrumPiecesTest
 
             await Assert.That(Drums(given).SetEquals(pieces)).IsTrue().Because($"seed {seed}");
             // where the drums change the form, the parts move with it: where they enter, as an intro bringing the parts in
-            // one by one does, its order taking the drums' roles, and a drum solo
-            if (!SameForm(drawn.Map, given.Map) || drawn.Trace.Concat(given.Trace).Any(x => x.Point == TracePoints.DrumSolo))
+            // one by one does, its order taking the drums' roles, a drum solo, and stop time, which the drums keeping time
+            // carry through a bar
+            if (!SameForm(drawn.Map, given.Map) || drawn.Trace.Concat(given.Trace).Any(x => x.Point == TracePoints.DrumSolo || x.Point == TracePoints.StopTime && (bool)x.Value!))
                 continue;
             compared++;
             foreach (var (track, definition) in drawn.Song.TrackDefinitions.Where(x => x.Key < DrumGroups.FirstTrackNumber))
