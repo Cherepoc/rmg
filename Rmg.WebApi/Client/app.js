@@ -177,6 +177,8 @@ let songsComing = 0;
 let isSongRandom = false;
 let playRequest = 0;
 let isListening = false;
+// whether the page asks a listening question, whose songs, A and B and the next, keep the mutes and solos pressed
+let asksQuestion = false;
 let downloadUrl = null;
 let exportUrl = null;
 let frame = null;
@@ -954,8 +956,8 @@ async function generate(seed, { isRolled = seed === null, isRemade = false, keep
         elements.seed.value = songSeed;
         showSections(report);
 
-        // a new song is heard whole, a song made again as it was being heard
-        if (!isRemade) {
+        // a new song is heard whole, a song made again as it was being heard, and a listening question's as the last was
+        if (!isRemade && !asksQuestion) {
             muted.clear();
             soloed.clear();
         }
@@ -2699,6 +2701,7 @@ function startListening() {
         return true;
     }
 
+    asksQuestion = true;
     const strip = createListeningStrip(question, {
         play: (seed, isWithout, from) => {
             const preset = question.genre === null ? null : presetById(question.genre);

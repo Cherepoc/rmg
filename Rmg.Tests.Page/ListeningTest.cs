@@ -67,6 +67,40 @@ public sealed class ListeningTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>A question's songs keep the mutes and solos pressed, from A to B and on to the next song.</summary>
+    [Test]
+    public async Task AQuestionsSongs_KeepTheMutesAndSolos()
+    {
+        await using var page = await SongPage.Open(site, "?listen=pushes");
+        var strip = page.Page.Locator("section.listening");
+        await page.Until(() => strip.IsVisibleAsync(), "the question asked");
+        var mute = page.Page.Locator("#mixer button.listen[aria-label='Mute the bass']");
+        var solo = page.Page.Locator("#mixer button.listen[aria-label='Solo the melody']");
+
+        async Task Play(string letter)
+        {
+            var count = page.Requests.Count;
+            await strip.GetByRole(AriaRole.Button, new() { Name = $"Play {letter}" }).ClickAsync();
+            await page.Until(() => page.Requests.Count > count, $"{letter} asked for");
+            await page.Settled();
+            await page.Until(() => page.IsGenerateEnabled(), $"{letter} arrived");
+        }
+
+        await Play("A");
+        await page.Page.EvaluateAsync("() => { document.querySelector(\"#mixer button.listen[aria-label='Mute the bass']\").click(); document.querySelector(\"#mixer button.listen[aria-label='Solo the melody']\").click(); }");
+        await Assert.That(await mute.GetAttributeAsync("aria-pressed")).IsEqualTo("true");
+
+        await Play("B");
+        await Assert.That(await mute.GetAttributeAsync("aria-pressed")).IsEqualTo("true");
+        await Assert.That(await solo.GetAttributeAsync("aria-pressed")).IsEqualTo("true");
+
+        await strip.GetByRole(AriaRole.Button, new() { Name = "The same" }).ClickAsync();
+        await Play("A");
+        await Assert.That(await mute.GetAttributeAsync("aria-pressed")).IsEqualTo("true");
+        await Assert.That(await solo.GetAttributeAsync("aria-pressed")).IsEqualTo("true");
+        await Assert.That(page.Errors).IsEmpty();
+    }
+
     [Test]
     public async Task NoQuestion_ListsEveryQuestion_WithItsLink_AndAsksForNoSong()
     {
