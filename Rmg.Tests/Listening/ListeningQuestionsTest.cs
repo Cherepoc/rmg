@@ -198,6 +198,9 @@ public sealed class ListeningQuestionsTest
         return GenrePresets.Genre(preset with { Choices = choices });
     }
 
+    /// <summary>How long before the two first differ a song is listened from, in seconds, the page starting it a moment earlier still.</summary>
+    private const double LeadIn = 4;
+
     /// <summary>How many parts a song names to listen to at most, and how much of the most different's difference one makes at least to be named.</summary>
     private const int Listened = 3;
 
@@ -217,6 +220,8 @@ public sealed class ListeningQuestionsTest
         var best = places.Max(x => x.Difference);
         var (most, at) = places.First(x => x.Difference >= best * NearBest - 1e-9);
         var parts = difference.Parts(at, at + Heard).OrderByDescending(x => x.Value).ToArray();
+        // heard from a few seconds before the two first differ there, so that the device comes after what leads into it
+        at = Math.Max(0, (difference.FirstDifference(at, at + Heard) ?? at) - LeadIn);
         // a part once, at its largest share, which its second take or its other instrument would name again
         return (most, at, [..parts.Where(x => x.Value >= parts.FirstOrDefault().Value * ListenedShare).DistinctBy(x => x.Key.Split(" (")[0]).Take(Listened).Select(x => x.Key)]);
     }

@@ -42,7 +42,7 @@ internal sealed class HeardDifference
         var parts = new Dictionary<string, double>();
         var (with, without) = (_with.NotesBetween(from, to), _without.NotesBetween(from, to));
         var all = with.Sum(x => x.Value.Loudness) + without.Sum(x => x.Value.Loudness);
-        foreach (var (key, (part, loudness)) in with.Where(x => !without.ContainsKey(x.Key)).Concat(without.Where(x => !with.ContainsKey(x.Key))))
+        foreach (var (key, (part, loudness, _)) in with.Where(x => !without.ContainsKey(x.Key)).Concat(without.Where(x => !with.ContainsKey(x.Key))))
             parts[part] = parts.GetValueOrDefault(part) + loudness / all;
 
         var moments = 0;
@@ -65,6 +65,31 @@ internal sealed class HeardDifference
         foreach (var (part, count) in differ)
             parts[part] = parts.GetValueOrDefault(part) + count / (double)moments;
         return parts;
+    }
+
+    /// <summary>The first second from one to another where the two differ, a note or an effect; none where they do not.</summary>
+    public double? FirstDifference(double from, double to)
+    {
+        var (with, without) = (_with.NotesBetween(from, to), _without.NotesBetween(from, to));
+        var notes = with.Where(x => !without.ContainsKey(x.Key)).Select(x => x.Value.Seconds).Concat(without.Where(x => !with.ContainsKey(x.Key)).Select(x => x.Value.Seconds))
+            .Select(x => (double?)x).Min();
+        double? effects = null;
+        foreach (var track in _with.Tracks.Keys.Intersect(_without.Tracks.Keys))
+        {
+            var (a, b) = (_with.Tracks[track], _without.Tracks[track]);
+            for (var k = (int)Math.Ceiling(from / Sample); k * Sample < to && (effects is null || k * Sample < effects); k++)
+            {
+                var at = k * Sample;
+                if ((a.Sounds(k) || b.Sounds(k)) && (Math.Abs(a.BendAt(at) - b.BendAt(at)) > BendDifference || Math.Abs(a.ExpressionAt(at) - b.ExpressionAt(at)) > ExpressionDifference
+                                                     || a.Controllers.Keys.Union(b.Controllers.Keys).Any(c => Math.Abs(a.ControllerAt(c, at) - b.ControllerAt(c, at)) > ControllerDifference)))
+                {
+                    effects = at;
+                    break;
+                }
+            }
+        }
+
+        return notes is { } n && effects is { } e ? Math.Min(n, e) : notes ?? effects;
     }
 
     /// <summary>A part as a listener knows it: a pitched part's role and the instrument it plays there, a drum by its name.</summary>
@@ -122,13 +147,13 @@ internal sealed class HeardDifference
             _notes = [..notes.OrderBy(x => x.Item3)];
         }
 
-        /// <summary>The notes starting from one second to another, by their keys, each its part's name and its loudness.</summary>
-        public Dictionary<string, (string Part, double Loudness)> NotesBetween(double from, double to)
+        /// <summary>The notes starting from one second to another, by their keys, each its part's name, its loudness and its second.</summary>
+        public Dictionary<string, (string Part, double Loudness, double Seconds)> NotesBetween(double from, double to)
         {
-            var result = new Dictionary<string, (string Part, double Loudness)>();
+            var result = new Dictionary<string, (string Part, double Loudness, double Seconds)>();
             foreach (var (key, part, seconds, loudness) in _notes)
                 if (seconds >= from && seconds < to)
-                    result[key] = (part, result.GetValueOrDefault(key).Loudness + loudness);
+                    result[key] = (part, result.GetValueOrDefault(key).Loudness + loudness, seconds);
             return result;
         }
     }

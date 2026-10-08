@@ -282,6 +282,9 @@ Each item with its plan, and what it waits for.
   under the parts they colour (`DrumMarks`), and a genre's drums' loudness as its data, a level of the drum kit's
   against the band's, Ambient's and Dungeon's low, set through the render's velocity curve (`Render.FromMidiVelocity`)
   rather than by scaling a velocity's sum; measured by the drums' velocities as rendered against the pitched parts'.
+  And the kit that marks the form (suggested the same day): never the standard, room or power kit, a band's, but the
+  orchestral kit, its timpani and its bass drum, or the percussion, perhaps the brush or the electronic kit too; the
+  kit a drum job's choice (`DrumMarks.Jobs`, `GenreChoices` "kit"), Ambient's and Dungeon's marks on the orchestra.
 - **A riff's drone, reworked** (P2, heard 8 October 2026: a good idea for metal, but the songs sounded better without
   it, so no preset plays it now; `GenreChoices.Riff` "drone" kept): the riff's weak notes all on its chord's root at the
   bottom of its range, 69% of them, is a pedal, not a drone riff; a black metal or a folk metal riff alternates its
