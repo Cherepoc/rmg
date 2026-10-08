@@ -14,7 +14,8 @@ percent everywhere, and a listening question once deployed):
    pad out; Djent's 55% of songs, Metal's 42%, Nu metal's 41% (`?listen=breakdown`).
 2. Done: the riff as the song's signature, a song opening on its riff alone, the band coming in after it; Rock's 33%,
    Metal's 42% (`?listen=riff-intro`). Between its sections, the part alone already (`GenreChoices.Alone`).
-3. A snare's ghost notes and drags on the backbeat's own figure, Funk's, Soul's and Rock's.
+3. Done: a snare's ghost notes, soft 16ths around its backbeat, the same in a section's bars; Funk's 1.2 a bar,
+   Soul's 0.9, Rock's 0.5 (`?listen=ghosts`). Its drags left (*What the genres cannot play yet*).
 4. The solo harmonised: a second guitar a third under the solo's notes of an 8th and longer, a twin-guitar break.
 5. Harmony for Jazz and Soul: the passing diminished, the tritone substitute in a reharmonised appearance, chromatic
    approaches from below, a ii–V into a chord but the home.
@@ -459,8 +460,7 @@ left:
   - The pump on the kick wherever it falls, should a pumping genre's kick leave the beat; it ducks on the beat now.
   - The pinned drums (`GenreChoices.Pins`) in the bars a drop or an entry clears, and the wilder songs that leave a
     role free.
-  - A snare's drag and its ghost notes, which want the backbeat's own figure, the pinned backbeat keeping its hits
-    clean.
+  - A snare's drag, two quick strokes before a backbeat, should the ghost notes want it.
   - The piano's montuno, a broken chord off the beat, an arpeggio's pattern of its own (`Arpeggios`) rather than a
     figure, the figures striking a player's chord or note; a second time keeper playing straight under the tresillo.
   - More figures (P3, by listening): Bossa nova's clave, a figure for the hi-hat or the snare, a figure of more than

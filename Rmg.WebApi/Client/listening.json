@@ -325,7 +325,7 @@
       },
       {
         "seed": "F",
-        "at": 13.2
+        "at": 15.2
       },
       {
         "seed": "H",
@@ -1073,6 +1073,44 @@
       {
         "seed": "17",
         "at": 0
+      }
+    ]
+  },
+  {
+    "id": "ghosts",
+    "question": "Funk's snare playing ghost notes, soft 16ths around its backbeat: a funk drummer's, or clutter?",
+    "decides": "The ghost notes' chances by genre, how many and how soft.",
+    "genre": "funk",
+    "without": {
+      "skip": [
+        "Ghosts"
+      ],
+      "genre": {}
+    },
+    "seeds": [
+      {
+        "seed": "2",
+        "at": 12.8
+      },
+      {
+        "seed": "A",
+        "at": 26
+      },
+      {
+        "seed": "D",
+        "at": 86
+      },
+      {
+        "seed": "J",
+        "at": 215.1
+      },
+      {
+        "seed": "L",
+        "at": 12
+      },
+      {
+        "seed": "O",
+        "at": 102.9
       }
     ]
   }

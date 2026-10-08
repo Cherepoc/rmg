@@ -315,6 +315,9 @@ internal static class TracePoints
     /// <summary>Whether a section is a heavy band's breakdown (a <c>bool</c>; <see cref="Composition.Breakdowns" />).</summary>
     public const string Breakdown = "Breakdown";
 
+    /// <summary>Whether a section's snare plays ghost notes (a <c>bool</c>; <see cref="Composition.Ghosts" />).</summary>
+    public const string Ghosts = "Ghosts";
+
     /// <summary>How the song ends, in words.</summary>
     public const string SongEnding = "Song ending";
 }

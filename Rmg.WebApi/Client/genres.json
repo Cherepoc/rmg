@@ -4,6 +4,7 @@
     "name": "Rock",
     "description": "Overdriven and distorted guitars on a riff, a picked bass, power chords, the kick and snare square on the beat, the hi-hat in 8ths, minor or Mixolydian, mid to fast.",
     "choices": {
+      "ghosts": { "sections": [10, 20, 30] },
       "riffIntro": { "songs": [30, 40, 40] },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 60, "tom": 70, "cymbal": 100, "tambourine": [20, 20, 30] },
       "intro": { "entries": 60, "cold": 30, "countIn": [15, 20, 25] },
@@ -353,6 +354,7 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano, piano and pads looping, minor and Dorian, now and then a darker Phrygian or harmonic minor loop.",
     "choices": {
+      "ghosts": { "sections": [20, 30, 40] },
       "room": { "room": 100, "plate": [0, 20, 30] },
       "ornaments": { "graces": [0, 5, 30], "turns": [0, 0, 10], "trills": [0, 0, 15] },
       "vamp": { "sections": [10, 20, 20] },
@@ -537,6 +539,7 @@
     "name": "Funk",
     "description": "The hi-hat in 16ths, a busy syncopated slap or finger bass, a clavinet and a muted guitar comping in 16ths, brass, sevenths and ninths, Dorian and Mixolydian, everything repeating.",
     "choices": {
+      "ghosts": { "sections": [50, 70, 80] },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 40, "tom": 50, "cymbal": 70, "tambourine": [30, 40, 50], "cowbell": [10, 20, 30], "conga": [10, 20, 30] },
       "soloists": { "solo": 100, "melody": [25, 45, 25], "chords": [25, 30, 25], "riff": [25, 20, 25], "rhythm": [25, 15, 25], "counterMelody": [0, 18, 25], "bass": [0, 25, 40], "drum": [0, 11, 25] },
       "drumSounds": { "openHiHat": 65 },
@@ -642,6 +645,7 @@
     "name": "Blues",
     "description": "A shuffle, sevenths over Mixolydian, a harmonica, an overdriven guitar and an organ, slow to mid.",
     "choices": {
+      "ghosts": { "sections": [20, 30, 40] },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 60, "tom": 50, "cymbal": 70, "tambourine": [20, 30, 40] },
       "louderForms": { "guitars": [0, 15, 30] },
       "pins": { "backbeat": [70, 70, 40] },
@@ -1135,6 +1139,7 @@
     "name": "Disco",
     "description": "The kick four on the floor, the open hi-hat off the beat, a bass in octaves, strings and horns, a clean guitar scratching 16ths, electric piano sevenths and ninths, minor and Dorian, 110 to 130.",
     "choices": {
+      "ghosts": { "sections": [10, 20, 30] },
       "vamp": { "sections": [20, 30, 40] },
       "articulation": { "legato": [0, 40, 60], "roll": [0, 30, 50], "stabs": [20, 30, 40] },
       "strongEffect": { "none": [100, 70, 30], "pump": [0, 25, 40], "echo": [0, 5, 20], "sweep": [0, 5, 20] },
@@ -1479,6 +1484,7 @@
     "name": "Fusion",
     "description": "Electric piano and a soprano sax over a fretless bass singing high, Lydian, Dorian and melodic minor, ninths to thirteenths and quartal chords, chords in scales of their own and planed, odd meters, long solos.",
     "choices": {
+      "ghosts": { "sections": [30, 50, 60] },
       "drumSoloFeet": { "hatFoot": 60, "groove": 100 },
       "polymeter": { "sections": [0, 10, 30] },
       "tempo": { "from": [90, 90, 80], "to": [140, 140, 180] },
@@ -1529,6 +1535,7 @@
     "name": "Soul",
     "description": "An organ, a piano and horns, sevenths and ninths passing through applied dominants, a laid-back backbeat, 4/4 or a swaying 6/8, a last chorus lifted, sax solos answering the tune.",
     "choices": {
+      "ghosts": { "sections": [40, 55, 70] },
       "stopTime": { "sections": [5, 10, 15] },
       "insertion": { "none": 100, "wah": [10, 20, 30], "phaser": [10, 20, 30] },
       "room": { "plate": 100, "room": 60 },
