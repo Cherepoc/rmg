@@ -221,8 +221,8 @@ Each item with its plan, and what it waits for.
 - **Pinch harmonics, by listening** (`?listen=pinch`): their chances by genre, Nu metal's 79 in 64 songs, Metal's 32; a
   riff's twin pinching apart from its riff. Their sound heard on test (`pinch-sound`, October 2026): the squeal 2,
   the harmonics 1, unsure 3 of 6 songs, so the two are hard to tell apart and a pinch is hard to hear at all, as the
-  dive was. A pinch made easier to hear, held longer and a little louder, before its sound is decided; until then the
-  squeal the likelier of the two in a genre that names neither.
+  dive was. Since then a pinch is held 0.6 s at least and played a little louder, and the squeal is twice as likely
+  as the harmonics; both questions to be asked again.
 - **Page tests timing out** (P2): two of fourteen runs of the whole page suite, a test each, past its 30 seconds
   (`ThePage_OpensWithASong_AndNoErrors`, `TheWindowsOverride_IsCheckedByAChange_AndUncheckedLeavesTheChoiceToTheSongs`),
   the suite's tests in parallel against one site; which wait, and whether the songs' queue or the browser is the
