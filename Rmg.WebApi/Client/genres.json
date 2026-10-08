@@ -799,6 +799,7 @@
     "name": "Metal",
     "description": "Distorted guitars chugging a riff in power chords, a double kick in 16ths, the snare on 2 and 4 or in half time, breaks and stops, guitar solos, natural minor, Phrygian and harmonic minor, fast.",
     "choices": {
+      "breakdown": { "sections": [20, 30, 40] },
       "sticking": { "singles": 100, "doubles": 50, "handFoot": 70, "sixStroke": [10, 30, 40] },
       "drumSoloFeet": { "doubleKick": 100, "groove": 50 },
       "cadenceRaise": { "sections": [20, 30, 30] },
@@ -974,6 +975,7 @@
     "name": "Djent",
     "description": "Low distorted guitars chugging a cycle of 16ths across the bar, the kick with them, the snare on 3 and a china in quarters against it, one chord or none, Phrygian and Locrian, a clean lead floating over.",
     "choices": {
+      "breakdown": { "sections": [40, 50, 60] },
       "dropKind": { "silent": 30, "filtered": 100 },
       "drumSoloFeet": { "doubleKick": 80, "groove": 60 },
       "cadenceRaise": { "sections": 0 },
@@ -1056,6 +1058,7 @@
     "name": "Nu metal",
     "description": "A low distorted riff of one note chugged in a syncopated hip-hop groove, a clicking slap bass, quiet clean verses with room for a voice and loud distorted choruses, squealing bends, natural minor and Phrygian.",
     "choices": {
+      "breakdown": { "sections": [30, 40, 50] },
       "cadenceRaise": { "sections": 0 },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 50, "tom": 60, "cymbal": 100 },
       "alone": { "rhythm": 100, "riff": 50, "bass": 40, "drum": 20 },

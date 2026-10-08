@@ -362,12 +362,12 @@
         "at": 47.3
       },
       {
-        "seed": "9",
-        "at": 123.3
-      },
-      {
         "seed": "D",
         "at": 92.3
+      },
+      {
+        "seed": "F",
+        "at": 115.3
       },
       {
         "seed": "I",
@@ -392,10 +392,6 @@
     },
     "seeds": [
       {
-        "seed": "7",
-        "at": 26
-      },
-      {
         "seed": "G",
         "at": 67.7
       },
@@ -408,12 +404,16 @@
         "at": 89.4
       },
       {
-        "seed": "d",
-        "at": 83.1
-      },
-      {
         "seed": "q",
         "at": 0
+      },
+      {
+        "seed": "u",
+        "at": 129.3
+      },
+      {
+        "seed": "y",
+        "at": 72
       }
     ]
   },
@@ -435,7 +435,7 @@
       },
       {
         "seed": "L",
-        "at": 172.8
+        "at": 106.8
       },
       {
         "seed": "N",
@@ -642,16 +642,12 @@
     },
     "seeds": [
       {
-        "seed": "1",
-        "at": 91.4
-      },
-      {
         "seed": "A",
         "at": 59.9
       },
       {
-        "seed": "H",
-        "at": 6.7
+        "seed": "F",
+        "at": 90
       },
       {
         "seed": "I",
@@ -664,6 +660,10 @@
       {
         "seed": "L",
         "at": 54.5
+      },
+      {
+        "seed": "S",
+        "at": 97.7
       }
     ]
   },
@@ -702,12 +702,12 @@
         "at": 188.6
       },
       {
-        "seed": "J",
-        "at": 13.2
+        "seed": "S",
+        "at": 120.6
       },
       {
-        "seed": "S",
-        "at": 122.6
+        "seed": "V",
+        "at": 162.5
       }
     ]
   },
@@ -993,6 +993,46 @@
       {
         "seed": "L",
         "at": 249.8
+      }
+    ]
+  },
+  {
+    "id": "breakdown",
+    "question": "Djent's bridge as a breakdown, the drums in half time, the kick with the chugging riff, the melody and the pad out: heavy, or a hole?",
+    "decides": "The breakdown's chances in the heavy genres.",
+    "genre": "djent",
+    "without": {
+      "skip": [],
+      "genre": {
+        "breakdown": {
+          "sections": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "H",
+        "at": 206
+      },
+      {
+        "seed": "J",
+        "at": 11.2
+      },
+      {
+        "seed": "N",
+        "at": 20.6
+      },
+      {
+        "seed": "S",
+        "at": 150
+      },
+      {
+        "seed": "W",
+        "at": 87.2
+      },
+      {
+        "seed": "a",
+        "at": 141.3
       }
     ]
   }

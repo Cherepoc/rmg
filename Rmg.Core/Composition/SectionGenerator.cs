@@ -179,12 +179,21 @@ internal sealed class SectionGenerator
 
         var (sectionStrokes, barDrums) = _drums.DrawDrumBars(sectionId, activeDrumTrackNumbers, kit, scheme, rhythm, tilt);
 
-        // the drums in half time now and then, in the quieter sections, or double time, in the louder, from a sequence of its own
+        // a heavy band's breakdown now and then, a genre's, from a sequence of its own
+        var breakdown = Breakdowns.MayBreakDown(plan.Role, plan.KeepsSongScale)
+                        && Stream(sectionId, SectionStream.Breakdown).TestProbability(Breakdowns.Chance.At(facets[Facet.Form], _genre.Chance(GenreChoices.Breakdown, "sections")));
+        StateTrace.Record(TracePoints.Breakdown, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{breakdown}", breakdown);
+        // the drums in half time now and then, in the quieter sections, or double time, in the louder, from a sequence of its
+        // own, drawn in a breakdown too, which plays in half time
         var timeFeel = Groove.DrawTimeFeel(Stream(sectionId, SectionStream.TimeFeel), tilt, sectionRhythm.Facets[Facet.Groove], _genre);
+        if (breakdown)
+            timeFeel = 1;
         StateTrace.Record(TracePoints.TimeFeel, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{timeFeel}", timeFeel);
         // the drums from a sequence of their own, so that the pitched tracks are the same whichever drums the song plays
         var drums = _drums.GenerateDrums(Stream(sectionId, SectionStream.Drums), sectionId, sectionStateMap, activeDrumTrackNumbers, doubles, feelLeads, sectionRoles, sectionStrokes, barDrums, barStateTimelineMap, sectionRhythm, timeFeel, meter).ToArray();
         var (powerChords, chugs, octaveBass, hooks) = DrawDevices(sectionId, plan.Role, facets);
+        // a breakdown's riff chugging on its pedal
+        chugs |= breakdown;
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
@@ -216,6 +225,7 @@ internal sealed class SectionGenerator
             powerChords,
             chugs,
             octaveBass,
+            breakdown,
             _drumJob,
             _genre
         );
@@ -735,6 +745,7 @@ internal sealed record SectionDrums(bool IsPercussionOnly, SectionKit Kit, bool 
 /// <param name="ArrangementSeed">The seed of the sequences a later appearance draws its parts from.</param>
 /// <param name="Roles">What every track plays, by its number.</param>
 /// <param name="Meter">The meter the section's bars are in.</param>
+/// <param name="Breakdown">Whether the section is a heavy band's breakdown (<see cref="Breakdowns" />), which leaves its lines and pad out.</param>
 /// <param name="DrumJob">What the song's drums do, which a part left alone must carry.</param>
 internal sealed record GeneratedSection(
     TrackEventStateTimelineMap<StateMap> Timeline,
@@ -756,6 +767,7 @@ internal sealed record GeneratedSection(
     bool RiffPowerChords,
     bool Chugs,
     bool OctaveBass,
+    bool Breakdown,
     DrumJob DrumJob,
     Genre Genre
 )
@@ -805,7 +817,8 @@ internal sealed record GeneratedSection(
             ? Resting
             : Arrangement.DrawRests(new GenerationContext(Seeds.Derive(ArrangementSeed, appearance)), SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), Role, Absent, Genre, Facets[Facet.Form])
                 .Intersect(before);
-        var resting = drawn.Union(held).Except(entering);
+        // a breakdown's lines and pad out every time
+        var resting = drawn.Union(held).Union(Breakdown ? Breakdowns.Resting : []).Except(entering);
         // never silent: the parts held back playing where nothing else would, and every part the song has where its rests
         // alone leave none
         bool Silent() => !Roles.Values.Distinct().Any(x => !resting.Contains(x) && HasNotes(x));
@@ -821,7 +834,8 @@ internal sealed record GeneratedSection(
         var texture = Composition.Texture.Draw(new GenerationContext(Seeds.Derive(Seeds.Derive(ArrangementSeed, appearance), TextureStream)), Facets[Facet.Form], Plays, playing, Genre,
             SectionEnergy.Tilt(Energy + energyStep, Rhythm.Coupling), DrumJob == DrumJob.Marks);
         ImmutableArray<ImmutableHashSet<TrackRole>> steady = [..Enumerable.Repeat(ImmutableHashSet<TrackRole>.Empty, Plays)];
-        if (keepsTexture)
+        // a breakdown played steady, its riff through
+        if (keepsTexture || Breakdown)
             texture = (TextureKind.Steady, ImmutableHashSet<TrackRole>.Empty, steady);
         // a solo plays through: a drum solo the drums alone, a pitched one its soloists and the melody, whose line it is,
         // improvised through
@@ -932,5 +946,6 @@ internal enum SectionStream
     ChordOwnScales = 41,
     Vamp = 42,
     Colour = 43,
-    HeldHome = 44
+    HeldHome = 44,
+    Breakdown = 45
 }

@@ -27,7 +27,7 @@ public sealed record Figure(string Name, string Label, FigurePlayer Player, Immu
 /// <summary>
 ///     The figures a genre gives its players in its sections: a groove or thrash band's kick with the riff, or in 16ths, a
 ///     double kick; a black metal band's blast beat and its tremolo-picked riff; a breakbeat's kick and snare; a heavy
-///     band's galloping riff; a clave's three and two; a trance's chords in 16ths, its arpeggio's steady run, and its bass
+///     band's galloping riff, and a breakdown's kick with the riff always (<see cref="Breakdowns" />); a clave's three and two; a trance's chords in 16ths, its arpeggio's steady run, and its bass
 ///     rolling in the 16ths after the kick or on the offbeats. A section draws each player's, its own rhythm or one of its
 ///     figures, from a sequence of its own, by the feel facet and the genre's pool, leaned by its energy, a figure two
 ///     players play, a blast's or a breakbeat's, drawn by the first and played by both; the songs play their own rhythms
@@ -100,6 +100,9 @@ internal static class Figures
                 // so that the draws are as many
                 var shared = figures.Values.FirstOrDefault(x => x is not null && Of(player, x.Name) is not null);
                 figures[player] = shared is not null && isFour ? Of(player, shared.Name) : Of(player, name);
+                // a breakdown's kick with its riff, drawn all the same
+                if (player == FigurePlayer.Ground && section.Breakdown)
+                    figures[player] = Of(player, "withRiff");
             }
             var played = figures.Where(x => x.Value is not null).ToImmutableDictionary(x => x.Key, x => x.Value!.Name);
             StateTrace.Record(TracePoints.Figures, SectionGenerator.SectionTrace, id, 0, StateMap.Default, 0, string.Join(", ", played.Select(x => $"{x.Key} {x.Value}")), played);

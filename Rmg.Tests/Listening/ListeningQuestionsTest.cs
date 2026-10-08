@@ -132,7 +132,10 @@ public sealed class ListeningQuestionsTest
             x => FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Wow) > 0)),
         new("inversion", "Pop's melody playing a figure it repeats upside down now and then, its steps mirrored: a tune developed, or wrong notes?",
             "The inversion's chances, and a motif displaced or stretched beside it.", "pop", [], new() { ["inversion"] = new() { ["melody"] = 0 } },
-            x => FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.LineInversion) > 0, role => role == TrackRole.Melody))
+            x => FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.LineInversion) > 0, role => role == TrackRole.Melody)),
+        new("breakdown", "Djent's bridge as a breakdown, the drums in half time, the kick with the chugging riff, the melody and the pad out: heavy, or a hole?",
+            "The breakdown's chances in the heavy genres.", "djent", [], new() { ["breakdown"] = new() { ["sections"] = 0 } },
+            x => Before(x, FirstSection(x, TracePoints.Breakdown, v => (bool)v!), 2))
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

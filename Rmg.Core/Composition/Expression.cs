@@ -556,9 +556,9 @@ internal static class Expression
     )
     {
         var ((songVibrato, songChorus, songSwell, songBends, _, _), carriers) = songEffects;
-        // a gated part holding its chords, which the gate chops in time
-        if (carriers.TryGetValue(StrongEffect.Gate, out var gated))
-            notes = notes.SetItem(gated, GatedChords.Hold(notes[gated], map, changes, cuts(gated), stopTime,
+        // a gated part holding its chords, which the gate chops in time, where it plays at all
+        if (carriers.TryGetValue(StrongEffect.Gate, out var gated) && notes.TryGetValue(gated, out var gatedNotes))
+            notes = notes.SetItem(gated, GatedChords.Hold(gatedNotes, map, changes, cuts(gated), stopTime,
                 note => InstrumentTraits.Has(ProgramOf(note, ((PitchInstrumentTrack)definitions[gated]).InstrumentCode), InstrumentTrait.Decays)));
 
         // the snares, which echo with a comping part's echo, at its delay, the drums' tracks coming after the pitched parts'

@@ -60,6 +60,7 @@ public static class GenreChoiceDescriptions
         ["sticking"] = "The stickings a drum solo's runs are played in: single and double strokes, paradiddles, six-stroke rolls, or hands and foot in triplets, the right hand moving round the toms and the left on the snare.",
         ["dropKind"] = "How a drop takes the bar before it: the band silent, or the band playing on through the whole mix closing to muffled and bursting open on the drop's downbeat.",
         ["mixFilter"] = "How often the whole mix is filtered, every part muffled together: a song opening up from muffled over its intro, a section's last bar or two closing before the next bursts in open, and the song closing as it ends.",
+        ["breakdown"] = "How often a bridge, or a section of a free form, is a heavy band's breakdown: the drums in half time, the kick striking with the riff, the riff chugging on its lowest note, the melody, the counter-melody and the pad laying out.",
         ["stopTime"] = "How often a section's first phrase plays in stop time, the band hitting once a bar under the melody, as the blues and rock do.",
         ["push"] = "How often a section plays its chord changes an 8th early, an anticipation that pushes the groove forward.",
         ["keyChanges"] = "How often the last chorus lifts to a higher key, a section plays in a key of its own, or the key changes anywhere at all.",

@@ -10,7 +10,8 @@ is removed once it is built.
 each device a genre's data on a mechanism there already where it can be, strong in its genres rather than a few
 percent everywhere, and a listening question once deployed):
 
-1. A breakdown: a section in half time, sparser, the riff at its lowest and chugging, Metal's, Djent's and Nu metal's.
+1. Done: a breakdown, a bridge or a free form's section in half time, the kick with the chugging riff, the lines and the
+   pad out; Djent's 55% of songs, Metal's 42%, Nu metal's 41% (`?listen=breakdown`).
 2. The riff as the song's signature: the riff alone opening the song and between its sections.
 3. A snare's ghost notes and drags on the backbeat's own figure, Funk's, Soul's and Rock's.
 4. The solo harmonised: a second guitar a third under the solo's notes of an 8th and longer, a twin-guitar break.
@@ -424,7 +425,6 @@ left:
     (`TrackRole.RiffTwin`); a twin-guitar break.
   - The riff as the song's signature (P3): the riff alone opening the song and between its sections; one part alone
     is a texture already (`TextureKind.Alone`), the part not chosen as the riff, nor placed as an interlude.
-  - A breakdown (P3): a section slower and sparser, the riff at its lowest, half time leaning, beyond half time alone.
   - Tremolo picking (P3, measured first): fast repeated notes unmuted, the riff's speed perhaps enough already.
   - A melody sung rather than played (P3, a listening question first): no singer in General MIDI; the melody's
     rhythms word-like, its breaths and held ends, should it sound like a lead guitar playing a tune.

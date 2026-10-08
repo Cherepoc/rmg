@@ -312,6 +312,9 @@ internal static class TracePoints
     /// <summary>Where the song's whole mix is filtered (<see cref="Composition.MixFilterPlan" />).</summary>
     public const string MixFilter = "Mix filter";
 
+    /// <summary>Whether a section is a heavy band's breakdown (a <c>bool</c>; <see cref="Composition.Breakdowns" />).</summary>
+    public const string Breakdown = "Breakdown";
+
     /// <summary>How the song ends, in words.</summary>
     public const string SongEnding = "Song ending";
 }
