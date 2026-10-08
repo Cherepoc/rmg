@@ -181,9 +181,12 @@ internal static class DrumSolos
             return song;
 
         var sounds = new FillSounds(songDrums, odds).Sounds;
-        foreach (var (index, _) in solos.Where(x => x.Value.IsDrumSolo).OrderBy(x => x.Key))
+        foreach (var (index, solo) in solos.Where(x => x.Value.IsDrumSolo || x.Value.TradesWithDrums).OrderBy(x => x.Key))
         {
             var whole = map.Sections[index];
+            // a solo traded with the drums their turns alone, the band laying out for them
+            var drumsTurn = solo.Soloists.IndexOf(TrackRole.Drum);
+            bool IsDrumsTurn(double position) => !solo.TradesWithDrums || solo.TurnAt(whole, position) == drumsTurn;
             // all but its last bar, the fill's into the section after
             var span = whole with { Duration = Math.Max(whole.Meter.BarDuration, whole.Duration - whole.Meter.BarDuration) };
             bool Plays(RunSound sound) => song.TrackTimelineMap.TryGetValue(sound.Track, out var track) &&
@@ -250,12 +253,31 @@ internal static class DrumSolos
                 (_, _) => 1,
                 position => common.GetEffectiveStateMapAt(position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60
             );
+            var turn = SoloPlan.TurnOf(whole);
+            // its segments in the drums' turns, a segment across a turn's end cut there
+            var played = solo.TradesWithDrums
+                ? plan.SelectMany(x => Enumerable.Range(0, (int)Math.Ceiling((x.End - whole.Start) / turn))
+                        .Select(k => x with { Start = Math.Max(x.Start, whole.Start + k * turn), End = Math.Min(x.End, whole.Start + (k + 1) * turn) })
+                        .Where(y => y.End > y.Start + 1e-9 && IsDrumsTurn(y.Start)))
+                    .ToArray()
+                : plan;
+            // a trade whose drums' turns fall in the bar the fill plays alone leaves them none
+            if (played.Length == 0)
+                continue;
             StateTrace.Record(TracePoints.DrumSolo, FillGenerator.DrumsTrace, whole.SectionId, 0, StateMap.Default, 0,
-                $"{plan.Length} segments, {soloists.Count} soloists {mode}{(feetTracks.Count > 0 ? ", the feet keeping time" : "")}",
-                new DrumSolo(index, plan, feetTracks.Count > 0, [..soloists.Select(x => Array.IndexOf(band, x))], mode, [..keepers.Select(x => Array.IndexOf(band, x))], [..band.Select(x => x.Tracks.Order().ToArray())], answered));
+                $"{played.Length} segments, {soloists.Count} soloists {mode}{(feetTracks.Count > 0 ? ", the feet keeping time" : "")}",
+                new DrumSolo(index, played, feetTracks.Count > 0, [..soloists.Select(x => Array.IndexOf(band, x))], mode, [..keepers.Select(x => Array.IndexOf(band, x))], [..band.Select(x => x.Tracks.Order().ToArray())], answered));
 
             var edits = new TimelineEdits(context, meter, map);
-            foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn, phrase, _) in plan)
+            if (solo.TradesWithDrums)
+            {
+                for (var at = whole.Start; at < whole.End - 1e-9; at += turn)
+                    if (IsDrumsTurn(at))
+                        foreach (var track in song.TrackTimelineMap.Keys.Where(x => x < DrumGroups.FirstTrackNumber))
+                            edits.Clear(track, at, Math.Min(whole.End, at + turn));
+            }
+
+            foreach (var (start, end, level, gesture, speed, shape, sizes, goesOn, phrase, _) in played)
             {
                 // the groove quoted as it plays, and anything else in place of it
                 if (gesture == SoloGesture.Quote)

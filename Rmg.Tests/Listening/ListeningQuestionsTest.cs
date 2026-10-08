@@ -135,6 +135,9 @@ public sealed class ListeningQuestionsTest
         new("mutation", "IDM's drums mutating, a hit moved, dropped, ratcheted, two 8ths swapped, the edits kept and the groove straying as a section goes on: an evolving break, or mistakes?",
             "The mutation's chance by genre and its edits.", "idm", ["Mutations"], null,
             x => x.Trace.Where(t => t.Point == TracePoints.Mutations && (((int, int))t.Value!).Item2 > 2).Select(t => (double?)x.Map.Sections[(((int, int))t.Value!).Item1].Start).Min() is { } start ? start + 4 * x.Song.MeterAt(start).BarDuration : null),
+        new("trade", "Jazz's solo trading with the drums, turn by turn, the band laying out for the drums: a jazz band's, or a hole?",
+            "The trade's chance by genre.", "jazz", [], new() { ["solos"] = new() { ["trades"] = 0 } },
+            x => x.Solos.Where(s => s.Value.TradesWithDrums).Select(s => (double?)x.Map.Sections[s.Key].Start).Min()),
         new("drum-solo", "Jazz's drum solo, its hands in stickings round the snare and toms over the hi-hat's pedal on 2 and 4 (with), or over the groove's kick (without): a drummer, or a pattern?",
             "The drum solo's feet by genre.", "jazz", [], new() { ["drumSoloFeet"] = new() { ["hatFoot"] = 0, ["groove"] = 100 } },
             x => x.Trace.Where(t => t.Point == TracePoints.DrumSolo && ((DrumSolo)t.Value!).Feet).Select(t => (double?)x.Map.Sections[((DrumSolo)t.Value!).Index].Start).Min())

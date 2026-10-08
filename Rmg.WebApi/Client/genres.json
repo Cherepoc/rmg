@@ -111,7 +111,7 @@
         "ground": { "fullness": 19 }
       },
       "levels": { "drum": 40 },
-      "solos": { "sections": [40, 50, 60] },
+      "solos": { "sections": [40, 50, 60], "trades": [30, 50, 60] },
       "soloists": { "solo": 100, "chords": [70, 80, 80], "melody": [30, 30, 40], "bass": [0, 10, 20], "drum": [0, 10, 20] },
       "ending": { "button": 100, "ringOut": [80, 80, 60], "fade": [10, 10, 30], "stop": [0, 10, 30] },
       "drumRole": {

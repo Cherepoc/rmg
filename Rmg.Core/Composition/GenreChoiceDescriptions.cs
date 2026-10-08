@@ -64,7 +64,7 @@ public static class GenreChoiceDescriptions
         ["keyChanges"] = "How often the last chorus lifts to a higher key, a section plays in a key of its own, or the key changes anywhere at all.",
         ["hook"] = "How often a chorus, or any other section, is built on a short repeating melodic hook.",
         ["riff"] = "How often a section's riff plays in power chords, and how often its guitars and picked bass chug, their repeated notes palm-muted.",
-        ["solos"] = "How often a section that comes back is played as a solo instead.",
+        ["solos"] = "How often a section that comes back is played as a solo instead, and how often a solo trades with the drums, turn by turn, the band laying out for theirs.",
         ["soloists"] = "Which part takes the solos: the solo part, a lead such as a sax or a guitar, or another part, even the drums.",
         ["intro"] = "How the song starts: the whole band at once, a count-in, or the parts coming in one by one.",
         ["ending"] = "How the song ends: a short final hit, a ringing chord, a sudden stop, a fade, or left open.",

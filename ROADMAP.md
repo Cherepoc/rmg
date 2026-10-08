@@ -114,6 +114,8 @@ Done for a version when every question is answered or let go of.
 - **Chords in solos:** 41% of a chord soloist's held notes stacked, planing 17% at the middle and 59% wild. Decides
   their rates.
 - **Drum solos:** stickings round the kit; a crash with the kick in 23% of segments. Decides the drum solo's gestures.
+- **Trading with the drums** (`?listen=trade`): Jazz's solos trading with the drums by turns, the band laying out. Decides
+  the trade's chance by genre, and whether the band keeps time under the drums' turns instead.
 
 ### Drums and groove
 
@@ -324,7 +326,8 @@ Each item with its plan, and what it waits for.
      diminished left, by listening.
   4. Done October 2026, measured: its runs' and licks' hits a beat and loudness follow the intensity, 3.6, 6.2 and 8.1
      hits a beat at 0.37, 0.44 and 0.55 by its thirds, and the intensity grows over the solo, 0.53, 0.61, 0.64.
-  5. Trading with the band, jazz's fours: the drums and a pitched soloist alternating four or eight bars.
+  5. Done October 2026: a pitched solo trading with the drums turn by turn, the band laying out for the drums' turns
+     (`Solos.Trade`), Jazz's 30% to 60% of its solos, 112 trades in 64 Jazz songs.
   6. A genre's idioms as data: metal's double-kick runs and tom cascades, a timbales' abanico, funk's ghosted groove
      solo, an IDM's drill of ratchets (the mutating groove at its wildest).
   Measured by the solos' notes a beat over their arc, the limbs' share, the stickings drawn; `?listen=` questions.

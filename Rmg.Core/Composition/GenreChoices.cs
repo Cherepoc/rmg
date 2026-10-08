@@ -143,7 +143,8 @@ public static class GenreChoices
     public static GenreChoice Loop { get; } = Chances("loop", "Loop", [("sections", "Sections on the first's chords", SectionGenerator.Loop)]);
 
     /// <summary>The chance a later appearance is a solo, as the songs have it by its role (<see cref="Composition.Solos.Chance" />).</summary>
-    public static GenreChoice Solos { get; } = Chances("solos", "Solos", [("sections", "A section soloed", Composition.Solos.Chance)]);
+    public static GenreChoice Solos { get; } = Chances("solos", "Solos",
+        [("sections", "A section soloed", Composition.Solos.Chance), ("trades", "A solo trading with the drums", Composition.Solos.Trade)]);
 
     /// <summary>Who solos (<see cref="Composition.Solos.Soloists" />).</summary>
     public static GenreChoice Soloists { get; } = Pool("soloists", "Soloists",

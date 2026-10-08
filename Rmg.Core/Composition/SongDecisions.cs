@@ -306,6 +306,9 @@ internal sealed record SongDecisions(
             [..played.Select(id => generateSection(id).Facets[Facet.Melody])],
             [..SongParts.All.Except(absent)]
         );
+        // a pitched solo trading with the drums now and then, each from a sequence of its own
+        drawnSolos = [..drawnSolos.Select((x, index) => Composition.Solos.WithTrade(new GenerationContext(Seeds.Derive(Seeds.Derive(seed, (int)SongStream.SoloTrades), index)), x,
+            generateSection(played[index]).Facets[Facet.Melody], partsAt[index], genre))];
         for (var index = 0; index < played.Length; index++)
         {
             cancellation.ThrowIfCancellationRequested();

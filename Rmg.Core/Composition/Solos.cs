@@ -17,13 +17,25 @@ public enum SoloMode
 }
 
 /// <summary>A section's appearance played as a solo: who solos, and how several share it.</summary>
-/// <param name="Soloists">The parts that solo; the drums alone for a drum solo.</param>
+/// <param name="Soloists">The parts that solo; the drums alone for a drum solo, and last where a pitched solo trades with them.</param>
 /// <param name="Mode">How several share it.</param>
 /// <param name="Step">How many scale steps from the first the others play, playing together.</param>
 /// <param name="IsOwn">Whether its line is its own, over the chords, rather than on the melody's.</param>
 public sealed record SoloPlan(ImmutableArray<TrackRole> Soloists, SoloMode Mode, int Step, bool IsOwn)
 {
-    public bool IsDrumSolo => Soloists.Contains(TrackRole.Drum);
+    /// <summary>Whether the drums solo alone, the band resting.</summary>
+    public bool IsDrumSolo => Soloists is [TrackRole.Drum];
+
+    /// <summary>Whether a pitched solo trades with the drums, turn by turn, the band laying out for the drums' turns.</summary>
+    public bool TradesWithDrums => Soloists.Length > 1 && Soloists.Contains(TrackRole.Drum);
+
+    /// <summary>
+    ///     How long a soloist's turn is in a section that trades: its pattern, or half of it where the section plays it once,
+    ///     and whose turn it is at a position, by its place among the soloists.
+    /// </summary>
+    public static double TurnOf(SectionSpan span) => Math.Max(1, (int)Math.Round(span.Duration / span.Meter.PatternDuration)) > 1 ? span.Meter.PatternDuration : span.Meter.PatternDuration / 2;
+
+    public int TurnAt(SectionSpan span, double position) => (int)Math.Floor((position - span.Start) / TurnOf(span) + 1e-9) % Soloists.Length;
 }
 
 /// <summary>
@@ -37,6 +49,21 @@ public sealed record SoloPlan(ImmutableArray<TrackRole> Soloists, SoloMode Mode,
 /// </summary>
 internal static class Solos
 {
+    /// <summary>
+    ///     The chance a pitched solo trades with the drums, turn by turn, as a jazz band trades fours, by the melody facet:
+    ///     never at the plain end, now and then at the wild; a genre's where it names it, Jazz's.
+    /// </summary>
+    public static ByConvention Trade { get; } = new(0, 0.05, 0.2);
+
+    /// <summary>A pitched solo trading with the drums where the song has them, from a sequence of its own, the solo as it is otherwise.</summary>
+    public static SoloPlan? WithTrade(IGenerationContext context, SoloPlan? solo, double melody, IReadOnlyCollection<TrackRole> parts, Genre genre)
+    {
+        var trades = context.TestProbability(Trade.At(melody, genre.Chance(GenreChoices.Solos, "trades")));
+        return trades && solo is { IsDrumSolo: false } && parts.Contains(TrackRole.Drum)
+            ? solo with { Soloists = [..solo.Soloists, TrackRole.Drum], Mode = SoloMode.Trading }
+            : solo;
+    }
+
     /// <summary>The chance a later appearance is a solo, by the form facet.</summary>
     public static ByConvention Chance { get; } = new(0, 0.035, 0.5);
 
@@ -210,9 +237,6 @@ internal static class Solos
             var chordsHeld = song.TrackTimelineMap.TryGetValue(trackOf[TrackRole.Chords], out var chords) ? chords.EventTimeline.Where(IsIn).ToArray() : [];
             var (line, segments) = SoloLines.Generate(context, voicings(index), motifs(index), span, soloists[solo.Soloists[0]], solo.IsOwn, melody, chordsHeld, song.TrackTimelineMap[first], (PitchInstrumentTrack)definitions[first], song.CommonStateTimelineMap);
             StateTrace.Record(TracePoints.SoloGestures, first, span.SectionId, 0, StateMap.Default, 0, $"{(solo.IsOwn ? "own" : "on the melody")}, {segments.Length} segments", (index, solo.IsOwn, segments));
-            var phrases = Math.Max(1, (int)Math.Round(span.Duration / span.Meter.PatternDuration));
-            // a solo of one phrase is traded by its halves
-            var turn = phrases > 1 ? span.Meter.PatternDuration : span.Meter.PatternDuration / 2;
 
             // as loud as the band's loudest part there and a margin over it, the melody resting and the drums apart
             var band = song.TrackTimelineMap
@@ -222,10 +246,11 @@ internal static class Solos
                 .DefaultIfEmpty(0)
                 .Max();
             var moves = new Dictionary<int, Func<EventTimeline<StateMap>, EventTimeline<StateMap>>>();
-            foreach (var (soloist, place) in solo.Soloists.Select((x, i) => (x, i)))
+            // the drums' turns the drums' own (DrumSolos)
+            foreach (var (soloist, place) in solo.Soloists.Select((x, i) => (x, i)).Where(x => x.x != TrackRole.Drum))
             {
                 TimelineItem<StateMap>[] notes = solo.Mode == SoloMode.Trading
-                    ? [..line.Where(x => (int)Math.Floor((x.Position - span.Start) / turn + 1e-9) % solo.Soloists.Length == place)]
+                    ? [..line.Where(x => solo.TurnAt(span, x.Position) == place)]
                     : place == 0
                         ? line
                         : [..line.Where(_ => !context.TestProbability(LeftOutChance))

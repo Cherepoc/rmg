@@ -206,6 +206,39 @@ public sealed class DrumSoloTest
         await Assert.That(pedals).IsGreaterThan(10);
     }
 
+    /// <summary>
+    ///     A pitched solo trading with the drums, Jazz's: in the drums' turns the drums solo and no pitched part plays, the
+    ///     band laid out; in the others the soloists play.
+    /// </summary>
+    [Test]
+    public async Task ASoloTradingWithTheDrums_LeavesTheirTurnsToThem_TheBandLaidOut()
+    {
+        var (trades, drumTurns, pitchedTurns) = (0, 0, 0);
+        foreach (var song in TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: Rmg.Tests.Genres.GenrePresets.Genre("jazz")))))
+        foreach (var (index, solo) in song.Solos.Where(x => x.Value.TradesWithDrums))
+        {
+            trades++;
+            var span = song.Map.Sections[index];
+            var turn = SoloPlan.TurnOf(span);
+            for (var at = span.Start; at < span.End - 1e-9; at += turn)
+            {
+                var end = Math.Min(span.End, at + turn);
+                var pitched = song.Song.Notes!.Where(x => x.Key < DrumGroups.FirstTrackNumber).Sum(x => x.Value.Count(n => n.Position >= at - 1e-9 && n.Position < end - 1e-9));
+                if (solo.TurnAt(span, at) == solo.Soloists.IndexOf(TrackRole.Drum))
+                {
+                    drumTurns++;
+                    await Assert.That(pitched).IsEqualTo(0).Because($"seed {song.Seed} at {at}");
+                }
+                else
+                    pitchedTurns += pitched > 0 ? 1 : 0;
+            }
+        }
+
+        Console.WriteLine($"{trades} solos of 64 Jazz songs trading with the drums, {drumTurns} drums' turns, {pitchedTurns} soloists' turns played");
+        await Assert.That(trades).IsGreaterThan(3);
+        await Assert.That(pitchedTurns).IsGreaterThan(0);
+    }
+
     /// <summary>A kit's solo's phrase restating the phrase before's motif now and then, as the pitched solos' phrases do.</summary>
     [Test]
     public async Task ADrumSolosPhrases_RestateThePhraseBeforesMotif_NowAndThen()

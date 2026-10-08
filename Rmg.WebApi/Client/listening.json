@@ -918,12 +918,12 @@
         "at": 29.7
       },
       {
-        "seed": "F",
-        "at": 116.3
-      },
-      {
         "seed": "I",
         "at": 43.1
+      },
+      {
+        "seed": "N",
+        "at": 113.9
       }
     ]
   },
@@ -951,10 +951,6 @@
         "at": 29.7
       },
       {
-        "seed": "F",
-        "at": 116.3
-      },
-      {
         "seed": "I",
         "at": 43.1
       },
@@ -965,6 +961,10 @@
       {
         "seed": "S",
         "at": 151.7
+      },
+      {
+        "seed": "s",
+        "at": 4.6
       }
     ]
   },
@@ -1053,6 +1053,46 @@
     ]
   },
   {
+    "id": "trade",
+    "question": "Jazz's solo trading with the drums, turn by turn, the band laying out for the drums: a jazz band's, or a hole?",
+    "decides": "The trade's chance by genre.",
+    "genre": "jazz",
+    "without": {
+      "skip": [],
+      "genre": {
+        "solos": {
+          "trades": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "1",
+        "at": 17.9
+      },
+      {
+        "seed": "2",
+        "at": 91.8
+      },
+      {
+        "seed": "3",
+        "at": 56.3
+      },
+      {
+        "seed": "4",
+        "at": 25
+      },
+      {
+        "seed": "5",
+        "at": 50.5
+      },
+      {
+        "seed": "6",
+        "at": 7.6
+      }
+    ]
+  },
+  {
     "id": "drum-solo",
     "question": "Jazz's drum solo, its hands in stickings round the snare and toms over the hi-hat's pedal on 2 and 4 (with), or over the groove's kick (without): a drummer, or a pattern?",
     "decides": "The drum solo's feet by genre.",
@@ -1072,24 +1112,24 @@
         "at": 10.7
       },
       {
-        "seed": "C",
-        "at": 71.8
+        "seed": "1",
+        "at": 17.9
       },
       {
-        "seed": "F",
-        "at": 85.5
+        "seed": "2",
+        "at": 91.8
       },
       {
-        "seed": "H",
-        "at": 47.6
+        "seed": "3",
+        "at": 95.5
       },
       {
-        "seed": "V",
-        "at": 32.5
+        "seed": "4",
+        "at": 50.1
       },
       {
-        "seed": "Z",
-        "at": 51.9
+        "seed": "5",
+        "at": 50.5
       }
     ]
   }

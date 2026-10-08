@@ -237,5 +237,6 @@ internal enum SongStream
     DrumSoloOstinato = 95,
     DrumSoloStickings = 96,
     DropKind = 97,
-    DrumSoloMotifs = 98
+    DrumSoloMotifs = 98,
+    SoloTrades = 99
 }
