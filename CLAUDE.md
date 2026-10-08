@@ -28,7 +28,9 @@
 - **State decides, `Realizer` realizes.** Generation decides the notes as layered state (song, section, track, bar,
   note); `Realizer` only chooses their register from what came before (a chord's voicing) and leads into what follows. A
   decision that needs the song put together, such as a fill, the form or a stop, is an edit after assembly, not a render
-  flag.
+  flag. The stages after assembly run in one order (`SongStages`): those before `Realizer` edit the state, those after
+  it edit the notes, and can no longer change a chord's voicing or a line's placement. A stage that hands another its
+  work does so through `SongDraft`, and comes before it.
 - **Lean, don't decide.** Bias a choice by conventionality through its ends (`ByConvention`), and by energy, a line's
   weight or anything else with `Tilt`: an option's weight times the odds to the power of its lean, a chance through its
   odds, a value around its middle by its skew. A lean is data on the option; never multiply or cap a chance by hand.

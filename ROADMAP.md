@@ -50,10 +50,8 @@ genre first (see *Genres*).
 **Put off** until its uses ask for it: a tag (see *Form and sections*).
 
 **From the review of 8 October 2026** (P2, to be ordered into the next plan): the architecture's items (see
-*Architecture*: named streams, the song's decisions passed whole, the stages' reads
-and writes, a genre's one rule, a genre resolved once, plainer prose); and the music's: the
-melody's motifs, the songs' own appoggiaturas (*Fills and lines*), phrases of other than four bars
-(*Rhythm engine*), scales of other sizes (*Scales and chords*); and targets from outside (*Listening data*).
+*Architecture*: a genre's one rule, a genre resolved once, plainer prose); and the music's: the
+melody's motifs, the songs' own appoggiaturas (*Fills and lines*), scales of other sizes (*Scales and chords*); and targets from outside (*Listening data*).
 
 **Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where they stand: a melody in block harmony, a hook at the end, the tempo leaning by the energy, a key change's common tone, the
 fills' loudness as layers, and a head with solos (which the form's devices by genre with AABA likely make).
@@ -376,25 +374,16 @@ Each item with its plan, and what it waits for.
   3-2. Put off as an engine's change: the bar is the unit of the scheme's letters, the state's layers, the melody's
   question and answer, the drums' presence, the fills' lines and the feels. A crash every two bars, should it be
   missed, an edit after assembly as the lift's cues are.
-- **Phrases of other than four bars** (P2, the review of October 2026; a 3-bar phrase, a 6-bar section), which the
-  line's question and answer and the fills assume. A section is 4, 8, 16 or 32 bars now (`SectionLength`). The
-  cheapest first, as edits after assembly: a phrase extended before its cadence (4 + 2, the cadence's bars played
-  again), then a 2-bar tag closing a section (*A tag*); a phrase of three or six bars after them, as an engine's
-  change. Leaned by the form facet, the plain end keeping four.
-
-### Architecture
-
-From the review of October 2026 (P2), each measured by the fingerprint, unchanged unless said:
-
-- **Named streams:** `SongStream` has 97 numbers that must never change, and the stages pass streams to the modules
-  as lambdas, six to `DrumSolos.Apply`. A stream derived from a name and its places (`song.Stream("drumSolo.feet",
-  index)`), each module owning its names, takes the enum and its rule away; the seeds move once.
-- **The song's decisions passed whole:** the stages unpack `SongDecisions` into long argument lists (`Expression.Apply`
-  about twenty, `DrumSolos.Apply` sixteen); a module taking the song and reading what it needs, with the named streams.
-- **The stages' reads and writes:** a stage's order is its correctness (`SongStages.All`), its hand-offs fields of
-  `SongDraft` (`Runs`, `MelodyWalks`, `Chains`, `Polymeters`, `Notes`); every stage naming what it reads and writes, and
-  a test that every read comes after its write. The stages after `Realizer` (thirteen of thirty) edit notes rather than
-  state, a phase of its own: CLAUDE.md to say so.
+- **Phrases of other than four bars** (P3, postponed October 2026: a section is whole 4-bar patterns, and 89 places in
+  26 files count its bars by them, the fills, the phrase ends, stop time, the energy, the polymeters; an extension's bars
+  would count as its pattern's first, not its last): a phrase extended before its cadence (4 + 2, the cadence's bars
+  played again), a 2-bar tag closing a section (*A tag*), a phrase of three or six bars, once the pattern is no longer
+  the unit (*Long cycles*). Leaned by the form facet, the plain end keeping four.
+- **Decided in the review of October 2026, not built:** streams by name (they would move every seed and so lose the
+  fingerprint as a refactor's check, for one line saved a stream); a stage's module taking the song's decisions whole
+  (it moves the unpacking from `SongStages` into the module, and a module's parameters say what it reads); a stage
+  declaring what it reads and writes (`SongDraft`'s fields say who makes them, and CLAUDE.md the two phases). A new
+  stage takes `(SongDecisions, SongDraft)`, as fifteen do.
 - **A genre's one rule:** a genre combines with the songs' weights by six entry points of `ByConvention` (`Weigh`,
   `Weigh` with a pool, `Lean`, `Within`, `WeighFilled`, `At` with a pool), replacing, leaning or filling them. One rule
   written down, `Lean` apart where a choice draws in roles.
