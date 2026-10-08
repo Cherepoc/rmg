@@ -76,15 +76,17 @@ const CHOICES = [
 ];
 
 /**
- *     The strip asking the question: a song at a time, A and B played on asking, and a verdict, which goes on to the
- *     next song, each started a moment before where its device plays; and back to the song before, its verdict shown, to
- *     give it again, which the server counts in place of the first. `play` is given the song's seed, whether it is the
- *     one without and the second it starts at; `verdict` the seed and the choice, "with", "without", "same" or "unsure".
+ *     The strip asking the question: a song at a time, A and B played on asking, an answer chosen, shown pressed and
+ *     changed at will, and Next, which tells it and goes on to the next song, each started a moment before where its device
+ *     plays; and back to the song before, its answer pressed, to change it, which the server counts in place of the
+ *     first. `play` is given the song's seed, whether it is the one without and the second it starts at; `verdict` the
+ *     seed and the choice, "with", "without", "same" or "unsure".
  */
 export function createListeningStrip(question, { play, verdict }) {
     let at = 0;
-    // the verdict given on each song, as its button said it
-    const given = [];
+    // the answer chosen on each song, by its button's choice, and the one told
+    const chosen = [];
+    const told = [];
     const strip = document.createElement("section");
     strip.className = "panel listening";
     strip.setAttribute("aria-label", "Listening");
@@ -112,30 +114,49 @@ export function createListeningStrip(question, { play, verdict }) {
         heard.textContent = `Playing ${letter}`;
         play(question.seeds[at].seed, isWithout(letter), Math.max(0, question.seeds[at].at - LEAD_SECONDS));
     }, "primary"));
-    const verdicts = CHOICES.map(([choice, text]) => button(text, () => {
-        verdict(question.seeds[at].seed, choice === "A" || choice === "B" ? (isWithout(choice) ? "without" : "with") : choice);
-        given[at] = text;
-        at++;
-        show();
-    }));
+    const answers = CHOICES.map(([choice, text]) => {
+        const element = button(text, () => {
+            chosen[at] = choice;
+            show();
+        });
+        element.dataset.choice = choice;
+        return element;
+    });
     const back = button("Back", () => {
         at--;
         show();
     });
+    const next = button("Next", () => {
+        const choice = chosen[at];
+        // told once, and again only where it was changed
+        if (told[at] !== choice) {
+            verdict(question.seeds[at].seed, choice === "A" || choice === "B" ? (isWithout(choice) ? "without" : "with") : choice);
+            told[at] = choice;
+        }
+        at++;
+        show();
+    }, "primary");
 
-    const controls = document.createElement("div");
-    controls.className = "listening-controls";
-    controls.append(...plays, ...verdicts, back);
-    strip.append(asked, where, controls, heard);
+    const row = (...elements) => {
+        const controls = document.createElement("div");
+        controls.className = "listening-controls";
+        controls.append(...elements);
+        return controls;
+    };
+    const choices = row(...answers);
+    choices.setAttribute("role", "group");
+    choices.setAttribute("aria-label", "Your answer");
+    strip.append(asked, where, row(...plays), choices, row(back, next), heard);
 
     function show() {
         const done = at >= question.seeds.length;
         where.textContent = done
             ? `Done: ${question.seeds.length} songs heard. Thank you.`
-            : `Song ${at + 1} of ${question.seeds.length} · listen at ${clock(question.seeds[at].at)}, A and B starting just before`
-              + (given[at] === undefined ? "" : ` · your verdict: ${given[at]}`);
+            : `Song ${at + 1} of ${question.seeds.length} · listen at ${clock(question.seeds[at].at)}, A and B starting just before`;
         heard.textContent = "";
-        for (const element of [...plays, ...verdicts]) element.disabled = done;
+        for (const element of [...plays, ...answers]) element.disabled = done;
+        for (const element of answers) element.setAttribute("aria-pressed", String(!done && chosen[at] === element.dataset.choice));
+        next.disabled = done || chosen[at] === undefined;
         back.disabled = at === 0;
     }
 

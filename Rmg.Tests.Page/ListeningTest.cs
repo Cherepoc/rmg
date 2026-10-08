@@ -46,9 +46,17 @@ public sealed class ListeningTest(Site site)
         await page.Settled();
         await Assert.That(page.Requests.All(x => x.Ended == "200")).IsTrue();
 
-        // A better on the first song, the one with: kept as such, and on to the next song, whose A is the one without
-        await strip.GetByRole(AriaRole.Button, new() { Name = "A is better" }).ClickAsync();
+        // A better on the first song, the one with: pressed, the song staying until Next, which tells it and goes on to the
+        // next song, whose A is the one without
+        var next = strip.GetByRole(AriaRole.Button, new() { Name = "Next" });
+        await Assert.That(await next.IsDisabledAsync()).IsTrue();
+        var better = strip.GetByRole(AriaRole.Button, new() { Name = "A is better" });
+        await better.ClickAsync();
+        await Assert.That(await better.GetAttributeAsync("aria-pressed")).IsEqualTo("true");
+        await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).StartsWith("Song 1 of 6");
+        await next.ClickAsync();
         await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).StartsWith("Song 2 of 6 · listen at ");
+        await Assert.That(await better.GetAttributeAsync("aria-pressed")).IsEqualTo("false");
         count = page.Requests.Count;
         await strip.GetByRole(AriaRole.Button, new() { Name = "Play A" }).ClickAsync();
         await page.Until(() => page.Requests.Count > count, "the next A asked for");
@@ -67,7 +75,7 @@ public sealed class ListeningTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
-    /// <summary>Back goes to the song before, its verdict shown, and a verdict given again counts in place of the first.</summary>
+    /// <summary>Back goes to the song before, its answer pressed, and an answer changed counts in place of the first.</summary>
     [Test]
     public async Task Back_GoesToTheSongBefore_AndAVerdictGivenAgainReplacesTheFirst()
     {
@@ -82,13 +90,18 @@ public sealed class ListeningTest(Site site)
         await page.Until(() => page.Requests.Count > count, "A asked for");
         await page.Settled();
 
-        await strip.GetByRole(AriaRole.Button, new() { Name = "The same" }).ClickAsync();
+        var (same, unsure, next) = (strip.GetByRole(AriaRole.Button, new() { Name = "The same" }), strip.GetByRole(AriaRole.Button, new() { Name = "Can't tell" }),
+            strip.GetByRole(AriaRole.Button, new() { Name = "Next" }));
+        await same.ClickAsync();
+        await next.ClickAsync();
         await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).StartsWith("Song 2 of 6");
         await back.ClickAsync();
         await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).StartsWith("Song 1 of 6");
-        await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).EndsWith("your verdict: The same");
+        await Assert.That(await same.GetAttributeAsync("aria-pressed")).IsEqualTo("true");
         await Assert.That(await back.IsDisabledAsync()).IsTrue();
-        await strip.GetByRole(AriaRole.Button, new() { Name = "Can't tell" }).ClickAsync();
+        await unsure.ClickAsync();
+        await Assert.That(await same.GetAttributeAsync("aria-pressed")).IsEqualTo("false");
+        await next.ClickAsync();
         await Assert.That(await strip.Locator(".listening-where").TextContentAsync()).StartsWith("Song 2 of 6");
 
         using var client = new HttpClient { BaseAddress = site.Address };
@@ -149,6 +162,7 @@ public sealed class ListeningTest(Site site)
         await Assert.That(await solo.GetAttributeAsync("aria-pressed")).IsEqualTo("true");
 
         await strip.GetByRole(AriaRole.Button, new() { Name = "The same" }).ClickAsync();
+        await strip.GetByRole(AriaRole.Button, new() { Name = "Next" }).ClickAsync();
         await Play("A");
         await Assert.That(await mute.GetAttributeAsync("aria-pressed")).IsEqualTo("true");
         await Assert.That(await solo.GetAttributeAsync("aria-pressed")).IsEqualTo("true");
