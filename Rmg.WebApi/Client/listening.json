@@ -12,10 +12,6 @@
     },
     "seeds": [
       {
-        "seed": "0",
-        "at": 159.3
-      },
-      {
         "seed": "C",
         "at": 142
       },
@@ -30,6 +26,10 @@
       {
         "seed": "L",
         "at": 2.2
+      },
+      {
+        "seed": "M",
+        "at": 129
       },
       {
         "seed": "V",
@@ -523,7 +523,7 @@
       },
       {
         "seed": "J",
-        "at": 174.1
+        "at": 120.1
       },
       {
         "seed": "Q",
@@ -545,7 +545,7 @@
     "seeds": [
       {
         "seed": "6",
-        "at": 87.1
+        "at": 127.1
       },
       {
         "seed": "7",
@@ -556,12 +556,12 @@
         "at": 38.4
       },
       {
-        "seed": "b",
-        "at": 249.2
+        "seed": "a",
+        "at": 58
       },
       {
-        "seed": "d",
-        "at": 214.6
+        "seed": "b",
+        "at": 249.2
       },
       {
         "seed": "i",
@@ -1235,46 +1235,6 @@
       {
         "seed": "K",
         "at": 93.3
-      }
-    ]
-  },
-  {
-    "id": "drone",
-    "question": "Black metal's riff playing its weak notes on an open string's drone: a black metal riff, or a monotone?",
-    "decides": "The drone's chances by genre.",
-    "genre": "blackMetal",
-    "without": {
-      "skip": [],
-      "genre": {
-        "riff": {
-          "drone": 0
-        }
-      }
-    },
-    "seeds": [
-      {
-        "seed": "0",
-        "at": 110.8
-      },
-      {
-        "seed": "3",
-        "at": 3.5
-      },
-      {
-        "seed": "6",
-        "at": 84
-      },
-      {
-        "seed": "9",
-        "at": 226.6
-      },
-      {
-        "seed": "D",
-        "at": 202.5
-      },
-      {
-        "seed": "J",
-        "at": 118
       }
     ]
   },

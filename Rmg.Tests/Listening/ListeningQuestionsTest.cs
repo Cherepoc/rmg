@@ -151,8 +151,6 @@ public sealed class ListeningQuestionsTest
         new("root-fifth", "Country's bass alternating the chord's root and its fifth below on the strong beats: a country bass, or a plod?",
             "The alternating bass's chances by genre.", "country", [], new() { ["alternatingBass"] = new() { ["sections"] = 0 } },
             x => FirstSection(x, TracePoints.AlternatingBass, v => (bool)v!)),
-        new("drone", "Black metal's riff playing its weak notes on an open string's drone: a black metal riff, or a monotone?",
-            "The drone's chances by genre.", "blackMetal", [], new() { ["riff"] = new() { ["drone"] = 0 } }, x => FirstSection(x, TracePoints.Drone, v => (bool)v!)),
         new("quieter-form", "Black metal's distorted guitar turning acoustic or clean in its quieter sections: a calm between the storms, or a jump?",
             "The quieter form's chances by genre.", "blackMetal", [], new() { ["louderForms"] = new() { ["quieter"] = 0 } },
             x => x.Trace.Where(t => t.Point == TracePoints.QuieterForm).Select(t => x.Song.Notes!.GetValueOrDefault(t.Track)?

@@ -28,9 +28,9 @@ percent everywhere, and a listening question once deployed):
    38% (`?listen=root-fifth`); Jazz's walking quarters there already, its bass's rhythm in quarters leading into its chords.
 7. Done: the kick and the crash pushing with the band, an eighth early; the drums playing a stop-time phrase's last
    half bar, a fill there as heavy as a section's, 1% to 21% of the phrases filled out of.
-8. Done: a riff's weak notes on an open string's drone, the chugging riff's pedal without its chugs, Black metal's 38%
-   of its sections; a driven guitar's quieter form, acoustic or clean in the quieter appearances, Black metal's
-   (`?listen=drone`, `?listen=quieter-form`). The montuno left, a pattern of its own (*What the genres cannot play yet*).
+8. Done: a riff's weak notes on an open string's drone, the chugging riff's pedal without its chugs, heard worse and
+   played by no preset now (*A riff's drone, reworked*); a driven guitar's quieter form, acoustic or clean in the quieter
+   appearances, Black metal's (`?listen=quieter-form`; *Acoustic sections, fitted*). The montuno left, a pattern of its own (*What the genres cannot play yet*).
 9. Done already: the instruments by listening are in the presets, the timpani, the organ bass, the church organ, the
    music box and the kalimba, Chiptune's squares; their weights by listening (*Instruments by listening*).
 10. Done: a strum's up stroke missing a full chord's lowest string. Left: legato slides, by listening; a fill's toms by
@@ -272,6 +272,16 @@ Each item with its plan, and what it waits for.
   following the chugs, heard as great): Metal's and Nu metal's already break down (42% and 41% of their songs); more of
   Nu metal's, and the other heavy genres', Punk's hardcore end and Black metal's slower passages, each a genre's
   `breakdown` chance, and a breakdown in a verse or before the last chorus beside the bridge, should more be wanted.
+- **A riff's drone, reworked** (P2, heard 8 October 2026: a good idea for metal, but the songs sounded better without
+  it, so no preset plays it now; `GenreChoices.Riff` "drone" kept): the riff's weak notes all on its chord's root at the
+  bottom of its range, 69% of them, is a pedal, not a drone riff; a black metal or a folk metal riff alternates its
+  melody with an open string, the string the key's own (its tonic or fifth, not every chord's root), in a pattern of
+  the riff's own (every other note, or the 16ths between its melody's 8ths), the melody on the strong notes over it.
+- **Acoustic sections, fitted** (P2, heard 8 October 2026: acoustic sections are great for metal and rock, but not every
+  quieter section fits one): a driven guitar turned acoustic only where no other part plays a heavy riff, the riff, its
+  twin and the rhythm all turning together or the section left as it is, rather than one part at a time; and the
+  acoustic guitar breaking its chords there (`Arpeggios`), as a band's quiet passage is picked; for Metal and Rock
+  beside Black metal, whose quieter form plays 36% of its songs now (`?listen=quieter-form`).
 - **A breakdown's snare** (P2, suggested 8 October 2026 after listening): Djent's breakdown plays its backbeat on the
   cross-stick, where a breakdown wants the snare itself, struck on the riff's accents with the kick or on the song's
   backbeat in half time, its 3 or its 2 and 4; the snare's sound in a breakdown the full one (`DrumSounds`), and its

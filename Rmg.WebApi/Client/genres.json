@@ -602,7 +602,6 @@
     "name": "Folk",
     "description": "Steel and nylon guitars strummed, a fiddle, a banjo, a harmonica, an acoustic bass, plain triads, major and Mixolydian, 3/4 and 6/8 as likely as not, a tambourine and a shaker on a room kit.",
     "choices": {
-      "riff": { "drone": [20, 30, 40] },
       "alternatingBass": { "sections": [20, 30, 40] },
       "ornaments": { "graces": [0, 50, 100], "turns": [0, 20, 60], "trills": [0, 25, 70] },
       "rootMotion": { "fifthDown": 70, "stepUp": 65, "fourthDown": 60 },
@@ -1777,7 +1776,7 @@
       "rootDegree": { "second": 75, "fourth": 70, "fifth": 65, "sixth": 30, "seventh": 25 },
       "harmonicRhythm": { "oneBar": 100, "twoBars": [60, 60, 50], "halfBar": [10, 15, 20] },
       "riffScale": { "section": 100, "chromatic": [10, 20, 40] },
-      "riff": { "powerChords": [20, 20, 20], "chugs": [5, 5, 10], "drone": [30, 40, 50] },
+      "riff": { "powerChords": [20, 20, 20], "chugs": [5, 5, 10] },
       "figure": { "ground": { "own": 100, "doubleKick": [40, 50, 60], "blast": [40, 50, 60] }, "backbeat": { "own": 100 }, "riff": { "own": [60, 50, 40], "tremolo": 100 } },
       "phraseScheme": { "aaaa": 100, "aaab": [40, 40, 50], "abab": [20, 20, 30] },
       "sectionLength": { "bars16": 100, "bars32": [60, 60, 60] },
