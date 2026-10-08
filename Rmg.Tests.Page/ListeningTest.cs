@@ -67,6 +67,24 @@ public sealed class ListeningTest(Site site)
         await Assert.That(page.Errors).IsEmpty();
     }
 
+    /// <summary>A question's song without its device keeps the genre's other options of the choice it patches, differing by the device alone.</summary>
+    [Test]
+    public async Task AQuestionsSongWithout_KeepsTheGenresOtherOptions()
+    {
+        await using var page = await SongPage.Open(site, "?listen=tone");
+        var strip = page.Page.Locator("section.listening");
+        await page.Until(() => strip.IsVisibleAsync(), "the question asked");
+        // the first song's B the one without
+        var count = page.Requests.Count;
+        await strip.GetByRole(AriaRole.Button, new() { Name = "Play B" }).ClickAsync();
+        await page.Until(() => page.Requests.Count > count, "B asked for");
+        var effects = page.Requests[^1].Body.GetProperty("genre").GetProperty("effects");
+        await Assert.That(effects.GetProperty("tone").GetInt32()).IsEqualTo(0);
+        await Assert.That(effects.TryGetProperty("vibrato", out _)).IsTrue();
+        await page.Settled();
+        await Assert.That(page.Requests.All(x => x.Ended == "200")).IsTrue();
+    }
+
     /// <summary>A question's songs keep the mutes and solos pressed, from A to B and on to the next song.</summary>
     [Test]
     public async Task AQuestionsSongs_KeepTheMutesAndSolos()

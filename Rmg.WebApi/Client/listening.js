@@ -8,6 +8,17 @@ import QUESTIONS from "./listening.json";
  *     of its genre.
  */
 
+/**
+ *     A genre's choices with a question's patch laid over them for its song without the device: every option the patch
+ *     names its amount, and the genre's other options of the choice as they are, so that the song without differs by the
+ *     device alone.
+ */
+export function withoutDevice(choices, patch) {
+    const patched = { ...choices };
+    for (const [choice, options] of Object.entries(patch)) patched[choice] = { ...(choices[choice] ?? {}), ...options };
+    return patched;
+}
+
 /** The question of the id, none for none or one not asked. */
 export function listeningQuestion(id) {
     return id === null ? null : QUESTIONS.find((x) => x.id === id) ?? null;

@@ -23,7 +23,7 @@ public sealed class ListeningQuestionsTest
     /// <param name="Decides">What the answer decides.</param>
     /// <param name="Genre">The preset the songs are made in, none for the songs' own.</param>
     /// <param name="Skip">The stages the song without the device leaves out.</param>
-    /// <param name="GenrePatch">The choices the song without the device lays over its genre's, by choice and option.</param>
+    /// <param name="GenrePatch">The options the song without the device lays over its genre's, by choice and option, the genre's others as they are.</param>
     /// <param name="At">Where the song first plays the device, in beats, as its trace and notes have it, a little before it where it grows; none where it does not.</param>
     private sealed record Question(
         string Id,
@@ -34,6 +34,9 @@ public sealed class ListeningQuestionsTest
         Dictionary<string, Dictionary<string, int>>? GenrePatch,
         Func<CorpusSong, double?> At
     );
+
+    /// <summary>A patch keeping a choice to one option alone, every other of its options at none, as a song without a device's has it.</summary>
+    private static Dictionary<string, int> Only(GenreChoice choice, string option) => choice.Options.ToDictionary(x => x.Name, x => x.Name == option ? 100 : 0);
 
     /// <summary>The first note of the song, of the parts given or any, whose state says it plays the device.</summary>
     private static double? FirstNote(CorpusSong song, Func<RealizedNote, bool> plays, Func<TrackRole, bool>? parts = null) =>
@@ -102,13 +105,13 @@ public sealed class ListeningQuestionsTest
             "Its weight in IDM, and a genre's breakbeats elsewhere.", "idm", ["Figures"], null, x => Plays(x, FigurePlayer.Ground, "breakbeat")),
         new("echo", "The echo, the synthesizer's delay repeating the rhythm part and the snare: dub's, or a smear?",
             "The delay's level, feedback and darkness, and the echo's weight by genre.", "reggae", [],
-            new() { ["strongEffect"] = new() { ["none"] = 100 } },
+            new() { ["strongEffect"] = Only(GenreChoices.StrongEffect, "none") },
             x => ((SongEffects)x.Trace.Single(t => t.Point == TracePoints.SongEffects).Value!).Strong == StrongEffect.Echo ? FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Echo) > 0) : null),
         new("metal-arpeggio", "A guitar breaking its chord, a pedal point or upwards, a ninth or a menacing tone laid on it: metal's, or out of place?",
-            "Its patterns, its pace and its colours in Metal.", "metal", [], new() { ["arpeggio"] = new() { ["none"] = 100 } },
+            "Its patterns, its pace and its colours in Metal.", "metal", [], new() { ["arpeggio"] = Only(GenreChoices.Arpeggio, "none") },
             x => FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Arpeggio) == (int)ArpeggioPattern.Pedal)),
         new("djent-arpeggio", "Djent's clean arpeggios, mostly dissonant, over and between the riffs: atmosphere, or wrong notes?",
-            "Its colours' weights in Djent.", "djent", [], new() { ["colour"] = new() { ["none"] = 100 } },
+            "Its colours' weights in Djent.", "djent", [], new() { ["colour"] = Only(GenreChoices.Colour, "none") },
             x => FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Colour) != 0)),
         new("djent-tension", "Djent's slow synth line over the guitars, its strong beats on a tension against the chord: a menacing glow, or a wrong note?",
             "Its tension chances in Djent, the counter-melody's and the melody's.", "djent", [], new() { ["tension"] = new() { ["counterMelody"] = 0, ["melody"] = 0 } },
@@ -138,6 +141,12 @@ public sealed class ListeningQuestionsTest
         new("trade", "Jazz's solo trading with the drums, turn by turn, the band laying out for the drums: a jazz band's, or a hole?",
             "The trade's chance by genre.", "jazz", [], new() { ["solos"] = new() { ["trades"] = 0 } },
             x => x.Solos.Where(s => s.Value.TradesWithDrums).Select(s => (double?)x.Map.Sections[s.Key].Start).Min()),
+        new("tape", "IDM off a worn tape, its parts' pitch drifting together by a few cents, its lines held a few cents off: warm, or out of tune?",
+            "The tape's chances in IDM, Hip hop, Ambient and Synthwave, and its wow's depth.", "idm", [], new() { ["effects"] = new() { ["tape"] = 0 } },
+            x => FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Wow) > 0)),
+        new("dive", "Nu metal's riff diving on the whammy bar into a louder section, held into it: a launch, or a gimmick?",
+            "The dive's chances by genre.", "nuMetal", [], new() { ["effects"] = new() { ["dive"] = 0 } },
+            x => Before(x, FirstNote(x, n => n.State.GetStateValue(CompositionStateKinds.Bend) == (int)BendKind.Dive), 2)),
         new("drum-solo", "Jazz's drum solo, its hands in stickings round the snare and toms over the hi-hat's pedal on 2 and 4 (with), or over the groove's kick (without): a drummer, or a pattern?",
             "The drum solo's feet by genre.", "jazz", [], new() { ["drumSoloFeet"] = new() { ["hatFoot"] = 0, ["groove"] = 100 } },
             x => x.Trace.Where(t => t.Point == TracePoints.DrumSolo && ((DrumSolo)t.Value!).Feet).Select(t => (double?)x.Map.Sections[((DrumSolo)t.Value!).Index].Start).Min())
@@ -152,32 +161,87 @@ public sealed class ListeningQuestionsTest
         return Path.Combine(directory?.FullName ?? throw new InvalidOperationException("No repository above the tests."), "Rmg.WebApi", "Client", "listening.json");
     }
 
-    /// <summary>Writes the questions, each with the first of the corpus's seeds that play its device and where it first plays, where the page reads them.</summary>
+    /// <summary>How long a listener hears a song from where to listen, in seconds, which its difference is measured over.</summary>
+    private const double Heard = 16;
+
+    /// <summary>How far apart the places to listen from are tried, in seconds.</summary>
+    private const double Step = 2;
+
+    /// <summary>How many of the corpus's songs that play a question's device are measured, of which the most different are asked.</summary>
+    private const int Candidates = 24;
+
+    /// <summary>How near the best a place to listen may be and still be taken for being earlier, as a share of the best.</summary>
+    private const double NearBest = 0.9;
+
+    /// <summary>A question's genre as its song without the device has it, its choices patched as the page patches them; none for no genre.</summary>
+    private static Genre? GenreOf(Question question, bool without)
+    {
+        if (question.Genre is null)
+            return null;
+        var preset = GenrePresets.All.Single(x => x.Id == question.Genre);
+        if (!without || question.GenrePatch is null)
+            return GenrePresets.Genre(preset);
+        var choices = new Dictionary<string, Dictionary<string, JsonElement>>(preset.Choices);
+        // every option the patch names its amount, the genre's others as they are, as the page lays it (listening.js)
+        foreach (var (choice, options) in question.GenrePatch)
+        {
+            var patched = choices.TryGetValue(choice, out var own) ? new Dictionary<string, JsonElement>(own) : [];
+            foreach (var (option, amount) in options)
+                patched[option] = JsonDocument.Parse(amount.ToString()).RootElement;
+            choices[choice] = patched;
+        }
+        return GenrePresets.Genre(preset with { Choices = choices });
+    }
+
+    /// <summary>
+    ///     A song of a question heard with its device and without, from where the device first plays: how much the two differ
+    ///     where they differ the most, at the earliest place nearly as different, and that place, in seconds.
+    /// </summary>
+    private static (double Difference, double At) Measure(Question question, int seed, CorpusSong with, double first)
+    {
+        var without = SongGenerator.GenerateSong((ulong)seed, new SongOverrides(Genre: GenreOf(question, true)), question.Skip.ToImmutableHashSet(), CancellationToken.None);
+        var difference = new HeardDifference(with.Rendered, Rmg.Core.Rendering.Render.RenderSong(without));
+        var places = Enumerable.Range(0, (int)Math.Max(1, Math.Ceiling((with.Rendered.Seconds - Heard - first) / Step)))
+            .Select(k => first + k * Step).Select(at => (Difference: difference.Between(at, at + Heard), At: at)).ToArray();
+        var best = places.Max(x => x.Difference);
+        return places.First(x => x.Difference >= best * NearBest - 1e-9);
+    }
+
+    /// <summary>
+    ///     Writes the questions where the page reads them, each with the songs of the corpus's that play its device whose
+    ///     device is heard the most, by how much the song with it and without it differ (<see cref="HeardDifference" />),
+    ///     and where to listen in each; and says how much more than the first songs that play it, which it asked before.
+    /// </summary>
     [Test]
     [Explicit]
     public async Task Write()
     {
-        var written = Questions.Select(question =>
+        var written = new List<object>();
+        foreach (var question in Questions)
         {
-            var genre = question.Genre is null ? null : GenrePresets.Genre(question.Genre);
-            // each song's seed and where to listen, in seconds from its start
-            var seeds = TestCorpus.InParallel(Enumerable.Range(0, 128), seed =>
+            var genre = GenreOf(question, false);
+            // the first songs that play the device, each measured where it plays
+            var measured = TestCorpus.InParallel(Enumerable.Range(0, 128), seed =>
                 {
                     var song = TestCorpus.Get(seed, new SongOverrides(Genre: genre));
-                    return question.At(song) is { } at ? new { seed = Base62.FromSeed((ulong)seed), at = Math.Round(Seconds(song, at), 1) } : null;
+                    return question.At(song) is { } at ? (Seed: seed, Measure: (ValueTuple<double, double>?)Measure(question, seed, song, Seconds(song, at))) : (seed, null);
                 })
-                .Where(x => x is not null).Take(Seeds).ToArray();
-            Console.WriteLine($"{question.Id}: {seeds.Length} seeds");
-            return new
+                .Where(x => x.Measure is not null).Take(Candidates).Select(x => (x.Seed, Difference: x.Measure!.Value.Item1, At: x.Measure.Value.Item2)).ToArray();
+            var asked = measured.OrderByDescending(x => x.Difference).Take(Seeds).OrderBy(x => x.Seed).ToArray();
+            Console.WriteLine($"{question.Id}: {measured.Length} songs measured, the first {Seeds} differing {measured.Take(Seeds).Select(x => x.Difference).DefaultIfEmpty().Average():F2} on the average, " +
+                              $"those asked {asked.Select(x => x.Difference).DefaultIfEmpty().Average():F2}, from {asked.Select(x => x.Difference).DefaultIfEmpty().Min():F2}");
+            if (asked.Length == 0 || asked.Any(x => x.Difference <= 0))
+                throw new InvalidOperationException($"{question.Id}: a song asked sounds the same with its device and without.");
+            written.Add(new
             {
                 id = question.Id,
                 question = question.Text,
                 decides = question.Decides,
                 genre = question.Genre,
                 without = new { skip = question.Skip, genre = question.GenrePatch ?? [] },
-                seeds
-            };
-        }).ToArray();
+                seeds = asked.Select(x => new { seed = Base62.FromSeed((ulong)x.Seed), at = Math.Round(x.At, 1) }).ToArray()
+            });
+        }
 
         var path = QuestionsFile();
         await File.WriteAllTextAsync(path, JsonSerializer.Serialize(written, new JsonSerializerOptions { WriteIndented = true, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping }) + "\n");

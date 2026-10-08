@@ -52,7 +52,7 @@ import { asGenre, byName, hasAGenre, isSameGenre, nestedChoices, presetById, pre
 import { createGenreEditor } from "./genre-editor.js";
 import { createGenreManager } from "./genre-manager.js";
 import { since, tell, track } from "./tally.js";
-import { createListeningIndex, createListeningStrip, listeningQuestion } from "./listening.js";
+import { createListeningIndex, createListeningStrip, listeningQuestion, withoutDevice } from "./listening.js";
 
 const PLAY_ICON = "M8 5v14l11-7z";
 const PAUSE_ICON = "M7 5h3.5v14H7zM13.5 5H17v14h-3.5z";
@@ -2707,7 +2707,7 @@ function startListening() {
             const preset = question.genre === null ? null : presetById(question.genre);
             const genre = preset === null ? noGenre() : asGenre(preset);
             skipped = isWithout ? question.without.skip : [];
-            const choices = isWithout ? { ...genre.choices, ...question.without.genre } : genre.choices;
+            const choices = isWithout ? withoutDevice(genre.choices, question.without.genre) : genre.choices;
             // the song as the question picked it, of the settings as by default but its genre, the volume as heard; read as
             // the song is asked for, before generate waits on anything
             startAt = from;

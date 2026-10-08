@@ -60,7 +60,12 @@ fills' loudness as layers, and a head with solos (which the form's devices by ge
 
 What listening is to settle: each a question, its measure, what it decides, and where the page's listening mode asks
 it, `?listen=` its id on the test instance (`ListeningQuestionsTest` writes them, the dashboard tables the verdicts).
-Done for a version when every question is answered or let go of.
+Done for a version when every question is answered or let go of. A question's songs are those of the corpus's first 24 that play its
+device where it is heard the most, by how much its song with the device and without differ as heard
+(`HeardDifference`, the notes' loudness that differs and the moments its effects do), from where they differ the most;
+its song without lays its patch over the genre's options, the others kept (`withoutDevice`). Asked again since:
+`tape` and `dive`, whose songs without had lost every other effect of their genre's, and `pinch-sound` and `stop-time`.
+The least heard by their nature, short devices in a long song: `lift-cues`, `pinch-sound`, `dive`, under 0.1.
 
 ### The song and its sections
 
