@@ -184,7 +184,7 @@ internal sealed class LinePattern
                 continue;
 
             notes[i] = last with { Pitch = line.Approach(approach, last.Note.Chord, last.Note.Classes, last.Rank, last.Pitch, next.Note.Chord, next.Pitch,
-                (LineScale)last.Note.State.GetStateValue(CompositionStateKinds.LineScale)) };
+                (LineScale)last.Note.State.GetStateValue(CompositionStateKinds.LineScale), last.Note.State.GetStateValue(CompositionStateKinds.LineLift)) };
         }
 
         var loudness = PhraseArc(notes.Select(x => (x.Note.State, x.Pitch)).ToArray(), profile.PhraseArc);

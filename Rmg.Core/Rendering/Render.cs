@@ -153,9 +153,9 @@ public static class Render
                 // a drum that echoes, a dub's snare, sent to the delay by its key, every stroke of it
                 if (trackNotes.Any(x => x.Value.State.GetStateValue(CompositionStateKinds.Echo) > 0))
                     echoingDrums.UnionWith(renderedNotes.Select(x => x.Value.Offset));
-                // the drums' reverb and chorus, as their first note has them
-                if (percussionSends.IsEmpty && trackNotes.Count > 0)
-                    percussionSends = [..ExpressionRender.Render(EventTimeline.Create(trackNotes.Duration, [trackNotes[0]]), song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), 0, [])
+                // the drums' reverb and chorus, as their first note sent to them has them, an intro's carrying none
+                if (percussionSends.IsEmpty && trackNotes.FirstOrDefault(x => x.Value.State.GetStateValue(CompositionStateKinds.Reverb) > 0) is { Value: not null } sent)
+                    percussionSends = [..ExpressionRender.Render(EventTimeline.Create(trackNotes.Duration, [sent]), song.Map, swing, common.GetStateTimeline(StateKinds.Tempo), 0, [])
                         .Controllers.Where(x => x.Controller is not (ExpressionRender.DelayController or ExpressionRender.BrightnessController))];
             }
         }
@@ -227,14 +227,18 @@ public static class Render
         return changes.ToImmutable();
     }
 
-    /// <summary>How the song swings, which moves where its every note plays.</summary>
+    /// <summary>How the song swings, which moves where its every note plays, its pairs counted from each section's start in the meter it has.</summary>
     internal static Swing GetSwing(Song song)
     {
         var common = song.TrackEventStateTimelineMap.CommonStateTimelineMap;
-        return new Swing(
+        var swing = new Swing(
             common.GetStateTimeline(StateKinds.SwingDelay).GetEffectiveValueAt(0),
             common.GetStateTimeline(StateKinds.SwingPeriod).GetEffectiveValueAt(0)
         );
+        return song.Map is not { } map ? swing : swing with
+        {
+            Spans = [..map.Sections.Select(x => (x.Start, x.Meter.Pairs(swing.Period))), (map.Ending.Start, map.Meter.Pairs(swing.Period))]
+        };
     }
 
     /// <summary>

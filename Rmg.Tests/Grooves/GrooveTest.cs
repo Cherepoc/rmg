@@ -18,6 +18,21 @@ public sealed class GrooveTest
     }
 
     [Test]
+    public async Task ASwing_CountsItsPairsFromEachSpansStart_AndLeavesASpanThatDoesNotPairStraight()
+    {
+        // a bar of 7/8 from 0, which does not pair 8ths, and 4/4 from 3.5
+        var swing = new Swing(1.0 / 6, 1) { Spans = [(0, false), (3.5, true)] };
+
+        await Assert.That(swing.Apply(0.5)).IsEqualTo(0.5);
+        await Assert.That(swing.Apply(3.5)).IsEqualTo(3.5).Within(1e-9);
+        await Assert.That(swing.Apply(4)).IsEqualTo(3.5 + 2.0 / 3).Within(1e-9);
+        await Assert.That(swing.Apply(4.5)).IsEqualTo(4.5).Within(1e-9);
+        var positions = Enumerable.Range(0, 400).Select(x => x / 96.0).ToArray();
+        var swung = positions.Select(swing.Apply).ToArray();
+        await Assert.That(swung.Zip(swung.Skip(1)).All(x => x.First < x.Second)).IsTrue();
+    }
+
+    [Test]
     public async Task ASwing_KeepsTheOrderOfAnyTwoPositions()
     {
         foreach (var swing in new[] { new Swing(1.0 / 6, 1), new Swing(0.05, 0.5), Swing.None })
@@ -34,8 +49,8 @@ public sealed class GrooveTest
         foreach (var song in TestCorpus.Range(32))
         {
             var swing = Render.GetSwing(song.Song);
-            var drawn = song.Trace.Single(x => x.Point == TracePoints.Swing).Value;
-            await Assert.That(drawn).IsEqualTo(swing);
+            var drawn = (Swing)song.Trace.Single(x => x.Point == TracePoints.Swing).Value!;
+            await Assert.That((drawn.Delay, drawn.Period)).IsEqualTo((swing.Delay, swing.Period));
 
             // a note's own place, and its ornament's every step
             var generated = song.Song.Notes!.Values.SelectMany(x => x).SelectMany(x =>

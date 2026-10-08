@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Rmg.Core.Events;
 using Rmg.Core.Probabilities;
 
@@ -7,6 +8,13 @@ namespace Rmg.Core.Composition;
 public readonly record struct Swing(double Delay, double Period)
 {
     public static Swing None { get; } = new(0, 1);
+
+    /// <summary>
+    ///     Where its pairs are counted from: every section's start and the ending's, and whether the span from it swings,
+    ///     as its meter's groups pair the swing's notes, so that a section in a meter of its own neither swings across its
+    ///     groups nor shifts the pairs of the sections after it; none for pairs counted from the song's start.
+    /// </summary>
+    public ImmutableArray<(double Start, bool Swings)> Spans { get; init; } = [];
 
     /// <summary>
     ///     Where a position plays, swung: every pair's first half stretched and its second squeezed, so that its middle
@@ -20,7 +28,17 @@ public readonly record struct Swing(double Delay, double Period)
         if (Delay == 0)
             return position;
 
-        var start = Math.Floor(position / Period) * Period;
+        var (from, swings) = (0.0, true);
+        for (var i = Spans.IsDefault ? -1 : Spans.Length - 1; i >= 0; i--)
+            if (Spans[i].Start <= position + 1e-9)
+            {
+                (from, swings) = Spans[i];
+                break;
+            }
+
+        if (!swings)
+            return position;
+        var start = from + Math.Floor((position - from) / Period) * Period;
         var within = position - start;
         var half = Period / 2;
         return start + (within < half

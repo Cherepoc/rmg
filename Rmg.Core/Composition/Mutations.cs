@@ -145,11 +145,16 @@ internal static class Mutations
         if (track < 0)
             return null;
         var hits = HitsIn(played[track], start, length).Where(x => !anchored || !IsAnchor(track, x, meter, kicks, snares)).Distinct().ToArray();
+        // a stretch of the bar holding an anchor, which a swap or a trade moves whole
+        bool Holds(double from, double width) => anchored && drums.Any(drum =>
+            HitsIn(played[drum], start, length).Any(x => x >= from - 1e-9 && x < from + width - 1e-9 && IsAnchor(drum, x, meter, kicks, snares)));
+        var beat = Math.Floor(pick * Math.Floor(length + 1e-9));
         return kind switch
         {
-            MutationKind.Swap when from != to => new Mutation(kind, track, from * 2 * Sixteenth, to * 2 * Sixteenth),
-            MutationKind.Trade => new Mutation(kind, track, Math.Floor(pick * Math.Floor(length + 1e-9)), 0),
-            MutationKind.Swap => null,
+            MutationKind.Swap when from != to && !Holds(from * 2 * Sixteenth, 2 * Sixteenth) && !Holds(to * 2 * Sixteenth, 2 * Sixteenth) =>
+                new Mutation(kind, track, from * 2 * Sixteenth, to * 2 * Sixteenth),
+            MutationKind.Trade when !Holds(beat, 1) => new Mutation(kind, track, beat, 0),
+            MutationKind.Swap or MutationKind.Trade => null,
             _ when hits.Length == 0 => null,
             MutationKind.Shift => new Mutation(kind, track, hits[(int)(pick * hits.Length)], by * Sixteenth),
             MutationKind.Ratchet => new Mutation(kind, track, hits[(int)(pick * hits.Length)], times),

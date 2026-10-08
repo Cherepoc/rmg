@@ -267,17 +267,17 @@ public sealed class LineTest
         var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
 
         // a step from the next already: kept
-        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Weak, 67, C, 69, LineScale.Section)).IsEqualTo(67);
+        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Weak, 67, C, 69, LineScale.Section, 0)).IsEqualTo(67);
         // B leads into G through A on a weak beat; on a strong beat only a note of its own chord may, and none is near
-        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Weak, 71, C, 67, LineScale.Section)).IsEqualTo(69);
-        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Strong, 71, C, 67, LineScale.Section)).IsEqualTo(71);
+        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Weak, 71, C, 67, LineScale.Section, 0)).IsEqualTo(69);
+        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Strong, 71, C, 67, LineScale.Section, 0)).IsEqualTo(71);
         // G leads into D through E, a note of its chord, on a strong beat
-        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Strong, 67, C, 62, LineScale.Section)).IsEqualTo(64);
+        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Strong, 67, C, 62, LineScale.Section, 0)).IsEqualTo(64);
         // too far to bend without a leap: kept
-        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Weak, 72, C, 62, LineScale.Section)).IsEqualTo(72);
+        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Weak, 72, C, 62, LineScale.Section, 0)).IsEqualTo(72);
         // G leads into E through F, but a pentatonic line, which has no F, keeps its G
-        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Weak, 67, C, 64, LineScale.Section)).IsEqualTo(65);
-        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Weak, 67, C, 64, LineScale.Pentatonic)).IsEqualTo(67);
+        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Weak, 67, C, 64, LineScale.Section, 0)).IsEqualTo(65);
+        await Assert.That(line.Approach(ChordApproach.ScaleStep, C, CTones, Weak, 67, C, 64, LineScale.Pentatonic, 0)).IsEqualTo(67);
     }
 
     [Test]
@@ -291,7 +291,7 @@ public sealed class LineTest
         // C5 before G4, over G: the root nearest the next note is G4, and its fifth nearest G4 is D4
         var line = new Line(MelodyLayers.Line, MinNote, MaxNote);
 
-        await Assert.That(line.Approach(approach, C, CTones, Weak, 72, ChordOn(4), 67, LineScale.Section)).IsEqualTo(expected);
+        await Assert.That(line.Approach(approach, C, CTones, Weak, 72, ChordOn(4), 67, LineScale.Section, 0)).IsEqualTo(expected);
     }
 
     [Test]

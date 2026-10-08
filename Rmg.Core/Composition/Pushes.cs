@@ -72,8 +72,10 @@ internal static class Pushes
             // the other drums keep time under the push, and the lines go on
             if (song.Tracks.Definitions[track].Role is TrackRole.Melody or TrackRole.CounterMelody or TrackRole.Solo or TrackRole.Drum)
                 continue;
-            // a part pushes a change where it played in the bar before, not where it comes in
-            var own = pushes.Where(x => timeline.Any(n => n.Position >= x.At - x.BarDuration - 1e-9 && n.Position < x.At - 1e-9)).Select(x => x.At).ToArray();
+            // a part pushes a change where it played in the bar before, not where it comes in, and strikes the change, not
+            // where it ties over it or anticipates it already
+            var own = pushes.Where(x => timeline.Any(n => n.Position >= x.At - x.BarDuration - 1e-9 && n.Position < x.At - 1e-9)
+                                        && timeline.Any(n => Math.Abs(n.Position - x.At) < 1e-6)).Select(x => x.At).ToArray();
             bool On(double position) => own.Any(x => Math.Abs(x - position) < 1e-6);
             bool Before(double position) => own.Any(x => position > x - Early - 1e-6 && position < x - 1e-6);
             var bar = pushes.Length > 0 ? pushes.Min(x => x.BarDuration) : 0;

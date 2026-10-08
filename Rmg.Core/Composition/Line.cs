@@ -220,6 +220,7 @@ internal sealed class Line
     /// <param name="beatRank">How strong the note's beat is, 0 the strongest.</param>
     /// <param name="nextChord">The chord of the next note.</param>
     /// <param name="lineScale">The scale the note's line keeps to.</param>
+    /// <param name="lift">How far the note's range is lifted, as it was placed (<see cref="Place" />).</param>
     public int Approach(
         ChordApproach approach,
         ChordContext chord,
@@ -228,9 +229,11 @@ internal sealed class Line
         int note,
         ChordContext nextChord,
         int next,
-        LineScale lineScale
+        LineScale lineScale,
+        double lift
     )
     {
+        Lift(lift);
         _classes = LineScales.Classes(lineScale, chord);
         var root = NearestOfClass(nextChord.Root, next);
         var approached = approach switch

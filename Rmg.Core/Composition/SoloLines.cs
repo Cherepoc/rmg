@@ -303,6 +303,8 @@ internal static class SoloLines
                             var moved = MotifAt(count - 1) + step - Index(pitches[count - 1]);
                             for (var i = 0; i < pitches.Length; i++)
                                 pitches[i] = scale[Math.Clamp(i < count ? MotifAt(i) + step : Index(pitches[i]) + moved, 0, scale.Length - 1)];
+                            // and a run going on into the next gesture goes on from where it was moved to
+                            cursor.Root = scale[Math.Clamp(Index(cursor.Root) + moved, 0, scale.Length - 1)];
                         }
                         motif = pitches[..Math.Min(cells.Length > 0 ? cells[0] : pitches.Length, pitches.Length)];
                         (motifPhrase, motifShape) = (phrase, shape);
