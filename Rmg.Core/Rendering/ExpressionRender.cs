@@ -134,8 +134,8 @@ internal static class ExpressionRender
                         // to a scale note above or below, and back
                         BendKind.BendAndRelease or BendKind.ReleaseAndBend => depth * Math.Sin(Math.PI * share),
                         BendKind.FallOff => share < 0.75 ? 0 : depth * (share - 0.75) / 0.25,
-                        // a dive past its attack, faster as it goes
-                        BendKind.Dive => depth * Math.Pow(Math.Clamp((share - 0.25) / 0.75, 0, 1), 2),
+                        // a dive past its attack, falling fast and slowing as it nears its bottom
+                        BendKind.Dive => depth * (1 - Math.Pow(1 - Math.Clamp((share - 0.25) / 0.75, 0, 1), 2)),
                         _ => 0
                     };
                     // a vibrato grows in after the attack, from a third of the note to its middle

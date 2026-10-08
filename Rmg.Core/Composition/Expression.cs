@@ -28,7 +28,7 @@ public enum BendKind
     /// <summary>Struck bent up a step, sounding it, and released down onto the note.</summary>
     PrebendRelease,
 
-    /// <summary>A whammy bar's dive, the note falling away as it rings, faster as it goes, up to an octave.</summary>
+    /// <summary>A whammy bar's dive, the note falling away as it rings, fast and then slowing at its bottom, an octave.</summary>
     Dive
 }
 
@@ -575,6 +575,10 @@ internal static class Expression
             var program = definition is PitchInstrumentTrack pitched ? pitched.InstrumentCode : -1;
             var states = new StateMap?[timeline.Count];
             var raised = new int[timeline.Count];
+            // a dived note's length, held to the section it dives into, and the notes it lets go of after it
+            var held = new double?[timeline.Count];
+            var dropped = new bool[timeline.Count];
+            var trackCuts = cuts(track);
             // the first note at or after a position
             int first(double position)
             {
@@ -666,6 +670,9 @@ internal static class Expression
                 // the notes in the section, in order, the timeline's being
                 for (var i = first(span.Start); i < timeline.Count && timeline[i].Position < span.End - 1e-9; i++)
                 {
+                    // a note the riff let go of for a dive plays no more
+                    if (dropped[i])
+                        continue;
                     var note = timeline[i];
 
                     var noteProgram = ProgramOf(note.Value, program);
@@ -772,14 +779,21 @@ internal static class Expression
                         }
                     }
 
-                    // the riff's last held note before a louder section diving into it, where the song dives
+                    // the riff's longest note of its last bar before a louder section diving into it, where the song dives, the
+                    // riff letting go of its notes after it, as a guitarist leaves the riff for the bar
                     if (songDives && role is TrackRole.Riff && !isSolo && Pinches(noteProgram) && note.Value.Pitches.Length <= 2
-                        && (i + 1 >= timeline.Count || timeline[i + 1].Position >= span.End - 1e-9)
+                        && note.Position >= span.End - span.Meter.BarDuration - 1e-9 && LongestOfBar(timeline, i, span)
                         && index + 1 < energies.Count && energies[index + 1] > energies[index]
                         && note.Value.Duration >= 1 && note.Value.Duration * beatSeconds(note.Position) >= PinchShortest
                         && state.GetStateValue(CompositionStateKinds.Pinch) == 0 && pinching.TestProbability(DiveChance))
+                    {
                         state = state.With(CompositionStateKinds.Bend, (int)BendKind.Dive).With(CompositionStateKinds.BendDepth, -DiveDepth)
                             .With(CompositionStateKinds.Vibrato, 0).With(CompositionStateKinds.WideVibrato, 0);
+                        // held through to the louder section's downbeat, where the band plays on to it, so that the dive is heard
+                        held[i] = Math.Max(note.Value.Duration, trackCuts.Where(x => x > note.Position + 1e-9).Append(span.End).Min() - note.Position);
+                        for (var next = i + 1; next < timeline.Count && timeline[next].Position < span.End - 1e-9; next++)
+                            dropped[next] = true;
+                    }
 
                     states[i] = state;
                 }
@@ -788,8 +802,13 @@ internal static class Expression
             result[track] = EventTimeline.Create(
                 timeline.Duration,
                 timeline.Select((x, i) => states[i] is { } state
-                    ? (x.Value with { State = state, Pitches = raised[i] == 0 ? x.Value.Pitches : [..x.Value.Pitches.Select(p => p + raised[i])] }).ToTimelineItem(x.Position)
-                    : x)
+                    ? (x.Value with
+                    {
+                        State = state,
+                        Pitches = raised[i] == 0 ? x.Value.Pitches : [..x.Value.Pitches.Select(p => p + raised[i])],
+                        Duration = held[i] ?? x.Value.Duration
+                    }).ToTimelineItem(x.Position)
+                    : x).Where((_, i) => !dropped[i])
             );
         }
 

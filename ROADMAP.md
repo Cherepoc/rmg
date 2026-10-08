@@ -19,7 +19,9 @@ is removed once it is built.
 9. A line's tensions beyond Djent, after `?listen=djent-tension` is answered.
 10. Done: Djent's gate on its pad, not its riff; a tremolo moving held notes alone; a gated chord on a decaying
     instrument struck again on every bar line.
-11. The dive by listening: held longer, slow at its bottom, the tempo easing into the next section (*The dive heard*).
+11. Done: a dive on the riff's longest note of its last bar, the notes after it let go of, held to the louder
+    section and slowing at its bottom; Metal's and Djent's as often as Nu metal's. Its ritardando deferred (*A band leaning
+    into a big entrance*).
 12. Techno's drops both kinds, the silent one with its riser as likely as the filtered (*The drops heard*).
 13. Stop time carried, a line or the drum keeping time going on through every stopped bar (*Stop time carried*).
 
@@ -309,19 +311,10 @@ Each item with its plan, and what it waits for.
 - **A held riff restruck outside a gate** (P3, by listening): a decaying chord is struck again on its bar lines only
   where the gate holds it (`GatedChords.Hold`); a rock band's riff held over a bar restruck the same way, should a held
   guitar chord dying out be heard elsewhere.
-- **The dive heard** (P1, step 11; `?listen=dive`, October 2026, with 3, unsure 3 of 6 songs): a riff's whammy dive into a louder section is good, in
-  Nu metal and in Metal and Djent too, but not heard: the note too short, the dive too quick. Its note held longer,
-  through the bar before the section where the riff allows; its curve falling fast and then slowly at its bottom, rather
-  than speeding up as it falls (`BendKind.Dive`, an ease out); and the tempo easing a little over the last bar before
-  the section now and then, as a band leans into a big entrance, a ritardando back to tempo on its downbeat. The dive's
-  chances in Metal and Djent as Nu metal's.
-- **The trance gate kept** (heard on test, `?listen=gate`, October 2026, with 6 of 6 Trance songs): the trance sound.
-  Trance's gate weight raised a little (17% of its songs, `GateTest.Report`), its parts as they are; the pad's slow
-  attack and a click not heard.
-- **The tape, by listening** (P2; heard on test, `?listen=tape`, October 2026, with 3, without 2, unsure 1 of 6 IDM
-  songs; out of tune in seeds E and G): the tape's chances as they are; its parts held a few cents off (40% of the
-  parts, by 5) against the drift they share (9 cents) checked in those two songs, and the parts held off fewer or
-  nearer, should they be what sounds out of tune.
+- **A band leaning into a big entrance** (P3, deferred from the dive, October 2026): the tempo easing a little over the
+  last bar before a louder section now and then, a ritardando back to tempo on its downbeat, where a riff dives into it.
+  The tempo is decided before the notes (`SectionTempo`) and the dive after them (`Expression`), so the dive's section
+  would be decided with the tempo; should the dive, held to the section now, still sound rushed.
 - **The playing following the articulation** (P3; palm-muted chugs done): octaves popped in slap, short notes muted,
   without which an articulation is only another sound.
 - **Plain doubling,** a part doubling another in unison, now that the parts play by their pocket (`Pocket`).
