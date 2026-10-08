@@ -39,6 +39,9 @@ internal static class TracePoints
     /// <summary>Whether a section's bass plays in octaves (a <c>bool</c>).</summary>
     public const string OctaveBass = "Octave bass";
 
+    /// <summary>Whether a section's bass alternates the root and the fifth (a <c>bool</c>; <see cref="Composition.SectionGenerator.AlternatingBassChance" />).</summary>
+    public const string AlternatingBass = "Alternating bass";
+
     /// <summary>A section's pedal's root, in steps above its home, none where it holds none (an <c>int?</c>).</summary>
     public const string SectionPedal = "Section pedal";
 

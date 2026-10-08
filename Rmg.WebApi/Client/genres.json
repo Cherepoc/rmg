@@ -602,6 +602,7 @@
     "name": "Folk",
     "description": "Steel and nylon guitars strummed, a fiddle, a banjo, a harmonica, an acoustic bass, plain triads, major and Mixolydian, 3/4 and 6/8 as likely as not, a tambourine and a shaker on a room kit.",
     "choices": {
+      "alternatingBass": { "sections": [20, 30, 40] },
       "ornaments": { "graces": [0, 50, 100], "turns": [0, 20, 60], "trills": [0, 25, 70] },
       "rootMotion": { "fifthDown": 70, "stepUp": 65, "fourthDown": 60 },
       "tempo": { "from": [79, 79, 65], "to": [130, 130, 150] },
@@ -1592,6 +1593,7 @@
     "name": "Country",
     "description": "A fiddle, a steel-string guitar strummed, a banjo and a honky-tonk piano, plain triads moving by fourths and fifths, the bass on the root and the fifth, the snare on 2 and 4, major and Mixolydian.",
     "choices": {
+      "alternatingBass": { "sections": [60, 70, 80] },
       "soloAnswers": { "sections": [20, 30, 40] },
       "stopTime": { "sections": [5, 10, 15] },
       "phrases": { "fourBars": 100, "eightBars": [40, 40, 50], "twelveBars": [5, 10, 15] },

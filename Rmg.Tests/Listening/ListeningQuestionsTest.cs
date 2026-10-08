@@ -147,7 +147,10 @@ public sealed class ListeningQuestionsTest
         new("jazz-passing", "Jazz passing into its chords by the tritone substitute, a half-diminished chord a semitone below or a chromatic slide (with), or by their dominants alone (without): richer, or wrong?",
             "The passing chords' kinds by genre.", "jazz", [],
             new() { ["passingKind"] = new() { ["dominant"] = 100, ["tritone"] = 0, ["diminished"] = 0, ["chromatic"] = 0, ["chromaticBelow"] = 0 } },
-            x => FirstSection(x, TracePoints.HarmonicRhythm, v => !((HarmonicRhythm)v!).Passing.IsEmpty))
+            x => FirstSection(x, TracePoints.HarmonicRhythm, v => !((HarmonicRhythm)v!).Passing.IsEmpty)),
+        new("root-fifth", "Country's bass alternating the chord's root and its fifth below on the strong beats: a country bass, or a plod?",
+            "The alternating bass's chances by genre.", "country", [], new() { ["alternatingBass"] = new() { ["sections"] = 0 } },
+            x => FirstSection(x, TracePoints.AlternatingBass, v => (bool)v!))
     ];
 
     /// <summary>The page's questions file, in the repository the tests run from.</summary>

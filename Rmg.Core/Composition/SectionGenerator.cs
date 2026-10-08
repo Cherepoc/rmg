@@ -87,6 +87,12 @@ internal sealed class SectionGenerator
     /// <summary>The chance a section's bass plays in octaves, its notes off the beat the note before an octave up, as a disco or funk bass does, by the groove facet: rare in the songs.</summary>
     public static Probabilities.ByConvention OctaveBassChance { get; } = new(0, 0.05, 0.05);
 
+    /// <summary>
+    ///     The chance a section's bass alternates the root and the fifth on its strong beats while a chord lasts, as a country
+    ///     bass does, a genre's that the songs never play (<see cref="GenreChoices.AlternatingBass" />).
+    /// </summary>
+    public static Probabilities.ByConvention AlternatingBassChance { get; } = new(0, 0, 0);
+
     /// <summary>The chance a section's riff plays in power chords, a genre's that the songs never play (<see cref="GenreChoices.Riff" />).</summary>
     public static Probabilities.ByConvention PowerChordChance { get; } = new(0, 0, 0);
 
@@ -194,6 +200,10 @@ internal sealed class SectionGenerator
         var (powerChords, chugs, octaveBass, hooks) = DrawDevices(sectionId, plan.Role, facets);
         // a breakdown's riff chugging on its pedal
         chugs |= breakdown;
+        // its bass alternating the root and the fifth, a genre's, from a sequence of its own
+        var alternatingBass = Stream(sectionId, SectionStream.AlternatingBass)
+            .TestProbability(AlternatingBassChance.At(facets[Facet.Groove], _genre.Chance(GenreChoices.AlternatingBass, "sections")));
+        StateTrace.Record(TracePoints.AlternatingBass, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{alternatingBass}", alternatingBass);
         var pitched = GeneratePitchedTracks(context, sectionId, sectionStateMap, barStateTimelineMap, harmonicRhythm, sectionRhythm, meter, hooks, powerChords, chugs).ToArray();
         // the section's pattern played once, twice or four times, its melody as a question and its answer, from a sequence
         // of its own, the less conventional the section the likelier it plays other than twice
@@ -225,6 +235,7 @@ internal sealed class SectionGenerator
             powerChords,
             chugs,
             octaveBass,
+            alternatingBass,
             breakdown,
             _drumJob,
             _genre
@@ -745,6 +756,7 @@ internal sealed record SectionDrums(bool IsPercussionOnly, SectionKit Kit, bool 
 /// <param name="ArrangementSeed">The seed of the sequences a later appearance draws its parts from.</param>
 /// <param name="Roles">What every track plays, by its number.</param>
 /// <param name="Meter">The meter the section's bars are in.</param>
+/// <param name="AlternatingBass">Whether its bass alternates the root and the fifth on its strong beats (<see cref="Articulations" />).</param>
 /// <param name="Breakdown">Whether the section is a heavy band's breakdown (<see cref="Breakdowns" />), which leaves its lines and pad out.</param>
 /// <param name="DrumJob">What the song's drums do, which a part left alone must carry.</param>
 internal sealed record GeneratedSection(
@@ -767,6 +779,7 @@ internal sealed record GeneratedSection(
     bool RiffPowerChords,
     bool Chugs,
     bool OctaveBass,
+    bool AlternatingBass,
     bool Breakdown,
     DrumJob DrumJob,
     Genre Genre
@@ -947,5 +960,6 @@ internal enum SectionStream
     Vamp = 42,
     Colour = 43,
     HeldHome = 44,
-    Breakdown = 45
+    Breakdown = 45,
+    AlternatingBass = 46
 }

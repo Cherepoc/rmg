@@ -1197,5 +1197,45 @@
         "at": 48
       }
     ]
+  },
+  {
+    "id": "root-fifth",
+    "question": "Country's bass alternating the chord's root and its fifth below on the strong beats: a country bass, or a plod?",
+    "decides": "The alternating bass's chances by genre.",
+    "genre": "country",
+    "without": {
+      "skip": [],
+      "genre": {
+        "alternatingBass": {
+          "sections": 0
+        }
+      }
+    },
+    "seeds": [
+      {
+        "seed": "5",
+        "at": 0
+      },
+      {
+        "seed": "6",
+        "at": 0
+      },
+      {
+        "seed": "8",
+        "at": 2
+      },
+      {
+        "seed": "9",
+        "at": 0
+      },
+      {
+        "seed": "D",
+        "at": 0
+      },
+      {
+        "seed": "K",
+        "at": 93.3
+      }
+    ]
   }
 ]

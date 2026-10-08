@@ -22,7 +22,8 @@ percent everywhere, and a listening question once deployed):
    between roots a whole step apart, the next chord a semitone below, beside its dominant and a semitone above; Jazz's,
    Soul's, Bossa nova's and Orchestral's pools (`?listen=jazz-passing`). A ii–V into a chord but the home left
    (*Approach chords*).
-6. The bass's root and fifth within the bar, Country's, and Jazz's walking quarters.
+6. Done: the bass alternating its chord's root and fifth on its strong beats, Country's 73% of its sections, Folk's
+   38% (`?listen=root-fifth`); Jazz's walking quarters there already, its bass's rhythm in quarters leading into its chords.
 7. The drums' push, a crash and kick on the and of four; a fill in a stop-time phrase's last bar.
 8. Data on mechanisms there already: the piano's montuno, a riff's drone, Black metal's acoustic interlude.
 9. Instruments by listening (*Genres*).
@@ -444,8 +445,7 @@ left:
 - **More genres** (P3). What the genres made in October 2026 still want: Fusion's
   roots off the scale (the progressions move by a 7-note scale's steps, chromatic and constant-structure motion
   coming only of planing and a chord's own scale) and a lead's wide-interval legato lines (*A melody's leaping by
-  genre*); Country's bass on the root
-  and the fifth within the bar and Bossa nova's two-bar clave (below and *Long cycles*).
+  genre*); and Bossa nova's two-bar clave (below and *Long cycles*).
 - **The hook and the phrase scheme as one** (P3): a hooked section a scheme sung literally, should a trial keep the
   report's repeats (50% of a hooked section's notes at their first bar's places); otherwise kept apart, with the reason.
 - **Harmony for Jazz and Soul** (P3): a ii–V elsewhere (*Approach chords*, *Harmony's devices*); call and response
@@ -472,7 +472,6 @@ left:
   - A melody's leaping by genre, a lean of its register's freedom and its leap's size: leaning its stepwiseness moved
     the mean move by a tenth of a semitone and the leaps not at all, a melody's leaps coming of a phrase starting
     afresh in another register, its echoes and its landings.
-  - The bass's root and fifth figure within the bar, and Jazz's walking quarters, as its rhythm settings have them.
   - A part resting by the section's role (a dub's breakdown), with *A genre's sections differing*.
   - A genre's lean of the phrases' place rules, should it press them, and the songs' own sections of eight bars now
     and then.

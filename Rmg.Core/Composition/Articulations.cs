@@ -28,7 +28,7 @@ internal static class Articulations
     ///     rings its accent; the riff's, the rhythm part's and the bass's, by their instruments. And every chord a guitar
     ///     plays strummed, down on a beat's first half and up on its second, as quickly as the song strums, and a piano's held
     ///     chord rolled upward where its part rolls, and the chords struck short where they stab; and a bass in
-    ///     octaves, its notes off the beat the note before an octave away.
+    ///     octaves, its notes off the beat the note before an octave away, or alternating its chord's root and fifth.
     /// </summary>
     internal static SongDraft Apply(SongDecisions song, SongDraft draft)
     {
@@ -46,6 +46,19 @@ internal static class Articulations
             var stabs = part.Role == TrackRole.Chords
                         && song.Stream(SongStream.Stabs, track).TestProbability(StabChance.At(song.Facets[Facet.Sound], song.Genre.Chance(GenreChoices.Articulation, "stabs")));
             var (bottom, top) = Realizer.GetRange(part);
+            // every strong note's place among the strong notes of its chord in its section, from 0, a weak note's -1
+            var strongPlaces = new int[timeline.Count];
+            for (var (k, last) = (0, -1); k < timeline.Count; k++)
+            {
+                strongPlaces[k] = -1;
+                if (timeline[k].Value.State.GetStateValue(CompositionStateKinds.BeatRank) > 0)
+                    continue;
+                var sameChord = last >= 0 && timeline[last].Value.State.GetStateValue(StateKinds.ChordChange) == timeline[k].Value.State.GetStateValue(StateKinds.ChordChange)
+                                && song.Form.Map.SectionAt(timeline[last].Position) == song.Form.Map.SectionAt(timeline[k].Position);
+                strongPlaces[k] = sameChord ? strongPlaces[last] + 1 : 0;
+                last = k;
+            }
+
             result[track] = EventTimeline.Create(timeline.Duration, timeline.Select((note, i) =>
             {
                 var state = note.Value.State;
@@ -66,6 +79,15 @@ internal static class Articulations
                 if (part.Role == TrackRole.Bass && section >= 0 && song.Sections[section].OctaveBass && !song.Sections[section].Chugs && i > 0 && weak && !leads
                     && timeline[i - 1].Value.Pitches is var before && (before.All(x => x + 12 <= top) || before.All(x => x - 12 >= bottom)))
                     pitches = [..before.Select(x => before.All(y => y + 12 <= top) ? x + 12 : x - 12)];
+                // a bass alternating the root and the fifth, every other strong note of a chord its fifth, below the note
+                // before where its range has it and above where not, as a country bass plays
+                if (part.Role == TrackRole.Bass && section >= 0 && song.Sections[section].AlternatingBass && strongPlaces[i] % 2 == 1 && pitches.Length == 1)
+                {
+                    var fifth = Realizer.GetChord(note.Value.State).Chord.GetPitch(4);
+                    var below = timeline[Array.LastIndexOf(strongPlaces, strongPlaces[i] - 1, i)].Value.Pitches.Min() - 1;
+                    var under = below - (below - fifth).Mod(12);
+                    pitches = [under >= bottom ? under : under + 12 <= top ? under + 12 : pitches[0]];
+                }
                 // the stroke in beats at the tempo there
                 double Beats(double seconds) => seconds * tempo.GetEffectiveStateMapAt(note.Position).GetStateValue(StateKinds.Tempo) * Meter.BaseTempo / 60;
                 if (note.Value.Pitches.Length > 1 && InstrumentTraits.Has(program, InstrumentTrait.Strums))
