@@ -46,8 +46,9 @@ internal sealed class Line
     // aimed then
     private readonly Dictionary<int, (int Step, int Root, double Aim)> _heard = [];
 
-    // the run of echoes playing: the root of its chord, and the octave it plays in, in scale steps from where it was heard
-    private (int Root, int Octave)? _echoRun;
+    // the run of echoes playing: the root of its chord, the octave it plays in, in scale steps from where it was heard, and
+    // where it plays its figure inverted, the step it mirrors the figure's about, its first's
+    private (int Root, int Octave, int? Axis)? _echoRun;
 
     // the pitch classes the line takes over the chord it plays over now, by its line scale; none for all of the section's scale
     private IReadOnlySet<int>? _classes;
@@ -95,6 +96,7 @@ internal sealed class Line
     ///     they were heard; going on from the note before, its echoes replayed nearest it; none within a phrase.
     /// </param>
     /// <param name="lift">How far the section moves the line's range and its aim up its instrument's, in semitones (<see cref="CompositionStateKinds.LineLift" />).</param>
+    /// <param name="inverts">Whether a run of echoes starting on the note plays its figure inverted, its steps mirrored about its first.</param>
     public int Place(
         ChordContext chord,
         IReadOnlyCollection<int> chordToneClasses,
@@ -107,7 +109,8 @@ internal sealed class Line
         PhraseStart phraseStart = PhraseStart.None,
         LineScale lineScale = LineScale.Section,
         double lift = 0,
-        double pedal = 1
+        double pedal = 1,
+        bool inverts = false
     )
     {
         Lift(lift);
@@ -137,7 +140,7 @@ internal sealed class Line
             // moved by as many scale steps as the phrase now aims away from where it aimed when the note was heard, so that
             // a figure repeated where its phrase rises or falls rises or falls with it, as a sequence, and one repeated
             // where the phrase aims as it did plays as heard, as a section that comes back does
-            var echoStep = heard.Step + (int)Math.Round((aim - heard.Aim) * ScaleStepCount / OctaveNoteCount);
+            var moved = (int)Math.Round((aim - heard.Aim) * ScaleStepCount / OctaveNoteCount);
             // over the root it was heard over, as it was, but in a phrase that goes on, where that would leap from the
             // note before; over another root, nearest the note before, as a sequence: the octave the figure as heard
             // plays in, which the move by the aim then takes up or down, rather than one nearest the note before again,
@@ -145,8 +148,11 @@ internal sealed class Line
             if (_echoRun?.Root != chord.Root)
             {
                 var asHeard = chord.Root == heard.Root && !(_echoesNear && _previous is { } last && Math.Abs(chord.GetPitch(heard.Step) - last) >= _profile.LeapSize);
-                _echoRun = (chord.Root, asHeard ? 0 : GetNearestOctave(chord, heard.Step) - heard.Step);
+                _echoRun = (chord.Root, asHeard ? 0 : GetNearestOctave(chord, heard.Step) - heard.Step, inverts ? heard.Step : null);
             }
+
+            // its step as heard, or mirrored about the run's first where the run plays the figure inverted
+            var echoStep = (_echoRun.Value.Axis is { } axis ? 2 * axis - heard.Step : heard.Step) + moved;
             note = PlaceEcho(chord, chordToneClasses, beatRank, echoStep + _echoRun.Value.Octave);
         }
         else

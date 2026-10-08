@@ -610,6 +610,10 @@ internal sealed class SectionGenerator
             if (chance > 0)
                 sectionTrackLayer.Add(CompositionStateKinds.LineTension, chance);
         }
+        // a line's figures played inverted where they come back now and then, as the part has it, by the section's melody facet
+        if (LinePattern.Inversions.Where(x => x.Role == _tracks.Definitions[trackNumber].Role).Select(x => (ByConvention?)x.Chance).FirstOrDefault() is { } inversions
+            && inversions.At(sectionRhythm.Facets[Facet.Melody]) is var inversion and > 0)
+            sectionTrackLayer.Add(CompositionStateKinds.LineInversion, inversion);
         // a line's phrases ending on a goal, as the part has it, by the section's melody facet
         if (LinePattern.Goals.Where(x => x.Role == _tracks.Definitions[trackNumber].Role).Select(x => (ByConvention?)x.Chance).FirstOrDefault() is { } goals
             && goals.At(sectionRhythm.Facets[Facet.Melody]) is var goal and > 0)

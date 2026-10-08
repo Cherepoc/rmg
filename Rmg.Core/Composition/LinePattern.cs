@@ -38,6 +38,19 @@ internal sealed class LinePattern
         (TrackRole.Melody, new ByConvention(1, 0.7, 0))
     ];
 
+    /// <summary>The stream an echo's draw of whether its run plays the figure inverted derives from its key (<see cref="Inversions" />).</summary>
+    private const int InversionStream = 10;
+
+    /// <summary>
+    ///     The chance a line's run of echoes, a figure played again, plays it inverted, its steps mirrored about its first
+    ///     note, as a motif is developed, by the part: the melody's never at the plain end, which repeats its figures as they
+    ///     were, now and then in the middle and more at the wild end.
+    /// </summary>
+    public static ImmutableArray<(TrackRole Role, ByConvention Chance)> Inversions { get; } =
+    [
+        (TrackRole.Melody, new ByConvention(0, 0.15, 0.4))
+    ];
+
     /// <summary>How likely a goal is its chord's root rather than its third.</summary>
     public const double GoalRootShare = 0.6;
 
@@ -144,7 +157,8 @@ internal sealed class LinePattern
                         (LineScale)x.State.GetStateValue(CompositionStateKinds.LineScale),
                         x.State.GetStateValue(CompositionStateKinds.LineLift),
                         // a chugging riff's note's own draw of its pedal, by its key, which draws nothing else
-                        x.State.GetStateValue(CompositionStateKinds.LinePedal) > 0 ? new GenerationContext(Seeds.Derive((ulong)x.State.GetStateValue(CompositionStateKinds.NoteKey), PedalStream)).GenerateDouble() : 1
+                        x.State.GetStateValue(CompositionStateKinds.LinePedal) > 0 ? new GenerationContext(Seeds.Derive((ulong)x.State.GetStateValue(CompositionStateKinds.NoteKey), PedalStream)).GenerateDouble() : 1,
+                        Inverts(x)
                     );
                     return (Note: x, Rank: rank, Pitch: pitch);
                 }
@@ -251,6 +265,11 @@ internal sealed class LinePattern
         // its third where its chord has one, a suspended chord's root
         return goal < chance ? root < GoalRootShare || !note.Classes.Contains(note.Chord.GetPitch(2).Mod(12)) ? ChordArrival.Root : ChordArrival.Third : null;
     }
+
+    /// <summary>Whether a run of echoes starting on a note plays its figure inverted, by the note's own draw, from its key, which draws nothing else.</summary>
+    private static bool Inverts(LineNote note) =>
+        note.State.GetStateValue(CompositionStateKinds.LineInversion) is var chance and > 0
+        && new GenerationContext(Seeds.Derive((ulong)note.State.GetStateValue(CompositionStateKinds.NoteKey), InversionStream)).GenerateDouble() < chance;
 
     /// <summary>Whether a note on a strong beat lands on a tension, by its own draw, from its key, which draws nothing else.</summary>
     private static bool IsTense(LineNote note, int rank, LineProfile profile) =>

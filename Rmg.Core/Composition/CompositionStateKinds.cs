@@ -52,6 +52,9 @@ internal static class CompositionStateKinds
     // the chance a line's phrase ends on a goal, its held last note on its chord's root or third (LinePattern.Goals)
     public static StateKind<double> LineGoal { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineGoal", StateScope.Render);
 
+    // the chance a line's run of echoes plays its figure inverted, its steps mirrored about its first (LinePattern.Inversions)
+    public static StateKind<double> LineInversion { get; } = StateKinds.CreateAdditive<double>(Prefix + "LineInversion", StateScope.Render);
+
     // how a line's note's bar leads out into the next chord (a ChordApproach), and what its first note lands on (a
     // ChordArrival), the line's own, where bar state would be every track's
     public static StateKind<int> LineApproach { get; } = StateKinds.CreateAdditive<int>(Prefix + "LineApproach", StateScope.Render);

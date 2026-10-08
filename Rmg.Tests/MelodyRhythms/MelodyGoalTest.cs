@@ -39,6 +39,16 @@ public sealed class MelodyGoalTest
         await Assert.That(roots + thirds).IsEqualTo(ends);
     }
 
+    /// <summary>A plain melody plays its figures again as they were, a wilder one now and then inverted (<see cref="LinePattern.Inversions" />).</summary>
+    [Test]
+    public async Task APlainMelody_NeverInvertsItsFigures_AWildOneNowAndThen()
+    {
+        double Chance(SongOverrides overrides) => TestCorpus.InParallel(Enumerable.Range(0, 8), seed => TestCorpus.Get(seed, overrides))
+            .SelectMany(x => x.Song.Notes![SongTracks.MelodyTrack]).Select(x => x.Value.State.GetStateValue(CompositionStateKinds.LineInversion)).DefaultIfEmpty().Max();
+        await Assert.That(Chance(Melody(0))).IsEqualTo(0);
+        await Assert.That(Chance(Melody(1))).IsGreaterThan(0.3);
+    }
+
     /// <summary>How a melody's phrases end, by its melody facet: on the chord's root, its third, any of its notes.</summary>
     [Test]
     [Explicit]

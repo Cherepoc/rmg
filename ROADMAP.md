@@ -51,7 +51,7 @@ genre first (see *Genres*).
 
 **From the review of 8 October 2026** (P2, to be ordered into the next plan): the architecture's items (see
 *Architecture*: plainer prose); and the music's: the
-melody's motifs, the songs' own appoggiaturas (*Fills and lines*); and targets from outside (*Listening data*).
+songs' own appoggiaturas (*Fills and lines*); and targets from outside (*Listening data*).
 
 **Parked** (P4): see *Parked*, kept for their reasons, not planned; and, parked where they stand: scales of other sizes, a melody in block harmony, a hook at the end, the tempo leaning by the energy, a key change's common tone, the
 fills' loudness as layers, and a head with solos (which the form's devices by genre with AABA likely make).
@@ -274,11 +274,9 @@ Each item with its plan, and what it waits for.
 
 ### Fills and lines
 
-- **The melody's motif developed** (P3): the bar is the unit of repetition (the scheme's letters,
-  the echoes), so a motif is a bar's. Within a phrase, a cell of a beat or two stated and then answered: displaced by
-  an 8th, its rhythm stretched, inverted, as the soloist's motifs are (`Soloist.MotifInversion`, *A motif stretched*),
-  drawn as data on the echoes rather than as a mechanism of its own. Measured by how often cells shorter than a bar
-  recur in a phrase.
+- **The melody's motif developed, the rest** (P3, by listening): a run of echoes plays its figure inverted now and
+  then (`LinePattern.Inversions`, 15% in the middle, 40% at the wild end); a figure displaced by an 8th or its rhythm
+  stretched, should the inverted ones be heard as development rather than wrong notes.
 - **The songs' own appoggiaturas** (P2, with step 9 of the plan of 7 October): a line's note on a strong beat a tension
   that resolves by step to the chord, the songs' chance 0 at the plain end and low in the middle (`LinePattern.Tensions`
   is a genre's alone now, 0 for the songs); a genre's tension (`GenreChoices.Tension`) stays as it is.
