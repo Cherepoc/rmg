@@ -3,13 +3,16 @@ using Rmg.Core.Songs;
 
 namespace Rmg.Tests.Rendering;
 
-/// <summary>A guitar's strum: its chords' strings struck one after another, down on the beat and up off it, in a stroke's time; and a piano's roll, upward.</summary>
+/// <summary>
+///     A guitar's strum: its chords' strings struck one after another, down on the beat and up off it, in a stroke's time,
+///     a full chord's up stroke missing its lowest string; and a piano's roll, upward.
+/// </summary>
 public sealed class StrumTest
 {
     [Test]
     public async Task AGuitarsChord_IsStruckString_ByString_DownOnTheBeat_UpOffIt()
     {
-        int strummed = 0, down = 0, rolled = 0;
+        int strummed = 0, down = 0, rolled = 0, thinned = 0;
         var strokes = new List<double>();
         foreach (var song in TestCorpus.Range(32))
         foreach (var (track, notes) in song.Song.Notes!)
@@ -37,7 +40,14 @@ public sealed class StrumTest
                 // its strings in order from the stroke's first, the last a whole stroke after it
                 var strings = rendered.Where(x => Math.Abs(x.Position - Swing(song.Song).Apply(note.Position)) < 1e-6 && note.Value.Pitches.Contains(x.Value.Offset))
                     .OrderBy(x => x.Value.Shift).Select(x => x.Value).ToArray();
-                if (strings.Select(x => x.Offset).Distinct().Count() != note.Value.Pitches.Distinct().Count())
+                // a full chord's up stroke missing its lowest string
+                var struck = strum < 0 && note.Value.Pitches.Length >= Rmg.Core.Rendering.Render.UpStrokeFullest ? note.Value.Pitches.Order().Skip(1).ToArray() : note.Value.Pitches.ToArray();
+                if (strum < 0 && note.Value.Pitches.Length >= Rmg.Core.Rendering.Render.UpStrokeFullest)
+                {
+                    thinned++;
+                    await Assert.That(strings.Any(x => x.Offset == note.Value.Pitches.Min() && note.Value.Pitches.Count(p => p == x.Offset) == 1)).IsFalse();
+                }
+                if (strings.Select(x => x.Offset).Distinct().Count() != struck.Distinct().Count())
                     continue;
                 var pitches = strings.Select(x => x.Offset).ToArray();
                 await Assert.That(pitches).IsEquivalentTo(strum > 0 ? pitches.Order() : pitches.OrderDescending(), TUnit.Assertions.Enums.CollectionOrdering.Matching);
@@ -47,6 +57,7 @@ public sealed class StrumTest
 
         await Assert.That(strummed).IsGreaterThan(500);
         await Assert.That(rolled).IsGreaterThan(20);
+        await Assert.That(thinned).IsGreaterThan(20);
         await Assert.That(down / (double)strummed).IsBetween(0.3, 0.95);
         await Assert.That(strokes.All(x => x is > 0 and < 0.2)).IsTrue();
     }

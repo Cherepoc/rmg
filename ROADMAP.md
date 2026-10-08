@@ -31,9 +31,11 @@ percent everywhere, and a listening question once deployed):
 8. Done: a riff's weak notes on an open string's drone, the chugging riff's pedal without its chugs, Black metal's 38%
    of its sections; a driven guitar's quieter form, acoustic or clean in the quieter appearances, Black metal's
    (`?listen=drone`, `?listen=quieter-form`). The montuno left, a pattern of its own (*What the genres cannot play yet*).
-9. Instruments by listening (*Genres*).
-10. Smaller: legato slides, a strum's thinner up stroke, a fill's toms by genre, a band leaning into a big entrance, a
-    riser over a filtered drop.
+9. Done already: the instruments by listening are in the presets, the timpani, the organ bass, the church organ, the
+   music box and the kalimba, Chiptune's squares; their weights by listening (*Instruments by listening*).
+10. Done: a strum's up stroke missing a full chord's lowest string. Left: legato slides, by listening; a fill's toms by
+    genre; a band leaning into a big entrance, whose tempo would know the dive's section; the riser over a filtered drop,
+    put off with the riser as a lift cue, both wanting a channel of their own.
 11. A phrase extended before its cadence, 4 + 2, as an edit after assembly; let go of should it want the 4-bar grid
     rewritten (*Phrases of other than four bars*).
 
@@ -352,7 +354,6 @@ Each item with its plan, and what it waits for.
   Measured by the solos' notes a beat over their arc, the limbs' share, the stickings drawn; `?listen=` questions.
 - **A drum's pocket by its section's role** (P3, if a section's change of role is heard): the timing takes a drum's
   offset by its role in the song's groove (`Pocket.OffsetOf`), not a section's, which may move a ride to the time.
-- **A strum's thinner up stroke,** its lowest strings left out, if the up strokes sound as full as the down.
 
 ### Scales and chords
 

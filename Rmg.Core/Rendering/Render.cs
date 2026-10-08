@@ -27,6 +27,9 @@ public static class Render
 
     /// <summary>How loud an up stroke plays against a down stroke.</summary>
     internal const double UpStrokeVelocity = 0.9;
+
+    /// <summary>How many strings an up stroke's chord has at least for its lowest to be missed.</summary>
+    internal const int UpStrokeFullest = 4;
     internal const double VelocityScale = 1.03;
     private const double MiddleVelocity = 0.6;
     private const double VelocityReach = 0.4;
@@ -84,10 +87,10 @@ public static class Render
                     if (note.Value.State.GetStateValue(CompositionStateKinds.Legato) > 0)
                         velocity *= SlurredVelocity;
                     // a strummed chord's strings struck one after another, down from the lowest or up from the highest, the up
-                    // stroke a touch softer
+                    // stroke a touch softer and thinner, a full chord's lowest string missed as the hand comes up
                     var shift = note.Value.State.GetStateValue(CompositionStateKinds.TimingOffset);
                     var strum = note.Value.State.GetStateValue(CompositionStateKinds.Strum);
-                    var order = note.Value.Pitches.Order().ToArray();
+                    var order = note.Value.Pitches.Order().Skip(strum < 0 && note.Value.Pitches.Length >= UpStrokeFullest ? 1 : 0).ToArray();
                     // an ornament's quick notes, lighter, from the note's start, and the note after them
                     var ornament = note.Value.State.GetStateValue(CompositionStateKinds.Ornament);
                     if (!ornament.IsDefaultOrEmpty)
@@ -99,7 +102,7 @@ public static class Render
                             .Append(new RenderedNote(note.Value.Pitches[0], velocity, position + duration - start, shift).ToTimelineItem(start));
                     }
 
-                    return note.Value.Pitches.Select(pitch =>
+                    return order.Select(pitch =>
                     {
                         var rank = strum > 0 ? Array.IndexOf(order, pitch) : order.Length - 1 - Array.IndexOf(order, pitch);
                         var spread = order.Length > 1 ? Math.Abs(strum) * rank / (order.Length - 1) : 0;
