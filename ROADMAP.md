@@ -36,8 +36,9 @@ percent everywhere, and a listening question once deployed):
 10. Done: a strum's up stroke missing a full chord's lowest string. Left: legato slides, by listening; a fill's toms by
     genre; a band leaning into a big entrance, whose tempo would know the dive's section; the riser over a filtered drop,
     put off with the riser as a lift cue, both wanting a channel of their own.
-11. A phrase extended before its cadence, 4 + 2, as an edit after assembly; let go of should it want the 4-bar grid
-    rewritten (*Phrases of other than four bars*).
+11. Let go of after its plan's review: a phrase extended before its cadence, 4 + 2, as an edit after assembly, would
+    move every later place of the song's map, its lines, fills and stop time, its bars counting as its pattern's first:
+    the 4-bar grid rewritten in all but name (*Phrases of other than four bars*).
 
 Done in the plan of 7 October 2026: pinch harmonics; an ending in the song's own harmony; any General MIDI instrument
 in any role; a sparse song's silent start; a groove that mutates; drum solos' feet and stickings; a filtered drop and a
