@@ -558,7 +558,7 @@ Each item with its plan, and what it waits for.
   1. Done October 2026: its feet a genre's ostinato, the groove's kick, the hi-hat's pedal on 2 and 4, a double kick, a
      bossa's kick (`DrumSolos.Feet`); a samba's or a baião's kick and a timbales player's cascara left, by listening.
   2. Done October 2026: its runs and licks in stickings, singles, doubles, paradiddles, six-stroke rolls, hands and foot
-     in triplets, the right hand round the toms, the left on the snare (`DrumSolos.Stickings`); flams and drags left.
+     in triplets, the right hand round the toms, the left on the snare (`DrumSolos.Stickings`); its drags the song's (`DrumOrnaments`), its flams left.
   3. Done October 2026: a phrase's first run or lick restating the phrase before's, its sticking and speed, a drum
      round the kit, displaced by a 16th now and then, 38% of the kit's phrases (`DrumSolos.MotifChance`); augmented or
      diminished left, by listening.
