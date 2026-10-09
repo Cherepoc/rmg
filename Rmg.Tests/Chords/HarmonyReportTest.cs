@@ -95,8 +95,7 @@ public sealed class HarmonyReportTest
                     .Select(x =>
                     {
                         var entry = x.First();
-                        var role = entry.StateMap.GetStateValue(CompositionStateKinds.RoleChord);
-                        var chord = role.IsEmpty ? CompositionStateKinds.ChordPool.Pick(entry.StateMap) : role[0];
+                        var chord = PatternGenerator.ChordOf(entry.StateMap);
                         var place = x.Key == 0 ? "home" : x.Key == rhythm.Count - 1 ? "cadence" : "between";
                         // laid out as its shape is, rather than inverted or spread by octaves, for a shape a voicing may lay out
                         var isClose = chord.IsVoicingFixed ? (bool?)null : chord.Heights.SequenceEqual(chord.Shape.Targets.Order().Select(h => h / 12));
@@ -109,7 +108,7 @@ public sealed class HarmonyReportTest
         var progressions = song.Trace.Where(x => x.Point == TracePoints.Progression)
             .Select(x => (Math.Clamp((int)(facets[x.Section][Facet.Progression] * 5), 0, 4), (ImmutableArray<int>)x.Value!));
 
-        var songFacets = (Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!;
+        var songFacets = song.Unconventionality;
         // the chords' bars that start afresh in a register of their own, rather than led from the chord before
         var bars = song.Song.Notes![song.Song.Track(TrackRole.Chords)]
             .Where(x => song.Map.SectionAt(x.Position) is not null)

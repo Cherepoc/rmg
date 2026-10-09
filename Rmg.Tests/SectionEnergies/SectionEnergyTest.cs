@@ -21,9 +21,9 @@ public sealed class SectionEnergyTest
         // 0 plays twice, 1 four times, 2 once: the mean is 7/3, and 1 is furthest from it
         var energies = Traced(0, 1, 0, 1, 2, 1, 1);
 
-        await Assert.That(Explained(energies[1], "Section recurrence")).IsEqualTo(SectionEnergy.Recurrence).Within(1e-9);
-        await Assert.That(Explained(energies[0], "Section recurrence")).IsLessThan(0);
-        await Assert.That(Explained(energies[2], "Section recurrence")).IsLessThan(Explained(energies[0], "Section recurrence"));
+        await Assert.That(Explained(energies[1], Layers.SectionRecurrence)).IsEqualTo(SectionEnergy.Recurrence).Within(1e-9);
+        await Assert.That(Explained(energies[0], Layers.SectionRecurrence)).IsLessThan(0);
+        await Assert.That(Explained(energies[2], Layers.SectionRecurrence)).IsLessThan(Explained(energies[0], Layers.SectionRecurrence));
     }
 
     [Test]
@@ -31,9 +31,9 @@ public sealed class SectionEnergyTest
     {
         var energies = Traced(0, 1, 2, 3);
 
-        await Assert.That(Explained(energies[0], "Section arc")).IsEqualTo(-SectionEnergy.Arc).Within(1e-9);
-        await Assert.That(Explained(energies[3], "Section arc")).IsEqualTo(SectionEnergy.Arc).Within(1e-9);
-        await Assert.That(Explained(energies[1], "Section arc")).IsLessThan(Explained(energies[2], "Section arc"));
+        await Assert.That(Explained(energies[0], Layers.SectionArc)).IsEqualTo(-SectionEnergy.Arc).Within(1e-9);
+        await Assert.That(Explained(energies[3], Layers.SectionArc)).IsEqualTo(SectionEnergy.Arc).Within(1e-9);
+        await Assert.That(Explained(energies[1], Layers.SectionArc)).IsLessThan(Explained(energies[2], Layers.SectionArc));
     }
 
     [Test]
@@ -41,8 +41,8 @@ public sealed class SectionEnergyTest
     {
         var energies = Traced(0, 1, 0, 1);
 
-        await Assert.That(Explained(energies[0], "Section recurrence")).IsEqualTo(0);
-        await Assert.That(Explained(energies[1], "Section recurrence")).IsEqualTo(0);
+        await Assert.That(Explained(energies[0], Layers.SectionRecurrence)).IsEqualTo(0);
+        await Assert.That(Explained(energies[1], Layers.SectionRecurrence)).IsEqualTo(0);
     }
 
     [Test]

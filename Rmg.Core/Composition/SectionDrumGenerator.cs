@@ -200,7 +200,7 @@ internal sealed class SectionDrumGenerator
         foreach (var group in _tracks.Groups)
         {
             // the section's time, as a step of every drum's period: half time twice as long, double time half
-            var groupStateMap = new StateMapBuilder("Section drum group", perTrack: true)
+            var groupStateMap = new StateMapBuilder(Layers.SectionDrumGroup, perTrack: true)
                 .AddRhythmLayer(sectionRhythm.Unconventionality.Lean(RhythmLayers.SectionDrumGroup).Tilted(sectionRhythm.Energy))
                 .AddNoteWalkLayer()
                 .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.SectionDrumGroup))

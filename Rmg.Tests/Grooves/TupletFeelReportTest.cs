@@ -46,7 +46,7 @@ public sealed class TupletFeelReportTest
     private static SongFeel Measure(CorpusSong song)
     {
         // the song's feel facet, in fifths
-        var rhythm = Math.Clamp((int)(((Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!)[Facet.Feel] * 5), 0, 4);
+        var rhythm = Math.Clamp((int)(song.Unconventionality[Facet.Feel] * 5), 0, 4);
         // every drum's bars in the order the song plays its sections, each section's bars as it first made them
         var entries = song.Trace
             .Where(x => x.Point == TracePoints.BarPattern && song.Song.TrackDefinitions[x.Track].Role == Rmg.Core.Songs.TrackRole.Drum && x.Bar % Meter.PhraseBarCount != Meter.PhraseBarCount - 1)

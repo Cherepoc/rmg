@@ -26,11 +26,8 @@ public sealed class SongGeneratorStateLayerTest
             var twice = new List<string>();
             foreach (var (trackNumber, trackTimelineMap) in song.TrackEventStateTimelineMap.TrackTimelineMap)
             {
-                // the same merge as Render does
-                var notes = trackTimelineMap
-                    .MergeStateMap(song.TrackDefinitions[trackNumber].StateMap)
-                    .MergeStateTimelineMap(commonStateTimelineMap)
-                    .ToMappedEventTimeline((s1, s2) => StateMap.Aggregate([s1, s2]));
+                // every note's state as the notes read it
+                var notes = Rmg.Core.Composition.Realizer.GetNoteStates(trackTimelineMap, song.TrackDefinitions[trackNumber], commonStateTimelineMap);
 
                 foreach (var note in notes)
                 {
@@ -47,7 +44,7 @@ public sealed class SongGeneratorStateLayerTest
         await Assert.That(checks.SelectMany(x => x.Twice).ToArray()).IsEmpty();
         var layersSeen = checks.SelectMany(x => x.Seen).ToHashSet();
         // the section's home and the progression's root both reach the notes
-        await Assert.That(layersSeen.IsSupersetOf(["Section", "Progression"])).IsTrue().Because(string.Join(", ", layersSeen));
+        await Assert.That(layersSeen.IsSupersetOf([Layers.Section, Layers.Progression])).IsTrue().Because(string.Join(", ", layersSeen));
     }
 
     [Test]

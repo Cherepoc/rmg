@@ -60,7 +60,7 @@ public sealed class HookIntroTest
     [Explicit]
     public async Task Report()
     {
-        var kinds = TestCorpus.Measure(1024, song => (Fifth: Math.Min(4, (int)(((Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!)[Facet.Form] * 5)), song.Map.Intro.Kind));
+        var kinds = TestCorpus.Measure(1024, song => (Fifth: Math.Min(4, (int)(song.Unconventionality[Facet.Form] * 5)), song.Map.Intro.Kind));
         foreach (var fifth in Enumerable.Range(0, 5))
         {
             var of = kinds.Where(x => x.Fifth == fifth).ToArray();

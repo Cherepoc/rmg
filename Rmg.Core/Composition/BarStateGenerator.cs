@@ -104,17 +104,17 @@ internal sealed class BarStateGenerator
                 StateKinds.ChordRoot,
                 progression.Select((root, chord) => root.ToTimelineItem(changes[chord]))
             )
-            .WithLayer("Progression");
+            .WithLayer(Layers.Progression);
         var changeTimeline = StateTimeline.Create(
                 _meter.PatternDuration,
                 StateKinds.ChordChange,
                 changes.Select((position, chord) => (chord + 1).ToTimelineItem(position))
             )
-            .WithLayer("Progression");
+            .WithLayer(Layers.Progression);
 
         // a chord moved by semitones, set where any is, so that a section with none has no such state
         IStateTimeline[] shiftTimeline = shifts.Any(x => x != 0)
-            ? [StateTimeline.Create(_meter.PatternDuration, StateKinds.ChordShift, shifts.Select((x, chord) => x.ToTimelineItem(changes[chord]))).WithLayer("Progression")]
+            ? [StateTimeline.Create(_meter.PatternDuration, StateKinds.ChordShift, shifts.Select((x, chord) => x.ToTimelineItem(changes[chord]))).WithLayer(Layers.Progression)]
             : [];
 
         // every chord in its own scale, set by the section where it differs from the chord's before, the first's from the
@@ -126,7 +126,7 @@ internal sealed class BarStateGenerator
                     .Where((x, chord) => x.Steps != (chord == 0 ? StepAlterations.None : chordScales[chord - 1].Steps))
                     .Select(x => new LayerValue<StepAlterations>(StateDepths.Section, x.Steps).ToTimelineItem(x.Position))
             )
-            .WithLayer("Progression");
+            .WithLayer(Layers.Progression);
 
         // the home chord plays a plain chord and the cadence one with pull; the chords between pick from the pool
         var homeChord = ImmutableArray.Create(unconventionality.GenerateHomeChord(context)).ToTimelineItem(0.0);
@@ -136,7 +136,7 @@ internal sealed class BarStateGenerator
                 CompositionStateKinds.RoleChord,
                 changes.Length > 2 ? [homeChord, ImmutableArray<Chord>.Empty.ToTimelineItem(changes[1]), cadenceChord] : [homeChord, cadenceChord]
             )
-            .WithLayer("Progression");
+            .WithLayer(Layers.Progression);
 
         return StateTimelineMap.Create(
             _meter.PatternDuration,
@@ -144,7 +144,7 @@ internal sealed class BarStateGenerator
                 .._timelineGenerators.Select((generator, index) =>
                     generator.Generate(context.CreateContext((uint)Seeds.Key(seed, index)), _meter.PatternDuration)
                 ),
-                StateTimeline.Create(_meter.PatternDuration, StateKinds.ScaleOffsets, [scale.Offsets.ToTimelineItem(0.0)]).WithLayer("Section"),
+                StateTimeline.Create(_meter.PatternDuration, StateKinds.ScaleOffsets, [scale.Offsets.ToTimelineItem(0.0)]).WithLayer(Layers.Section),
                 progressionTimeline,
                 changeTimeline,
                 scaleTimeline,

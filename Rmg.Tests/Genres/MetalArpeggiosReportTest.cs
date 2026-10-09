@@ -21,7 +21,7 @@ public sealed class MetalArpeggiosReportTest
                 .Where(x => x.Notes.Length > 0)
                 .ToArray();
             var arpeggios = broken.Where(x => x.Notes.Any(n => n.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) != 0)).ToArray();
-            int Program(PitchInstrumentTrack part, RealizedNote note) => note.State.GetStateValue(CompositionStateKinds.Program) is var p and > 0 ? p - 1 : part.InstrumentCode;
+            int Program(PitchInstrumentTrack part, RealizedNote note) => InstrumentsOverTime.ProgramOf(note.State, part.InstrumentCode);
             var clean = arpeggios.Count(x => x.Notes.Count(n => Program(x.Part, n.Value) is >= 24 and <= 28) > x.Notes.Length / 2);
             var colours = arpeggios.Select(x => (ChordColour)x.Notes[0].Value.State.GetStateValue(CompositionStateKinds.Colour)).ToArray();
             var patterns = arpeggios.Select(x => (ArpeggioPattern)x.Notes[0].Value.State.GetStateValue(CompositionStateKinds.Arpeggio)).ToArray();

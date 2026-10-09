@@ -93,7 +93,7 @@ public sealed class RiffTwinTest
     public async Task Report()
     {
         var songs = TestCorpus.Range(512).Where(x => !Absent(x).Contains(TrackRole.Riff)).ToArray();
-        foreach (var band in songs.GroupBy(x => Math.Clamp((int)(((Unconventionality)x.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Melody] * 5), 0, 4)).OrderBy(x => x.Key))
+        foreach (var band in songs.GroupBy(x => Math.Clamp((int)(x.Unconventionality[Facet.Melody] * 5), 0, 4)).OrderBy(x => x.Key))
         {
             var twins = band.Where(x => !Absent(x).Contains(TrackRole.RiffTwin)).ToArray();
             var intervals = twins.SelectMany(Intervals).ToArray();

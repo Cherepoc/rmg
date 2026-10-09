@@ -77,7 +77,7 @@ public sealed class SectionTempoTest
         var sections = TestCorpus.Measure(1024, song =>
         {
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
-            var facet = ((Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!)[Facet.Feel];
+            var facet = song.Unconventionality[Facet.Feel];
             var tempos = Tempos(song);
             return song.Map.Sections.Select((x, i) => (x.SectionId, Index: i)).Where(x => x.SectionId != structure.SectionIds[0])
                 .Select(x => (Band: Math.Clamp((int)(facet * 5), 0, 4), Contrasts: structure.Roles[x.SectionId] is SectionRole.Chorus or SectionRole.Bridge, Factor: tempos[x.Index],

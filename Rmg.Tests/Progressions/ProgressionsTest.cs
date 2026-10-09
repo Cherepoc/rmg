@@ -237,7 +237,7 @@ public sealed class ProgressionsTest
         foreach (var entry in chordEntries)
         {
             var layers = entry.StateMap.Explain(StateKinds.ChordRoot).Select(x => x.Layer).ToArray();
-            await Assert.That(layers.All(x => x is "Progression" or "Section")).IsTrue();
+            await Assert.That(layers.All(x => x is Layers.Progression or Layers.Section)).IsTrue();
             seen.UnionWith(layers);
         }
 

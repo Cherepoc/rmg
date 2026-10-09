@@ -234,7 +234,7 @@ public sealed class SoloTest
     [Explicit]
     public async Task CellReport()
     {
-        static double MelodyOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Melody];
+        static double MelodyOf(CorpusSong song) => song.Unconventionality[Facet.Melody];
         var runs = TestCorpus.Measure(512, song => Runs(song).Select(x => (Fifth: Math.Clamp((int)(MelodyOf(song) * 5), 0, 4), Run: x)).ToArray()).SelectMany(x => x).ToArray();
         foreach (var band in runs.GroupBy(x => x.Fifth).OrderBy(x => x.Key))
         {
@@ -394,7 +394,7 @@ public sealed class SoloTest
     [Explicit]
     public async Task PitchReport()
     {
-        static double SoundOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Sound];
+        static double SoundOf(CorpusSong song) => song.Unconventionality[Facet.Sound];
         static string Family(int program) => program is >= 24 and <= 31 or >= 80 and <= 87 ? "guitar or lead" : Expression.Bends(program) ? "other bending" : "not bending";
         var solos = TestCorpus.Measure(1024, song => Gestures(song).Select(g =>
         {
@@ -493,7 +493,7 @@ public sealed class SoloTest
                 foreach (var note in notes.Where(x => x.Value.State.GetStateValue(CompositionStateKinds.SoloRelease) == 1))
                 {
                     var state = note.Value.State;
-                    var program = state.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
+                    var program = InstrumentsOverTime.ProgramOf(state, ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode);
                     var bend = (BendKind)state.GetStateValue(CompositionStateKinds.Bend);
                     await Assert.That(bend is BendKind.None or BendKind.Scoop or BendKind.PrebendRelease).IsTrue().Because($"seed {song.Seed} at {note.Position}");
                     // nor a stacked one, a chord rather than a line
@@ -539,7 +539,7 @@ public sealed class SoloTest
     [Explicit]
     public async Task PhraseReport()
     {
-        static double MelodyOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Melody];
+        static double MelodyOf(CorpusSong song) => song.Unconventionality[Facet.Melody];
         var solos = TestCorpus.Measure(512, song => Plans(song).Select(x => (Fifth: Math.Clamp((int)(MelodyOf(song) * 5), 0, 4), Bar: song.Map.Sections[x.Index].Meter.BarDuration, x.Plan)).ToArray()).SelectMany(x => x).ToArray();
         foreach (var band in solos.GroupBy(x => x.Fifth).OrderBy(x => x.Key))
         {
@@ -781,7 +781,7 @@ public sealed class SoloTest
     [Explicit]
     public async Task SpeedReport()
     {
-        static double MelodyOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Melody];
+        static double MelodyOf(CorpusSong song) => song.Unconventionality[Facet.Melody];
         var drawn = TestCorpus.Measure(512, song => Plans(song).Select(x => (Fifth: Math.Clamp((int)(MelodyOf(song) * 5), 0, 4), x.Plan)).ToArray()).SelectMany(x => x)
             .Concat(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Plans(TestCorpus.Get(seed, Facets(1, 1))).Select(x => (Fifth: 5, x.Plan)).ToArray()).SelectMany(x => x))
             .ToArray();
@@ -804,7 +804,7 @@ public sealed class SoloTest
     [Explicit]
     public async Task GestureReport()
     {
-        static double MelodyOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Melody];
+        static double MelodyOf(CorpusSong song) => song.Unconventionality[Facet.Melody];
         var solos = TestCorpus.Measure(512, song => Gestures(song).Select(x => (Fifth: Math.Clamp((int)(MelodyOf(song) * 5), 0, 4), Solo: x)).ToArray()).SelectMany(x => x).ToArray();
         foreach (var band in solos.GroupBy(x => x.Fifth).OrderBy(x => x.Key))
         {
@@ -822,9 +822,9 @@ public sealed class SoloTest
     public async Task Report()
     {
         var songs = TestCorpus.Range(512);
-        foreach (var band in songs.GroupBy(x => Math.Clamp((int)(((Unconventionality)x.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Form] * 5), 0, 4)).OrderBy(x => x.Key))
+        foreach (var band in songs.GroupBy(x => Math.Clamp((int)(x.Unconventionality[Facet.Form] * 5), 0, 4)).OrderBy(x => x.Key))
             Console.WriteLine($"  form {band.Key}/5, {band.Count()} songs: with a solo {band.Count(x => !x.Solos.IsEmpty) / (double)band.Count():P0}, solos a song {band.Average(x => x.Solos.Count):F2}");
-        foreach (var band in songs.GroupBy(x => Math.Clamp((int)(((Unconventionality)x.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Melody] * 5), 0, 4)).OrderBy(x => x.Key))
+        foreach (var band in songs.GroupBy(x => Math.Clamp((int)(x.Unconventionality[Facet.Melody] * 5), 0, 4)).OrderBy(x => x.Key))
         {
             var soloists = band.SelectMany(x => x.Solos.Values).SelectMany(x => x.Soloists).ToArray();
             Console.WriteLine($"  melody {band.Key}/5, {soloists.Length} soloists: {string.Join(", ", soloists.GroupBy(x => x).OrderByDescending(x => x.Count()).Select(x => $"{x.Key} {x.Count() / (double)soloists.Length:P0}"))}");

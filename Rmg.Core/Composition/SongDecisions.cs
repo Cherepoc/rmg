@@ -402,7 +402,7 @@ internal sealed record SongDecisions(
         RhythmicUnconventionality rhythmicUnconventionality
     )
     {
-        return new StateMapBuilder("Song")
+        return new StateMapBuilder(Layers.Song)
             .AddRhythmLayer(rhythmicUnconventionality.Lean(RhythmLayers.Song))
             .Add(CompositionStateKinds.Rhythm.MaxRank, 2)
             .Add(CompositionStateKinds.Rhythm.Fullness, RhythmSettings.Fullness)
@@ -421,7 +421,7 @@ internal sealed record SongDecisions(
     /// <param name="feel">The feel facet of the song's unconventionality, by which a genre's range of tempos is eased between its ends.</param>
     private static StateMap CreateCommonStateMap(IGenerationContext context, double feel, SongOverrides overrides, Genre genre)
     {
-        var drawn = new StateMapBuilder("Song")
+        var drawn = new StateMapBuilder(Layers.Song)
             .Add(StateKinds.KeyOffset, Generators.Int(0, 12))
             // the dyadic draw of the tempo, or, where a genre gives a range of it, a tempo in the range at the song's feel,
             // leaning to its middle, or to an end as the genre has it

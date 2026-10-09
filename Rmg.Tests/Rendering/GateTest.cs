@@ -103,7 +103,7 @@ public sealed class GateTest
         foreach (var section in song.Map.Sections)
         foreach (var note in timeline.Where(x => x.Position >= section.Start - 1e-9 && x.Position < section.End - 1e-9 && x.Value.State.GetStateValue(CompositionStateKinds.Arpeggio) == 0))
         {
-            var program = note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
+            var program = InstrumentsOverTime.ProgramOf(note.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode);
             var bar = section.Meter.BarDuration;
             var crosses = Math.Floor((note.Position - section.Start + 1e-6) / bar) != Math.Floor((note.Position + note.Value.Duration - section.Start - 1e-6) / bar);
             if (!InstrumentTraits.Has(program, InstrumentTrait.Decays))

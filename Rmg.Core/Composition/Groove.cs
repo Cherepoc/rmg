@@ -123,7 +123,7 @@ internal static class Groove
 
     public static StateMap ToStateMap(Swing swing, IGenerationContext context)
     {
-        return new StateMapBuilder("Song")
+        return new StateMapBuilder(Layers.Song)
             .Add(StateKinds.SwingDelay, swing.Delay)
             .Add(StateKinds.SwingPeriod, swing.Period)
             .ToStateMap(context);

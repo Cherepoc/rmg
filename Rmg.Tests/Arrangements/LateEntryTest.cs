@@ -49,7 +49,7 @@ public sealed class LateEntryTest
     [Explicit]
     public async Task Report()
     {
-        var songs = TestCorpus.Measure(1024, song => (Form: ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Form], Entries: Entries(song),
+        var songs = TestCorpus.Measure(1024, song => (Form: song.Unconventionality[Facet.Form], Entries: Entries(song),
             Returns: Enumerable.Range(1, song.Map.Sections.Length - 1).FirstOrDefault(i => song.Map.Sections.Take(i).Any(s => s.SectionId == song.Map.Sections[i].SectionId))));
         foreach (var band in songs.GroupBy(x => Math.Clamp((int)(x.Form * 5), 0, 4)).OrderBy(x => x.Key))
             Console.WriteLine($"  form {band.Key}/5, {band.Count()} songs: holding back {band.Count(x => !x.Entries.IsEmpty) / (double)band.Count():P0}, two or more {band.Count(x => x.Entries.Count > 1) / (double)band.Count():P1}");

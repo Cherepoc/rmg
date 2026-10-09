@@ -174,14 +174,13 @@ public sealed class ExpressionTest
     [Explicit]
     public async Task SlideReport()
     {
-        static double SoundOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Sound];
         static string Of((int, int May, int Slides)[] parts)
         {
             var sliding = parts.Where(x => x.Slides > 0).ToArray();
             return $"{sliding.Length / (double)Math.Max(1, parts.Length):P0} of {parts.Length} parts slide, over {sliding.Sum(x => x.Slides) / (double)Math.Max(1, sliding.Sum(x => x.May)):P0} of the changes they may";
         }
 
-        var drawn = TestCorpus.Measure(512, song => (Fifth: Math.Clamp((int)(SoundOf(song) * 5), 0, 4), Parts: Slides(song)));
+        var drawn = TestCorpus.Measure(512, song => (Fifth: Math.Clamp((int)(song.Unconventionality[Facet.Sound] * 5), 0, 4), Parts: Slides(song)));
         foreach (var band in drawn.GroupBy(x => x.Fifth).OrderBy(x => x.Key))
             Console.WriteLine($"  sound {band.Key}/5: {Of(band.SelectMany(x => x.Parts).ToArray())}");
         foreach (var sound in new[] { 0.0, 1.0 })
@@ -211,7 +210,6 @@ public sealed class ExpressionTest
     [Explicit]
     public async Task VibratoReport()
     {
-        static double SoundOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Sound];
         static string[] Widths(CorpusSong song) => song.Song.Notes!
             .Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack { InstrumentCode: >= 24 and <= 31 or >= 80 and <= 87 })
             .SelectMany(x => x.Value)
@@ -221,7 +219,7 @@ public sealed class ExpressionTest
             .ToArray();
         static string Shares(string[] widths) => string.Join(", ", widths.GroupBy(x => x).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count() / (double)widths.Length:P0}")) + $" of {widths.Length}";
 
-        var drawn = TestCorpus.Measure(512, song => (Fifth: Math.Clamp((int)(SoundOf(song) * 5), 0, 4), Widths: Widths(song)));
+        var drawn = TestCorpus.Measure(512, song => (Fifth: Math.Clamp((int)(song.Unconventionality[Facet.Sound] * 5), 0, 4), Widths: Widths(song)));
         foreach (var band in drawn.GroupBy(x => x.Fifth).OrderBy(x => x.Key))
             Console.WriteLine($"  sound {band.Key}/5: {Shares(band.SelectMany(x => x.Widths).ToArray())}");
         Console.WriteLine($"  sound 1 given: {Shares(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Widths(TestCorpus.Get(seed, Sound(1)))).SelectMany(x => x).ToArray())}");
@@ -234,10 +232,9 @@ public sealed class ExpressionTest
     [Explicit]
     public async Task BendReport()
     {
-        static double SoundOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Sound];
         static string Far(IReadOnlyCollection<(int, int Steps, double?)> some) => $"{some.Count(x => Math.Abs(x.Steps) == 2) / (double)Math.Max(1, some.Count):P0} two steps of {some.Count}";
 
-        var drawn = TestCorpus.Measure(512, song => (Fifth: Math.Clamp((int)(SoundOf(song) * 5), 0, 4), Bends: Bends(song)));
+        var drawn = TestCorpus.Measure(512, song => (Fifth: Math.Clamp((int)(song.Unconventionality[Facet.Sound] * 5), 0, 4), Bends: Bends(song)));
         foreach (var band in drawn.GroupBy(x => x.Fifth).OrderBy(x => x.Key))
             Console.WriteLine($"  sound {band.Key}/5: {Far(band.SelectMany(x => x.Bends).ToArray())}");
         var wild = TestCorpus.InParallel(Enumerable.Range(0, 64), seed => Bends(TestCorpus.Get(seed, Sound(1))));
@@ -262,7 +259,7 @@ public sealed class ExpressionTest
     {
         static bool IsWide(RealizedNote note) => note.State.GetStateValue(CompositionStateKinds.WideVibrato) > 0;
         int Program(CorpusSong song, int track, RealizedNote note) =>
-            note.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
+            InstrumentsOverTime.ProgramOf(note.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode);
 
         var plain = TestCorpus.InParallel(Enumerable.Range(0, 16), seed => TestCorpus.Get(seed, Sound(0)));
         await Assert.That(plain.Sum(x => x.Song.Notes!.Values.Sum(n => n.Count(note => IsWide(note.Value))))).IsEqualTo(0);
@@ -289,7 +286,7 @@ public sealed class ExpressionTest
         foreach (var (track, notes) in song.Song.Notes!)
         foreach (var note in notes.Where(x => Has(CompositionStateKinds.Bend, CompositionStateKinds.Vibrato, CompositionStateKinds.WideVibrato)(x.Value.State)))
         {
-            var program = note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
+            var program = InstrumentsOverTime.ProgramOf(note.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode);
             await Assert.That(Expression.Bends(program)).IsTrue();
             await Assert.That(note.Value.Pitches.Length == 1 || note.Value.State.GetStateValue(CompositionStateKinds.Octave) > 0).IsTrue();
         }
@@ -322,9 +319,8 @@ public sealed class ExpressionTest
     [Explicit]
     public async Task Report()
     {
-        static double SoundOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Sound];
 
-        var drawn = TestCorpus.Measure(512, song => (Band: $"sound {Math.Clamp((int)(SoundOf(song) * 5), 0, 4)}/5", Parts: PartEffects(song)));
+        var drawn = TestCorpus.Measure(512, song => (Band: $"sound {Math.Clamp((int)(song.Unconventionality[Facet.Sound] * 5), 0, 4)}/5", Parts: PartEffects(song)));
         var given = new[] { 0.0, 1.0 }.SelectMany(sound => TestCorpus.InParallel(Enumerable.Range(0, 64), seed => (Band: $"sound {sound} given", Parts: PartEffects(TestCorpus.Get(seed, Sound(sound))))));
         foreach (var band in drawn.OrderBy(x => x.Band).Concat(given).GroupBy(x => x.Band))
         {

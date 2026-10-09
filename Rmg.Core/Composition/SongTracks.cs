@@ -156,7 +156,7 @@ internal sealed class SongTracks
         // the riff's state, which its twin shares, so that the two play its notes alike
         var riffLayer = LayerStates.CreateTrackLayer(
             riffContext,
-            "Track",
+            Layers.Track,
             new StateMapBuilder("Track role", perTrack: true)
                 .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Riff))
                 .Add(CompositionStateKinds.LineStepwiseness, RiffLayers.Stepwiseness)
@@ -172,7 +172,7 @@ internal sealed class SongTracks
             [SoloTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
                     soloContext,
-                    "Track",
+                    Layers.Track,
                     new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Solo))
                         .ToStateMap(soloContext),
@@ -190,7 +190,7 @@ internal sealed class SongTracks
             [RhythmTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
                     rhythmContext,
-                    "Track",
+                    Layers.Track,
                     new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Rhythm))
                         // as the chords', its instrument sets how smoothly its chords move, and the song moves it a little
@@ -217,7 +217,7 @@ internal sealed class SongTracks
             [CounterMelodyTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
                     counterContext,
-                    "Track",
+                    Layers.Track,
                     new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.CounterMelody))
                         .Add(CompositionStateKinds.LineStepwiseness, CounterLayers.Stepwiseness)
@@ -236,7 +236,7 @@ internal sealed class SongTracks
             [PadTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
                     padContext,
-                    "Track",
+                    Layers.Track,
                     new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Pad))
                         .Add(StateKinds.VoiceLeading, padInstrument.Leading)
@@ -253,7 +253,7 @@ internal sealed class SongTracks
             [ChordsTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
                     context,
-                    "Track",
+                    Layers.Track,
                     new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Chords))
                         // the chord instrument sets how smoothly the chords move, and the song moves it a little
@@ -271,7 +271,7 @@ internal sealed class SongTracks
             [MelodyTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
                     context,
-                    "Track",
+                    Layers.Track,
                     new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Melody))
                         // the melody instrument sets how stepwise the melody is, and the song moves it a little
@@ -291,7 +291,7 @@ internal sealed class SongTracks
             [BassTrack] = new PitchInstrumentTrack(
                 LayerStates.CreateTrackLayer(
                     context,
-                    "Track",
+                    Layers.Track,
                     new StateMapBuilder("Track role", perTrack: true)
                         .Add(CompositionStateKinds.NoteDynamics, VelocityLayers.GetDynamics(TrackRole.Bass))
                         .Add(CompositionStateKinds.LineStepwiseness, BassLeadingLayers.Stepwiseness)
@@ -335,7 +335,7 @@ internal sealed class SongTracks
                 if (pins)
                     drumStateMap = drumStateMap.MergeWith(StateMap.FromStates([CompositionStateKinds.Pinned.CreateState(1)]));
                 definitions[DrumGroups.GetTrackNumber(drum)] = new PercussionInstrumentTrack(
-                    LayerStates.CreateTrackLayer(context, "Track", drumStateMap, _ => VelocityLayers.GetLevel(drum),
+                    LayerStates.CreateTrackLayer(context, Layers.Track, drumStateMap, _ => VelocityLayers.GetLevel(drum),
                         pins ? RhythmLayers.Still : DrumRoles.Hold(trackRhythmLayer, DrumRoles.Of(drumStateMap))),
                     drum.Sounds
                 );
@@ -371,7 +371,7 @@ internal sealed class SongTracks
                 [..songDrums.Select(DrumGroups.GetTrackNumber)],
                 LayerStates.CreateTrackLayer(
                     context,
-                    "Drum group",
+                    Layers.DrumGroup,
                     StateMap.Default,
                     _ => Level(TrackRole.Drum),
                     rhythmicUnconventionality.Lean(RhythmLayers.DrumGroup)

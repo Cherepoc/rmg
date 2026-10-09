@@ -92,11 +92,10 @@ public sealed class OctaveTest
     [Explicit]
     public async Task Report()
     {
-        static double SoundOf(CorpusSong song) => ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Sound];
         static string Shares(IEnumerable<(TrackRole Role, bool InOctaves, double)> some) =>
             string.Join(", ", some.GroupBy(x => x.Role).OrderBy(x => x.Key).Select(x => $"{x.Key} {x.Count(a => a.InOctaves) / (double)x.Count():P0} of {x.Count()}"));
 
-        var drawn = TestCorpus.Measure(512, song => (Fifth: Math.Clamp((int)(SoundOf(song) * 5), 0, 4), Appearances: Appearances(song).ToArray()));
+        var drawn = TestCorpus.Measure(512, song => (Fifth: Math.Clamp((int)(song.Unconventionality[Facet.Sound] * 5), 0, 4), Appearances: Appearances(song).ToArray()));
         foreach (var band in drawn.GroupBy(x => x.Fifth).OrderBy(x => x.Key))
             Console.WriteLine($"  sound {band.Key}/5: {Shares(band.SelectMany(x => x.Appearances))}");
         foreach (var sound in new[] { 0.0, 1.0 })

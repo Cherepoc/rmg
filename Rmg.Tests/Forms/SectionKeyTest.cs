@@ -11,7 +11,7 @@ public sealed class SectionKeyTest
         // the plainer half's songs, as the wilder change key at any pattern too (KeyChangeTest), which would move a
         // section's own key at its start
         var songs = TestCorpus.Range(128)
-            .Where(x => ((Unconventionality)x.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Scale] <= 0.5)
+            .Where(x => x.Unconventionality[Facet.Scale] <= 0.5)
             .ToArray();
         var ownKeys = 0;
         foreach (var song in songs)
@@ -43,7 +43,7 @@ public sealed class SectionKeyTest
         {
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
             var (_, songScale) = ((HarmonicUnconventionality, Scale))song.Trace.Single(x => x.Point == TracePoints.SongHarmony).Value!;
-            var facet = ((Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!)[Facet.Scale];
+            var facet = song.Unconventionality[Facet.Scale];
             var scales = song.Trace.Where(x => x.Point == TracePoints.SectionScale).ToDictionary(x => x.Section, x => (Scale)x.Value!);
             var keys = song.Song.TrackEventStateTimelineMap.CommonStateTimelineMap.GetStateTimeline(StateKinds.KeyOffset);
             return song.Map.Sections.Skip(1).DistinctBy(x => x.SectionId).Select(x => (

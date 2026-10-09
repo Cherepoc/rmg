@@ -91,8 +91,7 @@ public sealed class RiffTest
         var (doubled, inTimbre) = (0, 0);
         foreach (var song in TestCorpus.Range(256))
         {
-            var program = (int track, TimelineItem<RealizedNote> note) => note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0
-                ? stated - 1 : ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode;
+            var program = (int track, TimelineItem<RealizedNote> note) => InstrumentsOverTime.ProgramOf(note.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[track]).InstrumentCode);
             var melody = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Melody), Rmg.Core.Events.EventTimeline.Create<RealizedNote>(0));
             var counter = song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.CounterMelody), Rmg.Core.Events.EventTimeline.Create<RealizedNote>(0));
             foreach (var (index, source, _, _) in Doublings(song).Where(x => x.Source == TrackRole.Melody && x.Target == TrackRole.CounterMelody))

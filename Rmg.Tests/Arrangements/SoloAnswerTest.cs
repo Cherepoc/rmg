@@ -72,7 +72,7 @@ public sealed class SoloAnswerTest
         {
             var (answers, melody) = Notes(song);
             var plays = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key].Role == TrackRole.Solo).Sum(x => x.Value.Count) > 0;
-            var facet = ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Melody];
+            var facet = song.Unconventionality[Facet.Melody];
             // the bars of the sections it answers in
             var bars = song.Map.Sections.Where(s => answers.Any(a => a.Position >= s.Start && a.Position < s.End)).Sum(s => s.Duration / s.Meter.BarDuration);
             return (Facet: facet, Plays: plays, Answers: answers.Length, PerBar: answers.Length / Math.Max(1, bars), Velocity: answers.Length > 0 ? answers.Average(x => x.Value.Velocity) - melody.Average(x => x.Value.Velocity) : double.NaN);

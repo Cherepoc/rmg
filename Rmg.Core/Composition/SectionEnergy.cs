@@ -48,7 +48,7 @@ internal static class SectionEnergy
     {
         var shift = genre.Shift(GenreChoices.Dynamics, "energy");
         var draw = Probabilities.Tilt.Of(GenreEnergyOdds, shift).SplineValue();
-        return new StateMapBuilder("Song")
+        return new StateMapBuilder(Layers.Song)
             .Add(CompositionStateKinds.Energy, draw.Then(x => x * Song))
             .ToStateMap(context);
     }
@@ -75,16 +75,16 @@ internal static class SectionEnergy
 
         return places.ToImmutableDictionary(
             x => x.Id,
-            x => new StateMapBuilder("Section recurrence")
+            x => new StateMapBuilder(Layers.SectionRecurrence)
                 .Add(CompositionStateKinds.Energy, maxDeviation > 0 ? contrast * Recurrence * (x.Count - meanCount) / maxDeviation : 0)
                 .ToStateMap(context)
                 .MergeWith(
-                    new StateMapBuilder("Section arc")
+                    new StateMapBuilder(Layers.SectionArc)
                         .Add(CompositionStateKinds.Energy, contrast * Arc * (2 * x.Place - 1))
                         .ToStateMap(context)
                 )
                 .MergeWith(
-                    new StateMapBuilder("Section")
+                    new StateMapBuilder(Layers.Section)
                         .Add(CompositionStateKinds.Energy, own.Then(v => v * contrast * Section))
                         .ToStateMap(context)
                 )

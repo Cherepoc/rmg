@@ -46,7 +46,7 @@ public sealed class ChordShapesTest
         // the shapes the chords play, a pick of every bar's chord, by level
         var shapes = TestCorpus.Measure(256, song => song.Trace
                 .Where(x => x.Point == TracePoints.Chord && x.Track == song.Track(TrackRole.Chords))
-                .Select(x => x.StateMap.GetStateValue(CompositionStateKinds.RoleChord) is { IsEmpty: false } role ? role[0] : CompositionStateKinds.ChordPool.Pick(x.StateMap))
+                .Select(x => PatternGenerator.ChordOf(x.StateMap))
                 .Select(x => x.Shape)
                 .ToArray())
             .SelectMany(x => x)

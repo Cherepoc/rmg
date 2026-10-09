@@ -102,7 +102,7 @@ internal sealed class PatternGenerator
         // a bar pattern's own layer, drawn for every track and bar; no chord root offset here: every track plays the
         // progression's chord, and a track leaves it only by moving its root from note to note
         // a drum's held as its role holds its groove
-        Func<IGenerationContext, StateMap> BarPatternLayer(RhythmLayer layer) => new StateMapBuilder("Bar pattern", perTrack: true)
+        Func<IGenerationContext, StateMap> BarPatternLayer(RhythmLayer layer) => new StateMapBuilder(Layers.BarPattern, perTrack: true)
             .AddRhythmLayer(layer)
             .AddNoteWalkLayer()
             .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.BarPattern))
@@ -218,7 +218,7 @@ internal sealed class PatternGenerator
         var patternSeeds = CreatePatternSeeds(seed);
         var trackGenerationContext = _context.CreateContext((uint)patternSeeds.TrackState);
         // an answer's bar that draws its rhythm afresh plays its bar pattern's settings on another rhythm
-        var builder = new StateMapBuilder("Bar pattern", perTrack: true)
+        var builder = new StateMapBuilder(Layers.BarPattern, perTrack: true)
             .Add(barPatternLayerGenerator)
             .Add(CompositionStateKinds.Rhythm.Seed, GetRhythmSeed(patternSeeds.Rhythm, redrawsRhythm, rhythmKey))
             .Add(CompositionStateKinds.ValueSeed, seed);
@@ -429,9 +429,7 @@ internal sealed class PatternGenerator
     /// <summary>The chord at a position, from the bar's state there, as <see cref="GetChord" /> has it, unrecorded.</summary>
     internal static StateMap PickChord(StateMap stateMap, StateMap barStateMap)
     {
-        var chordStateMap = stateMap.MergeWith(barStateMap.Subset([CompositionStateKinds.ChordPool.Index]));
-        var roleChord = barStateMap.GetStateValue(CompositionStateKinds.RoleChord);
-        var chord = roleChord.IsEmpty ? CompositionStateKinds.ChordPool.Pick(chordStateMap) : roleChord[0];
+        var chord = ChordOf(stateMap.MergeWith(barStateMap.Subset([CompositionStateKinds.ChordPool.Index, CompositionStateKinds.RoleChord])));
         return StateMap.FromStates(
             [
                 StateKinds.ChordNotePitchOffsets.CreateState(chord.Heights),
@@ -439,6 +437,10 @@ internal sealed class PatternGenerator
             ]
         );
     }
+
+    /// <summary>The chord a state plays: its part's own where its role has one, else the one its pool picks.</summary>
+    internal static Chord ChordOf(StateMap stateMap) =>
+        stateMap.GetStateValue(CompositionStateKinds.RoleChord) is { IsEmpty: false } role ? role[0] : CompositionStateKinds.ChordPool.Pick(stateMap);
 
     /// <summary>The state of the walk that changes by beat along a bar pattern, over the pattern's own.</summary>
     private static Func<IGenerationContext, StateMap> CreateBeatLayerGenerator(StateMap stateMap)

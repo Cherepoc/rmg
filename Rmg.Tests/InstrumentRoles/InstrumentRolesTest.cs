@@ -47,7 +47,7 @@ public sealed class InstrumentRolesTest
         {
             if (definition is not PitchInstrumentTrack part || RoleOf(part.Role) is not { } role)
                 continue;
-            var programs = song.Song.Notes!.GetValueOrDefault(track)?.Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) is var p and > 0 ? p - 1 : part.InstrumentCode).Distinct() ?? [];
+            var programs = song.Song.Notes!.GetValueOrDefault(track)?.Select(x => InstrumentsOverTime.ProgramOf(x.Value.State, part.InstrumentCode)).Distinct() ?? [];
             // but an articulation's variant, the same player's (InstrumentsOverTime.Variants)
             foreach (var program in programs.Append(part.InstrumentCode).Where(x => role.Instruments.Any(i => i.Program == x)))
             {

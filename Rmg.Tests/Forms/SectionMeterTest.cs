@@ -47,7 +47,7 @@ public sealed class SectionMeterTest
         var sections = TestCorpus.Measure(1024, song =>
         {
             var structure = (SongStructure)song.Trace.Single(x => x.Point == TracePoints.SongForm).Value!;
-            var facet = ((Unconventionality)song.Trace.Single(x => x.Point == TracePoints.SongUnconventionality).Value!)[Facet.Feel];
+            var facet = song.Unconventionality[Facet.Feel];
             return Meters(song).Where(x => x.Key != structure.SectionIds[0])
                 .Select(x => (Band: Math.Clamp((int)(facet * 5), 0, 4), Contrasts: structure.Roles[x.Key] is SectionRole.Chorus or SectionRole.Bridge, Own: !x.Value.Equals(song.Map.Meter), x.Value))
                 .ToArray();

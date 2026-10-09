@@ -154,7 +154,7 @@ internal sealed class SectionGenerator
             StateTrace.Record(TracePoints.Feel, SectionTrace, sectionId, 0, StateMap.Default, 0, $"{feelOfSection}", feelOfSection);
         var sectionStateMap = CreateSectionStateMap(
             songStateMap,
-            new StateMapBuilder("Section")
+            new StateMapBuilder(Layers.Section)
                 .AddRhythmLayer(rhythm.Lean(RhythmLayers.Section))
                 .AddNoteWalkLayer()
                 .Add(CompositionStateKinds.ChordPool.Index, LayerStates.ChordPoolIndex)
@@ -163,7 +163,7 @@ internal sealed class SectionGenerator
                 .AddNoteDurationLayer()
                 .ToStateMap(Stream(sectionId, SectionStream.SectionState))
                 .MergeWith(feelChange is { } changed ? Feels.At(StateDepths.Section, changed) : StateMap.Default),
-            new StateMapBuilder("Section")
+            new StateMapBuilder(Layers.Section)
                 .Add(CompositionStateKinds.ChordPool.Collection, chords)
                 .Add(StateKinds.ChordRoot, home)
                 // the melody higher the more energy the section has than the song, a chorus over its verse
@@ -616,7 +616,7 @@ internal sealed class SectionGenerator
     {
         // a section's chords move more smoothly or more in blocks than the song's, and its melody more or less by step,
         // and is as busy as the section has it
-        var sectionTrackLayer = new StateMapBuilder("Section track", perTrack: true)
+        var sectionTrackLayer = new StateMapBuilder(Layers.SectionTrack, perTrack: true)
             .Add(StateKinds.VoiceLeading, VoiceLeadingLayers.CreateGenerator(VoiceLeadingLayers.Section));
         if (_tracks.Definitions[trackNumber].Role == TrackRole.Melody)
         {
@@ -707,7 +707,7 @@ internal sealed class SectionGenerator
         var layer = sectionRhythm.Unconventionality.Lean(RhythmLayers.SectionTrack).Tilted(tilt);
         return LayerStates.CreateTrackLayer(
             context,
-            "Section track",
+            Layers.SectionTrack,
             SongTracks.GetGenerationStateMap(_tracks.Definitions[trackNumber]),
             VelocityLayers.CreateGenerator(VelocityLayers.SectionTrack),
             role is { } drumRole ? DrumRoles.Hold(layer, drumRole) : layer

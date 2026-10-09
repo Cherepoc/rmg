@@ -87,9 +87,9 @@ public sealed class SongPage : IAsyncDisposable
 
     /// <summary>
     ///     The page at <paramref name="path" />, on a phone's narrow touch screen when <paramref name="phone" />, and with
-    ///     the admin area's credentials when <paramref name="admin" />.
+    ///     the admin area's credentials when <paramref name="admin" />; <paramref name="script" /> run in it before its own.
     /// </summary>
-    public static async Task<SongPage> Open(Site site, string path = "", bool phone = false, bool admin = false)
+    public static async Task<SongPage> Open(Site site, string path = "", bool phone = false, bool admin = false, string? script = null)
     {
         var options = new BrowserNewContextOptions { BaseURL = site.Address.ToString() };
         // the admin area's credentials, which the browser gives when the area asks for them
@@ -103,6 +103,8 @@ public sealed class SongPage : IAsyncDisposable
         }
 
         var context = await site.Browser.NewContextAsync(options);
+        if (script is not null)
+            await context.AddInitScriptAsync(script);
         // the tests' own listening questions, whatever the page's are now
         await context.RouteAsync("**/listening.json", route => route.FulfillAsync(new RouteFulfillOptions { Path = Path.Combine(AppContext.BaseDirectory, "listening.json") }));
         var page = await context.NewPageAsync();

@@ -11,16 +11,6 @@ public sealed class RoleChordTest
 
     private static readonly string[] CadenceShapeNames = ["Seventh", "Seven-sus4", "Sus4", "Triad", "Ninth", "Nine-sus4"];
 
-    /// <summary>The shape a chord is laid out from: voicings move notes by octaves, so the pitch classes tell.</summary>
-    private static ChordShape ShapeOf(Chord chord)
-    {
-        static string Classes(IEnumerable<double> semitones) =>
-            string.Join(",", semitones.Select(x => Math.Round(((x % 12) + 12) % 12, 3)).Distinct().Order());
-
-        var classes = Classes(chord.Heights.Select(x => x * 12));
-        return ChordShapes.All.First(x => Classes(x.Targets) == classes);
-    }
-
     [Test]
     [Arguments(0.0)]
     [Arguments(0.5)]
@@ -30,7 +20,7 @@ public sealed class RoleChordTest
         var context = new GenerationContext(1);
 
         var levels = Enumerable.Range(0, DrawCount)
-            .Select(_ => ShapeOf(unconventionality.GenerateHomeChord(context)).Unconventionality)
+            .Select(_ => unconventionality.GenerateHomeChord(context).Shape.Unconventionality)
             .ToArray();
 
         await Assert.That(levels.Max()).IsLessThanOrEqualTo(1);

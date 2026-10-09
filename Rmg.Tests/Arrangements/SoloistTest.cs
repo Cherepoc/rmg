@@ -69,7 +69,7 @@ public sealed class SoloistTest
     public async Task Report()
     {
         var soloists = TestCorpus.Measure(512, song => song.Trace.Where(x => x.Point == TracePoints.Soloist)
-            .Select(x => (Fifth: Math.Clamp((int)(((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Melody] * 5), 0, 4),
+            .Select(x => (Fifth: Math.Clamp((int)(song.Unconventionality[Facet.Melody] * 5), 0, 4),
                 Soloist: (((TrackRole, Soloist))x.Value!).Item2))
             .ToArray()).SelectMany(x => x).ToArray();
         foreach (var band in soloists.GroupBy(x => x.Fifth).OrderBy(x => x.Key))

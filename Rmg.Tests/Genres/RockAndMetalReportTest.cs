@@ -50,7 +50,7 @@ public sealed class RockAndMetalReportTest
                 if (song.Song.Notes!.GetValueOrDefault(song.Song.Track(TrackRole.Chords)) is { } chords && song.Song.TrackDefinitions[song.Song.Track(TrackRole.Chords)] is PitchInstrumentTrack own)
                 {
                     int[] Programs(SectionSpan span) => [..chords.Where(x => x.Position >= span.Start - 1e-9 && x.Position < span.End - 1e-9)
-                        .Select(x => x.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : own.InstrumentCode)];
+                        .Select(x => InstrumentsOverTime.ProgramOf(x.Value.State, own.InstrumentCode))];
                     var quiet = Programs(song.Map.Sections.MinBy(x => energies.GetValueOrDefault(x.SectionId))!);
                     var loud = Programs(song.Map.Sections.MaxBy(x => energies.GetValueOrDefault(x.SectionId))!);
                     if (quiet.Any(x => x is >= 24 and <= 28) && loud.Any(x => x is 29 or 30))

@@ -124,7 +124,7 @@ public sealed class KeyPreparationTest
     [Explicit]
     public async Task Report()
     {
-        var songs = TestCorpus.Measure(1024, song => (Scale: ((Unconventionality)song.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Scale],
+        var songs = TestCorpus.Measure(1024, song => (Scale: song.Unconventionality[Facet.Scale],
             Changes: ((ImmutableArray<KeyChange>)song.Trace.Single(t => t.Point == TracePoints.KeyChange).Value!).Length, Links: Links(song),
             Pivots: Preparations(song).Count(x => x.Device == KeyChange.Device.Pivot), Pedals: Preparations(song).Count(x => x.Device == KeyChange.Device.Pedal), Sequences: Preparations(song).Count(x => x.Device == KeyChange.Device.Sequence)));
         foreach (var band in songs.GroupBy(x => Math.Clamp((int)(x.Scale * 5), 0, 4)).OrderBy(x => x.Key))

@@ -26,7 +26,7 @@ public sealed class ConventionalityExamplesTest
             var (_, scale) = ((HarmonicUnconventionality, Scale))trace.Single(x => x.Point == TracePoints.SongHarmony).Value!;
             var feels = trace.Where(x => x.Point == TracePoints.Feel).Select(x => (int)x.Value!).ToArray();
             var chords = trace.Where(x => x.Point == TracePoints.Chord && x.Track == song.Track(TrackRole.Chords))
-                .Select(x => { var role = x.StateMap.GetStateValue(CompositionStateKinds.RoleChord); return (role.IsEmpty ? CompositionStateKinds.ChordPool.Pick(x.StateMap) : role[0]).Shape; })
+                .Select(x => PatternGenerator.ChordOf(x.StateMap).Shape)
                 .ToArray();
             var shapes = string.Join(", ", chords.GroupBy(x => x.Name).OrderByDescending(x => x.Count()).Take(5).Select(x => $"{x.Key} {x.Count() * 100 / chords.Length}%"));
             var sectionScales = trace.Where(x => x.Point == TracePoints.SectionScale).Select(x => ((Scale)x.Value!).Name).Distinct();

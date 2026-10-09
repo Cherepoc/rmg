@@ -200,6 +200,9 @@ internal sealed record CorpusSong(int Seed, Song Song, RenderedSong Rendered, Im
     /// <summary>The track that plays the part in the song.</summary>
     public int Track(TrackRole role) => Song.Track(role);
 
+    /// <summary>How unconventional the song is, by each facet, as it drew it.</summary>
+    public Unconventionality Unconventionality => (Unconventionality)Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!;
+
     /// <summary>Whether the track is one of the song's drums.</summary>
     public bool IsDrum(int track) => Song.IsDrum(track);
 

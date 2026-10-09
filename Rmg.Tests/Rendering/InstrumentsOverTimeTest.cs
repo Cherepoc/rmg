@@ -83,7 +83,7 @@ public sealed class InstrumentsOverTimeTest
     public async Task Report()
     {
         var songs = TestCorpus.Range(256);
-        foreach (var band in songs.GroupBy(x => Math.Clamp((int)(((Unconventionality)x.Trace.Single(t => t.Point == TracePoints.SongUnconventionality).Value!)[Facet.Sound] * 5), 0, 4)).OrderBy(x => x.Key))
+        foreach (var band in songs.GroupBy(x => Math.Clamp((int)(x.Unconventionality[Facet.Sound] * 5), 0, 4)).OrderBy(x => x.Key))
         {
             var changes = band.SelectMany(Changes).ToArray();
             Console.WriteLine($"  sound {band.Key}/5, {band.Count()} songs: songs changing {band.Count(x => Changes(x).Length > 0) / (double)band.Count():P0}; articulated {changes.Count(x => x.Mode != ArticulationMode.None)}, by bars {changes.Count(x => x.Mode == ArticulationMode.Bars)}, on accents {changes.Count(x => x.Mode == ArticulationMode.Accents)}");

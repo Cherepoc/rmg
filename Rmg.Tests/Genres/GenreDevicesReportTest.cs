@@ -32,8 +32,8 @@ public sealed class GenreDevicesReportTest
         var meter = (Meter)song.Trace.Single(x => x.Point == TracePoints.Meter).Value!;
         // a piano's chords held a beat or longer, which its part rolls or strikes together
         var held = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack).SelectMany(x => x.Value.Where(n =>
-            n.Value.Pitches.Length >= 3 && n.Value.Duration >= 1 - 1e-9 && n.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated
-            && (stated > 0 ? stated - 1 : ((PitchInstrumentTrack)song.Song.TrackDefinitions[x.Key]).InstrumentCode) is >= 0 and <= 7)).ToArray();
+            n.Value.Pitches.Length >= 3 && n.Value.Duration >= 1 - 1e-9
+            && InstrumentsOverTime.ProgramOf(n.Value.State, ((PitchInstrumentTrack)song.Song.TrackDefinitions[x.Key]).InstrumentCode) is >= 0 and <= 7)).ToArray();
         // the pitched parts' sections, and those in an instrument switched to
         var played = song.Song.Notes!.Where(x => song.Song.TrackDefinitions[x.Key] is PitchInstrumentTrack)
             .SelectMany(x => sections.Select((span, i) => (x.Key, i, Notes: x.Value.Where(n => n.Position >= span.Start - 1e-9 && n.Position < span.End - 1e-9).ToArray())))

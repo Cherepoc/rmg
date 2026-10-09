@@ -25,7 +25,7 @@ public sealed class GenreInstrumentsReportTest
             return song.Notes!.Where(x => song.TrackDefinitions[x.Key] is PitchInstrumentTrack).SelectMany(x =>
             {
                 var track = (PitchInstrumentTrack)song.TrackDefinitions[x.Key];
-                return x.Value.Select(n => (track.Role, Program: n.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : track.InstrumentCode,
+                return x.Value.Select(n => (track.Role, Program: InstrumentsOverTime.ProgramOf(n.Value.State, track.InstrumentCode),
                     Muted: n.Value.State.GetStateValue(CompositionStateKinds.PalmMute) > 0));
             }).ToArray();
         }).SelectMany(x => x).ToArray();

@@ -98,7 +98,7 @@ public sealed class StateTraceTest
             .ToHashSet();
 
         // the phase's offset is drawn in every rhythm layer, so each shows up
-        await Assert.That(layers.IsSupersetOf(["Song", "Section", "Track", "Section track", "Drum group", "Section drum group", "Bar pattern"])).IsTrue();
+        await Assert.That(layers.IsSupersetOf([Rmg.Core.Events.Layers.Song, Rmg.Core.Events.Layers.Section, Rmg.Core.Events.Layers.Track, Rmg.Core.Events.Layers.SectionTrack, Rmg.Core.Events.Layers.DrumGroup, Rmg.Core.Events.Layers.SectionDrumGroup, Rmg.Core.Events.Layers.BarPattern])).IsTrue();
     }
 
     [Test]

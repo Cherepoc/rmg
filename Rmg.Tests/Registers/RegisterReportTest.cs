@@ -24,7 +24,7 @@ public sealed class RegisterReportTest
                     continue;
                 foreach (var note in notes)
                 {
-                    var program = note.Value.State.GetStateValue(CompositionStateKinds.Program) is var stated and > 0 ? stated - 1 : part.InstrumentCode;
+                    var program = InstrumentsOverTime.ProgramOf(note.Value.State, part.InstrumentCode);
                     var (low, high) = InstrumentRanges.Of(program);
                     all[part.Role] = all.GetValueOrDefault(part.Role) + 1;
                     if (note.Value.Pitches.Any(x => x < low || x > high))
