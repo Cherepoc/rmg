@@ -169,7 +169,7 @@ internal sealed class SectionGenerator
                 .AddRhythmLayer(rhythm.Lean(RhythmLayers.Section))
                 .AddNoteWalkLayer()
                 .Add(CompositionStateKinds.ChordPool.Index, LayerStates.ChordPoolIndex)
-                .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.Section, tilt))
+                .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.Section * VelocityLayers.SpreadOf(_genre), tilt))
                 .Add(CompositionStateKinds.NoteDynamics, Math.Pow(rhythm.ChanceScale, VelocityLayers.DynamicsLean))
                 .AddNoteDurationLayer()
                 .ToStateMap(Stream(sectionId, SectionStream.SectionState))
@@ -719,7 +719,7 @@ internal sealed class SectionGenerator
             context,
             Layers.SectionTrack,
             SongTracks.GetGenerationStateMap(_tracks.Definitions[trackNumber]),
-            VelocityLayers.CreateGenerator(VelocityLayers.SectionTrack),
+            VelocityLayers.CreateGenerator(VelocityLayers.SectionTrack * VelocityLayers.SpreadOf(_genre)),
             role is { } drumRole ? DrumRoles.Hold(layer, drumRole) : layer
         );
     }

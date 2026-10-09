@@ -67,6 +67,7 @@
     "name": "Jazz",
     "description": "Swung, the ride keeping time on a jazz or brush kit, a sparse kick, an upright bass walking in quarters, sevenths, ninths and shells, piano and jazz guitar comping off the beat, sax and trumpet leads, solos likely.",
     "choices": {
+      "dynamics": { "evenness": 40 },
       "sticking": { "singles": 100, "doubles": 60, "paradiddle": 60, "sixStroke": [10, 30, 40] },
       "drumSoloFeet": { "hatFoot": 100, "groove": 40 },
       "room": { "room": 100, "hall": [0, 20, 30] },
@@ -137,6 +138,7 @@
     "name": "House",
     "description": "The kick four on the floor, the hi-hat on the offbeats, everything repeating, synth leads, a pumping bass and pads, piano and electric piano chords now and then, a TR-808 or electronic kit, straight, 120 to 128, minor, sus and add9 chords, a drop into the chorus.",
     "choices": {
+      "dynamics": { "evenness": 85 },
       "cadenceRaise": { "sections": 0 },
       "dropKind": { "silent": 100, "filtered": 50 },
       "mixFilter": { "opening": [10, 30, 50], "dips": [3, 6, 10], "closing": [10, 15, 25] },
@@ -213,6 +215,7 @@
     "name": "Techno",
     "description": "A kick on every beat, driving and dark, the hi-hat on the offbeats, one figure looping for minutes over a chord or two, a square or sawtooth riff, little melody, a minor or Phrygian key, a TR-808 or electronic kit, 130 to 145, the pads and bass pumping.",
     "choices": {
+      "dynamics": { "evenness": 85 },
       "dropKind": { "silent": 100, "filtered": 100 },
       "mutation": { "bars": [0, 5, 15] },
       "mixFilter": { "opening": [20, 40, 60], "dips": [3, 8, 12], "closing": [10, 20, 30] },
@@ -291,6 +294,7 @@
     "name": "Synthwave",
     "description": "Eighties synths over a big backbeat, the snare on 2 and 4, sawtooth leads, polysynth pads and strings, a synth bass in eighths, a verse and a chorus, major or minor, 85 to 118, a lead's echo and a pad's chorus.",
     "choices": {
+      "dynamics": { "evenness": 85 },
       "cadenceRaise": { "sections": 0 },
       "mixFilter": { "opening": [10, 20, 30], "dips": 0, "closing": 0 },
       "insertion": { "none": 100, "phaser": [20, 30, 40] },
@@ -358,6 +362,7 @@
     "name": "Hip-hop",
     "description": "Slow, lightly swung 16ths on a TR-808, a sparse syncopated kick, a repeating bass, electric piano, piano and pads looping, minor and Dorian, now and then a darker Phrygian or harmonic minor loop.",
     "choices": {
+      "dynamics": { "evenness": 75 },
       "cadenceRaise": { "sections": 0 },
       "ghosts": { "sections": [20, 30, 40] },
       "room": { "room": 100, "plate": [0, 20, 30] },
@@ -607,6 +612,7 @@
     "name": "Folk",
     "description": "Steel and nylon guitars strummed, a fiddle, a banjo, a harmonica, an acoustic bass, plain triads, major and Mixolydian, 3/4 and 6/8 as likely as not, a tambourine and a shaker on a room kit.",
     "choices": {
+      "dynamics": { "evenness": 40 },
       "alternatingBass": { "sections": [20, 30, 40] },
       "ornaments": { "graces": [0, 50, 100], "turns": [0, 20, 60], "trills": [0, 25, 70] },
       "rootMotion": { "fifthDown": 70, "stepUp": 65, "fourthDown": 60 },
@@ -652,6 +658,7 @@
     "name": "Blues",
     "description": "A shuffle, sevenths over Mixolydian, a harmonica, an overdriven guitar and an organ, slow to mid.",
     "choices": {
+      "dynamics": { "evenness": 40 },
       "loop": { "sections": [80, 80, 60] },
       "ghosts": { "sections": [20, 30, 40] },
       "drumPieces": { "kick": 100, "acousticSnare": 100, "hiHat": 100, "ride": 60, "tom": 50, "cymbal": 70, "tambourine": [20, 30, 40] },
@@ -802,7 +809,7 @@
       "kit": { "standard": 100, "power": [20, 20, 30], "electronic": [20, 20, 40] },
       "drumSetup": { "kit": 100, "kitAndPercussion": [10, 20, 40] },
       "fills": { "amount": 50 },
-      "dynamics": { "energy": 60, "contrast": 70, "lift": 70 },
+      "dynamics": { "energy": 60, "contrast": 70, "lift": 70, "evenness": 75 },
       "phraseScheme": { "aaab": 100, "abab": [60, 60, 60], "aaaa": [40, 40, 30], "aaba": [40, 40, 40] },
       "arpeggio": { "none": 100, "up": [20, 20, 30], "upDown": [15, 15, 25], "alberti": [10, 10, 20], "upTwoOctaves": [0, 0, 15] },
       "passingChords": { "chords": [0, 5, 5] }
@@ -854,7 +861,7 @@
       "strongEffect": { "none": 100, "echo": [0, 10, 30] },
       "ending": { "button": 100, "stop": [80, 80, 80], "ringOut": [60, 60, 60] },
       "levels": { "riff": 70, "drum": 65 },
-      "dynamics": { "energy": 85, "contrast": 60 },
+      "dynamics": { "energy": 85, "contrast": 60, "evenness": 75 },
       "doubling": { "octaves": [7, 11, 15], "harmony": 25, "riff": [70, 70, 60] },
       "instrument": {
         "melody": { "electricGuitarClean": [40, 40, 60], "lead2Sawtooth": [30, 30, 50], "violin": [20, 20, 30], "lead5Charang": 100 },
@@ -928,7 +935,7 @@
       "drumJob": { "marks": [100, 100, 60], "groove": [0, 10, 40] },
       "marks": { "often": 45, "swells": 65 },
       "fills": { "amount": 20 },
-      "dynamics": { "energy": 30, "contrast": 35, "lift": 75 },
+      "dynamics": { "energy": 30, "contrast": 35, "lift": 75, "evenness": 40 },
       "texture": { "build": 100, "steady": 60, "alone": 40 },
       "intro": { "entries": 100, "cold": 30 },
       "ending": { "ringOut": 100, "fade": 40 },
@@ -1062,7 +1069,7 @@
       "doubling": { "riff": [90, 90, 80], "octaves": [7, 11, 15], "harmony": 25 },
       "fills": { "amount": 60 },
       "stopTime": { "sections": [0, 5, 10] },
-      "dynamics": { "energy": 80, "contrast": 60 },
+      "dynamics": { "energy": 80, "contrast": 60, "evenness": 85 },
       "effects": { "bends": [20, 30, 50], "vibrato": [30, 50, 70], "swell": [0, 10, 30], "pinch": [20, 30, 40], "dive": [20, 35, 50], "chorus": 0, "tone": 0, "tape": 0 },
       "strongEffect": { "none": 100, "echo": [10, 30, 50], "sweep": [0, 0, 20], "gate": [5, 15, 25] },
       "space": { "riff": 25, "rhythm": 25, "bass": 30, "drum": 40, "melody": 80, "pad": 80 },
@@ -1107,7 +1114,7 @@
       "register": { "riff": 0 },
       "parts": { "melody": 100, "chords": 100, "bass": 100, "pad": [30, 30, 50], "counterMelody": [20, 20, 30], "drum": 100, "riff": 100, "riffTwin": [0, 10, 15], "rhythm": [70, 70, 60], "solo": [0, 5, 20] },
       "voice": { "verses": [50, 60, 60] },
-      "dynamics": { "energy": 70, "contrast": 85 },
+      "dynamics": { "energy": 70, "contrast": 85, "evenness": 75 },
       "texture": { "steady": 100, "build": 80, "thin": 40, "alone": [5, 10, 20] },
       "louderForms": { "guitars": [80, 90, 90] },
       "instrument": {
@@ -1195,7 +1202,7 @@
       "fills": { "amount": 40 },
       "stopTime": { "sections": [5, 10, 15] },
       "levels": { "bass": 65, "drum": 70 },
-      "dynamics": { "energy": 70, "contrast": 50 },
+      "dynamics": { "energy": 70, "contrast": 50, "evenness": 75 },
       "hook": { "choruses": [70, 70, 50] },
       "form": { "vpcvpcbc": 100, "vcvcbc": 70 },
       "formChances": { "forms": [100, 90, 60] },
@@ -1213,6 +1220,7 @@
     "name": "Trap",
     "description": "A TR-808 in half time, the hi-hat in 16ths rolling into 32nds and triplets, a long gliding bass, dark bells and pads looping, minor and Phrygian, verses left to a voice.",
     "choices": {
+      "dynamics": { "evenness": 85 },
       "mutation": { "bars": [0, 5, 10] },
       "cadenceRaise": { "sections": [10, 20, 20] },
       "rootDegree": { "third": 30, "seventh": 40, "sixth": 60, "fourth": 65 },
@@ -1274,6 +1282,7 @@
     "name": "Trance",
     "description": "The kick four on the floor, the hi-hat off the beat, sawtooth arpeggios and leads over pumping pads, a rolling bass, minor, 132 to 140, long sections building to a drop.",
     "choices": {
+      "dynamics": { "evenness": 85 },
       "dropKind": { "silent": 100, "filtered": 60 },
       "rootDegree": { "sixth": 80, "third": 85, "seventh": 75 },
       "mixFilter": { "opening": [20, 50, 70], "dips": [5, 10, 15], "closing": [10, 20, 30] },
@@ -1334,6 +1343,7 @@
     "name": "Drum and bass",
     "description": "Liquid: breakbeats at 165 to 178, a syncopated kick and the snare on 2 and 4, the hi-hat in 16ths, a deep synth bass, electric piano, piano and pads in minor sevenths, moody rather than bright, long sections and drops.",
     "choices": {
+      "dynamics": { "evenness": 85 },
       "figure": { "ground": { "own": 100, "breakbeat": [30, 40, 50] } },
       "dropKind": { "silent": 100, "filtered": 40 },
       "mutation": { "bars": [5, 15, 25] },
@@ -1705,7 +1715,7 @@
       "pocket": { "laidBack": 55 },
       "fills": { "amount": 20 },
       "effects": { "vibrato": [20, 40, 60], "tone": [30, 50, 60], "chorus": 0, "swell": 0, "bends": 0, "tape": 0, "pinch": 0, "dive": 0 },
-      "dynamics": { "energy": 30, "contrast": 30 },
+      "dynamics": { "energy": 30, "contrast": 30, "evenness": 40 },
       "space": { "melody": 55, "chords": 45 },
       "levels": { "drum": 40 },
       "ending": { "ringOut": 100, "fade": 60 },
@@ -1756,7 +1766,7 @@
       "drumJob": { "marks": [80, 80, 50], "groove": [20, 20, 50] },
       "marks": { "often": 55, "swells": 70 },
       "doubling": { "octaves": [20, 30, 40], "harmony": [20, 30, 30], "riff": 0 },
-      "dynamics": { "energy": 50, "contrast": 90, "lift": 100 },
+      "dynamics": { "energy": 50, "contrast": 90, "lift": 100, "evenness": 40 },
       "texture": { "build": 100, "steady": 60, "thin": 40, "alone": [20, 30, 40] },
       "effects": { "vibrato": [40, 60, 80], "swell": [30, 50, 70], "bends": [0, 0, 10], "chorus": 0, "tone": 0, "tape": 0, "pinch": 0, "dive": 0 },
       "strongEffect": { "none": 100 },
@@ -1811,7 +1821,7 @@
       "effects": { "bends": [0, 10, 30], "vibrato": [10, 20, 40], "pinch": [5, 10, 15], "chorus": 0, "swell": 0, "tone": 0, "tape": 0, "dive": 0 },
       "strongEffect": { "none": 100, "echo": [0, 5, 15] },
       "room": { "hall": 100 },
-      "dynamics": { "energy": 80, "contrast": 55 },
+      "dynamics": { "energy": 80, "contrast": 55, "evenness": 75 },
       "levels": { "riff": 70, "drum": 60 },
       "drumSounds": { "china": 40 },
       "kit": { "standard": 100, "power": 60 },
@@ -1884,6 +1894,7 @@
     "name": "Chiptune",
     "description": "Square and saw waves on every part, as an old games console's sound chip plays them: chords broken into fast arpeggios, a pulse bass, a catchy hook repeated, a small electronic kit, straight, 120 to 160, major or minor.",
     "choices": {
+      "dynamics": { "evenness": 85 },
       "space": { "melody": 25, "chords": 25, "bass": 15, "drum": 25, "counterMelody": 25, "riff": 25 },
       "feelChances": { "swing": 0, "halfTime": 8, "doubleTime": 4 },
       "tempo": { "from": [120, 120, 110], "to": [160, 160, 190] },

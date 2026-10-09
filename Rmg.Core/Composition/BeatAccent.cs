@@ -41,11 +41,12 @@ internal static class BeatAccent
         return dynamics * (GetAccent(newRank, maxRank) - GetAccent(rank, maxRank));
     }
 
-    /// <summary>A note's velocity by its beat: its accent and a variation drawn around it, times the dynamics.</summary>
+    /// <summary>A note's velocity by its beat: its accent and a variation drawn around it as far as the spread has it, times the dynamics.</summary>
     /// <param name="dynamics">How far the track's notes move from its level, 1 as tuned.</param>
-    public static Func<IGenerationContext, double> CreateVelocityGenerator(int rank, int maxRank, double dynamics)
+    /// <param name="spread">How much of its variation a note plays, its genre's (<see cref="VelocityLayers.SpreadOf" />).</param>
+    public static Func<IGenerationContext, double> CreateVelocityGenerator(int rank, int maxRank, double dynamics, double spread)
     {
         var accent = GetAccent(rank, maxRank);
-        return context => dynamics * (accent + Variation(context));
+        return context => dynamics * (accent + spread * Variation(context));
     }
 }

@@ -1,5 +1,7 @@
+using System.Collections.Immutable;
 using Rmg.Core;
 using Rmg.Core.Composition;
+using Rmg.Core.Probabilities;
 using Rmg.Core.Songs;
 using Rmg.Tests.Genres;
 
@@ -106,6 +108,25 @@ public sealed class VelocityReportTest
         Console.WriteLine($"melody {melody.Loudness:F1} dB, bass {bass.Loudness:F1}, chords {chords.Loudness:F1}, drums {drums.Loudness:F1}");
         await Assert.That(Math.Abs(melody.Loudness - bass.Loudness)).IsLessThan(4);
         await Assert.That(Math.Min(melody.Loudness, bass.Loudness)).IsGreaterThan(Math.Max(chords.Loudness, drums.Loudness));
+    }
+
+    /// <summary>
+    ///     A calibration: a genre played as evenly as can be plays a part's notes at the same place from bar to bar closer
+    ///     together than the songs do, the same songs measured with it and without it; measured 0.49 of the drums' spread and
+    ///     0.52 of the bass's (October 2026).
+    /// </summary>
+    [Test]
+    public async Task AnEvenGenre_PlaysItsNotesCloserTogether()
+    {
+        var even = new Genre(ImmutableDictionary<string, ImmutableDictionary<string, ByConvention>>.Empty
+            .Add(GenreChoices.Dynamics.Name, ImmutableDictionary<string, ByConvention>.Empty.Add("evenness", new(1, 1, 1))));
+        var songs = Measure(TestCorpus.Range(64));
+        var evenSongs = Measure(TestCorpus.InParallel(Enumerable.Range(0, 64), seed => TestCorpus.Get(seed, new SongOverrides(Genre: even))));
+        foreach (var role in new[] { "Drum", "Bass" })
+        {
+            Console.WriteLine($"{role}: spread at the same place {songs[role].Spread:F2} to {evenSongs[role].Spread:F2}, {evenSongs[role].Spread / songs[role].Spread:F2} of it");
+            await Assert.That(evenSongs[role].Spread).IsLessThan(songs[role].Spread * 0.8);
+        }
     }
 
     [Test]

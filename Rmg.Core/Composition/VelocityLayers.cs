@@ -78,6 +78,16 @@ internal static class VelocityLayers
     /// </summary>
     public const double DynamicsLean = 0.25;
 
+    /// <summary>How far a genre's evenness at its most or its least narrows or widens the velocity its layers draw.</summary>
+    public const double EvenReach = 3;
+
+    /// <summary>
+    ///     How much of the velocity its layers draw a genre's parts play (<see cref="GenreChoices.Dynamics" />): less the more
+    ///     evenly it is played, as a heavy band or a programmed beat strikes alike, and more the less, as a jazz band
+    ///     breathes; the beats' accents, the parts' levels and the scale as they are.
+    /// </summary>
+    public static double SpreadOf(Genre genre) => Math.Pow(EvenReach, -genre.Shift(GenreChoices.Dynamics, "evenness"));
+
     /// <summary>A layer's random velocity, scaled by its weight, leaning louder or quieter by the tilt, such as a section's energy.</summary>
     public static Func<IGenerationContext, double> CreateGenerator(double weight, Tilt tilt = default)
     {

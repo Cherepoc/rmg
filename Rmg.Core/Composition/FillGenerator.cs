@@ -486,8 +486,9 @@ internal sealed class FillGenerator
         {
             var (position, rank, maxRank) = notes[k];
             var loudness = startVelocity + (endVelocity - startVelocity) * (position - from) / span
-                           // a run's accents its own, as a drummer's hands make them, whatever the groove's dynamics
-                           + FillLayers.AccentWeight * BeatAccent.CreateVelocityGenerator(rank, maxRank, 1)(_line);
+                           // a run's accents its own, as a drummer's hands make them, whatever the groove's dynamics, as evenly as
+                           // the genre plays
+                           + FillLayers.AccentWeight * BeatAccent.CreateVelocityGenerator(rank, maxRank, 1, VelocityLayers.SpreadOf(_genre))(_line);
             foreach (var sound in FillSounds.GetNoteSounds(run, places[k], x => drums[x].Has(position, line)))
             {
                 edits.Hit(sound.Track, position, loudness, sound.Articulation, sectionId, HitKind.Fill);

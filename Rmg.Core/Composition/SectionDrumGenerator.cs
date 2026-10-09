@@ -203,7 +203,7 @@ internal sealed class SectionDrumGenerator
         var groupStateMap = new StateMapBuilder(Layers.SectionDrumGroup, perTrack: true)
             .AddRhythmLayer(sectionRhythm.Unconventionality.Lean(RhythmLayers.SectionDrumGroup).Tilted(sectionRhythm.Energy))
             .AddNoteWalkLayer()
-            .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.SectionDrumGroup))
+            .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.SectionDrumGroup * VelocityLayers.SpreadOf(_genre)))
             .AddNoteDurationLayer()
             .ToStateMap(context)
             .MergeWith(new StateMapBuilder("Section time").Add(CompositionStateKinds.Rhythm.Period.Power, timeFeel).ToStateMap(context))

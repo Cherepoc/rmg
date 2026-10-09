@@ -103,7 +103,7 @@ internal sealed class PatternGenerator
         Func<IGenerationContext, StateMap> BarPatternLayer(RhythmLayer layer) => new StateMapBuilder(Layers.BarPattern, perTrack: true)
             .AddRhythmLayer(layer)
             .AddNoteWalkLayer()
-            .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.BarPattern))
+            .Add(StateKinds.Velocity, VelocityLayers.CreateGenerator(VelocityLayers.BarPattern * VelocityLayers.SpreadOf(_genre)))
             .AddNoteDurationLayer()
             .ToStateMapGenerator();
         var barPatternLayer = sectionRhythm.Unconventionality.Lean(RhythmLayers.BarPattern);
@@ -310,7 +310,7 @@ internal sealed class PatternGenerator
             var rank = beat.Rank;
             var builder = new StateMapBuilder("Note", perTrack: true)
                 .Add(StateKinds.ArticulationOffset, articulationOffsetGenerator(innerContext, position))
-                .Add(StateKinds.Velocity, BeatAccent.CreateVelocityGenerator(rank, rhythmPattern.MaxRank, dynamics).Then(x => x * VelocityLayers.Note))
+                .Add(StateKinds.Velocity, BeatAccent.CreateVelocityGenerator(rank, rhythmPattern.MaxRank, dynamics, VelocityLayers.SpreadOf(_genre)).Then(x => x * VelocityLayers.Note))
                 .AddNoteDurationLayer()
                 .Add(CompositionStateKinds.BeatRank, rank);
             line?.AddNoteState(builder, beat);

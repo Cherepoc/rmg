@@ -41,7 +41,7 @@ internal sealed class BarStateGenerator
             StateTimelineGenerator.Create(
                 StateKinds.Velocity,
                 meter.BarDuration,
-                VelocityLayers.CreateGenerator(VelocityLayers.Bar),
+                VelocityLayers.CreateGenerator(VelocityLayers.Bar * VelocityLayers.SpreadOf(genre)),
                 PoolSize,
                 "Bar"
             ),

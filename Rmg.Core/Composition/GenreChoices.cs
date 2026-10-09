@@ -442,11 +442,12 @@ public static class GenreChoices
 
     /// <summary>
     ///     How loud and busy a song is, its energy leaning high or low, how much its sections differ from it
-    ///     (<see cref="SectionEnergy" />), and how long the band swells into a louder section, a beat to a phrase
-    ///     (<see cref="FormLayers.GenreLiftReach" />), as it is where a genre does not say.
+    ///     (<see cref="SectionEnergy" />), how long the band swells into a louder section, a beat to a phrase
+    ///     (<see cref="FormLayers.GenreLiftReach" />), and how evenly its parts are played (<see cref="VelocityLayers.SpreadOf" />),
+    ///     as it is where a genre does not say.
     /// </summary>
     public static GenreChoice Dynamics { get; } = Values("dynamics", "Dynamics",
-        [("energy", "How loud and busy"), ("contrast", "How much its sections differ"), ("lift", "How long a lift swells")], Facet.Form);
+        [("energy", "How loud and busy"), ("contrast", "How much its sections differ"), ("lift", "How long a lift swells"), ("evenness", "How evenly it is played")], Facet.Form);
 
     /// <summary>How many phrases of four bars a section's pattern may have, its progression's cycle: one, as every song's has, to four.</summary>
     public static ImmutableArray<int> PhraseCounts { get; } = [1, 2, 3, 4];

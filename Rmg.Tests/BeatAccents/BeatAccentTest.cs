@@ -32,8 +32,8 @@ public sealed class BeatAccentTest
     public async Task Velocity_IsTheAccent_AndAVariationAroundIt_AsFarAsTheDynamicsHaveThem(double dynamics)
     {
         var context = new GenerationContext(0);
-        var strongest = Enumerable.Range(0, 20000).Select(_ => BeatAccent.CreateVelocityGenerator(0, 2, dynamics)(context)).ToArray();
-        var weakest = Enumerable.Range(0, 20000).Select(_ => BeatAccent.CreateVelocityGenerator(2, 2, dynamics)(context)).ToArray();
+        var strongest = Enumerable.Range(0, 20000).Select(_ => BeatAccent.CreateVelocityGenerator(0, 2, dynamics, 1)(context)).ToArray();
+        var weakest = Enumerable.Range(0, 20000).Select(_ => BeatAccent.CreateVelocityGenerator(2, 2, dynamics, 1)(context)).ToArray();
 
         await Assert.That(strongest.Average()).IsEqualTo(BeatAccent.StrongestAccent * dynamics).Within(0.01);
         await Assert.That(weakest.Average()).IsEqualTo(0).Within(0.01);

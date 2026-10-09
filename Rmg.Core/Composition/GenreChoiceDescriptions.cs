@@ -83,7 +83,7 @@ public static class GenreChoiceDescriptions
         ["sectionLength"] = "How many times a section plays its pattern over: once, twice or four times, a verse or a chorus the longer, a dance track's the longest.",
         ["phraseScheme"] = "How a section's four bars repeat: AAAA for a loop, AAAB with a different last bar, ABAB, or every bar different for the wildest.",
         ["texture"] = "How a section brings its parts in: all through, building up, thinning out, or one part alone.",
-        ["dynamics"] = "How loud and busy the song is, how much its sections differ, and how long the band swells into a louder section, from a beat to a whole phrase.",
+        ["dynamics"] = "How loud and busy the song is, how much its sections differ, how long the band swells into a louder section, from a beat to a whole phrase, and how evenly its parts are played, as a heavy band or a programmed beat strikes alike and a jazz band breathes.",
         ["phrases"] = "How long a section's chord pattern is before it repeats: 4 bars for most songs, 8 for a longer phrase, 12 for the blues, 16 for a tune.",
         ["sectionChanges"] = "How often a section changes the song's tempo, by a jump or by a metric ratio, or plays in a meter of its own.",
         ["alone"] = "Which part plays a section alone, where its texture leaves one: a clean guitar's arpeggio in a metal intro, a pad in an ambient piece, a piano in a ballad.",
